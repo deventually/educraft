@@ -90,7 +90,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t.settings.heading}</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{t.settings.heading}</h1>
       <p className="mt-2 text-slate-600">{t.settings.intro}</p>
 
       <section className="mt-6 space-y-3">

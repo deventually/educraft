@@ -55,7 +55,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{loc(tool.name, locale)}</h1>
+              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{loc(tool.name, locale)}</h1>
               <Badge>{tool.userType === "instructor" ? t.badge.instructor : t.badge.student}</Badge>
             </div>
             <p className="mt-1 text-slate-600">{loc(tool.tagline, locale)}</p>

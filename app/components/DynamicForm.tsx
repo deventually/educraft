@@ -33,7 +33,7 @@ export function DynamicForm({ fields, values, onChange }: Props) {
       {groups.map(([group, groupFields]) => (
         <fieldset key={group ?? "_"} className="space-y-4">
           {group && (
-            <legend className="text-xs font-semibold uppercase tracking-wide text-violet-700">
+            <legend className="text-xs font-semibold uppercase tracking-wide text-brass-600">
               {group}
             </legend>
           )}

@@ -33,7 +33,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t.about.heading}</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{t.about.heading}</h1>
       <p className="mt-3 text-slate-600">
         {t.about.intro1} <span className="font-medium">{BOOK.bookTitle}</span>{" "}
         {fmt(t.about.intro2, { editor: BOOK.editor, year: BOOK.year })}

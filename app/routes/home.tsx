@@ -35,7 +35,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t.home.heading}</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight text-slate-900">{t.home.heading}</h1>
         <p className="mt-2 max-w-2xl text-slate-600">{t.home.intro}</p>
       </div>
 

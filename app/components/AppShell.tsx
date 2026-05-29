@@ -23,11 +23,11 @@ export default function AppShell() {
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <NavLink to="/" className="flex items-center gap-2.5">
-            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-sm">
+            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-700 via-violet-600 to-violet-500 text-white shadow-sm">
               <GraduationCap className="size-5" />
             </span>
-            <span className="text-lg font-bold tracking-tight">
-              Edu<span className="text-violet-600">Craft</span>
+            <span className="font-display text-xl font-semibold tracking-tight">
+              Edu<span className="font-bold text-violet-600">Craft</span>
             </span>
           </NavLink>
           <div className="flex items-center gap-2">
