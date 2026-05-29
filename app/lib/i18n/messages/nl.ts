@@ -67,6 +67,8 @@ export const nl = {
     errorPrefix: "Er ging iets mis",
     emptyResult: 'Vul het formulier in en klik op "{action}". Het resultaat verschijnt hier.',
     fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
+    imageUploadLabel: "Afbeeldingen uploaden",
+    imageRemove: "Verwijderen",
   },
   chat: {
     send: "Versturen",

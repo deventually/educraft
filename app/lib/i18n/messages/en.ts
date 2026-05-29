@@ -64,6 +64,8 @@ export const en: Messages = {
     errorPrefix: "Something went wrong",
     emptyResult: 'Fill in the form and click "{action}". The result will appear here.',
     fileComingSoon: "File/image input will become available in a later phase.",
+    imageUploadLabel: "Upload images",
+    imageRemove: "Remove",
   },
   chat: {
     send: "Send",

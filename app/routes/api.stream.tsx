@@ -3,11 +3,12 @@ import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
-import { isResolvableModel } from "~/lib/ai/models";
+import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { saveGeneration } from "~/server/repositories/generations.server";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
+import type { ImageInput } from "~/lib/ai/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -16,6 +17,11 @@ import { localizeError } from "~/lib/i18n/errors";
 const ChatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string(),
+});
+
+const ImageInputSchema = z.object({
+  mediaType: z.string().regex(/^image\/(png|jpeg|gif|webp)$/),
+  dataBase64: z.string().regex(/^[A-Za-z0-9+/=]+$/),
 });
 
 interface StreamBody {
@@ -29,6 +35,8 @@ interface StreamBody {
   model?: string;
   /** For chat mode: full message history (user turns + assistant responses). */
   messages?: ChatMessage[];
+  /** Images for vision-capable tools. */
+  images?: ImageInput[];
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -59,6 +67,41 @@ export async function action({ request }: Route.ActionArgs) {
       body.model && isResolvableModel(body.model) ? body.model : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 
+    // Validate images if provided
+    let images: ImageInput[] | undefined;
+    if (body.images && body.images.length > 0) {
+      // Check model supports images
+      const modelInfo = resolveModelInfo(model);
+      if (!modelInfo.supportsImages) {
+        const errorMsg =
+          outputLanguage === "en"
+            ? `This model (${modelInfo.displayName}) does not support image analysis. Please select a vision-capable model.`
+            : `Dit model (${modelInfo.displayName}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.`;
+        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
+      }
+
+      // Validate image array
+      const validated = z.array(ImageInputSchema).safeParse(body.images);
+      if (!validated.success) {
+        const errorMsg =
+          outputLanguage === "en"
+            ? "Invalid image format. Images must be PNG or JPEG."
+            : "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG of JPEG zijn.";
+        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
+      }
+
+      // Check image count
+      if (validated.data.length > 10) {
+        const errorMsg =
+          outputLanguage === "en"
+            ? "Too many images. Maximum 10 images allowed."
+            : "Te veel afbeeldingen. Maximaal 10 afbeeldingen toegestaan.";
+        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
+      }
+
+      images = validated.data;
+    }
+
     // Chat mode: use provided message history; one-shot: trigger with initial message
     let messages: ChatMessage[];
     if (tool.mode === "chat" && body.messages) {
@@ -79,6 +122,7 @@ export async function action({ request }: Route.ActionArgs) {
       model,
       system,
       messages,
+      images,
       temperature: stage.temperature ?? tool.defaultTemperature,
     });
 

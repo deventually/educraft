@@ -6,6 +6,7 @@ import { arcsReactor } from "./tools/arcs-reactor";
 import { forumAutograder } from "./tools/forum-autograder";
 import { contextualization } from "./tools/contextualization";
 import { mentorai } from "./tools/mentorai";
+import { mathGrading } from "./tools/math-grading";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -16,6 +17,7 @@ export const ALL_TOOLS: Tool[] = [
   forumAutograder,
   contextualization,
   mentorai,
+  mathGrading,
 ];
 
 /** Tools visible/usable in the app right now. */

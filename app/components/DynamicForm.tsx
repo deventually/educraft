@@ -1,11 +1,14 @@
 import type { InputField } from "~/lib/registry/types";
+import type { ImageInput } from "~/lib/ai/types";
 import { Label, Input, Textarea, Select, HelpText } from "./ui";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
+import { filesToImageInputs } from "~/lib/images/process";
+import { useState, useCallback } from "react";
 
-export type FormValues = Record<string, string | number | boolean | string[]>;
+export type FormValues = Record<string, string | number | boolean | string[] | ImageInput[]>;
 
 export function defaultValuesFor(fields: InputField[]): FormValues {
   const values: FormValues = {};
@@ -60,17 +63,16 @@ function FieldControl({
   value: FormValues[string];
   onChange: (v: FormValues[string]) => void;
 }) {
-  const t = useT();
   const locale = useLocale();
   const id = `f-${field.name}`;
   return (
     <div>
-      {field.kind !== "boolean" && (
+      {field.kind !== "boolean" && field.kind !== "image" && (
         <Label htmlFor={id} required={field.required} className="mb-1.5">
           {loc(field.label, locale)}
         </Label>
       )}
-      {renderControl(field, id, value, onChange, t.tool.fileComingSoon, locale)}
+      {renderControl(field, id, value, onChange, locale)}
       {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}
     </div>
   );
@@ -81,7 +83,6 @@ function renderControl(
   id: string,
   value: FormValues[string],
   onChange: (v: FormValues[string]) => void,
-  fileComingSoon: string,
   locale: Locale,
 ) {
   const placeholder = loc(field.placeholder, locale) || undefined;
@@ -132,7 +133,8 @@ function renderControl(
         </label>
       );
     case "multiselect": {
-      const selected = Array.isArray(value) ? value : [];
+      const selected =
+        Array.isArray(value) && typeof value[0] === "string" ? (value as string[]) : [];
       return (
         <div className="flex flex-wrap gap-2">
           {field.options?.map((o) => {
@@ -141,9 +143,12 @@ function renderControl(
               <button
                 type="button"
                 key={o.value}
-                onClick={() =>
-                  onChange(active ? selected.filter((v) => v !== o.value) : [...selected, o.value])
-                }
+                onClick={() => {
+                  const newSelected = active
+                    ? selected.filter((v) => v !== o.value)
+                    : [...selected, o.value];
+                  onChange(newSelected as FormValues[string]);
+                }}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-sm transition-colors",
                   active
@@ -158,11 +163,20 @@ function renderControl(
         </div>
       );
     }
-    case "file":
     case "image":
       return (
+        <ImageInputControl
+          id={id}
+          value={(value as ImageInput[]) ?? []}
+          accept={field.accept ?? "image/*"}
+          onChange={onChange}
+          label={loc(field.label, locale)}
+        />
+      );
+    case "file":
+      return (
         <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-          {fileComingSoon}
+          File upload coming soon
         </p>
       );
     default:
@@ -176,6 +190,123 @@ function renderControl(
         />
       );
   }
+}
+
+interface ImageInputControlProps {
+  id: string;
+  value: ImageInput[];
+  accept: string;
+  onChange: (v: ImageInput[]) => void;
+  label: string;
+}
+
+function ImageInputControl({ id, value, accept, onChange, label }: ImageInputControlProps) {
+  const t = useT();
+  const [error, setError] = useState<string | undefined>();
+
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.currentTarget.files ?? []);
+      if (files.length === 0) return;
+
+      try {
+        setError(undefined);
+        const newImages = await filesToImageInputs(files, accept);
+        onChange([...value, ...newImages]);
+        // Reset input after successful upload
+        const input = document.getElementById(id) as HTMLInputElement;
+        if (input) input.value = "";
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to process images";
+        setError(message);
+        console.warn("Image upload validation failed:", message);
+      }
+    },
+    [value, accept, onChange, id],
+  );
+
+  const handleRemove = useCallback(
+    (index: number) => {
+      onChange(value.filter((_, i) => i !== index));
+    },
+    [value, onChange],
+  );
+
+  return (
+    <div className="space-y-3">
+      <Label required htmlFor={id} className="mb-1.5">
+        {label}
+      </Label>
+
+      {/* File input (visually hidden, triggered by button) */}
+      <input
+        id={id}
+        type="file"
+        accept={accept}
+        multiple
+        className="hidden"
+        onChange={handleFileChange}
+        aria-label={t.tool.imageUploadLabel}
+      />
+
+      {/* Upload button */}
+      <label htmlFor={id} className="block">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            const input = document.getElementById(id) as HTMLInputElement;
+            input?.click();
+          }}
+          className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+        >
+          {t.tool.imageUploadLabel}
+        </button>
+      </label>
+
+      {/* Error message */}
+      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+      {/* Preview grid */}
+      {value.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          {value.map((img, i) => (
+            <div
+              key={img.dataBase64.slice(0, 32)}
+              className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+            >
+              {/* Thumbnail */}
+              <img
+                src={`data:${img.mediaType};base64,${img.dataBase64}`}
+                alt={`Preview ${i + 1}`}
+                className="h-full w-full object-cover"
+              />
+
+              {/* Remove button overlay */}
+              <button
+                type="button"
+                onClick={() => handleRemove(i)}
+                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-all group-hover:bg-opacity-50"
+                title={t.tool.imageRemove}
+                aria-label={`${t.tool.imageRemove} image ${i + 1}`}
+              >
+                <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-900 opacity-0 transition-opacity group-hover:opacity-100">
+                  {t.tool.imageRemove}
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Image count indicator */}
+      {value.length > 0 && (
+        <p className="text-xs text-slate-600">
+          {value.length} image{value.length !== 1 ? "s" : ""} uploaded
+        </p>
+      )}
+    </div>
+  );
 }
 
 function groupBy(fields: InputField[], locale: Locale): Array<[string | undefined, InputField[]]> {
