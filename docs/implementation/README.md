@@ -37,7 +37,7 @@ concurrently. Each session should be its own branch/worktree to avoid collisions
 
 | Session | Scope | Depends on | State |
 |---|---|---|---|
-| [S1](S1-foundation.md) | Test harness · `AGENTS.md`/`CLAUDE.md` · `/tdd` skill | — | ☐ |
+| [S1](S1-foundation.md) | Test harness · `AGENTS.md`/`CLAUDE.md` · `/tdd` skill | — | ✅ `b58aee6`+`fc7164b` |
 | [S2](S2-generators.md) | Forum Autograder + Contextualization (one-shot) | S1 | ☐ |
 | [S3](S3-chat-infra-mentorai.md) | Chat infrastructure + MentorAI | S1 | ☐ |
 | [S4](S4-image-infra-math-grading.md) | Image pipeline + Math Grading | S1 | ☐ |
