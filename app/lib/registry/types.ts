@@ -1,4 +1,7 @@
 import type { LocalizedText } from "~/lib/i18n/localized";
+import type { ChatMessage as AIChatMessage } from "~/lib/ai/types";
+
+export type ChatMessage = AIChatMessage;
 
 /**
  * The Tool registry — EduCraft's single most important abstraction.
@@ -100,10 +103,10 @@ export interface ToolStage {
 }
 
 export interface ChatConfig {
-  /** Opening assistant message (NL). */
-  greeting?: string;
-  /** Suggested starter prompts shown as chips (NL). */
-  starters?: string[];
+  /** Opening assistant message. */
+  greeting?: LocalizedText;
+  /** Suggested starter prompts shown as chips. */
+  starters?: LocalizedText[];
   allowRegenerate?: boolean;
   allowStop?: boolean;
 }

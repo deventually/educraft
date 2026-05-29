@@ -7,6 +7,7 @@ import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
 import { GeneratorView } from "~/components/GeneratorView";
 import { StageStepper } from "~/components/StageStepper";
+import { ChatView } from "~/components/ChatView";
 import { ToolIcon } from "~/components/ToolIcon";
 import { Badge } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -116,7 +117,14 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
         </div>
       </header>
 
-      {multiStage ? (
+      {tool.mode === "chat" ? (
+        <ChatView
+          tool={tool}
+          contextProfile={profiles.find((p) => p.id === defaultProfileId) || null}
+          defaultModel={undefined}
+          outputLanguage={undefined}
+        />
+      ) : multiStage ? (
         <StageStepper
           tool={tool}
           profiles={profiles}

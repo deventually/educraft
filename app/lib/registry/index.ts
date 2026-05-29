@@ -3,6 +3,7 @@ import { guidedReflection } from "./tools/guided-reflection";
 import { cognitiveArchitect } from "./tools/cognitive-architect";
 import { authenticAssessment } from "./tools/authentic-assessment";
 import { arcsReactor } from "./tools/arcs-reactor";
+import { mentorai } from "./tools/mentorai";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -10,6 +11,7 @@ export const ALL_TOOLS: Tool[] = [
   cognitiveArchitect,
   authenticAssessment,
   arcsReactor,
+  mentorai,
 ];
 
 /** Tools visible/usable in the app right now. */

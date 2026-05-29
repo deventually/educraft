@@ -92,8 +92,8 @@ const toolSchema = z.object({
   stages: z.array(toolStage).min(1),
   chat: z
     .object({
-      greeting: z.string().optional(),
-      starters: z.array(z.string()).optional(),
+      greeting: localizedText.optional(),
+      starters: z.array(localizedText).optional(),
       allowRegenerate: z.boolean().optional(),
       allowStop: z.boolean().optional(),
     })

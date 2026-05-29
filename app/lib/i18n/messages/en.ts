@@ -62,8 +62,19 @@ export const en: Messages = {
     adaptedNotice:
       "This prompt has been adapted (interview → one-shot generation, and translated). View the original prompt for the exact text from the book.",
     errorPrefix: "Something went wrong",
-    emptyResult: "Fill in the form and click “{action}”. The result will appear here.",
+    emptyResult: 'Fill in the form and click "{action}". The result will appear here.',
     fileComingSoon: "File/image input will become available in a later phase.",
+  },
+  chat: {
+    send: "Send",
+    stop: "Stop",
+    regenerate: "Regenerate",
+    streaming: "Thinking…",
+    inputPlaceholder: "Your message…",
+    sandboxHint: "Fill in the details below. These inputs are used once.",
+    continue: "Continue",
+    startConversation: "Start a conversation by clicking a suggestion or typing a message.",
+    interrupted: "Interrupted",
   },
   settings: {
     heading: "Teaching context",

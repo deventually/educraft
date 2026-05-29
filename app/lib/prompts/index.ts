@@ -2,6 +2,7 @@ import type { PromptDef, PromptLanguage } from "./types";
 import { GUIDED_REFLECTION_PROMPT } from "./guided-reflection.prompt";
 import { AUTHENTIC_ASSESSMENT_PROMPT } from "./authentic-assessment.prompt";
 import { ARCS_REACTOR_PROMPT } from "./arcs-reactor.prompt";
+import { MENTORAI_PROMPT } from "./mentorai.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -13,6 +14,7 @@ const ALL: PromptDef[] = [
   GUIDED_REFLECTION_PROMPT,
   AUTHENTIC_ASSESSMENT_PROMPT,
   ARCS_REACTOR_PROMPT,
+  MENTORAI_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
