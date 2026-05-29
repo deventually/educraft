@@ -52,33 +52,10 @@ export const MODELS = {
     supportsImages: true,
     tier: 1,
   },
-  // Local, OpenAI-compatible servers. `apiId` must match a model you have
-  // pulled (Ollama) or loaded (LM Studio); dynamic discovery via each server's
-  // /v1/models endpoint is a planned follow-up.
-  "ollama-llama3.1": {
-    provider: "ollama",
-    apiId: "llama3.1",
-    displayName: "Ollama · Llama 3.1",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-  },
-  "ollama-qwen2.5": {
-    provider: "ollama",
-    apiId: "qwen2.5",
-    displayName: "Ollama · Qwen2.5",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-  },
-  "lmstudio-local": {
-    provider: "lmstudio",
-    apiId: "local-model",
-    displayName: "LM Studio · geladen model",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-  },
+  // NB: local OpenAI-compatible models (Ollama / LM Studio) are NOT listed here.
+  // They are discovered at runtime from each server's /v1/models endpoint
+  // (see discover.server.ts) and resolved via resolveModelInfo().
+  //
   // Local CLI agents — run on the user's machine, choose their own model.
   "claude-code": {
     provider: "claude-code",
@@ -122,6 +99,44 @@ export function getModel(id: string): ModelInfo {
   const info = (MODELS as Record<string, ModelInfo>)[id];
   if (!info) throw new Error(`Unknown model id: ${id}`);
   return info;
+}
+
+/** Separator for dynamically-discovered local model ids: "<provider>::<apiId>". */
+const DYNAMIC_SEP = "::";
+const DYNAMIC_PROVIDERS: Record<string, ProviderId> = {
+  ollama: "ollama",
+  lmstudio: "lmstudio",
+};
+
+/** Build a runtime id for a discovered local model, e.g. "ollama::gemma4:31b". */
+export function dynamicModelId(provider: "ollama" | "lmstudio", apiId: string): string {
+  return `${provider}${DYNAMIC_SEP}${apiId}`;
+}
+
+function parseDynamicModel(id: string): ModelInfo | null {
+  const idx = id.indexOf(DYNAMIC_SEP);
+  if (idx === -1) return null;
+  const provider = DYNAMIC_PROVIDERS[id.slice(0, idx)];
+  const apiId = id.slice(idx + DYNAMIC_SEP.length);
+  if (!provider || !apiId) return null;
+  return { provider, apiId, displayName: apiId, supportsImages: false, tier: 2, local: true };
+}
+
+/**
+ * Resolve a model id to its ModelInfo: the static catalog first, then a
+ * dynamically-discovered local id ("<provider>::<apiId>"). Throws if neither.
+ */
+export function resolveModelInfo(id: string): ModelInfo {
+  return (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id) ?? throwUnknown(id);
+}
+
+function throwUnknown(id: string): never {
+  throw new Error(`Unknown model id: ${id}`);
+}
+
+/** Whether an id resolves to a usable model (static catalog or dynamic local). */
+export function isResolvableModel(id: string): boolean {
+  return id in MODELS || parseDynamicModel(id) !== null;
 }
 
 export function listModels(): Array<{ id: ModelId } & ModelInfo> {

@@ -45,7 +45,7 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
     const output = args.priorOutputs?.[dep.fromStageId];
     if (output === undefined) {
       throw new Error(
-        `Uitvoer van eerdere fase "${dep.fromStageId}" ontbreekt (nodig voor {{${dep.placeholder}}}).`,
+        `Output of earlier stage "${dep.fromStageId}" is missing (required for {{${dep.placeholder}}}).`,
       );
     }
     values[dep.placeholder] = output;

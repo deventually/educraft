@@ -7,13 +7,14 @@ import type { UserType } from "~/lib/registry/types";
 import { ToolIcon } from "~/components/ToolIcon";
 import { Badge } from "~/components/ui";
 import { cn } from "~/lib/utils";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
+import { loc } from "~/lib/i18n/localized";
 
 export function loader() {
   const tools = getEnabledTools().map((tool) => ({
     slug: tool.slug,
-    nameNl: tool.nameNl,
-    taglineNl: tool.taglineNl,
+    name: tool.name,
+    tagline: tool.tagline,
     icon: tool.icon,
     userType: tool.userType,
     mode: tool.mode,
@@ -26,6 +27,7 @@ type Filter = "all" | UserType;
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const t = useT();
+  const locale = useLocale();
   const { tools } = loaderData;
   const [filter, setFilter] = useState<Filter>("all");
   const shown = tools.filter((tl) => filter === "all" || tl.userType === filter);
@@ -73,10 +75,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               </span>
               <Badge>{tool.userType === "instructor" ? t.badge.instructor : t.badge.student}</Badge>
             </div>
-            <h2 className="font-semibold text-slate-900">{tool.nameNl}</h2>
-            <p className="mt-1 flex-1 text-sm text-slate-600">{tool.taglineNl}</p>
+            <h2 className="font-semibold text-slate-900">{loc(tool.name, locale)}</h2>
+            <p className="mt-1 flex-1 text-sm text-slate-600">{loc(tool.tagline, locale)}</p>
             <div className="mt-4 flex items-center justify-between">
-              <span className="text-xs text-slate-400">{tool.theory}</span>
+              <span className="text-xs text-slate-400">{loc(tool.theory, locale)}</span>
               <ArrowRight className="size-4 text-violet-500 transition-transform group-hover:translate-x-0.5" />
             </div>
           </Link>

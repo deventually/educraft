@@ -2,7 +2,7 @@ import type { Route } from "./+types/api.stream";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
-import { MODELS } from "~/lib/ai/models";
+import { isResolvableModel } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { saveGeneration } from "~/server/repositories/generations.server";
@@ -10,6 +10,7 @@ import type { OutputLanguage } from "~/lib/registry/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { localizeError } from "~/lib/i18n/errors";
 
 interface StreamBody {
   slug: string;
@@ -23,7 +24,8 @@ interface StreamBody {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const m = getMessages(getLocale(request));
+  const locale = getLocale(request);
+  const m = getMessages(locale);
   try {
     const body = (await request.json()) as StreamBody;
 
@@ -46,17 +48,22 @@ export async function action({ request }: Route.ActionArgs) {
     });
 
     const model =
-      body.model && body.model in MODELS ? body.model : stage.model ?? tool.defaultModel;
+      body.model && isResolvableModel(body.model)
+        ? body.model
+        : stage.model ?? tool.defaultModel;
     const provider = providerForModel(model);
 
+    const trigger =
+      outputLanguage === "en" ? "Carry out the task in full." : "Voer de opdracht volledig uit.";
     const tokens = provider.streamChat({
       model,
       system,
-      messages: [{ role: "user", content: "Voer de opdracht volledig uit." }],
+      messages: [{ role: "user", content: trigger }],
       temperature: stage.temperature ?? tool.defaultTemperature,
     });
 
     const stream = sseStream(tokens, {
+      formatError: (err) => localizeError(err, locale, m.error.unknown),
       onComplete: (full) => {
         try {
           saveGeneration({
@@ -69,14 +76,15 @@ export async function action({ request }: Route.ActionArgs) {
             outputMarkdown: full,
           });
         } catch (e) {
-          console.error("Opslaan van generatie mislukt:", e);
+          console.error("Failed to save generation:", e);
         }
       },
     });
 
     return new Response(stream, { headers: SSE_HEADERS });
   } catch (err) {
-    const message = err instanceof Error ? err.message : m.error.unknown;
-    return new Response(sseError(message), { headers: SSE_HEADERS });
+    return new Response(sseError(localizeError(err, locale, m.error.unknown)), {
+      headers: SSE_HEADERS,
+    });
   }
 }

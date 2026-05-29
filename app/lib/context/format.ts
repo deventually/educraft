@@ -1,26 +1,9 @@
-import type {
-  ContextProfile,
-  HboiActivity,
-  HboiArchitectureLayer,
+import {
+  type ContextProfile,
+  HBOI_ARCHITECTURE_LAYER_LABELS,
+  HBOI_ACTIVITY_LABELS,
 } from "./types";
 import type { OutputLanguage } from "~/lib/registry/types";
-
-/** English glosses for the hbo-i framework terms, so EN output stays English. */
-const LAYER_EN: Record<HboiArchitectureLayer, string> = {
-  Gebruikersinteractie: "User interaction",
-  Organisatieprocessen: "Business processes",
-  Infrastructuur: "Infrastructure",
-  Software: "Software",
-  "Hardware-interfacing": "Hardware interfacing",
-};
-
-const ACTIVITY_EN: Record<HboiActivity, string> = {
-  Analyseren: "Analysis",
-  Adviseren: "Advice",
-  Ontwerpen: "Design",
-  Realiseren: "Realisation",
-  Beheren: "Management",
-};
 
 interface Labels {
   intro: string;
@@ -110,15 +93,11 @@ export function formatProfile(
     lines.push(t.hboiIntro);
     if (profile.hboiLevel) lines.push(`- ${t.hboiLevel}: ${profile.hboiLevel}`);
     if (profile.architectureLayers?.length) {
-      const layers =
-        lang === "en"
-          ? profile.architectureLayers.map((l) => LAYER_EN[l])
-          : profile.architectureLayers;
+      const layers = profile.architectureLayers.map((l) => HBOI_ARCHITECTURE_LAYER_LABELS[l][lang]);
       lines.push(`- ${t.layers}: ${layers.join(", ")}`);
     }
     if (profile.activities?.length) {
-      const acts =
-        lang === "en" ? profile.activities.map((a) => ACTIVITY_EN[a]) : profile.activities;
+      const acts = profile.activities.map((a) => HBOI_ACTIVITY_LABELS[a][lang]);
       lines.push(`- ${t.activities}: ${acts.join(", ")}`);
     }
   }

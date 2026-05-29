@@ -23,7 +23,7 @@ export function getToolBySlug(slug: string): Tool | undefined {
 
 export function getToolBySlugOrThrow(slug: string): Tool {
   const tool = getToolBySlug(slug);
-  if (!tool) throw new Response("Tool niet gevonden", { status: 404 });
+  if (!tool) throw new Response("Tool not found", { status: 404 });
   return tool;
 }
 

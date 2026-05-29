@@ -25,7 +25,7 @@ export const PROMPTS: Record<string, PromptDef> = Object.fromEntries(
 
 export function getPrompt(id: string): PromptDef {
   const p = PROMPTS[id];
-  if (!p) throw new Error(`Onbekende prompt-id: ${id}`);
+  if (!p) throw new Error(`Unknown prompt id: ${id}`);
   return p;
 }
 

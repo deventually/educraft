@@ -11,13 +11,16 @@ import {
   HBO_DOMAINS,
   HBOI_ARCHITECTURE_LAYERS,
   HBOI_ACTIVITIES,
+  HBOI_ARCHITECTURE_LAYER_LABELS,
+  HBOI_ACTIVITY_LABELS,
   type HboDomain,
   type HboiActivity,
   type HboiArchitectureLayer,
 } from "~/lib/context/types";
 import { Button, Card, Input, Label, Select, Textarea, Badge } from "~/components/ui";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 
@@ -78,6 +81,7 @@ function str(v: FormDataEntryValue | null): string | undefined {
 
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
+  const locale = useLocale();
   const { profiles } = loaderData;
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -189,10 +193,22 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
                 </Select>
               </Field>
               <Field label={t.settings.layers}>
-                <CheckGroup name="architectureLayers" options={HBOI_ARCHITECTURE_LAYERS} />
+                <CheckGroup
+                  name="architectureLayers"
+                  options={HBOI_ARCHITECTURE_LAYERS.map((v) => ({
+                    value: v,
+                    label: loc(HBOI_ARCHITECTURE_LAYER_LABELS[v], locale),
+                  }))}
+                />
               </Field>
               <Field label={t.settings.activities}>
-                <CheckGroup name="activities" options={HBOI_ACTIVITIES} />
+                <CheckGroup
+                  name="activities"
+                  options={HBOI_ACTIVITIES.map((v) => ({
+                    value: v,
+                    label: loc(HBOI_ACTIVITY_LABELS[v], locale),
+                  }))}
+                />
               </Field>
             </fieldset>
           )}
@@ -234,16 +250,22 @@ function Field({
   );
 }
 
-function CheckGroup({ name, options }: { name: string; options: readonly string[] }) {
+function CheckGroup({
+  name,
+  options,
+}: {
+  name: string;
+  options: { value: string; label: string }[];
+}) {
   return (
     <div className="flex flex-wrap gap-3">
       {options.map((o) => (
         <label
-          key={o}
+          key={o.value}
           className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
         >
-          <input type="checkbox" name={name} value={o} className="size-4 rounded border-slate-300 text-violet-600" />
-          {o}
+          <input type="checkbox" name={name} value={o.value} className="size-4 rounded border-slate-300 text-violet-600" />
+          {o.label}
         </label>
       ))}
     </div>

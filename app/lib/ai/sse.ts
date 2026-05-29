@@ -8,6 +8,8 @@
 export interface SseOptions {
   /** Called with the full concatenated text after a successful stream. */
   onComplete?: (fullText: string) => void | Promise<void>;
+  /** Map a thrown value to the user-facing message (e.g. localize it). */
+  formatError?: (err: unknown) => string;
 }
 
 export function sseStream(
@@ -28,7 +30,11 @@ export function sseStream(
         if (opts.onComplete) await opts.onComplete(full);
         controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = opts.formatError
+          ? opts.formatError(err)
+          : err instanceof Error
+            ? err.message
+            : String(err);
         controller.enqueue(
           encoder.encode(`event: error\ndata: ${JSON.stringify({ message })}\n\n`),
         );

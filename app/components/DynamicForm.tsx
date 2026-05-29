@@ -1,7 +1,9 @@
 import type { InputField } from "~/lib/registry/types";
 import { Label, Input, Textarea, Select, HelpText } from "./ui";
 import { cn } from "~/lib/utils";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
+import { loc } from "~/lib/i18n/localized";
+import type { Locale } from "~/lib/i18n";
 
 export type FormValues = Record<string, string | number | boolean | string[]>;
 
@@ -24,7 +26,8 @@ interface Props {
 }
 
 export function DynamicForm({ fields, values, onChange }: Props) {
-  const groups = groupBy(fields);
+  const locale = useLocale();
+  const groups = groupBy(fields, locale);
   return (
     <div className="space-y-6">
       {groups.map(([group, groupFields]) => (
@@ -58,16 +61,17 @@ function FieldControl({
   onChange: (v: FormValues[string]) => void;
 }) {
   const t = useT();
+  const locale = useLocale();
   const id = `f-${field.name}`;
   return (
     <div>
       {field.kind !== "boolean" && (
         <Label htmlFor={id} required={field.required} className="mb-1.5">
-          {field.label}
+          {loc(field.label, locale)}
         </Label>
       )}
-      {renderControl(field, id, value, onChange, t.tool.fileComingSoon)}
-      {field.help && <HelpText>{field.help}</HelpText>}
+      {renderControl(field, id, value, onChange, t.tool.fileComingSoon, locale)}
+      {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}
     </div>
   );
 }
@@ -78,14 +82,16 @@ function renderControl(
   value: FormValues[string],
   onChange: (v: FormValues[string]) => void,
   fileComingSoon: string,
+  locale: Locale,
 ) {
+  const placeholder = loc(field.placeholder, locale) || undefined;
   switch (field.kind) {
     case "textarea":
       return (
         <Textarea
           id={id}
           rows={field.rows ?? 3}
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           value={String(value ?? "")}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -95,7 +101,7 @@ function renderControl(
         <Select id={id} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)}>
           {field.options?.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {loc(o.label, locale)}
             </option>
           ))}
         </Select>
@@ -122,7 +128,7 @@ function renderControl(
             checked={Boolean(value)}
             onChange={(e) => onChange(e.target.checked)}
           />
-          {field.label}
+          {loc(field.label, locale)}
         </label>
       );
     case "multiselect": {
@@ -147,7 +153,7 @@ function renderControl(
                     : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
                 )}
               >
-                {o.label}
+                {loc(o.label, locale)}
               </button>
             );
           })}
@@ -166,7 +172,7 @@ function renderControl(
         <Input
           id={id}
           type="text"
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           value={String(value ?? "")}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -174,24 +180,26 @@ function renderControl(
   }
 }
 
-function groupBy(fields: InputField[]): Array<[string | undefined, InputField[]]> {
+function groupBy(
+  fields: InputField[],
+  locale: Locale,
+): Array<[string | undefined, InputField[]]> {
   const map = new Map<string | undefined, InputField[]>();
   for (const f of fields) {
-    const key = f.group;
+    const key = f.group ? loc(f.group, locale) : undefined;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(f);
   }
   return [...map.entries()];
 }
 
-/** Client-side required-field check. Returns names of missing required fields. */
-export function missingRequired(fields: InputField[], values: FormValues): string[] {
+/** Client-side required-field check. Returns the missing required fields. */
+export function missingRequired(fields: InputField[], values: FormValues): InputField[] {
   return fields
     .filter((f) => f.required)
     .filter((f) => {
       const v = values[f.name];
       if (Array.isArray(v)) return v.length === 0;
       return v === undefined || v === null || String(v).trim() === "";
-    })
-    .map((f) => f.label);
+    });
 }

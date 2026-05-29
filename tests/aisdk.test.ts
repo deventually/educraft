@@ -23,7 +23,7 @@ vi.mock("@ai-sdk/anthropic", () => ({
 import { aiSdkProvider } from "~/lib/ai/adapters/aisdk";
 
 const base = {
-  model: "ollama-llama3.1",
+  model: "ollama::llama3.1",
   system: "system",
   messages: [{ role: "user" as const, content: "hi" }],
 };

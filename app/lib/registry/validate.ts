@@ -18,20 +18,26 @@ const fieldKind = z.enum([
   "image",
 ]);
 
+/** A plain string or a per-locale { nl, en } object (see lib/i18n/localized). */
+const localizedText = z.union([
+  z.string().min(1),
+  z.object({ nl: z.string().min(1), en: z.string().min(1) }),
+]);
+
 const inputField = z.object({
   name: z.string().regex(/^[a-zA-Z0-9_]+$/),
-  label: z.string().min(1),
+  label: localizedText,
   kind: fieldKind,
   required: z.boolean().optional(),
-  placeholder: z.string().optional(),
-  help: z.string().optional(),
+  placeholder: localizedText.optional(),
+  help: localizedText.optional(),
   defaultValue: z.any().optional(),
-  options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+  options: z.array(z.object({ value: z.string(), label: localizedText })).optional(),
   min: z.number().optional(),
   max: z.number().optional(),
   step: z.number().optional(),
   accept: z.string().optional(),
-  group: z.string().optional(),
+  group: localizedText.optional(),
   rows: z.number().optional(),
 });
 
@@ -42,15 +48,15 @@ const stageDependency = z.object({
 
 const toolStage = z.object({
   id: z.string().min(1),
-  name: z.string().min(1),
-  description: z.string().optional(),
+  name: localizedText,
+  description: localizedText.optional(),
   systemPromptId: z.string().min(1),
   inputs: z.array(inputField).optional(),
   consumes: z.array(stageDependency).optional(),
   optional: z.boolean().optional(),
   output: z.object({
     kind: z.enum(["markdown", "json", "structured-sections"]),
-    hint: z.string().optional(),
+    hint: localizedText.optional(),
     sections: z.array(z.string()).optional(),
   }),
   model: z.string().optional(),
@@ -59,17 +65,15 @@ const toolStage = z.object({
 
 const toolSchema = z.object({
   id: z.string().min(1),
-  slug: z
-    .string()
-    .regex(/^[a-z0-9-]+$/, "slug moet kebab-case zijn"),
-  nameNl: z.string().min(1),
-  taglineNl: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9-]+$/, "slug must be kebab-case"),
+  name: localizedText,
+  tagline: localizedText,
   icon: z.string().optional(),
   userType: z.enum(["instructor", "student"]),
   mode: z.enum(["one-shot", "chat"]),
   theory: z.object({
-    name: z.string().min(1),
-    summaryNl: z.string().min(1),
+    name: localizedText,
+    summary: localizedText,
     keyCitations: z.array(z.string()),
   }),
   attribution: z.object({
@@ -81,7 +85,7 @@ const toolSchema = z.object({
     year: z.number(),
     license: z.literal("CC BY 4.0"),
     sourcePages: z.string().optional(),
-    evaluatedWith: z.string().optional(),
+    evaluatedWith: localizedText.optional(),
     adapted: z.boolean().optional(),
   }),
   inputs: z.array(inputField),
@@ -110,8 +114,9 @@ export interface ValidationIssue {
 /**
  * Validate a list of tools: shape (zod), unique slugs/ids, resolvable models and
  * prompt ids, valid stage `consumes` references, and that every {{placeholder}}
- * in each stage's runtime prompt is satisfied by an input, an injected var, or a
- * consumed prior-stage output. Returns all issues (empty array = valid).
+ * in each stage's runtime prompt (both language variants) is satisfied by an
+ * input, an injected var, or a consumed prior-stage output. Returns all issues
+ * (empty array = valid).
  */
 export function validateTools(tools: Tool[]): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -127,16 +132,16 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
       continue;
     }
 
-    if (slugs.has(tool.slug)) issues.push({ tool: tool.slug, message: "dubbele slug" });
-    if (ids.has(tool.id)) issues.push({ tool: tool.slug, message: "dubbele id" });
+    if (slugs.has(tool.slug)) issues.push({ tool: tool.slug, message: "duplicate slug" });
+    if (ids.has(tool.id)) issues.push({ tool: tool.slug, message: "duplicate id" });
     slugs.add(tool.slug);
     ids.add(tool.id);
 
     if (!(tool.defaultModel in MODELS)) {
-      issues.push({ tool: tool.slug, message: `onbekend defaultModel: ${tool.defaultModel}` });
+      issues.push({ tool: tool.slug, message: `unknown defaultModel: ${tool.defaultModel}` });
     }
     if (tool.mode === "chat" && !tool.chat) {
-      issues.push({ tool: tool.slug, message: "mode 'chat' vereist een chat-config" });
+      issues.push({ tool: tool.slug, message: "mode 'chat' requires a chat config" });
     }
 
     const stageIds = new Set(tool.stages.map((s) => s.id));
@@ -147,12 +152,12 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
       if (!prompt) {
         issues.push({
           tool: tool.slug,
-          message: `fase "${stage.id}": onbekende systemPromptId ${stage.systemPromptId}`,
+          message: `stage "${stage.id}": unknown systemPromptId ${stage.systemPromptId}`,
         });
         continue;
       }
       if (stage.model && !(stage.model in MODELS)) {
-        issues.push({ tool: tool.slug, message: `fase "${stage.id}": onbekend model ${stage.model}` });
+        issues.push({ tool: tool.slug, message: `stage "${stage.id}": unknown model ${stage.model}` });
       }
 
       // Resolvable placeholder sources: tool inputs + stage inputs + injected + consumed.
@@ -167,7 +172,7 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
         if (!stageIds.has(dep.fromStageId)) {
           issues.push({
             tool: tool.slug,
-            message: `fase "${stage.id}" consumeert onbekende fase "${dep.fromStageId}"`,
+            message: `stage "${stage.id}" consumes unknown stage "${dep.fromStageId}"`,
           });
         }
       }
@@ -177,7 +182,7 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
           if (!available.has(ph)) {
             issues.push({
               tool: tool.slug,
-              message: `fase "${stage.id}" (${lang}): placeholder {{${ph}}} heeft geen bron (input/injected/consumed)`,
+              message: `stage "${stage.id}" (${lang}): placeholder {{${ph}}} has no source (input/injected/consumed)`,
             });
           }
         }

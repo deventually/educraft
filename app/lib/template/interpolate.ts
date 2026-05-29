@@ -49,7 +49,7 @@ export function interpolate(
 
   if (missing.length) {
     throw new Error(
-      `Ontbrekende template-waarden voor: ${[...new Set(missing)].join(", ")}`,
+      `Missing template values for: ${[...new Set(missing)].join(", ")}`,
     );
   }
   return result;

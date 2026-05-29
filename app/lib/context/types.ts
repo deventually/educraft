@@ -44,6 +44,31 @@ export const HBOI_ACTIVITIES = [
 ] as const;
 export type HboiActivity = (typeof HBOI_ACTIVITIES)[number];
 
+/**
+ * Bilingual labels for the hbo-i framework terms. The array values above stay
+ * the canonical (Dutch) identifiers (used as form values + stored); these maps
+ * are the single source for displaying/injecting them in either language —
+ * consumed by both the settings UI and the prompt context formatter.
+ */
+export const HBOI_ARCHITECTURE_LAYER_LABELS: Record<
+  HboiArchitectureLayer,
+  { nl: string; en: string }
+> = {
+  Gebruikersinteractie: { nl: "Gebruikersinteractie", en: "User interaction" },
+  Organisatieprocessen: { nl: "Organisatieprocessen", en: "Business processes" },
+  Infrastructuur: { nl: "Infrastructuur", en: "Infrastructure" },
+  Software: { nl: "Software", en: "Software" },
+  "Hardware-interfacing": { nl: "Hardware-interfacing", en: "Hardware interfacing" },
+};
+
+export const HBOI_ACTIVITY_LABELS: Record<HboiActivity, { nl: string; en: string }> = {
+  Analyseren: { nl: "Analyseren", en: "Analysis" },
+  Adviseren: { nl: "Adviseren", en: "Advice" },
+  Ontwerpen: { nl: "Ontwerpen", en: "Design" },
+  Realiseren: { nl: "Realiseren", en: "Realisation" },
+  Beheren: { nl: "Beheren", en: "Management" },
+};
+
 export interface ContextProfile {
   id: string;
   /** e.g. "Software Engineering — jaar 2" or "Verpleegkunde — jaar 3". */

@@ -3,15 +3,18 @@ import { ArrowLeft, BookOpen, Info } from "lucide-react";
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import { getVerbatimPrompt } from "~/lib/prompts";
+import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
 import { GeneratorView } from "~/components/GeneratorView";
 import { StageStepper } from "~/components/StageStepper";
 import { ToolIcon } from "~/components/ToolIcon";
 import { Badge } from "~/components/ui";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
+import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params }: Route.LoaderArgs) {
   const tool = getToolBySlugOrThrow(params.slug);
   const profiles = listProfiles();
   const defaultProfile = getDefaultProfile();
@@ -19,16 +22,23 @@ export function loader({ params }: Route.LoaderArgs) {
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),
   }));
-  return { tool, profiles, defaultProfileId: defaultProfile?.id ?? "", verbatim };
+  const localModels = (await discoverLocalModels()).map((m) => ({
+    id: m.id,
+    displayName: m.displayName,
+  }));
+  return { tool, profiles, defaultProfileId: defaultProfile?.id ?? "", verbatim, localModels };
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  return [{ title: data ? `${data.tool.nameNl} — EduCraft` : "EduCraft" }];
+export function meta({ data, matches }: Route.MetaArgs) {
+  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const locale = root?.locale ?? DEFAULT_LOCALE;
+  return [{ title: data ? `${loc(data.tool.name, locale)} — EduCraft` : "EduCraft" }];
 }
 
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
-  const { tool, profiles, defaultProfileId, verbatim } = loaderData;
+  const locale = useLocale();
+  const { tool, profiles, defaultProfileId, verbatim, localModels } = loaderData;
   const a = tool.attribution;
   const multiStage = tool.stages.length > 1;
 
@@ -45,16 +55,16 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{tool.nameNl}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{loc(tool.name, locale)}</h1>
               <Badge>{tool.userType === "instructor" ? t.badge.instructor : t.badge.student}</Badge>
             </div>
-            <p className="mt-1 text-slate-600">{tool.taglineNl}</p>
+            <p className="mt-1 text-slate-600">{loc(tool.tagline, locale)}</p>
 
             <div className="mt-4 rounded-xl bg-slate-50 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <BookOpen className="size-4 text-violet-600" /> {t.tool.theory}: {tool.theory.name}
+                <BookOpen className="size-4 text-violet-600" /> {t.tool.theory}: {loc(tool.theory.name, locale)}
               </div>
-              <p className="mt-1 text-sm text-slate-600">{tool.theory.summaryNl}</p>
+              <p className="mt-1 text-sm text-slate-600">{loc(tool.theory.summary, locale)}</p>
               {tool.theory.keyCitations.length > 0 && (
                 <p className="mt-1 text-xs text-slate-400">{tool.theory.keyCitations.join(" · ")}</p>
               )}
@@ -63,7 +73,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             <p className="mt-3 text-xs text-slate-500">
               {t.tool.source}: <span className="italic">{a.chapterTitle}</span> — {a.authors}.{" "}
               {a.bookTitle} ({a.editor}, {a.year}). {a.sourcePages}. {a.license}.
-              {a.evaluatedWith ? ` ${fmt(t.tool.evaluatedWith, { model: a.evaluatedWith })}` : ""}
+              {a.evaluatedWith ? ` ${fmt(t.tool.evaluatedWith, { model: loc(a.evaluatedWith, locale) })}` : ""}
             </p>
 
             {a.adapted && (
@@ -79,8 +89,8 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
               </summary>
               <div className="mt-2 space-y-3">
                 {verbatim.map((v) => (
-                  <div key={v.name}>
-                    {multiStage && <div className="text-xs font-semibold text-slate-500">{v.name}</div>}
+                  <div key={loc(v.name, locale)}>
+                    {multiStage && <div className="text-xs font-semibold text-slate-500">{loc(v.name, locale)}</div>}
                     <pre className="mt-1 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100">
                       {v.text}
                     </pre>
@@ -93,9 +103,19 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
       </header>
 
       {multiStage ? (
-        <StageStepper tool={tool} profiles={profiles} defaultProfileId={defaultProfileId} />
+        <StageStepper
+          tool={tool}
+          profiles={profiles}
+          defaultProfileId={defaultProfileId}
+          localModels={localModels}
+        />
       ) : (
-        <GeneratorView tool={tool} profiles={profiles} defaultProfileId={defaultProfileId} />
+        <GeneratorView
+          tool={tool}
+          profiles={profiles}
+          defaultProfileId={defaultProfileId}
+          localModels={localModels}
+        />
       )}
     </div>
   );

@@ -2,13 +2,14 @@ import type { Route } from "./+types/about";
 import { ALL_TOOLS } from "~/lib/registry";
 import { BOOK, LICENSE_URL } from "~/lib/prompts/attribution";
 import { Badge, Card } from "~/components/ui";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
 
 export function loader() {
   return {
     tools: ALL_TOOLS.map((t) => ({
-      nameNl: t.nameNl,
+      name: t.name,
       phase: t.phase,
       enabled: t.enabled,
       userType: t.userType,
@@ -18,6 +19,7 @@ export function loader() {
 
 export default function About({ loaderData }: Route.ComponentProps) {
   const t = useT();
+  const locale = useLocale();
   const phaseLabels: Record<number, string> = {
     1: t.about.phase1,
     2: t.about.phase2,
@@ -57,10 +59,10 @@ export default function About({ loaderData }: Route.ComponentProps) {
             <div className="flex flex-wrap gap-2">
               {tools.map((tl) => (
                 <span
-                  key={tl.nameNl}
+                  key={loc(tl.name, locale)}
                   className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
                 >
-                  {tl.nameNl}
+                  {loc(tl.name, locale)}
                   {!tl.enabled && <Badge>{t.home.comingSoon}</Badge>}
                 </span>
               ))}

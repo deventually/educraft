@@ -3,24 +3,31 @@ import { AUTHENTIC_ASSESSMENT_PROMPT } from "~/lib/prompts/authentic-assessment.
 import { attribution } from "~/lib/prompts/attribution";
 
 const MODALITEIT = [
-  { value: "contactonderwijs", label: "Contactonderwijs" },
-  { value: "online", label: "Online" },
-  { value: "hybride", label: "Hybride" },
+  { value: "in-person", label: { nl: "Contactonderwijs", en: "In-person" } },
+  { value: "online", label: { nl: "Online", en: "Online" } },
+  { value: "hybrid", label: { nl: "Hybride", en: "Hybrid" } },
 ];
+
+const CURSUSCONTEXT = { nl: "Cursuscontext", en: "Course context" };
+const BACKWARD_DESIGN = { nl: "Backward Design", en: "Backward Design" };
 
 export const authenticAssessment: Tool = {
   id: "authentic-assessment-backward-design",
   slug: "authentieke-toetsing",
-  nameNl: "Authentieke toetsing (Backward Design)",
-  taglineNl:
-    "Ontwerp een realistische, praktijkgerichte toets met analytische rubric en bruikbare feedback.",
+  name: { nl: "Authentieke toetsing (Backward Design)", en: "Authentic Assessment (Backward Design)" },
+  tagline: {
+    nl: "Ontwerp een realistische, praktijkgerichte toets met analytische rubric en bruikbare feedback.",
+    en: "Design a realistic, practice-oriented assessment with an analytic rubric and usable feedback.",
+  },
   icon: "clipboard-check",
   userType: "instructor",
   mode: "one-shot",
   theory: {
     name: "Backward Design + Authentic Assessment + VALUE rubrics",
-    summaryNl:
-      "Vertrek vanuit leeruitkomsten en aanvaardbaar bewijs naar een authentieke beroepstaak met afgestemde, schaalbare beoordeling.",
+    summary: {
+      nl: "Vertrek vanuit leeruitkomsten en aanvaardbaar bewijs naar een authentieke beroepstaak met afgestemde, schaalbare beoordeling.",
+      en: "Move from learning outcomes and acceptable evidence to an authentic professional task with aligned, scalable assessment.",
+    },
     keyCitations: ["Wiggins & McTighe (2005)", "AAC&U VALUE Rubrics"],
   },
   attribution: attribution({
@@ -40,106 +47,135 @@ export const authenticAssessment: Tool = {
   inputs: [
     {
       name: "discipline",
-      label: "Vakgebied / discipline",
+      label: { nl: "Vakgebied / discipline", en: "Subject area / discipline" },
       kind: "text",
       required: true,
-      placeholder: "bijv. Software Engineering",
-      group: "Cursuscontext",
+      placeholder: { nl: "bijv. Software Engineering", en: "e.g. Software Engineering" },
+      group: CURSUSCONTEXT,
     },
     {
       name: "niveau",
-      label: "Niveau",
+      label: { nl: "Niveau", en: "Level" },
       kind: "select",
       required: true,
       options: [
-        { value: "introductie", label: "Introductie" },
-        { value: "gevorderd", label: "Gevorderd" },
-        { value: "afstudeerfase", label: "Afstudeerfase" },
+        { value: "introductory", label: { nl: "Introductie", en: "Introductory" } },
+        { value: "advanced", label: { nl: "Gevorderd", en: "Advanced" } },
+        { value: "graduation phase", label: { nl: "Afstudeerfase", en: "Graduation phase" } },
       ],
-      defaultValue: "gevorderd",
-      group: "Cursuscontext",
+      defaultValue: "advanced",
+      group: CURSUSCONTEXT,
     },
     {
       name: "modaliteit",
-      label: "Modaliteit",
+      label: { nl: "Modaliteit", en: "Modality" },
       kind: "select",
       options: MODALITEIT,
-      defaultValue: "contactonderwijs",
-      group: "Cursuscontext",
+      defaultValue: "in-person",
+      group: CURSUSCONTEXT,
     },
     {
       name: "groepsgrootte",
-      label: "Groepsgrootte",
+      label: { nl: "Groepsgrootte", en: "Class size" },
       kind: "number",
       min: 1,
       max: 1000,
       defaultValue: 30,
-      group: "Cursuscontext",
+      group: CURSUSCONTEXT,
     },
     {
       name: "randvoorwaarden",
-      label: "Randvoorwaarden",
+      label: { nl: "Randvoorwaarden", en: "Constraints" },
       kind: "textarea",
       rows: 2,
-      placeholder: "Nakijkcapaciteit, accreditatie, verplichte tools, planning…",
-      group: "Cursuscontext",
+      placeholder: {
+        nl: "Nakijkcapaciteit, accreditatie, verplichte tools, planning…",
+        en: "Grading capacity, accreditation, required tools, timeline…",
+      },
+      group: CURSUSCONTEXT,
     },
     {
       name: "leeruitkomsten",
-      label: "Gewenste leeruitkomst(en)",
+      label: { nl: "Gewenste leeruitkomst(en)", en: "Desired learning outcome(s)" },
       kind: "textarea",
       required: true,
       rows: 3,
-      help: "Wat moeten studenten kunnen aantonen? Eén per regel.",
-      group: "Backward Design",
+      help: {
+        nl: "Wat moeten studenten kunnen aantonen? Eén per regel.",
+        en: "What must students be able to demonstrate? One per line.",
+      },
+      group: BACKWARD_DESIGN,
     },
     {
       name: "bewijs",
-      label: "Aanvaardbaar bewijs van leren",
+      label: { nl: "Aanvaardbaar bewijs van leren", en: "Acceptable evidence of learning" },
       kind: "textarea",
       rows: 2,
-      help: "Wat geldt als overtuigend bewijs dat de leeruitkomst is behaald?",
-      group: "Backward Design",
+      help: {
+        nl: "Wat geldt als overtuigend bewijs dat de leeruitkomst is behaald?",
+        en: "What counts as convincing evidence that the outcome has been met?",
+      },
+      group: BACKWARD_DESIGN,
     },
     {
       name: "authentiekeContext",
-      label: "Authentieke (beroeps)context, rol & doelgroep",
+      label: {
+        nl: "Authentieke (beroeps)context, rol & doelgroep",
+        en: "Authentic (professional) context, role & audience",
+      },
       kind: "textarea",
       required: true,
       rows: 3,
-      placeholder:
-        "bijv. student levert als junior developer een technisch adviesrapport op voor een opdrachtgever",
-      group: "Backward Design",
+      placeholder: {
+        nl: "bijv. student levert als junior developer een technisch adviesrapport op voor een opdrachtgever",
+        en: "e.g. as a junior developer, the student delivers a technical advisory report to a client",
+      },
+      group: BACKWARD_DESIGN,
     },
     {
       name: "rubricFramework",
-      label: "Rubricraamwerk",
+      label: { nl: "Rubricraamwerk", en: "Rubric framework" },
       kind: "text",
       defaultValue: "AAC&U VALUE rubrics",
-      help: "Te gebruiken rubric-/competentieraamwerk (aanpasbaar).",
-      group: "Backward Design",
+      help: {
+        nl: "Te gebruiken rubric-/competentieraamwerk (aanpasbaar).",
+        en: "Rubric/competency framework to use (adjustable).",
+      },
+      group: BACKWARD_DESIGN,
     },
     {
       name: "iteratie",
-      label: "Realistisch niveau van iteratie",
+      label: { nl: "Realistisch niveau van iteratie", en: "Realistic level of iteration" },
       kind: "select",
       options: [
-        { value: "beperkt (één inlevermoment)", label: "Beperkt (één inlevermoment)" },
-        { value: "gemiddeld (één draft + feedback)", label: "Gemiddeld (draft + feedback)" },
-        { value: "uitgebreid (meerdere checkpoints)", label: "Uitgebreid (meerdere checkpoints)" },
+        {
+          value: "limited (single submission)",
+          label: { nl: "Beperkt (één inlevermoment)", en: "Limited (single submission)" },
+        },
+        {
+          value: "moderate (draft + feedback)",
+          label: { nl: "Gemiddeld (draft + feedback)", en: "Moderate (draft + feedback)" },
+        },
+        {
+          value: "extensive (multiple checkpoints)",
+          label: { nl: "Uitgebreid (meerdere checkpoints)", en: "Extensive (multiple checkpoints)" },
+        },
       ],
-      defaultValue: "gemiddeld (één draft + feedback)",
-      group: "Backward Design",
+      defaultValue: "moderate (draft + feedback)",
+      group: BACKWARD_DESIGN,
     },
   ],
   stages: [
     {
       id: "blueprint",
-      name: "Assessment Blueprint",
+      name: { nl: "Assessment Blueprint", en: "Assessment Blueprint" },
       systemPromptId: AUTHENTIC_ASSESSMENT_PROMPT.id,
       output: {
         kind: "structured-sections",
-        hint: "Volledige Assessment Blueprint: taak, analytische rubric, studentgerichte rubric, feedback, UDL & integriteit.",
+        hint: {
+          nl: "Volledige Assessment Blueprint: taak, analytische rubric, studentgerichte rubric, feedback, UDL & integriteit.",
+          en: "Full Assessment Blueprint: task, analytic rubric, student-facing rubric, feedback, UDL & integrity.",
+        },
       },
     },
   ],

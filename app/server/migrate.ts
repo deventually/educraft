@@ -8,4 +8,4 @@ import { DB_PATH } from "./env.server";
 
 // Touch the db so the module initializes and ensureSchema runs.
 void db;
-console.log(`✓ EduCraft database klaar: ${DB_PATH}`);
+console.log(`✓ EduCraft database ready: ${DB_PATH}`);

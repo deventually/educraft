@@ -3,21 +3,24 @@ import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
-import { ToolControls } from "./ToolControls";
+import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
 import { Button } from "./ui";
 import { streamPost } from "~/lib/streamClient";
-import { useT } from "~/lib/i18n/useT";
+import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
 
 interface Props {
   tool: Tool;
   profiles: ContextProfile[];
   defaultProfileId: string;
+  localModels?: PickerModel[];
 }
 
-export function GeneratorView({ tool, profiles, defaultProfileId }: Props) {
+export function GeneratorView({ tool, profiles, defaultProfileId, localModels }: Props) {
   const t = useT();
+  const locale = useLocale();
   const stage = tool.stages[0];
   const [values, setValues] = useState<FormValues>(() => defaultValuesFor(tool.inputs));
   const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
@@ -31,7 +34,7 @@ export function GeneratorView({ tool, profiles, defaultProfileId }: Props) {
   async function generate() {
     const missing = missingRequired(tool.inputs, values);
     if (missing.length) {
-      setError(`${t.tool.required}: ${missing.join(", ")}`);
+      setError(`${t.tool.required}: ${missing.map((f) => loc(f.label, locale)).join(", ")}`);
       return;
     }
     setError(null);
@@ -71,6 +74,7 @@ export function GeneratorView({ tool, profiles, defaultProfileId }: Props) {
           onLanguage={setOutputLanguage}
           model={model}
           onModel={setModel}
+          localModels={localModels}
           disabled={streaming}
         />
         <DynamicForm

@@ -4,6 +4,12 @@ import { listModels } from "~/lib/ai/models";
 import { Label, Select } from "./ui";
 import { useT } from "~/lib/i18n/useT";
 
+/** Minimal shape needed to render an <option> (static or discovered local). */
+export interface PickerModel {
+  id: string;
+  displayName: string;
+}
+
 interface Props {
   usesContextProfile: boolean;
   profiles: ContextProfile[];
@@ -13,12 +19,14 @@ interface Props {
   onLanguage: (l: OutputLanguage) => void;
   model: string;
   onModel: (m: string) => void;
+  /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
+  localModels?: PickerModel[];
   disabled?: boolean;
 }
 
 export function ToolControls(props: Props) {
   const t = useT();
-  const models = listModels();
+  const models: PickerModel[] = [...listModels(), ...(props.localModels ?? [])];
   return (
     <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">
       {props.usesContextProfile && (

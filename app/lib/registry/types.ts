@@ -1,3 +1,5 @@
+import type { LocalizedText } from "~/lib/i18n/localized";
+
 /**
  * The Tool registry — EduCraft's single most important abstraction.
  *
@@ -30,21 +32,21 @@ export type FieldKind =
 
 export interface FieldOption {
   value: string;
-  /** NL label shown in the UI. */
-  label: string;
+  /** Localized label shown in the UI. */
+  label: LocalizedText;
 }
 
 export interface InputField {
   /** Becomes a {{name}} placeholder key in the prompt template. */
   name: string;
-  /** NL label. */
-  label: string;
+  /** Localized label. */
+  label: LocalizedText;
   kind: FieldKind;
   required?: boolean;
-  /** NL helper text shown inside the input. */
-  placeholder?: string;
-  /** NL tooltip / longer description shown under the label. */
-  help?: string;
+  /** Localized helper text shown inside the input. */
+  placeholder?: LocalizedText;
+  /** Localized tooltip / longer description shown under the label. */
+  help?: LocalizedText;
   defaultValue?: string | number | boolean | string[];
   /** For select / multiselect. */
   options?: FieldOption[];
@@ -54,16 +56,16 @@ export interface InputField {
   step?: number;
   /** For file / image, e.g. "image/png,image/jpeg". */
   accept?: string;
-  /** Optional UI grouping, e.g. "Cursuscontext", "Leerdoelen". */
-  group?: string;
+  /** Optional localized UI grouping, e.g. "Cursuscontext" / "Course context". */
+  group?: LocalizedText;
   /** For textarea sizing. */
   rows?: number;
 }
 
 export interface OutputFormat {
   kind: "markdown" | "json" | "structured-sections";
-  /** NL hint shown to the user about what this stage produces. */
-  hint?: string;
+  /** Localized hint shown to the user about what this stage produces. */
+  hint?: LocalizedText;
   /** Expected headings; drives copy/export structure. */
   sections?: string[];
 }
@@ -79,10 +81,10 @@ export interface StageDependency {
 /** A single LLM step. One-shot generators and chat tools have exactly one. */
 export interface ToolStage {
   id: string;
-  /** NL display name of the stage. */
-  name: string;
-  /** NL description of the stage. */
-  description?: string;
+  /** Localized display name of the stage. */
+  name: LocalizedText;
+  /** Localized description of the stage. */
+  description?: LocalizedText;
   /** Prompt-template id resolved from app/lib/prompts (the PROMPTS map). */
   systemPromptId: string;
   /** Inputs specific to this stage (in addition to tool-level `inputs`). */
@@ -119,7 +121,7 @@ export interface Attribution {
   /** Appendix page range the prompt was extracted from. */
   sourcePages?: string;
   /** Model the chapter reported using during evaluation, if stated. */
-  evaluatedWith?: string;
+  evaluatedWith?: LocalizedText;
   /**
    * True when the runtime prompt was adapted (e.g. interview → one-shot, or
    * translated to Dutch). The verbatim original is preserved in the prompt file
@@ -129,10 +131,10 @@ export interface Attribution {
 }
 
 export interface Theory {
-  /** e.g. "Backward Design (Understanding by Design)". */
-  name: string;
-  /** Short NL explainer shown in the tool header. */
-  summaryNl: string;
+  /** Theory/method name, e.g. "Backward Design (Understanding by Design)". */
+  name: LocalizedText;
+  /** Short localized explainer shown in the tool header. */
+  summary: LocalizedText;
   keyCitations: string[];
 }
 
@@ -140,10 +142,10 @@ export interface Tool {
   id: string;
   /** URL: /tools/<slug>. */
   slug: string;
-  /** NL display name. */
-  nameNl: string;
-  /** One-line NL pitch shown on the card. */
-  taglineNl: string;
+  /** Localized display name. */
+  name: LocalizedText;
+  /** One-line localized pitch shown on the card. */
+  tagline: LocalizedText;
   /** Lucide icon name, e.g. "compass". */
   icon?: string;
   userType: UserType;

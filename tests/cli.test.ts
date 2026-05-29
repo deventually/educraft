@@ -3,7 +3,6 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 // Fake child process whose stdout is an async-iterable of Buffers.
 function fakeChild(chunks: string[], exitCode: number | null = 0) {
   return {
-    stdin: { write: vi.fn(), end: vi.fn() },
     stderr: { on: vi.fn() },
     stdout: (async function* () {
       for (const c of chunks) yield Buffer.from(c);
@@ -38,12 +37,16 @@ describe("assemblePrompt", () => {
 });
 
 describe("cliProvider", () => {
-  it("spawns the agent binary and streams stdout", async () => {
+  it("spawns the agent binary with the prompt as the final arg and streams stdout", async () => {
     spawnMock.mockReturnValue(fakeChild(["Hel", "lo"]));
     const out: string[] = [];
     for await (const c of cliProvider.streamChat(base)) out.push(c);
     expect(out.join("")).toBe("Hello");
-    expect(spawnMock).toHaveBeenCalledWith("claude", ["-p"], expect.anything());
+    expect(spawnMock).toHaveBeenCalledWith(
+      "claude",
+      ["-p", "SYSTEM INSTRUCTIONS\n\ntrigger"],
+      expect.anything(),
+    );
   });
 
   it("generate() collects the full output", async () => {

@@ -4,12 +4,13 @@ import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { Badge } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
+import { loc } from "~/lib/i18n/localized";
 
 export function loader() {
   const generations = listGenerations(50).map((g) => ({
     id: g.id,
     toolSlug: g.toolSlug,
-    toolName: getToolBySlug(g.toolSlug)?.nameNl ?? g.toolSlug,
+    toolName: getToolBySlug(g.toolSlug)?.name ?? g.toolSlug,
     stageId: g.stageId,
     model: g.model,
     outputLanguage: g.outputLanguage,
@@ -37,7 +38,7 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
               <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-slate-900">{g.toolName}</span>
+                    <span className="font-medium text-slate-900">{loc(g.toolName, locale)}</span>
                     {g.stageId && <Badge>{g.stageId}</Badge>}
                   </div>
                   <p className="truncate text-xs text-slate-400">
@@ -48,7 +49,7 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
               <div className="border-t border-slate-100 p-3">
                 <ResultPanel
                   markdown={g.outputMarkdown}
-                  title={g.toolName}
+                  title={loc(g.toolName, locale)}
                   filenameBase={`${g.toolSlug}-${g.id.slice(0, 8)}`}
                 />
               </div>

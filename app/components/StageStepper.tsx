@@ -3,17 +3,19 @@ import { Sparkles, Square, AlertTriangle, Lock, RotateCcw } from "lucide-react";
 import type { Tool, OutputLanguage, ToolStage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
-import { ToolControls } from "./ToolControls";
+import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
 import { Badge, Button } from "./ui";
 import { streamPost } from "~/lib/streamClient";
-import { useT } from "~/lib/i18n/useT";
-// i18n: all visible strings resolved via useT() (locale-aware).
+import { useT, useLocale } from "~/lib/i18n/useT";
+import { loc } from "~/lib/i18n/localized";
+// i18n: all visible strings resolved via useT()/loc() (locale-aware).
 
 interface Props {
   tool: Tool;
   profiles: ContextProfile[];
   defaultProfileId: string;
+  localModels?: PickerModel[];
 }
 
 interface StageState {
@@ -22,8 +24,9 @@ interface StageState {
   error: string | null;
 }
 
-export function StageStepper({ tool, profiles, defaultProfileId }: Props) {
+export function StageStepper({ tool, profiles, defaultProfileId, localModels }: Props) {
   const t = useT();
+  const locale = useLocale();
   const [values, setValues] = useState<FormValues>(() => defaultValuesFor(tool.inputs));
   const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
@@ -55,7 +58,7 @@ export function StageStepper({ tool, profiles, defaultProfileId }: Props) {
     if (isEntry) {
       const missing = missingRequired(tool.inputs, values);
       if (missing.length) {
-        setFormError(`${t.tool.required}: ${missing.join(", ")}`);
+        setFormError(`${t.tool.required}: ${missing.map((f) => loc(f.label, locale)).join(", ")}`);
         return;
       }
       setFormError(null);
@@ -104,6 +107,7 @@ export function StageStepper({ tool, profiles, defaultProfileId }: Props) {
           onLanguage={setOutputLanguage}
           model={model}
           onModel={setModel}
+          localModels={localModels}
         />
         <DynamicForm
           fields={tool.inputs}
@@ -128,11 +132,11 @@ export function StageStepper({ tool, profiles, defaultProfileId }: Props) {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-slate-800">{stage.name}</h3>
+                    <h3 className="font-semibold text-slate-800">{loc(stage.name, locale)}</h3>
                     {stage.optional && <Badge>{t.tool.optionalStage}</Badge>}
                   </div>
                   {stage.description && (
-                    <p className="mt-0.5 text-xs text-slate-500">{stage.description}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">{loc(stage.description, locale)}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -164,7 +168,7 @@ export function StageStepper({ tool, profiles, defaultProfileId }: Props) {
                 <div className="p-3">
                   <ResultPanel
                     markdown={st?.output ?? ""}
-                    title={stage.name}
+                    title={loc(stage.name, locale)}
                     filenameBase={`${tool.slug}-${stage.id}`}
                     streaming={st?.streaming}
                   />

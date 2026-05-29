@@ -1,15 +1,21 @@
 import { spawn } from "node:child_process";
 import { getModel, type ProviderId } from "../models";
 import type { GenerateOptions, LLMProvider } from "../types";
+import { LocalizedError } from "~/lib/i18n/errors";
 
 /**
  * Local CLI agents (claude code, opencode, codex, gemini cli) exposed through
- * the portable LLMProvider interface. Each is run headlessly as a subprocess:
- * the assembled prompt is written to stdin and stdout is streamed back.
+ * the portable LLMProvider interface. Each is run headlessly as a subprocess
+ * with the assembled prompt passed as the final positional argument; stdout is
+ * streamed back.
  *
  * These only work where EduCraft runs on the same machine as the binaries, so
- * they are disabled in production. Per-agent invocation is best-effort for
- * current CLI versions — adjust a single `args` entry below if yours differs.
+ * they are disabled in production. Flags below are the verified headless modes:
+ *   claude -p "<prompt>"        (Claude Code non-interactive print)
+ *   codex exec "<prompt>"       (Codex non-interactive)
+ *   gemini -p "<prompt>"        (Gemini CLI headless)
+ *   opencode run "<prompt>"     (opencode one-shot run)
+ * The prompt is appended after `args`, so it always arrives as the last arg.
  */
 interface CliSpec {
   command: string;
@@ -41,10 +47,14 @@ export function assemblePrompt(opts: GenerateOptions): string {
 /** Spawn the agent, stream stdout, and surface spawn/exit failures clearly. */
 async function* runCli(catalogId: string, prompt: string): AsyncIterable<string> {
   if (process.env.NODE_ENV === "production") {
-    throw new Error("CLI agents run locally only and are disabled in production.");
+    throw new LocalizedError({
+      nl: "CLI-agents draaien alleen lokaal en zijn uitgeschakeld in productie.",
+      en: "CLI agents run locally only and are disabled in production.",
+    });
   }
   const spec = specFor(catalogId);
-  const child = spawn(spec.command, spec.args, { stdio: ["pipe", "pipe", "pipe"] });
+  // Prompt is the final positional argument (claude -p "…", codex exec "…", …).
+  const child = spawn(spec.command, [...spec.args, prompt], { stdio: ["ignore", "pipe", "pipe"] });
 
   const spawnErrors: NodeJS.ErrnoException[] = [];
   child.on("error", (err) => {
@@ -55,9 +65,6 @@ async function* runCli(catalogId: string, prompt: string): AsyncIterable<string>
   child.stderr?.on("data", (chunk: Buffer) => {
     stderr += chunk.toString();
   });
-
-  child.stdin?.write(prompt);
-  child.stdin?.end();
 
   if (child.stdout) {
     for await (const chunk of child.stdout) {
@@ -71,11 +78,23 @@ async function* runCli(catalogId: string, prompt: string): AsyncIterable<string>
 
   if (spawnErrors.length > 0) {
     const err = spawnErrors[0];
-    const hint = err.code === "ENOENT" ? " Is it installed and on your PATH?" : "";
-    throw new Error(`CLI "${spec.command}" could not be started (${err.code}).${hint}`);
+    if (err.code === "ENOENT") {
+      throw new LocalizedError({
+        nl: `CLI "${spec.command}" kon niet worden gestart. Is deze geïnstalleerd en beschikbaar in je PATH?`,
+        en: `CLI "${spec.command}" could not be started. Is it installed and on your PATH?`,
+      });
+    }
+    throw new LocalizedError({
+      nl: `CLI "${spec.command}" kon niet worden gestart (${err.code}).`,
+      en: `CLI "${spec.command}" could not be started (${err.code}).`,
+    });
   }
   if (code !== 0 && code !== null) {
-    throw new Error(`CLI "${spec.command}" exited with code ${code}. ${stderr.slice(0, 500)}`.trim());
+    const detail = stderr.slice(0, 500).trim();
+    throw new LocalizedError({
+      nl: `CLI "${spec.command}" eindigde met code ${code}. ${detail}`.trim(),
+      en: `CLI "${spec.command}" exited with code ${code}. ${detail}`.trim(),
+    });
   }
 }
 

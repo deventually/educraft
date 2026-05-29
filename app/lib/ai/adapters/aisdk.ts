@@ -1,22 +1,24 @@
 import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { getModel } from "../models";
+import { resolveModelInfo } from "../models";
 import type { GenerateOptions, LLMProvider } from "../types";
 import { env } from "~/server/env.server";
+import { LocalizedError } from "~/lib/i18n/errors";
 
 const DEFAULT_MAX_TOKENS = 8192;
 const DEFAULT_TEMPERATURE = 0.4;
 
-/** Resolve a catalog model id to a concrete AI SDK LanguageModel. */
+/** Resolve a catalog or dynamic local model id to a concrete AI SDK LanguageModel. */
 function resolveModel(catalogId: string): LanguageModel {
-  const info = getModel(catalogId);
+  const info = resolveModelInfo(catalogId);
   switch (info.provider) {
     case "anthropic": {
       if (!env.ANTHROPIC_API_KEY) {
-        throw new Error(
-          "ANTHROPIC_API_KEY ontbreekt. Vul deze in je .env in (zie .env.example).",
-        );
+        throw new LocalizedError({
+          nl: "ANTHROPIC_API_KEY ontbreekt. Vul deze in je .env in (zie .env.example).",
+          en: "ANTHROPIC_API_KEY is missing. Add it to your .env (see .env.example).",
+        });
       }
       return createAnthropic({ apiKey: env.ANTHROPIC_API_KEY })(info.apiId);
     }
@@ -31,7 +33,7 @@ function resolveModel(catalogId: string): LanguageModel {
         apiKey: "lm-studio",
       }).chatModel(info.apiId);
     default:
-      throw new Error(`Provider "${info.provider}" wordt (nog) niet via de AI SDK bediend.`);
+      throw new Error(`Provider "${info.provider}" is not (yet) served via the AI SDK.`);
   }
 }
 
