@@ -8,6 +8,7 @@ import { useT } from "~/lib/i18n/useT";
 export interface PickerModel {
   id: string;
   displayName: string;
+  supportsImages?: boolean;
 }
 
 interface Props {
@@ -22,11 +23,19 @@ interface Props {
   /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
   localModels?: PickerModel[];
   disabled?: boolean;
+  /** If true, filter to only vision-capable models. */
+  requiresImages?: boolean;
 }
 
 export function ToolControls(props: Props) {
   const t = useT();
-  const models: PickerModel[] = [...listModels(), ...(props.localModels ?? [])];
+  let models: PickerModel[] = [...listModels(), ...(props.localModels ?? [])];
+
+  // Filter to vision-capable models if tool requires images
+  if (props.requiresImages) {
+    models = models.filter((m) => m.supportsImages !== false);
+  }
+
   return (
     <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">
       {props.usesContextProfile && (

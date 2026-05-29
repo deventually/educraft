@@ -5,6 +5,7 @@ import { ARCS_REACTOR_PROMPT } from "./arcs-reactor.prompt";
 import { FORUM_AUTOGRADER_PROMPT } from "./forum-autograder.prompt";
 import { CONTEXTUALIZATION_PROMPT } from "./contextualization.prompt";
 import { MENTORAI_PROMPT } from "./mentorai.prompt";
+import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -19,6 +20,7 @@ const ALL: PromptDef[] = [
   FORUM_AUTOGRADER_PROMPT,
   CONTEXTUALIZATION_PROMPT,
   MENTORAI_PROMPT,
+  MATH_GRADING_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,

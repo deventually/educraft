@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
+import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
@@ -31,6 +32,9 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Check if tool has image inputs
+  const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
+
   async function generate() {
     const missing = missingRequired(tool.inputs, values);
     if (missing.length) {
@@ -42,9 +46,41 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
     setStreaming(true);
     const ctrl = new AbortController();
     abortRef.current = ctrl;
+
+    // Extract images from form values if present
+    const images: ImageInput[] = [];
+    for (const field of tool.inputs) {
+      if (field.kind === "image") {
+        const fieldImages = values[field.name];
+        if (
+          Array.isArray(fieldImages) &&
+          fieldImages.length > 0 &&
+          typeof fieldImages[0] === "object"
+        ) {
+          images.push(...(fieldImages as ImageInput[]));
+        }
+      }
+    }
+
+    // Remove image fields from values before sending (they're sent separately)
+    const valuesToSend = { ...values };
+    for (const field of tool.inputs) {
+      if (field.kind === "image") {
+        delete valuesToSend[field.name];
+      }
+    }
+
     await streamPost(
       "/api/stream",
-      { slug: tool.slug, stageId: stage.id, values, contextProfileId, outputLanguage, model },
+      {
+        slug: tool.slug,
+        stageId: stage.id,
+        values: valuesToSend,
+        contextProfileId,
+        outputLanguage,
+        model,
+        images: images.length > 0 ? images : undefined,
+      },
       {
         onToken: (text) => setOutput((prev) => prev + text),
         onDone: () => setStreaming(false),
@@ -76,6 +112,7 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
           onModel={setModel}
           localModels={localModels}
           disabled={streaming}
+          requiresImages={hasImageInputs}
         />
         <DynamicForm
           fields={tool.inputs}
