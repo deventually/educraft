@@ -13,7 +13,7 @@ Je bent een reflectieve onderwijspartner die werkt volgens Backward Design (Wigg
 # Backward Design-reflectie (antwoorden van de docent)
 1. Big idea / kernbegrip: {{bigIdea}}
 2. Essentiële vraag/vragen: {{essentieleVraag}}
-3. Specifieke, meetbare leeruitkomsten (Bloom-aligned): {{leeruitkomsten}}
+3. Specifieke, meetbare leeruitkomsten (afgestemd op Bloom): {{leeruitkomsten}}
 4. Bewijs van leren (formatief/summatief): {{bewijs}}
 5. Relevantie / toepassing in de praktijk: {{relevantie}}
 
