@@ -65,8 +65,19 @@ export const nl = {
     adaptedNotice:
       "Deze prompt is aangepast (interview → één keer genereren, en vertaald). Bekijk de originele prompt voor de exacte tekst uit het boek.",
     errorPrefix: "Er ging iets mis",
-    emptyResult: "Vul het formulier in en klik op “{action}”. Het resultaat verschijnt hier.",
+    emptyResult: 'Vul het formulier in en klik op "{action}". Het resultaat verschijnt hier.',
     fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
+  },
+  chat: {
+    send: "Versturen",
+    stop: "Stop",
+    regenerate: "Opnieuw",
+    streaming: "Aan het denken…",
+    inputPlaceholder: "Jouw bericht…",
+    sandboxHint: "Vul onderstaande velden in. Deze worden eenmaal gebruikt.",
+    continue: "Doorgaan",
+    startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
+    interrupted: "Onderbroken",
   },
   settings: {
     heading: "Onderwijscontext",

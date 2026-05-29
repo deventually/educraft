@@ -1,4 +1,5 @@
 import type { Route } from "./+types/api.stream";
+import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
@@ -6,11 +7,16 @@ import { isResolvableModel } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { saveGeneration } from "~/server/repositories/generations.server";
-import type { OutputLanguage } from "~/lib/registry/types";
+import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { localizeError } from "~/lib/i18n/errors";
+
+const ChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string(),
+});
 
 interface StreamBody {
   slug: string;
@@ -21,6 +27,8 @@ interface StreamBody {
   /** Outputs of earlier stages, keyed by stage id (multi-stage tools). */
   priorOutputs?: Record<string, string>;
   model?: string;
+  /** For chat mode: full message history (user turns + assistant responses). */
+  messages?: ChatMessage[];
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -51,12 +59,26 @@ export async function action({ request }: Route.ActionArgs) {
       body.model && isResolvableModel(body.model) ? body.model : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 
-    const trigger =
-      outputLanguage === "en" ? "Carry out the task in full." : "Voer de opdracht volledig uit.";
+    // Chat mode: use provided message history; one-shot: trigger with initial message
+    let messages: ChatMessage[];
+    if (tool.mode === "chat" && body.messages) {
+      // Validate message array
+      const validated = z.array(ChatMessageSchema).safeParse(body.messages);
+      if (!validated.success) {
+        return new Response(sseError("Invalid message format"), { headers: SSE_HEADERS });
+      }
+      messages = validated.data;
+    } else {
+      // One-shot/multi-stage: single trigger message
+      const trigger =
+        outputLanguage === "en" ? "Carry out the task in full." : "Voer de opdracht volledig uit.";
+      messages = [{ role: "user", content: trigger }];
+    }
+
     const tokens = provider.streamChat({
       model,
       system,
-      messages: [{ role: "user", content: trigger }],
+      messages,
       temperature: stage.temperature ?? tool.defaultTemperature,
     });
 
