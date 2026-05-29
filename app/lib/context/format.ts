@@ -1,8 +1,4 @@
-import {
-  type ContextProfile,
-  HBOI_ARCHITECTURE_LAYER_LABELS,
-  HBOI_ACTIVITY_LABELS,
-} from "./types";
+import { type ContextProfile, HBOI_ARCHITECTURE_LAYER_LABELS, HBOI_ACTIVITY_LABELS } from "./types";
 import type { OutputLanguage } from "~/lib/registry/types";
 
 interface Labels {
@@ -40,8 +36,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
     hboiLevel: "Beheersingsniveau",
   },
   en: {
-    intro:
-      "This lesson is designed within Dutch higher professional education (hbo).",
+    intro: "This lesson is designed within Dutch higher professional education (hbo).",
     programme: "Programme",
     domain: "Domain/sector",
     course: "Course",
@@ -86,9 +81,7 @@ export function formatProfile(
 
   const hasIctPack =
     profile.domain === "ICT" &&
-    (profile.architectureLayers?.length ||
-      profile.activities?.length ||
-      profile.hboiLevel);
+    (profile.architectureLayers?.length || profile.activities?.length || profile.hboiLevel);
   if (hasIctPack) {
     lines.push(t.hboiIntro);
     if (profile.hboiLevel) lines.push(`- ${t.hboiLevel}: ${profile.hboiLevel}`);

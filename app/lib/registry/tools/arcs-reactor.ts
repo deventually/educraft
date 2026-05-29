@@ -51,9 +51,18 @@ export const arcsReactor: Tool = {
       kind: "select",
       required: true,
       options: [
-        { value: "foundation year (year 1)", label: { nl: "Propedeuse (jaar 1)", en: "Foundation year (year 1)" } },
-        { value: "main phase (years 2-3)", label: { nl: "Hoofdfase (jaar 2–3)", en: "Main phase (years 2–3)" } },
-        { value: "graduation phase (year 4)", label: { nl: "Afstudeerfase (jaar 4)", en: "Graduation phase (year 4)" } },
+        {
+          value: "foundation year (year 1)",
+          label: { nl: "Propedeuse (jaar 1)", en: "Foundation year (year 1)" },
+        },
+        {
+          value: "main phase (years 2-3)",
+          label: { nl: "Hoofdfase (jaar 2–3)", en: "Main phase (years 2–3)" },
+        },
+        {
+          value: "graduation phase (year 4)",
+          label: { nl: "Afstudeerfase (jaar 4)", en: "Graduation phase (year 4)" },
+        },
       ],
       defaultValue: "foundation year (year 1)",
       group: CONTEXT,
@@ -82,7 +91,10 @@ export const arcsReactor: Tool = {
     },
     {
       name: "studentkenmerken",
-      label: { nl: "Sterktes en uitdagingen van studenten", en: "Student strengths and challenges" },
+      label: {
+        nl: "Sterktes en uitdagingen van studenten",
+        en: "Student strengths and challenges",
+      },
       kind: "textarea",
       rows: 2,
       placeholder: {

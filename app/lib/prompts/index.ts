@@ -19,9 +19,7 @@ const ALL: PromptDef[] = [
   COGNITIVE_ARCHITECT_ANALYST_GEN,
 ];
 
-export const PROMPTS: Record<string, PromptDef> = Object.fromEntries(
-  ALL.map((p) => [p.id, p]),
-);
+export const PROMPTS: Record<string, PromptDef> = Object.fromEntries(ALL.map((p) => [p.id, p]));
 
 export function getPrompt(id: string): PromptDef {
   const p = PROMPTS[id];

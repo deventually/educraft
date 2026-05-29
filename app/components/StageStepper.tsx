@@ -136,7 +136,9 @@ export function StageStepper({ tool, profiles, defaultProfileId, localModels }: 
                     {stage.optional && <Badge>{t.tool.optionalStage}</Badge>}
                   </div>
                   {stage.description && (
-                    <p className="mt-0.5 text-xs text-slate-500">{loc(stage.description, locale)}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {loc(stage.description, locale)}
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">

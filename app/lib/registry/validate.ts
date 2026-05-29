@@ -127,7 +127,10 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
     const parsed = toolSchema.safeParse(tool);
     if (!parsed.success) {
       for (const e of parsed.error.issues) {
-        issues.push({ tool: tool.slug ?? tool.id ?? "?", message: `${e.path.join(".")}: ${e.message}` });
+        issues.push({
+          tool: tool.slug ?? tool.id ?? "?",
+          message: `${e.path.join(".")}: ${e.message}`,
+        });
       }
       continue;
     }
@@ -157,7 +160,10 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
         continue;
       }
       if (stage.model && !(stage.model in MODELS)) {
-        issues.push({ tool: tool.slug, message: `stage "${stage.id}": unknown model ${stage.model}` });
+        issues.push({
+          tool: tool.slug,
+          message: `stage "${stage.id}": unknown model ${stage.model}`,
+        });
       }
 
       // Resolvable placeholder sources: tool inputs + stage inputs + injected + consumed.

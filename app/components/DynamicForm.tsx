@@ -142,9 +142,7 @@ function renderControl(
                 type="button"
                 key={o.value}
                 onClick={() =>
-                  onChange(
-                    active ? selected.filter((v) => v !== o.value) : [...selected, o.value],
-                  )
+                  onChange(active ? selected.filter((v) => v !== o.value) : [...selected, o.value])
                 }
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-sm transition-colors",
@@ -180,10 +178,7 @@ function renderControl(
   }
 }
 
-function groupBy(
-  fields: InputField[],
-  locale: Locale,
-): Array<[string | undefined, InputField[]]> {
+function groupBy(fields: InputField[], locale: Locale): Array<[string | undefined, InputField[]]> {
   const map = new Map<string | undefined, InputField[]>();
   for (const f of fields) {
     const key = f.group ? loc(f.group, locale) : undefined;

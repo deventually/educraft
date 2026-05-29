@@ -48,9 +48,7 @@ export async function action({ request }: Route.ActionArgs) {
     });
 
     const model =
-      body.model && isResolvableModel(body.model)
-        ? body.model
-        : stage.model ?? tool.defaultModel;
+      body.model && isResolvableModel(body.model) ? body.model : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 
     const trigger =

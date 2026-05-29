@@ -13,7 +13,10 @@ export const LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/";
 
 /** Build a full Attribution from the book constants plus chapter-specific fields. */
 export function attribution(
-  fields: Pick<Attribution, "chapterTitle" | "authors" | "sourcePages" | "evaluatedWith" | "adapted">,
+  fields: Pick<
+    Attribution,
+    "chapterTitle" | "authors" | "sourcePages" | "evaluatedWith" | "adapted"
+  >,
 ): Attribution {
   return {
     ...fields,

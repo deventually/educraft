@@ -65,8 +65,7 @@ export const nl = {
     adaptedNotice:
       "Deze prompt is aangepast (interview → één keer genereren, en vertaald). Bekijk de originele prompt voor de exacte tekst uit het boek.",
     errorPrefix: "Er ging iets mis",
-    emptyResult:
-      "Vul het formulier in en klik op “{action}”. Het resultaat verschijnt hier.",
+    emptyResult: "Vul het formulier in en klik op “{action}”. Het resultaat verschijnt hier.",
     fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
   },
   settings: {

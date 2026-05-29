@@ -44,7 +44,10 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      <Link to="/" className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800">
+      <Link
+        to="/"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800"
+      >
         <ArrowLeft className="size-4" /> {t.nav.tools}
       </Link>
 
@@ -55,25 +58,32 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{loc(tool.name, locale)}</h1>
+              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+                {loc(tool.name, locale)}
+              </h1>
               <Badge>{tool.userType === "instructor" ? t.badge.instructor : t.badge.student}</Badge>
             </div>
             <p className="mt-1 text-slate-600">{loc(tool.tagline, locale)}</p>
 
             <div className="mt-4 rounded-xl bg-slate-50 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <BookOpen className="size-4 text-violet-600" /> {t.tool.theory}: {loc(tool.theory.name, locale)}
+                <BookOpen className="size-4 text-violet-600" /> {t.tool.theory}:{" "}
+                {loc(tool.theory.name, locale)}
               </div>
               <p className="mt-1 text-sm text-slate-600">{loc(tool.theory.summary, locale)}</p>
               {tool.theory.keyCitations.length > 0 && (
-                <p className="mt-1 text-xs text-slate-400">{tool.theory.keyCitations.join(" · ")}</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  {tool.theory.keyCitations.join(" · ")}
+                </p>
               )}
             </div>
 
             <p className="mt-3 text-xs text-slate-500">
               {t.tool.source}: <span className="italic">{a.chapterTitle}</span> — {a.authors}.{" "}
               {a.bookTitle} ({a.editor}, {a.year}). {a.sourcePages}. {a.license}.
-              {a.evaluatedWith ? ` ${fmt(t.tool.evaluatedWith, { model: loc(a.evaluatedWith, locale) })}` : ""}
+              {a.evaluatedWith
+                ? ` ${fmt(t.tool.evaluatedWith, { model: loc(a.evaluatedWith, locale) })}`
+                : ""}
             </p>
 
             {a.adapted && (
@@ -90,7 +100,11 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
               <div className="mt-2 space-y-3">
                 {verbatim.map((v) => (
                   <div key={loc(v.name, locale)}>
-                    {multiStage && <div className="text-xs font-semibold text-slate-500">{loc(v.name, locale)}</div>}
+                    {multiStage && (
+                      <div className="text-xs font-semibold text-slate-500">
+                        {loc(v.name, locale)}
+                      </div>
+                    )}
                     <pre className="mt-1 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100">
                       {v.text}
                     </pre>

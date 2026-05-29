@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Form, useNavigation } from "react-router";
 import { Trash2, Plus, Star } from "lucide-react";
 import type { Route } from "./+types/settings";
-import {
-  listProfiles,
-  createProfile,
-  deleteProfile,
-} from "~/server/repositories/profiles.server";
+import { listProfiles, createProfile, deleteProfile } from "~/server/repositories/profiles.server";
 import {
   HBO_DOMAINS,
   HBOI_ARCHITECTURE_LAYERS,
@@ -90,7 +86,9 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{t.settings.heading}</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+        {t.settings.heading}
+      </h1>
       <p className="mt-2 text-slate-600">{t.settings.intro}</p>
 
       <section className="mt-6 space-y-3">
@@ -112,7 +110,14 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
             </div>
             <Form method="post">
               <input type="hidden" name="id" value={p.id} />
-              <Button type="submit" name="intent" value="delete" variant="danger" size="sm" disabled={busy}>
+              <Button
+                type="submit"
+                name="intent"
+                value="delete"
+                variant="danger"
+                size="sm"
+                disabled={busy}
+              >
                 <Trash2 className="size-4" /> {t.settings.delete}
               </Button>
             </Form>
@@ -133,11 +138,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
               <Input name="programme" placeholder={t.settings.ph.programme} />
             </Field>
             <Field label={t.settings.domain}>
-              <Select
-                name="domain"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-              >
+              <Select name="domain" value={domain} onChange={(e) => setDomain(e.target.value)}>
                 <option value="">{t.settings.domainNone}</option>
                 {HBO_DOMAINS.map((d) => (
                   <option key={d} value={d}>
@@ -173,7 +174,11 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
             <Textarea name="competencies" rows={2} placeholder={t.settings.ph.competencies} />
           </Field>
           <Field label={t.settings.professionalContext}>
-            <Textarea name="professionalContext" rows={2} placeholder={t.settings.ph.professionalContext} />
+            <Textarea
+              name="professionalContext"
+              rows={2}
+              placeholder={t.settings.ph.professionalContext}
+            />
           </Field>
           <Field label={t.settings.tools}>
             <Input name="tools" placeholder={t.settings.ph.tools} />
@@ -218,7 +223,11 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
           </Field>
 
           <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="isDefault" className="size-4 rounded border-slate-300 text-violet-600" />
+            <input
+              type="checkbox"
+              name="isDefault"
+              className="size-4 rounded border-slate-300 text-violet-600"
+            />
             <Star className="size-4 text-amber-500" /> {t.settings.makeDefault}
           </label>
 
@@ -264,7 +273,12 @@ function CheckGroup({
           key={o.value}
           className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
         >
-          <input type="checkbox" name={name} value={o.value} className="size-4 rounded border-slate-300 text-violet-600" />
+          <input
+            type="checkbox"
+            name={name}
+            value={o.value}
+            className="size-4 rounded border-slate-300 text-violet-600"
+          />
           {o.label}
         </label>
       ))}

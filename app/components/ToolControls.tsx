@@ -59,7 +59,11 @@ export function ToolControls(props: Props) {
       </div>
       <div>
         <Label className="mb-1.5">{t.tool.model}</Label>
-        <Select value={props.model} onChange={(e) => props.onModel(e.target.value)} disabled={props.disabled}>
+        <Select
+          value={props.model}
+          onChange={(e) => props.onModel(e.target.value)}
+          disabled={props.disabled}
+        >
           {models.map((m) => (
             <option key={m.id} value={m.id}>
               {m.displayName}

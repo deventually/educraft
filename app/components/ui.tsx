@@ -11,8 +11,7 @@ export function Button({
   size?: "sm" | "md";
 }) {
   const variants = {
-    primary:
-      "bg-violet-600 text-white hover:bg-violet-700 disabled:bg-violet-300 shadow-sm",
+    primary: "bg-violet-600 text-white hover:bg-violet-700 disabled:bg-violet-300 shadow-sm",
     secondary:
       "bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 disabled:opacity-50",
     ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
@@ -35,19 +34,13 @@ export function Button({
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "rounded-2xl border border-slate-200 bg-white shadow-sm",
-        className,
-      )}
+      className={cn("rounded-2xl border border-slate-200 bg-white shadow-sm", className)}
       {...props}
     />
   );
 }
 
-export function Badge({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) {
+export function Badge({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
     <span
       className={cn(
@@ -88,11 +81,12 @@ export function Label({
 const fieldBase =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30";
 
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(fieldBase, className)} {...props} />
-  ),
-);
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className, ...props }, ref) => (
+  <input ref={ref} className={cn(fieldBase, className)} {...props} />
+));
 Input.displayName = "Input";
 
 export const Textarea = React.forwardRef<

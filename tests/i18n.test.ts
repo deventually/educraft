@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  messages,
-  LOCALES,
-  DEFAULT_LOCALE,
-  isLocale,
-  getMessages,
-} from "~/lib/i18n";
+import { messages, LOCALES, DEFAULT_LOCALE, isLocale, getMessages } from "~/lib/i18n";
 import { fmt } from "~/lib/i18n/format";
 
 /** Recursively collect every dotted leaf key path of an object. */

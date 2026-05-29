@@ -48,9 +48,7 @@ export function interpolate(
   });
 
   if (missing.length) {
-    throw new Error(
-      `Missing template values for: ${[...new Set(missing)].join(", ")}`,
-    );
+    throw new Error(`Missing template values for: ${[...new Set(missing)].join(", ")}`);
   }
   return result;
 }

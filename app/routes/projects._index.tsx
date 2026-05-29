@@ -26,7 +26,9 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
   const { generations } = loaderData;
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{t.nav.projects}</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+        {t.nav.projects}
+      </h1>
       <p className="mt-2 text-slate-600">{t.projects.subtitle}</p>
 
       {generations.length === 0 ? (

@@ -10,11 +10,7 @@ function rowToProfile(row: typeof contextProfiles.$inferSelect): ContextProfile 
 }
 
 export function listProfiles(): ContextProfile[] {
-  return db
-    .select()
-    .from(contextProfiles)
-    .all()
-    .map(rowToProfile);
+  return db.select().from(contextProfiles).all().map(rowToProfile);
 }
 
 export function getProfile(id: string): ContextProfile | null {
@@ -23,15 +19,14 @@ export function getProfile(id: string): ContextProfile | null {
 }
 
 export function getDefaultProfile(): ContextProfile | null {
-  const row = db
-    .select()
-    .from(contextProfiles)
-    .where(eq(contextProfiles.isDefault, true))
-    .get();
+  const row = db.select().from(contextProfiles).where(eq(contextProfiles.isDefault, true)).get();
   return row ? rowToProfile(row) : null;
 }
 
-export function createProfile(input: Omit<ContextProfile, "id">, isDefault = false): ContextProfile {
+export function createProfile(
+  input: Omit<ContextProfile, "id">,
+  isDefault = false,
+): ContextProfile {
   const id = randomUUID();
   const { name, ...rest } = input;
   if (isDefault) clearDefault();

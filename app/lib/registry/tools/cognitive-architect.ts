@@ -100,7 +100,10 @@ export const cognitiveArchitect: Tool = {
           label: { nl: "Introductie (eerste kennismaking)", en: "Introduction (first encounter)" },
         },
         { value: "Guided Practice", label: { nl: "Begeleide oefening", en: "Guided practice" } },
-        { value: "Independent Practice", label: { nl: "Zelfstandige oefening", en: "Independent practice" } },
+        {
+          value: "Independent Practice",
+          label: { nl: "Zelfstandige oefening", en: "Independent practice" },
+        },
         { value: "Review", label: { nl: "Herhaling / review", en: "Review" } },
       ],
       defaultValue: "Guided Practice",

@@ -32,10 +32,7 @@ export function loader({ request }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   const m = getMessages(data?.locale);
-  return [
-    { title: m.meta.homeTitle },
-    { name: "description", content: m.meta.description },
-  ];
+  return [{ title: m.meta.homeTitle }, { name: "description", content: m.meta.description }];
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

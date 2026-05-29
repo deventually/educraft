@@ -33,7 +33,9 @@ export default function About({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">{t.about.heading}</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+        {t.about.heading}
+      </h1>
       <p className="mt-3 text-slate-600">
         {t.about.intro1} <span className="font-medium">{BOOK.bookTitle}</span>{" "}
         {fmt(t.about.intro2, { editor: BOOK.editor, year: BOOK.year })}
@@ -44,7 +46,12 @@ export default function About({ loaderData }: Route.ComponentProps) {
         <p className="mt-2 text-sm text-slate-600">
           {t.about.licenseBody1} <span className="italic">{BOOK.bookTitle}</span>{" "}
           {fmt(t.about.licenseBody2, { doi: BOOK.doi })}{" "}
-          <a href={LICENSE_URL} target="_blank" rel="noreferrer" className="text-violet-600 hover:underline">
+          <a
+            href={LICENSE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-violet-600 hover:underline"
+          >
             {BOOK.license}
           </a>
           {t.about.licenseBody3}

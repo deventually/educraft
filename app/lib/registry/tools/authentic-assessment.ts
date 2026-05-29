@@ -14,7 +14,10 @@ const BACKWARD_DESIGN = { nl: "Backward Design", en: "Backward Design" };
 export const authenticAssessment: Tool = {
   id: "authentic-assessment-backward-design",
   slug: "authentieke-toetsing",
-  name: { nl: "Authentieke toetsing (Backward Design)", en: "Authentic Assessment (Backward Design)" },
+  name: {
+    nl: "Authentieke toetsing (Backward Design)",
+    en: "Authentic Assessment (Backward Design)",
+  },
   tagline: {
     nl: "Ontwerp een realistische, praktijkgerichte toets met analytische rubric en bruikbare feedback.",
     en: "Design a realistic, practice-oriented assessment with an analytic rubric and usable feedback.",
@@ -158,7 +161,10 @@ export const authenticAssessment: Tool = {
         },
         {
           value: "extensive (multiple checkpoints)",
-          label: { nl: "Uitgebreid (meerdere checkpoints)", en: "Extensive (multiple checkpoints)" },
+          label: {
+            nl: "Uitgebreid (meerdere checkpoints)",
+            en: "Extensive (multiple checkpoints)",
+          },
         },
       ],
       defaultValue: "moderate (draft + feedback)",

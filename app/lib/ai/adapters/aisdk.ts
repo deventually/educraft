@@ -40,8 +40,7 @@ function resolveModel(catalogId: string): LanguageModel {
 /** Build AI SDK messages, attaching images to the LAST user message if present. */
 function toMessages(opts: GenerateOptions): ModelMessage[] {
   return opts.messages.map((m, i): ModelMessage => {
-    const isLastUser =
-      m.role === "user" && i === opts.messages.length - 1 && !!opts.images?.length;
+    const isLastUser = m.role === "user" && i === opts.messages.length - 1 && !!opts.images?.length;
     if (isLastUser) {
       return {
         role: "user",

@@ -50,9 +50,7 @@ export function sseError(message: string): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   return new ReadableStream<Uint8Array>({
     start(controller) {
-      controller.enqueue(
-        encoder.encode(`event: error\ndata: ${JSON.stringify({ message })}\n\n`),
-      );
+      controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ message })}\n\n`));
       controller.close();
     },
   });

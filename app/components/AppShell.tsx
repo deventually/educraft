@@ -62,9 +62,14 @@ export default function AppShell() {
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-500">
           {t.appName} — {t.footer.prompts}{" "}
-          <span className="font-medium text-slate-600">The Pedagogical Promptbook</span> ({t.footer.by}),{" "}
-          {t.footer.licensed}{" "}
-          <a href={LICENSE_URL} className="text-violet-600 hover:underline" target="_blank" rel="noreferrer">
+          <span className="font-medium text-slate-600">The Pedagogical Promptbook</span> (
+          {t.footer.by}), {t.footer.licensed}{" "}
+          <a
+            href={LICENSE_URL}
+            className="text-violet-600 hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
             CC BY 4.0
           </a>
           .
@@ -76,7 +81,11 @@ export default function AppShell() {
 
 function LanguageSwitcher({ current, redirectTo }: { current: string; redirectTo: string }) {
   return (
-    <Form method="post" action="/set-locale" className="ml-1 flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
+    <Form
+      method="post"
+      action="/set-locale"
+      className="ml-1 flex items-center rounded-lg border border-slate-200 bg-white p-0.5"
+    >
       <input type="hidden" name="redirectTo" value={redirectTo} />
       {LOCALES.map((loc) => (
         <button
@@ -87,9 +96,7 @@ function LanguageSwitcher({ current, redirectTo }: { current: string; redirectTo
           aria-pressed={current === loc}
           className={cn(
             "rounded-md px-2 py-1 text-xs font-semibold uppercase transition-colors",
-            current === loc
-              ? "bg-violet-600 text-white"
-              : "text-slate-500 hover:bg-slate-100",
+            current === loc ? "bg-violet-600 text-white" : "text-slate-500 hover:bg-slate-100",
           )}
         >
           {loc}

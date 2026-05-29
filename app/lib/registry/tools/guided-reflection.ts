@@ -3,9 +3,18 @@ import { GUIDED_REFLECTION_PROMPT } from "~/lib/prompts/guided-reflection.prompt
 import { attribution } from "~/lib/prompts/attribution";
 
 const NIVEAU = [
-  { value: "foundation year (year 1)", label: { nl: "Propedeuse (jaar 1)", en: "Foundation year (year 1)" } },
-  { value: "main phase (years 2-3)", label: { nl: "Hoofdfase (jaar 2–3)", en: "Main phase (years 2–3)" } },
-  { value: "graduation phase (year 4)", label: { nl: "Afstudeerfase (jaar 4)", en: "Graduation phase (year 4)" } },
+  {
+    value: "foundation year (year 1)",
+    label: { nl: "Propedeuse (jaar 1)", en: "Foundation year (year 1)" },
+  },
+  {
+    value: "main phase (years 2-3)",
+    label: { nl: "Hoofdfase (jaar 2–3)", en: "Main phase (years 2–3)" },
+  },
+  {
+    value: "graduation phase (year 4)",
+    label: { nl: "Afstudeerfase (jaar 4)", en: "Graduation phase (year 4)" },
+  },
 ];
 
 const MODALITEIT = [
@@ -136,11 +145,17 @@ export const guidedReflection: Tool = {
     },
     {
       name: "leeruitkomsten",
-      label: { nl: "3. Specifieke, meetbare leeruitkomsten", en: "3. Specific, measurable learning outcomes" },
+      label: {
+        nl: "3. Specifieke, meetbare leeruitkomsten",
+        en: "3. Specific, measurable learning outcomes",
+      },
       kind: "textarea",
       required: true,
       rows: 4,
-      help: { nl: "Bloom-aligned. Eén leeruitkomst per regel.", en: "Bloom-aligned. One outcome per line." },
+      help: {
+        nl: "Bloom-aligned. Eén leeruitkomst per regel.",
+        en: "Bloom-aligned. One outcome per line.",
+      },
       group: REFLECTIE,
     },
     {
@@ -156,10 +171,16 @@ export const guidedReflection: Tool = {
     },
     {
       name: "relevantie",
-      label: { nl: "5. Relevantie / toepassing in de praktijk", en: "5. Real-world relevance / application" },
+      label: {
+        nl: "5. Relevantie / toepassing in de praktijk",
+        en: "5. Real-world relevance / application",
+      },
       kind: "textarea",
       rows: 2,
-      help: { nl: "Waarom doet dit ertoe in het werkveld?", en: "Why does this matter in professional practice?" },
+      help: {
+        nl: "Waarom doet dit ertoe in het werkveld?",
+        en: "Why does this matter in professional practice?",
+      },
       group: REFLECTIE,
     },
     {
