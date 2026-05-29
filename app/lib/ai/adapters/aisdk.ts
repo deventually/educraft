@@ -1,0 +1,96 @@
+import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { getModel } from "../models";
+import type { GenerateOptions, LLMProvider } from "../types";
+import { env } from "~/server/env.server";
+
+const DEFAULT_MAX_TOKENS = 8192;
+const DEFAULT_TEMPERATURE = 0.4;
+
+/** Resolve a catalog model id to a concrete AI SDK LanguageModel. */
+function resolveModel(catalogId: string): LanguageModel {
+  const info = getModel(catalogId);
+  switch (info.provider) {
+    case "anthropic": {
+      if (!env.ANTHROPIC_API_KEY) {
+        throw new Error(
+          "ANTHROPIC_API_KEY ontbreekt. Vul deze in je .env in (zie .env.example).",
+        );
+      }
+      return createAnthropic({ apiKey: env.ANTHROPIC_API_KEY })(info.apiId);
+    }
+    case "ollama":
+      return createOpenAICompatible({ name: "ollama", baseURL: env.OLLAMA_BASE_URL }).chatModel(
+        info.apiId,
+      );
+    case "lmstudio":
+      return createOpenAICompatible({
+        name: "lmstudio",
+        baseURL: env.LMSTUDIO_BASE_URL,
+        apiKey: "lm-studio",
+      }).chatModel(info.apiId);
+    default:
+      throw new Error(`Provider "${info.provider}" wordt (nog) niet via de AI SDK bediend.`);
+  }
+}
+
+/** Build AI SDK messages, attaching images to the LAST user message if present. */
+function toMessages(opts: GenerateOptions): ModelMessage[] {
+  return opts.messages.map((m, i): ModelMessage => {
+    const isLastUser =
+      m.role === "user" && i === opts.messages.length - 1 && !!opts.images?.length;
+    if (isLastUser) {
+      return {
+        role: "user",
+        content: [
+          { type: "text", text: m.content },
+          ...opts.images!.map((img) => ({
+            type: "image" as const,
+            image: img.dataBase64,
+            mediaType: img.mediaType,
+          })),
+        ],
+      };
+    }
+    return { role: m.role, content: m.content };
+  });
+}
+
+/**
+ * One adapter that serves every HTTP / OpenAI-compatible provider through the
+ * Vercel AI SDK: Anthropic (API), Ollama and LM Studio (local), and any frontier
+ * API added to the catalog later. The concrete provider is chosen per-model from
+ * the catalog, so call sites only ever see the portable LLMProvider interface.
+ * CLI agents (claude code, opencode, codex, gemini cli) get their own adapters.
+ */
+export const aiSdkProvider: LLMProvider = {
+  id: "ai-sdk",
+
+  async generate(opts) {
+    const { text, usage } = await generateText({
+      model: resolveModel(opts.model),
+      system: opts.system,
+      messages: toMessages(opts),
+      temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
+      maxOutputTokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
+    });
+    return {
+      text,
+      usage: { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 },
+    };
+  },
+
+  async *streamChat(opts) {
+    const result = streamText({
+      model: resolveModel(opts.model),
+      system: opts.system,
+      messages: toMessages(opts),
+      temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
+      maxOutputTokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
+    });
+    for await (const delta of result.textStream) {
+      yield delta;
+    }
+  },
+};
