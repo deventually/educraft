@@ -41,7 +41,7 @@ New behavior starts as a failing test. These principles hold without repetition:
 
 **Enforcement:**
 - Component test per UI element under `tests/components/**/*.test.tsx`.
-- Assert `expect(await axe(container)).toHaveNoViolations()`.
+- Assert zero violations with vitest-axe: `expect((await axe(container)).violations).toEqual([])` (import `axe` from `vitest-axe`).
 - `npm test` runs all `.test.tsx` tests; do not merge without green axe.
 
 ### 4. Deep Modules (Ousterhout)
@@ -117,7 +117,7 @@ See `wiki/Adding-a-Tool-or-Pack.md` for the full depth. Sketch:
 
 4. **(chat tools only)** — add `tests/components/<id>.test.tsx`:
    - Render greeting, send a message, stream a turn.
-   - Assert `expect(await axe(container)).toHaveNoViolations()`.
+   - Assert `expect((await axe(container)).violations).toEqual([])` (vitest-axe).
 
 5. **GATE** — `npm test` · `npm run typecheck` · `npm run check` all green.
 

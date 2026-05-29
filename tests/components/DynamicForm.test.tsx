@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { axe } from "jest-axe";
+import { axe } from "vitest-axe";
 import { DynamicForm, defaultValuesFor } from "~/components/DynamicForm";
 import type { InputField } from "~/lib/registry/types";
 
@@ -50,6 +50,6 @@ describe("DynamicForm", () => {
 
     // Run accessibility check
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
   });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { axe } from "jest-axe";
+import { axe } from "vitest-axe";
 import { ChatView } from "~/components/ChatView";
 import type { Tool } from "~/lib/registry/types";
 
@@ -116,7 +116,7 @@ describe("ChatView", () => {
 
     // First, check a11y of the sandbox form (before continue)
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
 
     // Submit the sandbox form to see the greeting
     const continueBtn = screen.getByRole("button", { name: "Continue" });
@@ -141,7 +141,7 @@ describe("ChatView", () => {
 
     // Accessibility
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
   });
 
   it("sends a message and simulates streaming response", async () => {

@@ -176,7 +176,7 @@ The registry/prompt test is identical. Once GREEN, add:
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { axe } from "jest-axe";
+import { axe } from "vitest-axe";
 import { <Id>ChatView } from "~/components/chat/<id>";
 import { getToolBySlug } from "~/lib/registry";
 
@@ -196,7 +196,7 @@ describe("<Id> Chat View", () => {
 
     // Accessibility: no violations
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
   });
 
   it("sends a message and streams a response", async () => {
