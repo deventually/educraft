@@ -4,8 +4,11 @@
 handwritten-math grading tool ("Leveraging LLMs for Grading and Feedback on Handwritten Math
 Assessment Responses").
 
-**Prerequisites:** S1. Independent of S2/S3 (can run in parallel) but **touches shared files**
-(`api.stream.tsx`, `DynamicForm.tsx`) — coordinate/land before S5–S7 if they're concurrent.
+**Prerequisites:** S1 + **S2 + S3 are merged into `main`**; this worktree was refreshed onto
+current `main`, so the chat infra (S3) and both generators (S2) are already present. Start from here.
+**Shared-file note:** `api.stream.tsx` now contains S3's chat-mode branch (`messages[]` handling) —
+add image handling **alongside** it, don't replace it. `DynamicForm.tsx` is untouched by S3, so its
+`image`/`file` "coming soon" stub is still yours to implement.
 **Master plan:** `/Users/bastiaandressen/.claude/plans/can-you-make-a-atomic-bee.md` (Workstreams D + E-image).
 
 ## What already exists (reuse — do not reinvent)
@@ -14,6 +17,8 @@ Assessment Responses").
 - `ImageInput` type (`app/lib/ai/types.ts:5` — `{ mediaType, dataBase64 }`) and
   `GenerateOptions.images` already exist.
 - `ModelInfo.supportsImages` already exists (`app/lib/ai/models.ts:26`; Claude = true, CLI/local = false).
+- `StreamBody` in `api.stream.tsx` already carries `messages?: ChatMessage[]` (from S3) and branches
+  on `tool.mode`; add `images?: ImageInput[]` next to it and forward them on the one-shot path.
 
 ## Scope
 - **API** — `app/routes/api.stream.tsx`: add `images?: ImageInput[]` to `StreamBody`; forward to
@@ -32,7 +37,8 @@ Assessment Responses").
 
 ## TDD order
 1. RED `tests/components/DynamicForm.image.test.tsx`: selecting files yields base64 values,
-   preview + remove work, oversized/wrong-MIME rejected, `axe` = 0 violations.
+   preview + remove work, oversized/wrong-MIME rejected, and (vitest-axe)
+   `expect((await axe(container)).violations).toEqual([])`.
 2. RED a small `tests/api/stream-images.test.ts` (or unit on the validation helper): non-vision
    model + images → localized error; vision model + valid images → forwarded.
 3. GREEN the pipeline + gating.
