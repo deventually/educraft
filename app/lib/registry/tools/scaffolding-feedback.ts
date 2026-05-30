@@ -30,8 +30,7 @@ export const scaffoldingFeedback: Tool = {
     keyCitations: ["Sweller (1988)", "Hattie & Timperley (2007)", "Vygotsky (1978)"],
   },
   attribution: attribution({
-    chapterTitle:
-      "Scaffolding with Formative Feedback: A Deployable AI Tutoring Prompt System",
+    chapterTitle: "Scaffolding with Formative Feedback: A Deployable AI Tutoring Prompt System",
     authors: "multiple authors",
     sourcePages: "pp. 279–310",
     evaluatedWith: { nl: "Claude", en: "Claude" },
