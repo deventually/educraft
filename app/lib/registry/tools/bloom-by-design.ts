@@ -16,7 +16,7 @@ export const bloomByDesign: Tool = {
     en: "Select educational technology based on learning outcomes, not preference.",
   },
   icon: "target",
-  userType: "student",
+  userType: "instructor",
   mode: "chat",
   theory: {
     name: {
