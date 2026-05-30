@@ -20,6 +20,7 @@ export const en: Messages = {
   nav: {
     tools: "Tools",
     projects: "Projects",
+    help: "Help",
     settings: "Context & settings",
     about: "About",
   },
@@ -137,6 +138,20 @@ export const en: Messages = {
     subtitle: "Your recently generated materials.",
     empty: "Nothing generated yet. Choose a tool to get started.",
     delete: "Delete",
+  },
+  help: {
+    heading: "Help & documentation",
+    intro: "Per-tool guidance and general topics to get you going quickly.",
+    topicsSection: "General",
+    toolsSection: "By tool",
+    whatItDoes: "What it does",
+    inputsTitle: "What you fill in",
+    howToUse: "How to use",
+    noOverlay:
+      "A detailed guide for this tool is coming. Above you can see what the tool does and what input it needs.",
+    openTool: "Open this tool",
+    fullHelp: "Help & examples",
+    allHelp: "All help",
   },
   error: {
     title: "Oops!",
