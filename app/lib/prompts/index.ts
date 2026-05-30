@@ -6,6 +6,12 @@ import { FORUM_AUTOGRADER_PROMPT } from "./forum-autograder.prompt";
 import { CONTEXTUALIZATION_PROMPT } from "./contextualization.prompt";
 import { MENTORAI_PROMPT } from "./mentorai.prompt";
 import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
+import { THINK_PAIR_SHARE_PROMPT } from "./think-pair-share.prompt";
+import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
+import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
+import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
+import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
+import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -21,6 +27,12 @@ const ALL: PromptDef[] = [
   CONTEXTUALIZATION_PROMPT,
   MENTORAI_PROMPT,
   MATH_GRADING_PROMPT,
+  THINK_PAIR_SHARE_PROMPT,
+  SOCRATIC_PARTNER_PROMPT,
+  BLOOM_BY_DESIGN_PROMPT,
+  DIALOGIC_ENCOUNTERS_PROMPT,
+  PEER_TUTORING_PROMPT,
+  SCAFFOLDING_FEEDBACK_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
