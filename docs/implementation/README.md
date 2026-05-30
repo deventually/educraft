@@ -41,8 +41,11 @@ concurrently. Each session should be its own branch/worktree to avoid collisions
 | [S2](S2-generators.md) | Forum Autograder + Contextualization (one-shot) | S1 | ✅ `86a8ad1` |
 | [S3](S3-chat-infra-mentorai.md) | Chat infrastructure + MentorAI | S1 | ✅ `4982074` |
 | [S4](S4-image-infra-math-grading.md) | Image pipeline + Math Grading | S1 | ✅ `aea5648` |
-| [S5](S5-tutors-tps-socratic.md) | Think-Pair-Share + Socratic Partner | S3 | ☐ |
-| [S6](S6-tutors-bloom-dialogic.md) | Bloom by Design + Dialogic Encounters | S3 | ☐ |
-| [S7](S7-tutors-peer-scaffolding.md) | Peer Tutoring + Scaffolding Feedback | S3 | ☐ |
+| [S5](S5-tutors-tps-socratic.md) | Think-Pair-Share + Socratic Partner | S3 | ✅ `0b01b79` |
+| [S6](S6-tutors-bloom-dialogic.md) | Bloom by Design + Dialogic Encounters | S3 | ✅ `0b01b79` |
+| [S7](S7-tutors-peer-scaffolding.md) | Peer Tutoring + Scaffolding Feedback | S3 | ✅ `0b01b79` |
+
+**All 7 sessions complete — 14/14 tools shipped.** S5–S7's six chat tutors were authored
+together in one `tutors` branch (one clean merge, no registration conflicts).
 
 When a session is done, tick its box and note the merge commit.
