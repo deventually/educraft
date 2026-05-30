@@ -126,11 +126,7 @@ export const en: Messages = {
     licenseBody2: "(DOI {doi}) and are licensed under",
     licenseBody3:
       ". This means they may be used and adapted freely (including translation), provided they are properly attributed. We show the source and the original prompt text for every tool.",
-    roadmapHeading: "Tools & roadmap",
-    phase1: "MVP — available now",
-    phase2: "Phase 2 — remaining generators & assessment",
-    phase3: "Phase 3 — student-facing chatbots",
-    phase4: "Phase 4 — evaluation & polish",
+    toolsHeading: "Available tools",
   },
   footer: {
     prompts: "prompts from",
@@ -140,6 +136,7 @@ export const en: Messages = {
   projects: {
     subtitle: "Your recently generated materials.",
     empty: "Nothing generated yet. Choose a tool to get started.",
+    delete: "Delete",
   },
   error: {
     title: "Oops!",

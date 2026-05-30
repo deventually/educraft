@@ -125,22 +125,24 @@ Use the `/tdd` skill for ready-to-copy test templates.
 
 ## The 14-Tool Roadmap
 
+**All 14 tools are shipped** — the build roadmap below is complete. Further work tracks enhancements (help/docs, per-country packs), not new core tools.
+
 | # | Chapter | Tool | Mode | Status |
 |---|---------|------|------|--------|
-| 1 | From Model to Mentor | MentorAI | chat | remaining |
-| 2 | Contextualization | Contextualization | one-shot | remaining |
-| 3 | Think-Pair-Share | Think-Pair-Share | chat | remaining |
+| 1 | From Model to Mentor | MentorAI | chat | ✅ shipped |
+| 2 | Contextualization | Contextualization | one-shot | ✅ shipped |
+| 3 | Think-Pair-Share | Think-Pair-Share | chat | ✅ shipped |
 | 4 | Guided Reflection | Guided Reflection | one-shot | ✅ shipped |
-| 5 | Dialogic Encounters | Dialogic Encounters | chat | remaining |
-| 6 | Forum Autograder | Forum Autograder | one-shot | remaining |
-| 7 | Handwritten Math | Math Grading | one-shot + image | remaining |
+| 5 | Dialogic Encounters | Dialogic Encounters | chat | ✅ shipped |
+| 6 | Forum Autograder | Forum Autograder | one-shot | ✅ shipped |
+| 7 | Handwritten Math | Math Grading | one-shot + image | ✅ shipped |
 | 8 | Authentic Assessment | Authentic Assessment | one-shot | ✅ shipped |
 | 9 | ARCS Reactor | ARCS Reactor | one-shot | ✅ shipped |
-| 10 | Bloom by Design | Bloom by Design | chat | remaining |
-| 11 | Peer Tutoring | Peer Tutoring | chat | remaining |
+| 10 | Bloom by Design | Bloom by Design | chat | ✅ shipped |
+| 11 | Peer Tutoring | Peer Tutoring | chat | ✅ shipped |
 | 12 | Automating Gagné | Cognitive Architect | multi-stage | ✅ shipped |
-| 13 | Scaffolding | Scaffolding Feedback | chat | remaining |
-| 14 | Oracle to Socratic | Socratic Partner | chat | remaining |
+| 13 | Scaffolding | Scaffolding Feedback | chat | ✅ shipped |
+| 14 | Oracle to Socratic | Socratic Partner | chat | ✅ shipped |
 
 ## Key Files
 
