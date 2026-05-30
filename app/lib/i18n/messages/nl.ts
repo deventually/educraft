@@ -129,11 +129,7 @@ export const nl = {
     licenseBody2: "(DOI {doi}) en zijn gelicentieerd onder",
     licenseBody3:
       ". Dit betekent dat ze vrij gebruikt en aangepast (o.a. vertaald) mogen worden, mits correct toegeschreven. Per tool tonen we de bron en de originele prompttekst.",
-    roadmapHeading: "Tools & roadmap",
-    phase1: "MVP — nu beschikbaar",
-    phase2: "Fase 2 — overige generators & beoordeling",
-    phase3: "Fase 3 — studentgerichte chatbots",
-    phase4: "Fase 4 — evaluatie & polish",
+    toolsHeading: "Beschikbare tools",
   },
   footer: {
     prompts: "prompts uit",
@@ -143,6 +139,7 @@ export const nl = {
   projects: {
     subtitle: "Je recent gegenereerde materialen.",
     empty: "Nog niets gegenereerd. Kies een tool om te beginnen.",
+    delete: "Verwijderen",
   },
   error: {
     title: "Oeps!",
