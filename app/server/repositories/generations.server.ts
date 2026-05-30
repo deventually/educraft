@@ -39,3 +39,7 @@ export function listGenerations(limit = 50): GenerationRow[] {
 export function getGeneration(id: string): GenerationRow | undefined {
   return db.select().from(generations).where(eq(generations.id, id)).get();
 }
+
+export function deleteGeneration(id: string) {
+  db.delete(generations).where(eq(generations.id, id)).run();
+}
