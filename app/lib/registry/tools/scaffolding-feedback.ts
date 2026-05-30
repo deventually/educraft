@@ -27,11 +27,7 @@ export const scaffoldingFeedback: Tool = {
       nl: "Leer door progressieve, begeleide praktijk met warm feedback. Taak-complexiteit wordt geleidelijk opgebouwd terwijl steun afneemt.",
       en: "Learn through progressive, guided practice with warm feedback. Task complexity builds gradually as support fades.",
     },
-    keyCitations: [
-      "Sweller (1988)",
-      "Hattie & Timperley (2007)",
-      "Vygotsky (1978)",
-    ],
+    keyCitations: ["Sweller (1988)", "Hattie & Timperley (2007)", "Vygotsky (1978)"],
   },
   attribution: attribution({
     chapterTitle:

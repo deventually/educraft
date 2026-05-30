@@ -27,11 +27,7 @@ export const peerTutoring: Tool = {
       nl: "Ontwikkel onderzoeksvaardigheden door stap-voor-stap begeleiding in bronnevaluatie. Leer frames zoals CRAAP, RADAR en SIFT toe.",
       en: "Develop research skills through step-by-step guidance in source evaluation. Apply frameworks like CRAAP, RADAR, and SIFT.",
     },
-    keyCitations: [
-      "Kuhn (2010)",
-      "Metzger & Flanagin (2008)",
-      "Sward (2006)",
-    ],
+    keyCitations: ["Kuhn (2010)", "Metzger & Flanagin (2008)", "Sward (2006)"],
   },
   attribution: attribution({
     chapterTitle:

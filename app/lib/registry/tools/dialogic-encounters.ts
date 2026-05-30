@@ -25,13 +25,9 @@ export const dialogicEncounters: Tool = {
     },
     summary: {
       nl: "Leer leertheorieën door role-play dialoog met de theoretici zelf. Ervaar hoe theoretische aannames onderwijsbeslissingen vormgeven.",
-      en: "Learn learning theories through role-play dialogue with the theorists themselves. Experience how theoretical assumptions shape instructional decisions.",
+      en: "Learn theories through role-play dialogue with theorists. Experience how theoretical assumptions shape instructional decisions.",
     },
-    keyCitations: [
-      "Mercer & Howe (2012)",
-      "Gee (2007)",
-      "Kuhn (2010)",
-    ],
+    keyCitations: ["Mercer & Howe (2012)", "Gee (2007)", "Kuhn (2010)"],
   },
   attribution: attribution({
     chapterTitle:
