@@ -6,7 +6,8 @@ import { providerForModel } from "~/lib/ai/provider";
 import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
-import { saveGeneration } from "~/server/repositories/generations.server";
+import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
+import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
@@ -35,6 +36,8 @@ interface StreamBody {
   model?: string;
   /** For chat mode: full message history (user turns + assistant responses). */
   messages?: ChatMessage[];
+  /** For chat mode: stable id grouping every turn into one saved project. */
+  sessionId?: string;
   /** Images for vision-capable tools. */
   images?: ImageInput[];
 }
@@ -130,15 +133,35 @@ export async function action({ request }: Route.ActionArgs) {
       formatError: (err) => localizeError(err, locale, m.error.unknown),
       onComplete: (full) => {
         try {
-          saveGeneration({
-            toolSlug: tool.slug,
-            stageId: stage.id,
-            model,
-            input: body.values ?? {},
-            contextProfileId: body.contextProfileId ?? null,
-            outputLanguage,
-            outputMarkdown: full,
-          });
+          const sessionId =
+            tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";
+          if (sessionId.length >= 8 && sessionId.length <= 100) {
+            // Chat: collapse the whole conversation into one project row,
+            // rewritten on every turn rather than one row per message.
+            upsertChatGeneration({
+              id: sessionId,
+              toolSlug: tool.slug,
+              stageId: stage.id,
+              model,
+              input: body.values ?? {},
+              contextProfileId: body.contextProfileId ?? null,
+              outputLanguage,
+              transcript: buildChatTranscript(
+                [...messages, { role: "assistant", content: full }],
+                outputLanguage,
+              ),
+            });
+          } else {
+            saveGeneration({
+              toolSlug: tool.slug,
+              stageId: stage.id,
+              model,
+              input: body.values ?? {},
+              contextProfileId: body.contextProfileId ?? null,
+              outputLanguage,
+              outputMarkdown: full,
+            });
+          }
         } catch (e) {
           console.error("Failed to save generation:", e);
         }

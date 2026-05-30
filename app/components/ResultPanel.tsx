@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { remarkPlugins, rehypePlugins } from "./markdownPlugins";
 import { Check, Copy, Download } from "lucide-react";
 import { Button, Spinner } from "./ui";
 import { downloadText, slugifyFilename } from "~/lib/utils";
@@ -50,7 +50,9 @@ export function ResultPanel({ markdown, title, filenameBase, streaming }: Props)
       </div>
       <div className="md max-h-[70vh] overflow-y-auto px-5 py-4">
         {markdown ? (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>
+            {markdown}
+          </ReactMarkdown>
         ) : (
           <p className="text-sm text-slate-400">{t.tool.generating}</p>
         )}

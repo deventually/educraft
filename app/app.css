@@ -102,6 +102,60 @@ body {
 .md pre code {
   @apply bg-transparent p-0 text-slate-100;
 }
+/* highlight.js token colours, tuned for the dark (slate-900) code block. */
+.md .hljs-comment,
+.md .hljs-quote {
+  @apply italic text-slate-400;
+}
+.md .hljs-keyword,
+.md .hljs-selector-tag,
+.md .hljs-literal,
+.md .hljs-meta-keyword,
+.md .hljs-doctag {
+  @apply text-violet-300;
+}
+.md .hljs-built_in,
+.md .hljs-class .hljs-title,
+.md .hljs-title.class_,
+.md .hljs-type {
+  @apply text-teal-300;
+}
+.md .hljs-string,
+.md .hljs-regexp,
+.md .hljs-addition,
+.md .hljs-attribute,
+.md .hljs-meta-string {
+  @apply text-emerald-300;
+}
+.md .hljs-number,
+.md .hljs-symbol,
+.md .hljs-bullet,
+.md .hljs-link,
+.md .hljs-meta {
+  @apply text-amber-300;
+}
+.md .hljs-title,
+.md .hljs-title.function_,
+.md .hljs-section,
+.md .hljs-name {
+  @apply text-sky-300;
+}
+.md .hljs-attr,
+.md .hljs-variable,
+.md .hljs-template-variable,
+.md .hljs-selector-id,
+.md .hljs-selector-class {
+  @apply text-rose-300;
+}
+.md .hljs-deletion {
+  @apply text-red-300;
+}
+.md .hljs-emphasis {
+  @apply italic;
+}
+.md .hljs-strong {
+  @apply font-semibold;
+}
 .md table {
   @apply my-4 w-full border-collapse overflow-hidden rounded-lg text-sm;
 }

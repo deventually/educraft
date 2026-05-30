@@ -10,7 +10,15 @@ import { pickableModels, type PickerModel } from "~/lib/ai/models";
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "./Markdown";
+
+/** Stable id grouping every turn of one chat into a single saved project. */
+function newSessionId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 interface ChatViewProps {
   tool: Tool;
@@ -43,6 +51,9 @@ export function ChatView({
   );
   const threadRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // One id for the whole conversation, so each turn updates the same project.
+  const sessionIdRef = useRef<string | null>(null);
+  if (sessionIdRef.current === null) sessionIdRef.current = newSessionId();
 
   const greeting = tool.chat?.greeting;
   const starters = tool.chat?.starters;
@@ -121,6 +132,7 @@ export function ChatView({
           outputLanguage,
           model: selectedModel,
           messages: messageHistory,
+          sessionId: sessionIdRef.current,
         },
         {
           onToken: (token: string) => {
@@ -280,7 +292,7 @@ export function ChatView({
                   }`}
                 >
                   {turn.content ? (
-                    <ReactMarkdown className="prose prose-sm">{turn.content}</ReactMarkdown>
+                    <Markdown>{turn.content}</Markdown>
                   ) : (
                     <span className="italic text-slate-500">
                       {turn.interrupted ? (
