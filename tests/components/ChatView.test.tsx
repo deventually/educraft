@@ -213,15 +213,61 @@ describe("ChatView", () => {
     expect(thread).toBeInTheDocument();
   });
 
-  it("supports stop action when allowed", () => {
+  it("stops an in-progress stream and marks the turn interrupted", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    let abortSignal: AbortSignal | undefined;
+    // Simulate a stream that stays in progress (no tokens, never resolves on its own).
+    mockStreamPost.mockImplementation(async (_url, _body, _handlers, signal) => {
+      abortSignal = signal;
+      return new Promise<void>(() => {});
+    });
+
+    const user = userEvent.setup();
     render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
-    // Stop is gated by allowStop and surfaces while streaming.
-    expect(mockTool.chat?.allowStop).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    await user.type(screen.getByPlaceholderText("Your message…"), "Explain recursion");
+    await user.keyboard("{Enter}");
+
+    // While streaming, the Stop button is shown; clicking it aborts the request.
+    await user.click(await screen.findByRole("button", { name: "Stop" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Stop" })).not.toBeInTheDocument();
+    });
+    expect(abortSignal?.aborted).toBe(true);
+    // Streaming ended (Send is back) and the empty assistant turn is marked interrupted.
+    expect(screen.getByRole("button", { name: "Generate" })).toBeInTheDocument();
+    expect(screen.getByText("Interrupted")).toBeInTheDocument();
   });
 
-  it("supports regenerate action when allowed", () => {
+  it("regenerates by dropping the last answer and re-sending the prior message", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("First answer");
+      onDone?.("First answer");
+    });
+
+    const user = userEvent.setup();
     render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
-    // Regenerate is gated by allowRegenerate and surfaces after a turn exists.
-    expect(mockTool.chat?.allowRegenerate).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    await user.type(screen.getByPlaceholderText("Your message…"), "What is OOP?");
+    await user.keyboard("{Enter}");
+
+    await screen.findByText("First answer");
+    expect(mockStreamPost).toHaveBeenCalledTimes(1);
+
+    // Regenerate is available once a turn exists and streaming has stopped.
+    await user.click(await screen.findByRole("button", { name: "Regenerate" }));
+
+    // It re-sends, with the prior user message as the last entry in the payload.
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalledTimes(2));
+    const resentBody = mockStreamPost.mock.calls[1][1] as {
+      messages: { role: string; content: string }[];
+    };
+    expect(resentBody.messages.at(-1)).toEqual({ role: "user", content: "What is OOP?" });
   });
 });
