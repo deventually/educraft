@@ -12,6 +12,7 @@ import { socraticPartner } from "./tools/socratic-partner";
 import { bloomByDesign } from "./tools/bloom-by-design";
 import { dialogicEncounters } from "./tools/dialogic-encounters";
 import { peerTutoring } from "./tools/peer-tutoring";
+import { scaffoldingFeedback } from "./tools/scaffolding-feedback";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -28,6 +29,7 @@ export const ALL_TOOLS: Tool[] = [
   bloomByDesign,
   dialogicEncounters,
   peerTutoring,
+  scaffoldingFeedback,
 ];
 
 /** Tools visible/usable in the app right now. */
