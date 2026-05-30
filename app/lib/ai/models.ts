@@ -145,3 +145,26 @@ export function listModels(): Array<{ id: ModelId } & ModelInfo> {
     ...info,
   }));
 }
+
+/** Minimal shape needed to render a model <option> (static catalog or discovered local). */
+export interface PickerModel {
+  id: string;
+  displayName: string;
+  supportsImages?: boolean;
+}
+
+/**
+ * The single source of truth for the model picker on EVERY screen: the static
+ * catalog (API-key models + locally-installed CLI agents) plus any local models
+ * discovered at runtime (Ollama / LM Studio). When `requiresImages` is set
+ * (e.g. the handwritten-math tool) the list is narrowed to vision-capable models.
+ */
+export function pickableModels(
+  localModels: PickerModel[] = [],
+  requiresImages = false,
+): PickerModel[] {
+  const all: PickerModel[] = [...listModels(), ...localModels];
+  // A vision tool must only offer models KNOWN to support images: an unknown
+  // (undefined) flag is treated as non-vision, not waved through.
+  return requiresImages ? all.filter((m) => m.supportsImages === true) : all;
+}

@@ -242,6 +242,31 @@ describe("ChatView", () => {
     expect(screen.getByText("Interrupted")).toBeInTheDocument();
   });
 
+  it("offers the full model list (catalog + CLIs + discovered local) in the chat picker", async () => {
+    const user = userEvent.setup();
+    const local = [{ id: "ollama::gemma4:31b", displayName: "Ollama · gemma4:31b" }];
+    const { container } = render(
+      <ChatView tool={mockTool} localModels={local} onGenerationStart={() => {}} />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    const picker = container.querySelector("#chat-model") as HTMLSelectElement;
+    expect(picker).toBeInTheDocument();
+    const optionValues = [...picker.options].map((o) => o.value);
+    // API-key model, a CLI agent, and the running local model are all selectable.
+    expect(optionValues).toContain("claude-sonnet-4-6");
+    expect(optionValues).toContain("claude-code");
+    expect(optionValues).toContain("ollama::gemma4:31b");
+    // The stale hardcoded Opus id is gone.
+    expect(optionValues).not.toContain("claude-opus-4-7");
+
+    // Every offered id must actually resolve, so none silently falls back server-side.
+    const { isResolvableModel } = await import("~/lib/ai/models");
+    for (const value of optionValues) {
+      expect(isResolvableModel(value), value).toBe(true);
+    }
+  });
+
   it("regenerates by dropping the last answer and re-sending the prior message", async () => {
     const { streamPost } = await import("~/lib/streamClient");
     const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;

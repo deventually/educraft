@@ -7,6 +7,7 @@ import {
   dynamicModelId,
   resolveModelInfo,
   isResolvableModel,
+  pickableModels,
 } from "~/lib/ai/models";
 import { providerForModel } from "~/lib/ai/provider";
 
@@ -39,6 +40,55 @@ describe("model catalog", () => {
       expect(typeof impl.streamChat).toBe("function");
       expect(typeof impl.generate).toBe("function");
     }
+  });
+});
+
+describe("pickableModels (the picker list shared by every screen)", () => {
+  const local = [
+    { id: "ollama::gemma4:31b", displayName: "Ollama · gemma4:31b", supportsImages: false },
+    { id: "lmstudio::qwen3", displayName: "LM Studio · qwen3", supportsImages: false },
+  ];
+
+  it("includes the API-key catalog AND the CLI agents", () => {
+    const ids = pickableModels().map((m) => m.id);
+    expect(ids).toContain("claude-sonnet-4-6");
+    expect(ids).toContain("claude-code");
+    expect(ids).toContain("gemini-cli");
+  });
+
+  it("appends discovered local models (Ollama / LM Studio)", () => {
+    const ids = pickableModels(local).map((m) => m.id);
+    expect(ids).toContain("ollama::gemma4:31b");
+    expect(ids).toContain("lmstudio::qwen3");
+  });
+
+  it("offers only catalog ids that actually resolve (no stale ids)", () => {
+    for (const m of pickableModels(local)) {
+      expect(isResolvableModel(m.id)).toBe(true);
+    }
+    // The stale chat-only Opus id must never appear.
+    expect(pickableModels().map((m) => m.id)).not.toContain("claude-opus-4-7");
+  });
+
+  it("filters to vision-capable models when requiresImages is set", () => {
+    const ids = pickableModels(local, true).map((m) => m.id);
+    expect(ids).not.toContain("ollama::gemma4:31b");
+    expect(ids).toContain("claude-sonnet-4-6");
+  });
+
+  it("excludes local models with UNKNOWN image support from a vision picker", () => {
+    // discover.server may omit the flag → undefined; it must NOT pass the vision filter.
+    const unknown = [{ id: "ollama::mystery", displayName: "Ollama · mystery" }];
+    const ids = pickableModels(unknown, true).map((m) => m.id);
+    expect(ids).not.toContain("ollama::mystery");
+  });
+
+  it("keeps vision-capable local models in a vision picker", () => {
+    const visionLocal = [
+      { id: "ollama::llava", displayName: "Ollama · llava", supportsImages: true },
+    ];
+    const ids = pickableModels(visionLocal, true).map((m) => m.id);
+    expect(ids).toContain("ollama::llava");
   });
 });
 

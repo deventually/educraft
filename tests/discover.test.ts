@@ -45,4 +45,45 @@ describe("discoverLocalModels", () => {
     mockFetch(() => "throw");
     expect(await discoverLocalModels(50)).toEqual([]);
   });
+
+  it("flags Ollama models vision-capable from /api/show capabilities", async () => {
+    // /api/show is POSTed with the model name; capabilities decide image support.
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/models")) {
+        if (url.includes("11434"))
+          return {
+            ok: true,
+            json: async () => ({ data: [{ id: "gemma4:31b" }, { id: "llama3" }] }),
+          } as Response;
+        return { ok: false, json: async () => ({}) } as Response; // LM Studio absent
+      }
+      if (url.includes("/api/show")) {
+        const model = JSON.parse(String(init?.body ?? "{}")).model;
+        const capabilities =
+          model === "gemma4:31b" ? ["completion", "vision", "tools"] : ["completion"];
+        return { ok: true, json: async () => ({ capabilities }) } as Response;
+      }
+      return { ok: false, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+
+    const models = await discoverLocalModels(200);
+    const gemma = models.find((m) => m.id === "ollama::gemma4:31b");
+    const llama = models.find((m) => m.id === "ollama::llama3");
+    expect(gemma?.supportsImages).toBe(true);
+    expect(llama?.supportsImages).toBe(false);
+  });
+
+  it("defaults Ollama vision to false when /api/show fails (fail-soft)", async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/models") && url.includes("11434"))
+        return { ok: true, json: async () => ({ data: [{ id: "gemma4:31b" }] }) } as Response;
+      if (url.includes("/api/show")) throw new Error("connection refused");
+      return { ok: false, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+
+    const models = await discoverLocalModels(200);
+    expect(models.find((m) => m.id === "ollama::gemma4:31b")?.supportsImages).toBe(false);
+  });
 });
