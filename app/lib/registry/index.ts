@@ -8,6 +8,7 @@ import { contextualization } from "./tools/contextualization";
 import { mentorai } from "./tools/mentorai";
 import { mathGrading } from "./tools/math-grading";
 import { thinkPairShare } from "./tools/think-pair-share";
+import { socraticPartner } from "./tools/socratic-partner";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -20,6 +21,7 @@ export const ALL_TOOLS: Tool[] = [
   mentorai,
   mathGrading,
   thinkPairShare,
+  socraticPartner,
 ];
 
 /** Tools visible/usable in the app right now. */
