@@ -9,6 +9,7 @@ import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
 import { THINK_PAIR_SHARE_PROMPT } from "./think-pair-share.prompt";
 import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
+import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -27,6 +28,7 @@ const ALL: PromptDef[] = [
   THINK_PAIR_SHARE_PROMPT,
   SOCRATIC_PARTNER_PROMPT,
   BLOOM_BY_DESIGN_PROMPT,
+  DIALOGIC_ENCOUNTERS_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
