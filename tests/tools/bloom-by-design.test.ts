@@ -71,8 +71,8 @@ describe("tool: bloom-by-design", () => {
     expect(tool.chat?.allowRegenerate).toBe(true);
   });
 
-  it("marks as for student users", () => {
+  it("marks as for instructor users", () => {
     const tool = getToolBySlug("bloom-by-design")!;
-    expect(tool.userType).toBe("student");
+    expect(tool.userType).toBe("instructor");
   });
 });
