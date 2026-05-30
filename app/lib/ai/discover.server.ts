@@ -20,6 +20,32 @@ interface ModelsResponse {
   data?: Array<{ id?: unknown }>;
 }
 
+/**
+ * Ask Ollama's native /api/show whether a model is vision-capable. Ollama reports
+ * model `capabilities` (e.g. ["completion","vision","tools"]); the OpenAI-compatible
+ * /v1/models endpoint does not, so we consult the native API. Fails soft → false.
+ * LM Studio exposes no equivalent, so its models stay non-vision for now.
+ */
+async function ollamaSupportsImages(
+  nativeBaseURL: string,
+  model: string,
+  signal: AbortSignal,
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${nativeBaseURL}/api/show`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model }),
+      signal,
+    });
+    if (!res.ok) return false;
+    const body = (await res.json()) as { capabilities?: unknown };
+    return Array.isArray(body.capabilities) && body.capabilities.includes("vision");
+  } catch {
+    return false;
+  }
+}
+
 /** Query one server's /v1/models, failing soft (server down/absent → []). */
 async function discoverServer(server: LocalServer, timeoutMs: number): Promise<DiscoveredModel[]> {
   const controller = new AbortController();
@@ -33,12 +59,23 @@ async function discoverServer(server: LocalServer, timeoutMs: number): Promise<D
     const ids = (body.data ?? [])
       .map((m) => (typeof m.id === "string" ? m.id : null))
       .filter((id): id is string => !!id);
-    return ids.map((apiId) => ({
+
+    // Determine image support. Ollama: ask its native /api/show capabilities so
+    // vision-capable local models can be offered on the image tool. Others: false.
+    const nativeBaseURL = server.baseURL.replace(/\/v1\/?$/, "");
+    const supportsImages =
+      server.provider === "ollama"
+        ? await Promise.all(
+            ids.map((id) => ollamaSupportsImages(nativeBaseURL, id, controller.signal)),
+          )
+        : ids.map(() => false);
+
+    return ids.map((apiId, i) => ({
       id: dynamicModelId(server.provider, apiId),
       provider: server.provider,
       apiId,
       displayName: `${server.label} · ${apiId}`,
-      supportsImages: false,
+      supportsImages: supportsImages[i],
       tier: 2,
       local: true,
     }));

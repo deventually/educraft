@@ -26,6 +26,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   const localModels = (await discoverLocalModels()).map((m) => ({
     id: m.id,
     displayName: m.displayName,
+    supportsImages: m.supportsImages,
   }));
   return { tool, profiles, defaultProfileId: defaultProfile?.id ?? "", verbatim, localModels };
 }
@@ -123,6 +124,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
           contextProfile={profiles.find((p) => p.id === defaultProfileId) || null}
           defaultModel={undefined}
           outputLanguage={undefined}
+          localModels={localModels}
         />
       ) : multiStage ? (
         <StageStepper

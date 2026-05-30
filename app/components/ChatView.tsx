@@ -6,20 +6,19 @@ import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import { Button, Label, Select } from "./ui";
+import { pickableModels, type PickerModel } from "~/lib/ai/models";
+import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
+import { interpolateGreeting } from "~/lib/chat/greeting";
+import type { TemplateValues } from "~/lib/template/interpolate";
 import ReactMarkdown from "react-markdown";
-
-interface Turn {
-  role: "user" | "assistant";
-  content: string;
-  id: string;
-  interrupted?: boolean;
-}
 
 interface ChatViewProps {
   tool: Tool;
   contextProfile?: { id: string } | null;
   defaultModel?: string;
   outputLanguage?: "nl" | "en";
+  /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
+  localModels?: PickerModel[];
   onGenerationStart?: () => void;
 }
 
@@ -28,6 +27,7 @@ export function ChatView({
   contextProfile,
   defaultModel,
   outputLanguage: defaultOutputLanguage,
+  localModels,
   onGenerationStart,
 }: ChatViewProps) {
   const t = useT();
@@ -46,6 +46,9 @@ export function ChatView({
 
   const greeting = tool.chat?.greeting;
   const starters = tool.chat?.starters;
+  // Every screen offers the same models: API-key catalog + local CLI agents +
+  // any Ollama / LM Studio models discovered at runtime.
+  const modelOptions = pickableModels(localModels ?? []);
 
   // Auto-scroll the thread to the bottom whenever a new turn is added or
   // streamed into, so the latest output stays in view.
@@ -121,28 +124,14 @@ export function ChatView({
         },
         {
           onToken: (token: string) => {
-            setTurns((prev) => {
-              const updated = [...prev];
-              const lastTurn = updated[updated.length - 1];
-              if (lastTurn) {
-                lastTurn.content += token;
-              }
-              return updated;
-            });
+            setTurns((prev) => appendTokenToLastTurn(prev, token));
           },
           onDone: () => {
             setIsStreaming(false);
           },
           onError: (error: string) => {
             console.error("Stream error:", error);
-            setTurns((prev) => {
-              const updated = [...prev];
-              const lastTurn = updated[updated.length - 1];
-              if (lastTurn) {
-                lastTurn.interrupted = true;
-              }
-              return updated;
-            });
+            setTurns((prev) => markLastTurnInterrupted(prev));
             setIsStreaming(false);
           },
         },
@@ -151,14 +140,7 @@ export function ChatView({
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         console.error("Chat error:", err);
-        setTurns((prev) => {
-          const updated = [...prev];
-          const lastTurn = updated[updated.length - 1];
-          if (lastTurn) {
-            lastTurn.interrupted = true;
-          }
-          return updated;
-        });
+        setTurns((prev) => markLastTurnInterrupted(prev));
       }
       setIsStreaming(false);
     }
@@ -168,14 +150,7 @@ export function ChatView({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    setTurns((prev) => {
-      const updated = [...prev];
-      const lastTurn = updated[updated.length - 1];
-      if (lastTurn) {
-        lastTurn.interrupted = true;
-      }
-      return updated;
-    });
+    setTurns((prev) => markLastTurnInterrupted(prev));
     setIsStreaming(false);
   };
 
@@ -227,8 +202,11 @@ export function ChatView({
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
             >
-              <option value="claude-sonnet-4-6">Claude Sonnet</option>
-              <option value="claude-opus-4-7">Claude Opus</option>
+              {modelOptions.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
             </Select>
           </div>
           <div>
@@ -250,7 +228,14 @@ export function ChatView({
       {/* Greeting and starters (on first load) */}
       {sandboxSubmitted && turns.length === 0 && greeting && (
         <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-          <p className="mb-3 text-slate-900">{loc(greeting, locale)}</p>
+          <p className="mb-3 text-slate-900">
+            {interpolateGreeting(
+              loc(greeting, locale),
+              // Sandbox values supply greeting placeholders like {{subject}};
+              // image fields are irrelevant to greetings, hence the cast.
+              sandboxValues as unknown as TemplateValues,
+            )}
+          </p>
           {starters && starters.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {starters.map((starter) => (
