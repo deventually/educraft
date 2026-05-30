@@ -1,21 +1,24 @@
 import { Link } from "react-router";
-import { ArrowLeft, BookOpen, Info } from "lucide-react";
+import { ArrowLeft, BookOpen, HelpCircle, Info } from "lucide-react";
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
+import { getToolHelpOverlay } from "~/lib/help/registry";
+import { getLocale } from "~/lib/i18n/locale.server";
 import { GeneratorView } from "~/components/GeneratorView";
 import { StageStepper } from "~/components/StageStepper";
 import { ChatView } from "~/components/ChatView";
 import { ToolIcon } from "~/components/ToolIcon";
+import { Markdown } from "~/components/Markdown";
 import { Badge } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const tool = getToolBySlugOrThrow(params.slug);
   const profiles = listProfiles();
   const defaultProfile = getDefaultProfile();
@@ -28,7 +31,15 @@ export async function loader({ params }: Route.LoaderArgs) {
     displayName: m.displayName,
     supportsImages: m.supportsImages,
   }));
-  return { tool, profiles, defaultProfileId: defaultProfile?.id ?? "", verbatim, localModels };
+  const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
+  return {
+    tool,
+    profiles,
+    defaultProfileId: defaultProfile?.id ?? "",
+    verbatim,
+    localModels,
+    helpOverlay,
+  };
 }
 
 export function meta({ data, matches }: Route.MetaArgs) {
@@ -40,7 +51,7 @@ export function meta({ data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tool, profiles, defaultProfileId, verbatim, localModels } = loaderData;
+  const { tool, profiles, defaultProfileId, verbatim, localModels, helpOverlay } = loaderData;
   const a = tool.attribution;
   const multiStage = tool.stages.length > 1;
 
@@ -67,6 +78,13 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             </div>
             <p className="mt-1 text-slate-600">{loc(tool.tagline, locale)}</p>
 
+            <Link
+              to={`/help/${tool.id}`}
+              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:underline"
+            >
+              <HelpCircle className="size-4" /> {t.help.fullHelp}
+            </Link>
+
             <div className="mt-4 rounded-xl bg-slate-50 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                 <BookOpen className="size-4 text-violet-600" /> {t.tool.theory}:{" "}
@@ -79,6 +97,17 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
                 </p>
               )}
             </div>
+
+            {helpOverlay && (
+              <details className="mt-3 text-sm">
+                <summary className="cursor-pointer font-medium text-violet-600 hover:underline">
+                  {t.help.howToUse}
+                </summary>
+                <div className="mt-2 rounded-xl border border-slate-200 bg-white p-4">
+                  <Markdown>{helpOverlay}</Markdown>
+                </div>
+              </details>
+            )}
 
             <p className="mt-3 text-xs text-slate-500">
               {t.tool.source}: <span className="italic">{a.chapterTitle}</span> — {a.authors}.{" "}

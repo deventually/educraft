@@ -5,6 +5,7 @@ export default [
     index("routes/home.tsx"),
     route("tools/:slug", "routes/tool.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
+    ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("settings", "routes/settings.tsx"),
     route("about", "routes/about.tsx"),
   ]),
