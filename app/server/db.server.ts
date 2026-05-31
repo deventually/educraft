@@ -69,7 +69,7 @@ function ensureSchema(sqlite: Database.Database) {
   `);
 }
 
-const globalForDb = globalThis as unknown as { __educraftDb?: ReturnType<typeof createDb> };
+const globalForDb = globalThis as unknown as { __limeonitDb?: ReturnType<typeof createDb> };
 
-export const db = globalForDb.__educraftDb ?? createDb();
-if (process.env.NODE_ENV !== "production") globalForDb.__educraftDb = db;
+export const db = globalForDb.__limeonitDb ?? createDb();
+if (process.env.NODE_ENV !== "production") globalForDb.__limeonitDb = db;

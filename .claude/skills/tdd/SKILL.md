@@ -1,9 +1,9 @@
 ---
 name: tdd
-description: TDD loop for EduCraft — red/green/refactor with test templates for tools and chat tutors
+description: TDD loop for LimeOnIt — red/green/refactor with test templates for tools and chat tutors
 ---
 
-# TDD Skill — EduCraft Red-Green-Refactor
+# TDD Skill — LimeOnIt Red-Green-Refactor
 
 Use this skill when:
 - **Adding a tool** (generator or chat tutor)

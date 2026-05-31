@@ -9,7 +9,7 @@ import { LocalizedError } from "~/lib/i18n/errors";
  * with the assembled prompt passed as the final positional argument; stdout is
  * streamed back.
  *
- * These only work where EduCraft runs on the same machine as the binaries, so
+ * These only work where LimeOnIt runs on the same machine as the binaries, so
  * they are disabled in production. Flags below are the verified headless modes:
  *   claude -p "<prompt>"        (Claude Code non-interactive print)
  *   codex exec "<prompt>"       (Codex non-interactive)

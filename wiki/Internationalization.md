@@ -1,6 +1,6 @@
 # Internationalization
 
-Reaching "every country" is **far more than translation**. EduCraft separates five
+Reaching "every country" is **far more than translation**. LimeOnIt separates five
 localization layers, in increasing depth. Layers 1–2 exist today; the global
 [Vision](../docs/VISION.md) lives in layers 3–5.
 

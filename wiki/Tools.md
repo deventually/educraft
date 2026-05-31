@@ -1,6 +1,6 @@
 # Tools
 
-A *tool* in EduCraft pairs an evidence-based teaching method with a carefully
+A *tool* in LimeOnIt pairs an evidence-based teaching method with a carefully
 designed, evaluated prompt. Tools are **data** on a shared runtime — see
 [Architecture](Architecture.md). Each tool's prompt is adapted from
 *The Pedagogical Promptbook* (CC BY 4.0) and kept faithful to its source via a

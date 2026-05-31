@@ -1,6 +1,6 @@
-# EduCraft
+# LimeOnIt
 
-Evidence-based onderwijs ontwerpen met generatieve AI. EduCraft zet de
+Evidence-based onderwijs ontwerpen met generatieve AI. LimeOnIt zet de
 onderwijsmethoden uit **The Pedagogical Promptbook** (David Wiley, red. — CC BY 4.0)
 om in werkende tools. Elke tool koppelt een onderwijstheorie aan een zorgvuldig
 ontworpen, geëvalueerde prompt. De eerste focus ligt op het **hbo-i** (hoger
@@ -11,7 +11,7 @@ beroepsonderwijs ICT) en op Nederlandstalige uitvoer.
 ```bash
 npm install
 cp .env.example .env        # vul ANTHROPIC_API_KEY in
-npm run db:migrate          # maakt data/educraft.db aan
+npm run db:migrate          # maakt data/limeonit.db aan
 npm run dev                 # http://localhost:5173
 ```
 

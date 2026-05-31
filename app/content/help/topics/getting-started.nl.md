@@ -1,6 +1,6 @@
 # Aan de slag
 
-EduCraft zet evidence-based onderwijsmethoden uit *The Pedagogical Promptbook* om in werkende tools voor het hbo. Zo werk je in vier stappen:
+LimeOnIt zet evidence-based onderwijsmethoden uit *The Pedagogical Promptbook* om in werkende tools voor het hbo. Zo werk je in vier stappen:
 
 1. **Kies een tool.** Op de startpagina staan alle tools. Filter op **Voor docenten** of **Voor studenten** om sneller te vinden wat je zoekt.
 2. **Stel je onderwijscontext in.** Maak onder **Onderwijscontext** een profiel aan (opleiding, vak, niveau, competenties). Dat profiel wordt automatisch in elke prompt verwerkt, zodat het resultaat past bij jóuw onderwijs. Zie [Onderwijscontext instellen](/help/context-profielen).

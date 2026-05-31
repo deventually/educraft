@@ -6,7 +6,7 @@
 /.react-router/
 /build/
 
-# EduCraft
+# LimeOnIt
 /data/*.db
 /data/*.db-*
 book/*.pdf

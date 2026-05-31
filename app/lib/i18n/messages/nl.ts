@@ -8,12 +8,12 @@
  * with `fmt()` from "~/lib/i18n/format".
  */
 export const nl = {
-  appName: "EduCraft",
+  appName: "LimeOnIt",
   tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   meta: {
-    homeTitle: "EduCraft — Evidence-based onderwijs ontwerpen met AI",
+    homeTitle: "LimeOnIt — Evidence-based onderwijs ontwerpen met AI",
     description:
-      "EduCraft zet de evidence-based onderwijsmethoden uit The Pedagogical Promptbook om in werkende tools voor het hbo.",
+      "LimeOnIt zet de evidence-based onderwijsmethoden uit The Pedagogical Promptbook om in werkende tools voor het hbo.",
   },
   language: {
     label: "Taal",
@@ -38,11 +38,39 @@ export const nl = {
   home: {
     heading: "Kies een tool",
     intro:
-      "Elke tool zet een evidence-based onderwijsmethode uit The Pedagogical Promptbook om in een werkende generator. Ontworpen voor het hbo.",
+      "Elke tool zet een evidence-based onderwijsmethode uit The Pedagogical Promptbook om in een werkende tool. Ontworpen voor het hbo.",
     filterAll: "Alle",
     instructor: "Voor docenten",
     student: "Voor studenten",
     comingSoon: "Binnenkort",
+    search: "Zoek op naam, methode of taak…",
+    allTypes: "Alle types",
+    generators: "Generators",
+    chatbots: "Chatbots",
+    resultCount: "{count} tools",
+    resultCountOne: "{count} tool",
+    noResults: "Geen tools gevonden. Pas je zoekopdracht of filters aan.",
+    clear: "Wissen",
+    backToGoals: "Terug naar doel-weergave",
+    stages: "{count} fasen",
+    mode: {
+      generator: "Generator",
+      chatbot: "Chatbot",
+    },
+    a11y: {
+      search: "Zoek tools",
+      clearSearch: "Zoekopdracht wissen",
+      audience: "Filter op publiek",
+      type: "Filter op type",
+      resultView: "Weergave van resultaten",
+      grid: "Raster",
+      list: "Lijst",
+      goalRegion: "Tools per onderwijsdoel",
+      resultsRegion: "Zoekresultaten",
+      open: "Open tool",
+      generator: "generator",
+      chatbot: "chatbot",
+    },
   },
   tool: {
     theory: "Onderbouwing",
@@ -157,8 +185,8 @@ export const nl = {
     },
   },
   about: {
-    heading: "Over EduCraft",
-    intro1: "EduCraft zet de evidence-based onderwijsmethoden uit",
+    heading: "Over LimeOnIt",
+    intro1: "LimeOnIt zet de evidence-based onderwijsmethoden uit",
     intro2:
       "({editor}, {year}) om in werkende tools. Elke tool koppelt een onderwijstheorie aan een zorgvuldig ontworpen, geëvalueerde prompt. De focus ligt eerst op het hbo-i.",
     licenseHeading: "Licentie & bron",

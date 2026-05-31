@@ -5,12 +5,12 @@ import type { Messages } from "./nl";
  * enforces identical key sets and matching interpolation placeholders.
  */
 export const en: Messages = {
-  appName: "EduCraft",
+  appName: "LimeOnIt",
   tagline: "Design evidence-based education with generative AI",
   meta: {
-    homeTitle: "EduCraft — Design evidence-based education with AI",
+    homeTitle: "LimeOnIt — Design evidence-based education with AI",
     description:
-      "EduCraft turns the evidence-based teaching methods from The Pedagogical Promptbook into working tools for Dutch higher professional education (hbo).",
+      "LimeOnIt turns the evidence-based teaching methods from The Pedagogical Promptbook into working tools for Dutch higher professional education (hbo).",
   },
   language: {
     label: "Language",
@@ -35,11 +35,39 @@ export const en: Messages = {
   home: {
     heading: "Choose a tool",
     intro:
-      "Each tool turns an evidence-based teaching method from The Pedagogical Promptbook into a working generator. Designed for Dutch higher professional education (hbo).",
+      "Each tool turns an evidence-based teaching method from The Pedagogical Promptbook into a working tool. Designed for Dutch higher professional education (hbo).",
     filterAll: "All",
     instructor: "For instructors",
     student: "For students",
     comingSoon: "Coming soon",
+    search: "Search by name, method or task…",
+    allTypes: "All types",
+    generators: "Generators",
+    chatbots: "Chatbots",
+    resultCount: "{count} tools",
+    resultCountOne: "{count} tool",
+    noResults: "No tools found. Try a different search or filter.",
+    clear: "Clear",
+    backToGoals: "Back to goal view",
+    stages: "{count} stages",
+    mode: {
+      generator: "Generator",
+      chatbot: "Chatbot",
+    },
+    a11y: {
+      search: "Search tools",
+      clearSearch: "Clear search",
+      audience: "Filter by audience",
+      type: "Filter by type",
+      resultView: "Result display",
+      grid: "Grid",
+      list: "List",
+      goalRegion: "Tools by teaching goal",
+      resultsRegion: "Search results",
+      open: "Open tool",
+      generator: "generator",
+      chatbot: "chatbot",
+    },
   },
   tool: {
     theory: "Rationale",
@@ -154,8 +182,8 @@ export const en: Messages = {
     },
   },
   about: {
-    heading: "About EduCraft",
-    intro1: "EduCraft turns the evidence-based teaching methods from",
+    heading: "About LimeOnIt",
+    intro1: "LimeOnIt turns the evidence-based teaching methods from",
     intro2:
       "({editor}, {year}) into working tools. Each tool pairs a teaching theory with a carefully designed, evaluated prompt. The initial focus is ICT higher education.",
     licenseHeading: "License & source",

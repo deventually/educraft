@@ -1,9 +1,9 @@
-# EduCraft Wiki
+# LimeOnIt Wiki
 
-Welcome to the EduCraft project wiki — the living knowledge base for what EduCraft
+Welcome to the LimeOnIt project wiki — the living knowledge base for what LimeOnIt
 is, how it is built, and where it is going.
 
-> **EduCraft in one line:** a *pedagogy compiler* — turn evidence-based teaching
+> **LimeOnIt in one line:** a *pedagogy compiler* — turn evidence-based teaching
 > methods into ready-to-use learning designs for **any level (EQF 1–8), any sector,
 > any country, any language**.
 
@@ -22,7 +22,7 @@ For the full strategic picture, read the [Vision](../docs/VISION.md).
 | [Qualification Frameworks](Qualification-Frameworks.md) | EQF/ISCED + national frameworks per target country. |
 | [Internationalization](Internationalization.md) | The five localization layers; UI vs output language; compliance. |
 | [Roadmap](Roadmap.md) | Phased path from today's MVP to the global vision. |
-| [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md) | How to extend EduCraft. |
+| [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md) | How to extend LimeOnIt. |
 | [Glossary](Glossary.md) | EQF, ISCED, hbo-i, ARCS-V, backward design, "pack", and more. |
 
 ---

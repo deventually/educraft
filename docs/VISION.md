@@ -1,4 +1,4 @@
-# EduCraft — Vision
+# LimeOnIt — Vision
 
 > A **pedagogy compiler for the world**: one application that turns evidence-based
 > teaching methods into ready-to-use learning designs for **any level (EQF 1–8),
@@ -6,7 +6,7 @@
 
 *Status: living document · Started 2026-05-29*
 
-This is an envisioning document, not a commitment. It describes what EduCraft can
+This is an envisioning document, not a commitment. It describes what LimeOnIt can
 become and the single architectural idea that makes that reach tractable. For what
 exists today and how it is built, see [`README.md`](../README.md).
 
@@ -23,20 +23,20 @@ and a doctoral seminar, nor between Rotterdam and Nairobi. What changes is the
 **shell** around it: the words, the level of complexity, the curriculum standard,
 the language, the assessment culture, the legal regime.
 
-EduCraft's bet:
+LimeOnIt's bet:
 
 > **Build the universal pedagogical engine once, and make everything local a
 > swappable layer of data.**
 
 A teacher anywhere enters their context; the engine *compiles* it into
 research-grounded, classroom-ready material — in their language, at their level,
-within their framework. This is why EduCraft is **one app, not many** (see §6).
+within their framework. This is why LimeOnIt is **one app, not many** (see §6).
 
 ---
 
 ## 2. Three axes of universality
 
-EduCraft generalizes along three independent axes. Today it occupies a single
+LimeOnIt generalizes along three independent axes. Today it occupies a single
 corner — **Netherlands · hbo · Dutch**. The vision is to fill the cube.
 
 1. **Level — the full EQF 1–8.** From basic general knowledge (EQF 1) through
@@ -145,7 +145,7 @@ Translation is layer 1–2. The reach of the vision lives in layers 3–5.
 
 The pedagogy is universal; only the surface differs. The divergence between
 sectors and countries is **data, not code** — terminology, level taxonomy,
-framework pack, register. EduCraft's architecture (tools-as-data, generic profile +
+framework pack, register. LimeOnIt's architecture (tools-as-data, generic profile +
 packs, output language as a parameter) is already built around exactly that seam.
 
 Forking into separate apps per sector or per country would mean N deploys, N× the
@@ -183,7 +183,7 @@ The line between these two columns is the entire architecture.
 
 ## 8. Architecture: the vision extends today's design
 
-EduCraft already rests on the right primitive — **tools are data, context is a
+LimeOnIt already rests on the right primitive — **tools are data, context is a
 generic profile + optional packs, output language is a parameter.** The global
 vision is that *same* primitive, scaled:
 

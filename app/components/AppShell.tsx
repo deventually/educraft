@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, NavLink, Outlet, useLocation } from "react-router";
-import { GraduationCap, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { LOCALES } from "~/lib/i18n";
@@ -32,14 +32,10 @@ export default function AppShell() {
           <NavLink
             to="/"
             onClick={() => setMenuOpen(false)}
-            className="flex shrink-0 items-center gap-2.5"
+            className="flex shrink-0 items-center"
+            aria-label={t.appName}
           >
-            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-700 via-violet-600 to-violet-500 text-white shadow-sm">
-              <GraduationCap className="size-5" />
-            </span>
-            <span className="font-display text-xl font-semibold tracking-tight">
-              Edu<span className="font-bold text-violet-600">Craft</span>
-            </span>
+            <img src="/logo.svg" alt={t.appName} className="h-9 w-auto" />
           </NavLink>
           <div className="flex items-center gap-2">
             {/* Inline nav — visible from md upward. */}

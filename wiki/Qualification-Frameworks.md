@@ -1,6 +1,6 @@
 # Qualification Frameworks
 
-EduCraft scales a tool's complexity, vocabulary, and pedagogy to the learner's
+LimeOnIt scales a tool's complexity, vocabulary, and pedagogy to the learner's
 **level**. To do that across countries, it needs a level model that is both precise
 and globally translatable. This page is the reference.
 
@@ -10,14 +10,14 @@ See also: [Context Model](Context-Model.md) · [Vision §3](../docs/VISION.md#3-
 
 ## The spine and the bridge
 
-- **EQF 1–8 (European Qualifications Framework)** is the **named spine** EduCraft
+- **EQF 1–8 (European Qualifications Framework)** is the **named spine** LimeOnIt
   reasons about — eight levels expressed as learning outcomes.
 - **ISCED 2011 (UNESCO)** is the **global bridge** — a worldwide level reference
   (0–8) used to translate "what level is this" for countries without an EQF tie, or
   with a differently-sized framework.
 
 > **Important:** national frameworks do **not** all use EQF's 1–8 range. Several run
-> 1–10, Scotland's runs 1–12. EduCraft maps each national level onto the ISCED/EQF
+> 1–10, Scotland's runs 1–12. LimeOnIt maps each national level onto the ISCED/EQF
 > spine — it never assumes a fixed count.
 
 ---
@@ -72,7 +72,7 @@ Provincial education systems coordinated through **CMEC**; the
 
 1. The teacher picks **country → sector → level** (a prominent first choice, not a
    buried setting — see [Vision §6](../docs/VISION.md#6-why-one-app-a-settled-decision)).
-2. EduCraft resolves that to an ISCED/EQF position and loads the matching
+2. LimeOnIt resolves that to an ISCED/EQF position and loads the matching
    [framework pack](Context-Model.md#packs).
 3. The engine scales the prompt — complexity, examples, vocabulary, pedagogical
    assumptions — to the level's outcome descriptors.

@@ -39,7 +39,7 @@ export function ResultPanel({ markdown, title, filenameBase, streaming }: Props)
             size="sm"
             variant="ghost"
             onClick={() =>
-              downloadText(`${slugifyFilename(filenameBase) || "educraft"}.md`, markdown)
+              downloadText(`${slugifyFilename(filenameBase) || "limeonit"}.md`, markdown)
             }
             disabled={!markdown}
           >

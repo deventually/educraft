@@ -1,10 +1,10 @@
-# AGENTS.md — EduCraft's Agent Contract
+# AGENTS.md — LimeOnIt's Agent Contract
 
-This is the canonical contract for AI agents and developers working on EduCraft. Adherence is enforced via tests, tooling, and the TDD loop below. One source of truth — see `CLAUDE.md` for how this auto-loads.
+This is the canonical contract for AI agents and developers working on LimeOnIt. Adherence is enforced via tests, tooling, and the TDD loop below. One source of truth — see `CLAUDE.md` for how this auto-loads.
 
 ## Project Model
 
-**EduCraft** turns *The Pedagogical Promptbook* (David Wiley, ed., CC BY 4.0) into a React Router 7 app for Dutch education (VO/mbo/hbo/wo).
+**LimeOnIt** turns *The Pedagogical Promptbook* (David Wiley, ed., CC BY 4.0) into a React Router 7 app for Dutch education (VO/mbo/hbo/wo).
 
 - **Tools as data:** Every pedagogical tool from the book conforms to one shape (a `Tool` registry entry) regardless of mode. No control-flow branching for each tool — capability grows by data addition, not engine churn.
 - **Prompt pipeline:** Prompts are externalized per language (NL/EN) as `.md` files with `{{placeholder}}` syntax. Each tool lives in `app/lib/prompts/<id>.prompt.ts` (registered) with language variants in `app/lib/prompts/files/<id>.{nl,en}.md`. Placeholders are validated at build time.

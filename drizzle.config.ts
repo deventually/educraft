@@ -1,6 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 
-const url = process.env.DATABASE_URL?.replace(/^file:/, "") ?? "./data/educraft.db";
+const url = process.env.DATABASE_URL?.replace(/^file:/, "") ?? "./data/limeonit.db";
 
 export default defineConfig({
   dialect: "sqlite",

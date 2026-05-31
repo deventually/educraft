@@ -1,6 +1,6 @@
 # Getting started
 
-EduCraft turns evidence-based teaching methods from *The Pedagogical Promptbook* into working tools for higher professional education. Here's the four-step flow:
+LimeOnIt turns evidence-based teaching methods from *The Pedagogical Promptbook* into working tools for higher professional education. Here's the four-step flow:
 
 1. **Pick a tool.** Every tool is on the home page. Filter by **For instructors** or **For students** to find what you need faster.
 2. **Set your teaching context.** Under **Teaching context**, create a profile (programme, course, level, competencies). That profile is woven into every prompt automatically, so the result fits *your* teaching. See [Setting your teaching context](/help/context-profielen).

@@ -39,7 +39,7 @@ default and the quality bar lives in the repo (not in a person's head).
 
 ### 3. TDD skill
 - Create `.claude/skills/tdd/SKILL.md` (frontmatter: `name: tdd`, a `description` that triggers
-  on "TDD", "test-first", "add a tool"). Encode EduCraft's red→green→refactor loop and include
+  on "TDD", "test-first", "add a tool"). Encode LimeOnIt's red→green→refactor loop and include
   two ready-to-copy templates:
   - **Add a tool (generator):** the `tests/tools/<id>.test.ts` shape from the plan's recipe.
   - **Add a chat tool:** the `tests/components/<id>.test.tsx` shape (render greeting → send →

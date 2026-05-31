@@ -1,4 +1,4 @@
-# Claude Code Setup — EduCraft
+# Claude Code Setup — LimeOnIt
 
 **See the canonical contract:** @AGENTS.md
 

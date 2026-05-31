@@ -10,7 +10,7 @@ const schema = z.object({
   // Local OpenAI-compatible servers (no API key needed).
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434/v1"),
   LMSTUDIO_BASE_URL: z.string().default("http://localhost:1234/v1"),
-  DATABASE_URL: z.string().default("file:./data/educraft.db"),
+  DATABASE_URL: z.string().default("file:./data/limeonit.db"),
 });
 
 export const env = schema.parse(process.env);

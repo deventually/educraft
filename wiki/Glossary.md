@@ -1,13 +1,13 @@
 # Glossary
 
-Shared vocabulary for EduCraft. Linked from across the wiki.
+Shared vocabulary for LimeOnIt. Linked from across the wiki.
 
 ---
 
 ## Education levels & frameworks
 
 - **EQF** — European Qualifications Framework; 8 levels of learning outcomes.
-  EduCraft's named [level spine](Qualification-Frameworks.md).
+  LimeOnIt's named [level spine](Qualification-Frameworks.md).
 - **ISCED** — International Standard Classification of Education (UNESCO); the global
   level reference (0–8) used to translate levels across countries.
 - **NLQF** — the Dutch national qualifications framework (referenced to EQF).
@@ -40,9 +40,9 @@ Shared vocabulary for EduCraft. Linked from across the wiki.
 - **Science of Learning** — evidence-based principles (e.g. retrieval practice,
   spaced practice, dual coding) underpinning the Cognitive Architect.
 - **The Pedagogical Promptbook** — David Wiley (ed.), CC BY 4.0, DOI 10.59668/2340;
-  EduCraft's source material.
+  LimeOnIt's source material.
 
-## EduCraft architecture
+## LimeOnIt architecture
 
 - **Tool** — a declarative method+prompt unit; *data, not code*. See
   [Architecture](Architecture.md).

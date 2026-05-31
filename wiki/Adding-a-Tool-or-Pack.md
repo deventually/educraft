@@ -1,6 +1,6 @@
 # Adding a Tool or Pack
 
-EduCraft is designed to be extended by **authoring data**, not writing features. The
+LimeOnIt is designed to be extended by **authoring data**, not writing features. The
 two main extension points are **tools** and **packs**.
 
 See [Architecture](Architecture.md) for the underlying model.

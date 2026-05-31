@@ -4,7 +4,7 @@ import type { ChatMessage as AIChatMessage } from "~/lib/ai/types";
 export type ChatMessage = AIChatMessage;
 
 /**
- * The Tool registry — EduCraft's single most important abstraction.
+ * The Tool registry — LimeOnIt's single most important abstraction.
  *
  * Every pedagogical tool from *The Pedagogical Promptbook* (CC BY 4.0) conforms to
  * this one shape, regardless of whether it is an instructor-facing generator or a

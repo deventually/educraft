@@ -1,6 +1,6 @@
 # Architecture
 
-How EduCraft is built today, and why the design already supports the global
+How LimeOnIt is built today, and why the design already supports the global
 [Vision](../docs/VISION.md). For the canonical current-state summary see the
 [README](../README.md); this page goes deeper and connects the pieces.
 
@@ -48,7 +48,7 @@ Generation is streamed to the browser via SSE through the resource route
 
 ## Providers (model-agnostic)
 
-EduCraft is not tied to one model vendor.
+LimeOnIt is not tied to one model vendor.
 
 - **Vercel AI SDK v6** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, Ollama,
   LM Studio.
@@ -59,7 +59,7 @@ EduCraft is not tied to one model vendor.
 - `models.ts` holds the static catalog; `provider.ts` routes a model id to an adapter.
 - Default model: `claude-sonnet-4-6`.
 
-This matters for the vision: institutions in different countries can run EduCraft on
+This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 
 ---
