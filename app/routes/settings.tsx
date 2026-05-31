@@ -97,7 +97,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
                 <p className="mt-1 line-clamp-2 text-xs text-slate-400">{p.competencies}</p>
               )}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
               <Button
                 type="button"
                 variant="secondary"
