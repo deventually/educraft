@@ -313,8 +313,9 @@ function groupBy(fields: InputField[], locale: Locale): Array<[string | undefine
   const map = new Map<string | undefined, InputField[]>();
   for (const f of fields) {
     const key = f.group ? loc(f.group, locale) : undefined;
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(f);
+    const bucket = map.get(key);
+    if (bucket) bucket.push(f);
+    else map.set(key, [f]);
   }
   return [...map.entries()];
 }

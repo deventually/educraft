@@ -79,10 +79,17 @@ export function StageStepper({ tool, profiles, defaultProfileId, localModels }: 
       },
       {
         onToken: (text) =>
-          setStages((prev) => ({
-            ...prev,
-            [stage.id]: { ...prev[stage.id]!, output: (prev[stage.id]?.output ?? "") + text },
-          })),
+          setStages((prev) => {
+            const existing: StageState = prev[stage.id] ?? {
+              output: "",
+              streaming: true,
+              error: null,
+            };
+            return {
+              ...prev,
+              [stage.id]: { ...existing, output: existing.output + text },
+            };
+          }),
         onDone: () => setStage(stage.id, { streaming: false }),
         onError: (msg) => setStage(stage.id, { streaming: false, error: msg }),
       },

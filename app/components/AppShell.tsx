@@ -35,7 +35,11 @@ export default function AppShell() {
             className="flex shrink-0 items-center"
             aria-label={t.appName}
           >
-            <img src="/logo.svg" alt={t.appName} className="h-9 w-auto" />
+            <img
+              src="/logo.svg"
+              alt={t.appName}
+              className="h-[clamp(2.3rem,3.5vw,3.25rem)] w-auto"
+            />
           </NavLink>
           <div className="flex items-center gap-2">
             {/* Inline nav — visible from md upward. */}

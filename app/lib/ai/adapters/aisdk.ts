@@ -46,7 +46,7 @@ function toMessages(opts: GenerateOptions): ModelMessage[] {
         role: "user",
         content: [
           { type: "text", text: m.content },
-          ...opts.images!.map((img) => ({
+          ...(opts.images ?? []).map((img) => ({
             type: "image" as const,
             image: img.dataBase64,
             mediaType: img.mediaType,

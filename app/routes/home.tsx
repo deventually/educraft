@@ -123,15 +123,15 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      <div className="mb-7">
+      <div className="mb-10">
         <h1 className="font-display text-[clamp(1.7rem,4vw,2.05rem)] font-medium tracking-tight text-balance text-slate-900">
           {t.home.heading}
         </h1>
-        <p className="mt-2 max-w-[60ch] text-pretty text-slate-600">{t.home.intro}</p>
+        <p className="mt-3 max-w-[60ch] text-pretty text-slate-600">{t.home.intro}</p>
       </div>
 
       {/* Toolbar: search + audience + type filters */}
-      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <SearchBox
           value={query}
           onChange={setQuery}
@@ -164,7 +164,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Live region: announces result-count changes to screen readers. */}
-      <p className="mb-4 text-sm text-slate-500" aria-live="polite">
+      <p className="mb-6 text-sm text-slate-500" aria-live="polite">
         {isFiltered ? resultLabel(results.length) : ""}
       </p>
 
@@ -243,7 +243,7 @@ type Locale = ReturnType<typeof useLocale>;
 /** Default view: tools grouped by teaching goal. */
 function GoalSections({ tools, locale, t }: { tools: ToolCardData[]; locale: Locale; t: T }) {
   return (
-    <section className="flex flex-col gap-9" aria-label={t.home.a11y.goalRegion}>
+    <section className="flex flex-col gap-12" aria-label={t.home.a11y.goalRegion}>
       {GOAL_ORDER.map((g) => {
         const goal = GOALS[g];
         const inGoal = tools.filter((tool) => tool.goal === g);
@@ -251,7 +251,7 @@ function GoalSections({ tools, locale, t }: { tools: ToolCardData[]; locale: Loc
         const isStudent = goal.audience === "student";
         return (
           <section key={g} aria-labelledby={`goal-${g}`}>
-            <div className="mb-4 flex items-start gap-3.5">
+            <div className="mb-5 flex items-start gap-3.5">
               <span
                 className={cn(
                   "grid size-[46px] shrink-0 place-items-center rounded-[13px]",
@@ -295,7 +295,7 @@ function GoalSections({ tools, locale, t }: { tools: ToolCardData[]; locale: Loc
 /** Container-responsive grid (column count follows available width). */
 function ToolGrid({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="grid list-none gap-4 p-0 [grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))]">
+    <ul className="grid list-none gap-5 p-0 [grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))]">
       {children}
     </ul>
   );
