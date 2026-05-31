@@ -24,8 +24,12 @@ export const nl = {
     tools: "Tools",
     projects: "Projecten",
     help: "Help",
-    settings: "Context & instellingen",
+    settings: "Onderwijscontext",
     about: "Over",
+    label: "Hoofdnavigatie",
+    menuLabel: "Mobiele navigatie",
+    openMenu: "Menu openen",
+    closeMenu: "Menu sluiten",
   },
   badge: {
     instructor: "Docent",

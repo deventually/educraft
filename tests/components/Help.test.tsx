@@ -37,7 +37,7 @@ const tool = {
     en: "Choose technology by learning outcome",
   },
   theory: {
-    name: { nl: "Constructieve alignering", en: "Constructive alignment" },
+    name: { nl: "Constructive alignering", en: "Constructive alignment" },
     summary: { nl: "Stem activiteiten, toetsing en technologie op elkaar af.", en: "Align." },
     keyCitations: [],
   },

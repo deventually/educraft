@@ -21,8 +21,12 @@ export const en: Messages = {
     tools: "Tools",
     projects: "Projects",
     help: "Help",
-    settings: "Context & settings",
+    settings: "Teaching context",
     about: "About",
+    label: "Main navigation",
+    menuLabel: "Mobile navigation",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   badge: {
     instructor: "Instructor",

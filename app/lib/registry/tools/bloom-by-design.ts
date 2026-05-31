@@ -20,7 +20,7 @@ export const bloomByDesign: Tool = {
   mode: "chat",
   theory: {
     name: {
-      nl: "Constructieve Alignering",
+      nl: "Constructive Alignment",
       en: "Constructive Alignment",
     },
     summary: {
@@ -95,7 +95,7 @@ export const bloomByDesign: Tool = {
       id: "alignment",
       name: { nl: "Bloom by Design", en: "Bloom by Design" },
       description: {
-        nl: "Gids voor het selecteren van onderwijstechnologie op basis van constructieve alignering.",
+        nl: "Gids voor het selecteren van onderwijstechnologie op basis van constructive alignment.",
         en: "Guide for selecting educational technology based on constructive alignment.",
       },
       systemPromptId: BLOOM_BY_DESIGN_PROMPT.id,
@@ -110,7 +110,7 @@ export const bloomByDesign: Tool = {
   ],
   chat: {
     greeting: {
-      nl: "Welkom bij Bloom by Design! Ik help je onderwijstechnologie te selecteren op basis van constructieve alignering—het afstemmen van leerresultaten, activiteiten en evaluatie. Laten we beginnen met je leerresultaten.",
+      nl: "Welkom bij Bloom by Design! Ik help je onderwijstechnologie te selecteren op basis van constructive alignment—het afstemmen van leerresultaten, activiteiten en evaluatie. Laten we beginnen met je leerresultaten.",
       en: "Welcome to Bloom by Design! I help you select educational technology based on constructive alignment—coordinating learning outcomes, activities, and assessment. Let's start with your learning outcomes.",
     },
     starters: [

@@ -1,6 +1,6 @@
 ## Wanneer gebruik je deze tool?
 
-Bloom by Design helpt je **onderwijstechnologie kiezen op basis van leerresultaten**, niet op basis van wat populair of nieuw is. Gebruik de tool als je twijfelt welke tool, werkvorm of platform past bij wat studenten moeten kunnen — en je die keuze pedagogisch wilt onderbouwen (constructieve alignering).
+Bloom by Design helpt je **onderwijstechnologie kiezen op basis van leerresultaten**, niet op basis van wat populair of nieuw is. Gebruik de tool als je twijfelt welke tool, werkvorm of platform past bij wat studenten moeten kunnen — en je die keuze pedagogisch wilt onderbouwen (constructive alignment).
 
 ## Hoe werkt het?
 

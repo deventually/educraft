@@ -4,7 +4,7 @@ A **context profile** describes your teaching situation once, so every tool take
 
 ## Creating a profile
 
-Go to **Context & settings**. No profile is set up by default — you create one the way you prefer:
+Go to **Teaching context**. No profile is set up by default — you create one the way you prefer:
 
 - **Use the wizard** — step by step, with guidance and recommended fields per domain.
 - **Fill it in yourself** — all fields on one page.

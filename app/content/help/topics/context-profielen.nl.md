@@ -4,7 +4,7 @@ Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke 
 
 ## Een profiel aanmaken
 
-Ga naar **Context & instellingen**. Er staat standaard nog geen profiel klaar — je maakt er zelf één aan op de manier die je prettig vindt:
+Ga naar **Onderwijscontext**. Er staat standaard nog geen profiel klaar — je maakt er zelf één aan op de manier die je prettig vindt:
 
 - **Met de wizard** — stap voor stap, met uitleg en aanbevolen velden per domein.
 - **Zelf invullen** — alle velden op één pagina.
