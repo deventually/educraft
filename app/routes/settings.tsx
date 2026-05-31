@@ -1,27 +1,25 @@
-import { useState } from "react";
-import { Form, useNavigation } from "react-router";
-import { Trash2, Plus, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Form, useActionData, useNavigation } from "react-router";
+import { Trash2, Plus, Pencil, Wand2, PenLine, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/settings";
-import { listProfiles, createProfile, deleteProfile } from "~/server/repositories/profiles.server";
 import {
-  HBO_DOMAINS,
-  HBOI_ARCHITECTURE_LAYERS,
-  HBOI_ACTIVITIES,
-  HBOI_ARCHITECTURE_LAYER_LABELS,
-  HBOI_ACTIVITY_LABELS,
-  type HboDomain,
-  type HboiActivity,
-  type HboiArchitectureLayer,
-} from "~/lib/context/types";
-import { Button, Card, Input, Label, Select, Textarea, Badge } from "~/components/ui";
-import { useT, useLocale } from "~/lib/i18n/useT";
-import { fmt } from "~/lib/i18n/format";
-import { loc } from "~/lib/i18n/localized";
+  listProfiles,
+  createProfile,
+  updateProfile,
+  deleteProfile,
+  getDefaultProfile,
+} from "~/server/repositories/profiles.server";
+import type { ContextProfile } from "~/lib/context/types";
+import { parseContextForm } from "~/lib/context/parseForm";
+import { Button, Card, Badge } from "~/components/ui";
+import { ContextWizard } from "~/components/context/ContextWizard";
+import { ContextForm } from "~/components/context/ContextForm";
+import { useT } from "~/lib/i18n/useT";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 
 export function loader() {
-  return { profiles: listProfiles() };
+  return { profiles: listProfiles(), defaultId: getDefaultProfile()?.id ?? "" };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -33,56 +31,43 @@ export async function action({ request }: Route.ActionArgs) {
     return { ok: true };
   }
 
-  if (intent === "create") {
-    const name = String(fd.get("name") ?? "").trim();
-    if (!name) {
+  if (intent === "create" || intent === "update") {
+    const { input, isDefault, error } = parseContextForm(fd);
+    if (error || !input) {
       const m = getMessages(getLocale(request));
       return { ok: false, error: m.settings.nameRequired };
     }
-    const domain = str(fd.get("domain")) as HboDomain | undefined;
-    const eqfRaw = String(fd.get("eqf") ?? "");
-    const yearRaw = String(fd.get("studyYear") ?? "");
-    const levelRaw = String(fd.get("hboiLevel") ?? "");
-    const isIct = domain === "ICT";
-    createProfile(
-      {
-        name,
-        programme: str(fd.get("programme")),
-        domain,
-        courseName: str(fd.get("courseName")),
-        studyYear: yearRaw ? (Number(yearRaw) as 1 | 2 | 3 | 4) : undefined,
-        eqf: eqfRaw ? (Number(eqfRaw) as 5 | 6 | 7) : undefined,
-        competencies: str(fd.get("competencies")),
-        professionalContext: str(fd.get("professionalContext")),
-        tools: str(fd.get("tools")),
-        notes: str(fd.get("notes")),
-        architectureLayers: isIct
-          ? (fd.getAll("architectureLayers") as HboiArchitectureLayer[])
-          : undefined,
-        activities: isIct ? (fd.getAll("activities") as HboiActivity[]) : undefined,
-        hboiLevel: isIct && levelRaw ? (Number(levelRaw) as 1 | 2 | 3) : undefined,
-      },
-      fd.get("isDefault") === "on",
-    );
+    if (intent === "update") {
+      const id = String(fd.get("id") ?? "");
+      if (id) updateProfile(id, input, isDefault);
+    } else {
+      createProfile(input, isDefault);
+    }
     return { ok: true };
   }
 
   return { ok: false };
 }
 
-function str(v: FormDataEntryValue | null): string | undefined {
-  const s = String(v ?? "").trim();
-  return s || undefined;
-}
+type CreateMode = "choose" | "wizard" | "form";
 
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
-  const locale = useLocale();
-  const { profiles } = loaderData;
+  const { profiles, defaultId } = loaderData;
+  const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
-  const [domain, setDomain] = useState<string>("");
-  const isIct = domain === "ICT";
+  const [mode, setMode] = useState<CreateMode>("choose");
+  const [editing, setEditing] = useState<ContextProfile | null>(null);
+
+  // After any successful submit, collapse back to the choice so the next
+  // action starts from a clean slate.
+  useEffect(() => {
+    if (actionData?.ok) {
+      setMode("choose");
+      setEditing(null);
+    }
+  }, [actionData]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -94,12 +79,16 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
       <section className="mt-6 space-y-3">
         {profiles.length === 0 && <p className="text-sm text-slate-500">{t.settings.empty}</p>}
         {profiles.map((p) => (
-          <Card key={p.id} className="flex items-start justify-between gap-4 p-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-slate-900">{p.name}</h3>
+          <Card
+            key={p.id}
+            className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold text-slate-900">{p.name}</p>
                 {p.domain && <Badge>{p.domain}</Badge>}
                 {p.eqf && <Badge>EQF {p.eqf}</Badge>}
+                {p.id === defaultId && <Badge>{t.settings.defaultBadge}</Badge>}
               </div>
               <p className="mt-1 text-sm text-slate-600">
                 {[p.programme, p.courseName, p.tools].filter(Boolean).join(" · ")}
@@ -108,180 +97,113 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
                 <p className="mt-1 line-clamp-2 text-xs text-slate-400">{p.competencies}</p>
               )}
             </div>
-            <Form method="post">
-              <input type="hidden" name="id" value={p.id} />
+            <div className="flex shrink-0 items-center gap-2">
               <Button
-                type="submit"
-                name="intent"
-                value="delete"
-                variant="danger"
+                type="button"
+                variant="secondary"
                 size="sm"
                 disabled={busy}
+                onClick={() => setEditing(p)}
               >
-                <Trash2 className="size-4" /> {t.settings.delete}
+                <Pencil className="size-4" aria-hidden /> {t.settings.edit}
               </Button>
-            </Form>
+              <Form method="post">
+                <input type="hidden" name="id" value={p.id} />
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="delete"
+                  variant="danger"
+                  size="sm"
+                  disabled={busy}
+                >
+                  <Trash2 className="size-4" aria-hidden /> {t.settings.delete}
+                </Button>
+              </Form>
+            </div>
           </Card>
         ))}
       </section>
 
       <Card className="mt-8 p-6">
-        <h2 className="mb-4 flex items-center gap-2 font-semibold text-slate-900">
-          <Plus className="size-4 text-violet-600" /> {t.settings.newProfile}
-        </h2>
-        <Form method="post" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t.settings.name} required>
-              <Input name="name" required placeholder={t.settings.ph.name} />
-            </Field>
-            <Field label={t.settings.programme}>
-              <Input name="programme" placeholder={t.settings.ph.programme} />
-            </Field>
-            <Field label={t.settings.domain}>
-              <Select name="domain" value={domain} onChange={(e) => setDomain(e.target.value)}>
-                <option value="">{t.settings.domainNone}</option>
-                {HBO_DOMAINS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label={t.settings.course}>
-              <Input name="courseName" placeholder={t.settings.ph.course} />
-            </Field>
-            <Field label={t.settings.studyYear}>
-              <Select name="studyYear" defaultValue="">
-                <option value="">{t.settings.yearNone}</option>
-                {[1, 2, 3, 4].map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label={t.settings.eqfOptional}>
-              <Select name="eqf" defaultValue="">
-                <option value="">{t.settings.eqfNone}</option>
-                <option value="5">EQF 5</option>
-                <option value="6">EQF 6</option>
-                <option value="7">EQF 7</option>
-              </Select>
-            </Field>
-          </div>
-
-          <Field label={t.settings.competencies}>
-            <Textarea name="competencies" rows={2} placeholder={t.settings.ph.competencies} />
-          </Field>
-          <Field label={t.settings.professionalContext}>
-            <Textarea
-              name="professionalContext"
-              rows={2}
-              placeholder={t.settings.ph.professionalContext}
-            />
-          </Field>
-          <Field label={t.settings.tools}>
-            <Input name="tools" placeholder={t.settings.ph.tools} />
-          </Field>
-
-          {isIct && (
-            <fieldset className="space-y-4 rounded-xl border border-violet-200 bg-violet-50/40 p-4">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-violet-700">
-                {t.settings.ictPack}
-              </legend>
-              <Field label={t.settings.level}>
-                <Select name="hboiLevel" defaultValue="">
-                  <option value="">{t.settings.eqfNone}</option>
-                  <option value="1">{fmt(t.settings.levelOption, { n: 1 })}</option>
-                  <option value="2">{fmt(t.settings.levelOption, { n: 2 })}</option>
-                  <option value="3">{fmt(t.settings.levelOption, { n: 3 })}</option>
-                </Select>
-              </Field>
-              <Field label={t.settings.layers}>
-                <CheckGroup
-                  name="architectureLayers"
-                  options={HBOI_ARCHITECTURE_LAYERS.map((v) => ({
-                    value: v,
-                    label: loc(HBOI_ARCHITECTURE_LAYER_LABELS[v], locale),
-                  }))}
-                />
-              </Field>
-              <Field label={t.settings.activities}>
-                <CheckGroup
-                  name="activities"
-                  options={HBOI_ACTIVITIES.map((v) => ({
-                    value: v,
-                    label: loc(HBOI_ACTIVITY_LABELS[v], locale),
-                  }))}
-                />
-              </Field>
-            </fieldset>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            {editing ? (
+              <>
+                <Pencil className="size-4 text-violet-600" aria-hidden /> {t.settings.editProfile}
+              </>
+            ) : (
+              <>
+                <Plus className="size-4 text-violet-600" aria-hidden /> {t.settings.newProfile}
+              </>
+            )}
+          </h2>
+          {(editing || mode !== "choose") && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setEditing(null);
+                setMode("choose");
+              }}
+            >
+              <ArrowLeft className="size-4" aria-hidden /> {t.settings.cancel}
+            </Button>
           )}
+        </div>
 
-          <Field label={t.settings.notes}>
-            <Textarea name="notes" rows={2} placeholder={t.settings.ph.notes} />
-          </Field>
+        {actionData && !actionData.ok && actionData.error && (
+          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {actionData.error}
+          </p>
+        )}
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              name="isDefault"
-              className="size-4 rounded border-slate-300 text-violet-600"
-            />
-            <Star className="size-4 text-amber-500" /> {t.settings.makeDefault}
-          </label>
-
-          <Button type="submit" name="intent" value="create" disabled={busy}>
-            {t.settings.save}
-          </Button>
-        </Form>
-      </Card>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <Label required={required} className="mb-1.5">
-        {label}
-      </Label>
-      {children}
-    </div>
-  );
-}
-
-function CheckGroup({
-  name,
-  options,
-}: {
-  name: string;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="flex flex-wrap gap-3">
-      {options.map((o) => (
-        <label
-          key={o.value}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-        >
-          <input
-            type="checkbox"
-            name={name}
-            value={o.value}
-            className="size-4 rounded border-slate-300 text-violet-600"
+        {editing ? (
+          <ContextForm
+            key={editing.id}
+            profile={editing}
+            isCurrentDefault={editing.id === defaultId}
+            onCancel={() => setEditing(null)}
           />
-          {o.label}
-        </label>
-      ))}
+        ) : mode === "choose" ? (
+          <div>
+            <p className="text-sm text-slate-600">{t.settings.chooseIntro}</p>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setMode("wizard")}
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-violet-400 hover:bg-violet-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              >
+                <Wand2 className="mt-0.5 size-5 shrink-0 text-violet-600" aria-hidden />
+                <span>
+                  <span className="block font-medium text-slate-900">{t.settings.useWizard}</span>
+                  <span className="mt-0.5 block text-sm text-slate-500">
+                    {t.settings.useWizardDesc}
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("form")}
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-violet-400 hover:bg-violet-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              >
+                <PenLine className="mt-0.5 size-5 shrink-0 text-violet-600" aria-hidden />
+                <span>
+                  <span className="block font-medium text-slate-900">{t.settings.useForm}</span>
+                  <span className="mt-0.5 block text-sm text-slate-500">
+                    {t.settings.useFormDesc}
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : mode === "wizard" ? (
+          <ContextWizard onCancel={() => setMode("choose")} />
+        ) : (
+          <ContextForm onCancel={() => setMode("choose")} />
+        )}
+      </Card>
     </div>
   );
 }

@@ -4,13 +4,29 @@ Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke 
 
 ## Een profiel aanmaken
 
-Ga naar **Context & instellingen** en vul in wat van toepassing is:
+Ga naar **Context & instellingen**. Er staat standaard nog geen profiel klaar — je maakt er zelf één aan op de manier die je prettig vindt:
+
+- **Met de wizard** — stap voor stap, met uitleg en aanbevolen velden per domein.
+- **Zelf invullen** — alle velden op één pagina.
+
+Beide vragen om hetzelfde:
 
 - **Naam** — bijv. "Software Engineering — jaar 2".
 - **Opleiding, vak, studiejaar, EQF-niveau** — bepalen toon en niveau van de output.
 - **Beoogde competenties / leeruitkomsten** — waar het onderwijs op stuurt.
 - **Beroepspraktijk** — voor welk werkveld je opleidt.
-- **hbo-i (ICT)** — als je domein ICT is, kun je architectuurlagen, beroepsactiviteiten en beheersingsniveau toevoegen.
+
+## Domeinkader per domein
+
+Kies je een **domein/sector**, dan verschijnen de relevante velden uit het landelijke raamwerk van dat domein — bijvoorbeeld de hbo-i-architectuurlagen voor ICT, de CanMEDS-rollen voor Zorg & welzijn, of de leeruitkomsten van HBO-Rechten. Bij elk kader staat de **bron** vermeld.
+
+Deze velden worden alvast **ingevuld** op basis van het raamwerk: het volledige kader wordt aangevinkt (vink af wat niet van toepassing is), het EQF-niveau staat op 6 (hbo-bachelor), en zodra je een **studiejaar** kiest, wordt het beheersingsniveau voorgesteld (jaar 1 → 1, jaar 4 → 3; tussenjaren → 2). Het zijn voorstellen — pas elk veld gerust aan of verwijder het.
+
+Heeft een domein geen landelijk vastgesteld raamwerk (zoals Agro of Overig), dan zie je dat duidelijk terug en voeg je zelf de relevante velden toe.
+
+## Eigen velden
+
+Met **Eigen velden** voeg je voor elk profiel zelf extra naam-/waardeparen toe. Die worden net als de rest aan elke prompt meegegeven — handig voor specialisaties of accenten die niet in een standaardkader passen.
 
 Zet één profiel als **standaard**; dat wordt dan vooraf geselecteerd op de toolpagina's.
 

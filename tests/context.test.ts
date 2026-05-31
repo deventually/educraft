@@ -20,10 +20,22 @@ const ict: ContextProfile = {
   name: "SE jaar 2",
   programme: "HBO-ICT",
   domain: "ICT",
-  hboiLevel: 2,
-  architectureLayers: ["Software", "Infrastructuur"],
-  activities: ["Realiseren"],
   tools: "Java",
+  packValues: {
+    beheersingsniveau: 2,
+    architectuurlagen: ["Software", "Infrastructuur"],
+    activiteiten: ["Realiseren"],
+  },
+};
+
+const recht: ContextProfile = {
+  id: "r1",
+  name: "HBO-Rechten jaar 2",
+  domain: "Recht",
+  packValues: {
+    leeruitkomsten: ["Juridisch analyseren", "Digitaliseren"],
+    rechtsgebied: ["Strafrecht"],
+  },
 };
 
 describe("formatProfile", () => {
@@ -32,14 +44,15 @@ describe("formatProfile", () => {
     expect(formatProfile(undefined, "en")).toBe("");
   });
 
-  it("renders generic hbo fields in Dutch", () => {
+  it("renders generic hbo fields in Dutch (no pack line without packValues)", () => {
     const out = formatProfile(generic, "nl");
     expect(out).toContain("hbo");
     expect(out).toContain("Verpleegkunde");
     expect(out).toContain("EQF 6");
     expect(out).toContain("Klinisch redeneren");
-    // No ICT pack for a non-ICT domain.
-    expect(out).not.toContain("hbo-i");
+    // No framework block: a Zorg & welzijn pack exists, but this profile set no values.
+    expect(out).not.toContain("Relevant kader");
+    expect(out).not.toContain("CanMEDS");
   });
 
   it("renders generic hbo fields in English", () => {
@@ -49,14 +62,15 @@ describe("formatProfile", () => {
     expect(out).toContain("Professional field: Ziekenhuis");
   });
 
-  it("adds the hbo-i (ICT) pack only for the ICT domain", () => {
+  it("adds the hbo-i (ICT) pack with its source, resolving option labels", () => {
     const nl = formatProfile(ict, "nl");
-    expect(nl).toContain("hbo-i");
+    expect(nl).toContain("hbo-i domeinbeschrijving");
     expect(nl).toContain("Software");
     expect(nl).toContain("Realiseren");
+    expect(nl).toContain("2"); // beheersingsniveau
   });
 
-  it("translates hbo-i framework terms in English output", () => {
+  it("translates pack option labels in English output", () => {
     const en = formatProfile(ict, "en");
     expect(en).toContain("Software");
     expect(en).toContain("Infrastructure"); // Infrastructuur → Infrastructure
@@ -64,8 +78,37 @@ describe("formatProfile", () => {
     expect(en).not.toContain("Realiseren");
   });
 
-  it("does not add the ICT pack when ICT data is present but domain is not ICT", () => {
+  it("renders any domain's pack — e.g. HBO-Rechten leeruitkomsten + rechtsgebied", () => {
+    const nl = formatProfile(recht, "nl");
+    expect(nl).toContain("HBO-Rechten");
+    expect(nl).toContain("Juridisch analyseren");
+    expect(nl).toContain("Strafrecht");
+    const en = formatProfile(recht, "en");
+    expect(en).toContain("Legal analysis"); // Juridisch analyseren → Legal analysis
+    expect(en).toContain("Criminal law"); // Strafrecht → Criminal law
+  });
+
+  it("renders user-defined custom fields and skips incomplete ones", () => {
+    const out = formatProfile(
+      {
+        id: "c1",
+        name: "Agro",
+        domain: "Agro, voeding & leefomgeving",
+        customFields: [
+          { label: "Specialisatie", value: "Precisielandbouw" },
+          { label: "", value: "leeg" },
+          { label: "Geen waarde", value: "" },
+        ],
+      },
+      "nl",
+    );
+    expect(out).toContain("Specialisatie: Precisielandbouw");
+    expect(out).not.toContain("leeg");
+    expect(out).not.toContain("Geen waarde");
+  });
+
+  it("does not render the ICT source when the domain is not ICT", () => {
     const out = formatProfile({ ...ict, domain: "Techniek" }, "nl");
-    expect(out).not.toContain("hbo-i");
+    expect(out).not.toContain("hbo-i domeinbeschrijving");
   });
 });

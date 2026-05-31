@@ -45,10 +45,12 @@ describe("buildSystemPrompt", () => {
       id: "p1",
       name: "SE jaar 2",
       domain: "ICT",
-      hboiLevel: 2,
-      architectureLayers: ["Software"],
-      activities: ["Realiseren"],
       tools: "Java",
+      packValues: {
+        beheersingsniveau: 2,
+        architectuurlagen: ["Software"],
+        activiteiten: ["Realiseren"],
+      },
     };
     const sys = buildSystemPrompt({
       promptId: guidedReflection.stages[0].systemPromptId,

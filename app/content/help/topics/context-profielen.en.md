@@ -4,13 +4,29 @@ A **context profile** describes your teaching situation once, so every tool take
 
 ## Creating a profile
 
-Go to **Context & settings** and fill in what applies:
+Go to **Context & settings**. No profile is set up by default — you create one the way you prefer:
+
+- **Use the wizard** — step by step, with guidance and recommended fields per domain.
+- **Fill it in yourself** — all fields on one page.
+
+Both ask for the same things:
 
 - **Name** — e.g. "Software Engineering — year 2".
 - **Programme, course, study year, EQF level** — set the tone and level of the output.
 - **Target competencies / learning outcomes** — what the teaching steers towards.
 - **Professional field** — the field of work you prepare students for.
-- **hbo-i (ICT)** — if your domain is ICT, you can add architecture layers, professional activities, and proficiency level.
+
+## Domain framework per domain
+
+When you pick a **domain/sector**, the relevant fields from that domain's national framework appear — for example the hbo-i architecture layers for ICT, the CanMEDS roles for Health & social care, or the HBO-Rechten learning outcomes. Each framework shows its **source**.
+
+These fields are **pre-filled** from the framework: the full framework is ticked (deselect what doesn't apply), EQF defaults to 6 (hbo bachelor), and as soon as you pick a **study year** the mastery level is suggested (year 1 → 1, year 4 → 3; middle years → 2). These are suggestions — adjust or remove any field.
+
+If a domain has no nationally established framework (such as Agro or Other), you'll see that stated plainly and can add the relevant fields yourself.
+
+## Custom fields
+
+With **Custom fields** you add your own name/value pairs per profile. They're passed to every prompt like everything else — handy for specialisations or accents that don't fit a standard framework.
 
 Mark one profile as **default**; it will be pre-selected on the tool pages.
 

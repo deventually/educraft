@@ -4,12 +4,14 @@
  *
  * The model is generic across ALL hbo (Dutch higher professional education):
  * any study fills in the free-text + EQF fields. Domains that have a recognized
- * structured framework get an optional "pack" on top — hbo-i (ICT) is the first,
- * contributing architecture layers, professional activities and a 1–3 level.
- * New packs can be added later without reshaping the base.
+ * structured framework get an optional **pack** on top — a set of prefilled,
+ * verified fields (e.g. hbo-i for ICT, CanMEDS for Zorg & welzijn). The pack
+ * field definitions live in `packs.ts`; a profile stores only the chosen values
+ * in `packValues`. Anything a pack does not cover — or a domain without a pack —
+ * is captured as user-defined `customFields`. New packs are pure data additions.
  */
 
-/** hbo sectors/domains. ICT (hbo-i) is the first with a structured pack. */
+/** hbo sectors/domains. Each may have an optional structured pack (see packs.ts). */
 export const HBO_DOMAINS = [
   "ICT",
   "Techniek",
@@ -24,50 +26,14 @@ export const HBO_DOMAINS = [
 ] as const;
 export type HboDomain = (typeof HBO_DOMAINS)[number];
 
-// --- hbo-i (ICT) pack ------------------------------------------------------
+/** A value answered for a single domain-pack field. */
+export type PackFieldValue = string | string[] | number;
 
-export const HBOI_ARCHITECTURE_LAYERS = [
-  "Gebruikersinteractie",
-  "Organisatieprocessen",
-  "Infrastructuur",
-  "Software",
-  "Hardware-interfacing",
-] as const;
-export type HboiArchitectureLayer = (typeof HBOI_ARCHITECTURE_LAYERS)[number];
-
-export const HBOI_ACTIVITIES = [
-  "Analyseren",
-  "Adviseren",
-  "Ontwerpen",
-  "Realiseren",
-  "Beheren",
-] as const;
-export type HboiActivity = (typeof HBOI_ACTIVITIES)[number];
-
-/**
- * Bilingual labels for the hbo-i framework terms. The array values above stay
- * the canonical (Dutch) identifiers (used as form values + stored); these maps
- * are the single source for displaying/injecting them in either language —
- * consumed by both the settings UI and the prompt context formatter.
- */
-export const HBOI_ARCHITECTURE_LAYER_LABELS: Record<
-  HboiArchitectureLayer,
-  { nl: string; en: string }
-> = {
-  Gebruikersinteractie: { nl: "Gebruikersinteractie", en: "User interaction" },
-  Organisatieprocessen: { nl: "Organisatieprocessen", en: "Business processes" },
-  Infrastructuur: { nl: "Infrastructuur", en: "Infrastructure" },
-  Software: { nl: "Software", en: "Software" },
-  "Hardware-interfacing": { nl: "Hardware-interfacing", en: "Hardware interfacing" },
-};
-
-export const HBOI_ACTIVITY_LABELS: Record<HboiActivity, { nl: string; en: string }> = {
-  Analyseren: { nl: "Analyseren", en: "Analysis" },
-  Adviseren: { nl: "Adviseren", en: "Advice" },
-  Ontwerpen: { nl: "Ontwerpen", en: "Design" },
-  Realiseren: { nl: "Realiseren", en: "Realisation" },
-  Beheren: { nl: "Beheren", en: "Management" },
-};
+/** A free-form field the user defined themselves (label → value). */
+export interface CustomField {
+  label: string;
+  value: string;
+}
 
 export interface ContextProfile {
   id: string;
@@ -94,11 +60,9 @@ export interface ContextProfile {
   /** Vrije aanvullende context, woordelijk meegegeven aan het model. */
   notes?: string;
 
-  // --- hbo-i (ICT) pack — only meaningful when domain === "ICT" ---
-  /** HBO-i architectuurlagen. */
-  architectureLayers?: HboiArchitectureLayer[];
-  /** HBO-i beroepsactiviteiten. */
-  activities?: HboiActivity[];
-  /** HBO-i beheersingsniveau 1–3. */
-  hboiLevel?: 1 | 2 | 3;
+  // --- Domain pack + custom extension ---
+  /** Answers to the selected domain pack's fields, keyed by the field key. */
+  packValues?: Record<string, PackFieldValue>;
+  /** User-defined extra fields, always available regardless of domain. */
+  customFields?: CustomField[];
 }

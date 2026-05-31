@@ -1,4 +1,6 @@
-import { type ContextProfile, HBOI_ARCHITECTURE_LAYER_LABELS, HBOI_ACTIVITY_LABELS } from "./types";
+import type { ContextProfile, PackFieldValue } from "./types";
+import { getDomainPack, type PackField } from "./packs";
+import { loc } from "~/lib/i18n/localized";
 import type { OutputLanguage } from "~/lib/registry/types";
 
 interface Labels {
@@ -12,10 +14,7 @@ interface Labels {
   professionalContext: string;
   tools: string;
   notes: string;
-  hboiIntro: string;
-  layers: string;
-  activities: string;
-  hboiLevel: string;
+  framework: string;
 }
 
 const LABELS: Record<OutputLanguage, Labels> = {
@@ -30,10 +29,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
     professionalContext: "Beroepspraktijk / werkveld",
     tools: "Technologie / methoden / instrumenten",
     notes: "Aanvullende context",
-    hboiIntro: "Relevant hbo-i-kader (ICT):",
-    layers: "Architectuurlagen",
-    activities: "Beroepsactiviteiten",
-    hboiLevel: "Beheersingsniveau",
+    framework: "Relevant kader",
   },
   en: {
     intro: "This lesson is designed within Dutch higher professional education (hbo).",
@@ -46,12 +42,25 @@ const LABELS: Record<OutputLanguage, Labels> = {
     professionalContext: "Professional field",
     tools: "Technology / methods / instruments",
     notes: "Additional context",
-    hboiIntro: "Relevant hbo-i framework (ICT):",
-    layers: "Architecture layers",
-    activities: "Professional activities",
-    hboiLevel: "Proficiency level",
+    framework: "Relevant framework",
   },
 };
+
+/** Render a single pack field's value into a human string, or "" if empty. */
+function renderPackValue(field: PackField, value: PackFieldValue, lang: OutputLanguage): string {
+  if (field.type === "level") {
+    return typeof value === "number" ? String(value) : "";
+  }
+  const resolve = (v: string) => {
+    const opt = field.options?.find((o) => o.value === v);
+    return opt ? loc(opt.label, lang) : v;
+  };
+  if (Array.isArray(value)) {
+    const parts = value.map(resolve).filter(Boolean);
+    return parts.join(", ");
+  }
+  return typeof value === "string" && value ? resolve(value) : "";
+}
 
 /**
  * Render a context profile into a compact block for a prompt's
@@ -79,20 +88,28 @@ export function formatProfile(
   }
   if (profile.tools?.trim()) lines.push(`- ${t.tools}: ${profile.tools.trim()}`);
 
-  const hasIctPack =
-    profile.domain === "ICT" &&
-    (profile.architectureLayers?.length || profile.activities?.length || profile.hboiLevel);
-  if (hasIctPack) {
-    lines.push(t.hboiIntro);
-    if (profile.hboiLevel) lines.push(`- ${t.hboiLevel}: ${profile.hboiLevel}`);
-    if (profile.architectureLayers?.length) {
-      const layers = profile.architectureLayers.map((l) => HBOI_ARCHITECTURE_LAYER_LABELS[l][lang]);
-      lines.push(`- ${t.layers}: ${layers.join(", ")}`);
+  // Domain pack — render only the fields with a value, resolved to the output language.
+  const pack = getDomainPack(profile.domain);
+  const packValues = profile.packValues;
+  if (pack && packValues) {
+    const rendered: string[] = [];
+    for (const field of pack.fields) {
+      const raw = packValues[field.key];
+      if (raw == null) continue;
+      const text = renderPackValue(field, raw, lang);
+      if (text) rendered.push(`- ${loc(field.label, lang)}: ${text}`);
     }
-    if (profile.activities?.length) {
-      const acts = profile.activities.map((a) => HBOI_ACTIVITY_LABELS[a][lang]);
-      lines.push(`- ${t.activities}: ${acts.join(", ")}`);
+    if (rendered.length) {
+      lines.push(`${t.framework} (${loc(pack.source, lang)}):`);
+      lines.push(...rendered);
     }
+  }
+
+  // User-defined custom fields.
+  for (const cf of profile.customFields ?? []) {
+    const label = cf.label?.trim();
+    const value = cf.value?.trim();
+    if (label && value) lines.push(`- ${label}: ${value}`);
   }
 
   if (profile.notes?.trim()) lines.push(`- ${t.notes}: ${profile.notes.trim()}`);

@@ -14,10 +14,15 @@ universal engine — not as separate code paths. A teacher describes their conte
 [`buildSystemPrompt`](Architecture.md) injects it into the prompt as
 `{{contextProfile}}`.
 
-Today this is implemented as a generic profile
-(`app/lib/context/types.ts`) plus the **hbo-i (ICT) pack**, formatted bilingually by
-`formatProfile(profile, lang)` in `app/lib/context/format.ts`. The vision generalizes
-this into a small set of **orthogonal dimensions**.
+Today this is implemented as a generic profile (`app/lib/context/types.ts`) plus a
+**domain-pack registry** (`app/lib/context/packs.ts`): each hbo domain with a verified
+national framework contributes its own prefilled, structured fields. A profile stores
+only the chosen answers (`packValues`) keyed by field key, plus any user-defined
+`customFields`; both are formatted bilingually by `formatProfile(profile, lang)` in
+`app/lib/context/format.ts`. Profiles are created either through a guided **wizard** or a
+single-page **form** (`app/components/context/`), and form input is validated against the
+registry in `app/lib/context/parseForm.ts`. The vision generalizes this further into a
+small set of **orthogonal dimensions**.
 
 ---
 
@@ -42,10 +47,18 @@ adding a tool does not touch localization.
 ## Packs
 
 A **pack** is a bundle of locale- or domain-specific data that plugs into the engine
-without changing it. The existing **hbo-i pack** (architectuurlagen / activiteiten /
-niveau, shown when `domain === "ICT"`) is the prototype for all future packs:
+without changing it. Domain packs live as pure data in `DOMAIN_PACKS`
+(`app/lib/context/packs.ts`); adding capability means adding a registry entry, never
+branching control flow. Each pack's option values are lifted verbatim from the domain's
+authoritative national framework and carry a `source`/`sourceUrl` for transparency.
+Shipped domain packs: ICT (hbo-i), Techniek (HBO Engineering), Economie & management
+(HEO), Zorg & welzijn (Bachelor Nursing 2020 / CanMEDS), Onderwijs (bekwaamheidseisen +
+generieke kennisbasis), Sociale studies (LOD Sociaal Werk), Recht (LBOP HBO-Rechten),
+Kunst & creatief (Beeldende kunst & design). Domains **without** a recognised national
+taxonomy (Agro/voeding & leefomgeving, Overig) are deliberately absent — the UI falls
+back to user-defined `customFields` rather than inventing a framework.
 
-- **Domain packs** — subject-specific structure (hbo-i for ICT; others to follow).
+- **Domain packs** — subject-specific structure, one verified registry entry per domain.
 - **Framework packs** — a country+sector+level's curriculum standards and
   qualification descriptors (see [Qualification Frameworks](Qualification-Frameworks.md)).
 
