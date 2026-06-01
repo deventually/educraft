@@ -105,6 +105,37 @@ describe("tool: stage-assessment", () => {
     expect(prompt.toLowerCase()).toMatch(/examinator/);
   });
 
+  it("forbids hallucination and demands strictly factual, evidence-based output", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    const values = {
+      document: "x",
+      documentType: "stageverslag",
+      track: "",
+      studyYear: 3,
+      durationWeeks: 20,
+      assessmentFramework: "x",
+      assessmentScale: "x",
+      companyEvaluation: "",
+    };
+    const nl = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values,
+      outputLanguage: "nl",
+    });
+    const en = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values,
+      outputLanguage: "en",
+    });
+    // Explicit no-hallucination + stay-factual instruction in both languages.
+    expect(nl.toLowerCase()).toMatch(/hallucineer|verzin/);
+    expect(nl.toLowerCase()).toContain("feitelijk");
+    expect(nl.toLowerCase()).toMatch(/onzeker/);
+    expect(en.toLowerCase()).toMatch(/hallucinate|fabricate/);
+    expect(en.toLowerCase()).toContain("factual");
+    expect(en.toLowerCase()).toMatch(/uncertain/);
+  });
+
   it("scopes the assessment to the selected document type (no 'wrong document' false flags)", () => {
     const tool = getToolBySlug("stage-assessment")!;
     const base = {
