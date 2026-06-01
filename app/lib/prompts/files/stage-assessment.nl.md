@@ -42,7 +42,7 @@ Hieronder staat — indien aangeleverd — de evaluatie die de bedrijfsbegeleide
 
 ## Gevraagde uitvoer
 
-Geef je concept-beoordeling in het Nederlands, in deze structuur:
+Geef je concept-beoordeling in het Nederlands, in deze structuur. Benoem het document in je titel/kop en in de tekst consequent volgens het werkelijke type document ({{documentType}}); ga er nooit standaard vanuit dat het een stageverslag is.
 
 1. **Samenvattend oordeel (concept)** — een voorlopige indicatie per leeruitkomst/onderdeel volgens de schaal, met de slaagregel expliciet toegepast. Maak duidelijk dat dit een concept is en dat de docent beslist.
 2. **Per succescriterium** — voor elk criterium uit het kader:

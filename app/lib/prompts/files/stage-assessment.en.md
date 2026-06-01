@@ -42,7 +42,7 @@ Below — if provided — is the evaluation filled in by the company mentor. Use
 
 ## Required output
 
-Give your draft assessment in English, in this structure:
+Give your draft assessment in English, in this structure. In your title/heading and throughout, refer to the document consistently by its actual document type ({{documentType}}); never default to calling it an internship report.
 
 1. **Summary verdict (draft)** — a provisional indication per learning outcome/component on the scale, with the pass rule applied explicitly. Make clear this is a draft and the teacher decides.
 2. **Per success criterion** — for each criterion in the framework:

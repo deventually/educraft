@@ -167,6 +167,12 @@ describe("tool: stage-assessment", () => {
     expect(en.toLowerCase()).toMatch(/wrong document/);
     // The selected document type is interpolated into the scoping rule.
     expect(nl).toContain("onderzoeksverslag");
+    // Output must be named after the actual document type, not defaulted to
+    // "stageverslag" / "internship report".
+    expect(nl.toLowerCase()).toContain("werkelijke type document");
+    expect(nl.toLowerCase()).toMatch(/nooit standaard vanuit dat het een stageverslag/);
+    expect(en.toLowerCase()).toContain("actual document type");
+    expect(en.toLowerCase()).toMatch(/never default to calling it an internship report/);
   });
 
   it("treats a whole portfolio as covering all learning outcomes (Analyseren + Realiseren)", () => {
