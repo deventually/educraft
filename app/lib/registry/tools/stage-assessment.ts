@@ -67,16 +67,16 @@ export const stageAssessment: Tool = {
     {
       name: "document",
       label: { nl: "Te beoordelen document", en: "Document to assess" },
-      kind: "textarea",
+      kind: "document",
       required: true,
       rows: 12,
       placeholder: {
-        nl: "Plak hier de volledige tekst van het stageverslag, onderzoeksverslag of portfolio.",
-        en: "Paste the full text of the internship report, research report or portfolio here.",
+        nl: "Upload de PDF of Word, of plak hier de volledige tekst van het stageverslag, onderzoeksverslag of portfolio.",
+        en: "Upload the PDF or Word file, or paste the full text of the internship report, research report or portfolio here.",
       },
       help: {
-        nl: "Plak de tekst (bijv. uit de PDF of Word). Tabellen en figuren gaan bij plakken verloren; upload kernfiguren los hieronder.",
-        en: "Paste the text (e.g. from the PDF or Word). Tables and figures are lost when pasting; upload key figures separately below.",
+        nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Tabellen en figuren gaan verloren; upload kernfiguren los hieronder.",
+        en: "Upload the file (PDF or Word) — the text appears below for you to review and edit. Or paste it yourself. Tables and figures are lost; upload key figures separately below.",
       },
       group: DOC,
     },

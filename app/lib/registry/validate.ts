@@ -16,6 +16,7 @@ const fieldKind = z.enum([
   "boolean",
   "file",
   "image",
+  "document",
 ]);
 
 /** A plain string or a per-locale { nl, en } object (see lib/i18n/localized). */

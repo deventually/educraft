@@ -28,7 +28,9 @@ describe("tool: stage-assessment", () => {
     const type = tool.inputs.find((f) => f.name === "documentType");
     const year = tool.inputs.find((f) => f.name === "studyYear");
     const weeks = tool.inputs.find((f) => f.name === "durationWeeks");
-    expect(doc?.kind).toBe("textarea");
+    // `document` is the upload-or-paste control: its value is still a plain
+    // string consumed as {{document}}, so buildSystemPrompt is unaffected.
+    expect(doc?.kind).toBe("document");
     expect(doc?.required).toBe(true);
     expect(type?.kind).toBe("select");
     expect(year?.kind).toBe("number");

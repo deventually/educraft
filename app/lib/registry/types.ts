@@ -31,7 +31,8 @@ export type FieldKind =
   | "number"
   | "boolean"
   | "file"
-  | "image";
+  | "image"
+  | "document";
 
 export interface FieldOption {
   value: string;

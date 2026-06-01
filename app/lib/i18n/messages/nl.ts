@@ -103,6 +103,11 @@ export const nl = {
     fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
     imageUploadLabel: "Afbeeldingen uploaden",
     imageRemove: "Verwijderen",
+    docUpload: "PDF of Word uploaden",
+    docExtracting: "Tekst ophalen…",
+    docExtracted: "Tekst opgehaald — controleer en pas hieronder aan.",
+    docEmpty: "Geen tekst gevonden (een scan?). Plak de tekst hieronder zelf.",
+    docLarge: "Dit document is erg groot; genereren kan traag en duur zijn.",
   },
   chat: {
     send: "Versturen",

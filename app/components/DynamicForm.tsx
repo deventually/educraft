@@ -1,11 +1,12 @@
 import type { InputField } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
-import { Label, Input, Textarea, Select, HelpText } from "./ui";
+import { Label, Input, Textarea, Select, HelpText, Button, Spinner } from "./ui";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
 import { filesToImageInputs } from "~/lib/images/process";
+import { fileToText, DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
 import { useState, useCallback } from "react";
 
 export type FormValues = Record<string, string | number | boolean | string[] | ImageInput[]>;
@@ -173,6 +174,17 @@ function renderControl(
           label={loc(field.label, locale)}
         />
       );
+    case "document":
+      return (
+        <DocumentInputControl
+          id={id}
+          value={String(value ?? "")}
+          accept={field.accept ?? DOC_ACCEPT_ATTR}
+          rows={field.rows ?? 12}
+          placeholder={placeholder}
+          onChange={onChange}
+        />
+      );
     case "file":
       return (
         <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500">
@@ -305,6 +317,99 @@ function ImageInputControl({ id, value, accept, onChange, label }: ImageInputCon
           {value.length} image{value.length !== 1 ? "s" : ""} uploaded
         </p>
       )}
+    </div>
+  );
+}
+
+interface DocumentInputControlProps {
+  id: string;
+  value: string;
+  accept: string;
+  rows: number;
+  placeholder?: string;
+  onChange: (v: string) => void;
+}
+
+/**
+ * A textarea the teacher can fill by uploading a PDF/Word file *or* by pasting.
+ * Extraction runs in the browser ({@link fileToText}); only the resulting text
+ * is stored, so the value stays a plain string — identical to a textarea field.
+ */
+function DocumentInputControl({
+  id,
+  value,
+  accept,
+  rows,
+  placeholder,
+  onChange,
+}: DocumentInputControlProps) {
+  const t = useT();
+  const fileId = `${id}-file`;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const [notice, setNotice] = useState<string | undefined>();
+
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.currentTarget.files?.[0];
+      e.currentTarget.value = ""; // allow re-selecting the same file
+      if (!file) return;
+
+      setError(undefined);
+      setNotice(undefined);
+      setBusy(true);
+      try {
+        const result = await fileToText(file);
+        if (result.empty) {
+          setNotice(t.tool.docEmpty);
+        } else {
+          onChange(result.text);
+          setNotice(result.large ? t.tool.docLarge : t.tool.docExtracted);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t.tool.docEmpty);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [onChange, t],
+  );
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <input
+          id={fileId}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={handleFileChange}
+          aria-label={t.tool.docUpload}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={busy}
+          onClick={() => document.getElementById(fileId)?.click()}
+        >
+          {busy && <Spinner />}
+          {busy ? t.tool.docExtracting : t.tool.docUpload}
+        </Button>
+      </div>
+
+      <div aria-live="polite">
+        {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+        {notice && !error && <p className="text-xs text-slate-600">{notice}</p>}
+      </div>
+
+      <Textarea
+        id={id}
+        rows={rows}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }

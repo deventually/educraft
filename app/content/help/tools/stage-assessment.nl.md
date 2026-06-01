@@ -6,7 +6,7 @@ Gebruik de tool om sneller een eerste, consistente beoordeling op te stellen, om
 
 ## Hoe werkt het?
 
-1. **Plak het document** dat je wilt beoordelen (uit de PDF of Word). Tabellen en figuren gaan bij plakken verloren — upload kernfiguren los als afbeelding.
+1. **Upload het document** (PDF of Word) dat je wilt beoordelen, of **plak de tekst**. Bij uploaden haalt de tool de tekst eruit en zet die in het tekstveld, zodat je hem nog kunt controleren en bijwerken vóór je genereert. Tabellen en figuren gaan verloren — upload kernfiguren los als afbeelding. Is het een scan (alleen afbeeldingen)? Dan vindt de tool geen tekst en plak je hem zelf.
 2. **Kies type document, richting, studiejaar en duur.** De richting (UX/Software/Data) bepaalt welke variant van de succescriteria geldt.
 3. **Controleer het beoordelingskader.** Standaard staat het HBO-i stage-nakijkmodel (niveau 2) al ingevuld. Beoordeel je een andere opleiding? Pas het kader en de schaal aan of vervang ze volledig — dit kader is leidend.
 4. **Voeg eventueel de evaluatie van de bedrijfsbegeleider toe.** Die wordt gebruikt als ondersteunend bewijs én op volledigheid gecontroleerd.

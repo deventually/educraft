@@ -148,7 +148,8 @@ Use the `/tdd` skill for ready-to-copy test templates.
 
 - **New:** `AGENTS.md`, `CLAUDE.md`, `.claude/skills/tdd/SKILL.md`, `tests/setup.ts`, per-tool `tests/tools/*.test.ts`, `tests/components/*.test.tsx`.
 - **Modified (S1 foundation):** `vitest.config.ts` (dual projects), `package.json` (dev deps).
-- **Modified (later phases):** `api.stream.tsx` (chat + images), `tool.tsx` (mode branching), `DynamicForm.tsx` (image control), `registry/types.ts` (ChatConfig i18n), `prompts/index.ts`, `registry/index.ts`, `messages/{nl,en}.ts`.
+- **Modified (later phases):** `api.stream.tsx` (chat + images), `tool.tsx` (mode branching), `DynamicForm.tsx` (image control + `document` upload control), `registry/types.ts` (ChatConfig i18n; `document` field kind), `prompts/index.ts`, `registry/index.ts`, `messages/{nl,en}.ts`.
+- **Document upload (client-side):** `app/lib/documents/extract.ts` — `fileToText`/`extractTextFromBytes` lazily load `unpdf` (PDF) + `mammoth` (DOCX), extract text in the browser, and fill a `kind: "document"` textarea. No server endpoint; `buildSystemPrompt` and `api.stream` are unchanged (the value stays a plain string). Fixtures: `tests/fixtures/generate.mjs`.
 - **Reused as-is:** runtime (`provider.ts`, `models.ts`, `aisdk.ts`), streaming (`streamPost`), components (`GeneratorView`, `ToolControls`), context, interpolation.
 
 ## Quick Ref: How to Start Work
