@@ -75,8 +75,8 @@ export const stageAssessment: Tool = {
         en: "Upload the PDF or Word file, or paste the full text of the internship report, research report or portfolio here.",
       },
       help: {
-        nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Tabellen en figuren gaan verloren; upload kernfiguren los hieronder.",
-        en: "Upload the file (PDF or Word) — the text appears below for you to review and edit. Or paste it yourself. Tables and figures are lost; upload key figures separately below.",
+        nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Je kunt meerdere bestanden tegelijk selecteren (bijv. onderzoeksverslag + beroepsproduct voor een geheel portfolio); de teksten worden samengevoegd. Tabellen en figuren gaan verloren; upload kernfiguren los hieronder.",
+        en: "Upload the file (PDF or Word) — the text appears below for you to review and edit. Or paste it yourself. You can select multiple files at once (e.g. research report + work product for a whole portfolio); their texts are merged. Tables and figures are lost; upload key figures separately below.",
       },
       group: DOC,
     },
@@ -113,6 +113,10 @@ export const stageAssessment: Tool = {
         { value: "afstudeerscriptie", label: { nl: "Afstudeerscriptie", en: "Thesis" } },
         { value: "overig", label: { nl: "Overig", en: "Other" } },
       ],
+      help: {
+        nl: "Kies 'Onderzoeksportfolio (geheel)' om zowel het onderzoeksverslag (Analyseren) als het beroepsproduct/de realisatie (Realiseren) samen te beoordelen — upload of plak dan beide documenten. De overige typen beoordelen één onderdeel.",
+        en: "Choose 'Research portfolio (whole)' to assess both the research report (Analyseren) and the work product/realisation (Realiseren) together — then upload or paste both documents. The other types assess a single component.",
+      },
       group: CONTEXT,
     },
     {

@@ -6,7 +6,7 @@ import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
 import { filesToImageInputs } from "~/lib/images/process";
-import { fileToText, DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
+import { filesToDocumentText, DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
 import { useState, useCallback } from "react";
 
 export type FormValues = Record<string, string | number | boolean | string[] | ImageInput[]>;
@@ -331,9 +331,11 @@ interface DocumentInputControlProps {
 }
 
 /**
- * A textarea the teacher can fill by uploading a PDF/Word file *or* by pasting.
- * Extraction runs in the browser ({@link fileToText}); only the resulting text
- * is stored, so the value stays a plain string — identical to a textarea field.
+ * A textarea the teacher can fill by uploading PDF/Word file(s) *or* by pasting.
+ * Extraction runs in the browser ({@link filesToDocumentText}); only the
+ * resulting text is stored, so the value stays a plain string — identical to a
+ * textarea field. Multiple files (e.g. a research report + work product for a
+ * whole portfolio) can be selected at once and are merged with headings.
  */
 function DocumentInputControl({
   id,
@@ -348,24 +350,27 @@ function DocumentInputControl({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [notice, setNotice] = useState<string | undefined>();
+  const [skipped, setSkipped] = useState<string[]>([]);
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.currentTarget.files?.[0];
-      e.currentTarget.value = ""; // allow re-selecting the same file
-      if (!file) return;
+      const files = Array.from(e.currentTarget.files ?? []);
+      e.currentTarget.value = ""; // allow re-selecting the same file(s)
+      if (files.length === 0) return;
 
       setError(undefined);
       setNotice(undefined);
+      setSkipped([]);
       setBusy(true);
       try {
-        const result = await fileToText(file);
-        if (result.empty) {
+        const { text, emptyFiles, large } = await filesToDocumentText(files);
+        if (!text) {
           setNotice(t.tool.docEmpty);
         } else {
-          onChange(result.text);
-          setNotice(result.large ? t.tool.docLarge : t.tool.docExtracted);
+          onChange(text);
+          setNotice(large ? t.tool.docLarge : t.tool.docExtracted);
         }
+        setSkipped(emptyFiles);
       } catch (err) {
         setError(err instanceof Error ? err.message : t.tool.docEmpty);
       } finally {
@@ -382,6 +387,7 @@ function DocumentInputControl({
           id={fileId}
           type="file"
           accept={accept}
+          multiple
           className="hidden"
           onChange={handleFileChange}
           aria-label={t.tool.docUpload}
@@ -401,6 +407,11 @@ function DocumentInputControl({
       <div aria-live="polite">
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         {notice && !error && <p className="text-xs text-slate-600">{notice}</p>}
+        {skipped.length > 0 && !error && (
+          <p className="text-xs text-amber-700">
+            {t.tool.docSkippedEmpty}: {skipped.join(", ")}
+          </p>
+        )}
       </div>
 
       <Textarea

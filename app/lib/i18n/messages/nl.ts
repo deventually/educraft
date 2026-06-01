@@ -108,6 +108,7 @@ export const nl = {
     docExtracted: "Tekst opgehaald — controleer en pas hieronder aan.",
     docEmpty: "Geen tekst gevonden (een scan?). Plak de tekst hieronder zelf.",
     docLarge: "Dit document is erg groot; genereren kan traag en duur zijn.",
+    docSkippedEmpty: "Geen leesbare tekst gevonden in (overgeslagen)",
   },
   chat: {
     send: "Versturen",

@@ -14,14 +14,15 @@ vi.mock("~/lib/i18n/useT", () => ({
       docExtracted: "Text extracted — review and edit below.",
       docEmpty: "No text found (is it a scan?). Paste the text below instead.",
       docLarge: "This document is very large; generating may be slow and costly.",
+      docSkippedEmpty: "No readable text found in (skipped)",
     },
   }),
 }));
 
 // Mock the extractor so the test never touches unpdf/mammoth or real bytes.
-const fileToText = vi.fn();
+const filesToDocumentText = vi.fn();
 vi.mock("~/lib/documents/extract", () => ({
-  fileToText: (file: File) => fileToText(file),
+  filesToDocumentText: (files: File[]) => filesToDocumentText(files),
   DOC_ACCEPT_ATTR: ".pdf,.docx,application/pdf",
 }));
 
@@ -42,9 +43,11 @@ function renderField() {
   return { ...utils, onChange };
 }
 
+const pdf = (name = "report.pdf") => new File(["x"], name, { type: "application/pdf" });
+
 describe("DocumentInputControl", () => {
   beforeEach(() => {
-    fileToText.mockReset();
+    filesToDocumentText.mockReset();
   });
 
   it("renders a labelled textarea and an upload button with no a11y violations", async () => {
@@ -54,6 +57,8 @@ describe("DocumentInputControl", () => {
     expect(textarea).toBeInTheDocument();
     expect(textarea).toHaveAttribute("id", "f-document");
 
+    const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
+    expect(input).toHaveAttribute("multiple");
     expect(screen.getByRole("button", { name: /Upload PDF or Word/i })).toBeInTheDocument();
 
     const results = await axe(container, {
@@ -63,50 +68,81 @@ describe("DocumentInputControl", () => {
   });
 
   it("fills the field with extracted text on a successful upload", async () => {
-    fileToText.mockResolvedValue({ text: "EXTRACTED REPORT TEXT", empty: false, large: false });
+    filesToDocumentText.mockResolvedValue({
+      text: "EXTRACTED REPORT TEXT",
+      emptyFiles: [],
+      large: false,
+    });
     const { onChange } = renderField();
 
     const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
-    const file = new File(["x"], "report.pdf", { type: "application/pdf" });
-    fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.change(input, { target: { files: [pdf()] } });
 
     await waitFor(() => expect(onChange).toHaveBeenCalledWith("EXTRACTED REPORT TEXT"));
     expect(await screen.findByText(/review and edit below/i)).toBeInTheDocument();
   });
 
-  it("shows the paste-instead notice and does not fill on an empty (scanned) file", async () => {
-    fileToText.mockResolvedValue({ text: "", empty: true, large: false });
+  it("merges several files (whole-portfolio case)", async () => {
+    filesToDocumentText.mockResolvedValue({
+      text: "## a.pdf\n\nAAA\n\n## b.docx\n\nBBB",
+      emptyFiles: [],
+      large: false,
+    });
     const { onChange } = renderField();
 
     const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
-    const file = new File(["x"], "scan.pdf", { type: "application/pdf" });
-    fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.change(input, { target: { files: [pdf("a.pdf"), pdf("b.docx")] } });
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith("## a.pdf\n\nAAA\n\n## b.docx\n\nBBB"),
+    );
+    // The control passes every selected file to the extractor.
+    expect(filesToDocumentText.mock.calls[0][0]).toHaveLength(2);
+  });
+
+  it("lists files that had no readable text alongside a successful merge", async () => {
+    filesToDocumentText.mockResolvedValue({
+      text: "## report.pdf\n\nAAA",
+      emptyFiles: ["scan.pdf"],
+      large: false,
+    });
+    const { onChange } = renderField();
+
+    const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [pdf(), pdf("scan.pdf")] } });
+
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
+    expect(await screen.findByText(/skipped.*scan\.pdf|scan\.pdf/i)).toBeInTheDocument();
+  });
+
+  it("shows the paste-instead notice and does not fill when nothing is extracted", async () => {
+    filesToDocumentText.mockResolvedValue({ text: "", emptyFiles: ["scan.pdf"], large: false });
+    const { onChange } = renderField();
+
+    const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [pdf("scan.pdf")] } });
 
     expect(await screen.findByText(/No text found/i)).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it("warns when the extracted text is very large", async () => {
-    fileToText.mockResolvedValue({ text: "huge", empty: false, large: true });
+    filesToDocumentText.mockResolvedValue({ text: "huge", emptyFiles: [], large: true });
     const { onChange } = renderField();
 
     const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
-    const file = new File(["x"], "big.docx", {
-      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    });
-    fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.change(input, { target: { files: [pdf("big.pdf")] } });
 
     await waitFor(() => expect(onChange).toHaveBeenCalledWith("huge"));
     expect(await screen.findByText(/very large/i)).toBeInTheDocument();
   });
 
   it("surfaces the error message when extraction throws", async () => {
-    fileToText.mockRejectedValue(new Error("File too large: maximum size is 15 MB."));
+    filesToDocumentText.mockRejectedValue(new Error("File too large: maximum size is 15 MB."));
     const { onChange } = renderField();
 
     const input = screen.getByLabelText("Upload PDF or Word") as HTMLInputElement;
-    const file = new File(["x"], "huge.pdf", { type: "application/pdf" });
-    fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.change(input, { target: { files: [pdf("huge.pdf")] } });
 
     expect(await screen.findByText(/maximum size is 15 MB/i)).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();

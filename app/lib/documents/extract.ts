@@ -113,3 +113,44 @@ export async function fileToText(file: File): Promise<ExtractResult> {
   const bytes = new Uint8Array(await file.arrayBuffer());
   return extractTextFromBytes(bytes, file.type);
 }
+
+export interface MergedDocumentResult {
+  /** Combined text of all files; per-file `## filename` headings when >1 file. */
+  text: string;
+  /** Names of files that yielded no text (e.g. scans), skipped from `text`. */
+  emptyFiles: string[];
+  /** True when the combined text is large enough to warn about token cost. */
+  large: boolean;
+}
+
+/**
+ * Extracts and merges several uploaded files into one document — e.g. an
+ * onderzoeksverslag plus a beroepsproduct uploaded together as a whole
+ * portfolio. With more than one file each block gets a `## filename` heading so
+ * the teacher (and the model) can tell the parts apart. A file with no text is
+ * collected in `emptyFiles` rather than failing the whole batch; an invalid file
+ * (bad type/size) throws DocumentExtractionError, prefixed with its name.
+ */
+export async function filesToDocumentText(files: File[]): Promise<MergedDocumentResult> {
+  const multiple = files.length > 1;
+  const blocks: string[] = [];
+  const emptyFiles: string[] = [];
+
+  for (const file of files) {
+    let result: ExtractResult;
+    try {
+      result = await fileToText(file);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "extraction failed";
+      throw new DocumentExtractionError(multiple ? `${file.name}: ${msg}` : msg);
+    }
+    if (result.empty) {
+      emptyFiles.push(file.name);
+      continue;
+    }
+    blocks.push(multiple ? `## ${file.name}\n\n${result.text}` : result.text);
+  }
+
+  const text = blocks.join("\n\n");
+  return { text, emptyFiles, large: text.length > LARGE_TEXT_THRESHOLD };
+}

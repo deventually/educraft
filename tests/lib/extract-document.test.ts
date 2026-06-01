@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
   extractTextFromBytes,
+  filesToDocumentText,
   validateDocFile,
   DocumentExtractionError,
   PDF_MIME,
@@ -12,6 +13,8 @@ import {
 
 const fixture = (name: string) =>
   new Uint8Array(readFileSync(fileURLToPath(new URL(`../fixtures/${name}`, import.meta.url))));
+
+const fixtureFile = (name: string, type: string) => new File([fixture(name)], name, { type });
 
 /**
  * The extractor is the deep module behind the new `document` upload control:
@@ -49,6 +52,44 @@ describe("document extraction", () => {
   it("does not flag a normal report as large", async () => {
     const result = await extractTextFromBytes(fixture("sample.docx"), DOCX_MIME);
     expect(result.large).toBe(false);
+  });
+});
+
+describe("merging multiple uploaded files", () => {
+  it("concatenates several files with per-file headings (whole-portfolio case)", async () => {
+    const merged = await filesToDocumentText([
+      fixtureFile("sample.pdf", PDF_MIME),
+      fixtureFile("sample.docx", DOCX_MIME),
+    ]);
+    expect(merged.emptyFiles).toEqual([]);
+    // Both documents' text is present...
+    expect(merged.text).toContain("STAGEFIXTUREPAGEONE");
+    expect(merged.text).toContain("STAGEFIXTUREDOCX");
+    // ...each under a heading naming its file, so the parts stay distinguishable.
+    expect(merged.text).toContain("## sample.pdf");
+    expect(merged.text).toContain("## sample.docx");
+  });
+
+  it("does not add a heading for a single file", async () => {
+    const merged = await filesToDocumentText([fixtureFile("sample.pdf", PDF_MIME)]);
+    expect(merged.text).not.toContain("##");
+    expect(merged.text).toContain("STAGEFIXTUREPAGEONE");
+  });
+
+  it("reports files with no readable text instead of failing the batch", async () => {
+    const merged = await filesToDocumentText([
+      fixtureFile("sample.docx", DOCX_MIME),
+      fixtureFile("sample-empty.pdf", PDF_MIME),
+    ]);
+    expect(merged.emptyFiles).toEqual(["sample-empty.pdf"]);
+    expect(merged.text).toContain("STAGEFIXTUREDOCX");
+  });
+
+  it("rejects an invalid file in the batch, naming it", async () => {
+    const badFile = new File([new Uint8Array([1, 2, 3])], "note.txt", { type: "text/plain" });
+    await expect(
+      filesToDocumentText([fixtureFile("sample.pdf", PDF_MIME), badFile]),
+    ).rejects.toThrow(/note\.txt/);
   });
 });
 

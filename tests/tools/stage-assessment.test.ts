@@ -105,6 +105,67 @@ describe("tool: stage-assessment", () => {
     expect(prompt.toLowerCase()).toMatch(/examinator/);
   });
 
+  it("scopes the assessment to the selected document type (no 'wrong document' false flags)", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    const base = {
+      document: "x",
+      documentType: "onderzoeksverslag",
+      track: "",
+      studyYear: 3,
+      durationWeeks: 20,
+      assessmentFramework: "x",
+      assessmentScale: "x",
+      companyEvaluation: "",
+    };
+    const nl = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values: base,
+      outputLanguage: "nl",
+    });
+    const en = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values: base,
+      outputLanguage: "en",
+    });
+    // The framework may list criteria for several document types; the prompt must
+    // tell the model to mark non-matching criteria as out of scope, not "missing"
+    // or "wrong document".
+    expect(nl.toLowerCase()).toContain("niet van toepassing op dit documenttype");
+    expect(nl.toLowerCase()).toMatch(/verkeerde document/);
+    expect(en.toLowerCase()).toContain("not applicable to this document type");
+    expect(en.toLowerCase()).toMatch(/wrong document/);
+    // The selected document type is interpolated into the scoping rule.
+    expect(nl).toContain("onderzoeksverslag");
+  });
+
+  it("treats a whole portfolio as covering all learning outcomes (Analyseren + Realiseren)", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    const values = {
+      document: "x",
+      documentType: "portfolio",
+      track: "",
+      studyYear: 3,
+      durationWeeks: 20,
+      assessmentFramework: "x",
+      assessmentScale: "x",
+      companyEvaluation: "",
+    };
+    const nl = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values,
+      outputLanguage: "nl",
+    });
+    const en = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values,
+      outputLanguage: "en",
+    });
+    expect(nl.toLowerCase()).toMatch(/geheel.*portfolio|portfolio.*geheel/);
+    expect(nl).toContain("Analyseren");
+    expect(nl).toContain("Realiseren");
+    expect(en.toLowerCase()).toMatch(/whole.*portfolio|portfolio.*whole/);
+  });
+
   it("uses a vision-capable default model and a low temperature for consistency", () => {
     const tool = getToolBySlug("stage-assessment")!;
     expect(["claude-sonnet-4-6", "claude-opus-4-8"]).toContain(tool.defaultModel);

@@ -105,6 +105,7 @@ export const en: Messages = {
     docExtracted: "Text extracted — review and edit below.",
     docEmpty: "No text found (is it a scan?). Paste the text below instead.",
     docLarge: "This document is very large; generating may be slow and costly.",
+    docSkippedEmpty: "No readable text found in (skipped)",
   },
   chat: {
     send: "Send",
