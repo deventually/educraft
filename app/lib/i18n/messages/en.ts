@@ -72,6 +72,7 @@ export const en: Messages = {
   tool: {
     theory: "Rationale",
     source: "Source",
+    sourceOriginal: "Original tool",
     evaluatedWith: "Evaluated with {model}.",
     viewOriginal: "View original prompt",
     contextProfile: "Teaching context",

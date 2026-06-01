@@ -13,6 +13,7 @@ import { bloomByDesign } from "./tools/bloom-by-design";
 import { dialogicEncounters } from "./tools/dialogic-encounters";
 import { peerTutoring } from "./tools/peer-tutoring";
 import { scaffoldingFeedback } from "./tools/scaffolding-feedback";
+import { stageAssessment } from "./tools/stage-assessment";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -30,6 +31,7 @@ export const ALL_TOOLS: Tool[] = [
   dialogicEncounters,
   peerTutoring,
   scaffoldingFeedback,
+  stageAssessment,
 ];
 
 /** Tools visible/usable in the app right now. */

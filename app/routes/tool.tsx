@@ -110,8 +110,18 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             )}
 
             <p className="mt-3 text-xs text-slate-500">
-              {t.tool.source}: <span className="italic">{a.chapterTitle}</span> — {a.authors}.{" "}
-              {a.bookTitle} ({a.editor}, {a.year}). {a.sourcePages}. {a.license}.
+              {a.original ? (
+                <>
+                  {t.tool.sourceOriginal}:{" "}
+                  <span className="italic">{a.source ? loc(a.source, locale) : "LimeOnIt"}</span>.{" "}
+                  {a.license}.
+                </>
+              ) : (
+                <>
+                  {t.tool.source}: <span className="italic">{a.chapterTitle}</span> — {a.authors}.{" "}
+                  {a.bookTitle} ({a.editor}, {a.year}). {a.sourcePages}. {a.license}.
+                </>
+              )}
               {a.evaluatedWith
                 ? ` ${fmt(t.tool.evaluatedWith, { model: loc(a.evaluatedWith, locale) })}`
                 : ""}

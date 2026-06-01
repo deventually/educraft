@@ -112,14 +112,21 @@ export interface ChatConfig {
 }
 
 export interface Attribution {
-  /** Exact book chapter title (EN). */
-  chapterTitle: string;
+  /**
+   * True for tools original to LimeOnIt (not derived from the book). The book
+   * fields below are then omitted and `source` is shown instead.
+   */
+  original?: boolean;
+  /** Human-readable origin for an original tool, e.g. "Origineel LimeOnIt-instrument". */
+  source?: LocalizedText;
+  /** Exact book chapter title (EN). Omitted for original tools. */
+  chapterTitle?: string;
   /** Chapter author(s), exactly as printed. */
-  authors: string;
-  bookTitle: string;
-  editor: string;
-  doi: string;
-  year: number;
+  authors?: string;
+  bookTitle?: string;
+  editor?: string;
+  doi?: string;
+  year?: number;
   license: "CC BY 4.0";
   /** Appendix page range the prompt was extracted from. */
   sourcePages?: string;

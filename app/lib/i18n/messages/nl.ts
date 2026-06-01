@@ -75,6 +75,7 @@ export const nl = {
   tool: {
     theory: "Onderbouwing",
     source: "Bron",
+    sourceOriginal: "Origineel instrument",
     evaluatedWith: "Geëvalueerd met {model}.",
     viewOriginal: "Bekijk originele prompt",
     contextProfile: "Onderwijscontext",

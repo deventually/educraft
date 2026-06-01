@@ -1,4 +1,5 @@
 import type { Attribution } from "~/lib/registry/types";
+import type { LocalizedText } from "~/lib/i18n/localized";
 
 /** Shared book-level constants reused by every tool's Attribution. */
 export const BOOK = {
@@ -24,6 +25,22 @@ export function attribution(
     editor: BOOK.editor,
     doi: BOOK.doi,
     year: BOOK.year,
+    license: BOOK.license,
+  };
+}
+
+/**
+ * Attribution for a tool original to LimeOnIt (not derived from the book).
+ * No book chapter is claimed; `source` describes the real origin.
+ */
+export function originalAttribution(fields: {
+  source: LocalizedText;
+  evaluatedWith?: LocalizedText;
+}): Attribution {
+  return {
+    original: true,
+    source: fields.source,
+    evaluatedWith: fields.evaluatedWith,
     license: BOOK.license,
   };
 }
