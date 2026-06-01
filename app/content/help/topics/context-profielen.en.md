@@ -20,7 +20,7 @@ Both ask for the same things:
 
 When you pick a **domain/sector**, the relevant fields from that domain's national framework appear — for example the hbo-i architecture layers for ICT, the CanMEDS roles for Health & social care, or the HBO-Rechten learning outcomes. Each framework shows its **source**.
 
-These fields are **pre-filled** from the framework: the full framework is ticked (deselect what doesn't apply), EQF defaults to 6 (hbo bachelor), and as soon as you pick a **study year** the mastery level is suggested (year 1 → 1, year 4 → 3; middle years → 2). These are suggestions — adjust or remove any field.
+For those fields, tick only what your programme actually touches — for a Software Engineering course, say, the *Software* layer and the *Design* and *Realisation* activities, not the whole framework. The framework lists every dimension of the domain, but a course usually touches only a few; ticking what doesn't apply dilutes the context and gives the tools a vaguer picture. EQF defaults to 6 (hbo bachelor), and as soon as you pick a **study year** the mastery level is suggested (year 1 → 1, year 4 → 3; middle years → 2). Adjust or remove any field.
 
 If a domain has no nationally established framework (such as Agro or Other), you'll see that stated plainly and can add the relevant fields yourself.
 

@@ -20,7 +20,7 @@ Beide vragen om hetzelfde:
 
 Kies je een **domein/sector**, dan verschijnen de relevante velden uit het landelijke raamwerk van dat domein — bijvoorbeeld de hbo-i-architectuurlagen voor ICT, de CanMEDS-rollen voor Zorg & welzijn, of de leeruitkomsten van HBO-Rechten. Bij elk kader staat de **bron** vermeld.
 
-Deze velden worden alvast **ingevuld** op basis van het raamwerk: het volledige kader wordt aangevinkt (vink af wat niet van toepassing is), het EQF-niveau staat op 6 (hbo-bachelor), en zodra je een **studiejaar** kiest, wordt het beheersingsniveau voorgesteld (jaar 1 → 1, jaar 4 → 3; tussenjaren → 2). Het zijn voorstellen — pas elk veld gerust aan of verwijder het.
+Vink bij die velden alleen aan wat je opleiding écht raakt — bijvoorbeeld voor een Software Engineering-vak de laag *Software* en de activiteiten *Ontwerpen* en *Realiseren*, niet het hele kader. Het kader noemt álle dimensies van het domein, maar een vak raakt er meestal maar een paar; aanvinken wat niet van toepassing is, verwatert de context en levert de tools een vager beeld. Het EQF-niveau staat op 6 (hbo-bachelor) en zodra je een **studiejaar** kiest, wordt het beheersingsniveau voorgesteld (jaar 1 → 1, jaar 4 → 3; tussenjaren → 2). Pas elk veld gerust aan of verwijder het.
 
 Heeft een domein geen landelijk vastgesteld raamwerk (zoals Agro of Overig), dan zie je dat duidelijk terug en voeg je zelf de relevante velden toe.
 

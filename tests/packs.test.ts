@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { DOMAIN_PACKS, getDomainPack, getPackField, type PackField } from "~/lib/context/packs";
+import {
+  DOMAIN_PACKS,
+  defaultPackValues,
+  getDomainPack,
+  getPackField,
+  levelForYear,
+  type PackField,
+} from "~/lib/context/packs";
 import { HBO_DOMAINS } from "~/lib/context/types";
 import type { LocalizedText } from "~/lib/i18n/localized";
 
@@ -104,5 +111,37 @@ describe("domain packs registry", () => {
 
   it("encodes the 6 HBO-Rechten leeruitkomsten", () => {
     expect(getPackField("Recht", "leeruitkomsten")?.options).toHaveLength(6);
+  });
+});
+
+describe("defaultPackValues", () => {
+  it("does NOT pre-select multiselect options (focused-by-default, not the whole framework)", () => {
+    // Pre-filling every option floods the prompt with the undifferentiated
+    // taxonomy and drowns the discriminating free-text fields. The user picks
+    // the few dimensions their course emphasises instead.
+    const v = defaultPackValues("ICT", 3);
+    expect(v.architectuurlagen).toBeUndefined();
+    expect(v.activiteiten).toBeUndefined();
+  });
+
+  it("still derives the single-value level field from the study year (low-noise)", () => {
+    expect(defaultPackValues("ICT", 1).beheersingsniveau).toBe(1);
+    expect(defaultPackValues("ICT", 3).beheersingsniveau).toBe(2);
+    expect(defaultPackValues("ICT", 4).beheersingsniveau).toBe(3);
+  });
+
+  it("omits the level when no study year is chosen", () => {
+    expect(defaultPackValues("ICT").beheersingsniveau).toBeUndefined();
+  });
+
+  it("returns nothing for domains without a pack", () => {
+    expect(defaultPackValues("Overig", 3)).toEqual({});
+    expect(defaultPackValues(undefined)).toEqual({});
+  });
+
+  it("levelForYear maps years onto the 1..levelMax scale", () => {
+    expect(levelForYear(undefined, 3)).toBeUndefined();
+    expect(levelForYear(2, 3)).toBe(2);
+    expect(levelForYear(4, 3)).toBe(3);
   });
 });

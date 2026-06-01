@@ -19,7 +19,7 @@ interface Labels {
 
 const LABELS: Record<OutputLanguage, Labels> = {
   nl: {
-    intro: "Deze les wordt ontworpen binnen het hbo (hoger beroepsonderwijs).",
+    intro: "Context van de opleiding (hbo, hoger beroepsonderwijs):",
     programme: "Opleiding",
     domain: "Domein/sector",
     course: "Vak",
@@ -32,7 +32,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
     framework: "Relevant kader",
   },
   en: {
-    intro: "This lesson is designed within Dutch higher professional education (hbo).",
+    intro: "Programme context (Dutch higher professional education, hbo):",
     programme: "Programme",
     domain: "Domain/sector",
     course: "Course",

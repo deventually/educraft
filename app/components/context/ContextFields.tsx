@@ -218,10 +218,13 @@ export function NotesField({ defaultValue }: { defaultValue?: string }) {
 // --- Domain pack -----------------------------------------------------------
 
 /**
- * Recommended, verified fields for the chosen domain — prefilled definitions
- * the user fills in. Each field can be removed; domains without a national
- * framework show an honest note instead. Pass `key={domain}` so switching
- * domains resets selections + removals. `values` pre-selects answers (editing).
+ * Recommended, verified fields for the chosen domain. Multiselects start empty
+ * — the user ticks only the dimensions their course emphasises (selecting the
+ * whole framework would inject undifferentiated noise into every prompt); the
+ * level field is suggested from the study year. Each field can be removed;
+ * domains without a national framework show an honest note instead. Pass
+ * `key={domain}` so switching domains resets selections + removals. `values`
+ * pre-selects answers (editing, or the year-derived level).
  */
 export function DomainFields({
   domain,

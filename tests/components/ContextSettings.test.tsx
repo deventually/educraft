@@ -73,15 +73,16 @@ describe("Context settings", () => {
     expect(screen.getByText(/hbo-i domeinbeschrijving/i)).toBeInTheDocument();
   });
 
-  it("pre-fills the full framework on domain choice, and the level once a year is set", async () => {
+  it("leaves the framework multiselects empty on domain choice, and fills the level once a year is set", async () => {
     const user = userEvent.setup();
     renderSettings();
     await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
     await user.selectOptions(screen.getByLabelText(/domein|domain/i), "ICT");
 
-    // The full framework is pre-checked (deselect what doesn't apply).
-    expect(screen.getByRole("checkbox", { name: "Gebruikersinteractie" })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Software" })).toBeChecked();
+    // Multiselects start empty — the user ticks only what the course emphasises,
+    // rather than injecting the whole undifferentiated taxonomy into prompts.
+    expect(screen.getByRole("checkbox", { name: "Gebruikersinteractie" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Software" })).not.toBeChecked();
     // EQF defaults to the hbo-bachelor qualification level.
     expect(screen.getByLabelText(/eqf/i)).toHaveValue("6");
 

@@ -10,3 +10,4 @@
 /data/*.db
 /data/*.db-*
 book/*.pdf
+/teaching

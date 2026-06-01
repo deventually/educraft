@@ -111,4 +111,15 @@ describe("formatProfile", () => {
     const out = formatProfile({ ...ict, domain: "Techniek" }, "nl");
     expect(out).not.toContain("hbo-i domeinbeschrijving");
   });
+
+  it("frames the context neutrally, not as a lesson being designed", () => {
+    // The block is injected into every tool (chat tutors, graders, …), not just
+    // lesson-design tools, so the intro must not assume a lesson is being made.
+    const nl = formatProfile(generic, "nl");
+    expect(nl).not.toContain("Deze les wordt ontworpen");
+    expect(nl).toContain("hbo"); // still signals the education level
+    const en = formatProfile(generic, "en");
+    expect(en).not.toContain("This lesson is designed");
+    expect(en).toContain("higher professional education");
+  });
 });

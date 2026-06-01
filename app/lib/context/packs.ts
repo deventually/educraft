@@ -513,10 +513,12 @@ export function levelForYear(year: number | undefined, levelMax: number): number
 
 /**
  * Factual default answers for a domain's pack, used to PRE-FILL the create form:
- * - multiselect dimensions → the full framework (every option), since the source
- *   defines these as the domain's complete competence set; the user deselects
- *   what their programme doesn't emphasise (selecting a subset would be a guess).
- * - level → `levelForYear` once a study year is chosen (refines further by year).
+ * - multiselect dimensions → left EMPTY. The framework lists the domain's whole
+ *   competence set, but a course only touches a few of those dimensions. Pre-
+ *   selecting every option injects the undifferentiated taxonomy into every
+ *   prompt — noise that carries no discriminating signal and drowns the genuinely
+ *   informative free-text fields. The user picks the few their course emphasises.
+ * - level → `levelForYear` once a study year is chosen (single low-noise value).
  * - single-select → left unset (no factual default among the alternatives).
  */
 export function defaultPackValues(
@@ -527,9 +529,7 @@ export function defaultPackValues(
   if (!pack) return {};
   const out: Record<string, PackFieldValue> = {};
   for (const field of pack.fields) {
-    if (field.type === "multiselect") {
-      out[field.key] = (field.options ?? []).map((o) => o.value);
-    } else if (field.type === "level") {
+    if (field.type === "level") {
       const lvl = levelForYear(studyYear, field.levelMax ?? 3);
       if (lvl != null) out[field.key] = lvl;
     }
