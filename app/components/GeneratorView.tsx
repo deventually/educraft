@@ -138,12 +138,13 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
         )}
       </div>
 
-      <div className="min-w-0">
+      <div className="min-w-0 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
         {output || streaming ? (
           <ResultPanel
             markdown={output}
             filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
             streaming={streaming}
+            fill
           />
         ) : (
           <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">

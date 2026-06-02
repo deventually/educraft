@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { remarkPlugins, rehypePlugins } from "./markdownPlugins";
 import { Check, Copy, Download } from "lucide-react";
 import { Button, Spinner } from "./ui";
-import { downloadText, slugifyFilename } from "~/lib/utils";
+import { cn, downloadText, slugifyFilename } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
 
 interface Props {
@@ -11,9 +11,15 @@ interface Props {
   title?: string;
   filenameBase: string;
   streaming?: boolean;
+  /**
+   * Fill the parent's height (flex column, internal scroll) instead of growing
+   * to content height capped at 70vh. Used by the side-by-side generator so the
+   * panel can be sticky and viewport-tall; left off for inline/stacked uses.
+   */
+  fill?: boolean;
 }
 
-export function ResultPanel({ markdown, title, filenameBase, streaming }: Props) {
+export function ResultPanel({ markdown, title, filenameBase, streaming, fill }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
 
@@ -24,7 +30,12 @@ export function ResultPanel({ markdown, title, filenameBase, streaming }: Props)
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div
+      className={cn(
+        "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm",
+        fill && "flex h-full flex-col",
+      )}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70 px-4 py-2.5">
         <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
           {streaming && <Spinner className="text-violet-600" />}
@@ -48,7 +59,7 @@ export function ResultPanel({ markdown, title, filenameBase, streaming }: Props)
           </Button>
         </div>
       </div>
-      <div className="md max-h-[70vh] overflow-y-auto px-5 py-4">
+      <div className={cn("md overflow-y-auto px-5 py-4", fill ? "flex-1" : "max-h-[70vh]")}>
         {markdown ? (
           <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>
             {markdown}
