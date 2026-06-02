@@ -8,9 +8,10 @@ Gebruik de tool om sneller een eerste, consistente beoordeling op te stellen, om
 
 1. **Upload het document** (PDF of Word) dat je wilt beoordelen, of **plak de tekst**. Bij uploaden haalt de tool de tekst eruit en zet die in het tekstveld, zodat je hem nog kunt controleren en bijwerken vóór je genereert. Tabellen en figuren gaan verloren — upload kernfiguren los als afbeelding. Is het een scan (alleen afbeeldingen)? Dan vindt de tool geen tekst en plak je hem zelf.
 2. **Kies type document, richting, studiejaar en duur.** De richting (UX/Software/Data) bepaalt welke variant van de succescriteria geldt.
-3. **Controleer het beoordelingskader.** Standaard staat het HBO-i stage-nakijkmodel (niveau 2) al ingevuld. Beoordeel je een andere opleiding? Pas het kader en de schaal aan of vervang ze volledig — dit kader is leidend.
-4. **Voeg eventueel de evaluatie van de bedrijfsbegeleider toe.** Die wordt gebruikt als ondersteunend bewijs én op volledigheid gecontroleerd.
-5. **Genereer.** Je krijgt: een samenvattend concept-oordeel (met de slaagregel toegepast), een onderbouwing per succescriterium met letterlijke citaten, concrete verbeterpunten, concept-feedback voor de student, en aandachtspunten.
+3. **Geef eventueel een toelichting bij deze inzending (optioneel).** Hier vertel je wat wél/niet meetelt of wat later of apart wordt beoordeeld — bijvoorbeeld: "alleen het onderzoeks- en stageverslag worden nu beoordeeld; het beroepsproduct volgt en wordt apart via de eindpresentatie beoordeeld." De assistent volgt deze toelichting en laat de genoemde onderdelen buiten het oordeel.
+4. **Controleer het beoordelingskader.** Standaard staat het HBO-i stage-nakijkmodel (niveau 2) al ingevuld. Beoordeel je een andere opleiding? Pas het kader en de schaal aan of vervang ze volledig — dit kader is leidend.
+5. **Voeg eventueel de evaluatie van de bedrijfsbegeleider toe.** Die wordt gebruikt als ondersteunend bewijs én op volledigheid gecontroleerd.
+6. **Genereer.** Je krijgt: een samenvattend concept-oordeel (met de slaagregel toegepast), een onderbouwing per succescriterium met letterlijke citaten, concrete verbeterpunten, concept-feedback voor de student, en aandachtspunten.
 
 ## Wat de tool wél en niet doet
 

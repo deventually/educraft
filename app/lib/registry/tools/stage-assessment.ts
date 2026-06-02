@@ -152,6 +152,25 @@ export const stageAssessment: Tool = {
       group: CONTEXT,
     },
     {
+      name: "submissionNotes",
+      label: {
+        nl: "Toelichting bij deze inzending (optioneel)",
+        en: "Notes about this submission (optional)",
+      },
+      kind: "textarea",
+      required: false,
+      rows: 4,
+      placeholder: {
+        nl: "Bijv.: alleen het onderzoeksverslag en stageverslag worden nu beoordeeld; deze worden in de eerste helft van de stage ingeleverd. Het beroepsproduct (de realisatie) volgt daarna en wordt apart via de eindpresentatie beoordeeld — beoordeel dat onderdeel nu dus niet.",
+        en: "E.g.: only the research report and internship report are assessed now; these are handed in during the first half. The work product (realisation) follows afterwards and is graded separately via the final presentation — so do not assess that part now.",
+      },
+      help: {
+        nl: "Jouw aanwijzingen als docent over deze specifieke beoordeling: wat wél/niet meetelt, welke onderdelen later of apart worden beoordeeld, en bijzonderheden van de inzending. De assistent volgt deze toelichting (in tegenstelling tot het studentdocument).",
+        en: "Your instructions as the teacher about this specific assessment: what does/doesn't count, which parts are assessed later or separately, and any particulars of the submission. The assistant follows these notes (unlike the student document).",
+      },
+      group: CONTEXT,
+    },
+    {
       name: "assessmentFramework",
       label: {
         nl: "Beoordelingskader / succescriteria (nakijkmodel)",

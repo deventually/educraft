@@ -8,9 +8,10 @@ Use it to draft a fast, consistent first assessment, to check your own judgement
 
 1. **Upload the document** (PDF or Word) you want to assess, or **paste the text**. When you upload, the tool extracts the text into the field so you can review and edit it before generating. Tables and figures are lost — upload key figures separately as images. Is it a scan (images only)? Then the tool finds no text and you paste it yourself.
 2. **Choose document type, track, study year and duration.** The track (UX/Software/Data) determines which variant of the success criteria applies.
-3. **Check the assessment framework.** The HBO-i internship rubric (level 2) is pre-filled by default. Assessing a different programme? Edit or fully replace the framework and scale — this framework drives the judgement.
-4. **Optionally add the company mentor's evaluation.** It's used as supporting evidence and checked for completeness.
-5. **Generate.** You get: a summary draft verdict (with the pass rule applied), evidence per success criterion with literal quotes, concrete improvement points, draft feedback for the student, and caveats.
+3. **Optionally add notes about this submission.** State what does or doesn't count, or what is assessed later or separately — for example: "only the research and internship reports are assessed now; the work product follows and is graded separately via the final presentation." The assistant follows these notes and leaves the stated parts out of the judgement.
+4. **Check the assessment framework.** The HBO-i internship rubric (level 2) is pre-filled by default. Assessing a different programme? Edit or fully replace the framework and scale — this framework drives the judgement.
+5. **Optionally add the company mentor's evaluation.** It's used as supporting evidence and checked for completeness.
+6. **Generate.** You get: a summary draft verdict (with the pass rule applied), evidence per success criterion with literal quotes, concrete improvement points, draft feedback for the student, and caveats.
 
 ## What the tool does and doesn't do
 

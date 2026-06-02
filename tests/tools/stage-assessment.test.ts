@@ -70,6 +70,7 @@ describe("tool: stage-assessment", () => {
       assessmentFramework: "SC1 onderzoek; SC2 onderbouwing; SC3 belanghebbenden",
       assessmentScale: "O=0, V=6, G=10; één O = onvoldoende",
       companyEvaluation: "",
+      submissionNotes: "",
     };
     const prompt = buildSystemPrompt({
       promptId: tool.stages[0].systemPromptId,
@@ -94,6 +95,7 @@ describe("tool: stage-assessment", () => {
         assessmentFramework: "x",
         assessmentScale: "x",
         companyEvaluation: "",
+        submissionNotes: "",
       },
       outputLanguage: "nl",
     });
@@ -116,6 +118,7 @@ describe("tool: stage-assessment", () => {
       assessmentFramework: "x",
       assessmentScale: "x",
       companyEvaluation: "",
+      submissionNotes: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0].systemPromptId,
@@ -147,6 +150,7 @@ describe("tool: stage-assessment", () => {
       assessmentFramework: "x",
       assessmentScale: "x",
       companyEvaluation: "",
+      submissionNotes: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0].systemPromptId,
@@ -186,6 +190,7 @@ describe("tool: stage-assessment", () => {
       assessmentFramework: "x",
       assessmentScale: "x",
       companyEvaluation: "",
+      submissionNotes: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0].systemPromptId,
@@ -201,6 +206,54 @@ describe("tool: stage-assessment", () => {
     expect(nl).toContain("Analyseren");
     expect(nl).toContain("Realiseren");
     expect(en.toLowerCase()).toMatch(/whole.*portfolio|portfolio.*whole/);
+  });
+
+  it("offers an optional teacher-notes field that scopes the assessment as trusted guidance", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    const notes = tool.inputs.find((f) => f.name === "submissionNotes");
+    expect(notes).toBeDefined();
+    expect(notes?.kind).toBe("textarea");
+    expect(notes?.required).not.toBe(true);
+
+    // The note text is injected and the prompt frames it as trusted (vs the
+    // student document) and able to put parts out of scope (e.g. graded later).
+    const note =
+      "Alleen onderzoeksverslag en stageverslag nu; het beroepsproduct volgt en wordt apart via de eindpresentatie beoordeeld.";
+    const nl = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values: {
+        document: "x",
+        documentType: "stageverslag",
+        track: "",
+        studyYear: 3,
+        durationWeeks: 20,
+        assessmentFramework: "x",
+        assessmentScale: "x",
+        companyEvaluation: "",
+        submissionNotes: note,
+      },
+      outputLanguage: "nl",
+    });
+    const en = buildSystemPrompt({
+      promptId: tool.stages[0].systemPromptId,
+      values: {
+        document: "x",
+        documentType: "stageverslag",
+        track: "",
+        studyYear: 3,
+        durationWeeks: 20,
+        assessmentFramework: "x",
+        assessmentScale: "x",
+        companyEvaluation: "",
+        submissionNotes: "Only the report is assessed now; the product is graded separately later.",
+      },
+      outputLanguage: "en",
+    });
+    expect(nl).toContain(note); // the teacher's note reaches the model
+    expect(nl.toLowerCase()).toMatch(/toelichting van de docent/);
+    expect(nl.toLowerCase()).toMatch(/buiten scope|apart\/later beoordeeld|buiten de slaagregel/);
+    expect(en.toLowerCase()).toMatch(/teacher'?s notes/);
+    expect(en.toLowerCase()).toMatch(/out of scope|assessed separately/);
   });
 
   it("uses a vision-capable default model and a low temperature for consistency", () => {
