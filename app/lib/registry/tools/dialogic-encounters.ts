@@ -70,6 +70,17 @@ export const dialogicEncounters: Tool = {
           label: { nl: "John Dewey (Constructivisme)", en: "John Dewey (Constructivism)" },
         },
         {
+          value: "Seymour Papert",
+          label: {
+            nl: "Seymour Papert (Constructionisme)",
+            en: "Seymour Papert (Constructionism)",
+          },
+        },
+        {
+          value: "Albert Bandura",
+          label: { nl: "Albert Bandura (Sociaal leren)", en: "Albert Bandura (Social Learning)" },
+        },
+        {
           value: "B.F. Skinner",
           label: { nl: "B.F. Skinner (Behaviorisme)", en: "B.F. Skinner (Behaviorism)" },
         },
@@ -77,29 +88,46 @@ export const dialogicEncounters: Tool = {
           value: "Ivan Pavlov",
           label: { nl: "Ivan Pavlov (Behaviorisme)", en: "Ivan Pavlov (Behaviorism)" },
         },
-      ],
-      group: CONTEXT,
-    },
-    {
-      name: "theory",
-      label: {
-        nl: "Leertheorie",
-        en: "Learning theory",
-      },
-      kind: "select",
-      required: true,
-      options: [
         {
-          value: "Constructivism",
-          label: { nl: "Constructivisme", en: "Constructivism" },
+          value: "Robert Gagné",
+          label: { nl: "Robert Gagné (Cognitivisme)", en: "Robert Gagné (Cognitivism)" },
         },
         {
-          value: "Behaviorism",
-          label: { nl: "Behaviorisme", en: "Behaviorism" },
+          value: "David Ausubel",
+          label: { nl: "David Ausubel (Cognitivisme)", en: "David Ausubel (Cognitivism)" },
         },
         {
-          value: "Cognitivism",
-          label: { nl: "Cognitivisme", en: "Cognitivism" },
+          value: "John Sweller",
+          label: {
+            nl: "John Sweller (Cognitieve belasting)",
+            en: "John Sweller (Cognitive Load)",
+          },
+        },
+        {
+          value: "Jeroen van Merriënboer",
+          label: {
+            nl: "Jeroen van Merriënboer (4C/ID)",
+            en: "Jeroen van Merriënboer (4C/ID)",
+          },
+        },
+        {
+          value: "Paul A. Kirschner",
+          label: {
+            nl: "Paul A. Kirschner (Directe instructie)",
+            en: "Paul A. Kirschner (Direct Instruction)",
+          },
+        },
+        {
+          value: "David Kolb",
+          label: { nl: "David Kolb (Ervaringsleren)", en: "David Kolb (Experiential Learning)" },
+        },
+        {
+          value: "Carl Rogers",
+          label: { nl: "Carl Rogers (Humanisme)", en: "Carl Rogers (Humanism)" },
+        },
+        {
+          value: "Malcolm Knowles",
+          label: { nl: "Malcolm Knowles (Andragogiek)", en: "Malcolm Knowles (Andragogy)" },
         },
       ],
       group: CONTEXT,

@@ -116,7 +116,7 @@ export const nl = {
     regenerate: "Opnieuw",
     streaming: "Aan het denken…",
     inputPlaceholder: "Jouw bericht…",
-    sandboxHint: "Vul onderstaande velden in. Deze worden eenmaal gebruikt.",
+    sandboxHint: "Vul onderstaande gegevens in. Deze worden eenmaal gebruikt.",
     continue: "Doorgaan",
     startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
     interrupted: "Onderbroken",

@@ -113,7 +113,7 @@ export const en: Messages = {
     regenerate: "Regenerate",
     streaming: "Thinking…",
     inputPlaceholder: "Your message…",
-    sandboxHint: "Fill in the details below. These inputs are used once.",
+    sandboxHint: "Fill in the details below. These are used once.",
     continue: "Continue",
     startConversation: "Start a conversation by clicking a suggestion or typing a message.",
     interrupted: "Interrupted",

@@ -21,7 +21,6 @@ describe("tool: dialogic-encounters", () => {
     const tool = getToolBySlug("dialogic-encounters")!;
     const inputs = {
       theorist: "Jean Piaget",
-      theory: "Constructivism",
     };
 
     const prompt = buildSystemPrompt({
