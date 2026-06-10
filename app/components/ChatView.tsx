@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Square, RotateCcw } from "lucide-react";
+import { Send, Square, RotateCcw, Pencil } from "lucide-react";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
 import { DynamicForm, defaultValuesFor, type FormValues } from "./DynamicForm";
+import { summarizeSandbox } from "~/lib/forms/summarize";
 import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
@@ -11,6 +12,7 @@ import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { Markdown } from "./Markdown";
+import { ToolIcon } from "./ToolIcon";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
 function newSessionId(): string {
@@ -46,10 +48,13 @@ export function ChatView({
   const [messageInput, setMessageInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState(defaultModel || tool.defaultModel);
+  // The conversation defaults to the interface language: a Dutch UI opens a
+  // Dutch chat, an English UI an English one. An explicit prop still wins.
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
-    defaultOutputLanguage || tool.defaultOutputLanguage,
+    defaultOutputLanguage || locale,
   );
   const threadRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   // One id for the whole conversation, so each turn updates the same project.
   const sessionIdRef = useRef<string | null>(null);
@@ -69,6 +74,16 @@ export function ChatView({
       threadRef.current.scrollTop = threadRef.current.scrollHeight;
     }
   }, [turns]);
+
+  // Grow the composer textarea with its content (single line → up to ~8 lines),
+  // then scroll internally — the bottom-pinned input never pushes the page.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every input change to resize
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [messageInput]);
 
   const handleSandboxSubmit = () => {
     setSandboxSubmitted(true);
@@ -180,11 +195,11 @@ export function ChatView({
     }
   };
 
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Sandbox inputs (one-time) */}
-      {!sandboxSubmitted && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  // Sandbox gate: a focused card the user fills once before the chat opens.
+  if (!sandboxSubmitted) {
+    return (
+      <div className="mx-auto w-full max-w-2xl">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4">
             <h3 className="font-semibold text-slate-900">{t.tool.contextProfile}</h3>
             <p className="mt-1 text-sm text-slate-600">
@@ -200,19 +215,75 @@ export function ChatView({
             {t.chat?.continue || "Continue"}
           </Button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Simple controls (model, output language) */}
-      {sandboxSubmitted && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  // Greeting and starters are conversation content, so they follow the output
+  // language (the aside's "Taal van uitvoer") — switching it re-renders them at
+  // once and keeps them consistent with the language the model replies in. UI
+  // chrome (labels, buttons) stays in the interface `locale`.
+  const greetingText = greeting
+    ? interpolateGreeting(
+        loc(greeting, outputLanguage),
+        // Sandbox values supply greeting placeholders like {{subject}};
+        // image fields are irrelevant to greetings, hence the cast.
+        sandboxValues as unknown as TemplateValues,
+      )
+    : "";
+  const isEmpty = turns.length === 0;
+  // What the user entered in the one-time sandbox, shown so the chat makes clear
+  // which settings (e.g. which theorist) it's running with.
+  const sandboxSummary = summarizeSandbox(tool.inputs, sandboxValues, locale);
+
+  return (
+    // Two-pane chat: a settings aside on the side, and a chat column whose
+    // thread scrolls internally so the composer stays pinned at all times.
+    <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row md:gap-6">
+      {/* Settings aside — what was entered before the chat, plus model/language. */}
+      <aside
+        aria-labelledby="chat-settings-heading"
+        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:w-72 md:overflow-y-auto"
+      >
+        <h2
+          id="chat-settings-heading"
+          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
+          {t.chat?.yourSettings || "Your settings"}
+        </h2>
+
+        {sandboxSummary.length > 0 && (
+          <dl className="mt-3 space-y-2.5">
+            {sandboxSummary.map((item) => (
+              <div key={item.name}>
+                <dt className="text-[11px] text-slate-500">{item.label}</dt>
+                <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {tool.inputs.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSandboxSubmitted(false)}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+          >
+            <Pencil className="size-3.5" aria-hidden />
+            {t.chat?.edit || "Edit"}
+          </button>
+        )}
+
+        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
           <div>
-            <Label htmlFor="chat-model" className="mb-1.5">
+            <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
               {t.tool.model}
             </Label>
             <Select
               id="chat-model"
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
+              className="h-9 w-full py-0 text-sm"
             >
               {modelOptions.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -222,147 +293,155 @@ export function ChatView({
             </Select>
           </div>
           <div>
-            <Label htmlFor="chat-lang" className="mb-1.5">
+            <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
               {t.tool.outputLanguage}
             </Label>
             <Select
               id="chat-lang"
               value={outputLanguage}
               onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
+              className="h-9 w-full py-0 text-sm"
             >
               <option value="nl">{t.tool.dutch}</option>
               <option value="en">{t.tool.english}</option>
             </Select>
           </div>
         </div>
-      )}
+      </aside>
 
-      {/* Greeting and starters (on first load) */}
-      {sandboxSubmitted && turns.length === 0 && greeting && (
-        <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-          <p className="mb-3 text-slate-900">
-            {interpolateGreeting(
-              loc(greeting, locale),
-              // Sandbox values supply greeting placeholders like {{subject}};
-              // image fields are irrelevant to greetings, hence the cast.
-              sandboxValues as unknown as TemplateValues,
-            )}
-          </p>
-          {starters && starters.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {starters.map((starter) => (
-                <button
-                  key={loc(starter, locale)}
-                  onClick={() => handleStarterClick(loc(starter, locale))}
-                  className="rounded-full border border-violet-300 bg-white px-3 py-1.5 text-sm text-violet-700 hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                >
-                  {loc(starter, locale)}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Message thread */}
-      {sandboxSubmitted && (
+      {/* Chat column — the thread fills the height, composer pinned to the bottom. */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Message thread — the scroll region that fills the available height */}
         <div
           ref={threadRef}
-          className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
+          className="min-h-0 flex-1 overflow-y-auto"
           role="log"
           aria-live="polite"
           aria-label="Chat thread"
         >
-          {turns.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              {t.chat?.startConversation ||
-                "Start the conversation by clicking a starter or typing a message."}
-            </p>
-          ) : (
-            turns.map((turn) => (
-              <div
-                key={turn.id}
-                className={`flex gap-2 ${turn.role === "user" ? "flex-row-reverse" : ""}`}
-              >
-                <div
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm ${
-                    turn.role === "user"
-                      ? "bg-violet-100 text-slate-900"
-                      : "bg-white text-slate-800"
-                  }`}
-                >
-                  {turn.content ? (
-                    <Markdown>{turn.content}</Markdown>
-                  ) : (
-                    <span className="italic text-slate-500">
-                      {turn.interrupted ? (
-                        t.chat?.interrupted || "Interrupted"
-                      ) : (
-                        <>
-                          <span className="inline-block animate-pulse">●</span> {t.tool.generating}
-                        </>
-                      )}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Composer (message input) */}
-      {sandboxSubmitted && (
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !isStreaming) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            placeholder={t.chat?.inputPlaceholder || "Your message…"}
-            disabled={isStreaming}
-            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm placeholder-slate-400 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 disabled:bg-slate-100"
-          />
-
-          {isStreaming ? (
-            tool.chat?.allowStop && (
-              <button
-                onClick={handleStop}
-                className="rounded-lg bg-red-500 p-2 text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                title={t.tool.stop}
-              >
-                <Square className="size-4" />
-              </button>
-            )
-          ) : (
-            <>
-              <button
-                onClick={() => sendMessage()}
-                disabled={!messageInput.trim() || isStreaming}
-                className="rounded-lg bg-violet-600 p-2 text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:bg-slate-300"
-                title={t.tool.generate}
-              >
-                <Send className="size-4" />
-              </button>
-
-              {tool.chat?.allowRegenerate && turns.length > 0 && (
-                <button
-                  onClick={handleRegenerate}
-                  className="rounded-lg border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                  title={t.tool.regenerate}
-                >
-                  <RotateCcw className="size-4" />
-                </button>
+          {isEmpty ? (
+            // Centered welcome, like a fresh chat — greeting + starter prompts.
+            <div className="mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-4 py-10 text-center">
+              <span className="mb-4 grid size-14 place-items-center rounded-2xl bg-violet-50 text-violet-600">
+                <ToolIcon name={tool.icon} className="size-7" />
+              </span>
+              {greetingText ? (
+                <p className="max-w-xl text-lg leading-relaxed text-slate-700">{greetingText}</p>
+              ) : (
+                <p className="text-sm text-slate-500">
+                  {t.chat?.startConversation ||
+                    "Start the conversation by clicking a starter or typing a message."}
+                </p>
               )}
-            </>
+              {starters && starters.length > 0 && (
+                <div className="mt-6 flex flex-wrap justify-center gap-2">
+                  {starters.map((starter) => (
+                    <button
+                      key={loc(starter, outputLanguage)}
+                      onClick={() => handleStarterClick(loc(starter, outputLanguage))}
+                      className="rounded-full border border-violet-300 bg-white px-4 py-2 text-sm text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                    >
+                      {loc(starter, outputLanguage)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
+              {turns.map((turn) =>
+                turn.role === "user" ? (
+                  <div key={turn.id} className="flex justify-end">
+                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-violet-600 px-4 py-2.5 text-sm leading-relaxed text-white">
+                      {turn.content}
+                    </div>
+                  </div>
+                ) : (
+                  <div key={turn.id} className="flex gap-3">
+                    <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-violet-50 text-violet-600">
+                      <ToolIcon name={tool.icon} className="size-4" />
+                    </span>
+                    <div className="min-w-0 flex-1 text-sm text-slate-800">
+                      {turn.content ? (
+                        <Markdown>{turn.content}</Markdown>
+                      ) : (
+                        <span className="italic text-slate-500">
+                          {turn.interrupted ? (
+                            t.chat?.interrupted || "Interrupted"
+                          ) : (
+                            <>
+                              <span className="inline-block animate-pulse">●</span>{" "}
+                              {t.tool.generating}
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
           )}
         </div>
-      )}
+
+        {/* Composer — pinned to the bottom of the chat column */}
+        <div className="flex-none pt-3">
+          <div className="mx-auto w-full max-w-3xl">
+            <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-violet-500 focus-within:ring-1 focus-within:ring-violet-500">
+              <textarea
+                ref={inputRef}
+                rows={1}
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !isStreaming) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder={t.chat?.inputPlaceholder || "Your message…"}
+                disabled={isStreaming}
+                className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-400 focus:outline-none disabled:opacity-60"
+              />
+
+              {isStreaming ? (
+                tool.chat?.allowStop && (
+                  <button
+                    onClick={handleStop}
+                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-red-500 text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    title={t.tool.stop}
+                  >
+                    <Square className="size-4" />
+                  </button>
+                )
+              ) : (
+                <>
+                  {tool.chat?.allowRegenerate && turns.length > 0 && (
+                    <button
+                      onClick={handleRegenerate}
+                      className="grid size-9 shrink-0 place-items-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      title={t.tool.regenerate}
+                    >
+                      <RotateCcw className="size-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => sendMessage()}
+                    disabled={!messageInput.trim() || isStreaming}
+                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-600 text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:bg-slate-300"
+                    title={t.tool.generate}
+                  >
+                    <Send className="size-4" />
+                  </button>
+                </>
+              )}
+            </div>
+            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-400">
+              {t.chat?.enterHint || "Enter to send · Shift+Enter for a new line"}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

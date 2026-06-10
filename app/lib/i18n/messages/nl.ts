@@ -122,8 +122,11 @@ export const nl = {
     inputPlaceholder: "Jouw bericht…",
     sandboxHint: "Vul onderstaande gegevens in. Deze worden eenmaal gebruikt.",
     continue: "Doorgaan",
+    yourSettings: "Jouw instellingen",
+    edit: "Aanpassen",
     startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
     interrupted: "Onderbroken",
+    enterHint: "Enter om te versturen · Shift+Enter voor een nieuwe regel",
   },
   settings: {
     heading: "Onderwijscontext",

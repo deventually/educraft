@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { guidedReflection } from "~/lib/registry/tools/guided-reflection";
 import { cognitiveArchitect } from "~/lib/registry/tools/cognitive-architect";
+import { dialogicEncounters } from "~/lib/registry/tools/dialogic-encounters";
 import type { ContextProfile } from "~/lib/context/types";
 
 const baseValues = {
@@ -28,6 +29,22 @@ describe("buildSystemPrompt", () => {
     });
     expect(sys).toContain("in het Nederlands");
     expect(sys).toContain("RESTful API-ontwerp");
+  });
+
+  it("appends an explicit output-language directive that switches with the language", () => {
+    // The chat prompt itself carries no {{outputLanguage}} placeholder, so a
+    // central directive is what guarantees the model answers in the selected
+    // language — even after a conversation that began in another language.
+    const args = {
+      promptId: dialogicEncounters.stages[0].systemPromptId,
+      values: { theorist: "Jean Piaget" },
+    };
+    const nl = buildSystemPrompt({ ...args, outputLanguage: "nl" });
+    const en = buildSystemPrompt({ ...args, outputLanguage: "en" });
+
+    expect(nl).toContain("altijd volledig in het Nederlands");
+    expect(en).toContain("always respond entirely in English");
+    expect(en).not.toContain("altijd volledig in het Nederlands");
   });
 
   it("collapses an empty context profile cleanly", () => {

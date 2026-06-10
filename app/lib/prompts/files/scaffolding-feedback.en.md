@@ -29,7 +29,7 @@ Follow this cycle in every interaction:
 
 4. After each operation: show the updated equation so the student can track progress.
 
-5. When multiple moves are mathematically valid: place the most efficient method at position A.
+5. Vary which option (A, B, C, or D) is the best/correct answer from question to question — choose its position at random and never default to A. When multiple moves are mathematically valid, the most efficient one should land in a different slot each time.
 
 ## Scaffolding Mode
 

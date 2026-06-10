@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, NavLink, Outlet, useLocation } from "react-router";
+import { Form, NavLink, Outlet, useLocation, useMatches } from "react-router";
 import { Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -16,6 +16,12 @@ export default function AppShell() {
   const location = useLocation();
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
+  // A chat tool claims the full height: the page itself must not scroll and the
+  // footer is hidden, so the chat's own thread scrolls and the composer pins.
+  const matches = useMatches();
+  const isChatRoute = matches.some(
+    (m) => (m.data as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
+  );
 
   const nav: NavItem[] = [
     { to: "/", label: t.nav.tools, end: true },
@@ -26,8 +32,8 @@ export default function AppShell() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
+    <div className="flex h-dvh flex-col bg-slate-50 text-slate-900">
+      <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4">
           <NavLink
             to="/"
@@ -95,26 +101,43 @@ export default function AppShell() {
         )}
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        <Outlet />
-      </main>
+      {/* Single scroll region: normal pages scroll the document as before;
+          a full-height child (chat) instead claims the height and scrolls
+          its own thread, keeping its composer pinned. */}
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          isChatRoute ? "overflow-hidden" : "overflow-y-auto",
+        )}
+      >
+        <main
+          className={cn(
+            "mx-auto flex w-full max-w-6xl flex-1 flex-col px-4",
+            isChatRoute ? "min-h-0 py-6" : "py-8",
+          )}
+        >
+          <Outlet />
+        </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-500">
-          {t.appName} — {t.footer.prompts}{" "}
-          <span className="font-medium text-slate-600">The Pedagogical Promptbook</span> (
-          {t.footer.by}), {t.footer.licensed}{" "}
-          <a
-            href={LICENSE_URL}
-            className="text-violet-600 hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            CC BY 4.0
-          </a>
-          .
-        </div>
-      </footer>
+        {!isChatRoute && (
+          <footer className="border-t border-slate-200 bg-white">
+            <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-500">
+              {t.appName} — {t.footer.prompts}{" "}
+              <span className="font-medium text-slate-600">The Pedagogical Promptbook</span> (
+              {t.footer.by}), {t.footer.licensed}{" "}
+              <a
+                href={LICENSE_URL}
+                className="text-violet-600 hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                CC BY 4.0
+              </a>
+              .
+            </div>
+          </footer>
+        )}
+      </div>
     </div>
   );
 }

@@ -9,19 +9,13 @@ import { filesToImageInputs } from "~/lib/images/process";
 import { filesToDocumentText, DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
 import { useState, useCallback } from "react";
 
-export type FormValues = Record<string, string | number | boolean | string[] | ImageInput[]>;
-
-export function defaultValuesFor(fields: InputField[]): FormValues {
-  const values: FormValues = {};
-  for (const f of fields) {
-    if (f.defaultValue !== undefined) values[f.name] = f.defaultValue;
-    else if (f.kind === "multiselect") values[f.name] = [];
-    else if (f.kind === "boolean") values[f.name] = false;
-    else if (f.kind === "number") values[f.name] = f.min ?? 0;
-    else values[f.name] = "";
-  }
-  return values;
-}
+// Form value shape and defaults live in a framework-free module so they can be
+// imported in node tests without pulling in React. Re-exported here for the
+// many call sites that import them alongside the form component. The local
+// `import type` is needed because a bare `export … from` re-export does not
+// bind the name in this module's own scope (used in annotations below).
+import type { FormValues } from "~/lib/forms/values";
+export { defaultValuesFor, type FormValues } from "~/lib/forms/values";
 
 interface Props {
   fields: InputField[];

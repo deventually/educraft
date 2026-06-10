@@ -9,6 +9,18 @@ const LANGUAGE_LABEL: Record<OutputLanguage, string> = {
   en: "Engels",
 };
 
+/**
+ * A firm, final instruction that fixes the response language. Not every prompt
+ * references {{outputLanguage}} (chat prompts in particular don't), and a
+ * conversation begun in one language otherwise keeps its momentum. Appending
+ * this — in the target language, "regardless of earlier messages" — makes the
+ * selected output language take effect on the very next turn, for every tool.
+ */
+const LANGUAGE_DIRECTIVE: Record<OutputLanguage, string> = {
+  nl: "Belangrijk: antwoord altijd volledig in het Nederlands, ongeacht de taal van eerdere berichten in dit gesprek.",
+  en: "Important: always respond entirely in English, regardless of the language of earlier messages in this conversation.",
+};
+
 export interface BuildSystemPromptArgs {
   /** ToolStage.systemPromptId. */
   promptId: string;
@@ -51,5 +63,6 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
     values[dep.placeholder] = output;
   }
 
-  return interpolate(template, values, { allowEmpty });
+  const filled = interpolate(template, values, { allowEmpty });
+  return `${filled}\n\n${LANGUAGE_DIRECTIVE[args.outputLanguage]}`;
 }

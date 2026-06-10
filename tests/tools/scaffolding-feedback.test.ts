@@ -34,6 +34,26 @@ describe("tool: scaffolding-feedback", () => {
     expect(prompt).toContain("tutor");
   });
 
+  it("does not pin the correct answer to a fixed option position", () => {
+    const tool = getToolBySlug("scaffolding-feedback")!;
+    const inputs = { subject: "Algebra", studentBackground: "Struggling learner" };
+
+    for (const outputLanguage of ["en", "nl"] as const) {
+      const prompt = buildSystemPrompt({
+        promptId: tool.stages[0]!.systemPromptId,
+        values: inputs,
+        outputLanguage,
+      });
+      // Must not instruct placing the best/correct option at a fixed slot (A).
+      expect(prompt).not.toMatch(/(position|slot|optie|positie)\s*A\b/i);
+      expect(prompt).not.toMatch(/\bbij A\b/i);
+      // Must instruct varying / randomising which option is correct.
+      expect(prompt).toMatch(
+        /random|vary|varieer|wissel|verschillende positie|different position/i,
+      );
+    }
+  });
+
   it("enforces required input fields", () => {
     const tool = getToolBySlug("scaffolding-feedback")!;
     const requiredFields = tool.inputs.filter((f) => f.required);

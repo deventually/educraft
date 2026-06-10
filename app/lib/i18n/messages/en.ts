@@ -119,8 +119,11 @@ export const en: Messages = {
     inputPlaceholder: "Your message…",
     sandboxHint: "Fill in the details below. These are used once.",
     continue: "Continue",
+    yourSettings: "Your settings",
+    edit: "Edit",
     startConversation: "Start a conversation by clicking a suggestion or typing a message.",
     interrupted: "Interrupted",
+    enterHint: "Enter to send · Shift+Enter for a new line",
   },
   settings: {
     heading: "Teaching context",

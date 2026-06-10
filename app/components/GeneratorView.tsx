@@ -4,6 +4,7 @@ import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
+import { toTemplateValues } from "~/lib/forms/values";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
 import { Button } from "./ui";
@@ -62,13 +63,8 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
       }
     }
 
-    // Remove image fields from values before sending (they're sent separately)
-    const valuesToSend = { ...values };
-    for (const field of tool.inputs) {
-      if (field.kind === "image") {
-        delete valuesToSend[field.name];
-      }
-    }
+    // Image fields are sent separately (above); drop them from the prompt values.
+    const valuesToSend = toTemplateValues(values);
 
     await streamPost(
       "/api/stream",

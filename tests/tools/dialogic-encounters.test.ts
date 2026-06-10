@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { defaultValuesFor, toTemplateValues } from "~/lib/forms/values";
 
 describe("tool: dialogic-encounters", () => {
   it("registers and resolves by slug", () => {
@@ -30,6 +31,25 @@ describe("tool: dialogic-encounters", () => {
     });
 
     expect(prompt).not.toMatch(/\{\{(\w+)\}\}/);
+  });
+
+  it("names the theorist in the prompt using the chat's default sandbox values", () => {
+    // Reproduces the real chat path: the sandbox starts from the form defaults.
+    // The model must be told *who* it is — never "You are , ...".
+    const tool = getToolBySlug("dialogic-encounters")!;
+    const values = defaultValuesFor(tool.inputs);
+
+    expect(values.theorist).toBeTruthy();
+
+    const prompt = buildSystemPrompt({
+      promptId: tool.stages[0]!.systemPromptId,
+      values: toTemplateValues(values),
+      outputLanguage: "en",
+    });
+
+    expect(prompt).toContain(String(values.theorist));
+    // No empty-name artefact from an unresolved theorist.
+    expect(prompt).not.toMatch(/You are\s*,/);
   });
 
   it("enforces required input fields", () => {

@@ -53,6 +53,33 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByRole("navigation", { name: "Mobiele navigatie" })).toBeNull();
   });
 
+  it("shows the footer on normal pages", () => {
+    renderShell();
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+  });
+
+  it("hides the footer on a chat tool route so the composer can stay pinned", async () => {
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: AppShell,
+        children: [
+          { index: true, Component: () => <p>Tools home</p> },
+          {
+            path: "tools/:slug",
+            loader: () => ({ tool: { mode: "chat" } }),
+            Component: () => <p>Chat tool</p>,
+          },
+        ],
+      },
+    ]);
+    render(<Stub initialEntries={["/tools/mentorai"]} />);
+
+    // Wait for the chat route's loader data to resolve and render.
+    await screen.findByText("Chat tool");
+    expect(screen.queryByRole("contentinfo")).toBeNull();
+  });
+
   it("has no a11y violations with the menu closed", async () => {
     const { container } = renderShell();
     const results = await axe(container, axeOpts);

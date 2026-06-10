@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { ChatView } from "~/components/ChatView";
@@ -29,6 +29,10 @@ vi.mock("~/lib/i18n/useT", () => ({
       generating: "Generating…",
       stop: "Stop",
       regenerate: "Regenerate",
+      model: "Model",
+      outputLanguage: "Output language",
+      dutch: "Dutch",
+      english: "English",
     },
     chat: {
       send: "Send",
@@ -40,6 +44,8 @@ vi.mock("~/lib/i18n/useT", () => ({
       continue: "Continue",
       startConversation: "Start the conversation",
       interrupted: "Interrupted",
+      yourSettings: "Your settings",
+      edit: "Edit",
     },
     error: {
       unknown: "Something went wrong",
@@ -142,6 +148,105 @@ describe("ChatView", () => {
     // Accessibility
     const results = await axe(container);
     expect(results.violations).toEqual([]);
+  });
+
+  it("reflects the chosen sandbox settings in the chat screen", async () => {
+    const user = userEvent.setup();
+    const selectTool: Tool = {
+      ...mockTool,
+      inputs: [
+        {
+          name: "theorist",
+          label: { nl: "Theoreticus", en: "Theorist" },
+          kind: "select",
+          required: true,
+          options: [
+            { value: "Jean Piaget", label: { nl: "Piaget", en: "Piaget" } },
+            { value: "Lev Vygotsky", label: { nl: "Vygotsky", en: "Vygotsky" } },
+          ],
+        },
+      ],
+    };
+
+    const { container } = render(<ChatView tool={selectTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    // The chat screen surfaces what was selected before entering the chat,
+    // shown in the settings aside.
+    const aside = container.querySelector("aside");
+    expect(aside).toBeInTheDocument();
+    expect(within(aside as HTMLElement).getByText("Theorist")).toBeInTheDocument();
+    expect(within(aside as HTMLElement).getByText("Piaget")).toBeInTheDocument();
+
+    // And offers a way back to change it.
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+
+    const results = await axe(container);
+    expect(results.violations).toEqual([]);
+  });
+
+  it("sends the currently selected output language with the next message", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("ok");
+      onDone?.("ok");
+    });
+
+    const user = userEvent.setup();
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    // Switch the aside's output language, then send a message.
+    await user.selectOptions(screen.getByLabelText("Output language"), "nl");
+    await user.type(screen.getByPlaceholderText("Your message…"), "Hello");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+    const body = mockStreamPost.mock.calls.at(-1)?.[1] as { outputLanguage: string };
+    expect(body.outputLanguage).toBe("nl");
+  });
+
+  it("re-renders greeting and starters in the selected output language at once", async () => {
+    const user = userEvent.setup();
+    // mockTool defaults to English output, so the welcome view starts English.
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByText("Welcome!")).toBeInTheDocument();
+    expect(screen.getByText("Help me understand OOP")).toBeInTheDocument();
+
+    // Switching the aside's output language flips the conversation scaffolding.
+    await user.selectOptions(screen.getByLabelText("Output language"), "nl");
+
+    expect(screen.getByText("Welkom!")).toBeInTheDocument();
+    expect(screen.queryByText("Welcome!")).toBeNull();
+    expect(screen.getByText("Help me verstaan OOP")).toBeInTheDocument();
+    expect(screen.queryByText("Help me understand OOP")).toBeNull();
+  });
+
+  it("defaults the chat output language to the UI locale, not the tool default", async () => {
+    const user = userEvent.setup();
+    // UI locale is mocked to "en"; give the tool a conflicting Dutch default to
+    // prove the chat follows the interface language, not the tool's own default.
+    const nlDefaultTool: Tool = { ...mockTool, defaultOutputLanguage: "nl" };
+    const { container } = render(<ChatView tool={nlDefaultTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    const langSelect = container.querySelector("#chat-lang") as HTMLSelectElement;
+    expect(langSelect.value).toBe("en");
+  });
+
+  it("lets the user reopen the sandbox via Edit", async () => {
+    const user = userEvent.setup();
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    // Back on the sandbox gate.
+    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
   });
 
   it("sends a message and simulates streaming response", async () => {

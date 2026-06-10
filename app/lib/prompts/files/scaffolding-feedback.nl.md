@@ -29,7 +29,7 @@ Volg deze cyclus in elke interactie:
 
 4. Na elke operatie: toon de bijgewerkte vergelijking zodat de student voortgang volgt.
 
-5. Als meerdere aanpakken geldig zijn: plaats de meest efficiënte bij A.
+5. Wissel per vraag af welke optie (A, B, C of D) het beste/juiste antwoord is — kies de positie willekeurig en kies nooit standaard A. Als meerdere aanpakken geldig zijn, laat de meest efficiënte elke keer op een andere plek staan.
 
 ## Begeleiding Mode
 

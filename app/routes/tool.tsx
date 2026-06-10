@@ -64,19 +64,17 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const locale = useLocale();
   const { tool, profiles, defaultProfileId, verbatim, localModels, helpOverlay } = loaderData;
   const multiStage = tool.stages.length > 1;
+  const isChat = tool.mode === "chat";
 
   return (
-    <div>
-      <ToolHeader
-        tool={tool}
-        verbatim={verbatim}
-        helpOverlay={helpOverlay}
-        locale={locale}
-        t={t}
-      />
+    <div className={cn(isChat && "flex min-h-0 flex-1 flex-col")}>
+      <ToolHeader tool={tool} verbatim={verbatim} helpOverlay={helpOverlay} locale={locale} t={t} />
 
-      <section id="tool-workspace" className="scroll-mt-24">
-        {tool.mode === "chat" ? (
+      <section
+        id="tool-workspace"
+        className={cn("scroll-mt-24", isChat && "flex min-h-0 flex-1 flex-col")}
+      >
+        {isChat ? (
           <ChatView
             tool={tool}
             contextProfile={profiles.find((p) => p.id === defaultProfileId) || null}

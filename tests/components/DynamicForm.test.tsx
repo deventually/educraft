@@ -52,4 +52,42 @@ describe("DynamicForm", () => {
     const results = await axe(container);
     expect(results.violations).toEqual([]);
   });
+
+  it("seeds a select to its first option so the stored value matches what is shown", () => {
+    // A controlled <select> whose value matches no <option> visually shows the
+    // first option but holds "". Defaulting to the first option keeps the value
+    // and the display in sync, so the choice actually reaches the prompt.
+    const fields: InputField[] = [
+      {
+        name: "theorist",
+        label: { nl: "Theoreticus", en: "Theorist" },
+        kind: "select",
+        required: true,
+        options: [
+          { value: "Jean Piaget", label: { nl: "Piaget", en: "Piaget" } },
+          { value: "Lev Vygotsky", label: { nl: "Vygotsky", en: "Vygotsky" } },
+        ],
+      },
+    ];
+
+    const values = defaultValuesFor(fields);
+    expect(values.theorist).toBe("Jean Piaget");
+  });
+
+  it("honours an explicit select defaultValue over the first option", () => {
+    const fields: InputField[] = [
+      {
+        name: "level",
+        label: { nl: "Niveau", en: "Level" },
+        kind: "select",
+        defaultValue: "hbo",
+        options: [
+          { value: "mbo", label: { nl: "mbo", en: "mbo" } },
+          { value: "hbo", label: { nl: "hbo", en: "hbo" } },
+        ],
+      },
+    ];
+
+    expect(defaultValuesFor(fields).level).toBe("hbo");
+  });
 });
