@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
+import type { ChatMessage } from "~/lib/registry/types";
 import { guidedReflection } from "~/lib/registry/tools/guided-reflection";
 import { cognitiveArchitect } from "~/lib/registry/tools/cognitive-architect";
 import { dialogicEncounters } from "~/lib/registry/tools/dialogic-encounters";
@@ -102,5 +103,44 @@ describe("buildSystemPrompt", () => {
         priorOutputs: { analyst: "doc" }, // missing "generator"
       }),
     ).toThrow();
+  });
+});
+
+describe("reinforceLanguage", () => {
+  const history: ChatMessage[] = [
+    { role: "user", content: "Leg uit wat OOP is." },
+    { role: "assistant", content: "Objectgeoriënteerd programmeren is…" },
+    { role: "user", content: "Tell me more." },
+  ];
+
+  it("echoes the directive on the last user turn so a mid-chat switch wins", () => {
+    const out = reinforceLanguage(history, "en");
+    // Earlier turns are untouched…
+    expect(out[0]).toEqual(history[0]);
+    expect(out[1]).toEqual(history[1]);
+    // …only the final user turn carries the recency reminder.
+    expect(out[2].content).toContain("Tell me more.");
+    expect(out[2].content).toContain("always respond entirely in English");
+  });
+
+  it("uses the target language for the reminder", () => {
+    const out = reinforceLanguage(history, "nl");
+    expect(out.at(-1)?.content).toContain("altijd volledig in het Nederlands");
+  });
+
+  it("does not mutate the original history (kept clean for the transcript)", () => {
+    const before = history[2].content;
+    reinforceLanguage(history, "en");
+    expect(history[2].content).toBe(before);
+  });
+
+  it("leaves messages untouched when the last turn is not a user message", () => {
+    const ending: ChatMessage[] = [{ role: "assistant", content: "Hallo!" }];
+    expect(reinforceLanguage(ending, "en")).toBe(ending);
+  });
+
+  it("returns an empty history unchanged", () => {
+    const empty: ChatMessage[] = [];
+    expect(reinforceLanguage(empty, "nl")).toBe(empty);
   });
 });

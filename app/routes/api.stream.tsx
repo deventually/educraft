@@ -1,7 +1,7 @@
 import type { Route } from "./+types/api.stream";
 import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
-import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
 import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
@@ -121,10 +121,16 @@ export async function action({ request }: Route.ActionArgs) {
       messages = [{ role: "user", content: trigger }];
     }
 
+    // Echo the language directive on the final user turn so a mid-chat language
+    // switch overrides the momentum of earlier turns. The saved transcript keeps
+    // the untouched `messages`.
+    const promptMessages =
+      tool.mode === "chat" ? reinforceLanguage(messages, outputLanguage) : messages;
+
     const tokens = provider.streamChat({
       model,
       system,
-      messages,
+      messages: promptMessages,
       images,
       temperature: stage.temperature ?? tool.defaultTemperature,
     });

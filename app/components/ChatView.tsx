@@ -53,7 +53,7 @@ export function ChatView({
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
     defaultOutputLanguage || locale,
   );
-  const threadRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   // One id for the whole conversation, so each turn updates the same project.
@@ -66,13 +66,12 @@ export function ChatView({
   // any Ollama / LM Studio models discovered at runtime.
   const modelOptions = pickableModels(localModels ?? []);
 
-  // Auto-scroll the thread to the bottom whenever a new turn is added or
-  // streamed into, so the latest output stays in view.
+  // Keep the latest output in view whenever a turn is added or streamed into.
+  // Scrolling an end anchor into view follows whichever element actually
+  // scrolls — the thread on wide screens, the page on mobile.
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every turns change to follow streaming
   useEffect(() => {
-    if (threadRef.current) {
-      threadRef.current.scrollTop = threadRef.current.scrollHeight;
-    }
+    endRef.current?.scrollIntoView({ block: "end" });
   }, [turns]);
 
   // Grow the composer textarea with its content (single line → up to ~8 lines),
@@ -237,13 +236,16 @@ export function ChatView({
   const sandboxSummary = summarizeSandbox(tool.inputs, sandboxValues, locale);
 
   return (
-    // Two-pane chat: a settings aside on the side, and a chat column whose
-    // thread scrolls internally so the composer stays pinned at all times.
-    <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row md:gap-6">
+    // Two-pane chat. On a wide screen it's a fixed-height layout: the aside sits
+    // on the right, and the chat column's thread scrolls internally so the
+    // composer stays pinned. On mobile it collapses to a single column (aside on
+    // top) that scrolls with the page — pinning there would trap the tall aside
+    // and its model/language controls off-screen.
+    <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
       {/* Settings aside — what was entered before the chat, plus model/language. */}
       <aside
         aria-labelledby="chat-settings-heading"
-        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:w-72 md:overflow-y-auto"
+        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
       >
         <h2
           id="chat-settings-heading"
@@ -309,19 +311,19 @@ export function ChatView({
         </div>
       </aside>
 
-      {/* Chat column — the thread fills the height, composer pinned to the bottom. */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        {/* Message thread — the scroll region that fills the available height */}
+      {/* Chat column — on wide screens the thread fills the height and the
+          composer pins; on mobile it flows in the page scroll. */}
+      <div className="flex flex-col md:min-h-0 md:flex-1">
+        {/* Message thread — the scroll region that fills the available height (md+) */}
         <div
-          ref={threadRef}
-          className="min-h-0 flex-1 overflow-y-auto"
+          className="md:min-h-0 md:flex-1 md:overflow-y-auto"
           role="log"
           aria-live="polite"
           aria-label="Chat thread"
         >
           {isEmpty ? (
             // Centered welcome, like a fresh chat — greeting + starter prompts.
-            <div className="mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-4 py-10 text-center">
+            <div className="mx-auto flex min-h-[50vh] max-w-3xl flex-col items-center justify-center px-4 py-10 text-center md:h-full md:min-h-0">
               <span className="mb-4 grid size-14 place-items-center rounded-2xl bg-violet-50 text-violet-600">
                 <ToolIcon name={tool.icon} className="size-7" />
               </span>
@@ -380,6 +382,9 @@ export function ChatView({
                   </div>
                 ),
               )}
+              {/* Anchor the auto-scroll: scrolls the thread (md+) or the page
+                  (mobile) so the latest turn stays in view while streaming. */}
+              <div ref={endRef} aria-hidden />
             </div>
           )}
         </div>

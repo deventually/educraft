@@ -1,7 +1,7 @@
 import { getRuntimePrompt } from "~/lib/prompts";
 import type { ContextProfile } from "~/lib/context/types";
 import { formatProfile } from "~/lib/context/format";
-import type { OutputLanguage, StageDependency } from "~/lib/registry/types";
+import type { ChatMessage, OutputLanguage, StageDependency } from "~/lib/registry/types";
 import { interpolate, type TemplateValues } from "./interpolate";
 
 const LANGUAGE_LABEL: Record<OutputLanguage, string> = {
@@ -65,4 +65,30 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
 
   const filled = interpolate(template, values, { allowEmpty });
   return `${filled}\n\n${LANGUAGE_DIRECTIVE[args.outputLanguage]}`;
+}
+
+/**
+ * Reinforce the output language at the point of highest recency: the last user
+ * turn. The system prompt already carries {@link LANGUAGE_DIRECTIVE}, but in a
+ * long chat the model reads many prior-language turns *after* the system prompt,
+ * and that momentum can outweigh a single up-front instruction. Echoing the
+ * directive on the final user message — the last thing the model reads before
+ * replying — makes a mid-conversation language switch take effect immediately.
+ *
+ * Returns a copy; the original history (used for the saved transcript) is left
+ * untouched so the reminder never leaks into stored conversations.
+ */
+export function reinforceLanguage(
+  messages: ChatMessage[],
+  outputLanguage: OutputLanguage,
+): ChatMessage[] {
+  if (messages.length === 0) return messages;
+  const lastIndex = messages.length - 1;
+  const last = messages[lastIndex];
+  if (last.role !== "user") return messages;
+  return messages.map((msg, i) =>
+    i === lastIndex
+      ? { ...msg, content: `${msg.content}\n\n[${LANGUAGE_DIRECTIVE[outputLanguage]}]` }
+      : msg,
+  );
 }

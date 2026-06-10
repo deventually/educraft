@@ -18,10 +18,14 @@ export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   // A chat tool claims the full height: the page itself must not scroll and the
   // footer is hidden, so the chat's own thread scrolls and the composer pins.
+  // Scoped to the tool page itself — a help page (/help/:id) for the same tool
+  // also carries the tool in its loader data, but must scroll like any article.
   const matches = useMatches();
-  const isChatRoute = matches.some(
-    (m) => (m.data as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
-  );
+  const isChatRoute =
+    location.pathname.startsWith("/tools/") &&
+    matches.some(
+      (m) => (m.data as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
+    );
 
   const nav: NavItem[] = [
     { to: "/", label: t.nav.tools, end: true },
@@ -107,7 +111,9 @@ export default function AppShell() {
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col",
-          isChatRoute ? "overflow-hidden" : "overflow-y-auto",
+          // A chat route pins itself only from md upward; on mobile it scrolls
+          // with the page so the stacked aside (and its controls) stays reachable.
+          isChatRoute ? "overflow-y-auto md:overflow-hidden" : "overflow-y-auto",
         )}
       >
         <main
