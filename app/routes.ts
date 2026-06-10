@@ -8,6 +8,9 @@ export default [
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("settings", "routes/settings.tsx"),
     route("about", "routes/about.tsx"),
+    route("contact", "routes/contact.tsx"),
+    route("cookies", "routes/cookies.tsx"),
+    route("legal", "routes/legal.tsx"),
   ]),
   // Resource route (no UI) — SSE streaming endpoint for generators.
   route("api/stream", "routes/api.stream.tsx"),

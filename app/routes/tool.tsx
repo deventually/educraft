@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import {
-  ArrowRight,
   BookOpen,
   ChevronDown,
   ChevronRight,
@@ -72,7 +71,13 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
 
       <section
         id="tool-workspace"
-        className={cn("scroll-mt-24", isChat && "flex min-h-0 flex-1 flex-col")}
+        className={cn(
+          "scroll-mt-24",
+          // On md+ the chat workspace fills the remaining height and pins its
+          // composer, but keeps a min-height floor so it never collapses when an
+          // expanded ToolHeader pushes it down — the page scrolls instead.
+          isChat && "flex min-h-0 flex-1 flex-col md:min-h-[30rem]",
+        )}
       >
         {isChat ? (
           <ChatView
@@ -187,13 +192,6 @@ function ToolHeader({
               aria-hidden
             />
           </button>
-          <a
-            href="#tool-workspace"
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-          >
-            <ArrowRight className="size-4" aria-hidden />
-            {multiStage ? t.tool.startStage1 : t.tool.start}
-          </a>
         </div>
       </div>
 

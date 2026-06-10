@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AppShell from "~/components/AppShell";
@@ -80,6 +80,34 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByRole("contentinfo")).toBeNull();
   });
 
+  it("keeps the chat page vertically scrollable so an expanded header is never clipped", async () => {
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: AppShell,
+        children: [
+          { index: true, Component: () => <p>Tools home</p> },
+          {
+            path: "tools/:slug",
+            loader: () => ({ tool: { mode: "chat" } }),
+            Component: () => <p>Chat tool</p>,
+          },
+        ],
+      },
+    ]);
+    const { container } = render(<Stub initialEntries={["/tools/mentorai"]} />);
+    await screen.findByText("Chat tool");
+
+    // The single scroll region wraps the <main id="top"> outlet.
+    const scrollRegion = container.querySelector("#top")?.parentElement;
+    expect(scrollRegion).not.toBeNull();
+    const cls = scrollRegion?.className ?? "";
+    // It must allow vertical scrolling and must never clip overflow — a tall,
+    // expanded ToolHeader has to remain reachable on a chat route.
+    expect(cls).toContain("overflow-y-auto");
+    expect(cls).not.toMatch(/overflow-hidden/);
+  });
+
   it("has no a11y violations with the menu closed", async () => {
     const { container } = renderShell();
     const results = await axe(container, axeOpts);
@@ -91,5 +119,23 @@ describe("AppShell top navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const results = await axe(container, axeOpts);
     expect(results.violations).toEqual([]);
+  });
+});
+
+describe("AppShell footer extras", () => {
+  it("offers a back-to-top link that targets the top of the page", () => {
+    renderShell();
+    const footer = screen.getByRole("contentinfo");
+    const backToTop = within(footer).getByRole("link", { name: "Naar boven" });
+    expect(backToTop).toHaveAttribute("href", "#top");
+    // The anchor target exists so the link actually scrolls somewhere.
+    expect(document.getElementById("top")).not.toBeNull();
+  });
+
+  it("surfaces a direct contact email as a mailto link", () => {
+    renderShell();
+    const footer = screen.getByRole("contentinfo");
+    const mail = within(footer).getByRole("link", { name: /@/ });
+    expect(mail.getAttribute("href")).toMatch(/^mailto:/);
   });
 });
