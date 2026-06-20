@@ -217,7 +217,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           {resultView === "grid" ? (
             <ToolGrid>
               {results.map((tool) => (
-                <li key={tool.slug} className="flex">
+                <li key={tool.slug} className="contents">
                   <ToolCard tool={tool} locale={locale} t={t} />
                 </li>
               ))}
@@ -280,7 +280,7 @@ function GoalSections({ tools, locale, t }: { tools: ToolCardData[]; locale: Loc
             </div>
             <ToolGrid>
               {inGoal.map((tool) => (
-                <li key={tool.slug} className="flex">
+                <li key={tool.slug} className="contents">
                   <ToolCard tool={tool} locale={locale} t={t} showAudience={false} />
                 </li>
               ))}
@@ -322,31 +322,29 @@ function ToolCard({
     <Link
       to={`/tools/${tool.slug}`}
       aria-label={toolAria(tool, locale, t)}
-      className="group flex flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+      className="group row-span-4 grid grid-rows-subgrid items-start gap-y-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
     >
-      <div className="mb-3 flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <span className="grid size-[42px] shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
           <ToolIcon name={tool.icon} />
         </span>
-        <h3 className="m-0 flex min-w-0 flex-1 flex-wrap items-center gap-2 text-base font-semibold leading-snug text-slate-900">
+        <h3 className="m-0 min-w-0 flex-1 self-center text-base font-semibold leading-snug text-slate-900">
           {loc(tool.name, locale)}
-          {tool.stages > 1 && <StageChip count={tool.stages} t={t} />}
         </h3>
       </div>
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         {showAudience && (
           <Badge tone={tool.userType === "student" ? "brass" : "slate"}>
             {tool.userType === "student" ? t.badge.student : t.badge.instructor}
           </Badge>
         )}
         <ModePill mode={tool.mode} t={t} />
+        {tool.stages > 1 && <StageChip count={tool.stages} t={t} />}
       </div>
-      <p className="mt-1.5 flex-1 text-sm leading-relaxed text-slate-600">
-        {loc(tool.tagline, locale)}
-      </p>
-      <div className="mt-4 flex items-center justify-between gap-2.5">
+      <p className="text-sm leading-relaxed text-slate-600">{loc(tool.tagline, locale)}</p>
+      <div className="flex items-center justify-between gap-2.5 self-end">
         <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-          <BookOpen className="size-3.5 text-slate-400" aria-hidden />
+          <BookOpen className="size-3.5 shrink-0 text-slate-400" aria-hidden />
           {loc(tool.theory, locale)}
         </span>
         <ArrowRight className="size-4 shrink-0 text-violet-500 transition-transform group-hover:translate-x-0.5" />
@@ -447,7 +445,7 @@ function ModePill({ mode, t }: { mode: InteractionMode; t: T }) {
 
 function StageChip({ count, t }: { count: number; t: T }) {
   return (
-    <span className="whitespace-nowrap rounded-full border border-[#ecdcc0] bg-amber-50 px-1.5 py-px text-[10.5px] font-semibold text-brass-600">
+    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#ecdcc0] bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-brass-600">
       {fmt(t.home.stages, { count })}
     </span>
   );

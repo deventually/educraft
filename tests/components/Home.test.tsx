@@ -72,6 +72,26 @@ describe("Home / tools page", () => {
     expect(screen.getByText("4 fasen")).toBeInTheDocument();
   });
 
+  it("places the stage chip in the meta row next to the mode pill, not inside the title", () => {
+    renderHome();
+    const stageChip = screen.getByText("4 fasen");
+    // It must not live inside the card's <h3> title (which would make titles wrap unevenly).
+    expect(stageChip.closest("h3")).toBeNull();
+    // It shares its row with the mode pill so all the meta chips line up together.
+    const metaRow = stageChip.parentElement;
+    expect(metaRow).not.toBeNull();
+    expect(metaRow).toHaveTextContent("Generator");
+  });
+
+  it("shows full tool titles without clamping or truncating them", () => {
+    renderHome();
+    const heading = screen.getByRole("heading", { name: /Cognitive Architect/ });
+    expect(heading.textContent).toContain("Cognitive Architect");
+    // No line-clamp wrapper — the whole title must be visible so users don't have to guess.
+    expect(heading.className).not.toMatch(/line-clamp/);
+    expect(heading.querySelector('[class*="line-clamp"]')).toBeNull();
+  });
+
   it("collapses to a flat result list when a filter is applied", async () => {
     const user = userEvent.setup();
     renderHome();
