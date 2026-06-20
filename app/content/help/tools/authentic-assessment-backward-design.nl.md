@@ -12,6 +12,6 @@ Het is een **one-shot generator** die Backward Design volgt: van leeruitkomsten 
 - **Maak de authentieke rol concreet**: wie is de student (junior developer, adviseur…), voor wie levert die op, en wat?
 - **Wees eerlijk over je randvoorwaarden** (nakijkcapaciteit, accreditatie) — dan blijft de toets uitvoerbaar.
 - **Stel het iteratieniveau realistisch in**; draft + feedback vraagt andere planning dan één inlevermoment.
-- Werk je opleidingsbreed? Koppel je [contextprofiel](/help/context-profielen) voor afgestemde competenties.
+- Werk je opleidingsbreed? Koppel je [contextprofiel](/help/context-profiles) voor afgestemde competenties.
 
 > Bron: hoofdstuk *Backward Design* uit *The Pedagogical Promptbook* (Wiggins & McTighe; AAC&U VALUE-rubrics).

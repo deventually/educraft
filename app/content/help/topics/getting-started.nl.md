@@ -3,7 +3,7 @@
 LimeOnIt zet evidence-based onderwijsmethoden uit *The Pedagogical Promptbook* om in werkende tools voor het hbo. Zo werk je in vier stappen:
 
 1. **Kies een tool.** Op de startpagina staan alle tools. Filter op **Voor docenten** of **Voor studenten** om sneller te vinden wat je zoekt.
-2. **Stel je onderwijscontext in.** Maak onder **Onderwijscontext** een profiel aan (opleiding, vak, niveau, beroepspraktijk). Dat profiel wordt automatisch in elke prompt verwerkt, zodat het resultaat past bij jóuw onderwijs. Zie [Onderwijscontext instellen](/help/context-profielen).
+2. **Stel je onderwijscontext in.** Maak onder **Onderwijscontext** een profiel aan (opleiding, vak, niveau, beroepspraktijk). Dat profiel wordt automatisch in elke prompt verwerkt, zodat het resultaat past bij jóuw onderwijs. Zie [Onderwijscontext instellen](/help/context-profiles).
 3. **Genereer of begin een gesprek.** One-shot-tools vul je in en genereer je in één keer. Chat-tools voeren een gesprek met je: begin met een suggestie of typ je eigen bericht.
 4. **Bewaar en hergebruik.** Resultaten verschijnen onder **Projecten**. Daar kun je ze teruglezen, kopiëren, exporteren en verwijderen.
 

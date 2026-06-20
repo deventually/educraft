@@ -9,7 +9,7 @@ Het is een **one-shot generator**: vul de velden in en genereer in één keer. J
 ## Tips
 
 - **Benoem de leeruitkomst van de reflectie zelf**, niet alleen het onderwerp. Reflectie is een leeractiviteit, geen verslag.
-- **Koppel aan de beroepspraktijk** via je [contextprofiel](/help/context-profielen) — dan worden de vragen concreter.
+- **Koppel aan de beroepspraktijk** via je [contextprofiel](/help/context-profiles) — dan worden de vragen concreter.
 - **Itereer**: pas een veld aan en genereer opnieuw als de diepgang of toon nog niet klopt.
 - Te algemeen resultaat? Maak het leerdoel en de context specifieker.
 

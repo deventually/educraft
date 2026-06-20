@@ -80,11 +80,11 @@ export const GOAL_ORDER: TeachingGoal[] = ["design", "assess", "motivate", "coac
 
 /** Maps each tool slug to its teaching goal. */
 export const TOOL_GOALS: Record<string, TeachingGoal> = {
-  "begeleide-reflectie": "design",
+  "guided-reflection": "design",
   "cognitive-architect": "design",
   "bloom-by-design": "design",
   contextualization: "design",
-  "authentieke-toetsing": "assess",
+  "authentic-assessment": "assess",
   "forum-autograder": "assess",
   "math-grading": "assess",
   "stage-assessment": "assess",
@@ -103,7 +103,7 @@ export const TOOL_GOALS: Record<string, TeachingGoal> = {
  * like "motivatie" or "rubric" or "gagné" surfaces the right tool.
  */
 export const TOOL_KEYWORDS: Record<string, string[]> = {
-  "begeleide-reflectie": [
+  "guided-reflection": [
     "backward design",
     "leeruitkomsten",
     "outcomes",
@@ -148,7 +148,7 @@ export const TOOL_KEYWORDS: Record<string, string[]> = {
     "gaps",
     "reflectie",
   ],
-  "authentieke-toetsing": [
+  "authentic-assessment": [
     "toets",
     "assessment",
     "rubric",

@@ -12,6 +12,6 @@ It's a **one-shot generator with image input**. Upload a photo of the handwritte
 - **Make your rubric explicit with points** (e.g. correct answer 5pt, steps 3pt, notation 2pt) for a consistent score.
 - **Check the handwriting transcription**: verify any doubtful digits or symbols yourself.
 - **Use it as an aid, not a final verdict** — you remain responsible for the grade.
-- Tie in your [context profile](/help/context-profielen) so the feedback fits your subject and level.
+- Tie in your [context profile](/help/context-profiles) so the feedback fits your subject and level.
 
 > Source: the *Grading Handwritten Math Responses* chapter of *The Pedagogical Promptbook* (effective feedback, Hattie & Timperley; Shute).

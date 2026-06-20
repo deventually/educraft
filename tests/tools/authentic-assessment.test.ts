@@ -7,11 +7,11 @@ const profile = (studyYear?: 1 | 2 | 3 | 4): ContextProfile => ({ id: "p", name:
 
 describe("tool: authentic-assessment", () => {
   it("registers and resolves by slug", () => {
-    expect(getToolBySlug("authentieke-toetsing")?.id).toBe("authentic-assessment-backward-design");
+    expect(getToolBySlug("authentic-assessment")?.id).toBe("authentic-assessment-backward-design");
   });
 
   it("derives the level from the profile's study year (no double entry)", () => {
-    const tool = getToolBySlug("authentieke-toetsing")!;
+    const tool = getToolBySlug("authentic-assessment")!;
     expect(tool.inputs.find((f) => f.name === "niveau")?.prefillFromProfile?.source).toBe(
       "studyYear",
     );

@@ -12,6 +12,6 @@ It's a **one-shot generator** that follows Backward Design: from learning outcom
 - **Make the authentic role concrete**: who is the student (junior developer, consultant…), who do they deliver to, and what?
 - **Be honest about your constraints** (grading capacity, accreditation) so the assessment stays feasible.
 - **Set the iteration level realistically**; draft + feedback needs different planning than a single submission.
-- Working across a programme? Tie in your [context profile](/help/context-profielen) for aligned competencies.
+- Working across a programme? Tie in your [context profile](/help/context-profiles) for aligned competencies.
 
 > Source: the *Backward Design* chapter of *The Pedagogical Promptbook* (Wiggins & McTighe; AAC&U VALUE rubrics).

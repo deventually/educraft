@@ -10,7 +10,7 @@ type ToolData = ComponentProps<typeof Home>["loaderData"]["tools"][number];
 
 const tools: ToolData[] = [
   {
-    slug: "begeleide-reflectie",
+    slug: "guided-reflection",
     name: { nl: "Begeleide reflectie", en: "Guided Reflection" },
     tagline: { nl: "Ontwerp een les.", en: "Design a lesson." },
     icon: "compass",

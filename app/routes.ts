@@ -6,7 +6,7 @@ export default [
     route("tools/:slug", "routes/tool.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
-    route("settings", "routes/settings.tsx"),
+    route("context-profiles", "routes/context-profiles.tsx"),
     route("about", "routes/about.tsx"),
     route("contact", "routes/contact.tsx"),
     route("cookies", "routes/cookies.tsx"),

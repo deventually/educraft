@@ -9,7 +9,7 @@ It's a **one-shot generator**: fill in the fields and generate in one pass. You 
 ## Tips
 
 - **Name the learning outcome of the reflection itself**, not just the topic. Reflection is a learning activity, not a report.
-- **Tie it to the professional field** via your [context profile](/help/context-profielen) — the questions become more concrete.
+- **Tie it to the professional field** via your [context profile](/help/context-profiles) — the questions become more concrete.
 - **Iterate**: tweak a field and regenerate if the depth or tone isn't right yet.
 - Output too generic? Make the learning goal and context more specific.
 

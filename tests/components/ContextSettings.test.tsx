@@ -12,7 +12,7 @@ vi.mock("~/server/repositories/profiles.server", () => ({
   deleteProfile: () => {},
 }));
 
-import Settings from "~/routes/settings";
+import Settings from "~/routes/context-profiles";
 
 type Profile = {
   id: string;
@@ -27,8 +27,10 @@ function renderSettings(profiles: Profile[] = [], defaultId = "") {
   const props = { loaderData: { profiles, defaultId } } as unknown as ComponentProps<
     typeof Settings
   >;
-  const Stub = createRoutesStub([{ path: "/settings", Component: () => <Settings {...props} /> }]);
-  return render(<Stub initialEntries={["/settings"]} />);
+  const Stub = createRoutesStub([
+    { path: "/context-profiles", Component: () => <Settings {...props} /> },
+  ]);
+  return render(<Stub initialEntries={["/context-profiles"]} />);
 }
 
 // happy-dom loads no stylesheet, so axe can't compute real contrast.

@@ -11,6 +11,6 @@ It's a **one-shot generator**. You paste your course outline, learning outcomes,
 - **Be explicit about your approach** (lectures, group work, project-based) *and* the why — that's what the analysis works on.
 - **Provide real learning outcomes**, one per line; vague goals give a vague alignment check.
 - **Use the output as a mirror**, not a verdict: the "gaps" are starting points for redesign.
-- Tie in your [context profile](/help/context-profielen) so the analysis accounts for your programme and level.
+- Tie in your [context profile](/help/context-profiles) so the analysis accounts for your programme and level.
 
 > Source: the *Making Pedagogical Intent Visible* chapter of *The Pedagogical Promptbook* (constructive alignment, Biggs; Wiggins & McTighe).

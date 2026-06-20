@@ -13,7 +13,7 @@ Dit is een **meertraps-tool**. Elke fase bouwt voort op de vorige: de uitvoer va
 ## Tips
 
 - **Investeer in fase 1.** Een scherp ontwerp maakt alle volgende fasen beter.
-- **Stel een rijk [contextprofiel](/help/context-profielen) in** — bij meertraps-output telt context dubbel.
+- **Stel een rijk [contextprofiel](/help/context-profiles) in** — bij meertraps-output telt context dubbel.
 - **Niet tevreden over een fase?** Genereer díe fase opnieuw voordat je verdergaat.
 
 > Bron: hoofdstuk *Automating Gagné* uit *The Pedagogical Promptbook*.

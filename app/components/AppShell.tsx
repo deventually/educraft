@@ -33,7 +33,7 @@ export default function AppShell() {
     { to: "/", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
     { to: "/help", label: t.nav.help, end: false },
-    { to: "/settings", label: t.nav.settings, end: false },
+    { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/about", label: t.nav.about, end: false },
   ];
 
@@ -140,7 +140,7 @@ function SiteFooter({ t }: { t: Messages }) {
       links: [
         { to: "/", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
-        { to: "/settings", label: t.nav.settings },
+        { to: "/context-profiles", label: t.nav.settings },
       ],
     },
     {

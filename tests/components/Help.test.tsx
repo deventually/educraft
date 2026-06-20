@@ -14,7 +14,7 @@ import HelpPage from "~/routes/help.$id";
 const indexData = {
   topics: [
     { slug: "getting-started", title: "Aan de slag" },
-    { slug: "context-profielen", title: "Onderwijscontext instellen" },
+    { slug: "context-profiles", title: "Onderwijscontext instellen" },
   ],
   tools: [
     {

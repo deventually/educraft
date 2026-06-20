@@ -28,7 +28,7 @@ describe("help registry — tool resolution", () => {
 describe("help registry — topics", () => {
   it("ships the core topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("getting-started");
-    expect(HELP_TOPIC_SLUGS).toContain("context-profielen");
+    expect(HELP_TOPIC_SLUGS).toContain("context-profiles");
   });
 
   it("has both nl and en for every topic (no half-translated topics)", () => {
@@ -47,7 +47,7 @@ describe("help registry — topics", () => {
   it("derives a topic title from its first H1", () => {
     expect(getTopicTitle("getting-started", "nl")).toBe("Aan de slag");
     expect(getTopicTitle("getting-started", "en")).toBe("Getting started");
-    expect(getTopicTitle("context-profielen", "nl")).toBe("Onderwijscontext instellen");
+    expect(getTopicTitle("context-profiles", "nl")).toBe("Onderwijscontext instellen");
     // Unknown slug falls back to the slug itself.
     expect(getTopicTitle("does-not-exist", "nl")).toBe("does-not-exist");
   });

@@ -10,7 +10,7 @@ Het is een **one-shot generator**. Beschrijf je context en het specifieke motiva
 
 - **Beschrijf de barrière concreet** — "studenten slaan testoefeningen over omdat ze het nut niet zien" levert betere PowerUps dan "weinig motivatie".
 - **Vul de studentkenmerken in**: sterktes én uitdagingen sturen de toon van de interventies.
-- **Koppel aan je [contextprofiel](/help/context-profielen)** zodat de voorbeelden bij jouw opleiding en beroepspraktijk passen.
+- **Koppel aan je [contextprofiel](/help/context-profiles)** zodat de voorbeelden bij jouw opleiding en beroepspraktijk passen.
 - **Begin klein**: kies één PowerUp om uit te proberen voordat je je hele cursus herontwerpt.
 
 > Bron: hoofdstuk *The ARCS Reactor* uit *The Pedagogical Promptbook* (ARCS-V-model, Keller).

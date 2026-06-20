@@ -10,7 +10,7 @@ It's a **one-shot generator**. Describe your context and the specific motivation
 
 - **Describe the barrier concretely** — "students skip the testing exercises because they don't see the point" yields better PowerUps than "low motivation".
 - **Fill in the student traits**: strengths *and* challenges shape the tone of the interventions.
-- **Tie it to your [context profile](/help/context-profielen)** so the examples fit your programme and professional field.
+- **Tie it to your [context profile](/help/context-profiles)** so the examples fit your programme and professional field.
 - **Start small**: pick one PowerUp to try before redesigning your whole course.
 
 > Source: the *ARCS Reactor* chapter of *The Pedagogical Promptbook* (ARCS-V model, Keller).

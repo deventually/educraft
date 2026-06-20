@@ -12,7 +12,7 @@ function renderShell(initialPath = "/") {
       Component: AppShell,
       children: [
         { index: true, Component: () => <p>Tools home</p> },
-        { path: "settings", Component: () => <p>Teaching context page</p> },
+        { path: "context-profiles", Component: () => <p>Teaching context page</p> },
       ],
     },
   ]);
@@ -24,7 +24,10 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 describe("AppShell top navigation", () => {
   it("labels the context nav item 'Onderwijscontext' (Dutch default)", () => {
     renderShell();
-    expect(screen.getAllByRole("link", { name: "Onderwijscontext" }).length).toBeGreaterThan(0);
+    const links = screen.getAllByRole("link", { name: "Onderwijscontext" });
+    expect(links.length).toBeGreaterThan(0);
+    // The teaching-context page lives at /context-profiles (English URL slug).
+    expect(links[0]).toHaveAttribute("href", "/context-profiles");
     // Old label is gone.
     expect(screen.queryByText("Context & instellingen")).toBeNull();
   });

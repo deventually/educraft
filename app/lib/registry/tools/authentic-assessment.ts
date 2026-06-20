@@ -13,7 +13,7 @@ const BACKWARD_DESIGN = { nl: "Backward Design", en: "Backward Design" };
 
 export const authenticAssessment: Tool = {
   id: "authentic-assessment-backward-design",
-  slug: "authentieke-toetsing",
+  slug: "authentic-assessment",
   name: {
     nl: "Authentieke toetsing (Backward Design)",
     en: "Authentic Assessment (Backward Design)",

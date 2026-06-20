@@ -13,7 +13,7 @@ This is a **multi-stage tool**. Each stage builds on the previous one: the outpu
 ## Tips
 
 - **Invest in stage 1.** A sharp design makes every later stage better.
-- **Set a rich [context profile](/help/context-profielen)** — with multi-stage output, context counts double.
+- **Set a rich [context profile](/help/context-profiles)** — with multi-stage output, context counts double.
 - **Unhappy with a stage?** Regenerate *that* stage before moving on.
 
 > Source: the *Automating Gagné* chapter of *The Pedagogical Promptbook*.

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, useActionData, useNavigation } from "react-router";
 import { Trash2, Plus, Pencil, Wand2, PenLine, ArrowLeft } from "lucide-react";
-import type { Route } from "./+types/settings";
+import type { Route } from "./+types/context-profiles";
 import {
   listProfiles,
   createProfile,
