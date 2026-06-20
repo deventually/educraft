@@ -15,10 +15,8 @@ import {
   CourseField,
   StudyYearField,
   EqfField,
-  CompetenciesField,
   ProfessionalContextField,
   ToolsField,
-  NotesField,
   DomainFields,
   CustomFieldsEditor,
 } from "./ContextFields";
@@ -65,13 +63,10 @@ export function ContextForm({
 
       <DomainFields key={domain || "none"} domain={domain} values={packValues} />
 
-      <CompetenciesField defaultValue={profile?.competencies} />
       <ProfessionalContextField defaultValue={profile?.professionalContext} />
       <ToolsField defaultValue={profile?.tools} />
 
       <CustomFieldsEditor initial={profile?.customFields} />
-
-      <NotesField defaultValue={profile?.notes} />
 
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <input

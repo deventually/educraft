@@ -49,10 +49,25 @@ describe("formatProfile", () => {
     expect(out).toContain("hbo");
     expect(out).toContain("Verpleegkunde");
     expect(out).toContain("EQF 6");
-    expect(out).toContain("Klinisch redeneren");
     // No framework block: a Zorg & welzijn pack exists, but this profile set no values.
     expect(out).not.toContain("Relevant kader");
     expect(out).not.toContain("CanMEDS");
+  });
+
+  it("slims the injected block: omits per-task / redundant fields", () => {
+    // competencies + notes are per-task and restated by each tool's own inputs;
+    // the domain line is implied by programme + the framework header. Cutting
+    // them removes the redundancy that dilutes a generator's task instruction.
+    const out = formatProfile({ ...generic, notes: "ZZZ_NOTE_MARKER" }, "nl");
+    expect(out).not.toContain("Klinisch redeneren"); // competencies cut
+    expect(out).not.toContain("ZZZ_NOTE_MARKER"); // notes cut
+    expect(out).not.toContain("Domein/sector"); // redundant domain line cut
+    // High-signal anchors stay.
+    expect(out).toContain("Verpleegkunde"); // programme
+    expect(out).toContain("Acute zorg"); // courseName
+    expect(out).toContain("Studiejaar: 3"); // studyYear
+    expect(out).toContain("EQF 6"); // eqf
+    expect(out).toContain("Ziekenhuis"); // professionalContext
   });
 
   it("renders generic hbo fields in English", () => {

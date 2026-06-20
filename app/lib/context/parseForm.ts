@@ -99,10 +99,8 @@ export function parseContextForm(fd: FormData): ParsedContextForm {
     courseName: str(fd.get("courseName")),
     studyYear: yearRaw && year >= 1 && year <= 4 ? (year as 1 | 2 | 3 | 4) : undefined,
     eqf: eqfRaw && eqf >= 5 && eqf <= 7 ? (eqf as 5 | 6 | 7) : undefined,
-    competencies: str(fd.get("competencies")),
     professionalContext: str(fd.get("professionalContext")),
     tools: str(fd.get("tools")),
-    notes: str(fd.get("notes")),
     packValues: parsePackValues(fd, domain),
     customFields: parseCustomFields(fd),
   };

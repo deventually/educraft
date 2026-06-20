@@ -94,6 +94,19 @@ describe("Context settings", () => {
     expect(level()).toHaveValue("3"); // graduation ceiling
   });
 
+  it("omits the slimmed-out competencies and notes fields from the form", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
+    // Removed: per-task / verbatim free-text that duplicated each generator
+    // tool's own inputs and diluted the task instruction.
+    expect(container.querySelector('[name="competencies"]')).toBeNull();
+    expect(container.querySelector('[name="notes"]')).toBeNull();
+    // Kept: the standing, high-signal anchors.
+    expect(container.querySelector('[name="professionalContext"]')).not.toBeNull();
+    expect(container.querySelector('[name="programme"]')).not.toBeNull();
+  });
+
   it("shows an honest 'no national framework' note for an unpacked domain", async () => {
     const user = userEvent.setup();
     renderSettings();

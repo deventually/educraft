@@ -13,7 +13,6 @@ Beide vragen om hetzelfde:
 
 - **Naam** — bijv. "Software Engineering — jaar 2".
 - **Opleiding, vak, studiejaar, EQF-niveau** — bepalen toon en niveau van de output.
-- **Beoogde competenties / leeruitkomsten** — waar het onderwijs op stuurt.
 - **Beroepspraktijk** — voor welk werkveld je opleidt.
 
 ## Domeinkader per domein

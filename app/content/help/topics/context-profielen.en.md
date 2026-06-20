@@ -13,7 +13,6 @@ Both ask for the same things:
 
 - **Name** — e.g. "Software Engineering — year 2".
 - **Programme, course, study year, EQF level** — set the tone and level of the output.
-- **Target competencies / learning outcomes** — what the teaching steers towards.
 - **Professional field** — the field of work you prepare students for.
 
 ## Domain framework per domain

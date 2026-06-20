@@ -156,21 +156,6 @@ export function EqfField({ defaultValue }: { defaultValue?: number | string }) {
   );
 }
 
-export function CompetenciesField({ defaultValue }: { defaultValue?: string }) {
-  const t = useT();
-  return (
-    <Field id="cf-competencies" label={t.settings.competencies}>
-      <Textarea
-        id="cf-competencies"
-        name="competencies"
-        rows={2}
-        defaultValue={defaultValue}
-        placeholder={t.settings.ph.competencies}
-      />
-    </Field>
-  );
-}
-
 export function ProfessionalContextField({ defaultValue }: { defaultValue?: string }) {
   const t = useT();
   return (
@@ -195,21 +180,6 @@ export function ToolsField({ defaultValue }: { defaultValue?: string }) {
         name="tools"
         defaultValue={defaultValue}
         placeholder={t.settings.ph.tools}
-      />
-    </Field>
-  );
-}
-
-export function NotesField({ defaultValue }: { defaultValue?: string }) {
-  const t = useT();
-  return (
-    <Field id="cf-notes" label={t.settings.notes}>
-      <Textarea
-        id="cf-notes"
-        name="notes"
-        rows={2}
-        defaultValue={defaultValue}
-        placeholder={t.settings.ph.notes}
       />
     </Field>
   );

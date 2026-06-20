@@ -51,13 +51,22 @@ export interface ContextProfile {
   studyYear?: 1 | 2 | 3 | 4;
   /** EQF-niveau (5/6/7) — het enige niveau dat over alle hbo-opleidingen geldt. */
   eqf?: 5 | 6 | 7;
-  /** Beoogde competenties / leeruitkomsten (vrije tekst). */
+  /**
+   * @deprecated Legacy. No longer collected or injected: competencies are
+   * per-task and every generator tool already asks for them, so injecting them
+   * here only duplicated and diluted the task. Kept on the type so older stored
+   * profiles still deserialize without a migration.
+   */
   competencies?: string;
   /** Beroepspraktijk / werkveld waarvoor wordt opgeleid (vrije tekst). */
   professionalContext?: string;
   /** Technologie, methoden of instrumenten, bijv. "Java", "SPSS", "verpleegtechnieken". */
   tools?: string;
-  /** Vrije aanvullende context, woordelijk meegegeven aan het model. */
+  /**
+   * @deprecated Legacy. No longer collected or injected: free-text notes were
+   * passed verbatim and competed with the tool's own task instruction. Kept on
+   * the type so older stored profiles still deserialize without a migration.
+   */
   notes?: string;
 
   // --- Domain pack + custom extension ---

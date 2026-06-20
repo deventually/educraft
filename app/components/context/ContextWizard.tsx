@@ -18,10 +18,8 @@ import {
   CourseField,
   StudyYearField,
   EqfField,
-  CompetenciesField,
   ProfessionalContextField,
   ToolsField,
-  NotesField,
   DomainFields,
   CustomFieldsEditor,
 } from "./ContextFields";
@@ -131,10 +129,8 @@ export function ContextWizard({ onCancel }: { onCancel: () => void }) {
       {/* Step 3 — Custom fields & context */}
       <div hidden={step !== 2} className="space-y-4">
         <CustomFieldsEditor />
-        <CompetenciesField />
         <ProfessionalContextField />
         <ToolsField />
-        <NotesField />
       </div>
 
       {/* Step 4 — Finish */}

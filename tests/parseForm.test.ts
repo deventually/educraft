@@ -27,7 +27,6 @@ describe("parseContextForm", () => {
         ["domain", "ICT"],
         ["studyYear", "2"],
         ["eqf", "6"],
-        ["competencies", "Klinisch redeneren"],
       ]),
     );
     expect(input?.name).toBe("SE jaar 2");
