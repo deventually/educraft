@@ -139,6 +139,8 @@ export const stageAssessment: Tool = {
       min: 1,
       max: 6,
       defaultValue: 3,
+      // Copied straight from the teaching context's study year when one is selected.
+      prefillFromProfile: { source: "studyYear" },
       group: CONTEXT,
     },
     {

@@ -67,6 +67,11 @@ export const authenticAssessment: Tool = {
         { value: "graduation phase", label: { nl: "Afstudeerfase", en: "Graduation phase" } },
       ],
       defaultValue: "advanced",
+      // Derived from the teaching context's study year when one is selected.
+      prefillFromProfile: {
+        source: "studyYear",
+        map: { "1": "introductory", "2": "advanced", "3": "advanced", "4": "graduation phase" },
+      },
       group: CURSUSCONTEXT,
     },
     {

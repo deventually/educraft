@@ -3,7 +3,13 @@ import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
-import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
+import {
+  DynamicForm,
+  defaultValuesFor,
+  missingRequired,
+  profilePrefillValues,
+  type FormValues,
+} from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
@@ -24,8 +30,36 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
-  const [values, setValues] = useState<FormValues>(() => defaultValuesFor(tool.inputs));
+  const [values, setValues] = useState<FormValues>(() => ({
+    ...defaultValuesFor(tool.inputs),
+    // Derive any profile-backed fields (e.g. course level) from the default
+    // profile so they aren't entered twice.
+    ...profilePrefillValues(
+      tool.inputs,
+      profiles.find((p) => p.id === defaultProfileId),
+    ),
+  }));
   const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
+
+  // Switching the teaching context re-derives its profile-backed fields, while
+  // leaving the rest of the form untouched. A field with no derived value (e.g.
+  // a profile without a study year, or "no profile") resets to its empty
+  // default, so a stale prefill never lingers.
+  function selectProfile(id: string) {
+    setContextProfileId(id);
+    const prefill = profilePrefillValues(
+      tool.inputs,
+      profiles.find((p) => p.id === id),
+    );
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const f of tool.inputs) {
+        if (!f.prefillFromProfile) continue;
+        next[f.name] = f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name];
+      }
+      return next;
+    });
+  }
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   const [model, setModel] = useState(tool.defaultModel);
   const [output, setOutput] = useState("");
@@ -101,7 +135,7 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
           usesContextProfile={tool.usesContextProfile}
           profiles={profiles}
           contextProfileId={contextProfileId}
-          onProfile={setContextProfileId}
+          onProfile={selectProfile}
           outputLanguage={outputLanguage}
           onLanguage={setOutputLanguage}
           model={model}

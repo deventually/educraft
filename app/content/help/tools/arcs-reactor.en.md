@@ -4,7 +4,7 @@ ARCS Reactor helps you tackle **a concrete motivation problem** in your teaching
 
 ## How it works
 
-It's a **one-shot generator**. Describe your context and the specific motivational barrier; you get an ARCS-V diagnosis (Attention, Relevance, Confidence, Satisfaction, Volition), 2–3 worked-out "Learning PowerUps", three remixes, and a supporting insight.
+It's a **one-shot generator**. Describe your context and the specific motivation problem; you get an ARCS-V diagnosis (Attention, Relevance, Confidence, Satisfaction, Volition), 2–3 worked-out "Learning PowerUps", three remixes, and a supporting insight.
 
 ## Tips
 

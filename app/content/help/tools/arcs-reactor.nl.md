@@ -4,7 +4,7 @@ ARCS Reactor helpt je bij **een concreet motivatieprobleem** in je onderwijs. Ge
 
 ## Hoe werkt het?
 
-Het is een **one-shot generator**. Beschrijf je context en de specifieke motivatiebarrière; je krijgt een ARCS-V-diagnose (Attention, Relevance, Confidence, Satisfaction, Volition), 2–3 uitgewerkte "Learning PowerUps", drie remixes en een onderbouwend inzicht.
+Het is een **one-shot generator**. Beschrijf je context en het specifieke motivatieprobleem; je krijgt een ARCS-V-diagnose (Attention, Relevance, Confidence, Satisfaction, Volition), 2–3 uitgewerkte "Learning PowerUps", drie remixes en een onderbouwend inzicht.
 
 ## Tips
 

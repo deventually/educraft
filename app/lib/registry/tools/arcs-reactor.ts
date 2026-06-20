@@ -50,6 +50,20 @@ export const arcsReactor: Tool = {
       label: { nl: "Cursusniveau", en: "Course level" },
       kind: "select",
       required: true,
+      // No default: the level steers the whole motivational design, so it must be
+      // a conscious choice. The placeholder renders an empty first option (rather
+      // than silently defaulting to year 1). When a teaching context is selected,
+      // the level is derived from its study year so it needn't be re-entered.
+      placeholder: { nl: "Kies een niveau…", en: "Choose a level…" },
+      prefillFromProfile: {
+        source: "studyYear",
+        map: {
+          "1": "foundation year (year 1)",
+          "2": "main phase (years 2-3)",
+          "3": "main phase (years 2-3)",
+          "4": "graduation phase (year 4)",
+        },
+      },
       options: [
         {
           value: "foundation year (year 1)",
@@ -64,7 +78,6 @@ export const arcsReactor: Tool = {
           label: { nl: "Afstudeerfase (jaar 4)", en: "Graduation phase (year 4)" },
         },
       ],
-      defaultValue: "foundation year (year 1)",
       group: CONTEXT,
     },
     {
@@ -90,32 +103,41 @@ export const arcsReactor: Tool = {
       group: CONTEXT,
     },
     {
-      name: "studentkenmerken",
-      label: {
-        nl: "Sterktes en uitdagingen van studenten",
-        en: "Student strengths and challenges",
-      },
-      kind: "textarea",
-      rows: 2,
-      placeholder: {
-        nl: "bijv. technisch sterk, maar haken af bij theorie",
-        en: "e.g. technically strong, but disengage with theory",
-      },
-      group: CONTEXT,
-    },
-    {
       name: "barriere",
-      label: { nl: "De specifieke motivatiebarrière", en: "The specific motivational barrier" },
+      // The load-bearing input: the ARCS-V diagnosis keys off this. It comes
+      // first and is named plainly ("the motivation problem") so teachers have
+      // one obvious home for it — not the optional background field below.
+      label: { nl: "Het motivatieprobleem", en: "The motivation problem" },
       kind: "textarea",
       required: true,
       rows: 3,
       help: {
-        nl: "Beschrijf concreet waar de motivatie hapert.",
-        en: "Describe concretely where motivation breaks down.",
+        nl: "Beschrijf concreet waar de motivatie hapert — het gedrag dat je wilt veranderen.",
+        en: "Describe concretely where motivation breaks down — the behaviour you want to change.",
       },
       placeholder: {
         nl: "bijv. studenten zien het nut van geautomatiseerd testen niet en slaan oefeningen over",
         en: "e.g. students don't see the point of automated testing and skip the exercises",
+      },
+      group: CONTEXT,
+    },
+    {
+      name: "studentkenmerken",
+      // Optional, secondary context. Reframed as "background" (not "challenges")
+      // so it no longer reads as the motivation problem itself.
+      label: {
+        nl: "Achtergrond van de studenten (optioneel)",
+        en: "Student background (optional)",
+      },
+      kind: "textarea",
+      rows: 2,
+      help: {
+        nl: "Algemene kenmerken zoals voorkennis of werkhouding — niet het probleem hierboven.",
+        en: "General traits such as prior knowledge or work attitude — not the problem above.",
+      },
+      placeholder: {
+        nl: "bijv. veel voorkennis programmeren, weinig wiskunde",
+        en: "e.g. strong prior programming knowledge, little maths",
       },
       group: CONTEXT,
     },

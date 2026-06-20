@@ -76,6 +76,16 @@ export const guidedReflection: Tool = {
       required: true,
       options: NIVEAU,
       defaultValue: "main phase (years 2-3)",
+      // Derived from the teaching context's study year when one is selected.
+      prefillFromProfile: {
+        source: "studyYear",
+        map: {
+          "1": "foundation year (year 1)",
+          "2": "main phase (years 2-3)",
+          "3": "main phase (years 2-3)",
+          "4": "graduation phase (year 4)",
+        },
+      },
       group: BASIS,
     },
     {

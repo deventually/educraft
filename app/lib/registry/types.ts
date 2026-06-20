@@ -40,6 +40,25 @@ export interface FieldOption {
   label: LocalizedText;
 }
 
+/** Scalar teaching-context attributes a field may derive its default from. */
+export type ProfilePrefillSource = "studyYear" | "eqf" | "programme" | "courseName" | "domain";
+
+/**
+ * Declares that a field's initial value can be derived from the selected
+ * teaching-context profile, so a teacher needn't re-enter what the profile
+ * already states. The field stays editable — a per-task override.
+ */
+export interface ProfilePrefill {
+  /** Profile attribute to read. */
+  source: ProfilePrefillSource;
+  /**
+   * Optional lookup from the (stringified) source value to this field's value —
+   * e.g. mapping a study year 1–4 onto a course-level option. When omitted, the
+   * source value is copied through (stringified).
+   */
+  map?: Record<string, string>;
+}
+
 export interface InputField {
   /** Becomes a {{name}} placeholder key in the prompt template. */
   name: string;
@@ -64,6 +83,8 @@ export interface InputField {
   group?: LocalizedText;
   /** For textarea sizing. */
   rows?: number;
+  /** Optional: derive this field's initial value from the selected profile. */
+  prefillFromProfile?: ProfilePrefill;
 }
 
 export interface OutputFormat {

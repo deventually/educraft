@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { profilePrefillValues } from "~/lib/forms/values";
+import type { ContextProfile } from "~/lib/context/types";
 
 /**
  * Stage- & afstudeerbeoordeling: a docent-facing one-shot tool that drafts
@@ -13,6 +15,20 @@ describe("tool: stage-assessment", () => {
     const tool = getToolBySlug("stage-assessment");
     expect(tool).toBeDefined();
     expect(tool?.id).toBe("stage-assessment");
+  });
+
+  it("derives the study year directly from the profile (no double entry, numeric)", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    const field = tool.inputs.find((f) => f.name === "studyYear")!;
+    expect(field.prefillFromProfile?.source).toBe("studyYear");
+    const profile = (studyYear?: 1 | 2 | 3 | 4): ContextProfile => ({
+      id: "p",
+      name: "p",
+      studyYear,
+    });
+    // Direct copy with no map keeps the numeric value for the number input.
+    expect(profilePrefillValues(tool.inputs, profile(2)).studyYear).toBe(2);
+    expect(profilePrefillValues(tool.inputs, profile(undefined)).studyYear).toBeUndefined();
   });
 
   it("is a one-shot, single-stage instructor tool", () => {

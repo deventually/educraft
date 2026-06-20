@@ -15,7 +15,7 @@ import { useState, useCallback } from "react";
 // `import type` is needed because a bare `export … from` re-export does not
 // bind the name in this module's own scope (used in annotations below).
 import type { FormValues } from "~/lib/forms/values";
-export { defaultValuesFor, type FormValues } from "~/lib/forms/values";
+export { defaultValuesFor, profilePrefillValues, type FormValues } from "~/lib/forms/values";
 
 interface Props {
   fields: InputField[];
@@ -95,6 +95,7 @@ function renderControl(
     case "select":
       return (
         <Select id={id} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)}>
+          {placeholder && <option value="">{placeholder}</option>}
           {field.options?.map((o) => (
             <option key={o.value} value={o.value}>
               {loc(o.label, locale)}

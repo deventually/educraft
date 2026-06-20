@@ -1,8 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
-import { DynamicForm, defaultValuesFor } from "~/components/DynamicForm";
+import {
+  DynamicForm,
+  defaultValuesFor,
+  missingRequired,
+  profilePrefillValues,
+} from "~/components/DynamicForm";
 import type { InputField } from "~/lib/registry/types";
+import type { ContextProfile } from "~/lib/context/types";
 
 // Mock useLocale to avoid React Router context requirement
 vi.mock("~/lib/i18n/useT", () => ({
@@ -72,6 +78,73 @@ describe("DynamicForm", () => {
 
     const values = defaultValuesFor(fields);
     expect(values.theorist).toBe("Jean Piaget");
+  });
+
+  it("seeds a placeholder select to empty so it forces a conscious choice", () => {
+    // A select with a placeholder + no default starts unselected (""), rendering
+    // a leading empty option. This makes "no choice" a real, visible state so a
+    // required select can't silently submit its first option.
+    const fields: InputField[] = [
+      {
+        name: "level",
+        label: { nl: "Niveau", en: "Level" },
+        kind: "select",
+        required: true,
+        placeholder: { nl: "Kies een niveau…", en: "Choose a level…" },
+        options: [
+          { value: "year1", label: { nl: "Jaar 1", en: "Year 1" } },
+          { value: "year2", label: { nl: "Jaar 2", en: "Year 2" } },
+        ],
+      },
+    ];
+
+    const values = defaultValuesFor(fields);
+    expect(values.level).toBe(""); // not the first option
+    // …and a required placeholder select reads as missing until a choice is made.
+    expect(missingRequired(fields, values).map((f) => f.name)).toContain("level");
+
+    render(<DynamicForm fields={fields} values={values} onChange={() => {}} />);
+    const select = screen.getByRole("combobox", { name: /Level/i });
+    expect(select).toHaveValue("");
+    expect(screen.getByRole("option", { name: "Choose a level…" })).toBeInTheDocument();
+  });
+
+  it("derives field values from the selected profile (mapped + direct), omitting unknowns", () => {
+    const fields: InputField[] = [
+      {
+        name: "level",
+        label: { nl: "Niveau", en: "Level" },
+        kind: "select",
+        prefillFromProfile: { source: "studyYear", map: { "2": "mid", "3": "mid", "4": "grad" } },
+        options: [
+          { value: "mid", label: { nl: "Midden", en: "Mid" } },
+          { value: "grad", label: { nl: "Afstuderen", en: "Graduation" } },
+        ],
+      },
+      {
+        name: "discipline",
+        label: { nl: "Vak", en: "Subject" },
+        kind: "text",
+        prefillFromProfile: { source: "programme" }, // no map → copy through
+      },
+      {
+        name: "year",
+        label: { nl: "Jaar", en: "Year" },
+        kind: "number",
+        prefillFromProfile: { source: "studyYear" }, // no map → keep the numeric type
+      },
+      { name: "free", label: { nl: "Vrij", en: "Free" }, kind: "text" },
+    ];
+    const profile = { id: "x", name: "X", studyYear: 3, programme: "HBO-ICT" } as ContextProfile;
+
+    expect(profilePrefillValues(fields, profile)).toEqual({
+      level: "mid",
+      discipline: "HBO-ICT",
+      year: 3, // number preserved, not "3"
+    });
+    // A source the profile doesn't set is skipped; no profile yields nothing.
+    expect(profilePrefillValues(fields, { id: "y", name: "Y" } as ContextProfile)).toEqual({});
+    expect(profilePrefillValues(fields, null)).toEqual({});
   });
 
   it("honours an explicit select defaultValue over the first option", () => {
