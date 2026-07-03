@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import type { Route } from "./+types/home";
 import { getEnabledTools } from "~/lib/registry";
+import { canUseTool } from "~/lib/registry/access";
+import { requireUser } from "~/server/auth.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
 import {
   GOAL_ORDER,
@@ -43,25 +45,29 @@ interface ToolCardData {
   stages: number;
 }
 
-export function loader() {
-  const tools: ToolCardData[] = getEnabledTools().map((tool) => {
-    const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
-    const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
-    return {
-      slug: tool.slug,
-      name: tool.name,
-      tagline: tool.tagline,
-      icon: tool.icon,
-      userType: tool.userType,
-      mode: tool.mode,
-      theory: tool.theory.name,
-      goal: TOOL_GOALS[tool.slug] ?? "design",
-      search: [text(tool.name), text(tool.tagline), text(tool.theory.name), keywords.join(" ")]
-        .join(" ")
-        .toLowerCase(),
-      stages: tool.stages.length,
-    };
-  });
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await requireUser(request);
+  // Server-side gate: a student never even receives instructor tools in the list.
+  const tools: ToolCardData[] = getEnabledTools()
+    .filter((tool) => canUseTool(user, tool))
+    .map((tool) => {
+      const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
+      const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
+      return {
+        slug: tool.slug,
+        name: tool.name,
+        tagline: tool.tagline,
+        icon: tool.icon,
+        userType: tool.userType,
+        mode: tool.mode,
+        theory: tool.theory.name,
+        goal: TOOL_GOALS[tool.slug] ?? "design",
+        search: [text(tool.name), text(tool.tagline), text(tool.theory.name), keywords.join(" ")]
+          .join(" ")
+          .toLowerCase(),
+        stages: tool.stages.length,
+      };
+    });
   return { tools };
 }
 

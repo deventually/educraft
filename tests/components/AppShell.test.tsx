@@ -19,6 +19,20 @@ function renderShell(initialPath = "/") {
   return render(<Stub initialEntries={[initialPath]} />);
 }
 
+/** Render the shell with a signed-in user via a `root` loader (async hydration). */
+function renderShellWithUser(user: { name: string; role: string }) {
+  const Stub = createRoutesStub([
+    {
+      id: "root",
+      path: "/",
+      Component: AppShell,
+      loader: () => ({ locale: "nl", user }),
+      children: [{ index: true, Component: () => <p>Tools home</p> }],
+    },
+  ]);
+  return render(<Stub initialEntries={["/"]} />);
+}
+
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 describe("AppShell top navigation", () => {
@@ -122,6 +136,29 @@ describe("AppShell top navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const results = await axe(container, axeOpts);
     expect(results.violations).toEqual([]);
+  });
+});
+
+describe("AppShell user area", () => {
+  it("shows the current user's name and a logout control when signed in", async () => {
+    renderShellWithUser({ name: "Jan de Vries", role: "teacher" });
+    await screen.findByText("Tools home");
+    expect(screen.getByText("Jan de Vries")).toBeInTheDocument();
+    const logout = screen.getByRole("button", { name: "Uitloggen" });
+    expect(logout).toBeInTheDocument();
+    // The logout control posts to the /logout resource route.
+    expect(logout.closest("form")).toHaveAttribute("action", "/logout");
+  });
+
+  it("renders no user area when signed out", () => {
+    renderShell();
+    expect(screen.queryByRole("button", { name: "Uitloggen" })).toBeNull();
+  });
+
+  it("has no a11y violations with the user area shown", async () => {
+    const { container } = renderShellWithUser({ name: "Jan de Vries", role: "teacher" });
+    await screen.findByText("Tools home");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
 

@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
+import { canUseTool } from "~/lib/registry/access";
+import { requireUser } from "~/server/auth.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
@@ -29,9 +31,13 @@ import { loc } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
+  const user = await requireUser(request);
   const tool = getToolBySlugOrThrow(params.slug);
-  const profiles = listProfiles();
-  const defaultProfile = getDefaultProfile();
+  // A student may not open an instructor tool — indistinguishable from a
+  // non-existent tool (no information leak about what exists).
+  if (!canUseTool(user, tool)) throw new Response("Not Found", { status: 404 });
+  const profiles = await listProfiles(user.id);
+  const defaultProfile = await getDefaultProfile(user.id);
   const verbatim = tool.stages.map((s) => ({
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),

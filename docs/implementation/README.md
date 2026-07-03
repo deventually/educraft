@@ -39,7 +39,7 @@ Ground rules for every phase:
 | Session | Scope | Depends on | State |
 | --- | --- | --- | --- |
 | [P0](P0-security-hardening.md) | Zod stream body + caps · model allow-list · rate limiting · per-tool maxTokens · drizzle patch · security headers · CI | — | ✅ `0c9cdd2` |
-| [P1](P1-auth-roles-scoping.md) | Invite auth · roles (student/teacher/admin) · per-user scoping · real migrations · async repos + `getDb()` seam | P0 | ⬜ |
+| [P1](P1-auth-roles-scoping.md) | Invite auth · roles (student/teacher/admin) · per-user scoping · real migrations · async repos + `getDb()` seam | P0 | ✅ |
 | [P2](P2-ops-feedback-compliance.md) | Structured logging · daily quotas · tester feedback · AI-notice/compliance shape · healthz · deploy → **invites go out** | P1 | ⬜ |
 | [P3](P3-prompts-eqf-evals.md) | Prompt TEMPLATE.md · EQF 1–8 context · eval harness (baseline first!) · weak-prompt refactors · multi-turn stability | P2\* | ⬜ |
 | [P4](P4-admin-console.md) | Instance settings (tools/models availability) · admin routes: tools, models, invites, usage, feedback | P2 | ⬜ |

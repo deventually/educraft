@@ -1,9 +1,16 @@
+/**
+ * Repository rule (Phase 1): all DB access goes through repositories; every
+ * exported signature is `async` and returns a Promise (portability insurance);
+ * no better-sqlite3 API is used outside `db.server.ts`; and every query is
+ * scoped to its owning `userId` in the WHERE clause (never trust the client).
+ */
 import { randomUUID } from "node:crypto";
-import { desc, eq } from "drizzle-orm";
-import { db } from "../db.server";
+import { and, desc, eq } from "drizzle-orm";
+import { getDb } from "../db.server";
 import { generations, type GenerationRow } from "../schema.server";
 
 export interface SaveGenerationInput {
+  userId: string;
   projectId?: string | null;
   toolSlug: string;
   stageId?: string | null;
@@ -14,10 +21,11 @@ export interface SaveGenerationInput {
   outputMarkdown: string;
 }
 
-export function saveGeneration(input: SaveGenerationInput): GenerationRow {
+export async function saveGeneration(input: SaveGenerationInput): Promise<GenerationRow> {
   const id = randomUUID();
   const row: GenerationRow = {
     id,
+    userId: input.userId,
     projectId: input.projectId ?? null,
     toolSlug: input.toolSlug,
     stageId: input.stageId ?? null,
@@ -28,13 +36,14 @@ export function saveGeneration(input: SaveGenerationInput): GenerationRow {
     outputMarkdown: input.outputMarkdown,
     createdAt: new Date(),
   };
-  db.insert(generations).values(row).run();
+  getDb().insert(generations).values(row).run();
   return row;
 }
 
 export interface UpsertChatGenerationInput {
   /** Stable client-side session id; doubles as the generation's primary key. */
   id: string;
+  userId: string;
   toolSlug: string;
   stageId?: string | null;
   model: string;
@@ -51,10 +60,13 @@ export interface UpsertChatGenerationInput {
  * Projects page shows one entry per conversation, not one per message. The
  * original createdAt is preserved to keep list ordering stable across turns.
  */
-export function upsertChatGeneration(input: UpsertChatGenerationInput): GenerationRow {
-  const existing = getGeneration(input.id);
+export async function upsertChatGeneration(
+  input: UpsertChatGenerationInput,
+): Promise<GenerationRow> {
+  const existing = await getGeneration(input.userId, input.id);
   const row: GenerationRow = {
     id: input.id,
+    userId: input.userId,
     projectId: existing?.projectId ?? null,
     toolSlug: input.toolSlug,
     stageId: input.stageId ?? null,
@@ -66,7 +78,8 @@ export function upsertChatGeneration(input: UpsertChatGenerationInput): Generati
     createdAt: existing?.createdAt ?? new Date(),
   };
   if (existing) {
-    db.update(generations)
+    getDb()
+      .update(generations)
       .set({
         toolSlug: row.toolSlug,
         stageId: row.stageId,
@@ -76,22 +89,38 @@ export function upsertChatGeneration(input: UpsertChatGenerationInput): Generati
         outputLanguage: row.outputLanguage,
         outputMarkdown: row.outputMarkdown,
       })
-      .where(eq(generations.id, input.id))
+      .where(and(eq(generations.id, input.id), eq(generations.userId, input.userId)))
       .run();
   } else {
-    db.insert(generations).values(row).run();
+    getDb().insert(generations).values(row).run();
   }
   return row;
 }
 
-export function listGenerations(limit = 50): GenerationRow[] {
-  return db.select().from(generations).orderBy(desc(generations.createdAt)).limit(limit).all();
+export async function listGenerations(userId: string, limit = 50): Promise<GenerationRow[]> {
+  return getDb()
+    .select()
+    .from(generations)
+    .where(eq(generations.userId, userId))
+    .orderBy(desc(generations.createdAt))
+    .limit(limit)
+    .all();
 }
 
-export function getGeneration(id: string): GenerationRow | undefined {
-  return db.select().from(generations).where(eq(generations.id, id)).get();
+export async function getGeneration(
+  userId: string,
+  id: string,
+): Promise<GenerationRow | undefined> {
+  return getDb()
+    .select()
+    .from(generations)
+    .where(and(eq(generations.id, id), eq(generations.userId, userId)))
+    .get();
 }
 
-export function deleteGeneration(id: string) {
-  db.delete(generations).where(eq(generations.id, id)).run();
+export async function deleteGeneration(userId: string, id: string): Promise<void> {
+  getDb()
+    .delete(generations)
+    .where(and(eq(generations.id, id), eq(generations.userId, userId)))
+    .run();
 }

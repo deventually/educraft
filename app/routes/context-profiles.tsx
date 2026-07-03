@@ -9,6 +9,7 @@ import {
   deleteProfile,
   getDefaultProfile,
 } from "~/server/repositories/profiles.server";
+import { requireUser } from "~/server/auth.server";
 import type { ContextProfile } from "~/lib/context/types";
 import { parseContextForm } from "~/lib/context/parseForm";
 import { Button, Card, Badge } from "~/components/ui";
@@ -18,16 +19,21 @@ import { useT } from "~/lib/i18n/useT";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 
-export function loader() {
-  return { profiles: listProfiles(), defaultId: getDefaultProfile()?.id ?? "" };
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await requireUser(request);
+  return {
+    profiles: await listProfiles(user.id),
+    defaultId: (await getDefaultProfile(user.id))?.id ?? "",
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  const user = await requireUser(request);
   const fd = await request.formData();
   const intent = fd.get("intent");
 
   if (intent === "delete") {
-    deleteProfile(String(fd.get("id")));
+    await deleteProfile(user.id, String(fd.get("id")));
     return { ok: true };
   }
 
@@ -39,9 +45,9 @@ export async function action({ request }: Route.ActionArgs) {
     }
     if (intent === "update") {
       const id = String(fd.get("id") ?? "");
-      if (id) updateProfile(id, input, isDefault);
+      if (id) await updateProfile(user.id, id, input, isDefault);
     } else {
-      createProfile(input, isDefault);
+      await createProfile(user.id, input, isDefault);
     }
     return { ok: true };
   }

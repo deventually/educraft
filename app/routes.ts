@@ -12,6 +12,11 @@ export default [
     route("cookies", "routes/cookies.tsx"),
     route("legal", "routes/legal.tsx"),
   ]),
+  // Auth front door — outside the AppShell layout (no nav/footer chrome).
+  route("invite/:token", "routes/invite.tsx"),
+  route("login", "routes/login.tsx"),
+  // Resource route (no UI) — POST destroys the session.
+  route("logout", "routes/logout.tsx"),
   // Resource route (no UI) — SSE streaming endpoint for generators.
   route("api/stream", "routes/api.stream.tsx"),
   // Resource route (no UI) — persists the chosen UI locale in a cookie.

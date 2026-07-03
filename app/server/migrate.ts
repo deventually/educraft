@@ -1,11 +1,11 @@
 /**
- * Connecting to the DB creates the schema (CREATE TABLE IF NOT EXISTS), so
- * "migrating" is just a connect. Kept as an explicit `npm run db:migrate` step
- * for clarity and CI.
+ * Manual/CI migration entry point (`npm run db:migrate`). Connecting via
+ * `getDb()` applies all pending drizzle migrations from `./drizzle` (see
+ * db.server.ts), so this is a thin, explicit trigger for that same migrator.
  */
-import { db } from "./db.server";
+import { getDb } from "./db.server";
 import { DB_PATH } from "./env.server";
 
-// Touch the db so the module initializes and ensureSchema runs.
-void db;
-console.log(`✓ LimeOnIt database ready: ${DB_PATH}`);
+// Touch the db so the module initializes and migrations run.
+getDb();
+console.log(`✓ LimeOnIt database migrated: ${DB_PATH}`);

@@ -1,8 +1,12 @@
+import type { Route } from "./+types/legal";
 import { Card } from "~/components/ui";
+import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 
-export function meta() {
-  return [{ title: "Disclaimer — LimeOnIt" }];
+export function meta({ matches }: Route.MetaArgs) {
+  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const m = getMessages(root?.locale ?? DEFAULT_LOCALE);
+  return [{ title: `${m.pages.legal.heading} — ${m.appName}` }];
 }
 
 export default function Legal() {

@@ -1,9 +1,19 @@
+import type { Route } from "./+types/contact";
 import { Card } from "~/components/ui";
+import { requireUser } from "~/server/auth.server";
+import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { SITE } from "~/lib/site";
 
-export function meta() {
-  return [{ title: "Contact — LimeOnIt" }];
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireUser(request);
+  return null;
+}
+
+export function meta({ matches }: Route.MetaArgs) {
+  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const m = getMessages(root?.locale ?? DEFAULT_LOCALE);
+  return [{ title: `${m.pages.contact.heading} — ${m.appName}` }];
 }
 
 export default function Contact() {

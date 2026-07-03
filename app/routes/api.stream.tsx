@@ -7,6 +7,8 @@ import { isResolvableModel, isClientSelectable, resolveModelInfo } from "~/lib/a
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
+import { getUser } from "~/server/auth.server";
+import { canUseTool } from "~/lib/registry/access";
 import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
@@ -74,19 +76,17 @@ const rateLimiter = createRateLimiter({
   maxConcurrent: env.RATE_LIMIT_CONCURRENT,
 });
 
-/**
- * Rate-limit key: client IP (first x-forwarded-for hop behind a proxy) + the
- * chat session. Phase 1: key by userId once authentication exists.
- */
-function clientKey(request: Request, sessionId?: string): string {
-  const fwd = request.headers.get("x-forwarded-for");
-  const ip = fwd?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
-  return `${ip}:${sessionId ?? ""}`;
-}
-
 export async function action({ request }: Route.ActionArgs) {
   const locale = getLocale(request);
   const m = getMessages(locale);
+
+  // Authenticate first: an anonymous caller never reaches the model. The result
+  // is a localized SSE error (the client renders it in the result panel) rather
+  // than a redirect, which a fetch()-driven stream can't follow.
+  const user = await getUser(request);
+  if (!user) {
+    return new Response(sseError(m.error.unauthorized), { headers: SSE_HEADERS });
+  }
 
   // Cheap early reject on the declared body size, before buffering it.
   const declaredLength = Number(request.headers.get("content-length") ?? "0");
@@ -114,11 +114,21 @@ export async function action({ request }: Route.ActionArgs) {
     const tool = getToolBySlug(body.slug);
     if (!tool) return new Response(sseError(m.error.unknownTool), { headers: SSE_HEADERS });
 
+    // Role gate (server-side, not just UI): a student can't drive an instructor
+    // tool via a hand-crafted POST.
+    if (!canUseTool(user, tool)) {
+      return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
+    }
+
     const stage = tool.stages.find((s) => s.id === body.stageId) ?? tool.stages[0];
     const outputLanguage: OutputLanguage = body.outputLanguage === "en" ? "en" : "nl";
 
+    // Resolve the profile scoped to the requesting user — never fetch another
+    // user's profile by id (audit finding #2).
     const profile =
-      tool.usesContextProfile && body.contextProfileId ? getProfile(body.contextProfileId) : null;
+      tool.usesContextProfile && body.contextProfileId
+        ? await getProfile(user.id, body.contextProfileId)
+        : null;
 
     const system = buildSystemPrompt({
       promptId: stage.systemPromptId,
@@ -171,8 +181,9 @@ export async function action({ request }: Route.ActionArgs) {
     // Reserve a rate + concurrency slot as late as possible: only a request that
     // will actually stream counts against the budget. The slot is freed in
     // onFinally, which runs whether the stream completes, errors, or is closed.
-    // Phase 1: key by userId.
-    const gate = rateLimiter.acquire(clientKey(request, body.sessionId));
+    // Keyed by the authenticated user id (Phase 1) — abuse budgets follow the
+    // account, not a spoofable IP/session pair.
+    const gate = rateLimiter.acquire(user.id);
     if (!gate.ok) {
       return new Response(sseError(m.error.rateLimited), { headers: SSE_HEADERS });
     }
@@ -189,15 +200,16 @@ export async function action({ request }: Route.ActionArgs) {
     const stream = sseStream(tokens, {
       formatError: (err) => localizeError(err, locale, m.error.unknown),
       onFinally: () => gate.release(),
-      onComplete: (full) => {
+      onComplete: async (full) => {
         try {
           const sessionId =
             tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";
           if (sessionId.length >= 8 && sessionId.length <= 100) {
             // Chat: collapse the whole conversation into one project row,
             // rewritten on every turn rather than one row per message.
-            upsertChatGeneration({
+            await upsertChatGeneration({
               id: sessionId,
+              userId: user.id,
               toolSlug: tool.slug,
               stageId: stage.id,
               model,
@@ -210,7 +222,8 @@ export async function action({ request }: Route.ActionArgs) {
               ),
             });
           } else {
-            saveGeneration({
+            await saveGeneration({
+              userId: user.id,
               toolSlug: tool.slug,
               stageId: stage.id,
               model,
