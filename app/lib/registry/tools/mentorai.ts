@@ -33,6 +33,7 @@ export const mentorai: Tool = {
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
+  defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,
   phase: 1,

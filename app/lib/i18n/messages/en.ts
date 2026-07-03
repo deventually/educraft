@@ -265,5 +265,12 @@ export const en: Messages = {
     serverErrorTitle: "Error",
     unknownTool: "Unknown tool.",
     unknown: "Unknown error",
+    invalidRequest: "Invalid request.",
+    rateLimited: "Too many requests. Please try again in a moment.",
+    modelNoVision:
+      "This model ({model}) does not support image analysis. Please select a vision-capable model.",
+    invalidImages: "Invalid image format. Images must be PNG, JPEG, GIF or WebP.",
+    tooManyImages: "Too many images. Maximum 10 images allowed.",
+    invalidMessages: "Invalid message format.",
   },
 };

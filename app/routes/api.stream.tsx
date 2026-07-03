@@ -3,17 +3,29 @@ import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
-import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
+import { isResolvableModel, isClientSelectable, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
-import type { TemplateValues } from "~/lib/template/interpolate";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { localizeError } from "~/lib/i18n/errors";
+import { createRateLimiter } from "~/server/rateLimit.server";
+import { env } from "~/server/env.server";
+
+// Boundaries: every value is length/count-capped so a hostile body can never
+// balloon the prompt (and thus the owner's token bill) or exhaust memory.
+const MAX_VALUE_CHARS = 20_000; // per form field (documents land here as text)
+const MAX_VALUES_KEYS = 40;
+const MAX_MESSAGE_CHARS = 20_000; // per chat message
+const MAX_MESSAGES = 100;
+const MAX_PRIOR_OUTPUT_CHARS = 60_000; // multi-stage outputs can be long
+// Reject before buffering the body when the declared size is implausible.
+// 10 images × ~1.9 MB base64 ≈ 19 MB + text headroom.
+const MAX_BODY_BYTES = 25 * 1024 * 1024;
 
 const ChatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -25,29 +37,80 @@ const ImageInputSchema = z.object({
   dataBase64: z.string().regex(/^[A-Za-z0-9+/=]+$/),
 });
 
-interface StreamBody {
-  slug: string;
-  stageId?: string;
-  values?: TemplateValues;
-  contextProfileId?: string | null;
-  outputLanguage?: string;
-  /** Outputs of earlier stages, keyed by stage id (multi-stage tools). */
-  priorOutputs?: Record<string, string>;
-  model?: string;
-  /** For chat mode: full message history (user turns + assistant responses). */
-  messages?: ChatMessage[];
-  /** For chat mode: stable id grouping every turn into one saved project. */
-  sessionId?: string;
-  /** Images for vision-capable tools. */
-  images?: ImageInput[];
+// Mirrors TemplateValue (see lib/template/interpolate): string | number | boolean
+// | string[] | null — each string bounded so a single field can't run away.
+const TemplateValueSchema = z.union([
+  z.string().max(MAX_VALUE_CHARS),
+  z.number(),
+  z.boolean(),
+  z.array(z.string().max(MAX_VALUE_CHARS)).max(50),
+  z.null(),
+]);
+
+const StreamBodySchema = z.object({
+  slug: z.string().min(1).max(100),
+  stageId: z.string().max(100).optional(),
+  values: z
+    .record(z.string().max(100), TemplateValueSchema)
+    .refine((v) => Object.keys(v).length <= MAX_VALUES_KEYS, "too many values")
+    .optional(),
+  contextProfileId: z.string().max(100).nullish(),
+  outputLanguage: z.enum(["nl", "en"]).optional(),
+  priorOutputs: z.record(z.string().max(100), z.string().max(MAX_PRIOR_OUTPUT_CHARS)).optional(),
+  model: z.string().max(200).optional(),
+  messages: z
+    .array(ChatMessageSchema.extend({ content: z.string().max(MAX_MESSAGE_CHARS) }))
+    .max(MAX_MESSAGES)
+    .optional(),
+  sessionId: z.string().min(8).max(100).optional(),
+  images: z.array(ImageInputSchema).max(10).optional(),
+});
+
+// Process-local abuse limits. Single-instance deployment makes in-memory state
+// sound (see rateLimit.server). One map for the whole process.
+const rateLimiter = createRateLimiter({
+  windowMs: 60_000,
+  max: env.RATE_LIMIT_PER_MINUTE,
+  maxConcurrent: env.RATE_LIMIT_CONCURRENT,
+});
+
+/**
+ * Rate-limit key: client IP (first x-forwarded-for hop behind a proxy) + the
+ * chat session. Phase 1: key by userId once authentication exists.
+ */
+function clientKey(request: Request, sessionId?: string): string {
+  const fwd = request.headers.get("x-forwarded-for");
+  const ip = fwd?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
+  return `${ip}:${sessionId ?? ""}`;
 }
 
 export async function action({ request }: Route.ActionArgs) {
   const locale = getLocale(request);
   const m = getMessages(locale);
-  try {
-    const body = (await request.json()) as StreamBody;
 
+  // Cheap early reject on the declared body size, before buffering it.
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return new Response(sseError(m.error.invalidRequest), { headers: SSE_HEADERS });
+  }
+
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return new Response(sseError(m.error.invalidRequest), { headers: SSE_HEADERS });
+  }
+
+  // Validate the whole body at the boundary. Never echo Zod detail to the client;
+  // log it server-side for debugging.
+  const parsed = StreamBodySchema.safeParse(raw);
+  if (!parsed.success) {
+    console.error("Rejected /api/stream body:", parsed.error.flatten());
+    return new Response(sseError(m.error.invalidRequest), { headers: SSE_HEADERS });
+  }
+  const body = parsed.data;
+
+  try {
     const tool = getToolBySlug(body.slug);
     if (!tool) return new Response(sseError(m.error.unknownTool), { headers: SSE_HEADERS });
 
@@ -66,56 +129,34 @@ export async function action({ request }: Route.ActionArgs) {
       consumes: stage.consumes,
     });
 
+    // Server-side model allow-list: a caller may only pick a *client-selectable*
+    // model (never Opus-class). Anything else falls back to the tool/stage
+    // default, so a hostile body can't force an expensive model on the owner.
     const model =
-      body.model && isResolvableModel(body.model) ? body.model : (stage.model ?? tool.defaultModel);
+      body.model && isResolvableModel(body.model) && isClientSelectable(body.model)
+        ? body.model
+        : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 
-    // Validate images if provided
+    // Vision gate. The image array is already shape/size/count-validated by the
+    // schema; here we only refuse images to a non-vision model.
     let images: ImageInput[] | undefined;
     if (body.images && body.images.length > 0) {
-      // Check model supports images
       const modelInfo = resolveModelInfo(model);
       if (!modelInfo.supportsImages) {
-        const errorMsg =
-          outputLanguage === "en"
-            ? `This model (${modelInfo.displayName}) does not support image analysis. Please select a vision-capable model.`
-            : `Dit model (${modelInfo.displayName}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.`;
-        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
+        return new Response(
+          sseError(m.error.modelNoVision.replace("{model}", modelInfo.displayName)),
+          { headers: SSE_HEADERS },
+        );
       }
-
-      // Validate image array
-      const validated = z.array(ImageInputSchema).safeParse(body.images);
-      if (!validated.success) {
-        const errorMsg =
-          outputLanguage === "en"
-            ? "Invalid image format. Images must be PNG or JPEG."
-            : "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG of JPEG zijn.";
-        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
-      }
-
-      // Check image count
-      if (validated.data.length > 10) {
-        const errorMsg =
-          outputLanguage === "en"
-            ? "Too many images. Maximum 10 images allowed."
-            : "Te veel afbeeldingen. Maximaal 10 afbeeldingen toegestaan.";
-        return new Response(sseError(errorMsg), { headers: SSE_HEADERS });
-      }
-
-      images = validated.data;
+      images = body.images;
     }
 
-    // Chat mode: use provided message history; one-shot: trigger with initial message
+    // Chat mode: use the provided history. One-shot/multi-stage: single trigger.
     let messages: ChatMessage[];
     if (tool.mode === "chat" && body.messages) {
-      // Validate message array
-      const validated = z.array(ChatMessageSchema).safeParse(body.messages);
-      if (!validated.success) {
-        return new Response(sseError("Invalid message format"), { headers: SSE_HEADERS });
-      }
-      messages = validated.data;
+      messages = body.messages;
     } else {
-      // One-shot/multi-stage: single trigger message
       const trigger =
         outputLanguage === "en" ? "Carry out the task in full." : "Voer de opdracht volledig uit.";
       messages = [{ role: "user", content: trigger }];
@@ -127,16 +168,27 @@ export async function action({ request }: Route.ActionArgs) {
     const promptMessages =
       tool.mode === "chat" ? reinforceLanguage(messages, outputLanguage) : messages;
 
+    // Reserve a rate + concurrency slot as late as possible: only a request that
+    // will actually stream counts against the budget. The slot is freed in
+    // onFinally, which runs whether the stream completes, errors, or is closed.
+    // Phase 1: key by userId.
+    const gate = rateLimiter.acquire(clientKey(request, body.sessionId));
+    if (!gate.ok) {
+      return new Response(sseError(m.error.rateLimited), { headers: SSE_HEADERS });
+    }
+
     const tokens = provider.streamChat({
       model,
       system,
       messages: promptMessages,
       images,
       temperature: stage.temperature ?? tool.defaultTemperature,
+      maxTokens: stage.maxTokens ?? tool.defaultMaxTokens,
     });
 
     const stream = sseStream(tokens, {
       formatError: (err) => localizeError(err, locale, m.error.unknown),
+      onFinally: () => gate.release(),
       onComplete: (full) => {
         try {
           const sessionId =

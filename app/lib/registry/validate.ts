@@ -25,6 +25,13 @@ const localizedText = z.union([
   z.object({ nl: z.string().min(1), en: z.string().min(1) }),
 ]);
 
+/** Output-token cap: positive and not absurd (guards against typos/abuse). */
+const maxTokens = z
+  .number()
+  .int("maxTokens must be an integer")
+  .positive("maxTokens must be positive")
+  .max(32_000, "maxTokens must be <= 32000");
+
 const inputField = z.object({
   name: z.string().regex(/^[a-zA-Z0-9_]+$/),
   label: localizedText,
@@ -62,6 +69,7 @@ const toolStage = z.object({
   }),
   model: z.string().optional(),
   temperature: z.number().optional(),
+  maxTokens: maxTokens.optional(),
 });
 
 const toolSchema = z.object({
@@ -103,6 +111,7 @@ const toolSchema = z.object({
     .optional(),
   defaultModel: z.string().min(1),
   defaultTemperature: z.number().optional(),
+  defaultMaxTokens: maxTokens.optional(),
   usesContextProfile: z.boolean(),
   defaultOutputLanguage: z.enum(["nl", "en"]),
   enabled: z.boolean(),

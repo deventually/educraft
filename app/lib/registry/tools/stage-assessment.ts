@@ -60,6 +60,7 @@ export const stageAssessment: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
+  defaultMaxTokens: 8192,
   defaultTemperature: 0.3,
   enabled: true,
   phase: 1,

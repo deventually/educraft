@@ -78,6 +78,8 @@ async function discoverServer(server: LocalServer, timeoutMs: number): Promise<D
       supportsImages: supportsImages[i],
       tier: 2,
       local: true,
+      // Local inference is free to the owner, so discovered models stay selectable.
+      clientSelectable: true,
     }));
   } catch {
     // Server not running / not installed / timed out — simply contribute nothing.

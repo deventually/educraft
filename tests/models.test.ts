@@ -7,6 +7,7 @@ import {
   dynamicModelId,
   resolveModelInfo,
   isResolvableModel,
+  isClientSelectable,
   pickableModels,
 } from "~/lib/ai/models";
 import { providerForModel } from "~/lib/ai/provider";
@@ -89,6 +90,44 @@ describe("pickableModels (the picker list shared by every screen)", () => {
     ];
     const ids = pickableModels(visionLocal, true).map((m) => m.id);
     expect(ids).toContain("ollama::llava");
+  });
+});
+
+describe("client-selectable model allow-list", () => {
+  it("marks Haiku and Sonnet as client-selectable but never Opus", () => {
+    expect(isClientSelectable("claude-haiku-4-5")).toBe(true);
+    expect(isClientSelectable("claude-sonnet-4-6")).toBe(true);
+    // Opus is reachable only as a tool/stage default, never forced by a caller.
+    expect(isClientSelectable("claude-opus-4-8")).toBe(false);
+  });
+
+  it("keeps the local CLI agents client-selectable (they cost the owner nothing)", () => {
+    expect(isClientSelectable("claude-code")).toBe(true);
+    expect(isClientSelectable("opencode")).toBe(true);
+    expect(isClientSelectable("codex")).toBe(true);
+    expect(isClientSelectable("gemini-cli")).toBe(true);
+  });
+
+  it("treats discovered local models (Ollama / LM Studio) as selectable free inference", () => {
+    expect(isClientSelectable("ollama::gemma4:31b")).toBe(true);
+    expect(isClientSelectable("lmstudio::qwen3")).toBe(true);
+  });
+
+  it("returns false for unknown ids", () => {
+    expect(isClientSelectable("does-not-exist")).toBe(false);
+  });
+
+  it("sets clientSelectable on every static catalog entry", () => {
+    for (const m of listModels()) {
+      expect(typeof m.clientSelectable, `${m.id} needs a clientSelectable flag`).toBe("boolean");
+    }
+  });
+
+  it("never offers Opus in the picker (the server would swap it anyway)", () => {
+    expect(pickableModels().map((m) => m.id)).not.toContain("claude-opus-4-8");
+    // Selectable models still appear.
+    expect(pickableModels().map((m) => m.id)).toContain("claude-sonnet-4-6");
+    expect(pickableModels().map((m) => m.id)).toContain("claude-haiku-4-5");
   });
 });
 

@@ -10,6 +10,12 @@ export interface SseOptions {
   onComplete?: (fullText: string) => void | Promise<void>;
   /** Map a thrown value to the user-facing message (e.g. localize it). */
   formatError?: (err: unknown) => string;
+  /**
+   * Always called exactly once when the stream settles — after normal completion
+   * OR an error OR the reader closing. Use it to release resources (e.g. a rate
+   * limiter's concurrency slot) regardless of how the stream ended.
+   */
+  onFinally?: () => void;
 }
 
 export function sseStream(
@@ -40,6 +46,7 @@ export function sseStream(
         );
       } finally {
         controller.close();
+        opts.onFinally?.();
       }
     },
   });

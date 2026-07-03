@@ -28,6 +28,16 @@ export interface ModelInfo {
   tier: 1 | 2 | 3;
   /** Local provider (runs on the user's machine; no API key). */
   local?: boolean;
+  /**
+   * May a client force this model via the request body? Expensive API models
+   * (Opus-class) are reachable only as a tool/stage default, never selectable by
+   * a caller, so a malicious body can't run up the owner's bill. Local/CLI models
+   * cost the owner nothing, so they stay selectable. Phase 4 turns this hardcoded
+   * flag into the default for an admin-configurable list — the check stays in the
+   * single `isClientSelectable()` / `pickableModels()` surface so only the
+   * implementation changes.
+   */
+  clientSelectable: boolean;
 }
 
 export const MODELS = {
@@ -37,6 +47,8 @@ export const MODELS = {
     displayName: "Claude Opus 4.8",
     supportsImages: true,
     tier: 3,
+    // Opus is expensive: reachable only as a tool/stage default, never forced by a caller.
+    clientSelectable: false,
   },
   "claude-sonnet-4-6": {
     provider: "anthropic",
@@ -44,6 +56,7 @@ export const MODELS = {
     displayName: "Claude Sonnet 4.6",
     supportsImages: true,
     tier: 2,
+    clientSelectable: true,
   },
   "claude-haiku-4-5": {
     provider: "anthropic",
@@ -51,6 +64,7 @@ export const MODELS = {
     displayName: "Claude Haiku 4.5",
     supportsImages: true,
     tier: 1,
+    clientSelectable: true,
   },
   // NB: local OpenAI-compatible models (Ollama / LM Studio) are NOT listed here.
   // They are discovered at runtime from each server's /v1/models endpoint
@@ -64,6 +78,8 @@ export const MODELS = {
     supportsImages: false,
     tier: 3,
     local: true,
+    // Runs on the caller's own machine; costs the owner nothing.
+    clientSelectable: true,
   },
   opencode: {
     provider: "opencode",
@@ -72,6 +88,7 @@ export const MODELS = {
     supportsImages: false,
     tier: 2,
     local: true,
+    clientSelectable: true,
   },
   codex: {
     provider: "codex",
@@ -80,6 +97,7 @@ export const MODELS = {
     supportsImages: false,
     tier: 2,
     local: true,
+    clientSelectable: true,
   },
   "gemini-cli": {
     provider: "gemini-cli",
@@ -88,6 +106,7 @@ export const MODELS = {
     supportsImages: false,
     tier: 2,
     local: true,
+    clientSelectable: true,
   },
 } as const satisfies Record<string, ModelInfo>;
 
@@ -119,7 +138,16 @@ function parseDynamicModel(id: string): ModelInfo | null {
   const provider = DYNAMIC_PROVIDERS[id.slice(0, idx)];
   const apiId = id.slice(idx + DYNAMIC_SEP.length);
   if (!provider || !apiId) return null;
-  return { provider, apiId, displayName: apiId, supportsImages: false, tier: 2, local: true };
+  // Local inference is free to the owner, so discovered models stay selectable.
+  return {
+    provider,
+    apiId,
+    displayName: apiId,
+    supportsImages: false,
+    tier: 2,
+    local: true,
+    clientSelectable: true,
+  };
 }
 
 /**
@@ -137,6 +165,17 @@ function throwUnknown(id: string): never {
 /** Whether an id resolves to a usable model (static catalog or dynamic local). */
 export function isResolvableModel(id: string): boolean {
   return id in MODELS || parseDynamicModel(id) !== null;
+}
+
+/**
+ * Whether a caller may force this model via the request body. Guards the owner's
+ * bill: expensive API models (Opus) are excluded, so a hostile body can only
+ * ever downgrade to a selectable model, never up. Unknown ids are not selectable.
+ * Phase 4 swaps this body for an admin-configured allow-list.
+ */
+export function isClientSelectable(id: string): boolean {
+  const info = (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id);
+  return info?.clientSelectable === true;
 }
 
 export function listModels(): Array<{ id: ModelId } & ModelInfo> {
@@ -163,7 +202,10 @@ export function pickableModels(
   localModels: PickerModel[] = [],
   requiresImages = false,
 ): PickerModel[] {
-  const all: PickerModel[] = [...listModels(), ...localModels];
+  // Never offer a model the server would silently swap: filter the catalog to
+  // client-selectable entries. Discovered local models are free and always shown.
+  const catalog = listModels().filter((m) => m.clientSelectable);
+  const all: PickerModel[] = [...catalog, ...localModels];
   // A vision tool must only offer models KNOWN to support images: an unknown
   // (undefined) flag is treated as non-vision, not waved through.
   return requiresImages ? all.filter((m) => m.supportsImages === true) : all;

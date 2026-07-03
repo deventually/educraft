@@ -11,6 +11,9 @@ const schema = z.object({
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434/v1"),
   LMSTUDIO_BASE_URL: z.string().default("http://localhost:1234/v1"),
   DATABASE_URL: z.string().default("file:./data/limeonit.db"),
+  // Abuse limits for the streaming endpoint (in-memory, per client key).
+  RATE_LIMIT_PER_MINUTE: z.coerce.number().default(10),
+  RATE_LIMIT_CONCURRENT: z.coerce.number().default(3),
 });
 
 export const env = schema.parse(process.env);

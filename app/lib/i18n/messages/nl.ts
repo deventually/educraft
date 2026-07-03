@@ -268,6 +268,13 @@ export const nl = {
     serverErrorTitle: "Fout",
     unknownTool: "Onbekende tool.",
     unknown: "Onbekende fout",
+    invalidRequest: "Ongeldig verzoek.",
+    rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",
+    modelNoVision:
+      "Dit model ({model}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.",
+    invalidImages: "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG, JPEG, GIF of WebP zijn.",
+    tooManyImages: "Te veel afbeeldingen. Maximaal 10 afbeeldingen toegestaan.",
+    invalidMessages: "Ongeldig berichtformaat.",
   },
 };
 

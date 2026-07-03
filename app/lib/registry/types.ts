@@ -122,6 +122,8 @@ export interface ToolStage {
   /** Per-stage model override (catalog id). */
   model?: string;
   temperature?: number;
+  /** Per-stage output-token cap; overrides the tool's `defaultMaxTokens`. */
+  maxTokens?: number;
 }
 
 export interface ChatConfig {
@@ -197,6 +199,12 @@ export interface Tool {
   /** Catalog model id. */
   defaultModel: string;
   defaultTemperature?: number;
+  /**
+   * Default output-token cap for this tool's generations (bounds cost/latency).
+   * A stage may override it via `ToolStage.maxTokens`. Absent → the provider's
+   * built-in fallback (8192) applies.
+   */
+  defaultMaxTokens?: number;
 
   /** Whether the HBO-i context profile is injected by default. */
   usesContextProfile: boolean;

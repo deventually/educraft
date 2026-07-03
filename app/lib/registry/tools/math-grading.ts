@@ -42,6 +42,7 @@ export const mathGrading: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
+  defaultMaxTokens: 4096,
   defaultTemperature: 0.7,
   enabled: true,
   phase: 1,

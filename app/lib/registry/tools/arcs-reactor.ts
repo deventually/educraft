@@ -33,6 +33,7 @@ export const arcsReactor: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
+  defaultMaxTokens: 6144,
   defaultTemperature: 0.5,
   enabled: true,
   phase: 1,
