@@ -2,6 +2,7 @@ import { Form, useNavigation } from "react-router";
 import { Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
 import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
+import { requireUser } from "~/server/auth.server";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { Badge, Button } from "~/components/ui";
@@ -9,16 +10,18 @@ import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 
 export async function action({ request }: Route.ActionArgs) {
+  const user = await requireUser(request);
   const fd = await request.formData();
   if (fd.get("intent") === "delete") {
-    deleteGeneration(String(fd.get("id")));
+    await deleteGeneration(user.id, String(fd.get("id")));
     return { ok: true };
   }
   return { ok: false };
 }
 
-export function loader() {
-  const generations = listGenerations(50).map((g) => ({
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await requireUser(request);
+  const generations = (await listGenerations(user.id, 50)).map((g) => ({
     id: g.id,
     toolSlug: g.toolSlug,
     toolName: getToolBySlug(g.toolSlug)?.name ?? g.toolSlug,

@@ -17,6 +17,15 @@ vi.mock("~/lib/ai/provider", () => ({
   })),
 }));
 
+// Stub authentication: the route treats a request as an authenticated user whose
+// id comes from an `x-test-user` header (so distinct callers stay isolated for
+// the userId-keyed rate limiter). Individual tests override for the anon case.
+const { getUserMock } = vi.hoisted(() => ({ getUserMock: vi.fn() }));
+
+vi.mock("~/server/auth.server", () => ({
+  getUser: getUserMock,
+}));
+
 type ActionMod = typeof import("~/routes/api.stream");
 let action: ActionMod["action"];
 let invalidRequestMsg: string;
@@ -34,12 +43,27 @@ beforeEach(() => {
   streamChatSpy.mockImplementation(async function* () {
     yield "ok";
   });
+  getUserMock.mockReset();
+  getUserMock.mockImplementation(async (request: Request) => ({
+    id: request.headers.get("x-test-user") ?? "anon",
+    name: "Test User",
+    email: null,
+    role: "teacher" as const,
+    createdAt: new Date(0),
+  }));
 });
 
 function makeRequest(body: unknown, headers: Record<string, string> = {}) {
+  // Key the rate limiter per caller: derive the test user id from the session id
+  // so distinct-session tests don't share a bucket.
+  const sessionId =
+    body && typeof body === "object" && "sessionId" in body
+      ? String((body as { sessionId?: unknown }).sessionId ?? "")
+      : "";
+  const userHeader: Record<string, string> = sessionId ? { "x-test-user": sessionId } : {};
   return new Request("http://localhost/api/stream", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
+    headers: { "Content-Type": "application/json", ...userHeader, ...headers },
     body: typeof body === "string" ? body : JSON.stringify(body),
   });
 }
@@ -69,6 +93,17 @@ function validBody(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
 }
+
+describe("api.stream — authentication", () => {
+  it("refuses an unauthenticated request with a localized SSE error and no provider call", async () => {
+    getUserMock.mockResolvedValueOnce(null);
+    const { getMessages } = await import("~/lib/i18n");
+    const res = await invoke(validBody({ sessionId: "unauth-session-1" }));
+    const text = await res.text();
+    expect(sseErrorMessage(text)).toBe(getMessages("nl").error.unauthorized);
+    expect(streamChatSpy).not.toHaveBeenCalled();
+  });
+});
 
 describe("api.stream — request validation", () => {
   it("rejects a body that is not JSON with a localized error and no provider call", async () => {

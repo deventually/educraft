@@ -1,5 +1,25 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+/** An authenticated account. Created via invite link (see `invites`). */
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(), // crypto.randomUUID()
+  name: text("name").notNull(),
+  email: text("email").unique(), // nullable; invites may be nameless
+  passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
+  role: text("role").notNull().default("teacher"), // "student" | "teacher" | "admin"
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/** A single-use invitation token that mints an account with a preset role. */
+export const invites = sqliteTable("invites", {
+  token: text("token").primaryKey(), // 32+ random bytes, base64url
+  role: text("role").notNull().default("teacher"),
+  note: text("note"), // who this was for
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+  usedByUserId: text("used_by_user_id"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 /** A saved piece of work grouping generations and chat sessions. */
 export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
@@ -11,6 +31,7 @@ export const projects = sqliteTable("projects", {
 /** A one-shot generation result (one row per produced artifact / stage). */
 export const generations = sqliteTable("generations", {
   id: text("id").primaryKey(),
+  userId: text("user_id"), // owner; scoped in every repository query
   projectId: text("project_id"),
   toolSlug: text("tool_slug").notNull(),
   stageId: text("stage_id"),
@@ -51,6 +72,8 @@ export const contextProfiles = sqliteTable("context_profiles", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+export type UserRow = typeof users.$inferSelect;
+export type InviteRow = typeof invites.$inferSelect;
 export type ProjectRow = typeof projects.$inferSelect;
 export type GenerationRow = typeof generations.$inferSelect;
 export type ChatSessionRow = typeof chatSessions.$inferSelect;

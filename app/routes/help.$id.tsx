@@ -8,13 +8,15 @@ import {
   getTopicTitle,
   HELP_TOPIC_SLUGS,
 } from "~/lib/help/registry";
+import { requireUser } from "~/server/auth.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { HelpContent } from "~/components/HelpContent";
 import { Markdown } from "~/components/Markdown";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 
-export function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
+  await requireUser(request);
   const lang = getLocale(request);
   const tool = getToolById(params.id);
   if (tool) {

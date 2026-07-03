@@ -12,6 +12,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { getUser } from "~/server/auth.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -26,8 +27,13 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function loader({ request }: Route.LoaderArgs) {
-  return { locale: getLocale(request) };
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await getUser(request);
+  return {
+    locale: getLocale(request),
+    // Only the display-safe fields reach the client (never the password hash).
+    user: user ? { name: user.name, role: user.role } : null,
+  };
 }
 
 export function meta({ data }: Route.MetaArgs) {

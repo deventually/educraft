@@ -3,11 +3,13 @@ import { BookOpen, FileText } from "lucide-react";
 import type { Route } from "./+types/help._index";
 import { getEnabledTools } from "~/lib/registry";
 import { HELP_TOPIC_SLUGS, getTopicTitle } from "~/lib/help/registry";
+import { requireUser } from "~/server/auth.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 
-export function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireUser(request);
   const lang = getLocale(request);
   return {
     topics: HELP_TOPIC_SLUGS.map((slug) => ({ slug, title: getTopicTitle(slug, lang) })),

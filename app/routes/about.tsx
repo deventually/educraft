@@ -1,12 +1,14 @@
 import type { Route } from "./+types/about";
 import { ALL_TOOLS } from "~/lib/registry";
+import { requireUser } from "~/server/auth.server";
 import { BOOK, LICENSE_URL } from "~/lib/prompts/attribution";
 import { Card } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 
-export function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireUser(request);
   return {
     tools: ALL_TOOLS.filter((t) => t.enabled).map((t) => ({
       name: t.name,

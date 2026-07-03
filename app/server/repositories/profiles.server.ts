@@ -1,6 +1,14 @@
+/**
+ * Repository rule (Phase 1): all DB access goes through repositories; every
+ * exported signature is `async` and returns a Promise (portability insurance —
+ * better-sqlite3 resolves synchronously today, a Postgres/MySQL port stays a
+ * port); no better-sqlite3 API is used outside `db.server.ts`; and every query
+ * is scoped to its owning `userId` in the WHERE clause (never trust the client
+ * to filter).
+ */
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
-import { db } from "../db.server";
+import { and, eq } from "drizzle-orm";
+import { getDb } from "../db.server";
 import { contextProfiles } from "../schema.server";
 import type { ContextProfile, PackFieldValue } from "~/lib/context/types";
 
@@ -33,30 +41,46 @@ function rowToProfile(row: typeof contextProfiles.$inferSelect): ContextProfile 
   return { id: row.id, name: row.name, ...(data as Omit<ContextProfile, "id" | "name">) };
 }
 
-export function listProfiles(): ContextProfile[] {
-  return db.select().from(contextProfiles).all().map(rowToProfile);
+export async function listProfiles(userId: string): Promise<ContextProfile[]> {
+  return getDb()
+    .select()
+    .from(contextProfiles)
+    .where(eq(contextProfiles.userId, userId))
+    .all()
+    .map(rowToProfile);
 }
 
-export function getProfile(id: string): ContextProfile | null {
-  const row = db.select().from(contextProfiles).where(eq(contextProfiles.id, id)).get();
+export async function getProfile(userId: string, id: string): Promise<ContextProfile | null> {
+  const row = getDb()
+    .select()
+    .from(contextProfiles)
+    .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
+    .get();
   return row ? rowToProfile(row) : null;
 }
 
-export function getDefaultProfile(): ContextProfile | null {
-  const row = db.select().from(contextProfiles).where(eq(contextProfiles.isDefault, true)).get();
+export async function getDefaultProfile(userId: string): Promise<ContextProfile | null> {
+  const row = getDb()
+    .select()
+    .from(contextProfiles)
+    .where(and(eq(contextProfiles.userId, userId), eq(contextProfiles.isDefault, true)))
+    .get();
   return row ? rowToProfile(row) : null;
 }
 
-export function createProfile(
+export async function createProfile(
+  userId: string,
   input: Omit<ContextProfile, "id">,
   isDefault = false,
-): ContextProfile {
+): Promise<ContextProfile> {
   const id = randomUUID();
   const { name, ...rest } = input;
-  if (isDefault) clearDefault();
-  db.insert(contextProfiles)
+  if (isDefault) await clearDefault(userId);
+  getDb()
+    .insert(contextProfiles)
     .values({
       id,
+      userId,
       name,
       dataJson: JSON.stringify(rest),
       isDefault,
@@ -66,23 +90,36 @@ export function createProfile(
   return { id, ...input };
 }
 
-export function updateProfile(id: string, input: Omit<ContextProfile, "id">, isDefault?: boolean) {
+export async function updateProfile(
+  userId: string,
+  id: string,
+  input: Omit<ContextProfile, "id">,
+  isDefault?: boolean,
+): Promise<void> {
   const { name, ...rest } = input;
-  if (isDefault) clearDefault();
-  db.update(contextProfiles)
+  if (isDefault) await clearDefault(userId);
+  getDb()
+    .update(contextProfiles)
     .set({
       name,
       dataJson: JSON.stringify(rest),
       ...(isDefault === undefined ? {} : { isDefault }),
     })
-    .where(eq(contextProfiles.id, id))
+    .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
     .run();
 }
 
-export function deleteProfile(id: string) {
-  db.delete(contextProfiles).where(eq(contextProfiles.id, id)).run();
+export async function deleteProfile(userId: string, id: string): Promise<void> {
+  getDb()
+    .delete(contextProfiles)
+    .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
+    .run();
 }
 
-function clearDefault() {
-  db.update(contextProfiles).set({ isDefault: false }).run();
+async function clearDefault(userId: string): Promise<void> {
+  getDb()
+    .update(contextProfiles)
+    .set({ isDefault: false })
+    .where(eq(contextProfiles.userId, userId))
+    .run();
 }

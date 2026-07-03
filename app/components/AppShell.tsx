@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { Form, Link, NavLink, Outlet, useLocation, useMatches } from "react-router";
-import { ArrowUp, Menu, X } from "lucide-react";
+import {
+  Form,
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useMatches,
+  useRouteLoaderData,
+} from "react-router";
+import { ArrowUp, LogOut, Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import type { Messages } from "~/lib/i18n/messages/nl";
@@ -16,6 +24,10 @@ export default function AppShell() {
   const t = useT();
   const locale = useLocale();
   const location = useLocation();
+  const root = useRouteLoaderData("root") as
+    | { user?: { name: string; role: string } | null }
+    | undefined;
+  const user = root?.user ?? null;
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
   // A chat tool claims the full height: the page itself must not scroll and the
@@ -68,6 +80,13 @@ export default function AppShell() {
               ))}
             </nav>
             <LanguageSwitcher current={locale} redirectTo={redirectTo} />
+            {user && (
+              <UserArea
+                name={user.name}
+                logoutLabel={t.auth.logout}
+                loggedInAs={t.auth.loggedInAs}
+              />
+            )}
             {/* Hamburger — visible below md. */}
             <button
               type="button"
@@ -238,6 +257,36 @@ function navLinkClass(isActive: boolean) {
     isActive
       ? "bg-violet-50 text-violet-700"
       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+  );
+}
+
+function UserArea({
+  name,
+  logoutLabel,
+  loggedInAs,
+}: {
+  name: string;
+  logoutLabel: string;
+  loggedInAs: string;
+}) {
+  return (
+    <div className="ml-1 flex items-center gap-1.5">
+      <span
+        className="hidden max-w-[10rem] truncate text-sm font-medium text-slate-600 sm:inline"
+        title={loggedInAs.replace("{name}", name)}
+      >
+        {name}
+      </span>
+      <Form method="post" action="/logout">
+        <button
+          type="submit"
+          aria-label={logoutLabel}
+          className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        >
+          <LogOut className="size-4" aria-hidden />
+        </button>
+      </Form>
+    </div>
   );
 }
 
