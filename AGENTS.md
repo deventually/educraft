@@ -146,6 +146,7 @@ Use the `/tdd` skill for ready-to-copy test templates.
 
 ## Key Files
 
+- **Audit & improvement program (July 2026):** `docs/Audit-2026-07.md` (findings), `docs/Improvement-Plan.md` (decisions & roadmap), `docs/implementation/P0…P5` (per-phase session briefs — execute in order, see `docs/implementation/README.md`).
 - **New:** `AGENTS.md`, `CLAUDE.md`, `.claude/skills/tdd/SKILL.md`, `tests/setup.ts`, per-tool `tests/tools/*.test.ts`, `tests/components/*.test.tsx`.
 - **Modified (S1 foundation):** `vitest.config.ts` (dual projects), `package.json` (dev deps).
 - **Modified (later phases):** `api.stream.tsx` (chat + images), `tool.tsx` (mode branching), `DynamicForm.tsx` (image control + `document` upload control), `registry/types.ts` (ChatConfig i18n; `document` field kind), `prompts/index.ts`, `registry/index.ts`, `messages/{nl,en}.ts`.

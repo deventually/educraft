@@ -1,10 +1,9 @@
-# Implementation sessions — remaining 10 tools (14 total)
+# Implementation sessions
 
 Each file here is a **self-contained brief** for one work session. Open one in a fresh
 Claude Code session and it can be executed cold — no prior conversation needed.
 
-**Master plan:** `/Users/bastiaandressen/.claude/plans/can-you-make-a-atomic-bee.md`
-**Standing contract (after S1):** [`/AGENTS.md`](../../AGENTS.md) · TDD loop: the `/tdd` skill.
+**Standing contract:** [`/AGENTS.md`](../../AGENTS.md) · TDD loop: the `/tdd` skill.
 **Architecture depth:** [`wiki/Architecture.md`](../../wiki/Architecture.md) ·
 [`wiki/Adding-a-Tool-or-Pack.md`](../../wiki/Adding-a-Tool-or-Pack.md).
 
@@ -12,13 +11,52 @@ Claude Code session and it can be executed cold — no prior conversation needed
 
 Paste this into a new session (swap the file):
 
-> Read `docs/implementation/S2-generators.md` and the master plan it references, then
-> implement it. Work test-first per the `/tdd` skill / `AGENTS.md`. Verify with
-> `npm test`, `npm run typecheck`, `npm run check`, and the preview tools before finishing.
+> Read `docs/implementation/P0-security-hardening.md` and implement it exactly. Work
+> test-first per the `/tdd` skill / `AGENTS.md` — write the failing tests from the
+> spec's Test Plan first. Verify with `npm test`, `npm run typecheck`, `npm run check`,
+> and the spec's acceptance criteria before finishing.
 
-## Dependency graph
+---
 
-```
+## P-series — hardening & commercialization program (July 2026)
+
+Implements [`docs/Improvement-Plan.md`](../Improvement-Plan.md), remediating
+[`docs/Audit-2026-07.md`](../Audit-2026-07.md). **Execute strictly in order** — later
+phases assume earlier ones landed (P2 quotas need P1 users; P4 settings replace P0's
+hardcoded model allow-list). One phase per session; finish, run the gates, commit.
+
+Ground rules for every phase:
+
+1. **Read `AGENTS.md` first.** TDD is non-negotiable: RED (the failing tests listed in
+   the spec's Test Plan) → GREEN → REFACTOR. Gate before done: `npm test && npm run
+   typecheck && npm run check`, no exceptions. Every new interactive component ships a
+   vitest-axe zero-violations test. All displayed strings bilingual. Tools-as-data —
+   never per-tool control flow.
+2. **When a spec conflicts with reality** (a file moved, a signature changed), the
+   spec's *intent* wins — adapt the mechanics, keep the acceptance criteria.
+3. **Do not gold-plate.** Each spec lists what is explicitly out of scope; respect it.
+
+| Session | Scope | Depends on | State |
+| --- | --- | --- | --- |
+| [P0](P0-security-hardening.md) | Zod stream body + caps · model allow-list · rate limiting · per-tool maxTokens · drizzle patch · security headers · CI | — | ⬜ |
+| [P1](P1-auth-roles-scoping.md) | Invite auth · roles (student/teacher/admin) · per-user scoping · real migrations · async repos + `getDb()` seam | P0 | ⬜ |
+| [P2](P2-ops-feedback-compliance.md) | Structured logging · daily quotas · tester feedback · AI-notice/compliance shape · healthz · deploy → **invites go out** | P1 | ⬜ |
+| [P3](P3-prompts-eqf-evals.md) | Prompt TEMPLATE.md · EQF 1–8 context · eval harness (baseline first!) · weak-prompt refactors · multi-turn stability | P2\* | ⬜ |
+| [P4](P4-admin-console.md) | Instance settings (tools/models availability) · admin routes: tools, models, invites, usage, feedback | P2 | ⬜ |
+| [P5](P5-test-tech-debt.md) | api.stream integration tests · missing component/tool tests · client i18n fix · shared sandbox hook · boot validation · AGENTS.md truth pass · dep upgrades | P4 | ⬜ |
+
+\* P3 only needs P0 technically (eval harness + prompts are independent of auth), but
+runs after P2 so tester feedback can inform the prompt work.
+
+When a session is done, tick its box and note the merge commit.
+
+---
+
+## S-series — the 14-tool build (complete, historical)
+
+**Master plan:** `/Users/bastiaandressen/.claude/plans/can-you-make-a-atomic-bee.md`
+
+```text
 S1  Foundation (test harness + docs + TDD skill)         no deps — do FIRST
  ├─ S2  Generators: Forum Autograder + Contextualization      needs S1
  ├─ S3  Chat infra + MentorAI                                 needs S1
@@ -28,15 +66,8 @@ S1  Foundation (test harness + docs + TDD skill)         no deps — do FIRST
  └─ S4  Image infra + Math Grading                            needs S1
 ```
 
-**Parallelism:** after S1, run S2 / S3 / S4 concurrently. After S3, run S5 / S6 / S7
-concurrently. Each session should be its own branch/worktree to avoid collisions
-(S2/S5/S6/S7 only add files; S3/S4 touch shared files — `api.stream.tsx`,
-`registry/types.ts`, `DynamicForm.tsx` — so land those before fanning out).
-
-## Status
-
 | Session | Scope | Depends on | State |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [S1](S1-foundation.md) | Test harness · `AGENTS.md`/`CLAUDE.md` · `/tdd` skill | — | ✅ `b58aee6`+`fc7164b` |
 | [S2](S2-generators.md) | Forum Autograder + Contextualization (one-shot) | S1 | ✅ `86a8ad1` |
 | [S3](S3-chat-infra-mentorai.md) | Chat infrastructure + MentorAI | S1 | ✅ `4982074` |
@@ -45,7 +76,6 @@ concurrently. Each session should be its own branch/worktree to avoid collisions
 | [S6](S6-tutors-bloom-dialogic.md) | Bloom by Design + Dialogic Encounters | S3 | ✅ `0b01b79` |
 | [S7](S7-tutors-peer-scaffolding.md) | Peer Tutoring + Scaffolding Feedback | S3 | ✅ `0b01b79` |
 
-**All 7 sessions complete — 14/14 tools shipped.** S5–S7's six chat tutors were authored
-together in one `tutors` branch (one clean merge, no registration conflicts).
-
-When a session is done, tick its box and note the merge commit.
+**All 7 sessions complete — 14/14 tools shipped** (a 15th, stage-assessment, was added
+later outside the S-series). S5–S7's six chat tutors were authored together in one
+`tutors` branch (one clean merge, no registration conflicts).
