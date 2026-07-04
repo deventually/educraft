@@ -85,6 +85,7 @@ export default function AppShell() {
                 name={user.name}
                 logoutLabel={t.auth.logout}
                 loggedInAs={t.auth.loggedInAs}
+                accountLabel={t.auth.accountArea}
               />
             )}
             {/* Hamburger — visible below md. */}
@@ -264,19 +265,23 @@ function UserArea({
   name,
   logoutLabel,
   loggedInAs,
+  accountLabel,
 }: {
   name: string;
   logoutLabel: string;
   loggedInAs: string;
+  accountLabel: string;
 }) {
   return (
     <div className="ml-1 flex items-center gap-1.5">
-      <span
-        className="hidden max-w-[10rem] truncate text-sm font-medium text-slate-600 sm:inline"
+      <Link
+        to="/account"
+        aria-label={accountLabel}
         title={loggedInAs.replace("{name}", name)}
+        className="hidden max-w-[10rem] truncate rounded-md px-1.5 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 sm:inline"
       >
         {name}
-      </span>
+      </Link>
       <Form method="post" action="/logout">
         <button
           type="submit"

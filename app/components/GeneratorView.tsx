@@ -13,6 +13,7 @@ import {
 import { toTemplateValues } from "~/lib/forms/values";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
+import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
 import { streamPost } from "~/lib/streamClient";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -168,19 +169,24 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
         )}
       </div>
 
-      <div className="min-w-0 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
-        {output || streaming ? (
-          <ResultPanel
-            markdown={output}
-            filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
-            streaming={streaming}
-            fill
-          />
-        ) : (
-          <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
-            {fmt(t.tool.emptyResult, { action: t.tool.generate })}
-          </div>
-        )}
+      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
+        <div className="min-h-0 flex-1">
+          {output || streaming ? (
+            <ResultPanel
+              markdown={output}
+              filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
+              streaming={streaming}
+              fill
+            />
+          ) : (
+            <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
+              {fmt(t.tool.emptyResult, { action: t.tool.generate })}
+            </div>
+          )}
+        </div>
+        {/* Persistent AI-transparency notice; stronger "teacher decides" variant
+            for grading tools, driven by registry data. */}
+        <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="shrink-0" />
       </div>
     </div>
   );

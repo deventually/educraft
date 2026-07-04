@@ -6,7 +6,16 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { invites, users, type InviteRow, type UserRow } from "../schema.server";
+import {
+  contextProfiles,
+  feedback,
+  generations,
+  invites,
+  usage,
+  users,
+  type InviteRow,
+  type UserRow,
+} from "../schema.server";
 import type { Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
@@ -40,8 +49,23 @@ export async function getUserByEmail(email: string): Promise<UserRow | null> {
 }
 
 export async function deleteUser(id: string): Promise<void> {
-  // Phase 2 wires the delete-my-data cascade (generations, profiles, sessions).
   getDb().delete(users).where(eq(users.id, id)).run();
+}
+
+/**
+ * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
+ * user owns — feedback, usage counters, generations, context profiles — then the
+ * user row, in a single transaction so a partial failure leaves nothing orphaned.
+ * Scoped by `userId`/`id`, so another user's rows are never touched.
+ */
+export async function deleteUserCascade(id: string): Promise<void> {
+  getDb().transaction((tx) => {
+    tx.delete(feedback).where(eq(feedback.userId, id)).run();
+    tx.delete(usage).where(eq(usage.userId, id)).run();
+    tx.delete(generations).where(eq(generations.userId, id)).run();
+    tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
+    tx.delete(users).where(eq(users.id, id)).run();
+  });
 }
 
 export interface CreateInviteInput {

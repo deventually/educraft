@@ -5,6 +5,7 @@ import { listGenerations, deleteGeneration } from "~/server/repositories/generat
 import { requireUser } from "~/server/auth.server";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
+import { FeedbackWidget } from "~/components/FeedbackWidget";
 import { Badge, Button } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
@@ -68,12 +69,16 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                     </p>
                   </div>
                 </summary>
-                <div className="border-t border-slate-100 p-3">
+                <div className="space-y-3 border-t border-slate-100 p-3">
                   <ResultPanel
                     markdown={g.outputMarkdown}
                     title={loc(g.toolName, locale)}
                     filenameBase={`${g.toolSlug}-${g.id.slice(0, 8)}`}
                   />
+                  {/* Feedback lives on the projects list: every generation — one-shot,
+                      multi-stage, and chat sessions (saved as one row) — is ratable
+                      here by its known id, without plumbing ids through the SSE stream. */}
+                  <FeedbackWidget generationId={g.id} />
                 </div>
               </details>
               <Form method="post" className="absolute right-3 top-2.5">

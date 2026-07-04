@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { sql } from "drizzle-orm";
 import * as schema from "./schema.server";
 import { DB_PATH, env } from "./env.server";
 
@@ -37,4 +38,13 @@ export function getDb(): Db {
     globalForDb.__limeonitDb = createDb();
   }
   return globalForDb.__limeonitDb;
+}
+
+/**
+ * Trivial connectivity probe for the health endpoint. Throws if the database is
+ * unreachable; returns nothing on success. Kept here so the raw-SQL access stays
+ * behind the `db.server` seam.
+ */
+export function pingDb(): void {
+  getDb().get(sql`SELECT 1`);
 }

@@ -13,6 +13,7 @@ import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
+import { AiNotice } from "./AiNotice";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
 function newSessionId(): string {
@@ -392,6 +393,8 @@ export function ChatView({
         {/* Composer — pinned to the bottom of the chat column */}
         <div className="flex-none pt-3">
           <div className="mx-auto w-full max-w-3xl">
+            {/* Persistent AI-transparency notice above the composer. */}
+            <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="mb-2" />
             <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-violet-500 focus-within:ring-1 focus-within:ring-violet-500">
               <textarea
                 ref={inputRef}
