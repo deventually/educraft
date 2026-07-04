@@ -63,12 +63,14 @@ a load-balancer probe).
 
 ## Content-Security-Policy
 
-CSP currently ships **report-only** (`Content-Security-Policy-Report-Only`, see
-`app/server/securityHeaders.server.ts`) so it can be verified in the browser
-without breaking the app. **Deploy step:** after a clean click-through of the
-deployed instance with the browser console open (no CSP violations reported),
-flip the header name to the enforcing `Content-Security-Policy` in
-`securityHeaders.server.ts` and redeploy.
+CSP is **enforcing** (`Content-Security-Policy`, see
+`app/server/securityHeaders.server.ts`). It shipped report-only in Phase 0 and
+was flipped to enforcing during the P2 deploy after a clean browser
+click-through of every app surface (login, home, one-shot/grader/chat tools,
+projects, account, admin) plus a live generation and feedback submit — all with
+zero CSP violations. If you later add an external resource (a new font host,
+analytics, an image CDN, a cross-origin API), extend the relevant directive in
+`securityHeaders.server.ts` or it will be blocked.
 
 ## Smoke checklist (run after each deploy)
 

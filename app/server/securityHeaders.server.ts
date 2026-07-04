@@ -5,14 +5,17 @@
  */
 
 /**
- * Content Security Policy — shipped **report-only** until verified in the browser
- * (Phase 2 deploy checklist flips it to enforcing). Notes on the sources:
+ * Content Security Policy — **enforcing**. Shipped report-only in Phase 0, then
+ * verified in the browser during the P2 deploy click-through (all app surfaces
+ * loaded + a live generation and feedback submit produced zero CSP violations)
+ * and flipped to enforcing. Notes on the sources:
  *  - `root.tsx` loads Google Fonts → googleapis (styles) + gstatic (fonts).
  *  - React Router injects inline hydration scripts → `script-src 'unsafe-inline'`
- *    (tightening to nonces is out of scope for Phase 0).
+ *    (tightening to nonces is a later hardening step).
  *  - Uploaded image previews are `data:`/`blob:` URLs.
+ *  - The SSE stream + feedback POST are same-origin fetches → `connect-src 'self'`.
  */
-export const CSP_REPORT_ONLY = [
+export const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -26,7 +29,7 @@ export const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Content-Security-Policy-Report-Only": CSP_REPORT_ONLY,
+  "Content-Security-Policy": CSP,
 };
 
 /** Set every baseline security header onto an outgoing response's Headers. */
