@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 /** An authenticated account. Created via invite link (see `invites`). */
 export const users = sqliteTable("users", {
@@ -62,6 +62,42 @@ export const messages = sqliteTable("messages", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+/**
+ * Per-user daily usage counters backing the request/token quota. One row per
+ * (userId, day) — upserted on each completed generation. `day` is a UTC date
+ * string ("2026-07-03") so a rollover simply lands on a fresh row.
+ */
+export const usage = sqliteTable(
+  "usage",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    day: text("day").notNull(),
+    requests: integer("requests").notNull().default(0),
+    outputChars: integer("output_chars").notNull().default(0),
+    // Nullable until the adapter surfaces token usage (logged as chars for now).
+    outputTokens: integer("output_tokens"),
+  },
+  (t) => [uniqueIndex("usage_user_day").on(t.userId, t.day)],
+);
+
+/**
+ * Structured tester feedback on a generation. One row per (userId, generationId)
+ * — re-rating updates in place rather than duplicating.
+ */
+export const feedback = sqliteTable(
+  "feedback",
+  {
+    id: text("id").primaryKey(),
+    generationId: text("generation_id").notNull(),
+    userId: text("user_id").notNull(),
+    rating: integer("rating").notNull(), // +1 / -1
+    comment: text("comment"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [uniqueIndex("feedback_user_generation").on(t.userId, t.generationId)],
+);
+
 /** A reusable HBO-i context profile. */
 export const contextProfiles = sqliteTable("context_profiles", {
   id: text("id").primaryKey(),
@@ -79,3 +115,5 @@ export type GenerationRow = typeof generations.$inferSelect;
 export type ChatSessionRow = typeof chatSessions.$inferSelect;
 export type MessageRow = typeof messages.$inferSelect;
 export type ContextProfileRow = typeof contextProfiles.$inferSelect;
+export type UsageRow = typeof usage.$inferSelect;
+export type FeedbackRow = typeof feedback.$inferSelect;

@@ -209,6 +209,13 @@ export interface Tool {
   /** Whether the HBO-i context profile is injected by default. */
   usesContextProfile: boolean;
 
+  /**
+   * True for learning-outcome evaluation tools (grading/assessment). Drives the
+   * stronger "teacher decides" AI-transparency notice (EU AI Act Annex III
+   * framing) purely from data — no per-tool branching in the UI.
+   */
+  assistiveGrading?: boolean;
+
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;
 

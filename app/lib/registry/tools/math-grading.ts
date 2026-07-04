@@ -40,6 +40,7 @@ export const mathGrading: Tool = {
     adapted: true,
   }),
   usesContextProfile: true,
+  assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
   defaultMaxTokens: 4096,

@@ -58,6 +58,7 @@ export const stageAssessment: Tool = {
     evaluatedWith: { nl: "Claude Sonnet 4.6", en: "Claude Sonnet 4.6" },
   }),
   usesContextProfile: true,
+  assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
   defaultMaxTokens: 8192,

@@ -17,6 +17,8 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { localizeError } from "~/lib/i18n/errors";
 import { createRateLimiter } from "~/server/rateLimit.server";
 import { env } from "~/server/env.server";
+import { log } from "~/server/log.server";
+import { checkQuota, recordUsage } from "~/server/repositories/usage.server";
 
 // Boundaries: every value is length/count-capped so a hostile body can never
 // balloon the prompt (and thus the owner's token bill) or exhaust memory.
@@ -162,6 +164,27 @@ export async function action({ request }: Route.ActionArgs) {
       images = body.images;
     }
 
+    // Structured metadata for the per-generation log line — metadata only, never
+    // prompt/response content (student data stays out of logs).
+    const logFields = {
+      userId: user.id,
+      toolSlug: tool.slug,
+      stageId: stage.id,
+      model,
+      mode: tool.mode,
+      outputLanguage,
+    };
+
+    // Per-user daily quota (audit finding #8). Checked after auth, before the
+    // provider call. Admins are exempt. Over quota → localized SSE error.
+    if (user.role !== "admin") {
+      const { ok } = await checkQuota(user.id);
+      if (!ok) {
+        log("generation", { ...logFields, outcome: "quota_exceeded", durationMs: 0 });
+        return new Response(sseError(m.error.quotaExceeded), { headers: SSE_HEADERS });
+      }
+    }
+
     // Chat mode: use the provided history. One-shot/multi-stage: single trigger.
     let messages: ChatMessage[];
     if (tool.mode === "chat" && body.messages) {
@@ -185,9 +208,11 @@ export async function action({ request }: Route.ActionArgs) {
     // account, not a spoofable IP/session pair.
     const gate = rateLimiter.acquire(user.id);
     if (!gate.ok) {
+      log("generation", { ...logFields, outcome: "rate_limited", durationMs: 0 });
       return new Response(sseError(m.error.rateLimited), { headers: SSE_HEADERS });
     }
 
+    const startedAt = Date.now();
     const tokens = provider.streamChat({
       model,
       system,
@@ -198,9 +223,32 @@ export async function action({ request }: Route.ActionArgs) {
     });
 
     const stream = sseStream(tokens, {
-      formatError: (err) => localizeError(err, locale, m.error.unknown),
+      formatError: (err) => {
+        // One log line on a mid-stream failure. Metadata only.
+        log("generation", {
+          ...logFields,
+          outcome: "error",
+          durationMs: Date.now() - startedAt,
+        });
+        return localizeError(err, locale, m.error.unknown);
+      },
       onFinally: () => gate.release(),
       onComplete: async (full) => {
+        // Record usage against the daily quota and emit the success log line.
+        // TODO: surface inputTokens/outputTokens once the AI SDK adapter exposes
+        // the stream `usage` promise (see lib/ai/adapters/aisdk.ts) — until then
+        // we count chars only.
+        try {
+          await recordUsage(user.id, { chars: full.length });
+        } catch (e) {
+          console.error("Failed to record usage:", e);
+        }
+        log("generation", {
+          ...logFields,
+          outcome: "ok",
+          durationMs: Date.now() - startedAt,
+          chars: full.length,
+        });
         try {
           const sessionId =
             tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";

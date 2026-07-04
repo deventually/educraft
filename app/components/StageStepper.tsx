@@ -5,6 +5,7 @@ import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
+import { AiNotice } from "./AiNotice";
 import { Badge, Button } from "./ui";
 import { streamPost } from "~/lib/streamClient";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -192,6 +193,8 @@ export function StageStepper({ tool, profiles, defaultProfileId, localModels }: 
             </div>
           );
         })}
+        {/* Persistent AI-transparency notice under the staged results. */}
+        <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} />
       </div>
     </div>
   );
