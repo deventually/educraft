@@ -84,3 +84,65 @@ describe("invites repository", () => {
     expect(await repo.consumeInvite("does-not-exist", "user-x")).toBeNull();
   });
 });
+
+describe("curated, identity-bound, batch invites (Phase 6)", () => {
+  it("createInvite stores creator, cohort and email", async () => {
+    const invite = await repo.createInvite({
+      role: "student",
+      createdByUserId: "teacher-1",
+      cohortId: "cohort-1",
+      email: "Student@School.NL",
+    });
+    const fetched = await repo.getInvite(invite.token);
+    expect(fetched?.createdByUserId).toBe("teacher-1");
+    expect(fetched?.cohortId).toBe("cohort-1");
+    expect(fetched?.email).toBe("Student@School.NL");
+    expect(fetched?.role).toBe("student");
+  });
+
+  it("createInvitesForCohort mints one single-use student token per recipient", async () => {
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const invites = await repo.createInvitesForCohort(
+      "cohort-batch",
+      "teacher-2",
+      [{ email: "a@example.com" }, { email: "b@example.com" }, {}],
+      expiresAt,
+    );
+    expect(invites).toHaveLength(3);
+    for (const inv of invites) {
+      expect(inv.role).toBe("student");
+      expect(inv.cohortId).toBe("cohort-batch");
+      expect(inv.createdByUserId).toBe("teacher-2");
+      expect(inv.usedByUserId).toBeNull();
+      expect(inv.token.length).toBeGreaterThanOrEqual(32);
+    }
+    // Email is bound where given, and absent (link-only) where not.
+    expect(invites[0].email).toBe("a@example.com");
+    expect(invites[2].email ?? null).toBeNull();
+    // Tokens are distinct.
+    expect(new Set(invites.map((i) => i.token)).size).toBe(3);
+  });
+
+  it("consumeInvite requires a matching email (case-insensitive) for an identity-bound invite", async () => {
+    const invite = await repo.createInvite({
+      role: "student",
+      cohortId: "c",
+      email: "bound@example.com",
+    });
+    // A wrong email is rejected and the invite stays unused.
+    expect(await repo.consumeInvite(invite.token, "user-wrong", "other@example.com")).toBeNull();
+    expect((await repo.getInvite(invite.token))?.usedByUserId ?? null).toBeNull();
+
+    // The matching email (any case) succeeds exactly once.
+    const ok = await repo.consumeInvite(invite.token, "user-right", "BOUND@example.com");
+    expect(ok?.usedByUserId).toBe("user-right");
+    // Still single-use afterwards.
+    expect(await repo.consumeInvite(invite.token, "user-late", "bound@example.com")).toBeNull();
+  });
+
+  it("consumeInvite ignores the submitted email for a non-bound invite", async () => {
+    const invite = await repo.createInvite({ role: "student", cohortId: "c" });
+    const ok = await repo.consumeInvite(invite.token, "user-any", "whatever@example.com");
+    expect(ok?.usedByUserId).toBe("user-any");
+  });
+});

@@ -7,6 +7,9 @@ export const users = sqliteTable("users", {
   email: text("email").unique(), // nullable; invites may be nameless
   passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
   role: text("role").notNull().default("teacher"), // "student" | "teacher" | "admin"
+  // Single active session (Phase 6 anti-sharing): bumped on every login/redeem and
+  // carried in the session cookie; a stale cookie is treated as logged out.
+  sessionVersion: integer("session_version").notNull().default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -17,8 +20,43 @@ export const invites = sqliteTable("invites", {
   note: text("note"), // who this was for
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   usedByUserId: text("used_by_user_id"),
+  // Provisioning (Phase 6): who issued it, which cohort the redeemer joins, and
+  // the intended student's email (identity-bound invites — redemption must match).
+  // All nullable: legacy role-only ops invites (scripts/invite.ts) carry none.
+  createdByUserId: text("created_by_user_id"),
+  cohortId: text("cohort_id"),
+  email: text("email"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+/**
+ * A cohort (Phase 6) — the shared configuration a teacher provisions once: which
+ * tutors are allowed, how each is configured, the context profile whose level is
+ * injected for members, and an access window. Per-student invites are minted
+ * against it; redeeming one joins the cohort. Intra-instance, not a tenant.
+ */
+export const cohorts = sqliteTable("cohorts", {
+  id: text("id").primaryKey(),
+  createdByUserId: text("created_by_user_id").notNull(), // teacher/mentor/admin
+  name: text("name").notNull(), // "SE jaar 2 — 25/26 blok 1"
+  allowedToolSlugs: text("allowed_tool_slugs").notNull(), // JSON string[] ⊆ userType:"student" slugs
+  configJson: text("config_json").notNull().default("{}"), // { [slug]: { values: Record<string,string> } }
+  contextProfileId: text("context_profile_id"), // teacher-owned profile → injected server-side for members
+  activeUntil: integer("active_until", { mode: "timestamp_ms" }), // access window; null = open-ended
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/** A student ↔ cohort edge. One row per membership (join table leaves room for multi-cohort later). */
+export const cohortMemberships = sqliteTable(
+  "cohort_memberships",
+  {
+    id: text("id").primaryKey(),
+    cohortId: text("cohort_id").notNull(),
+    userId: text("user_id").notNull(), // the student
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [uniqueIndex("membership_cohort_user").on(t.cohortId, t.userId)],
+);
 
 /** A saved piece of work grouping generations and chat sessions. */
 export const projects = sqliteTable("projects", {
@@ -51,6 +89,10 @@ export const chatSessions = sqliteTable("chat_sessions", {
   systemPrompt: text("system_prompt").notNull(),
   model: text("model").notNull(),
   contextProfileId: text("context_profile_id"),
+  // Denormalised owner + cohort (Phase 6) — populated now so Phase 7's cohort
+  // analytics need no re-migration.
+  userId: text("user_id"),
+  cohortId: text("cohort_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -110,6 +152,8 @@ export const contextProfiles = sqliteTable("context_profiles", {
 
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
+export type CohortRow = typeof cohorts.$inferSelect;
+export type CohortMembershipRow = typeof cohortMemberships.$inferSelect;
 export type ProjectRow = typeof projects.$inferSelect;
 export type GenerationRow = typeof generations.$inferSelect;
 export type ChatSessionRow = typeof chatSessions.$inferSelect;

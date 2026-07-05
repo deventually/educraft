@@ -34,6 +34,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     email: input.email ?? null,
     passwordHash: input.passwordHash,
     role: input.role,
+    sessionVersion: 0,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -72,6 +73,12 @@ export interface CreateInviteInput {
   role: Role;
   note?: string | null;
   expiresAt?: Date | null;
+  /** Who issued the invite (teacher/admin). Null for legacy ops invites. */
+  createdByUserId?: string | null;
+  /** The cohort the redeemer joins. Null → a role-only teacher/admin invite. */
+  cohortId?: string | null;
+  /** Bind the invite to an intended student; redemption must match (see consumeInvite). */
+  email?: string | null;
 }
 
 export async function createInvite(input: CreateInviteInput): Promise<InviteRow> {
@@ -81,10 +88,40 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     note: input.note ?? null,
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
+    createdByUserId: input.createdByUserId ?? null,
+    cohortId: input.cohortId ?? null,
+    email: input.email ?? null,
     createdAt: new Date(),
   };
   getDb().insert(invites).values(row).run();
   return row;
+}
+
+/**
+ * Mint one single-use `student` token per recipient against a cohort — the batch
+ * primitive behind the provisioning UI (a single invite is `recipients.length === 1`).
+ * A recipient with an `email` is identity-bound; without, it's a link-only bearer
+ * invite. Same cohort ⇒ same tools/config for every token minted here.
+ */
+export async function createInvitesForCohort(
+  cohortId: string,
+  createdByUserId: string,
+  recipients: { email?: string | null }[],
+  expiresAt: Date | null,
+): Promise<InviteRow[]> {
+  const rows: InviteRow[] = [];
+  for (const recipient of recipients) {
+    rows.push(
+      await createInvite({
+        role: "student",
+        cohortId,
+        createdByUserId,
+        email: recipient.email?.trim() || null,
+        expiresAt,
+      }),
+    );
+  }
+  return rows;
 }
 
 export async function getInvite(token: string): Promise<InviteRow | null> {
@@ -95,13 +132,27 @@ export async function getInvite(token: string): Promise<InviteRow | null> {
  * Atomically claim an invite for `userId`. Single-use: the guarded UPDATE only
  * matches rows with `used_by_user_id IS NULL`, so a race admits exactly one
  * consumer. Returns null if the token is unknown, already used, or expired.
+ *
+ * Identity binding (Phase 6): when the invite carries an `email`, the redeemer's
+ * `submittedEmail` must match it (case-insensitive) or the claim is rejected —
+ * casual link-forwarding to the wrong person then fails.
  */
-export async function consumeInvite(token: string, userId: string): Promise<InviteRow | null> {
+export async function consumeInvite(
+  token: string,
+  userId: string,
+  submittedEmail?: string | null,
+): Promise<InviteRow | null> {
   const db = getDb();
   const invite = db.select().from(invites).where(eq(invites.token, token)).get();
   if (!invite) return null;
   if (invite.usedByUserId) return null;
   if (invite.expiresAt && invite.expiresAt.getTime() < Date.now()) return null;
+  if (
+    invite.email &&
+    invite.email.trim().toLowerCase() !== (submittedEmail ?? "").trim().toLowerCase()
+  ) {
+    return null;
+  }
 
   const result = db
     .update(invites)
@@ -110,4 +161,17 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
     .run();
   if (result.changes === 0) return null;
   return { ...invite, usedByUserId: userId };
+}
+
+/**
+ * Bump a user's single-active-session counter (Phase 6 anti-sharing). Called on
+ * every login/redeem; the new value is written into the fresh session cookie, so
+ * an older cookie's stale `sessionVersion` no longer matches and is logged out.
+ */
+export async function bumpSessionVersion(userId: string): Promise<number> {
+  const db = getDb();
+  const current = db.select().from(users).where(eq(users.id, userId)).get();
+  const next = (current?.sessionVersion ?? 0) + 1;
+  db.update(users).set({ sessionVersion: next }).where(eq(users.id, userId)).run();
+  return next;
 }

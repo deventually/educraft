@@ -91,3 +91,22 @@ describe("auth helpers", () => {
     expect(user.role).toBe("admin");
   });
 });
+
+describe("single active session (Phase 6 anti-sharing)", () => {
+  it("treats a stale sessionVersion cookie as logged out after a newer login", async () => {
+    const u = await users.createUser({
+      name: "Multi Device",
+      email: "multi@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "student",
+    });
+    // Two successive logins mint two cookies; the second bumps sessionVersion.
+    const cookie1 = await sessionCookieFor(u.id);
+    const cookie2 = await sessionCookieFor(u.id);
+
+    // The newest cookie authenticates…
+    expect((await auth.getUser(requestWithCookie(cookie2)))?.id).toBe(u.id);
+    // …the older one no longer does (its sessionVersion is stale).
+    expect(await auth.getUser(requestWithCookie(cookie1))).toBeNull();
+  });
+});
