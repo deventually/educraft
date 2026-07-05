@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "id": "assessment-eqf6",
+      "description": "Authentic assessment design at EQF 6 (hbo). Should produce a task, analytic + student-facing rubric, and feedback plan aligned to the outcomes, without inventing standards.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Software Engineering, jaar 3",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Software Architecture",
+        "eqf": 6,
+        "professionalContext": "Architectuurrol in een softwarebedrijf"
+      },
+      "values": {
+        "discipline": "Software Engineering",
+        "niveau": "Derdejaars hbo-bachelor",
+        "modaliteit": "Blended, projectgestuurd",
+        "groepsgrootte": "30 studenten",
+        "randvoorwaarden": "Beperkte nakijkcapaciteit; individuele beoordeling vereist; 4 weken doorlooptijd.",
+        "leeruitkomsten": "De student ontwerpt een softwarearchitectuur voor een realistisch probleem en verantwoordt de belangrijkste trade-offs met kwaliteitsattributen.",
+        "bewijs": "Een architectuurdocument met beslissingen (ADR's) en een mondelinge verdediging.",
+        "authentiekeContext": "De student treedt op als architect voor een fictieve opdrachtgever (een groeiende webshop) en adviseert over schaalbaarheid en onderhoudbaarheid.",
+        "rubricFramework": "Analytische rubric met 4 niveaus (Uitmuntend/Bekwaam/In ontwikkeling/Beginnend).",
+        "iteratie": "Tussenfeedback op het conceptontwerp in week 2."
+      }
+    },
+    {
+      "id": "assessment-eqf4",
+      "description": "Same tool at EQF 4 (mbo-4). Task and rubric expectations should be more concrete and closer to practice than the hbo case.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Software Developer, niveau 4",
+        "programme": "MBO Software Developer",
+        "domain": "ICT",
+        "courseName": "Applicatie realiseren",
+        "eqf": 4,
+        "professionalContext": "Junior developer in een ontwikkelteam"
+      },
+      "values": {
+        "discipline": "Applicatieontwikkeling",
+        "niveau": "Vierdejaars mbo-4",
+        "modaliteit": "Praktijkgericht, projectmatig",
+        "groepsgrootte": "18 studenten",
+        "randvoorwaarden": "Individuele beoordeling; 3 weken; toetsing op een werkend product.",
+        "leeruitkomsten": "De student bouwt een werkende applicatie volgens een opdracht en toont aan dat die aan de eisen voldoet.",
+        "bewijs": "Een werkende applicatie plus een korte demonstratie en toelichting.",
+        "authentiekeContext": "De student maakt een voorraad-app voor een lokale winkel op basis van een klantopdracht.",
+        "rubricFramework": "Analytische rubric met 4 niveaus, in begrijpelijke taal.",
+        "iteratie": "Feedbackmoment op de eerste werkende versie."
+      }
+    }
+  ]
+}

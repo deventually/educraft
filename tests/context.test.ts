@@ -138,3 +138,45 @@ describe("formatProfile", () => {
     expect(en).toContain("higher professional education");
   });
 });
+
+// The country-neutral level-adaptation directive (EQF 1–8). The *only* thing the
+// engine injects about level is the EQF number + this directive, so it works for
+// any EQF country, not just NL. Exact-string asserts pin the contract.
+const NL_DIRECTIVE = (n: number) =>
+  `- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF ${n}); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.`;
+const EN_DIRECTIVE = (n: number) =>
+  `- Match complexity, examples and expectations to this level (EQF ${n}); adapt the language register only for text the learner reads directly. Do not mention the level itself.`;
+
+describe("formatProfile — EQF 1–8 level adaptation", () => {
+  it("accepts the full ladder: EQF 1 (entry) and EQF 8 (doctorate)", () => {
+    const eqf1 = formatProfile({ ...generic, eqf: 1 }, "nl");
+    expect(eqf1).toContain("EQF 1");
+    expect(eqf1).toContain(NL_DIRECTIVE(1));
+    const eqf8 = formatProfile({ ...generic, eqf: 8 }, "nl");
+    expect(eqf8).toContain("EQF 8");
+    expect(eqf8).toContain(NL_DIRECTIVE(8));
+  });
+
+  it("appends the adaptation directive when eqf is set (NL), keyed to the level", () => {
+    const out = formatProfile({ ...generic, eqf: 2 }, "nl");
+    expect(out).toContain(NL_DIRECTIVE(2));
+    // The directive never leaks a country-specific term — only the EQF number.
+    expect(out).not.toContain("mbo");
+    expect(out).not.toContain("havo");
+  });
+
+  it("localizes the directive to the output language (EN)", () => {
+    const out = formatProfile({ ...generic, eqf: 6 }, "en");
+    expect(out).toContain(EN_DIRECTIVE(6));
+    expect(out).not.toContain(NL_DIRECTIVE(6));
+  });
+
+  it("omits the directive entirely when eqf is not set", () => {
+    const { eqf, ...noEqf } = generic;
+    const nl = formatProfile(noEqf, "nl");
+    expect(nl).not.toContain("Stem de complexiteit");
+    expect(nl).not.toContain("EQF");
+    const en = formatProfile(noEqf, "en");
+    expect(en).not.toContain("Match complexity");
+  });
+});

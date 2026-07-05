@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "id": "source-evaluation-peer",
+      "description": "Chat peer (fellow student) helping evaluate a source. Checks it coaches critical evaluation as a peer rather than delivering a verdict, and stays in the peer role.",
+      "outputLanguage": "nl",
+      "values": {
+        "assignment": "Beoordeel de betrouwbaarheid van een bron voor een onderzoeksopdracht.",
+        "discipline": "Communicatie",
+        "level": "Eerstejaars hbo"
+      },
+      "userTurns": [
+        "Ik heb een blogpost gevonden over klimaatverandering. Kan ik die gebruiken als bron?",
+        "Er staat geen auteur bij en geen bronvermelding.",
+        "Hij is wel van 2019.",
+        "Dus jij vindt dat ik hem beter niet kan gebruiken?"
+      ]
+    }
+  ]
+}

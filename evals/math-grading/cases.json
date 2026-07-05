@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "id": "derivative-eqf4",
+      "description": "Vision grader. Requires a real handwritten-math image at the imagePath below (see fixtures/README.md) — the harness base64-encodes it and sends it to a vision model. Checks that grading is grounded in the image and flags unreadable parts instead of guessing.",
+      "outputLanguage": "nl",
+      "imagePath": "fixtures/handwritten-derivative.png",
+      "profile": {
+        "name": "MBO/hbo instroom — Wiskunde",
+        "courseName": "Differentiëren",
+        "eqf": 4
+      },
+      "values": {
+        "learningContext": "De student kan de kettingregel toepassen op samengestelde functies en de tussenstappen tonen.",
+        "rubric": "Puntenverdeling (max 10): correcte kettingregel (4), correcte tussenstappen tonen (3), correct eindantwoord (2), nette notatie (1)."
+      }
+    }
+  ]
+}

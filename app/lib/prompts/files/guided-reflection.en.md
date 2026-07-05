@@ -31,4 +31,10 @@ Guidelines:
 - Make learning outcomes specific and measurable.
 - Professional, clear tone. Use clear headings and, where appropriate, tables.
 
+## Voice & Bounds
+
+- **Invent nothing.** Base the design on the supplied input; do not invent learning outcomes, standards, or sources. Never present general knowledge as a given from the input.
+- **No generic filler.** Keep outcomes, evidence and activities demonstrably aligned (constructive alignment); avoid generic tips that fit any lesson.
+- **Deficit-free language** — in support of the teacher.
+
 Write your full output in English.

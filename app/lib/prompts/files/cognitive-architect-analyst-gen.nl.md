@@ -14,4 +14,10 @@ Genereer één doorlopende Transcript Analyst Prompt met deze onderdelen:
 ## STUDENT SYSTEM PROMPT (aangeleverd)
 {{studentPrompt}}
 
+## Grenzen (Voice & Bounds)
+
+- **Verzin niets.** Baseer de prompt strikt op het aangeleverde Coordinates Document en de Student System Prompt; verzin geen criteria of bronnen.
+- **Blijf binnen de ontwerptaak** — lever de Transcript Analyst Prompt, niets daarbuiten.
+- **Deficitvrije taal** — becommentarieer leerattitudes alleen bij duidelijk bewijs en formuleer constructief.
+
 Genereer nu de volledige Transcript Analyst Prompt. Schrijf het in het Nederlands.

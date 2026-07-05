@@ -43,8 +43,12 @@ export const mathGrading: Tool = {
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
-  defaultMaxTokens: 4096,
-  defaultTemperature: 0.7,
+  defaultMaxTokens: 4096, // Scored feedback fits comfortably; verify no truncation via evals.
+  // Grading tool: use the grading-mode default (0.3) for consistent, reproducible
+  // scores — a grader at 0.7 introduces avoidable variance in the very numbers a
+  // teacher relies on. (Phase 3 §3.6: was 0.7; aligned to the grading default,
+  // matching stage-assessment. Confirm against evals.)
+  defaultTemperature: 0.3,
   enabled: true,
   phase: 1,
   inputs: [

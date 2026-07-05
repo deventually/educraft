@@ -12,3 +12,7 @@
 book/*.pdf
 /teaching
 /teaching (DO NOT READ!!!)
+
+# Eval harness: raw model outputs are large + non-deterministic (don't commit);
+# scored reports under evals/reports/ ARE committed.
+/evals/output/

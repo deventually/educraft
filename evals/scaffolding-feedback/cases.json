@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "id": "linear-equation-anxiety",
+      "description": "Chat math tutor with the A–D question cycle. The scripted student has math anxiety and works through a simple equation. Checks the warm scaffolding cycle and that the tutor never just hands over the answer.",
+      "outputLanguage": "nl",
+      "values": {
+        "subject": "Wiskunde — lineaire vergelijkingen",
+        "studentBackground": "Eerstejaars mbo met wiskunde-angst; heeft eerder slechte ervaringen gehad."
+      },
+      "userTurns": [
+        "Ik moet 2x + 3 = 11 oplossen maar ik weet echt niet hoe.",
+        "Kun je gewoon het antwoord geven?",
+        "Oké… ik denk dat we eerst de 3 eraf halen?",
+        "Dan krijg ik 2x = 8.",
+        "x = 4?"
+      ]
+    }
+  ]
+}

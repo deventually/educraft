@@ -14,6 +14,26 @@ interface Labels {
   framework: string;
 }
 
+/**
+ * The country-neutral level-adaptation directive, appended right after the EQF
+ * line whenever a level is set. This — not any national label — is how level
+ * adaptation reaches EVERY context-injecting tool through {{contextProfile}}, in
+ * any EQF country, without the engine ever branching on level.
+ *
+ * It is deliberately reader-aware: almost every context-injecting tool is
+ * instructor-facing, and a teacher is a professional adult regardless of the
+ * students' level. So the level scales the *substance* — task complexity,
+ * examples, and the depth expected of the students — for every tool; the *language
+ * register* only adapts for text the learner reads directly (a chat tutor, or
+ * feedback relayed to the student). "Never mention the level" keeps it implicit.
+ */
+const LEVEL_DIRECTIVE: Record<OutputLanguage, (n: number) => string> = {
+  nl: (n) =>
+    `- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF ${n}); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.`,
+  en: (n) =>
+    `- Match complexity, examples and expectations to this level (EQF ${n}); adapt the language register only for text the learner reads directly. Do not mention the level itself.`,
+};
+
 const LABELS: Record<OutputLanguage, Labels> = {
   nl: {
     intro: "Context van de opleiding (hbo, hoger beroepsonderwijs):",
@@ -74,7 +94,10 @@ export function formatProfile(
   if (profile.programme) lines.push(`- ${t.programme}: ${profile.programme}`);
   if (profile.courseName) lines.push(`- ${t.course}: ${profile.courseName}`);
   if (profile.studyYear) lines.push(`- ${t.year}: ${profile.studyYear}`);
-  if (profile.eqf) lines.push(`- ${t.eqf}: EQF ${profile.eqf}`);
+  if (profile.eqf) {
+    lines.push(`- ${t.eqf}: EQF ${profile.eqf}`);
+    lines.push(LEVEL_DIRECTIVE[lang](profile.eqf));
+  }
   if (profile.professionalContext?.trim()) {
     lines.push(`- ${t.professionalContext}: ${profile.professionalContext.trim()}`);
   }

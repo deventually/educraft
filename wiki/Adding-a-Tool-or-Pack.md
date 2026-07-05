@@ -14,7 +14,12 @@ A tool = an evidence-based method + an evaluated prompt, expressed as a `Tool` p
 
 1. **Write the prompt files** —
    `app/lib/prompts/files/<id>.nl.md` and `<id>.en.md`, using `{{placeholders}}` for
-   every context-driven value.
+   every context-driven value. **Follow `app/lib/prompts/TEMPLATE.md`** — the
+   mandatory prompt skeleton (Role, Task, Inputs, Level & tone/EQF, Output, Voice &
+   Bounds, Multi-turn stability [chat only], Failure behavior). Keep its canonical
+   headings verbatim: **`Voice & Bounds`** is required in every prompt and
+   **`Multi-turn`** in every chat prompt (a structural test greps for them). Bake
+   the language per file — no `{{outputLanguage}}` placeholder.
 2. **Create the `PromptDef`** — `app/lib/prompts/<id>.prompt.ts`, holding the
    **verbatim** original (shown in the UI for CC BY fidelity) and the **runtime**
    prompt reference. Register it in `app/lib/prompts/index.ts` (the `PROMPTS` map).

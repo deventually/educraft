@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "id": "coi-rich-thread",
+      "description": "A substantive Community-of-Inquiry thread with genuine disagreement and integration — the grader should quote evidence and score presences differentiated.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Ethiek & technologie, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Ethiek & technologie",
+        "eqf": 6
+      },
+      "values": {
+        "discussionThread": "Onderwerp: Mag een gemeente gezichtsherkenning inzetten op straat?\n\n[Sanne, 12 mrt 09:14] Ik vind van niet. Het schendt privacy van iedereen die toevallig langsloopt, ook al heb je niks misdaan. De AVG spreekt van 'gerechtvaardigd belang', maar hier ontbreekt dat volgens mij.\n\n[Youssef, 12 mrt 11:02] Eens met de privacyzorg, maar is er geen verschil tussen live-herkenning en achteraf beelden bekijken bij een concreet misdrijf? Bij het tweede is er een duidelijk doel. @Sanne zou dat jouw bezwaar wegnemen?\n\n[Sanne, 12 mrt 13:40] Goed punt Youssef. Achteraf, gericht op een verdachte, met rechterlijke toets — dat is proportioneler. Live-scanning van iedereen niet. Ik verschuif mijn standpunt: het gaat om proportionaliteit, niet om de techniek zelf.\n\n[Meike, 13 mrt 08:20] Ik mis in deze discussie de foutmarge. Studies laten hogere false-positives zien bij bepaalde bevolkingsgroepen. Als het systeem vaker onschuldigen aanwijst, versterkt inzet bestaande ongelijkheid. Dat weegt voor mij zwaarder dan het doel.\n\n[Docent, 13 mrt 15:00] Mooie verdieping. Wie kan de proportionaliteitstoets en de foutmarge samenbrengen in één afweging voor de gemeenteraad?",
+        "learningObjectives": "Studenten wegen juridische (AVG), ethische en technische argumenten tegen elkaar af en onderbouwen een standpunt met bronnen; studenten reageren respectvol en bouwen voort op elkaars bijdragen.",
+        "rubric": "Kwaliteit van redeneren, gebruik van bewijs/bronnen, mate van voortbouwen op anderen, respectvolle toon."
+      }
+    },
+    {
+      "id": "coi-thin-thread",
+      "description": "A shallow thread (agreement, no evidence, little building-on). The grader should score cognitive presence low, be specific about what is missing, and stay constructive — without inventing content that isn't there.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Ethiek & technologie, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Ethiek & technologie",
+        "eqf": 6
+      },
+      "values": {
+        "discussionThread": "Onderwerp: Mag een gemeente gezichtsherkenning inzetten op straat?\n\n[Tom, 12 mrt 10:00] Nee, gewoon niet doen. Privacy.\n\n[Lisa, 12 mrt 10:05] Eens met Tom.\n\n[Ravi, 12 mrt 10:12] Ja same, slecht idee.\n\n[Tom, 12 mrt 10:20] Precies. Klaar.",
+        "learningObjectives": "Studenten wegen juridische (AVG), ethische en technische argumenten tegen elkaar af en onderbouwen een standpunt met bronnen; studenten reageren respectvol en bouwen voort op elkaars bijdragen.",
+        "rubric": "Kwaliteit van redeneren, gebruik van bewijs/bronnen, mate van voortbouwen op anderen, respectvolle toon."
+      }
+    }
+  ]
+}

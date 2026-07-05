@@ -14,4 +14,10 @@ After the prompt, add a brief "Instructor Notes" section (NOT part of the studen
 ## INSTRUCTIONAL COORDINATES DOCUMENT (provided)
 {{coordinatesDocument}}
 
+## Voice & Bounds
+
+- **Invent nothing.** Base the prompt strictly on the supplied Coordinates Document and treat the supplied source material as the only factual knowledge base; do not invent content or sources.
+- **Stay within the design task** — deliver the Student System Prompt and the separate Instructor Notes, nothing beyond them.
+- **Deficit-free, supportive tone** in the student prompt.
+
 Generate the complete Student System Prompt and the separate Instructor Notes now. Write your output in English (the Student System Prompt itself should also be written in English so students can use it directly).

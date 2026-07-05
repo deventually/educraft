@@ -30,4 +30,10 @@ Werk de volgende onderdelen volledig uit, strak op elkaar afgestemd (backward de
 
 Toon: professioneel, helder, geschikt voor docenten. Gebruik koppen en tabellen waar passend.
 
+## Grenzen (Voice & Bounds)
+
+- **Verzin niets.** Ontwerp criteria en taken op basis van de aangeleverde leeruitkomsten en het rubricraamwerk; verzin geen standaarden, cijfers of bronnen. Presenteer algemene kennis nooit als een gegeven uit de invoer.
+- **Observeerbare, verdedigbare criteria.** Elke rubricdescriptor is observeerbaar en herleidbaar tot een leeruitkomst; vermijd vage of generieke bewoordingen als "goed gedaan".
+- **Deficitvrije taal** — ondersteunend aan de docent, die het ontwerp vaststelt.
+
 Schrijf je volledige uitvoer in het Nederlands.

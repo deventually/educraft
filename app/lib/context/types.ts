@@ -26,6 +26,13 @@ export const HBO_DOMAINS = [
 ] as const;
 export type HboDomain = (typeof HBO_DOMAINS)[number];
 
+/**
+ * EQF (European Qualifications Framework) level — the country-neutral 1–8 spine
+ * covering the whole education ladder (basic → doctorate). See `context/eqf.ts`
+ * for the level catalogue and the internationalisation rationale.
+ */
+export type EqfLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
 /** A value answered for a single domain-pack field. */
 export type PackFieldValue = string | string[] | number;
 
@@ -49,8 +56,14 @@ export interface ContextProfile {
   courseName?: string;
   /** Studiejaar 1–4. */
   studyYear?: 1 | 2 | 3 | 4;
-  /** EQF-niveau (5/6/7) — het enige niveau dat over alle hbo-opleidingen geldt. */
-  eqf?: 5 | 6 | 7;
+  /**
+   * EQF level (1–8) — the country-neutral level measure spanning the whole
+   * education ladder (basic/vocational/secondary → bachelor/master/doctorate),
+   * usable in any EQF country. The engine injects only this number plus a generic
+   * adaptation directive (see `format.ts`), never a country-specific label. See
+   * `eqf.ts`.
+   */
+  eqf?: EqfLevel;
   /**
    * @deprecated Legacy. No longer collected or injected: competencies are
    * per-task and every generator tool already asks for them, so injecting them

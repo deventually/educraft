@@ -43,8 +43,11 @@ export const forumAutograder: Tool = {
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
-  defaultMaxTokens: 4096,
-  defaultTemperature: 0.5,
+  defaultMaxTokens: 4096, // CoI diagnosis + advice fits comfortably in 4096; verify via evals.
+  // Grading tool: use the grading-mode default (0.3) for consistent scores. The
+  // facilitation advice it also produces is secondary to scoring stability.
+  // (Phase 3 §3.6: was 0.5; aligned to the grading default. Confirm against evals.)
+  defaultTemperature: 0.3,
   enabled: true,
   phase: 1,
   inputs: [

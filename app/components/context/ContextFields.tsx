@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 import { X, Plus, RotateCcw, ExternalLink } from "lucide-react";
 import { HBO_DOMAINS, type CustomField, type PackFieldValue } from "~/lib/context/types";
 import { getDomainPack, type PackField } from "~/lib/context/packs";
+import { EQF_LEVELS } from "~/lib/context/eqf";
 import { Input, Label, Select, Textarea, HelpText } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -140,6 +141,7 @@ export function StudyYearField({
 
 export function EqfField({ defaultValue }: { defaultValue?: number | string }) {
   const t = useT();
+  const locale = useLocale();
   return (
     <Field id="cf-eqf" label={t.settings.eqfOptional}>
       <Select
@@ -147,10 +149,15 @@ export function EqfField({ defaultValue }: { defaultValue?: number | string }) {
         name="eqf"
         defaultValue={defaultValue != null ? String(defaultValue) : ""}
       >
+        {/* The full EQF 1–8 ladder (every education level, any EQF country). NL
+            labels carry indicative Dutch anchors; EN labels are country-neutral.
+            The engine only ever injects the number — see context/eqf.ts. */}
         <option value="">{t.settings.eqfNone}</option>
-        <option value="5">EQF 5</option>
-        <option value="6">EQF 6</option>
-        <option value="7">EQF 7</option>
+        {EQF_LEVELS.map((e) => (
+          <option key={e.level} value={e.level}>
+            {loc(e.label, locale)}
+          </option>
+        ))}
       </Select>
     </Field>
   );

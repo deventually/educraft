@@ -42,12 +42,51 @@ describe("parseContextForm", () => {
         ["name", "x"],
         ["domain", "NotADomain"],
         ["studyYear", "9"],
-        ["eqf", "1"],
+        ["eqf", "9"], // EQF only runs 1–8
       ]),
     );
     expect(input?.domain).toBeUndefined();
     expect(input?.studyYear).toBeUndefined();
     expect(input?.eqf).toBeUndefined();
+  });
+
+  it("accepts the full EQF ladder 1–8 (the whole education ladder, not just hbo)", () => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const { input } = parseContextForm(
+        fd([
+          ["name", "x"],
+          ["eqf", String(n)],
+        ]),
+      );
+      expect(input?.eqf, `EQF ${n}`).toBe(n);
+    }
+  });
+
+  it("rejects EQF 0 and non-integers", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["eqf", "0"],
+        ]),
+      ).input?.eqf,
+    ).toBeUndefined();
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["eqf", "6.5"],
+        ]),
+      ).input?.eqf,
+    ).toBeUndefined();
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["eqf", "abc"],
+        ]),
+      ).input?.eqf,
+    ).toBeUndefined();
   });
 
   it("keeps only registry-valid pack values for the selected domain", () => {

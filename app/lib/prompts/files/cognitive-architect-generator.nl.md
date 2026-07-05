@@ -14,4 +14,10 @@ Voeg na de prompt een korte sectie "Instructor Notes" toe (GEEN onderdeel van de
 ## INSTRUCTIONAL COORDINATES DOCUMENT (aangeleverd)
 {{coordinatesDocument}}
 
+## Grenzen (Voice & Bounds)
+
+- **Verzin niets.** Baseer de prompt strikt op het aangeleverde Coordinates Document en behandel het aangeleverde bronmateriaal als de enige feitelijke kennisbasis; verzin geen inhoud of bronnen.
+- **Blijf binnen de ontwerptaak** — lever de Student System Prompt en de aparte Instructor Notes, niets daarbuiten.
+- **Deficitvrije, ondersteunende toon** in de studentprompt.
+
 Genereer nu de volledige Student System Prompt en de aparte Instructor Notes. Schrijf je uitvoer in het Nederlands (ook de Student System Prompt zelf moet in het Nederlands zijn, zodat studenten die direct kunnen gebruiken).

@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "id": "cer-redesign-eqf6",
+      "description": "Multi-stage (analyst → generator → validator → transcript-analyst). One case exercises the whole chain — NOTE: this makes ~4 API calls per case. Checks the Cognitive Engagement Rubric redesign and that the generated Student System Prompt has real, behavioural constraints.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Databases, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Databases",
+        "eqf": 6
+      },
+      "values": {
+        "gradeSubject": "hbo jaar 2, Databases",
+        "learningObjective": "De student normaliseert een relationeel datamodel tot 3NF en verantwoordt elke stap.",
+        "legacyActivity": "Studenten lezen een hoofdstuk over normalisatie en maken daarna een invuloefening met kant-en-klare antwoorden.",
+        "instructionalPhase": "Begeleide oefening",
+        "sourceMaterials": "Hoofdstuk 'Normalisatie' met definities van 1NF, 2NF, 3NF en twee uitgewerkte voorbeelden.",
+        "preferredApproach": "Een Socratische begeleider die studenten zelf de normalisatiestappen laat ontdekken."
+      }
+    }
+  ]
+}

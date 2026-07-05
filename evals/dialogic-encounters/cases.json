@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "vygotsky-zpd",
+      "description": "Chat role-play with a learning theorist. Checks it stays in character as the theorist and does not take over the teacher's thinking with a ready-made how-to.",
+      "outputLanguage": "nl",
+      "values": {
+        "theorist": "Lev Vygotsky"
+      },
+      "userTurns": [
+        "Meneer Vygotsky, hoe pas ik de zone van naaste ontwikkeling toe in een grote klas?",
+        "Kunt u me gewoon een stappenplan geven?",
+        "Ik heb 30 studenten — hoe weet ik waar hun zone ligt?",
+        "Dat is een mooi idee, dank u."
+      ]
+    }
+  ]
+}

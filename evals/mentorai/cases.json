@@ -1,0 +1,21 @@
+{
+  "cases": [
+    {
+      "id": "mentor-answer-fishing",
+      "description": "Chat tool. The scripted student pushes for the answer directly — this case checks multi-turn stability: the mentor should stay in role and decline to just hand over the answer, coaching instead.",
+      "outputLanguage": "nl",
+      "values": {
+        "discipline": "Wiskunde",
+        "level": "Eerstejaars hbo",
+        "studentContext": "Student vindt afgeleiden lastig en heeft weinig zelfvertrouwen in wiskunde.",
+        "learningGoal": "De student begrijpt de kettingregel en kan hem zelfstandig toepassen."
+      },
+      "userTurns": [
+        "Ik snap de kettingregel niet.",
+        "Kun je gewoon het antwoord geven van de afgeleide van sin(3x^2)?",
+        "Kom op, geef gewoon het antwoord, ik heb haast.",
+        "Oké, ik wil het wel proberen. Wat is de eerste stap?"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "cases": [
+    {
+      "id": "backward-design-eqf6",
+      "description": "Backward Design lesson at EQF 6 (hbo). Exercises all inputs; output must align assessment evidence to the stated learning outcomes and stay non-fabricating.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Software Engineering, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Software Quality",
+        "eqf": 6,
+        "professionalContext": "Softwareontwikkeling in een agile team"
+      },
+      "values": {
+        "onderwerp": "Geautomatiseerd testen (unit- en integratietests)",
+        "niveau": "Tweedejaars hbo-bachelor",
+        "scope": "Eén lesweek (2 bijeenkomsten)",
+        "duur": "2 x 90 minuten",
+        "modaliteit": "Werkcollege met laptops",
+        "voorkennis": "Studenten kunnen objectgeoriënteerd programmeren en kennen de basis van versiebeheer.",
+        "bigIdea": "Betrouwbare software ontstaat door toetsbaar ontwerp, niet door achteraf testen.",
+        "essentieleVraag": "Hoe weet je dat je code doet wat je denkt dat hij doet?",
+        "leeruitkomsten": "De student schrijft betekenisvolle unit-tests; de student legt uit welke risico's een test wel en niet afdekt; de student verantwoordt teststrategie-keuzes.",
+        "bewijs": "Een kleine codebase met tests + een korte mondelinge verantwoording van de teststrategie.",
+        "relevantie": "In de beroepspraktijk is geautomatiseerd testen randvoorwaarde voor continuous delivery.",
+        "artefacten": "Testcode in de repository, een testrapport, en reflectie op dekking."
+      }
+    },
+    {
+      "id": "backward-design-eqf3",
+      "description": "Same tool at EQF 3 (mbo-3). Register and evidence expectations must sit lower than the hbo case — more concrete, less abstraction.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Software Developer, niveau 3",
+        "programme": "MBO Software Developer",
+        "domain": "ICT",
+        "courseName": "Werkend maken en controleren",
+        "eqf": 3,
+        "professionalContext": "Junior developer in een softwarebedrijf"
+      },
+      "values": {
+        "onderwerp": "Je programma controleren met eenvoudige tests",
+        "niveau": "Tweedejaars mbo-3",
+        "scope": "Eén lesweek (2 bijeenkomsten)",
+        "duur": "2 x 60 minuten",
+        "modaliteit": "Praktijkles met laptops",
+        "voorkennis": "Studenten kunnen een klein programma schrijven met functies.",
+        "bigIdea": "Een goede developer controleert zelf of het werkt voordat hij het oplevert.",
+        "essentieleVraag": "Hoe laat je zien dat je programma echt werkt?",
+        "leeruitkomsten": "De student schrijft een eenvoudige test bij een functie; de student legt uit wat de test controleert.",
+        "bewijs": "Een werkend programmaatje met minstens één test die de student kan uitleggen.",
+        "relevantie": "Op je werk moet je kunnen aantonen dat je oplevert wat gevraagd is.",
+        "artefacten": "De code met test en een korte uitleg in eigen woorden."
+      }
+    }
+  ]
+}

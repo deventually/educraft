@@ -12,6 +12,7 @@ import {
   type PackFieldValue,
 } from "./types";
 import { getDomainPack } from "./packs";
+import { isEqfLevel } from "./eqf";
 
 export const MAX_CUSTOM_FIELDS = 30;
 export const MAX_CUSTOM_LABEL = 120;
@@ -98,7 +99,7 @@ export function parseContextForm(fd: FormData): ParsedContextForm {
     domain,
     courseName: str(fd.get("courseName")),
     studyYear: yearRaw && year >= 1 && year <= 4 ? (year as 1 | 2 | 3 | 4) : undefined,
-    eqf: eqfRaw && eqf >= 5 && eqf <= 7 ? (eqf as 5 | 6 | 7) : undefined,
+    eqf: eqfRaw && isEqfLevel(eqf) ? eqf : undefined,
     professionalContext: str(fd.get("professionalContext")),
     tools: str(fd.get("tools")),
     packValues: parsePackValues(fd, domain),

@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "id": "internship-report-eqf6",
+      "description": "Instructor grader on a short internship report. Checks evidence-quoting with location, 'niet aangetroffen' for missing evidence, applying the pass rule, and the teacher-decides framing / closing sentence.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — afstudeerfase, jaar 4",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "Stageverslag",
+        "track": "Software Engineering",
+        "studyYear": "3",
+        "durationWeeks": "20",
+        "submissionNotes": "De eindpresentatie en het beroepsproduct worden apart beoordeeld; beoordeel nu alleen het verslag.",
+        "assessmentFramework": "Beoordeel op twee hbo-i beroepstaken. ANALYSEREN: de student brengt de probleemstelling en eisen gestructureerd in kaart en onderbouwt keuzes. REALISEREN: de student realiseert een werkende oplossing en verantwoordt de aanpak. Per taak: aantoonbaar met bewijs uit het verslag.",
+        "assessmentScale": "Schaal per beroepstaak: Onvoldoende (O) / Voldoende (V) / Goed (G). Slaagregel: één O op een beroepstaak = geheel onvoldoende (knock-out).",
+        "companyEvaluation": "",
+        "document": "STAGEVERSLAG (fragment)\n\n1. Inleiding\nTijdens mijn stage bij een softwarebedrijf heb ik gewerkt aan een dashboard voor logistieke data. De opdracht was om inzicht te geven in doorlooptijden.\n\n2. Analyse\nIk heb gesprekken gevoerd met twee gebruikers en daaruit drie eisen gehaald: (a) realtime overzicht, (b) filteren op vestiging, (c) export naar Excel. Ik heb geen expliciete niet-functionele eisen opgesteld.\n\n3. Realisatie\nHet dashboard is gebouwd met React en een REST-API. De filters werken; de export was aan het eind van de stage nog niet af. Ik heb geen geautomatiseerde tests geschreven wegens tijdgebrek.\n\n4. Reflectie\nIk ben tevreden over het resultaat, maar had eerder met de gebruikers moeten valideren."
+      }
+    }
+  ]
+}

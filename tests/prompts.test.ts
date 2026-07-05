@@ -31,4 +31,17 @@ describe("externalised prompt definitions", () => {
       expect(placeholdersIn(p.runtime.en), `${p.id} en`).not.toContain("outputLanguage");
     }
   });
+
+  // {{contextProfile}} is injected by the pipeline and interpolate() replaces EVERY
+  // occurrence — so referencing it inline in prose (as well as at the injection
+  // point) injects the whole profile block twice, once mangled mid-sentence. Guard:
+  // it may appear at most once per variant. Refer to it in prose as "the teaching
+  // context", never as a placeholder.
+  it("references {{contextProfile}} at most once per variant", () => {
+    const count = (s: string) => (s.match(/\{\{\s*contextProfile\s*\}\}/g) ?? []).length;
+    for (const p of entries) {
+      expect(count(p.runtime.nl), `${p.id} nl`).toBeLessThanOrEqual(1);
+      expect(count(p.runtime.en), `${p.id} en`).toBeLessThanOrEqual(1);
+    }
+  });
 });

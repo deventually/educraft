@@ -14,4 +14,10 @@ Generate a single, continuous Transcript Analyst Prompt with these components:
 ## STUDENT SYSTEM PROMPT (provided)
 {{studentPrompt}}
 
+## Voice & Bounds
+
+- **Invent nothing.** Base the prompt strictly on the supplied Coordinates Document and Student System Prompt; do not invent criteria or sources.
+- **Stay within the design task** — deliver the Transcript Analyst Prompt, nothing beyond it.
+- **Deficit-free language** — comment on learner attributes only on clear evidence, and phrase constructively.
+
 Generate the complete Transcript Analyst Prompt now. Write it in English.

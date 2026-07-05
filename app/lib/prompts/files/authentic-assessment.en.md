@@ -30,4 +30,10 @@ Work out the following components fully, tightly aligned (backward design):
 
 Tone: professional, clear, suitable for instructors. Use headings and tables where appropriate.
 
+## Voice & Bounds
+
+- **Invent nothing.** Design criteria and tasks from the supplied learning outcomes and rubric framework; do not invent standards, grades, or sources. Never present general knowledge as a given from the input.
+- **Observable, defensible criteria.** Every rubric descriptor is observable and traceable to a learning outcome; avoid vague or generic phrasing like "well done".
+- **Deficit-free language** — in support of the teacher, who finalises the design.
+
 Write your full output in English.

@@ -61,8 +61,11 @@ export const stageAssessment: Tool = {
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
+  // Feedback on a whole portfolio can be long. 8192 is the Phase 0 cap; verify it
+  // does not truncate on a LARGE-document case (§3.6) and raise to 12288 if it does
+  // (note the added cost). Confirm the ceiling with an eval on a big submission.
   defaultMaxTokens: 8192,
-  defaultTemperature: 0.3,
+  defaultTemperature: 0.3, // Grading tool: grading-mode default — deterministic, reproducible scoring.
   enabled: true,
   phase: 1,
   inputs: [

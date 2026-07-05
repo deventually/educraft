@@ -96,6 +96,20 @@ describe("Context settings", () => {
     expect(level()).toHaveValue("3"); // graduation ceiling
   });
 
+  it("offers the full EQF 1–8 ladder in the form (usable in any EQF country)", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
+    const eqf = screen.getByLabelText(/eqf/i) as HTMLSelectElement;
+    const values = Array.from(eqf.querySelectorAll("option")).map((o) => o.value);
+    expect(values).toEqual(["", "1", "2", "3", "4", "5", "6", "7", "8"]);
+    // Each option names the EQF level; NL anchors help a Dutch teacher pick.
+    expect(screen.getByRole("option", { name: /EQF 1\b/ })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /EQF 8\b/ })).toBeInTheDocument();
+    // Default preserved: EQF 6 (hbo-bachelor) — no regression for NL.
+    expect(eqf).toHaveValue("6");
+  });
+
   it("omits the slimmed-out competencies and notes fields from the form", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();

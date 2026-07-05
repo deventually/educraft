@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "id": "motivation-eqf2",
+      "description": "Strong tool (ARCS-V) at EQF 2 (mbo-2). PowerUps and register must fit a concrete, practice-oriented level — short activities, everyday relevance.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Zorg & welzijn, niveau 2 (Helpende)",
+        "programme": "MBO Helpende Zorg & Welzijn",
+        "domain": "Zorg & welzijn",
+        "courseName": "Communicatie met cliënten",
+        "eqf": 2,
+        "professionalContext": "Zorginstelling / thuiszorg"
+      },
+      "values": {
+        "discipline": "Communicatie in de zorg",
+        "cursusniveau": "Eerstejaars mbo-2",
+        "modaliteit": "Contactonderwijs met veel praktijk",
+        "groepsgrootte": "16 studenten",
+        "barriere": "Studenten vinden theorie over gespreksvaardigheden saai en zien niet hoe het hen op stage helpt.",
+        "studentkenmerken": "Praktijkgericht, weinig leeservaring, gemotiveerd door echte situaties en doen."
+      }
+    },
+    {
+      "id": "motivation-eqf6",
+      "description": "Same method at EQF 6 (hbo-bachelor). PowerUps may draw on abstraction, self-direction and design reasoning — a visibly higher register than the EQF 2 case.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Verpleegkunde, jaar 3",
+        "programme": "HBO Verpleegkunde",
+        "domain": "Zorg & welzijn",
+        "courseName": "Klinisch redeneren",
+        "eqf": 6,
+        "professionalContext": "Ziekenhuis / wijkverpleging"
+      },
+      "values": {
+        "discipline": "Klinisch redeneren",
+        "cursusniveau": "Derdejaars hbo-bachelor",
+        "modaliteit": "Blended: hoorcollege + casusgestuurde werkgroepen",
+        "groepsgrootte": "28 studenten",
+        "barriere": "Studenten passen redeneermodellen mechanisch toe zonder de onderliggende afwegingen te doorzien, en haken af bij complexe casuïstiek.",
+        "studentkenmerken": "Analytisch capabel maar onzeker bij ambigue situaties; gebaat bij autonomie en betekenisvolle uitdaging."
+      }
+    }
+  ]
+}

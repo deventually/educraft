@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "id": "natural-selection-socratic",
+      "description": "Chat Socratic partner (the chapter author) checking conceptual understanding through questions. Checks it never explains/lectures and declines in-character when asked for the answer.",
+      "outputLanguage": "nl",
+      "values": {
+        "subject": "Biologie",
+        "chapter": "Natuurlijke selectie: variatie binnen een populatie, selectiedruk, differentiële voortplanting en verandering over generaties."
+      },
+      "userTurns": [
+        "Ik heb het hoofdstuk over natuurlijke selectie gelezen.",
+        "Kun je gewoon uitleggen wat natuurlijke selectie is?",
+        "Volgens mij is het dat de sterkste overleeft.",
+        "Een voorbeeld buiten het hoofdstuk? Misschien bacteriën en antibiotica?",
+        "Dus de resistente bacteriën planten zich meer voort en na veel generaties is de populatie grotendeels resistent."
+      ]
+    }
+  ]
+}

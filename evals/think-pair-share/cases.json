@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "id": "ethics-facial-recognition",
+      "description": "Chat peer running Think → Pair → Share. Checks the phase order is respected and the AI doesn't skip to giving an opinion when pushed.",
+      "outputLanguage": "nl",
+      "values": {
+        "discipline": "Ethiek & technologie",
+        "topic": "Mag een gemeente gezichtsherkenning op straat inzetten?"
+      },
+      "userTurns": [
+        "Ik weet niet goed wat ik van gezichtsherkenning op straat vind.",
+        "Geef jij gewoon je mening?",
+        "Oké, ik denk dat privacy zwaarder weegt dan veiligheid.",
+        "Maar wat als het een ernstig misdrijf voorkomt?",
+        "Ik snap nu dat het een afweging is tussen proportionaliteit en doel."
+      ]
+    }
+  ]
+}

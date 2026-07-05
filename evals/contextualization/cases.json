@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "id": "security-eqf2",
+      "description": "Same theme (password & phishing safety) at EQF 2 (mbo-2 ICT support). Output must use concrete, short-sentence register and everyday examples — no abstract jargon.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO ICT-support, niveau 2",
+        "programme": "MBO ICT-support",
+        "domain": "ICT",
+        "courseName": "Veilig digitaal werken",
+        "eqf": 2,
+        "professionalContext": "Servicedesk / interne IT-ondersteuning"
+      },
+      "values": {
+        "courseOutline": "Module 'Veilig digitaal werken': sterke wachtwoorden, tweestapsverificatie, phishing herkennen, wat te doen bij een verdacht bericht, wachtwoordmanager gebruiken.",
+        "learningObjectives": "De student herkent een phishingmail aan concrete kenmerken; de student stelt een sterk wachtwoord in en zet 2FA aan; de student meldt een verdacht bericht volgens de werkinstructie.",
+        "pedagogicalApproach": "Praktijkgericht, veel voordoen-nadoen, korte oefeningen met echte voorbeelden."
+      }
+    },
+    {
+      "id": "security-eqf6",
+      "description": "Same theme at EQF 6 (hbo-ICT security). Output may use threat models, risk trade-offs and reasoned analysis — a visibly higher register than the EQF 2 variant.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — Security, jaar 3",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Identity & Access Management",
+        "eqf": 6,
+        "professionalContext": "Security engineering / IAM in een DevOps-team"
+      },
+      "values": {
+        "courseOutline": "Module 'Authenticatie & phishing-weerbaarheid': wachtwoordbeleid en entropie, MFA-factoren en hun trade-offs, phishing-resistente factoren (FIDO2/passkeys), social-engineering-aanvalsketens, incidentrespons bij credential compromise.",
+        "learningObjectives": "De student analyseert de sterkte van een authenticatie-ontwerp tegen een dreigingsmodel; de student onderbouwt een keuze voor MFA-factoren met risico-afwegingen; de student ontwerpt een incidentresponsstap bij gelekte credentials.",
+        "pedagogicalApproach": "Onderzoekend en casusgestuurd; studenten verantwoorden ontwerpkeuzes met argumenten en bronnen."
+      }
+    }
+  ]
+}

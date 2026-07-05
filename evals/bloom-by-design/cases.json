@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "id": "databases-alignment",
+      "description": "Chat design partner for constructive alignment (Bloom). Checks it helps the teacher align assessment to a higher-order outcome step by step, without dumping a finished product.",
+      "outputLanguage": "nl",
+      "values": {
+        "learningOutcome": "Studenten kunnen een relationeel datamodel normaliseren tot 3NF en hun keuzes verantwoorden.",
+        "assessmentGoals": "Een toetsvorm die hoger-orde denken meet, niet alleen reproductie.",
+        "context": "Module Databases, hbo-ICT jaar 2, 30 studenten, beperkte nakijktijd."
+      },
+      "userTurns": [
+        "Ik wil de toetsing van mijn module Databases verbeteren.",
+        "Kun je meteen een kant-en-klare toets geven?",
+        "Nu toets ik met multiple choice, maar dat voelt te laag voor 'verantwoorden'.",
+        "Oké, help me een passender toetsvorm kiezen en verantwoorden."
+      ]
+    }
+  ]
+}
