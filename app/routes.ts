@@ -2,7 +2,10 @@ import { type RouteConfig, index, route, layout, prefix } from "@react-router/de
 
 export default [
   layout("components/AppShell.tsx", [
-    index("routes/home.tsx"),
+    // `/` is a role-aware redirector (admin → /admin, else → /tools).
+    index("routes/index.tsx"),
+    // The tool catalogue lives at /tools (home.tsx); individual tools at /tools/:slug.
+    route("tools", "routes/home.tsx"),
     route("tools/:slug", "routes/tool.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
@@ -29,6 +32,7 @@ export default [
   ]),
   // Auth front door — outside the AppShell layout (no nav/footer chrome).
   route("invite/:token", "routes/invite.tsx"),
+  route("reset/:token", "routes/reset.$token.tsx"),
   route("login", "routes/login.tsx"),
   // Resource route (no UI) — POST destroys the session.
   route("logout", "routes/logout.tsx"),

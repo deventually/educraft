@@ -9,16 +9,19 @@ import { getDb } from "../db.server";
 import {
   chatSessions,
   cohortMemberships,
+  cohortTeachers,
   cohorts,
   contextProfiles,
   feedback,
   generations,
   invites,
   messages,
+  passwordResets,
   sessionSummaries,
   usage,
   users,
   type InviteRow,
+  type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
 import type { Role } from "~/lib/registry/access";
@@ -63,6 +66,20 @@ export async function setUserRole(id: string, role: Role): Promise<void> {
 }
 
 /**
+ * Overwrite a user's email — self-service change (`/account`) or admin recovery
+ * of an email-less account. Pass null to clear. Uniqueness is enforced by the
+ * schema's unique index; callers check for a collision first for a clean error.
+ */
+export async function updateUserEmail(id: string, email: string | null): Promise<void> {
+  getDb().update(users).set({ email }).where(eq(users.id, id)).run();
+}
+
+/** Overwrite a user's password hash (self-service change or reset-link redemption). */
+export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
+  getDb().update(users).set({ passwordHash }).where(eq(users.id, id)).run();
+}
+
+/**
  * A teacher's per-tool allow-list, or null when unrestricted (no list / empty).
  * Composed on top of instance availability in `availability.server`.
  */
@@ -98,16 +115,39 @@ export async function deleteUser(id: string): Promise<void> {
 /**
  * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
  * user owns — feedback, usage counters, generations, context profiles, cohort
- * memberships, and their chat history + de-personalised summaries (Phase 7) —
- * then the user row, in a single transaction so a partial failure leaves nothing
- * orphaned. Scoped by `userId`/`id`, so another user's rows are never touched.
+ * memberships + co-teach assignments, and their chat history + de-personalised
+ * summaries (Phase 7) — then the user row, in a single transaction so a partial
+ * failure leaves nothing orphaned. Scoped by `userId`/`id`, so another user's
+ * rows are never touched.
+ *
+ * Cohorts the user *created* are deliberately KEPT: a cohort is shared teaching
+ * config (its students' access), not personal data, so it survives as a
+ * reassignable orphan an admin can re-home (see `setCohortOwner`). We only clear
+ * the dangling reference to any of this user's now-deleted context profiles.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
   getDb().transaction((tx) => {
     tx.delete(feedback).where(eq(feedback.userId, id)).run();
     tx.delete(usage).where(eq(usage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
+    // Null any surviving cohort's reference to a profile we're about to delete,
+    // so no orphaned cohort points at a vanished profile.
+    const profileIds = tx
+      .select({ id: contextProfiles.id })
+      .from(contextProfiles)
+      .where(eq(contextProfiles.userId, id))
+      .all()
+      .map((p) => p.id);
+    if (profileIds.length > 0) {
+      tx.update(cohorts)
+        .set({ contextProfileId: null })
+        .where(inArray(cohorts.contextProfileId, profileIds))
+        .run();
+    }
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
+    // Drop this user's co-teacher assignments (a colleague's cohort just loses a
+    // co-manager); their own cohorts stay, orphaned for reassignment.
+    tx.delete(cohortTeachers).where(eq(cohortTeachers.userId, id)).run();
     tx.delete(cohortMemberships).where(eq(cohortMemberships.userId, id)).run();
     // Chat history: drop the user's messages (via their sessions), the sessions,
     // and the derived summaries. The student's raw transcript leaves with them.
@@ -296,4 +336,42 @@ export async function bumpSessionVersion(userId: string): Promise<number> {
   const next = (current?.sessionVersion ?? 0) + 1;
   db.update(users).set({ sessionVersion: next }).where(eq(users.id, userId)).run();
   return next;
+}
+
+/**
+ * Mint a single-use password-reset token for `userId` (default 48h window). With
+ * no email service, an admin shares the resulting link out-of-band; the user
+ * opens it and sets their own new password. Mirrors the invite-link pattern.
+ */
+export async function createPasswordReset(
+  userId: string,
+  ttlHours = 48,
+): Promise<PasswordResetRow> {
+  const row: PasswordResetRow = {
+    token: randomBytes(32).toString("base64url"),
+    userId,
+    expiresAt: new Date(Date.now() + ttlHours * 60 * 60 * 1000),
+    createdAt: new Date(),
+  };
+  getDb().insert(passwordResets).values(row).run();
+  return row;
+}
+
+export async function getPasswordReset(token: string): Promise<PasswordResetRow | null> {
+  return getDb().select().from(passwordResets).where(eq(passwordResets.token, token)).get() ?? null;
+}
+
+/**
+ * Consume a reset token: returns its row and deletes it (single-use) when it
+ * exists and hasn't expired; null otherwise. The guarded delete admits exactly
+ * one consumer under a race, mirroring `revokeInvite`.
+ */
+export async function consumePasswordReset(token: string): Promise<PasswordResetRow | null> {
+  const db = getDb();
+  const row = db.select().from(passwordResets).where(eq(passwordResets.token, token)).get();
+  if (!row) return null;
+  if (row.expiresAt.getTime() < Date.now()) return null;
+  const result = db.delete(passwordResets).where(eq(passwordResets.token, token)).run();
+  if (result.changes === 0) return null;
+  return row;
 }

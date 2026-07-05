@@ -17,6 +17,18 @@ export const users = sqliteTable("users", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+/**
+ * A single-use password-reset token. There is no email service, so an admin
+ * mints one, shares the link out-of-band (like an invite), and the user opens it
+ * to set a new password themselves. Deleted on use (single-use, like `revokeInvite`).
+ */
+export const passwordResets = sqliteTable("password_resets", {
+  token: text("token").primaryKey(), // 32+ random bytes, base64url
+  userId: text("user_id").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 /** A single-use invitation token that mints an account with a preset role. */
 export const invites = sqliteTable("invites", {
   token: text("token").primaryKey(), // 32+ random bytes, base64url
@@ -50,6 +62,10 @@ export const cohorts = sqliteTable("cohorts", {
   allowedToolSlugs: text("allowed_tool_slugs").notNull(), // JSON string[] ⊆ userType:"student" slugs
   configJson: text("config_json").notNull().default("{}"), // { [slug]: { values: Record<string,string> } }
   contextProfileId: text("context_profile_id"), // teacher-owned profile → injected server-side for members
+  // Alternative to a full profile: level the cohort by a bare EQF number (1-8).
+  // Mutually exclusive with contextProfileId — a profile carries its own EQF, so
+  // when a profile is attached this stays null (see cohorts.$id / api.stream).
+  contextEqf: integer("context_eqf"), // 1-8, or null
   activeUntil: integer("active_until", { mode: "timestamp_ms" }), // access window; null = open-ended
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
@@ -225,6 +241,7 @@ export const instanceSettings = sqliteTable("instance_settings", {
 
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
+export type PasswordResetRow = typeof passwordResets.$inferSelect;
 export type CohortRow = typeof cohorts.$inferSelect;
 export type CohortMembershipRow = typeof cohortMemberships.$inferSelect;
 export type CohortTeacherRow = typeof cohortTeachers.$inferSelect;

@@ -1,4 +1,3 @@
-import { Form, useNavigation } from "react-router";
 import { Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
 import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
@@ -6,7 +5,8 @@ import { requireUser } from "~/server/auth.server";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
-import { Badge, Button } from "~/components/ui";
+import { Badge } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 
@@ -38,8 +38,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const nav = useNavigation();
-  const busy = nav.state !== "idle";
   const { generations } = loaderData;
   return (
     <div className="mx-auto max-w-4xl">
@@ -81,20 +79,18 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                   <FeedbackWidget generationId={g.id} />
                 </div>
               </details>
-              <Form method="post" className="absolute right-3 top-2.5">
-                <input type="hidden" name="id" value={g.id} />
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="delete"
-                  variant="danger"
-                  size="sm"
-                  disabled={busy}
-                  aria-label={t.projects.delete}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </Form>
+              <div className="absolute right-3 top-2.5">
+                <ConfirmDialog
+                  triggerLabel={t.projects.delete}
+                  triggerIcon={<Trash2 className="size-4" aria-hidden />}
+                  triggerIconOnly
+                  title={t.projects.deleteTitle}
+                  description={t.projects.deleteBody}
+                  confirmLabel={t.projects.delete}
+                  cancelLabel={t.confirm.cancel}
+                  fields={{ intent: "delete", id: g.id }}
+                />
+              </div>
             </li>
           ))}
         </ul>

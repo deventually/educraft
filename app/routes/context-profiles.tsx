@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Form, useActionData, useNavigation } from "react-router";
+import { useActionData, useNavigation } from "react-router";
 import { Trash2, Plus, Pencil, Wand2, PenLine, ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/context-profiles";
 import {
@@ -13,6 +13,7 @@ import { requireUser } from "~/server/auth.server";
 import type { ContextProfile } from "~/lib/context/types";
 import { parseContextForm } from "~/lib/context/parseForm";
 import { Button, Card, Badge } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { ContextWizard } from "~/components/context/ContextWizard";
 import { ContextForm } from "~/components/context/ContextForm";
 import { useT } from "~/lib/i18n/useT";
@@ -113,19 +114,15 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
               >
                 <Pencil className="size-4" aria-hidden /> {t.settings.edit}
               </Button>
-              <Form method="post">
-                <input type="hidden" name="id" value={p.id} />
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="delete"
-                  variant="danger"
-                  size="sm"
-                  disabled={busy}
-                >
-                  <Trash2 className="size-4" aria-hidden /> {t.settings.delete}
-                </Button>
-              </Form>
+              <ConfirmDialog
+                triggerLabel={t.settings.delete}
+                triggerIcon={<Trash2 className="size-4" aria-hidden />}
+                title={t.settings.deleteTitle}
+                description={t.settings.deleteBody}
+                confirmLabel={t.settings.delete}
+                cancelLabel={t.confirm.cancel}
+                fields={{ intent: "delete", id: p.id }}
+              />
             </div>
           </Card>
         ))}

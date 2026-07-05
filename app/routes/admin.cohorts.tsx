@@ -10,10 +10,12 @@ import {
   getCohortTeacherIds,
   listAllCohorts,
   removeCohortTeacher,
+  setCohortOwner,
 } from "~/server/repositories/cohorts.server";
 import { listUsers } from "~/server/repositories/users.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { Button, Card, Select } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
@@ -22,11 +24,15 @@ export async function loader({ request }: Route.LoaderArgs) {
   const rows = await Promise.all(
     cohorts.map(async (c) => {
       const teacherIds = [...(await getCohortTeacherIds(c.id))];
+      // An orphan cohort's creator account is gone (e.g. the teacher was removed).
+      // It survives for reassignment; only a co-teacher-less orphan needs an owner.
+      const orphaned = !nameById.has(c.createdByUserId);
       return {
         id: c.id,
         name: c.name,
         ownerName: nameById.get(c.createdByUserId) ?? c.createdByUserId,
         ownerId: c.createdByUserId,
+        orphaned,
         toolCount: allowedSlugsOf(c).size,
         memberCount: await countCohortMembers(c.id),
         activeUntil: c.activeUntil,
@@ -54,6 +60,10 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "assign") {
     await addCohortTeacher(cohortId, String(fd.get("userId") ?? ""));
     return { assigned: true as const };
+  }
+  if (intent === "reassignOwner") {
+    await setCohortOwner(cohortId, String(fd.get("userId") ?? ""));
+    return { reassigned: true as const };
   }
   if (intent === "remove") {
     await removeCohortTeacher(cohortId, String(fd.get("userId") ?? ""));
@@ -89,22 +99,25 @@ export default function AdminCohorts({ loaderData }: Route.ComponentProps) {
                     <div className="min-w-0">
                       <h3 className="font-semibold text-slate-900">{c.name}</h3>
                       <p className="mt-0.5 text-sm text-slate-500">
-                        {t.admin.cohorts.colOwner}: {c.ownerName}
+                        {t.admin.cohorts.colOwner}:{" "}
+                        {c.orphaned ? (
+                          <span className="font-medium text-amber-700">
+                            {t.admin.cohorts.orphaned}
+                          </span>
+                        ) : (
+                          c.ownerName
+                        )}
                       </p>
                     </div>
-                    <Form method="post">
-                      <input type="hidden" name="intent" value="delete" />
-                      <input type="hidden" name="cohortId" value={c.id} />
-                      <Button
-                        type="submit"
-                        variant="danger"
-                        size="sm"
-                        title={t.admin.cohorts.confirmDelete}
-                      >
-                        <Trash2 className="size-3.5" aria-hidden />
-                        {t.admin.cohorts.delete}
-                      </Button>
-                    </Form>
+                    <ConfirmDialog
+                      triggerLabel={t.admin.cohorts.delete}
+                      triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
+                      title={t.admin.cohorts.deleteTitle}
+                      description={t.admin.cohorts.confirmDelete}
+                      confirmLabel={t.admin.cohorts.delete}
+                      cancelLabel={t.confirm.cancel}
+                      fields={{ intent: "delete", cohortId: c.id }}
+                    />
                   </div>
 
                   <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
@@ -119,6 +132,43 @@ export default function AdminCohorts({ loaderData }: Route.ComponentProps) {
                       </dd>
                     </div>
                   </dl>
+
+                  {/* Orphan hand-over: only offered when no co-teacher already
+                      manages it (a co-teacher can take it over as-is). */}
+                  {c.orphaned && c.teachers.length === 0 && options.length > 0 && (
+                    <Form
+                      method="post"
+                      className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3"
+                    >
+                      <input type="hidden" name="intent" value="reassignOwner" />
+                      <input type="hidden" name="cohortId" value={c.id} />
+                      <label
+                        htmlFor={`owner-${c.id}`}
+                        className="text-sm font-medium text-amber-800"
+                      >
+                        {t.admin.cohorts.reassignOwnerLabel}
+                      </label>
+                      <Select
+                        id={`owner-${c.id}`}
+                        name="userId"
+                        defaultValue=""
+                        className="w-auto"
+                        required
+                      >
+                        <option value="" disabled>
+                          {t.admin.cohorts.chooseTeacher}
+                        </option>
+                        {options.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <Button type="submit" variant="secondary" size="sm">
+                        {t.admin.cohorts.reassignOwner}
+                      </Button>
+                    </Form>
+                  )}
 
                   {/* Teacher assignment */}
                   <div className="mt-4 border-t border-slate-100 pt-4">

@@ -32,6 +32,11 @@ describe("Invite page", () => {
     ).toBeInTheDocument();
   });
 
+  it("warns that an email is needed to log back in (email is optional here)", () => {
+    renderInvite(true);
+    expect(screen.getByText(/zonder e-mailadres|without an email/i)).toBeInTheDocument();
+  });
+
   it("shows a friendly error and no form for an invalid invite", () => {
     renderInvite(false);
     expect(screen.getByRole("heading", { name: /ongeldig|invalid/i })).toBeInTheDocument();

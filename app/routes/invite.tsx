@@ -8,7 +8,7 @@ import { addMembership } from "~/server/repositories/cohorts.server";
 import { hashPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
-import { Button, Card, Input, Label } from "~/components/ui";
+import { Button, Card, HelpText, Input, Label } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 
 export function meta({ matches }: Route.MetaArgs) {
@@ -160,7 +160,9 @@ export default function Invite({ loaderData }: Route.ComponentProps) {
               defaultValue={boundEmail ?? undefined}
               readOnly={Boolean(boundEmail)}
               required={Boolean(boundEmail)}
+              aria-describedby={boundEmail ? undefined : "email-hint"}
             />
+            {!boundEmail && <HelpText id="email-hint">{t.auth.emailLoginHint}</HelpText>}
           </div>
           <div>
             <Label htmlFor="password">{t.auth.password}</Label>

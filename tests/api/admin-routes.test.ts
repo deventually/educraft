@@ -133,6 +133,58 @@ describe("admin.invites action", () => {
     await invoke(invitesRoute.action, post({ intent: "revoke", token: invite.token }));
     expect(await users.getInvite(invite.token)).toBeNull();
   });
+
+  it("blocks an admin from deleting their OWN account (use /account instead)", async () => {
+    const res = (await invoke(
+      invitesRoute.action,
+      post({ intent: "deleteUser", userId: "admin-1" }),
+    )) as { error?: string };
+    expect(res.error).toBe("selfDelete");
+  });
+
+  it("removes another user's account (cascade)", async () => {
+    const teacher = await users.createUser({
+      name: "Remove Me",
+      email: "remove@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      invitesRoute.action,
+      post({ intent: "deleteUser", userId: teacher.id }),
+    )) as { userDeleted?: boolean };
+    expect(res.userDeleted).toBe(true);
+    expect(await users.getUserById(teacher.id)).toBeNull();
+  });
+
+  it("mints a single-use password-reset link for a user (admin never sets the password)", async () => {
+    const teacher = await users.createUser({
+      name: "Forgot Pw",
+      email: "forgot@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      invitesRoute.action,
+      post({ intent: "resetPassword", userId: teacher.id }),
+    )) as { resetLink?: string };
+    expect(res.resetLink).toMatch(/\/reset\//);
+    const token = res.resetLink!.split("/reset/")[1];
+    expect((await users.getPasswordReset(token))?.userId).toBe(teacher.id);
+  });
+
+  it("sets a user's email (recovers an email-less account)", async () => {
+    const student = await users.createUser({
+      name: "No Email",
+      passwordHash: "scrypt:a:b",
+      role: "student",
+    });
+    await invoke(
+      invitesRoute.action,
+      post({ intent: "setEmail", userId: student.id, email: "recovered@example.com" }),
+    );
+    expect((await users.getUserById(student.id))?.email).toBe("recovered@example.com");
+  });
 });
 
 describe("admin.cohorts action — oversight over any cohort", () => {
@@ -157,5 +209,18 @@ describe("admin.cohorts action — oversight over any cohort", () => {
 
     await invoke(cohortsRoute.action, post({ intent: "delete", cohortId: cohort.id }));
     expect(await cohorts.getCohort(cohort.id)).toBeNull();
+  });
+
+  it("reassigns ownership of an orphan cohort to a new teacher", async () => {
+    const orphan = await cohorts.createCohort({
+      createdByUserId: "deleted-owner",
+      name: "Orphaned cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await invoke(
+      cohortsRoute.action,
+      post({ intent: "reassignOwner", cohortId: orphan.id, userId: "new-owner" }),
+    );
+    expect((await cohorts.getCohort(orphan.id))?.createdByUserId).toBe("new-owner");
   });
 });

@@ -84,6 +84,7 @@ describe("cohorts.$id action — provisioning", () => {
             name: "Sneaky cohort",
             tools: ["mentorai"],
             emails: "x@example.com",
+            contextSource: "profile",
             contextProfileId: foreign.id,
           },
           "teacher-1",
@@ -147,6 +148,7 @@ describe("cohorts.$id action — provisioning", () => {
             name: "Legit cohort",
             tools: ["mentorai"],
             emails: "y@example.com",
+            contextSource: "profile",
             contextProfileId: mine.id,
           },
           "teacher-3",
@@ -159,5 +161,56 @@ describe("cohorts.$id action — provisioning", () => {
     const owned = await cohorts.listCohortsByOwner("teacher-3");
     const cohort = owned.find((c) => c.name === "Legit cohort");
     expect(cohort?.contextProfileId).toBe(mine.id);
+  });
+
+  it("lets only an admin delete a cohort from the manage page", async () => {
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "owner-del",
+      name: "Deletable",
+      allowedToolSlugs: ["mentorai"],
+    });
+
+    // A teacher (even one who could manage it) is refused — delete is admin-only.
+    await expect(
+      route.action(args({ id: cohort.id }, formPost({ intent: "deleteCohort" }, "owner-del"))),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(await cohorts.getCohort(cohort.id)).not.toBeNull();
+
+    // An admin succeeds: the cohort is deleted and the action redirects.
+    requireRoleMock.mockImplementationOnce(async () => ({
+      id: "admin-1",
+      name: "Admin",
+      email: null,
+      role: "admin" as const,
+      createdAt: new Date(0),
+    }));
+    await expect(
+      route.action(args({ id: cohort.id }, formPost({ intent: "deleteCohort" }, "admin-1"))),
+    ).rejects.toMatchObject({ status: 302 });
+    expect(await cohorts.getCohort(cohort.id)).toBeNull();
+  });
+
+  it("levels a cohort by a bare EQF number (no profile)", async () => {
+    const res = (await route.action(
+      args(
+        { id: "new" },
+        formPost(
+          {
+            name: "EQF cohort",
+            tools: ["mentorai"],
+            emails: "z@example.com",
+            contextSource: "eqf",
+            contextEqf: "5",
+          },
+          "teacher-eqf",
+        ),
+      ),
+    )) as { links?: unknown[]; error?: string };
+
+    expect(res.error).toBeUndefined();
+    const owned = await cohorts.listCohortsByOwner("teacher-eqf");
+    const cohort = owned.find((c) => c.name === "EQF cohort");
+    expect(cohort?.contextEqf).toBe(5);
+    expect(cohort?.contextProfileId).toBeNull();
   });
 });

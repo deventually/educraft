@@ -42,15 +42,15 @@ export default function AppShell() {
     );
 
   const nav: NavItem[] = [
-    { to: "/", label: t.nav.tools, end: true },
+    // Admin console — first for the effective admin role (hidden while an admin is
+    // viewing as a teacher), so an admin lands on their console entry immediately.
+    ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
+    { to: "/tools", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
     // Provisioning is a teacher/admin surface only.
     ...(user && user.role !== "student"
       ? [{ to: "/cohorts", label: t.nav.cohorts, end: false }]
       : []),
-    // Admin console — shown for the effective admin role (hidden while an admin
-    // is viewing as a teacher).
-    ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
     { to: "/help", label: t.nav.help, end: false },
     { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/about", label: t.nav.about, end: false },
@@ -174,7 +174,7 @@ function SiteFooter({ t }: { t: Messages }) {
     {
       heading: t.footer.product,
       links: [
-        { to: "/", label: t.nav.tools },
+        { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
         { to: "/context-profiles", label: t.nav.settings },
       ],

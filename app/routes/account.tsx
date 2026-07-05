@@ -1,8 +1,16 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { AlertTriangle } from "lucide-react";
+import { z } from "zod";
 import type { Route } from "./+types/account";
 import { requireUser, logout } from "~/server/auth.server";
-import { deleteUserCascade } from "~/server/repositories/users.server";
+import {
+  deleteUserCascade,
+  getUserById,
+  getUserByEmail,
+  updateUserEmail,
+  updateUserPassword,
+} from "~/server/repositories/users.server";
+import { hashPassword, verifyPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
@@ -25,13 +33,46 @@ export async function action({ request }: Route.ActionArgs) {
   const user = await requireUser(request);
   const m = getMessages(getLocale(request));
   const fd = await request.formData();
+  const intent = String(fd.get("intent") ?? "delete");
 
-  // Type-to-confirm: the pasted word must match the locale's confirmation word.
+  // The password hash never leaves the server boundary, so re-read the row here to
+  // check the current password before any self-service change.
+  const row = await getUserById(user.id);
+  if (!row) return logout(request);
+
+  if (intent === "changeEmail") {
+    if (!verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash)) {
+      return { error: m.account.wrongPassword };
+    }
+    const email = String(fd.get("email") ?? "").trim() || null;
+    if (email && !z.string().email().safeParse(email).success) {
+      return { error: m.account.invalidEmail };
+    }
+    if (email) {
+      const existing = await getUserByEmail(email);
+      if (existing && existing.id !== user.id) return { error: m.account.emailTaken };
+    }
+    await updateUserEmail(user.id, email);
+    return { ok: "email" as const };
+  }
+
+  if (intent === "changePassword") {
+    if (!verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash)) {
+      return { error: m.account.wrongPassword };
+    }
+    const password = String(fd.get("password") ?? "");
+    const confirm = String(fd.get("confirm") ?? "");
+    if (password.length < 10) return { error: m.auth.passwordTooShort };
+    if (password !== confirm) return { error: m.auth.passwordMismatch };
+    await updateUserPassword(user.id, hashPassword(password));
+    return { ok: "password" as const };
+  }
+
+  // Delete: type-to-confirm — the pasted word must match the locale's word.
   const confirm = String(fd.get("confirm") ?? "").trim();
   if (confirm !== m.account.confirmWord) {
     return { error: m.account.mismatch };
   }
-
   await deleteUserCascade(user.id);
   // Destroy the session and land on /login — the account no longer exists.
   return logout(request);
@@ -49,6 +90,9 @@ export default function Account({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
+
+  const error = actionData && "error" in actionData ? actionData.error : undefined;
+  const ok = actionData && "ok" in actionData ? actionData.ok : undefined;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -68,6 +112,103 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         </dl>
       </Card>
 
+      {/* ── Change email ──────────────────────────────────────────────────── */}
+      <Card className="mt-6 p-6">
+        <h2 className="font-semibold text-slate-900">{t.account.emailHeading}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t.account.emailIntro}</p>
+        {ok === "email" && (
+          <p role="status" className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+            {t.account.emailSaved}
+          </p>
+        )}
+        <Form method="post" className="mt-4 space-y-3">
+          <input type="hidden" name="intent" value="changeEmail" />
+          <div>
+            <Label htmlFor="new-email">{t.account.newEmail}</Label>
+            <Input
+              id="new-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              defaultValue={user.email ?? ""}
+              className="mt-1 max-w-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="email-current-password">{t.account.currentPassword}</Label>
+            <Input
+              id="email-current-password"
+              name="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              required
+              className="mt-1 max-w-sm"
+            />
+          </div>
+          <Button type="submit" variant="secondary" disabled={busy}>
+            {t.account.saveEmail}
+          </Button>
+        </Form>
+      </Card>
+
+      {/* ── Change password ───────────────────────────────────────────────── */}
+      <Card className="mt-6 p-6">
+        <h2 className="font-semibold text-slate-900">{t.account.passwordHeading}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t.account.passwordIntro}</p>
+        {ok === "password" && (
+          <p role="status" className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+            {t.account.passwordSaved}
+          </p>
+        )}
+        <Form method="post" className="mt-4 space-y-3">
+          <input type="hidden" name="intent" value="changePassword" />
+          <div>
+            <Label htmlFor="pw-current-password">{t.account.currentPassword}</Label>
+            <Input
+              id="pw-current-password"
+              name="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              required
+              className="mt-1 max-w-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="new-password">{t.account.newPassword}</Label>
+            <Input
+              id="new-password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={10}
+              className="mt-1 max-w-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="repeat-password">{t.account.repeatPassword}</Label>
+            <Input
+              id="repeat-password"
+              name="confirm"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={10}
+              className="mt-1 max-w-sm"
+            />
+          </div>
+          <Button type="submit" variant="secondary" disabled={busy}>
+            {t.account.savePassword}
+          </Button>
+        </Form>
+      </Card>
+
+      {error && (
+        <p role="alert" className="mt-4 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">
+          {error}
+        </p>
+      )}
+
       <section
         aria-labelledby="account-danger"
         className="mt-8 rounded-2xl border border-red-200 bg-red-50/50 p-6"
@@ -78,13 +219,8 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         </h2>
         <p className="mt-2 text-sm text-red-700">{t.account.dangerIntro}</p>
 
-        {actionData?.error && (
-          <p role="alert" className="mt-3 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">
-            {actionData.error}
-          </p>
-        )}
-
         <Form method="post" className="mt-4 space-y-3">
+          <input type="hidden" name="intent" value="delete" />
           <div>
             <Label htmlFor="confirm">
               {fmt(t.account.confirmLabel, { word: t.account.confirmWord })}

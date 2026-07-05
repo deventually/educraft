@@ -1,20 +1,27 @@
 import { useState } from "react";
 import { Form, Link, useActionData } from "react-router";
-import { Copy } from "lucide-react";
+import { z } from "zod";
+import { Copy, KeyRound, Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.invites";
 import { requireRole } from "~/server/auth.server";
 import { getAvailableTools } from "~/server/availability.server";
 import {
   createInvite,
+  createPasswordReset,
+  deleteUserCascade,
+  getUserByEmail,
   listInvitesWithContext,
   listUsers,
   revokeInvite,
   setUserRole,
+  updateUserEmail,
 } from "~/server/repositories/users.server";
 import type { Role } from "~/lib/registry/access";
 import { useT, useLocale } from "~/lib/i18n/useT";
+import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { Button, HelpText, Input, Label, Select } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 const ROLES: Role[] = ["student", "teacher", "admin"];
 
@@ -88,6 +95,39 @@ export async function action({ request }: Route.ActionArgs) {
     return { roleChanged: true as const };
   }
 
+  if (intent === "deleteUser") {
+    const userId = String(fd.get("userId") ?? "");
+    // An admin removes their own account via /account (type-to-confirm) — and
+    // since they can't remove themselves here, the instance always keeps an admin.
+    if (userId === admin.id) return { error: "selfDelete" as const };
+    await deleteUserCascade(userId);
+    return { userDeleted: true as const };
+  }
+
+  if (intent === "resetPassword") {
+    const userId = String(fd.get("userId") ?? "");
+    if (userId === admin.id) return { error: "selfReset" as const };
+    // No email service: mint a single-use link the admin shares out-of-band; the
+    // user opens it and sets their own new password. The admin never sees it.
+    const reset = await createPasswordReset(userId);
+    return { resetLink: `${new URL(request.url).origin}/reset/${reset.token}` };
+  }
+
+  if (intent === "setEmail") {
+    const userId = String(fd.get("userId") ?? "");
+    const email = String(fd.get("email") ?? "").trim() || null;
+    if (email && !z.string().email().safeParse(email).success) {
+      return { error: "invalidEmail" as const };
+    }
+    // Reject a collision up front so the unique index never throws.
+    if (email) {
+      const existing = await getUserByEmail(email);
+      if (existing && existing.id !== userId) return { error: "emailTaken" as const };
+    }
+    await updateUserEmail(userId, email);
+    return { emailSet: true as const };
+  }
+
   return { error: "unknown" as const };
 }
 
@@ -103,6 +143,18 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
     teacher: t.admin.invites.roleTeacher,
     admin: t.admin.invites.roleAdmin,
   };
+
+  // Errors surfaced in the Users section (selfDemote is shown up in the mint area).
+  const userErrors: Record<string, string> = {
+    selfDelete: t.admin.invites.selfDeleteError,
+    selfReset: t.admin.invites.selfResetError,
+    invalidEmail: t.admin.invites.invalidEmailError,
+    emailTaken: t.admin.invites.emailTakenError,
+  };
+  const userError =
+    actionData && "error" in actionData && typeof actionData.error === "string"
+      ? userErrors[actionData.error]
+      : undefined;
 
   return (
     <div className="space-y-10">
@@ -276,13 +328,14 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                       <td className="px-4 py-2.5 text-slate-600">{inv.cohortName ?? "—"}</td>
                       <td className="px-4 py-2.5 text-right">
                         {open && (
-                          <Form method="post">
-                            <input type="hidden" name="intent" value="revoke" />
-                            <input type="hidden" name="token" value={inv.token} />
-                            <Button type="submit" variant="danger" size="sm">
-                              {t.admin.invites.revoke}
-                            </Button>
-                          </Form>
+                          <ConfirmDialog
+                            triggerLabel={t.admin.invites.revoke}
+                            title={t.admin.invites.revokeTitle}
+                            description={t.admin.invites.revokeBody}
+                            confirmLabel={t.admin.invites.revoke}
+                            cancelLabel={t.confirm.cancel}
+                            fields={{ intent: "revoke", token: inv.token }}
+                          />
                         )}
                       </td>
                     </tr>
@@ -300,6 +353,26 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
           {t.admin.invites.usersHeading}
         </h2>
         <p className="mt-1 text-sm text-slate-600">{t.admin.invites.usersIntro}</p>
+
+        {userError && (
+          <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {userError}
+          </p>
+        )}
+
+        {actionData && "resetLink" in actionData && actionData.resetLink && (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="font-semibold text-slate-900">{t.admin.invites.resetLinkHeading}</h3>
+            <p className="mt-1 text-sm text-slate-600">{t.admin.invites.resetLinkHint}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-700">
+                {actionData.resetLink}
+              </span>
+              <CopyButton url={actionData.resetLink} label={t.admin.invites.copy} />
+            </div>
+          </div>
+        )}
+
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{t.admin.invites.usersHeading}</caption>
@@ -315,7 +388,7 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                   {t.admin.invites.colUserRole}
                 </th>
                 <th scope="col" className="px-4 py-2.5 text-right font-semibold">
-                  <span className="sr-only">{t.admin.invites.changeRole}</span>
+                  <span className="sr-only">{t.admin.invites.userActions}</span>
                 </th>
               </tr>
             </thead>
@@ -323,7 +396,7 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
               {users.map((u) => {
                 const isSelf = u.id === selfId;
                 return (
-                  <tr key={u.id} className="border-b border-slate-50 last:border-0">
+                  <tr key={u.id} className="border-b border-slate-50 last:border-0 align-top">
                     <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
                       {u.name}
                       {isSelf && (
@@ -332,34 +405,80 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                         </span>
                       )}
                     </th>
-                    <td className="px-4 py-2.5 text-slate-600">{u.email ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-slate-600">
+                      {isSelf ? (
+                        (u.email ?? "—")
+                      ) : (
+                        <Form method="post" className="flex items-center gap-1.5">
+                          <input type="hidden" name="intent" value="setEmail" />
+                          <input type="hidden" name="userId" value={u.id} />
+                          <label htmlFor={`email-${u.id}`} className="sr-only">
+                            {t.admin.invites.editEmailLabel} — {u.name}
+                          </label>
+                          <Input
+                            id={`email-${u.id}`}
+                            name="email"
+                            type="email"
+                            defaultValue={u.email ?? ""}
+                            placeholder={t.admin.invites.emailPlaceholder}
+                            className="h-8 w-40 text-sm"
+                          />
+                          <Button type="submit" variant="secondary" size="sm">
+                            {t.admin.invites.save}
+                          </Button>
+                        </Form>
+                      )}
+                    </td>
                     <td className="px-4 py-2.5 text-slate-600">{roleLabel[u.role] ?? u.role}</td>
                     <td className="px-4 py-2.5">
                       {isSelf ? (
                         <span className="block text-right text-xs text-slate-400">—</span>
                       ) : (
-                        <Form method="post" className="flex items-center justify-end gap-2">
-                          <input type="hidden" name="intent" value="role" />
-                          <input type="hidden" name="userId" value={u.id} />
-                          <label htmlFor={`role-${u.id}`} className="sr-only">
-                            {t.admin.invites.changeRole} — {u.name}
-                          </label>
-                          <Select
-                            id={`role-${u.id}`}
-                            name="role"
-                            defaultValue={u.role}
-                            className="w-auto"
-                          >
-                            {ROLES.map((r) => (
-                              <option key={r} value={r}>
-                                {roleLabel[r]}
-                              </option>
-                            ))}
-                          </Select>
-                          <Button type="submit" variant="secondary" size="sm">
-                            {t.admin.invites.apply}
-                          </Button>
-                        </Form>
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <Form method="post" className="flex items-center gap-2">
+                            <input type="hidden" name="intent" value="role" />
+                            <input type="hidden" name="userId" value={u.id} />
+                            <label htmlFor={`role-${u.id}`} className="sr-only">
+                              {t.admin.invites.changeRole} — {u.name}
+                            </label>
+                            <Select
+                              id={`role-${u.id}`}
+                              name="role"
+                              defaultValue={u.role}
+                              className="w-auto"
+                            >
+                              {ROLES.map((r) => (
+                                <option key={r} value={r}>
+                                  {roleLabel[r]}
+                                </option>
+                              ))}
+                            </Select>
+                            <Button type="submit" variant="secondary" size="sm">
+                              {t.admin.invites.apply}
+                            </Button>
+                          </Form>
+                          <Form method="post">
+                            <input type="hidden" name="intent" value="resetPassword" />
+                            <input type="hidden" name="userId" value={u.id} />
+                            <Button type="submit" variant="secondary" size="sm">
+                              <KeyRound className="size-3.5" aria-hidden />
+                              {t.admin.invites.resetPassword}
+                            </Button>
+                          </Form>
+                          <ConfirmDialog
+                            triggerLabel={t.admin.invites.deleteUser}
+                            triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
+                            title={t.admin.invites.deleteUserTitle}
+                            description={t.admin.invites.deleteUserConfirm}
+                            confirmLabel={t.admin.invites.deleteUser}
+                            cancelLabel={t.confirm.cancel}
+                            fields={{ intent: "deleteUser", userId: u.id }}
+                            typeToConfirm={{
+                              word: u.name,
+                              label: fmt(t.admin.invites.deleteUserType, { name: u.name }),
+                            }}
+                          />
+                        </div>
                       )}
                     </td>
                   </tr>

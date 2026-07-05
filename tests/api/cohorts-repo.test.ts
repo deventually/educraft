@@ -176,6 +176,35 @@ describe("cohorts repository", () => {
     expect((await repo.getCohortTeacherIds(c1.id)).size).toBe(0);
   });
 
+  it("setCohortOwner transfers ownership to another teacher (orphan hand-over)", async () => {
+    const cohort = await repo.createCohort({
+      createdByUserId: "old-owner",
+      name: "Handover",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.setCohortOwner(cohort.id, "new-owner");
+    const after = await repo.getCohort(cohort.id);
+    expect(after?.createdByUserId).toBe("new-owner");
+  });
+
+  it("persists an EQF-only level (no profile) via create and update", async () => {
+    const cohort = await repo.createCohort({
+      createdByUserId: "eqf-teacher",
+      name: "EQF-only",
+      allowedToolSlugs: ["mentorai"],
+      contextEqf: 6,
+    });
+    expect(cohort.contextEqf).toBe(6);
+    expect(cohort.contextProfileId).toBeNull();
+    expect((await repo.getCohort(cohort.id))?.contextEqf).toBe(6);
+
+    // Switching to a profile clears the bare EQF (mutually exclusive).
+    await repo.updateCohort(cohort.id, { contextProfileId: "prof-x", contextEqf: null });
+    const after = await repo.getCohort(cohort.id);
+    expect(after?.contextEqf).toBeNull();
+    expect(after?.contextProfileId).toBe("prof-x");
+  });
+
   it("isCohortActive honours activeUntil (null = open-ended)", async () => {
     const open = await repo.createCohort({
       createdByUserId: "t",

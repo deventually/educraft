@@ -71,6 +71,25 @@ describe("Admin invites", () => {
     expect(selects).toHaveLength(1);
   });
 
+  it("offers reset-password, delete, and email edit for another user (not for self)", () => {
+    renderRoute();
+    // teacher-9 is the only non-self user → exactly one of each control.
+    expect(screen.getByRole("button", { name: /verwijderen|delete/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/e-mailadres wijzigen|change email address/i)).toBeInTheDocument();
+  });
+
+  it("shows the shareable reset link after a reset (mutation)", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ resetLink: "http://localhost/reset/tok-r" }));
+    await user.click(screen.getByRole("button", { name: /wachtwoord resetten|reset password/i }));
+    await waitFor(() => {
+      expect(screen.getByText("http://localhost/reset/tok-r")).toBeInTheDocument();
+    });
+  });
+
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
     expect((await axe(container, axeOpts)).violations).toEqual([]);

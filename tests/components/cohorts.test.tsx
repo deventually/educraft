@@ -50,6 +50,30 @@ function renderForm(action?: () => unknown) {
   return render(<Stub initialEntries={["/cohorts/new"]} />);
 }
 
+function renderManage(canDelete: boolean) {
+  const props = {
+    loaderData: {
+      mode: "manage" as const,
+      canDelete,
+      tutors,
+      profiles: [{ id: "p1", name: "SE jaar 2" }],
+      cohort: {
+        id: "c1",
+        name: "SE jaar 2",
+        allowedToolSlugs: [],
+        config: {},
+        contextProfileId: null,
+        contextEqf: null,
+        activeUntil: null,
+      },
+    },
+  } as unknown as ComponentProps<typeof CohortForm>;
+  const Stub = createRoutesStub([
+    { path: "/cohorts/:id", Component: () => <CohortForm {...props} />, action: () => null },
+  ]);
+  return render(<Stub initialEntries={["/cohorts/c1"]} />);
+}
+
 describe("Cohort provisioning form", () => {
   it("renders a tutor checkbox per student tool", () => {
     renderForm();
@@ -89,8 +113,45 @@ describe("Cohort provisioning form", () => {
     expect(screen.getByText("a@example.com")).toBeInTheDocument();
   });
 
+  it("offers a context-source choice and hides the EQF selector until chosen", () => {
+    renderForm();
+    expect(screen.getByRole("radio", { name: /geen niveau|no level/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: /contextprofiel|context profile/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /alleen eqf|eqf level only/i })).toBeInTheDocument();
+    // Neither the profile nor the EQF control is shown while "none" is selected.
+    expect(screen.queryByLabelText("EQF-niveau")).toBeNull();
+  });
+
+  it("reveals the EQF selector when 'EQF level only' is chosen", async () => {
+    const user = userEvent.setup();
+    renderForm();
+    await user.click(screen.getByRole("radio", { name: /alleen eqf|eqf level only/i }));
+    expect(screen.getByLabelText("EQF-niveau")).toBeInTheDocument();
+  });
+
+  it("shows an admin-only delete on a managed cohort, hidden otherwise", () => {
+    renderManage(true);
+    expect(
+      screen.getByRole("button", { name: /cohort verwijderen|delete cohort/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("hides cohort delete when the viewer may not delete it", () => {
+    renderManage(false);
+    expect(screen.queryByRole("button", { name: /cohort verwijderen|delete cohort/i })).toBeNull();
+  });
+
   it("has no a11y violations", async () => {
     const { container } = renderForm();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("has no a11y violations with the EQF selector expanded", async () => {
+    const user = userEvent.setup();
+    const { container } = renderForm();
+    await user.click(screen.getByRole("radio", { name: /alleen eqf|eqf level only/i }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

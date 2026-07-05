@@ -11,6 +11,7 @@ import {
   getCohortForUser,
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
+import { isEqfLevel } from "~/lib/context/eqf";
 import { getSelectableModelIds, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { recordChatTurn } from "~/server/repositories/chat.server";
@@ -155,6 +156,14 @@ export async function action({ request }: Route.ActionArgs) {
     if (cohort) {
       if (tool.usesContextProfile && cohort.contextProfileId) {
         profile = await getProfileForMember(user.id, cohort.contextProfileId);
+      } else if (
+        tool.usesContextProfile &&
+        cohort.contextEqf != null &&
+        isEqfLevel(cohort.contextEqf)
+      ) {
+        // EQF-only cohort: no profile, just a bare level. A minimal synthetic
+        // profile is enough — formatProfile injects "EQF N" + the level directive.
+        profile = { id: "cohort-eqf", name: "", eqf: cohort.contextEqf };
       }
       const slugValues = cohortConfig(cohort)[tool.slug]?.values;
       if (slugValues) values = { ...values, ...slugValues };

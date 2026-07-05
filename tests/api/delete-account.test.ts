@@ -9,6 +9,7 @@ type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
 type Chat = typeof import("~/server/repositories/chat.server");
 type Insight = typeof import("~/server/repositories/insight.server");
+type Cohorts = typeof import("~/server/repositories/cohorts.server");
 
 let users: Users;
 let profiles: Profiles;
@@ -17,6 +18,7 @@ let usage: Usage;
 let feedback: Feedback;
 let chat: Chat;
 let insight: Insight;
+let cohorts: Cohorts;
 
 beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
@@ -26,6 +28,7 @@ beforeAll(async () => {
   feedback = await import("~/server/repositories/feedback.server");
   chat = await import("~/server/repositories/chat.server");
   insight = await import("~/server/repositories/insight.server");
+  cohorts = await import("~/server/repositories/cohorts.server");
 });
 
 async function seedUser(id: string) {
@@ -85,6 +88,39 @@ describe("deleteUserCascade", () => {
     expect(await chat.getChatSession(sessionId)).toBeNull();
     expect(await chat.getSessionMessages(sessionId)).toHaveLength(0);
     expect(await insight.getSummary(sessionId)).toBeNull();
+  });
+
+  it("keeps a teacher's cohorts (orphan-safe), nulls their dangling profile ref, drops co-teach links", async () => {
+    await users.createUser({
+      id: "del-teacher-own",
+      name: "Cohort Owner",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    const profile = await profiles.createProfile("del-teacher-own", { name: "Niveau 6", eqf: 6 });
+    const owned = await cohorts.createCohort({
+      createdByUserId: "del-teacher-own",
+      name: "Owned cohort",
+      allowedToolSlugs: ["mentorai"],
+      contextProfileId: profile.id,
+    });
+    // A co-teach assignment on a colleague's cohort.
+    const colleague = await cohorts.createCohort({
+      createdByUserId: "del-teacher-other",
+      name: "Colleague cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addCohortTeacher(colleague.id, "del-teacher-own");
+
+    await users.deleteUserCascade("del-teacher-own");
+
+    // The owned cohort survives so an admin can reassign it — but the dangling
+    // reference to the now-deleted profile is cleared.
+    const survived = await cohorts.getCohort(owned.id);
+    expect(survived).not.toBeNull();
+    expect(survived?.contextProfileId).toBeNull();
+    // Their co-teach assignment is removed (no orphaned join row).
+    expect((await cohorts.getCohortTeacherIds(colleague.id)).has("del-teacher-own")).toBe(false);
   });
 
   it("leaves other users' data untouched", async () => {

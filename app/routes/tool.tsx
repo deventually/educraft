@@ -183,7 +183,7 @@ function ToolHeader({
         aria-label={t.tool.breadcrumb}
         className="mb-3 flex items-center gap-1.5 text-[13px] text-slate-500"
       >
-        <Link to="/" className="transition-colors hover:text-violet-600">
+        <Link to="/tools" className="transition-colors hover:text-violet-600">
           {t.nav.tools}
         </Link>
         <ChevronRight className="size-3.5 text-slate-400" aria-hidden />

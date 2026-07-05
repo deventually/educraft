@@ -172,6 +172,14 @@ describe("AppShell admin surface & role switch", () => {
     expect(screen.getAllByRole("link", { name: "Beheer" }).length).toBeGreaterThan(0);
   });
 
+  it("places the admin link first in the main navigation for an admin", async () => {
+    renderShellWithUser({ name: "Admin A", role: "admin", realRole: "admin" });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    const links = within(primary).getAllByRole("link");
+    expect(links[0]).toHaveAccessibleName("Beheer");
+  });
+
   it("hides the admin nav link for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher" });
     await screen.findByText("Tools home");

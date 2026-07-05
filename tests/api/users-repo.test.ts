@@ -42,6 +42,23 @@ describe("users repository", () => {
     });
     const byId = await repo.getUserById(created.id);
     expect(byId?.email ?? null).toBeNull();
+    // An email-less account can't be found by email → it can't log in until an
+    // email is set (self-service on /account, or admin recovery).
+    expect(await repo.getUserByEmail("")).toBeNull();
+  });
+
+  it("updates a user's email (with a later add) and password hash", async () => {
+    const u = await repo.createUser({
+      name: "Editable",
+      passwordHash: "scrypt:old:hash",
+      role: "teacher",
+    });
+    await repo.updateUserEmail(u.id, "added@example.com");
+    expect((await repo.getUserById(u.id))?.email).toBe("added@example.com");
+    expect((await repo.getUserByEmail("added@example.com"))?.id).toBe(u.id);
+
+    await repo.updateUserPassword(u.id, "scrypt:new:hash");
+    expect((await repo.getUserById(u.id))?.passwordHash).toBe("scrypt:new:hash");
   });
 });
 

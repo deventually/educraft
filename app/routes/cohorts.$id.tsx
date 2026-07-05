@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Link, useActionData, useNavigation } from "react-router";
+import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
 import { ArrowLeft, Copy, LineChart } from "lucide-react";
 import type { Route } from "./+types/cohorts.$id";
 import { requireRole } from "~/server/auth.server";
@@ -9,18 +9,21 @@ import {
   canManageCohort,
   cohortConfig,
   createCohort,
+  deleteCohort,
   getCohort,
   getCohortTeacherIds,
   updateCohort,
 } from "~/server/repositories/cohorts.server";
 import { createInvitesForCohort } from "~/server/repositories/users.server";
 import { getProfile, listProfiles } from "~/server/repositories/profiles.server";
+import { EQF_LEVELS, isEqfLevel } from "~/lib/context/eqf";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { InputField } from "~/lib/registry/types";
 import { Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
@@ -50,6 +53,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   return {
     mode: isNew ? ("new" as const) : ("manage" as const),
+    // Deleting a cohort is admin-only (teachers manage but never delete).
+    canDelete: !isNew && user.role === "admin",
     tutors: studentTutors(),
     profiles,
     cohort: cohort
@@ -59,6 +64,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
           allowedToolSlugs: [...allowedSlugsOf(cohort)],
           config: cohortConfig(cohort),
           contextProfileId: cohort.contextProfileId,
+          contextEqf: cohort.contextEqf,
           activeUntil: cohort.activeUntil,
         }
       : null,
@@ -69,6 +75,17 @@ export async function action({ params, request }: Route.ActionArgs) {
   const user = await requireRole(request, "teacher", "admin");
   const m = getMessages(getLocale(request));
   const fd = await request.formData();
+
+  // Deleting a cohort is admin-only. Student accounts survive — only their
+  // membership link is dropped (see deleteCohort).
+  if (fd.get("intent") === "deleteCohort") {
+    if (user.role !== "admin" || params.id === "new") {
+      throw new Response("Forbidden", { status: 403 });
+    }
+    const existing = await getCohort(params.id);
+    if (existing) await deleteCohort(existing.id);
+    throw redirect("/cohorts");
+  }
 
   const name = String(fd.get("name") ?? "").trim();
   if (!name) return { error: m.cohorts.errorName };
@@ -92,13 +109,22 @@ export async function action({ params, request }: Route.ActionArgs) {
     config[slug] = { values };
   }
 
-  // The cohort profile is injected for members via membership-authorised read
-  // (getProfileForMember bypasses owner-scoping). So the teacher may only attach a
-  // profile *they own* — otherwise a teacher could leak a colleague's profile to
-  // their own students by referencing its id.
-  const contextProfileId = String(fd.get("contextProfileId") ?? "").trim() || null;
-  if (contextProfileId && !(await getProfile(user.id, contextProfileId))) {
-    return { error: m.cohorts.errorInvalidProfile };
+  // Level source (mutually exclusive): a full context profile, a bare EQF number,
+  // or none. The cohort profile is injected for members via membership-authorised
+  // read (getProfileForMember bypasses owner-scoping), so the teacher may only
+  // attach a profile *they own* — otherwise they could leak a colleague's profile
+  // to their students by referencing its id.
+  const contextSource = String(fd.get("contextSource") ?? "none");
+  let contextProfileId: string | null = null;
+  let contextEqf: number | null = null;
+  if (contextSource === "profile") {
+    contextProfileId = String(fd.get("contextProfileId") ?? "").trim() || null;
+    if (contextProfileId && !(await getProfile(user.id, contextProfileId))) {
+      return { error: m.cohorts.errorInvalidProfile };
+    }
+  } else if (contextSource === "eqf") {
+    const eqf = Number(fd.get("contextEqf"));
+    contextEqf = isEqfLevel(eqf) ? eqf : null;
   }
   const activeUntilRaw = String(fd.get("activeUntil") ?? "").trim();
   const activeUntil = activeUntilRaw ? new Date(activeUntilRaw) : null;
@@ -128,6 +154,7 @@ export async function action({ params, request }: Route.ActionArgs) {
       allowedToolSlugs,
       config,
       contextProfileId,
+      contextEqf,
       activeUntil,
     });
     cohortId = cohort.id;
@@ -142,6 +169,7 @@ export async function action({ params, request }: Route.ActionArgs) {
       allowedToolSlugs,
       config,
       contextProfileId,
+      contextEqf,
       activeUntil,
     });
     cohortId = params.id;
@@ -161,7 +189,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
-  const { mode, tutors, profiles, cohort } = loaderData;
+  const { mode, canDelete, tutors, profiles, cohort } = loaderData;
 
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(cohort?.allowedToolSlugs ?? []),
@@ -173,6 +201,12 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
       else next.add(slug);
       return next;
     });
+
+  // How the cohort's level is set: a full context profile, a bare EQF number, or
+  // none. Defaults to whichever the loaded cohort already uses.
+  const [contextSource, setContextSource] = useState<"none" | "profile" | "eqf">(() =>
+    cohort?.contextProfileId ? "profile" : cohort?.contextEqf != null ? "eqf" : "none",
+  );
 
   const error = actionData?.error;
   const links = actionData?.links;
@@ -253,33 +287,94 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
               </div>
             </fieldset>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="contextProfileId">{t.cohorts.profileLabel}</Label>
-                <Select
-                  id="contextProfileId"
-                  name="contextProfileId"
-                  defaultValue={cohort?.contextProfileId ?? ""}
-                  className="mt-1"
-                >
-                  <option value="">{t.cohorts.profileNone}</option>
-                  {profiles.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-semibold text-slate-800">
+                {t.cohorts.contextSourceLegend}
+              </legend>
+              <HelpText>{t.cohorts.contextSourceHint}</HelpText>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2.5 text-sm text-slate-800">
+                  <input
+                    type="radio"
+                    name="contextSource"
+                    value="none"
+                    checked={contextSource === "none"}
+                    onChange={() => setContextSource("none")}
+                    className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                  />
+                  {t.cohorts.contextNone}
+                </label>
+                <label className="flex items-center gap-2.5 text-sm text-slate-800">
+                  <input
+                    type="radio"
+                    name="contextSource"
+                    value="profile"
+                    checked={contextSource === "profile"}
+                    onChange={() => setContextSource("profile")}
+                    className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                  />
+                  {t.cohorts.contextProfile}
+                </label>
+                <label className="flex items-center gap-2.5 text-sm text-slate-800">
+                  <input
+                    type="radio"
+                    name="contextSource"
+                    value="eqf"
+                    checked={contextSource === "eqf"}
+                    onChange={() => setContextSource("eqf")}
+                    className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                  />
+                  {t.cohorts.contextEqf}
+                </label>
               </div>
-              <div>
-                <Label htmlFor="activeUntil">{t.cohorts.activeUntilLabel}</Label>
-                <Input
-                  id="activeUntil"
-                  name="activeUntil"
-                  type="date"
-                  defaultValue={toDateInput(cohort?.activeUntil)}
-                  className="mt-1"
-                />
-              </div>
+
+              {contextSource === "profile" && (
+                <div>
+                  <Label htmlFor="contextProfileId">{t.cohorts.profileLabel}</Label>
+                  <Select
+                    id="contextProfileId"
+                    name="contextProfileId"
+                    defaultValue={cohort?.contextProfileId ?? ""}
+                    className="mt-1"
+                  >
+                    <option value="">{t.cohorts.profileNone}</option>
+                    {profiles.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+
+              {contextSource === "eqf" && (
+                <div>
+                  <Label htmlFor="contextEqf">{t.cohorts.eqfLabel}</Label>
+                  <Select
+                    id="contextEqf"
+                    name="contextEqf"
+                    defaultValue={cohort?.contextEqf != null ? String(cohort.contextEqf) : "6"}
+                    className="mt-1"
+                  >
+                    {EQF_LEVELS.map((e) => (
+                      <option key={e.level} value={e.level}>
+                        {loc(e.label, locale)}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+            </fieldset>
+
+            <div>
+              <Label htmlFor="activeUntil">{t.cohorts.activeUntilLabel}</Label>
+              <Input
+                id="activeUntil"
+                name="activeUntil"
+                type="date"
+                defaultValue={toDateInput(cohort?.activeUntil)}
+                className="mt-1 max-w-xs"
+              />
             </div>
 
             <fieldset className="space-y-3 border-t border-slate-100 pt-5">
@@ -324,6 +419,28 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
             </Button>
           </Form>
         </Card>
+      )}
+
+      {mode === "manage" && canDelete && (
+        <section
+          aria-labelledby="cohort-danger"
+          className="mt-8 rounded-2xl border border-red-200 bg-red-50/50 p-6"
+        >
+          <h2 id="cohort-danger" className="font-semibold text-red-800">
+            {t.cohorts.deleteHeading}
+          </h2>
+          <p className="mt-2 text-sm text-red-700">{t.cohorts.deleteIntro}</p>
+          <div className="mt-4">
+            <ConfirmDialog
+              triggerLabel={t.cohorts.deleteHeading}
+              title={t.cohorts.deleteTitle}
+              description={t.cohorts.deleteBody}
+              confirmLabel={t.cohorts.deleteConfirm}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "deleteCohort" }}
+            />
+          </div>
+        </section>
       )}
     </div>
   );

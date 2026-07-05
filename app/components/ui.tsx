@@ -105,6 +105,10 @@ export const Select = React.forwardRef<
 ));
 Select.displayName = "Select";
 
-export function HelpText({ children }: { children: React.ReactNode }) {
-  return <p className="mt-1 text-xs text-slate-500">{children}</p>;
+export function HelpText({ id, children }: { id?: string; children: React.ReactNode }) {
+  return (
+    <p id={id} className="mt-1 text-xs text-slate-500">
+      {children}
+    </p>
+  );
 }

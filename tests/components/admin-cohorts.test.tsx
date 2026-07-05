@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -54,13 +54,16 @@ describe("Admin cohorts", () => {
     expect(screen.queryByRole("option", { name: "Teacher T" })).toBeNull();
   });
 
-  it("submits a delete (mutation)", async () => {
+  it("submits a delete only after confirming in the dialog (mutation)", async () => {
     const user = userEvent.setup();
     const action = vi.fn(() => ({ deleted: true }));
     renderRoute(action);
-    // Exact name so the cohort "Verwijderen" button isn't confused with the
-    // per-teacher "Docent verwijderen" remove control.
+    // Clicking the trigger opens a confirm dialog — it must NOT submit yet.
     await user.click(screen.getByRole("button", { name: "Verwijderen" }));
+    expect(action).not.toHaveBeenCalled();
+    // Confirming inside the dialog submits.
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Verwijderen" }));
     await waitFor(() => expect(action).toHaveBeenCalled());
   });
 

@@ -30,6 +30,8 @@ export interface CreateCohortInput {
   allowedToolSlugs: string[];
   config?: CohortConfig;
   contextProfileId?: string | null;
+  /** Bare EQF level (1-8), an alternative to a full profile. Mutually exclusive. */
+  contextEqf?: number | null;
   activeUntil?: Date | null;
 }
 
@@ -41,6 +43,7 @@ export async function createCohort(input: CreateCohortInput): Promise<CohortRow>
     allowedToolSlugs: JSON.stringify(input.allowedToolSlugs),
     configJson: JSON.stringify(input.config ?? {}),
     contextProfileId: input.contextProfileId ?? null,
+    contextEqf: input.contextEqf ?? null,
     activeUntil: input.activeUntil ?? null,
     createdAt: new Date(),
   };
@@ -53,6 +56,7 @@ export interface UpdateCohortPatch {
   allowedToolSlugs?: string[];
   config?: CohortConfig;
   contextProfileId?: string | null;
+  contextEqf?: number | null;
   activeUntil?: Date | null;
 }
 
@@ -64,9 +68,22 @@ export async function updateCohort(id: string, patch: UpdateCohortPatch): Promis
     set.allowedToolSlugs = JSON.stringify(patch.allowedToolSlugs);
   if (patch.config !== undefined) set.configJson = JSON.stringify(patch.config);
   if (patch.contextProfileId !== undefined) set.contextProfileId = patch.contextProfileId;
+  if (patch.contextEqf !== undefined) set.contextEqf = patch.contextEqf;
   if (patch.activeUntil !== undefined) set.activeUntil = patch.activeUntil;
   if (Object.keys(set).length === 0) return;
   getDb().update(cohorts).set(set).where(eq(cohorts.id, id)).run();
+}
+
+/**
+ * Transfer a cohort to a new owner (admin hand-over). Used to re-home an orphan
+ * cohort whose creator was deleted; ownership then confers `canManageCohort`.
+ */
+export async function setCohortOwner(cohortId: string, newOwnerId: string): Promise<void> {
+  getDb()
+    .update(cohorts)
+    .set({ createdByUserId: newOwnerId })
+    .where(eq(cohorts.id, cohortId))
+    .run();
 }
 
 export async function getCohort(id: string): Promise<CohortRow | null> {
