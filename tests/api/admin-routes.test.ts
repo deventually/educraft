@@ -1,0 +1,161 @@
+import { describe, it, expect, beforeAll, vi } from "vitest";
+
+// Isolated in-memory SQLite before any server module loads.
+process.env.DATABASE_URL = "file::memory:";
+
+// The admin is always "admin-1"; every route's requireRole returns them.
+const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
+vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
+
+type ToolsRoute = typeof import("~/routes/admin.tools");
+type ModelsRoute = typeof import("~/routes/admin.models");
+type InvitesRoute = typeof import("~/routes/admin.invites");
+type CohortsRoute = typeof import("~/routes/admin.cohorts");
+type Settings = typeof import("~/server/repositories/settings.server");
+type Users = typeof import("~/server/repositories/users.server");
+type Cohorts = typeof import("~/server/repositories/cohorts.server");
+
+let toolsRoute: ToolsRoute;
+let modelsRoute: ModelsRoute;
+let invitesRoute: InvitesRoute;
+let cohortsRoute: CohortsRoute;
+let settings: Settings;
+let users: Users;
+let cohorts: Cohorts;
+
+beforeAll(async () => {
+  [toolsRoute, modelsRoute, invitesRoute, cohortsRoute, settings, users, cohorts] =
+    await Promise.all([
+      import("~/routes/admin.tools"),
+      import("~/routes/admin.models"),
+      import("~/routes/admin.invites"),
+      import("~/routes/admin.cohorts"),
+      import("~/server/repositories/settings.server"),
+      import("~/server/repositories/users.server"),
+      import("~/server/repositories/cohorts.server"),
+    ]);
+  requireRoleMock.mockImplementation(async () => ({
+    id: "admin-1",
+    name: "Admin A",
+    email: "admin@example.com",
+    role: "admin" as const,
+    createdAt: new Date(0),
+  }));
+});
+
+function post(fields: Record<string, string | string[]>): Request {
+  const body = new URLSearchParams();
+  for (const [k, v] of Object.entries(fields)) {
+    if (Array.isArray(v)) for (const x of v) body.append(k, x);
+    else body.append(k, v);
+  }
+  return new Request("http://localhost/admin", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+}
+
+/** Invoke a route action with a form request, bypassing the RR arg-type ceremony. */
+function invoke<T extends (arg: never) => unknown>(action: T, request: Request): ReturnType<T> {
+  return action({
+    request,
+    params: {},
+    context: {},
+  } as unknown as Parameters<T>[0]) as ReturnType<T>;
+}
+
+describe("admin.tools action", () => {
+  it("upserts a tool's enabled flag and audience override", async () => {
+    await invoke(toolsRoute.action, post({ slug: "mentorai", enabled: "on", audience: "both" }));
+    const row = await settings.getToolSetting("mentorai");
+    expect(row?.enabled).toBe(true);
+    expect(row?.audienceOverride).toBe("both");
+  });
+});
+
+describe("admin.models action — lockout guard", () => {
+  it("refuses an empty selection and does not persist", async () => {
+    const res = (await invoke(modelsRoute.action, post({}))) as {
+      error?: boolean;
+      saved?: boolean;
+    };
+    expect(res.error).toBe(true);
+    expect(await settings.getEnabledModels()).toBeNull(); // unchanged
+  });
+
+  it("persists a non-empty allow-list", async () => {
+    const res = (await invoke(modelsRoute.action, post({ models: ["claude-haiku-4-5"] }))) as {
+      saved?: boolean;
+    };
+    expect(res.saved).toBe(true);
+    expect(await settings.getEnabledModels()).toEqual(["claude-haiku-4-5"]);
+    await settings.setEnabledModels(null); // reset
+  });
+});
+
+describe("admin.invites action", () => {
+  it("mints a teacher invite carrying the chosen tool allow-list", async () => {
+    const res = (await invoke(
+      invitesRoute.action,
+      post({ intent: "mint", toolMode: "restrict", tools: ["bloom-by-design"] }),
+    )) as { link?: string };
+    expect(res.link).toMatch(/\/invite\//);
+    const token = res.link!.split("/invite/")[1];
+    const invite = await users.getInvite(token);
+    expect(invite?.role).toBe("teacher");
+    expect(JSON.parse(invite!.allowedToolSlugs!)).toEqual(["bloom-by-design"]);
+  });
+
+  it("blocks an admin from changing their OWN role (self-demote guard)", async () => {
+    const res = (await invoke(
+      invitesRoute.action,
+      post({ intent: "role", userId: "admin-1", role: "teacher" }),
+    )) as { error?: string };
+    expect(res.error).toBe("selfDemote");
+  });
+
+  it("promotes an existing user in place (role only — no new account, no password change)", async () => {
+    const teacher = await users.createUser({
+      name: "Promote Me",
+      email: "promote@example.com",
+      passwordHash: "scrypt:keep:me",
+      role: "teacher",
+    });
+    await invoke(invitesRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
+    const after = await users.getUserById(teacher.id);
+    expect(after?.role).toBe("admin");
+    expect(after?.passwordHash).toBe("scrypt:keep:me"); // untouched
+  });
+
+  it("revokes an open invite (its token becomes unknown)", async () => {
+    const invite = await users.createInvite({ role: "teacher", createdByUserId: "admin-1" });
+    await invoke(invitesRoute.action, post({ intent: "revoke", token: invite.token }));
+    expect(await users.getInvite(invite.token)).toBeNull();
+  });
+});
+
+describe("admin.cohorts action — oversight over any cohort", () => {
+  it("assigns and removes a co-teacher, and deletes a cohort the admin did not create", async () => {
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "some-teacher",
+      name: "Not the admin's cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+
+    await invoke(
+      cohortsRoute.action,
+      post({ intent: "assign", cohortId: cohort.id, userId: "co-t" }),
+    );
+    expect((await cohorts.getCohortTeacherIds(cohort.id)).has("co-t")).toBe(true);
+
+    await invoke(
+      cohortsRoute.action,
+      post({ intent: "remove", cohortId: cohort.id, userId: "co-t" }),
+    );
+    expect((await cohorts.getCohortTeacherIds(cohort.id)).has("co-t")).toBe(false);
+
+    await invoke(cohortsRoute.action, post({ intent: "delete", cohortId: cohort.id }));
+    expect(await cohorts.getCohort(cohort.id)).toBeNull();
+  });
+});

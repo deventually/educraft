@@ -17,6 +17,8 @@ interface Props {
   onModel: (m: string) => void;
   /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
   localModels?: PickerModel[];
+  /** Admin-configured catalog allow-list (Phase 4); omitted → full client-selectable catalog. */
+  catalogModels?: PickerModel[];
   disabled?: boolean;
   /** If true, filter to only vision-capable models. */
   requiresImages?: boolean;
@@ -24,7 +26,11 @@ interface Props {
 
 export function ToolControls(props: Props) {
   const t = useT();
-  const models = pickableModels(props.localModels ?? [], props.requiresImages ?? false);
+  const models = pickableModels(
+    props.localModels ?? [],
+    props.requiresImages ?? false,
+    props.catalogModels,
+  );
 
   return (
     <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">

@@ -3,18 +3,17 @@ import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
-import { isResolvableModel, isClientSelectable, resolveModelInfo } from "~/lib/ai/models";
+import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile, getProfileForMember } from "~/server/repositories/profiles.server";
 import {
-  allowedSlugsOf,
   cohortConfig,
   getCohortForUser,
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
+import { getSelectableModelIds, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { getUser } from "~/server/auth.server";
-import { canUseTool } from "~/lib/registry/access";
 import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
@@ -122,12 +121,12 @@ export async function action({ request }: Route.ActionArgs) {
     const tool = getToolBySlug(body.slug);
     if (!tool) return new Response(sseError(m.error.unknownTool), { headers: SSE_HEADERS });
 
-    // Cohort-aware role gate (server-side, not just UI): a student can't drive an
-    // instructor tool — nor a student tool outside their cohort's allow-list — via
-    // a hand-crafted POST, and an expired cohort is refused outright.
+    // Effective-availability gate (server-side, not just UI): a disabled tool, an
+    // instructor tool for a student, a student tool outside their cohort's
+    // allow-list, or a tool outside a narrowed teacher's allow-list can't be
+    // driven via a hand-crafted POST; an expired cohort is refused outright.
     const cohort = user.role === "student" ? await getCohortForUser(user.id) : null;
-    const allowedSlugs = cohort ? allowedSlugsOf(cohort) : null;
-    if (!canUseTool(user, tool, allowedSlugs)) {
+    if (!(await isToolAvailable(user, tool))) {
       return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
     }
     if (cohort && !isCohortActive(cohort)) {
@@ -170,13 +169,16 @@ export async function action({ request }: Route.ActionArgs) {
       audience,
     });
 
-    // Server-side model allow-list: a caller may only pick a *client-selectable*
-    // model (never Opus-class). Anything else falls back to the tool/stage
-    // default, so a hostile body can't force an expensive model on the owner.
-    const model =
-      body.model && isResolvableModel(body.model) && isClientSelectable(body.model)
-        ? body.model
-        : (stage.model ?? tool.defaultModel);
+    // Server-side model allow-list (Phase 4): a caller may only pick a model the
+    // admin has enabled (always ⊆ client-selectable — never Opus-class), or a free
+    // local model. Anything else falls back to the tool/stage default, so a hostile
+    // body can't force an expensive or disabled model on the owner.
+    const selectableModelIds = await getSelectableModelIds();
+    const mayPickModel =
+      !!body.model &&
+      isResolvableModel(body.model) &&
+      (selectableModelIds.has(body.model) || resolveModelInfo(body.model).local === true);
+    const model = mayPickModel ? (body.model as string) : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 
     // Vision gate. The image array is already shape/size/count-validated by the

@@ -102,6 +102,80 @@ describe("cohorts repository", () => {
     expect(await repo.getAllowedToolSlugs("student-without-cohort")).toBeNull();
   });
 
+  it("assigns and removes co-teachers; canManageCohort honours creator, assignee, admin", async () => {
+    const cohort = await repo.createCohort({
+      createdByUserId: "owner-teacher",
+      name: "Team-taught",
+      allowedToolSlugs: ["mentorai"],
+    });
+
+    // Creator manages; an unrelated teacher does not; an admin always does.
+    let teacherIds = await repo.getCohortTeacherIds(cohort.id);
+    expect(repo.canManageCohort({ id: "owner-teacher", role: "teacher" }, cohort, teacherIds)).toBe(
+      true,
+    );
+    expect(repo.canManageCohort({ id: "other", role: "teacher" }, cohort, teacherIds)).toBe(false);
+    expect(repo.canManageCohort({ id: "any-admin", role: "admin" }, cohort, teacherIds)).toBe(true);
+
+    // Assign a co-teacher → they can now manage. Idempotent re-assign is a no-op.
+    await repo.addCohortTeacher(cohort.id, "co-teacher");
+    await repo.addCohortTeacher(cohort.id, "co-teacher");
+    teacherIds = await repo.getCohortTeacherIds(cohort.id);
+    expect(teacherIds.has("co-teacher")).toBe(true);
+    expect(repo.canManageCohort({ id: "co-teacher", role: "teacher" }, cohort, teacherIds)).toBe(
+      true,
+    );
+
+    // Remove them → management revoked.
+    await repo.removeCohortTeacher(cohort.id, "co-teacher");
+    teacherIds = await repo.getCohortTeacherIds(cohort.id);
+    expect(teacherIds.has("co-teacher")).toBe(false);
+    expect(repo.canManageCohort({ id: "co-teacher", role: "teacher" }, cohort, teacherIds)).toBe(
+      false,
+    );
+  });
+
+  it("listCohortsForManager returns owned AND assigned cohorts", async () => {
+    const owned = await repo.createCohort({
+      createdByUserId: "mgr-1",
+      name: "Owned by mgr-1",
+      allowedToolSlugs: ["mentorai"],
+    });
+    const assigned = await repo.createCohort({
+      createdByUserId: "someone-else",
+      name: "Assigned to mgr-1",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.addCohortTeacher(assigned.id, "mgr-1");
+
+    const names = (await repo.listCohortsForManager("mgr-1")).map((c) => c.name);
+    expect(names).toContain("Owned by mgr-1");
+    expect(names).toContain("Assigned to mgr-1");
+    // No duplicate when a manager both owns and is assigned to the same cohort.
+    await repo.addCohortTeacher(owned.id, "mgr-1");
+    const namesAfter = (await repo.listCohortsForManager("mgr-1")).map((c) => c.name);
+    expect(namesAfter.filter((n) => n === "Owned by mgr-1")).toHaveLength(1);
+  });
+
+  it("listAllCohorts spans every owner (admin oversight); deleteCohort removes it + its edges", async () => {
+    const c1 = await repo.createCohort({
+      createdByUserId: "owner-x",
+      name: "X-instance cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.addMembership(c1.id, "member-1");
+    await repo.addCohortTeacher(c1.id, "assistant-1");
+
+    const all = await repo.listAllCohorts();
+    expect(all.some((c) => c.name === "X-instance cohort")).toBe(true);
+
+    // Admin deletes another owner's cohort → gone, along with memberships + teacher edges.
+    await repo.deleteCohort(c1.id);
+    expect(await repo.getCohort(c1.id)).toBeNull();
+    expect(await repo.getCohortForUser("member-1")).toBeNull();
+    expect((await repo.getCohortTeacherIds(c1.id)).size).toBe(0);
+  });
+
   it("isCohortActive honours activeUntil (null = open-ended)", async () => {
     const open = await repo.createCohort({
       createdByUserId: "t",

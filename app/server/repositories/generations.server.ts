@@ -5,7 +5,7 @@
  * scoped to its owning `userId` in the WHERE clause (never trust the client).
  */
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { generations, type GenerationRow } from "../schema.server";
 
@@ -116,6 +116,24 @@ export async function getGeneration(
     .from(generations)
     .where(and(eq(generations.id, id), eq(generations.userId, userId)))
     .get();
+}
+
+/**
+ * Generation counts per tool over the last `days` days — the admin usage
+ * "per tool" totals. Not user-scoped by design (an admin sees the whole
+ * instance); cheap group-by, no analytics infrastructure.
+ */
+export async function countGenerationsByTool(
+  days = 14,
+): Promise<{ toolSlug: string; count: number }[]> {
+  const cutoff = new Date(Date.now() - days * 86_400_000);
+  return getDb()
+    .select({ toolSlug: generations.toolSlug, count: sql<number>`count(*)` })
+    .from(generations)
+    .where(gte(generations.createdAt, cutoff))
+    .groupBy(generations.toolSlug)
+    .orderBy(desc(sql`count(*)`))
+    .all();
 }
 
 export async function deleteGeneration(userId: string, id: string): Promise<void> {

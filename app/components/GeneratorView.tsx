@@ -25,9 +25,16 @@ interface Props {
   profiles: ContextProfile[];
   defaultProfileId: string;
   localModels?: PickerModel[];
+  catalogModels?: PickerModel[];
 }
 
-export function GeneratorView({ tool, profiles, defaultProfileId, localModels }: Props) {
+export function GeneratorView({
+  tool,
+  profiles,
+  defaultProfileId,
+  localModels,
+  catalogModels,
+}: Props) {
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
@@ -142,6 +149,7 @@ export function GeneratorView({ tool, profiles, defaultProfileId, localModels }:
           model={model}
           onModel={setModel}
           localModels={localModels}
+          catalogModels={catalogModels}
           disabled={streaming}
           requiresImages={hasImageInputs}
         />

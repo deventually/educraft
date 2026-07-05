@@ -13,6 +13,7 @@ import "./app.css";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
+import { getEffectiveRole } from "~/server/roleView.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,7 +33,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     locale: getLocale(request),
     // Only the display-safe fields reach the client (never the password hash).
-    user: user ? { name: user.name, role: user.role } : null,
+    // `role` is the *effective* role (an admin may view-as teacher); `realRole`
+    // is the account's true role, so the shell can still offer the switch back.
+    user: user
+      ? { name: user.name, role: getEffectiveRole(user, request), realRole: user.role }
+      : null,
   };
 }
 

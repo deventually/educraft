@@ -51,3 +51,21 @@ describe("canUseTool — cohort allow-list (Phase 6)", () => {
     expect(canUseTool({ role: "admin" }, instructorTool, allowed)).toBe(true);
   });
 });
+
+describe('canUseTool — audience "both" (Phase 4 override)', () => {
+  const bothTool = { slug: "bloom-by-design", userType: "both" as const };
+
+  it("a student MAY use a tool whose (effective) audience is both", () => {
+    expect(canUseTool({ role: "student" }, bothTool)).toBe(true);
+  });
+
+  it('"both" is still narrowed by the student cohort allow-list', () => {
+    expect(canUseTool({ role: "student" }, bothTool, new Set(["bloom-by-design"]))).toBe(true);
+    expect(canUseTool({ role: "student" }, bothTool, new Set(["mentorai"]))).toBe(false);
+  });
+
+  it("teachers and admins may use a both tool unconditionally", () => {
+    expect(canUseTool({ role: "teacher" }, bothTool)).toBe(true);
+    expect(canUseTool({ role: "admin" }, bothTool)).toBe(true);
+  });
+});

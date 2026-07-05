@@ -17,6 +17,7 @@ interface Props {
   profiles: ContextProfile[];
   defaultProfileId: string;
   localModels?: PickerModel[];
+  catalogModels?: PickerModel[];
 }
 
 interface StageState {
@@ -25,7 +26,13 @@ interface StageState {
   error: string | null;
 }
 
-export function StageStepper({ tool, profiles, defaultProfileId, localModels }: Props) {
+export function StageStepper({
+  tool,
+  profiles,
+  defaultProfileId,
+  localModels,
+  catalogModels,
+}: Props) {
   const t = useT();
   const locale = useLocale();
   const [values, setValues] = useState<FormValues>(() => defaultValuesFor(tool.inputs));
@@ -116,6 +123,7 @@ export function StageStepper({ tool, profiles, defaultProfileId, localModels }: 
           model={model}
           onModel={setModel}
           localModels={localModels}
+          catalogModels={catalogModels}
         />
         <DynamicForm
           fields={tool.inputs}

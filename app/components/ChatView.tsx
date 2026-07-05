@@ -30,6 +30,8 @@ interface ChatViewProps {
   outputLanguage?: "nl" | "en";
   /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
   localModels?: PickerModel[];
+  /** Admin-configured catalog allow-list (Phase 4); omitted → full client-selectable catalog. */
+  catalogModels?: PickerModel[];
   /**
    * Provisioned-student mode (Phase 6.9): the sandbox is prefilled + locked from
    * the cohort config, so the student skips the sandbox gate and the editable
@@ -46,6 +48,7 @@ export function ChatView({
   defaultModel,
   outputLanguage: defaultOutputLanguage,
   localModels,
+  catalogModels,
   lockedValues,
   onGenerationStart,
 }: ChatViewProps) {
@@ -77,7 +80,7 @@ export function ChatView({
   const starters = tool.chat?.starters;
   // Every screen offers the same models: API-key catalog + local CLI agents +
   // any Ollama / LM Studio models discovered at runtime.
-  const modelOptions = pickableModels(localModels ?? []);
+  const modelOptions = pickableModels(localModels ?? [], false, catalogModels);
 
   // Keep the latest output in view whenever a turn is added or streamed into.
   // Scrolling an end anchor into view follows whichever element actually

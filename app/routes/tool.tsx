@@ -11,14 +11,14 @@ import {
 } from "lucide-react";
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
-import { canUseTool } from "~/lib/registry/access";
 import {
-  allowedSlugsOf,
   cohortConfig,
   getCohortForUser,
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
+import { getSelectableModels, isToolAvailable } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
+import { getEffectiveRole } from "~/server/roleView.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
@@ -39,12 +39,15 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const tool = getToolBySlugOrThrow(params.slug);
-  // A student may not open an instructor tool, nor a student tool outside their
-  // cohort's allow-list, nor any tool once their cohort's access window has
-  // passed — all indistinguishable from a non-existent tool (no info leak).
-  const cohort = user.role === "student" ? await getCohortForUser(user.id) : null;
-  const allowedSlugs = cohort ? allowedSlugsOf(cohort) : null;
-  if (!canUseTool(user, tool, allowedSlugs)) throw new Response("Not Found", { status: 404 });
+  // A tool the instance has disabled, an instructor tool for a student, a student
+  // tool outside their cohort's allow-list, a tool outside a narrowed teacher's
+  // allow-list, or any tool once the cohort's window has passed — all
+  // indistinguishable from a non-existent tool (no info leak). Effective
+  // availability (Phase 4) composes the instance + role/cohort + teacher gates;
+  // an admin who "views as teacher" is gated as a teacher.
+  const viewer = { ...user, role: getEffectiveRole(user, request) };
+  const cohort = viewer.role === "student" ? await getCohortForUser(user.id) : null;
+  if (!(await isToolAvailable(viewer, tool))) throw new Response("Not Found", { status: 404 });
   if (cohort && !isCohortActive(cohort)) throw new Response("Not Found", { status: 404 });
 
   // A provisioned student lands straight in the chat: the sandbox is prefilled +
@@ -63,6 +66,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     displayName: m.displayName,
     supportsImages: m.supportsImages,
   }));
+  // The catalog models a caller may pick, narrowed to the admin's allow-list
+  // (Phase 4). Passed to the pickers so the module-scope catalog no longer wins.
+  const catalogModels = await getSelectableModels();
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
   return {
     tool,
@@ -70,6 +76,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     defaultProfileId: defaultProfile?.id ?? "",
     verbatim,
     localModels,
+    catalogModels,
     helpOverlay,
     lockedValues,
   };
@@ -84,8 +91,16 @@ export function meta({ data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tool, profiles, defaultProfileId, verbatim, localModels, helpOverlay, lockedValues } =
-    loaderData;
+  const {
+    tool,
+    profiles,
+    defaultProfileId,
+    verbatim,
+    localModels,
+    catalogModels,
+    helpOverlay,
+    lockedValues,
+  } = loaderData;
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
@@ -110,6 +125,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             defaultModel={undefined}
             outputLanguage={undefined}
             localModels={localModels}
+            catalogModels={catalogModels}
             lockedValues={lockedValues ?? undefined}
           />
         ) : multiStage ? (
@@ -118,6 +134,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             profiles={profiles}
             defaultProfileId={defaultProfileId}
             localModels={localModels}
+            catalogModels={catalogModels}
           />
         ) : (
           <GeneratorView
@@ -125,6 +142,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             profiles={profiles}
             defaultProfileId={defaultProfileId}
             localModels={localModels}
+            catalogModels={catalogModels}
           />
         )}
       </section>

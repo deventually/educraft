@@ -10,7 +10,17 @@ export default [
     route("cohorts", "routes/cohorts._index.tsx"),
     route("cohorts/:id", "routes/cohorts.$id.tsx"),
     route("account", "routes/account.tsx"),
-    ...prefix("admin", [route("feedback", "routes/admin.feedback.tsx")]),
+    // Admin console (Phase 4). The layout gates on requireRole("admin"); every
+    // child repeats the check (loaders run in parallel).
+    route("admin", "routes/admin.tsx", [
+      index("routes/admin._index.tsx"),
+      route("tools", "routes/admin.tools.tsx"),
+      route("models", "routes/admin.models.tsx"),
+      route("invites", "routes/admin.invites.tsx"),
+      route("cohorts", "routes/admin.cohorts.tsx"),
+      route("usage", "routes/admin.usage.tsx"),
+      route("feedback", "routes/admin.feedback.tsx"),
+    ]),
     route("about", "routes/about.tsx"),
     route("contact", "routes/contact.tsx"),
     route("cookies", "routes/cookies.tsx"),
@@ -29,6 +39,8 @@ export default [
   route("healthz", "routes/healthz.tsx"),
   // Resource route (no UI) — persists the chosen UI locale in a cookie.
   route("set-locale", "routes/set-locale.tsx"),
+  // Resource route (no UI) — an admin toggles the "view as teacher" cookie.
+  route("set-view", "routes/set-view.tsx"),
   // Resource route (no UI) — silences Chrome DevTools' workspace probe.
   route(".well-known/appspecific/com.chrome.devtools.json", "routes/devtools-probe.tsx"),
 ] satisfies RouteConfig;

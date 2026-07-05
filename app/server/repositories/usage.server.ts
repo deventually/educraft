@@ -7,9 +7,9 @@
  * (userId, day); `day` is a UTC date string so a rollover lands on a fresh row.
  */
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { usage } from "../schema.server";
+import { usage, users } from "../schema.server";
 import { env } from "../env.server";
 
 /** Today's date as a UTC "YYYY-MM-DD" string — the quota bucket key. */
@@ -114,4 +114,35 @@ export async function checkQuota(userId: string, day = utcDay()): Promise<{ ok: 
 /** Remove all usage rows for a user (delete-my-data cascade). */
 export async function deleteUsageForUser(userId: string): Promise<void> {
   getDb().delete(usage).where(eq(usage.userId, userId)).run();
+}
+
+export interface AdminUsageRow {
+  userId: string;
+  userName: string | null;
+  day: string;
+  requests: number;
+  outputChars: number;
+}
+
+/**
+ * Per-user, per-day usage over the last `days` days, joined with the user's name
+ * — the admin usage table. Not user-scoped by design (an admin sees everyone).
+ * `day` is a lexicographically-sortable UTC date string, so a string `>=` bound
+ * is a correct date filter.
+ */
+export async function listRecentUsage(days = 14): Promise<AdminUsageRow[]> {
+  const cutoff = utcDay(new Date(Date.now() - days * 86_400_000));
+  return getDb()
+    .select({
+      userId: usage.userId,
+      userName: users.name,
+      day: usage.day,
+      requests: usage.requests,
+      outputChars: usage.outputChars,
+    })
+    .from(usage)
+    .leftJoin(users, eq(usage.userId, users.id))
+    .where(gte(usage.day, cutoff))
+    .orderBy(desc(usage.day), users.name)
+    .all();
 }

@@ -6,9 +6,11 @@ import { requireRole } from "~/server/auth.server";
 import { getEnabledTools, getToolBySlug } from "~/lib/registry";
 import {
   allowedSlugsOf,
+  canManageCohort,
   cohortConfig,
   createCohort,
   getCohort,
+  getCohortTeacherIds,
   updateCohort,
 } from "~/server/repositories/cohorts.server";
 import { createInvitesForCohort } from "~/server/repositories/users.server";
@@ -37,10 +39,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireRole(request, "teacher", "admin");
   const isNew = params.id === "new";
   const cohort = isNew ? null : await getCohort(params.id);
-  // A cohort is owner-scoped: managing someone else's is indistinguishable from
-  // a missing one.
-  if (!isNew && (!cohort || cohort.createdByUserId !== user.id)) {
-    throw new Response("Not Found", { status: 404 });
+  // A cohort is managed by its creator, its assigned co-teachers (Phase 4), or an
+  // admin. Anyone else can't tell it from a missing one.
+  if (!isNew) {
+    if (!cohort) throw new Response("Not Found", { status: 404 });
+    if (!canManageCohort(user, cohort, await getCohortTeacherIds(cohort.id))) {
+      throw new Response("Not Found", { status: 404 });
+    }
   }
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   return {
@@ -128,7 +133,8 @@ export async function action({ params, request }: Route.ActionArgs) {
     cohortId = cohort.id;
   } else {
     const existing = await getCohort(params.id);
-    if (!existing || existing.createdByUserId !== user.id) {
+    if (!existing) throw new Response("Not Found", { status: 404 });
+    if (!canManageCohort(user, existing, await getCohortTeacherIds(existing.id))) {
       throw new Response("Not Found", { status: 404 });
     }
     await updateCohort(params.id, {

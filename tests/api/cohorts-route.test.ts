@@ -98,6 +98,45 @@ describe("cohorts.$id action — provisioning", () => {
     expect(owned.some((c) => c.name === "Sneaky cohort")).toBe(false);
   });
 
+  it("lets an assigned co-teacher manage a cohort they did not create", async () => {
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "owner-99",
+      name: "Team cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addCohortTeacher(cohort.id, "co-99");
+
+    const res = (await route.action(
+      args(
+        { id: cohort.id },
+        formPost({ name: "Team cohort", tools: ["mentorai"], emails: "s@example.com" }, "co-99"),
+      ),
+    )) as { links?: unknown[]; error?: string };
+
+    expect(res.error).toBeUndefined();
+    expect(res.links).toHaveLength(1);
+  });
+
+  it("404s a teacher who neither created nor is assigned to the cohort", async () => {
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "owner-100",
+      name: "Private cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+
+    await expect(
+      route.action(
+        args(
+          { id: cohort.id },
+          formPost(
+            { name: "Private cohort", tools: ["mentorai"], emails: "s@example.com" },
+            "stranger-1",
+          ),
+        ),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
   it("accepts the teacher's own context profile", async () => {
     const mine = await profiles.createProfile("teacher-3", { name: "My profile" });
     const res = (await route.action(

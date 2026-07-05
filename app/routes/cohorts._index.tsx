@@ -5,7 +5,7 @@ import { requireRole } from "~/server/auth.server";
 import {
   allowedSlugsOf,
   countCohortMembers,
-  listCohortsByOwner,
+  listCohortsForManager,
 } from "~/server/repositories/cohorts.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -19,7 +19,8 @@ export function meta({ matches }: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireRole(request, "teacher", "admin");
-  const cohorts = await listCohortsByOwner(user.id);
+  // Cohorts a teacher manages: their own plus ones they're assigned to (Phase 4).
+  const cohorts = await listCohortsForManager(user.id);
   const rows = await Promise.all(
     cohorts.map(async (c) => ({
       id: c.id,
