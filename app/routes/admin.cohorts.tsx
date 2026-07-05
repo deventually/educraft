@@ -1,5 +1,5 @@
-import { Form } from "react-router";
-import { Trash2, UserMinus, Users } from "lucide-react";
+import { Form, Link } from "react-router";
+import { Trash2, UserMinus, Users, Wrench } from "lucide-react";
 import type { Route } from "./+types/admin.cohorts";
 import { requireRole } from "~/server/auth.server";
 import {
@@ -109,15 +109,24 @@ export default function AdminCohorts({ loaderData }: Route.ComponentProps) {
                         )}
                       </p>
                     </div>
-                    <ConfirmDialog
-                      triggerLabel={t.admin.cohorts.delete}
-                      triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
-                      title={t.admin.cohorts.deleteTitle}
-                      description={t.admin.cohorts.confirmDelete}
-                      confirmLabel={t.admin.cohorts.delete}
-                      cancelLabel={t.confirm.cancel}
-                      fields={{ intent: "delete", cohortId: c.id }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/cohorts/${c.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      >
+                        <Wrench className="size-3.5" aria-hidden />
+                        {t.admin.cohorts.editTools}
+                      </Link>
+                      <ConfirmDialog
+                        triggerLabel={t.admin.cohorts.delete}
+                        triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
+                        title={t.admin.cohorts.deleteTitle}
+                        description={t.admin.cohorts.confirmDelete}
+                        confirmLabel={t.admin.cohorts.delete}
+                        cancelLabel={t.confirm.cancel}
+                        fields={{ intent: "delete", cohortId: c.id }}
+                      />
+                    </div>
                   </div>
 
                   <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">

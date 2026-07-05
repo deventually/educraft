@@ -497,6 +497,7 @@ export const en: Messages = {
       colMembers: "Students",
       colActiveUntil: "Active until",
       openEnd: "Open-ended",
+      editTools: "Edit tools",
       delete: "Delete",
       confirmDelete: "Delete this cohort and its links?",
       deleteTitle: "Delete cohort?",
@@ -575,7 +576,12 @@ export const en: Messages = {
     recipientsEmailsHint: "Each invite is bound to this email address.",
     linkCountLabel: "Or: number of link-only invites (no email)",
     submitCreate: "Create cohort and generate invites",
-    submitManage: "Add invites",
+    saveChanges: "Save changes",
+    saved: "Changes saved.",
+    recipientsOptional:
+      "Optional — fill this in only to invite extra students. Leaving it empty just saves your changes.",
+    levelManagedByOwner:
+      "This cohort's level is managed by its owner. Leave this as-is to keep it.",
     linksHeading: "Generated invite links",
     linksHint: "Copy each link and share it with the intended student. Every link works once.",
     linkOnly: "Link-only",

@@ -131,6 +131,9 @@ export async function action({ params, request }: Route.ActionArgs) {
   const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "7") || 7));
 
   // Recipients: one identity-bound invite per email + N link-only bearer invites.
+  // Required to *create* a cohort (a cohort exists to invite students into) but
+  // optional when *managing* one — changing tools/level must not force a fresh
+  // invite batch. A manage save with recipients edits AND invites in one step.
   const emails = String(fd.get("emails") ?? "")
     .split(/[\n,;]+/)
     .map((s) => s.trim())
@@ -140,14 +143,14 @@ export async function action({ params, request }: Route.ActionArgs) {
     ...emails.map((email) => ({ email })),
     ...Array.from({ length: linkCount }, () => ({}) as { email?: string }),
   ];
-  if (recipients.length === 0) return { error: m.cohorts.errorNoRecipients };
-
   const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
+  const origin = new URL(request.url).origin;
+  const toLinks = (invites: { token: string; email: string | null }[]) =>
+    invites.map((inv) => ({ url: `${origin}/invite/${inv.token}`, email: inv.email }));
 
-  // Config granularity = the batch: every invite minted here shares this cohort's
-  // tools/config. A single invite is a batch of one with its own cohort.
-  let cohortId: string;
+  // ── Create a brand-new cohort (recipients required) ─────────────────────────
   if (params.id === "new") {
+    if (recipients.length === 0) return { error: m.cohorts.errorNoRecipients };
     const cohort = await createCohort({
       createdByUserId: user.id,
       name,
@@ -157,30 +160,45 @@ export async function action({ params, request }: Route.ActionArgs) {
       contextEqf,
       activeUntil,
     });
-    cohortId = cohort.id;
-  } else {
-    const existing = await getCohort(params.id);
-    if (!existing) throw new Response("Not Found", { status: 404 });
-    if (!canManageCohort(user, existing, await getCohortTeacherIds(existing.id))) {
-      throw new Response("Not Found", { status: 404 });
-    }
-    await updateCohort(params.id, {
-      name,
-      allowedToolSlugs,
-      config,
-      contextProfileId,
-      contextEqf,
-      activeUntil,
-    });
-    cohortId = params.id;
+    const invites = await createInvitesForCohort(cohort.id, user.id, recipients, expiresAt);
+    return { cohortId: cohort.id, links: toLinks(invites) };
   }
 
-  const invites = await createInvitesForCohort(cohortId, user.id, recipients, expiresAt);
-  const origin = new URL(request.url).origin;
-  return {
-    cohortId,
-    links: invites.map((inv) => ({ url: `${origin}/invite/${inv.token}`, email: inv.email })),
-  };
+  // ── Edit an existing cohort ─────────────────────────────────────────────────
+  // Authorise (creator, assigned co-teacher, or admin) before any side effect.
+  const existing = await getCohort(params.id);
+  if (!existing) throw new Response("Not Found", { status: 404 });
+  if (!canManageCohort(user, existing, await getCohortTeacherIds(existing.id))) {
+    throw new Response("Not Found", { status: 404 });
+  }
+
+  // Guard a colleague's context profile: an editor who does not own the cohort's
+  // current profile can't see it in their dropdown, so an untouched "profile"
+  // source submits an empty id. Preserve the existing profile rather than silently
+  // wiping it — removing the level stays possible via the explicit "no level".
+  let finalProfileId = contextProfileId;
+  let finalEqf = contextEqf;
+  if (contextSource === "profile" && !contextProfileId && existing.contextProfileId) {
+    const ownsExisting = await getProfile(user.id, existing.contextProfileId);
+    if (!ownsExisting) {
+      finalProfileId = existing.contextProfileId;
+      finalEqf = null;
+    }
+  }
+
+  await updateCohort(params.id, {
+    name,
+    allowedToolSlugs,
+    config,
+    contextProfileId: finalProfileId,
+    contextEqf: finalEqf,
+    activeUntil,
+  });
+
+  // Pure edit unless recipients were supplied — then invite them in the same save.
+  if (recipients.length === 0) return { saved: true as const };
+  const invites = await createInvitesForCohort(params.id, user.id, recipients, expiresAt);
+  return { saved: true as const, links: toLinks(invites) };
 }
 
 export default function CohortForm({ loaderData }: Route.ComponentProps) {
@@ -210,6 +228,14 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
 
   const error = actionData?.error;
   const links = actionData?.links;
+  const saved = actionData?.saved;
+
+  // The cohort levels members by a profile the current editor doesn't own (e.g. an
+  // admin editing a colleague's cohort). It can't appear in their dropdown, so the
+  // form flags it as read-only; the action preserves it on save (see `action`).
+  const foreignProfile = Boolean(
+    cohort?.contextProfileId && !profiles.some((p) => p.id === cohort.contextProfileId),
+  );
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -246,6 +272,14 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
               className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
             >
               {error}
+            </p>
+          )}
+          {saved && (
+            <p
+              role="status"
+              className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+            >
+              {t.cohorts.saved}
             </p>
           )}
           <Form method="post" className="space-y-6">
@@ -334,7 +368,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
                   <Select
                     id="contextProfileId"
                     name="contextProfileId"
-                    defaultValue={cohort?.contextProfileId ?? ""}
+                    defaultValue={foreignProfile ? "" : (cohort?.contextProfileId ?? "")}
                     className="mt-1"
                   >
                     <option value="">{t.cohorts.profileNone}</option>
@@ -344,6 +378,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
                       </option>
                     ))}
                   </Select>
+                  {foreignProfile && <HelpText>{t.cohorts.levelManagedByOwner}</HelpText>}
                 </div>
               )}
 
@@ -381,6 +416,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
               <legend className="text-sm font-semibold text-slate-800">
                 {t.cohorts.recipientsLegend}
               </legend>
+              {mode === "manage" && <HelpText>{t.cohorts.recipientsOptional}</HelpText>}
               <div>
                 <Label htmlFor="emails">{t.cohorts.recipientsEmailsLabel}</Label>
                 <Textarea id="emails" name="emails" rows={3} className="mt-1" />
@@ -415,7 +451,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
             </fieldset>
 
             <Button type="submit" disabled={busy} className="w-full">
-              {mode === "new" ? t.cohorts.submitCreate : t.cohorts.submitManage}
+              {mode === "new" ? t.cohorts.submitCreate : t.cohorts.saveChanges}
             </Button>
           </Form>
         </Card>

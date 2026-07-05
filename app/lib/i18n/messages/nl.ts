@@ -501,6 +501,7 @@ export const nl = {
       colMembers: "Studenten",
       colActiveUntil: "Actief tot",
       openEnd: "Onbeperkt",
+      editTools: "Tutors bewerken",
       delete: "Verwijderen",
       confirmDelete: "Dit cohort en zijn koppelingen verwijderen?",
       deleteTitle: "Cohort verwijderen?",
@@ -580,7 +581,12 @@ export const nl = {
     recipientsEmailsHint: "Elke uitnodiging wordt aan dit e-mailadres gebonden.",
     linkCountLabel: "Of: aantal open uitnodigingslinks (zonder e-mail)",
     submitCreate: "Cohort aanmaken en uitnodigingen genereren",
-    submitManage: "Uitnodigingen toevoegen",
+    saveChanges: "Wijzigingen opslaan",
+    saved: "Wijzigingen opgeslagen.",
+    recipientsOptional:
+      "Optioneel — vul dit alleen in om extra studenten uit te nodigen. Leeg laten bewaart alleen de wijzigingen.",
+    levelManagedByOwner:
+      "Het niveau van dit cohort wordt beheerd door de eigenaar. Laat dit staan om het te behouden.",
     linksHeading: "Gegenereerde uitnodigingslinks",
     linksHint: "Kopieer elke link en deel hem met de bedoelde student. Elke link werkt één keer.",
     linkOnly: "Open link",

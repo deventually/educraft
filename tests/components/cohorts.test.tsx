@@ -50,7 +50,7 @@ function renderForm(action?: () => unknown) {
   return render(<Stub initialEntries={["/cohorts/new"]} />);
 }
 
-function renderManage(canDelete: boolean) {
+function renderManage(canDelete: boolean, action?: () => unknown) {
   const props = {
     loaderData: {
       mode: "manage" as const,
@@ -69,7 +69,11 @@ function renderManage(canDelete: boolean) {
     },
   } as unknown as ComponentProps<typeof CohortForm>;
   const Stub = createRoutesStub([
-    { path: "/cohorts/:id", Component: () => <CohortForm {...props} />, action: () => null },
+    {
+      path: "/cohorts/:id",
+      Component: () => <CohortForm {...props} />,
+      action: action ?? (() => null),
+    },
   ]);
   return render(<Stub initialEntries={["/cohorts/c1"]} />);
 }
@@ -141,6 +145,50 @@ describe("Cohort provisioning form", () => {
   it("hides cohort delete when the viewer may not delete it", () => {
     renderManage(false);
     expect(screen.queryByRole("button", { name: /cohort verwijderen|delete cohort/i })).toBeNull();
+  });
+
+  it("offers a Save changes action that persists tool edits without inviting", async () => {
+    const user = userEvent.setup();
+    renderManage(false, () => ({ saved: true }));
+    // Change the cohort's tutors, then save — no recipients required.
+    await user.click(screen.getByLabelText("Peer Tutoring"));
+    await user.click(screen.getByRole("button", { name: /wijzigingen opslaan|save changes/i }));
+    await waitFor(() =>
+      expect(screen.getByText(/wijzigingen opgeslagen|changes saved/i)).toBeInTheDocument(),
+    );
+  });
+
+  it("notes that the level is managed by the owner when the profile isn't the editor's", () => {
+    // The cohort references a profile id absent from the editor's own profiles —
+    // e.g. an admin editing a colleague's cohort. The form flags it as read-only
+    // so the editor doesn't mistake the empty dropdown for "no level".
+    const props = {
+      loaderData: {
+        mode: "manage" as const,
+        canDelete: true,
+        tutors,
+        profiles: [{ id: "mine", name: "My profile" }],
+        cohort: {
+          id: "c1",
+          name: "SE jaar 2",
+          allowedToolSlugs: ["mentorai"],
+          config: {},
+          contextProfileId: "someone-elses-profile",
+          contextEqf: null,
+          activeUntil: null,
+        },
+      },
+    } as unknown as ComponentProps<typeof CohortForm>;
+    const Stub = createRoutesStub([
+      { path: "/cohorts/:id", Component: () => <CohortForm {...props} />, action: () => null },
+    ]);
+    render(<Stub initialEntries={["/cohorts/c1"]} />);
+    expect(screen.getByText(/eigenaar|owner/i)).toBeInTheDocument();
+  });
+
+  it("has no a11y violations in manage mode", async () => {
+    const { container } = renderManage(true);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("has no a11y violations", async () => {

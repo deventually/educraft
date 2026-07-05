@@ -47,6 +47,12 @@ describe("Admin cohorts", () => {
     expect(screen.getByText("Co Teacher")).toBeInTheDocument();
   });
 
+  it("links each cohort to its manage page so its tools can be edited", () => {
+    renderRoute();
+    const link = screen.getByRole("link", { name: /tutors bewerken|edit tools/i });
+    expect(link).toHaveAttribute("href", "/cohorts/c1");
+  });
+
   it("only offers unassigned teachers in the assign dropdown (owner + assignee excluded)", () => {
     renderRoute();
     // Teacher X is the only assignable option (owner + already-assigned filtered out).
