@@ -119,6 +119,7 @@ export const en: Messages = {
     continue: "Continue",
     yourSettings: "Your settings",
     edit: "Edit",
+    provisionedFor: "Set up for you",
     startConversation: "Start a conversation by clicking a suggestion or typing a message.",
     interrupted: "Interrupted",
     enterHint: "Enter to send · Shift+Enter for a new line",
@@ -274,6 +275,8 @@ export const en: Messages = {
     inviteInvalidTitle: "Invitation invalid",
     inviteInvalid:
       "This invitation link is invalid, already used, or expired. Please request a new one.",
+    emailMismatch:
+      "This invitation is linked to a different email address. Use the address the invite was sent to.",
     nameRequired: "Name is required.",
     passwordTooShort: "Password must be at least 10 characters.",
     passwordMismatch: "The passwords do not match.",
@@ -338,6 +341,7 @@ export const en: Messages = {
     notAllowed: "This tool is not available for your account.",
     rateLimited: "Too many requests. Please try again in a moment.",
     quotaExceeded: "Daily limit reached — available again tomorrow.",
+    cohortInactive: "This group is no longer active. Please contact your teacher.",
     modelNoVision:
       "This model ({model}) does not support image analysis. Please select a vision-capable model.",
     invalidImages: "Invalid image format. Images must be PNG, JPEG, GIF or WebP.",

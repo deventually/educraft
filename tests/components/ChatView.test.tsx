@@ -136,6 +136,33 @@ describe("ChatView", () => {
     expect(starters).toBeInTheDocument();
   });
 
+  it("locked (provisioned) mode: skips the sandbox and settings controls, greets immediately", async () => {
+    const { container } = render(
+      <ChatView
+        tool={mockTool}
+        lockedValues={{ discipline: "OOP" }}
+        onGenerationStart={() => {}}
+      />,
+    );
+
+    // No sandbox gate: the student lands straight in the chat (no Continue).
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
+    // The greeting renders immediately.
+    expect(screen.getByText("Welcome!")).toBeInTheDocument();
+    // No editable settings/profile controls: no Edit, no model/language pickers.
+    expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
+    expect(container.querySelector("#chat-model")).toBeNull();
+    expect(container.querySelector("#chat-lang")).toBeNull();
+
+    // Accessibility stays clean in the locked layout.
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("teacher mode (no lockedValues) still shows the editable sandbox first", async () => {
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
+  });
+
   it("renders one-time sandbox inputs from tool.inputs", async () => {
     const { container } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
 

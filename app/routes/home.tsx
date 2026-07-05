@@ -15,6 +15,7 @@ import {
 import type { Route } from "./+types/home";
 import { getEnabledTools } from "~/lib/registry";
 import { canUseTool } from "~/lib/registry/access";
+import { getAllowedToolSlugs } from "~/server/repositories/cohorts.server";
 import { requireUser } from "~/server/auth.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
 import {
@@ -47,9 +48,11 @@ interface ToolCardData {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  // Server-side gate: a student never even receives instructor tools in the list.
+  // Server-side gate: a student never even receives instructor tools in the list,
+  // and a provisioned student sees only their cohort's allow-listed tutors.
+  const allowedSlugs = user.role === "student" ? await getAllowedToolSlugs(user.id) : null;
   const tools: ToolCardData[] = getEnabledTools()
-    .filter((tool) => canUseTool(user, tool))
+    .filter((tool) => canUseTool(user, tool, allowedSlugs))
     .map((tool) => {
       const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
       const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");

@@ -12,6 +12,12 @@ import {
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import { canUseTool } from "~/lib/registry/access";
+import {
+  allowedSlugsOf,
+  cohortConfig,
+  getCohortForUser,
+  isCohortActive,
+} from "~/server/repositories/cohorts.server";
 import { requireUser } from "~/server/auth.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
@@ -33,11 +39,21 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const tool = getToolBySlugOrThrow(params.slug);
-  // A student may not open an instructor tool — indistinguishable from a
-  // non-existent tool (no information leak about what exists).
-  if (!canUseTool(user, tool)) throw new Response("Not Found", { status: 404 });
-  const profiles = await listProfiles(user.id);
-  const defaultProfile = await getDefaultProfile(user.id);
+  // A student may not open an instructor tool, nor a student tool outside their
+  // cohort's allow-list, nor any tool once their cohort's access window has
+  // passed — all indistinguishable from a non-existent tool (no info leak).
+  const cohort = user.role === "student" ? await getCohortForUser(user.id) : null;
+  const allowedSlugs = cohort ? allowedSlugsOf(cohort) : null;
+  if (!canUseTool(user, tool, allowedSlugs)) throw new Response("Not Found", { status: 404 });
+  if (cohort && !isCohortActive(cohort)) throw new Response("Not Found", { status: 404 });
+
+  // A provisioned student lands straight in the chat: the sandbox is prefilled +
+  // locked from the cohort config, and no profile is offered (the cohort profile
+  // is injected server-side by membership). Teachers/admins keep today's
+  // behaviour — their own profiles + an editable sandbox.
+  const lockedValues = cohort ? (cohortConfig(cohort)[tool.slug]?.values ?? {}) : null;
+  const profiles = lockedValues ? [] : await listProfiles(user.id);
+  const defaultProfile = lockedValues ? null : await getDefaultProfile(user.id);
   const verbatim = tool.stages.map((s) => ({
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),
@@ -55,6 +71,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     verbatim,
     localModels,
     helpOverlay,
+    lockedValues,
   };
 }
 
@@ -67,7 +84,8 @@ export function meta({ data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tool, profiles, defaultProfileId, verbatim, localModels, helpOverlay } = loaderData;
+  const { tool, profiles, defaultProfileId, verbatim, localModels, helpOverlay, lockedValues } =
+    loaderData;
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
@@ -92,6 +110,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             defaultModel={undefined}
             outputLanguage={undefined}
             localModels={localModels}
+            lockedValues={lockedValues ?? undefined}
           />
         ) : multiStage ? (
           <StageStepper
