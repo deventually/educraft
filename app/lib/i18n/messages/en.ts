@@ -380,7 +380,7 @@ export const en: Messages = {
     notAllowed: "This tool is not available for your account.",
     rateLimited: "Too many requests. Please try again in a moment.",
     quotaExceeded: "Daily limit reached — available again tomorrow.",
-    cohortInactive: "This group is no longer active. Please contact your teacher.",
+    cohortInactive: "This cohort is no longer active. Please contact your teacher.",
     modelNoVision:
       "This model ({model}) does not support image analysis. Please select a vision-capable model.",
     invalidImages: "Invalid image format. Images must be PNG, JPEG, GIF or WebP.",

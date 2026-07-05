@@ -383,7 +383,7 @@ export const nl = {
     notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
     rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",
     quotaExceeded: "Daglimiet bereikt — morgen weer beschikbaar.",
-    cohortInactive: "Deze groep is niet meer actief. Neem contact op met je docent.",
+    cohortInactive: "Dit cohort is niet meer actief. Neem contact op met je docent.",
     modelNoVision:
       "Dit model ({model}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.",
     invalidImages: "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG, JPEG, GIF of WebP zijn.",
