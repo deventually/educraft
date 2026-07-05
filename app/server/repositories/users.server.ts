@@ -4,15 +4,18 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
+  chatSessions,
   cohortMemberships,
   cohorts,
   contextProfiles,
   feedback,
   generations,
   invites,
+  messages,
+  sessionSummaries,
   usage,
   users,
   type InviteRow,
@@ -94,9 +97,10 @@ export async function deleteUser(id: string): Promise<void> {
 
 /**
  * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
- * user owns — feedback, usage counters, generations, context profiles — then the
- * user row, in a single transaction so a partial failure leaves nothing orphaned.
- * Scoped by `userId`/`id`, so another user's rows are never touched.
+ * user owns — feedback, usage counters, generations, context profiles, cohort
+ * memberships, and their chat history + de-personalised summaries (Phase 7) —
+ * then the user row, in a single transaction so a partial failure leaves nothing
+ * orphaned. Scoped by `userId`/`id`, so another user's rows are never touched.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
   getDb().transaction((tx) => {
@@ -105,6 +109,19 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
     tx.delete(cohortMemberships).where(eq(cohortMemberships.userId, id)).run();
+    // Chat history: drop the user's messages (via their sessions), the sessions,
+    // and the derived summaries. The student's raw transcript leaves with them.
+    const sessionIds = tx
+      .select({ id: chatSessions.id })
+      .from(chatSessions)
+      .where(eq(chatSessions.userId, id))
+      .all()
+      .map((s) => s.id);
+    if (sessionIds.length > 0) {
+      tx.delete(messages).where(inArray(messages.sessionId, sessionIds)).run();
+    }
+    tx.delete(chatSessions).where(eq(chatSessions.userId, id)).run();
+    tx.delete(sessionSummaries).where(eq(sessionSummaries.userId, id)).run();
     tx.delete(users).where(eq(users.id, id)).run();
   });
 }

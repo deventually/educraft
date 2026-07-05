@@ -13,6 +13,7 @@ import {
 } from "~/server/repositories/cohorts.server";
 import { getSelectableModelIds, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
+import { recordChatTurn } from "~/server/repositories/chat.server";
 import { getUser } from "~/server/auth.server";
 import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
@@ -299,6 +300,19 @@ export async function action({ request }: Route.ActionArgs) {
                 [...messages, { role: "assistant", content: full }],
                 outputLanguage,
               ),
+            });
+            // Also record the turn into the normalised chat_sessions/messages
+            // tables (Phase 7) so cohort engagement + the post-session summariser
+            // have a source. Denormalise the cohort so mentor rollups can scope.
+            await recordChatTurn({
+              sessionId,
+              userId: user.id,
+              cohortId: cohort?.id ?? null,
+              toolSlug: tool.slug,
+              model,
+              systemPrompt: system,
+              contextProfileId: body.contextProfileId ?? null,
+              messages: [...messages, { role: "assistant", content: full }],
             });
           } else {
             await saveGeneration({

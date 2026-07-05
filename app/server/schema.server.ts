@@ -130,6 +130,30 @@ export const messages = sqliteTable("messages", {
 });
 
 /**
+ * De-personalised, per-session learning signal for the provisioning mentor
+ * (Phase 7). One row per finished chat session — a post-session summariser pass
+ * writes `summaryJson`, and the student may attach a `helpfulness` self-rating at
+ * close. Privacy by construction: this is the ONLY mentor-facing view of a
+ * session, and it carries derived signal about the *work*, never raw messages,
+ * verbatim quotes, or personal disclosure (the summariser + a leakage guard
+ * enforce that). Denormalised `userId`/`cohortId` let cohort rollups scope
+ * without touching `messages`.
+ */
+export const sessionSummaries = sqliteTable("session_summaries", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull(), // FK chat_sessions
+  userId: text("user_id").notNull(), // the student (denormalised)
+  cohortId: text("cohort_id"), // denormalised for rollups
+  toolSlug: text("tool_slug").notNull(),
+  // { topicsWorkedOn[], skillsProgressed[], misconceptions[] (about the material), effort }
+  // — no quotes, no personal disclosure.
+  summaryJson: text("summary_json").notNull(),
+  // Optional student self-rating at close (−1/0/+1). The one signal the student chooses to share.
+  helpfulness: integer("helpfulness"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
  * Per-user daily usage counters backing the request/token quota. One row per
  * (userId, day) — upserted on each completed generation. `day` is a UTC date
  * string ("2026-07-03") so a rollover simply lands on a fresh row.
@@ -213,3 +237,4 @@ export type MessageRow = typeof messages.$inferSelect;
 export type ContextProfileRow = typeof contextProfiles.$inferSelect;
 export type UsageRow = typeof usage.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;
+export type SessionSummaryRow = typeof sessionSummaries.$inferSelect;

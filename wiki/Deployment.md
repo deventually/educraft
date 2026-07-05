@@ -45,6 +45,7 @@ DATABASE_URL=file:/data/limeonit.db   # volume mounted at /data
 | `DAILY_REQUEST_LIMIT` | no | Default 50 (per user/day; admins exempt). |
 | `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 (enforced only once token data is surfaced). |
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
+| `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |
 | `OLLAMA_BASE_URL` / `LMSTUDIO_BASE_URL` | no | Local model endpoints. |
 
 ### EU hosting / data residency

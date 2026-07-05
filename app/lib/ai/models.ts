@@ -9,6 +9,10 @@ export type ProviderId =
   | "openai"
   | "google"
   | "mistral"
+  // A configured OpenAI-compatible endpoint (base URL + optional key in .env):
+  // covers ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, … — any
+  // frontier or self-hosted model that speaks the OpenAI API.
+  | "openai-compat"
   | "ollama"
   | "lmstudio"
   // Local CLI agents (subprocess; pick their own model internally).
@@ -150,21 +154,56 @@ function parseDynamicModel(id: string): ModelInfo | null {
   };
 }
 
+/** Prefix for a configured OpenAI-compatible endpoint model, e.g. "compat::glm-4-plus". */
+const COMPAT_PREFIX = `openai-compat${DYNAMIC_SEP}`;
+const COMPAT_ALIAS = `compat${DYNAMIC_SEP}`;
+
+/**
+ * Resolve a configured OpenAI-compatible model id ("compat::<apiId>"). The
+ * endpoint (base URL + optional key) lives in `.env`; this only carries the raw
+ * model id. Unlike local models it is a PAID remote model, so it is NOT
+ * client-selectable — reachable as a configured default (e.g. the summary
+ * sweep's `--model`), never forced from a request body.
+ */
+function parseCompatModel(id: string): ModelInfo | null {
+  const apiId = id.startsWith(COMPAT_PREFIX)
+    ? id.slice(COMPAT_PREFIX.length)
+    : id.startsWith(COMPAT_ALIAS)
+      ? id.slice(COMPAT_ALIAS.length)
+      : null;
+  if (!apiId) return null;
+  return {
+    provider: "openai-compat",
+    apiId,
+    displayName: apiId,
+    supportsImages: false,
+    tier: 2,
+    local: false,
+    clientSelectable: false,
+  };
+}
+
 /**
  * Resolve a model id to its ModelInfo: the static catalog first, then a
- * dynamically-discovered local id ("<provider>::<apiId>"). Throws if neither.
+ * dynamically-discovered local id ("<provider>::<apiId>"), then a configured
+ * OpenAI-compatible endpoint ("compat::<apiId>"). Throws if none.
  */
 export function resolveModelInfo(id: string): ModelInfo {
-  return (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id) ?? throwUnknown(id);
+  return (
+    (MODELS as Record<string, ModelInfo>)[id] ??
+    parseDynamicModel(id) ??
+    parseCompatModel(id) ??
+    throwUnknown(id)
+  );
 }
 
 function throwUnknown(id: string): never {
   throw new Error(`Unknown model id: ${id}`);
 }
 
-/** Whether an id resolves to a usable model (static catalog or dynamic local). */
+/** Whether an id resolves to a usable model (catalog, dynamic local, or configured compat). */
 export function isResolvableModel(id: string): boolean {
-  return id in MODELS || parseDynamicModel(id) !== null;
+  return id in MODELS || parseDynamicModel(id) !== null || parseCompatModel(id) !== null;
 }
 
 /**
@@ -174,7 +213,8 @@ export function isResolvableModel(id: string): boolean {
  * Phase 4 swaps this body for an admin-configured allow-list.
  */
 export function isClientSelectable(id: string): boolean {
-  const info = (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id);
+  const info =
+    (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id) ?? parseCompatModel(id);
   return info?.clientSelectable === true;
 }
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Link, useActionData, useNavigation } from "react-router";
-import { ArrowLeft, Copy } from "lucide-react";
+import { ArrowLeft, Copy, LineChart } from "lucide-react";
 import type { Route } from "./+types/cohorts.$id";
 import { requireRole } from "~/server/auth.server";
 import { getEnabledTools, getToolBySlug } from "~/lib/registry";
@@ -190,6 +190,16 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
         {mode === "new" ? t.cohorts.createHeading : t.cohorts.manageHeading}
       </h1>
       <p className="mt-2 text-slate-600">{t.cohorts.intro}</p>
+
+      {mode === "manage" && cohort && (
+        <Link
+          to={`/cohorts/${cohort.id}/insight`}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100"
+        >
+          <LineChart className="size-4" aria-hidden />
+          {t.cohorts.insightCta}
+        </Link>
+      )}
 
       {links ? (
         <GeneratedLinks links={links} />

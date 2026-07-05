@@ -32,6 +32,22 @@ function resolveModel(catalogId: string): LanguageModel {
         baseURL: env.LMSTUDIO_BASE_URL,
         apiKey: "lm-studio",
       }).chatModel(info.apiId);
+    case "openai-compat": {
+      // A configured frontier / self-hosted OpenAI-compatible endpoint. The
+      // model id ("compat::<apiId>") carries only the model; the endpoint lives
+      // in .env. Key is optional (a self-hosted endpoint may need none).
+      if (!env.OPENAI_COMPAT_BASE_URL) {
+        throw new LocalizedError({
+          nl: "OPENAI_COMPAT_BASE_URL ontbreekt. Vul de endpoint-URL in je .env in (zie .env.example).",
+          en: "OPENAI_COMPAT_BASE_URL is missing. Add the endpoint URL to your .env (see .env.example).",
+        });
+      }
+      return createOpenAICompatible({
+        name: "openai-compat",
+        baseURL: env.OPENAI_COMPAT_BASE_URL,
+        apiKey: env.OPENAI_COMPAT_API_KEY,
+      }).chatModel(info.apiId);
+    }
     default:
       throw new Error(`Provider "${info.provider}" is not (yet) served via the AI SDK.`);
   }

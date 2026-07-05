@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "0ab44fbc-e2ba-498d-8f79-76c1ee52e08b",
-  "prevId": "f188b526-c334-4475-ad86-66bf02e1ea45",
+  "id": "3fc5aa78-eb98-441e-a71c-792670237110",
+  "prevId": "0ab44fbc-e2ba-498d-8f79-76c1ee52e08b",
   "tables": {
     "chat_sessions": {
       "name": "chat_sessions",
@@ -112,6 +112,53 @@
       "indexes": {
         "membership_cohort_user": {
           "name": "membership_cohort_user",
+          "columns": [
+            "cohort_id",
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "cohort_teachers": {
+      "name": "cohort_teachers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cohort_id": {
+          "name": "cohort_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "cohort_teacher_cohort_user": {
+          "name": "cohort_teacher_cohort_user",
           "columns": [
             "cohort_id",
             "user_id"
@@ -393,6 +440,37 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "instance_settings": {
+      "name": "instance_settings",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value_json": {
+          "name": "value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "invites": {
       "name": "invites",
       "columns": {
@@ -448,6 +526,13 @@
         },
         "email": {
           "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "allowed_tool_slugs": {
+          "name": "allowed_tool_slugs",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -616,6 +701,44 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "tool_settings": {
+      "name": "tool_settings",
+      "columns": {
+        "tool_slug": {
+          "name": "tool_slug",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "audience_override": {
+          "name": "audience_override",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "usage": {
       "name": "usage",
       "columns": {
@@ -725,6 +848,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "allowed_tool_slugs": {
+          "name": "allowed_tool_slugs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
