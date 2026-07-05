@@ -13,10 +13,9 @@ import {
   X,
 } from "lucide-react";
 import type { Route } from "./+types/home";
-import { getEnabledTools } from "~/lib/registry";
-import { canUseTool } from "~/lib/registry/access";
-import { getAllowedToolSlugs } from "~/server/repositories/cohorts.server";
+import { getAvailableTools } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
+import { getEffectiveRole } from "~/server/roleView.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
 import {
   GOAL_ORDER,
@@ -48,29 +47,29 @@ interface ToolCardData {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  // Server-side gate: a student never even receives instructor tools in the list,
-  // and a provisioned student sees only their cohort's allow-listed tutors.
-  const allowedSlugs = user.role === "student" ? await getAllowedToolSlugs(user.id) : null;
-  const tools: ToolCardData[] = getEnabledTools()
-    .filter((tool) => canUseTool(user, tool, allowedSlugs))
-    .map((tool) => {
-      const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
-      const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
-      return {
-        slug: tool.slug,
-        name: tool.name,
-        tagline: tool.tagline,
-        icon: tool.icon,
-        userType: tool.userType,
-        mode: tool.mode,
-        theory: tool.theory.name,
-        goal: TOOL_GOALS[tool.slug] ?? "design",
-        search: [text(tool.name), text(tool.tagline), text(tool.theory.name), keywords.join(" ")]
-          .join(" ")
-          .toLowerCase(),
-        stages: tool.stages.length,
-      };
-    });
+  // Server-side gate (Phase 4): effective availability composes instance settings
+  // (enabled + audience), the student's cohort allow-list, and any per-teacher
+  // allow-list — so a student never receives instructor tools and a disabled tool
+  // vanishes for everyone. An admin who "views as teacher" sees the teacher set.
+  const viewer = { ...user, role: getEffectiveRole(user, request) };
+  const tools: ToolCardData[] = (await getAvailableTools(viewer)).map((tool) => {
+    const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
+    const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
+    return {
+      slug: tool.slug,
+      name: tool.name,
+      tagline: tool.tagline,
+      icon: tool.icon,
+      userType: tool.userType,
+      mode: tool.mode,
+      theory: tool.theory.name,
+      goal: TOOL_GOALS[tool.slug] ?? "design",
+      search: [text(tool.name), text(tool.tagline), text(tool.theory.name), keywords.join(" ")]
+        .join(" ")
+        .toLowerCase(),
+      stages: tool.stages.length,
+    };
+  });
   return { tools };
 }
 

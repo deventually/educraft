@@ -189,3 +189,30 @@ describe("invite flow — cohort provisioning (Phase 6)", () => {
     expect((await cohorts.getCohortForUser(user!.id))?.id).toBe(cohort.id);
   });
 });
+
+describe("invite flow — teacher tool allow-list (Phase 4)", () => {
+  it("copies an admin-minted invite's tool allow-list onto the new teacher account", async () => {
+    const invite = await users.createInvite({
+      role: "teacher",
+      createdByUserId: "admin-1",
+      allowedToolSlugs: ["bloom-by-design", "arcs-reactor"],
+    });
+    const res = await route.action({
+      params: { token: invite.token },
+      request: formRequest({
+        name: "Narrowed Teacher",
+        email: "narrow@example.com",
+        password: "supersecret10",
+        confirm: "supersecret10",
+      }),
+    } as ActionArgs);
+    expect((res as Response).status).toBe(302);
+
+    const user = await users.getUserByEmail("narrow@example.com");
+    const allow = await users.getUserToolAllowlist(user!.id);
+    expect(allow).toBeInstanceOf(Set);
+    expect(allow?.has("bloom-by-design")).toBe(true);
+    expect(allow?.has("arcs-reactor")).toBe(true);
+    expect(allow?.has("mentorai")).toBe(false);
+  });
+});

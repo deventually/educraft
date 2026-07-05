@@ -4,11 +4,12 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   chatSessions,
   cohortMemberships,
+  cohorts,
   contextProfiles,
   feedback,
   generations,
@@ -29,6 +30,8 @@ export interface CreateUserInput {
   email?: string | null;
   passwordHash: string;
   role: Role;
+  /** Per-teacher tool allow-list (Phase 4); null = unrestricted. */
+  allowedToolSlugs?: string[] | null;
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserRow> {
@@ -39,10 +42,45 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     passwordHash: input.passwordHash,
     role: input.role,
     sessionVersion: 0,
+    allowedToolSlugs:
+      input.allowedToolSlugs && input.allowedToolSlugs.length > 0
+        ? JSON.stringify(input.allowedToolSlugs)
+        : null,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
   return row;
+}
+
+/** Every account, newest first — the admin user list. Not user-scoped by design. */
+export async function listUsers(): Promise<UserRow[]> {
+  return getDb().select().from(users).orderBy(desc(users.createdAt)).all();
+}
+
+/** Change a user's role (admin console). The self-demotion guard lives in the route. */
+export async function setUserRole(id: string, role: Role): Promise<void> {
+  getDb().update(users).set({ role }).where(eq(users.id, id)).run();
+}
+
+/**
+ * A teacher's per-tool allow-list, or null when unrestricted (no list / empty).
+ * Composed on top of instance availability in `availability.server`.
+ */
+export async function getUserToolAllowlist(userId: string): Promise<Set<string> | null> {
+  const row = getDb().select().from(users).where(eq(users.id, userId)).get();
+  if (!row?.allowedToolSlugs) return null;
+  try {
+    const parsed = JSON.parse(row.allowedToolSlugs) as string[];
+    return Array.isArray(parsed) && parsed.length > 0 ? new Set(parsed) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Set (or clear, with null/[]) a teacher's per-tool allow-list. */
+export async function setUserToolAllowlist(userId: string, slugs: string[] | null): Promise<void> {
+  const value = slugs && slugs.length > 0 ? JSON.stringify(slugs) : null;
+  getDb().update(users).set({ allowedToolSlugs: value }).where(eq(users.id, userId)).run();
 }
 
 export async function getUserById(id: string): Promise<UserRow | null> {
@@ -98,6 +136,11 @@ export interface CreateInviteInput {
   cohortId?: string | null;
   /** Bind the invite to an intended student; redemption must match (see consumeInvite). */
   email?: string | null;
+  /**
+   * Per-teacher tool allow-list (Phase 4). Set on an admin-minted teacher invite;
+   * copied onto the account at redeem. Null/empty = unrestricted.
+   */
+  allowedToolSlugs?: string[] | null;
 }
 
 export async function createInvite(input: CreateInviteInput): Promise<InviteRow> {
@@ -110,6 +153,10 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     createdByUserId: input.createdByUserId ?? null,
     cohortId: input.cohortId ?? null,
     email: input.email ?? null,
+    allowedToolSlugs:
+      input.allowedToolSlugs && input.allowedToolSlugs.length > 0
+        ? JSON.stringify(input.allowedToolSlugs)
+        : null,
     createdAt: new Date(),
   };
   getDb().insert(invites).values(row).run();
@@ -180,6 +227,62 @@ export async function consumeInvite(
     .run();
   if (result.changes === 0) return null;
   return { ...invite, usedByUserId: userId };
+}
+
+export interface InviteWithContext {
+  token: string;
+  role: string;
+  note: string | null;
+  email: string | null;
+  expiresAt: Date | null;
+  usedByUserId: string | null;
+  createdByUserId: string | null;
+  createdByName: string | null;
+  cohortId: string | null;
+  cohortName: string | null;
+  allowedToolSlugs: string | null;
+  createdAt: Date;
+}
+
+/**
+ * Every invite, newest first, joined with its issuer's name and (if any) the
+ * cohort it provisions — the admin oversight list. Not user-scoped by design
+ * (an admin sees every invite on the instance).
+ */
+export async function listInvitesWithContext(): Promise<InviteWithContext[]> {
+  return getDb()
+    .select({
+      token: invites.token,
+      role: invites.role,
+      note: invites.note,
+      email: invites.email,
+      expiresAt: invites.expiresAt,
+      usedByUserId: invites.usedByUserId,
+      createdByUserId: invites.createdByUserId,
+      createdByName: users.name,
+      cohortId: invites.cohortId,
+      cohortName: cohorts.name,
+      allowedToolSlugs: invites.allowedToolSlugs,
+      createdAt: invites.createdAt,
+    })
+    .from(invites)
+    .leftJoin(users, eq(invites.createdByUserId, users.id))
+    .leftJoin(cohorts, eq(invites.cohortId, cohorts.id))
+    .orderBy(desc(invites.createdAt))
+    .all();
+}
+
+/**
+ * Revoke an *open* invite by deleting it: an already-redeemed invite is left
+ * intact (its account exists). Returns true when a row was removed. A revoked
+ * token becomes unknown → the redeem page shows the friendly "invalid" error.
+ */
+export async function revokeInvite(token: string): Promise<boolean> {
+  const result = getDb()
+    .delete(invites)
+    .where(and(eq(invites.token, token), isNull(invites.usedByUserId)))
+    .run();
+  return result.changes > 0;
 }
 
 /**

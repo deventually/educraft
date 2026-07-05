@@ -233,19 +233,24 @@ export interface PickerModel {
 }
 
 /**
- * The single source of truth for the model picker on EVERY screen: the static
- * catalog (API-key models + locally-installed CLI agents) plus any local models
- * discovered at runtime (Ollama / LM Studio). When `requiresImages` is set
- * (e.g. the handwritten-math tool) the list is narrowed to vision-capable models.
+ * The single source of truth for the model picker on EVERY screen: a catalog of
+ * choosable models plus any local models discovered at runtime (Ollama / LM
+ * Studio). When `requiresImages` is set (e.g. the handwritten-math tool) the list
+ * is narrowed to vision-capable models.
+ *
+ * `catalog` lets a loader supply the admin-configured allow-list (Phase 4) rather
+ * than the whole client-selectable catalog. Omitted → the static client-selectable
+ * catalog, i.e. the pre-Phase-4 behaviour (so component tests need no wiring).
  */
 export function pickableModels(
   localModels: PickerModel[] = [],
   requiresImages = false,
+  catalog?: PickerModel[],
 ): PickerModel[] {
-  // Never offer a model the server would silently swap: filter the catalog to
+  // Never offer a model the server would silently swap: default to the catalog's
   // client-selectable entries. Discovered local models are free and always shown.
-  const catalog = listModels().filter((m) => m.clientSelectable);
-  const all: PickerModel[] = [...catalog, ...localModels];
+  const base = catalog ?? listModels().filter((m) => m.clientSelectable);
+  const all: PickerModel[] = [...base, ...localModels];
   // A vision tool must only offer models KNOWN to support images: an unknown
   // (undefined) flag is treated as non-vision, not waved through.
   return requiresImages ? all.filter((m) => m.supportsImages === true) : all;

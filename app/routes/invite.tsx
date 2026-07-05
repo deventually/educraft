@@ -65,12 +65,25 @@ export async function action({ params, request }: Route.ActionArgs) {
   const consumed = await consumeInvite(params.token, userId, emailRaw || null);
   if (!consumed) return { error: m.auth.inviteInvalid };
 
+  // A teacher invite may carry a per-teacher tool allow-list (Phase 4); it travels
+  // onto the account so effective availability can narrow this teacher's tools.
+  let allowedToolSlugs: string[] | null = null;
+  if (consumed.allowedToolSlugs) {
+    try {
+      const parsed = JSON.parse(consumed.allowedToolSlugs);
+      if (Array.isArray(parsed)) allowedToolSlugs = parsed as string[];
+    } catch {
+      allowedToolSlugs = null;
+    }
+  }
+
   await createUser({
     id: userId,
     name,
     email: emailRaw || null,
     passwordHash: hashPassword(password),
     role: consumed.role as Parameters<typeof createUser>[0]["role"],
+    allowedToolSlugs,
   });
 
   // A cohort invite joins the redeemer to the cohort, inheriting its allow-list

@@ -10,6 +10,10 @@ export const users = sqliteTable("users", {
   // Single active session (Phase 6 anti-sharing): bumped on every login/redeem and
   // carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
+  // Per-teacher tool allow-list (Phase 4). Set from the invite that minted this
+  // account. JSON string[] or null = unrestricted. Only narrows teachers; admins
+  // are never restricted, students are governed by their cohort's allow-list.
+  allowedToolSlugs: text("allowed_tool_slugs"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -26,6 +30,10 @@ export const invites = sqliteTable("invites", {
   createdByUserId: text("created_by_user_id"),
   cohortId: text("cohort_id"),
   email: text("email"),
+  // Per-teacher tool allow-list (Phase 4). An admin minting a teacher invite may
+  // restrict which tools the redeemer gets; copied onto `users.allowed_tool_slugs`
+  // at redeem. JSON string[] or null = unrestricted (all available tools).
+  allowedToolSlugs: text("allowed_tool_slugs"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -56,6 +64,23 @@ export const cohortMemberships = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
   (t) => [uniqueIndex("membership_cohort_user").on(t.cohortId, t.userId)],
+);
+
+/**
+ * A teacher ↔ cohort assignment (Phase 4). The cohort creator is an implicit
+ * manager; extra teachers assigned here co-manage it (multiple mentors, or a
+ * hand-over when a colleague leaves). Admins can manage every cohort regardless.
+ * One row per assignment; the unique index makes re-assignment idempotent.
+ */
+export const cohortTeachers = sqliteTable(
+  "cohort_teachers",
+  {
+    id: text("id").primaryKey(),
+    cohortId: text("cohort_id").notNull(),
+    userId: text("user_id").notNull(), // the assigned teacher
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [uniqueIndex("cohort_teacher_cohort_user").on(t.cohortId, t.userId)],
 );
 
 /** A saved piece of work grouping generations and chat sessions. */
@@ -174,10 +199,37 @@ export const contextProfiles = sqliteTable("context_profiles", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+/**
+ * Per-tool instance configuration (Phase 4). One row per tool an admin has
+ * touched; an absent row means "registry default" (safe defaults — a fresh
+ * instance behaves exactly as before this phase). `enabled` null = registry
+ * default; `audienceOverride` null = the tool's own `userType`.
+ */
+export const toolSettings = sqliteTable("tool_settings", {
+  toolSlug: text("tool_slug").primaryKey(),
+  enabled: integer("enabled", { mode: "boolean" }), // null = registry default
+  audienceOverride: text("audience_override"), // null | "student" | "instructor" | "both"
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
+ * Instance-wide key/value settings (Phase 4), e.g. `enabledModels`. The value is
+ * JSON so a key can hold a list or object without a schema change. An absent key
+ * means "default" (for enabledModels: the whole client-selectable catalog).
+ */
+export const instanceSettings = sqliteTable("instance_settings", {
+  key: text("key").primaryKey(), // e.g. "enabledModels"
+  valueJson: text("value_json").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
 export type CohortRow = typeof cohorts.$inferSelect;
 export type CohortMembershipRow = typeof cohortMemberships.$inferSelect;
+export type CohortTeacherRow = typeof cohortTeachers.$inferSelect;
+export type ToolSettingRow = typeof toolSettings.$inferSelect;
+export type InstanceSettingRow = typeof instanceSettings.$inferSelect;
 export type ProjectRow = typeof projects.$inferSelect;
 export type GenerationRow = typeof generations.$inferSelect;
 export type ChatSessionRow = typeof chatSessions.$inferSelect;

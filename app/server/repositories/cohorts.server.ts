@@ -10,14 +10,16 @@
  * row, so they stay synchronous.
  */
 import { randomUUID } from "node:crypto";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   cohortMemberships,
+  cohortTeachers,
   cohorts,
   type CohortMembershipRow,
   type CohortRow,
 } from "../schema.server";
+import type { Role } from "~/lib/registry/access";
 
 /** Per-tutor sandbox config: `{ [slug]: { values: { field: value } } }`. */
 export type CohortConfig = Record<string, { values: Record<string, string> }>;
@@ -164,4 +166,90 @@ export function cohortConfig(cohort: CohortRow): CohortConfig {
 /** Whether the cohort's access window is still open. */
 export function isCohortActive(cohort: CohortRow): boolean {
   return !cohort.activeUntil || cohort.activeUntil.getTime() > Date.now();
+}
+
+// ── Multi-teacher assignment & admin oversight (Phase 4) ────────────────────
+
+/**
+ * Whether `user` may manage `cohort`: admins always; the creator; and any
+ * assigned co-teacher (pass their ids via `getCohortTeacherIds`). Pure predicate
+ * over already-loaded rows, mirroring `isCohortActive`.
+ */
+export function canManageCohort(
+  user: { id: string; role: Role },
+  cohort: Pick<CohortRow, "createdByUserId">,
+  teacherIds: Set<string>,
+): boolean {
+  if (user.role === "admin") return true;
+  if (cohort.createdByUserId === user.id) return true;
+  return teacherIds.has(user.id);
+}
+
+/** Assign a co-teacher to a cohort. Idempotent (unique (cohort,user) index). */
+export async function addCohortTeacher(cohortId: string, userId: string): Promise<void> {
+  getDb()
+    .insert(cohortTeachers)
+    .values({ id: randomUUID(), cohortId, userId, createdAt: new Date() })
+    .onConflictDoNothing()
+    .run();
+}
+
+/** Remove a co-teacher assignment. */
+export async function removeCohortTeacher(cohortId: string, userId: string): Promise<void> {
+  getDb()
+    .delete(cohortTeachers)
+    .where(and(eq(cohortTeachers.cohortId, cohortId), eq(cohortTeachers.userId, userId)))
+    .run();
+}
+
+/** The set of teachers explicitly assigned to a cohort (excludes the creator). */
+export async function getCohortTeacherIds(cohortId: string): Promise<Set<string>> {
+  const rows = getDb()
+    .select({ userId: cohortTeachers.userId })
+    .from(cohortTeachers)
+    .where(eq(cohortTeachers.cohortId, cohortId))
+    .all();
+  return new Set(rows.map((r) => r.userId));
+}
+
+/** Cohorts a teacher manages: ones they created plus ones they're assigned to. */
+export async function listCohortsForManager(userId: string): Promise<CohortRow[]> {
+  const db = getDb();
+  const owned = db
+    .select()
+    .from(cohorts)
+    .where(eq(cohorts.createdByUserId, userId))
+    .orderBy(desc(cohorts.createdAt))
+    .all();
+  const assignedIds = db
+    .select({ cohortId: cohortTeachers.cohortId })
+    .from(cohortTeachers)
+    .where(eq(cohortTeachers.userId, userId))
+    .all()
+    .map((r) => r.cohortId);
+  const seen = new Set(owned.map((c) => c.id));
+  const assigned = assignedIds
+    .filter((id) => !seen.has(id))
+    .map((id) => db.select().from(cohorts).where(eq(cohorts.id, id)).get())
+    .filter((c): c is CohortRow => Boolean(c));
+  return [...owned, ...assigned].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
+
+/** Every cohort on the instance, newest first — the admin oversight list. */
+export async function listAllCohorts(): Promise<CohortRow[]> {
+  return getDb().select().from(cohorts).orderBy(desc(cohorts.createdAt)).all();
+}
+
+/**
+ * Delete a cohort and its edges (memberships + teacher assignments) in one
+ * transaction. Admin-only in the route; unscoped here so an admin can remove a
+ * cohort they did not create. Existing member *accounts* are left intact — only
+ * their membership link is dropped (they simply lose the cohort's tools/window).
+ */
+export async function deleteCohort(id: string): Promise<void> {
+  getDb().transaction((tx) => {
+    tx.delete(cohortMemberships).where(eq(cohortMemberships.cohortId, id)).run();
+    tx.delete(cohortTeachers).where(eq(cohortTeachers.cohortId, id)).run();
+    tx.delete(cohorts).where(eq(cohorts.id, id)).run();
+  });
 }

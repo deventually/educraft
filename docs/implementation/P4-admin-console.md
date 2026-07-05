@@ -1,5 +1,7 @@
 # Phase 4 — Admin Console & Instance Configuration
 
+> **Status: ✅ shipped** on branch `p4-admin-console`. Beyond this brief, the following was added at the owner's request: a **per-teacher tool allow-list** on admin-minted invites; **teacher-only invites** (admins are created via `npm run create-admin` or in-place promotion — never by invite, see [`docs/Tenancy-and-Admin.md`](../Tenancy-and-Admin.md)); **admin cohort oversight** (`/admin/cohorts` — list all, delete any); **multi-teacher cohorts** (assign/remove co-teachers, `cohort_teachers` table); and an **admin↔teacher "view as" switch** (`getEffectiveRole` + `/set-view`). `/admin/cohorts` was added to the route list below.
+
 ## Context & goal
 
 The tool catalog will keep growing, and per the product model **admins configure what's available on their instance**: which tools end users see, for which audience, and which LLMs may be selected. Today availability is hardcoded (registry `enabled` flag; Phase 0's `clientSelectable` model flag). This phase makes availability **DB-backed instance configuration** with an admin console, and gives admins the operational views (invites, usage, feedback) that Phases 1–2 created data for.
