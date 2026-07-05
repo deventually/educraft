@@ -14,6 +14,12 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
   MISTRAL_API_KEY: z.string().optional(),
+  // A configured OpenAI-compatible endpoint — the one knob for "any frontier or
+  // self-hosted model that speaks the OpenAI API" (ChatGPT, Gemini, Mistral, GLM,
+  // DeepSeek, OpenRouter, vLLM, …). Used by `compat::<model>` ids. The key is
+  // optional (a self-hosted endpoint may need none).
+  OPENAI_COMPAT_BASE_URL: z.string().optional(),
+  OPENAI_COMPAT_API_KEY: z.string().optional(),
   // Local OpenAI-compatible servers (no API key needed).
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434/v1"),
   LMSTUDIO_BASE_URL: z.string().default("http://localhost:1234/v1"),

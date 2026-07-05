@@ -14,6 +14,7 @@ import type { TemplateValues } from "~/lib/template/interpolate";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
 import { AiNotice } from "./AiNotice";
+import { SessionHelpfulness } from "./SessionHelpfulness";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
 function newSessionId(): string {
@@ -60,6 +61,9 @@ export function ChatView({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  // End-of-session self-report + summariser trigger (Phase 7). `ending` reveals
+  // the helpfulness control (which shows its own post-rating confirmation).
+  const [ending, setEnding] = useState(false);
   const [selectedModel, setSelectedModel] = useState(defaultModel || tool.defaultModel);
   // The conversation defaults to the interface language: a Dutch UI opens a
   // Dutch chat, an English UI an English one. An explicit prop still wins.
@@ -191,6 +195,23 @@ export function ChatView({
     }
     setTurns((prev) => markLastTurnInterrupted(prev));
     setIsStreaming(false);
+  };
+
+  // Close the session: fire-and-forget the summariser + optional self-report.
+  // Best-effort — a failed close never blocks the student from leaving.
+  const closeSession = (helpfulness: number | null) => {
+    void fetch("/api/session-close", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: sessionIdRef.current, helpfulness }),
+    }).catch(() => {});
+  };
+
+  const handleEndSession = () => {
+    setEnding(true);
+    // The click itself is the explicit close: run the summary now, even if the
+    // student never picks a rating.
+    closeSession(null);
   };
 
   const handleRegenerate = () => {
@@ -473,6 +494,24 @@ export function ChatView({
             <p className="mt-1.5 px-2 text-center text-[11px] text-slate-400">
               {t.chat?.enterHint || "Enter to send · Shift+Enter for a new line"}
             </p>
+
+            {/* End-of-session self-report (Phase 7). Offered once the chat has
+                content; picking a rating (or ending) triggers the de-personalised
+                summariser and records the student's optional helpfulness signal. */}
+            {turns.length > 0 && !ending && !isStreaming && (
+              <div className="mt-2 text-center">
+                <button
+                  type="button"
+                  onClick={handleEndSession}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                >
+                  {t.chat?.endSession || "End session"}
+                </button>
+              </div>
+            )}
+            {ending && (
+              <SessionHelpfulness className="mt-3" onSubmit={(value) => closeSession(value)} />
+            )}
           </div>
         </div>
       </div>

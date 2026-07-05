@@ -17,7 +17,9 @@
     "db:migrate": "tsx app/server/migrate.ts",
     "db:push": "drizzle-kit push",
     "invite": "tsx scripts/invite.ts",
-    "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts"
+    "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",
+    "eval:summary": "vite-node -c scripts/eval.config.ts scripts/eval-session-summary.ts",
+    "sweep": "vite-node -c scripts/eval.config.ts scripts/sweep-summaries.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",

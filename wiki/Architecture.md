@@ -51,12 +51,21 @@ Generation is streamed to the browser via SSE through the resource route
 LimeOnIt is not tied to one model vendor.
 
 - **Vercel AI SDK v6** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, Ollama,
-  LM Studio.
+  LM Studio, and any configured OpenAI-compatible endpoint.
 - **CLI** adapter (`app/lib/ai/adapters/cli.ts`) — drives local agent CLIs
   (Claude Code, opencode, codex, gemini) as subprocesses (prod-guarded).
 - **Dynamic discovery** (`app/lib/ai/discover.server.ts`) — local Ollama/LM Studio
   models are discovered at runtime (queried per `/v1/models`), not hard-coded.
-- `models.ts` holds the static catalog; `provider.ts` routes a model id to an adapter.
+- **Configured endpoint** — a `compat::<model>` id points at any frontier or
+  self-hosted model that speaks the OpenAI API (ChatGPT, Gemini, Mistral, GLM,
+  DeepSeek, OpenRouter, vLLM, …), via `OPENAI_COMPAT_BASE_URL` /
+  `OPENAI_COMPAT_API_KEY` in `.env`. It's a *paid remote* model, so — like Opus —
+  it is **not** client-selectable: reachable as a configured default (e.g. the
+  summary sweep's `--model`), never forced from a request body.
+- `models.ts` holds the static catalog + the `compat::`/local id schemes;
+  `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
+  to the `.env` var it needs (or none, for local/CLI). All keys come from
+  `.env` through `env.server` — never hardcoded or read ad hoc.
 - Default model: `claude-sonnet-4-6`.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on

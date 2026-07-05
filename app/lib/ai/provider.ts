@@ -15,6 +15,8 @@ const providers: Partial<Record<ProviderId, LLMProvider>> = {
   anthropic: aiSdkProvider,
   ollama: aiSdkProvider,
   lmstudio: aiSdkProvider,
+  // Any configured OpenAI-compatible endpoint (frontier or self-hosted).
+  "openai-compat": aiSdkProvider,
   "claude-code": cliProvider,
   opencode: cliProvider,
   codex: cliProvider,

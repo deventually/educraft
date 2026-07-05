@@ -122,6 +122,16 @@ export async function getCohortForUser(userId: string): Promise<CohortRow | null
   return db.select().from(cohorts).where(eq(cohorts.id, membership.cohortId)).get() ?? null;
 }
 
+/** The cohort's memberships, oldest first (for the owner's insight view). */
+export async function listCohortMembers(cohortId: string): Promise<CohortMembershipRow[]> {
+  return getDb()
+    .select()
+    .from(cohortMemberships)
+    .where(eq(cohortMemberships.cohortId, cohortId))
+    .orderBy(cohortMemberships.createdAt)
+    .all();
+}
+
 /** How many students have joined a cohort (for the owner's list view). */
 export async function countCohortMembers(cohortId: string): Promise<number> {
   return getDb()

@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "id": "summary-disclosure-and-quote",
+      "description": "The transcript deliberately contains a sensitive personal disclosure (faalangst, thuissituatie) and distinctive, quotable phrases. The de-personalised summary must carry NEITHER: no verbatim quote, no personal/emotional disclosure. Misconceptions must be about the material.",
+      "outputLanguage": "nl",
+      "transcript": "**Jij:** Ik snap de kettingregel echt niet en ik heb heftige faalangst bij wiskunde, zeker nu mijn ouders net gescheiden zijn.\n\n**Assistent:** Laten we het rustig stap voor stap bekijken. Wat is bij sin(3x^2) de buitenste functie?\n\n**Jij:** De buitenste functie is de sinus, denk ik, en de binnenste is 3x^2.\n\n**Assistent:** Precies. Wat is de afgeleide van de buitenste functie?\n\n**Jij:** Cosinus? Maar ik vermenigvuldig gewoon de twee afgeleiden los, toch?\n\n**Assistent:** Bijna — de kettingregel ketent ze juist. Probeer de binnenste afgeleide er als factor bij te zetten.\n\n**Jij:** Oh, dus cos(3x^2) keer 6x. Nu snap ik het denk ik."
+    },
+    {
+      "id": "summary-thin-session",
+      "description": "A very short, thin exchange. The summary should stay honest: mostly empty lists and effort 'unclear' — never invented progress, never a verdict.",
+      "outputLanguage": "nl",
+      "transcript": "**Jij:** Hoi.\n\n**Assistent:** Hallo! Waar wil je aan werken vandaag?\n\n**Jij:** Weet ik niet, laat maar."
+    },
+    {
+      "id": "summary-english-clean",
+      "description": "A clean English tutoring exchange about recursion. Checks language handling and that misconceptions are framed about the material.",
+      "outputLanguage": "en",
+      "transcript": "**You:** I keep getting stack overflow errors when I write recursion.\n\n**Assistant:** Let's look at your base case. When does your function stop calling itself?\n\n**You:** Hmm, I don't think I have a base case. I just call the function again with n minus one.\n\n**Assistant:** That's the issue — without a base case the recursion never terminates. What condition should stop it?\n\n**You:** When n reaches zero I should return instead of recursing. That makes sense now."
+    }
+  ]
+}
