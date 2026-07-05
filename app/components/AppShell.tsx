@@ -44,6 +44,10 @@ export default function AppShell() {
   const nav: NavItem[] = [
     { to: "/", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
+    // Provisioning is a teacher/admin surface only.
+    ...(user && user.role !== "student"
+      ? [{ to: "/cohorts", label: t.nav.cohorts, end: false }]
+      : []),
     { to: "/help", label: t.nav.help, end: false },
     { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/about", label: t.nav.about, end: false },

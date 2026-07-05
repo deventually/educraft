@@ -122,6 +122,15 @@ export async function getCohortForUser(userId: string): Promise<CohortRow | null
   return db.select().from(cohorts).where(eq(cohorts.id, membership.cohortId)).get() ?? null;
 }
 
+/** How many students have joined a cohort (for the owner's list view). */
+export async function countCohortMembers(cohortId: string): Promise<number> {
+  return getDb()
+    .select()
+    .from(cohortMemberships)
+    .where(eq(cohortMemberships.cohortId, cohortId))
+    .all().length;
+}
+
 /** The parsed allow-list of a cohort. */
 export function allowedSlugsOf(cohort: CohortRow): Set<string> {
   const parsed = JSON.parse(cohort.allowedToolSlugs) as string[];

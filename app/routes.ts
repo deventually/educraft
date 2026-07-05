@@ -7,6 +7,8 @@ export default [
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("context-profiles", "routes/context-profiles.tsx"),
+    route("cohorts", "routes/cohorts._index.tsx"),
+    route("cohorts/:id", "routes/cohorts.$id.tsx"),
     route("account", "routes/account.tsx"),
     ...prefix("admin", [route("feedback", "routes/admin.feedback.tsx")]),
     route("about", "routes/about.tsx"),
