@@ -7,6 +7,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
+  cohortMemberships,
   contextProfiles,
   feedback,
   generations,
@@ -65,6 +66,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(usage).where(eq(usage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
+    tx.delete(cohortMemberships).where(eq(cohortMemberships.userId, id)).run();
     tx.delete(users).where(eq(users.id, id)).run();
   });
 }
