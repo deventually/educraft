@@ -1,273 +1,86 @@
 ---
 name: tdd
-description: TDD loop for LimeOnIt — red/green/refactor with test templates for tools and chat tutors
+description: >-
+  TDD loop for LimeOnIt — red → green → refactor, done well. Use when adding a
+  tool (generator or chat tutor), fixing a bug test-first, building or changing a
+  UI component, or making any behaviour/copy/route/i18n change: write the failing
+  test first. Bundles the test-quality bar (behaviour over implementation, seams,
+  anti-patterns, mocking) with copy-ready, repo-accurate templates. Triggers:
+  "red-green-refactor", "test-first", "add a tool", "new tool", "TDD", "write a
+  test for".
 ---
 
-# TDD Skill — LimeOnIt Red-Green-Refactor
+# TDD — LimeOnIt Red → Green → Refactor, done well
 
-Use this skill when:
-- **Adding a tool** (generator or chat tutor)
-- **Implementing test-first** (bug fix, new feature, refactor)
-- **Starting any TDD session** — write the failing test first
+Two things have to be true at once: you follow the loop, **and** the tests the loop
+leaves behind are worth keeping. This skill covers both. The loop is the easy half;
+the quality bar is where most TDD quietly fails.
 
-The loop is always: **RED** → **GREEN** → **REFACTOR** → verify (`npm test`, `npm run typecheck`, `npm run check`).
+- **The loop** — the cadence below.
+- **The quality bar** — `quality.md`: what a good test is, where tests go (seams),
+  the anti-patterns that pass CI but rot, and when to mock. Read it *before* writing
+  assertions, not after.
+- **The recipes** — `recipes.md`: copy-ready, compile-accurate templates for a
+  generator tool, a chat tool, a bug fix, and a UI component — plus what the global
+  test suites already cover so you only write the delta.
 
-## The Loop (5 steps)
+## When to use
 
-### 1. RED — Write the failing test
+- Adding a **tool** — generator (one-shot / multi-stage) or chat tutor.
+- **Bug fix** — reproduce with a failing test, then fix.
+- **UI component** — new or changed interactive component or page (ships a `vitest-axe`
+  zero-violations test).
+- Any **behaviour change** — copy, layout, routes, i18n all count.
 
-Pick your template below; write the test under `tests/` (either `tools/` or `components/`). Run `npm run test:watch` to see it fail.
+## The loop
 
-### 2. GREEN — Minimal implementation
+The cadence is **Red → Green → Refactor** — the project contract in `AGENTS.md`. Run
+`npm run test:watch` while you work.
 
-Write just enough code to make the test pass. No refactoring yet.
+1. **RED — one failing test, at a named seam.** Before you type an assertion, name the
+   seam you're testing at (see `quality.md`): the public boundary where you can observe
+   behaviour — `getToolBySlug`, `buildSystemPrompt`, a rendered component's
+   roles/labels — never a tool's internal fields or a component's state. State it in the
+   `describe` name or a one-line comment. Then write **one** test and watch it fail *for
+   the right reason* (assertion fires — not a typo, missing import, or unregistered tool).
+2. **GREEN — minimum to pass.** Just enough code to go green. No speculative fields, no
+   "while I'm here." If the implementation feels impossible to test, the design is
+   unclear — fix the shape, not the test.
+3. **REFACTOR — clean up on a green net.** This is where tools-as-data and deep-module
+   cleanups land (extract a shared input group, collapse a `mode === "chat"` branch into
+   the component). Keep the test green throughout.
 
-### 3. REFACTOR
+Work in **vertical slices**: one seam → one test → one implementation → repeat. Never
+write all the tests first and all the code after (that's the horizontal-slicing
+anti-pattern in `quality.md` — it locks you into imagined behaviour). Each test is a
+tracer bullet that responds to what the last one taught you.
 
-Extract shared logic, deduplicate, improve names. Keep tests green.
+> **Refactor vs. review.** Keep *refactoring* in the loop. But judging whether these are
+> the *right* assertions at the *right* seam is a separate **quality review** pass — use
+> `quality.md` and the `code-review` skill — don't interleave it with getting to green.
 
-### 4. VERIFY
+## The gate — before done
+
+All three green. No exceptions (`AGENTS.md`).
 
 ```bash
-npm test                 # All tests pass
-npm run typecheck       # No type errors
-npm run check           # No lint/format issues
+npm test          # vitest run — node (*.test.ts) + happy-dom (*.test.tsx)
+npm run typecheck # react-router typegen && tsc
+npm run check     # biome (lint + format)
 ```
 
-### 5. DONE
+## Before-merge checklist
 
-Commit with a clear message. Move to the next task.
+- [ ] The new test names its seam and failed first for the right reason (RED → GREEN).
+- [ ] Assertions read as behaviour ("resolves by slug", "no unresolved `{{…}}`"), not
+      structure — cross-check against the anti-patterns in `quality.md`.
+- [ ] Interactive UI ships a `vitest-axe` test: `expect((await axe(container)).violations).toEqual([])`.
+- [ ] Refactored toward data-not-control-flow / deeper modules.
+- [ ] `npm test` && `npm run typecheck` && `npm run check` all green.
+- [ ] No leftover `console.log` / debug code. Commit message says *what*, not *how*.
 
----
+## Pointers
 
-## Template: Add a Tool (Generator)
-
-Use this when building a **generator tool** (one-shot or multi-stage). The test validates the registry, prompt resolution, and input fields.
-
-### File: `tests/tools/<id>.test.ts`
-
-```typescript
-import { describe, it, expect } from "vitest";
-import { getToolBySlug } from "~/lib/registry";
-import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
-
-describe("tool: <id>", () => {
-  it("registers and resolves by slug", () => {
-    const tool = getToolBySlug("<id>");
-    expect(tool).toBeDefined();
-    expect(tool?.title.en).toBe("<Tool Title>");
-  });
-
-  it("builds prompt with no unresolved placeholders", () => {
-    const tool = getToolBySlug("<id>")!;
-    const inputs = {
-      // Provide a value for every required input field
-      fieldName1: "example text",
-      fieldName2: 5,
-    };
-    
-    const prompt = buildSystemPrompt(tool, inputs);
-    expect(prompt).not.toMatch(/\{\{(\w+)\}\}/); // No unresolved {{…}}
-    expect(prompt).toContain("expected anchor text"); // Sanity check
-  });
-
-  it("enforces required fields", () => {
-    const tool = getToolBySlug("<id>")!;
-    const requiredFields = tool.stages[0]?.inputs.filter(f => f.required);
-    expect(requiredFields?.length).toBeGreaterThan(0);
-  });
-
-  it("has NL/EN parity in placeholders and labels", () => {
-    const tool = getToolBySlug("<id>")!;
-    for (const input of tool.stages[0]?.inputs || []) {
-      expect(input.label.nl).toBeDefined();
-      expect(input.label.en).toBeDefined();
-    }
-  });
-});
-```
-
-### Implementation Files
-
-Once the test fails (RED), create:
-
-1. **`app/lib/prompts/files/<id>.nl.md`** — Dutch prompt with `{{placeholder}}` syntax
-2. **`app/lib/prompts/files/<id>.en.md`** — English prompt
-3. **`app/lib/prompts/<id>@v1.prompt.ts`** — Export the prompt and `buildPrompt` function:
-
-```typescript
-import nl from "./files/<id>.nl.md?raw";
-import en from "./files/<id>.en.md?raw";
-
-export const <id>Prompt = {
-  nl,
-  en,
-};
-
-export async function buildPrompt(inputs: Record<string, unknown>) {
-  // Transform inputs into final prompt (if needed); most tools just use the template directly.
-  return { nl, en };
-}
-```
-
-4. **`app/lib/registry/tools/<id>.ts`** — Register the tool:
-
-```typescript
-import type { Tool } from "~/lib/registry/types";
-import { <id>Prompt } from "~/lib/prompts/<id>@v1.prompt";
-
-export const <id>Tool: Tool = {
-  id: "<id>",
-  title: { nl: "...", en: "..." },
-  description: { nl: "...", en: "..." },
-  mode: "one-shot",
-  stages: [
-    {
-      id: "generate",
-      inputs: [
-        {
-          name: "fieldName1",
-          label: { nl: "Label NL", en: "Label EN" },
-          kind: "textarea",
-          required: true,
-        },
-        // ... more fields
-      ],
-      output: { kind: "markdown" },
-      promptId: "<id>@v1",
-    },
-  ],
-  enabled: true,
-};
-```
-
-5. **Register in `app/lib/prompts/index.ts`:**
-
-```typescript
-export { <id>Prompt } from "./<id>@v1.prompt";
-```
-
-6. **Register in `app/lib/registry/index.ts`:**
-
-```typescript
-import { <id>Tool } from "./tools/<id>";
-
-export const TOOLS: Tool[] = [
-  // ... existing tools
-  <id>Tool,
-];
-```
-
-Run `npm test` — test should now **GREEN**.
-
----
-
-## Template: Add a Chat Tool
-
-Use this when building a **chat tutor** tool. The test validates greeting, starters, sandbox inputs, and accessibility.
-
-### File: `tests/tools/<id>.test.ts` (same as generator above)
-
-The registry/prompt test is identical. Once GREEN, add:
-
-### File: `tests/components/<id>.test.tsx`
-
-```typescript
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { axe } from "vitest-axe";
-import { <Id>ChatView } from "~/components/chat/<id>";
-import { getToolBySlug } from "~/lib/registry";
-
-describe("<Id> Chat View", () => {
-  it("renders greeting and starter chips with no a11y violations", async () => {
-    const tool = getToolBySlug("<id>")!;
-    const { container } = render(
-      <<Id>ChatView tool={tool} contextProfile={mockProfile} onGenerationStart={() => {}} />
-    );
-
-    // Check greeting is rendered
-    expect(screen.getByText((content) => content.includes("greeting text"))).toBeInTheDocument();
-
-    // Check starter chips are rendered
-    const starters = screen.getAllByRole("button");
-    expect(starters.length).toBeGreaterThan(0);
-
-    // Accessibility: no violations
-    const results = await axe(container);
-    expect(results.violations).toEqual([]);
-  });
-
-  it("sends a message and streams a response", async () => {
-    const tool = getToolBySlug("<id>")!;
-    const user = userEvent.setup();
-    const { container } = render(
-      <<Id>ChatView tool={tool} contextProfile={mockProfile} onGenerationStart={() => {}} />
-    );
-
-    // Type and send a message
-    const input = screen.getByRole("textbox");
-    await user.type(input, "Hello, tutor");
-    const sendBtn = screen.getByRole("button", { name: /send|submit/i });
-    await user.click(sendBtn);
-
-    // (Optional: mock the streaming response, or rely on integration-like behavior)
-    // Verify the message appears in the thread
-    expect(screen.getByText("Hello, tutor")).toBeInTheDocument();
-  });
-});
-```
-
-### Implementation: Create `ChatView`
-
-Once the test fails (RED), implement the component. See the [plan](https://...) or `AGENTS.md` for the full chat infrastructure. Sketch:
-
-1. **`app/components/chat/<id>.tsx`** — The chat UI component
-   - Render greeting (localized)
-   - Render starter chips (buttons)
-   - One-time sandbox inputs (InputField-driven form)
-   - Message thread with `aria-live="polite"`
-   - Composer (text input + send button)
-   - Stop / Regenerate (if multi-turn)
-
-2. **Register in `app/routes/tool.tsx`:**
-
-```typescript
-if (tool.mode === "chat") {
-  return <ChatView tool={tool} ... />;
-}
-```
-
-Run `npm test` — test should **GREEN**.
-
----
-
-## Checklist: Before Merge
-
-- [ ] `npm test` — all tests pass (node + DOM environments)
-- [ ] `npm run typecheck` — no type errors
-- [ ] `npm run check` — no lint/format issues
-- [ ] New test captures the behavior (RED → GREEN)
-- [ ] Refactored toward deeper modules / less duplication
-- [ ] Commit message is clear (mentions what, not how)
-- [ ] No leftover `console.log` or debugging code
-
----
-
-## FAQ
-
-**Q: How do I debug a failing test?**
-A: Run `npm run test:watch`, then edit the test or code. Changes re-run instantly.
-
-**Q: Can I skip the test and just write code?**
-A: No. TDD is a standing rule; it catches edge cases and documents intent.
-
-**Q: What if my test is too hard to write first?**
-A: That usually means the design is unclear. Sketch the shape first (what inputs/outputs?), then test the shape, then implement.
-
-**Q: How do I add a tool that depends on earlier tool output (multi-stage)?**
-A: Same flow, but with multiple stages in the tool definition. See `Cognitive Architect` as an example.
-
-**Q: Where do I find the prompt templates?**
-A: `app/lib/prompts/files/<id>.{nl,en}.md`. Use `{{placeholder}}` syntax and reference the chapter appendix in the book.
+- **`quality.md`** — the quality bar. Read first.
+- **`recipes.md`** — repo-accurate templates + "covered for free" by the global suites.
+- **`AGENTS.md`** — the canonical contract (TDD, security, a11y, deep modules, i18n).
