@@ -369,6 +369,7 @@ export const nl = {
     errorName: "Geef het cohort een naam.",
     errorNoTools: "Kies minstens één tutor.",
     errorNoRecipients: "Voeg minstens één ontvanger toe (e-mailadres of open link).",
+    errorInvalidProfile: "Kies een contextprofiel dat van jou is.",
   },
   error: {
     title: "Oeps!",

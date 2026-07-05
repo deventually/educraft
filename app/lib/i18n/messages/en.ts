@@ -366,6 +366,7 @@ export const en: Messages = {
     errorName: "Give the cohort a name.",
     errorNoTools: "Choose at least one tutor.",
     errorNoRecipients: "Add at least one recipient (email address or link-only).",
+    errorInvalidProfile: "Choose a context profile that belongs to you.",
   },
   error: {
     title: "Oops!",

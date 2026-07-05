@@ -12,7 +12,7 @@ import {
   updateCohort,
 } from "~/server/repositories/cohorts.server";
 import { createInvitesForCohort } from "~/server/repositories/users.server";
-import { listProfiles } from "~/server/repositories/profiles.server";
+import { getProfile, listProfiles } from "~/server/repositories/profiles.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -87,7 +87,14 @@ export async function action({ params, request }: Route.ActionArgs) {
     config[slug] = { values };
   }
 
+  // The cohort profile is injected for members via membership-authorised read
+  // (getProfileForMember bypasses owner-scoping). So the teacher may only attach a
+  // profile *they own* — otherwise a teacher could leak a colleague's profile to
+  // their own students by referencing its id.
   const contextProfileId = String(fd.get("contextProfileId") ?? "").trim() || null;
+  if (contextProfileId && !(await getProfile(user.id, contextProfileId))) {
+    return { error: m.cohorts.errorInvalidProfile };
+  }
   const activeUntilRaw = String(fd.get("activeUntil") ?? "").trim();
   const activeUntil = activeUntilRaw ? new Date(activeUntilRaw) : null;
   const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "7") || 7));
