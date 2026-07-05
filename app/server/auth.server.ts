@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 import { commitSession, destroySession, getSession } from "./session.server";
-import { getUserById } from "./repositories/users.server";
+import { bumpSessionVersion, getUserById } from "./repositories/users.server";
 import type { UserRow } from "./schema.server";
 import type { Role } from "~/lib/registry/access";
 
@@ -33,7 +33,12 @@ export async function getUser(request: Request): Promise<User | null> {
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") return null;
   const row = await getUserById(userId);
-  return row ? toPublicUser(row) : null;
+  if (!row) return null;
+  // Single active session (Phase 6): a cookie whose sessionVersion is behind the
+  // stored one was invalidated by a newer login → treat as logged out.
+  const cookieVersion = session.get("sessionVersion") ?? 0;
+  if ((row.sessionVersion ?? 0) !== cookieVersion) return null;
+  return toPublicUser(row);
 }
 
 /** Require an authenticated user; throw a redirect to /login otherwise. */
@@ -50,10 +55,16 @@ export async function requireRole(request: Request, ...roles: Role[]): Promise<U
   return user;
 }
 
-/** Create a session for `userId` and redirect to `redirectTo`. */
+/**
+ * Create a session for `userId` and redirect to `redirectTo`. Bumps the user's
+ * `sessionVersion` first and writes it into the cookie, so this login invalidates
+ * any older cookie (single active session, Phase 6).
+ */
 export async function createUserSession(userId: string, redirectTo: string): Promise<Response> {
+  const sessionVersion = await bumpSessionVersion(userId);
   const session = await getSession();
   session.set("userId", userId);
+  session.set("sessionVersion", sessionVersion);
   return redirect(redirectTo, {
     headers: { "Set-Cookie": await commitSession(session) },
   });
