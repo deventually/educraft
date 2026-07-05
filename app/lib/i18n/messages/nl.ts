@@ -122,6 +122,7 @@ export const nl = {
     continue: "Doorgaan",
     yourSettings: "Jouw instellingen",
     edit: "Aanpassen",
+    provisionedFor: "Ingesteld voor jou",
     startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
     interrupted: "Onderbroken",
     enterHint: "Enter om te versturen · Shift+Enter voor een nieuwe regel",
@@ -277,6 +278,8 @@ export const nl = {
     inviteInvalidTitle: "Uitnodiging ongeldig",
     inviteInvalid:
       "Deze uitnodigingslink is ongeldig, al gebruikt of verlopen. Vraag een nieuwe aan.",
+    emailMismatch:
+      "Deze uitnodiging is gekoppeld aan een ander e-mailadres. Gebruik het adres waarnaar de uitnodiging is gestuurd.",
     nameRequired: "Naam is verplicht.",
     passwordTooShort: "Wachtwoord moet minstens 10 tekens bevatten.",
     passwordMismatch: "De wachtwoorden komen niet overeen.",
@@ -341,6 +344,7 @@ export const nl = {
     notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
     rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",
     quotaExceeded: "Daglimiet bereikt — morgen weer beschikbaar.",
+    cohortInactive: "Deze groep is niet meer actief. Neem contact op met je docent.",
     modelNoVision:
       "Dit model ({model}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.",
     invalidImages: "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG, JPEG, GIF of WebP zijn.",

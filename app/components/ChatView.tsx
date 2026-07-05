@@ -30,6 +30,13 @@ interface ChatViewProps {
   outputLanguage?: "nl" | "en";
   /** Local models discovered at runtime (Ollama / LM Studio), appended to the catalog. */
   localModels?: PickerModel[];
+  /**
+   * Provisioned-student mode (Phase 6.9): the sandbox is prefilled + locked from
+   * the cohort config, so the student skips the sandbox gate and the editable
+   * settings/profile controls and lands directly on the greeting. `undefined` for
+   * teachers/admins, who keep the editable sandbox.
+   */
+  lockedValues?: Record<string, string>;
   onGenerationStart?: () => void;
 }
 
@@ -39,12 +46,17 @@ export function ChatView({
   defaultModel,
   outputLanguage: defaultOutputLanguage,
   localModels,
+  lockedValues,
   onGenerationStart,
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
-  const [sandboxValues, setSandboxValues] = useState<FormValues>(defaultValuesFor(tool.inputs));
-  const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
+  const locked = lockedValues != null;
+  const [sandboxValues, setSandboxValues] = useState<FormValues>(
+    locked ? { ...defaultValuesFor(tool.inputs), ...lockedValues } : defaultValuesFor(tool.inputs),
+  );
+  // Provisioned students skip the sandbox gate entirely (locked ⇒ pre-submitted).
+  const [sandboxSubmitted, setSandboxSubmitted] = useState(locked);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -243,78 +255,92 @@ export function ChatView({
     // top) that scrolls with the page — pinning there would trap the tall aside
     // and its model/language controls off-screen.
     <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
-      {/* Settings aside — what was entered before the chat, plus model/language. */}
-      <aside
-        aria-labelledby="chat-settings-heading"
-        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
-      >
-        <h2
-          id="chat-settings-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+      {/* Settings aside — what was entered before the chat, plus model/language.
+          Hidden for a provisioned student: the teacher set the config, so there
+          are no editable settings/profile controls (Phase 6.9). */}
+      {!locked && (
+        <aside
+          aria-labelledby="chat-settings-heading"
+          className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
         >
-          {t.chat?.yourSettings || "Your settings"}
-        </h2>
-
-        {sandboxSummary.length > 0 && (
-          <dl className="mt-3 space-y-2.5">
-            {sandboxSummary.map((item) => (
-              <div key={item.name}>
-                <dt className="text-[11px] text-slate-500">{item.label}</dt>
-                <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
-        {tool.inputs.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setSandboxSubmitted(false)}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+          <h2
+            id="chat-settings-heading"
+            className="text-xs font-semibold uppercase tracking-wide text-slate-500"
           >
-            <Pencil className="size-3.5" aria-hidden />
-            {t.chat?.edit || "Edit"}
-          </button>
-        )}
+            {t.chat?.yourSettings || "Your settings"}
+          </h2>
 
-        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-          <div>
-            <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
-              {t.tool.model}
-            </Label>
-            <Select
-              id="chat-model"
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="h-9 w-full py-0 text-sm"
-            >
-              {modelOptions.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.displayName}
-                </option>
+          {sandboxSummary.length > 0 && (
+            <dl className="mt-3 space-y-2.5">
+              {sandboxSummary.map((item) => (
+                <div key={item.name}>
+                  <dt className="text-[11px] text-slate-500">{item.label}</dt>
+                  <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
+                </div>
               ))}
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
-              {t.tool.outputLanguage}
-            </Label>
-            <Select
-              id="chat-lang"
-              value={outputLanguage}
-              onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
-              className="h-9 w-full py-0 text-sm"
+            </dl>
+          )}
+
+          {tool.inputs.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSandboxSubmitted(false)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             >
-              <option value="nl">{t.tool.dutch}</option>
-              <option value="en">{t.tool.english}</option>
-            </Select>
+              <Pencil className="size-3.5" aria-hidden />
+              {t.chat?.edit || "Edit"}
+            </button>
+          )}
+
+          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+            <div>
+              <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
+                {t.tool.model}
+              </Label>
+              <Select
+                id="chat-model"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="h-9 w-full py-0 text-sm"
+              >
+                {modelOptions.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.displayName}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
+                {t.tool.outputLanguage}
+              </Label>
+              <Select
+                id="chat-lang"
+                value={outputLanguage}
+                onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
+                className="h-9 w-full py-0 text-sm"
+              >
+                <option value="nl">{t.tool.dutch}</option>
+                <option value="en">{t.tool.english}</option>
+              </Select>
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      )}
 
       {/* Chat column — on wide screens the thread fills the height and the
           composer pins; on mobile it flows in the page scroll. */}
       <div className="flex flex-col md:min-h-0 md:flex-1">
+        {/* Provisioned student: a compact read-only line naming the teacher's
+            config, for transparency (no editable controls). */}
+        {locked && sandboxSummary.length > 0 && (
+          <p className="mb-2 flex-none text-xs text-slate-500">
+            <span className="font-medium text-slate-600">
+              {t.chat?.provisionedFor || "Set up for you"}:
+            </span>{" "}
+            {sandboxSummary.map((item) => item.value).join(" · ")}
+          </p>
+        )}
         {/* Message thread — the scroll region that fills the available height (md+) */}
         <div
           className="md:min-h-0 md:flex-1 md:overflow-y-auto"

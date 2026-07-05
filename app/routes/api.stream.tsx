@@ -5,7 +5,13 @@ import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystem
 import { providerForModel } from "~/lib/ai/provider";
 import { isResolvableModel, isClientSelectable, resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
-import { getProfile } from "~/server/repositories/profiles.server";
+import { getProfile, getProfileForMember } from "~/server/repositories/profiles.server";
+import {
+  allowedSlugsOf,
+  cohortConfig,
+  getCohortForUser,
+  isCohortActive,
+} from "~/server/repositories/cohorts.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { getUser } from "~/server/auth.server";
 import { canUseTool } from "~/lib/registry/access";
@@ -116,29 +122,52 @@ export async function action({ request }: Route.ActionArgs) {
     const tool = getToolBySlug(body.slug);
     if (!tool) return new Response(sseError(m.error.unknownTool), { headers: SSE_HEADERS });
 
-    // Role gate (server-side, not just UI): a student can't drive an instructor
-    // tool via a hand-crafted POST.
-    if (!canUseTool(user, tool)) {
+    // Cohort-aware role gate (server-side, not just UI): a student can't drive an
+    // instructor tool — nor a student tool outside their cohort's allow-list — via
+    // a hand-crafted POST, and an expired cohort is refused outright.
+    const cohort = user.role === "student" ? await getCohortForUser(user.id) : null;
+    const allowedSlugs = cohort ? allowedSlugsOf(cohort) : null;
+    if (!canUseTool(user, tool, allowedSlugs)) {
       return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
+    }
+    if (cohort && !isCohortActive(cohort)) {
+      return new Response(sseError(m.error.cohortInactive), { headers: SSE_HEADERS });
     }
 
     const stage = tool.stages.find((s) => s.id === body.stageId) ?? tool.stages[0];
     const outputLanguage: OutputLanguage = body.outputLanguage === "en" ? "en" : "nl";
 
+    // Level register follows WHO reads the output: a student-facing tutor gets the
+    // direct-address directive, an instructor tool the substance-first one (P6.8).
+    const audience = tool.userType === "student" ? "learner" : "instructor";
+
     // Resolve the profile scoped to the requesting user — never fetch another
-    // user's profile by id (audit finding #2).
-    const profile =
+    // user's profile by id (audit finding #2). For a provisioned student running
+    // a tutor, the cohort's profile is injected instead, authorised by membership
+    // (the sanctioned bypass of owner-scoping), and the cohort's per-tutor sandbox
+    // config is merged as the input values (server-authoritative — it wins over a
+    // tampered client body).
+    let profile =
       tool.usesContextProfile && body.contextProfileId
         ? await getProfile(user.id, body.contextProfileId)
         : null;
+    let values = body.values ?? {};
+    if (cohort) {
+      if (tool.usesContextProfile && cohort.contextProfileId) {
+        profile = await getProfileForMember(user.id, cohort.contextProfileId);
+      }
+      const slugValues = cohortConfig(cohort)[tool.slug]?.values;
+      if (slugValues) values = { ...values, ...slugValues };
+    }
 
     const system = buildSystemPrompt({
       promptId: stage.systemPromptId,
-      values: body.values ?? {},
+      values,
       profile,
       outputLanguage,
       priorOutputs: body.priorOutputs ?? {},
       consumes: stage.consumes,
+      audience,
     });
 
     // Server-side model allow-list: a caller may only pick a *client-selectable*
@@ -261,7 +290,7 @@ export async function action({ request }: Route.ActionArgs) {
               toolSlug: tool.slug,
               stageId: stage.id,
               model,
-              input: body.values ?? {},
+              input: values,
               contextProfileId: body.contextProfileId ?? null,
               outputLanguage,
               transcript: buildChatTranscript(
@@ -275,7 +304,7 @@ export async function action({ request }: Route.ActionArgs) {
               toolSlug: tool.slug,
               stageId: stage.id,
               model,
-              input: body.values ?? {},
+              input: values,
               contextProfileId: body.contextProfileId ?? null,
               outputLanguage,
               outputMarkdown: full,

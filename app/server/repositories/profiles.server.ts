@@ -10,6 +10,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { contextProfiles } from "../schema.server";
+import { getCohortForUser } from "./cohorts.server";
 import type { ContextProfile, PackFieldValue } from "~/lib/context/types";
 
 /** Legacy hbo-i fields (pre-pack model) → the generic ICT packValues keys. */
@@ -56,6 +57,24 @@ export async function getProfile(userId: string, id: string): Promise<ContextPro
     .from(contextProfiles)
     .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
     .get();
+  return row ? rowToProfile(row) : null;
+}
+
+/**
+ * Read a context profile a student is authorised to see **by cohort membership**,
+ * not by ownership (Phase 6.6). This is the one sanctioned bypass of the
+ * owner-scoping rule: a student never owns the teacher's profile, but membership
+ * in a cohort that references it grants read access so the server can inject the
+ * programme level on the student's behalf. Returns null unless the user's active
+ * cohort actually references `profileId`.
+ */
+export async function getProfileForMember(
+  userId: string,
+  profileId: string,
+): Promise<ContextProfile | null> {
+  const cohort = await getCohortForUser(userId);
+  if (!cohort || cohort.contextProfileId !== profileId) return null;
+  const row = getDb().select().from(contextProfiles).where(eq(contextProfiles.id, profileId)).get();
   return row ? rowToProfile(row) : null;
 }
 
