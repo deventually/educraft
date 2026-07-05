@@ -13,6 +13,7 @@ import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
+import { SESSION_SUMMARY_PROMPT } from "./session-summary.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -35,6 +36,7 @@ const ALL: PromptDef[] = [
   PEER_TUTORING_PROMPT,
   SCAFFOLDING_FEEDBACK_PROMPT,
   STAGE_ASSESSMENT_PROMPT,
+  SESSION_SUMMARY_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,

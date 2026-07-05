@@ -7,12 +7,16 @@ type Profiles = typeof import("~/server/repositories/profiles.server");
 type Generations = typeof import("~/server/repositories/generations.server");
 type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
+type Chat = typeof import("~/server/repositories/chat.server");
+type Insight = typeof import("~/server/repositories/insight.server");
 
 let users: Users;
 let profiles: Profiles;
 let generations: Generations;
 let usage: Usage;
 let feedback: Feedback;
+let chat: Chat;
+let insight: Insight;
 
 beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
@@ -20,6 +24,8 @@ beforeAll(async () => {
   generations = await import("~/server/repositories/generations.server");
   usage = await import("~/server/repositories/usage.server");
   feedback = await import("~/server/repositories/feedback.server");
+  chat = await import("~/server/repositories/chat.server");
+  insight = await import("~/server/repositories/insight.server");
 });
 
 async function seedUser(id: string) {
@@ -49,6 +55,36 @@ describe("deleteUserCascade", () => {
     expect(await profiles.listProfiles("del-user-a")).toHaveLength(0);
     expect((await usage.getTodayUsage("del-user-a", "2026-07-01")).requests).toBe(0);
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === genId)).toBe(false);
+  });
+
+  it("removes the user's chat sessions, messages and session summaries (P7)", async () => {
+    const sessionId = "del-chat-session-1";
+    await chat.recordChatTurn({
+      sessionId,
+      userId: "del-user-chat",
+      cohortId: "c-x",
+      toolSlug: "mentorai",
+      model: "m",
+      systemPrompt: "sys",
+      messages: [
+        { role: "user", content: "hi" },
+        { role: "assistant", content: "hello" },
+      ],
+    });
+    await insight.saveSummary({
+      sessionId,
+      userId: "del-user-chat",
+      cohortId: "c-x",
+      toolSlug: "mentorai",
+      summary: { topicsWorkedOn: [], skillsProgressed: [], misconceptions: [], effort: "unclear" },
+      helpfulness: 1,
+    });
+
+    await users.deleteUserCascade("del-user-chat");
+
+    expect(await chat.getChatSession(sessionId)).toBeNull();
+    expect(await chat.getSessionMessages(sessionId)).toHaveLength(0);
+    expect(await insight.getSummary(sessionId)).toBeNull();
   });
 
   it("leaves other users' data untouched", async () => {

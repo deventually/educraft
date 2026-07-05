@@ -9,6 +9,7 @@ export default [
     route("context-profiles", "routes/context-profiles.tsx"),
     route("cohorts", "routes/cohorts._index.tsx"),
     route("cohorts/:id", "routes/cohorts.$id.tsx"),
+    route("cohorts/:id/insight", "routes/cohorts.$id.insight.tsx"),
     route("account", "routes/account.tsx"),
     ...prefix("admin", [route("feedback", "routes/admin.feedback.tsx")]),
     route("about", "routes/about.tsx"),
@@ -25,6 +26,8 @@ export default [
   route("api/stream", "routes/api.stream.tsx"),
   // Resource route (no UI) — records tester feedback on a generation.
   route("api/feedback", "routes/api.feedback.tsx"),
+  // Resource route (no UI) — ends a chat session: records helpfulness + summary.
+  route("api/session-close", "routes/api.session-close.tsx"),
   // Public health probe for orchestrators (no auth, no chrome).
   route("healthz", "routes/healthz.tsx"),
   // Resource route (no UI) — persists the chosen UI locale in a cookie.

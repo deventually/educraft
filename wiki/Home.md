@@ -20,6 +20,7 @@ For the full strategic picture, read the [Vision](../docs/VISION.md).
 | [Tools](Tools.md) | The current tool catalog, the stage model, and what's planned. |
 | [Context Model](Context-Model.md) | The orthogonal context dimensions and the pack system. |
 | [Authentication](Authentication.md) | Invite auth, the three roles, sessions, and per-user data scoping. |
+| [Mentor Insight](Mentor-Insight.md) | Privacy-safe session summaries, engagement/effectiveness views, and the abandoned-session sweep. |
 | [Qualification Frameworks](Qualification-Frameworks.md) | EQF/ISCED + national frameworks per target country. |
 | [Internationalization](Internationalization.md) | The five localization layers; UI vs output language; compliance. |
 | [Roadmap](Roadmap.md) | Phased path from today's MVP to the global vision. |
