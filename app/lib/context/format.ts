@@ -34,6 +34,24 @@ const LEVEL_DIRECTIVE: Record<OutputLanguage, (n: number) => string> = {
     `- Match complexity, examples and expectations to this level (EQF ${n}); adapt the language register only for text the learner reads directly. Do not mention the level itself.`,
 };
 
+/**
+ * The learner-facing, **register-first** variant (Phase 6.8). The ~4 learner
+ * tutors (scaffolding-feedback, socratic-partner, peer-tutoring, mentorai) speak
+ * to the student directly, so the language register leads: pitch vocabulary,
+ * sentence length and abstraction to the learner, start at the level and
+ * recalibrate to what they show — never name the level. Selected via the
+ * `audience: "learner"` argument; every instructor tool keeps {@link LEVEL_DIRECTIVE}.
+ */
+const LEVEL_DIRECTIVE_DIRECT: Record<OutputLanguage, (n: number) => string> = {
+  nl: (n) =>
+    `- Stem je woordkeuze, zinslengte en abstractieniveau af op deze lerende (EQF ${n}); begin op dit niveau en herijk op wat de lerende laat zien. Noem het niveau zelf niet.`,
+  en: (n) =>
+    `- Pitch your vocabulary, sentence length and level of abstraction to this learner (EQF ${n}); start there and recalibrate to what the learner shows. Do not mention the level itself.`,
+};
+
+/** Who reads the tool's output — governs which level directive is injected. */
+export type Audience = "instructor" | "learner";
+
 const LABELS: Record<OutputLanguage, Labels> = {
   nl: {
     intro: "Context van de opleiding (hbo, hoger beroepsonderwijs):",
@@ -81,6 +99,7 @@ function renderPackValue(field: PackField, value: PackFieldValue, lang: OutputLa
 export function formatProfile(
   profile: ContextProfile | null | undefined,
   lang: OutputLanguage,
+  audience: Audience = "instructor",
 ): string {
   if (!profile) return "";
   const t = LABELS[lang];
@@ -96,7 +115,8 @@ export function formatProfile(
   if (profile.studyYear) lines.push(`- ${t.year}: ${profile.studyYear}`);
   if (profile.eqf) {
     lines.push(`- ${t.eqf}: EQF ${profile.eqf}`);
-    lines.push(LEVEL_DIRECTIVE[lang](profile.eqf));
+    const directive = audience === "learner" ? LEVEL_DIRECTIVE_DIRECT : LEVEL_DIRECTIVE;
+    lines.push(directive[lang](profile.eqf));
   }
   if (profile.professionalContext?.trim()) {
     lines.push(`- ${t.professionalContext}: ${profile.professionalContext.trim()}`);

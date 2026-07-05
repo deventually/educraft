@@ -30,7 +30,9 @@ export const mentorai: Tool = {
     evaluatedWith: { nl: "Claude", en: "Claude" },
     adapted: false,
   }),
-  usesContextProfile: false,
+  // The cohort's context profile seeds the learner's level (EQF); the bespoke
+  // foundation/intermediate/advanced input is retired onto that spine (P6.8).
+  usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
   defaultMaxTokens: 2048,
@@ -44,19 +46,6 @@ export const mentorai: Tool = {
       kind: "text",
       required: true,
       placeholder: { nl: "bijv. Programmeertalen", en: "e.g. Programming languages" },
-      group: CONTEXT,
-    },
-    {
-      name: "level",
-      label: { nl: "Niveau", en: "Level" },
-      kind: "select",
-      required: true,
-      options: [
-        { value: "foundation", label: { nl: "Fundamenteel", en: "Foundation" } },
-        { value: "intermediate", label: { nl: "Intermediate", en: "Intermediate" } },
-        { value: "advanced", label: { nl: "Gevorderd", en: "Advanced" } },
-      ],
-      defaultValue: "foundation",
       group: CONTEXT,
     },
     {

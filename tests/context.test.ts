@@ -180,3 +180,37 @@ describe("formatProfile — EQF 1–8 level adaptation", () => {
     expect(en).not.toContain("Match complexity");
   });
 });
+
+// The learner-facing register-first directive (Phase 6.8). For the ~4 learner
+// tutors the model addresses the student directly, so the register (vocabulary,
+// sentence length, abstraction) leads — recalibrate to the learner, never name
+// the level. Instructor tools keep the substance-first directive above.
+const NL_DIRECT = (n: number) =>
+  `- Stem je woordkeuze, zinslengte en abstractieniveau af op deze lerende (EQF ${n}); begin op dit niveau en herijk op wat de lerende laat zien. Noem het niveau zelf niet.`;
+const EN_DIRECT = (n: number) =>
+  `- Pitch your vocabulary, sentence length and level of abstraction to this learner (EQF ${n}); start there and recalibrate to what the learner shows. Do not mention the level itself.`;
+
+describe("formatProfile — direct-address (learner) level adaptation", () => {
+  it("emits the direct directive for a learner audience, not the substance one", () => {
+    const nl = formatProfile({ ...generic, eqf: 4 }, "nl", "learner");
+    expect(nl).toContain(NL_DIRECT(4));
+    expect(nl).not.toContain(NL_DIRECTIVE(4));
+    const en = formatProfile({ ...generic, eqf: 4 }, "en", "learner");
+    expect(en).toContain(EN_DIRECT(4));
+    expect(en).not.toContain(EN_DIRECTIVE(4));
+  });
+
+  it("keeps the substance directive for the instructor audience (default)", () => {
+    const nlDefault = formatProfile({ ...generic, eqf: 4 }, "nl");
+    const nlInstructor = formatProfile({ ...generic, eqf: 4 }, "nl", "instructor");
+    expect(nlDefault).toContain(NL_DIRECTIVE(4));
+    expect(nlDefault).not.toContain(NL_DIRECT(4));
+    expect(nlInstructor).toContain(NL_DIRECTIVE(4));
+  });
+
+  it("never names the level in the direct directive", () => {
+    const nl = formatProfile({ ...generic, eqf: 2 }, "nl", "learner");
+    expect(nl).not.toContain("mbo");
+    expect(nl).not.toContain("havo");
+  });
+});

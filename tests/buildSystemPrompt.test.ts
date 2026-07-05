@@ -80,6 +80,29 @@ describe("buildSystemPrompt", () => {
     expect(sys).toContain("Java");
   });
 
+  it("emits the direct-address level directive for a learner audience", () => {
+    const profile: ContextProfile = { id: "p2", name: "SE jaar 1", eqf: 4 };
+    const learner = buildSystemPrompt({
+      promptId: guidedReflection.stages[0].systemPromptId,
+      values: baseValues,
+      profile,
+      outputLanguage: "en",
+      audience: "learner",
+    });
+    expect(learner).toContain("Pitch your vocabulary");
+    expect(learner).not.toContain("Match complexity");
+
+    // The instructor default keeps the substance-first directive.
+    const instructor = buildSystemPrompt({
+      promptId: guidedReflection.stages[0].systemPromptId,
+      values: baseValues,
+      profile,
+      outputLanguage: "en",
+    });
+    expect(instructor).toContain("Match complexity");
+    expect(instructor).not.toContain("Pitch your vocabulary");
+  });
+
   it("injects a consumed prior-stage output for multi-stage tools", () => {
     const generatorStage = cognitiveArchitect.stages.find((s) => s.id === "generator")!;
     const sys = buildSystemPrompt({
