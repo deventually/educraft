@@ -22,7 +22,6 @@ describe("tool: peer-tutoring", () => {
     const inputs = {
       assignment: "Literature review on climate change",
       discipline: "Environmental Science",
-      level: "undergraduate",
     };
 
     const prompt = buildSystemPrompt({
@@ -33,6 +32,12 @@ describe("tool: peer-tutoring", () => {
 
     expect(prompt).not.toMatch(/\{\{(\w+)\}\}/);
     expect(prompt).toContain("source");
+  });
+
+  it("retires the bespoke level input (level now flows from the cohort profile)", () => {
+    const tool = getToolBySlug("peer-tutoring")!;
+    expect(tool.inputs.some((f) => f.name === "level")).toBe(false);
+    expect(tool.usesContextProfile).toBe(true);
   });
 
   it("enforces required input fields", () => {

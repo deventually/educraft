@@ -22,7 +22,6 @@ describe("tool: mentorai", () => {
     const tool = getToolBySlug("mentorai")!;
     const inputs = {
       discipline: "Software Development",
-      level: "foundation",
       studentContext: "First-year student struggling with OOP concepts",
       learningGoal: "Understand inheritance and polymorphism",
     };
@@ -37,6 +36,12 @@ describe("tool: mentorai", () => {
     expect(prompt).not.toMatch(/\{\{(\w+)\}\}/);
     // Sanity check for expected content
     expect(prompt).toContain("mentor");
+  });
+
+  it("retires the bespoke level input (level now flows from the cohort profile)", () => {
+    const tool = getToolBySlug("mentorai")!;
+    expect(tool.inputs.some((f) => f.name === "level")).toBe(false);
+    expect(tool.usesContextProfile).toBe(true);
   });
 
   it("enforces required input fields", () => {

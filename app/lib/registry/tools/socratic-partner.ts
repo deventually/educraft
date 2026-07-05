@@ -34,7 +34,9 @@ export const socraticPartner: Tool = {
     evaluatedWith: { nl: "Claude", en: "Claude" },
     adapted: false,
   }),
-  usesContextProfile: false,
+  // Learner tutor: the cohort's context profile seeds the level (EQF) with the
+  // direct-address register directive (P6.8).
+  usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
   defaultMaxTokens: 2048,

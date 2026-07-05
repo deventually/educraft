@@ -37,7 +37,9 @@ export const peerTutoring: Tool = {
     evaluatedWith: { nl: "Claude", en: "Claude" },
     adapted: false,
   }),
-  usesContextProfile: false,
+  // The cohort's context profile seeds the learner's level (EQF); the bespoke
+  // high-school/undergraduate/graduate input is retired onto that spine (P6.8).
+  usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-4-6",
   defaultMaxTokens: 2048,
@@ -72,22 +74,6 @@ export const peerTutoring: Tool = {
         nl: "bijv. Milieuwetenschap",
         en: "e.g. Environmental Science",
       },
-      group: CONTEXT,
-    },
-    {
-      name: "level",
-      label: {
-        nl: "Academisch niveau",
-        en: "Academic level",
-      },
-      kind: "select",
-      required: true,
-      options: [
-        { value: "high-school", label: { nl: "Middelbare School", en: "High School" } },
-        { value: "undergraduate", label: { nl: "Bachelor", en: "Undergraduate" } },
-        { value: "graduate", label: { nl: "Master", en: "Graduate" } },
-      ],
-      defaultValue: "undergraduate",
       group: CONTEXT,
     },
   ],

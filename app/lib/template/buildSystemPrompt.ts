@@ -1,6 +1,6 @@
 import { getRuntimePrompt } from "~/lib/prompts";
 import type { ContextProfile } from "~/lib/context/types";
-import { formatProfile } from "~/lib/context/format";
+import { formatProfile, type Audience } from "~/lib/context/format";
 import type { ChatMessage, OutputLanguage, StageDependency } from "~/lib/registry/types";
 import { interpolate, type TemplateValues } from "./interpolate";
 
@@ -33,6 +33,12 @@ export interface BuildSystemPromptArgs {
   priorOutputs?: Record<string, string>;
   /** Which prior outputs this stage consumes and under which placeholder. */
   consumes?: StageDependency[];
+  /**
+   * Who reads the output — governs the level-adaptation directive in
+   * {{contextProfile}}. `"learner"` (student-facing tutors) gets the register-first
+   * direct-address directive; `"instructor"` (default) keeps the substance-first one.
+   */
+  audience?: Audience;
 }
 
 /**
@@ -47,7 +53,7 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
 
   const values: TemplateValues = {
     ...args.values,
-    contextProfile: formatProfile(args.profile, args.outputLanguage),
+    contextProfile: formatProfile(args.profile, args.outputLanguage, args.audience),
     outputLanguage: LANGUAGE_LABEL[args.outputLanguage],
   };
 
