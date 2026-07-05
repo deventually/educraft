@@ -4,7 +4,7 @@
 
 The audit found the project's TDD contract violated in specific, listable places: the core streaming route has almost no tests, the multi-stage orchestrator has none, one tool lacks its registry test, five interactive components lack their mandated axe tests, and several small architecture leaks (hardcoded Dutch error fallback, duplicated sandbox logic, registry validation never running at boot) accumulated. This phase pays that debt down and makes `AGENTS.md` truthful again.
 
-Run this phase **after** Phases 0–4 so tests are written against the final (auth-gated, availability-aware) behavior rather than rewritten twice. If Phases 3–4 slip, items 5.1, 5.2, and 5.4–5.7 can run any time after Phase 1.
+Run this phase **last — after Phases 0–4 and 6–7** — so tests are written against the final (auth-gated, availability-aware, cohort-provisioned) behavior rather than rewritten twice. If Phases 3–4 or 6–7 slip, items 5.1, 5.2, and 5.4–5.7 can run any time after Phase 1, but re-check coverage once the slipped phases land.
 
 Audit findings closed: #7, #13 (client half), #15, AGENTS.md drift.
 
@@ -22,7 +22,8 @@ Audit findings closed: #7, #13 (client half), #15, AGENTS.md drift.
 
 - Happy paths: one-shot (trigger message built, language directive applied), chat (messages validated, `reinforceLanguage` applied to last turn only), multi-stage (priorOutputs + `stage.consumes` land in the system prompt).
 - Persistence branches: chat with valid `sessionId` (8–100 chars) → `upsertChatGeneration` with rebuilt transcript; one-shot → `saveGeneration`; save-failure (`throw` in repo mock) does not kill the stream (error is caught + logged).
-- Every refusal path returns a **localized SSE error frame and never calls the provider**: unknown slug, auth missing, role not allowed for tool, disabled tool, invalid body, oversized values, invalid messages, non-vision model + images, rate-limited, over quota.
+- Every refusal path returns a **localized SSE error frame and never calls the provider**: unknown slug, auth missing, role not allowed for tool, disabled tool, invalid body, oversized values, invalid messages, non-vision model + images, rate-limited, over quota, **student tool outside their cohort allowlist, inactive cohort** (P6). A **stale `sessionVersion`** cookie (P6.7) is treated as unauthenticated.
+- Cohort chat happy-path (P6): a student session injects the cohort's config values + membership-authorized profile into the system prompt.
 - SSE mechanics: token frames accumulate in order; a provider mid-stream throw produces a trailing error frame (test through `sseStream` with a failing async iterator).
 
 ### 5.2 Missing component & tool tests
@@ -41,7 +42,7 @@ All in `tests/components/`, happy-dom, axe zero-violations each, mocking `stream
 
 ### 5.4 Shared sandbox/profile hook
 
-ChatView (`ChatView.tsx:87-98`) and GeneratorView (`GeneratorView.tsx:48-62`) duplicate profile-selection + prefill logic (StageStepper likely too — verify). Extract `app/lib/hooks/useSandbox.ts` (or `useProfileSelection`) with the union of current behavior; all three consume it. Pure refactor: existing component tests must pass unchanged (that's the acceptance test); add a focused unit test for the hook via `renderHook`.
+ChatView (`ChatView.tsx:87-98`) and GeneratorView (`GeneratorView.tsx:48-62`) duplicate profile-selection + prefill logic (StageStepper likely too — verify). Extract `app/lib/hooks/useSandbox.ts` (or `useProfileSelection`) with the union of current behavior; all three consume it. **Must carry P6.9's locked/prefilled student mode** (cohort-supplied values, no editable sandbox or profile selector). Pure refactor: existing component tests must pass unchanged (that's the acceptance test); add a focused unit test for the hook via `renderHook`, incl. the locked-mode branch.
 
 ### 5.5 Registry validation at boot
 
@@ -57,7 +58,7 @@ Fix the drift the audit documented — the contract must match reality:
 - Tool count: 15 (roadmap table gains stage-assessment; "all 14 shipped" reworded).
 - The five component-test gaps and cognitive-architect test are now closed — claims become true; keep them.
 - "Zod at the boundary" — now true again (Phase 0); add one line naming `StreamBodySchema` as the boundary.
-- Add the new conventions: roles & `canUseTool`, availability resolution (`availability.server.ts`), async-repository rule, `getDb()` seam, EQF/level-adaptation via `formatProfile`, `TEMPLATE.md` mandatory for new prompts, eval harness (`npm run eval`), invite/admin flows. Keep it terse — AGENTS.md is a contract, not a changelog. Update `wiki/Architecture.md` and `wiki/Home.md` links (Audit, Improvement-Plan, Deployment, Compliance).
+- Add the new conventions: roles & `canUseTool`, availability resolution (`availability.server.ts`), async-repository rule, `getDb()` seam, EQF/level-adaptation via `formatProfile`, `TEMPLATE.md` mandatory for new prompts, eval harness (`npm run eval`), invite/admin flows, **cohorts & student provisioning (P6): cohort-aware `canUseTool` composing with availability, membership-authorized profile injection, single-active-session, the four learner tutors now `usesContextProfile:true` with a direct-address directive; privacy-safe mentor insight / `session-summary` (P7)**. Keep it terse — AGENTS.md is a contract, not a changelog. Update `wiki/Architecture.md` and `wiki/Home.md` links (Audit, Improvement-Plan, Deployment, Compliance).
 
 ### 5.8 Dependency upgrades (each its own PR, in this order)
 

@@ -12,6 +12,7 @@ Principle: **code defines what exists, the DB configures what's available.** New
 - All admin routes gated by `requireRole("admin")` (server-side, loader + action).
 - Availability must be enforced **server-side** (loader/action/api.stream), not just hidden in the UI.
 - Safe defaults: with zero rows in settings tables, behavior is identical to Phase 3's (registry `enabled` + `clientSelectable` catalog flags). An admin misclick must never brick the instance (see 4.2 guard).
+- **Revised order — runs after P6/P7:** cohorts, curated invites, and cohort-aware `canUseTool` already exist. Instance availability here is an **independent gate** that composes *on top* of cohort provisioning — a student sees `available ∩ audience ∩ cohort allowlist`. Do **not** rebuild P6's provisioning flow.
 
 ## Features
 
@@ -40,7 +41,7 @@ export const instanceSettings = sqliteTable("instance_settings", {
 
 **New file:** `app/server/availability.server.ts` — the single module every consumer uses:
 
-- `getAvailableTools(user)`: registry tools where `(setting.enabled ?? tool.enabled) === true`, filtered by audience: `audienceOverride ?? tool.userType` matched against the user's role via the Phase 1 `canUseTool` logic (extended to honor `"both"`).
+- `getAvailableTools(user)`: registry tools where `(setting.enabled ?? tool.enabled) === true`, filtered by audience: `audienceOverride ?? tool.userType` matched against the user's role via the Phase 1 `canUseTool` logic (extended to honor `"both"`). **Compose with P6:** for a student in a cohort, also pass the cohort `allowedSlugs` into `canUseTool` — instance availability and cohort provisioning are independent gates and a tool must pass both.
 - `getSelectableModels()`: catalog models where `clientSelectable && (enabledModels === null || enabledModels.includes(id))`, plus discovered local models (always allowed — they're free). **Guard:** if the intersection is empty, fall back to the catalog default (`DEFAULT_MODEL`) and log a warning — an admin can't lock everyone out.
 - Consumers to rewire: `home.tsx` loader (tool list), `tool.tsx` loader (404 when unavailable), `api.stream.tsx` (refuse generation for disabled tool / non-selectable model — the Phase 0 `isClientSelectable` check's implementation moves here, call sites unchanged), model pickers (`pickableModels` gets its allow-list from the loader instead of module scope — check how `ToolControls` receives models today via `localModels` prop and extend that data flow).
 
@@ -50,7 +51,7 @@ Add under a layout `route("admin", "routes/admin.tsx", [...])` in `routes.ts`; t
 
 - **`/admin/tools`** — table of all registry tools: name, userType, mode, phase, effective status; toggle enabled; audience override select (default/student/instructor/both). Form-post actions (no JS-only interactions), optimistic UI optional.
 - **`/admin/models`** — catalog models with checkboxes (only `clientSelectable` ones listed); empty-selection guard surfaced in UI ("at least one model required").
-- **`/admin/invites`** — replaces the CLI as primary flow (script stays for ops): list invites (status: open/used/expired), mint new (role select, note, expiry days) showing the URL with a copy button, revoke open invites. Also list users (name, role, created, last-activity if cheaply available) with a role-change select (admin cannot demote themselves — guard).
+- **`/admin/invites`** — **student/cohort provisioning lives in P6** (`/cohorts`); this admin view is instance-wide **oversight + role-only ops invites**: list all invites (status open/used/expired, creator, cohort if any), revoke open ones, and mint **teacher/admin** invites (role select, note, expiry) with a copy button. Link out to P6's provisioning for student invites — don't duplicate the cohort flow. Also list users (name, role, created, last-activity if cheaply available) with a role-change select (admin cannot demote themselves — guard).
 - **`/admin/usage`** — per-user per-day table from the `usage` table (last 14 days), totals per tool from the generation log if cheaply queryable (else per-user only; don't build analytics infrastructure).
 - **`/admin/feedback`** — restyle the Phase 2 plain list into the console layout; filter by tool.
 
@@ -79,4 +80,4 @@ Follow the existing app shell/component idiom (check `AppShell.tsx`, `ui.tsx`, h
 
 ## Out of scope
 
-Per-user (rather than per-instance) tool assignment, tool *configuration* beyond enabled/audience (no per-instance prompt editing), analytics dashboards/charts, audit trail of admin actions, multi-tenant settings sync.
+Per-*cohort* student tool assignment (**delivered by P6**, not this phase's per-instance availability), tool *configuration* beyond enabled/audience (no per-instance prompt editing), analytics dashboards/charts, audit trail of admin actions, multi-tenant settings sync.

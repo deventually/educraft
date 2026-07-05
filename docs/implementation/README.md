@@ -21,9 +21,16 @@ Paste this into a new session (swap the file):
 ## P-series — hardening & commercialization program (July 2026)
 
 Implements [`docs/Improvement-Plan.md`](../Improvement-Plan.md), remediating
-[`docs/Audit-2026-07.md`](../Audit-2026-07.md). **Execute strictly in order** — later
-phases assume earlier ones landed (P2 quotas need P1 users; P4 settings replace P0's
-hardcoded model allow-list). One phase per session; finish, run the gates, commit.
+[`docs/Audit-2026-07.md`](../Audit-2026-07.md). **Execute in dependency order, not by
+number** — later phases assume their dependencies landed (P2 quotas need P1 users; P4
+settings replace P0's hardcoded model allow-list). One phase per session; finish, run
+the gates, commit.
+
+**Recommended order: … P3, then P6 → P7, then P4 → P5.** P6/P7 depend only on P1+P2
+(both done), so they take precedence over P4: P6's cohort-based provisioning supersedes
+P4's role-only invite admin, so building it first avoids throwaway. (P6.8 edits the four
+learner-tutor prompts — run P3's eval baseline for those tutors first so the change stays
+measurable.)
 
 Ground rules for every phase:
 
@@ -44,6 +51,8 @@ Ground rules for every phase:
 | [P3](P3-prompts-eqf-evals.md) | Prompt TEMPLATE.md · EQF 1–8 context · eval harness (baseline first!) · weak-prompt refactors · multi-turn stability | P2\* | 🟨 code/prompts/harness done; **baseline + after eval pending owner run** (needs `ANTHROPIC_API_KEY`, ~€1–3/run — see `evals/README.md`) |
 | [P4](P4-admin-console.md) | Instance settings (tools/models availability) · admin routes: tools, models, invites, usage, feedback | P2 | ⬜ |
 | [P5](P5-test-tech-debt.md) | api.stream integration tests · missing component/tool tests · client i18n fix · shared sandbox hook · boot validation · AGENTS.md truth pass · dep upgrades | P4 | ⬜ |
+| [P6](P6-student-provisioning.md) | Cohorts + curated per-invite/batch invites · cohort-aware access · membership-injected tutor level (EQF payoff) · anti-sharing (single active session) — impl. of [ADR 0001](../adr/0001-student-provisioning-cohorts-mentor-insight.md) D1–D4 | P1, P2 | ⬜ |
+| [P7](P7-mentor-insight.md) | Privacy-safe mentor insight: de-personalised session summaries · engagement + effectiveness views (no raw transcript) · student self-report — ADR 0001 D5 | P6 | ⬜ |
 
 \* P3 only needs P0 technically (eval harness + prompts are independent of auth), but
 runs after P2 so tester feedback can inform the prompt work.
