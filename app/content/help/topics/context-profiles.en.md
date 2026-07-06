@@ -1,27 +1,35 @@
-# Setting your teaching context
+# Set up your teaching context
 
 A **context profile** describes your teaching situation once, so every tool takes it into account. The profile is passed to each prompt as background (`{{context}}`), so you don't retype it every time.
 
-## Creating a profile
+## One editor, four steps
 
-Go to **Teaching context**. No profile is set up by default — you create one the way you prefer:
+Go to **Teaching context** and click **New context profile**. There is one clear editor that walks you through everything in four steps — the same editor you later use to **edit** a profile.
 
-- **Use the wizard** — step by step, with guidance and recommended fields per domain.
-- **Fill it in yourself** — all fields on one page.
+1. **Basics** — the **name** (e.g. "Software Engineering — year 2"), the **country**, the **type of education**, and optionally the programme and course.
+2. **Level & framework** — the NLQF level (with its derived EU level) and the domain/subject with any national framework.
+3. **Context & custom fields** — professional field, technology/methods, educational concept, term for learners, and custom fields.
+4. **Finish** — a short summary; optionally set the profile as your default.
 
-Both ask for the same things:
+## Country → type of education → level
 
-- **Name** — e.g. "Software Engineering — year 2".
-- **Programme, course, study year, EQF level** — set the tone and level of the output.
-- **Professional field** — the field of work you prepare students for.
+You start with the **country** and **type of education**. The type of education (secondary, senior vocational, higher professional or university — with its track or degree, such as vmbo-kb, havo, mbo-4 or hbo bachelor) drives the rest: it proposes the matching **level** automatically and determines which subjects/domains you can choose.
 
-## Domain framework per domain
+Level is stored as an **NLQF level** — the Dutch national qualifications framework is the source of truth. The editor shows the **derived EU level (EQF)** next to it and a link to the source ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)). Important: only that EQF number plus a neutral level directive reaches the prompt — never the term "NLQF" itself. That keeps the engine country-neutral while you choose in familiar Dutch terms. The entry-level (Instroom) option is passed as an entry level, just below EQF 1.
 
-When you pick a **domain/sector**, the relevant fields from that domain's national framework appear — for example the hbo-i architecture layers for ICT, the CanMEDS roles for Health & social care, or the HBO-Rechten learning outcomes. Each framework shows its **source**.
+## Framework per domain
 
-For those fields, tick only what your programme actually touches — for a Software Engineering course, say, the *Software* layer and the *Design* and *Realisation* activities, not the whole framework. The framework lists every dimension of the domain, but a course usually touches only a few; ticking what doesn't apply dilutes the context and gives the tools a vaguer picture. EQF defaults to 6 (hbo bachelor), and as soon as you pick a **study year** the mastery level is suggested (year 1 → 1, year 4 → 3; middle years → 2). Adjust or remove any field.
+When you pick a **domain/subject**, the relevant fields from that domain's national framework appear — today for **hbo** only (for example the hbo-i architecture layers for ICT, the CanMEDS roles for Health & social care, or the HBO-Rechten learning outcomes). Each framework shows its **source**.
 
-If a domain has no nationally established framework (such as Agro or Other), you'll see that stated plainly and can add the relevant fields yourself.
+For those fields, tick only what your programme actually touches — not the whole framework. For hbo the level starts at the bachelor, and as soon as you pick a **study year** the mastery level is suggested (year 1 → 1, year 4 → 3; middle years → 2).
+
+For **secondary (vo)** and **senior vocational (mbo)** education no national frameworks are built in yet. You'll see plainly that there is no established framework and add the relevant fields yourself — nothing is invented.
+
+## Learner term and educational concept
+
+The term for learners follows automatically from the type of education: in secondary education they are **pupils**, in mbo/hbo/wo **students** (in mbo you can switch to the Dutch *deelnemers*). The teacher is a **teacher**. This way the tools use the right words without you having to adjust anything.
+
+With **Educational concept / didactic approach** you optionally add your pedagogical approach (Montessori, Dalton, Jenaplan, problem-based…). That text is passed verbatim to every prompt.
 
 ## Custom fields
 
@@ -31,4 +39,4 @@ Mark one profile as **default**; it will be pre-selected on the tool pages.
 
 ## Why it matters
 
-Without context, a tool produces generic output. With a good profile, the material fits your programme, level, and field — saving a lot of editing afterwards. You can create several profiles (e.g. one per course) and choose which to use for each generation.
+Without context, a tool produces generic output. With a good profile, the material fits your type of education, level, and field — saving a lot of editing afterwards. You can create several profiles (e.g. one per course) and choose which to use for each generation.

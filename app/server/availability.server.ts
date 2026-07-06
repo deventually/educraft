@@ -15,9 +15,20 @@ import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { canUseTool, type Audience, type Role } from "~/lib/registry/access";
 import { DEFAULT_MODEL, listModels, type PickerModel } from "~/lib/ai/models";
+import { COUNTRIES, type CountryCode } from "~/lib/context/countries";
+import { SECTORS, type Sector } from "~/lib/context/sectors";
 import { log } from "./log.server";
-import { getToolSettings, getEnabledModels } from "./repositories/settings.server";
-import { getUserToolAllowlist } from "./repositories/users.server";
+import {
+  getToolSettings,
+  getEnabledModels,
+  getEnabledCountries,
+  getEnabledSectors,
+} from "./repositories/settings.server";
+import {
+  getUserToolAllowlist,
+  getUserAssignedCountries,
+  getUserAssignedSectors,
+} from "./repositories/users.server";
 import { getAllowedToolSlugs } from "./repositories/cohorts.server";
 
 export interface AvailabilityUser {
@@ -106,4 +117,53 @@ export async function getSelectableModels(): Promise<PickerModel[]> {
   return listModels()
     .filter((m) => ids.has(m.id))
     .map((m) => ({ id: m.id, displayName: m.displayName, supportsImages: m.supportsImages }));
+}
+
+/**
+ * Compose the shipped catalogue with an instance allow-list and a per-teacher
+ * assignment — each layer default-open (null = no restriction). Mirrors the model
+ * lockout guard: if the intersection is empty, someone has locked everyone out,
+ * so fall back to the full catalogue and warn (no editor may offer nothing).
+ */
+function composeAvailable<T extends string>(
+  catalogue: readonly T[],
+  instanceEnabled: string[] | null,
+  teacherAssigned: Set<string> | null,
+  lockoutKey: string,
+): T[] {
+  let ids = [...catalogue];
+  if (instanceEnabled) ids = ids.filter((x) => instanceEnabled.includes(x));
+  if (teacherAssigned) ids = ids.filter((x) => teacherAssigned.has(x));
+  if (ids.length === 0) {
+    log(lockoutKey, { fallback: "all" });
+    return [...catalogue];
+  }
+  return ids;
+}
+
+/**
+ * The countries a teacher/admin may pick in the context editor (Phase 8):
+ * shipped catalogue ∩ instance-enabled ∩ per-teacher-assigned. Per-teacher
+ * assignment applies to teachers only; admins get the instance-enabled set.
+ * Students are N/A (no editor — their level comes from the cohort profile).
+ */
+export async function getAvailableCountries(user: AvailabilityUser): Promise<CountryCode[]> {
+  const assigned = user.role === "teacher" ? await getUserAssignedCountries(user.id) : null;
+  return composeAvailable(
+    COUNTRIES,
+    await getEnabledCountries(),
+    assigned,
+    "availability_no_available_countries",
+  );
+}
+
+/** The sectors a teacher/admin may pick in the context editor (see above). */
+export async function getAvailableSectors(user: AvailabilityUser): Promise<Sector[]> {
+  const assigned = user.role === "teacher" ? await getUserAssignedSectors(user.id) : null;
+  return composeAvailable(
+    SECTORS,
+    await getEnabledSectors(),
+    assigned,
+    "availability_no_available_sectors",
+  );
 }

@@ -14,15 +14,27 @@ universal engine — not as separate code paths. A teacher describes their conte
 [`buildSystemPrompt`](Architecture.md) injects it into the prompt as
 `{{contextProfile}}`.
 
-Today this is implemented as a generic profile (`app/lib/context/types.ts`) plus a
-**domain-pack registry** (`app/lib/context/packs.ts`): each hbo domain with a verified
-national framework contributes its own prefilled, structured fields. A profile stores
-only the chosen answers (`packValues`) keyed by field key, plus any user-defined
-`customFields`; both are formatted bilingually by `formatProfile(profile, lang)` in
-`app/lib/context/format.ts`. Profiles are created either through a guided **wizard** or a
-single-page **form** (`app/components/context/`), and form input is validated against the
-registry in `app/lib/context/parseForm.ts`. The vision generalizes this further into a
-small set of **orthogonal dimensions**.
+Today this is implemented (Phase 8) as a generic profile (`app/lib/context/types.ts`)
+threaded through a **country → sector → level → domain → framework** seam:
+
+- **Country** (`countries.ts`) — `NL` today; the outer axis a future country pack slots into.
+- **Sector** (`sectors.ts`) — `vo · mbo · hbo · wo` (primary education, po, is deliberately
+  not shipped). Sector scopes the subject taxonomy and drives the learner/teacher noun.
+- **Level** — stored as the national **NLQF** level (`nlqf.ts`, the source of truth); the
+  engine *derives* and injects only the country-neutral **EQF number** via `derive.ts`
+  (`resolveLevel`). No national term ("NLQF"/"Instroom") ever reaches the prompt.
+- **Domain** (`domains.ts`) — sector-scoped subject options (`getDomainsForSector`).
+- **Framework** (`frameworks.ts`) — a verified domain pack resolved by
+  `resolveFramework(country, sector, domain)`; hbo-only today, else the honest
+  custom-fields fallback (never an invented framework).
+
+A profile stores only the chosen answers (`packValues`) plus any user-defined
+`customFields`; everything is formatted bilingually by `formatProfile(profile, lang)` in
+`app/lib/context/format.ts`. Profiles are created + edited in one consolidated **stepped
+editor** (`ContextProfileEditor`), and input is validated against the catalogues in
+`app/lib/context/parseForm.ts`. Which countries/sectors a teacher may pick is composed by
+`availability.server.ts` (`getAvailableCountries/Sectors`, default-open). The vision
+generalizes this further into a small set of **orthogonal dimensions**.
 
 ---
 
@@ -30,9 +42,9 @@ small set of **orthogonal dimensions**.
 
 | Dimension | Examples | Notes |
 |-----------|----------|-------|
-| **Country / region** | NL, US, CA, AU, NZ, ZA … | Selects the framework pack, terminology, and compliance regime. |
-| **Education sector** | general/academic · vocational · higher · professional/CPD | Drives tone and learner vocabulary. |
-| **Level** | EQF 1–8 ↔ ISCED ↔ national framework | See [Qualification Frameworks](Qualification-Frameworks.md). |
+| **Country / region** | NL (US, CA, AU, NZ, ZA … as a seam) | Selects the framework pack, terminology, and compliance regime. |
+| **Education sector** | vo · mbo · hbo · wo (po not shipped) | Drives tone and learner/teacher vocabulary; scopes the domain catalogue. |
+| **Level** | national **NLQF** stored → **EQF 1–8** derived | **ISCED is not adopted** (seam only). Only the EQF number is injected. See [Qualification Frameworks](Qualification-Frameworks.md). |
 | **Subject / domain** | ICT, healthcare, language, … | Optional **domain pack** (hbo-i is the first). |
 | **Framework pack** | curriculum standards + qualification descriptors | Per country + sector + level. |
 | **Language** | UI language *and* output language | Two separate parameters — see [Internationalization](Internationalization.md). |
@@ -68,13 +80,15 @@ back to user-defined `customFields` rather than inventing a framework.
 
 ---
 
-## The learner-noun problem (a concrete near-term task)
+## The learner-noun problem (largely solved in Phase 8)
 
-The current Dutch prompts hard-code *"studenten"* and *"docent"*. Across the ladder
-the correct learner-noun varies — VO **leerlingen**, mbo **deelnemers/studenten**,
-hbo/wo **studenten**, and per country/language again. The fix is to make the
-learner-noun and register part of the **learner profile** dimension, so prompts read
-it from context instead of fixing it. This is one of the first steps in the
+The Dutch prompt files still contain literal *"studenten"* / *"docent"*, but across the
+ladder the correct learner-noun varies — vo **leerlingen**, mbo **studenten/deelnemers**,
+hbo/wo **studenten** — and the teacher is a **docent** (a primary *leerkracht* would follow
+once po ships). Phase 8 fixes this **without editing the 15 prompt files**: `format.ts`
+injects a sector-driven learner-noun + teacher-noun directive (both audiences), so the tools
+use the right words from context. The remaining literal sweep of the prompt files themselves
+is an eval-gated backlog item (highest regression risk, kept standalone) — see
 [Roadmap](Roadmap.md).
 
 ## Related

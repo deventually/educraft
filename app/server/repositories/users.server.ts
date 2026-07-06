@@ -14,6 +14,7 @@ import {
   contextProfiles,
   feedback,
   generations,
+  instanceSettings,
   invites,
   messages,
   passwordResets,
@@ -98,6 +99,37 @@ export async function getUserToolAllowlist(userId: string): Promise<Set<string> 
 export async function setUserToolAllowlist(userId: string, slugs: string[] | null): Promise<void> {
   const value = slugs && slugs.length > 0 ? JSON.stringify(slugs) : null;
   getDb().update(users).set({ allowedToolSlugs: value }).where(eq(users.id, userId)).run();
+}
+
+/**
+ * Per-teacher country/sector assignment (Phase 8) — the read side of the P8
+ * availability seam. It mirrors `getUserToolAllowlist`'s contract exactly
+ * (returns a `Set<string>` or null; null/empty = unrestricted), but is stored as
+ * a per-user `instance_settings` key rather than a `users` column: P8 forbids a
+ * DB migration, and the `instance_settings` key/value table is the sanctioned
+ * migration-free store. The matching setters + write UI are P9.
+ */
+async function getAssignedList(prefix: string, userId: string): Promise<Set<string> | null> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, `${prefix}:${userId}`))
+    .get();
+  if (!row) return null;
+  try {
+    const parsed = JSON.parse(row.valueJson) as string[];
+    return Array.isArray(parsed) && parsed.length > 0 ? new Set(parsed) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getUserAssignedCountries(userId: string): Promise<Set<string> | null> {
+  return getAssignedList("assignedCountries", userId);
+}
+
+export async function getUserAssignedSectors(userId: string): Promise<Set<string> | null> {
+  return getAssignedList("assignedSectors", userId);
 }
 
 export async function getUserById(id: string): Promise<UserRow | null> {

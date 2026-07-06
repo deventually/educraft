@@ -1,27 +1,35 @@
-# Onderwijscontext instellen
+# Je onderwijscontext instellen
 
 Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke tool er rekening mee houdt. Het profiel wordt als achtergrond aan elke prompt meegegeven (`{{context}}`), zonder dat je het telkens opnieuw hoeft te typen.
 
-## Een profiel aanmaken
+## Eén editor, vier stappen
 
-Ga naar **Onderwijscontext**. Er staat standaard nog geen profiel klaar — je maakt er zelf één aan op de manier die je prettig vindt:
+Ga naar **Onderwijscontext** en klik op **Nieuw contextprofiel**. Er is één duidelijke editor die je in vier stappen langs alles leidt — dezelfde editor gebruik je later om een profiel te **bewerken**.
 
-- **Met de wizard** — stap voor stap, met uitleg en aanbevolen velden per domein.
-- **Zelf invullen** — alle velden op één pagina.
+1. **Basis** — de **naam** (bijv. "Software Engineering — jaar 2"), het **land**, het **onderwijstype**, en optioneel opleiding en vak.
+2. **Niveau & kader** — het NLQF-niveau (met afgeleid EU-niveau) en het domein/vak met eventueel landelijk kader.
+3. **Context & eigen velden** — beroepspraktijk, technologie/methoden, onderwijsconcept, aanspreekvorm en eigen velden.
+4. **Afronden** — een korte samenvatting; zet het profiel eventueel als standaard.
 
-Beide vragen om hetzelfde:
+## Land → onderwijstype → niveau
 
-- **Naam** — bijv. "Software Engineering — jaar 2".
-- **Opleiding, vak, studiejaar, EQF-niveau** — bepalen toon en niveau van de output.
-- **Beroepspraktijk** — voor welk werkveld je opleidt.
+Je begint met **land** en **onderwijstype**. Het onderwijstype (voortgezet onderwijs, mbo, hbo of wo — met bijbehorende leerweg of graad, zoals vmbo-kb, havo, mbo-4 of hbo-bachelor) bepaalt de rest: het stelt automatisch het passende **niveau** voor en bepaalt welke vakken/domeinen je kunt kiezen.
 
-## Domeinkader per domein
+Het niveau leg je vast als **NLQF-niveau** — het Nederlandse kwalificatieraamwerk is de bron van waarheid. De editor toont er het **afgeleide EU-niveau (EQF)** bij en een link naar de bron ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)). Belangrijk: in de prompt komt alléén dat EQF-getal plus een neutrale niveau-instructie terecht — nooit de term "NLQF" zelf. Zo blijft de engine landneutraal terwijl jij in vertrouwde Nederlandse termen kiest. De Instroomniveau-optie wordt als instapniveau (net onder EQF 1) meegegeven.
 
-Kies je een **domein/sector**, dan verschijnen de relevante velden uit het landelijke raamwerk van dat domein — bijvoorbeeld de hbo-i-architectuurlagen voor ICT, de CanMEDS-rollen voor Zorg & welzijn, of de leeruitkomsten van HBO-Rechten. Bij elk kader staat de **bron** vermeld.
+## Kader per domein
 
-Vink bij die velden alleen aan wat je opleiding écht raakt — bijvoorbeeld voor een Software Engineering-vak de laag *Software* en de activiteiten *Ontwerpen* en *Realiseren*, niet het hele kader. Het kader noemt álle dimensies van het domein, maar een vak raakt er meestal maar een paar; aanvinken wat niet van toepassing is, verwatert de context en levert de tools een vager beeld. Het EQF-niveau staat op 6 (hbo-bachelor) en zodra je een **studiejaar** kiest, wordt het beheersingsniveau voorgesteld (jaar 1 → 1, jaar 4 → 3; tussenjaren → 2). Pas elk veld gerust aan of verwijder het.
+Kies je een **domein/vak**, dan verschijnen de relevante velden uit het landelijke raamwerk van dat domein — vandaag alleen voor het **hbo** (bijvoorbeeld de hbo-i-architectuurlagen voor ICT, de CanMEDS-rollen voor Zorg & welzijn, of de leeruitkomsten van HBO-Rechten). Bij elk kader staat de **bron** vermeld.
 
-Heeft een domein geen landelijk vastgesteld raamwerk (zoals Agro of Overig), dan zie je dat duidelijk terug en voeg je zelf de relevante velden toe.
+Vink bij die velden alleen aan wat je opleiding écht raakt — niet het hele kader. Voor het hbo staat het niveau op de bachelor en zodra je een **studiejaar** kiest wordt het beheersingsniveau voorgesteld (jaar 1 → 1, jaar 4 → 3; tussenjaren → 2).
+
+Voor **vo** en **mbo** zijn (nog) geen landelijke kaders ingebouwd. Je ziet dan eerlijk dat er geen vastgesteld raamwerk is en voeg je zelf de relevante velden toe — er wordt niets verzonnen.
+
+## Aanspreekvorm en onderwijsconcept
+
+De aanspreekvorm volgt automatisch uit het onderwijstype: in het vo heten de lerenden **leerlingen**, in mbo/hbo/wo **studenten** (in het mbo kun je wisselen naar **deelnemers**). De begeleider heet **docent**. Zo gebruiken de tools de juiste woorden zonder dat jij iets hoeft aan te passen.
+
+Met **Onderwijsconcept / didactische aanpak** geef je optioneel je pedagogische aanpak mee (Montessori, Dalton, Jenaplan, probleemgestuurd…). Die tekst wordt letterlijk in elke prompt meegenomen.
 
 ## Eigen velden
 
@@ -31,4 +39,4 @@ Zet één profiel als **standaard**; dat wordt dan vooraf geselecteerd op de too
 
 ## Waarom het belangrijk is
 
-Zonder context maakt een tool generieke output. Met een goed profiel sluit het materiaal aan op je opleiding, niveau en werkveld — dat scheelt veel naredigeren. Je kunt meerdere profielen aanmaken (bijv. per vak) en per generatie kiezen welk profiel je gebruikt.
+Zonder context maakt een tool generieke output. Met een goed profiel sluit het materiaal aan op je onderwijstype, niveau en werkveld — dat scheelt veel naredigeren. Je kunt meerdere profielen aanmaken (bijv. per vak) en per generatie kiezen welk profiel je gebruikt.

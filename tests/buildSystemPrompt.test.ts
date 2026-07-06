@@ -62,6 +62,8 @@ describe("buildSystemPrompt", () => {
     const profile: ContextProfile = {
       id: "p1",
       name: "SE jaar 2",
+      country: "NL",
+      sector: "hbo",
       domain: "ICT",
       tools: "Java",
       packValues: {

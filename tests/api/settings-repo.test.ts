@@ -56,3 +56,10 @@ describe("settings repository — enabled models", () => {
     expect(await repo.getEnabledModels()).toBeNull();
   });
 });
+
+describe("settings repository — enabled countries/sectors (P8 read getters)", () => {
+  it("returns null when unset (default = whole catalogue, non-breaking until P9)", async () => {
+    expect(await repo.getEnabledCountries()).toBeNull();
+    expect(await repo.getEnabledSectors()).toBeNull();
+  });
+});

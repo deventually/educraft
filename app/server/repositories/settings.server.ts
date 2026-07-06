@@ -61,14 +61,12 @@ export async function setToolSetting(slug: string, patch: ToolSettingPatch): Pro
 }
 
 const ENABLED_MODELS_KEY = "enabledModels";
+const ENABLED_COUNTRIES_KEY = "enabledCountries";
+const ENABLED_SECTORS_KEY = "enabledSectors";
 
-/** The admin's model allow-list, or null when unset (= whole catalog). */
-export async function getEnabledModels(): Promise<string[] | null> {
-  const row = getDb()
-    .select()
-    .from(instanceSettings)
-    .where(eq(instanceSettings.key, ENABLED_MODELS_KEY))
-    .get();
+/** Read an instance_settings JSON `string[]` list by key, or null when unset. */
+async function getInstanceList(key: string): Promise<string[] | null> {
+  const row = getDb().select().from(instanceSettings).where(eq(instanceSettings.key, key)).get();
   if (!row) return null;
   try {
     const parsed = JSON.parse(row.valueJson);
@@ -76,6 +74,24 @@ export async function getEnabledModels(): Promise<string[] | null> {
   } catch {
     return null;
   }
+}
+
+/** The admin's model allow-list, or null when unset (= whole catalog). */
+export async function getEnabledModels(): Promise<string[] | null> {
+  return getInstanceList(ENABLED_MODELS_KEY);
+}
+
+/**
+ * The admin's country/sector allow-lists (Phase 8), or null when unset (= whole
+ * catalogue, per the `enabledModels` convention). Read side only — the setters +
+ * admin write UI are P9, so these return null until then (non-breaking).
+ */
+export async function getEnabledCountries(): Promise<string[] | null> {
+  return getInstanceList(ENABLED_COUNTRIES_KEY);
+}
+
+export async function getEnabledSectors(): Promise<string[] | null> {
+  return getInstanceList(ENABLED_SECTORS_KEY);
 }
 
 /** Set the model allow-list; `null` clears it back to the default (whole catalog). */
