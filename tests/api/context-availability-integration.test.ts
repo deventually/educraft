@@ -80,8 +80,8 @@ describe("override model ↔ compose seam (real storage, no mocks)", () => {
   });
 });
 
-describe("getAvailableDomains (P10.3) — track-scoped, per-teacher, real storage", () => {
-  it("narrows a track catalogue by the teacher's assignment; admin is unrestricted", async () => {
+describe("getAvailableDomains — track-scoped, override model, real storage (P12)", () => {
+  it("an activated teacher narrows a track catalogue by their own assignment; admin unrestricted", async () => {
     const row = await users.createUser({
       name: "Dom",
       email: "dom@example.com",
@@ -97,14 +97,16 @@ describe("getAvailableDomains (P10.3) — track-scoped, per-teacher, real storag
       "cm",
     ]);
     await users.setUserAssignedDomains(teacher.id, ["nt", "em"]);
+    await users.setUserContextCustomAccess(teacher.id, true); // activate → own set wins
     expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt", "em"]);
 
-    // An admin ignores any per-teacher assignment.
+    // An admin ignores any per-teacher assignment (follows the instance = all here).
     await users.setUserAssignedDomains("admin-dom", ["nt"]);
     expect(
       await availability.getAvailableDomains({ id: "admin-dom", role: "admin" }, "vo", "havo"),
     ).toEqual(["nt", "ng", "em", "cm"]);
     await users.setUserAssignedDomains(teacher.id, null);
+    await users.setUserContextCustomAccess(teacher.id, false);
   });
 
   it("is track-scoped: a vmbo slug doesn't leak into a havo catalogue", async () => {
@@ -116,12 +118,14 @@ describe("getAvailableDomains (P10.3) — track-scoped, per-teacher, real storag
     });
     const teacher = { id: row.id, role: "teacher" as const };
     await users.setUserAssignedDomains(teacher.id, ["zw", "nt"]);
+    await users.setUserContextCustomAccess(teacher.id, true);
     expect(await availability.getAvailableDomains(teacher, "vo", "vmbo-bb")).toEqual(["zw"]);
     expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt"]);
     await users.setUserAssignedDomains(teacher.id, null);
+    await users.setUserContextCustomAccess(teacher.id, false);
   });
 
-  it("falls back to the full catalogue when the assignment excludes every catalogue slug", async () => {
+  it("falls back to the full catalogue when the selection excludes every catalogue slug", async () => {
     const row = await users.createUser({
       name: "Dom3",
       email: "dom3@example.com",
@@ -130,12 +134,29 @@ describe("getAvailableDomains (P10.3) — track-scoped, per-teacher, real storag
     });
     const teacher = { id: row.id, role: "teacher" as const };
     await users.setUserAssignedDomains(teacher.id, ["ICT"]); // hbo slug, not in havo
+    await users.setUserContextCustomAccess(teacher.id, true);
     expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual([
       "nt",
       "ng",
       "em",
       "cm",
     ]);
+    await users.setUserAssignedDomains(teacher.id, null);
+    await users.setUserContextCustomAccess(teacher.id, false);
+  });
+
+  it("an unactivated teacher follows the INSTANCE domain set (not their assignment)", async () => {
+    const row = await users.createUser({
+      name: "DomInst",
+      email: "dominst@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const teacher = { id: row.id, role: "teacher" as const };
+    await users.setUserAssignedDomains(teacher.id, ["em"]); // saved but ignored while off
+    await settings.setEnabledDomains(["nt", "ng"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt", "ng"]);
+    await settings.setEnabledDomains(null);
     await users.setUserAssignedDomains(teacher.id, null);
   });
 
