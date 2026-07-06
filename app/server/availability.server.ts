@@ -12,6 +12,7 @@
  * Nothing is cached — a write takes effect on the next request (no bust needed).
  */
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
+import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { canUseTool, type Audience, type Role } from "~/lib/registry/access";
 import { DEFAULT_MODEL, listModels, type PickerModel } from "~/lib/ai/models";
 import { log } from "./log.server";
@@ -43,6 +44,10 @@ async function resolveContext(user: AvailabilityUser): Promise<AvailabilityConte
 
 /** Whether a tool passes all three gates for `user`, given a resolved context. */
 function passes(user: AvailabilityUser, tool: Tool, ctx: AvailabilityContext): boolean {
+  // Boot-invalid tools (Phase 5.5) are excluded from every listing and refused by
+  // the stream, in production, rather than crashing the instance.
+  if (getInvalidToolSlugs().has(tool.slug)) return false;
+
   const setting = ctx.settings.get(tool.slug);
   const enabled = setting?.enabled ?? tool.enabled;
   if (!enabled) return false;

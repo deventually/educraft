@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { ContextProfile } from "~/lib/context/types";
 import type { OutputLanguage } from "~/lib/registry/types";
 import { pickableModels, type PickerModel } from "~/lib/ai/models";
@@ -26,6 +27,12 @@ interface Props {
 
 export function ToolControls(props: Props) {
   const t = useT();
+  // Unique ids so each label is programmatically associated with its select
+  // (accessible name), even if two ToolControls render on one page.
+  const uid = useId();
+  const profileId = `${uid}-profile`;
+  const languageId = `${uid}-language`;
+  const modelId = `${uid}-model`;
   const models = pickableModels(
     props.localModels ?? [],
     props.requiresImages ?? false,
@@ -36,8 +43,11 @@ export function ToolControls(props: Props) {
     <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">
       {props.usesContextProfile && (
         <div>
-          <Label className="mb-1.5">{t.tool.contextProfile}</Label>
+          <Label htmlFor={profileId} className="mb-1.5">
+            {t.tool.contextProfile}
+          </Label>
           <Select
+            id={profileId}
             value={props.contextProfileId}
             onChange={(e) => props.onProfile(e.target.value)}
             disabled={props.disabled}
@@ -52,8 +62,11 @@ export function ToolControls(props: Props) {
         </div>
       )}
       <div>
-        <Label className="mb-1.5">{t.tool.outputLanguage}</Label>
+        <Label htmlFor={languageId} className="mb-1.5">
+          {t.tool.outputLanguage}
+        </Label>
         <Select
+          id={languageId}
           value={props.outputLanguage}
           onChange={(e) => props.onLanguage(e.target.value as OutputLanguage)}
           disabled={props.disabled}
@@ -63,8 +76,11 @@ export function ToolControls(props: Props) {
         </Select>
       </div>
       <div>
-        <Label className="mb-1.5">{t.tool.model}</Label>
+        <Label htmlFor={modelId} className="mb-1.5">
+          {t.tool.model}
+        </Label>
         <Select
+          id={modelId}
           value={props.model}
           onChange={(e) => props.onModel(e.target.value)}
           disabled={props.disabled}

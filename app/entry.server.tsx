@@ -12,8 +12,15 @@ import { isbot } from "isbot";
 import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 import { applySecurityHeaders } from "~/server/securityHeaders.server";
+import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 
 export const streamTimeout = 5_000;
+
+// Validate the tool registry once at server startup (Phase 5.5). In dev this
+// throws on the first invalid tool (fail fast); in production it logs each issue
+// and excludes the offending tool (via availability.server) so a single typo can
+// never take the instance down.
+ensureRegistryValidated();
 
 export default function handleRequest(
   request: Request,

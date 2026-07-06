@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { Sparkles, Square, AlertTriangle, Lock, RotateCcw } from "lucide-react";
 import type { Tool, OutputLanguage, ToolStage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
-import { DynamicForm, defaultValuesFor, missingRequired, type FormValues } from "./DynamicForm";
+import { DynamicForm, missingRequired } from "./DynamicForm";
+import { useSandbox } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
@@ -35,8 +36,14 @@ export function StageStepper({
 }: Props) {
   const t = useT();
   const locale = useLocale();
-  const [values, setValues] = useState<FormValues>(() => defaultValuesFor(tool.inputs));
-  const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
+  // Shared sandbox (see useSandbox). Cognitive Architect has no profile-backed
+  // fields, so `selectProfile` here is just the context selector; the hook keeps
+  // the door open for prefill without special-casing the multi-stage surface.
+  const { values, setValue, contextProfileId, selectProfile } = useSandbox({
+    inputs: tool.inputs,
+    profiles,
+    defaultProfileId,
+  });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   const [model, setModel] = useState(tool.defaultModel);
   const [stages, setStages] = useState<Record<string, StageState>>({});
@@ -99,7 +106,8 @@ export function StageStepper({
             };
           }),
         onDone: () => setStage(stage.id, { streaming: false }),
-        onError: (msg) => setStage(stage.id, { streaming: false, error: msg }),
+        onError: (err) =>
+          setStage(stage.id, { streaming: false, error: err.message ?? t.error.unknown }),
       },
       ctrl.signal,
     );
@@ -117,7 +125,7 @@ export function StageStepper({
           usesContextProfile={tool.usesContextProfile}
           profiles={profiles}
           contextProfileId={contextProfileId}
-          onProfile={setContextProfileId}
+          onProfile={selectProfile}
           outputLanguage={outputLanguage}
           onLanguage={setOutputLanguage}
           model={model}
@@ -125,11 +133,7 @@ export function StageStepper({
           localModels={localModels}
           catalogModels={catalogModels}
         />
-        <DynamicForm
-          fields={tool.inputs}
-          values={values}
-          onChange={(name, value) => setValues((prev) => ({ ...prev, [name]: value }))}
-        />
+        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
         {formError && (
           <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />

@@ -8,6 +8,18 @@ Run this phase **last — after Phases 0–4 and 6–7** — so tests are writte
 
 Audit findings closed: #7, #13 (client half), #15, AGENTS.md drift.
 
+## Reality alignment (2026-07, before implementing)
+
+P0–P4 and P6–P7 have **all shipped** (P3's eval baseline is the only open item, and it is owner-run, not code). This section reconciles the spec — drafted before those phases landed — with the code as it now stands. The *intent* and acceptance criteria below are unchanged; only the mechanics are corrected.
+
+- **5.1 harness.** The provider-mocking integration harness already exists, but in `tests/api/stream-validation.test.ts` (+ `stream-availability.test.ts`), **not** `stream-images.test.ts` (which is a shape/flag unit test that never calls the route). `tests/api/stream.test.ts` becomes the single comprehensive route test; the three narrow files (`stream-validation`, `stream-availability`, `stream-images`) are folded into it and removed, so there is one source of truth for `/api/stream` coverage. Auth is stubbed via `vi.mock("~/server/auth.server")`; the DB is real in-memory (`process.env.DATABASE_URL = "file::memory:"`), so cohort/profile/availability paths run against seeded rows (recipes: `cohorts-repo.test.ts`, `auth.test.ts`).
+- **5.1 stale sessionVersion (P6.7).** `getUser` already returns `null` for a cookie whose `sessionVersion` is behind the DB (`auth.server.ts:37-40`), and that is unit-covered in `auth.test.ts`. In `stream.test.ts` this is asserted at the **route boundary**: one test delegates the auth mock to the *real* `getUser` (`vi.importActual`) with a stale minted cookie and asserts the route emits the localized unauthorized SSE frame with no provider call.
+- **5.3 keys already exist.** The `chat.*` message keys the spec asks for (`continue`, `yourSettings`, `edit`, `provisionedFor`, `startConversation`, `interrupted`, `enterHint`, …) were added in P6/P7 and already have NL/EN parity. The remaining work is to (a) stop `streamClient.ts` inventing Dutch copy (`"Onbekende fout"`, lines 61/63) — surface a machine code, callers map it; (b) drop the raw-English `|| "…"` fallbacks still inline in `ChatView.tsx` and use the keys directly; (c) promote the two genuinely hardcoded English strings (the `"Chat thread"` aria-label and the sandbox-hint fallback) into keys. The old `ChatView.tsx:205,214,…` line refs are stale — grep for the literals instead.
+- **5.4 duplication is thinner than assumed.** Only `GeneratorView` has full profile-prefill-on-change (`selectProfile`, lines 56-70). `StageStepper` has profile *state* but no prefill; `ChatView` has the sandbox gate + P6.9 locked mode but no profile selector. The shared `useSandbox` hook captures the **union**: `values` (from `defaultValuesFor` + optional profile prefill + optional `lockedValues`), `contextProfileId`, and `selectProfile`. cognitive-architect (the only multi-stage tool) has no `prefillFromProfile` fields, so routing StageStepper through the hook is behaviour-neutral. The 5.2 StageStepper/Generator/Chat tests are the acceptance test.
+- **5.5 must be server-only.** `validate.ts` imports `PROMPTS` (every `.md`) and `MODELS`; running it at `registry/index.ts` module scope would pull all prompt text into the **client** bundle. Put boot validation in a `.server.ts` module, trigger dev fail-fast from `entry.server.tsx`, and exclude any invalid slug through `availability.server.ts` (already server-only) so the invalid tool is filtered from what users see.
+- **5.6 signatures.** `listProfiles(userId)` currently takes **no** `limit` — add one; `listGenerations(userId, limit = 50)` has a limit but no clamp. Cap both at `Math.min(limit ?? 50, 500)`.
+- **5.8 versions today:** `vitest ^3.0.5`, `happy-dom ^20.9.0`, `ai ^6.0.193`, `@ai-sdk/anthropic ^3.0.81`, `react-router 7.15.1`, `@anthropic-ai/sdk ^0.65.0`. `@anthropic-ai/sdk` is imported **nowhere** in source (only `@ai-sdk/anthropic` is), so item 4 is a straight removal.
+
 ## Constraints
 
 - `AGENTS.md`: gates green; axe assertions in every component test; tests must be meaningful (assert behavior, not existence).
@@ -18,7 +30,7 @@ Audit findings closed: #7, #13 (client half), #15, AGENTS.md drift.
 
 ### 5.1 api.stream integration tests
 
-**File:** `tests/api/stream.test.ts` (extend/replace the narrow `stream-images.test.ts` harness — read it first; it already mocks the provider). Cover, with the provider mocked:
+**File:** `tests/api/stream.test.ts` (the provider-mocking harness to copy lives in `stream-validation.test.ts`/`stream-availability.test.ts` — see Reality alignment; the three narrow stream tests fold into this file). Cover, with the provider mocked:
 
 - Happy paths: one-shot (trigger message built, language directive applied), chat (messages validated, `reinforceLanguage` applied to last turn only), multi-stage (priorOutputs + `stage.consumes` land in the system prompt).
 - Persistence branches: chat with valid `sessionId` (8–100 chars) → `upsertChatGeneration` with rebuilt transcript; one-shot → `saveGeneration`; save-failure (`throw` in repo mock) does not kill the stream (error is caught + logged).

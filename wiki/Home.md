@@ -23,15 +23,23 @@ For the full strategic picture, read the [Vision](../docs/VISION.md).
 | [Mentor Insight](Mentor-Insight.md) | Privacy-safe session summaries, engagement/effectiveness views, and the abandoned-session sweep. |
 | [Qualification Frameworks](Qualification-Frameworks.md) | EQF/ISCED + national frameworks per target country. |
 | [Internationalization](Internationalization.md) | The five localization layers; UI vs output language; compliance. |
+| [Deployment](Deployment.md) | Running the instance: env, migrations, security headers, health check. |
+| [Compliance](Compliance.md) | AI-transparency notice, GDPR/AI-Act shaping, data handling. |
 | [Roadmap](Roadmap.md) | Phased path from today's MVP to the global vision. |
 | [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md) | How to extend LimeOnIt. |
 | [Glossary](Glossary.md) | EQF, ISCED, hbo-i, ARCS-V, backward design, "pack", and more. |
+
+For the hardening & commercialization program (July 2026), see the
+[audit findings](../docs/Audit-2026-07.md), the [improvement plan](../docs/Improvement-Plan.md),
+and the per-phase briefs under [`docs/implementation/`](../docs/implementation/README.md).
 
 ---
 
 ## Status snapshot
 
-- **Today:** Netherlands · hbo · Dutch/English UI · 4 instructor generators.
+- **Today:** Netherlands · hbo · Dutch/English UI · **15 tools shipped** (14 from the
+  book + 1 original), instructor generators + student tutors · invite auth with
+  three roles · teacher-provisioned cohorts · admin console · privacy-safe mentor insight.
 - **Source material:** *The Pedagogical Promptbook* (David Wiley, ed. — CC BY 4.0,
   DOI 10.59668/2340).
 - **Stack:** React Router 7 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) ·

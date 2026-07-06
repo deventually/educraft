@@ -31,8 +31,9 @@ New behavior starts as a failing test. These principles hold without repetition:
 **The rule:** All external input validated with Zod at the boundary. Secrets via `env.server` only. LLM output via ReactMarkdown (no `dangerouslySetInnerHTML`). Image uploads constrained by MIME allow-list + size cap.
 
 **Enforcement:**
+- The `/api/stream` boundary parses the whole request body with `StreamBodySchema` (Zod) — every field length/count-capped; a bad body returns a localized SSE error, never a stack trace. Extend that schema, never `request.json()` directly.
 - Extend `app/server/env.server.ts` for server secrets.
-- Extend `app/lib/registry/validate.ts` for runtime validation.
+- Extend `app/lib/registry/validate.ts` for runtime validation; it runs at boot (`registry/boot.server.ts`) — dev throws, prod logs + excludes the bad tool.
 - Tool prompt "boundaries" sections (the book's *Voice & Bounds*) act as guardrails.
 - Review: `npm run check` (biome).
 
@@ -96,6 +97,20 @@ New behavior starts as a failing test. These principles hold without repetition:
 - Country/sector/level specifics live in **packs** (see `wiki/Internationalization.md`).
 - A new tool's prompt can be Dutch-first, but the engine routes it via the same `streamChat` interface.
 
+### Access & Availability (roles, cohorts, instance settings)
+- **Roles:** `student | teacher | admin` (`app/lib/registry/access.ts`). `canUseTool(user, tool, allowedSlugs?)` is the one source of truth for role × tool visibility — data-driven, no per-tool branching. Students see only student/`both` tools, narrowed to their cohort's allow-list.
+- **Effective availability:** `app/server/availability.server.ts` composes three gates — instance settings (admin `tool_settings`), role/cohort (`canUseTool`), per-teacher allow-list — into `isToolAvailable`/`getAvailableTools`. Enforced server-side in the home loader, the tool loader (404), and the stream action (refuse). Empty settings = pre-P4 behaviour.
+- **Cohorts & student provisioning (P6):** a teacher provisions a cohort once (allowed tutors + per-tutor sandbox config + a context profile *or* bare EQF + access window); per-student single-use invites join it. The stream injects the cohort's config values (server-authoritative — beats a tampered body) and, by membership, the teacher's profile (`getProfileForMember`, the one sanctioned bypass of owner-scoping). Anti-sharing: single active session via `sessionVersion` (a stale cookie ⇒ logged out). Repos: `cohorts.server.ts`.
+- **Mentor insight (P7):** privacy-safe — de-personalised `session-summary`, engagement/effectiveness rollups, student self-report; never the raw transcript.
+
+### Repositories & the DB seam
+- All DB access goes through repositories under `app/server/repositories/`; **every exported DB function is `async`** (portability insurance) and **scoped to its owning `userId`** in the WHERE clause. No better-sqlite3 API outside `db.server.ts`.
+- `getDb()` is the seam: tests point `DATABASE_URL=file::memory:` before importing any server module. List queries are capped (`Math.min(limit ?? 50, 500)`).
+
+### Level adaptation (EQF) & prompt authoring
+- Level reaches every context-injecting tool through `{{contextProfile}}` via `formatProfile` (`app/lib/context/format.ts`) — a country-neutral EQF 1–8 directive, reader-aware (`audience: "learner"` for the direct-address tutors, `"instructor"` otherwise). The engine never branches on level.
+- **New prompts** follow `app/lib/prompts/TEMPLATE.md` (Voice & Bounds; multi-turn stability tokens) and are covered by the eval harness (`npm run eval`; needs `ANTHROPIC_API_KEY` — see `evals/README.md`).
+
 ## Per-Tool Recipe (The TDD Loop)
 
 See `wiki/Adding-a-Tool-or-Pack.md` for the full depth. Sketch:
@@ -123,9 +138,9 @@ See `wiki/Adding-a-Tool-or-Pack.md` for the full depth. Sketch:
 
 Use the `/tdd` skill for ready-to-copy test templates.
 
-## The 14-Tool Roadmap
+## The Tool Roadmap (15 shipped)
 
-**All 14 tools are shipped** — the build roadmap below is complete. Further work tracks enhancements (help/docs, per-country packs), not new core tools.
+**All 15 tools are shipped** — the 14 from *The Pedagogical Promptbook* plus one original (Stage Assessment). The build roadmap below is complete; further work tracks enhancements (help/docs, per-country packs), not new core tools.
 
 | # | Chapter | Tool | Mode | Status |
 |---|---------|------|------|--------|
@@ -143,6 +158,7 @@ Use the `/tdd` skill for ready-to-copy test templates.
 | 12 | Automating Gagné | Cognitive Architect | multi-stage | ✅ shipped |
 | 13 | Scaffolding | Scaffolding Feedback | chat | ✅ shipped |
 | 14 | Oracle to Socratic | Socratic Partner | chat | ✅ shipped |
+| 15 | — (original) | Stage Assessment | one-shot | ✅ shipped |
 
 ## Key Files
 

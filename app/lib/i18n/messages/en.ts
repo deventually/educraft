@@ -126,6 +126,7 @@ export const en: Messages = {
     edit: "Edit",
     provisionedFor: "Set up for you",
     startConversation: "Start a conversation by clicking a suggestion or typing a message.",
+    threadLabel: "Chat thread",
     interrupted: "Interrupted",
     enterHint: "Enter to send · Shift+Enter for a new line",
     endSession: "End session",

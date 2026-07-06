@@ -3,10 +3,27 @@
  * Uses fetch + ReadableStream (not EventSource, which is GET-only) so we can
  * send a JSON body and abort via AbortController.
  */
+/**
+ * A stream failure. Either the server sent an already-localized `message` (its
+ * SSE error frame), or the failure is client-side and carries only a machine
+ * `code` — the caller (which holds `useT`) maps a code to `m.error.unknown`. The
+ * client never invents human-readable copy (Phase 5.3).
+ */
+export type StreamErrorCode = "network" | "http" | "parse";
+
+export interface StreamError {
+  /** Localized message from the server's error frame, when present. */
+  message?: string;
+  /** Machine code for a client-side failure; the caller localizes it. */
+  code?: StreamErrorCode;
+  /** HTTP status, for a `"http"` code (diagnostics only). */
+  status?: number;
+}
+
 export interface StreamHandlers {
   onToken: (text: string) => void;
   onDone?: () => void;
-  onError?: (message: string) => void;
+  onError?: (error: StreamError) => void;
 }
 
 export async function streamPost(
@@ -25,12 +42,12 @@ export async function streamPost(
     });
   } catch (err) {
     if ((err as Error).name === "AbortError") return;
-    handlers.onError?.((err as Error).message);
+    handlers.onError?.({ code: "network" });
     return;
   }
 
   if (!res.ok || !res.body) {
-    handlers.onError?.(`HTTP ${res.status}`);
+    handlers.onError?.({ code: "http", status: res.status });
     return;
   }
 
@@ -57,11 +74,17 @@ export async function streamPost(
         }
         if (!data) continue;
         if (event === "error") {
+          // The server's error frame carries an already-localized message; pass
+          // it through. If it is missing/unparseable, surface a machine code and
+          // let the caller localize — never invent copy here.
+          let message: string | undefined;
           try {
-            handlers.onError?.(JSON.parse(data).message ?? "Onbekende fout");
+            const parsed = JSON.parse(data) as { message?: unknown };
+            if (typeof parsed.message === "string") message = parsed.message;
           } catch {
-            handlers.onError?.("Onbekende fout");
+            /* not JSON — fall through to the parse code */
           }
+          handlers.onError?.(message ? { message } : { code: "parse" });
           return;
         }
         if (event === "done") {
@@ -79,6 +102,6 @@ export async function streamPost(
     handlers.onDone?.();
   } catch (err) {
     if ((err as Error).name === "AbortError") return;
-    handlers.onError?.((err as Error).message);
+    handlers.onError?.({ code: "network" });
   }
 }

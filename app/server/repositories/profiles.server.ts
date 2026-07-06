@@ -42,11 +42,15 @@ function rowToProfile(row: typeof contextProfiles.$inferSelect): ContextProfile 
   return { id: row.id, name: row.name, ...(data as Omit<ContextProfile, "id" | "name">) };
 }
 
-export async function listProfiles(userId: string): Promise<ContextProfile[]> {
+export async function listProfiles(userId: string, limit?: number): Promise<ContextProfile[]> {
+  // Belt-and-braces cap (Phase 5.6): per-user scoping already bounds realistic
+  // sizes, but never return an unbounded result set.
+  const capped = Math.min(limit ?? 50, 500);
   return getDb()
     .select()
     .from(contextProfiles)
     .where(eq(contextProfiles.userId, userId))
+    .limit(capped)
     .all()
     .map(rowToProfile);
 }
