@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Activity,
   Cpu,
+  GraduationCap,
   MessagesSquare,
   SlidersHorizontal,
   UserPlus,
@@ -53,6 +54,7 @@ export default function AdminOverview({ loaderData }: Route.ComponentProps) {
   const sections = [
     { to: "/admin/tools", title: nav.tools, desc: desc.tools, Icon: SlidersHorizontal },
     { to: "/admin/models", title: nav.models, desc: desc.models, Icon: Cpu },
+    { to: "/admin/context", title: nav.context, desc: desc.context, Icon: GraduationCap },
     { to: "/admin/invites", title: nav.invites, desc: desc.invites, Icon: UserPlus },
     { to: "/admin/cohorts", title: nav.cohorts, desc: desc.cohorts, Icon: Users },
     { to: "/admin/usage", title: nav.usage, desc: desc.usage, Icon: Activity },

@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router";
 import {
   Activity,
   Cpu,
+  GraduationCap,
   LayoutDashboard,
   MessagesSquare,
   SlidersHorizontal,
@@ -36,6 +37,7 @@ const SECTIONS = [
   { to: "/admin", end: true, key: "overview", Icon: LayoutDashboard },
   { to: "/admin/tools", end: false, key: "tools", Icon: SlidersHorizontal },
   { to: "/admin/models", end: false, key: "models", Icon: Cpu },
+  { to: "/admin/context", end: false, key: "context", Icon: GraduationCap },
   { to: "/admin/invites", end: false, key: "invites", Icon: UserPlus },
   { to: "/admin/cohorts", end: false, key: "cohorts", Icon: Users },
   { to: "/admin/usage", end: false, key: "usage", Icon: Activity },

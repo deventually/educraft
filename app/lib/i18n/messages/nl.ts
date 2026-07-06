@@ -370,6 +370,7 @@ export const nl = {
         overview: "Overzicht",
         tools: "Tools",
         models: "Modellen",
+        context: "Onderwijscontext",
         invites: "Uitnodigingen",
         cohorts: "Cohorten",
         usage: "Gebruik",
@@ -393,6 +394,7 @@ export const nl = {
       desc: {
         tools: "Zet tools aan of uit en bepaal hun doelgroep.",
         models: "Kies welke AI-modellen gebruikers mogen selecteren.",
+        context: "Bepaal welke landen en sectoren docenten mogen gebruiken.",
         invites: "Nodig docenten uit en beheer gebruikersrollen.",
         cohorts: "Bekijk alle cohorten en wijs docenten toe.",
         usage: "Volg het dagelijkse gebruik per gebruiker en tool.",
@@ -430,6 +432,21 @@ export const nl = {
       atLeastOne: "Kies minstens één model — je kunt niet iedereen buitensluiten.",
       save: "Opslaan",
       localNote: "Lokale modellen (Ollama, CLI) zijn gratis en altijd selecteerbaar.",
+    },
+    context: {
+      heading: "Onderwijscontext",
+      intro:
+        "Kies welke landen en onderwijssectoren op deze instantie beschikbaar zijn. Docenten kunnen alleen contextprofielen maken binnen de ingeschakelde landen en sectoren.",
+      countriesLegend: "Landen",
+      sectorsLegend: "Sectoren",
+      save: "Opslaan",
+      atLeastOne: "Kies minstens één land en één sector — je kunt niet alles uitschakelen.",
+      teacherLegend: "Toegang per docent",
+      teacherPick:
+        "Beperk een individuele docent tot bepaalde landen en sectoren. Beheerders volgen altijd de instantie-instelling hierboven.",
+      teacherHint:
+        "Niets aangevinkt = geen beperking; de docent ziet dan alle ingeschakelde landen en sectoren.",
+      teacherNone: "Er zijn nog geen docenten om toe te wijzen.",
     },
     invites: {
       mintHeading: "Docent uitnodigen",

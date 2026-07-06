@@ -11,6 +11,7 @@ type ToolsRoute = typeof import("~/routes/admin.tools");
 type ModelsRoute = typeof import("~/routes/admin.models");
 type InvitesRoute = typeof import("~/routes/admin.invites");
 type CohortsRoute = typeof import("~/routes/admin.cohorts");
+type ContextRoute = typeof import("~/routes/admin.context");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
 type Cohorts = typeof import("~/server/repositories/cohorts.server");
@@ -19,17 +20,19 @@ let toolsRoute: ToolsRoute;
 let modelsRoute: ModelsRoute;
 let invitesRoute: InvitesRoute;
 let cohortsRoute: CohortsRoute;
+let contextRoute: ContextRoute;
 let settings: Settings;
 let users: Users;
 let cohorts: Cohorts;
 
 beforeAll(async () => {
-  [toolsRoute, modelsRoute, invitesRoute, cohortsRoute, settings, users, cohorts] =
+  [toolsRoute, modelsRoute, invitesRoute, cohortsRoute, contextRoute, settings, users, cohorts] =
     await Promise.all([
       import("~/routes/admin.tools"),
       import("~/routes/admin.models"),
       import("~/routes/admin.invites"),
       import("~/routes/admin.cohorts"),
+      import("~/routes/admin.context"),
       import("~/server/repositories/settings.server"),
       import("~/server/repositories/users.server"),
       import("~/server/repositories/cohorts.server"),
@@ -91,6 +94,51 @@ describe("admin.models action — lockout guard", () => {
     expect(res.saved).toBe(true);
     expect(await settings.getEnabledModels()).toEqual(["claude-haiku-4-5"]);
     await settings.setEnabledModels(null); // reset
+  });
+});
+
+describe("admin.context action — instance lockout guard", () => {
+  it("refuses an empty selection and does not persist", async () => {
+    const res = (await invoke(contextRoute.action, post({ intent: "instance" }))) as {
+      error?: string;
+      saved?: boolean;
+    };
+    expect(res.error).toBe("instance-empty");
+    expect(await settings.getEnabledSectors()).toBeNull(); // unchanged
+    expect(await settings.getEnabledCountries()).toBeNull();
+  });
+
+  it("refuses when either axis is empty (a country but no sector)", async () => {
+    const res = (await invoke(
+      contextRoute.action,
+      post({ intent: "instance", countries: ["NL"] }),
+    )) as { error?: string };
+    expect(res.error).toBe("instance-empty");
+    expect(await settings.getEnabledSectors()).toBeNull();
+  });
+
+  it("persists a valid instance selection (catalogue-filtered)", async () => {
+    const res = (await invoke(
+      contextRoute.action,
+      // A junk value is dropped; only shipped catalogue codes survive.
+      post({ intent: "instance", countries: ["NL", "XX"], sectors: ["hbo", "wo", "bogus"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await settings.getEnabledCountries()).toEqual(["NL"]);
+    expect(await settings.getEnabledSectors()).toEqual(["hbo", "wo"]);
+    // Reset so later tests see the default-open state.
+    await settings.setEnabledCountries(null);
+    await settings.setEnabledSectors(null);
+  });
+
+  it("loader builds all-checked rows when nothing is configured", async () => {
+    const data = (await invoke(contextRoute.loader, post({}))) as {
+      countries: { id: string; checked: boolean }[];
+      sectors: { id: string; checked: boolean }[];
+    };
+    expect(data.countries.every((c) => c.checked)).toBe(true);
+    expect(data.sectors.every((s) => s.checked)).toBe(true);
+    expect(data.sectors.map((s) => s.id)).toEqual(["vo", "mbo", "hbo", "wo"]);
   });
 });
 
