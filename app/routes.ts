@@ -20,6 +20,7 @@ export default [
       index("routes/admin._index.tsx"),
       route("tools", "routes/admin.tools.tsx"),
       route("models", "routes/admin.models.tsx"),
+      route("context", "routes/admin.context.tsx"),
       route("invites", "routes/admin.invites.tsx"),
       route("cohorts", "routes/admin.cohorts.tsx"),
       route("usage", "routes/admin.usage.tsx"),

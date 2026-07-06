@@ -367,6 +367,7 @@ export const en: Messages = {
         overview: "Overview",
         tools: "Tools",
         models: "Models",
+        context: "Teaching context",
         invites: "Invites",
         cohorts: "Cohorts",
         usage: "Usage",
@@ -390,6 +391,7 @@ export const en: Messages = {
       desc: {
         tools: "Turn tools on or off and set their audience.",
         models: "Choose which AI models users may select.",
+        context: "Choose which countries and sectors teachers may use.",
         invites: "Invite teachers and manage user roles.",
         cohorts: "See every cohort and assign teachers.",
         usage: "Track daily usage per user and tool.",
@@ -427,6 +429,21 @@ export const en: Messages = {
       atLeastOne: "Pick at least one model — you can't lock everyone out.",
       save: "Save",
       localNote: "Local models (Ollama, CLI) are free and always selectable.",
+    },
+    context: {
+      heading: "Teaching context",
+      intro:
+        "Choose which countries and education sectors are available on this instance. Teachers can only build context profiles within the enabled countries and sectors.",
+      countriesLegend: "Countries",
+      sectorsLegend: "Sectors",
+      save: "Save",
+      atLeastOne: "Pick at least one country and one sector — you can't disable everything.",
+      teacherLegend: "Access per teacher",
+      teacherPick:
+        "Restrict an individual teacher to specific countries and sectors. Admins always follow the instance setting above.",
+      teacherHint:
+        "Nothing checked = no restriction; the teacher then sees every enabled country and sector.",
+      teacherNone: "There are no teachers to assign yet.",
     },
     invites: {
       mintHeading: "Invite a teacher",
