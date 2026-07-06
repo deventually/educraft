@@ -105,6 +105,7 @@ export function DomainSelect({
   country = "NL",
   sector = "hbo",
   track,
+  available,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -112,12 +113,16 @@ export function DomainSelect({
   country?: string;
   sector?: string;
   track?: string;
+  /** Per-teacher domain allow-list (Phase 10.3); null/undefined = unrestricted. */
+  available?: string[] | null;
 }) {
   const t = useT();
   const locale = useLocale();
-  const options = getDomainsForTrack(country, sector, track);
-  // Back-compat: a legacy stored value outside the track catalogue is kept as a
-  // selected option so opening + editing a pre-P10 profile doesn't blank it.
+  const catalogue = getDomainsForTrack(country, sector, track);
+  const options =
+    available == null ? catalogue : catalogue.filter((d) => available.includes(d.value));
+  // Back-compat: a legacy/assigned-away stored value outside the visible options
+  // is kept as a selected option so opening + editing a profile doesn't blank it.
   const withLegacy =
     value && !options.some((d) => d.value === value)
       ? [...options, { value, label: value } satisfies DomainOption]

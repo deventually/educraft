@@ -21,7 +21,7 @@ import type { LocalizedText } from "~/lib/i18n/localized";
 import type { CountryCode } from "./countries";
 import { isCountryCode } from "./countries";
 import type { Sector } from "./sectors";
-import { isSector } from "./sectors";
+import { isSector, tracksForSector } from "./sectors";
 import { HBO_DOMAINS } from "./types";
 
 export interface DomainOption {
@@ -120,4 +120,55 @@ export function getDomainsForTrack(
   if (!country || !isCountryCode(country) || !sector || !isSector(sector)) return [];
   if (sector === "vo") return track ? (VO_DOMAINS_BY_TRACK[track] ?? []) : [];
   return DOMAINS_BY_SECTOR[country]?.[sector] ?? [];
+}
+
+/** A group of tracks that share an identical domain set (admin per-teacher UI). */
+export interface DomainGroup {
+  /** The tracks this group covers ([] for a track-independent sector like hbo). */
+  tracks: string[];
+  domains: DomainOption[];
+}
+
+/**
+ * The domain groups to render for a sector in the admin per-teacher UI: hbo is a
+ * single track-less group; vo merges tracks whose profiel set is identical
+ * (havo+vwo, vmbo bb/kb/gl) so a slug isn't offered under six near-duplicate
+ * headings. Sectors without a catalogue return []. Assignment is a flat slug set,
+ * so this grouping is purely presentational.
+ */
+export function domainGroupsForSector(
+  country: string | undefined,
+  sector: string | undefined,
+): DomainGroup[] {
+  if (!country || !isCountryCode(country) || !sector || !isSector(sector)) return [];
+  if (sector !== "vo") {
+    const domains = DOMAINS_BY_SECTOR[country]?.[sector] ?? [];
+    return domains.length ? [{ tracks: [], domains }] : [];
+  }
+  const groups: DomainGroup[] = [];
+  for (const tr of tracksForSector(sector)) {
+    const domains = getDomainsForTrack(country, sector, tr.value);
+    if (!domains.length) continue;
+    const sig = domains.map((d) => d.value).join(",");
+    const existing = groups.find((g) => g.domains.map((d) => d.value).join(",") === sig);
+    if (existing) existing.tracks.push(tr.value);
+    else groups.push({ tracks: [tr.value], domains });
+  }
+  return groups;
+}
+
+/** Every valid domain slug across all sectors/tracks — the admin write-side filter. */
+export function allDomainValues(country: string | undefined): string[] {
+  if (!country || !isCountryCode(country)) return [];
+  const values = new Set<string>();
+  for (const opts of Object.values(DOMAINS_BY_SECTOR[country] ?? {})) {
+    for (const o of opts ?? []) values.add(o.value);
+  }
+  // vo is track-scoped (outside DOMAINS_BY_SECTOR) and NL-only today.
+  if (country === "NL") {
+    for (const opts of Object.values(VO_DOMAINS_BY_TRACK)) {
+      for (const o of opts) values.add(o.value);
+    }
+  }
+  return [...values];
 }

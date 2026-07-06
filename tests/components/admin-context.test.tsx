@@ -8,6 +8,29 @@ import AdminContext from "~/routes/admin.context";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
+// A small hbo domain group used by both teacher fixtures.
+const hboDomainSector = {
+  sector: "hbo",
+  groups: [
+    {
+      tracks: [] as string[],
+      domains: [
+        { value: "ICT", label: "ICT" },
+        { value: "Techniek", label: { nl: "Techniek", en: "Engineering" } },
+      ],
+    },
+  ],
+};
+const havoDomainSector = {
+  sector: "vo",
+  groups: [
+    {
+      tracks: ["havo", "vwo"],
+      domains: [{ value: "nt", label: { nl: "Natuur & Techniek", en: "Nature & Technology" } }],
+    },
+  ],
+};
+
 // Defaults-all for the instance; two teachers — one restricted, one unrestricted.
 const loaderData = {
   countries: [{ id: "NL", checked: true }],
@@ -24,8 +47,18 @@ const loaderData = {
       email: "beperkt@school.nl",
       countries: ["NL"],
       sectors: ["mbo"],
+      domains: ["ICT"],
+      domainSectors: [hboDomainSector, havoDomainSector],
     },
-    { id: "t-open", name: "Docent Open", email: null, countries: null, sectors: null },
+    {
+      id: "t-open",
+      name: "Docent Open",
+      email: null,
+      countries: null,
+      sectors: null,
+      domains: null,
+      domainSectors: [hboDomainSector],
+    },
   ],
 };
 
@@ -100,5 +133,32 @@ describe("Admin context — per-teacher assignment", () => {
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin context — per-teacher domains (P10.3)", () => {
+  it("renders domain checkboxes and pre-checks a restricted teacher's assignment only", () => {
+    renderRoute();
+    const form = within(screen.getByRole("form", { name: "Docent Beperkt" }));
+    // ICT is assigned → checked; Techniek is not → unchecked.
+    const ict = form.getByLabelText("ICT") as HTMLInputElement;
+    const tech = form.getByLabelText("Techniek") as HTMLInputElement;
+    expect(ict.name).toBe("domains");
+    expect(ict.checked).toBe(true);
+    expect(tech.checked).toBe(false);
+  });
+
+  it("pre-checks every domain for an unrestricted teacher (null = all)", () => {
+    renderRoute();
+    const form = within(screen.getByRole("form", { name: "Docent Open" }));
+    const ict = form.getByLabelText("ICT") as HTMLInputElement;
+    expect(ict.checked).toBe(true);
+  });
+
+  it("groups vo profielen under a collapsible details for the reachable track(s)", () => {
+    renderRoute();
+    const form = within(screen.getByRole("form", { name: "Docent Beperkt" }));
+    // The havo/vwo profiel is present (grouped under the vo sector's details).
+    expect(form.getByLabelText(/Natuur & Techniek/)).toBeInTheDocument();
   });
 });

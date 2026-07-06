@@ -133,6 +133,15 @@ export async function getUserAssignedSectors(userId: string): Promise<Set<string
 }
 
 /**
+ * Per-teacher domain assignment (Phase 10.3) — a full P9-style axis, stored the
+ * same migration-free way as country/sector. Flat slug set (not per-track); the
+ * editor filters the track catalogue by it. null/empty = unrestricted.
+ */
+export async function getUserAssignedDomains(userId: string): Promise<Set<string> | null> {
+  return getAssignedList("assignedDomains", userId);
+}
+
+/**
  * Set (or clear) a per-teacher country/sector assignment (Phase 9 write side) —
  * the setter half of `getAssignedList`. Writes the `${prefix}:${userId}`
  * instance_settings key with a JSON `string[]`; a null/empty list deletes the key
@@ -170,6 +179,10 @@ export async function setUserAssignedCountries(
 
 export async function setUserAssignedSectors(userId: string, ids: string[] | null): Promise<void> {
   return setAssignedList("assignedSectors", userId, ids);
+}
+
+export async function setUserAssignedDomains(userId: string, ids: string[] | null): Promise<void> {
+  return setAssignedList("assignedDomains", userId, ids);
 }
 
 export async function getUserById(id: string): Promise<UserRow | null> {

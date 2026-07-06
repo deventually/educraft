@@ -96,6 +96,7 @@ export function ContextProfileEditor({
   isCurrentDefault = false,
   availableCountries,
   availableSectors,
+  availableDomains,
 }: {
   onCancel: () => void;
   /** When set, the editor edits this profile instead of creating a new one. */
@@ -103,6 +104,8 @@ export function ContextProfileEditor({
   isCurrentDefault?: boolean;
   availableCountries: string[];
   availableSectors: string[];
+  /** Per-teacher domain allow-list (Phase 10.3); null = unrestricted. */
+  availableDomains: string[] | null;
 }) {
   const t = useT();
   const locale = useLocale();
@@ -212,6 +215,7 @@ export function ContextProfileEditor({
             country={country}
             sector={sector}
             track={track}
+            available={availableDomains}
           />
         </div>
         <DomainFields

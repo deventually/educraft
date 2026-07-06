@@ -447,6 +447,10 @@ export const nl = {
       teacherHint:
         "Niets aangevinkt = geen beperking; de docent ziet dan alle ingeschakelde landen en sectoren.",
       teacherNone: "Er zijn nog geen docenten om toe te wijzen.",
+      domainsLegend: "Domeinen / profielen per docent",
+      domainsHint:
+        "Beperk de domeinen of profielen die deze docent kan kiezen. Niets aangevinkt = geen beperking. Alleen de sectoren die de docent kan bereiken worden getoond.",
+      domainsNone: "Geen domeinen om toe te wijzen voor de sectoren van deze docent.",
     },
     invites: {
       mintHeading: "Docent uitnodigen",

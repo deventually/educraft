@@ -68,3 +68,69 @@ describe("P9 write side ↔ P8 compose seam (real storage, no mocks)", () => {
     await users.setUserAssignedCountries(teacher.id, null);
   });
 });
+
+describe("getAvailableDomains (P10.3) — track-scoped, per-teacher, real storage", () => {
+  it("narrows a track catalogue by the teacher's assignment; admin is unrestricted", async () => {
+    const row = await users.createUser({
+      name: "Dom",
+      email: "dom@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const teacher = { id: row.id, role: "teacher" as const };
+    // havo catalogue, unrestricted, in catalogue order.
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual([
+      "nt",
+      "ng",
+      "em",
+      "cm",
+    ]);
+    await users.setUserAssignedDomains(teacher.id, ["nt", "em"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt", "em"]);
+
+    // An admin ignores any per-teacher assignment.
+    await users.setUserAssignedDomains("admin-dom", ["nt"]);
+    expect(
+      await availability.getAvailableDomains({ id: "admin-dom", role: "admin" }, "vo", "havo"),
+    ).toEqual(["nt", "ng", "em", "cm"]);
+    await users.setUserAssignedDomains(teacher.id, null);
+  });
+
+  it("is track-scoped: a vmbo slug doesn't leak into a havo catalogue", async () => {
+    const row = await users.createUser({
+      name: "Dom2",
+      email: "dom2@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const teacher = { id: row.id, role: "teacher" as const };
+    await users.setUserAssignedDomains(teacher.id, ["zw", "nt"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "vmbo-bb")).toEqual(["zw"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt"]);
+    await users.setUserAssignedDomains(teacher.id, null);
+  });
+
+  it("falls back to the full catalogue when the assignment excludes every catalogue slug", async () => {
+    const row = await users.createUser({
+      name: "Dom3",
+      email: "dom3@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const teacher = { id: row.id, role: "teacher" as const };
+    await users.setUserAssignedDomains(teacher.id, ["ICT"]); // hbo slug, not in havo
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual([
+      "nt",
+      "ng",
+      "em",
+      "cm",
+    ]);
+    await users.setUserAssignedDomains(teacher.id, null);
+  });
+
+  it("returns [] for a sector with no domain catalogue (mbo/wo)", async () => {
+    const teacher = { id: "dom-mbo", role: "teacher" as const };
+    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toEqual([]);
+    expect(await availability.getAvailableDomains(teacher, "wo", "master")).toEqual([]);
+  });
+});

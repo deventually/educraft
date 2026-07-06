@@ -10,7 +10,12 @@ import {
   getDefaultProfile,
 } from "~/server/repositories/profiles.server";
 import { requireUser } from "~/server/auth.server";
-import { getAvailableCountries, getAvailableSectors } from "~/server/availability.server";
+import {
+  getAvailableCountries,
+  getAvailableSectors,
+  getAvailableDomains,
+} from "~/server/availability.server";
+import { getUserAssignedDomains } from "~/server/repositories/users.server";
 import type { ContextProfile } from "~/lib/context/types";
 import { parseContextForm } from "~/lib/context/parseForm";
 import { resolveLevel } from "~/lib/context/derive";
@@ -25,17 +30,21 @@ import { getLocale } from "~/lib/i18n/locale.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  const [profiles, def, availableCountries, availableSectors] = await Promise.all([
+  const [profiles, def, availableCountries, availableSectors, assignedDomains] = await Promise.all([
     listProfiles(user.id),
     getDefaultProfile(user.id),
     getAvailableCountries(user),
     getAvailableSectors(user),
+    // The teacher's flat domain allow-list; the editor filters the track
+    // catalogue by it client-side (null = unrestricted; admins are never scoped).
+    user.role === "teacher" ? getUserAssignedDomains(user.id) : Promise.resolve(null),
   ]);
   return {
     profiles,
     defaultId: def?.id ?? "",
     availableCountries,
     availableSectors,
+    assignedDomains: assignedDomains ? [...assignedDomains] : null,
   };
 }
 
@@ -66,6 +75,15 @@ export async function action({ request }: Route.ActionArgs) {
         ok: false,
         error: error === "name-required" ? m.settings.nameRequired : m.settings.optionUnavailable,
       };
+    }
+    // Re-validate the submitted domain against the teacher's available set —
+    // never trust the body (mirrors the country/sector re-check above).
+    if (input.domain) {
+      const availableDomains = await getAvailableDomains(user, input.sector, input.track);
+      if (!availableDomains.includes(input.domain)) {
+        const m = getMessages(getLocale(request));
+        return { ok: false, error: m.settings.optionUnavailable };
+      }
     }
     if (intent === "update") {
       const id = String(fd.get("id") ?? "");
@@ -99,7 +117,7 @@ function ProfileMeta({ profile, locale }: { profile: ContextProfile; locale: "nl
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { profiles, defaultId, availableCountries, availableSectors } = loaderData;
+  const { profiles, defaultId, availableCountries, availableSectors, assignedDomains } = loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -196,6 +214,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
             isCurrentDefault={editing != null && editing.id === defaultId}
             availableCountries={availableCountries}
             availableSectors={availableSectors}
+            availableDomains={assignedDomains}
             onCancel={() => setEditor(null)}
           />
         ) : (

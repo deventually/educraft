@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getDomainsForTrack } from "~/lib/context/domains";
+import { getDomainsForTrack, domainGroupsForSector, allDomainValues } from "~/lib/context/domains";
 import { loc } from "~/lib/i18n/localized";
 import { HBO_DOMAINS } from "~/lib/context/types";
 
@@ -60,6 +60,51 @@ describe("getDomainsForTrack — vo profielen (track-scoped)", () => {
     // A verified havo/vwo profiel reads naturally in Dutch.
     const havo = getDomainsForTrack("NL", "vo", "havo");
     expect(havo.find((d) => d.value === "nt")?.label).toMatchObject({ nl: "Natuur & Techniek" });
+  });
+});
+
+describe("domainGroupsForSector — admin per-teacher grouping (P10.3)", () => {
+  it("returns one track-less group for hbo (sector-level catalogue)", () => {
+    const groups = domainGroupsForSector("NL", "hbo");
+    expect(groups.length).toBe(1);
+    expect(groups[0].tracks).toEqual([]);
+    expect(groups[0].domains.map((d) => d.value)).toEqual([...HBO_DOMAINS]);
+  });
+
+  it("merges vo tracks that share an identical profiel set (havo+vwo, vmbo bb/kb/gl)", () => {
+    const groups = domainGroupsForSector("NL", "vo");
+    // Three distinct groups: havo/vwo, vmbo bb/kb/gl, vmbo-tl.
+    expect(groups.length).toBe(3);
+    const havoVwo = groups.find((g) => g.tracks.includes("havo"));
+    expect(havoVwo?.tracks.sort()).toEqual(["havo", "vwo"]);
+    expect(havoVwo?.domains.map((d) => d.value).sort()).toEqual(["cm", "em", "ng", "nt"]);
+    const vmbo = groups.find((g) => g.tracks.includes("vmbo-bb"));
+    expect(vmbo?.tracks.sort()).toEqual(["vmbo-bb", "vmbo-gl", "vmbo-kb"]);
+    expect(vmbo?.domains.length).toBe(10);
+    const tl = groups.find((g) => g.tracks.includes("vmbo-tl"));
+    expect(tl?.domains.length).toBe(4);
+  });
+
+  it("returns [] for a sector with no catalogue (mbo/wo)", () => {
+    expect(domainGroupsForSector("NL", "mbo")).toEqual([]);
+    expect(domainGroupsForSector("NL", "wo")).toEqual([]);
+  });
+});
+
+describe("allDomainValues — the union of every valid domain slug (P10.3 filter)", () => {
+  it("includes hbo domains and vo profielen, and nothing invented", () => {
+    const all = allDomainValues("NL");
+    expect(all).toContain("ICT"); // hbo
+    expect(all).toContain("nt"); // havo/vwo
+    expect(all).toContain("zw"); // vmbo beroepsgericht
+    expect(all).toContain("zorg-welzijn"); // vmbo-tl
+    expect(all).not.toContain("nederlands"); // dropped kernvak
+    expect(all).not.toContain("not-a-domain");
+  });
+
+  it("returns [] for an unknown country", () => {
+    expect(allDomainValues("XX")).toEqual([]);
+    expect(allDomainValues(undefined)).toEqual([]);
   });
 });
 

@@ -11,19 +11,30 @@ import {
 import {
   getUserAssignedCountries,
   getUserAssignedSectors,
+  getUserAssignedDomains,
   getUserById,
   listUsers,
   setUserAssignedCountries,
   setUserAssignedSectors,
+  setUserAssignedDomains,
 } from "~/server/repositories/users.server";
+import { getAvailableSectors } from "~/server/availability.server";
 import {
   COUNTRIES,
   COUNTRY_LABELS,
   type CountryCode,
   isCountryCode,
 } from "~/lib/context/countries";
-import { SECTORS, SECTORS_INFO, type Sector, isSector } from "~/lib/context/sectors";
+import {
+  SECTORS,
+  SECTORS_INFO,
+  TRACKS_BY_SECTOR,
+  type Sector,
+  isSector,
+} from "~/lib/context/sectors";
+import { domainGroupsForSector, allDomainValues, type DomainGroup } from "~/lib/context/domains";
 import { loc } from "~/lib/i18n/localized";
+import type { Locale } from "~/lib/i18n";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { Button } from "~/components/ui";
 
@@ -58,10 +69,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     allUsers
       .filter((u) => u.role === "teacher")
       .map(async (u) => {
-        const [ac, as] = await Promise.all([
+        const [ac, as, ad, reachableSectors] = await Promise.all([
           getUserAssignedCountries(u.id),
           getUserAssignedSectors(u.id),
+          getUserAssignedDomains(u.id),
+          getAvailableSectors({ id: u.id, role: "teacher" }),
         ]);
+        // Offer domain checkboxes only for the sectors the teacher can reach that
+        // actually have a catalogue (hbo, vo) — mbo/wo (custom fields) are skipped.
+        const domainSectors = reachableSectors
+          .map((s) => ({ sector: s, groups: domainGroupsForSector("NL", s) }))
+          .filter((ds) => ds.groups.length > 0);
         return {
           id: u.id,
           name: u.name,
@@ -69,6 +87,8 @@ export async function loader({ request }: Route.LoaderArgs) {
           // null (unrestricted) preserved; a Set becomes a plain array to serialize.
           countries: ac ? [...ac] : null,
           sectors: as ? [...as] : null,
+          domains: ad ? [...ad] : null,
+          domainSectors,
         };
       }),
   );
@@ -103,6 +123,13 @@ export async function action({ request }: Route.ActionArgs) {
     // Empty = clear the restriction (unrestricted), not a lockout.
     await setUserAssignedCountries(userId, countries.length ? countries : null);
     await setUserAssignedSectors(userId, sectors.length ? sectors : null);
+    // Per-teacher domains (Phase 10.3): keep only known catalogue slugs.
+    const known = new Set(allDomainValues("NL"));
+    const domains = fd
+      .getAll("domains")
+      .map(String)
+      .filter((d) => known.has(d));
+    await setUserAssignedDomains(userId, domains.length ? domains : null);
     return { saved: true as const };
   }
 
@@ -145,6 +172,94 @@ function CheckAxis({
   );
 }
 
+/**
+ * Per-teacher domain/profiel assignment — grouped by the sectors the teacher can
+ * reach (and, for vo, by track), collapsed by default. The stored assignment is a
+ * flat slug set (`name="domains"`), so a slug shared across tracks (e.g. groen)
+ * appears once per group with a unique id; null assignment = all checked.
+ */
+function TeacherDomains({
+  teacherId,
+  domainSectors,
+  assigned,
+  legend,
+  hint,
+  emptyLabel,
+  sectorLabel,
+  trackHeading,
+  locale,
+}: {
+  teacherId: string;
+  domainSectors: { sector: string; groups: DomainGroup[] }[];
+  assigned: string[] | null;
+  legend: string;
+  hint: string;
+  emptyLabel: string;
+  sectorLabel: (s: string) => string;
+  trackHeading: (s: string, tracks: string[]) => string;
+  locale: Locale;
+}) {
+  const isChecked = (v: string) => assigned === null || assigned.includes(v);
+  return (
+    <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <legend className="px-1 text-sm font-semibold text-slate-800">{legend}</legend>
+      <p className="mt-1 text-xs text-slate-500">{hint}</p>
+      {domainSectors.length === 0 ? (
+        <p className="mt-2 text-sm text-slate-500">{emptyLabel}</p>
+      ) : (
+        <div className="mt-2 space-y-2">
+          {domainSectors.map((ds) => (
+            <details
+              key={ds.sector}
+              className="rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2"
+            >
+              <summary className="cursor-pointer text-sm font-medium text-slate-800">
+                {sectorLabel(ds.sector)}
+              </summary>
+              <div className="mt-2 space-y-3">
+                {ds.groups.map((g) => {
+                  const groupKey = g.tracks.join("_") || "all";
+                  const heading = g.tracks.length ? trackHeading(ds.sector, g.tracks) : null;
+                  const boxes = g.domains.map((d) => {
+                    const id = `teacher-${teacherId}-domain-${ds.sector}-${groupKey}-${d.value}`;
+                    return (
+                      <li key={id} className="flex items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          id={id}
+                          name="domains"
+                          value={d.value}
+                          defaultChecked={isChecked(d.value)}
+                          className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                        />
+                        <label htmlFor={id} className="text-sm text-slate-800">
+                          {loc(d.label, locale)}
+                        </label>
+                      </li>
+                    );
+                  });
+                  return heading ? (
+                    <fieldset key={groupKey} className="rounded-md border border-slate-200 p-2">
+                      <legend className="px-1 text-xs font-semibold text-slate-600">
+                        {heading}
+                      </legend>
+                      <ul className="mt-1 list-none space-y-2 p-0">{boxes}</ul>
+                    </fieldset>
+                  ) : (
+                    <ul key={groupKey} className="list-none space-y-2 p-0">
+                      {boxes}
+                    </ul>
+                  );
+                })}
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
+    </fieldset>
+  );
+}
+
 export default function AdminContext({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
@@ -154,6 +269,17 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
 
   const countryLabel = (id: CountryCode) => loc(COUNTRY_LABELS[id], locale);
   const sectorLabel = (id: Sector) => loc(SECTORS_INFO[id].label, locale);
+  const sectorLabelStr = (s: string) => (isSector(s) ? sectorLabel(s) : s);
+  // The track heading for a merged group (e.g. "havo · vwo"), from verified labels.
+  const trackHeading = (s: string, tracks: string[]) =>
+    isSector(s)
+      ? tracks
+          .map((tv) => {
+            const opt = TRACKS_BY_SECTOR[s].find((tr) => tr.value === tv);
+            return opt ? loc(opt.label, locale) : tv;
+          })
+          .join(" · ")
+      : tracks.join(" · ");
   // A teacher assignment is `null` (unrestricted → all checked) or a subset.
   const isAssigned = (assigned: string[] | null, id: string) =>
     assigned === null || assigned.includes(id);
@@ -263,6 +389,17 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
                         label: sectorLabel(x.id),
                         checked: isAssigned(teacher.sectors, x.id),
                       }))}
+                    />
+                    <TeacherDomains
+                      teacherId={teacher.id}
+                      domainSectors={teacher.domainSectors}
+                      assigned={teacher.domains}
+                      legend={c.domainsLegend}
+                      hint={c.domainsHint}
+                      emptyLabel={c.domainsNone}
+                      sectorLabel={sectorLabelStr}
+                      trackHeading={trackHeading}
+                      locale={locale}
                     />
                   </div>
                   <Button type="submit" className="mt-4">
