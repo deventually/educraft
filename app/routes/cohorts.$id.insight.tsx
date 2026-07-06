@@ -2,7 +2,12 @@ import { Link } from "react-router";
 import { ArrowLeft, ShieldCheck, Users, GraduationCap } from "lucide-react";
 import type { Route } from "./+types/cohorts.$id.insight";
 import { requireRole } from "~/server/auth.server";
-import { getCohort, listCohortMembers } from "~/server/repositories/cohorts.server";
+import {
+  canManageCohort,
+  getCohort,
+  getCohortTeacherIds,
+  listCohortMembers,
+} from "~/server/repositories/cohorts.server";
 import { cohortEngagement, listSummariesForCohort } from "~/server/repositories/insight.server";
 import { getUserById } from "~/server/repositories/users.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -38,8 +43,9 @@ function average(nums: number[]): number | null {
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireRole(request, "teacher", "admin");
   const cohort = await getCohort(params.id);
-  // Owner-scoped: another teacher's cohort is indistinguishable from a missing one.
-  if (!cohort || cohort.createdByUserId !== user.id) {
+  // Insight follows cohort management rights (creator, assigned co-teacher, or
+  // admin). To anyone else, the cohort is indistinguishable from a missing one.
+  if (!cohort || !canManageCohort(user, cohort, await getCohortTeacherIds(cohort.id))) {
     throw new Response("Not Found", { status: 404 });
   }
   const locale = getLocale(request);
@@ -48,14 +54,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     return t ? loc(t.name, locale) : slug;
   };
 
-  // All reads are owner-checked inside the repo; these return the cohort's own
+  // All reads are manager-checked inside the repo; these return the cohort's own
   // derived signal only — never message content.
-  const engagement = (await cohortEngagement(user.id, cohort.id)) ?? {
+  const engagement = (await cohortEngagement(user, cohort.id)) ?? {
     totals: { sessions: 0, turns: 0, lastActiveAt: null },
     perTutor: [],
     perStudent: [],
   };
-  const summaryRows = await listSummariesForCohort(user.id, cohort.id);
+  const summaryRows = await listSummariesForCohort(user, cohort.id);
   const members = await listCohortMembers(cohort.id);
 
   const engByStudent = new Map(engagement.perStudent.map((s) => [s.userId, s]));

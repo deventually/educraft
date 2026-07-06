@@ -4,7 +4,8 @@
  * + engagement counts) and, by construction, has NO query that returns message
  * content: engagement counts turns/last-active straight off the `messages` table
  * without ever reading the `content` column. Every read is guarded by cohort
- * ownership — a teacher sees only cohorts they created.
+ * management rights: the creator, an assigned co-teacher, or an admin — the same
+ * rule as `canManageCohort` (Phase 4). A non-manager sees nothing.
  *
  * Repository rule (Phase 1): all DB access goes through repositories; every
  * exported function is async; no better-sqlite3 API outside `db.server.ts`.
@@ -15,12 +16,24 @@ import { getDb } from "../db.server";
 import {
   chatSessions,
   cohortMemberships,
+  cohortTeachers,
   cohorts,
   messages,
   sessionSummaries,
   type SessionSummaryRow,
 } from "../schema.server";
+import { canManageCohort, getCohortTeacherIds } from "./cohorts.server";
 import type { SessionSummary } from "~/lib/insight/summary";
+import type { Role } from "~/lib/registry/access";
+
+/**
+ * Who is asking for insight — their id and role. Authorization mirrors cohort
+ * management: an admin always, the creator, or an assigned co-teacher.
+ */
+export interface InsightRequester {
+  id: string;
+  role: Role;
+}
 
 // ---------------------------------------------------------------------------
 // Summaries
@@ -92,14 +105,14 @@ export async function getSummary(sessionId: string): Promise<SessionSummaryRow |
 }
 
 /**
- * The cohort's de-personalised summaries — but only if the requester owns the
- * cohort. A non-owner (or unknown cohort) gets an empty list, never content.
+ * The cohort's de-personalised summaries — but only if the requester may manage
+ * the cohort. A non-manager (or unknown cohort) gets an empty list, never content.
  */
 export async function listSummariesForCohort(
-  ownerId: string,
+  requester: InsightRequester,
   cohortId: string,
 ): Promise<SessionSummaryRow[]> {
-  if (!(await ownsCohort(ownerId, cohortId))) return [];
+  if (!(await canReadInsight(requester, cohortId))) return [];
   return getDb()
     .select()
     .from(sessionSummaries)
@@ -204,12 +217,12 @@ function cohortSessions(cohortId: string): SessionMeta[] {
     .all();
 }
 
-/** Engagement for a whole cohort (owner-checked). Null if not the owner. */
+/** Engagement for a whole cohort (manager-checked). Null if not a manager. */
 export async function cohortEngagement(
-  ownerId: string,
+  requester: InsightRequester,
   cohortId: string,
 ): Promise<CohortEngagement | null> {
-  if (!(await ownsCohort(ownerId, cohortId))) return null;
+  if (!(await canReadInsight(requester, cohortId))) return null;
   const sessions = cohortSessions(cohortId);
   const stats = messageStats(sessions.map((s) => s.id));
 
@@ -232,32 +245,26 @@ export async function cohortEngagement(
 }
 
 /**
- * Engagement for a single student — only if the requester owns a cohort the
- * student belongs to. Scoped to that student's sessions in the owner's cohorts.
+ * Engagement for a single student — only if the requester manages a cohort the
+ * student belongs to. Scoped to that student's sessions in the managed cohorts.
  */
 export async function studentEngagement(
-  ownerId: string,
+  requester: InsightRequester,
   userId: string,
 ): Promise<StudentEngagement | null> {
-  const ownedCohortIds = (
-    await getDb()
-      .select({ id: cohorts.id })
-      .from(cohorts)
-      .where(eq(cohorts.createdByUserId, ownerId))
-      .all()
-  ).map((c) => c.id);
-  if (ownedCohortIds.length === 0) return null;
+  const managedCohortIds = await managedCohortIdSet(requester);
+  if (managedCohortIds.size === 0) return null;
 
   const membered = getDb()
     .select({ cohortId: cohortMemberships.cohortId })
     .from(cohortMemberships)
     .where(eq(cohortMemberships.userId, userId))
     .all()
-    .some((m) => ownedCohortIds.includes(m.cohortId));
+    .some((m) => managedCohortIds.has(m.cohortId));
   if (!membered) return null;
 
-  // Scope to the student's sessions within the owner's cohorts only (defensive:
-  // a student could belong to another teacher's cohort too).
+  // Scope to the student's sessions within the requester's managed cohorts only
+  // (defensive: a student could belong to another teacher's cohort too).
   const scoped = getDb()
     .select({
       id: chatSessions.id,
@@ -269,7 +276,7 @@ export async function studentEngagement(
     .from(chatSessions)
     .where(eq(chatSessions.userId, userId))
     .all()
-    .filter((s) => s.cohortId != null && ownedCohortIds.includes(s.cohortId));
+    .filter((s) => s.cohortId != null && managedCohortIds.has(s.cohortId));
 
   const stats = messageStats(scoped.map((s) => s.id));
   return {
@@ -332,10 +339,43 @@ export async function listAbandonedSessions(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// Ownership guard
+// Management guard — insight is visible to whoever may manage the cohort
+// (creator, assigned co-teacher, or admin), mirroring `canManageCohort`.
 // ---------------------------------------------------------------------------
 
-async function ownsCohort(ownerId: string, cohortId: string): Promise<boolean> {
+/** Whether `requester` may read a single cohort's insight. */
+async function canReadInsight(requester: InsightRequester, cohortId: string): Promise<boolean> {
   const cohort = getDb().select().from(cohorts).where(eq(cohorts.id, cohortId)).get();
-  return !!cohort && cohort.createdByUserId === ownerId;
+  if (!cohort) return false;
+  return canManageCohort(requester, cohort, await getCohortTeacherIds(cohortId));
+}
+
+/**
+ * The set of cohort ids `requester` may see insight for: every cohort for an
+ * admin, otherwise the ones they created plus the ones they're assigned to.
+ */
+async function managedCohortIdSet(requester: InsightRequester): Promise<Set<string>> {
+  const db = getDb();
+  if (requester.role === "admin") {
+    return new Set(
+      db
+        .select({ id: cohorts.id })
+        .from(cohorts)
+        .all()
+        .map((c) => c.id),
+    );
+  }
+  const created = db
+    .select({ id: cohorts.id })
+    .from(cohorts)
+    .where(eq(cohorts.createdByUserId, requester.id))
+    .all()
+    .map((c) => c.id);
+  const assigned = db
+    .select({ cohortId: cohortTeachers.cohortId })
+    .from(cohortTeachers)
+    .where(eq(cohortTeachers.userId, requester.id))
+    .all()
+    .map((r) => r.cohortId);
+  return new Set([...created, ...assigned]);
 }

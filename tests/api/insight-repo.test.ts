@@ -97,7 +97,7 @@ describe("insight repository — summaries", () => {
       helpfulness: -1,
     });
 
-    const rows = await insight.listSummariesForCohort(owner, mine.id);
+    const rows = await insight.listSummariesForCohort({ id: owner, role: "teacher" }, mine.id);
     expect(rows.map((r) => r.sessionId)).toEqual(["sum-mine"]);
     // The mentor-facing row carries only derived signal — no `content`/`messages` field.
     for (const row of rows) {
@@ -106,7 +106,39 @@ describe("insight repository — summaries", () => {
     }
 
     // A non-owner asking for the same cohort gets nothing.
-    expect(await insight.listSummariesForCohort(other, mine.id)).toEqual([]);
+    expect(await insight.listSummariesForCohort({ id: other, role: "teacher" }, mine.id)).toEqual(
+      [],
+    );
+  });
+
+  it("lets an assigned co-teacher and an admin read a cohort's summaries", async () => {
+    const owner = "teacher-shares";
+    const co = "co-teacher-shares";
+    const cohort = await cohorts.createCohort({
+      createdByUserId: owner,
+      name: "Shared",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addCohortTeacher(cohort.id, co);
+    await insight.saveSummary({
+      sessionId: "shared-sum",
+      userId: "s-shared",
+      cohortId: cohort.id,
+      toolSlug: "mentorai",
+      summary,
+      helpfulness: 1,
+    });
+
+    // Co-teacher (Phase 4) manages the cohort, so they see its insight too.
+    const coRows = await insight.listSummariesForCohort({ id: co, role: "teacher" }, cohort.id);
+    expect(coRows.map((r) => r.sessionId)).toEqual(["shared-sum"]);
+
+    // An admin has cohort oversight regardless of authorship.
+    const adminRows = await insight.listSummariesForCohort(
+      { id: "some-admin", role: "admin" },
+      cohort.id,
+    );
+    expect(adminRows.map((r) => r.sessionId)).toEqual(["shared-sum"]);
   });
 });
 
@@ -177,7 +209,7 @@ describe("insight repository — engagement", () => {
     const eng = await cohorts.getCohort(cohort.id); // sanity: cohort exists
     expect(eng).not.toBeNull();
 
-    const c = await insight.cohortEngagement(owner, cohort.id);
+    const c = await insight.cohortEngagement({ id: owner, role: "teacher" }, cohort.id);
     expect(c).not.toBeNull();
     expect(c!.totals.sessions).toBe(4);
     expect(c!.totals.turns).toBe(10); // 4 + 2 + 2 + 2
@@ -219,11 +251,16 @@ describe("insight repository — engagement", () => {
       ],
     });
 
-    const se = await insight.studentEngagement(owner, "se-student");
+    const se = await insight.studentEngagement({ id: owner, role: "teacher" }, "se-student");
     expect(se).not.toBeNull();
     expect(se!.totals.sessions).toBe(1);
     expect(se!.totals.turns).toBe(2);
     expect(se!.perTutor[0]?.toolSlug).toBe("mentorai");
+
+    // A co-teacher assigned to that cohort sees the same student engagement.
+    await cohorts.addCohortTeacher(cohort.id, "co-se");
+    const co = await insight.studentEngagement({ id: "co-se", role: "teacher" }, "se-student");
+    expect(co?.totals.sessions).toBe(1);
   });
 
   it("denies a non-owner: cohortEngagement/studentEngagement/listSummaries return empty", async () => {
@@ -248,9 +285,10 @@ describe("insight repository — engagement", () => {
       ],
     });
 
-    expect(await insight.cohortEngagement(intruder, cohort.id)).toBeNull();
-    expect(await insight.studentEngagement(intruder, "priv-student")).toBeNull();
-    expect(await insight.listSummariesForCohort(intruder, cohort.id)).toEqual([]);
+    const stranger = { id: intruder, role: "teacher" as const };
+    expect(await insight.cohortEngagement(stranger, cohort.id)).toBeNull();
+    expect(await insight.studentEngagement(stranger, "priv-student")).toBeNull();
+    expect(await insight.listSummariesForCohort(stranger, cohort.id)).toEqual([]);
   });
 });
 
