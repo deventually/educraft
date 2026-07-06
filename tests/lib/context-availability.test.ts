@@ -16,25 +16,31 @@ vi.mock("~/server/log.server", () => ({ log: logMock }));
 const {
   enabledCountriesMock,
   enabledSectorsMock,
+  enabledDomainsMock,
   assignedCountriesMock,
   assignedSectorsMock,
+  assignedDomainsMock,
   customAccessMock,
 } = vi.hoisted(() => ({
   enabledCountriesMock: vi.fn(),
   enabledSectorsMock: vi.fn(),
+  enabledDomainsMock: vi.fn(),
   assignedCountriesMock: vi.fn(),
   assignedSectorsMock: vi.fn(),
+  assignedDomainsMock: vi.fn(),
   customAccessMock: vi.fn(),
 }));
 vi.mock("~/server/repositories/settings.server", async (orig) => ({
   ...(await orig<typeof import("~/server/repositories/settings.server")>()),
   getEnabledCountries: enabledCountriesMock,
   getEnabledSectors: enabledSectorsMock,
+  getEnabledDomains: enabledDomainsMock,
 }));
 vi.mock("~/server/repositories/users.server", async (orig) => ({
   ...(await orig<typeof import("~/server/repositories/users.server")>()),
   getUserAssignedCountries: assignedCountriesMock,
   getUserAssignedSectors: assignedSectorsMock,
+  getUserAssignedDomains: assignedDomainsMock,
   getUserContextCustomAccess: customAccessMock,
 }));
 
@@ -67,8 +73,10 @@ beforeEach(() => {
   for (const m of [
     enabledCountriesMock,
     enabledSectorsMock,
+    enabledDomainsMock,
     assignedCountriesMock,
     assignedSectorsMock,
+    assignedDomainsMock,
   ]) {
     m.mockReset();
     m.mockResolvedValue(null);
@@ -163,5 +171,60 @@ describe("lockout fallback", () => {
     enabledSectorsMock.mockResolvedValue(["does-not-exist"]);
     expect(await availability.getAvailableSectors(teacher)).toEqual([...SECTORS]);
     expect(logMock).toHaveBeenCalled();
+  });
+});
+
+describe("getAvailableDomains — instance axis + override (P12)", () => {
+  // The real vo/havo catalogue (getDomainsForTrack is not mocked).
+  const HAVO = ["nt", "ng", "em", "cm"];
+
+  it("narrows an unactivated teacher by the INSTANCE domain set", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt"]);
+  });
+
+  it("an activated teacher uses their OWN domain set, ignoring the instance", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt"]);
+    assignedDomainsMock.mockResolvedValue(new Set(["em"]));
+    activate("teacher-1");
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["em"]);
+  });
+
+  it("an activated teacher with no domain selection = the whole catalogue", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt"]); // instance restricted…
+    assignedDomainsMock.mockResolvedValue(null); // …teacher picked none
+    activate("teacher-1");
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(HAVO);
+  });
+
+  it("an admin follows the instance domain set (never the per-teacher getter)", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt", "ng"]);
+    assignedDomainsMock.mockResolvedValue(new Set(["em"]));
+    expect(await availability.getAvailableDomains(admin, "vo", "havo")).toEqual(["nt", "ng"]);
+    expect(assignedDomainsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns [] for a sector with no catalogue, regardless of instance settings", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt"]);
+    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toEqual([]);
+    expect(await availability.getAvailableDomains(teacher, "wo", "master")).toEqual([]);
+  });
+});
+
+describe("getAvailableDomainSlugs — flat effective set for the editor loader (P12)", () => {
+  it("is the instance set for an unactivated teacher, the own set when activated, null = all", async () => {
+    enabledDomainsMock.mockResolvedValue(["nt"]);
+    assignedDomainsMock.mockResolvedValue(new Set(["em"]));
+
+    // Unactivated → the instance set.
+    expect(await availability.getAvailableDomainSlugs(teacher)).toEqual(["nt"]);
+
+    // Activated → the teacher's own set (instance ignored).
+    activate("teacher-1");
+    expect([...(await availability.getAvailableDomainSlugs(teacher))!].sort()).toEqual(["em"]);
+
+    // Activated + no selection → null (unrestricted).
+    assignedDomainsMock.mockResolvedValue(null);
+    expect(await availability.getAvailableDomainSlugs(teacher)).toBeNull();
   });
 });

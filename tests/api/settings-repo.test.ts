@@ -90,3 +90,16 @@ describe("settings repository — enabled countries/sectors (P9 setters)", () =>
     await repo.setEnabledSectors(null); // reset
   });
 });
+
+describe("settings repository — enabled domains (P12 instance axis)", () => {
+  it("returns null when unset (default = whole catalogue)", async () => {
+    expect(await repo.getEnabledDomains()).toBeNull();
+  });
+
+  it("round-trips an explicit domain allow-list and clears with null", async () => {
+    await repo.setEnabledDomains(["nt", "ICT"]);
+    expect(await repo.getEnabledDomains()).toEqual(["nt", "ICT"]);
+    await repo.setEnabledDomains(null);
+    expect(await repo.getEnabledDomains()).toBeNull();
+  });
+});

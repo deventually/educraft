@@ -24,6 +24,7 @@ import {
   getEnabledModels,
   getEnabledCountries,
   getEnabledSectors,
+  getEnabledDomains,
 } from "./repositories/settings.server";
 import {
   getUserToolAllowlist,
@@ -182,13 +183,23 @@ export async function getAvailableSectors(user: AvailabilityUser): Promise<Secto
 }
 
 /**
- * The domains/profielen a teacher/admin may pick for a given (sector, track) —
- * the track-scoped catalogue ∩ the per-teacher assignment (Phase 10.3). No
- * instance-level domain axis (per-teacher only). An empty catalogue (mbo/wo, or
- * a vo sector with no track yet) short-circuits to [] — no lockout warning, since
- * "no catalogue" isn't "everything banned". Otherwise the composeAvailable
- * lockout guard applies: an assignment excluding every catalogue slug falls back
- * to the full catalogue and warns (no editor may offer nothing).
+ * The flat domain/profiel allow-list that governs a user under the OVERRIDE model
+ * (Phase 12): an activated teacher's own assignment (instance ignored, null =
+ * all), else the instance domain set. `null` = no restriction. This is the
+ * track-independent effective set the editor loader filters each catalogue by;
+ * `getAvailableDomains` layers a specific (sector, track) catalogue on top.
+ */
+export async function getAvailableDomainSlugs(user: AvailabilityUser): Promise<string[] | null> {
+  const selection = await axisSelection(user, getEnabledDomains, getUserAssignedDomains);
+  return selection ? [...selection] : null;
+}
+
+/**
+ * The domains/profielen a teacher/admin may pick for a given (sector, track): the
+ * track-scoped catalogue filtered by the effective domain allow-list
+ * (`getAvailableDomainSlugs`). An empty catalogue (mbo/wo, or a vo sector with no
+ * track yet) short-circuits to [] — "no catalogue" isn't "everything banned", so
+ * no lockout warning. Otherwise the `resolveAxis` lockout guard applies.
  */
 export async function getAvailableDomains(
   user: AvailabilityUser,
@@ -197,6 +208,6 @@ export async function getAvailableDomains(
 ): Promise<string[]> {
   const catalogue = getDomainsForTrack(DEFAULT_COUNTRY, sector, track).map((d) => d.value);
   if (catalogue.length === 0) return [];
-  const assigned = user.role === "teacher" ? await getUserAssignedDomains(user.id) : null;
-  return resolveAxis(catalogue, assigned, "availability_no_available_domains");
+  const selection = await getAvailableDomainSlugs(user);
+  return resolveAxis(catalogue, selection, "availability_no_available_domains");
 }

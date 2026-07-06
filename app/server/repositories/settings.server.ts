@@ -63,6 +63,7 @@ export async function setToolSetting(slug: string, patch: ToolSettingPatch): Pro
 const ENABLED_MODELS_KEY = "enabledModels";
 const ENABLED_COUNTRIES_KEY = "enabledCountries";
 const ENABLED_SECTORS_KEY = "enabledSectors";
+const ENABLED_DOMAINS_KEY = "enabledDomains";
 
 /** Read an instance_settings JSON `string[]` list by key, or null when unset. */
 async function getInstanceList(key: string): Promise<string[] | null> {
@@ -92,6 +93,15 @@ export async function getEnabledCountries(): Promise<string[] | null> {
 
 export async function getEnabledSectors(): Promise<string[] | null> {
   return getInstanceList(ENABLED_SECTORS_KEY);
+}
+
+/**
+ * The admin's instance domain/profiel allow-list (Phase 12), or null when unset
+ * (= whole catalogue). The instance analog of the per-teacher domain assignment;
+ * a flat slug set filtered against each track catalogue at read time.
+ */
+export async function getEnabledDomains(): Promise<string[] | null> {
+  return getInstanceList(ENABLED_DOMAINS_KEY);
 }
 
 /** Upsert an instance_settings JSON `string[]` list by key; `null` deletes it. */
@@ -129,4 +139,9 @@ export async function setEnabledCountries(ids: string[] | null): Promise<void> {
 
 export async function setEnabledSectors(ids: string[] | null): Promise<void> {
   return setInstanceList(ENABLED_SECTORS_KEY, ids);
+}
+
+/** Set the instance domain allow-list (Phase 12); `null`/`[]` clears it (= all). */
+export async function setEnabledDomains(ids: string[] | null): Promise<void> {
+  return setInstanceList(ENABLED_DOMAINS_KEY, ids);
 }
