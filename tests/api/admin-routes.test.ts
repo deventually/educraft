@@ -142,6 +142,68 @@ describe("admin.context action — instance lockout guard", () => {
   });
 });
 
+describe("admin.context action — per-teacher assignment", () => {
+  it("assigns a subset to a teacher, then clears it back to unrestricted", async () => {
+    const teacher = await users.createUser({
+      name: "Assignable",
+      email: "assignable@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id, countries: ["NL"], sectors: ["mbo", "hbo"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect([...(await users.getUserAssignedCountries(teacher.id))!]).toEqual(["NL"]);
+    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
+
+    // An empty submission clears the assignment (unrestricted, not a lockout).
+    const cleared = (await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id }),
+    )) as { saved?: boolean };
+    expect(cleared.saved).toBe(true);
+    expect(await users.getUserAssignedCountries(teacher.id)).toBeNull();
+    expect(await users.getUserAssignedSectors(teacher.id)).toBeNull();
+  });
+
+  it("catalogue-filters the submitted codes before writing", async () => {
+    const teacher = await users.createUser({
+      name: "Filtered",
+      email: "filtered@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id, sectors: ["wo", "not-a-sector"] }),
+    );
+    expect([...(await users.getUserAssignedSectors(teacher.id))!]).toEqual(["wo"]);
+  });
+
+  it("refuses (404) a per-teacher write whose userId is not a teacher", async () => {
+    const student = await users.createUser({
+      name: "Not a teacher",
+      passwordHash: "scrypt:a:b",
+      role: "student",
+    });
+    await expect(
+      invoke(
+        contextRoute.action,
+        post({ intent: "teacher", userId: student.id, sectors: ["mbo"] }),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(await users.getUserAssignedSectors(student.id)).toBeNull(); // never written
+  });
+
+  it("refuses (404) a per-teacher write for an unknown userId", async () => {
+    await expect(
+      invoke(contextRoute.action, post({ intent: "teacher", userId: "ghost", sectors: ["mbo"] })),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});
+
 describe("admin.invites action", () => {
   it("mints a teacher invite carrying the chosen tool allow-list", async () => {
     const res = (await invoke(
