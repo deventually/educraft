@@ -151,6 +151,29 @@ const NL_DIRECTIVE = (n: number) =>
 const EN_DIRECTIVE = (n: number) =>
   `- Match complexity, examples and expectations to this level (EQF ${n}); adapt the language register only for text the learner reads directly. Do not mention the level itself.`;
 
+describe("formatProfile — vo profiel injection (P10.2)", () => {
+  const havo = {
+    id: "h1",
+    name: "5 havo N&T",
+    country: "NL",
+    sector: "vo",
+    track: "havo",
+    domain: "nt",
+    nationalLevel: "4",
+  } as ContextProfile;
+
+  it("injects the vo profiel with a 'Profiel' label (no pack → not lost)", () => {
+    expect(formatProfile(havo, "nl")).toContain("Profiel: Natuur & Techniek");
+    expect(formatProfile(havo, "en")).toContain("Profile: Nature & Technology");
+  });
+
+  it("keeps the domain implicit for hbo (pack + programme carry it — June 2026 slimming)", () => {
+    // ict resolves the hbo-i pack; no bare 'Domein: ICT' line is added.
+    expect(formatProfile(ict, "nl")).not.toMatch(/Domein: ICT/);
+    expect(formatProfile(generic, "nl")).not.toMatch(/Domein:/);
+  });
+});
+
 describe("formatProfile — EQF 1–8 level adaptation", () => {
   it("accepts the full ladder: EQF 1 (entry) and EQF 8 (doctorate)", () => {
     const eqf1 = formatProfile({ ...generic, eqf: 1 }, "nl");

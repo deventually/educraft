@@ -9,8 +9,12 @@ import { useRef, useState } from "react";
 import { X, Plus, RotateCcw, ExternalLink } from "lucide-react";
 import type { CustomField, PackFieldValue } from "~/lib/context/types";
 import type { PackField } from "~/lib/context/packs";
-import { getDomainsForSector } from "~/lib/context/domains";
-import { showsProgramme, showsProfessionalContext } from "~/lib/context/relevance";
+import { getDomainsForTrack, type DomainOption } from "~/lib/context/domains";
+import {
+  showsProgramme,
+  showsProfessionalContext,
+  domainFieldLabel,
+} from "~/lib/context/relevance";
 import { resolveFramework } from "~/lib/context/frameworks";
 import { COUNTRY_LABELS, type CountryCode } from "~/lib/context/countries";
 import {
@@ -100,21 +104,29 @@ export function DomainSelect({
   onChange,
   country = "NL",
   sector = "hbo",
+  track,
 }: {
   value: string;
   onChange: (v: string) => void;
-  /** Scope the options to a sector's catalogue; defaults to the legacy hbo shape. */
+  /** Scope the options to a (country, sector, track) catalogue; hbo ignores track. */
   country?: string;
   sector?: string;
+  track?: string;
 }) {
   const t = useT();
   const locale = useLocale();
-  const options = getDomainsForSector(country, sector);
+  const options = getDomainsForTrack(country, sector, track);
+  // Back-compat: a legacy stored value outside the track catalogue is kept as a
+  // selected option so opening + editing a pre-P10 profile doesn't blank it.
+  const withLegacy =
+    value && !options.some((d) => d.value === value)
+      ? [...options, { value, label: value } satisfies DomainOption]
+      : options;
   return (
-    <Field id="cf-domain" label={t.settings.domain}>
+    <Field id="cf-domain" label={loc(domainFieldLabel(sector), locale)}>
       <Select id="cf-domain" name="domain" value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{t.settings.domainNone}</option>
-        {options.map((d) => (
+        {withLegacy.map((d) => (
           <option key={d.value} value={d.value}>
             {loc(d.label, locale)}
           </option>

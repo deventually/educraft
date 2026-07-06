@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { showsProgramme, showsProfessionalContext, courseLabel } from "~/lib/context/relevance";
+import {
+  showsProgramme,
+  showsProfessionalContext,
+  courseLabel,
+  domainFieldLabel,
+} from "~/lib/context/relevance";
 import { loc } from "~/lib/i18n/localized";
 
 describe("showsProgramme", () => {
@@ -56,5 +61,16 @@ describe("courseLabel", () => {
     expect(loc(courseLabel("mbo"), "en")).toBe("Course");
     expect(loc(courseLabel("hbo"), "en")).toBe("Course");
     expect(loc(courseLabel("wo"), "en")).toBe("Course");
+  });
+});
+
+describe("domainFieldLabel", () => {
+  it("labels the domain field 'Profiel' for vo and 'Domein' for every other sector", () => {
+    expect(loc(domainFieldLabel("vo"), "nl")).toBe("Profiel");
+    expect(loc(domainFieldLabel("vo"), "en")).toBe("Profile");
+    for (const s of ["mbo", "hbo", "wo", undefined]) {
+      expect(loc(domainFieldLabel(s), "nl")).toBe("Domein");
+      expect(loc(domainFieldLabel(s), "en")).toBe("Domain");
+    }
   });
 });

@@ -1,6 +1,8 @@
 import type { ContextProfile, PackFieldValue } from "./types";
 import type { PackField } from "./packs";
 import { resolveFramework } from "./frameworks";
+import { getDomainsForTrack } from "./domains";
+import { domainFieldLabel } from "./relevance";
 import { resolveLevel } from "./derive";
 import { SECTORS_INFO, isSector, learnerNounFor, teacherNounFor, type Sector } from "./sectors";
 import { loc } from "~/lib/i18n/localized";
@@ -150,6 +152,17 @@ export function formatProfile(
   // here only duplicates and dilutes the task instruction.
   if (profile.programme) lines.push(`- ${t.programme}: ${profile.programme}`);
   if (profile.courseName) lines.push(`- ${t.course}: ${profile.courseName}`);
+  // Domain: kept implicit where a verified framework exists (hbo — the pack
+  // header + programme already convey it; June 2026 slimming). For vo there is no
+  // pack and often no programme, so the chosen profiel IS the signal — inject it
+  // with its label ("Profiel: Natuur & Techniek") so it isn't lost.
+  if (sector === "vo" && profile.domain) {
+    const opt = getDomainsForTrack(profile.country, profile.sector, profile.track).find(
+      (d) => d.value === profile.domain,
+    );
+    const value = opt ? loc(opt.label, lang) : profile.domain;
+    lines.push(`- ${loc(domainFieldLabel(profile.sector), lang)}: ${value}`);
+  }
   if (profile.studyYear) lines.push(`- ${t.year}: ${profile.studyYear}`);
   // Level: derive the country-neutral EQF from the profile (national level, else
   // legacy/synthetic eqf) and inject only the number + the existing directive —

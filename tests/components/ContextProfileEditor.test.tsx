@@ -105,13 +105,28 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     expect(link.href).toContain("nlqf.nl");
   });
 
-  it("scopes domain options to the chosen sector (hbo → ICT present)", async () => {
+  it("scopes domain options to the chosen sector (hbo → ICT present, labelled 'Domein')", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
     await toStep2(user);
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
     expect(values).toContain("ICT");
+    const label = container.querySelector(`label[for="${domain.id}"]`);
+    expect(label?.textContent?.trim()).toBe("Domein");
+  });
+
+  it("scopes vo domain options to the track's profielen and labels the field 'Profiel'", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+    await toStep2(user, "vo::havo");
+    const domain = sel(container, "domain") as HTMLSelectElement;
+    const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
+    expect(values).toContain("nt"); // Natuur & Techniek
+    expect(values).not.toContain("ICT"); // hbo domain, not offered for vo
+    expect(values).not.toContain("zw"); // vmbo profiel, not offered on havo
+    const label = container.querySelector(`label[for="${domain.id}"]`);
+    expect(label?.textContent?.trim()).toBe("Profiel");
   });
 
   it("reveals the hbo-i pack with its source when ICT is chosen", async () => {
@@ -123,11 +138,11 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     expect(screen.getByText(/hbo-i domeinbeschrijving/i)).toBeInTheDocument();
   });
 
-  it("shows an honest 'no national framework' note for a vo domain", async () => {
+  it("shows an honest 'no national framework' note for a vo profiel", async () => {
     const user = userEvent.setup();
     renderEditor();
     await toStep2(user, "vo::havo");
-    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "zw");
+    await user.selectOptions(screen.getByLabelText(/profiel|domein|domain/i), "nt");
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
   });
 });
@@ -219,6 +234,25 @@ describe("ContextProfileEditor — edit mode", () => {
     expect((sel(container, "pedagogy") as HTMLInputElement).value).toBe(
       "Probleemgestuurd onderwijs",
     );
+  });
+
+  it("preserves a legacy stored domain no longer in the track catalogue (P10.2 back-compat)", () => {
+    // A pre-P10 flat-vo profile stored a kernvak slug that the track catalogue no
+    // longer offers — the editor keeps it as a selected option so opening +
+    // editing doesn't silently blank it.
+    const legacy = {
+      id: "leg",
+      name: "Legacy vo",
+      country: "NL",
+      sector: "vo",
+      track: "havo",
+      domain: "nederlands",
+    } as ContextProfile;
+    const { container } = renderEditor({ profile: legacy });
+    const domain = sel(container, "domain") as HTMLSelectElement;
+    expect(domain.value).toBe("nederlands");
+    const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
+    expect(values).toContain("nederlands");
   });
 });
 

@@ -14,7 +14,7 @@ import { getAvailableCountries, getAvailableSectors } from "~/server/availabilit
 import type { ContextProfile } from "~/lib/context/types";
 import { parseContextForm } from "~/lib/context/parseForm";
 import { resolveLevel } from "~/lib/context/derive";
-import { getDomainsForSector } from "~/lib/context/domains";
+import { getDomainsForTrack } from "~/lib/context/domains";
 import { Button, Card, Badge } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { ContextProfileEditor } from "~/components/context/ContextProfileEditor";
@@ -82,8 +82,9 @@ export async function action({ request }: Route.ActionArgs) {
 /** A short, readable summary line for a profile card. */
 function ProfileMeta({ profile, locale }: { profile: ContextProfile; locale: "nl" | "en" }) {
   const domainLabel = profile.domain
-    ? (getDomainsForSector(profile.country, profile.sector).find((d) => d.value === profile.domain)
-        ?.label ?? profile.domain)
+    ? (getDomainsForTrack(profile.country, profile.sector, profile.track).find(
+        (d) => d.value === profile.domain,
+      )?.label ?? profile.domain)
     : undefined;
   const parts = [
     profile.programme,

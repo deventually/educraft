@@ -7,7 +7,7 @@
  */
 import type { ContextProfile, CustomField, PackFieldValue } from "./types";
 import { resolveFramework } from "./frameworks";
-import { getDomainsForSector } from "./domains";
+import { getDomainsForTrack } from "./domains";
 import { isCountryCode, type CountryCode } from "./countries";
 import { isSector, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
 import { showsProgramme, showsProfessionalContext } from "./relevance";
@@ -27,10 +27,15 @@ function str(v: FormDataEntryValue | null): string | undefined {
   return s || undefined;
 }
 
-/** A domain is valid only if it belongs to the (country, sector) catalogue. */
-function validDomain(country: string, sector: string, raw: string | undefined): string | undefined {
+/** A domain is valid only if it belongs to the (country, sector, track) catalogue. */
+function validDomain(
+  country: string,
+  sector: string,
+  track: string | undefined,
+  raw: string | undefined,
+): string | undefined {
   if (!raw) return undefined;
-  return getDomainsForSector(country, sector).some((d) => d.value === raw) ? raw : undefined;
+  return getDomainsForTrack(country, sector, track).some((d) => d.value === raw) ? raw : undefined;
 }
 
 /** Collect + validate the selected domain's pack answers from the form. */
@@ -128,7 +133,7 @@ export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): P
   const learnerNounOverride =
     rawNoun && learnerNounChoices(effSector).includes(rawNoun) ? rawNoun : undefined;
 
-  const domain = validDomain(effCountry, effSector, str(fd.get("domain")));
+  const domain = validDomain(effCountry, effSector, track, str(fd.get("domain")));
   const yearRaw = String(fd.get("studyYear") ?? "");
   const eqfRaw = String(fd.get("eqf") ?? "");
   const year = Number(yearRaw);

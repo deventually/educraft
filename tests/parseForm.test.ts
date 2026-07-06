@@ -248,16 +248,40 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
     ).toBe("havo");
   });
 
-  it("gates the domain by the sector's catalogue", () => {
+  it("gates the domain by the track's catalogue (P10)", () => {
+    // A vmbo beroepsgericht profiel is valid on a vmbo track…
     expect(
       parseContextForm(
         fd([
           ["name", "x"],
           ["sector", "vo"],
+          ["track", "vmbo-bb"],
           ["domain", "zw"],
         ]),
       ).input?.domain,
     ).toBe("zw");
+    // …but rejected on a havo track (havo offers N&T/N&G/E&M/C&M only).
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["domain", "zw"],
+        ]),
+      ).input?.domain,
+    ).toBeUndefined();
+    // A havo profiel is accepted on a havo track.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["domain", "nt"],
+        ]),
+      ).input?.domain,
+    ).toBe("nt");
     // 'zw' is a vo slug, not an hbo domain → dropped for hbo.
     expect(
       parseContextForm(
