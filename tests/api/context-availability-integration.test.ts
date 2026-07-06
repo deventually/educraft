@@ -21,8 +21,8 @@ beforeAll(async () => {
   ]);
 });
 
-describe("P9 write side ↔ P8 compose seam (real storage, no mocks)", () => {
-  it("narrows getAvailableSectors by the written instance + teacher assignment", async () => {
+describe("override model ↔ compose seam (real storage, no mocks)", () => {
+  it("an activated teacher overrides the instance; deactivating is non-destructive", async () => {
     const row = await users.createUser({
       name: "Real",
       email: "real@example.com",
@@ -33,16 +33,27 @@ describe("P9 write side ↔ P8 compose seam (real storage, no mocks)", () => {
     await settings.setEnabledSectors(["mbo", "hbo", "wo"]);
     await users.setUserAssignedSectors(teacher.id, ["mbo", "hbo"]);
 
-    // instance ∩ teacher, in catalogue order.
-    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo"]);
-
-    // Clearing the teacher assignment falls back to the instance set.
-    await users.setUserAssignedSectors(teacher.id, null);
+    // Not activated yet → inherit the instance (the assignment is ignored).
     expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo", "wo"]);
 
-    // Clearing the instance setting returns to the full catalogue.
-    await settings.setEnabledSectors(null);
+    // Activate → the teacher's own set wins, instance ignored (catalogue order).
+    await users.setUserContextCustomAccess(teacher.id, true);
+    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo"]);
+
+    // Deactivate → inherit the instance again; the saved assignment is untouched.
+    await users.setUserContextCustomAccess(teacher.id, false);
+    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo", "wo"]);
+
+    // Re-activate → the preserved assignment comes right back (non-destructive).
+    await users.setUserContextCustomAccess(teacher.id, true);
+    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo"]);
+
+    // An activated teacher with an empty selection = ALL, ignoring the instance.
+    await users.setUserAssignedSectors(teacher.id, null);
     expect(await availability.getAvailableSectors(teacher)).toEqual(["vo", "mbo", "hbo", "wo"]);
+
+    await users.setUserContextCustomAccess(teacher.id, false);
+    await settings.setEnabledSectors(null);
   });
 
   it("ignores a per-teacher assignment for an admin (instance set only)", async () => {

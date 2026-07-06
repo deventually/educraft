@@ -30,6 +30,7 @@ import {
   getUserAssignedCountries,
   getUserAssignedSectors,
   getUserAssignedDomains,
+  getUserContextCustomAccess,
 } from "./repositories/users.server";
 import { getAllowedToolSlugs } from "./repositories/cohorts.server";
 
@@ -122,20 +123,21 @@ export async function getSelectableModels(): Promise<PickerModel[]> {
 }
 
 /**
- * Compose the shipped catalogue with an instance allow-list and a per-teacher
- * assignment — each layer default-open (null = no restriction). Mirrors the model
- * lockout guard: if the intersection is empty, someone has locked everyone out,
- * so fall back to the full catalogue and warn (no editor may offer nothing).
+ * Resolve one availability axis (country/sector/domain) to the catalogue slugs a
+ * user may pick, under the Phase 12 OVERRIDE model. `selection` is the single set
+ * that governs (see `axisSelection`); null/empty = no restriction (the whole
+ * catalogue). A non-empty selection filters the catalogue; if it filters
+ * everything away (a garbage/legacy slug), fall back to the whole catalogue and
+ * warn — no editor may offer nothing.
  */
-function composeAvailable<T extends string>(
+function resolveAxis<T extends string>(
   catalogue: readonly T[],
-  instanceEnabled: string[] | null,
-  teacherAssigned: Set<string> | null,
+  selection: Iterable<string> | null,
   lockoutKey: string,
 ): T[] {
-  let ids = [...catalogue];
-  if (instanceEnabled) ids = ids.filter((x) => instanceEnabled.includes(x));
-  if (teacherAssigned) ids = ids.filter((x) => teacherAssigned.has(x));
+  const set = selection ? new Set(selection) : null;
+  if (!set || set.size === 0) return [...catalogue];
+  const ids = catalogue.filter((x) => set.has(x));
   if (ids.length === 0) {
     log(lockoutKey, { fallback: "all" });
     return [...catalogue];
@@ -144,30 +146,39 @@ function composeAvailable<T extends string>(
 }
 
 /**
- * The countries a teacher/admin may pick in the context editor (Phase 8):
- * shipped catalogue ∩ instance-enabled ∩ per-teacher-assigned. Per-teacher
- * assignment applies to teachers only; admins get the instance-enabled set.
+ * The single selection that governs a user's axis under the OVERRIDE model
+ * (Phase 12). An *activated* teacher uses their own assignment — the instance is
+ * ignored entirely, so they may pick beyond it (empty = all). Everyone else
+ * (admin, unactivated teacher) follows the instance-enabled list. Returned raw
+ * (null = no restriction) for `resolveAxis` to interpret. The `&&` short-circuit
+ * keeps admins from ever touching the per-teacher getters.
+ */
+async function axisSelection(
+  user: AvailabilityUser,
+  instanceEnabled: () => Promise<string[] | null>,
+  teacherAssigned: (id: string) => Promise<Set<string> | null>,
+): Promise<Iterable<string> | null> {
+  if (user.role === "teacher" && (await getUserContextCustomAccess(user.id))) {
+    return teacherAssigned(user.id);
+  }
+  return instanceEnabled();
+}
+
+/**
+ * The countries a teacher/admin may pick in the context editor. OVERRIDE model
+ * (Phase 12): an activated teacher's own set wins (instance ignored, empty =
+ * all); admins and unactivated teachers follow the instance-enabled set.
  * Students are N/A (no editor — their level comes from the cohort profile).
  */
 export async function getAvailableCountries(user: AvailabilityUser): Promise<CountryCode[]> {
-  const assigned = user.role === "teacher" ? await getUserAssignedCountries(user.id) : null;
-  return composeAvailable(
-    COUNTRIES,
-    await getEnabledCountries(),
-    assigned,
-    "availability_no_available_countries",
-  );
+  const selection = await axisSelection(user, getEnabledCountries, getUserAssignedCountries);
+  return resolveAxis(COUNTRIES, selection, "availability_no_available_countries");
 }
 
 /** The sectors a teacher/admin may pick in the context editor (see above). */
 export async function getAvailableSectors(user: AvailabilityUser): Promise<Sector[]> {
-  const assigned = user.role === "teacher" ? await getUserAssignedSectors(user.id) : null;
-  return composeAvailable(
-    SECTORS,
-    await getEnabledSectors(),
-    assigned,
-    "availability_no_available_sectors",
-  );
+  const selection = await axisSelection(user, getEnabledSectors, getUserAssignedSectors);
+  return resolveAxis(SECTORS, selection, "availability_no_available_sectors");
 }
 
 /**
@@ -187,5 +198,5 @@ export async function getAvailableDomains(
   const catalogue = getDomainsForTrack(DEFAULT_COUNTRY, sector, track).map((d) => d.value);
   if (catalogue.length === 0) return [];
   const assigned = user.role === "teacher" ? await getUserAssignedDomains(user.id) : null;
-  return composeAvailable(catalogue, null, assigned, "availability_no_available_domains");
+  return resolveAxis(catalogue, assigned, "availability_no_available_domains");
 }
