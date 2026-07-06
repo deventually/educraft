@@ -47,6 +47,10 @@ These realize the [Vision](../docs/VISION.md) and run alongside the phases above
 - **Framework-pack system** — generalize the hbo-i pack into the
   [pack mechanism](Context-Model.md#packs); add a first non-NL country (e.g. US or
   UK) as a second pack.
+- **Per-teacher access override** *(P12, shipped)* — admins set instance defaults on the
+  country / sector / domain axes; a teacher inherits them unless given *custom access*,
+  which then replaces the instance for that teacher. See
+  [Context Model](Context-Model.md#availability--per-teacher-override-p12).
 - **Multilingual UI** — extend the i18n catalog beyond nl/en.
 - **Global reach** — target regions: Europe, US, Canada, Australia, New Zealand,
   South Africa, and more wherever the model applies.

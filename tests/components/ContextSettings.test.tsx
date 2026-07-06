@@ -38,7 +38,7 @@ function renderSettings(profiles: Profile[] = [], defaultId = "") {
       defaultId,
       availableCountries: ["NL"],
       availableSectors: ["vo", "mbo", "hbo", "wo"],
-      assignedDomains: null,
+      availableDomains: null,
     },
   } as unknown as ComponentProps<typeof Settings>;
   const Stub = createRoutesStub([

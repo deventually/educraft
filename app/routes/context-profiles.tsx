@@ -14,8 +14,8 @@ import {
   getAvailableCountries,
   getAvailableSectors,
   getAvailableDomains,
+  getAvailableDomainSlugs,
 } from "~/server/availability.server";
-import { getUserAssignedDomains } from "~/server/repositories/users.server";
 import type { ContextProfile } from "~/lib/context/types";
 import { parseContextForm } from "~/lib/context/parseForm";
 import { resolveLevel } from "~/lib/context/derive";
@@ -30,21 +30,24 @@ import { getLocale } from "~/lib/i18n/locale.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  const [profiles, def, availableCountries, availableSectors, assignedDomains] = await Promise.all([
-    listProfiles(user.id),
-    getDefaultProfile(user.id),
-    getAvailableCountries(user),
-    getAvailableSectors(user),
-    // The teacher's flat domain allow-list; the editor filters the track
-    // catalogue by it client-side (null = unrestricted; admins are never scoped).
-    user.role === "teacher" ? getUserAssignedDomains(user.id) : Promise.resolve(null),
-  ]);
+  const [profiles, def, availableCountries, availableSectors, availableDomains] = await Promise.all(
+    [
+      listProfiles(user.id),
+      getDefaultProfile(user.id),
+      getAvailableCountries(user),
+      getAvailableSectors(user),
+      // The effective flat domain allow-list under the override model (P12): an
+      // activated teacher's own set, else the instance set (null = unrestricted).
+      // The editor filters each track catalogue by it client-side.
+      getAvailableDomainSlugs(user),
+    ],
+  );
   return {
     profiles,
     defaultId: def?.id ?? "",
     availableCountries,
     availableSectors,
-    assignedDomains: assignedDomains ? [...assignedDomains] : null,
+    availableDomains,
   };
 }
 
@@ -117,7 +120,8 @@ function ProfileMeta({ profile, locale }: { profile: ContextProfile; locale: "nl
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { profiles, defaultId, availableCountries, availableSectors, assignedDomains } = loaderData;
+  const { profiles, defaultId, availableCountries, availableSectors, availableDomains } =
+    loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -214,7 +218,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
             isCurrentDefault={editing != null && editing.id === defaultId}
             availableCountries={availableCountries}
             availableSectors={availableSectors}
-            availableDomains={assignedDomains}
+            availableDomains={availableDomains}
             onCancel={() => setEditor(null)}
           />
         ) : (
