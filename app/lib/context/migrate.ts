@@ -39,6 +39,16 @@ function migrateIctPack(data: Record<string, unknown>): Record<string, unknown> 
   return { ...rest, packValues };
 }
 
+/**
+ * Note (Phase 10): a pre-P10 flat-vo profile may carry a `domain` slug the new
+ * track-scoped catalogue no longer offers (a kernvak like `nederlands`, or a
+ * vmbo profiel stored on a havo profile). There is no cheap, honest normalization
+ * — the correct target differs per profile — so we leave the stored value as-is
+ * and handle it display-only: the editor preserves it as a selected option, and
+ * `format.ts` injects its raw value when no label resolves. A conscious re-save
+ * then normalizes it via `parseForm`'s track validation.
+ */
+
 /** Pass 2 — backfill the Phase 8 teaching-context axes (idempotent). */
 function migrateAxes(data: Record<string, unknown>): Record<string, unknown> {
   const out = { ...data };

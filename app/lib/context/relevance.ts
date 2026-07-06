@@ -32,3 +32,12 @@ export function showsProfessionalContext(
 export function courseLabel(sector: string | undefined): LocalizedText {
   return sector === "vo" ? { nl: "Vak", en: "Subject" } : { nl: "Vak", en: "Course" };
 }
+
+/**
+ * Sector-aware label for the domain field: vo picks a **profiel**, every other
+ * sector picks a **domein**. Drives both the editor field and the prompt
+ * injection label (`format.ts`) so the two never diverge.
+ */
+export function domainFieldLabel(sector: string | undefined): LocalizedText {
+  return sector === "vo" ? { nl: "Profiel", en: "Profile" } : { nl: "Domein", en: "Domain" };
+}

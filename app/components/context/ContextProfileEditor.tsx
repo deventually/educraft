@@ -206,7 +206,13 @@ export function ContextProfileEditor({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <NationalLevelSelect value={nationalLevel} onChange={setNationalLevel} />
           {isHbo && <StudyYearField value={studyYear} onChange={setStudyYear} />}
-          <DomainSelect value={domain} onChange={setDomain} country={country} sector={sector} />
+          <DomainSelect
+            value={domain}
+            onChange={setDomain}
+            country={country}
+            sector={sector}
+            track={track}
+          />
         </div>
         <DomainFields
           key={`${sector}|${domain || "none"}`}
