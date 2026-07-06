@@ -117,33 +117,57 @@ describe("admin.context action — instance lockout guard", () => {
     expect(await settings.getEnabledSectors()).toBeNull();
   });
 
-  it("persists a valid instance selection (catalogue-filtered)", async () => {
+  it("persists a valid instance selection incl. domains (catalogue-filtered)", async () => {
     const res = (await invoke(
       contextRoute.action,
-      // A junk value is dropped; only shipped catalogue codes survive.
-      post({ intent: "instance", countries: ["NL", "XX"], sectors: ["hbo", "wo", "bogus"] }),
+      // Junk values are dropped; only shipped catalogue codes survive on every axis.
+      post({
+        intent: "instance",
+        countries: ["NL", "XX"],
+        sectors: ["hbo", "wo", "bogus"],
+        domains: ["ICT", "not-a-domain", "nt"],
+      }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect(await settings.getEnabledCountries()).toEqual(["NL"]);
     expect(await settings.getEnabledSectors()).toEqual(["hbo", "wo"]);
+    expect(await settings.getEnabledDomains()).toEqual(["ICT", "nt"]);
     // Reset so later tests see the default-open state.
+    await settings.setEnabledCountries(null);
+    await settings.setEnabledSectors(null);
+    await settings.setEnabledDomains(null);
+  });
+
+  it("clears instance domains when none are submitted (empty = all)", async () => {
+    await settings.setEnabledDomains(["nt"]);
+    await invoke(
+      contextRoute.action,
+      post({ intent: "instance", countries: ["NL"], sectors: ["hbo"] }),
+    );
+    expect(await settings.getEnabledDomains()).toBeNull();
     await settings.setEnabledCountries(null);
     await settings.setEnabledSectors(null);
   });
 
-  it("loader builds all-checked rows when nothing is configured", async () => {
+  it("loader builds all-checked rows + domain catalogue when nothing is configured", async () => {
     const data = (await invoke(contextRoute.loader, post({}))) as {
       countries: { id: string; checked: boolean }[];
       sectors: { id: string; checked: boolean }[];
+      enabledDomains: string[] | null;
+      domainCatalogueSectors: { sector: string; groups: unknown[] }[];
     };
     expect(data.countries.every((c) => c.checked)).toBe(true);
     expect(data.sectors.every((s) => s.checked)).toBe(true);
     expect(data.sectors.map((s) => s.id)).toEqual(["vo", "mbo", "hbo", "wo"]);
+    // The instance domain axis: unset = null (= all), and the shared catalogue
+    // carries the catalogued sectors (vo + hbo).
+    expect(data.enabledDomains).toBeNull();
+    expect(data.domainCatalogueSectors.map((d) => d.sector).sort()).toEqual(["hbo", "vo"]);
   });
 });
 
-describe("admin.context action — per-teacher assignment", () => {
-  it("assigns a subset to a teacher, then clears it back to unrestricted", async () => {
+describe("admin.context action — activation + per-teacher assignment (P12)", () => {
+  it("activating persists the flag + axes; an empty axis is unrestricted", async () => {
     const teacher = await users.createUser({
       name: "Assignable",
       email: "assignable@example.com",
@@ -152,23 +176,71 @@ describe("admin.context action — per-teacher assignment", () => {
     });
     const res = (await invoke(
       contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, countries: ["NL"], sectors: ["mbo", "hbo"] }),
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        customAccess: "1",
+        countries: ["NL"],
+        sectors: ["mbo", "hbo"],
+      }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
+    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
     expect([...(await users.getUserAssignedCountries(teacher.id))!]).toEqual(["NL"]);
     expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
 
-    // An empty submission clears the assignment (unrestricted, not a lockout).
-    const cleared = (await invoke(
+    // Still activated, but sectors omitted → that axis clears to unrestricted.
+    await invoke(
       contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id }),
-    )) as { saved?: boolean };
-    expect(cleared.saved).toBe(true);
-    expect(await users.getUserAssignedCountries(teacher.id)).toBeNull();
+      post({ intent: "teacher", userId: teacher.id, customAccess: "1", countries: ["NL"] }),
+    );
+    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
     expect(await users.getUserAssignedSectors(teacher.id)).toBeNull();
   });
 
-  it("catalogue-filters the submitted codes before writing", async () => {
+  it("deactivating flips the flag off and leaves the saved assignments untouched", async () => {
+    const teacher = await users.createUser({
+      name: "Toggle",
+      email: "toggle@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    // Activate + assign all three axes.
+    await invoke(
+      contextRoute.action,
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        customAccess: "1",
+        sectors: ["mbo", "hbo"],
+        domains: ["ICT"],
+      }),
+    );
+    // Deactivate: no customAccess field → the flag goes off, assignments preserved.
+    const res = (await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(false);
+    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
+    expect([...(await users.getUserAssignedDomains(teacher.id))!]).toEqual(["ICT"]);
+
+    // Re-activating restores exactly what was saved (round-trip).
+    await invoke(
+      contextRoute.action,
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        customAccess: "1",
+        sectors: ["mbo", "hbo"],
+        domains: ["ICT"],
+      }),
+    );
+    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
+  });
+
+  it("catalogue-filters submitted codes + domains before writing (activated)", async () => {
     const teacher = await users.createUser({
       name: "Filtered",
       email: "filtered@example.com",
@@ -177,9 +249,16 @@ describe("admin.context action — per-teacher assignment", () => {
     });
     await invoke(
       contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, sectors: ["wo", "not-a-sector"] }),
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        customAccess: "1",
+        sectors: ["wo", "not-a-sector"],
+        domains: ["nt", "not-a-domain", "zw"],
+      }),
     );
     expect([...(await users.getUserAssignedSectors(teacher.id))!]).toEqual(["wo"]);
+    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["nt", "zw"]);
   });
 
   it("refuses (404) a per-teacher write whose userId is not a teacher", async () => {
@@ -191,52 +270,17 @@ describe("admin.context action — per-teacher assignment", () => {
     await expect(
       invoke(
         contextRoute.action,
-        post({ intent: "teacher", userId: student.id, sectors: ["mbo"] }),
+        post({ intent: "teacher", userId: student.id, customAccess: "1", sectors: ["mbo"] }),
       ),
     ).rejects.toMatchObject({ status: 404 });
     expect(await users.getUserAssignedSectors(student.id)).toBeNull(); // never written
+    expect(await users.getUserContextCustomAccess(student.id)).toBe(false);
   });
 
   it("refuses (404) a per-teacher write for an unknown userId", async () => {
     await expect(
       invoke(contextRoute.action, post({ intent: "teacher", userId: "ghost", sectors: ["mbo"] })),
     ).rejects.toMatchObject({ status: 404 });
-  });
-
-  it("assigns a subset of domains to a teacher and clears back to unrestricted (P10.3)", async () => {
-    const teacher = await users.createUser({
-      name: "DomAssign",
-      email: "domassign@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const res = (await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, domains: ["nt", "ICT"] }),
-    )) as { saved?: boolean };
-    expect(res.saved).toBe(true);
-    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["ICT", "nt"]);
-
-    const cleared = (await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id }),
-    )) as { saved?: boolean };
-    expect(cleared.saved).toBe(true);
-    expect(await users.getUserAssignedDomains(teacher.id)).toBeNull();
-  });
-
-  it("catalogue-filters submitted domain slugs before writing (P10.3)", async () => {
-    const teacher = await users.createUser({
-      name: "DomFilter",
-      email: "domfilter@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, domains: ["nt", "not-a-domain", "zw"] }),
-    );
-    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["nt", "zw"]);
   });
 });
 

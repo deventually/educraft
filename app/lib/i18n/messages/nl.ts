@@ -438,21 +438,26 @@ export const nl = {
     context: {
       heading: "Onderwijscontext",
       intro:
-        "Kies welke landen en onderwijssectoren op deze instantie beschikbaar zijn. Docenten kunnen alleen contextprofielen maken binnen de ingeschakelde landen en sectoren.",
+        "Kies welke landen, onderwijssectoren en domeinen/profielen op deze instantie beschikbaar zijn. Docenten erven deze standaardinstellingen, tenzij je ze hieronder aangepaste toegang geeft.",
       countriesLegend: "Landen",
       sectorsLegend: "Sectoren",
       save: "Opslaan",
       atLeastOne: "Kies minstens één land en één sector — je kunt niet alles uitschakelen.",
+      instanceDomainsLegend: "Domeinen / profielen",
+      instanceDomainsHint:
+        "Beperk optioneel welke domeinen of profielen op deze instantie beschikbaar zijn. Niets aangevinkt = alle domeinen.",
       teacherLegend: "Toegang per docent",
       teacherPick:
-        "Beperk een individuele docent tot bepaalde landen en sectoren. Beheerders volgen altijd de instantie-instelling hierboven.",
+        "Geef een individuele docent aangepaste toegang. Activeer dit om de instantie-standaard voor die docent te overschrijven — de docent kan meer of minder landen, sectoren en domeinen krijgen. Uit gelaten erft de docent de instantie-instellingen hierboven.",
       teacherHint:
-        "Niets aangevinkt = geen beperking; de docent ziet dan alle ingeschakelde landen en sectoren.",
+        "Een geactiveerde docent negeert de instantie volledig; niets aangevinkt op een as = geen beperking (alles uit de catalogus).",
+      activateLabel: "Aangepaste toegang activeren",
+      inheritsNote: "Erft de instantie-standaard. Activeer aangepaste toegang om te overschrijven.",
       teacherNone: "Er zijn nog geen docenten om toe te wijzen.",
-      domainsLegend: "Domeinen / profielen per docent",
+      domainsLegend: "Domeinen / profielen",
       domainsHint:
-        "Beperk de domeinen of profielen die deze docent kan kiezen. Niets aangevinkt = geen beperking. Alleen de sectoren die de docent kan bereiken worden getoond.",
-      domainsNone: "Geen domeinen om toe te wijzen voor de sectoren van deze docent.",
+        "Beperk de domeinen of profielen die deze docent kan kiezen. Niets aangevinkt = geen beperking.",
+      domainsNone: "Geen domeinen om toe te wijzen.",
     },
     invites: {
       mintHeading: "Docent uitnodigen",

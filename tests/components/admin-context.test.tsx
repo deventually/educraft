@@ -31,7 +31,8 @@ const havoDomainSector = {
   ],
 };
 
-// Defaults-all for the instance; two teachers — one restricted, one unrestricted.
+// Defaults-all for the instance; two teachers — one activated + restricted, one
+// inheriting (custom access off).
 const loaderData = {
   countries: [{ id: "NL", checked: true }],
   sectors: [
@@ -40,24 +41,28 @@ const loaderData = {
     { id: "hbo", checked: true },
     { id: "wo", checked: true },
   ],
+  // Instance domain axis: null = all enabled. The shared catalogue is used for
+  // both the instance section and every teacher (activation ignores the instance).
+  enabledDomains: null,
+  domainCatalogueSectors: [hboDomainSector, havoDomainSector],
   teachers: [
     {
       id: "t-restricted",
       name: "Docent Beperkt",
       email: "beperkt@school.nl",
+      customAccess: true,
       countries: ["NL"],
       sectors: ["mbo"],
       domains: ["ICT"],
-      domainSectors: [hboDomainSector, havoDomainSector],
     },
     {
       id: "t-open",
       name: "Docent Open",
       email: null,
+      customAccess: false,
       countries: null,
       sectors: null,
       domains: null,
-      domainSectors: [hboDomainSector],
     },
   ],
 };
@@ -101,6 +106,38 @@ describe("Admin context — instance toggle", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
     });
+  });
+
+  it("renders an instance Domains section: a checkbox per catalogue slug, name=domains, all-checked (null)", () => {
+    renderRoute();
+    const ict = instanceForm().getByLabelText("ICT") as HTMLInputElement;
+    expect(ict.name).toBe("domains");
+    expect(ict.checked).toBe(true);
+    // The vo profiel is offered too (grouped under its sector's details).
+    expect(instanceForm().getByLabelText(/Natuur & Techniek/)).toBeInTheDocument();
+  });
+});
+
+describe("Admin context — activate custom access (P12)", () => {
+  it("checks the toggle for an activated teacher and unchecks it for an inheriting one", () => {
+    renderRoute();
+    const restricted = within(screen.getByRole("form", { name: "Docent Beperkt" }));
+    const open = within(screen.getByRole("form", { name: "Docent Open" }));
+    const rBox = restricted.getByLabelText(/aangepaste toegang|custom access/i) as HTMLInputElement;
+    const oBox = open.getByLabelText(/aangepaste toegang|custom access/i) as HTMLInputElement;
+    expect(rBox).toHaveAttribute("name", "customAccess");
+    expect(rBox.checked).toBe(true);
+    expect(oBox.checked).toBe(false);
+  });
+
+  it("disables the axis controls until custom access is activated, then enables them", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    const open = within(screen.getByRole("form", { name: "Docent Open" }));
+    const mbo = open.getByLabelText(/middelbaar beroepsonderwijs/i) as HTMLInputElement;
+    expect(mbo.disabled).toBe(true); // inheriting → controls disabled
+    await user.click(open.getByLabelText(/aangepaste toegang|custom access/i));
+    expect(mbo.disabled).toBe(false); // activating enables them
   });
 });
 

@@ -435,21 +435,26 @@ export const en: Messages = {
     context: {
       heading: "Teaching context",
       intro:
-        "Choose which countries and education sectors are available on this instance. Teachers can only build context profiles within the enabled countries and sectors.",
+        "Choose which countries, education sectors and domains/profiles are available on this instance. Teachers inherit these defaults unless you give them custom access below.",
       countriesLegend: "Countries",
       sectorsLegend: "Sectors",
       save: "Save",
       atLeastOne: "Pick at least one country and one sector — you can't disable everything.",
+      instanceDomainsLegend: "Domains / profiles",
+      instanceDomainsHint:
+        "Optionally restrict which domains or profiles are available on this instance. Nothing checked = all domains.",
       teacherLegend: "Access per teacher",
       teacherPick:
-        "Restrict an individual teacher to specific countries and sectors. Admins always follow the instance setting above.",
+        "Give an individual teacher custom access. Activate it to override the instance defaults for that teacher — they can be granted more or fewer countries, sectors and domains. Left off, the teacher inherits the instance settings above.",
       teacherHint:
-        "Nothing checked = no restriction; the teacher then sees every enabled country and sector.",
+        "An activated teacher ignores the instance entirely; nothing checked on an axis = no restriction (everything in the catalogue).",
+      activateLabel: "Activate custom access",
+      inheritsNote: "Inherits the instance defaults. Activate custom access to override.",
       teacherNone: "There are no teachers to assign yet.",
-      domainsLegend: "Domains / profiles per teacher",
+      domainsLegend: "Domains / profiles",
       domainsHint:
-        "Restrict the domains or profiles this teacher can pick. Nothing checked = no restriction. Only the sectors the teacher can reach are shown.",
-      domainsNone: "No domains to assign for this teacher's sectors.",
+        "Restrict the domains or profiles this teacher can pick. Nothing checked = no restriction.",
+      domainsNone: "No domains to assign.",
     },
     invites: {
       mintHeading: "Invite a teacher",
