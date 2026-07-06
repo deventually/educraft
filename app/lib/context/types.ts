@@ -10,6 +10,9 @@
  * in `packValues`. Anything a pack does not cover — or a domain without a pack —
  * is captured as user-defined `customFields`. New packs are pure data additions.
  */
+import type { CountryCode } from "./countries";
+import type { NlqfLevel } from "./nlqf";
+import type { Sector } from "./sectors";
 
 /** hbo sectors/domains. Each may have an optional structured pack (see packs.ts). */
 export const HBO_DOMAINS = [
@@ -47,21 +50,46 @@ export interface ContextProfile {
   /** e.g. "Software Engineering — jaar 2" or "Verpleegkunde — jaar 3". */
   name: string;
 
-  // --- Generic (all hbo) ---
+  // --- Teaching context axes (Phase 8) — all optional, all additive ---
+  /** Country the programme lives in (seam; `"NL"` today). Backfilled at read time. */
+  country?: CountryCode;
+  /** Education sector (vo/mbo/hbo/wo) — drives the learner/teacher noun + domains. */
+  sector?: Sector;
+  /** Sector-scoped school-type / leerweg slug (see `TRACKS_BY_SECTOR`); most meaningful for vo. */
+  track?: string;
+  /**
+   * The Dutch national (NLQF) level — the **source of truth** for level. The
+   * engine derives and injects only the EQF number (see `derive.ts`/`format.ts`),
+   * never the national label. Absent for a profile that carries no level.
+   */
+  nationalLevel?: NlqfLevel;
+  /** mbo learner-noun override (studenten ↔ deelnemers); Dutch-only distinction. */
+  learnerNounOverride?: string;
+  /**
+   * Free-text onderwijsconcept / didactische aanpak (Montessori, Dalton,
+   * Vrijeschool, Jenaplan…). Injected verbatim like `professionalContext` —
+   * deliberately not a catalogued enum (open-ended pedagogical philosophy).
+   */
+  pedagogy?: string;
+
+  // --- Generic ---
   /** Opleiding, e.g. "HBO-ICT", "Verpleegkunde", "Bedrijfskunde". */
   programme?: string;
-  /** Sector/domain — drives which optional pack applies. */
-  domain?: HboDomain;
+  /**
+   * Sector/domain slug — validated against the sector's catalogue, not a fixed
+   * enum, so it spans every sector. `HboDomain` stays the hbo subset (packs.ts).
+   */
+  domain?: string;
   /** Vak / cursusnaam. */
   courseName?: string;
   /** Studiejaar 1–4. */
   studyYear?: 1 | 2 | 3 | 4;
   /**
-   * EQF level (1–8) — the country-neutral level measure spanning the whole
-   * education ladder (basic/vocational/secondary → bachelor/master/doctorate),
-   * usable in any EQF country. The engine injects only this number plus a generic
-   * adaptation directive (see `format.ts`), never a country-specific label. See
-   * `eqf.ts`.
+   * EQF level (1–8). **Deprecated as an input** (Phase 8): the editor now collects
+   * the national `nationalLevel` and the engine *derives* EQF (see `derive.ts`).
+   * Retained because it is still the level currency the engine injects, it backs
+   * the cohort synthetic profile `{ eqf: cohort.contextEqf }`, and it keeps legacy
+   * profiles deserializing + resolving via `resolveLevel`'s fallback. See `eqf.ts`.
    */
   eqf?: EqfLevel;
   /**

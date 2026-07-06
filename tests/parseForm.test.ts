@@ -3,6 +3,7 @@ import {
   parseContextForm,
   MAX_CUSTOM_FIELDS,
   MAX_CUSTOM_VALUE,
+  MAX_PEDAGOGY,
   PACK_PREFIX,
 } from "~/lib/context/parseForm";
 
@@ -177,5 +178,185 @@ describe("parseContextForm", () => {
       ).isDefault,
     ).toBe(true);
     expect(parseContextForm(fd([["name", "x"]])).isDefault).toBe(false);
+  });
+});
+
+describe("parseContextForm — Phase 8 teaching-context axes", () => {
+  it("stores validated country / sector / track / nationalLevel", () => {
+    const { input } = parseContextForm(
+      fd([
+        ["name", "x"],
+        ["country", "NL"],
+        ["sector", "hbo"],
+        ["track", "bachelor"],
+        ["nationalLevel", "6"],
+      ]),
+    );
+    expect(input?.country).toBe("NL");
+    expect(input?.sector).toBe("hbo");
+    expect(input?.track).toBe("bachelor");
+    expect(input?.nationalLevel).toBe("6");
+  });
+
+  it("accepts the Instroom + 4+ national levels, dropping junk", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["nationalLevel", "instroom"],
+        ]),
+      ).input?.nationalLevel,
+    ).toBe("instroom");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["nationalLevel", "4+"],
+        ]),
+      ).input?.nationalLevel,
+    ).toBe("4+");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["nationalLevel", "9"],
+        ]),
+      ).input?.nationalLevel,
+    ).toBeUndefined();
+  });
+
+  it("drops a track that doesn't belong to the sector", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "bachelor"],
+        ]),
+      ).input?.track,
+    ).toBeUndefined();
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+        ]),
+      ).input?.track,
+    ).toBe("havo");
+  });
+
+  it("gates the domain by the sector's catalogue", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["domain", "zw"],
+        ]),
+      ).input?.domain,
+    ).toBe("zw");
+    // 'zw' is a vo slug, not an hbo domain → dropped for hbo.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["domain", "zw"],
+        ]),
+      ).input?.domain,
+    ).toBeUndefined();
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["domain", "ICT"],
+        ]),
+      ).input?.domain,
+    ).toBe("ICT");
+  });
+
+  it("stores an mbo learner-noun override and drops it for other sectors", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "mbo"],
+          ["learnerNounOverride", "deelnemers"],
+        ]),
+      ).input?.learnerNounOverride,
+    ).toBe("deelnemers");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["learnerNounOverride", "deelnemers"],
+        ]),
+      ).input?.learnerNounOverride,
+    ).toBeUndefined();
+  });
+
+  it("stores pedagogy, capped in length", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["pedagogy", "Montessori"],
+        ]),
+      ).input?.pedagogy,
+    ).toBe("Montessori");
+    const long = parseContextForm(
+      fd([
+        ["name", "x"],
+        ["pedagogy", "z".repeat(MAX_PEDAGOGY + 50)],
+      ]),
+    ).input?.pedagogy;
+    expect(long?.length).toBe(MAX_PEDAGOGY);
+  });
+
+  it("no longer requires eqf — the level comes from nationalLevel", () => {
+    const { input } = parseContextForm(
+      fd([
+        ["name", "x"],
+        ["sector", "hbo"],
+        ["nationalLevel", "7"],
+      ]),
+    );
+    expect(input?.eqf).toBeUndefined();
+    expect(input?.nationalLevel).toBe("7");
+  });
+
+  it("refuses a country/sector outside the caller's available set", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "wo"],
+        ]),
+        { availableSectors: ["hbo"] },
+      ).error,
+    ).toBe("sector-not-available");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["country", "NL"],
+        ]),
+        { availableCountries: ["XX"] },
+      ).error,
+    ).toBe("country-not-available");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+        ]),
+        { availableSectors: ["hbo", "wo"] },
+      ).error,
+    ).toBeUndefined();
   });
 });

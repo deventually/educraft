@@ -7,9 +7,19 @@
  */
 import { useRef, useState } from "react";
 import { X, Plus, RotateCcw, ExternalLink } from "lucide-react";
-import { HBO_DOMAINS, type CustomField, type PackFieldValue } from "~/lib/context/types";
-import { getDomainPack, type PackField } from "~/lib/context/packs";
-import { EQF_LEVELS } from "~/lib/context/eqf";
+import type { CustomField, PackFieldValue } from "~/lib/context/types";
+import type { PackField } from "~/lib/context/packs";
+import { getDomainsForSector } from "~/lib/context/domains";
+import { resolveFramework } from "~/lib/context/frameworks";
+import { COUNTRY_LABELS, type CountryCode } from "~/lib/context/countries";
+import {
+  SECTORS_INFO,
+  TRACKS_BY_SECTOR,
+  defaultLevelForTrack,
+  isSector,
+  learnerNounChoices,
+} from "~/lib/context/sectors";
+import { NLQF_LEVELS, NLQF_SOURCE_URL, isNlqfLevel, nlqfToEqf } from "~/lib/context/nlqf";
 import { Input, Label, Select, Textarea, HelpText } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -79,18 +89,25 @@ export function ProgrammeField({ defaultValue }: { defaultValue?: string }) {
 export function DomainSelect({
   value,
   onChange,
+  country = "NL",
+  sector = "hbo",
 }: {
   value: string;
   onChange: (v: string) => void;
+  /** Scope the options to a sector's catalogue; defaults to the legacy hbo shape. */
+  country?: string;
+  sector?: string;
 }) {
   const t = useT();
+  const locale = useLocale();
+  const options = getDomainsForSector(country, sector);
   return (
     <Field id="cf-domain" label={t.settings.domain}>
       <Select id="cf-domain" name="domain" value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{t.settings.domainNone}</option>
-        {HBO_DOMAINS.map((d) => (
-          <option key={d} value={d}>
-            {d}
+        {options.map((d) => (
+          <option key={d.value} value={d.value}>
+            {loc(d.label, locale)}
           </option>
         ))}
       </Select>
@@ -139,26 +156,171 @@ export function StudyYearField({
   );
 }
 
-export function EqfField({ defaultValue }: { defaultValue?: number | string }) {
+/** Country picker (Phase 8) — only rendered by the editor when >1 country is available. */
+export function CountrySelect({
+  value,
+  onChange,
+  countries,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  countries: string[];
+}) {
   const t = useT();
   const locale = useLocale();
   return (
-    <Field id="cf-eqf" label={t.settings.eqfOptional}>
+    <Field id="cf-country" label={t.settings.country}>
       <Select
-        id="cf-eqf"
-        name="eqf"
-        defaultValue={defaultValue != null ? String(defaultValue) : ""}
+        id="cf-country"
+        name="country"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
       >
-        {/* The full EQF 1–8 ladder (every education level, any EQF country). NL
-            labels carry indicative Dutch anchors; EN labels are country-neutral.
-            The engine only ever injects the number — see context/eqf.ts. */}
-        <option value="">{t.settings.eqfNone}</option>
-        {EQF_LEVELS.map((e) => (
-          <option key={e.level} value={e.level}>
-            {loc(e.label, locale)}
+        {countries.map((c) => (
+          <option key={c} value={c}>
+            {loc(COUNTRY_LABELS[c as CountryCode] ?? c, locale)}
           </option>
         ))}
       </Select>
+    </Field>
+  );
+}
+
+/**
+ * The one grouped "Onderwijstype" picker: an optgroup per available sector, each
+ * option a track. Choosing one sets both `sector` and `track` and hands back the
+ * track's prefilled NLQF level. It is a UI driver (no `name`) — the editor renders
+ * hidden `sector`/`track` inputs so a single Form submit carries them.
+ */
+export function OnderwijstypeSelect({
+  value,
+  onChange,
+  sectors,
+}: {
+  /** `"sector::track"`, or "" when nothing chosen. */
+  value: string;
+  onChange: (sector: string, track: string, defaultLevel: string) => void;
+  sectors: string[];
+}) {
+  const t = useT();
+  const locale = useLocale();
+  return (
+    <Field id="cf-onderwijstype" label={t.settings.onderwijstype}>
+      <Select
+        id="cf-onderwijstype"
+        value={value}
+        onChange={(e) => {
+          const [sector = "", track = ""] = e.target.value.split("::");
+          onChange(sector, track, defaultLevelForTrack(sector, track) ?? "");
+        }}
+      >
+        <option value="">{t.settings.onderwijstypeNone}</option>
+        {sectors.filter(isSector).map((s) => (
+          <optgroup key={s} label={loc(SECTORS_INFO[s].label, locale)}>
+            {TRACKS_BY_SECTOR[s].map((tr) => (
+              <option key={`${s}::${tr.value}`} value={`${s}::${tr.value}`}>
+                {loc(tr.label, locale)}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </Select>
+    </Field>
+  );
+}
+
+/**
+ * The NLQF level select — the stored source of truth for level. Prefilled from
+ * the chosen track, overridable, with a read-only derived-EQF preview (only the
+ * EQF number ever reaches a prompt) and a cited nlqf.nl source link.
+ */
+export function NationalLevelSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const t = useT();
+  const locale = useLocale();
+  const derived = isNlqfLevel(value) ? nlqfToEqf(value) : null;
+  return (
+    <Field id="cf-level" label={t.settings.nationalLevel}>
+      <Select
+        id="cf-level"
+        name="nationalLevel"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">{t.settings.nationalLevelNone}</option>
+        {NLQF_LEVELS.map((l) => (
+          <option key={l.level} value={l.level}>
+            {loc(l.label, locale)}
+          </option>
+        ))}
+      </Select>
+      <HelpText>
+        {derived && (
+          <span className="mr-1.5 font-medium text-slate-700">
+            {t.settings.derivedEqf}: EQF {derived.eqf}.
+          </span>
+        )}
+        <a
+          href={NLQF_SOURCE_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-0.5 font-medium text-violet-600 hover:underline"
+        >
+          <ExternalLink className="size-3" aria-hidden /> {t.settings.viewSource}
+        </a>
+      </HelpText>
+    </Field>
+  );
+}
+
+/** mbo-only learner-noun override (studenten ↔ deelnemers). Self-hides otherwise. */
+export function LearnerNounField({
+  sector,
+  value,
+  onChange,
+}: {
+  sector: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const t = useT();
+  const choices = learnerNounChoices(sector);
+  if (choices.length === 0) return null;
+  const current = choices.includes(value) ? value : choices[0];
+  return (
+    <Field id="cf-learnernoun" label={t.settings.learnerNoun}>
+      <Select
+        id="cf-learnernoun"
+        name="learnerNounOverride"
+        value={current}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {choices.map((c) => (
+          <option key={c} value={c}>
+            {c}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+}
+
+/** Free-text onderwijsconcept / didactic approach (injected verbatim). */
+export function PedagogyField({ defaultValue }: { defaultValue?: string }) {
+  const t = useT();
+  return (
+    <Field id="cf-pedagogy" label={t.settings.pedagogy}>
+      <Input
+        id="cf-pedagogy"
+        name="pedagogy"
+        defaultValue={defaultValue}
+        placeholder={t.settings.ph.pedagogy}
+      />
     </Field>
   );
 }
@@ -206,13 +368,18 @@ export function ToolsField({ defaultValue }: { defaultValue?: string }) {
 export function DomainFields({
   domain,
   values,
+  country = "NL",
+  sector = "hbo",
 }: {
   domain: string;
   values?: Record<string, PackFieldValue>;
+  /** Scope the framework lookup to a sector; defaults to the legacy hbo shape. */
+  country?: string;
+  sector?: string;
 }) {
   const t = useT();
   const locale = useLocale();
-  const pack = getDomainPack(domain);
+  const pack = resolveFramework(country, sector, domain);
   const [removed, setRemoved] = useState<Set<string>>(() => new Set());
 
   if (!domain) return null;

@@ -9,7 +9,13 @@ import { createRoutesStub } from "react-router";
 vi.mock("~/server/repositories/profiles.server", () => ({
   listProfiles: () => [],
   createProfile: () => ({}),
+  updateProfile: () => {},
   deleteProfile: () => {},
+  getDefaultProfile: () => null,
+}));
+vi.mock("~/server/availability.server", () => ({
+  getAvailableCountries: async () => ["NL"],
+  getAvailableSectors: async () => ["vo", "mbo", "hbo", "wo"],
 }));
 
 import Settings from "~/routes/context-profiles";
@@ -17,16 +23,23 @@ import Settings from "~/routes/context-profiles";
 type Profile = {
   id: string;
   name: string;
+  sector?: string;
   domain?: string;
   eqf?: number;
+  nationalLevel?: string;
   packValues?: Record<string, unknown>;
   customFields?: { label: string; value: string }[];
 };
 
 function renderSettings(profiles: Profile[] = [], defaultId = "") {
-  const props = { loaderData: { profiles, defaultId } } as unknown as ComponentProps<
-    typeof Settings
-  >;
+  const props = {
+    loaderData: {
+      profiles,
+      defaultId,
+      availableCountries: ["NL"],
+      availableSectors: ["vo", "mbo", "hbo", "wo"],
+    },
+  } as unknown as ComponentProps<typeof Settings>;
   const Stub = createRoutesStub([
     { path: "/context-profiles", Component: () => <Settings {...props} /> },
   ]);
@@ -39,141 +52,59 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const ictProfile: Profile = {
   id: "p1",
   name: "SE jaar 3",
+  sector: "hbo",
   domain: "ICT",
-  eqf: 6,
-  packValues: { architectuurlagen: ["Software", "Infrastructuur"], beheersingsniveau: 2 },
+  nationalLevel: "6",
+  packValues: { architectuurlagen: ["Software"], beheersingsniveau: 2 },
   customFields: [{ label: "Specialisatie", value: "Security" }],
 };
 
 describe("Context settings", () => {
-  it("offers a wizard OR a fill-it-yourself choice", () => {
+  it("has no wizard-vs-form choice screen (consolidated into one editor)", () => {
     renderSettings();
-    expect(screen.getByRole("button", { name: /wizard/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /zelf invullen|yourself/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /wizard/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /zelf invullen|yourself/i })).toBeNull();
   });
 
-  it("shows an empty-state hint when there is no profile yet (no default)", () => {
+  it("shows an empty-state hint when there is no profile yet", () => {
     renderSettings([]);
     expect(screen.getByText(/nog geen contextprofiel|no context profile/i)).toBeInTheDocument();
   });
 
-  it("launches the wizard at step 1 of 4 with a name field", async () => {
+  it("opens the editor directly at step 1 when creating a new profile", async () => {
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("button", { name: /wizard/i }));
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
     expect(screen.getByText(/stap 1 van 4|step 1 of 4/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/naam|name/i)).toBeInTheDocument();
   });
 
-  it("reveals the verified domain pack when a packed domain is chosen in the form", async () => {
-    const user = userEvent.setup();
-    renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "ICT");
-    // hbo-i architecture layers appear, with the source citation.
-    expect(screen.getByText("Architectuurlagen")).toBeInTheDocument();
-    expect(screen.getByText(/hbo-i domeinbeschrijving/i)).toBeInTheDocument();
-  });
-
-  it("leaves the framework multiselects empty on domain choice, and fills the level once a year is set", async () => {
-    const user = userEvent.setup();
-    renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "ICT");
-
-    // Multiselects start empty — the user ticks only what the course emphasises,
-    // rather than injecting the whole undifferentiated taxonomy into prompts.
-    expect(screen.getByRole("checkbox", { name: "Gebruikersinteractie" })).not.toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Software" })).not.toBeChecked();
-    // EQF defaults to the hbo-bachelor qualification level.
-    expect(screen.getByLabelText(/eqf/i)).toHaveValue("6");
-
-    // No level until a study year is chosen; then it fills to the year's default.
-    const level = () =>
-      screen.getByRole("combobox", { name: /beheersingsniveau|proficiency level/i });
-    expect(level()).toHaveValue("");
-    await user.selectOptions(screen.getByLabelText(/studiejaar|study year/i), "4");
-    expect(level()).toHaveValue("3"); // graduation ceiling
-  });
-
-  it("offers the full EQF 1–8 ladder in the form (usable in any EQF country)", async () => {
-    const user = userEvent.setup();
-    renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    const eqf = screen.getByLabelText(/eqf/i) as HTMLSelectElement;
-    const values = Array.from(eqf.querySelectorAll("option")).map((o) => o.value);
-    expect(values).toEqual(["", "1", "2", "3", "4", "5", "6", "7", "8"]);
-    // Each option names the EQF level; NL anchors help a Dutch teacher pick.
-    expect(screen.getByRole("option", { name: /EQF 1\b/ })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: /EQF 8\b/ })).toBeInTheDocument();
-    // Default preserved: EQF 6 (hbo-bachelor) — no regression for NL.
-    expect(eqf).toHaveValue("6");
-  });
-
-  it("omits the slimmed-out competencies and notes fields from the form", async () => {
-    const user = userEvent.setup();
-    const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    // Removed: per-task / verbatim free-text that duplicated each generator
-    // tool's own inputs and diluted the task instruction.
-    expect(container.querySelector('[name="competencies"]')).toBeNull();
-    expect(container.querySelector('[name="notes"]')).toBeNull();
-    // Kept: the standing, high-signal anchors.
-    expect(container.querySelector('[name="professionalContext"]')).not.toBeNull();
-    expect(container.querySelector('[name="programme"]')).not.toBeNull();
-  });
-
-  it("shows an honest 'no national framework' note for an unpacked domain", async () => {
-    const user = userEvent.setup();
-    renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "Overig");
-    expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
-  });
-
-  it("has no a11y violations on the choice screen", async () => {
-    const { container } = renderSettings();
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-
-  it("has no a11y violations in the wizard", async () => {
-    const user = userEvent.setup();
-    const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /wizard/i }));
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-
-  it("has no a11y violations in the form with a domain pack rendered", async () => {
-    const user = userEvent.setup();
-    const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /zelf invullen|yourself/i }));
-    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "Zorg & welzijn");
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-
-  it("lets you edit a profile, pre-filling the form with its values", async () => {
-    const user = userEvent.setup();
+  it("shows a sector badge on a profile card", () => {
     renderSettings([ictProfile], "p1");
-    // The default profile is flagged in the list.
-    expect(screen.getByText(/standaard|default/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /bewerken|edit/i }));
-
-    // Generic fields pre-filled.
-    expect(screen.getByDisplayValue("SE jaar 3")).toBeInTheDocument();
-    expect(screen.getByLabelText(/domein|domain/i)).toHaveValue("ICT");
-    // Pack selections pre-checked, and a custom field carried over.
-    expect(screen.getByRole("checkbox", { name: "Software" })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Gebruikersinteractie" })).not.toBeChecked();
-    expect(screen.getByDisplayValue("Specialisatie")).toBeInTheDocument();
-    // Save control present (submits as an update).
-    expect(screen.getByRole("button", { name: /opslaan|save/i })).toBeInTheDocument();
+    // The list card carries the sector (hbo) as a badge.
+    expect(screen.getByText(/hbo/i)).toBeInTheDocument();
   });
 
-  it("has no a11y violations while editing", async () => {
+  it("edits a profile, opening the editor pre-filled with its values", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings([ictProfile], "p1");
+    expect(screen.getByText(/standaard|default/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /bewerken|edit/i }));
+    // The stepped editor opens at step 1, prefilled and in edit (update) mode.
+    expect(screen.getByText(/stap 1 van 4|step 1 of 4/i)).toBeInTheDocument();
+    expect(screen.getByDisplayValue("SE jaar 3")).toBeInTheDocument();
+    expect(container.querySelector('input[name="id"]')).toHaveValue("p1");
+  });
+
+  it("has no a11y violations on the list view", async () => {
+    const { container } = renderSettings([ictProfile], "p1");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("has no a11y violations in the editor", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

@@ -18,6 +18,8 @@ const generic: ContextProfile = {
 const ict: ContextProfile = {
   id: "i1",
   name: "SE jaar 2",
+  country: "NL",
+  sector: "hbo",
   programme: "HBO-ICT",
   domain: "ICT",
   tools: "Java",
@@ -31,6 +33,8 @@ const ict: ContextProfile = {
 const recht: ContextProfile = {
   id: "r1",
   name: "HBO-Rechten jaar 2",
+  country: "NL",
+  sector: "hbo",
   domain: "Recht",
   packValues: {
     leeruitkomsten: ["Juridisch analyseren", "Digitaliseren"],
@@ -212,5 +216,129 @@ describe("formatProfile — direct-address (learner) level adaptation", () => {
     const nl = formatProfile({ ...generic, eqf: 2 }, "nl", "learner");
     expect(nl).not.toContain("mbo");
     expect(nl).not.toContain("havo");
+  });
+});
+
+// Phase 8.1 — the stored level is the national (NLQF) level; the engine derives
+// and injects only the EQF number + the existing neutral directive. NLQF is the
+// source of truth and outranks a legacy eqf; no national term ("NLQF"/"Instroom")
+// ever reaches {{contextProfile}}.
+describe("formatProfile — NLQF national level → derived EQF", () => {
+  it("injects the derived EQF number from the stored nationalLevel", () => {
+    // nationalLevel outranks the legacy eqf on the same profile.
+    const out = formatProfile({ ...generic, nationalLevel: "7" }, "nl");
+    expect(out).toContain("EQF 7");
+    expect(out).toContain(NL_DIRECTIVE(7));
+    expect(out).not.toContain("EQF 6"); // the legacy eqf:6 is not injected
+  });
+
+  it("appends one neutral entry-level note for the Instroomniveau (EQF 1)", () => {
+    const nl = formatProfile({ ...generic, nationalLevel: "instroom" }, "nl");
+    expect(nl).toContain("EQF 1");
+    expect(nl).toContain(NL_DIRECTIVE(1));
+    expect(nl).toContain("instapniveau"); // the neutral entry-level note
+    const en = formatProfile({ ...generic, nationalLevel: "instroom" }, "en");
+    expect(en).toContain("entry level");
+  });
+
+  it("never leaks a national term into the injected block", () => {
+    for (const level of ["instroom", "2", "4+"] as const) {
+      const nl = formatProfile({ ...generic, nationalLevel: level }, "nl");
+      expect(nl, level).not.toContain("NLQF");
+      expect(nl, level).not.toContain("Instroom");
+    }
+  });
+
+  it("maps the 4+ rung to EQF 4", () => {
+    expect(formatProfile({ ...generic, nationalLevel: "4+" }, "nl")).toContain("EQF 4");
+  });
+
+  it("keeps the legacy eqf fallback working (no nationalLevel)", () => {
+    const { nationalLevel, ...noNat } = { ...generic } as typeof generic & {
+      nationalLevel?: string;
+    };
+    void nationalLevel;
+    expect(formatProfile(noNat, "nl")).toContain("EQF 6"); // from eqf:6
+  });
+});
+
+// Phase 8.2 — the sector drives a learner-noun + teacher-noun directive so the
+// right vocabulary reaches every tool without editing the prompt files. A vo
+// class is "leerlingen"; mbo can toggle studenten↔deelnemers. No national term
+// ("NLQF"/"Instroom") ever leaks. `pedagogy` (onderwijsconcept) is injected
+// verbatim like professionalContext.
+describe("formatProfile — sector-driven learner/teacher noun directive", () => {
+  const vo = { id: "v1", name: "3 havo", sector: "vo", nationalLevel: "4" } as ContextProfile;
+  const mbo = {
+    id: "m1",
+    name: "mbo-4 ICT",
+    sector: "mbo",
+    nationalLevel: "4",
+    learnerNounOverride: "deelnemers",
+  } as ContextProfile;
+
+  it("names vo learners 'leerlingen' and the teacher 'docent'", () => {
+    const nl = formatProfile(vo, "nl");
+    expect(nl).toContain("leerlingen");
+    expect(nl).toContain("docent");
+    expect(nl).not.toContain("NLQF");
+    expect(nl).not.toContain("Instroom");
+  });
+
+  it("localises the noun directive (vo → pupils/teacher in English)", () => {
+    const en = formatProfile(vo, "en");
+    expect(en).toContain("pupils");
+    expect(en).toContain("teacher");
+  });
+
+  it("applies the mbo learner-noun override (studenten → deelnemers)", () => {
+    expect(formatProfile(mbo, "nl")).toContain("deelnemers");
+  });
+
+  it("injects the noun directive for BOTH audiences", () => {
+    expect(formatProfile(vo, "nl", "instructor")).toContain("leerlingen");
+    expect(formatProfile(vo, "nl", "learner")).toContain("leerlingen");
+  });
+
+  it("adapts the intro to the sector (vo, not hbo)", () => {
+    const nl = formatProfile(vo, "nl");
+    expect(nl).toContain("voortgezet onderwijs");
+    expect(nl).not.toContain("hoger beroepsonderwijs");
+  });
+
+  it("injects the pedagogy (onderwijsconcept) verbatim when set", () => {
+    const p = { ...vo, pedagogy: "Daltononderwijs" } as ContextProfile;
+    expect(formatProfile(p, "nl")).toContain("Daltononderwijs");
+    expect(formatProfile(p, "en")).toContain("Daltononderwijs");
+  });
+
+  it("omits the noun directive when no sector is set (legacy profile)", () => {
+    // The pre-P8 `generic` profile carries no sector — behaviour is unchanged.
+    const nl = formatProfile(generic, "nl");
+    expect(nl).not.toContain("leerlingen");
+  });
+});
+
+// Phase 8.3 — the framework block is resolved via country→sector→domain, so it
+// renders ONLY when a verified pack exists (hbo today). A vo/mbo/wo profile with
+// a chosen domain shows no invented framework — the honest custom-fields fallback.
+describe("formatProfile — framework block is sector-scoped", () => {
+  it("renders the hbo-i framework for an hbo/ICT profile (pack resolves)", () => {
+    expect(formatProfile(ict, "nl")).toContain("hbo-i domeinbeschrijving");
+  });
+
+  it("renders NO framework block for a vo profile, even with a domain + values", () => {
+    const vo = {
+      id: "v9",
+      name: "vmbo-4 Z&W",
+      country: "NL",
+      sector: "vo",
+      domain: "zw",
+      // Even if a stray packValues survives, no vo pack exists → nothing invented.
+      packValues: { canmedsRollen: ["Zorgverlener"] },
+    } as ContextProfile;
+    const nl = formatProfile(vo, "nl");
+    expect(nl).not.toContain("Relevant kader");
+    expect(nl).not.toContain("CanMEDS");
   });
 });

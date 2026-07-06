@@ -11,34 +11,11 @@ import { and, eq } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { contextProfiles } from "../schema.server";
 import { getCohortForUser } from "./cohorts.server";
-import type { ContextProfile, PackFieldValue } from "~/lib/context/types";
-
-/** Legacy hbo-i fields (pre-pack model) → the generic ICT packValues keys. */
-interface LegacyIctData {
-  architectureLayers?: string[];
-  activities?: string[];
-  hboiLevel?: number;
-}
-
-function migrateLegacy(data: Record<string, unknown>): Record<string, unknown> {
-  const legacy = data as LegacyIctData;
-  if (data.packValues || (!legacy.architectureLayers && !legacy.activities && !legacy.hboiLevel)) {
-    return data;
-  }
-  const packValues: Record<string, PackFieldValue> = {};
-  if (legacy.architectureLayers?.length) packValues.architectuurlagen = legacy.architectureLayers;
-  if (legacy.activities?.length) packValues.activiteiten = legacy.activities;
-  if (legacy.hboiLevel) packValues.beheersingsniveau = legacy.hboiLevel;
-  const { architectureLayers, activities, hboiLevel, ...rest } = data as Record<string, unknown> &
-    LegacyIctData;
-  void architectureLayers;
-  void activities;
-  void hboiLevel;
-  return { ...rest, packValues };
-}
+import type { ContextProfile } from "~/lib/context/types";
+import { migrateLegacyProfile } from "~/lib/context/migrate";
 
 function rowToProfile(row: typeof contextProfiles.$inferSelect): ContextProfile {
-  const data = migrateLegacy(JSON.parse(row.dataJson) as Record<string, unknown>);
+  const data = migrateLegacyProfile(JSON.parse(row.dataJson) as Record<string, unknown>);
   return { id: row.id, name: row.name, ...(data as Omit<ContextProfile, "id" | "name">) };
 }
 

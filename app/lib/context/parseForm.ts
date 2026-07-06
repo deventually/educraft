@@ -1,22 +1,22 @@
 /**
- * Parse + validate a context-profile form submission (from the wizard OR the
- * plain form — both post the same field names). Security boundary: pack values
- * are filtered against the domain registry (no arbitrary values), and custom
- * fields are trimmed, de-duplicated of empties, and capped in count + length.
+ * Parse + validate a context-profile form submission from the stepped editor.
+ * Security boundary: every field is validated against its catalogue — country,
+ * sector, track, national level, domain (sector-scoped) and pack values are all
+ * gated (no arbitrary values), and custom fields are trimmed, de-duplicated of
+ * empties, and capped in count + length.
  */
-import {
-  HBO_DOMAINS,
-  type ContextProfile,
-  type CustomField,
-  type HboDomain,
-  type PackFieldValue,
-} from "./types";
-import { getDomainPack } from "./packs";
+import type { ContextProfile, CustomField, PackFieldValue } from "./types";
+import { resolveFramework } from "./frameworks";
+import { getDomainsForSector } from "./domains";
+import { isCountryCode, type CountryCode } from "./countries";
+import { isSector, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
+import { isNlqfLevel, type NlqfLevel } from "./nlqf";
 import { isEqfLevel } from "./eqf";
 
 export const MAX_CUSTOM_FIELDS = 30;
 export const MAX_CUSTOM_LABEL = 120;
 export const MAX_CUSTOM_VALUE = 600;
+export const MAX_PEDAGOGY = 300;
 
 /** Input name prefix for domain-pack fields, e.g. `pack.architectuurlagen`. */
 export const PACK_PREFIX = "pack.";
@@ -26,17 +26,20 @@ function str(v: FormDataEntryValue | null): string | undefined {
   return s || undefined;
 }
 
-function asDomain(v: FormDataEntryValue | null): HboDomain | undefined {
-  const s = str(v);
-  return s && (HBO_DOMAINS as readonly string[]).includes(s) ? (s as HboDomain) : undefined;
+/** A domain is valid only if it belongs to the (country, sector) catalogue. */
+function validDomain(country: string, sector: string, raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  return getDomainsForSector(country, sector).some((d) => d.value === raw) ? raw : undefined;
 }
 
 /** Collect + validate the selected domain's pack answers from the form. */
 function parsePackValues(
   fd: FormData,
-  domain: HboDomain | undefined,
+  country: string,
+  sector: string,
+  domain: string | undefined,
 ): Record<string, PackFieldValue> | undefined {
-  const pack = getDomainPack(domain);
+  const pack = resolveFramework(country, sector, domain);
   if (!pack) return undefined;
   const out: Record<string, PackFieldValue> = {};
 
@@ -75,19 +78,56 @@ function parseCustomFields(fd: FormData): CustomField[] | undefined {
   return out.length ? out : undefined;
 }
 
+/** Availability sets the action re-validates submitted country/sector against. */
+export interface ContextFormOptions {
+  availableCountries?: string[];
+  availableSectors?: string[];
+}
+
 export interface ParsedContextForm {
   input?: Omit<ContextProfile, "id">;
   isDefault: boolean;
-  /** Set when validation fails (currently: missing name). */
-  error?: "name-required";
+  /** Set when validation fails. */
+  error?: "name-required" | "country-not-available" | "sector-not-available";
 }
 
-export function parseContextForm(fd: FormData): ParsedContextForm {
+export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): ParsedContextForm {
   const name = String(fd.get("name") ?? "").trim();
   const isDefault = fd.get("isDefault") === "on";
   if (!name) return { isDefault, error: "name-required" };
 
-  const domain = asDomain(fd.get("domain"));
+  // Server-side availability guard: a submitted country/sector must be in the
+  // caller's available set. A hand-crafted POST for a disabled/unassigned one is
+  // refused (the seam is default-open until P9 writes any settings).
+  const rawCountry = str(fd.get("country"));
+  const rawSector = str(fd.get("sector"));
+  if (rawCountry && opts.availableCountries && !opts.availableCountries.includes(rawCountry)) {
+    return { isDefault, error: "country-not-available" };
+  }
+  if (rawSector && opts.availableSectors && !opts.availableSectors.includes(rawSector)) {
+    return { isDefault, error: "sector-not-available" };
+  }
+
+  // Stored (validated) axes vs the effective values used to resolve catalogues.
+  // A legacy submission with no sector still resolves against hbo for domains/packs.
+  const country: CountryCode | undefined = isCountryCode(rawCountry ?? "") ? "NL" : undefined;
+  const sector: Sector | undefined = isSector(rawSector ?? "") ? (rawSector as Sector) : undefined;
+  const effCountry = country ?? "NL";
+  const effSector = sector ?? "hbo";
+
+  const rawTrack = str(fd.get("track"));
+  const track =
+    rawTrack && tracksForSector(effSector).some((t) => t.value === rawTrack) ? rawTrack : undefined;
+
+  const rawLevel = str(fd.get("nationalLevel"));
+  const nationalLevel: NlqfLevel | undefined =
+    rawLevel && isNlqfLevel(rawLevel) ? rawLevel : undefined;
+
+  const rawNoun = str(fd.get("learnerNounOverride"));
+  const learnerNounOverride =
+    rawNoun && learnerNounChoices(effSector).includes(rawNoun) ? rawNoun : undefined;
+
+  const domain = validDomain(effCountry, effSector, str(fd.get("domain")));
   const yearRaw = String(fd.get("studyYear") ?? "");
   const eqfRaw = String(fd.get("eqf") ?? "");
   const year = Number(yearRaw);
@@ -95,14 +135,22 @@ export function parseContextForm(fd: FormData): ParsedContextForm {
 
   const input: Omit<ContextProfile, "id"> = {
     name,
+    country,
+    sector,
+    track,
+    nationalLevel,
+    learnerNounOverride,
     programme: str(fd.get("programme")),
     domain,
     courseName: str(fd.get("courseName")),
     studyYear: yearRaw && year >= 1 && year <= 4 ? (year as 1 | 2 | 3 | 4) : undefined,
+    // eqf is deprecated as an input (the level comes from nationalLevel); parsed
+    // only for backward compatibility if a caller still submits it.
     eqf: eqfRaw && isEqfLevel(eqf) ? eqf : undefined,
     professionalContext: str(fd.get("professionalContext")),
     tools: str(fd.get("tools")),
-    packValues: parsePackValues(fd, domain),
+    pedagogy: str(fd.get("pedagogy"))?.slice(0, MAX_PEDAGOGY),
+    packValues: parsePackValues(fd, effCountry, effSector, domain),
     customFields: parseCustomFields(fd),
   };
 

@@ -1,9 +1,13 @@
 import type { ContextProfile, PackFieldValue } from "./types";
-import { getDomainPack, type PackField } from "./packs";
+import type { PackField } from "./packs";
+import { resolveFramework } from "./frameworks";
+import { resolveLevel } from "./derive";
+import { SECTORS_INFO, isSector, learnerNounFor, teacherNounFor, type Sector } from "./sectors";
 import { loc } from "~/lib/i18n/localized";
 import type { OutputLanguage } from "~/lib/registry/types";
 
 interface Labels {
+  /** Fallback intro for a legacy profile with no sector (hbo-flavoured). */
   intro: string;
   programme: string;
   course: string;
@@ -11,6 +15,7 @@ interface Labels {
   eqf: string;
   professionalContext: string;
   tools: string;
+  pedagogy: string;
   framework: string;
 }
 
@@ -49,6 +54,16 @@ const LEVEL_DIRECTIVE_DIRECT: Record<OutputLanguage, (n: number) => string> = {
     `- Pitch your vocabulary, sentence length and level of abstraction to this learner (EQF ${n}); start there and recalibrate to what the learner shows. Do not mention the level itself.`,
 };
 
+/**
+ * One neutral note appended when the derived level is the Instroomniveau
+ * approximation (below EQF 1). It never names the national term — the word
+ * "instapniveau"/"entry level" is a generic register cue, not "NLQF"/"Instroom".
+ */
+const ENTRY_LEVEL_NOTE: Record<OutputLanguage, string> = {
+  nl: "- Dit is een instapniveau onder het laagste kwalificatieniveau: houd de stof extra concreet, toegankelijk en kleinstappig.",
+  en: "- This is an entry level below the lowest qualification level: keep the material especially concrete, accessible and in small steps.",
+};
+
 /** Who reads the tool's output — governs which level directive is injected. */
 export type Audience = "instructor" | "learner";
 
@@ -61,6 +76,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
     eqf: "EQF-niveau",
     professionalContext: "Beroepspraktijk / werkveld",
     tools: "Technologie / methoden / instrumenten",
+    pedagogy: "Onderwijsconcept / didactische aanpak",
     framework: "Relevant kader",
   },
   en: {
@@ -71,9 +87,30 @@ const LABELS: Record<OutputLanguage, Labels> = {
     eqf: "EQF level",
     professionalContext: "Professional field",
     tools: "Technology / methods / instruments",
+    pedagogy: "Educational concept / didactic approach",
     framework: "Relevant framework",
   },
 };
+
+/** The context intro, adapted to the sector when set (else the hbo fallback). */
+function introFor(sector: Sector | undefined, lang: OutputLanguage): string {
+  if (!sector) return LABELS[lang].intro;
+  const label = loc(SECTORS_INFO[sector].label, lang);
+  return lang === "nl" ? `Context van de opleiding (${label}):` : `Programme context (${label}):`;
+}
+
+/**
+ * The learner-noun + teacher-noun directive (both audiences). Injected whenever a
+ * sector is set so the right vocabulary reaches every tool without editing the
+ * prompt files. It carries only nouns — no national term ever appears.
+ */
+function nounDirective(sector: Sector, override: string | undefined, lang: OutputLanguage): string {
+  const learner = learnerNounFor(sector, override, lang);
+  const teacher = teacherNounFor(sector, lang);
+  return lang === "nl"
+    ? `- Spreek over de lerenden als "${learner}" en over de begeleider als "${teacher}", passend bij dit onderwijstype.`
+    : `- Refer to the learners as "${learner}" and to the teacher as "${teacher}", as fits this type of education.`;
+}
 
 /** Render a single pack field's value into a human string, or "" if empty. */
 function renderPackValue(field: PackField, value: PackFieldValue, lang: OutputLanguage): string {
@@ -103,7 +140,8 @@ export function formatProfile(
 ): string {
   if (!profile) return "";
   const t = LABELS[lang];
-  const lines: string[] = [t.intro];
+  const sector = isSector(profile.sector ?? "") ? (profile.sector as Sector) : undefined;
+  const lines: string[] = [introFor(sector, lang)];
 
   // Domain is intentionally NOT printed: it drives the framework pack below
   // (whose header already names the domain) and is implied by the programme.
@@ -113,18 +151,29 @@ export function formatProfile(
   if (profile.programme) lines.push(`- ${t.programme}: ${profile.programme}`);
   if (profile.courseName) lines.push(`- ${t.course}: ${profile.courseName}`);
   if (profile.studyYear) lines.push(`- ${t.year}: ${profile.studyYear}`);
-  if (profile.eqf) {
-    lines.push(`- ${t.eqf}: EQF ${profile.eqf}`);
+  // Level: derive the country-neutral EQF from the profile (national level, else
+  // legacy/synthetic eqf) and inject only the number + the existing directive —
+  // the national label never reaches the prompt.
+  const lvl = resolveLevel(profile);
+  if (lvl) {
+    lines.push(`- ${t.eqf}: EQF ${lvl.eqf}`);
     const directive = audience === "learner" ? LEVEL_DIRECTIVE_DIRECT : LEVEL_DIRECTIVE;
-    lines.push(directive[lang](profile.eqf));
+    lines.push(directive[lang](lvl.eqf));
+    if (lvl.entryLevel) lines.push(ENTRY_LEVEL_NOTE[lang]);
   }
+  // Learner/teacher vocabulary, driven by sector (both audiences).
+  if (sector) lines.push(nounDirective(sector, profile.learnerNounOverride, lang));
   if (profile.professionalContext?.trim()) {
     lines.push(`- ${t.professionalContext}: ${profile.professionalContext.trim()}`);
   }
   if (profile.tools?.trim()) lines.push(`- ${t.tools}: ${profile.tools.trim()}`);
+  // Onderwijsconcept / didactic approach — injected verbatim like the field above.
+  if (profile.pedagogy?.trim()) lines.push(`- ${t.pedagogy}: ${profile.pedagogy.trim()}`);
 
-  // Domain pack — render only the fields with a value, resolved to the output language.
-  const pack = getDomainPack(profile.domain);
+  // Verified framework pack — resolved via country → sector → domain, so it
+  // renders only where a national framework exists (hbo today). Elsewhere the
+  // block is simply absent — nothing is invented.
+  const pack = resolveFramework(profile.country, profile.sector, profile.domain);
   const packValues = profile.packValues;
   if (pack && packValues) {
     const rendered: string[] = [];

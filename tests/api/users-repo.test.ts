@@ -34,6 +34,12 @@ describe("users repository", () => {
     expect(await repo.getUserByEmail("nobody@example.com")).toBeNull();
   });
 
+  it("returns null for per-teacher country/sector assignment when unset (P8 read getters)", async () => {
+    // Storage + setters are P9; until then these default-open (null = all).
+    expect(await repo.getUserAssignedCountries("anyone")).toBeNull();
+    expect(await repo.getUserAssignedSectors("anyone")).toBeNull();
+  });
+
   it("allows a nameless (email-less) invite-based account", async () => {
     const created = await repo.createUser({
       name: "Anon",
