@@ -1,9 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "vitest-axe";
 import { GeneratorView } from "~/components/GeneratorView";
 import { getToolBySlug } from "~/lib/registry";
 import type { ContextProfile } from "~/lib/context/types";
+
+// happy-dom loads no stylesheet, so axe can't compute real contrast.
+const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 vi.mock("~/lib/streamClient", () => ({ streamPost: vi.fn() }));
 
@@ -61,5 +65,13 @@ describe("GeneratorView — profile prefill", () => {
     // placeholder state, so a stale prefill never lingers.
     await user.selectOptions(profilePicker, "pNo");
     expect(level).toHaveValue("");
+  });
+
+  it("has no accessibility violations", async () => {
+    const tool = getToolBySlug("arcs-reactor")!;
+    const { container } = render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" />,
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
