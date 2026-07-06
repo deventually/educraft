@@ -54,7 +54,7 @@ validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the
 
 LimeOnIt is not tied to one model vendor.
 
-- **Vercel AI SDK v6** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, Ollama,
+- **Vercel AI SDK v7** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, Ollama,
   LM Studio, and any configured OpenAI-compatible endpoint.
 - **CLI** adapter (`app/lib/ai/adapters/cli.ts`) — drives local agent CLIs
   (Claude Code, opencode, codex, gemini) as subprocesses (prod-guarded).
