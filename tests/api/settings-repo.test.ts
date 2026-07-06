@@ -57,9 +57,36 @@ describe("settings repository — enabled models", () => {
   });
 });
 
-describe("settings repository — enabled countries/sectors (P8 read getters)", () => {
-  it("returns null when unset (default = whole catalogue, non-breaking until P9)", async () => {
+describe("settings repository — enabled countries/sectors (P9 setters)", () => {
+  it("returns null when unset (default = whole catalogue)", async () => {
     expect(await repo.getEnabledCountries()).toBeNull();
     expect(await repo.getEnabledSectors()).toBeNull();
+  });
+
+  it("round-trips an explicit country allow-list", async () => {
+    await repo.setEnabledCountries(["NL"]);
+    expect(await repo.getEnabledCountries()).toEqual(["NL"]);
+  });
+
+  it("round-trips an explicit sector allow-list", async () => {
+    await repo.setEnabledSectors(["hbo", "wo"]);
+    expect(await repo.getEnabledSectors()).toEqual(["hbo", "wo"]);
+  });
+
+  it("clears each list back to default when set to null", async () => {
+    await repo.setEnabledCountries(["NL"]);
+    await repo.setEnabledCountries(null);
+    expect(await repo.getEnabledCountries()).toBeNull();
+
+    await repo.setEnabledSectors(["mbo"]);
+    await repo.setEnabledSectors(null);
+    expect(await repo.getEnabledSectors()).toBeNull();
+  });
+
+  it("upsert overwrites a previously stored list", async () => {
+    await repo.setEnabledSectors(["vo"]);
+    await repo.setEnabledSectors(["mbo", "hbo"]);
+    expect(await repo.getEnabledSectors()).toEqual(["mbo", "hbo"]);
+    await repo.setEnabledSectors(null); // reset
   });
 });

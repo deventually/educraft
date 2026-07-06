@@ -34,10 +34,29 @@ describe("users repository", () => {
     expect(await repo.getUserByEmail("nobody@example.com")).toBeNull();
   });
 
-  it("returns null for per-teacher country/sector assignment when unset (P8 read getters)", async () => {
-    // Storage + setters are P9; until then these default-open (null = all).
+  it("returns null for per-teacher country/sector assignment when unset (default-open)", async () => {
+    // null = all; a teacher with no assignment is unrestricted.
     expect(await repo.getUserAssignedCountries("anyone")).toBeNull();
     expect(await repo.getUserAssignedSectors("anyone")).toBeNull();
+  });
+
+  it("round-trips a per-teacher country/sector assignment (P9 setters)", async () => {
+    await repo.setUserAssignedCountries("t-assign", ["NL"]);
+    await repo.setUserAssignedSectors("t-assign", ["mbo", "hbo"]);
+    expect([...(await repo.getUserAssignedCountries("t-assign"))!]).toEqual(["NL"]);
+    expect([...(await repo.getUserAssignedSectors("t-assign"))!].sort()).toEqual(["hbo", "mbo"]);
+    // Assignments are keyed per user — an unrelated teacher stays unrestricted.
+    expect(await repo.getUserAssignedSectors("t-other")).toBeNull();
+  });
+
+  it("clears a per-teacher assignment with null or an empty list", async () => {
+    await repo.setUserAssignedSectors("t-clear", ["vo"]);
+    await repo.setUserAssignedSectors("t-clear", null);
+    expect(await repo.getUserAssignedSectors("t-clear")).toBeNull();
+
+    await repo.setUserAssignedCountries("t-clear", ["NL"]);
+    await repo.setUserAssignedCountries("t-clear", []);
+    expect(await repo.getUserAssignedCountries("t-clear")).toBeNull();
   });
 
   it("allows a nameless (email-less) invite-based account", async () => {
