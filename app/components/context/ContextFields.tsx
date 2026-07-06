@@ -10,6 +10,7 @@ import { X, Plus, RotateCcw, ExternalLink } from "lucide-react";
 import type { CustomField, PackFieldValue } from "~/lib/context/types";
 import type { PackField } from "~/lib/context/packs";
 import { getDomainsForSector } from "~/lib/context/domains";
+import { showsProgramme, showsProfessionalContext } from "~/lib/context/relevance";
 import { resolveFramework } from "~/lib/context/frameworks";
 import { COUNTRY_LABELS, type CountryCode } from "~/lib/context/countries";
 import {
@@ -23,7 +24,7 @@ import { NLQF_LEVELS, NLQF_SOURCE_URL, isNlqfLevel, nlqfToEqf } from "~/lib/cont
 import { Input, Label, Select, Textarea, HelpText } from "~/components/ui";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import { loc } from "~/lib/i18n/localized";
+import { loc, type LocalizedText } from "~/lib/i18n/localized";
 
 /** Label + control wrapper with proper htmlFor/id association. */
 export function Field({
@@ -72,8 +73,16 @@ export function NameField({
   );
 }
 
-export function ProgrammeField({ defaultValue }: { defaultValue?: string }) {
+/** Opleiding / Programme — self-hides for the vo sector (no such concept there). */
+export function ProgrammeField({
+  sector,
+  defaultValue,
+}: {
+  sector?: string;
+  defaultValue?: string;
+}) {
   const t = useT();
+  if (!showsProgramme(sector)) return null;
   return (
     <Field id="cf-programme" label={t.settings.programme}>
       <Input
@@ -115,10 +124,18 @@ export function DomainSelect({
   );
 }
 
-export function CourseField({ defaultValue }: { defaultValue?: string }) {
+/** Vak / Course — sector-aware label (Subject for vo, Course elsewhere in EN). */
+export function CourseField({
+  label,
+  defaultValue,
+}: {
+  label?: LocalizedText;
+  defaultValue?: string;
+}) {
   const t = useT();
+  const locale = useLocale();
   return (
-    <Field id="cf-course" label={t.settings.course}>
+    <Field id="cf-course" label={label ? loc(label, locale) : t.settings.course}>
       <Input
         id="cf-course"
         name="courseName"
@@ -325,8 +342,18 @@ export function PedagogyField({ defaultValue }: { defaultValue?: string }) {
   );
 }
 
-export function ProfessionalContextField({ defaultValue }: { defaultValue?: string }) {
+/** Beroepspraktijk / Professional field — self-hides for the general havo/vwo tracks. */
+export function ProfessionalContextField({
+  sector,
+  track,
+  defaultValue,
+}: {
+  sector?: string;
+  track?: string;
+  defaultValue?: string;
+}) {
   const t = useT();
+  if (!showsProfessionalContext(sector, track)) return null;
   return (
     <Field id="cf-prof" label={t.settings.professionalContext}>
       <Textarea

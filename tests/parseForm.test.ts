@@ -330,6 +330,64 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
     expect(input?.nationalLevel).toBe("7");
   });
 
+  it("drops Programme server-side for the vo sector (irrelevant field defense)", () => {
+    // vo has no 'opleiding' concept — a hand-crafted POST can't persist one.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["programme", "smuggled"],
+        ]),
+      ).input?.programme,
+    ).toBeUndefined();
+    // …but every other sector keeps it.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["programme", "HBO-ICT"],
+        ]),
+      ).input?.programme,
+    ).toBe("HBO-ICT");
+  });
+
+  it("drops Professional field server-side for havo/vwo, keeps it for vmbo & hbo", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["professionalContext", "smuggled"],
+        ]),
+      ).input?.professionalContext,
+    ).toBeUndefined();
+    // A vocational vo track (vmbo) keeps it.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "vmbo-bb"],
+          ["professionalContext", "Bouwplaats"],
+        ]),
+      ).input?.professionalContext,
+    ).toBe("Bouwplaats");
+    // hbo keeps it.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["professionalContext", "Zorg"],
+        ]),
+      ).input?.professionalContext,
+    ).toBe("Zorg");
+  });
+
   it("refuses a country/sector outside the caller's available set", () => {
     expect(
       parseContextForm(

@@ -17,6 +17,7 @@ import { cn } from "~/lib/utils";
 import type { ContextProfile } from "~/lib/context/types";
 import { defaultPackValues } from "~/lib/context/packs";
 import { SECTORS_INFO, TRACKS_BY_SECTOR, isSector } from "~/lib/context/sectors";
+import { courseLabel } from "~/lib/context/relevance";
 import { NLQF_LEVELS, isNlqfLevel, nlqfToEqf } from "~/lib/context/nlqf";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import type { Messages } from "~/lib/i18n";
@@ -195,8 +196,8 @@ export function ContextProfileEditor({
             onChange={onOnderwijstype}
             sectors={availableSectors}
           />
-          <ProgrammeField defaultValue={profile?.programme} />
-          <CourseField defaultValue={profile?.courseName} />
+          <ProgrammeField sector={sector} defaultValue={profile?.programme} />
+          <CourseField label={courseLabel(sector)} defaultValue={profile?.courseName} />
         </div>
       </div>
 
@@ -218,7 +219,11 @@ export function ContextProfileEditor({
 
       {/* Step 3 — Context & eigen velden */}
       <div hidden={step !== 2} className="space-y-4">
-        <ProfessionalContextField defaultValue={profile?.professionalContext} />
+        <ProfessionalContextField
+          sector={sector}
+          track={track}
+          defaultValue={profile?.professionalContext}
+        />
         <ToolsField defaultValue={profile?.tools} />
         <PedagogyField defaultValue={profile?.pedagogy} />
         <LearnerNounField sector={sector} value={learnerNoun} onChange={setLearnerNoun} />
