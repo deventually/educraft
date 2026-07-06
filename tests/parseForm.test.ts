@@ -250,12 +250,14 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
 
   it("gates the domain by the track's catalogue (P10)", () => {
     // A vmbo beroepsgericht profiel is valid on a vmbo track…
+    // (the profiel is a bovenbouw concept — Phase 11 — so the fase is set here).
     expect(
       parseContextForm(
         fd([
           ["name", "x"],
           ["sector", "vo"],
           ["track", "vmbo-bb"],
+          ["phase", "bovenbouw"],
           ["domain", "zw"],
         ]),
       ).input?.domain,
@@ -267,6 +269,7 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
           ["name", "x"],
           ["sector", "vo"],
           ["track", "havo"],
+          ["phase", "bovenbouw"],
           ["domain", "zw"],
         ]),
       ).input?.domain,
@@ -278,6 +281,7 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
           ["name", "x"],
           ["sector", "vo"],
           ["track", "havo"],
+          ["phase", "bovenbouw"],
           ["domain", "nt"],
         ]),
       ).input?.domain,
@@ -410,6 +414,104 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
         ]),
       ).input?.professionalContext,
     ).toBe("Zorg");
+  });
+
+  it("stores the vo fase and drops it off non-vo (Phase 11)", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["phase", "bovenbouw"],
+        ]),
+      ).input?.phase,
+    ).toBe("bovenbouw");
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["phase", "onderbouw"],
+        ]),
+      ).input?.phase,
+    ).toBe("onderbouw");
+    // Junk value is dropped.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["phase", "garbage"],
+        ]),
+      ).input?.phase,
+    ).toBeUndefined();
+    // A hand-crafted POST can't smuggle a fase onto a non-vo sector.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["phase", "bovenbouw"],
+        ]),
+      ).input?.phase,
+    ).toBeUndefined();
+  });
+
+  it("gates the vo profiel by fase: dropped in onderbouw, kept in bovenbouw (Phase 11)", () => {
+    // The profiel is a tweede-fase (bovenbouw) concept — the onderbouw has none.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["phase", "onderbouw"],
+          ["domain", "nt"],
+        ]),
+      ).input?.domain,
+    ).toBeUndefined();
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["track", "havo"],
+          ["phase", "bovenbouw"],
+          ["domain", "nt"],
+        ]),
+      ).input?.domain,
+    ).toBe("nt");
+  });
+
+  it("un-gates a numeric studiejaar for mbo, keeps hbo, drops vo (Phase 11)", () => {
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "mbo"],
+          ["studyYear", "3"],
+        ]),
+      ).input?.studyYear,
+    ).toBe(3);
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "hbo"],
+          ["studyYear", "2"],
+        ]),
+      ).input?.studyYear,
+    ).toBe(2);
+    // vo carries fase, not a study year — a smuggled one is dropped.
+    expect(
+      parseContextForm(
+        fd([
+          ["name", "x"],
+          ["sector", "vo"],
+          ["studyYear", "3"],
+        ]),
+      ).input?.studyYear,
+    ).toBeUndefined();
   });
 
   it("refuses a country/sector outside the caller's available set", () => {

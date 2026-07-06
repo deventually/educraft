@@ -59,6 +59,13 @@ function migrateAxes(data: Record<string, unknown>): Record<string, unknown> {
   if (out.nationalLevel == null && out.eqf != null && isEqfLevel(Number(out.eqf))) {
     out.nationalLevel = String(out.eqf);
   }
+  // Phase 11: a stored vo profiel exists only in the tweede fase, so its stage is
+  // bovenbouw — backfill it so the fase field + profiel gating stay coherent on
+  // read and re-save. A profiel-less vo profile stays phase-less (blank onderbouw
+  // is legitimate); other sectors carry a studiejaar, never a fase.
+  if (out.sector === "vo" && out.phase == null && out.domain != null && out.domain !== "") {
+    out.phase = "bovenbouw";
+  }
   return out;
 }
 

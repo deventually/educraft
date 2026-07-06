@@ -38,6 +38,7 @@ function renderSettings(profiles: Profile[] = [], defaultId = "") {
       defaultId,
       availableCountries: ["NL"],
       availableSectors: ["vo", "mbo", "hbo", "wo"],
+      assignedDomains: null,
     },
   } as unknown as ComponentProps<typeof Settings>;
   const Stub = createRoutesStub([
@@ -105,6 +106,74 @@ describe("Context settings", () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
     await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows the vo Fase field after choosing a vo track", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.selectOptions(
+      container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
+      "vo::havo",
+    );
+    expect(container.querySelector("#cf-phase")).toBeTruthy();
+    expect(screen.getByLabelText(/fase|phase/i)).toBeInTheDocument();
+  });
+
+  it("hides the profiel until the vo fase is bovenbouw", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.selectOptions(
+      container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
+      "vo::havo",
+    );
+    // Onderbouw has no profiel — the domain select stays out of the DOM.
+    await user.selectOptions(
+      container.querySelector("#cf-phase") as HTMLSelectElement,
+      "onderbouw",
+    );
+    expect(container.querySelector("#cf-domain")).toBeNull();
+    // Bovenbouw (tweede fase) reveals the profiel select with the havo profielen.
+    await user.selectOptions(
+      container.querySelector("#cf-phase") as HTMLSelectElement,
+      "bovenbouw",
+    );
+    const domain = container.querySelector("#cf-domain");
+    expect(domain).toBeTruthy();
+    expect(domain?.textContent).toMatch(/Natuur & Techniek/);
+  });
+
+  it("shows Studiejaar for mbo and hbo but not vo", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    const onderwijstype = container.querySelector("#cf-onderwijstype") as HTMLSelectElement;
+
+    await user.selectOptions(onderwijstype, "mbo::mbo-4");
+    expect(container.querySelector("#cf-year")).toBeTruthy();
+    expect(screen.getByLabelText(/studiejaar|study year/i)).toBeInTheDocument();
+
+    await user.selectOptions(onderwijstype, "vo::havo");
+    expect(container.querySelector("#cf-year")).toBeNull();
+
+    await user.selectOptions(onderwijstype, "hbo::bachelor");
+    expect(container.querySelector("#cf-year")).toBeTruthy();
+  });
+
+  it("has no a11y violations in the editor with a vo track chosen", async () => {
+    const user = userEvent.setup();
+    const { container } = renderSettings();
+    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.selectOptions(
+      container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
+      "vo::havo",
+    );
+    await user.selectOptions(
+      container.querySelector("#cf-phase") as HTMLSelectElement,
+      "bovenbouw",
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

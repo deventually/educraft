@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   showsProgramme,
   showsProfessionalContext,
+  showsPhase,
+  showsStudyYear,
+  showsDomain,
   courseLabel,
   domainFieldLabel,
 } from "~/lib/context/relevance";
@@ -61,6 +64,56 @@ describe("courseLabel", () => {
     expect(loc(courseLabel("mbo"), "en")).toBe("Course");
     expect(loc(courseLabel("hbo"), "en")).toBe("Course");
     expect(loc(courseLabel("wo"), "en")).toBe("Course");
+  });
+});
+
+describe("showsPhase", () => {
+  it("shows the onderbouw/bovenbouw fase only for vo", () => {
+    expect(showsPhase("vo")).toBe(true);
+  });
+
+  it("hides fase for mbo/hbo/wo and a legacy/undefined sector", () => {
+    expect(showsPhase("mbo")).toBe(false);
+    expect(showsPhase("hbo")).toBe(false);
+    expect(showsPhase("wo")).toBe(false);
+    expect(showsPhase(undefined)).toBe(false);
+    expect(showsPhase("")).toBe(false);
+  });
+});
+
+describe("showsStudyYear", () => {
+  it("shows the numeric study year for hbo and mbo", () => {
+    expect(showsStudyYear("hbo")).toBe(true);
+    expect(showsStudyYear("mbo")).toBe(true);
+  });
+
+  it("hides the study year for vo (which uses fase) and for wo", () => {
+    expect(showsStudyYear("vo")).toBe(false);
+    expect(showsStudyYear("wo")).toBe(false);
+  });
+
+  it("hides the study year for a legacy/undefined sector", () => {
+    expect(showsStudyYear(undefined)).toBe(false);
+    expect(showsStudyYear("")).toBe(false);
+  });
+});
+
+describe("showsDomain", () => {
+  it("shows the profiel for vo only in the bovenbouw (it is a tweede-fase concept)", () => {
+    expect(showsDomain("vo", "bovenbouw")).toBe(true);
+  });
+
+  it("hides the profiel for vo in the onderbouw or before a fase is chosen", () => {
+    expect(showsDomain("vo", "onderbouw")).toBe(false);
+    expect(showsDomain("vo", undefined)).toBe(false);
+    expect(showsDomain("vo", "")).toBe(false);
+  });
+
+  it("keeps the domain field for every non-vo sector regardless of phase", () => {
+    expect(showsDomain("hbo", undefined)).toBe(true);
+    expect(showsDomain("mbo", "onderbouw")).toBe(true);
+    expect(showsDomain("wo", undefined)).toBe(true);
+    expect(showsDomain(undefined, undefined)).toBe(true);
   });
 });
 

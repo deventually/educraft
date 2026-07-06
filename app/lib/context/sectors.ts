@@ -175,6 +175,24 @@ export function isSector(s: string): s is Sector {
   return (SECTORS as readonly string[]).includes(s);
 }
 
+/**
+ * The two vo stages (Phase 11). onderbouw = the broad, foundational lower years
+ * (no profiel yet); bovenbouw = the tweede fase where a profiel is chosen and the
+ * work turns exam-oriented. EN labels keep the Dutch term parenthetically, in the
+ * house style of the track labels (e.g. "havo (senior general secondary)").
+ */
+export const VO_PHASES = [
+  { value: "onderbouw", label: { nl: "Onderbouw", en: "Lower secondary (onderbouw)" } },
+  { value: "bovenbouw", label: { nl: "Bovenbouw", en: "Upper secondary (bovenbouw)" } },
+] as const satisfies readonly { value: string; label: LocalizedText }[];
+
+export type VoPhase = (typeof VO_PHASES)[number]["value"];
+
+/** Runtime guard: is `v` one of the two vo stages? */
+export function isVoPhase(v: string): v is VoPhase {
+  return VO_PHASES.some((p) => p.value === v);
+}
+
 /** The tracks valid for a sector (empty for an unknown sector). */
 export function tracksForSector(sector: string | undefined): TrackOption[] {
   return sector && isSector(sector) ? TRACKS_BY_SECTOR[sector] : [];

@@ -25,6 +25,24 @@ describe("migrateLegacyProfile — Phase 8 read-time backfill", () => {
     expect(out.nationalLevel).toBe("4");
   });
 
+  it("backfills phase=bovenbouw for a legacy vo profile that carries a profiel (Phase 11)", () => {
+    // A stored vo profiel only exists in the tweede fase, so its stage is bovenbouw.
+    // Backfilling it keeps the fase field + profiel gating coherent on read + re-save.
+    const out = migrateLegacyProfile({ sector: "vo", track: "havo", domain: "nederlands" });
+    expect(out.phase).toBe("bovenbouw");
+  });
+
+  it("does not add a phase to a vo profile with no profiel, or overwrite an existing one", () => {
+    expect(migrateLegacyProfile({ sector: "vo", track: "havo" }).phase).toBeUndefined();
+    expect(migrateLegacyProfile({ sector: "vo", domain: "nt", phase: "onderbouw" }).phase).toBe(
+      "onderbouw",
+    );
+  });
+
+  it("never adds a phase to a non-vo profile (studiejaar sector)", () => {
+    expect(migrateLegacyProfile({ sector: "hbo", domain: "ICT" }).phase).toBeUndefined();
+  });
+
   it("is idempotent", () => {
     const once = migrateLegacyProfile({ eqf: 7 });
     const twice = migrateLegacyProfile(once);

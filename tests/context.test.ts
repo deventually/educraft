@@ -172,6 +172,14 @@ describe("formatProfile — vo profiel injection (P10.2)", () => {
     expect(formatProfile(ict, "nl")).not.toMatch(/Domein: ICT/);
     expect(formatProfile(generic, "nl")).not.toMatch(/Domein:/);
   });
+
+  it("injects the vo fase with a 'Fase' label (Phase 11)", () => {
+    const bovenbouw = { ...havo, phase: "bovenbouw" } as ContextProfile;
+    const nl = formatProfile(bovenbouw, "nl");
+    expect(nl).toContain("Fase: Bovenbouw");
+    const en = formatProfile(bovenbouw, "en");
+    expect(en).toContain("Phase: Upper secondary (bovenbouw)");
+  });
 });
 
 describe("formatProfile — EQF 1–8 level adaptation", () => {

@@ -85,12 +85,15 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   async function toStep2(
     user: ReturnType<typeof userEvent.setup>,
     onderwijstype = "hbo::bachelor",
+    phase?: "onderbouw" | "bovenbouw",
   ) {
     await user.type(screen.getByLabelText(/naam|name/i), "P");
     await user.selectOptions(
       screen.getByLabelText(/onderwijstype|type of education/i),
       onderwijstype,
     );
+    // vo's profiel is a bovenbouw concept, so a vo test must pick the fase first.
+    if (phase) await user.selectOptions(screen.getByLabelText(/^fase$|^phase$/i), phase);
     await user.click(screen.getByRole("button", { name: /volgende|next/i }));
   }
 
@@ -120,7 +123,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("scopes vo domain options to the track's profielen and labels the field 'Profiel'", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await toStep2(user, "vo::havo");
+    await toStep2(user, "vo::havo", "bovenbouw");
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
     expect(values).toContain("nt"); // Natuur & Techniek
@@ -128,6 +131,13 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     expect(values).not.toContain("zw"); // vmbo profiel, not offered on havo
     const label = container.querySelector(`label[for="${domain.id}"]`);
     expect(label?.textContent?.trim()).toBe("Profiel");
+  });
+
+  it("hides the vo profiel in the onderbouw (it is a bovenbouw / tweede-fase concept)", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+    await toStep2(user, "vo::havo", "onderbouw");
+    expect(sel(container, "domain")).toBeNull();
   });
 
   it("reveals the hbo-i pack with its source when ICT is chosen", async () => {
@@ -142,7 +152,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("shows an honest 'no national framework' note for a vo profiel", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep2(user, "vo::havo");
+    await toStep2(user, "vo::havo", "bovenbouw");
     await user.selectOptions(screen.getByLabelText(/profiel|domein|domain/i), "nt");
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
   });
@@ -150,7 +160,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("filters the domain dropdown by the teacher's available domains (P10.3)", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor({ availableDomains: ["nt"] });
-    await toStep2(user, "vo::havo");
+    await toStep2(user, "vo::havo", "bovenbouw");
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option"))
       .map((o) => o.value)

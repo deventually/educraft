@@ -13,6 +13,8 @@ import { getDomainsForTrack, type DomainOption } from "~/lib/context/domains";
 import {
   showsProgramme,
   showsProfessionalContext,
+  showsPhase,
+  showsStudyYear,
   domainFieldLabel,
 } from "~/lib/context/relevance";
 import { resolveFramework } from "~/lib/context/frameworks";
@@ -20,6 +22,7 @@ import { COUNTRY_LABELS, type CountryCode } from "~/lib/context/countries";
 import {
   SECTORS_INFO,
   TRACKS_BY_SECTOR,
+  VO_PHASES,
   defaultLevelForTrack,
   isSector,
   learnerNounChoices,
@@ -163,14 +166,48 @@ export function CourseField({
   );
 }
 
-export function StudyYearField({
+/**
+ * Fase / vo stage (onderbouw vs bovenbouw) — a vo-only, pedagogically meaningful
+ * cut a bare leerjaar can't convey. Self-hides for every other sector.
+ */
+export function PhaseField({
+  sector,
   value,
   onChange,
 }: {
+  sector: string;
   value: string;
   onChange: (v: string) => void;
 }) {
   const t = useT();
+  const locale = useLocale();
+  if (!showsPhase(sector)) return null;
+  return (
+    <Field id="cf-phase" label={t.settings.phase}>
+      <Select id="cf-phase" name="phase" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{t.settings.phaseNone}</option>
+        {VO_PHASES.map((p) => (
+          <option key={p.value} value={p.value}>
+            {loc(p.label, locale)}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+}
+
+/** Numeric study year 1–4 — self-hides outside the year-counting sectors (hbo/mbo). */
+export function StudyYearField({
+  sector,
+  value,
+  onChange,
+}: {
+  sector: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const t = useT();
+  if (!showsStudyYear(sector)) return null;
   return (
     <Field id="cf-year" label={t.settings.studyYear}>
       <Select

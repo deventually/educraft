@@ -159,6 +159,8 @@ export const nl = {
     domain: "Domein / vak",
     domainNone: "—",
     course: "Vak",
+    phase: "Fase",
+    phaseNone: "Kies fase…",
     studyYear: "Studiejaar",
     yearNone: "—",
     nationalLevel: "Niveau (NLQF)",

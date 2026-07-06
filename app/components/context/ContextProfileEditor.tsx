@@ -16,8 +16,8 @@ import { Button } from "~/components/ui";
 import { cn } from "~/lib/utils";
 import type { ContextProfile } from "~/lib/context/types";
 import { defaultPackValues } from "~/lib/context/packs";
-import { SECTORS_INFO, TRACKS_BY_SECTOR, isSector } from "~/lib/context/sectors";
-import { courseLabel } from "~/lib/context/relevance";
+import { SECTORS_INFO, TRACKS_BY_SECTOR, VO_PHASES, isSector } from "~/lib/context/sectors";
+import { courseLabel, showsDomain } from "~/lib/context/relevance";
 import { NLQF_LEVELS, isNlqfLevel, nlqfToEqf } from "~/lib/context/nlqf";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import type { Messages } from "~/lib/i18n";
@@ -30,6 +30,7 @@ import {
   OnderwijstypeSelect,
   NationalLevelSelect,
   ProgrammeField,
+  PhaseField,
   DomainSelect,
   CourseField,
   StudyYearField,
@@ -64,6 +65,11 @@ function buildSummary(
     const parts = [loc(SECTORS_INFO[sector].label, locale)];
     if (trackLabel) parts.push(loc(trackLabel, locale));
     add(t.settings.onderwijstype, parts.join(" · "));
+  }
+  const phaseVal = get("phase");
+  if (phaseVal) {
+    const opt = VO_PHASES.find((p) => p.value === phaseVal);
+    add(t.settings.phase, opt ? loc(opt.label, locale) : phaseVal);
   }
   add(t.settings.programme, get("programme"));
   add(t.settings.course, get("courseName"));
@@ -119,6 +125,7 @@ export function ContextProfileEditor({
   const [country, setCountry] = useState(profile?.country ?? availableCountries[0] ?? "NL");
   const [sector, setSector] = useState<string>(profile?.sector ?? "");
   const [track, setTrack] = useState(profile?.track ?? "");
+  const [phase, setPhase] = useState(profile?.phase ?? "");
   const [nationalLevel, setNationalLevel] = useState(profile?.nationalLevel ?? "");
   const [domain, setDomain] = useState(profile?.domain ?? "");
   const [studyYear, setStudyYear] = useState(
@@ -149,14 +156,26 @@ export function ContextProfileEditor({
   };
   const goBack = () => setStep((s) => Math.max(s - 1, 0));
   const canNext = step !== 0 || name.trim().length > 0;
-  const isHbo = sector === "hbo";
 
   const onOnderwijstype = (nextSector: string, nextTrack: string, defaultLevel: string) => {
     setSector(nextSector);
     setTrack(nextTrack);
     setNationalLevel(defaultLevel);
     setDomain(""); // a sector switch invalidates the previous domain
+    if (nextSector !== "vo") setPhase(""); // fase is vo-only
   };
+
+  // Leaving bovenbouw (or clearing the fase) removes the profiel it gated.
+  const onPhase = (v: string) => {
+    setPhase(v);
+    if (v !== "bovenbouw") setDomain("");
+  };
+
+  // The profiel is a bovenbouw concept, so it is gated to vo-bovenbouw. But a
+  // profile that already carries a domain (a legacy flat-vo profiel, or any hbo
+  // profile) must keep showing it so opening + editing never silently blanks a
+  // stored value — matching DomainSelect's own out-of-catalogue preservation.
+  const showsDomainField = showsDomain(sector, phase) || Boolean(domain);
 
   return (
     <Form method="post" ref={formRef} className="space-y-5">
@@ -199,6 +218,7 @@ export function ContextProfileEditor({
             onChange={onOnderwijstype}
             sectors={availableSectors}
           />
+          <PhaseField sector={sector} value={phase} onChange={onPhase} />
           <ProgrammeField sector={sector} defaultValue={profile?.programme} />
           <CourseField label={courseLabel(sector)} defaultValue={profile?.courseName} />
         </div>
@@ -208,23 +228,27 @@ export function ContextProfileEditor({
       <div hidden={step !== 1} className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <NationalLevelSelect value={nationalLevel} onChange={setNationalLevel} />
-          {isHbo && <StudyYearField value={studyYear} onChange={setStudyYear} />}
-          <DomainSelect
-            value={domain}
-            onChange={setDomain}
+          <StudyYearField sector={sector} value={studyYear} onChange={setStudyYear} />
+          {showsDomainField && (
+            <DomainSelect
+              value={domain}
+              onChange={setDomain}
+              country={country}
+              sector={sector}
+              track={track}
+              available={availableDomains}
+            />
+          )}
+        </div>
+        {showsDomainField && (
+          <DomainFields
+            key={`${sector}|${domain || "none"}`}
+            domain={domain}
             country={country}
             sector={sector}
-            track={track}
-            available={availableDomains}
+            values={packValues}
           />
-        </div>
-        <DomainFields
-          key={`${sector}|${domain || "none"}`}
-          domain={domain}
-          country={country}
-          sector={sector}
-          values={packValues}
-        />
+        )}
       </div>
 
       {/* Step 3 — Context & eigen velden */}

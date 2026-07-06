@@ -156,6 +156,8 @@ export const en: Messages = {
     domain: "Domain / subject",
     domainNone: "—",
     course: "Course",
+    phase: "Phase",
+    phaseNone: "Choose phase…",
     studyYear: "Study year",
     yearNone: "—",
     nationalLevel: "Level (NLQF)",

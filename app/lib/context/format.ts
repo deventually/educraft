@@ -4,7 +4,14 @@ import { resolveFramework } from "./frameworks";
 import { getDomainsForTrack } from "./domains";
 import { domainFieldLabel } from "./relevance";
 import { resolveLevel } from "./derive";
-import { SECTORS_INFO, isSector, learnerNounFor, teacherNounFor, type Sector } from "./sectors";
+import {
+  SECTORS_INFO,
+  VO_PHASES,
+  isSector,
+  learnerNounFor,
+  teacherNounFor,
+  type Sector,
+} from "./sectors";
 import { loc } from "~/lib/i18n/localized";
 import type { OutputLanguage } from "~/lib/registry/types";
 
@@ -12,6 +19,7 @@ interface Labels {
   /** Fallback intro for a legacy profile with no sector (hbo-flavoured). */
   intro: string;
   programme: string;
+  phase: string;
   course: string;
   year: string;
   eqf: string;
@@ -73,6 +81,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
   nl: {
     intro: "Context van de opleiding (hbo, hoger beroepsonderwijs):",
     programme: "Opleiding",
+    phase: "Fase",
     course: "Vak",
     year: "Studiejaar",
     eqf: "EQF-niveau",
@@ -84,6 +93,7 @@ const LABELS: Record<OutputLanguage, Labels> = {
   en: {
     intro: "Programme context (Dutch higher professional education, hbo):",
     programme: "Programme",
+    phase: "Phase",
     course: "Course",
     year: "Study year",
     eqf: "EQF level",
@@ -162,6 +172,10 @@ export function formatProfile(
     );
     const value = opt ? loc(opt.label, lang) : profile.domain;
     lines.push(`- ${loc(domainFieldLabel(profile.sector), lang)}: ${value}`);
+  }
+  if (profile.phase) {
+    const opt = VO_PHASES.find((p) => p.value === profile.phase);
+    lines.push(`- ${t.phase}: ${opt ? loc(opt.label, lang) : profile.phase}`);
   }
   if (profile.studyYear) lines.push(`- ${t.year}: ${profile.studyYear}`);
   // Level: derive the country-neutral EQF from the profile (national level, else

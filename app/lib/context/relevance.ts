@@ -28,6 +28,35 @@ export function showsProfessionalContext(
   return !(sector === "vo" && (track === "havo" || track === "vwo"));
 }
 
+/**
+ * The onderbouw/bovenbouw **fase** is a vo-only stage: it is the pedagogically
+ * meaningful cut (foundational vs specialized/exam-oriented) that a bare leerjaar
+ * number can't convey unambiguously — "leerjaar 3" is onderbouw for vwo but nearly
+ * bovenbouw for vmbo. mbo/hbo instead carry a numeric study year (see below).
+ */
+export function showsPhase(sector: string | undefined): boolean {
+  return sector === "vo";
+}
+
+/**
+ * The numeric study year (studiejaar 1–4) applies to the tertiary/vocational
+ * sectors that count in years — hbo (where it also drives the pack mastery level)
+ * and mbo. vo uses fase instead; wo omits it.
+ */
+export function showsStudyYear(sector: string | undefined): boolean {
+  return sector === "hbo" || sector === "mbo";
+}
+
+/**
+ * Whether the domain/profiel field applies. For vo the profiel is a tweede-fase
+ * (bovenbouw) concept — the onderbouw has no profiel — so it is shown only once
+ * the fase is `bovenbouw`. Every other sector keeps its domain field (mbo/wo just
+ * resolve an empty catalogue → custom fields).
+ */
+export function showsDomain(sector: string | undefined, phase: string | undefined): boolean {
+  return sector === "vo" ? phase === "bovenbouw" : true;
+}
+
 /** Sector-aware label for the Course/"Vak" field (Dutch is "Vak" throughout). */
 export function courseLabel(sector: string | undefined): LocalizedText {
   return sector === "vo" ? { nl: "Vak", en: "Subject" } : { nl: "Vak", en: "Course" };

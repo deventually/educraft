@@ -9,8 +9,14 @@ import type { ContextProfile, CustomField, PackFieldValue } from "./types";
 import { resolveFramework } from "./frameworks";
 import { getDomainsForTrack } from "./domains";
 import { isCountryCode, type CountryCode } from "./countries";
-import { isSector, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
-import { showsProgramme, showsProfessionalContext } from "./relevance";
+import { isSector, isVoPhase, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
+import {
+  showsProgramme,
+  showsProfessionalContext,
+  showsPhase,
+  showsStudyYear,
+  showsDomain,
+} from "./relevance";
 import { isNlqfLevel, type NlqfLevel } from "./nlqf";
 import { isEqfLevel } from "./eqf";
 
@@ -133,7 +139,14 @@ export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): P
   const learnerNounOverride =
     rawNoun && learnerNounChoices(effSector).includes(rawNoun) ? rawNoun : undefined;
 
-  const domain = validDomain(effCountry, effSector, track, str(fd.get("domain")));
+  // The vo fase (onderbouw/bovenbouw) — server-defended off any non-vo sector.
+  // Computed before domain because the profiel only applies in bovenbouw.
+  const rawPhase = str(fd.get("phase"));
+  const phase = showsPhase(effSector) && rawPhase && isVoPhase(rawPhase) ? rawPhase : undefined;
+
+  const domain = showsDomain(effSector, phase)
+    ? validDomain(effCountry, effSector, track, str(fd.get("domain")))
+    : undefined;
   const yearRaw = String(fd.get("studyYear") ?? "");
   const eqfRaw = String(fd.get("eqf") ?? "");
   const year = Number(yearRaw);
@@ -151,8 +164,13 @@ export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): P
     // the chosen sector/track so they never persist.
     programme: showsProgramme(effSector) ? str(fd.get("programme")) : undefined,
     domain,
+    // The vo fase, server-defended off non-vo sectors above.
+    phase,
     courseName: str(fd.get("courseName")),
-    studyYear: yearRaw && year >= 1 && year <= 4 ? (year as 1 | 2 | 3 | 4) : undefined,
+    studyYear:
+      showsStudyYear(effSector) && yearRaw && year >= 1 && year <= 4
+        ? (year as 1 | 2 | 3 | 4)
+        : undefined,
     // eqf is deprecated as an input (the level comes from nationalLevel); parsed
     // only for backward compatibility if a caller still submits it.
     eqf: eqfRaw && isEqfLevel(eqf) ? eqf : undefined,

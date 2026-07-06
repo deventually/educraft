@@ -82,7 +82,13 @@ export interface ContextProfile {
   domain?: string;
   /** Vak / cursusnaam. */
   courseName?: string;
-  /** Studiejaar 1–4. */
+  /**
+   * vo stage (Phase 11) — onderbouw/bovenbouw. A vo-only signal (see `VO_PHASES`):
+   * it fixes whether the profiel applies (bovenbouw) and scales expectations. Other
+   * sectors use `studyYear` instead. Stored as a slug; no DB migration (JSON column).
+   */
+  phase?: "onderbouw" | "bovenbouw";
+  /** Studiejaar 1–4 (hbo drives the pack level from it; mbo carries it as context). */
   studyYear?: 1 | 2 | 3 | 4;
   /**
    * EQF level (1–8). **Deprecated as an input** (Phase 8): the editor now collects
