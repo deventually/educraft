@@ -53,6 +53,8 @@ Ground rules for every phase:
 | [P5](P5-test-tech-debt.md) | api.stream integration tests · missing component/tool tests · client i18n fix · shared sandbox hook · boot validation · AGENTS.md truth pass · dep upgrades | P4 | ✅ (branch `p5-test-tech-debt`; vitest 4 + AI SDK 7 shipped, RR8 deferred) |
 | [P6](P6-student-provisioning.md) | Cohorts + curated per-invite/batch invites · cohort-aware access · membership-injected tutor level (EQF payoff) · anti-sharing (single active session) — impl. of [ADR 0001](../adr/0001-student-provisioning-cohorts-mentor-insight.md) D1–D4 | P1, P2 | ✅ |
 | [P7](P7-mentor-insight.md) | Privacy-safe mentor insight: de-personalised session summaries · engagement + effectiveness views (no raw transcript) · student self-report — ADR 0001 D5 | P6 | ✅ (branch `p7-mentor-insight`) |
+| [P8](P8-teaching-context-overhaul.md) | Teaching-context overhaul: consolidated edit-capable editor (retires the wizard/form split) · store NLQF level → derive EQF · full Dutch ladder (po/vo+vmbo-forms/havo/vwo/mbo/hbo/wo) · sector-scoped domains + framework-resolution seam (packs stay hbo-only) · sector-driven learner/teacher-noun directive · admin+per-teacher country/sector availability **compose seam (read)** · free-text `pedagogy`. No DB migration. | P4, P6 | 📋 planned (brief ready) |
+| P9 (brief TBD) | Admin + per-teacher country/sector availability **write UI**: `admin.context.tsx` toggles + per-teacher assignment in the invite/management flow, on top of P8's seam. Brief authored when P8 lands. | P8 | 📋 planned (stub) |
 
 \* P3 only needs P0 technically (eval harness + prompts are independent of auth), but
 runs after P2 so tester feedback can inform the prompt work.
