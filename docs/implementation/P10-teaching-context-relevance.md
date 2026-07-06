@@ -189,16 +189,20 @@ checked from the assignment (null = all). Action branch: catalogue-filter `domai
 
 ## Acceptance criteria
 
-- [ ] A teacher picking **havo/vwo** sees no Programme and no Professional field; Course reads "Vak";
+- [x] A teacher picking **havo/vwo** sees no Programme and no Professional field; Course reads "Vak";
       the domain field is labelled **"Profiel"** and offers exactly N&T/N&G/E&M/C&M.
-- [ ] **vmbo** shows its profielen (10 for bb/kb/gl, 4 for tl) and keeps Professional field; **hbo**
+- [x] **vmbo** shows its profielen (10 for bb/kb/gl, 4 for tl) and keeps Professional field; **hbo**
       is unchanged (8 domains + verified packs, label "Domein").
-- [ ] An admin can assign a **subset of domains** to a teacher (grouped, collapsible UI) and clear it
+- [x] An admin can assign a **subset of domains** to a teacher (grouped, collapsible UI) and clear it
       back to unrestricted; an unavailable domain never appears in that teacher's editor and a
       hand-crafted POST for it is refused. No migration, no new column.
-- [ ] Every displayed string bilingual (parity green); every changed interactive component axe-clean;
+- [x] Every displayed string bilingual (parity green); every changed interactive component axe-clean;
       `requireRole("admin")` on the admin loader/action.
-- [ ] All gates green (`npm test && npm run typecheck && npm run check`) at the end of each phase.
+- [x] All gates green (`npm test && npm run typecheck && npm run check`) at the end of each phase.
+
+> **Shipped** (branch `p10-context-relevance`, 10.1–10.3). Decision on the brief's open honesty
+> question: mbo & wo (bachelor/master/phd) keep the honest custom-fields fallback — **no** invented
+> domain catalogue or framework — user-confirmed. hbo remains the only sector with verified packs.
 
 ## Verification (manual, end-to-end)
 
