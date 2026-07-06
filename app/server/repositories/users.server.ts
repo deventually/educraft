@@ -132,6 +132,46 @@ export async function getUserAssignedSectors(userId: string): Promise<Set<string
   return getAssignedList("assignedSectors", userId);
 }
 
+/**
+ * Set (or clear) a per-teacher country/sector assignment (Phase 9 write side) —
+ * the setter half of `getAssignedList`. Writes the `${prefix}:${userId}`
+ * instance_settings key with a JSON `string[]`; a null/empty list deletes the key
+ * (unrestricted). No `users` column, no migration — mirrors the P8 read storage.
+ */
+async function setAssignedList(
+  prefix: string,
+  userId: string,
+  ids: string[] | null,
+): Promise<void> {
+  const db = getDb();
+  const key = `${prefix}:${userId}`;
+  if (!ids || ids.length === 0) {
+    db.delete(instanceSettings).where(eq(instanceSettings.key, key)).run();
+    return;
+  }
+  const valueJson = JSON.stringify(ids);
+  const existing = db.select().from(instanceSettings).where(eq(instanceSettings.key, key)).get();
+  if (existing) {
+    db.update(instanceSettings)
+      .set({ valueJson, updatedAt: new Date() })
+      .where(eq(instanceSettings.key, key))
+      .run();
+  } else {
+    db.insert(instanceSettings).values({ key, valueJson, updatedAt: new Date() }).run();
+  }
+}
+
+export async function setUserAssignedCountries(
+  userId: string,
+  ids: string[] | null,
+): Promise<void> {
+  return setAssignedList("assignedCountries", userId, ids);
+}
+
+export async function setUserAssignedSectors(userId: string, ids: string[] | null): Promise<void> {
+  return setAssignedList("assignedSectors", userId, ids);
+}
+
 export async function getUserById(id: string): Promise<UserRow | null> {
   return getDb().select().from(users).where(eq(users.id, id)).get() ?? null;
 }

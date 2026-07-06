@@ -94,27 +94,39 @@ export async function getEnabledSectors(): Promise<string[] | null> {
   return getInstanceList(ENABLED_SECTORS_KEY);
 }
 
-/** Set the model allow-list; `null` clears it back to the default (whole catalog). */
-export async function setEnabledModels(ids: string[] | null): Promise<void> {
+/** Upsert an instance_settings JSON `string[]` list by key; `null` deletes it. */
+async function setInstanceList(key: string, ids: string[] | null): Promise<void> {
   const db = getDb();
   if (ids === null) {
-    db.delete(instanceSettings).where(eq(instanceSettings.key, ENABLED_MODELS_KEY)).run();
+    db.delete(instanceSettings).where(eq(instanceSettings.key, key)).run();
     return;
   }
   const valueJson = JSON.stringify(ids);
-  const existing = db
-    .select()
-    .from(instanceSettings)
-    .where(eq(instanceSettings.key, ENABLED_MODELS_KEY))
-    .get();
+  const existing = db.select().from(instanceSettings).where(eq(instanceSettings.key, key)).get();
   if (existing) {
     db.update(instanceSettings)
       .set({ valueJson, updatedAt: new Date() })
-      .where(eq(instanceSettings.key, ENABLED_MODELS_KEY))
+      .where(eq(instanceSettings.key, key))
       .run();
   } else {
-    db.insert(instanceSettings)
-      .values({ key: ENABLED_MODELS_KEY, valueJson, updatedAt: new Date() })
-      .run();
+    db.insert(instanceSettings).values({ key, valueJson, updatedAt: new Date() }).run();
   }
+}
+
+/** Set the model allow-list; `null` clears it back to the default (whole catalog). */
+export async function setEnabledModels(ids: string[] | null): Promise<void> {
+  return setInstanceList(ENABLED_MODELS_KEY, ids);
+}
+
+/**
+ * Set the instance country/sector allow-lists (Phase 9 write side). `null` clears
+ * a list back to the default (whole catalogue); a non-empty list upserts it. The
+ * admin route's lockout guard forbids an empty list, so these never store `[]`.
+ */
+export async function setEnabledCountries(ids: string[] | null): Promise<void> {
+  return setInstanceList(ENABLED_COUNTRIES_KEY, ids);
+}
+
+export async function setEnabledSectors(ids: string[] | null): Promise<void> {
+  return setInstanceList(ENABLED_SECTORS_KEY, ids);
 }
