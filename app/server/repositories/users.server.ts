@@ -185,6 +185,23 @@ export async function setUserAssignedDomains(userId: string, ids: string[] | nul
   return setAssignedList("assignedDomains", userId, ids);
 }
 
+/**
+ * Per-teacher "custom access" activation flag (Phase 12). A pure gate: when off
+ * (default) a teacher inherits the instance country/sector/domain sets; when on,
+ * their own assignment (above) is authoritative and the instance is ignored.
+ * Stored the same migration-free way as the assignments — a present
+ * `contextCustomAccess:<userId>` key means activated. Deactivating only deletes
+ * this key; the caller must NOT clear the assignments, so re-activating restores
+ * exactly what the teacher had.
+ */
+export async function getUserContextCustomAccess(userId: string): Promise<boolean> {
+  return (await getAssignedList("contextCustomAccess", userId)) !== null;
+}
+
+export async function setUserContextCustomAccess(userId: string, on: boolean): Promise<void> {
+  return setAssignedList("contextCustomAccess", userId, on ? ["1"] : null);
+}
+
 export async function getUserById(id: string): Promise<UserRow | null> {
   return getDb().select().from(users).where(eq(users.id, id)).get() ?? null;
 }

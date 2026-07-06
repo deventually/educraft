@@ -75,6 +75,21 @@ describe("users repository", () => {
     expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
   });
 
+  it("round-trips the per-teacher context custom-access flag (P12)", async () => {
+    // Default: a teacher is not activated → inherits the instance.
+    expect(await repo.getUserContextCustomAccess("ca-anyone")).toBe(false);
+
+    await repo.setUserContextCustomAccess("ca-t", true);
+    expect(await repo.getUserContextCustomAccess("ca-t")).toBe(true);
+    // Keyed per user — an unrelated teacher stays unactivated.
+    expect(await repo.getUserContextCustomAccess("ca-other")).toBe(false);
+
+    // Deactivating flips the flag back off (and is independent of any saved
+    // country/sector/domain assignments, which the caller must not clear).
+    await repo.setUserContextCustomAccess("ca-t", false);
+    expect(await repo.getUserContextCustomAccess("ca-t")).toBe(false);
+  });
+
   it("allows a nameless (email-less) invite-based account", async () => {
     const created = await repo.createUser({
       name: "Anon",
