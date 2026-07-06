@@ -32,9 +32,10 @@ A profile stores only the chosen answers (`packValues`) plus any user-defined
 `customFields`; everything is formatted bilingually by `formatProfile(profile, lang)` in
 `app/lib/context/format.ts`. Profiles are created + edited in one consolidated **stepped
 editor** (`ContextProfileEditor`), and input is validated against the catalogues in
-`app/lib/context/parseForm.ts`. Which countries/sectors a teacher may pick is composed by
-`availability.server.ts` (`getAvailableCountries/Sectors`, default-open). The vision
-generalizes this further into a small set of **orthogonal dimensions**.
+`app/lib/context/parseForm.ts`. Which countries, sectors and domains a teacher may pick is
+composed by `availability.server.ts` under an **override** model, not an intersection — see
+[Availability & per-teacher override](#availability--per-teacher-override-p12) below. The
+vision generalizes this further into a small set of **orthogonal dimensions**.
 
 ---
 
@@ -53,6 +54,45 @@ generalizes this further into a small set of **orthogonal dimensions**.
 
 The dimensions are **independent**: adding a country does not touch the level logic;
 adding a tool does not touch localization.
+
+---
+
+## Availability & per-teacher override (P12)
+
+Not every instance offers every country, sector, or domain, and one teacher may need a
+different scope than the house default. Three axes — **countries**, **education sectors**
+(`vo · mbo · hbo · wo`), and **domains / profielen** — are composed in
+`availability.server.ts` into the option sets the context editor shows.
+
+**Instance defaults.** The admin *Teaching context* page (`admin.context.tsx`) sets a
+house default per axis, stored migration-free in `instance_settings`
+(`enabledCountries` / `enabledSectors` / `enabledDomains`). Country and sector cannot be
+emptied (a lockout guard keeps at least the catalogue); an empty domain list means "all".
+
+**Per-teacher override — not an intersection.** Each teacher carries an *Activate custom
+access* flag:
+
+- **Off (default):** the teacher **inherits the instance** on every axis.
+- **On:** the teacher's own per-axis selection **replaces the instance entirely** — they
+  may be granted *more* than the instance or fewer, and an empty axis means "all" (the
+  instance is ignored for them).
+
+The composition is `axisSelection` (which single set governs — an activated teacher's own
+assignment, else the instance-enabled list) feeding `resolveAxis` (catalogue ∩ selection,
+with a fall-back-to-all lockout guard). This override model fixes an earlier bug where a
+disjoint instance/teacher pair (instance sectors `{wo}`, teacher `{vo}`) intersected to
+empty and silently fell back to the full catalogue.
+
+**Non-destructive deactivate.** Turning the flag off only flips the flag; the teacher's
+saved per-axis selections are preserved and return if custom access is re-activated. The
+flag and per-teacher assignments live under keyed `instance_settings` rows too — no
+migration.
+
+Public seam: `getAvailableCountries` / `getAvailableSectors` / `getAvailableDomains`, plus
+the track-independent `getAvailableDomainSlugs`.
+
+> Note the contrast with the **tool/model** gates in the same module, which *intersect*
+> instance × role/cohort × per-teacher allow-list. The context axes deliberately do not.
 
 ---
 

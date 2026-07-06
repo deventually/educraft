@@ -37,6 +37,14 @@ With **Custom fields** you add your own name/value pairs per profile. They're pa
 
 Mark one profile as **default**; it will be pre-selected on the tool pages.
 
+## For admins: defaults and custom access
+
+If you're an **admin**, the **Teaching context** admin page is where you set the defaults for the whole instance: which **countries**, which **types of education**, and — under **Domains / profiles** — which subject areas teachers may choose. Country and type of education always keep at least one choice; leave **Domains / profiles** empty and *all* domains are available.
+
+By default every teacher **inherits** these settings. To give one teacher a different scope, switch on **Activate custom access** for that teacher. Their own selection then **replaces** the instance default entirely — you can allow *more* than the default or fewer. An axis you leave empty means "all"; the instance default no longer counts for that teacher.
+
+Turn **custom access** off again later and the teacher simply inherits the defaults once more. This happens **without any loss**: the choices you saved for that teacher are kept and return the moment you re-activate custom access.
+
 ## Why it matters
 
 Without context, a tool produces generic output. With a good profile, the material fits your type of education, level, and field — saving a lot of editing afterwards. You can create several profiles (e.g. one per course) and choose which to use for each generation.

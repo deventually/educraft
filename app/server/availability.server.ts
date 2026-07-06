@@ -10,6 +10,11 @@
  * Safe defaults: with empty settings tables this reduces exactly to the previous
  * behaviour (`tool.enabled` + `tool.userType`), so a fresh instance is unchanged.
  * Nothing is cached — a write takes effect on the next request (no bust needed).
+ *
+ * Context-editor axes (country/sector/domain) use a different, OVERRIDE model
+ * (Phase 12), NOT the intersect the tool gates use: a teacher either inherits the
+ * instance or, once given *custom access*, replaces it entirely with their own
+ * selection (empty axis = all). See `axisSelection`/`resolveAxis` below.
  */
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";

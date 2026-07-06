@@ -37,6 +37,14 @@ Met **Eigen velden** voeg je voor elk profiel zelf extra naam-/waardeparen toe. 
 
 Zet één profiel als **standaard**; dat wordt dan vooraf geselecteerd op de toolpagina's.
 
+## Voor beheerders: standaarden en aangepaste toegang
+
+Ben je **beheerder**, dan stel je op de beheerpagina **Onderwijscontext** de standaarden voor de hele omgeving in: welke **landen**, welke **onderwijstypen** en — onder **Domeinen / profielen** — welke vakgebieden docenten mogen kiezen. Land en onderwijstype houden altijd minstens één keuze; laat je **Domeinen / profielen** leeg, dan zijn álle domeinen beschikbaar.
+
+Standaard **erft** elke docent deze instellingen. Wil je één docent een andere scope geven, zet dan bij die docent **Aangepaste toegang activeren** aan. De eigen keuze van die docent **vervangt** dan de omgevingsstandaard volledig — zo kun je méér toestaan dan de standaard of juist minder. Een as die je leeg laat betekent "alles"; de omgevingsstandaard telt voor die docent dan niet meer mee.
+
+Zet je **Aangepaste toegang** later weer uit, dan erft de docent gewoon weer de standaarden. Dat gaat **zonder verlies**: de keuzes die je voor die docent had opgeslagen blijven bewaard en komen terug zodra je de aangepaste toegang opnieuw activeert.
+
 ## Waarom het belangrijk is
 
 Zonder context maakt een tool generieke output. Met een goed profiel sluit het materiaal aan op je onderwijstype, niveau en werkveld — dat scheelt veel naredigeren. Je kunt meerdere profielen aanmaken (bijv. per vak) en per generatie kiezen welk profiel je gebruikt.

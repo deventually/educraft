@@ -8,16 +8,19 @@ vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
 
 // Drive the availability seam directly so the loader/action enforcement is
 // exercisable in P8 (before P9 writes any settings).
-const { availableSectorsMock, availableCountriesMock, availableDomainsMock } = vi.hoisted(() => ({
-  availableSectorsMock: vi.fn(),
-  availableCountriesMock: vi.fn(),
-  availableDomainsMock: vi.fn(),
-}));
+const { availableSectorsMock, availableCountriesMock, availableDomainsMock, domainSlugsMock } =
+  vi.hoisted(() => ({
+    availableSectorsMock: vi.fn(),
+    availableCountriesMock: vi.fn(),
+    availableDomainsMock: vi.fn(),
+    domainSlugsMock: vi.fn(),
+  }));
 vi.mock("~/server/availability.server", async (orig) => ({
   ...(await orig<typeof import("~/server/availability.server")>()),
   getAvailableSectors: availableSectorsMock,
   getAvailableCountries: availableCountriesMock,
   getAvailableDomains: availableDomainsMock,
+  getAvailableDomainSlugs: domainSlugsMock,
 }));
 
 // Keep the route off the DB for profile persistence.
@@ -31,13 +34,10 @@ vi.mock("~/server/repositories/profiles.server", () => ({
 }));
 
 type Route = typeof import("~/routes/context-profiles");
-type Users = typeof import("~/server/repositories/users.server");
 let route: Route;
-let users: Users;
 
 beforeAll(async () => {
   route = await import("~/routes/context-profiles");
-  users = await import("~/server/repositories/users.server");
   requireUserMock.mockResolvedValue({
     id: "teacher-1",
     name: "Teacher",
@@ -50,6 +50,8 @@ beforeAll(async () => {
   availableCountriesMock.mockResolvedValue(["NL"]);
   // Default: every hbo domain available (overridden per test).
   availableDomainsMock.mockResolvedValue(["ICT"]);
+  // Default effective domain allow-list = unrestricted (overridden per test).
+  domainSlugsMock.mockResolvedValue(null);
 });
 
 function req(fields: Record<string, string>): Request {
@@ -74,13 +76,15 @@ describe("context-profiles loader — availability", () => {
     expect(data.availableCountries).toEqual(["NL"]);
   });
 
-  it("passes the teacher's assigned domains to the editor (P10.3)", async () => {
-    await users.setUserAssignedDomains("teacher-1", ["ICT"]);
-    const data = (await route.loader(loaderArgs())) as { assignedDomains: string[] | null };
-    expect(data.assignedDomains).toEqual(["ICT"]);
-    await users.setUserAssignedDomains("teacher-1", null);
-    const cleared = (await route.loader(loaderArgs())) as { assignedDomains: string[] | null };
-    expect(cleared.assignedDomains).toBeNull();
+  it("passes the effective domain allow-list to the editor (P12 override)", async () => {
+    // The loader trusts availability's effective set (activated → own; unactivated
+    // → instance), not the raw per-teacher assignment.
+    domainSlugsMock.mockResolvedValueOnce(["ICT"]);
+    const data = (await route.loader(loaderArgs())) as { availableDomains: string[] | null };
+    expect(data.availableDomains).toEqual(["ICT"]);
+    domainSlugsMock.mockResolvedValueOnce(null);
+    const cleared = (await route.loader(loaderArgs())) as { availableDomains: string[] | null };
+    expect(cleared.availableDomains).toBeNull();
   });
 });
 
