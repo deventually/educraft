@@ -444,6 +444,10 @@ export const en: Messages = {
       teacherHint:
         "Nothing checked = no restriction; the teacher then sees every enabled country and sector.",
       teacherNone: "There are no teachers to assign yet.",
+      domainsLegend: "Domains / profiles per teacher",
+      domainsHint:
+        "Restrict the domains or profiles this teacher can pick. Nothing checked = no restriction. Only the sectors the teacher can reach are shown.",
+      domainsNone: "No domains to assign for this teacher's sectors.",
     },
     invites: {
       mintHeading: "Invite a teacher",

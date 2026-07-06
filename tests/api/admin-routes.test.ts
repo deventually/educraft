@@ -202,6 +202,42 @@ describe("admin.context action — per-teacher assignment", () => {
       invoke(contextRoute.action, post({ intent: "teacher", userId: "ghost", sectors: ["mbo"] })),
     ).rejects.toMatchObject({ status: 404 });
   });
+
+  it("assigns a subset of domains to a teacher and clears back to unrestricted (P10.3)", async () => {
+    const teacher = await users.createUser({
+      name: "DomAssign",
+      email: "domassign@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id, domains: ["nt", "ICT"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["ICT", "nt"]);
+
+    const cleared = (await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id }),
+    )) as { saved?: boolean };
+    expect(cleared.saved).toBe(true);
+    expect(await users.getUserAssignedDomains(teacher.id)).toBeNull();
+  });
+
+  it("catalogue-filters submitted domain slugs before writing (P10.3)", async () => {
+    const teacher = await users.createUser({
+      name: "DomFilter",
+      email: "domfilter@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    await invoke(
+      contextRoute.action,
+      post({ intent: "teacher", userId: teacher.id, domains: ["nt", "not-a-domain", "zw"] }),
+    );
+    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["nt", "zw"]);
+  });
 });
 
 describe("admin.invites action", () => {

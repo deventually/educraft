@@ -15,8 +15,9 @@ import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { canUseTool, type Audience, type Role } from "~/lib/registry/access";
 import { DEFAULT_MODEL, listModels, type PickerModel } from "~/lib/ai/models";
-import { COUNTRIES, type CountryCode } from "~/lib/context/countries";
+import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from "~/lib/context/countries";
 import { SECTORS, type Sector } from "~/lib/context/sectors";
+import { getDomainsForTrack } from "~/lib/context/domains";
 import { log } from "./log.server";
 import {
   getToolSettings,
@@ -28,6 +29,7 @@ import {
   getUserToolAllowlist,
   getUserAssignedCountries,
   getUserAssignedSectors,
+  getUserAssignedDomains,
 } from "./repositories/users.server";
 import { getAllowedToolSlugs } from "./repositories/cohorts.server";
 
@@ -166,4 +168,24 @@ export async function getAvailableSectors(user: AvailabilityUser): Promise<Secto
     assigned,
     "availability_no_available_sectors",
   );
+}
+
+/**
+ * The domains/profielen a teacher/admin may pick for a given (sector, track) —
+ * the track-scoped catalogue ∩ the per-teacher assignment (Phase 10.3). No
+ * instance-level domain axis (per-teacher only). An empty catalogue (mbo/wo, or
+ * a vo sector with no track yet) short-circuits to [] — no lockout warning, since
+ * "no catalogue" isn't "everything banned". Otherwise the composeAvailable
+ * lockout guard applies: an assignment excluding every catalogue slug falls back
+ * to the full catalogue and warns (no editor may offer nothing).
+ */
+export async function getAvailableDomains(
+  user: AvailabilityUser,
+  sector: string | undefined,
+  track: string | undefined,
+): Promise<string[]> {
+  const catalogue = getDomainsForTrack(DEFAULT_COUNTRY, sector, track).map((d) => d.value);
+  if (catalogue.length === 0) return [];
+  const assigned = user.role === "teacher" ? await getUserAssignedDomains(user.id) : null;
+  return composeAvailable(catalogue, null, assigned, "availability_no_available_domains");
 }

@@ -59,6 +59,22 @@ describe("users repository", () => {
     expect(await repo.getUserAssignedCountries("t-clear")).toBeNull();
   });
 
+  it("round-trips a per-teacher domain assignment and clears with null/[] (P10.3)", async () => {
+    // Default-open: an unset teacher is unrestricted.
+    expect(await repo.getUserAssignedDomains("dom-anyone")).toBeNull();
+
+    await repo.setUserAssignedDomains("dom-t", ["nt", "ICT"]);
+    expect([...(await repo.getUserAssignedDomains("dom-t"))!].sort()).toEqual(["ICT", "nt"]);
+    // Keyed per user — an unrelated teacher stays unrestricted.
+    expect(await repo.getUserAssignedDomains("dom-other")).toBeNull();
+
+    await repo.setUserAssignedDomains("dom-t", null);
+    expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
+    await repo.setUserAssignedDomains("dom-t", ["zw"]);
+    await repo.setUserAssignedDomains("dom-t", []);
+    expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
+  });
+
   it("allows a nameless (email-less) invite-based account", async () => {
     const created = await repo.createUser({
       name: "Anon",

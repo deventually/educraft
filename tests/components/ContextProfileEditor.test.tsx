@@ -16,6 +16,7 @@ function renderEditor(overrides: Partial<Props> = {}) {
   const props: Props = {
     availableCountries: ["NL"],
     availableSectors: ["vo", "mbo", "hbo", "wo"],
+    availableDomains: null,
     onCancel: () => {},
     ...overrides,
   };
@@ -144,6 +145,18 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     await toStep2(user, "vo::havo");
     await user.selectOptions(screen.getByLabelText(/profiel|domein|domain/i), "nt");
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
+  });
+
+  it("filters the domain dropdown by the teacher's available domains (P10.3)", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor({ availableDomains: ["nt"] });
+    await toStep2(user, "vo::havo");
+    const domain = sel(container, "domain") as HTMLSelectElement;
+    const values = Array.from(domain.querySelectorAll("option"))
+      .map((o) => o.value)
+      .filter(Boolean);
+    // Only the assigned profiel survives; ng/em/cm are filtered out.
+    expect(values).toEqual(["nt"]);
   });
 });
 
