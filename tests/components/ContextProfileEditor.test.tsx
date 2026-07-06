@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -129,6 +129,42 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     await toStep2(user, "vo::havo");
     await user.selectOptions(screen.getByLabelText(/domein|domain/i), "zw");
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
+  });
+});
+
+describe("ContextProfileEditor — field relevance (P10.1)", () => {
+  /** Render a fresh editor and choose an onderwijstype; return its container. */
+  async function editorWith(onderwijstype: string) {
+    const { container } = renderEditor();
+    const user = userEvent.setup();
+    const scope = within(container);
+    await user.type(scope.getByLabelText(/naam|name/i), "P");
+    await user.selectOptions(
+      scope.getByLabelText(/onderwijstype|type of education/i),
+      onderwijstype,
+    );
+    return container;
+  }
+
+  it("hides Programme for havo but shows it for hbo", async () => {
+    expect(sel(await editorWith("vo::havo"), "programme")).toBeNull();
+    expect(sel(await editorWith("hbo::bachelor"), "programme")).not.toBeNull();
+  });
+
+  it("hides the Professional field for havo, keeps it for vmbo and hbo", async () => {
+    // Professional field lives on the (hidden) step 3, but a self-hiding field
+    // returning null is absent from the DOM regardless of the active step.
+    expect(sel(await editorWith("vo::havo"), "professionalContext")).toBeNull();
+    expect(sel(await editorWith("vo::vmbo-bb"), "professionalContext")).not.toBeNull();
+    expect(sel(await editorWith("hbo::bachelor"), "professionalContext")).not.toBeNull();
+  });
+
+  it("labels the Course field 'Vak' when a vo track is chosen", async () => {
+    const container = await editorWith("vo::havo");
+    const course = sel(container, "courseName") as HTMLInputElement;
+    expect(course).not.toBeNull();
+    const label = container.querySelector(`label[for="${course.id}"]`);
+    expect(label?.textContent?.trim()).toBe("Vak");
   });
 });
 

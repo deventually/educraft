@@ -10,6 +10,7 @@ import { resolveFramework } from "./frameworks";
 import { getDomainsForSector } from "./domains";
 import { isCountryCode, type CountryCode } from "./countries";
 import { isSector, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
+import { showsProgramme, showsProfessionalContext } from "./relevance";
 import { isNlqfLevel, type NlqfLevel } from "./nlqf";
 import { isEqfLevel } from "./eqf";
 
@@ -140,14 +141,19 @@ export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): P
     track,
     nationalLevel,
     learnerNounOverride,
-    programme: str(fd.get("programme")),
+    // Relevance defense (Phase 10): a hidden field isn't submitted by the editor,
+    // but a hand-crafted POST could smuggle one — drop fields that don't apply to
+    // the chosen sector/track so they never persist.
+    programme: showsProgramme(effSector) ? str(fd.get("programme")) : undefined,
     domain,
     courseName: str(fd.get("courseName")),
     studyYear: yearRaw && year >= 1 && year <= 4 ? (year as 1 | 2 | 3 | 4) : undefined,
     // eqf is deprecated as an input (the level comes from nationalLevel); parsed
     // only for backward compatibility if a caller still submits it.
     eqf: eqfRaw && isEqfLevel(eqf) ? eqf : undefined,
-    professionalContext: str(fd.get("professionalContext")),
+    professionalContext: showsProfessionalContext(effSector, track)
+      ? str(fd.get("professionalContext"))
+      : undefined,
     tools: str(fd.get("tools")),
     pedagogy: str(fd.get("pedagogy"))?.slice(0, MAX_PEDAGOGY),
     packValues: parsePackValues(fd, effCountry, effSector, domain),
