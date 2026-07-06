@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Square, RotateCcw, Pencil } from "lucide-react";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
-import { DynamicForm, defaultValuesFor, type FormValues } from "./DynamicForm";
+import { DynamicForm } from "./DynamicForm";
+import { useSandbox } from "~/lib/hooks/useSandbox";
 import { summarizeSandbox } from "~/lib/forms/summarize";
 import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -55,10 +56,13 @@ export function ChatView({
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
-  const locked = lockedValues != null;
-  const [sandboxValues, setSandboxValues] = useState<FormValues>(
-    locked ? { ...defaultValuesFor(tool.inputs), ...lockedValues } : defaultValuesFor(tool.inputs),
-  );
+  // Shared sandbox (see useSandbox). ChatView has no profile selector — the
+  // context profile arrives as a prop — so it only uses the values + locked flag.
+  const {
+    values: sandboxValues,
+    setValue: setSandboxValue,
+    locked,
+  } = useSandbox({ inputs: tool.inputs, lockedValues });
   // Provisioned students skip the sandbox gate entirely (locked ⇒ pre-submitted).
   const [sandboxSubmitted, setSandboxSubmitted] = useState(locked);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -175,8 +179,10 @@ export function ChatView({
           onDone: () => {
             setIsStreaming(false);
           },
-          onError: (error: string) => {
-            console.error("Stream error:", error);
+          onError: (error) => {
+            // The thread marks the turn interrupted rather than rendering the
+            // message inline; log the server message or the machine code.
+            console.error("Stream error:", error.message ?? error.code);
             setTurns((prev) => markLastTurnInterrupted(prev));
             setIsStreaming(false);
           },
@@ -238,17 +244,11 @@ export function ChatView({
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4">
             <h3 className="font-semibold text-slate-900">{t.tool.contextProfile}</h3>
-            <p className="mt-1 text-sm text-slate-600">
-              {t.chat?.sandboxHint || "Fill in the details below. These inputs are used once."}
-            </p>
+            <p className="mt-1 text-sm text-slate-600">{t.chat.sandboxHint}</p>
           </div>
-          <DynamicForm
-            fields={tool.inputs}
-            values={sandboxValues}
-            onChange={(name, value) => setSandboxValues((prev) => ({ ...prev, [name]: value }))}
-          />
+          <DynamicForm fields={tool.inputs} values={sandboxValues} onChange={setSandboxValue} />
           <Button onClick={handleSandboxSubmit} className="mt-4">
-            {t.chat?.continue || "Continue"}
+            {t.chat.continue}
           </Button>
         </div>
       </div>
@@ -291,7 +291,7 @@ export function ChatView({
             id="chat-settings-heading"
             className="text-xs font-semibold uppercase tracking-wide text-slate-500"
           >
-            {t.chat?.yourSettings || "Your settings"}
+            {t.chat.yourSettings}
           </h2>
 
           {sandboxSummary.length > 0 && (
@@ -312,7 +312,7 @@ export function ChatView({
               className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <Pencil className="size-3.5" aria-hidden />
-              {t.chat?.edit || "Edit"}
+              {t.chat.edit}
             </button>
           )}
 
@@ -359,9 +359,7 @@ export function ChatView({
             config, for transparency (no editable controls). */}
         {locked && sandboxSummary.length > 0 && (
           <p className="mb-2 flex-none text-xs text-slate-500">
-            <span className="font-medium text-slate-600">
-              {t.chat?.provisionedFor || "Set up for you"}:
-            </span>{" "}
+            <span className="font-medium text-slate-600">{t.chat.provisionedFor}:</span>{" "}
             {sandboxSummary.map((item) => item.value).join(" · ")}
           </p>
         )}
@@ -370,7 +368,7 @@ export function ChatView({
           className="md:min-h-0 md:flex-1 md:overflow-y-auto"
           role="log"
           aria-live="polite"
-          aria-label="Chat thread"
+          aria-label={t.chat.threadLabel}
         >
           {isEmpty ? (
             // Centered welcome, like a fresh chat — greeting + starter prompts.
@@ -381,10 +379,7 @@ export function ChatView({
               {greetingText ? (
                 <p className="max-w-xl text-lg leading-relaxed text-slate-700">{greetingText}</p>
               ) : (
-                <p className="text-sm text-slate-500">
-                  {t.chat?.startConversation ||
-                    "Start the conversation by clicking a starter or typing a message."}
-                </p>
+                <p className="text-sm text-slate-500">{t.chat.startConversation}</p>
               )}
               {starters && starters.length > 0 && (
                 <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -420,7 +415,7 @@ export function ChatView({
                       ) : (
                         <span className="italic text-slate-500">
                           {turn.interrupted ? (
-                            t.chat?.interrupted || "Interrupted"
+                            t.chat.interrupted
                           ) : (
                             <>
                               <span className="inline-block animate-pulse">●</span>{" "}
@@ -457,7 +452,7 @@ export function ChatView({
                     sendMessage();
                   }
                 }}
-                placeholder={t.chat?.inputPlaceholder || "Your message…"}
+                placeholder={t.chat.inputPlaceholder}
                 disabled={isStreaming}
                 className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-400 focus:outline-none disabled:opacity-60"
               />
@@ -494,9 +489,7 @@ export function ChatView({
                 </>
               )}
             </div>
-            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-400">
-              {t.chat?.enterHint || "Enter to send · Shift+Enter for a new line"}
-            </p>
+            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-400">{t.chat.enterHint}</p>
 
             {/* End-of-session self-report (Phase 7). Offered once the chat has
                 content; picking a rating (or ending) triggers the de-personalised
@@ -508,7 +501,7 @@ export function ChatView({
                   onClick={handleEndSession}
                   className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 >
-                  {t.chat?.endSession || "End session"}
+                  {t.chat.endSession}
                 </button>
               </div>
             )}

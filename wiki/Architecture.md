@@ -42,7 +42,11 @@ app/lib/prompts/<id>.prompt.ts             # PromptDef: verbatim original + runt
   the test suite.
 
 Generation is streamed to the browser via SSE through the resource route
-`app/routes/api.stream.tsx`.
+`app/routes/api.stream.tsx`. That route is also the **access boundary**: it parses
+the body with `StreamBodySchema` (Zod), authenticates, and refuses via
+`isToolAvailable` (`app/server/availability.server.ts` — instance settings + role/cohort
+`canUseTool` + per-teacher allow-list) before any provider call. The registry is
+validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the bad tool.
 
 ---
 
@@ -94,8 +98,10 @@ app/
     template/        interpolate · buildSystemPrompt
     context/         types · format  (the context profile + hbo-i pack)
     i18n/            messages/{nl,en}.ts · index · format · localized
-  server/            env · db (auto-schema) · schema · migrate · repositories/*
-docs/                VISION.md
+    registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
+    hooks/           useSandbox (shared values/profile/locked-mode across the tool surfaces)
+  server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
+docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7
 wiki/                this wiki
 book/                The Pedagogical Promptbook (source material)
 ```
@@ -105,9 +111,9 @@ book/                The Pedagogical Promptbook (source material)
 ## Quality gates
 
 ```bash
-npm test           # registry validation, interpolation, buildSystemPrompt, i18n, providers (57 tests)
+npm test           # full node + DOM suite: registry, interpolation, buildSystemPrompt, i18n, the api.stream route, components (axe)
 npm run typecheck  # react-router typegen + tsc
-npm run lint       # Biome
+npm run check      # Biome (lint + format)
 npm run build      # production build
 ```
 
@@ -115,3 +121,7 @@ npm run build      # production build
 
 - [Context Model](Context-Model.md) · [Tools](Tools.md) ·
   [Internationalization](Internationalization.md) · [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md)
+- [Authentication](Authentication.md) · [Mentor Insight](Mentor-Insight.md) ·
+  [Deployment](Deployment.md) · [Compliance](Compliance.md)
+- Program docs: [audit](../docs/Audit-2026-07.md) · [improvement plan](../docs/Improvement-Plan.md) ·
+  [phase briefs](../docs/implementation/README.md)

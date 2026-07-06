@@ -97,13 +97,16 @@ export async function upsertChatGeneration(
   return row;
 }
 
-export async function listGenerations(userId: string, limit = 50): Promise<GenerationRow[]> {
+export async function listGenerations(userId: string, limit?: number): Promise<GenerationRow[]> {
+  // Belt-and-braces cap (Phase 5.6): clamp so a caller can never request an
+  // unbounded result set. Per-user scoping already bounds realistic sizes.
+  const capped = Math.min(limit ?? 50, 500);
   return getDb()
     .select()
     .from(generations)
     .where(eq(generations.userId, userId))
     .orderBy(desc(generations.createdAt))
-    .limit(limit)
+    .limit(capped)
     .all();
 }
 

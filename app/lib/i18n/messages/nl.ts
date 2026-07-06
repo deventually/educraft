@@ -129,6 +129,7 @@ export const nl = {
     edit: "Aanpassen",
     provisionedFor: "Ingesteld voor jou",
     startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
+    threadLabel: "Gesprek",
     interrupted: "Onderbroken",
     enterHint: "Enter om te versturen · Shift+Enter voor een nieuwe regel",
     endSession: "Gesprek afsluiten",

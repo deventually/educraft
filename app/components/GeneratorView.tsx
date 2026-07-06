@@ -3,14 +3,9 @@ import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
-import {
-  DynamicForm,
-  defaultValuesFor,
-  missingRequired,
-  profilePrefillValues,
-  type FormValues,
-} from "./DynamicForm";
+import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
+import { useSandbox } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
@@ -38,36 +33,13 @@ export function GeneratorView({
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
-  const [values, setValues] = useState<FormValues>(() => ({
-    ...defaultValuesFor(tool.inputs),
-    // Derive any profile-backed fields (e.g. course level) from the default
-    // profile so they aren't entered twice.
-    ...profilePrefillValues(
-      tool.inputs,
-      profiles.find((p) => p.id === defaultProfileId),
-    ),
-  }));
-  const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
-
-  // Switching the teaching context re-derives its profile-backed fields, while
-  // leaving the rest of the form untouched. A field with no derived value (e.g.
-  // a profile without a study year, or "no profile") resets to its empty
-  // default, so a stale prefill never lingers.
-  function selectProfile(id: string) {
-    setContextProfileId(id);
-    const prefill = profilePrefillValues(
-      tool.inputs,
-      profiles.find((p) => p.id === id),
-    );
-    setValues((prev) => {
-      const next = { ...prev };
-      for (const f of tool.inputs) {
-        if (!f.prefillFromProfile) continue;
-        next[f.name] = f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name];
-      }
-      return next;
-    });
-  }
+  // Shared sandbox: seeds field defaults + the default profile's prefill, and
+  // re-derives profile-backed fields on `selectProfile` (see useSandbox).
+  const { values, setValue, contextProfileId, selectProfile } = useSandbox({
+    inputs: tool.inputs,
+    profiles,
+    defaultProfileId,
+  });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   const [model, setModel] = useState(tool.defaultModel);
   const [output, setOutput] = useState("");
@@ -122,8 +94,10 @@ export function GeneratorView({
       {
         onToken: (text) => setOutput((prev) => prev + text),
         onDone: () => setStreaming(false),
-        onError: (msg) => {
-          setError(msg);
+        onError: (err) => {
+          // Server errors arrive already localized; a client-side failure carries
+          // only a machine code, mapped here to the localized generic message.
+          setError(err.message ?? t.error.unknown);
           setStreaming(false);
         },
       },
@@ -153,11 +127,7 @@ export function GeneratorView({
           disabled={streaming}
           requiresImages={hasImageInputs}
         />
-        <DynamicForm
-          fields={tool.inputs}
-          values={values}
-          onChange={(name, value) => setValues((prev) => ({ ...prev, [name]: value }))}
-        />
+        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
         <div className="flex items-center gap-3">
           {streaming ? (
             <Button variant="secondary" onClick={stop}>
