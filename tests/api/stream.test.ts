@@ -511,23 +511,42 @@ describe("api.stream — model allow-list & budget", () => {
     expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
   });
 
-  it("[P13] a free local model is still honoured despite a cohort restriction", async () => {
+  it("[P14] an uncurated instance still honours a local/CLI model (back-compat)", async () => {
+    await settings.setEnabledModels(null); // nothing curated → local stays available
+    await invoke(
+      { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-code" },
+      { userId: "p14-uncurated-teacher" },
+    );
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-code");
+  });
+
+  it("[P14] a CLI model disabled instance-wide falls back to the tool default", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]); // claude-code NOT enabled
+    await invoke(
+      { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-code" },
+      { userId: "p14-curated-teacher" },
+    );
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("[P14] a local/CLI model outside a cohort's set is refused for its students", async () => {
     await settings.setEnabledModels(null);
-    const student = "p13-local-student";
+    const student = "p14-cohort-student";
     const cohort = await cohorts.createCohort({
-      createdByUserId: "p13-teacher-2",
-      name: "Sonnet-only, but local is free",
+      createdByUserId: "p14-teacher-2",
+      name: "Sonnet-only — local now governed",
       allowedToolSlugs: ["socratic-partner"],
-      allowedModelIds: ["claude-sonnet-4-6"],
+      allowedModelIds: ["claude-sonnet-4-6"], // claude-code excluded
     });
     await cohorts.addMembership(cohort.id, student);
     asUser(student, "student");
     await invoke({
       slug: "socratic-partner",
       values: { chapter: "x" },
-      model: "claude-code", // local CLI — free, always selectable
+      model: "claude-code", // no longer free-passed → falls back to default
     });
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-code");
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
   });
 
   it("streams with the tool's configured maxTokens budget", async () => {

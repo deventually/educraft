@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
 import { providerForModel } from "~/lib/ai/provider";
-import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
+import { resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile, getProfileForMember } from "~/server/repositories/profiles.server";
 import {
@@ -12,7 +12,7 @@ import {
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
 import { isEqfLevel } from "~/lib/context/eqf";
-import { getSelectableModelIds, isToolAvailable } from "~/server/availability.server";
+import { isModelSelectableForUser, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { recordChatTurn } from "~/server/repositories/chat.server";
 import { getUser } from "~/server/auth.server";
@@ -179,16 +179,14 @@ export async function action({ request }: Route.ActionArgs) {
       audience,
     });
 
-    // Server-side model allow-list (Phase 4 + 13): a caller may only pick a model
-    // in THEIR effective set — the instance allow-list, narrowed by the teacher's
-    // assignment or the student's cohort set (intersect) — or a free local model.
-    // Anything else falls back to the tool/stage default, so a hostile body can't
-    // force an expensive, disabled, or un-granted model on the owner.
-    const selectableModelIds = await getSelectableModelIds(user);
-    const mayPickModel =
-      !!body.model &&
-      isResolvableModel(body.model) &&
-      (selectableModelIds.has(body.model) || resolveModelInfo(body.model).local === true);
+    // Server-side model allow-list (Phase 4 + 13 + 14): a caller may only pick a
+    // model in THEIR effective set — the instance allow-list, narrowed by the
+    // teacher's assignment or the student's cohort set (intersect). Since P14 this
+    // gate also governs local/CLI/discovered models (still free, now curatable), so
+    // there is no local free-pass. Anything else falls back to the tool/stage
+    // default, so a hostile body can't force an expensive, disabled, or un-granted
+    // model on the owner.
+    const mayPickModel = !!body.model && (await isModelSelectableForUser(user, body.model));
     const model = mayPickModel ? (body.model as string) : (stage.model ?? tool.defaultModel);
     const provider = providerForModel(model);
 

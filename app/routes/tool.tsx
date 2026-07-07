@@ -16,7 +16,11 @@ import {
   getCohortForUser,
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
-import { getSelectableModels, isToolAvailable } from "~/server/availability.server";
+import {
+  getSelectableModels,
+  isToolAvailable,
+  narrowLocalModels,
+} from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
 import { getEffectiveRole } from "~/server/roleView.server";
 import type { InteractionMode } from "~/lib/registry/types";
@@ -61,11 +65,15 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),
   }));
-  const localModels = (await discoverLocalModels()).map((m) => ({
+  // Discovered local models, narrowed to the viewer's effective set (Phase 14):
+  // local/CLI/discovered models are no longer free-passed — an admin/teacher may
+  // curate them, so a disabled/un-granted one must never reach the picker.
+  const discovered = (await discoverLocalModels()).map((m) => ({
     id: m.id,
     displayName: m.displayName,
     supportsImages: m.supportsImages,
   }));
+  const localModels = await narrowLocalModels(viewer, discovered);
   // The catalog models a caller may pick, narrowed to the viewer's effective set
   // (Phase 4 instance allow-list + Phase 13 per-teacher / per-cohort gates). Passed
   // to the pickers so the module-scope catalog no longer wins.

@@ -19,7 +19,13 @@
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { canUseTool, type Audience, type Role } from "~/lib/registry/access";
-import { DEFAULT_MODEL, listModels, type PickerModel } from "~/lib/ai/models";
+import {
+  DEFAULT_MODEL,
+  isResolvableModel,
+  listModels,
+  resolveModelInfo,
+  type PickerModel,
+} from "~/lib/ai/models";
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from "~/lib/context/countries";
 import { SECTORS, type Sector } from "~/lib/context/sectors";
 import { getDomainsForTrack } from "~/lib/context/domains";
@@ -149,6 +155,51 @@ export async function getSelectableModels(user?: AvailabilityUser): Promise<Pick
   return listModels()
     .filter((m) => ids.has(m.id))
     .map((m) => ({ id: m.id, displayName: m.displayName, supportsImages: m.supportsImages }));
+}
+
+/**
+ * Whether a *single* model id is selectable for `user` (Phase 14) — the gate that
+ * governs local/CLI/discovered models too. Unlike `getSelectableModelIds`, which
+ * enumerates the static catalog, this is a membership walk so it works for volatile
+ * discovered ids (`ollama::…`) without enumerating any local server: the id must be
+ * resolvable and client-selectable (Opus-class stays out), then each applicable
+ * INTERSECT level must either impose no restriction (null/empty ⇒ inherit) or list
+ * the id — instance `enabledModels`, then the teacher's assignment or the student's
+ * cohort set. Empty at every level = every resolvable, client-selectable model is
+ * allowed (an uncurated instance is unchanged: local/CLI stay free but curatable).
+ */
+export async function isModelSelectableForUser(
+  user: AvailabilityUser | undefined,
+  id: string,
+): Promise<boolean> {
+  if (!isResolvableModel(id) || !resolveModelInfo(id).clientSelectable) return false;
+  const enabled = await getEnabledModels();
+  if (enabled !== null && enabled.length > 0 && !enabled.includes(id)) return false;
+  const restriction =
+    user?.role === "teacher"
+      ? await getUserAssignedModels(user.id)
+      : user?.role === "student"
+        ? await getAllowedModelIds(user.id)
+        : null;
+  if (restriction && restriction.size > 0 && !restriction.has(id)) return false;
+  return true;
+}
+
+/**
+ * Filter a list of discovered local/compat picker models to the ones `user` may
+ * select (Phase 14). The static catalog half of the picker comes from
+ * `getSelectableModels`; this is the discovered half — dropped entries never reach
+ * the client, so a disabled/un-granted local model is not offered.
+ */
+export async function narrowLocalModels(
+  user: AvailabilityUser | undefined,
+  discovered: PickerModel[],
+): Promise<PickerModel[]> {
+  const out: PickerModel[] = [];
+  for (const model of discovered) {
+    if (await isModelSelectableForUser(user, model.id)) out.push(model);
+  }
+  return out;
 }
 
 /**

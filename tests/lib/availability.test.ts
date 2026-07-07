@@ -177,3 +177,66 @@ describe("getSelectableModelIds — per-teacher & per-cohort narrowing (P13)", (
     await users.setUserAssignedModels(teacher.id, null); // reset
   });
 });
+
+describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
+  const teacher = { id: "p14-teacher", role: "teacher" as const };
+  const CLI = "claude-code"; // static local CLI agent (clientSelectable)
+  const LOCAL = "ollama::p14-model"; // discovered local id (resolves via parseDynamicModel)
+
+  it("an uncurated instance selects a CLI agent and a discovered local model", async () => {
+    expect(await availability.isModelSelectableForUser(undefined, CLI)).toBe(true);
+    expect(await availability.isModelSelectableForUser(undefined, LOCAL)).toBe(true);
+    // frontier still selectable; Opus and unknown ids never
+    expect(await availability.isModelSelectableForUser(undefined, "claude-sonnet-4-6")).toBe(true);
+    expect(await availability.isModelSelectableForUser(undefined, "claude-opus-4-8")).toBe(false);
+    expect(await availability.isModelSelectableForUser(undefined, "no-such-id")).toBe(false);
+  });
+
+  it("an explicit instance allow-list omitting the CLI id blocks it (curation)", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]); // CLI not listed
+    expect(await availability.isModelSelectableForUser(undefined, CLI)).toBe(false);
+    expect(await availability.isModelSelectableForUser(undefined, LOCAL)).toBe(false);
+    // once listed, it is selectable again
+    await settings.setEnabledModels(["claude-sonnet-4-6", CLI]);
+    expect(await availability.isModelSelectableForUser(undefined, CLI)).toBe(true);
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("a teacher assignment narrows a local/CLI id (intersect); clearing restores it", async () => {
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]); // no CLI
+    expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(false);
+    await users.setUserAssignedModels(teacher.id, null);
+    expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(true);
+  });
+
+  it("a student's cohort set narrows a local/CLI id", async () => {
+    const student = { id: "p14-cohort-student", role: "student" as const };
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "p14-teacher",
+      name: "Haiku-only cohort",
+      allowedToolSlugs: ["mentorai"],
+      allowedModelIds: ["claude-haiku-4-5"], // CLI/local excluded
+    });
+    await cohorts.addMembership(cohort.id, student.id);
+    expect(await availability.isModelSelectableForUser(student, CLI)).toBe(false);
+    expect(await availability.isModelSelectableForUser(student, LOCAL)).toBe(false);
+  });
+
+  it("narrowLocalModels drops discovered models outside the effective set", async () => {
+    const discovered = [
+      { id: "ollama::a", displayName: "ollama::a" },
+      { id: "ollama::b", displayName: "ollama::b" },
+    ];
+    // uncurated → both kept
+    expect((await availability.narrowLocalModels(undefined, discovered)).map((m) => m.id)).toEqual([
+      "ollama::a",
+      "ollama::b",
+    ]);
+    // curated to only ollama::a → drops ollama::b
+    await settings.setEnabledModels(["ollama::a"]);
+    expect((await availability.narrowLocalModels(undefined, discovered)).map((m) => m.id)).toEqual([
+      "ollama::a",
+    ]);
+    await settings.setEnabledModels(null); // reset
+  });
+});
