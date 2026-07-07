@@ -24,11 +24,18 @@ import type { Role } from "~/lib/registry/access";
 /** Per-tutor sandbox config: `{ [slug]: { values: { field: value } } }`. */
 export type CohortConfig = Record<string, { values: Record<string, string> }>;
 
+/** Serialize a model allow-list: a non-empty list → JSON, else null (= inherit). */
+function serializeModelIds(ids: string[] | null | undefined): string | null {
+  return ids && ids.length > 0 ? JSON.stringify(ids) : null;
+}
+
 export interface CreateCohortInput {
   createdByUserId: string;
   name: string;
   allowedToolSlugs: string[];
   config?: CohortConfig;
+  /** Per-cohort model set (Phase 13) ⊆ the teacher's models; null/[] = inherit. */
+  allowedModelIds?: string[] | null;
   contextProfileId?: string | null;
   /** Bare EQF level (1-8), an alternative to a full profile. Mutually exclusive. */
   contextEqf?: number | null;
@@ -42,6 +49,7 @@ export async function createCohort(input: CreateCohortInput): Promise<CohortRow>
     name: input.name,
     allowedToolSlugs: JSON.stringify(input.allowedToolSlugs),
     configJson: JSON.stringify(input.config ?? {}),
+    allowedModelsJson: serializeModelIds(input.allowedModelIds),
     contextProfileId: input.contextProfileId ?? null,
     contextEqf: input.contextEqf ?? null,
     activeUntil: input.activeUntil ?? null,
@@ -55,6 +63,8 @@ export interface UpdateCohortPatch {
   name?: string;
   allowedToolSlugs?: string[];
   config?: CohortConfig;
+  /** Per-cohort model set (Phase 13); null/[] = inherit the teacher's models. */
+  allowedModelIds?: string[] | null;
   contextProfileId?: string | null;
   contextEqf?: number | null;
   activeUntil?: Date | null;
@@ -67,6 +77,8 @@ export async function updateCohort(id: string, patch: UpdateCohortPatch): Promis
   if (patch.allowedToolSlugs !== undefined)
     set.allowedToolSlugs = JSON.stringify(patch.allowedToolSlugs);
   if (patch.config !== undefined) set.configJson = JSON.stringify(patch.config);
+  if (patch.allowedModelIds !== undefined)
+    set.allowedModelsJson = serializeModelIds(patch.allowedModelIds);
   if (patch.contextProfileId !== undefined) set.contextProfileId = patch.contextProfileId;
   if (patch.contextEqf !== undefined) set.contextEqf = patch.contextEqf;
   if (patch.activeUntil !== undefined) set.activeUntil = patch.activeUntil;
@@ -173,6 +185,32 @@ export function allowedSlugsOf(cohort: CohortRow): Set<string> {
 export async function getAllowedToolSlugs(userId: string): Promise<Set<string> | null> {
   const cohort = await getCohortForUser(userId);
   return cohort ? allowedSlugsOf(cohort) : null;
+}
+
+/**
+ * The cohort's per-cohort model set (Phase 13), or `null` when unset (= inherit
+ * the teacher's models). Pure over an already-loaded row, mirroring
+ * `allowedSlugsOf`; a corrupt value degrades to `null` (inherit) rather than
+ * throwing.
+ */
+export function allowedModelsOf(cohort: CohortRow): Set<string> | null {
+  if (!cohort.allowedModelsJson) return null;
+  try {
+    const parsed = JSON.parse(cohort.allowedModelsJson) as string[];
+    return Array.isArray(parsed) && parsed.length > 0 ? new Set(parsed) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The set of model ids a user's cohort allows, or `null` when the user has no
+ * cohort or the cohort inherits (the call site then falls back to the teacher/
+ * instance base). Mirrors `getAllowedToolSlugs`.
+ */
+export async function getAllowedModelIds(userId: string): Promise<Set<string> | null> {
+  const cohort = await getCohortForUser(userId);
+  return cohort ? allowedModelsOf(cohort) : null;
 }
 
 /** The cohort's per-tutor sandbox config, parsed. */

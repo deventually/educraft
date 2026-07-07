@@ -142,6 +142,16 @@ export async function getUserAssignedDomains(userId: string): Promise<Set<string
 }
 
 /**
+ * Per-teacher model assignment (Phase 13) — the admin→teacher gate. Same
+ * migration-free storage as the context axes (`assignedModels:<userId>`), but
+ * composed by INTERSECT, not override: a teacher's effective models are the
+ * instance base ∩ this set. null/empty = unrestricted (inherit the instance).
+ */
+export async function getUserAssignedModels(userId: string): Promise<Set<string> | null> {
+  return getAssignedList("assignedModels", userId);
+}
+
+/**
  * Set (or clear) a per-teacher country/sector assignment (Phase 9 write side) —
  * the setter half of `getAssignedList`. Writes the `${prefix}:${userId}`
  * instance_settings key with a JSON `string[]`; a null/empty list deletes the key
@@ -183,6 +193,11 @@ export async function setUserAssignedSectors(userId: string, ids: string[] | nul
 
 export async function setUserAssignedDomains(userId: string, ids: string[] | null): Promise<void> {
   return setAssignedList("assignedDomains", userId, ids);
+}
+
+/** Set (or clear, with null/[]) a per-teacher model assignment (Phase 13). */
+export async function setUserAssignedModels(userId: string, ids: string[] | null): Promise<void> {
+  return setAssignedList("assignedModels", userId, ids);
 }
 
 /**

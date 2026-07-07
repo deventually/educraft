@@ -36,9 +36,10 @@ import {
   getUserAssignedCountries,
   getUserAssignedSectors,
   getUserAssignedDomains,
+  getUserAssignedModels,
   getUserContextCustomAccess,
 } from "./repositories/users.server";
-import { getAllowedToolSlugs } from "./repositories/cohorts.server";
+import { getAllowedToolSlugs, getAllowedModelIds } from "./repositories/cohorts.server";
 
 export interface AvailabilityUser {
   id: string;
@@ -97,32 +98,54 @@ export async function isToolAvailable(user: AvailabilityUser, tool: Tool): Promi
 }
 
 /**
- * The set of catalog model ids a caller may select, honoring the admin's
- * `enabledModels` allow-list. Only client-selectable models are ever eligible
- * (Opus-class stays server-only). Lockout guard: if the intersection is empty an
- * admin has effectively banned everything — fall back to the catalog default and
- * warn, because no admin may lock every user out of generation.
+ * The instance base for the model gates: client-selectable catalog ∩ the admin's
+ * `enabledModels` allow-list (Opus-class stays server-only). No lockout fallback
+ * here — that is applied once, after the per-teacher/cohort narrowing below.
  */
-export async function getSelectableModelIds(): Promise<Set<string>> {
+async function selectableCatalogIds(): Promise<Set<string>> {
   const enabled = await getEnabledModels();
   const catalog = listModels()
     .filter((m) => m.clientSelectable)
     .map((m) => m.id);
-  const ids = catalog.filter((id) => enabled === null || enabled.includes(id));
-  if (ids.length === 0) {
-    log("availability_no_selectable_models", { fallback: DEFAULT_MODEL });
-    return new Set([DEFAULT_MODEL]);
-  }
-  return new Set(ids);
+  return new Set(catalog.filter((id) => enabled === null || enabled.includes(id)));
+}
+
+/** Narrow a model set by a restriction (INTERSECT). null/empty = no change. */
+function narrowModels(ids: Set<string>, restriction: Set<string> | null): Set<string> {
+  if (!restriction || restriction.size === 0) return ids;
+  return new Set([...ids].filter((id) => restriction.has(id)));
 }
 
 /**
- * The catalog picker models a caller may choose (admin-enabled ∩ client-
- * selectable, with the lockout fallback). Local/discovered models are free and
- * always allowed, so they are added by the caller via `pickableModels`, not here.
+ * The catalog model ids a caller may select. Composes three INTERSECT gates
+ * (Phase 13), each only ever *narrowing* — the opposite of the P12 context axes:
+ *   1. Instance base — the admin's `enabledModels` (client-selectable only).
+ *   2. Per-teacher — an admin's `assignedModels` for a teacher (⊆ base).
+ *   3. Per-cohort — a teacher's model set for a student's cohort (⊆ teacher).
+ * Empty/unset at a level = inherit the level above; admin/no-user = the base.
+ * Local/discovered models are free and always allowed, so they are added by the
+ * caller via `pickableModels`, not here. Lockout guard: an empty final set (only
+ * reachable via a stale allow-list) falls back to the catalog default and warns —
+ * no configuration may lock a user out of generation entirely.
  */
-export async function getSelectableModels(): Promise<PickerModel[]> {
-  const ids = await getSelectableModelIds();
+export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
+  let ids = await selectableCatalogIds();
+  if (user?.role === "teacher") ids = narrowModels(ids, await getUserAssignedModels(user.id));
+  else if (user?.role === "student") ids = narrowModels(ids, await getAllowedModelIds(user.id));
+  if (ids.size === 0) {
+    log("availability_no_selectable_models", { fallback: DEFAULT_MODEL });
+    return new Set([DEFAULT_MODEL]);
+  }
+  return ids;
+}
+
+/**
+ * The catalog picker models a caller may choose — `getSelectableModelIds` mapped
+ * to picker shape. Pass the caller so the picker reflects their effective set
+ * (instance base narrowed by the teacher/cohort gates); omit for the raw base.
+ */
+export async function getSelectableModels(user?: AvailabilityUser): Promise<PickerModel[]> {
+  const ids = await getSelectableModelIds(user);
   return listModels()
     .filter((m) => ids.has(m.id))
     .map((m) => ({ id: m.id, displayName: m.displayName, supportsImages: m.supportsImages }));

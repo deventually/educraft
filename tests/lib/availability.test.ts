@@ -11,11 +11,13 @@ vi.mock("~/server/log.server", () => ({ log: logMock }));
 type Availability = typeof import("~/server/availability.server");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
+type Cohorts = typeof import("~/server/repositories/cohorts.server");
 type Registry = typeof import("~/lib/registry");
 
 let availability: Availability;
 let settings: Settings;
 let users: Users;
+let cohorts: Cohorts;
 let registry: Registry;
 
 const admin = { id: "admin-1", role: "admin" as const };
@@ -31,6 +33,7 @@ beforeAll(async () => {
   availability = await import("~/server/availability.server");
   settings = await import("~/server/repositories/settings.server");
   users = await import("~/server/repositories/users.server");
+  cohorts = await import("~/server/repositories/cohorts.server");
   registry = await import("~/lib/registry");
 });
 
@@ -111,5 +114,66 @@ describe("getSelectableModels — admin model allow-list + lockout guard", () =>
     expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
     expect(logMock).toHaveBeenCalled();
     await settings.setEnabledModels(null); // reset
+  });
+});
+
+describe("getSelectableModelIds — per-teacher & per-cohort narrowing (P13)", () => {
+  const teacher = { id: "mdl-teacher", role: "teacher" as const };
+  const cohortStudent = { id: "mdl-student", role: "student" as const };
+
+  it("no user (admin) is unchanged: the instance base, never widened", async () => {
+    const ids = await availability.getSelectableModelIds();
+    const forAdmin = await availability.getSelectableModelIds(admin);
+    expect(forAdmin.has("claude-sonnet-4-6")).toBe(true);
+    expect(forAdmin.has("claude-haiku-4-5")).toBe(true);
+    // Admin follows the instance base exactly (no per-teacher path).
+    expect([...forAdmin].sort()).toEqual([...ids].sort());
+  });
+
+  it("a teacher's assignment narrows the base (intersect); clearing restores it", async () => {
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    const narrowed = await availability.getSelectableModelIds(teacher);
+    expect(narrowed.has("claude-haiku-4-5")).toBe(true);
+    expect(narrowed.has("claude-sonnet-4-6")).toBe(false);
+
+    await users.setUserAssignedModels(teacher.id, null);
+    const inherited = await availability.getSelectableModelIds(teacher);
+    expect(inherited.has("claude-sonnet-4-6")).toBe(true); // back to base
+  });
+
+  it("a student is narrowed by their cohort's model set (intersect)", async () => {
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "mdl-teacher",
+      name: "Model-restricted cohort",
+      allowedToolSlugs: ["mentorai"],
+      allowedModelIds: ["claude-haiku-4-5"],
+    });
+    await cohorts.addMembership(cohort.id, cohortStudent.id);
+
+    const ids = await availability.getSelectableModelIds(cohortStudent);
+    expect(ids.has("claude-haiku-4-5")).toBe(true);
+    expect(ids.has("claude-sonnet-4-6")).toBe(false);
+  });
+
+  it("a student with no cohort restriction inherits the base", async () => {
+    const ids = await availability.getSelectableModelIds({ id: "mdl-free", role: "student" });
+    expect(ids.has("claude-sonnet-4-6")).toBe(true);
+    expect(ids.has("claude-haiku-4-5")).toBe(true);
+  });
+
+  it("getSelectableModels mirrors the narrowing for the picker", async () => {
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    const models = await availability.getSelectableModels(teacher);
+    expect(models.map((m) => m.id)).toEqual(["claude-haiku-4-5"]);
+    await users.setUserAssignedModels(teacher.id, null); // reset
+  });
+
+  it("an out-of-base teacher assignment falls back to the default (+warns), never empty", async () => {
+    logMock.mockClear();
+    await users.setUserAssignedModels(teacher.id, ["nonexistent-model-xyz"]);
+    const ids = await availability.getSelectableModelIds(teacher);
+    expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
+    expect(logMock).toHaveBeenCalled();
+    await users.setUserAssignedModels(teacher.id, null); // reset
   });
 });

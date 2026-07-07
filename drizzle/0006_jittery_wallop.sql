@@ -1,0 +1,1 @@
+ALTER TABLE `cohorts` ADD `allowed_models_json` text;

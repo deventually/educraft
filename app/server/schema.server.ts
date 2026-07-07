@@ -61,6 +61,7 @@ export const cohorts = sqliteTable("cohorts", {
   name: text("name").notNull(), // "SE jaar 2 — 25/26 blok 1"
   allowedToolSlugs: text("allowed_tool_slugs").notNull(), // JSON string[] ⊆ userType:"student" slugs
   configJson: text("config_json").notNull().default("{}"), // { [slug]: { values: Record<string,string> } }
+  allowedModelsJson: text("allowed_models_json"), // JSON string[] ⊆ teacher's models (P13); null = inherit
   contextProfileId: text("context_profile_id"), // teacher-owned profile → injected server-side for members
   // Alternative to a full profile: level the cohort by a bare EQF number (1-8).
   // Mutually exclusive with contextProfileId — a profile carries its own EQF, so

@@ -102,6 +102,45 @@ describe("cohorts repository", () => {
     expect(await repo.getAllowedToolSlugs("student-without-cohort")).toBeNull();
   });
 
+  it("round-trips the per-cohort model set; getAllowedModelIds resolves it by membership (P13)", async () => {
+    // Unset = null (inherit the teacher's set); a set narrows.
+    const inherit = await repo.createCohort({
+      createdByUserId: "teacher-m1",
+      name: "Inherit models",
+      allowedToolSlugs: ["mentorai"],
+    });
+    expect(inherit.allowedModelsJson).toBeNull();
+    expect(repo.allowedModelsOf(inherit)).toBeNull();
+
+    const restricted = await repo.createCohort({
+      createdByUserId: "teacher-m2",
+      name: "Restricted models",
+      allowedToolSlugs: ["mentorai"],
+      allowedModelIds: ["claude-haiku-4-5"],
+    });
+    expect(repo.allowedModelsOf(restricted)?.has("claude-haiku-4-5")).toBe(true);
+    expect(repo.allowedModelsOf(restricted)?.has("claude-sonnet-4-6")).toBe(false);
+
+    // Edit in place: change then clear back to inherit.
+    await repo.updateCohort(restricted.id, {
+      allowedModelIds: ["claude-haiku-4-5", "claude-sonnet-4-6"],
+    });
+    expect([...repo.allowedModelsOf((await repo.getCohort(restricted.id))!)!].sort()).toEqual([
+      "claude-haiku-4-5",
+      "claude-sonnet-4-6",
+    ]);
+    await repo.updateCohort(restricted.id, { allowedModelIds: null });
+    expect(repo.allowedModelsOf((await repo.getCohort(restricted.id))!)).toBeNull();
+
+    // Resolved by membership, like getAllowedToolSlugs; null with no cohort.
+    await repo.addMembership(restricted.id, "student-m");
+    await repo.updateCohort(restricted.id, { allowedModelIds: ["claude-haiku-4-5"] });
+    const forStudent = await repo.getAllowedModelIds("student-m");
+    expect(forStudent).toBeInstanceOf(Set);
+    expect(forStudent?.has("claude-haiku-4-5")).toBe(true);
+    expect(await repo.getAllowedModelIds("student-without-cohort")).toBeNull();
+  });
+
   it("assigns and removes co-teachers; canManageCohort honours creator, assignee, admin", async () => {
     const cohort = await repo.createCohort({
       createdByUserId: "owner-teacher",

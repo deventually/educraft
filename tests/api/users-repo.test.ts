@@ -75,6 +75,25 @@ describe("users repository", () => {
     expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
   });
 
+  it("round-trips a per-teacher model assignment and clears with null/[] (P13)", async () => {
+    // Default-open: an unset teacher inherits the instance model set (intersect).
+    expect(await repo.getUserAssignedModels("mdl-anyone")).toBeNull();
+
+    await repo.setUserAssignedModels("mdl-t", ["claude-haiku-4-5", "claude-sonnet-4-6"]);
+    expect([...(await repo.getUserAssignedModels("mdl-t"))!].sort()).toEqual([
+      "claude-haiku-4-5",
+      "claude-sonnet-4-6",
+    ]);
+    // Keyed per user — an unrelated teacher stays unrestricted.
+    expect(await repo.getUserAssignedModels("mdl-other")).toBeNull();
+
+    await repo.setUserAssignedModels("mdl-t", null);
+    expect(await repo.getUserAssignedModels("mdl-t")).toBeNull();
+    await repo.setUserAssignedModels("mdl-t", ["claude-haiku-4-5"]);
+    await repo.setUserAssignedModels("mdl-t", []);
+    expect(await repo.getUserAssignedModels("mdl-t")).toBeNull();
+  });
+
   it("round-trips the per-teacher context custom-access flag (P12)", async () => {
     // Default: a teacher is not activated → inherits the instance.
     expect(await repo.getUserContextCustomAccess("ca-anyone")).toBe(false);
