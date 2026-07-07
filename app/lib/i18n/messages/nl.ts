@@ -428,12 +428,16 @@ export const nl = {
     models: {
       heading: "Modellen",
       intro:
-        "Kies welke modellen gebruikers mogen selecteren. Opus-klasse blijft serverzijdig; lokale modellen zijn altijd beschikbaar.",
+        "Kies welke modellen gebruikers mogen selecteren. Opus-klasse blijft serverzijdig; lokale en CLI-modellen zijn gratis maar kies je hier expliciet.",
       caption: "Selecteerbare modellen uit de catalogus.",
       available: "Beschikbaar voor gebruikers",
       atLeastOne: "Kies minstens één model — je kunt niet iedereen buitensluiten.",
       save: "Opslaan",
-      localNote: "Lokale modellen (Ollama, CLI) zijn gratis en altijd selecteerbaar.",
+      frontierGroup: "Frontier-API",
+      cliGroup: "CLI-agents",
+      localGroup: "Lokaal (gevonden)",
+      localGroupHint:
+        "Lokale en CLI-modellen zijn gratis, maar wel te beheren. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",
       teacherLegend: "Modellen per docent",
       teacherIntro:
         "Beperk optioneel welke modellen een docent mag gebruiken en aan cohorten mag toewijzen. Niets aangevinkt (of alles aangevinkt) betekent dat de docent de instantie erft.",

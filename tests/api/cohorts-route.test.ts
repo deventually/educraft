@@ -7,6 +7,9 @@ process.env.DATABASE_URL = "file::memory:";
 const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
 vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
 
+// Env-dependent local discovery is stubbed so the cohort model catalog is hermetic.
+vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
+
 type Route = typeof import("~/routes/cohorts.$id");
 type Cohorts = typeof import("~/server/repositories/cohorts.server");
 type Profiles = typeof import("~/server/repositories/profiles.server");
@@ -120,6 +123,26 @@ describe("cohorts.$id action — provisioning", () => {
     expect(models?.has("claude-haiku-4-5")).toBe(true);
     expect(models?.has("totally-bogus")).toBe(false); // not a real model
     expect(models?.has("claude-sonnet-4-6")).toBe(false); // not selected
+  });
+
+  it("[P14] persists a local/CLI model in the cohort's set", async () => {
+    const res = (await route.action(
+      args(
+        { id: "new" },
+        formPost(
+          {
+            name: "CLI cohort",
+            tools: ["mentorai"],
+            emails: "cli@example.com",
+            models: ["claude-code"], // a local CLI agent — now offered per-cohort
+          },
+          "teacher-1",
+        ),
+      ),
+    )) as { cohortId?: string; error?: string };
+    expect(res.error).toBeUndefined();
+    const cohort = await cohorts.getCohort(res.cohortId!);
+    expect(cohorts.allowedModelsOf(cohort!)?.has("claude-code")).toBe(true);
   });
 
   it("clears the cohort's model set to inherit when none are submitted (P13)", async () => {

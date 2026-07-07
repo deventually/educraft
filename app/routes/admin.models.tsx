@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import type { Route } from "./+types/admin.models";
 import { requireRole } from "~/server/auth.server";
 import { listModels } from "~/lib/ai/models";
+import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { getEnabledModels, setEnabledModels } from "~/server/repositories/settings.server";
 import {
   getUserAssignedModels,
@@ -13,28 +14,53 @@ import {
 import { useT } from "~/lib/i18n/useT";
 import { Button } from "~/components/ui";
 
-/** The catalog models an admin can toggle: client-selectable, non-local. */
-function selectableCatalog(): { id: string; displayName: string }[] {
-  return listModels()
-    .filter((m) => m.clientSelectable && !m.local)
-    .map((m) => ({ id: m.id as string, displayName: m.displayName }));
+/** Which section a model belongs to in the UI (P14): frontier API, CLI agent, or
+ *  a locally-discovered (Ollama/LM Studio) model. */
+type ModelGroup = "frontier" | "cli" | "local";
+type CatalogModel = { id: string; displayName: string; group: ModelGroup };
+
+/**
+ * Every model an admin can curate (P14) — client-selectable only (Opus-class stays
+ * server-side), across all origins: static frontier + CLI agents, plus any local
+ * model discovered at runtime. Since P14 local/CLI are curatable here (not "always
+ * on"); discovery is env-specific, so a model absent from this list is simply not
+ * running right now.
+ */
+async function fullCatalog(): Promise<CatalogModel[]> {
+  const staticModels: CatalogModel[] = listModels()
+    .filter((m) => m.clientSelectable)
+    .map((m) => ({
+      id: m.id as string,
+      displayName: m.displayName,
+      group: m.local ? "cli" : "frontier",
+    }));
+  const discovered: CatalogModel[] = (await discoverLocalModels()).map((m) => ({
+    id: m.id,
+    displayName: m.displayName,
+    group: "local",
+  }));
+  return [...staticModels, ...discovered];
 }
 
-/** The assignable base: the selectable catalog narrowed to the instance's allow-list. */
-function assignableBase(enabled: string[] | null): { id: string; displayName: string }[] {
-  return selectableCatalog().filter((m) => enabled === null || enabled.includes(m.id));
+/** The assignable base: the full catalog narrowed to the instance's allow-list. */
+function assignableBase(catalog: CatalogModel[], enabled: string[] | null): CatalogModel[] {
+  return catalog.filter((m) => enabled === null || enabled.includes(m.id));
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
   const enabled = await getEnabledModels();
-  const rows = selectableCatalog().map((m) => ({
+  const catalog = await fullCatalog();
+  const rows = catalog.map((m) => ({
     ...m,
     checked: enabled === null || enabled.includes(m.id),
   }));
   // Per-teacher assignment (P13): checkboxes iterate the instance-enabled base;
   // a teacher's saved subset pre-checks, null (unset) = inherit = all checked.
-  const base = assignableBase(enabled);
+  const base = assignableBase(catalog, enabled).map((m) => ({
+    id: m.id,
+    displayName: m.displayName,
+  }));
   const allUsers = await listUsers();
   const teachers = await Promise.all(
     allUsers
@@ -52,13 +78,15 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "instance");
 
+  const catalog = await fullCatalog();
+
   // ── Per-teacher assignment (P13): intersect, never widens the instance ──────
   if (intent === "teacher") {
     const userId = String(fd.get("userId") ?? "");
     const target = await getUserById(userId);
     if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
     const enabled = await getEnabledModels();
-    const baseIds = assignableBase(enabled).map((m) => m.id);
+    const baseIds = assignableBase(catalog, enabled).map((m) => m.id);
     const selected = [
       ...new Set(
         fd
@@ -74,8 +102,8 @@ export async function action({ request }: Route.ActionArgs) {
     return { saved: true as const };
   }
 
-  // ── Instance allow-list (unchanged) ─────────────────────────────────────────
-  const catalogIds = new Set(selectableCatalog().map((m) => m.id));
+  // ── Instance allow-list: frontier + CLI + discovered local (P14) ────────────
+  const catalogIds = new Set(catalog.map((m) => m.id));
   const selected = fd
     .getAll("models")
     .map(String)
@@ -191,24 +219,44 @@ export default function AdminModels({ loaderData }: Route.ComponentProps) {
         <input type="hidden" name="intent" value="instance" />
         <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <legend className="px-1 text-sm font-semibold text-slate-800">{m.available}</legend>
-          <ul className="mt-2 space-y-2.5">
-            {rows.map((mdl) => (
-              <li key={mdl.id} className="flex items-center gap-2.5">
-                <input
-                  type="checkbox"
-                  id={`model-${mdl.id}`}
-                  name="models"
-                  value={mdl.id}
-                  defaultChecked={mdl.checked}
-                  className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                />
-                <label htmlFor={`model-${mdl.id}`} className="text-sm font-medium text-slate-800">
-                  {mdl.displayName}
-                </label>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-xs text-slate-500">{m.localNote}</p>
+          {(
+            [
+              { group: "frontier", label: m.frontierGroup },
+              { group: "cli", label: m.cliGroup },
+              { group: "local", label: m.localGroup },
+            ] as const
+          ).map(({ group, label }) => {
+            const items = rows.filter((mdl) => mdl.group === group);
+            if (items.length === 0) return null;
+            return (
+              <div key={group} className="mt-4 first:mt-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {label}
+                </p>
+                <ul className="mt-2 space-y-2.5">
+                  {items.map((mdl) => (
+                    <li key={mdl.id} className="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        id={`model-${mdl.id}`}
+                        name="models"
+                        value={mdl.id}
+                        defaultChecked={mdl.checked}
+                        className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                      />
+                      <label
+                        htmlFor={`model-${mdl.id}`}
+                        className="text-sm font-medium text-slate-800"
+                      >
+                        {mdl.displayName}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+          <p className="mt-4 text-xs text-slate-500">{m.localGroupHint}</p>
         </fieldset>
         <Button type="submit" className="mt-4">
           {m.save}

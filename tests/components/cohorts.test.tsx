@@ -29,6 +29,8 @@ const tutors = [
 const modelCatalog = [
   { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6" },
   { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5" },
+  // P14: a teacher may also offer a local/CLI model to a cohort.
+  { id: "claude-code", displayName: "Claude Code (CLI)" },
 ];
 
 const loaderData = {
@@ -105,6 +107,12 @@ describe("Cohort provisioning form", () => {
     expect((within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).checked).toBe(
       true,
     );
+  });
+
+  it("[P14] lists a local/CLI model as a cohort model option", () => {
+    renderForm();
+    const group = screen.getByRole("group", { name: /modellen voor dit cohort/i });
+    expect(within(group).getByLabelText("Claude Code (CLI)")).toBeInTheDocument();
   });
 
   it("pre-checks only the cohort's selected models in manage mode (P13)", () => {

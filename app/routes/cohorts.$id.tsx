@@ -6,7 +6,8 @@ import { requireRole } from "~/server/auth.server";
 import { getEnabledTools, getToolBySlug } from "~/lib/registry";
 import type { Role } from "~/lib/registry/access";
 import { listModels } from "~/lib/ai/models";
-import { getSelectableModelIds } from "~/server/availability.server";
+import { discoverLocalModels } from "~/lib/ai/discover.server";
+import { getSelectableModelIds, narrowLocalModels } from "~/server/availability.server";
 import {
   allowedModelsOf,
   allowedSlugsOf,
@@ -52,10 +53,19 @@ async function assignableCohortModels(user: {
   id: string;
   role: Role;
 }): Promise<{ id: string; displayName: string }[]> {
+  // The teacher's effective catalog (frontier + CLI, narrowed by admin assignment),
+  // plus any locally-discovered model they may still offer (P14: local/CLI are
+  // curatable per-cohort too, no longer a silent free-pass).
   const effective = await getSelectableModelIds(user);
-  return listModels()
-    .filter((m) => m.clientSelectable && !m.local && effective.has(m.id))
+  const staticModels = listModels()
+    .filter((m) => m.clientSelectable && effective.has(m.id))
     .map((m) => ({ id: m.id as string, displayName: m.displayName }));
+  const discovered = (await discoverLocalModels()).map((m) => ({
+    id: m.id,
+    displayName: m.displayName,
+  }));
+  const localModels = await narrowLocalModels(user, discovered);
+  return [...staticModels, ...localModels];
 }
 
 export async function loader({ params, request }: Route.LoaderArgs) {

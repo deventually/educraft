@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
+import { listModels } from "~/lib/ai/models";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -6,6 +7,10 @@ process.env.DATABASE_URL = "file::memory:";
 // The admin is always "admin-1"; every route's requireRole returns them.
 const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
 vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
+
+// Local discovery is env-dependent (Ollama/LM Studio may be running on the host);
+// stub it out so the catalog is a known, hermetic static set (P14).
+vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 type ToolsRoute = typeof import("~/routes/admin.tools");
 type ModelsRoute = typeof import("~/routes/admin.models");
@@ -95,6 +100,16 @@ describe("admin.models action — lockout guard", () => {
     expect(await settings.getEnabledModels()).toEqual(["claude-haiku-4-5"]);
     await settings.setEnabledModels(null); // reset
   });
+
+  it("[P14] persists a list including a local/CLI model", async () => {
+    const res = (await invoke(
+      modelsRoute.action,
+      post({ models: ["claude-haiku-4-5", "claude-code"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await settings.getEnabledModels()).toEqual(["claude-haiku-4-5", "claude-code"]);
+    await settings.setEnabledModels(null); // reset
+  });
 });
 
 describe("admin.models action — per-teacher assignment (P13)", () => {
@@ -114,6 +129,22 @@ describe("admin.models action — per-teacher assignment (P13)", () => {
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
   });
 
+  it("[P14] persists a per-teacher CLI/local subset (narrows within the base)", async () => {
+    await settings.setEnabledModels(null); // base = full selectable catalog incl. CLI
+    const teacher = await users.createUser({
+      name: "CLI Teacher",
+      email: "cliteacher@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      modelsRoute.action,
+      post({ intent: "teacher", userId: teacher.id, models: ["claude-code"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-code"]);
+  });
+
   it("stores null (inherit) when all base models are selected, or none are", async () => {
     await settings.setEnabledModels(null);
     const teacher = await users.createUser({
@@ -122,14 +153,14 @@ describe("admin.models action — per-teacher assignment (P13)", () => {
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
-    // All base models checked → inherit (not a stored full list).
+    // All base models checked → inherit (not a stored full list). Since P14 the base
+    // includes the CLI agents, so "all" means the whole client-selectable catalog.
+    const allBase = listModels()
+      .filter((mdl) => mdl.clientSelectable)
+      .map((mdl) => mdl.id);
     await invoke(
       modelsRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        models: ["claude-sonnet-4-6", "claude-haiku-4-5"],
-      }),
+      post({ intent: "teacher", userId: teacher.id, models: allBase }),
     );
     expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
     // None checked → inherit, never a lockout.
