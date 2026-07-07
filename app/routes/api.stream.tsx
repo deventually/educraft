@@ -179,11 +179,12 @@ export async function action({ request }: Route.ActionArgs) {
       audience,
     });
 
-    // Server-side model allow-list (Phase 4): a caller may only pick a model the
-    // admin has enabled (always ⊆ client-selectable — never Opus-class), or a free
-    // local model. Anything else falls back to the tool/stage default, so a hostile
-    // body can't force an expensive or disabled model on the owner.
-    const selectableModelIds = await getSelectableModelIds();
+    // Server-side model allow-list (Phase 4 + 13): a caller may only pick a model
+    // in THEIR effective set — the instance allow-list, narrowed by the teacher's
+    // assignment or the student's cohort set (intersect) — or a free local model.
+    // Anything else falls back to the tool/stage default, so a hostile body can't
+    // force an expensive, disabled, or un-granted model on the owner.
+    const selectableModelIds = await getSelectableModelIds(user);
     const mayPickModel =
       !!body.model &&
       isResolvableModel(body.model) &&

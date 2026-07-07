@@ -127,7 +127,7 @@ the P12 context axes, which override). Effective selectable **catalog** model id
 - **No new instance axis** beyond the existing `enabledModels`; no student-facing UI beyond the
   already-shown picker (now narrowed).
 
-## Acceptance
+## Acceptance — ✅ shipped 13.1–13.4 (`main`)
 
 `npm test && npm run typecheck && npm run check` green after each sub-phase. Manual repro: admin
 assigns Teacher T only `{Haiku}` → T's picker + cohort editor offer only Haiku; T restricts a cohort

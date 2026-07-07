@@ -66,9 +66,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     displayName: m.displayName,
     supportsImages: m.supportsImages,
   }));
-  // The catalog models a caller may pick, narrowed to the admin's allow-list
-  // (Phase 4). Passed to the pickers so the module-scope catalog no longer wins.
-  const catalogModels = await getSelectableModels();
+  // The catalog models a caller may pick, narrowed to the viewer's effective set
+  // (Phase 4 instance allow-list + Phase 13 per-teacher / per-cohort gates). Passed
+  // to the pickers so the module-scope catalog no longer wins.
+  const catalogModels = await getSelectableModels(viewer);
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
   return {
     tool,

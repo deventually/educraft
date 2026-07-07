@@ -479,6 +479,57 @@ describe("api.stream — model allow-list & budget", () => {
     await settings.setEnabledModels(null); // reset
   });
 
+  it("[P13] a per-teacher assignment blocks a model outside it (falls back to default)", async () => {
+    await settings.setEnabledModels(null); // instance base = full catalog
+    const teacherId = "p13-assigned-teacher";
+    await users.setUserAssignedModels(teacherId, ["claude-sonnet-4-6"]); // haiku not assigned
+    await invoke(
+      { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
+      { userId: teacherId }, // default role teacher
+    );
+    // haiku ∉ the teacher's set → refused → tool default (sonnet), not the forced haiku.
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    await users.setUserAssignedModels(teacherId, null); // reset
+  });
+
+  it("[P13] a cohort's model set blocks a model outside it for its students", async () => {
+    await settings.setEnabledModels(null);
+    const student = "p13-cohort-student";
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "p13-teacher",
+      name: "Sonnet-only cohort",
+      allowedToolSlugs: ["socratic-partner"],
+      allowedModelIds: ["claude-sonnet-4-6"], // haiku excluded
+    });
+    await cohorts.addMembership(cohort.id, student);
+    asUser(student, "student");
+    await invoke({
+      slug: "socratic-partner",
+      values: { chapter: "x" },
+      model: "claude-haiku-4-5",
+    });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+  });
+
+  it("[P13] a free local model is still honoured despite a cohort restriction", async () => {
+    await settings.setEnabledModels(null);
+    const student = "p13-local-student";
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "p13-teacher-2",
+      name: "Sonnet-only, but local is free",
+      allowedToolSlugs: ["socratic-partner"],
+      allowedModelIds: ["claude-sonnet-4-6"],
+    });
+    await cohorts.addMembership(cohort.id, student);
+    asUser(student, "student");
+    await invoke({
+      slug: "socratic-partner",
+      values: { chapter: "x" },
+      model: "claude-code", // local CLI — free, always selectable
+    });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-code");
+  });
+
   it("streams with the tool's configured maxTokens budget", async () => {
     await invoke({ slug: "socratic-partner", values: { chapter: "x" } }, { userId: "budget" });
     expect(streamChatSpy.mock.calls[0][0].maxTokens).toBe(2048); // chat tutor budget
