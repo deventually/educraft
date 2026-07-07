@@ -600,6 +600,9 @@ export const nl = {
     tutorsLegend: "Kies de tutors",
     tutorsHint: "Elke geselecteerde tutor krijgt hieronder zijn eigen instellingen.",
     configFor: "Instellingen voor deze tutor",
+    modelsLegend: "Modellen voor dit cohort",
+    modelsHint:
+      "Kies welke modellen studenten in dit cohort mogen gebruiken. Niets aangevinkt (of alles aangevinkt) = alle modellen die jij mag gebruiken.",
     profileLabel: "Contextprofiel (bepaalt niveau/EQF)",
     profileNone: "Geen",
     contextSourceLegend: "Niveau van het cohort",

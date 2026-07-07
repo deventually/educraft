@@ -4,7 +4,11 @@ import { ArrowLeft, Copy, LineChart } from "lucide-react";
 import type { Route } from "./+types/cohorts.$id";
 import { requireRole } from "~/server/auth.server";
 import { getEnabledTools, getToolBySlug } from "~/lib/registry";
+import type { Role } from "~/lib/registry/access";
+import { listModels } from "~/lib/ai/models";
+import { getSelectableModelIds } from "~/server/availability.server";
 import {
+  allowedModelsOf,
   allowedSlugsOf,
   canManageCohort,
   cohortConfig,
@@ -38,6 +42,22 @@ function studentTutors() {
     .map((tl) => ({ slug: tl.slug, name: tl.name, inputs: tl.inputs }));
 }
 
+/**
+ * The paid (non-local) catalog models the editor may assign to a cohort (P13):
+ * the editor's OWN effective selectable set, minus free local/CLI models (which
+ * students may use regardless). A cohort's model set is ⊆ this, re-capped by the
+ * instance at read time — so a cohort can only ever narrow the teacher's models.
+ */
+async function assignableCohortModels(user: {
+  id: string;
+  role: Role;
+}): Promise<{ id: string; displayName: string }[]> {
+  const effective = await getSelectableModelIds(user);
+  return listModels()
+    .filter((m) => m.clientSelectable && !m.local && effective.has(m.id))
+    .map((m) => ({ id: m.id as string, displayName: m.displayName }));
+}
+
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireRole(request, "teacher", "admin");
   const isNew = params.id === "new";
@@ -51,12 +71,17 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     }
   }
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
+  // Per-cohort model set (P13): the editor's assignable catalog + the cohort's
+  // current selection (null = inherit = all of the editor's models).
+  const modelCatalog = await assignableCohortModels(user);
+  const cohortModels = cohort ? allowedModelsOf(cohort) : null;
   return {
     mode: isNew ? ("new" as const) : ("manage" as const),
     // Deleting a cohort is admin-only (teachers manage but never delete).
     canDelete: !isNew && user.role === "admin",
     tutors: studentTutors(),
     profiles,
+    models: { catalog: modelCatalog, selected: cohortModels ? [...cohortModels] : null },
     cohort: cohort
       ? {
           id: cohort.id,
@@ -109,6 +134,23 @@ export async function action({ params, request }: Route.ActionArgs) {
     config[slug] = { values };
   }
 
+  // Per-cohort model set (P13): keep only ids the editor may actually assign
+  // (their effective, non-local catalog). Empty OR all-selected = inherit (null);
+  // a strict subset narrows. Never widens — re-capped by the instance at read time.
+  const modelCatalogIds = new Set((await assignableCohortModels(user)).map((mdl) => mdl.id));
+  const selectedModels = [
+    ...new Set(
+      fd
+        .getAll("models")
+        .map(String)
+        .filter((id) => modelCatalogIds.has(id)),
+    ),
+  ];
+  const allowedModelIds =
+    selectedModels.length === 0 || selectedModels.length === modelCatalogIds.size
+      ? null
+      : selectedModels;
+
   // Level source (mutually exclusive): a full context profile, a bare EQF number,
   // or none. The cohort profile is injected for members via membership-authorised
   // read (getProfileForMember bypasses owner-scoping), so the teacher may only
@@ -156,6 +198,7 @@ export async function action({ params, request }: Route.ActionArgs) {
       name,
       allowedToolSlugs,
       config,
+      allowedModelIds,
       contextProfileId,
       contextEqf,
       activeUntil,
@@ -190,6 +233,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     name,
     allowedToolSlugs,
     config,
+    allowedModelIds,
     contextProfileId: finalProfileId,
     contextEqf: finalEqf,
     activeUntil,
@@ -207,7 +251,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
-  const { mode, canDelete, tutors, profiles, cohort } = loaderData;
+  const { mode, canDelete, tutors, profiles, cohort, models } = loaderData;
 
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(cohort?.allowedToolSlugs ?? []),
@@ -320,6 +364,34 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
                 ))}
               </div>
             </fieldset>
+
+            {models.catalog.length > 0 && (
+              <fieldset className="space-y-3">
+                <legend className="text-sm font-semibold text-slate-800">
+                  {t.cohorts.modelsLegend}
+                </legend>
+                <HelpText>{t.cohorts.modelsHint}</HelpText>
+                <div className="space-y-2">
+                  {models.catalog.map((mdl) => (
+                    <label
+                      key={mdl.id}
+                      className="flex items-center gap-2.5 text-sm text-slate-800"
+                    >
+                      <input
+                        type="checkbox"
+                        name="models"
+                        value={mdl.id}
+                        defaultChecked={
+                          models.selected === null || models.selected.includes(mdl.id)
+                        }
+                        className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                      />
+                      {mdl.displayName}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
 
             <fieldset className="space-y-3">
               <legend className="text-sm font-semibold text-slate-800">

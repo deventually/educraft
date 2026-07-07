@@ -99,6 +99,46 @@ describe("cohorts.$id action — provisioning", () => {
     expect(owned.some((c) => c.name === "Sneaky cohort")).toBe(false);
   });
 
+  it("persists the cohort's model subset on create, dropping unknown ids (P13)", async () => {
+    const res = (await route.action(
+      args(
+        { id: "new" },
+        formPost(
+          {
+            name: "Model cohort",
+            tools: ["mentorai"],
+            emails: "m@example.com",
+            models: ["claude-haiku-4-5", "totally-bogus"],
+          },
+          "teacher-1",
+        ),
+      ),
+    )) as { cohortId?: string; error?: string };
+    expect(res.error).toBeUndefined();
+    const cohort = await cohorts.getCohort(res.cohortId!);
+    const models = cohorts.allowedModelsOf(cohort!);
+    expect(models?.has("claude-haiku-4-5")).toBe(true);
+    expect(models?.has("totally-bogus")).toBe(false); // not a real model
+    expect(models?.has("claude-sonnet-4-6")).toBe(false); // not selected
+  });
+
+  it("clears the cohort's model set to inherit when none are submitted (P13)", async () => {
+    const created = await cohorts.createCohort({
+      createdByUserId: "teacher-1",
+      name: "Editable models",
+      allowedToolSlugs: ["mentorai"],
+      allowedModelIds: ["claude-haiku-4-5"],
+    });
+    await route.action(
+      args(
+        { id: created.id },
+        formPost({ name: "Editable models", tools: ["mentorai"] }, "teacher-1"),
+      ),
+    );
+    const updated = await cohorts.getCohort(created.id);
+    expect(cohorts.allowedModelsOf(updated!)).toBeNull();
+  });
+
   it("lets an assigned co-teacher manage a cohort they did not create", async () => {
     const cohort = await cohorts.createCohort({
       createdByUserId: "owner-99",

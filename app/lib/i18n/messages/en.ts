@@ -596,6 +596,9 @@ export const en: Messages = {
     tutorsLegend: "Choose the tutors",
     tutorsHint: "Each selected tutor gets its own settings below.",
     configFor: "Settings for this tutor",
+    modelsLegend: "Models for this cohort",
+    modelsHint:
+      "Choose which models students in this cohort may use. Nothing checked (or everything checked) means all the models you may use.",
     profileLabel: "Context profile (sets the level/EQF)",
     profileNone: "None",
     contextSourceLegend: "Cohort level",

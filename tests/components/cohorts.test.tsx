@@ -26,11 +26,17 @@ const tutors = [
   { slug: "peer-tutoring", name: { nl: "Peer Tutoring", en: "Peer Tutoring" }, inputs: [] },
 ];
 
+const modelCatalog = [
+  { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6" },
+  { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5" },
+];
+
 const loaderData = {
   mode: "new" as const,
   tutors,
   profiles: [{ id: "p1", name: "SE jaar 2" }],
   cohort: null,
+  models: { catalog: modelCatalog, selected: null },
 };
 
 /**
@@ -66,6 +72,8 @@ function renderManage(canDelete: boolean, action?: () => unknown) {
         contextEqf: null,
         activeUntil: null,
       },
+      // Manage mode: the cohort is restricted to one model (P13).
+      models: { catalog: modelCatalog, selected: ["claude-haiku-4-5"] },
     },
   } as unknown as ComponentProps<typeof CohortForm>;
   const Stub = createRoutesStub([
@@ -81,9 +89,33 @@ function renderManage(canDelete: boolean, action?: () => unknown) {
 describe("Cohort provisioning form", () => {
   it("renders a tutor checkbox per student tool", () => {
     renderForm();
-    expect(screen.getAllByRole("checkbox")).toHaveLength(tutors.length);
+    // Scope to the tutors fieldset — the model fieldset adds more checkboxes below.
+    const tutorGroup = screen.getByRole("group", { name: /kies de tutors/i });
+    expect(within(tutorGroup).getAllByRole("checkbox")).toHaveLength(tutors.length);
     expect(screen.getByLabelText("MentorAI")).toBeInTheDocument();
     expect(screen.getByLabelText("Socratic Partner")).toBeInTheDocument();
+  });
+
+  it("renders a model checkbox per selectable model, all checked for a new cohort (P13)", () => {
+    renderForm();
+    const group = screen.getByRole("group", { name: /modellen voor dit cohort/i });
+    expect((within(group).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement).checked).toBe(
+      true,
+    );
+    expect((within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).checked).toBe(
+      true,
+    );
+  });
+
+  it("pre-checks only the cohort's selected models in manage mode (P13)", () => {
+    renderManage(false);
+    const group = screen.getByRole("group", { name: /modellen voor dit cohort/i });
+    expect((within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).checked).toBe(
+      true,
+    );
+    expect((within(group).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement).checked).toBe(
+      false,
+    );
   });
 
   it("reveals a tutor's per-tutor config only once it is selected", async () => {
@@ -177,6 +209,7 @@ describe("Cohort provisioning form", () => {
           contextEqf: null,
           activeUntil: null,
         },
+        models: { catalog: modelCatalog, selected: null },
       },
     } as unknown as ComponentProps<typeof CohortForm>;
     const Stub = createRoutesStub([
