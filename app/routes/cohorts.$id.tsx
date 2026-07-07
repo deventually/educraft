@@ -11,15 +11,21 @@ import { getSelectableModelIds, narrowLocalModels } from "~/server/availability.
 import {
   allowedModelsOf,
   allowedSlugsOf,
+  assertManagesMember,
   canManageCohort,
   cohortConfig,
   createCohort,
   deleteCohort,
   getCohort,
   getCohortTeacherIds,
+  listCohortMembersWithStatus,
   updateCohort,
 } from "~/server/repositories/cohorts.server";
-import { createInvitesForCohort } from "~/server/repositories/users.server";
+import {
+  createInvitesForCohort,
+  deleteUserCascade,
+  reactivateUser,
+} from "~/server/repositories/users.server";
 import { getProfile, listProfiles } from "~/server/repositories/profiles.server";
 import { EQF_LEVELS, isEqfLevel } from "~/lib/context/eqf";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
@@ -27,7 +33,7 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { InputField } from "~/lib/registry/types";
-import { Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
+import { Badge, Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export function meta({ matches }: Route.MetaArgs) {
@@ -85,12 +91,23 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   // current selection (null = inherit = all of the editor's models).
   const modelCatalog = await assignableCohortModels(user);
   const cohortModels = cohort ? allowedModelsOf(cohort) : null;
+  // Enrolled students + their account status (Phase 14): the manage screen surfaces
+  // removal requests and offers remove/restore. Empty for a not-yet-created cohort.
+  const members = cohort
+    ? (await listCohortMembersWithStatus(cohort.id)).map((mem) => ({
+        userId: mem.userId,
+        label: mem.name || mem.email || mem.userId.slice(0, 8),
+        removalRequested: mem.deletionRequestedAt !== null,
+        disabled: mem.disabledAt !== null,
+      }))
+    : [];
   return {
     mode: isNew ? ("new" as const) : ("manage" as const),
     // Deleting a cohort is admin-only (teachers manage but never delete).
     canDelete: !isNew && user.role === "admin",
     tutors: studentTutors(),
     profiles,
+    members,
     models: { catalog: modelCatalog, selected: cohortModels ? [...cohortModels] : null },
     cohort: cohort
       ? {
@@ -120,6 +137,18 @@ export async function action({ params, request }: Route.ActionArgs) {
     const existing = await getCohort(params.id);
     if (existing) await deleteCohort(existing.id);
     throw redirect("/cohorts");
+  }
+
+  // Member management on a removal-requested (or any) student (Phase 14): purge or
+  // restore. Guarded so the actor manages the cohort AND the target is a member —
+  // a teacher can never touch an arbitrary account.
+  const memberIntent = fd.get("intent");
+  if (memberIntent === "removeStudent" || memberIntent === "reactivateStudent") {
+    const userId = String(fd.get("userId") ?? "");
+    await assertManagesMember(user, params.id, userId);
+    if (memberIntent === "removeStudent") await deleteUserCascade(userId);
+    else await reactivateUser(userId);
+    return { saved: true as const };
   }
 
   const name = String(fd.get("name") ?? "").trim();
@@ -261,7 +290,7 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
-  const { mode, canDelete, tutors, profiles, cohort, models } = loaderData;
+  const { mode, canDelete, tutors, profiles, cohort, members, models } = loaderData;
 
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(cohort?.allowedToolSlugs ?? []),
@@ -537,6 +566,65 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
             </Button>
           </Form>
         </Card>
+      )}
+
+      {/* Students + account-removal handling (Phase 14). A removal-requested
+          student is disabled and flagged here; the manager restores or purges. */}
+      {mode === "manage" && (
+        <section
+          aria-labelledby="cohort-students"
+          className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="cohort-students" className="font-semibold text-slate-900">
+            {t.cohorts.studentsHeading}
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">{t.cohorts.studentsIntro}</p>
+          {members.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">{t.cohorts.studentsEmpty}</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-slate-100">
+              {members.map((mem) => (
+                <li
+                  key={mem.userId}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                >
+                  <span className="flex items-center gap-2 text-sm text-slate-800">
+                    {mem.label}
+                    {mem.removalRequested ? (
+                      <Badge className="border-amber-200 bg-amber-50 text-amber-800">
+                        {t.cohorts.removalRequested}
+                      </Badge>
+                    ) : mem.disabled ? (
+                      <Badge className="border-slate-200 bg-slate-50 text-slate-600">
+                        {t.cohorts.disabledBadge}
+                      </Badge>
+                    ) : null}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    {mem.disabled && (
+                      <Form method="post">
+                        <input type="hidden" name="intent" value="reactivateStudent" />
+                        <input type="hidden" name="userId" value={mem.userId} />
+                        <Button type="submit" variant="secondary" size="sm" disabled={busy}>
+                          {t.cohorts.restoreAccess}
+                        </Button>
+                      </Form>
+                    )}
+                    <ConfirmDialog
+                      triggerLabel={t.cohorts.removeStudent}
+                      triggerSize="sm"
+                      title={t.cohorts.removeStudentTitle}
+                      description={t.cohorts.removeStudentBody}
+                      confirmLabel={t.cohorts.removeStudentConfirm}
+                      cancelLabel={t.confirm.cancel}
+                      fields={{ intent: "removeStudent", userId: mem.userId }}
+                    />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       )}
 
       {mode === "manage" && canDelete && (

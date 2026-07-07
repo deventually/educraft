@@ -650,6 +650,19 @@ export const nl = {
     deleteBody:
       "Dit cohort en zijn koppelingen worden verwijderd. Dit kan niet ongedaan worden gemaakt.",
     deleteConfirm: "Cohort verwijderen",
+    studentsHeading: "Studenten",
+    studentsIntro:
+      "Ingeschreven studenten. Een student die wil stoppen wordt uitgeschakeld en hier gemarkeerd — herstel hun toegang of verwijder hun account en gegevens definitief.",
+    studentsEmpty: "Nog geen studenten.",
+    removalRequested: "Verwijdering aangevraagd",
+    disabledBadge: "Uitgeschakeld",
+    pendingRemovals: "{count} verwijderverzoek(en)",
+    removeStudent: "Student verwijderen",
+    removeStudentTitle: "Deze student verwijderen?",
+    removeStudentBody:
+      "Dit verwijdert het account, de chatgeschiedenis en het cohortlidmaatschap van de student definitief. Dit kan niet ongedaan worden gemaakt.",
+    removeStudentConfirm: "Verwijderen en wissen",
+    restoreAccess: "Toegang herstellen",
   },
   insight: {
     heading: "Inzicht & voortgang",

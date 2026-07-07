@@ -71,6 +71,14 @@ LimeOnIt is not tied to one model vendor.
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
 - Default model: `claude-sonnet-4-6`.
+- **Availability (P4/P13/P14).** Which models a caller may *pick* is governed by a
+  three-level INTERSECT — instance `enabledModels` → per-teacher `assignedModels` →
+  per-cohort `allowedModelsJson` (each level narrows, never widens; unset = inherit).
+  Since **P14** this also governs local/CLI/discovered models (still free, now
+  curatable — no silent free-pass): `availability.server.ts#isModelSelectableForUser`
+  is a membership walk over the three levels, so it gates a volatile `ollama::…` id
+  without enumerating any local server. Opus-class + `compat::` stay server-only.
+  Students never pick; the gates only bound what admin/teacher may *offer*.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).

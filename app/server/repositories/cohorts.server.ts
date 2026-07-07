@@ -10,12 +10,13 @@
  * row, so they stay synchronous.
  */
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   cohortMemberships,
   cohortTeachers,
   cohorts,
+  users,
   type CohortMembershipRow,
   type CohortRow,
 } from "../schema.server";
@@ -307,4 +308,78 @@ export async function deleteCohort(id: string): Promise<void> {
     tx.delete(cohortTeachers).where(eq(cohortTeachers.cohortId, id)).run();
     tx.delete(cohorts).where(eq(cohorts.id, id)).run();
   });
+}
+
+// ── Member status & account-removal handling (Phase 14) ─────────────────────
+
+/** A cohort member joined with their account status (for the manage screen). */
+export interface MemberWithStatus {
+  userId: string;
+  name: string;
+  email: string | null;
+  disabledAt: Date | null;
+  deletionRequestedAt: Date | null;
+}
+
+/**
+ * The cohort's members with each account's disable/removal-request status (Phase
+ * 14) — the data behind the manage screen's Students section. Not manager-checked
+ * here (the route loader already gates via `canManageCohort`, like
+ * `listCohortMembers`); the mutating actions are guarded by `assertManagesMember`.
+ */
+export async function listCohortMembersWithStatus(cohortId: string): Promise<MemberWithStatus[]> {
+  return getDb()
+    .select({
+      userId: cohortMemberships.userId,
+      name: users.name,
+      email: users.email,
+      disabledAt: users.disabledAt,
+      deletionRequestedAt: users.deletionRequestedAt,
+    })
+    .from(cohortMemberships)
+    .innerJoin(users, eq(users.id, cohortMemberships.userId))
+    .where(eq(cohortMemberships.cohortId, cohortId))
+    .orderBy(cohortMemberships.createdAt)
+    .all();
+}
+
+/** How many of a cohort's members have a pending removal request (the list badge). */
+export async function countPendingRemovals(cohortId: string): Promise<number> {
+  return getDb()
+    .select({ id: cohortMemberships.id })
+    .from(cohortMemberships)
+    .innerJoin(users, eq(users.id, cohortMemberships.userId))
+    .where(and(eq(cohortMemberships.cohortId, cohortId), isNotNull(users.deletionRequestedAt)))
+    .all().length;
+}
+
+/** Drop a single membership link (the account itself is untouched). */
+export async function removeMembership(cohortId: string, userId: string): Promise<void> {
+  getDb()
+    .delete(cohortMemberships)
+    .where(and(eq(cohortMemberships.cohortId, cohortId), eq(cohortMemberships.userId, userId)))
+    .run();
+}
+
+/**
+ * Guard for the member-management actions (Phase 14): the actor must manage the
+ * cohort AND the target must be one of its members — so a teacher can never purge
+ * or reactivate an arbitrary account. Throws a 404 Response (indistinguishable from
+ * a missing cohort/member — no info leak) when either fails.
+ */
+export async function assertManagesMember(
+  actor: { id: string; role: Role },
+  cohortId: string,
+  userId: string,
+): Promise<void> {
+  const cohort = await getCohort(cohortId);
+  if (!cohort || !canManageCohort(actor, cohort, await getCohortTeacherIds(cohortId))) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  const member = getDb()
+    .select({ id: cohortMemberships.id })
+    .from(cohortMemberships)
+    .where(and(eq(cohortMemberships.cohortId, cohortId), eq(cohortMemberships.userId, userId)))
+    .get();
+  if (!member) throw new Response("Not Found", { status: 404 });
 }

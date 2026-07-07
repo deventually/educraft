@@ -38,6 +38,7 @@ const loaderData = {
   tutors,
   profiles: [{ id: "p1", name: "SE jaar 2" }],
   cohort: null,
+  members: [],
   models: { catalog: modelCatalog, selected: null },
 };
 
@@ -58,7 +59,9 @@ function renderForm(action?: () => unknown) {
   return render(<Stub initialEntries={["/cohorts/new"]} />);
 }
 
-function renderManage(canDelete: boolean, action?: () => unknown) {
+type Member = { userId: string; label: string; removalRequested: boolean; disabled: boolean };
+
+function renderManage(canDelete: boolean, action?: () => unknown, members: Member[] = []) {
   const props = {
     loaderData: {
       mode: "manage" as const,
@@ -74,6 +77,7 @@ function renderManage(canDelete: boolean, action?: () => unknown) {
         contextEqf: null,
         activeUntil: null,
       },
+      members,
       // Manage mode: the cohort is restricted to one model (P13).
       models: { catalog: modelCatalog, selected: ["claude-haiku-4-5"] },
     },
@@ -217,6 +221,7 @@ describe("Cohort provisioning form", () => {
           contextEqf: null,
           activeUntil: null,
         },
+        members: [],
         models: { catalog: modelCatalog, selected: null },
       },
     } as unknown as ComponentProps<typeof CohortForm>;
@@ -250,6 +255,42 @@ describe("Cohort provisioning form", () => {
     await user.click(screen.getByLabelText("MentorAI"));
     // The revealed config field is properly labelled.
     within(container).getByLabelText(/Vakgebied|Discipline/i);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Cohort students section (P14)", () => {
+  const members = [
+    { userId: "s1", label: "Active One", removalRequested: false, disabled: false },
+    { userId: "s2", label: "Leaving Two", removalRequested: true, disabled: true },
+  ];
+
+  it("lists members and flags a removal request with a badge + remove/restore actions", () => {
+    renderManage(false, undefined, members);
+    const section = screen.getByRole("region", { name: /studenten|students/i });
+    expect(within(section).getByText("Active One")).toBeInTheDocument();
+    expect(within(section).getByText("Leaving Two")).toBeInTheDocument();
+    expect(
+      within(section).getByText(/verwijdering aangevraagd|removal requested/i),
+    ).toBeInTheDocument();
+    // Every member offers Remove (purge); Restore only appears for a disabled one.
+    expect(
+      within(section).getAllByRole("button", { name: /student verwijderen|remove student/i })
+        .length,
+    ).toBe(members.length);
+    expect(
+      within(section).getByRole("button", { name: /toegang herstellen|restore access/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows an empty state when the cohort has no students yet", () => {
+    renderManage(false, undefined, []);
+    const section = screen.getByRole("region", { name: /studenten|students/i });
+    expect(within(section).getByText(/nog geen studenten|no students yet/i)).toBeInTheDocument();
+  });
+
+  it("has no a11y violations with a flagged student", async () => {
+    const { container } = renderManage(false, undefined, members);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

@@ -1,15 +1,17 @@
 import { Link } from "react-router";
-import { Plus, Users, Wrench } from "lucide-react";
+import { BellRing, Plus, Users, Wrench } from "lucide-react";
 import type { Route } from "./+types/cohorts._index";
 import { requireRole } from "~/server/auth.server";
 import {
   allowedSlugsOf,
   countCohortMembers,
+  countPendingRemovals,
   listCohortsForManager,
 } from "~/server/repositories/cohorts.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
+import { fmt } from "~/lib/i18n/format";
 import { useT, useLocale } from "~/lib/i18n/useT";
-import { Card } from "~/components/ui";
+import { Badge, Card } from "~/components/ui";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
@@ -27,6 +29,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       name: c.name,
       toolCount: allowedSlugsOf(c).size,
       memberCount: await countCohortMembers(c.id),
+      // Pending account-removal requests to flag on the row (Phase 14).
+      pendingRemovals: await countPendingRemovals(c.id),
       activeUntil: c.activeUntil,
     })),
   );
@@ -70,7 +74,15 @@ export default function CohortsIndex({ loaderData }: Route.ComponentProps) {
                   className="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate font-semibold text-slate-900">{r.name}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="block truncate font-semibold text-slate-900">{r.name}</span>
+                      {r.pendingRemovals > 0 && (
+                        <Badge className="border-amber-200 bg-amber-50 text-amber-800">
+                          <BellRing className="mr-1 size-3" aria-hidden />
+                          {fmt(t.cohorts.pendingRemovals, { count: r.pendingRemovals })}
+                        </Badge>
+                      )}
+                    </span>
                     <span className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1">
                         <Wrench className="size-3.5" aria-hidden />

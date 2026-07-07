@@ -4,10 +4,13 @@ import { describe, it, expect, beforeAll } from "vitest";
 process.env.DATABASE_URL = "file::memory:";
 
 type Repo = typeof import("~/server/repositories/cohorts.server");
+type Users = typeof import("~/server/repositories/users.server");
 let repo: Repo;
+let users: Users;
 
 beforeAll(async () => {
   repo = await import("~/server/repositories/cohorts.server");
+  users = await import("~/server/repositories/users.server");
 });
 
 describe("cohorts repository", () => {
@@ -266,5 +269,101 @@ describe("cohorts repository", () => {
     expect(repo.isCohortActive(open)).toBe(true);
     expect(repo.isCohortActive(future)).toBe(true);
     expect(repo.isCohortActive(past)).toBe(false);
+  });
+});
+
+describe("cohort member status + management (P14)", () => {
+  it("lists members with account status and counts pending removals", async () => {
+    const teacher = await users.createUser({
+      name: "Owner Teacher",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    const active = await users.createUser({
+      name: "Active Student",
+      email: "active@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const leaving = await users.createUser({
+      name: "Leaving Student",
+      email: "leaving@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await repo.createCohort({
+      createdByUserId: teacher.id,
+      name: "Status cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.addMembership(cohort.id, active.id);
+    await repo.addMembership(cohort.id, leaving.id);
+    await users.requestAccountDeletion(leaving.id);
+
+    const members = await repo.listCohortMembersWithStatus(cohort.id);
+    expect(members).toHaveLength(2);
+    const leavingRow = members.find((r) => r.userId === leaving.id);
+    expect(leavingRow?.name).toBe("Leaving Student");
+    expect(leavingRow?.email).toBe("leaving@example.com");
+    expect(leavingRow?.deletionRequestedAt).toBeInstanceOf(Date);
+    expect(leavingRow?.disabledAt).toBeInstanceOf(Date);
+    const activeRow = members.find((r) => r.userId === active.id);
+    expect(activeRow?.deletionRequestedAt ?? null).toBeNull();
+
+    expect(await repo.countPendingRemovals(cohort.id)).toBe(1);
+  });
+
+  it("assertManagesMember allows a manager over a member, rejects others (404)", async () => {
+    const teacher = await users.createUser({
+      name: "Manager",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    const student = await users.createUser({
+      name: "Member",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await repo.createCohort({
+      createdByUserId: teacher.id,
+      name: "Guard cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.addMembership(cohort.id, student.id);
+
+    // The owner (and any admin) may act on a member.
+    await expect(
+      repo.assertManagesMember({ id: teacher.id, role: "teacher" }, cohort.id, student.id),
+    ).resolves.toBeUndefined();
+    await expect(
+      repo.assertManagesMember({ id: "some-admin", role: "admin" }, cohort.id, student.id),
+    ).resolves.toBeUndefined();
+    // A stranger teacher may not.
+    await expect(
+      repo.assertManagesMember({ id: "stranger", role: "teacher" }, cohort.id, student.id),
+    ).rejects.toMatchObject({ status: 404 });
+    // Not even the manager, for a non-member target.
+    await expect(
+      repo.assertManagesMember({ id: teacher.id, role: "teacher" }, cohort.id, "ghost"),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("removeMembership drops only the membership link", async () => {
+    const student = await users.createUser({
+      name: "Removed",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await repo.createCohort({
+      createdByUserId: "t-remove",
+      name: "Remove cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await repo.addMembership(cohort.id, student.id);
+    expect(await repo.countCohortMembers(cohort.id)).toBe(1);
+    await repo.removeMembership(cohort.id, student.id);
+    expect(await repo.countCohortMembers(cohort.id)).toBe(0);
+    // The account itself is untouched by removeMembership.
+    expect(await users.getUserById(student.id)).not.toBeNull();
   });
 });

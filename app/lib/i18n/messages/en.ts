@@ -644,6 +644,19 @@ export const en: Messages = {
     deleteTitle: "Delete cohort?",
     deleteBody: "This cohort and its links will be deleted. This cannot be undone.",
     deleteConfirm: "Delete cohort",
+    studentsHeading: "Students",
+    studentsIntro:
+      "Enrolled students. A student who asks to leave is disabled and flagged here — restore their access or permanently remove their account and data.",
+    studentsEmpty: "No students yet.",
+    removalRequested: "Removal requested",
+    disabledBadge: "Disabled",
+    pendingRemovals: "{count} removal request(s)",
+    removeStudent: "Remove student",
+    removeStudentTitle: "Remove this student?",
+    removeStudentBody:
+      "This permanently deletes the student's account, chat history and cohort membership. This cannot be undone.",
+    removeStudentConfirm: "Remove and delete",
+    restoreAccess: "Restore access",
   },
   insight: {
     heading: "Insight & progress",

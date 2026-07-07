@@ -13,14 +13,17 @@ vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async ()
 type Route = typeof import("~/routes/cohorts.$id");
 type Cohorts = typeof import("~/server/repositories/cohorts.server");
 type Profiles = typeof import("~/server/repositories/profiles.server");
+type Users = typeof import("~/server/repositories/users.server");
 let route: Route;
 let cohorts: Cohorts;
 let profiles: Profiles;
+let users: Users;
 
 beforeAll(async () => {
   route = await import("~/routes/cohorts.$id");
   cohorts = await import("~/server/repositories/cohorts.server");
   profiles = await import("~/server/repositories/profiles.server");
+  users = await import("~/server/repositories/users.server");
   requireRoleMock.mockImplementation(async (request: Request) => ({
     id: request.headers.get("x-test-user") ?? "teacher-1",
     name: "Teacher",
@@ -448,5 +451,82 @@ describe("cohorts.$id action — editing an existing cohort", () => {
     expect(res.saved).toBe(true);
     const updated = await cohorts.getCohort(cohort.id);
     expect(updated?.contextProfileId).toBeNull(); // explicit clear honoured
+  });
+});
+
+describe("cohorts.$id action — member removal & restore (P14)", () => {
+  it("removeStudent purges a managed member's account and drops the membership", async () => {
+    const student = await users.createUser({
+      name: "Leaving",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "teacher-1",
+      name: "Remove cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addMembership(cohort.id, student.id);
+    await users.requestAccountDeletion(student.id);
+
+    const res = (await route.action(
+      args(
+        { id: cohort.id },
+        formPost({ intent: "removeStudent", userId: student.id }, "teacher-1"),
+      ),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await users.getUserById(student.id)).toBeNull(); // hard-deleted
+    expect(await cohorts.countCohortMembers(cohort.id)).toBe(0);
+  });
+
+  it("reactivateStudent restores a disabled member's account", async () => {
+    const student = await users.createUser({
+      name: "Restored",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "teacher-1",
+      name: "Restore cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addMembership(cohort.id, student.id);
+    await users.requestAccountDeletion(student.id);
+
+    await route.action(
+      args(
+        { id: cohort.id },
+        formPost({ intent: "reactivateStudent", userId: student.id }, "teacher-1"),
+      ),
+    );
+    const row = await users.getUserById(student.id);
+    expect(row?.disabledAt ?? null).toBeNull();
+    expect(row?.deletionRequestedAt ?? null).toBeNull();
+  });
+
+  it("refuses member actions from a teacher who does not manage the cohort (404)", async () => {
+    const student = await users.createUser({
+      name: "Protected",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "teacher-1",
+      name: "Guarded cohort",
+      allowedToolSlugs: ["mentorai"],
+    });
+    await cohorts.addMembership(cohort.id, student.id);
+
+    await expect(
+      route.action(
+        args(
+          { id: cohort.id },
+          formPost({ intent: "removeStudent", userId: student.id }, "stranger-x"),
+        ),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    // The account survives the refused attempt.
+    expect(await users.getUserById(student.id)).not.toBeNull();
   });
 });

@@ -6,6 +6,7 @@ import {
   addCohortTeacher,
   allowedSlugsOf,
   countCohortMembers,
+  countPendingRemovals,
   deleteCohort,
   getCohortTeacherIds,
   listAllCohorts,
@@ -13,8 +14,9 @@ import {
   setCohortOwner,
 } from "~/server/repositories/cohorts.server";
 import { listUsers } from "~/server/repositories/users.server";
+import { fmt } from "~/lib/i18n/format";
 import { useT, useLocale } from "~/lib/i18n/useT";
-import { Button, Card, Select } from "~/components/ui";
+import { Badge, Button, Card, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -35,6 +37,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         orphaned,
         toolCount: allowedSlugsOf(c).size,
         memberCount: await countCohortMembers(c.id),
+        pendingRemovals: await countPendingRemovals(c.id),
         activeUntil: c.activeUntil,
         teachers: teacherIds.map((id) => ({ id, name: nameById.get(id) ?? id })),
       };
@@ -97,7 +100,14 @@ export default function AdminCohorts({ loaderData }: Route.ComponentProps) {
                 <Card className="p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-slate-900">{c.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold text-slate-900">{c.name}</h3>
+                        {c.pendingRemovals > 0 && (
+                          <Badge className="border-amber-200 bg-amber-50 text-amber-800">
+                            {fmt(t.cohorts.pendingRemovals, { count: c.pendingRemovals })}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-sm text-slate-500">
                         {t.admin.cohorts.colOwner}:{" "}
                         {c.orphaned ? (

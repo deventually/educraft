@@ -50,6 +50,21 @@ UI for this; the script stays for headless ops.
 - `SESSION_SECRET` (min 32 chars) signs the cookie. A dev default keeps local/test
   boots frictionless; **production refuses to boot** with the dev default.
 
+## Account disable & student-initiated removal (P14)
+
+A **disabled** account (`users.disabledAt` set) is a hard logout everywhere: `getUser`
+returns null and `login` refuses it with a specific "account disabled" message (the
+password was already proven, so no user-enumeration leak). It is a *reversible holding
+state*, not a delete.
+
+A **student** cannot hard-delete their own account (a teacher may still need the data).
+On `/account` a student's request calls `requestAccountDeletion` — setting `disabledAt`
++ `deletionRequestedAt` and logging them out. The teacher sees the flagged student on the
+**cohort manage screen** (Students section) and on the cohort-list badge, then either
+**Restores** (`reactivateUser`) or **Removes/purges** (`deleteUserCascade`) the account —
+both guarded by `assertManagesMember` (the actor must manage the cohort *and* the target
+must be a member). Teachers/admins keep the immediate hard delete on their own `/account`.
+
 ## Data scoping
 
 Repositories are the only DB access point, every signature is `async`, and every
