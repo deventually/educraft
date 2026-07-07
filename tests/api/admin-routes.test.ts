@@ -97,6 +97,57 @@ describe("admin.models action — lockout guard", () => {
   });
 });
 
+describe("admin.models action — per-teacher assignment (P13)", () => {
+  it("persists a per-teacher model subset (narrows within the base)", async () => {
+    await settings.setEnabledModels(null); // base = full selectable catalog
+    const teacher = await users.createUser({
+      name: "Model Teacher",
+      email: "modelteacher@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const res = (await invoke(
+      modelsRoute.action,
+      post({ intent: "teacher", userId: teacher.id, models: ["claude-haiku-4-5"] }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+  });
+
+  it("stores null (inherit) when all base models are selected, or none are", async () => {
+    await settings.setEnabledModels(null);
+    const teacher = await users.createUser({
+      name: "Inherit Teacher",
+      email: "inheritteacher@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    // All base models checked → inherit (not a stored full list).
+    await invoke(
+      modelsRoute.action,
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        models: ["claude-sonnet-4-6", "claude-haiku-4-5"],
+      }),
+    );
+    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+    // None checked → inherit, never a lockout.
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    await invoke(modelsRoute.action, post({ intent: "teacher", userId: teacher.id }));
+    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+  });
+
+  it("404s an unknown or non-teacher target", async () => {
+    await expect(
+      invoke(
+        modelsRoute.action,
+        post({ intent: "teacher", userId: "nobody", models: ["claude-haiku-4-5"] }),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});
+
 describe("admin.context action — instance lockout guard", () => {
   it("refuses an empty selection and does not persist", async () => {
     const res = (await invoke(contextRoute.action, post({ intent: "instance" }))) as {

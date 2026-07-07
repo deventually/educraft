@@ -431,6 +431,10 @@ export const en: Messages = {
       atLeastOne: "Pick at least one model — you can't lock everyone out.",
       save: "Save",
       localNote: "Local models (Ollama, CLI) are free and always selectable.",
+      teacherLegend: "Models per teacher",
+      teacherIntro:
+        "Optionally restrict which models a teacher may use and assign to cohorts. Nothing checked (or everything checked) means the teacher inherits the instance.",
+      teacherNone: "No teachers yet.",
     },
     context: {
       heading: "Teaching context",

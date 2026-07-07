@@ -434,6 +434,10 @@ export const nl = {
       atLeastOne: "Kies minstens één model — je kunt niet iedereen buitensluiten.",
       save: "Opslaan",
       localNote: "Lokale modellen (Ollama, CLI) zijn gratis en altijd selecteerbaar.",
+      teacherLegend: "Modellen per docent",
+      teacherIntro:
+        "Beperk optioneel welke modellen een docent mag gebruiken en aan cohorten mag toewijzen. Niets aangevinkt (of alles aangevinkt) betekent dat de docent de instantie erft.",
+      teacherNone: "Nog geen docenten.",
     },
     context: {
       heading: "Onderwijscontext",
