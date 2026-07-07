@@ -28,8 +28,20 @@ import { loc } from "~/lib/i18n/localized";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 
-export async function loader({ request }: Route.LoaderArgs) {
+/**
+ * The teaching-context editor is a teacher/admin surface. A student's level is
+ * injected server-side from their cohort profile (see P6), so a student neither
+ * authors nor views a context of their own — they get a 403, not a 404, because
+ * the surface is not secret, just off-limits to their role.
+ */
+async function requireContextEditor(request: Request) {
   const user = await requireUser(request);
+  if (user.role === "student") throw new Response("Forbidden", { status: 403 });
+  return user;
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await requireContextEditor(request);
   const [profiles, def, availableCountries, availableSectors, availableDomains] = await Promise.all(
     [
       listProfiles(user.id),
@@ -52,7 +64,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const user = await requireUser(request);
+  const user = await requireContextEditor(request);
   const fd = await request.formData();
   const intent = fd.get("intent");
 

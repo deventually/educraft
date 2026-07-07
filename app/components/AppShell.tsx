@@ -52,7 +52,11 @@ export default function AppShell() {
       ? [{ to: "/cohorts", label: t.nav.cohorts, end: false }]
       : []),
     { to: "/help", label: t.nav.help, end: false },
-    { to: "/context-profiles", label: t.nav.settings, end: false },
+    // Teaching context is a teacher/admin surface — a signed-in student's level
+    // comes from their cohort profile, so they never author (or see) one.
+    ...(!user || user.role !== "student"
+      ? [{ to: "/context-profiles", label: t.nav.settings, end: false }]
+      : []),
     { to: "/about", label: t.nav.about, end: false },
   ];
 
@@ -159,24 +163,26 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        {!isChatRoute && <SiteFooter t={t} />}
+        {!isChatRoute && <SiteFooter t={t} user={user} />}
       </div>
     </div>
   );
 }
 
-function SiteFooter({ t }: { t: Messages }) {
+function SiteFooter({ t, user }: { t: Messages; user: { role: string } | null }) {
   // A real website footer: brand + site map columns on a deep evergreen field
   // (one step darker than the brand button green). The book attribution lives in
   // the bottom bar to satisfy CC BY — the prominent link back to the book now
   // sits in each tool's "Rationale & source" panel.
+  const isStudent = user?.role === "student";
   const columns = [
     {
       heading: t.footer.product,
       links: [
         { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
-        { to: "/context-profiles", label: t.nav.settings },
+        // Teaching context is teacher/admin-only (see the top nav) — never a student.
+        ...(isStudent ? [] : [{ to: "/context-profiles", label: t.nav.settings }]),
       ],
     },
     {

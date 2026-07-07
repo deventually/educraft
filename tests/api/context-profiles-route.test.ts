@@ -66,6 +66,32 @@ function req(fields: Record<string, string>): Request {
 const loaderArgs = () => ({ request: new Request("http://localhost/context-profiles") }) as never;
 const actionArgs = (request: Request) => ({ request }) as never;
 
+const student = {
+  id: "student-1",
+  name: "Havo Student",
+  email: null,
+  role: "student" as const,
+  createdAt: new Date(0),
+};
+
+describe("context-profiles — students may not create a teaching context", () => {
+  it("forbids a student from loading the editor (403)", async () => {
+    // The teaching-context editor is a teacher/admin surface: a student's level
+    // comes from their cohort profile, never a self-authored context.
+    requireUserMock.mockResolvedValueOnce(student);
+    await expect(route.loader(loaderArgs())).rejects.toMatchObject({ status: 403 });
+  });
+
+  it("forbids a student from creating a teaching context (403), no write attempted", async () => {
+    createProfileMock.mockClear();
+    requireUserMock.mockResolvedValueOnce(student);
+    await expect(
+      route.action(actionArgs(req({ intent: "create", name: "X", country: "NL", sector: "hbo" }))),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(createProfileMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("context-profiles loader — availability", () => {
   it("passes the available country + sector sets to the editor", async () => {
     const data = (await route.loader(loaderArgs())) as {
