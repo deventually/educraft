@@ -553,6 +553,38 @@ describe("api.stream — model allow-list & budget", () => {
     await invoke({ slug: "socratic-partner", values: { chapter: "x" } }, { userId: "budget" });
     expect(streamChatSpy.mock.calls[0][0].maxTokens).toBe(2048); // chat tutor budget
   });
+
+  it("[bugfix] a cohort allowing ONLY a local model serves it, never the disabled tool default", async () => {
+    await settings.setEnabledModels(null); // uncurated instance → local model is free
+    const student = "local-only-cohort-student";
+    const cohort = await cohorts.createCohort({
+      createdByUserId: "local-only-cohort-teacher",
+      name: "Ollama-only cohort",
+      allowedToolSlugs: ["socratic-partner"],
+      allowedModelIds: ["ollama::qwen3.6:27b-coding-nvfp4"], // Sonnet NOT allowed
+    });
+    await cohorts.addMembership(cohort.id, student);
+    asUser(student, "student");
+
+    // The student explicitly picks the cohort's only model → used verbatim.
+    await invoke({
+      slug: "socratic-partner",
+      values: { chapter: "x" },
+      model: "ollama::qwen3.6:27b-coding-nvfp4",
+    });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+
+    // The reported bug: a stale client sends the (disabled) tool default. The
+    // server must NOT serve it — it substitutes the cohort's only allowed model.
+    streamChatSpy.mockClear();
+    await invoke({
+      slug: "socratic-partner",
+      values: { chapter: "x" },
+      model: "claude-sonnet-4-6", // disabled for this cohort
+    });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    expect(streamChatSpy.mock.calls[0][0].model).not.toBe("claude-sonnet-4-6");
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════

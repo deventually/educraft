@@ -240,3 +240,65 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
     await settings.setEnabledModels(null); // reset
   });
 });
+
+// A cohort (or teacher) whose ONLY allowed model is a discovered local one
+// ("ollama::…"). Such an id is never in the static catalog, so the catalog
+// INTERSECT collapses to empty — but the caller is NOT locked out (the model
+// rides `narrowLocalModels`). The old lockout guard mistook this for a misconfig
+// and re-offered DEFAULT_MODEL (a disabled frontier default). These pin the fix.
+describe("model gates — a local-only allow-list is not a lockout (bugfix)", () => {
+  const LOCAL = "ollama::qwen3.6:27b-coding-nvfp4";
+
+  async function localOnlyStudent(id: string) {
+    const student = { id, role: "student" as const };
+    const cohort = await cohorts.createCohort({
+      createdByUserId: `${id}-teacher`,
+      name: "Ollama-only cohort",
+      allowedToolSlugs: ["mentorai"],
+      allowedModelIds: [LOCAL], // Sonnet & the rest of the catalog excluded
+    });
+    await cohorts.addMembership(cohort.id, student.id);
+    return student;
+  }
+
+  it("getSelectableModelIds returns an empty CATALOG set — never DEFAULT_MODEL — and does not warn", async () => {
+    logMock.mockClear();
+    const student = await localOnlyStudent("local-only-catalog");
+    const ids = await availability.getSelectableModelIds(student);
+    // The catalog half is legitimately empty; the local model rides narrowLocalModels.
+    expect([...ids]).toEqual([]);
+    expect(ids.has("claude-sonnet-4-6")).toBe(false);
+    // Not a lockout → the availability warning must NOT fire.
+    expect(logMock).not.toHaveBeenCalled();
+  });
+
+  it("still rescues a GENUINE lockout (an allow-list of only unknown catalog ids) with DEFAULT_MODEL", async () => {
+    logMock.mockClear();
+    await users.setUserAssignedModels("bug-genuine-teacher", ["nonexistent-model-xyz"]);
+    const ids = await availability.getSelectableModelIds({
+      id: "bug-genuine-teacher",
+      role: "teacher",
+    });
+    expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
+    expect(logMock).toHaveBeenCalled();
+    await users.setUserAssignedModels("bug-genuine-teacher", null); // reset
+  });
+
+  it("effectiveDefaultModel keeps the preferred default for an unrestricted caller", async () => {
+    expect(await availability.effectiveDefaultModel(admin, "claude-sonnet-4-6")).toBe(
+      "claude-sonnet-4-6",
+    );
+    expect(
+      await availability.effectiveDefaultModel(
+        { id: "edm-free-student", role: "student" },
+        "claude-sonnet-4-6",
+      ),
+    ).toBe("claude-sonnet-4-6");
+  });
+
+  it("effectiveDefaultModel substitutes the cohort's local model when the preferred default is disabled", async () => {
+    const student = await localOnlyStudent("edm-local-only");
+    // Sonnet is not in the cohort's set → the fallback must be the cohort's model.
+    expect(await availability.effectiveDefaultModel(student, "claude-sonnet-4-6")).toBe(LOCAL);
+  });
+});

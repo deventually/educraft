@@ -255,3 +255,21 @@ export function pickableModels(
   // (undefined) flag is treated as non-vision, not waved through.
   return requiresImages ? all.filter((m) => m.supportsImages === true) : all;
 }
+
+/**
+ * The model a picker should pre-select: an explicit choice if it is offered, else
+ * the tool's default if offered, else the first offered model. Keeps the initial
+ * selection INSIDE the offered set, so a cohort that offers only a local model
+ * never pre-selects (and then sends) the tool's frontier default the cohort
+ * disabled. Falls back to `toolDefault` only when nothing is offered at all.
+ */
+export function initialPickerModel(
+  options: PickerModel[],
+  toolDefault: string,
+  explicit?: string,
+): string {
+  const has = (id: string | undefined): id is string => !!id && options.some((m) => m.id === id);
+  if (has(explicit)) return explicit;
+  if (has(toolDefault)) return toolDefault;
+  return options[0]?.id ?? toolDefault;
+}

@@ -135,14 +135,61 @@ function narrowModels(ids: Set<string>, restriction: Set<string> | null): Set<st
  * no configuration may lock a user out of generation entirely.
  */
 export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
-  let ids = await selectableCatalogIds();
-  if (user?.role === "teacher") ids = narrowModels(ids, await getUserAssignedModels(user.id));
-  else if (user?.role === "student") ids = narrowModels(ids, await getAllowedModelIds(user.id));
-  if (ids.size === 0) {
+  const base = await selectableCatalogIds();
+  const restriction = await userModelRestriction(user);
+  const ids = narrowModels(base, restriction);
+  if (ids.size === 0 && !restrictionGrantsUsableModel(restriction)) {
+    // A genuine lockout: the intersection is empty AND the caller's restriction
+    // grants no usable model at all (unset, or only stale/unknown catalog ids).
+    // Rescue with the default so no configuration locks a user out of generation.
+    // NOT a lockout — and so NOT rescued — is a restriction that lists a
+    // resolvable local/CLI model (e.g. a cohort set to only "ollama::…"): that
+    // model rides `narrowLocalModels`/`isModelSelectableForUser`, so the catalog
+    // half is legitimately empty. Injecting DEFAULT_MODEL there would re-offer a
+    // frontier default the teacher/admin explicitly excluded (the P14 bug).
     log("availability_no_selectable_models", { fallback: DEFAULT_MODEL });
     return new Set([DEFAULT_MODEL]);
   }
   return ids;
+}
+
+/** The per-teacher/cohort model restriction for a caller (null = no restriction). */
+async function userModelRestriction(user?: AvailabilityUser): Promise<Set<string> | null> {
+  if (user?.role === "teacher") return getUserAssignedModels(user.id);
+  if (user?.role === "student") return getAllowedModelIds(user.id);
+  return null;
+}
+
+/** Whether a restriction lists at least one resolvable, client-selectable model. */
+function restrictionGrantsUsableModel(restriction: Set<string> | null): boolean {
+  if (!restriction || restriction.size === 0) return false;
+  return [...restriction].some(
+    (id) => isResolvableModel(id) && resolveModelInfo(id).clientSelectable,
+  );
+}
+
+/**
+ * The model to serve when a request doesn't force a selectable one (Phase 14
+ * bugfix). `preferred` is the intended fallback (a tool's `defaultModel`); this
+ * returns it only when the caller may actually use it — otherwise it substitutes
+ * a model the caller IS allowed, so a disabled/un-granted frontier default can
+ * never leak past the cohort/teacher gate. Order: the preferred default, then the
+ * caller's own allow-list (this is where a local-only cohort's model comes from),
+ * then any catalog model, then `DEFAULT_MODEL` as a last resort.
+ */
+export async function effectiveDefaultModel(
+  user: AvailabilityUser,
+  preferred: string,
+): Promise<string> {
+  if (await isModelSelectableForUser(user, preferred)) return preferred;
+  const restriction = await userModelRestriction(user);
+  if (restriction) {
+    for (const id of restriction) {
+      if (await isModelSelectableForUser(user, id)) return id;
+    }
+  }
+  for (const id of await getSelectableModelIds(user)) return id;
+  return DEFAULT_MODEL;
 }
 
 /**

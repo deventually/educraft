@@ -9,6 +9,7 @@ import {
   isResolvableModel,
   isClientSelectable,
   pickableModels,
+  initialPickerModel,
 } from "~/lib/ai/models";
 import { providerForModel } from "~/lib/ai/provider";
 
@@ -90,6 +91,37 @@ describe("pickableModels (the picker list shared by every screen)", () => {
     ];
     const ids = pickableModels(visionLocal, true).map((m) => m.id);
     expect(ids).toContain("ollama::llava");
+  });
+});
+
+describe("initialPickerModel (pre-selection stays inside the offered set)", () => {
+  const localOnly = [{ id: "ollama::qwen3.6:27b-coding-nvfp4", displayName: "Ollama · qwen" }];
+  const withDefault = [{ id: "claude-sonnet-4-6", displayName: "Sonnet" }, ...localOnly];
+
+  it("keeps the tool default when it is actually offered", () => {
+    expect(initialPickerModel(withDefault, "claude-sonnet-4-6")).toBe("claude-sonnet-4-6");
+  });
+
+  it("falls back to the first offered model when the tool default is NOT offered", () => {
+    // The bug: a cohort allowing only a local model must not pre-select the
+    // (disabled) frontier default — it must land on the offered local model.
+    expect(initialPickerModel(localOnly, "claude-sonnet-4-6")).toBe(
+      "ollama::qwen3.6:27b-coding-nvfp4",
+    );
+  });
+
+  it("honours an explicit choice when offered, otherwise ignores it", () => {
+    expect(
+      initialPickerModel(localOnly, "claude-sonnet-4-6", "ollama::qwen3.6:27b-coding-nvfp4"),
+    ).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    // An explicit choice not in the offered set is discarded for the first offered.
+    expect(initialPickerModel(localOnly, "claude-sonnet-4-6", "not-offered")).toBe(
+      "ollama::qwen3.6:27b-coding-nvfp4",
+    );
+  });
+
+  it("degrades to the tool default when nothing is offered", () => {
+    expect(initialPickerModel([], "claude-sonnet-4-6")).toBe("claude-sonnet-4-6");
   });
 });
 

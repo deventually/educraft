@@ -12,7 +12,11 @@ import {
   isCohortActive,
 } from "~/server/repositories/cohorts.server";
 import { isEqfLevel } from "~/lib/context/eqf";
-import { isModelSelectableForUser, isToolAvailable } from "~/server/availability.server";
+import {
+  effectiveDefaultModel,
+  isModelSelectableForUser,
+  isToolAvailable,
+} from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { recordChatTurn } from "~/server/repositories/chat.server";
 import { getUser } from "~/server/auth.server";
@@ -187,7 +191,13 @@ export async function action({ request }: Route.ActionArgs) {
     // default, so a hostile body can't force an expensive, disabled, or un-granted
     // model on the owner.
     const mayPickModel = !!body.model && (await isModelSelectableForUser(user, body.model));
-    const model = mayPickModel ? (body.model as string) : (stage.model ?? tool.defaultModel);
+    // A stage may pin a specific model (infra), respected as-is; otherwise the
+    // soft default (tool.defaultModel) is resolved to a model THIS caller may
+    // actually use — so a disabled/un-granted default can't leak past the
+    // cohort/teacher gate when the requested model is refused (Phase 14 bugfix).
+    const model = mayPickModel
+      ? (body.model as string)
+      : (stage.model ?? (await effectiveDefaultModel(user, tool.defaultModel)));
     const provider = providerForModel(model);
 
     // Vision gate. The image array is already shape/size/count-validated by the

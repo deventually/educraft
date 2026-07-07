@@ -5,6 +5,7 @@ import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { useSandbox } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
+import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
 import { Badge, Button } from "./ui";
@@ -45,7 +46,11 @@ export function StageStepper({
     defaultProfileId,
   });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
-  const [model, setModel] = useState(tool.defaultModel);
+  // Pre-select an OFFERED model, not blindly the tool default: a cohort that
+  // offers only a local model must not start on the frontier default it disabled.
+  const [model, setModel] = useState(() =>
+    initialPickerModel(pickableModels(localModels ?? [], false, catalogModels), tool.defaultModel),
+  );
   const [stages, setStages] = useState<Record<string, StageState>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const abortRefs = useRef<Record<string, AbortController>>({});

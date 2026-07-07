@@ -8,7 +8,7 @@ import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import { Button, Label, Select } from "./ui";
-import { pickableModels, type PickerModel } from "~/lib/ai/models";
+import { initialPickerModel, pickableModels, type PickerModel } from "~/lib/ai/models";
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
@@ -71,7 +71,15 @@ export function ChatView({
   // End-of-session self-report + summariser trigger (Phase 7). `ending` reveals
   // the helpfulness control (which shows its own post-rating confirmation).
   const [ending, setEnding] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(defaultModel || tool.defaultModel);
+  // Every screen offers the same models: API-key catalog + local CLI agents +
+  // any Ollama / LM Studio models discovered at runtime.
+  const modelOptions = pickableModels(localModels ?? [], false, catalogModels);
+  // Pre-select an OFFERED model (not blindly the tool default): a cohort that
+  // offers only a local model must not start on — and then send — the frontier
+  // default it disabled.
+  const [selectedModel, setSelectedModel] = useState(() =>
+    initialPickerModel(modelOptions, tool.defaultModel, defaultModel),
+  );
   // The conversation defaults to the interface language: a Dutch UI opens a
   // Dutch chat, an English UI an English one. An explicit prop still wins.
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
@@ -86,9 +94,6 @@ export function ChatView({
 
   const greeting = tool.chat?.greeting;
   const starters = tool.chat?.starters;
-  // Every screen offers the same models: API-key catalog + local CLI agents +
-  // any Ollama / LM Studio models discovered at runtime.
-  const modelOptions = pickableModels(localModels ?? [], false, catalogModels);
 
   // Keep the latest output in view whenever a turn is added or streamed into.
   // Scrolling an end anchor into view follows whichever element actually

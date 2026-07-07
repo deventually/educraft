@@ -234,6 +234,41 @@ describe("ChatView", () => {
     expect(body.outputLanguage).toBe("nl");
   });
 
+  it("[bugfix] sends an offered model, not the tool default, when the default isn't offered", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("ok");
+      onDone?.("ok");
+    });
+
+    const user = userEvent.setup();
+    // Simulate a local-only cohort: the loader offers only the local model, so
+    // the tool's frontier default (Sonnet) is not selectable for this student.
+    render(
+      <ChatView
+        tool={mockTool} // defaultModel: "claude-sonnet-4-6"
+        onGenerationStart={() => {}}
+        catalogModels={[]}
+        localModels={[{ id: "ollama::qwen3.6:27b-coding-nvfp4", displayName: "Ollama · qwen" }]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    // The picker pre-selects the only offered model, never the disabled default.
+    const select = screen.getByLabelText("Model") as HTMLSelectElement;
+    expect(select.value).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+
+    // And the model actually sent is the offered one, not the tool default.
+    await user.type(screen.getByPlaceholderText("Your message…"), "Hello");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+    const body = mockStreamPost.mock.calls.at(-1)?.[1] as { model: string };
+    expect(body.model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    expect(body.model).not.toBe("claude-sonnet-4-6");
+  });
+
   it("re-renders greeting and starters in the selected output language at once", async () => {
     const user = userEvent.setup();
     // mockTool defaults to English output, so the welcome view starts English.

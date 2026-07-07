@@ -7,6 +7,7 @@ import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
 import { useSandbox } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
+import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
@@ -41,14 +42,20 @@ export function GeneratorView({
     defaultProfileId,
   });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
-  const [model, setModel] = useState(tool.defaultModel);
+  // Check if tool has image inputs (a vision tool narrows the offered models).
+  const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
+  // Pre-select an OFFERED model, not blindly the tool default: a cohort that
+  // offers only a local model must not start on the frontier default it disabled.
+  const [model, setModel] = useState(() =>
+    initialPickerModel(
+      pickableModels(localModels ?? [], hasImageInputs, catalogModels),
+      tool.defaultModel,
+    ),
+  );
   const [output, setOutput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-
-  // Check if tool has image inputs
-  const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
 
   async function generate() {
     const missing = missingRequired(tool.inputs, values);
