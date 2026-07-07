@@ -50,6 +50,8 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
       input.allowedToolSlugs && input.allowedToolSlugs.length > 0
         ? JSON.stringify(input.allowedToolSlugs)
         : null,
+    disabledAt: null,
+    deletionRequestedAt: null,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -78,6 +80,31 @@ export async function updateUserEmail(id: string, email: string | null): Promise
 /** Overwrite a user's password hash (self-service change or reset-link redemption). */
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
   getDb().update(users).set({ passwordHash }).where(eq(users.id, id)).run();
+}
+
+/**
+ * Disable an account on a student-initiated removal request (Phase 14). A reversible
+ * holding state — not a delete: `disabledAt` blocks login everywhere, and
+ * `deletionRequestedAt` surfaces the pending request to the teacher on the cohort
+ * screen. The teacher (or an admin) then purges (`deleteUserCascade`) or restores
+ * (`reactivateUser`) the account.
+ */
+export async function requestAccountDeletion(id: string): Promise<void> {
+  const now = new Date();
+  getDb()
+    .update(users)
+    .set({ disabledAt: now, deletionRequestedAt: now })
+    .where(eq(users.id, id))
+    .run();
+}
+
+/** Re-enable a disabled account and clear any pending removal request (Phase 14). */
+export async function reactivateUser(id: string): Promise<void> {
+  getDb()
+    .update(users)
+    .set({ disabledAt: null, deletionRequestedAt: null })
+    .where(eq(users.id, id))
+    .run();
 }
 
 /**

@@ -109,6 +109,28 @@ describe("users repository", () => {
     expect(await repo.getUserContextCustomAccess("ca-t")).toBe(false);
   });
 
+  it("disables + flags an account on removal request and reactivates it (P14)", async () => {
+    const u = await repo.createUser({
+      name: "Leaving Student",
+      passwordHash: "scrypt:x:y",
+      role: "student",
+    });
+    // Fresh accounts are active.
+    const fresh = await repo.getUserById(u.id);
+    expect(fresh?.disabledAt ?? null).toBeNull();
+    expect(fresh?.deletionRequestedAt ?? null).toBeNull();
+
+    await repo.requestAccountDeletion(u.id);
+    const disabled = await repo.getUserById(u.id);
+    expect(disabled?.disabledAt).toBeInstanceOf(Date);
+    expect(disabled?.deletionRequestedAt).toBeInstanceOf(Date);
+
+    await repo.reactivateUser(u.id);
+    const active = await repo.getUserById(u.id);
+    expect(active?.disabledAt ?? null).toBeNull();
+    expect(active?.deletionRequestedAt ?? null).toBeNull();
+  });
+
   it("allows a nameless (email-less) invite-based account", async () => {
     const created = await repo.createUser({
       name: "Anon",

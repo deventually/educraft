@@ -7,6 +7,7 @@ import {
   deleteUserCascade,
   getUserById,
   getUserByEmail,
+  requestAccountDeletion,
   updateUserEmail,
   updateUserPassword,
 } from "~/server/repositories/users.server";
@@ -73,8 +74,15 @@ export async function action({ request }: Route.ActionArgs) {
   if (confirm !== m.account.confirmWord) {
     return { error: m.account.mismatch };
   }
-  await deleteUserCascade(user.id);
-  // Destroy the session and land on /login — the account no longer exists.
+  // A student may not destroy data a teacher might still need (Phase 14): the
+  // request disables the account (reversible holding state) and notifies the
+  // teacher, who then purges or restores it. Teachers/admins keep the hard delete.
+  if (user.role === "student") {
+    await requestAccountDeletion(user.id);
+  } else {
+    await deleteUserCascade(user.id);
+  }
+  // Destroy the session and land on /login — the account is gone or disabled.
   return logout(request);
 }
 
@@ -209,35 +217,45 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         </p>
       )}
 
-      <section
-        aria-labelledby="account-danger"
-        className="mt-8 rounded-2xl border border-red-200 bg-red-50/50 p-6"
-      >
-        <h2 id="account-danger" className="flex items-center gap-2 font-semibold text-red-800">
-          <AlertTriangle className="size-5 shrink-0" aria-hidden />
-          {t.account.dangerHeading}
-        </h2>
-        <p className="mt-2 text-sm text-red-700">{t.account.dangerIntro}</p>
+      {/* A student may only *request* removal (Phase 14): it disables the account
+          and notifies their teacher, who purges or restores it. Teachers/admins
+          keep the immediate hard delete. */}
+      {(() => {
+        const isStudent = user.role === "student";
+        return (
+          <section
+            aria-labelledby="account-danger"
+            className="mt-8 rounded-2xl border border-red-200 bg-red-50/50 p-6"
+          >
+            <h2 id="account-danger" className="flex items-center gap-2 font-semibold text-red-800">
+              <AlertTriangle className="size-5 shrink-0" aria-hidden />
+              {isStudent ? t.account.requestHeading : t.account.dangerHeading}
+            </h2>
+            <p className="mt-2 text-sm text-red-700">
+              {isStudent ? t.account.requestIntro : t.account.dangerIntro}
+            </p>
 
-        <Form method="post" className="mt-4 space-y-3">
-          <input type="hidden" name="intent" value="delete" />
-          <div>
-            <Label htmlFor="confirm">
-              {fmt(t.account.confirmLabel, { word: t.account.confirmWord })}
-            </Label>
-            <Input
-              id="confirm"
-              name="confirm"
-              autoComplete="off"
-              className="mt-1 max-w-xs"
-              placeholder={t.account.confirmWord}
-            />
-          </div>
-          <Button type="submit" variant="danger" disabled={busy}>
-            {t.account.deleteButton}
-          </Button>
-        </Form>
-      </section>
+            <Form method="post" className="mt-4 space-y-3">
+              <input type="hidden" name="intent" value="delete" />
+              <div>
+                <Label htmlFor="confirm">
+                  {fmt(t.account.confirmLabel, { word: t.account.confirmWord })}
+                </Label>
+                <Input
+                  id="confirm"
+                  name="confirm"
+                  autoComplete="off"
+                  className="mt-1 max-w-xs"
+                  placeholder={t.account.confirmWord}
+                />
+              </div>
+              <Button type="submit" variant="danger" disabled={busy}>
+                {isStudent ? t.account.requestButton : t.account.deleteButton}
+              </Button>
+            </Form>
+          </section>
+        );
+      })()}
     </div>
   );
 }

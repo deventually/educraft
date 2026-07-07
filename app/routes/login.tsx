@@ -40,6 +40,10 @@ export async function action({ request }: Route.ActionArgs) {
   if (!row || !verifyPassword(parsed.data.password, row.passwordHash)) {
     return { error: m.auth.loginFailed };
   }
+  // A disabled account (Phase 14) proved its password but may not enter. A specific
+  // message (not the generic loginFailed) is safe here — the credentials were
+  // correct, so there is no user-enumeration leak — and it points them at recovery.
+  if (row.disabledAt) return { error: m.auth.accountDisabled };
   return createUserSession(row.id, "/");
 }
 

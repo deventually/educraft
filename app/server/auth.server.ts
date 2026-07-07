@@ -34,6 +34,9 @@ export async function getUser(request: Request): Promise<User | null> {
   if (!userId || typeof userId !== "string") return null;
   const row = await getUserById(userId);
   if (!row) return null;
+  // Disabled account (Phase 14): a student-requested removal (or an admin disable)
+  // is a hard logout everywhere until a teacher/admin restores or purges it.
+  if (row.disabledAt) return null;
   // Single active session (Phase 6): a cookie whose sessionVersion is behind the
   // stored one was invalidated by a newer login → treat as logged out.
   const cookieVersion = session.get("sessionVersion") ?? 0;

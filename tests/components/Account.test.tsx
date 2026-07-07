@@ -7,9 +7,12 @@ import Account from "~/routes/account";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-function renderAccount(email: string | null = "teacher@example.com") {
+function renderAccount(
+  email: string | null = "teacher@example.com",
+  role: "teacher" | "student" | "admin" = "teacher",
+) {
   const props = {
-    loaderData: { user: { name: "Teacher T", email, role: "teacher" as const } },
+    loaderData: { user: { name: "Teacher T", email, role } },
   } as unknown as ComponentProps<typeof Account>;
   const Stub = createRoutesStub([
     { path: "/account", Component: () => <Account {...props} />, action: () => null },
@@ -35,15 +38,27 @@ describe("Account page", () => {
     ).toBeInTheDocument();
   });
 
-  it("still offers the type-to-confirm account deletion", () => {
+  it("still offers a teacher the type-to-confirm account deletion", () => {
     renderAccount();
     expect(
       screen.getByRole("button", { name: /verwijder mijn account|delete my account/i }),
     ).toBeInTheDocument();
   });
 
-  it("has no a11y violations", async () => {
-    const { container } = renderAccount();
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  it("[P14] a student sees the request-removal variant, not a hard delete", () => {
+    renderAccount("student@example.com", "student");
+    expect(
+      screen.getByRole("button", { name: /vraag verwijdering|request removal/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /verwijder mijn account|delete my account/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("has no a11y violations (teacher and student variants)", async () => {
+    const teacher = renderAccount();
+    expect((await axe(teacher.container, axeOpts)).violations).toEqual([]);
+    const student = renderAccount("student@example.com", "student");
+    expect((await axe(student.container, axeOpts)).violations).toEqual([]);
   });
 });

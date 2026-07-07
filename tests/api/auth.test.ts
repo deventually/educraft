@@ -5,12 +5,24 @@ process.env.DATABASE_URL = "file::memory:";
 
 type Auth = typeof import("~/server/auth.server");
 type Users = typeof import("~/server/repositories/users.server");
+type Login = typeof import("~/routes/login");
+type I18n = typeof import("~/lib/i18n");
+type LocaleServer = typeof import("~/lib/i18n/locale.server");
+type Password = typeof import("~/server/password.server");
 let auth: Auth;
 let users: Users;
+let login: Login;
+let i18n: I18n;
+let localeServer: LocaleServer;
+let password: Password;
 
 beforeAll(async () => {
   auth = await import("~/server/auth.server");
   users = await import("~/server/repositories/users.server");
+  login = await import("~/routes/login");
+  i18n = await import("~/lib/i18n");
+  localeServer = await import("~/lib/i18n/locale.server");
+  password = await import("~/server/password.server");
 });
 
 /** Mint a session cookie header for a user id via createUserSession's Set-Cookie. */
@@ -89,6 +101,44 @@ describe("auth helpers", () => {
     const cookie = await sessionCookieFor(admin.id);
     const user = await auth.requireRole(requestWithCookie(cookie), "admin");
     expect(user.role).toBe("admin");
+  });
+});
+
+describe("disabled account (Phase 14)", () => {
+  it("getUser returns null for a disabled account even with a valid cookie", async () => {
+    const u = await users.createUser({
+      name: "To Disable",
+      email: "todisable@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "student",
+    });
+    const cookie = await sessionCookieFor(u.id);
+    // Active first…
+    expect((await auth.getUser(requestWithCookie(cookie)))?.id).toBe(u.id);
+    // …then disabling logs them out everywhere (session version unchanged).
+    await users.requestAccountDeletion(u.id);
+    expect(await auth.getUser(requestWithCookie(cookie))).toBeNull();
+  });
+
+  it("the login action refuses a disabled account despite correct credentials", async () => {
+    const pw = "correct horse battery staple";
+    const u = await users.createUser({
+      name: "Blocked",
+      email: "blocked@example.com",
+      passwordHash: password.hashPassword(pw),
+      role: "student",
+    });
+    await users.requestAccountDeletion(u.id);
+    const req = new Request("http://localhost/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: "blocked@example.com", password: pw }).toString(),
+    });
+    const m = i18n.getMessages(localeServer.getLocale(req));
+    const res = (await login.action({ request: req } as Parameters<typeof login.action>[0])) as {
+      error?: string;
+    };
+    expect(res.error).toBe(m.auth.accountDisabled);
   });
 });
 

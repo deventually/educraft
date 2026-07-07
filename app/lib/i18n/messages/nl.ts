@@ -295,6 +295,7 @@ export const nl = {
     passwordRepeat: "Herhaal wachtwoord",
     login: "Inloggen",
     loginFailed: "Onjuiste e-mail of wachtwoord.",
+    accountDisabled: "Dit account is uitgeschakeld. Vraag je docent om je toegang te herstellen.",
     logout: "Uitloggen",
     name: "Naam",
     inviteHeading: "Account aanmaken",
@@ -344,6 +345,10 @@ export const nl = {
     dangerHeading: "Account en gegevens verwijderen",
     dangerIntro:
       "Dit verwijdert je account en al je gegevens (materialen, contextprofielen, feedback en gebruik) definitief. Dit kan niet ongedaan worden gemaakt.",
+    requestHeading: "Verwijdering aanvragen",
+    requestIntro:
+      "Dit schakelt je account uit en stelt je docent op de hoogte. Je wordt uitgelogd en kunt niet inloggen totdat je docent je toegang herstelt of je account en gegevens definitief verwijdert.",
+    requestButton: "Vraag verwijdering aan en schakel mijn account uit",
     confirmLabel: "Typ {word} om te bevestigen",
     confirmWord: "VERWIJDER",
     deleteButton: "Verwijder mijn account en gegevens",

@@ -14,6 +14,12 @@ export const users = sqliteTable("users", {
   // account. JSON string[] or null = unrestricted. Only narrows teachers; admins
   // are never restricted, students are governed by their cohort's allow-list.
   allowedToolSlugs: text("allowed_tool_slugs"),
+  // Account disable (Phase 14). `disabledAt` set ⇒ the account cannot log in and is
+  // treated as logged out everywhere (a reversible holding state, not a delete);
+  // `deletionRequestedAt` marks a student-initiated removal request so a teacher
+  // sees it on the cohort screen. Both null = a normal, active account.
+  disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
+  deletionRequestedAt: integer("deletion_requested_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 

@@ -292,6 +292,7 @@ export const en: Messages = {
     passwordRepeat: "Repeat password",
     login: "Log in",
     loginFailed: "Incorrect email or password.",
+    accountDisabled: "This account is disabled. Ask your teacher to restore your access.",
     logout: "Log out",
     name: "Name",
     inviteHeading: "Create your account",
@@ -341,6 +342,10 @@ export const en: Messages = {
     dangerHeading: "Delete account and data",
     dangerIntro:
       "This permanently deletes your account and all your data (materials, context profiles, feedback and usage). This cannot be undone.",
+    requestHeading: "Request account removal",
+    requestIntro:
+      "This disables your account and notifies your teacher. You will be logged out and cannot log in until your teacher restores access or permanently removes your account and data.",
+    requestButton: "Request removal and disable my account",
     confirmLabel: "Type {word} to confirm",
     confirmWord: "DELETE",
     deleteButton: "Delete my account and data",

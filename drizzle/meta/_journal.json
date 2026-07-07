@@ -50,6 +50,13 @@
       "when": 1783404297964,
       "tag": "0006_jittery_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1783433542221,
+      "tag": "0007_heavy_morbius",
+      "breakpoints": true
     }
   ]
 }
