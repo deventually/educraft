@@ -105,7 +105,7 @@ Two gaps surfaced after P13 shipped.
   user" console beyond the cohort-screen restore/remove. No fix to the insight-screen emptiness (derived
   P7 signal — separate). No email/push — the teacher notification is the in-app badge only.
 
-## Acceptance — ✅ shipped 14.1–14.4
+## Acceptance — ✅ shipped 14.1–14.4 (`main`)
 
 `npm test && npm run typecheck && npm run check` green after each sub-phase. Manual repro: an admin
 disables a CLI agent instance-wide → it leaves the picker and, forced via the body, the stream falls back
