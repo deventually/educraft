@@ -86,6 +86,51 @@ describe("useFormToast", () => {
     await waitFor(() => expect(screen.queryByRole("listitem")).toBeNull());
   });
 
+  it("ignores a submission aimed at another route (a shell form)", async () => {
+    // The shell's language/logout forms share the global navigation state but
+    // post elsewhere — they must not flash a toast for the current route.
+    let release!: () => void;
+    const gate = new Promise<void>((res) => {
+      release = res;
+    });
+    function View() {
+      const actionData = useActionData();
+      useFormToast(actionData, {
+        result: () => ({ variant: "success", message: "should-not-show" }),
+      });
+      return (
+        <Form method="post" action="/other">
+          <button type="submit">shell</button>
+        </Form>
+      );
+    }
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <ToastProvider>
+            <View />
+          </ToastProvider>
+        ),
+      },
+      {
+        path: "/other",
+        action: async () => {
+          await gate;
+          return { ok: true };
+        },
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<Stub initialEntries={["/"]} />);
+
+    await user.click(screen.getByRole("button", { name: "shell" }));
+    // Mid-flight to /other → no pending toast for this route.
+    expect(screen.queryByRole("listitem")).toBeNull();
+    release();
+    await waitFor(() => expect(screen.queryByText("should-not-show")).toBeNull());
+  });
+
   it("dismisses the pending toast when a redirecting action navigates away", async () => {
     // The provider lives in a persistent layout (like root.tsx), so the toast
     // survives the navigation — only the unmount cleanup should clear it.

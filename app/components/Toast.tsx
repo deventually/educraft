@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useNavigation } from "react-router";
+import { useLocation, useNavigation } from "react-router";
 import { Check, Info, Loader2, ShieldAlert, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
@@ -106,6 +106,7 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
   const { showToast, updateToast, dismiss } = useToast();
   const t = useT();
   const nav = useNavigation();
+  const location = useLocation();
 
   const resultRef = useRef(options.result);
   resultRef.current = options.result;
@@ -117,6 +118,10 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
   savingRef.current = t.toast?.saving ?? "…";
   const formDataRef = useRef(nav.formData);
   formDataRef.current = nav.formData;
+  // The shell's own forms (language, view-switch, logout) share this global
+  // navigation state but post elsewhere; only react to this route's own submits.
+  const ownsSubmitRef = useRef(true);
+  ownsSubmitRef.current = !nav.formAction || nav.formAction.split("?")[0] === location.pathname;
 
   const pendingIdRef = useRef<number | null>(null);
   const inFlightRef = useRef(false);
@@ -128,6 +133,11 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
     prevStateRef.current = curr;
 
     if (curr === "submitting" && prev !== "submitting") {
+      // A submission aimed at another route (a shell form) isn't ours to report.
+      if (!ownsSubmitRef.current) {
+        inFlightRef.current = false;
+        return;
+      }
       // Entering a submit → show the pending toast (unless the route suppresses).
       const custom = pendingRef.current?.(formDataRef.current);
       inFlightRef.current = true;
