@@ -72,6 +72,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     id: m.id,
     displayName: m.displayName,
     supportsImages: m.supportsImages,
+    supportsThinking: m.supportsThinking,
   }));
   const localModels = await narrowLocalModels(viewer, discovered);
   // The catalog models a caller may pick, narrowed to the viewer's effective set

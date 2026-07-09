@@ -23,6 +23,14 @@ export interface GenerateOptions {
   maxTokens?: number;
   /** Attached to the LAST user message (e.g. handwritten-math grading). */
   images?: ImageInput[];
+  /**
+   * Reasoning ("thinking") switch for models that support it (e.g. Ollama Qwen3).
+   * `false` forces a direct answer — no chain-of-thought — which is dramatically
+   * faster for chat; `true` lets the model reason first. `undefined` = the
+   * provider/model default. Only the native Ollama adapter honors this; other
+   * providers ignore it.
+   */
+  thinking?: boolean;
 }
 
 export interface TokenUsage {

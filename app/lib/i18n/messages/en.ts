@@ -88,6 +88,8 @@ export const en: Messages = {
     dutch: "Dutch",
     english: "English",
     model: "Model",
+    reasoning: "Reason before answering",
+    reasoningHint: "Off is much faster. On is more thorough, but slower.",
     generate: "Generate",
     generating: "Generating…",
     stop: "Stop",

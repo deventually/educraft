@@ -74,6 +74,31 @@ describe("discoverLocalModels", () => {
     expect(llama?.supportsImages).toBe(false);
   });
 
+  it("flags Ollama models thinking-capable from /api/show capabilities", async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/models")) {
+        if (url.includes("11434"))
+          return {
+            ok: true,
+            json: async () => ({ data: [{ id: "qwen3" }, { id: "llama3" }] }),
+          } as Response;
+        return { ok: false, json: async () => ({}) } as Response;
+      }
+      if (url.includes("/api/show")) {
+        const model = JSON.parse(String(init?.body ?? "{}")).model;
+        const capabilities =
+          model === "qwen3" ? ["completion", "thinking", "tools"] : ["completion"];
+        return { ok: true, json: async () => ({ capabilities }) } as Response;
+      }
+      return { ok: false, json: async () => ({}) } as Response;
+    }) as typeof fetch;
+
+    const models = await discoverLocalModels(200);
+    expect(models.find((m) => m.id === "ollama::qwen3")?.supportsThinking).toBe(true);
+    expect(models.find((m) => m.id === "ollama::llama3")?.supportsThinking).toBe(false);
+  });
+
   it("defaults Ollama vision to false when /api/show fails (fail-soft)", async () => {
     globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);

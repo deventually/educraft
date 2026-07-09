@@ -554,6 +554,19 @@ describe("api.stream — model allow-list & budget", () => {
     expect(streamChatSpy.mock.calls[0][0].maxTokens).toBe(2048); // chat tutor budget
   });
 
+  it("[thinking] forwards the body's thinking flag to the provider", async () => {
+    await invoke(
+      { slug: "socratic-partner", values: { chapter: "x" }, thinking: false },
+      { userId: "think-off" },
+    );
+    expect(streamChatSpy.mock.calls[0][0].thinking).toBe(false);
+  });
+
+  it("[thinking] leaves the flag undefined when the body omits it (model default)", async () => {
+    await invoke({ slug: "socratic-partner", values: { chapter: "x" } }, { userId: "think-unset" });
+    expect(streamChatSpy.mock.calls[0][0].thinking).toBeUndefined();
+  });
+
   it("[bugfix] a cohort allowing ONLY a local model serves it, never the disabled tool default", async () => {
     await settings.setEnabledModels(null); // uncurated instance → local model is free
     const student = "local-only-cohort-student";

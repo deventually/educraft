@@ -8,7 +8,7 @@ This is the canonical contract for AI agents and developers working on LimeOnIt.
 
 - **Tools as data:** Every pedagogical tool from the book conforms to one shape (a `Tool` registry entry) regardless of mode. No control-flow branching for each tool — capability grows by data addition, not engine churn.
 - **Prompt pipeline:** Prompts are externalized per language (NL/EN) as `.md` files with `{{placeholder}}` syntax. Each tool lives in `app/lib/prompts/<id>.prompt.ts` (registered) with language variants in `app/lib/prompts/files/<id>.{nl,en}.md`. Placeholders are validated at build time.
-- **Provider abstraction:** The AI layer (`app/lib/ai/provider.ts`) abstracts Claude/OpenAI/local models behind one interface. Tools never import specific SDKs.
+- **Provider abstraction:** The AI layer (`app/lib/ai/provider.ts`) abstracts Claude/OpenAI/local models behind one interface. Tools never import specific SDKs. Anthropic/LM Studio/OpenAI-compat go through the AI SDK adapter (`adapters/aisdk.ts`); **Ollama uses a native adapter (`adapters/ollama.ts`, `/api/chat`)** because the AI SDK's `/v1` path ignores Ollama's `think` switch. Reasoning ("thinking") models can be told not to reason via `GenerateOptions.thinking` (`false` = direct answer, far faster for chat; `undefined` = model default) — surfaced as a per-chat toggle in `ChatView`, shown only for models whose `/api/show` capabilities include `thinking` (`PickerModel.supportsThinking`, detected in `discover.server.ts`). The stream carries it as the optional `thinking` body field.
 - **Interaction modes:**
   - **one-shot:** fill inputs → generate → stream result.
   - **chat:** one-time sandbox inputs + multi-turn conversation (greeting, starters, send/stop/regenerate).
@@ -172,6 +172,7 @@ Use the `/tdd` skill for ready-to-copy test templates.
 - **Modified (later phases):** `api.stream.tsx` (chat + images), `tool.tsx` (mode branching), `DynamicForm.tsx` (image control + `document` upload control), `registry/types.ts` (ChatConfig i18n; `document` field kind), `prompts/index.ts`, `registry/index.ts`, `messages/{nl,en}.ts`.
 - **Document upload (client-side):** `app/lib/documents/extract.ts` — `fileToText`/`extractTextFromBytes` lazily load `unpdf` (PDF) + `mammoth` (DOCX), extract text in the browser, and fill a `kind: "document"` textarea. No server endpoint; `buildSystemPrompt` and `api.stream` are unchanged (the value stays a plain string). Fixtures: `tests/fixtures/generate.mjs`.
 - **Reused as-is:** runtime (`provider.ts`, `models.ts`, `aisdk.ts`), streaming (`streamPost`), components (`GeneratorView`, `ToolControls`), context, interpolation.
+- **Native Ollama adapter (`app/lib/ai/adapters/ollama.ts`):** streams `/api/chat`, honors the `thinking` switch (drops the `thinking` field from the stream so raw chain-of-thought never reaches the answer), attaches images as raw base64. Added so local reasoning models (Qwen3 etc.) can answer directly — see the Provider-abstraction note above.
 
 ## Quick Ref: How to Start Work
 

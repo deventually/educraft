@@ -33,6 +33,8 @@ vi.mock("~/lib/i18n/useT", () => ({
       outputLanguage: "Output language",
       dutch: "Dutch",
       english: "English",
+      reasoning: "Reason before answering",
+      reasoningHint: "Off is much faster.",
     },
     chat: {
       send: "Send",
@@ -267,6 +269,74 @@ describe("ChatView", () => {
     const body = mockStreamPost.mock.calls.at(-1)?.[1] as { model: string };
     expect(body.model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
     expect(body.model).not.toBe("claude-sonnet-4-6");
+  });
+
+  it("[thinking] shows a reasoning toggle for a thinking-capable model and sends the flag", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("ok");
+      onDone?.("ok");
+    });
+
+    const user = userEvent.setup();
+    const { container } = render(
+      <ChatView
+        tool={mockTool}
+        onGenerationStart={() => {}}
+        catalogModels={[]}
+        localModels={[
+          { id: "ollama::qwen3", displayName: "Ollama · qwen3", supportsThinking: true },
+        ]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    const toggle = screen.getByLabelText("Reason before answering") as HTMLInputElement;
+    expect(toggle.checked).toBe(false); // default OFF → fast answers
+    expect((await axe(container)).violations).toEqual([]);
+
+    // Default (off) → thinking:false is sent.
+    await user.type(screen.getByPlaceholderText("Your message…"), "hi");
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+    expect((mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking).toBe(false);
+
+    // Turn reasoning on → thinking:true is sent.
+    await user.click(toggle);
+    await user.type(screen.getByPlaceholderText("Your message…"), "again");
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(mockStreamPost.mock.calls.length).toBeGreaterThan(1));
+    expect((mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking).toBe(true);
+  });
+
+  it("[thinking] hides the toggle and omits the flag for a non-thinking model", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("ok");
+      onDone?.("ok");
+    });
+
+    const user = userEvent.setup();
+    render(
+      <ChatView
+        tool={mockTool}
+        onGenerationStart={() => {}}
+        catalogModels={[]}
+        localModels={[{ id: "ollama::llama3", displayName: "Ollama · llama3" }]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.queryByLabelText("Reason before answering")).toBeNull();
+
+    await user.type(screen.getByPlaceholderText("Your message…"), "hi");
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+    expect(
+      (mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking,
+    ).toBeUndefined();
   });
 
   it("re-renders greeting and starters in the selected output language at once", async () => {

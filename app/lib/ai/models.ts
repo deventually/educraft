@@ -28,6 +28,12 @@ export interface ModelInfo {
   /** NL/EN display name shown in the UI. */
   displayName: string;
   supportsImages: boolean;
+  /**
+   * Whether the model reasons ("thinks") before answering and can be told NOT to
+   * (Ollama's `think` switch). Detected at discovery from `/api/show` capabilities.
+   * Drives the chat UI's "thinking" toggle; only ever set for local models.
+   */
+  supportsThinking?: boolean;
   /** Rough ordering for the model picker (lower = lighter/cheaper). */
   tier: 1 | 2 | 3;
   /** Local provider (runs on the user's machine; no API key). */
@@ -230,6 +236,8 @@ export interface PickerModel {
   id: string;
   displayName: string;
   supportsImages?: boolean;
+  /** Reasoning model whose thinking can be toggled off (drives the chat toggle). */
+  supportsThinking?: boolean;
 }
 
 /**

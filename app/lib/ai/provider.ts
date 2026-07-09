@@ -1,19 +1,21 @@
 import { resolveModelInfo, type ProviderId } from "./models";
 import type { LLMProvider } from "./types";
 import { aiSdkProvider } from "./adapters/aisdk";
+import { ollamaProvider } from "./adapters/ollama";
 import { cliProvider } from "./adapters/cli";
 
 /**
  * Registry mapping each provider id to its implementation.
  *
- * Anthropic, Ollama and LM Studio are all served by the single AI SDK adapter
- * (Ollama/LM Studio models are discovered at runtime). OpenAI / Google / Mistral
- * slot in by adding a catalog entry + key — same adapter, no new code. CLI agents
- * (claude code, opencode, codex, gemini cli) use the subprocess adapter.
+ * Anthropic and LM Studio are served by the AI SDK adapter. Ollama uses its own
+ * native adapter (`/api/chat`) so the reasoning ("thinking") switch works — the
+ * AI SDK's `/v1` path ignores it. OpenAI / Google / Mistral slot in by adding a
+ * catalog entry + key — same AI SDK adapter, no new code. CLI agents (claude
+ * code, opencode, codex, gemini cli) use the subprocess adapter.
  */
 const providers: Partial<Record<ProviderId, LLMProvider>> = {
   anthropic: aiSdkProvider,
-  ollama: aiSdkProvider,
+  ollama: ollamaProvider,
   lmstudio: aiSdkProvider,
   // Any configured OpenAI-compatible endpoint (frontier or self-hosted).
   "openai-compat": aiSdkProvider,

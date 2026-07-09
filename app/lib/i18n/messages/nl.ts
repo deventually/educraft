@@ -91,6 +91,8 @@ export const nl = {
     dutch: "Nederlands",
     english: "Engels",
     model: "Model",
+    reasoning: "Redeneren vóór antwoord",
+    reasoningHint: "Uit = veel sneller. Aan = grondiger, maar trager.",
     generate: "Genereer",
     generating: "Bezig met genereren…",
     stop: "Stop",

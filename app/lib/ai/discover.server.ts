@@ -21,16 +21,17 @@ interface ModelsResponse {
 }
 
 /**
- * Ask Ollama's native /api/show whether a model is vision-capable. Ollama reports
- * model `capabilities` (e.g. ["completion","vision","tools"]); the OpenAI-compatible
- * /v1/models endpoint does not, so we consult the native API. Fails soft → false.
- * LM Studio exposes no equivalent, so its models stay non-vision for now.
+ * Ask Ollama's native /api/show for a model's `capabilities` (e.g.
+ * ["completion","vision","thinking","tools"]). The OpenAI-compatible /v1/models
+ * endpoint omits these, so we consult the native API — one call feeds both the
+ * vision and the thinking flags. Fails soft → []. LM Studio exposes no
+ * equivalent, so its models report no capabilities for now.
  */
-async function ollamaSupportsImages(
+async function ollamaCapabilities(
   nativeBaseURL: string,
   model: string,
   signal: AbortSignal,
-): Promise<boolean> {
+): Promise<string[]> {
   try {
     const res = await fetch(`${nativeBaseURL}/api/show`, {
       method: "POST",
@@ -38,11 +39,13 @@ async function ollamaSupportsImages(
       body: JSON.stringify({ model }),
       signal,
     });
-    if (!res.ok) return false;
+    if (!res.ok) return [];
     const body = (await res.json()) as { capabilities?: unknown };
-    return Array.isArray(body.capabilities) && body.capabilities.includes("vision");
+    return Array.isArray(body.capabilities)
+      ? body.capabilities.filter((c): c is string => typeof c === "string")
+      : [];
   } catch {
-    return false;
+    return [];
   }
 }
 
@@ -60,22 +63,23 @@ async function discoverServer(server: LocalServer, timeoutMs: number): Promise<D
       .map((m) => (typeof m.id === "string" ? m.id : null))
       .filter((id): id is string => !!id);
 
-    // Determine image support. Ollama: ask its native /api/show capabilities so
-    // vision-capable local models can be offered on the image tool. Others: false.
+    // Capabilities. Ollama: one /api/show per model tells us both vision (for the
+    // image tool) and thinking (for the chat reasoning toggle). Others: none.
     const nativeBaseURL = server.baseURL.replace(/\/v1\/?$/, "");
-    const supportsImages =
+    const capabilities =
       server.provider === "ollama"
         ? await Promise.all(
-            ids.map((id) => ollamaSupportsImages(nativeBaseURL, id, controller.signal)),
+            ids.map((id) => ollamaCapabilities(nativeBaseURL, id, controller.signal)),
           )
-        : ids.map(() => false);
+        : ids.map(() => [] as string[]);
 
     return ids.map((apiId, i) => ({
       id: dynamicModelId(server.provider, apiId),
       provider: server.provider,
       apiId,
       displayName: `${server.label} · ${apiId}`,
-      supportsImages: supportsImages[i],
+      supportsImages: capabilities[i].includes("vision"),
+      supportsThinking: capabilities[i].includes("thinking"),
       tier: 2,
       local: true,
       // Local inference is free to the owner, so discovered models stay selectable.

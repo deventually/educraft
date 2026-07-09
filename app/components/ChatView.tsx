@@ -80,6 +80,12 @@ export function ChatView({
   const [selectedModel, setSelectedModel] = useState(() =>
     initialPickerModel(modelOptions, tool.defaultModel, defaultModel),
   );
+  // Reasoning switch for thinking-capable local models (Ollama Qwen3 etc.). Off by
+  // default: a direct answer is dramatically faster for chat than reasoning first.
+  // Only sent to the server when the selected model actually supports it.
+  const [thinking, setThinking] = useState(false);
+  const selectedModelSupportsThinking =
+    modelOptions.find((m) => m.id === selectedModel)?.supportsThinking ?? false;
   // The conversation defaults to the interface language: a Dutch UI opens a
   // Dutch chat, an English UI an English one. An explicit prop still wins.
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
@@ -174,6 +180,9 @@ export function ChatView({
           contextProfileId: contextProfile?.id || null,
           outputLanguage,
           model: selectedModel,
+          // Only govern reasoning for models that support it; otherwise leave it to
+          // the model default (omit the flag).
+          thinking: selectedModelSupportsThinking ? thinking : undefined,
           messages: messageHistory,
           sessionId: sessionIdRef.current,
         },
@@ -339,6 +348,27 @@ export function ChatView({
                 ))}
               </Select>
             </div>
+            {/* Reasoning switch — only for models that support it (Ollama Qwen3
+                etc.). Off by default: a direct answer is far faster than reasoning
+                first. Hidden entirely for non-thinking models. */}
+            {selectedModelSupportsThinking && (
+              <div>
+                <label
+                  htmlFor="chat-thinking"
+                  className="flex items-center gap-2 text-sm text-slate-700"
+                >
+                  <input
+                    id="chat-thinking"
+                    type="checkbox"
+                    className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                    checked={thinking}
+                    onChange={(e) => setThinking(e.target.checked)}
+                  />
+                  {t.tool.reasoning}
+                </label>
+                <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
+              </div>
+            )}
             <div>
               <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
                 {t.tool.outputLanguage}

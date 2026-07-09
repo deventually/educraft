@@ -73,6 +73,8 @@ const StreamBodySchema = z.object({
   outputLanguage: z.enum(["nl", "en"]).optional(),
   priorOutputs: z.record(z.string().max(100), z.string().max(MAX_PRIOR_OUTPUT_CHARS)).optional(),
   model: z.string().max(200).optional(),
+  /** Reasoning switch for thinking-capable local models (see availability/ollama). */
+  thinking: z.boolean().optional(),
   messages: z
     .array(ChatMessageSchema.extend({ content: z.string().max(MAX_MESSAGE_CHARS) }))
     .max(MAX_MESSAGES)
@@ -270,6 +272,9 @@ export async function action({ request }: Route.ActionArgs) {
       images,
       temperature: stage.temperature ?? tool.defaultTemperature,
       maxTokens: stage.maxTokens ?? tool.defaultMaxTokens,
+      // Reasoning switch — honored only by the native Ollama adapter; other
+      // providers ignore it. `undefined` (absent from the body) = model default.
+      thinking: body.thinking,
     });
 
     const stream = sseStream(tokens, {
