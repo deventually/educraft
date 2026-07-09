@@ -325,6 +325,11 @@ export const nl = {
     generic: "AI-gegenereerd concept — controleer en beoordeel zelf voor gebruik.",
     assistive: "Dit is een beoordelings-advies voor de docent. De docent beslist.",
   },
+  toast: {
+    regionLabel: "Meldingen",
+    dismiss: "Melding sluiten",
+    saving: "Bezig…",
+  },
   feedback: {
     heading: "Was dit nuttig?",
     helpful: "Nuttig",

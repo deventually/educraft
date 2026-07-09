@@ -322,6 +322,11 @@ export const en: Messages = {
     generic: "AI-generated draft — review and judge before use.",
     assistive: "This is an assessment suggestion for the teacher. The teacher decides.",
   },
+  toast: {
+    regionLabel: "Notifications",
+    dismiss: "Dismiss notification",
+    saving: "Working…",
+  },
   feedback: {
     heading: "Was this helpful?",
     helpful: "Helpful",
