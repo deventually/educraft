@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AppShell from "~/components/AppShell";
@@ -222,6 +223,46 @@ describe("AppShell admin surface & role switch", () => {
       realRole: "admin",
     });
     await screen.findByText("Tools home");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("AppShell navigation a11y", () => {
+  it("renders a skip link as the first focusable element, targeting #top", () => {
+    renderShell();
+    const skip = screen.getByRole("link", { name: "Naar hoofdinhoud" });
+    expect(skip).toHaveAttribute("href", "#top");
+    // First in DOM/tab order — before the logo and everything else.
+    expect(screen.getAllByRole("link")[0]).toBe(skip);
+    // Its target is focusable so activating it moves focus into the content.
+    const main = document.querySelector("main#top");
+    expect(main).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("does not announce or steal focus on initial mount", () => {
+    renderShell();
+    expect(screen.getByRole("status").textContent).toBe("");
+    expect(document.activeElement).not.toBe(document.querySelector("main#top"));
+  });
+
+  it("announces the new page title and moves focus to main after client navigation", async () => {
+    const user = userEvent.setup();
+    renderShell("/");
+    const announcer = screen.getByRole("status");
+    expect(announcer.textContent).toBe("");
+
+    // RR meta sets document.title post-navigation; simulate that here.
+    document.title = "Onderwijscontext — LimeOnIt";
+    await user.click(screen.getAllByRole("link", { name: "Onderwijscontext" })[0]);
+    await screen.findByText("Teaching context page");
+
+    const main = document.querySelector("main#top");
+    await waitFor(() => expect(document.activeElement).toBe(main));
+    await waitFor(() => expect(announcer).toHaveTextContent("Onderwijscontext — LimeOnIt"));
+  });
+
+  it("has no a11y violations with the skip link and announcer present", async () => {
+    const { container } = renderShell();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

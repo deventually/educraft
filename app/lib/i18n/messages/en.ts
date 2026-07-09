@@ -32,6 +32,7 @@ export const en: Messages = {
     menuLabel: "Mobile navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    skipToContent: "Skip to main content",
   },
   badge: {
     instructor: "Instructor",

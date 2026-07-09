@@ -35,6 +35,7 @@ export const nl = {
     menuLabel: "Mobiele navigatie",
     openMenu: "Menu openen",
     closeMenu: "Menu sluiten",
+    skipToContent: "Naar hoofdinhoud",
   },
   badge: {
     instructor: "Docent",
