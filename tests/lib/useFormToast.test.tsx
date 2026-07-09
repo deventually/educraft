@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Form, createRoutesStub, useActionData } from "react-router";
+import { Form, Outlet, createRoutesStub, redirect, useActionData } from "react-router";
 import { ToastProvider, useFormToast, type ToastInput } from "~/components/Toast";
 
 type Result = (d: unknown) => ToastInput | null;
@@ -84,5 +84,46 @@ describe("useFormToast", () => {
     await user.click(screen.getByRole("button", { name: "save" }));
     // The pending toast must not hang — it is dismissed once the action settles.
     await waitFor(() => expect(screen.queryByRole("listitem")).toBeNull());
+  });
+
+  it("dismisses the pending toast when a redirecting action navigates away", async () => {
+    // The provider lives in a persistent layout (like root.tsx), so the toast
+    // survives the navigation — only the unmount cleanup should clear it.
+    function RedirectView() {
+      const actionData = useActionData();
+      useFormToast(actionData, { result: () => ({ variant: "success", message: "unused" }) });
+      return (
+        <Form method="post">
+          <button type="submit">delete</button>
+        </Form>
+      );
+    }
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <ToastProvider>
+            <Outlet />
+          </ToastProvider>
+        ),
+        children: [
+          {
+            index: true,
+            Component: RedirectView,
+            action: () => {
+              throw redirect("/done");
+            },
+          },
+          { path: "done", Component: () => <p>done</p> },
+        ],
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<Stub initialEntries={["/"]} />);
+
+    await user.click(screen.getByRole("button", { name: "delete" }));
+    await screen.findByText("done");
+    // The route unmounted mid-flight → its pending toast must not linger.
+    expect(screen.queryByRole("listitem")).toBeNull();
   });
 });

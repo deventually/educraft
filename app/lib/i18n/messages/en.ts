@@ -270,6 +270,7 @@ export const en: Messages = {
     delete: "Delete",
     deleteTitle: "Delete result?",
     deleteBody: "This result will be permanently deleted.",
+    toastDeleted: "Result deleted.",
   },
   help: {
     heading: "Help & documentation",
@@ -563,6 +564,11 @@ export const en: Messages = {
       orphaned: "orphaned (no owner)",
       reassignOwner: "Assign",
       reassignOwnerLabel: "New owner",
+      toastDeleted: "Cohort deleted.",
+      toastAssigned: "Teacher assigned.",
+      toastReassigned: "Owner changed.",
+      toastRemoved: "Teacher removed.",
+      toastError: "Something went wrong. Please try again.",
     },
     usage: {
       heading: "Usage",

@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminModels from "~/routes/admin.models";
+import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -33,7 +34,11 @@ function renderRoute(action?: () => unknown) {
   const Stub = createRoutesStub([
     {
       path: "/admin/models",
-      Component: () => <AdminModels {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <AdminModels {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => ({ saved: true })),
     },
   ]);

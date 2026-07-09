@@ -1,5 +1,4 @@
 import { Form, useActionData } from "react-router";
-import { Check } from "lucide-react";
 import type { Route } from "./+types/admin.tools";
 import { requireRole } from "~/server/auth.server";
 import { ALL_TOOLS } from "~/lib/registry";
@@ -10,6 +9,7 @@ import {
 } from "~/server/repositories/settings.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { useFormToast } from "~/components/Toast";
 import { Badge, Button, Select } from "~/components/ui";
 
 const AUDIENCES = ["", "student", "instructor", "both"] as const;
@@ -54,6 +54,16 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
   const { rows } = loaderData;
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d
+          ? { variant: "error", message: t.error.invalidRequest }
+          : "savedSlug" in d
+            ? { variant: "success", message: t.admin.console.saved }
+            : null,
+  });
   const audienceLabel: Record<string, string> = {
     "": t.admin.tools.audienceDefault,
     student: t.admin.tools.audienceStudent,
@@ -68,18 +78,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
       </h2>
       <p className="mt-1 text-sm text-slate-600">{t.admin.tools.intro}</p>
 
-      <p className="mt-3 h-5 text-sm text-emerald-700" aria-live="polite">
-        {actionData?.savedSlug ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Check className="size-4" aria-hidden />
-            {t.admin.console.saved}
-          </span>
-        ) : (
-          ""
-        )}
-      </p>
-
-      <div className="mt-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">{t.admin.tools.caption}</caption>
           <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">

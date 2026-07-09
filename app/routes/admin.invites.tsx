@@ -20,6 +20,7 @@ import type { Role } from "~/lib/registry/access";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
+import { useFormToast } from "~/components/Toast";
 import { Button, HelpText, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 
@@ -156,6 +157,21 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
       ? userErrors[actionData.error]
       : undefined;
 
+  // The toast covers every outcome, including `selfDemote` (shown inline in the
+  // mint area, not the Users section) and the unknown fallback.
+  const toastErrors: Record<string, string> = {
+    ...userErrors,
+    selfDemote: t.admin.invites.selfDemoteError,
+  };
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d && typeof d.error === "string"
+          ? { variant: "error", message: toastErrors[d.error] ?? t.error.generic }
+          : { variant: "success", message: t.admin.console.saved },
+  });
+
   return (
     <div className="space-y-10">
       {/* ── Mint a teacher invite ─────────────────────────────────────────── */}
@@ -166,7 +182,7 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
         <p className="mt-1 text-sm text-slate-600">{t.admin.invites.mintIntro}</p>
 
         {actionData && "error" in actionData && actionData.error === "selfDemote" && (
-          <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             {t.admin.invites.selfDemoteError}
           </p>
         )}
@@ -355,9 +371,7 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
         <p className="mt-1 text-sm text-slate-600">{t.admin.invites.usersIntro}</p>
 
         {userError && (
-          <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {userError}
-          </p>
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{userError}</p>
         )}
 
         {actionData && "resetLink" in actionData && actionData.resetLink && (

@@ -273,6 +273,7 @@ export const nl = {
     delete: "Verwijderen",
     deleteTitle: "Resultaat verwijderen?",
     deleteBody: "Dit resultaat wordt definitief verwijderd.",
+    toastDeleted: "Resultaat verwijderd.",
   },
   help: {
     heading: "Help & documentatie",
@@ -567,6 +568,11 @@ export const nl = {
       orphaned: "verweesd (geen eigenaar)",
       reassignOwner: "Toewijzen",
       reassignOwnerLabel: "Nieuwe eigenaar",
+      toastDeleted: "Cohort verwijderd.",
+      toastAssigned: "Docent toegewezen.",
+      toastReassigned: "Eigenaar gewijzigd.",
+      toastRemoved: "Docent verwijderd.",
+      toastError: "Er ging iets mis. Probeer het opnieuw.",
     },
     usage: {
       heading: "Gebruik",

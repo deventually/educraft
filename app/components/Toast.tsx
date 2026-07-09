@@ -149,7 +149,7 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
       pendingIdRef.current = null;
       if (id != null) {
         // Swap pending → result in place, or dismiss it so it never hangs
-        // (redirect / empty action data).
+        // (empty action data).
         if (r) updateToast(id, r);
         else dismiss(id);
       } else if (r) {
@@ -157,6 +157,15 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
       }
     }
   }, [nav.state, showToast, updateToast, dismiss]);
+
+  // A redirecting action (delete → redirect) never returns this route to `idle`
+  // — it unmounts mid-flight. Dismiss any still-pending toast on unmount so it
+  // doesn't hang on the next page. (Flash-across-redirect success is P16.)
+  useEffect(() => {
+    return () => {
+      if (pendingIdRef.current != null) dismiss(pendingIdRef.current);
+    };
+  }, [dismiss]);
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

@@ -1,5 +1,4 @@
 import { Form, useActionData } from "react-router";
-import { Check } from "lucide-react";
 import type { Route } from "./+types/admin.models";
 import { requireRole } from "~/server/auth.server";
 import { listModels } from "~/lib/ai/models";
@@ -12,6 +11,7 @@ import {
   setUserAssignedModels,
 } from "~/server/repositories/users.server";
 import { useT } from "~/lib/i18n/useT";
+import { useFormToast } from "~/components/Toast";
 import { Button } from "~/components/ui";
 
 /** Which section a model belongs to in the UI (P14): frontier API, CLI agent, or
@@ -191,6 +191,16 @@ export default function AdminModels({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const { rows, base, teachers } = loaderData;
   const m = t.admin.models;
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d
+          ? { variant: "error", message: m.atLeastOne }
+          : "saved" in d
+            ? { variant: "success", message: t.admin.console.saved }
+            : null,
+  });
 
   return (
     <section>
@@ -200,20 +210,8 @@ export default function AdminModels({ loaderData }: Route.ComponentProps) {
       <p className="mt-1 text-sm text-slate-600">{m.intro}</p>
 
       {actionData?.error && (
-        <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {m.atLeastOne}
-        </p>
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{m.atLeastOne}</p>
       )}
-      <p className="mt-3 h-5 text-sm text-emerald-700" aria-live="polite">
-        {actionData?.saved ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Check className="size-4" aria-hidden />
-            {t.admin.console.saved}
-          </span>
-        ) : (
-          ""
-        )}
-      </p>
 
       <Form method="post" className="mt-2 max-w-xl">
         <input type="hidden" name="intent" value="instance" />

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Form, useActionData } from "react-router";
-import { Check } from "lucide-react";
 import type { Route } from "./+types/admin.context";
 import { requireRole } from "~/server/auth.server";
 import {
@@ -40,6 +39,7 @@ import { domainGroupsForSector, allDomainValues, type DomainGroup } from "~/lib/
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
 import { useLocale, useT } from "~/lib/i18n/useT";
+import { useFormToast } from "~/components/Toast";
 import { Button } from "~/components/ui";
 
 /**
@@ -415,6 +415,16 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const { countries, sectors, enabledDomains, domainCatalogueSectors, teachers } = loaderData;
   const c = t.admin.context;
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d
+          ? { variant: "error", message: c.atLeastOne }
+          : "saved" in d
+            ? { variant: "success", message: t.admin.console.saved }
+            : null,
+  });
 
   return (
     <section>
@@ -427,20 +437,8 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
       <p className="mt-1 text-sm text-slate-600">{c.intro}</p>
 
       {actionData?.error === "instance-empty" && (
-        <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {c.atLeastOne}
-        </p>
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{c.atLeastOne}</p>
       )}
-      <p className="mt-3 h-5 text-sm text-emerald-700" aria-live="polite">
-        {actionData?.saved ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Check className="size-4" aria-hidden />
-            {t.admin.console.saved}
-          </span>
-        ) : (
-          ""
-        )}
-      </p>
 
       {/* Instance-level toggle — labelled by the page heading. */}
       <Form method="post" aria-labelledby="admin-context-heading" className="mt-2 max-w-xl">

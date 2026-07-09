@@ -22,6 +22,7 @@ import { resolveLevel } from "~/lib/context/derive";
 import { getDomainsForTrack } from "~/lib/context/domains";
 import { Button, Card, Badge } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { useFormToast } from "~/components/Toast";
 import { ContextProfileEditor } from "~/components/context/ContextProfileEditor";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
@@ -144,6 +145,15 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
   useEffect(() => {
     if (actionData?.ok) setEditor(null);
   }, [actionData]);
+
+  useFormToast(actionData, {
+    result: (d) => {
+      if (!d) return null;
+      if (d.ok) return { variant: "success", message: t.admin.console.saved };
+      const err = "error" in d ? d.error : undefined;
+      return err ? { variant: "error", message: err } : null;
+    },
+  });
 
   const editing = editor?.profile;
 
