@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useNavigation } from "react-router";
 import { Check, Info, Loader2, ShieldAlert, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
@@ -54,6 +55,108 @@ const ToastContext = createContext<ToastContextValue>({
 /** Access the toast API. No-ops silently when rendered outside a `ToastProvider`. */
 export function useToast(): ToastContextValue {
   return useContext(ToastContext);
+}
+
+/**
+ * Result-only bridge: fire a toast once per *new* `data` object identity
+ * (`useActionData`/a fetcher returns a fresh object per submission, so this
+ * re-fires per submit, not per re-render). `mapper` returning `null`, or a
+ * `null`/`undefined` `data`, produces no toast. Use where there is no form
+ * navigation to hang a pending toast on (e.g. fetcher widgets).
+ */
+export function useActionToast<T>(
+  data: T | null | undefined,
+  mapper: (data: T) => ToastInput | null,
+): void {
+  const { showToast } = useToast();
+  // Read the mapper through a ref so a fresh closure never goes stale.
+  const mapperRef = useRef(mapper);
+  mapperRef.current = mapper;
+  const seenRef = useRef<T | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (data == null) return;
+    if (data === seenRef.current) return; // same identity → already fired
+    seenRef.current = data;
+    const input = mapperRef.current(data);
+    if (input) showToast(input);
+  }, [data, showToast]);
+}
+
+interface FormToastOptions<T> {
+  /** Map settled action data to a result toast. `null` = dismiss the pending one. */
+  result: (data: T | undefined) => ToastInput | null;
+  /**
+   * Optional pending-toast builder, inspecting the in-flight `FormData` (e.g.
+   * `formData.get("intent")` to name the action). Return `null` to suppress the
+   * pending toast for this route.
+   */
+  pending?: (formData: FormData | undefined) => ToastInput | null;
+}
+
+/**
+ * The primary route bridge: a *pending* toast the instant a `<Form>` submits,
+ * updated **in place** to the mapped result once the action settles. Call it
+ * **once per route** — navigation state is router-global, so a page's several
+ * `<Form>`s share one hook. Drives a single effect off `useNavigation().state`
+ * and reads the latest action data via a ref (populated by the time state
+ * returns to `idle`).
+ */
+export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T>): void {
+  const { showToast, updateToast, dismiss } = useToast();
+  const t = useT();
+  const nav = useNavigation();
+
+  const resultRef = useRef(options.result);
+  resultRef.current = options.result;
+  const pendingRef = useRef(options.pending);
+  pendingRef.current = options.pending;
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const savingRef = useRef(t.toast?.saving ?? "…");
+  savingRef.current = t.toast?.saving ?? "…";
+  const formDataRef = useRef(nav.formData);
+  formDataRef.current = nav.formData;
+
+  const pendingIdRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const prevStateRef = useRef(nav.state);
+
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    const curr = nav.state;
+    prevStateRef.current = curr;
+
+    if (curr === "submitting" && prev !== "submitting") {
+      // Entering a submit → show the pending toast (unless the route suppresses).
+      const custom = pendingRef.current?.(formDataRef.current);
+      inFlightRef.current = true;
+      if (pendingRef.current && custom == null) {
+        pendingIdRef.current = null; // explicitly suppressed
+      } else {
+        pendingIdRef.current = showToast(
+          custom ?? { variant: "pending", message: savingRef.current },
+        );
+      }
+      return;
+    }
+
+    if (curr === "idle" && inFlightRef.current) {
+      // The submit settled → resolve the pending toast into the result.
+      inFlightRef.current = false;
+      const r = resultRef.current(dataRef.current);
+      const id = pendingIdRef.current;
+      pendingIdRef.current = null;
+      if (id != null) {
+        // Swap pending → result in place, or dismiss it so it never hangs
+        // (redirect / empty action data).
+        if (r) updateToast(id, r);
+        else dismiss(id);
+      } else if (r) {
+        showToast(r);
+      }
+    }
+  }, [nav.state, showToast, updateToast, dismiss]);
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
