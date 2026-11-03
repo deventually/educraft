@@ -44,8 +44,8 @@ export function GeneratorView({
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Check if tool has image inputs (a vision tool narrows the offered models).
   const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
-  // Pre-select an OFFERED model, not blindly the tool default: a cohort that
-  // offers only a local model must not start on the frontier default it disabled.
+  // Pre-select an OFFERED model, not blindly the tool default: a teacher
+  // whose set holds only a local model must not start on the frontier default.
   const [model, setModel] = useState(() =>
     initialPickerModel(
       pickableModels(localModels ?? [], hasImageInputs, catalogModels),

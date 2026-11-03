@@ -18,7 +18,6 @@ const loaderData = {
       mode: "chat" as const,
       phase: 1 as const,
       enabled: true,
-      audienceOverride: "",
     },
     {
       slug: "bloom-by-design",
@@ -27,7 +26,6 @@ const loaderData = {
       mode: "chat" as const,
       phase: 3 as const,
       enabled: false,
-      audienceOverride: "both",
     },
   ],
 };
@@ -49,14 +47,17 @@ function renderRoute(action?: () => unknown) {
 }
 
 describe("Admin tools", () => {
-  it("lists every registry tool with an enabled toggle and audience select", () => {
+  it("lists every registry tool with an enabled toggle", () => {
     renderRoute();
     expect(screen.getByText("MentorAI")).toBeInTheDocument();
     expect(screen.getByText("Bloom by Design")).toBeInTheDocument();
     // One enabled checkbox per tool.
     expect(screen.getAllByRole("checkbox")).toHaveLength(2);
-    // One audience select per tool.
-    expect(screen.getAllByRole("combobox")).toHaveLength(2);
+  });
+
+  it("offers no audience select", () => {
+    renderRoute();
+    expect(screen.queryAllByRole("combobox")).toHaveLength(0);
   });
 
   it("confirms a save (mutation) via the per-row form", async () => {

@@ -7,30 +7,22 @@ import {
   MessagesSquare,
   SlidersHorizontal,
   UserPlus,
-  Users,
 } from "lucide-react";
 import type { Route } from "./+types/admin._index";
 import { requireRole } from "~/server/auth.server";
 import { getAvailableTools } from "~/server/availability.server";
 import { listUsers } from "~/server/repositories/users.server";
-import { listAllCohorts } from "~/server/repositories/cohorts.server";
 import { useT } from "~/lib/i18n/useT";
 import { Card } from "~/components/ui";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireRole(request, "admin");
-  const [users, cohorts, available] = await Promise.all([
-    listUsers(),
-    listAllCohorts(),
-    getAvailableTools(user),
-  ]);
+  const [users, available] = await Promise.all([listUsers(), getAvailableTools(user)]);
   return {
     stats: {
       users: users.length,
       teachers: users.filter((u) => u.role === "teacher").length,
-      students: users.filter((u) => u.role === "student").length,
       admins: users.filter((u) => u.role === "admin").length,
-      cohorts: cohorts.length,
       availableTools: available.length,
     },
   };
@@ -45,9 +37,7 @@ export default function AdminOverview({ loaderData }: Route.ComponentProps) {
   const statCards = [
     { label: t.admin.overview.stats.users, value: stats.users },
     { label: t.admin.overview.stats.teachers, value: stats.teachers },
-    { label: t.admin.overview.stats.students, value: stats.students },
     { label: t.admin.overview.stats.admins, value: stats.admins },
-    { label: t.admin.overview.stats.cohorts, value: stats.cohorts },
     { label: t.admin.overview.stats.availableTools, value: stats.availableTools },
   ];
 
@@ -56,7 +46,6 @@ export default function AdminOverview({ loaderData }: Route.ComponentProps) {
     { to: "/admin/models", title: nav.models, desc: desc.models, Icon: Cpu },
     { to: "/admin/context", title: nav.context, desc: desc.context, Icon: GraduationCap },
     { to: "/admin/invites", title: nav.invites, desc: desc.invites, Icon: UserPlus },
-    { to: "/admin/cohorts", title: nav.cohorts, desc: desc.cohorts, Icon: Users },
     { to: "/admin/usage", title: nav.usage, desc: desc.usage, Icon: Activity },
     { to: "/admin/feedback", title: nav.feedback, desc: desc.feedback, Icon: MessagesSquare },
   ];
@@ -66,7 +55,7 @@ export default function AdminOverview({ loaderData }: Route.ComponentProps) {
       <h2 className="sr-only">{t.admin.overview.heading}</h2>
       <p className="text-sm text-slate-600">{t.admin.overview.intro}</p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {statCards.map((s) => (
           <Card key={s.label} className="p-4">
             <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">

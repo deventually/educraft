@@ -53,7 +53,7 @@ describe("password reset repository", () => {
     const u = await users.createUser({
       name: "Expired",
       passwordHash: "scrypt:a:b",
-      role: "student",
+      role: "teacher",
     });
     const reset = await users.createPasswordReset(u.id, -1); // already expired
     expect(await users.consumePasswordReset(reset.token)).toBeNull();
@@ -99,5 +99,31 @@ describe("reset route action", () => {
     const after = await users.getUserById(u.id);
     expect(password.verifyPassword("keep-this-one", after!.passwordHash)).toBe(true);
     expect(await users.getPasswordReset(reset.token)).not.toBeNull();
+  });
+
+  it("logs out an older session of the same user, and keeps the new one valid", async () => {
+    const auth = await import("~/server/auth.server");
+    const u = await users.createUser({
+      name: "Stale Cookie",
+      email: "stale@example.com",
+      passwordHash: password.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    const cookieOf = async (res: Response) => (res.headers.get("Set-Cookie") ?? "").split(";")[0];
+    const asRequest = (cookie: string) =>
+      new Request("http://localhost/", { headers: { Cookie: cookie } });
+
+    const older = await cookieOf(await auth.createUserSession(u.id, "/"));
+    expect((await auth.getUser(asRequest(older)))?.id).toBe(u.id);
+
+    const reset = await users.createPasswordReset(u.id);
+    const res = (await invoke(
+      reset.token,
+      post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
+    )) as Response;
+    const fresh = await cookieOf(res);
+
+    expect(await auth.getUser(asRequest(older))).toBeNull();
+    expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
   });
 });

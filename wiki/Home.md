@@ -19,7 +19,7 @@ For the full strategic picture, read the [Vision](../docs/VISION.md).
 | [Architecture](Architecture.md) | Stack, the "tools are data" model, prompt pipeline, providers, repo map. |
 | [Tools](Tools.md) | The current tool catalog, the stage model, and what's planned. |
 | [Context Model](Context-Model.md) | The orthogonal context dimensions and the pack system. |
-| [Authentication](Authentication.md) | Invite auth, the three roles, sessions, and per-user data scoping. |
+| [Authentication](Authentication.md) | Invite auth, the two roles, sessions, and per-user data scoping. |
 | [Qualification Frameworks](Qualification-Frameworks.md) | EQF/ISCED + national frameworks per target country. |
 | [Internationalization](Internationalization.md) | The five localization layers; UI vs output language; compliance. |
 | [Deployment](Deployment.md) | Running the instance: env, migrations, security headers, health check. |
@@ -38,7 +38,7 @@ and the per-phase briefs under [`docs/implementation/`](../docs/implementation/R
 
 - **Today:** Netherlands · hbo · Dutch/English UI · **15 tools shipped** (14 from the
   book + 1 original), instructor generators + student tutors · invite auth with
-  three roles · teacher-provisioned cohorts · admin console.
+  two roles (teacher, admin) · admin console.
 - **Source material:** *The Pedagogical Promptbook* (David Wiley, ed. — CC BY 4.0,
   DOI 10.59668/2340).
 - **Stack:** React Router 7 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) ·

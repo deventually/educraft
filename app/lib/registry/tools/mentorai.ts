@@ -30,7 +30,7 @@ export const mentorai: Tool = {
     evaluatedWith: { nl: "Claude", en: "Claude" },
     adapted: false,
   }),
-  // The cohort's context profile seeds the learner's level (EQF); the bespoke
+  // The teacher's context profile seeds the learner's level (EQF); the bespoke
   // foundation/intermediate/advanced input is retired onto that spine (P6.8).
   usesContextProfile: true,
   defaultOutputLanguage: "nl",

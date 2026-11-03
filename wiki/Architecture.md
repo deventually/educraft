@@ -44,8 +44,8 @@ app/lib/prompts/<id>.prompt.ts             # PromptDef: verbatim original + runt
 Generation is streamed to the browser via SSE through the resource route
 `app/routes/api.stream.tsx`. That route is also the **access boundary**: it parses
 the body with `StreamBodySchema` (Zod), authenticates, and refuses via
-`isToolAvailable` (`app/server/availability.server.ts` — instance settings + role/cohort
-`canUseTool` + per-teacher allow-list) before any provider call. The registry is
+`isToolAvailable` (`app/server/availability.server.ts` — instance settings + per-teacher
+allow-list) before any provider call. The registry is
 validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the bad tool.
 
 ---
@@ -71,13 +71,13 @@ LimeOnIt is not tied to one model vendor.
   `.env` through `env.server` — never hardcoded or read ad hoc.
 - Default model: `claude-sonnet-4-6`.
 - **Availability (P4/P13/P14).** Which models a caller may *pick* is governed by a
-  three-level INTERSECT — instance `enabledModels` → per-teacher `assignedModels` →
-  per-cohort `allowedModelsJson` (each level narrows, never widens; unset = inherit).
+  two-level INTERSECT — instance `enabledModels` → per-teacher `assignedModels`
+  (each level narrows, never widens; unset = inherit).
   Since **P14** this also governs local/CLI/discovered models (still free, now
   curatable — no silent free-pass): `availability.server.ts#isModelSelectableForUser`
-  is a membership walk over the three levels, so it gates a volatile `ollama::…` id
+  is a membership walk over the two levels, so it gates a volatile `ollama::…` id
   without enumerating any local server. Opus-class + `compat::` stay server-only.
-  Students never pick; the gates only bound what admin/teacher may *offer*.
+  The gates only bound what an admin/teacher may *offer*.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).

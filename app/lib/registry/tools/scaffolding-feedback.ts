@@ -36,7 +36,7 @@ export const scaffoldingFeedback: Tool = {
     evaluatedWith: { nl: "Claude", en: "Claude" },
     adapted: false,
   }),
-  // Learner tutor: the cohort's context profile seeds the level (EQF) with the
+  // Learner tutor: the teacher's context profile seeds the level (EQF) with the
   // direct-address register directive (P6.8).
   usesContextProfile: true,
   defaultOutputLanguage: "nl",

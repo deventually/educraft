@@ -33,8 +33,6 @@ vi.mock("~/server/repositories/generations.server", () => ({
 type ActionMod = typeof import("~/routes/api.stream");
 let action: ActionMod["action"];
 let m: Awaited<ReturnType<typeof import("~/lib/i18n").getMessages>>;
-let cohorts: typeof import("~/server/repositories/cohorts.server");
-let profiles: typeof import("~/server/repositories/profiles.server");
 let users: typeof import("~/server/repositories/users.server");
 let settings: typeof import("~/server/repositories/settings.server");
 let realAuth: typeof import("~/server/auth.server");
@@ -48,8 +46,6 @@ beforeAll(async () => {
   ({ action } = await import("~/routes/api.stream"));
   const i18n = await import("~/lib/i18n");
   m = i18n.getMessages("nl");
-  cohorts = await import("~/server/repositories/cohorts.server");
-  profiles = await import("~/server/repositories/profiles.server");
   users = await import("~/server/repositories/users.server");
   settings = await import("~/server/repositories/settings.server");
   realAuth = await vi.importActual("~/server/auth.server");
@@ -71,7 +67,7 @@ beforeEach(() => {
     id: request.headers.get("x-test-user") ?? "anon",
     name: "Test User",
     email: null,
-    role: (request.headers.get("x-test-role") ?? "teacher") as "teacher" | "admin" | "student",
+    role: (request.headers.get("x-test-role") ?? "teacher") as "teacher" | "admin",
     createdAt: new Date(0),
   }));
 });
@@ -124,16 +120,6 @@ function sseTokens(text: string): string[] {
 /** All template placeholders resolved, so buildSystemPrompt never throws. */
 function fullValues(slug: string): Record<string, unknown> {
   return toTemplateValues(defaultValuesFor(getToolBySlug(slug)!.inputs));
-}
-
-function asUser(id: string, role: "student" | "teacher" | "admin") {
-  getUserMock.mockResolvedValue({
-    id,
-    name: `Test ${role}`,
-    email: null,
-    role,
-    createdAt: new Date(0),
-  });
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -272,16 +258,6 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
     getUserMock.mockResolvedValueOnce(null);
     const res = await invoke({ slug: "socratic-partner", values: { chapter: "x" } });
     expect(sseErrorMessage(await res.text())).toBe(m.error.unauthorized);
-    expect(streamChatSpy).not.toHaveBeenCalled();
-  });
-
-  it("[3] role not allowed: a student cannot drive an instructor tool", async () => {
-    asUser("r-role-student", "student"); // no cohort → all student tools, but not instructor ones
-    const res = await invoke({
-      slug: "cognitive-architect",
-      values: fullValues("cognitive-architect"),
-    });
-    expect(sseErrorMessage(await res.text())).toBe(m.error.notAllowed);
     expect(streamChatSpy).not.toHaveBeenCalled();
   });
 
@@ -429,37 +405,7 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
     expect(streamChatSpy).toHaveBeenCalledTimes(2);
   });
 
-  it("[11] a student tool outside the cohort allow-list → notAllowed (P6)", async () => {
-    const student = "r-cohort-allow";
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "teacher-allow",
-      name: "Allow only mentorai",
-      allowedToolSlugs: ["mentorai"],
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
-    // socratic-partner is a student tool but NOT in the cohort's allow-list.
-    const res = await invoke({ slug: "socratic-partner", values: { chapter: "x" } });
-    expect(sseErrorMessage(await res.text())).toBe(m.error.notAllowed);
-    expect(streamChatSpy).not.toHaveBeenCalled();
-  });
-
-  it("[12] an inactive cohort → cohortInactive (P6)", async () => {
-    const student = "r-cohort-inactive";
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "teacher-inactive",
-      name: "Expired",
-      allowedToolSlugs: ["socratic-partner"],
-      activeUntil: new Date(Date.now() - 86_400_000), // yesterday
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
-    const res = await invoke({ slug: "socratic-partner", values: { chapter: "x" } });
-    expect(sseErrorMessage(await res.text())).toBe(m.error.cohortInactive);
-    expect(streamChatSpy).not.toHaveBeenCalled();
-  });
-
-  it("[13] a stale sessionVersion cookie is treated as unauthenticated (P6.7)", async () => {
+  it("[11] a cookie from before a password change is treated as unauthenticated", async () => {
     // Real getUser + real session cookies for this one test.
     getUserMock.mockImplementation((req: Request) => realAuth.getUser(req));
     const u = await users.createUser({
@@ -471,8 +417,8 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
     const staleCookie = (await realAuth.createUserSession(u.id, "/")).headers
       .get("Set-Cookie")!
       .split(";")[0];
-    // A second login bumps the DB sessionVersion, invalidating the first cookie.
-    await realAuth.createUserSession(u.id, "/");
+    // A password change bumps the DB sessionVersion, invalidating the first cookie.
+    await users.updateUserPassword(u.id, "scrypt:cc:dd");
 
     const res = await invoke(
       { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
@@ -527,25 +473,6 @@ describe("api.stream — model allow-list & budget", () => {
     await users.setUserAssignedModels(teacherId, null); // reset
   });
 
-  it("[P13] a cohort's model set blocks a model outside it for its students", async () => {
-    await settings.setEnabledModels(null);
-    const student = "p13-cohort-student";
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "p13-teacher",
-      name: "Sonnet-only cohort",
-      allowedToolSlugs: ["socratic-partner"],
-      allowedModelIds: ["claude-sonnet-4-6"], // haiku excluded
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
-    await invoke({
-      slug: "socratic-partner",
-      values: { chapter: "x" },
-      model: "claude-haiku-4-5",
-    });
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
-  });
-
   it("[P14] an uncurated instance still honours a local/CLI model (back-compat)", async () => {
     await settings.setEnabledModels(null); // nothing curated → local stays available
     await invoke(
@@ -565,23 +492,20 @@ describe("api.stream — model allow-list & budget", () => {
     await settings.setEnabledModels(null); // reset
   });
 
-  it("[P14] a local/CLI model outside a cohort's set is refused for its students", async () => {
+  it("[P14] a local/CLI model outside a teacher's assigned set is refused", async () => {
     await settings.setEnabledModels(null);
-    const student = "p14-cohort-student";
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "p14-teacher-2",
-      name: "Sonnet-only — local now governed",
-      allowedToolSlugs: ["socratic-partner"],
-      allowedModelIds: ["claude-sonnet-4-6"], // claude-code excluded
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
-    await invoke({
-      slug: "socratic-partner",
-      values: { chapter: "x" },
-      model: "claude-code", // no longer free-passed → falls back to default
-    });
+    const teacherId = "p14-assigned-teacher";
+    await users.setUserAssignedModels(teacherId, ["claude-sonnet-4-6"]); // claude-code excluded
+    await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "x" },
+        model: "claude-code", // not free-passed → falls back to default
+      },
+      { userId: teacherId },
+    );
     expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    await users.setUserAssignedModels(teacherId, null); // reset
   });
 
   it("streams with the tool's configured maxTokens budget", async () => {
@@ -602,73 +526,36 @@ describe("api.stream — model allow-list & budget", () => {
     expect(streamChatSpy.mock.calls[0][0].thinking).toBeUndefined();
   });
 
-  it("[bugfix] a cohort allowing ONLY a local model serves it, never the disabled tool default", async () => {
+  it("[bugfix] a teacher assigned ONLY a local model is served it, never the disabled tool default", async () => {
     await settings.setEnabledModels(null); // uncurated instance → local model is free
-    const student = "local-only-cohort-student";
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "local-only-cohort-teacher",
-      name: "Ollama-only cohort",
-      allowedToolSlugs: ["socratic-partner"],
-      allowedModelIds: ["ollama::qwen3.6:27b-coding-nvfp4"], // Sonnet NOT allowed
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
+    const teacherId = "local-only-teacher";
+    await users.setUserAssignedModels(teacherId, ["ollama::qwen3.6:27b-coding-nvfp4"]); // Sonnet NOT allowed
 
-    // The student explicitly picks the cohort's only model → used verbatim.
-    await invoke({
-      slug: "socratic-partner",
-      values: { chapter: "x" },
-      model: "ollama::qwen3.6:27b-coding-nvfp4",
-    });
+    // The teacher explicitly picks their only model → used verbatim.
+    await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "x" },
+        model: "ollama::qwen3.6:27b-coding-nvfp4",
+      },
+      { userId: teacherId },
+    );
     expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
 
     // The reported bug: a stale client sends the (disabled) tool default. The
-    // server must NOT serve it — it substitutes the cohort's only allowed model.
+    // server must NOT serve it — it substitutes the teacher's only allowed model.
     streamChatSpy.mockClear();
-    await invoke({
-      slug: "socratic-partner",
-      values: { chapter: "x" },
-      model: "claude-sonnet-4-6", // disabled for this cohort
-    });
+    await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "x" },
+        model: "claude-sonnet-4-6", // disabled for this teacher
+      },
+      { userId: teacherId },
+    );
     expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
     expect(streamChatSpy.mock.calls[0][0].model).not.toBe("claude-sonnet-4-6");
-  });
-});
-
-// ════════════════════════════════════════════════════════════════════════════
-// Cohort chat happy-path (P6) — membership-authorized profile + config injection
-// ════════════════════════════════════════════════════════════════════════════
-
-describe("api.stream — provisioned student (P6)", () => {
-  it("injects the cohort's config values and membership-authorized profile into the prompt", async () => {
-    const student = "cohort-happy-student";
-    const profile = await profiles.createProfile("cohort-teacher", {
-      name: "Cohort profile",
-      eqf: 6,
-    });
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "cohort-teacher",
-      name: "SE cohort",
-      allowedToolSlugs: ["socratic-partner"],
-      config: { "socratic-partner": { values: { chapter: "Photosynthesis" } } },
-      contextProfileId: profile.id,
-      activeUntil: null,
-    });
-    await cohorts.addMembership(cohort.id, student);
-    asUser(student, "student");
-
-    await invoke({
-      slug: "socratic-partner",
-      // A tampered client value must lose to the cohort's server-authoritative config.
-      values: { chapter: "CLIENT-TAMPERED" },
-      messages: [{ role: "user", content: "hoi" }],
-    });
-
-    expect(streamChatSpy).toHaveBeenCalledTimes(1);
-    const { system } = streamChatSpy.mock.calls[0][0];
-    expect(system).toContain("Photosynthesis"); // cohort config won
-    expect(system).not.toContain("CLIENT-TAMPERED");
-    expect(system).toContain("EQF 6"); // profile injected by membership
+    await users.setUserAssignedModels(teacherId, null); // reset
   });
 });
 

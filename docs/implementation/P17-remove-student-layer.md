@@ -11,7 +11,7 @@
 
 LimeOnIt wordt eerst een **assistent voor docenten** (BESLUIT-2026-11-02-1). De studentenlaag uit
 P6/P7/P13/P14 (studentrol, cohorten, studentuitnodigingen, mentorinzicht, verwijderverzoek,
-vergrendelde modus, één actieve sessie) wordt in de pilot niet gebruikt. Ze maakt elke wijziging
+vergrendelde modus, uitloggen bij elke login) wordt in de pilot niet gebruikt. Ze maakt elke wijziging
 duurder: elke loader, de stream en elke modelpoort hebben een studenttak. Bastiaan heeft besloten dat
 de laag eruit gaat (BESLUIT-2026-11-03-3) en dat er geen studentdata bewaard hoeft te worden. De
 studenttutors blijven, als tools waarmee docenten zelf leren (BESLUIT-2026-11-03-4).
@@ -38,8 +38,10 @@ onderaan).
    definitief, met de bestaande bevestiging door een woord te typen. Het verwijderverzoek en
    `disabledAt` verdwijnen. `disabledAt` wordt nergens anders gebruikt (gecontroleerd met grep:
    alleen `requestAccountDeletion`, `reactivateUser`, `getUser` en `login.tsx`).
-5. **Eén actieve sessie gaat helemaal weg** (`sessionVersion`), zoals de opdracht zegt. Zie
-   *Risico's* punt 2 voor wat docenten daarmee verliezen.
+5. **Inloggen op meerdere apparaten tegelijk mag; uitloggen na een nieuw wachtwoord blijft**
+   (BESLUIT-2026-11-03-13). De kolom `users.session_version` en de cookiecontrole in `getUser`
+   blijven. De teller wordt **alleen** verhoogd bij een nieuw wachtwoord (wachtwoordreset en
+   wachtwoordwijziging op `/account`), nooit bij een login. Zie *Risico's* punt 2.
 6. **Uitnodigingen:** een beheerder nodigt docenten uit zoals nu (`/admin/invites`,
    `npm run invite`). Studentuitnodigingen, cohortkoppeling en uitnodigingen gebonden aan een
    e-mailadres (alleen gebruikt voor studenten) verdwijnen.
@@ -152,7 +154,7 @@ tabellen bestaan nog (besluit 8).
 ## 17.2 — De studentrol en cohorten eruit (PR 2)
 
 **Doel:** de app kent alleen `teacher` en `admin`. Er zijn geen cohorten, geen
-studentuitnodigingen, geen vergrendelde modus, geen verwijderverzoek, geen sessieversie en geen
+studentuitnodigingen, geen vergrendelde modus, geen verwijderverzoek, geen uitloggen bij elke login en geen
 cohortlaag in de modelpoort. Het schema blijft ongewijzigd (besluit 8).
 
 **Model:** Sonnet, gemiddeld. De PR is groot maar mechanisch: vooral weghalen. Ga naar Sonnet hoog
@@ -174,18 +176,25 @@ als een cluster tests om onduidelijke reden faalt. **Voorstel voor de branch:**
   - `userModelRestriction()` en `isModelSelectableForUser()`: de studenttak eruit (alleen de
     docenttak blijft). Commentaren over "per-cohort" / "cohort set" herschrijven naar twee niveaus.
 - `app/server/auth.server.ts`:
-  - `getUser()`: de controle op `row.disabledAt` en de controle op `sessionVersion` eruit. Nieuw:
-    `if (!isRole(row.role)) return null;`. Een overgebleven studentrij (vóór 17.3, of blijvend in
+  - `getUser()`: de controle op `row.disabledAt` eruit. De controle op `sessionVersion` **blijft**.
+    Nieuw: `if (!isRole(row.role)) return null;`. Een overgebleven studentrij (vóór 17.3, of blijvend in
     het alternatief) telt dan als uitgelogd.
-  - `createUserSession()`: geen `bumpSessionVersion` meer; de cookie draagt alleen `userId`.
-- `app/server/session.server.ts`: `sessionVersion` uit het cookietype en uit het commentaar. Oude
-  cookies met dat veld blijven werken, want het veld wordt genegeerd.
+  - `createUserSession()`: verhoogt `sessionVersion` **niet** meer; de cookie draagt `userId` en de
+    huidige `sessionVersion`. Een login laat andere sessies dus met rust.
+  - `reissueSessionCookie(userId)` (nieuw): een verse cookie met de huidige versie, voor het
+    apparaat dat het wachtwoord net wijzigde.
+- `app/server/session.server.ts`: het cookietype houdt `sessionVersion`; pas alleen het commentaar
+  aan (verhoogd bij een nieuw wachtwoord, niet bij een login).
 - `app/routes/login.tsx`: de tak met `row.disabledAt`/`accountDisabled` eruit. Nieuw: een rij met
   een rol waarvoor `!isRole(row.role)` geldt, krijgt de generieke `m.auth.loginFailed` (geen
   opsomming van accounts).
-- `app/routes/reset.$token.tsx`: alleen het commentaar over `sessionVersion` aanpassen.
+- `app/routes/reset.$token.tsx`: alleen het commentaar aanpassen. `updateUserPassword` verhoogt de
+  teller, en de sessie die daarna wordt aangemaakt draagt de nieuwe versie.
+- `app/routes/account.tsx` (`changePassword`): `updateUserPassword` verhoogt de teller; de action
+  geeft met `data(…, { headers })` een verse cookie terug, zodat dit apparaat ingelogd blijft.
 - `app/server/repositories/users.server.ts`: `requestAccountDeletion`, `reactivateUser`,
-  `bumpSessionVersion` en `createInvitesForCohort` eruit. Uit `CreateInviteInput` gaan `cohortId` en
+  `bumpSessionVersion` en `createInvitesForCohort` eruit. `updateUserPassword` verhoogt zelf
+  `sessionVersion` (de enige plek waar dat gebeurt). Uit `CreateInviteInput` gaan `cohortId` en
   `email`. `createInvite`/`createUser` vullen de schemavelden met `null`/`0` (besluit 8). Uit
   `consumeInvite` gaat de e-mailbinding, en ook de parameter `submittedEmail`. Uit
   `listInvitesWithContext` gaan de `leftJoin(cohorts)` en de velden `cohortId`/`cohortName`/`email`.
@@ -276,8 +285,13 @@ als een cluster tests om onduidelijke reden faalt. **Voorstel voor de branch:**
       geldige cookie geeft `getUser` → `null`.
     - `it("login refuses a legacy student account with the generic message")`.
     - `it("a second login keeps the first session valid")`: twee keer `createUserSession` voor
-      dezelfde gebruiker; beide cookies lossen op naar die gebruiker. Dit test is nu RED, door
-      `sessionVersion`.
+      dezelfde gebruiker; beide cookies lossen op naar die gebruiker. Dit test is nu RED, omdat
+      een login `sessionVersion` verhoogt.
+    - `it("a password update logs out every older session but not a freshly minted one")`.
+    - `tests/api/reset-flow.test.ts`: een oudere cookie van dezelfde gebruiker is na een
+      wachtwoordreset ongeldig, de nieuwe sessie geldig.
+    - `tests/api/account-route.test.ts`: na `changePassword` is een cookie van een ander apparaat
+      ongeldig en geeft de action een verse, geldige cookie terug.
     - De blokken `disabled account (Phase 14)` en `single active session (Phase 6 anti-sharing)`
       verwijderen.
   - `tests/api/invite-flow.test.ts`:
@@ -352,8 +366,8 @@ als een cluster tests om onduidelijke reden faalt. **Voorstel voor de branch:**
   - **Model availability:** twee niveaus (instelling ∩ docent). Uit de P14-subbullet gaan de
     verwijzingen naar cohorten en studenten.
 - `wiki/Authentication.md`: de rollentabel (zonder `student`) en de sectie "Account disable &
-  student-initiated removal (P14)" eruit. Haal ook het stuk over één actieve sessie weg, als dat er
-  staat.
+  student-initiated removal (P14)" eruit. Beschrijf de sessies: meerdere apparaten tegelijk;
+  alleen een nieuw wachtwoord logt de andere uit.
 - `wiki/Architecture.md` (regels ~47, ~76, ~81), `wiki/Context-Model.md` (regel ~95: "role/cohort")
   en `wiki/Home.md` (de samenvatting "three roles · teacher-provisioned cohorts"):
   bijwerken.
@@ -377,7 +391,8 @@ als een cluster tests om onduidelijke reden faalt. **Voorstel voor de branch:**
 - [ ] Handmatig: een beheerder ziet in `/admin` geen Cohorten, geen studentstatistiek en geen
       doelgroepkeuze bij tools.
 - [ ] De PR-beschrijving noemt onder *Wat Bastiaan moet beslissen*: de wijziging in `AGENTS.md` en
-      het verlies van "uitloggen na een wachtwoordreset" (Risico 2).
+      dat inloggen op meerdere apparaten nu mag en dat een nieuw wachtwoord de andere apparaten nog
+      steeds uitlogt (BESLUIT-2026-11-03-13).
 
 ---
 
@@ -400,7 +415,7 @@ goed met de merge; noem het in de PR.
 - Weg (tabellen): `cohorts`, `cohortMemberships`, `cohortTeachers` en `sessionSummaries`, met hun
   rijtypes (`CohortRow`, `CohortMembershipRow`, `CohortTeacherRow`, `SessionSummaryRow`).
 - Weg (kolommen):
-  - `users`: `sessionVersion`, `disabledAt`, `deletionRequestedAt`. Werk het commentaar bij
+  - `users`: `disabledAt`, `deletionRequestedAt`. **`sessionVersion` blijft** (BESLUIT-2026-11-03-13). Werk het commentaar bij
     `role` bij naar `"teacher" | "admin"`.
   - `invites`: `cohortId`, `email`.
   - `chatSessions`: `cohortId`.
@@ -458,15 +473,16 @@ goed met de merge; noem het in de PR.
       het student-id; de docentrijen zijn er allemaal nog (tel per tabel).
     - `it("drops the cohort and insight tables")`: `sqlite_master` kent `cohorts`,
       `cohort_memberships`, `cohort_teachers` en `session_summaries` niet meer.
-    - `it("drops the student-only columns")`: `PRAGMA table_info` mist `users.session_version`,
+    - `it("drops the student-only columns")`: `PRAGMA table_info` mist
       `users.disabled_at`, `users.deletion_requested_at`, `invites.cohort_id`, `invites.email`,
       `chat_sessions.cohort_id` en `tool_settings.audience_override`.
+    - `it("keeps users.session_version")`: die kolom blijft (BESLUIT-2026-11-03-13).
     - `it("keeps the open teacher invite redeemable")`: de rij bestaat nog, met `role='teacher'`.
   - RED: zonder nieuwe migratie zijn er geen latere entries en falen alle vier.
 - **Aanpassen:**
   - `tests/api/delete-account.test.ts`: het geval `keeps a teacher's cohorts (orphan-safe)…`
     verwijderen.
-  - Tests die nog `sessionVersion`, `disabledAt` of `audienceOverride` in een rij-literal zetten:
+  - Tests die nog `disabledAt` of `audienceOverride` in een rij-literal zetten:
     weghalen. `npm run typecheck` vindt ze.
 - **Verwijderen:** de nu overbodige bestandscontroles hoeven niet weg; `tests/p17-removed.test.ts`
   blijft als bewaking.
@@ -483,7 +499,7 @@ goed met de merge; noem het in de PR.
 ### Klaar als
 
 - [ ] De migratietest faalde eerst en is nu groen; de poort is groen.
-- [ ] `grep -rni "cohort\|sessionVersion\|session_version\|disabledAt\|audienceOverride" app`
+- [ ] `grep -rni "cohort\|disabledAt\|audienceOverride" app`
       geeft niets meer.
 - [ ] Lokaal geprobeerd op een kopie van een database in de stand van 0007 (geen pilotdata in de
       repo!): de app start, een docent logt in, ziet zijn werk in Projecten en zijn profielen.
@@ -532,12 +548,12 @@ Er komt geen destructieve migratie.
      - Een docent logt in en ziet zijn werk.
    - **Terugdraaien** = de back-up terugzetten op het volume en de vorige image deployen.
    - De back-up bevat studentdata. Verwijder hem na een korte, door Bastiaan gekozen termijn.
-2. **Eén actieve sessie weg = ook "uitloggen na een wachtwoordreset" weg.** Nu maakt een login of
-   reset elke oudere cookie ongeldig. Zonder `sessionVersion` blijft een oude cookie tot 30 dagen
-   geldig, ook na een reset. Voor docenten is het gemak (inloggen op laptop en telefoon tegelijk)
-   een winst. Wil Bastiaan de reset-uitlog houden, houd dan de kolom en verhoog hem **alleen** in
-   `reset.$token.tsx` en bij `changePassword` (niet bij elke login). Dat is een klein extra geval in
-   17.2, alleen op zijn verzoek.
+2. **Uitloggen bij elke login is weg; uitloggen na een nieuw wachtwoord blijft** (besluit van
+   Bastiaan, 2026-11-03). Een docent kan op laptop en telefoon tegelijk ingelogd zijn. De kolom
+   `users.session_version` en de cookiecontrole in `getUser` blijven; de teller gaat **alleen**
+   omhoog in `updateUserPassword` (wachtwoordreset via `reset.$token.tsx` en `changePassword` op
+   `/account`), nooit bij een login. Het apparaat dat het wachtwoord wijzigt krijgt een verse
+   cookie en blijft ingelogd. Alleen een cookie van vóór de wijziging wordt uitgelogd.
 3. **Volgorde met P20.** P20 maakt ook een migratie en noemt "0008". Wie later merget, krijgt het
    volgende nummer. De migratietest zoekt entries via de journal, dus niets breekt. Als P17 eerst
    landt, vervallen in P20 de studentgevallen (`requireRole` → een student krijgt een 404, de

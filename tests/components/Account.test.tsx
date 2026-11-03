@@ -9,7 +9,7 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 function renderAccount(
   email: string | null = "teacher@example.com",
-  role: "teacher" | "student" | "admin" = "teacher",
+  role: "teacher" | "admin" = "teacher",
 ) {
   const props = {
     loaderData: { user: { name: "Teacher T", email, role } },
@@ -45,20 +45,20 @@ describe("Account page", () => {
     ).toBeInTheDocument();
   });
 
-  it("[P14] a student sees the request-removal variant, not a hard delete", () => {
-    renderAccount("student@example.com", "student");
+  it("offers the hard delete to everyone, with no request-removal variant", () => {
+    renderAccount();
     expect(
-      screen.getByRole("button", { name: /vraag verwijdering|request removal/i }),
+      screen.getByRole("button", { name: /verwijder mijn account|delete my account/i }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /verwijder mijn account|delete my account/i }),
+      screen.queryByRole("button", { name: /vraag verwijdering|request removal/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("has no a11y violations (teacher and student variants)", async () => {
+  it("has no a11y violations (teacher and admin variants)", async () => {
     const teacher = renderAccount();
     expect((await axe(teacher.container, axeOpts)).violations).toEqual([]);
-    const student = renderAccount("student@example.com", "student");
-    expect((await axe(student.container, axeOpts)).violations).toEqual([]);
+    const admin = renderAccount("admin@example.com", "admin");
+    expect((await axe(admin.container, axeOpts)).violations).toEqual([]);
   });
 });

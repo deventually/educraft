@@ -10,9 +10,7 @@ import {
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import { useFormToast } from "~/components/Toast";
-import { Badge, Button, Select } from "~/components/ui";
-
-const AUDIENCES = ["", "student", "instructor", "both"] as const;
+import { Badge, Button } from "~/components/ui";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
@@ -27,7 +25,6 @@ export async function loader({ request }: Route.LoaderArgs) {
       mode: tool.mode,
       phase: tool.phase,
       enabled: s?.enabled ?? tool.enabled, // effective
-      audienceOverride: s?.audienceOverride ?? "",
     };
   });
   return { rows };
@@ -40,11 +37,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (!ALL_TOOLS.some((tl) => tl.slug === slug)) {
     return { error: true as const };
   }
-  const audienceRaw = String(fd.get("audience") ?? "");
-  const audienceOverride = (AUDIENCES as readonly string[]).includes(audienceRaw)
-    ? audienceRaw || null
-    : null;
-  await setToolSetting(slug, { enabled: fd.get("enabled") === "on", audienceOverride });
+  await setToolSetting(slug, { enabled: fd.get("enabled") === "on" });
   const saved = await getToolSetting(slug);
   return { savedSlug: slug, enabled: saved?.enabled ?? false };
 }
@@ -64,13 +57,6 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
             ? { variant: "success", message: t.admin.console.saved }
             : null,
   });
-  const audienceLabel: Record<string, string> = {
-    "": t.admin.tools.audienceDefault,
-    student: t.admin.tools.audienceStudent,
-    instructor: t.admin.tools.audienceInstructor,
-    both: t.admin.tools.audienceBoth,
-  };
-
   return (
     <section>
       <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
@@ -91,9 +77,6 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
               </th>
               <th scope="col" className="px-4 py-2.5 font-semibold">
                 {t.admin.tools.colPhase}
-              </th>
-              <th scope="col" className="px-4 py-2.5 font-semibold">
-                {t.admin.tools.audienceLabel}
               </th>
               <th scope="col" className="px-4 py-2.5 font-semibold">
                 {t.admin.tools.enabledLabel}
@@ -122,24 +105,6 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                     {r.mode === "chat" ? t.admin.tools.modeChat : t.admin.tools.modeOneShot}
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">{r.phase}</td>
-                  <td className="px-4 py-2.5">
-                    <label htmlFor={`audience-${r.slug}`} className="sr-only">
-                      {t.admin.tools.audienceLabel} — {name}
-                    </label>
-                    <Select
-                      id={`audience-${r.slug}`}
-                      form={r.slug}
-                      name="audience"
-                      defaultValue={r.audienceOverride}
-                      className="w-auto"
-                    >
-                      {AUDIENCES.map((a) => (
-                        <option key={a || "default"} value={a}>
-                          {audienceLabel[a]}
-                        </option>
-                      ))}
-                    </Select>
-                  </td>
                   <td className="px-4 py-2.5">
                     <input
                       form={r.slug}

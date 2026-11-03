@@ -46,3 +46,27 @@ describe("P17.1 — mentor insight removed", () => {
     }
   });
 });
+
+describe("P17.2 — student role and cohorts removed", () => {
+  it("routes.ts registers no cohort routes", () => {
+    expect(read("app/routes.ts")).not.toContain("cohorts");
+  });
+
+  it("the cohort modules are gone", () => {
+    for (const p of [
+      "app/server/repositories/cohorts.server.ts",
+      "app/routes/cohorts._index.tsx",
+      "app/routes/cohorts.$id.tsx",
+      "app/routes/admin.cohorts.tsx",
+    ]) {
+      expect(existsSync(resolve(root, p)), p).toBe(false);
+    }
+  });
+
+  it("the i18n catalogues have no cohorts namespace", () => {
+    for (const cat of [nl, en]) {
+      expect("cohorts" in cat).toBe(false);
+      expect("cohorts" in (cat as { admin: object }).admin).toBe(false);
+    }
+  });
+});

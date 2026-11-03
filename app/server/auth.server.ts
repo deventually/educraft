@@ -1,8 +1,8 @@
 import { redirect } from "react-router";
 import { commitSession, destroySession, getSession } from "./session.server";
-import { bumpSessionVersion, getUserById } from "./repositories/users.server";
+import { getUserById } from "./repositories/users.server";
 import type { UserRow } from "./schema.server";
-import type { Role } from "~/lib/registry/access";
+import { isRole, type Role } from "~/lib/registry/access";
 
 /**
  * The public user shape passed to loaders/components — the password hash never
@@ -34,11 +34,10 @@ export async function getUser(request: Request): Promise<User | null> {
   if (!userId || typeof userId !== "string") return null;
   const row = await getUserById(userId);
   if (!row) return null;
-  // Disabled account (Phase 14): a student-requested removal (or an admin disable)
-  // is a hard logout everywhere until a teacher/admin restores or purges it.
-  if (row.disabledAt) return null;
-  // Single active session (Phase 6): a cookie whose sessionVersion is behind the
-  // stored one was invalidated by a newer login → treat as logged out.
+  // A legacy row with a retired role (e.g. "student", pre-P17 data) counts as logged out.
+  if (!isRole(row.role)) return null;
+  // A cookie whose sessionVersion is behind the stored one predates a password
+  // change → treat as logged out on that device.
   const cookieVersion = session.get("sessionVersion") ?? 0;
   if ((row.sessionVersion ?? 0) !== cookieVersion) return null;
   return toPublicUser(row);
@@ -58,19 +57,30 @@ export async function requireRole(request: Request, ...roles: Role[]): Promise<U
   return user;
 }
 
-/**
- * Create a session for `userId` and redirect to `redirectTo`. Bumps the user's
- * `sessionVersion` first and writes it into the cookie, so this login invalidates
- * any older cookie (single active session, Phase 6).
- */
-export async function createUserSession(userId: string, redirectTo: string): Promise<Response> {
-  const sessionVersion = await bumpSessionVersion(userId);
+/** Mint a session cookie carrying the user's current `sessionVersion` (no bump). */
+async function sessionCookie(userId: string): Promise<string> {
+  const row = await getUserById(userId);
   const session = await getSession();
   session.set("userId", userId);
-  session.set("sessionVersion", sessionVersion);
-  return redirect(redirectTo, {
-    headers: { "Set-Cookie": await commitSession(session) },
-  });
+  session.set("sessionVersion", row?.sessionVersion ?? 0);
+  return commitSession(session);
+}
+
+/**
+ * Create a session for `userId` and redirect to `redirectTo`. Logging in does not
+ * touch other sessions: the same account may be signed in on several devices.
+ */
+export async function createUserSession(userId: string, redirectTo: string): Promise<Response> {
+  return redirect(redirectTo, { headers: { "Set-Cookie": await sessionCookie(userId) } });
+}
+
+/**
+ * `Set-Cookie` header value for a fresh session of `userId`. Used after a password
+ * change: the change bumps `sessionVersion` (logging out every other device), so the
+ * device that made the change needs a re-issued cookie to stay signed in.
+ */
+export async function reissueSessionCookie(userId: string): Promise<string> {
+  return sessionCookie(userId);
 }
 
 /** Destroy the session and redirect to /login. */

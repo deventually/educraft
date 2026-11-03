@@ -92,7 +92,7 @@ Public seam: `getAvailableCountries` / `getAvailableSectors` / `getAvailableDoma
 the track-independent `getAvailableDomainSlugs`.
 
 > Note the contrast with the **tool/model** gates in the same module, which *intersect*
-> instance × role/cohort × per-teacher allow-list. The context axes deliberately do not.
+> instance × per-teacher allow-list. The context axes deliberately do not.
 
 ---
 

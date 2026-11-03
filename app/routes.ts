@@ -10,8 +10,6 @@ export default [
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("context-profiles", "routes/context-profiles.tsx"),
-    route("cohorts", "routes/cohorts._index.tsx"),
-    route("cohorts/:id", "routes/cohorts.$id.tsx"),
     route("account", "routes/account.tsx"),
     // Admin console (Phase 4). The layout gates on requireRole("admin"); every
     // child repeats the check (loaders run in parallel).
@@ -21,7 +19,6 @@ export default [
       route("models", "routes/admin.models.tsx"),
       route("context", "routes/admin.context.tsx"),
       route("invites", "routes/admin.invites.tsx"),
-      route("cohorts", "routes/admin.cohorts.tsx"),
       route("usage", "routes/admin.usage.tsx"),
       route("feedback", "routes/admin.feedback.tsx"),
     ]),

@@ -46,8 +46,8 @@ export function StageStepper({
     defaultProfileId,
   });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
-  // Pre-select an OFFERED model, not blindly the tool default: a cohort that
-  // offers only a local model must not start on the frontier default it disabled.
+  // Pre-select an OFFERED model, not blindly the tool default: a teacher
+  // whose set holds only a local model must not start on the frontier default.
   const [model, setModel] = useState(() =>
     initialPickerModel(pickableModels(localModels ?? [], false, catalogModels), tool.defaultModel),
   );

@@ -33,13 +33,6 @@ interface ChatViewProps {
   localModels?: PickerModel[];
   /** Admin-configured catalog allow-list (Phase 4); omitted → full client-selectable catalog. */
   catalogModels?: PickerModel[];
-  /**
-   * Provisioned-student mode (Phase 6.9): the sandbox is prefilled + locked from
-   * the cohort config, so the student skips the sandbox gate and the editable
-   * settings/profile controls and lands directly on the greeting. `undefined` for
-   * teachers/admins, who keep the editable sandbox.
-   */
-  lockedValues?: Record<string, string>;
   onGenerationStart?: () => void;
 }
 
@@ -50,27 +43,23 @@ export function ChatView({
   outputLanguage: defaultOutputLanguage,
   localModels,
   catalogModels,
-  lockedValues,
   onGenerationStart,
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
-  // context profile arrives as a prop — so it only uses the values + locked flag.
-  const {
-    values: sandboxValues,
-    setValue: setSandboxValue,
-    locked,
-  } = useSandbox({ inputs: tool.inputs, lockedValues });
-  // Provisioned students skip the sandbox gate entirely (locked ⇒ pre-submitted).
-  const [sandboxSubmitted, setSandboxSubmitted] = useState(locked);
+  // context profile arrives as a prop — so it only uses the values.
+  const { values: sandboxValues, setValue: setSandboxValue } = useSandbox({
+    inputs: tool.inputs,
+  });
+  const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   // Every screen offers the same models: API-key catalog + local CLI agents +
   // any Ollama / LM Studio models discovered at runtime.
   const modelOptions = pickableModels(localModels ?? [], false, catalogModels);
-  // Pre-select an OFFERED model (not blindly the tool default): a cohort that
+  // Pre-select an OFFERED model (not blindly the tool default): a teacher whose set
   // offers only a local model must not start on — and then send — the frontier
   // default it disabled.
   const [selectedModel, setSelectedModel] = useState(() =>
@@ -272,111 +261,99 @@ export function ChatView({
     // top) that scrolls with the page — pinning there would trap the tall aside
     // and its model/language controls off-screen.
     <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
-      {/* Settings aside — what was entered before the chat, plus model/language.
-          Hidden for a provisioned student: the teacher set the config, so there
-          are no editable settings/profile controls (Phase 6.9). */}
-      {!locked && (
-        <aside
-          aria-labelledby="chat-settings-heading"
-          className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
+      {/* Settings aside — what was entered before the chat, plus model/language. */}
+      <aside
+        aria-labelledby="chat-settings-heading"
+        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
+      >
+        <h2
+          id="chat-settings-heading"
+          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
         >
-          <h2
-            id="chat-settings-heading"
-            className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+          {t.chat.yourSettings}
+        </h2>
+
+        {sandboxSummary.length > 0 && (
+          <dl className="mt-3 space-y-2.5">
+            {sandboxSummary.map((item) => (
+              <div key={item.name}>
+                <dt className="text-[11px] text-slate-500">{item.label}</dt>
+                <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {tool.inputs.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSandboxSubmitted(false)}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
           >
-            {t.chat.yourSettings}
-          </h2>
+            <Pencil className="size-3.5" aria-hidden />
+            {t.chat.edit}
+          </button>
+        )}
 
-          {sandboxSummary.length > 0 && (
-            <dl className="mt-3 space-y-2.5">
-              {sandboxSummary.map((item) => (
-                <div key={item.name}>
-                  <dt className="text-[11px] text-slate-500">{item.label}</dt>
-                  <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-
-          {tool.inputs.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setSandboxSubmitted(false)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+          <div>
+            <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
+              {t.tool.model}
+            </Label>
+            <Select
+              id="chat-model"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="h-9 w-full py-0 text-sm"
             >
-              <Pencil className="size-3.5" aria-hidden />
-              {t.chat.edit}
-            </button>
-          )}
-
-          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-            <div>
-              <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
-                {t.tool.model}
-              </Label>
-              <Select
-                id="chat-model"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="h-9 w-full py-0 text-sm"
-              >
-                {modelOptions.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.displayName}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {/* Reasoning switch — only for models that support it (Ollama Qwen3
+              {modelOptions.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
+            </Select>
+          </div>
+          {/* Reasoning switch — only for models that support it (Ollama Qwen3
                 etc.). Off by default: a direct answer is far faster than reasoning
                 first. Hidden entirely for non-thinking models. */}
-            {selectedModelSupportsThinking && (
-              <div>
-                <label
-                  htmlFor="chat-thinking"
-                  className="flex items-center gap-2 text-sm text-slate-700"
-                >
-                  <input
-                    id="chat-thinking"
-                    type="checkbox"
-                    className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
-                    checked={thinking}
-                    onChange={(e) => setThinking(e.target.checked)}
-                  />
-                  {t.tool.reasoning}
-                </label>
-                <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
-              </div>
-            )}
+          {selectedModelSupportsThinking && (
             <div>
-              <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
-                {t.tool.outputLanguage}
-              </Label>
-              <Select
-                id="chat-lang"
-                value={outputLanguage}
-                onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
-                className="h-9 w-full py-0 text-sm"
+              <label
+                htmlFor="chat-thinking"
+                className="flex items-center gap-2 text-sm text-slate-700"
               >
-                <option value="nl">{t.tool.dutch}</option>
-                <option value="en">{t.tool.english}</option>
-              </Select>
+                <input
+                  id="chat-thinking"
+                  type="checkbox"
+                  className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                  checked={thinking}
+                  onChange={(e) => setThinking(e.target.checked)}
+                />
+                {t.tool.reasoning}
+              </label>
+              <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
             </div>
+          )}
+          <div>
+            <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
+              {t.tool.outputLanguage}
+            </Label>
+            <Select
+              id="chat-lang"
+              value={outputLanguage}
+              onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
+              className="h-9 w-full py-0 text-sm"
+            >
+              <option value="nl">{t.tool.dutch}</option>
+              <option value="en">{t.tool.english}</option>
+            </Select>
           </div>
-        </aside>
-      )}
+        </div>
+      </aside>
 
       {/* Chat column — on wide screens the thread fills the height and the
           composer pins; on mobile it flows in the page scroll. */}
       <div className="flex flex-col md:min-h-0 md:flex-1">
-        {/* Provisioned student: a compact read-only line naming the teacher's
-            config, for transparency (no editable controls). */}
-        {locked && sandboxSummary.length > 0 && (
-          <p className="mb-2 flex-none text-xs text-slate-500">
-            <span className="font-medium text-slate-600">{t.chat.provisionedFor}:</span>{" "}
-            {sandboxSummary.map((item) => item.value).join(" · ")}
-          </p>
-        )}
         {/* Message thread — the scroll region that fills the available height (md+) */}
         <div
           className="md:min-h-0 md:flex-1 md:overflow-y-auto"

@@ -11,29 +11,24 @@ vi.mock("~/server/log.server", () => ({ log: logMock }));
 type Availability = typeof import("~/server/availability.server");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
-type Cohorts = typeof import("~/server/repositories/cohorts.server");
 type Registry = typeof import("~/lib/registry");
 
 let availability: Availability;
 let settings: Settings;
 let users: Users;
-let cohorts: Cohorts;
 let registry: Registry;
 
 const admin = { id: "admin-1", role: "admin" as const };
-const student = { id: "student-1", role: "student" as const };
 
 // Disjoint fixtures per concern so tests stay order-independent.
 const STUDENT_TOOL = "mentorai"; // untouched → registry default
 const INSTRUCTOR_TOOL = "bloom-by-design"; // untouched → registry default
 const DISABLED_TOOL = "arcs-reactor"; // this file disables it
-const BOTH_TOOL = "authentic-assessment"; // this file overrides its audience to "both"
 
 beforeAll(async () => {
   availability = await import("~/server/availability.server");
   settings = await import("~/server/repositories/settings.server");
   users = await import("~/server/repositories/users.server");
-  cohorts = await import("~/server/repositories/cohorts.server");
   registry = await import("~/lib/registry");
 });
 
@@ -44,10 +39,12 @@ describe("getAvailableTools — registry defaults (empty settings)", () => {
     expect(slugs).toContain(INSTRUCTOR_TOOL);
   });
 
-  it("a student sees student tools but never an instructor tool", async () => {
-    const slugs = (await availability.getAvailableTools(student)).map((t) => t.slug);
+  it("a teacher sees tools of both audiences too (no audience gate)", async () => {
+    const slugs = (await availability.getAvailableTools({ id: "t-open", role: "teacher" })).map(
+      (t) => t.slug,
+    );
     expect(slugs).toContain(STUDENT_TOOL);
-    expect(slugs).not.toContain(INSTRUCTOR_TOOL);
+    expect(slugs).toContain(INSTRUCTOR_TOOL);
   });
 });
 
@@ -59,12 +56,6 @@ describe("getAvailableTools — instance overrides", () => {
     // And the single-tool gate agrees (drives tool.tsx 404 + api.stream refusal).
     const tool = registry.getToolBySlug(DISABLED_TOOL);
     expect(await availability.isToolAvailable(admin, tool!)).toBe(false);
-  });
-
-  it('audienceOverride "both" exposes an instructor tool to students', async () => {
-    await settings.setToolSetting(BOTH_TOOL, { audienceOverride: "both" });
-    const slugs = (await availability.getAvailableTools(student)).map((t) => t.slug);
-    expect(slugs).toContain(BOTH_TOOL);
   });
 });
 
@@ -117,9 +108,8 @@ describe("getSelectableModels — admin model allow-list + lockout guard", () =>
   });
 });
 
-describe("getSelectableModelIds — per-teacher & per-cohort narrowing (P13)", () => {
+describe("getSelectableModelIds — per-teacher narrowing (P13)", () => {
   const teacher = { id: "mdl-teacher", role: "teacher" as const };
-  const cohortStudent = { id: "mdl-student", role: "student" as const };
 
   it("no user (admin) is unchanged: the instance base, never widened", async () => {
     const ids = await availability.getSelectableModelIds();
@@ -139,26 +129,6 @@ describe("getSelectableModelIds — per-teacher & per-cohort narrowing (P13)", (
     await users.setUserAssignedModels(teacher.id, null);
     const inherited = await availability.getSelectableModelIds(teacher);
     expect(inherited.has("claude-sonnet-4-6")).toBe(true); // back to base
-  });
-
-  it("a student is narrowed by their cohort's model set (intersect)", async () => {
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "mdl-teacher",
-      name: "Model-restricted cohort",
-      allowedToolSlugs: ["mentorai"],
-      allowedModelIds: ["claude-haiku-4-5"],
-    });
-    await cohorts.addMembership(cohort.id, cohortStudent.id);
-
-    const ids = await availability.getSelectableModelIds(cohortStudent);
-    expect(ids.has("claude-haiku-4-5")).toBe(true);
-    expect(ids.has("claude-sonnet-4-6")).toBe(false);
-  });
-
-  it("a student with no cohort restriction inherits the base", async () => {
-    const ids = await availability.getSelectableModelIds({ id: "mdl-free", role: "student" });
-    expect(ids.has("claude-sonnet-4-6")).toBe(true);
-    expect(ids.has("claude-haiku-4-5")).toBe(true);
   });
 
   it("getSelectableModels mirrors the narrowing for the picker", async () => {
@@ -209,19 +179,6 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
     expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(true);
   });
 
-  it("a student's cohort set narrows a local/CLI id", async () => {
-    const student = { id: "p14-cohort-student", role: "student" as const };
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "p14-teacher",
-      name: "Haiku-only cohort",
-      allowedToolSlugs: ["mentorai"],
-      allowedModelIds: ["claude-haiku-4-5"], // CLI/local excluded
-    });
-    await cohorts.addMembership(cohort.id, student.id);
-    expect(await availability.isModelSelectableForUser(student, CLI)).toBe(false);
-    expect(await availability.isModelSelectableForUser(student, LOCAL)).toBe(false);
-  });
-
   it("narrowLocalModels drops discovered models outside the effective set", async () => {
     const discovered = [
       { id: "ollama::a", displayName: "ollama::a" },
@@ -241,7 +198,7 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
   });
 });
 
-// A cohort (or teacher) whose ONLY allowed model is a discovered local one
+// A teacher whose ONLY allowed model is a discovered local one
 // ("ollama::…"). Such an id is never in the static catalog, so the catalog
 // INTERSECT collapses to empty — but the caller is NOT locked out (the model
 // rides `narrowLocalModels`). The old lockout guard mistook this for a misconfig
@@ -249,22 +206,17 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
 describe("model gates — a local-only allow-list is not a lockout (bugfix)", () => {
   const LOCAL = "ollama::qwen3.6:27b-coding-nvfp4";
 
-  async function localOnlyStudent(id: string) {
-    const student = { id, role: "student" as const };
-    const cohort = await cohorts.createCohort({
-      createdByUserId: `${id}-teacher`,
-      name: "Ollama-only cohort",
-      allowedToolSlugs: ["mentorai"],
-      allowedModelIds: [LOCAL], // Sonnet & the rest of the catalog excluded
-    });
-    await cohorts.addMembership(cohort.id, student.id);
-    return student;
+  async function localOnlyTeacher(id: string) {
+    const teacher = { id, role: "teacher" as const };
+    // Sonnet & the rest of the catalog excluded.
+    await users.setUserAssignedModels(id, [LOCAL]);
+    return teacher;
   }
 
   it("getSelectableModelIds returns an empty CATALOG set — never DEFAULT_MODEL — and does not warn", async () => {
     logMock.mockClear();
-    const student = await localOnlyStudent("local-only-catalog");
-    const ids = await availability.getSelectableModelIds(student);
+    const teacher = await localOnlyTeacher("local-only-catalog");
+    const ids = await availability.getSelectableModelIds(teacher);
     // The catalog half is legitimately empty; the local model rides narrowLocalModels.
     expect([...ids]).toEqual([]);
     expect(ids.has("claude-sonnet-4-6")).toBe(false);
@@ -290,15 +242,15 @@ describe("model gates — a local-only allow-list is not a lockout (bugfix)", ()
     );
     expect(
       await availability.effectiveDefaultModel(
-        { id: "edm-free-student", role: "student" },
+        { id: "edm-free-teacher", role: "teacher" },
         "claude-sonnet-4-6",
       ),
     ).toBe("claude-sonnet-4-6");
   });
 
-  it("effectiveDefaultModel substitutes the cohort's local model when the preferred default is disabled", async () => {
-    const student = await localOnlyStudent("edm-local-only");
-    // Sonnet is not in the cohort's set → the fallback must be the cohort's model.
-    expect(await availability.effectiveDefaultModel(student, "claude-sonnet-4-6")).toBe(LOCAL);
+  it("effectiveDefaultModel substitutes the teacher's local model when the preferred default is disabled", async () => {
+    const teacher = await localOnlyTeacher("edm-local-only");
+    // Sonnet is not in the teacher's set → the fallback must be the teacher's model.
+    expect(await availability.effectiveDefaultModel(teacher, "claude-sonnet-4-6")).toBe(LOCAL);
   });
 });

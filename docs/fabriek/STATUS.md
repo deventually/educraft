@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.1)_
+_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.2)_
 
 ## Nu
 
@@ -12,9 +12,10 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.1)_
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
-  Vitest + axe. 1.013 tests, CI groen op `main`.
-- **Laatst op `main` (2026-11-03):** P15 (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen,
-  documenten tot 300k tekens, briefs P20–P22, de fabriek.
+  Vitest + axe. 895 tests, CI groen op `main`.
+- **Laatst op `main` (2026-11-03):** V1 stap 17.1 (mentorinzicht eruit), P15 (toasts,
+  navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs P20–P22, de
+  fabriek.
 
 ## Verzoeken
 
@@ -26,7 +27,7 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.1)_
 
 ## Bezig
 
-- V1 stap 17.1: mentorinzicht eruit — deze PR.
+- V1 stap 17.2: studentrol en cohorten eruit — deze PR.
 
 ## Wacht op jou
 
@@ -34,9 +35,7 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.1)_
 
 1. **Vereenvoudiging V1** (brief P17, drie PR's): de studentenlaag eruit (rol, cohorten,
    studentuitnodigingen, mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie).
-   De zes tutors blijven, voor docenten. Bastiaan 2026-11-03: studentdata definitief wissen;
-   uitloggen na een nieuw wachtwoord houden (17.2 houdt `sessionVersion` en verhoogt hem alleen bij
-   reset en wachtwoordwijziging, zie Risico's punt 2).
+   De zes tutors blijven, voor docenten. Besluit: BESLUIT-2026-11-03-13. Daarna 17.3.
 2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
    toegang per docent voor tools en context weg; modellen per instelling met een overrule per
    docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.

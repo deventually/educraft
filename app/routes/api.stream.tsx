@@ -5,13 +5,7 @@ import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystem
 import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
-import { getProfile, getProfileForMember } from "~/server/repositories/profiles.server";
-import {
-  cohortConfig,
-  getCohortForUser,
-  isCohortActive,
-} from "~/server/repositories/cohorts.server";
-import { isEqfLevel } from "~/lib/context/eqf";
+import { getProfile } from "~/server/repositories/profiles.server";
 import {
   effectiveDefaultModel,
   isModelSelectableForUser,
@@ -153,16 +147,11 @@ export async function action({ request }: Route.ActionArgs) {
     const tool = getToolBySlug(body.slug);
     if (!tool) return new Response(sseError(m.error.unknownTool), { headers: SSE_HEADERS });
 
-    // Effective-availability gate (server-side, not just UI): a disabled tool, an
-    // instructor tool for a student, a student tool outside their cohort's
-    // allow-list, or a tool outside a narrowed teacher's allow-list can't be
-    // driven via a hand-crafted POST; an expired cohort is refused outright.
-    const cohort = user.role === "student" ? await getCohortForUser(user.id) : null;
+    // Effective-availability gate (server-side, not just UI): a disabled tool or a
+    // tool outside a narrowed teacher's allow-list can't be driven via a
+    // hand-crafted POST.
     if (!(await isToolAvailable(user, tool))) {
       return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
-    }
-    if (cohort && !isCohortActive(cohort)) {
-      return new Response(sseError(m.error.cohortInactive), { headers: SSE_HEADERS });
     }
     const capError = fieldCapError(tool, body.values ?? {});
     if (capError) {
@@ -180,31 +169,12 @@ export async function action({ request }: Route.ActionArgs) {
     const audience = tool.userType === "student" ? "learner" : "instructor";
 
     // Resolve the profile scoped to the requesting user — never fetch another
-    // user's profile by id (audit finding #2). For a provisioned student running
-    // a tutor, the cohort's profile is injected instead, authorised by membership
-    // (the sanctioned bypass of owner-scoping), and the cohort's per-tutor sandbox
-    // config is merged as the input values (server-authoritative — it wins over a
-    // tampered client body).
-    let profile =
+    // user's profile by id (audit finding #2).
+    const profile =
       tool.usesContextProfile && body.contextProfileId
         ? await getProfile(user.id, body.contextProfileId)
         : null;
-    let values = body.values ?? {};
-    if (cohort) {
-      if (tool.usesContextProfile && cohort.contextProfileId) {
-        profile = await getProfileForMember(user.id, cohort.contextProfileId);
-      } else if (
-        tool.usesContextProfile &&
-        cohort.contextEqf != null &&
-        isEqfLevel(cohort.contextEqf)
-      ) {
-        // EQF-only cohort: no profile, just a bare level. A minimal synthetic
-        // profile is enough — formatProfile injects "EQF N" + the level directive.
-        profile = { id: "cohort-eqf", name: "", eqf: cohort.contextEqf };
-      }
-      const slugValues = cohortConfig(cohort)[tool.slug]?.values;
-      if (slugValues) values = { ...values, ...slugValues };
-    }
+    const values = body.values ?? {};
 
     const system = buildSystemPrompt({
       promptId: stage.systemPromptId,
@@ -218,7 +188,7 @@ export async function action({ request }: Route.ActionArgs) {
 
     // Server-side model allow-list (Phase 4 + 13 + 14): a caller may only pick a
     // model in THEIR effective set — the instance allow-list, narrowed by the
-    // teacher's assignment or the student's cohort set (intersect). Since P14 this
+    // teacher's assignment (intersect). Since P14 this
     // gate also governs local/CLI/discovered models (still free, now curatable), so
     // there is no local free-pass. Anything else falls back to the tool/stage
     // default, so a hostile body can't force an expensive, disabled, or un-granted
@@ -227,7 +197,7 @@ export async function action({ request }: Route.ActionArgs) {
     // A stage may pin a specific model (infra), respected as-is; otherwise the
     // soft default (tool.defaultModel) is resolved to a model THIS caller may
     // actually use — so a disabled/un-granted default can't leak past the
-    // cohort/teacher gate when the requested model is refused (Phase 14 bugfix).
+    // teacher gate when the requested model is refused (Phase 14 bugfix).
     const model = mayPickModel
       ? (body.model as string)
       : (stage.model ?? (await effectiveDefaultModel(user, tool.defaultModel)));
@@ -248,7 +218,7 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     // Structured metadata for the per-generation log line — metadata only, never
-    // prompt/response content (student data stays out of logs).
+    // prompt/response content (user data stays out of logs).
     const logFields = {
       userId: user.id,
       toolSlug: tool.slug,

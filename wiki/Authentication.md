@@ -11,19 +11,20 @@ scoped to its owning user, and every tool is gated by the user's role.
 
 ## Roles
 
-Three instance-level roles (no org/tenant structure):
+Two instance-level roles (no org/tenant structure):
 
 | Role | Sees / uses |
 |------|-------------|
-| `student` | only tools with `userType: "student"` |
-| `teacher` | every tool (teachers preview student tools) |
-| `admin`   | every tool (admin UI arrives in P4) |
+| `teacher` | every tool (unless the admin narrows that teacher's allow-list) |
+| `admin`   | every tool, plus the admin console |
 
-The mapping lives in **one place** — `canUseTool(user, tool)` in
-[`app/lib/registry/access.ts`](../app/lib/registry/access.ts) — and is enforced
-server-side in three spots: the home loader (list filter), the tool loader (404),
-and the `/api/stream` action (refuse with a localized SSE error). No per-tool
-branching.
+The roles live in **one place** — `ROLES`/`isRole` in
+[`app/lib/registry/access.ts`](../app/lib/registry/access.ts). Which tools a user
+may use is decided by `isToolAvailable` in `availability.server.ts` (instance
+settings + the per-teacher allow-list) and enforced server-side in three spots:
+the home loader (list filter), the tool loader (404), and the `/api/stream` action
+(refuse with a localized SSE error). No per-tool branching. A legacy `student` row
+(from before P17) can neither log in nor redeem an invite.
 
 ## How accounts are created
 
@@ -41,29 +42,26 @@ UI for this; the script stays for headless ops.
 ## Sessions & passwords
 
 - Cookie sessions via React Router's `createCookieSessionStorage`
-  ([`session.server.ts`](../app/server/session.server.ts)). The cookie stores only
-  `{ userId }`; the **role is read fresh from the DB on every request**, so a role
-  change takes effect without re-login.
+  ([`session.server.ts`](../app/server/session.server.ts)). The cookie stores
+  `{ userId, sessionVersion }`; the **role is read fresh from the DB on every
+  request**, so a role change takes effect without re-login.
+- **Several devices at once, one switch to sign them all out.** Logging in never
+  invalidates other sessions (laptop and phone can both be signed in). Only a new
+  password does: `updateUserPassword` bumps `users.sessionVersion`, `getUser` rejects
+  any cookie with an older version, and the device that changed the password gets a
+  fresh cookie so it stays signed in.
 - Passwords hashed with Node's built-in `scrypt`
   ([`password.server.ts`](../app/server/password.server.ts)) — no native
   bcrypt/argon2 dependency. Stored self-describing as `scrypt:<saltHex>:<hashHex>`.
 - `SESSION_SECRET` (min 32 chars) signs the cookie. A dev default keeps local/test
   boots frictionless; **production refuses to boot** with the dev default.
 
-## Account disable & student-initiated removal (P14)
+## Account removal (P17)
 
-A **disabled** account (`users.disabledAt` set) is a hard logout everywhere: `getUser`
-returns null and `login` refuses it with a specific "account disabled" message (the
-password was already proven, so no user-enumeration leak). It is a *reversible holding
-state*, not a delete.
-
-A **student** cannot hard-delete their own account (a teacher may still need the data).
-On `/account` a student's request calls `requestAccountDeletion` — setting `disabledAt`
-+ `deletionRequestedAt` and logging them out. The teacher sees the flagged student on the
-**cohort manage screen** (Students section) and on the cohort-list badge, then either
-**Restores** (`reactivateUser`) or **Removes/purges** (`deleteUserCascade`) the account —
-both guarded by `assertManagesMember` (the actor must manage the cohort *and* the target
-must be a member). Teachers/admins keep the immediate hard delete on their own `/account`.
+Every user (teacher or admin) deletes their own account on `/account`: type the
+confirmation word and `deleteUserCascade` removes the account and everything it owns,
+immediately and permanently. There is no request/holding state and no `disabledAt`.
+An admin can remove other users from the user list in `/admin/invites`.
 
 ## Data scoping
 
@@ -87,7 +85,7 @@ an oversight — revisit when the user base grows beyond the invite list.
 
 Institutional SSO (SURFconext / SAML / OIDC) later replaces **only** the login /
 invite front door and the role mapping. The permanent parts built here —
-`createCookieSessionStorage` sessions, `requireUser`/`requireRole`, the three roles,
+`createCookieSessionStorage` sessions, `requireUser`/`requireRole`, the two roles,
 and per-user data scoping — stay. The `getDb()` seam
 ([`db.server.ts`](../app/server/db.server.ts)) also keeps the door open for a hosted
 database-per-tenant model without a rewrite.

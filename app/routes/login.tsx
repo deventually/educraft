@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Route } from "./+types/login";
 import { getUser, createUserSession } from "~/server/auth.server";
 import { getUserByEmail } from "~/server/repositories/users.server";
+import { isRole } from "~/lib/registry/access";
 import { verifyPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -40,10 +41,9 @@ export async function action({ request }: Route.ActionArgs) {
   if (!row || !verifyPassword(parsed.data.password, row.passwordHash)) {
     return { error: m.auth.loginFailed };
   }
-  // A disabled account (Phase 14) proved its password but may not enter. A specific
-  // message (not the generic loginFailed) is safe here — the credentials were
-  // correct, so there is no user-enumeration leak — and it points them at recovery.
-  if (row.disabledAt) return { error: m.auth.accountDisabled };
+  // A legacy row with a retired role (pre-P17 "student") may not enter; the same
+  // generic message avoids listing which accounts exist.
+  if (!isRole(row.role)) return { error: m.auth.loginFailed };
   return createUserSession(row.id, "/");
 }
 

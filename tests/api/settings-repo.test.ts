@@ -15,16 +15,14 @@ describe("settings repository — tool settings", () => {
     await repo.setToolSetting("mentorai", { enabled: false });
     const row = await repo.getToolSetting("mentorai");
     expect(row?.enabled).toBe(false);
-    expect(row?.audienceOverride).toBeNull();
   });
 
   it("merges a patch in place (only provided keys change)", async () => {
     await repo.setToolSetting("bloom-by-design", { enabled: true });
-    await repo.setToolSetting("bloom-by-design", { audienceOverride: "both" });
+    await repo.setToolSetting("bloom-by-design", {});
     const row = await repo.getToolSetting("bloom-by-design");
-    // The earlier `enabled` survives the audience-only patch.
+    // The earlier `enabled` survives an empty patch.
     expect(row?.enabled).toBe(true);
-    expect(row?.audienceOverride).toBe("both");
   });
 
   it("returns null for an untouched tool (absent row = registry default)", async () => {

@@ -19,9 +19,8 @@ interface Guarded {
 let guarded: Guarded[];
 
 let teacherCookie: string;
-let studentCookie: string;
 
-async function cookieFor(role: "teacher" | "student"): Promise<string> {
+async function cookieFor(role: "teacher"): Promise<string> {
   const u = await users.createUser({
     name: `${role} user`,
     email: `${role}-${Math.round(performance.now() * 1000)}@example.com`,
@@ -53,15 +52,13 @@ beforeAll(async () => {
   auth = await import("~/server/auth.server");
   users = await import("~/server/repositories/users.server");
   teacherCookie = await cookieFor("teacher");
-  studentCookie = await cookieFor("student");
 
-  const [layout, index, tools, models, invites, cohorts, usage, feedback] = await Promise.all([
+  const [layout, index, tools, models, invites, usage, feedback] = await Promise.all([
     import("~/routes/admin"),
     import("~/routes/admin._index"),
     import("~/routes/admin.tools"),
     import("~/routes/admin.models"),
     import("~/routes/admin.invites"),
-    import("~/routes/admin.cohorts"),
     import("~/routes/admin.usage"),
     import("~/routes/admin.feedback"),
   ]);
@@ -75,8 +72,6 @@ beforeAll(async () => {
     g("admin.models action", models.action),
     g("admin.invites loader", invites.loader),
     g("admin.invites action", invites.action),
-    g("admin.cohorts loader", cohorts.loader),
-    g("admin.cohorts action", cohorts.action),
     g("admin.usage loader", usage.loader),
     g("admin.feedback loader", feedback.loader),
   ];
@@ -86,14 +81,6 @@ describe("admin routes — access control", () => {
   it("rejects a teacher with a 403 on every loader and action", async () => {
     for (const { name, fn } of guarded) {
       const thrown = await catchThrow(fn, req(teacherCookie));
-      expect(thrown, name).toBeInstanceOf(Response);
-      expect((thrown as Response).status, name).toBe(403);
-    }
-  });
-
-  it("rejects a student with a 403 on every loader and action", async () => {
-    for (const { name, fn } of guarded) {
-      const thrown = await catchThrow(fn, req(studentCookie));
       expect(thrown, name).toBeInstanceOf(Response);
       expect((thrown as Response).status, name).toBe(403);
     }

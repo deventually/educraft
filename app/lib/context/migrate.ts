@@ -7,8 +7,6 @@
  *  2. Phase 8 axes: `country`/`sector` default to the old hbo shape, and a legacy
  *     `eqf` seeds `nationalLevel` (so the level still resolves) — but never invents
  *     a level where none existed (no fabricated "instroom"). `eqf` is retained.
- *
- * Cohorts stay EQF-native and are NOT migrated (they carry no stored profile).
  */
 import { DEFAULT_COUNTRY } from "./countries";
 import { isEqfLevel } from "./eqf";

@@ -1,10 +1,8 @@
 /**
  * Level derivation (Phase 8) — the single seam that turns a profile's stored
  * level into the country-neutral EQF the engine injects. It prefers the national
- * (NLQF) level and falls back to a legacy/synthetic `eqf`, so two things keep
- * working untouched:
- *   - the cohort synthetic profile `{ eqf: cohort.contextEqf }` (api.stream), and
- *   - legacy profiles saved before the national-level field existed.
+ * (NLQF) level and falls back to a legacy `eqf`, so legacy profiles saved before
+ * the national-level field existed keep working untouched.
  *
  * Everything downstream (format.ts) reads only `{ eqf, entryLevel }`, never the
  * national level — that is what keeps the prompt pipeline country-neutral.
@@ -19,7 +17,7 @@ export interface ResolvedLevel {
   entryLevel: boolean;
 }
 
-/** The level-bearing fields — a full ContextProfile or the cohort `{ eqf }` synthetic. */
+/** The level-bearing fields — a full ContextProfile or a bare `{ eqf }`. */
 export interface LevelInput {
   nationalLevel?: NlqfLevel;
   eqf?: EqfLevel;

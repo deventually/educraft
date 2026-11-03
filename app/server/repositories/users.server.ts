@@ -4,7 +4,7 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   chatSessions,
@@ -25,7 +25,7 @@ import {
   type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
-import type { Role } from "~/lib/registry/access";
+import { ROLES, type Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
   /** Optional explicit id so an invite can claim it atomically before creation. */
@@ -50,6 +50,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
       input.allowedToolSlugs && input.allowedToolSlugs.length > 0
         ? JSON.stringify(input.allowedToolSlugs)
         : null,
+    // Legacy schema columns (dropped in 17.3): filled neutrally, never read.
     disabledAt: null,
     deletionRequestedAt: null,
     createdAt: new Date(),
@@ -77,32 +78,16 @@ export async function updateUserEmail(id: string, email: string | null): Promise
   getDb().update(users).set({ email }).where(eq(users.id, id)).run();
 }
 
-/** Overwrite a user's password hash (self-service change or reset-link redemption). */
-export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
-  getDb().update(users).set({ passwordHash }).where(eq(users.id, id)).run();
-}
-
 /**
- * Disable an account on a student-initiated removal request (Phase 14). A reversible
- * holding state — not a delete: `disabledAt` blocks login everywhere, and
- * `deletionRequestedAt` surfaces the pending request to the teacher on the cohort
- * screen. The teacher (or an admin) then purges (`deleteUserCascade`) or restores
- * (`reactivateUser`) the account.
+ * Overwrite a user's password hash (self-service change or reset-link redemption)
+ * and bump `sessionVersion` in the same statement, so every session minted before
+ * the change is logged out. Callers re-issue the acting device's cookie afterwards.
+ * This is the ONLY place `sessionVersion` changes — a plain login never does.
  */
-export async function requestAccountDeletion(id: string): Promise<void> {
-  const now = new Date();
+export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
   getDb()
     .update(users)
-    .set({ disabledAt: now, deletionRequestedAt: now })
-    .where(eq(users.id, id))
-    .run();
-}
-
-/** Re-enable a disabled account and clear any pending removal request (Phase 14). */
-export async function reactivateUser(id: string): Promise<void> {
-  getDb()
-    .update(users)
-    .set({ disabledAt: null, deletionRequestedAt: null })
+    .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
     .where(eq(users.id, id))
     .run();
 }
@@ -265,8 +250,8 @@ export async function deleteUser(id: string): Promise<void> {
  * rows are never touched.
  *
  * Cohorts the user *created* are deliberately KEPT: a cohort is shared teaching
- * config (its students' access), not personal data, so it survives as a
- * reassignable orphan an admin can re-home (see `setCohortOwner`). We only clear
+ * config (its students' access), not personal data, so it survives as an
+ * orphan (the teacher-owned cohort layer is being removed). We only clear
  * the dangling reference to any of this user's now-deleted context profiles.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
@@ -316,10 +301,6 @@ export interface CreateInviteInput {
   expiresAt?: Date | null;
   /** Who issued the invite (teacher/admin). Null for legacy ops invites. */
   createdByUserId?: string | null;
-  /** The cohort the redeemer joins. Null → a role-only teacher/admin invite. */
-  cohortId?: string | null;
-  /** Bind the invite to an intended student; redemption must match (see consumeInvite). */
-  email?: string | null;
   /**
    * Per-teacher tool allow-list (Phase 4). Set on an admin-minted teacher invite;
    * copied onto the account at redeem. Null/empty = unrestricted.
@@ -335,8 +316,9 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
     createdByUserId: input.createdByUserId ?? null,
-    cohortId: input.cohortId ?? null,
-    email: input.email ?? null,
+    // Legacy schema columns (dropped in 17.3): filled neutrally, never read.
+    cohortId: null,
+    email: null,
     allowedToolSlugs:
       input.allowedToolSlugs && input.allowedToolSlugs.length > 0
         ? JSON.stringify(input.allowedToolSlugs)
@@ -347,33 +329,6 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
   return row;
 }
 
-/**
- * Mint one single-use `student` token per recipient against a cohort — the batch
- * primitive behind the provisioning UI (a single invite is `recipients.length === 1`).
- * A recipient with an `email` is identity-bound; without, it's a link-only bearer
- * invite. Same cohort ⇒ same tools/config for every token minted here.
- */
-export async function createInvitesForCohort(
-  cohortId: string,
-  createdByUserId: string,
-  recipients: { email?: string | null }[],
-  expiresAt: Date | null,
-): Promise<InviteRow[]> {
-  const rows: InviteRow[] = [];
-  for (const recipient of recipients) {
-    rows.push(
-      await createInvite({
-        role: "student",
-        cohortId,
-        createdByUserId,
-        email: recipient.email?.trim() || null,
-        expiresAt,
-      }),
-    );
-  }
-  return rows;
-}
-
 export async function getInvite(token: string): Promise<InviteRow | null> {
   return getDb().select().from(invites).where(eq(invites.token, token)).get() ?? null;
 }
@@ -382,32 +337,25 @@ export async function getInvite(token: string): Promise<InviteRow | null> {
  * Atomically claim an invite for `userId`. Single-use: the guarded UPDATE only
  * matches rows with `used_by_user_id IS NULL`, so a race admits exactly one
  * consumer. Returns null if the token is unknown, already used, or expired.
- *
- * Identity binding (Phase 6): when the invite carries an `email`, the redeemer's
- * `submittedEmail` must match it (case-insensitive) or the claim is rejected —
- * casual link-forwarding to the wrong person then fails.
  */
-export async function consumeInvite(
-  token: string,
-  userId: string,
-  submittedEmail?: string | null,
-): Promise<InviteRow | null> {
+export async function consumeInvite(token: string, userId: string): Promise<InviteRow | null> {
   const db = getDb();
   const invite = db.select().from(invites).where(eq(invites.token, token)).get();
   if (!invite) return null;
   if (invite.usedByUserId) return null;
   if (invite.expiresAt && invite.expiresAt.getTime() < Date.now()) return null;
-  if (
-    invite.email &&
-    invite.email.trim().toLowerCase() !== (submittedEmail ?? "").trim().toLowerCase()
-  ) {
-    return null;
-  }
 
   const result = db
     .update(invites)
     .set({ usedByUserId: userId })
-    .where(and(eq(invites.token, token), isNull(invites.usedByUserId)))
+    .where(
+      and(
+        eq(invites.token, token),
+        isNull(invites.usedByUserId),
+        isNull(invites.cohortId),
+        inArray(invites.role, [...ROLES]),
+      ),
+    )
     .run();
   if (result.changes === 0) return null;
   return { ...invite, usedByUserId: userId };
@@ -417,21 +365,17 @@ export interface InviteWithContext {
   token: string;
   role: string;
   note: string | null;
-  email: string | null;
   expiresAt: Date | null;
   usedByUserId: string | null;
   createdByUserId: string | null;
   createdByName: string | null;
-  cohortId: string | null;
-  cohortName: string | null;
   allowedToolSlugs: string | null;
   createdAt: Date;
 }
 
 /**
- * Every invite, newest first, joined with its issuer's name and (if any) the
- * cohort it provisions — the admin oversight list. Not user-scoped by design
- * (an admin sees every invite on the instance).
+ * Every invite, newest first, joined with its issuer's name — the admin oversight
+ * list. Not user-scoped by design (an admin sees every invite on the instance).
  */
 export async function listInvitesWithContext(): Promise<InviteWithContext[]> {
   return getDb()
@@ -439,19 +383,15 @@ export async function listInvitesWithContext(): Promise<InviteWithContext[]> {
       token: invites.token,
       role: invites.role,
       note: invites.note,
-      email: invites.email,
       expiresAt: invites.expiresAt,
       usedByUserId: invites.usedByUserId,
       createdByUserId: invites.createdByUserId,
       createdByName: users.name,
-      cohortId: invites.cohortId,
-      cohortName: cohorts.name,
       allowedToolSlugs: invites.allowedToolSlugs,
       createdAt: invites.createdAt,
     })
     .from(invites)
     .leftJoin(users, eq(invites.createdByUserId, users.id))
-    .leftJoin(cohorts, eq(invites.cohortId, cohorts.id))
     .orderBy(desc(invites.createdAt))
     .all();
 }
@@ -467,19 +407,6 @@ export async function revokeInvite(token: string): Promise<boolean> {
     .where(and(eq(invites.token, token), isNull(invites.usedByUserId)))
     .run();
   return result.changes > 0;
-}
-
-/**
- * Bump a user's single-active-session counter (Phase 6 anti-sharing). Called on
- * every login/redeem; the new value is written into the fresh session cookie, so
- * an older cookie's stale `sessionVersion` no longer matches and is logged out.
- */
-export async function bumpSessionVersion(userId: string): Promise<number> {
-  const db = getDb();
-  const current = db.select().from(users).where(eq(users.id, userId)).get();
-  const next = (current?.sessionVersion ?? 0) + 1;
-  db.update(users).set({ sessionVersion: next }).where(eq(users.id, userId)).run();
-  return next;
 }
 
 /**

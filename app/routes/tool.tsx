@@ -12,11 +12,6 @@ import {
 import type { Route } from "./+types/tool";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import {
-  cohortConfig,
-  getCohortForUser,
-  isCohortActive,
-} from "~/server/repositories/cohorts.server";
-import {
   getSelectableModels,
   isToolAvailable,
   narrowLocalModels,
@@ -43,24 +38,15 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const tool = getToolBySlugOrThrow(params.slug);
-  // A tool the instance has disabled, an instructor tool for a student, a student
-  // tool outside their cohort's allow-list, a tool outside a narrowed teacher's
-  // allow-list, or any tool once the cohort's window has passed — all
-  // indistinguishable from a non-existent tool (no info leak). Effective
-  // availability (Phase 4) composes the instance + role/cohort + teacher gates;
-  // an admin who "views as teacher" is gated as a teacher.
+  // A tool the instance has disabled or a tool outside a narrowed teacher's
+  // allow-list is indistinguishable from a non-existent tool (no info leak).
+  // Effective availability composes the instance + teacher gates; an admin who
+  // "views as teacher" is gated as a teacher.
   const viewer = { ...user, role: getEffectiveRole(user, request) };
-  const cohort = viewer.role === "student" ? await getCohortForUser(user.id) : null;
   if (!(await isToolAvailable(viewer, tool))) throw new Response("Not Found", { status: 404 });
-  if (cohort && !isCohortActive(cohort)) throw new Response("Not Found", { status: 404 });
 
-  // A provisioned student lands straight in the chat: the sandbox is prefilled +
-  // locked from the cohort config, and no profile is offered (the cohort profile
-  // is injected server-side by membership). Teachers/admins keep today's
-  // behaviour — their own profiles + an editable sandbox.
-  const lockedValues = cohort ? (cohortConfig(cohort)[tool.slug]?.values ?? {}) : null;
-  const profiles = lockedValues ? [] : await listProfiles(user.id);
-  const defaultProfile = lockedValues ? null : await getDefaultProfile(user.id);
+  const profiles = await listProfiles(user.id);
+  const defaultProfile = await getDefaultProfile(user.id);
   const verbatim = tool.stages.map((s) => ({
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),
@@ -76,7 +62,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }));
   const localModels = await narrowLocalModels(viewer, discovered);
   // The catalog models a caller may pick, narrowed to the viewer's effective set
-  // (Phase 4 instance allow-list + Phase 13 per-teacher / per-cohort gates). Passed
+  // (Phase 4 instance allow-list + Phase 13 per-teacher gate). Passed
   // to the pickers so the module-scope catalog no longer wins.
   const catalogModels = await getSelectableModels(viewer);
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
@@ -88,7 +74,6 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     localModels,
     catalogModels,
     helpOverlay,
-    lockedValues,
   };
 }
 
@@ -101,16 +86,8 @@ export function meta({ data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const {
-    tool,
-    profiles,
-    defaultProfileId,
-    verbatim,
-    localModels,
-    catalogModels,
-    helpOverlay,
-    lockedValues,
-  } = loaderData;
+  const { tool, profiles, defaultProfileId, verbatim, localModels, catalogModels, helpOverlay } =
+    loaderData;
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
@@ -136,7 +113,6 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             outputLanguage={undefined}
             localModels={localModels}
             catalogModels={catalogModels}
-            lockedValues={lockedValues ?? undefined}
           />
         ) : multiStage ? (
           <StageStepper

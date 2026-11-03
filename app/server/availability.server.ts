@@ -1,14 +1,13 @@
 /**
  * Effective availability (Phase 4) — the single module every consumer uses to
- * answer "which tools/models may THIS user see?". It composes three independent
- * gates on top of the registry:
+ * answer "which tools/models may THIS user see?". Two independent gates sit on
+ * top of the registry's boot-validity check:
  *
- *   1. Instance availability — an admin's `tool_settings` (enabled + audience).
- *   2. Role/cohort — the Phase 1/6 `canUseTool` logic (student cohort allow-list).
- *   3. Per-teacher allow-list — an admin may narrow an individual teacher's tools.
+ *   1. Instance availability — an admin's `tool_settings` (enabled).
+ *   2. Per-teacher allow-list — an admin may narrow an individual teacher's tools.
  *
- * Safe defaults: with empty settings tables this reduces exactly to the previous
- * behaviour (`tool.enabled` + `tool.userType`), so a fresh instance is unchanged.
+ * Safe defaults: with empty settings tables this reduces exactly to `tool.enabled`,
+ * so a fresh instance shows every tool to every teacher and admin.
  * Nothing is cached — a write takes effect on the next request (no bust needed).
  *
  * Context-editor axes (country/sector/domain) use a different, OVERRIDE model
@@ -18,7 +17,7 @@
  */
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
-import { canUseTool, type Audience, type Role } from "~/lib/registry/access";
+import type { Role } from "~/lib/registry/access";
 import {
   DEFAULT_MODEL,
   isResolvableModel,
@@ -45,7 +44,6 @@ import {
   getUserAssignedModels,
   getUserContextCustomAccess,
 } from "./repositories/users.server";
-import { getAllowedToolSlugs, getAllowedModelIds } from "./repositories/cohorts.server";
 
 export interface AvailabilityUser {
   id: string;
@@ -53,23 +51,19 @@ export interface AvailabilityUser {
 }
 
 interface AvailabilityContext {
-  settings: Map<string, { enabled: boolean | null; audienceOverride: string | null }>;
+  settings: Map<string, { enabled: boolean | null }>;
   teacherAllowlist: Set<string> | null; // teachers only
-  studentAllowlist: Set<string> | null; // students only (cohort)
 }
 
 /** Resolve every gate input once per request, so a list filter is a pure map. */
 async function resolveContext(user: AvailabilityUser): Promise<AvailabilityContext> {
   const rows = await getToolSettings();
-  const settings = new Map(
-    rows.map((r) => [r.toolSlug, { enabled: r.enabled, audienceOverride: r.audienceOverride }]),
-  );
+  const settings = new Map(rows.map((r) => [r.toolSlug, { enabled: r.enabled }]));
   const teacherAllowlist = user.role === "teacher" ? await getUserToolAllowlist(user.id) : null;
-  const studentAllowlist = user.role === "student" ? await getAllowedToolSlugs(user.id) : null;
-  return { settings, teacherAllowlist, studentAllowlist };
+  return { settings, teacherAllowlist };
 }
 
-/** Whether a tool passes all three gates for `user`, given a resolved context. */
+/** Whether a tool passes the boot-validity check and both gates for `user`, given a resolved context. */
 function passes(user: AvailabilityUser, tool: Tool, ctx: AvailabilityContext): boolean {
   // Boot-invalid tools (Phase 5.5) are excluded from every listing and refused by
   // the stream, in production, rather than crashing the instance.
@@ -79,11 +73,6 @@ function passes(user: AvailabilityUser, tool: Tool, ctx: AvailabilityContext): b
   const enabled = setting?.enabled ?? tool.enabled;
   if (!enabled) return false;
 
-  const audience = (setting?.audienceOverride ?? tool.userType) as Audience;
-  if (!canUseTool(user, { slug: tool.slug, userType: audience }, ctx.studentAllowlist)) {
-    return false;
-  }
-
   // A teacher may be narrowed to a subset of tools by the admin who invited them.
   if (user.role === "teacher" && ctx.teacherAllowlist && !ctx.teacherAllowlist.has(tool.slug)) {
     return false;
@@ -91,7 +80,7 @@ function passes(user: AvailabilityUser, tool: Tool, ctx: AvailabilityContext): b
   return true;
 }
 
-/** Every tool `user` may see, honoring instance + role/cohort + teacher gates. */
+/** Every tool `user` may see, honoring the instance + teacher gates. */
 export async function getAvailableTools(user: AvailabilityUser): Promise<Tool[]> {
   const ctx = await resolveContext(user);
   return ALL_TOOLS.filter((tool) => passes(user, tool, ctx));
@@ -106,7 +95,7 @@ export async function isToolAvailable(user: AvailabilityUser, tool: Tool): Promi
 /**
  * The instance base for the model gates: client-selectable catalog ∩ the admin's
  * `enabledModels` allow-list (Opus-class stays server-only). No lockout fallback
- * here — that is applied once, after the per-teacher/cohort narrowing below.
+ * here — that is applied once, after the per-teacher narrowing below.
  */
 async function selectableCatalogIds(): Promise<Set<string>> {
   const enabled = await getEnabledModels();
@@ -123,11 +112,10 @@ function narrowModels(ids: Set<string>, restriction: Set<string> | null): Set<st
 }
 
 /**
- * The catalog model ids a caller may select. Composes three INTERSECT gates
+ * The catalog model ids a caller may select. Composes two INTERSECT gates
  * (Phase 13), each only ever *narrowing* — the opposite of the P12 context axes:
  *   1. Instance base — the admin's `enabledModels` (client-selectable only).
  *   2. Per-teacher — an admin's `assignedModels` for a teacher (⊆ base).
- *   3. Per-cohort — a teacher's model set for a student's cohort (⊆ teacher).
  * Empty/unset at a level = inherit the level above; admin/no-user = the base.
  * Local/discovered models are free and always allowed, so they are added by the
  * caller via `pickableModels`, not here. Lockout guard: an empty final set (only
@@ -143,7 +131,7 @@ export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Se
     // grants no usable model at all (unset, or only stale/unknown catalog ids).
     // Rescue with the default so no configuration locks a user out of generation.
     // NOT a lockout — and so NOT rescued — is a restriction that lists a
-    // resolvable local/CLI model (e.g. a cohort set to only "ollama::…"): that
+    // resolvable local/CLI model (e.g. a teacher assigned only "ollama::…"): that
     // model rides `narrowLocalModels`/`isModelSelectableForUser`, so the catalog
     // half is legitimately empty. Injecting DEFAULT_MODEL there would re-offer a
     // frontier default the teacher/admin explicitly excluded (the P14 bug).
@@ -153,11 +141,9 @@ export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Se
   return ids;
 }
 
-/** The per-teacher/cohort model restriction for a caller (null = no restriction). */
+/** The per-teacher model restriction for a caller (null = no restriction). */
 async function userModelRestriction(user?: AvailabilityUser): Promise<Set<string> | null> {
-  if (user?.role === "teacher") return getUserAssignedModels(user.id);
-  if (user?.role === "student") return getAllowedModelIds(user.id);
-  return null;
+  return user?.role === "teacher" ? getUserAssignedModels(user.id) : null;
 }
 
 /** Whether a restriction lists at least one resolvable, client-selectable model. */
@@ -173,8 +159,8 @@ function restrictionGrantsUsableModel(restriction: Set<string> | null): boolean 
  * bugfix). `preferred` is the intended fallback (a tool's `defaultModel`); this
  * returns it only when the caller may actually use it — otherwise it substitutes
  * a model the caller IS allowed, so a disabled/un-granted frontier default can
- * never leak past the cohort/teacher gate. Order: the preferred default, then the
- * caller's own allow-list (this is where a local-only cohort's model comes from),
+ * never leak past the teacher gate. Order: the preferred default, then the
+ * caller's own allow-list (this is where a local-only teacher's model comes from),
  * then any catalog model, then `DEFAULT_MODEL` as a last resort.
  */
 export async function effectiveDefaultModel(
@@ -195,7 +181,7 @@ export async function effectiveDefaultModel(
 /**
  * The catalog picker models a caller may choose — `getSelectableModelIds` mapped
  * to picker shape. Pass the caller so the picker reflects their effective set
- * (instance base narrowed by the teacher/cohort gates); omit for the raw base.
+ * (instance base narrowed by the teacher gate); omit for the raw base.
  */
 export async function getSelectableModels(user?: AvailabilityUser): Promise<PickerModel[]> {
   const ids = await getSelectableModelIds(user);
@@ -211,8 +197,7 @@ export async function getSelectableModels(user?: AvailabilityUser): Promise<Pick
  * discovered ids (`ollama::…`) without enumerating any local server: the id must be
  * resolvable and client-selectable (Opus-class stays out), then each applicable
  * INTERSECT level must either impose no restriction (null/empty ⇒ inherit) or list
- * the id — instance `enabledModels`, then the teacher's assignment or the student's
- * cohort set. Empty at every level = every resolvable, client-selectable model is
+ * the id — instance `enabledModels`, then the teacher's assignment. Empty at every level = every resolvable, client-selectable model is
  * allowed (an uncurated instance is unchanged: local/CLI stay free but curatable).
  */
 export async function isModelSelectableForUser(
@@ -222,12 +207,7 @@ export async function isModelSelectableForUser(
   if (!isResolvableModel(id) || !resolveModelInfo(id).clientSelectable) return false;
   const enabled = await getEnabledModels();
   if (enabled !== null && enabled.length > 0 && !enabled.includes(id)) return false;
-  const restriction =
-    user?.role === "teacher"
-      ? await getUserAssignedModels(user.id)
-      : user?.role === "student"
-        ? await getAllowedModelIds(user.id)
-        : null;
+  const restriction = await userModelRestriction(user);
   if (restriction && restriction.size > 0 && !restriction.has(id)) return false;
   return true;
 }
@@ -295,7 +275,6 @@ async function axisSelection(
  * The countries a teacher/admin may pick in the context editor. OVERRIDE model
  * (Phase 12): an activated teacher's own set wins (instance ignored, empty =
  * all); admins and unactivated teachers follow the instance-enabled set.
- * Students are N/A (no editor — their level comes from the cohort profile).
  */
 export async function getAvailableCountries(user: AvailabilityUser): Promise<CountryCode[]> {
   const selection = await axisSelection(user, getEnabledCountries, getUserAssignedCountries);
