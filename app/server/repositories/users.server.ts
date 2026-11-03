@@ -8,9 +8,6 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   chatSessions,
-  cohortMemberships,
-  cohortTeachers,
-  cohorts,
   contextProfiles,
   feedback,
   generations,
@@ -18,7 +15,6 @@ import {
   invites,
   messages,
   passwordResets,
-  sessionSummaries,
   usage,
   users,
   type InviteRow,
@@ -50,9 +46,6 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
       input.allowedToolSlugs && input.allowedToolSlugs.length > 0
         ? JSON.stringify(input.allowedToolSlugs)
         : null,
-    // Legacy schema columns (dropped in 17.3): filled neutrally, never read.
-    disabledAt: null,
-    deletionRequestedAt: null,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -243,43 +236,18 @@ export async function deleteUser(id: string): Promise<void> {
 
 /**
  * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
- * user owns — feedback, usage counters, generations, context profiles, cohort
- * memberships + co-teach assignments, and their chat history + de-personalised
- * summaries (Phase 7) — then the user row, in a single transaction so a partial
+ * user owns — feedback, usage counters, generations, context profiles, and
+ * their chat history — then the user row, in a single transaction so a partial
  * failure leaves nothing orphaned. Scoped by `userId`/`id`, so another user's
  * rows are never touched.
- *
- * Cohorts the user *created* are deliberately KEPT: a cohort is shared teaching
- * config (its students' access), not personal data, so it survives as an
- * orphan (the teacher-owned cohort layer is being removed). We only clear
- * the dangling reference to any of this user's now-deleted context profiles.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
   getDb().transaction((tx) => {
     tx.delete(feedback).where(eq(feedback.userId, id)).run();
     tx.delete(usage).where(eq(usage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
-    // Null any surviving cohort's reference to a profile we're about to delete,
-    // so no orphaned cohort points at a vanished profile.
-    const profileIds = tx
-      .select({ id: contextProfiles.id })
-      .from(contextProfiles)
-      .where(eq(contextProfiles.userId, id))
-      .all()
-      .map((p) => p.id);
-    if (profileIds.length > 0) {
-      tx.update(cohorts)
-        .set({ contextProfileId: null })
-        .where(inArray(cohorts.contextProfileId, profileIds))
-        .run();
-    }
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
-    // Drop this user's co-teacher assignments (a colleague's cohort just loses a
-    // co-manager); their own cohorts stay, orphaned for reassignment.
-    tx.delete(cohortTeachers).where(eq(cohortTeachers.userId, id)).run();
-    tx.delete(cohortMemberships).where(eq(cohortMemberships.userId, id)).run();
-    // Chat history: drop the user's messages (via their sessions), the sessions,
-    // and the derived summaries. The student's raw transcript leaves with them.
+    // Chat history: drop the user's messages (via their sessions) and the sessions.
     const sessionIds = tx
       .select({ id: chatSessions.id })
       .from(chatSessions)
@@ -290,7 +258,6 @@ export async function deleteUserCascade(id: string): Promise<void> {
       tx.delete(messages).where(inArray(messages.sessionId, sessionIds)).run();
     }
     tx.delete(chatSessions).where(eq(chatSessions.userId, id)).run();
-    tx.delete(sessionSummaries).where(eq(sessionSummaries.userId, id)).run();
     tx.delete(users).where(eq(users.id, id)).run();
   });
 }
@@ -316,9 +283,6 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
     createdByUserId: input.createdByUserId ?? null,
-    // Legacy schema columns (dropped in 17.3): filled neutrally, never read.
-    cohortId: null,
-    email: null,
     allowedToolSlugs:
       input.allowedToolSlugs && input.allowedToolSlugs.length > 0
         ? JSON.stringify(input.allowedToolSlugs)
@@ -352,7 +316,6 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
       and(
         eq(invites.token, token),
         isNull(invites.usedByUserId),
-        isNull(invites.cohortId),
         inArray(invites.role, [...ROLES]),
       ),
     )

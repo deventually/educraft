@@ -175,14 +175,11 @@ describe("invites repository", () => {
     expect((await repo.getInvite(invite.token))?.usedByUserId ?? null).toBeNull();
   });
 
-  it("refuses cohort invites and retired roles at the guarded UPDATE", async () => {
+  it("refuses retired roles at the guarded UPDATE", async () => {
     const { getDb } = await import("~/server/db.server");
     const { invites } = await import("~/server/schema.server");
     const { eq } = await import("drizzle-orm");
     const db = getDb();
-    const cohortInvite = await repo.createInvite({ role: "teacher" });
-    db.update(invites).set({ cohortId: "c1" }).where(eq(invites.token, cohortInvite.token)).run();
-    expect(await repo.consumeInvite(cohortInvite.token, "u1")).toBeNull();
     const retired = await repo.createInvite({ role: "teacher" });
     db.update(invites).set({ role: "student" }).where(eq(invites.token, retired.token)).run();
     expect(await repo.consumeInvite(retired.token, "u2")).toBeNull();

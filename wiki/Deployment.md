@@ -30,6 +30,21 @@ starts empty.
 DATABASE_URL=file:/data/limeonit.db   # volume mounted at /data
 ```
 
+## Back-up vóór een destructieve migratie
+
+Migraties draaien automatisch bij de eerste database-toegang na een deploy. Migratie `0008`
+(P17.3) wist studentaccounts en hun data definitief en laat de cohort- en inzichttabellen vallen.
+Doe daarom vooraf:
+
+1. Tel de rollen: `SELECT role, COUNT(*) FROM users GROUP BY role;` en noteer de aantallen.
+2. Stop de app en kopieer `limeonit.db` **plus** `limeonit.db-wal` en `limeonit.db-shm` van het
+   volume (of maak een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-0008.db"`).
+3. Bewaar de back-up buiten de repo. Hij bevat studentdata: verwijder hem na een korte, door de
+   beheerder gekozen termijn.
+4. Deploy. Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten en beheerders. Een
+   docent logt in en ziet zijn werk.
+5. Terugdraaien = de back-up terugzetten op het volume en de vorige image deployen.
+
 ## Environment checklist
 
 | Var | Required | Notes |

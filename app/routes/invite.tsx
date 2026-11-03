@@ -18,9 +18,8 @@ export function meta({ matches }: Route.MetaArgs) {
 }
 
 /**
- * Whether an invite token is still redeemable (exists, unused, not expired). A
- * legacy invite — one bound to a cohort or carrying a retired role such as
- * "student" (pre-P17 data) — is never redeemable.
+ * Whether an invite token is still redeemable (exists, unused, not expired). An
+ * invite carrying a retired role such as "student" is never redeemable.
  */
 function isRedeemable(
   invite: Awaited<ReturnType<typeof getInvite>>,
@@ -28,7 +27,6 @@ function isRedeemable(
   return Boolean(
     invite &&
       isRole(invite.role) &&
-      !invite.cohortId &&
       !invite.usedByUserId &&
       !(invite.expiresAt && invite.expiresAt.getTime() < Date.now()),
   );
@@ -55,7 +53,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (password.length < 10) return { error: m.auth.passwordTooShort };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
-  // Refuse a legacy (cohort/student) invite before it can be claimed.
+  // Refuse a retired-role (e.g. student) invite before it can be claimed.
   if (!isRedeemable(await getInvite(params.token))) return { error: m.auth.inviteInvalid };
 
   // Claim the invite atomically for a fresh id *before* creating the user, so a
