@@ -429,7 +429,6 @@ describe("admin.users action", () => {
     const token = res.link!.split("/invite/")[1];
     const invite = await users.getInvite(token);
     expect(invite?.role).toBe("teacher");
-    expect(invite!.allowedToolSlugs).toBeNull();
   });
 
   it("blocks an admin from changing their OWN role (self-demote guard)", async () => {

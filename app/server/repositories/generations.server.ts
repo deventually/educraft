@@ -11,7 +11,6 @@ import { generations, type GenerationRow } from "../schema.server";
 
 export interface SaveGenerationInput {
   userId: string;
-  projectId?: string | null;
   toolSlug: string;
   stageId?: string | null;
   model: string;
@@ -26,7 +25,6 @@ export async function saveGeneration(input: SaveGenerationInput): Promise<Genera
   const row: GenerationRow = {
     id,
     userId: input.userId,
-    projectId: input.projectId ?? null,
     toolSlug: input.toolSlug,
     stageId: input.stageId ?? null,
     model: input.model,
@@ -67,7 +65,6 @@ export async function upsertChatGeneration(
   const row: GenerationRow = {
     id: input.id,
     userId: input.userId,
-    projectId: existing?.projectId ?? null,
     toolSlug: input.toolSlug,
     stageId: input.stageId ?? null,
     model: input.model,

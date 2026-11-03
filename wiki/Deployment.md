@@ -34,12 +34,16 @@ DATABASE_URL=file:/data/limeonit.db   # volume mounted at /data
 
 Migraties draaien automatisch bij de eerste database-toegang na een deploy. Migratie `0008`
 (P17.3) wist studentaccounts en hun data definitief en laat de cohort- en inzichttabellen vallen.
-Doe daarom vooraf:
+Migratie `0010` (P18.8) laat de tabellen `chat_sessions`, `messages` en `projects` en de kolommen
+`allowed_tool_slugs` en `project_id` vallen, ruimt verouderde instellingssleutels op en verwijdert
+open beheerdersuitnodigingen. Doe daarom vooraf:
 
 1. Tel de rollen: `SELECT role, COUNT(*) FROM users GROUP BY role;` en noteer de aantallen.
+   Voor `0010` ook: `SELECT COUNT(*) FROM chat_sessions;`, `SELECT COUNT(*) FROM messages;`,
+   `SELECT COUNT(*) FROM projects;` en `SELECT COUNT(*) FROM generations;`.
 2. Stop de app en kopieer `limeonit.db` **plus** `limeonit.db-wal` en `limeonit.db-shm` van het
-   volume (of maak een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-0008.db"`).
-3. Bewaar de back-up buiten de repo. Hij bevat studentdata: verwijder hem na een korte, door de
+   volume (of maak een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-p18.db"`).
+3. Bewaar de back-up buiten de repo. Hij bevat studentdata en oude chattranscripten: verwijder hem na een korte, door de
    beheerder gekozen termijn.
 4. Deploy. Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten en beheerders. Een
    docent logt in en ziet zijn werk.
