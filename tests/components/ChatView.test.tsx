@@ -48,6 +48,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       interrupted: "Interrupted",
       yourSettings: "Your settings",
       edit: "Edit",
+      endSession: "End session",
     },
     error: {
       unknown: "Something went wrong",
@@ -422,6 +423,25 @@ describe("ChatView", () => {
     await waitFor(() => {
       expect(screen.getByText("What is OOP?")).toBeInTheDocument();
     });
+  });
+
+  it("offers no end-session control after a completed turn", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    (streamPost as ReturnType<typeof vi.fn>).mockImplementation(
+      async (_url, _body, { onToken, onDone }) => {
+        onToken("Hi");
+        onDone("Hi");
+      },
+    );
+    const { container } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(await screen.findByPlaceholderText("Your message…"), "What is OOP?");
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(screen.getByText("What is OOP?")).toBeInTheDocument());
+    await screen.findByText("Hi");
+    expect(screen.queryByRole("button", { name: /end session|sessie beëindigen/i })).toBeNull();
+    expect((await axe(container)).violations).toEqual([]);
   });
 
   it("shows live region for streaming with aria-live=polite", async () => {

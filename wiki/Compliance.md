@@ -41,14 +41,8 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
 - **Right to erasure.** "Delete my account and data" (`/account`) runs
   `deleteUserCascade` (`app/server/repositories/users.server.ts`) — a single
   transaction removing the user's feedback, usage counters, generations, context
-  profiles, cohort memberships, and their chat history + de-personalised session
-  summaries, then the user row — and ends the session. Scoped by user id, so no
-  other account is touched.
-- **Privacy-safe mentor insight.** A provisioning teacher sees engagement metrics
-  and *de-personalised* session summaries for their cohort, but **never** the raw
-  chat transcript — enforced structurally (the mentor-facing repo has no query
-  that returns message content) and by a summariser that strips verbatim quotes
-  and personal disclosure. See [Mentor Insight](Mentor-Insight.md).
+  profiles, cohort memberships, and their chat history, then the user row — and
+  ends the session. Scoped by user id, so no other account is touched.
 - **Access control & scoping.** Invite-only accounts, three roles
   (student/teacher/admin), and per-user scoping on every repository query (a user
   only ever sees their own data). See `wiki/Authentication.md`.
@@ -62,10 +56,6 @@ is **no silent server-side retention/expiry job** — deletion is user-initiated
 (per-item on the Projects page, or the full account cascade at `/account`). If a
 future deployment requires automatic retention limits, add a scheduled job; it is
 intentionally not built now to keep behaviour predictable and user-controlled.
-
-The one scheduled server-side job is the abandoned-session **sweep** (`npm run
-sweep`, see [Mentor Insight](Mentor-Insight.md)) — it only *adds* de-personalised
-summaries for cohort sessions and never deletes or expires student data.
 
 ## What procurement will typically ask
 

@@ -7,8 +7,6 @@ type Profiles = typeof import("~/server/repositories/profiles.server");
 type Generations = typeof import("~/server/repositories/generations.server");
 type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
-type Chat = typeof import("~/server/repositories/chat.server");
-type Insight = typeof import("~/server/repositories/insight.server");
 type Cohorts = typeof import("~/server/repositories/cohorts.server");
 
 let users: Users;
@@ -16,8 +14,6 @@ let profiles: Profiles;
 let generations: Generations;
 let usage: Usage;
 let feedback: Feedback;
-let chat: Chat;
-let insight: Insight;
 let cohorts: Cohorts;
 
 beforeAll(async () => {
@@ -26,8 +22,6 @@ beforeAll(async () => {
   generations = await import("~/server/repositories/generations.server");
   usage = await import("~/server/repositories/usage.server");
   feedback = await import("~/server/repositories/feedback.server");
-  chat = await import("~/server/repositories/chat.server");
-  insight = await import("~/server/repositories/insight.server");
   cohorts = await import("~/server/repositories/cohorts.server");
 });
 
@@ -60,34 +54,38 @@ describe("deleteUserCascade", () => {
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === genId)).toBe(false);
   });
 
-  it("removes the user's chat sessions, messages and session summaries (P7)", async () => {
+  it("removes the user's chat sessions and messages", async () => {
     const sessionId = "del-chat-session-1";
-    await chat.recordChatTurn({
-      sessionId,
-      userId: "del-user-chat",
-      cohortId: "c-x",
-      toolSlug: "mentorai",
-      model: "m",
-      systemPrompt: "sys",
-      messages: [
-        { role: "user", content: "hi" },
-        { role: "assistant", content: "hello" },
-      ],
-    });
-    await insight.saveSummary({
-      sessionId,
-      userId: "del-user-chat",
-      cohortId: "c-x",
-      toolSlug: "mentorai",
-      summary: { topicsWorkedOn: [], skillsProgressed: [], misconceptions: [], effort: "unclear" },
-      helpfulness: 1,
-    });
+    const { getDb } = await import("~/server/db.server");
+    const { chatSessions, messages } = await import("~/server/schema.server");
+    const { eq } = await import("drizzle-orm");
+    const db = getDb();
+    db.insert(chatSessions)
+      .values({
+        id: sessionId,
+        toolSlug: "mentorai",
+        systemPrompt: "sys",
+        model: "m",
+        userId: "del-user-chat",
+        cohortId: "c-x",
+        createdAt: new Date(),
+      })
+      .run();
+    db.insert(messages)
+      .values([
+        { id: "del-msg-1", sessionId, role: "user", content: "hi", createdAt: new Date() },
+        { id: "del-msg-2", sessionId, role: "assistant", content: "hello", createdAt: new Date() },
+      ])
+      .run();
 
     await users.deleteUserCascade("del-user-chat");
 
-    expect(await chat.getChatSession(sessionId)).toBeNull();
-    expect(await chat.getSessionMessages(sessionId)).toHaveLength(0);
-    expect(await insight.getSummary(sessionId)).toBeNull();
+    expect(db.select().from(chatSessions).where(eq(chatSessions.id, sessionId)).all()).toHaveLength(
+      0,
+    );
+    expect(db.select().from(messages).where(eq(messages.sessionId, sessionId)).all()).toHaveLength(
+      0,
+    );
   });
 
   it("keeps a teacher's cohorts (orphan-safe), nulls their dangling profile ref, drops co-teach links", async () => {

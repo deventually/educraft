@@ -64,8 +64,7 @@ LimeOnIt is not tied to one model vendor.
   self-hosted model that speaks the OpenAI API (ChatGPT, Gemini, Mistral, GLM,
   DeepSeek, OpenRouter, vLLM, …), via `OPENAI_COMPAT_BASE_URL` /
   `OPENAI_COMPAT_API_KEY` in `.env`. It's a *paid remote* model, so — like Opus —
-  it is **not** client-selectable: reachable as a configured default (e.g. the
-  summary sweep's `--model`), never forced from a request body.
+  it is **not** client-selectable: reachable only as a configured default, never forced from a request body.
 - `models.ts` holds the static catalog + the `compat::`/local id schemes;
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
@@ -129,7 +128,7 @@ npm run build      # production build
 
 - [Context Model](Context-Model.md) · [Tools](Tools.md) ·
   [Internationalization](Internationalization.md) · [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md)
-- [Authentication](Authentication.md) · [Mentor Insight](Mentor-Insight.md) ·
-  [Deployment](Deployment.md) · [Compliance](Compliance.md)
+- [Authentication](Authentication.md) · [Deployment](Deployment.md) ·
+  [Compliance](Compliance.md)
 - Program docs: [audit](../docs/Audit-2026-07.md) · [improvement plan](../docs/Improvement-Plan.md) ·
   [phase briefs](../docs/implementation/README.md)
