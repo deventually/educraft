@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const mathGrading: Tool = {
   id: "math-grading",
   slug: "math-grading",
-  name: {
-    nl: "Wiskunde Grading — Handgeschreven antwoorden",
-    en: "Math Grading — Handwritten Responses",
+  name: { nl: "Wiskundeantwoorden nakijken", en: "Grade handwritten math answers" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Wiskunde Grading (handgeschreven antwoorden)",
+    en: "Math Grading (handwritten responses)",
   },
   tagline: {
     nl: "Beoordeel handgeschreven wiskundige antwoorden met AI; geef gestructureerde feedback op basis van je beoordelingscriteria.",

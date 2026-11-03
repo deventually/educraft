@@ -31,7 +31,12 @@ const MATERIALEN = { nl: "Materialen", en: "Materials" };
 export const guidedReflection: Tool = {
   id: "guided-reflection-backward-design",
   slug: "guided-reflection",
-  name: { nl: "Begeleide reflectie & Backward Design", en: "Guided Reflection & Backward Design" },
+  name: { nl: "Les of cursus ontwerpen", en: "Design a lesson or course" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Begeleide reflectie (Backward Design)",
+    en: "Guided Reflection (Backward Design)",
+  },
   tagline: {
     nl: "Ontwerp een les of cursus vanuit de gewenste leeruitkomsten, volgens Backward Design.",
     en: "Design a lesson or course backward from the desired learning outcomes, using Backward Design.",

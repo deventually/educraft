@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const thinkPairShare: Tool = {
   id: "think-pair-share",
   slug: "think-pair-share",
-  name: {
-    nl: "Think-Pair-Share — Peer Denken",
-    en: "Think-Pair-Share — Collaborative Peer Thinking",
+  name: { nl: "Samen nadenken met een peer", en: "Think it through with a peer" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Think-Pair-Share (peer denken)",
+    en: "Think-Pair-Share (collaborative peer thinking)",
   },
   tagline: {
     nl: "Werk samen met een gelijkwaardige peer om dieper na te denken over je leerstof.",

@@ -7,7 +7,12 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const mentorai: Tool = {
   id: "mentorai",
   slug: "mentorai",
-  name: { nl: "MentorAI — Cognitieve Leermeesterschap", en: "MentorAI — Cognitive Apprenticeship" },
+  name: { nl: "Persoonlijke leermeester", en: "Personal learning mentor" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "MentorAI (Cognitief Leermeesterschap)",
+    en: "MentorAI (Cognitive Apprenticeship)",
+  },
   tagline: {
     nl: "Een persoonlijke leermeester die je helpt door vragen te stellen en je denken te geleiden.",
     en: "A personal mentor who helps you by asking questions and guiding your thinking.",

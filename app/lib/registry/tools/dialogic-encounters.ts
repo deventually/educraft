@@ -7,10 +7,9 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const dialogicEncounters: Tool = {
   id: "dialogic-encounters",
   slug: "dialogic-encounters",
-  name: {
-    nl: "Dialogische Ontmoetingen — Rol-Spel met Theoretici",
-    en: "Dialogic Encounters — Role-Play with Theorists",
-  },
+  name: { nl: "Gesprek met een theoreticus", en: "Talk with a learning theorist" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: { nl: "Dialogische ontmoetingen (Dialogic Encounters)", en: "Dialogic Encounters" },
   tagline: {
     nl: "Interview een leertheoricus en verken hoe hun perspectief onderwijs vormt.",
     en: "Interview a learning theorist and explore how their perspective shapes teaching.",

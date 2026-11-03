@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2-plan)_
+_Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
 
 ## Nu
 
@@ -50,9 +50,10 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan)_
    modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
    ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
    t/m -17.
-3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
-   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de
-   stageverslagen-checker ('Beoordelingsassistent — stage & afstuderen') moet vindbaar zijn.
+3. **Vereenvoudiging V3** (wordt P19): de docentkant. Stap 19.1 (toolnamen, taak eerst; besluit
+   BESLUIT-2026-11-03-18) is gemerged. Nog te doen: menu, toolpagina (techniek achter
+   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de stageverslagen-checker
+   heet nu 'Stageverslag of afstudeerwerk beoordelen'.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 

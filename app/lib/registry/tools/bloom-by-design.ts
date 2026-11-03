@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const bloomByDesign: Tool = {
   id: "bloom-by-design",
   slug: "bloom-by-design",
-  name: {
-    nl: "Bloom by Design — Onderwijstechnologie Alignment",
-    en: "Bloom by Design — EdTech Alignment",
+  name: { nl: "Onderwijstechnologie kiezen", en: "Choose educational technology" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Bloom by Design (Constructive Alignment)",
+    en: "Bloom by Design (Constructive Alignment)",
   },
   tagline: {
     nl: "Selecteer onderwijstechnologie op basis van leerresultaten, niet op voorkeur.",

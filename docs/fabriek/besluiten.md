@@ -99,3 +99,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   beheerders.** De superbeheerder kan ook accounts direct aanmaken (met een eenmalige link of een
   beginwachtwoord, zonder e-mail), wachtwoorden resetten of instellen, en accounts op non-actief
   zetten en weer activeren.
+- **BESLUIT-2026-11-03-18:** **Toolnamen: taak eerst, boeknaam als ondertitel (V3).** Elke tool heet
+  naar wat de docent wil doen (bijvoorbeeld 'Stageverslag of afstudeerwerk beoordelen'); de naam uit
+  het boek of de techniek staat klein eronder (`Tool.subtitle`). Slugs, ids en prompts blijven gelijk.

@@ -171,8 +171,8 @@ modellen die ook in productie worden aangeboden. Bastiaan heeft op 2026-11-03 ge
 - **Migraties:** 18.7 (kolom erbij, niet destructief) en 18.8 (destructief). Nummers volgen de
   journal (`0009_…`, `0010_…`, of hoger als P20 eerder landt). Tests zoeken entries via
   `drizzle/meta/_journal.json`, nooit via een vast nummer.
-- **Samenloop met P19.1** (V3, parallelle werker op `claude/project-thread-vpdrvw`): P19.1 hernoemt
-  tools (taak eerst, boektitel als ondertitel). P18 verandert **geen** tooltitels, geen `Tool`-type
+- **Samenloop met P19.1** (V3): P19.1 is gemerged en hernoemde
+  de tools (taak eerst, boektitel als `Tool.subtitle`; `Tool.name` is nu de taaknaam). P18 verandert **geen** tooltitels, geen `Tool`-type
   en geen kaarten op de startpagina. Beheertests mogen **geen tooltitels hardcoderen**: lees de naam
   uit het register (`loc(getToolBySlug("…")!.name, "nl")` of `ALL_TOOLS[i].name`), zodat de hernoeming
   ze niet breekt. Bestaande beheertests die je in P18 aanraakt, zet je zo om.

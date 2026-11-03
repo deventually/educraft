@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const socraticPartner: Tool = {
   id: "socratic-partner",
   slug: "socratic-partner",
-  name: {
-    nl: "Socratische Partner — Kennisverificatie",
-    en: "Socratic Partner — Knowledge Verification",
+  name: { nl: "Begrip verdiepen met vragen", en: "Deepen understanding with questions" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Socratische Partner (kennisverificatie)",
+    en: "Socratic Partner (knowledge verification)",
   },
   tagline: {
     nl: "Een onderwijsauteur stelt vragen om je begrip van een onderwerp dieper te maken.",

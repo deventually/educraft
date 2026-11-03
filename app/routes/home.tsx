@@ -29,11 +29,14 @@ import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
+import { ToolSubtitle } from "~/components/ToolTitle";
 
 interface ToolCardData {
   slug: string;
   name: LocalizedText;
   tagline: LocalizedText;
+  /** Book/technique name, small under the name. */
+  subtitle?: LocalizedText;
   icon?: string;
   userType: UserType;
   mode: InteractionMode;
@@ -58,12 +61,19 @@ export async function loader({ request }: Route.LoaderArgs) {
       slug: tool.slug,
       name: tool.name,
       tagline: tool.tagline,
+      subtitle: tool.subtitle,
       icon: tool.icon,
       userType: tool.userType,
       mode: tool.mode,
       theory: tool.theory.name,
       goal: TOOL_GOALS[tool.slug] ?? "design",
-      search: [text(tool.name), text(tool.tagline), text(tool.theory.name), keywords.join(" ")]
+      search: [
+        text(tool.name),
+        tool.subtitle ? text(tool.subtitle) : "",
+        text(tool.tagline),
+        text(tool.theory.name),
+        keywords.join(" "),
+      ]
         .join(" ")
         .toLowerCase(),
       stages: tool.stages.length,
@@ -335,9 +345,12 @@ function ToolCard({
         <span className="grid size-[42px] shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
           <ToolIcon name={tool.icon} />
         </span>
-        <h3 className="m-0 min-w-0 flex-1 self-center text-base font-semibold leading-snug text-slate-900">
-          {loc(tool.name, locale)}
-        </h3>
+        <div className="min-w-0 flex-1 self-center">
+          <h3 className="m-0 text-base font-semibold leading-snug text-slate-900">
+            {loc(tool.name, locale)}
+          </h3>
+          <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         {showAudience && (
@@ -399,6 +412,9 @@ function ToolRow({
           )}
           <ModePill mode={tool.mode} t={t} />
         </span>
+        {tool.subtitle && (
+          <span className="truncate text-xs text-slate-500">{loc(tool.subtitle, locale)}</span>
+        )}
         <span className="truncate text-[13px] leading-snug text-slate-500">
           {loc(tool.tagline, locale)}
         </span>

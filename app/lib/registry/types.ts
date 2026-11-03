@@ -176,8 +176,10 @@ export interface Tool {
   id: string;
   /** URL: /tools/<slug>. */
   slug: string;
-  /** Localized display name. */
+  /** Localized display name: task first (what the teacher wants to do). */
   name: LocalizedText;
+  /** Book/technique name, shown small under the name. Data only, never branched on. */
+  subtitle?: LocalizedText;
   /** One-line localized pitch shown on the card. */
   tagline: LocalizedText;
   /** Lucide icon name, e.g. "compass". */
