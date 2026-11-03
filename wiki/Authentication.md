@@ -112,7 +112,8 @@ approval first. Every link below is shown on the page for the admin to copy and 
 
 - **Reset link** (since P4): an admin mints a single-use `/reset/:token` for a user
   (`createPasswordReset`, 48 h); the user chooses their own new password and is signed in.
-  A role change voids the user's open links.
+  A role change, a new password (`updateUserPassword`: reset, `/account`, the owner's
+  `setPassword`) and a deactivation void the user's open links.
 - **Create an account** (owner only, `/admin/users`): name, e-mail (required, logging in
   uses it), role teacher or admin, and either a **link** (default: the account exists with
   `passwordHash = NO_PASSWORD`, which no typed password matches, plus a 7-day single-use
@@ -124,8 +125,9 @@ approval first. Every link below is shown on the page for the admin to copy and 
 - **Deactivate / reactivate** (owner only): `users.disabled_at` is set or cleared. A
   deactivated account cannot log in (a correct password gets the "deactivated" message,
   a wrong one the generic one), `getUser` returns `null`, the data stays. Deactivating
-  bumps `sessionVersion`, so reactivating does not revive old cookies. Its reset link is
-  invalid and stays unspent (`reset.$token.tsx`) until the account is reactivated.
+  bumps `sessionVersion` and voids the open reset links, so reactivating revives neither
+  old cookies nor old links. A link minted while the account is deactivated is invalid and
+  stays unspent (`reset.$token.tsx`) until the account is reactivated.
 - Nobody uses these on their own account; they use `/account`.
 
 ## What SSO will (and won't) replace

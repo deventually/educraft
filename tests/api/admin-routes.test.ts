@@ -992,6 +992,31 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(await auth.getUser(asReq())).toBeNull(); // logged out everywhere
   });
 
+  it("setting a password voids the user's open reset and set-password links", async () => {
+    await actAsOwner();
+    const created = await run({
+      intent: "createAccount",
+      name: "Link Then Set",
+      email: "linkthenset@example.com",
+      role: "teacher",
+      passwordMode: "link",
+    });
+    const token = String(created.setPasswordLink).split("/reset/")[1];
+    const target = await users.getUserByEmail("linkthenset@example.com");
+    const other = await users.createPasswordReset(target!.id);
+
+    const res = await run({
+      intent: "setPassword",
+      userId: target!.id,
+      password: "owner-chosen-secret",
+      confirm: "owner-chosen-secret",
+    });
+    expect(res.passwordSet).toBe(true);
+    // Whoever holds an older link can no longer overwrite the owner's password.
+    expect(await users.getPasswordReset(token)).toBeNull();
+    expect(await users.getPasswordReset(other.token)).toBeNull();
+  });
+
   it("setPassword refuses a short or mismatching password and changes nothing", async () => {
     await actAsOwner();
     const pw = await password();

@@ -23,6 +23,7 @@ export function meta({ matches }: Route.MetaArgs) {
  * Whether a reset token is still redeemable: it exists, has not expired, and its account
  * is not deactivated (P18.7). A deactivated user must not get a session from a link, so
  * the link counts as invalid — and is left unspent — until the account is reactivated.
+ * (Deactivation voids the links open at that moment; this covers one minted after.)
  */
 async function isRedeemable(token: string): Promise<boolean> {
   const reset = await getPasswordReset(token);

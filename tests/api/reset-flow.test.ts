@@ -129,7 +129,25 @@ describe("reset route action", () => {
 });
 
 describe("reset link of a deactivated account (P18.7)", () => {
-  it("does not let a deactivated user in, and does not spend the link", async () => {
+  it("deactivating voids the account's open links; reactivating does not bring them back", async () => {
+    const u = await users.createUser({
+      name: "Dark Void",
+      email: "darkvoid@example.com",
+      passwordHash: password.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    const reset = await users.createPasswordReset(u.id);
+    await users.setUserDisabled(u.id, true);
+    expect(await users.getPasswordReset(reset.token)).toBeNull();
+    await users.setUserDisabled(u.id, false);
+    const res = await invoke(
+      reset.token,
+      post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
+    );
+    expect(res instanceof Response).toBe(false);
+  });
+
+  it("a link minted while deactivated does not let the user in, and is not spent", async () => {
     const auth = await import("~/server/auth.server");
     const u = await users.createUser({
       name: "Dark Reset",
@@ -137,8 +155,9 @@ describe("reset link of a deactivated account (P18.7)", () => {
       passwordHash: password.hashPassword("old-password-x"),
       role: "teacher",
     });
-    const reset = await users.createPasswordReset(u.id);
     await users.setUserDisabled(u.id, true);
+    // e.g. a regular admin's reset link for a deactivated teacher
+    const reset = await users.createPasswordReset(u.id);
 
     // The page says the link is invalid ...
     const loaded = (await resetRoute.loader({
@@ -160,7 +179,7 @@ describe("reset link of a deactivated account (P18.7)", () => {
     expect(password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(false);
     expect(await users.getPasswordReset(reset.token)).not.toBeNull(); // not consumed
 
-    // After reactivation the same link works again.
+    // After reactivation that link works.
     await users.setUserDisabled(u.id, false);
     const ok = await invoke(
       reset.token,
@@ -171,5 +190,34 @@ describe("reset link of a deactivated account (P18.7)", () => {
     expect(
       (await auth.getUser(new Request("http://localhost/", { headers: { Cookie: cookie } })))?.id,
     ).toBe(u.id);
+  });
+});
+
+describe("a new password voids the other open links (P18.7 review)", () => {
+  it("redeeming one link kills the user's other open links", async () => {
+    const u = await users.createUser({
+      name: "Two Links",
+      email: "twolinks@example.com",
+      passwordHash: password.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    const first = await users.createPasswordReset(u.id);
+    const second = await users.createPasswordReset(u.id);
+    const res = await invoke(
+      first.token,
+      post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
+    );
+    expect(res instanceof Response).toBe(true);
+    expect(await users.getPasswordReset(second.token)).toBeNull();
+  });
+
+  it("updateUserPassword voids every open link of that user only", async () => {
+    const a = await users.createUser({ name: "PwA", passwordHash: "scrypt:a:b", role: "teacher" });
+    const b = await users.createUser({ name: "PwB", passwordHash: "scrypt:a:b", role: "teacher" });
+    const la = await users.createPasswordReset(a.id);
+    const lb = await users.createPasswordReset(b.id);
+    await users.updateUserPassword(a.id, password.hashPassword("another-secret"));
+    expect(await users.getPasswordReset(la.token)).toBeNull();
+    expect(await users.getPasswordReset(lb.token)).not.toBeNull();
   });
 });
