@@ -416,7 +416,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         {invites.length === 0 ? (
           <p className="mt-4 text-sm text-slate-500">{t.admin.invites.none}</p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t.admin.invites.listHeading}</caption>
               <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
@@ -501,7 +501,9 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
           />
         )}
 
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* `relative`: the box is the containing block of the absolutely positioned
+            sr-only labels, so they scroll with the table instead of widening the page. */}
+        <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{t.admin.invites.usersHeading}</caption>
             <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">

@@ -299,6 +299,21 @@ describe("Admin users", () => {
     );
   });
 
+  it("keeps each table's sr-only labels inside its own scroll box (no page scroll on a phone)", () => {
+    // An `sr-only` label is position:absolute. Without a positioned ancestor inside the
+    // `overflow-x-auto` box it escapes that box's clipping and widens the whole page
+    // (iPhone 13: a ~690px layout viewport, dialogs off-screen). The box itself must be
+    // the containing block.
+    const { container } = renderRoute();
+    const tables = container.querySelectorAll("table");
+    expect(tables.length).toBeGreaterThanOrEqual(2); // invites + users
+    for (const table of tables) {
+      const box = table.parentElement as HTMLElement;
+      expect(box.className).toMatch(/\boverflow-x-auto\b/);
+      expect(box.className).toMatch(/\brelative\b/);
+    }
+  });
+
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
