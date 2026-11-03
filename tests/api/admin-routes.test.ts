@@ -379,6 +379,19 @@ describe("admin.invites action", () => {
     expect(res.error).toBe("selfDemote");
   });
 
+  it("refuses a role change for a user whose stored role is no longer valid", async () => {
+    const legacy = await users.createUser({
+      name: "Legacy Student",
+      email: "legacy-student@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "student" as never,
+    });
+    await expect(
+      invoke(invitesRoute.action, post({ intent: "role", userId: legacy.id, role: "teacher" })),
+    ).rejects.toMatchObject({ status: 404 });
+    expect((await users.getUserById(legacy.id))?.role).toBe("student");
+  });
+
   it("promotes an existing user in place (role only — no new account, no password change)", async () => {
     const teacher = await users.createUser({
       name: "Promote Me",

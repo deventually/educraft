@@ -7,7 +7,7 @@ export const users = sqliteTable("users", {
   email: text("email").unique(), // nullable; invites may be nameless
   passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
   role: text("role").notNull().default("teacher"), // "student" | "teacher" | "admin"
-  // Single active session (Phase 6 anti-sharing): bumped on every login/redeem and
+  // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and
   // carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
   // Per-teacher tool allow-list (Phase 4). Set from the invite that minted this

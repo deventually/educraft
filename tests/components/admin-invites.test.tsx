@@ -33,8 +33,10 @@ const loaderData = {
   ],
 };
 
-function renderRoute(action?: () => unknown) {
-  const props = { loaderData } as unknown as ComponentProps<typeof AdminInvites>;
+function renderRoute(action?: () => unknown, extraUsers: (typeof loaderData.users)[number][] = []) {
+  const props = {
+    loaderData: { ...loaderData, users: [...loaderData.users, ...extraUsers] },
+  } as unknown as ComponentProps<typeof AdminInvites>;
   const Stub = createRoutesStub([
     {
       path: "/admin/invites",
@@ -46,6 +48,17 @@ function renderRoute(action?: () => unknown) {
 }
 
 describe("Admin invites", () => {
+  it("shows a retired role read-only, with no role-change form", async () => {
+    const { container } = renderRoute(undefined, [
+      { id: "legacy-1", name: "Legacy L", email: "l@x.nl", role: "student", createdAt: new Date() },
+    ]);
+    await screen.findByText("Legacy L");
+    expect(container.querySelector("#role-legacy-1")).toBeNull();
+    expect(container.querySelector("#role-teacher-9")).not.toBeNull();
+    expect(screen.getByText("student")).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("reveals the tool allow-list only when 'restrict' is chosen", async () => {
     const user = userEvent.setup();
     renderRoute();

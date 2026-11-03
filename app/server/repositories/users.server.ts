@@ -25,7 +25,7 @@ import {
   type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
-import type { Role } from "~/lib/registry/access";
+import { ROLES, type Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
   /** Optional explicit id so an invite can claim it atomically before creation. */
@@ -250,8 +250,8 @@ export async function deleteUser(id: string): Promise<void> {
  * rows are never touched.
  *
  * Cohorts the user *created* are deliberately KEPT: a cohort is shared teaching
- * config (its students' access), not personal data, so it survives as a
- * reassignable orphan an admin can re-home (see `setCohortOwner`). We only clear
+ * config (its students' access), not personal data, so it survives as an
+ * orphan (the teacher-owned cohort layer is being removed). We only clear
  * the dangling reference to any of this user's now-deleted context profiles.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
@@ -348,7 +348,14 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
   const result = db
     .update(invites)
     .set({ usedByUserId: userId })
-    .where(and(eq(invites.token, token), isNull(invites.usedByUserId)))
+    .where(
+      and(
+        eq(invites.token, token),
+        isNull(invites.usedByUserId),
+        isNull(invites.cohortId),
+        inArray(invites.role, [...ROLES]),
+      ),
+    )
     .run();
   if (result.changes === 0) return null;
   return { ...invite, usedByUserId: userId };

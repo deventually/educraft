@@ -10,6 +10,7 @@ import {
   createPasswordReset,
   deleteUserCascade,
   getUserByEmail,
+  getUserById,
   listInvitesWithContext,
   listUsers,
   revokeInvite,
@@ -88,6 +89,10 @@ export async function action({ request }: Route.ActionArgs) {
     const role = String(fd.get("role") ?? "");
     // An admin can never change their OWN role — no self-lockout.
     if (userId === admin.id) return { error: "selfDemote" as const };
+    // A legacy row whose role is no longer valid (e.g. "student") is never
+    // promoted by a role change — treat it as not manageable here.
+    const target = await getUserById(userId);
+    if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
     if (isRole(role)) await setUserRole(userId, role);
     return { roleChanged: true as const };
   }
@@ -435,28 +440,30 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                         <span className="block text-right text-xs text-slate-400">—</span>
                       ) : (
                         <div className="flex flex-wrap items-center justify-end gap-2">
-                          <Form method="post" className="flex items-center gap-2">
-                            <input type="hidden" name="intent" value="role" />
-                            <input type="hidden" name="userId" value={u.id} />
-                            <label htmlFor={`role-${u.id}`} className="sr-only">
-                              {t.admin.invites.changeRole} — {u.name}
-                            </label>
-                            <Select
-                              id={`role-${u.id}`}
-                              name="role"
-                              defaultValue={u.role}
-                              className="w-auto"
-                            >
-                              {ROLES.map((r) => (
-                                <option key={r} value={r}>
-                                  {roleLabel[r]}
-                                </option>
-                              ))}
-                            </Select>
-                            <Button type="submit" variant="secondary" size="sm">
-                              {t.admin.invites.apply}
-                            </Button>
-                          </Form>
+                          {isRole(u.role) && (
+                            <Form method="post" className="flex items-center gap-2">
+                              <input type="hidden" name="intent" value="role" />
+                              <input type="hidden" name="userId" value={u.id} />
+                              <label htmlFor={`role-${u.id}`} className="sr-only">
+                                {t.admin.invites.changeRole} — {u.name}
+                              </label>
+                              <Select
+                                id={`role-${u.id}`}
+                                name="role"
+                                defaultValue={u.role}
+                                className="w-auto"
+                              >
+                                {ROLES.map((r) => (
+                                  <option key={r} value={r}>
+                                    {roleLabel[r]}
+                                  </option>
+                                ))}
+                              </Select>
+                              <Button type="submit" variant="secondary" size="sm">
+                                {t.admin.invites.apply}
+                              </Button>
+                            </Form>
+                          )}
                           <Form method="post">
                             <input type="hidden" name="intent" value="resetPassword" />
                             <input type="hidden" name="userId" value={u.id} />
