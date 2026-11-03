@@ -21,7 +21,7 @@ import { saveGeneration, upsertChatGeneration } from "~/server/repositories/gene
 import { recordChatTurn } from "~/server/repositories/chat.server";
 import { getUser } from "~/server/auth.server";
 import { buildChatTranscript } from "~/lib/chat/transcript";
-import type { OutputLanguage, ChatMessage } from "~/lib/registry/types";
+import type { OutputLanguage, ChatMessage, Tool } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -33,7 +33,8 @@ import { checkQuota, recordUsage } from "~/server/repositories/usage.server";
 
 // Boundaries: every value is length/count-capped so a hostile body can never
 // balloon the prompt (and thus the owner's token bill) or exhaust memory.
-const MAX_VALUE_CHARS = 20_000; // per form field (documents land here as text)
+const MAX_VALUE_CHARS = 20_000; // per form field
+const MAX_DOCUMENT_CHARS = 300_000; // per `document` field: a whole report or portfolio
 const MAX_VALUES_KEYS = 40;
 const MAX_MESSAGE_CHARS = 20_000; // per chat message
 const MAX_MESSAGES = 100;
@@ -53,9 +54,10 @@ const ImageInputSchema = z.object({
 });
 
 // Mirrors TemplateValue (see lib/template/interpolate): string | number | boolean
-// | string[] | null — each string bounded so a single field can't run away.
+// | string[] | null. The per-field bound depends on the field's kind, so this is
+// only the outer ceiling; `fieldCapError` applies the real cap once the tool is known.
 const TemplateValueSchema = z.union([
-  z.string().max(MAX_VALUE_CHARS),
+  z.string().max(MAX_BODY_BYTES),
   z.number(),
   z.boolean(),
   z.array(z.string().max(MAX_VALUE_CHARS)).max(50),
@@ -90,6 +92,29 @@ const rateLimiter = createRateLimiter({
   max: env.RATE_LIMIT_PER_MINUTE,
   maxConcurrent: env.RATE_LIMIT_CONCURRENT,
 });
+
+/**
+ * The message key for the first value over its field's cap, or null. A `document`
+ * field carries a whole report, so it gets its own cap and an error the teacher
+ * can act on; a plain field over its cap is not something the form produces.
+ */
+function fieldCapError(
+  tool: Tool,
+  values: Record<string, unknown>,
+): "documentTooLong" | "invalidRequest" | null {
+  const documentFields = new Set(
+    tool.inputs.filter((f) => f.kind === "document").map((f) => f.name),
+  );
+  for (const [name, value] of Object.entries(values)) {
+    if (typeof value !== "string") continue;
+    if (documentFields.has(name)) {
+      if (value.length > MAX_DOCUMENT_CHARS) return "documentTooLong";
+    } else if (value.length > MAX_VALUE_CHARS) {
+      return "invalidRequest";
+    }
+  }
+  return null;
+}
 
 export async function action({ request }: Route.ActionArgs) {
   const locale = getLocale(request);
@@ -139,6 +164,13 @@ export async function action({ request }: Route.ActionArgs) {
     }
     if (cohort && !isCohortActive(cohort)) {
       return new Response(sseError(m.error.cohortInactive), { headers: SSE_HEADERS });
+    }
+    const capError = fieldCapError(tool, body.values ?? {});
+    if (capError) {
+      return new Response(
+        sseError(m.error[capError].replace("{max}", MAX_DOCUMENT_CHARS.toLocaleString(locale))),
+        { headers: SSE_HEADERS },
+      );
     }
 
     const stage = tool.stages.find((s) => s.id === body.stageId) ?? tool.stages[0];

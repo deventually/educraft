@@ -35,6 +35,7 @@ import { loc } from "~/lib/i18n/localized";
 import type { InputField } from "~/lib/registry/types";
 import { Badge, Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { useFormToast } from "~/components/Toast";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
@@ -311,7 +312,14 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
 
   const error = actionData?.error;
   const links = actionData?.links;
-  const saved = actionData?.saved;
+  useFormToast(actionData, {
+    result: (d) => {
+      if (!d) return null;
+      if ("error" in d && d.error) return { variant: "error", message: d.error };
+      if ("saved" in d || "cohortId" in d) return { variant: "success", message: t.cohorts.saved };
+      return null;
+    },
+  });
 
   // The cohort levels members by a profile the current editor doesn't own (e.g. an
   // admin editing a colleague's cohort). It can't appear in their dropdown, so the
@@ -351,18 +359,9 @@ export default function CohortForm({ loaderData }: Route.ComponentProps) {
           {error && (
             <p
               id="cohort-error"
-              role="alert"
               className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
             >
               {error}
-            </p>
-          )}
-          {saved && (
-            <p
-              role="status"
-              className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-            >
-              {t.cohorts.saved}
             </p>
           )}
           <Form method="post" className="space-y-6">

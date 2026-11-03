@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
+import { getModel } from "~/lib/ai/models";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { profilePrefillValues } from "~/lib/forms/values";
 import type { ContextProfile } from "~/lib/context/types";
@@ -274,7 +275,7 @@ describe("tool: stage-assessment", () => {
 
   it("uses a vision-capable default model and a low temperature for consistency", () => {
     const tool = getToolBySlug("stage-assessment")!;
-    expect(["claude-sonnet-4-6", "claude-opus-4-8"]).toContain(tool.defaultModel);
+    expect(getModel(tool.defaultModel).supportsImages).toBe(true);
     expect(tool.defaultTemperature ?? 1).toBeLessThanOrEqual(0.5);
   });
 

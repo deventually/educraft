@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Form,
   Link,
@@ -30,6 +30,21 @@ export default function AppShell() {
   const user = root?.user ?? null;
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Focus-to-main on client navigation: keyboard/SR users restart at the top of
+  // the new page. Skips the initial mount so we never yank focus on first paint.
+  // (The RouteAnnouncer below reads the new title politely — focusing the <main>
+  // landmark doesn't read it, so the two don't collide.)
+  const mainRef = useRef<HTMLElement>(null);
+  const firstRenderRef = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every navigation to move focus
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    mainRef.current?.focus();
+  }, [location.pathname]);
   // A chat tool claims the full height: the page itself must not scroll and the
   // footer is hidden, so the chat's own thread scrolls and the composer pins.
   // Scoped to the tool page itself — a help page (/help/:id) for the same tool
@@ -62,6 +77,15 @@ export default function AppShell() {
 
   return (
     <div className="flex h-dvh flex-col bg-slate-50 text-slate-900">
+      {/* First focusable element — a keyboard user can jump straight to content. */}
+      <a
+        href="#top"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900 focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+      >
+        {t.nav.skipToContent}
+      </a>
+      <RouteAnnouncer />
+
       <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4">
           <NavLink
@@ -155,8 +179,10 @@ export default function AppShell() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <main
           id="top"
+          ref={mainRef}
+          tabIndex={-1}
           className={cn(
-            "mx-auto flex w-full max-w-6xl flex-1 flex-col px-4",
+            "mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 focus:outline-none",
             isChatRoute ? "min-h-0 py-6" : "py-8",
           )}
         >
@@ -165,6 +191,35 @@ export default function AppShell() {
 
         {!isChatRoute && <SiteFooter t={t} user={user} />}
       </div>
+    </div>
+  );
+}
+
+/**
+ * An always-mounted polite live region that announces the new page to screen
+ * readers after a client-side (SPA) navigation — otherwise route changes are
+ * silent. Reads `document.title` on the next tick (RR's meta sets it just after
+ * the navigation commits), and skips the initial mount so the first page load
+ * isn't double-announced.
+ */
+function RouteAnnouncer() {
+  const { pathname } = useLocation();
+  const firstRenderRef = useRef(true);
+  const [message, setMessage] = useState("");
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every navigation to announce
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    const id = setTimeout(() => setMessage(document.title), 0);
+    return () => clearTimeout(id);
+  }, [pathname]);
+
+  return (
+    <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+      {message}
     </div>
   );
 }

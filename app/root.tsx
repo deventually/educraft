@@ -10,6 +10,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { ToastProvider } from "~/components/Toast";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
@@ -67,7 +68,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  // Wraps every route (incl. the auth routes outside AppShell) and sits above
+  // every Form/action, so the toast viewport is available app-wide. The
+  // viewport renders inside <body> via ToastProvider, with the root loader
+  // context useT() needs.
+  return (
+    <ToastProvider>
+      <Outlet />
+    </ToastProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

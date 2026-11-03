@@ -39,7 +39,7 @@ export const bloomByDesign: Tool = {
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

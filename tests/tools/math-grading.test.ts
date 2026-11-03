@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
+import { getModel } from "~/lib/ai/models";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 
 describe("tool: math-grading", () => {
@@ -46,9 +47,7 @@ describe("tool: math-grading", () => {
 
   it("defaults to a vision-capable model", () => {
     const tool = getToolBySlug("math-grading")!;
-    // Default model should support images
-    // Typical choices: claude-sonnet-4-6, claude-opus-4-8
-    expect(["claude-sonnet-4-6", "claude-opus-4-8"]).toContain(tool.defaultModel);
+    expect(getModel(tool.defaultModel).supportsImages).toBe(true);
   });
 
   it("builds prompt with no unresolved placeholders", () => {

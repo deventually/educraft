@@ -1,4 +1,4 @@
-import { Form, Link } from "react-router";
+import { Form, Link, useActionData } from "react-router";
 import { Trash2, UserMinus, Users, Wrench } from "lucide-react";
 import type { Route } from "./+types/admin.cohorts";
 import { requireRole } from "~/server/auth.server";
@@ -16,6 +16,7 @@ import {
 import { listUsers } from "~/server/repositories/users.server";
 import { fmt } from "~/lib/i18n/format";
 import { useT, useLocale } from "~/lib/i18n/useT";
+import { useFormToast } from "~/components/Toast";
 import { Badge, Button, Card, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 
@@ -78,7 +79,21 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AdminCohorts({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
+  const actionData = useActionData<typeof action>();
   const { rows, assignable } = loaderData;
+  const c = t.admin.cohorts;
+  // These mutations gave no feedback before P15 — now a toast confirms each.
+  useFormToast(actionData, {
+    result: (d) => {
+      if (!d) return null;
+      if ("deleted" in d) return { variant: "success", message: c.toastDeleted };
+      if ("assigned" in d) return { variant: "success", message: c.toastAssigned };
+      if ("reassigned" in d) return { variant: "success", message: c.toastReassigned };
+      if ("removed" in d) return { variant: "success", message: c.toastRemoved };
+      if ("error" in d) return { variant: "error", message: c.toastError };
+      return null;
+    },
+  });
 
   return (
     <section>

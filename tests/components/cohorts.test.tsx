@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import CohortForm from "~/routes/cohorts.$id";
+import { ToastProvider } from "~/components/Toast";
 import type { InputField } from "~/lib/registry/types";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -52,7 +53,11 @@ function renderForm(action?: () => unknown) {
   const Stub = createRoutesStub([
     {
       path: "/cohorts/:id",
-      Component: () => <CohortForm {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <CohortForm {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => null),
     },
   ]);
@@ -85,7 +90,11 @@ function renderManage(canDelete: boolean, action?: () => unknown, members: Membe
   const Stub = createRoutesStub([
     {
       path: "/cohorts/:id",
-      Component: () => <CohortForm {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <CohortForm {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => null),
     },
   ]);

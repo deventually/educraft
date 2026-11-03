@@ -12,10 +12,18 @@ import {
   initialPickerModel,
 } from "~/lib/ai/models";
 import { providerForModel } from "~/lib/ai/provider";
+import { ALL_TOOLS } from "~/lib/registry";
 
 describe("model catalog", () => {
   it("has the default model", () => {
     expect(DEFAULT_MODEL in MODELS).toBe(true);
+  });
+
+  it("defaults API calls to Claude Sonnet 5.5 — app-wide and for every tool", () => {
+    expect(DEFAULT_MODEL).toBe("claude-sonnet-5-5");
+    for (const tool of ALL_TOOLS) {
+      expect(tool.defaultModel, `${tool.slug} default model`).toBe("claude-sonnet-5-5");
+    }
   });
 
   it("lists static models with unique ids, including the CLI agents", () => {
@@ -131,6 +139,29 @@ describe("client-selectable model allow-list", () => {
     expect(isClientSelectable("claude-sonnet-4-6")).toBe(true);
     // Opus is reachable only as a tool/stage default, never forced by a caller.
     expect(isClientSelectable("claude-opus-4-8")).toBe(false);
+  });
+
+  it("catalogs the Claude 5.5 family under the same billing guard", () => {
+    expect(getModel("claude-sonnet-5-5")).toMatchObject({
+      provider: "anthropic",
+      apiId: "claude-sonnet-5-5",
+      displayName: "Claude Sonnet 5.5",
+      supportsImages: true,
+      tier: 2,
+    });
+    expect(getModel("claude-opus-5-5")).toMatchObject({
+      provider: "anthropic",
+      apiId: "claude-opus-5-5",
+      displayName: "Claude Opus 5.5",
+      supportsImages: true,
+      tier: 3,
+    });
+    // Sonnet is pickable; Opus stays a default-only model, like Opus 4.8.
+    expect(isClientSelectable("claude-sonnet-5-5")).toBe(true);
+    expect(isClientSelectable("claude-opus-5-5")).toBe(false);
+    const picker = pickableModels().map((m) => m.id);
+    expect(picker).toContain("claude-sonnet-5-5");
+    expect(picker).not.toContain("claude-opus-5-5");
   });
 
   it("keeps the local CLI agents client-selectable (they cost the owner nothing)", () => {

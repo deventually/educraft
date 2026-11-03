@@ -16,6 +16,7 @@ import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
+import { useFormToast } from "~/components/Toast";
 import { Button, Card, Input, Label } from "~/components/ui";
 import type { Role } from "~/lib/registry/access";
 
@@ -100,7 +101,20 @@ export default function Account({ loaderData }: Route.ComponentProps) {
   const busy = nav.state !== "idle";
 
   const error = actionData && "error" in actionData ? actionData.error : undefined;
-  const ok = actionData && "ok" in actionData ? actionData.ok : undefined;
+
+  // Immediate feedback: a pending toast on submit that resolves to the result.
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d && d.error
+          ? { variant: "error", message: d.error }
+          : "ok" in d && d.ok === "email"
+            ? { variant: "success", message: t.account.emailSaved }
+            : "ok" in d && d.ok === "password"
+              ? { variant: "success", message: t.account.passwordSaved }
+              : null,
+  });
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -124,11 +138,6 @@ export default function Account({ loaderData }: Route.ComponentProps) {
       <Card className="mt-6 p-6">
         <h2 className="font-semibold text-slate-900">{t.account.emailHeading}</h2>
         <p className="mt-1 text-sm text-slate-600">{t.account.emailIntro}</p>
-        {ok === "email" && (
-          <p role="status" className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
-            {t.account.emailSaved}
-          </p>
-        )}
         <Form method="post" className="mt-4 space-y-3">
           <input type="hidden" name="intent" value="changeEmail" />
           <div>
@@ -163,11 +172,6 @@ export default function Account({ loaderData }: Route.ComponentProps) {
       <Card className="mt-6 p-6">
         <h2 className="font-semibold text-slate-900">{t.account.passwordHeading}</h2>
         <p className="mt-1 text-sm text-slate-600">{t.account.passwordIntro}</p>
-        {ok === "password" && (
-          <p role="status" className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
-            {t.account.passwordSaved}
-          </p>
-        )}
         <Form method="post" className="mt-4 space-y-3">
           <input type="hidden" name="intent" value="changePassword" />
           <div>
@@ -212,9 +216,7 @@ export default function Account({ loaderData }: Route.ComponentProps) {
       </Card>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">
-          {error}
-        </p>
+        <p className="mt-4 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">{error}</p>
       )}
 
       {/* A student may only *request* removal (Phase 14): it disables the account

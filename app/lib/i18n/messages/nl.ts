@@ -35,6 +35,7 @@ export const nl = {
     menuLabel: "Mobiele navigatie",
     openMenu: "Menu openen",
     closeMenu: "Menu sluiten",
+    skipToContent: "Naar hoofdinhoud",
   },
   badge: {
     instructor: "Docent",
@@ -273,6 +274,7 @@ export const nl = {
     delete: "Verwijderen",
     deleteTitle: "Resultaat verwijderen?",
     deleteBody: "Dit resultaat wordt definitief verwijderd.",
+    toastDeleted: "Resultaat verwijderd.",
   },
   help: {
     heading: "Help & documentatie",
@@ -324,6 +326,11 @@ export const nl = {
   aiNotice: {
     generic: "AI-gegenereerd concept — controleer en beoordeel zelf voor gebruik.",
     assistive: "Dit is een beoordelings-advies voor de docent. De docent beslist.",
+  },
+  toast: {
+    regionLabel: "Meldingen",
+    dismiss: "Melding sluiten",
+    saving: "Bezig…",
   },
   feedback: {
     heading: "Was dit nuttig?",
@@ -562,6 +569,11 @@ export const nl = {
       orphaned: "verweesd (geen eigenaar)",
       reassignOwner: "Toewijzen",
       reassignOwnerLabel: "Nieuwe eigenaar",
+      toastDeleted: "Cohort verwijderd.",
+      toastAssigned: "Docent toegewezen.",
+      toastReassigned: "Eigenaar gewijzigd.",
+      toastRemoved: "Docent verwijderd.",
+      toastError: "Er ging iets mis. Probeer het opnieuw.",
     },
     usage: {
       heading: "Gebruik",
@@ -715,6 +727,8 @@ export const nl = {
     unknownTool: "Onbekende tool.",
     unknown: "Onbekende fout",
     invalidRequest: "Ongeldig verzoek.",
+    documentTooLong:
+      "Dit document is te lang: maximaal {max} tekens. Kort het in of upload minder bestanden.",
     unauthorized: "Log in om deze tool te gebruiken.",
     notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
     rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",

@@ -32,6 +32,7 @@ export const en: Messages = {
     menuLabel: "Mobile navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    skipToContent: "Skip to main content",
   },
   badge: {
     instructor: "Instructor",
@@ -270,6 +271,7 @@ export const en: Messages = {
     delete: "Delete",
     deleteTitle: "Delete result?",
     deleteBody: "This result will be permanently deleted.",
+    toastDeleted: "Result deleted.",
   },
   help: {
     heading: "Help & documentation",
@@ -321,6 +323,11 @@ export const en: Messages = {
   aiNotice: {
     generic: "AI-generated draft — review and judge before use.",
     assistive: "This is an assessment suggestion for the teacher. The teacher decides.",
+  },
+  toast: {
+    regionLabel: "Notifications",
+    dismiss: "Dismiss notification",
+    saving: "Working…",
   },
   feedback: {
     heading: "Was this helpful?",
@@ -558,6 +565,11 @@ export const en: Messages = {
       orphaned: "orphaned (no owner)",
       reassignOwner: "Assign",
       reassignOwnerLabel: "New owner",
+      toastDeleted: "Cohort deleted.",
+      toastAssigned: "Teacher assigned.",
+      toastReassigned: "Owner changed.",
+      toastRemoved: "Teacher removed.",
+      toastError: "Something went wrong. Please try again.",
     },
     usage: {
       heading: "Usage",
@@ -709,6 +721,8 @@ export const en: Messages = {
     unknownTool: "Unknown tool.",
     unknown: "Unknown error",
     invalidRequest: "Invalid request.",
+    documentTooLong:
+      "This document is too long: {max} characters at most. Shorten it or upload fewer files.",
     unauthorized: "Log in to use this tool.",
     notAllowed: "This tool is not available for your account.",
     rateLimited: "Too many requests. Please try again in a moment.",

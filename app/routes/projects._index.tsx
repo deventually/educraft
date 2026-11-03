@@ -1,3 +1,4 @@
+import { useActionData } from "react-router";
 import { Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
 import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
@@ -7,6 +8,7 @@ import { ResultPanel } from "~/components/ResultPanel";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
 import { Badge } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { useFormToast } from "~/components/Toast";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 
@@ -38,7 +40,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
+  const actionData = useActionData<typeof action>();
   const { generations } = loaderData;
+  useFormToast(actionData, {
+    result: (d) => (d?.ok ? { variant: "success", message: t.projects.toastDeleted } : null),
+  });
   return (
     <div className="mx-auto max-w-4xl">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">

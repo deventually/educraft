@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminTools from "~/routes/admin.tools";
+import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -36,7 +37,11 @@ function renderRoute(action?: () => unknown) {
   const Stub = createRoutesStub([
     {
       path: "/admin/tools",
-      Component: () => <AdminTools {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <AdminTools {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => ({ savedSlug: "mentorai", enabled: false })),
     },
   ]);

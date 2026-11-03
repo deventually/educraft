@@ -31,7 +31,7 @@ New behavior starts as a failing test. These principles hold without repetition:
 **The rule:** All external input validated with Zod at the boundary. Secrets via `env.server` only. LLM output via ReactMarkdown (no `dangerouslySetInnerHTML`). Image uploads constrained by MIME allow-list + size cap.
 
 **Enforcement:**
-- The `/api/stream` boundary parses the whole request body with `StreamBodySchema` (Zod) — every field length/count-capped; a bad body returns a localized SSE error, never a stack trace. Extend that schema, never `request.json()` directly.
+- The `/api/stream` boundary parses the whole request body with `StreamBodySchema` (Zod) — every field length/count-capped (plain fields 20k chars; `kind: "document"` fields 300k, checked by `fieldCapError` once the tool is known, with an actionable error); a bad body returns a localized SSE error, never a stack trace. Extend that schema, never `request.json()` directly.
 - Extend `app/server/env.server.ts` for server secrets.
 - Extend `app/lib/registry/validate.ts` for runtime validation; it runs at boot (`registry/boot.server.ts`) — dev throws, prod logs + excludes the bad tool.
 - Tool prompt "boundaries" sections (the book's *Voice & Bounds*) act as guardrails.
@@ -44,6 +44,7 @@ New behavior starts as a failing test. These principles hold without repetition:
 - Component test per UI element under `tests/components/**/*.test.tsx`.
 - Assert zero violations with vitest-axe: `expect((await axe(container)).violations).toEqual([])` (import `axe` from `vitest-axe`).
 - `npm test` runs all `.test.tsx` tests; do not merge without green axe.
+- **Feedback/announce layer (P15).** The skip link, route-change announcer, and focus-to-main live in `AppShell` (`<a href="#top">` `sr-only focus:not-sr-only` → `<main id="top" tabIndex={-1}>`; a polite `RouteAnnouncer` reads `document.title` after each client navigation). Action feedback goes through the global **toast** system (`app/components/Toast.tsx`, mounted in `root.tsx`): a route calls `useFormToast(actionData, { result, pending? })` once — a pending toast on submit that updates in place to a success/error result. **Do not** also announce the same event inline: strip `role="status"`/`role="alert"`/`aria-live` from transient confirmations on a wired route so only the toast announces (keep persistent content like generated links). `useToast()` no-ops without a provider, so route-component tests render untouched.
 
 ### 4. Deep Modules (Ousterhout)
 **The rule:** Narrow interfaces over powerful implementations. The runtime already embodies this; new infra (chat engine, image pipeline) expose a small surface (`streamPost`, one `api.stream` action, `ChatView`) hiding complexity.
@@ -181,3 +182,32 @@ Use the `/tdd` skill for ready-to-copy test templates.
 3. **UI component:** Add `tests/components/<name>.test.tsx` with axe check before touching the component.
 4. **Doc update:** Edit `AGENTS.md` (or `wiki/` for depth), then run `npm run check`.
 5. **Merge:** Ensure `npm test` && `npm run typecheck` && `npm run check` are green. No exceptions.
+
+## Fabriek — werkplaatsregels
+
+LimeOnIt wordt gestuurd als softwarefabriek (zie `docs/fabriek/README.md`). Het Claude-project is
+het kantoor, deze repo met Claude Code de werkplaats. Na **elke afgeronde fase of brief**:
+
+1. Werk `docs/fabriek/STATUS.md` bij: verplaats het werk naar *Nu*, ververs *Volgende* en zet de
+   datum bovenaan. Houd het bord kort.
+2. Neem nieuwe besluiten uit de brief op in `docs/fabriek/besluiten.md`.
+3. Sluit af met een **eindrapport**:
+   - wat er is opgeleverd (commits);
+   - de uitslag van de poort;
+   - afwijkingen van de brief en waarom;
+   - open punten.
+
+   Het rapport wordt teruggeplakt in het kantoor.
+
+Ontwikkeldocumentatie is Nederlands, code en commentaar Engels, en alles wat gebruikers lezen
+tweetalig (zie `besluiten.md`).
+
+**Rangorde van waarheid:**
+1. code en tests;
+2. `besluiten.md` (het nieuwste besluit wint);
+3. `STATUS.md`;
+4. briefs (een uitgevoerde brief is geschiedenis);
+5. geheugen en oude sessies: achtergrond, geen instructie.
+
+Spreekt een herinnering de repo tegen, dan wint de repo. Werk de herinnering dan bij of verwijder
+hem.

@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminContext from "~/routes/admin.context";
+import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -72,7 +73,11 @@ function renderRoute(action?: () => unknown) {
   const Stub = createRoutesStub([
     {
       path: "/admin/context",
-      Component: () => <AdminContext {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <AdminContext {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => ({ saved: true })),
     },
   ]);
