@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form, useActionData } from "react-router";
 import { z } from "zod";
 import { Copy, KeyRound, Trash2 } from "lucide-react";
-import type { Route } from "./+types/admin.invites";
+import type { Route } from "./+types/admin.users";
 import { requireRole } from "~/server/auth.server";
 import {
   createInvite,
@@ -11,8 +11,10 @@ import {
   getUserByEmail,
   getUserById,
   listInvitesWithContext,
+  getUserAssignedModels,
   listUsers,
   revokeInvite,
+  setUserAssignedModels,
   setUserRole,
   updateUserEmail,
 } from "~/server/repositories/users.server";
@@ -22,11 +24,37 @@ import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
+import { fullCatalog } from "~/server/modelCatalog.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
-  const [invites, users] = await Promise.all([listInvitesWithContext(), listUsers()]);
+  const [invites, users, catalog] = await Promise.all([
+    listInvitesWithContext(),
+    listUsers(),
+    fullCatalog(),
+  ]);
+  // Per-teacher model override (P18): a teacher either follows the instance ("inherit")
+  // or has an own set ("own") that replaces it and may be wider — so the checkboxes run
+  // over the whole catalogue, not over the instance set.
+  const base = catalog.map((m) => ({ id: m.id, displayName: m.displayName }));
+  const teachers = await Promise.all(
+    users
+      .filter((u) => u.role === "teacher")
+      .map(async (u) => {
+        const own = await getUserAssignedModels(u.id);
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          mode: own ? ("own" as const) : ("inherit" as const),
+          models: own ? [...own] : [],
+        };
+      }),
+  );
   return {
+    base,
+    teachers,
     selfId: admin.id,
     invites: invites.map((i) => ({
       token: i.token,
@@ -68,6 +96,26 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "revoke") {
     await revokeInvite(String(fd.get("token") ?? ""));
     return { revoked: true as const };
+  }
+
+  // ── Per-teacher model override (P18): inherit the instance, or an own set ────
+  if (intent === "teacherModels") {
+    const userId = String(fd.get("userId") ?? "");
+    const target = await getUserById(userId);
+    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
+    if (fd.get("mode") === "own") {
+      // An own set replaces the instance, so it is checked against the catalogue,
+      // not the instance set. Exactly the chosen set is stored; empty is refused.
+      const catalogIds = new Set((await fullCatalog()).map((m) => m.id));
+      const chosen = [...new Set(fd.getAll("models").map(String))].filter((id) =>
+        catalogIds.has(id),
+      );
+      if (chosen.length === 0) return { error: "atLeastOne" as const };
+      await setUserAssignedModels(userId, chosen);
+    } else {
+      await setUserAssignedModels(userId, null);
+    }
+    return { saved: true as const };
   }
 
   if (intent === "role") {
@@ -119,10 +167,10 @@ export async function action({ request }: Route.ActionArgs) {
   return { error: "unknown" as const };
 }
 
-export default function AdminInvites({ loaderData }: Route.ComponentProps) {
+export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const actionData = useActionData<typeof action>();
-  const { selfId, invites, users } = loaderData;
+  const { selfId, invites, users, base, teachers } = loaderData;
 
   const roleLabel: Record<string, string> = {
     teacher: t.admin.invites.roleTeacher,
@@ -146,6 +194,7 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
   const toastErrors: Record<string, string> = {
     ...userErrors,
     selfDemote: t.admin.invites.selfDemoteError,
+    atLeastOne: t.admin.models.atLeastOne,
   };
   useFormToast(actionData, {
     result: (d) =>
@@ -429,6 +478,31 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* ── Models per teacher (P18): follow the instance, or an own set ───── */}
+      <section>
+        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
+          {t.admin.models.teacherLegend}
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">{t.admin.models.teacherIntro}</p>
+        {teachers.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-500">{t.admin.models.teacherNone}</p>
+        ) : (
+          <ul className="mt-4 max-w-xl list-none space-y-6 p-0">
+            {teachers.map((teacher) => (
+              <li key={teacher.id}>
+                <TeacherModelForm
+                  teacher={teacher}
+                  base={base}
+                  save={t.admin.models.save}
+                  inheritLabel={t.admin.models.teacherInherit}
+                  ownLabel={t.admin.models.teacherOwn}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

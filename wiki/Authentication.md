@@ -61,7 +61,7 @@ UI for this; the script stays for headless ops.
 Every user (teacher or admin) deletes their own account on `/account`: type the
 confirmation word and `deleteUserCascade` removes the account and everything it owns,
 immediately and permanently. There is no request/holding state and no `disabledAt`.
-An admin can remove other users from the user list in `/admin/invites`.
+An admin can remove other users from the user list in `/admin/users`.
 
 ## Data scoping
 

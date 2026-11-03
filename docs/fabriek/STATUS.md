@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.3: modellen als overrule per docent)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.4: beheer naar vier pagina's)_
 
 ## Nu
 
@@ -40,6 +40,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.3: modellen als overrule per docent)_
 
 - V2 stap 18.2: toegang per docent en land-as weg — deze PR.
 - V2 stap 18.3: modellen als overrule per docent — PR (bovenop 18.2).
+- V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
 
 ## Wacht op jou
 

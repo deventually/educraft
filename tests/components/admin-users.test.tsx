@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
-import AdminInvites from "~/routes/admin.invites";
+import AdminUsers from "~/routes/admin.users";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -28,6 +28,23 @@ const loaderData = {
       createdAt: new Date("2026-07-01T10:00:00Z"),
     },
   ],
+  // The whole model catalogue + per-teacher rows ("Modellen per docent").
+  base: [
+    { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6" },
+    { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5" },
+    { id: "claude-code", displayName: "Claude Code (CLI)" },
+    { id: "ollama::gemma", displayName: "Ollama · gemma" },
+  ],
+  teachers: [
+    {
+      id: "t1",
+      name: "Teacher One",
+      email: "t1@example.com",
+      mode: "own",
+      models: ["claude-haiku-4-5"],
+    },
+    { id: "t2", name: "Teacher Two", email: null, mode: "inherit", models: [] },
+  ],
   users: [
     { id: "admin-1", name: "Admin A", email: "a@x.nl", role: "admin", createdAt: new Date() },
     { id: "teacher-9", name: "Teacher T", email: "t@x.nl", role: "teacher", createdAt: new Date() },
@@ -37,18 +54,18 @@ const loaderData = {
 function renderRoute(action?: () => unknown, extraUsers: (typeof loaderData.users)[number][] = []) {
   const props = {
     loaderData: { ...loaderData, users: [...loaderData.users, ...extraUsers] },
-  } as unknown as ComponentProps<typeof AdminInvites>;
+  } as unknown as ComponentProps<typeof AdminUsers>;
   const Stub = createRoutesStub([
     {
-      path: "/admin/invites",
-      Component: () => <AdminInvites {...props} />,
+      path: "/admin/users",
+      Component: () => <AdminUsers {...props} />,
       action: action ?? (() => ({ link: "http://localhost/invite/tok-new" })),
     },
   ]);
-  return render(<Stub initialEntries={["/admin/invites"]} />);
+  return render(<Stub initialEntries={["/admin/users"]} />);
 }
 
-describe("Admin invites", () => {
+describe("Admin users", () => {
   it("shows a retired role read-only, with no role-change form", async () => {
     const { container } = renderRoute(undefined, [
       { id: "legacy-1", name: "Legacy L", email: "l@x.nl", role: "student", createdAt: new Date() },
@@ -109,6 +126,48 @@ describe("Admin invites", () => {
     await waitFor(() => {
       expect(screen.getByText("http://localhost/reset/tok-r")).toBeInTheDocument();
     });
+  });
+
+  it("pre-checks a teacher's own model set", () => {
+    renderRoute();
+    expect(
+      screen.getByRole("heading", { name: /modellen per docent|models per teacher/i }),
+    ).toBeTruthy();
+    const group = screen.getByRole("group", { name: "Teacher One" });
+    const haiku = within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
+    const sonnet = within(group).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement;
+    expect(haiku.checked).toBe(true); // in the own set
+    expect(sonnet.checked).toBe(false); // not in the own set
+  });
+
+  it("offers inherit/own per teacher; checkboxes are disabled while inheriting", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    const one = screen.getByRole("group", { name: "Teacher One" });
+    const two = screen.getByRole("group", { name: "Teacher Two" });
+    const oneOwn = within(one).getByRole("radio", { name: /eigen keuze/i }) as HTMLInputElement;
+    const twoInherit = within(two).getByRole("radio", {
+      name: /volgt de instelling/i,
+    }) as HTMLInputElement;
+    expect(oneOwn.checked).toBe(true);
+    expect(twoInherit.checked).toBe(true);
+    expect((within(one).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      false,
+    );
+    expect((within(two).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      true,
+    );
+    await user.click(within(two).getByRole("radio", { name: /eigen keuze/i }));
+    expect((within(two).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it("lists the whole catalogue for a teacher, not only the instance set", () => {
+    renderRoute();
+    const group = screen.getByRole("group", { name: "Teacher Two" });
+    expect(within(group).getByLabelText("Ollama · gemma")).toBeInTheDocument();
+    expect(within(group).getByLabelText("Claude Code (CLI)")).toBeInTheDocument();
   });
 
   it("has no a11y violations", async () => {

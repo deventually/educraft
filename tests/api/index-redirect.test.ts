@@ -29,10 +29,10 @@ function loaderWith(role: "admin" | "teacher") {
 }
 
 describe("home redirector", () => {
-  it("sends an admin to the admin console (home = /admin)", async () => {
+  it("sends an admin to the user list (home = /admin/users)", async () => {
     const res = (await loaderWith("admin").catch((r) => r)) as Response;
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("/admin");
+    expect(res.headers.get("Location")).toBe("/admin/users");
   });
 
   it("sends a teacher to the tool catalogue at /tools", async () => {

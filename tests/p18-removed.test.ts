@@ -52,3 +52,43 @@ describe("P18.2 — per-teacher tool/context access and the country axis removed
     }
   });
 });
+
+describe("P18.4 — the admin console has four pages", () => {
+  it("routes.ts registers exactly the four admin pages", () => {
+    const src = read("app/routes.ts");
+    const start = src.indexOf('"routes/admin.tsx", [');
+    const block = src.slice(start + 1, src.indexOf('route("about"'));
+    const files = [...block.matchAll(/(?:route\("([^"]+)"|index\()[^)]*?"routes\/([^"]+)"/g)].map(
+      (m) => `${m[1] ?? ""}:${m[2]}`,
+    );
+    expect(files).toEqual([
+      ":admin._index.tsx",
+      "users:admin.users.tsx",
+      "tools:admin.tools.tsx",
+      "context:admin.context.tsx",
+      "usage:admin.usage.tsx",
+    ]);
+  });
+
+  it("the old admin pages are gone", () => {
+    for (const p of [
+      "app/routes/admin.models.tsx",
+      "app/routes/admin.invites.tsx",
+      "app/routes/admin.feedback.tsx",
+    ]) {
+      expect(existsSync(resolve(root, p)), p).toBe(false);
+    }
+  });
+
+  it("the i18n catalogues have no admin.overview", () => {
+    for (const admin of [nl.admin, en.admin] as Record<string, unknown>[]) {
+      expect(admin).not.toHaveProperty("overview");
+    }
+  });
+
+  it("the console nav has only users, tools, context and usage", () => {
+    for (const nav of [nl.admin.console.nav, en.admin.console.nav]) {
+      expect(Object.keys(nav).sort()).toEqual(["context", "tools", "usage", "users"]);
+    }
+  });
+});

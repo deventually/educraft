@@ -96,7 +96,7 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
    [`Authentication.md`](Authentication.md)).
 3. Generate with a cheap model (e.g. Haiku) → tokens stream into the result.
 4. Open **Projects** → the generation was saved.
-5. Rate a generation 👍/👎 with a comment → it lands on `/admin/feedback`
+5. Rate a generation 👍/👎 with a comment → it lands on `/admin/usage`
    (as an admin).
 6. Set `DAILY_REQUEST_LIMIT=1`, restart, generate twice → the 2nd trips the
    localized "daily limit reached" error; an admin is exempt.
