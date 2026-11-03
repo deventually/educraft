@@ -6,7 +6,7 @@
 ## Waarom dit bestaat
 
 Tweede stap van het docentassistentspoor. P20 geeft de docent een cursusgraaf en deterministische
-bevindingen. P21 voegt de **helft van het oordeel** toe: rolagenten ("petten") die een cursus, of
+bevindingen. P21 voegt de **oordeelshelft** toe: rolagenten ("petten") die een cursus, of
 een daaraan gekoppelde generatie, beoordelen zoals een kritische collega dat zou doen.
 
 ## Vaste besluiten (uit de visiediscussie van november 2026)
@@ -16,7 +16,7 @@ een daaraan gekoppelde generatie, beoordelen zoals een kritische collega dat zou
   van menselijk toezicht en later het evaluatiesignaal.
 - **Eerst op verzoek.** De docent klikt "Laat beoordelen". Proactieve/geplande beoordeling komt met
   P22.
-- **Noodzakelijke = pakketbasis + docentlaag.** Agenten toetsen aan de eigen leeruitkomsten van de
+- **Het noodzakelijke = pakketbasis + docentlaag.** Agenten toetsen aan de eigen leeruitkomsten van de
   docent (P20) **en** aan pakketkaders. Het eerste pakket is HBO-i: leeruitkomsten worden getagd
   met beroepstaak / architectuurlaag / beheersingsniveau uit `DOMAIN_PACKS.ICT`. Alleen
   geverifieerde kaders worden gebruikt, nooit verzonnen kaders.
@@ -27,7 +27,7 @@ een daaraan gekoppelde generatie, beoordelen zoals een kritische collega dat zou
 1. **Agenten als registerdata** (`app/lib/agents/`), zonder controlestroom per agent:
    `{ id, role: LocalizedText, personaPromptId, watches: ("course" | "generation")[], checks:
    ("alignment" | promptId)[] }`. v1 heeft twee petten: **Toetsdeskundige** (toetsmatrijs,
-   Bloom-spreiding, formulering, cesuur) en **Ontwerper** (constructieve afstemming, activerend
+   Bloom-spreiding, formulering, cesuur) en **Ontwerper** (constructive alignment, activerend
    onderwijs, tijdbudget).
 2. **Beoordeling in twee lagen:** de `checkAlignment` van P20 (deterministisch), daarna één LLM-ronde
    per pet met gestructureerde JSON-uitvoer (`{ findings: [{ severity, targetId?, message,

@@ -42,7 +42,7 @@ P21-agenten bouwen.
    weet van hbo, en andere sectoren hergebruiken hem ongewijzigd.
 2. **Adviseren, nooit aanpassen.** Bevindingen zijn adviezen. Niets past de cursus van de docent
    automatisch aan, en de docent beslist.
-3. **Noodzakelijke = pakketbasis + docentlaag.** P20 levert de docentlaag (de eigen leeruitkomsten
+3. **Het noodzakelijke = pakketbasis + docentlaag.** P20 levert de docentlaag (de eigen leeruitkomsten
    van de docent) plus de universele Bloom-as. Het taggen van leeruitkomsten met **pakket**-kaders
    (HBO-i beroepstaak / architectuurlaag / beheersingsniveau uit `DOMAIN_PACKS`) is P21.
 4. **Bloom = de herziene taxonomie** (Anderson & Krathwohl, 2001): `remember · understand · apply ·
@@ -246,7 +246,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
 
 `npm test && npm run typecheck && npm run check` zijn groen na elke subfase.
 
-Handmatige herhaling:
+Handmatig nalopen:
 1. Een docent maakt "Software Engineering — jaar 2" aan met drie leeruitkomsten (één op *analyze*),
    vier lessen en één summatieve toets die twee leeruitkomsten dekt op *understand*.
 2. De matrix toont de hiaten. De bevindingen noemen `outcome-not-assessed` voor de derde

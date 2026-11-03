@@ -35,11 +35,11 @@ _Laatst bijgewerkt: 2026-11-03 (proefrit)_
 1. **Vereenvoudiging V1** (wordt P17): de studentenlaag eruit (rol, cohorten, studentuitnodigingen,
    mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie). De zes tutors blijven,
    voor docenten.
-2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de toegang per docent
-   voor tools en context weg; modellen per instelling met een overrule per docent; CLI- en lokale
-   modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
-3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina (techniek achter
-   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
+2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
+   toegang per docent voor tools en context weg; modellen per instelling met een overrule per
+   docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
+3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
+   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 
