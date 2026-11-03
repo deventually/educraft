@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V1-plan)_
+_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.1)_
 
 ## Nu
 
@@ -26,18 +26,17 @@ _Laatst bijgewerkt: 2026-11-03 (V1-plan)_
 
 ## Bezig
 
-- V1 bouwplan (P17) — deze PR.
+- V1 stap 17.1: mentorinzicht eruit — deze PR.
 
 ## Wacht op jou
-
-- Studentdata bij V1: **definitief verwijderen** (aanbevolen) of **laten staan**? Bepaalt of P17.3
-  een verwijdermigratie wordt (brief P17).
 
 ## Volgende (voorgestelde volgorde)
 
 1. **Vereenvoudiging V1** (brief P17, drie PR's): de studentenlaag eruit (rol, cohorten,
    studentuitnodigingen, mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie).
-   De zes tutors blijven, voor docenten.
+   De zes tutors blijven, voor docenten. Bastiaan 2026-11-03: studentdata definitief wissen;
+   uitloggen na een nieuw wachtwoord houden (17.2 houdt `sessionVersion` en verhoogt hem alleen bij
+   reset en wachtwoordwijziging, zie Risico's punt 2).
 2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
    toegang per docent voor tools en context weg; modellen per instelling met een overrule per
    docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.

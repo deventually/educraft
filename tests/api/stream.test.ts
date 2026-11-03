@@ -29,8 +29,6 @@ vi.mock("~/server/repositories/generations.server", () => ({
   saveGeneration: saveGenerationSpy,
   upsertChatGeneration: upsertChatSpy,
 }));
-const { recordChatTurnSpy } = vi.hoisted(() => ({ recordChatTurnSpy: vi.fn() }));
-vi.mock("~/server/repositories/chat.server", () => ({ recordChatTurn: recordChatTurnSpy }));
 
 type ActionMod = typeof import("~/routes/api.stream");
 let action: ActionMod["action"];
@@ -68,7 +66,6 @@ beforeEach(() => {
   });
   saveGenerationSpy.mockReset().mockResolvedValue({});
   upsertChatSpy.mockReset().mockResolvedValue({});
-  recordChatTurnSpy.mockReset().mockResolvedValue(undefined);
   getUserMock.mockReset();
   getUserMock.mockImplementation(async (request: Request) => ({
     id: request.headers.get("x-test-user") ?? "anon",
@@ -242,7 +239,6 @@ describe("api.stream — persistence", () => {
     expect(arg.id).toBe(sessionId);
     expect(typeof arg.transcript).toBe("string");
     expect(arg.transcript).toContain("ok"); // the assistant's completed reply
-    expect(recordChatTurnSpy).toHaveBeenCalledTimes(1);
     expect(saveGenerationSpy).not.toHaveBeenCalled();
   });
 
