@@ -16,3 +16,4 @@ Algemene, langere lessen over het product staan in [`geschiedenis.md`](geschiede
 | 2026-11-01 (any1) | "Why didn't you suggest a ready made alternative?" | Advies bevat altijd een koopoptie. | `producer.md`: Praten met Bastiaan |
 | 2026-11-03 | Bastiaans genummerde antwoorden werden aan de verkeerde vragenlijst gekoppeld. | Koppel antwoorden aan precies de vragen waar hij op reageert, en vraag het na bij twijfel. | `producer.md`: Concreet vragen |
 | 2026-11-03 | Na een merge faalde één test die apart wel slaagde. De machine was zwaar belast door een ander programma. | Kijk eerst naar de machine voordat je de code "repareert". | `producer.md`: Wanneer een PR "klaar" is |
+| 2026-11-03 | Bij de gereedschapscheck kon de Producer GitHub lezen en CI zien, maar de proefrit liep vast op pushen (403): schrijftoegang was nooit getest. | Test bij de gereedschapscheck ook schrijven (een push naar een eigen branch), niet alleen lezen. | — |
