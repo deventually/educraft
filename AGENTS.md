@@ -31,7 +31,7 @@ New behavior starts as a failing test. These principles hold without repetition:
 **The rule:** All external input validated with Zod at the boundary. Secrets via `env.server` only. LLM output via ReactMarkdown (no `dangerouslySetInnerHTML`). Image uploads constrained by MIME allow-list + size cap.
 
 **Enforcement:**
-- The `/api/stream` boundary parses the whole request body with `StreamBodySchema` (Zod) — every field length/count-capped; a bad body returns a localized SSE error, never a stack trace. Extend that schema, never `request.json()` directly.
+- The `/api/stream` boundary parses the whole request body with `StreamBodySchema` (Zod) — every field length/count-capped (plain fields 20k chars; `kind: "document"` fields 300k, checked by `fieldCapError` once the tool is known, with an actionable error); a bad body returns a localized SSE error, never a stack trace. Extend that schema, never `request.json()` directly.
 - Extend `app/server/env.server.ts` for server secrets.
 - Extend `app/lib/registry/validate.ts` for runtime validation; it runs at boot (`registry/boot.server.ts`) — dev throws, prod logs + excludes the bad tool.
 - Tool prompt "boundaries" sections (the book's *Voice & Bounds*) act as guardrails.

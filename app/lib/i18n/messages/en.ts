@@ -721,6 +721,8 @@ export const en: Messages = {
     unknownTool: "Unknown tool.",
     unknown: "Unknown error",
     invalidRequest: "Invalid request.",
+    documentTooLong:
+      "This document is too long: {max} characters at most. Shorten it or upload fewer files.",
     unauthorized: "Log in to use this tool.",
     notAllowed: "This tool is not available for your account.",
     rateLimited: "Too many requests. Please try again in a moment.",

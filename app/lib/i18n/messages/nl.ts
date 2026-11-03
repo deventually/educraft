@@ -727,6 +727,8 @@ export const nl = {
     unknownTool: "Onbekende tool.",
     unknown: "Onbekende fout",
     invalidRequest: "Ongeldig verzoek.",
+    documentTooLong:
+      "Dit document is te lang: maximaal {max} tekens. Kort het in of upload minder bestanden.",
     unauthorized: "Log in om deze tool te gebruiken.",
     notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
     rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",

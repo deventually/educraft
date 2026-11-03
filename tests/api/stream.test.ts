@@ -330,6 +330,45 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
     expect(streamChatSpy).not.toHaveBeenCalled();
   });
 
+  it("[6b] a report in a document field above the plain-field cap reaches the model", async () => {
+    const report = "stageverslag ".repeat(5_000).trim(); // 65k chars ≈ a 25-page report
+    const res = await invoke(
+      {
+        slug: "stage-assessment",
+        values: { ...fullValues("stage-assessment"), document: report },
+      },
+      { userId: "r-longdoc" },
+    );
+    expect(sseErrorMessage(await res.text())).toBeNull();
+    expect(JSON.stringify(streamChatSpy.mock.calls[0]?.[0])).toContain(report);
+  });
+
+  it("[6c] a plain field keeps its cap, even on a tool with a document field", async () => {
+    const res = await invoke(
+      {
+        slug: "stage-assessment",
+        values: { ...fullValues("stage-assessment"), submissionNotes: "x".repeat(30_000) },
+      },
+      { userId: "r-bignotes" },
+    );
+    expect(sseErrorMessage(await res.text())).toBe(m.error.invalidRequest);
+    expect(streamChatSpy).not.toHaveBeenCalled();
+  });
+
+  it("[6d] a document over its cap says so and names the limit", async () => {
+    const res = await invoke(
+      {
+        slug: "stage-assessment",
+        values: { ...fullValues("stage-assessment"), document: "x".repeat(300_001) },
+      },
+      { userId: "r-hugedoc" },
+    );
+    const message = sseErrorMessage(await res.text());
+    expect(message).toContain("te lang");
+    expect(message).toContain("300.000");
+    expect(streamChatSpy).not.toHaveBeenCalled();
+  });
+
   it("[7] a messages array beyond the maximum → invalidRequest", async () => {
     const messages = Array.from({ length: 101 }, () => ({ role: "user", content: "hi" }));
     const res = await invoke(
