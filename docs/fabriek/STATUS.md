@@ -39,6 +39,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
 ## Bezig
 
 - V2 bouwplan (P18) — deze PR.
+- Brief P19 (V3) — deze PR.
 
 ## Wacht op jou
 
@@ -50,10 +51,10 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
    modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
    ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
    t/m -17.
-3. **Vereenvoudiging V3** (wordt P19): de docentkant. Stap 19.1 (toolnamen, taak eerst; besluit
-   BESLUIT-2026-11-03-18) is gemerged. Nog te doen: menu, toolpagina (techniek achter
-   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de stageverslagen-checker
-   heet nu 'Stageverslag of afstudeerwerk beoordelen'.
+3. **Vereenvoudiging V3** (brief P19, nog vijf PR's): de docentkant. 19.1 (toolnamen, taak eerst;
+   BESLUIT-2026-11-03-18) is gemerged. Daarna: 19.2 geen doelgroeplabels, 19.3 techniek achter
+   "Geavanceerd", 19.4 lege pagina's die sturen (kunnen naast V2); 19.5 menu en 19.6 kort
+   contextformulier wachten op 18.1, 18.2 en 18.4. Drie vragen voor Bastiaan staan in de brief.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 
