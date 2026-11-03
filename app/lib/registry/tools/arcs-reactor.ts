@@ -7,7 +7,12 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const arcsReactor: Tool = {
   id: "arcs-reactor",
   slug: "arcs-reactor",
-  name: { nl: "ARCS Reactor — motivationeel ontwerp", en: "ARCS Reactor — motivational design" },
+  name: { nl: "Motivatieprobleem aanpakken", en: "Tackle a motivation problem" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "ARCS Reactor (ARCS-V motivatiemodel)",
+    en: "ARCS Reactor (ARCS-V motivation model)",
+  },
   tagline: {
     nl: "Diagnosticeer een motivatiebarrière en krijg concrete 'Learning PowerUps' volgens het ARCS-V-model.",
     en: "Diagnose a motivational barrier and get concrete 'Learning PowerUps' using the ARCS-V model.",

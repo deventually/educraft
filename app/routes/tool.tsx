@@ -33,6 +33,7 @@ import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
+import { ToolSubtitle } from "~/components/ToolTitle";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -195,6 +196,7 @@ function ToolHeader({
                 <ModePill mode={tool.mode} t={t} />
               )}
             </div>
+            <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600 sm:line-clamp-1">
               {loc(tool.tagline, locale)}
             </p>

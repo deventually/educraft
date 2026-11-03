@@ -12,9 +12,11 @@ const COORDS = { nl: "Instructional Coordinates", en: "Instructional Coordinates
 export const cognitiveArchitect: Tool = {
   id: "cognitive-architect",
   slug: "cognitive-architect",
-  name: {
-    nl: "Cognitive Architect — AI-leeractiviteit ontwerpen",
-    en: "Cognitive Architect — design an AI learning activity",
+  name: { nl: "AI-leeractiviteit ontwerpen", en: "Design an AI learning activity" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Cognitive Architect (Science of Learning)",
+    en: "Cognitive Architect (Science of Learning)",
   },
   tagline: {
     nl: "Ontwerp in vier fasen een AI-ondersteunde leeractiviteit op basis van de leerwetenschap (Gagné/Rosenshine).",

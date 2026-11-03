@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const forumAutograder: Tool = {
   id: "forum-autograder",
   slug: "forum-autograder",
-  name: {
-    nl: "Forum Autograder — Community of Inquiry",
-    en: "Forum Autograder — Community of Inquiry",
+  name: { nl: "Forumbijdragen beoordelen", en: "Assess forum posts" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Forum Autograder (Community of Inquiry)",
+    en: "Forum Autograder (Community of Inquiry)",
   },
   tagline: {
     nl: "Beoordeel asynchrone forumdiscussies met AI met de CoI-framework: sociale, cognitieve en onderwijsaanwezigheid.",

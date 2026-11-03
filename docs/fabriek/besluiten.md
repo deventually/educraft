@@ -85,3 +85,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   branch-regel (PR + groene CI, geen force-push), en komt er niets in de repo dat niet openbaar mag.
 - **BESLUIT-2026-11-03-13:** Studentdata bij V1 wordt **definitief gewist** (17.3). **Uitloggen op alle
   apparaten na een nieuw wachtwoord blijft**; inloggen op meerdere apparaten tegelijk mag.
+- **BESLUIT-2026-11-03-18:** **Toolnamen: taak eerst, boeknaam als ondertitel (V3).** Elke tool heet
+  naar wat de docent wil doen (bijvoorbeeld 'Stageverslag of afstudeerwerk beoordelen'); de naam uit
+  het boek of de techniek staat klein eronder (`Tool.subtitle`). Slugs, ids en prompts blijven gelijk.

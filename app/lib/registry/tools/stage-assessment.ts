@@ -24,8 +24,13 @@ export const stageAssessment: Tool = {
   id: "stage-assessment",
   slug: "stage-assessment",
   name: {
-    nl: "Beoordelingsassistent — stage & afstuderen",
-    en: "Assessment assistant — internship & thesis",
+    nl: "Stageverslag of afstudeerwerk beoordelen",
+    en: "Assess an internship report or thesis",
+  },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Beoordelingsassistent (stage & afstuderen)",
+    en: "Assessment assistant (internship & thesis)",
   },
   tagline: {
     nl: "Concept-beoordeling en feedback op stage- en afstudeerdocumenten tegen jouw nakijkmodel; de docent beslist.",
