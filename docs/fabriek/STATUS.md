@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (fabriek met Producer)_
+_Laatst bijgewerkt: 2026-11-03 (proefrit)_
 
 ## Nu
 
@@ -14,7 +14,7 @@ _Laatst bijgewerkt: 2026-11-03 (fabriek met Producer)_
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
   Vitest + axe. 1.013 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** P15 (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen,
-  documenten tot 300k tekens, briefs P17–P19, de fabriek.
+  documenten tot 300k tekens, briefs P20–P22, de fabriek.
 
 ## Verzoeken
 
@@ -26,23 +26,22 @@ _Laatst bijgewerkt: 2026-11-03 (fabriek met Producer)_
 
 ## Bezig
 
-## Wacht op jou
+- Proefrit: briefs P20–P22 hernummerd en vertaald, bord rechtgezet (deze PR).
 
-- Branch-regel voor `main` op GitHub instellen (zie `docs/fabriek/README.md`, stap 1).
-- Claude-project LimeOnIt inrichten en starten (stappen 2–3).
+## Wacht op jou
 
 ## Volgende (voorgestelde volgorde)
 
-1. **Vereenvoudiging V1:** de studentenlaag eruit (rol, cohorten, studentuitnodigingen,
+1. **Vereenvoudiging V1** (wordt P17): de studentenlaag eruit (rol, cohorten, studentuitnodigingen,
    mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie). De zes tutors blijven,
    voor docenten.
-2. **Vereenvoudiging V2:** beheer van acht naar vier pagina's; de land-as en de toegang per docent
-   voor tools en context weg; modellen per instelling met een overrule per docent; CLI- en lokale
-   modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
-3. **Vereenvoudiging V3:** de docentkant: menu, toolnamen (taak eerst), toolpagina (techniek achter
-   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
-4. **Cursussen en de rode draad:** brief P17 (wordt hernummerd en naar het Nederlands vertaald).
-5. **Rolagenten** (stub P18), daarna de **docentweek** (stub P19).
+2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
+   toegang per docent voor tools en context weg; modellen per instelling met een overrule per
+   docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
+3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
+   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
+4. **Cursussen en de rode draad:** brief P20.
+5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 
 ## Open vragen
 
@@ -55,3 +54,4 @@ _Laatst bijgewerkt: 2026-11-03 (fabriek met Producer)_
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
 - Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.
+- Flash-toasts na een redirect (stub P16).
