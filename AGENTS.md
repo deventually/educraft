@@ -182,3 +182,32 @@ Use the `/tdd` skill for ready-to-copy test templates.
 3. **UI component:** Add `tests/components/<name>.test.tsx` with axe check before touching the component.
 4. **Doc update:** Edit `AGENTS.md` (or `wiki/` for depth), then run `npm run check`.
 5. **Merge:** Ensure `npm test` && `npm run typecheck` && `npm run check` are green. No exceptions.
+
+## Fabriek — werkplaatsregels
+
+LimeOnIt wordt gestuurd als softwarefabriek (zie `docs/fabriek/README.md`). Het Claude-project is
+het kantoor, deze repo met Claude Code de werkplaats. Na **elke afgeronde fase of brief**:
+
+1. Werk `docs/fabriek/STATUS.md` bij: verplaats het werk naar *Nu*, ververs *Volgende* en zet de
+   datum bovenaan. Houd het bord kort.
+2. Neem nieuwe besluiten uit de brief op in `docs/fabriek/besluiten.md`.
+3. Sluit af met een **eindrapport**:
+   - wat er is opgeleverd (commits);
+   - de uitslag van de poort;
+   - afwijkingen van de brief en waarom;
+   - open punten.
+
+   Het rapport wordt teruggeplakt in het kantoor.
+
+Ontwikkeldocumentatie is Nederlands, code en commentaar Engels, en alles wat gebruikers lezen
+tweetalig (zie `besluiten.md`).
+
+**Rangorde van waarheid:**
+1. code en tests;
+2. `besluiten.md` (het nieuwste besluit wint);
+3. `STATUS.md`;
+4. briefs (een uitgevoerde brief is geschiedenis);
+5. geheugen en oude sessies: achtergrond, geen instructie.
+
+Spreekt een herinnering de repo tegen, dan wint de repo. Werk de herinnering dan bij of verwijder
+hem.
