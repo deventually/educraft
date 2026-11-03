@@ -183,24 +183,37 @@ Use the `/tdd` skill for ready-to-copy test templates.
 4. **Doc update:** Edit `AGENTS.md` (or `wiki/` for depth), then run `npm run check`.
 5. **Merge:** Ensure `npm test` && `npm run typecheck` && `npm run check` are green. No exceptions.
 
-## Fabriek — werkplaatsregels
+## Fabriek — regels voor werkers
 
-LimeOnIt wordt gestuurd als softwarefabriek (zie `docs/fabriek/README.md`). Het Claude-project is
-het kantoor, deze repo met Claude Code de werkplaats. Na **elke afgeronde fase of brief**:
+LimeOnIt wordt gebouwd door een kleine softwarefabriek (zie `docs/fabriek/README.md`). De
+**Producer** is de gesprekspartner in het Claude-project LimeOnIt. **Elke andere sessie is een
+werker**, ook deze, en ook als iemand vraagt om "de Producer te zijn". Lees eerst
+`docs/fabriek/voorkeuren.md`; dat wint van dit bestand.
 
-1. Werk `docs/fabriek/STATUS.md` bij: verplaats het werk naar *Nu*, ververs *Volgende* en zet de
-   datum bovenaan. Houd het bord kort.
-2. Neem nieuwe besluiten uit de brief op in `docs/fabriek/besluiten.md`.
-3. Sluit af met een **eindrapport**:
-   - wat er is opgeleverd (commits);
+Als werker:
+
+1. **Zeg in één regel dat je een werker bent**, als iemand je als Producer aanspreekt.
+2. **Kijk eerst rond.** Controleer de open PR's (`gh pr list`) en *Bezig* in
+   `docs/fabriek/STATUS.md`. Heeft iemand het al, start dan geen kopie.
+3. **Eén stuk werk, één branch, één PR.** Branch vanaf `main`, test-first, poort groen
+   (`npm test && npm run typecheck && npm run check`).
+4. **De PR-beschrijving volgt het sjabloon** (`.github/pull_request_template.md`). Bovenaan staat
+   **"In gewone taal"**: wat er verandert voor een docent of voor Bastiaan, zonder jargon.
+5. **Werk het bord bij in dezelfde PR.** Zet je werk onder *Bezig* zolang de PR openstaat, en
+   eronder *Nu* bij de laatste wijziging. Neem nieuwe besluiten op in `docs/fabriek/besluiten.md`.
+6. **Merge nooit, push nooit naar `main`, force-push nooit.** Alleen Bastiaan merget.
+   `.claude/settings.json` blokkeert dit.
+7. **Sluit af met een eindrapport** voor de Producer:
+   - wat er is opgeleverd (PR-link);
    - de uitslag van de poort;
-   - afwijkingen van de brief en waarom;
-   - open punten.
-
-   Het rapport wordt teruggeplakt in het kantoor.
+   - afwijkingen van de opdracht en waarom;
+   - open punten;
+   - wat Bastiaan moet beslissen.
+8. **Faalt een cluster tests ineens**, terwijl elke test apart slaagt, kijk dan eerst naar de
+   machine (`uptime`, wees-processen) voordat je de code aanpast.
 
 Ontwikkeldocumentatie is Nederlands, code en commentaar Engels, en alles wat gebruikers lezen
-tweetalig (zie `besluiten.md`).
+tweetalig (zie `docs/fabriek/besluiten.md`).
 
 **Rangorde van waarheid:**
 1. code en tests;
