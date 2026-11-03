@@ -41,8 +41,6 @@ export default [
   route("healthz", "routes/healthz.tsx"),
   // Resource route (no UI) — persists the chosen UI locale in a cookie.
   route("set-locale", "routes/set-locale.tsx"),
-  // Resource route (no UI) — an admin toggles the "view as teacher" cookie.
-  route("set-view", "routes/set-view.tsx"),
   // Resource route (no UI) — silences Chrome DevTools' workspace probe.
   route(".well-known/appspecific/com.chrome.devtools.json", "routes/devtools-probe.tsx"),
 ] satisfies RouteConfig;
