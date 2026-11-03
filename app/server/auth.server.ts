@@ -37,8 +37,10 @@ export async function getUser(request: Request): Promise<User | null> {
   if (!row) return null;
   // A legacy row with a retired role (e.g. "student", pre-P17 data) counts as logged out.
   if (!isRole(row.role)) return null;
+  // A deactivated account (P18.7) has no session at all; its data stays.
+  if (row.disabledAt) return null;
   // A cookie whose sessionVersion is behind the stored one predates a password
-  // change → treat as logged out on that device.
+  // change or a deactivation → treat as logged out on that device.
   const cookieVersion = session.get("sessionVersion") ?? 0;
   if ((row.sessionVersion ?? 0) !== cookieVersion) return null;
   return toPublicUser(row);

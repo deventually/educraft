@@ -59,6 +59,7 @@ can keep running. Until it has run there is **no owner** and nobody can change a
 | E-mail, reset link, delete — on a **teacher** | yes | yes |
 | E-mail, reset link, delete — on an **admin** | no | yes |
 | Change a role (teacher ↔ admin) | no | yes |
+| Create an account directly, set a password, deactivate / reactivate | no | yes (not on their own account) |
 | Anything on their own account | no (use `/account`) | no (use `/account`) |
 
 Every refusal is made in the action (`{ error: "ownerOnly" }`); the page only hides the
@@ -76,9 +77,9 @@ minted for a teacher never opens that account once it is an admin.
   request**, so a role change takes effect without re-login.
 - **Several devices at once, one switch to sign them all out.** Logging in never
   invalidates other sessions (laptop and phone can both be signed in). Only a new
-  password does: `updateUserPassword` bumps `users.sessionVersion`, `getUser` rejects
-  any cookie with an older version, and the device that changed the password gets a
-  fresh cookie so it stays signed in.
+  password (`updateUserPassword`) or a deactivation (`setUserDisabled`) bumps
+  `users.sessionVersion`; `getUser` rejects any cookie with an older version, and the
+  device that changed its own password gets a fresh cookie so it stays signed in.
 - Passwords hashed with Node's built-in `scrypt`
   ([`password.server.ts`](../app/server/password.server.ts)) — no native
   bcrypt/argon2 dependency. Stored self-describing as `scrypt:<saltHex>:<hashHex>`.
@@ -89,8 +90,9 @@ minted for a teacher never opens that account once it is an admin.
 
 Every user (teacher or admin) deletes their own account on `/account`: type the
 confirmation word and `deleteUserCascade` removes the account and everything it owns,
-immediately and permanently. There is no request/holding state and no `disabledAt`.
-An admin can remove other users from the user list in `/admin/users`.
+immediately and permanently. There is no request/holding state. An admin can remove
+other users from the user list in `/admin/users`. (Deactivating, below, is the reversible
+alternative, owner only.)
 
 ## Data scoping
 
@@ -103,12 +105,28 @@ trust a client-supplied id alone. See the header comment in
 Abuse budgets (rate + concurrency) are keyed by **user id**, so limits follow the
 account rather than a spoofable IP.
 
-## Password reset — not built (by design)
+## Passwords and accounts (P18.7)
 
-At test-drive scale there is **no password-reset flow and no email sending**. If a
-tester is locked out, the owner simply **mints a fresh invite** (a new account) or,
-once the admin UI lands (P4), resets it there. This is a deliberate scope cut, not
-an oversight — revisit when the user base grows beyond the invite list.
+There is **no e-mail sending**: a mail service is a new provider, which needs Bastiaan's
+approval first. Every link below is shown on the page for the admin to copy and pass on.
+
+- **Reset link** (since P4): an admin mints a single-use `/reset/:token` for a user
+  (`createPasswordReset`, 48 h); the user chooses their own new password and is signed in.
+  A role change voids the user's open links.
+- **Create an account** (owner only, `/admin/users`): name, e-mail (required, logging in
+  uses it), role teacher or admin, and either a **link** (default: the account exists with
+  `passwordHash = NO_PASSWORD`, which no typed password matches, plus a 7-day single-use
+  reset link) or an **initial password** (at least 10 characters, hashed by
+  `hashPassword`, never shown again).
+- **Set a password** (owner only): `setPassword` writes a hash through
+  `updateUserPassword`, so the user is signed out on every device. The password is never
+  returned to the client.
+- **Deactivate / reactivate** (owner only): `users.disabled_at` is set or cleared. A
+  deactivated account cannot log in (a correct password gets the "deactivated" message,
+  a wrong one the generic one), `getUser` returns `null`, the data stays. Deactivating
+  bumps `sessionVersion`, so reactivating does not revive old cookies. Its reset link is
+  invalid and stays unspent (`reset.$token.tsx`) until the account is reactivated.
+- Nobody uses these on their own account; they use `/account`.
 
 ## What SSO will (and won't) replace
 

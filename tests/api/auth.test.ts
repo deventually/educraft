@@ -166,3 +166,136 @@ describe("multiple devices (P17)", () => {
     expect((await auth.getUser(requestWithCookie(fresh)))?.id).toBe(u.id);
   });
 });
+
+describe("deactivated accounts (P18.7)", () => {
+  const PW = "correct horse battery staple";
+  const loginReq = (email: string, pw: string) =>
+    new Request("http://localhost/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email, password: pw }).toString(),
+    });
+  const runLogin = (req: Request) =>
+    login.action({ request: req } as Parameters<typeof login.action>[0]);
+  const msgs = (req: Request) => i18n.getMessages(localeServer.getLocale(req));
+
+  it("a new user is active (disabledAt null)", async () => {
+    const u = await users.createUser({
+      name: "Active",
+      email: "active-p187@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    expect(u.disabledAt).toBeNull();
+    expect((await users.getUserById(u.id))?.disabledAt).toBeNull();
+  });
+
+  it("a deactivated user is logged out everywhere", async () => {
+    const u = await users.createUser({
+      name: "Gone Dark",
+      email: "gonedark@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    const phone = await sessionCookieFor(u.id);
+    const laptop = await sessionCookieFor(u.id);
+    expect((await auth.getUser(requestWithCookie(phone)))?.id).toBe(u.id);
+
+    await users.setUserDisabled(u.id, true);
+
+    expect(await auth.getUser(requestWithCookie(phone))).toBeNull();
+    expect(await auth.getUser(requestWithCookie(laptop))).toBeNull();
+    // requireUser sends a deactivated session to /login like any logged-out visitor.
+    await expect(auth.requireUser(requestWithCookie(phone))).rejects.toMatchObject({
+      status: 302,
+    });
+    const row = await users.getUserById(u.id);
+    expect(row?.disabledAt).toBeInstanceOf(Date);
+    // The data stays.
+    expect(row?.email).toBe("gonedark@example.com");
+  });
+
+  it("login refuses a deactivated account with accountDisabled after a correct password", async () => {
+    const u = await users.createUser({
+      name: "Disabled Login",
+      email: "disabledlogin@example.com",
+      passwordHash: password.hashPassword(PW),
+      role: "teacher",
+    });
+    await users.setUserDisabled(u.id, true);
+    const req = loginReq("disabledlogin@example.com", PW);
+    const res = (await runLogin(req)) as { error?: string };
+    expect(res instanceof Response).toBe(false);
+    expect(res.error).toBe(msgs(req).auth.accountDisabled);
+    expect(msgs(req).auth.accountDisabled).not.toBe(msgs(req).auth.loginFailed);
+  });
+
+  it("login with a wrong password on a deactivated account stays generic", async () => {
+    const u = await users.createUser({
+      name: "Disabled Wrong",
+      email: "disabledwrong@example.com",
+      passwordHash: password.hashPassword(PW),
+      role: "teacher",
+    });
+    await users.setUserDisabled(u.id, true);
+    const req = loginReq("disabledwrong@example.com", "not the password");
+    const res = (await runLogin(req)) as { error?: string };
+    expect(res.error).toBe(msgs(req).auth.loginFailed);
+    // Same answer as for an address that does not exist: no account enumeration.
+    const ghost = (await runLogin(loginReq("nobody-p187@example.com", "x"))) as { error?: string };
+    expect(ghost.error).toBe(res.error);
+  });
+
+  it("an account created without a password (set-password link) cannot log in", async () => {
+    await users.createUser({
+      name: "No Pw Yet",
+      email: "nopwyet@example.com",
+      passwordHash: password.NO_PASSWORD,
+      role: "teacher",
+    });
+    for (const typed of ["none", PW, "scrypt::"]) {
+      const req = loginReq("nopwyet@example.com", typed);
+      const res = (await runLogin(req)) as { error?: string };
+      expect(res instanceof Response).toBe(false);
+      expect(res.error).toBe(msgs(req).auth.loginFailed);
+    }
+  });
+
+  it("reactivating restores login but not old cookies", async () => {
+    const u = await users.createUser({
+      name: "Back Again",
+      email: "backagain@example.com",
+      passwordHash: password.hashPassword(PW),
+      role: "teacher",
+    });
+    const old = await sessionCookieFor(u.id);
+    await users.setUserDisabled(u.id, true);
+    await users.setUserDisabled(u.id, false);
+
+    expect((await users.getUserById(u.id))?.disabledAt).toBeNull();
+    // The old cookie stays dead: deactivating bumped sessionVersion.
+    expect(await auth.getUser(requestWithCookie(old))).toBeNull();
+    // A fresh login works again.
+    const res = await runLogin(loginReq("backagain@example.com", PW));
+    expect(res instanceof Response).toBe(true);
+    const fresh = ((res as Response).headers.get("Set-Cookie") ?? "").split(";")[0];
+    expect((await auth.getUser(requestWithCookie(fresh)))?.id).toBe(u.id);
+  });
+
+  it("deactivating twice bumps once; reactivating never bumps", async () => {
+    const u = await users.createUser({
+      name: "Counter",
+      email: "counter-p187@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    const v0 = (await users.getUserById(u.id))!.sessionVersion;
+    await users.setUserDisabled(u.id, true);
+    const v1 = (await users.getUserById(u.id))!.sessionVersion;
+    expect(v1).toBe(v0 + 1);
+    await users.setUserDisabled(u.id, true);
+    expect((await users.getUserById(u.id))!.sessionVersion).toBe(v1);
+    await users.setUserDisabled(u.id, false);
+    expect((await users.getUserById(u.id))!.sessionVersion).toBe(v1);
+  });
+});

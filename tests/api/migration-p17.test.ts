@@ -12,6 +12,9 @@ const journal = JSON.parse(readFileSync(join(DRIZZLE, "meta/_journal.json"), "ut
   entries: { tag: string }[];
 };
 const LAST_OLD = "0007_heavy_morbius";
+// The P17.3 migration is this entry. Later entries (P18.7 re-adds users.disabled_at) are
+// out of scope here, so the database is built up to and including it only.
+const LAST_P17 = "0008_stormy_bloodaxe";
 
 function apply(db: Database.Database, tags: string[]) {
   for (const tag of tags) {
@@ -24,6 +27,7 @@ function apply(db: Database.Database, tags: string[]) {
 
 const tags = journal.entries.map((e) => e.tag);
 const cut = tags.indexOf(LAST_OLD) + 1;
+const end = tags.indexOf(LAST_P17) + 1;
 const NOW = 1_700_000_000_000;
 
 let db: Database.Database;
@@ -169,7 +173,7 @@ beforeAll(() => {
   db = new Database(":memory:");
   apply(db, tags.slice(0, cut));
   seed(db);
-  apply(db, tags.slice(cut));
+  apply(db, tags.slice(cut, end));
 });
 
 const count = (sql: string, ...p: unknown[]) => (db.prepare(sql).get(...p) as { n: number }).n;
@@ -178,7 +182,7 @@ const cols = (t: string) =>
 
 describe("P17.3 migration", () => {
   it("has a migration after 0007", () => {
-    expect(tags.length).toBeGreaterThan(cut);
+    expect(end).toBeGreaterThan(cut);
   });
 
   it("removes every student row and nothing of the teacher", () => {

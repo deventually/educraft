@@ -4,6 +4,7 @@ import { createUserSession } from "~/server/auth.server";
 import {
   consumePasswordReset,
   getPasswordReset,
+  getUserById,
   updateUserPassword,
 } from "~/server/repositories/users.server";
 import { hashPassword } from "~/server/password.server";
@@ -18,13 +19,20 @@ export function meta({ matches }: Route.MetaArgs) {
   return [{ title: `${m.auth.resetHeading} — ${m.appName}` }];
 }
 
-/** Whether a reset token is still redeemable (exists and not expired). */
-function isRedeemable(reset: Awaited<ReturnType<typeof getPasswordReset>>): boolean {
-  return Boolean(reset && reset.expiresAt.getTime() >= Date.now());
+/**
+ * Whether a reset token is still redeemable: it exists, has not expired, and its account
+ * is not deactivated (P18.7). A deactivated user must not get a session from a link, so
+ * the link counts as invalid — and is left unspent — until the account is reactivated.
+ */
+async function isRedeemable(token: string): Promise<boolean> {
+  const reset = await getPasswordReset(token);
+  if (!reset || reset.expiresAt.getTime() < Date.now()) return false;
+  const user = await getUserById(reset.userId);
+  return Boolean(user && !user.disabledAt);
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
-  return { valid: isRedeemable(await getPasswordReset(params.token)) };
+  return { valid: await isRedeemable(params.token) };
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -36,9 +44,15 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (password.length < 10) return { error: m.auth.passwordTooShort };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
+  // Checked before the token is claimed, so a deactivated account's link is not spent.
+  if (!(await isRedeemable(params.token))) return { error: m.auth.resetInvalid };
+
   // Claim the token atomically (single-use) before mutating the account.
   const reset = await consumePasswordReset(params.token);
   if (!reset) return { error: m.auth.resetInvalid };
+  // Re-check after the claim: an account deactivated in between must not get a session.
+  const account = await getUserById(reset.userId);
+  if (!account || account.disabledAt) return { error: m.auth.resetInvalid };
 
   await updateUserPassword(reset.userId, hashPassword(password));
   // `updateUserPassword` bumped sessionVersion, so every older cookie is logged out;

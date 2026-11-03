@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.6: superbeheerder)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.7: accounts aanmaken, wachtwoord instellen, non-actief)_
 
 ## Nu
 
@@ -43,6 +43,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.6: superbeheerder)_
 - V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
 - V2 stap 18.5: automatisch opslaan in beheer, geen opslaan-knoppen meer — branch `claude/p18-5` (bovenop 18.4).
 - V2 stap 18.6: superbeheerder — alleen hij maakt, degradeert en verwijdert beheerders; uitnodigingen maken nooit beheerders; `npm run set-owner` — branch `claude/p18-6` (bovenop 18.5).
+- V2 stap 18.7: superbeheerder maakt accounts direct aan (link of beginwachtwoord), stelt wachtwoorden in en zet accounts op non-actief; migratie `0009` (kolom erbij) — branch `claude/p18-7` (bovenop 18.6).
 
 ## Wacht op jou
 

@@ -7,12 +7,15 @@ export const users = sqliteTable("users", {
   email: text("email").unique(), // nullable; invites may be nameless
   passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
   role: text("role").notNull().default("teacher"), // "teacher" | "admin"
-  // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and
-  // carried in the session cookie; a stale cookie is treated as logged out.
+  // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and on
+  // owner deactivation (P18.7), and carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
   // Retired per-teacher tool allow-list (Phase 4; ignored since P18, dropped in 18.8).
   // Always written as null now.
   allowedToolSlugs: text("allowed_tool_slugs"),
+  // P18: owner-set deactivation; null = active. (An earlier student-only column of the same
+  // name was dropped in 0008.)
+  disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 

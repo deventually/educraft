@@ -22,6 +22,12 @@ interface ConfirmDialogProps {
   fields: Record<string, string>;
   /** Optional gate: the confirm button stays disabled until `word` is typed. */
   typeToConfirm?: { word: string; label: string; placeholder?: string };
+  /**
+   * Extra inputs POSTed with the hidden `fields` (e.g. a new password and its
+   * confirmation). Rendered inside the form, between the description and the buttons.
+   * Mark the first one `data-autofocus`: it gets the focus on open instead of Cancel.
+   */
+  children?: React.ReactNode;
 }
 
 /**
@@ -46,6 +52,7 @@ export function ConfirmDialog({
   confirmVariant = "danger",
   fields,
   typeToConfirm,
+  children,
 }: ConfirmDialogProps) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
@@ -139,24 +146,25 @@ export function ConfirmDialog({
               </div>
             )}
 
-            <div className="mt-6 flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={close}
-                {...(typeToConfirm ? {} : { "data-autofocus": true })}
-              >
-                {cancelLabel}
-              </Button>
-              <Form method="post" onSubmit={close}>
-                {Object.entries(fields).map(([k, v]) => (
-                  <input key={k} type="hidden" name={k} value={v} />
-                ))}
+            <Form method="post" onSubmit={close}>
+              {Object.entries(fields).map(([k, v]) => (
+                <input key={k} type="hidden" name={k} value={v} />
+              ))}
+              {children && <div className="mt-4 space-y-4">{children}</div>}
+              <div className="mt-6 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={close}
+                  {...(typeToConfirm || children ? {} : { "data-autofocus": true })}
+                >
+                  {cancelLabel}
+                </Button>
                 <Button type="submit" variant={confirmVariant} disabled={confirmDisabled}>
                   {confirmLabel}
                 </Button>
-              </Form>
-            </div>
+              </div>
+            </Form>
           </div>
         </div>
       )}

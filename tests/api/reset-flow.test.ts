@@ -127,3 +127,49 @@ describe("reset route action", () => {
     expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
   });
 });
+
+describe("reset link of a deactivated account (P18.7)", () => {
+  it("does not let a deactivated user in, and does not spend the link", async () => {
+    const auth = await import("~/server/auth.server");
+    const u = await users.createUser({
+      name: "Dark Reset",
+      email: "darkreset@example.com",
+      passwordHash: password.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    const reset = await users.createPasswordReset(u.id);
+    await users.setUserDisabled(u.id, true);
+
+    // The page says the link is invalid ...
+    const loaded = (await resetRoute.loader({
+      params: { token: reset.token },
+      request: new Request("http://localhost/reset/x"),
+      context: {},
+    } as never)) as { valid: boolean };
+    expect(loaded.valid).toBe(false);
+
+    // ... and posting a new password neither changes it nor starts a session.
+    const res = await invoke(
+      reset.token,
+      post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
+    );
+    expect(res instanceof Response).toBe(false);
+    expect((res as { error?: string }).error).toBeTruthy();
+    const after = await users.getUserById(u.id);
+    expect(password.verifyPassword("old-password-x", after!.passwordHash)).toBe(true);
+    expect(password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(false);
+    expect(await users.getPasswordReset(reset.token)).not.toBeNull(); // not consumed
+
+    // After reactivation the same link works again.
+    await users.setUserDisabled(u.id, false);
+    const ok = await invoke(
+      reset.token,
+      post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
+    );
+    expect(ok instanceof Response).toBe(true);
+    const cookie = ((ok as Response).headers.get("Set-Cookie") ?? "").split(";")[0];
+    expect(
+      (await auth.getUser(new Request("http://localhost/", { headers: { Cookie: cookie } })))?.id,
+    ).toBe(u.id);
+  });
+});

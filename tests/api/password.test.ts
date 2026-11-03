@@ -38,3 +38,14 @@ describe("password hashing (scrypt)", () => {
     expect(verifyPassword("x", "scrypt:only-two")).toBe(false);
   });
 });
+
+describe("NO_PASSWORD (P18.7)", () => {
+  it("is a record verifyPassword always rejects, whatever is typed", async () => {
+    const { NO_PASSWORD } = await import("~/server/password.server");
+    for (const typed of ["", "none", "scrypt", "none:none:none", "correct horse battery"]) {
+      expect(verifyPassword(typed, NO_PASSWORD)).toBe(false);
+    }
+    // It is not a three-part scrypt record (the only shape verifyPassword accepts).
+    expect(NO_PASSWORD.split(":")).toHaveLength(1);
+  });
+});
