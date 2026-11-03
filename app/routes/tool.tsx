@@ -20,6 +20,7 @@ import { requireUser } from "~/server/auth.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
+import { localModelsEnabled } from "~/server/env.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
 import { getToolHelpOverlay } from "~/lib/help/registry";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -38,9 +39,8 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const tool = getToolBySlugOrThrow(params.slug);
-  // A tool the instance has disabled or a tool outside a narrowed teacher's
-  // allow-list is indistinguishable from a non-existent tool (no info leak).
-  // Effective availability composes the instance + teacher gates.
+  // A tool the instance has disabled is indistinguishable from a non-existent tool
+  // (no info leak).
   if (!(await isToolAvailable(user, tool))) throw new Response("Not Found", { status: 404 });
 
   const profiles = await listProfiles(user.id);
@@ -49,10 +49,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     name: s.name,
     text: getVerbatimPrompt(s.systemPromptId),
   }));
-  // Discovered local models, narrowed to the viewer's effective set (Phase 14):
-  // local/CLI/discovered models are no longer free-passed — an admin/teacher may
-  // curate them, so a disabled/un-granted one must never reach the picker.
-  const discovered = (await discoverLocalModels()).map((m) => ({
+  // Discovered local models, narrowed to the viewer's effective set: an admin/teacher
+  // may curate them, so a disabled/un-granted one must never reach the picker.
+  // Local models exist only outside production (P18): skip discovery there, which also
+  // saves its 1.5 s time-out on every tool page.
+  const discovered = (localModelsEnabled() ? await discoverLocalModels() : []).map((m) => ({
     id: m.id,
     displayName: m.displayName,
     supportsImages: m.supportsImages,
@@ -60,7 +61,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }));
   const localModels = await narrowLocalModels(user, discovered);
   // The catalog models a caller may pick, narrowed to the viewer's effective set
-  // (Phase 4 instance allow-list + Phase 13 per-teacher gate). Passed
+  // (instance allow-list, or the teacher's own set). Passed
   // to the pickers so the module-scope catalog no longer wins.
   const catalogModels = await getSelectableModels(user);
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));

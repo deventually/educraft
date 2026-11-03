@@ -407,8 +407,7 @@ export const nl = {
     },
     models: {
       heading: "Modellen",
-      intro:
-        "Kies welke modellen gebruikers mogen selecteren. Opus-klasse blijft serverzijdig; lokale en CLI-modellen zijn gratis maar kies je hier expliciet.",
+      intro: "Kies welke modellen gebruikers mogen selecteren. Opus-klasse blijft serverzijdig.",
       caption: "Selecteerbare modellen uit de catalogus.",
       available: "Beschikbaar voor gebruikers",
       atLeastOne: "Kies minstens één model — je kunt niet iedereen buitensluiten.",
@@ -417,10 +416,12 @@ export const nl = {
       cliGroup: "CLI-agents",
       localGroup: "Lokaal (gevonden)",
       localGroupHint:
-        "Lokale en CLI-modellen zijn gratis, maar wel te beheren. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",
+        "Alleen zichtbaar in ontwikkelmodus (npm run dev). In productie bestaan CLI-agents en lokale modellen niet. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",
       teacherLegend: "Modellen per docent",
       teacherIntro:
-        "Beperk optioneel welke modellen een docent mag gebruiken. Niets aangevinkt (of alles aangevinkt) betekent dat de docent de instantie erft.",
+        "Een docent volgt de modellen van de instelling, of krijgt een eigen keuze. Een eigen keuze vervangt de instelling en mag ruimer zijn.",
+      teacherInherit: "Volgt de instelling",
+      teacherOwn: "Eigen keuze",
       teacherNone: "Nog geen docenten.",
     },
     context: {

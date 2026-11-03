@@ -104,70 +104,163 @@ describe("admin.models action — lockout guard", () => {
   });
 });
 
-describe("admin.models action — per-teacher assignment (P13)", () => {
-  it("persists a per-teacher model subset (narrows within the base)", async () => {
-    await settings.setEnabledModels(null); // base = full selectable catalog
-    const teacher = await users.createUser({
-      name: "Model Teacher",
-      email: "modelteacher@example.com",
+describe("admin.models action — per-teacher override (P18)", () => {
+  async function newTeacher(tag: string) {
+    return users.createUser({
+      name: `Model Teacher ${tag}`,
+      email: `modelteacher-${tag}@example.com`,
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
+  }
+
+  it("mode=inherit clears the teacher's set", async () => {
+    const teacher = await newTeacher("inherit");
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
     const res = (await invoke(
       modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: ["claude-haiku-4-5"] }),
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        mode: "inherit",
+        models: ["claude-haiku-4-5"],
+      }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+  });
+
+  it("mode=own stores exactly the chosen set, also outside the instance set", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]); // haiku is not enabled instance-wide
+    const teacher = await newTeacher("own");
+    const res = (await invoke(
+      modelsRoute.action,
+      post({ intent: "teacher", userId: teacher.id, mode: "own", models: ["claude-haiku-4-5"] }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+    await settings.setEnabledModels(null); // reset
   });
 
-  it("[P14] persists a per-teacher CLI/local subset (narrows within the base)", async () => {
-    await settings.setEnabledModels(null); // base = full selectable catalog incl. CLI
-    const teacher = await users.createUser({
-      name: "CLI Teacher",
-      email: "cliteacher@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
+  it("mode=own with every catalogue model keeps the full list (no collapse to inherit)", async () => {
+    await settings.setEnabledModels(null);
+    const teacher = await newTeacher("all");
+    const all = listModels()
+      .filter((mdl) => mdl.clientSelectable)
+      .map((mdl) => mdl.id);
+    await invoke(
+      modelsRoute.action,
+      post({ intent: "teacher", userId: teacher.id, mode: "own", models: all }),
+    );
+    expect([...(await users.getUserAssignedModels(teacher.id))!].sort()).toEqual([...all].sort());
+  });
+
+  it("[P14] mode=own persists a CLI model", async () => {
+    const teacher = await newTeacher("cli");
     const res = (await invoke(
       modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: ["claude-code"] }),
+      post({ intent: "teacher", userId: teacher.id, mode: "own", models: ["claude-code"] }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-code"]);
   });
 
-  it("stores null (inherit) when all base models are selected, or none are", async () => {
-    await settings.setEnabledModels(null);
-    const teacher = await users.createUser({
-      name: "Inherit Teacher",
-      email: "inheritteacher@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    // All base models checked → inherit (not a stored full list). Since P14 the base
-    // includes the CLI agents, so "all" means the whole client-selectable catalog.
-    const allBase = listModels()
-      .filter((mdl) => mdl.clientSelectable)
-      .map((mdl) => mdl.id);
+  it("mode=own with nothing chosen is refused and stores nothing", async () => {
+    const teacher = await newTeacher("empty");
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    const res = (await invoke(
+      modelsRoute.action,
+      post({ intent: "teacher", userId: teacher.id, mode: "own" }),
+    )) as { error?: boolean; saved?: boolean };
+    expect(res.error).toBe(true);
+    expect(res.saved).toBeUndefined();
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+  });
+
+  it("drops unknown ids", async () => {
+    const teacher = await newTeacher("unknown");
     await invoke(
       modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: allBase }),
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        mode: "own",
+        models: ["claude-haiku-4-5", "nonexistent-model-xyz", "claude-opus-4-8"],
+      }),
     );
-    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
-    // None checked → inherit, never a lockout.
-    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
-    await invoke(modelsRoute.action, post({ intent: "teacher", userId: teacher.id }));
-    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+    // Only unknown ids = nothing chosen → refused.
+    const res = (await invoke(
+      modelsRoute.action,
+      post({
+        intent: "teacher",
+        userId: teacher.id,
+        mode: "own",
+        models: ["nonexistent-model-xyz"],
+      }),
+    )) as { error?: boolean };
+    expect(res.error).toBe(true);
   });
 
   it("404s an unknown or non-teacher target", async () => {
     await expect(
       invoke(
         modelsRoute.action,
-        post({ intent: "teacher", userId: "nobody", models: ["claude-haiku-4-5"] }),
+        post({ intent: "teacher", userId: "nobody", mode: "own", models: ["claude-haiku-4-5"] }),
       ),
     ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("the loader gives each teacher a mode and lists the whole catalogue, not the instance set", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    const teacher = await newTeacher("loader");
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    const data = (await modelsRoute.loader({
+      request: new Request("http://localhost/admin/models"),
+      params: {},
+      context: {},
+    } as unknown as Parameters<typeof modelsRoute.loader>[0])) as {
+      base: { id: string }[];
+      teachers: { id: string; mode: string; models: string[] }[];
+    };
+    const row = data.teachers.find((t) => t.id === teacher.id)!;
+    expect(row.mode).toBe("own");
+    expect(row.models).toEqual(["claude-haiku-4-5"]);
+    expect(data.base.map((b) => b.id)).toContain("claude-haiku-4-5"); // not in the instance set
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("the loader lists no CLI or local models in production", async () => {
+    const discover = await import("~/lib/ai/discover.server");
+    vi.mocked(discover.discoverLocalModels).mockClear();
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const data = (await modelsRoute.loader({
+        request: new Request("http://localhost/admin/models"),
+        params: {},
+        context: {},
+      } as unknown as Parameters<typeof modelsRoute.loader>[0])) as {
+        rows: { id: string; group: string }[];
+        base: { id: string }[];
+      };
+      expect(data.rows.some((r) => r.group !== "frontier")).toBe(false);
+      expect(data.base.some((r) => r.id === "claude-code")).toBe(false);
+      expect(discover.discoverLocalModels).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("the action ignores a CLI model id in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const res = (await invoke(modelsRoute.action, post({ models: ["claude-code"] }))) as {
+        error?: boolean;
+      };
+      expect(res.error).toBe(true); // nothing valid chosen
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

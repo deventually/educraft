@@ -101,20 +101,18 @@ async function getAssignedList(prefix: string, userId: string): Promise<Set<stri
 }
 
 /**
- * Per-teacher model assignment (Phase 13) — the admin→teacher gate. Same
- * migration-free storage as the context axes (`assignedModels:<userId>`), but
- * composed by INTERSECT, not override: a teacher's effective models are the
- * instance base ∩ this set. null/empty = unrestricted (inherit the instance).
+ * A teacher's own model set (`assignedModels:<userId>`, migration-free storage).
+ * Since P18 it OVERRIDES the instance set (and may be wider); null/empty = no own
+ * set, the teacher follows the instance.
  */
 export async function getUserAssignedModels(userId: string): Promise<Set<string> | null> {
   return getAssignedList("assignedModels", userId);
 }
 
 /**
- * Set (or clear) a per-teacher country/sector assignment (Phase 9 write side) —
- * the setter half of `getAssignedList`. Writes the `${prefix}:${userId}`
- * instance_settings key with a JSON `string[]`; a null/empty list deletes the key
- * (unrestricted). No `users` column, no migration — mirrors the P8 read storage.
+ * Set (or clear) a per-user list — the setter half of `getAssignedList`. Writes
+ * the `${prefix}:${userId}` instance_settings key with a JSON `string[]`; a
+ * null/empty list deletes the key. No `users` column, no migration.
  */
 async function setAssignedList(
   prefix: string,
@@ -180,6 +178,10 @@ export async function deleteUserCascade(id: string): Promise<void> {
       tx.delete(messages).where(inArray(messages.sessionId, sessionIds)).run();
     }
     tx.delete(chatSessions).where(eq(chatSessions.userId, id)).run();
+    // The teacher's own model set lives in instance_settings, not on the user row.
+    tx.delete(instanceSettings)
+      .where(eq(instanceSettings.key, `assignedModels:${id}`))
+      .run();
     tx.delete(users).where(eq(users.id, id)).run();
   });
 }

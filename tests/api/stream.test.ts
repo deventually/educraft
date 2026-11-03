@@ -473,6 +473,35 @@ describe("api.stream — model allow-list & budget", () => {
     await users.setUserAssignedModels(teacherId, null); // reset
   });
 
+  it("[P18] a teacher's own set may include a model the instance disabled", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]); // haiku NOT enabled instance-wide
+    const teacherId = "p18-override-teacher";
+    await users.setUserAssignedModels(teacherId, ["claude-haiku-4-5"]);
+    await invoke(
+      { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
+      { userId: teacherId },
+    );
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-haiku-4-5");
+    await users.setUserAssignedModels(teacherId, null); // reset
+    await settings.setEnabledModels(null);
+  });
+
+  it("[P18] a CLI model is refused in production and falls back to the tool default", async () => {
+    await settings.setEnabledModels(null);
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      await invoke(
+        { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-code" },
+        { userId: "p18-prod-teacher" },
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+    expect(streamChatSpy.mock.calls[0][0].model).toBe(
+      getToolBySlug("socratic-partner")!.defaultModel,
+    );
+  });
+
   it("[P14] an uncurated instance still honours a local/CLI model (back-compat)", async () => {
     await settings.setEnabledModels(null); // nothing curated → local stays available
     await invoke(

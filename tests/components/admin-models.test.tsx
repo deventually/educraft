@@ -17,15 +17,22 @@ const loaderData = {
     { id: "claude-code", displayName: "Claude Code (CLI)", checked: true, group: "cli" },
     { id: "ollama::gemma", displayName: "Ollama · gemma", checked: false, group: "local" },
   ],
-  // The assignable base (instance-enabled selectable catalog) + per-teacher rows.
+  // The whole catalogue (a teacher's own set may exceed the instance set) + per-teacher rows.
   base: [
     { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6" },
     { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5" },
     { id: "claude-code", displayName: "Claude Code (CLI)" },
+    { id: "ollama::gemma", displayName: "Ollama · gemma" },
   ],
   teachers: [
-    { id: "t1", name: "Teacher One", email: "t1@example.com", models: ["claude-haiku-4-5"] },
-    { id: "t2", name: "Teacher Two", email: null, models: null },
+    {
+      id: "t1",
+      name: "Teacher One",
+      email: "t1@example.com",
+      mode: "own",
+      models: ["claude-haiku-4-5"],
+    },
+    { id: "t2", name: "Teacher Two", email: null, mode: "inherit", models: [] },
   ],
 };
 
@@ -65,25 +72,47 @@ describe("Admin models", () => {
     expect(local.checked).toBe(false); // discovered but not yet enabled
   });
 
-  it("renders per-teacher model checkboxes, pre-checked from the assignment (P13)", () => {
+  it("pre-checks a teacher's own set", () => {
     renderRoute();
     expect(screen.getByText("Teacher One")).toBeInTheDocument();
     const group = screen.getByRole("group", { name: "Teacher One" });
     const haiku = within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
     const sonnet = within(group).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement;
-    expect(haiku.checked).toBe(true); // assigned
-    expect(sonnet.checked).toBe(false); // not assigned
+    expect(haiku.checked).toBe(true); // in the own set
+    expect(sonnet.checked).toBe(false); // not in the own set
   });
 
-  it("shows all models checked for a teacher with no assignment (inherit)", () => {
+  it("offers inherit/own per teacher; checkboxes are disabled while inheriting", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    const one = screen.getByRole("group", { name: "Teacher One" });
+    const two = screen.getByRole("group", { name: "Teacher Two" });
+    const oneOwn = within(one).getByRole("radio", { name: /eigen keuze/i }) as HTMLInputElement;
+    const twoInherit = within(two).getByRole("radio", {
+      name: /volgt de instelling/i,
+    }) as HTMLInputElement;
+    expect(oneOwn.checked).toBe(true);
+    expect(twoInherit.checked).toBe(true);
+    // Own: boxes are usable. Inherit: boxes are disabled.
+    expect((within(one).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      false,
+    );
+    expect((within(two).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      true,
+    );
+    // Switching Teacher Two to "own" enables them.
+    await user.click(within(two).getByRole("radio", { name: /eigen keuze/i }));
+    expect((within(two).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it("lists the whole catalogue for a teacher, not only the instance set", () => {
     renderRoute();
     const group = screen.getByRole("group", { name: "Teacher Two" });
-    expect((within(group).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement).checked).toBe(
-      true,
-    );
-    expect((within(group).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).checked).toBe(
-      true,
-    );
+    // "Ollama · gemma" is not enabled instance-wide (checked: false above) but is offered.
+    expect(within(group).getByLabelText("Ollama · gemma")).toBeInTheDocument();
+    expect(within(group).getByLabelText("Claude Code (CLI)")).toBeInTheDocument();
   });
 
   it("surfaces the empty-selection guard when the action rejects", async () => {

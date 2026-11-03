@@ -404,8 +404,7 @@ export const en: Messages = {
     },
     models: {
       heading: "Models",
-      intro:
-        "Choose which models users may select. Opus-class stays server-side; local and CLI models are free but you enable them here explicitly.",
+      intro: "Choose which models users may select. Opus-class stays server-side.",
       caption: "Selectable models from the catalog.",
       available: "Available to users",
       atLeastOne: "Pick at least one model — you can't lock everyone out.",
@@ -414,10 +413,12 @@ export const en: Messages = {
       cliGroup: "CLI agents",
       localGroup: "Local (discovered)",
       localGroupHint:
-        "Local and CLI models are free, but still curatable here. Discovered models depend on what is running now (Ollama/LM Studio).",
+        "Only visible in development mode (npm run dev). In production, CLI agents and local models do not exist. Discovered models depend on what is running now (Ollama/LM Studio).",
       teacherLegend: "Models per teacher",
       teacherIntro:
-        "Optionally restrict which models a teacher may use. Nothing checked (or everything checked) means the teacher inherits the instance.",
+        "A teacher follows the instance's models, or gets an own selection. An own selection replaces the instance's and may be wider.",
+      teacherInherit: "Follows the instance",
+      teacherOwn: "Own selection",
       teacherNone: "No teachers yet.",
     },
     context: {

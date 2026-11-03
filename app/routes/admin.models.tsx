@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Form, useActionData } from "react-router";
 import type { Route } from "./+types/admin.models";
 import { requireRole } from "~/server/auth.server";
 import { listModels } from "~/lib/ai/models";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
+import { localModelsEnabled } from "~/server/env.server";
 import { getEnabledModels, setEnabledModels } from "~/server/repositories/settings.server";
 import {
   getUserAssignedModels,
@@ -13,38 +15,36 @@ import {
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button } from "~/components/ui";
+import { cn } from "~/lib/utils";
 
-/** Which section a model belongs to in the UI (P14): frontier API, CLI agent, or
+/** Which section a model belongs to in the UI: frontier API, CLI agent, or
  *  a locally-discovered (Ollama/LM Studio) model. */
 type ModelGroup = "frontier" | "cli" | "local";
 type CatalogModel = { id: string; displayName: string; group: ModelGroup };
 
 /**
- * Every model an admin can curate (P14) — client-selectable only (Opus-class stays
- * server-side), across all origins: static frontier + CLI agents, plus any local
- * model discovered at runtime. Since P14 local/CLI are curatable here (not "always
- * on"); discovery is env-specific, so a model absent from this list is simply not
- * running right now.
+ * Every model that can be offered — client-selectable only (Opus-class stays
+ * server-side). CLI agents and discovered local models are part of the catalogue
+ * only outside production (`localModelsEnabled`, P18): in production they do not
+ * exist for the app, so they are neither listed nor probed.
  */
 async function fullCatalog(): Promise<CatalogModel[]> {
+  const local = localModelsEnabled();
   const staticModels: CatalogModel[] = listModels()
-    .filter((m) => m.clientSelectable)
+    .filter((m) => m.clientSelectable && (local || !m.local))
     .map((m) => ({
       id: m.id as string,
       displayName: m.displayName,
       group: m.local ? "cli" : "frontier",
     }));
-  const discovered: CatalogModel[] = (await discoverLocalModels()).map((m) => ({
-    id: m.id,
-    displayName: m.displayName,
-    group: "local",
-  }));
+  const discovered: CatalogModel[] = local
+    ? (await discoverLocalModels()).map((m) => ({
+        id: m.id,
+        displayName: m.displayName,
+        group: "local",
+      }))
+    : [];
   return [...staticModels, ...discovered];
-}
-
-/** The assignable base: the full catalog narrowed to the instance's allow-list. */
-function assignableBase(catalog: CatalogModel[], enabled: string[] | null): CatalogModel[] {
-  return catalog.filter((m) => enabled === null || enabled.includes(m.id));
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -55,19 +55,23 @@ export async function loader({ request }: Route.LoaderArgs) {
     ...m,
     checked: enabled === null || enabled.includes(m.id),
   }));
-  // Per-teacher assignment (P13): checkboxes iterate the instance-enabled base;
-  // a teacher's saved subset pre-checks, null (unset) = inherit = all checked.
-  const base = assignableBase(catalog, enabled).map((m) => ({
-    id: m.id,
-    displayName: m.displayName,
-  }));
+  // Per-teacher override (P18): a teacher either follows the instance ("inherit") or
+  // has an own set ("own") that replaces it and may be wider — so the checkboxes run
+  // over the whole catalogue, not over the instance set.
+  const base = catalog.map((m) => ({ id: m.id, displayName: m.displayName }));
   const allUsers = await listUsers();
   const teachers = await Promise.all(
     allUsers
       .filter((u) => u.role === "teacher")
       .map(async (u) => {
-        const models = await getUserAssignedModels(u.id);
-        return { id: u.id, name: u.name, email: u.email, models: models ? [...models] : null };
+        const own = await getUserAssignedModels(u.id);
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          mode: own ? ("own" as const) : ("inherit" as const),
+          models: own ? [...own] : [],
+        };
       }),
   );
   return { rows, base, teachers };
@@ -79,40 +83,31 @@ export async function action({ request }: Route.ActionArgs) {
   const intent = String(fd.get("intent") ?? "instance");
 
   const catalog = await fullCatalog();
+  const catalogIds = new Set(catalog.map((m) => m.id));
+  const chosen = [...new Set(fd.getAll("models").map(String))].filter((id) => catalogIds.has(id));
 
-  // ── Per-teacher assignment (P13): intersect, never widens the instance ──────
+  // ── Per-teacher override (P18): inherit the instance, or an own set ─────────
   if (intent === "teacher") {
     const userId = String(fd.get("userId") ?? "");
     const target = await getUserById(userId);
     if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    const enabled = await getEnabledModels();
-    const baseIds = assignableBase(catalog, enabled).map((m) => m.id);
-    const selected = [
-      ...new Set(
-        fd
-          .getAll("models")
-          .map(String)
-          .filter((id) => baseIds.includes(id)),
-      ),
-    ];
-    // Empty OR all-of-base = inherit (null); a strict subset narrows. Never a
-    // lockout — a teacher always falls back to at least the instance base.
-    const restrict = selected.length === 0 || selected.length === baseIds.length ? null : selected;
-    await setUserAssignedModels(userId, restrict);
+    if (fd.get("mode") === "own") {
+      // An own set replaces the instance, so it is checked against the catalogue,
+      // not the instance set. Exactly the chosen set is stored; empty is refused.
+      if (chosen.length === 0) return { error: true as const };
+      await setUserAssignedModels(userId, chosen);
+    } else {
+      await setUserAssignedModels(userId, null);
+    }
     return { saved: true as const };
   }
 
-  // ── Instance allow-list: frontier + CLI + discovered local (P14) ────────────
-  const catalogIds = new Set(catalog.map((m) => m.id));
-  const selected = fd
-    .getAll("models")
-    .map(String)
-    .filter((id) => catalogIds.has(id));
+  // ── Instance allow-list ─────────────────────────────────────────────────────
   // Lockout guard at the boundary: an admin may not unselect everything.
-  if (selected.length === 0) {
+  if (chosen.length === 0) {
     return { error: true as const };
   }
-  await setEnabledModels(selected);
+  await setEnabledModels(chosen);
   return { saved: true as const };
 }
 
@@ -121,20 +116,22 @@ type TeacherRow = {
   id: string;
   name: string | null;
   email: string | null;
-  models: string[] | null;
+  mode: "inherit" | "own";
+  models: string[];
 };
 
-/** One checkbox per model in `base`, pre-checked by `checkedIds` (null = all). */
+/** One checkbox per model in `base`, pre-checked by `checkedIds`; all disabled together. */
 function ModelCheckboxes({
   idPrefix,
   base,
   checkedIds,
+  disabled,
 }: {
   idPrefix: string;
   base: ModelBox[];
-  checkedIds: string[] | null;
+  checkedIds: string[];
+  disabled: boolean;
 }) {
-  const isChecked = (id: string) => checkedIds === null || checkedIds.includes(id);
   return (
     <ul className="mt-2 space-y-2.5">
       {base.map((m) => (
@@ -144,10 +141,14 @@ function ModelCheckboxes({
             id={`${idPrefix}-${m.id}`}
             name="models"
             value={m.id}
-            defaultChecked={isChecked(m.id)}
-            className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+            defaultChecked={checkedIds.includes(m.id)}
+            disabled={disabled}
+            className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50"
           />
-          <label htmlFor={`${idPrefix}-${m.id}`} className="text-sm font-medium text-slate-800">
+          <label
+            htmlFor={`${idPrefix}-${m.id}`}
+            className={cn("text-sm font-medium text-slate-800", disabled && "text-slate-400")}
+          >
             {m.displayName}
           </label>
         </li>
@@ -156,16 +157,45 @@ function ModelCheckboxes({
   );
 }
 
-/** One teacher's model-assignment form (checkboxes over the instance base). */
+/**
+ * One teacher's model form (P18): "follows the instance" or "own selection". An own
+ * selection replaces the instance set, so its checkboxes run over the whole
+ * catalogue; they are disabled (and not submitted) while the teacher follows the
+ * instance.
+ */
 function TeacherModelForm({
   teacher,
   base,
   save,
+  inheritLabel,
+  ownLabel,
 }: {
   teacher: TeacherRow;
   base: ModelBox[];
   save: string;
+  inheritLabel: string;
+  ownLabel: string;
 }) {
+  const [mode, setMode] = useState(teacher.mode);
+  const radio = (value: "inherit" | "own", label: string) => (
+    <div className="flex items-center gap-2.5">
+      <input
+        type="radio"
+        id={`teacher-${teacher.id}-mode-${value}`}
+        name="mode"
+        value={value}
+        checked={mode === value}
+        onChange={() => setMode(value)}
+        className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+      />
+      <label
+        htmlFor={`teacher-${teacher.id}-mode-${value}`}
+        className="text-sm font-medium text-slate-800"
+      >
+        {label}
+      </label>
+    </div>
+  );
   return (
     <Form method="post">
       <input type="hidden" name="intent" value="teacher" />
@@ -173,10 +203,15 @@ function TeacherModelForm({
       <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <legend className="px-1 text-sm font-semibold text-slate-800">{teacher.name}</legend>
         {teacher.email && <p className="text-xs text-slate-500">{teacher.email}</p>}
+        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+          {radio("inherit", inheritLabel)}
+          {radio("own", ownLabel)}
+        </div>
         <ModelCheckboxes
           idPrefix={`teacher-${teacher.id}-model`}
           base={base}
           checkedIds={teacher.models}
+          disabled={mode === "inherit"}
         />
       </fieldset>
       <Button type="submit" className="mt-3">
@@ -254,14 +289,16 @@ export default function AdminModels({ loaderData }: Route.ComponentProps) {
               </div>
             );
           })}
-          <p className="mt-4 text-xs text-slate-500">{m.localGroupHint}</p>
+          {rows.some((mdl) => mdl.group !== "frontier") && (
+            <p className="mt-4 text-xs text-slate-500">{m.localGroupHint}</p>
+          )}
         </fieldset>
         <Button type="submit" className="mt-4">
           {m.save}
         </Button>
       </Form>
 
-      {/* Per-teacher model assignment (P13) — intersect, narrows the base only. */}
+      {/* Per-teacher override (P18): follow the instance, or an own set that replaces it. */}
       <div className="mt-10 max-w-xl">
         <h3 className="font-display text-base font-medium tracking-tight text-slate-900">
           {m.teacherLegend}
@@ -273,7 +310,13 @@ export default function AdminModels({ loaderData }: Route.ComponentProps) {
           <ul className="mt-4 list-none space-y-6 p-0">
             {teachers.map((teacher) => (
               <li key={teacher.id}>
-                <TeacherModelForm teacher={teacher} base={base} save={m.save} />
+                <TeacherModelForm
+                  teacher={teacher}
+                  base={base}
+                  save={m.save}
+                  inheritLabel={m.teacherInherit}
+                  ownLabel={m.teacherOwn}
+                />
               </li>
             ))}
           </ul>
