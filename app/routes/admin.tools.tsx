@@ -1,4 +1,3 @@
-import { Form, useActionData } from "react-router";
 import type { Route } from "./+types/admin.tools";
 import { requireRole } from "~/server/auth.server";
 import { ALL_TOOLS } from "~/lib/registry";
@@ -11,8 +10,8 @@ import {
 } from "~/server/repositories/settings.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
-import { useFormToast } from "~/components/Toast";
-import { Badge, Button } from "~/components/ui";
+import { Badge } from "~/components/ui";
+import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { fullCatalog } from "~/server/modelCatalog.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -70,19 +69,8 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const actionData = useActionData<typeof action>();
   const { rows, models } = loaderData;
   const m = t.admin.models;
-  useFormToast(actionData, {
-    result: (d) =>
-      !d
-        ? null
-        : "error" in d
-          ? { variant: "error", message: d.error === true ? m.atLeastOne : t.error.invalidRequest }
-          : "saved" in d || "savedSlug" in d
-            ? { variant: "success", message: t.admin.console.saved }
-            : null,
-  });
   return (
     <div className="space-y-10">
       <section>
@@ -108,9 +96,6 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                 <th scope="col" className="px-4 py-2.5 font-semibold">
                   {t.admin.tools.enabledLabel}
                 </th>
-                <th scope="col" className="px-4 py-2.5 font-semibold">
-                  <span className="sr-only">{t.admin.tools.save}</span>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -133,23 +118,19 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                     </td>
                     <td className="px-4 py-2.5 text-slate-600">{r.phase}</td>
                     <td className="px-4 py-2.5">
-                      <input
-                        form={r.slug}
-                        type="checkbox"
-                        name="enabled"
-                        defaultChecked={r.enabled}
-                        aria-label={`${t.admin.tools.enabledLabel} — ${name}`}
-                        className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                      />
-                    </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <Form method="post" id={r.slug}>
-                        <input type="hidden" name="intent" value="tool" />
-                        <input type="hidden" name="slug" value={r.slug} />
-                        <Button type="submit" variant="secondary" size="sm">
-                          {t.admin.tools.save}
-                        </Button>
-                      </Form>
+                      <AutoSaveForm
+                        intent="tool"
+                        hidden={{ slug: r.slug }}
+                        errorMessage={() => t.error.invalidRequest}
+                      >
+                        <input
+                          type="checkbox"
+                          name="enabled"
+                          defaultChecked={r.enabled}
+                          aria-label={`${t.admin.tools.enabledLabel} — ${name}`}
+                          className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                        />
+                      </AutoSaveForm>
                     </td>
                   </tr>
                 );
@@ -166,8 +147,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
         </h2>
         <p className="mt-1 text-sm text-slate-600">{m.intro}</p>
 
-        <Form method="post" className="mt-2 max-w-xl">
-          <input type="hidden" name="intent" value="models" />
+        <AutoSaveForm intent="models" errorMessage={() => m.atLeastOne} className="mt-2 max-w-xl">
           <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <legend className="px-1 text-sm font-semibold text-slate-800">{m.available}</legend>
             {(
@@ -211,10 +191,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
               <p className="mt-4 text-xs text-slate-500">{m.localGroupHint}</p>
             )}
           </fieldset>
-          <Button type="submit" className="mt-4">
-            {m.save}
-          </Button>
-        </Form>
+        </AutoSaveForm>
       </section>
     </div>
   );

@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminUsers from "~/routes/admin.users";
+import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -43,7 +44,14 @@ const loaderData = {
       mode: "own",
       models: ["claude-haiku-4-5"],
     },
-    { id: "t2", name: "Teacher Two", email: null, mode: "inherit", models: [] },
+    // An inheriting teacher's boxes show the instance set (here: Sonnet only).
+    {
+      id: "t2",
+      name: "Teacher Two",
+      email: null,
+      mode: "inherit",
+      models: ["claude-sonnet-4-6"],
+    },
   ],
   users: [
     { id: "admin-1", name: "Admin A", email: "a@x.nl", role: "admin", createdAt: new Date() },
@@ -51,14 +59,21 @@ const loaderData = {
   ],
 };
 
-function renderRoute(action?: () => unknown, extraUsers: (typeof loaderData.users)[number][] = []) {
+function renderRoute(
+  action?: (args: { request: Request }) => unknown,
+  extraUsers: (typeof loaderData.users)[number][] = [],
+) {
   const props = {
     loaderData: { ...loaderData, users: [...loaderData.users, ...extraUsers] },
   } as unknown as ComponentProps<typeof AdminUsers>;
   const Stub = createRoutesStub([
     {
       path: "/admin/users",
-      Component: () => <AdminUsers {...props} />,
+      Component: () => (
+        <ToastProvider>
+          <AdminUsers {...props} />
+        </ToastProvider>
+      ),
       action: action ?? (() => ({ link: "http://localhost/invite/tok-new" })),
     },
   ]);
@@ -168,6 +183,115 @@ describe("Admin users", () => {
     const group = screen.getByRole("group", { name: "Teacher Two" });
     expect(within(group).getByLabelText("Ollama · gemma")).toBeInTheDocument();
     expect(within(group).getByLabelText("Claude Code (CLI)")).toBeInTheDocument();
+  });
+
+  it("has no save buttons", () => {
+    renderRoute();
+    expect(screen.queryAllByRole("button", { name: /opslaan|save|toepassen|apply/i })).toHaveLength(
+      0,
+    );
+  });
+
+  it("keeps the action buttons (invite, reset, delete)", () => {
+    renderRoute();
+    expect(
+      screen.getByRole("button", { name: /uitnodiging aanmaken|create invite/i }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: /verwijderen|delete/i })).toBeTruthy();
+  });
+
+  it("autosaves a role change from the select, with one toast (mutation)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { roleChanged: true };
+    });
+    await user.selectOptions(screen.getByLabelText(/rol wijzigen|change role/i), "admin");
+    await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
+    expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
+    expect(body?.get("intent")).toBe("role");
+    expect(body?.get("userId")).toBe("teacher-9");
+    expect(body?.get("role")).toBe("admin");
+  });
+
+  it("autosaves an e-mail on blur and reverts it with an error toast when refused", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    renderRoute(async ({ request }) => {
+      bodies.push(await request.formData());
+      return { error: "emailTaken" };
+    });
+    const email = screen.getByLabelText(/e-mailadres wijzigen|change email address/i);
+    await user.clear(email);
+    await user.type(email, "nieuw@x.nl");
+    expect(bodies).toHaveLength(0);
+    await user.tab();
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].get("intent")).toBe("setEmail");
+    expect(bodies[0].get("email")).toBe("nieuw@x.nl");
+    expect((email as HTMLInputElement).value).toBe("t@x.nl"); // sprong terug
+    expect(screen.queryByText("nieuw@x.nl")).toBeNull();
+  });
+
+  it("autosaves switching a teacher to an own selection, with the prefilled set", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const two = screen.getByRole("group", { name: "Teacher Two" });
+    await user.click(within(two).getByRole("radio", { name: /eigen keuze/i }));
+    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+    expect(body?.get("intent")).toBe("teacherModels");
+    expect(body?.get("userId")).toBe("t2");
+    expect(body?.get("mode")).toBe("own");
+    expect(body?.getAll("models")).toEqual(["claude-sonnet-4-6"]);
+  });
+
+  it("autosaves switching back to the instance set (no models sent)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const one = screen.getByRole("group", { name: "Teacher One" });
+    await user.click(within(one).getByRole("radio", { name: /volgt de instelling/i }));
+    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+    expect(body?.get("mode")).toBe("inherit");
+    expect(body?.getAll("models")).toEqual([]);
+  });
+
+  it("reverts the radio and boxes when the last model is unchecked and the server refuses", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "atLeastOne" }));
+    const one = screen.getByRole("group", { name: "Teacher One" });
+    const haiku = within(one).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
+    await user.click(haiku);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/minstens één model|at least one model/i);
+    });
+    expect(haiku.checked).toBe(true);
+  });
+
+  it("restores the inherit state of the boxes after a refused switch to inherit", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "unknown" }));
+    const one = screen.getByRole("group", { name: "Teacher One" });
+    await user.click(within(one).getByRole("radio", { name: /volgt de instelling/i }));
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(
+      (within(one).getByRole("radio", { name: /eigen keuze/i }) as HTMLInputElement).checked,
+    ).toBe(true);
+    expect((within(one).getByLabelText("Claude Haiku 4.5") as HTMLInputElement).disabled).toBe(
+      false,
+    );
   });
 
   it("has no a11y violations", async () => {

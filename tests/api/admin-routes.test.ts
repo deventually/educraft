@@ -274,6 +274,26 @@ describe("admin.users action — teacherModels override (P18)", () => {
     expect(data.base.map((b) => b.id)).toContain("claude-haiku-4-5"); // not in the instance set
     await settings.setEnabledModels(null); // reset
   });
+
+  it("the loader prefills an inheriting teacher's boxes with the instance set (autosave starting point)", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    const teacher = await newTeacher("prefill");
+    const load = () =>
+      usersRoute.loader({
+        request: new Request("http://localhost/admin/users"),
+        params: {},
+        context: {},
+      } as unknown as Parameters<typeof usersRoute.loader>[0]) as Promise<{
+        teachers: { id: string; mode: string; models: string[] }[];
+      }>;
+    const row = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    expect(row.mode).toBe("inherit");
+    expect(row.models).toEqual(["claude-sonnet-4-6"]);
+    // Unset instance list = the whole catalogue.
+    await settings.setEnabledModels(null);
+    const all = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    expect(all.models.length).toBeGreaterThan(1);
+  });
 });
 
 describe("admin.context action — instance lockout guard", () => {

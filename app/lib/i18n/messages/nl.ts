@@ -377,7 +377,6 @@ export const nl = {
       statusAvailable: "Beschikbaar",
       statusDisabled: "Uitgeschakeld",
       enabledLabel: "Beschikbaar",
-      save: "Opslaan",
       audienceStudent: "Student",
       audienceInstructor: "Docent",
       modeChat: "Chat",
@@ -389,7 +388,6 @@ export const nl = {
       caption: "Selecteerbare modellen uit de catalogus.",
       available: "Beschikbaar voor gebruikers",
       atLeastOne: "Kies minstens één model — je kunt niet iedereen buitensluiten.",
-      save: "Opslaan",
       frontierGroup: "Frontier-API",
       cliGroup: "CLI-agents",
       localGroup: "Lokaal (gevonden)",
@@ -407,7 +405,6 @@ export const nl = {
       intro:
         "Kies welke onderwijssectoren en domeinen/profielen docenten in hun onderwijscontext kunnen kiezen.",
       sectorsLegend: "Sectoren",
-      save: "Opslaan",
       atLeastOne: "Kies minstens één sector.",
       instanceDomainsLegend: "Domeinen / profielen",
       instanceDomainsHint:
@@ -447,13 +444,11 @@ export const nl = {
       roleTeacher: "Docent",
       roleAdmin: "Beheerder",
       changeRole: "Rol wijzigen",
-      apply: "Toepassen",
       selfDemoteError: "Je kunt je eigen beheerdersrol niet wijzigen.",
       you: "jij",
       userActions: "Gebruikersacties",
       editEmailLabel: "E-mailadres wijzigen",
       emailPlaceholder: "naam@school.nl",
-      save: "Opslaan",
       resetPassword: "Wachtwoord resetten",
       resetLinkHeading: "Herstel-link voor wachtwoord",
       resetLinkHint:

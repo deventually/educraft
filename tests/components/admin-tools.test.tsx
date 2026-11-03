@@ -45,7 +45,7 @@ const loaderData = {
   ],
 };
 
-function renderRoute(action?: () => unknown) {
+function renderRoute(action?: (args: { request: Request }) => unknown) {
   const props = { loaderData } as unknown as ComponentProps<typeof AdminTools>;
   const Stub = createRoutesStub([
     {
@@ -93,17 +93,38 @@ describe("Admin tools", () => {
     );
   });
 
-  it("surfaces the empty-selection guard when the action rejects", async () => {
+  it("has no save buttons", () => {
+    renderRoute();
+    expect(screen.queryAllByRole("button", { name: /opslaan|save|toepassen|apply/i })).toHaveLength(
+      0,
+    );
+  });
+
+  it("autosaves a model toggle with the whole list and one toast (mutation)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
+    await user.click(within(instance).getByLabelText("Claude Haiku 4.5"));
+    await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
+    expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
+    expect(body?.get("intent")).toBe("models");
+    expect(body?.getAll("models")).toEqual(["claude-sonnet-4-6", "claude-code"]);
+  });
+
+  it("reverts the last model and shows an error toast when the action refuses", async () => {
     const user = userEvent.setup();
     renderRoute(() => ({ error: true }));
     const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
-    const form = instance.closest("form")!;
-    await user.click(within(form).getByRole("button", { name: /opslaan|save/i }));
+    const haiku = within(instance).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
+    await user.click(haiku);
     await waitFor(() => {
-      expect(screen.getAllByText(/minstens één model|at least one model/i).length).toBeGreaterThan(
-        0,
-      );
+      expect(screen.getByRole("alert")).toHaveTextContent(/minstens één model|at least one model/i);
     });
+    expect(haiku.checked).toBe(true); // sprong terug
   });
 
   it("offers no audience select", () => {
@@ -111,15 +132,31 @@ describe("Admin tools", () => {
     expect(screen.queryAllByRole("combobox")).toHaveLength(0);
   });
 
-  it("confirms a save (mutation) via the per-row form", async () => {
+  it("autosaves a tool toggle per row with its slug (mutation)", async () => {
     const user = userEvent.setup();
-    renderRoute();
-    const table = screen.getByRole("table");
-    const [firstSave] = within(table).getAllByRole("button", { name: /opslaan|save/i });
-    await user.click(firstSave);
-    await waitFor(() => {
-      expect(screen.getByText(/opgeslagen|saved/i)).toBeInTheDocument();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { savedSlug: "bloom-by-design", enabled: true };
     });
+    const table = screen.getByRole("table");
+    await user.click(within(table).getByLabelText(new RegExp(secondName)));
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
+    });
+    expect(body?.get("intent")).toBe("tool");
+    expect(body?.get("slug")).toBe("bloom-by-design");
+    expect(body?.get("enabled")).toBe("on");
+  });
+
+  it("reverts a tool toggle and says why when the action refuses", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "invalid" }));
+    const table = screen.getByRole("table");
+    const box = within(table).getByLabelText(new RegExp(secondName)) as HTMLInputElement;
+    await user.click(box);
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(box.checked).toBe(false);
   });
 
   it("has no a11y violations", async () => {

@@ -374,7 +374,6 @@ export const en: Messages = {
       statusAvailable: "Available",
       statusDisabled: "Disabled",
       enabledLabel: "Available",
-      save: "Save",
       audienceStudent: "Student",
       audienceInstructor: "Teacher",
       modeChat: "Chat",
@@ -386,7 +385,6 @@ export const en: Messages = {
       caption: "Selectable models from the catalog.",
       available: "Available to users",
       atLeastOne: "Pick at least one model — you can't lock everyone out.",
-      save: "Save",
       frontierGroup: "Frontier API",
       cliGroup: "CLI agents",
       localGroup: "Local (discovered)",
@@ -404,7 +402,6 @@ export const en: Messages = {
       intro:
         "Choose which sectors and domains/profiles teachers can pick in their teaching context.",
       sectorsLegend: "Sectors",
-      save: "Save",
       atLeastOne: "Choose at least one sector.",
       instanceDomainsLegend: "Domains / profiles",
       instanceDomainsHint:
@@ -444,13 +441,11 @@ export const en: Messages = {
       roleTeacher: "Teacher",
       roleAdmin: "Admin",
       changeRole: "Change role",
-      apply: "Apply",
       selfDemoteError: "You can't change your own admin role.",
       you: "you",
       userActions: "User actions",
       editEmailLabel: "Change email address",
       emailPlaceholder: "name@school.com",
-      save: "Save",
       resetPassword: "Reset password",
       resetLinkHeading: "Password reset link",
       resetLinkHint:
