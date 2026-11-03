@@ -447,6 +447,7 @@ export const en: Messages = {
       roleAdmin: "Admin",
       changeRole: "Change role",
       selfDemoteError: "You can't change your own admin role.",
+      selfEmailError: "Change your own email address from your account page.",
       you: "you",
       userActions: "User actions",
       editEmailLabel: "Change email address",

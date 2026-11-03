@@ -647,6 +647,24 @@ describe("admin.users action — owner (P18.6)", () => {
     expect(await users.getUserById(OWNER_ID)).not.toBeNull();
   });
 
+  it("no admin changes their own email here — that stays on /account with the password", async () => {
+    await actAsOwner();
+    const before = (await users.getUserById(OWNER_ID))?.email;
+    const own = (await invoke(
+      usersRoute.action,
+      post({ intent: "setEmail", userId: OWNER_ID, email: "hijack@example.com" }),
+    )) as { error?: string };
+    expect(own.error).toBe("selfEmail");
+    expect((await users.getUserById(OWNER_ID))?.email).toBe(before);
+
+    actAsRegularAdmin();
+    const self = (await invoke(
+      usersRoute.action,
+      post({ intent: "setEmail", userId: "admin-1", email: "hijack2@example.com" }),
+    )) as { error?: string };
+    expect(self.error).toBe("selfEmail");
+  });
+
   it("a regular admin cannot delete, reset or re-email another admin", async () => {
     actAsRegularAdmin();
     await settings.setOwnerUserId(OWNER_ID);

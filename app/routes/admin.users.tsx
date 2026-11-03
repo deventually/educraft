@@ -188,6 +188,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "setEmail") {
     const userId = String(fd.get("userId") ?? "");
+    // Own email changes go via /account, which asks for the current password.
+    if (userId === admin.id) return { error: "selfEmail" as const };
     if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     const email = String(fd.get("email") ?? "").trim() || null;
     if (email && !z.string().email().safeParse(email).success) {
@@ -231,6 +233,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     invalidEmail: t.admin.invites.invalidEmailError,
     emailTaken: t.admin.invites.emailTakenError,
     selfDemote: t.admin.invites.selfDemoteError,
+    selfEmail: t.admin.invites.selfEmailError,
     ownerOnly: t.admin.invites.ownerOnlyError,
     atLeastOne: t.admin.models.atLeastOne,
   };

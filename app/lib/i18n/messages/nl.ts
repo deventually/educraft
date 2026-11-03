@@ -450,6 +450,7 @@ export const nl = {
       roleAdmin: "Beheerder",
       changeRole: "Rol wijzigen",
       selfDemoteError: "Je kunt je eigen beheerdersrol niet wijzigen.",
+      selfEmailError: "Wijzig je eigen e-mailadres via je accountpagina.",
       you: "jij",
       userActions: "Gebruikersacties",
       editEmailLabel: "E-mailadres wijzigen",
