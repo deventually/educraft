@@ -6,20 +6,14 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   email: text("email").unique(), // nullable; invites may be nameless
   passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
-  role: text("role").notNull().default("teacher"), // "student" | "teacher" | "admin"
+  role: text("role").notNull().default("teacher"), // "teacher" | "admin"
   // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and
   // carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
   // Per-teacher tool allow-list (Phase 4). Set from the invite that minted this
   // account. JSON string[] or null = unrestricted. Only narrows teachers; admins
-  // are never restricted, students are governed by their cohort's allow-list.
+  // are never restricted.
   allowedToolSlugs: text("allowed_tool_slugs"),
-  // Account disable (Phase 14). `disabledAt` set ⇒ the account cannot log in and is
-  // treated as logged out everywhere (a reversible holding state, not a delete);
-  // `deletionRequestedAt` marks a student-initiated removal request so a teacher
-  // sees it on the cohort screen. Both null = a normal, active account.
-  disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
-  deletionRequestedAt: integer("deletion_requested_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -42,69 +36,14 @@ export const invites = sqliteTable("invites", {
   note: text("note"), // who this was for
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   usedByUserId: text("used_by_user_id"),
-  // Provisioning (Phase 6): who issued it, which cohort the redeemer joins, and
-  // the intended student's email (identity-bound invites — redemption must match).
-  // All nullable: legacy role-only ops invites (scripts/invite.ts) carry none.
+  // Who issued it. Nullable: role-only ops invites (scripts/invite.ts) carry none.
   createdByUserId: text("created_by_user_id"),
-  cohortId: text("cohort_id"),
-  email: text("email"),
   // Per-teacher tool allow-list (Phase 4). An admin minting a teacher invite may
   // restrict which tools the redeemer gets; copied onto `users.allowed_tool_slugs`
   // at redeem. JSON string[] or null = unrestricted (all available tools).
   allowedToolSlugs: text("allowed_tool_slugs"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
-
-/**
- * A cohort (Phase 6) — the shared configuration a teacher provisions once: which
- * tutors are allowed, how each is configured, the context profile whose level is
- * injected for members, and an access window. Per-student invites are minted
- * against it; redeeming one joins the cohort. Intra-instance, not a tenant.
- */
-export const cohorts = sqliteTable("cohorts", {
-  id: text("id").primaryKey(),
-  createdByUserId: text("created_by_user_id").notNull(), // teacher/mentor/admin
-  name: text("name").notNull(), // "SE jaar 2 — 25/26 blok 1"
-  allowedToolSlugs: text("allowed_tool_slugs").notNull(), // JSON string[] ⊆ userType:"student" slugs
-  configJson: text("config_json").notNull().default("{}"), // { [slug]: { values: Record<string,string> } }
-  allowedModelsJson: text("allowed_models_json"), // JSON string[] ⊆ teacher's models (P13); null = inherit
-  contextProfileId: text("context_profile_id"), // teacher-owned profile → injected server-side for members
-  // Alternative to a full profile: level the cohort by a bare EQF number (1-8).
-  // Mutually exclusive with contextProfileId — a profile carries its own EQF, so
-  // when a profile is attached this stays null (see cohorts.$id / api.stream).
-  contextEqf: integer("context_eqf"), // 1-8, or null
-  activeUntil: integer("active_until", { mode: "timestamp_ms" }), // access window; null = open-ended
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
-
-/** A student ↔ cohort edge. One row per membership (join table leaves room for multi-cohort later). */
-export const cohortMemberships = sqliteTable(
-  "cohort_memberships",
-  {
-    id: text("id").primaryKey(),
-    cohortId: text("cohort_id").notNull(),
-    userId: text("user_id").notNull(), // the student
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  },
-  (t) => [uniqueIndex("membership_cohort_user").on(t.cohortId, t.userId)],
-);
-
-/**
- * A teacher ↔ cohort assignment (Phase 4). The cohort creator is an implicit
- * manager; extra teachers assigned here co-manage it (multiple mentors, or a
- * hand-over when a colleague leaves). Admins can manage every cohort regardless.
- * One row per assignment; the unique index makes re-assignment idempotent.
- */
-export const cohortTeachers = sqliteTable(
-  "cohort_teachers",
-  {
-    id: text("id").primaryKey(),
-    cohortId: text("cohort_id").notNull(),
-    userId: text("user_id").notNull(), // the assigned teacher
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  },
-  (t) => [uniqueIndex("cohort_teacher_cohort_user").on(t.cohortId, t.userId)],
-);
 
 /** A saved piece of work grouping generations and chat sessions. */
 export const projects = sqliteTable("projects", {
@@ -137,10 +76,7 @@ export const chatSessions = sqliteTable("chat_sessions", {
   systemPrompt: text("system_prompt").notNull(),
   model: text("model").notNull(),
   contextProfileId: text("context_profile_id"),
-  // Denormalised owner + cohort (Phase 6) — populated now so Phase 7's cohort
-  // analytics need no re-migration.
   userId: text("user_id"),
-  cohortId: text("cohort_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -149,30 +85,6 @@ export const messages = sqliteTable("messages", {
   sessionId: text("session_id").notNull(),
   role: text("role").notNull(), // "user" | "assistant"
   content: text("content").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
-
-/**
- * De-personalised, per-session learning signal for the provisioning mentor
- * (Phase 7). One row per finished chat session — a post-session summariser pass
- * writes `summaryJson`, and the student may attach a `helpfulness` self-rating at
- * close. Privacy by construction: this is the ONLY mentor-facing view of a
- * session, and it carries derived signal about the *work*, never raw messages,
- * verbatim quotes, or personal disclosure (the summariser + a leakage guard
- * enforce that). Denormalised `userId`/`cohortId` let cohort rollups scope
- * without touching `messages`.
- */
-export const sessionSummaries = sqliteTable("session_summaries", {
-  id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull(), // FK chat_sessions
-  userId: text("user_id").notNull(), // the student (denormalised)
-  cohortId: text("cohort_id"), // denormalised for rollups
-  toolSlug: text("tool_slug").notNull(),
-  // { topicsWorkedOn[], skillsProgressed[], misconceptions[] (about the material), effort }
-  // — no quotes, no personal disclosure.
-  summaryJson: text("summary_json").notNull(),
-  // Optional student self-rating at close (−1/0/+1). The one signal the student chooses to share.
-  helpfulness: integer("helpfulness"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -226,12 +138,11 @@ export const contextProfiles = sqliteTable("context_profiles", {
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
  * touched; an absent row means "registry default" (safe defaults — a fresh
  * instance behaves exactly as before this phase). `enabled` null = registry
- * default; `audienceOverride` null = the tool's own `userType`.
+ * default.
  */
 export const toolSettings = sqliteTable("tool_settings", {
   toolSlug: text("tool_slug").primaryKey(),
   enabled: integer("enabled", { mode: "boolean" }), // null = registry default
-  audienceOverride: text("audience_override"), // null | "student" | "instructor" | "both"
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -249,9 +160,6 @@ export const instanceSettings = sqliteTable("instance_settings", {
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
 export type PasswordResetRow = typeof passwordResets.$inferSelect;
-export type CohortRow = typeof cohorts.$inferSelect;
-export type CohortMembershipRow = typeof cohortMemberships.$inferSelect;
-export type CohortTeacherRow = typeof cohortTeachers.$inferSelect;
 export type ToolSettingRow = typeof toolSettings.$inferSelect;
 export type InstanceSettingRow = typeof instanceSettings.$inferSelect;
 export type ProjectRow = typeof projects.$inferSelect;
@@ -261,4 +169,3 @@ export type MessageRow = typeof messages.$inferSelect;
 export type ContextProfileRow = typeof contextProfiles.$inferSelect;
 export type UsageRow = typeof usage.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;
-export type SessionSummaryRow = typeof sessionSummaries.$inferSelect;

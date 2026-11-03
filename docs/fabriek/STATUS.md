@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.2)_
+_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
 
 ## Nu
 
@@ -12,8 +12,8 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.2)_
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
-  Vitest + axe. 895 tests, CI groen op `main`.
-- **Laatst op `main` (2026-11-03):** V1 stap 17.1 (mentorinzicht eruit), P15 (toasts,
+  Vitest + axe. 902 tests, CI groen op `main`.
+- **Laatst op `main` (2026-11-03):** V1 stap 17.1 + 17.2 (mentorinzicht, studentrol en cohorten eruit), P15 (toasts,
   navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs P20–P22, de
   fabriek.
 
@@ -24,10 +24,14 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.2)_
   V1–V3 hieronder.
 - 2026-11-03: "Ik denk wel dat de admin modellen moet kunnen toewijzen … per instelling en kan de
   admin dat per docent overrulen." → onderdeel van V2.
+- 2026-11-03: "Ik wil ook niet bij beheer op elke tabel regel een opslaan knop hebben. Of eentje
+  onderop, of hij slaat automatisch op" → V2: automatisch opslaan met melding.
+- 2026-11-03: "Ik mis de stageverslagen checker" (hij heet 'Beoordelingsassistent — stage &
+  afstuderen' en was onvindbaar) → V3: duidelijkere toolnamen.
 
 ## Bezig
 
-- V1 stap 17.2: studentrol en cohorten eruit — deze PR.
+- V1 stap 17.3: studentdata en schema opruimen — deze PR.
 
 ## Wacht op jou
 
@@ -35,12 +39,14 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.2)_
 
 1. **Vereenvoudiging V1** (brief P17, drie PR's): de studentenlaag eruit (rol, cohorten,
    studentuitnodigingen, mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie).
-   De zes tutors blijven, voor docenten. Besluit: BESLUIT-2026-11-03-13. Daarna 17.3.
+   De zes tutors blijven, voor docenten. Besluit: BESLUIT-2026-11-03-13. Stap 17.1 en 17.2 zijn gemerged; 17.3 staat in PR.
 2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
    toegang per docent voor tools en context weg; modellen per instelling met een overrule per
-   docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
+   docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg; beheer
+   slaat automatisch op (met melding) in plaats van een opslaan-knop per regel.
 3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
-   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
+   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de
+   stageverslagen-checker ('Beoordelingsassistent — stage & afstuderen') moet vindbaar zijn.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 

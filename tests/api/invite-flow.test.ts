@@ -117,7 +117,7 @@ describe("invite flow (loader + action)", () => {
 });
 
 describe("invite flow — legacy invites (P17)", () => {
-  async function insertRaw(values: { role: string; cohortId?: string }) {
+  async function insertRaw(values: { role: string }) {
     const { getDb } = await import("~/server/db.server");
     const { invites } = await import("~/server/schema.server");
     const token = `legacy-${Math.random().toString(36).slice(2)}`;
@@ -126,7 +126,6 @@ describe("invite flow — legacy invites (P17)", () => {
       .values({
         token,
         role: values.role,
-        cohortId: values.cohortId ?? null,
         expiresAt: new Date(Date.now() + 86_400_000),
         createdAt: new Date(),
       } as never)
@@ -152,15 +151,6 @@ describe("invite flow — legacy invites (P17)", () => {
     } as ActionArgs);
     expect(res instanceof Response && res.status === 302).toBe(false);
     expect(await users.getUserByEmail("sofie@example.com")).toBeNull();
-  });
-
-  it("a legacy cohort invite is invalid", async () => {
-    const token = await insertRaw({ role: "teacher", cohortId: "some-cohort" });
-    const data = await route.loader({
-      params: { token },
-      request: new Request(`http://localhost/invite/${token}`),
-    } as LoaderArgs);
-    expect(data.valid).toBe(false);
   });
 });
 

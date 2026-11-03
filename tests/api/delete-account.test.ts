@@ -64,7 +64,6 @@ describe("deleteUserCascade", () => {
         systemPrompt: "sys",
         model: "m",
         userId: "del-user-chat",
-        cohortId: "c-x",
         createdAt: new Date(),
       })
       .run();
@@ -83,60 +82,6 @@ describe("deleteUserCascade", () => {
     expect(db.select().from(messages).where(eq(messages.sessionId, sessionId)).all()).toHaveLength(
       0,
     );
-  });
-
-  it("keeps a teacher's cohorts (orphan-safe), nulls their dangling profile ref, drops co-teach links", async () => {
-    // Legacy cohort tables (dropped in 17.3): rows are seeded directly because the
-    // cohort repository is gone, but the cascade still has to clean after them.
-    const { getDb } = await import("~/server/db.server");
-    const { cohorts, cohortTeachers } = await import("~/server/schema.server");
-    const { eq, and } = await import("drizzle-orm");
-    const db = getDb();
-    await users.createUser({
-      id: "del-teacher-own",
-      name: "Cohort Owner",
-      passwordHash: "scrypt:x:y",
-      role: "teacher",
-    });
-    const profile = await profiles.createProfile("del-teacher-own", { name: "Niveau 6", eqf: 6 });
-    const now = new Date();
-    const base = { allowedToolSlugs: "[]", configJson: "{}", createdAt: now };
-    db.insert(cohorts)
-      .values([
-        {
-          ...base,
-          id: "c-owned",
-          createdByUserId: "del-teacher-own",
-          name: "Owned cohort",
-          contextProfileId: profile.id,
-        },
-        { ...base, id: "c-colleague", createdByUserId: "del-teacher-other", name: "Colleague" },
-      ])
-      .run();
-    db.insert(cohortTeachers)
-      .values({ id: "ct-1", cohortId: "c-colleague", userId: "del-teacher-own", createdAt: now })
-      .run();
-
-    await users.deleteUserCascade("del-teacher-own");
-
-    // The owned cohort survives so an admin can reassign it — but the dangling
-    // reference to the now-deleted profile is cleared.
-    const survived = db.select().from(cohorts).where(eq(cohorts.id, "c-owned")).get();
-    expect(survived).toBeDefined();
-    expect(survived?.contextProfileId).toBeNull();
-    // Their co-teach assignment is removed (no orphaned join row).
-    expect(
-      db
-        .select()
-        .from(cohortTeachers)
-        .where(
-          and(
-            eq(cohortTeachers.cohortId, "c-colleague"),
-            eq(cohortTeachers.userId, "del-teacher-own"),
-          ),
-        )
-        .all(),
-    ).toHaveLength(0);
   });
 
   it("leaves other users' data untouched", async () => {
