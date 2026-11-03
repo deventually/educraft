@@ -39,7 +39,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-07-06-1:** **po geschrapt.** De sectoren zijn vo/mbo/hbo/wo.
 - **BESLUIT-2026-07-06-2:** De upgrade naar **React Router 8 is uitgesteld** tot er E2E-tests zijn.
 - **BESLUIT-2026-07-06-3:** Contextbeschikbaarheid per docent als **overrule** (P12).
-  **Wordt herzien in vereenvoudiging V2** (BESLUIT-2026-11-03-6).
+  **Vervangen door BESLUIT-2026-11-03-15.**
 - **BESLUIT-2026-07-07-1:** Modelbeheer als **doorsnede**: instelling → docent → cohort (P13–P14).
   **Vervangen door BESLUIT-2026-11-03-7.**
 
@@ -68,9 +68,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   als docent.
 - **BESLUIT-2026-11-03-6:** **Weg wat overbodig is.** Liever eenvoudiger, efficiënter en
   doeltreffender bouwen dan alles behouden.
-- **BESLUIT-2026-11-03-7 (voorlopig):** **Modellen:** de beheerder stelt ze per instelling in en kan
+- **BESLUIT-2026-11-03-7:** **Modellen:** de beheerder stelt ze per instelling in en kan
   dat **per docent overrulen** (vervangen, dus ook ruimer dan de instelling). De
-  cohortlaag verdwijnt met de studentenlaag.
+  cohortlaag verdwijnt met de studentenlaag. *Definitief gemaakt door BESLUIT-2026-11-03-16.*
 - **BESLUIT-2026-11-03-8:** Het project wordt gestuurd als **softwarefabriek**.
   *Aangescherpt door BESLUIT-2026-11-03-9.*
 - **BESLUIT-2026-11-03-9:** De fabriek is het **lichte broertje van any1-studio**: één **Producer**
@@ -85,3 +85,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   branch-regel (PR + groene CI, geen force-push), en komt er niets in de repo dat niet openbaar mag.
 - **BESLUIT-2026-11-03-13:** Studentdata bij V1 wordt **definitief gewist** (17.3). **Uitloggen op alle
   apparaten na een nieuw wachtwoord blijft**; inloggen op meerdere apparaten tegelijk mag.
+- **BESLUIT-2026-11-03-14:** **Beheer gaat van acht naar vier pagina's**: Gebruikers, Tools en
+  modellen, Onderwijscontext, Gebruik en feedback. Beheer **slaat automatisch op**, met een melding,
+  in plaats van een opslaan-knop per regel. **"Bekijk als docent" verdwijnt.** Uitwerking: P18.
+- **BESLUIT-2026-11-03-15:** **Geen toegang per docent meer** voor tools en onderwijscontext: elke
+  docent ziet wat de instelling aanzet. **De land-as verdwijnt**; alleen sector en domein blijven.
+  De pakketdata blijft per land opgeslagen, als seam voor later. Vervangt BESLUIT-2026-07-06-3.
+- **BESLUIT-2026-11-03-16:** **Modellen per instelling, met een overrule per docent.** Een eigen set
+  van een docent **vervangt** de instelling en mag ruimer zijn; zonder eigen set volgt de docent de
+  instelling. CLI- en lokale modellen alleen in ontwikkelmodus. Maakt BESLUIT-2026-11-03-7 definitief.
+- **BESLUIT-2026-11-03-17:** Er is één **superbeheerder** (Bastiaan). Alleen hij maakt beheerders,
+  maakt ze weer docent en verwijdert ze; beheerders kunnen dat niet. **Uitnodigingen maken nooit
+  beheerders.** De superbeheerder kan ook accounts direct aanmaken (met een eenmalige link of een
+  beginwachtwoord, zonder e-mail), wachtwoorden resetten of instellen, en accounts op non-actief
+  zetten en weer activeren.

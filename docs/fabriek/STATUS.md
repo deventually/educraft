@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
+_Laatst bijgewerkt: 2026-11-03 (V2-plan)_
 
 ## Nu
 
@@ -13,9 +13,10 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
   Vitest + axe. 902 tests, CI groen op `main`.
-- **Laatst op `main` (2026-11-03):** V1 stap 17.1 + 17.2 (mentorinzicht, studentrol en cohorten eruit), P15 (toasts,
-  navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs P20–P22, de
-  fabriek.
+- **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
+  studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
+  (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
+  P20–P22, de fabriek.
 
 ## Verzoeken
 
@@ -28,22 +29,27 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
   onderop, of hij slaat automatisch op" → V2: automatisch opslaan met melding.
 - 2026-11-03: "Ik mis de stageverslagen checker" (hij heet 'Beoordelingsassistent — stage &
   afstuderen' en was onvindbaar) → V3: duidelijkere toolnamen.
+- 2026-11-03: "Ik wil een super beheerder. Dat ben ik. Die kan andere beheerders aanmaken en alles.
+  Beheerders kunnen geen andere beheerders aanmaken." → V2 (P18.6).
+- 2026-11-03: "Ik wil als superbeheerder ook users kunnen aanmaken zonder email verzoek" → V2
+  (P18.7).
+- 2026-11-03: "Ook dat wil ik kunnen doen. Resetten, wachtwoord link versturen en zelf een
+  wachtwoord invoeren. Ook user account op non-actief kunnen zetten" → V2 (P18.7).
 
 ## Bezig
 
-- V1 stap 17.3: studentdata en schema opruimen — deze PR.
+- V2 bouwplan (P18) — deze PR.
 
 ## Wacht op jou
 
 ## Volgende (voorgestelde volgorde)
 
-1. **Vereenvoudiging V1** (brief P17, drie PR's): de studentenlaag eruit (rol, cohorten,
-   studentuitnodigingen, mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie).
-   De zes tutors blijven, voor docenten. Besluit: BESLUIT-2026-11-03-13. Stap 17.1 en 17.2 zijn gemerged; 17.3 staat in PR.
-2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
-   toegang per docent voor tools en context weg; modellen per instelling met een overrule per
-   docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg; beheer
-   slaat automatisch op (met melding) in plaats van een opslaan-knop per regel.
+1. **Vereenvoudiging V1** (brief P17): klaar, gemerged en uitgerold op 2026-11-03.
+2. **Vereenvoudiging V2** (brief P18, acht PR's): beheer naar vier pagina's die automatisch
+   opslaan; "Bekijk als docent", de land-as en de toegang per docent voor tools en context weg;
+   modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
+   ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
+   t/m -17.
 3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
    (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de
    stageverslagen-checker ('Beoordelingsassistent — stage & afstuderen') moet vindbaar zijn.
