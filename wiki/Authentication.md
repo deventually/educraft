@@ -65,6 +65,8 @@ Every refusal is made in the action (`{ error: "ownerOnly" }`); the page only hi
 controls and marks the owner with a badge. **Invites never make admins**: `/invite/:token` and
 `consumeInvite` redeem teacher invites only, and `npm run invite` has no `--role`. The owner
 cannot delete their own account on `/account` until ownership is handed over.
+A role change voids the user's open reset links (`setUserRole`), so a link a regular admin
+minted for a teacher never opens that account once it is an admin.
 
 ## Sessions & passwords
 

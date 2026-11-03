@@ -601,6 +601,26 @@ describe("admin.users action — owner (P18.6)", () => {
     expect((await users.getUserById(admin.id))?.role).toBe("teacher");
   });
 
+  it("a promotion voids reset links a regular admin minted while the user was a teacher", async () => {
+    // Otherwise: regular admin mints a 48h reset link for a teacher, the owner promotes
+    // that teacher, and the regular admin redeems the link — taking over an admin.
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const teacher = await mkUser("ResetThenPromote", "teacher");
+    const minted = (await invoke(
+      usersRoute.action,
+      post({ intent: "resetPassword", userId: teacher.id }),
+    )) as { resetLink?: string };
+    const token = minted.resetLink!.split("/reset/")[1];
+    expect(await users.getPasswordReset(token)).not.toBeNull();
+
+    await actAsOwner();
+    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
+    expect((await users.getUserById(teacher.id))?.role).toBe("admin");
+    expect(await users.getPasswordReset(token)).toBeNull();
+    expect(await users.consumePasswordReset(token)).toBeNull();
+  });
+
   it("the owner cannot change their own role (never an accidental self-demotion)", async () => {
     await actAsOwner();
     const res = (await invoke(

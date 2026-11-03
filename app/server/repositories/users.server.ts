@@ -4,7 +4,7 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   chatSessions,
@@ -52,9 +52,23 @@ export async function listUsers(): Promise<UserRow[]> {
   return getDb().select().from(users).orderBy(desc(users.createdAt)).all();
 }
 
-/** Change a user's role (admin console). The self-demotion guard lives in the route. */
+/**
+ * Change a user's role (admin console). The self-demotion guard lives in the route.
+ * A role change also voids the user's open reset links (P18.6): a link a regular
+ * admin minted while the user was a teacher must not open the account once it is
+ * an admin.
+ */
 export async function setUserRole(id: string, role: Role): Promise<void> {
-  getDb().update(users).set({ role }).where(eq(users.id, id)).run();
+  getDb().transaction((tx) => {
+    const changed = tx
+      .update(users)
+      .set({ role })
+      .where(and(eq(users.id, id), ne(users.role, role)))
+      .run();
+    if (changed.changes > 0) {
+      tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+    }
+  });
 }
 
 /**
