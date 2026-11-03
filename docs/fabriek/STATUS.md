@@ -1,39 +1,48 @@
 # Fabrieksbord
 
-> Het actuele overzicht voor het kantoor (Claude-project). **De werkplaats (Claude Code) werkt dit
-> bij aan het eind van elke fase.** Kort houden: dit is een bord, geen archief. Geschiedenis staat in
+> Het bord van de Producer. Een werker werkt het bij **in dezelfde PR** als zijn werk. Een lege sectie
+> blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03_
+_Laatst bijgewerkt: 2026-11-03 (fabriek met Producer)_
 
 ## Nu
 
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 15 tools (9 voor
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
-- **Stack:** React Router 7, SQLite (Drizzle), AI SDK (Claude) + lokale modellen, Vitest + axe.
-  Ongeveer 23.500 regels app en 15.400 regels tests (1.013 tests, groen).
+- **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
+  Vitest + axe. 1.013 tests, CI groen op `main`.
+- **Laatst op `main` (2026-11-03):** P15 (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen,
+  documenten tot 300k tekens, briefs P17–P19, de fabriek.
 
-## Werk in uitvoering
+## Verzoeken
 
-- **Branch `p15-user-feedback-toasts-a11y`:** P15 (toasts + navigatie-a11y) is gecommit, nog niet
-  gemerged. Daarnaast staan er niet-gecommitte wijzigingen die **niet** bij P15 horen:
-  1. **Modelupgrade:** Claude Sonnet 5.5 en Opus 5.5 in de catalogus; standaard en alle tools →
-     Sonnet 5.5.
-  2. **Grotere documenten:** een `document`-veld mag 300k tekens bevatten (was 20k), met een
-     duidelijke foutmelding.
-  3. **Docs:** P17–P19 (cursussen, rolagenten, docentweek, nog Engels) en `docs/fabriek/`.
+- 2026-11-03: "Haal weg wat overbodig is. Als we het op een eenvoudigere en efficiëntere en
+  doeltreffendere manier kunnen bouwen, dan ben ik daar een voorstander van." → vereenvoudiging
+  V1–V3 hieronder.
+- 2026-11-03: "Ik denk wel dat de admin modellen moet kunnen toewijzen … per instelling en kan de
+  admin dat per docent overrulen." → onderdeel van V2.
+
+## Bezig
+
+## Wacht op jou
+
+- Branch-regel voor `main` op GitHub instellen (zie `docs/fabriek/README.md`, stap 1).
+- Claude-project LimeOnIt inrichten en starten (stappen 2–3).
 
 ## Volgende (voorgestelde volgorde)
 
-1. **P15 afronden:** de losse wijzigingen apart committen, daarna mergen.
-2. **Vereenvoudiging V1:** de studentenlaag eruit; de tutors blijven voor docenten.
-3. **Vereenvoudiging V2:** beheer van acht naar vier pagina's; land-as en toegang per docent voor
-   tools en context weg; modellen per instelling met overrule per docent.
-4. **Vereenvoudiging V3:** de docentkant: menu, toolnamen (taak eerst), toolpagina, kort
-   contextformulier, lege pagina's die sturen.
-5. **Cursussen en de rode draad** (nu brief P17, wordt hernummerd en vertaald).
-6. **Rolagenten** (stub P18), daarna **docentweek** (stub P19).
+1. **Vereenvoudiging V1:** de studentenlaag eruit (rol, cohorten, studentuitnodigingen,
+   mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie). De zes tutors blijven,
+   voor docenten.
+2. **Vereenvoudiging V2:** beheer van acht naar vier pagina's; de land-as en de toegang per docent
+   voor tools en context weg; modellen per instelling met een overrule per docent; CLI- en lokale
+   modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
+3. **Vereenvoudiging V3:** de docentkant: menu, toolnamen (taak eerst), toolpagina (techniek achter
+   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen.
+4. **Cursussen en de rode draad:** brief P17 (wordt hernummerd en naar het Nederlands vertaald).
+5. **Rolagenten** (stub P18), daarna de **docentweek** (stub P19).
 
 ## Open vragen
 
@@ -45,3 +54,4 @@ _Laatst bijgewerkt: 2026-11-03_
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
+- Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.

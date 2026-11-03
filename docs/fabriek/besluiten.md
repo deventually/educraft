@@ -71,6 +71,15 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-03-7 (voorlopig):** **Modellen:** de beheerder stelt ze per instelling in en kan
   dat **per docent overrulen** (vervangen, dus ook ruimer dan de instelling). De
   cohortlaag verdwijnt met de studentenlaag.
-- **BESLUIT-2026-11-03-8:** Het project wordt gestuurd als **softwarefabriek**: een Claude-project
-  (het kantoor, threads = werkorders) en Claude Code (de werkplaats), met briefs als lopende band.
-  Zie `docs/fabriek/`.
+- **BESLUIT-2026-11-03-8:** Het project wordt gestuurd als **softwarefabriek**.
+  *Aangescherpt door BESLUIT-2026-11-03-9.*
+- **BESLUIT-2026-11-03-9:** De fabriek is het **lichte broertje van any1-studio**: één **Producer**
+  (het Claude-project LimeOnIt, elke thread) met werkers per taak. Geen Architect, afdelingen,
+  issue-backlog of dashboard. Het oude werkordermodel (KOERS/IDEE/BRIEF…) vervalt. Zie
+  `producer.md`.
+- **BESLUIT-2026-11-03-10:** De Producer praat **Nederlands en ELI5**, begint elk bericht met 🍋 en
+  **bouwt nooit zelf**. Elk stuk werk eindigt in één PR, en **alleen Bastiaan merget**.
+- **BESLUIT-2026-11-03-11:** De Producer start op **autonomiestand 2 (opdracht)**, met hooguit twee
+  werkers tegelijk. Meer autonomie volgt na bewezen vertrouwen (`voorkeuren.md`).
+- **BESLUIT-2026-11-03-12:** De repo is **publiek**. Daarom wordt `main` beschermd met een
+  branch-regel (PR + groene CI, geen force-push), en komt er niets in de repo dat niet openbaar mag.
