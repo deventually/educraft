@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const contextualization: Tool = {
   id: "contextualization",
   slug: "contextualization",
-  name: {
-    nl: "Contextualization — Pedagogische intentie zichtbaar maken",
-    en: "Contextualization — Making Pedagogical Intent Visible",
+  name: { nl: "Cursus op samenhang controleren", en: "Check your course alignment" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Contextualization (pedagogische intentie)",
+    en: "Contextualization (pedagogical intent)",
   },
   tagline: {
     nl: "Maak de onderliggende onderwijsfilosofie en theorie in je cursus explicieter door alignment te analyseren en gaps op te sporen.",

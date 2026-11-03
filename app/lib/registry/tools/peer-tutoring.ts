@@ -7,10 +7,9 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const peerTutoring: Tool = {
   id: "peer-tutoring",
   slug: "peer-tutoring",
-  name: {
-    nl: "Peer Tutoring — Bronnen Evaluatie",
-    en: "Peer Tutoring — Source Evaluation",
-  },
+  name: { nl: "Bronnen leren beoordelen", en: "Learn to judge sources" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: { nl: "Peer Tutoring (bronnenevaluatie)", en: "Peer Tutoring (source evaluation)" },
   tagline: {
     nl: "Leer onderzoeksbronnen kritisch evalueren met begeleiding van een gelijkwaardige peer.",
     en: "Learn to critically evaluate research sources with guidance from an equal peer.",

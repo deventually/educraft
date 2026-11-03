@@ -14,6 +14,7 @@ import { HelpContent } from "~/components/HelpContent";
 import { Markdown } from "~/components/Markdown";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { ToolSubtitle } from "~/components/ToolTitle";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   await requireUser(request);
@@ -48,9 +49,16 @@ export default function HelpPage({ loaderData }: Route.ComponentProps) {
       {loaderData.kind === "tool" ? (
         <>
           <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
-              {loc(loaderData.tool.name, locale)}
-            </h1>
+            <div>
+              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+                {loc(loaderData.tool.name, locale)}
+              </h1>
+              <ToolSubtitle
+                subtitle={loaderData.tool.subtitle}
+                locale={locale}
+                className="mt-0.5"
+              />
+            </div>
             <Link
               to={`/tools/${loaderData.tool.slug}`}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:underline"

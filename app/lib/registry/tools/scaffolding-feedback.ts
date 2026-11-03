@@ -7,9 +7,11 @@ const CONTEXT = { nl: "Context", en: "Context" };
 export const scaffoldingFeedback: Tool = {
   id: "scaffolding-feedback",
   slug: "scaffolding-feedback",
-  name: {
-    nl: "Scaffolding Feedback — Warme Begeleiding",
-    en: "Scaffolding Feedback — Warm Guidance",
+  name: { nl: "Stapsgewijze begeleiding", en: "Step-by-step guidance" },
+  /** Book/technique name shown small under the task-first name. */
+  subtitle: {
+    nl: "Scaffolding Feedback (warme begeleiding)",
+    en: "Scaffolding Feedback (warm guidance)",
   },
   tagline: {
     nl: "Een geduldig tutor die stap voor stap je probleemoplossing begeleidt.",

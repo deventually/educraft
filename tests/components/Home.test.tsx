@@ -16,6 +16,10 @@ const tools: ToolData[] = [
     icon: "compass",
     userType: "instructor",
     mode: "one-shot",
+    subtitle: {
+      nl: "Begeleide reflectie (Backward Design)",
+      en: "Guided Reflection (Backward Design)",
+    },
     theory: { nl: "Backward Design", en: "Backward Design" },
     goal: "design",
     search: "begeleide reflectie guided reflection backward design les lesson",
@@ -59,6 +63,11 @@ describe("Home / tools page", () => {
     expect(screen.getByText("Plannen & ontwerpen")).toBeInTheDocument();
     expect(screen.getByText("Begeleiden & coachen")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Begeleide reflectie/ })).toBeInTheDocument();
+  });
+
+  it("shows the book name as a subtitle on the card", () => {
+    renderHome();
+    expect(screen.getByText("Begeleide reflectie (Backward Design)")).toBeInTheDocument();
   });
 
   it("does not render goals that have no tools", () => {

@@ -32,6 +32,7 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
 ## Bezig
 
 - V1 stap 17.3: studentdata en schema opruimen — deze PR.
+- V3 stap 19.1: duidelijke toolnamen — deze PR.
 
 ## Wacht op jou
 
@@ -44,9 +45,10 @@ _Laatst bijgewerkt: 2026-11-03 (V1 stap 17.3)_
    toegang per docent voor tools en context weg; modellen per instelling met een overrule per
    docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg; beheer
    slaat automatisch op (met melding) in plaats van een opslaan-knop per regel.
-3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst), toolpagina
-   (techniek achter "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de
-   stageverslagen-checker ('Beoordelingsassistent — stage & afstuderen') moet vindbaar zijn.
+3. **Vereenvoudiging V3** (wordt P19): de docentkant: menu, toolnamen (taak eerst; stap 19.1 in
+   PR, besluit BESLUIT-2026-11-03-18), toolpagina (techniek achter "Geavanceerd"), een kort
+   contextformulier, lege pagina's die sturen; de stageverslagen-checker heet nu 'Stageverslag of
+   afstudeerwerk beoordelen'.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 
