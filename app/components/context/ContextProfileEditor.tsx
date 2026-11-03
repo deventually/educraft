@@ -15,6 +15,7 @@ import { ArrowLeft, ArrowRight, Check, Star } from "lucide-react";
 import { Button } from "~/components/ui";
 import { cn } from "~/lib/utils";
 import type { ContextProfile } from "~/lib/context/types";
+import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { defaultPackValues } from "~/lib/context/packs";
 import { SECTORS_INFO, TRACKS_BY_SECTOR, VO_PHASES, isSector } from "~/lib/context/sectors";
 import { courseLabel, showsDomain } from "~/lib/context/relevance";
@@ -26,7 +27,6 @@ import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import {
   NameField,
-  CountrySelect,
   OnderwijstypeSelect,
   NationalLevelSelect,
   ProgrammeField,
@@ -100,7 +100,6 @@ export function ContextProfileEditor({
   onCancel,
   profile,
   isCurrentDefault = false,
-  availableCountries,
   availableSectors,
   availableDomains,
 }: {
@@ -108,7 +107,6 @@ export function ContextProfileEditor({
   /** When set, the editor edits this profile instead of creating a new one. */
   profile?: ContextProfile;
   isCurrentDefault?: boolean;
-  availableCountries: string[];
   availableSectors: string[];
   /** Per-teacher domain allow-list (Phase 10.3); null = unrestricted. */
   availableDomains: string[] | null;
@@ -122,7 +120,6 @@ export function ContextProfileEditor({
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState(profile?.name ?? "");
-  const [country, setCountry] = useState(profile?.country ?? availableCountries[0] ?? "NL");
   const [sector, setSector] = useState<string>(profile?.sector ?? "");
   const [track, setTrack] = useState(profile?.track ?? "");
   const [phase, setPhase] = useState(profile?.phase ?? "");
@@ -208,11 +205,6 @@ export function ContextProfileEditor({
       <div hidden={step !== 0} className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <NameField value={name} onChange={setName} required={false} />
-          {availableCountries.length > 1 ? (
-            <CountrySelect value={country} onChange={setCountry} countries={availableCountries} />
-          ) : (
-            <input type="hidden" name="country" value={country} />
-          )}
           <OnderwijstypeSelect
             value={sector && track ? `${sector}::${track}` : ""}
             onChange={onOnderwijstype}
@@ -233,7 +225,7 @@ export function ContextProfileEditor({
             <DomainSelect
               value={domain}
               onChange={setDomain}
-              country={country}
+              country={DEFAULT_COUNTRY}
               sector={sector}
               track={track}
               available={availableDomains}
@@ -244,7 +236,7 @@ export function ContextProfileEditor({
           <DomainFields
             key={`${sector}|${domain || "none"}`}
             domain={domain}
-            country={country}
+            country={DEFAULT_COUNTRY}
             sector={sector}
             values={packValues}
           />

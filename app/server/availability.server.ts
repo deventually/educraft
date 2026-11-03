@@ -1,19 +1,17 @@
 /**
- * Effective availability (Phase 4) — the single module every consumer uses to
- * answer "which tools/models may THIS user see?". Two independent gates sit on
- * top of the registry's boot-validity check:
- *
- *   1. Instance availability — an admin's `tool_settings` (enabled).
- *   2. Per-teacher allow-list — an admin may narrow an individual teacher's tools.
+ * Effective availability — the single module every consumer uses to answer "which
+ * tools/models may THIS user see?". One gate sits on top of the registry's
+ * boot-validity check: instance availability, an admin's `tool_settings`
+ * (enabled). There is no per-teacher tool gate (P18): every teacher and admin
+ * sees what the instance enables.
  *
  * Safe defaults: with empty settings tables this reduces exactly to `tool.enabled`,
  * so a fresh instance shows every tool to every teacher and admin.
  * Nothing is cached — a write takes effect on the next request (no bust needed).
  *
- * Context-editor axes (country/sector/domain) use a different, OVERRIDE model
- * (Phase 12), NOT the intersect the tool gates use: a teacher either inherits the
- * instance or, once given *custom access*, replaces it entirely with their own
- * selection (empty axis = all). See `axisSelection`/`resolveAxis` below.
+ * Context-editor axes (sector/domain) follow the instance settings too
+ * (`enabledSectors`/`enabledDomains`); there is no per-teacher access (P18) and no
+ * country axis (the country is a data seam in the packs, not a choice).
  */
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
@@ -25,25 +23,17 @@ import {
   resolveModelInfo,
   type PickerModel,
 } from "~/lib/ai/models";
-import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from "~/lib/context/countries";
+import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { SECTORS, type Sector } from "~/lib/context/sectors";
 import { getDomainsForTrack } from "~/lib/context/domains";
 import { log } from "./log.server";
 import {
   getToolSettings,
   getEnabledModels,
-  getEnabledCountries,
   getEnabledSectors,
   getEnabledDomains,
 } from "./repositories/settings.server";
-import {
-  getUserToolAllowlist,
-  getUserAssignedCountries,
-  getUserAssignedSectors,
-  getUserAssignedDomains,
-  getUserAssignedModels,
-  getUserContextCustomAccess,
-} from "./repositories/users.server";
+import { getUserAssignedModels } from "./repositories/users.server";
 
 export interface AvailabilityUser {
   id: string;
@@ -52,44 +42,39 @@ export interface AvailabilityUser {
 
 interface AvailabilityContext {
   settings: Map<string, { enabled: boolean | null }>;
-  teacherAllowlist: Set<string> | null; // teachers only
 }
 
 /** Resolve every gate input once per request, so a list filter is a pure map. */
-async function resolveContext(user: AvailabilityUser): Promise<AvailabilityContext> {
+async function resolveContext(): Promise<AvailabilityContext> {
   const rows = await getToolSettings();
   const settings = new Map(rows.map((r) => [r.toolSlug, { enabled: r.enabled }]));
-  const teacherAllowlist = user.role === "teacher" ? await getUserToolAllowlist(user.id) : null;
-  return { settings, teacherAllowlist };
+  return { settings };
 }
 
-/** Whether a tool passes the boot-validity check and both gates for `user`, given a resolved context. */
-function passes(user: AvailabilityUser, tool: Tool, ctx: AvailabilityContext): boolean {
+/** Whether a tool passes the boot-validity check and the instance gate, given a resolved context. */
+function passes(tool: Tool, ctx: AvailabilityContext): boolean {
   // Boot-invalid tools (Phase 5.5) are excluded from every listing and refused by
   // the stream, in production, rather than crashing the instance.
   if (getInvalidToolSlugs().has(tool.slug)) return false;
 
   const setting = ctx.settings.get(tool.slug);
   const enabled = setting?.enabled ?? tool.enabled;
-  if (!enabled) return false;
-
-  // A teacher may be narrowed to a subset of tools by the admin who invited them.
-  if (user.role === "teacher" && ctx.teacherAllowlist && !ctx.teacherAllowlist.has(tool.slug)) {
-    return false;
-  }
-  return true;
+  return enabled;
 }
 
-/** Every tool `user` may see, honoring the instance + teacher gates. */
-export async function getAvailableTools(user: AvailabilityUser): Promise<Tool[]> {
-  const ctx = await resolveContext(user);
-  return ALL_TOOLS.filter((tool) => passes(user, tool, ctx));
+/**
+ * Every tool `user` may see: the instance gate. `user` is kept in the signature so
+ * every caller stays unchanged (and a future gate has the seam).
+ */
+export async function getAvailableTools(_user: AvailabilityUser): Promise<Tool[]> {
+  const ctx = await resolveContext();
+  return ALL_TOOLS.filter((tool) => passes(tool, ctx));
 }
 
 /** Single-tool gate — drives the tool.tsx 404 and the api.stream refusal. */
-export async function isToolAvailable(user: AvailabilityUser, tool: Tool): Promise<boolean> {
-  const ctx = await resolveContext(user);
-  return passes(user, tool, ctx);
+export async function isToolAvailable(_user: AvailabilityUser, tool: Tool): Promise<boolean> {
+  const ctx = await resolveContext();
+  return passes(tool, ctx);
 }
 
 /**
@@ -230,12 +215,11 @@ export async function narrowLocalModels(
 }
 
 /**
- * Resolve one availability axis (country/sector/domain) to the catalogue slugs a
- * user may pick, under the Phase 12 OVERRIDE model. `selection` is the single set
- * that governs (see `axisSelection`); null/empty = no restriction (the whole
- * catalogue). A non-empty selection filters the catalogue; if it filters
- * everything away (a garbage/legacy slug), fall back to the whole catalogue and
- * warn — no editor may offer nothing.
+ * Resolve one availability axis (sector/domain) to the catalogue slugs a user may
+ * pick. `selection` is the instance's enabled list; null/empty = no restriction
+ * (the whole catalogue). A non-empty selection filters the catalogue; if it
+ * filters everything away (a garbage/legacy slug), fall back to the whole
+ * catalogue and warn — no editor may offer nothing.
  */
 function resolveAxis<T extends string>(
   catalogue: readonly T[],
@@ -252,51 +236,19 @@ function resolveAxis<T extends string>(
   return ids;
 }
 
-/**
- * The single selection that governs a user's axis under the OVERRIDE model
- * (Phase 12). An *activated* teacher uses their own assignment — the instance is
- * ignored entirely, so they may pick beyond it (empty = all). Everyone else
- * (admin, unactivated teacher) follows the instance-enabled list. Returned raw
- * (null = no restriction) for `resolveAxis` to interpret. The `&&` short-circuit
- * keeps admins from ever touching the per-teacher getters.
- */
-async function axisSelection(
-  user: AvailabilityUser,
-  instanceEnabled: () => Promise<string[] | null>,
-  teacherAssigned: (id: string) => Promise<Set<string> | null>,
-): Promise<Iterable<string> | null> {
-  if (user.role === "teacher" && (await getUserContextCustomAccess(user.id))) {
-    return teacherAssigned(user.id);
-  }
-  return instanceEnabled();
+/** The sectors a teacher/admin may pick in the context editor: the instance set. */
+export async function getAvailableSectors(_user: AvailabilityUser): Promise<Sector[]> {
+  return resolveAxis(SECTORS, await getEnabledSectors(), "availability_no_available_sectors");
 }
 
 /**
- * The countries a teacher/admin may pick in the context editor. OVERRIDE model
- * (Phase 12): an activated teacher's own set wins (instance ignored, empty =
- * all); admins and unactivated teachers follow the instance-enabled set.
+ * The flat domain/profiel allow-list that governs a user: the instance's enabled
+ * domains (`null` = no restriction). This is the track-independent effective set
+ * the editor loader filters each catalogue by; `getAvailableDomains` layers a
+ * specific (sector, track) catalogue on top.
  */
-export async function getAvailableCountries(user: AvailabilityUser): Promise<CountryCode[]> {
-  const selection = await axisSelection(user, getEnabledCountries, getUserAssignedCountries);
-  return resolveAxis(COUNTRIES, selection, "availability_no_available_countries");
-}
-
-/** The sectors a teacher/admin may pick in the context editor (see above). */
-export async function getAvailableSectors(user: AvailabilityUser): Promise<Sector[]> {
-  const selection = await axisSelection(user, getEnabledSectors, getUserAssignedSectors);
-  return resolveAxis(SECTORS, selection, "availability_no_available_sectors");
-}
-
-/**
- * The flat domain/profiel allow-list that governs a user under the OVERRIDE model
- * (Phase 12): an activated teacher's own assignment (instance ignored, null =
- * all), else the instance domain set. `null` = no restriction. This is the
- * track-independent effective set the editor loader filters each catalogue by;
- * `getAvailableDomains` layers a specific (sector, track) catalogue on top.
- */
-export async function getAvailableDomainSlugs(user: AvailabilityUser): Promise<string[] | null> {
-  const selection = await axisSelection(user, getEnabledDomains, getUserAssignedDomains);
-  return selection ? [...selection] : null;
+export async function getAvailableDomainSlugs(_user: AvailabilityUser): Promise<string[] | null> {
+  return getEnabledDomains();
 }
 
 /**

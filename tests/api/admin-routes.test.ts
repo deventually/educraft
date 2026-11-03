@@ -179,13 +179,12 @@ describe("admin.context action — instance lockout guard", () => {
     };
     expect(res.error).toBe("instance-empty");
     expect(await settings.getEnabledSectors()).toBeNull(); // unchanged
-    expect(await settings.getEnabledCountries()).toBeNull();
   });
 
-  it("refuses when either axis is empty (a country but no sector)", async () => {
+  it("refuses an empty sector selection", async () => {
     const res = (await invoke(
       contextRoute.action,
-      post({ intent: "instance", countries: ["NL"] }),
+      post({ intent: "instance", domains: ["nt"] }),
     )) as { error?: string };
     expect(res.error).toBe("instance-empty");
     expect(await settings.getEnabledSectors()).toBeNull();
@@ -197,40 +196,33 @@ describe("admin.context action — instance lockout guard", () => {
       // Junk values are dropped; only shipped catalogue codes survive on every axis.
       post({
         intent: "instance",
-        countries: ["NL", "XX"],
         sectors: ["hbo", "wo", "bogus"],
         domains: ["ICT", "not-a-domain", "nt"],
       }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
-    expect(await settings.getEnabledCountries()).toEqual(["NL"]);
     expect(await settings.getEnabledSectors()).toEqual(["hbo", "wo"]);
     expect(await settings.getEnabledDomains()).toEqual(["ICT", "nt"]);
     // Reset so later tests see the default-open state.
-    await settings.setEnabledCountries(null);
     await settings.setEnabledSectors(null);
     await settings.setEnabledDomains(null);
   });
 
   it("clears instance domains when none are submitted (empty = all)", async () => {
     await settings.setEnabledDomains(["nt"]);
-    await invoke(
-      contextRoute.action,
-      post({ intent: "instance", countries: ["NL"], sectors: ["hbo"] }),
-    );
+    await invoke(contextRoute.action, post({ intent: "instance", sectors: ["hbo"] }));
     expect(await settings.getEnabledDomains()).toBeNull();
-    await settings.setEnabledCountries(null);
     await settings.setEnabledSectors(null);
   });
 
   it("loader builds all-checked rows + domain catalogue when nothing is configured", async () => {
     const data = (await invoke(contextRoute.loader, post({}))) as {
-      countries: { id: string; checked: boolean }[];
       sectors: { id: string; checked: boolean }[];
       enabledDomains: string[] | null;
       domainCatalogueSectors: { sector: string; groups: unknown[] }[];
     };
-    expect(data.countries.every((c) => c.checked)).toBe(true);
+    expect(data).not.toHaveProperty("countries");
+    expect(data).not.toHaveProperty("teachers");
     expect(data.sectors.every((s) => s.checked)).toBe(true);
     expect(data.sectors.map((s) => s.id)).toEqual(["vo", "mbo", "hbo", "wo"]);
     // The instance domain axis: unset = null (= all), and the shared catalogue
@@ -240,135 +232,35 @@ describe("admin.context action — instance lockout guard", () => {
   });
 });
 
-describe("admin.context action — activation + per-teacher assignment (P12)", () => {
-  it("activating persists the flag + axes; an empty axis is unrestricted", async () => {
+describe("admin.context action — no per-teacher intent (P18.2)", () => {
+  it("rejects the retired teacher intent with a 400", async () => {
     const teacher = await users.createUser({
       name: "Assignable",
       email: "assignable@example.com",
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
-    const res = (await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        countries: ["NL"],
-        sectors: ["mbo", "hbo"],
-      }),
-    )) as { saved?: boolean };
-    expect(res.saved).toBe(true);
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-    expect([...(await users.getUserAssignedCountries(teacher.id))!]).toEqual(["NL"]);
-    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
-
-    // Still activated, but sectors omitted → that axis clears to unrestricted.
-    await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, customAccess: "1", countries: ["NL"] }),
-    );
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-    expect(await users.getUserAssignedSectors(teacher.id)).toBeNull();
-  });
-
-  it("deactivating flips the flag off and leaves the saved assignments untouched", async () => {
-    const teacher = await users.createUser({
-      name: "Toggle",
-      email: "toggle@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    // Activate + assign all three axes.
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["mbo", "hbo"],
-        domains: ["ICT"],
-      }),
-    );
-    // Deactivate: no customAccess field → the flag goes off, assignments preserved.
-    const res = (await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id }),
-    )) as { saved?: boolean };
-    expect(res.saved).toBe(true);
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(false);
-    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
-    expect([...(await users.getUserAssignedDomains(teacher.id))!]).toEqual(["ICT"]);
-
-    // Re-activating restores exactly what was saved (round-trip).
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["mbo", "hbo"],
-        domains: ["ICT"],
-      }),
-    );
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-  });
-
-  it("catalogue-filters submitted codes + domains before writing (activated)", async () => {
-    const teacher = await users.createUser({
-      name: "Filtered",
-      email: "filtered@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["wo", "not-a-sector"],
-        domains: ["nt", "not-a-domain", "zw"],
-      }),
-    );
-    expect([...(await users.getUserAssignedSectors(teacher.id))!]).toEqual(["wo"]);
-    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["nt", "zw"]);
-  });
-
-  it("refuses (404) a per-teacher write whose userId is not a teacher", async () => {
-    const student = await users.createUser({
-      name: "Not a teacher",
-      passwordHash: "scrypt:a:b",
-      role: "admin",
-    });
     await expect(
       invoke(
         contextRoute.action,
-        post({ intent: "teacher", userId: student.id, customAccess: "1", sectors: ["mbo"] }),
+        post({ intent: "teacher", userId: teacher.id, customAccess: "1", sectors: ["mbo"] }),
       ),
-    ).rejects.toMatchObject({ status: 404 });
-    expect(await users.getUserAssignedSectors(student.id)).toBeNull(); // never written
-    expect(await users.getUserContextCustomAccess(student.id)).toBe(false);
-  });
-
-  it("refuses (404) a per-teacher write for an unknown userId", async () => {
-    await expect(
-      invoke(contextRoute.action, post({ intent: "teacher", userId: "ghost", sectors: ["mbo"] })),
-    ).rejects.toMatchObject({ status: 404 });
+    ).rejects.toMatchObject({ status: 400 });
   });
 });
 
 describe("admin.invites action", () => {
-  it("mints a teacher invite carrying the chosen tool allow-list", async () => {
+  it("mints a plain teacher invite (no tool list)", async () => {
     const res = (await invoke(
       invitesRoute.action,
+      // A stale client may still send the old fields; they are ignored.
       post({ intent: "mint", toolMode: "restrict", tools: ["bloom-by-design"] }),
     )) as { link?: string };
     expect(res.link).toMatch(/\/invite\//);
     const token = res.link!.split("/invite/")[1];
     const invite = await users.getInvite(token);
     expect(invite?.role).toBe("teacher");
-    expect(JSON.parse(invite!.allowedToolSlugs!)).toEqual(["bloom-by-design"]);
+    expect(invite!.allowedToolSlugs).toBeNull();
   });
 
   it("blocks an admin from changing their OWN role (self-demote guard)", async () => {

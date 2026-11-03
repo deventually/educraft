@@ -136,7 +136,6 @@ export const en: Messages = {
     newProfile: "New context profile",
     cancel: "Cancel",
     name: "Name",
-    country: "Country",
     onderwijstype: "Type of education",
     onderwijstypeNone: "Choose type of education…",
     programme: "Programme",
@@ -380,7 +379,7 @@ export const en: Messages = {
       desc: {
         tools: "Turn tools on or off.",
         models: "Choose which AI models users may select.",
-        context: "Choose which countries and sectors teachers may use.",
+        context: "Choose which sectors and domains teachers can pick.",
         invites: "Invite teachers and manage user roles.",
         usage: "Track daily usage per user and tool.",
         feedback: "Read ratings on generated materials.",
@@ -424,25 +423,13 @@ export const en: Messages = {
     context: {
       heading: "Teaching context",
       intro:
-        "Choose which countries, education sectors and domains/profiles are available on this instance. Teachers inherit these defaults unless you give them custom access below.",
-      countriesLegend: "Countries",
+        "Choose which sectors and domains/profiles teachers can pick in their teaching context.",
       sectorsLegend: "Sectors",
       save: "Save",
-      atLeastOne: "Pick at least one country and one sector — you can't disable everything.",
+      atLeastOne: "Choose at least one sector.",
       instanceDomainsLegend: "Domains / profiles",
       instanceDomainsHint:
         "Optionally restrict which domains or profiles are available on this instance. Nothing checked = all domains.",
-      teacherLegend: "Access per teacher",
-      teacherPick:
-        "Give an individual teacher custom access. Activate it to override the instance defaults for that teacher — they can be granted more or fewer countries, sectors and domains. Left off, the teacher inherits the instance settings above.",
-      teacherHint:
-        "An activated teacher ignores the instance entirely; nothing checked on an axis = no restriction (everything in the catalogue).",
-      activateLabel: "Activate custom access",
-      inheritsNote: "Inherits the instance defaults. Activate custom access to override.",
-      teacherNone: "There are no teachers to assign yet.",
-      domainsLegend: "Domains / profiles",
-      domainsHint:
-        "Restrict the domains or profiles this teacher can pick. Nothing checked = no restriction.",
       domainsNone: "No domains to assign.",
     },
     invites: {
@@ -452,10 +439,6 @@ export const en: Messages = {
       noteLabel: "Note (who is this for?)",
       notePlaceholder: "e.g. Jan de Vries",
       expiryLabel: "Expires after (days)",
-      toolsLegend: "Tool access",
-      toolsHint: "By default the teacher gets every available tool.",
-      allToolsOption: "All available tools",
-      restrictOption: "Restrict to selected tools",
       submit: "Create invite",
       linkHeading: "Invite link",
       linkHint: "Copy the link and share it with the teacher. It works once.",

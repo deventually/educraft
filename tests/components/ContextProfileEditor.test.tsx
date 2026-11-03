@@ -14,7 +14,6 @@ type Props = ComponentProps<typeof ContextProfileEditor>;
 
 function renderEditor(overrides: Partial<Props> = {}) {
   const props: Props = {
-    availableCountries: ["NL"],
     availableSectors: ["vo", "mbo", "hbo", "wo"],
     availableDomains: null,
     onCancel: () => {},
@@ -60,11 +59,10 @@ describe("ContextProfileEditor — stepped flow", () => {
     expect(next).toBeEnabled();
   });
 
-  it("hides the country picker when only one country is available", () => {
-    const { container } = renderEditor({ availableCountries: ["NL"] });
+  it("has no country field at all", () => {
+    const { container } = renderEditor();
     expect(screen.queryByLabelText(/^land$|^country$/i)).toBeNull();
-    // …but still submits the country as a hidden field.
-    expect(sel(container, "country")?.value).toBe("NL");
+    expect(sel(container, "country")).toBeNull();
   });
 
   it("the grouped Onderwijstype picker sets sector + track and prefills the NLQF level", async () => {

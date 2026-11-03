@@ -55,15 +55,9 @@ describe("settings repository — enabled models", () => {
   });
 });
 
-describe("settings repository — enabled countries/sectors (P9 setters)", () => {
+describe("settings repository — enabled sectors (P9 setters)", () => {
   it("returns null when unset (default = whole catalogue)", async () => {
-    expect(await repo.getEnabledCountries()).toBeNull();
     expect(await repo.getEnabledSectors()).toBeNull();
-  });
-
-  it("round-trips an explicit country allow-list", async () => {
-    await repo.setEnabledCountries(["NL"]);
-    expect(await repo.getEnabledCountries()).toEqual(["NL"]);
   });
 
   it("round-trips an explicit sector allow-list", async () => {
@@ -71,11 +65,7 @@ describe("settings repository — enabled countries/sectors (P9 setters)", () =>
     expect(await repo.getEnabledSectors()).toEqual(["hbo", "wo"]);
   });
 
-  it("clears each list back to default when set to null", async () => {
-    await repo.setEnabledCountries(["NL"]);
-    await repo.setEnabledCountries(null);
-    expect(await repo.getEnabledCountries()).toBeNull();
-
+  it("clears the list back to default when set to null", async () => {
     await repo.setEnabledSectors(["mbo"]);
     await repo.setEnabledSectors(null);
     expect(await repo.getEnabledSectors()).toBeNull();

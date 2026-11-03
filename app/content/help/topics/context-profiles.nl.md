@@ -6,14 +6,14 @@ Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke 
 
 Ga naar **Onderwijscontext** en klik op **Nieuw contextprofiel**. Er is één duidelijke editor die je in vier stappen langs alles leidt — dezelfde editor gebruik je later om een profiel te **bewerken**.
 
-1. **Basis** — de **naam** (bijv. "Software Engineering — jaar 2"), het **land**, het **onderwijstype**, en optioneel opleiding en vak.
+1. **Basis** — de **naam** (bijv. "Software Engineering — jaar 2"), het **onderwijstype**, en optioneel opleiding en vak.
 2. **Niveau & kader** — het NLQF-niveau (met afgeleid EU-niveau) en het domein/vak met eventueel landelijk kader.
 3. **Context & eigen velden** — beroepspraktijk, technologie/methoden, onderwijsconcept, aanspreekvorm en eigen velden.
 4. **Afronden** — een korte samenvatting; zet het profiel eventueel als standaard.
 
-## Land → onderwijstype → niveau
+## Onderwijstype → niveau
 
-Je begint met **land** en **onderwijstype**. Het onderwijstype (voortgezet onderwijs, mbo, hbo of wo — met bijbehorende leerweg of graad, zoals vmbo-kb, havo, mbo-4 of hbo-bachelor) bepaalt de rest: het stelt automatisch het passende **niveau** voor en bepaalt welke vakken/domeinen je kunt kiezen.
+Je begint met het **onderwijstype**. Het onderwijstype (voortgezet onderwijs, mbo, hbo of wo — met bijbehorende leerweg of graad, zoals vmbo-kb, havo, mbo-4 of hbo-bachelor) bepaalt de rest: het stelt automatisch het passende **niveau** voor en bepaalt welke vakken/domeinen je kunt kiezen.
 
 Het niveau leg je vast als **NLQF-niveau** — het Nederlandse kwalificatieraamwerk is de bron van waarheid. De editor toont er het **afgeleide EU-niveau (EQF)** bij en een link naar de bron ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)). Belangrijk: in de prompt komt alléén dat EQF-getal plus een neutrale niveau-instructie terecht — nooit de term "NLQF" zelf. Zo blijft de engine landneutraal terwijl jij in vertrouwde Nederlandse termen kiest. De Instroomniveau-optie wordt als instapniveau (net onder EQF 1) meegegeven.
 
@@ -37,13 +37,11 @@ Met **Eigen velden** voeg je voor elk profiel zelf extra naam-/waardeparen toe. 
 
 Zet één profiel als **standaard**; dat wordt dan vooraf geselecteerd op de toolpagina's.
 
-## Voor beheerders: standaarden en aangepaste toegang
+## Voor beheerders: standaarden
 
-Ben je **beheerder**, dan stel je op de beheerpagina **Onderwijscontext** de standaarden voor de hele omgeving in: welke **landen**, welke **onderwijstypen** en — onder **Domeinen / profielen** — welke vakgebieden docenten mogen kiezen. Land en onderwijstype houden altijd minstens één keuze; laat je **Domeinen / profielen** leeg, dan zijn álle domeinen beschikbaar.
+Ben je **beheerder**, dan stel je op de beheerpagina **Onderwijscontext** de standaarden voor de hele omgeving in: welke **onderwijstypen** (sectoren) en — onder **Domeinen / profielen** — welke vakgebieden docenten mogen kiezen. Er blijft altijd minstens één onderwijstype over; laat je **Domeinen / profielen** leeg, dan zijn álle domeinen beschikbaar.
 
-Standaard **erft** elke docent deze instellingen. Wil je één docent een andere scope geven, zet dan bij die docent **Aangepaste toegang activeren** aan. De eigen keuze van die docent **vervangt** dan de omgevingsstandaard volledig — zo kun je méér toestaan dan de standaard of juist minder. Een as die je leeg laat betekent "alles"; de omgevingsstandaard telt voor die docent dan niet meer mee.
-
-Zet je **Aangepaste toegang** later weer uit, dan erft de docent gewoon weer de standaarden. Dat gaat **zonder verlies**: de keuzes die je voor die docent had opgeslagen blijven bewaard en komen terug zodra je de aangepaste toegang opnieuw activeert.
+Elke docent en beheerder volgt deze instellingen; er is geen aparte toegang per docent.
 
 ## Waarom het belangrijk is
 

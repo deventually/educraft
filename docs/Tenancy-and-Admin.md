@@ -12,7 +12,7 @@ Two roles, stored on `users.role` and read fresh from the DB every request
 
 | Role      | Created by                              | Scope                                              |
 |-----------|-----------------------------------------|----------------------------------------------------|
-| `teacher` | Admin-minted invite (`/admin/invites`), tools optionally narrowed by a per-teacher allow-list | Uses every tool (instructor + student tutors) |
+| `teacher` | Admin-minted invite (`/admin/invites`) | Uses every tool (instructor + student tutors) |
 | `admin`   | **Ops script, never an invite**         | Configures the whole instance (tools, models, context, users) |
 
 (P17 removed the `student` role and cohorts; see BESLUIT-2026-11-03-3.)

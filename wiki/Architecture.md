@@ -44,8 +44,7 @@ app/lib/prompts/<id>.prompt.ts             # PromptDef: verbatim original + runt
 Generation is streamed to the browser via SSE through the resource route
 `app/routes/api.stream.tsx`. That route is also the **access boundary**: it parses
 the body with `StreamBodySchema` (Zod), authenticates, and refuses via
-`isToolAvailable` (`app/server/availability.server.ts` — instance settings + per-teacher
-allow-list) before any provider call. The registry is
+`isToolAvailable` (`app/server/availability.server.ts` — instance settings) before any provider call. The registry is
 validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the bad tool.
 
 ---

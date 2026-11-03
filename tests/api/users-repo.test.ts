@@ -34,47 +34,6 @@ describe("users repository", () => {
     expect(await repo.getUserByEmail("nobody@example.com")).toBeNull();
   });
 
-  it("returns null for per-teacher country/sector assignment when unset (default-open)", async () => {
-    // null = all; a teacher with no assignment is unrestricted.
-    expect(await repo.getUserAssignedCountries("anyone")).toBeNull();
-    expect(await repo.getUserAssignedSectors("anyone")).toBeNull();
-  });
-
-  it("round-trips a per-teacher country/sector assignment (P9 setters)", async () => {
-    await repo.setUserAssignedCountries("t-assign", ["NL"]);
-    await repo.setUserAssignedSectors("t-assign", ["mbo", "hbo"]);
-    expect([...(await repo.getUserAssignedCountries("t-assign"))!]).toEqual(["NL"]);
-    expect([...(await repo.getUserAssignedSectors("t-assign"))!].sort()).toEqual(["hbo", "mbo"]);
-    // Assignments are keyed per user — an unrelated teacher stays unrestricted.
-    expect(await repo.getUserAssignedSectors("t-other")).toBeNull();
-  });
-
-  it("clears a per-teacher assignment with null or an empty list", async () => {
-    await repo.setUserAssignedSectors("t-clear", ["vo"]);
-    await repo.setUserAssignedSectors("t-clear", null);
-    expect(await repo.getUserAssignedSectors("t-clear")).toBeNull();
-
-    await repo.setUserAssignedCountries("t-clear", ["NL"]);
-    await repo.setUserAssignedCountries("t-clear", []);
-    expect(await repo.getUserAssignedCountries("t-clear")).toBeNull();
-  });
-
-  it("round-trips a per-teacher domain assignment and clears with null/[] (P10.3)", async () => {
-    // Default-open: an unset teacher is unrestricted.
-    expect(await repo.getUserAssignedDomains("dom-anyone")).toBeNull();
-
-    await repo.setUserAssignedDomains("dom-t", ["nt", "ICT"]);
-    expect([...(await repo.getUserAssignedDomains("dom-t"))!].sort()).toEqual(["ICT", "nt"]);
-    // Keyed per user — an unrelated teacher stays unrestricted.
-    expect(await repo.getUserAssignedDomains("dom-other")).toBeNull();
-
-    await repo.setUserAssignedDomains("dom-t", null);
-    expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
-    await repo.setUserAssignedDomains("dom-t", ["zw"]);
-    await repo.setUserAssignedDomains("dom-t", []);
-    expect(await repo.getUserAssignedDomains("dom-t")).toBeNull();
-  });
-
   it("round-trips a per-teacher model assignment and clears with null/[] (P13)", async () => {
     // Default-open: an unset teacher inherits the instance model set (intersect).
     expect(await repo.getUserAssignedModels("mdl-anyone")).toBeNull();
@@ -92,21 +51,6 @@ describe("users repository", () => {
     await repo.setUserAssignedModels("mdl-t", ["claude-haiku-4-5"]);
     await repo.setUserAssignedModels("mdl-t", []);
     expect(await repo.getUserAssignedModels("mdl-t")).toBeNull();
-  });
-
-  it("round-trips the per-teacher context custom-access flag (P12)", async () => {
-    // Default: a teacher is not activated → inherits the instance.
-    expect(await repo.getUserContextCustomAccess("ca-anyone")).toBe(false);
-
-    await repo.setUserContextCustomAccess("ca-t", true);
-    expect(await repo.getUserContextCustomAccess("ca-t")).toBe(true);
-    // Keyed per user — an unrelated teacher stays unactivated.
-    expect(await repo.getUserContextCustomAccess("ca-other")).toBe(false);
-
-    // Deactivating flips the flag back off (and is independent of any saved
-    // country/sector/domain assignments, which the caller must not clear).
-    await repo.setUserContextCustomAccess("ca-t", false);
-    expect(await repo.getUserContextCustomAccess("ca-t")).toBe(false);
   });
 
   it("allows a nameless (email-less) invite-based account", async () => {

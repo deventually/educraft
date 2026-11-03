@@ -139,7 +139,6 @@ export const nl = {
     newProfile: "Nieuw contextprofiel",
     cancel: "Annuleren",
     name: "Naam",
-    country: "Land",
     onderwijstype: "Onderwijstype",
     onderwijstypeNone: "Kies onderwijstype…",
     programme: "Opleiding",
@@ -383,7 +382,7 @@ export const nl = {
       desc: {
         tools: "Zet tools aan of uit.",
         models: "Kies welke AI-modellen gebruikers mogen selecteren.",
-        context: "Bepaal welke landen en sectoren docenten mogen gebruiken.",
+        context: "Bepaal welke sectoren en domeinen docenten kunnen kiezen.",
         invites: "Nodig docenten uit en beheer gebruikersrollen.",
         usage: "Volg het dagelijkse gebruik per gebruiker en tool.",
         feedback: "Lees beoordelingen op gegenereerde materialen.",
@@ -427,25 +426,13 @@ export const nl = {
     context: {
       heading: "Onderwijscontext",
       intro:
-        "Kies welke landen, onderwijssectoren en domeinen/profielen op deze instantie beschikbaar zijn. Docenten erven deze standaardinstellingen, tenzij je ze hieronder aangepaste toegang geeft.",
-      countriesLegend: "Landen",
+        "Kies welke onderwijssectoren en domeinen/profielen docenten in hun onderwijscontext kunnen kiezen.",
       sectorsLegend: "Sectoren",
       save: "Opslaan",
-      atLeastOne: "Kies minstens één land en één sector — je kunt niet alles uitschakelen.",
+      atLeastOne: "Kies minstens één sector.",
       instanceDomainsLegend: "Domeinen / profielen",
       instanceDomainsHint:
         "Beperk optioneel welke domeinen of profielen op deze instantie beschikbaar zijn. Niets aangevinkt = alle domeinen.",
-      teacherLegend: "Toegang per docent",
-      teacherPick:
-        "Geef een individuele docent aangepaste toegang. Activeer dit om de instantie-standaard voor die docent te overschrijven — de docent kan meer of minder landen, sectoren en domeinen krijgen. Uit gelaten erft de docent de instantie-instellingen hierboven.",
-      teacherHint:
-        "Een geactiveerde docent negeert de instantie volledig; niets aangevinkt op een as = geen beperking (alles uit de catalogus).",
-      activateLabel: "Aangepaste toegang activeren",
-      inheritsNote: "Erft de instantie-standaard. Activeer aangepaste toegang om te overschrijven.",
-      teacherNone: "Er zijn nog geen docenten om toe te wijzen.",
-      domainsLegend: "Domeinen / profielen",
-      domainsHint:
-        "Beperk de domeinen of profielen die deze docent kan kiezen. Niets aangevinkt = geen beperking.",
       domainsNone: "Geen domeinen om toe te wijzen.",
     },
     invites: {
@@ -455,10 +442,6 @@ export const nl = {
       noteLabel: "Notitie (voor wie is deze?)",
       notePlaceholder: "bijv. Jan de Vries",
       expiryLabel: "Verloopt na (dagen)",
-      toolsLegend: "Toegang tot tools",
-      toolsHint: "Standaard krijgt de docent alle beschikbare tools.",
-      allToolsOption: "Alle beschikbare tools",
-      restrictOption: "Beperk tot geselecteerde tools",
       submit: "Uitnodiging aanmaken",
       linkHeading: "Uitnodigingslink",
       linkHint: "Kopieer de link en deel hem met de docent. De link werkt één keer.",
