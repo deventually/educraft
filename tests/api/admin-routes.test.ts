@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 import { listModels } from "~/lib/ai/models";
 
 // Isolated in-memory SQLite before any server module loads.
@@ -6,7 +6,11 @@ process.env.DATABASE_URL = "file::memory:";
 
 // The admin is always "admin-1"; every route's requireRole returns them.
 const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
+// isOwner stays real: it reads the stored owner id (P18.6).
+vi.mock("~/server/auth.server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("~/server/auth.server")>();
+  return { ...actual, requireRole: requireRoleMock };
+});
 
 // Local discovery is env-dependent (Ollama/LM Studio may be running on the host);
 // stub it out so the catalog is a known, hermetic static set (P14).
@@ -62,6 +66,46 @@ function invoke<T extends (arg: never) => unknown>(action: T, request: Request):
     context: {},
   } as unknown as Parameters<T>[0]) as ReturnType<T>;
 }
+
+const OWNER_ID = "owner-1";
+const regularAdmin = {
+  id: "admin-1",
+  name: "Admin A",
+  email: "admin@example.com",
+  role: "admin" as const,
+  createdAt: new Date(0),
+};
+
+/** Act as the stored owner (a real admin row), for the owner-only intents. */
+async function actAsOwner() {
+  if (!(await users.getUserById(OWNER_ID))) {
+    await users.createUser({
+      id: OWNER_ID,
+      name: "Owner O",
+      email: "owner@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "admin",
+    });
+  }
+  await settings.setOwnerUserId(OWNER_ID);
+  requireRoleMock.mockImplementation(async () => ({
+    ...regularAdmin,
+    id: OWNER_ID,
+    name: "Owner O",
+    email: "owner@example.com",
+  }));
+}
+
+/** Act as a regular admin (admin-1): signed in as admin, but not the owner. */
+function actAsRegularAdmin() {
+  requireRoleMock.mockImplementation(async () => regularAdmin);
+}
+
+// Every test starts as a regular admin with no owner; owner tests opt in.
+beforeEach(async () => {
+  actAsRegularAdmin();
+  await settings.setOwnerUserId(null);
+});
 
 describe("admin.tools action", () => {
   it("upserts a tool's enabled flag", async () => {
@@ -397,6 +441,7 @@ describe("admin.users action", () => {
   });
 
   it("refuses a role change for a user whose stored role is no longer valid", async () => {
+    await actAsOwner();
     const legacy = await users.createUser({
       name: "Legacy Student",
       email: "legacy-student@example.com",
@@ -410,6 +455,7 @@ describe("admin.users action", () => {
   });
 
   it("promotes an existing user in place (role only — no new account, no password change)", async () => {
+    await actAsOwner();
     const teacher = await users.createUser({
       name: "Promote Me",
       email: "promote@example.com",
@@ -423,6 +469,7 @@ describe("admin.users action", () => {
   });
 
   it("refuses to set the legacy student role", async () => {
+    await actAsOwner();
     const teacher = await users.createUser({
       name: "Stay Teacher",
       email: "stay@example.com",
@@ -489,5 +536,263 @@ describe("admin.users action", () => {
       post({ intent: "setEmail", userId: student.id, email: "recovered@example.com" }),
     );
     expect((await users.getUserById(student.id))?.email).toBe("recovered@example.com");
+  });
+});
+
+describe("admin.users action — owner (P18.6)", () => {
+  async function mkUser(name: string, role: "teacher" | "admin", email = `${name}@example.com`) {
+    return users.createUser({ name, email, passwordHash: "scrypt:a:b", role });
+  }
+
+  it("a regular admin cannot change any role", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const teacher = await mkUser("RoleT", "teacher");
+    const other = await mkUser("RoleA", "admin");
+    const promote = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: teacher.id, role: "admin" }),
+    )) as { error?: string };
+    expect(promote.error).toBe("ownerOnly");
+    expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
+    const demote = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: other.id, role: "teacher" }),
+    )) as { error?: string };
+    expect(demote.error).toBe("ownerOnly");
+    expect((await users.getUserById(other.id))?.role).toBe("admin");
+  });
+
+  it("with no owner set nobody can change a role", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(null);
+    const teacher = await mkUser("NoOwnerT", "teacher");
+    const res = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: teacher.id, role: "admin" }),
+    )) as { error?: string };
+    expect(res.error).toBe("ownerOnly");
+    expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
+  });
+
+  it("an admin who is not the stored owner is refused even if their id looks like the owner's", async () => {
+    // The stored id belongs to someone else; this actor is admin-1.
+    await settings.setOwnerUserId("someone-else");
+    actAsRegularAdmin();
+    const teacher = await mkUser("LookT", "teacher");
+    const res = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: teacher.id, role: "admin" }),
+    )) as { error?: string };
+    expect(res.error).toBe("ownerOnly");
+  });
+
+  it("the owner promotes a teacher and demotes an admin", async () => {
+    await actAsOwner();
+    const teacher = await mkUser("PromoT", "teacher");
+    const admin = await mkUser("DemoA", "admin");
+    const up = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: teacher.id, role: "admin" }),
+    )) as { roleChanged?: boolean };
+    expect(up.roleChanged).toBe(true);
+    expect((await users.getUserById(teacher.id))?.role).toBe("admin");
+    await invoke(usersRoute.action, post({ intent: "role", userId: admin.id, role: "teacher" }));
+    expect((await users.getUserById(admin.id))?.role).toBe("teacher");
+  });
+
+  it("the owner cannot change their own role (never an accidental self-demotion)", async () => {
+    await actAsOwner();
+    const res = (await invoke(
+      usersRoute.action,
+      post({ intent: "role", userId: OWNER_ID, role: "teacher" }),
+    )) as { error?: string };
+    expect(res.error).toBe("selfDemote");
+    expect((await users.getUserById(OWNER_ID))?.role).toBe("admin");
+    expect(await settings.getOwnerUserId()).toBe(OWNER_ID);
+  });
+
+  it("the owner cannot delete or reset themselves either", async () => {
+    await actAsOwner();
+    const del = (await invoke(
+      usersRoute.action,
+      post({ intent: "deleteUser", userId: OWNER_ID }),
+    )) as { error?: string };
+    expect(del.error).toBe("selfDelete");
+    const reset = (await invoke(
+      usersRoute.action,
+      post({ intent: "resetPassword", userId: OWNER_ID }),
+    )) as { error?: string };
+    expect(reset.error).toBe("selfReset");
+    expect(await users.getUserById(OWNER_ID)).not.toBeNull();
+  });
+
+  it("a regular admin cannot delete, reset or re-email another admin", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const target = await mkUser("Target", "admin", "target@example.com");
+
+    const del = (await invoke(
+      usersRoute.action,
+      post({ intent: "deleteUser", userId: target.id }),
+    )) as { error?: string };
+    expect(del.error).toBe("ownerOnly");
+    expect(await users.getUserById(target.id)).not.toBeNull();
+
+    const reset = (await invoke(
+      usersRoute.action,
+      post({ intent: "resetPassword", userId: target.id }),
+    )) as { error?: string; resetLink?: string };
+    expect(reset.error).toBe("ownerOnly");
+    expect(reset.resetLink).toBeUndefined();
+
+    const email = (await invoke(
+      usersRoute.action,
+      post({ intent: "setEmail", userId: target.id, email: "hijack@example.com" }),
+    )) as { error?: string };
+    expect(email.error).toBe("ownerOnly");
+    expect((await users.getUserById(target.id))?.email).toBe("target@example.com");
+  });
+
+  it("a regular admin cannot touch the owner's account either", async () => {
+    await actAsOwner();
+    actAsRegularAdmin();
+    for (const post_ of [
+      post({ intent: "deleteUser", userId: OWNER_ID }),
+      post({ intent: "resetPassword", userId: OWNER_ID }),
+      post({ intent: "setEmail", userId: OWNER_ID, email: "taken@example.com" }),
+      post({ intent: "role", userId: OWNER_ID, role: "teacher" }),
+    ]) {
+      const res = (await invoke(usersRoute.action, post_)) as { error?: string };
+      expect(res.error).toBe("ownerOnly");
+    }
+    const row = await users.getUserById(OWNER_ID);
+    expect(row?.role).toBe("admin");
+    expect(row?.email).toBe("owner@example.com");
+  });
+
+  it("a regular admin still deletes, resets and re-emails a teacher", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const t = await mkUser("TeachOK", "teacher", "teachok@example.com");
+
+    const email = (await invoke(
+      usersRoute.action,
+      post({ intent: "setEmail", userId: t.id, email: "teachok2@example.com" }),
+    )) as { emailSet?: boolean };
+    expect(email.emailSet).toBe(true);
+    expect((await users.getUserById(t.id))?.email).toBe("teachok2@example.com");
+
+    const reset = (await invoke(
+      usersRoute.action,
+      post({ intent: "resetPassword", userId: t.id }),
+    )) as { resetLink?: string };
+    expect(reset.resetLink).toMatch(/\/reset\//);
+
+    const del = (await invoke(usersRoute.action, post({ intent: "deleteUser", userId: t.id }))) as {
+      userDeleted?: boolean;
+    };
+    expect(del.userDeleted).toBe(true);
+    expect(await users.getUserById(t.id)).toBeNull();
+  });
+
+  it("a regular admin cannot manage a legacy-role row (fail closed: teachers only)", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const legacy = await users.createUser({
+      name: "Old Student",
+      email: "old-student@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "student" as never,
+    });
+    const res = (await invoke(
+      usersRoute.action,
+      post({ intent: "deleteUser", userId: legacy.id }),
+    )) as { error?: string };
+    expect(res.error).toBe("ownerOnly");
+    expect(await users.getUserById(legacy.id)).not.toBeNull();
+  });
+
+  it("the owner deletes, resets and re-emails an admin", async () => {
+    await actAsOwner();
+    const a = await mkUser("OwnerManaged", "admin", "managed@example.com");
+    const email = (await invoke(
+      usersRoute.action,
+      post({ intent: "setEmail", userId: a.id, email: "managed2@example.com" }),
+    )) as { emailSet?: boolean };
+    expect(email.emailSet).toBe(true);
+    const reset = (await invoke(
+      usersRoute.action,
+      post({ intent: "resetPassword", userId: a.id }),
+    )) as { resetLink?: string };
+    expect(reset.resetLink).toMatch(/\/reset\//);
+    const del = (await invoke(usersRoute.action, post({ intent: "deleteUser", userId: a.id }))) as {
+      userDeleted?: boolean;
+    };
+    expect(del.userDeleted).toBe(true);
+    expect(await users.getUserById(a.id)).toBeNull();
+  });
+
+  it("an action on a user that does not exist is a 404, not a silent success", async () => {
+    await actAsOwner();
+    for (const intent of ["deleteUser", "resetPassword", "setEmail"]) {
+      await expect(
+        invoke(usersRoute.action, post({ intent, userId: "ghost", email: "g@example.com" })),
+      ).rejects.toMatchObject({ status: 404 });
+    }
+  });
+
+  it("an invite never makes an admin, whatever the form says", async () => {
+    await actAsOwner(); // even the owner's invite form mints teachers only
+    const res = (await invoke(usersRoute.action, post({ intent: "mint", role: "admin" }))) as {
+      link?: string;
+    };
+    const invite = await users.getInvite(res.link!.split("/invite/")[1]);
+    expect(invite?.role).toBe("teacher");
+  });
+
+  it("a regular admin can still manage a teacher's models, the owner too", async () => {
+    const t = await mkUser("ModelsT", "teacher");
+    for (const act of [actAsRegularAdmin, actAsOwner]) {
+      await act();
+      const res = (await invoke(
+        usersRoute.action,
+        post({ intent: "teacherModels", userId: t.id, mode: "inherit" }),
+      )) as { saved?: boolean };
+      expect(res.saved).toBe(true);
+    }
+  });
+
+  it("the loader tells the page who the owner is and whether the viewer is the owner", async () => {
+    await actAsOwner();
+    const asOwner = (await invoke(
+      usersRoute.loader,
+      new Request("http://localhost/admin/users"),
+    )) as {
+      isOwner: boolean;
+      ownerId: string | null;
+    };
+    expect(asOwner.isOwner).toBe(true);
+    expect(asOwner.ownerId).toBe(OWNER_ID);
+    actAsRegularAdmin();
+    const asAdmin = (await invoke(
+      usersRoute.loader,
+      new Request("http://localhost/admin/users"),
+    )) as {
+      isOwner: boolean;
+      ownerId: string | null;
+    };
+    expect(asAdmin.isOwner).toBe(false);
+    expect(asAdmin.ownerId).toBe(OWNER_ID);
+  });
+
+  it("the loader reports no owner when the stored id is no admin any more", async () => {
+    actAsRegularAdmin();
+    const demoted = await mkUser("FormerOwner", "teacher");
+    await settings.setOwnerUserId(demoted.id);
+    const data = (await invoke(usersRoute.loader, new Request("http://localhost/admin/users"))) as {
+      ownerId: string | null;
+    };
+    expect(data.ownerId).toBeNull();
   });
 });

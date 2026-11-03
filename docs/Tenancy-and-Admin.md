@@ -13,18 +13,30 @@ Two roles, stored on `users.role` and read fresh from the DB every request
 | Role      | Created by                              | Scope                                              |
 |-----------|-----------------------------------------|----------------------------------------------------|
 | `teacher` | Admin-minted invite (`/admin/users`) | Uses every tool (instructor + student tutors) |
-| `admin`   | **Ops script, never an invite**         | Configures the whole instance (tools, models, context, users) |
+| `admin`   | **Ops script or promotion by the super admin, never an invite** | Configures the whole instance (tools, models, context, teachers) |
+| super admin (**owner**, not a third role) | `npm run set-owner -- --email …` | An admin who is also the only one who creates, demotes and deletes admins |
+
+The owner is one key in `instance_settings` (`ownerUserId`), not a role: `isOwner(user)`
+(`auth.server.ts`) is `role === "admin"` and the stored id matches. A key that points at a
+demoted or deleted account counts as "no owner". It is **not** the *super user* of the future
+control plane below: the owner administers one instance (one tenant database); the super user
+sits above all of them and lives in the control plane, outside every tenant DB.
 
 (P17 removed the `student` role and cohorts; see BESLUIT-2026-11-03-3.)
 
-**Admins are never minted by an invite link.** Two supported paths:
+**Admins are never minted by an invite link** (P18.6: `consumeInvite` and `/invite/:token`
+accept teacher invites only; `scripts/invite.ts` has no `--role`). Two supported paths:
 
 1. `npm run create-admin -- --name "…" --email …@… --password …` — direct seed
    (`scripts/create-admin.ts`). If `--password` is omitted a strong one is
    generated and printed once.
-2. Promotion — an existing admin changes a teacher's role to `admin` in the
-   admin console (`/admin/users` user list). Guard: an admin can never demote
-   **themselves**, so the last admin can't lock the instance out of admin.
+2. Promotion — **only the super admin** changes a teacher's role to `admin` in the
+   admin console (`/admin/users` user list), and only he demotes or deletes an admin,
+   or resets an admin's password or changes an admin's e-mail (a regular admin could
+   otherwise take over any admin account, the owner's included). The server refuses
+   with `ownerOnly`. Guard: nobody can demote or delete **themselves** there, so the
+   last admin can't lock the instance out of admin; the owner also cannot delete their
+   own account on `/account` (hand over with `set-owner` first).
 
 ## Future: multi-tenant SaaS (database-per-tenant)
 

@@ -4,7 +4,6 @@ import { z } from "zod";
 import type { Route } from "./+types/invite";
 import { createUserSession } from "~/server/auth.server";
 import { consumeInvite, createUser, getInvite } from "~/server/repositories/users.server";
-import { isRole, type Role } from "~/lib/registry/access";
 import { hashPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -18,15 +17,16 @@ export function meta({ matches }: Route.MetaArgs) {
 }
 
 /**
- * Whether an invite token is still redeemable (exists, unused, not expired). An
- * invite carrying a retired role such as "student" is never redeemable.
+ * Whether an invite token is still redeemable (exists, unused, not expired). Invites
+ * make teachers only (P18.6): an invite carrying "admin" or a retired role such as
+ * "student" is never redeemable.
  */
 function isRedeemable(
   invite: Awaited<ReturnType<typeof getInvite>>,
 ): invite is NonNullable<typeof invite> {
   return Boolean(
     invite &&
-      isRole(invite.role) &&
+      invite.role === "teacher" &&
       !invite.usedByUserId &&
       !(invite.expiresAt && invite.expiresAt.getTime() < Date.now()),
   );
@@ -53,7 +53,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (password.length < 10) return { error: m.auth.passwordTooShort };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
-  // Refuse a retired-role (e.g. student) invite before it can be claimed.
+  // Refuse a non-teacher (admin, retired role) invite before it can be claimed.
   if (!isRedeemable(await getInvite(params.token))) return { error: m.auth.inviteInvalid };
 
   // Claim the invite atomically for a fresh id *before* creating the user, so a
@@ -67,7 +67,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     name,
     email: emailRaw || null,
     passwordHash: hashPassword(password),
-    role: consumed.role as Role,
+    role: "teacher", // never taken from the invite row or the form
   });
 
   return createUserSession(userId, "/");

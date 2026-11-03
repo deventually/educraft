@@ -21,7 +21,7 @@ import {
   type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
-import { ROLES, type Role } from "~/lib/registry/access";
+import type { Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
   /** Optional explicit id so an invite can claim it atomically before creation. */
@@ -232,7 +232,8 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
       and(
         eq(invites.token, token),
         isNull(invites.usedByUserId),
-        inArray(invites.role, [...ROLES]),
+        // Invites make teachers only (P18.6); an admin or retired-role invite never redeems.
+        eq(invites.role, "teacher"),
       ),
     )
     .run();

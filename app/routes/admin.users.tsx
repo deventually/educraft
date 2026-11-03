@@ -3,7 +3,7 @@ import { Form, useActionData } from "react-router";
 import { z } from "zod";
 import { Copy, KeyRound, Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.users";
-import { requireRole } from "~/server/auth.server";
+import { isOwner, requireRole } from "~/server/auth.server";
 import {
   createInvite,
   createPasswordReset,
@@ -18,7 +18,7 @@ import {
   setUserRole,
   updateUserEmail,
 } from "~/server/repositories/users.server";
-import { getEnabledModels } from "~/server/repositories/settings.server";
+import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -29,14 +29,37 @@ import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { fullCatalog } from "~/server/modelCatalog.server";
 
+/**
+ * Whether the acting admin may manage `target` (P18.6): a teacher, or anyone when the
+ * actor is the super admin. A regular admin never touches another admin (nor a
+ * retired-role row — fail closed): that would be a way around the promotion rule.
+ */
+function mayManage(actorIsOwner: boolean, target: { role: string }): boolean {
+  return actorIsOwner || target.role === "teacher";
+}
+
+/** The target of a manage action: 404 when missing, `ownerOnly` when out of reach. */
+async function manageTarget(actorIsOwner: boolean, userId: string) {
+  const target = await getUserById(userId);
+  if (!target) throw new Response("Not found", { status: 404 });
+  return mayManage(actorIsOwner, target) ? target : null;
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
-  const [invites, users, catalog, instanceModels] = await Promise.all([
-    listInvitesWithContext(),
-    listUsers(),
-    fullCatalog(),
-    getEnabledModels(),
-  ]);
+  const [invites, users, catalog, instanceModels, storedOwnerId, viewerIsOwner] = await Promise.all(
+    [
+      listInvitesWithContext(),
+      listUsers(),
+      fullCatalog(),
+      getEnabledModels(),
+      getOwnerUserId(),
+      isOwner(admin),
+    ],
+  );
+  // The badge is for every admin to see; a stored id of a demoted or deleted account
+  // counts as "no owner".
+  const ownerId = users.find((u) => u.id === storedOwnerId && u.role === "admin")?.id ?? null;
   // Per-teacher model override (P18): a teacher either follows the instance ("inherit")
   // or has an own set ("own") that replaces it and may be wider — so the checkboxes run
   // over the whole catalogue, not over the instance set.
@@ -62,6 +85,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     base,
     teachers,
     selfId: admin.id,
+    isOwner: viewerIsOwner,
+    ownerId,
     invites: invites.map((i) => ({
       token: i.token,
       role: i.role,
@@ -83,6 +108,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const admin = await requireRole(request, "admin");
+  // Authority is decided here, on the server, for every intent below; the page only hides.
+  const actorIsOwner = await isOwner(admin);
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
 
@@ -129,6 +156,8 @@ export async function action({ request }: Route.ActionArgs) {
     const role = String(fd.get("role") ?? "");
     // An admin can never change their OWN role — no self-lockout.
     if (userId === admin.id) return { error: "selfDemote" as const };
+    // Only the super admin promotes, demotes or otherwise changes a role (P18.6).
+    if (!actorIsOwner) return { error: "ownerOnly" as const };
     // A legacy row whose role is no longer valid (e.g. "student") is never
     // promoted by a role change — treat it as not manageable here.
     const target = await getUserById(userId);
@@ -142,6 +171,7 @@ export async function action({ request }: Route.ActionArgs) {
     // An admin removes their own account via /account (type-to-confirm) — and
     // since they can't remove themselves here, the instance always keeps an admin.
     if (userId === admin.id) return { error: "selfDelete" as const };
+    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     await deleteUserCascade(userId);
     return { userDeleted: true as const };
   }
@@ -149,6 +179,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "resetPassword") {
     const userId = String(fd.get("userId") ?? "");
     if (userId === admin.id) return { error: "selfReset" as const };
+    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     // No email service: mint a single-use link the admin shares out-of-band; the
     // user opens it and sets their own new password. The admin never sees it.
     const reset = await createPasswordReset(userId);
@@ -157,6 +188,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "setEmail") {
     const userId = String(fd.get("userId") ?? "");
+    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     const email = String(fd.get("email") ?? "").trim() || null;
     if (email && !z.string().email().safeParse(email).success) {
       return { error: "invalidEmail" as const };
@@ -176,7 +208,7 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const actionData = useActionData<typeof action>();
-  const { selfId, invites, users, base, teachers } = loaderData;
+  const { selfId, invites, users, base, teachers, isOwner: viewerIsOwner, ownerId } = loaderData;
 
   const roleLabel: Record<string, string> = {
     teacher: t.admin.invites.roleTeacher,
@@ -189,6 +221,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const userErrors: Record<string, string> = {
     selfDelete: t.admin.invites.selfDeleteError,
     selfReset: t.admin.invites.selfResetError,
+    ownerOnly: t.admin.invites.ownerOnlyError,
   };
   const userError =
     actionData && "error" in actionData && typeof actionData.error === "string"
@@ -198,6 +231,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     invalidEmail: t.admin.invites.invalidEmailError,
     emailTaken: t.admin.invites.emailTakenError,
     selfDemote: t.admin.invites.selfDemoteError,
+    ownerOnly: t.admin.invites.ownerOnlyError,
     atLeastOne: t.admin.models.atLeastOne,
   };
   const autoSaveError = (code: string | true) =>
@@ -385,6 +419,8 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
             <tbody>
               {users.map((u) => {
                 const isSelf = u.id === selfId;
+                // Regular admins manage teachers only; the owner manages everyone.
+                const canManage = viewerIsOwner || u.role === "teacher";
                 return (
                   <tr key={u.id} className="border-b border-slate-50 last:border-0 align-top">
                     <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
@@ -394,9 +430,14 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                           ({t.admin.invites.you})
                         </span>
                       )}
+                      {u.id === ownerId && (
+                        <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
+                          {t.admin.invites.ownerBadge}
+                        </span>
+                      )}
                     </th>
                     <td className="px-4 py-2.5 text-slate-600">
-                      {isSelf ? (
+                      {isSelf || !canManage ? (
                         (u.email ?? "—")
                       ) : (
                         <AutoSaveForm
@@ -421,11 +462,11 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                     </td>
                     <td className="px-4 py-2.5 text-slate-600">{roleLabel[u.role] ?? u.role}</td>
                     <td className="px-4 py-2.5">
-                      {isSelf ? (
+                      {isSelf || !canManage ? (
                         <span className="block text-right text-xs text-slate-400">—</span>
                       ) : (
                         <div className="flex flex-wrap items-center justify-end gap-2">
-                          {isRole(u.role) && (
+                          {viewerIsOwner && isRole(u.role) && (
                             <AutoSaveForm
                               intent="role"
                               hidden={{ userId: u.id }}

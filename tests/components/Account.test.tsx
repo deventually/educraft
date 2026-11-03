@@ -10,9 +10,10 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 function renderAccount(
   email: string | null = "teacher@example.com",
   role: "teacher" | "admin" = "teacher",
+  isOwner = false,
 ) {
   const props = {
-    loaderData: { user: { name: "Teacher T", email, role } },
+    loaderData: { user: { name: "Teacher T", email, role }, isOwner },
   } as unknown as ComponentProps<typeof Account>;
   const Stub = createRoutesStub([
     { path: "/account", Component: () => <Account {...props} />, action: () => null },
@@ -53,6 +54,23 @@ describe("Account page", () => {
     expect(
       screen.queryByRole("button", { name: /vraag verwijdering|request removal/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows the owner a transfer note instead of delete", async () => {
+    const { container } = renderAccount("owner@example.com", "admin", true);
+    expect(
+      screen.queryByRole("button", { name: /verwijder mijn account|delete my account/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/superbeheerder|super admin/i, { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByText(/set-owner/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("still shows a regular admin the delete form", () => {
+    renderAccount("admin@example.com", "admin", false);
+    expect(
+      screen.getByRole("button", { name: /verwijder mijn account|delete my account/i }),
+    ).toBeInTheDocument();
   });
 
   it("has no a11y violations (teacher and admin variants)", async () => {

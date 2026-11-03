@@ -328,6 +328,8 @@ export const en: Messages = {
     roleTeacher: "Teacher",
     roleAdmin: "Admin",
     dangerHeading: "Delete account and data",
+    ownerCannotDelete:
+      "You are the super admin. Hand that over first (npm run set-owner) before you delete your account.",
     dangerIntro:
       "This permanently deletes your account and all your data (materials, context profiles, feedback and usage). This cannot be undone.",
     confirmLabel: "Type {word} to confirm",
@@ -411,7 +413,7 @@ export const en: Messages = {
     invites: {
       mintHeading: "Invite a teacher",
       mintIntro:
-        "Create an invite link for a teacher. Admins are not created via invites — promote an existing user below.",
+        "Create an invite link for a teacher. An invite never makes an admin; only the super admin makes admins.",
       noteLabel: "Note (who is this for?)",
       notePlaceholder: "e.g. Jan de Vries",
       expiryLabel: "Expires after (days)",
@@ -433,7 +435,10 @@ export const en: Messages = {
       none: "No invites yet.",
       linkOnly: "Open link",
       usersHeading: "Users",
-      usersIntro: "Change roles. You can't demote yourself.",
+      usersIntro:
+        "Admins manage teachers. The super admin also manages admins: role, email address, reset link and delete. You can't demote yourself.",
+      ownerBadge: "Super admin",
+      ownerOnlyError: "Only the super admin can do this.",
       colName: "Name",
       colEmail: "Email",
       colUserRole: "Role",

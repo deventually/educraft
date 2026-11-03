@@ -2,7 +2,7 @@ import { Form, data, useActionData, useNavigation } from "react-router";
 import { AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/account";
-import { requireUser, logout, reissueSessionCookie } from "~/server/auth.server";
+import { isOwner, requireUser, logout, reissueSessionCookie } from "~/server/auth.server";
 import {
   deleteUserCascade,
   getUserById,
@@ -27,7 +27,11 @@ export function meta({ matches }: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  return { user: { name: user.name, email: user.email, role: user.role } };
+  return {
+    user: { name: user.name, email: user.email, role: user.role },
+    // The super admin hands ownership over (npm run set-owner) before deleting (P18.6).
+    isOwner: await isOwner(user),
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -74,6 +78,10 @@ export async function action({ request }: Route.ActionArgs) {
     );
   }
 
+  // The super admin cannot delete their own account: the instance would be left
+  // without anyone who can manage admins (P18.6).
+  if (await isOwner(user)) return { error: m.account.ownerCannotDelete };
+
   // Delete: type-to-confirm — the pasted word must match the locale's word.
   const confirm = String(fd.get("confirm") ?? "").trim();
   if (confirm !== m.account.confirmWord) {
@@ -91,7 +99,7 @@ function roleLabel(role: Role, m: ReturnType<typeof getMessages>): string {
 
 export default function Account({ loaderData }: Route.ComponentProps) {
   const t = useT();
-  const { user } = loaderData;
+  const { user, isOwner: viewerIsOwner } = loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -223,26 +231,32 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           <AlertTriangle className="size-5 shrink-0" aria-hidden />
           {t.account.dangerHeading}
         </h2>
-        <p className="mt-2 text-sm text-red-700">{t.account.dangerIntro}</p>
+        {viewerIsOwner ? (
+          <p className="mt-2 text-sm text-red-700">{t.account.ownerCannotDelete}</p>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-red-700">{t.account.dangerIntro}</p>
 
-        <Form method="post" className="mt-4 space-y-3">
-          <input type="hidden" name="intent" value="delete" />
-          <div>
-            <Label htmlFor="confirm">
-              {fmt(t.account.confirmLabel, { word: t.account.confirmWord })}
-            </Label>
-            <Input
-              id="confirm"
-              name="confirm"
-              autoComplete="off"
-              className="mt-1 max-w-xs"
-              placeholder={t.account.confirmWord}
-            />
-          </div>
-          <Button type="submit" variant="danger" disabled={busy}>
-            {t.account.deleteButton}
-          </Button>
-        </Form>
+            <Form method="post" className="mt-4 space-y-3">
+              <input type="hidden" name="intent" value="delete" />
+              <div>
+                <Label htmlFor="confirm">
+                  {fmt(t.account.confirmLabel, { word: t.account.confirmWord })}
+                </Label>
+                <Input
+                  id="confirm"
+                  name="confirm"
+                  autoComplete="off"
+                  className="mt-1 max-w-xs"
+                  placeholder={t.account.confirmWord}
+                />
+              </div>
+              <Button type="submit" variant="danger" disabled={busy}>
+                {t.account.deleteButton}
+              </Button>
+            </Form>
+          </>
+        )}
       </section>
     </div>
   );

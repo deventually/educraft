@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.5: automatisch opslaan in beheer)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.6: superbeheerder)_
 
 ## Nu
 
@@ -42,6 +42,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.5: automatisch opslaan in beheer)_
 - V2 stap 18.3: modellen als overrule per docent — PR (bovenop 18.2).
 - V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
 - V2 stap 18.5: automatisch opslaan in beheer, geen opslaan-knoppen meer — branch `claude/p18-5` (bovenop 18.4).
+- V2 stap 18.6: superbeheerder — alleen hij maakt, degradeert en verwijdert beheerders; uitnodigingen maken nooit beheerders; `npm run set-owner` — branch `claude/p18-6` (bovenop 18.5).
 
 ## Wacht op jou
 
