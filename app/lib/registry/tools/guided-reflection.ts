@@ -56,7 +56,7 @@ export const guidedReflection: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 6144,
   defaultTemperature: 0.4,
   enabled: true,

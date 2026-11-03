@@ -60,7 +60,7 @@ export const stageAssessment: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   // Feedback on a whole portfolio can be long. 8192 is the Phase 0 cap; verify it
   // does not truncate on a LARGE-document case (§3.6) and raise to 12288 if it does
   // (note the added cost). Confirm the ceiling with an eval on a big submission.

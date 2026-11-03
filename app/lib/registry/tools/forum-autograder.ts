@@ -42,7 +42,7 @@ export const forumAutograder: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 4096, // CoI diagnosis + advice fits comfortably in 4096; verify via evals.
   // Grading tool: use the grading-mode default (0.3) for consistent scores. The
   // facilitation advice it also produces is secondary to scoring stability.

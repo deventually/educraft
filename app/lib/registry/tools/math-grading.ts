@@ -42,7 +42,7 @@ export const mathGrading: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 4096, // Scored feedback fits comfortably; verify no truncation via evals.
   // Grading tool: use the grading-mode default (0.3) for consistent, reproducible
   // scores — a grader at 0.7 introduces avoidable variance in the very numbers a

@@ -458,7 +458,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-opus-4-8" },
       { userId: "allow-opus" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-5-5");
   });
 
   it("honours a client-selectable model (Haiku)", async () => {
@@ -470,12 +470,12 @@ describe("api.stream — model allow-list & budget", () => {
   });
 
   it("falls back to the tool default when the requested model is not admin-enabled", async () => {
-    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    await settings.setEnabledModels(["claude-sonnet-5-5"]);
     await invoke(
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
       { userId: "avail-model" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-5-5");
     await settings.setEnabledModels(null); // reset
   });
 

@@ -38,7 +38,7 @@ export const socraticPartner: Tool = {
   // direct-address register directive (P6.8).
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

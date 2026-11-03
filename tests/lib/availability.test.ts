@@ -111,7 +111,7 @@ describe("getSelectableModels — admin model allow-list + lockout guard", () =>
     logMock.mockClear();
     await settings.setEnabledModels(["nonexistent-model-xyz"]);
     const ids = await availability.getSelectableModelIds();
-    expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
+    expect([...ids]).toEqual(["claude-sonnet-5-5"]); // DEFAULT_MODEL
     expect(logMock).toHaveBeenCalled();
     await settings.setEnabledModels(null); // reset
   });
@@ -172,7 +172,7 @@ describe("getSelectableModelIds — per-teacher & per-cohort narrowing (P13)", (
     logMock.mockClear();
     await users.setUserAssignedModels(teacher.id, ["nonexistent-model-xyz"]);
     const ids = await availability.getSelectableModelIds(teacher);
-    expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
+    expect([...ids]).toEqual(["claude-sonnet-5-5"]); // DEFAULT_MODEL
     expect(logMock).toHaveBeenCalled();
     await users.setUserAssignedModels(teacher.id, null); // reset
   });
@@ -279,7 +279,7 @@ describe("model gates — a local-only allow-list is not a lockout (bugfix)", ()
       id: "bug-genuine-teacher",
       role: "teacher",
     });
-    expect([...ids]).toEqual(["claude-sonnet-4-6"]); // DEFAULT_MODEL
+    expect([...ids]).toEqual(["claude-sonnet-5-5"]); // DEFAULT_MODEL
     expect(logMock).toHaveBeenCalled();
     await users.setUserAssignedModels("bug-genuine-teacher", null); // reset
   });

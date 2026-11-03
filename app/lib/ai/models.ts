@@ -51,6 +51,23 @@ export interface ModelInfo {
 }
 
 export const MODELS = {
+  "claude-opus-5-5": {
+    provider: "anthropic",
+    apiId: "claude-opus-5-5",
+    displayName: "Claude Opus 5.5",
+    supportsImages: true,
+    tier: 3,
+    // Opus-class: a tool/stage default only, never forced by a caller.
+    clientSelectable: false,
+  },
+  "claude-sonnet-5-5": {
+    provider: "anthropic",
+    apiId: "claude-sonnet-5-5",
+    displayName: "Claude Sonnet 5.5",
+    supportsImages: true,
+    tier: 2,
+    clientSelectable: true,
+  },
   "claude-opus-4-8": {
     provider: "anthropic",
     apiId: "claude-opus-4-8",
@@ -122,7 +139,7 @@ export const MODELS = {
 
 export type ModelId = keyof typeof MODELS;
 
-export const DEFAULT_MODEL: ModelId = "claude-sonnet-4-6";
+export const DEFAULT_MODEL: ModelId = "claude-sonnet-5-5";
 
 export function getModel(id: string): ModelInfo {
   const info = (MODELS as Record<string, ModelInfo>)[id];
