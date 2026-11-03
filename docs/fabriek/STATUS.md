@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (proefrit)_
+_Laatst bijgewerkt: 2026-11-03 (V1-plan)_
 
 ## Nu
 
@@ -26,15 +26,18 @@ _Laatst bijgewerkt: 2026-11-03 (proefrit)_
 
 ## Bezig
 
-- Proefrit: briefs P20–P22 hernummerd en vertaald, bord rechtgezet (deze PR).
+- V1 bouwplan (P17) — deze PR.
 
 ## Wacht op jou
 
+- Studentdata bij V1: **definitief verwijderen** (aanbevolen) of **laten staan**? Bepaalt of P17.3
+  een verwijdermigratie wordt (brief P17).
+
 ## Volgende (voorgestelde volgorde)
 
-1. **Vereenvoudiging V1** (wordt P17): de studentenlaag eruit (rol, cohorten, studentuitnodigingen,
-   mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie). De zes tutors blijven,
-   voor docenten.
+1. **Vereenvoudiging V1** (brief P17, drie PR's): de studentenlaag eruit (rol, cohorten,
+   studentuitnodigingen, mentorinzicht, verwijderverzoek, vergrendelde modus, één actieve sessie).
+   De zes tutors blijven, voor docenten.
 2. **Vereenvoudiging V2** (wordt P18): beheer van acht naar vier pagina's; de land-as en de
    toegang per docent voor tools en context weg; modellen per instelling met een overrule per
    docent; CLI- en lokale modellen alleen in ontwikkelmodus; "Bekijk als docent" weg.
