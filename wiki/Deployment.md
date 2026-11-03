@@ -38,16 +38,22 @@ Migratie `0010` (P18.8) laat de tabellen `chat_sessions`, `messages` en `project
 `allowed_tool_slugs` en `project_id` vallen, ruimt verouderde instellingssleutels op en verwijdert
 open beheerdersuitnodigingen. Doe daarom vooraf:
 
-1. Tel de rollen: `SELECT role, COUNT(*) FROM users GROUP BY role;` en noteer de aantallen.
+1. Stop de app eerst, zodat de aantallen niet meer veranderen tussen tellen en back-up.
+2. Tel de rollen: `SELECT role, COUNT(*) FROM users GROUP BY role;` en noteer de aantallen.
    Voor `0010` ook: `SELECT COUNT(*) FROM chat_sessions;`, `SELECT COUNT(*) FROM messages;`,
-   `SELECT COUNT(*) FROM projects;` en `SELECT COUNT(*) FROM generations;`.
-2. Stop de app en kopieer `limeonit.db` **plus** `limeonit.db-wal` en `limeonit.db-shm` van het
-   volume (of maak een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-p18.db"`).
-3. Bewaar de back-up buiten de repo. Hij bevat studentdata en oude chattranscripten: verwijder hem na een korte, door de
-   beheerder gekozen termijn.
-4. Deploy. Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten en beheerders. Een
-   docent logt in en ziet zijn werk.
-5. Terugdraaien = de back-up terugzetten op het volume en de vorige image deployen.
+   `SELECT COUNT(*) FROM projects;` en `SELECT COUNT(*) FROM generations;`. Kijk ook of er oude
+   uitzonderingen per docent zijn (die verdwijnen in `0010`):
+   `SELECT COUNT(*) FROM users WHERE allowed_tool_slugs IS NOT NULL;` en
+   `SELECT key, value_json FROM instance_settings WHERE key LIKE 'contextCustomAccess:%' OR key LIKE 'assignedSectors:%' OR key LIKE 'assignedDomains:%';`.
+   Staat er iets, zet dan eerst de instelling ruim genoeg op `/admin/context`.
+3. Kopieer `limeonit.db` **plus** `limeonit.db-wal` en `limeonit.db-shm` van het volume (of maak
+   een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-p18.db"`).
+4. Bewaar de back-up buiten de repo. Hij bevat verwijderde data (studentdata vóór `0008`, oude
+   chattranscripten vóór `0010`): verwijder hem na een korte, door de beheerder gekozen termijn.
+5. Deploy (of start de app weer). Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten
+   en beheerders, en voor `0010` hetzelfde aantal `generations`. Een docent logt in en ziet zijn
+   werk in Projecten.
+6. Terugdraaien = de app stoppen, de back-up terugzetten op het volume en de vorige image deployen.
 
 ## Environment checklist
 
