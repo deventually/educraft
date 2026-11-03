@@ -14,7 +14,7 @@ function renderDialog(extra: Partial<Parameters<typeof ConfirmDialog>[0]> = {}) 
       Component: () => (
         <ConfirmDialog
           triggerLabel="Verwijderen"
-          title="Cohort verwijderen?"
+          title="Item verwijderen?"
           description="Dit kan niet ongedaan worden gemaakt."
           confirmLabel="Verwijderen"
           cancelLabel="Annuleren"
@@ -35,7 +35,7 @@ describe("ConfirmDialog", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Verwijderen" }));
     const dialog = screen.getByRole("dialog");
-    expect(dialog).toHaveAccessibleName("Cohort verwijderen?");
+    expect(dialog).toHaveAccessibleName("Item verwijderen?");
   });
 
   it("closes on Cancel and on Escape", async () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Link, useActionData } from "react-router";
+import { Form, useActionData } from "react-router";
 import { z } from "zod";
 import { Copy, KeyRound, Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.invites";
@@ -16,15 +16,13 @@ import {
   setUserRole,
   updateUserEmail,
 } from "~/server/repositories/users.server";
-import type { Role } from "~/lib/registry/access";
+import { ROLES, isRole } from "~/lib/registry/access";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { useFormToast } from "~/components/Toast";
 import { Button, HelpText, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
-
-const ROLES: Role[] = ["student", "teacher", "admin"];
 
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
@@ -38,11 +36,9 @@ export async function loader({ request }: Route.LoaderArgs) {
       token: i.token,
       role: i.role,
       note: i.note,
-      email: i.email,
       expiresAt: i.expiresAt,
       used: Boolean(i.usedByUserId),
       createdByName: i.createdByName,
-      cohortName: i.cohortName,
       createdAt: i.createdAt,
     })),
     users: users.map((u) => ({
@@ -92,7 +88,7 @@ export async function action({ request }: Route.ActionArgs) {
     const role = String(fd.get("role") ?? "");
     // An admin can never change their OWN role — no self-lockout.
     if (userId === admin.id) return { error: "selfDemote" as const };
-    if ((ROLES as string[]).includes(role)) await setUserRole(userId, role as Role);
+    if (isRole(role)) await setUserRole(userId, role);
     return { roleChanged: true as const };
   }
 
@@ -140,7 +136,6 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
   const [restrict, setRestrict] = useState(false);
 
   const roleLabel: Record<string, string> = {
-    student: t.admin.invites.roleStudent,
     teacher: t.admin.invites.roleTeacher,
     admin: t.admin.invites.roleAdmin,
   };
@@ -276,11 +271,6 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
             </fieldset>
 
             <Button type="submit">{t.admin.invites.submit}</Button>
-            <p className="text-xs text-slate-500">
-              <Link to="/cohorts" className="font-medium text-violet-600 hover:underline">
-                {t.admin.invites.cohortLink}
-              </Link>
-            </p>
           </Form>
         )}
       </section>
@@ -311,9 +301,6 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                   <th scope="col" className="px-4 py-2.5 font-semibold">
                     {t.admin.invites.colCreator}
                   </th>
-                  <th scope="col" className="px-4 py-2.5 font-semibold">
-                    {t.admin.invites.colCohort}
-                  </th>
                   <th scope="col" className="px-4 py-2.5 text-right font-semibold">
                     <span className="sr-only">{t.admin.invites.revoke}</span>
                   </th>
@@ -337,11 +324,10 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                         {roleLabel[inv.role] ?? inv.role}
                       </td>
                       <td className="px-4 py-2.5 text-slate-600">
-                        {inv.email ?? inv.note ?? t.admin.invites.linkOnly}
+                        {inv.note ?? t.admin.invites.linkOnly}
                       </td>
                       <td className="px-4 py-2.5 text-slate-600">{status}</td>
                       <td className="px-4 py-2.5 text-slate-600">{inv.createdByName ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-slate-600">{inv.cohortName ?? "—"}</td>
                       <td className="px-4 py-2.5 text-right">
                         {open && (
                           <ConfirmDialog

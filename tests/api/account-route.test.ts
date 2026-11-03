@@ -39,7 +39,7 @@ function deleteRequest(): Request {
   });
 }
 
-function actAs(id: string, role: "student" | "teacher" | "admin") {
+function actAs(id: string, role: "teacher" | "admin") {
   requireUserMock.mockResolvedValue({
     id,
     name: `User ${id}`,
@@ -49,23 +49,8 @@ function actAs(id: string, role: "student" | "teacher" | "admin") {
   });
 }
 
-describe("account deletion (Phase 14)", () => {
-  it("a student's request disables the account instead of hard-deleting it", async () => {
-    const s = await users.createUser({
-      id: "acc-student",
-      name: "Student S",
-      passwordHash: "scrypt:x:y",
-      role: "student",
-    });
-    actAs(s.id, "student");
-    await route.action({ request: deleteRequest() } as Parameters<typeof route.action>[0]);
-    const row = await users.getUserById(s.id);
-    expect(row).not.toBeNull(); // NOT deleted — held for the teacher
-    expect(row?.disabledAt).toBeInstanceOf(Date);
-    expect(row?.deletionRequestedAt).toBeInstanceOf(Date);
-  });
-
-  it("a teacher's deletion still hard-deletes their account", async () => {
+describe("account deletion (P17)", () => {
+  it("a teacher's deletion hard-deletes their account", async () => {
     const tch = await users.createUser({
       id: "acc-teacher",
       name: "Teacher T",
@@ -75,5 +60,51 @@ describe("account deletion (Phase 14)", () => {
     actAs(tch.id, "teacher");
     await route.action({ request: deleteRequest() } as Parameters<typeof route.action>[0]);
     expect(await users.getUserById(tch.id)).toBeNull();
+  });
+});
+
+describe("account password change (P17)", () => {
+  it("logs out other devices but keeps the changing device signed in", async () => {
+    const auth = await import("~/server/auth.server");
+    const pw = await import("~/server/password.server");
+    const u = await users.createUser({
+      id: "acc-pwchange",
+      name: "Pw Changer",
+      email: "pwchanger@example.com",
+      passwordHash: pw.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0];
+    const asRequest = (cookie: string) =>
+      new Request("http://localhost/", { headers: { Cookie: cookie } });
+
+    const otherDevice = cookieOf(
+      (await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"),
+    );
+    expect((await auth.getUser(asRequest(otherDevice)))?.id).toBe(u.id);
+
+    actAs(u.id, "teacher");
+    const res = (await route.action({
+      request: new Request("http://localhost/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          intent: "changePassword",
+          currentPassword: "old-password-x",
+          password: "brand-new-secret",
+          confirm: "brand-new-secret",
+        }).toString(),
+      }),
+    } as Parameters<typeof route.action>[0])) as unknown as {
+      data: { ok?: string };
+      init: { headers: Headers | Record<string, string> } | null;
+    };
+
+    expect(res.data.ok).toBe("password");
+    expect(await auth.getUser(asRequest(otherDevice))).toBeNull();
+    const headers = new Headers(res.init?.headers);
+    const fresh = cookieOf(headers.get("Set-Cookie"));
+    expect(fresh).toContain("__session=");
+    expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
   });
 });

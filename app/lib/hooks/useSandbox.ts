@@ -10,12 +10,6 @@ export interface UseSandboxOptions {
   profiles?: ContextProfile[];
   /** Which profile is selected initially. */
   defaultProfileId?: string;
-  /**
-   * Provisioned-student mode (Phase 6.9): cohort-supplied values prefill AND lock
-   * the sandbox — there is no editable profile selector, and callers hide the
-   * editing UI when `locked` is true.
-   */
-  lockedValues?: Record<string, string>;
 }
 
 export interface UseSandbox {
@@ -29,20 +23,16 @@ export interface UseSandbox {
   contextProfileId: string;
   /** Select a profile and re-derive its profile-backed fields. */
   selectProfile: (id: string) => void;
-  /** True in provisioned-student mode (values are locked, no editable controls). */
-  locked: boolean;
 }
 
 /**
  * The shared sandbox: the per-tool input values plus the selected context
- * profile, with two behaviours the three tool surfaces used to each re-implement:
+ * profile, with one behaviour the three tool surfaces used to each re-implement:
  *
  *  - **profile prefill** — a field marked `prefillFromProfile` is seeded from the
  *    selected profile and re-derived when the profile changes (GeneratorView,
  *    StageStepper). Switching to a profile that derives nothing resets the field
  *    to its default, so a stale prefill never lingers.
- *  - **locked mode** — a provisioned student's cohort supplies the values and
- *    there is no editable sandbox/profile selector (ChatView, Phase 6.9).
  *
  * A tool with no `prefillFromProfile` fields (e.g. Cognitive Architect) behaves
  * exactly as before: `selectProfile` only touches profile-backed fields.
@@ -51,10 +41,8 @@ export function useSandbox({
   inputs,
   profiles,
   defaultProfileId = "",
-  lockedValues,
 }: UseSandboxOptions): UseSandbox {
   const profileList = profiles ?? [];
-  const locked = lockedValues != null;
   const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
   const [values, setValues] = useState<FormValues>(() => ({
     ...defaultValuesFor(inputs),
@@ -62,7 +50,6 @@ export function useSandbox({
       inputs,
       profileList.find((p) => p.id === defaultProfileId),
     ),
-    ...(lockedValues ?? {}),
   }));
 
   function selectProfile(id: string) {
@@ -84,5 +71,5 @@ export function useSandbox({
   const setValue = (name: string, value: FormValues[string]) =>
     setValues((prev) => ({ ...prev, [name]: value }));
 
-  return { values, setValue, setValues, contextProfileId, selectProfile, locked };
+  return { values, setValue, setValues, contextProfileId, selectProfile };
 }

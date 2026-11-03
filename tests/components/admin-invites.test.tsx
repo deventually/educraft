@@ -24,7 +24,6 @@ const loaderData = {
       expiresAt: new Date(Date.now() + 86_400_000),
       used: false,
       createdByName: "Admin A",
-      cohortName: null,
       createdAt: new Date("2026-07-01T10:00:00Z"),
     },
   ],
@@ -62,6 +61,15 @@ describe("Admin invites", () => {
     await waitFor(() => {
       expect(screen.getByText("http://localhost/invite/tok-new")).toBeInTheDocument();
     });
+  });
+
+  it("offers only teacher and admin in the role select", () => {
+    renderRoute();
+    const values = screen
+      .getAllByRole("combobox")
+      .flatMap((s) => Array.from(s.querySelectorAll("option")).map((o) => o.getAttribute("value")));
+    expect(values.length).toBeGreaterThan(0);
+    for (const v of values) expect(["teacher", "admin"]).toContain(v);
   });
 
   it("offers a role change for other users but not for the signed-in admin", () => {

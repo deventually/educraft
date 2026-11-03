@@ -41,10 +41,10 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
 - **Right to erasure.** "Delete my account and data" (`/account`) runs
   `deleteUserCascade` (`app/server/repositories/users.server.ts`) — a single
   transaction removing the user's feedback, usage counters, generations, context
-  profiles, cohort memberships, and their chat history, then the user row — and
+  profiles, and any legacy chat history and cohort rows, then the user row — and
   ends the session. Scoped by user id, so no other account is touched.
-- **Access control & scoping.** Invite-only accounts, three roles
-  (student/teacher/admin), and per-user scoping on every repository query (a user
+- **Access control & scoping.** Invite-only accounts, two roles
+  (teacher/admin), and per-user scoping on every repository query (a user
   only ever sees their own data). See `wiki/Authentication.md`.
 - **Abuse & cost bounds.** Per-user rate limits and a per-user daily quota
   (`app/server/repositories/usage.server.ts`) cap runaway use.

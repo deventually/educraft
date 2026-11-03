@@ -23,28 +23,6 @@ function ProjectsView() {
   );
 }
 
-/** Mirrors admin.cohorts.tsx: assign/delete/reassign/remove → success, error → alert. */
-function CohortsView() {
-  const c = useT().admin.cohorts;
-  const actionData = useActionData() as Record<string, unknown> | undefined;
-  useFormToast(actionData, {
-    result: (d) => {
-      if (!d) return null;
-      if ("deleted" in d) return { variant: "success", message: c.toastDeleted };
-      if ("assigned" in d) return { variant: "success", message: c.toastAssigned };
-      if ("reassigned" in d) return { variant: "success", message: c.toastReassigned };
-      if ("removed" in d) return { variant: "success", message: c.toastRemoved };
-      if ("error" in d) return { variant: "error", message: c.toastError };
-      return null;
-    },
-  });
-  return (
-    <Form method="post">
-      <button type="submit">go</button>
-    </Form>
-  );
-}
-
 function stub(View: () => React.ReactNode, action: () => unknown) {
   return createRoutesStub([
     {
@@ -68,21 +46,5 @@ describe("toast wiring", () => {
     await waitFor(() =>
       expect(screen.getByRole("status")).toHaveTextContent("Resultaat verwijderd."),
     );
-  });
-
-  it("announces an admin.cohorts assign (previously silent)", async () => {
-    const Stub = stub(CohortsView, () => ({ assigned: true }));
-    const user = userEvent.setup();
-    render(<Stub initialEntries={["/"]} />);
-    await user.click(screen.getByRole("button", { name: "go" }));
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Docent toegewezen."));
-  });
-
-  it("shows an assertive alert for an admin.cohorts error", async () => {
-    const Stub = stub(CohortsView, () => ({ error: true }));
-    const user = userEvent.setup();
-    render(<Stub initialEntries={["/"]} />);
-    await user.click(screen.getByRole("button", { name: "go" }));
-    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
   });
 });

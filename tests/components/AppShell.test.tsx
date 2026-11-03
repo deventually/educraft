@@ -144,11 +144,10 @@ describe("AppShell top navigation", () => {
 });
 
 describe("AppShell teaching-context visibility by role", () => {
-  it("hides the Onderwijscontext link for a signed-in student (nav + footer)", async () => {
-    // A student authors no teaching context — the link must not appear anywhere.
-    renderShellWithUser({ name: "Havo Student", role: "student" });
+  it("shows no Cohorten link for a teacher", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher" });
     await screen.findByText("Tools home");
-    expect(screen.queryByRole("link", { name: "Onderwijscontext" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Cohorten" })).toBeNull();
   });
 
   it("keeps the Onderwijscontext link for a teacher", async () => {

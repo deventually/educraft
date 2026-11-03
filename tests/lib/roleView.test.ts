@@ -11,10 +11,9 @@ describe("view-as effective role (Phase 4)", () => {
     expect(getEffectiveRole({ role: "admin" }, req())).toBe("admin");
   });
 
-  it("never raises privilege — a teacher stays a teacher, a student a student", () => {
+  it("never raises privilege — a teacher stays a teacher", () => {
     // The cookie can only lower privilege; a non-admin's cookie is inert.
     expect(getEffectiveRole({ role: "teacher" }, req("viewAs=teacher"))).toBe("teacher");
-    expect(getEffectiveRole({ role: "student" }, req("viewAs=teacher"))).toBe("student");
     // There is no cookie value that grants admin.
     expect(getEffectiveRole({ role: "teacher" }, req("viewAs=admin"))).toBe("teacher");
   });

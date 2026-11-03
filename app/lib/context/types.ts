@@ -93,8 +93,7 @@ export interface ContextProfile {
   /**
    * EQF level (1–8). **Deprecated as an input** (Phase 8): the editor now collects
    * the national `nationalLevel` and the engine *derives* EQF (see `derive.ts`).
-   * Retained because it is still the level currency the engine injects, it backs
-   * the cohort synthetic profile `{ eqf: cohort.contextEqf }`, and it keeps legacy
+   * Retained because it is still the level currency the engine injects, and it keeps legacy
    * profiles deserializing + resolving via `resolveLevel`'s fallback. See `eqf.ts`.
    */
   eqf?: EqfLevel;

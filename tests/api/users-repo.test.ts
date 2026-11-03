@@ -109,33 +109,11 @@ describe("users repository", () => {
     expect(await repo.getUserContextCustomAccess("ca-t")).toBe(false);
   });
 
-  it("disables + flags an account on removal request and reactivates it (P14)", async () => {
-    const u = await repo.createUser({
-      name: "Leaving Student",
-      passwordHash: "scrypt:x:y",
-      role: "student",
-    });
-    // Fresh accounts are active.
-    const fresh = await repo.getUserById(u.id);
-    expect(fresh?.disabledAt ?? null).toBeNull();
-    expect(fresh?.deletionRequestedAt ?? null).toBeNull();
-
-    await repo.requestAccountDeletion(u.id);
-    const disabled = await repo.getUserById(u.id);
-    expect(disabled?.disabledAt).toBeInstanceOf(Date);
-    expect(disabled?.deletionRequestedAt).toBeInstanceOf(Date);
-
-    await repo.reactivateUser(u.id);
-    const active = await repo.getUserById(u.id);
-    expect(active?.disabledAt ?? null).toBeNull();
-    expect(active?.deletionRequestedAt ?? null).toBeNull();
-  });
-
   it("allows a nameless (email-less) invite-based account", async () => {
     const created = await repo.createUser({
       name: "Anon",
       passwordHash: "scrypt:aa:bb",
-      role: "student",
+      role: "teacher",
     });
     const byId = await repo.getUserById(created.id);
     expect(byId?.email ?? null).toBeNull();
@@ -155,7 +133,10 @@ describe("users repository", () => {
     expect((await repo.getUserByEmail("added@example.com"))?.id).toBe(u.id);
 
     await repo.updateUserPassword(u.id, "scrypt:new:hash");
-    expect((await repo.getUserById(u.id))?.passwordHash).toBe("scrypt:new:hash");
+    const after = await repo.getUserById(u.id);
+    expect(after?.passwordHash).toBe("scrypt:new:hash");
+    // A password change is the only thing that bumps the session version.
+    expect(after?.sessionVersion).toBe(1);
   });
 });
 
@@ -171,7 +152,7 @@ describe("invites repository", () => {
   });
 
   it("consumes an invite exactly once (single-use, atomic)", async () => {
-    const invite = await repo.createInvite({ role: "student" });
+    const invite = await repo.createInvite({ role: "teacher" });
     const first = await repo.consumeInvite(invite.token, "user-a");
     expect(first?.usedByUserId).toBe("user-a");
 
@@ -186,7 +167,7 @@ describe("invites repository", () => {
 
   it("rejects an expired invite", async () => {
     const invite = await repo.createInvite({
-      role: "student",
+      role: "teacher",
       expiresAt: new Date(Date.now() - 1000),
     });
     expect(await repo.consumeInvite(invite.token, "user-c")).toBeNull();
@@ -199,64 +180,11 @@ describe("invites repository", () => {
   });
 });
 
-describe("curated, identity-bound, batch invites (Phase 6)", () => {
-  it("createInvite stores creator, cohort and email", async () => {
-    const invite = await repo.createInvite({
-      role: "student",
-      createdByUserId: "teacher-1",
-      cohortId: "cohort-1",
-      email: "Student@School.NL",
-    });
+describe("invite provenance (P17)", () => {
+  it("createInvite stores the creator", async () => {
+    const invite = await repo.createInvite({ role: "teacher", createdByUserId: "admin-1" });
     const fetched = await repo.getInvite(invite.token);
-    expect(fetched?.createdByUserId).toBe("teacher-1");
-    expect(fetched?.cohortId).toBe("cohort-1");
-    expect(fetched?.email).toBe("Student@School.NL");
-    expect(fetched?.role).toBe("student");
-  });
-
-  it("createInvitesForCohort mints one single-use student token per recipient", async () => {
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const invites = await repo.createInvitesForCohort(
-      "cohort-batch",
-      "teacher-2",
-      [{ email: "a@example.com" }, { email: "b@example.com" }, {}],
-      expiresAt,
-    );
-    expect(invites).toHaveLength(3);
-    for (const inv of invites) {
-      expect(inv.role).toBe("student");
-      expect(inv.cohortId).toBe("cohort-batch");
-      expect(inv.createdByUserId).toBe("teacher-2");
-      expect(inv.usedByUserId).toBeNull();
-      expect(inv.token.length).toBeGreaterThanOrEqual(32);
-    }
-    // Email is bound where given, and absent (link-only) where not.
-    expect(invites[0].email).toBe("a@example.com");
-    expect(invites[2].email ?? null).toBeNull();
-    // Tokens are distinct.
-    expect(new Set(invites.map((i) => i.token)).size).toBe(3);
-  });
-
-  it("consumeInvite requires a matching email (case-insensitive) for an identity-bound invite", async () => {
-    const invite = await repo.createInvite({
-      role: "student",
-      cohortId: "c",
-      email: "bound@example.com",
-    });
-    // A wrong email is rejected and the invite stays unused.
-    expect(await repo.consumeInvite(invite.token, "user-wrong", "other@example.com")).toBeNull();
-    expect((await repo.getInvite(invite.token))?.usedByUserId ?? null).toBeNull();
-
-    // The matching email (any case) succeeds exactly once.
-    const ok = await repo.consumeInvite(invite.token, "user-right", "BOUND@example.com");
-    expect(ok?.usedByUserId).toBe("user-right");
-    // Still single-use afterwards.
-    expect(await repo.consumeInvite(invite.token, "user-late", "bound@example.com")).toBeNull();
-  });
-
-  it("consumeInvite ignores the submitted email for a non-bound invite", async () => {
-    const invite = await repo.createInvite({ role: "student", cohortId: "c" });
-    const ok = await repo.consumeInvite(invite.token, "user-any", "whatever@example.com");
-    expect(ok?.usedByUserId).toBe("user-any");
+    expect(fetched?.createdByUserId).toBe("admin-1");
+    expect(fetched?.role).toBe("teacher");
   });
 });

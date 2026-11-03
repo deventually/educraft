@@ -7,7 +7,6 @@ import {
   MessagesSquare,
   SlidersHorizontal,
   UserPlus,
-  Users,
 } from "lucide-react";
 import type { Route } from "./+types/admin";
 import { requireRole } from "~/server/auth.server";
@@ -39,7 +38,6 @@ const SECTIONS = [
   { to: "/admin/models", end: false, key: "models", Icon: Cpu },
   { to: "/admin/context", end: false, key: "context", Icon: GraduationCap },
   { to: "/admin/invites", end: false, key: "invites", Icon: UserPlus },
-  { to: "/admin/cohorts", end: false, key: "cohorts", Icon: Users },
   { to: "/admin/usage", end: false, key: "usage", Icon: Activity },
   { to: "/admin/feedback", end: false, key: "feedback", Icon: MessagesSquare },
 ] as const;

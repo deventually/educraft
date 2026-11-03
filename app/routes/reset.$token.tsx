@@ -41,8 +41,8 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (!reset) return { error: m.auth.resetInvalid };
 
   await updateUserPassword(reset.userId, hashPassword(password));
-  // A fresh session bumps sessionVersion, so any older cookie is logged out — a
-  // reset both sets the password and locks out a stale session.
+  // `updateUserPassword` bumped sessionVersion, so every older cookie is logged out;
+  // the fresh session below carries the new version.
   return createUserSession(reset.userId, "/");
 }
 

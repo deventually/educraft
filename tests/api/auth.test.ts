@@ -104,59 +104,65 @@ describe("auth helpers", () => {
   });
 });
 
-describe("disabled account (Phase 14)", () => {
-  it("getUser returns null for a disabled account even with a valid cookie", async () => {
+describe("legacy student rows (P17)", () => {
+  it("treats a legacy student row as logged out", async () => {
     const u = await users.createUser({
-      name: "To Disable",
-      email: "todisable@example.com",
+      name: "Legacy Student",
+      email: "legacy@example.com",
       passwordHash: "scrypt:aa:bb",
-      role: "student",
+      role: "student" as never,
     });
     const cookie = await sessionCookieFor(u.id);
-    // Active first…
-    expect((await auth.getUser(requestWithCookie(cookie)))?.id).toBe(u.id);
-    // …then disabling logs them out everywhere (session version unchanged).
-    await users.requestAccountDeletion(u.id);
     expect(await auth.getUser(requestWithCookie(cookie))).toBeNull();
   });
 
-  it("the login action refuses a disabled account despite correct credentials", async () => {
+  it("login refuses a legacy student account with the generic message", async () => {
     const pw = "correct horse battery staple";
-    const u = await users.createUser({
-      name: "Blocked",
-      email: "blocked@example.com",
+    await users.createUser({
+      name: "Legacy Login",
+      email: "legacylogin@example.com",
       passwordHash: password.hashPassword(pw),
-      role: "student",
+      role: "student" as never,
     });
-    await users.requestAccountDeletion(u.id);
     const req = new Request("http://localhost/login", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ email: "blocked@example.com", password: pw }).toString(),
+      body: new URLSearchParams({ email: "legacylogin@example.com", password: pw }).toString(),
     });
     const m = i18n.getMessages(localeServer.getLocale(req));
     const res = (await login.action({ request: req } as Parameters<typeof login.action>[0])) as {
       error?: string;
     };
-    expect(res.error).toBe(m.auth.accountDisabled);
+    expect(res.error).toBe(m.auth.loginFailed);
   });
 });
 
-describe("single active session (Phase 6 anti-sharing)", () => {
-  it("treats a stale sessionVersion cookie as logged out after a newer login", async () => {
+describe("multiple devices (P17)", () => {
+  it("a second login keeps the first session valid", async () => {
     const u = await users.createUser({
       name: "Multi Device",
       email: "multi@example.com",
       passwordHash: "scrypt:aa:bb",
-      role: "student",
+      role: "teacher",
     });
-    // Two successive logins mint two cookies; the second bumps sessionVersion.
     const cookie1 = await sessionCookieFor(u.id);
     const cookie2 = await sessionCookieFor(u.id);
-
-    // The newest cookie authenticates…
+    expect((await auth.getUser(requestWithCookie(cookie1)))?.id).toBe(u.id);
     expect((await auth.getUser(requestWithCookie(cookie2)))?.id).toBe(u.id);
-    // …the older one no longer does (its sessionVersion is stale).
-    expect(await auth.getUser(requestWithCookie(cookie1))).toBeNull();
+  });
+
+  it("a password update logs out every older session but not a freshly minted one", async () => {
+    const u = await users.createUser({
+      name: "Pw Change",
+      email: "pwchange@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    const old = await sessionCookieFor(u.id);
+    expect((await auth.getUser(requestWithCookie(old)))?.id).toBe(u.id);
+    await users.updateUserPassword(u.id, "scrypt:cc:dd");
+    expect(await auth.getUser(requestWithCookie(old))).toBeNull();
+    const fresh = await sessionCookieFor(u.id);
+    expect((await auth.getUser(requestWithCookie(fresh)))?.id).toBe(u.id);
   });
 });

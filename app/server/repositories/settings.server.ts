@@ -26,13 +26,12 @@ export async function getToolSetting(slug: string): Promise<ToolSettingRow | nul
 
 export interface ToolSettingPatch {
   enabled?: boolean | null;
-  audienceOverride?: string | null;
 }
 
 /**
  * Upsert a tool setting, merging in place — only the keys present in `patch`
- * change, so toggling `enabled` never clobbers an `audienceOverride` (and vice
- * versa).
+ * change. The legacy `audience_override` column (dropped in 17.3) is no longer
+ * read; it is written `null` so a stale value cannot linger.
  */
 export async function setToolSetting(slug: string, patch: ToolSettingPatch): Promise<void> {
   const db = getDb();
@@ -40,10 +39,7 @@ export async function setToolSetting(slug: string, patch: ToolSettingPatch): Pro
   const next: ToolSettingRow = {
     toolSlug: slug,
     enabled: patch.enabled !== undefined ? patch.enabled : (existing?.enabled ?? null),
-    audienceOverride:
-      patch.audienceOverride !== undefined
-        ? patch.audienceOverride
-        : (existing?.audienceOverride ?? null),
+    audienceOverride: null,
     updatedAt: new Date(),
   };
   if (existing) {

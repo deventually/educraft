@@ -7,14 +7,12 @@ type Profiles = typeof import("~/server/repositories/profiles.server");
 type Generations = typeof import("~/server/repositories/generations.server");
 type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
-type Cohorts = typeof import("~/server/repositories/cohorts.server");
 
 let users: Users;
 let profiles: Profiles;
 let generations: Generations;
 let usage: Usage;
 let feedback: Feedback;
-let cohorts: Cohorts;
 
 beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
@@ -22,7 +20,6 @@ beforeAll(async () => {
   generations = await import("~/server/repositories/generations.server");
   usage = await import("~/server/repositories/usage.server");
   feedback = await import("~/server/repositories/feedback.server");
-  cohorts = await import("~/server/repositories/cohorts.server");
 });
 
 async function seedUser(id: string) {
@@ -89,6 +86,12 @@ describe("deleteUserCascade", () => {
   });
 
   it("keeps a teacher's cohorts (orphan-safe), nulls their dangling profile ref, drops co-teach links", async () => {
+    // Legacy cohort tables (dropped in 17.3): rows are seeded directly because the
+    // cohort repository is gone, but the cascade still has to clean after them.
+    const { getDb } = await import("~/server/db.server");
+    const { cohorts, cohortTeachers } = await import("~/server/schema.server");
+    const { eq, and } = await import("drizzle-orm");
+    const db = getDb();
     await users.createUser({
       id: "del-teacher-own",
       name: "Cohort Owner",
@@ -96,29 +99,44 @@ describe("deleteUserCascade", () => {
       role: "teacher",
     });
     const profile = await profiles.createProfile("del-teacher-own", { name: "Niveau 6", eqf: 6 });
-    const owned = await cohorts.createCohort({
-      createdByUserId: "del-teacher-own",
-      name: "Owned cohort",
-      allowedToolSlugs: ["mentorai"],
-      contextProfileId: profile.id,
-    });
-    // A co-teach assignment on a colleague's cohort.
-    const colleague = await cohorts.createCohort({
-      createdByUserId: "del-teacher-other",
-      name: "Colleague cohort",
-      allowedToolSlugs: ["mentorai"],
-    });
-    await cohorts.addCohortTeacher(colleague.id, "del-teacher-own");
+    const now = new Date();
+    const base = { allowedToolSlugs: "[]", configJson: "{}", createdAt: now };
+    db.insert(cohorts)
+      .values([
+        {
+          ...base,
+          id: "c-owned",
+          createdByUserId: "del-teacher-own",
+          name: "Owned cohort",
+          contextProfileId: profile.id,
+        },
+        { ...base, id: "c-colleague", createdByUserId: "del-teacher-other", name: "Colleague" },
+      ])
+      .run();
+    db.insert(cohortTeachers)
+      .values({ id: "ct-1", cohortId: "c-colleague", userId: "del-teacher-own", createdAt: now })
+      .run();
 
     await users.deleteUserCascade("del-teacher-own");
 
     // The owned cohort survives so an admin can reassign it — but the dangling
     // reference to the now-deleted profile is cleared.
-    const survived = await cohorts.getCohort(owned.id);
-    expect(survived).not.toBeNull();
+    const survived = db.select().from(cohorts).where(eq(cohorts.id, "c-owned")).get();
+    expect(survived).toBeDefined();
     expect(survived?.contextProfileId).toBeNull();
     // Their co-teach assignment is removed (no orphaned join row).
-    expect((await cohorts.getCohortTeacherIds(colleague.id)).has("del-teacher-own")).toBe(false);
+    expect(
+      db
+        .select()
+        .from(cohortTeachers)
+        .where(
+          and(
+            eq(cohortTeachers.cohortId, "c-colleague"),
+            eq(cohortTeachers.userId, "del-teacher-own"),
+          ),
+        )
+        .all(),
+    ).toHaveLength(0);
   });
 
   it("leaves other users' data untouched", async () => {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { Route } from "./+types/invite";
 import { createUserSession } from "~/server/auth.server";
 import { consumeInvite, createUser, getInvite } from "~/server/repositories/users.server";
-import { addMembership } from "~/server/repositories/cohorts.server";
+import { isRole, type Role } from "~/lib/registry/access";
 import { hashPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -17,12 +17,18 @@ export function meta({ matches }: Route.MetaArgs) {
   return [{ title: `${m.auth.inviteHeading} — ${m.appName}` }];
 }
 
-/** Whether an invite token is still redeemable (exists, unused, not expired). */
+/**
+ * Whether an invite token is still redeemable (exists, unused, not expired). A
+ * legacy invite — one bound to a cohort or carrying a retired role such as
+ * "student" (pre-P17 data) — is never redeemable.
+ */
 function isRedeemable(
   invite: Awaited<ReturnType<typeof getInvite>>,
 ): invite is NonNullable<typeof invite> {
   return Boolean(
     invite &&
+      isRole(invite.role) &&
+      !invite.cohortId &&
       !invite.usedByUserId &&
       !(invite.expiresAt && invite.expiresAt.getTime() < Date.now()),
   );
@@ -30,9 +36,7 @@ function isRedeemable(
 
 export async function loader({ params }: Route.LoaderArgs) {
   const invite = await getInvite(params.token);
-  // An identity-bound invite prefills (and locks) the email so the intended
-  // student can only redeem it as themselves.
-  return { valid: isRedeemable(invite), boundEmail: invite?.email ?? null };
+  return { valid: isRedeemable(invite) };
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -51,18 +55,13 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (password.length < 10) return { error: m.auth.passwordTooShort };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
-  // Identity binding (Phase 6): a bound invite may only be redeemed with its
-  // intended email. Surface a specific message at the boundary; consumeInvite
-  // enforces the same match atomically as a belt-and-suspenders guard.
-  const invite = await getInvite(params.token);
-  if (invite?.email && invite.email.trim().toLowerCase() !== emailRaw.toLowerCase()) {
-    return { error: m.auth.emailMismatch };
-  }
+  // Refuse a legacy (cohort/student) invite before it can be claimed.
+  if (!isRedeemable(await getInvite(params.token))) return { error: m.auth.inviteInvalid };
 
   // Claim the invite atomically for a fresh id *before* creating the user, so a
   // race (or a replayed link) admits exactly one account.
   const userId = randomUUID();
-  const consumed = await consumeInvite(params.token, userId, emailRaw || null);
+  const consumed = await consumeInvite(params.token, userId);
   if (!consumed) return { error: m.auth.inviteInvalid };
 
   // A teacher invite may carry a per-teacher tool allow-list (Phase 4); it travels
@@ -82,13 +81,9 @@ export async function action({ params, request }: Route.ActionArgs) {
     name,
     email: emailRaw || null,
     passwordHash: hashPassword(password),
-    role: consumed.role as Parameters<typeof createUser>[0]["role"],
+    role: consumed.role as Role,
     allowedToolSlugs,
   });
-
-  // A cohort invite joins the redeemer to the cohort, inheriting its allow-list
-  // + config; ongoing authorisation then lives on the cohort, not the link.
-  if (consumed.cohortId) await addMembership(consumed.cohortId, userId);
 
   return createUserSession(userId, "/");
 }
@@ -115,10 +110,6 @@ export default function Invite({ loaderData }: Route.ComponentProps) {
   }
 
   const error = actionData?.error;
-  // An identity-bound invite prefills the intended email and locks it: the
-  // student redeems only as themselves (casual link-forwarding then fails).
-  const boundEmail = loaderData.boundEmail ?? null;
-
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col justify-center py-10">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
@@ -150,19 +141,16 @@ export default function Invite({ loaderData }: Route.ComponentProps) {
             />
           </div>
           <div>
-            <Label htmlFor="email">{boundEmail ? t.auth.email : t.auth.emailOptional}</Label>
+            <Label htmlFor="email">{t.auth.emailOptional}</Label>
             <Input
               id="email"
               name="email"
               type="email"
               autoComplete="email"
               className="mt-1"
-              defaultValue={boundEmail ?? undefined}
-              readOnly={Boolean(boundEmail)}
-              required={Boolean(boundEmail)}
-              aria-describedby={boundEmail ? undefined : "email-hint"}
+              aria-describedby="email-hint"
             />
-            {!boundEmail && <HelpText id="email-hint">{t.auth.emailLoginHint}</HelpText>}
+            <HelpText id="email-hint">{t.auth.emailLoginHint}</HelpText>
           </div>
           <div>
             <Label htmlFor="password">{t.auth.password}</Label>

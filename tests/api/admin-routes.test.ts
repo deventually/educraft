@@ -15,33 +15,26 @@ vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async ()
 type ToolsRoute = typeof import("~/routes/admin.tools");
 type ModelsRoute = typeof import("~/routes/admin.models");
 type InvitesRoute = typeof import("~/routes/admin.invites");
-type CohortsRoute = typeof import("~/routes/admin.cohorts");
 type ContextRoute = typeof import("~/routes/admin.context");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
-type Cohorts = typeof import("~/server/repositories/cohorts.server");
 
 let toolsRoute: ToolsRoute;
 let modelsRoute: ModelsRoute;
 let invitesRoute: InvitesRoute;
-let cohortsRoute: CohortsRoute;
 let contextRoute: ContextRoute;
 let settings: Settings;
 let users: Users;
-let cohorts: Cohorts;
 
 beforeAll(async () => {
-  [toolsRoute, modelsRoute, invitesRoute, cohortsRoute, contextRoute, settings, users, cohorts] =
-    await Promise.all([
-      import("~/routes/admin.tools"),
-      import("~/routes/admin.models"),
-      import("~/routes/admin.invites"),
-      import("~/routes/admin.cohorts"),
-      import("~/routes/admin.context"),
-      import("~/server/repositories/settings.server"),
-      import("~/server/repositories/users.server"),
-      import("~/server/repositories/cohorts.server"),
-    ]);
+  [toolsRoute, modelsRoute, invitesRoute, contextRoute, settings, users] = await Promise.all([
+    import("~/routes/admin.tools"),
+    import("~/routes/admin.models"),
+    import("~/routes/admin.invites"),
+    import("~/routes/admin.context"),
+    import("~/server/repositories/settings.server"),
+    import("~/server/repositories/users.server"),
+  ]);
   requireRoleMock.mockImplementation(async () => ({
     id: "admin-1",
     name: "Admin A",
@@ -74,11 +67,10 @@ function invoke<T extends (arg: never) => unknown>(action: T, request: Request):
 }
 
 describe("admin.tools action", () => {
-  it("upserts a tool's enabled flag and audience override", async () => {
-    await invoke(toolsRoute.action, post({ slug: "mentorai", enabled: "on", audience: "both" }));
+  it("upserts a tool's enabled flag", async () => {
+    await invoke(toolsRoute.action, post({ slug: "mentorai", enabled: "on" }));
     const row = await settings.getToolSetting("mentorai");
     expect(row?.enabled).toBe(true);
-    expect(row?.audienceOverride).toBe("both");
   });
 });
 
@@ -347,7 +339,7 @@ describe("admin.context action — activation + per-teacher assignment (P12)", (
     const student = await users.createUser({
       name: "Not a teacher",
       passwordHash: "scrypt:a:b",
-      role: "student",
+      role: "admin",
     });
     await expect(
       invoke(
@@ -400,6 +392,20 @@ describe("admin.invites action", () => {
     expect(after?.passwordHash).toBe("scrypt:keep:me"); // untouched
   });
 
+  it("refuses to set the legacy student role", async () => {
+    const teacher = await users.createUser({
+      name: "Stay Teacher",
+      email: "stay@example.com",
+      passwordHash: "scrypt:keep:me",
+      role: "teacher",
+    });
+    await invoke(
+      invitesRoute.action,
+      post({ intent: "role", userId: teacher.id, role: "student" }),
+    );
+    expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
+  });
+
   it("revokes an open invite (its token becomes unknown)", async () => {
     const invite = await users.createInvite({ role: "teacher", createdByUserId: "admin-1" });
     await invoke(invitesRoute.action, post({ intent: "revoke", token: invite.token }));
@@ -449,50 +455,12 @@ describe("admin.invites action", () => {
     const student = await users.createUser({
       name: "No Email",
       passwordHash: "scrypt:a:b",
-      role: "student",
+      role: "teacher",
     });
     await invoke(
       invitesRoute.action,
       post({ intent: "setEmail", userId: student.id, email: "recovered@example.com" }),
     );
     expect((await users.getUserById(student.id))?.email).toBe("recovered@example.com");
-  });
-});
-
-describe("admin.cohorts action — oversight over any cohort", () => {
-  it("assigns and removes a co-teacher, and deletes a cohort the admin did not create", async () => {
-    const cohort = await cohorts.createCohort({
-      createdByUserId: "some-teacher",
-      name: "Not the admin's cohort",
-      allowedToolSlugs: ["mentorai"],
-    });
-
-    await invoke(
-      cohortsRoute.action,
-      post({ intent: "assign", cohortId: cohort.id, userId: "co-t" }),
-    );
-    expect((await cohorts.getCohortTeacherIds(cohort.id)).has("co-t")).toBe(true);
-
-    await invoke(
-      cohortsRoute.action,
-      post({ intent: "remove", cohortId: cohort.id, userId: "co-t" }),
-    );
-    expect((await cohorts.getCohortTeacherIds(cohort.id)).has("co-t")).toBe(false);
-
-    await invoke(cohortsRoute.action, post({ intent: "delete", cohortId: cohort.id }));
-    expect(await cohorts.getCohort(cohort.id)).toBeNull();
-  });
-
-  it("reassigns ownership of an orphan cohort to a new teacher", async () => {
-    const orphan = await cohorts.createCohort({
-      createdByUserId: "deleted-owner",
-      name: "Orphaned cohort",
-      allowedToolSlugs: ["mentorai"],
-    });
-    await invoke(
-      cohortsRoute.action,
-      post({ intent: "reassignOwner", cohortId: orphan.id, userId: "new-owner" }),
-    );
-    expect((await cohorts.getCohort(orphan.id))?.createdByUserId).toBe("new-owner");
   });
 });

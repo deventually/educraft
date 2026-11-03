@@ -1,6 +1,6 @@
 # ADR 0001 — Student provisioning via cohorts, mentor insight, and anti-sharing security
 
-- **Status:** Proposed (owner-approved direction; specs to follow in `docs/implementation/`)
+- **Status:** Vervangen door BESLUIT-2026-11-03-3 (P17)
 - **Date:** 2026-07-05
 - **Supersedes / extends:** the "Roles, not multi-tenancy" and "Auth: invite links" decisions in [`Improvement-Plan.md`](../Improvement-Plan.md). Nothing here reverses those; it fills the **intra-instance provisioning** gap they left open.
 - **Related:** [`P1-auth-roles-scoping.md`](../implementation/P1-auth-roles-scoping.md), [`P3-prompts-eqf-evals.md`](../implementation/P3-prompts-eqf-evals.md) (EQF spine), `app/lib/registry/access.ts` (`canUseTool`).

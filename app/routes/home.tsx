@@ -48,9 +48,8 @@ interface ToolCardData {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   // Server-side gate (Phase 4): effective availability composes instance settings
-  // (enabled + audience), the student's cohort allow-list, and any per-teacher
-  // allow-list — so a student never receives instructor tools and a disabled tool
-  // vanishes for everyone. An admin who "views as teacher" sees the teacher set.
+  // (enabled) and any per-teacher allow-list — a disabled tool vanishes for
+  // everyone. An admin who "views as teacher" sees the teacher set.
   const viewer = { ...user, role: getEffectiveRole(user, request) };
   const tools: ToolCardData[] = (await getAvailableTools(viewer)).map((tool) => {
     const keywords = TOOL_KEYWORDS[tool.slug] ?? [];

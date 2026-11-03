@@ -9,9 +9,7 @@
  */
 import { createInvite } from "../app/server/repositories/users.server";
 import { env } from "../app/server/env.server";
-
-type Role = "student" | "teacher" | "admin";
-const ROLES: Role[] = ["student", "teacher", "admin"];
+import { ROLES, isRole } from "../app/lib/registry/access";
 
 function parseArgs(argv: string[]): Record<string, string> {
   const args: Record<string, string> = {};
@@ -31,13 +29,14 @@ function parseArgs(argv: string[]): Record<string, string> {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const role = (args.role ?? "teacher") as Role;
+const requestedRole = args.role ?? "teacher";
 
-if (!ROLES.includes(role)) {
-  console.error(`Unknown role "${role}". Use one of: ${ROLES.join(", ")}.`);
+if (!isRole(requestedRole)) {
+  console.error(`Unknown role "${requestedRole}". Use one of: ${ROLES.join(", ")}.`);
   process.exit(1);
 }
 
+const role = requestedRole;
 const note = args.note ?? null;
 const expiresDays = args["expires-days"] ? Number(args["expires-days"]) : null;
 if (expiresDays !== null && (!Number.isFinite(expiresDays) || expiresDays <= 0)) {

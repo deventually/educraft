@@ -29,7 +29,6 @@ describe("useSandbox", () => {
   it("seeds values from field defaults + the default profile's prefill", () => {
     const { result } = renderHook(() => useSandbox({ inputs, profiles, defaultProfileId: "p2" }));
     expect(result.current.contextProfileId).toBe("p2");
-    expect(result.current.locked).toBe(false);
     expect(result.current.values.topic).toBe(""); // plain default
     expect(result.current.values.level).toBe("beginner"); // derived from studyYear 2
   });
@@ -51,15 +50,5 @@ describe("useSandbox", () => {
     act(() => result.current.setValue("topic", "photosynthesis"));
     expect(result.current.values.topic).toBe("photosynthesis");
     expect(result.current.values.level).toBe("beginner"); // untouched
-  });
-
-  it("locked (provisioned-student) mode prefills from lockedValues and reports locked", () => {
-    const { result } = renderHook(() =>
-      useSandbox({ inputs, lockedValues: { topic: "fixed by teacher" } }),
-    );
-    expect(result.current.locked).toBe(true);
-    expect(result.current.values.topic).toBe("fixed by teacher");
-    // Non-locked fields still get their normal defaults.
-    expect(result.current.values.level).toBe("beginner");
   });
 });
