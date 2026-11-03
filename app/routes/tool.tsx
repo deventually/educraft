@@ -17,7 +17,6 @@ import {
   narrowLocalModels,
 } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
-import { getEffectiveRole } from "~/server/roleView.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
@@ -41,10 +40,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const tool = getToolBySlugOrThrow(params.slug);
   // A tool the instance has disabled or a tool outside a narrowed teacher's
   // allow-list is indistinguishable from a non-existent tool (no info leak).
-  // Effective availability composes the instance + teacher gates; an admin who
-  // "views as teacher" is gated as a teacher.
-  const viewer = { ...user, role: getEffectiveRole(user, request) };
-  if (!(await isToolAvailable(viewer, tool))) throw new Response("Not Found", { status: 404 });
+  // Effective availability composes the instance + teacher gates.
+  if (!(await isToolAvailable(user, tool))) throw new Response("Not Found", { status: 404 });
 
   const profiles = await listProfiles(user.id);
   const defaultProfile = await getDefaultProfile(user.id);
@@ -61,11 +58,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     supportsImages: m.supportsImages,
     supportsThinking: m.supportsThinking,
   }));
-  const localModels = await narrowLocalModels(viewer, discovered);
+  const localModels = await narrowLocalModels(user, discovered);
   // The catalog models a caller may pick, narrowed to the viewer's effective set
   // (Phase 4 instance allow-list + Phase 13 per-teacher gate). Passed
   // to the pickers so the module-scope catalog no longer wins.
-  const catalogModels = await getSelectableModels(viewer);
+  const catalogModels = await getSelectableModels(user);
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
   return {
     tool,

@@ -23,9 +23,7 @@ export function meta({ matches }: Route.MetaArgs) {
 /**
  * Admin console layout (Phase 4). Gates the whole section on `requireRole("admin")`
  * — and every child loader/action repeats the check, because loaders run in
- * parallel and a nested loader must not trust the layout ran first. Guards on the
- * *real* role, so an admin who is "viewing as teacher" can still reach the console
- * (the nav link is hidden, but direct access never locks them out).
+ * parallel and a nested loader must not trust the layout ran first.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");

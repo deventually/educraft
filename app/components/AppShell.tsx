@@ -8,7 +8,7 @@ import {
   useMatches,
   useRouteLoaderData,
 } from "react-router";
-import { ArrowUp, LogOut, Menu, UserCog, X } from "lucide-react";
+import { ArrowUp, LogOut, Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import type { Messages } from "~/lib/i18n/messages/nl";
@@ -25,7 +25,7 @@ export default function AppShell() {
   const locale = useLocale();
   const location = useLocation();
   const root = useRouteLoaderData("root") as
-    | { user?: { name: string; role: string; realRole?: string } | null }
+    | { user?: { name: string; role: string } | null }
     | undefined;
   const user = root?.user ?? null;
   const redirectTo = location.pathname + location.search;
@@ -57,8 +57,7 @@ export default function AppShell() {
     );
 
   const nav: NavItem[] = [
-    // Admin console — first for the effective admin role (hidden while an admin is
-    // viewing as a teacher), so an admin lands on their console entry immediately.
+    // Admin console — first for an admin, so they land on their console entry immediately.
     ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
     { to: "/tools", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
@@ -106,15 +105,6 @@ export default function AppShell() {
                 </NavLink>
               ))}
             </nav>
-            {/* Admins can dynamically drop into the teacher experience and back. */}
-            {user?.realRole === "admin" && (
-              <RoleSwitch
-                viewingAsTeacher={user.role === "teacher"}
-                redirectTo={redirectTo}
-                toTeacherLabel={t.nav.viewAsTeacher}
-                toAdminLabel={t.nav.backToAdmin}
-              />
-            )}
             <LanguageSwitcher current={locale} redirectTo={redirectTo} />
             {user && (
               <UserArea
@@ -359,40 +349,6 @@ function UserArea({
         </button>
       </Form>
     </div>
-  );
-}
-
-function RoleSwitch({
-  viewingAsTeacher,
-  redirectTo,
-  toTeacherLabel,
-  toAdminLabel,
-}: {
-  viewingAsTeacher: boolean;
-  redirectTo: string;
-  toTeacherLabel: string;
-  toAdminLabel: string;
-}) {
-  // Toggle to the opposite view: from admin → teacher, or back.
-  const target = viewingAsTeacher ? "admin" : "teacher";
-  const label = viewingAsTeacher ? toAdminLabel : toTeacherLabel;
-  return (
-    <Form method="post" action="/set-view" className="hidden sm:block">
-      <input type="hidden" name="redirectTo" value={redirectTo} />
-      <input type="hidden" name="view" value={target} />
-      <button
-        type="submit"
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
-          viewingAsTeacher
-            ? "border-brass-300 bg-amber-50 text-brass-700 hover:bg-amber-100"
-            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-        )}
-      >
-        <UserCog className="size-3.5" aria-hidden />
-        {label}
-      </button>
-    </Form>
   );
 }
 

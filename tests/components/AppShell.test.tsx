@@ -21,7 +21,7 @@ function renderShell(initialPath = "/") {
 }
 
 /** Render the shell with a signed-in user via a `root` loader (async hydration). */
-function renderShellWithUser(user: { name: string; role: string; realRole?: string }) {
+function renderShellWithUser(user: { name: string; role: string }) {
   const Stub = createRoutesStub([
     {
       id: "root",
@@ -29,10 +29,7 @@ function renderShellWithUser(user: { name: string; role: string; realRole?: stri
       Component: AppShell,
       loader: () => ({ locale: "nl", user }),
       children: [{ index: true, Component: () => <p>Tools home</p> }],
-      // A real /set-view route so the admin role-switch form has a valid action.
-      // (Sibling resource route: no UI, just absorbs the POST in tests.)
     },
-    { path: "/set-view", action: () => null },
   ]);
   return render(<Stub initialEntries={["/"]} />);
 }
@@ -182,13 +179,13 @@ describe("AppShell user area", () => {
 
 describe("AppShell admin surface & role switch", () => {
   it("shows the admin nav link only for the effective admin role", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin", realRole: "admin" });
+    renderShellWithUser({ name: "Admin A", role: "admin" });
     await screen.findByText("Tools home");
     expect(screen.getAllByRole("link", { name: "Beheer" }).length).toBeGreaterThan(0);
   });
 
   it("places the admin link first in the main navigation for an admin", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin", realRole: "admin" });
+    renderShellWithUser({ name: "Admin A", role: "admin" });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     const links = within(primary).getAllByRole("link");
@@ -201,25 +198,16 @@ describe("AppShell admin surface & role switch", () => {
     expect(screen.queryByRole("link", { name: "Beheer" })).toBeNull();
   });
 
-  it("offers a real admin the 'view as teacher' switch, posting to /set-view", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin", realRole: "admin" });
+  it("offers an admin no view-as switch", async () => {
+    renderShellWithUser({ name: "Admin A", role: "admin" });
     await screen.findByText("Tools home");
-    const button = screen.getByRole("button", { name: "Bekijk als docent" });
-    expect(button.closest("form")).toHaveAttribute("action", "/set-view");
+    expect(screen.queryByRole("button", { name: /Bekijk als docent|View as teacher/ })).toBeNull();
   });
 
-  it("shows 'back to admin' (and hides the admin link) while an admin views as teacher", async () => {
-    renderShellWithUser({ name: "Admin A", role: "teacher", realRole: "admin" });
-    await screen.findByText("Tools home");
-    expect(screen.getByRole("button", { name: "Terug naar beheer" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Beheer" })).toBeNull();
-  });
-
-  it("has no a11y violations with the admin role switch shown", async () => {
+  it("has no a11y violations for an admin", async () => {
     const { container } = renderShellWithUser({
       name: "Admin A",
       role: "admin",
-      realRole: "admin",
     });
     await screen.findByText("Tools home");
     expect((await axe(container, axeOpts)).violations).toEqual([]);

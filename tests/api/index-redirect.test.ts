@@ -2,8 +2,7 @@ import { describe, it, expect, beforeAll, vi } from "vitest";
 
 process.env.DATABASE_URL = "file::memory:";
 
-// Mock auth so we can drive the viewer's role; getEffectiveRole (real) then reads
-// the (absent) view-as cookie and returns the real role.
+// Mock auth so we can drive the viewer's role.
 const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
 vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
 
@@ -14,7 +13,7 @@ beforeAll(async () => {
   route = await import("~/routes/index");
 });
 
-function loaderWith(role: "admin" | "teacher" | "student") {
+function loaderWith(role: "admin" | "teacher") {
   requireUserMock.mockResolvedValueOnce({
     id: "u",
     name: "U",
@@ -39,11 +38,6 @@ describe("home redirector", () => {
   it("sends a teacher to the tool catalogue at /tools", async () => {
     const res = (await loaderWith("teacher").catch((r) => r)) as Response;
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("/tools");
-  });
-
-  it("sends a student to /tools", async () => {
-    const res = (await loaderWith("student").catch((r) => r)) as Response;
     expect(res.headers.get("Location")).toBe("/tools");
   });
 });

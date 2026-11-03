@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.1: "Bekijk als docent" weg)_
 
 ## Nu
 
@@ -12,7 +12,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
-  Vitest + axe. 902 tests, CI groen op `main`.
+  Vitest + axe. 905 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
@@ -38,7 +38,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
 
 ## Bezig
 
-- V2 bouwplan (P18) — deze PR.
+- V2 stap 18.1: "Bekijk als docent" weg — deze PR.
 
 ## Wacht op jou
 
