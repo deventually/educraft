@@ -35,6 +35,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       english: "English",
       reasoning: "Reason before answering",
       reasoningHint: "Off is much faster.",
+      advanced: "Advanced",
     },
     chat: {
       send: "Send",
@@ -43,6 +44,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       streaming: "Thinking…",
       inputPlaceholder: "Your message…",
       sandboxHint: "Fill in the details",
+      setupHeading: "Before you start",
       continue: "Continue",
       startConversation: "Start the conversation",
       interrupted: "Interrupted",
@@ -143,7 +145,7 @@ describe("ChatView", () => {
     const { container } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
 
     // The sandbox form section should be visible
-    expect(screen.getByText("Context")).toBeInTheDocument();
+    expect(screen.getByText("Before you start")).toBeInTheDocument();
 
     // The continue button should be present
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
@@ -231,9 +233,8 @@ describe("ChatView", () => {
     );
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
-    // The picker pre-selects the only offered model, never the disabled default.
-    const select = screen.getByLabelText("Model") as HTMLSelectElement;
-    expect(select.value).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    // One offered model → nothing to choose, so no picker (and no "Advanced") is shown.
+    expect(screen.queryByLabelText("Model")).toBeNull();
 
     // And the model actually sent is the offered one, not the tool default.
     await user.type(screen.getByPlaceholderText("Your message…"), "Hello");
@@ -266,6 +267,7 @@ describe("ChatView", () => {
     );
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
+    await user.click(screen.getByText("Advanced"));
     const toggle = screen.getByLabelText("Reason before answering") as HTMLInputElement;
     expect(toggle.checked).toBe(false); // default OFF → fast answers
     expect((await axe(container)).violations).toEqual([]);
@@ -282,6 +284,57 @@ describe("ChatView", () => {
     await user.keyboard("{Enter}");
     await waitFor(() => expect(mockStreamPost.mock.calls.length).toBeGreaterThan(1));
     expect((mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking).toBe(true);
+  });
+
+  it("keeps model and reasoning inside 'Advanced'; language stays visible", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <ChatView
+        tool={mockTool}
+        onGenerationStart={() => {}}
+        catalogModels={[]}
+        localModels={[
+          { id: "ollama::qwen3", displayName: "Ollama · qwen3", supportsThinking: true },
+          { id: "ollama::llama3", displayName: "Ollama · llama3" },
+        ]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    const details = container.querySelector("aside details") as HTMLDetailsElement;
+    expect(details).toBeInTheDocument();
+    expect(details.open).toBe(false);
+    expect(details.querySelector("summary")).toHaveTextContent("Advanced");
+    expect(details.querySelector("summary")).toHaveTextContent("Ollama · qwen3");
+    expect(details.contains(container.querySelector("#chat-model"))).toBe(true);
+    expect(details.contains(container.querySelector("#chat-thinking"))).toBe(true);
+    // Output language is not technique: it stays outside the disclosure.
+    const lang = container.querySelector("#chat-lang") as HTMLElement;
+    expect(lang).toBeInTheDocument();
+    expect(lang.closest("details")).toBeNull();
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("shows no 'Advanced' for one model without a reasoning switch", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <ChatView
+        tool={mockTool}
+        onGenerationStart={() => {}}
+        catalogModels={[]}
+        localModels={[{ id: "ollama::llama3", displayName: "Ollama · llama3" }]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(container.querySelector("aside details")).toBeNull();
+    expect(container.querySelector("#chat-model")).toBeNull();
+    expect(container.querySelector("#chat-lang")).toBeInTheDocument();
+  });
+
+  it("titles the one-time setup card 'Before you start'", () => {
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    expect(screen.getByRole("heading", { name: "Before you start" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Context" })).toBeNull();
   });
 
   it("[thinking] hides the toggle and omits the flag for a non-thinking model", async () => {
@@ -479,6 +532,7 @@ describe("ChatView", () => {
       <ChatView tool={mockTool} localModels={local} onGenerationStart={() => {}} />,
     );
     await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByText("Advanced"));
 
     const picker = container.querySelector("#chat-model") as HTMLSelectElement;
     expect(picker).toBeInTheDocument();

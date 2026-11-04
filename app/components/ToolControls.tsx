@@ -2,6 +2,7 @@ import { useId } from "react";
 import type { ContextProfile } from "~/lib/context/types";
 import type { OutputLanguage } from "~/lib/registry/types";
 import { pickableModels, type PickerModel } from "~/lib/ai/models";
+import { AdvancedSettings } from "./AdvancedSettings";
 import { Label, Select } from "./ui";
 import { useT } from "~/lib/i18n/useT";
 
@@ -39,59 +40,68 @@ export function ToolControls(props: Props) {
     props.catalogModels,
   );
 
+  const currentModel = models.find((m) => m.id === props.model)?.displayName ?? props.model;
+
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">
-      {props.usesContextProfile && (
+    <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {props.usesContextProfile && (
+          <div>
+            <Label htmlFor={profileId} className="mb-1.5">
+              {t.tool.contextProfile}
+            </Label>
+            <Select
+              id={profileId}
+              value={props.contextProfileId}
+              onChange={(e) => props.onProfile(e.target.value)}
+              disabled={props.disabled}
+            >
+              <option value="">{t.tool.noProfile}</option>
+              {props.profiles.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         <div>
-          <Label htmlFor={profileId} className="mb-1.5">
-            {t.tool.contextProfile}
+          <Label htmlFor={languageId} className="mb-1.5">
+            {t.tool.outputLanguage}
           </Label>
           <Select
-            id={profileId}
-            value={props.contextProfileId}
-            onChange={(e) => props.onProfile(e.target.value)}
+            id={languageId}
+            value={props.outputLanguage}
+            onChange={(e) => props.onLanguage(e.target.value as OutputLanguage)}
             disabled={props.disabled}
           >
-            <option value="">{t.tool.noProfile}</option>
-            {props.profiles.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
+            <option value="nl">{t.tool.dutch}</option>
+            <option value="en">{t.tool.english}</option>
           </Select>
         </div>
+      </div>
+      {/* Nothing to choose with a single model: the parent already preselected it. */}
+      {models.length > 1 && (
+        <AdvancedSettings current={currentModel}>
+          <div>
+            <Label htmlFor={modelId} className="mb-1.5">
+              {t.tool.model}
+            </Label>
+            <Select
+              id={modelId}
+              value={props.model}
+              onChange={(e) => props.onModel(e.target.value)}
+              disabled={props.disabled}
+            >
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </AdvancedSettings>
       )}
-      <div>
-        <Label htmlFor={languageId} className="mb-1.5">
-          {t.tool.outputLanguage}
-        </Label>
-        <Select
-          id={languageId}
-          value={props.outputLanguage}
-          onChange={(e) => props.onLanguage(e.target.value as OutputLanguage)}
-          disabled={props.disabled}
-        >
-          <option value="nl">{t.tool.dutch}</option>
-          <option value="en">{t.tool.english}</option>
-        </Select>
-      </div>
-      <div>
-        <Label htmlFor={modelId} className="mb-1.5">
-          {t.tool.model}
-        </Label>
-        <Select
-          id={modelId}
-          value={props.model}
-          onChange={(e) => props.onModel(e.target.value)}
-          disabled={props.disabled}
-        >
-          {models.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.displayName}
-            </option>
-          ))}
-        </Select>
-      </div>
     </div>
   );
 }

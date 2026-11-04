@@ -29,6 +29,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       dutch: "Dutch",
       english: "English",
       model: "Model",
+      advanced: "Advanced",
       generate: "Generate",
       stop: "Stop",
       required: "Required",
@@ -54,8 +55,7 @@ describe("GeneratorView — profile prefill", () => {
     const level = screen.getByLabelText(/course level/i);
     expect(level).toHaveValue("main phase (years 2-3)");
 
-    // The profile picker is the first combobox (ToolControls renders it first).
-    const profilePicker = screen.getAllByRole("combobox")[0];
+    const profilePicker = screen.getByRole("combobox", { name: "Context" });
 
     // Switch to a year-4 profile → level re-derives to the graduation phase.
     await user.selectOptions(profilePicker, "p4");
@@ -65,6 +65,16 @@ describe("GeneratorView — profile prefill", () => {
     // placeholder state, so a stale prefill never lingers.
     await user.selectOptions(profilePicker, "pNo");
     expect(level).toHaveValue("");
+  });
+
+  it("puts the task fields before the context and model controls", () => {
+    const tool = getToolBySlug("arcs-reactor")!;
+    render(<GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" />);
+    const firstField = screen.getByLabelText(/discipline/i);
+    const contextSelect = screen.getByRole("combobox", { name: "Context" });
+    expect(
+      firstField.compareDocumentPosition(contextSelect) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("has no accessibility violations", async () => {

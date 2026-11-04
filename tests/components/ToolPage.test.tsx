@@ -33,10 +33,8 @@ describe("Tool page", () => {
 
     it(`has no a11y violations (${slug})`, async () => {
       const { container } = renderTool(getToolBySlug(slug)!);
-      const results = await axe(container, {
-        // heading-order: the chat sandbox panel starts at h3 (pre-existing; 19.3 reshapes the page).
-        rules: { "color-contrast": { enabled: false }, "heading-order": { enabled: false } },
-      });
+      // Full axe (heading-order included): the setup card sits at h2 under the page h1.
+      const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
       expect(results.violations).toEqual([]);
     });
   }
