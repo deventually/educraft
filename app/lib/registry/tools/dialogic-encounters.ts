@@ -44,6 +44,14 @@ export const dialogicEncounters: Tool = {
       nl: "Gebaseerd op het interview uit het boek (\"Tech Talk with a Theorist\"). In het boek plakt de student zelf een sjabloon in ChatGPT; hier zit dat sjabloon in de tool en kies je de theoreticus. We schrijven de lessen uit het hoofdstuk in de prompt: de theoreticus spreekt in zijn eigen begrippen en tijd, corrigeert een verkeerde aanname in je vraag (ook een subtiele, op de grens tussen theorieën), zegt het als hij over latere technologie doorredeneert, verzint geen bronnen, en doet een eerlijke CRAAP-test als je het interview stopt. Vertaald naar het Nederlands.",
       en: "Based on the book's interview (\"Tech Talk with a Theorist\"). In the book the student pastes a template into ChatGPT; here the template is built into the tool and you choose the theorist. We write the chapter's lessons into the prompt: the theorist speaks in their own concepts and era, corrects a wrong assumption in your question (also a subtle one, on the boundary between theories), says so when extrapolating to later technology, invents no sources, and runs an honest CRAAP test when you stop the interview.",
     },
+    improvedAfter: {
+      date: "2026-11-04",
+      report: "evals/reports/2026-11-04i.md",
+      summary: {
+        nl: "de theoreticus wijst een verkeerde aanname in je vraag nu steeds stevig af, praat in lopende tekst zonder lijstjes en stelt meestal hooguit één vraag terug (gemiddeld 3,0 → 4,1 op vier interviews, elk drie keer).",
+        en: "the theorist now firmly rejects a wrong assumption in your question every time, speaks in running prose without lists and mostly asks at most one question back (average 3.0 → 4.1 over four interviews, each run three times).",
+      },
+    },
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",

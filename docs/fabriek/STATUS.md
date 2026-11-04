@@ -23,6 +23,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **MentorAI v2 (#61) gemerged op 2026-11-04:** de leermeester uit het boek, met eerlijke
+  bronvermelding; gemiddeld 2,5 → 3,4 (`evals/reports/2026-11-04f.md`).
 - **P25.4 kader-extractie (#59) en P23.3 rubric invullen in batches (#60) gemerged op
   2026-11-04;** na #60 `npm run db:migrate` (migratie 0013).
 - **Strengere meting (#56) gemerged op 2026-11-04:** drie runs per case, harde ja/nee-checks met
@@ -69,11 +71,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- MentorAI v2 naar het boek (24.0): de prompt van het boek (Agarwal e.a., p. 36–44) als basis, met
-  jouw vak en leerdoel in plaats van de vaste SBI-oefening; de leermeester lost je eigen opgave nooit
-  op. De toolpagina toont de echte boektekst en zegt wat wij veranderden (BESLUIT-2026-11-04-22).
-  Getelde checks (woorden, vraagtekens, lijstjes) in code. Eindmeting f: gemiddeld 2,5 → 3,4
-  (`evals/reports/2026-11-04f.md`) — PR open.
+- Dialogisch gesprek v2 naar het boek (24.0): het interview uit het boek (Clark-Stallkamp e.a.,
+  p. 100–102). De theoreticus beantwoordt je vragen in zijn eigen begrippen en tijd, wijst een
+  verkeerde aanname af (ook een subtiele), zegt het als hij over latere technologie doorredeneert,
+  verzint geen bronnen en doet een eerlijke CRAAP-test als je het interview stopt. Rubric en cases
+  naar het boek; de beoordelaar krijgt meer ruimte en meldt niet-beoordeelde runs. Meting g2 → i:
+  gemiddeld 3,0 → 4,1 (`evals/reports/2026-11-04i.md`) — PR open.
 
 ## Wacht op jou
 
@@ -84,7 +87,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
-1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 → Dialogisch gesprek →
+1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 (klaar) → Dialogisch gesprek →
    Begeleide reflectie → de andere tools, elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.

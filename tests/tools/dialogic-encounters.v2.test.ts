@@ -38,6 +38,9 @@ describe("dialogic-encounters@v2 — the book's interview with a theorist", () =
     expect(loc(a.adaptation!, "nl")).toMatch(/interview/i);
     expect(loc(a.adaptation!, "nl")).toMatch(/aanname/i);
     expect(loc(a.adaptation!, "en")).toMatch(/assumption/i);
+    // The improvement claim cites the final measurement (BESLUIT-2026-11-04-22).
+    expect(a.improvedAfter?.report).toBe("evals/reports/2026-11-04i.md");
+    expect(loc(a.improvedAfter!.summary, "nl")).toMatch(/aanname/);
   });
 
   for (const lang of ["nl", "en"] as const) {
