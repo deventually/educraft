@@ -113,6 +113,11 @@ describe("tool: lesson-plan", () => {
     expect(p).toContain("voorkennis ontbreekt");
     expect(p).toContain("niet waarneembaar");
     expect(p).toContain("dit is een concept. de docent past de les aan op de eigen groep.");
+    // Meting lp1: "hij" for students and teachers, minutes inside a phase that did not add
+    // up to the phase, and a proposed break row the judge took for a format slip.
+    expect(p).toContain("genderneutraal");
+    expect(p).toContain("binnen een fase");
+    expect(p).toContain("pauze (voorstel)");
   });
 
   it("guards the brief's demands and Rosenshine's principles (en)", () => {
@@ -140,6 +145,9 @@ describe("tool: lesson-plan", () => {
     expect(p).toContain("prior knowledge is missing");
     expect(p).toContain("not observable");
     expect(p).toContain("this is a draft. the teacher adapts the lesson to their own group.");
+    expect(p).toContain("gender-neutral");
+    expect(p).toContain("within a phase");
+    expect(p).toContain("break (proposal)");
   });
 
   it("asks for a time plan table with a total row, in both languages", () => {

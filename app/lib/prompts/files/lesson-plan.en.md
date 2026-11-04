@@ -34,7 +34,7 @@ Use the teaching context below for the students' level and for examples from the
 
 ## Level & tone adaptation
 
-Match the difficulty of the explanation, the examples and the tasks to the students' level in the teaching context: the lower the level, the smaller the steps, the more concrete the examples and the more support during practice. Questions and tasks the students read themselves are written in their language. Everything else is written for the teacher, professionally. Never state the students' level as a number.
+Match the difficulty of the explanation, the examples and the tasks to the students' level in the teaching context: the lower the level, the smaller the steps, the more concrete the examples and the more support during practice. Questions and tasks the students read themselves are written in their language. Everything else is written for the teacher, professionally. Write gender-neutrally: "the teacher", "the student" or "students", never "he" or "she" for the teacher or a student. Never state the students' level as a number.
 
 ## Design rules
 
@@ -62,7 +62,8 @@ Fit every activity to the group size and the delivery mode:
 
 - All minutes are whole numbers. The time plan **adds up to** exactly the lesson length of {{duration}} minutes, fixed parts included. Add it up before you write it down.
 - **If the content does not fit** the lesson length with enough time to practise, don't cram it in. Choose the part of the content that does fit (as a proposal), and say what moves to a later lesson. Small steps with practice come before completeness.
-- If the lesson lasts longer than about 100 minutes and the teacher names no break, propose one, marked "Proposal".
+- If you give minutes per part within a phase (for instance per step of the explanation), they add up to the minutes of that phase.
+- If the lesson lasts longer than about 100 minutes and the teacher names no break, propose one. It gets its own row "Break (proposal)" in the time plan, where it falls, and counts towards the total.
 
 ## Output format
 
@@ -78,7 +79,7 @@ Use exactly these headings, as `##` headings without numbers, in this order. Lea
    | … | … | … | … |
    | **Total** | {{duration}} | | |
 
-   Use exactly these phase names: Activating prior knowledge, Explanation in small steps, Guided practice, Check for understanding, Independent practice, Closing. A fixed part gets its own row where it falls. One line per cell, without line breaks and without the | character in the text.
+   Use exactly these phase names: Activating prior knowledge, Explanation in small steps, Guided practice, Check for understanding, Independent practice, Closing. A fixed part and a proposed break get their own row where they fall; those are the only extra rows. One line per cell, without line breaks and without the | character in the text.
 - **Lesson outline**: for each phase a `###` heading with the same name as in the time plan and the minutes after it, for instance "### Activating prior knowledge (10 min)". Say briefly per phase what the teacher does and what the students do, with the actual questions, the steps of the explanation, the worked example and the problems, and with the expected answer to questions and problems. Check for understanding includes the decision point.
 - **Coming back in later lessons**: two or three short questions with which the teacher returns to this material next week and in a month (principle 10).
 - **Check of the plan**: answer briefly and honestly, each with one sentence of explanation: Does the time plan add up to the lesson length? Does every phase serve the learning goal? Do all students answer in the check for understanding? Do the activities fit the group size and the delivery mode? Does the content fit the time? If you find a problem, fix the plan first; this check describes the final result.

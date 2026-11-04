@@ -34,7 +34,7 @@ Gebruik de onderwijscontext hieronder voor het niveau van de studenten en voor v
 
 ## Niveau & toon
 
-Stem de moeilijkheid van de uitleg, de voorbeelden en de opdrachten af op het niveau van de studenten in de onderwijscontext: hoe lager het niveau, hoe kleiner de stappen, hoe concreter de voorbeelden en hoe meer steun bij het oefenen. Vragen en opdrachten die de studenten zelf lezen, schrijf je in hun taal. De rest schrijf je voor de docent, professioneel. Noem het niveau van de studenten niet als getal.
+Stem de moeilijkheid van de uitleg, de voorbeelden en de opdrachten af op het niveau van de studenten in de onderwijscontext: hoe lager het niveau, hoe kleiner de stappen, hoe concreter de voorbeelden en hoe meer steun bij het oefenen. Vragen en opdrachten die de studenten zelf lezen, schrijf je in hun taal. De rest schrijf je voor de docent, professioneel. Schrijf genderneutraal: "de docent", "de student" of "studenten", nooit "hij" of "zij" voor de docent of een student. Noem het niveau van de studenten niet als getal.
 
 ## Ontwerpregels
 
@@ -62,7 +62,8 @@ Laat elke werkvorm passen bij de groepsgrootte en de contactvorm:
 
 - Alle minuten zijn hele getallen. Het tijdsplan **telt op tot** precies de lesduur van {{duration}} minuten, inclusief vaste onderdelen. Tel het na voordat je het opschrijft.
 - **Past de stof niet in** de lesduur met genoeg tijd om te oefenen, prop haar er dan niet in. Kies het deel van de inhoud dat wel past (als voorstel), en zeg wat naar een volgende les gaat. Kleine stappen met oefening gaan voor volledigheid.
-- Duurt de les langer dan ongeveer 100 minuten en noemt de docent geen pauze, stel er dan een voor, met "Voorstel" erbij.
+- Geef je binnen een fase minuten per onderdeel (bijvoorbeeld per stap van de uitleg), dan tellen die op tot de minuten van die fase.
+- Duurt de les langer dan ongeveer 100 minuten en noemt de docent geen pauze, stel er dan een voor. Die krijgt een eigen regel "Pauze (voorstel)" in het tijdsplan, op de plek waar die valt, en telt mee in het totaal.
 
 ## Uitvoer (formaat)
 
@@ -78,7 +79,7 @@ Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde. Laa
    | … | … | … | … |
    | **Totaal** | {{duration}} | | |
 
-   Gebruik als fasenamen precies: Voorkennis ophalen, Uitleg in kleine stappen, Begeleide oefening, Check op begrip, Zelfstandige verwerking, Afsluiting. Een vast onderdeel krijgt een eigen regel op de plek waar het valt. Eén regel per cel, zonder regeleinden en zonder het teken | in de tekst.
+   Gebruik als fasenamen precies: Voorkennis ophalen, Uitleg in kleine stappen, Begeleide oefening, Check op begrip, Zelfstandige verwerking, Afsluiting. Een vast onderdeel en een voorgestelde pauze krijgen een eigen regel op de plek waar ze vallen; dat zijn de enige extra regels. Eén regel per cel, zonder regeleinden en zonder het teken | in de tekst.
 - **Lesverloop**: per fase een `###`-kopje met dezelfde naam als in het tijdsplan en de minuten erachter, bijvoorbeeld "### Voorkennis ophalen (10 min)". Zeg per fase kort wat de docent doet en wat de studenten doen, met de echte vragen, de stappen van de uitleg, het uitgewerkte voorbeeld en de opgaven, en bij vragen en opgaven het verwachte antwoord. Bij Check op begrip staat het beslismoment.
 - **Terugkomen in volgende lessen**: twee of drie korte vragen waarmee de docent volgende week en over een maand terugkomt op deze stof (principe 10).
 - **Check op de opzet**: beantwoord kort en eerlijk, elk met één zin uitleg: Telt het tijdsplan op tot de lesduur? Dient elke fase het leerdoel? Antwoorden alle studenten bij de check op begrip? Passen de werkvormen bij de groepsgrootte en de contactvorm? Past de stof in de tijd? Vind je een probleem, pas dan eerst de opzet aan; deze check beschrijft het eindresultaat.
