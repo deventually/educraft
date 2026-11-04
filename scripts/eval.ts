@@ -15,6 +15,7 @@
  *    npm run eval -- --dry-run               # build every prompt, NO API calls (free)
  *    npm run eval -- --tool mentorai --runs 3 # mean + spread over 3 runs per case
  *    npm run eval -- --tool a,b --label d     # several tools, report <date>d.md
+ *    npm run eval -- --tool x --batch         # half price via the Message Batches API
  *
  * Layout:
  *    evals/<tool-slug>/cases.json   input scenarios (committed)
@@ -32,6 +33,9 @@ import type { Tool, ToolStage, OutputLanguage, ChatMessage } from "~/lib/registr
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { providerForModel } from "~/lib/ai/provider";
+import type { LLMProvider } from "~/lib/ai/types";
+import { env } from "~/server/env.server";
+import { anthropicSubmit, createBatchingProvider } from "./eval-batch";
 import {
   parseJudgeResult,
   evalGreeting,
@@ -89,6 +93,8 @@ interface Cli {
   runs: number;
   /** Suffix for a second report on the same day: `--label d` → `<date>d.md`. */
   label: string;
+  /** Send one-shot generations and all judging through the Message Batches API (half price). */
+  batch: boolean;
 }
 
 const EVALS_DIR = join(process.cwd(), "evals");
@@ -104,6 +110,7 @@ function parseCli(argv: string[]): Cli {
     judgeModel: DEFAULT_JUDGE_MODEL,
     runs: 1,
     label: "",
+    batch: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -111,6 +118,7 @@ function parseCli(argv: string[]): Cli {
     else if (a === "--cases-only") cli.casesOnly = true;
     else if (a === "--judge-only") cli.judgeOnly = true;
     else if (a === "--dry-run") cli.dryRun = true;
+    else if (a === "--batch") cli.batch = true;
     else if (a === "--judge-model") cli.judgeModel = argv[++i] ?? DEFAULT_JUDGE_MODEL;
     else if (a === "--label") cli.label = (argv[++i] ?? "").replace(/[^a-z0-9-]/gi, "");
     else if (a === "--runs") cli.runs = Math.max(1, Math.min(10, Number(argv[++i]) || 1));
@@ -155,6 +163,16 @@ function loadRubric(tool: Tool): string {
 // ---------------------------------------------------------------------------
 // Case phase — build the real prompt and call the provider
 // ---------------------------------------------------------------------------
+
+/**
+ * With `--batch`, one-shot stages and the judge go through one batching provider, so
+ * concurrent calls share a batch. Chat tools keep the direct provider: every turn waits
+ * on the previous one, and a batch per turn would take hours.
+ */
+let batchProvider: LLMProvider | null = null;
+function oneShotProvider(model: string): LLMProvider {
+  return batchProvider ?? providerForModel(model);
+}
 
 const TRIGGER: Record<OutputLanguage, string> = {
   nl: "Voer de opdracht volledig uit.",
@@ -279,7 +297,7 @@ async function runOneShot(
   c: EvalCase,
   model: string,
 ): Promise<{ text: string; truncated: boolean }> {
-  const provider = providerForModel(model);
+  const provider = oneShotProvider(model);
   const images = c.imagePath ? [loadImage(tool.slug, c.imagePath)] : undefined;
   const { text, finishReason } = await provider.generate({
     model,
@@ -369,7 +387,7 @@ async function judgeOutput(
   co: CaseOutput,
   judgeModel: string,
 ): Promise<JudgedCase> {
-  const provider = providerForModel(judgeModel);
+  const provider = oneShotProvider(judgeModel);
   const ask = async (maxTokens: number) =>
     parseJudgeResult(
       (
@@ -544,56 +562,76 @@ async function main() {
   const runDate = cli.judgeOnly ? (latestOutputDate() ?? today()) : today();
   const judged: JudgedCase[] = [];
 
+  if (cli.batch) {
+    if (!env.ANTHROPIC_API_KEY) throw new Error("--batch needs ANTHROPIC_API_KEY in .env.");
+    batchProvider = createBatchingProvider(anthropicSubmit(env.ANTHROPIC_API_KEY));
+    console.log("Batch mode: one-shot stages and judging go through the Message Batches API (half price).");
+  }
+
+  /** One run of one case: generate (or read) the output, then judge it. */
+  const oneRun = async (tool: Tool, rubric: string, c: EvalCase, run: number): Promise<JudgedCase | null> => {
+    const tag = cli.runs > 1 ? `${c.id} [run ${run}/${cli.runs}]` : c.id;
+    try {
+      let co: CaseOutput | null;
+      if (cli.judgeOnly) {
+        co = readExistingOutput(runDate, tool.slug, c.id, run);
+        if (!co) {
+          console.warn(`  · ${tag}: no existing output to judge — skipped`);
+          return null;
+        }
+      } else {
+        console.log(`  · ${tag} (${c.outputLanguage}) → generating…`);
+        co = await runCase(tool, c);
+        writeOutput(runDate, co, run);
+      }
+      if (cli.casesOnly) return null;
+
+      const refused = unjudgeableReason(co.output);
+      if (refused) {
+        console.warn(`  · ${tag}: NOT JUDGED — ${refused}`);
+        return notJudged(tool, c, co, refused);
+      }
+      console.log(`  · ${tag} → judging (${cli.judgeModel})…`);
+      const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
+      if (co.truncated) {
+        j.scores = capTruncated(j.scores);
+        j.worst = `⚠️ output hit the token limit (cut off; scores capped at ${TRUNCATION_CAP}). ${j.worst}`;
+      }
+      if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
+      writeFileSync(join(OUTPUT_DIR, runDate, tool.slug, judgeFileName(c.id, run)), judgeRecord(j), "utf8");
+      return j;
+    } catch (err) {
+      console.error(`  · ${tag}: FAILED — ${(err as Error).message}`);
+      return null;
+    }
+  };
+
+  const work: { tool: Tool; rubric: string; c: EvalCase }[] = [];
   for (const tool of tools) {
     const cases = loadCases(tool);
-    const rubric = loadRubric(tool);
     console.log(`\n=== ${tool.slug} (${cases.length} cases, mode=${tool.mode}) ===`);
-
-    for (const c of cases) {
-      const runs: JudgedCase[] = [];
-      for (let run = 1; run <= cli.runs; run++) {
-        const tag = cli.runs > 1 ? `${c.id} [run ${run}/${cli.runs}]` : c.id;
-        try {
-          let co: CaseOutput | null;
-          if (cli.judgeOnly) {
-            co = readExistingOutput(runDate, tool.slug, c.id, run);
-            if (!co) {
-              console.warn(`  · ${tag}: no existing output to judge — skipped`);
-              continue;
-            }
-          } else {
-            console.log(`  · ${tag} (${c.outputLanguage}) → generating…`);
-            co = await runCase(tool, c);
-            writeOutput(runDate, co, run);
-          }
-          if (cli.casesOnly) continue;
-
-          const refused = unjudgeableReason(co.output);
-          if (refused) {
-            console.warn(`  · ${tag}: NOT JUDGED — ${refused}`);
-            runs.push(notJudged(tool, c, co, refused));
-            continue;
-          }
-          console.log(`  · ${tag} → judging (${cli.judgeModel})…`);
-          const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
-          if (co.truncated) {
-            j.scores = capTruncated(j.scores);
-            j.worst = `⚠️ output hit the token limit (cut off; scores capped at ${TRUNCATION_CAP}). ${j.worst}`;
-          }
-          if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
-          runs.push(j);
-          writeFileSync(
-            join(OUTPUT_DIR, runDate, tool.slug, judgeFileName(c.id, run)),
-            judgeRecord(j),
-            "utf8",
-          );
-        } catch (err) {
-          console.error(`  · ${tag}: FAILED — ${(err as Error).message}`);
-        }
-      }
-      const combined = combineRuns(runs);
-      if (combined) judged.push(combined);
+    const rubric = loadRubric(tool);
+    for (const c of cases) work.push({ tool, rubric, c });
+  }
+  const runNumbers = Array.from({ length: cli.runs }, (_, i) => i + 1);
+  // Sequential by default; with --batch every case and run at once, so they share batches.
+  const perCase: (JudgedCase | null)[][] = [];
+  if (cli.batch) {
+    perCase.push(
+      ...(await Promise.all(
+        work.map((w) => Promise.all(runNumbers.map((run) => oneRun(w.tool, w.rubric, w.c, run)))),
+      )),
+    );
+  } else {
+    for (const w of work) {
+      const runs: (JudgedCase | null)[] = [];
+      for (const run of runNumbers) runs.push(await oneRun(w.tool, w.rubric, w.c, run));
+      perCase.push(runs);
     }
+  }
+  for (const runs of perCase) {
+    const combined = combineRuns(runs.filter((r): r is JudgedCase => r !== null));
+    if (combined) judged.push(combined);
   }
 
   if (cli.casesOnly) {
