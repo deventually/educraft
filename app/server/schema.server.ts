@@ -101,6 +101,20 @@ export const contextProfiles = sqliteTable("context_profiles", {
 });
 
 /**
+ * A BDB/BKE workplace dossier (brief P25). The whole dossier is one
+ * Zod-validated JSON document (`DossierDataSchema`), edited as a whole, like a
+ * context profile. Scoped to its owner.
+ */
+export const portfolioDossiers = sqliteTable("portfolio_dossiers", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  dataJson: text("data_json").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
  * touched; an absent row means "registry default" (safe defaults — a fresh
  * instance behaves exactly as before this phase). `enabled` null = registry

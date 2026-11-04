@@ -1,0 +1,77 @@
+import { describe, expect, it } from "vitest";
+import { DossierDataSchema, emptyDossier, LIMITS } from "~/lib/portfolio/schema";
+import { C1, LU, sampleDossier } from "./fixtures";
+
+describe("DossierDataSchema", () => {
+  it("parses a valid dossier", () => {
+    expect(DossierDataSchema.safeParse(sampleDossier()).success).toBe(true);
+  });
+
+  it("parses an empty dossier for every track combination", () => {
+    for (const tracks of [["bdb"], ["bke"], ["bdb", "bke"]] as const) {
+      const d = emptyDossier([...tracks]);
+      expect(DossierDataSchema.safeParse(d).success).toBe(true);
+      expect(d.coachMode).toBe("coach");
+      expect(d.framework.confirmedAt).toBeUndefined();
+    }
+  });
+
+  it("rejects an evidence link to an unknown criterion", () => {
+    const d = sampleDossier();
+    d.evidence[0].criterionIds = ["00000000-0000-4000-8000-00000000dead"];
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("rejects a status for an unknown criterion", () => {
+    const d = sampleDossier();
+    d.status["00000000-0000-4000-8000-00000000dead"] = "shown";
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("rejects a chapter for an unknown outcome", () => {
+    const d = sampleDossier();
+    d.chapters[0].outcomeId = "00000000-0000-4000-8000-00000000dead";
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("rejects duplicate criterion ids across outcomes", () => {
+    const d = sampleDossier();
+    d.framework.outcomes.push({
+      ...d.framework.outcomes[0],
+      id: "00000000-0000-4000-8000-000000000002",
+      criteria: [{ id: C1, text: "dubbel" }],
+    });
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("enforces text and count limits", () => {
+    const long = sampleDossier();
+    long.framework.outcomes[0].criteria[0].text = "x".repeat(LIMITS.criterionText + 1);
+    expect(DossierDataSchema.safeParse(long).success).toBe(false);
+
+    const many = sampleDossier();
+    many.evidence = Array.from({ length: LIMITS.evidence + 1 }, (_, i) => ({
+      ...many.evidence[0],
+      id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
+    }));
+    expect(DossierDataSchema.safeParse(many).success).toBe(false);
+
+    const doc = sampleDossier();
+    doc.chapters[0].text = "x".repeat(LIMITS.documentText + 1);
+    expect(DossierDataSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects an unknown track or status value", () => {
+    const d = sampleDossier() as unknown as Record<string, unknown>;
+    expect(DossierDataSchema.safeParse({ ...d, tracks: ["ske"] }).success).toBe(false);
+    expect(DossierDataSchema.safeParse({ ...d, status: { [C1]: "done" } }).success).toBe(false);
+  });
+
+  it("requires at least one track and keeps outcome ids unique", () => {
+    expect(DossierDataSchema.safeParse({ ...sampleDossier(), tracks: [] }).success).toBe(false);
+    const d = sampleDossier();
+    d.framework.outcomes.push({ ...d.framework.outcomes[0], criteria: [] });
+    expect(d.framework.outcomes[1].id).toBe(LU);
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+});

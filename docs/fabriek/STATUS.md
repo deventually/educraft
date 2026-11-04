@@ -52,12 +52,13 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in een aparte PR (gekozen 2026-11-04), na #35.
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
   open, wacht op Bastiaan.
-- Brief P25 (BDB/BKE-werkplaats), PR #37.
+- P25 kortste pad, PR A (25.1 + 25.2: dossier en opslag). Daarna PR B (UI), PR C (coach) en de
+  Word-export, die vóór ongeveer 20 november klaar moet zijn (eerste gebruik: BKE inleveren op 30
+  november).
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
 
-- Brief P25 (BDB/BKE-werkplaats) mergen, PR #37.
 
 ## Volgende (voorgestelde volgorde)
 
