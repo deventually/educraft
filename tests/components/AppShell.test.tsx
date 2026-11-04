@@ -47,6 +47,19 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByText("Context & instellingen")).toBeNull();
   });
 
+  it("has a fifth menu item 'BDB/BKE' that leads to the workplace (P25)", () => {
+    renderShell();
+    const links = screen.getAllByRole("link", { name: "BDB/BKE" });
+    expect(links.length).toBeGreaterThan(0);
+    expect(links[0]).toHaveAttribute("href", "/portfolio");
+    fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
+    const panel = screen.getByRole("navigation", { name: "Mobiele navigatie" });
+    expect(within(panel).getByRole("link", { name: "BDB/BKE" })).toHaveAttribute(
+      "href",
+      "/portfolio",
+    );
+  });
+
   it("collapses behind a toggle on small screens", () => {
     renderShell();
     const toggle = screen.getByRole("button", { name: "Menu openen" });
@@ -140,26 +153,26 @@ describe("AppShell top navigation", () => {
   });
 });
 
-describe("AppShell menu (P19.5)", () => {
-  const FOUR = ["Tools", "Mijn werk", "Onderwijscontext", "Help"];
-  const HREFS = ["/tools", "/projects", "/context-profiles", "/help"];
+describe("AppShell menu (P19.5; fifth item BDB/BKE since P25, BESLUIT-2026-11-04-17)", () => {
+  const FIVE = ["Tools", "Mijn werk", "BDB/BKE", "Onderwijscontext", "Help"];
+  const HREFS = ["/tools", "/projects", "/portfolio", "/context-profiles", "/help"];
 
-  it("shows exactly four menu items in order for a teacher", async () => {
+  it("shows exactly five menu items in order for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher" });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     const links = within(primary).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual(FOUR);
+    expect(links.map((l) => l.textContent)).toEqual(FIVE);
     expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
   });
 
-  it("shows the same four items in the mobile menu", async () => {
+  it("shows the same five items in the mobile menu", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher" });
     await screen.findByText("Tools home");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
     const links = within(mobile).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual(FOUR);
+    expect(links.map((l) => l.textContent)).toEqual(FIVE);
     expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
   });
 
@@ -180,7 +193,7 @@ describe("AppShell menu (P19.5)", () => {
       within(primary)
         .getAllByRole("link")
         .map((l) => l.textContent),
-    ).toEqual(["Tools", "My work", "Teaching context", "Help"]);
+    ).toEqual(["Tools", "My work", "BDB/BKE", "Teaching context", "Help"]);
   });
 
   it("has no a11y violations with the mobile menu open", async () => {
@@ -244,6 +257,7 @@ describe("AppShell admin surface & role switch", () => {
       "Beheer",
       "Tools",
       "Mijn werk",
+      "BDB/BKE",
       "Onderwijscontext",
       "Help",
     ]);

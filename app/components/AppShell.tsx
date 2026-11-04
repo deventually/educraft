@@ -61,6 +61,7 @@ export default function AppShell() {
     ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
     { to: "/tools", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
+    { to: "/portfolio", label: t.nav.portfolio, end: false },
     { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/help", label: t.nav.help, end: false },
   ];
@@ -216,6 +217,7 @@ function SiteFooter({ t }: { t: Messages }) {
       links: [
         { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
+        { to: "/portfolio", label: t.nav.portfolio },
         { to: "/context-profiles", label: t.nav.settings },
       ],
     },
