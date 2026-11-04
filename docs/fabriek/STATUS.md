@@ -50,8 +50,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Wacht op jou
 
-- Brief P23: kies het menu (vijfde item "BDB/BKE" of een tegel op de startpagina) en geef akkoord
-  op de eval-run (ongeveer €1–3 per run).
+- Brief P23 mergen (PR #37).
 
 ## Volgende (voorgestelde volgorde)
 

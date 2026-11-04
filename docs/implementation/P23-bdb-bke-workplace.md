@@ -162,8 +162,7 @@ export interface DossierData {
 - **Routes:** `portfolio` (lijst + aanmaken: naam, BDB/BKE/beide), `portfolio/:id` (overzicht),
   `portfolio/:id/framework` (kader), `portfolio/:id/outcome/:outcomeId` (bewijs + hoofdstuk).
   `requireRole("teacher", "admin")`; een vreemd dossier → 404.
-- **Menu:** een item "BDB/BKE" in `AppShell` (desktop + mobiel). Dit wijkt af van
-  BESLUIT-2026-11-04-3 (vier items); zie *Wat Bastiaan moet beslissen*.
+- **Menu:** een vijfde item "BDB/BKE" in `AppShell` (desktop + mobiel), BESLUIT-2026-11-04-11.
 - **Kader** (`/framework`): start met het skelet of met een upload. De upload gebruikt de bestaande
   `fileToText` (PDF/DOCX in de browser); de tekst gaat naar 23.4 (extractie). Daarna een
   bewerkbare lijst van leeruitkomsten en criteria, en een knop "Kader bevestigen". Zonder bevestiging
@@ -240,8 +239,8 @@ export interface DossierData {
     lokaal bij Bastiaan). Niets daaruit wordt gecommit;
     rapporten over privé-cases noemen alleen case-id's en scores. Voeg een test toe die faalt als
     `evals/` een bestand uit die map bevat (op naam).
-  - Een eval-run kost geld (ongeveer €1–3). **Vraag Bastiaan eerst**; de nulmeting van het harnas is
-    nog nooit gedraaid.
+  - Een eval-run kost ongeveer €1–3; Bastiaan gaf akkoord (BESLUIT-2026-11-04-12). Draai eerst de
+    nulmeting van het harnas, die nog nooit gedraaid is.
 - **Testplan (RED):** prompt-structuurtests; `tests/portfolio/coach.test.ts` met een nepprovider
   voor elke controle hierboven; componenttest met axe voor het beoordelingspaneel en de melding.
 
@@ -286,8 +285,7 @@ Handmatig nalopen (23.6):
 5. De export opent in Word met de juiste koppen, bijlagen en bronnenlijst.
 6. Een tweede docent kan het dossier niet zien.
 
-## Wat Bastiaan moet beslissen
+## Beslist door Bastiaan (4 november 2026)
 
-1. **Menu:** een vijfde menu-item "BDB/BKE" (advies), of de werkplaats als tegel op de startpagina
-   (dan blijft BESLUIT-2026-11-04-3 met vier items staan).
-2. **Eval-run:** akkoord op ongeveer €1–3 per run voor de nulmeting en de coach-evals.
+1. **Menu:** een vijfde menu-item "BDB/BKE" (BESLUIT-2026-11-04-11).
+2. **Eval-runs:** akkoord op ongeveer €1–3 per run (BESLUIT-2026-11-04-12).

@@ -132,3 +132,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-04-9:** **Export naar Word mag**, ook met een nieuwe dependency (`docx`).
 - **BESLUIT-2026-11-04-10:** **Importeren uit TestVision, ANS en Remindo** hoort bij de werkplaats,
   zodat toetsresultaten meegaan in de documentatie voor de leeruitkomsten. Uitwerking: P25.
+- **BESLUIT-2026-11-04-11:** **Het menu krijgt een vijfde item "BDB/BKE"** voor de werkplaats. Vult
+  BESLUIT-2026-11-04-3 aan; de andere vier items blijven.
+- **BESLUIT-2026-11-04-12:** **Eval-runs mogen geld kosten** (ongeveer €1–3 per run), voor de
+  nulmeting en de evals van de BDB/BKE-tools.
