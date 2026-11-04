@@ -41,6 +41,8 @@ export interface TokenUsage {
 export interface GenerateResult {
   text: string;
   usage?: TokenUsage;
+  /** Why the model stopped, when the provider says ("stop", "length", …). "length" = cut off by maxTokens. */
+  finishReason?: string;
 }
 
 export interface LLMProvider {

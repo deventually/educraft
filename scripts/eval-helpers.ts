@@ -96,6 +96,13 @@ export function averageScore(scores: Record<string, number>): number {
   return Math.round(mean * 100) / 100;
 }
 
+/** Average per scored case, keyed for the next run's Δ; a case that was not judged is left out. */
+export function scoresForNextRun(rows: ReportRow[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of rows) if (Object.keys(r.scores).length > 0) out[reportRowKey(r)] = averageScore(r.scores);
+  return out;
+}
+
 /** A signed 2-decimal delta vs the previous avg, or an em dash when none. */
 export function formatDelta(current: number, previous: number | undefined): string {
   if (previous === undefined) return "—";
@@ -126,16 +133,21 @@ export function buildReportMarkdown(input: ReportInput): string {
 
   const bodyLines = rows.map((r) => {
     const avg = averageScore(r.scores);
+    if (Object.keys(r.scores).length === 0) {
+      const empty = criteria.map(() => "–");
+      return [r.tool, r.caseId, ...empty, "not judged", "—", r.model, String(r.promptWords)];
+    }
     const delta = formatDelta(avg, prev[reportRowKey(r)]);
     const critCells = criteria.map((c) => (r.scores[c] !== undefined ? String(r.scores[c]) : "–"));
     return [r.tool, r.caseId, ...critCells, avg.toFixed(2), delta, r.model, String(r.promptWords)];
   });
 
+  const scored = rows.filter((r) => Object.keys(r.scores).length > 0).length;
   const toRow = (cells: string[]) => `| ${cells.join(" | ")} |`;
   const lines = [
     `# Eval report — ${input.date}`,
     "",
-    `Cases scored: ${rows.length}. Scores are 1–5 (higher is better); Δ compares the average to the previous report.`,
+    `Cases scored: ${scored} of ${rows.length}. Scores are 1–5 (higher is better); Δ compares the average to the previous report.`,
     "",
     toRow(header),
     toRow(sep),
@@ -157,4 +169,16 @@ export function evalGreeting(
   if (!greeting) return undefined;
   const text = typeof greeting === "string" ? greeting : greeting[c.outputLanguage];
   return interpolateGreeting(text, (c.values ?? {}) as TemplateValues);
+}
+
+/**
+ * Why an output must not go to the judge, or null when it may. In the second
+ * measurement (2026-11-04) guided-reflection eqf6 came back empty and the judge
+ * still gave it 3.6: a judge scores whatever it gets, so an empty answer is
+ * refused here and reported as not judged.
+ */
+export function unjudgeableReason(output: string): string | null {
+  if (!output.trim()) return "empty output";
+  if (/\*\*Tutor:\*\*[ \t]*(?:\n\s*(?=\*\*Student:\*\*)|\s*$)/.test(output)) return "empty tutor turn";
+  return null;
 }

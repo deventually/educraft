@@ -34,6 +34,13 @@ export interface ModelInfo {
    * Drives the chat UI's "thinking" toggle; only ever set for local models.
    */
   supportsThinking?: boolean;
+  /**
+   * The model always reasons before it answers (Claude 5.x adaptive thinking), and
+   * that reasoning counts toward maxOutputTokens. The adapter adds
+   * {@link THINKING_HEADROOM} on top of the tool's budget so the answer itself
+   * still fits (second measurement 2026-11-04: an empty answer at 6144).
+   */
+  alwaysThinks?: boolean;
   /** Rough ordering for the model picker (lower = lighter/cheaper). */
   tier: 1 | 2 | 3;
   /** Local provider (runs on the user's machine; no API key). */
@@ -56,6 +63,7 @@ export const MODELS = {
     apiId: "claude-opus-5-5",
     displayName: "Claude Opus 5.5",
     supportsImages: true,
+    alwaysThinks: true,
     tier: 3,
     // Opus-class: a tool/stage default only, never forced by a caller.
     clientSelectable: false,
@@ -65,6 +73,7 @@ export const MODELS = {
     apiId: "claude-sonnet-5-5",
     displayName: "Claude Sonnet 5.5",
     supportsImages: true,
+    alwaysThinks: true,
     tier: 2,
     clientSelectable: true,
   },
@@ -138,6 +147,25 @@ export const MODELS = {
 } as const satisfies Record<string, ModelInfo>;
 
 export type ModelId = keyof typeof MODELS;
+
+/** Answer budget when a tool sets none. */
+export const DEFAULT_MAX_TOKENS = 8192;
+
+/**
+ * Extra output tokens for a model that always thinks. Thinking is billed when it
+ * happens, so the headroom costs nothing unless the model uses it; without it a
+ * long think leaves no room for the answer.
+ */
+export const THINKING_HEADROOM = 16000;
+
+/** maxOutputTokens to send: the tool's answer budget, plus thinking room where the model always thinks. */
+export function outputTokenBudget(
+  info: Pick<ModelInfo, "alwaysThinks">,
+  maxTokens?: number,
+): number {
+  const answer = maxTokens ?? DEFAULT_MAX_TOKENS;
+  return info.alwaysThinks ? answer + THINKING_HEADROOM : answer;
+}
 
 export const DEFAULT_MODEL: ModelId = "claude-sonnet-5-5";
 

@@ -33,6 +33,8 @@ import { providerForModel } from "~/lib/ai/provider";
 import {
   parseJudgeResult,
   evalGreeting,
+  scoresForNextRun,
+  unjudgeableReason,
   averageScore,
   buildReportMarkdown,
   reportRowKey,
@@ -164,6 +166,8 @@ interface CaseOutput {
   outputLanguage: OutputLanguage;
   promptWords: number;
   output: string;
+  /** A model answer hit maxTokens (finishReason "length"): the output is cut off. */
+  truncated?: boolean;
 }
 
 /**
@@ -199,6 +203,7 @@ async function runCase(tool: Tool, c: EvalCase): Promise<CaseOutput> {
   const priorOutputs: Record<string, string> = {};
   let promptWords = 0;
   let finalOutput = "";
+  let truncated = false;
   const parts: string[] = [];
 
   for (const stage of tool.stages) {
@@ -213,10 +218,12 @@ async function runCase(tool: Tool, c: EvalCase): Promise<CaseOutput> {
     promptWords += countWords(system);
     const model = stage.model ?? tool.defaultModel;
 
-    const output =
+    const run =
       tool.mode === "chat"
         ? await runChat(tool, stage, system, c, model)
         : await runOneShot(tool, stage, system, c, model);
+    const output = run.text;
+    if (run.truncated) truncated = true;
 
     priorOutputs[stage.id] = output;
     finalOutput = output;
@@ -230,6 +237,7 @@ async function runCase(tool: Tool, c: EvalCase): Promise<CaseOutput> {
     outputLanguage: c.outputLanguage,
     promptWords,
     output: parts.join("\n\n---\n\n") || finalOutput,
+    truncated,
   };
 }
 
@@ -246,17 +254,17 @@ async function runOneShot(
   system: string,
   c: EvalCase,
   model: string,
-): Promise<string> {
+): Promise<{ text: string; truncated: boolean }> {
   const provider = providerForModel(model);
   const images = c.imagePath ? [loadImage(tool.slug, c.imagePath)] : undefined;
-  const { text } = await provider.generate({
+  const { text, finishReason } = await provider.generate({
     model,
     system,
     messages: [{ role: "user", content: TRIGGER[c.outputLanguage] }],
     images,
     ...stageParams(tool, stage),
   });
-  return text;
+  return { text, truncated: finishReason === "length" };
 }
 
 /** Play the scripted student turns; return the full transcript for judging. */
@@ -266,8 +274,9 @@ async function runChat(
   system: string,
   c: EvalCase,
   model: string,
-): Promise<string> {
+): Promise<{ text: string; truncated: boolean }> {
   const provider = providerForModel(model);
+  let truncated = false;
   const turns = c.userTurns?.length ? c.userTurns : [TRIGGER[c.outputLanguage]];
   const history: ChatMessage[] = [];
   const transcript: string[] = [];
@@ -279,22 +288,23 @@ async function runChat(
   for (const turn of turns) {
     history.push({ role: "user", content: turn });
     transcript.push(`**Student:** ${turn}`);
-    const { text } = await provider.generate({
+    const { text, finishReason } = await provider.generate({
       model,
       system,
       messages: reinforceLanguage(history, c.outputLanguage),
       ...stageParams(tool, stage),
     });
+    if (finishReason === "length") truncated = true;
     history.push({ role: "assistant", content: text });
     transcript.push(`**Tutor:** ${text}`);
   }
-  return transcript.join("\n\n");
+  return { text: transcript.join("\n\n"), truncated };
 }
 
 function writeOutput(date: string, o: CaseOutput) {
   const dir = join(OUTPUT_DIR, date, o.tool);
   ensureDir(dir);
-  const header = `<!-- tool=${o.tool} case=${o.caseId} model=${o.model} lang=${o.outputLanguage} promptWords=${o.promptWords} -->\n\n`;
+  const header = `<!-- tool=${o.tool} case=${o.caseId} model=${o.model} lang=${o.outputLanguage} promptWords=${o.promptWords}${o.truncated ? " truncated=1" : ""} -->\n\n`;
   writeFileSync(join(dir, `${o.caseId}.md`), header + o.output, "utf8");
 }
 
@@ -356,6 +366,20 @@ async function judgeOutput(
   };
 }
 
+/** A case whose output could not be judged: no scores, the reason as its weakest aspect. */
+function notJudged(tool: Tool, c: EvalCase, co: CaseOutput, reason: string): JudgedCase {
+  return {
+    tool: tool.slug,
+    caseId: c.id,
+    scores: {},
+    model: co.model,
+    promptWords: co.promptWords,
+    outputLanguage: co.outputLanguage,
+    worst: `NOT JUDGED: ${reason}${co.truncated ? " (the model hit the token limit)" : ""}`,
+    verdict: "",
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Report — deltas come from the most recent prior <date>.scores.json
 // ---------------------------------------------------------------------------
@@ -384,8 +408,7 @@ function writeReport(date: string, judged: JudgedCase[]) {
     .join("\n");
   writeFileSync(join(REPORTS_DIR, `${date}.md`), `${md}\n\n## Weakest aspect per case\n\n${notes}\n`, "utf8");
   // Machine-readable avgs → next run's delta source.
-  const scores: Record<string, number> = {};
-  for (const j of judged) scores[reportRowKey(j)] = averageScore(j.scores);
+  const scores = scoresForNextRun(judged);
   writeFileSync(join(REPORTS_DIR, `${date}.scores.json`), `${JSON.stringify(scores, null, 2)}\n`, "utf8");
   console.log(`\nReport written: evals/reports/${date}.md`);
 }
@@ -407,6 +430,7 @@ function readExistingOutput(date: string, toolId: string, caseId: string): CaseO
     outputLanguage: (meta?.[4] as OutputLanguage) ?? "nl",
     promptWords: meta ? Number(meta[5]) : 0,
     output: body,
+    truncated: / truncated=1 -->/.test(raw),
   };
 }
 
@@ -472,8 +496,16 @@ async function main() {
         }
         if (cli.casesOnly) continue;
 
+        const refused = unjudgeableReason(co.output);
+        if (refused) {
+          console.warn(`  · ${c.id}: NOT JUDGED — ${refused}`);
+          judged.push(notJudged(tool, c, co, refused));
+          continue;
+        }
         console.log(`  · ${c.id} → judging (${cli.judgeModel})…`);
-        judged.push(await judgeOutput(tool, rubric, c, co, cli.judgeModel));
+        const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
+        if (co.truncated) j.worst = `⚠️ output hit the token limit (cut off). ${j.worst}`;
+        judged.push(j);
       } catch (err) {
         console.error(`  · ${c.id}: FAILED — ${(err as Error).message}`);
       }

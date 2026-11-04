@@ -55,6 +55,11 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- Lege en afgekapte antwoorden: bij Claude Sonnet 5.5 en Opus 5.5 telt het denken mee in de
+  antwoordruimte. Begeleide reflectie gaf daardoor bij een uitgebreide les een leeg antwoord, en
+  Authentieke toetsing hield halverwege op. Deze modellen krijgen nu 16.000 tokens extra
+  denkruimte bovenop het budget van de tool. De eval beoordeelt een leeg antwoord niet meer en meldt
+  een afgekapt antwoord — PR open.
 - Reparaties na de nulmeting (24.0): langere antwoordruimte voor ARCS Reactor, Authentieke toetsing,
   Cognitive Architect (12288) en Forum Autograder (8192), want hun antwoorden werden afgekapt; de
   beoordelingsmaatstaf van Contextualisering beoordeelt nu de echte taak (analyse van samenhang, niet
