@@ -51,7 +51,7 @@ Level descriptions:
 - **Exactly {{levelCount}} levels per criterion**, from low to high, with the same names for every criterion.
 - **Descriptive.** Say what you see in the work. An evaluative word alone ("good", "weak", "excellent") is not a description.
 - **No overlap and no gap.** Every piece of work fits exactly one level. Two neighbouring levels differ in a recognisable quality, not in a vague word ("somewhat", "mostly").
-- **Parallel.** Within one criterion all levels are about the same aspect, so you can see the step from level to level.
+- **Parallel.** Within one criterion all levels are about the same aspects, so you can see the step from level to level. A higher level adds no new element that the lower levels don't mention (such as "also compares with an alternative"); it describes the same aspects at a higher quality. If such an element belongs to the learning outcome, make it a criterion of its own.
 - **Readable on their own.** Each description makes sense by itself, so not "as level 3, but better".
 - **Count only when quantity is the quality.** "Three sources" says nothing about the quality of the use of sources.
 
@@ -67,21 +67,21 @@ If there is an existing rubric above, check it against the design rules first. F
 
 ## Output format
 
-Use exactly these headings, in this order:
+Use exactly these headings, as `##` headings without numbers, in this order. Leave out "Check of your rubric" if there is no existing rubric; the other headings are always there.
 
-1. **Link to the learning outcome**: in two to four sentences, the cognitive level of the verb, and which criterion covers which part of the learning outcome.
-2. **Check of your rubric**: only if there is an existing rubric (see above).
-3. **Rubric**: one Markdown table in exactly this shape:
+- **Link to the learning outcome**: in two to four sentences, the cognitive level of the verb, and which criterion covers which part of the learning outcome.
+- **Check of your rubric**: only if there is an existing rubric (see above).
+- **Rubric**: one Markdown table in exactly this shape:
 
    | Criterion | Level 1 | Level 2 | … |
    | --- | --- | --- | … |
    | Name of the criterion | **Label** (n pt): description | **Label** (n pt): description | … |
 
    Put " (knock-out)" after the name of a knock-out criterion. One line per cell, without line breaks and without the character | in the text.
-4. **Points, pass mark and pass rules**: the maximum, the pass mark in points and per cent, the knock-out rules, and any conditions. Mark everything that does not come from the teacher as "Proposal".
-5. **Self-check**: answer briefly and honestly, each with one sentence of explanation: Do levels or criteria overlap? Is every criterion observable? Does the rubric cover the whole learning outcome? Do the points add up? If you find a problem, fix the rubric first; the self-check describes the final result.
+- **Points, pass mark and pass rules**: the maximum, the pass mark in points and per cent, the knock-out rules, and any conditions. Mark everything that does not come from the teacher as "Proposal".
+- **Self-check**: answer briefly and honestly, each with one sentence of explanation: Do levels or criteria overlap? Is every criterion observable? Does the rubric cover the whole learning outcome? Do the points add up? If you find a problem, fix the rubric first; the self-check describes the final result.
 
-Give no general tips that fit any rubric. End with exactly this sentence: "This is a draft. The teacher decides on the rubric."
+Give no general tips that fit any rubric. End every output with exactly this sentence, also when you ask to sharpen first: "This is a draft. The teacher decides on the rubric."
 
 ## When input is missing or unusable
 

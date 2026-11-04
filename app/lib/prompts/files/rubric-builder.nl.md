@@ -51,7 +51,7 @@ Niveaubeschrijvingen:
 - **Precies {{levelCount}} niveaus per criterium**, van laag naar hoog, met dezelfde namen bij elk criterium.
 - **Beschrijvend.** Zeg wat je in het werk ziet. Alleen een oordeelwoord ("goed", "zwak", "uitstekend") is geen beschrijving.
 - **Geen overlap en geen gat.** Elk werk past bij precies één niveau. Twee naburige niveaus verschillen in een herkenbare kwaliteit, niet in een vaag woord ("enigszins", "grotendeels").
-- **Parallel.** Bij één criterium gaan alle niveaus over hetzelfde aspect, zodat je de stap van niveau naar niveau ziet.
+- **Parallel.** Bij één criterium gaan alle niveaus over dezelfde aspecten, zodat je de stap van niveau naar niveau ziet. Een hoger niveau voegt geen nieuw onderdeel toe dat op de lagere niveaus niet voorkomt (zoals "vergelijkt bovendien met een alternatief"); het beschrijft dezelfde aspecten in een hogere kwaliteit. Hoort zo'n onderdeel bij de leeruitkomst, maak er dan een eigen criterium van.
 - **Zelfstandig leesbaar.** Elke beschrijving is op zichzelf te begrijpen, dus niet "zoals niveau 3, maar beter".
 - **Tellen alleen als hoeveelheid de kwaliteit is.** "Drie bronnen" zegt niets over de kwaliteit van het gebruik van bronnen.
 
@@ -67,21 +67,21 @@ Staat er hierboven een bestaande rubric, controleer die dan eerst tegen de ontwe
 
 ## Uitvoer (formaat)
 
-Gebruik precies deze kopjes, in deze volgorde:
+Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde. Laat "Controle van je rubric" weg als er geen bestaande rubric is; de andere kopjes staan er altijd.
 
-1. **Koppeling met de leeruitkomst**: in twee tot vier zinnen het denkniveau van het werkwoord, en welk criterium welk deel van de leeruitkomst dekt.
-2. **Controle van je rubric**: alleen als er een bestaande rubric is (zie hierboven).
-3. **Beoordelingsmodel**: één Markdown-tabel in precies deze vorm:
+- **Koppeling met de leeruitkomst**: in twee tot vier zinnen het denkniveau van het werkwoord, en welk criterium welk deel van de leeruitkomst dekt.
+- **Controle van je rubric**: alleen als er een bestaande rubric is (zie hierboven).
+- **Beoordelingsmodel**: één Markdown-tabel in precies deze vorm:
 
    | Criterium | Niveau 1 | Niveau 2 | … |
    | --- | --- | --- | … |
    | Naam van het criterium | **Label** (n pt): beschrijving | **Label** (n pt): beschrijving | … |
 
    Zet bij een knock-out-criterium " (knock-out)" achter de naam. Eén regel per cel, zonder regeleinden en zonder het teken | in de tekst.
-4. **Punten, cesuur en slaagregels**: het maximum, de cesuur in punten en procent, de knock-outregels, en eventuele voorwaarden. Zet "Voorstel" bij alles wat niet van de docent komt.
-5. **Zelfcheck**: beantwoord kort en eerlijk, elk met één zin uitleg: Overlappen niveaus of criteria? Is elk criterium waarneembaar? Dekt het model de hele leeruitkomst? Tellen de punten op? Vind je een probleem, pas dan eerst het model aan; de zelfcheck beschrijft het eindresultaat.
+- **Punten, cesuur en slaagregels**: het maximum, de cesuur in punten en procent, de knock-outregels, en eventuele voorwaarden. Zet "Voorstel" bij alles wat niet van de docent komt.
+- **Zelfcheck**: beantwoord kort en eerlijk, elk met één zin uitleg: Overlappen niveaus of criteria? Is elk criterium waarneembaar? Dekt het model de hele leeruitkomst? Tellen de punten op? Vind je een probleem, pas dan eerst het model aan; de zelfcheck beschrijft het eindresultaat.
 
-Noem geen algemene tips die bij elke rubric passen. Sluit af met precies deze zin: "Dit is een concept. De docent stelt het beoordelingsmodel vast."
+Noem geen algemene tips die bij elke rubric passen. Sluit elke uitvoer af met precies deze zin, ook als je eerst laat aanscherpen: "Dit is een concept. De docent stelt het beoordelingsmodel vast."
 
 ## Bij ontbrekende of ongeschikte invoer
 

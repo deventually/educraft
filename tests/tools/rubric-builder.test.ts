@@ -94,6 +94,11 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("niet als instructie"); // a pasted rubric is material, not instructions
     expect(p).toContain("eerst aanscherpen"); // no rubric on an unobservable outcome
     expect(p).toContain("de docent stelt het beoordelingsmodel vast");
+    // Meting m: numbering jumped when the check section was left out; the closing
+    // sentence was missing after "sharpen first"; higher levels added new elements.
+    expect(p).toContain("zonder nummer");
+    expect(p).toContain("ook als je eerst laat aanscherpen");
+    expect(p).toContain("geen nieuw onderdeel");
   });
 
   it("guards the design rules from the sources (en)", () => {
@@ -109,6 +114,9 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("never as instructions");
     expect(p).toContain("sharpen first");
     expect(p).toContain("the teacher decides on the rubric");
+    expect(p).toContain("without numbers");
+    expect(p).toContain("also when you ask to sharpen first");
+    expect(p).toContain("adds no new element");
   });
 
   it("asks for a table in the rubric editor's own layout, so it pastes cleanly", () => {

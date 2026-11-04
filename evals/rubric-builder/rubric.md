@@ -21,9 +21,9 @@ shared criterion 1–5.
   parallel? Does the pass level ask for the outcome's cognitive process (an "analyse" outcome
   is not passed by description)? Are task directions (length, layout, deadlines) kept out of
   the quality criteria?
-- **formatAdherence** — The required headings in order (link to the outcome, the check of an
-  existing rubric only when one was given, the rubric table, points and pass rules, the
-  self-check), one Markdown table in the editor's layout (`| Criterium | Niveau 1 | …` or
+- **formatAdherence** — The required `##` headings without numbers, in order (link to the
+  outcome, the check of an existing rubric only when one was given, the rubric table, points
+  and pass rules, the self-check), one Markdown table in the editor's layout (`| Criterium | Niveau 1 | …` or
   `| Criterion | Level 1 | …`, cells "**Label** (n pt): description", " (knock-out)" after a
   knock-out criterion), and the exact closing sentence ("Dit is een concept. De docent stelt
   het beoordelingsmodel vast." / "This is a draft. The teacher decides on the rubric.").
