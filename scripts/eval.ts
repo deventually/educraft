@@ -42,6 +42,8 @@ import {
   meanScores,
   parseHardChecks,
   runSpread,
+  capTruncated,
+  TRUNCATION_CAP,
   averageScore,
   buildReportMarkdown,
   reportRowKey,
@@ -564,7 +566,10 @@ async function main() {
           }
           console.log(`  · ${tag} → judging (${cli.judgeModel})…`);
           const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
-          if (co.truncated) j.worst = `⚠️ output hit the token limit (cut off). ${j.worst}`;
+          if (co.truncated) {
+            j.scores = capTruncated(j.scores);
+            j.worst = `⚠️ output hit the token limit (cut off; scores capped at ${TRUNCATION_CAP}). ${j.worst}`;
+          }
           if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
           runs.push(j);
         } catch (err) {

@@ -153,6 +153,18 @@ export function applyHardChecks(
   return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, Math.min(v, cap)]));
 }
 
+/**
+ * The highest score an answer that hit the token limit can get. In meting d a
+ * guided-reflection answer that stopped mid-text still scored 4.67: a teacher would
+ * get an unfinished lesson, so the judge's scale cannot be trusted here.
+ */
+export const TRUNCATION_CAP = 3;
+
+/** Cap every score of a cut-off answer at {@link TRUNCATION_CAP}. */
+export function capTruncated(scores: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, Math.min(v, TRUNCATION_CAP)]));
+}
+
 /** Per-criterion mean over the judged runs (empty score sets skipped), two decimals. */
 export function meanScores(runs: Record<string, number>[]): Record<string, number> {
   const judged = runs.filter((r) => Object.keys(r).length > 0);

@@ -14,6 +14,8 @@ import {
   hardChecksInstruction,
   meanScores,
   runSpread,
+  capTruncated,
+  TRUNCATION_CAP,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -329,5 +331,12 @@ describe("hard checks in the committed rubrics", () => {
     const checks = parseHardChecks(rubric);
     expect(checks.find((c) => c.id === "gaveAnswer")?.cap).toBe(2);
     expect(checks.find((c) => c.id === "inventedStudentWords")?.cap).toBe(2);
+  });
+});
+
+describe("a cut-off answer is capped", () => {
+  it("caps every score at the truncation cap (meting d: a cut-off answer still got 4.67)", () => {
+    expect(TRUNCATION_CAP).toBe(3);
+    expect(capTruncated({ a: 5, b: 2 })).toEqual({ a: 3, b: 2 });
   });
 });

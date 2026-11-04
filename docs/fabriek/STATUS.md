@@ -64,8 +64,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 - Strengere meting (#56): elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
   rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
-  maximaal 2). Twee extra MentorAI-cases (afhaker, te zekere student). Meting d (vier tools, drie
-  runs) draait op de Mac.
+  maximaal 2); een afgekapt antwoord krijgt hooguit een 3. Twee extra MentorAI-cases (afhaker,
+  te zekere student). Begeleide reflectie krijgt 12288 tokens, want 2 van de 3 lessen op eqf6
+  hielden halverwege op. Meting d (`evals/reports/2026-11-04d.md`): MentorAI 2,3–2,6 (te veel
+  vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
 - MentorAI v2 naar het boek (24.0): de prompt van het boek (Agarwal e.a., p. 36–44) als basis, met
   jouw vak en leerdoel in plaats van de vaste SBI-oefening; de leermeester lost je eigen opgave nooit
   op. De toolpagina toont de echte boektekst en zegt wat wij veranderden (BESLUIT-2026-11-04-22) —

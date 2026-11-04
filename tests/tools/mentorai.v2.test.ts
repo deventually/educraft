@@ -85,9 +85,12 @@ describe("mentorai@v2 — the book's Cognitive Apprenticeship Coach, generalised
     const nl = runtime("nl").toLowerCase();
     expect(nl).toContain("los de eigen opgave van de lerende nooit op");
     expect(nl).toContain("maak je beurt korter");
+    // Meting d: the old mentor gave a fill-in sentence for the student's own problem statement.
+    expect(nl).toContain("geen invulzin of sjabloon");
     const en = runtime("en").toLowerCase();
     expect(en).toContain("never solve the learner's own task");
     expect(en).toContain("compress your turn");
+    expect(en).toContain("no fill-in sentence or template");
   });
 
   it("is clean Dutch: no leftovers from the old prompt", () => {
