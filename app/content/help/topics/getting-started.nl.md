@@ -5,7 +5,7 @@ LimeOnIt zet evidence-based onderwijsmethoden uit *The Pedagogical Promptbook* o
 1. **Kies een tool.** Op de startpagina staan alle tools, per doel. Zoek op wat je wilt doen, bijvoorbeeld *rubric* of *motivatie*.
 2. **Stel je onderwijscontext in.** Maak onder **Onderwijscontext** een profiel aan (opleiding, vak, niveau, beroepspraktijk). Dat profiel wordt automatisch in elke prompt verwerkt, zodat het resultaat past bij jóuw onderwijs. Zie [Onderwijscontext instellen](/help/context-profiles).
 3. **Genereer of begin een gesprek.** One-shot-tools vul je in en genereer je in één keer. Chat-tools voeren een gesprek met je: begin met een suggestie of typ je eigen bericht. Model en andere techniek vind je onder **Geavanceerd**.
-4. **Bewaar en hergebruik.** Resultaten verschijnen onder **Projecten**. Daar kun je ze teruglezen, kopiëren, exporteren en verwijderen.
+4. **Bewaar en hergebruik.** Resultaten verschijnen onder **Mijn werk**. Daar kun je ze teruglezen, kopiëren, exporteren en verwijderen.
 
 ## Tips
 

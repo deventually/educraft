@@ -19,7 +19,7 @@ export const en: Messages = {
   },
   nav: {
     tools: "Tools",
-    projects: "Projects",
+    projects: "My work",
     help: "Help",
     settings: "Teaching context",
     about: "About",
@@ -34,7 +34,6 @@ export const en: Messages = {
     heading: "Choose a tool",
     intro:
       "Each tool turns an evidence-based teaching method from The Pedagogical Promptbook into a working tool. Designed for Dutch higher professional education (hbo).",
-    comingSoon: "Coming soon",
     search: "Search by name, method or task…",
     resultCount: "{count} tools",
     resultCountOne: "{count} tool",
@@ -209,7 +208,6 @@ export const en: Messages = {
     product: "Product",
     resources: "Resources",
     legal: "Legal",
-    contact: "Contact",
     cookies: "Privacy & cookies",
     disclaimer: "Disclaimer",
     prompts: "prompts from",
@@ -220,12 +218,6 @@ export const en: Messages = {
     emailLabel: "Email",
   },
   pages: {
-    contact: {
-      heading: "Contact",
-      intro: "Questions, feedback, or interested in working together? We'd love to hear from you.",
-      emailLabel: "Email",
-      placeholder: "This page is still being completed.",
-    },
     cookies: {
       heading: "Privacy & cookies",
       intro: "How LimeOnIt handles your data and which cookies we use.",
@@ -238,7 +230,7 @@ export const en: Messages = {
     },
   },
   projects: {
-    subtitle: "Your recently generated materials.",
+    subtitle: "Everything you made with the tools.",
     emptyTitle: "Nothing saved yet",
     emptyBody:
       "Everything you make with a tool appears here automatically. You can read it again, copy, export and delete it.",
