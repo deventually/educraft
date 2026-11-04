@@ -273,6 +273,7 @@ export const en: Messages = {
       done: "Every criterion has been shown. Read the whole thing once more.",
     },
     goThere: "Go there",
+    exportWord: "Download as a Word file",
     frameworkLink: "View or edit the framework",
     frameworkConfirmed: "Framework confirmed on {date}.",
     frameworkNotConfirmed: "The framework has not been confirmed yet.",
@@ -632,6 +633,15 @@ export const en: Messages = {
       filterLabel: "Filter by tool",
       filterAll: "All tools",
     },
+  },
+  portfolioExport: {
+    year: "Academic year {year}",
+    words: "Word count (excluding appendices): {n}",
+    noChapter: "(No text yet.)",
+    aiDisclosure: "Use of AI",
+    references: "References",
+    appendices: "Appendices",
+    appendix: "Appendix {n}. {title}",
   },
   confirm: {
     cancel: "Cancel",

@@ -39,6 +39,8 @@ export default [
   route("logout", "routes/logout.tsx"),
   // Resource route (no UI) — SSE streaming endpoint for generators.
   route("api/stream", "routes/api.stream.tsx"),
+  // Resource route (no UI) — a BDB/BKE dossier as a Word (.docx) download (P25.6).
+  route("portfolio/:id/export", "routes/portfolio.$id.export.tsx"),
   // Resource route (no UI) — records tester feedback on a generation.
   route("api/feedback", "routes/api.feedback.tsx"),
   // Public health probe for orchestrators (no auth, no chrome).

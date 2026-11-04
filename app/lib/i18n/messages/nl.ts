@@ -277,6 +277,7 @@ export const nl = {
       done: "Alle criteria zijn aangetoond. Lees het geheel nog één keer na.",
     },
     goThere: "Ga erheen",
+    exportWord: "Download als Word-bestand",
     frameworkLink: "Kader bekijken of aanpassen",
     frameworkConfirmed: "Kader bevestigd op {date}.",
     frameworkNotConfirmed: "Het kader is nog niet bevestigd.",
@@ -636,6 +637,15 @@ export const nl = {
       filterLabel: "Filter op tool",
       filterAll: "Alle tools",
     },
+  },
+  portfolioExport: {
+    year: "Studiejaar {year}",
+    words: "Aantal woorden (zonder bijlagen): {n}",
+    noChapter: "(Nog geen tekst.)",
+    aiDisclosure: "Verantwoording AI-gebruik",
+    references: "Bronnenlijst",
+    appendices: "Bijlagen",
+    appendix: "Bijlage {n}. {title}",
   },
   confirm: {
     cancel: "Annuleren",

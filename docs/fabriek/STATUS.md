@@ -55,8 +55,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
   open, wacht op Bastiaan.
 - P25 kortste pad, PR B (25.3: de schermen van de werkplaats, menu-item "BDB/BKE") — PR open. Daarna
-  PR C (coach). De Word-export (25.6) loopt parallel in een eigen thread; die moet vóór ongeveer 20
-  november klaar zijn (eerste gebruik: BKE inleveren op 30 november).
+  PR C (coach). De Word-export (25.6) staat op `main`; PR B zet de knop op het overzicht.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou

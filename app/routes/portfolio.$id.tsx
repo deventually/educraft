@@ -120,6 +120,17 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         </Link>
       </p>
 
+      {/* Word export (25.6): a plain download link, works without JS. */}
+      <p className="mt-2">
+        <a
+          href={`/portfolio/${id}/export`}
+          download
+          className="text-sm font-medium text-violet-700 underline underline-offset-2"
+        >
+          {t.portfolio.exportWord}
+        </a>
+      </p>
+
       {framework.outcomes.length > 0 && (
         <section className="mt-8" aria-labelledby="outcomes-title">
           <h2 id="outcomes-title" className="text-lg font-medium text-slate-900">

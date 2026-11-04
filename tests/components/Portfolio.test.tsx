@@ -92,6 +92,10 @@ describe("Portfolio overview", () => {
       screen.getByText(/"De les sluit aan bij de beginsituatie." heeft nog geen bewijs/),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Bron (APA)")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Download als Word-bestand" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/export`,
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
