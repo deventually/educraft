@@ -183,6 +183,22 @@ describe("/portfolio/:id and its pages", () => {
     } as never);
     expect(data.status[C2]).toBe("shown");
   });
+  it("names the available tool that helps with the next criterion, on both pages", async () => {
+    const d = sampleDossier();
+    d.framework.confirmedAt = 1;
+    d.framework.outcomes[0].criteria[1].text = "Je motiveert studenten tijdens de les.";
+    const mine = await repo.createDossier("teacher-a", "A", d);
+    const page = await overview.loader({ request: get("/x"), params: { id: mine.id } } as never);
+    expect(page.next).toMatchObject({ step: "add-evidence", criterionId: C2 });
+    expect(page.nextTools[0]).toEqual({ slug: "arcs-reactor", name: expect.any(String) });
+    const data = await outcome.loader({
+      request: get("/x"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(data.toolHints[C2][0].slug).toBe("arcs-reactor");
+    // A criterion that already has evidence gets no suggestion.
+    expect(Object.keys(data.toolHints)).toEqual([C2]);
+  });
 });
 
 describe("/projects — add to dossier", () => {

@@ -16,6 +16,9 @@ import { useFormToast } from "~/components/Toast";
 import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
+import { ToolHints } from "~/components/portfolio/ToolHints";
+import { availableToolNames } from "~/server/portfolio.server";
+import { chapterHints, criterionHints } from "~/lib/portfolio/toolHints";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -26,11 +29,15 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { dossier } = await loadDossier(request, params.id);
+  const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
   const outcome = d.framework.outcomes.find((o) => o.id === params.outcomeId);
   if (!outcome) throw new Response("Not Found", { status: 404 });
   const own = new Set(outcome.criteria.map((c) => c.id));
+  const linked = new Set(d.evidence.flatMap((e) => e.criterionIds));
+  const names = await availableToolNames(request, user);
+  const available = new Set(names.keys());
+  const view = (slugs: string[]) => slugs.map((slug) => ({ slug, name: names.get(slug) ?? slug }));
   return {
     id: dossier.id,
     name: dossier.name,
@@ -50,6 +57,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id)))
       .map((c) => c.id),
     stored: storedReview(d.reviews?.[outcome.id]),
+    toolHints: Object.fromEntries(
+      outcome.criteria
+        .filter((c) => !linked.has(c.id))
+        .map((c) => [c.id, view(criterionHints(outcome, c, available))]),
+    ),
+    chapterTools: view(chapterHints(outcome, available)),
   };
 }
 
@@ -108,6 +121,8 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     showDraftNotice,
     withEvidence,
     stored,
+    toolHints,
+    chapterTools,
   } = loaderData;
   const drafts =
     coachMode === "draft" && confirmed
@@ -147,6 +162,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                   {fmt(to.strongLevel, { text: c.strongLevel })}
                 </p>
               )}
+              <ToolHints hints={toolHints[c.id] ?? []} step="evidence" className="mt-3" />
               <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
                 <input type="hidden" name="intent" value="setStatus" />
                 <input type="hidden" name="criterionId" value={c.id} />
@@ -238,6 +254,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
             </Form>
           </div>
         )}
+        <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
         <div className="mt-3">
           {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}
           <ChapterEditor

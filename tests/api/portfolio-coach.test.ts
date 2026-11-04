@@ -21,6 +21,7 @@ vi.mock("~/server/repositories/usage.server", () => ({
 }));
 vi.mock("~/server/availability.server", () => ({
   effectiveDefaultModel: vi.fn(async () => "claude-sonnet-5-5"),
+  getAvailableTools: vi.fn(async () => []),
 }));
 
 let coach: typeof import("~/server/portfolioCoach.server");

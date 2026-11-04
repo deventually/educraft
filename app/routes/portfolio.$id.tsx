@@ -1,7 +1,9 @@
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id";
-import { loadDossier, saveIntent } from "~/server/portfolio.server";
+import { availableToolNames, loadDossier, saveIntent } from "~/server/portfolio.server";
+import { criterionHints } from "~/lib/portfolio/toolHints";
+import { ToolHints } from "~/components/portfolio/ToolHints";
 import { nextStep, outcomeProgress, requirementFindings } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
@@ -15,15 +17,29 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { dossier } = await loadDossier(request, params.id);
+  const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
+  const next = nextStep(d);
+  let nextTools: { slug: string; name: string }[] = [];
+  if (next.step === "add-evidence") {
+    const outcome = d.framework.outcomes.find((o) => o.id === next.outcomeId);
+    const criterion = outcome?.criteria.find((c) => c.id === next.criterionId);
+    if (outcome && criterion) {
+      const names = await availableToolNames(request, user);
+      nextTools = criterionHints(outcome, criterion, new Set(names.keys())).map((slug) => ({
+        slug,
+        name: names.get(slug) ?? slug,
+      }));
+    }
+  }
   return {
     id: dossier.id,
     name: dossier.name,
     framework: d.framework,
     progress: outcomeProgress(d),
     findings: requirementFindings(d),
-    next: nextStep(d),
+    next,
+    nextTools,
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -58,6 +74,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     coachMode,
     aiUsed,
     aiRequired,
+    nextTools,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -120,6 +137,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             {t.portfolio.goThere}
           </Link>
         )}
+        <ToolHints hints={nextTools} step="evidence" className="mt-3 bg-white" />
       </Card>
 
       <p className="mt-6 text-sm text-slate-600">

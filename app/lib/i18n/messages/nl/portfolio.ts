@@ -29,6 +29,37 @@ export const portfolio = {
   backToList: "Alle dossiers",
   backToDossier: "Terug naar het dossier",
   nextStepTitle: "Volgende stap",
+  tools: {
+    title: "Hulp uit LimeOnIt",
+    chapterTitle: "Denkhulp bij het schrijven",
+    open: "Open {tool}",
+    saveHow:
+      "Wat je in de tool maakt, staat daarna bij Projecten. Kies daar “Toevoegen aan dossier” en koppel het hier aan het criterium.",
+    thinkHow: "Een gesprek helpt je denken, maar is geen bewijs en geen bron.",
+    how: {
+      "guided-reflection":
+        "Ontwerp je les vanuit de leeruitkomsten (Backward Design). Het lesontwerp laat je voorbereiding zien.",
+      "cognitive-architect":
+        "Werk een leeractiviteit stap voor stap uit volgens Gagné en Rosenshine. Zo laat je de opbouw en de werkvormen zien.",
+      "arcs-reactor":
+        "Beschrijf waar de motivatie van je studenten hapert en krijg concrete ingrepen volgens het ARCS-model.",
+      "bloom-by-design":
+        "Kies een digitaal middel dat past bij je leerdoelen, en onderbouw die keuze.",
+      contextualization:
+        "Analyseer of je leerdoelen, werkvormen en toetsing op elkaar aansluiten. De analyse laat zien hoe je onderwijs in het geheel past.",
+      "authentic-assessment":
+        "Ontwerp een praktijkgerichte toets met een analytische rubric. Toets en rubric laten je toetsontwerp zien.",
+      "stage-assessment":
+        "Laat een concept-beoordeling van studentwerk maken tegen je eigen nakijkmodel. Jij beslist; jouw definitieve beoordeling is het bewijs.",
+      "forum-autograder":
+        "Beoordeel een online discussie op sociale, cognitieve en onderwijsaanwezigheid. Zo laat je zien hoe je de interactie begeleidt.",
+      "dialogic-encounters":
+        "Verken in een gesprek met een leertheoreticus hoe je je keuzes theoretisch onderbouwt.",
+      "peer-tutoring": "Beoordeel een bron kritisch voordat je hem in je hoofdstuk gebruikt.",
+      "socratic-partner":
+        "Laat je met vragen uitdagen om je eigen ontwikkeling scherp onder woorden te brengen.",
+    },
+  },
   nextStep: {
     buildFramework: "Vul het kader van je hogeschool in.",
     confirmFramework: "Controleer het kader en bevestig het.",

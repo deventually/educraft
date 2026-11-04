@@ -1,0 +1,104 @@
+/**
+ * Which LimeOnIt tool helps at which moment of a BDB/BKE dossier (pure data,
+ * no LLM). A hint matches on the teacher's own words: the criterion text
+ * first, then the outcome title and the evidence the form asks for. Nothing
+ * is suggested when no pattern fits; a wrong suggestion is worse than none.
+ */
+import type { Criterion, Outcome } from "./types";
+
+export type HintStep = "evidence" | "chapter";
+
+export interface ToolHint {
+  /** Tool slug in the registry. */
+  slug: string;
+  /** "evidence": the tool makes something to add to the dossier; "chapter": a thinking partner. */
+  step: HintStep;
+  /** Dutch and English keywords from criteria. */
+  match: RegExp;
+}
+
+export const TOOL_HINTS: readonly ToolHint[] = [
+  {
+    slug: "guided-reflection",
+    step: "evidence",
+    match:
+      /lesontwerp|lesvoorbereiding|lesplan|onderwijssessie|bereid|ontwerp|leerdoel|leeruitkomst|backward|lesson plan|prepar|design|learning (goal|outcome|objective)/i,
+  },
+  {
+    slug: "cognitive-architect",
+    step: "evidence",
+    match:
+      /werkvorm|activerend|leeractiviteit|instructie|opbouw|structuur|activating|learning activit|instruction|structure/i,
+  },
+  { slug: "arcs-reactor", step: "evidence", match: /motiv|betrokken|engag/i },
+  {
+    slug: "bloom-by-design",
+    step: "evidence",
+    match: /technolog|digita|\bict\b|blended|onderwijsmiddel|media/i,
+  },
+  {
+    slug: "contextualization",
+    step: "evidence",
+    match:
+      /opleidingsprofiel|leerlijn|alignment|samenhang|curricul|programme profile|learning line|coherence/i,
+  },
+  {
+    slug: "authentic-assessment",
+    step: "evidence",
+    match: /toets|rubric|formatie|summatie|assessment|\btests?\b/i,
+  },
+  {
+    slug: "stage-assessment",
+    step: "evidence",
+    match: /beoordeel|nakijk|\bstage|afstudeer|grading|marking|internship|thesis/i,
+  },
+  {
+    slug: "forum-autograder",
+    step: "evidence",
+    match: /forum|discussie|interactie|discussion|interaction/i,
+  },
+  {
+    slug: "dialogic-encounters",
+    step: "chapter",
+    match: /theor|literatuur|onderbouw|literature|justif/i,
+  },
+  {
+    slug: "peer-tutoring",
+    step: "chapter",
+    match: /literatuur|\bbron|literature|source/i,
+  },
+  {
+    slug: "socratic-partner",
+    step: "chapter",
+    match: /ontwikkeling|reflect|onderzoekend|development|inquir/i,
+  },
+];
+
+const MAX = 2;
+
+function rank(step: HintStep, strong: string, weak: string, available: Set<string>): string[] {
+  return TOOL_HINTS.filter((h) => h.step === step && available.has(h.slug))
+    .map((h, i) => ({
+      slug: h.slug,
+      i,
+      score: h.match.test(strong) ? 2 : h.match.test(weak) ? 1 : 0,
+    }))
+    .filter((h) => h.score > 0)
+    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .slice(0, MAX)
+    .map((h) => h.slug);
+}
+
+function outcomeText(o: Outcome): string {
+  return [o.title, ...o.requiredEvidence].join("\n");
+}
+
+/** Tools that make evidence for this criterion, best first, among the available slugs. */
+export function criterionHints(o: Outcome, c: Criterion, available: Set<string>): string[] {
+  return rank("evidence", c.text, outcomeText(o), available);
+}
+
+/** Thinking partners for writing this outcome's chapter. */
+export function chapterHints(o: Outcome, available: Set<string>): string[] {
+  return rank("chapter", o.criteria.map((c) => c.text).join("\n"), outcomeText(o), available);
+}
