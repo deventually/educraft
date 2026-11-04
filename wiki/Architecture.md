@@ -121,6 +121,12 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `portfolioCoach.server.ts`) drops quotes that are not verbatim in the chapter and advice that
   cites a source not in the teacher's references. `toolHints.ts` suggests at most two available
   tools per step.
+  Framework extraction (P25.4, intent `extract` on the framework page): the teacher pastes the
+  form or picks one or more PDF/DOCX files (`fileToText`, in the browser); `portfolio-framework@v1`
+  returns JSON and `extract.ts` clips it to `LIMITS`, marks a criterion that is not verbatim in the
+  form as `unverified` ("Controleer dit"; saving the criterion clears it) and refuses to replace a
+  framework that work depends on (`frameworkInUse`). The proposal is stored unconfirmed. The model
+  call is shared with the coach in `portfolioAi.server.ts`.
 
 ---
 

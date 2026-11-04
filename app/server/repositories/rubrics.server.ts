@@ -6,7 +6,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { rubrics } from "../schema.server";
+import { rubricScores, rubrics } from "../schema.server";
 import { RUBRIC_LIMITS, RubricDataSchema, type RubricData } from "~/lib/utilities/rubric";
 
 export interface Rubric {
@@ -95,12 +95,19 @@ export async function updateRubric(
   return { ...existing, name, data, updatedAt };
 }
 
+/** Deletes the rubric and its closed fill-ins (P23.3) together. */
 export async function deleteRubric(userId: string, id: string): Promise<boolean> {
-  const result = getDb()
-    .delete(rubrics)
-    .where(and(eq(rubrics.id, id), eq(rubrics.userId, userId)))
-    .run();
-  return result.changes > 0;
+  return getDb().transaction((tx) => {
+    const result = tx
+      .delete(rubrics)
+      .where(and(eq(rubrics.id, id), eq(rubrics.userId, userId)))
+      .run();
+    if (result.changes === 0) return false;
+    tx.delete(rubricScores)
+      .where(and(eq(rubricScores.rubricId, id), eq(rubricScores.userId, userId)))
+      .run();
+    return true;
+  });
 }
 
 export async function duplicateRubric(

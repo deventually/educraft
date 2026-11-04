@@ -13,6 +13,8 @@ export interface Criterion {
   text: string;
   /** Optional "goed"/excellent description: what makes the evidence stronger. */
   strongLevel?: string;
+  /** Set by the framework extraction when the text is not verbatim in the form; saving the criterion clears it. */
+  unverified?: boolean;
 }
 
 /** A learning outcome / core task / BKE quality, holding its criteria. */

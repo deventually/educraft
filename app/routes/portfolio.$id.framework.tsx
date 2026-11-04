@@ -4,6 +4,8 @@ import type { Route } from "./+types/portfolio.$id.framework";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
+import { frameworkInUse } from "~/lib/portfolio/extract";
+import { FrameworkExtract } from "~/components/portfolio/FrameworkExtract";
 import type { Criterion, Outcome } from "~/lib/portfolio/types";
 import { Button, Card, Input, Label, Textarea } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
@@ -17,7 +19,12 @@ export function meta({ data }: Route.MetaArgs) {
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { dossier } = await loadDossier(request, params.id);
-  return { id: dossier.id, name: dossier.name, framework: dossier.data.framework };
+  return {
+    id: dossier.id,
+    name: dossier.name,
+    framework: dossier.data.framework,
+    canExtract: !frameworkInUse(dossier.data),
+  };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -30,17 +37,30 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
   const tf = t.portfolio.framework;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
-    result: (r) =>
-      !r
-        ? null
-        : r.ok
-          ? {
-              variant: "success",
-              message: r.intent === "confirm" ? t.portfolio.toastConfirmed : t.portfolio.toastSaved,
-            }
-          : { variant: "error", message: r.error },
+    pending: (fd) =>
+      fd?.get("intent") === "extract"
+        ? { variant: "pending", message: tf.extractPending }
+        : { variant: "pending", message: t.toast.saving },
+    result: (r) => {
+      if (!r) return null;
+      if (!r.ok) return { variant: "error", message: r.error };
+      if (r.intent === "extract") {
+        const done = r.flagged
+          ? fmt(tf.extractDoneCheck, { n: String(r.flagged) })
+          : tf.extractDone;
+        return { variant: "success", message: r.clipped ? `${done} ${tf.extractClipped}` : done };
+      }
+      return {
+        variant: "success",
+        message: r.intent === "confirm" ? t.portfolio.toastConfirmed : t.portfolio.toastSaved,
+      };
+    },
   });
-  const { id, name, framework } = loaderData;
+  const { id, name, framework, canExtract } = loaderData;
+  const flagged = framework.outcomes.reduce(
+    (n, o) => n + o.criteria.filter((c) => c.unverified).length,
+    0,
+  );
   const req = framework.requirements;
   const hasCriteria = framework.outcomes.some((o) => o.criteria.length > 0);
 
@@ -57,6 +77,8 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
         {tf.heading} · {name}
       </h1>
       <p className="mt-2 text-slate-600">{tf.intro}</p>
+
+      {canExtract && <FrameworkExtract replaces={framework.outcomes.length > 0} />}
 
       <Card className="mt-6 p-5">
         <h2 className="text-lg font-medium text-slate-900">{tf.metaTitle}</h2>
@@ -173,6 +195,11 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
             ? fmt(t.portfolio.frameworkConfirmed, { date: fmtDate(framework.confirmedAt, locale) })
             : tf.confirmBody}
         </p>
+        {flagged > 0 && (
+          <p className="mt-2 text-sm text-amber-800">
+            {fmt(tf.checkThisCount, { n: String(flagged) })}
+          </p>
+        )}
         {!framework.confirmedAt && (
           <Form method="post" className="mt-3">
             <input type="hidden" name="intent" value="confirm" />
@@ -306,7 +333,13 @@ function CriterionEditor({
             required
             defaultValue={criterion.text}
             maxLength={LIMITS.criterionText}
+            aria-describedby={criterion.unverified ? `${p}-check` : undefined}
           />
+          {criterion.unverified && (
+            <p id={`${p}-check`} className="mt-1 text-sm font-medium text-amber-800">
+              {tf.checkThis}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor={`${p}-strong`}>{tf.criterionStrong}</Label>

@@ -145,6 +145,48 @@ describe("Portfolio framework", () => {
     expect(screen.getByRole("button", { name: "Kader bevestigen" })).toBeEnabled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
+
+  it("offers to read the form when nothing depends on the framework yet", async () => {
+    const d = emptyDossier(["bdb"]);
+    const { container } = renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: d.framework,
+      canExtract: true,
+    });
+    expect(screen.getByLabelText("Tekst van het beoordelingsformulier")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Of kies het formulier/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kader uit formulier halen" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("hides the form reader once the framework is in use", () => {
+    const d = sampleDossier();
+    renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: d.framework,
+      canExtract: false,
+    });
+    expect(screen.queryByRole("button", { name: "Kader uit formulier halen" })).toBeNull();
+  });
+
+  it("marks a criterion that is not literally in the form", async () => {
+    const d = sampleDossier();
+    d.framework.outcomes[0].criteria[1].unverified = true;
+    const { container } = renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: d.framework,
+      canExtract: false,
+    });
+    const flags = screen.getAllByText(/Controleer dit/);
+    // One on the criterion, one summary above the confirm button.
+    expect(flags).toHaveLength(2);
+    expect(screen.getByLabelText("Criterium 2")).toHaveAccessibleDescription(/Controleer dit/);
+    expect(screen.getByLabelText("Criterium 1")).not.toHaveAccessibleDescription(/Controleer dit/);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
 });
 
 describe("Portfolio — which tool helps now", () => {

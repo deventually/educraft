@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 
 /** An authenticated account. Created via invite link (see `invites`). */
 export const users = sqliteTable("users", {
@@ -126,6 +126,24 @@ export const rubrics = sqliteTable("rubrics", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+/**
+ * Closed rubric fill-ins (brief P23.3, BESLUIT-2026-11-04-8): only which level was chosen per
+ * criterion (`levelsJson`, `RubricScoreSchema`) and the month of closing. On purpose there is no
+ * column for a name, a student code, a comment or a date per fill-in. Scoped to its owner.
+ */
+export const rubricScores = sqliteTable(
+  "rubric_scores",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    rubricId: text("rubric_id").notNull(),
+    /** YYYY-MM */
+    month: text("month").notNull(),
+    levelsJson: text("levels_json").notNull(),
+  },
+  (t) => [index("rubric_scores_user_rubric_idx").on(t.userId, t.rubricId)],
+);
 
 /**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
