@@ -23,6 +23,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **React Router 8 en React 19.3 (#65) gemerged op 2026-11-04:** `npm run dev` start zonder
+  waarschuwingen; `meta` en `useMatches` lezen `loaderData`. `vite-node` viel daarbij weg (#68).
 - **Begeleide reflectie v2 (#63) gemerged op 2026-11-04:** de drie fasen van Backward Design uit
   het boek, eerst aanscherpen bij vage invoer; gemiddeld 3,4 → 4,8 (`evals/reports/2026-11-04l.md`).
 - **Dialogisch gesprek v2 (#62) gemerged op 2026-11-04:** het interview uit het boek; gemiddeld
@@ -80,8 +82,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
   Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
   bekende fout — PR open, meting volgt.
-- **React Router 8 en React 19.3:** `npm run dev` start zonder waarschuwingen. De upgrade vervangt de
-  patch voor de `envFile`-melding; `meta` en `useMatches` lezen nu `loaderData` — PR open.
+- Een test bewaakt dat elk geïmporteerd pakket zelf in `package.json` staat (bovenop #68) — PR open.
 - Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
   bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
   pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
