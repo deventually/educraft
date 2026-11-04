@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en kolommen)_
+_Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Nu
 
@@ -17,6 +17,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **V2 (P18) klaar en uitgerold op 2026-11-04:** PR's #17, #19, #21–#28; migraties 0009 en 0010 gedraaid; back-up `data/limeonit-voor-p18.db`; superbeheerder ingesteld.
 
 ## Verzoeken
 
@@ -38,14 +39,6 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
 
 ## Bezig
 
-- V2 stap 18.2: toegang per docent en land-as weg — deze PR.
-- V2 stap 18.3: modellen als overrule per docent — PR (bovenop 18.2).
-- V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
-- V2 stap 18.5: automatisch opslaan in beheer, geen opslaan-knoppen meer — branch `claude/p18-5` (bovenop 18.4).
-- V2 stap 18.6: superbeheerder — alleen hij maakt, degradeert en verwijdert beheerders; uitnodigingen maken nooit beheerders; `npm run set-owner` — branch `claude/p18-6` (bovenop 18.5).
-- V2 stap 18.7: superbeheerder maakt accounts direct aan (link of beginwachtwoord), stelt wachtwoorden in en zet accounts op non-actief; migratie `0009` (kolom erbij) — branch `claude/p18-7` (bovenop 18.6).
-- V2 stap 18.8: opruimen — tabellen `chat_sessions`/`messages`/`projects` en kolommen `allowed_tool_slugs`/`project_id` weg, oude instellingen en open beheerdersuitnodigingen gewist (destructieve migratie `0010`, eerst back-up) — branch `claude/p18-8` (bovenop 18.7).
-- V2 stap 18.9: wie van rol wisselt (docent ↔ beheerder) wordt overal uitgelogd (`setUserRole` verhoogt `sessionVersion`) — branch `claude/p18-9` (bovenop 18.8).
 - Brief P19 (V3) — deze PR.
 
 ## Wacht op jou
@@ -53,7 +46,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
 ## Volgende (voorgestelde volgorde)
 
 1. **Vereenvoudiging V1** (brief P17): klaar, gemerged en uitgerold op 2026-11-03.
-2. **Vereenvoudiging V2** (brief P18, acht PR's): beheer naar vier pagina's die automatisch
+2. **Vereenvoudiging V2** (brief P18): klaar en uitgerold op 2026-11-04. Het omvatte beheer naar vier pagina's die automatisch
    opslaan; "Bekijk als docent", de land-as en de toegang per docent voor tools en context weg;
    modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
    ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
