@@ -50,8 +50,9 @@ describe("tool: rubric-builder", () => {
     expect(field("existingRubric")?.required).not.toBe(true);
     const levels = field("levelCount");
     expect(levels?.kind).toBe("select");
-    expect(levels?.options?.map((o) => o.value)).toEqual(["3", "4", "5"]);
-    expect(levels?.defaultValue).toBe("4");
+    expect(levels?.options?.map((o) => o.value)).toEqual(["2", "3", "4", "5"]);
+    // Bastiaan, 2026-11-04: departments mostly use 2- or 3-level rubrics.
+    expect(levels?.defaultValue).toBe("3");
   });
 
   it("is an original LimeOnIt tool that names its verified sources", () => {
@@ -105,6 +106,7 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("helemaal ontbreekt");
     expect(p).toContain("één niveau lager niet");
     expect(p).toContain("## leeruitkomst eerst aanscherpen");
+    expect(p).toContain("verzin je geen tussenniveau");
   });
 
   it("guards the design rules from the sources (en)", () => {
@@ -127,6 +129,7 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("missing altogether");
     expect(p).toContain("one level lower, not");
     expect(p).toContain("## sharpen the learning outcome first");
+    expect(p).toContain("you invent no level in between");
   });
 
   it("asks for a table in the rubric editor's own layout, so it pastes cleanly", () => {

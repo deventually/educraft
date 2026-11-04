@@ -49,6 +49,7 @@ Cognitive level (Anderson & Krathwohl, 2001): determine the cognitive process of
 Level descriptions:
 
 - **Exactly {{levelCount}} levels per criterion**, from low to high, with the same names for every criterion.
+- **With 2 levels** you invent no level in between. The top level describes exactly what the learning outcome asks, and the pass mark lies there. The lowest level describes what you see in work that does not reach it.
 - **Descriptive.** Say what you see in the work. An evaluative word alone ("good", "weak", "excellent") is not a description.
 - **No overlap and no gap.** Every piece of work fits exactly one level. Two neighbouring levels differ in a recognisable quality, not in a vague word ("somewhat", "mostly"). The lowest level catches everything the level above does not reach, including work in which the element is missing altogether. The same sentence does not appear at two levels or in two criteria.
 - **Parallel.** Within one criterion all levels are about the same aspects, so you can see the step from level to level. A higher level adds no new element that the lower levels don't mention (such as "also compares with an alternative"); it describes the same aspects at a higher quality. If such an element belongs to the learning outcome, make it a criterion of its own.

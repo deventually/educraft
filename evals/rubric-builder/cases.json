@@ -125,6 +125,27 @@
         "scale": "Maximaal 40 punten, cesuur 22 punten.",
         "existingRubric": ""
       }
+    },
+    {
+      "id": "two-level-portfolio-eqf6",
+      "description": "Ordinary case at EQF 6 with exactly 2 levels (e.g. niet aangetoond / aangetoond), a common hbo format. The tool must not invent an in-between level: the top level describes exactly what the outcome asks and is the pass level, the lowest level describes what is seen in work that does not reach it, including work in which the element is missing. Points and pass rule are given by the teacher: every criterion must be at the top level to pass.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 3",
+        "programme": "Social Work",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Beroepsproduct methodisch handelen",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Sociaal werker in een wijkteam"
+      },
+      "values": {
+        "learningOutcome": "De student stelt voor een cliëntsituatie uit de praktijk een onderbouwd plan van aanpak op, waarin doelen, interventies en evaluatie aantoonbaar volgen uit een eigen analyse van de hulpvraag.",
+        "assignment": "Plan van aanpak (circa 2500 woorden) voor een geanonimiseerde cliënt uit de stage, met een analyse van de hulpvraag, doelen, interventies en een evaluatieplan.",
+        "levelCount": "2",
+        "scale": "Per criterium aangetoond of niet aangetoond. Voldoende als alle criteria aangetoond zijn.",
+        "existingRubric": ""
+      }
     }
   ]
 }

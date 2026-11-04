@@ -6,7 +6,7 @@ Gebruik deze tool als je een **beoordelingsmodel (rubric)** nodig hebt bij een l
 
 1. **Vul de leeruitkomst in**, met een waarneembaar werkwoord (analyseert, ontwerpt, beargumenteert). Staat er "begrijpt" of "kent", dan stelt de tool eerst een scherpere formulering voor en maakt hij nog geen model.
 2. **Beschrijf de opdracht**: wat maakt of doet de student?
-3. **Kies het aantal niveaus** (3, 4 of 5) en vul eventueel je punten, cesuur en knock-outcriteria in. Laat je dat leeg, dan doet de tool een voorstel, en dat staat er ook bij.
+3. **Kies het aantal niveaus** (2, 3, 4 of 5) en vul eventueel je punten, cesuur en knock-outcriteria in. Laat je dat leeg, dan doet de tool een voorstel, en dat staat er ook bij.
 4. **Heb je al een rubric?** Plak hem in het laatste veld. De tool zoekt eerst overlappende of vage niveaus, criteria die niet bij de leeruitkomst horen en punten die niet kloppen, en maakt daarna een verbeterde versie.
 
 ## Wat de tool wél en niet doet

@@ -6,7 +6,7 @@ Use this tool when you need an **assessment rubric** for a learning outcome: for
 
 1. **Fill in the learning outcome**, with an observable verb (analyses, designs, argues). If it says "understands" or "knows", the tool first proposes a sharper wording and doesn't build a rubric yet.
 2. **Describe the assignment**: what does the student make or do?
-3. **Choose the number of levels** (3, 4 or 5) and optionally fill in your points, pass mark and knock-out criteria. If you leave that empty, the tool makes a proposal, and says so.
+3. **Choose the number of levels** (2, 3, 4 or 5) and optionally fill in your points, pass mark and knock-out criteria. If you leave that empty, the tool makes a proposal, and says so.
 4. **Already have a rubric?** Paste it in the last field. The tool first looks for overlapping or vague levels, criteria that don't belong to the outcome and points that don't add up, then makes an improved version.
 
 ## What the tool does and doesn't do

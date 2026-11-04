@@ -49,6 +49,7 @@ Denkniveau (Anderson & Krathwohl, 2001): bepaal het denkniveau van het werkwoord
 Niveaubeschrijvingen:
 
 - **Precies {{levelCount}} niveaus per criterium**, van laag naar hoog, met dezelfde namen bij elk criterium.
+- **Bij 2 niveaus** verzin je geen tussenniveau. Het hoogste niveau beschrijft precies wat de leeruitkomst vraagt, en daar ligt de cesuur. Het laagste niveau beschrijft wat je ziet in werk dat dat niet haalt.
 - **Beschrijvend.** Zeg wat je in het werk ziet. Alleen een oordeelwoord ("goed", "zwak", "uitstekend") is geen beschrijving.
 - **Geen overlap en geen gat.** Elk werk past bij precies één niveau. Twee naburige niveaus verschillen in een herkenbare kwaliteit, niet in een vaag woord ("enigszins", "grotendeels"). Het laagste niveau vangt alles op wat het niveau erboven niet haalt, ook werk waarin het onderdeel helemaal ontbreekt. Dezelfde zin staat niet bij twee niveaus of bij twee criteria.
 - **Parallel.** Bij één criterium gaan alle niveaus over dezelfde aspecten, zodat je de stap van niveau naar niveau ziet. Een hoger niveau voegt geen nieuw onderdeel toe dat op de lagere niveaus niet voorkomt (zoals "vergelijkt bovendien met een alternatief"); het beschrijft dezelfde aspecten in een hogere kwaliteit. Hoort zo'n onderdeel bij de leeruitkomst, maak er dan een eigen criterium van.

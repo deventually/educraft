@@ -83,8 +83,9 @@ export const rubricBuilder: Tool = {
       name: "levelCount",
       label: { nl: "Aantal niveaus", en: "Number of levels" },
       kind: "select",
-      defaultValue: "4",
+      defaultValue: "3",
       options: [
+        { value: "2", label: { nl: "2 niveaus", en: "2 levels" } },
         { value: "3", label: { nl: "3 niveaus", en: "3 levels" } },
         { value: "4", label: { nl: "4 niveaus", en: "4 levels" } },
         { value: "5", label: { nl: "5 niveaus", en: "5 levels" } },
