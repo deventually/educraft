@@ -126,3 +126,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   docententools van 2026-11-04.
 - **BESLUIT-2026-11-04-6:** **Hulpmiddelen staan op de toolspagina**, als eigen sectie onder de
   tools. Het menu blijft vier items (BESLUIT-2026-11-04-3). Brief P23.
+- **BESLUIT-2026-11-04-7:** **Acht nieuwe AI-tools, eerst meten.** Bastiaan koos alle acht AI-tools
+  uit het onderzoek (feedback op studentwerk door Stage Assessment breder te maken, rubric maken,
+  toetsvragen en toetsmatrijs, les voorbereiden, toetsanalyse, opdracht helder schrijven,
+  differentiëren, lastig gesprek oefenen) en koos om eerst de nulmeting te draaien. Elke tool moet een
+  meetbare kwaliteitslat halen. Uitwerking: brief P24.
