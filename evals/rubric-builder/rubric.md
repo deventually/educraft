@@ -27,8 +27,10 @@ shared criterion 1–5.
   `| Criterion | Level 1 | …`, cells "**Label** (n pt): description", " (knock-out)" after a
   knock-out criterion), and the exact closing sentence ("Dit is een concept. De docent stelt
   het beoordelingsmodel vast." / "This is a draft. The teacher decides on the rubric.").
-  Finished, not cut off. When the tool rightly stops to sharpen a vague outcome, score format
-  on that short answer and don't penalise the missing table.
+  Finished, not cut off. When the tool rightly stops to sharpen a vague outcome, the required
+  form is one heading ("## Leeruitkomst eerst aanscherpen" / "## Sharpen the learning outcome
+  first") followed by the closing sentence: score format on that short answer and don't
+  penalise the missing table or other headings.
 - **levelFit** — The demands in the descriptions fit the case's EQF level and study year: the
   top level is within reach for these students, and the EQF 4 case is markedly more concrete
   than the EQF 7 case. Prose for the teacher stays professional.

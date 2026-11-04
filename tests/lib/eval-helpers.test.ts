@@ -25,6 +25,8 @@ import {
   COUNTED_CHECKS,
   countedFailures,
   JUDGE_MAX_TOKENS,
+  judgeFileName,
+  judgeRecord,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -448,5 +450,27 @@ describe("case values", () => {
     expect(v.onderwerp).toBe("Testen");
     expect(v.eerdereErvaring).toBe("");
     expect(v.scope).toBe("single lesson");
+  });
+});
+
+describe("the judge's verdict is kept next to each output (meting n, 2026-11-04)", () => {
+  it("names the file after the output, per run", () => {
+    expect(judgeFileName("case-a", 1)).toBe("case-a.judge.json");
+    expect(judgeFileName("case-a", 3)).toBe("case-a.run3.judge.json");
+  });
+
+  it("keeps the scores, failed checks, weakest aspect and verdict", () => {
+    const rec = judgeRecord({
+      scores: { taskFidelity: 4 },
+      failedChecks: ["x"],
+      worst: "w",
+      verdict: "v",
+    });
+    expect(JSON.parse(rec)).toEqual({
+      scores: { taskFidelity: 4 },
+      failedChecks: ["x"],
+      worst: "w",
+      verdict: "v",
+    });
   });
 });

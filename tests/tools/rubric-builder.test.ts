@@ -99,6 +99,12 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("zonder nummer");
     expect(p).toContain("ook als je eerst laat aanscherpen");
     expect(p).toContain("geen nieuw onderdeel");
+    // Meting n: a weight in the name cell, a gap below the lowest level, a pass mark
+    // that did not match the pass level, and no fixed form for the short stop answer.
+    expect(p).toContain("geen weging");
+    expect(p).toContain("helemaal ontbreekt");
+    expect(p).toContain("één niveau lager niet");
+    expect(p).toContain("## leeruitkomst eerst aanscherpen");
   });
 
   it("guards the design rules from the sources (en)", () => {
@@ -117,6 +123,10 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("without numbers");
     expect(p).toContain("also when you ask to sharpen first");
     expect(p).toContain("adds no new element");
+    expect(p).toContain("no weight");
+    expect(p).toContain("missing altogether");
+    expect(p).toContain("one level lower, not");
+    expect(p).toContain("## sharpen the learning outcome first");
   });
 
   it("asks for a table in the rubric editor's own layout, so it pastes cleanly", () => {
