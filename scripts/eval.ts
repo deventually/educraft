@@ -32,6 +32,7 @@ import type { ImageInput } from "~/lib/ai/types";
 import { providerForModel } from "~/lib/ai/provider";
 import {
   parseJudgeResult,
+  evalGreeting,
   averageScore,
   buildReportMarkdown,
   reportRowKey,
@@ -270,9 +271,8 @@ async function runChat(
   const turns = c.userTurns?.length ? c.userTurns : [TRIGGER[c.outputLanguage]];
   const history: ChatMessage[] = [];
   const transcript: string[] = [];
-  const greeting = tool.chat?.greeting;
-  if (greeting) {
-    const g = typeof greeting === "string" ? greeting : greeting[c.outputLanguage];
+  const g = evalGreeting(tool, c);
+  if (g) {
     history.push({ role: "assistant", content: g });
     transcript.push(`**Tutor (greeting):** ${g}`);
   }
@@ -329,14 +329,21 @@ async function judgeOutput(
   judgeModel: string,
 ): Promise<JudgedCase> {
   const provider = providerForModel(judgeModel);
-  const { text } = await provider.generate({
-    model: judgeModel,
-    system: "You output only valid JSON.",
-    messages: [{ role: "user", content: buildJudgePrompt(rubric, c, co.output) }],
-    temperature: 0,
-    maxTokens: 1024,
-  });
-  const parsed = parseJudgeResult(text);
+  const ask = async (maxTokens: number) =>
+    parseJudgeResult(
+      (
+        await provider.generate({
+          model: judgeModel,
+          system: "You output only valid JSON.",
+          messages: [{ role: "user", content: buildJudgePrompt(rubric, c, co.output) }],
+          temperature: 0,
+          maxTokens,
+        })
+      ).text,
+    );
+  // One retry with more room: in the nulmeting (2026-11-04) one verdict was cut off
+  // at 1024 tokens and left a case un-scored.
+  const parsed = (await ask(1024)) ?? (await ask(2048));
   return {
     tool: tool.slug,
     caseId: c.id,

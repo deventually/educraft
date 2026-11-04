@@ -55,7 +55,7 @@ export const cognitiveArchitect: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-5-5",
-  defaultMaxTokens: 6144,
+  defaultMaxTokens: 12288, // nulmeting 2026-11-04: 6144 truncated the stage 3–4 artefacts.
   defaultTemperature: 0.4,
   enabled: true,
   phase: 1,

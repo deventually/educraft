@@ -17,6 +17,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **P24.0c en 24.0b gemerged op 2026-11-04 (#49, #50):** het originele document naast de tekst
+  voor de AI, en anonimiseren vóór het versturen.
 - **P25 PR B (#41) en de Word-export (#40) gemerged op 2026-11-04:** de werkplaats is te gebruiken
   zonder AI, met export naar Word.
 - **P25 PR A (#39) gemerged op 2026-11-04:** het dossier en de opslag van de BDB/BKE-werkplaats;
@@ -53,10 +55,11 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- P24.0b (anonimiseren vóór het versturen): namen en gegevens worden in de browser door codes
-  vervangen, de docent kijkt het na, en de namen komen terug in het resultaat — PR open. De
-  promptregel over codes komt met 24.1 (`@v2`), na de nulmeting.
-- Eval-rapport portfoliocoach van 2026-11-04 (7 van 7 geslaagd) toegevoegd aan `evals/reports/` — PR open.
+- Reparaties na de nulmeting (24.0): langere antwoordruimte voor ARCS Reactor, Authentieke toetsing,
+  Cognitive Architect (12288) en Forum Autograder (8192), want hun antwoorden werden afgekapt; de
+  beoordelingsmaatstaf van Contextualisering beoordeelt nu de echte taak (analyse van samenhang, niet
+  voorbeelden); de meting vult de begroeting van chattools in en vraagt de beoordelaar één keer
+  opnieuw — PR open. Daarna de tweede meting.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
@@ -72,9 +75,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Wacht op jou
 
-- **De nulmeting (24.0):** `ANTHROPIC_API_KEY=… npm run eval` op `main` en het rapport committen.
-  Zonder meting verandert geen prompt (brief P24).
-
+- **De nulmeting (24.0):** gedraaid op 2026-11-04, rapport in PR #51 — mergen.
+- **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
+  `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
 
 ## Volgende (voorgestelde volgorde)
 
