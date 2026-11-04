@@ -40,15 +40,24 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   (P18.7).
 - 2026-11-03: "Ook dat wil ik kunnen doen. Resetten, wachtwoord link versturen en zelf een
   wachtwoord invoeren. Ook user account op non-actief kunnen zetten" → V2 (P18.7).
+- 2026-11-04: "Hoe kunnen we beginnende docenten begeleiden om hun BDB en BKE goed te maken en
+  makkelijk voor ze maken? Ik vind dat we met deze tool de BDB en BKE binnen een paar dagen moeten
+  kunnen afronden en wederom met een hele hoge kwaliteit." → brief P25 (werkplaats).
+- 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
+  wijden." → BESLUIT-2026-11-04-11.
+- 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → BESLUIT-2026-11-04-16, vervolg op P25.
 
 ## Bezig
 
 - Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in #38 (gekozen 2026-11-04).
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
   open, wacht op Bastiaan.
+- Brief P25 (BDB/BKE-werkplaats), PR #37.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
+
+- Brief P25 (BDB/BKE-werkplaats) mergen, PR #37.
 
 ## Volgende (voorgestelde volgorde)
 
@@ -69,6 +78,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
    contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
+6. **BDB/BKE-werkplaats** (brief P25, **gaat voor**: eerste gebruik deze maand): kortste pad in drie
+   PR's, daarna Word-export, kader-extractie en de BKE-onderdelen met de tools uit P23 en P24.
 
 ## Open vragen
 
