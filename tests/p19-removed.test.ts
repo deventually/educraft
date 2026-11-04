@@ -17,7 +17,7 @@ describe("P19.5 — menu with four items, no contact page", () => {
   });
 
   it("the i18n catalogues have no unused nav, home, footer or pages.contact keys", () => {
-    for (const m of [nl, en] as Array<Record<string, any>>) {
+    for (const m of [nl, en] as unknown as Array<Record<string, Record<string, unknown>>>) {
       expect(m.nav).not.toHaveProperty("viewingAsTeacher");
       expect(m.home).not.toHaveProperty("comingSoon");
       expect(m.footer).not.toHaveProperty("contact");

@@ -43,20 +43,33 @@ const ictProfile: ContextProfile = {
   customFields: [{ label: "Specialisatie", value: "Security" }],
 };
 
-describe("ContextProfileEditor — stepped flow", () => {
-  it("starts at step 1 of 4 with a name field", () => {
+const MORE = /meer details|more details/i;
+
+/** Open the closed "Meer details (optioneel)" disclosure. */
+async function openMore(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByText(MORE));
+}
+
+describe("ContextProfileEditor — one short page", () => {
+  it("is one page without steps", () => {
     renderEditor();
-    expect(screen.getByText(/stap 1 van 4|step 1 of 4/i)).toBeInTheDocument();
+    expect(screen.queryByText(/stap \d van|step \d of/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: /volgende|next|vorige|back/i })).toBeNull();
+    // One submit button (plus Cancel, which is not a submit).
+    const submits = screen
+      .getAllByRole("button")
+      .filter((b) => (b as HTMLButtonElement).type === "submit");
+    expect(submits).toHaveLength(1);
     expect(screen.getByLabelText(/naam|name/i)).toBeInTheDocument();
   });
 
-  it("gates advancing past step 1 on a name", async () => {
+  it("disables the save button while the name is empty", async () => {
     const user = userEvent.setup();
     renderEditor();
-    const next = screen.getByRole("button", { name: /volgende|next/i });
-    expect(next).toBeDisabled();
+    const save = screen.getByRole("button", { name: /profiel opslaan|save profile/i });
+    expect(save).toBeDisabled();
     await user.type(screen.getByLabelText(/naam|name/i), "Mijn profiel");
-    expect(next).toBeEnabled();
+    expect(save).toBeEnabled();
   });
 
   it("has no country field at all", () => {
@@ -77,10 +90,84 @@ describe("ContextProfileEditor — stepped flow", () => {
     // hbo-bachelor → NLQF 6 prefilled (overridable).
     expect(sel(container, "nationalLevel")?.value).toBe("6");
   });
+
+  it("shows name, onderwijstype, programme, course and study year up front", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+    await user.selectOptions(
+      screen.getByLabelText(/onderwijstype|type of education/i),
+      "hbo::bachelor",
+    );
+    for (const label of [
+      /naam|name/i,
+      /onderwijstype|type of education/i,
+      /opleiding|programme/i,
+      /^vak$|^course$/i,
+      /studiejaar|study year/i,
+    ]) {
+      const field = screen.getByLabelText(label);
+      expect(field.closest("details"), String(label)).toBeNull();
+    }
+  });
+
+  it("shows the vo Fase (instead of Studiejaar) up front", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+    await user.selectOptions(screen.getByLabelText(/onderwijstype|type of education/i), "vo::havo");
+    expect(screen.getByLabelText(/^fase$|^phase$/i).closest("details")).toBeNull();
+    expect(screen.queryByLabelText(/studiejaar|study year/i)).toBeNull();
+  });
+
+  it("puts level, domain and the free fields under a closed 'Meer details'", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+    await user.selectOptions(
+      screen.getByLabelText(/onderwijstype|type of education/i),
+      "hbo::bachelor",
+    );
+    const details = screen.getByText(MORE).closest("details") as HTMLDetailsElement;
+    expect(details.open).toBe(false);
+    for (const label of [
+      /niveau \(nlqf\)|level \(nlqf\)/i,
+      /^domein$|^domain$/i,
+      /beroepspraktijk|professional field/i,
+      /onderwijsconcept|teaching approach|educational concept/i,
+    ]) {
+      expect(screen.getByLabelText(label).closest("details"), String(label)).toBe(details);
+    }
+    expect(
+      within(details).getByRole("heading", { name: /eigen velden|custom fields/i }),
+    ).toBeInTheDocument();
+    expect(details.open).toBe(false);
+  });
+
+  it("submits the level prefilled from the onderwijstype while 'Meer details' is closed", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+    await user.type(screen.getByLabelText(/naam|name/i), "P");
+    await user.selectOptions(
+      screen.getByLabelText(/onderwijstype|type of education/i),
+      "hbo::bachelor",
+    );
+    const form = container.querySelector("form") as HTMLFormElement;
+    expect((screen.getByText(MORE).closest("details") as HTMLDetailsElement).open).toBe(false);
+    expect(new FormData(form).get("nationalLevel")).toBe("6");
+  });
+
+  it("counts the filled details in the summary when editing", () => {
+    renderEditor({ profile: ictProfile });
+    // domain + 2 pack fields + pedagogy + 1 custom field.
+    expect(screen.getByText(MORE).closest("summary")).toHaveTextContent(/5 ingevuld|5 filled in/);
+  });
+
+  it("shows no count when nothing under 'Meer details' is filled", () => {
+    renderEditor();
+    expect(screen.getByText(MORE).closest("summary")).not.toHaveTextContent(/ingevuld|filled in/);
+  });
 });
 
-describe("ContextProfileEditor — level & framework (step 2)", () => {
-  async function toStep2(
+describe("ContextProfileEditor — level & framework (under Meer details)", () => {
+  async function toMore(
     user: ReturnType<typeof userEvent.setup>,
     onderwijstype = "hbo::bachelor",
     phase?: "onderbouw" | "bovenbouw",
@@ -92,13 +179,13 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
     );
     // vo's profiel is a bovenbouw concept, so a vo test must pick the fase first.
     if (phase) await user.selectOptions(screen.getByLabelText(/^fase$|^phase$/i), phase);
-    await user.click(screen.getByRole("button", { name: /volgende|next/i }));
+    await openMore(user);
   }
 
   it("shows the NLQF level select with a derived-EQF preview and a cited source", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep2(user);
+    await toMore(user);
     expect(screen.getByLabelText(/nlqf|niveau/i)).toBeInTheDocument();
     // Derived EQF preview.
     expect(screen.getByText(/EQF 6/)).toBeInTheDocument();
@@ -110,7 +197,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("scopes domain options to the chosen sector (hbo → ICT present, labelled 'Domein')", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await toStep2(user);
+    await toMore(user);
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
     expect(values).toContain("ICT");
@@ -121,7 +208,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("scopes vo domain options to the track's profielen and labels the field 'Profiel'", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await toStep2(user, "vo::havo", "bovenbouw");
+    await toMore(user, "vo::havo", "bovenbouw");
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option")).map((o) => o.value);
     expect(values).toContain("nt"); // Natuur & Techniek
@@ -134,14 +221,14 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("hides the vo profiel in the onderbouw (it is a bovenbouw / tweede-fase concept)", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await toStep2(user, "vo::havo", "onderbouw");
+    await toMore(user, "vo::havo", "onderbouw");
     expect(sel(container, "domain")).toBeNull();
   });
 
   it("reveals the hbo-i pack with its source when ICT is chosen", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep2(user);
+    await toMore(user);
     await user.selectOptions(screen.getByLabelText(/domein|domain/i), "ICT");
     expect(screen.getByText("Architectuurlagen")).toBeInTheDocument();
     expect(screen.getByText(/hbo-i domeinbeschrijving/i)).toBeInTheDocument();
@@ -150,7 +237,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("shows an honest 'no national framework' note for a vo profiel", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep2(user, "vo::havo", "bovenbouw");
+    await toMore(user, "vo::havo", "bovenbouw");
     await user.selectOptions(screen.getByLabelText(/profiel|domein|domain/i), "nt");
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
   });
@@ -158,7 +245,7 @@ describe("ContextProfileEditor — level & framework (step 2)", () => {
   it("filters the domain dropdown by the teacher's available domains (P10.3)", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor({ availableDomains: ["nt"] });
-    await toStep2(user, "vo::havo", "bovenbouw");
+    await toMore(user, "vo::havo", "bovenbouw");
     const domain = sel(container, "domain") as HTMLSelectElement;
     const values = Array.from(domain.querySelectorAll("option"))
       .map((o) => o.value)
@@ -188,8 +275,8 @@ describe("ContextProfileEditor — field relevance (P10.1)", () => {
   });
 
   it("hides the Professional field for havo, keeps it for vmbo and hbo", async () => {
-    // Professional field lives on the (hidden) step 3, but a self-hiding field
-    // returning null is absent from the DOM regardless of the active step.
+    // Professional field lives on the closed "Meer details", but a self-hiding field
+    // returning null is absent from the DOM regardless of the disclosure state.
     expect(sel(await editorWith("vo::havo"), "professionalContext")).toBeNull();
     expect(sel(await editorWith("vo::vmbo-bb"), "professionalContext")).not.toBeNull();
     expect(sel(await editorWith("hbo::bachelor"), "professionalContext")).not.toBeNull();
@@ -204,35 +291,34 @@ describe("ContextProfileEditor — field relevance (P10.1)", () => {
   });
 });
 
-describe("ContextProfileEditor — context step (step 3)", () => {
-  async function toStep3(user: ReturnType<typeof userEvent.setup>, onderwijstype: string) {
+describe("ContextProfileEditor — free fields (under Meer details)", () => {
+  async function toDetails(user: ReturnType<typeof userEvent.setup>, onderwijstype: string) {
     await user.type(screen.getByLabelText(/naam|name/i), "P");
     await user.selectOptions(
       screen.getByLabelText(/onderwijstype|type of education/i),
       onderwijstype,
     );
-    await user.click(screen.getByRole("button", { name: /volgende|next/i }));
-    await user.click(screen.getByRole("button", { name: /volgende|next/i }));
+    await openMore(user);
   }
 
   it("offers the mbo learner-noun override for mbo only", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep3(user, "mbo::mbo-4");
+    await toDetails(user, "mbo::mbo-4");
     expect(screen.getByLabelText(/aanspreekvorm|term for learners/i)).toBeInTheDocument();
   });
 
   it("does NOT offer the learner-noun override for hbo", async () => {
     const user = userEvent.setup();
     renderEditor();
-    await toStep3(user, "hbo::bachelor");
+    await toDetails(user, "hbo::bachelor");
     expect(screen.queryByLabelText(/aanspreekvorm|term for learners/i)).toBeNull();
   });
 
   it("has a free-text pedagogy (onderwijsconcept) field", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await toStep3(user, "hbo::bachelor");
+    await toDetails(user, "hbo::bachelor");
     expect(sel(container, "pedagogy")).not.toBeNull();
   });
 });
@@ -242,14 +328,14 @@ describe("ContextProfileEditor — edit mode", () => {
     const { container } = renderEditor({ profile: ictProfile, isCurrentDefault: true });
     // Edit mode: the hidden id is always present (submits as an update).
     expect(sel(container, "id")?.value).toBe("p1");
-    // Basics + axes (hidden inputs/selects resolve regardless of the active step).
+    // Basics + axes (hidden inputs and the closed disclosure stay in the DOM).
     expect(screen.getByDisplayValue("SE jaar 3")).toBeInTheDocument();
     expect(sel(container, "sector")?.value).toBe("hbo");
     expect(sel(container, "track")?.value).toBe("bachelor");
     expect(sel(container, "nationalLevel")?.value).toBe("6");
     expect(sel(container, "domain")?.value).toBe("ICT");
-    // Pack selection + custom field + pedagogy carried over (pack lives on a
-    // not-yet-active step, so include hidden nodes for the checkbox).
+    // Pack selection + custom field + pedagogy carried over (pack lives in a
+    // closed disclosure, so include hidden nodes for the checkbox).
     expect(screen.getByRole("checkbox", { name: "Software", hidden: true })).toBeChecked();
     expect(screen.getByDisplayValue("Specialisatie")).toBeInTheDocument();
     expect((sel(container, "pedagogy") as HTMLInputElement).value).toBe(
@@ -278,27 +364,26 @@ describe("ContextProfileEditor — edit mode", () => {
 });
 
 describe("ContextProfileEditor — a11y", () => {
-  it("has no violations on step 1", async () => {
+  it("has no violations with 'Meer details' closed", async () => {
     const { container } = renderEditor();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("has no violations on the recap step", async () => {
+  it("has no violations with 'Meer details' open", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();
-    await user.type(screen.getByLabelText(/naam|name/i), "P");
     await user.selectOptions(
       screen.getByLabelText(/onderwijstype|type of education/i),
       "hbo::bachelor",
     );
-    for (let i = 0; i < 3; i++)
-      await user.click(screen.getByRole("button", { name: /volgende|next/i }));
-    expect(screen.getByText(/je maakt aan|you're creating|recap/i)).toBeInTheDocument();
+    await openMore(user);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("has no violations with a domain pack rendered (edit mode)", async () => {
+  it("has no violations open with a domain pack rendered (edit mode)", async () => {
+    const user = userEvent.setup();
     const { container } = renderEditor({ profile: ictProfile });
+    await openMore(user);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

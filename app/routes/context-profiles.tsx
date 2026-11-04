@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useActionData, useNavigation } from "react-router";
-import { Trash2, Plus, Pencil, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, Pencil, ArrowLeft, Layers } from "lucide-react";
 import type { Route } from "./+types/context-profiles";
 import {
   listProfiles,
@@ -20,6 +20,7 @@ import { parseContextForm } from "~/lib/context/parseForm";
 import { resolveLevel } from "~/lib/context/derive";
 import { getDomainsForTrack } from "~/lib/context/domains";
 import { Button, Card, Badge } from "~/components/ui";
+import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { ContextProfileEditor } from "~/components/context/ContextProfileEditor";
@@ -139,8 +140,16 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
       </h1>
       <p className="mt-2 text-slate-600">{t.settings.intro}</p>
 
+      {profiles.length === 0 && !editor && (
+        <EmptyState
+          icon={<Layers aria-hidden />}
+          title={t.settings.emptyTitle}
+          body={t.settings.emptyBody}
+          action={{ onClick: () => setEditor({}), label: t.settings.emptyAction }}
+        />
+      )}
+
       <section className="mt-6 space-y-3">
-        {profiles.length === 0 && <p className="text-sm text-slate-500">{t.settings.empty}</p>}
         {profiles.map((p) => {
           const level = resolveLevel(p);
           return (
@@ -182,47 +191,49 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
         })}
       </section>
 
-      <Card className="mt-8 p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-            {editing ? (
-              <>
-                <Pencil className="size-4 text-violet-600" aria-hidden /> {t.settings.editProfile}
-              </>
-            ) : (
-              <>
-                <Plus className="size-4 text-violet-600" aria-hidden /> {t.settings.newProfile}
-              </>
+      {(profiles.length > 0 || editor) && (
+        <Card className="mt-8 p-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+              {editing ? (
+                <>
+                  <Pencil className="size-4 text-violet-600" aria-hidden /> {t.settings.editProfile}
+                </>
+              ) : (
+                <>
+                  <Plus className="size-4 text-violet-600" aria-hidden /> {t.settings.newProfile}
+                </>
+              )}
+            </h2>
+            {editor && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setEditor(null)}>
+                <ArrowLeft className="size-4" aria-hidden /> {t.settings.cancel}
+              </Button>
             )}
-          </h2>
-          {editor && (
-            <Button type="button" variant="ghost" size="sm" onClick={() => setEditor(null)}>
-              <ArrowLeft className="size-4" aria-hidden /> {t.settings.cancel}
+          </div>
+
+          {actionData && !actionData.ok && actionData.error && (
+            <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {actionData.error}
+            </p>
+          )}
+
+          {editor ? (
+            <ContextProfileEditor
+              key={editing?.id ?? "new"}
+              profile={editing}
+              isCurrentDefault={editing != null && editing.id === defaultId}
+              availableSectors={availableSectors}
+              availableDomains={availableDomains}
+              onCancel={() => setEditor(null)}
+            />
+          ) : (
+            <Button type="button" onClick={() => setEditor({})}>
+              <Plus className="size-4" aria-hidden /> {t.settings.newProfile}
             </Button>
           )}
-        </div>
-
-        {actionData && !actionData.ok && actionData.error && (
-          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {actionData.error}
-          </p>
-        )}
-
-        {editor ? (
-          <ContextProfileEditor
-            key={editing?.id ?? "new"}
-            profile={editing}
-            isCurrentDefault={editing != null && editing.id === defaultId}
-            availableSectors={availableSectors}
-            availableDomains={availableDomains}
-            onCancel={() => setEditor(null)}
-          />
-        ) : (
-          <Button type="button" onClick={() => setEditor({})}>
-            <Plus className="size-4" aria-hidden /> {t.settings.newProfile}
-          </Button>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }

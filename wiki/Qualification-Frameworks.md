@@ -89,7 +89,7 @@ Provincial education systems coordinated through **CMEC**; the
 ## How it is used (Phase 8)
 
 1. The teacher picks **country → onderwijstype (sector + track) → level** in the
-   stepped editor — a prominent first choice, not a buried setting
+   profile editor — a prominent first choice, not a buried setting
    (see [Vision §6](../docs/VISION.md#6-why-one-app-a-settled-decision)). The track
    prefills the matching NLQF level (overridable).
 2. `derive.ts` resolves the stored NLQF level to an **EQF number**; the sector
