@@ -85,6 +85,11 @@ export interface InputField {
   rows?: number;
   /** Optional: derive this field's initial value from the selected profile. */
   prefillFromProfile?: ProfilePrefill;
+  /**
+   * Student work: before sending, the browser replaces names and other personal
+   * details in this field by codes the teacher reviews (P24, 24.0b).
+   */
+  redact?: boolean;
 }
 
 export interface OutputFormat {

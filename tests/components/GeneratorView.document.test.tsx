@@ -91,6 +91,8 @@ describe("GeneratorView with a document field", () => {
     await screen.findByText("Page 1 of 1");
 
     await user.click(screen.getByRole("button", { name: /generate/i }));
+    // Student work goes through the anonymise step first (24.0b).
+    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
     await waitFor(() => expect(streamPost).toHaveBeenCalled());
 
     expect(screen.getByRole("region", { name: "Original" })).toBeInTheDocument();
