@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { routeTable } from "./helpers/routes";
 import { PROMPTS } from "~/lib/prompts";
 import { en } from "~/lib/i18n/messages/en";
 import { nl } from "~/lib/i18n/messages/nl";
@@ -9,8 +10,8 @@ const root = resolve(__dirname, "..");
 const read = (p: string) => readFileSync(resolve(root, p), "utf8");
 
 describe("P17.1 — mentor insight removed", () => {
-  it("routes.ts registers no api/session-close and no cohort insight page", () => {
-    const routes = read("app/routes.ts");
+  it("the route table registers no api/session-close and no cohort insight page", () => {
+    const routes = routeTable();
     expect(routes).not.toContain("api/session-close");
     expect(routes).not.toContain("/insight");
   });
@@ -48,8 +49,8 @@ describe("P17.1 — mentor insight removed", () => {
 });
 
 describe("P17.2 — student role and cohorts removed", () => {
-  it("routes.ts registers no cohort routes", () => {
-    expect(read("app/routes.ts")).not.toContain("cohorts");
+  it("the route table registers no cohort routes", () => {
+    expect(routeTable()).not.toContain("cohorts");
   });
 
   it("the cohort modules are gone", () => {

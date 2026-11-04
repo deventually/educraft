@@ -9,7 +9,7 @@ localization layers, in increasing depth. Layers 1–2 exist today; the global
 ## The five layers
 
 ### 1. UI language (chrome)
-The interface itself. Implemented with `app/lib/i18n/messages/{nl,en}.ts`
+The interface itself. Implemented with `app/lib/i18n/messages/{nl,en}/` (one file per namespace)
 (nl canonical, `en: Messages` 1:1), a `lang` cookie, `useT()` / `useLocale()`, and a
 switcher. Extends from nl/en to N languages.
 
