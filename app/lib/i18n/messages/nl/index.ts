@@ -5,6 +5,7 @@ import { aiNotice } from "./aiNotice";
 import { auth } from "./auth";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { documents } from "./documents";
 import { error } from "./error";
 import { feedback } from "./feedback";
 import { footer } from "./footer";
@@ -44,6 +45,7 @@ export const nl = {
   auth,
   chat,
   confirm,
+  documents,
   error,
   feedback,
   footer,

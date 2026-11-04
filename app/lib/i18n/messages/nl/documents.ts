@@ -1,0 +1,33 @@
+export const documents = {
+  aiEmpty: "Nog geen tekst. Upload een bestand of plak de tekst in het formulier.",
+  aiHint: "Dit is precies de tekst die naar de AI gaat. Aanpassen doe je in het formulier.",
+  aiTab: "Wat de AI krijgt",
+  cannotShow:
+    "Dit bestand kan hier niet getoond worden. De uitgehaalde tekst gaat wel gewoon naar de AI.",
+  file: "Bestand",
+  foundDocx: "Gevonden en gemarkeerd in het document.",
+  foundPage: "Gevonden op pagina {page}.",
+  foundTimes: "Komt {n} keer voor; dit is de eerste.",
+  frameTitle: "Origineel: {name}",
+  imageAlt: "Afbeelding uit het document",
+  loading: "Origineel laden…",
+  locate: "Toon in document",
+  match: "Treffer {i} van {n}",
+  matchPage: "Treffer {i} van {n} (pagina {page})",
+  noMatches: "Geen treffers.",
+  notFound:
+    "Niet precies gevonden in het origineel (misschien anders geformuleerd). Zoek zelf met het zoekveld.",
+  notStored:
+    "Het origineel blijft in je browser en wordt niet opgeslagen of verstuurd. Open je dit resultaat later opnieuw, kies het bestand dan opnieuw.",
+  originalTab: "Origineel",
+  page: "Pagina {n} van {total}",
+  pageTextFallback: "Geen afbeelding van deze pagina; dit is de uitgehaalde tekst.",
+  quotes: "Citaten uit het resultaat ({n})",
+  search: "Zoek in het origineel",
+  searchButton: "Zoek",
+  tabs: "Weergave",
+  title: "Document",
+  tooShort: "Dit citaat is te kort om betrouwbaar terug te vinden.",
+  wordNote:
+    "Word-weergave: koppen, lijsten, tabellen en afbeeldingen blijven, kleur en lettertype vallen weg.",
+};

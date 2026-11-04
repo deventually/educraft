@@ -53,6 +53,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.0c (documentviewer): het origineel (PDF of Word) naast de tekst die naar de AI gaat, zoeken
+  en "Toon in document" vanuit een citaat; alles in de browser — PR open. Daarna 24.0b
+  (anonimiseren) en, na de nulmeting, 24.1 (Stage Assessment breder).
 - Eval-rapport portfoliocoach van 2026-11-04 (7 van 7 geslaagd) toegevoegd aan `evals/reports/` — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
@@ -68,6 +71,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
+
+- **De nulmeting (24.0):** `ANTHROPIC_API_KEY=… npm run eval` op `main` en het rapport committen.
+  Zonder meting verandert geen prompt (brief P24).
 
 
 ## Volgende (voorgestelde volgorde)
