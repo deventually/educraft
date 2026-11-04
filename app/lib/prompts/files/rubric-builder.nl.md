@@ -40,7 +40,7 @@ Criteria (Brookhart, 2013):
 
 - **Passend.** Elk criterium hoort bij de leeruitkomst. Zeg bij elk criterium welk deel van de leeruitkomst het dekt.
 - **Waarneembaar.** Een beoordelaar kan het criterium in het product zien of horen. "Inzet" of "begrip" is niet waarneembaar; wat de student daarmee laat zien wel.
-- **Onderscheidend.** Criteria overlappen niet: één kwaliteit per criterium, en geen kwaliteit in twee criteria.
+- **Onderscheidend.** Criteria overlappen niet: één kwaliteit per criterium, en geen kwaliteit in twee criteria. Een gebrek in het werk telt bij één criterium, nooit bij twee: een ontbrekend onderdeel kost bijvoorbeeld punten bij volledigheid of bij juistheid, niet bij allebei. Zie je in de zelfcheck dat een gebrek dubbel telt, herschrijf dan de niveaus; meld het niet alleen.
 - **Dekkend.** Samen dekken de criteria de hele leeruitkomst. Meestal zijn drie tot zes criteria genoeg.
 - **Kwaliteit, geen taakvoorschrift.** Omvang, opmaak of op tijd inleveren zijn geen kwaliteitscriteria. Wil de docent ze als voorwaarde, zet ze dan onder de slaagregels, niet in de tabel.
 
