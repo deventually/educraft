@@ -6,8 +6,7 @@
 > zie ze falen om de goede reden, en maak ze dan groen. Poort per PR: `npm test && npm run typecheck
 > && npm run check`. Branch vanaf `main`. Merge nooit zelf; alleen Bastiaan merget. **Hangt af van:**
 > P17 (gemerged). 19.5 en 19.6 hangen ook af van **P18.1, 18.2 en 18.4** (zie *Volgorde en
-> samenloop*). **Lees eerst *Wat Bastiaan moet beslissen*:** drie stappen hebben een deel dat op zijn
-> antwoord wacht.
+> samenloop*). **Lees eerst *Wat Bastiaan moet beslissen*:** zijn drie keuzes zijn vastgelegd (BESLUIT-2026-11-04-1 t/m -3).
 
 ## Context en doel
 
@@ -84,28 +83,28 @@ label op een tool.
 ## Inventaris: weg wat overbodig is
 
 De docentkant op `main` (2026-11-03), met per onderdeel het voorstel. **Vast** = valt onder het
-goedgekeurde doel. **Vraag 1–3** = productkeuze, zie *Wat Bastiaan moet beslissen*.
+goedgekeurde doel. **Besloten (BESLUIT-2026-11-04-1 t/m -3)** = productkeuze, zie *Wat Bastiaan moet beslissen*.
 
 | Waar | Wat er nu is | Voorstel | Status | Stap |
 | --- | --- | --- | --- | --- |
 | Startpagina `home.tsx` | Filter "Alle / Voor docenten / Voor studenten" | Weg | Vast (P17 → V3) | 19.2 |
 | Startpagina | Badge "Docent" / "Student" bij elk doel, elke kaart en elke rij; goud voor tutors, paars voor de rest | Weg; één kleur | Vast | 19.2 |
 | Startpagina | Doelen "Begeleiden & coachen" en "Samen denken & bevragen" beschrijven tutors die je *voor studenten inzet* | Tekst: de docent leert zelf | Vast | 19.2 |
-| Startpagina | Typefilter "Alle types / Generators / Chatbots" | Weg; zoeken en de doelen volstaan | **Vraag 1** | 19.2 |
-| Startpagina | Knop raster/lijst (alleen bij zoekresultaten) | Weg; altijd raster | **Vraag 1** | 19.2 |
-| Startpagina | Theorieregel onderaan elke kaart, naast de boeknaam uit 19.1 (vaak dezelfde techniek twee keer) | Weg; theorie blijft doorzoekbaar en op de toolpagina | **Vraag 1** | 19.2 |
+| Startpagina | Typefilter "Alle types / Generators / Chatbots" | Weg; zoeken en de doelen volstaan | Besloten (BESLUIT-2026-11-04-1) | 19.2 |
+| Startpagina | Knop raster/lijst (alleen bij zoekresultaten) | Weg; altijd raster | Besloten (BESLUIT-2026-11-04-1) | 19.2 |
+| Startpagina | Theorieregel onderaan elke kaart, naast de boeknaam uit 19.1 (vaak dezelfde techniek twee keer) | Weg; theorie blijft doorzoekbaar en op de toolpagina | Besloten (BESLUIT-2026-11-04-1) | 19.2 |
 | Startpagina en toolpagina | Labels "Generator" / "Chatbot" | Duidelijke woorden: "Formulier" / "Gesprek" | Vast | 19.2 |
 | Toolpagina `tool.tsx` | Badge "Docent" / "Student" naast de titel | Weg | Vast | 19.2 |
-| Over `about.tsx` | Toollijst gegroepeerd "Voor docenten / Voor studenten" | Toollijst weg (staat al op de startpagina) | **Vraag 1** (anders: één lijst zonder groepen) | 19.2 |
+| Over `about.tsx` | Toollijst gegroepeerd "Voor docenten / Voor studenten" | Toollijst weg (staat al op de startpagina) | Besloten (BESLUIT-2026-11-04-1) | 19.2 |
 | Toolpagina | Modelkeuze altijd zichtbaar, boven het formulier | Achter "Geavanceerd", onder de taak | Vast | 19.3 |
 | Chat (`ChatView`) | Model en "Redeneren" altijd zichtbaar in de zijkolom | Achter "Geavanceerd" | Vast | 19.3 |
 | Chat | De invulkaart vóór het gesprek heet "Onderwijscontext", maar vraagt de toolvelden | Kop "Voordat je begint" | Vast (duidelijke woorden) | 19.3 |
 | Mijn werk `projects._index.tsx` | Leeg: één grijze zin | Lege toestand met actie "Kies een tool" | Vast | 19.4 |
 | Toolpagina en chat | Geen onderwijscontext: alleen "Geen context" in een lijst, of niets | Korte hint met link "Onderwijscontext instellen" | Vast | 19.4 |
-| Menu `AppShell.tsx` | Tools · Projecten · Help · Onderwijscontext · Over (+ Beheer) | Tools · Mijn werk · Onderwijscontext · Help (+ Beheer); "Over" alleen onderaan | **Vraag 2** | 19.5 |
-| Contact `contact.tsx` | Pagina met "wordt nog verder ingevuld" en het e-mailadres dat de footer al toont | Pagina weg; de footer houdt de mailto-link | **Vraag 2** | 19.5 |
+| Menu `AppShell.tsx` | Tools · Projecten · Help · Onderwijscontext · Over (+ Beheer) | Tools · Mijn werk · Onderwijscontext · Help (+ Beheer); "Over" alleen onderaan | Besloten (BESLUIT-2026-11-04-2) | 19.5 |
+| Contact `contact.tsx` | Pagina met "wordt nog verder ingevuld" en het e-mailadres dat de footer al toont | Pagina weg; de footer houdt de mailto-link | Besloten (BESLUIT-2026-11-04-2) | 19.5 |
 | i18n | Ongebruikte sleutels `nav.viewingAsTeacher`, `home.comingSoon` | Weg | Vast | 19.5 |
-| Onderwijscontext `context-profiles.tsx` | Vier stappen plus samenvatting, ± 15 velden | Eén korte pagina; de rest onder "Meer details" | Vast (velden: **Vraag 3**) | 19.6 |
+| Onderwijscontext `context-profiles.tsx` | Vier stappen plus samenvatting, ± 15 velden | Eén korte pagina; de rest onder "Meer details" | Vast (velden: Besloten (BESLUIT-2026-11-04-3)) | 19.6 |
 | Onderwijscontext | Leeg: één grijze zin, formulier pas na een klik | Lege toestand met één actie | Vast | 19.6 |
 | Help, legal, cookies, account | — | Blijven | — | — |
 
@@ -120,11 +119,11 @@ originele prompt horen bij de licentie en bij de AI Act-transparantie, BESLUIT-2
 | PR | Titel | Model | Hangt af van |
 | --- | --- | --- | --- |
 | 19.1 | Toolnamen: taak eerst, boeknaam als ondertitel | — | ✅ gemerged (#18, `30e6b23`) |
-| 19.2 | Geen doelgroeplabels meer; startpagina eenvoudiger | Sonnet, gemiddeld | — (deel wacht op vraag 1) |
+| 19.2 | Geen doelgroeplabels meer; startpagina eenvoudiger | Sonnet, gemiddeld | — |
 | 19.3 | Toolpagina: taak eerst, techniek achter "Geavanceerd" | Sonnet, gemiddeld | — |
 | 19.4 | Lege pagina's die sturen | Sonnet, gemiddeld | 19.3 |
-| 19.5 | Menu: minder items, duidelijke woorden | Sonnet, gemiddeld | **18.1, 18.2 en 18.4 gemerged**; 19.4; vraag 2 |
-| 19.6 | Kort contextformulier | Sonnet, hoog | **18.2 en 18.4 gemerged**; 19.4; vraag 3 |
+| 19.5 | Menu: minder items, duidelijke woorden | Sonnet, gemiddeld | **18.1, 18.2 en 18.4 gemerged**; 19.4; Besloten (BESLUIT-2026-11-04-2) |
+| 19.6 | Kort contextformulier | Sonnet, hoog | **18.2 en 18.4 gemerged**; 19.4; Besloten (BESLUIT-2026-11-04-3) |
 
 **Waarom deze volgorde.** De bouw-PR's van V2 (18.1 t/m 18.8) landen één voor één op `main`. Twee
 daarvan raken dezelfde bestanden als V3:
@@ -176,8 +175,7 @@ Tests: `tests/tool-names.test.ts`, `tests/components/ToolTitle.test.tsx`, het su
 startpagina heeft een zoekveld en de doelen, en niets wat dubbel is. **Branch:**
 `p19-2-no-audience-labels`.
 
-Punten met **[vraag 1]** voer je alleen uit als Bastiaan bij vraag 1 "ja" zegt (de aanbeveling).
-Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest blijft gelijk.
+Punten met **Besloten (BESLUIT-2026-11-04-1)** zijn vastgelegd: Bastiaan koos de aanbeveling (BESLUIT-2026-11-04-1).
 
 ### Startpagina (`app/routes/home.tsx`, alleen componenten)
 
@@ -189,12 +187,12 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
 - `toolAria`: zonder doelgroep → `` `${open}: ${naam}. ${soort}. ${tagline}` ``.
 - De loader blijft **onaangeroerd** (zie *Samenloop*): `userType` mag in het loaderresultaat blijven
   staan; de component leest het alleen niet meer.
-- **[vraag 1]** Weg: het typefilter (`TypeFilter`, state `type`, de tweede `Segmented`), en daarmee de
+- **Besloten (BESLUIT-2026-11-04-1)** Weg: het typefilter (`TypeFilter`, state `type`, de tweede `Segmented`), en daarmee de
   hele `Segmented`-functie als hij ongebruikt is.
-- **[vraag 1]** Weg: de raster/lijst-knop (`ResultView`, `resultView`, `chooseView`, het
+- **Besloten (BESLUIT-2026-11-04-1)** Weg: de raster/lijst-knop (`ResultView`, `resultView`, `chooseView`, het
   `localStorage`-item `ec-result-view`, `ViewButton`, `ToolRow`). Zoekresultaten tonen altijd het
   raster (`ToolGrid` + `ToolCard`).
-- **[vraag 1]** Weg: de theorieregel onderaan `ToolCard` (het `BookOpen`-icoon met
+- **Besloten (BESLUIT-2026-11-04-1)** Weg: de theorieregel onderaan `ToolCard` (het `BookOpen`-icoon met
   `tool.theory`). `theory` blijft in de zoektekst (`search`).
 
 ### Doelen (`app/lib/registry/goals.ts`)
@@ -217,23 +215,19 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
 
 ### Over (`app/routes/about.tsx`)
 
-- **[vraag 1]** Weg: de sectie "Beschikbare tools" (`groups`, de `h2` met `t.about.toolsHeading`) en
+- **Besloten (BESLUIT-2026-11-04-1)** Weg: de sectie "Beschikbare tools" (`groups`, de `h2` met `t.about.toolsHeading`) en
   de `tools` in de loader; de loader houdt alleen `requireUser`.
-- **Zonder [vraag 1]:** één lijst zonder groepen, met de tools uit `getAvailableTools(user)` (zoals
-  de startpagina) in plaats van `ALL_TOOLS.filter(enabled)`.
 
 ### Woorden voor de soort tool
 
 - `home.mode.generator`: "Formulier" / "Form"; `home.mode.chatbot`: "Gesprek" / "Chat".
 - `home.a11y.generator`: "formulier" / "form"; `home.a11y.chatbot`: "gesprek" / "chat".
-- Zonder [vraag 1] blijft het typefilter, met: `home.allTypes` "Alles" / "All",
-  `home.generators` "Formulieren" / "Forms", `home.chatbots` "Gesprekken" / "Chats".
 
 ### i18n (nl + en)
 
 - **Weg:** de hele namespace `badge`; `home.filterAll`, `home.instructor`, `home.student`,
   `home.a11y.audience`.
-- **Weg [vraag 1]:** `home.allTypes`, `home.generators`, `home.chatbots`, `home.a11y.type`,
+- **Besloten (BESLUIT-2026-11-04-1), weg:** `home.allTypes`, `home.generators`, `home.chatbots`, `home.a11y.type`,
   `home.a11y.resultView`, `home.a11y.grid`, `home.a11y.list`, `about.toolsHeading`.
 - Controleer met `grep -rn "t\.badge\|home\.student\|home\.instructor" app` dat er niets overblijft.
   `admin.tools.audienceStudent` / `audienceInstructor` **blijven** (beheer, zie *Wat blijft*).
@@ -243,8 +237,7 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
 - `app/content/help/topics/getting-started.{nl,en}.md`, stap 1: "**Kies een tool.** Op de
   startpagina staan alle tools, per doel. Zoek op wat je wilt doen, bijvoorbeeld *rubric* of
   *motivatie*." / "**Choose a tool.** The start page lists every tool by goal. Search for what you
-  want to do, for example *rubric* or *motivation*." (Zonder [vraag 1] mag "Filter op formulier of
-  gesprek" erachter.)
+  want to do, for example *rubric* or *motivation*."
 
 ### Tests
 
@@ -257,9 +250,9 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
     zonder `Student`.
   - `it("labels the kind of tool in plain words")`: de kaart van MentorAI toont `Gesprek`, die van
     Begeleide reflectie `Formulier`.
-  - **[vraag 1]** `it("offers no type filter and no grid/list switch")`: geen knop `Chatbots`, geen
+  - **Besloten (BESLUIT-2026-11-04-1)** `it("offers no type filter and no grid/list switch")`: geen knop `Chatbots`, geen
     knop `Lijst`.
-  - **[vraag 1]** `it("does not repeat the theory under a card")`:
+  - **Besloten (BESLUIT-2026-11-04-1)** `it("does not repeat the theory under a card")`:
     `queryByText("Science of Learning", { exact: true })` is `null` (de fixture van Cognitive
     Architect heeft geen subtitel, dus die tekst staat alleen in de theorieregel).
   - Herschrijven: `"collapses to a flat result list when a filter is applied"` →
@@ -276,8 +269,8 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
   EN name and blurb"` gaat eruit; `"a goal's audience matches every tool filed under it"` wordt
   `it("goals carry no audience")`: `"audience" in goal` is `false` voor elk doel.
 - **RED, gewijzigd:** `tests/components/About.test.tsx`: `"groups tools by audience instead of
-  phase"` wordt **[vraag 1]** `it("lists no tools (the start page does)")` of, zonder vraag 1,
-  `it("lists the tools without audience groups")`. De axe-check blijft.
+  phase"` wordt **Besloten (BESLUIT-2026-11-04-1)** `it("lists no tools (the start page does)")`. De
+  axe-check blijft.
 - **Ongewijzigd groen:** `tests/api/stream.test.ts` (de stream leest `userType` nog), `tests/i18n.test.ts`.
 
 ### Klaar als
@@ -288,8 +281,7 @@ Kiest hij "alleen het afgesproken deel", dan sla je die punten over; de rest bli
       onveranderd.
 - [ ] Screenshots van de startpagina (doelen en een zoekresultaat), een tutorpagina en `/about`: NL en
       EN, desktop en mobiel.
-- [ ] PR-beschrijving, *Wat Bastiaan moet beslissen*: de teksten van de twee doelen; en welk antwoord
-      op vraag 1 is gebouwd.
+- [ ] PR-beschrijving, *Wat Bastiaan moet beslissen*: de teksten van de twee doelen; en dat de keuze van BESLUIT-2026-11-04-1 is gebouwd.
 
 ---
 
@@ -487,30 +479,28 @@ Nieuw: `app/components/EmptyState.tsx`:
 **Doel:** het menu van een docent heeft vier items: **Tools · Mijn werk · Onderwijscontext · Help**.
 Een beheerder ziet daarvoor **Beheer**. **Branch:** `p19-5-simpler-menu`.
 
-Punten met **[vraag 2]** voer je alleen uit als Bastiaan bij vraag 2 "ja" zegt (de aanbeveling).
-Anders blijft het menu zoals het is, op de volgorde na (Onderwijscontext vóór Help), en alleen
-`nav.viewingAsTeacher` en `home.comingSoon` gaan weg.
+Punten met **Besloten (BESLUIT-2026-11-04-2)** zijn vastgelegd: Bastiaan koos het menu met vier items (BESLUIT-2026-11-04-2). Daarnaast gaan `nav.viewingAsTeacher` en `home.comingSoon` weg.
 
 ### Shell (`app/components/AppShell.tsx`)
 
 - `nav` wordt: (beheerder) `/admin` Beheer, dan `/tools` Tools, `/projects` Mijn werk,
-  `/context-profiles` Onderwijscontext, `/help` Help. **[vraag 2]** `/about` gaat uit het menu.
+  `/context-profiles` Onderwijscontext, `/help` Help. **Besloten (BESLUIT-2026-11-04-2)** `/about` gaat uit het menu.
 - Desktop en mobiel gebruiken dezelfde lijst (zoals nu).
-- Footer, kolom *Bronnen*: Help en Over blijven. **[vraag 2]** De link naar `/contact` gaat weg; het
+- Footer, kolom *Bronnen*: Help en Over blijven. **Besloten (BESLUIT-2026-11-04-2)** De link naar `/contact` gaat weg; het
   e-mailadres links in de footer blijft (`SITE.contactEmail`, mailto).
 
 ### Pagina's
 
-- **[vraag 2]** Weg: `app/routes/contact.tsx` en `route("contact", …)` in `app/routes.ts`.
+- **Besloten (BESLUIT-2026-11-04-2)** Weg: `app/routes/contact.tsx` en `route("contact", …)` in `app/routes.ts`.
 - `app/routes/projects._index.tsx`: de kop leest al `t.nav.projects`, dus hij heet vanzelf "Mijn
   werk".
 
 ### i18n (nl + en)
 
-- **Nieuwe tekst [vraag 2]:** `nav.projects`: "Mijn werk" / "My work"; `projects.subtitle`: "Alles
+- **Besloten (BESLUIT-2026-11-04-2), nieuwe tekst:** `nav.projects`: "Mijn werk" / "My work"; `projects.subtitle`: "Alles
   wat je met de tools hebt gemaakt." / "Everything you made with the tools."
 - **Weg:** `nav.viewingAsTeacher` en `home.comingSoon` (beide ongebruikt; controleer met grep).
-  **[vraag 2]** `footer.contact` en de namespace `pages.contact`.
+  **Besloten (BESLUIT-2026-11-04-2)** `footer.contact` en de namespace `pages.contact`.
 
 ### Help (zelfde PR)
 
@@ -529,13 +519,13 @@ Anders blijft het menu zoals het is, op de volgorde na (Onderwijscontext vóór 
   - `it("keeps Over in the footer, not in the menu")`.
   - `it("renders the menu in English")` (root-loaderdata met `locale: "en"`): `Tools`, `My work`,
     `Teaching context`, `Help`.
-  - `"surfaces a direct contact email as a mailto link"` blijft; nieuw **[vraag 2]**
+  - `"surfaces a direct contact email as a mailto link"` blijft; nieuw **Besloten (BESLUIT-2026-11-04-2)**
     `it("has no link to a contact page")`.
   - De axe-checks met het menu dicht en open blijven.
 - **RED, nieuw:** `tests/p19-removed.test.ts` (node, `node:fs`, zoals `tests/p17-removed.test.ts`):
-  **[vraag 2]** `it("routes.ts registers no contact page")`, `it("the contact route is gone")`;
+  **Besloten (BESLUIT-2026-11-04-2)** `it("routes.ts registers no contact page")`, `it("the contact route is gone")`;
   `it("the i18n catalogues have no unused nav or home keys")` (`viewingAsTeacher`, `comingSoon`).
-- **Aanpassen:** `tests/components/LegalPages.test.tsx` (het contactgeval weg **[vraag 2]**),
+- **Aanpassen:** `tests/components/LegalPages.test.tsx` (het contactgeval weg **Besloten (BESLUIT-2026-11-04-2)**),
   `tests/components/Projects.test.tsx` (kop `Mijn werk`).
 
 ### Klaar als
@@ -559,7 +549,7 @@ Anders blijft het menu zoals het is, op de volgorde na (Onderwijscontext vóór 
 **Doel:** een docent maakt een onderwijscontext op één korte pagina. Wat er het meest toe doet staat
 open; de rest staat onder **"Meer details (optioneel)"**. **Branch:** `p19-6-short-context-form`.
 
-### Welke velden open staan (aanbeveling, vraag 3)
+### Welke velden open staan — Besloten (BESLUIT-2026-11-04-3)
 
 Open, in deze volgorde (de bestaande componenten uit `ContextFields.tsx`):
 
@@ -578,8 +568,7 @@ Onder **"Meer details (optioneel)"** (een native `<details>`, dicht):
   `showsDomainField` zoals nu.
 - Beroepspraktijk, Technologie / methoden, Onderwijsconcept, Aanspreekvorm (mbo), Eigen velden.
 
-Kiest Bastiaan bij vraag 3 een andere verdeling, dan schuif je alleen componenten tussen "open" en
-"Meer details"; de rest van deze stap blijft gelijk.
+Deze verdeling is vastgelegd in BESLUIT-2026-11-04-3.
 
 ### Editor (`app/components/context/ContextProfileEditor.tsx`)
 
@@ -679,7 +668,7 @@ Kiest Bastiaan bij vraag 3 een andere verdeling, dan schuif je alleen componente
       details" toont het aantal, en na opslaan is niets verloren.
 - [ ] Screenshots van de lege pagina, het korte formulier (dicht en open) en een vo-profiel: NL en EN,
       desktop en mobiel.
-- [ ] PR-beschrijving, *Wat Bastiaan moet beslissen*: welk antwoord op vraag 3 is gebouwd.
+- [ ] PR-beschrijving, *Wat Bastiaan moet beslissen*: dat de verdeling van BESLUIT-2026-11-04-3 is gebouwd.
 
 ---
 
@@ -733,21 +722,16 @@ Handmatig nalopen na 19.6, als nieuwe docent op de Mac met `npm run dev`:
 
 ## Wat Bastiaan moet beslissen
 
-Drie productkeuzes. Elke werker bouwt de aanbeveling, tenzij Bastiaan iets anders kiest. Zijn
-antwoorden legt de Producer vast in `docs/fabriek/besluiten.md`, met het volgende vrije nummer
-(nu BESLUIT-2026-11-03-19).
+Bastiaan beantwoordde de drie productkeuzes met "1 ja 2 ja 3 ja": de aanbeveling is gekozen. De
+keuzes staan in `docs/fabriek/besluiten.md` als BESLUIT-2026-11-04-1 t/m -3. De stappen hierboven
+bouwen die keuzes.
 
-1. **Startpagina en Over: mag er meer weg dan het doelgroepfilter en de badges?** Het typefilter
-   ("Generators / Chatbots"), de knop raster/lijst, de theorieregel op elke kaart (die herhaalt vaak
-   de boeknaam erboven) en de toollijst op "Over" (die staat al op de startpagina).
-   **Aanbeveling: ja, alles weg.** Zoeken en de vijf doelen vinden elke tool; de rest is dubbel.
-   *Alternatief:* alleen het afgesproken deel (filter "Voor studenten" en de badges) weg.
-2. **Menu: vier items, met "Mijn werk" en zonder contactpagina?** "Projecten" heet "Mijn werk"
-   (het zijn je bewaarde resultaten, geen projecten; en P20 brengt straks echte cursussen). "Over"
-   staat alleen nog onderaan. De contactpagina, die alleen het e-mailadres uit de footer herhaalt,
-   gaat weg. **Aanbeveling: ja.** *Alternatief:* de namen houden en alleen de volgorde aanpassen.
-3. **Welke velden staan open in het korte contextformulier?** **Aanbeveling:** Naam, Onderwijstype,
-   Opleiding, Vak en Studiejaar (of Fase in het vo); niveau, domein en kader, en de vrije velden onder
-   "Meer details". Het niveau volgt dan vanzelf uit het onderwijstype. *Alternatieven:* (a) nog korter:
-   alleen Onderwijstype en Opleiding of Vak, met een naam die zichzelf invult; (b) het domein ook open,
-   omdat het bij hbo het kader (zoals hbo-i) kiest.
+1. **Startpagina en Over: weg wat dubbel is.** Besloten (BESLUIT-2026-11-04-1): weg zijn het
+   typefilter ("Generators / Chatbots"), de knop raster/lijst, de theorieregel op elke kaart en de
+   toollijst op "Over" (die staat al op de startpagina). Zoeken en de vijf doelen vinden elke tool.
+2. **Menu: vier items, met "Mijn werk" en zonder contactpagina.** Besloten (BESLUIT-2026-11-04-2):
+   het docentmenu is Tools · Mijn werk · Onderwijscontext · Help; "Over" staat alleen onderaan; de
+   contactpagina gaat weg. "Projecten" heet "Mijn werk" (de route blijft `/projects`).
+3. **Velden in het korte contextformulier.** Besloten (BESLUIT-2026-11-04-3): open staan Naam,
+   Onderwijstype, Opleiding, Vak en Studiejaar (in het vo: Fase). Niveau, domein en kader, en de vrije
+   velden staan onder "Meer details".

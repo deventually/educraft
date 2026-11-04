@@ -102,3 +102,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-03-18:** **Toolnamen: taak eerst, boeknaam als ondertitel (V3).** Elke tool heet
   naar wat de docent wil doen (bijvoorbeeld 'Stageverslag of afstudeerwerk beoordelen'); de naam uit
   het boek of de techniek staat klein eronder (`Tool.subtitle`). Slugs, ids en prompts blijven gelijk.
+- **BESLUIT-2026-11-04-1:** **Startpagina en Over: weg wat dubbel is (V3, vraag 1 van P19).**
+  Bastiaan koos de aanbeveling. Weg: het typefilter ("Generators / Chatbots"), de knop raster/lijst,
+  de theorieregel onderaan elke kaart (de theorie blijft doorzoekbaar en staat op de toolpagina) en
+  de toollijst op "Over" (die staat al op de startpagina). Zoeken en de vijf doelen vinden elke tool.
+  Uitwerking: brief P19, stap 19.2.
+- **BESLUIT-2026-11-04-2:** **Menu: vier items, zonder contactpagina (V3, vraag 2 van P19).** Het
+  docentmenu heeft vier items: Tools · Mijn werk · Onderwijscontext · Help (voor een beheerder vooraf
+  Beheer). "Over" staat alleen onderaan. "Projecten" heet "Mijn werk"; de route blijft `/projects`.
+  De lege contactpagina gaat weg; het e-mailadres in de footer blijft. Uitwerking: brief P19, stap 19.5.
+- **BESLUIT-2026-11-04-3:** **Contextformulier: vijf velden open, de rest onder "Meer details" (V3,
+  vraag 3 van P19).** Open, in deze volgorde: Naam, Onderwijstype, Opleiding, Vak, en Studiejaar (in
+  het vo: Fase). Het vinkje "Als standaard instellen" staat onder de velden. Onder "Meer details
+  (optioneel)", dicht: niveau, domein en kader, beroepspraktijk, technologie, onderwijsconcept,
+  aanspreekvorm (mbo) en eigen velden. Uitwerking: brief P19, stap 19.6.
