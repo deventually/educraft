@@ -1,52 +1,37 @@
-import { type RouteConfig, index, route, layout, prefix } from "@react-router/dev/routes";
+import { type RouteConfig, index, layout } from "@react-router/dev/routes";
+import { account } from "./routing/account";
+import { admin } from "./routing/admin";
+import { api } from "./routing/api";
+import { auth } from "./routing/auth";
+import { help } from "./routing/help";
+import { info } from "./routing/info";
+import { portfolio } from "./routing/portfolio";
+import { projects } from "./routing/projects";
+import { tools } from "./routing/tools";
+import type { RouteArea } from "./routing/types";
+
+/**
+ * The routes live per part of the app in `app/routing/<area>.ts`, so PRs on different parts do
+ * not edit the same file. A new area = a new file there plus one import and one line below
+ * (alphabetical). Order does not matter: React Router ranks routes by specificity.
+ */
+const areas: RouteArea[] = [
+  account,
+  admin,
+  api,
+  auth,
+  help,
+  info,
+  portfolio,
+  projects,
+  tools,
+];
 
 export default [
   layout("components/AppShell.tsx", [
     // `/` is a role-aware redirector (admin → /admin/users, else → /tools).
     index("routes/index.tsx"),
-    // The tool catalogue lives at /tools (home.tsx); individual tools at /tools/:slug.
-    route("tools", "routes/home.tsx"),
-    route("tools/:slug", "routes/tool.tsx"),
-    ...prefix("projects", [index("routes/projects._index.tsx")]),
-    // BDB/BKE workplace (brief P25, 25.3): dossier list, overview, framework, one outcome.
-    ...prefix("portfolio", [
-      index("routes/portfolio._index.tsx"),
-      route(":id", "routes/portfolio.$id.tsx"),
-      route(":id/framework", "routes/portfolio.$id.framework.tsx"),
-      route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
-    ]),
-    ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
-    route("context-profiles", "routes/context-profiles.tsx"),
-    route("account", "routes/account.tsx"),
-    // Admin console (Phase 4, four pages since P18.4). The layout gates on requireRole("admin"); every
-    // child repeats the check (loaders run in parallel).
-    route("admin", "routes/admin.tsx", [
-      index("routes/admin._index.tsx"), // redirects to /admin/users
-      route("users", "routes/admin.users.tsx"),
-      route("tools", "routes/admin.tools.tsx"),
-      route("context", "routes/admin.context.tsx"),
-      route("usage", "routes/admin.usage.tsx"),
-    ]),
-    route("about", "routes/about.tsx"),
-    route("cookies", "routes/cookies.tsx"),
-    route("legal", "routes/legal.tsx"),
+    ...areas.flatMap((a) => a.shell ?? []),
   ]),
-  // Auth front door — outside the AppShell layout (no nav/footer chrome).
-  route("invite/:token", "routes/invite.tsx"),
-  route("reset/:token", "routes/reset.$token.tsx"),
-  route("login", "routes/login.tsx"),
-  // Resource route (no UI) — POST destroys the session.
-  route("logout", "routes/logout.tsx"),
-  // Resource route (no UI) — SSE streaming endpoint for generators.
-  route("api/stream", "routes/api.stream.tsx"),
-  // Resource route (no UI) — a BDB/BKE dossier as a Word (.docx) download (P25.6).
-  route("portfolio/:id/export", "routes/portfolio.$id.export.tsx"),
-  // Resource route (no UI) — records tester feedback on a generation.
-  route("api/feedback", "routes/api.feedback.tsx"),
-  // Public health probe for orchestrators (no auth, no chrome).
-  route("healthz", "routes/healthz.tsx"),
-  // Resource route (no UI) — persists the chosen UI locale in a cookie.
-  route("set-locale", "routes/set-locale.tsx"),
-  // Resource route (no UI) — silences Chrome DevTools' workspace probe.
-  route(".well-known/appspecific/com.chrome.devtools.json", "routes/devtools-probe.tsx"),
+  ...areas.flatMap((a) => a.standalone ?? []),
 ] satisfies RouteConfig;

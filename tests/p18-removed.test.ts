@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { flatRoutes, routeTable } from "./helpers/routes";
 import { en } from "~/lib/i18n/messages/en";
 import { nl } from "~/lib/i18n/messages/nl";
 
@@ -10,8 +11,8 @@ const root = resolve(__dirname, "..");
 const read = (p: string) => readFileSync(resolve(root, p), "utf8");
 
 describe("P18.1 — 'view as teacher' removed", () => {
-  it("routes.ts registers no set-view route", () => {
-    expect(read("app/routes.ts")).not.toContain("set-view");
+  it("the route table registers no set-view route", () => {
+    expect(routeTable()).not.toContain("set-view");
   });
 
   it("the view-as modules are gone", () => {
@@ -54,13 +55,10 @@ describe("P18.2 — per-teacher tool/context access and the country axis removed
 });
 
 describe("P18.4 — the admin console has four pages", () => {
-  it("routes.ts registers exactly the four admin pages", () => {
-    const src = read("app/routes.ts");
-    const start = src.indexOf('"routes/admin.tsx", [');
-    const block = src.slice(start + 1, src.indexOf('route("about"'));
-    const files = [...block.matchAll(/(?:route\("([^"]+)"|index\()[^)]*?"routes\/([^"]+)"/g)].map(
-      (m) => `${m[1] ?? ""}:${m[2]}`,
-    );
+  it("the route table registers exactly the four admin pages", () => {
+    const files = flatRoutes()
+      .filter((r) => r.path.startsWith("/admin") && r.file !== "routes/admin.tsx")
+      .map((r) => `${r.path.replace(/^\/admin\/?/, "")}:${r.file.replace(/^routes\//, "")}`);
     expect(files).toEqual([
       ":admin._index.tsx",
       "users:admin.users.tsx",
