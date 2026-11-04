@@ -21,6 +21,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **Strengere meting (#56) gemerged op 2026-11-04:** drie runs per case, harde ja/nee-checks met
+  een plafond, een afgekapt antwoord hooguit een 3; Begeleide reflectie 12288 tokens. Nulmeting d:
+  `evals/reports/2026-11-04d.md`.
 - **Tweede meting (#54), P24.1 (#53) en lege antwoorden (#55) gemerged op 2026-11-04:** Stage
   Assessment heet nu "Studentwerk beoordelen en feedback geven"; Claude 5.5 krijgt extra denkruimte,
   zodat een antwoord niet meer leeg blijft of halverwege ophoudt.
@@ -62,16 +65,11 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Strengere meting (#56): elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
-  rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
-  maximaal 2); een afgekapt antwoord krijgt hooguit een 3. Twee extra MentorAI-cases (afhaker,
-  te zekere student). Begeleide reflectie krijgt 12288 tokens, want 2 van de 3 lessen op eqf6
-  hielden halverwege op. Meting d (`evals/reports/2026-11-04d.md`): MentorAI 2,3–2,6 (te veel
-  vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
 - MentorAI v2 naar het boek (24.0): de prompt van het boek (Agarwal e.a., p. 36–44) als basis, met
   jouw vak en leerdoel in plaats van de vaste SBI-oefening; de leermeester lost je eigen opgave nooit
-  op. De toolpagina toont de echte boektekst en zegt wat wij veranderden (BESLUIT-2026-11-04-22) —
-  PR open, na meting d en de meting erna.
+  op. De toolpagina toont de echte boektekst en zegt wat wij veranderden (BESLUIT-2026-11-04-22).
+  Getelde checks (woorden, vraagtekens, lijstjes) in code. Eindmeting f: gemiddeld 2,5 → 3,4
+  (`evals/reports/2026-11-04f.md`) — PR open.
 
 ## Wacht op jou
 

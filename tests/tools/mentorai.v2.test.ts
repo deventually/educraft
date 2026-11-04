@@ -42,8 +42,9 @@ describe("mentorai@v2 — the book's Cognitive Apprenticeship Coach, generalised
     expect(loc(a.adaptation!, "nl")).toMatch(/SBI/);
     expect(loc(a.adaptation!, "nl")).toMatch(/vak/);
     expect(loc(a.adaptation!, "en")).toMatch(/SBI/);
-    // No "improved" claim before a measurement shows it.
-    expect(a.improvedAfter).toBeUndefined();
+    // The improvement claim cites the final measurement (BESLUIT-2026-11-04-22).
+    expect(a.improvedAfter?.report).toBe("evals/reports/2026-11-04f.md");
+    expect(loc(a.improvedAfter!.summary, "nl")).toMatch(/antwoord/);
   });
 
   it("cites the theory behind it", () => {

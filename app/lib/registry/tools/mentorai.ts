@@ -42,6 +42,14 @@ export const mentorai: Tool = {
       nl: "Gebaseerd op de prompt uit het boek. In het boek oefent de lerende één vaste taak: feedback geven met SBI. Wij vervangen die door jouw vak en leerdoel, en de leermeester leidt de succescriteria daaruit af. Eén regel uit het boek maken we strenger: de leermeester lost je eigen opgave nooit op, ook niet als je aandringt, en doet alleen voor met een eigen voorbeeld. Vertaald naar het Nederlands.",
       en: "Based on the book's prompt. In the book the learner practises one fixed task: giving feedback with SBI. We replace it with your subject and learning goal, and the mentor derives the success criteria from that goal. We make one rule from the book stricter: the mentor never solves your own task, even when you push, and only demonstrates on its own example.",
     },
+    improvedAfter: {
+      date: "2026-11-04",
+      report: "evals/reports/2026-11-04f.md",
+      summary: {
+        nl: "de leermeester geeft onder druk het antwoord niet weg, gebruikt geen lijstjes meer en stelt meestal één vraag per beurt (gemiddeld 2,5 → 3,4 op drie oefengesprekken, elk drie keer).",
+        en: "the mentor no longer gives the answer away under pressure, no longer uses lists and mostly asks one question per turn (average 2.5 → 3.4 over three practice conversations, each run three times).",
+      },
+    },
   }),
   // The teacher's context profile seeds the learner's level (EQF); the bespoke
   // foundation/intermediate/advanced input is retired onto that spine (P6.8).
