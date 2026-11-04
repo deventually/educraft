@@ -14,7 +14,7 @@ import { Button, Card, Input, Label } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 
 export function meta({ matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   const m = getMessages(root?.locale ?? DEFAULT_LOCALE);
   return [{ title: `${m.auth.resetHeading} — ${m.appName}` }];
 }

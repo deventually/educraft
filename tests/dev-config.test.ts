@@ -1,44 +1,40 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import config from "../react-router.config";
 
 /**
- * `npm run dev` should start without warnings: no React Router v8 future-flag warnings and no
- * Vite `envFile` deprecation (that one comes from inside @react-router/dev and is patched).
+ * `npm run dev` should start without warnings. React Router v7 printed v8 future-flag warnings and
+ * passed Vite 8's deprecated `envFile` option; on v8 both are gone.
  */
 const root = resolve(__dirname, "..");
+const pkg = (name: string) =>
+  JSON.parse(readFileSync(resolve(root, "node_modules", name, "package.json"), "utf8")) as {
+    version: string;
+  };
 
 describe("dev server config", () => {
-  it("opts in to every React Router v8 future flag", () => {
-    expect(config.future).toEqual({
-      v8_middleware: true,
-      v8_passThroughRequests: true,
-      v8_splitRouteModules: true,
-      v8_trailingSlashAwareDataRequests: true,
-      v8_viteEnvironmentApi: true,
-    });
-  });
-
   it.each([
-    "vite.js",
-    "cli/index.js",
-    "vite/cloudflare.js",
-  ])("@react-router/dev dist/%s uses envDir: false, not the deprecated envFile", (file) => {
-    const source = readFileSync(resolve(root, "node_modules/@react-router/dev/dist", file), "utf8");
-    expect(source).not.toContain("envFile: false");
-    expect(source).toContain("envDir: false");
-  });
-});
-
-describe("Dockerfile with the patch-package postinstall", () => {
-  const dockerfile = readFileSync(resolve(root, "Dockerfile"), "utf8");
-
-  it("skips install scripts for the production deps (patch-package is a devDependency)", () => {
-    expect(dockerfile).toContain("npm ci --omit=dev --ignore-scripts");
+    "react-router",
+    "@react-router/dev",
+    "@react-router/node",
+    "@react-router/serve",
+  ])("%s is on major version 8", (name) => {
+    expect(pkg(name).version.split(".")[0]).toBe("8");
   });
 
-  it("still builds the one native production dependency", () => {
-    expect(dockerfile).toContain("npm rebuild better-sqlite3");
+  it("sets no v8_ future flags (they are the default on v8)", () => {
+    const flags = Object.keys((config as { future?: object }).future ?? {});
+    expect(flags.filter((f) => f.startsWith("v8_"))).toEqual([]);
+  });
+
+  it("@react-router/dev no longer passes Vite's deprecated envFile option", () => {
+    const dist = resolve(root, "node_modules/@react-router/dev/dist");
+    const files = readdirSync(dist, { recursive: true, encoding: "utf8" }).filter((f) =>
+      f.endsWith(".js"),
+    );
+    for (const f of files) {
+      expect(readFileSync(resolve(dist, f), "utf8"), f).not.toContain("envFile: false");
+    }
   });
 });

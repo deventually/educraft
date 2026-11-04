@@ -36,7 +36,7 @@ LimeOnIt draait als pilot met docenten in het hbo. De app is tweetalig (NL/EN).
 
 ## Architectuur
 
-React Router 7 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) · AI SDK.
+React Router 8 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) · AI SDK.
 
 Elke tool is **data**, geen code: een registry-entry met invoervelden en één of meer fasen, plus
 een tweetalig promptbestand. Een nieuwe tool toevoegen is dus data toevoegen, test-first. Meer in

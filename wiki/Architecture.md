@@ -133,7 +133,7 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
 
 ## Stack
 
-React Router 7.15 (framework mode, SSR) · TypeScript · Tailwind v4 (CSS-first) ·
+React Router 8 (framework mode, SSR) · TypeScript · Tailwind v4 (CSS-first) ·
 SQLite via Drizzle + better-sqlite3 (local-first, schema auto-created) ·
 multi-provider AI. Dev server on **port 5173** (`npm run dev`).
 

@@ -7,8 +7,7 @@ RUN npm ci
 FROM node:24-alpine AS production-dependencies-env
 COPY ./package.json package-lock.json /app/
 WORKDIR /app
-# --ignore-scripts: the postinstall (patch-package) is dev-only; rebuild the native dep explicitly.
-RUN npm ci --omit=dev --ignore-scripts && npm rebuild better-sqlite3
+RUN npm ci --omit=dev
 
 FROM node:24-alpine AS build-env
 COPY . /app/

@@ -20,7 +20,7 @@ import { Button, Card, Input, Label } from "~/components/ui";
 import type { Role } from "~/lib/registry/access";
 
 export function meta({ matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   const m = getMessages(root?.locale ?? DEFAULT_LOCALE);
   return [{ title: `${m.account.heading} — ${m.appName}` }];
 }
