@@ -26,6 +26,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   V1–V3 hieronder.
 - 2026-11-03: "Ik denk wel dat de admin modellen moet kunnen toewijzen … per instelling en kan de
   admin dat per docent overrulen." → onderdeel van V2.
+- 2026-11-04: "welke tools we nog meer kunnen maken/aanbieden … Wat missen we allemaal?" →
+  onderzoek (Claude Doc, 2026-11-04). Daarna: "nuttige tools … die geen LLM nodig hebben" en "Ja geef
+  ze een eigen plek" → BESLUIT-2026-11-04-5, brief P23. Daarna: tools 1 t/m 8 en eerst de nulmeting →
+  BESLUIT-2026-11-04-7, brief P24.
 - 2026-11-03: "Ik wil ook niet bij beheer op elke tabel regel een opslaan knop hebben. Of eentje
   onderop, of hij slaat automatisch op" → V2: automatisch opslaan met melding.
 - 2026-11-03: "Ik mis de stageverslagen checker" (hij heet 'Beoordelingsassistent — stage &
@@ -38,21 +42,28 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   wachtwoord invoeren. Ook user account op non-actief kunnen zetten" → V2 (P18.7).
 - 2026-11-04: "Hoe kunnen we beginnende docenten begeleiden om hun BDB en BKE goed te maken en
   makkelijk voor ze maken? Ik vind dat we met deze tool de BDB en BKE binnen een paar dagen moeten
-  kunnen afronden en wederom met een hele hoge kwaliteit." → brief P23 (werkplaats).
+  kunnen afronden en wederom met een hele hoge kwaliteit." → brief P25 (werkplaats).
 - 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
-  wijden." → BESLUIT-2026-11-04-5.
-- 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → P25.
+  wijden." → BESLUIT-2026-11-04-11.
+- 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → BESLUIT-2026-11-04-16, vervolg op P25.
 
 ## Bezig
 
-- Brief P23 (BDB/BKE-werkplaats), als PR ter goedkeuring.
+- Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
+  open, wacht op Bastiaan.
+- Brief P25 (BDB/BKE-werkplaats), PR #37.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
 
-- Brief P23 mergen (PR #37).
+- Brief P25 (BDB/BKE-werkplaats) mergen, PR #37.
 
 ## Volgende (voorgestelde volgorde)
+
+0. **Hulpmiddelen zonder AI** (brief P23): de plek, de cijferrekenaar, rubrics bewaren en invullen.
+   Drie PR's. Klein en zonder risico, kan naast de rest.
+0. **Acht nieuwe AI-tools** (brief P24): eerst de nulmeting (24.0, Bastiaan draait hem), dan één PR
+   per tool met een meetbare kwaliteitslat.
 
 1. **Vereenvoudiging V1** (brief P17): klaar, gemerged en uitgerold op 2026-11-03.
 2. **Vereenvoudiging V2** (brief P18): klaar en uitgerold op 2026-11-04. Het omvatte beheer naar vier pagina's die automatisch
@@ -66,8 +77,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
    contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
-6. **BDB/BKE-werkplaats:** brief P23 (zes PR's), daarna P24 toets bouwen, P25 toetsanalyse en
-   import, P26 oefenen en feedback. P23 hangt niet af van P20; P24 wel.
+6. **BDB/BKE-werkplaats** (brief P25, **gaat voor**: eerste gebruik deze maand): kortste pad in drie
+   PR's, daarna Word-export, kader-extractie en de BKE-onderdelen met de tools uit P23 en P24.
 
 ## Open vragen
 

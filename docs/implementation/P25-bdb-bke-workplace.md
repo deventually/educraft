@@ -1,10 +1,10 @@
-# Fase 23 — De BDB/BKE-werkplaats: dossier, bewijschecklist, portfoliocoach, Word-export
+# Fase 25 — De BDB/BKE-werkplaats: dossier, bewijschecklist, portfoliocoach, Word-export
 
 > **Zo voer je deze brief uit:** open hem in een verse sessie en voer hem precies uit, test-first
-> volgens `AGENTS.md` / de `/tdd`-skill. Doe de interne fasen op volgorde (23.1 → 23.6). **Elke
+> volgens `AGENTS.md` / de `/tdd`-skill. Doe de interne fasen op volgorde (25.1 → 25.6). **Elke
 > fase is één PR**; laat elke fase door `npm test && npm run typecheck && npm run check` komen. Hangt
 > af van P15 (toasts) en de documentupload (`app/lib/documents/extract.ts`). **Hangt niet af van
-> P20**; de koppeling met cursussen komt in P24. Branch per fase vanaf `main`.
+> P20**; de koppeling met cursussen komt later. Branch per fase vanaf `main`.
 
 ## Context en doel
 
@@ -15,7 +15,7 @@ over 3 tot 18 maanden (bij één hogeschool: 240 uur BDB, waarvan ongeveer 84 uu
 doel van Bastiaan: **het portfolio in een paar werkdagen af, met een hoge kwaliteit.**
 
 Het onderzoek en de keuzes staan in het voorstel "BDB en BKE in een paar dagen" (Claude Doc in het
-project) en in BESLUIT-2026-11-04-5 t/m -10. Kort:
+project) en in BESLUIT-2026-11-04-11 t/m -18. Kort:
 
 - BDB/BKE wordt een **apart deel van de app**, de werkplaats, met één **dossier** per traject.
 - Elke hogeschool heeft eigen criteria. De werkplaats werkt daarom met het **kader van de eigen
@@ -31,17 +31,17 @@ project) en in BESLUIT-2026-11-04-5 t/m -10. Kort:
 ## Kortste pad (november 2026)
 
 De eerste gebruiker moet de werkplaats **deze maand** voor een eigen BDB kunnen gebruiken. Daarom
-gaat P23 voor op ander toolwerk, en bouwen we in deze volgorde, in **drie PR's** in plaats van zes:
+gaat P25 voor op ander toolwerk (ook op P23 en P24), en bouwen we in deze volgorde, in **drie PR's** in plaats van zes:
 
-1. **PR A = 23.1 + 23.2:** domein en opslag (dossier, kader, bewijs, hoofdstukken, status,
+1. **PR A = 25.1 + 25.2:** domein en opslag (dossier, kader, bewijs, hoofdstukken, status,
    voortgang). Zonder de AI-verantwoording; die schuift naar PR C.
-2. **PR B = 23.3:** de werkplaats-UI zonder AI, met het vijfde menu-item. Het kader wordt **met de
+2. **PR B = 25.3:** de werkplaats-UI zonder AI, met het vijfde menu-item. Het kader wordt **met de
    hand** ingevoerd (een BDB heeft ongeveer twintig criteria; een half uur werk). Daarna is het
    dossier al bruikbaar als checklist en schrijfplek.
-3. **PR C = 23.5:** de portfoliocoach, met de AI-verantwoording uit 23.1 en de evals. Dit is de
+3. **PR C = 25.5:** de portfoliocoach, met de AI-verantwoording uit 25.1 en de evals. Dit is de
    eigenlijke winst.
 
-Later, in deze volgorde: 23.6 Word-export (nodig voor de BKE), 23.4 kader-extractie, daarna P24–P26.
+Later, in deze volgorde: 25.6 Word-export (nodig voor de BKE), 25.4 kader-extractie, daarna de vervolgstappen onder *Buiten bereik*.
 Ook later: de BKE-onderdelen, imports, een tweede hogeschool. Een oefentool voor de professionele
 dialoog (eindgesprek) is een kleine chattool in het register en kan, als er tijd is, na PR C.
 
@@ -51,16 +51,16 @@ dialoog (eindgesprek) is een kleine chattool in het register en kan, als er tijd
    "Teaching qualification workspace". De bestaande tools worden vanuit de werkplaats ingezet, maar de
    werkplaats is geen tool in het register (het is een samenstel van data en pagina's, net als
    `/projects`).
-2. **Coachen standaard, schrijven als keuze** (BESLUIT-2026-11-04-6). LimeOnIt leest de docent niet
+2. **Coachen standaard, schrijven als keuze** (BESLUIT-2026-11-04-12). LimeOnIt leest de docent niet
    de les.
 3. **Kader van de eigen hogeschool** is de maatstaf. Het is altijd door de docent bevestigd voordat
    het wordt gebruikt (een LLM-extractie is een voorstel, geen waarheid).
 4. **Bronnen:** de coach noemt nooit literatuur die niet in het dossier staat (eigen bronnenlijst van
    de docent of de vaste lijst `app/lib/portfolio/sources.ts`, alleen met geverifieerde titels).
-5. **Word-export mag een nieuwe dependency gebruiken** (BESLUIT-2026-11-04-9): het npm-pakket
+5. **Word-export mag een nieuwe dependency gebruiken** (BESLUIT-2026-11-04-15): het npm-pakket
    `docx` (MIT, geen native code). Pin de versie.
 6. **Studentdata:** de docent plakt bewijs als tekst. Er is geen bestandsopslag en geen video. Scores
-   van studenten komen pas in P25 (standaard geanonimiseerd).
+   van studenten komen pas in een vervolgstap (standaard geanonimiseerd, BESLUIT-2026-11-04-13 en -9).
 
 ## Het model (`app/lib/portfolio/types.ts`)
 
@@ -139,7 +139,7 @@ export interface DossierData {
 - Coachuitvoer wordt **niet** in het dossier bewaard maar als gewone `generations`-rij
   (`toolSlug = "portfolio-coach"`), zodat "Mijn werk" en het gebruik vanzelf meetellen.
 
-## 23.1 — Puur domein (`app/lib/portfolio/`)
+## 25.1 — Puur domein (`app/lib/portfolio/`)
 
 - `types.ts`, `schema.ts` (`DossierDataSchema`, `emptyDossier(tracks)`), `skeleton.ts`.
 - `skeleton.ts`: een **openbaar startskelet** uit het landelijke protocol van de Vereniging
@@ -164,9 +164,9 @@ export interface DossierData {
 - **Testplan (RED):** `tests/portfolio/schema.test.ts`, `edit.test.ts`, `progress.test.ts`,
   `aiDisclosure.test.ts`, met één gericht geval per bevinding en het negatieve geval.
 
-## 23.2 — Persistentie
+## 25.2 — Persistentie
 
-- Tabel `portfolio_dossiers` in `schema.server.ts`; `npm run db:generate` maakt migratie 0011.
+- Tabel `portfolio_dossiers` in `schema.server.ts`; `npm run db:generate` maakt de volgende vrije migratie (P23.2 voegt er misschien eerder een toe).
 - Repository `app/server/repositories/portfolio.server.ts`: `listDossiers` (limiet), `getDossier`,
   `createDossier`, `updateDossier` (parset opnieuw met `DossierDataSchema`; ongeldig → fout, niets
   geschreven), `deleteDossier`. Alles async en per `userId` afgebakend.
@@ -174,14 +174,14 @@ export interface DossierData {
 - **Testplan (RED):** `tests/api/portfolio-repo.test.ts`: CRUD-rondreis; een dossier van een
   ander is onzichtbaar en niet bij te werken; ongeldige data wordt geweigerd; de cascade; de limiet.
 
-## 23.3 — Werkplaats-UI zonder AI
+## 25.3 — Werkplaats-UI zonder AI
 
 - **Routes:** `portfolio` (lijst + aanmaken: naam, BDB/BKE/beide), `portfolio/:id` (overzicht),
   `portfolio/:id/framework` (kader), `portfolio/:id/outcome/:outcomeId` (bewijs + hoofdstuk).
   `requireRole("teacher", "admin")`; een vreemd dossier → 404.
-- **Menu:** een vijfde item "BDB/BKE" in `AppShell` (desktop + mobiel), BESLUIT-2026-11-04-11.
+- **Menu:** een vijfde item "BDB/BKE" in `AppShell` (desktop + mobiel), BESLUIT-2026-11-04-17.
 - **Kader** (`/framework`): start met het skelet of met een upload. De upload gebruikt de bestaande
-  `fileToText` (PDF/DOCX in de browser); de tekst gaat naar 23.4 (extractie). Daarna een
+  `fileToText` (PDF/DOCX in de browser); de tekst gaat naar 25.4 (extractie). Daarna een
   bewerkbare lijst van leeruitkomsten en criteria, en een knop "Kader bevestigen". Zonder bevestiging
   is de coach uit.
 - **Overzicht:** per leeruitkomst de voortgang (x van y criteria aangetoond, als tekst en niet alleen
@@ -198,7 +198,7 @@ export interface DossierData {
   leeruitkomstpagina; `tests/api/portfolio-route.test.ts` per intent, vreemd dossier → 404,
   ongeldige payload → gelokaliseerde fout; `AppShell.test.tsx` voor het menu-item.
 
-## 23.4 — Kader-extractie (LLM, één keer per dossier)
+## 25.4 — Kader-extractie (LLM, één keer per dossier)
 
 - Prompt `app/lib/prompts/files/portfolio-framework.{nl,en}.md` + `portfolio-framework@v1.prompt.ts`,
   volgens `TEMPLATE.md` (Voice & Bounds). Invoer: de tekst van het formulier. Uitvoer: **alleen
@@ -215,7 +215,7 @@ export interface DossierData {
   `tests/portfolio/extract.test.ts` met een nepprovider: geldige JSON → kader; een verzonnen
   criterium → gemarkeerd; kapotte JSON → één retry → fout.
 
-## 23.5 — Portfoliocoach (LLM, de kern)
+## 25.5 — Portfoliocoach (LLM, de kern)
 
 - Prompt `portfolio-coach.{nl,en}.md` + `@v1`. Invoer: het bevestigde kader van één leeruitkomst
   (criteria + strongLevel + requiredEvidence), het hoofdstuk, korte uittreksels van het gekoppelde
@@ -248,7 +248,7 @@ export interface DossierData {
   vragen, met het eigen bewijs als enige bron. De eerste keer verschijnt één neutrale melding
   (NL/EN, i18n-sleutel `portfolio.draft.notice`), daarna niet meer (`draftNoticeSeenAt`). Elke
   opgestelde tekst komt in de textarea, waar de docent hem aanpast. `aiLog` krijgt een regel.
-- **Evals (verplicht voordat 23.5 live gaat):**
+- **Evals (verplicht voordat 25.5 live gaat):**
   - `evals/portfolio-coach/cases.json` + `rubric.md` met **synthetische** hoofdstukken waarvan de
     fout bekend is: een criterium alleen gesuggereerd, een citaat dat niet bewijst, een ontbrekend
     verplicht bewijsstuk, een sterk hoofdstuk (de coach mag niet vitten).
@@ -256,41 +256,44 @@ export interface DossierData {
     lokaal bij Bastiaan). Niets daaruit wordt gecommit;
     rapporten over privé-cases noemen alleen case-id's en scores. Voeg een test toe die faalt als
     `evals/` een bestand uit die map bevat (op naam).
-  - Een eval-run kost ongeveer €1–3; Bastiaan gaf akkoord (BESLUIT-2026-11-04-12). Draai eerst de
+  - Een eval-run kost ongeveer €1–3; Bastiaan gaf akkoord (BESLUIT-2026-11-04-18). Draai eerst de
     nulmeting van het harnas, die nog nooit gedraaid is.
 - **Testplan (RED):** prompt-structuurtests; `tests/portfolio/coach.test.ts` met een nepprovider
   voor elke controle hierboven; componenttest met axe voor het beoordelingspaneel en de melding.
 
-## 23.6 — Export naar Word
+## 25.6 — Export naar Word
 
 - Dependency `docx` (gepind). Server-resource-route `portfolio/:id/export` (GET) → `.docx`, alleen
   voor de eigenaar.
 - Inhoud: titelpagina (naam dossier, instelling, jaar, datum), per leeruitkomst het hoofdstuk
   (markdown → koppen, alinea's, lijsten, tabellen), bijlagen (bewijsstukken in volgorde), de
   bronnenlijst (APA, zoals de docent hem invoerde, alfabetisch), en optioneel de AI-verantwoording
-  uit 23.1. Woordentelling exclusief bijlagen op de titelpagina.
+  uit 25.1. Woordentelling exclusief bijlagen op de titelpagina.
 - Toegankelijk document: echte kopstijlen, documenttaal ingesteld, tabellen met kopregel.
 - **Testplan (RED):** `tests/portfolio/export.test.ts`: het bestand opent (zip met
   `word/document.xml`), bevat de koppen in volgorde, de bronnenlijst is alfabetisch, de
   AI-verantwoording staat er alleen in als die aan staat; route-test: vreemd dossier → 404.
 
-## Buiten bereik (volgende briefs)
+## Buiten bereik (vervolg, hergebruikt P23 en P24)
 
-- **P24** Toets bouwen: toetsmatrijs, vier-ogencheck per vraag, beoordelingsmodel en cesuur;
-  koppeling dossier ↔ P20-cursus; bestaande tools openen met het dossier voorgevuld.
-- **P25** Toetsanalyse: import uit TestVision, ANS, Remindo en het HU-sjabloon "Itemanalyse";
-  p-waarde, gokcorrectie, a-waarden, D-index, Rit/Rir, alfa/KR20 in code; standaard
-  geanonimiseerd; duiding en verbeterplan met AI.
-- **P26** Oefenen en feedback: proefassessment (professionele dialoog van 30 minuten),
-  feedbackvragenlijsten per criterium, feedback op medekandidaten, lesvoorbereiding en lesevaluatie
-  met een kijkwijzer op aantekeningen (geen video).
-- SKE, delen met de werkplekbegeleider in de app, bestandsopslag.
+De werkplaats bouwt geen eigen versie van wat P23 en P24 al leveren. Een latere brief koppelt ze:
+
+- **Toets bouwen (BKE):** toetsvragen en toetsmatrijs (P24.3), rubric maken (P24.2) en de cijfer- en
+  cesuurrekenaar (P23.1) openen vanuit het dossier; de uitkomst wordt een bewijsstuk.
+- **Toetsanalyse (BKE):** P24.5 rekent in code en legt uit; de werkplaats voegt de import uit
+  TestVision, ANS, Remindo en het veelgebruikte Excel-sjabloon "Itemanalyse" toe (BESLUIT-2026-11-04-16),
+  standaard geanonimiseerd (BESLUIT-2026-11-04-13, -9).
+- **Lesvoorbereiding (LU Doceren):** P24.4 vanuit het dossier.
+- **Oefenen en feedback:** proefassessment (professionele dialoog van 30 minuten),
+  feedbackvragenlijsten per criterium, feedback op medekandidaten, lesevaluatie met een kijkwijzer op
+  aantekeningen (geen video).
+- Koppeling dossier ↔ P20-cursus; SKE; delen met de werkplekbegeleider in de app; bestandsopslag.
 
 ## Acceptatie
 
 `npm test && npm run typecheck && npm run check` zijn groen na elke subfase.
 
-Handmatig nalopen (23.6):
+Handmatig nalopen (25.6):
 1. Een docent maakt een dossier "BDB 2026" aan, uploadt het beoordelingsformulier van de eigen
    hogeschool, controleert het kader en bevestigt het.
 2. Bij leeruitkomst Doceren plakt de docent een lesvoorbereiding en feedback, koppelt die aan
@@ -304,5 +307,5 @@ Handmatig nalopen (23.6):
 
 ## Beslist door Bastiaan (4 november 2026)
 
-1. **Menu:** een vijfde menu-item "BDB/BKE" (BESLUIT-2026-11-04-11).
-2. **Eval-runs:** akkoord op ongeveer €1–3 per run (BESLUIT-2026-11-04-12).
+1. **Menu:** een vijfde menu-item "BDB/BKE" (BESLUIT-2026-11-04-17).
+2. **Eval-runs:** akkoord op ongeveer €1–3 per run (BESLUIT-2026-11-04-18).

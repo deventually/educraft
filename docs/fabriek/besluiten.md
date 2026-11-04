@@ -119,20 +119,44 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   het vo: Fase). Het vinkje "Als standaard instellen" staat onder de velden. Onder "Meer details
   (optioneel)", dicht: niveau, domein en kader, beroepspraktijk, technologie, onderwijsconcept,
   aanspreekvorm (mbo) en eigen velden. Uitwerking: brief P19, stap 19.6.
-- **BESLUIT-2026-11-04-5:** **BDB en BKE krijgen een eigen deel van de app**, de werkplaats, dat de
-  bestaande tools mag inzetten. Uitwerking: brief P23.
-- **BESLUIT-2026-11-04-6:** **Coachen of schrijven is een keuze van de docent.** Standaard coacht de
+- **BESLUIT-2026-11-04-5:** **Hulpmiddelen zonder AI krijgen een eigen plek.** Naast de AI-tools
+  komen rekenhulpen die geen LLM gebruiken (eerst de cijfer- en cesuurrekenaar en rubrics bewaren en
+  invullen). Ze zijn geen `Tool` in het register maar hebben een eigen klein register. Bastiaan: "Ja
+  geef ze een eigen plek". Uitwerking: brief P23. Achtergrond: het onderzoek naar ontbrekende
+  docententools van 2026-11-04.
+- **BESLUIT-2026-11-04-6:** **Hulpmiddelen staan op de toolspagina**, als eigen sectie onder de
+  tools, zonder eigen menu-item. Brief P23.
+- **BESLUIT-2026-11-04-7:** **Acht nieuwe AI-tools, eerst meten.** Bastiaan koos alle acht AI-tools
+  uit het onderzoek (feedback op studentwerk door Stage Assessment breder te maken, rubric maken,
+  toetsvragen en toetsmatrijs, les voorbereiden, toetsanalyse, opdracht helder schrijven,
+  differentiëren, lastig gesprek oefenen) en koos om eerst de nulmeting te draaien. Elke tool moet een
+  meetbare kwaliteitslat halen. Uitwerking: brief P24.
+- **BESLUIT-2026-11-04-8:** **Ingevulde rubrics: namen lokaal, daarna anoniem.** Namen en opmerkingen
+  staan alleen in de browser van de docent en gaan nooit naar de server of een LLM. Bij het afsluiten
+  van een batch blijven alleen de gekozen niveaus per criterium over, zonder code en zonder datum per
+  invulling, voor meetdoeleinden. De privacy-officer bevestigt dit één keer. Brief P23.3.
+- **BESLUIT-2026-11-04-9:** **Anonimiseren vóór het versturen.** Elke tool die studentwerk leest,
+  vervangt in de browser namen en andere gegevens door codes voordat er iets naar de LLM gaat; de
+  docent geeft aan wat weg moet en kijkt het na, en de browser zet de namen in het resultaat terug.
+  Brief P24, stap 24.0b.
+- **BESLUIT-2026-11-04-10:** **Het origineel naast de tekst.** Bij een geüpload PDF- of Word-document
+  ziet de docent het origineel naast de tekst die naar de AI gaat, en kan hij vanuit een citaat in het
+  resultaat naar de plek in het origineel springen. Alles blijft in de browser; het origineel wordt
+  niet opgeslagen. Brief P24, stap 24.0c.
+- **BESLUIT-2026-11-04-11:** **BDB en BKE krijgen een eigen deel van de app**, de werkplaats, dat de
+  bestaande tools mag inzetten. Uitwerking: brief P25.
+- **BESLUIT-2026-11-04-12:** **Coachen of schrijven is een keuze van de docent.** Standaard coacht de
   werkplaats. Laat de docent tekst opstellen, dan past de docent die aan en draagt de docent de
   verantwoordelijkheid. Hooguit één neutrale melding; LimeOnIt leest de docent niet de les.
-- **BESLUIT-2026-11-04-7:** **Scores van studenten worden standaard geanonimiseerd** bij het
+- **BESLUIT-2026-11-04-13:** **Scores van studenten worden standaard geanonimiseerd** bij het
   importeren; de docent kan dat uitzetten.
-- **BESLUIT-2026-11-04-8:** **Het BDB/BKE-cursusmateriaal van Bastiaan** (van een BDB-opleiding,
+- **BESLUIT-2026-11-04-14:** **Het BDB/BKE-cursusmateriaal van Bastiaan** (van een BDB-opleiding,
   2025-2026) mag gebruikt worden als achtergrond en voor evals. Niets ervan komt in de repo of de
   app (auteursrecht); privé-evaldata staat buiten de repo.
-- **BESLUIT-2026-11-04-9:** **Export naar Word mag**, ook met een nieuwe dependency (`docx`).
-- **BESLUIT-2026-11-04-10:** **Importeren uit TestVision, ANS en Remindo** hoort bij de werkplaats,
-  zodat toetsresultaten meegaan in de documentatie voor de leeruitkomsten. Uitwerking: P25.
-- **BESLUIT-2026-11-04-11:** **Het menu krijgt een vijfde item "BDB/BKE"** voor de werkplaats. Vult
+- **BESLUIT-2026-11-04-15:** **Export naar Word mag**, ook met een nieuwe dependency (`docx`).
+- **BESLUIT-2026-11-04-16:** **Importeren uit TestVision, ANS en Remindo** hoort bij de werkplaats,
+  zodat toetsresultaten meegaan in de documentatie voor de leeruitkomsten. Uitwerking: brief P25 (vervolg).
+- **BESLUIT-2026-11-04-17:** **Het menu krijgt een vijfde item "BDB/BKE"** voor de werkplaats. Vult
   BESLUIT-2026-11-04-3 aan; de andere vier items blijven.
-- **BESLUIT-2026-11-04-12:** **Eval-runs mogen geld kosten** (ongeveer €1–3 per run), voor de
+- **BESLUIT-2026-11-04-18:** **Eval-runs mogen geld kosten** (ongeveer €1–3 per run), voor de
   nulmeting en de evals van de BDB/BKE-tools.
