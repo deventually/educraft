@@ -1,11 +1,11 @@
 export const projects = {
-  subtitle: "Alles wat je met de tools hebt gemaakt.",
-  emptyTitle: "Nog geen werk bewaard",
+  delete: "Verwijderen",
+  deleteBody: "Dit resultaat wordt definitief verwijderd.",
+  deleteTitle: "Resultaat verwijderen?",
+  emptyAction: "Kies een tool",
   emptyBody:
     "Alles wat je met een tool maakt, komt hier vanzelf te staan. Je kunt het teruglezen, kopiëren, exporteren en verwijderen.",
-  emptyAction: "Kies een tool",
-  delete: "Verwijderen",
-  deleteTitle: "Resultaat verwijderen?",
-  deleteBody: "Dit resultaat wordt definitief verwijderd.",
+  emptyTitle: "Nog geen werk bewaard",
+  subtitle: "Alles wat je met de tools hebt gemaakt.",
   toastDeleted: "Resultaat verwijderd.",
 };

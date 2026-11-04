@@ -1,14 +1,14 @@
 export const help = {
+  allHelp: "Alle help",
+  fullHelp: "Hulp & voorbeelden",
   heading: "Help & documentatie",
-  intro: "Uitleg per tool en algemene onderwerpen om snel op weg te zijn.",
-  topicsSection: "Algemeen",
-  toolsSection: "Per tool",
-  whatItDoes: "Wat het doet",
-  inputsTitle: "Wat je invult",
   howToUse: "Hoe te gebruiken",
+  inputsTitle: "Wat je invult",
+  intro: "Uitleg per tool en algemene onderwerpen om snel op weg te zijn.",
   noOverlay:
     "Een uitgebreide handleiding voor deze tool volgt. Hierboven zie je wat de tool doet en welke invoer je geeft.",
   openTool: "Open deze tool",
-  fullHelp: "Hulp & voorbeelden",
-  allHelp: "Alle help",
+  toolsSection: "Per tool",
+  topicsSection: "Algemeen",
+  whatItDoes: "Wat het doet",
 };

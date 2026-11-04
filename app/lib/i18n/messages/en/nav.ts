@@ -1,16 +1,16 @@
 import type { Messages } from "../nl";
 
 export const nav: Messages["nav"] = {
-  tools: "Tools",
-  projects: "My work",
-  portfolio: "BDB/BKE",
-  help: "Help",
-  settings: "Teaching context",
   about: "About",
   admin: "Admin",
+  closeMenu: "Close menu",
+  help: "Help",
   label: "Main navigation",
   menuLabel: "Mobile navigation",
   openMenu: "Open menu",
-  closeMenu: "Close menu",
+  portfolio: "BDB/BKE",
+  projects: "My work",
+  settings: "Teaching context",
   skipToContent: "Skip to main content",
+  tools: "Tools",
 };

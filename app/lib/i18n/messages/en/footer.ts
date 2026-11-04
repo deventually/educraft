@@ -1,16 +1,16 @@
 import type { Messages } from "../nl";
 
 export const footer: Messages["footer"] = {
-  tagline: "Design evidence-based education with generative AI.",
-  product: "Product",
-  resources: "Resources",
-  legal: "Legal",
+  backToTop: "Back to top",
+  by: "David Wiley, ed.",
   cookies: "Privacy & cookies",
   disclaimer: "Disclaimer",
-  prompts: "prompts from",
-  by: "David Wiley, ed.",
-  licensed: "licensed under",
-  rights: "All rights reserved.",
-  backToTop: "Back to top",
   emailLabel: "Email",
+  legal: "Legal",
+  licensed: "licensed under",
+  product: "Product",
+  prompts: "prompts from",
+  resources: "Resources",
+  rights: "All rights reserved.",
+  tagline: "Design evidence-based education with generative AI.",
 };
