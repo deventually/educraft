@@ -2,7 +2,11 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { Button } from "./ui";
 
-type Action = { label: string; to: string } | { label: string; onClick: () => void };
+type Action =
+  | { label: string; to: string }
+  | { label: string; onClick: () => void }
+  /** A ready-made control, e.g. a button that opens a dialog. */
+  | { node: ReactNode };
 
 interface Props {
   icon?: ReactNode;
@@ -27,7 +31,9 @@ export function EmptyState({ icon, title, body, action }: Props) {
       <h2 className="font-display text-lg font-medium text-slate-900">{title}</h2>
       <p className="mt-1 max-w-md text-sm text-slate-600">{body}</p>
       <div className="mt-5">
-        {"to" in action ? (
+        {"node" in action ? (
+          action.node
+        ) : "to" in action ? (
           <Link
             to={action.to}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"

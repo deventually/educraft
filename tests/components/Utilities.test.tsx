@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import UtilitiesIndex from "~/routes/utilities._index";
@@ -68,6 +69,21 @@ describe("/utilities/rubric", () => {
     renderList([]);
     expect(await screen.findByRole("heading", { name: "Nog geen rubrics" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Nieuwe rubric" })).toHaveLength(1);
+  });
+
+  it("asks for a name before it makes a rubric", async () => {
+    const user = userEvent.setup();
+    const { container } = renderList([
+      { id: "r1", name: "Verslag", criteria: 2, maxPoints: 5, updatedAt: "2026-11-04T10:00:00Z" },
+    ]);
+    await user.click(await screen.findByRole("button", { name: "Nieuwe rubric" }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe rubric" });
+    const name = within(dialog).getByLabelText("Naam van de rubric");
+    expect(name).toBeRequired();
+    expect(name).toHaveFocus();
+    expect(name).toHaveValue("");
+    expect(within(dialog).getByRole("button", { name: "Maken" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("lists rubrics with their size", async () => {

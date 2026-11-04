@@ -101,7 +101,9 @@ export const en: Messages = {
     rubric: {
       listIntro: "Keep your rubrics here and reuse them. Only you can see them.",
       new: "New rubric",
-      newName: "New rubric",
+      newTitle: "New rubric",
+      newBody: "Give your rubric a name, for example the name of the test or assignment.",
+      create: "Create",
       emptyTitle: "No rubrics yet",
       emptyBody: "Make a rubric with criteria and levels. It saves itself while you work.",
       summary: "{criteria} criteria, at most {points} points",
