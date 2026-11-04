@@ -82,7 +82,13 @@ describe("P18.7 migration", () => {
 // 18.8
 // ---------------------------------------------------------------------------------------------
 
-const sqlOf18_8 = () => tags.slice(cut187).map(readSql).join("\n");
+// 18.8 is exactly one migration (0010). Later phases add their own migrations after it, so
+// bound the slice instead of reading "everything after 18.7".
+const sqlOf18_8 = () =>
+  tags
+    .slice(cut187, cut187 + 1)
+    .map(readSql)
+    .join("\n");
 let db8: Database.Database;
 const tableNames = () =>
   (
