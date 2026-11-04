@@ -12,6 +12,9 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const loaderData = {
   origin: "http://localhost",
   selfId: "admin-1",
+  // Default viewer: the owner (super admin). Tests for a regular admin override this.
+  isOwner: true,
+  ownerId: "admin-1",
   // A stale loader shape (with `tools`) must not make the form offer a restriction.
   tools: [
     { slug: "bloom-by-design", name: { nl: "Bloom by Design", en: "Bloom by Design" } },
@@ -62,9 +65,10 @@ const loaderData = {
 function renderRoute(
   action?: (args: { request: Request }) => unknown,
   extraUsers: (typeof loaderData.users)[number][] = [],
+  overrides: { isOwner?: boolean; ownerId?: string | null } = {},
 ) {
   const props = {
-    loaderData: { ...loaderData, users: [...loaderData.users, ...extraUsers] },
+    loaderData: { ...loaderData, ...overrides, users: [...loaderData.users, ...extraUsers] },
   } as unknown as ComponentProps<typeof AdminUsers>;
   const Stub = createRoutesStub([
     {
@@ -297,5 +301,98 @@ describe("Admin users", () => {
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin users — super admin vs regular admin (P18.6)", () => {
+  const otherAdmin = {
+    id: "admin-2",
+    name: "Admin Two",
+    email: "two@x.nl",
+    role: "admin",
+    createdAt: new Date(),
+  };
+  const asRegular = { isOwner: false, ownerId: "admin-2" };
+
+  it("shows the role select only to the owner", () => {
+    const owner = renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-1" });
+    expect(owner.container.querySelector("#role-teacher-9")).not.toBeNull();
+    expect(owner.container.querySelector("#role-admin-2")).not.toBeNull();
+    owner.unmount();
+    renderRoute(undefined, [otherAdmin], asRegular);
+    expect(screen.queryAllByRole("combobox")).toHaveLength(0);
+    // The role is still readable as text.
+    expect(screen.getAllByText(/^(beheerder|admin)$/i).length).toBeGreaterThan(0);
+  });
+
+  it("hides admin-row actions from a regular admin", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    // Only the teacher row keeps reset, delete and the e-mail field.
+    expect(screen.getAllByRole("button", { name: /verwijderen|delete/i })).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toHaveLength(1);
+    const emailFields = screen.getAllByLabelText(/e-mailadres wijzigen|change email address/i);
+    expect(emailFields).toHaveLength(1);
+    expect(emailFields[0].getAttribute("id")).toBe("email-teacher-9");
+    // The admin's address is read-only text.
+    expect(screen.getByText("two@x.nl")).toBeInTheDocument();
+  });
+
+  it("gives the owner the actions on every other row, admins included", () => {
+    renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-1" });
+    expect(screen.getAllByRole("button", { name: /verwijderen|delete/i })).toHaveLength(2);
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toHaveLength(2);
+  });
+
+  it("still lets a regular admin act on a teacher and manage teacher models", () => {
+    renderRoute(undefined, [], { isOwner: false, ownerId: null });
+    expect(screen.getByRole("button", { name: /verwijderen|delete/i })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Teacher One" })).toBeInTheDocument();
+  });
+
+  it("marks the owner with a badge, visible to a regular admin too", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    const row = screen.getByRole("row", { name: /Admin Two/ });
+    expect(within(row).getByText(/^(superbeheerder|super admin)$/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^(superbeheerder|super admin)$/i)).toHaveLength(1);
+  });
+
+  it("shows no owner badge when no owner is set", () => {
+    renderRoute(undefined, [otherAdmin], { isOwner: false, ownerId: null });
+    expect(screen.queryByText(/^(superbeheerder|super admin)$/i)).toBeNull();
+  });
+
+  it("tells a regular admin that only the super admin manages admins", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    expect(screen.getByText(/beheert ook beheerders|also manages admins/i)).toBeInTheDocument();
+  });
+
+  it("mentions in the invite intro that an invite never makes an admin", () => {
+    renderRoute(undefined, [], asRegular);
+    expect(screen.getByText(/nooit een beheerder|never makes an admin/i)).toBeTruthy();
+  });
+
+  it("shows the owner error as a toast and reverts when the server answers ownerOnly", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "ownerOnly" }));
+    const select = screen.getByLabelText(/rol wijzigen|change role/i) as HTMLSelectElement;
+    await user.selectOptions(select, "admin");
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /alleen de superbeheerder kan dit|only the super admin can do this/i,
+      ),
+    );
+    expect(select.value).toBe("teacher");
+  });
+
+  it("has no a11y violations for a regular admin and for the owner", async () => {
+    const regular = renderRoute(undefined, [otherAdmin], asRegular);
+    expect((await axe(regular.container, axeOpts)).violations).toEqual([]);
+    regular.unmount();
+    const owner = renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-2" });
+    expect((await axe(owner.container, axeOpts)).violations).toEqual([]);
   });
 });

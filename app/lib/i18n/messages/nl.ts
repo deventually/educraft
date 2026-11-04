@@ -331,6 +331,8 @@ export const nl = {
     roleTeacher: "Docent",
     roleAdmin: "Beheerder",
     dangerHeading: "Account en gegevens verwijderen",
+    ownerCannotDelete:
+      "Je bent de superbeheerder. Draag dat eerst over (npm run set-owner) voordat je je account verwijdert.",
     dangerIntro:
       "Dit verwijdert je account en al je gegevens (materialen, contextprofielen, feedback en gebruik) definitief. Dit kan niet ongedaan worden gemaakt.",
     confirmLabel: "Typ {word} om te bevestigen",
@@ -414,7 +416,7 @@ export const nl = {
     invites: {
       mintHeading: "Docent uitnodigen",
       mintIntro:
-        "Maak een uitnodigingslink voor een docent. Beheerders worden niet via uitnodigingen aangemaakt — promoveer een bestaande gebruiker hieronder.",
+        "Maak een uitnodigingslink voor een docent. Een uitnodiging maakt nooit een beheerder; een beheerder maakt alleen de superbeheerder.",
       noteLabel: "Notitie (voor wie is deze?)",
       notePlaceholder: "bijv. Jan de Vries",
       expiryLabel: "Verloopt na (dagen)",
@@ -436,7 +438,10 @@ export const nl = {
       none: "Nog geen uitnodigingen.",
       linkOnly: "Open link",
       usersHeading: "Gebruikers",
-      usersIntro: "Wijzig rollen. Je kunt jezelf niet degraderen.",
+      usersIntro:
+        "Beheerders beheren docenten. De superbeheerder beheert ook beheerders: rol wijzigen, e-mailadres, herstel-link en verwijderen. Je kunt jezelf niet degraderen.",
+      ownerBadge: "Superbeheerder",
+      ownerOnlyError: "Alleen de superbeheerder kan dit.",
       colName: "Naam",
       colEmail: "E-mail",
       colUserRole: "Rol",
@@ -445,6 +450,7 @@ export const nl = {
       roleAdmin: "Beheerder",
       changeRole: "Rol wijzigen",
       selfDemoteError: "Je kunt je eigen beheerdersrol niet wijzigen.",
+      selfEmailError: "Wijzig je eigen e-mailadres via je accountpagina.",
       you: "jij",
       userActions: "Gebruikersacties",
       editEmailLabel: "E-mailadres wijzigen",

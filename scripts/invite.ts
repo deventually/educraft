@@ -1,15 +1,15 @@
 /**
- * Ops script: mint an invite link.
+ * Ops script: mint a teacher invite link. Invites make teachers only (P18.6): an
+ * admin is made with `npm run create-admin`, or by the super admin's promotion.
  *
- *   npm run invite -- --role teacher --note "Jan de Vries" [--expires-days 14]
+ *   npm run invite -- --note "Jan de Vries" [--expires-days 14]
  *
- * Prints the absolute invite URL (using APP_ORIGIN). Phase 4 adds an admin UI
- * for this; the script stays for headless ops. Relative imports (not the `~`
+ * Prints the absolute invite URL (using APP_ORIGIN). The admin UI mints the same
+ * invites; the script stays for headless ops. Relative imports (not the `~`
  * alias) keep it runnable under plain tsx, matching db:migrate.
  */
 import { createInvite } from "../app/server/repositories/users.server";
 import { env } from "../app/server/env.server";
-import { ROLES, isRole } from "../app/lib/registry/access";
 
 function parseArgs(argv: string[]): Record<string, string> {
   const args: Record<string, string> = {};
@@ -29,14 +29,15 @@ function parseArgs(argv: string[]): Record<string, string> {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const requestedRole = args.role ?? "teacher";
 
-if (!isRole(requestedRole)) {
-  console.error(`Unknown role "${requestedRole}". Use one of: ${ROLES.join(", ")}.`);
+if (args.role !== undefined && args.role !== "teacher") {
+  console.error(
+    "Uitnodigingen maken alleen docenten. Een beheerder maak je met npm run create-admin " +
+      "of via promotie door de superbeheerder.",
+  );
   process.exit(1);
 }
 
-const role = requestedRole;
 const note = args.note ?? null;
 const expiresDays = args["expires-days"] ? Number(args["expires-days"]) : null;
 if (expiresDays !== null && (!Number.isFinite(expiresDays) || expiresDays <= 0)) {
@@ -45,8 +46,8 @@ if (expiresDays !== null && (!Number.isFinite(expiresDays) || expiresDays <= 0))
 }
 const expiresAt = expiresDays ? new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000) : null;
 
-const invite = await createInvite({ role, note, expiresAt });
+const invite = await createInvite({ role: "teacher", note, expiresAt });
 
-console.log(`✓ Invite minted (role: ${role}${note ? `, note: ${note}` : ""}).`);
+console.log(`✓ Invite minted (role: teacher${note ? `, note: ${note}` : ""}).`);
 if (expiresAt) console.log(`  Expires: ${expiresAt.toISOString()}`);
 console.log(`${env.APP_ORIGIN}/invite/${invite.token}`);

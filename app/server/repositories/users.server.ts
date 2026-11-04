@@ -4,7 +4,7 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   chatSessions,
@@ -21,7 +21,7 @@ import {
   type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
-import { ROLES, type Role } from "~/lib/registry/access";
+import type { Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
   /** Optional explicit id so an invite can claim it atomically before creation. */
@@ -52,9 +52,23 @@ export async function listUsers(): Promise<UserRow[]> {
   return getDb().select().from(users).orderBy(desc(users.createdAt)).all();
 }
 
-/** Change a user's role (admin console). The self-demotion guard lives in the route. */
+/**
+ * Change a user's role (admin console). The self-demotion guard lives in the route.
+ * A role change also voids the user's open reset links (P18.6): a link a regular
+ * admin minted while the user was a teacher must not open the account once it is
+ * an admin.
+ */
 export async function setUserRole(id: string, role: Role): Promise<void> {
-  getDb().update(users).set({ role }).where(eq(users.id, id)).run();
+  getDb().transaction((tx) => {
+    const changed = tx
+      .update(users)
+      .set({ role })
+      .where(and(eq(users.id, id), ne(users.role, role)))
+      .run();
+    if (changed.changes > 0) {
+      tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+    }
+  });
 }
 
 /**
@@ -232,7 +246,8 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
       and(
         eq(invites.token, token),
         isNull(invites.usedByUserId),
-        inArray(invites.role, [...ROLES]),
+        // Invites make teachers only (P18.6); an admin or retired-role invite never redeems.
+        eq(invites.role, "teacher"),
       ),
     )
     .run();

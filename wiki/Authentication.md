@@ -31,13 +31,42 @@ the home loader (list filter), the tool loader (404), and the `/api/stream` acti
 There is **no public sign-up**. An operator mints an invite:
 
 ```bash
-npm run invite -- --role teacher --note "Jan de Vries" [--expires-days 14]
+npm run invite -- --note "Jan de Vries" [--expires-days 14]
 ```
 
 This prints `${APP_ORIGIN}/invite/<token>`. The recipient opens it, sets a name
 (optional email) and a password (min 10 chars), and lands signed in. Invites are
 **single-use** (claimed atomically) and honour an optional expiry. P4 adds an admin
 UI for this; the script stays for headless ops.
+
+## Superbeheerder (owner, P18.6)
+
+One admin is the **super admin** (code: *owner*). It is not a third role but one key in
+`instance_settings` (`ownerUserId`); `isOwner(user)` in
+[`auth.server.ts`](../app/server/auth.server.ts) is "role is `admin` **and** the stored id
+matches". Set or hand over with:
+
+```bash
+npm run set-owner -- --email <e-mail of an existing admin>
+```
+
+The script refuses an unknown e-mail or a non-admin. The key is read per request, so the app
+can keep running. Until it has run there is **no owner** and nobody can change a role.
+
+| On `/admin/users` | Admin | Super admin |
+|---|---|---|
+| Invite a teacher, revoke an invite, models per teacher | yes | yes |
+| E-mail, reset link, delete — on a **teacher** | yes | yes |
+| E-mail, reset link, delete — on an **admin** | no | yes |
+| Change a role (teacher ↔ admin) | no | yes |
+| Anything on their own account | no (use `/account`) | no (use `/account`) |
+
+Every refusal is made in the action (`{ error: "ownerOnly" }`); the page only hides the
+controls and marks the owner with a badge. **Invites never make admins**: `/invite/:token` and
+`consumeInvite` redeem teacher invites only, and `npm run invite` has no `--role`. The owner
+cannot delete their own account on `/account` until ownership is handed over.
+A role change voids the user's open reset links (`setUserRole`), so a link a regular admin
+minted for a teacher never opens that account once it is an admin.
 
 ## Sessions & passwords
 

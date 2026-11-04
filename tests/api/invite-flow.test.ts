@@ -154,6 +154,55 @@ describe("invite flow — legacy invites (P17)", () => {
   });
 });
 
+describe("invite flow — never an admin (P18.6)", () => {
+  it("an admin invite is invalid and creates no account", async () => {
+    const { getDb } = await import("~/server/db.server");
+    const { invites } = await import("~/server/schema.server");
+    const token = "admin-invite-token";
+    getDb()
+      .insert(invites)
+      .values({
+        token,
+        role: "admin",
+        expiresAt: new Date(Date.now() + 86_400_000),
+        createdAt: new Date(),
+      })
+      .run();
+    const data = await route.loader({
+      params: { token },
+      request: new Request(`http://localhost/invite/${token}`),
+    } as LoaderArgs);
+    expect(data.valid).toBe(false);
+    const res = await route.action({
+      params: { token },
+      request: formRequest({
+        name: "Sneaky",
+        email: "sneaky@example.com",
+        password: "supersecret10",
+        confirm: "supersecret10",
+      }),
+    } as ActionArgs);
+    expect(res instanceof Response && res.status === 302).toBe(false);
+    expect(await users.getUserByEmail("sneaky@example.com")).toBeNull();
+    expect((await users.getInvite(token))?.usedByUserId ?? null).toBeNull();
+  });
+
+  it("a redeemed teacher invite always creates a teacher, whatever the form posts", async () => {
+    const invite = await users.createInvite({ role: "teacher" });
+    await route.action({
+      params: { token: invite.token },
+      request: formRequest({
+        name: "Role Poster",
+        email: "roleposter@example.com",
+        password: "supersecret10",
+        confirm: "supersecret10",
+        role: "admin",
+      }),
+    } as ActionArgs);
+    expect((await users.getUserByEmail("roleposter@example.com"))?.role).toBe("teacher");
+  });
+});
+
 describe("invite flow — legacy tool list (P18.2)", () => {
   it("a legacy invite with a tool list creates an unrestricted teacher", async () => {
     // Pre-P18 invites may still carry a tool list; the setter is gone, so insert directly.
