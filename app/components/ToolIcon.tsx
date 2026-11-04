@@ -13,6 +13,8 @@ import {
   Users,
   UsersRound,
   Wrench,
+  Calculator,
+  Table2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -31,6 +33,8 @@ const ICONS: Record<string, LucideIcon> = {
   "book-open": BookOpen,
   users: Users,
   "users-round": UsersRound,
+  calculator: Calculator,
+  table: Table2,
 };
 
 export function ToolIcon({ name, className }: { name?: string; className?: string }) {

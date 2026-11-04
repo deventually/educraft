@@ -7,6 +7,9 @@ export default [
     // The tool catalogue lives at /tools (home.tsx); individual tools at /tools/:slug.
     route("tools", "routes/home.tsx"),
     route("tools/:slug", "routes/tool.tsx"),
+    // Utilities without AI (P23): own small registry, found via a section on /tools (no menu item).
+    route("utilities", "routes/utilities._index.tsx"),
+    route("utilities/:slug", "routes/utilities.$slug.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("context-profiles", "routes/context-profiles.tsx"),
