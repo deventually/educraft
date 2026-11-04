@@ -139,3 +139,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   vervangt in de browser namen en andere gegevens door codes voordat er iets naar de LLM gaat; de
   docent geeft aan wat weg moet en kijkt het na, en de browser zet de namen in het resultaat terug.
   Brief P24, stap 24.0b.
+- **BESLUIT-2026-11-04-10:** **Het origineel naast de tekst.** Bij een geüpload PDF- of Word-document
+  ziet de docent het origineel naast de tekst die naar de AI gaat, en kan hij vanuit een citaat in het
+  resultaat naar de plek in het origineel springen. Alles blijft in de browser; het origineel wordt
+  niet opgeslagen. Brief P24, stap 24.0c.

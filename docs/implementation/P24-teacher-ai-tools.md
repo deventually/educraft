@@ -5,7 +5,7 @@
 > Elke deelfase is **één PR met één doel**. **24.0 komt eerst**: zonder nulmeting wordt geen prompt
 > geschreven of gewijzigd. Poort per PR: `npm test && npm run typecheck && npm run check`, plus de
 > kwaliteitspoort hieronder. Branch vanaf `main`. Merge nooit zelf; alleen Bastiaan merget.
-> **Hangt af van:** 24.0 voor alles; 24.1 ook van 24.0b; 24.5 ook van P23.1 (het register voor
+> **Hangt af van:** 24.0 voor alles; 24.1 ook van 24.0b en 24.0c; 24.5 ook van P23.1 (het register voor
 > hulpmiddelen).
 
 ## Context en doel
@@ -99,6 +99,47 @@ Bastiaan: namen mogen niet naar de LLM (BESLUIT-2026-11-04-9). Eén gedeelde sta
   vervanging binnen een ander woord, terugzetten geeft de oorspronkelijke tekst);
   `tests/components/RedactReview.test.tsx` (markeringen, bijselecteren, axe = 0); een test dat bij een
   veld met `redact: true` het verzoek naar `/api/stream` geen enkele opgegeven naam bevat.
+
+## 24.0c — Het origineel naast de tekst (documentviewer)
+
+Bastiaan: *"Nu wordt het omgezet in tekst, maar ik wil ook nog het origineel ernaast kunnen houden.
+Zoiets als een document viewer van zowel de geuploade Word and PDF documenten"*
+(BESLUIT-2026-11-04-10).
+
+- **Wat:** bij een veld met `kind: "document"` ziet de docent na het uploaden twee panelen naast
+  elkaar: links het **origineel** (PDF of Word), rechts de **tekst die naar de AI gaat**, met de
+  markeringen van het anonimiseren (24.0b). Op mobiel twee tabbladen ("Origineel" / "Wat de AI
+  krijgt"). Bij meerdere bestanden (portfolio) een kiezer per bestand. Tijdens en na het beoordelen
+  blijft het origineel naast het resultaat open.
+- **Alles in de browser.** Het origineel wordt niet naar de server gestuurd en niet opgeslagen
+  (consistent met 24.0b). Een oude generatie later openen toont dus geen origineel; de docent kan
+  het bestand opnieuw kiezen. Dat staat eerlijk in de UI.
+- **PDF:** render de pagina's met de pdf.js-laag die `unpdf` al meebrengt (canvas per pagina, lazy,
+  met paginanummers), zodat de vindplaatsen in het resultaat ("p. 12") te volgen zijn. Valt dat
+  tegen, dan als terugval de ingebouwde PDF-weergave van de browser via een `blob:`-URL in een
+  `<iframe>` met een titel. **Geen nieuwe dependency** zonder Bastiaans akkoord.
+- **Word (DOCX):** `mammoth` (al aanwezig) zet het document om naar HTML met koppen, lijsten, tabellen
+  en afbeeldingen. Die HTML gaat **niet** via `dangerouslySetInnerHTML`: parse hem met `DOMParser` en
+  bouw React-elementen uit een allow-list van tags (`h1–h6, p, ul, ol, li, table, thead, tbody, tr,
+  th, td, strong, em, a, img, br`), zonder attributen behalve `href` (alleen `http(s)`, met
+  `rel="noopener noreferrer"`) en `src` voor `data:`-afbeeldingen. Opmaak als kleur en lettertype
+  gaat verloren; dat is een Word-weergave, geen exacte kopie, en de UI zegt dat.
+- **Zoeken en springen:** een zoekveld boven het origineel. Een citaat in het resultaat krijgt een
+  knop "Toon in document" die de tekst in het origineel zoekt en markeert (PDF: naar de pagina;
+  Word: scrollen en markeren). Lukt de match niet precies (andere witruimte, afbreekstreepjes), dan
+  zegt de knop dat in plaats van iets fout te markeren.
+- **Toegankelijk:** elk paneel is een `region` met een naam; de PDF-pagina's hebben een tekstalternatief
+  (de uitgehaalde tekst van die pagina); toetsenbord: tab naar de panelen, zoeken met Enter.
+- **Deep module:** één component `DocumentViewer` (`app/components/documents/`) met een smalle
+  interface `{ file: File; highlights?: string[]; onLocate?: … }`; `DynamicForm` en het resultaat
+  gebruiken hem voor elk `document`-veld, geen `if` per tool.
+- **Testplan (RED):** `tests/documents/docxToReact.test.ts` (allow-list: `<script>`, `onclick`,
+  `javascript:`-links en externe `src` verdwijnen; koppen, lijsten en tabellen blijven);
+  `tests/documents/locate.test.ts` (citaat vinden ondanks witruimte en afbreekstreepjes; geen
+  valse treffer); `tests/components/DocumentViewer.test.tsx` met de fixtures uit
+  `tests/fixtures/generate.mjs` (PDF en DOCX renderen, tabbladen op smal scherm, zoeken markeert,
+  "Toon in document" werkt, axe = 0); een test dat het uploaden van een document **geen
+  netwerkverzoek** met het bestand doet.
 
 ## 24.1 — Feedback op studentwerk (Stage Assessment breder)
 
@@ -213,7 +254,7 @@ Elke koppeling komt pas als beide kanten gemerged zijn, als kleine eigen PR.
 
 ## Volgorde
 
-24.0 → 24.0b → 24.1 → 24.2 → 24.3 → 24.4 → 24.5 (na P23.1) → 24.6 → 24.7 → 24.8. Hooguit twee werkers
+24.0 → 24.0b → 24.0c → 24.1 → 24.2 → 24.3 → 24.4 → 24.5 (na P23.1) → 24.6 → 24.7 → 24.8. Hooguit twee werkers
 tegelijk (WIP-limiet). 24.1 en 24.2 eerst, omdat ze samen met P23 de beoordelingsketen sluiten.
 
 ## Buiten bereik
