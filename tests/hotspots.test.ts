@@ -34,7 +34,9 @@ describe("i18n messages: one file per namespace", () => {
 });
 
 describe("routes: one file per area", () => {
-  const areas = readdirSync(resolve(root, "app/routing")).filter((f) => f.endsWith(".ts") && f !== "types.ts");
+  const areas = readdirSync(resolve(root, "app/routing")).filter(
+    (f) => f.endsWith(".ts") && f !== "types.ts",
+  );
 
   it("routes.ts registers no routes of its own beyond the shell and its index", () => {
     const src = read("app/routes.ts");
@@ -60,7 +62,11 @@ describe("routes: one file per area", () => {
         { path: "/projects", file: "routes/projects._index.tsx", inShell: true },
         { path: "/portfolio", file: "routes/portfolio._index.tsx", inShell: true },
         { path: "/portfolio/:id", file: "routes/portfolio.$id.tsx", inShell: true },
-        { path: "/portfolio/:id/framework", file: "routes/portfolio.$id.framework.tsx", inShell: true },
+        {
+          path: "/portfolio/:id/framework",
+          file: "routes/portfolio.$id.framework.tsx",
+          inShell: true,
+        },
         {
           path: "/portfolio/:id/outcome/:outcomeId",
           file: "routes/portfolio.$id.outcome.$outcomeId.tsx",
@@ -98,6 +104,7 @@ describe("routes: one file per area", () => {
   });
 
   it("every registered route file exists", () => {
-    for (const r of flatRoutes()) expect(existsSync(resolve(root, "app", r.file)), r.file).toBe(true);
+    for (const r of flatRoutes())
+      expect(existsSync(resolve(root, "app", r.file)), r.file).toBe(true);
   });
 });

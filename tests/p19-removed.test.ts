@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { routeTable } from "./helpers/routes";
@@ -6,7 +6,6 @@ import { en } from "~/lib/i18n/messages/en";
 import { nl } from "~/lib/i18n/messages/nl";
 
 const root = resolve(__dirname, "..");
-const read = (p: string) => readFileSync(resolve(root, p), "utf8");
 
 describe("P19.5 — menu with four items, no contact page", () => {
   it("the route table registers no contact page", () => {
