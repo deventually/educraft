@@ -21,7 +21,6 @@ export default [
       route("usage", "routes/admin.usage.tsx"),
     ]),
     route("about", "routes/about.tsx"),
-    route("contact", "routes/contact.tsx"),
     route("cookies", "routes/cookies.tsx"),
     route("legal", "routes/legal.tsx"),
   ]),

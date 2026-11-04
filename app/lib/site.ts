@@ -3,7 +3,7 @@
  * with the real organisation details before launch.
  */
 export const SITE = {
-  /** Public contact address surfaced on the Contact page and footer. */
+  /** Public contact address surfaced in the footer. */
   contactEmail: "hello@limeonit.app",
   /** Copyright year shown in the footer. */
   year: 2026,

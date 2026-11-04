@@ -22,7 +22,7 @@ export const nl = {
   },
   nav: {
     tools: "Tools",
-    projects: "Projecten",
+    projects: "Mijn werk",
     help: "Help",
     settings: "Onderwijscontext",
     about: "Over",
@@ -37,7 +37,6 @@ export const nl = {
     heading: "Kies een tool",
     intro:
       "Elke tool zet een evidence-based onderwijsmethode uit The Pedagogical Promptbook om in een werkende tool. Ontworpen voor het hbo.",
-    comingSoon: "Binnenkort",
     search: "Zoek op naam, methode of taak…",
     resultCount: "{count} tools",
     resultCountOne: "{count} tool",
@@ -212,7 +211,6 @@ export const nl = {
     product: "Product",
     resources: "Bronnen",
     legal: "Juridisch",
-    contact: "Contact",
     cookies: "Privacy & cookies",
     disclaimer: "Disclaimer",
     prompts: "prompts uit",
@@ -223,12 +221,6 @@ export const nl = {
     emailLabel: "E-mail",
   },
   pages: {
-    contact: {
-      heading: "Contact",
-      intro: "Vragen, feedback of interesse in samenwerking? We horen graag van je.",
-      emailLabel: "E-mail",
-      placeholder: "Deze pagina wordt nog verder ingevuld.",
-    },
     cookies: {
       heading: "Privacy & cookies",
       intro: "Hoe LimeOnIt omgaat met je gegevens en welke cookies we gebruiken.",
@@ -241,7 +233,7 @@ export const nl = {
     },
   },
   projects: {
-    subtitle: "Je recent gegenereerde materialen.",
+    subtitle: "Alles wat je met de tools hebt gemaakt.",
     emptyTitle: "Nog geen werk bewaard",
     emptyBody:
       "Alles wat je met een tool maakt, komt hier vanzelf te staan. Je kunt het teruglezen, kopiëren, exporteren en verwijderen.",

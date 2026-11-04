@@ -26,6 +26,12 @@ function renderProjects(generations: (typeof gen)[]) {
 }
 
 describe("Projects page", () => {
+  it("is titled 'Mijn werk'", () => {
+    renderProjects([gen]);
+    expect(screen.getByRole("heading", { level: 1, name: "Mijn werk" })).toBeInTheDocument();
+    expect(screen.getByText("Alles wat je met de tools hebt gemaakt.")).toBeInTheDocument();
+  });
+
   it("renders a delete control for each generation", () => {
     renderProjects([gen]);
     expect(screen.getByRole("button", { name: /verwijder|delete/i })).toBeInTheDocument();

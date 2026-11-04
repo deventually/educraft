@@ -5,7 +5,7 @@ LimeOnIt turns evidence-based teaching methods from *The Pedagogical Promptbook*
 1. **Choose a tool.** The start page lists every tool by goal. Search for what you want to do, for example *rubric* or *motivation*.
 2. **Set your teaching context.** Under **Teaching context**, create a profile (programme, course, level, professional field). That profile is woven into every prompt automatically, so the result fits *your* teaching. See [Setting your teaching context](/help/context-profiles).
 3. **Generate or start a conversation.** One-shot tools you fill in and generate in one pass. Chat tools hold a conversation with you: start from a suggestion or type your own message. The model and other technical options are under **Advanced**.
-4. **Save and reuse.** Results appear under **Projects**, where you can re-read, copy, export, and delete them.
+4. **Save and reuse.** Results appear under **My work**, where you can re-read, copy, export, and delete them.
 
 ## Tips
 

@@ -21,13 +21,13 @@ function renderShell(initialPath = "/") {
 }
 
 /** Render the shell with a signed-in user via a `root` loader (async hydration). */
-function renderShellWithUser(user: { name: string; role: string }) {
+function renderShellWithUser(user: { name: string; role: string }, locale: "nl" | "en" = "nl") {
   const Stub = createRoutesStub([
     {
       id: "root",
       path: "/",
       Component: AppShell,
-      loader: () => ({ locale: "nl", user }),
+      loader: () => ({ locale, user }),
       children: [{ index: true, Component: () => <p>Tools home</p> }],
     },
   ]);
@@ -140,6 +140,57 @@ describe("AppShell top navigation", () => {
   });
 });
 
+describe("AppShell menu (P19.5)", () => {
+  const FOUR = ["Tools", "Mijn werk", "Onderwijscontext", "Help"];
+  const HREFS = ["/tools", "/projects", "/context-profiles", "/help"];
+
+  it("shows exactly four menu items in order for a teacher", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    const links = within(primary).getAllByRole("link");
+    expect(links.map((l) => l.textContent)).toEqual(FOUR);
+    expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
+  });
+
+  it("shows the same four items in the mobile menu", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
+    const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
+    const links = within(mobile).getAllByRole("link");
+    expect(links.map((l) => l.textContent)).toEqual(FOUR);
+    expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
+  });
+
+  it("keeps Over in the footer, not in the menu", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    expect(within(primary).queryByRole("link", { name: "Over" })).toBeNull();
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("link", { name: "Over" })).toHaveAttribute("href", "/about");
+  });
+
+  it("renders the menu in English", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher" }, "en");
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Main navigation" });
+    expect(
+      within(primary)
+        .getAllByRole("link")
+        .map((l) => l.textContent),
+    ).toEqual(["Tools", "My work", "Teaching context", "Help"]);
+  });
+
+  it("has no a11y violations with the mobile menu open", async () => {
+    const { container } = renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
 describe("AppShell teaching-context visibility by role", () => {
   it("shows no Cohorten link for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher" });
@@ -184,12 +235,19 @@ describe("AppShell admin surface & role switch", () => {
     expect(screen.getAllByRole("link", { name: "Beheer" }).length).toBeGreaterThan(0);
   });
 
-  it("places the admin link first in the main navigation for an admin", async () => {
+  it("adds Beheer first for an admin", async () => {
     renderShellWithUser({ name: "Admin A", role: "admin" });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     const links = within(primary).getAllByRole("link");
-    expect(links[0]).toHaveAccessibleName("Beheer");
+    expect(links.map((l) => l.textContent)).toEqual([
+      "Beheer",
+      "Tools",
+      "Mijn werk",
+      "Onderwijscontext",
+      "Help",
+    ]);
+    expect(links[0]).toHaveAttribute("href", "/admin");
   });
 
   it("hides the admin nav link for a teacher", async () => {
@@ -269,5 +327,10 @@ describe("AppShell footer extras", () => {
     const footer = screen.getByRole("contentinfo");
     const mail = within(footer).getByRole("link", { name: /@/ });
     expect(mail.getAttribute("href")).toMatch(/^mailto:/);
+  });
+
+  it("has no link to a contact page", () => {
+    renderShell();
+    expect(document.querySelector('a[href="/contact"]')).toBeNull();
   });
 });

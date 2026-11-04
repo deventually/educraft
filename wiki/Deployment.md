@@ -52,7 +52,7 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
    chattranscripten vóór `0010`): verwijder hem na een korte, door de beheerder gekozen termijn.
 5. Deploy (of start de app weer). Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten
    en beheerders, en voor `0010` hetzelfde aantal `generations`. Een docent logt in en ziet zijn
-   werk in Projecten.
+   het resultaat onder Mijn werk.
 6. Terugdraaien = de app stoppen, de back-up terugzetten op het volume en de vorige image deployen.
 
 ## Environment checklist
@@ -105,7 +105,7 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
 2. Log in with a seeded invite (`npm run invite` locally to mint one; see
    [`Authentication.md`](Authentication.md)).
 3. Generate with a cheap model (e.g. Haiku) → tokens stream into the result.
-4. Open **Projects** → the generation was saved.
+4. Open **My work** → the generation was saved.
 5. Rate a generation 👍/👎 with a comment → it lands on `/admin/usage`
    (as an admin).
 6. Set `DAILY_REQUEST_LIMIT=1`, restart, generate twice → the 2nd trips the
