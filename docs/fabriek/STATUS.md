@@ -80,7 +80,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - P24.2 Beoordelingsmodel maken (`rubric-builder`): uit leeruitkomst en opdracht een concept-rubric
   met waarneembare niveaus, punten, cesuur en knock-out, plus een zelfcheck; een geplakte rubric
   wordt eerst gecontroleerd. Bronnen: Brookhart (2013), Anderson & Krathwohl (2001). Zes
-  eval-casussen, drie met een bekende fout — PR open, meting volgt.
+  eval-casussen, drie met een bekende fout. Metingen m → n → o: elke case 4,60–4,87, geen gefaalde
+  harde check, geen regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet) — PR open.
 
 ## Wacht op jou
 
