@@ -74,10 +74,11 @@ minted for a teacher never opens that account once it is an admin.
 - Cookie sessions via React Router's `createCookieSessionStorage`
   ([`session.server.ts`](../app/server/session.server.ts)). The cookie stores
   `{ userId, sessionVersion }`; the **role is read fresh from the DB on every
-  request**, so a role change takes effect without re-login.
+  request**; a real role change additionally logs that user out everywhere (P18.9).
 - **Several devices at once, one switch to sign them all out.** Logging in never
   invalidates other sessions (laptop and phone can both be signed in). Only a new
-  password (`updateUserPassword`) or a deactivation (`setUserDisabled`) bumps
+  password (`updateUserPassword`), a deactivation (`setUserDisabled`) or a real role change
+  (`setUserRole`) bumps
   `users.sessionVersion`; `getUser` rejects any cookie with an older version, and the
   device that changed its own password gets a fresh cookie so it stays signed in.
 - Passwords hashed with Node's built-in `scrypt`

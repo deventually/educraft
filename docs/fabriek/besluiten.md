@@ -102,3 +102,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-03-18:** **Toolnamen: taak eerst, boeknaam als ondertitel (V3).** Elke tool heet
   naar wat de docent wil doen (bijvoorbeeld 'Stageverslag of afstudeerwerk beoordelen'); de naam uit
   het boek of de techniek staat klein eronder (`Tool.subtitle`). Slugs, ids en prompts blijven gelijk.
+- **BESLUIT-2026-11-04-1:** Wie beheerder wordt (of weer docent), wordt **overal uitgelogd** en moet
+  opnieuw inloggen. Een bestaande docentsessie mag niet stilletjes een beheerderssessie worden
+  (beveiligingsreview 18.6). Dezelfde rol opnieuw instellen doet niets.
