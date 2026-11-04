@@ -76,8 +76,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   };
 }
 
-export function meta({ data, matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+export function meta({ loaderData: data, matches }: Route.MetaArgs) {
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   const locale = root?.locale ?? DEFAULT_LOCALE;
   return [{ title: data ? `${loc(data.tool.name, locale)} — LimeOnIt` : "LimeOnIt" }];
 }

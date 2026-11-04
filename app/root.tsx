@@ -37,7 +37,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ loaderData: data }: Route.MetaArgs) {
   const m = getMessages(data?.locale);
   return [{ title: m.meta.homeTitle }, { name: "description", content: m.meta.description }];
 }

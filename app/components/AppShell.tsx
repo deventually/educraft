@@ -53,7 +53,7 @@ export default function AppShell() {
   const isChatRoute =
     location.pathname.startsWith("/tools/") &&
     matches.some(
-      (m) => (m.data as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
+      (m) => (m.loaderData as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
     );
 
   const nav: NavItem[] = [
