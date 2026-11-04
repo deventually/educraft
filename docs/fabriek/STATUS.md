@@ -53,9 +53,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- P24.0c (documentviewer): het origineel (PDF of Word) naast de tekst die naar de AI gaat, zoeken
-  en "Toon in document" vanuit een citaat; alles in de browser — PR open. Daarna 24.0b
-  (anonimiseren) en, na de nulmeting, 24.1 (Stage Assessment breder).
+- P24.0b (anonimiseren vóór het versturen): namen en gegevens worden in de browser door codes
+  vervangen, de docent kijkt het na, en de namen komen terug in het resultaat — PR open. De
+  promptregel over codes komt met 24.1 (`@v2`), na de nulmeting.
 - Eval-rapport portfoliocoach van 2026-11-04 (7 van 7 geslaagd) toegevoegd aan `evals/reports/` — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
@@ -99,6 +99,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
    PR's, daarna Word-export, kader-extractie en de BKE-onderdelen met de tools uit P23 en P24.
 
 ## Open vragen
+
+- De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
 
 - Volgorde: eerst de hele vereenvoudiging, of na V1 al cursussen?
 

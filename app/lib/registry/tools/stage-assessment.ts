@@ -76,6 +76,7 @@ export const stageAssessment: Tool = {
   inputs: [
     {
       name: "document",
+      redact: true,
       label: { nl: "Te beoordelen document", en: "Document to assess" },
       kind: "document",
       required: true,
@@ -213,6 +214,7 @@ export const stageAssessment: Tool = {
     },
     {
       name: "companyEvaluation",
+      redact: true,
       label: {
         nl: "Evaluatie bedrijfsbegeleider (optioneel)",
         en: "Company mentor evaluation (optional)",

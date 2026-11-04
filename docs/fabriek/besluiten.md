@@ -165,3 +165,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   (`producer.md`, *Na elke merge*). Om conflicten te voorkomen zijn de schermteksten en de routes
   opgesplitst in één bestand per onderdeel (`app/lib/i18n/messages/{nl,en}/<onderdeel>.ts`,
   `app/routing/<onderdeel>.ts`). Squash-mergen mag; vervolgwerk start dan op een verse branch.
+- **BESLUIT-2026-11-04-20:** **Namen bij anonimiseren alleen in het geheugen van de pagina.** Wat de
+  docent invult om te anonimiseren (24.0b) staat niet in de browseropslag; na herladen is het weg en
+  vult de docent het opnieuw in. De privacy-officer kijkt later mee; tot dan staan de grenzen eerlijk
+  in de UI. Bastiaan, 2026-11-04.
