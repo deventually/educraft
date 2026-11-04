@@ -52,7 +52,7 @@ De stam:
 
 De opties:
 
-- **Precies één goed antwoord.** Elke afleider is zonder twijfel fout volgens de leerstof, ook voor een deskundige. Een afleider is ook niet te verdedigen vanuit een andere gangbare opvatting in het vak of vanuit een strengere lezing van de leerstof. Kan dat wel, herschrijf dan de stam zo dat de leerstof beslist, of kies een andere afleider. Opties overlappen niet, en geen optie is een deel van een andere.
+- **Precies één goed antwoord.** Elke afleider is zonder twijfel fout volgens de leerstof, ook voor een deskundige. Een afleider is ook niet te verdedigen vanuit een andere gangbare opvatting in het vak of vanuit een strengere lezing van de leerstof. Kan dat wel, herschrijf dan de stam zo dat de leerstof beslist, of kies een andere afleider. Stel geen meerkeuzevraag over een kwestie waarover vakmensen het oneens zijn (bijvoorbeeld of een ontwerp zonder loting een causale vraag kan beantwoorden); vraag dan naar iets wat eenduidig uit de leerstof volgt, zoals wat een ontwerpkeuze wel en niet uitsluit. Een strenge, principiële stelling die sommige vakmensen verdedigen, is nooit een afleider. Opties overlappen niet, en geen optie is een deel van een andere.
 - Gebruik vier opties (A tot en met D), tenzij je geen drie aannemelijke afleiders kunt bedenken; gebruik dan drie opties. Nooit een opvuloptie.
 - **Aannemelijke afleiders.** Elke afleider is een fout die studenten echt maken: een veelvoorkomende misvatting, een rekenfout of een verwisseling van begrippen. Een afleider is nooit belachelijk of grappig.
 - **Geen aanwijzing naar het goede antwoord** in de stam of de opties: het goede antwoord is niet het langste of het meest precieze, herhaalt geen opvallend woord uit de stam, en past grammaticaal niet beter bij de stam dan de afleiders. Vermijd absolute woorden als "altijd" en "nooit" in de opties.
@@ -69,13 +69,13 @@ De opties:
 
 Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde.
 
-Lever alleen de eindversie. Zie je tijdens het schrijven of in de zelfcheck een fout, herschrijf dan de vraag zelf: geen notities over correcties in de vragen of het antwoordmodel, geen tweede versie van een vraag, en niets na de slotzin.
+Lever alleen de eindversie, ook in de kopjes: geen pijltjes of correctiesporen. Zie je tijdens het schrijven of in de zelfcheck een fout, herschrijf dan de vraag zelf: geen notities over correcties in de vragen of het antwoordmodel, geen tweede versie van een vraag, en niets na de slotzin.
 
 - **Vragen**: alle vragen, klaar voor studenten, zonder antwoorden. Per vraag een kopje "### Vraag n (n pt)", dan de stam, en bij meerkeuze de opties als "A. …", "B. …" enzovoort, elk op een eigen regel.
-- **Antwoordmodel**: per vraag een kopje "### Vraag n — Rij Rx, denkniveau", daarna:
+- **Antwoordmodel**: per vraag een kopje "### Vraag n — Rij Rx, denkniveau", met één rij en één denkniveau, zonder pijltjes of correctiesporen, daarna:
   - bij meerkeuze: "**Goed antwoord:** letter", met één zin waarom het goed is, en per afleider "**A:** waarom fout, en welke fout of misvatting de afleider vangt";
   - bij een open vraag: het antwoordmodel met de punten per onderdeel, en de andere antwoorden die ook goed zijn.
-- **Controle tegen de matrijs**: één Markdown-tabel `| Rij | Gepland | Geschreven | Vragen |`, met per rij het aantal vragen uit de matrijs, het aantal dat je schreef en de vraagnummers, en een regel "Totaal" met het totaal aantal vragen en punten. Zet eronder hoe vaak A, B, C en D het goede antwoord zijn, en meld hier een fout in de matrijs als je die zag.
+- **Controle tegen de matrijs**: één Markdown-tabel `| Rij | Gepland | Geschreven | Vragen |`, met per rij het aantal vragen uit de matrijs, het aantal dat je schreef en de vraagnummers, en een regel "Totaal" met het totaal aantal vragen en punten. Heeft de toets meerkeuzevragen, zet er dan onder hoe vaak A, B, C en D het goede antwoord zijn, en meld hier een fout in de matrijs als je die zag.
 - **Zelfcheck**: beantwoord kort, elk met één zin uitleg: Heeft elke meerkeuzevraag precies één goed antwoord? Staat er nergens een aanwijzing naar het goede antwoord? Zijn alle afleiders aannemelijk? Toetst elke vraag het denkniveau van zijn rij? Volgt alles uit de leerstof? Geeft een vraag het antwoord op een andere? Vind je een probleem, pas dan eerst de vraag aan; de zelfcheck beschrijft het eindresultaat.
 
 Sluit af met precies deze zin: "Dit is een concept. De docent stelt de toets vast."

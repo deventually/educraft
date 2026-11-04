@@ -86,7 +86,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
   Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
   bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
-  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte — PR open.
+  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte:
+  r2 (1 run) niets afgekapt, nog één dubbel verdedigbare vraag; ronde 2 verbiedt meerkeuze over
+  kwesties waarover vakmensen het oneens zijn — PR open.
 
 ## Wacht op jou
 

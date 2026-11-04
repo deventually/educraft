@@ -104,6 +104,9 @@ describe("tool: test-items", () => {
     expect(p).toContain("alleen de eindversie");
     expect(p).toContain("geen tweede versie");
     expect(p).toContain("andere gangbare opvatting");
+    // Meting r2: a distractor that states a strict methodological position stayed defensible.
+    expect(p).toContain("waarover vakmensen het oneens zijn");
+    expect(p).toContain("geen pijltjes");
   });
 
   it("asks for one clean final version and only one defensible answer (en)", () => {
@@ -112,6 +115,8 @@ describe("tool: test-items", () => {
     expect(p).toContain("only the final version");
     expect(p).toContain("no second version");
     expect(p).toContain("other common view");
+    expect(p).toContain("on which experts disagree");
+    expect(p).toContain("no arrows");
   });
 
   for (const stage of ["blueprint", "items"] as const) {
