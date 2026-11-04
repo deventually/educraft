@@ -45,4 +45,16 @@ describe("Projects page", () => {
     renderProjects([]);
     expect(screen.queryByRole("button", { name: /verwijder|delete/i })).toBeNull();
   });
+
+  it("guides an empty page to the tools", () => {
+    renderProjects([]);
+    expect(screen.getByRole("heading", { level: 2, name: "Nog geen werk bewaard" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Kies een tool" })).toHaveAttribute("href", "/tools");
+  });
+
+  it("has no a11y violations on the empty page", async () => {
+    const { container } = renderProjects([]);
+    const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
+    expect(results.violations).toEqual([]);
+  });
 });

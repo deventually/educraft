@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { axe } from "vitest-axe";
 
 // ToolControls only reads useT(); mock it (the GeneratorView pattern) and use the
@@ -19,6 +20,8 @@ vi.mock("~/lib/i18n/useT", () => ({
       english: "English",
       model: "Model",
       advanced: "Advanced",
+      noProfileHint: "No teaching context yet.",
+      noProfileAction: "Set up teaching context",
     },
   }),
 }));
@@ -36,17 +39,19 @@ function renderControls(overrides: Partial<ComponentProps<typeof ToolControls>> 
   const onLanguage = vi.fn();
   const onModel = vi.fn();
   const utils = render(
-    <ToolControls
-      usesContextProfile
-      profiles={profiles}
-      contextProfileId=""
-      onProfile={onProfile}
-      outputLanguage="nl"
-      onLanguage={onLanguage}
-      model="claude-sonnet-4-6"
-      onModel={onModel}
-      {...overrides}
-    />,
+    <MemoryRouter>
+      <ToolControls
+        usesContextProfile
+        profiles={profiles}
+        contextProfileId=""
+        onProfile={onProfile}
+        outputLanguage="nl"
+        onLanguage={onLanguage}
+        model="claude-sonnet-4-6"
+        onModel={onModel}
+        {...overrides}
+      />
+    </MemoryRouter>,
   );
   return { ...utils, onProfile, onLanguage, onModel };
 }
@@ -151,6 +156,25 @@ describe("ToolControls", () => {
     expect(container.querySelector("details")).toBeNull();
     expect(screen.queryByText("Advanced")).toBeNull();
     expect(screen.queryByRole("combobox", { name: "Model" })).toBeNull();
+  });
+
+  it("links to the context page when the teacher has no profile", () => {
+    renderControls({ profiles: [] });
+    expect(screen.getByText("No teaching context yet.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Set up teaching context" })).toHaveAttribute(
+      "href",
+      "/context-profiles",
+    );
+  });
+
+  it("shows no hint once a profile exists", () => {
+    renderControls();
+    expect(screen.queryByRole("link", { name: "Set up teaching context" })).toBeNull();
+  });
+
+  it("shows no hint for a tool that does not use a context profile", () => {
+    renderControls({ usesContextProfile: false, profiles: [] });
+    expect(screen.queryByRole("link", { name: "Set up teaching context" })).toBeNull();
   });
 
   it("disables every control when disabled", async () => {

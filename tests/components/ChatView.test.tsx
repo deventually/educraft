@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { axe } from "vitest-axe";
 import { ChatView } from "~/components/ChatView";
 import type { Tool } from "~/lib/registry/types";
@@ -36,6 +37,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       reasoning: "Reason before answering",
       reasoningHint: "Off is much faster.",
       advanced: "Advanced",
+      noProfileAction: "Set up teaching context",
     },
     chat: {
       send: "Send",
@@ -45,6 +47,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       inputPlaceholder: "Your message…",
       sandboxHint: "Fill in the details",
       setupHeading: "Before you start",
+      noProfileHint: "This conversation does not know your teaching context.",
       continue: "Continue",
       startConversation: "Start the conversation",
       interrupted: "Interrupted",
@@ -335,6 +338,54 @@ describe("ChatView", () => {
     render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
     expect(screen.getByRole("heading", { name: "Before you start" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Context" })).toBeNull();
+  });
+
+  it("hints at setting a default context when a context tool has none", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <ChatView
+          tool={{ ...mockTool, usesContextProfile: true }}
+          contextProfile={null}
+          onGenerationStart={() => {}}
+        />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(
+      screen.getByText("This conversation does not know your teaching context."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Set up teaching context" })).toHaveAttribute(
+      "href",
+      "/context-profiles",
+    );
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("shows no context hint when a profile is set", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ChatView
+          tool={{ ...mockTool, usesContextProfile: true }}
+          contextProfile={{ id: "p1" }}
+          onGenerationStart={() => {}}
+        />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.queryByRole("link", { name: "Set up teaching context" })).toBeNull();
+  });
+
+  it("shows no context hint for a tool that does not use one", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ChatView tool={mockTool} contextProfile={null} onGenerationStart={() => {}} />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.queryByRole("link", { name: "Set up teaching context" })).toBeNull();
   });
 
   it("[thinking] hides the toggle and omits the flag for a non-thinking model", async () => {
