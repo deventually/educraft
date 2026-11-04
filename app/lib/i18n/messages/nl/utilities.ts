@@ -43,7 +43,9 @@ export const utilities = {
   rubric: {
     listIntro: "Bewaar je rubrics hier en gebruik ze opnieuw. Alleen jij ziet ze.",
     new: "Nieuwe rubric",
-    newName: "Nieuwe rubric",
+    newTitle: "Nieuwe rubric",
+    newBody: "Geef je rubric een naam, bijvoorbeeld de naam van de toets of opdracht.",
+    create: "Maken",
     emptyTitle: "Nog geen rubrics",
     emptyBody:
       "Maak een rubric met criteria en niveaus. Hij wordt vanzelf bewaard terwijl je werkt.",

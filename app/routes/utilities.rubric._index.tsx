@@ -1,12 +1,14 @@
-import { Form, Link, redirect, useSubmit } from "react-router";
+import { useId } from "react";
+import { Link, redirect } from "react-router";
 import { ArrowLeft, Plus, Table2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric._index";
 import { requireUser } from "~/server/auth.server";
 import { createRubric, listRubrics } from "~/server/repositories/rubrics.server";
-import { maxPoints, newRubricData } from "~/lib/utilities/rubric";
+import { maxPoints, newRubricData, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
 import { getUtilityBySlug } from "~/lib/utilities";
 import { EmptyState } from "~/components/EmptyState";
-import { Button } from "~/components/ui";
+import { Input, Label } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -30,11 +32,13 @@ export async function action({ request }: Route.ActionArgs) {
   const user = await requireUser(request);
   const fd = await request.formData();
   if (fd.get("intent") !== "create") return { error: "invalid" as const };
+  const name = String(fd.get("name") ?? "").trim();
+  if (name.length < 1 || name.length > RUBRIC_LIMITS.name) return { error: "name" as const };
   // A new rubric starts in the teacher's UI language: one criterion, three levels.
   const r = getMessages(getLocale(request)).utilities.rubric;
   const rubric = await createRubric(
     user.id,
-    r.newName,
+    name,
     newRubricData(r.defaultCriterion, [
       { label: r.defaultLevels.fail, points: 0 },
       { label: r.defaultLevels.pass, points: 1 },
@@ -55,7 +59,6 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const r = t.utilities.rubric;
   const locale = useLocale();
-  const submit = useSubmit();
   const utility = getUtilityBySlug("rubric");
   const { rubrics } = loaderData;
   const dateFmt = new Intl.DateTimeFormat(locale === "nl" ? "nl-NL" : "en-GB", {
@@ -78,15 +81,7 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
           </h1>
           <p className="mt-3 max-w-[60ch] text-pretty text-slate-600">{r.listIntro}</p>
         </div>
-        {rubrics.length > 0 && (
-          <Form method="post">
-            <input type="hidden" name="intent" value="create" />
-            <Button type="submit">
-              <Plus className="size-4" aria-hidden />
-              {r.new}
-            </Button>
-          </Form>
-        )}
+        {rubrics.length > 0 && <NewRubricDialog />}
       </div>
 
       {rubrics.length === 0 ? (
@@ -94,10 +89,7 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
           icon={<Table2 aria-hidden />}
           title={r.emptyTitle}
           body={r.emptyBody}
-          action={{
-            label: r.new,
-            onClick: () => submit({ intent: "create" }, { method: "post" }),
-          }}
+          action={{ node: <NewRubricDialog /> }}
         />
       ) : (
         <ul className="flex list-none flex-col gap-3 p-0">
@@ -122,5 +114,39 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
         </ul>
       )}
     </div>
+  );
+}
+
+/** "Nieuwe rubric": asks for the name first, then creates the rubric and opens it. */
+function NewRubricDialog() {
+  const t = useT();
+  const r = t.utilities.rubric;
+  const id = useId();
+  return (
+    <ConfirmDialog
+      triggerLabel={r.new}
+      triggerIcon={<Plus className="size-4" aria-hidden />}
+      triggerVariant="primary"
+      triggerSize="md"
+      title={r.newTitle}
+      description={r.newBody}
+      confirmLabel={r.create}
+      confirmVariant="primary"
+      cancelLabel={t.confirm.cancel}
+      fields={{ intent: "create" }}
+    >
+      <div className="mt-4">
+        <Label htmlFor={`${id}-name`}>{r.name}</Label>
+        <Input
+          id={`${id}-name`}
+          name="name"
+          required
+          maxLength={RUBRIC_LIMITS.name}
+          autoComplete="off"
+          data-autofocus
+          className="mt-1"
+        />
+      </div>
+    </ConfirmDialog>
   );
 }

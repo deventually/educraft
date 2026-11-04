@@ -35,20 +35,35 @@ function post(path: string, fields: Record<string, string>, cookie = ""): Reques
 const as = (id: string) => requireUserMock.mockResolvedValue(teacher(id));
 
 describe("/utilities/rubric", () => {
-  it("creates a rubric in the teacher's language and opens it", async () => {
+  it("creates a rubric under the teacher's name, in their language, and opens it", async () => {
     as("t-create");
     const res = (await list.action({
-      request: post("/utilities/rubric", { intent: "create" }, "lang=en"),
+      request: post(
+        "/utilities/rubric",
+        { intent: "create", name: " BKE eindopdracht " },
+        "lang=en",
+      ),
     } as never)) as Response;
     expect(res.status).toBe(302);
     const [created] = await repo.listRubrics("t-create");
     expect(res.headers.get("Location")).toBe(`/utilities/rubric/${created.id}`);
-    expect(created.name).toBe("New rubric");
+    expect(created.name).toBe("BKE eindopdracht");
     expect(created.data.criteria[0].levels.map((l) => l.label)).toEqual([
       "Insufficient",
       "Sufficient",
       "Good",
     ]);
+  });
+
+  it("refuses a rubric without a name and creates nothing", async () => {
+    as("t-noname");
+    for (const name of [undefined, "", "   ", "x".repeat(201)]) {
+      const fields: Record<string, string> = { intent: "create" };
+      if (name !== undefined) fields.name = name;
+      const res = await list.action({ request: post("/utilities/rubric", fields) } as never);
+      expect(res).toEqual({ error: "name" });
+    }
+    expect(await repo.listRubrics("t-noname")).toEqual([]);
   });
 
   it("lists only the teacher's own rubrics, with their maximum", async () => {
