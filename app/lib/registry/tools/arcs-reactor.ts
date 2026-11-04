@@ -31,9 +31,13 @@ export const arcsReactor: Tool = {
   attribution: attribution({
     chapterTitle: "The ARCS Reactor: Powering Situated Intentional Motivational Design",
     authors: "Travis N Thurston",
-    sourcePages: "pp. 187–189",
+    sourcePages: "pp. 185–186",
     evaluatedWith: { nl: "ChatGPT, Claude en Gemini", en: "ChatGPT, Claude and Gemini" },
     adapted: true,
+    adaptation: {
+      nl: "In het boek vraagt de AI eerst naar de context en laat de docent een PowerUp kiezen voordat hij die uitwerkt. Bij ons vult de docent de context in een formulier in en maakt de AI alles in één keer: diagnose, PowerUps, de uitwerking van de best passende, drie remixen en een reflectie, in het Nederlands.",
+      en: "In the book the AI first asks for the context and lets the teacher pick a PowerUp before expanding it. With us the teacher fills in the context in a form and the AI produces everything in one go: diagnosis, PowerUps, the expansion of the best fit, three remixes and a reflection, in Dutch.",
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",

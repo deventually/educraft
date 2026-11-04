@@ -1,17 +1,15 @@
 import type { PromptDef } from "./types";
 import nl from "./files/contextualization.nl.md?raw";
 import en from "./files/contextualization.en.md?raw";
+import verbatim from "./book/contextualization.md?raw";
 
 /**
- * SOURCE: "Making Pedagogical Intent Visible: AI-Supported Contextualization
- * in Higher Education Course Design"
- * The Pedagogical Promptbook (CC BY 4.0). Evaluated across Claude, ChatGPT, and Gemini.
+ * SOURCE: Alexis Guethler, "Making Pedagogical Intent Visible: AI-Supported Contextualization in Higher Education Course Design", in The Pedagogical Promptbook (ed. D. Wiley), CC BY 4.0.
+ * `verbatim` (book/contextualization.md) is the book's prompt, word for word: Appendix 1 "Final Version of Prompt", from the web edition (edtechbooks.org/promptbook/making-pedagogical-intent-visible, doi.org/10.59668/2340.26734); the chapter is missing from the book PDF, and the web edition has no page numbers.
  *
- * The runtime variants (one-shot adaptation, per language) live in
- * files/contextualization.{nl,en}.md.
+ * What LimeOnIt changed is in the tool's Attribution.adaptation. The runtime
+ * variants (per language) live in files/contextualization.{nl,en}.md.
  */
-const verbatim = `You are an expert in curriculum design and pedagogical intent. Your task is to help instructors make their teaching philosophy and learning theories explicit by analyzing course outlines and identifying alignment between learning outcomes, teaching activities, and assessment methods. Help instructors articulate their underlying assumptions and provide actionable feedback for greater coherence and transparency.`;
-
 export const CONTEXTUALIZATION_PROMPT: PromptDef = {
   id: "contextualization@v1",
   verbatim,

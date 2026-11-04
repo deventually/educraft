@@ -39,9 +39,9 @@ All 14 tools from the book plus one original are shipped. *For* = who the tool s
 | 9 | ARCS Reactor | ARCS Reactor (`arcs-reactor`) | one-shot | teacher |
 | 10 | Bloom by Design | Bloom by Design (`bloom-by-design`) | chat | teacher |
 | 11 | Peer Tutoring | Peer Tutoring (`peer-tutoring`) | chat | learner |
-| 12 | Automating Gagné | Cognitive Architect (`cognitive-architect`) | multi-stage (4) | teacher |
+| 12 | Oracle to Socratic (Appendices A–D) | Cognitive Architect (`cognitive-architect`) | multi-stage (4) | teacher |
 | 13 | Scaffolding | Scaffolding Feedback (`scaffolding-feedback`) | chat | learner |
-| 14 | Oracle to Socratic | Socratic Partner (`socratic-partner`) | chat | learner |
+| 14 | Oracle to Socratic (Appendix E.3) | Socratic Partner (`socratic-partner`) | chat | learner |
 | 15 | — (original) | Assess student work (`stage-assessment`, prompt `@v2`) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt

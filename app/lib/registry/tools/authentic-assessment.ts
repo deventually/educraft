@@ -38,10 +38,14 @@ export const authenticAssessment: Tool = {
   attribution: attribution({
     chapterTitle:
       "Backward Design: Using Structured Frameworks to Develop Authentic Assessment Opportunities",
-    authors: "Rebecca McNulty, Wendy Howard & Roslyn Miller",
-    sourcePages: "pp. 162–166",
-    evaluatedWith: "Microsoft Copilot (Enterprise)",
+    authors: "Rebecca McNulty, Wendy Howard, & Roslyn Miller",
+    sourcePages: "pp. 161–165",
+    evaluatedWith: { nl: "Microsoft Copilot (Enterprise)", en: "Microsoft Copilot (Enterprise)" },
     adapted: true,
+    adaptation: {
+      nl: "In het boek is het een interview: de AI stelt één vraag tegelijk en bouwt zo het toetsontwerp op. Bij ons vult de docent de antwoorden vooraf in een formulier in en maakt de AI het volledige toetsontwerp met rubric in één keer, in het Nederlands. De VALUE-rubrics uit het boek zijn een voorbeeld; de docent kiest zelf een kader.",
+      en: "In the book it is an interview: the AI asks one question at a time and builds the assessment design that way. With us the teacher fills in the answers beforehand in a form and the AI produces the complete assessment blueprint with rubric in one go, in Dutch. The book's VALUE rubrics are an example; the teacher chooses a framework.",
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",

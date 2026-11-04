@@ -32,14 +32,19 @@ export const mathGrading: Tool = {
     keyCitations: ["Hattie & Timperley (2007)", "Shute (2008)"],
   },
   attribution: attribution({
-    chapterTitle: "Grading Handwritten Math Responses with Generative AI",
-    authors: "David Wiley, ed.",
-    sourcePages: "The Pedagogical Promptbook",
+    chapterTitle:
+      "Leveraging LLMs for Grading and Feedback on Handwritten Math Assessment Responses",
+    authors: "Alberto Gandolfi, Jonas Saman, & Eleni Tesfaye",
+    sourcePages: "pp. 143–145",
     evaluatedWith: {
-      nl: "Claude Sonnet 4.6",
-      en: "Claude Sonnet 4.6",
+      nl: "GPT-5.1 Pro, GPT-5.2 en Gemini 3 Pro",
+      en: "GPT-5.1 Pro, GPT-5.2 and Gemini 3 Pro",
     },
     adapted: true,
+    adaptation: {
+      nl: "In het boek vraagt de assistent eerst om de rubric, de syllabus en de gescande toetsen, en beoordeelt hij daarna een hele toets per vraag, als eerste ronde voor de docent of assistent. Wij beoordelen één antwoord op een foto in één keer, met de rubric en de leercontext van de docent, als concept met feedback, in het Nederlands.",
+      en: "In the book the assistant first asks for the rubric, the syllabus and the scanned tests, then grades a whole test question by question, as a first pass for the teacher or TA. We assess one answer from a photo in one go, with the teacher's rubric and learning context, as a draft with feedback, in Dutch.",
+    },
   }),
   usesContextProfile: true,
   assistiveGrading: true,

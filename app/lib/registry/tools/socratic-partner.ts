@@ -31,10 +31,17 @@ export const socraticPartner: Tool = {
   attribution: attribution({
     chapterTitle:
       "From Oracle to Socratic Partner: Redesigning Instruction with AI Through the Science of Learning",
-    authors: "multiple authors",
-    sourcePages: "pp. 338–343",
-    evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    authors: "Andy Van Schaack & Roman Sarlo",
+    sourcePages: "Appendix E.3, pp. 341–343",
+    evaluatedWith: {
+      nl: "Model-agnostisch (Claude, GPT-4, of gelijkwaardig)",
+      en: "Model-agnostic (Claude, GPT-4, or equivalent)",
+    },
+    adapted: true,
+    adaptation: {
+      nl: "In het boek is dit een uitgewerkt voorbeeld: de student interviewt de auteur van een biologiehoofdstuk over natuurlijke selectie. Wij maken er een algemene versie van voor het onderwerp en hoofdstuk die de docent invult, met dezelfde opbouw: voorkennis ophalen, uitleggen in eigen woorden, eigen voorbeelden, en een afsluitende samenvatting. In het Nederlands.",
+      en: "In the book this is a worked example: the student interviews the author of a biology chapter on natural selection. We make a general version for the subject and chapter the teacher fills in, with the same structure: recall prior knowledge, explain in your own words, your own examples, and a closing summary. In Dutch.",
+    },
   }),
   // Learner tutor: the teacher's context profile seeds the level (EQF) with the
   // direct-address register directive (P6.8).

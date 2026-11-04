@@ -216,7 +216,7 @@ export const portfolio = {
       "bloom-by-design":
         "Kies een digitaal middel dat past bij je leerdoelen, en onderbouw die keuze.",
       "cognitive-architect":
-        "Werk een leeractiviteit stap voor stap uit volgens Gagné en Rosenshine. Zo laat je de opbouw en de werkvormen zien.",
+        "Herontwerp een opdracht tot een AI-leeractiviteit volgens zes leerprincipes. Zo laat je zien hoe je studenten zelf laat denken.",
       contextualization:
         "Analyseer of je leerdoelen, werkvormen en toetsing op elkaar aansluiten. De analyse laat zien hoe je onderwijs in het geheel past.",
       "dialogic-encounters":

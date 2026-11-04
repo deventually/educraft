@@ -33,13 +33,14 @@ export const forumAutograder: Tool = {
   },
   attribution: attribution({
     chapterTitle: "AI-Supported Forum Autograder: A Community of Inquiry Approach",
-    authors: "David Wiley, ed.",
-    sourcePages: "The Pedagogical Promptbook",
-    evaluatedWith: {
-      nl: "Claude, ChatGPT, Gemini",
-      en: "Claude, ChatGPT, Gemini",
-    },
+    authors: "Lina Kadi",
+    sourcePages: "pp. 122–124",
+    evaluatedWith: { nl: "Claude Haiku 4.5", en: "Claude Haiku 4.5" },
     adapted: true,
+    adaptation: {
+      nl: "In het boek is het een Python-script dat een heel forum in stukken beoordeelt: per student een score op een vaste rubric, als JSONL, met één annotatie. Wij analyseren één forumdraad in één keer op de drie vormen van aanwezigheid uit Community of Inquiry, met de rubric en leerdoelen van de docent, en geven advies voor de begeleiding. Het is een concept voor de docent, in het Nederlands, en geen cijfer per student.",
+      en: "In the book it is a Python script that grades a whole forum in chunks: a score per student on a fixed rubric, as JSONL, with one annotation. We analyse one forum thread in one go on the three Community of Inquiry presences, with the teacher's rubric and outcomes, and give facilitation advice. It is a draft for the teacher, in Dutch, not a grade per student.",
+    },
   }),
   usesContextProfile: true,
   assistiveGrading: true,

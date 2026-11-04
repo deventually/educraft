@@ -1,16 +1,15 @@
 import type { PromptDef } from "./types";
 import nl from "./files/forum-autograder.nl.md?raw";
 import en from "./files/forum-autograder.en.md?raw";
+import verbatim from "./book/forum-autograder.md?raw";
 
 /**
- * SOURCE: "AI-Supported Forum Autograder: A Community of Inquiry Approach"
- * The Pedagogical Promptbook (CC BY 4.0). Evaluated across Claude, ChatGPT, and Gemini.
+ * SOURCE: Lina Kadi, "AI-Supported Forum Autograder: A Community of Inquiry Approach", in The Pedagogical Promptbook (ed. D. Wiley), CC BY 4.0.
+ * `verbatim` (book/forum-autograder.md) is the book's prompt, word for word: Appendix 2 (a Python notebook), printed pp. 122–124: the SYSTEM_PROMPT, the per-chunk user_prompt and the repair_prompt. The rubric table it inserts as {RUBRIC_TEXT} (pp. 121–122) is left out, because the PDF text layer scrambles it.
  *
- * The runtime variants (one-shot adaptation, per language) live in
- * files/forum-autograder.{nl,en}.md.
+ * What LimeOnIt changed is in the tool's Attribution.adaptation. The runtime
+ * variants (per language) live in files/forum-autograder.{nl,en}.md.
  */
-const verbatim = `You are an expert assessor of asynchronous forum discussions in higher education, using the Community of Inquiry (CoI) framework. Your task is to evaluate forum threads across three dimensions of presence: social (community building), cognitive (critical thinking), and teaching (instructor facilitation). Provide actionable scores and recommendations to help instructors strengthen their online teaching presence and guide deeper learning.`;
-
 export const FORUM_AUTOGRADER_PROMPT: PromptDef = {
   id: "forum-autograder@v1",
   verbatim,

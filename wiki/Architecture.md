@@ -29,6 +29,7 @@ Prompts live **outside** the code as Markdown, per tool and per language:
 
 ```
 app/lib/prompts/files/<id>.{nl,en}.md      # the runtime prompt, with {{placeholders}}
+app/lib/prompts/book/<id>.md               # the book's prompt, word for word (verbatim)
 app/lib/prompts/<id>.prompt.ts             # PromptDef: verbatim original + runtime ref
 ```
 

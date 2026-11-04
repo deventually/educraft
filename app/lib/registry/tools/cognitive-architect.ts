@@ -19,38 +19,42 @@ export const cognitiveArchitect: Tool = {
     en: "Cognitive Architect (Science of Learning)",
   },
   tagline: {
-    nl: "Ontwerp in vier fasen een AI-ondersteunde leeractiviteit op basis van de leerwetenschap (Gagné/Rosenshine).",
-    en: "Design an AI-supported learning activity in four stages, grounded in the science of learning (Gagné/Rosenshine).",
+    nl: "Ontwerp in vier fasen een AI-ondersteunde leeractiviteit op basis van de leerwetenschap (zes leerprincipes en Rosenshine).",
+    en: "Design an AI-supported learning activity in four stages, grounded in the science of learning (six learning principles and Rosenshine).",
   },
   icon: "layers",
   userType: "instructor",
   mode: "one-shot",
   theory: {
     name: {
-      nl: "Science of Learning (zes principes) + Gagné & Rosenshine",
-      en: "Science of Learning (six principles) + Gagné & Rosenshine",
+      nl: "Science of Learning (zes principes) + Rosenshine",
+      en: "Science of Learning (six principles) + Rosenshine",
     },
     summary: {
       nl: "Diagnosticeer een bestaande activiteit met de Cognitive Engagement Rubric en herontwerp deze tot een Socratische AI-dialoog die diep cognitief werk afdwingt.",
       en: "Diagnose an existing activity with the Cognitive Engagement Rubric and redesign it into a Socratic AI dialogue that forces deep cognitive work.",
     },
     keyCitations: [
-      "Gagné (1965)",
       "Rosenshine (2012)",
+      "Weinstein et al. (2018)",
       "Karpicke & Roediger (2008)",
-      "Collins, Brown & Newman (1989)",
+      "Schmidt & Bjork (1992)",
     ],
   },
   attribution: attribution({
     chapterTitle:
       "From Oracle to Socratic Partner: Redesigning Instruction with AI Through the Science of Learning",
     authors: "Andy Van Schaack & Roman Sarlo",
-    sourcePages: "Appendices A–D, pp. 326–341",
+    sourcePages: "Appendices A–D, pp. 324–338",
     evaluatedWith: {
       nl: "Model-agnostisch (Claude, GPT-4, of gelijkwaardig)",
       en: "Model-agnostic (Claude, GPT-4, or equivalent)",
     },
     adapted: true,
+    adaptation: {
+      nl: "In het boek is elke fase een apart gesprek: de analist interviewt de docent met één vraag tegelijk. Bij ons vult de docent de gegevens in een formulier in en voert LimeOnIt de vier fasen na elkaar uit, waarbij elke fase de uitvoer van de vorige gebruikt, in het Nederlands.",
+      en: "In the book each stage is a separate conversation: the analyst interviews the teacher one question at a time. With us the teacher fills in the details in a form and LimeOnIt runs the four stages in turn, each stage using the previous one's output, in Dutch.",
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
