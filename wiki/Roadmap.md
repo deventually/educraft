@@ -1,42 +1,48 @@
 # Roadmap
 
-A phased path from today's MVP to the global [Vision](../docs/VISION.md). This is
+The path from today's pilot to the global [Vision](../docs/VISION.md). This is
 **direction, not commitment** — sequence by real demand. The current-state list also
 lives in the [README](../README.md).
 
 ---
 
-## Now — shipped (phase 1)
+## Shipped
 
-- Netherlands · hbo · Dutch/English UI.
-- Four instructor generators (see [Tools](Tools.md)).
-- Externalized bilingual prompts, generic context profile + hbo-i pack, multi-provider
-  AI with dynamic local-model discovery.
-- Verified: build, typecheck, 57 tests, full pipeline (live LLM call needs an API key).
+- 15 tools: the 14 from the book plus one original (assess student work against the teacher's
+  rubric). See [Tools](Tools.md).
+- Invite auth with two roles (teacher, admin) and an owner; a four-page admin console with
+  autosave; models per instance with a per-teacher override.
+- The simplification rounds V1 (student layer removed) and V2 (admin simplified).
+- Documents read in the browser, a document viewer, and anonymisation before sending.
+- The BDB/BKE workplace (`/portfolio`) with a coach and Word export.
+- Utilities without AI: the grade calculator and saved rubrics.
 
-## Phase 2 — breadth
+## Next (proposed order)
 
-- Remaining instructor generators: Bloom by Design, Forum Autograder,
-  handwritten-math marking (image input).
-- More provider adapters (OpenAI / Gemini) alongside the existing ones.
+The live order is on the board ([`docs/fabriek/STATUS.md`](../docs/fabriek/STATUS.md)); briefs
+live in [`docs/implementation/`](../docs/implementation/README.md).
 
-## Phase 3 — student-facing
+1. **Eight new AI tools** (brief P24): after the baseline measurement, one PR per tool with a
+   measurable quality bar.
+2. **Utilities without AI, part 3** (brief P23): fill in a rubric in batches.
+3. **Simplification V3** (brief P19): the teacher side — no audience labels, technique behind
+   "Advanced", empty pages that guide, a clearer menu and a short context form.
+4. **BDB/BKE workplace follow-up** (brief P25): framework extraction, imports from assessment
+   tools, the BKE parts with the P23/P24 tools.
+5. **Courses and the alignment spine** (brief P20).
+6. **Role agents** (brief P21), then the **teacher week** (brief P22).
 
-- Student-facing chatbots (MentorAI, Think-Pair-Share, Socratic tutor) on the
-  existing chat infrastructure (`mode: "chat"`).
-- First need for [compliance & safeguarding](Internationalization.md#5-compliance--safeguarding)
-  for minors.
+## Later (parked on purpose)
 
-## Phase 4 — quality & sharing
-
-- Evaluation with synthetic students, multi-model comparison.
-- PDF / DOCX export, shareable links.
+- Practice simulations (add-on).
+- Voice (dictation, read-aloud).
+- A student layer, rebuilt and better.
 
 ---
 
 ## Vision tracks (cross-cutting, sequence by demand)
 
-These realize the [Vision](../docs/VISION.md) and run alongside the phases above.
+These realize the [Vision](../docs/VISION.md) and run alongside the list above.
 
 - **Level spine** — add EQF 1–8 as a first-class dimension across NL
   (VO / mbo / hbo / wo); anchor to ISCED. See
