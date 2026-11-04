@@ -64,39 +64,6 @@ describe("deleteUserCascade", () => {
     expect(await users.getUserAssignedModels("del-user-models-other")).not.toBeNull();
   });
 
-  it("removes the user's chat sessions and messages", async () => {
-    const sessionId = "del-chat-session-1";
-    const { getDb } = await import("~/server/db.server");
-    const { chatSessions, messages } = await import("~/server/schema.server");
-    const { eq } = await import("drizzle-orm");
-    const db = getDb();
-    db.insert(chatSessions)
-      .values({
-        id: sessionId,
-        toolSlug: "mentorai",
-        systemPrompt: "sys",
-        model: "m",
-        userId: "del-user-chat",
-        createdAt: new Date(),
-      })
-      .run();
-    db.insert(messages)
-      .values([
-        { id: "del-msg-1", sessionId, role: "user", content: "hi", createdAt: new Date() },
-        { id: "del-msg-2", sessionId, role: "assistant", content: "hello", createdAt: new Date() },
-      ])
-      .run();
-
-    await users.deleteUserCascade("del-user-chat");
-
-    expect(db.select().from(chatSessions).where(eq(chatSessions.id, sessionId)).all()).toHaveLength(
-      0,
-    );
-    expect(db.select().from(messages).where(eq(messages.sessionId, sessionId)).all()).toHaveLength(
-      0,
-    );
-  });
-
   it("leaves other users' data untouched", async () => {
     await seedUser("del-user-b");
     const keepGenId = await seedUser("del-user-keep");

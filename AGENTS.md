@@ -112,6 +112,7 @@ New behavior starts as a failing test. These principles hold without repetition:
 
 ### Repositories & the DB seam
 - All DB access goes through repositories under `app/server/repositories/`; **every exported DB function is `async`** (portability insurance) and **scoped to its owning `userId`** in the WHERE clause. No better-sqlite3 API outside `db.server.ts`.
+- Schema is lean after P18.8: no `projects`, `chat_sessions`, `messages` tables and no `allowed_tool_slugs`/`project_id` columns; a teacher's work lives in `generations` (chat transcripts included).
 - `getDb()` is the seam: tests point `DATABASE_URL=file::memory:` before importing any server module. List queries are capped (`Math.min(limit ?? 50, 500)`).
 
 ### Level adaptation (EQF) & prompt authoring
