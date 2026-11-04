@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { CRITERION_STATUSES, type DossierData, EVIDENCE_KINDS, type Track, TRACKS } from "./types";
+import {
+  CRITERION_STATUSES,
+  type DossierData,
+  EVIDENCE_KINDS,
+  type Track,
+  TRACKS,
+  VERDICTS,
+} from "./types";
 
 /** Boundary limits for a dossier (brief P25, "Het model"). */
 export const LIMITS = {
@@ -23,6 +30,30 @@ export const LIMITS = {
 } as const;
 
 const Id = z.string().min(1).max(LIMITS.id);
+
+/** Coach output limits (brief P25, 25.5). */
+export const COACH_LIMITS = {
+  quote: 1_500,
+  gap: 1_000,
+  item: 500,
+  items: 3,
+  overall: 600,
+} as const;
+
+export const CriterionReviewSchema = z.object({
+  criterionId: Id,
+  verdict: z.enum(VERDICTS),
+  quote: z.string().max(COACH_LIMITS.quote).optional(),
+  quoteUnverified: z.boolean().optional(),
+  gap: z.string().max(COACH_LIMITS.gap).optional(),
+  strengthen: z.array(z.string().max(COACH_LIMITS.item)).max(COACH_LIMITS.items),
+  evidenceNeeded: z.array(z.string().max(COACH_LIMITS.item)).max(COACH_LIMITS.items),
+});
+
+export const CoachReviewSchema = z.object({
+  criteria: z.array(CriterionReviewSchema).max(LIMITS.criteriaPerOutcome),
+  overall: z.string().max(COACH_LIMITS.overall),
+});
 
 export const CriterionSchema = z.object({
   id: Id,
@@ -92,6 +123,16 @@ export const DossierDataSchema = z
         }),
       )
       .max(LIMITS.aiLog),
+    reviews: z
+      .record(
+        Id,
+        z.object({
+          at: z.number().int().nonnegative(),
+          model: z.string().max(200),
+          review: CoachReviewSchema,
+        }),
+      )
+      .optional(),
   })
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: no dangling or duplicate ids.

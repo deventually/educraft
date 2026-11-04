@@ -71,3 +71,23 @@ forum-autograder, math-grading. The student-facing chat tutors
 dialogic-encounters, bloom-by-design) set `usesContextProfile: false` by design and
 do **not** currently adapt to EQF — extending level-adaptation to them is a product
 decision (attaching teaching context to student sessions), tracked as follow-up.
+
+## Portfolio coach (`npm run eval:coach`)
+
+The BDB/BKE coach (brief P25, 25.5) is not a registry tool and has its own runner,
+`scripts/eval-coach.ts`. It runs the real coach prompt and the real code checks
+(`app/lib/portfolio/coach.ts`) on `evals/portfolio-coach/cases.json`: synthetic chapters
+whose flaw is known. Scoring is **deterministic** (no judge): per criterion the expected
+verdicts, plus no unverified quotes and, per case, the evidence that must be named. See
+`evals/portfolio-coach/rubric.md`.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:coach                       # public cases
+ANTHROPIC_API_KEY=sk-… EVALS_PRIVATE_DIR=/pad/naar/map npm run eval:coach -- --repeat 3
+npm run eval:coach -- --dry-run                                 # build messages only
+```
+
+**Private cases** live outside the repo in `EVALS_PRIVATE_DIR` (`*.json`, same shape as
+`cases.json`). The report (`evals/reports/<date>-portfolio-coach.md`) names only their case
+ids and scores. `tests/lib/eval-coach.test.ts` fails when a file name from that folder shows
+up under `evals/`.

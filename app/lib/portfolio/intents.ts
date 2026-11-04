@@ -96,6 +96,8 @@ const SCHEMAS = {
   }),
   removeEvidence: z.object({ evidenceId: Id }),
   writeChapter: z.object({ outcomeId: Id, text: z.string().max(LIMITS.documentText) }),
+  coachMode: z.object({ mode: z.enum(["coach", "draft"]) }),
+  dismissDraftNotice: z.object({}),
   addReference: z.object({ apa: required(LIMITS.reference) }),
   removeReference: z.object({ referenceId: Id }),
 } as const;
@@ -226,6 +228,12 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
       criteriaOf(d, v.outcomeId);
       return edit.writeChapter(d, v.outcomeId, v.text);
     }
+    case "coachMode": {
+      const v = input as z.infer<(typeof SCHEMAS)["coachMode"]>;
+      return { ...d, coachMode: v.mode };
+    }
+    case "dismissDraftNotice":
+      return { ...d, draftNoticeSeenAt: d.draftNoticeSeenAt ?? ctx.now };
     case "addReference": {
       const v = input as z.infer<(typeof SCHEMAS)["addReference"]>;
       return edit.addReference(d, v.apa);
