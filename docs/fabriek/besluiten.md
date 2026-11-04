@@ -182,3 +182,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-04-23:** **Een promptwijziging wordt gemeten met drie runs per case en harde
   ja/nee-checks** (`--runs 3`, `## Hard checks` in de rubric). Een verschil kleiner dan de spreiding
   telt als ruis. Advies Producer na de tweede meting, waarin de beoordelaar een leeg antwoord 3,6 gaf.
+- **BESLUIT-2026-11-04-25:** **Metingen goedkoper: tussenrondes met 1 run, en alles via de Batch
+  API.** Alleen de eindmeting van een tool draait met 3 runs. `npm run eval -- --batch` stuurt
+  genereren en beoordelen via de Message Batches API van Anthropic, die de helft kost; de uitslag
+  duurt dan iets langer. Samen ongeveer 60–70% minder per tool. Bastiaan, 2026-11-04.

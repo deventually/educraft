@@ -16,6 +16,7 @@ ANTHROPIC_API_KEY=sk-… npm run eval -- --tool forum-autograder
 ANTHROPIC_API_KEY=sk-… npm run eval -- --judge-model claude-sonnet-4-6
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai --runs 3   # mean + spread
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai,guided-reflection --label d  # one report, evals/reports/<date>d.md
+ANTHROPIC_API_KEY=sk-… npm run eval -- --tool rubric-builder --batch   # half price, Message Batches API
 npm run eval -- --cases-only     # regenerate raw outputs, skip the judge
 npm run eval -- --judge-only     # re-judge the latest raw outputs, skip generation
 ```
@@ -84,6 +85,23 @@ the mean per criterion and the spread of the run averages (`3 (4.20–4.80)`). R
 is written as `<case>.md`, later runs as `<case>.run2.md` etc. Use `--runs 3` for a
 before/after measurement of a prompt change: a difference smaller than the spread
 is noise.
+
+Intermediate rounds use one run; only the final measurement of a tool uses
+`--runs 3` (BESLUIT-2026-11-04-25).
+
+## Half price (`--batch`)
+
+`--batch` sends every one-shot stage and every judge call through the Anthropic
+Message Batches API, which costs half (`scripts/eval-batch.ts`). All cases and runs
+start at once, so all first stages share one batch, all second stages the next, and
+all judge calls the one after. A batch usually ends well within an hour; the script
+polls every 30 seconds. The request is the one the app sends (same model, system
+prompt, messages, temperature and output budget). Chat tools keep the direct API,
+because every turn waits on the previous one; their judging is still batched.
+
+```bash
+npm run eval -- --tool test-items --runs 3 --batch --label q
+```
 
 ## Reports & deltas
 
