@@ -1,12 +1,21 @@
-import { useActionData } from "react-router";
+import { Form, useActionData } from "react-router";
 import { FolderOpen, Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
-import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
+import {
+  listGenerations,
+  deleteGeneration,
+  getGeneration,
+} from "~/server/repositories/generations.server";
+import { getDossier, listDossiers, updateDossier } from "~/server/repositories/portfolio.server";
+import { addEvidence } from "~/lib/portfolio/edit";
+import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
+import { getMessages } from "~/lib/i18n";
+import { getLocale } from "~/lib/i18n/locale.server";
 import { requireUser } from "~/server/auth.server";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
-import { Badge } from "~/components/ui";
+import { Badge, Button, Label, Select } from "~/components/ui";
 import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
@@ -18,7 +27,32 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   if (fd.get("intent") === "delete") {
     await deleteGeneration(user.id, String(fd.get("id")));
-    return { ok: true };
+    return { ok: true, intent: "delete" };
+  }
+  if (fd.get("intent") === "addToDossier") {
+    // "Voeg toe aan dossier" (P25, 25.3): the output becomes unlinked evidence;
+    // the teacher links it to criteria on the outcome page.
+    const m = getMessages(getLocale(request));
+    const [generation, dossier] = await Promise.all([
+      getGeneration(user.id, String(fd.get("id") ?? "")),
+      getDossier(user.id, String(fd.get("dossierId") ?? "")),
+    ]);
+    if (!generation || !dossier) return { ok: false, error: m.portfolio.errorNotFound };
+    const toolName = getToolBySlug(generation.toolSlug)?.name;
+    const next = addEvidence(dossier.data, {
+      title: (toolName ? loc(toolName, getLocale(request)) : generation.toolSlug).slice(
+        0,
+        LIMITS.title,
+      ),
+      kind: "other",
+      text: generation.outputMarkdown.slice(0, LIMITS.documentText),
+      criterionIds: [],
+      sourceGenerationId: generation.id,
+    });
+    if (!DossierDataSchema.safeParse(next).success)
+      return { ok: false, error: m.portfolio.errorInvalid };
+    await updateDossier(user.id, dossier.id, { data: next });
+    return { ok: true, intent: "addToDossier" };
   }
   return { ok: false };
 }
@@ -35,16 +69,25 @@ export async function loader({ request }: Route.LoaderArgs) {
     outputMarkdown: g.outputMarkdown,
     createdAt: g.createdAt,
   }));
-  return { generations };
+  const dossiers = (await listDossiers(user.id)).map((d) => ({ id: d.id, name: d.name }));
+  return { generations, dossiers };
 }
 
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
-  const { generations } = loaderData;
+  const { generations, dossiers = [] } = loaderData;
   useFormToast(actionData, {
-    result: (d) => (d?.ok ? { variant: "success", message: t.projects.toastDeleted } : null),
+    result: (d) => {
+      if (!d) return null;
+      if (!d.ok) return "error" in d && d.error ? { variant: "error", message: d.error } : null;
+      return {
+        variant: "success",
+        message:
+          d.intent === "addToDossier" ? t.portfolio.toastAddedToDossier : t.projects.toastDeleted,
+      };
+    },
   });
   return (
     <div className="mx-auto max-w-4xl">
@@ -89,6 +132,25 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                       multi-stage, and chat sessions (saved as one row) — is ratable
                       here by its known id, without plumbing ids through the SSE stream. */}
                   <FeedbackWidget generationId={g.id} />
+                  {dossiers.length > 0 && (
+                    <Form method="post" className="flex flex-wrap items-end gap-2">
+                      <input type="hidden" name="intent" value="addToDossier" />
+                      <input type="hidden" name="id" value={g.id} />
+                      <div>
+                        <Label htmlFor={`dossier-${g.id}`}>{t.portfolio.addToDossierLabel}</Label>
+                        <Select id={`dossier-${g.id}`} name="dossierId">
+                          {dossiers.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <Button type="submit" variant="secondary" size="sm">
+                        {t.portfolio.addToDossier}
+                      </Button>
+                    </Form>
+                  )}
                 </div>
               </details>
               <div className="absolute right-3 top-2.5">

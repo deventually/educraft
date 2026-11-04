@@ -1,0 +1,294 @@
+import { Form, Link, useActionData } from "react-router";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
+import { loadDossier, saveIntent } from "~/server/portfolio.server";
+import { outcomeLabel } from "~/lib/portfolio/format";
+import { LIMITS } from "~/lib/portfolio/schema";
+import {
+  CRITERION_STATUSES,
+  EVIDENCE_KINDS,
+  type Criterion,
+  type EvidenceItem,
+} from "~/lib/portfolio/types";
+import { Button, Card, Input, Label, Select } from "~/components/ui";
+import { useFormToast } from "~/components/Toast";
+import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
+import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
+import { useT } from "~/lib/i18n/useT";
+import { fmt } from "~/lib/i18n/format";
+import type { Messages } from "~/lib/i18n";
+
+export function meta({ data }: Route.MetaArgs) {
+  return [{ title: `${data ? outcomeLabel(data.outcome) : "BDB/BKE"} — LimeOnIt` }];
+}
+
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const { dossier } = await loadDossier(request, params.id);
+  const d = dossier.data;
+  const outcome = d.framework.outcomes.find((o) => o.id === params.outcomeId);
+  if (!outcome) throw new Response("Not Found", { status: 404 });
+  const own = new Set(outcome.criteria.map((c) => c.id));
+  return {
+    id: dossier.id,
+    name: dossier.name,
+    outcome,
+    status: Object.fromEntries(
+      outcome.criteria.map((c) => [c.id, d.status[c.id] ?? "not-started"]),
+    ),
+    evidence: d.evidence.filter((e) => e.criterionIds.some((cid) => own.has(cid))),
+    unlinked: d.evidence.filter((e) => e.criterionIds.length === 0),
+    chapter: d.chapters.find((ch) => ch.outcomeId === outcome.id)?.text ?? "",
+    maxWords: d.framework.requirements.maxWords,
+    evidenceFull: d.evidence.length >= LIMITS.evidence,
+  };
+}
+
+export async function action({ request, params }: Route.ActionArgs) {
+  return saveIntent(request, params.id);
+}
+
+type PortfolioMessages = Messages["portfolio"];
+
+export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
+  const t = useT();
+  const to = t.portfolio.outcome;
+  const actionData = useActionData<typeof action>();
+  useFormToast(actionData, {
+    result: (r) =>
+      !r
+        ? null
+        : r.ok
+          ? { variant: "success", message: t.portfolio.toastSaved }
+          : { variant: "error", message: r.error },
+  });
+  const { id, outcome, status, evidence, unlinked, chapter, maxWords, evidenceFull } = loaderData;
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <Link
+        to={`/portfolio/${id}`}
+        className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        {t.portfolio.backToDossier}
+      </Link>
+      <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
+        {outcomeLabel(outcome)}
+      </h1>
+
+      <section className="mt-6" aria-labelledby="criteria-title">
+        <h2 id="criteria-title" className="text-lg font-medium text-slate-900">
+          {to.criteriaTitle}
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">{to.criteriaIntro}</p>
+        <ol className="mt-3 space-y-3">
+          {outcome.criteria.map((c, i) => (
+            <li key={c.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-slate-900">
+                <span className="font-medium">{i + 1}.</span> {c.text}
+              </p>
+              {c.strongLevel && (
+                <p className="mt-1 text-sm text-slate-600">
+                  {fmt(to.strongLevel, { text: c.strongLevel })}
+                </p>
+              )}
+              <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
+                <input type="hidden" name="intent" value="setStatus" />
+                <input type="hidden" name="criterionId" value={c.id} />
+                <div>
+                  <Label htmlFor={`status-${c.id}`}>
+                    {to.statusLabel} {i + 1}
+                  </Label>
+                  <Select id={`status-${c.id}`} name="status" defaultValue={status[c.id]}>
+                    {CRITERION_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {t.portfolio.status[s]}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <Button type="submit" variant="secondary" size="sm">
+                  {to.saveStatus}
+                </Button>
+              </Form>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-8" aria-labelledby="evidence-title">
+        <h2 id="evidence-title" className="text-lg font-medium text-slate-900">
+          {to.evidenceTitle}
+        </h2>
+        {evidence.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-600">{to.evidenceEmpty}</p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {evidence.map((e) => (
+              <EvidenceRow
+                key={e.id}
+                item={e}
+                outcomeId={outcome.id}
+                criteria={outcome.criteria}
+                t={t.portfolio}
+              />
+            ))}
+          </ul>
+        )}
+        {unlinked.length > 0 && (
+          <>
+            <h3 className="mt-6 text-sm font-medium text-slate-900">{to.unlinkedTitle}</h3>
+            <ul className="mt-2 space-y-3">
+              {unlinked.map((e) => (
+                <EvidenceRow
+                  key={e.id}
+                  item={e}
+                  outcomeId={outcome.id}
+                  criteria={outcome.criteria}
+                  t={t.portfolio}
+                />
+              ))}
+            </ul>
+          </>
+        )}
+
+        {!evidenceFull && (
+          <Card className="mt-6 p-5">
+            <h3 className="text-base font-medium text-slate-900">{to.addEvidenceTitle}</h3>
+            {/* Keyed on the evidence count: a saved item resets the form. */}
+            <Form key={evidence.length + unlinked.length} method="post" className="mt-3 grid gap-3">
+              <input type="hidden" name="intent" value="addEvidence" />
+              <input type="hidden" name="outcomeId" value={outcome.id} />
+              <EvidenceFields prefix="new-evidence" criteria={outcome.criteria} t={t.portfolio} />
+              <div>
+                <Button type="submit">{to.addEvidence}</Button>
+              </div>
+            </Form>
+          </Card>
+        )}
+      </section>
+
+      <section className="mt-8" aria-labelledby="chapter-title">
+        <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
+          {to.chapterTitle}
+        </h2>
+        <div className="mt-3">
+          <ChapterEditor outcomeId={outcome.id} defaultValue={chapter} maxWords={maxWords} />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function EvidenceFields({
+  prefix,
+  criteria,
+  item,
+  t,
+}: {
+  prefix: string;
+  criteria: Criterion[];
+  item?: EvidenceItem;
+  t: PortfolioMessages;
+}) {
+  const linked = new Set(item?.criterionIds ?? []);
+  return (
+    <>
+      <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
+        <div>
+          <Label htmlFor={`${prefix}-title`}>{t.outcome.evidenceTitleLabel}</Label>
+          <Input
+            id={`${prefix}-title`}
+            name="title"
+            required
+            maxLength={LIMITS.title}
+            defaultValue={item?.title ?? ""}
+          />
+        </div>
+        <div>
+          <Label htmlFor={`${prefix}-kind`}>{t.outcome.evidenceKind}</Label>
+          <Select id={`${prefix}-kind`} name="kind" defaultValue={item?.kind ?? "other"}>
+            {EVIDENCE_KINDS.map((k) => (
+              <option key={k} value={k}>
+                {t.kinds[k]}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </div>
+      <EvidenceTextField id={`${prefix}-text`} defaultValue={item?.text ?? ""} />
+      {criteria.length > 0 && (
+        <fieldset>
+          <legend className="text-sm font-medium text-slate-700">
+            {t.outcome.evidenceCriteria}
+          </legend>
+          <div className="mt-2 space-y-1">
+            {criteria.map((c, i) => (
+              <label key={c.id} className="flex items-start gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  name="criterionIds"
+                  value={c.id}
+                  defaultChecked={linked.has(c.id)}
+                  className="mt-1"
+                />
+                <span>
+                  {i + 1}. {c.text}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+    </>
+  );
+}
+
+function EvidenceRow({
+  item,
+  outcomeId,
+  criteria,
+  t,
+}: {
+  item: EvidenceItem;
+  outcomeId: string;
+  criteria: Criterion[];
+  t: PortfolioMessages;
+}) {
+  return (
+    <li className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <details>
+        <summary className="cursor-pointer px-4 py-3">
+          <span className="font-medium text-slate-900">{item.title}</span>{" "}
+          <span className="text-sm text-slate-600">· {t.kinds[item.kind]}</span>
+        </summary>
+        <div className="border-t border-slate-100 p-4">
+          <Form method="post" className="grid gap-3">
+            <input type="hidden" name="intent" value="updateEvidence" />
+            <input type="hidden" name="outcomeId" value={outcomeId} />
+            <input type="hidden" name="evidenceId" value={item.id} />
+            <EvidenceFields prefix={`ev-${item.id}`} criteria={criteria} item={item} t={t} />
+            <div>
+              <Button type="submit" variant="secondary" size="sm">
+                {t.outcome.saveEvidence}
+              </Button>
+            </div>
+          </Form>
+          <Form method="post" className="mt-2">
+            <input type="hidden" name="intent" value="removeEvidence" />
+            <input type="hidden" name="evidenceId" value={item.id} />
+            <Button
+              type="submit"
+              variant="danger"
+              size="sm"
+              aria-label={`${t.outcome.removeEvidence}: ${item.title}`}
+            >
+              <Trash2 className="size-4" aria-hidden />
+              {t.outcome.removeEvidence}
+            </Button>
+          </Form>
+        </div>
+      </details>
+    </li>
+  );
+}

@@ -14,6 +14,13 @@ export default [
     route("utilities/rubric/:id", "routes/utilities.rubric.$id.tsx"),
     route("utilities/:slug", "routes/utilities.$slug.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
+    // BDB/BKE workplace (brief P25, 25.3): dossier list, overview, framework, one outcome.
+    ...prefix("portfolio", [
+      index("routes/portfolio._index.tsx"),
+      route(":id", "routes/portfolio.$id.tsx"),
+      route(":id/framework", "routes/portfolio.$id.framework.tsx"),
+      route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
+    ]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),
     route("context-profiles", "routes/context-profiles.tsx"),
     route("account", "routes/account.tsx"),

@@ -16,11 +16,16 @@ const gen = {
   createdAt: new Date("2026-05-01T10:00:00Z"),
 };
 
-function renderProjects(generations: (typeof gen)[]) {
+function renderProjects(
+  generations: (typeof gen)[],
+  dossiers: { id: string; name: string }[] = [],
+) {
   // createRoutesStub renders route components without injecting the loaderData
   // prop (that's framework-mode behaviour), so we pass it via a wrapper while
   // still rendering inside the stub's data router (needed for Form/useNavigation).
-  const props = { loaderData: { generations } } as unknown as ComponentProps<typeof Projects>;
+  const props = { loaderData: { generations, dossiers } } as unknown as ComponentProps<
+    typeof Projects
+  >;
   const Stub = createRoutesStub([{ path: "/", Component: () => <Projects {...props} /> }]);
   return render(<Stub initialEntries={["/"]} />);
 }
@@ -44,6 +49,16 @@ describe("Projects page", () => {
     const results = await axe(container, {
       rules: { "color-contrast": { enabled: false } },
     });
+    expect(results.violations).toEqual([]);
+  });
+
+  it("offers 'Toevoegen aan dossier' only when the teacher has a dossier (P25)", async () => {
+    renderProjects([gen]);
+    expect(screen.queryByRole("button", { name: "Toevoegen aan dossier" })).toBeNull();
+    const { container } = renderProjects([gen], [{ id: "d1", name: "Mijn BDB" }]);
+    expect(screen.getByRole("button", { name: "Toevoegen aan dossier" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Mijn BDB" })).toHaveValue("d1");
+    const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
     expect(results.violations).toEqual([]);
   });
 
