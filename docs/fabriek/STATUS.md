@@ -17,6 +17,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **P23.1 + 23.2 gemerged op 2026-11-04:** de plek voor hulpmiddelen, de cijferrekenaar en rubrics
+  bewaren (migratie 0012).
 - **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
 - **Tweede meting (#54), P24.1 (#53) en lege antwoorden (#55) gemerged op 2026-11-04:** Stage
   Assessment heet nu "Studentwerk beoordelen en feedback geven"; Claude 5.5 krijgt extra denkruimte,
@@ -67,8 +69,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
-- P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
-  (migratie 0012, tabel `rubrics`). 23.3 (rubric invullen in batches) volgt.
+- P23.3 (rubric invullen in batches, zonder AI): per student niveaus kiezen, met totaal, cijfer en
+  knock-out; namen en opmerkingen alleen in de browser; na "Batch afsluiten" bewaart de server alleen
+  de gekozen niveaus (migratie 0013, tabel `rubric_scores`) — PR open. De privacy-officer kijkt later
+  mee.
 
 - Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in een aparte PR (gekozen 2026-11-04), na #35.
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
@@ -112,6 +116,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 ## Open vragen
 
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
+- De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
 
 - Volgorde: eerst de hele vereenvoudiging, of na V1 al cursussen?
 

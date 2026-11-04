@@ -29,9 +29,20 @@ export interface RubricCriterion {
   knockout?: boolean;
 }
 
+/** How a rubric total becomes a grade (P23.3); maxPoints comes from the rubric itself. */
+export interface RubricGrade {
+  passPercent: number;
+  passGrade: number;
+  minGrade: number;
+  maxGrade: number;
+  decimals: 0 | 1 | 2;
+}
+
 export interface RubricData {
   criteria: RubricCriterion[];
   passRule?: "total" | "no-fail-on-knockout";
+  /** Absent = the grade calculator's defaults (DEFAULT_RUBRIC_GRADE). */
+  grade?: RubricGrade;
 }
 
 const points = z.number().finite().min(0).max(RUBRIC_LIMITS.points);
@@ -55,11 +66,25 @@ export const RubricCriterionSchema = z
   })
   .strict();
 
+export const RubricGradeSchema = z
+  .object({
+    passPercent: z.number().finite().gt(0).lt(100),
+    passGrade: z.number().finite().min(0).max(100),
+    minGrade: z.number().finite().min(0).max(100),
+    maxGrade: z.number().finite().min(0).max(100),
+    decimals: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  })
+  .strict()
+  .refine((g) => g.minGrade < g.passGrade && g.passGrade < g.maxGrade, {
+    message: "Grade order",
+  });
+
 /** The boundary for every rubric write: limits, UUID ids, unique ids, no unknown keys. */
 export const RubricDataSchema = z
   .object({
     criteria: z.array(RubricCriterionSchema).min(1).max(RUBRIC_LIMITS.criteria),
     passRule: z.enum(["total", "no-fail-on-knockout"]).optional(),
+    grade: RubricGradeSchema.optional(),
   })
   .strict()
   .refine(

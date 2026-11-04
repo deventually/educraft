@@ -112,6 +112,29 @@ describe("RubricEditor", () => {
     expect(String(writeText.mock.calls[0][0])).toMatch(/^\| Criterium \| Niveau 1 \|/);
   });
 
+  it("keeps the grade settings on the rubric, starting from the calculator's defaults", async () => {
+    const user = userEvent.setup();
+    const { posts } = renderEditor();
+    const group = await screen.findByRole("group", { name: "Van punten naar cijfer" });
+    expect(within(group).getByText(/OER van je opleiding/)).toBeInTheDocument();
+    const pass = within(group).getByLabelText("Cesuur (percentage van de punten)");
+    expect(pass).toHaveValue("55");
+    await user.clear(pass);
+    await user.type(pass, "60");
+    await user.tab();
+    await waitFor(() =>
+      expect(lastData(posts).grade).toEqual({
+        passPercent: 60,
+        passGrade: 5.5,
+        minGrade: 1,
+        maxGrade: 10,
+        decimals: 1,
+      }),
+    );
+    await user.selectOptions(within(group).getByLabelText("Decimalen"), "0");
+    await waitFor(() => expect(lastData(posts).grade.decimals).toBe(0));
+  });
+
   it("shows a preview table with a caption", async () => {
     renderEditor();
     expect(
