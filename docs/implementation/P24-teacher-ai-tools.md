@@ -5,7 +5,8 @@
 > Elke deelfase is **één PR met één doel**. **24.0 komt eerst**: zonder nulmeting wordt geen prompt
 > geschreven of gewijzigd. Poort per PR: `npm test && npm run typecheck && npm run check`, plus de
 > kwaliteitspoort hieronder. Branch vanaf `main`. Merge nooit zelf; alleen Bastiaan merget.
-> **Hangt af van:** 24.0 voor alles; 24.5 ook van P23.1 (het register voor hulpmiddelen).
+> **Hangt af van:** 24.0 voor alles; 24.1 ook van 24.0b; 24.5 ook van P23.1 (het register voor
+> hulpmiddelen).
 
 ## Context en doel
 
@@ -65,6 +66,39 @@ en Bastiaan draait `npm run eval -- --tool <id>` lokaal.
 - **Contextualization en Forum Autograder:** de audit van juli noemde ze zwak. In P3 zijn ze daarna
   herschreven (nu met Voice & Bounds), maar nooit gemeten. Ze worden alleen opnieuw aangepakt als de
   nulmeting ze onder de lat laat zien; dan elk een eigen PR met een meting ervoor en erna.
+
+## 24.0b — Anonimiseren vóór het versturen
+
+Bastiaan: namen mogen niet naar de LLM (BESLUIT-2026-11-04-9). Eén gedeelde stap in de browser, voor
+**elke** tool die studentwerk leest: nu Stage Assessment en Forumbijdragen beoordelen, straks 24.1.
+
+- **Waar:** de tekst wordt al in de browser uit het document gehaald (`app/lib/documents/extract.ts`).
+  Daarna, vóór `streamPost`, draait een pure module `app/lib/privacy/redact.ts`. De server en
+  `buildSystemPrompt` veranderen niet: de waarde blijft een gewone string.
+- **Welke tools:** een veld krijgt `redact: true` in de `InputField`-data (tools zijn data). Elk veld
+  met die vlag gaat door de stap; geen `if` per tool.
+- **1. De docent zegt wat weg moet.** Een kort lijstje: naam student, studentnummer, bedrijf,
+  begeleiders (vrij uit te breiden). Elk krijgt een code: `[STUDENT]`, `[STUDENTNUMMER]`, `[BEDRIJF]`,
+  `[BEGELEIDER-1]`. Bij het bedrijf kan een omschrijving mee ("een webshop in sportartikelen"), die
+  in de tekst achter de code komt, zodat de beoordeling klopt.
+- **2. Patronen zonder AI:** e-mailadressen, telefoonnummers, postcodes, IBAN en reeksen cijfers die op
+  een studentnummer lijken. Pure regexen, met tests per patroon. Ook naamvarianten: hoofdletters,
+  bezittelijke vorm ("Jans", "Jan's"), voornaam en achternaam los.
+- **3. Eerst nakijken.** Een voorbeeldweergave met elke vervanging gemarkeerd (niet alleen kleur:
+  ook een code-label, toegankelijk). De docent kan woorden bijselecteren of een vervanging
+  terugdraaien. Pas na "Verstuur geanonimiseerd" gaat de tekst eruit.
+- **4. Terugzetten.** De koppeling code ↔ naam blijft alleen in de browser (dezelfde
+  `app/lib/privacy/localNames.ts` als P23.3). In het resultaat zet de browser de namen terug; in
+  `generations` op de server staat de versie **met codes**.
+- **Prompt:** de beoordelingsprompts krijgen één regel: codes tussen vierkante haken zijn bewust
+  weggelaten gegevens; noem ze zoals ze staan en raad niet wie het is.
+- **Grenzen, eerlijk in de UI:** figuren en foto's worden niet geanonimiseerd; een spelfout in een
+  naam of een heel herkenbare projectbeschrijving kan erdoor glippen. De docent blijft
+  verantwoordelijk voor de controle.
+- **Testplan (RED):** `tests/privacy/redact.test.ts` (elke categorie, naamvarianten, geen
+  vervanging binnen een ander woord, terugzetten geeft de oorspronkelijke tekst);
+  `tests/components/RedactReview.test.tsx` (markeringen, bijselecteren, axe = 0); een test dat bij een
+  veld met `redact: true` het verzoek naar `/api/stream` geen enkele opgegeven naam bevat.
 
 ## 24.1 — Feedback op studentwerk (Stage Assessment breder)
 
@@ -163,9 +197,23 @@ en Bastiaan draait `npm run eval -- --tool <id>` lokaal.
 - **Extra eval-eis:** de student blijft in de rol over minstens acht beurten; de feedback citeert
   wat de docent echt zei.
 
+## Koppeling met de hulpmiddelen (P23)
+
+De app koppelt AI-tools en hulpmiddelen **zelf, vast en voorspelbaar**. De AI roept geen
+rekenhulp aan (geen function calling): dat is eenvoudiger, goedkoper en te testen.
+
+- **24.1:** kies een bewaarde rubric (P23.2) in plaats van een kader te plakken.
+- **24.2:** knop "Bewaar als rubric": de uitkomst wordt een rubric in P23.2. Daarvoor levert de
+  prompt naast de tabel een vast JSON-blok dat met `RubricDataSchema` wordt geparsed; mislukt dat, dan
+  blijft de knop weg en meldt de UI waarom.
+- **24.3:** de matrijs gaat naar de toetsmatrijs-teller zodra die er is (P20).
+- **24.5:** het hulpmiddel rekent, de AI legt uit (zie 24.5).
+
+Elke koppeling komt pas als beide kanten gemerged zijn, als kleine eigen PR.
+
 ## Volgorde
 
-24.0 → 24.1 → 24.2 → 24.3 → 24.4 → 24.5 (na P23.1) → 24.6 → 24.7 → 24.8. Hooguit twee werkers
+24.0 → 24.0b → 24.1 → 24.2 → 24.3 → 24.4 → 24.5 (na P23.1) → 24.6 → 24.7 → 24.8. Hooguit twee werkers
 tegelijk (WIP-limiet). 24.1 en 24.2 eerst, omdat ze samen met P23 de beoordelingsketen sluiten.
 
 ## Buiten bereik

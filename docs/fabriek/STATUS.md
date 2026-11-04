@@ -43,7 +43,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -7 — PR #36
+- Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -9 — PR #36
   open, wacht op Bastiaan.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 

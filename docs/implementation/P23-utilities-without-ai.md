@@ -32,10 +32,15 @@ Later (niet in deze brief): toetsanalyse-rekenaar (C), studielastrekenaar (D). D
    (`app/lib/utilities/`), zodat de AI-engine niet verandert.
 2. **Rekenen is pure code.** Elke berekening is een pure functie onder `app/lib/utilities/<id>/`,
    met unit-tests. Geen LLM, geen netwerk.
-3. **Geen studentgegevens opslaan.** Een rubric (het model) mag worden bewaard; een ingevulde
-   beoordeling **niet**. Invullen gebeurt in de browser; de docent kan het resultaat printen of
-   kopiëren. Er komt geen naam- of nummerveld voor de student. (Zie *Wat Bastiaan moet beslissen*,
-   vraag 2.)
+3. **Namen blijven op het apparaat van de docent; de server bewaart alleen anonieme scores**
+   (BESLUIT-2026-11-04-8). Een rubric (het model) wordt bewaard. Bij het invullen werkt de docent in
+   een **batch**: per student een naam (optioneel) en een code ("Student 7"). Namen staan alleen in
+   de browser (`localStorage`, per batch, in try/catch) en gaan nooit naar de server of een LLM; de
+   server ziet alleen de code. Bij **"Batch afsluiten"** wist de browser de namen en bewaart de server
+   alleen de gekozen niveaus per criterium, **zonder code, zonder opmerkingen en zonder datum per
+   invulling** (alleen de maand van de batch). Opmerkingen blijven alleen in de browser en verdwijnen
+   met de batch. De privacy-officer van de instelling bevestigt dit ontwerp één keer vóór de pilot
+   het gebruikt (pseudoniem is nog geen anoniem).
 4. **Verzin geen regel.** Er is geen landelijke regel voor cesuur of cijferberekening in het hbo; die
    staat in de OER van de opleiding. De rekenaar maakt elke keuze **instelbaar** en zegt dat in de
    UI ("Controleer of dit past bij de OER van je opleiding"). De standaardwaarden zijn alleen een
@@ -170,23 +175,36 @@ export interface RubricData { criteria: RubricCriterion[]; passRule?: "total" | 
   te werken; ongeldige data schrijft niets; `deleteUserCascade` ruimt op.
 - `tests/components/utilities/RubricEditor.test.tsx`: criterium en niveau toevoegen, axe = 0.
 
-## 23.3 — Een rubric invullen
+## 23.3 — Een rubric invullen, in batches
 
-- Op een bewaarde rubric: knop **"Invullen"**. Per criterium kiest de docent een niveau (radiogroep
+- Op een bewaarde rubric: knop **"Nieuwe batch"**. De docent voegt studenten toe (naam optioneel; de
+  app geeft elke student een code). Per student kiest de docent per criterium een niveau (radiogroep
   in een `fieldset`/`legend`), met een optioneel opmerkingenveld.
 - De uitkomst rekent mee: totaal, het cijfer via `pointsToGrade` van 23.1 (cijferinstellingen per
   rubric bewaard, met dezelfde standaardwaarden), en de slaagregel: is een `knockout`-criterium op het
   laagste niveau, dan "onvoldoende, ongeacht het totaal".
-- **Niets van de invulling wordt opgeslagen** (vast besluit 3). Bij weggaan met ingevulde waarden
-  vraagt de pagina of de docent zeker is. "Print" en "Kopieer" geven een nette uitdraai zonder
-  studentnaam.
-- Testplan (RED): `tests/utilities/rubric-score.test.ts` (totaal, gewichten, knock-out, koppeling
-  met de rekenaar) en `tests/components/utilities/RubricFill.test.tsx` (kiezen, uitkomst, geen
-  netwerkverzoek bij invullen, axe = 0).
+- **Namen en opmerkingen alleen in de browser** (vast besluit 3), in een kleine module
+  `app/lib/privacy/localNames.ts` (code ↔ naam per batch; alleen client). Op het scherm en in de print
+  zet de browser de naam terug bij de code. "Print" en "Kopieer" geven een overzicht met namen voor de
+  docent.
+- **"Batch afsluiten"** (met bevestiging): de browser wist de namen en opmerkingen van die batch; de
+  server slaat per invulling alleen `{ rubricId, month, levels: { criterionId: levelId }[] }` op, los
+  van elkaar en zonder code.
+- **Persistentie:** tabel `rubric_scores` (`id`, `userId`, `rubricId`, `month` als `YYYY-MM`,
+  `levelsJson`), in dezelfde migratie als 23.2 als die nog niet gedraaid is, anders een eigen migratie.
+  Repository per `userId` afgebakend; `deleteRubric` en `deleteUserCascade` ruimen op.
+- **Meten:** op de rubricpagina een klein overzicht per criterium (hoe vaak elk niveau gekozen is),
+  vanaf **vijf** afgesloten invullingen, zodat één student niet herkenbaar is.
+- **Testplan (RED):** `tests/utilities/rubric-score.test.ts` (totaal, gewichten, knock-out, koppeling
+  met de rekenaar); `tests/privacy/localNames.test.ts` (koppelen, terugzetten, wissen); een
+  repo-test dat `rubric_scores` geen naam, code of opmerking kan bevatten (het schema heeft er geen
+  veld voor en de Zod-grens weigert extra sleutels); een test dat het overzicht onder vijf invullingen
+  niets toont; `tests/components/utilities/RubricFill.test.tsx` (kiezen, uitkomst, **geen
+  netwerkverzoek met een naam erin**, afsluiten wist de namen, axe = 0).
 
 ## Buiten bereik
 
-- Ingevulde beoordelingen bewaren, studentnamen, exports naar een LMS.
+- Namen op de server, exports naar een LMS.
 - Een AI-tool die een rubric maakt (AI-tool 1 uit het onderzoek): dat wordt een aparte brief met de
   promptlat uit het onderzoek, en schrijft dan naar dit rubricmodel.
 - Toetsanalyse- en studielastrekenaar (C en D): een volgende brief.
@@ -196,8 +214,5 @@ export interface RubricData { criteria: RubricCriterion[]; passRule?: "total" | 
 
 1. **Waar staan de hulpmiddelen?** Besloten: als sectie op de toolspagina; het menu blijft vier
    items (BESLUIT-2026-11-04-6).
-2. **Ingevulde rubrics bewaren?** Open. Bastiaan wil ze bewaren als dat anoniem kan, voor
-   meetdoeleinden. Voorstel: bewaar alleen de gekozen niveaus per criterium (geen naam, geen
-   opmerkingen, geen datum per invulling), na een akkoord van de privacy-officer. Tot dat besluit er
-   is, bouwt 23.3 de invulling zonder opslag (vast besluit 3); opslaan kan er dan later bij zonder
-   iets over te doen.
+2. **Ingevulde rubrics bewaren?** Besloten: namen alleen lokaal, na afsluiten alleen anonieme
+   scores (BESLUIT-2026-11-04-8). Nog te doen door Bastiaan: de privacy-officer laten bevestigen.

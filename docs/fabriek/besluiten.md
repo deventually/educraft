@@ -131,3 +131,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   toetsvragen en toetsmatrijs, les voorbereiden, toetsanalyse, opdracht helder schrijven,
   differentiëren, lastig gesprek oefenen) en koos om eerst de nulmeting te draaien. Elke tool moet een
   meetbare kwaliteitslat halen. Uitwerking: brief P24.
+- **BESLUIT-2026-11-04-8:** **Ingevulde rubrics: namen lokaal, daarna anoniem.** Namen en opmerkingen
+  staan alleen in de browser van de docent en gaan nooit naar de server of een LLM. Bij het afsluiten
+  van een batch blijven alleen de gekozen niveaus per criterium over, zonder code en zonder datum per
+  invulling, voor meetdoeleinden. De privacy-officer bevestigt dit één keer. Brief P23.3.
+- **BESLUIT-2026-11-04-9:** **Anonimiseren vóór het versturen.** Elke tool die studentwerk leest,
+  vervangt in de browser namen en andere gegevens door codes voordat er iets naar de LLM gaat; de
+  docent geeft aan wat weg moet en kijkt het na, en de browser zet de namen in het resultaat terug.
+  Brief P24, stap 24.0b.
