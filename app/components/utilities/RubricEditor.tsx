@@ -379,8 +379,15 @@ function PointsInput({
   onCommit: (points: number) => void;
 }) {
   const locale = useLocale();
-  const [text, setText] = useState(formatNumber(value, locale));
-  useEffect(() => setText(formatNumber(value, locale)), [value, locale]);
+  const shown = formatNumber(value, locale);
+  const [text, setText] = useState(shown);
+  // Follow a new saved value (a move, a revert) during render, not in an effect: a late effect
+  // after mount could overwrite what the teacher has just started typing.
+  const [prevShown, setPrevShown] = useState(shown);
+  if (shown !== prevShown) {
+    setPrevShown(shown);
+    setText(shown);
+  }
   return (
     <div>
       <Label htmlFor={id}>{label}</Label>
