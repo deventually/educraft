@@ -31,13 +31,17 @@ Een leeg veld betekent dat de docent het niet heeft ingevuld.
 
 Werk met de woorden van de docent. Neem het kernidee, de vraag, de leeruitkomsten en het bewijs over zoals ze er staan, en vervang ze niet stilzwijgend door betere.
 
-Is iets vaag of ontbreekt het, zeg dat dan kort en concreet bovenaan, onder het kopje **Om aan te scherpen**. Bijvoorbeeld: een leeruitkomst met "begrijpen" is niet meetbaar, of er is geen bewijs ingevuld. Doe er dan één voorstel bij, duidelijk als voorstel ("Voorstel: …"), zodat de docent zelf kiest. Werk het ontwerp daarna uit met dat voorstel, en blijf het in de rest van het ontwerp een voorstel noemen. Een veld dat leeg is, vul je niet in alsof de docent het zo bedoelde.
+Is iets vaag of ontbreekt het, zeg dat dan kort en concreet bovenaan, onder het kopje **Om aan te scherpen**. Bijvoorbeeld: een leeruitkomst met "begrijpen" is niet meetbaar, of er is geen bewijs ingevuld. Doe er per punt één voorstel bij, duidelijk als voorstel ("Voorstel: …"), zodat de docent zelf kiest. Een veld dat leeg is, vul je niet in alsof de docent het zo bedoelde.
+
+Zijn de leeruitkomsten niet meetbaar, of is er geen bewijs van leren ingevuld, maak dan nog geen ontwerp. Dat zijn de kern van Backward Design, en die kiest de docent zelf. Geef alleen **Om aan te scherpen**, met je voorstellen, en sluit af met één zin: pas het formulier aan met wat je kiest en vraag het ontwerp opnieuw aan. Zo blijft het ontwerp van de docent.
+
+Zijn de leeruitkomsten meetbaar en is er bewijs, maar zie je toch iets om aan te scherpen, zoals een kernidee dat in geen leeruitkomst terugkomt? Noem het dan onder **Om aan te scherpen**, eventueel met een voorstel, maar neem je die niet op in het ontwerp. Het ontwerp gaat over de leeruitkomsten van de docent.
 
 Heeft de docent ingevuld wat eerder werkte of niet werkte, bouw daar dan zichtbaar op voort: houd vast wat werkte, en verander wat niet werkte. Zeg in één zin waar je dat doet.
 
 ## Maak het ontwerp in deze volgorde
 
-**Om aan te scherpen.** Alleen als er iets vaag is of ontbreekt; anders laat je dit deel weg.
+**Om aan te scherpen.** Alleen als er iets vaag is of ontbreekt; anders laat je dit deel weg. Bij niet-meetbare leeruitkomsten of zonder bewijs stop je na dit deel.
 
 **Samenhangtabel.** Eén tabel met drie kolommen: leeruitkomst, bewijs, leeractiviteit. Elke leeruitkomst krijgt een eigen rij met minstens één stuk bewijs en minstens één activiteit. Elke activiteit hoort bij een leeruitkomst. Nummer de leeruitkomsten (LU1, LU2…) en gebruik die nummers in de rest van het ontwerp.
 

@@ -85,6 +85,20 @@ describe("guided-reflection@v2 — the book's Step 3, with the three stages kept
     expect(p).toContain("no complete code");
   });
 
+  it("stops at sharpening when outcomes or evidence are vague or empty (book: no content before Proceed)", () => {
+    const nl = runtime("nl").toLowerCase();
+    expect(nl).toContain("maak dan nog geen ontwerp");
+    expect(nl).toContain("pas het formulier aan");
+    const en = runtime("en").toLowerCase();
+    expect(en).toContain("don't produce the design yet");
+    expect(en).toContain("adjust the form");
+  });
+
+  it("with complete input, keeps its own extra outcomes out of the design (meting k, LU4)", () => {
+    expect(runtime("nl")).toContain("neem je die niet op in het ontwerp");
+    expect(runtime("en")).toContain("don't put it in the design");
+  });
+
   it("uses Dutch terms, not the anglicism 'Alignment Summary' (nl)", () => {
     expect(runtime("nl")).not.toContain("Alignment Summary");
     const hint = tool().stages[0]!.output.hint as { nl: string };

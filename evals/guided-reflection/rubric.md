@@ -34,6 +34,12 @@ Judge the output as a Backward Design plan for a teacher. Score each shared crit
 
 When the teacher's input is vague, reward an output that says so and names what the
 teacher should sharpen, and that keeps their wording rather than silently replacing it.
+In the book the AI asks clarifying questions and produces nothing before "Proceed"
+(Step 1, Guardrails). So when the learning outcomes are not measurable or no evidence is
+given, the right output stops after naming what to sharpen, with marked suggestions,
+and asks the teacher to adjust the form: score that as full task fidelity and format,
+and don't penalise the missing deliverables or stages. Suggestions listed only under
+such a sharpening section are not invented outcomes.
 
 ## Hard checks
 

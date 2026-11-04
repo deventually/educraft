@@ -28,6 +28,10 @@ describe("guided-reflection eval follows the book (Benedict & Thayer)", () => {
     );
   });
 
+  it("rewards stopping to sharpen vague core input instead of designing on own proposals", () => {
+    expect(rubric).toMatch(/stops? after naming what to sharpen/i);
+  });
+
   it("has a case with vague teacher input, where the tool must not fill the gap itself", () => {
     expect(cases.some((c) => /vague/.test(c.id))).toBe(true);
   });
