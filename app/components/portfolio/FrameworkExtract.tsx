@@ -21,12 +21,17 @@ export function FrameworkExtract({ replaces }: { replaces: boolean }) {
   const id = useId();
   const helpId = `${id}-help`;
 
+  // Several files at once (an institution may publish one PDF per learning
+  // outcome); each file's text is appended, so pasted text is kept.
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     try {
-      const { text } = await fileToText(file);
-      setValue(text.slice(0, LIMITS.documentText));
+      const texts: string[] = [];
+      for (const file of files) texts.push((await fileToText(file)).text.trim());
+      setValue((prev) =>
+        [prev.trim(), ...texts].filter(Boolean).join("\n\n").slice(0, LIMITS.documentText),
+      );
       setFailed(false);
     } catch {
       setFailed(true);
@@ -59,6 +64,7 @@ export function FrameworkExtract({ replaces }: { replaces: boolean }) {
             ref={fileRef}
             id={`${id}-file`}
             type="file"
+            multiple
             accept={DOC_ACCEPT_ATTR}
             aria-describedby={helpId}
             onChange={onFile}

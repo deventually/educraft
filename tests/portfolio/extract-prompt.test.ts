@@ -23,6 +23,13 @@ describe("portfolio-framework@v1 prompt", () => {
     for (const lang of ["nl", "en"] as const) expect(p.runtime[lang]).toContain("`notes`");
   });
 
+  it("keeps only mandatory evidence, with its condition, and leaves suggestions out", () => {
+    expect(p.runtime.nl).toMatch(/voorwaarde/i);
+    expect(p.runtime.nl).toMatch(/toetssuggestie/i);
+    expect(p.runtime.en).toMatch(/condition/i);
+    expect(p.runtime.en).toMatch(/suggest/i);
+  });
+
   it("keeps the two languages structurally the same", () => {
     const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
     expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));

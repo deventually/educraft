@@ -155,7 +155,7 @@ describe("Portfolio framework", () => {
       canExtract: true,
     });
     expect(screen.getByLabelText("Tekst van het beoordelingsformulier")).toBeInTheDocument();
-    expect(screen.getByLabelText("Of kies het formulier (PDF of Word)")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Of kies het formulier/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Kader uit formulier halen" })).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });

@@ -96,7 +96,7 @@ export const portfolio: Messages["portfolio"] = {
         "The framework is already in use: statuses, evidence or chapters depend on it. Change it by hand instead.",
       quota: "Daily limit reached; try again tomorrow.",
     },
-    extractFile: "Or choose the form (PDF or Word)",
+    extractFile: "Or choose the form (PDF or Word, several files allowed)",
     extractFileFailed: "This file could not be read. Paste the text yourself instead.",
     extractFileHelp:
       "The file is read on your computer and not stored. Only the text goes to the AI model.",

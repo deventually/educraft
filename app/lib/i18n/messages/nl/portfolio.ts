@@ -95,7 +95,7 @@ export const portfolio = {
         "Het kader is al in gebruik: er hangen statussen, bewijs of hoofdstukken aan. Pas het daarom met de hand aan.",
       quota: "Daglimiet bereikt; morgen kan het weer.",
     },
-    extractFile: "Of kies het formulier (PDF of Word)",
+    extractFile: "Of kies het formulier (PDF of Word, ook meerdere bestanden)",
     extractFileFailed: "Dit bestand kon niet worden gelezen. Plak de tekst dan zelf.",
     extractFileHelp:
       "Het bestand wordt op je computer gelezen en niet bewaard. Alleen de tekst gaat naar het AI-model.",
