@@ -55,6 +55,7 @@ export const forumAutograder: Tool = {
   inputs: [
     {
       name: "discussionThread",
+      redact: true,
       label: {
         nl: "Forumthread / discussie",
         en: "Forum thread / discussion",

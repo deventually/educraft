@@ -18,6 +18,13 @@ import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { DocumentViewer } from "./documents/DocumentViewer";
 import { extractQuotes } from "~/lib/documents/locate";
+import { restoreNames, type CodeTable } from "~/lib/privacy/redact";
+import {
+  RedactReview,
+  emptyRedactDraft,
+  type RedactDraft,
+  type RedactResult,
+} from "./privacy/RedactReview";
 
 interface Props {
   tool: Tool;
@@ -64,15 +71,39 @@ export function GeneratorView({
   const [originals, setOriginals] = useState<Record<string, File[]>>({});
   const docField = tool.inputs.find((f) => f.kind === "document" && originals[f.name]?.length);
   const docFiles = docField ? originals[docField.name] : undefined;
-  const quotes = docFiles && output && !streaming ? extractQuotes(output) : [];
+  // Anonymise step (24.0b) for fields marked `redact: true`. The code → name
+  // table stays in this component's memory; the server only ever sees codes.
+  const [reviewing, setReviewing] = useState(false);
+  const [redactDraft, setRedactDraft] = useState<RedactDraft>(emptyRedactDraft);
+  const [codes, setCodes] = useState<CodeTable | null>(null);
+  const redactFields = tool.inputs.filter(
+    (f) => f.redact && String(values[f.name] ?? "").trim() !== "",
+  );
+  const shown = codes ? restoreNames(output, codes) : output;
+  const quotes = docFiles && shown && !streaming ? extractQuotes(shown) : [];
 
-  async function generate() {
+  function generate() {
     const missing = missingRequired(tool.inputs, values);
     if (missing.length) {
       setError(`${t.tool.required}: ${missing.map((f) => loc(f.label, locale)).join(", ")}`);
       return;
     }
     setError(null);
+    if (redactFields.length > 0) {
+      setReviewing(true);
+      return;
+    }
+    setCodes(null);
+    void send({});
+  }
+
+  function sendRedacted(result: RedactResult) {
+    setReviewing(false);
+    setCodes(result.codes);
+    void send(result.values);
+  }
+
+  async function send(overrides: Record<string, string>) {
     setOutput("");
     setStreaming(true);
     const ctrl = new AbortController();
@@ -94,7 +125,7 @@ export function GeneratorView({
     }
 
     // Image fields are sent separately (above); drop them from the prompt values.
-    const valuesToSend = toTemplateValues(values);
+    const valuesToSend = { ...toTemplateValues(values), ...overrides };
 
     await streamPost(
       "/api/stream",
@@ -155,7 +186,7 @@ export function GeneratorView({
               <Square className="size-4" /> {t.tool.stop}
             </Button>
           ) : (
-            <Button onClick={generate}>
+            <Button onClick={generate} disabled={reviewing}>
               <Sparkles className="size-4" /> {t.tool.generate}
             </Button>
           )}
@@ -172,10 +203,13 @@ export function GeneratorView({
         <div
           className={cn(
             "min-h-0 flex-1",
-            docFiles && (output || streaming) && "grid gap-3 2xl:grid-cols-2",
+            docFiles &&
+              (output || streaming) &&
+              !reviewing &&
+              "grid gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1",
           )}
         >
-          {docFiles && docField && (
+          {docFiles && docField && !reviewing && (
             <div className={cn("min-h-0", (output || streaming) && "2xl:order-2")}>
               <DocumentViewer
                 files={docFiles}
@@ -184,9 +218,23 @@ export function GeneratorView({
               />
             </div>
           )}
-          {output || streaming ? (
+          {reviewing ? (
+            <div className="h-full min-h-0 overflow-y-auto">
+              <RedactReview
+                fields={redactFields.map((f) => ({
+                  name: f.name,
+                  label: loc(f.label, locale),
+                  text: String(values[f.name] ?? ""),
+                }))}
+                draft={redactDraft}
+                onDraft={setRedactDraft}
+                onConfirm={sendRedacted}
+                onCancel={() => setReviewing(false)}
+              />
+            </div>
+          ) : output || streaming ? (
             <ResultPanel
-              markdown={output}
+              markdown={shown}
               filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
               streaming={streaming}
               fill
@@ -199,6 +247,9 @@ export function GeneratorView({
         </div>
         {/* Persistent AI-transparency notice; stronger "teacher decides" variant
             for grading tools, driven by registry data. */}
+        {codes && output && !reviewing && (
+          <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
+        )}
         <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="shrink-0" />
       </div>
     </div>
