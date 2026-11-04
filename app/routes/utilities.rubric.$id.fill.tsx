@@ -37,7 +37,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: data ? `${data.rubric.name} — LimeOnIt` : "LimeOnIt" }];
 }
 
