@@ -26,6 +26,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   V1–V3 hieronder.
 - 2026-11-03: "Ik denk wel dat de admin modellen moet kunnen toewijzen … per instelling en kan de
   admin dat per docent overrulen." → onderdeel van V2.
+- 2026-11-04: "welke tools we nog meer kunnen maken/aanbieden … Wat missen we allemaal?" →
+  onderzoek (Claude Doc, 2026-11-04). Daarna: "nuttige tools … die geen LLM nodig hebben" en "Ja geef
+  ze een eigen plek" → BESLUIT-2026-11-04-5, brief P23. Daarna: tools 1 t/m 8 en eerst de nulmeting →
+  BESLUIT-2026-11-04-7, brief P24.
 - 2026-11-03: "Ik wil ook niet bij beheer op elke tabel regel een opslaan knop hebben. Of eentje
   onderop, of hij slaat automatisch op" → V2: automatisch opslaan met melding.
 - 2026-11-03: "Ik mis de stageverslagen checker" (hij heet 'Beoordelingsassistent — stage &
@@ -39,11 +43,18 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
+  open, wacht op Bastiaan.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
 
 ## Volgende (voorgestelde volgorde)
+
+0. **Hulpmiddelen zonder AI** (brief P23): de plek, de cijferrekenaar, rubrics bewaren en invullen.
+   Drie PR's. Klein en zonder risico, kan naast de rest.
+0. **Acht nieuwe AI-tools** (brief P24): eerst de nulmeting (24.0, Bastiaan draait hem), dan één PR
+   per tool met een meetbare kwaliteitslat.
 
 1. **Vereenvoudiging V1** (brief P17): klaar, gemerged en uitgerold op 2026-11-03.
 2. **Vereenvoudiging V2** (brief P18): klaar en uitgerold op 2026-11-04. Het omvatte beheer naar vier pagina's die automatisch
