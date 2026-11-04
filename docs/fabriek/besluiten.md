@@ -189,3 +189,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   die wijziging terug. Na twee rondes stopt het en staat de uitslag eerlijk in de PR. Vervangt
   voor de P24-tools de lat "minstens het nulmetingsgemiddelde van Stage Assessment (≈ 5,0) per
   criterium" uit de brief. Bastiaan, 2026-11-04.
+- **BESLUIT-2026-11-04-25:** **Metingen goedkoper: tussenrondes met 1 run, en alles via de Batch
+  API.** Alleen de eindmeting van een tool draait met 3 runs. `npm run eval -- --batch` stuurt
+  genereren en beoordelen via de Message Batches API van Anthropic, die de helft kost; de uitslag
+  duurt dan iets langer. Samen ongeveer 60–70% minder per tool. Bastiaan, 2026-11-04.

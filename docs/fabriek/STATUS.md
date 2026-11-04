@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Nu
 
+- **Beoordelingsmodel: een gebrek telt bij één criterium (#71) gemerged op 2026-11-04:** na meting q;
+  meting s zonder regressie.
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 16 tools (10 voor
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
@@ -83,14 +85,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
   Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
-  bekende fout — PR open, meting volgt.
-- Een test bewaakt dat elk geïmporteerd pakket zelf in `package.json` staat (bovenop #68) — PR open.
-- Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
-  bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
-  pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
-  Architect en Socratische partner komen uit Van Schaack & Sarlo, niet uit "Automating Gagné".
-  Contextualisatie ontbreekt in het PDF; de prompt komt uit de webversie (Guethler). De runtime-
-  prompts veranderen niet, er is dus niets gemeten — PR open.
+  bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
+  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte — PR open.
 
 ## Wacht op jou
 
