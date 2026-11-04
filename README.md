@@ -18,70 +18,48 @@ npm run dev                 # http://localhost:5173
 Zonder `ANTHROPIC_API_KEY` start de app wel, maar genereren geeft een nette
 foutmelding. Een key haal je op via https://console.anthropic.com/.
 
-## Tools (MVP — fase 1)
+## Waar we staan (november 2026)
 
-| Tool | Methode | Type |
-|------|---------|------|
-| Begeleide reflectie & Backward Design | Backward Design | generator (één fase) |
-| Cognitive Architect | Science of Learning (Gagné/Rosenshine) | generator (vier fasen) |
-| Authentieke toetsing | Backward Design + VALUE rubrics | generator (één fase) |
-| ARCS Reactor | ARCS-V motivatiemodel | generator (één fase) |
+LimeOnIt draait als pilot met docenten in het hbo. De app is tweetalig (NL/EN).
 
-De prompts zijn afkomstig uit de appendices van het boek (CC BY 4.0) en
-aangepast (interview → één keer genereren, en vertaalbaar naar het Nederlands).
-De **originele, woordelijke prompt** is per tool zichtbaar via "Bekijk originele
-prompt", en de bron/attributie staat in de tool-header en op `/about`.
+- **15 AI-tools**: de 14 uit het boek plus één eigen tool (studentwerk beoordelen tegen de rubric
+  van de docent). Negen tools werken voor de docent, zes zijn tutors die de docent klaarzet voor
+  studenten. Zie [Tools](wiki/Tools.md).
+- **BDB/BKE-werkplaats** (`/portfolio`): een beginnende docent bouwt hier het dossier voor de BDB
+  en de BKE op, met een coach en export naar Word.
+- **Hulpmiddelen zonder AI**: een cijferrekenaar en rubrics bewaren.
+- **Privacy**: documenten worden in de browser gelezen en studentgegevens kunnen worden
+  geanonimiseerd voordat er iets naar de AI gaat.
+- **Beheer**: uitnodigingen, gebruikers, tools, modellen en context per instelling, met een
+  superbeheerder.
+- **Modellen**: standaard Claude; lokale modellen (Ollama, LM Studio) in ontwikkelmodus.
 
 ## Architectuur
 
-React Router 7 (framework mode, SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle).
+React Router 7 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) · AI SDK.
 
-```
-app/
-  routes/            home · tool · settings · about · projects · api.stream (SSE)
-  components/        AppShell · DynamicForm · GeneratorView · StageStepper · ResultPanel · ui
-  lib/
-    registry/        types.ts (de Tool-abstractie) · validate.ts · tools/<tool>.ts
-    prompts/         <tool>.prompt.ts  (woordelijke + aangepaste prompt) · index.ts (PROMPTS-map)
-    ai/              types · models (catalogus) · provider · adapters/anthropic · sse
-    template/        interpolate · buildSystemPrompt  (prompt + context + taal + fasen samenvoegen)
-    context/         types · hboi  (hbo-i contextprofiel)
-    i18n/nl.ts       UI-teksten
-  server/            env · db (auto-schema) · schema · repositories/*
-```
-
-### Hoe een tool werkt
-
-Elke tool is **data**, geen code. Een `Tool` (zie `app/lib/registry/types.ts`)
-beschrijft: gebruikerstype, interactiemodus, invoervelden (`inputs` → het
-formulier wordt automatisch gerenderd), en één of meer `stages` met elk een
-`systemPromptId`. `stages` is de unificator: een one-shot generator heeft één
-fase, de Cognitive Architect vier (waarbij latere fasen via `consumes` de uitvoer
-van eerdere fasen injecteren). Een nieuwe tool toevoegen = een promptbestand +
-een registry-entry, daarna in `app/lib/registry/index.ts` registreren.
-
-### Een nieuwe tool toevoegen
-
-1. `app/lib/prompts/<tool>.prompt.ts` — exporteer een `PromptDef` met de
-   woordelijke (`verbatim`) en de runtime (`runtime`) prompt; voeg toe aan
-   `app/lib/prompts/index.ts`.
-2. `app/lib/registry/tools/<tool>.ts` — definieer de `Tool` (velden + fasen).
-3. Registreer in `app/lib/registry/index.ts`.
-4. `npm test` valideert automatisch dat elke `{{placeholder}}` een bron heeft.
+Elke tool is **data**, geen code: een registry-entry met invoervelden en één of meer fasen, plus
+een tweetalig promptbestand. Een nieuwe tool toevoegen is dus data toevoegen, test-first. Meer in
+de [wiki](wiki/Home.md): [Architectuur](wiki/Architecture.md),
+[Een tool toevoegen](wiki/Adding-a-Tool-or-Pack.md). Werkafspraken voor ontwikkelaars en AI-agents
+staan in [`AGENTS.md`](AGENTS.md).
 
 ## Tests & checks
 
 ```bash
-npm test           # registry-validatie, interpolatie, buildSystemPrompt
-npm run typecheck  # react-router typegen + tsc
-npm run build      # productiebuild
+npm test && npm run typecheck && npm run check   # de poort: alle drie groen
+npm run eval                                     # promptkwaliteit meten (ANTHROPIC_API_KEY nodig)
 ```
 
 ## Roadmap
 
-- **Fase 2** — overige generators (Bloom by Design, Forum Autograder, wiskunde-nakijken met beeldinvoer) + OpenAI/Gemini-adapters.
-- **Fase 3** — studentgerichte chatbots (MentorAI, Think-Pair-Share, Socratische tutor) via de bestaande chat-infrastructuur.
-- **Fase 4** — evaluatie met synthetische studenten, multi-model vergelijking, PDF/DOCX-export, deelbare links.
+Richting, geen belofte. De volledige roadmap staat in [wiki/Roadmap.md](wiki/Roadmap.md).
+
+- **Nu:** de acht nieuwe AI-tools, één voor één met een meetbare kwaliteitslat, en rubrics in
+  batches invullen.
+- **Daarna:** de docentkant eenvoudiger maken, cursussen als rode draad, en het vervolg op de
+  BDB/BKE-werkplaats.
+- **Later:** rolagenten, de docentweek, praktijksimulaties en spraak.
 
 ## Licentie & attributie
 

@@ -21,32 +21,43 @@ the [prompt pipeline](Architecture.md#the-prompt-pipeline).
 
 ---
 
-## Current tools (MVP — phase 1)
+## Current tools (15)
 
-| Tool | Method | Type |
-|------|--------|------|
-| **Begeleide reflectie & Backward Design** | Backward Design | generator (1 stage) |
-| **Cognitive Architect** | Science of Learning (Gagné / Rosenshine) | generator (4 stages) |
-| **Authentieke toetsing** | Backward Design + VALUE rubrics | generator (1 stage) |
-| **ARCS Reactor** | ARCS-V motivation model | generator (1 stage) |
+All 14 tools from the book plus one original are shipped. *For* = who the tool speaks to
+(`Tool.userType`): the teacher, or the learner through a tutor the teacher sets up.
+
+| # | Chapter | Tool (slug) | Mode | For |
+|---|---------|-------------|------|-----|
+| 1 | From Model to Mentor | MentorAI (`mentorai`, prompt `@v2`: the book's Cognitive Apprenticeship Coach) | chat | learner |
+| 2 | Contextualization | Contextualization (`contextualization`) | one-shot | teacher |
+| 3 | Think-Pair-Share | Think-Pair-Share (`think-pair-share`) | chat | learner |
+| 4 | Guided Reflection | Guided Reflection (`guided-reflection`) | one-shot | teacher |
+| 5 | Dialogic Encounters | Dialogic Encounters (`dialogic-encounters`) | chat | learner |
+| 6 | Forum Autograder | Forum Autograder (`forum-autograder`) | one-shot | teacher |
+| 7 | Handwritten Math | Math Grading (`math-grading`) | one-shot + image | teacher |
+| 8 | Authentic Assessment | Authentic Assessment (`authentic-assessment`) | one-shot | teacher |
+| 9 | ARCS Reactor | ARCS Reactor (`arcs-reactor`) | one-shot | teacher |
+| 10 | Bloom by Design | Bloom by Design (`bloom-by-design`) | chat | teacher |
+| 11 | Peer Tutoring | Peer Tutoring (`peer-tutoring`) | chat | learner |
+| 12 | Automating Gagné | Cognitive Architect (`cognitive-architect`) | multi-stage (4) | teacher |
+| 13 | Scaffolding | Scaffolding Feedback (`scaffolding-feedback`) | chat | learner |
+| 14 | Oracle to Socratic | Socratic Partner (`socratic-partner`) | chat | learner |
+| 15 | — (original) | Assess student work (`stage-assessment`, prompt `@v2`) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later
 stages consuming earlier artifacts (the Instructional Coordinates Document, the
 Student System Prompt).
 
+Next to the tools, the **BDB/BKE workplace** (`/portfolio`) helps a teacher build their
+teaching-qualification dossier (see [Architecture](Architecture.md#feature-modules)).
+
 ---
 
-## Planned tools (roadmap)
+## Planned tools
 
-See the [Roadmap](Roadmap.md) for sequencing.
-
-- **Instructor generators:** Bloom by Design, Forum Autograder, handwritten-math
-  marking (with image input).
-- **Student-facing tools (phase 3):** MentorAI, Think-Pair-Share, Socratic tutor —
-  built on the existing chat infrastructure. This is where
-  [compliance & safeguarding](Internationalization.md#5-compliance--safeguarding)
-  for minors becomes load-bearing.
+See the [Roadmap](Roadmap.md): utilities without AI (brief P23) and eight new AI tools
+(brief P24).
 
 ---
 
