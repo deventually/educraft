@@ -58,6 +58,7 @@
     "@types/react-dom": "^19.2.3",
     "drizzle-kit": "^0.31.1",
     "happy-dom": "^21.0.4",
+    "jszip": "^3.10.2",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
