@@ -30,22 +30,12 @@ export const en: Messages = {
     closeMenu: "Close menu",
     skipToContent: "Skip to main content",
   },
-  badge: {
-    instructor: "Instructor",
-    student: "Student",
-  },
   home: {
     heading: "Choose a tool",
     intro:
       "Each tool turns an evidence-based teaching method from The Pedagogical Promptbook into a working tool. Designed for Dutch higher professional education (hbo).",
-    filterAll: "All",
-    instructor: "For instructors",
-    student: "For students",
     comingSoon: "Coming soon",
     search: "Search by name, method or task…",
-    allTypes: "All types",
-    generators: "Generators",
-    chatbots: "Chatbots",
     resultCount: "{count} tools",
     resultCountOne: "{count} tool",
     noResults: "No tools found. Try a different search or filter.",
@@ -53,22 +43,17 @@ export const en: Messages = {
     backToGoals: "Back to goal view",
     stages: "{count} stages",
     mode: {
-      generator: "Generator",
-      chatbot: "Chatbot",
+      generator: "Form",
+      chatbot: "Chat",
     },
     a11y: {
       search: "Search tools",
       clearSearch: "Clear search",
-      audience: "Filter by audience",
-      type: "Filter by type",
-      resultView: "Result display",
-      grid: "Grid",
-      list: "List",
       goalRegion: "Tools by teaching goal",
       resultsRegion: "Search results",
       open: "Open tool",
-      generator: "generator",
-      chatbot: "chatbot",
+      generator: "form",
+      chatbot: "chat",
     },
   },
   tool: {
@@ -213,7 +198,6 @@ export const en: Messages = {
     licenseBody2: "(DOI {doi}) and are licensed under",
     licenseBody3:
       ". This means they may be used and adapted freely (including translation), provided they are properly attributed. We show the source and the original prompt text for every tool.",
-    toolsHeading: "Available tools",
   },
   footer: {
     tagline: "Design evidence-based education with generative AI.",

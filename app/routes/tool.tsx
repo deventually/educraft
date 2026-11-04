@@ -185,9 +185,6 @@ function ToolHeader({
               <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
                 {loc(tool.name, locale)}
               </h1>
-              <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700">
-                {tool.userType === "instructor" ? t.badge.instructor : t.badge.student}
-              </span>
               {multiStage ? (
                 <StagePill count={tool.stages.length} t={t} />
               ) : (

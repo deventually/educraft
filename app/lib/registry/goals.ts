@@ -1,5 +1,4 @@
 import type { LocalizedText } from "~/lib/i18n/localized";
-import type { UserType } from "./types";
 
 /**
  * Teaching-goal taxonomy — the findability layer for the Tools/Home page.
@@ -21,8 +20,6 @@ export type TeachingGoal = "design" | "assess" | "motivate" | "coach" | "discuss
 export interface Goal {
   /** Lucide icon name (resolved via ToolIcon). */
   icon: string;
-  /** Whose work this goal serves — drives the section's accent + badge. */
-  audience: UserType;
   name: LocalizedText;
   blurb: LocalizedText;
 }
@@ -31,7 +28,6 @@ export interface Goal {
 export const GOALS: Record<TeachingGoal, Goal> = {
   design: {
     icon: "compass",
-    audience: "instructor",
     name: { nl: "Plannen & ontwerpen", en: "Plan & design" },
     blurb: {
       nl: "Bouw lessen, cursussen en AI-leeractiviteiten op vanuit je leeruitkomsten.",
@@ -40,7 +36,6 @@ export const GOALS: Record<TeachingGoal, Goal> = {
   },
   assess: {
     icon: "clipboard-check",
-    audience: "instructor",
     name: { nl: "Beoordelen & feedback", en: "Assess & give feedback" },
     blurb: {
       nl: "Ontwerp authentieke toetsen en beoordeel werk met bruikbare, eerlijke feedback.",
@@ -49,7 +44,6 @@ export const GOALS: Record<TeachingGoal, Goal> = {
   },
   motivate: {
     icon: "zap",
-    audience: "instructor",
     name: { nl: "Motiveren & activeren", en: "Motivate & engage" },
     blurb: {
       nl: "Diagnosticeer een motivatiebarrière en krijg concrete interventies.",
@@ -58,20 +52,18 @@ export const GOALS: Record<TeachingGoal, Goal> = {
   },
   coach: {
     icon: "brain",
-    audience: "student",
-    name: { nl: "Begeleiden & coachen", en: "Coach & mentor" },
+    name: { nl: "Zelf leren met een coach", en: "Learn with a coach" },
     blurb: {
-      nl: "Zet een AI-leermaatje in dat studenten stap voor stap begeleidt.",
-      en: "Deploy an AI study companion that guides students step by step.",
+      nl: "Oefen zelf met een AI-leermaatje dat je stap voor stap begeleidt, bijvoorbeeld voor je BDB of BKE.",
+      en: "Practise with an AI study companion that guides you step by step, for example for a teaching qualification.",
     },
   },
   discuss: {
     icon: "users-round",
-    audience: "student",
     name: { nl: "Samen denken & bevragen", en: "Think & question together" },
     blurb: {
-      nl: "Laat studenten dieper denken door dialoog en kritische vragen.",
-      en: "Let students think more deeply through dialogue and critical questioning.",
+      nl: "Denk dieper na over je vak en je onderwijs, met een AI-gesprekspartner die doorvraagt.",
+      en: "Think more deeply about your subject and your teaching, with an AI partner that keeps asking questions.",
     },
   },
 };

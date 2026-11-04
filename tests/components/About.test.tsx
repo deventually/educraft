@@ -1,30 +1,23 @@
 import { describe, it, expect } from "vitest";
-import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import About from "~/routes/about";
 
-const tools = [
-  { name: { nl: "Docent Tool", en: "Instructor Tool" }, userType: "instructor" as const },
-  { name: { nl: "Student Tool", en: "Student Tool" }, userType: "student" as const },
-];
-
 function renderAbout() {
   // createRoutesStub does not inject the loaderData prop, so pass it via a
   // wrapper while keeping the stub's router context (useLocale → root loader).
-  const props = { loaderData: { tools } } as unknown as ComponentProps<typeof About>;
-  const Stub = createRoutesStub([{ path: "/", Component: () => <About {...props} /> }]);
+
+  const Stub = createRoutesStub([{ path: "/", Component: () => <About /> }]);
   return render(<Stub initialEntries={["/"]} />);
 }
 
 describe("About / tools catalog", () => {
-  it("groups tools by audience instead of phase", () => {
+  it("lists no tools (the start page does)", () => {
     renderAbout();
-    expect(screen.getByText("Voor docenten")).toBeInTheDocument();
-    expect(screen.getByText("Voor studenten")).toBeInTheDocument();
-    expect(screen.getByText("Docent Tool")).toBeInTheDocument();
-    expect(screen.getByText("Student Tool")).toBeInTheDocument();
+    expect(screen.queryByText("Beschikbare tools")).toBeNull();
+    expect(screen.queryByText("Voor docenten")).toBeNull();
+    expect(screen.queryByText("Voor studenten")).toBeNull();
   });
 
   it("no longer shows phase or coming-soon labels", () => {
