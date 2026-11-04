@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -163,6 +163,31 @@ describe("Home / tools page", () => {
     await user.type(screen.getByRole("searchbox"), "zzzznotathing");
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText("0 tools")).toBeInTheDocument();
+  });
+
+  it("shows a 'Hulpmiddelen' section below the tools, with a card per utility", () => {
+    renderHome();
+    const section = screen.getByRole("region", { name: "Hulpmiddelen" });
+    expect(
+      within(section).getByRole("link", { name: /Punten omrekenen naar een cijfer/ }),
+    ).toHaveAttribute("href", "/utilities/grade-calculator");
+    expect(within(section).getByRole("link", { name: "Alle hulpmiddelen" })).toHaveAttribute(
+      "href",
+      "/utilities",
+    );
+    // Below the goal sections.
+    const goals = screen.getByRole("region", { name: "Tools per onderwijsdoel" });
+    expect(goals.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("finds the grade calculator with the search box", async () => {
+    const user = userEvent.setup();
+    renderHome();
+    await user.type(screen.getByRole("searchbox"), "cesuur");
+    expect(screen.getByText("1 tool")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Punten omrekenen naar een cijfer/ }),
+    ).toBeInTheDocument();
   });
 
   it("has no a11y violations", async () => {

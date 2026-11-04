@@ -7,6 +7,12 @@ export default [
     // The tool catalogue lives at /tools (home.tsx); individual tools at /tools/:slug.
     route("tools", "routes/home.tsx"),
     route("tools/:slug", "routes/tool.tsx"),
+    // Utilities without AI (P23): own small registry, found via a section on /tools (no menu item).
+    route("utilities", "routes/utilities._index.tsx"),
+    // The rubric utility has its own pages (it stores data); static segments win over :slug.
+    route("utilities/rubric", "routes/utilities.rubric._index.tsx"),
+    route("utilities/rubric/:id", "routes/utilities.rubric.$id.tsx"),
+    route("utilities/:slug", "routes/utilities.$slug.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     // BDB/BKE workplace (brief P25, 25.3): dossier list, overview, framework, one outcome.
     ...prefix("portfolio", [
