@@ -53,7 +53,30 @@ describe("profiles repository — per-user scoping", () => {
     await repo.updateProfile(USER_A, created.id, { name: "Edited" }, true);
     expect((await repo.getProfile(USER_A, created.id))?.name).toBe("Edited");
     expect((await repo.getDefaultProfile(USER_A))?.id).toBe(created.id);
-    // B has no default of their own.
-    expect(await repo.getDefaultProfile(USER_B)).toBeNull();
+    // B's default (if any) is never A's profile.
+    expect((await repo.getDefaultProfile(USER_B))?.id).not.toBe(created.id);
+  });
+});
+
+describe("profiles repository — first profile becomes the default (P19.6)", () => {
+  const USER_C = "user-cccc";
+  const USER_D = "user-dddd";
+
+  it("makes the first profile the default, even without the flag", async () => {
+    const first = await repo.createProfile(USER_C, { name: "Eerste" }, false);
+    expect((await repo.getDefaultProfile(USER_C))?.id).toBe(first.id);
+  });
+
+  it("keeps the existing default when another profile is created without the flag", async () => {
+    const first = await repo.createProfile(USER_D, { name: "Eerste" }, false);
+    await repo.createProfile(USER_D, { name: "Tweede" }, false);
+    expect((await repo.getDefaultProfile(USER_D))?.id).toBe(first.id);
+  });
+
+  it("lets an explicit default move the default", async () => {
+    const first = await repo.createProfile("user-eeee", { name: "Eerste" });
+    const second = await repo.createProfile("user-eeee", { name: "Tweede" }, true);
+    expect((await repo.getDefaultProfile("user-eeee"))?.id).toBe(second.id);
+    expect(first.id).not.toBe(second.id);
   });
 });

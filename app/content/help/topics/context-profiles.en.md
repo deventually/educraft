@@ -2,14 +2,13 @@
 
 A **context profile** describes your teaching situation once, so every tool takes it into account. The profile is passed to each prompt as background (`{{context}}`), so you don't retype it every time.
 
-## One editor, four steps
+## One short page
 
-Go to **Teaching context** and click **New context profile**. There is one clear editor that walks you through everything in four steps — the same editor you later use to **edit** a profile.
+Go to **Teaching context** and click **Set up teaching context** (or **New context profile** if you already have one). You fill in one short page — the same page you later use to **edit** a profile.
 
-1. **Basics** — the **name** (e.g. "Software Engineering — year 2"), the **type of education**, and optionally the programme and course.
-2. **Level & framework** — the NLQF level (with its derived EU level) and the domain/subject with any national framework.
-3. **Context & custom fields** — professional field, technology/methods, educational concept, term for learners, and custom fields.
-4. **Finish** — a short summary; optionally set the profile as your default.
+- **Open up front** are the **name** (e.g. "Software Engineering — year 2"), the **type of education**, the **programme**, the **course** and the **study year** (in secondary education: the **phase**). The type of education already proposes the level.
+- Under **More details (optional)** you find the level, the domain/subject with any national framework, professional field, technology/methods, educational concept, term for learners and custom fields. For an existing profile it shows how many are filled in. Folded-away fields are always saved as usual.
+- Your **first profile automatically becomes your default**, so a tutor uses it right away. If you don't want that, untick **Set as default** later.
 
 ## Type of education → level
 

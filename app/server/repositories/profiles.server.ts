@@ -56,7 +56,10 @@ export async function createProfile(
 ): Promise<ContextProfile> {
   const id = randomUUID();
   const { name, ...rest } = input;
-  if (isDefault) await clearDefault(userId);
+  // A teacher's first profile becomes the default even without the flag: chat
+  // tools only use the default, so a lone profile must not be silently ignored.
+  const makeDefault = isDefault || (await getDefaultProfile(userId)) === null;
+  if (makeDefault) await clearDefault(userId);
   getDb()
     .insert(contextProfiles)
     .values({
@@ -64,7 +67,7 @@ export async function createProfile(
       userId,
       name,
       dataJson: JSON.stringify(rest),
-      isDefault,
+      isDefault: makeDefault,
       createdAt: new Date(),
     })
     .run();

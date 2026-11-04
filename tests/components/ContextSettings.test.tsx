@@ -66,17 +66,35 @@ describe("Context settings", () => {
     expect(screen.queryByRole("button", { name: /zelf invullen|yourself/i })).toBeNull();
   });
 
-  it("shows an empty-state hint when there is no profile yet", () => {
+  it("guides a teacher without a profile to one clear action", async () => {
+    const user = userEvent.setup();
     renderSettings([]);
-    expect(screen.getByText(/nog geen contextprofiel|no context profile/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Nog geen onderwijscontext" }),
+    ).toBeVisible();
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveAccessibleName("Onderwijscontext instellen");
+    // No second "New context profile" card underneath.
+    expect(screen.queryByRole("button", { name: /nieuw contextprofiel/i })).toBeNull();
+    await user.click(buttons[0]);
+    expect(screen.getByLabelText(/naam|name/i)).toBeInTheDocument();
   });
 
-  it("opens the editor directly at step 1 when creating a new profile", async () => {
+  it("has no a11y violations on the empty page", async () => {
+    const { container } = renderSettings([]);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("opens the short form when creating a new profile", async () => {
     const user = userEvent.setup();
-    renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
-    expect(screen.getByText(/stap 1 van 4|step 1 of 4/i)).toBeInTheDocument();
+    renderSettings([ictProfile], "p1");
+    await user.click(
+      screen.getByRole("button", { name: /nieuw contextprofiel|new context profile/i }),
+    );
+    expect(screen.queryByText(/stap 1 van 4|step 1 of 4/i)).toBeNull();
     expect(screen.getByLabelText(/naam|name/i)).toBeInTheDocument();
+    expect(screen.getByText(/meer details/i)).toBeInTheDocument();
   });
 
   it("shows a sector badge on a profile card", () => {
@@ -90,8 +108,7 @@ describe("Context settings", () => {
     const { container } = renderSettings([ictProfile], "p1");
     expect(screen.getByText(/standaard|default/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /bewerken|edit/i }));
-    // The stepped editor opens at step 1, prefilled and in edit (update) mode.
-    expect(screen.getByText(/stap 1 van 4|step 1 of 4/i)).toBeInTheDocument();
+    // The short editor opens prefilled and in edit (update) mode.
     expect(screen.getByDisplayValue("SE jaar 3")).toBeInTheDocument();
     expect(container.querySelector('input[name="id"]')).toHaveValue("p1");
   });
@@ -104,14 +121,18 @@ describe("Context settings", () => {
   it("has no a11y violations in the editor", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.click(
+      screen.getByRole("button", { name: /onderwijscontext instellen|set up teaching context/i }),
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("shows the vo Fase field after choosing a vo track", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.click(
+      screen.getByRole("button", { name: /onderwijscontext instellen|set up teaching context/i }),
+    );
     await user.selectOptions(
       container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
       "vo::havo",
@@ -123,7 +144,9 @@ describe("Context settings", () => {
   it("hides the profiel until the vo fase is bovenbouw", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.click(
+      screen.getByRole("button", { name: /onderwijscontext instellen|set up teaching context/i }),
+    );
     await user.selectOptions(
       container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
       "vo::havo",
@@ -147,7 +170,9 @@ describe("Context settings", () => {
   it("shows Studiejaar for mbo and hbo but not vo", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.click(
+      screen.getByRole("button", { name: /onderwijscontext instellen|set up teaching context/i }),
+    );
     const onderwijstype = container.querySelector("#cf-onderwijstype") as HTMLSelectElement;
 
     await user.selectOptions(onderwijstype, "mbo::mbo-4");
@@ -164,7 +189,9 @@ describe("Context settings", () => {
   it("has no a11y violations in the editor with a vo track chosen", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
-    await user.click(screen.getByRole("button", { name: /nieuw|new/i }));
+    await user.click(
+      screen.getByRole("button", { name: /onderwijscontext instellen|set up teaching context/i }),
+    );
     await user.selectOptions(
       container.querySelector("#cf-onderwijstype") as HTMLSelectElement,
       "vo::havo",

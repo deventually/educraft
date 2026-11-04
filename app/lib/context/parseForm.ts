@@ -1,5 +1,5 @@
 /**
- * Parse + validate a context-profile form submission from the stepped editor.
+ * Parse + validate a context-profile form submission from the profile editor.
  * Security boundary: every field is validated against its catalogue — country,
  * sector, track, national level, domain (sector-scoped) and pack values are all
  * gated (no arbitrary values), and custom fields are trimmed, de-duplicated of

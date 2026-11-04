@@ -2,14 +2,13 @@
 
 Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke tool er rekening mee houdt. Het profiel wordt als achtergrond aan elke prompt meegegeven (`{{context}}`), zonder dat je het telkens opnieuw hoeft te typen.
 
-## Eén editor, vier stappen
+## Eén korte pagina
 
-Ga naar **Onderwijscontext** en klik op **Nieuw contextprofiel**. Er is één duidelijke editor die je in vier stappen langs alles leidt — dezelfde editor gebruik je later om een profiel te **bewerken**.
+Ga naar **Onderwijscontext** en klik op **Onderwijscontext instellen** (of **Nieuw contextprofiel** als je al een profiel hebt). Je vult één korte pagina in — dezelfde pagina gebruik je later om een profiel te **bewerken**.
 
-1. **Basis** — de **naam** (bijv. "Software Engineering — jaar 2"), het **onderwijstype**, en optioneel opleiding en vak.
-2. **Niveau & kader** — het NLQF-niveau (met afgeleid EU-niveau) en het domein/vak met eventueel landelijk kader.
-3. **Context & eigen velden** — beroepspraktijk, technologie/methoden, onderwijsconcept, aanspreekvorm en eigen velden.
-4. **Afronden** — een korte samenvatting; zet het profiel eventueel als standaard.
+- **Open staan** de **naam** (bijv. "Software Engineering — jaar 2"), het **onderwijstype**, de **opleiding**, het **vak** en het **studiejaar** (in het vo: de **fase**). Het onderwijstype stelt het niveau al voor.
+- Onder **Meer details (optioneel)** staan het niveau, het domein/vak met eventueel landelijk kader, beroepspraktijk, technologie/methoden, onderwijsconcept, aanspreekvorm en eigen velden. Hoort er al iets bij een bestaand profiel, dan zie je hoeveel er is ingevuld. Ingeklapte velden worden altijd gewoon opgeslagen.
+- Je **eerste profiel wordt vanzelf je standaard**, zodat ook een tutor het meteen gebruikt. Wil je dat niet, haal dan het vinkje **Als standaard instellen** later weg.
 
 ## Onderwijstype → niveau
 

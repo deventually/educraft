@@ -1,30 +1,23 @@
 /**
- * The single, edit-capable, stepped context-profile editor (Phase 8) —
- * consolidates the old wizard + form + choose-screen. All four steps live inside
- * one <Form>; inactive steps are `hidden` (not unmounted) so their values persist
- * and submit together. Pass `profile` to edit (hidden `id` + `intent="update"`).
- *
- * The whole teaching context is set here: a single grouped "Onderwijstype" picker
- * fixes sector + track and prefills the NLQF level; an explicit NLQF select lets
- * you override it (with a derived-EQF preview + cited source). Sector then scopes
- * the domain options and the framework pack.
+ * The context-profile editor: one short page. What matters most is open — name,
+ * onderwijstype (which fixes sector + track and prefills the NLQF level),
+ * programme, course and study year (vo: phase) — and the default checkbox. The
+ * rest (level, domain/profiel with its framework, professional field, tools,
+ * onderwijsconcept, learner noun, custom fields) sits in a closed native
+ * <details> "Meer details (optioneel)". Closed content stays in the form, so it
+ * is always submitted. Pass `profile` to edit (hidden `id` + `intent="update"`).
  */
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Form, useNavigation } from "react-router";
-import { ArrowLeft, ArrowRight, Check, Star } from "lucide-react";
+import { Check, ChevronDown, Star } from "lucide-react";
 import { Button } from "~/components/ui";
-import { cn } from "~/lib/utils";
 import type { ContextProfile } from "~/lib/context/types";
 import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { defaultPackValues } from "~/lib/context/packs";
-import { SECTORS_INFO, TRACKS_BY_SECTOR, VO_PHASES, isSector } from "~/lib/context/sectors";
 import { courseLabel, showsDomain } from "~/lib/context/relevance";
-import { NLQF_LEVELS, isNlqfLevel, nlqfToEqf } from "~/lib/context/nlqf";
-import { useT, useLocale } from "~/lib/i18n/useT";
-import type { Messages } from "~/lib/i18n";
-import type { Locale } from "~/lib/i18n";
+import { countFilledDetails } from "~/lib/context/details";
+import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import { loc } from "~/lib/i18n/localized";
 import {
   NameField,
   OnderwijstypeSelect,
@@ -42,60 +35,6 @@ import {
   CustomFieldsEditor,
 } from "./ContextFields";
 
-const TOTAL = 4;
-
-/** A short recap read from the live form on step 4, with resolved labels. */
-function buildSummary(
-  fd: FormData,
-  t: Messages,
-  locale: Locale,
-): { label: string; value: string }[] {
-  const out: { label: string; value: string }[] = [];
-  const add = (label: string, v: string) => {
-    if (v.trim()) out.push({ label, value: v.trim() });
-  };
-  const get = (k: string) => String(fd.get(k) ?? "");
-
-  add(t.settings.name, get("name"));
-
-  const sector = get("sector");
-  const track = get("track");
-  if (isSector(sector)) {
-    const trackLabel = TRACKS_BY_SECTOR[sector].find((tr) => tr.value === track)?.label;
-    const parts = [loc(SECTORS_INFO[sector].label, locale)];
-    if (trackLabel) parts.push(loc(trackLabel, locale));
-    add(t.settings.onderwijstype, parts.join(" · "));
-  }
-  const phaseVal = get("phase");
-  if (phaseVal) {
-    const opt = VO_PHASES.find((p) => p.value === phaseVal);
-    add(t.settings.phase, opt ? loc(opt.label, locale) : phaseVal);
-  }
-  add(t.settings.programme, get("programme"));
-  add(t.settings.course, get("courseName"));
-
-  const level = get("nationalLevel");
-  if (isNlqfLevel(level)) {
-    const label = NLQF_LEVELS.find((l) => l.level === level)?.label;
-    add(
-      t.settings.nationalLevel,
-      `${label ? loc(label, locale) : level} (EQF ${nlqfToEqf(level).eqf})`,
-    );
-  }
-  add(t.settings.domain, get("domain"));
-  add(t.settings.pedagogy, get("pedagogy"));
-
-  let packCount = 0;
-  for (const [k, v] of fd.entries()) {
-    if (k.startsWith("pack.") && String(v).trim()) packCount++;
-  }
-  if (packCount) out.push({ label: t.settings.packHeading, value: String(packCount) });
-
-  const customCount = fd.getAll("customLabel").filter((v) => String(v).trim()).length;
-  if (customCount) out.push({ label: t.settings.customHeading, value: String(customCount) });
-  return out;
-}
-
 export function ContextProfileEditor({
   onCancel,
   profile,
@@ -112,13 +51,10 @@ export function ContextProfileEditor({
   availableDomains: string[] | null;
 }) {
   const t = useT();
-  const locale = useLocale();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
-  const formRef = useRef<HTMLFormElement>(null);
   const editing = profile != null;
 
-  const [step, setStep] = useState(0);
   const [name, setName] = useState(profile?.name ?? "");
   const [sector, setSector] = useState<string>(profile?.sector ?? "");
   const [track, setTrack] = useState(profile?.track ?? "");
@@ -129,30 +65,12 @@ export function ContextProfileEditor({
     profile?.studyYear != null ? String(profile.studyYear) : "",
   );
   const [learnerNoun, setLearnerNoun] = useState(profile?.learnerNounOverride ?? "");
-  const [summary, setSummary] = useState<{ label: string; value: string }[]>([]);
 
   // When editing, keep the profile's stored answers; when creating, prefill the
   // pack from the framework (hbo, refined by year).
   const packValues = editing
     ? profile.packValues
     : defaultPackValues(domain, studyYear ? Number(studyYear) : undefined);
-
-  const titles = [
-    t.settings.step1Title,
-    t.settings.step2Title,
-    t.settings.step3Title,
-    t.settings.step4Title,
-  ];
-
-  const goNext = () => {
-    const next = Math.min(step + 1, TOTAL - 1);
-    if (next === TOTAL - 1 && formRef.current) {
-      setSummary(buildSummary(new FormData(formRef.current), t, locale));
-    }
-    setStep(next);
-  };
-  const goBack = () => setStep((s) => Math.max(s - 1, 0));
-  const canNext = step !== 0 || name.trim().length > 0;
 
   const onOnderwijstype = (nextSector: string, nextTrack: string, defaultLevel: string) => {
     setSector(nextSector);
@@ -174,131 +92,98 @@ export function ContextProfileEditor({
   // stored value — matching DomainSelect's own out-of-catalogue preservation.
   const showsDomainField = showsDomain(sector, phase) || Boolean(domain);
 
+  const filledCount = editing ? countFilledDetails(profile) : 0;
+
   return (
-    <Form method="post" ref={formRef} className="space-y-5">
+    <Form method="post" className="space-y-5">
       {editing && <input type="hidden" name="id" value={profile.id} />}
       <input type="hidden" name="sector" value={sector} />
       <input type="hidden" name="track" value={track} />
 
-      <div>
-        <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-          <span>{fmt(t.settings.stepOf, { n: step + 1, total: TOTAL })}</span>
-          <span className="text-slate-700">{titles[step]}</span>
-        </div>
-        <ol className="mt-2 flex gap-1.5">
-          {titles.map((tl, i) => (
-            <li
-              key={tl}
-              aria-current={i === step ? "step" : undefined}
-              className={cn(
-                "h-1.5 flex-1 rounded-full",
-                i <= step ? "bg-violet-500" : "bg-slate-200",
-              )}
-            >
-              <span className="sr-only">{tl}</span>
-            </li>
-          ))}
-        </ol>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <NameField value={name} onChange={setName} required={false} />
+        <OnderwijstypeSelect
+          value={sector && track ? `${sector}::${track}` : ""}
+          onChange={onOnderwijstype}
+          sectors={availableSectors}
+        />
+        <ProgrammeField sector={sector} defaultValue={profile?.programme} />
+        <CourseField label={courseLabel(sector)} defaultValue={profile?.courseName} />
+        <StudyYearField sector={sector} value={studyYear} onChange={setStudyYear} />
+        <PhaseField sector={sector} value={phase} onChange={onPhase} />
       </div>
 
-      {/* Step 1 — Basis */}
-      <div hidden={step !== 0} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <NameField value={name} onChange={setName} required={false} />
-          <OnderwijstypeSelect
-            value={sector && track ? `${sector}::${track}` : ""}
-            onChange={onOnderwijstype}
-            sectors={availableSectors}
+      {/* Everything optional, folded away but still part of the form. */}
+      <details className="group rounded-xl border border-slate-200 bg-slate-50/60">
+        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 [&::-webkit-details-marker]:hidden">
+          <span>{t.settings.moreDetails}</span>
+          {filledCount > 0 && (
+            <span className="font-normal text-slate-600">
+              {fmt(t.settings.moreDetailsFilled, { count: filledCount })}
+            </span>
+          )}
+          <ChevronDown
+            className="ml-auto size-4 shrink-0 text-slate-500 transition-transform group-open:rotate-180"
+            aria-hidden
           />
-          <PhaseField sector={sector} value={phase} onChange={onPhase} />
-          <ProgrammeField sector={sector} defaultValue={profile?.programme} />
-          <CourseField label={courseLabel(sector)} defaultValue={profile?.courseName} />
-        </div>
-      </div>
-
-      {/* Step 2 — Niveau & kader */}
-      <div hidden={step !== 1} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <NationalLevelSelect value={nationalLevel} onChange={setNationalLevel} />
-          <StudyYearField sector={sector} value={studyYear} onChange={setStudyYear} />
+        </summary>
+        <div className="space-y-4 border-t border-slate-200 p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <NationalLevelSelect value={nationalLevel} onChange={setNationalLevel} />
+            {showsDomainField && (
+              <DomainSelect
+                value={domain}
+                onChange={setDomain}
+                country={DEFAULT_COUNTRY}
+                sector={sector}
+                track={track}
+                available={availableDomains}
+              />
+            )}
+          </div>
           {showsDomainField && (
-            <DomainSelect
-              value={domain}
-              onChange={setDomain}
+            <DomainFields
+              key={`${sector}|${domain || "none"}`}
+              domain={domain}
               country={DEFAULT_COUNTRY}
               sector={sector}
-              track={track}
-              available={availableDomains}
+              values={packValues}
             />
           )}
-        </div>
-        {showsDomainField && (
-          <DomainFields
-            key={`${sector}|${domain || "none"}`}
-            domain={domain}
-            country={DEFAULT_COUNTRY}
+          <ProfessionalContextField
             sector={sector}
-            values={packValues}
+            track={track}
+            defaultValue={profile?.professionalContext}
           />
-        )}
-      </div>
-
-      {/* Step 3 — Context & eigen velden */}
-      <div hidden={step !== 2} className="space-y-4">
-        <ProfessionalContextField
-          sector={sector}
-          track={track}
-          defaultValue={profile?.professionalContext}
-        />
-        <ToolsField defaultValue={profile?.tools} />
-        <PedagogyField defaultValue={profile?.pedagogy} />
-        <LearnerNounField sector={sector} value={learnerNoun} onChange={setLearnerNoun} />
-        <CustomFieldsEditor initial={profile?.customFields} />
-      </div>
-
-      {/* Step 4 — Afronden */}
-      <div hidden={step !== 3} className="space-y-4">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-semibold text-slate-700">{t.settings.recap}</p>
-          <dl className="mt-2 space-y-1 text-sm">
-            {summary.map((s) => (
-              <div key={s.label} className="flex gap-2">
-                <dt className="shrink-0 text-slate-500">{s.label}:</dt>
-                <dd className="text-slate-800">{s.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <ToolsField defaultValue={profile?.tools} />
+          <PedagogyField defaultValue={profile?.pedagogy} />
+          <LearnerNounField sector={sector} value={learnerNoun} onChange={setLearnerNoun} />
+          <CustomFieldsEditor initial={profile?.customFields} />
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            name="isDefault"
-            defaultChecked={isCurrentDefault}
-            className="size-4 rounded border-slate-300 text-violet-600"
-          />
-          <Star className="size-4 text-amber-500" aria-hidden /> {t.settings.makeDefault}
-        </label>
-      </div>
+      </details>
+
+      <label className="flex items-center gap-2 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="isDefault"
+          defaultChecked={isCurrentDefault}
+          className="size-4 rounded border-slate-300 text-violet-600"
+        />
+        <Star className="size-4 text-amber-500" aria-hidden /> {t.settings.makeDefault}
+      </label>
 
       <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-        <Button type="button" variant="ghost" onClick={step === 0 ? onCancel : goBack}>
-          <ArrowLeft className="size-4" aria-hidden />{" "}
-          {step === 0 ? t.settings.cancel : t.settings.back}
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          {t.settings.cancel}
         </Button>
-        {step < TOTAL - 1 ? (
-          <Button type="button" onClick={goNext} disabled={!canNext}>
-            {t.settings.next} <ArrowRight className="size-4" aria-hidden />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            name="intent"
-            value={editing ? "update" : "create"}
-            disabled={busy || !name.trim()}
-          >
-            <Check className="size-4" aria-hidden /> {editing ? t.settings.save : t.settings.finish}
-          </Button>
-        )}
+        <Button
+          type="submit"
+          name="intent"
+          value={editing ? "update" : "create"}
+          disabled={busy || !name.trim()}
+        >
+          <Check className="size-4" aria-hidden /> {editing ? t.settings.save : t.settings.finish}
+        </Button>
       </div>
     </Form>
   );
