@@ -292,5 +292,5 @@ focus-visible, `aria-live="polite"` for streaming regions), pass the a11y gate, 
 refactor toward a deeper module — one narrow prop surface hiding the complexity.
 
 **i18n reminder:** any new displayed string is a behaviour change — add its `nl`/`en` keys
-to `app/lib/i18n/messages/{nl,en}.ts` (parity enforced by `tests/i18n.test.ts`), and wrap
+to `app/lib/i18n/messages/{nl,en}/<namespace>.ts` (parity enforced by `tests/i18n.test.ts`), and wrap
 displayed strings in the localized helpers rather than hardcoding.

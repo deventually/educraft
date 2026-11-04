@@ -74,8 +74,28 @@ De Producer meldt een PR pas als klaar als hij zelf heeft gecontroleerd dat:
 6. bij een UI-wijziging **screenshots** in de PR staan, in NL en EN en op desktop en mobiel, plus een
    axe-check.
 
-Is er tijdsdruk, dan **schrapt hij scope, nooit kwaliteit of uiterlijk**. Na elke merge laat hij de
-andere open PR's bijwerken, zodat ze weer zonder conflict zijn voordat Bastiaan ze ziet.
+Is er tijdsdruk, dan **schrapt hij scope, nooit kwaliteit of uiterlijk**.
+
+## Na elke merge: de andere PR's bijwerken
+
+Bastiaan lost **nooit** zelf een merge-conflict op. Na elke merge naar `main` zorgt de Producer
+ervoor dat **elke andere open PR** `main` binnenkrijgt, voordat Bastiaan ernaar kijkt:
+
+1. De werker van die PR (of een nieuwe werker) haalt `main` binnen met een gewone merge, nooit met
+   rebase of force-push, en lost de conflicten op.
+2. De poort draait opnieuw (`npm test && npm run typecheck && npm run check`) en CI wordt weer groen.
+3. Pas dan meldt de Producer de PR (weer) als klaar.
+
+Is een PR gemerged, dan gaat vervolgwerk op een **verse branch vanaf `main`**, ook als de PR
+gesquasht is. Een branch die na een (squash-)merge doorloopt, geeft juist nieuwe conflicten.
+
+Conflicten voorkomen gaat vóór oplossen. De bestanden waar bijna elke PR in schrijft, zijn daarom
+per onderdeel opgesplitst (BESLUIT-2026-11-04-19):
+- de schermteksten: één bestand per onderdeel in `app/lib/i18n/messages/nl/` en `en/`;
+- de routes: één bestand per onderdeel in `app/routing/`.
+
+Een werker zet nieuwe teksten en routes in het bestand van zijn eigen onderdeel, of maakt een nieuw
+bestand. Hij voegt niets toe aan een ander onderdeel als dat niet hoeft.
 
 **Rood door de machine, niet door de code?** Falen er ineens meerdere tests die apart wel slagen, kijk
 dan eerst naar de belasting van de machine voordat iemand de code gaat "repareren". Een fix die

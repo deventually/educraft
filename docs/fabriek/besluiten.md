@@ -160,3 +160,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   BESLUIT-2026-11-04-3 aan; de andere vier items blijven.
 - **BESLUIT-2026-11-04-18:** **Eval-runs mogen geld kosten** (ongeveer €1–3 per run), voor de
   nulmeting en de evals van de BDB/BKE-tools.
+- **BESLUIT-2026-11-04-19:** **Bastiaan lost nooit zelf een merge-conflict op.** Na elke merge brengt
+  de Producer `main` in alle andere open PR's en lost hij de conflicten op voordat Bastiaan kijkt
+  (`producer.md`, *Na elke merge*). Om conflicten te voorkomen zijn de schermteksten en de routes
+  opgesplitst in één bestand per onderdeel (`app/lib/i18n/messages/{nl,en}/<onderdeel>.ts`,
+  `app/routing/<onderdeel>.ts`). Squash-mergen mag; vervolgwerk start dan op een verse branch.

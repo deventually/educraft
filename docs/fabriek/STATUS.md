@@ -53,6 +53,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
+  de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
   (migratie 0012, tabel `rubrics`). 23.3 (rubric invullen in batches) volgt.
 

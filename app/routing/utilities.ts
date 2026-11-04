@@ -1,0 +1,13 @@
+import { route } from "@react-router/dev/routes";
+import type { RouteArea } from "./types";
+
+/** Utilities without AI (P23): own small registry, found via a section on /tools (no menu item). */
+export const utilities: RouteArea = {
+  shell: [
+    route("utilities", "routes/utilities._index.tsx"),
+    // The rubric utility has its own pages (it stores data); static segments win over :slug.
+    route("utilities/rubric", "routes/utilities.rubric._index.tsx"),
+    route("utilities/rubric/:id", "routes/utilities.rubric.$id.tsx"),
+    route("utilities/:slug", "routes/utilities.$slug.tsx"),
+  ],
+};

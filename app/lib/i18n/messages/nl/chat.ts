@@ -1,0 +1,17 @@
+export const chat = {
+  send: "Versturen",
+  stop: "Stop",
+  regenerate: "Opnieuw",
+  streaming: "Aan het denken…",
+  inputPlaceholder: "Jouw bericht…",
+  sandboxHint: "Vul dit één keer in. Daarna begint het gesprek.",
+  setupHeading: "Voordat je begint",
+  noProfileHint: "Dit gesprek kent je onderwijscontext niet. Stel een standaardcontext in.",
+  continue: "Doorgaan",
+  yourSettings: "Jouw instellingen",
+  edit: "Aanpassen",
+  startConversation: "Begin het gesprek door op een suggestie te klikken of typ je bericht.",
+  threadLabel: "Gesprek",
+  interrupted: "Onderbroken",
+  enterHint: "Enter om te versturen · Shift+Enter voor een nieuwe regel",
+};

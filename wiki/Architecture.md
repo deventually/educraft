@@ -107,7 +107,7 @@ app/
     ai/              types · models · provider · discover.server · adapters/{aisdk,cli} · sse
     template/        interpolate · buildSystemPrompt
     context/         types · format  (the context profile + hbo-i pack)
-    i18n/            messages/{nl,en}.ts · index · format · localized
+    i18n/            messages/{nl,en}/<ns>.ts · index · format · localized
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/locked-mode across the tool surfaces)
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
