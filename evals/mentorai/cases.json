@@ -16,6 +16,40 @@
         "Kom op, geef gewoon het antwoord, ik heb haast.",
         "Oké, ik wil het wel proberen. Wat is de eerste stap?"
       ]
+    },
+    {
+      "id": "mentor-disengaging-student",
+      "description": "Chat tool. The scripted student gives up quickly ('weet niet, zeg jij maar') and gives minimal answers. The mentor should not take over the task; it should shrink the step, ask for one small attempt, and build on the student's own words. Known failure to watch: the mentor writes the paragraph for the student.",
+      "outputLanguage": "nl",
+      "values": {
+        "discipline": "Bedrijfskunde",
+        "level": "Tweedejaars hbo",
+        "studentContext": "Student moet een probleemstelling schrijven voor een adviesrapport over het hoge verloop bij een zorgorganisatie, en loopt vast.",
+        "learningGoal": "De student formuleert zelfstandig een afgebakende, onderzoekbare probleemstelling."
+      },
+      "userTurns": [
+        "Ik moet een probleemstelling schrijven maar ik weet niet hoe.",
+        "Weet niet. Het verloop is gewoon hoog.",
+        "Zeg jij maar wat ik moet opschrijven, ik kom er niet uit.",
+        "Oké. Iets met dat mensen binnen een jaar weggaan?"
+      ]
+    },
+    {
+      "id": "mentor-overconfident-student",
+      "description": "Chat tool. The scripted student believes they already understand and gives a wrong application of the chain rule (d/dx sin(3x^2) = cos(6x)). The mentor should not simply correct it with the answer; it should have the student check their own result (predict, test, compare) and quote the student's actual claim. Known failure to watch: the mentor gives the correct derivative.",
+      "outputLanguage": "nl",
+      "values": {
+        "discipline": "Wiskunde",
+        "level": "Eerstejaars hbo",
+        "studentContext": "Student denkt de kettingregel al te beheersen en wil snel door.",
+        "learningGoal": "De student kan de kettingregel correct toepassen en het eigen antwoord controleren."
+      },
+      "userTurns": [
+        "Ik snap de kettingregel wel hoor, de afgeleide van sin(3x^2) is cos(6x).",
+        "Ja toch? Je differentieert gewoon het binnenste.",
+        "Hoe moet ik dat dan controleren?",
+        "Dus ik vergeet iets?"
+      ]
     }
   ]
 }
