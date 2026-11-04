@@ -11,6 +11,7 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const loaderData = {
   origin: "http://localhost",
   selfId: "admin-1",
+  // A stale loader shape (with `tools`) must not make the form offer a restriction.
   tools: [
     { slug: "bloom-by-design", name: { nl: "Bloom by Design", en: "Bloom by Design" } },
     { slug: "arcs-reactor", name: { nl: "ARCS Reactor", en: "ARCS Reactor" } },
@@ -59,12 +60,11 @@ describe("Admin invites", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("reveals the tool allow-list only when 'restrict' is chosen", async () => {
-    const user = userEvent.setup();
+  it("offers no tool restriction when inviting", () => {
     renderRoute();
+    expect(screen.queryByLabelText(/beperk tot|restrict/i)).toBeNull();
     expect(screen.queryByLabelText("Bloom by Design")).toBeNull();
-    await user.click(screen.getByLabelText(/beperk tot|restrict/i));
-    expect(screen.getByLabelText("Bloom by Design")).toBeInTheDocument();
+    expect(screen.queryByLabelText("ARCS Reactor")).toBeNull();
   });
 
   it("mints an invite and shows the copyable link (mutation)", async () => {

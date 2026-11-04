@@ -4,7 +4,6 @@ import { z } from "zod";
 import { Copy, KeyRound, Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.invites";
 import { requireRole } from "~/server/auth.server";
-import { getAvailableTools } from "~/server/availability.server";
 import {
   createInvite,
   createPasswordReset,
@@ -18,21 +17,17 @@ import {
   updateUserEmail,
 } from "~/server/repositories/users.server";
 import { ROLES, isRole } from "~/lib/registry/access";
-import { useT, useLocale } from "~/lib/i18n/useT";
+import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import { loc } from "~/lib/i18n/localized";
 import { useFormToast } from "~/components/Toast";
-import { Button, HelpText, Input, Label, Select } from "~/components/ui";
+import { Button, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
-  // Candidate tools an admin can grant a teacher = whatever a teacher may see.
-  const teacherTools = await getAvailableTools({ id: "__invite_preview__", role: "teacher" });
   const [invites, users] = await Promise.all([listInvitesWithContext(), listUsers()]);
   return {
     selfId: admin.id,
-    tools: teacherTools.map((t) => ({ slug: t.slug, name: t.name })),
     invites: invites.map((i) => ({
       token: i.token,
       role: i.role,
@@ -61,20 +56,11 @@ export async function action({ request }: Route.ActionArgs) {
     const note = String(fd.get("note") ?? "").trim() || null;
     const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "14") || 14));
     const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
-    // Only registry-known tools a teacher may see can be granted (never trust the body).
-    const teacherTools = await getAvailableTools({ id: "__invite_preview__", role: "teacher" });
-    const grantable = new Set(teacherTools.map((t) => t.slug));
-    const restrict = String(fd.get("toolMode") ?? "all") === "restrict";
-    const selected = fd
-      .getAll("tools")
-      .map(String)
-      .filter((s) => grantable.has(s));
     const invite = await createInvite({
       role: "teacher", // admins are never minted by invite
       note,
       expiresAt,
       createdByUserId: admin.id,
-      allowedToolSlugs: restrict ? selected : null,
     });
     return { link: `${new URL(request.url).origin}/invite/${invite.token}` };
   }
@@ -135,10 +121,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function AdminInvites({ loaderData }: Route.ComponentProps) {
   const t = useT();
-  const locale = useLocale();
   const actionData = useActionData<typeof action>();
-  const { selfId, tools, invites, users } = loaderData;
-  const [restrict, setRestrict] = useState(false);
+  const { selfId, invites, users } = loaderData;
 
   const roleLabel: Record<string, string> = {
     teacher: t.admin.invites.roleTeacher,
@@ -225,55 +209,6 @@ export default function AdminInvites({ loaderData }: Route.ComponentProps) {
                 />
               </div>
             </div>
-
-            <fieldset className="space-y-2.5">
-              <legend className="text-sm font-semibold text-slate-800">
-                {t.admin.invites.toolsLegend}
-              </legend>
-              <HelpText>{t.admin.invites.toolsHint}</HelpText>
-              <label className="flex items-center gap-2.5 text-sm text-slate-800">
-                <input
-                  type="radio"
-                  name="toolMode"
-                  value="all"
-                  defaultChecked
-                  onChange={() => setRestrict(false)}
-                  className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                />
-                {t.admin.invites.allToolsOption}
-              </label>
-              <label className="flex items-center gap-2.5 text-sm text-slate-800">
-                <input
-                  type="radio"
-                  name="toolMode"
-                  value="restrict"
-                  onChange={() => setRestrict(true)}
-                  className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                />
-                {t.admin.invites.restrictOption}
-              </label>
-              {restrict && (
-                <ul className="mt-1 grid gap-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2">
-                  {tools.map((tool) => (
-                    <li key={tool.slug} className="flex items-center gap-2.5">
-                      <input
-                        type="checkbox"
-                        id={`grant-${tool.slug}`}
-                        name="tools"
-                        value={tool.slug}
-                        className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                      />
-                      <label
-                        htmlFor={`grant-${tool.slug}`}
-                        className="text-sm font-medium text-slate-800"
-                      >
-                        {loc(tool.name, locale)}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </fieldset>
 
             <Button type="submit">{t.admin.invites.submit}</Button>
           </Form>

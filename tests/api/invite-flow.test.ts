@@ -154,17 +154,26 @@ describe("invite flow — legacy invites (P17)", () => {
   });
 });
 
-describe("invite flow — teacher tool allow-list (Phase 4)", () => {
-  it("copies an admin-minted invite's tool allow-list onto the new teacher account", async () => {
-    const invite = await users.createInvite({
-      role: "teacher",
-      createdByUserId: "admin-1",
-      allowedToolSlugs: ["bloom-by-design", "arcs-reactor"],
-    });
+describe("invite flow — legacy tool list (P18.2)", () => {
+  it("a legacy invite with a tool list creates an unrestricted teacher", async () => {
+    // Pre-P18 invites may still carry a tool list; the setter is gone, so insert directly.
+    const { getDb } = await import("~/server/db.server");
+    const { invites } = await import("~/server/schema.server");
+    const token = "legacy-invite-token";
+    getDb()
+      .insert(invites)
+      .values({
+        token,
+        role: "teacher",
+        createdByUserId: "admin-1",
+        allowedToolSlugs: JSON.stringify(["bloom-by-design"]),
+        createdAt: new Date(),
+      })
+      .run();
     const res = await route.action({
-      params: { token: invite.token },
+      params: { token },
       request: formRequest({
-        name: "Narrowed Teacher",
+        name: "Legacy Teacher",
         email: "narrow@example.com",
         password: "supersecret10",
         confirm: "supersecret10",
@@ -173,10 +182,10 @@ describe("invite flow — teacher tool allow-list (Phase 4)", () => {
     expect((res as Response).status).toBe(302);
 
     const user = await users.getUserByEmail("narrow@example.com");
-    const allow = await users.getUserToolAllowlist(user!.id);
-    expect(allow).toBeInstanceOf(Set);
-    expect(allow?.has("bloom-by-design")).toBe(true);
-    expect(allow?.has("arcs-reactor")).toBe(true);
-    expect(allow?.has("mentorai")).toBe(false);
+    expect(user?.role).toBe("teacher");
+    expect(user?.allowedToolSlugs).toBeNull();
+    const { getAvailableTools } = await import("~/server/availability.server");
+    const slugs = (await getAvailableTools({ id: user!.id, role: "teacher" })).map((t) => t.slug);
+    expect(slugs).toContain("arcs-reactor");
   });
 });

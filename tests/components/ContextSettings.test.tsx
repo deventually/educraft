@@ -36,7 +36,6 @@ function renderSettings(profiles: Profile[] = [], defaultId = "") {
     loaderData: {
       profiles,
       defaultId,
-      availableCountries: ["NL"],
       availableSectors: ["vo", "mbo", "hbo", "wo"],
       availableDomains: null,
     },

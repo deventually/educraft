@@ -30,8 +30,6 @@ export interface CreateUserInput {
   email?: string | null;
   passwordHash: string;
   role: Role;
-  /** Per-teacher tool allow-list (Phase 4); null = unrestricted. */
-  allowedToolSlugs?: string[] | null;
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserRow> {
@@ -42,10 +40,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     passwordHash: input.passwordHash,
     role: input.role,
     sessionVersion: 0,
-    allowedToolSlugs:
-      input.allowedToolSlugs && input.allowedToolSlugs.length > 0
-        ? JSON.stringify(input.allowedToolSlugs)
-        : null,
+    allowedToolSlugs: null, // retired per-teacher gate (P18); the column goes in 18.8
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -86,33 +81,9 @@ export async function updateUserPassword(id: string, passwordHash: string): Prom
 }
 
 /**
- * A teacher's per-tool allow-list, or null when unrestricted (no list / empty).
- * Composed on top of instance availability in `availability.server`.
- */
-export async function getUserToolAllowlist(userId: string): Promise<Set<string> | null> {
-  const row = getDb().select().from(users).where(eq(users.id, userId)).get();
-  if (!row?.allowedToolSlugs) return null;
-  try {
-    const parsed = JSON.parse(row.allowedToolSlugs) as string[];
-    return Array.isArray(parsed) && parsed.length > 0 ? new Set(parsed) : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Set (or clear, with null/[]) a teacher's per-tool allow-list. */
-export async function setUserToolAllowlist(userId: string, slugs: string[] | null): Promise<void> {
-  const value = slugs && slugs.length > 0 ? JSON.stringify(slugs) : null;
-  getDb().update(users).set({ allowedToolSlugs: value }).where(eq(users.id, userId)).run();
-}
-
-/**
- * Per-teacher country/sector assignment (Phase 8) — the read side of the P8
- * availability seam. It mirrors `getUserToolAllowlist`'s contract exactly
- * (returns a `Set<string>` or null; null/empty = unrestricted), but is stored as
- * a per-user `instance_settings` key rather than a `users` column: P8 forbids a
- * DB migration, and the `instance_settings` key/value table is the sanctioned
- * migration-free store. The matching setters + write UI are P9.
+ * A per-user list stored as an `instance_settings` key `${prefix}:${userId}`
+ * (returns a `Set<string>` or null; null/empty = unset). Migration-free store;
+ * today only the per-teacher model set (`assignedModels`) uses it.
  */
 async function getAssignedList(prefix: string, userId: string): Promise<Set<string> | null> {
   const row = getDb()
@@ -127,23 +98,6 @@ async function getAssignedList(prefix: string, userId: string): Promise<Set<stri
   } catch {
     return null;
   }
-}
-
-export async function getUserAssignedCountries(userId: string): Promise<Set<string> | null> {
-  return getAssignedList("assignedCountries", userId);
-}
-
-export async function getUserAssignedSectors(userId: string): Promise<Set<string> | null> {
-  return getAssignedList("assignedSectors", userId);
-}
-
-/**
- * Per-teacher domain assignment (Phase 10.3) — a full P9-style axis, stored the
- * same migration-free way as country/sector. Flat slug set (not per-track); the
- * editor filters the track catalogue by it. null/empty = unrestricted.
- */
-export async function getUserAssignedDomains(userId: string): Promise<Set<string> | null> {
-  return getAssignedList("assignedDomains", userId);
 }
 
 /**
@@ -185,41 +139,9 @@ async function setAssignedList(
   }
 }
 
-export async function setUserAssignedCountries(
-  userId: string,
-  ids: string[] | null,
-): Promise<void> {
-  return setAssignedList("assignedCountries", userId, ids);
-}
-
-export async function setUserAssignedSectors(userId: string, ids: string[] | null): Promise<void> {
-  return setAssignedList("assignedSectors", userId, ids);
-}
-
-export async function setUserAssignedDomains(userId: string, ids: string[] | null): Promise<void> {
-  return setAssignedList("assignedDomains", userId, ids);
-}
-
 /** Set (or clear, with null/[]) a per-teacher model assignment (Phase 13). */
 export async function setUserAssignedModels(userId: string, ids: string[] | null): Promise<void> {
   return setAssignedList("assignedModels", userId, ids);
-}
-
-/**
- * Per-teacher "custom access" activation flag (Phase 12). A pure gate: when off
- * (default) a teacher inherits the instance country/sector/domain sets; when on,
- * their own assignment (above) is authoritative and the instance is ignored.
- * Stored the same migration-free way as the assignments — a present
- * `contextCustomAccess:<userId>` key means activated. Deactivating only deletes
- * this key; the caller must NOT clear the assignments, so re-activating restores
- * exactly what the teacher had.
- */
-export async function getUserContextCustomAccess(userId: string): Promise<boolean> {
-  return (await getAssignedList("contextCustomAccess", userId)) !== null;
-}
-
-export async function setUserContextCustomAccess(userId: string, on: boolean): Promise<void> {
-  return setAssignedList("contextCustomAccess", userId, on ? ["1"] : null);
 }
 
 export async function getUserById(id: string): Promise<UserRow | null> {
@@ -268,11 +190,6 @@ export interface CreateInviteInput {
   expiresAt?: Date | null;
   /** Who issued the invite (teacher/admin). Null for legacy ops invites. */
   createdByUserId?: string | null;
-  /**
-   * Per-teacher tool allow-list (Phase 4). Set on an admin-minted teacher invite;
-   * copied onto the account at redeem. Null/empty = unrestricted.
-   */
-  allowedToolSlugs?: string[] | null;
 }
 
 export async function createInvite(input: CreateInviteInput): Promise<InviteRow> {
@@ -283,10 +200,7 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
     createdByUserId: input.createdByUserId ?? null,
-    allowedToolSlugs:
-      input.allowedToolSlugs && input.allowedToolSlugs.length > 0
-        ? JSON.stringify(input.allowedToolSlugs)
-        : null,
+    allowedToolSlugs: null, // retired per-teacher gate (P18); the column goes in 18.8
     createdAt: new Date(),
   };
   getDb().insert(invites).values(row).run();
@@ -332,7 +246,6 @@ export interface InviteWithContext {
   usedByUserId: string | null;
   createdByUserId: string | null;
   createdByName: string | null;
-  allowedToolSlugs: string | null;
   createdAt: Date;
 }
 
@@ -350,7 +263,6 @@ export async function listInvitesWithContext(): Promise<InviteWithContext[]> {
       usedByUserId: invites.usedByUserId,
       createdByUserId: invites.createdByUserId,
       createdByName: users.name,
-      allowedToolSlugs: invites.allowedToolSlugs,
       createdAt: invites.createdAt,
     })
     .from(invites)

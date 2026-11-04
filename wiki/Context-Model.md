@@ -32,9 +32,9 @@ A profile stores only the chosen answers (`packValues`) plus any user-defined
 `customFields`; everything is formatted bilingually by `formatProfile(profile, lang)` in
 `app/lib/context/format.ts`. Profiles are created + edited in one consolidated **stepped
 editor** (`ContextProfileEditor`), and input is validated against the catalogues in
-`app/lib/context/parseForm.ts`. Which countries, sectors and domains a teacher may pick is
-composed by `availability.server.ts` under an **override** model, not an intersection — see
-[Availability & per-teacher override](#availability--per-teacher-override-p12) below. The
+`app/lib/context/parseForm.ts`. Which sectors and domains a teacher may pick is
+decided by the instance settings, via `availability.server.ts` — see
+[Availability](#availability-p18) below. The
 vision generalizes this further into a small set of **orthogonal dimensions**.
 
 ---
@@ -43,7 +43,7 @@ vision generalizes this further into a small set of **orthogonal dimensions**.
 
 | Dimension | Examples | Notes |
 |-----------|----------|-------|
-| **Country / region** | NL (US, CA, AU, NZ, ZA … as a seam) | Selects the framework pack, terminology, and compliance regime. |
+| **Country / region** | NL (US, CA, AU, NZ, ZA … as a *data seam*) | Not a choice for users (no UI): a profile always stores `NL`; pack data stays keyed by country so a later country slots in as data. Would select the framework pack, terminology, and compliance regime. |
 | **Education sector** | vo · mbo · hbo · wo (po not shipped) | Drives tone and learner/teacher vocabulary; scopes the domain catalogue. |
 | **Level** | national **NLQF** stored → **EQF 1–8** derived | **ISCED is not adopted** (seam only). Only the EQF number is injected. See [Qualification Frameworks](Qualification-Frameworks.md). |
 | **Subject / domain** | ICT, healthcare, language, … | Optional **domain pack** (hbo-i is the first). |
@@ -57,42 +57,30 @@ adding a tool does not touch localization.
 
 ---
 
-## Availability & per-teacher override (P12)
+## Availability (P18)
 
-Not every instance offers every country, sector, or domain, and one teacher may need a
-different scope than the house default. Three axes — **countries**, **education sectors**
-(`vo · mbo · hbo · wo`), and **domains / profielen** — are composed in
+Not every instance offers every education sector or domain. Two axes — **education
+sectors** (`vo · mbo · hbo · wo`) and **domains / profielen** — are resolved in
 `availability.server.ts` into the option sets the context editor shows.
 
-**Instance defaults.** The admin *Teaching context* page (`admin.context.tsx`) sets a
-house default per axis, stored migration-free in `instance_settings`
-(`enabledCountries` / `enabledSectors` / `enabledDomains`). Country and sector cannot be
-emptied (a lockout guard keeps at least the catalogue); an empty domain list means "all".
+**The instance decides.** The admin *Teaching context* page (`admin.context.tsx`) sets one
+selection per axis, stored migration-free in `instance_settings` (`enabledSectors` /
+`enabledDomains`). Every teacher and admin follows it: there is no per-teacher access
+(P12's *custom access* override was removed in P18) and no country axis. Sectors cannot be
+emptied (a lockout guard); an empty domain list means "all".
 
-**Per-teacher override — not an intersection.** Each teacher carries an *Activate custom
-access* flag:
+The composition is `resolveAxis` (catalogue ∩ the instance selection, with a
+fall-back-to-all lockout guard against a garbage/legacy slug). Public seam:
+`getAvailableSectors` / `getAvailableDomains`, plus the track-independent
+`getAvailableDomainSlugs`.
 
-- **Off (default):** the teacher **inherits the instance** on every axis.
-- **On:** the teacher's own per-axis selection **replaces the instance entirely** — they
-  may be granted *more* than the instance or fewer, and an empty axis means "all" (the
-  instance is ignored for them).
+**The country is a data seam, not a choice.** `profile.country` is always `NL`
+(`parseForm`/`migrateLegacyProfile`), and the pack data (`DOMAINS_BY_SECTOR`,
+`FRAMEWORK_REGISTRY`, `resolveFramework`, `getDomainsForTrack`) stays keyed by country. A
+later country would be added as data, with no engine change.
 
-The composition is `axisSelection` (which single set governs — an activated teacher's own
-assignment, else the instance-enabled list) feeding `resolveAxis` (catalogue ∩ selection,
-with a fall-back-to-all lockout guard). This override model fixes an earlier bug where a
-disjoint instance/teacher pair (instance sectors `{wo}`, teacher `{vo}`) intersected to
-empty and silently fell back to the full catalogue.
-
-**Non-destructive deactivate.** Turning the flag off only flips the flag; the teacher's
-saved per-axis selections are preserved and return if custom access is re-activated. The
-flag and per-teacher assignments live under keyed `instance_settings` rows too — no
-migration.
-
-Public seam: `getAvailableCountries` / `getAvailableSectors` / `getAvailableDomains`, plus
-the track-independent `getAvailableDomainSlugs`.
-
-> Note the contrast with the **tool/model** gates in the same module, which *intersect*
-> instance × per-teacher allow-list. The context axes deliberately do not.
+> Leftover `contextCustomAccess:<id>` / `assigned{Countries,Sectors,Domains}:<id>` and
+> `enabledCountries` rows in `instance_settings` are ignored; they are removed in P18.8.
 
 ---
 

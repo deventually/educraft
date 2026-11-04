@@ -59,27 +59,28 @@ describe("getAvailableTools — instance overrides", () => {
   });
 });
 
-describe("getAvailableTools — per-teacher allow-list (Phase 4)", () => {
-  it("narrows a teacher with an allow-list, leaves an un-listed teacher unrestricted", async () => {
-    const restricted = await users.createUser({
-      name: "Restricted",
-      email: "restricted@example.com",
+describe("getAvailableTools — no per-teacher gate (P18.2)", () => {
+  it("a teacher sees every instance-enabled tool; a stored allow-list is ignored", async () => {
+    const legacy = await users.createUser({
+      name: "Legacy",
+      email: "legacy@example.com",
       passwordHash: "x",
       role: "teacher",
     });
-    await users.setUserToolAllowlist(restricted.id, [STUDENT_TOOL]);
+    // The column survives until 18.8; set it directly (the setter is gone).
+    const { getDb } = await import("~/server/db.server");
+    const { users: usersTable } = await import("~/server/schema.server");
+    const { eq } = await import("drizzle-orm");
+    await getDb()
+      .update(usersTable)
+      .set({ allowedToolSlugs: JSON.stringify([STUDENT_TOOL]) })
+      .where(eq(usersTable.id, legacy.id));
 
-    const restrictedSlugs = (
-      await availability.getAvailableTools({ id: restricted.id, role: "teacher" })
-    ).map((t) => t.slug);
-    expect(restrictedSlugs).toContain(STUDENT_TOOL);
-    expect(restrictedSlugs).not.toContain(INSTRUCTOR_TOOL);
-
-    // A teacher with no allow-list row keeps today's behaviour (sees everything).
-    const openSlugs = (
-      await availability.getAvailableTools({ id: "teacher-open", role: "teacher" })
-    ).map((t) => t.slug);
-    expect(openSlugs).toContain(INSTRUCTOR_TOOL);
+    const slugs = (await availability.getAvailableTools({ id: legacy.id, role: "teacher" })).map(
+      (t) => t.slug,
+    );
+    expect(slugs).toContain(STUDENT_TOOL);
+    expect(slugs).toContain(INSTRUCTOR_TOOL);
   });
 });
 

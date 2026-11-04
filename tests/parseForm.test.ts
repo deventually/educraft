@@ -514,7 +514,7 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
     ).toBeUndefined();
   });
 
-  it("refuses a country/sector outside the caller's available set", () => {
+  it("refuses a sector outside the available set", () => {
     expect(
       parseContextForm(
         fd([
@@ -528,19 +528,16 @@ describe("parseContextForm — Phase 8 teaching-context axes", () => {
       parseContextForm(
         fd([
           ["name", "x"],
-          ["country", "NL"],
-        ]),
-        { availableCountries: ["XX"] },
-      ).error,
-    ).toBe("country-not-available");
-    expect(
-      parseContextForm(
-        fd([
-          ["name", "x"],
           ["sector", "hbo"],
         ]),
         { availableSectors: ["hbo", "wo"] },
       ).error,
     ).toBeUndefined();
+  });
+
+  it("always stores country NL, even when the form sends another", () => {
+    for (const extra of [[["country", "BE"]], [["country", "NL"]], []] as [string, string][][]) {
+      expect(parseContextForm(fd([["name", "x"], ...extra])).input?.country).toBe("NL");
+    }
   });
 });

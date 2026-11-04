@@ -11,7 +11,6 @@ import {
 } from "~/server/repositories/profiles.server";
 import { requireUser } from "~/server/auth.server";
 import {
-  getAvailableCountries,
   getAvailableSectors,
   getAvailableDomains,
   getAvailableDomainSlugs,
@@ -31,22 +30,17 @@ import { getLocale } from "~/lib/i18n/locale.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  const [profiles, def, availableCountries, availableSectors, availableDomains] = await Promise.all(
-    [
-      listProfiles(user.id),
-      getDefaultProfile(user.id),
-      getAvailableCountries(user),
-      getAvailableSectors(user),
-      // The effective flat domain allow-list under the override model (P12): an
-      // activated teacher's own set, else the instance set (null = unrestricted).
-      // The editor filters each track catalogue by it client-side.
-      getAvailableDomainSlugs(user),
-    ],
-  );
+  const [profiles, def, availableSectors, availableDomains] = await Promise.all([
+    listProfiles(user.id),
+    getDefaultProfile(user.id),
+    getAvailableSectors(user),
+    // The instance's flat domain allow-list (null = unrestricted). The editor
+    // filters each track catalogue by it client-side.
+    getAvailableDomainSlugs(user),
+  ]);
   return {
     profiles,
     defaultId: def?.id ?? "",
-    availableCountries,
     availableSectors,
     availableDomains,
   };
@@ -63,16 +57,10 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "create" || intent === "update") {
-    // Re-validate the submitted country/sector against what THIS user may use —
-    // never trust the client (mirrors the tool loader-404 / stream-refuse seam).
-    const [availableCountries, availableSectors] = await Promise.all([
-      getAvailableCountries(user),
-      getAvailableSectors(user),
-    ]);
-    const { input, isDefault, error } = parseContextForm(fd, {
-      availableCountries,
-      availableSectors,
-    });
+    // Re-validate the submitted sector against what THIS user may use — never
+    // trust the client (mirrors the tool loader-404 / stream-refuse seam).
+    const availableSectors = await getAvailableSectors(user);
+    const { input, isDefault, error } = parseContextForm(fd, { availableSectors });
     if (error || !input) {
       const m = getMessages(getLocale(request));
       return {
@@ -81,7 +69,7 @@ export async function action({ request }: Route.ActionArgs) {
       };
     }
     // Re-validate the submitted domain against the teacher's available set —
-    // never trust the body (mirrors the country/sector re-check above).
+    // never trust the body (mirrors the sector re-check above).
     if (input.domain) {
       const availableDomains = await getAvailableDomains(user, input.sector, input.track);
       if (!availableDomains.includes(input.domain)) {
@@ -121,8 +109,7 @@ function ProfileMeta({ profile, locale }: { profile: ContextProfile; locale: "nl
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { profiles, defaultId, availableCountries, availableSectors, availableDomains } =
-    loaderData;
+  const { profiles, defaultId, availableSectors, availableDomains } = loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -226,7 +213,6 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
             key={editing?.id ?? "new"}
             profile={editing}
             isCurrentDefault={editing != null && editing.id === defaultId}
-            availableCountries={availableCountries}
             availableSectors={availableSectors}
             availableDomains={availableDomains}
             onCancel={() => setEditor(null)}

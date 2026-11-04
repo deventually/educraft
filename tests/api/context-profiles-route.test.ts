@@ -8,17 +8,14 @@ vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
 
 // Drive the availability seam directly so the loader/action enforcement is
 // exercisable in P8 (before P9 writes any settings).
-const { availableSectorsMock, availableCountriesMock, availableDomainsMock, domainSlugsMock } =
-  vi.hoisted(() => ({
-    availableSectorsMock: vi.fn(),
-    availableCountriesMock: vi.fn(),
-    availableDomainsMock: vi.fn(),
-    domainSlugsMock: vi.fn(),
-  }));
+const { availableSectorsMock, availableDomainsMock, domainSlugsMock } = vi.hoisted(() => ({
+  availableSectorsMock: vi.fn(),
+  availableDomainsMock: vi.fn(),
+  domainSlugsMock: vi.fn(),
+}));
 vi.mock("~/server/availability.server", async (orig) => ({
   ...(await orig<typeof import("~/server/availability.server")>()),
   getAvailableSectors: availableSectorsMock,
-  getAvailableCountries: availableCountriesMock,
   getAvailableDomains: availableDomainsMock,
   getAvailableDomainSlugs: domainSlugsMock,
 }));
@@ -47,7 +44,6 @@ beforeAll(async () => {
   });
   // A narrowed instance: only hbo is available to this teacher.
   availableSectorsMock.mockResolvedValue(["hbo"]);
-  availableCountriesMock.mockResolvedValue(["NL"]);
   // Default: every hbo domain available (overridden per test).
   availableDomainsMock.mockResolvedValue(["ICT"]);
   // Default effective domain allow-list = unrestricted (overridden per test).
@@ -67,13 +63,10 @@ const loaderArgs = () => ({ request: new Request("http://localhost/context-profi
 const actionArgs = (request: Request) => ({ request }) as never;
 
 describe("context-profiles loader — availability", () => {
-  it("passes the available country + sector sets to the editor", async () => {
-    const data = (await route.loader(loaderArgs())) as {
-      availableSectors: string[];
-      availableCountries: string[];
-    };
+  it("passes the available sector set to the editor (and no country set)", async () => {
+    const data = (await route.loader(loaderArgs())) as { availableSectors: string[] };
     expect(data.availableSectors).toEqual(["hbo"]);
-    expect(data.availableCountries).toEqual(["NL"]);
+    expect(data).not.toHaveProperty("availableCountries");
   });
 
   it("passes the effective domain allow-list to the editor (P12 override)", async () => {

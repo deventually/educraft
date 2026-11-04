@@ -15,13 +15,13 @@ Two instance-level roles (no org/tenant structure):
 
 | Role | Sees / uses |
 |------|-------------|
-| `teacher` | every tool (unless the admin narrows that teacher's allow-list) |
+| `teacher` | every tool the instance enables |
 | `admin`   | every tool, plus the admin console |
 
 The roles live in **one place** — `ROLES`/`isRole` in
 [`app/lib/registry/access.ts`](../app/lib/registry/access.ts). Which tools a user
 may use is decided by `isToolAvailable` in `availability.server.ts` (instance
-settings + the per-teacher allow-list) and enforced server-side in three spots:
+settings) and enforced server-side in three spots:
 the home loader (list filter), the tool loader (404), and the `/api/stream` action
 (refuse with a localized SSE error). No per-tool branching. A legacy `student` row
 (from before P17) can neither log in nor redeem an invite.
