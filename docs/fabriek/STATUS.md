@@ -80,8 +80,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 ## Bezig
 
 - Beoordelingsmodel: een gebrek telt bij één criterium, nooit bij twee (na meting q: in 1 van de 3
-  runs telde een ontbrekend testgeval dubbel). Meting q staat in `evals/reports/2026-11-04q.md`;
-  tussenronde met 1 run volgt — PR open.
+  runs telde een ontbrekend testgeval dubbel). Meting s (1 run): die case weer 4,60, geen
+  case onder q, geen gefaalde check (`evals/reports/2026-11-04s.md`) — PR open.
 
 ## Wacht op jou
 
