@@ -5,6 +5,7 @@ import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import UtilitiesIndex from "~/routes/utilities._index";
 import UtilityPage, { resolveUtility } from "~/routes/utilities.$slug";
+import RubricList from "~/routes/utilities.rubric._index";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -53,5 +54,37 @@ describe("/utilities/:slug", () => {
       "/utilities",
     );
     expect(screen.getByRole("table")).toBeInTheDocument();
+  });
+});
+
+describe("/utilities/rubric", () => {
+  type ListProps = ComponentProps<typeof RubricList>;
+  const renderList = (rubrics: ListProps["loaderData"]["rubrics"], locale: "nl" | "en" = "nl") => {
+    const props = { loaderData: { rubrics } } as unknown as ListProps;
+    return renderAt(() => <RubricList {...props} />, locale);
+  };
+
+  it("shows an empty state with one action", async () => {
+    renderList([]);
+    expect(await screen.findByRole("heading", { name: "Nog geen rubrics" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Nieuwe rubric" })).toHaveLength(1);
+  });
+
+  it("lists rubrics with their size", async () => {
+    renderList([
+      { id: "r1", name: "Verslag", criteria: 2, maxPoints: 5, updatedAt: "2026-11-04T10:00:00Z" },
+    ]);
+    const link = await screen.findByRole("link", { name: /Verslag/ });
+    expect(link).toHaveAttribute("href", "/utilities/rubric/r1");
+    expect(link).toHaveTextContent("2 criteria, maximaal 5 punten");
+  });
+
+  it("has no a11y violations (EN)", async () => {
+    const { container } = renderList(
+      [{ id: "r1", name: "Report", criteria: 2, maxPoints: 5, updatedAt: "2026-11-04T10:00:00Z" }],
+      "en",
+    );
+    await screen.findByRole("heading", { level: 1, name: "Make and keep rubrics" });
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

@@ -9,6 +9,9 @@ export default [
     route("tools/:slug", "routes/tool.tsx"),
     // Utilities without AI (P23): own small registry, found via a section on /tools (no menu item).
     route("utilities", "routes/utilities._index.tsx"),
+    // The rubric utility has its own pages (it stores data); static segments win over :slug.
+    route("utilities/rubric", "routes/utilities.rubric._index.tsx"),
+    route("utilities/rubric/:id", "routes/utilities.rubric.$id.tsx"),
     route("utilities/:slug", "routes/utilities.$slug.tsx"),
     ...prefix("projects", [index("routes/projects._index.tsx")]),
     ...prefix("help", [index("routes/help._index.tsx"), route(":id", "routes/help.$id.tsx")]),

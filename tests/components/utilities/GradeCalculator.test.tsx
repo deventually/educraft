@@ -5,11 +5,11 @@ import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { GradeCalculator } from "~/components/utilities/GradeCalculator";
 
-function renderCalc(locale: "nl" | "en" = "nl") {
+function renderCalc(locale: "nl" | "en" = "nl", url = "/") {
   const Stub = createRoutesStub([
     { id: "root", path: "/", loader: () => ({ locale }), Component: GradeCalculator },
   ]);
-  return render(<Stub initialEntries={["/"]} />);
+  return render(<Stub initialEntries={[url]} />);
 }
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -19,6 +19,11 @@ describe("GradeCalculator", () => {
     renderCalc();
     // Default: 30 points, 55 % → 16.5.
     expect(await screen.findByText("Cesuur: 16,5 van de 30 punten.")).toBeInTheDocument();
+  });
+
+  it("takes the maximum from ?max= (the link from a rubric)", async () => {
+    renderCalc("nl", "/?max=12");
+    expect(await screen.findByText("Cesuur: 6,6 van de 12 punten.")).toBeInTheDocument();
   });
 
   it("recalculates while the teacher types", async () => {

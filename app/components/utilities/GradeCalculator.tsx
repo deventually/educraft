@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { Copy, Printer } from "lucide-react";
 import { Button, HelpText, Input, Label, Select } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -43,8 +44,12 @@ export function GradeCalculator() {
   const locale = useLocale();
   const id = useId();
   const [copied, setCopied] = useState(false);
+  // A rubric links here with its maximum filled in (?max=12).
+  const [params] = useSearchParams();
+  const fromRubric = parseNumber(params.get("max") ?? "");
   const [draft, setDraft] = useState<Draft>({
-    maxPoints: "30",
+    maxPoints:
+      Number.isFinite(fromRubric) && fromRubric > 0 ? formatNumber(fromRubric, locale) : "30",
     passPercent: String(DEFAULT_SCALE.passPercent),
     minGrade: String(DEFAULT_SCALE.minGrade),
     passGrade: formatNumber(DEFAULT_SCALE.passGrade, locale),
@@ -211,8 +216,8 @@ export function GradeCalculator() {
                 {g.print}
               </Button>
             </div>
-            <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-              <table className="w-full text-sm">
+            <div className="mt-4 max-w-sm overflow-x-auto rounded-xl border border-slate-200 bg-white">
+              <table className="w-full text-left text-sm">
                 <caption className="px-4 py-2 text-left font-medium text-slate-700">
                   {g.tableCaption}
                 </caption>

@@ -33,3 +33,9 @@ describe("utility registry", () => {
     }
   });
 });
+
+describe("utility registry — rubric", () => {
+  it("lists the rubric utility at /utilities/rubric", () => {
+    expect(getUtilityBySlug("rubric")?.id).toBe("rubric");
+  });
+});

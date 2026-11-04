@@ -40,6 +40,23 @@ export const UTILITIES: readonly Utility[] = [
       "guessing",
     ],
   },
+  {
+    id: "rubric",
+    slug: "rubric",
+    name: { nl: "Rubrics maken en bewaren", en: "Make and keep rubrics" },
+    summary: {
+      nl: "Zet criteria en niveaus in een rubric, bewaar hem en kopieer hem naar Word, Excel of een beoordelingstool. Zonder AI.",
+      en: "Put criteria and levels in a rubric, keep it, and copy it to Word, Excel or an assessment tool. No AI.",
+    },
+    icon: "table",
+    keywords: [
+      "rubric",
+      "beoordelingsmodel",
+      "beoordelingsformulier",
+      "criteria",
+      "assessment form",
+    ],
+  },
 ];
 
 export function getUtilityBySlug(slug: string): Utility | undefined {
