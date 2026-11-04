@@ -14,6 +14,7 @@ import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
+import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
@@ -43,6 +44,7 @@ const ALL: PromptDef[] = [
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
   PEER_TUTORING_PROMPT,
+  RUBRIC_BUILDER_PROMPT,
   SCAFFOLDING_FEEDBACK_PROMPT,
   STAGE_ASSESSMENT_PROMPT,
   STAGE_ASSESSMENT_PROMPT_V2,

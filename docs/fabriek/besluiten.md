@@ -182,3 +182,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-04-23:** **Een promptwijziging wordt gemeten met drie runs per case en harde
   ja/nee-checks** (`--runs 3`, `## Hard checks` in de rubric). Een verschil kleiner dan de spreiding
   telt als ruis. Advies Producer na de tweede meting, waarin de beoordelaar een leeg antwoord 3,6 gaf.
+- **BESLUIT-2026-11-04-24:** **Een nieuwe tool is klaar na de meting als elke case gemiddeld 4,5 of
+  hoger scoort, geen harde check faalt en geen uitvoer is afgekapt.** Haalt de meting dat niet, dan
+  volgt nog één verbeterronde. Het streven blijft 5,0. Een ronde mag geen regressie geven: geen
+  case of criterium zakt verder dan de spreiding onder de vorige meting van dezelfde tool, anders gaat
+  die wijziging terug. Na twee rondes stopt het en staat de uitslag eerlijk in de PR. Vervangt
+  voor de P24-tools de lat "minstens het nulmetingsgemiddelde van Stage Assessment (≈ 5,0) per
+  criterium" uit de brief. Bastiaan, 2026-11-04.
