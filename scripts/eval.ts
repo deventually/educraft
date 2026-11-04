@@ -14,6 +14,7 @@
  *    npm run eval -- --judge-model claude-sonnet-4-6
  *    npm run eval -- --dry-run               # build every prompt, NO API calls (free)
  *    npm run eval -- --tool mentorai --runs 3 # mean + spread over 3 runs per case
+ *    npm run eval -- --tool a,b --label d     # several tools, report <date>d.md
  *
  * Layout:
  *    evals/<tool-slug>/cases.json   input scenarios (committed)
@@ -79,6 +80,8 @@ interface Cli {
   judgeModel: string;
   /** Runs per case; the report shows the mean and the spread (default 1). */
   runs: number;
+  /** Suffix for a second report on the same day: `--label d` → `<date>d.md`. */
+  label: string;
 }
 
 const EVALS_DIR = join(process.cwd(), "evals");
@@ -93,6 +96,7 @@ function parseCli(argv: string[]): Cli {
     dryRun: false,
     judgeModel: DEFAULT_JUDGE_MODEL,
     runs: 1,
+    label: "",
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -101,6 +105,7 @@ function parseCli(argv: string[]): Cli {
     else if (a === "--judge-only") cli.judgeOnly = true;
     else if (a === "--dry-run") cli.dryRun = true;
     else if (a === "--judge-model") cli.judgeModel = argv[++i] ?? DEFAULT_JUDGE_MODEL;
+    else if (a === "--label") cli.label = (argv[++i] ?? "").replace(/[^a-z0-9-]/gi, "");
     else if (a === "--runs") cli.runs = Math.max(1, Math.min(10, Number(argv[++i]) || 1));
   }
   return cli;
@@ -120,9 +125,11 @@ function ensureDir(dir: string) {
 // ---------------------------------------------------------------------------
 
 /** Tools that have an evals/<tool-slug>/cases.json, optionally filtered to one. */
+/** `--tool a,b` runs several tools into one report. */
 function toolsWithCases(only?: string): Tool[] {
-  const wanted = only ? [getToolBySlug(only)].filter((t): t is Tool => !!t) : ALL_TOOLS;
-  if (only && wanted.length === 0) throw new Error(`Unknown tool slug: ${only}`);
+  const slugs = only ? only.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  for (const slug of slugs) if (!getToolBySlug(slug)) throw new Error(`Unknown tool slug: ${slug}`);
+  const wanted = slugs.length ? ALL_TOOLS.filter((t) => slugs.includes(t.slug)) : ALL_TOOLS;
   return wanted.filter((t) => existsSync(join(EVALS_DIR, t.slug, "cases.json")));
 }
 
@@ -428,18 +435,24 @@ function combineRuns(runs: JudgedCase[]): JudgedCase | null {
 // Report — deltas come from the most recent prior <date>.scores.json
 // ---------------------------------------------------------------------------
 
+/**
+ * The most recent prior avg per key: a later report overrides an earlier one key by
+ * key, so a report that ran only some tools does not hide the others' last score.
+ */
 function previousAvgByKey(currentDate: string): Record<string, number> {
   if (!existsSync(REPORTS_DIR)) return {};
   const priors = readdirSync(REPORTS_DIR)
     .filter((f) => f.endsWith(".scores.json") && f < `${currentDate}.scores.json`)
     .sort();
-  const latest = priors.at(-1);
-  if (!latest) return {};
-  try {
-    return JSON.parse(readFileSync(join(REPORTS_DIR, latest), "utf8")) as Record<string, number>;
-  } catch {
-    return {};
+  const merged: Record<string, number> = {};
+  for (const file of priors) {
+    try {
+      Object.assign(merged, JSON.parse(readFileSync(join(REPORTS_DIR, file), "utf8")) as Record<string, number>);
+    } catch {
+      // A corrupt prior report only loses its deltas.
+    }
   }
+  return merged;
 }
 
 function writeReport(date: string, judged: JudgedCase[]) {
@@ -571,7 +584,7 @@ async function main() {
     console.error("No cases were judged; no report written.");
     process.exit(1);
   }
-  writeReport(runDate, judged);
+  writeReport(`${runDate}${cli.label}`, judged);
 }
 
 main().catch((err) => {

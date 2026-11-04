@@ -15,6 +15,7 @@ ANTHROPIC_API_KEY=sk-… npm run eval                      # every tool that has
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool forum-autograder
 ANTHROPIC_API_KEY=sk-… npm run eval -- --judge-model claude-sonnet-4-6
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai --runs 3   # mean + spread
+ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai,guided-reflection --label d  # one report, evals/reports/<date>d.md
 npm run eval -- --cases-only     # regenerate raw outputs, skip the judge
 npm run eval -- --judge-only     # re-judge the latest raw outputs, skip generation
 ```
