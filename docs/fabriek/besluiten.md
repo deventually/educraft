@@ -143,3 +143,20 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   ziet de docent het origineel naast de tekst die naar de AI gaat, en kan hij vanuit een citaat in het
   resultaat naar de plek in het origineel springen. Alles blijft in de browser; het origineel wordt
   niet opgeslagen. Brief P24, stap 24.0c.
+- **BESLUIT-2026-11-04-11:** **BDB en BKE krijgen een eigen deel van de app**, de werkplaats, dat de
+  bestaande tools mag inzetten. Uitwerking: brief P25.
+- **BESLUIT-2026-11-04-12:** **Coachen of schrijven is een keuze van de docent.** Standaard coacht de
+  werkplaats. Laat de docent tekst opstellen, dan past de docent die aan en draagt de docent de
+  verantwoordelijkheid. Hooguit één neutrale melding; LimeOnIt leest de docent niet de les.
+- **BESLUIT-2026-11-04-13:** **Scores van studenten worden standaard geanonimiseerd** bij het
+  importeren; de docent kan dat uitzetten.
+- **BESLUIT-2026-11-04-14:** **Het BDB/BKE-cursusmateriaal van Bastiaan** (van een BDB-opleiding,
+  2025-2026) mag gebruikt worden als achtergrond en voor evals. Niets ervan komt in de repo of de
+  app (auteursrecht); privé-evaldata staat buiten de repo.
+- **BESLUIT-2026-11-04-15:** **Export naar Word mag**, ook met een nieuwe dependency (`docx`).
+- **BESLUIT-2026-11-04-16:** **Importeren uit TestVision, ANS en Remindo** hoort bij de werkplaats,
+  zodat toetsresultaten meegaan in de documentatie voor de leeruitkomsten. Uitwerking: brief P25 (vervolg).
+- **BESLUIT-2026-11-04-17:** **Het menu krijgt een vijfde item "BDB/BKE"** voor de werkplaats. Vult
+  BESLUIT-2026-11-04-3 aan; de andere vier items blijven.
+- **BESLUIT-2026-11-04-18:** **Eval-runs mogen geld kosten** (ongeveer €1–3 per run), voor de
+  nulmeting en de evals van de BDB/BKE-tools.
