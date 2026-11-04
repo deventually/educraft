@@ -1,0 +1,151 @@
+{
+  "cases": [
+    {
+      "id": "advisory-report-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo bachelor, year 2). The teacher gives the points, the pass mark and a knock-out criterion. The rubric must cover the whole outcome (own analysis AND a well-founded advice), ask analysis at the pass mark rather than description, use exactly 4 levels, keep referencing as the knock-out the teacher asked for, and add up: maximum 100, pass mark 55.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 2",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Procesverbetering",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Adviseur procesverbetering bij mkb-bedrijven"
+      },
+      "values": {
+        "learningOutcome": "De student analyseert een bedrijfsproces van een mkb-organisatie met een passend procesmodel en stelt op basis van die analyse een onderbouwd verbeteradvies op.",
+        "assignment": "Adviesrapport van ongeveer 3000 woorden voor een echte mkb-opdrachtgever, met een procesmodel van de huidige situatie, een analyse van knelpunten en een advies.",
+        "levelCount": "4",
+        "scale": "Maximaal 100 punten, cesuur 55 punten. Bronvermelding volgens APA is knock-out: zonder correcte bronvermelding geen voldoende.",
+        "existingRubric": ""
+      }
+    },
+    {
+      "id": "test-report-mbo4-eqf4",
+      "description": "Ordinary case at EQF 4 (mbo-4). No scale given: the tool must propose points and a pass mark itself and mark them clearly as a proposal. Exactly 3 levels. The descriptions must be concrete and within reach for mbo-4 students, and the pass level must ask for applying the test plan (Bloom: apply), not more.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Software Developer, niveau 4",
+        "programme": "Software Developer",
+        "domain": "ICT",
+        "courseName": "Testen",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Junior developer in een softwarebedrijf"
+      },
+      "values": {
+        "learningOutcome": "De student voert de testgevallen uit een gegeven testplan uit op een webapplicatie en legt de gevonden fouten reproduceerbaar vast in een testrapport.",
+        "assignment": "Testrapport bij een kleine webapplicatie (een reserveringssysteem), op basis van een testplan met twaalf testgevallen dat de docent aanlevert.",
+        "levelCount": "3",
+        "scale": "",
+        "existingRubric": ""
+      }
+    },
+    {
+      "id": "critical-review-en-eqf7",
+      "description": "Ordinary case in English at EQF 7 (master). Five levels. The outcome asks to evaluate AND to justify an alternative design (Bloom: evaluate, create); the pass level must require a justified judgement, not a summary of the study. Points: 20 maximum, pass at 11. The table must use the English layout (Criterion | Level 1 …).",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "MSc Educational Sciences — year 1",
+        "programme": "MSc Educational Sciences",
+        "domain": "Education",
+        "courseName": "Research Methods in Education",
+        "eqf": 7,
+        "studyYear": 1,
+        "professionalContext": "Educational researcher"
+      },
+      "values": {
+        "learningOutcome": "The student critically evaluates the research design of a published empirical study in education and justifies an alternative design that addresses its main weaknesses.",
+        "assignment": "A critical review of about 2,000 words of one empirical study chosen from a list provided by the lecturer.",
+        "levelCount": "5",
+        "scale": "20 points in total; a pass is 11 points or more.",
+        "existingRubric": ""
+      }
+    },
+    {
+      "id": "overlapping-rubric-known-error-eqf6",
+      "description": "KNOWN ERROR in the teacher's existing rubric, which the tool must find and name before improving it: (1) the levels of 'Bronnengebruik' overlap ('2 tot 4 bronnen' vs '3 tot 5 bronnen'), and counting sources says nothing about their use; (2) the levels of 'Analyse' are evaluative words only ('matig', 'redelijk', 'goed', 'uitstekend'); (3) 'Opmaak en spelling' is not part of the learning outcome; (4) the teacher says the maximum is 50 points but the top levels add up to 45 (15 + 15 + 10 + 5). The improved rubric must fix all four without silently dropping a criterion (it says what happens to 'Opmaak en spelling').",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 3",
+        "programme": "Social Work",
+        "domain": "Sociaal werk",
+        "courseName": "Onderzoek in de praktijk",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Sociaal werker in een wijkteam"
+      },
+      "values": {
+        "learningOutcome": "De student analyseert een praktijkvraag uit het sociaal werk met behulp van wetenschappelijke literatuur en trekt daaruit een onderbouwde conclusie voor het handelen van de sociaal werker.",
+        "assignment": "Literatuurverslag van ongeveer 2500 woorden over een praktijkvraag uit de eigen stage.",
+        "levelCount": "4",
+        "scale": "Maximaal 50 punten, cesuur 28 punten.",
+        "existingRubric": "Criterium 1: Bronnengebruik\n- Onvoldoende (0 pt): minder dan 2 bronnen\n- Voldoende (8 pt): 2 tot 4 bronnen\n- Goed (12 pt): 3 tot 5 bronnen\n- Uitstekend (15 pt): meer dan 5 bronnen\n\nCriterium 2: Analyse\n- Onvoldoende (0 pt): matig\n- Voldoende (8 pt): redelijk\n- Goed (12 pt): goed\n- Uitstekend (15 pt): uitstekend\n\nCriterium 3: Conclusie voor het handelen\n- Onvoldoende (0 pt): geen conclusie\n- Voldoende (5 pt): een conclusie die aansluit bij de praktijkvraag\n- Goed (8 pt): een conclusie die aansluit bij de praktijkvraag en volgt uit de literatuur\n- Uitstekend (10 pt): een conclusie die volgt uit de literatuur en concreet zegt wat de sociaal werker anders doet\n\nCriterium 4: Opmaak en spelling\n- Onvoldoende (0 pt): veel fouten\n- Voldoende (2 pt): enkele fouten\n- Goed (4 pt): bijna geen fouten\n- Uitstekend (5 pt): foutloos\n\nTotaal: 50 punten."
+      }
+    },
+    {
+      "id": "unobservable-rubric-known-error-en-eqf5",
+      "description": "KNOWN ERROR in English, in the teacher's existing rubric: 'Effort and attitude' is not observable in the product and is not part of the outcome; the levels of 'Understanding of the brief' are not observable ('shows little/some/good/full understanding'); and the rubric has 3 levels while the teacher asks for 4. The tool must name these problems with literal quotes, then give a 4-level improved rubric that keeps 'Presentation of the design' where sound and says what happens to 'Effort and attitude'. No scale given, so points and pass mark are a marked proposal.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "Associate degree Media Design — year 1",
+        "programme": "Media Design (Associate degree)",
+        "domain": "Creative industries",
+        "courseName": "Design brief",
+        "eqf": 5,
+        "studyYear": 1,
+        "professionalContext": "Junior designer at an agency"
+      },
+      "values": {
+        "learningOutcome": "The student designs a visual identity for a client brief and explains in a short design rationale how each design choice answers the brief.",
+        "assignment": "A visual identity (logo, colour palette, typography, two applications) plus a design rationale of about 600 words.",
+        "levelCount": "4",
+        "scale": "",
+        "existingRubric": "Criterion A — Understanding of the brief: Low = shows little understanding; Medium = shows some understanding; High = shows full understanding.\nCriterion B — Presentation of the design: Low = the design is shown without its applications; Medium = the design is shown in one application; High = the design is shown in both applications, consistently.\nCriterion C — Effort and attitude: Low = little effort; Medium = reasonable effort; High = great effort and a positive attitude in class."
+      }
+    },
+    {
+      "id": "vague-outcome-known-error-eqf6",
+      "description": "KNOWN ERROR: the learning outcome has no observable verb ('begrijpt het belang van'). The tool must not build a rubric on it. It names what is not observable, gives one rewritten outcome clearly marked as a proposal, and asks the teacher to adjust the form and request the rubric again. Building a full rubric anyway (even on its own sharper wording) fails this case.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bouwkunde — jaar 1",
+        "programme": "Bouwkunde",
+        "domain": "Bouw",
+        "courseName": "Duurzaam bouwen",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Bouwkundig adviseur"
+      },
+      "values": {
+        "learningOutcome": "De student begrijpt het belang van duurzaamheid in de bouw.",
+        "assignment": "Een poster over duurzame materialen, met een korte mondelinge toelichting.",
+        "levelCount": "4",
+        "scale": "Maximaal 40 punten, cesuur 22 punten.",
+        "existingRubric": ""
+      }
+    },
+    {
+      "id": "two-level-portfolio-eqf6",
+      "description": "Ordinary case at EQF 6 with exactly 2 levels (e.g. niet aangetoond / aangetoond), a common hbo format. The tool must not invent an in-between level: the top level describes exactly what the outcome asks and is the pass level, the lowest level describes what is seen in work that does not reach it, including work in which the element is missing. Points and pass rule are given by the teacher: every criterion must be at the top level to pass.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 3",
+        "programme": "Social Work",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Beroepsproduct methodisch handelen",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Sociaal werker in een wijkteam"
+      },
+      "values": {
+        "learningOutcome": "De student stelt voor een cliëntsituatie uit de praktijk een onderbouwd plan van aanpak op, waarin doelen, interventies en evaluatie aantoonbaar volgen uit een eigen analyse van de hulpvraag.",
+        "assignment": "Plan van aanpak (circa 2500 woorden) voor een geanonimiseerde cliënt uit de stage, met een analyse van de hulpvraag, doelen, interventies en een evaluatieplan.",
+        "levelCount": "2",
+        "scale": "Per criterium aangetoond of niet aangetoond. Voldoende als alle criteria aangetoond zijn.",
+        "existingRubric": ""
+      }
+    }
+  ]
+}

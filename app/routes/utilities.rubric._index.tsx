@@ -49,7 +49,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export function meta({ matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   const utility = getUtilityBySlug("rubric");
   return [{ title: `${loc(utility?.name, root?.locale ?? DEFAULT_LOCALE)} — LimeOnIt` }];
 }

@@ -20,8 +20,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return { slug: resolveUtility(params.slug).slug };
 }
 
-export function meta({ data, matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+export function meta({ loaderData: data, matches }: Route.MetaArgs) {
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   const utility = data ? getUtilityBySlug(data.slug) : undefined;
   return [
     {

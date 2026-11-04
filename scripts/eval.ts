@@ -37,6 +37,8 @@ import {
   evalGreeting,
   scoresForNextRun,
   unjudgeableReason,
+  judgeFileName,
+  judgeRecord,
   applyHardChecks,
   hardChecksInstruction,
   meanScores,
@@ -580,6 +582,11 @@ async function main() {
           }
           if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
           runs.push(j);
+          writeFileSync(
+            join(OUTPUT_DIR, runDate, tool.slug, judgeFileName(c.id, run)),
+            judgeRecord(j),
+            "utf8",
+          );
         } catch (err) {
           console.error(`  · ${tag}: FAILED — ${(err as Error).message}`);
         }

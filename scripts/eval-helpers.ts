@@ -370,3 +370,22 @@ export function unjudgeableReason(output: string): string | null {
 export function caseValues(tool: Tool, values: TemplateValues | undefined): TemplateValues {
   return { ...toTemplateValues(defaultValuesFor(tool.inputs)), ...(values ?? {}) };
 }
+
+/** The judge's JSON for one run, saved next to its output (`<case>.judge.json`, `<case>.run2.judge.json`). */
+export function judgeFileName(caseId: string, run: number): string {
+  return run === 1 ? `${caseId}.judge.json` : `${caseId}.run${run}.judge.json`;
+}
+
+/** What the judge said about one run: enough to see why a score is below 5. */
+export function judgeRecord(j: {
+  scores: Record<string, number>;
+  failedChecks?: string[];
+  worst: string;
+  verdict: string;
+}): string {
+  return `${JSON.stringify(
+    { scores: j.scores, failedChecks: j.failedChecks ?? [], worst: j.worst, verdict: j.verdict },
+    null,
+    2,
+  )}\n`;
+}

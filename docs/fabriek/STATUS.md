@@ -8,10 +8,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Nu
 
-- **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 15 tools (9 voor
+- **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 16 tools (10 voor
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
-- **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
+- **Stack:** React Router 8, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
   Vitest + axe. 878 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
@@ -23,6 +23,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **Eerlijke bronvermelding (#64) gemerged op 2026-11-04:** bij elf boektools staat nu de echte
+  boekprompt als origineel, met de auteurs en pagina's zoals gedrukt. Daarmee is P24.0 klaar.
+- **React Router 8 en React 19.3 (#65) gemerged op 2026-11-04:** `npm run dev` start zonder
+  waarschuwingen; `meta` en `useMatches` lezen `loaderData`. `vite-node` viel daarbij weg (#68).
 - **Begeleide reflectie v2 (#63) gemerged op 2026-11-04:** de drie fasen van Backward Design uit
   het boek, eerst aanscherpen bij vage invoer; gemiddeld 3,4 → 4,8 (`evals/reports/2026-11-04l.md`).
 - **Dialogisch gesprek v2 (#62) gemerged op 2026-11-04:** het interview uit het boek; gemiddeld
@@ -80,6 +84,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
   Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
   bekende fout — PR open, meting volgt.
+- Een test bewaakt dat elk geïmporteerd pakket zelf in `package.json` staat (bovenop #68) — PR open.
 - Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
   bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
   pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
@@ -97,7 +102,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 (klaar) → Dialogisch gesprek (klaar) →
-   Begeleide reflectie (klaar) → de andere tools (bronvermelding: PR open), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
+   Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
 3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
