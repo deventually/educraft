@@ -79,18 +79,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- P24.2 Beoordelingsmodel maken (`rubric-builder`): uit leeruitkomst en opdracht een concept-rubric
-  met waarneembare niveaus, punten, cesuur en knock-out, plus een zelfcheck; een geplakte rubric
-  wordt eerst gecontroleerd. Bronnen: Brookhart (2013), Anderson & Krathwohl (2001). Zes
-  eval-casussen, drie met een bekende fout. Metingen m → n → o: elke case 4,60–4,87, geen gefaalde
-  harde check, geen regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet) — PR open.
-- Een test bewaakt dat elk geïmporteerd pakket zelf in `package.json` staat (bovenop #68) — PR open.
-- Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
-  bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
-  pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
-  Architect en Socratische partner komen uit Van Schaack & Sarlo, niet uit "Automating Gagné".
-  Contextualisatie ontbreekt in het PDF; de prompt komt uit de webversie (Guethler). De runtime-
-  prompts veranderen niet, er is dus niets gemeten — PR open.
+- Beoordelingsmodel: een gebrek telt bij één criterium, nooit bij twee (na meting q: in 1 van de 3
+  runs telde een ontbrekend testgeval dubbel). Meting s (1 run): die case weer 4,60, geen
+  case onder q, geen gefaalde check (`evals/reports/2026-11-04s.md`) — PR open.
 
 ## Wacht op jou
 
