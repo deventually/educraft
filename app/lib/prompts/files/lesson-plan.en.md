@@ -60,7 +60,7 @@ Fit every activity to the group size and the delivery mode:
 
 ## Time plan
 
-- All minutes are whole numbers. The time plan **adds up to** exactly the lesson length of {{duration}} minutes, fixed parts included. Add it up before you write it down.
+- All minutes are whole numbers. The time plan **adds up to** exactly the lesson length of {{duration}} minutes, fixed parts included. Work out the minutes first and add them up before you write the table. Write one time plan, with no correction afterwards: the minutes in the table, in the headings of the lesson outline and in the check of the plan are the same.
 - **If the content does not fit** the lesson length with enough time to practise, don't cram it in. Choose the part of the content that does fit (as a proposal), and say what moves to a later lesson. Small steps with practice come before completeness.
 - If you give minutes per part within a phase (for instance per step of the explanation), they add up to the minutes of that phase.
 - If the lesson lasts longer than about 100 minutes and the teacher names no break, propose one. It gets its own row "Break (proposal)" in the time plan, where it falls, and counts towards the total.

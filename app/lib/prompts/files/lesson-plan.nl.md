@@ -60,7 +60,7 @@ Laat elke werkvorm passen bij de groepsgrootte en de contactvorm:
 
 ## Tijdsplan
 
-- Alle minuten zijn hele getallen. Het tijdsplan **telt op tot** precies de lesduur van {{duration}} minuten, inclusief vaste onderdelen. Tel het na voordat je het opschrijft.
+- Alle minuten zijn hele getallen. Het tijdsplan **telt op tot** precies de lesduur van {{duration}} minuten, inclusief vaste onderdelen. Reken de minuten eerst uit en tel ze na voordat je de tabel schrijft. Schrijf één tijdsplan, zonder correctie achteraf: de minuten in de tabel, in de kopjes van het lesverloop en in de check op de opzet zijn dezelfde.
 - **Past de stof niet in** de lesduur met genoeg tijd om te oefenen, prop haar er dan niet in. Kies het deel van de inhoud dat wel past (als voorstel), en zeg wat naar een volgende les gaat. Kleine stappen met oefening gaan voor volledigheid.
 - Geef je binnen een fase minuten per onderdeel (bijvoorbeeld per stap van de uitleg), dan tellen die op tot de minuten van die fase.
 - Duurt de les langer dan ongeveer 100 minuten en noemt de docent geen pauze, stel er dan een voor. Die krijgt een eigen regel "Pauze (voorstel)" in het tijdsplan, op de plek waar die valt, en telt mee in het totaal.

@@ -22,8 +22,13 @@ Score each shared criterion 1–5.
   the goal itself with a decision point, monitored independent practice at the goal's level, a
   closing in which students show what they learned, and review questions for later lessons? Are
   the worked examples and expected answers correct?
-- **formatAdherence** — The required `##` headings without numbers, in order ("Note first" only
-  when there is a problem in the input), one time-plan table in the required layout
+- **formatAdherence** — The required `##` headings without numbers, in order, in the output
+  language: Dutch "Let op vooraf", "Leerdoel en succescriterium", "Tijdsplan", "Lesverloop",
+  "Terugkomen in volgende lessen", "Check op de opzet"; English "Note first", "Learning goal and
+  success criterion", "Time plan", "Lesson outline", "Coming back in later lessons", "Check of the
+  plan". The first heading appears only when there is a problem in the input (a goal that is not
+  observable, content that does not fit, missing prior knowledge, or prior knowledge left empty and
+  assumed); bullets under it are fine. one time-plan table in the required layout
   (`| Fase | Minuten | Werkvorm | Hoe dit het leerdoel dient |` or
   `| Phase | Minutes | Activity | How this serves the learning goal |`) with the fixed phase
   names and a **Totaal**/**Total** row (an extra row for a teacher's fixed part or a proposed break, "Pauze (voorstel)" / "Break (proposal)", is the required form, not a deviation), `###` phase headings with the minutes, and the exact
@@ -51,5 +56,5 @@ score (the cap is the maximum), however good the rest is.
 - **phaseWithoutGoal** (cap 3): Is one of the six phases missing, or is there a phase or activity that does not serve the learning goal (a general icebreaker, content the teacher did not name, practice at a different skill than the goal asks)?
 - **noCheckOfAllStudents** (cap 3): Does the check for understanding rely on calling on single students or asking "does everyone understand?", instead of a way in which all students answer, or does it lack a decision point for what the teacher does when too few answer correctly?
 - **ignoresSetting** (cap 3): Does the plan contain an activity that does not work for the group size or the delivery mode: circulating among everyone's work in a lecture of 200 students, mini-whiteboards held up in an online lesson, or a hybrid activity that leaves out the online students?
-- **wrongContent** (cap 2): Is a worked example, formula, expected answer or subject fact in the plan wrong?
+- **wrongContent** (cap 2): Is a worked example, formula, expected answer or subject fact in the plan wrong? Recompute every calculation step by step from the numbers given in the plan before answering true, and answer true only when you can name the line and the correct value.
 - **inventedSources** (cap 2): Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up, or attribute to Rosenshine something the article does not say?

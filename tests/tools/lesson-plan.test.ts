@@ -118,6 +118,8 @@ describe("tool: lesson-plan", () => {
     expect(p).toContain("genderneutraal");
     expect(p).toContain("binnen een fase");
     expect(p).toContain("pauze (voorstel)");
+    // Meting lp2: a table totalling 60 over 59 minutes, corrected below with a second table.
+    expect(p).toContain("één tijdsplan, zonder correctie achteraf");
   });
 
   it("guards the brief's demands and Rosenshine's principles (en)", () => {
@@ -148,6 +150,7 @@ describe("tool: lesson-plan", () => {
     expect(p).toContain("gender-neutral");
     expect(p).toContain("within a phase");
     expect(p).toContain("break (proposal)");
+    expect(p).toContain("one time plan, with no correction afterwards");
   });
 
   it("asks for a time plan table with a total row, in both languages", () => {
