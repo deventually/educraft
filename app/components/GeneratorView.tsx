@@ -120,6 +120,7 @@ export function GeneratorView({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
       <div className="space-y-4">
+        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
         <ToolControls
           usesContextProfile={tool.usesContextProfile}
           profiles={profiles}
@@ -134,7 +135,6 @@ export function GeneratorView({
           disabled={streaming}
           requiresImages={hasImageInputs}
         />
-        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
         <div className="flex items-center gap-3">
           {streaming ? (
             <Button variant="secondary" onClick={stop}>

@@ -7,6 +7,7 @@ import { summarizeSandbox } from "~/lib/forms/summarize";
 import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { AdvancedSettings } from "./AdvancedSettings";
 import { Button, Label, Select } from "./ui";
 import { initialPickerModel, pickableModels, type PickerModel } from "~/lib/ai/models";
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
@@ -69,8 +70,9 @@ export function ChatView({
   // default: a direct answer is dramatically faster for chat than reasoning first.
   // Only sent to the server when the selected model actually supports it.
   const [thinking, setThinking] = useState(false);
-  const selectedModelSupportsThinking =
-    modelOptions.find((m) => m.id === selectedModel)?.supportsThinking ?? false;
+  const selectedPickerModel = modelOptions.find((m) => m.id === selectedModel);
+  const selectedModelSupportsThinking = selectedPickerModel?.supportsThinking ?? false;
+  const selectedModelName = selectedPickerModel?.displayName ?? selectedModel;
   // The conversation defaults to the interface language: a Dutch UI opens a
   // Dutch chat, an English UI an English one. An explicit prop still wins.
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
@@ -225,7 +227,7 @@ export function ChatView({
       <div className="mx-auto w-full max-w-2xl">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4">
-            <h3 className="font-semibold text-slate-900">{t.tool.contextProfile}</h3>
+            <h2 className="font-semibold text-slate-900">{t.chat.setupHeading}</h2>
             <p className="mt-1 text-sm text-slate-600">{t.chat.sandboxHint}</p>
           </div>
           <DynamicForm fields={tool.inputs} values={sandboxValues} onChange={setSandboxValue} />
@@ -261,7 +263,8 @@ export function ChatView({
     // top) that scrolls with the page — pinning there would trap the tall aside
     // and its model/language controls off-screen.
     <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
-      {/* Settings aside — what was entered before the chat, plus model/language. */}
+      {/* Settings aside: what was entered before the chat, the output language, and
+          the technique (model, reasoning) behind "Advanced". */}
       <aside
         aria-labelledby="chat-settings-heading"
         className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
@@ -296,44 +299,7 @@ export function ChatView({
         )}
 
         <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-          <div>
-            <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
-              {t.tool.model}
-            </Label>
-            <Select
-              id="chat-model"
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="h-9 w-full py-0 text-sm"
-            >
-              {modelOptions.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.displayName}
-                </option>
-              ))}
-            </Select>
-          </div>
-          {/* Reasoning switch — only for models that support it (Ollama Qwen3
-                etc.). Off by default: a direct answer is far faster than reasoning
-                first. Hidden entirely for non-thinking models. */}
-          {selectedModelSupportsThinking && (
-            <div>
-              <label
-                htmlFor="chat-thinking"
-                className="flex items-center gap-2 text-sm text-slate-700"
-              >
-                <input
-                  id="chat-thinking"
-                  type="checkbox"
-                  className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
-                  checked={thinking}
-                  onChange={(e) => setThinking(e.target.checked)}
-                />
-                {t.tool.reasoning}
-              </label>
-              <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
-            </div>
-          )}
+          {/* Output language is not technique: it stays visible. */}
           <div>
             <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
               {t.tool.outputLanguage}
@@ -348,6 +314,52 @@ export function ChatView({
               <option value="en">{t.tool.english}</option>
             </Select>
           </div>
+          {/* Technique (model, reasoning) sits behind "Advanced". With one model and
+              no reasoning switch there is nothing to choose, so it drops out. */}
+          {(modelOptions.length > 1 || selectedModelSupportsThinking) && (
+            <AdvancedSettings current={selectedModelName}>
+              {modelOptions.length > 1 && (
+                <div>
+                  <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
+                    {t.tool.model}
+                  </Label>
+                  <Select
+                    id="chat-model"
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    className="h-9 w-full py-0 text-sm"
+                  >
+                    {modelOptions.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.displayName}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+              {/* Reasoning switch: only for models that support it (Ollama Qwen3
+                  etc.). Off by default: a direct answer is far faster than
+                  reasoning first. */}
+              {selectedModelSupportsThinking && (
+                <div>
+                  <label
+                    htmlFor="chat-thinking"
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
+                    <input
+                      id="chat-thinking"
+                      type="checkbox"
+                      className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                      checked={thinking}
+                      onChange={(e) => setThinking(e.target.checked)}
+                    />
+                    {t.tool.reasoning}
+                  </label>
+                  <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
+                </div>
+              )}
+            </AdvancedSettings>
+          )}
         </div>
       </aside>
 
