@@ -36,12 +36,22 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   (P18.7).
 - 2026-11-03: "Ook dat wil ik kunnen doen. Resetten, wachtwoord link versturen en zelf een
   wachtwoord invoeren. Ook user account op non-actief kunnen zetten" → V2 (P18.7).
+- 2026-11-04: "Hoe kunnen we beginnende docenten begeleiden om hun BDB en BKE goed te maken en
+  makkelijk voor ze maken? Ik vind dat we met deze tool de BDB en BKE binnen een paar dagen moeten
+  kunnen afronden en wederom met een hele hoge kwaliteit." → brief P23 (werkplaats).
+- 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
+  wijden." → BESLUIT-2026-11-04-5.
+- 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → P25.
 
 ## Bezig
 
+- Brief P23 (BDB/BKE-werkplaats), als PR ter goedkeuring.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
+
+- Brief P23: kies het menu (vijfde item "BDB/BKE" of een tegel op de startpagina) en geef akkoord
+  op de eval-run (ongeveer €1–3 per run).
 
 ## Volgende (voorgestelde volgorde)
 
@@ -57,6 +67,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
    contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
+6. **BDB/BKE-werkplaats:** brief P23 (zes PR's), daarna P24 toets bouwen, P25 toetsanalyse en
+   import, P26 oefenen en feedback. P23 hangt niet af van P20; P24 wel.
 
 ## Open vragen
 

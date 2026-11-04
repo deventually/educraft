@@ -119,3 +119,16 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   het vo: Fase). Het vinkje "Als standaard instellen" staat onder de velden. Onder "Meer details
   (optioneel)", dicht: niveau, domein en kader, beroepspraktijk, technologie, onderwijsconcept,
   aanspreekvorm (mbo) en eigen velden. Uitwerking: brief P19, stap 19.6.
+- **BESLUIT-2026-11-04-5:** **BDB en BKE krijgen een eigen deel van de app**, de werkplaats, dat de
+  bestaande tools mag inzetten. Uitwerking: brief P23.
+- **BESLUIT-2026-11-04-6:** **Coachen of schrijven is een keuze van de docent.** Standaard coacht de
+  werkplaats. Laat de docent tekst opstellen, dan past de docent die aan en draagt de docent de
+  verantwoordelijkheid. Hooguit één neutrale melding; LimeOnIt leest de docent niet de les.
+- **BESLUIT-2026-11-04-7:** **Scores van studenten worden standaard geanonimiseerd** bij het
+  importeren; de docent kan dat uitzetten.
+- **BESLUIT-2026-11-04-8:** **Het BDB/BKE-cursusmateriaal van Bastiaan** (van een BDB-opleiding,
+  2025-2026) mag gebruikt worden als achtergrond en voor evals. Niets ervan komt in de repo of de
+  app (auteursrecht); privé-evaldata staat buiten de repo.
+- **BESLUIT-2026-11-04-9:** **Export naar Word mag**, ook met een nieuwe dependency (`docx`).
+- **BESLUIT-2026-11-04-10:** **Importeren uit TestVision, ANS en Remindo** hoort bij de werkplaats,
+  zodat toetsresultaten meegaan in de documentatie voor de leeruitkomsten. Uitwerking: P25.
