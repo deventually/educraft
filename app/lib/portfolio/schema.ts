@@ -59,6 +59,7 @@ export const CriterionSchema = z.object({
   id: Id,
   text: z.string().min(1).max(LIMITS.criterionText),
   strongLevel: z.string().max(LIMITS.criterionText).optional(),
+  unverified: z.boolean().optional(),
 });
 
 export const OutcomeSchema = z.object({

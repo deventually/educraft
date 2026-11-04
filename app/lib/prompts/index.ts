@@ -15,6 +15,7 @@ import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
+import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -40,6 +41,7 @@ const ALL: PromptDef[] = [
   STAGE_ASSESSMENT_PROMPT_V2,
   PORTFOLIO_COACH_PROMPT,
   PORTFOLIO_DRAFT_PROMPT,
+  PORTFOLIO_FRAMEWORK_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
