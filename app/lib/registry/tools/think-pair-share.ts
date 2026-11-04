@@ -32,9 +32,16 @@ export const thinkPairShare: Tool = {
     chapterTitle:
       "Rethinking Think-Pair-Share: Generative AI as a Collaborative Peer in Technology Education",
     authors: "Amara Atif",
-    sourcePages: "pp. 51–66",
-    evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    sourcePages: "pp. 62–63",
+    evaluatedWith: {
+      nl: "Microsoft Copilot (GPT-4o als beoordelaar)",
+      en: "Microsoft Copilot (GPT-4o as judge)",
+    },
+    adapted: true,
+    adaptation: {
+      nl: "In het boek plakt de student de prompt zelf in Copilot, met het vak en onderwerp ingevuld door de docent. Wij gebruiken dezelfde rol, fasen en beperkingen als systeemprompt in een chat, vertaald naar het Nederlands, met regels voor grenzen en een stabiel gesprek erbij.",
+      en: "In the book the student pastes the prompt into Copilot, with the subject and topic filled in by the teacher. We use the same role, phases and constraints as the system prompt of a chat, translated into Dutch, with rules for boundaries and a stable conversation added.",
+    },
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",

@@ -23,6 +23,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **Begeleide reflectie v2 (#63) gemerged op 2026-11-04:** de drie fasen van Backward Design uit
+  het boek, eerst aanscherpen bij vage invoer; gemiddeld 3,4 → 4,8 (`evals/reports/2026-11-04l.md`).
 - **Dialogisch gesprek v2 (#62) gemerged op 2026-11-04:** het interview uit het boek; gemiddeld
   3,0 → 4,1 (`evals/reports/2026-11-04i.md`).
 - **MentorAI v2 (#61) gemerged op 2026-11-04:** de leermeester uit het boek, met eerlijke
@@ -73,12 +75,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Begeleide reflectie v2 naar het boek (24.0): de prompt van Benedict & Thayer (p. 78–79) als
-  Step 3 na "Proceed". De drie fasen van Backward Design staan apart, bewijs en activiteiten
-  gescheiden, geen volledige code meer (niet meer afgekapt). Nieuw optioneel veld "Wat werkte
-  eerder (of niet)?" (gekozen door Bastiaan). Bij niet-meetbare leeruitkomsten of zonder bewijs
-  eerst "Om aan te scherpen" met voorstellen, nog geen ontwerp (advies; keuze ligt bij Bastiaan).
-  Meting j2 → l: gemiddeld 3,4 → 4,8 (`evals/reports/2026-11-04l.md`) — PR open.
+- Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
+  bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
+  pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
+  Architect en Socratische partner komen uit Van Schaack & Sarlo, niet uit "Automating Gagné".
+  Contextualisatie ontbreekt in het PDF; de prompt komt uit de webversie (Guethler). De runtime-
+  prompts veranderen niet, er is dus niets gemeten — PR open.
 
 ## Wacht op jou
 
@@ -90,7 +92,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 (klaar) → Dialogisch gesprek (klaar) →
-   Begeleide reflectie → de andere tools, elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
+   Begeleide reflectie (klaar) → de andere tools (bronvermelding: PR open), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
 3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).

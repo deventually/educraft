@@ -31,10 +31,18 @@ export const peerTutoring: Tool = {
   attribution: attribution({
     chapterTitle:
       "Generative AI Peer Tutoring to Support Peer-Reviewed Source Identification and Evaluation",
-    authors: "multiple authors",
-    sourcePages: "pp. 233–270",
-    evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    authors:
+      "Rae Mair, Michelle Kelley, Taylar Wenzel, Andrea C. Burrows Borowczak, Yuqing Li, & Mike Borowczak",
+    sourcePages: "pp. 236–239",
+    evaluatedWith: {
+      nl: "ChatGPT, Claude, Copilot en Gemini",
+      en: "ChatGPT, Claude, Copilot and Gemini",
+    },
+    adapted: true,
+    adaptation: {
+      nl: "Wij volgen de stappen uit het boek: de tutor helpt de student stap voor stap een bron herkennen als peer-reviewed en die beoordelen, zonder het antwoord te geven. De opdracht en het vak komen uit het formulier, het niveau uit het contextprofiel, en het gesprek is in het Nederlands, met regels voor grenzen en een stabiel gesprek erbij.",
+      en: "We follow the book's steps: the tutor helps the student step by step to identify a source as peer-reviewed and evaluate it, without giving the answer. The assignment and subject come from the form, the level from the context profile, and the conversation is in Dutch, with rules for boundaries and a stable conversation added.",
+    },
   }),
   // The teacher's context profile seeds the learner's level (EQF); the bespoke
   // high-school/undergraduate/graduate input is retired onto that spine (P6.8).

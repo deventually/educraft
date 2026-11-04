@@ -217,7 +217,7 @@ export const portfolio: Messages["portfolio"] = {
       "bloom-by-design":
         "Choose a digital tool that fits your learning goals, and justify that choice.",
       "cognitive-architect":
-        "Work out a learning activity step by step following Gagné and Rosenshine. This shows the structure and the methods.",
+        "Redesign an assignment into an AI learning activity using six learning principles. This shows how you let students do the thinking.",
       contextualization:
         "Analyse whether your learning goals, methods and assessment fit together. The analysis shows how your teaching fits the whole.",
       "dialogic-encounters":

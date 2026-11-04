@@ -33,10 +33,13 @@ export const scaffoldingFeedback: Tool = {
   },
   attribution: attribution({
     chapterTitle: "Scaffolding with Formative Feedback: A Deployable AI Tutoring Prompt System",
-    authors: "multiple authors",
-    sourcePages: "pp. 279–310",
-    evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    authors: "April Crenshaw, LeAnders Burns, & David Escalante Gonzalez",
+    sourcePages: "pp. 279–283",
+    adapted: true,
+    adaptation: {
+      nl: "Het boek is gemaakt voor één wiskundevak (MATH 1710 Precalculus) en wordt in een eigen app opgebouwd, met de stand Step-by-Step. Wij houden de toon, de leercyclus met meerkeuzevragen A tot en met D en de stand Step-by-Step, maar voor het vak dat de docent invult, in het Nederlands.",
+      en: "The book is built for one maths course (MATH 1710 Precalculus) and assembled in its own app, in Step-by-Step mode. We keep the voice, the teaching cycle with multiple-choice questions A to D and the Step-by-Step mode, but for the subject the teacher fills in, in Dutch.",
+    },
   }),
   // Learner tutor: the teacher's context profile seeds the level (EQF) with the
   // direct-address register directive (P6.8).

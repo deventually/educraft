@@ -34,10 +34,14 @@ export const bloomByDesign: Tool = {
   attribution: attribution({
     chapterTitle:
       "Bloom by Design: Prompt Engineering an AI Chatbot for Constructive Alignment of Outcomes and EdTech",
-    authors: "Adam Palczewski, Laura Decuzzi, Dempsey Cruz",
-    sourcePages: "pp. 189–209",
-    evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    authors: "Adam Palczewski, Laura Decuzzi, & Dempsey Cruz",
+    sourcePages: "pp. 206–207",
+    evaluatedWith: { nl: "ChatGPT-4o", en: "ChatGPT-4o" },
+    adapted: true,
+    adaptation: {
+      nl: "In het boek beveelt de chatbot alleen tools aan uit een kennisbron met goedgekeurde onderwijstechnologie van de eigen instelling, met links. LimeOnIt geeft zo'n kennisbron niet mee, dus de chat noemt tools uit algemene kennis: ga zelf na of een tool bij jouw instelling is toegestaan. De chat is in het Nederlands.",
+      en: "In the book the chatbot only recommends tools from a knowledge source of the institution's approved educational technology, with links. LimeOnIt supplies no such knowledge source, so the chat names tools from general knowledge: check yourself whether a tool is allowed at your institution. The chat is in Dutch.",
+    },
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",

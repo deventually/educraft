@@ -1,4 +1,4 @@
-# Rubric — Cognitive Architect (Automating Gagné / CER)
+# Rubric — Cognitive Architect (From Oracle to Socratic Partner / CER)
 
 The output is the concatenation of four chained stages (Instructional Coordinates
 Document → Student System Prompt → Quality Validation Report → Transcript Analyst

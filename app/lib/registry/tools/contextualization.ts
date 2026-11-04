@@ -34,13 +34,13 @@ export const contextualization: Tool = {
   attribution: attribution({
     chapterTitle:
       "Making Pedagogical Intent Visible: AI-Supported Contextualization in Higher Education Course Design",
-    authors: "David Wiley, ed.",
-    sourcePages: "The Pedagogical Promptbook",
-    evaluatedWith: {
-      nl: "Claude, ChatGPT, Gemini",
-      en: "Claude, ChatGPT, Gemini",
-    },
+    authors: "Alexis Guethler",
+    sourcePages: "Appendix 1 (web edition, doi.org/10.59668/2340.26734)",
     adapted: true,
+    adaptation: {
+      nl: "Deze tool doet iets anders dan het boek. In het boek schrijft de AI per lesmateriaal (een tekst of video) een korte inleiding voor studenten, van 2 tot 5 zinnen, die laat zien waarom het materiaal ertoe doet. Wij nemen het doel van het hoofdstuk over, de pedagogische bedoeling zichtbaar maken, maar analyseren de samenhang van een hele cursusopzet: leerdoelen, werkvormen en toetsing. Het hoofdstuk ontbreekt in het boek-PDF; de prompt komt uit de webversie.",
+      en: "This tool does something different from the book. In the book the AI writes a short student-facing introduction of 2 to 5 sentences for each reading or video, showing why it matters. We keep the chapter's aim, making pedagogical intent visible, but analyse the alignment of a whole course design: outcomes, activities and assessment. The chapter is missing from the book PDF; the prompt comes from the web edition.",
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
