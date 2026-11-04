@@ -45,6 +45,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
 - V2 stap 18.6: superbeheerder — alleen hij maakt, degradeert en verwijdert beheerders; uitnodigingen maken nooit beheerders; `npm run set-owner` — branch `claude/p18-6` (bovenop 18.5).
 - V2 stap 18.7: superbeheerder maakt accounts direct aan (link of beginwachtwoord), stelt wachtwoorden in en zet accounts op non-actief; migratie `0009` (kolom erbij) — branch `claude/p18-7` (bovenop 18.6).
 - V2 stap 18.8: opruimen — tabellen `chat_sessions`/`messages`/`projects` en kolommen `allowed_tool_slugs`/`project_id` weg, oude instellingen en open beheerdersuitnodigingen gewist (destructieve migratie `0010`, eerst back-up) — branch `claude/p18-8` (bovenop 18.7).
+- V2 stap 18.9: wie van rol wisselt (docent ↔ beheerder) wordt overal uitgelogd (`setUserRole` verhoogt `sessionVersion`) — branch `claude/p18-9` (bovenop 18.8).
 - Brief P19 (V3) — deze PR.
 
 ## Wacht op jou
@@ -60,7 +61,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
 3. **Vereenvoudiging V3** (brief P19, nog vijf PR's): de docentkant. 19.1 (toolnamen, taak eerst;
    BESLUIT-2026-11-03-18) is gemerged. Daarna: 19.2 geen doelgroeplabels, 19.3 techniek achter
    "Geavanceerd", 19.4 lege pagina's die sturen (kunnen naast V2); 19.5 menu en 19.6 kort
-   contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-1 t/m -3.
+   contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 

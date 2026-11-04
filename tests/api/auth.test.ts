@@ -298,4 +298,40 @@ describe("deactivated accounts (P18.7)", () => {
     await users.setUserDisabled(u.id, false);
     expect((await users.getUserById(u.id))!.sessionVersion).toBe(v1);
   });
+
+  it("promoting or demoting logs the user out on every device (P18.9)", async () => {
+    const u = await users.createUser({
+      name: "Role Change",
+      email: "rolechange-p189@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    const laptop = await sessionCookieFor(u.id);
+    const phone = await sessionCookieFor(u.id);
+    expect((await auth.getUser(requestWithCookie(laptop)))?.id).toBe(u.id);
+
+    await users.setUserRole(u.id, "admin");
+    expect(await auth.getUser(requestWithCookie(laptop))).toBeNull();
+    expect(await auth.getUser(requestWithCookie(phone))).toBeNull();
+
+    // A fresh session works, and a demotion kills it again.
+    const asAdmin = await sessionCookieFor(u.id);
+    expect((await auth.getUser(requestWithCookie(asAdmin)))?.role).toBe("admin");
+    await users.setUserRole(u.id, "teacher");
+    expect(await auth.getUser(requestWithCookie(asAdmin))).toBeNull();
+  });
+
+  it("setting the role a user already has does not bump the session version", async () => {
+    const u = await users.createUser({
+      name: "Same Role",
+      email: "samerole-p189@example.com",
+      passwordHash: "scrypt:aa:bb",
+      role: "teacher",
+    });
+    const cookie = await sessionCookieFor(u.id);
+    const v0 = (await users.getUserById(u.id))!.sessionVersion;
+    await users.setUserRole(u.id, "teacher");
+    expect((await users.getUserById(u.id))!.sessionVersion).toBe(v0);
+    expect((await auth.getUser(requestWithCookie(cookie)))?.id).toBe(u.id);
+  });
 });
