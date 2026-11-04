@@ -1,5 +1,5 @@
 import { getToolBySlug } from "~/lib/registry";
-import { evalGreeting } from "../../scripts/eval-helpers";
+import { evalGreeting, scoresForNextRun, unjudgeableReason } from "../../scripts/eval-helpers";
 import { describe, it, expect } from "vitest";
 import {
   clampScore,
@@ -152,5 +152,45 @@ describe("chat greeting in the eval transcript (nulmeting 2026-11-04)", () => {
     expect(
       evalGreeting(getToolBySlug("arcs-reactor")!, { outputLanguage: "nl", values: {} }),
     ).toBeUndefined();
+  });
+});
+
+describe("unjudgeableReason (second measurement 2026-11-04)", () => {
+  // guided-reflection eqf6 came back empty twice; the judge still scored it 3.6.
+  it("refuses an empty or whitespace-only one-shot output", () => {
+    expect(unjudgeableReason("")).toMatch(/empty/);
+    expect(unjudgeableReason("  \n\t ")).toMatch(/empty/);
+  });
+
+  it("refuses a chat transcript with an empty tutor turn", () => {
+    const t = "**Student:** hoi\n\n**Tutor:** \n\n**Student:** en nu?\n\n**Tutor:** Goed.";
+    expect(unjudgeableReason(t)).toMatch(/empty tutor turn/);
+  });
+
+  it("accepts normal output and a complete transcript", () => {
+    expect(unjudgeableReason("# Lesplan\n\nFase 1 …")).toBeNull();
+    expect(
+      unjudgeableReason("**Tutor (greeting):** Hoi\n\n**Student:** hoi\n\n**Tutor:** Dag!"),
+    ).toBeNull();
+  });
+});
+
+describe("a case that was not judged", () => {
+  const rows: ReportRow[] = [
+    { tool: "a", caseId: "x", scores: { taskFidelity: 5 }, model: "m", promptWords: 1 },
+    { tool: "b", caseId: "empty", scores: {}, model: "m", promptWords: 1 },
+  ];
+
+  it("shows as not judged in the report, without a score or a delta", () => {
+    const md = buildReportMarkdown({ date: "d", rows, previousAvgByKey: { "b/empty": 3.6 } });
+    const line = md.split("\n").find((l) => l.includes("| empty |"))!;
+    expect(line).toContain("not judged");
+    expect(line).not.toContain("0.00");
+    expect(line).not.toMatch(/-3\.60/);
+    expect(md).toContain("Cases scored: 1 of 2");
+  });
+
+  it("is left out of the scores the next run compares with", () => {
+    expect(scoresForNextRun(rows)).toEqual({ "a/x": 5 });
   });
 });

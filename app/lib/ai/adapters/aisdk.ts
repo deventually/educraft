@@ -1,12 +1,11 @@
 import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { resolveModelInfo } from "../models";
+import { outputTokenBudget, resolveModelInfo } from "../models";
 import type { GenerateOptions, LLMProvider } from "../types";
 import { env } from "~/server/env.server";
 import { LocalizedError } from "~/lib/i18n/errors";
 
-const DEFAULT_MAX_TOKENS = 8192;
 const DEFAULT_TEMPERATURE = 0.4;
 
 /** Resolve a catalog or dynamic local model id to a concrete AI SDK LanguageModel. */
@@ -85,16 +84,17 @@ export const aiSdkProvider: LLMProvider = {
   id: "ai-sdk",
 
   async generate(opts) {
-    const { text, usage } = await generateText({
+    const { text, usage, finishReason } = await generateText({
       model: resolveModel(opts.model),
       system: opts.system,
       messages: toMessages(opts),
       temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
-      maxOutputTokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
+      maxOutputTokens: outputTokenBudget(resolveModelInfo(opts.model), opts.maxTokens),
     });
     return {
       text,
       usage: { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 },
+      finishReason,
     };
   },
 
@@ -104,7 +104,7 @@ export const aiSdkProvider: LLMProvider = {
       system: opts.system,
       messages: toMessages(opts),
       temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
-      maxOutputTokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
+      maxOutputTokens: outputTokenBudget(resolveModelInfo(opts.model), opts.maxTokens),
     });
     for await (const delta of result.textStream) {
       yield delta;
