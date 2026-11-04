@@ -21,9 +21,15 @@ interface Props {
   fields: InputField[];
   values: FormValues;
   onChange: (name: string, value: FormValues[string]) => void;
+  /**
+   * Called with the picked files of a `kind: "document"` field, so the caller
+   * can show the original next to the text (DocumentViewer). The files stay in
+   * the browser; the field's value is still only the extracted text.
+   */
+  onDocumentFiles?: (name: string, files: File[]) => void;
 }
 
-export function DynamicForm({ fields, values, onChange }: Props) {
+export function DynamicForm({ fields, values, onChange, onDocumentFiles }: Props) {
   const locale = useLocale();
   const groups = groupBy(fields, locale);
   return (
@@ -41,6 +47,7 @@ export function DynamicForm({ fields, values, onChange }: Props) {
               field={field}
               value={values[field.name]}
               onChange={(v) => onChange(field.name, v)}
+              onFiles={onDocumentFiles && ((files) => onDocumentFiles(field.name, files))}
             />
           ))}
         </fieldset>
@@ -53,10 +60,12 @@ function FieldControl({
   field,
   value,
   onChange,
+  onFiles,
 }: {
   field: InputField;
   value: FormValues[string];
   onChange: (v: FormValues[string]) => void;
+  onFiles?: (files: File[]) => void;
 }) {
   const locale = useLocale();
   const id = `f-${field.name}`;
@@ -67,7 +76,7 @@ function FieldControl({
           {loc(field.label, locale)}
         </Label>
       )}
-      {renderControl(field, id, value, onChange, locale)}
+      {renderControl(field, id, value, onChange, locale, onFiles)}
       {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}
     </div>
   );
@@ -79,6 +88,7 @@ function renderControl(
   value: FormValues[string],
   onChange: (v: FormValues[string]) => void,
   locale: Locale,
+  onFiles?: (files: File[]) => void,
 ) {
   const placeholder = loc(field.placeholder, locale) || undefined;
   switch (field.kind) {
@@ -178,6 +188,7 @@ function renderControl(
           rows={field.rows ?? 12}
           placeholder={placeholder}
           onChange={onChange}
+          onFiles={onFiles}
         />
       );
     case "file":
@@ -323,6 +334,7 @@ interface DocumentInputControlProps {
   rows: number;
   placeholder?: string;
   onChange: (v: string) => void;
+  onFiles?: (files: File[]) => void;
 }
 
 /**
@@ -339,6 +351,7 @@ function DocumentInputControl({
   rows,
   placeholder,
   onChange,
+  onFiles,
 }: DocumentInputControlProps) {
   const t = useT();
   const fileId = `${id}-file`;
@@ -366,13 +379,15 @@ function DocumentInputControl({
           setNotice(large ? t.tool.docLarge : t.tool.docExtracted);
         }
         setSkipped(emptyFiles);
+        // Even a scan without text is worth showing as the original.
+        onFiles?.(files);
       } catch (err) {
         setError(err instanceof Error ? err.message : t.tool.docEmpty);
       } finally {
         setBusy(false);
       }
     },
-    [onChange, t],
+    [onChange, onFiles, t],
   );
 
   return (

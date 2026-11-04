@@ -11,10 +11,13 @@ import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
+import { cn } from "~/lib/utils";
 import { streamPost } from "~/lib/streamClient";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
+import { DocumentViewer } from "./documents/DocumentViewer";
+import { extractQuotes } from "~/lib/documents/locate";
 
 interface Props {
   tool: Tool;
@@ -56,6 +59,12 @@ export function GeneratorView({
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Originals of `kind: "document"` fields, by field name. Browser memory only:
+  // they are shown in the DocumentViewer and never sent or stored.
+  const [originals, setOriginals] = useState<Record<string, File[]>>({});
+  const docField = tool.inputs.find((f) => f.kind === "document" && originals[f.name]?.length);
+  const docFiles = docField ? originals[docField.name] : undefined;
+  const quotes = docFiles && output && !streaming ? extractQuotes(output) : [];
 
   async function generate() {
     const missing = missingRequired(tool.inputs, values);
@@ -120,7 +129,12 @@ export function GeneratorView({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
       <div className="space-y-4">
-        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
+        <DynamicForm
+          fields={tool.inputs}
+          values={values}
+          onChange={setValue}
+          onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
+        />
         <ToolControls
           usesContextProfile={tool.usesContextProfile}
           profiles={profiles}
@@ -155,7 +169,21 @@ export function GeneratorView({
       </div>
 
       <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
-        <div className="min-h-0 flex-1">
+        <div
+          className={cn(
+            "min-h-0 flex-1",
+            docFiles && (output || streaming) && "grid gap-3 2xl:grid-cols-2",
+          )}
+        >
+          {docFiles && docField && (
+            <div className={cn("min-h-0", (output || streaming) && "2xl:order-2")}>
+              <DocumentViewer
+                files={docFiles}
+                text={String(values[docField.name] ?? "")}
+                quotes={quotes}
+              />
+            </div>
+          )}
           {output || streaming ? (
             <ResultPanel
               markdown={output}
@@ -163,7 +191,7 @@ export function GeneratorView({
               streaming={streaming}
               fill
             />
-          ) : (
+          ) : docFiles ? null : (
             <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
               {fmt(t.tool.emptyResult, { action: t.tool.generate })}
             </div>
