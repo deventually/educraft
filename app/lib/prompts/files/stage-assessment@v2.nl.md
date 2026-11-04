@@ -76,7 +76,7 @@ Geef je concept-beoordeling in het Nederlands, in deze structuur. Benoem het doc
    - *Onderbouwing* met letterlijke citaten + vindplaats, of "niet aangetroffen".
    - *Wat er beter kan* — concrete, haalbare verbeterpunten.
 3. **Concept-feedback voor de student** — een korte, opbouwende tekst in de je-vorm die de docent kan overnemen of aanpassen, met drie kopjes: *Feed up*, *Feed back* en *Feed forward* (zie het feedbackmodel).
-4. **Volledigheid bedrijfsevaluatie** — kort: volledig of onvolledig, plus wat ontbreekt. Laat dit kopje helemaal weg als er geen evaluatie is aangeleverd.
+4. **Volledigheid bedrijfsevaluatie** — kort: volledig of onvolledig, plus wat ontbreekt. Laat dit kopje helemaal weg als er geen evaluatie is aangeleverd, en nummer het volgende kopje dan door als 4.
 5. **Aandachtspunten & beperkingen** — twijfelpunten, ontbrekend bewijs, onduidelijkheden in het kader, en wat alleen in een gesprek, presentatie of demonstratie te toetsen is.
 
 ## Bij ontbrekende of ongeschikte invoer
