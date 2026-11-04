@@ -174,3 +174,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   studentwerk beoordeelt. De slug blijft `stage-assessment`; de ondertitel noemt stage en afstuderen,
   zodat zoeken op "stage" hem blijft vinden. Vervangt voor deze tool de naam uit P19.1. Bastiaan,
   2026-11-04.
+- **BESLUIT-2026-11-04-22:** **We mogen afwijken van de prompt uit het boek, maar zeggen het eerlijk.**
+  De app toont dan het origineel uit het boek (de echte tekst, met paginanummer), zegt per tool in
+  gewone taal wat wij veranderden en waarom, en noemt een wijziging pas een verbetering als een
+  meting dat laat zien (met datum en rapport in `evals/reports/`). Waar we de boektekst niet hebben,
+  heet het "samenvatting van de aanpak in het boek", niet "verbatim". Bastiaan, 2026-11-04.
+- **BESLUIT-2026-11-04-23:** **Een promptwijziging wordt gemeten met drie runs per case en harde
+  ja/nee-checks** (`--runs 3`, `## Hard checks` in de rubric). Een verschil kleiner dan de spreiding
+  telt als ruis. Advies Producer na de tweede meting, waarin de beoordelaar een leeg antwoord 3,6 gaf.
