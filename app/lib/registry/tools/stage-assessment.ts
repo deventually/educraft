@@ -1,11 +1,12 @@
 import type { Tool } from "../types";
-import { STAGE_ASSESSMENT_PROMPT } from "~/lib/prompts/stage-assessment@v1.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V2 } from "~/lib/prompts/stage-assessment@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import hboiNakijkmodel from "./presets/hbo-i-stage-nakijkmodel.md?raw";
 
 const DOC = { nl: "Document", en: "Document" };
 const CONTEXT = { nl: "Context", en: "Context" };
 const FRAMEWORK = { nl: "Beoordelingskader", en: "Assessment framework" };
+const INTERNSHIP = { nl: "Stage en afstuderen", en: "Internship and graduation" };
 
 const SCALE_DEFAULT = `Schaal: Onvoldoende (O) = 0 punten · Voldoende (V) = 6 punten · Goed (G) = 10 punten.
 Slaagregel: zodra één onderdeel/succescriterium Onvoldoende is, is het eindresultaat Onvoldoende (geen middeling).
@@ -24,17 +25,17 @@ export const stageAssessment: Tool = {
   id: "stage-assessment",
   slug: "stage-assessment",
   name: {
-    nl: "Stageverslag of afstudeerwerk beoordelen",
-    en: "Assess an internship report or thesis",
+    nl: "Studentwerk beoordelen en feedback geven",
+    en: "Assess student work and give feedback",
   },
   /** Book/technique name shown small under the task-first name. */
   subtitle: {
-    nl: "Beoordelingsassistent (stage & afstuderen)",
-    en: "Assessment assistant (internship & thesis)",
+    nl: "Beoordelingsassistent: essay, rapport, beroepsproduct, stage & afstuderen",
+    en: "Assessment assistant: essay, report, work product, internship & thesis",
   },
   tagline: {
-    nl: "Concept-beoordeling en feedback op stage- en afstudeerdocumenten tegen jouw nakijkmodel; de docent beslist.",
-    en: "Draft assessment and feedback on internship/thesis documents against your rubric; the teacher decides.",
+    nl: "Concept-beoordeling en feedback op geschreven studentwerk tegen jouw rubric of nakijkmodel, met feed up, feed back en feed forward; de docent beslist.",
+    en: "Draft assessment and feedback on written student work against your rubric, with feed up, feed back and feed forward; the teacher decides.",
   },
   icon: "clipboard-check",
   userType: "instructor",
@@ -45,8 +46,8 @@ export const stageAssessment: Tool = {
       en: "Criterion-referenced assessment & effective feedback",
     },
     summary: {
-      nl: "Beoordeling tegen expliciete succescriteria (Single Point Rubric) gecombineerd met constructieve, op verbetering gerichte feedback. De AI levert een onderbouwd concept; de examinator beslist.",
-      en: "Assessment against explicit success criteria (Single Point Rubric) combined with constructive, improvement-focused feedback. The AI drafts evidence-based advice; the examiner decides.",
+      nl: "Beoordeling tegen expliciete succescriteria, met feedback langs de drie vragen van Hattie & Timperley: waar werk je naartoe (feed up), waar sta je nu (feed back) en wat is de volgende stap (feed forward). De AI levert een onderbouwd concept; de examinator beslist.",
+      en: "Assessment against explicit success criteria, with feedback along Hattie & Timperley's three questions: where are you going (feed up), how are you going (feed back) and where to next (feed forward). The AI drafts evidence-based advice; the examiner decides.",
     },
     keyCitations: [
       "Hattie & Timperley (2007)",
@@ -82,8 +83,8 @@ export const stageAssessment: Tool = {
       required: true,
       rows: 12,
       placeholder: {
-        nl: "Upload de PDF of Word, of plak hier de volledige tekst van het stageverslag, onderzoeksverslag of portfolio.",
-        en: "Upload the PDF or Word file, or paste the full text of the internship report, research report or portfolio here.",
+        nl: "Upload de PDF of Word, of plak hier de volledige tekst van het essay, rapport, beroepsproduct, portfolio of stageverslag.",
+        en: "Upload the PDF or Word file, or paste the full text of the essay, report, work product, portfolio or internship report here.",
       },
       help: {
         nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Je kunt meerdere bestanden tegelijk selecteren (bijv. onderzoeksverslag + beroepsproduct voor een geheel portfolio); de teksten worden samengevoegd. Tabellen en figuren gaan verloren; upload kernfiguren los hieronder.",
@@ -113,6 +114,7 @@ export const stageAssessment: Tool = {
       kind: "select",
       required: true,
       defaultValue: "stageverslag",
+      // Old values stay first and unchanged so earlier generations reload as they were.
       options: [
         { value: "stageverslag", label: { nl: "Stageverslag", en: "Internship report" } },
         { value: "onderzoeksverslag", label: { nl: "Onderzoeksverslag", en: "Research report" } },
@@ -122,11 +124,18 @@ export const stageAssessment: Tool = {
           label: { nl: "Onderzoeksportfolio (geheel)", en: "Research portfolio (whole)" },
         },
         { value: "afstudeerscriptie", label: { nl: "Afstudeerscriptie", en: "Thesis" } },
+        { value: "essay", label: { nl: "Essay", en: "Essay" } },
+        { value: "adviesrapport", label: { nl: "Adviesrapport", en: "Advisory report" } },
+        { value: "verslag", label: { nl: "Verslag of rapport", en: "Report" } },
+        {
+          value: "beroepsproduct",
+          label: { nl: "Beroepsproduct", en: "Professional work product" },
+        },
         { value: "overig", label: { nl: "Overig", en: "Other" } },
       ],
       help: {
-        nl: "Kies 'Onderzoeksportfolio (geheel)' om zowel het onderzoeksverslag (Analyseren) als het beroepsproduct/de realisatie (Realiseren) samen te beoordelen — upload of plak dan beide documenten. De overige typen beoordelen één onderdeel.",
-        en: "Choose 'Research portfolio (whole)' to assess both the research report (Analyseren) and the work product/realisation (Realiseren) together — then upload or paste both documents. The other types assess a single component.",
+        nl: "Het type bepaalt welke criteria uit het kader gelden. Kies 'Onderzoeksportfolio (geheel)' om zowel het onderzoeksverslag (Analyseren) als het beroepsproduct/de realisatie (Realiseren) samen te beoordelen — upload of plak dan beide documenten. De overige typen beoordelen één onderdeel.",
+        en: "The type decides which criteria in the framework apply. Choose 'Research portfolio (whole)' to assess both the research report (Analyseren) and the work product/realisation (Realiseren) together — then upload or paste both documents. The other types assess a single component.",
       },
       group: CONTEXT,
     },
@@ -152,16 +161,6 @@ export const stageAssessment: Tool = {
       defaultValue: 3,
       // Copied straight from the teaching context's study year when one is selected.
       prefillFromProfile: { source: "studyYear" },
-      group: CONTEXT,
-    },
-    {
-      name: "durationWeeks",
-      label: { nl: "Duur van de stage (weken)", en: "Internship duration (weeks)" },
-      kind: "number",
-      required: true,
-      min: 1,
-      max: 52,
-      defaultValue: 20,
       group: CONTEXT,
     },
     {
@@ -194,8 +193,8 @@ export const stageAssessment: Tool = {
       rows: 12,
       defaultValue: hboiNakijkmodel,
       help: {
-        nl: "Standaard het HBO-i stage-nakijkmodel. Pas aan of vervang volledig voor een andere opleiding — dit kader is leidend voor het oordeel.",
-        en: "Defaults to the HBO-i internship rubric. Edit or fully replace it for another programme — this framework drives the judgement.",
+        nl: "Standaard het HBO-i stage-nakijkmodel. Beoordeel je een essay, rapport of ander werk, vervang het dan door je eigen rubric of succescriteria — dit kader is leidend voor het oordeel.",
+        en: "Defaults to the HBO-i internship rubric. For an essay, report or other work, replace it with your own rubric or success criteria — this framework drives the judgement.",
       },
       group: FRAMEWORK,
     },
@@ -213,6 +212,23 @@ export const stageAssessment: Tool = {
       group: FRAMEWORK,
     },
     {
+      name: "durationWeeks",
+      label: {
+        nl: "Duur van de stage in weken (optioneel)",
+        en: "Internship duration in weeks (optional)",
+      },
+      // Text, not number: an optional number field would start at its minimum and
+      // tell the model an essay came with a one-week internship.
+      kind: "text",
+      required: false,
+      placeholder: { nl: "bijv. 20", en: "e.g. 20" },
+      help: {
+        nl: "Alleen bij een stage of afstudeeropdracht. Laat leeg bij ander studentwerk.",
+        en: "Only for an internship or graduation project. Leave empty for other student work.",
+      },
+      group: INTERNSHIP,
+    },
+    {
       name: "companyEvaluation",
       redact: true,
       label: {
@@ -226,14 +242,14 @@ export const stageAssessment: Tool = {
         nl: "Plak hier de (tussentijdse/eind)evaluatie van de bedrijfsbegeleider. Wordt gebruikt als ondersteunend bewijs en op volledigheid gecontroleerd.",
         en: "Paste the company mentor's (interim/final) evaluation. Used as supporting evidence and checked for completeness.",
       },
-      group: FRAMEWORK,
+      group: INTERNSHIP,
     },
   ],
   stages: [
     {
       id: "assessment",
       name: { nl: "Concept-beoordeling", en: "Draft assessment" },
-      systemPromptId: STAGE_ASSESSMENT_PROMPT.id,
+      systemPromptId: STAGE_ASSESSMENT_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
         hint: {

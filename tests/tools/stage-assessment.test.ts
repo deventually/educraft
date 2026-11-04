@@ -51,7 +51,9 @@ describe("tool: stage-assessment", () => {
     expect(doc?.required).toBe(true);
     expect(type?.kind).toBe("select");
     expect(year?.kind).toBe("number");
-    expect(weeks?.kind).toBe("number");
+    // Optional since @v2 (any student work): text, so it can start empty.
+    expect(weeks?.kind).toBe("text");
+    expect(weeks?.required).not.toBe(true);
   });
 
   it("is generic: the assessment framework + scale are editable inputs with HBO-i defaults", () => {
