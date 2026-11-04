@@ -26,4 +26,9 @@ describe("eval scripts", () => {
       expect(declared.has(bin!)).toBe(true);
     });
   }
+
+  it("declares jszip, which the portfolio export tests import directly", () => {
+    // It used to arrive only through another package (mammoth); a later update could drop it.
+    expect(declared.has("jszip")).toBe(true);
+  });
 });
