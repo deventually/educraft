@@ -8,6 +8,7 @@ export const utilities: RouteArea = {
     // The rubric utility has its own pages (it stores data); static segments win over :slug.
     route("utilities/rubric", "routes/utilities.rubric._index.tsx"),
     route("utilities/rubric/:id", "routes/utilities.rubric.$id.tsx"),
+    route("utilities/rubric/:id/fill", "routes/utilities.rubric.$id.fill.tsx"),
     route("utilities/:slug", "routes/utilities.$slug.tsx"),
   ],
 };

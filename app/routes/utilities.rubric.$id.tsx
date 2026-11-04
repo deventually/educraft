@@ -1,5 +1,5 @@
 import { Form, Link, redirect } from "react-router";
-import { ArrowLeft, CopyPlus, Trash2 } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, CopyPlus, Trash2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.$id";
 import { requireUser } from "~/server/auth.server";
 import {
@@ -8,19 +8,30 @@ import {
   getRubric,
   updateRubric,
 } from "~/server/repositories/rubrics.server";
+import { listRubricScores } from "~/server/repositories/rubricScores.server";
+import { RubricInsight } from "~/components/utilities/RubricInsight";
 import { RubricEditor } from "~/components/utilities/RubricEditor";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { Button } from "~/components/ui";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
-import { RUBRIC_LIMITS } from "~/lib/utilities/rubric";
+import { levelDistribution, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const rubric = await getRubric(user.id, params.id);
   if (!rubric) throw new Response("Not Found", { status: 404 });
-  return { rubric: { id: rubric.id, name: rubric.name, data: rubric.data } };
+  const scores = await listRubricScores(user.id, rubric.id);
+  return {
+    rubric: { id: rubric.id, name: rubric.name, data: rubric.data },
+    scoreCount: scores.length,
+    // Null under five closed fill-ins, so one student is not recognisable (P23.3).
+    insight: levelDistribution(
+      rubric.data,
+      scores.map((s) => s.levels),
+    ),
+  };
 }
 
 const MAX_JSON = 200_000;
@@ -66,7 +77,7 @@ export function meta({ data }: Route.MetaArgs) {
 export default function RubricPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const r = t.utilities.rubric;
-  const { rubric } = loaderData;
+  const { rubric, insight, scoreCount } = loaderData;
   return (
     <div>
       <Link
@@ -81,6 +92,13 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
           {rubric.name}
         </h1>
         <div className="flex flex-wrap gap-2">
+          <Link
+            to={`/utilities/rubric/${rubric.id}/fill`}
+            className="inline-flex h-8 items-center gap-2 rounded-lg bg-violet-600 px-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            <ClipboardCheck className="size-4" aria-hidden />
+            {r.fill.link}
+          </Link>
           <Form method="post">
             <input type="hidden" name="intent" value="duplicate" />
             <Button type="submit" variant="secondary" size="sm">
@@ -101,6 +119,7 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
       </div>
       {/* Keyed on id: a duplicate opens with fresh editor state. */}
       <RubricEditor key={rubric.id} rubric={rubric} />
+      <RubricInsight insight={insight} count={scoreCount} />
     </div>
   );
 }

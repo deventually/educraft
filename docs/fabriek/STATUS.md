@@ -17,10 +17,14 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **P23.1 + 23.2 gemerged op 2026-11-04:** de plek voor hulpmiddelen, de cijferrekenaar en rubrics
+  bewaren (migratie 0012).
 - **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
 - **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
   Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
   bij welke stap" (#46).
+- **P25.4 kader-extractie (#59) en P23.3 rubric invullen in batches (#60) gemerged op
+  2026-11-04;** na #60 `npm run db:migrate` (migratie 0013).
 - **Strengere meting (#56) gemerged op 2026-11-04:** drie runs per case, harde ja/nee-checks met
   een plafond, een afgekapt antwoord hooguit een 3; Begeleide reflectie 12288 tokens. Nulmeting d:
   `evals/reports/2026-11-04d.md`.
@@ -78,20 +82,18 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
 
-Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1 + 23.2, P24.0b/0c/1, P25.1–25.3, 25.5 en 25.6.
+Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 → Dialogisch gesprek →
    Begeleide reflectie → de andere tools, elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
-2. **P25.4 kader-extractie** (spoor B, mag parallel; gaat voor, eerste gebruik deze maand, BKE af
-   op 30 november).
-3. **P23.3 rubric invullen in batches** (spoor C, mag parallel; zonder AI).
-4. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
+2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-5. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
+3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
 
 ## Open vragen
 
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
+- De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
 
 ## Later (bewust geparkeerd)
 

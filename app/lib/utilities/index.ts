@@ -45,8 +45,8 @@ export const UTILITIES: readonly Utility[] = [
     slug: "rubric",
     name: { nl: "Rubrics maken en bewaren", en: "Make and keep rubrics" },
     summary: {
-      nl: "Zet criteria en niveaus in een rubric, bewaar hem en kopieer hem naar Word, Excel of een beoordelingstool. Zonder AI.",
-      en: "Put criteria and levels in a rubric, keep it, and copy it to Word, Excel or an assessment tool. No AI.",
+      nl: "Zet criteria en niveaus in een rubric, vul hem per student in en reken om naar een cijfer. Namen blijven in je browser. Zonder AI.",
+      en: "Put criteria and levels in a rubric, fill it in per student and turn it into a grade. Names stay in your browser. No AI.",
     },
     icon: "table",
     keywords: [
@@ -55,6 +55,9 @@ export const UTILITIES: readonly Utility[] = [
       "beoordelingsformulier",
       "criteria",
       "assessment form",
+      "invullen",
+      "nakijken",
+      "fill in",
     ],
   },
 ];
