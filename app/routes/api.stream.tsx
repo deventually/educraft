@@ -186,11 +186,10 @@ export async function action({ request }: Route.ActionArgs) {
       audience,
     });
 
-    // Server-side model allow-list (Phase 4 + 13 + 14): a caller may only pick a
-    // model in THEIR effective set — the instance allow-list, narrowed by the
-    // teacher's assignment (intersect). Since P14 this
-    // gate also governs local/CLI/discovered models (still free, now curatable), so
-    // there is no local free-pass. Anything else falls back to the tool/stage
+    // Server-side model allow-list: a caller may only pick a model in THEIR effective
+    // set — the instance allow-list, or the teacher's own set when they have one
+    // (override, P18). The same gate governs local/CLI/discovered models, which exist
+    // only outside production. Anything else falls back to the tool/stage
     // default, so a hostile body can't force an expensive, disabled, or un-granted
     // model on the owner.
     const mayPickModel = !!body.model && (await isModelSelectableForUser(user, body.model));

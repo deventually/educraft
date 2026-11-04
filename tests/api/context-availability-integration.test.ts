@@ -21,8 +21,8 @@ beforeAll(async () => {
   ]);
 });
 
-describe("override model ↔ compose seam (real storage, no mocks)", () => {
-  it("an activated teacher overrides the instance; deactivating is non-destructive", async () => {
+describe("instance decides, on real storage (P18.2)", () => {
+  it("a teacher follows the instance sectors and domains", async () => {
     const row = await users.createUser({
       name: "Real",
       email: "real@example.com",
@@ -31,133 +31,56 @@ describe("override model ↔ compose seam (real storage, no mocks)", () => {
     });
     const teacher = { id: row.id, role: "teacher" as const };
     await settings.setEnabledSectors(["mbo", "hbo", "wo"]);
-    await users.setUserAssignedSectors(teacher.id, ["mbo", "hbo"]);
-
-    // Not activated yet → inherit the instance (the assignment is ignored).
+    await settings.setEnabledDomains(["nt", "em"]);
     expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo", "wo"]);
-
-    // Activate → the teacher's own set wins, instance ignored (catalogue order).
-    await users.setUserContextCustomAccess(teacher.id, true);
-    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo"]);
-
-    // Deactivate → inherit the instance again; the saved assignment is untouched.
-    await users.setUserContextCustomAccess(teacher.id, false);
-    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo", "wo"]);
-
-    // Re-activate → the preserved assignment comes right back (non-destructive).
-    await users.setUserContextCustomAccess(teacher.id, true);
-    expect(await availability.getAvailableSectors(teacher)).toEqual(["mbo", "hbo"]);
-
-    // An activated teacher with an empty selection = ALL, ignoring the instance.
-    await users.setUserAssignedSectors(teacher.id, null);
-    expect(await availability.getAvailableSectors(teacher)).toEqual(["vo", "mbo", "hbo", "wo"]);
-
-    await users.setUserContextCustomAccess(teacher.id, false);
-    await settings.setEnabledSectors(null);
-  });
-
-  it("ignores a per-teacher assignment for an admin (instance set only)", async () => {
-    const admin = { id: "admin-x", role: "admin" as const };
-    await settings.setEnabledSectors(["hbo"]);
-    await users.setUserAssignedSectors("admin-x", ["mbo"]); // never read for an admin
-    expect(await availability.getAvailableSectors(admin)).toEqual(["hbo"]);
-    await settings.setEnabledSectors(null);
-  });
-
-  it("narrows getAvailableCountries end-to-end too", async () => {
-    const row = await users.createUser({
-      name: "C",
-      email: "c@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const teacher = { id: row.id, role: "teacher" as const };
-    await settings.setEnabledCountries(["NL"]);
-    await users.setUserAssignedCountries(teacher.id, ["NL"]);
-    expect(await availability.getAvailableCountries(teacher)).toEqual(["NL"]);
-    await settings.setEnabledCountries(null);
-    await users.setUserAssignedCountries(teacher.id, null);
-  });
-});
-
-describe("getAvailableDomains — track-scoped, override model, real storage (P12)", () => {
-  it("an activated teacher narrows a track catalogue by their own assignment; admin unrestricted", async () => {
-    const row = await users.createUser({
-      name: "Dom",
-      email: "dom@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const teacher = { id: row.id, role: "teacher" as const };
-    // havo catalogue, unrestricted, in catalogue order.
-    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual([
-      "nt",
-      "ng",
-      "em",
-      "cm",
-    ]);
-    await users.setUserAssignedDomains(teacher.id, ["nt", "em"]);
-    await users.setUserContextCustomAccess(teacher.id, true); // activate → own set wins
     expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt", "em"]);
+    const admin = { id: "admin-x", role: "admin" as const };
+    expect(await availability.getAvailableSectors(admin)).toEqual(["mbo", "hbo", "wo"]);
+    await settings.setEnabledSectors(null);
+    await settings.setEnabledDomains(null);
+  });
 
-    // An admin ignores any per-teacher assignment (follows the instance = all here).
-    await users.setUserAssignedDomains("admin-dom", ["nt"]);
+  it("a stored custom-access flag and assignment are ignored", async () => {
+    const row = await users.createUser({
+      name: "Legacy",
+      email: "legacy@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const teacher = { id: row.id, role: "teacher" as const };
+    const { getDb } = await import("~/server/db.server");
+    const { instanceSettings } = await import("~/server/schema.server");
+    const now = new Date();
+    getDb()
+      .insert(instanceSettings)
+      .values([
+        { key: `contextCustomAccess:${row.id}`, valueJson: '["1"]', updatedAt: now },
+        { key: `assignedSectors:${row.id}`, valueJson: '["mbo"]', updatedAt: now },
+        { key: `assignedDomains:${row.id}`, valueJson: '["em"]', updatedAt: now },
+      ])
+      .run();
+    await settings.setEnabledSectors(["hbo"]);
+    await settings.setEnabledDomains(["nt"]);
+    expect(await availability.getAvailableSectors(teacher)).toEqual(["hbo"]);
+    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt"]);
+    await settings.setEnabledSectors(null);
+    await settings.setEnabledDomains(null);
+  });
+
+  it("falls back to the full catalogue when the instance set excludes every catalogue slug", async () => {
+    await settings.setEnabledDomains(["ICT"]); // hbo slug, not in havo
     expect(
-      await availability.getAvailableDomains({ id: "admin-dom", role: "admin" }, "vo", "havo"),
+      await availability.getAvailableDomains({ id: "t-x", role: "teacher" }, "vo", "havo"),
     ).toEqual(["nt", "ng", "em", "cm"]);
-    await users.setUserAssignedDomains(teacher.id, null);
-    await users.setUserContextCustomAccess(teacher.id, false);
+    await settings.setEnabledDomains(null);
   });
 
   it("is track-scoped: a vmbo slug doesn't leak into a havo catalogue", async () => {
-    const row = await users.createUser({
-      name: "Dom2",
-      email: "dom2@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const teacher = { id: row.id, role: "teacher" as const };
-    await users.setUserAssignedDomains(teacher.id, ["zw", "nt"]);
-    await users.setUserContextCustomAccess(teacher.id, true);
+    await settings.setEnabledDomains(["zw", "nt"]);
+    const teacher = { id: "t-y", role: "teacher" as const };
     expect(await availability.getAvailableDomains(teacher, "vo", "vmbo-bb")).toEqual(["zw"]);
     expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt"]);
-    await users.setUserAssignedDomains(teacher.id, null);
-    await users.setUserContextCustomAccess(teacher.id, false);
-  });
-
-  it("falls back to the full catalogue when the selection excludes every catalogue slug", async () => {
-    const row = await users.createUser({
-      name: "Dom3",
-      email: "dom3@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const teacher = { id: row.id, role: "teacher" as const };
-    await users.setUserAssignedDomains(teacher.id, ["ICT"]); // hbo slug, not in havo
-    await users.setUserContextCustomAccess(teacher.id, true);
-    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual([
-      "nt",
-      "ng",
-      "em",
-      "cm",
-    ]);
-    await users.setUserAssignedDomains(teacher.id, null);
-    await users.setUserContextCustomAccess(teacher.id, false);
-  });
-
-  it("an unactivated teacher follows the INSTANCE domain set (not their assignment)", async () => {
-    const row = await users.createUser({
-      name: "DomInst",
-      email: "dominst@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    const teacher = { id: row.id, role: "teacher" as const };
-    await users.setUserAssignedDomains(teacher.id, ["em"]); // saved but ignored while off
-    await settings.setEnabledDomains(["nt", "ng"]);
-    expect(await availability.getAvailableDomains(teacher, "vo", "havo")).toEqual(["nt", "ng"]);
     await settings.setEnabledDomains(null);
-    await users.setUserAssignedDomains(teacher.id, null);
   });
 
   it("returns [] for a sector with no domain catalogue (mbo/wo)", async () => {

@@ -8,7 +8,7 @@
 import type { ContextProfile, CustomField, PackFieldValue } from "./types";
 import { resolveFramework } from "./frameworks";
 import { getDomainsForTrack } from "./domains";
-import { isCountryCode, type CountryCode } from "./countries";
+import { DEFAULT_COUNTRY } from "./countries";
 import { isSector, isVoPhase, learnerNounChoices, tracksForSector, type Sector } from "./sectors";
 import {
   showsProgramme,
@@ -90,9 +90,8 @@ function parseCustomFields(fd: FormData): CustomField[] | undefined {
   return out.length ? out : undefined;
 }
 
-/** Availability sets the action re-validates submitted country/sector against. */
+/** Availability set the action re-validates the submitted sector against. */
 export interface ContextFormOptions {
-  availableCountries?: string[];
   availableSectors?: string[];
 }
 
@@ -100,7 +99,7 @@ export interface ParsedContextForm {
   input?: Omit<ContextProfile, "id">;
   isDefault: boolean;
   /** Set when validation fails. */
-  error?: "name-required" | "country-not-available" | "sector-not-available";
+  error?: "name-required" | "sector-not-available";
 }
 
 export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): ParsedContextForm {
@@ -108,23 +107,19 @@ export function parseContextForm(fd: FormData, opts: ContextFormOptions = {}): P
   const isDefault = fd.get("isDefault") === "on";
   if (!name) return { isDefault, error: "name-required" };
 
-  // Server-side availability guard: a submitted country/sector must be in the
-  // caller's available set. A hand-crafted POST for a disabled/unassigned one is
-  // refused (the seam is default-open until P9 writes any settings).
-  const rawCountry = str(fd.get("country"));
+  // Server-side availability guard: a submitted sector must be in the caller's
+  // available set. A hand-crafted POST for a disabled one is refused.
   const rawSector = str(fd.get("sector"));
-  if (rawCountry && opts.availableCountries && !opts.availableCountries.includes(rawCountry)) {
-    return { isDefault, error: "country-not-available" };
-  }
   if (rawSector && opts.availableSectors && !opts.availableSectors.includes(rawSector)) {
     return { isDefault, error: "sector-not-available" };
   }
 
   // Stored (validated) axes vs the effective values used to resolve catalogues.
   // A legacy submission with no sector still resolves against hbo for domains/packs.
-  const country: CountryCode | undefined = isCountryCode(rawCountry ?? "") ? "NL" : undefined;
+  // The country is a data seam, not a choice (P18): always NL, whatever the form sends.
+  const country = DEFAULT_COUNTRY;
   const sector: Sector | undefined = isSector(rawSector ?? "") ? (rawSector as Sector) : undefined;
-  const effCountry = country ?? "NL";
+  const effCountry = country;
   const effSector = sector ?? "hbo";
 
   const rawTrack = str(fd.get("track"));

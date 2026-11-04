@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 
 // Isolated in-memory SQLite before any server module (and thus env.server) loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -59,27 +59,28 @@ describe("getAvailableTools — instance overrides", () => {
   });
 });
 
-describe("getAvailableTools — per-teacher allow-list (Phase 4)", () => {
-  it("narrows a teacher with an allow-list, leaves an un-listed teacher unrestricted", async () => {
-    const restricted = await users.createUser({
-      name: "Restricted",
-      email: "restricted@example.com",
+describe("getAvailableTools — no per-teacher gate (P18.2)", () => {
+  it("a teacher sees every instance-enabled tool; a stored allow-list is ignored", async () => {
+    const legacy = await users.createUser({
+      name: "Legacy",
+      email: "legacy@example.com",
       passwordHash: "x",
       role: "teacher",
     });
-    await users.setUserToolAllowlist(restricted.id, [STUDENT_TOOL]);
+    // The column survives until 18.8; set it directly (the setter is gone).
+    const { getDb } = await import("~/server/db.server");
+    const { users: usersTable } = await import("~/server/schema.server");
+    const { eq } = await import("drizzle-orm");
+    await getDb()
+      .update(usersTable)
+      .set({ allowedToolSlugs: JSON.stringify([STUDENT_TOOL]) })
+      .where(eq(usersTable.id, legacy.id));
 
-    const restrictedSlugs = (
-      await availability.getAvailableTools({ id: restricted.id, role: "teacher" })
-    ).map((t) => t.slug);
-    expect(restrictedSlugs).toContain(STUDENT_TOOL);
-    expect(restrictedSlugs).not.toContain(INSTRUCTOR_TOOL);
-
-    // A teacher with no allow-list row keeps today's behaviour (sees everything).
-    const openSlugs = (
-      await availability.getAvailableTools({ id: "teacher-open", role: "teacher" })
-    ).map((t) => t.slug);
-    expect(openSlugs).toContain(INSTRUCTOR_TOOL);
+    const slugs = (await availability.getAvailableTools({ id: legacy.id, role: "teacher" })).map(
+      (t) => t.slug,
+    );
+    expect(slugs).toContain(STUDENT_TOOL);
+    expect(slugs).toContain(INSTRUCTOR_TOOL);
   });
 });
 
@@ -98,7 +99,7 @@ describe("getSelectableModels — admin model allow-list + lockout guard", () =>
     await settings.setEnabledModels(null); // reset
   });
 
-  it("falls back to the default model (and warns) when the intersection is empty", async () => {
+  it("falls back to the default model (and warns) when the instance set is empty", async () => {
     logMock.mockClear();
     await settings.setEnabledModels(["nonexistent-model-xyz"]);
     const ids = await availability.getSelectableModelIds();
@@ -108,43 +109,67 @@ describe("getSelectableModels — admin model allow-list + lockout guard", () =>
   });
 });
 
-describe("getSelectableModelIds — per-teacher narrowing (P13)", () => {
+describe("getSelectableModelIds — per-teacher override (P18)", () => {
   const teacher = { id: "mdl-teacher", role: "teacher" as const };
 
-  it("no user (admin) is unchanged: the instance base, never widened", async () => {
-    const ids = await availability.getSelectableModelIds();
+  it("an admin always gets the instance set", async () => {
+    await settings.setEnabledModels(["claude-haiku-4-5"]);
+    // Even a stray assignment under an admin's id is never read.
+    await users.setUserAssignedModels(admin.id, ["claude-sonnet-4-6"]);
     const forAdmin = await availability.getSelectableModelIds(admin);
-    expect(forAdmin.has("claude-sonnet-4-6")).toBe(true);
-    expect(forAdmin.has("claude-haiku-4-5")).toBe(true);
-    // Admin follows the instance base exactly (no per-teacher path).
-    expect([...forAdmin].sort()).toEqual([...ids].sort());
+    expect([...forAdmin]).toEqual(["claude-haiku-4-5"]);
+    await users.setUserAssignedModels(admin.id, null);
+    await settings.setEnabledModels(null); // reset
   });
 
-  it("a teacher's assignment narrows the base (intersect); clearing restores it", async () => {
+  it("a teacher without an own set follows the instance", async () => {
+    await settings.setEnabledModels(["claude-haiku-4-5"]);
+    const ids = await availability.getSelectableModelIds(teacher);
+    expect([...ids]).toEqual(["claude-haiku-4-5"]);
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("a teacher's own set replaces the instance set, also when wider", async () => {
+    await settings.setEnabledModels(["claude-haiku-4-5"]);
+    await users.setUserAssignedModels(teacher.id, ["claude-sonnet-4-6", "claude-haiku-4-5"]);
+    const ids = await availability.getSelectableModelIds(teacher);
+    expect(ids.has("claude-sonnet-4-6")).toBe(true); // outside the instance set
+    expect(ids.has("claude-haiku-4-5")).toBe(true);
+    expect(await availability.isModelSelectableForUser(teacher, "claude-sonnet-4-6")).toBe(true);
+    await users.setUserAssignedModels(teacher.id, null);
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("a teacher's own set may also be narrower; clearing it restores the instance", async () => {
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
-    const narrowed = await availability.getSelectableModelIds(teacher);
-    expect(narrowed.has("claude-haiku-4-5")).toBe(true);
-    expect(narrowed.has("claude-sonnet-4-6")).toBe(false);
+    const own = await availability.getSelectableModelIds(teacher);
+    expect([...own]).toEqual(["claude-haiku-4-5"]);
 
     await users.setUserAssignedModels(teacher.id, null);
     const inherited = await availability.getSelectableModelIds(teacher);
-    expect(inherited.has("claude-sonnet-4-6")).toBe(true); // back to base
+    expect(inherited.has("claude-sonnet-4-6")).toBe(true); // back to the instance
   });
 
-  it("getSelectableModels mirrors the narrowing for the picker", async () => {
+  it("getSelectableModels mirrors the override for the picker", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
     const models = await availability.getSelectableModels(teacher);
     expect(models.map((m) => m.id)).toEqual(["claude-haiku-4-5"]);
     await users.setUserAssignedModels(teacher.id, null); // reset
+    await settings.setEnabledModels(null);
   });
 
-  it("an out-of-base teacher assignment falls back to the default (+warns), never empty", async () => {
+  it("an own set of only unknown ids falls back to the instance set, not DEFAULT_MODEL", async () => {
     logMock.mockClear();
+    await settings.setEnabledModels(["claude-haiku-4-5"]);
     await users.setUserAssignedModels(teacher.id, ["nonexistent-model-xyz"]);
     const ids = await availability.getSelectableModelIds(teacher);
-    expect([...ids]).toEqual(["claude-sonnet-5-5"]); // DEFAULT_MODEL
-    expect(logMock).toHaveBeenCalled();
+    expect([...ids]).toEqual(["claude-haiku-4-5"]); // the instance set, not DEFAULT_MODEL
+    expect(logMock).not.toHaveBeenCalled();
+    expect(await availability.isModelSelectableForUser(teacher, "claude-haiku-4-5")).toBe(true);
+    expect(await availability.isModelSelectableForUser(teacher, "claude-sonnet-4-6")).toBe(false);
     await users.setUserAssignedModels(teacher.id, null); // reset
+    await settings.setEnabledModels(null);
   });
 });
 
@@ -172,9 +197,14 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
     await settings.setEnabledModels(null); // reset
   });
 
-  it("a teacher assignment narrows a local/CLI id (intersect); clearing restores it", async () => {
+  it("a teacher's own set decides a local/CLI id (override); clearing restores the instance", async () => {
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]); // no CLI
     expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(false);
+    // An own set may include a CLI agent the instance has not enabled.
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    await users.setUserAssignedModels(teacher.id, [CLI]);
+    expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(true);
+    await settings.setEnabledModels(null);
     await users.setUserAssignedModels(teacher.id, null);
     expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(true);
   });
@@ -200,7 +230,7 @@ describe("isModelSelectableForUser — local/CLI join the gate (P14)", () => {
 
 // A teacher whose ONLY allowed model is a discovered local one
 // ("ollama::…"). Such an id is never in the static catalog, so the catalog
-// INTERSECT collapses to empty — but the caller is NOT locked out (the model
+// own set has no catalog half — but the caller is NOT locked out (the model
 // rides `narrowLocalModels`). The old lockout guard mistook this for a misconfig
 // and re-offered DEFAULT_MODEL (a disabled frontier default). These pin the fix.
 describe("model gates — a local-only allow-list is not a lockout (bugfix)", () => {
@@ -224,8 +254,9 @@ describe("model gates — a local-only allow-list is not a lockout (bugfix)", ()
     expect(logMock).not.toHaveBeenCalled();
   });
 
-  it("still rescues a GENUINE lockout (an allow-list of only unknown catalog ids) with DEFAULT_MODEL", async () => {
+  it("still rescues a GENUINE lockout (a stale instance allow-list and no usable own set) with DEFAULT_MODEL", async () => {
     logMock.mockClear();
+    await settings.setEnabledModels(["nonexistent-model-xyz"]);
     await users.setUserAssignedModels("bug-genuine-teacher", ["nonexistent-model-xyz"]);
     const ids = await availability.getSelectableModelIds({
       id: "bug-genuine-teacher",
@@ -234,6 +265,7 @@ describe("model gates — a local-only allow-list is not a lockout (bugfix)", ()
     expect([...ids]).toEqual(["claude-sonnet-5-5"]); // DEFAULT_MODEL
     expect(logMock).toHaveBeenCalled();
     await users.setUserAssignedModels("bug-genuine-teacher", null); // reset
+    await settings.setEnabledModels(null);
   });
 
   it("effectiveDefaultModel keeps the preferred default for an unrestricted caller", async () => {
@@ -252,5 +284,54 @@ describe("model gates — a local-only allow-list is not a lockout (bugfix)", ()
     const teacher = await localOnlyTeacher("edm-local-only");
     // Sonnet is not in the teacher's set → the fallback must be the teacher's model.
     expect(await availability.effectiveDefaultModel(teacher, "claude-sonnet-4-6")).toBe(LOCAL);
+  });
+});
+
+describe("CLI and local models exist only outside production (P18)", () => {
+  const CLI = "claude-code";
+  const LOCAL = "ollama::p18-model";
+  const teacher = { id: "p18-prod-teacher", role: "teacher" as const };
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("localModelsEnabled reads NODE_ENV on every call", async () => {
+    const env = await import("~/server/env.server");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(env.localModelsEnabled()).toBe(false);
+    vi.stubEnv("NODE_ENV", "development");
+    expect(env.localModelsEnabled()).toBe(true);
+  });
+
+  it("hides CLI and local models in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(await availability.isModelSelectableForUser(undefined, CLI)).toBe(false);
+    expect(await availability.isModelSelectableForUser(undefined, LOCAL)).toBe(false);
+    expect(await availability.isModelSelectableForUser(undefined, "claude-sonnet-4-6")).toBe(true);
+    const ids = await availability.getSelectableModelIds();
+    for (const cli of ["claude-code", "codex", "gemini-cli", "opencode"]) {
+      expect(ids.has(cli)).toBe(false);
+    }
+    expect(ids.has("claude-sonnet-4-6")).toBe(true);
+    const discovered = [{ id: LOCAL, displayName: LOCAL }];
+    expect(await availability.narrowLocalModels(undefined, discovered)).toEqual([]);
+  });
+
+  it("an own set naming a CLI agent is ignored in production (filtered, then the instance set)", async () => {
+    await users.setUserAssignedModels(teacher.id, [CLI]);
+    vi.stubEnv("NODE_ENV", "production");
+    expect(await availability.isModelSelectableForUser(teacher, CLI)).toBe(false);
+    const ids = await availability.getSelectableModelIds(teacher);
+    expect(ids.has("claude-sonnet-4-6")).toBe(true); // follows the instance
+    await users.setUserAssignedModels(teacher.id, null);
+  });
+
+  it("offers CLI and local models outside production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    expect(await availability.isModelSelectableForUser(undefined, CLI)).toBe(true);
+    expect(await availability.isModelSelectableForUser(undefined, LOCAL)).toBe(true);
+    const ids = await availability.getSelectableModelIds();
+    expect(ids.has(CLI)).toBe(true);
   });
 });

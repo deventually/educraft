@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.5: automatisch opslaan in beheer)_
 
 ## Nu
 
@@ -12,7 +12,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
-  Vitest + axe. 902 tests, CI groen op `main`.
+  Vitest + axe. 878 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
@@ -38,7 +38,10 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
 
 ## Bezig
 
-- V2 bouwplan (P18) — deze PR.
+- V2 stap 18.2: toegang per docent en land-as weg — deze PR.
+- V2 stap 18.3: modellen als overrule per docent — PR (bovenop 18.2).
+- V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
+- V2 stap 18.5: automatisch opslaan in beheer, geen opslaan-knoppen meer — branch `claude/p18-5` (bovenop 18.4).
 - Brief P19 (V3) — deze PR.
 
 ## Wacht op jou
@@ -54,7 +57,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2-plan, na merge van 17.3 en 19.1)_
 3. **Vereenvoudiging V3** (brief P19, nog vijf PR's): de docentkant. 19.1 (toolnamen, taak eerst;
    BESLUIT-2026-11-03-18) is gemerged. Daarna: 19.2 geen doelgroeplabels, 19.3 techniek achter
    "Geavanceerd", 19.4 lege pagina's die sturen (kunnen naast V2); 19.5 menu en 19.6 kort
-   contextformulier wachten op 18.1, 18.2 en 18.4. Drie vragen voor Bastiaan staan in de brief.
+   contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Drie vragen voor Bastiaan staan in de brief.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 

@@ -44,8 +44,7 @@ app/lib/prompts/<id>.prompt.ts             # PromptDef: verbatim original + runt
 Generation is streamed to the browser via SSE through the resource route
 `app/routes/api.stream.tsx`. That route is also the **access boundary**: it parses
 the body with `StreamBodySchema` (Zod), authenticates, and refuses via
-`isToolAvailable` (`app/server/availability.server.ts` — instance settings + per-teacher
-allow-list) before any provider call. The registry is
+`isToolAvailable` (`app/server/availability.server.ts` — instance settings) before any provider call. The registry is
 validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the bad tool.
 
 ---
@@ -70,13 +69,17 @@ LimeOnIt is not tied to one model vendor.
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
 - Default model: `claude-sonnet-4-6`.
-- **Availability (P4/P13/P14).** Which models a caller may *pick* is governed by a
-  two-level INTERSECT — instance `enabledModels` → per-teacher `assignedModels`
-  (each level narrows, never widens; unset = inherit).
-  Since **P14** this also governs local/CLI/discovered models (still free, now
-  curatable — no silent free-pass): `availability.server.ts#isModelSelectableForUser`
-  is a membership walk over the two levels, so it gates a volatile `ollama::…` id
-  without enumerating any local server. Opus-class + `compat::` stay server-only.
+- **Availability (P4/P13/P14/P18).** Which models a caller may *pick* is an OVERRIDE:
+  the instance sets `enabledModels`; a teacher with their own `assignedModels` gets
+  exactly that set instead (it replaces the instance and may be wider); no own set =
+  follow the instance; an admin always gets the instance set. An own set that is
+  empty after filtering counts as not set. `availability.server.ts#isModelSelectableForUser`
+  is a membership walk, so it also gates a volatile `ollama::…` id without
+  enumerating any local server. Opus-class + `compat::` stay server-only.
+  **CLI agents and local (Ollama/LM Studio) models exist only outside production**
+  (`localModelsEnabled()` in `env.server.ts`, i.e. `NODE_ENV !== "production"`): in
+  production they are not offered, not discovered and not executed. The pilot runs on
+  `npm run dev`, so they work there; `npm start` and the Docker image do not have them.
   The gates only bound what an admin/teacher may *offer*.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on

@@ -10,9 +10,8 @@ export const users = sqliteTable("users", {
   // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and
   // carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
-  // Per-teacher tool allow-list (Phase 4). Set from the invite that minted this
-  // account. JSON string[] or null = unrestricted. Only narrows teachers; admins
-  // are never restricted.
+  // Retired per-teacher tool allow-list (Phase 4; ignored since P18, dropped in 18.8).
+  // Always written as null now.
   allowedToolSlugs: text("allowed_tool_slugs"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
@@ -38,9 +37,8 @@ export const invites = sqliteTable("invites", {
   usedByUserId: text("used_by_user_id"),
   // Who issued it. Nullable: role-only ops invites (scripts/invite.ts) carry none.
   createdByUserId: text("created_by_user_id"),
-  // Per-teacher tool allow-list (Phase 4). An admin minting a teacher invite may
-  // restrict which tools the redeemer gets; copied onto `users.allowed_tool_slugs`
-  // at redeem. JSON string[] or null = unrestricted (all available tools).
+  // Retired per-teacher tool allow-list (Phase 4, ignored since P18; column dropped
+  // in 18.8). Always written as null now.
   allowedToolSlugs: text("allowed_tool_slugs"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });

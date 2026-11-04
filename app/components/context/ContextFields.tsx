@@ -18,7 +18,6 @@ import {
   domainFieldLabel,
 } from "~/lib/context/relevance";
 import { resolveFramework } from "~/lib/context/frameworks";
-import { COUNTRY_LABELS, type CountryCode } from "~/lib/context/countries";
 import {
   SECTORS_INFO,
   TRACKS_BY_SECTOR,
@@ -220,36 +219,6 @@ export function StudyYearField({
         {[1, 2, 3, 4].map((y) => (
           <option key={y} value={y}>
             {y}
-          </option>
-        ))}
-      </Select>
-    </Field>
-  );
-}
-
-/** Country picker (Phase 8) — only rendered by the editor when >1 country is available. */
-export function CountrySelect({
-  value,
-  onChange,
-  countries,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  countries: string[];
-}) {
-  const t = useT();
-  const locale = useLocale();
-  return (
-    <Field id="cf-country" label={t.settings.country}>
-      <Select
-        id="cf-country"
-        name="country"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {countries.map((c) => (
-          <option key={c} value={c}>
-            {loc(COUNTRY_LABELS[c as CountryCode] ?? c, locale)}
           </option>
         ))}
       </Select>

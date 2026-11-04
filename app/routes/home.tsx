@@ -15,7 +15,6 @@ import {
 import type { Route } from "./+types/home";
 import { getAvailableTools } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
-import { getEffectiveRole } from "~/server/roleView.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
 import {
   GOAL_ORDER,
@@ -52,9 +51,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   // Server-side gate (Phase 4): effective availability composes instance settings
   // (enabled) and any per-teacher allow-list — a disabled tool vanishes for
-  // everyone. An admin who "views as teacher" sees the teacher set.
-  const viewer = { ...user, role: getEffectiveRole(user, request) };
-  const tools: ToolCardData[] = (await getAvailableTools(viewer)).map((tool) => {
+  // everyone.
+  const tools: ToolCardData[] = (await getAvailableTools(user)).map((tool) => {
     const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
     const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
     return {

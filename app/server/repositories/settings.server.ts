@@ -54,7 +54,6 @@ export async function setToolSetting(slug: string, patch: ToolSettingPatch): Pro
 }
 
 const ENABLED_MODELS_KEY = "enabledModels";
-const ENABLED_COUNTRIES_KEY = "enabledCountries";
 const ENABLED_SECTORS_KEY = "enabledSectors";
 const ENABLED_DOMAINS_KEY = "enabledDomains";
 
@@ -76,14 +75,9 @@ export async function getEnabledModels(): Promise<string[] | null> {
 }
 
 /**
- * The admin's country/sector allow-lists (Phase 8), or null when unset (= whole
- * catalogue, per the `enabledModels` convention). Read side only — the setters +
- * admin write UI are P9, so these return null until then (non-breaking).
+ * The admin's sector allow-list, or null when unset (= whole catalogue, per the
+ * `enabledModels` convention).
  */
-export async function getEnabledCountries(): Promise<string[] | null> {
-  return getInstanceList(ENABLED_COUNTRIES_KEY);
-}
-
 export async function getEnabledSectors(): Promise<string[] | null> {
   return getInstanceList(ENABLED_SECTORS_KEY);
 }
@@ -122,14 +116,10 @@ export async function setEnabledModels(ids: string[] | null): Promise<void> {
 }
 
 /**
- * Set the instance country/sector allow-lists (Phase 9 write side). `null` clears
- * a list back to the default (whole catalogue); a non-empty list upserts it. The
- * admin route's lockout guard forbids an empty list, so these never store `[]`.
+ * Set the instance sector allow-list. `null` clears it back to the default (whole
+ * catalogue); a non-empty list upserts it. The admin route's lockout guard forbids
+ * an empty list, so this never stores `[]`.
  */
-export async function setEnabledCountries(ids: string[] | null): Promise<void> {
-  return setInstanceList(ENABLED_COUNTRIES_KEY, ids);
-}
-
 export async function setEnabledSectors(ids: string[] | null): Promise<void> {
   return setInstanceList(ENABLED_SECTORS_KEY, ids);
 }

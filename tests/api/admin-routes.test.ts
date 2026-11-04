@@ -13,24 +13,21 @@ vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
 vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 type ToolsRoute = typeof import("~/routes/admin.tools");
-type ModelsRoute = typeof import("~/routes/admin.models");
-type InvitesRoute = typeof import("~/routes/admin.invites");
+type UsersRoute = typeof import("~/routes/admin.users");
 type ContextRoute = typeof import("~/routes/admin.context");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
 
 let toolsRoute: ToolsRoute;
-let modelsRoute: ModelsRoute;
-let invitesRoute: InvitesRoute;
+let usersRoute: UsersRoute;
 let contextRoute: ContextRoute;
 let settings: Settings;
 let users: Users;
 
 beforeAll(async () => {
-  [toolsRoute, modelsRoute, invitesRoute, contextRoute, settings, users] = await Promise.all([
+  [toolsRoute, usersRoute, contextRoute, settings, users] = await Promise.all([
     import("~/routes/admin.tools"),
-    import("~/routes/admin.models"),
-    import("~/routes/admin.invites"),
+    import("~/routes/admin.users"),
     import("~/routes/admin.context"),
     import("~/server/repositories/settings.server"),
     import("~/server/repositories/users.server"),
@@ -68,15 +65,15 @@ function invoke<T extends (arg: never) => unknown>(action: T, request: Request):
 
 describe("admin.tools action", () => {
   it("upserts a tool's enabled flag", async () => {
-    await invoke(toolsRoute.action, post({ slug: "mentorai", enabled: "on" }));
+    await invoke(toolsRoute.action, post({ intent: "tool", slug: "mentorai", enabled: "on" }));
     const row = await settings.getToolSetting("mentorai");
     expect(row?.enabled).toBe(true);
   });
 });
 
-describe("admin.models action — lockout guard", () => {
+describe("admin.tools action — instance models lockout guard", () => {
   it("refuses an empty selection and does not persist", async () => {
-    const res = (await invoke(modelsRoute.action, post({}))) as {
+    const res = (await invoke(toolsRoute.action, post({ intent: "models" }))) as {
       error?: boolean;
       saved?: boolean;
     };
@@ -85,7 +82,10 @@ describe("admin.models action — lockout guard", () => {
   });
 
   it("persists a non-empty allow-list", async () => {
-    const res = (await invoke(modelsRoute.action, post({ models: ["claude-haiku-4-5"] }))) as {
+    const res = (await invoke(
+      toolsRoute.action,
+      post({ intent: "models", models: ["claude-haiku-4-5"] }),
+    )) as {
       saved?: boolean;
     };
     expect(res.saved).toBe(true);
@@ -95,79 +95,204 @@ describe("admin.models action — lockout guard", () => {
 
   it("[P14] persists a list including a local/CLI model", async () => {
     const res = (await invoke(
-      modelsRoute.action,
-      post({ models: ["claude-haiku-4-5", "claude-code"] }),
+      toolsRoute.action,
+      post({ intent: "models", models: ["claude-haiku-4-5", "claude-code"] }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect(await settings.getEnabledModels()).toEqual(["claude-haiku-4-5", "claude-code"]);
     await settings.setEnabledModels(null); // reset
   });
+
+  it("the loader lists no CLI or local models in production", async () => {
+    const discover = await import("~/lib/ai/discover.server");
+    vi.mocked(discover.discoverLocalModels).mockClear();
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const data = (await toolsRoute.loader({
+        request: new Request("http://localhost/admin/tools"),
+        params: {},
+        context: {},
+      } as unknown as Parameters<typeof toolsRoute.loader>[0])) as {
+        models: { id: string; group: string }[];
+      };
+      expect(data.models.some((r) => r.group !== "frontier")).toBe(false);
+      expect(data.models.some((r) => r.id === "claude-code")).toBe(false);
+      expect(discover.discoverLocalModels).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("the action ignores a CLI model id in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const res = (await invoke(
+        toolsRoute.action,
+        post({ intent: "models", models: ["claude-code"] }),
+      )) as {
+        error?: boolean;
+      };
+      expect(res.error).toBe(true); // nothing valid chosen
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });
 
-describe("admin.models action — per-teacher assignment (P13)", () => {
-  it("persists a per-teacher model subset (narrows within the base)", async () => {
-    await settings.setEnabledModels(null); // base = full selectable catalog
-    const teacher = await users.createUser({
-      name: "Model Teacher",
-      email: "modelteacher@example.com",
+describe("admin.users action — teacherModels override (P18)", () => {
+  async function newTeacher(tag: string) {
+    return users.createUser({
+      name: `Model Teacher ${tag}`,
+      email: `modelteacher-${tag}@example.com`,
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
+  }
+
+  it("mode=inherit clears the teacher's set", async () => {
+    const teacher = await newTeacher("inherit");
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
     const res = (await invoke(
-      modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: ["claude-haiku-4-5"] }),
+      usersRoute.action,
+      post({
+        intent: "teacherModels",
+        userId: teacher.id,
+        mode: "inherit",
+        models: ["claude-haiku-4-5"],
+      }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+  });
+
+  it("mode=own stores exactly the chosen set, also outside the instance set", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]); // haiku is not enabled instance-wide
+    const teacher = await newTeacher("own");
+    const res = (await invoke(
+      usersRoute.action,
+      post({
+        intent: "teacherModels",
+        userId: teacher.id,
+        mode: "own",
+        models: ["claude-haiku-4-5"],
+      }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+    await settings.setEnabledModels(null); // reset
   });
 
-  it("[P14] persists a per-teacher CLI/local subset (narrows within the base)", async () => {
-    await settings.setEnabledModels(null); // base = full selectable catalog incl. CLI
-    const teacher = await users.createUser({
-      name: "CLI Teacher",
-      email: "cliteacher@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
+  it("mode=own with every catalogue model keeps the full list (no collapse to inherit)", async () => {
+    await settings.setEnabledModels(null);
+    const teacher = await newTeacher("all");
+    const all = listModels()
+      .filter((mdl) => mdl.clientSelectable)
+      .map((mdl) => mdl.id);
+    await invoke(
+      usersRoute.action,
+      post({ intent: "teacherModels", userId: teacher.id, mode: "own", models: all }),
+    );
+    expect([...(await users.getUserAssignedModels(teacher.id))!].sort()).toEqual([...all].sort());
+  });
+
+  it("[P14] mode=own persists a CLI model", async () => {
+    const teacher = await newTeacher("cli");
     const res = (await invoke(
-      modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: ["claude-code"] }),
+      usersRoute.action,
+      post({ intent: "teacherModels", userId: teacher.id, mode: "own", models: ["claude-code"] }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-code"]);
   });
 
-  it("stores null (inherit) when all base models are selected, or none are", async () => {
-    await settings.setEnabledModels(null);
-    const teacher = await users.createUser({
-      name: "Inherit Teacher",
-      email: "inheritteacher@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    // All base models checked → inherit (not a stored full list). Since P14 the base
-    // includes the CLI agents, so "all" means the whole client-selectable catalog.
-    const allBase = listModels()
-      .filter((mdl) => mdl.clientSelectable)
-      .map((mdl) => mdl.id);
-    await invoke(
-      modelsRoute.action,
-      post({ intent: "teacher", userId: teacher.id, models: allBase }),
-    );
-    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
-    // None checked → inherit, never a lockout.
+  it("mode=own with nothing chosen is refused and stores nothing", async () => {
+    const teacher = await newTeacher("empty");
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
-    await invoke(modelsRoute.action, post({ intent: "teacher", userId: teacher.id }));
-    expect(await users.getUserAssignedModels(teacher.id)).toBeNull();
+    const res = (await invoke(
+      usersRoute.action,
+      post({ intent: "teacherModels", userId: teacher.id, mode: "own" }),
+    )) as { error?: string; saved?: boolean };
+    expect(res.error).toBe("atLeastOne");
+    expect(res.saved).toBeUndefined();
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+  });
+
+  it("drops unknown ids", async () => {
+    const teacher = await newTeacher("unknown");
+    await invoke(
+      usersRoute.action,
+      post({
+        intent: "teacherModels",
+        userId: teacher.id,
+        mode: "own",
+        models: ["claude-haiku-4-5", "nonexistent-model-xyz", "claude-opus-4-8"],
+      }),
+    );
+    expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
+    // Only unknown ids = nothing chosen → refused.
+    const res = (await invoke(
+      usersRoute.action,
+      post({
+        intent: "teacherModels",
+        userId: teacher.id,
+        mode: "own",
+        models: ["nonexistent-model-xyz"],
+      }),
+    )) as { error?: string };
+    expect(res.error).toBe("atLeastOne");
   });
 
   it("404s an unknown or non-teacher target", async () => {
     await expect(
       invoke(
-        modelsRoute.action,
-        post({ intent: "teacher", userId: "nobody", models: ["claude-haiku-4-5"] }),
+        usersRoute.action,
+        post({
+          intent: "teacherModels",
+          userId: "nobody",
+          mode: "own",
+          models: ["claude-haiku-4-5"],
+        }),
       ),
     ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("the loader gives each teacher a mode and lists the whole catalogue, not the instance set", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    const teacher = await newTeacher("loader");
+    await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
+    const data = (await usersRoute.loader({
+      request: new Request("http://localhost/admin/users"),
+      params: {},
+      context: {},
+    } as unknown as Parameters<typeof usersRoute.loader>[0])) as {
+      base: { id: string }[];
+      teachers: { id: string; mode: string; models: string[] }[];
+    };
+    const row = data.teachers.find((t) => t.id === teacher.id)!;
+    expect(row.mode).toBe("own");
+    expect(row.models).toEqual(["claude-haiku-4-5"]);
+    expect(data.base.map((b) => b.id)).toContain("claude-haiku-4-5"); // not in the instance set
+    await settings.setEnabledModels(null); // reset
+  });
+
+  it("the loader prefills an inheriting teacher's boxes with the instance set (autosave starting point)", async () => {
+    await settings.setEnabledModels(["claude-sonnet-4-6"]);
+    const teacher = await newTeacher("prefill");
+    const load = () =>
+      usersRoute.loader({
+        request: new Request("http://localhost/admin/users"),
+        params: {},
+        context: {},
+      } as unknown as Parameters<typeof usersRoute.loader>[0]) as Promise<{
+        teachers: { id: string; mode: string; models: string[] }[];
+      }>;
+    const row = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    expect(row.mode).toBe("inherit");
+    expect(row.models).toEqual(["claude-sonnet-4-6"]);
+    // Unset instance list = the whole catalogue.
+    await settings.setEnabledModels(null);
+    const all = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    expect(all.models.length).toBeGreaterThan(1);
   });
 });
 
@@ -179,13 +304,12 @@ describe("admin.context action — instance lockout guard", () => {
     };
     expect(res.error).toBe("instance-empty");
     expect(await settings.getEnabledSectors()).toBeNull(); // unchanged
-    expect(await settings.getEnabledCountries()).toBeNull();
   });
 
-  it("refuses when either axis is empty (a country but no sector)", async () => {
+  it("refuses an empty sector selection", async () => {
     const res = (await invoke(
       contextRoute.action,
-      post({ intent: "instance", countries: ["NL"] }),
+      post({ intent: "instance", domains: ["nt"] }),
     )) as { error?: string };
     expect(res.error).toBe("instance-empty");
     expect(await settings.getEnabledSectors()).toBeNull();
@@ -197,40 +321,33 @@ describe("admin.context action — instance lockout guard", () => {
       // Junk values are dropped; only shipped catalogue codes survive on every axis.
       post({
         intent: "instance",
-        countries: ["NL", "XX"],
         sectors: ["hbo", "wo", "bogus"],
         domains: ["ICT", "not-a-domain", "nt"],
       }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
-    expect(await settings.getEnabledCountries()).toEqual(["NL"]);
     expect(await settings.getEnabledSectors()).toEqual(["hbo", "wo"]);
     expect(await settings.getEnabledDomains()).toEqual(["ICT", "nt"]);
     // Reset so later tests see the default-open state.
-    await settings.setEnabledCountries(null);
     await settings.setEnabledSectors(null);
     await settings.setEnabledDomains(null);
   });
 
   it("clears instance domains when none are submitted (empty = all)", async () => {
     await settings.setEnabledDomains(["nt"]);
-    await invoke(
-      contextRoute.action,
-      post({ intent: "instance", countries: ["NL"], sectors: ["hbo"] }),
-    );
+    await invoke(contextRoute.action, post({ intent: "instance", sectors: ["hbo"] }));
     expect(await settings.getEnabledDomains()).toBeNull();
-    await settings.setEnabledCountries(null);
     await settings.setEnabledSectors(null);
   });
 
   it("loader builds all-checked rows + domain catalogue when nothing is configured", async () => {
     const data = (await invoke(contextRoute.loader, post({}))) as {
-      countries: { id: string; checked: boolean }[];
       sectors: { id: string; checked: boolean }[];
       enabledDomains: string[] | null;
       domainCatalogueSectors: { sector: string; groups: unknown[] }[];
     };
-    expect(data.countries.every((c) => c.checked)).toBe(true);
+    expect(data).not.toHaveProperty("countries");
+    expect(data).not.toHaveProperty("teachers");
     expect(data.sectors.every((s) => s.checked)).toBe(true);
     expect(data.sectors.map((s) => s.id)).toEqual(["vo", "mbo", "hbo", "wo"]);
     // The instance domain axis: unset = null (= all), and the shared catalogue
@@ -240,140 +357,40 @@ describe("admin.context action — instance lockout guard", () => {
   });
 });
 
-describe("admin.context action — activation + per-teacher assignment (P12)", () => {
-  it("activating persists the flag + axes; an empty axis is unrestricted", async () => {
+describe("admin.context action — no per-teacher intent (P18.2)", () => {
+  it("rejects the retired teacher intent with a 400", async () => {
     const teacher = await users.createUser({
       name: "Assignable",
       email: "assignable@example.com",
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
-    const res = (await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        countries: ["NL"],
-        sectors: ["mbo", "hbo"],
-      }),
-    )) as { saved?: boolean };
-    expect(res.saved).toBe(true);
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-    expect([...(await users.getUserAssignedCountries(teacher.id))!]).toEqual(["NL"]);
-    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
-
-    // Still activated, but sectors omitted → that axis clears to unrestricted.
-    await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id, customAccess: "1", countries: ["NL"] }),
-    );
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-    expect(await users.getUserAssignedSectors(teacher.id)).toBeNull();
-  });
-
-  it("deactivating flips the flag off and leaves the saved assignments untouched", async () => {
-    const teacher = await users.createUser({
-      name: "Toggle",
-      email: "toggle@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    // Activate + assign all three axes.
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["mbo", "hbo"],
-        domains: ["ICT"],
-      }),
-    );
-    // Deactivate: no customAccess field → the flag goes off, assignments preserved.
-    const res = (await invoke(
-      contextRoute.action,
-      post({ intent: "teacher", userId: teacher.id }),
-    )) as { saved?: boolean };
-    expect(res.saved).toBe(true);
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(false);
-    expect([...(await users.getUserAssignedSectors(teacher.id))!].sort()).toEqual(["hbo", "mbo"]);
-    expect([...(await users.getUserAssignedDomains(teacher.id))!]).toEqual(["ICT"]);
-
-    // Re-activating restores exactly what was saved (round-trip).
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["mbo", "hbo"],
-        domains: ["ICT"],
-      }),
-    );
-    expect(await users.getUserContextCustomAccess(teacher.id)).toBe(true);
-  });
-
-  it("catalogue-filters submitted codes + domains before writing (activated)", async () => {
-    const teacher = await users.createUser({
-      name: "Filtered",
-      email: "filtered@example.com",
-      passwordHash: "scrypt:a:b",
-      role: "teacher",
-    });
-    await invoke(
-      contextRoute.action,
-      post({
-        intent: "teacher",
-        userId: teacher.id,
-        customAccess: "1",
-        sectors: ["wo", "not-a-sector"],
-        domains: ["nt", "not-a-domain", "zw"],
-      }),
-    );
-    expect([...(await users.getUserAssignedSectors(teacher.id))!]).toEqual(["wo"]);
-    expect([...(await users.getUserAssignedDomains(teacher.id))!].sort()).toEqual(["nt", "zw"]);
-  });
-
-  it("refuses (404) a per-teacher write whose userId is not a teacher", async () => {
-    const student = await users.createUser({
-      name: "Not a teacher",
-      passwordHash: "scrypt:a:b",
-      role: "admin",
-    });
     await expect(
       invoke(
         contextRoute.action,
-        post({ intent: "teacher", userId: student.id, customAccess: "1", sectors: ["mbo"] }),
+        post({ intent: "teacher", userId: teacher.id, customAccess: "1", sectors: ["mbo"] }),
       ),
-    ).rejects.toMatchObject({ status: 404 });
-    expect(await users.getUserAssignedSectors(student.id)).toBeNull(); // never written
-    expect(await users.getUserContextCustomAccess(student.id)).toBe(false);
-  });
-
-  it("refuses (404) a per-teacher write for an unknown userId", async () => {
-    await expect(
-      invoke(contextRoute.action, post({ intent: "teacher", userId: "ghost", sectors: ["mbo"] })),
-    ).rejects.toMatchObject({ status: 404 });
+    ).rejects.toMatchObject({ status: 400 });
   });
 });
 
-describe("admin.invites action", () => {
-  it("mints a teacher invite carrying the chosen tool allow-list", async () => {
+describe("admin.users action", () => {
+  it("mints a plain teacher invite (no tool list)", async () => {
     const res = (await invoke(
-      invitesRoute.action,
+      usersRoute.action,
+      // A stale client may still send the old fields; they are ignored.
       post({ intent: "mint", toolMode: "restrict", tools: ["bloom-by-design"] }),
     )) as { link?: string };
     expect(res.link).toMatch(/\/invite\//);
     const token = res.link!.split("/invite/")[1];
     const invite = await users.getInvite(token);
     expect(invite?.role).toBe("teacher");
-    expect(JSON.parse(invite!.allowedToolSlugs!)).toEqual(["bloom-by-design"]);
+    expect(invite!.allowedToolSlugs).toBeNull();
   });
 
   it("blocks an admin from changing their OWN role (self-demote guard)", async () => {
     const res = (await invoke(
-      invitesRoute.action,
+      usersRoute.action,
       post({ intent: "role", userId: "admin-1", role: "teacher" }),
     )) as { error?: string };
     expect(res.error).toBe("selfDemote");
@@ -387,7 +404,7 @@ describe("admin.invites action", () => {
       role: "student" as never,
     });
     await expect(
-      invoke(invitesRoute.action, post({ intent: "role", userId: legacy.id, role: "teacher" })),
+      invoke(usersRoute.action, post({ intent: "role", userId: legacy.id, role: "teacher" })),
     ).rejects.toMatchObject({ status: 404 });
     expect((await users.getUserById(legacy.id))?.role).toBe("student");
   });
@@ -399,7 +416,7 @@ describe("admin.invites action", () => {
       passwordHash: "scrypt:keep:me",
       role: "teacher",
     });
-    await invoke(invitesRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
+    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
     const after = await users.getUserById(teacher.id);
     expect(after?.role).toBe("admin");
     expect(after?.passwordHash).toBe("scrypt:keep:me"); // untouched
@@ -412,22 +429,19 @@ describe("admin.invites action", () => {
       passwordHash: "scrypt:keep:me",
       role: "teacher",
     });
-    await invoke(
-      invitesRoute.action,
-      post({ intent: "role", userId: teacher.id, role: "student" }),
-    );
+    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "student" }));
     expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
   });
 
   it("revokes an open invite (its token becomes unknown)", async () => {
     const invite = await users.createInvite({ role: "teacher", createdByUserId: "admin-1" });
-    await invoke(invitesRoute.action, post({ intent: "revoke", token: invite.token }));
+    await invoke(usersRoute.action, post({ intent: "revoke", token: invite.token }));
     expect(await users.getInvite(invite.token)).toBeNull();
   });
 
   it("blocks an admin from deleting their OWN account (use /account instead)", async () => {
     const res = (await invoke(
-      invitesRoute.action,
+      usersRoute.action,
       post({ intent: "deleteUser", userId: "admin-1" }),
     )) as { error?: string };
     expect(res.error).toBe("selfDelete");
@@ -441,7 +455,7 @@ describe("admin.invites action", () => {
       role: "teacher",
     });
     const res = (await invoke(
-      invitesRoute.action,
+      usersRoute.action,
       post({ intent: "deleteUser", userId: teacher.id }),
     )) as { userDeleted?: boolean };
     expect(res.userDeleted).toBe(true);
@@ -456,7 +470,7 @@ describe("admin.invites action", () => {
       role: "teacher",
     });
     const res = (await invoke(
-      invitesRoute.action,
+      usersRoute.action,
       post({ intent: "resetPassword", userId: teacher.id }),
     )) as { resetLink?: string };
     expect(res.resetLink).toMatch(/\/reset\//);
@@ -471,7 +485,7 @@ describe("admin.invites action", () => {
       role: "teacher",
     });
     await invoke(
-      invitesRoute.action,
+      usersRoute.action,
       post({ intent: "setEmail", userId: student.id, email: "recovered@example.com" }),
     );
     expect((await users.getUserById(student.id))?.email).toBe("recovered@example.com");

@@ -32,43 +32,20 @@ const havoDomainSector = {
   ],
 };
 
-// Defaults-all for the instance; two teachers — one activated + restricted, one
-// inheriting (custom access off).
+// Defaults-all for the instance.
 const loaderData = {
-  countries: [{ id: "NL", checked: true }],
   sectors: [
     { id: "vo", checked: true },
     { id: "mbo", checked: true },
     { id: "hbo", checked: true },
     { id: "wo", checked: true },
   ],
-  // Instance domain axis: null = all enabled. The shared catalogue is used for
-  // both the instance section and every teacher (activation ignores the instance).
+  // Instance domain axis: null = all enabled.
   enabledDomains: null,
   domainCatalogueSectors: [hboDomainSector, havoDomainSector],
-  teachers: [
-    {
-      id: "t-restricted",
-      name: "Docent Beperkt",
-      email: "beperkt@school.nl",
-      customAccess: true,
-      countries: ["NL"],
-      sectors: ["mbo"],
-      domains: ["ICT"],
-    },
-    {
-      id: "t-open",
-      name: "Docent Open",
-      email: null,
-      customAccess: false,
-      countries: null,
-      sectors: null,
-      domains: null,
-    },
-  ],
 };
 
-function renderRoute(action?: () => unknown) {
+function renderRoute(action?: (args: { request: Request }) => unknown) {
   const props = { loaderData } as unknown as ComponentProps<typeof AdminContext>;
   const Stub = createRoutesStub([
     {
@@ -84,16 +61,23 @@ function renderRoute(action?: () => unknown) {
   return render(<Stub initialEntries={["/admin/context"]} />);
 }
 
-/** The instance-toggle form, scoped so per-teacher forms don't shadow its labels. */
+/** The instance form. */
 function instanceForm() {
   return within(screen.getByRole("form", { name: "Onderwijscontext" }));
 }
 
 describe("Admin context — instance toggle", () => {
-  it("renders a checkbox per country, pre-checked from settings", () => {
-    renderRoute();
-    const nl = instanceForm().getByLabelText("Nederland") as HTMLInputElement;
-    expect(nl.checked).toBe(true);
+  it("offers no country axis", () => {
+    const { container } = renderRoute();
+    expect(screen.queryByLabelText(/nederland|netherlands/i)).toBeNull();
+    expect(container.querySelector('[name="countries"]')).toBeNull();
+  });
+
+  it("offers no per-teacher section", () => {
+    const { container } = renderRoute();
+    expect(container.querySelector('input[name="customAccess"]')).toBeNull();
+    expect(container.querySelector('input[name="userId"]')).toBeNull();
+    expect(screen.getAllByRole("form")).toHaveLength(1);
   });
 
   it("renders a checkbox per sector, pre-checked from settings", () => {
@@ -104,13 +88,57 @@ describe("Admin context — instance toggle", () => {
     expect(wo.checked).toBe(true);
   });
 
-  it("surfaces the lockout guard when the action rejects an empty selection", async () => {
+  it("has no save buttons", () => {
+    renderRoute();
+    expect(screen.queryAllByRole("button", { name: /opslaan|save|toepassen|apply/i })).toHaveLength(
+      0,
+    );
+  });
+
+  it("autosaves a sector toggle with the whole selection and one toast (mutation)", async () => {
     const user = userEvent.setup();
-    renderRoute(() => ({ error: "instance-empty" }));
-    await user.click(instanceForm().getByRole("button", { name: /opslaan|save/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
     });
+    await user.click(instanceForm().getByLabelText(/wetenschappelijk onderwijs/i));
+    await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
+    expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
+    expect(body?.get("intent")).toBe("instance");
+    expect(body?.getAll("sectors")).toEqual(["vo", "mbo", "hbo"]);
+  });
+
+  it("autosaves a domain toggle too", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    await user.click(instanceForm().getByLabelText("ICT"));
+    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+    expect(body?.getAll("domains")).not.toContain("ICT");
+  });
+
+  it("reverts the checkbox and shows the lockout as a toast when the action refuses", async () => {
+    const user = userEvent.setup();
+    let posted: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      posted = await request.formData();
+      return { error: "instance-empty" };
+    });
+    const wo = instanceForm().getByLabelText(/wetenschappelijk onderwijs/i) as HTMLInputElement;
+    await user.click(wo);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /minstens één sector|at least one sector/i,
+      );
+    });
+    expect(posted?.getAll("sectors")).not.toContain("wo"); // the refused state was posted
+    expect(wo.checked).toBe(true); // sprong terug
+    // The toast is the only announcer: no inline error line.
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
   });
 
   it("renders an instance Domains section: a checkbox per catalogue slug, name=domains, all-checked (null)", () => {
@@ -123,84 +151,9 @@ describe("Admin context — instance toggle", () => {
   });
 });
 
-describe("Admin context — activate custom access (P12)", () => {
-  it("checks the toggle for an activated teacher and unchecks it for an inheriting one", () => {
-    renderRoute();
-    const restricted = within(screen.getByRole("form", { name: "Docent Beperkt" }));
-    const open = within(screen.getByRole("form", { name: "Docent Open" }));
-    const rBox = restricted.getByLabelText(/aangepaste toegang|custom access/i) as HTMLInputElement;
-    const oBox = open.getByLabelText(/aangepaste toegang|custom access/i) as HTMLInputElement;
-    expect(rBox).toHaveAttribute("name", "customAccess");
-    expect(rBox.checked).toBe(true);
-    expect(oBox.checked).toBe(false);
-  });
-
-  it("disables the axis controls until custom access is activated, then enables them", async () => {
-    const user = userEvent.setup();
-    renderRoute();
-    const open = within(screen.getByRole("form", { name: "Docent Open" }));
-    const mbo = open.getByLabelText(/middelbaar beroepsonderwijs/i) as HTMLInputElement;
-    expect(mbo.disabled).toBe(true); // inheriting → controls disabled
-    await user.click(open.getByLabelText(/aangepaste toegang|custom access/i));
-    expect(mbo.disabled).toBe(false); // activating enables them
-  });
-});
-
-describe("Admin context — per-teacher assignment", () => {
-  it("renders one form per teacher carrying its userId + intent", () => {
-    renderRoute();
-    const form = screen.getByRole("form", { name: "Docent Beperkt" });
-    expect(form.querySelector('input[name="intent"]')).toHaveValue("teacher");
-    expect(form.querySelector('input[name="userId"]')).toHaveValue("t-restricted");
-  });
-
-  it("pre-checks a restricted teacher's assignment only (mbo, not hbo)", () => {
-    renderRoute();
-    const form = within(screen.getByRole("form", { name: "Docent Beperkt" }));
-    const mbo = form.getByLabelText(/middelbaar beroepsonderwijs/i) as HTMLInputElement;
-    const hbo = form.getByLabelText(/hoger beroepsonderwijs/i) as HTMLInputElement;
-    expect(mbo.checked).toBe(true);
-    expect(hbo.checked).toBe(false);
-  });
-
-  it("pre-checks everything for an unrestricted teacher (null = all)", () => {
-    renderRoute();
-    const form = within(screen.getByRole("form", { name: "Docent Open" }));
-    const mbo = form.getByLabelText(/middelbaar beroepsonderwijs/i) as HTMLInputElement;
-    const hbo = form.getByLabelText(/hoger beroepsonderwijs/i) as HTMLInputElement;
-    expect(mbo.checked).toBe(true);
-    expect(hbo.checked).toBe(true);
-  });
-
+describe("Admin context — a11y", () => {
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-});
-
-describe("Admin context — per-teacher domains (P10.3)", () => {
-  it("renders domain checkboxes and pre-checks a restricted teacher's assignment only", () => {
-    renderRoute();
-    const form = within(screen.getByRole("form", { name: "Docent Beperkt" }));
-    // ICT is assigned → checked; Techniek is not → unchecked.
-    const ict = form.getByLabelText("ICT") as HTMLInputElement;
-    const tech = form.getByLabelText("Techniek") as HTMLInputElement;
-    expect(ict.name).toBe("domains");
-    expect(ict.checked).toBe(true);
-    expect(tech.checked).toBe(false);
-  });
-
-  it("pre-checks every domain for an unrestricted teacher (null = all)", () => {
-    renderRoute();
-    const form = within(screen.getByRole("form", { name: "Docent Open" }));
-    const ict = form.getByLabelText("ICT") as HTMLInputElement;
-    expect(ict.checked).toBe(true);
-  });
-
-  it("groups vo profielen under a collapsible details for the reachable track(s)", () => {
-    renderRoute();
-    const form = within(screen.getByRole("form", { name: "Docent Beperkt" }));
-    // The havo/vwo profiel is present (grouped under the vo sector's details).
-    expect(form.getByLabelText(/Natuur & Techniek/)).toBeInTheDocument();
   });
 });

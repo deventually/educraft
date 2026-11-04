@@ -63,7 +63,8 @@ intentionally not built now to keep behaviour predictable and user-controlled.
   deployment (data categories, purposes, lawful basis, retention).
 - **Data residency** — where the DB and model inference run. The app is on-prem
   capable (SQLite + local/EU-hosted models); Anthropic/OpenAI calls leave the EU
-  unless a local model is used. EU hosting: Fly.io `ams` or Hetzner both fit.
+  unless a local model is used (local models run only in development mode, not in a
+  production process). EU hosting: Fly.io `ams` or Hetzner both fit.
 - **Retention & deletion** — documented above; deletion is implemented.
 - **Sub-processors** — the model provider(s) in use (Anthropic, OpenAI, or a
   local Ollama/LM Studio endpoint with no third party).

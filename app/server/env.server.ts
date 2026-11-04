@@ -51,3 +51,12 @@ if (process.env.NODE_ENV === "production" && env.SESSION_SECRET === DEV_SESSION_
 
 /** Filesystem path to the SQLite database (strips a leading file: scheme). */
 export const DB_PATH = env.DATABASE_URL.replace(/^file:/, "");
+
+/**
+ * CLI agents and local (Ollama/LM Studio) models exist only in development: a
+ * production process (`npm start`, the Docker image) has no business running
+ * commands or probing localhost. Read at call time, so `vi.stubEnv` works.
+ */
+export function localModelsEnabled(): boolean {
+  return process.env.NODE_ENV !== "production";
+}

@@ -12,7 +12,7 @@ Two roles, stored on `users.role` and read fresh from the DB every request
 
 | Role      | Created by                              | Scope                                              |
 |-----------|-----------------------------------------|----------------------------------------------------|
-| `teacher` | Admin-minted invite (`/admin/invites`), tools optionally narrowed by a per-teacher allow-list | Uses every tool (instructor + student tutors) |
+| `teacher` | Admin-minted invite (`/admin/users`) | Uses every tool (instructor + student tutors) |
 | `admin`   | **Ops script, never an invite**         | Configures the whole instance (tools, models, context, users) |
 
 (P17 removed the `student` role and cohorts; see BESLUIT-2026-11-03-3.)
@@ -23,7 +23,7 @@ Two roles, stored on `users.role` and read fresh from the DB every request
    (`scripts/create-admin.ts`). If `--password` is omitted a strong one is
    generated and printed once.
 2. Promotion — an existing admin changes a teacher's role to `admin` in the
-   admin console (`/admin/invites` user list). Guard: an admin can never demote
+   admin console (`/admin/users` user list). Guard: an admin can never demote
    **themselves**, so the last admin can't lock the instance out of admin.
 
 ## Future: multi-tenant SaaS (database-per-tenant)

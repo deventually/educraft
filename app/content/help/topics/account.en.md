@@ -9,8 +9,8 @@ signed in.
 
 ## Which AI models you can use
 
-The administrator decides which AI models are available to you, including local and CLI
-models. You pick from that set in the model menu of each tool.
+The administrator decides which AI models are available to you. You pick from that set in the
+model menu of each tool.
 
 ## Deleting your account
 

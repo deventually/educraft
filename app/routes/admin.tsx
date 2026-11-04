@@ -1,13 +1,5 @@
 import { NavLink, Outlet } from "react-router";
-import {
-  Activity,
-  Cpu,
-  GraduationCap,
-  LayoutDashboard,
-  MessagesSquare,
-  SlidersHorizontal,
-  UserPlus,
-} from "lucide-react";
+import { Activity, GraduationCap, SlidersHorizontal, Users } from "lucide-react";
 import type { Route } from "./+types/admin";
 import { requireRole } from "~/server/auth.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
@@ -23,9 +15,7 @@ export function meta({ matches }: Route.MetaArgs) {
 /**
  * Admin console layout (Phase 4). Gates the whole section on `requireRole("admin")`
  * — and every child loader/action repeats the check, because loaders run in
- * parallel and a nested loader must not trust the layout ran first. Guards on the
- * *real* role, so an admin who is "viewing as teacher" can still reach the console
- * (the nav link is hidden, but direct access never locks them out).
+ * parallel and a nested loader must not trust the layout ran first.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
@@ -33,13 +23,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 const SECTIONS = [
-  { to: "/admin", end: true, key: "overview", Icon: LayoutDashboard },
-  { to: "/admin/tools", end: false, key: "tools", Icon: SlidersHorizontal },
-  { to: "/admin/models", end: false, key: "models", Icon: Cpu },
-  { to: "/admin/context", end: false, key: "context", Icon: GraduationCap },
-  { to: "/admin/invites", end: false, key: "invites", Icon: UserPlus },
-  { to: "/admin/usage", end: false, key: "usage", Icon: Activity },
-  { to: "/admin/feedback", end: false, key: "feedback", Icon: MessagesSquare },
+  { to: "/admin/users", key: "users", Icon: Users },
+  { to: "/admin/tools", key: "tools", Icon: SlidersHorizontal },
+  { to: "/admin/context", key: "context", Icon: GraduationCap },
+  { to: "/admin/usage", key: "usage", Icon: Activity },
 ] as const;
 
 export default function AdminLayout() {
@@ -61,11 +48,10 @@ export default function AdminLayout() {
           aria-label={t.admin.console.sectionNav}
           className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0"
         >
-          {SECTIONS.map(({ to, end, key, Icon }) => (
+          {SECTIONS.map(({ to, key, Icon }) => (
             <NavLink
               key={to}
               to={to}
-              end={end}
               className={({ isActive }) =>
                 cn(
                   "inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",

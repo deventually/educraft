@@ -51,6 +51,19 @@ describe("deleteUserCascade", () => {
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === genId)).toBe(false);
   });
 
+  it("removes the user's assignedModels key", async () => {
+    await seedUser("del-user-models");
+    await users.setUserAssignedModels("del-user-models", ["claude-haiku-4-5"]);
+    await users.setUserAssignedModels("del-user-models-other", ["claude-haiku-4-5"]);
+    expect(await users.getUserAssignedModels("del-user-models")).not.toBeNull();
+
+    await users.deleteUserCascade("del-user-models");
+
+    expect(await users.getUserAssignedModels("del-user-models")).toBeNull();
+    // Another user's assignment is untouched.
+    expect(await users.getUserAssignedModels("del-user-models-other")).not.toBeNull();
+  });
+
   it("removes the user's chat sessions and messages", async () => {
     const sessionId = "del-chat-session-1";
     const { getDb } = await import("~/server/db.server");
