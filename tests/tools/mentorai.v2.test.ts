@@ -66,6 +66,8 @@ describe("mentorai@v2 — the book's Cognitive Apprenticeship Coach, generalised
     expect(p).toContain("voorspel");
     expect(p).toContain("letterlijke woorden");
     expect(p).toContain("één vraag");
+    // Meting e2: examples written as extra questions counted as several questions.
+    expect(p).toContain("precies één vraagteken");
     expect(p).toContain("noem je zetten nooit");
   });
 
@@ -78,6 +80,7 @@ describe("mentorai@v2 — the book's Cognitive Apprenticeship Coach, generalised
     expect(p).toContain("predict");
     expect(p).toContain("their own words");
     expect(p).toContain("one question");
+    expect(p).toContain("exactly one question mark");
     expect(p).toContain("never name your moves");
   });
 
