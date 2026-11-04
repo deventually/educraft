@@ -27,11 +27,15 @@ describe("task-first tool names (P19.1)", () => {
     }
   });
 
-  it("makes the internship-report checker findable by its task", () => {
+  it("makes the student-work assessor findable by its task, and still by 'stage'", () => {
+    // P24.1: broadened from internship/thesis to any student work; the subtitle
+    // keeps "stage"/"internship" so search still finds it.
     const tool = getToolBySlug("stage-assessment");
-    expect(loc(tool?.name, "nl")).toContain("Stageverslag");
-    expect(loc(tool?.name, "en").toLowerCase()).toContain("internship report");
+    expect(loc(tool?.name, "nl")).toBe("Studentwerk beoordelen en feedback geven");
+    expect(loc(tool?.name, "en").toLowerCase()).toContain("student work");
     expect(loc(tool?.subtitle, "nl")).toContain("Beoordelingsassistent");
+    expect(loc(tool?.subtitle, "nl").toLowerCase()).toContain("stage");
+    expect(loc(tool?.subtitle, "en").toLowerCase()).toContain("internship");
   });
 
   it("keeps slugs and ids unchanged", () => {

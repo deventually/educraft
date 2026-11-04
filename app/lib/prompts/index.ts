@@ -13,6 +13,7 @@ import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
@@ -36,6 +37,7 @@ const ALL: PromptDef[] = [
   PEER_TUTORING_PROMPT,
   SCAFFOLDING_FEEDBACK_PROMPT,
   STAGE_ASSESSMENT_PROMPT,
+  STAGE_ASSESSMENT_PROMPT_V2,
   PORTFOLIO_COACH_PROMPT,
   PORTFOLIO_DRAFT_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,

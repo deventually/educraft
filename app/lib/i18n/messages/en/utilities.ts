@@ -71,7 +71,7 @@ export const utilities: Messages["utilities"] = {
       points: "pt",
     },
     exportHint:
-      "Paste the Markdown into an assessment tool, such as Assess an internship report or thesis, or the table into Word or Excel.",
+      "Paste the Markdown into an assessment tool, such as Assess student work and give feedback, or the table into Word or Excel.",
     invalid: "Not saved: check the name and the points (0 to 100).",
     knockout: "Knock-out: the lowest level always means fail",
     level: "Level {n}",

@@ -169,3 +169,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   docent invult om te anonimiseren (24.0b) staat niet in de browseropslag; na herladen is het weg en
   vult de docent het opnieuw in. De privacy-officer kijkt later mee; tot dan staan de grenzen eerlijk
   in de UI. Bastiaan, 2026-11-04.
+- **BESLUIT-2026-11-04-21:** **Stage Assessment heet voortaan "Studentwerk beoordelen en feedback
+  geven"** (EN: "Assess student work and give feedback"), omdat de tool met 24.1 elk geschreven
+  studentwerk beoordeelt. De slug blijft `stage-assessment`; de ondertitel noemt stage en afstuderen,
+  zodat zoeken op "stage" hem blijft vinden. Vervangt voor deze tool de naam uit P19.1. Bastiaan,
+  2026-11-04.

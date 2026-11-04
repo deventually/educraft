@@ -17,6 +17,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
 - **P24.0c en 24.0b gemerged op 2026-11-04 (#49, #50):** het originele document naast de tekst
   voor de AI, en anonimiseren vóór het versturen.
 - **P25 PR B (#41) en de Word-export (#40) gemerged op 2026-11-04:** de werkplaats is te gebruiken
@@ -60,11 +61,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   Authentieke toetsing hield halverwege op. Deze modellen krijgen nu 16.000 tokens extra
   denkruimte bovenop het budget van de tool. De eval beoordeelt een leeg antwoord niet meer en meldt
   een afgekapt antwoord — PR open.
-- Reparaties na de nulmeting (24.0): langere antwoordruimte voor ARCS Reactor, Authentieke toetsing,
-  Cognitive Architect (12288) en Forum Autograder (8192), want hun antwoorden werden afgekapt; de
-  beoordelingsmaatstaf van Contextualisering beoordeelt nu de echte taak (analyse van samenhang, niet
-  voorbeelden); de meting vult de begroeting van chattools in en vraagt de beoordelaar één keer
-  opnieuw — PR open. Daarna de tweede meting.
+- P24.1 (Stage Assessment breder): de tool heet nu "Studentwerk beoordelen en feedback geven" en
+  beoordeelt elk geschreven studentwerk tegen de rubric van de docent; feedback langs feed up, feed
+  back en feed forward (Hattie & Timperley, 2007); stagevelden optioneel; prompt `stage-assessment@v2`
+  (`@v1` blijft); vijf evalcasussen, waarvan twee met een bekende fout en één Engels — PR open.
+  Daarna: de eval van deze tool en tien uitkomsten voor Bastiaan.
+- Tweede meting (24.0) na de reparaties van #52: draait op de Mac.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
@@ -80,7 +82,6 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Wacht op jou
 
-- **De nulmeting (24.0):** gedraaid op 2026-11-04, rapport in PR #51 — mergen.
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
   `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
 
