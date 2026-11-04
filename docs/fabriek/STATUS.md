@@ -46,6 +46,7 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
 - V2 stap 18.7: superbeheerder maakt accounts direct aan (link of beginwachtwoord), stelt wachtwoorden in en zet accounts op non-actief; migratie `0009` (kolom erbij) — branch `claude/p18-7` (bovenop 18.6).
 - V2 stap 18.8: opruimen — tabellen `chat_sessions`/`messages`/`projects` en kolommen `allowed_tool_slugs`/`project_id` weg, oude instellingen en open beheerdersuitnodigingen gewist (destructieve migratie `0010`, eerst back-up) — branch `claude/p18-8` (bovenop 18.7).
 - V2 stap 18.9: wie van rol wisselt (docent ↔ beheerder) wordt overal uitgelogd (`setUserRole` verhoogt `sessionVersion`) — branch `claude/p18-9` (bovenop 18.8).
+- Brief P19 (V3) — deze PR.
 
 ## Wacht op jou
 
@@ -57,16 +58,15 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.8: opruimen van slapende tabellen en 
    modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
    ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
    t/m -17.
-3. **Vereenvoudiging V3** (wordt P19): de docentkant. Stap 19.1 (toolnamen, taak eerst; besluit
-   BESLUIT-2026-11-03-18) is gemerged. Nog te doen: menu, toolpagina (techniek achter
-   "Geavanceerd"), een kort contextformulier, lege pagina's die sturen; de stageverslagen-checker
-   heet nu 'Stageverslag of afstudeerwerk beoordelen'.
+3. **Vereenvoudiging V3** (brief P19, nog vijf PR's): de docentkant. 19.1 (toolnamen, taak eerst;
+   BESLUIT-2026-11-03-18) is gemerged. Daarna: 19.2 geen doelgroeplabels, 19.3 techniek achter
+   "Geavanceerd", 19.4 lege pagina's die sturen (kunnen naast V2); 19.5 menu en 19.6 kort
+   contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
 4. **Cursussen en de rode draad:** brief P20.
 5. **Rolagenten** (P21), daarna de **docentweek** (P22).
 
 ## Open vragen
 
-- Toolnamen: taak als titel en boek als ondertitel, of de boeknamen zichtbaarder houden?
 - Volgorde: eerst de hele vereenvoudiging, of na V1 al cursussen?
 
 ## Later (bewust geparkeerd)
