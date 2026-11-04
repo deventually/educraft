@@ -75,6 +75,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- `npm run dev` zonder waarschuwingen: de vijf future flags van React Router v8 staan aan, en de
+  Vite-melding over `envFile` (uit `@react-router/dev` zelf) is weg via een kleine patch
+  (`patches/`, `patch-package`). Geen gedragsverschil voor docenten — PR open.
 - Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
   bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
   pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive
