@@ -26,14 +26,12 @@ describe("teaching-goal taxonomy", () => {
         expect((field as Record<string, string>).en?.trim()).toBeTruthy();
       }
       expect(goal.icon.trim()).toBeTruthy();
-      expect(["instructor", "student"]).toContain(goal.audience);
     }
   });
 
-  it("a goal's audience matches every tool filed under it", () => {
-    for (const tool of enabled) {
-      const goal = GOALS[TOOL_GOALS[tool.slug]];
-      expect(goal.audience).toBe(tool.userType);
+  it("goals carry no audience", () => {
+    for (const goal of Object.values(GOALS)) {
+      expect("audience" in goal).toBe(false);
     }
   });
 

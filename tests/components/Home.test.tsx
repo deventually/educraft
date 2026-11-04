@@ -61,7 +61,7 @@ describe("Home / tools page", () => {
   it("groups tools by teaching goal by default", () => {
     renderHome();
     expect(screen.getByText("Plannen & ontwerpen")).toBeInTheDocument();
-    expect(screen.getByText("Begeleiden & coachen")).toBeInTheDocument();
+    expect(screen.getByText("Zelf leren met een coach")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Begeleide reflectie/ })).toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe("Home / tools page", () => {
     // It shares its row with the mode pill so all the meta chips line up together.
     const metaRow = stageChip.parentElement;
     expect(metaRow).not.toBeNull();
-    expect(metaRow).toHaveTextContent("Generator");
+    expect(metaRow).toHaveTextContent("Formulier");
   });
 
   it("shows full tool titles without clamping or truncating them", () => {
@@ -101,15 +101,52 @@ describe("Home / tools page", () => {
     expect(heading.querySelector('[class*="line-clamp"]')).toBeNull();
   });
 
-  it("collapses to a flat result list when a filter is applied", async () => {
+  it("collapses to a flat result list when searching", async () => {
     const user = userEvent.setup();
     renderHome();
-    // Filter to students → goal sections disappear, flat results + count appear.
-    await user.click(screen.getByRole("button", { name: "Voor studenten", pressed: false }));
+    await user.type(screen.getByRole("searchbox"), "mentor");
     expect(screen.getByText("1 tool")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Terug naar doel-weergave/ })).toBeInTheDocument();
     expect(screen.queryByText("Plannen & ontwerpen")).toBeNull();
     expect(screen.getByRole("link", { name: /MentorAI/ })).toBeInTheDocument();
+  });
+
+  it("offers no audience filter", () => {
+    renderHome();
+    expect(screen.queryByRole("button", { name: "Voor studenten" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Voor docenten" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Filter op publiek" })).toBeNull();
+  });
+
+  it("shows no audience badge on goals or cards", () => {
+    renderHome();
+    expect(screen.queryByText("Student")).toBeNull();
+    expect(screen.queryByText("Docent")).toBeNull();
+  });
+
+  it("keeps the audience out of a card's accessible name", () => {
+    renderHome();
+    const link = screen.getByRole("link", { name: /MentorAI/ });
+    expect(link.getAttribute("aria-label")).not.toMatch(/Student/);
+  });
+
+  it("labels the kind of tool in plain words", () => {
+    renderHome();
+    expect(screen.getByRole("link", { name: /MentorAI/ })).toHaveTextContent("Gesprek");
+    expect(screen.getByRole("link", { name: /Begeleide reflectie/ })).toHaveTextContent(
+      "Formulier",
+    );
+  });
+
+  it("offers no type filter and no grid/list switch", () => {
+    renderHome();
+    expect(screen.queryByRole("button", { name: "Chatbots" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Lijst" })).toBeNull();
+  });
+
+  it("does not repeat the theory under a card", () => {
+    renderHome();
+    expect(screen.queryByText("Science of Learning", { exact: true })).toBeNull();
   });
 
   it("searches across keywords, not just the name", async () => {

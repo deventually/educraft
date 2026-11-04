@@ -33,22 +33,12 @@ export const nl = {
     closeMenu: "Menu sluiten",
     skipToContent: "Naar hoofdinhoud",
   },
-  badge: {
-    instructor: "Docent",
-    student: "Student",
-  },
   home: {
     heading: "Kies een tool",
     intro:
       "Elke tool zet een evidence-based onderwijsmethode uit The Pedagogical Promptbook om in een werkende tool. Ontworpen voor het hbo.",
-    filterAll: "Alle",
-    instructor: "Voor docenten",
-    student: "Voor studenten",
     comingSoon: "Binnenkort",
     search: "Zoek op naam, methode of taak…",
-    allTypes: "Alle types",
-    generators: "Generators",
-    chatbots: "Chatbots",
     resultCount: "{count} tools",
     resultCountOne: "{count} tool",
     noResults: "Geen tools gevonden. Pas je zoekopdracht of filters aan.",
@@ -56,22 +46,17 @@ export const nl = {
     backToGoals: "Terug naar doel-weergave",
     stages: "{count} fasen",
     mode: {
-      generator: "Generator",
-      chatbot: "Chatbot",
+      generator: "Formulier",
+      chatbot: "Gesprek",
     },
     a11y: {
       search: "Zoek tools",
       clearSearch: "Zoekopdracht wissen",
-      audience: "Filter op publiek",
-      type: "Filter op type",
-      resultView: "Weergave van resultaten",
-      grid: "Raster",
-      list: "Lijst",
       goalRegion: "Tools per onderwijsdoel",
       resultsRegion: "Zoekresultaten",
       open: "Open tool",
-      generator: "generator",
-      chatbot: "chatbot",
+      generator: "formulier",
+      chatbot: "gesprek",
     },
   },
   tool: {
@@ -216,7 +201,6 @@ export const nl = {
     licenseBody2: "(DOI {doi}) en zijn gelicentieerd onder",
     licenseBody3:
       ". Dit betekent dat ze vrij gebruikt en aangepast (o.a. vertaald) mogen worden, mits correct toegeschreven. Per tool tonen we de bron en de originele prompttekst.",
-    toolsHeading: "Beschikbare tools",
   },
   footer: {
     tagline: "Evidence-based onderwijs ontwerpen met generatieve AI.",
