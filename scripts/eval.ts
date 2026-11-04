@@ -44,6 +44,7 @@ import {
   runSpread,
   capTruncated,
   countedFailures,
+  JUDGE_MAX_TOKENS,
   TRUNCATION_CAP,
   averageScore,
   buildReportMarkdown,
@@ -378,9 +379,8 @@ async function judgeOutput(
         })
       ).text,
     );
-  // One retry with more room: in the nulmeting (2026-11-04) one verdict was cut off
-  // at 1024 tokens and left a case un-scored.
-  const parsed = (await ask(1024)) ?? (await ask(2048));
+  // One retry with more room (JUDGE_MAX_TOKENS): a verdict cut off mid-JSON leaves a run un-scored.
+  const parsed = (await ask(JUDGE_MAX_TOKENS[0])) ?? (await ask(JUDGE_MAX_TOKENS[1]));
   const checks = parseHardChecks(rubric);
   const judged = new Set(checks.filter((c) => !c.counted).map((c) => c.id));
   const failedChecks = [
@@ -432,6 +432,7 @@ function combineRuns(runs: JudgedCase[]): JudgedCase | null {
     ...first,
     scores: meanScores(runs.map((r) => r.scores)),
     runs: runs.length,
+    notJudgedRuns: runs.length - scored.length || undefined,
     spread: runSpread(runs.map((r) => r.scores)),
     failedChecks: [...new Set(runs.flatMap((r) => r.failedChecks ?? []))],
     worst: [lowest?.worst, ...notJudgedNotes].filter(Boolean).join(" | "),

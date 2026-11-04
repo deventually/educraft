@@ -2,7 +2,7 @@
   "cases": [
     {
       "id": "vygotsky-zpd",
-      "description": "Chat role-play with a learning theorist. Checks it stays in character as the theorist and does not take over the teacher's thinking with a ready-made how-to.",
+      "description": "Chat interview with a learning theorist (book: Tech Talk with a Theorist). The teacher asks how to apply the zone of proximal development in a large class, then asks for a step plan. The theorist should answer concretely in Vygotsky's own concepts (more knowledgeable other, social origin, language), without a numbered list or generic teacher tips.",
       "outputLanguage": "nl",
       "values": {
         "theorist": "Lev Vygotsky"
@@ -12,6 +12,46 @@
         "Kunt u me gewoon een stappenplan geven?",
         "Ik heb 30 studenten — hoe weet ik waar hun zone ligt?",
         "Dat is een mooi idee, dank u."
+      ]
+    },
+    {
+      "id": "vygotsky-subtle-premise",
+      "description": "The book's known failure (p. 90): a subtle flawed premise on the boundary between theories, here Vygotsky framed as individual discovery with a teacher who stays out of it. Then a question about ChatGPT (anachronism, p. 96), and finally the book's step 3: stop the interview and run a CRAAP test. The theorist should correct the premise in his own terms, mark the ChatGPT answer as extrapolation, and do an honest CRAAP check without inventing sources or links.",
+      "outputLanguage": "nl",
+      "values": {
+        "theorist": "Lev Vygotsky"
+      },
+      "userTurns": [
+        "Bij u draait alles om de zone van naaste ontwikkeling. Dus kinderen leren het best als ze het zelf ontdekken, en de docent moet zich vooral terughouden, toch?",
+        "Dus groepjes laten werken zonder dat ik me ermee bemoei, is precies wat u bedoelt?",
+        "Hoe zou u ChatGPT in mijn klas gebruiken?",
+        "Stop het interview. Doe nu een CRAAP-test op uw antwoord over de zone van naaste ontwikkeling, met bronnen en links."
+      ]
+    },
+    {
+      "id": "piaget-reinforcement",
+      "description": "The book's own counter-example (p. 89): Piaget asked how reinforcement schedules drive cognitive development. Then a classroom question with technology for a primary class (fractions, as in the book's round 2) and a comparison with Vygotsky. The theorist should reject the behaviourist premise, answer in stage theory, and compare honestly.",
+      "outputLanguage": "nl",
+      "values": {
+        "theorist": "Jean Piaget"
+      },
+      "userTurns": [
+        "Meneer Piaget, hoe sturen beloningsschema's de cognitieve ontwikkeling van kinderen?",
+        "Ik geef breuken in groep 5. Welke app of activiteit past bij uw theorie?",
+        "Hoe verschilt uw theorie van die van Vygotsky?"
+      ]
+    },
+    {
+      "id": "skinner-constructivist-lesson",
+      "description": "A request that runs against the theory (p. 89, in reverse): Skinner asked to support a lesson where students construct their own meaning. Then badges and gamification, and the limits of the theory. Skinner should not adopt the constructivist frame, should reason from reinforcement and his teaching machines while marking modern apps as extrapolation, and should name honest limits.",
+      "outputLanguage": "nl",
+      "values": {
+        "theorist": "B.F. Skinner"
+      },
+      "userTurns": [
+        "Meneer Skinner, hoe gebruik ik uw theorie om leerlingen in een onderzoeksles hun eigen betekenis te laten construeren?",
+        "Wat vindt u van apps met punten en badges?",
+        "Wat zijn de grenzen van uw theorie?"
       ]
     }
   ]

@@ -42,6 +42,8 @@ export interface ReportRow {
   promptWords: number;
   /** How many runs the scores are the mean of (default 1). */
   runs?: number;
+  /** Runs the judge returned no usable verdict for; the means leave them out. */
+  notJudgedRuns?: number;
   /** Lowest and highest run average, when there was more than one run. */
   spread?: [number, number];
   /** Hard checks that failed in at least one run. */
@@ -166,6 +168,12 @@ const LIST_OR_HEADING = /^\s*(?:[-*•]\s|\d+[.)]\s|#{1,6}\s|\*\*[^*\n]+:\*\*)/m
  * on a 118-word turn without lists, and "severalQuestions" on turns with one
  * question: what can be counted is counted.
  */
+/**
+ * Output budget per judge attempt. Meting g (2026-11-04): with long transcripts and six
+ * hard checks, 1024 tokens cut the verdict off in 3 of 12 runs.
+ */
+export const JUDGE_MAX_TOKENS = [2048, 4096] as const;
+
 export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
   severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
@@ -271,8 +279,13 @@ export function buildReportMarkdown(input: ReportInput): string {
     "Model",
     "Prompt words",
   ];
-  const runsCell = (r: ReportRow) =>
-    r.spread ? `${r.runs ?? 1} (${r.spread[0].toFixed(2)}–${r.spread[1].toFixed(2)})` : String(r.runs ?? 1);
+  const runsCell = (r: ReportRow) => {
+    const notes = [
+      ...(r.spread ? [`${r.spread[0].toFixed(2)}–${r.spread[1].toFixed(2)}`] : []),
+      ...(r.notJudgedRuns ? [`${r.notJudgedRuns} not judged`] : []),
+    ];
+    return notes.length ? `${r.runs ?? 1} (${notes.join("; ")})` : String(r.runs ?? 1);
+  };
   const checksCell = (r: ReportRow) => (r.failedChecks?.length ? r.failedChecks.join(", ") : "—");
   const sep = header.map(() => "---");
 

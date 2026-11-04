@@ -11,6 +11,7 @@ import { THINK_PAIR_SHARE_PROMPT } from "./think-pair-share.prompt";
 import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
+import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
@@ -37,6 +38,7 @@ const ALL: PromptDef[] = [
   SOCRATIC_PARTNER_PROMPT,
   BLOOM_BY_DESIGN_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
+  DIALOGIC_ENCOUNTERS_PROMPT_V2,
   PEER_TUTORING_PROMPT,
   SCAFFOLDING_FEEDBACK_PROMPT,
   STAGE_ASSESSMENT_PROMPT,
