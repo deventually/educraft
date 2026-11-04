@@ -8,12 +8,15 @@ import {
   CRITERION_STATUSES,
   EVIDENCE_KINDS,
   type Criterion,
+  type DossierData,
   type EvidenceItem,
 } from "~/lib/portfolio/types";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
+import { CoachPanel } from "~/components/portfolio/CoachPanel";
+import { resolveModelInfo } from "~/lib/ai/models";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
@@ -40,7 +43,25 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     chapter: d.chapters.find((ch) => ch.outcomeId === outcome.id)?.text ?? "",
     maxWords: d.framework.requirements.maxWords,
     evidenceFull: d.evidence.length >= LIMITS.evidence,
+    confirmed: d.framework.confirmedAt !== undefined,
+    coachMode: d.coachMode,
+    showDraftNotice: d.coachMode === "draft" && d.draftNoticeSeenAt === undefined,
+    withEvidence: outcome.criteria
+      .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id)))
+      .map((c) => c.id),
+    stored: storedReview(d.reviews?.[outcome.id]),
   };
+}
+
+function storedReview(r: NonNullable<DossierData["reviews"]>[string] | undefined) {
+  if (!r) return undefined;
+  let modelName = r.model;
+  try {
+    modelName = resolveModelInfo(r.model).displayName;
+  } catch {
+    // A model that left the catalog keeps its id as its name.
+  }
+  return { ...r, modelName };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -54,14 +75,48 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
   const to = t.portfolio.outcome;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
-    result: (r) =>
-      !r
-        ? null
-        : r.ok
-          ? { variant: "success", message: t.portfolio.toastSaved }
-          : { variant: "error", message: r.error },
+    pending: (fd) => {
+      const intent = String(fd?.get("intent") ?? "");
+      if (intent === "review") return { variant: "pending", message: t.portfolio.coach.pending };
+      if (intent.startsWith("draft:"))
+        return { variant: "pending", message: t.portfolio.draft.pending };
+      return { variant: "pending", message: t.toast.saving };
+    },
+    result: (r) => {
+      if (!r) return null;
+      if (!r.ok) return { variant: "error", message: r.error };
+      const message =
+        r.intent === "review"
+          ? t.portfolio.coach.done
+          : r.intent === "draft"
+            ? t.portfolio.draft.done
+            : t.portfolio.toastSaved;
+      return { variant: "success", message };
+    },
   });
-  const { id, outcome, status, evidence, unlinked, chapter, maxWords, evidenceFull } = loaderData;
+  const {
+    id,
+    outcome,
+    status,
+    evidence,
+    unlinked,
+    chapter,
+    maxWords,
+    evidenceFull,
+    confirmed,
+    coachMode,
+    showDraftNotice,
+    withEvidence,
+    stored,
+  } = loaderData;
+  const drafts =
+    coachMode === "draft" && confirmed
+      ? outcome.criteria.map((c, i) => ({
+          criterionId: c.id,
+          n: i + 1,
+          hasEvidence: withEvidence.includes(c.id),
+        }))
+      : undefined;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -172,10 +227,38 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
         <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
           {to.chapterTitle}
         </h2>
+        {showDraftNotice && (
+          <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm text-slate-800">{t.portfolio.draft.notice}</p>
+            <Form method="post" className="mt-2">
+              <input type="hidden" name="intent" value="dismissDraftNotice" />
+              <Button type="submit" variant="secondary" size="sm">
+                {t.portfolio.draft.noticeOk}
+              </Button>
+            </Form>
+          </div>
+        )}
         <div className="mt-3">
-          <ChapterEditor outcomeId={outcome.id} defaultValue={chapter} maxWords={maxWords} />
+          {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}
+          <ChapterEditor
+            key={`${chapter.length}:${chapter.slice(-40)}`}
+            outcomeId={outcome.id}
+            defaultValue={chapter}
+            maxWords={maxWords}
+            drafts={drafts}
+          />
         </div>
       </section>
+
+      <CoachPanel
+        dossierId={id}
+        outcomeId={outcome.id}
+        criteria={outcome.criteria}
+        status={status}
+        confirmed={confirmed}
+        hasChapter={chapter.trim().length > 0}
+        stored={stored}
+      />
     </div>
   );
 }

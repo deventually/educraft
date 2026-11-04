@@ -303,3 +303,24 @@ describe("applyIntent — absent optional fields", () => {
     expect(d.framework.outcomes[0].requiredEvidence).toEqual([]);
   });
 });
+
+describe("applyIntent — coach settings", () => {
+  it("switches between coaching and drafting, the teacher's choice", () => {
+    const d = ok(applyIntent(sampleDossier(), fd({ intent: "coachMode", mode: "draft" }), ctx));
+    expect(d.coachMode).toBe("draft");
+    expect(ok(applyIntent(d, fd({ intent: "coachMode", mode: "coach" }), ctx)).coachMode).toBe(
+      "coach",
+    );
+    expect(applyIntent(d, fd({ intent: "coachMode", mode: "auto" }), ctx)).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+  });
+
+  it("remembers the first time the draft notice was dismissed", () => {
+    const d = ok(applyIntent(sampleDossier(), fd({ intent: "dismissDraftNotice" }), ctx));
+    expect(d.draftNoticeSeenAt).toBe(1_000);
+    const again = ok(applyIntent(d, fd({ intent: "dismissDraftNotice" }), { ...ctx, now: 5_000 }));
+    expect(again.draftNoticeSeenAt).toBe(1_000);
+  });
+});

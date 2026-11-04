@@ -33,6 +33,9 @@ function overviewData(d = sampleDossier()) {
     findings: requirementFindings(d),
     next: nextStep(d),
     references: d.references,
+    coachMode: d.coachMode,
+    aiUsed: d.aiLog.length > 0,
+    aiRequired: !!d.framework.requirements.aiDisclosureRequired,
   };
 }
 
@@ -48,6 +51,11 @@ function outcomeData(d = sampleDossier()) {
     chapter: d.chapters[0].text,
     maxWords: 100,
     evidenceFull: false,
+    confirmed: true,
+    coachMode: "coach",
+    showDraftNotice: false,
+    withEvidence: [C1],
+    stored: undefined as unknown,
   };
 }
 
@@ -92,10 +100,11 @@ describe("Portfolio overview", () => {
       screen.getByText(/"De les sluit aan bij de beginsituatie." heeft nog geen bewijs/),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Bron (APA)")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Download als Word-bestand" })).toHaveAttribute(
-      "href",
-      `/portfolio/${ID}/export`,
-    );
+    const exportButton = screen.getByRole("button", { name: "Download als Word-bestand" });
+    expect(exportButton.closest("form")).toHaveAttribute("action", `/portfolio/${ID}/export`);
+    // No AI used yet: no disclosure checkbox.
+    expect(screen.queryByRole("checkbox", { name: /verantwoording/ })).toBeNull();
+    expect(screen.getByRole("radio", { name: /Alleen feedback/ })).toBeChecked();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -168,5 +177,95 @@ describe("Portfolio outcome page", () => {
     expect(
       screen.getByText("3 woorden; het hele verslag mag 100 woorden hebben"),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Portfolio overview — AI disclosure in the export", () => {
+  it("offers the disclosure once the coach was used, ticked when the form asks for it", async () => {
+    const { container } = renderRoute(PortfolioOverview, {
+      ...overviewData(),
+      aiUsed: true,
+      aiRequired: true,
+    });
+    expect(
+      screen.getByRole("checkbox", { name: /verantwoording van het AI-gebruik/ }),
+    ).toBeChecked();
+    expect(
+      screen.getByText("Je formulier vraagt om een verantwoording van AI-gebruik."),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio outcome page — coach", () => {
+  const review = {
+    at: Date.UTC(2026, 10, 4),
+    model: "claude-sonnet-5-5",
+    modelName: "Claude Sonnet 5.5",
+    review: {
+      overall: "Een helder begin; de beginsituatie ontbreekt nog.",
+      criteria: [
+        {
+          criterionId: C1,
+          verdict: "shown",
+          quote: "Mijn les begon met een vraag.",
+          strengthen: [],
+          evidenceNeeded: [],
+        },
+        {
+          criterionId: C2,
+          verdict: "partial",
+          quoteUnverified: true,
+          gap: "Je noemt de beginsituatie niet.",
+          strengthen: ["Beschrijf wat de studenten al wisten."],
+          evidenceNeeded: ["Opname van de les"],
+        },
+      ],
+    },
+  };
+
+  it("asks to confirm the framework before the coach can run", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false });
+    expect(screen.queryByRole("button", { name: "Laat beoordelen" })).toBeNull();
+    expect(screen.getByText(/Bevestig dat eerst/)).toBeInTheDocument();
+  });
+
+  it("runs on request and shows the advice per criterion, with the teacher's own mark", async () => {
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), stored: review });
+    expect(screen.getByRole("button", { name: "Opnieuw laten beoordelen" })).toBeEnabled();
+    expect(screen.getByText(/Beoordeeld op .* met Claude Sonnet 5.5/)).toBeInTheDocument();
+    expect(screen.getByText("Aangetoond volgens de coach")).toBeInTheDocument();
+    expect(screen.getByText("Deels aangetoond")).toBeInTheDocument();
+    expect(screen.getByText(/niet letterlijk in je hoofdstuk/)).toBeInTheDocument();
+    expect(screen.getByText("Beschrijf wat de studenten al wisten.")).toBeInTheDocument();
+    // C1 is already shown (teacher's status); C2 gets the one-click mark.
+    expect(
+      screen.getByText("Je hebt dit criterium als aangetoond gemarkeerd."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Markeer als aangetoond: 2" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no draft buttons in coaching mode", () => {
+    renderRoute(PortfolioOutcome, outcomeData());
+    expect(screen.queryByRole("button", { name: /Stel een alinea op/ })).toBeNull();
+  });
+
+  it("in draft mode shows one neutral notice and a draft button per criterion with evidence", async () => {
+    const { container } = renderRoute(PortfolioOutcome, {
+      ...outcomeData(),
+      coachMode: "draft",
+      showDraftNotice: true,
+    });
+    expect(screen.getByText(/eigen regels hebben voor AI-gebruik/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Begrepen" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Stel een alinea op voor criterium 1" }),
+    ).toHaveAttribute("value", `draft:${C1}`);
+    expect(
+      screen.queryByRole("button", { name: "Stel een alinea op voor criterium 2" }),
+    ).toBeNull();
+    expect(screen.getByText(/Criterium 2: koppel eerst bewijs/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

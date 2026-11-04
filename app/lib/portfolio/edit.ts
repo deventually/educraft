@@ -46,6 +46,8 @@ function prune(d: DossierData): DossierData {
     criterionIds: e.criterionIds.filter((id) => known.has(id)),
   }));
   d.chapters = d.chapters.filter((ch) => outcomes.has(ch.outcomeId));
+  if (d.reviews)
+    d.reviews = Object.fromEntries(Object.entries(d.reviews).filter(([id]) => outcomes.has(id)));
   return d;
 }
 
