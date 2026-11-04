@@ -21,9 +21,9 @@ the [prompt pipeline](Architecture.md#the-prompt-pipeline).
 
 ---
 
-## Current tools (16)
+## Current tools (17)
 
-All 14 tools from the book plus two originals are shipped. *For* = who the tool speaks to
+All 14 tools from the book plus three originals are shipped. *For* = who the tool speaks to
 (`Tool.userType`): the teacher, or the learner through a tutor the teacher sets up.
 
 | # | Chapter | Tool (slug) | Mode | For |
@@ -44,6 +44,7 @@ All 14 tools from the book plus two originals are shipped. *For* = who the tool 
 | 14 | Oracle to Socratic (Appendix E.3) | Socratic Partner (`socratic-partner`) | chat | learner |
 | 15 | — (original) | Assess student work (`stage-assessment`, prompt `@v2`) | one-shot | teacher |
 | 16 | — (original, P24.2) | Create an assessment rubric (`rubric-builder`) | one-shot | teacher |
+| 17 | — (original, P24.4) | Prepare a lesson (`lesson-plan`) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later

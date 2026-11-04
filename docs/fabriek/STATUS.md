@@ -79,6 +79,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
+  contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
+  optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
+  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Meting volgt — PR open.
 - P24.2 Beoordelingsmodel maken (`rubric-builder`): uit leeruitkomst en opdracht een concept-rubric
   met waarneembare niveaus, punten, cesuur en knock-out, plus een zelfcheck; een geplakte rubric
   wordt eerst gecontroleerd. Bronnen: Brookhart (2013), Anderson & Krathwohl (2001). Zes
