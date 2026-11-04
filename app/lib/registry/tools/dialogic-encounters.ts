@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { DIALOGIC_ENCOUNTERS_PROMPT } from "~/lib/prompts/dialogic-encounters.prompt";
+import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "~/lib/prompts/dialogic-encounters@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 
 const CONTEXT = { nl: "Context", en: "Context" };
@@ -11,30 +11,39 @@ export const dialogicEncounters: Tool = {
   /** Book/technique name shown small under the task-first name. */
   subtitle: { nl: "Dialogische ontmoetingen (Dialogic Encounters)", en: "Dialogic Encounters" },
   tagline: {
-    nl: "Interview een leertheoricus en verken hoe hun perspectief onderwijs vormt.",
-    en: "Interview a learning theorist and explore how their perspective shapes teaching.",
+    nl: "Interview een leertheoreticus en ontdek wat diens theorie betekent voor je les.",
+    en: "Interview a learning theorist and find out what their theory means for your lesson.",
   },
   icon: "users-round",
   userType: "student",
   mode: "chat",
   theory: {
     name: {
-      nl: "Dialogische Leertheorie",
-      en: "Dialogic Learning Theory",
+      nl: "Dialogisch leren en rollenspel",
+      en: "Dialogic learning and role-play",
     },
     summary: {
-      nl: "Leer leertheorieën door role-play dialoog met de theoretici zelf. Ervaar hoe theoretische aannames onderwijsbeslissingen vormgeven.",
-      en: "Learn theories through role-play dialogue with theorists. Experience how theoretical assumptions shape instructional decisions.",
+      nl: "Een leertheorie wordt een ontwerpkeuze als je ziet welke aannames over leren erachter zitten. In een gesprek met de theoreticus vraag je door, vergelijk je en pas je toe op je eigen klas. Omdat de AI vloeiend en overtuigend klinkt, controleer je daarna twee antwoorden met de CRAAP-test.",
+      en: "A learning theory becomes a design choice once you see the assumptions about learning behind it. In a conversation with the theorist you ask follow-up questions, compare and apply it to your own class. Because the AI sounds fluent and convincing, you then check two answers with the CRAAP test.",
     },
-    keyCitations: ["Mercer & Howe (2012)", "Gee (2007)", "Kuhn (2010)"],
+    keyCitations: [
+      "Ertmer & Newby (2013)",
+      "Mercer & Howe (2012)",
+      "Gee (2007)",
+      "Reber & Schwarz (1999)",
+    ],
   },
   attribution: attribution({
     chapterTitle:
       "Dialogic Encounters with Learning Theorists: Using AI Role-Play to Teach Pre-Service Teachers",
-    authors: "Rebecca Clark-Stallkamp, and others",
-    sourcePages: "pp. 84–106",
+    authors: "Clark-Stallkamp, Berry, Cole & Lin",
+    sourcePages: "pp. 100–102",
     evaluatedWith: { nl: "Claude", en: "Claude" },
-    adapted: false,
+    adapted: true,
+    adaptation: {
+      nl: "Gebaseerd op het interview uit het boek (\"Tech Talk with a Theorist\"). In het boek plakt de student zelf een sjabloon in ChatGPT; hier zit dat sjabloon in de tool en kies je de theoreticus. We schrijven de lessen uit het hoofdstuk in de prompt: de theoreticus spreekt in zijn eigen begrippen en tijd, corrigeert een verkeerde aanname in je vraag (ook een subtiele, op de grens tussen theorieën), zegt het als hij over latere technologie doorredeneert, verzint geen bronnen, en doet een eerlijke CRAAP-test als je het interview stopt. Vertaald naar het Nederlands.",
+      en: "Based on the book's interview (\"Tech Talk with a Theorist\"). In the book the student pastes a template into ChatGPT; here the template is built into the tool and you choose the theorist. We write the chapter's lessons into the prompt: the theorist speaks in their own concepts and era, corrects a wrong assumption in your question (also a subtle one, on the boundary between theories), says so when extrapolating to later technology, invents no sources, and runs an honest CRAAP test when you stop the interview.",
+    },
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
@@ -138,36 +147,36 @@ export const dialogicEncounters: Tool = {
       id: "encounter",
       name: { nl: "Dialogische Ontmoeting", en: "Dialogic Encounter" },
       description: {
-        nl: "Rol-spel dialoog met een leertheoricus.",
-        en: "Role-play dialogue with a learning theorist.",
+        nl: "Een interview met een leertheoreticus, gespeeld door de AI.",
+        en: "An interview with a learning theorist, played by the AI.",
       },
-      systemPromptId: DIALOGIC_ENCOUNTERS_PROMPT.id,
+      systemPromptId: DIALOGIC_ENCOUNTERS_PROMPT_V2.id,
       output: {
         kind: "markdown",
         hint: {
-          nl: "Een dialoog waarin je de leertheorie verkendt.",
-          en: "A dialogue in which you explore the learning theory.",
+          nl: "Een interview waarin je de leertheorie verkent.",
+          en: "An interview in which you explore the learning theory.",
         },
       },
     },
   ],
   chat: {
     greeting: {
-      nl: "Welkom bij Dialogische Ontmoetingen! Je bent op het punt om een van de grote leertheorici te ontmoeten. Stel jezelf voor en stel je eerste vraag.",
-      en: "Welcome to Dialogic Encounters! You are about to meet one of the great learning theorists. Introduce yourself and ask your first question.",
+      nl: "Je gaat een grote leertheoreticus interviewen. Stel één vraag per keer en vraag door op de antwoorden. Het is een simulatie: trek na afloop twee antwoorden na in een betrouwbare bron.",
+      en: "You are about to interview a great learning theorist. Ask one question at a time and follow up on the answers. It is a simulation: afterwards, check two answers in a reliable source.",
     },
     starters: [
       {
-        nl: "Wat is het kernidee van jouw theorie?",
-        en: "What is the core idea of your theory?",
+        nl: "Wat is het kernidee van uw theorie?",
+        en: "What is the core idea behind your learning theory?",
       },
       {
-        nl: "Hoe zouden docenten jouw ideeën in het klaslokaal gebruiken?",
-        en: "How would teachers use your ideas in the classroom?",
+        nl: "Hoe leren leerlingen volgens uw theorie het best?",
+        en: "How do students best learn according to your theory?",
       },
       {
-        nl: "Wat zijn de sterke punten van je theorie?",
-        en: "What are the strengths of your theory?",
+        nl: "Welke activiteiten of technologie passen bij uw theorie?",
+        en: "What kind of classroom activities or technologies would support your theory?",
       },
     ],
     allowStop: true,

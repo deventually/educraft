@@ -19,6 +19,7 @@ import {
   tutorTurns,
   COUNTED_CHECKS,
   countedFailures,
+  JUDGE_MAX_TOKENS,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -308,6 +309,32 @@ describe("several runs per case", () => {
     expect(md).toContain("3 (1.50–2.50)");
     expect(md).toContain("Failed checks");
     expect(md).toContain("gaveAnswer");
+  });
+
+  it("says how many runs the judge could not score, instead of averaging silently", () => {
+    // Meting g: the judge returned no JSON in 3 of 12 runs; a 1-run mean read as a 3-run mean.
+    const md = buildReportMarkdown({
+      date: "2026-11-04",
+      rows: [
+        {
+          tool: "dialogic-encounters",
+          caseId: "piaget",
+          scores: { taskFidelity: 4 },
+          model: "m",
+          promptWords: 10,
+          runs: 3,
+          notJudgedRuns: 2,
+          spread: [3.8, 3.8],
+        },
+      ],
+    });
+    expect(md).toContain("3 (3.80–3.80; 2 not judged)");
+  });
+});
+
+describe("judge budget", () => {
+  it("retries the judge with more room before giving up", () => {
+    expect(JUDGE_MAX_TOKENS).toEqual([2048, 4096]);
   });
 });
 
