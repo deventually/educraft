@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Square, RotateCcw, Pencil } from "lucide-react";
+import { Link } from "react-router";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
 import { DynamicForm } from "./DynamicForm";
 import { useSandbox } from "~/lib/hooks/useSandbox";
@@ -296,6 +297,18 @@ export function ChatView({
             <Pencil className="size-3.5" aria-hidden />
             {t.chat.edit}
           </button>
+        )}
+
+        {tool.usesContextProfile && !contextProfile && (
+          <p className="mt-3 text-xs text-slate-600">
+            {t.chat.noProfileHint}{" "}
+            <Link
+              to="/context-profiles"
+              className="font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            >
+              {t.tool.noProfileAction}
+            </Link>
+          </p>
         )}
 
         <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">

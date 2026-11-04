@@ -74,6 +74,8 @@ export const nl = {
     english: "Engels",
     model: "Model",
     advanced: "Geavanceerd",
+    noProfileHint: "Nog geen onderwijscontext. Daarmee past het resultaat beter bij je les.",
+    noProfileAction: "Onderwijscontext instellen",
     reasoning: "Redeneren vóór antwoord",
     reasoningHint: "Uit = veel sneller. Aan = grondiger, maar trager.",
     generate: "Genereer",
@@ -110,6 +112,7 @@ export const nl = {
     inputPlaceholder: "Jouw bericht…",
     sandboxHint: "Vul dit één keer in. Daarna begint het gesprek.",
     setupHeading: "Voordat je begint",
+    noProfileHint: "Dit gesprek kent je onderwijscontext niet. Stel een standaardcontext in.",
     continue: "Doorgaan",
     yourSettings: "Jouw instellingen",
     edit: "Aanpassen",
@@ -239,7 +242,10 @@ export const nl = {
   },
   projects: {
     subtitle: "Je recent gegenereerde materialen.",
-    empty: "Nog niets gegenereerd. Kies een tool om te beginnen.",
+    emptyTitle: "Nog geen werk bewaard",
+    emptyBody:
+      "Alles wat je met een tool maakt, komt hier vanzelf te staan. Je kunt het teruglezen, kopiëren, exporteren en verwijderen.",
+    emptyAction: "Kies een tool",
     delete: "Verwijderen",
     deleteTitle: "Resultaat verwijderen?",
     deleteBody: "Dit resultaat wordt definitief verwijderd.",

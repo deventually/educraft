@@ -71,6 +71,8 @@ export const en: Messages = {
     english: "English",
     model: "Model",
     advanced: "Advanced",
+    noProfileHint: "No teaching context yet. With one, the result fits your teaching better.",
+    noProfileAction: "Set up teaching context",
     reasoning: "Reason before answering",
     reasoningHint: "Off is much faster. On is more thorough, but slower.",
     generate: "Generate",
@@ -107,6 +109,7 @@ export const en: Messages = {
     inputPlaceholder: "Your message…",
     sandboxHint: "Fill this in once. Then the conversation starts.",
     setupHeading: "Before you start",
+    noProfileHint: "This conversation doesn't know your teaching context. Set a default context.",
     continue: "Continue",
     yourSettings: "Your settings",
     edit: "Edit",
@@ -236,7 +239,10 @@ export const en: Messages = {
   },
   projects: {
     subtitle: "Your recently generated materials.",
-    empty: "Nothing generated yet. Choose a tool to get started.",
+    emptyTitle: "Nothing saved yet",
+    emptyBody:
+      "Everything you make with a tool appears here automatically. You can read it again, copy, export and delete it.",
+    emptyAction: "Choose a tool",
     delete: "Delete",
     deleteTitle: "Delete result?",
     deleteBody: "This result will be permanently deleted.",

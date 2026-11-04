@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { Link } from "react-router";
 import type { ContextProfile } from "~/lib/context/types";
 import type { OutputLanguage } from "~/lib/registry/types";
 import { pickableModels, type PickerModel } from "~/lib/ai/models";
@@ -63,6 +64,17 @@ export function ToolControls(props: Props) {
                 </option>
               ))}
             </Select>
+            {props.profiles.length === 0 && (
+              <p className="mt-1.5 text-xs text-slate-600">
+                {t.tool.noProfileHint}{" "}
+                <Link
+                  to="/context-profiles"
+                  className="font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                >
+                  {t.tool.noProfileAction}
+                </Link>
+              </p>
+            )}
           </div>
         )}
         <div>

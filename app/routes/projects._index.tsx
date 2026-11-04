@@ -1,5 +1,5 @@
 import { useActionData } from "react-router";
-import { Trash2 } from "lucide-react";
+import { FolderOpen, Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
 import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
 import { requireUser } from "~/server/auth.server";
@@ -7,6 +7,7 @@ import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
 import { Badge } from "~/components/ui";
+import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { useT, useLocale } from "~/lib/i18n/useT";
@@ -53,7 +54,12 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
       <p className="mt-2 text-slate-600">{t.projects.subtitle}</p>
 
       {generations.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">{t.projects.empty}</p>
+        <EmptyState
+          icon={<FolderOpen aria-hidden />}
+          title={t.projects.emptyTitle}
+          body={t.projects.emptyBody}
+          action={{ to: "/tools", label: t.projects.emptyAction }}
+        />
       ) : (
         <ul className="mt-6 space-y-3">
           {generations.map((g) => (
