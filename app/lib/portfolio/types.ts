@@ -87,6 +87,34 @@ export interface AiLogEntry {
   model: string;
 }
 
+export const VERDICTS = ["shown", "partial", "missing"] as const;
+export type Verdict = (typeof VERDICTS)[number];
+
+/** The coach's advice on one criterion. Advice only: it never sets a status. */
+export interface CriterionReview {
+  criterionId: string;
+  verdict: Verdict;
+  /** A span copied verbatim from the chapter (checked in code). */
+  quote?: string;
+  /** True when the model gave a quote that is not in the chapter: dropped, verdict lowered. */
+  quoteUnverified?: boolean;
+  gap?: string;
+  strengthen: string[];
+  evidenceNeeded: string[];
+}
+
+export interface CoachReview {
+  criteria: CriterionReview[];
+  overall: string;
+}
+
+/** The latest review of one outcome, kept so a page reload does not lose it. */
+export interface StoredReview {
+  at: number;
+  model: string;
+  review: CoachReview;
+}
+
 export interface DossierData {
   tracks: Track[];
   framework: Framework;
@@ -98,4 +126,6 @@ export interface DossierData {
   coachMode: "coach" | "draft";
   draftNoticeSeenAt?: number;
   aiLog: AiLogEntry[];
+  /** outcomeId → the latest coach review of that outcome. */
+  reviews?: Record<string, StoredReview>;
 }

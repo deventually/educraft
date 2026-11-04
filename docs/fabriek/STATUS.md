@@ -17,6 +17,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
+- **P25 PR B (#41) en de Word-export (#40) gemerged op 2026-11-04:** de werkplaats is te gebruiken
+  zonder AI, met export naar Word.
 - **P25 PR A (#39) gemerged op 2026-11-04:** het dossier en de opslag van de BDB/BKE-werkplaats;
   migratie 0011 gedraaid.
 - **V2 (P18) klaar en uitgerold op 2026-11-04:** PR's #17, #19, #21–#28; migraties 0009 en 0010 gedraaid; back-up `data/limeonit-voor-p18.db`; superbeheerder ingesteld.
@@ -59,8 +61,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in een aparte PR (gekozen 2026-11-04), na #35.
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
   open, wacht op Bastiaan.
-- P25 kortste pad, PR B (25.3: de schermen van de werkplaats, menu-item "BDB/BKE") — PR open. Daarna
-  PR C (coach). De Word-export (25.6) staat op `main`; PR B zet de knop op het overzicht.
+- P25 kortste pad, PR C (25.5: de coach, alinea's laten opstellen als keuze, AI-verantwoording in de
+  export, evals) — PR open. Daarna: eerste eval-run (Bastiaan, `npm run eval:coach`), dan 25.4
+  kader-extractie.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou

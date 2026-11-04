@@ -25,6 +25,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     findings: requirementFindings(d),
     next: nextStep(d),
     references: d.references,
+    coachMode: d.coachMode,
+    aiUsed: d.aiLog.length > 0,
+    aiRequired: !!d.framework.requirements.aiDisclosureRequired,
   };
 }
 
@@ -44,7 +47,18 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
           ? { variant: "success", message: t.portfolio.toastSaved }
           : { variant: "error", message: r.error },
   });
-  const { id, name, framework, progress, findings, next, references } = loaderData;
+  const {
+    id,
+    name,
+    framework,
+    progress,
+    findings,
+    next,
+    references,
+    coachMode,
+    aiUsed,
+    aiRequired,
+  } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
     const o = outcomes.get(outcomeId);
@@ -120,16 +134,44 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         </Link>
       </p>
 
-      {/* Word export (25.6): a plain download link, works without JS. */}
-      <p className="mt-2">
-        <a
-          href={`/portfolio/${id}/export`}
-          download
-          className="text-sm font-medium text-violet-700 underline underline-offset-2"
-        >
+      {/* Word export (25.6): a plain GET form, works without JS. */}
+      <form
+        method="get"
+        action={`/portfolio/${id}/export`}
+        className="mt-4 flex flex-wrap items-center gap-3"
+        aria-label={t.portfolio.exportTitle}
+      >
+        {aiUsed && (
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" name="ai" value="1" defaultChecked={aiRequired} />
+            {t.portfolio.exportAi}
+          </label>
+        )}
+        <Button type="submit" variant="secondary" size="sm">
           {t.portfolio.exportWord}
-        </a>
-      </p>
+        </Button>
+        {aiUsed && aiRequired && (
+          <p className="w-full text-sm text-slate-600">{t.portfolio.exportAiRequired}</p>
+        )}
+      </form>
+
+      <Form method="post" className="mt-6">
+        <input type="hidden" name="intent" value="coachMode" />
+        <fieldset>
+          <legend className="text-sm font-medium text-slate-900">{t.portfolio.mode.legend}</legend>
+          <div className="mt-2 space-y-1">
+            {(["coach", "draft"] as const).map((mode) => (
+              <label key={mode} className="flex items-center gap-2 text-sm text-slate-700">
+                <input type="radio" name="mode" value={mode} defaultChecked={coachMode === mode} />
+                {t.portfolio.mode[mode]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <Button type="submit" variant="secondary" size="sm" className="mt-2">
+          {t.portfolio.mode.save}
+        </Button>
+      </Form>
 
       {framework.outcomes.length > 0 && (
         <section className="mt-8" aria-labelledby="outcomes-title">
