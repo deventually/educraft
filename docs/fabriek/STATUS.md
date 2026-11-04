@@ -59,9 +59,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in een aparte PR (gekozen 2026-11-04), na #35.
 - Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
   open, wacht op Bastiaan.
-- P25 kortste pad, PR C (25.5: de coach, alinea's laten opstellen als keuze, AI-verantwoording in de
-  export, evals) — PR open. Daarna: eerste eval-run (Bastiaan, `npm run eval:coach`), dan 25.4
-  kader-extractie.
+- P25: bij elke stap van het BDB/BKE-traject laten zien welke LimeOnIt-tool helpt en hoe
+  (verzoek Bastiaan 2026-11-04) — PR open. PR C (de coach) is gemerged (#44); daarna: eerste
+  eval-run (Bastiaan, `npm run eval:coach`), dan 25.4 kader-extractie.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou

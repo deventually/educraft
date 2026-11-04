@@ -36,6 +36,7 @@ function overviewData(d = sampleDossier()) {
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
+    nextTools: [] as { slug: string; name: string }[],
   };
 }
 
@@ -56,6 +57,8 @@ function outcomeData(d = sampleDossier()) {
     showDraftNotice: false,
     withEvidence: [C1],
     stored: undefined as unknown,
+    toolHints: {} as Record<string, { slug: string; name: string }[]>,
+    chapterTools: [] as { slug: string; name: string }[],
   };
 }
 
@@ -140,6 +143,44 @@ describe("Portfolio framework", () => {
       "Feedback van de werkplekbegeleider\nOpname van de les",
     );
     expect(screen.getByRole("button", { name: "Kader bevestigen" })).toBeEnabled();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio — which tool helps now", () => {
+  it("names a tool and how to use it for a criterion that still needs evidence", async () => {
+    const { container } = renderRoute(PortfolioOutcome, {
+      ...outcomeData(),
+      toolHints: { [C2]: [{ slug: "guided-reflection", name: "Les of cursus ontwerpen" }] },
+      chapterTools: [{ slug: "dialogic-encounters", name: "Dialogic Encounters" }],
+    });
+    const tool = screen.getByRole("link", { name: "Open Les of cursus ontwerpen" });
+    expect(tool).toHaveAttribute("href", "/tools/guided-reflection");
+    expect(screen.getByText(/Backward Design/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Toevoegen aan dossier/).length).toBe(1);
+    expect(screen.getByRole("link", { name: "Open Dialogic Encounters" })).toHaveAttribute(
+      "href",
+      "/tools/dialogic-encounters",
+    );
+    expect(screen.getByText(/geen bewijs en geen bron/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no tool help when nothing fits", () => {
+    renderRoute(PortfolioOutcome, outcomeData());
+    expect(screen.queryByText("Hulp uit LimeOnIt")).toBeNull();
+    expect(screen.queryByText("Denkhulp bij het schrijven")).toBeNull();
+  });
+
+  it("puts the fitting tool in the next-step card of the overview", async () => {
+    const { container } = renderRoute(PortfolioOverview, {
+      ...overviewData(),
+      nextTools: [{ slug: "authentic-assessment", name: "Authentiek toetsen" }],
+    });
+    expect(screen.getByRole("link", { name: "Open Authentiek toetsen" })).toHaveAttribute(
+      "href",
+      "/tools/authentic-assessment",
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

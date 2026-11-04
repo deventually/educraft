@@ -364,6 +364,37 @@ export const en: Messages = {
     backToList: "All dossiers",
     backToDossier: "Back to the dossier",
     nextStepTitle: "Next step",
+    tools: {
+      title: "Help from LimeOnIt",
+      chapterTitle: "Help with thinking while you write",
+      open: "Open {tool}",
+      saveHow:
+        "What you make in the tool then appears under Projects. Choose “Add to dossier” there and link it to the criterion here.",
+      thinkHow: "A conversation helps you think, but it is neither evidence nor a source.",
+      how: {
+        "guided-reflection":
+          "Design your lesson backward from the learning outcomes (Backward Design). The lesson design shows your preparation.",
+        "cognitive-architect":
+          "Work out a learning activity step by step following Gagné and Rosenshine. This shows the structure and the methods.",
+        "arcs-reactor":
+          "Describe where your students' motivation falters and get concrete interventions based on the ARCS model.",
+        "bloom-by-design":
+          "Choose a digital tool that fits your learning goals, and justify that choice.",
+        contextualization:
+          "Analyse whether your learning goals, methods and assessment fit together. The analysis shows how your teaching fits the whole.",
+        "authentic-assessment":
+          "Design a practice-oriented assessment with an analytic rubric. The assessment and rubric show your test design.",
+        "stage-assessment":
+          "Get a draft assessment of student work against your own rubric. You decide; your final assessment is the evidence.",
+        "forum-autograder":
+          "Assess an online discussion for social, cognitive and teaching presence. This shows how you guide the interaction.",
+        "dialogic-encounters":
+          "Explore in a conversation with a learning theorist how to ground your choices in theory.",
+        "peer-tutoring": "Evaluate a source critically before you use it in your chapter.",
+        "socratic-partner":
+          "Let questions challenge you to put your own development into clear words.",
+      },
+    },
     nextStep: {
       buildFramework: "Fill in your institution's framework.",
       confirmFramework: "Check the framework and confirm it.",

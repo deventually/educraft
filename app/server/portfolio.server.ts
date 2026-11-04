@@ -11,6 +11,8 @@ import { LIMITS } from "~/lib/portfolio/schema";
 import { draftParagraph, reviewOutcome } from "./portfolioCoach.server";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { getAvailableTools } from "./availability.server";
+import { loc } from "~/lib/i18n/localized";
 
 export async function requirePortfolioUser(request: Request): Promise<User> {
   return requireRole(request, "teacher", "admin");
@@ -24,6 +26,16 @@ export async function loadDossier(
   const dossier = id ? await getDossier(user.id, id) : null;
   if (!dossier) throw new Response("Not Found", { status: 404 });
   return { user, dossier };
+}
+
+/** Slug → display name of every tool this user may open, in the request's locale. */
+export async function availableToolNames(
+  request: Request,
+  user: User,
+): Promise<Map<string, string>> {
+  const locale = getLocale(request);
+  const tools = await getAvailableTools(user);
+  return new Map(tools.map((t) => [t.slug, loc(t.name, locale)]));
 }
 
 export type PortfolioActionResult = { ok: true; intent: string } | { ok: false; error: string };
