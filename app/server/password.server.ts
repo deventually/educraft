@@ -46,3 +46,11 @@ export function verifyPassword(password: string, stored: string): boolean {
     return false;
   }
 }
+
+/**
+ * `passwordHash` of an account that has no usable password yet (P18.7): created by the
+ * super admin with a set-password link, until the user opens it. A record that
+ * `verifyPassword` always rejects (it is not a three-part `scrypt:…` record), so no
+ * typed password can ever log in to it.
+ */
+export const NO_PASSWORD = "none";

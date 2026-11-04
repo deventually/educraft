@@ -834,3 +834,366 @@ describe("admin.users action — owner (P18.6)", () => {
     expect(data.ownerId).toBeNull();
   });
 });
+
+describe("admin.users action — owner accounts (P18.7)", () => {
+  async function mkUser(name: string, role: "teacher" | "admin", email = `${name}@example.com`) {
+    return users.createUser({ name, email, passwordHash: "scrypt:a:b", role });
+  }
+  type R = Record<string, unknown> & { error?: string };
+  const run = (fields: Record<string, string | string[]>) =>
+    invoke(usersRoute.action, post(fields)) as Promise<R>;
+  const create = (extra: Record<string, string> = {}) =>
+    run({
+      intent: "createAccount",
+      name: "New Person",
+      email: "newperson@example.com",
+      role: "teacher",
+      passwordMode: "link",
+      ...extra,
+    });
+  const password = () => import("~/server/password.server");
+
+  it("the owner creates an account with a set-password link; no password works before it is used", async () => {
+    await actAsOwner();
+    const res = await create();
+    expect(res.error).toBeUndefined();
+    const link = res.setPasswordLink as string;
+    expect(link).toMatch(/^http:\/\/localhost\/reset\/[A-Za-z0-9_-]{40,}$/);
+
+    const row = await users.getUserByEmail("newperson@example.com");
+    expect(row?.name).toBe("New Person");
+    expect(row?.role).toBe("teacher");
+    expect(row?.disabledAt).toBeNull();
+    const pw = await password();
+    expect(row?.passwordHash).toBe(pw.NO_PASSWORD);
+    for (const typed of ["", "none", "anything-at-all"]) {
+      expect(pw.verifyPassword(typed, row!.passwordHash)).toBe(false);
+    }
+
+    // The link is a 7-day single-use reset for exactly this account.
+    const token = link.split("/reset/")[1];
+    const reset = await users.getPasswordReset(token);
+    expect(reset?.userId).toBe(row!.id);
+    const days = (reset!.expiresAt.getTime() - Date.now()) / 86_400_000;
+    expect(days).toBeGreaterThan(6.9);
+    expect(days).toBeLessThanOrEqual(7.01);
+    // Nothing secret goes back to the client.
+    expect(JSON.stringify(res)).not.toContain("scrypt");
+    expect(JSON.stringify(res)).not.toContain("passwordHash");
+  });
+
+  it("the owner creates an account with an initial password; it is stored hashed", async () => {
+    await actAsOwner();
+    const secret = "initial-secret-123";
+    const res = await create({
+      name: "Pw Person",
+      email: "pwperson@example.com",
+      role: "admin",
+      passwordMode: "password",
+      password: secret,
+      confirm: secret,
+    });
+    expect(res.accountCreated).toBe(true);
+    expect(res.setPasswordLink).toBeUndefined();
+    // The plaintext never goes back to the client.
+    expect(JSON.stringify(res)).not.toContain(secret);
+
+    const row = await users.getUserByEmail("pwperson@example.com");
+    expect(row?.role).toBe("admin");
+    expect(row?.passwordHash.startsWith("scrypt:")).toBe(true);
+    expect(row?.passwordHash).not.toContain(secret);
+    const pw = await password();
+    expect(pw.verifyPassword(secret, row!.passwordHash)).toBe(true);
+    expect(pw.verifyPassword("initial-secret-124", row!.passwordHash)).toBe(false);
+    // No reset link was minted in this mode.
+    const loginAction = (await import("~/routes/login")).action;
+    const ok = await loginAction({
+      request: new Request("http://localhost/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ email: "pwperson@example.com", password: secret }).toString(),
+      }),
+    } as Parameters<typeof loginAction>[0]);
+    expect(ok instanceof Response).toBe(true);
+  });
+
+  it("refuses a taken email, a short password and an unknown role", async () => {
+    await actAsOwner();
+    await mkUser("Taken", "teacher", "taken-p187@example.com");
+    const before = (await users.listUsers()).length;
+
+    expect((await create({ email: "taken-p187@example.com" })).error).toBe("emailTaken");
+    expect(
+      (
+        await create({
+          email: "short@example.com",
+          passwordMode: "password",
+          password: "short",
+          confirm: "short",
+        })
+      ).error,
+    ).toBe("passwordTooShort");
+    expect(
+      (
+        await create({
+          email: "mismatch@example.com",
+          passwordMode: "password",
+          password: "long-enough-pw",
+          confirm: "long-enough-px",
+        })
+      ).error,
+    ).toBe("passwordMismatch");
+    expect((await create({ email: "role@example.com", role: "student" })).error).toBe(
+      "invalidRole",
+    );
+    expect((await create({ email: "role@example.com", role: "" })).error).toBe("invalidRole");
+    expect((await create({ email: "not-an-email" })).error).toBe("invalidEmail");
+    expect((await create({ email: "" })).error).toBe("invalidEmail");
+    expect((await create({ email: "noname@example.com", name: "   " })).error).toBe("nameRequired");
+    // An unknown mode is not silently treated as "link".
+    expect((await create({ email: "mode@example.com", passwordMode: "magic" })).error).toBe(
+      "unknown",
+    );
+
+    // Nothing was created by any of the refusals, and no reset link was minted.
+    expect((await users.listUsers()).length).toBe(before);
+    for (const e of ["short", "mismatch", "role", "noname", "mode"]) {
+      expect(await users.getUserByEmail(`${e}@example.com`)).toBeNull();
+    }
+  });
+
+  it("the owner sets a password: old cookies stop, the new password works", async () => {
+    await actAsOwner();
+    const auth = await import("~/server/auth.server");
+    const pw = await password();
+    const target = await users.createUser({
+      name: "SetPw",
+      email: "setpw@example.com",
+      passwordHash: pw.hashPassword("old-password-xx"),
+      role: "teacher",
+    });
+    const cookie = (
+      (await auth.createUserSession(target.id, "/")).headers.get("Set-Cookie") ?? ""
+    ).split(";")[0];
+    const asReq = () => new Request("http://localhost/", { headers: { Cookie: cookie } });
+    expect((await auth.getUser(asReq()))?.id).toBe(target.id);
+
+    const res = await run({
+      intent: "setPassword",
+      userId: target.id,
+      password: "brand-new-secret",
+      confirm: "brand-new-secret",
+    });
+    expect(res.passwordSet).toBe(true);
+    expect(JSON.stringify(res)).not.toContain("brand-new-secret");
+    const row = await users.getUserById(target.id);
+    expect(pw.verifyPassword("brand-new-secret", row!.passwordHash)).toBe(true);
+    expect(pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(false);
+    expect(await auth.getUser(asReq())).toBeNull(); // logged out everywhere
+  });
+
+  it("setting a password voids the user's open reset and set-password links", async () => {
+    await actAsOwner();
+    const created = await run({
+      intent: "createAccount",
+      name: "Link Then Set",
+      email: "linkthenset@example.com",
+      role: "teacher",
+      passwordMode: "link",
+    });
+    const token = String(created.setPasswordLink).split("/reset/")[1];
+    const target = await users.getUserByEmail("linkthenset@example.com");
+    const other = await users.createPasswordReset(target!.id);
+
+    const res = await run({
+      intent: "setPassword",
+      userId: target!.id,
+      password: "owner-chosen-secret",
+      confirm: "owner-chosen-secret",
+    });
+    expect(res.passwordSet).toBe(true);
+    // Whoever holds an older link can no longer overwrite the owner's password.
+    expect(await users.getPasswordReset(token)).toBeNull();
+    expect(await users.getPasswordReset(other.token)).toBeNull();
+  });
+
+  it("setPassword refuses a short or mismatching password and changes nothing", async () => {
+    await actAsOwner();
+    const pw = await password();
+    const target = await users.createUser({
+      name: "SetPwBad",
+      email: "setpwbad@example.com",
+      passwordHash: pw.hashPassword("old-password-xx"),
+      role: "teacher",
+    });
+    const v0 = (await users.getUserById(target.id))!.sessionVersion;
+    expect(
+      (await run({ intent: "setPassword", userId: target.id, password: "short", confirm: "short" }))
+        .error,
+    ).toBe("passwordTooShort");
+    expect(
+      (
+        await run({
+          intent: "setPassword",
+          userId: target.id,
+          password: "long-enough-pw",
+          confirm: "long-enough-px",
+        })
+      ).error,
+    ).toBe("passwordMismatch");
+    const row = await users.getUserById(target.id);
+    expect(pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(true);
+    expect(row!.sessionVersion).toBe(v0);
+  });
+
+  it("the owner deactivates and reactivates a user, never themself", async () => {
+    await actAsOwner();
+    const auth = await import("~/server/auth.server");
+    const target = await mkUser("Toggle", "teacher", "toggle@example.com");
+    const cookie = (
+      (await auth.createUserSession(target.id, "/")).headers.get("Set-Cookie") ?? ""
+    ).split(";")[0];
+    const asReq = () => new Request("http://localhost/", { headers: { Cookie: cookie } });
+
+    const off = await run({ intent: "deactivate", userId: target.id });
+    expect(off.error).toBeUndefined();
+    expect((await users.getUserById(target.id))?.disabledAt).toBeInstanceOf(Date);
+    expect(await auth.getUser(asReq())).toBeNull();
+
+    const on = await run({ intent: "reactivate", userId: target.id });
+    expect(on.error).toBeUndefined();
+    expect((await users.getUserById(target.id))?.disabledAt).toBeNull();
+    expect(await auth.getUser(asReq())).toBeNull(); // the old cookie stays dead
+
+    // Never themself.
+    const self = await run({ intent: "deactivate", userId: OWNER_ID });
+    expect(self.error).toBe("selfDeactivate");
+    expect((await run({ intent: "reactivate", userId: OWNER_ID })).error).toBe("selfDeactivate");
+    expect((await users.getUserById(OWNER_ID))?.disabledAt).toBeNull();
+    const selfPw = await run({
+      intent: "setPassword",
+      userId: OWNER_ID,
+      password: "brand-new-secret",
+      confirm: "brand-new-secret",
+    });
+    expect(selfPw.error).toBe("selfPassword");
+    expect((await users.getUserById(OWNER_ID))?.passwordHash).toBe("scrypt:x:y");
+  });
+
+  it("the owner may deactivate another admin and set an admin's password", async () => {
+    await actAsOwner();
+    const a = await mkUser("OtherAdmin", "admin", "otheradmin-p187@example.com");
+    expect((await run({ intent: "deactivate", userId: a.id })).error).toBeUndefined();
+    expect((await users.getUserById(a.id))?.disabledAt).toBeInstanceOf(Date);
+    const res = await run({
+      intent: "setPassword",
+      userId: a.id,
+      password: "brand-new-secret",
+      confirm: "brand-new-secret",
+    });
+    expect(res.passwordSet).toBe(true);
+    // Setting a password for a deactivated account does not reactivate it.
+    expect((await users.getUserById(a.id))?.disabledAt).toBeInstanceOf(Date);
+  });
+
+  it("a regular admin can do none of these (ownerOnly), and nothing changes", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(OWNER_ID);
+    const target = await mkUser("Untouched", "teacher", "untouched@example.com");
+    const before = await users.getUserById(target.id);
+    const count = (await users.listUsers()).length;
+
+    const attempts: Record<string, string>[] = [
+      {
+        intent: "createAccount",
+        name: "Sneaky",
+        email: "sneaky@example.com",
+        role: "admin",
+        passwordMode: "link",
+      },
+      {
+        intent: "createAccount",
+        name: "Sneaky",
+        email: "sneaky2@example.com",
+        role: "teacher",
+        passwordMode: "password",
+        password: "sneaky-password-1",
+        confirm: "sneaky-password-1",
+      },
+      {
+        intent: "setPassword",
+        userId: target.id,
+        password: "sneaky-password-1",
+        confirm: "sneaky-password-1",
+      },
+      { intent: "deactivate", userId: target.id },
+      { intent: "reactivate", userId: target.id },
+      // Not even on themselves or on the owner.
+      { intent: "deactivate", userId: "admin-1" },
+      {
+        intent: "setPassword",
+        userId: OWNER_ID,
+        password: "sneaky-password-1",
+        confirm: "sneaky-password-1",
+      },
+      { intent: "deactivate", userId: OWNER_ID },
+    ];
+    for (const fields of attempts) {
+      const res = await run(fields);
+      expect(res.error, JSON.stringify(fields)).toBe("ownerOnly");
+      expect(res.setPasswordLink).toBeUndefined();
+    }
+    expect(await users.getUserById(target.id)).toEqual(before);
+    expect((await users.listUsers()).length).toBe(count);
+    expect(await users.getUserByEmail("sneaky@example.com")).toBeNull();
+    expect((await users.getUserById(OWNER_ID))?.disabledAt).toBeNull();
+    expect((await users.getUserById(OWNER_ID))?.passwordHash).toBe("scrypt:x:y");
+  });
+
+  it("with no owner set, nobody may use the owner intents", async () => {
+    actAsRegularAdmin();
+    await settings.setOwnerUserId(null);
+    const target = await mkUser("NoOwnerT", "teacher", "noownert@example.com");
+    expect((await run({ intent: "deactivate", userId: target.id })).error).toBe("ownerOnly");
+    expect((await create({ email: "noowner@example.com" })).error).toBe("ownerOnly");
+  });
+
+  it("deactivate, reactivate and setPassword on a missing user are a 404; a legacy row is too", async () => {
+    await actAsOwner();
+    for (const intent of ["deactivate", "reactivate", "setPassword"]) {
+      await expect(
+        run({ intent, userId: "ghost", password: "brand-new-secret", confirm: "brand-new-secret" }),
+      ).rejects.toMatchObject({ status: 404 });
+    }
+    const legacy = await users.createUser({
+      name: "Old Student 2",
+      email: "old-student2@example.com",
+      passwordHash: "scrypt:x:y",
+      role: "student" as never,
+    });
+    await expect(run({ intent: "deactivate", userId: legacy.id })).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it("the loader reports which users are deactivated, and never a hash", async () => {
+    await actAsOwner();
+    const t = await mkUser("ListedOff", "teacher", "listedoff@example.com");
+    await users.setUserDisabled(t.id, true);
+    const data = (await invoke(usersRoute.loader, new Request("http://localhost/admin/users"))) as {
+      users: (Record<string, unknown> & { id: string; disabled: boolean })[];
+    };
+    expect(data.users.find((u) => u.id === t.id)?.disabled).toBe(true);
+    expect(data.users.find((u) => u.id === OWNER_ID)?.disabled).toBe(false);
+    expect(JSON.stringify(data)).not.toContain("scrypt");
+    expect(JSON.stringify(data)).not.toContain("passwordHash");
+  });
+
+  it("the owner can still mint a reset link for a deactivated user (it works once they are reactivated)", async () => {
+    await actAsOwner();
+    const t = await mkUser("ResetOff", "teacher", "resetoff@example.com");
+    await users.setUserDisabled(t.id, true);
+    const res = await run({ intent: "resetPassword", userId: t.id });
+    expect(res.resetLink).toMatch(/\/reset\//);
+  });
+});

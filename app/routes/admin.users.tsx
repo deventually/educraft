@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { Form, useActionData } from "react-router";
 import { z } from "zod";
-import { Copy, KeyRound, Trash2 } from "lucide-react";
+import { KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
 import type { Route } from "./+types/admin.users";
 import { isOwner, requireRole } from "~/server/auth.server";
+import { NO_PASSWORD, hashPassword } from "~/server/password.server";
 import {
   createInvite,
   createPasswordReset,
+  createUser,
   deleteUserCascade,
   getUserByEmail,
   getUserById,
@@ -15,8 +16,10 @@ import {
   listUsers,
   revokeInvite,
   setUserAssignedModels,
+  setUserDisabled,
   setUserRole,
   updateUserEmail,
+  updateUserPassword,
 } from "~/server/repositories/users.server";
 import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { ROLES, isRole } from "~/lib/registry/access";
@@ -27,6 +30,9 @@ import { Button, Input, Label, Select } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
+import { CreateAccountForm, type CreateAccountResult } from "~/components/admin/CreateAccountForm";
+import { LinkCard } from "~/components/admin/LinkCard";
+import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
 import { fullCatalog } from "~/server/modelCatalog.server";
 
 /**
@@ -43,6 +49,22 @@ async function manageTarget(actorIsOwner: boolean, userId: string) {
   const target = await getUserById(userId);
   if (!target) throw new Response("Not found", { status: 404 });
   return mayManage(actorIsOwner, target) ? target : null;
+}
+
+/** Shortest password the app accepts (same rule as the reset and invite pages). */
+const MIN_PASSWORD_LENGTH = 10;
+
+/** Days a set-password link for a freshly created account stays valid. */
+const SET_PASSWORD_LINK_DAYS = 7;
+
+/**
+ * The target of an owner-only account action (P18.7): 404 when missing or of a retired
+ * role (never acted on here, like `role`), `null` when it is the actor themself.
+ */
+async function ownerTarget(actorId: string, userId: string) {
+  const target = await getUserById(userId);
+  if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
+  return target.id === actorId ? null : target;
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -102,6 +124,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       email: u.email,
       role: u.role,
       createdAt: u.createdAt,
+      disabled: Boolean(u.disabledAt),
     })),
   };
 }
@@ -204,6 +227,66 @@ export async function action({ request }: Route.ActionArgs) {
     return { emailSet: true as const };
   }
 
+  // ── Owner-only accounts (P18.7) ─────────────────────────────────────────────
+  // The super admin creates accounts directly, sets passwords and (de)activates.
+  // Authority first: a regular admin gets `ownerOnly` for all of these, whatever the
+  // target (even themself), before anything is read or written. No password is ever
+  // returned to the client; the only secret that leaves is the single-use link.
+  if (
+    intent === "createAccount" ||
+    intent === "setPassword" ||
+    intent === "deactivate" ||
+    intent === "reactivate"
+  ) {
+    if (!actorIsOwner) return { error: "ownerOnly" as const };
+  }
+
+  if (intent === "createAccount") {
+    // Tagged so the page shows a refusal inside the create form, next to its fields.
+    const fail = <E extends string>(error: E) => ({ error, form: "create" as const });
+    const name = String(fd.get("name") ?? "").trim();
+    const email = String(fd.get("email") ?? "").trim();
+    const role = String(fd.get("role") ?? "");
+    const mode = String(fd.get("passwordMode") ?? "");
+    if (!name) return fail("nameRequired");
+    if (!z.string().email().safeParse(email).success) return fail("invalidEmail");
+    if (!isRole(role)) return fail("invalidRole");
+    if (mode !== "link" && mode !== "password") return fail("unknown");
+    let passwordHash = NO_PASSWORD;
+    if (mode === "password") {
+      const password = String(fd.get("password") ?? "");
+      const confirm = String(fd.get("confirm") ?? "");
+      if (password.length < MIN_PASSWORD_LENGTH) return fail("passwordTooShort");
+      if (password !== confirm) return fail("passwordMismatch");
+      passwordHash = hashPassword(password);
+    }
+    // Reject a collision up front so the unique index never throws.
+    if (await getUserByEmail(email)) return fail("emailTaken");
+    const created = await createUser({ name, email, passwordHash, role });
+    if (mode === "password") return { accountCreated: true as const };
+    const reset = await createPasswordReset(created.id, SET_PASSWORD_LINK_DAYS * 24);
+    return { setPasswordLink: `${new URL(request.url).origin}/reset/${reset.token}` };
+  }
+
+  if (intent === "setPassword") {
+    const target = await ownerTarget(admin.id, String(fd.get("userId") ?? ""));
+    if (!target) return { error: "selfPassword" as const };
+    const password = String(fd.get("password") ?? "");
+    const confirm = String(fd.get("confirm") ?? "");
+    if (password.length < MIN_PASSWORD_LENGTH) return { error: "passwordTooShort" as const };
+    if (password !== confirm) return { error: "passwordMismatch" as const };
+    // Bumps sessionVersion: the user is logged out on every device.
+    await updateUserPassword(target.id, hashPassword(password));
+    return { passwordSet: true as const };
+  }
+
+  if (intent === "deactivate" || intent === "reactivate") {
+    const target = await ownerTarget(admin.id, String(fd.get("userId") ?? ""));
+    if (!target) return { error: "selfDeactivate" as const };
+    await setUserDisabled(target.id, intent === "deactivate");
+    return { statusChanged: true as const };
+  }
+
   return { error: "unknown" as const };
 }
 
@@ -223,12 +306,25 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const userErrors: Record<string, string> = {
     selfDelete: t.admin.invites.selfDeleteError,
     selfReset: t.admin.invites.selfResetError,
+    selfPassword: t.admin.invites.selfPasswordError,
+    selfDeactivate: t.admin.invites.selfDeactivateError,
     ownerOnly: t.admin.invites.ownerOnlyError,
+    // The create form and the set-password dialog (P18.7).
+    nameRequired: t.auth.nameRequired,
+    invalidEmail: t.admin.invites.invalidEmailError,
+    emailTaken: t.admin.invites.emailTakenError,
+    invalidRole: t.admin.invites.invalidRoleError,
+    passwordTooShort: t.auth.passwordTooShort,
+    passwordMismatch: t.auth.passwordMismatch,
   };
-  const userError =
+  const actionError =
     actionData && "error" in actionData && typeof actionData.error === "string"
-      ? userErrors[actionData.error]
+      ? actionData.error
       : undefined;
+  // The create form shows its own refusals inline; the Users section shows the others.
+  const fromCreateForm = actionData && "form" in actionData && actionData.form === "create";
+  const createError = actionError && fromCreateForm ? userErrors[actionError] : undefined;
+  const userError = actionError && !fromCreateForm ? userErrors[actionError] : undefined;
   const autoSaveErrors: Record<string, string> = {
     invalidEmail: t.admin.invites.invalidEmailError,
     emailTaken: t.admin.invites.emailTakenError,
@@ -246,11 +342,24 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         ? null
         : "error" in d && typeof d.error === "string"
           ? { variant: "error", message: userErrors[d.error] ?? t.error.generic }
-          : { variant: "success", message: t.admin.console.saved },
+          : {
+              variant: "success",
+              message:
+                "setPasswordLink" in d || "accountCreated" in d
+                  ? t.admin.invites.accountCreated
+                  : "passwordSet" in d
+                    ? t.admin.invites.passwordSet
+                    : t.admin.console.saved,
+            },
   });
 
   return (
     <div className="space-y-10">
+      {/* ── Create an account (super admin only, P18.7) ──────────────────── */}
+      {viewerIsOwner && (
+        <CreateAccountForm result={actionData as CreateAccountResult} errorMessage={createError} />
+      )}
+
       {/* ── Mint a teacher invite ─────────────────────────────────────────── */}
       <section>
         <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
@@ -259,16 +368,12 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         <p className="mt-1 text-sm text-slate-600">{t.admin.invites.mintIntro}</p>
 
         {actionData && "link" in actionData && actionData.link ? (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h3 className="font-semibold text-slate-900">{t.admin.invites.linkHeading}</h3>
-            <p className="mt-1 text-sm text-slate-600">{t.admin.invites.linkHint}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-              <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-700">
-                {actionData.link}
-              </span>
-              <CopyButton url={actionData.link} label={t.admin.invites.copy} />
-            </div>
-          </div>
+          <LinkCard
+            heading={t.admin.invites.linkHeading}
+            hint={t.admin.invites.linkHint}
+            url={actionData.link}
+            copyLabel={t.admin.invites.copy}
+          />
         ) : (
           <Form method="post" className="mt-4 max-w-xl space-y-4">
             <input type="hidden" name="intent" value="mint" />
@@ -311,7 +416,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         {invites.length === 0 ? (
           <p className="mt-4 text-sm text-slate-500">{t.admin.invites.none}</p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t.admin.invites.listHeading}</caption>
               <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
@@ -388,19 +493,17 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         )}
 
         {actionData && "resetLink" in actionData && actionData.resetLink && (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h3 className="font-semibold text-slate-900">{t.admin.invites.resetLinkHeading}</h3>
-            <p className="mt-1 text-sm text-slate-600">{t.admin.invites.resetLinkHint}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-              <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-700">
-                {actionData.resetLink}
-              </span>
-              <CopyButton url={actionData.resetLink} label={t.admin.invites.copy} />
-            </div>
-          </div>
+          <LinkCard
+            heading={t.admin.invites.resetLinkHeading}
+            hint={t.admin.invites.resetLinkHint}
+            url={actionData.resetLink}
+            copyLabel={t.admin.invites.copy}
+          />
         )}
 
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* `relative`: the box is the containing block of the absolutely positioned
+            sr-only labels, so they scroll with the table instead of widening the page. */}
+        <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{t.admin.invites.usersHeading}</caption>
             <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
@@ -436,6 +539,11 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                       {u.id === ownerId && (
                         <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
                           {t.admin.invites.ownerBadge}
+                        </span>
+                      )}
+                      {u.disabled && (
+                        <span className="ml-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+                          {t.admin.invites.statusDisabled}
                         </span>
                       )}
                     </th>
@@ -501,6 +609,29 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                               {t.admin.invites.resetPassword}
                             </Button>
                           </Form>
+                          {viewerIsOwner && (
+                            <>
+                              <SetPasswordDialog userId={u.id} name={u.name} />
+                              <Form method="post">
+                                <input
+                                  type="hidden"
+                                  name="intent"
+                                  value={u.disabled ? "reactivate" : "deactivate"}
+                                />
+                                <input type="hidden" name="userId" value={u.id} />
+                                <Button type="submit" variant="secondary" size="sm">
+                                  {u.disabled ? (
+                                    <UserCheck className="size-3.5" aria-hidden />
+                                  ) : (
+                                    <UserX className="size-3.5" aria-hidden />
+                                  )}
+                                  {u.disabled
+                                    ? t.admin.invites.reactivate
+                                    : t.admin.invites.deactivate}
+                                </Button>
+                              </Form>
+                            </>
+                          )}
                           <ConfirmDialog
                             triggerLabel={t.admin.invites.deleteUser}
                             triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
@@ -550,24 +681,5 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         )}
       </section>
     </div>
-  );
-}
-
-function CopyButton({ url, label }: { url: string; label: string }) {
-  const [done, setDone] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        navigator.clipboard?.writeText(url).then(
-          () => setDone(true),
-          () => setDone(false),
-        );
-      }}
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-    >
-      <Copy className="size-3.5" aria-hidden />
-      {done ? "✓" : label}
-    </button>
   );
 }

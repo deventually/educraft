@@ -41,6 +41,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     role: input.role,
     sessionVersion: 0,
     allowedToolSlugs: null, // retired per-teacher gate (P18); the column goes in 18.8
+    disabledAt: null,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -81,17 +82,48 @@ export async function updateUserEmail(id: string, email: string | null): Promise
 }
 
 /**
- * Overwrite a user's password hash (self-service change or reset-link redemption)
- * and bump `sessionVersion` in the same statement, so every session minted before
- * the change is logged out. Callers re-issue the acting device's cookie afterwards.
- * This is the ONLY place `sessionVersion` changes — a plain login never does.
+ * Overwrite a user's password hash (self-service change, reset-link redemption or the
+ * owner setting one) and bump `sessionVersion` in the same statement, so every session
+ * minted before the change is logged out. Callers re-issue the acting device's cookie
+ * afterwards. Every open reset / set-password link of the user is voided in the same
+ * transaction: an older link must not overwrite the new password.
+ * Together with `setUserDisabled` (deactivation) this is one of the TWO places
+ * `sessionVersion` changes — a plain login never does.
  */
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
-  getDb()
-    .update(users)
-    .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
-    .where(eq(users.id, id))
-    .run();
+  getDb().transaction((tx) => {
+    tx.update(users)
+      .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
+      .where(eq(users.id, id))
+      .run();
+    tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+  });
+}
+
+/**
+ * Deactivate or reactivate an account (P18.7, super admin only; the guard lives in the
+ * route). Deactivating stamps `disabledAt` and bumps `sessionVersion` in the same
+ * statement, so every cookie minted before is dead for good — reactivating later does
+ * not bring them back. It is the second place the counter changes (see
+ * `updateUserPassword`). It also voids the account's open reset links. Deactivating an
+ * already deactivated account keeps the original timestamp and the counter; reactivating
+ * only clears `disabledAt`.
+ */
+export async function setUserDisabled(id: string, disabled: boolean): Promise<void> {
+  const db = getDb();
+  if (disabled) {
+    db.transaction((tx) => {
+      tx.update(users)
+        .set({ disabledAt: new Date(), sessionVersion: sql`${users.sessionVersion} + 1` })
+        .where(and(eq(users.id, id), isNull(users.disabledAt)))
+        .run();
+      // Like a role change: open reset / set-password links die with the deactivation,
+      // so reactivating later does not revive a link that may have leaked meanwhile.
+      tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+    });
+  } else {
+    db.update(users).set({ disabledAt: null }).where(eq(users.id, id)).run();
+  }
 }
 
 /**
