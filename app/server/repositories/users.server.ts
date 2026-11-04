@@ -9,6 +9,7 @@ import { getDb } from "../db.server";
 import {
   contextProfiles,
   portfolioDossiers,
+  rubrics,
   feedback,
   generations,
   instanceSettings,
@@ -214,6 +215,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
     tx.delete(portfolioDossiers).where(eq(portfolioDossiers.userId, id)).run();
+    tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
     // The teacher's own model set lives in instance_settings, not on the user row.
     tx.delete(instanceSettings)
       .where(eq(instanceSettings.key, `assignedModels:${id}`))
