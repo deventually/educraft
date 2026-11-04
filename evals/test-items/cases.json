@@ -1,0 +1,130 @@
+{
+  "cases": [
+    {
+      "id": "statistics-mixed-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo bachelor, year 1). Two outcomes (calculate and interpret = apply/understand; choose the right test = analyse/apply), mixed question types, 12 questions, teacher gives 30 points and 90 minutes. The blueprint must add up to exactly 12 questions and 30 points, both outcomes get at least two questions, apply-level questions use a new data situation. Every MC question has exactly one correct answer and distractors that are real student errors (e.g. using z instead of t, confusing the interval with the spread of the data).",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Toegepaste Psychologie — jaar 1",
+        "programme": "Toegepaste Psychologie",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Statistiek 1",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Toegepast psycholoog die onderzoek leest en zelf kleine metingen doet"
+      },
+      "values": {
+        "learningOutcomes": "De student berekent een betrouwbaarheidsinterval voor een gemiddelde en interpreteert het in de context van een onderzoeksvraag.\nDe student kiest bij een gegeven onderzoeksvraag en meetniveau de passende toets (t-toets voor één steekproef, t-toets voor twee onafhankelijke steekproeven, chikwadraattoets).",
+        "material": "Betrouwbaarheidsinterval voor een gemiddelde: x̄ ± t* · s/√n, met t* uit de t-verdeling met n − 1 vrijheidsgraden (bij 95% en n = 25 is t* = 2,064). Interpretatie: het interval geeft de waarden voor het populatiegemiddelde die met de steekproef verenigbaar zijn; het zegt niets over de spreiding van individuele scores. Een breder interval bij kleinere n of hogere betrouwbaarheid. Toetskeuze: t-toets voor één steekproef bij één gemiddelde tegen een vaste waarde (interval of ratio); t-toets voor twee onafhankelijke steekproeven bij twee groepen en een interval- of ratiovariabele; chikwadraattoets bij twee nominale variabelen. Veelgemaakte fouten: z* gebruiken in plaats van t*, delen door n in plaats van √n, het interval lezen als het bereik van de scores, een t-toets kiezen bij nominale data.",
+        "questionCount": "12",
+        "questionTypes": "mixed",
+        "conditions": "Totaal 30 punten, toetsduur 90 minuten. Rekenmachine toegestaan."
+      }
+    },
+    {
+      "id": "nursing-open-mbo4-eqf4",
+      "description": "Ordinary case at EQF 4 (mbo-4 nursing). Open questions only, 8 questions, no conditions given: points and duration must be proposed and marked as a proposal. Questions must be concrete and within reach for mbo-4 students, in plain Dutch, with an answer model per point. Apply-level questions use a short client case.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Verpleegkundige, niveau 4",
+        "programme": "Verpleegkundige",
+        "domain": "Zorg en welzijn",
+        "courseName": "Vitale functies",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Verpleegkundige op een verpleegafdeling in een ziekenhuis"
+      },
+      "values": {
+        "learningOutcomes": "De student meet de vitale functies (pols, bloeddruk, ademhaling, temperatuur, saturatie) en legt uit welke waarden afwijken van de normaalwaarden.\nDe student berekent een EWS-score bij een gegeven cliëntsituatie en noemt de actie die bij die score hoort volgens het afdelingsprotocol.",
+        "material": "Normaalwaarden volwassene: pols 60–100 slagen per minuut, ademhaling 12–20 per minuut, systolische bloeddruk 100–140 mmHg, temperatuur 36,5–37,5 °C, saturatie 95–100%. EWS (Early Warning Score) van de afdeling: ademhaling ≤8 = 3, 9–11 = 1, 12–20 = 0, 21–24 = 2, ≥25 = 3; saturatie ≤91 = 3, 92–93 = 2, 94–95 = 1, ≥96 = 0; systolisch ≤90 = 3, 91–100 = 2, 101–110 = 1, 111–219 = 0; pols ≤40 = 3, 41–50 = 1, 51–90 = 0, 91–110 = 1, 111–130 = 2, ≥131 = 3; temperatuur ≤35,0 = 3, 35,1–36,0 = 1, 36,1–38,0 = 0, 38,1–39,0 = 1, ≥39,1 = 2. Actie volgens protocol: score 0–2 elke dienst meten; score 3–4 binnen 1 uur opnieuw meten en de senior verpleegkundige informeren; score 5–6 de arts binnen 30 minuten waarschuwen; score 7 of hoger direct de arts en het spoedinterventieteam bellen.",
+        "questionCount": "8",
+        "questionTypes": "open",
+        "conditions": ""
+      }
+    },
+    {
+      "id": "research-methods-mc-en-eqf7",
+      "description": "Ordinary case at EQF 7 (master), in English. Multiple choice only, 10 questions, 10 points. Outcomes ask to evaluate a design (evaluate, via a case) and to identify threats to validity (analyse). MC at evaluate level must use a short study description. Exactly one correct answer per item, no clues, plausible distractors (e.g. confusing internal and external validity).",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "MSc Educational Sciences — year 1",
+        "programme": "Educational Sciences",
+        "domain": "Education",
+        "courseName": "Research Methods",
+        "eqf": 7,
+        "studyYear": 1,
+        "professionalContext": "Educational researcher or policy advisor who reads and designs studies"
+      },
+      "values": {
+        "learningOutcomes": "The student identifies threats to internal and external validity in a described study.\nThe student evaluates whether a described research design can answer a given causal research question.",
+        "material": "Internal validity: whether the observed effect can be attributed to the intervention. Threats: selection (non-equivalent groups), history (events during the study), maturation (natural change over time), testing (effect of a pretest), instrumentation (change in measurement), regression to the mean (extreme groups selected), attrition (differential drop-out). External validity: whether results generalise to other people, settings and times; threats include an unrepresentative sample and an artificial setting. Designs: a randomised controlled trial supports causal claims best because random assignment controls selection; a quasi-experiment with non-equivalent groups needs a pretest and control for selection; a one-group pretest–posttest design cannot rule out history, maturation and regression; a correlational design cannot establish the direction of an effect.",
+        "questionCount": "10",
+        "questionTypes": "multiple-choice",
+        "conditions": "10 points in total, one point per question. 45 minutes."
+      }
+    },
+    {
+      "id": "vague-outcome-known-error-eqf6",
+      "description": "Known error: of the three outcomes, the first has no observable verb ('kent de begrippen'). The blueprint must NOT include it, must put it under 'Niet opgenomen' with one rewritten outcome marked as a proposal, and build the blueprint from the other two outcomes with all 10 questions. Inventing questions on 'kent' counts as missing the known error.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 1",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Marketing 1",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Junior marketeer in een mkb-bedrijf"
+      },
+      "values": {
+        "learningOutcomes": "De student kent de begrippen van de marketingmix.\nDe student past de 4 P's toe op een gegeven product van een mkb-bedrijf.\nDe student berekent de break-evenafzet bij gegeven vaste kosten, prijs en variabele kosten per stuk.",
+        "material": "Marketingmix: de 4 P's zijn product (assortiment, kwaliteit, verpakking), prijs (prijsstrategie, kortingen), plaats (distributiekanalen, locatie) en promotie (reclame, social media, persoonlijke verkoop). Bij een mkb-bedrijf hangen de P's samen: een premium product vraagt een hogere prijs en selectieve distributie. Break-evenafzet = vaste kosten / (prijs − variabele kosten per stuk). Voorbeeld: vaste kosten € 12.000, prijs € 25, variabele kosten € 10, dus break-even bij 800 stuks. Veelgemaakte fouten: delen door de prijs in plaats van door de dekkingsbijdrage, en vaste en variabele kosten verwisselen.",
+        "questionCount": "10",
+        "questionTypes": "mixed",
+        "conditions": "20 punten."
+      }
+    },
+    {
+      "id": "create-with-mc-known-error-en-eqf6",
+      "description": "Known error, in English: the teacher asks for multiple choice only, but the second outcome asks students to design (create) a lesson plan. Multiple choice cannot measure create: the blueprint must leave that outcome out under 'Not included', say why and name a form that does measure it (e.g. a design assignment), and build all 8 questions on the first outcome only. Writing MC items that pretend to test 'designs' counts as missing the known error.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "Teacher education (bachelor) — year 2",
+        "programme": "Teacher Education Primary",
+        "domain": "Education",
+        "courseName": "Instruction and learning",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Primary school teacher"
+      },
+      "values": {
+        "learningOutcomes": "The student explains the principles of direct instruction (review, small steps, guided practice, checking for understanding, independent practice) using classroom examples.\nThe student designs a lesson plan for a primary school group that applies the principles of direct instruction.",
+        "material": "Rosenshine's principles of instruction as taught in this course: begin with a short review of previous learning; present new material in small steps with practice after each step; ask many questions and check the responses of all students; provide models and worked examples; guide student practice; check for understanding before moving on; obtain a high success rate (about 80%); provide scaffolds for difficult tasks; require and monitor independent practice; engage students in weekly and monthly review. Common misconceptions: direct instruction means lecturing without interaction; guided practice is the same as independent practice; checking for understanding means asking 'Does everyone understand?'.",
+        "questionCount": "8",
+        "questionTypes": "multiple-choice",
+        "conditions": ""
+      }
+    },
+    {
+      "id": "arithmetic-known-error-eqf5",
+      "description": "Known error: the teacher's conditions do not add up: 15 questions of 2 points each is 30, not the stated 40 points, and 15 open questions in 20 minutes is not feasible for an associate degree group. The blueprint must say literally that the teacher's figures do not add up and make a proposal that does (e.g. adjust points per question or the total), and flag the time problem. Silently using numbers that don't add up counts as missing the known error.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Associate degree Logistiek — jaar 1",
+        "programme": "Logistiek",
+        "domain": "Techniek en logistiek",
+        "courseName": "Voorraadbeheer",
+        "eqf": 5,
+        "studyYear": 1,
+        "professionalContext": "Teamleider in een distributiecentrum"
+      },
+      "values": {
+        "learningOutcomes": "De student berekent de economische bestelhoeveelheid (EOQ) en het bestelniveau bij gegeven vraag, kosten en levertijd.\nDe student verklaart het effect van een kortere levertijd op de veiligheidsvoorraad.",
+        "material": "EOQ = √(2 · D · S / H), met D de jaarvraag, S de bestelkosten per bestelling en H de voorraadkosten per stuk per jaar. Bestelniveau = vraag per dag × levertijd in dagen + veiligheidsvoorraad. Veiligheidsvoorraad = z × σ van de vraag per dag × √levertijd; een kortere levertijd verlaagt dus de benodigde veiligheidsvoorraad bij gelijke servicegraad. Voorbeeld: D = 3600, S = € 50, H = € 4, EOQ = 300 stuks. Veelgemaakte fouten: de wortel vergeten, S en H verwisselen, de levertijd in weken gebruiken met een vraag per dag.",
+        "questionCount": "15",
+        "questionTypes": "open",
+        "conditions": "15 vragen van elk 2 punten, totaal 40 punten. Toetsduur 20 minuten."
+      }
+    }
+  ]
+}

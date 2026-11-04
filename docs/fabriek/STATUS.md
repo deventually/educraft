@@ -75,6 +75,11 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.3 Toetsvragen en toetsmatrijs maken (`test-items`): in twee stappen een toetsmatrijs die
+  optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
+  matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
+  Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
+  bekende fout — PR open, meting volgt.
 - Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
   bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
   pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive

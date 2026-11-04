@@ -55,6 +55,7 @@ describe("task-first tool names (P19.1)", () => {
         "scaffolding-feedback",
         "socratic-partner",
         "stage-assessment",
+        "test-items",
         "think-pair-share",
       ].sort(),
     );
