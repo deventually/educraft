@@ -28,6 +28,23 @@ project) en in BESLUIT-2026-11-04-5 t/m -10. Kort:
   melding de eerste keer, verder geen waarschuwingen. De verantwoordelijkheid ligt bij de docent.
 - **Export naar Word** (.docx), omdat hogescholen één Word-bestand vragen (bijvoorbeeld voor de BKE).
 
+## Kortste pad (november 2026)
+
+De eerste gebruiker moet de werkplaats **deze maand** voor een eigen BDB kunnen gebruiken. Daarom
+gaat P23 voor op ander toolwerk, en bouwen we in deze volgorde, in **drie PR's** in plaats van zes:
+
+1. **PR A = 23.1 + 23.2:** domein en opslag (dossier, kader, bewijs, hoofdstukken, status,
+   voortgang). Zonder de AI-verantwoording; die schuift naar PR C.
+2. **PR B = 23.3:** de werkplaats-UI zonder AI, met het vijfde menu-item. Het kader wordt **met de
+   hand** ingevoerd (een BDB heeft ongeveer twintig criteria; een half uur werk). Daarna is het
+   dossier al bruikbaar als checklist en schrijfplek.
+3. **PR C = 23.5:** de portfoliocoach, met de AI-verantwoording uit 23.1 en de evals. Dit is de
+   eigenlijke winst.
+
+Later, in deze volgorde: 23.6 Word-export (nodig voor de BKE), 23.4 kader-extractie, daarna P24–P26.
+Ook later: de BKE-onderdelen, imports, een tweede hogeschool. Een oefentool voor de professionele
+dialoog (eindgesprek) is een kleine chattool in het register en kan, als er tijd is, na PR C.
+
 ## Vaste besluiten (bevestigd door Bastiaan, 4 november 2026)
 
 1. **Eigen deel van de app.** Route `/portfolio` (Engelse slug), UI-naam "BDB/BKE-werkplaats" /
