@@ -44,6 +44,9 @@ export async function action({ request }: Route.ActionArgs) {
   // A legacy row with a retired role (pre-P17 "student") may not enter; the same
   // generic message avoids listing which accounts exist.
   if (!isRole(row.role)) return { error: m.auth.loginFailed };
+  // A deactivated account (P18.7) is told so — but only after a correct password, so
+  // this message never reveals which addresses exist.
+  if (row.disabledAt) return { error: m.auth.accountDisabled };
   return createUserSession(row.id, "/");
 }
 

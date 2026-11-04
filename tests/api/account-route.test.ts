@@ -63,6 +63,61 @@ describe("account deletion (P17)", () => {
   });
 });
 
+describe("account deletion — the owner (P18.6)", () => {
+  it("refuses to delete the owner's account", async () => {
+    const settings = await import("~/server/repositories/settings.server");
+    const owner = await users.createUser({
+      id: "acc-owner",
+      name: "Owner O",
+      passwordHash: "scrypt:x:y",
+      role: "admin",
+    });
+    await settings.setOwnerUserId(owner.id);
+    actAs(owner.id, "admin");
+    const res = (await route.action({ request: deleteRequest() } as Parameters<
+      typeof route.action
+    >[0])) as { error?: string };
+    const m = i18n.getMessages(localeServer.getLocale(new Request("http://localhost/account")));
+    expect(res.error).toBe(m.account.ownerCannotDelete);
+    expect(await users.getUserById(owner.id)).not.toBeNull();
+    await settings.setOwnerUserId(null);
+  });
+
+  it("still lets a regular admin delete their own account", async () => {
+    const adm = await users.createUser({
+      id: "acc-regular-admin",
+      name: "Regular A",
+      passwordHash: "scrypt:x:y",
+      role: "admin",
+    });
+    actAs(adm.id, "admin");
+    await route.action({ request: deleteRequest() } as Parameters<typeof route.action>[0]);
+    expect(await users.getUserById(adm.id)).toBeNull();
+  });
+
+  it("the loader tells the page whether the viewer is the owner", async () => {
+    const settings = await import("~/server/repositories/settings.server");
+    const owner = await users.createUser({
+      id: "acc-owner-2",
+      name: "Owner Two",
+      passwordHash: "scrypt:x:y",
+      role: "admin",
+    });
+    await settings.setOwnerUserId(owner.id);
+    actAs(owner.id, "admin");
+    const asOwner = (await route.loader({
+      request: new Request("http://localhost/account"),
+    } as Parameters<typeof route.loader>[0])) as { isOwner: boolean };
+    expect(asOwner.isOwner).toBe(true);
+    actAs("someone-else", "admin");
+    const asOther = (await route.loader({
+      request: new Request("http://localhost/account"),
+    } as Parameters<typeof route.loader>[0])) as { isOwner: boolean };
+    expect(asOther.isOwner).toBe(false);
+    await settings.setOwnerUserId(null);
+  });
+});
+
 describe("account password change (P17)", () => {
   it("logs out other devices but keeps the changing device signed in", async () => {
     const auth = await import("~/server/auth.server");

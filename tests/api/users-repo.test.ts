@@ -130,6 +130,17 @@ describe("invites repository", () => {
     expect((await repo.getInvite(retired.token))?.usedByUserId ?? null).toBeNull();
   });
 
+  it("consumeInvite refuses an admin invite", async () => {
+    const { getDb } = await import("~/server/db.server");
+    const { invites } = await import("~/server/schema.server");
+    const { eq } = await import("drizzle-orm");
+    const db = getDb();
+    const adminInvite = await repo.createInvite({ role: "teacher" });
+    db.update(invites).set({ role: "admin" }).where(eq(invites.token, adminInvite.token)).run();
+    expect(await repo.consumeInvite(adminInvite.token, "u-admin")).toBeNull();
+    expect((await repo.getInvite(adminInvite.token))?.usedByUserId ?? null).toBeNull();
+  });
+
   it("returns null when consuming an unknown token", async () => {
     expect(await repo.consumeInvite("does-not-exist", "user-x")).toBeNull();
   });

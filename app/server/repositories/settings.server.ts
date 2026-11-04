@@ -128,3 +128,48 @@ export async function setEnabledSectors(ids: string[] | null): Promise<void> {
 export async function setEnabledDomains(ids: string[] | null): Promise<void> {
   return setInstanceList(ENABLED_DOMAINS_KEY, ids);
 }
+
+const OWNER_KEY = "ownerUserId";
+
+/**
+ * The super admin's user id (P18.6), or null when none is set. One owner per
+ * instance, stored as a JSON string. The id says nothing by itself: `isOwner`
+ * (auth.server) also demands that the user is currently an admin.
+ */
+export async function getOwnerUserId(): Promise<string | null> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, OWNER_KEY))
+    .get();
+  if (!row) return null;
+  try {
+    const parsed = JSON.parse(row.valueJson);
+    return typeof parsed === "string" && parsed ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Set the owner (an existing admin's id); `null` clears it (= no owner). */
+export async function setOwnerUserId(id: string | null): Promise<void> {
+  const db = getDb();
+  if (id === null) {
+    db.delete(instanceSettings).where(eq(instanceSettings.key, OWNER_KEY)).run();
+    return;
+  }
+  const valueJson = JSON.stringify(id);
+  const existing = db
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, OWNER_KEY))
+    .get();
+  if (existing) {
+    db.update(instanceSettings)
+      .set({ valueJson, updatedAt: new Date() })
+      .where(eq(instanceSettings.key, OWNER_KEY))
+      .run();
+  } else {
+    db.insert(instanceSettings).values({ key: OWNER_KEY, valueJson, updatedAt: new Date() }).run();
+  }
+}

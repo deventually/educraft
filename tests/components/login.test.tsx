@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import Login from "~/routes/login";
+import { getMessages } from "~/lib/i18n";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -34,6 +35,18 @@ describe("Login page", () => {
     await user.type(screen.getByLabelText(/wachtwoord|password/i), "wrongpassword");
     await user.click(screen.getByRole("button", { name: /inloggen|log in/i }));
     expect(await screen.findByText(/onjuiste e-mail of wachtwoord/i)).toBeInTheDocument();
+  });
+
+  it("shows the deactivated-account message (P18.7) as an alert, with no violations", async () => {
+    const user = userEvent.setup();
+    const nl = getMessages("nl").auth.accountDisabled;
+    const { container } = renderLogin(() => ({ error: nl }));
+    await user.type(screen.getByLabelText(/e-mail|email/i), "x@example.com");
+    await user.type(screen.getByLabelText(/wachtwoord|password/i), "correct-password");
+    await user.click(screen.getByRole("button", { name: /inloggen|log in/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/non-actief|deactivated/i);
+    expect(screen.getByRole("alert")).toHaveTextContent(nl);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("has no a11y violations", async () => {

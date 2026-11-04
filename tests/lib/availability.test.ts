@@ -60,22 +60,13 @@ describe("getAvailableTools — instance overrides", () => {
 });
 
 describe("getAvailableTools — no per-teacher gate (P18.2)", () => {
-  it("a teacher sees every instance-enabled tool; a stored allow-list is ignored", async () => {
+  it("a teacher sees every instance-enabled tool", async () => {
     const legacy = await users.createUser({
       name: "Legacy",
       email: "legacy@example.com",
       passwordHash: "x",
       role: "teacher",
     });
-    // The column survives until 18.8; set it directly (the setter is gone).
-    const { getDb } = await import("~/server/db.server");
-    const { users: usersTable } = await import("~/server/schema.server");
-    const { eq } = await import("drizzle-orm");
-    await getDb()
-      .update(usersTable)
-      .set({ allowedToolSlugs: JSON.stringify([STUDENT_TOOL]) })
-      .where(eq(usersTable.id, legacy.id));
-
     const slugs = (await availability.getAvailableTools({ id: legacy.id, role: "teacher" })).map(
       (t) => t.slug,
     );

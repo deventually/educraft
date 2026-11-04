@@ -12,6 +12,9 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const loaderData = {
   origin: "http://localhost",
   selfId: "admin-1",
+  // Default viewer: the owner (super admin). Tests for a regular admin override this.
+  isOwner: true,
+  ownerId: "admin-1",
   // A stale loader shape (with `tools`) must not make the form offer a restriction.
   tools: [
     { slug: "bloom-by-design", name: { nl: "Bloom by Design", en: "Bloom by Design" } },
@@ -62,9 +65,10 @@ const loaderData = {
 function renderRoute(
   action?: (args: { request: Request }) => unknown,
   extraUsers: (typeof loaderData.users)[number][] = [],
+  overrides: { isOwner?: boolean; ownerId?: string | null } = {},
 ) {
   const props = {
-    loaderData: { ...loaderData, users: [...loaderData.users, ...extraUsers] },
+    loaderData: { ...loaderData, ...overrides, users: [...loaderData.users, ...extraUsers] },
   } as unknown as ComponentProps<typeof AdminUsers>;
   const Stub = createRoutesStub([
     {
@@ -119,8 +123,9 @@ describe("Admin users", () => {
 
   it("offers a role change for other users but not for the signed-in admin", () => {
     renderRoute();
-    // The admin's own row shows no role <select>; only the teacher's does.
-    const selects = screen.getAllByRole("combobox");
+    // The admin's own row shows no role <select>; only the teacher's does. (The
+    // "create an account" form has its own role select, which is not a per-row one.)
+    const selects = screen.getAllByLabelText(/rol wijzigen|change role/i);
     expect(selects).toHaveLength(1);
   });
 
@@ -294,8 +299,432 @@ describe("Admin users", () => {
     );
   });
 
+  it("keeps each table's sr-only labels inside its own scroll box (no page scroll on a phone)", () => {
+    // An `sr-only` label is position:absolute. Without a positioned ancestor inside the
+    // `overflow-x-auto` box it escapes that box's clipping and widens the whole page
+    // (iPhone 13: a ~690px layout viewport, dialogs off-screen). The box itself must be
+    // the containing block.
+    const { container } = renderRoute();
+    const tables = container.querySelectorAll("table");
+    expect(tables.length).toBeGreaterThanOrEqual(2); // invites + users
+    for (const table of tables) {
+      const box = table.parentElement as HTMLElement;
+      expect(box.className).toMatch(/\boverflow-x-auto\b/);
+      expect(box.className).toMatch(/\brelative\b/);
+    }
+  });
+
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin users — super admin vs regular admin (P18.6)", () => {
+  const otherAdmin = {
+    id: "admin-2",
+    name: "Admin Two",
+    email: "two@x.nl",
+    role: "admin",
+    createdAt: new Date(),
+  };
+  const asRegular = { isOwner: false, ownerId: "admin-2" };
+
+  it("shows the role select only to the owner", () => {
+    const owner = renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-1" });
+    expect(owner.container.querySelector("#role-teacher-9")).not.toBeNull();
+    expect(owner.container.querySelector("#role-admin-2")).not.toBeNull();
+    owner.unmount();
+    renderRoute(undefined, [otherAdmin], asRegular);
+    expect(screen.queryAllByRole("combobox")).toHaveLength(0);
+    // The role is still readable as text.
+    expect(screen.getAllByText(/^(beheerder|admin)$/i).length).toBeGreaterThan(0);
+  });
+
+  it("hides admin-row actions from a regular admin", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    // Only the teacher row keeps reset, delete and the e-mail field.
+    expect(screen.getAllByRole("button", { name: /verwijderen|delete/i })).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toHaveLength(1);
+    const emailFields = screen.getAllByLabelText(/e-mailadres wijzigen|change email address/i);
+    expect(emailFields).toHaveLength(1);
+    expect(emailFields[0].getAttribute("id")).toBe("email-teacher-9");
+    // The admin's address is read-only text.
+    expect(screen.getByText("two@x.nl")).toBeInTheDocument();
+  });
+
+  it("gives the owner the actions on every other row, admins included", () => {
+    renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-1" });
+    expect(screen.getAllByRole("button", { name: /verwijderen|delete/i })).toHaveLength(2);
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord resetten|reset password/i }),
+    ).toHaveLength(2);
+  });
+
+  it("still lets a regular admin act on a teacher and manage teacher models", () => {
+    renderRoute(undefined, [], { isOwner: false, ownerId: null });
+    expect(screen.getByRole("button", { name: /verwijderen|delete/i })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Teacher One" })).toBeInTheDocument();
+  });
+
+  it("marks the owner with a badge, visible to a regular admin too", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    const row = screen.getByRole("row", { name: /Admin Two/ });
+    expect(within(row).getByText(/^(superbeheerder|super admin)$/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^(superbeheerder|super admin)$/i)).toHaveLength(1);
+  });
+
+  it("shows no owner badge when no owner is set", () => {
+    renderRoute(undefined, [otherAdmin], { isOwner: false, ownerId: null });
+    expect(screen.queryByText(/^(superbeheerder|super admin)$/i)).toBeNull();
+  });
+
+  it("tells a regular admin that only the super admin manages admins", () => {
+    renderRoute(undefined, [otherAdmin], asRegular);
+    expect(screen.getByText(/beheert ook beheerders|also manages admins/i)).toBeInTheDocument();
+  });
+
+  it("mentions in the invite intro that an invite never makes an admin", () => {
+    renderRoute(undefined, [], asRegular);
+    expect(screen.getByText(/nooit een beheerder|never makes an admin/i)).toBeTruthy();
+  });
+
+  it("shows the owner error as a toast and reverts when the server answers ownerOnly", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "ownerOnly" }));
+    const select = screen.getByLabelText(/rol wijzigen|change role/i) as HTMLSelectElement;
+    await user.selectOptions(select, "admin");
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /alleen de superbeheerder kan dit|only the super admin can do this/i,
+      ),
+    );
+    expect(select.value).toBe("teacher");
+  });
+
+  it("has no a11y violations for a regular admin and for the owner", async () => {
+    const regular = renderRoute(undefined, [otherAdmin], asRegular);
+    expect((await axe(regular.container, axeOpts)).violations).toEqual([]);
+    regular.unmount();
+    const owner = renderRoute(undefined, [otherAdmin], { isOwner: true, ownerId: "admin-2" });
+    expect((await axe(owner.container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin users — owner accounts (P18.7)", () => {
+  const dark = {
+    id: "teacher-off",
+    name: "Dark Teacher",
+    email: "dark@x.nl",
+    role: "teacher",
+    createdAt: new Date(),
+    disabled: true,
+  };
+  const darkAdmin = { ...dark, id: "admin-off", name: "Dark Admin", role: "admin" };
+  const asRegular = { isOwner: false, ownerId: "admin-2" };
+  const createHeading = /^(account aanmaken|create an account)$/i;
+
+  const createForm = () =>
+    screen.getByRole("heading", { name: createHeading }).closest("section") as HTMLElement;
+
+  it("shows the create form only to the owner", () => {
+    const owner = renderRoute();
+    expect(screen.getByRole("heading", { name: createHeading })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^naam$|^name$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^e-mailadres$|^email address$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^rol$|^role$/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }),
+    ).toBeInTheDocument();
+    owner.unmount();
+
+    renderRoute(undefined, [], asRegular);
+    expect(screen.queryByRole("heading", { name: createHeading })).toBeNull();
+    expect(screen.queryByLabelText(/^naam$|^name$/i)).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /^(account aanmaken|create account)$/i }),
+    ).toBeNull();
+  });
+
+  it("puts the create form above the invites", () => {
+    renderRoute();
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    const create = headings.findIndex((h) => createHeading.test(h ?? ""));
+    const invite = headings.findIndex((h) => /docent uitnodigen|invite a teacher/i.test(h ?? ""));
+    expect(create).toBeGreaterThanOrEqual(0);
+    expect(create).toBeLessThan(invite);
+  });
+
+  it("offers teacher and admin as the role of a new account", () => {
+    renderRoute();
+    const select = screen.getByLabelText(/^rol$|^role$/i) as HTMLSelectElement;
+    expect(Array.from(select.options).map((o) => o.value)).toEqual(["teacher", "admin"]);
+    expect(select.value).toBe("teacher");
+  });
+
+  it("shows the password fields only when 'initial password' is chosen", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    const link = screen.getByRole("radio", {
+      name: /link om zelf|link to choose/i,
+    }) as HTMLInputElement;
+    const own = screen.getByRole("radio", {
+      name: /beginwachtwoord|initial password/i,
+    }) as HTMLInputElement;
+    // The two ways form a labelled group, the link is the default.
+    expect(screen.getByRole("group", { name: /hoe krijgt|how does/i })).toBeInTheDocument();
+    expect(link.checked).toBe(true);
+    expect(own.checked).toBe(false);
+    expect(
+      within(createForm()).queryAllByLabelText(/wachtwoord|password/i, {
+        selector: "input[type=password]",
+      }),
+    ).toHaveLength(0);
+
+    await user.click(own);
+    const fields = within(createForm()).getAllByLabelText(/wachtwoord|password/i, {
+      selector: "input[type=password]",
+    });
+    expect(fields).toHaveLength(2);
+    for (const f of fields) {
+      expect(f).toHaveAttribute("autocomplete", "new-password");
+      expect(f).toBeRequired();
+    }
+
+    await user.click(link);
+    expect(
+      within(createForm()).queryAllByLabelText(/wachtwoord|password/i, {
+        selector: "input[type=password]",
+      }),
+    ).toHaveLength(0);
+  });
+
+  it("posts the new account as a link by default, with no password fields", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { setPasswordLink: "http://localhost/reset/tok-new" };
+    });
+    await user.type(screen.getByLabelText(/^naam$|^name$/i), "Nieuw Persoon");
+    await user.type(screen.getByLabelText(/^e-mailadres$|^email address$/i), "nieuw@x.nl");
+    await user.selectOptions(screen.getByLabelText(/^rol$|^role$/i), "admin");
+    await user.click(screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }));
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body?.get("intent")).toBe("createAccount");
+    expect(body?.get("name")).toBe("Nieuw Persoon");
+    expect(body?.get("email")).toBe("nieuw@x.nl");
+    expect(body?.get("role")).toBe("admin");
+    expect(body?.get("passwordMode")).toBe("link");
+    expect(body?.has("password")).toBe(false);
+  });
+
+  it("shows a copyable set-password link card after creating with a link", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ setPasswordLink: "http://localhost/reset/tok-new" }));
+    await user.type(screen.getByLabelText(/^naam$|^name$/i), "Nieuw Persoon");
+    await user.type(screen.getByLabelText(/^e-mailadres$|^email address$/i), "nieuw@x.nl");
+    await user.click(screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }));
+    expect(await screen.findByText("http://localhost/reset/tok-new")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /link om een wachtwoord te kiezen|link to choose a password/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/geef deze link zelf door|pass this link on yourself/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /kopiëren|copy/i })).toBeInTheDocument();
+  });
+
+  it("posts the initial password and confirmation, and shows no link", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { accountCreated: true };
+    });
+    await user.type(screen.getByLabelText(/^naam$|^name$/i), "Pw Persoon");
+    await user.type(screen.getByLabelText(/^e-mailadres$|^email address$/i), "pw@x.nl");
+    await user.click(screen.getByRole("radio", { name: /beginwachtwoord|initial password/i }));
+    const [pw, confirm] = within(createForm()).getAllByLabelText(/wachtwoord|password/i, {
+      selector: "input[type=password]",
+    });
+    await user.type(pw, "initial-secret-123");
+    await user.type(confirm, "initial-secret-123");
+    await user.click(screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }));
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body?.get("passwordMode")).toBe("password");
+    expect(body?.get("password")).toBe("initial-secret-123");
+    expect(body?.get("confirm")).toBe("initial-secret-123");
+    // One toast confirms; the password is not echoed anywhere on the page.
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(/aangemaakt|created/i),
+    );
+    expect(screen.queryByText("initial-secret-123")).toBeNull();
+    expect(screen.queryByText(/localhost\/reset/)).toBeNull();
+  });
+
+  it("shows a refusal of the create form as an error toast", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ error: "emailTaken" }));
+    await user.type(screen.getByLabelText(/^naam$|^name$/i), "Nieuw Persoon");
+    await user.type(screen.getByLabelText(/^e-mailadres$|^email address$/i), "taken@x.nl");
+    await user.click(screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(/al in gebruik|already in use/i),
+    );
+  });
+
+  it("marks a deactivated user, for a regular admin too", () => {
+    const owner = renderRoute(undefined, [dark]);
+    const ownerRow = screen.getByRole("row", { name: /Dark Teacher/ });
+    expect(within(ownerRow).getByText(/^(non-actief|deactivated)$/i)).toBeInTheDocument();
+    // An active user carries no badge.
+    const activeRow = screen.getByRole("row", { name: /Teacher T/ });
+    expect(within(activeRow).queryByText(/^(non-actief|deactivated)$/i)).toBeNull();
+    owner.unmount();
+
+    renderRoute(undefined, [dark], asRegular);
+    const regularRow = screen.getByRole("row", { name: /Dark Teacher/ });
+    expect(within(regularRow).getByText(/^(non-actief|deactivated)$/i)).toBeInTheDocument();
+  });
+
+  it("offers deactivate on an active user and reactivate on a deactivated one", () => {
+    renderRoute(undefined, [dark]);
+    const active = screen.getByRole("row", { name: /Teacher T/ });
+    expect(
+      within(active).getByRole("button", { name: /op non-actief zetten|deactivate/i }),
+    ).toBeInTheDocument();
+    expect(within(active).queryByRole("button", { name: /weer activeren|reactivate/i })).toBeNull();
+    const off = screen.getByRole("row", { name: /Dark Teacher/ });
+    expect(
+      within(off).getByRole("button", { name: /weer activeren|reactivate/i }),
+    ).toBeInTheDocument();
+    expect(
+      within(off).queryByRole("button", { name: /op non-actief zetten|deactivate/i }),
+    ).toBeNull();
+  });
+
+  it("posts deactivate and reactivate directly, without a confirmation step", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    renderRoute(
+      async ({ request }) => {
+        bodies.push(await request.formData());
+        return { statusChanged: true };
+      },
+      [dark],
+    );
+    await user.click(
+      within(screen.getByRole("row", { name: /Teacher T/ })).getByRole("button", {
+        name: /op non-actief zetten|deactivate/i,
+      }),
+    );
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(bodies[0].get("intent")).toBe("deactivate");
+    expect(bodies[0].get("userId")).toBe("teacher-9");
+    await user.click(
+      within(screen.getByRole("row", { name: /Dark Teacher/ })).getByRole("button", {
+        name: /weer activeren|reactivate/i,
+      }),
+    );
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1].get("intent")).toBe("reactivate");
+    expect(bodies[1].get("userId")).toBe("teacher-off");
+  });
+
+  it("offers set-password, deactivate and reactivate only to the owner, never on the own row", () => {
+    renderRoute(undefined, [dark, darkAdmin]);
+    const own = screen.getByRole("row", { name: /Admin A \(/ });
+    expect(within(own).queryByRole("button")).toBeNull();
+    // 3 other users: a password dialog trigger on each.
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord instellen|set password/i }),
+    ).toHaveLength(3);
+  });
+
+  it("hides every owner-only account action from a regular admin", () => {
+    renderRoute(undefined, [dark], asRegular);
+    expect(screen.queryByRole("button", { name: /wachtwoord instellen|set password/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /op non-actief zetten|deactivate/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /weer activeren|reactivate/i })).toBeNull();
+    // The existing teacher actions stay.
+    expect(
+      screen.getAllByRole("button", { name: /wachtwoord resetten|reset password/i }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("opens a set-password dialog with two password fields and posts them", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { passwordSet: true };
+    });
+    await user.click(screen.getByRole("button", { name: /wachtwoord instellen|set password/i }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("heading")).toHaveTextContent(/Teacher T/);
+    const [pw, confirm] = within(dialog).getAllByLabelText(/wachtwoord|password/i, {
+      selector: "input[type=password]",
+    });
+    expect(pw).toHaveAttribute("autocomplete", "new-password");
+    expect(confirm).toHaveAttribute("autocomplete", "new-password");
+    // Focus moves to the first field.
+    expect(document.activeElement).toBe(pw);
+    await user.type(pw, "brand-new-secret");
+    await user.type(confirm, "brand-new-secret");
+    await user.click(
+      within(dialog).getByRole("button", { name: /wachtwoord instellen|set password/i }),
+    );
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body?.get("intent")).toBe("setPassword");
+    expect(body?.get("userId")).toBe("teacher-9");
+    expect(body?.get("password")).toBe("brand-new-secret");
+    expect(body?.get("confirm")).toBe("brand-new-secret");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/ingesteld|set/i));
+    expect(screen.queryByText("brand-new-secret")).toBeNull();
+  });
+
+  it("closes the set-password dialog with Cancel and posts nothing", async () => {
+    const user = userEvent.setup();
+    let called = false;
+    renderRoute(() => {
+      called = true;
+      return { passwordSet: true };
+    });
+    await user.click(screen.getByRole("button", { name: /wachtwoord instellen|set password/i }));
+    await user.click(screen.getByRole("button", { name: /annuleren|cancel/i }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(called).toBe(false);
+  });
+
+  it("has no a11y violations with the create form, both modes, and the dialog open", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute(undefined, [dark, darkAdmin]);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.click(screen.getByRole("radio", { name: /beginwachtwoord|initial password/i }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.click(
+      screen.getAllByRole("button", { name: /wachtwoord instellen|set password/i })[0],
+    );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("has no a11y violations with the link card showing", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute(() => ({
+      setPasswordLink: "http://localhost/reset/tok-new",
+    }));
+    await user.type(screen.getByLabelText(/^naam$|^name$/i), "Nieuw Persoon");
+    await user.type(screen.getByLabelText(/^e-mailadres$|^email address$/i), "nieuw@x.nl");
+    await user.click(screen.getByRole("button", { name: /^(account aanmaken|create account)$/i }));
+    await screen.findByText("http://localhost/reset/tok-new");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

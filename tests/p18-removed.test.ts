@@ -92,3 +92,24 @@ describe("P18.4 — the admin console has four pages", () => {
     }
   });
 });
+
+describe("P18.6 — invites never make admins", () => {
+  it("scripts/invite.ts can only mint teacher invites", () => {
+    const src = read("scripts/invite.ts");
+    expect(src).not.toMatch(/\bROLES\b/);
+    expect(src).toContain('role: "teacher"');
+  });
+
+  it("consumeInvite and the invite route only accept teacher invites", () => {
+    expect(read("app/server/repositories/users.server.ts")).toContain(
+      'eq(invites.role, "teacher")',
+    );
+    expect(read("app/routes/invite.tsx")).toContain('invite.role === "teacher"');
+    expect(read("app/routes/invite.tsx")).toContain('role: "teacher"');
+  });
+
+  it("package.json has a set-owner script", () => {
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    expect(pkg.scripts["set-owner"]).toBe("tsx scripts/set-owner.ts");
+  });
+});

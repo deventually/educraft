@@ -1,6 +1,7 @@
 import { redirect } from "react-router";
 import { commitSession, destroySession, getSession } from "./session.server";
 import { getUserById } from "./repositories/users.server";
+import { getOwnerUserId } from "./repositories/settings.server";
 import type { UserRow } from "./schema.server";
 import { isRole, type Role } from "~/lib/registry/access";
 
@@ -36,8 +37,10 @@ export async function getUser(request: Request): Promise<User | null> {
   if (!row) return null;
   // A legacy row with a retired role (e.g. "student", pre-P17 data) counts as logged out.
   if (!isRole(row.role)) return null;
+  // A deactivated account (P18.7) has no session at all; its data stays.
+  if (row.disabledAt) return null;
   // A cookie whose sessionVersion is behind the stored one predates a password
-  // change → treat as logged out on that device.
+  // change or a deactivation → treat as logged out on that device.
   const cookieVersion = session.get("sessionVersion") ?? 0;
   if ((row.sessionVersion ?? 0) !== cookieVersion) return null;
   return toPublicUser(row);
@@ -55,6 +58,16 @@ export async function requireRole(request: Request, ...roles: Role[]): Promise<U
   const user = await requireUser(request);
   if (!roles.includes(user.role)) throw new Response("Forbidden", { status: 403 });
   return user;
+}
+
+/**
+ * Whether `user` is the super admin (P18.6): an admin whose id is the stored
+ * `ownerUserId`. Callers pass the user from `requireRole`/`getUser`, whose role is
+ * resolved fresh from the DB, so a stored id of a demoted user counts as no owner.
+ * Every owner-only authority check goes through this, server-side, in the action.
+ */
+export async function isOwner(user: Pick<User, "id" | "role">): Promise<boolean> {
+  return user.role === "admin" && (await getOwnerUserId()) === user.id;
 }
 
 /** Mint a session cookie carrying the user's current `sessionVersion` (no bump). */

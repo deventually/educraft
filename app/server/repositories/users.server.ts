@@ -4,16 +4,14 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
-  chatSessions,
   contextProfiles,
   feedback,
   generations,
   instanceSettings,
   invites,
-  messages,
   passwordResets,
   usage,
   users,
@@ -21,7 +19,7 @@ import {
   type PasswordResetRow,
   type UserRow,
 } from "../schema.server";
-import { ROLES, type Role } from "~/lib/registry/access";
+import type { Role } from "~/lib/registry/access";
 
 export interface CreateUserInput {
   /** Optional explicit id so an invite can claim it atomically before creation. */
@@ -40,7 +38,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     passwordHash: input.passwordHash,
     role: input.role,
     sessionVersion: 0,
-    allowedToolSlugs: null, // retired per-teacher gate (P18); the column goes in 18.8
+    disabledAt: null,
     createdAt: new Date(),
   };
   getDb().insert(users).values(row).run();
@@ -52,9 +50,23 @@ export async function listUsers(): Promise<UserRow[]> {
   return getDb().select().from(users).orderBy(desc(users.createdAt)).all();
 }
 
-/** Change a user's role (admin console). The self-demotion guard lives in the route. */
+/**
+ * Change a user's role (admin console). The self-demotion guard lives in the route.
+ * A role change also voids the user's open reset links (P18.6): a link a regular
+ * admin minted while the user was a teacher must not open the account once it is
+ * an admin.
+ */
 export async function setUserRole(id: string, role: Role): Promise<void> {
-  getDb().update(users).set({ role }).where(eq(users.id, id)).run();
+  getDb().transaction((tx) => {
+    const changed = tx
+      .update(users)
+      .set({ role })
+      .where(and(eq(users.id, id), ne(users.role, role)))
+      .run();
+    if (changed.changes > 0) {
+      tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+    }
+  });
 }
 
 /**
@@ -67,17 +79,48 @@ export async function updateUserEmail(id: string, email: string | null): Promise
 }
 
 /**
- * Overwrite a user's password hash (self-service change or reset-link redemption)
- * and bump `sessionVersion` in the same statement, so every session minted before
- * the change is logged out. Callers re-issue the acting device's cookie afterwards.
- * This is the ONLY place `sessionVersion` changes — a plain login never does.
+ * Overwrite a user's password hash (self-service change, reset-link redemption or the
+ * owner setting one) and bump `sessionVersion` in the same statement, so every session
+ * minted before the change is logged out. Callers re-issue the acting device's cookie
+ * afterwards. Every open reset / set-password link of the user is voided in the same
+ * transaction: an older link must not overwrite the new password.
+ * Together with `setUserDisabled` (deactivation) this is one of the TWO places
+ * `sessionVersion` changes — a plain login never does.
  */
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
-  getDb()
-    .update(users)
-    .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
-    .where(eq(users.id, id))
-    .run();
+  getDb().transaction((tx) => {
+    tx.update(users)
+      .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
+      .where(eq(users.id, id))
+      .run();
+    tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+  });
+}
+
+/**
+ * Deactivate or reactivate an account (P18.7, super admin only; the guard lives in the
+ * route). Deactivating stamps `disabledAt` and bumps `sessionVersion` in the same
+ * statement, so every cookie minted before is dead for good — reactivating later does
+ * not bring them back. It is the second place the counter changes (see
+ * `updateUserPassword`). It also voids the account's open reset links. Deactivating an
+ * already deactivated account keeps the original timestamp and the counter; reactivating
+ * only clears `disabledAt`.
+ */
+export async function setUserDisabled(id: string, disabled: boolean): Promise<void> {
+  const db = getDb();
+  if (disabled) {
+    db.transaction((tx) => {
+      tx.update(users)
+        .set({ disabledAt: new Date(), sessionVersion: sql`${users.sessionVersion} + 1` })
+        .where(and(eq(users.id, id), isNull(users.disabledAt)))
+        .run();
+      // Like a role change: open reset / set-password links die with the deactivation,
+      // so reactivating later does not revive a link that may have leaked meanwhile.
+      tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
+    });
+  } else {
+    db.update(users).set({ disabledAt: null }).where(eq(users.id, id)).run();
+  }
 }
 
 /**
@@ -156,8 +199,8 @@ export async function deleteUser(id: string): Promise<void> {
 
 /**
  * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
- * user owns — feedback, usage counters, generations, context profiles, and
- * their chat history — then the user row, in a single transaction so a partial
+ * user owns — feedback, usage counters, generations and context profiles,
+ * then the user row, in a single transaction so a partial
  * failure leaves nothing orphaned. Scoped by `userId`/`id`, so another user's
  * rows are never touched.
  */
@@ -167,17 +210,6 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(usage).where(eq(usage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
-    // Chat history: drop the user's messages (via their sessions) and the sessions.
-    const sessionIds = tx
-      .select({ id: chatSessions.id })
-      .from(chatSessions)
-      .where(eq(chatSessions.userId, id))
-      .all()
-      .map((s) => s.id);
-    if (sessionIds.length > 0) {
-      tx.delete(messages).where(inArray(messages.sessionId, sessionIds)).run();
-    }
-    tx.delete(chatSessions).where(eq(chatSessions.userId, id)).run();
     // The teacher's own model set lives in instance_settings, not on the user row.
     tx.delete(instanceSettings)
       .where(eq(instanceSettings.key, `assignedModels:${id}`))
@@ -202,7 +234,6 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
     createdByUserId: input.createdByUserId ?? null,
-    allowedToolSlugs: null, // retired per-teacher gate (P18); the column goes in 18.8
     createdAt: new Date(),
   };
   getDb().insert(invites).values(row).run();
@@ -232,7 +263,8 @@ export async function consumeInvite(token: string, userId: string): Promise<Invi
       and(
         eq(invites.token, token),
         isNull(invites.usedByUserId),
-        inArray(invites.role, [...ROLES]),
+        // Invites make teachers only (P18.6); an admin or retired-role invite never redeems.
+        eq(invites.role, "teacher"),
       ),
     )
     .run();

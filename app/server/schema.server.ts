@@ -7,12 +7,12 @@ export const users = sqliteTable("users", {
   email: text("email").unique(), // nullable; invites may be nameless
   passwordHash: text("password_hash").notNull(), // "scrypt:<saltHex>:<hashHex>"
   role: text("role").notNull().default("teacher"), // "teacher" | "admin"
-  // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and
-  // carried in the session cookie; a stale cookie is treated as logged out.
+  // Single active session (Phase 6 anti-sharing): bumped only on password change/reset and on
+  // owner deactivation (P18.7), and carried in the session cookie; a stale cookie is treated as logged out.
   sessionVersion: integer("session_version").notNull().default(0),
-  // Retired per-teacher tool allow-list (Phase 4; ignored since P18, dropped in 18.8).
-  // Always written as null now.
-  allowedToolSlugs: text("allowed_tool_slugs"),
+  // P18: owner-set deactivation; null = active. (An earlier student-only column of the same
+  // name was dropped in 0008.)
+  disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -37,17 +37,6 @@ export const invites = sqliteTable("invites", {
   usedByUserId: text("used_by_user_id"),
   // Who issued it. Nullable: role-only ops invites (scripts/invite.ts) carry none.
   createdByUserId: text("created_by_user_id"),
-  // Retired per-teacher tool allow-list (Phase 4, ignored since P18; column dropped
-  // in 18.8). Always written as null now.
-  allowedToolSlugs: text("allowed_tool_slugs"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
-
-/** A saved piece of work grouping generations and chat sessions. */
-export const projects = sqliteTable("projects", {
-  id: text("id").primaryKey(),
-  userId: text("user_id"), // nullable now; non-breaking path to multi-user later
-  name: text("name").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -55,7 +44,6 @@ export const projects = sqliteTable("projects", {
 export const generations = sqliteTable("generations", {
   id: text("id").primaryKey(),
   userId: text("user_id"), // owner; scoped in every repository query
-  projectId: text("project_id"),
   toolSlug: text("tool_slug").notNull(),
   stageId: text("stage_id"),
   model: text("model").notNull(),
@@ -63,26 +51,6 @@ export const generations = sqliteTable("generations", {
   contextProfileId: text("context_profile_id"),
   outputLanguage: text("output_language").notNull().default("nl"),
   outputMarkdown: text("output_markdown").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
-
-/** A multi-turn chat session (Phase 3 tools). */
-export const chatSessions = sqliteTable("chat_sessions", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id"),
-  toolSlug: text("tool_slug").notNull(),
-  systemPrompt: text("system_prompt").notNull(),
-  model: text("model").notNull(),
-  contextProfileId: text("context_profile_id"),
-  userId: text("user_id"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
-
-export const messages = sqliteTable("messages", {
-  id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull(),
-  role: text("role").notNull(), // "user" | "assistant"
-  content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -160,10 +128,7 @@ export type InviteRow = typeof invites.$inferSelect;
 export type PasswordResetRow = typeof passwordResets.$inferSelect;
 export type ToolSettingRow = typeof toolSettings.$inferSelect;
 export type InstanceSettingRow = typeof instanceSettings.$inferSelect;
-export type ProjectRow = typeof projects.$inferSelect;
 export type GenerationRow = typeof generations.$inferSelect;
-export type ChatSessionRow = typeof chatSessions.$inferSelect;
-export type MessageRow = typeof messages.$inferSelect;
 export type ContextProfileRow = typeof contextProfiles.$inferSelect;
 export type UsageRow = typeof usage.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;

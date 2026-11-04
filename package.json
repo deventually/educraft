@@ -18,6 +18,7 @@
     "db:push": "drizzle-kit push",
     "invite": "tsx scripts/invite.ts",
     "create-admin": "tsx scripts/create-admin.ts",
+    "set-owner": "tsx scripts/set-owner.ts",
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts"
   },
   "dependencies": {
