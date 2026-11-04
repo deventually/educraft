@@ -10,7 +10,7 @@ import {
 
 /** `npm run eval -- --batch`: half-price measurements through the Message Batches API. */
 describe("eval batches", () => {
-  it("sends what the app's AI SDK adapter sends: model id, system, messages, temperature, budget", () => {
+  it("leaves temperature out for models that reject it, as the AI SDK does (Sonnet 5.5)", () => {
     const p = toBatchParams({
       model: "claude-sonnet-5-5",
       system: "S",
@@ -18,12 +18,24 @@ describe("eval batches", () => {
       temperature: 0.3,
       maxTokens: 8192,
     });
-    expect(p).toEqual({
-      model: "claude-sonnet-5-5",
+    expect(p).not.toHaveProperty("temperature");
+    expect(p.max_tokens).toBe(8192 + THINKING_HEADROOM);
+  });
+
+  it("sends what the app's AI SDK adapter sends: model id, system, messages, temperature, budget", () => {
+    const p = toBatchParams({
+      model: "claude-sonnet-4-6",
       system: "S",
       messages: [{ role: "user", content: "Go" }],
       temperature: 0.3,
-      max_tokens: 8192 + THINKING_HEADROOM,
+      maxTokens: 8192,
+    });
+    expect(p).toEqual({
+      model: "claude-sonnet-4-6",
+      system: "S",
+      messages: [{ role: "user", content: "Go" }],
+      temperature: 0.3,
+      max_tokens: 8192,
     });
   });
 

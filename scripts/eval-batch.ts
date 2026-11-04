@@ -8,7 +8,8 @@
  * batch. The harness runs all cases and runs concurrently, so every first stage lands in
  * one batch, every second stage in the next, and every judge call in the one after that.
  * The request matches what the app's AI SDK adapter sends (same model id, system prompt,
- * messages, temperature and output budget), so a batched measurement measures the app.
+ * messages, output budget, and temperature only where the model accepts it; the same
+ * anthropic-version 2023-06-01), so a batched measurement measures the app.
  */
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChatMessage, GenerateOptions, GenerateResult, ImageInput, LLMProvider } from "~/lib/ai/types";
@@ -16,6 +17,18 @@ import { outputTokenBudget, resolveModelInfo } from "~/lib/ai/models";
 
 /** Same default as the AI SDK adapter. */
 const DEFAULT_TEMPERATURE = 0.4;
+
+/**
+ * Models that reject sampling parameters. The AI SDK (@ai-sdk/anthropic,
+ * getModelCapabilities → rejectsSamplingParameters) drops `temperature` for these with
+ * a warning, so the app never sends it; the API answers a 400 when it is sent anyway.
+ * Mirror that list, so a batched request is the request the app makes.
+ */
+const REJECTS_SAMPLING = ["claude-opus-4-8", "claude-opus-4-7", "claude-fable-5", "claude-sonnet-5"];
+
+export function rejectsTemperature(apiId: string): boolean {
+  return REJECTS_SAMPLING.some((prefix) => apiId.includes(prefix));
+}
 
 type ContentBlock =
   | { type: "text"; text: string }
@@ -25,7 +38,7 @@ export interface BatchParams {
   model: string;
   system: string;
   messages: { role: ChatMessage["role"]; content: string | ContentBlock[] }[];
-  temperature: number;
+  temperature?: number;
   max_tokens: number;
 }
 
@@ -57,7 +70,7 @@ export function toBatchParams(opts: GenerateOptions): BatchParams {
         ? { role: m.role, content: [{ type: "text", text: m.content }, ...opts.images.map(imageBlock)] }
         : { role: m.role, content: m.content },
     ),
-    temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
+    ...(rejectsTemperature(info.apiId) ? {} : { temperature: opts.temperature ?? DEFAULT_TEMPERATURE }),
     max_tokens: outputTokenBudget(info, opts.maxTokens),
   };
 }

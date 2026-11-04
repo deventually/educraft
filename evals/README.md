@@ -96,7 +96,8 @@ Message Batches API, which costs half (`scripts/eval-batch.ts`). All cases and r
 start at once, so all first stages share one batch, all second stages the next, and
 all judge calls the one after. A batch usually ends well within an hour; the script
 polls every 30 seconds. The request is the one the app sends (same model, system
-prompt, messages, temperature and output budget). Chat tools keep the direct API,
+prompt, messages and output budget; temperature only for models that accept it,
+as the AI SDK does). Chat tools keep the direct API,
 because every turn waits on the previous one; their judging is still batched.
 
 ```bash
