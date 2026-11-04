@@ -12,6 +12,8 @@ describe("output budget for long structured outputs", () => {
     ["authentic-assessment", 12288],
     ["cognitive-architect", 12288],
     ["forum-autograder", 8192],
+    // Meting d (2026-11-04d): 2 of 3 eqf6 runs stopped mid-text at 6144.
+    ["guided-reflection", 12288],
   ])("%s has room for its whole structure", (slug, min) => {
     const tool = getToolBySlug(slug);
     expect(tool).toBeDefined();

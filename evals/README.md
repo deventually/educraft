@@ -67,6 +67,10 @@ conversation that hands over the answer still scores at most 2. The report lists
 the failed checks per case. Concrete yes/no questions are what the Promptbook
 recommends for LLM judges (p. 17–18). A test checks that every check line parses.
 
+A cut-off answer (the model hit its token limit) is capped at 3 on every criterion
+(`capTruncated`): in meting d a guided-reflection lesson that stopped mid-text still
+got 4.67 from the judge.
+
 ## Several runs (`--runs N`)
 
 The same case varies from run to run (Authentic Assessment: 14.7k vs 22k

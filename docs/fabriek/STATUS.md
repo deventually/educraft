@@ -61,8 +61,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 - Strengere meting: elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
   rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
-  maximaal 2). Twee extra MentorAI-cases (afhaker, te zekere student) — PR open. Daarna de
-  nulmeting met `--runs 3` en MentorAI v2 naar het boek.
+  maximaal 2); een afgekapt antwoord krijgt hooguit een 3. Twee extra MentorAI-cases (afhaker,
+  te zekere student). Begeleide reflectie krijgt 12288 tokens, want 2 van de 3 lessen op eqf6
+  hielden halverwege op. Meting d (`evals/reports/2026-11-04d.md`): MentorAI 2,3–2,6 (te veel
+  vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
