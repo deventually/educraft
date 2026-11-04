@@ -8,6 +8,7 @@ import { info } from "./routing/info";
 import { portfolio } from "./routing/portfolio";
 import { projects } from "./routing/projects";
 import { tools } from "./routing/tools";
+import { utilities } from "./routing/utilities";
 import type { RouteArea } from "./routing/types";
 
 /**
@@ -25,6 +26,7 @@ const areas: RouteArea[] = [
   portfolio,
   projects,
   tools,
+  utilities,
 ];
 
 export default [

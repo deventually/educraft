@@ -18,6 +18,11 @@ import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { ToolSubtitle } from "~/components/ToolTitle";
+import { UTILITIES, utilitySearchText } from "~/lib/utilities";
+import { UtilityCard } from "~/components/utilities/UtilityCard";
+
+// Utilities are static data (no AI, always on), so the search haystack is built once.
+const UTILITY_SEARCH = UTILITIES.map((u) => ({ utility: u, search: utilitySearchText(u) }));
 
 interface ToolCardData {
   slug: string;
@@ -85,6 +90,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     return tools.filter((tool) => tool.search.includes(q));
   }, [tools, query]);
 
+  const utilityResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return UTILITY_SEARCH.filter((u) => u.search.includes(q)).map((u) => u.utility);
+  }, [query]);
+
+  const resultTotal = results.length + utilityResults.length;
+
   const resultLabel = (n: number) =>
     fmt(n === 1 ? t.home.resultCountOne : t.home.resultCount, { count: n });
 
@@ -110,12 +122,15 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
       {/* Live region: announces result-count changes to screen readers. */}
       <p className="mb-6 text-sm text-slate-500" aria-live="polite">
-        {isFiltered ? resultLabel(results.length) : ""}
+        {isFiltered ? resultLabel(resultTotal) : ""}
       </p>
 
       {!isFiltered ? (
-        <GoalSections tools={tools} locale={locale} t={t} />
-      ) : results.length === 0 ? (
+        <>
+          <GoalSections tools={tools} locale={locale} t={t} />
+          <UtilitiesSection t={t} />
+        </>
+      ) : resultTotal === 0 ? (
         <div
           role="status"
           className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white/50 px-6 py-14 text-center text-slate-500"
@@ -146,6 +161,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             {results.map((tool) => (
               <li key={tool.slug} className="contents">
                 <ToolCard tool={tool} locale={locale} t={t} />
+              </li>
+            ))}
+            {utilityResults.map((u) => (
+              <li key={u.id}>
+                <UtilityCard utility={u} />
               </li>
             ))}
           </ToolGrid>
@@ -197,6 +217,41 @@ function GoalSections({ tools, locale, t }: { tools: ToolCardData[]; locale: Loc
           </section>
         );
       })}
+    </section>
+  );
+}
+
+/** Utilities without AI (P23), below the tools: a card each and a link to /utilities. */
+function UtilitiesSection({ t }: { t: T }) {
+  return (
+    <section aria-labelledby="utilities-heading" className="mt-12">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2
+            id="utilities-heading"
+            className="font-display text-xl font-medium tracking-tight text-slate-900"
+          >
+            {t.utilities.heading}
+          </h2>
+          <p className="mt-0.5 text-sm leading-relaxed text-slate-600">
+            {t.utilities.sectionIntro}
+          </p>
+        </div>
+        <Link
+          to="/utilities"
+          className="inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
+        >
+          {t.utilities.allLink}
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </div>
+      <ToolGrid>
+        {UTILITIES.map((u) => (
+          <li key={u.id}>
+            <UtilityCard utility={u} />
+          </li>
+        ))}
+      </ToolGrid>
     </section>
   );
 }
