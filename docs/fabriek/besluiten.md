@@ -125,7 +125,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   geef ze een eigen plek". Uitwerking: brief P23. Achtergrond: het onderzoek naar ontbrekende
   docententools van 2026-11-04.
 - **BESLUIT-2026-11-04-6:** **Hulpmiddelen staan op de toolspagina**, als eigen sectie onder de
-  tools. Het menu blijft vier items (BESLUIT-2026-11-04-3). Brief P23.
+  tools, zonder eigen menu-item. Brief P23.
 - **BESLUIT-2026-11-04-7:** **Acht nieuwe AI-tools, eerst meten.** Bastiaan koos alle acht AI-tools
   uit het onderzoek (feedback op studentwerk door Stage Assessment breder te maken, rubric maken,
   toetsvragen en toetsmatrijs, les voorbereiden, toetsanalyse, opdracht helder schrijven,

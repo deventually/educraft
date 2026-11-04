@@ -74,8 +74,8 @@ refactoren, en twee à vier hulpmiddelen rechtvaardigen geen generieke formulier
 - `routes.ts`: `route("utilities", "routes/utilities._index.tsx")` en
   `route("utilities/:slug", "routes/utilities.$slug.tsx")`, binnen de ingelogde layout. Onbekende
   slug → 404.
-- **Vindbaar via de toolspagina, niet via het menu.** Het menu blijft vier items
-  (BESLUIT-2026-11-04-3). Onder de toolkaarten op `/tools` komt een sectie **"Hulpmiddelen"**
+- **Vindbaar via de toolspagina, niet via het menu.** Hulpmiddelen krijgen geen eigen menu-item
+  (BESLUIT-2026-11-04-6). Onder de toolkaarten op `/tools` komt een sectie **"Hulpmiddelen"**
   ("Utilities") met een kaart per hulpmiddel en een link "Alle hulpmiddelen" naar `/utilities`.
   De zoekbalk op `/tools` vindt ook hulpmiddelen op naam en samenvatting.
 
@@ -208,11 +208,11 @@ export interface RubricData { criteria: RubricCriterion[]; passRule?: "total" | 
 - Een AI-tool die een rubric maakt (AI-tool 1 uit het onderzoek): dat wordt een aparte brief met de
   promptlat uit het onderzoek, en schrijft dan naar dit rubricmodel.
 - Toetsanalyse- en studielastrekenaar (C en D): een volgende brief.
-- Een vijfde menu-item.
+- Een eigen menu-item voor hulpmiddelen.
 
 ## Wat Bastiaan moet beslissen
 
-1. **Waar staan de hulpmiddelen?** Besloten: als sectie op de toolspagina; het menu blijft vier
-   items (BESLUIT-2026-11-04-6).
+1. **Waar staan de hulpmiddelen?** Besloten: als sectie op de toolspagina, zonder eigen
+   menu-item (BESLUIT-2026-11-04-6).
 2. **Ingevulde rubrics bewaren?** Besloten: namen alleen lokaal, na afsluiten alleen anonieme
    scores (BESLUIT-2026-11-04-8). Nog te doen door Bastiaan: de privacy-officer laten bevestigen.
