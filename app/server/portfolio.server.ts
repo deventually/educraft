@@ -9,6 +9,7 @@ import type { User } from "./auth.server";
 import { applyIntent } from "~/lib/portfolio/intents";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { draftParagraph, reviewOutcome } from "./portfolioCoach.server";
+import { extractFramework } from "./portfolioExtract.server";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getAvailableTools } from "./availability.server";
@@ -38,11 +39,14 @@ export async function availableToolNames(
   return new Map(tools.map((t) => [t.slug, loc(t.name, locale)]));
 }
 
-export type PortfolioActionResult = { ok: true; intent: string } | { ok: false; error: string };
+export type PortfolioActionResult =
+  | { ok: true; intent: string; flagged?: number; clipped?: boolean }
+  | { ok: false; error: string };
 
 /**
- * Applies the posted intent to the dossier and stores it. Two intents call the
- * coach (`review`, `draft:<criterionId>`); every other one is a pure edit.
+ * Applies the posted intent to the dossier and stores it. Three intents call a
+ * model (`extract` on the framework page; `review`, `draft:<criterionId>` for
+ * the coach); every other one is a pure edit.
  */
 export async function saveIntent(
   request: Request,
@@ -53,6 +57,18 @@ export async function saveIntent(
   const locale = getLocale(request);
   const m = getMessages(locale);
   const intent = String(fd.get("intent") ?? "");
+
+  if (intent === "extract") {
+    const formText = String(fd.get("formText") ?? "").slice(0, LIMITS.documentText);
+    const result = await extractFramework(user, dossier.data, formText, locale).catch(() => ({
+      ok: false as const,
+      error: "failed" as const,
+    }));
+    if (!result.ok) return { ok: false, error: m.portfolio.framework.extractErrors[result.error] };
+    const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
+    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
+    return { ok: true, intent, flagged: result.flagged, clipped: result.clipped };
+  }
 
   if (intent === "review" || intent.startsWith("draft:")) {
     const outcomeId = String(fd.get("outcomeId") ?? "");

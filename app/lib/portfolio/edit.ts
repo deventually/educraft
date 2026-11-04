@@ -111,7 +111,12 @@ export function updateCriterion(
   const owner = d.framework.outcomes.find((o) => o.criteria.some((c) => c.id === criterionId));
   return mapOutcome(d, (owner as Outcome).id, (o) => ({
     ...o,
-    criteria: o.criteria.map((c) => (c.id === criterionId ? { ...c, ...patch } : c)),
+    criteria: o.criteria.map((c) => {
+      if (c.id !== criterionId) return c;
+      // The teacher has looked at it: drop the extraction's "check this" flag.
+      const { unverified: _checked, ...rest } = c;
+      return { ...rest, ...patch };
+    }),
   }));
 }
 

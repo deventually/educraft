@@ -62,7 +62,7 @@ export const guidedReflection: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-5-5",
-  defaultMaxTokens: 6144,
+  defaultMaxTokens: 12288,
   defaultTemperature: 0.4,
   enabled: true,
   phase: 1,

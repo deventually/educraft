@@ -20,6 +20,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **P23.1 + 23.2 gemerged op 2026-11-04:** de plek voor hulpmiddelen, de cijferrekenaar en rubrics
   bewaren (migratie 0012).
 - **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
+- **Tweede meting (#54), P24.1 (#53) en lege antwoorden (#55) gemerged op 2026-11-04:** Stage
+  Assessment heet nu "Studentwerk beoordelen en feedback geven"; Claude 5.5 krijgt extra denkruimte,
+  zodat een antwoord niet meer leeg blijft of halverwege ophoudt.
 - **P24.0c en 24.0b gemerged op 2026-11-04 (#49, #50):** het originele document naast de tekst
   voor de AI, en anonimiseren vóór het versturen.
 - **P25 PR B (#41) en de Word-export (#40) gemerged op 2026-11-04:** de werkplaats is te gebruiken
@@ -58,17 +61,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Lege en afgekapte antwoorden: bij Claude Sonnet 5.5 en Opus 5.5 telt het denken mee in de
-  antwoordruimte. Begeleide reflectie gaf daardoor bij een uitgebreide les een leeg antwoord, en
-  Authentieke toetsing hield halverwege op. Deze modellen krijgen nu 16.000 tokens extra
-  denkruimte bovenop het budget van de tool. De eval beoordeelt een leeg antwoord niet meer en meldt
-  een afgekapt antwoord — PR open.
-- P24.1 (Stage Assessment breder): de tool heet nu "Studentwerk beoordelen en feedback geven" en
-  beoordeelt elk geschreven studentwerk tegen de rubric van de docent; feedback langs feed up, feed
-  back en feed forward (Hattie & Timperley, 2007); stagevelden optioneel; prompt `stage-assessment@v2`
-  (`@v1` blijft); vijf evalcasussen, waarvan twee met een bekende fout en één Engels — PR open.
-  Daarna: de eval van deze tool en tien uitkomsten voor Bastiaan.
-- Tweede meting (24.0) na de reparaties van #52: draait op de Mac.
+- Strengere meting: elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
+  rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
+  maximaal 2); een afgekapt antwoord krijgt hooguit een 3. Twee extra MentorAI-cases (afhaker,
+  te zekere student). Begeleide reflectie krijgt 12288 tokens, want 2 van de 3 lessen op eqf6
+  hielden halverwege op. Meting d (`evals/reports/2026-11-04d.md`): MentorAI 2,3–2,6 (te veel
+  vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.3 (rubric invullen in batches, zonder AI): per student niveaus kiezen, met totaal, cijfer en
@@ -82,6 +80,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - P25: bij elke stap van het BDB/BKE-traject laten zien welke LimeOnIt-tool helpt en hoe
   (verzoek Bastiaan 2026-11-04) — PR open. PR C (de coach) is gemerged (#44); daarna: eerste
   eval-run (Bastiaan, `npm run eval:coach`), dan 25.4 kader-extractie.
+- P25.4 kader-extractie: op de kaderpagina plakt de docent het beoordelingsformulier (of kiest de
+  PDF/Word); LimeOnIt zet leeruitkomsten en criteria klaar, niet bevestigd. Een criterium dat niet
+  letterlijk in het formulier staat, krijgt "Controleer dit". Alleen zolang er nog niets aan het
+  kader hangt — PR open.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou

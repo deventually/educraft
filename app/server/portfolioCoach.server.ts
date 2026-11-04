@@ -3,9 +3,6 @@
  * call, the checks from `coach.ts`, usage accounting and the `aiLog` line.
  * Returns the next dossier data; the caller stores it. Never sets a status.
  */
-import { providerForModel } from "~/lib/ai/provider";
-import { DEFAULT_MODEL } from "~/lib/ai/models";
-import { getRuntimePrompt } from "~/lib/prompts";
 import {
   buildCoachMessage,
   buildDraftMessage,
@@ -16,8 +13,7 @@ import { LIMITS } from "~/lib/portfolio/schema";
 import type { AiLogEntry, CoachReview, DossierData } from "~/lib/portfolio/types";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
-import { effectiveDefaultModel } from "./availability.server";
-import { checkQuota, recordUsage } from "./repositories/usage.server";
+import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 
 export type CoachError =
@@ -40,43 +36,6 @@ function withLog(d: DossierData, entry: AiLogEntry): DossierData {
   return { ...d, aiLog: [...d.aiLog, entry].slice(-LIMITS.aiLog) };
 }
 
-async function gate(user: User): Promise<CoachError | null> {
-  if (user.role === "admin") return null;
-  return (await checkQuota(user.id)).ok ? null : "quota";
-}
-
-async function call(
-  user: User,
-  promptId: string,
-  message: string,
-  locale: Locale,
-  maxTokens: number,
-): Promise<{ text: string; model: string } | null> {
-  const model = await effectiveDefaultModel(user, DEFAULT_MODEL);
-  const started = Date.now();
-  try {
-    const { text, usage } = await providerForModel(model).generate({
-      model,
-      system: getRuntimePrompt(promptId, locale),
-      messages: [{ role: "user", content: message }],
-      temperature: 0,
-      maxTokens,
-    });
-    await recordUsage(user.id, { chars: text.length, tokens: usage?.output });
-    log("portfolio-coach", { promptId, model, outcome: "ok", durationMs: Date.now() - started });
-    return { text, model };
-  } catch (e) {
-    log("portfolio-coach", {
-      promptId,
-      model,
-      outcome: "error",
-      error: e instanceof Error ? e.message : String(e),
-      durationMs: Date.now() - started,
-    });
-    return null;
-  }
-}
-
 /** Reviews one outcome's chapter against its confirmed criteria. */
 export async function reviewOutcome(
   user: User,
@@ -87,13 +46,13 @@ export async function reviewOutcome(
 ): Promise<CoachResult<{ review: CoachReview; model: string }>> {
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
   if (!chapterOf(d, outcomeId).trim()) return { ok: false, error: "empty-chapter" };
-  const blocked = await gate(user);
+  const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
 
   const message = buildCoachMessage(d, outcomeId, locale);
   // One retry: a malformed answer is rare, and the second call usually fixes it.
   for (let attempt = 0; attempt < 2; attempt++) {
-    const answer = await call(user, "portfolio-coach@v1", message, locale, 4_000);
+    const answer = await callPortfolioModel(user, "portfolio-coach@v1", message, locale, 4_000);
     if (!answer) break;
     const parsed = parseCoachReview(answer.text, d, outcomeId);
     if (parsed.ok) {
@@ -139,10 +98,10 @@ export async function draftParagraph(
   };
   const message = buildDraftMessage(withText, outcomeId, criterionId, locale);
   if (!message) return { ok: false, error: "no-evidence" };
-  const blocked = await gate(user);
+  const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
 
-  const answer = await call(user, "portfolio-draft@v1", message, locale, 1_000);
+  const answer = await callPortfolioModel(user, "portfolio-draft@v1", message, locale, 1_000);
   const paragraph = answer ? parseDraft(answer.text) : null;
   if (!answer || !paragraph) return { ok: false, error: "failed" };
 
