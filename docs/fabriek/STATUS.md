@@ -100,6 +100,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Open vragen
 
+- De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
+
 - Volgorde: eerst de hele vereenvoudiging, of na V1 al cursussen?
 
 ## Later (bewust geparkeerd)
