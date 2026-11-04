@@ -119,3 +119,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   het vo: Fase). Het vinkje "Als standaard instellen" staat onder de velden. Onder "Meer details
   (optioneel)", dicht: niveau, domein en kader, beroepspraktijk, technologie, onderwijsconcept,
   aanspreekvorm (mbo) en eigen velden. Uitwerking: brief P19, stap 19.6.
+- **BESLUIT-2026-11-04-5:** **Hulpmiddelen zonder AI krijgen een eigen plek.** Naast de AI-tools
+  komen rekenhulpen die geen LLM gebruiken (eerst de cijfer- en cesuurrekenaar en rubrics bewaren en
+  invullen). Ze zijn geen `Tool` in het register maar hebben een eigen klein register. Bastiaan: "Ja
+  geef ze een eigen plek". Uitwerking: brief P23. Achtergrond: het onderzoek naar ontbrekende
+  docententools van 2026-11-04.
