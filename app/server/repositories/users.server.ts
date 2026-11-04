@@ -54,13 +54,15 @@ export async function listUsers(): Promise<UserRow[]> {
  * Change a user's role (admin console). The self-demotion guard lives in the route.
  * A role change also voids the user's open reset links (P18.6): a link a regular
  * admin minted while the user was a teacher must not open the account once it is
- * an admin.
+ * an admin. A real role change also bumps `sessionVersion` (P18.9): the user is logged
+ * out on every device, so a teacher session never silently becomes an admin one. The
+ * caller never changes their own role (route guard), so no cookie reissue is needed.
  */
 export async function setUserRole(id: string, role: Role): Promise<void> {
   getDb().transaction((tx) => {
     const changed = tx
       .update(users)
-      .set({ role })
+      .set({ role, sessionVersion: sql`${users.sessionVersion} + 1` })
       .where(and(eq(users.id, id), ne(users.role, role)))
       .run();
     if (changed.changes > 0) {
@@ -84,8 +86,8 @@ export async function updateUserEmail(id: string, email: string | null): Promise
  * minted before the change is logged out. Callers re-issue the acting device's cookie
  * afterwards. Every open reset / set-password link of the user is voided in the same
  * transaction: an older link must not overwrite the new password.
- * Together with `setUserDisabled` (deactivation) this is one of the TWO places
- * `sessionVersion` changes — a plain login never does.
+ * Together with `setUserDisabled` (deactivation) this is one of the THREE places
+ * `sessionVersion` changes (the third is a real role change in `setUserRole`) — a plain login never does.
  */
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
   getDb().transaction((tx) => {
