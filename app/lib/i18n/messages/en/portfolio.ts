@@ -72,6 +72,9 @@ export const portfolio: Messages["portfolio"] = {
     addOutcome: "Add",
     addOutcomeTitle: "Add learning outcome",
     aiDisclosureRequired: "The form asks for an account of AI use",
+    checkThis:
+      "Check this: this text is not verbatim in the form. Save the criterion if it is right.",
+    checkThisCount: '{n} criteria are not verbatim in the form. They are marked "Check this".',
     confirm: "Confirm framework",
     confirmBody:
       "Confirm when the framework matches your form. If you change it later, you confirm again.",
@@ -79,6 +82,28 @@ export const portfolio: Messages["portfolio"] = {
     criteriaTitle: "Criteria",
     criterionStrong: "What makes it stronger (optional)",
     criterionText: "Criterion",
+    extract: "Extract framework from form",
+    extractBody:
+      "Paste the text of your institution's assessment form, or choose the file. LimeOnIt sets out the learning outcomes and criteria for you. Then check every criterion and confirm the framework.",
+    extractClipped: "The form had more than fits in a dossier; the rest was left out.",
+    extractDone: "Framework set out. Check it and confirm it.",
+    extractDoneCheck:
+      "Framework set out. {n} criteria are not verbatim in the form; check those first.",
+    extractErrors: {
+      "empty-form": "Paste the text of the form first.",
+      failed: "Could not extract a framework from the form. Try again, or enter it by hand.",
+      "in-use":
+        "The framework is already in use: statuses, evidence or chapters depend on it. Change it by hand instead.",
+      quota: "Daily limit reached; try again tomorrow.",
+    },
+    extractFile: "Or choose the form (PDF or Word)",
+    extractFileFailed: "This file could not be read. Paste the text yourself instead.",
+    extractFileHelp:
+      "The file is read on your computer and not stored. Only the text goes to the AI model.",
+    extractPending: "Reading the form…",
+    extractReplace: "This replaces the learning outcomes that are there now.",
+    extractText: "Text of the assessment form",
+    extractTitle: "Extract the framework from your form",
     heading: "Framework",
     institution: "Institution",
     intro:

@@ -69,6 +69,10 @@ export const portfolio = {
     addOutcome: "Toevoegen",
     addOutcomeTitle: "Leeruitkomst toevoegen",
     aiDisclosureRequired: "Het formulier vraagt om een verantwoording van AI-gebruik",
+    checkThis:
+      "Controleer dit: deze tekst staat niet letterlijk in het formulier. Sla het criterium op als het klopt.",
+    checkThisCount:
+      '{n} criteria staan niet letterlijk in het formulier. Ze zijn gemarkeerd met "Controleer dit".',
     confirm: "Kader bevestigen",
     confirmBody:
       "Bevestig als het kader overeenkomt met je formulier. Pas je het later aan, dan bevestig je opnieuw.",
@@ -76,6 +80,29 @@ export const portfolio = {
     criteriaTitle: "Criteria",
     criterionStrong: "Wat het sterker maakt (optioneel)",
     criterionText: "Criterium",
+    extract: "Kader uit formulier halen",
+    extractBody:
+      "Plak de tekst van het beoordelingsformulier van je hogeschool, of kies het bestand. LimeOnIt zet de leeruitkomsten en criteria voor je klaar. Controleer daarna elk criterium en bevestig het kader.",
+    extractClipped: "Het formulier had meer dan er in een dossier past; de rest is weggelaten.",
+    extractDone: "Kader klaargezet. Controleer het en bevestig het.",
+    extractDoneCheck:
+      "Kader klaargezet. {n} criteria staan niet letterlijk in het formulier; controleer die eerst.",
+    extractErrors: {
+      "empty-form": "Plak eerst de tekst van het formulier.",
+      failed:
+        "Het lukte niet om een kader uit het formulier te halen. Probeer het opnieuw, of neem het met de hand over.",
+      "in-use":
+        "Het kader is al in gebruik: er hangen statussen, bewijs of hoofdstukken aan. Pas het daarom met de hand aan.",
+      quota: "Daglimiet bereikt; morgen kan het weer.",
+    },
+    extractFile: "Of kies het formulier (PDF of Word)",
+    extractFileFailed: "Dit bestand kon niet worden gelezen. Plak de tekst dan zelf.",
+    extractFileHelp:
+      "Het bestand wordt op je computer gelezen en niet bewaard. Alleen de tekst gaat naar het AI-model.",
+    extractPending: "Het formulier wordt gelezen…",
+    extractReplace: "Dit vervangt de leeruitkomsten die er nu staan.",
+    extractText: "Tekst van het beoordelingsformulier",
+    extractTitle: "Kader uit je formulier halen",
     heading: "Kader",
     institution: "Hogeschool",
     intro:

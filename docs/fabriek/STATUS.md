@@ -78,6 +78,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - P25: bij elke stap van het BDB/BKE-traject laten zien welke LimeOnIt-tool helpt en hoe
   (verzoek Bastiaan 2026-11-04) — PR open. PR C (de coach) is gemerged (#44); daarna: eerste
   eval-run (Bastiaan, `npm run eval:coach`), dan 25.4 kader-extractie.
+- P25.4 kader-extractie: op de kaderpagina plakt de docent het beoordelingsformulier (of kiest de
+  PDF/Word); LimeOnIt zet leeruitkomsten en criteria klaar, niet bevestigd. Een criterium dat niet
+  letterlijk in het formulier staat, krijgt "Controleer dit". Alleen zolang er nog niets aan het
+  kader hangt — PR open.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
