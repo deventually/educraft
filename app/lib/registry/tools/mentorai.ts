@@ -106,8 +106,8 @@ export const mentorai: Tool = {
   ],
   chat: {
     greeting: {
-      nl: "Welkom! Ik ben je leermeester. Ik laat je eerst zien hoe een expert het aanpakt, daarna ga jij zelf aan de slag. Het antwoord geef ik je niet, wel steeds een stap verder. Waar werk je aan, of waar loop je op vast?",
-      en: "Welcome! I'm your mentor. I'll first show you how an expert approaches it, then you get to work yourself. I won't give you the answer, but I'll always help you one step further. What are you working on, or where are you stuck?",
+      nl: "Welkom! Ik ben je leermeester. Het antwoord geef ik je niet, wel steeds een stap verder. Waar werk je aan, of waar loop je op vast?",
+      en: "Welcome! I'm your mentor. I won't give you the answer, but I'll always help you one step further. What are you working on, or where are you stuck?",
     },
     starters: [
       {

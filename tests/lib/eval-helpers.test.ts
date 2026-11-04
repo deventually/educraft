@@ -16,6 +16,9 @@ import {
   runSpread,
   capTruncated,
   TRUNCATION_CAP,
+  tutorTurns,
+  COUNTED_CHECKS,
+  countedFailures,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -338,5 +341,70 @@ describe("a cut-off answer is capped", () => {
   it("caps every score at the truncation cap (meting d: a cut-off answer still got 4.67)", () => {
     expect(TRUNCATION_CAP).toBe(3);
     expect(capTruncated({ a: 5, b: 2 })).toEqual({ a: 3, b: 2 });
+  });
+});
+
+describe("counted checks (decided in code, not by the judge)", () => {
+  const transcript = [
+    "**Tutor (greeting):** Welkom! Ik laat je eerst zien hoe het werkt. Klaar? Echt?",
+    "**Student:** Ik snap het niet.",
+    "**Tutor:** Prima. Wat weet je al over de kettingregel?",
+    "**Student:** Niks.",
+    "**Tutor:** Oké.\n\n1. Eerst dit\n2. Dan dat\n\nWat denk je?",
+  ].join("\n\n");
+
+  it("marks a check as counted in the rubric", () => {
+    const [c] = parseHardChecks(
+      "## Hard checks\n- **longTurn** (cap 3, counted): Any turn over 150 words or with lists?",
+    );
+    expect(c).toEqual({
+      id: "longTurn",
+      cap: 3,
+      question: "Any turn over 150 words or with lists?",
+      counted: true,
+    });
+  });
+
+  it("splits the tutor turns, leaving out the fixed greeting", () => {
+    expect(tutorTurns(transcript)).toEqual([
+      "Prima. Wat weet je al over de kettingregel?",
+      "Oké.\n\n1. Eerst dit\n2. Dan dat\n\nWat denk je?",
+    ]);
+  });
+
+  it("longTurn fails on a list, a heading or more than 150 words, not on the greeting", () => {
+    expect(COUNTED_CHECKS.longTurn(transcript)).toBe(true);
+    expect(COUNTED_CHECKS.longTurn("**Tutor:** Kort en goed. Wat denk je?")).toBe(false);
+    expect(COUNTED_CHECKS.longTurn(`**Tutor:** ${"woord ".repeat(151)}`)).toBe(true);
+    expect(COUNTED_CHECKS.longTurn(`**Tutor:** ${"woord ".repeat(140)}`)).toBe(false);
+    expect(COUNTED_CHECKS.longTurn("**Tutor:** **Jouw beurt:** wat denk je?")).toBe(true);
+    expect(COUNTED_CHECKS.longTurn("**Tutor:** ### Stap\nwat denk je?")).toBe(true);
+  });
+
+  it("severalQuestions fails on more than one question mark in a tutor turn", () => {
+    expect(COUNTED_CHECKS.severalQuestions(transcript)).toBe(false);
+    expect(COUNTED_CHECKS.severalQuestions("**Tutor:** Wat is f? En wat is g?")).toBe(true);
+  });
+
+  it("decides counted checks in code and asks the judge only the others", () => {
+    const checks = parseHardChecks(
+      "## Hard checks\n- **longTurn** (cap 3, counted): lists?\n- **gaveAnswer** (cap 2): answer?",
+    );
+    expect(countedFailures(checks, transcript)).toEqual(["longTurn"]);
+    const text = hardChecksInstruction(checks);
+    expect(text).toContain('"gaveAnswer"');
+    expect(text).not.toContain('"longTurn"');
+    expect(text).toContain("greeting");
+  });
+
+  it("every counted check in a committed rubric has a counter", async () => {
+    const { readdirSync, readFileSync, existsSync } = await import("node:fs");
+    for (const tool of readdirSync("evals")) {
+      const path = `evals/${tool}/rubric.md`;
+      if (!existsSync(path)) continue;
+      for (const c of parseHardChecks(readFileSync(path, "utf8")).filter((c) => c.counted)) {
+        expect(COUNTED_CHECKS[c.id], `${tool}/${c.id}`).toBeTypeOf("function");
+      }
+    }
   });
 });

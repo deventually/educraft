@@ -105,5 +105,9 @@ describe("mentorai@v2 — the book's Cognitive Apprenticeship Coach, generalised
     const g = tool().chat!.greeting as { nl: string; en: string };
     expect(g.nl.toLowerCase()).not.toContain("eerste stap");
     expect(g.en.toLowerCase()).not.toContain("first step");
+    // Meting e: the greeting announced the method ("ik laat je eerst zien hoe een expert…"),
+    // which the book forbids ("never label your move").
+    expect(g.nl).not.toMatch(/laat je eerst zien|expert/i);
+    expect(g.en).not.toMatch(/show you|expert/i);
   });
 });

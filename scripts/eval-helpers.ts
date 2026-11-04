@@ -27,6 +27,8 @@ export interface HardCheck {
   id: string;
   cap: number;
   question: string;
+  /** Decided in code by {@link COUNTED_CHECKS}, never asked of the judge. */
+  counted?: boolean;
 }
 
 /** One row of the eval report: a single (tool, case) output and its scores. */
@@ -125,20 +127,53 @@ export function parseHardChecks(rubric: string): HardCheck[] {
       continue;
     }
     if (!inSection) continue;
-    const m = /^-\s+\*\*([A-Za-z][\w-]*)\*\*\s*\(cap\s*([1-5])\)\s*:\s*(.+)$/.exec(line.trim());
-    if (m) checks.push({ id: m[1], cap: Number(m[2]), question: m[3].trim() });
+    const m = /^-\s+\*\*([A-Za-z][\w-]*)\*\*\s*\(cap\s*([1-5])(,\s*counted)?\)\s*:\s*(.+)$/.exec(line.trim());
+    if (m) {
+      const check: HardCheck = { id: m[1], cap: Number(m[2]), question: m[4].trim() };
+      if (m[3]) check.counted = true;
+      checks.push(check);
+    }
   }
   return checks;
 }
 
 /** The extra judge instruction for a rubric's hard checks; empty without checks. */
 export function hardChecksInstruction(checks: HardCheck[]): string {
-  if (checks.length === 0) return "";
-  const lines = checks.map((c) => `- "${c.id}" (cap ${c.cap}): ${c.question}`);
+  const asked = checks.filter((c) => !c.counted);
+  if (asked.length === 0) return "";
+  const lines = asked.map((c) => `- "${c.id}" (cap ${c.cap}): ${c.question}`);
   return [
-    'Also answer each HARD CHECK below in a "checks" object: true means the failure DID happen anywhere in the output, false means it did not. Answer from the output itself, not from intent.',
+    'Also answer each HARD CHECK below in a "checks" object: true means the failure DID happen anywhere in the output, false means it did not. Answer from the output itself, not from intent. A turn marked "(greeting)" is fixed app text, not written by the model: ignore it for the checks.',
     ...lines,
   ].join("\n");
+}
+
+/**
+ * The model's turns in a chat transcript (`**Tutor:** …`), without the fixed
+ * greeting (`**Tutor (greeting):**`), which the app shows and the model never wrote.
+ */
+export function tutorTurns(transcript: string): string[] {
+  return transcript
+    .split(/\n\n(?=\*\*(?:Tutor|Student)[^*]*:\*\*)/)
+    .filter((block) => block.startsWith("**Tutor:**"))
+    .map((block) => block.slice("**Tutor:**".length).trim());
+}
+
+const LIST_OR_HEADING = /^\s*(?:[-*•]\s|\d+[.)]\s|#{1,6}\s|\*\*[^*\n]+:\*\*)/m;
+
+/**
+ * Checks that are counted, not judged. In meting e the judge failed "longTurn"
+ * on a 118-word turn without lists, and "severalQuestions" on turns with one
+ * question: what can be counted is counted.
+ */
+export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
+  longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
+  severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
+};
+
+/** Ids of the counted checks that fail on this output. */
+export function countedFailures(checks: HardCheck[], output: string): string[] {
+  return checks.filter((c) => c.counted && COUNTED_CHECKS[c.id]?.(output)).map((c) => c.id);
 }
 
 /** Cap every score at the lowest cap among the failed checks the rubric defines. */
