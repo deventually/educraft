@@ -194,9 +194,10 @@ export interface RubricData { criteria: RubricCriterion[]; passRule?: "total" | 
 
 ## Wat Bastiaan moet beslissen
 
-1. **Waar staan de hulpmiddelen?** Advies: als sectie op de toolspagina, het menu blijft vier items
-   (BESLUIT-2026-11-04-3). Alternatief: een vijfde menu-item "Hulpmiddelen".
-2. **Ingevulde rubrics bewaren?** Advies: nee, om geen studentgegevens op te slaan (AVG). Wil je ze
-   wél bewaren, dan is dat een privacykeuze die eerst langs de privacy-officer moet.
-
-Tot Bastiaan anders kiest, bouwt de werker de adviezen.
+1. **Waar staan de hulpmiddelen?** Besloten: als sectie op de toolspagina; het menu blijft vier
+   items (BESLUIT-2026-11-04-6).
+2. **Ingevulde rubrics bewaren?** Open. Bastiaan wil ze bewaren als dat anoniem kan, voor
+   meetdoeleinden. Voorstel: bewaar alleen de gekozen niveaus per criterium (geen naam, geen
+   opmerkingen, geen datum per invulling), na een akkoord van de privacy-officer. Tot dat besluit er
+   is, bouwt 23.3 de invulling zonder opslag (vast besluit 3); opslaan kan er dan later bij zonder
+   iets over te doen.

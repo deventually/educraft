@@ -124,3 +124,5 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   invullen). Ze zijn geen `Tool` in het register maar hebben een eigen klein register. Bastiaan: "Ja
   geef ze een eigen plek". Uitwerking: brief P23. Achtergrond: het onderzoek naar ontbrekende
   docententools van 2026-11-04.
+- **BESLUIT-2026-11-04-6:** **Hulpmiddelen staan op de toolspagina**, als eigen sectie onder de
+  tools. Het menu blijft vier items (BESLUIT-2026-11-04-3). Brief P23.
