@@ -1,9 +1,5 @@
 import { getToolBySlug } from "~/lib/registry";
-import {
-  evalGreeting,
-  scoresForNextRun,
-  unjudgeableReason,
-} from "../../scripts/eval-helpers";
+import { evalGreeting, scoresForNextRun, unjudgeableReason } from "../../scripts/eval-helpers";
 import { describe, it, expect } from "vitest";
 import {
   clampScore,
