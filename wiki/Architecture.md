@@ -53,8 +53,15 @@ validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the
 
 LimeOnIt is not tied to one model vendor.
 
-- **Vercel AI SDK v7** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, Ollama,
-  LM Studio, and any configured OpenAI-compatible endpoint.
+- **Vercel AI SDK v7** adapter (`app/lib/ai/adapters/aisdk.ts`) — Anthropic, LM Studio,
+  and any configured OpenAI-compatible endpoint.
+- **Native Ollama** adapter (`app/lib/ai/adapters/ollama.ts`) — streams `/api/chat`, because the
+  AI SDK's `/v1` path ignores Ollama's `think` switch. It honours `GenerateOptions.thinking`
+  (`false` = answer directly, much faster for chat; `undefined` = model default), drops the
+  `thinking` field from the stream so raw chain-of-thought never reaches the answer, and
+  attaches images as raw base64. The per-chat toggle sits in `AdvancedSettings` ("Geavanceerd")
+  in `ChatView`, shown only for models whose `/api/show` capabilities include `thinking`
+  (`PickerModel.supportsThinking`).
 - **CLI** adapter (`app/lib/ai/adapters/cli.ts`) — drives local agent CLIs
   (Claude Code, opencode, codex, gemini) as subprocesses (prod-guarded).
 - **Dynamic discovery** (`app/lib/ai/discover.server.ts`) — local Ollama/LM Studio
@@ -68,7 +75,7 @@ LimeOnIt is not tied to one model vendor.
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
-- Default model: `claude-sonnet-4-6`.
+- Default model: `claude-sonnet-5-5` (`DEFAULT_MODEL` in `models.ts`).
 - **Availability (P4/P13/P14/P18).** Which models a caller may *pick* is an OVERRIDE:
   the instance sets `enabledModels`; a teacher with their own `assignedModels` gets
   exactly that set instead (it replaces the instance and may be wider); no own set =
@@ -84,6 +91,36 @@ LimeOnIt is not tied to one model vendor.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
+
+---
+
+## Feature modules
+
+Bigger features keep the same shape: a pure domain module, a thin route, one server seam.
+
+- **Feedback layer (P15).** Skip link, route announcer and focus-to-main live in `AppShell`.
+  Action feedback goes through the toast system (`app/components/Toast.tsx`): a route calls
+  `useFormToast(actionData, { result, pending? })` once; admin tables autosave through
+  `AutoSaveForm` (fetcher + `useActionToast`, revert on error). Transient confirmations on a wired
+  route carry no `role="status"`/`aria-live` of their own, so only the toast announces.
+- **Document upload** (`app/lib/documents/extract.ts`). `fileToText` lazily loads `unpdf` (PDF) and
+  `mammoth` (DOCX) and extracts text in the browser into a `kind: "document"` field (300k chars,
+  checked by `fieldCapError`). No server endpoint; fixtures in `tests/fixtures/generate.mjs`.
+- **Document viewer (P24.0c)** (`app/components/documents/DocumentViewer.tsx`). Shows the original
+  next to the text that goes to the AI. PDF pages via pdf.js, DOCX via mammoth HTML turned into an
+  allow-listed `SafeNode` tree (`docxHtml.ts`); `locate.ts` finds quotes for "Toon in document".
+  The original is never uploaded or stored.
+- **Anonymise before sending (P24.0b)** (`app/components/privacy/`, `app/lib/privacy/redact.ts`).
+  A field with `redact: true` shows `RedactReview` before `streamPost`; names, e-mail, phone,
+  postcode, IBAN and 6–8-digit numbers become codes. The code → name table lives only in component
+  memory; `restoreNames` restores them for the teacher, `generations` keeps the coded version.
+- **BDB/BKE workplace (P25)** at `/portfolio`. Pure domain in `app/lib/portfolio/` (`schema` with
+  `LIMITS`, immutable `edit`, `progress`, `intents.ts` → `applyIntent`, Zod per intent); routes stay
+  thin via `app/server/portfolio.server.ts`; storage is one JSON graph per dossier in
+  `portfolio_dossiers`. Only the teacher sets a criterion status. The coach (`coach.ts`,
+  `portfolioCoach.server.ts`) drops quotes that are not verbatim in the chapter and advice that
+  cites a source not in the teacher's references. `toolHints.ts` suggests at most two available
+  tools per step.
 
 ---
 
