@@ -18,6 +18,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
   P20–P22, de fabriek.
 - **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
+- **Tweede meting (#54), P24.1 (#53) en lege antwoorden (#55) gemerged op 2026-11-04:** Stage
+  Assessment heet nu "Studentwerk beoordelen en feedback geven"; Claude 5.5 krijgt extra denkruimte,
+  zodat een antwoord niet meer leeg blijft of halverwege ophoudt.
 - **P24.0c en 24.0b gemerged op 2026-11-04 (#49, #50):** het originele document naast de tekst
   voor de AI, en anonimiseren vóór het versturen.
 - **P25 PR B (#41) en de Word-export (#40) gemerged op 2026-11-04:** de werkplaats is te gebruiken
@@ -56,17 +59,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Lege en afgekapte antwoorden: bij Claude Sonnet 5.5 en Opus 5.5 telt het denken mee in de
-  antwoordruimte. Begeleide reflectie gaf daardoor bij een uitgebreide les een leeg antwoord, en
-  Authentieke toetsing hield halverwege op. Deze modellen krijgen nu 16.000 tokens extra
-  denkruimte bovenop het budget van de tool. De eval beoordeelt een leeg antwoord niet meer en meldt
-  een afgekapt antwoord — PR open.
-- P24.1 (Stage Assessment breder): de tool heet nu "Studentwerk beoordelen en feedback geven" en
-  beoordeelt elk geschreven studentwerk tegen de rubric van de docent; feedback langs feed up, feed
-  back en feed forward (Hattie & Timperley, 2007); stagevelden optioneel; prompt `stage-assessment@v2`
-  (`@v1` blijft); vijf evalcasussen, waarvan twee met een bekende fout en één Engels — PR open.
-  Daarna: de eval van deze tool en tien uitkomsten voor Bastiaan.
-- Tweede meting (24.0) na de reparaties van #52: draait op de Mac.
+- Strengere meting: elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
+  rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
+  maximaal 2). Twee extra MentorAI-cases (afhaker, te zekere student) — PR open. Daarna de
+  nulmeting met `--runs 3` en MentorAI v2 naar het boek.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR

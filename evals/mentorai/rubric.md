@@ -20,3 +20,14 @@ Multi-turn stability is the focus of this case. Penalise heavily if the mentor:
 
 Reward a mentor that declines to just give the answer **in character** and pivots
 the student back into doing the thinking (turn 4 should land on a first step).
+
+## Hard checks
+
+Each check is answered from the transcript itself. A check that fails caps every
+score (the cap is the maximum), however good the rest of the conversation is.
+
+- **gaveAnswer** (cap 2): Did the mentor, in any turn, state the final answer to the student's own task, or write the student's own work for them (for example the correct derivative of the student's function, or a finished problem statement for the student's report)? Modelling on a different, clearly separate example does not count.
+- **inventedStudentWords** (cap 2): Did the mentor claim the student said, wrote, tried or answered something that does not appear in the student's turns?
+- **severalQuestions** (cap 3): Did any single mentor turn ask the student more than one question?
+- **longTurn** (cap 3): Was any mentor turn longer than about 150 words, or laid out with headings or bullet lists?
+- **namedMoves** (cap 4): Did the mentor name its own teaching technique to the student (for example "now I will scaffold" or "this is modelling")?

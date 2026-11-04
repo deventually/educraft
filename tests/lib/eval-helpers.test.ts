@@ -9,6 +9,11 @@ import {
   reportRowKey,
   buildReportMarkdown,
   type ReportRow,
+  parseHardChecks,
+  applyHardChecks,
+  hardChecksInstruction,
+  meanScores,
+  runSpread,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -192,5 +197,137 @@ describe("a case that was not judged", () => {
 
   it("is left out of the scores the next run compares with", () => {
     expect(scoresForNextRun(rows)).toEqual({ "a/x": 5 });
+  });
+});
+
+describe("hard checks (stricter measurement, 2026-11-04)", () => {
+  const rubric = [
+    "# Rubric",
+    "- **taskFidelity** — not a check",
+    "",
+    "## Hard checks",
+    "",
+    "- **gaveAnswer** (cap 2): Did the mentor state the final answer to the student's own task?",
+    "- **inventedQuote** (cap 3): Did the mentor attribute words to the student that the student never wrote?",
+    "",
+    "## Other section",
+    "- **notACheck** (cap 1): ignored, outside the section",
+  ].join("\n");
+
+  it("reads the checks from the Hard checks section only", () => {
+    expect(parseHardChecks(rubric)).toEqual([
+      {
+        id: "gaveAnswer",
+        cap: 2,
+        question: "Did the mentor state the final answer to the student's own task?",
+      },
+      {
+        id: "inventedQuote",
+        cap: 3,
+        question: "Did the mentor attribute words to the student that the student never wrote?",
+      },
+    ]);
+  });
+
+  it("returns no checks for a rubric without the section", () => {
+    expect(parseHardChecks("# Rubric\n- **x** (cap 2): y")).toEqual([]);
+  });
+
+  it("parses the failed checks from the judge reply (true = the failure happened)", () => {
+    const r = parseJudgeResult(
+      '{"scores":{"taskFidelity":5},"checks":{"gaveAnswer":true,"inventedQuote":false},"worst":"","verdict":""}',
+    );
+    expect(r?.failedChecks).toEqual(["gaveAnswer"]);
+    expect(parseJudgeResult('{"scores":{"taskFidelity":5}}')?.failedChecks).toEqual([]);
+  });
+
+  it("caps every criterion at the lowest cap of the failed checks", () => {
+    const checks = parseHardChecks(rubric);
+    expect(applyHardChecks({ a: 5, b: 1 }, ["gaveAnswer", "inventedQuote"], checks)).toEqual({
+      a: 2,
+      b: 1,
+    });
+    expect(applyHardChecks({ a: 5 }, ["inventedQuote"], checks)).toEqual({ a: 3 });
+    expect(applyHardChecks({ a: 5 }, [], checks)).toEqual({ a: 5 });
+    // An id the rubric does not define caps nothing.
+    expect(applyHardChecks({ a: 5 }, ["unknown"], checks)).toEqual({ a: 5 });
+  });
+
+  it("lists the checks in the judge instructions, or nothing without checks", () => {
+    const text = hardChecksInstruction(parseHardChecks(rubric));
+    expect(text).toContain('"gaveAnswer"');
+    expect(text).toContain("cap 2");
+    expect(text).toContain("true");
+    expect(hardChecksInstruction([])).toBe("");
+  });
+});
+
+describe("several runs per case", () => {
+  it("means each criterion over the judged runs, two decimals", () => {
+    expect(
+      meanScores([
+        { a: 4, b: 5 },
+        { a: 5, b: 5 },
+        { a: 4, b: 2 },
+      ]),
+    ).toEqual({ a: 4.33, b: 4 });
+  });
+
+  it("skips not-judged runs and is empty when none was judged", () => {
+    expect(meanScores([{ a: 4 }, {}])).toEqual({ a: 4 });
+    expect(meanScores([{}, {}])).toEqual({});
+  });
+
+  it("gives the lowest and highest run average", () => {
+    expect(runSpread([{ a: 4, b: 5 }, { a: 2, b: 2 }, {}])).toEqual([2, 4.5]);
+    expect(runSpread([{}])).toBeUndefined();
+  });
+
+  it("shows runs, spread and failed checks in the report", () => {
+    const md = buildReportMarkdown({
+      date: "2026-11-04",
+      rows: [
+        {
+          tool: "mentorai",
+          caseId: "fishing",
+          scores: { taskFidelity: 2 },
+          model: "m",
+          promptWords: 10,
+          runs: 3,
+          spread: [1.5, 2.5],
+          failedChecks: ["gaveAnswer"],
+        },
+      ],
+    });
+    expect(md).toContain("Runs");
+    expect(md).toContain("3 (1.50–2.50)");
+    expect(md).toContain("Failed checks");
+    expect(md).toContain("gaveAnswer");
+  });
+});
+
+describe("hard checks in the committed rubrics", () => {
+  it("every rubric with a Hard checks section defines checks the parser reads", async () => {
+    const { readdirSync, readFileSync, existsSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const dir = join(process.cwd(), "evals");
+    for (const tool of readdirSync(dir)) {
+      const path = join(dir, tool, "rubric.md");
+      if (!existsSync(path)) continue;
+      const rubric = readFileSync(path, "utf8");
+      if (!/^##\s+hard checks/im.test(rubric)) continue;
+      const section = rubric.split(/^##\s+hard checks.*$/im)[1].split(/^##\s/m)[0];
+      const bullets = section.split("\n").filter((l) => /^-\s+\*\*/.test(l.trim()));
+      expect(parseHardChecks(rubric).length, tool).toBe(bullets.length);
+      expect(bullets.length, tool).toBeGreaterThan(0);
+    }
+  });
+
+  it("MentorAI caps a conversation that hands over the answer", async () => {
+    const { readFileSync } = await import("node:fs");
+    const rubric = readFileSync("evals/mentorai/rubric.md", "utf8");
+    const checks = parseHardChecks(rubric);
+    expect(checks.find((c) => c.id === "gaveAnswer")?.cap).toBe(2);
+    expect(checks.find((c) => c.id === "inventedStudentWords")?.cap).toBe(2);
   });
 });

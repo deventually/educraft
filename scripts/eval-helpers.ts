@@ -16,8 +16,17 @@ import type { TemplateValues } from "~/lib/template/interpolate";
 /** A judge model's parsed verdict for one output. Scores are clamped to 1–5. */
 export interface JudgeResult {
   scores: Record<string, number>;
+  /** Ids of the rubric's hard checks the judge answered `true` (the failure happened). */
+  failedChecks: string[];
   worst: string;
   verdict: string;
+}
+
+/** A yes/no check from a rubric's `## Hard checks` section; a failure caps every score. */
+export interface HardCheck {
+  id: string;
+  cap: number;
+  question: string;
 }
 
 /** One row of the eval report: a single (tool, case) output and its scores. */
@@ -29,6 +38,12 @@ export interface ReportRow {
   model: string;
   /** Word count of the built system prompt — the audit's "prompt investment". */
   promptWords: number;
+  /** How many runs the scores are the mean of (default 1). */
+  runs?: number;
+  /** Lowest and highest run average, when there was more than one run. */
+  spread?: [number, number];
+  /** Hard checks that failed in at least one run. */
+  failedChecks?: string[];
 }
 
 export interface ReportInput {
@@ -85,7 +100,77 @@ export function parseJudgeResult(raw: string): JudgeResult | null {
     const v = (obj as Record<string, unknown>)[name];
     return typeof v === "string" ? v : "";
   };
-  return { scores, worst: strField("worst"), verdict: strField("verdict") };
+  const rawChecks = (obj as Record<string, unknown>).checks;
+  const failedChecks =
+    typeof rawChecks === "object" && rawChecks !== null
+      ? Object.entries(rawChecks as Record<string, unknown>)
+          .filter(([, v]) => v === true)
+          .map(([k]) => k)
+      : [];
+  return { scores, failedChecks, worst: strField("worst"), verdict: strField("verdict") };
+}
+
+/**
+ * Read the yes/no checks from a rubric's `## Hard checks` section, one per line:
+ * `- **id** (cap N): question`. A judge scores a 1–5 scale leniently (the second
+ * measurement gave an empty answer 3.6); a concrete yes/no question is far more
+ * reliable (Promptbook p. 17–18), and a failed one caps the scores in code.
+ */
+export function parseHardChecks(rubric: string): HardCheck[] {
+  const checks: HardCheck[] = [];
+  let inSection = false;
+  for (const line of rubric.split("\n")) {
+    if (/^##\s/.test(line)) {
+      inSection = /^##\s+hard checks\b/i.test(line);
+      continue;
+    }
+    if (!inSection) continue;
+    const m = /^-\s+\*\*([A-Za-z][\w-]*)\*\*\s*\(cap\s*([1-5])\)\s*:\s*(.+)$/.exec(line.trim());
+    if (m) checks.push({ id: m[1], cap: Number(m[2]), question: m[3].trim() });
+  }
+  return checks;
+}
+
+/** The extra judge instruction for a rubric's hard checks; empty without checks. */
+export function hardChecksInstruction(checks: HardCheck[]): string {
+  if (checks.length === 0) return "";
+  const lines = checks.map((c) => `- "${c.id}" (cap ${c.cap}): ${c.question}`);
+  return [
+    'Also answer each HARD CHECK below in a "checks" object: true means the failure DID happen anywhere in the output, false means it did not. Answer from the output itself, not from intent.',
+    ...lines,
+  ].join("\n");
+}
+
+/** Cap every score at the lowest cap among the failed checks the rubric defines. */
+export function applyHardChecks(
+  scores: Record<string, number>,
+  failed: string[],
+  checks: HardCheck[],
+): Record<string, number> {
+  const caps = checks.filter((c) => failed.includes(c.id)).map((c) => c.cap);
+  if (caps.length === 0) return { ...scores };
+  const cap = Math.min(...caps);
+  return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, Math.min(v, cap)]));
+}
+
+/** Per-criterion mean over the judged runs (empty score sets skipped), two decimals. */
+export function meanScores(runs: Record<string, number>[]): Record<string, number> {
+  const judged = runs.filter((r) => Object.keys(r).length > 0);
+  if (judged.length === 0) return {};
+  const keys = [...new Set(judged.flatMap((r) => Object.keys(r)))];
+  const out: Record<string, number> = {};
+  for (const k of keys) {
+    const vals = judged.map((r) => r[k]).filter((v): v is number => v !== undefined);
+    out[k] = Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100;
+  }
+  return out;
+}
+
+/** Lowest and highest run average over the judged runs; undefined when none. */
+export function runSpread(runs: Record<string, number>[]): [number, number] | undefined {
+  const avgs = runs.filter((r) => Object.keys(r).length > 0).map(averageScore);
+  if (avgs.length === 0) return undefined;
+  return [Math.min(...avgs), Math.max(...avgs)];
 }
 
 /** Mean of the score values, rounded to two decimals; 0 for an empty set. */
@@ -128,18 +213,51 @@ export function buildReportMarkdown(input: ReportInput): string {
   );
   const criteria = [...new Set(rows.flatMap((r) => Object.keys(r.scores)))].sort();
 
-  const header = ["Tool", "Case", ...criteria, "Avg", "Δ vs prev", "Model", "Prompt words"];
+  const header = [
+    "Tool",
+    "Case",
+    ...criteria,
+    "Avg",
+    "Δ vs prev",
+    "Runs",
+    "Failed checks",
+    "Model",
+    "Prompt words",
+  ];
+  const runsCell = (r: ReportRow) =>
+    r.spread ? `${r.runs ?? 1} (${r.spread[0].toFixed(2)}–${r.spread[1].toFixed(2)})` : String(r.runs ?? 1);
+  const checksCell = (r: ReportRow) => (r.failedChecks?.length ? r.failedChecks.join(", ") : "—");
   const sep = header.map(() => "---");
 
   const bodyLines = rows.map((r) => {
     const avg = averageScore(r.scores);
     if (Object.keys(r.scores).length === 0) {
       const empty = criteria.map(() => "–");
-      return [r.tool, r.caseId, ...empty, "not judged", "—", r.model, String(r.promptWords)];
+      return [
+        r.tool,
+        r.caseId,
+        ...empty,
+        "not judged",
+        "—",
+        runsCell(r),
+        "—",
+        r.model,
+        String(r.promptWords),
+      ];
     }
     const delta = formatDelta(avg, prev[reportRowKey(r)]);
     const critCells = criteria.map((c) => (r.scores[c] !== undefined ? String(r.scores[c]) : "–"));
-    return [r.tool, r.caseId, ...critCells, avg.toFixed(2), delta, r.model, String(r.promptWords)];
+    return [
+      r.tool,
+      r.caseId,
+      ...critCells,
+      avg.toFixed(2),
+      delta,
+      runsCell(r),
+      checksCell(r),
+      r.model,
+      String(r.promptWords),
+    ];
   });
 
   const scored = rows.filter((r) => Object.keys(r.scores).length > 0).length;

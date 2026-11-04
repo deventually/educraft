@@ -13,6 +13,7 @@
  *    npm run eval -- --judge-only            # re-judge the latest outputs
  *    npm run eval -- --judge-model claude-sonnet-4-6
  *    npm run eval -- --dry-run               # build every prompt, NO API calls (free)
+ *    npm run eval -- --tool mentorai --runs 3 # mean + spread over 3 runs per case
  *
  * Layout:
  *    evals/<tool-slug>/cases.json   input scenarios (committed)
@@ -35,6 +36,11 @@ import {
   evalGreeting,
   scoresForNextRun,
   unjudgeableReason,
+  applyHardChecks,
+  hardChecksInstruction,
+  meanScores,
+  parseHardChecks,
+  runSpread,
   averageScore,
   buildReportMarkdown,
   reportRowKey,
@@ -71,6 +77,8 @@ interface Cli {
   /** Build every case's prompt (validates placeholders) without calling any API. */
   dryRun: boolean;
   judgeModel: string;
+  /** Runs per case; the report shows the mean and the spread (default 1). */
+  runs: number;
 }
 
 const EVALS_DIR = join(process.cwd(), "evals");
@@ -84,6 +92,7 @@ function parseCli(argv: string[]): Cli {
     judgeOnly: false,
     dryRun: false,
     judgeModel: DEFAULT_JUDGE_MODEL,
+    runs: 1,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -92,6 +101,7 @@ function parseCli(argv: string[]): Cli {
     else if (a === "--judge-only") cli.judgeOnly = true;
     else if (a === "--dry-run") cli.dryRun = true;
     else if (a === "--judge-model") cli.judgeModel = argv[++i] ?? DEFAULT_JUDGE_MODEL;
+    else if (a === "--runs") cli.runs = Math.max(1, Math.min(10, Number(argv[++i]) || 1));
   }
   return cli;
 }
@@ -301,11 +311,16 @@ async function runChat(
   return { text: transcript.join("\n\n"), truncated };
 }
 
-function writeOutput(date: string, o: CaseOutput) {
+/** Run 1 keeps the old name, so a single-run measurement looks as before. */
+function outputFileName(caseId: string, run: number): string {
+  return run === 1 ? `${caseId}.md` : `${caseId}.run${run}.md`;
+}
+
+function writeOutput(date: string, o: CaseOutput, run = 1) {
   const dir = join(OUTPUT_DIR, date, o.tool);
   ensureDir(dir);
   const header = `<!-- tool=${o.tool} case=${o.caseId} model=${o.model} lang=${o.outputLanguage} promptWords=${o.promptWords}${o.truncated ? " truncated=1" : ""} -->\n\n`;
-  writeFileSync(join(dir, `${o.caseId}.md`), header + o.output, "utf8");
+  writeFileSync(join(dir, outputFileName(o.caseId, run)), header + o.output, "utf8");
 }
 
 // ---------------------------------------------------------------------------
@@ -313,13 +328,15 @@ function writeOutput(date: string, o: CaseOutput) {
 // ---------------------------------------------------------------------------
 
 const JUDGE_SPINE = `You are a strict but fair evaluator of AI-generated teaching material. Score the OUTPUT against the RUBRIC. Reply with ONLY a JSON object, no prose, in this exact shape:
-{"scores": {"taskFidelity": 1-5, "pedagogicalSoundness": 1-5, "formatAdherence": 1-5, "levelFit": 1-5, "languageQuality": 1-5}, "worst": "<the single weakest aspect, one phrase>", "verdict": "<one sentence>"}
-Shared criteria (the rubric may add tool-specific ones): taskFidelity = does it do what the tool promises; pedagogicalSoundness = fidelity to the tool's pedagogical theory; formatAdherence = follows the required output structure; levelFit = register matches the case's EQF level; languageQuality = correct target language, no anglicisms in Dutch. Be harsh on fabricated facts. Integer scores 1 (poor) to 5 (excellent).`;
+{"scores": {"taskFidelity": 1-5, "pedagogicalSoundness": 1-5, "formatAdherence": 1-5, "levelFit": 1-5, "languageQuality": 1-5}, "checks": {"<hard check id>": true|false}, "worst": "<the single weakest aspect, one phrase>", "verdict": "<one sentence>"}
+Shared criteria (the rubric may add tool-specific ones): taskFidelity = does it do what the tool promises; pedagogicalSoundness = fidelity to the tool's pedagogical theory; formatAdherence = follows the required output structure; levelFit = register matches the case's EQF level; languageQuality = correct target language, no anglicisms in Dutch. Be harsh on fabricated facts. Integer scores 1 (poor) to 5 (excellent). A 5 means you found nothing to improve after looking for problems; reserve it for that. Leave "checks" empty ({}) when the rubric has no hard checks.`;
 
 function buildJudgePrompt(rubric: string, c: EvalCase, output: string): string {
+  const checks = hardChecksInstruction(parseHardChecks(rubric));
   return [
     JUDGE_SPINE,
     `\n# RUBRIC\n${rubric || "(no tool-specific rubric supplied; use the shared criteria only)"}`,
+    ...(checks ? [`\n# HARD CHECKS\n${checks}`] : []),
     `\n# CASE\nid: ${c.id}\noutputLanguage: ${c.outputLanguage}\nEQF: ${c.profile?.eqf ?? "n/a"}\ndescription: ${c.description ?? ""}\ninputs: ${JSON.stringify(c.values ?? {}, null, 2)}`,
     `\n# OUTPUT\n${output}`,
   ].join("\n");
@@ -354,10 +371,13 @@ async function judgeOutput(
   // One retry with more room: in the nulmeting (2026-11-04) one verdict was cut off
   // at 1024 tokens and left a case un-scored.
   const parsed = (await ask(1024)) ?? (await ask(2048));
+  const failedChecks = parsed?.failedChecks ?? [];
   return {
     tool: tool.slug,
     caseId: c.id,
-    scores: parsed?.scores ?? {},
+    // A failed hard check caps the scores in code, so a lenient scale cannot hide it.
+    scores: parsed ? applyHardChecks(parsed.scores, failedChecks, parseHardChecks(rubric)) : {},
+    failedChecks,
     model: co.model,
     promptWords: co.promptWords,
     outputLanguage: co.outputLanguage,
@@ -377,6 +397,30 @@ function notJudged(tool: Tool, c: EvalCase, co: CaseOutput, reason: string): Jud
     outputLanguage: co.outputLanguage,
     worst: `NOT JUDGED: ${reason}${co.truncated ? " (the model hit the token limit)" : ""}`,
     verdict: "",
+  };
+}
+
+/**
+ * One report row for a case from its runs: per-criterion means, the spread of the
+ * run averages, every hard check that failed in any run, and the weakest aspect of
+ * the lowest-scoring run. A run that was not judged counts toward `runs` but not
+ * toward the mean, and its reason is kept in the notes.
+ */
+function combineRuns(runs: JudgedCase[]): JudgedCase | null {
+  const first = runs[0];
+  if (!first) return null;
+  if (runs.length === 1) return first;
+  const scored = runs.filter((r) => Object.keys(r.scores).length > 0);
+  const lowest = [...scored].sort((a, b) => averageScore(a.scores) - averageScore(b.scores))[0];
+  const notJudgedNotes = runs.filter((r) => Object.keys(r.scores).length === 0).map((r) => r.worst);
+  return {
+    ...first,
+    scores: meanScores(runs.map((r) => r.scores)),
+    runs: runs.length,
+    spread: runSpread(runs.map((r) => r.scores)),
+    failedChecks: [...new Set(runs.flatMap((r) => r.failedChecks ?? []))],
+    worst: [lowest?.worst, ...notJudgedNotes].filter(Boolean).join(" | "),
+    verdict: lowest?.verdict ?? "",
   };
 }
 
@@ -417,8 +461,8 @@ function writeReport(date: string, judged: JudgedCase[]) {
 // Orchestration
 // ---------------------------------------------------------------------------
 
-function readExistingOutput(date: string, toolId: string, caseId: string): CaseOutput | null {
-  const path = join(OUTPUT_DIR, date, toolId, `${caseId}.md`);
+function readExistingOutput(date: string, toolId: string, caseId: string, run = 1): CaseOutput | null {
+  const path = join(OUTPUT_DIR, date, toolId, outputFileName(caseId, run));
   if (!existsSync(path)) return null;
   const raw = readFileSync(path, "utf8");
   const meta = /<!-- tool=(\S+) case=(\S+) model=(\S+) lang=(\S+) promptWords=(\d+) -->/.exec(raw);
@@ -481,34 +525,41 @@ async function main() {
     console.log(`\n=== ${tool.slug} (${cases.length} cases, mode=${tool.mode}) ===`);
 
     for (const c of cases) {
-      try {
-        let co: CaseOutput | null;
-        if (cli.judgeOnly) {
-          co = readExistingOutput(runDate, tool.slug, c.id);
-          if (!co) {
-            console.warn(`  · ${c.id}: no existing output to judge — skipped`);
+      const runs: JudgedCase[] = [];
+      for (let run = 1; run <= cli.runs; run++) {
+        const tag = cli.runs > 1 ? `${c.id} [run ${run}/${cli.runs}]` : c.id;
+        try {
+          let co: CaseOutput | null;
+          if (cli.judgeOnly) {
+            co = readExistingOutput(runDate, tool.slug, c.id, run);
+            if (!co) {
+              console.warn(`  · ${tag}: no existing output to judge — skipped`);
+              continue;
+            }
+          } else {
+            console.log(`  · ${tag} (${c.outputLanguage}) → generating…`);
+            co = await runCase(tool, c);
+            writeOutput(runDate, co, run);
+          }
+          if (cli.casesOnly) continue;
+
+          const refused = unjudgeableReason(co.output);
+          if (refused) {
+            console.warn(`  · ${tag}: NOT JUDGED — ${refused}`);
+            runs.push(notJudged(tool, c, co, refused));
             continue;
           }
-        } else {
-          console.log(`  · ${c.id} (${c.outputLanguage}) → generating…`);
-          co = await runCase(tool, c);
-          writeOutput(runDate, co);
+          console.log(`  · ${tag} → judging (${cli.judgeModel})…`);
+          const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
+          if (co.truncated) j.worst = `⚠️ output hit the token limit (cut off). ${j.worst}`;
+          if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
+          runs.push(j);
+        } catch (err) {
+          console.error(`  · ${tag}: FAILED — ${(err as Error).message}`);
         }
-        if (cli.casesOnly) continue;
-
-        const refused = unjudgeableReason(co.output);
-        if (refused) {
-          console.warn(`  · ${c.id}: NOT JUDGED — ${refused}`);
-          judged.push(notJudged(tool, c, co, refused));
-          continue;
-        }
-        console.log(`  · ${c.id} → judging (${cli.judgeModel})…`);
-        const j = await judgeOutput(tool, rubric, c, co, cli.judgeModel);
-        if (co.truncated) j.worst = `⚠️ output hit the token limit (cut off). ${j.worst}`;
-        judged.push(j);
-      } catch (err) {
-        console.error(`  · ${c.id}: FAILED — ${(err as Error).message}`);
       }
+      const combined = combineRuns(runs);
+      if (combined) judged.push(combined);
     }
   }
 

@@ -14,6 +14,7 @@ It is **not** part of `npm test`. Run it yourself:
 ANTHROPIC_API_KEY=sk-… npm run eval                      # every tool that has cases
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool forum-autograder
 ANTHROPIC_API_KEY=sk-… npm run eval -- --judge-model claude-sonnet-4-6
+ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai --runs 3   # mean + spread
 npm run eval -- --cases-only     # regenerate raw outputs, skip the judge
 npm run eval -- --judge-only     # re-judge the latest raw outputs, skip generation
 ```
@@ -48,6 +49,31 @@ evals/reports/<date>.md      scored report + <date>.scores.json (committed)
 judge scores five shared criteria 1–5 — **taskFidelity, pedagogicalSoundness,
 formatAdherence, levelFit, languageQuality** — plus any tool-specific expectations
 the rubric adds.
+
+## Hard checks (yes/no, with a cap)
+
+A judge scores a 1–5 scale leniently: in the second measurement (2026-11-04) it gave
+an empty answer 3.6. A rubric can therefore add a `## Hard checks` section, one line
+per check:
+
+```
+- **gaveAnswer** (cap 2): Did the mentor state the final answer to the student's own task?
+```
+
+The judge answers each check true (the failure happened) or false. A failed check
+caps **every** score at its cap, in code (`applyHardChecks`), so a good-looking
+conversation that hands over the answer still scores at most 2. The report lists
+the failed checks per case. Concrete yes/no questions are what the Promptbook
+recommends for LLM judges (p. 17–18). A test checks that every check line parses.
+
+## Several runs (`--runs N`)
+
+The same case varies from run to run (Authentic Assessment: 14.7k vs 22k
+characters). `--runs 3` generates and judges each case three times; the report shows
+the mean per criterion and the spread of the run averages (`3 (4.20–4.80)`). Run 1
+is written as `<case>.md`, later runs as `<case>.run2.md` etc. Use `--runs 3` for a
+before/after measurement of a prompt change: a difference smaller than the spread
+is noise.
 
 ## Reports & deltas
 
