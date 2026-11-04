@@ -43,6 +43,7 @@ import {
   parseHardChecks,
   runSpread,
   capTruncated,
+  caseValues,
   countedFailures,
   JUDGE_MAX_TOKENS,
   TRUNCATION_CAP,
@@ -199,7 +200,7 @@ interface CaseOutput {
  */
 function buildCasePrompts(tool: Tool, c: EvalCase): number {
   const profile: ContextProfile | null = c.profile ? { id: "eval", ...c.profile } : null;
-  const values = c.values ?? {};
+  const values = caseValues(tool, c.values);
   const priorOutputs: Record<string, string> = {};
   let words = 0;
   for (const stage of tool.stages) {
@@ -220,7 +221,7 @@ function buildCasePrompts(tool: Tool, c: EvalCase): number {
 /** Run one case end-to-end through the tool's real stages, returning the output. */
 async function runCase(tool: Tool, c: EvalCase): Promise<CaseOutput> {
   const profile: ContextProfile | null = c.profile ? { id: "eval", ...c.profile } : null;
-  const values = c.values ?? {};
+  const values = caseValues(tool, c.values);
   const priorOutputs: Record<string, string> = {};
   let promptWords = 0;
   let finalOutput = "";

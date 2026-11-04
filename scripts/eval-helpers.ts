@@ -12,6 +12,7 @@
 import type { Tool } from "~/lib/registry/types";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
+import { defaultValuesFor, toTemplateValues } from "~/lib/forms/values";
 
 /** A judge model's parsed verdict for one output. Scores are clamped to 1–5. */
 export interface JudgeResult {
@@ -359,4 +360,13 @@ export function unjudgeableReason(output: string): string | null {
   if (!output.trim()) return "empty output";
   if (/\*\*Tutor:\*\*[ \t]*(?:\n\s*(?=\*\*Student:\*\*)|\s*$)/.test(output)) return "empty tutor turn";
   return null;
+}
+
+/**
+ * A case's template values on top of the form's defaults, as the app sends them: the
+ * form starts from `defaultValuesFor`, so an optional field a case leaves out is empty
+ * rather than a missing placeholder.
+ */
+export function caseValues(tool: Tool, values: TemplateValues | undefined): TemplateValues {
+  return { ...toTemplateValues(defaultValuesFor(tool.inputs)), ...(values ?? {}) };
 }

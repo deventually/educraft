@@ -1,5 +1,10 @@
 import { getToolBySlug } from "~/lib/registry";
-import { evalGreeting, scoresForNextRun, unjudgeableReason } from "../../scripts/eval-helpers";
+import {
+  caseValues,
+  evalGreeting,
+  scoresForNextRun,
+  unjudgeableReason,
+} from "../../scripts/eval-helpers";
 import { describe, it, expect } from "vitest";
 import {
   clampScore,
@@ -433,5 +438,15 @@ describe("counted checks (decided in code, not by the judge)", () => {
         expect(COUNTED_CHECKS[c.id], `${tool}/${c.id}`).toBeTypeOf("function");
       }
     }
+  });
+});
+
+describe("case values", () => {
+  it("start from the form's defaults, as in the app, so an optional field a case omits is empty", () => {
+    const tool = getToolBySlug("guided-reflection")!;
+    const v = caseValues(tool, { onderwerp: "Testen" });
+    expect(v.onderwerp).toBe("Testen");
+    expect(v.eerdereErvaring).toBe("");
+    expect(v.scope).toBe("single lesson");
   });
 });
