@@ -100,7 +100,13 @@ describe("dialogic-encounters@v2 — the book's interview with a theorist", () =
 
   it("is clean Dutch: no leftovers from the old prompt", () => {
     const nl = runtime("nl");
-    for (const bad of ["leertheoricus", "Nodigen uit", "pre-service", "commitmenten", "ernstig interesse"]) {
+    for (const bad of [
+      "leertheoricus",
+      "Nodigen uit",
+      "pre-service",
+      "commitmenten",
+      "ernstig interesse",
+    ]) {
       expect(nl).not.toContain(bad);
     }
   });
