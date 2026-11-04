@@ -289,3 +289,17 @@ describe("applyIntent — outcome work", () => {
     expect(r).toEqual({ ok: false, error: "invalid" });
   });
 });
+
+describe("applyIntent — absent optional fields", () => {
+  it("treats absent form-requirement fields as not set", () => {
+    const d = ok(applyIntent(sampleDossier(), fd({ intent: "meta" }), ctx));
+    expect(d.framework.requirements).toEqual({});
+  });
+
+  it("treats an absent required-evidence field as no lines", () => {
+    const d = ok(
+      applyIntent(sampleDossier(), fd({ intent: "updateOutcome", outcomeId: LU, title: "T" }), ctx),
+    );
+    expect(d.framework.outcomes[0].requiredEvidence).toEqual([]);
+  });
+});

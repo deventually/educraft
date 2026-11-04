@@ -21,21 +21,29 @@ export interface IntentContext {
 const Id = z.string().min(1).max(LIMITS.id);
 const text = (max: number) => z.string().trim().max(max);
 const required = (max: number) => z.string().trim().min(1).max(max);
-/** An optional whole number from a text field: "" means not set. */
+/**
+ * An optional whole number from a text field: absent or "" means not set.
+ * (Zod 4 returns a `.default()` value as the output and skips transforms, so
+ * optional fields use `.optional()` before the transform instead.)
+ */
 const optionalInt = (max: number) =>
   z
     .string()
     .trim()
     .regex(/^\d*$/)
-    .transform((v) => (v === "" ? undefined : Number(v)))
+    .optional()
+    .transform((v) => (v ? Number(v) : undefined))
     .pipe(z.number().int().nonnegative().max(max).optional());
-/** One line per item; blank lines dropped. */
-const lines = z.string().transform((v) =>
-  v
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean),
-);
+/** One line per item; blank lines dropped; absent = none. */
+const lines = z
+  .string()
+  .optional()
+  .transform((v) =>
+    (v ?? "")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean),
+  );
 const omitEmpty = (v: string | undefined) => (v ? v : undefined);
 
 /** Form fields per intent; `getAll` fields are listed in MULTI. */
@@ -44,9 +52,9 @@ const SCHEMAS = {
   meta: z.object({
     institution: text(LIMITS.name).default(""),
     year: text(20).default(""),
-    maxWords: optionalInt(100_000).default(""),
-    minConstructedItems: optionalInt(500).default(""),
-    minAnalysedItems: optionalInt(500).default(""),
+    maxWords: optionalInt(100_000),
+    minConstructedItems: optionalInt(500),
+    minAnalysedItems: optionalInt(500),
     aiDisclosureRequired: z.string().optional(),
     notes: text(LIMITS.notes).default(""),
   }),
@@ -55,7 +63,7 @@ const SCHEMAS = {
     outcomeId: Id,
     code: text(LIMITS.code).default(""),
     title: required(LIMITS.title),
-    requiredEvidence: lines.default(""),
+    requiredEvidence: lines,
   }),
   removeOutcome: z.object({ outcomeId: Id }),
   addCriterion: z.object({
