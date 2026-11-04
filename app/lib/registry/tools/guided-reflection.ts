@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { GUIDED_REFLECTION_PROMPT } from "~/lib/prompts/guided-reflection.prompt";
+import { GUIDED_REFLECTION_PROMPT_V2 } from "~/lib/prompts/guided-reflection@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 
 const NIVEAU = [
@@ -55,9 +55,21 @@ export const guidedReflection: Tool = {
   attribution: attribution({
     chapterTitle: "Guided Reflection and Backward Design with Generative AI",
     authors: "Aileen Benedict & Matt Thayer",
-    sourcePages: "pp. 79–80",
+    sourcePages: "pp. 78–79",
     evaluatedWith: "ChatGPT-5",
     adapted: true,
+    adaptation: {
+      nl: 'Gebaseerd op de prompt uit het boek. In het boek stelt de AI eerst de reflectievragen, één voor één, en maakt hij pas materiaal als de docent "Proceed" typt. Hier beantwoord je die vragen in het formulier, ook wat eerder werkte of niet, en maakt de tool daarna direct het ontwerp. We schrijven de lessen uit het hoofdstuk in de prompt: de drie fasen van Backward Design als drie aparte delen, bewijs en activiteiten gescheiden, jouw eigen woorden behouden, en een vage invoer benoemen met een voorstel in plaats van zelf de richting te kiezen. Eigen toevoeging: een maximale lengte, zodat het ontwerp af is. Vertaald naar het Nederlands.',
+      en: "Based on the book's prompt. In the book the AI first asks the reflection questions one by one, and only produces material once the teacher types \"Proceed\". Here you answer those questions in the form, including what worked or didn't work before, and the tool then produces the design straight away. We write the chapter's lessons into the prompt: the three stages of Backward Design as three separate parts, evidence kept apart from activities, your own words kept, and vague input named with a suggestion instead of the tool choosing the direction. Our own addition: a maximum length, so that the design is finished.",
+    },
+    improvedAfter: {
+      date: "2026-11-04",
+      report: "evals/reports/2026-11-04l.md",
+      summary: {
+        nl: "de drie fasen staan nu apart, het ontwerp is af in plaats van halverwege afgekapt, en bij vage leeruitkomsten krijg je eerst voorstellen om aan te scherpen in plaats van een ontwerp op de keuzes van de AI (gemiddeld 3,4 → 4,8 op drie lesontwerpen, elk drie keer).",
+        en: "the three stages are now separate, the design is finished instead of cut off halfway, and with vague learning outcomes you first get suggestions to sharpen them instead of a design built on the AI's choices (average 3.4 → 4.8 over three lesson designs, each run three times).",
+      },
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
@@ -200,6 +212,20 @@ export const guidedReflection: Tool = {
       group: REFLECTIE,
     },
     {
+      name: "eerdereErvaring",
+      label: {
+        nl: "Wat werkte eerder (of niet)?",
+        en: "What worked before (or didn't)?",
+      },
+      kind: "textarea",
+      rows: 2,
+      help: {
+        nl: "Optioneel. Wat ging goed of mis in een eerdere versie van deze les, of met eerdere AI-suggesties?",
+        en: "Optional. What went well or badly in an earlier version of this lesson, or with earlier AI suggestions?",
+      },
+      group: REFLECTIE,
+    },
+    {
       name: "artefacten",
       label: { nl: "Te produceren materialen", en: "Materials to produce" },
       kind: "multiselect",
@@ -219,14 +245,14 @@ export const guidedReflection: Tool = {
     {
       id: "design",
       name: { nl: "Ontwerp", en: "Design" },
-      systemPromptId: GUIDED_REFLECTION_PROMPT.id,
+      systemPromptId: GUIDED_REFLECTION_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
         hint: {
-          nl: "Levert een Alignment Summary, de gevraagde materialen en een modelleersuggestie op.",
-          en: "Produces an Alignment Summary, the requested materials, and a modelling suggestion.",
+          nl: "Levert een samenhangtabel, de drie fasen (resultaten, bewijs, activiteiten), de gevraagde materialen en een korte suggestie voor de sessie op.",
+          en: "Produces an alignment table, the three stages (results, evidence, activities), the requested materials and a short suggestion for the session.",
         },
-        sections: ["Alignment Summary", "Materialen", "Modelleersuggestie"],
+        sections: ["Samenhangtabel", "Fase 1", "Fase 2", "Fase 3", "Materialen", "Sessie"],
       },
     },
   ],

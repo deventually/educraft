@@ -1,5 +1,6 @@
 import type { PromptDef, PromptLanguage } from "./types";
 import { GUIDED_REFLECTION_PROMPT } from "./guided-reflection.prompt";
+import { GUIDED_REFLECTION_PROMPT_V2 } from "./guided-reflection@v2.prompt";
 import { AUTHENTIC_ASSESSMENT_PROMPT } from "./authentic-assessment.prompt";
 import { ARCS_REACTOR_PROMPT } from "./arcs-reactor.prompt";
 import { FORUM_AUTOGRADER_PROMPT } from "./forum-autograder.prompt";
@@ -27,6 +28,7 @@ import {
 
 const ALL: PromptDef[] = [
   GUIDED_REFLECTION_PROMPT,
+  GUIDED_REFLECTION_PROMPT_V2,
   AUTHENTIC_ASSESSMENT_PROMPT,
   ARCS_REACTOR_PROMPT,
   FORUM_AUTOGRADER_PROMPT,

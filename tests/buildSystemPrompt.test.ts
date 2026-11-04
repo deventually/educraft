@@ -18,6 +18,7 @@ const baseValues = {
   leeruitkomsten: "Ontwerp een resource-model",
   bewijs: "Code review",
   relevantie: "Backend-werkveld",
+  eerdereErvaring: "",
   artefacten: ["een college-outline", "een werkvorm/activiteit"],
 };
 
