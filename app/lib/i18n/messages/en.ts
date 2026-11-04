@@ -498,6 +498,15 @@ export const en: Messages = {
       filterAll: "All tools",
     },
   },
+  portfolioExport: {
+    year: "Academic year {year}",
+    words: "Word count (excluding appendices): {n}",
+    noChapter: "(No text yet.)",
+    aiDisclosure: "Use of AI",
+    references: "References",
+    appendices: "Appendices",
+    appendix: "Appendix {n}. {title}",
+  },
   confirm: {
     cancel: "Cancel",
   },

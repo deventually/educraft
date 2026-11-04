@@ -55,6 +55,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - P25 kortste pad, PR A (25.1 + 25.2: dossier en opslag). Daarna PR B (UI), PR C (coach) en de
   Word-export, die vóór ongeveer 20 november klaar moet zijn (eerste gebruik: BKE inleveren op 30
   november).
+- P25.6 Word-export van het dossier (`/portfolio/:id/export`, pakket `docx` 9.11.0 gepind) — PR
+  open, wacht op Bastiaan. De knop op het overzicht komt met PR B; de AI-verantwoording met PR C.
 - V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
 
 ## Wacht op jou
