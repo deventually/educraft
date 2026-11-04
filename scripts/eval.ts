@@ -41,6 +41,8 @@ import {
   evalGreeting,
   scoresForNextRun,
   unjudgeableReason,
+  judgeFileName,
+  judgeRecord,
   applyHardChecks,
   hardChecksInstruction,
   meanScores,
@@ -596,6 +598,7 @@ async function main() {
         j.worst = `⚠️ output hit the token limit (cut off; scores capped at ${TRUNCATION_CAP}). ${j.worst}`;
       }
       if (j.failedChecks?.length) j.worst = `HARD CHECK FAILED: ${j.failedChecks.join(", ")}. ${j.worst}`;
+      writeFileSync(join(OUTPUT_DIR, runDate, tool.slug, judgeFileName(c.id, run)), judgeRecord(j), "utf8");
       return j;
     } catch (err) {
       console.error(`  · ${tag}: FAILED — ${(err as Error).message}`);
