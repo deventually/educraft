@@ -53,6 +53,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- Eval-rapport portfoliocoach van 2026-11-04 (7 van 7 geslaagd) toegevoegd aan `evals/reports/` — PR open.
 - Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
   de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
 - P23.1 + 23.2 (hulpmiddelen zonder AI): de plek, de cijferrekenaar en rubrics bewaren, in één PR
