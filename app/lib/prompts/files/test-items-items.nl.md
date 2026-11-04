@@ -40,6 +40,7 @@ Schrijf de vragen in taal die past bij de studenten in de onderwijscontext: kort
 - **Een vraag op het niveau toepassen of hoger** geeft een nieuwe situatie (een casus, gegevens, een fragment) die niet letterlijk in de leerstof staat. Wie alleen de leerstof heeft onthouden, kan zo'n vraag niet beantwoorden.
 - **Vragen zijn onafhankelijk.** Geen vraag geeft het antwoord op een andere vraag, en geen vraag heeft het antwoord op een eerdere vraag nodig.
 - **Geen meningsvragen** en geen vragen waarvan het antwoord afhangt van wie nakijkt.
+- **Rekenvragen met eenvoudige getallen.** Kies getallen waarmee het antwoord met weinig rekenwerk en zonder twijfel volgt, en reken elk antwoord één keer zorgvuldig uit. Een afleider bij een rekenvraag is de uitkomst van een echte, benoemde rekenfout.
 
 ## Richtlijnen voor meerkeuzevragen (Haladyna, Downing & Rodriguez, 2002)
 
@@ -51,7 +52,7 @@ De stam:
 
 De opties:
 
-- **Precies één goed antwoord.** Elke afleider is zonder twijfel fout volgens de leerstof, ook voor een deskundige. Opties overlappen niet, en geen optie is een deel van een andere.
+- **Precies één goed antwoord.** Elke afleider is zonder twijfel fout volgens de leerstof, ook voor een deskundige. Een afleider is ook niet te verdedigen vanuit een andere gangbare opvatting in het vak of vanuit een strengere lezing van de leerstof. Kan dat wel, herschrijf dan de stam zo dat de leerstof beslist, of kies een andere afleider. Opties overlappen niet, en geen optie is een deel van een andere.
 - Gebruik vier opties (A tot en met D), tenzij je geen drie aannemelijke afleiders kunt bedenken; gebruik dan drie opties. Nooit een opvuloptie.
 - **Aannemelijke afleiders.** Elke afleider is een fout die studenten echt maken: een veelvoorkomende misvatting, een rekenfout of een verwisseling van begrippen. Een afleider is nooit belachelijk of grappig.
 - **Geen aanwijzing naar het goede antwoord** in de stam of de opties: het goede antwoord is niet het langste of het meest precieze, herhaalt geen opvallend woord uit de stam, en past grammaticaal niet beter bij de stam dan de afleiders. Vermijd absolute woorden als "altijd" en "nooit" in de opties.
@@ -67,6 +68,8 @@ De opties:
 ## Uitvoer (formaat)
 
 Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde.
+
+Lever alleen de eindversie. Zie je tijdens het schrijven of in de zelfcheck een fout, herschrijf dan de vraag zelf: geen notities over correcties in de vragen of het antwoordmodel, geen tweede versie van een vraag, en niets na de slotzin.
 
 - **Vragen**: alle vragen, klaar voor studenten, zonder antwoorden. Per vraag een kopje "### Vraag n (n pt)", dan de stam, en bij meerkeuze de opties als "A. …", "B. …" enzovoort, elk op een eigen regel.
 - **Antwoordmodel**: per vraag een kopje "### Vraag n — Rij Rx, denkniveau", daarna:

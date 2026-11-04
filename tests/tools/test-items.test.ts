@@ -92,6 +92,28 @@ describe("tool: test-items", () => {
     expect(items.maxTokens ?? tool().defaultMaxTokens).toBeGreaterThanOrEqual(16000);
   });
 
+  // Meting p: three of 18 runs were cut off in the questions stage (calculation-heavy
+  // statistics), with the text itself far below the budget: the thinking ate it.
+  it("leaves the questions stage room to think through calculations", () => {
+    expect(tool().stages[1]!.maxTokens).toBeGreaterThanOrEqual(24576);
+  });
+
+  it("asks for one clean final version and only one defensible answer (nl)", () => {
+    const p = runtime("items", "nl").toLowerCase();
+    expect(p).toContain("eenvoudige getallen");
+    expect(p).toContain("alleen de eindversie");
+    expect(p).toContain("geen tweede versie");
+    expect(p).toContain("andere gangbare opvatting");
+  });
+
+  it("asks for one clean final version and only one defensible answer (en)", () => {
+    const p = runtime("items", "en").toLowerCase();
+    expect(p).toContain("simple numbers");
+    expect(p).toContain("only the final version");
+    expect(p).toContain("no second version");
+    expect(p).toContain("other common view");
+  });
+
   for (const stage of ["blueprint", "items"] as const) {
     for (const lang of ["nl", "en"] as const) {
       it(`resolves every placeholder (${stage}, ${lang})`, () => {

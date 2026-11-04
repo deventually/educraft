@@ -151,7 +151,8 @@ export const testItems: Tool = {
       },
       systemPromptId: TEST_ITEMS_ITEMS.id,
       consumes: [{ placeholder: "blueprint", fromStageId: "blueprint" }],
-      maxTokens: 16384,
+      // Meting p: calculation-heavy sets ran out of budget while thinking.
+      maxTokens: 24576,
       output: {
         kind: "structured-sections",
         hint: {
