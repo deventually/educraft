@@ -61,13 +61,14 @@ Doe daarom vooraf:
 | `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 (enforced only once token data is surfaced). |
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
 | `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |
-| `OLLAMA_BASE_URL` / `LMSTUDIO_BASE_URL` | no | Local model endpoints. |
+| `OLLAMA_BASE_URL` / `LMSTUDIO_BASE_URL` | no | Local model endpoints. Used only in development (`NODE_ENV` not `production`); a production process (`npm start`, Docker) does not discover or offer local or CLI models. |
 
 ### EU hosting / data residency
 
 For an EU-hosted deployment (AVG/GDPR data residency), **Fly.io `ams`
 (Amsterdam)** or **Hetzner** both fit. The host choice is the owner's. Note that
-Anthropic/OpenAI inference leaves the EU unless a local model (Ollama/LM Studio)
+Anthropic/OpenAI inference leaves the EU unless a local model (Ollama/LM Studio,
+development mode only)
 is used — see [`Compliance.md`](Compliance.md).
 
 ## Health probe
@@ -95,7 +96,7 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
    [`Authentication.md`](Authentication.md)).
 3. Generate with a cheap model (e.g. Haiku) → tokens stream into the result.
 4. Open **Projects** → the generation was saved.
-5. Rate a generation 👍/👎 with a comment → it lands on `/admin/feedback`
+5. Rate a generation 👍/👎 with a comment → it lands on `/admin/usage`
    (as an admin).
 6. Set `DAILY_REQUEST_LIMIT=1`, restart, generate twice → the 2nd trips the
    localized "daily limit reached" error; an admin is exempt.

@@ -45,7 +45,7 @@ const loaderData = {
   domainCatalogueSectors: [hboDomainSector, havoDomainSector],
 };
 
-function renderRoute(action?: () => unknown) {
+function renderRoute(action?: (args: { request: Request }) => unknown) {
   const props = { loaderData } as unknown as ComponentProps<typeof AdminContext>;
   const Stub = createRoutesStub([
     {
@@ -88,13 +88,57 @@ describe("Admin context — instance toggle", () => {
     expect(wo.checked).toBe(true);
   });
 
-  it("surfaces the lockout guard when the action rejects an empty selection", async () => {
+  it("has no save buttons", () => {
+    renderRoute();
+    expect(screen.queryAllByRole("button", { name: /opslaan|save|toepassen|apply/i })).toHaveLength(
+      0,
+    );
+  });
+
+  it("autosaves a sector toggle with the whole selection and one toast (mutation)", async () => {
     const user = userEvent.setup();
-    renderRoute(() => ({ error: "instance-empty" }));
-    await user.click(instanceForm().getByRole("button", { name: /opslaan|save/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
     });
+    await user.click(instanceForm().getByLabelText(/wetenschappelijk onderwijs/i));
+    await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
+    expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
+    expect(body?.get("intent")).toBe("instance");
+    expect(body?.getAll("sectors")).toEqual(["vo", "mbo", "hbo"]);
+  });
+
+  it("autosaves a domain toggle too", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    await user.click(instanceForm().getByLabelText("ICT"));
+    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+    expect(body?.getAll("domains")).not.toContain("ICT");
+  });
+
+  it("reverts the checkbox and shows the lockout as a toast when the action refuses", async () => {
+    const user = userEvent.setup();
+    let posted: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      posted = await request.formData();
+      return { error: "instance-empty" };
+    });
+    const wo = instanceForm().getByLabelText(/wetenschappelijk onderwijs/i) as HTMLInputElement;
+    await user.click(wo);
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /minstens één sector|at least one sector/i,
+      );
+    });
+    expect(posted?.getAll("sectors")).not.toContain("wo"); // the refused state was posted
+    expect(wo.checked).toBe(true); // sprong terug
+    // The toast is the only announcer: no inline error line.
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
   });
 
   it("renders an instance Domains section: a checkbox per catalogue slug, name=domains, all-checked (null)", () => {

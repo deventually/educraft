@@ -3,7 +3,9 @@
  * tools/models may THIS user see?". One gate sits on top of the registry's
  * boot-validity check: instance availability, an admin's `tool_settings`
  * (enabled). There is no per-teacher tool gate (P18): every teacher and admin
- * sees what the instance enables.
+ * sees what the instance enables. Models: the instance `enabledModels`, which a
+ * teacher's own set (`assignedModels`) replaces (P18); CLI/local models exist only
+ * outside production.
  *
  * Safe defaults: with empty settings tables this reduces exactly to `tool.enabled`,
  * so a fresh instance shows every tool to every teacher and admin.
@@ -34,6 +36,7 @@ import {
   getEnabledDomains,
 } from "./repositories/settings.server";
 import { getUserAssignedModels } from "./repositories/users.server";
+import { localModelsEnabled } from "./env.server";
 
 export interface AvailabilityUser {
   id: string;
@@ -78,65 +81,68 @@ export async function isToolAvailable(_user: AvailabilityUser, tool: Tool): Prom
 }
 
 /**
- * The instance base for the model gates: client-selectable catalog ∩ the admin's
- * `enabledModels` allow-list (Opus-class stays server-only). No lockout fallback
- * here — that is applied once, after the per-teacher narrowing below.
+ * Whether a model id may exist for this process at all: resolvable, client-selectable
+ * (Opus-class stays server-only) and — for CLI agents and local models — only outside
+ * production (`localModelsEnabled`).
+ */
+function isAllowedHere(id: string): boolean {
+  if (!isResolvableModel(id)) return false;
+  const info = resolveModelInfo(id);
+  return info.clientSelectable && (!info.local || localModelsEnabled());
+}
+
+/**
+ * The instance base for the model gates: the catalog models allowed here ∩ the admin's
+ * `enabledModels` allow-list (null = the whole catalog). No lockout fallback here — that
+ * is applied once, in `getSelectableModelIds`.
  */
 async function selectableCatalogIds(): Promise<Set<string>> {
   const enabled = await getEnabledModels();
   const catalog = listModels()
-    .filter((m) => m.clientSelectable)
+    .filter((m) => isAllowedHere(m.id))
     .map((m) => m.id);
   return new Set(catalog.filter((id) => enabled === null || enabled.includes(id)));
 }
 
-/** Narrow a model set by a restriction (INTERSECT). null/empty = no change. */
-function narrowModels(ids: Set<string>, restriction: Set<string> | null): Set<string> {
-  if (!restriction || restriction.size === 0) return ids;
-  return new Set([...ids].filter((id) => restriction.has(id)));
+/**
+ * A teacher's own model set (P18), or null when they follow the instance. The stored
+ * ids are filtered with `isAllowedHere`; a set that is empty after filtering (only
+ * unknown ids, or only CLI/local ids in production) counts as "not set". An admin has
+ * no own set.
+ */
+async function teacherOwnSet(user?: AvailabilityUser): Promise<Set<string> | null> {
+  if (user?.role !== "teacher") return null;
+  const assigned = await getUserAssignedModels(user.id);
+  if (!assigned) return null;
+  const own = new Set([...assigned].filter(isAllowedHere));
+  return own.size > 0 ? own : null;
 }
 
 /**
- * The catalog model ids a caller may select. Composes two INTERSECT gates
- * (Phase 13), each only ever *narrowing* — the opposite of the P12 context axes:
- *   1. Instance base — the admin's `enabledModels` (client-selectable only).
- *   2. Per-teacher — an admin's `assignedModels` for a teacher (⊆ base).
- * Empty/unset at a level = inherit the level above; admin/no-user = the base.
- * Local/discovered models are free and always allowed, so they are added by the
- * caller via `pickableModels`, not here. Lockout guard: an empty final set (only
- * reachable via a stale allow-list) falls back to the catalog default and warns —
- * no configuration may lock a user out of generation entirely.
+ * The catalog model ids a caller may select. Instance base = the admin's `enabledModels`;
+ * a teacher with an own set (`assignedModels`) gets exactly that set instead — it
+ * OVERRIDES the instance and may be wider (P18). No own set = follow the instance;
+ * an admin always gets the instance set. Local/discovered models are added by the
+ * caller via `narrowLocalModels`, not here. Lockout guard: an empty instance set (a
+ * stale allow-list) falls back to the catalog default and warns. An own set holding
+ * only a local model leaves the catalog half legitimately empty — no fallback, or the
+ * disabled frontier default would be re-offered (the P14 bug).
  */
 export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
-  const base = await selectableCatalogIds();
-  const restriction = await userModelRestriction(user);
-  const ids = narrowModels(base, restriction);
-  if (ids.size === 0 && !restrictionGrantsUsableModel(restriction)) {
-    // A genuine lockout: the intersection is empty AND the caller's restriction
-    // grants no usable model at all (unset, or only stale/unknown catalog ids).
-    // Rescue with the default so no configuration locks a user out of generation.
-    // NOT a lockout — and so NOT rescued — is a restriction that lists a
-    // resolvable local/CLI model (e.g. a teacher assigned only "ollama::…"): that
-    // model rides `narrowLocalModels`/`isModelSelectableForUser`, so the catalog
-    // half is legitimately empty. Injecting DEFAULT_MODEL there would re-offer a
-    // frontier default the teacher/admin explicitly excluded (the P14 bug).
+  const own = await teacherOwnSet(user);
+  if (own) {
+    return new Set(
+      listModels()
+        .filter((m) => own.has(m.id))
+        .map((m) => m.id),
+    );
+  }
+  const ids = await selectableCatalogIds();
+  if (ids.size === 0) {
     log("availability_no_selectable_models", { fallback: DEFAULT_MODEL });
     return new Set([DEFAULT_MODEL]);
   }
   return ids;
-}
-
-/** The per-teacher model restriction for a caller (null = no restriction). */
-async function userModelRestriction(user?: AvailabilityUser): Promise<Set<string> | null> {
-  return user?.role === "teacher" ? getUserAssignedModels(user.id) : null;
-}
-
-/** Whether a restriction lists at least one resolvable, client-selectable model. */
-function restrictionGrantsUsableModel(restriction: Set<string> | null): boolean {
-  if (!restriction || restriction.size === 0) return false;
-  return [...restriction].some(
-    (id) => isResolvableModel(id) && resolveModelInfo(id).clientSelectable,
-  );
 }
 
 /**
@@ -145,7 +151,7 @@ function restrictionGrantsUsableModel(restriction: Set<string> | null): boolean 
  * returns it only when the caller may actually use it — otherwise it substitutes
  * a model the caller IS allowed, so a disabled/un-granted frontier default can
  * never leak past the teacher gate. Order: the preferred default, then the
- * caller's own allow-list (this is where a local-only teacher's model comes from),
+ * caller's own set (this is where a local-only teacher's model comes from),
  * then any catalog model, then `DEFAULT_MODEL` as a last resort.
  */
 export async function effectiveDefaultModel(
@@ -153,9 +159,9 @@ export async function effectiveDefaultModel(
   preferred: string,
 ): Promise<string> {
   if (await isModelSelectableForUser(user, preferred)) return preferred;
-  const restriction = await userModelRestriction(user);
-  if (restriction) {
-    for (const id of restriction) {
+  const own = await teacherOwnSet(user);
+  if (own) {
+    for (const id of own) {
       if (await isModelSelectableForUser(user, id)) return id;
     }
   }
@@ -166,7 +172,7 @@ export async function effectiveDefaultModel(
 /**
  * The catalog picker models a caller may choose — `getSelectableModelIds` mapped
  * to picker shape. Pass the caller so the picker reflects their effective set
- * (instance base narrowed by the teacher gate); omit for the raw base.
+ * (their own set, else the instance set); omit for the raw instance base.
  */
 export async function getSelectableModels(user?: AvailabilityUser): Promise<PickerModel[]> {
   const ids = await getSelectableModelIds(user);
@@ -176,25 +182,23 @@ export async function getSelectableModels(user?: AvailabilityUser): Promise<Pick
 }
 
 /**
- * Whether a *single* model id is selectable for `user` (Phase 14) — the gate that
- * governs local/CLI/discovered models too. Unlike `getSelectableModelIds`, which
- * enumerates the static catalog, this is a membership walk so it works for volatile
- * discovered ids (`ollama::…`) without enumerating any local server: the id must be
- * resolvable and client-selectable (Opus-class stays out), then each applicable
- * INTERSECT level must either impose no restriction (null/empty ⇒ inherit) or list
- * the id — instance `enabledModels`, then the teacher's assignment. Empty at every level = every resolvable, client-selectable model is
- * allowed (an uncurated instance is unchanged: local/CLI stay free but curatable).
+ * Whether a *single* model id is selectable for `user` — the gate that governs
+ * local/CLI/discovered models too. Unlike `getSelectableModelIds`, which enumerates
+ * the static catalog, this is a membership walk so it works for volatile discovered
+ * ids (`ollama::…`) without enumerating any local server. The id must be allowed here
+ * (resolvable, client-selectable, CLI/local only outside production); then a teacher
+ * with an own set is decided by it alone (override), everyone else by the instance's
+ * `enabledModels` (null/empty = all).
  */
 export async function isModelSelectableForUser(
   user: AvailabilityUser | undefined,
   id: string,
 ): Promise<boolean> {
-  if (!isResolvableModel(id) || !resolveModelInfo(id).clientSelectable) return false;
+  if (!isAllowedHere(id)) return false;
+  const own = await teacherOwnSet(user);
+  if (own) return own.has(id);
   const enabled = await getEnabledModels();
-  if (enabled !== null && enabled.length > 0 && !enabled.includes(id)) return false;
-  const restriction = await userModelRestriction(user);
-  if (restriction && restriction.size > 0 && !restriction.has(id)) return false;
-  return true;
+  return enabled === null || enabled.length === 0 || enabled.includes(id);
 }
 
 /**

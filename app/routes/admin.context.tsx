@@ -1,4 +1,3 @@
-import { Form, useActionData } from "react-router";
 import type { Route } from "./+types/admin.context";
 import { requireRole } from "~/server/auth.server";
 import {
@@ -18,8 +17,7 @@ import { domainGroupsForSector, allDomainValues, type DomainGroup } from "~/lib/
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
 import { useLocale, useT } from "~/lib/i18n/useT";
-import { useFormToast } from "~/components/Toast";
-import { Button } from "~/components/ui";
+import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 
 /**
  * Sector/domain availability write UI: an admin toggles which sectors and
@@ -216,19 +214,8 @@ function DomainAxis({
 export default function AdminContext({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const actionData = useActionData<typeof action>();
   const { sectors, enabledDomains, domainCatalogueSectors } = loaderData;
   const c = t.admin.context;
-  useFormToast(actionData, {
-    result: (d) =>
-      !d
-        ? null
-        : "error" in d
-          ? { variant: "error", message: c.atLeastOne }
-          : "saved" in d
-            ? { variant: "success", message: t.admin.console.saved }
-            : null,
-  });
 
   return (
     <section>
@@ -240,13 +227,13 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
       </h2>
       <p className="mt-1 text-sm text-slate-600">{c.intro}</p>
 
-      {actionData?.error === "instance-empty" && (
-        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{c.atLeastOne}</p>
-      )}
-
-      {/* Instance-level toggle — labelled by the page heading. */}
-      <Form method="post" aria-labelledby="admin-context-heading" className="mt-2 max-w-xl">
-        <input type="hidden" name="intent" value="instance" />
+      {/* Instance-level toggle — labelled by the page heading; saves itself. */}
+      <AutoSaveForm
+        intent="instance"
+        aria-labelledby="admin-context-heading"
+        errorMessage={() => c.atLeastOne}
+        className="mt-2 max-w-xl"
+      >
         <div className="space-y-4">
           <CheckAxis
             legend={c.sectorsLegend}
@@ -270,10 +257,7 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
             locale={locale}
           />
         </div>
-        <Button type="submit" className="mt-4">
-          {c.save}
-        </Button>
-      </Form>
+      </AutoSaveForm>
     </section>
   );
 }

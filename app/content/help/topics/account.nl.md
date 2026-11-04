@@ -9,8 +9,8 @@ je het wijzigt blijft ingelogd.
 
 ## Welke AI-modellen je kunt gebruiken
 
-De beheerder bepaalt welke AI-modellen voor jou beschikbaar zijn, inclusief lokale en
-CLI-modellen. Je kiest uit die set in het modelmenu van elke tool.
+De beheerder bepaalt welke AI-modellen voor jou beschikbaar zijn. Je kiest uit die set in het
+modelmenu van elke tool.
 
 ## Je account verwijderen
 

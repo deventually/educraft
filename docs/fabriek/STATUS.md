@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.2: toegang per docent en land-as weg)_
+_Laatst bijgewerkt: 2026-11-03 (V2 stap 18.5: automatisch opslaan in beheer)_
 
 ## Nu
 
@@ -39,6 +39,9 @@ _Laatst bijgewerkt: 2026-11-03 (V2 stap 18.2: toegang per docent en land-as weg)
 ## Bezig
 
 - V2 stap 18.2: toegang per docent en land-as weg — deze PR.
+- V2 stap 18.3: modellen als overrule per docent — PR (bovenop 18.2).
+- V2 stap 18.4: vier beheerpagina's — PR (bovenop 18.3).
+- V2 stap 18.5: automatisch opslaan in beheer, geen opslaan-knoppen meer — branch `claude/p18-5` (bovenop 18.4).
 
 ## Wacht op jou
 
