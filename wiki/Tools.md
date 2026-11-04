@@ -31,7 +31,7 @@ All 14 tools from the book plus one original are shipped. *For* = who the tool s
 | 1 | From Model to Mentor | MentorAI (`mentorai`, prompt `@v2`: the book's Cognitive Apprenticeship Coach) | chat | learner |
 | 2 | Contextualization | Contextualization (`contextualization`) | one-shot | teacher |
 | 3 | Think-Pair-Share | Think-Pair-Share (`think-pair-share`) | chat | learner |
-| 4 | Guided Reflection | Guided Reflection (`guided-reflection`) | one-shot | teacher |
+| 4 | Guided Reflection | Guided Reflection (`guided-reflection`, prompt `@v2`: the book's Step 3, three stages apart) | one-shot | teacher |
 | 5 | Dialogic Encounters | Dialogic Encounters (`dialogic-encounters`, prompt `@v2`: the book's interview with a theorist) | chat | learner |
 | 6 | Forum Autograder | Forum Autograder (`forum-autograder`) | one-shot | teacher |
 | 7 | Handwritten Math | Math Grading (`math-grading`) | one-shot + image | teacher |

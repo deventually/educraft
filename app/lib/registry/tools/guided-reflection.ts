@@ -62,6 +62,14 @@ export const guidedReflection: Tool = {
       nl: 'Gebaseerd op de prompt uit het boek. In het boek stelt de AI eerst de reflectievragen, één voor één, en maakt hij pas materiaal als de docent "Proceed" typt. Hier beantwoord je die vragen in het formulier, ook wat eerder werkte of niet, en maakt de tool daarna direct het ontwerp. We schrijven de lessen uit het hoofdstuk in de prompt: de drie fasen van Backward Design als drie aparte delen, bewijs en activiteiten gescheiden, jouw eigen woorden behouden, en een vage invoer benoemen met een voorstel in plaats van zelf de richting te kiezen. Eigen toevoeging: een maximale lengte, zodat het ontwerp af is. Vertaald naar het Nederlands.',
       en: "Based on the book's prompt. In the book the AI first asks the reflection questions one by one, and only produces material once the teacher types \"Proceed\". Here you answer those questions in the form, including what worked or didn't work before, and the tool then produces the design straight away. We write the chapter's lessons into the prompt: the three stages of Backward Design as three separate parts, evidence kept apart from activities, your own words kept, and vague input named with a suggestion instead of the tool choosing the direction. Our own addition: a maximum length, so that the design is finished.",
     },
+    improvedAfter: {
+      date: "2026-11-04",
+      report: "evals/reports/2026-11-04l.md",
+      summary: {
+        nl: "de drie fasen staan nu apart, het ontwerp is af in plaats van halverwege afgekapt, en bij vage leeruitkomsten krijg je eerst voorstellen om aan te scherpen in plaats van een ontwerp op de keuzes van de AI (gemiddeld 3,4 → 4,8 op drie lesontwerpen, elk drie keer).",
+        en: "the three stages are now separate, the design is finished instead of cut off halfway, and with vague learning outcomes you first get suggestions to sharpen them instead of a design built on the AI's choices (average 3.4 → 4.8 over three lesson designs, each run three times).",
+      },
+    },
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",

@@ -46,6 +46,8 @@ describe("guided-reflection@v2 — the book's Step 3, with the three stages kept
     expect(loc(a.adaptation!, "nl")).toMatch(/formulier/);
     expect(loc(a.adaptation!, "nl")).toMatch(/Proceed/);
     expect(loc(a.adaptation!, "en")).toMatch(/form/);
+    expect(a.improvedAfter?.report).toBe("evals/reports/2026-11-04l.md");
+    expect(loc(a.improvedAfter!.summary, "nl")).toMatch(/fasen/);
   });
 
   it("asks what worked or did not work before (book step 2), optionally", () => {
