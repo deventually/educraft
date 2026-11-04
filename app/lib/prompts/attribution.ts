@@ -17,7 +17,8 @@ export function attribution(
   fields: Pick<
     Attribution,
     "chapterTitle" | "authors" | "sourcePages" | "evaluatedWith" | "adapted"
-  >,
+  > &
+    Partial<Pick<Attribution, "adaptation" | "improvedAfter">>,
 ): Attribution {
   return {
     ...fields,

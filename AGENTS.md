@@ -69,6 +69,9 @@ English slugs, never shown.
   output. `tests/tools/<id>.test.ts` asserts `buildSystemPrompt` leaves none unresolved.
 - Versioned ids: a changed prompt is a new `@v2`; keep `@v1` registered while sessions use it.
 - New prompts follow `app/lib/prompts/TEMPLATE.md` (Voice & Bounds) and get eval cases.
+- Departing from the book is allowed, honestly (BESLUIT-2026-11-04-22): `verbatim` is the book's real
+  prompt text; `Attribution.adaptation` says what we changed; `Attribution.improvedAfter` claims an
+  improvement only with a report in `evals/reports/` (`tests/tool-attribution.test.ts`).
 - Level reaches prompts only through `{{contextProfile}}` (`app/lib/context/format.ts`); the engine
   never branches on level.
 

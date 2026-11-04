@@ -279,7 +279,13 @@ function ToolHeader({
               {a.adapted && (
                 <p className="mt-2.5 flex items-start gap-1.5 text-xs text-amber-800">
                   <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-                  {t.tool.adaptedNotice}
+                  {a.adaptation ? loc(a.adaptation, locale) : t.tool.adaptedNotice}
+                </p>
+              )}
+              {a.improvedAfter && (
+                <p className="mt-2 text-xs text-emerald-800">
+                  {fmt(t.tool.improvedAfter, { date: a.improvedAfter.date })}{" "}
+                  {loc(a.improvedAfter.summary, locale)}
                 </p>
               )}
 

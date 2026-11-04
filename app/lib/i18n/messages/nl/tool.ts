@@ -23,6 +23,7 @@ export const tool = {
   generating: "Bezig met genereren…",
   imageRemove: "Verwijderen",
   imageUploadLabel: "Afbeeldingen uploaden",
+  improvedAfter: "Aangescherpt na meting ({date}):",
   model: "Model",
   noProfile: "Geen context",
   noProfileAction: "Onderwijscontext instellen",

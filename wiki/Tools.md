@@ -28,7 +28,7 @@ All 14 tools from the book plus one original are shipped. *For* = who the tool s
 
 | # | Chapter | Tool (slug) | Mode | For |
 |---|---------|-------------|------|-----|
-| 1 | From Model to Mentor | MentorAI (`mentorai`) | chat | learner |
+| 1 | From Model to Mentor | MentorAI (`mentorai`, prompt `@v2`: the book's Cognitive Apprenticeship Coach) | chat | learner |
 | 2 | Contextualization | Contextualization (`contextualization`) | one-shot | teacher |
 | 3 | Think-Pair-Share | Think-Pair-Share (`think-pair-share`) | chat | learner |
 | 4 | Guided Reflection | Guided Reflection (`guided-reflection`) | one-shot | teacher |

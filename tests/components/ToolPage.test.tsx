@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import ToolPage from "~/routes/tool";
@@ -38,4 +38,36 @@ describe("Tool page", () => {
       expect(results.violations).toEqual([]);
     });
   }
+
+  it("shows the tool's own adaptation text instead of the generic notice (mentorai)", () => {
+    const tool = getToolBySlug("mentorai")!;
+    renderTool(tool);
+    fireEvent.click(screen.getByRole("button", { name: /herkomst|bron|achtergrond|over/i }));
+    expect(screen.getByText(/In het boek oefent de lerende één vaste taak/)).toBeInTheDocument();
+    expect(screen.queryByText(/interview → één keer genereren/)).toBeNull();
+  });
+
+  it("shows an 'improved after measurement' line only when the tool claims one", async () => {
+    const base = getToolBySlug("mentorai")!;
+    const tool: Tool = {
+      ...base,
+      attribution: {
+        ...base.attribution,
+        improvedAfter: {
+          date: "2026-11-05",
+          report: "evals/reports/2026-11-05.md",
+          summary: {
+            nl: "geeft onder druk het antwoord niet meer weg",
+            en: "no longer gives the answer away",
+          },
+        },
+      },
+    };
+    const { container } = renderTool(tool);
+    fireEvent.click(screen.getByRole("button", { name: /herkomst|bron|achtergrond|over/i }));
+    expect(screen.getByText(/Aangescherpt na meting \(2026-11-05\)/)).toBeInTheDocument();
+    expect(screen.getByText(/geeft onder druk het antwoord niet meer weg/)).toBeInTheDocument();
+    const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
+    expect(results.violations).toEqual([]);
+  });
 });

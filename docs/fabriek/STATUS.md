@@ -20,6 +20,14 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **P23.1 + 23.2 gemerged op 2026-11-04:** de plek voor hulpmiddelen, de cijferrekenaar en rubrics
   bewaren (migratie 0012).
 - **Nulmeting (#51) en de reparaties erna (#52) gemerged op 2026-11-04.**
+- **Eerder op 2026-11-04 gemerged:** V3 helemaal (P19.2–19.6, #30–#34), de briefs P23/P24 (#36),
+  Zod 4 (#38), P23.1 + 23.2 (#42), schermteksten en routes per onderdeel (#45) en P25 "welke tool
+  bij welke stap" (#46).
+- **P25.4 kader-extractie (#59) en P23.3 rubric invullen in batches (#60) gemerged op
+  2026-11-04;** na #60 `npm run db:migrate` (migratie 0013).
+- **Strengere meting (#56) gemerged op 2026-11-04:** drie runs per case, harde ja/nee-checks met
+  een plafond, een afgekapt antwoord hooguit een 3; Begeleide reflectie 12288 tokens. Nulmeting d:
+  `evals/reports/2026-11-04d.md`.
 - **Tweede meting (#54), P24.1 (#53) en lege antwoorden (#55) gemerged op 2026-11-04:** Stage
   Assessment heet nu "Studentwerk beoordelen en feedback geven"; Claude 5.5 krijgt extra denkruimte,
   zodat een antwoord niet meer leeg blijft of halverwege ophoudt.
@@ -61,64 +69,31 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Strengere meting: elke case kan drie keer draaien (`--runs 3`, gemiddelde en spreiding), en een
-  rubric kan harde ja/nee-checks hebben die het cijfer begrenzen (MentorAI: "gaf het antwoord" →
-  maximaal 2); een afgekapt antwoord krijgt hooguit een 3. Twee extra MentorAI-cases (afhaker,
-  te zekere student). Begeleide reflectie krijgt 12288 tokens, want 2 van de 3 lessen op eqf6
-  hielden halverwege op. Meting d (`evals/reports/2026-11-04d.md`): MentorAI 2,3–2,6 (te veel
-  vragen en lijstjes per beurt, één keer een invulzin), Dialogisch gesprek 4,0 — PR open.
-- Merge-conflicten voorkomen: schermteksten en routes per onderdeel opgesplitst, plus de regel dat
-  de Producer na elke merge de andere PR's bijwerkt (BESLUIT-2026-11-04-19) — PR open.
-- P23.3 (rubric invullen in batches, zonder AI): per student niveaus kiezen, met totaal, cijfer en
-  knock-out; namen en opmerkingen alleen in de browser; na "Batch afsluiten" bewaart de server alleen
-  de gekozen niveaus (migratie 0013, tabel `rubric_scores`) — PR open. De privacy-officer kijkt later
-  mee.
-
-- Kwetsbaarheden in npm-pakketten: 26 → 5 (React Router, Vite, Vitest, happy-dom en indirecte pakketten bijgewerkt). Zod 3 → 4 volgt in een aparte PR (gekozen 2026-11-04), na #35.
-- Briefs P23 (hulpmiddelen zonder AI) en P24 (acht AI-tools), BESLUIT-2026-11-04-5 t/m -10 — PR #36
-  open, wacht op Bastiaan.
-- P25: bij elke stap van het BDB/BKE-traject laten zien welke LimeOnIt-tool helpt en hoe
-  (verzoek Bastiaan 2026-11-04) — PR open. PR C (de coach) is gemerged (#44); daarna: eerste
-  eval-run (Bastiaan, `npm run eval:coach`), dan 25.4 kader-extractie.
-- P25.4 kader-extractie: op de kaderpagina plakt de docent het beoordelingsformulier (of kiest de
-  PDF/Word); LimeOnIt zet leeruitkomsten en criteria klaar, niet bevestigd. Een criterium dat niet
-  letterlijk in het formulier staat, krijgt "Controleer dit". Alleen zolang er nog niets aan het
-  kader hangt — PR open.
-- V3 stappen 19.2 t/m 19.6 — vijf PR's op een rij (#30 en de vier erna), op volgorde mergen.
+- MentorAI v2 naar het boek (24.0): de prompt van het boek (Agarwal e.a., p. 36–44) als basis, met
+  jouw vak en leerdoel in plaats van de vaste SBI-oefening; de leermeester lost je eigen opgave nooit
+  op. De toolpagina toont de echte boektekst en zegt wat wij veranderden (BESLUIT-2026-11-04-22).
+  Getelde checks (woorden, vraagtekens, lijstjes) in code. Eindmeting f: gemiddeld 2,5 → 3,4
+  (`evals/reports/2026-11-04f.md`) — PR open.
 
 ## Wacht op jou
 
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
   `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
 
-## Volgende (voorgestelde volgorde)
+## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
 
-0. **Hulpmiddelen zonder AI** (brief P23): de plek, de cijferrekenaar, rubrics bewaren en invullen.
-   Drie PR's. Klein en zonder risico, kan naast de rest.
-0. **Acht nieuwe AI-tools** (brief P24): eerst de nulmeting (24.0, Bastiaan draait hem), dan één PR
-   per tool met een meetbare kwaliteitslat.
+Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
-1. **Vereenvoudiging V1** (brief P17): klaar, gemerged en uitgerold op 2026-11-03.
-2. **Vereenvoudiging V2** (brief P18): klaar en uitgerold op 2026-11-04. Het omvatte beheer naar vier pagina's die automatisch
-   opslaan; "Bekijk als docent", de land-as en de toegang per docent voor tools en context weg;
-   modellen per instelling met een overrule per docent; CLI- en lokale modellen alleen in
-   ontwikkelmodus; een superbeheerder; slapende tabellen opruimen. Besluiten: BESLUIT-2026-11-03-14
-   t/m -17.
-3. **Vereenvoudiging V3** (brief P19, nog vijf PR's): de docentkant. 19.1 (toolnamen, taak eerst;
-   BESLUIT-2026-11-03-18) is gemerged. Daarna: 19.2 geen doelgroeplabels, 19.3 techniek achter
-   "Geavanceerd", 19.4 lege pagina's die sturen (kunnen naast V2); 19.5 menu en 19.6 kort
-   contextformulier kunnen nu ook (18.2 en 18.4 zijn gemerged). Bastiaans keuzes: BESLUIT-2026-11-04-2 t/m -4.
-4. **Cursussen en de rode draad:** brief P20.
-5. **Rolagenten** (P21), daarna de **docentweek** (P22).
-6. **BDB/BKE-werkplaats** (brief P25, **gaat voor**: eerste gebruik deze maand): kortste pad in drie
-   PR's, daarna Word-export, kader-extractie en de BKE-onderdelen met de tools uit P23 en P24.
+1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 → Dialogisch gesprek →
+   Begeleide reflectie → de andere tools, elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
+2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
+   (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
+3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
 
 ## Open vragen
 
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
 - De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
-
-- Volgorde: eerst de hele vereenvoudiging, of na V1 al cursussen?
 
 ## Later (bewust geparkeerd)
 

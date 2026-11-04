@@ -167,6 +167,16 @@ export interface Attribution {
    * and surfaced in the UI for fidelity.
    */
   adapted?: boolean;
+  /**
+   * What LimeOnIt changed compared with the book's prompt, and why, in plain
+   * words. Shown instead of the generic "adapted" notice (BESLUIT-2026-11-04-22).
+   */
+  adaptation?: LocalizedText;
+  /**
+   * An "improved" claim, allowed only with a measurement: the report in
+   * evals/reports/ that shows it (tests/tool-attribution.test.ts checks it exists).
+   */
+  improvedAfter?: { date: string; report: string; summary: LocalizedText };
 }
 
 export interface Theory {

@@ -61,6 +61,11 @@ per check:
 - **gaveAnswer** (cap 2): Did the mentor state the final answer to the student's own task?
 ```
 
+A check marked `counted` — `- **longTurn** (cap 3, counted): …` — is decided in code
+(`COUNTED_CHECKS`: words, question marks, lists and headings per tutor turn, the fixed
+greeting excluded), because in meting e the judge failed a 118-word turn as "over 150
+words". Only checks that need judgement go to the judge.
+
 The judge answers each check true (the failure happened) or false. A failed check
 caps **every** score at its cap, in code (`applyHardChecks`), so a good-looking
 conversation that hands over the answer still scores at most 2. The report lists

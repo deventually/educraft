@@ -43,6 +43,7 @@ import {
   parseHardChecks,
   runSpread,
   capTruncated,
+  countedFailures,
   TRUNCATION_CAP,
   averageScore,
   buildReportMarkdown,
@@ -380,12 +381,17 @@ async function judgeOutput(
   // One retry with more room: in the nulmeting (2026-11-04) one verdict was cut off
   // at 1024 tokens and left a case un-scored.
   const parsed = (await ask(1024)) ?? (await ask(2048));
-  const failedChecks = parsed?.failedChecks ?? [];
+  const checks = parseHardChecks(rubric);
+  const judged = new Set(checks.filter((c) => !c.counted).map((c) => c.id));
+  const failedChecks = [
+    ...(parsed?.failedChecks ?? []).filter((id) => judged.has(id)),
+    ...countedFailures(checks, co.output),
+  ];
   return {
     tool: tool.slug,
     caseId: c.id,
     // A failed hard check caps the scores in code, so a lenient scale cannot hide it.
-    scores: parsed ? applyHardChecks(parsed.scores, failedChecks, parseHardChecks(rubric)) : {},
+    scores: parsed ? applyHardChecks(parsed.scores, failedChecks, checks) : {},
     failedChecks,
     model: co.model,
     promptWords: co.promptWords,

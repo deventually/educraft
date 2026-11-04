@@ -25,6 +25,7 @@ export const tool: Messages["tool"] = {
   generating: "Generating…",
   imageRemove: "Remove",
   imageUploadLabel: "Upload images",
+  improvedAfter: "Sharpened after measurement ({date}):",
   model: "Model",
   noProfile: "No context",
   noProfileAction: "Set up teaching context",
