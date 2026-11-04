@@ -5,8 +5,13 @@
  * (tests/lib/eval-helpers.test.ts): they must never import a prompt `?raw` file,
  * the LLM provider, or anything that touches the network — so `npm test` stays
  * offline and key-free. The runner imports both these helpers and the real
- * pipeline; the tests import only this module.
+ * pipeline; the tests import only this module. (`evalGreeting` uses the app's
+ * pure template helpers, which are network-free too.)
  */
+
+import type { Tool } from "~/lib/registry/types";
+import { interpolateGreeting } from "~/lib/chat/greeting";
+import type { TemplateValues } from "~/lib/template/interpolate";
 
 /** A judge model's parsed verdict for one output. Scores are clamped to 1–5. */
 export interface JudgeResult {
@@ -137,4 +142,19 @@ export function buildReportMarkdown(input: ReportInput): string {
     ...bodyLines.map(toRow),
   ];
   return lines.join("\n");
+}
+
+/**
+ * The chat greeting as the app shows it: placeholders such as `{{subject}}` filled
+ * from the case values (`interpolateGreeting`, the app's own helper). Before this,
+ * the transcript showed a literal `{{subject}}` (nulmeting 2026-11-04).
+ */
+export function evalGreeting(
+  tool: Tool,
+  c: { outputLanguage: "nl" | "en"; values?: Record<string, unknown> },
+): string | undefined {
+  const greeting = tool.chat?.greeting;
+  if (!greeting) return undefined;
+  const text = typeof greeting === "string" ? greeting : greeting[c.outputLanguage];
+  return interpolateGreeting(text, (c.values ?? {}) as TemplateValues);
 }

@@ -1,3 +1,5 @@
+import { getToolBySlug } from "~/lib/registry";
+import { evalGreeting } from "../../scripts/eval-helpers";
 import { describe, it, expect } from "vitest";
 import {
   clampScore,
@@ -131,5 +133,24 @@ describe("buildReportMarkdown", () => {
 
   it("handles an empty run without throwing", () => {
     expect(() => buildReportMarkdown({ date: "2026-07-05", rows: [] })).not.toThrow();
+  });
+});
+
+describe("chat greeting in the eval transcript (nulmeting 2026-11-04)", () => {
+  it("fills greeting placeholders from the case values, as the app does", () => {
+    const tool = getToolBySlug("scaffolding-feedback");
+    expect(tool).toBeDefined();
+    const g = evalGreeting(tool!, {
+      outputLanguage: "nl",
+      values: { subject: "lineaire vergelijkingen" },
+    });
+    expect(g).toContain("lineaire vergelijkingen");
+    expect(g).not.toContain("{{");
+  });
+
+  it("is undefined for a tool without a greeting", () => {
+    expect(
+      evalGreeting(getToolBySlug("arcs-reactor")!, { outputLanguage: "nl", values: {} }),
+    ).toBeUndefined();
   });
 });
