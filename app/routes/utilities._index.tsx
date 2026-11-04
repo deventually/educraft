@@ -11,7 +11,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export function meta({ matches }: Route.MetaArgs) {
-  const root = matches.find((m) => m?.id === "root")?.data as { locale?: Locale } | undefined;
+  const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
   return [{ title: `${getMessages(root?.locale ?? DEFAULT_LOCALE).utilities.heading} — LimeOnIt` }];
 }
 

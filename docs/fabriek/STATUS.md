@@ -11,7 +11,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 15 tools (9 voor
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
-- **Stack:** React Router 7, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
+- **Stack:** React Router 8, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
   Vitest + axe. 878 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
@@ -80,6 +80,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
   Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
   bekende fout — PR open, meting volgt.
+- **React Router 8 en React 19.3:** `npm run dev` start zonder waarschuwingen. De upgrade vervangt de
+  patch voor de `envFile`-melding; `meta` en `useMatches` lezen nu `loaderData` — PR open.
 - Eerlijke bronvermelding voor de overige elf boektools (laatste stap van 24.0). Het verbatim-veld
   bevat nu de echte boekprompt (`app/lib/prompts/book/`), naast het boek-PDF gelegd. Auteurs,
   pagina's en "getest met" staan zoals gedrukt, en per tool staat wat wij anders doen. Cognitive

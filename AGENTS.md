@@ -6,7 +6,7 @@ work; how things are built lives in the [wiki](wiki/Home.md), what is going on i
 
 ## Project model
 
-LimeOnIt turns *The Pedagogical Promptbook* (David Wiley, ed., CC BY 4.0) into a React Router 7
+LimeOnIt turns *The Pedagogical Promptbook* (David Wiley, ed., CC BY 4.0) into a React Router 8
 app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture.md).
 
 - **Tools are data.** Every tool is one `Tool` registry entry (`app/lib/registry/tools/<id>.ts`)

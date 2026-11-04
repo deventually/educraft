@@ -41,7 +41,7 @@ and the per-phase briefs under [`docs/implementation/`](../docs/implementation/R
   two roles (teacher, admin) · admin console.
 - **Source material:** *The Pedagogical Promptbook* (David Wiley, ed. — CC BY 4.0,
   DOI 10.59668/2340).
-- **Stack:** React Router 7 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) ·
+- **Stack:** React Router 8 (SSR) · TypeScript · Tailwind v4 · SQLite (Drizzle) ·
   multi-provider AI (Anthropic default, local & CLI providers wired).
 - **Decided:** **one app, not many** — see [Vision §6](../docs/VISION.md#6-why-one-app-a-settled-decision).
 
