@@ -29,12 +29,11 @@ import { utilities } from "./utilities";
  * One file per namespace, like nl/ (see nl/index.ts).
  */
 export const en: Messages = {
-  appName: "LimeOnIt",
-  tagline: "Design evidence-based education with generative AI",
   about,
   account,
   admin,
   aiNotice,
+  appName: "LimeOnIt",
   auth,
   chat,
   confirm,
@@ -51,6 +50,7 @@ export const en: Messages = {
   portfolioExport,
   projects,
   settings,
+  tagline: "Design evidence-based education with generative AI",
   toast,
   tool,
   utilities,

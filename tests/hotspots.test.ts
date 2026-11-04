@@ -33,6 +33,36 @@ describe("i18n messages: one file per namespace", () => {
   });
 });
 
+describe("i18n messages: keys in a fixed (sorted) order", () => {
+  // Two PRs in the same namespace used to append at the same spot (the end of an object) and
+  // collide. With sorted keys each new key has one fixed place, so inserts rarely touch the same
+  // lines. `npm run check` (biome useSortedKeys on app/lib/i18n/messages) sorts and enforces it.
+  const unsorted = (obj: unknown, path: string): string[] => {
+    if (obj === null || typeof obj !== "object") return [];
+    const keys = Object.keys(obj);
+    // Biome's natural order: case-insensitive first, then by code point.
+    const sorted = [...keys].sort((a, b) => {
+      const [x, y] = [a.toLowerCase(), b.toLowerCase()];
+      return x < y ? -1 : x > y ? 1 : a < b ? -1 : a > b ? 1 : 0;
+    });
+    const here = keys.join() === sorted.join() ? [] : [path || "(root)"];
+    return [
+      ...here,
+      ...Object.entries(obj as Record<string, unknown>).flatMap(([k, v]) =>
+        unsorted(v, path ? `${path}.${k}` : k),
+      ),
+    ];
+  };
+
+  it.each(["nl", "en"] as const)("every object in %s has sorted keys", (locale) => {
+    expect(unsorted(messages[locale], "")).toEqual([]);
+  });
+
+  it("biome enforces the order on the message files", () => {
+    expect(read("biome.json")).toContain('"useSortedKeys": "on"');
+  });
+});
+
 describe("routes: one file per area", () => {
   const areas = readdirSync(resolve(root, "app/routing")).filter(
     (f) => f.endsWith(".ts") && f !== "types.ts",

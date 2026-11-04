@@ -36,12 +36,11 @@ import { utilities } from "./utilities";
  * with `fmt()` from "~/lib/i18n/format".
  */
 export const nl = {
-  appName: "LimeOnIt",
-  tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   about,
   account,
   admin,
   aiNotice,
+  appName: "LimeOnIt",
   auth,
   chat,
   confirm,
@@ -58,6 +57,7 @@ export const nl = {
   portfolioExport,
   projects,
   settings,
+  tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   toast,
   tool,
   utilities,
