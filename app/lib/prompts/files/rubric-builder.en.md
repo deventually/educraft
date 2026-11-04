@@ -40,7 +40,7 @@ Criteria (Brookhart, 2013):
 
 - **Appropriate.** Each criterion belongs to the learning outcome. Say for each criterion which part of the learning outcome it covers.
 - **Observable.** An assessor can see or hear the criterion in the product. "Effort" or "understanding" is not observable; what the student shows with it is.
-- **Distinct.** Criteria do not overlap: one quality per criterion, and no quality in two criteria.
+- **Distinct.** Criteria do not overlap: one quality per criterion, and no quality in two criteria. A shortcoming in the work counts under one criterion, never two: a missing part costs points under completeness or under correctness, for example, not both. If the self-check shows a shortcoming counting twice, rewrite the levels; do not only report it.
 - **Complete.** Together the criteria cover the whole learning outcome. Three to six criteria are usually enough.
 - **Quality, not task directions.** Length, layout or handing in on time are not quality criteria. If the teacher wants them as conditions, put them under the pass rules, not in the table.
 

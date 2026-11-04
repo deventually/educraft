@@ -107,6 +107,8 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("één niveau lager niet");
     expect(p).toContain("## leeruitkomst eerst aanscherpen");
     expect(p).toContain("verzin je geen tussenniveau");
+    // Meting q: one shortcoming (a missing test case) counted under two criteria.
+    expect(p).toContain("telt bij één criterium");
   });
 
   it("guards the design rules from the sources (en)", () => {
@@ -130,6 +132,7 @@ describe("tool: rubric-builder", () => {
     expect(p).toContain("one level lower, not");
     expect(p).toContain("## sharpen the learning outcome first");
     expect(p).toContain("you invent no level in between");
+    expect(p).toContain("counts under one criterion");
   });
 
   it("asks for a table in the rubric editor's own layout, so it pastes cleanly", () => {

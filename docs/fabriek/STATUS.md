@@ -79,6 +79,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- Beoordelingsmodel: een gebrek telt bij één criterium, nooit bij twee (na meting q: in 1 van de 3
+  runs telde een ontbrekend testgeval dubbel). Meting q staat in `evals/reports/2026-11-04q.md`;
+  tussenronde met 1 run volgt — PR open.
 - P24.2 Beoordelingsmodel maken (`rubric-builder`): uit leeruitkomst en opdracht een concept-rubric
   met waarneembare niveaus, punten, cesuur en knock-out, plus een zelfcheck; een geplakte rubric
   wordt eerst gecontroleerd. Bronnen: Brookhart (2013), Anderson & Krathwohl (2001). Zes
