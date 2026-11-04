@@ -81,6 +81,20 @@ describe("dialogic-encounters@v2 — the book's interview with a theorist", () =
     expect(p).toContain("halfway");
   });
 
+  it("stays in character at the close; the greeting carries the simulation note (meting h)", () => {
+    // Meting h: the closing "ik ben een simulatie" counted as breaking character.
+    expect(runtime("nl")).not.toContain("omdat je een simulatie bent");
+    expect(runtime("en")).not.toContain("because you are a simulation");
+    const g = tool().chat!.greeting as { nl: string; en: string };
+    expect(g.nl).toMatch(/simulatie/);
+    expect(g.en).toMatch(/simulation/);
+  });
+
+  it("keeps the CRAAP turn short (meting h: 159 words)", () => {
+    expect(runtime("nl")).toContain("ook die beurt blijft onder de 150 woorden");
+    expect(runtime("en")).toContain("that turn too stays under 150 words");
+  });
+
   it("is clean Dutch: no leftovers from the old prompt", () => {
     const nl = runtime("nl");
     for (const bad of ["leertheoricus", "Nodigen uit", "pre-service", "commitmenten", "ernstig interesse"]) {
