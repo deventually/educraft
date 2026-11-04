@@ -70,7 +70,7 @@ export const utilities = {
       points: "pt",
     },
     exportHint:
-      "Plak de Markdown in een beoordelingstool, zoals Stageverslag of afstudeerwerk beoordelen, of de tabel in Word of Excel.",
+      "Plak de Markdown in een beoordelingstool, zoals Studentwerk beoordelen en feedback geven, of de tabel in Word of Excel.",
     invalid: "Niet opgeslagen: controleer de naam en de punten (0 tot en met 100).",
     knockout: "Knock-out: het laagste niveau is altijd onvoldoende",
     level: "Niveau {n}",
