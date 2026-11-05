@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TICKABLE_CODES } from "./readiness";
 import {
   CRITERION_STATUSES,
   type DossierData,
@@ -98,6 +99,7 @@ const EvidenceSchema = z.object({
       courseId: Id,
       part: z.union([z.literal("outcomes-and-matrix"), z.object({ assessmentId: Id })]),
       at: z.number().int().nonnegative(),
+      itemCount: z.number().int().nonnegative().max(1_000).optional(),
     })
     .optional(),
 });
@@ -140,6 +142,9 @@ export const DossierDataSchema = z
           review: CoachReviewSchema,
         }),
       )
+      .optional(),
+    readiness: z
+      .object({ ticked: z.partialRecord(z.enum(TICKABLE_CODES), z.number().int().nonnegative()) })
       .optional(),
   })
   .superRefine((d, ctx) => {

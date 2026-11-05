@@ -6,6 +6,7 @@
 import { z } from "zod";
 import * as edit from "./edit";
 import { DossierDataSchema, LIMITS } from "./schema";
+import { TICKABLE_CODES } from "./readiness";
 import { skeletonOutcomes } from "./skeleton";
 import { CRITERION_STATUSES, type DossierData, EVIDENCE_KINDS } from "./types";
 import type { Locale } from "~/lib/i18n";
@@ -100,6 +101,7 @@ const SCHEMAS = {
   dismissDraftNotice: z.object({}),
   addReference: z.object({ apa: required(LIMITS.reference) }),
   removeReference: z.object({ referenceId: Id }),
+  tickReadiness: z.object({ code: z.enum(TICKABLE_CODES), ticked: z.literal("on").optional() }),
 } as const;
 
 export type Intent = keyof typeof SCHEMAS;
@@ -241,6 +243,14 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
     case "removeReference": {
       const v = input as z.infer<(typeof SCHEMAS)["removeReference"]>;
       return edit.removeReference(d, v.referenceId);
+    }
+    case "tickReadiness": {
+      const v = input as z.infer<(typeof SCHEMAS)["tickReadiness"]>;
+      const { [v.code]: at, ...rest } = d.readiness?.ticked ?? {};
+      return {
+        ...d,
+        readiness: { ticked: v.ticked ? { ...rest, [v.code]: at ?? ctx.now } : rest },
+      };
     }
   }
 }

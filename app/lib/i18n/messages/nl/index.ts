@@ -23,6 +23,7 @@ import { pages } from "./pages";
 import { people } from "./people";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
+import { portfolioReadiness } from "./portfolioReadiness";
 import { privacy } from "./privacy";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
@@ -74,6 +75,7 @@ export const nl = {
   people,
   portfolio,
   portfolioExport,
+  portfolioReadiness,
   privacy,
   projects,
   resultActions,

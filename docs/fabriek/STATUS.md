@@ -170,6 +170,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Bezig
 
+- P29.1 Klaar om in te leveren?: in stap 5 van het BDB/BKE-dossier één lijst (groen / oranje /
+  rood, met pictogram en woord) of je dossier inleverklaar is, met per punt "Los op". Zonder AI en
+  zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten
+  (geen studentnamen, BKE-minimum, AI-verantwoording) met datum. Een toets als bewijs telt zijn
+  vragen (`itemCount`). Geen migratie. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop

@@ -15,7 +15,7 @@ import type { CourseData } from "~/lib/courses/types";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { addEvidence, updateEvidence } from "~/lib/portfolio/edit";
 import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
-import type { CourseEvidencePart, DossierData } from "~/lib/portfolio/types";
+import type { CourseEvidencePart, DossierData, EvidenceItem } from "~/lib/portfolio/types";
 
 /** The form value of a part: "outcomes-and-matrix" or "assessment:<id>" of an existing assessment. */
 export function parsePart(value: string, data: CourseData): CourseEvidencePart | null {
@@ -36,6 +36,17 @@ export async function dossierTargets(user: User) {
       criteria: o.criteria.map((c) => ({ id: c.id, text: c.text })),
     })),
   }));
+}
+
+/** Where a snapshot came from; a test also carries its question count (P29.1). */
+function snapshotSource(
+  course: Course,
+  part: CourseEvidencePart,
+): NonNullable<EvidenceItem["sourceCourse"]> {
+  const source = { courseId: course.id, part, at: Date.now() };
+  if (typeof part === "string") return source;
+  const items = course.data.assessments.find((a) => a.id === part.assessmentId)?.items;
+  return items ? { ...source, itemCount: items.length } : source;
 }
 
 export type CourseEvidenceResult = { ok: true } | { ok: false; error: string };
@@ -67,7 +78,7 @@ export async function addCourseToDossier(
     kind: typeof part === "string" ? "other" : "test-material",
     text: text.slice(0, LIMITS.documentText),
     criterionIds,
-    sourceCourse: { courseId: course.id, part, at: Date.now() },
+    sourceCourse: snapshotSource(course, part),
   });
   if (!DossierDataSchema.safeParse(next).success)
     return { ok: false, error: m.portfolio.errorInvalid };
@@ -110,7 +121,7 @@ export async function refreshCourseEvidence(
     ok: true,
     data: updateEvidence(d, evidenceId, {
       text: text.slice(0, LIMITS.documentText),
-      sourceCourse: { courseId, part, at: Date.now() },
+      sourceCourse: snapshotSource(course, part),
     }),
   };
 }

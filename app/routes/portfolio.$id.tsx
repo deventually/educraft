@@ -6,6 +6,8 @@ import { criterionHints } from "~/lib/portfolio/toolHints";
 import { ToolHints } from "~/components/portfolio/ToolHints";
 import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
+import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
+import { readinessCheck } from "~/lib/portfolio/readiness";
 import { nextStep, outcomeProgress, requirementFindings } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
@@ -46,7 +48,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     collect: work,
     fill: work,
     write: work,
-    finish: "#export",
+    finish: "#readiness",
   };
   const practise = names.has(PRACTISE_TOOL)
     ? { slug: PRACTISE_TOOL, name: names.get(PRACTISE_TOOL) ?? PRACTISE_TOOL }
@@ -62,6 +64,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     step: dossierStep(d),
     routeLinks,
     practise,
+    readiness: readinessCheck(d),
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -100,6 +103,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     step: routeStep,
     routeLinks,
     practise,
+    readiness,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -188,6 +192,8 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         </Link>
       </p>
 
+      <ReadinessCheck dossierId={id} items={readiness} framework={framework} />
+
       {/* Word export (25.6): a plain GET form, works without JS. */}
       <form
         id="export"
@@ -196,6 +202,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         className="mt-4 flex flex-wrap items-center gap-3"
         aria-label={t.portfolio.exportTitle}
       >
+        <ReadinessSummaryLink items={readiness} />
         {aiUsed && (
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" name="ai" value="1" defaultChecked={aiRequired} />
