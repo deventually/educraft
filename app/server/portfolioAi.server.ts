@@ -26,8 +26,10 @@ export async function callPortfolioModel(
   locale: Locale,
   maxTokens: number,
   event = "portfolio-coach",
+  /** A model the caller already checked as selectable for `user` (P21.4); else the default. */
+  chosenModel?: string,
 ): Promise<{ text: string; model: string } | null> {
-  const model = await effectiveDefaultModel(user, DEFAULT_MODEL);
+  const model = chosenModel ?? (await effectiveDefaultModel(user, DEFAULT_MODEL));
   const started = Date.now();
   try {
     const { text, usage } = await providerForModel(model).generate({

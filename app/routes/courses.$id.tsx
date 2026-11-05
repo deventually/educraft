@@ -87,6 +87,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
       if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
+      if (r.intent === "review" || r.intent === "decide")
+        return { variant: r.partial ? "info" : "success", message: r.message };
       if (r.intent === "import-blueprint")
         return { variant: "success", message: fmt(c.blueprint.done, { n: r.added }) };
       return { variant: "success", message: c.toastSaved };

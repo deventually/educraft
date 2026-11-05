@@ -34,6 +34,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
   thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
   menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, opslag (P21.3, #102) gemerged op 2026-11-05:** beoordelingen van een pet en de
+  besluiten van de docent worden bewaard (migratie 0018); verworpen adviezen komen niet terug.
 - **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** register van de twee petten,
   de invoer onder korte sleutels en de controle op het antwoord; nog zonder AI en scherm.
 - **Rolagenten, de twee AI-teksten (P21.2, #85) gemerged op 2026-11-05:** Toetsdeskundige en
@@ -147,10 +149,11 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 
 ## Bezig
 
-- P21.3 Rolagenten, opslag: twee tabellen (`agent_reviews` met de bevindingen van een pet,
-  `review_decisions` met Akkoord / Niet akkoord en een reden van hooguit 500 tekens), migratie 0018
-  en een repository per docent. Eerder verworpen bevindingen zijn op te vragen voor de volgende
-  beoordeling. Weg bij het verwijderen van de cursus of het account. Nog geen scherm. PR open.
+- P21.4 Rolagenten, "Laat beoordelen" (server): intent `review` op de cursuspagina laat beide
+  petten de cursus nakijken op het gekozen model (of je standaardmodel) en bewaart hun advies;
+  faalt één pet, dan blijft het advies van de andere bewaard en noemt de melding welke pet faalde.
+  Intent `decide` legt Akkoord / Niet akkoord met reden vast. 404 als rolagenten uit staan. Nog
+  geen scherm (21.5). PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
   zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).

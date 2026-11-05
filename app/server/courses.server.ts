@@ -5,6 +5,7 @@
  */
 import { requireRole, type User } from "./auth.server";
 import { requireFeature } from "./availability.server";
+import { decideOnFinding, reviewCourse } from "./agentReview.server";
 import {
   type Course,
   getCourse,
@@ -21,6 +22,8 @@ import { applyImport, type ImportProposal, parseImportSelection } from "~/lib/co
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
 import { extractCourseImport } from "./courseImport.server";
 import { addCourseToDossier } from "./courseEvidence.server";
 import { getGeneration } from "./repositories/generations.server";
@@ -51,6 +54,7 @@ export type CourseActionResult =
   | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
+  | { ok: true; intent: "review" | "decide"; message: string; partial?: boolean }
   | { ok: false; error: string; intent?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
@@ -125,6 +129,26 @@ export async function saveCourseIntent(
   if (intent === "use-as-evidence") {
     const result = await addCourseToDossier(user, course, fd, locale);
     return result.ok ? { ok: true, intent } : { ok: false, intent, error: result.error };
+  }
+
+  if (intent === "review" || intent === "decide") {
+    // Role agents can be switched off per team (P28.3): then these intents are a 404.
+    await requireFeature(user, "roleAgents");
+    const a = getMessages(locale).agents;
+    if (intent === "decide") {
+      const r = await decideOnFinding(user, course, fd);
+      if (r.ok) return { ok: true, intent, message: a.decide.done };
+      return {
+        ok: false,
+        intent,
+        error: r.error === "invalid" ? a.decide.invalid : a.decide.notFound,
+      };
+    }
+    const r = await reviewCourse(user, course, String(fd.get("model") ?? "") || null, locale);
+    if (!r.ok) return { ok: false, intent, error: a.review[r.error] };
+    if (r.failed.length === 0) return { ok: true, intent, message: a.review.done };
+    const names = r.failed.map((agent) => loc(agent.role, locale)).join(", ");
+    return { ok: true, intent, partial: true, message: fmt(a.review.partial, { agents: names }) };
   }
 
   if (intent === "settings") {
