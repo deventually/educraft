@@ -128,4 +128,65 @@ describe("/start (P27.3)", () => {
       await settings.setFeatureStand("courses", "on");
     }
   });
+
+  describe("the teacher's week (P22.3)", () => {
+    /** A course that starts on Monday 16 November 2026, with a lesson and a quiz. */
+    const datedCourse = () => ({
+      ...alignedCourse(),
+      startDate: "2026-11-16",
+    });
+    const at = (iso: string) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(iso));
+    };
+
+    it("is absent while no course has a start date, with a hint to the course", async () => {
+      currentUser.value = { id: "nodate", name: "N", email: null, role: "teacher" } as never;
+      const c = await courses.createCourse("nodate", { name: "Zonder", data: alignedCourse() });
+      const data = await load();
+      expect(data.teacherWeek).toBeNull();
+      expect(data.startDateHint).toEqual({ courseId: c.id });
+    });
+
+    it("computes this week from the own dated courses and links, never someone else's", async () => {
+      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      const mine = await courses.createCourse("dated", { name: "Datums", data: datedCourse() });
+      await courses.createCourse("other", { name: "Van een ander", data: datedCourse() });
+      at("2026-11-18T10:00:00Z"); // Wednesday of week 1
+      try {
+        const data = await load();
+        expect(data.startDateHint).toBeNull();
+        const week = data.teacherWeek;
+        expect(week?.now.isoWeek).toBe(47);
+        expect(week?.now.courses.map((c) => c.courseId)).toEqual([mine.id]);
+        expect(week?.next).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("adds next week on Friday in the institution's time zone", async () => {
+      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      // 23:30 UTC on Thursday is already Friday in Amsterdam.
+      at("2026-11-19T23:30:00Z");
+      try {
+        const data = await load();
+        expect(data.teacherWeek?.next?.isoWeek).toBe(48);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("is absent when courses are switched off", async () => {
+      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await settings.setFeatureStand("courses", "off");
+      try {
+        const data = await load();
+        expect(data.teacherWeek).toBeNull();
+        expect(data.startDateHint).toBeNull();
+      } finally {
+        await settings.setFeatureStand("courses", "on");
+      }
+    });
+  });
 });

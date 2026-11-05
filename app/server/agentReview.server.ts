@@ -210,3 +210,27 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
     linkedTests: (await linkedTestItems(user.id, course.id)).length,
   };
 }
+
+/**
+ * Open role-agent findings per course (P22.3): findings of each agent's latest review
+ * without a decision. Null when role agents are switched off for this teacher.
+ */
+export async function openAgentFindings(
+  user: User,
+  courseIds: string[],
+): Promise<Record<string, number> | null> {
+  if (!(await isFeatureOn(user, "roleAgents"))) return null;
+  const out: Record<string, number> = {};
+  for (const courseId of courseIds) {
+    const all = await listReviewsForCourse(user.id, courseId);
+    let open = 0;
+    for (const agent of agentsWatching("course")) {
+      const latest = all.find((r) => r.agentId === agent.id);
+      if (!latest) continue;
+      const decided = new Set((await listDecisions(user.id, latest.id)).map((d) => d.findingId));
+      open += latest.findings.filter((f) => !decided.has(f.id)).length;
+    }
+    if (open > 0) out[courseId] = open;
+  }
+  return out;
+}

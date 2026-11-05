@@ -5,6 +5,7 @@ import {
   GRADE_WEEKS,
   MAX_ROWS,
   nextWeek,
+  showsNextWeek,
   teacherWeek,
   type WeekCourse,
 } from "~/lib/week/teacherWeek";
@@ -219,5 +220,15 @@ describe("nextWeek (P22.2)", () => {
     // The week after the break is course week 2.
     const after = teacherWeek({ ...input, today: "2026-11-16" });
     expect(running(after.courses[0]).week).toBe(2);
+  });
+});
+
+describe("showsNextWeek (P22.3)", () => {
+  it("is true from Friday to Sunday, and false from Monday", () => {
+    expect(showsNextWeek("2026-11-19")).toBe(false); // Thursday
+    expect(showsNextWeek("2026-11-20")).toBe(true); // Friday
+    expect(showsNextWeek("2026-11-21")).toBe(true);
+    expect(showsNextWeek("2026-11-22")).toBe(true); // Sunday
+    expect(showsNextWeek("2026-11-23")).toBe(false); // Monday
   });
 });

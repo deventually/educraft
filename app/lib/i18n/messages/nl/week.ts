@@ -1,0 +1,21 @@
+/** The teacher's week on Start (P22.3). */
+export const week = {
+  agentFindings: "{count} adviezen van de petten",
+  agentFindingsOne: "1 advies van de petten",
+  break: "Vakantie",
+  courseWeek: "week {n}",
+  findings: "{count} aandachtspunten",
+  findingsOne: "1 aandachtspunt",
+  grade: "Nakijken",
+  heading: "Deze week · week {n}",
+  kindActivity: "les of opdracht",
+  kindAssessment: "toets",
+  lessons: "In de les",
+  more: "en nog {n}",
+  next: "Volgende week · week {n}",
+  nothing: "Niets gepland deze week.",
+  prepare: "Voorbereiden",
+  startDateHint: "Zet een startdatum bij je cursus, dan zie je hier je week.",
+  startDateLink: "Naar je cursus",
+  undated: "Zonder startdatum, dus nog niet in je week:",
+};

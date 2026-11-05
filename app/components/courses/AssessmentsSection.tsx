@@ -151,7 +151,11 @@ export function AssessmentsSection({
       ) : (
         <ul className="mt-3 space-y-2">
           {data.assessments.map((as) => (
-            <li key={as.id} className="rounded-xl border border-slate-200 bg-white p-3">
+            <li
+              key={as.id}
+              id={`item-${as.id}`}
+              className="scroll-mt-20 rounded-xl border border-slate-200 bg-white p-3"
+            >
               <p className="font-medium text-slate-900">{as.title}</p>
               <p className="text-sm text-slate-600">
                 <MetaLine

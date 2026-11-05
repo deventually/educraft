@@ -32,6 +32,7 @@ import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
 import { utilities } from "./utilities";
+import { week } from "./week";
 
 /**
  * English UI strings. Must mirror the shape of `nl` exactly — tests/i18n.test.ts
@@ -74,4 +75,5 @@ export const en: Messages = {
   toast,
   tool,
   utilities,
+  week,
 };

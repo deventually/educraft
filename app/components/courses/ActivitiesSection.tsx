@@ -88,7 +88,11 @@ export function ActivitiesSection({
       ) : (
         <ul className="mt-3 space-y-2">
           {data.activities.map((act) => (
-            <li key={act.id} className="rounded-xl border border-slate-200 bg-white p-3">
+            <li
+              key={act.id}
+              id={`item-${act.id}`}
+              className="scroll-mt-20 rounded-xl border border-slate-200 bg-white p-3"
+            >
               <p className="font-medium text-slate-900">{act.title}</p>
               <p className="text-sm text-slate-600">
                 <MetaLine
