@@ -14,6 +14,11 @@ import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getAvailableTools } from "./availability.server";
 import { loc } from "~/lib/i18n/localized";
+import type { DossierData } from "~/lib/portfolio/types";
+import { adoptGenerations, suggestEvidence } from "~/lib/portfolio/suggest";
+import { getGeneration, listGenerations } from "./repositories/generations.server";
+import { loadCourseLinks } from "./courses.server";
+import { getToolBySlug } from "~/lib/registry";
 
 export async function requirePortfolioUser(request: Request): Promise<User> {
   return requireRole(request, "teacher", "admin");
@@ -37,6 +42,34 @@ export async function availableToolNames(
   const locale = getLocale(request);
   const tools = await getAvailableTools(user);
   return new Map(tools.map((t) => [t.slug, loc(t.name, locale)]));
+}
+
+/** A tool's display name for a generation, falling back to its slug. */
+function toolName(slug: string, locale: ReturnType<typeof getLocale>): string {
+  const name = getToolBySlug(slug)?.name;
+  return name ? loc(name, locale) : slug;
+}
+
+/** How many recent generations "Dit heb je misschien al" looks at. */
+const SUGGEST_FROM = 200;
+
+/**
+ * "Dit heb je misschien al" (27.2): the teacher's own earlier work that fits a
+ * criterion, per criterion id, with the tool's name for display.
+ */
+export async function loadSuggestions(request: Request, user: User, d: DossierData) {
+  const locale = getLocale(request);
+  const [gens, links] = await Promise.all([
+    listGenerations(user.id, SUGGEST_FROM),
+    loadCourseLinks(user.id),
+  ]);
+  const byCriterion = suggestEvidence(d, gens, links.byGeneration);
+  return Object.fromEntries(
+    Object.entries(byCriterion).map(([id, list]) => [
+      id,
+      list.map((s) => ({ ...s, toolName: toolName(s.toolSlug, locale) })),
+    ]),
+  );
 }
 
 export type PortfolioActionResult =
@@ -89,6 +122,33 @@ export async function saveIntent(
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
     return { ok: true, intent: intent === "review" ? "review" : "draft" };
+  }
+
+  if (intent === "adoptSuggestions") {
+    // Owner-scoped: someone else's generation is simply not found.
+    const ids = fd.getAll("generationIds").map(String).slice(0, 20);
+    const found = await Promise.all(ids.map((gid) => getGeneration(user.id, gid)));
+    const picked = found.flatMap((g) =>
+      g
+        ? [
+            {
+              id: g.id,
+              title: toolName(g.toolSlug, locale).slice(0, LIMITS.title),
+              text: g.outputMarkdown.slice(0, LIMITS.documentText),
+            },
+          ]
+        : [],
+    );
+    if (picked.length === 0) return { ok: false, error: m.portfolio.errorNotFound };
+    let data: DossierData;
+    try {
+      data = adoptGenerations(dossier.data, String(fd.get("criterionId") ?? ""), picked);
+    } catch {
+      return { ok: false, error: m.portfolio.errorNotFound };
+    }
+    const saved = await updateDossier(user.id, dossier.id, { data }).catch(() => null);
+    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
+    return { ok: true, intent };
   }
 
   const result = applyIntent(dossier.data, fd, { now: Date.now(), locale });

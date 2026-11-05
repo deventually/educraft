@@ -17,7 +17,8 @@ import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ToolHints } from "~/components/portfolio/ToolHints";
-import { availableToolNames } from "~/server/portfolio.server";
+import { availableToolNames, loadSuggestions } from "~/server/portfolio.server";
+import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
 import { chapterHints, criterionHints } from "~/lib/portfolio/toolHints";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { useT } from "~/lib/i18n/useT";
@@ -38,6 +39,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const names = await availableToolNames(request, user);
   const available = new Set(names.keys());
   const view = (slugs: string[]) => slugs.map((slug) => ({ slug, name: names.get(slug) ?? slug }));
+  const allSuggestions = await loadSuggestions(request, user, d);
   return {
     id: dossier.id,
     name: dossier.name,
@@ -63,6 +65,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         .map((c) => [c.id, view(criterionHints(outcome, c, available))]),
     ),
     chapterTools: view(chapterHints(outcome, available)),
+    suggestions: Object.fromEntries(
+      outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
+    ),
   };
 }
 
@@ -123,6 +128,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     stored,
     toolHints,
     chapterTools,
+    suggestions,
   } = loaderData;
   const drafts =
     coachMode === "draft" && confirmed
@@ -162,6 +168,12 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                   {fmt(to.strongLevel, { text: c.strongLevel })}
                 </p>
               )}
+              <EvidenceSuggestions
+                criterionId={c.id}
+                n={i + 1}
+                suggestions={suggestions[c.id] ?? []}
+                className="mt-3"
+              />
               <ToolHints hints={toolHints[c.id] ?? []} step="evidence" className="mt-3" />
               <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
                 <input type="hidden" name="intent" value="setStatus" />
