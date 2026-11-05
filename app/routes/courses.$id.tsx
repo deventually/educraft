@@ -18,6 +18,7 @@ import { CoverageMatrix } from "~/components/courses/CoverageMatrix";
 import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { NumberField } from "~/components/courses/fields";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
+import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 
@@ -63,13 +64,23 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
   const c = t.courses;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
+    pending: (fd) =>
+      fd?.get("intent") === "import-extract"
+        ? { variant: "pending", message: c.import.pending }
+        : { variant: "pending", message: t.toast.saving },
     result: (r) => {
       if (!r) return null;
-      return r.ok
-        ? { variant: "success", message: c.toastSaved }
-        : { variant: "error", message: r.error };
+      if (!r.ok) return { variant: "error", message: r.error };
+      if (r.intent === "import-extract") {
+        const ready = r.flagged ? fmt(c.import.readyCheck, { n: r.flagged }) : c.import.ready;
+        return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
+      }
+      if (r.intent === "import-apply")
+        return { variant: "success", message: fmt(c.import.done, r.added) };
+      return { variant: "success", message: c.toastSaved };
     },
   });
+  const proposal = useImportProposal(actionData);
   const { course, profiles, findings, matrix, linkedWork = [] } = loaderData;
   const { data } = course;
 
@@ -101,6 +112,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           ec={data.ec}
           hours={plannedHours(data)}
           profiles={profiles}
+        />
+        <CourseImport
+          courseName={course.name}
+          startOpen={data.outcomes.length === 0}
+          proposal={proposal}
         />
         <FindingsList data={data} findings={findings} />
         <OutcomesSection data={data} />

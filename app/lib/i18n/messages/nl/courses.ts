@@ -52,6 +52,47 @@ export const courses = {
   heading: "Cursussen",
   help: "Hoe werkt dit?",
   hours: "Uren",
+  import: {
+    addTo: "Toevoegen aan de cursus",
+    apply: "Gekozen items toevoegen",
+    assessmentN: "Toets {n}",
+    assessmentsTitle: "Toetsen",
+    bloom: "Bloom-niveau (voorstel van de AI)",
+    body: "Plak de tekst van de OER of studiehandleiding, of kies het bestand. De AI zet de leeruitkomsten en toetsen klaar als voorstel; jij kiest wat in de cursus komt.",
+    check: "Controleer dit: deze tekst staat niet letterlijk in het document.",
+    clipped: "Het document had meer dan er in een cursus past; de rest is weggelaten.",
+    courseName: "Naam van het vak in het document",
+    courseNameHint: "Beschrijft het document meer vakken? Dan zoekt de AI alleen dit vak.",
+    covers: "Welke leeruitkomsten toetst deze toets?",
+    done: "{outcomes} leeruitkomsten en {assessments} toetsen toegevoegd.",
+    errors: {
+      "empty-document": "Plak eerst de tekst van het document.",
+      failed:
+        "Het lukte niet om leeruitkomsten en toetsen uit het document te halen. Probeer het opnieuw, of neem ze met de hand over.",
+      limit:
+        "Zoveel past er niet in één cursus (hooguit 30 leeruitkomsten en 30 toetsen). Vink minder aan.",
+      quota: "Daglimiet bereikt; morgen kan het weer.",
+    },
+    existing: "Staat al in je cursus; wordt niet dubbel toegevoegd en niet gewijzigd.",
+    extract: "Voorstel maken",
+    file: "Of kies het bestand (PDF of Word)",
+    fileFailed: "Dit bestand kon niet worden gelezen. Plak de tekst dan zelf.",
+    fileHelp:
+      "Het bestand wordt op je computer gelezen en niet bewaard. Alleen de tekst gaat naar het AI-model.",
+    notes: "Opmerkingen van de AI",
+    outcomeN: "Leeruitkomst {n}",
+    outcomesTitle: "Leeruitkomsten",
+    pending: "Het document wordt gelezen…",
+    proposalIntro:
+      "Vink aan wat in de cursus komt en pas de tekst aan waar nodig. Wat niet letterlijk in het document staat, staat uit.",
+    proposalTitle: "Voorstel",
+    ready: "Voorstel klaar. Kies wat in de cursus komt.",
+    readyCheck:
+      "Voorstel klaar. {n} leeruitkomsten staan niet letterlijk in het document; controleer die.",
+    text: "Tekst van het document",
+    title: "Importeren uit OER of studiehandleiding",
+    weightsOff: "De wegingen in het document tellen niet op tot 100%. LimeOnIt past ze niet aan.",
+  },
   intro:
     "Leg per cursus de leeruitkomsten, lessen en toetsen vast. Je ziet meteen wat nog niet onderwezen of getoetst wordt.",
   kind: "Soort",

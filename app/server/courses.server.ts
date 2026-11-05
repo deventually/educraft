@@ -15,11 +15,26 @@ import {
 } from "./repositories/courses.server";
 import { linkTargets, linksByGeneration, parseLinkTarget } from "~/lib/courses/links";
 import { applyCourseIntent } from "~/lib/courses/intents";
+import { applyImport, type ImportProposal, parseImportSelection } from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { extractCourseImport } from "./courseImport.server";
 
-export type CourseActionResult = { ok: true } | { ok: false; error: string };
+/** The largest document text accepted for an import (the model sees the first 80 000). */
+export const IMPORT_DOCUMENT_MAX = 300_000;
+
+export type CourseActionResult =
+  | { ok: true; intent?: undefined }
+  | {
+      ok: true;
+      intent: "import-extract";
+      proposal: ImportProposal;
+      flagged: number;
+      clipped: boolean;
+    }
+  | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
+  | { ok: false; error: string; intent?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
   return requireRole(request, "teacher", "admin");
@@ -42,9 +57,40 @@ export async function saveCourseIntent(
 ): Promise<CourseActionResult> {
   const { user, course } = await loadCourse(request, id);
   const fd = await request.formData();
-  const m = getMessages(getLocale(request)).courses;
+  const locale = getLocale(request);
+  const m = getMessages(locale).courses;
+  const intent = fd.get("intent");
 
-  if (fd.get("intent") === "settings") {
+  if (intent === "import-extract") {
+    const documentText = String(fd.get("documentText") ?? "").slice(0, IMPORT_DOCUMENT_MAX);
+    const courseName = String(fd.get("courseName") ?? course.name);
+    const result = await extractCourseImport(
+      user,
+      course.data,
+      documentText,
+      courseName,
+      locale,
+    ).catch(() => ({ ok: false as const, error: "failed" as const }));
+    if (!result.ok) return { ok: false, intent, error: m.import.errors[result.error] };
+    return { ok: true, intent, ...result };
+  }
+
+  if (intent === "import-apply") {
+    const selection = parseImportSelection(fd);
+    const applied = selection ? applyImport(course.data, selection) : null;
+    if (!applied?.ok)
+      return {
+        ok: false,
+        intent,
+        error: applied?.error === "limit" ? m.import.errors.limit : m.errorInvalid,
+      };
+    const saved = await updateCourse(user.id, course.id, { data: applied.data }).catch(() => null);
+    return saved
+      ? { ok: true, intent, added: applied.added }
+      : { ok: false, error: m.errorInvalid };
+  }
+
+  if (intent === "settings") {
     const name = String(fd.get("name") ?? "").trim();
     if (!name || name.length > COURSE_LIMITS.title) return { ok: false, error: m.errorName };
     const contextProfileId = String(fd.get("contextProfileId") ?? "") || null;

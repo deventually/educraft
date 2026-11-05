@@ -40,7 +40,7 @@ const bloom = z
   .transform((v) => (v ? v : undefined));
 
 /** An optional number from a text field: absent or "" means not set. */
-const optionalNumber = (min: number, max: number, int = false) =>
+export const optionalNumber = (min: number, max: number, int = false) =>
   z
     .string()
     .trim()
