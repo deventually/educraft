@@ -124,3 +124,32 @@ describe("useSandbox — a course from the link (P27.1)", () => {
     expect(result.current.contextProfileId).toBe("p2");
   });
 });
+
+describe("useSandbox — an item from the link (P27.4)", () => {
+  const courses = [
+    { id: "c1", contextProfileId: null, outcomes: [] },
+    { id: "c2", contextProfileId: null, outcomes: [] },
+  ];
+
+  it("keeps the item while the initial course stays selected", () => {
+    const { result } = renderHook(() =>
+      useSandbox({ inputs, courses, initialCourseId: "c1", initialItemId: "a1" }),
+    );
+    expect(result.current.itemId).toBe("a1");
+  });
+
+  it("drops the item when the teacher picks another course, also when picking it again", () => {
+    const { result } = renderHook(() =>
+      useSandbox({ inputs, courses, initialCourseId: "c1", initialItemId: "a1" }),
+    );
+    act(() => result.current.selectCourse("c2"));
+    expect(result.current.itemId).toBe("");
+    act(() => result.current.selectCourse("c1"));
+    expect(result.current.itemId).toBe("");
+  });
+
+  it("has no item without one", () => {
+    const { result } = renderHook(() => useSandbox({ inputs, courses, initialCourseId: "c1" }));
+    expect(result.current.itemId).toBe("");
+  });
+});

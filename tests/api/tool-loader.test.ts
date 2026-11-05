@@ -105,3 +105,39 @@ describe("tool loader — courses (P20, 20.4)", () => {
     expect(data.courses).toEqual([]);
   });
 });
+
+describe("tool loader — the item a tool was opened for (P27.4)", () => {
+  async function loadWith(query: string) {
+    return (await toolRoute.loader({
+      request: new Request(`http://localhost/tools/test-items${query}`),
+      params: { slug: "test-items" },
+      context: {},
+    } as unknown as Parameters<ToolRoute["loader"]>[0])) as {
+      initialCourseId: string;
+      initialItemId: string;
+    };
+  }
+
+  it("takes over an activity or test of the own course, nothing else", async () => {
+    const repo = await import("~/server/repositories/courses.server");
+    const mine = await repo.createCourse("tool-loader-teacher", {
+      name: "Met toets",
+      data: {
+        outcomes: [{ id: "lo", text: "Je toetst." }],
+        activities: [],
+        assessments: [
+          { id: "t1", title: "Toets", kind: "summative", coverage: [{ outcomeId: "lo" }] },
+        ],
+      },
+    });
+    const theirs = await repo.createCourse("someone-else-item", { name: "Niet van mij" });
+
+    expect((await loadWith(`?course=${mine.id}&item=t1`)).initialItemId).toBe("t1");
+    expect((await loadWith(`?course=${mine.id}&item=lo`)).initialItemId).toBe("");
+    expect((await loadWith(`?course=${mine.id}&item=gone`)).initialItemId).toBe("");
+    expect((await loadWith("?item=t1")).initialItemId).toBe("");
+    const foreign = await loadWith(`?course=${theirs.id}&item=t1`);
+    expect(foreign.initialCourseId).toBe("");
+    expect(foreign.initialItemId).toBe("");
+  });
+});

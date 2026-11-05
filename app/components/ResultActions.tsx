@@ -13,6 +13,8 @@ export interface ResultActionsProps {
   generationId: string | null;
   /** The course the work was made for ("" = none). It is linked already (P20.4). */
   courseId: string;
+  /** The course item the work was made for (P27.4); a next step carries it on. */
+  itemId?: string;
   nextTools: { slug: string; name: LocalizedText }[];
   linkTargets: LinkTarget[];
   dossiers: { id: string; name: string; criteria: { id: string; label: string }[] }[];
@@ -21,7 +23,7 @@ export interface ResultActionsProps {
 }
 
 /** What the tool page passes down to every result surface (P27.1). */
-export type ResultContext = Omit<ResultActionsProps, "generationId" | "courseId">;
+export type ResultContext = Omit<ResultActionsProps, "generationId" | "courseId" | "itemId">;
 
 type ActionResult = { ok: true; intent?: string } | { ok: false; error?: string };
 
@@ -35,6 +37,7 @@ const SEP = "::";
 export function ResultActions({
   generationId,
   courseId,
+  itemId = "",
   nextTools,
   linkTargets,
   dossiers,
@@ -73,7 +76,9 @@ export function ResultActions({
   const showEvidence = canKeep && !showCriterion && dossiers.length > 0;
   if (nextTools.length === 0 && !showCourse && !showEvidence && !showCriterion) return null;
 
-  const query = courseId ? `?course=${encodeURIComponent(courseId)}` : "";
+  const query = courseId
+    ? `?course=${encodeURIComponent(courseId)}${itemId ? `&item=${encodeURIComponent(itemId)}` : ""}`
+    : "";
 
   function keepAtCourse(e: FormEvent<HTMLFormElement>) {
     const target = String(new FormData(e.currentTarget).get("target") ?? "");

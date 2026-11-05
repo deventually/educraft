@@ -339,6 +339,42 @@ describe("api.stream — course link (P20, 20.4)", () => {
     expect(linkGenerationSpy).not.toHaveBeenCalled();
   });
 
+  it("links to the item the tool was opened for (P27.4)", async () => {
+    const res = await invoke(
+      {
+        slug: "authentic-assessment",
+        values: fullValues("authentic-assessment"),
+        courseId: "course-1",
+        itemId: "item-1",
+      },
+      { userId: "link-item" },
+    );
+    await res.text();
+    expect(linkGenerationSpy).toHaveBeenCalledWith("link-item", "course-1", "gen-1", "item-1");
+  });
+
+  it("an item without a course links nothing (P27.4)", async () => {
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment"), itemId: "i" },
+      { userId: "link-item-only" },
+    );
+    await res.text();
+    expect(linkGenerationSpy).not.toHaveBeenCalled();
+  });
+
+  it("an oversized itemId → invalidRequest (P27.4)", async () => {
+    const res = await invoke(
+      {
+        slug: "authentic-assessment",
+        values: fullValues("authentic-assessment"),
+        courseId: "course-1",
+        itemId: "x".repeat(101),
+      },
+      { userId: "link-item-big" },
+    );
+    expect(sseErrorMessage(await res.text())).toBe(m.error.invalidRequest);
+  });
+
   it("an oversized courseId → invalidRequest", async () => {
     const res = await invoke(
       {

@@ -44,6 +44,7 @@ export const testAnalysis: Tool = {
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 8192,
   defaultTemperature: 0.2,
+  courseActions: ["assessment"],
   enabled: true,
   phase: 1,
   inputs: [

@@ -46,6 +46,7 @@ export const rubricBuilder: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   next: ["stage-assessment"],
+  courseActions: ["assessment"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 8192,
   defaultTemperature: 0.3,

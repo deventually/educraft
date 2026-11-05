@@ -87,8 +87,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       }))
     : [];
   // P27.1: a next step opens with `?course=`; only an own course is taken over.
-  const wanted = new URL(request.url).searchParams.get("course") ?? "";
-  const initialCourseId = ownCourses.some((c) => c.id === wanted) ? wanted : "";
+  const search = new URL(request.url).searchParams;
+  const wanted = search.get("course") ?? "";
+  const initialCourse = ownCourses.find((c) => c.id === wanted);
+  const initialCourseId = initialCourse ? wanted : "";
+  // P27.4: opened from a lesson or test (`?item=`); only an item of that own course.
+  const wantedItem = search.get("item") ?? "";
+  const initialItemId =
+    initialCourse &&
+    [...initialCourse.data.activities, ...initialCourse.data.assessments].some(
+      (i) => i.id === wantedItem,
+    )
+      ? wantedItem
+      : "";
   const nextTools = await nextStepsFor(user, tool.next ?? []);
   // The BDB/BKE workplace switched off (P27): no dossiers, so no evidence choice.
   const ownDossiers = (await portfolioAccess(user)) ? await listDossiers(user.id) : [];
@@ -110,6 +121,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     helpOverlay,
     courses,
     initialCourseId,
+    initialItemId,
     nextTools,
     linkTargets: linkTargets(ownCourses),
     dossiers,
@@ -192,6 +204,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     helpOverlay,
     courses,
     initialCourseId,
+    initialItemId,
     nextTools,
     linkTargets,
     dossiers,
@@ -226,6 +239,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             catalogModels={catalogModels}
             courses={courses}
             initialCourseId={initialCourseId}
+            initialItemId={initialItemId}
             resultContext={resultContext}
           />
         ) : multiStage ? (
@@ -237,6 +251,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             catalogModels={catalogModels}
             courses={courses}
             initialCourseId={initialCourseId}
+            initialItemId={initialItemId}
             resultContext={resultContext}
           />
         ) : (
@@ -248,6 +263,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             catalogModels={catalogModels}
             courses={courses}
             initialCourseId={initialCourseId}
+            initialItemId={initialItemId}
             resultContext={resultContext}
           />
         )}

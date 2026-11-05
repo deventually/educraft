@@ -175,6 +175,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   weeks) and the open findings; `nextWeek` is the same call a week later, shown on Start from
   Friday to Sunday. `app/lib/calendar/ics.ts` writes the course as an RFC 5545 file (whole-week
   events, stable UID per item), served by `/courses/:id/calendar.ics` to the owner only.
+- **The course as a workplace (P27.4).** `Tool.courseActions` (`outcome | activity | assessment`)
+  says at which kind of course item a tool is a button; `FINDING_TOOLS` in
+  `app/lib/registry/courseActions.ts` maps a finding code to the tool for "Los op met…" (checked at
+  boot by `validateFindingTools`; the course engine knows nothing of tools). A hat finding gets the
+  first tool for the kind of its `targetId`. `courseToolsFor(user)` (`courseTools.server.ts`) keeps
+  only available tools. A button opens `/tools/<slug>?course=&item=`; the tool loader takes the item
+  only from the own course, `useSandbox` drops it when another course is picked, and `/api/stream`
+  links the result to that lesson or test (`itemId`). The course page shows "Per week"
+  (`weekPlan`, pure); the week on Start (P22.3) shows one button per row: the preferred tool of
+  its kind (`PREFERRED_TOOLS`), or the test analysis in *Nakijken* (`GRADE_TOOL`).
 
 ---
 

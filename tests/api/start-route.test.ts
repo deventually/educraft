@@ -177,6 +177,20 @@ describe("/start (P27.3)", () => {
       }
     });
 
+    it("gives the week the course tools the teacher may use (P27.4)", async () => {
+      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await settings.setToolStand("rubric-builder", "off");
+      try {
+        const data = await load();
+        expect(data.teacherWeek?.tools.activity.map((t) => t.slug)).toContain("lesson-plan");
+        expect(data.teacherWeek?.tools.assessment.map((t) => t.slug)).not.toContain(
+          "rubric-builder",
+        );
+      } finally {
+        await settings.setToolStand("rubric-builder", null);
+      }
+    });
+
     it("is absent when courses are switched off", async () => {
       currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
       await settings.setFeatureStand("courses", "off");
