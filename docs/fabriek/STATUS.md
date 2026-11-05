@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 bezig)_
 
 ## Nu
 
+- **Lastig gesprek oefenen (P24.8, #75) gemerged op 2026-11-05:** de AI speelt een verzonnen
+  student in een moeilijk gesprek en geeft daarna feedback met citaten; eindmeting dc3 elke case
+  4,60–4,93.
 - **Opdracht differentiëren (P24.7, #76) gemerged op 2026-11-05:** drie varianten met hetzelfde
   leerdoel naar Tomlinson (2017); eindmeting df2 elke case 4,73–5,00.
 - **Opdracht helder schrijven (P24.6, #73) gemerged op 2026-11-05:** opdracht of handleiding
@@ -88,18 +91,15 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
 - 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
   wijden." → BESLUIT-2026-11-04-11.
 - 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → BESLUIT-2026-11-04-16, vervolg op P25.
+- 2026-11-05: "Kunnen we niet alvast beginnen met de volgende P20 features?" en "Ik wil 2 t/m 5 wel
+  hebben" → P20 met studielast en de P24-tools erbij; toetsmatrijs, OER-import en BDB/BKE naar P26
+  (BESLUIT-2026-11-05-1).
 
 ## Bezig
 
-- P24.8 Lastig gesprek oefenen (`difficult-conversation`, chat): de AI speelt een verzonnen student
-  in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
-  vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
-  nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
-  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Metingen dc1 → dc2 → dc3:
-  ronde 1 (gewone opsommingstekens) hielp, de extra genderregel voor gebaren gaf regressie en is in
-  ronde 2 teruggedraaid. Eindmeting dc3 (3 runs, batch): elke case 4,60–4,93, geen gefaalde harde
-  check (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-05dc3.md`). Tien
-  uitkomsten liggen klaar in `evals/reviews/difficult-conversation/` voor Bastiaan — PR open.
+- P20.1 Cursussen, puur domein (`app/lib/courses/`): het cursusmodel (leeruitkomsten, activiteiten,
+  toetsen, Bloom, studielast), bewerkingen en de afstemmingscontroles, zonder AI en nog zonder
+  scherm. Daarna 20.2 (opslag), 20.3 (pagina's), 20.4 (koppelen en voorinvullen). PR open.
 
 ## Wacht op jou
 
