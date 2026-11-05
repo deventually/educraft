@@ -227,3 +227,5 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   per docent); de BDB/BKE-schakelaar per docent uit P27.2 wordt daarin de uitzondering per docent,
   en P28.1–28.3 komen vóór P27.3. Privacy: akkoord zonder extra toets. Bastiaan, 2026-11-05.
   Uitwerking: brief P28.
+- **BESLUIT-2026-11-05-6:** **Een beheerder heeft de BDB/BKE-werkplaats altijd**, los van de
+  schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).

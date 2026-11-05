@@ -127,6 +127,10 @@ _Laatst bijgewerkt: 2026-11-05 (brief P28 Teams in een PR)_
 
 ## Bezig
 
+- P27.2 BDB/BKE doet mee: "Dit heb je misschien al" (eerder werk als bewijs voorstellen), de route
+  in vijf stappen bovenaan het dossier en de BDB/BKE-schakelaar per docent (uit 27.3 naar voren) zijn
+  klaar, net als de weg terug: vanuit een criterium open je de tool en zet je het resultaat met één
+  knop bij dat criterium. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
   (architectuur en roadmap) en de README. Daarna is P20 af. PR open.

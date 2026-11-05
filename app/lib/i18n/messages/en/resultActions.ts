@@ -5,6 +5,7 @@ export const resultActions: Messages["resultActions"] = {
   evidenceLabel: "Dossier and criterion",
   heading: "Carry on with this result",
   next: "Next step",
+  putAtCriterion: "Add to this criterion",
   savedIn: "Kept with {course}",
   saveToCourse: "Keep with course",
   toastEvidence: "Added to your dossier.",

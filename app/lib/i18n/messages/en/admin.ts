@@ -138,6 +138,12 @@ export const admin: Messages["admin"] = {
     teacherNone: "No teachers yet.",
     teacherOwn: "Own selection",
   },
+  portfolio: {
+    heading: "BDB/BKE per teacher",
+    intro:
+      "Switch the BDB/BKE workplace on for the teachers who work on it. Switching it off hides the workplace; the dossier is kept.",
+    label: "BDB/BKE on for {name}",
+  },
   tools: {
     audienceInstructor: "Teacher",
     audienceStudent: "Student",

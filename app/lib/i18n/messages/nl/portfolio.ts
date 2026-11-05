@@ -3,6 +3,11 @@ export const portfolio = {
   addToDossierLabel: "Dossier",
   backToDossier: "Terug naar het dossier",
   backToList: "Alle dossiers",
+  bar: {
+    back: "Terug naar {dossier}",
+    for: "Voor je dossier, {outcome}:",
+    label: "Voor je dossier",
+  },
   coach: {
     alreadyShown: "Je hebt dit criterium als aangetoond gemarkeerd.",
     done: "De beoordeling staat klaar.",
@@ -196,10 +201,32 @@ export const portfolio = {
   referenceRemove: "Bron verwijderen",
   referencesEmpty: "Nog geen bronnen.",
   referencesTitle: "Literatuur",
+  route: {
+    finishHint:
+      "Laatste stap: zet elk criterium op aangetoond, kies of je de AI-verantwoording opneemt en download je dossier als Word-bestand.",
+    label: "Route van je dossier",
+    practise: "Oefen het eindgesprek met {tool}",
+    stepOf: "Stap {n} van 5",
+    steps: {
+      collect: "Verzamel wat je al hebt",
+      fill: "Vul aan met een tool",
+      finish: "Rond af",
+      framework: "Kader",
+      write: "Schrijf je hoofdstukken",
+    },
+  },
   status: {
     "in-progress": "Mee bezig",
     "not-started": "Nog niet begonnen",
     shown: "Aangetoond",
+  },
+  suggest: {
+    done: "Bij het criterium gezet.",
+    inCourses: "bij {courses}",
+    intro:
+      "Eerder gemaakt werk dat bij dit criterium past. Vink aan wat je als bewijs wilt gebruiken.",
+    submit: "Zet bij criterium {n}",
+    title: "Dit heb je misschien al",
   },
   toastAddedToDossier: "Toegevoegd aan het dossier. Koppel het daar aan een criterium.",
   toastConfirmed: "Kader bevestigd.",
@@ -221,19 +248,28 @@ export const portfolio = {
         "Analyseer of je leerdoelen, werkvormen en toetsing op elkaar aansluiten. De analyse laat zien hoe je onderwijs in het geheel past.",
       "dialogic-encounters":
         "Verken in een gesprek met een leertheoreticus hoe je je keuzes theoretisch onderbouwt.",
+      differentiation:
+        "Maak van één opdracht drie varianten voor verschillende beginsituaties, met hetzelfde leerdoel. Zo laat je zien hoe je met verschillen omgaat.",
       "forum-autograder":
         "Beoordeel een online discussie op sociale, cognitieve en onderwijsaanwezigheid. Zo laat je zien hoe je de interactie begeleidt.",
       "guided-reflection":
         "Ontwerp je les vanuit de leeruitkomsten (Backward Design). Het lesontwerp laat je voorbereiding zien.",
+      "lesson-plan":
+        "Laat een concept-lesopzet maken met een tijdsplan dat past bij de les. De lesopzet laat je voorbereiding zien.",
       "peer-tutoring": "Beoordeel een bron kritisch voordat je hem in je hoofdstuk gebruikt.",
+      "rubric-builder":
+        "Bouw een analytische rubric met niveaus per criterium. De rubric laat zien hoe je beoordeelt.",
       "socratic-partner":
         "Laat je met vragen uitdagen om je eigen ontwikkeling scherp onder woorden te brengen.",
       "stage-assessment":
         "Laat een concept-beoordeling van studentwerk maken tegen je eigen nakijkmodel. Jij beslist; jouw definitieve beoordeling is het bewijs.",
+      "test-analysis":
+        "Laat de uitslag van een toets per vraag uitleggen. De analyse laat zien hoe je je toetsen verbetert.",
+      "test-items":
+        "Schrijf toetsvragen met een toetsmatrijs die passen bij je leeruitkomsten. Vragen en matrijs laten je toetsontwerp zien.",
     },
     open: "Open {tool}",
-    saveHow:
-      "Wat je in de tool maakt, staat daarna bij Projecten. Kies daar “Toevoegen aan dossier” en koppel het hier aan het criterium.",
+    saveHow: "Klik na het maken op “Zet bij dit criterium”. Dan staat het hier als bewijs.",
     thinkHow: "Een gesprek helpt je denken, maar is geen bewijs en geen bron.",
     title: "Hulp uit LimeOnIt",
   },

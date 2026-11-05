@@ -57,6 +57,31 @@ export const TOOL_HINTS: readonly ToolHint[] = [
     step: "evidence",
     match: /forum|discussie|interactie|discussion|interaction/i,
   },
+  // P27.2: the P24 tools, after the older ones so existing rankings stay put.
+  {
+    slug: "lesson-plan",
+    step: "evidence",
+    match:
+      /lesontwerp|lesvoorbereiding|lesplan|lesopzet|onderwijssessie|lesson plan|lesson design/i,
+  },
+  { slug: "test-items", step: "evidence", match: /toets|toetsvra|\btests?\b|test items?|exam/i },
+  {
+    slug: "rubric-builder",
+    step: "evidence",
+    match: /rubric|beoordelingsmodel|beoordelingscriteri|nakijkmodel|marking scheme/i,
+  },
+  {
+    slug: "test-analysis",
+    step: "evidence",
+    match:
+      /toetsanalyse|analyse van (de )?toets|itemanalyse|toetskwaliteit|test analysis|item analysis/i,
+  },
+  {
+    slug: "differentiation",
+    step: "evidence",
+    match:
+      /differentia|beginsituatie|verschillen tussen studenten|starting situation|differences between students/i,
+  },
   {
     slug: "dialogic-encounters",
     step: "chapter",
@@ -76,7 +101,13 @@ export const TOOL_HINTS: readonly ToolHint[] = [
 
 const MAX = 2;
 
-function rank(step: HintStep, strong: string, weak: string, available: Set<string>): string[] {
+function rank(
+  step: HintStep,
+  strong: string,
+  weak: string,
+  available: Set<string>,
+  max = MAX,
+): string[] {
   return TOOL_HINTS.filter((h) => h.step === step && available.has(h.slug))
     .map((h, i) => ({
       slug: h.slug,
@@ -85,7 +116,7 @@ function rank(step: HintStep, strong: string, weak: string, available: Set<strin
     }))
     .filter((h) => h.score > 0)
     .sort((a, b) => b.score - a.score || a.i - b.i)
-    .slice(0, MAX)
+    .slice(0, max)
     .map((h) => h.slug);
 }
 
@@ -96,6 +127,16 @@ function outcomeText(o: Outcome): string {
 /** Tools that make evidence for this criterion, best first, among the available slugs. */
 export function criterionHints(o: Outcome, c: Criterion, available: Set<string>): string[] {
   return rank("evidence", c.text, outcomeText(o), available);
+}
+
+/**
+ * Every tool whose output could be evidence for this criterion, on the
+ * criterion's own words only (no cap, no availability filter): a suggestion of
+ * earlier work must be precise.
+ */
+export function criterionTools(c: Criterion): Set<string> {
+  const all = new Set(TOOL_HINTS.map((h) => h.slug));
+  return new Set(rank("evidence", c.text, "", all, Infinity));
 }
 
 /** Thinking partners for writing this outcome's chapter. */

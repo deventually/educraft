@@ -46,6 +46,7 @@ const loaderData = {
       email: "t1@example.com",
       mode: "own",
       models: ["claude-haiku-4-5"],
+      portfolio: true,
     },
     // An inheriting teacher's boxes show the instance set (here: Sonnet only).
     {
@@ -54,6 +55,7 @@ const loaderData = {
       email: null,
       mode: "inherit",
       models: ["claude-sonnet-4-6"],
+      portfolio: false,
     },
   ],
   users: [
@@ -241,6 +243,25 @@ describe("Admin users", () => {
     expect(bodies[0].get("email")).toBe("nieuw@x.nl");
     expect((email as HTMLInputElement).value).toBe("t@x.nl"); // sprong terug
     expect(screen.queryByText("nieuw@x.nl")).toBeNull();
+  });
+
+  it("switches the BDB/BKE workplace per teacher with autosave (P27)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    const { container } = renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    expect(screen.getByRole("heading", { level: 2, name: "BDB/BKE per docent" })).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "BDB/BKE aan voor Teacher One" })).toBeChecked();
+    const two = screen.getByRole("checkbox", { name: "BDB/BKE aan voor Teacher Two" });
+    expect(two).not.toBeChecked();
+    await user.click(two);
+    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+    expect(body?.get("intent")).toBe("portfolioAccess");
+    expect(body?.get("userId")).toBe("t2");
+    expect(body?.get("enabled")).toBe("1");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("autosaves switching a teacher to an own selection, with the prefilled set", async () => {

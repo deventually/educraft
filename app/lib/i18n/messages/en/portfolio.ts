@@ -5,6 +5,11 @@ export const portfolio: Messages["portfolio"] = {
   addToDossierLabel: "Dossier",
   backToDossier: "Back to the dossier",
   backToList: "All dossiers",
+  bar: {
+    back: "Back to {dossier}",
+    for: "For your dossier, {outcome}:",
+    label: "For your dossier",
+  },
   coach: {
     alreadyShown: "You have marked this criterion as shown.",
     done: "The feedback is ready.",
@@ -197,10 +202,31 @@ export const portfolio: Messages["portfolio"] = {
   referenceRemove: "Remove reference",
   referencesEmpty: "No references yet.",
   referencesTitle: "References",
+  route: {
+    finishHint:
+      "Last step: mark each criterion as shown, choose whether to include the AI disclosure and download your dossier as a Word file.",
+    label: "Your dossier's route",
+    practise: "Practise the final interview with {tool}",
+    stepOf: "Step {n} of 5",
+    steps: {
+      collect: "Collect what you already have",
+      fill: "Fill the gaps with a tool",
+      finish: "Finish",
+      framework: "Framework",
+      write: "Write your chapters",
+    },
+  },
   status: {
     "in-progress": "In progress",
     "not-started": "Not started",
     shown: "Shown",
+  },
+  suggest: {
+    done: "Added to the criterion.",
+    inCourses: "in {courses}",
+    intro: "Earlier work that fits this criterion. Tick what you want to use as evidence.",
+    submit: "Add to criterion {n}",
+    title: "You may already have this",
   },
   toastAddedToDossier: "Added to the dossier. Link it to a criterion there.",
   toastConfirmed: "Framework confirmed.",
@@ -222,19 +248,28 @@ export const portfolio: Messages["portfolio"] = {
         "Analyse whether your learning goals, methods and assessment fit together. The analysis shows how your teaching fits the whole.",
       "dialogic-encounters":
         "Explore in a conversation with a learning theorist how to ground your choices in theory.",
+      differentiation:
+        "Turn one assignment into three variants for different starting points, with the same learning goal. This shows how you deal with differences.",
       "forum-autograder":
         "Assess an online discussion for social, cognitive and teaching presence. This shows how you guide the interaction.",
       "guided-reflection":
         "Design your lesson backward from the learning outcomes (Backward Design). The lesson design shows your preparation.",
+      "lesson-plan":
+        "Get a draft lesson plan with a time plan that fits the lesson. The lesson plan shows your preparation.",
       "peer-tutoring": "Evaluate a source critically before you use it in your chapter.",
+      "rubric-builder":
+        "Build an analytic rubric with levels per criterion. The rubric shows how you assess.",
       "socratic-partner":
         "Let questions challenge you to put your own development into clear words.",
       "stage-assessment":
         "Get a draft assessment of student work against your own rubric. You decide; your final assessment is the evidence.",
+      "test-analysis":
+        "Have the results of a test explained per item. The analysis shows how you improve your tests.",
+      "test-items":
+        "Write test items with a test blueprint that fit your learning outcomes. Items and blueprint show your test design.",
     },
     open: "Open {tool}",
-    saveHow:
-      "What you make in the tool then appears under Projects. Choose “Add to dossier” there and link it to the criterion here.",
+    saveHow: "After making it, click “Add to this criterion”. It then appears here as evidence.",
     thinkHow: "A conversation helps you think, but it is neither evidence nor a source.",
     title: "Help from LimeOnIt",
   },
