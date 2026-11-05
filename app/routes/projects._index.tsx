@@ -1,17 +1,11 @@
 import { Form, useActionData } from "react-router";
 import { FolderOpen, Trash2 } from "lucide-react";
 import type { Route } from "./+types/projects._index";
-import {
-  listGenerations,
-  deleteGeneration,
-  getGeneration,
-} from "~/server/repositories/generations.server";
-import { getDossier, listDossiers, updateDossier } from "~/server/repositories/portfolio.server";
-import { addEvidence } from "~/lib/portfolio/edit";
-import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
-import { getMessages } from "~/lib/i18n";
+import { listGenerations, deleteGeneration } from "~/server/repositories/generations.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { requireUser } from "~/server/auth.server";
+import { listDossiers } from "~/server/repositories/portfolio.server";
+import { addGenerationToDossier } from "~/server/evidence.server";
 import { courseLinkIntent, loadCourseLinks } from "~/server/courses.server";
 import { CourseLinkBadges, CourseLinkForm } from "~/components/courses/CourseLinks";
 import { getToolBySlug } from "~/lib/registry";
@@ -36,27 +30,12 @@ export async function action({ request }: Route.ActionArgs) {
   if (fd.get("intent") === "addToDossier") {
     // "Voeg toe aan dossier" (P25, 25.3): the output becomes unlinked evidence;
     // the teacher links it to criteria on the outcome page.
-    const m = getMessages(getLocale(request));
-    const [generation, dossier] = await Promise.all([
-      getGeneration(user.id, String(fd.get("id") ?? "")),
-      getDossier(user.id, String(fd.get("dossierId") ?? "")),
-    ]);
-    if (!generation || !dossier) return { ok: false, error: m.portfolio.errorNotFound };
-    const toolName = getToolBySlug(generation.toolSlug)?.name;
-    const next = addEvidence(dossier.data, {
-      title: (toolName ? loc(toolName, getLocale(request)) : generation.toolSlug).slice(
-        0,
-        LIMITS.title,
-      ),
-      kind: "other",
-      text: generation.outputMarkdown.slice(0, LIMITS.documentText),
-      criterionIds: [],
-      sourceGenerationId: generation.id,
-    });
-    if (!DossierDataSchema.safeParse(next).success)
-      return { ok: false, error: m.portfolio.errorInvalid };
-    await updateDossier(user.id, dossier.id, { data: next });
-    return { ok: true, intent: "addToDossier" };
+    const added = await addGenerationToDossier(
+      user.id,
+      { generationId: String(fd.get("id") ?? ""), dossierId: String(fd.get("dossierId") ?? "") },
+      getLocale(request),
+    );
+    return added.ok ? { ok: true, intent: "addToDossier" } : added;
   }
   return { ok: false };
 }

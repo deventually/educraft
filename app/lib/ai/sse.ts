@@ -2,12 +2,17 @@
  * Bridge a provider's `AsyncIterable<string>` token stream into an HTTP
  * Server-Sent Events `ReadableStream`. Frames:
  *   data: {"t":"<chunk>"}\n\n        token delta
- *   event: done\ndata: {}\n\n         normal completion
+ *   event: done\ndata: {…}\n\n        normal completion (data = what onComplete returned, or {})
  *   event: error\ndata: {"message"}   error
  */
 export interface SseOptions {
-  /** Called with the full concatenated text after a successful stream. */
-  onComplete?: (fullText: string) => void | Promise<void>;
+  /**
+   * Called with the full concatenated text after a successful stream. What it returns
+   * (e.g. `{ generationId }`, P27.1) becomes the data of the done frame.
+   */
+  onComplete?: (
+    fullText: string,
+  ) => undefined | Record<string, unknown> | Promise<undefined | Record<string, unknown>>;
   /** Map a thrown value to the user-facing message (e.g. localize it). */
   formatError?: (err: unknown) => string;
   /**
@@ -33,8 +38,8 @@ export function sseStream(
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ t: chunk })}\n\n`));
           }
         }
-        if (opts.onComplete) await opts.onComplete(full);
-        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        const meta = (opts.onComplete ? await opts.onComplete(full) : undefined) ?? {};
+        controller.enqueue(encoder.encode(`event: done\ndata: ${JSON.stringify(meta)}\n\n`));
       } catch (err) {
         const message = opts.formatError
           ? opts.formatError(err)

@@ -20,9 +20,14 @@ export interface StreamError {
   status?: number;
 }
 
+/** What the server says about a completed stream: the saved work's id (P27.1). */
+export interface StreamDoneMeta {
+  generationId?: string;
+}
+
 export interface StreamHandlers {
   onToken: (text: string) => void;
-  onDone?: () => void;
+  onDone?: (meta: StreamDoneMeta) => void;
   onError?: (error: StreamError) => void;
 }
 
@@ -88,7 +93,7 @@ export async function streamPost(
           return;
         }
         if (event === "done") {
-          handlers.onDone?.();
+          handlers.onDone?.(parseDoneMeta(data));
           return;
         }
         try {
@@ -99,9 +104,18 @@ export async function streamPost(
         }
       }
     }
-    handlers.onDone?.();
+    handlers.onDone?.({});
   } catch (err) {
     if ((err as Error).name === "AbortError") return;
     handlers.onError?.({ code: "network" });
+  }
+}
+
+function parseDoneMeta(data: string): StreamDoneMeta {
+  try {
+    const parsed = JSON.parse(data) as { generationId?: unknown };
+    return typeof parsed.generationId === "string" ? { generationId: parsed.generationId } : {};
+  } catch {
+    return {};
   }
 }

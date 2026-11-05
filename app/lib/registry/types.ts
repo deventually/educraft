@@ -243,6 +243,12 @@ export interface Tool {
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;
 
+  /**
+   * Logical next tools (slugs, at most 3), offered under the result (P27.1). Data only:
+   * validated at boot; a tool the viewer may not use is left out by the loader.
+   */
+  next?: string[];
+
   /** Feature flag per roadmap phase. */
   enabled: boolean;
   phase: 1 | 2 | 3 | 4;

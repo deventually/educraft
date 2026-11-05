@@ -3,7 +3,9 @@ import { Sparkles, Square, AlertTriangle, Lock, RotateCcw } from "lucide-react";
 import type { Tool, OutputLanguage, ToolStage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
-import { useSandbox } from "~/lib/hooks/useSandbox";
+import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
+import { CoursePicker } from "./CoursePicker";
+import { ResultActions, type ResultContext } from "./ResultActions";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
@@ -20,6 +22,12 @@ interface Props {
   defaultProfileId: string;
   localModels?: PickerModel[];
   catalogModels?: PickerModel[];
+  /** The teacher's courses (P20.4/P27.1), for the course picker and its prefill. */
+  courses?: (SandboxCourse & { name: string })[];
+  /** The course to start on (P27.1, `?course=`). */
+  initialCourseId?: string;
+  /** Next steps and places to keep the result (P27.1). */
+  resultContext?: ResultContext;
 }
 
 interface StageState {
@@ -34,16 +42,21 @@ export function StageStepper({
   defaultProfileId,
   localModels,
   catalogModels,
+  courses,
+  initialCourseId,
+  resultContext,
 }: Props) {
   const t = useT();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). Cognitive Architect has no profile-backed
   // fields, so `selectProfile` here is just the context selector; the hook keeps
   // the door open for prefill without special-casing the multi-stage surface.
-  const { values, setValue, contextProfileId, selectProfile } = useSandbox({
+  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse } = useSandbox({
     inputs: tool.inputs,
     profiles,
     defaultProfileId,
+    courses,
+    initialCourseId,
   });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Pre-select an OFFERED model, not blindly the tool default: a teacher
@@ -53,6 +66,8 @@ export function StageStepper({
   );
   const [stages, setStages] = useState<Record<string, StageState>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  // The work saved by the latest finished stage (P27.1): what "keep" and "next" act on.
+  const [lastGenerationId, setLastGenerationId] = useState<string | null>(null);
   const abortRefs = useRef<Record<string, AbortController>>({});
 
   const outputs = (): Record<string, string> =>
@@ -96,6 +111,7 @@ export function StageStepper({
         outputLanguage,
         model,
         priorOutputs: outputs(),
+        courseId: courseId || undefined,
       },
       {
         onToken: (text) =>
@@ -110,7 +126,10 @@ export function StageStepper({
               [stage.id]: { ...existing, output: existing.output + text },
             };
           }),
-        onDone: () => setStage(stage.id, { streaming: false }),
+        onDone: (meta) => {
+          setStage(stage.id, { streaming: false });
+          if (meta?.generationId) setLastGenerationId(meta?.generationId);
+        },
         onError: (err) =>
           setStage(stage.id, { streaming: false, error: err.message ?? t.error.unknown }),
       },
@@ -126,6 +145,8 @@ export function StageStepper({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       <div className="space-y-4">
+        {/* First, because choosing a course fills the learning outcomes below it. */}
+        <CoursePicker courses={courses ?? []} value={courseId} onChange={selectCourse} />
         <ToolControls
           usesContextProfile={tool.usesContextProfile}
           profiles={profiles}
@@ -210,6 +231,11 @@ export function StageStepper({
             </div>
           );
         })}
+        {resultContext &&
+          Object.values(stages).some((st) => st.output) &&
+          !Object.values(stages).some((st) => st.streaming) && (
+            <ResultActions {...resultContext} generationId={lastGenerationId} courseId={courseId} />
+          )}
         {/* Persistent AI-transparency notice under the staged results. */}
         <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} />
       </div>
