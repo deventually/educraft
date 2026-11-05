@@ -23,7 +23,7 @@ const values = {
   practiceGoal: "Het slechte nieuws snel en duidelijk brengen.",
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "difficult-conversation@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "difficult-conversation@v2", values, outputLanguage: lang });
 
 describe("tool: difficult-conversation", () => {
   it("registers as a chat tool for teachers that uses the context profile", () => {
@@ -34,7 +34,7 @@ describe("tool: difficult-conversation", () => {
     expect(t.userType).toBe("instructor");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("difficult-conversation@v1");
+    expect(t.stages[0]?.systemPromptId).toBe("difficult-conversation@v2");
     expect(t.enabled).toBe(true);
     expect(t.assistiveGrading).not.toBe(true);
   });
@@ -148,10 +148,22 @@ describe("tool: difficult-conversation", () => {
     // Meting dc2: the extra gender rule for non-verbal cues made the student correct itself
     // in plain view ("Oeps, ik had genderneutraal moeten blijven"); it is reverted.
     expect(p).not.toContain("ook in de non-verbale aanwijzingen");
+    // #75 open point: the student switched between "haar" and "zijn" in the cues. v2 anchors one
+    // person by writing the cue in the first person, the student's own voice.
+    expect(p).toContain("in de ik-vorm");
+    expect(p).toContain("*ik kijk naar de grond*");
+    expect(p).not.toContain("genderneutraal, ook");
+  });
+
+  it("keeps @v1 registered for sessions that still use it", () => {
+    expect(getPrompt("difficult-conversation@v1").id).toBe("difficult-conversation@v1");
+    expect(getPrompt("difficult-conversation@v2").verbatim).toMatch(/LimeOnIt/);
   });
 
   it("guards the brief's demands (en)", () => {
     const p = runtime("en").toLowerCase();
+    expect(p).toContain("in the first person");
+    expect(p).toContain("*i look at the floor*");
     expect(p).toContain("voice & bounds");
     expect(p).toContain("multi-turn");
     expect(p).toContain("fictional student");

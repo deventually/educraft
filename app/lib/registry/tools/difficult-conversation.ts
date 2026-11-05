@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { DIFFICULT_CONVERSATION_PROMPT } from "~/lib/prompts/difficult-conversation@v1.prompt";
+import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "~/lib/prompts/difficult-conversation@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 
 const CONVERSATION = { nl: "Het gesprek", en: "The conversation" };
@@ -131,7 +131,7 @@ export const difficultConversation: Tool = {
         nl: "De AI speelt de student; op verzoek volgt feedback op je gesprek.",
         en: "The AI plays the student; on request you get feedback on your conversation.",
       },
-      systemPromptId: DIFFICULT_CONVERSATION_PROMPT.id,
+      systemPromptId: DIFFICULT_CONVERSATION_PROMPT_V2.id,
       output: {
         kind: "markdown",
         hint: {

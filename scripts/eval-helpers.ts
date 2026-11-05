@@ -175,6 +175,13 @@ const LIST_OR_HEADING = /^\s*(?:[-*•]\s|\d+[.)]\s|#{1,6}\s|\*\*[^*\n]+:\*\*)/m
  */
 export const JUDGE_MAX_TOKENS = [2048, 4096] as const;
 
+/** Non-verbal cues in a role turn: `*kijkt naar de grond*` (single asterisks, not bold). */
+function roleCues(turn: string): string[] {
+  return [...turn.matchAll(/(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)/g)].map((m) => m[1] ?? "");
+}
+const FEMALE = /\b(?:zij|haar|she|her|hers)\b/i;
+const MALE = /\b(?:hij|zijn|hem|he|his|him)\b/i;
+
 export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
   severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
@@ -183,6 +190,11 @@ export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
     tutorTurns(t)
       .slice(0, -1)
       .some((turn) => countWords(turn) > 100 || LIST_OR_HEADING.test(turn)),
+  /** Role-play (#75): the cues call the same student "haar" in one turn and "zijn" in another. */
+  mixedPronouns: (t) => {
+    const cues = tutorTurns(t).slice(0, -1).flatMap(roleCues);
+    return cues.some((c) => FEMALE.test(c)) && cues.some((c) => MALE.test(c));
+  },
 };
 
 /** Ids of the counted checks that fail on this output. */
