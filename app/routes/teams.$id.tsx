@@ -1,4 +1,4 @@
-import { Form, redirect, useActionData } from "react-router";
+import { Form, useActionData } from "react-router";
 import { UserPlus } from "lucide-react";
 import type { Route } from "./+types/teams.$id";
 import { requireUser } from "~/server/auth.server";
@@ -19,6 +19,7 @@ import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { LinkCard } from "~/components/admin/LinkCard";
 import { teamError } from "~/components/teams/teamError";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
+import { redirectWithFlash } from "~/server/flash.server";
 
 /** Days a lead's invite link stays valid (the admin's default). */
 const INVITE_DAYS = 14;
@@ -62,7 +63,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "stepDown") {
     await leadStepDown(user.id, params.id);
     // This page is no longer yours: back to the account page with your teams.
-    return redirect("/account");
+    return redirectWithFlash("/account", "steppedDown");
   }
   if (intent === "invite") {
     const note = String(fd.get("note") ?? "").trim() || null;

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -58,8 +59,12 @@ describe("account deletion (P17)", () => {
       role: "teacher",
     });
     actAs(tch.id, "teacher");
-    await route.action({ request: deleteRequest() } as Parameters<typeof route.action>[0]);
+    const res = await route.action({ request: deleteRequest() } as Parameters<
+      typeof route.action
+    >[0]);
     expect(await users.getUserById(tch.id)).toBeNull();
+    // P16: the login page says the account is gone.
+    expect(await flashKeyOf(res)).toBe("accountDeleted");
   });
 });
 

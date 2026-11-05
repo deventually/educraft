@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Link, redirect, useActionData } from "react-router";
+import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, Trash2, UserMinus, UserPlus } from "lucide-react";
 import type { Route } from "./+types/admin.teams.$id";
 import { requireRole } from "~/server/auth.server";
@@ -22,6 +22,7 @@ import { Button, Input, Label } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
+import { redirectWithFlash } from "~/server/flash.server";
 
 /** The most people one "add" may carry; the candidate list is capped the same. */
 const MAX_PEOPLE = 500;
@@ -86,7 +87,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
   if (intent === "delete") {
     await deleteTeam(team.id);
-    return redirect("/admin/teams");
+    return redirectWithFlash("/admin/teams", "teamDeleted");
   }
   return { error: "unknown" as const };
 }

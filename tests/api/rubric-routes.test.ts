@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 import { sampleRubric } from "../utilities/fixtures";
 
 process.env.DATABASE_URL = "file::memory:";
@@ -143,6 +144,7 @@ describe("/utilities/rubric/:id", () => {
       params: { id: r.id },
     } as never)) as Response;
     expect(dup.status).toBe(302);
+    expect(await flashKeyOf(dup)).toBe("rubricDuplicated");
     const all = await repo.listRubrics("t-dup");
     expect(all.map((x) => x.name).sort()).toEqual(["Toets", "Toets (kopie)"]);
 
@@ -151,6 +153,7 @@ describe("/utilities/rubric/:id", () => {
       params: { id: r.id },
     } as never)) as Response;
     expect(del.headers.get("Location")).toBe("/utilities/rubric");
+    expect(await flashKeyOf(del)).toBe("rubricDeleted");
     expect(await repo.getRubric("t-dup", r.id)).toBeNull();
   });
 });

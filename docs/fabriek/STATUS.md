@@ -219,6 +219,10 @@ _Laatst bijgewerkt: 2026-11-05 (bord opgeruimd: alles onder Bezig was gemerged; 
   `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
   plaats van 24x). De case vertelt de beoordelaar dat foutje; verwacht ± 8/10. Nog te meten met
   `npm run eval -- --tool math-grading`. PR open.
+- P16 Flash-toasts na een redirect: na inloggen, uitloggen, een uitnodiging, een nieuw
+  wachtwoord, account verwijderen, een gebruiker, team of rubric verwijderen, een rubric kopiëren
+  en stoppen als teamleider verschijnt op de volgende pagina een korte melding. Een kort cookie
+  van één minuut, één keer gelezen; geen migratie. PR open.
 - P28.4 Delen met je team: een cursus, rubric of onderwijscontext deel je met een team waar je in
   zit ("Delen met je team"); teamleden zien hem onder *Van mijn team*, alleen lezen, en maken een
   eigen kopie. Werk van tools die studentwerk verwerken (`Tool.handlesStudentWork`), chats en het
@@ -255,4 +259,3 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
 - Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.
-- Flash-toasts na een redirect (stub P16).
