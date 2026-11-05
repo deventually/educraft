@@ -1,0 +1,137 @@
+{
+  "cases": [
+    {
+      "id": "nursing-diagnosis-task-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo-v, year 2). The teacher's task asks for a nursing diagnosis in PES structure (Problem, Etiology, Signs/Symptoms) for a written case. All three variants must end in the student writing a PES diagnosis for the case themselves. The support variant may give a worked example of a different case, a step plan or sentence starters, but must not give the diagnosis or let the student only fill in single words. The challenge variant must be more complex (for instance a case with several competing problems and a justified priority), not more cases of the same kind. The group info (part of the group already does a placement) must be used in the tip.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Verpleegkunde — jaar 2",
+        "programme": "Verpleegkunde",
+        "domain": "Gezondheidszorg",
+        "courseName": "Klinisch redeneren",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Hbo-verpleegkundige in het ziekenhuis of de wijk"
+      },
+      "values": {
+        "learningGoal": "De student stelt bij een casus een verpleegkundige diagnose op volgens de PES-structuur en onderbouwt die met gegevens uit de casus.",
+        "material": "Opdracht (30 minuten, in tweetallen)\nLees de casus. Meneer De Wit (78) is drie dagen geleden opgenomen met een longontsteking. Hij woont alleen. Hij eet sinds de opname weinig: de helft van zijn maaltijden blijft staan. Hij zegt dat eten hem moe maakt en dat hij geen trek heeft. Hij is in een maand 4 kilo afgevallen (van 72 naar 68 kilo). Hij hoest en raakt snel benauwd bij inspanning.\nStel een verpleegkundige diagnose op volgens de PES-structuur. Onderbouw elk onderdeel met gegevens uit de casus. Lever je diagnose in op het digitale bord; we bespreken er drie klassikaal.",
+        "groupInfo": "Ongeveer een derde van de groep loopt al stage op een interne afdeling en heeft vaker diagnoses gesteld. Een paar studenten zijn zij-instromers en vinden het lastig om van de gegevens naar het probleem te komen."
+      }
+    },
+    {
+      "id": "sql-join-task-mbo4-eqf4",
+      "description": "Ordinary case at EQF 4 (mbo-4, year 2), no group info given. The task asks for one SQL query with an INNER JOIN between two given tables. All three variants must end in the student writing a working JOIN query themselves. The support variant must stay at mbo-4 level (concrete, small steps, for instance a worked example on other tables), and must not hand over the query. The challenge variant must stay with the goal (writing a JOIN) in a more complex form (for instance three tables, or choosing between INNER and LEFT JOIN with a reason), not ten extra queries. All SQL and expected results must be correct for the given tables. Because the group info is empty, the tip says it assumes the usual differences.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Software Developer, niveau 4",
+        "programme": "Software Developer",
+        "domain": "ICT",
+        "courseName": "Databases",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Junior developer in een softwarebedrijf"
+      },
+      "values": {
+        "learningGoal": "De student schrijft een SQL-query met INNER JOIN die gegevens uit twee gekoppelde tabellen ophaalt.",
+        "material": "Opdracht\nJe hebt twee tabellen.\nklanten(klant_id, naam, woonplaats): (1, Fatima, Utrecht), (2, Daan, Leiden), (3, Noor, Utrecht)\nbestellingen(bestelling_id, klant_id, bedrag): (10, 1, 25.00), (11, 1, 40.00), (12, 3, 15.50)\nSchrijf een query die van elke bestelling het bestelling_id, de naam van de klant en het bedrag laat zien. Voer de query uit en controleer of je drie rijen krijgt.",
+        "groupInfo": ""
+      }
+    },
+    {
+      "id": "explanation-standard-error-en-eqf6",
+      "description": "Ordinary case in English at EQF 6 (international bachelor in psychology, year 1). The material is an EXPLANATION, not a task: a short text about the standard error of the mean. The three variants are three versions of the explanation with a short practice question each, all leading to the same goal (explaining the difference between standard deviation and standard error and calculating SE = SD / √n). The support variant may add a concrete example before the formula and smaller steps; the challenge variant may ask why SE shrinks with √n and not with n, or apply it to a new situation; neither changes the goal. Any calculation must be correct (for instance SD 12 and n 36 give SE 2). The output must be in English with the English headings.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "BSc Psychology — year 1",
+        "programme": "BSc Psychology (international)",
+        "domain": "Behavioural sciences",
+        "courseName": "Statistics 1",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Psychologist or researcher"
+      },
+      "values": {
+        "learningGoal": "The student explains the difference between the standard deviation and the standard error of the mean, and calculates the standard error from a standard deviation and a sample size.",
+        "material": "The standard error of the mean (SE) tells you how much the mean of a sample would vary if you drew many samples of the same size from the same population. The standard deviation (SD) describes how much individual scores vary around the mean. The formula is SE = SD / √n. A larger sample gives a smaller standard error, so the sample mean becomes a more precise estimate of the population mean.\nPractice: a sample of 36 students has a mean reaction time of 420 ms with SD = 12 ms. Calculate the SE.",
+        "groupInfo": "About half of the group took statistics in secondary school; some students are anxious about formulas."
+      }
+    },
+    {
+      "id": "contract-law-task-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo-rechten, year 1). The task asks the student to assess whether an agreement has come about (offer and acceptance, Book 6 of the Dutch Civil Code) in a short case. All three variants must end in the student giving a reasoned judgement on the case themselves. The tool must not invent article numbers it is unsure of; naming the general rule of offer and acceptance is fine. The challenge variant may add a complication (for instance a late or changed acceptance) with a justified judgement, not more cases. The group info (some students came from mbo) must be used without deficit labels.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-Rechten — jaar 1",
+        "programme": "HBO-Rechten",
+        "domain": "Recht",
+        "courseName": "Verbintenissenrecht",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Juridisch medewerker of adviseur"
+      },
+      "values": {
+        "learningGoal": "De student beoordeelt aan de hand van aanbod en aanvaarding of in een casus een overeenkomst tot stand is gekomen, en onderbouwt het oordeel.",
+        "material": "Casus: Sanne biedt op maandag per e-mail haar tweedehands racefiets aan Joris aan voor € 450. Joris mailt op dinsdag terug: \"Akkoord, ik kom hem zaterdag halen.\" Op woensdag verkoopt Sanne de fiets aan iemand anders voor € 500.\nVraag: Is er tussen Sanne en Joris een overeenkomst tot stand gekomen? Onderbouw je antwoord met aanbod en aanvaarding.",
+        "groupInfo": "Een deel van de groep komt van het mbo (juridisch medewerker) en kent de begrippen al uit de praktijk; anderen komen van havo of vwo."
+      }
+    },
+    {
+      "id": "vague-goal-known-error-eqf5",
+      "description": "KNOWN ERROR: the learning goal 'De student begrijpt de AVG' is not observable. The tool must name this under 'Let op vooraf', give one sharper wording marked as a proposal (for instance that the student determines whether a given processing of personal data has a lawful basis), build all three variants on that proposal, and say that the teacher can adjust the goal in the form. All three variants must assess the proposed goal.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Associate degree Officemanagement — jaar 1",
+        "programme": "Associate degree Officemanagement",
+        "domain": "Economie en management",
+        "courseName": "Informatie en privacy",
+        "eqf": 5,
+        "studyYear": 1,
+        "professionalContext": "Officemanager in een middelgrote organisatie"
+      },
+      "values": {
+        "learningGoal": "De student begrijpt de AVG.",
+        "material": "Opdracht: Je werkt als officemanager bij een fysiotherapiepraktijk. De praktijk wil de verjaardagen van patiënten op een lijst in de wachtkamer zetten en een nieuwsbrief sturen naar alle patiënten van de afgelopen vijf jaar. Bespreek in je groepje wat de AVG hiervan vindt en schrijf jullie advies aan de praktijkhouder in een halve pagina.",
+        "groupInfo": ""
+      }
+    },
+    {
+      "id": "material-mismatch-known-error-eqf6",
+      "description": "KNOWN ERROR: the learning goal asks the student to ANALYSE the competitive position of a company with Porter's five forces, but the task only asks to look up and copy the definitions of the five forces. The task does not assess the goal. The tool must name this under 'Let op vooraf', make a base variant that does assess the goal (an analysis of a company with the five forces) with as little change as possible and say what changed, and build the support and challenge variants on that base. It must not produce three variants of copying definitions.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 2",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Strategisch management",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Adviseur of manager in een organisatie"
+      },
+      "values": {
+        "learningGoal": "De student analyseert met het vijfkrachtenmodel van Porter de concurrentiepositie van een bestaande onderneming en trekt daaruit een conclusie over de aantrekkelijkheid van de markt.",
+        "material": "Opdracht: Zoek in het boek de definities op van de vijf krachten van Porter (dreiging van nieuwe toetreders, onderhandelingsmacht van leveranciers, onderhandelingsmacht van afnemers, dreiging van substituten, rivaliteit tussen bestaande concurrenten). Schrijf elke definitie over in je eigen schrift. Tijd: 25 minuten.",
+        "groupInfo": "De groep werkt in vaste projectgroepjes van vier aan een opdrachtgever uit de regio, een fietsenwinkel met twee vestigingen."
+      }
+    },
+    {
+      "id": "lowered-goal-known-error-mbo4-eqf4",
+      "description": "KNOWN ERROR: in the group info the teacher asks that 'the weak group' only copies the formula and 'the plus group' simply gets ten extra sums. The first lowers the learning goal (the student no longer calculates the selling price), the second is more work, not more challenge. The tool must say this honestly under 'Let op vooraf', build the support variant in which the student still calculates the price themselves with support, and a challenge variant that is more complex (for instance working back from a desired price, or comparing two VAT rates) instead of more sums, and avoid the labels 'weak' and 'plus' in text for students. All answers must be correct: purchase price € 40, mark-up 50% gives € 60 excluding VAT, 21% VAT gives € 72.60 including VAT.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Ondernemer retail, niveau 4",
+        "programme": "Ondernemer retail",
+        "domain": "Economie en handel",
+        "courseName": "Commercieel rekenen",
+        "eqf": 4,
+        "studyYear": 1,
+        "professionalContext": "Ondernemer of filiaalmanager in de detailhandel"
+      },
+      "values": {
+        "learningGoal": "De student berekent uit de inkoopprijs, de winstopslag en het btw-tarief de verkoopprijs inclusief btw van een artikel.",
+        "material": "Opgave: Een sportwinkel koopt een paar hardloopschoenen in voor € 40,00. De winkel rekent een winstopslag van 50% op de inkoopprijs. Het btw-tarief is 21%. Bereken de verkoopprijs inclusief btw. Laat je berekening zien.",
+        "groupInfo": "De zwakke groep hoeft alleen de formule over te nemen van het bord. De plusgroep krijgt gewoon tien extra sommen, dan zijn ze bezig."
+      }
+    }
+  ]
+}

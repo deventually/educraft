@@ -12,6 +12,7 @@ import {
   BookOpen,
   CalendarClock,
   FilePenLine,
+  Route,
   Users,
   UsersRound,
   Wrench,
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   "calendar-clock": CalendarClock,
   "file-pen-line": FilePenLine,
   "chart-column": ChartColumn,
+  route: Route,
 };
 
 /** The icon names a tool may use (`Tool.icon`). */
