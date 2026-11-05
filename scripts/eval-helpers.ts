@@ -178,6 +178,11 @@ export const JUDGE_MAX_TOKENS = [2048, 4096] as const;
 export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
   severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
+  /** Role-play (P24.8): every turn in the role, i.e. all but the final feedback turn. */
+  longRoleTurn: (t) =>
+    tutorTurns(t)
+      .slice(0, -1)
+      .some((turn) => countWords(turn) > 100 || LIST_OR_HEADING.test(turn)),
 };
 
 /** Ids of the counted checks that fail on this output. */

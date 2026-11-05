@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
 
 ## Nu
 
+- **Opdracht differentiëren (P24.7, #76) gemerged op 2026-11-05:** drie varianten met hetzelfde
+  leerdoel naar Tomlinson (2017); eindmeting df2 elke case 4,73–5,00.
 - **Opdracht helder schrijven (P24.6, #73) gemerged op 2026-11-05:** opdracht of handleiding
   herschreven op taalniveau B1 met open punten en eisencheck; eindmeting ca2 elke case 4,67–5,00.
 - **Toetsanalyse na afloop (P24.5, #74) gemerged op 2026-11-05:** hulpmiddel item-analysis rekent,
@@ -92,13 +94,15 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 
 ## Bezig
 
-- P24.7 Opdracht differentiëren (`differentiation`): een opdracht of uitleg in drie varianten (extra
-  steun, basis, extra uitdaging) met hetzelfde leerdoel en een tip voor de les, naar Tomlinson (2017).
-  Zeven eval-casussen, drie met een bekende fout (vaag leerdoel, opdracht mist het leerdoel, wens die
-  het leerdoel verlaagt). Meting df1 (1 run): elke case 4,80–5,00; daarna alleen de rubric
-  verduidelijkt (prompt blijft @v1). Eindmeting df2 (3 runs, batch): elke case 4,73–5,00, geen
-  gefaalde harde check, niets afgekapt (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet;
-  `evals/reports/2026-11-05df2.md`). Tien uitkomsten wachten op Bastiaan — PR open.
+- P24.8 Lastig gesprek oefenen (`difficult-conversation`, chat): de AI speelt een verzonnen student
+  in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
+  vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
+  nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
+  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Metingen dc1 → dc2 → dc3:
+  ronde 1 (gewone opsommingstekens) hielp, de extra genderregel voor gebaren gaf regressie en is in
+  ronde 2 teruggedraaid. Eindmeting dc3 (3 runs, batch): elke case 4,60–4,93, geen gefaalde harde
+  check (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-05dc3.md`). Tien
+  uitkomsten liggen klaar in `evals/reviews/difficult-conversation/` voor Bastiaan — PR open.
 
 - P20.1 Cursussen, puur domein (`app/lib/courses/`): het cursusmodel (leeruitkomsten, activiteiten,
   toetsen, Bloom, studielast), bewerkingen en de afstemmingscontroles, zonder AI en nog zonder
