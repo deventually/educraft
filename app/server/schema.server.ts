@@ -293,6 +293,27 @@ export const featureExceptions = sqliteTable(
   (t) => [primaryKey({ columns: [t.userId, t.key] })],
 );
 
+/**
+ * An item shared with a team (P28.4): `kind` is "course" | "rubric" | "contextProfile"
+ * (`SHARE_KINDS`). Team-mates read and copy; only the owner writes. One row per
+ * (kind, item, team). Leaving the team or removing it drops the row.
+ */
+export const shares = sqliteTable(
+  "shares",
+  {
+    id: text("id").primaryKey(),
+    ownerUserId: text("owner_user_id").notNull(),
+    kind: text("kind").notNull(),
+    itemId: text("item_id").notNull(),
+    teamId: text("team_id").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [
+    uniqueIndex("shares_kind_item_team").on(t.kind, t.itemId, t.teamId),
+    index("shares_team_idx").on(t.teamId),
+  ],
+);
+
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
 export type TeamRow = typeof teams.$inferSelect;

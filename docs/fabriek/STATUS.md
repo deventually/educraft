@@ -4,10 +4,36 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-assignment@v2 open)_
+_Laatst bijgewerkt: 2026-11-05 (bord opgeruimd: alles onder Bezig was gemerged; P28.4 open)_
 
 ## Nu
 
+- **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
+  waren. Ze staan hieronder met hun nummer.
+- **Lijst plakken bij Toevoegen (P28.5, #127) gemerged op 2026-11-05:** per regel naam en e-mail,
+  een team kiezen, per persoon een uitnodigingslink of de reden van weigering.
+- **Dubbel blok "Aandachtspunten" weg uit het dossieroverzicht (#126) gemerged op 2026-11-05.**
+- **Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`, #121) gemerged op
+  2026-11-05:** meting ca3 elke case 4,53–5,00.
+- **Toetsvragen, vaste vraagindeling in code (`test-items-items@v2`, #118) gemerged op
+  2026-11-05:** eindmeting w elke case 4,67–4,87, niets afgekapt.
+- **P27.4 De cursus als werkplek (#116) gemerged op 2026-11-05:** knoppen naar de passende tools bij
+  elke les, toets en leeruitkomst, ook per regel van de week op Start; "Los op met…"; "Per week" op
+  de cursuspagina. Daarmee is P27 af.
+- **Rolagenten aan en uit in beheer (`/admin/agents`, #115) gemerged op 2026-11-05:** per pet Aan of
+  Uit voor de hele instelling (BESLUIT-2026-11-05-11).
+- **De week van de docent, agenda en documentatie (P22.4 + 22.5, #114) gemerged op 2026-11-05:**
+  "Zet in je agenda" per cursus (`.ics`). Daarmee is P22 af.
+- **Beheer sneller, tools (#112) gemerged op 2026-11-05:** zoeken, filteren op stand en "Zet alle
+  getoonde tools op …".
+- **Rolagenten, gekoppeld werk en documentatie (P21.7 + 21.8, #108) gemerged op 2026-11-05:** meting
+  ra2 11/11, ra3 33/33. Daarmee is P21 af.
+- **P27.3 Start en een menu van vier (#101) gemerged op 2026-11-05.**
+- **Word-tabellen in de export (#99) gemerged op 2026-11-05:** een cursus als bewijs komt als echte
+  tabel in de Word-export.
+- **P28.3 Onderdelen, tools en modellen per team (#96) gemerged op 2026-11-05:** migraties 0016 en
+  0017.
+- **P27.1 Volgende stap onder elk resultaat (#87) en brief P28 (#90) gemerged op 2026-11-05.**
 - **Documentatie van P29 (P29.4, #125) gemerged op 2026-11-05:** de wiki legt de klaar-check en
   het proefassessment uit, `evals/README.md` noemt `eval:rehearsal`. P29 is af.
 - **Proefassessment in de werkplaats (P29.3, #124) gemerged op 2026-11-05:** in stap 5 "Oefen je
@@ -111,7 +137,7 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
 - **Stack:** React Router 8, SQLite (Drizzle), AI SDK (standaard Claude Sonnet 5.5) + lokale modellen,
-  Vitest + axe. 878 tests, CI groen op `main`.
+  Vitest + axe. Ruim 2600 tests, CI groen op `main`.
 - **Laatst op `main` (2026-11-03):** V1 (P17) gemerged en uitgerold: de studentenlaag is eruit en de
   studentdata is gewist; de back-up van vóór de migratie wordt op 2026-11-10 verwijderd. Eerder: P15
   (toasts, navigatie-toegankelijkheid), Claude 5.5-modellen, documenten tot 300k tekens, briefs
@@ -188,62 +214,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
 
 ## Bezig
 
-- Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
-  eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
-  `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
-  nergens meer dan 8 punten. PR open.
-- Toetsvragen, vaste vraagindeling in code: de app rekent uit de toetsmatrijs per vraag de rij,
-  het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
-  (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
-  Pakt het punt onder Later aan (metingen t en u). Eindmeting v: vijf cases 4,60–4,93, statistics
-  3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
-  ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
-  in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
-- Dossieroverzicht: het dubbele blok "Aandachtspunten" is weg (Bastiaan, 2026-11-05); de
-  klaar-check in stap 5 toont dezelfde punten. PR open.
-- P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
-  tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
-  aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
-  opent de tool met cursus en onderdeel, en het resultaat komt bij dat onderdeel. Plus de
-  documentatie van P27 (27.5). Geen migratie. PR open.
-- Rolagenten aan en uit in beheer: een eigen pagina `/admin/agents` (menu *Rolagenten*) met de
-  hoofdschakelaar (dezelfde als bij Onderdelen, Aan / Op aanvraag / Uit) en per pet Aan of Uit
-  voor de hele instantie. Een pet die uit staat, draait niet, staat niet op de cursuspagina en telt
-  niet mee bij de open adviezen op Start; zijn oude adviezen blijven bewaard. Staan alle petten
-  uit, dan verdwijnt "Beoordeling". De uitleg op de cursuspagina noemt nu de petten die aan staan.
-  Opslag in `instance_settings` (`agentStand:<id>`), geen migratie. PR open.
-- Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
-  Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
-- P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
-  toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
-  zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
-  `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
-  bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
-- Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P22.4 + 22.5 De week van de docent, agenda en documentatie: "Zet in je agenda" op de cursus
-  (`/courses/:id/calendar.ics`, alleen de eigenaar, met vaste UID per onderdeel), het
-  helponderwerp "Je week" en de wiki. Daarmee is P22 af, op de toolknoppen na (wachten op P27.4).
-  PR open.
-- P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
-  Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
-  teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
-  Cursussen en hulpmiddelen zijn een 404 als ze uit staan. Migraties 0016 en 0017. PR open.
-
-- P27.3 Start en een menu van vier: een docent landt op `/start` met het vraagvak "Waar wil je
-  mee aan de slag?" (hooguit drie tools, zelfde zoekfunctie als de catalogus, met de gekozen cursus
-  in de link), *Deze week* (open aandachtspunten en laatst gemaakt werk) en je cursussen. Menu:
-  Start · Cursussen · BDB/BKE · Tools (+ Beheer). "Mijn werk" heet nu "Eerder gemaakt",
-  Onderwijscontext zit in het accountmenu, Help is een vraagteken rechtsboven. Geen route weg,
-  geen migratie. PR open.
-
-- P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
-  register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
-  het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus
-  (`?course=`). Toetsvragen kreeg zo ook de cursuskiezer. PR open.
-- Word-tabellen in de export: een cursus als bewijs (P26.4) komt in de Word-export van het
-  dossier als echte tabel met kopregel en eigen kopjes onder de bijlage, niet meer als tekst met
-  streepjes. Geplakt bewijs blijft letterlijk. PR open.
-
+- P28.4 Delen met je team: een cursus, rubric of onderwijscontext deel je met een team waar je in
+  zit ("Delen met je team"); teamleden zien hem onder *Van mijn team*, alleen lezen, en maken een
+  eigen kopie. Werk van tools die studentwerk verwerken (`Tool.handlesStudentWork`), chats en het
+  dossier zijn nooit te zien. Wie het team verlaat, ziet niets meer en zijn deelstanden vervallen.
+  Migratie 0019 (`shares`). PR open.
 
 ## Wacht op jou
 
@@ -261,6 +236,7 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
    BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
    (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
+   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.5 ook (#127); P28.4 loopt.
 
 ## Open vragen
 
