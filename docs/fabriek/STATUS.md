@@ -4,12 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (bord opgeruimd; P28.4 en test-items@v3 open)_
+_Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten per instelling en test-items@v3 open)_
 
 ## Nu
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Flash-toasts na een redirect (P16, #130) gemerged op 2026-11-05:** na inloggen, uitloggen,
+  een uitnodiging, een nieuw wachtwoord, verwijderen, een rubric kopiëren en stoppen als
+  teamleider verschijnt op de volgende pagina een korte melding. Daarmee is P16 af.
+- **Delen met je team (P28.4, #129) gemerged op 2026-11-05:** een cursus, rubric of
+  onderwijscontext delen met een team; collega's bekijken en kopiëren. Studentwerk, chats en het
+  dossier nooit. Migratie 0019 (`npm run db:migrate`). Daarmee is P28 af.
 - **Lijst plakken bij Toevoegen (P28.5, #127) gemerged op 2026-11-05:** per regel naam en e-mail,
   een team kiezen, per persoon een uitnodigingslink of de reden van weigering.
 - **Dubbel blok "Aandachtspunten" weg uit het dossieroverzicht (#126) gemerged op 2026-11-05.**
@@ -219,18 +225,12 @@ _Laatst bijgewerkt: 2026-11-05 (bord opgeruimd; P28.4 en test-items@v3 open)_
   vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe rij soms de vorige
   rij mee ("Row R1 is not used; this is Row R2"): 7 keer in de oude metingen, 1 keer in meting w.
   Nieuwe getelde check `correctionInHeading` in de eval. Eindmeting x: geen enkele correctie in
-  een kopje meer, geen gefaalde check, niets afgekapt; vijf cases 4,53–4,73, arithmetic 4,33
-  (zwakste punt in de matrijs van stap 1, die niet veranderde). Gemiddeld 4,58 (w: 4,77); de vorm
-  scoort overal iets lager. PR open, beslissing Bastiaan.
-- P16 Flash-toasts na een redirect: na inloggen, uitloggen, een uitnodiging, een nieuw
-  wachtwoord, account verwijderen, een gebruiker, team of rubric verwijderen, een rubric kopiëren
-  en stoppen als teamleider verschijnt op de volgende pagina een korte melding. Een kort cookie
-  van één minuut, één keer gelezen; geen migratie. PR open.
-- P28.4 Delen met je team: een cursus, rubric of onderwijscontext deel je met een team waar je in
-  zit ("Delen met je team"); teamleden zien hem onder *Van mijn team*, alleen lezen, en maken een
-  eigen kopie. Werk van tools die studentwerk verwerken (`Tool.handlesStudentWork`), chats en het
-  dossier zijn nooit te zien. Wie het team verlaat, ziet niets meer en zijn deelstanden vervallen.
-  Migratie 0019 (`shares`). PR open.
+  een kopje meer, geen gefaalde check, niets afgekapt; gemiddeld 4,58 (w: 4,77), arithmetic 4,33.
+  De beoordelaar rekende in 4 runs de indeling per rij als vormfout aan; de rubric zegt nu dat die
+  indeling de gevraagde vorm is. PR open, beslissing Bastiaan.
+- Rolagenten alleen voor de hele instelling: een team kan de schakelaar *Rolagenten* niet meer
+  zien of omzetten; een eerder bewaarde teamkeuze telt niet meer mee (BESLUIT-2026-11-05-11,
+  keuze Bastiaan). Een uitzondering per docent door de beheerder blijft. Geen migratie. PR open.
 
 ## Wacht op jou
 
@@ -248,7 +248,7 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
    BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
    (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
-   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.5 ook (#127); P28.4 loopt.
+   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.4 (#129) en P28.5 (#127) ook. P28 is af.
 
 ## Open vragen
 

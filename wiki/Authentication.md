@@ -117,6 +117,8 @@ effective = instance is Off              → off
 
 - **Register as data:** `app/lib/features/` lists the four parts (`portfolio` On request,
   `courses`, `roleAgents`, `utilities` On), validated at boot. No `if (feature === …)`.
+  `roleAgents` is `instanceOnly`: a team has no say and does not see it; a stored team choice
+  never counts (BESLUIT-2026-11-05-11). An admin's exception per teacher still applies.
 - **Storage:** the instance stand of a tool in `tool_settings.stand`, of a part in
   `instance_settings` (`featureStand:<id>`); a team's choices as JSON on `teams.settings_json`
   (`features`, `tools`, `models`); a teacher's exceptions in `feature_exceptions`

@@ -1,6 +1,6 @@
 # Phase 16 — Flash toasts across redirects
 
-> **Status:** 🟡 built (2026-11-05), PR open. Deviation from the sketch below: the flash rides its own
+> **Status:** ✅ klaar (#130, gemerged 2026-11-05). Deviation from the sketch below: the flash rides its own
 > signed `__flash` cookie, not the session cookie, so it survives `logout` and never touches auth.
 > Wired: login, invite, reset, logout, account delete, and the redirecting deletes (user, team,
 > rubric), rubric duplicate and team-lead step-down. How it works: [Architecture](../../wiki/Architecture.md).

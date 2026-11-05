@@ -110,7 +110,13 @@ export async function effectiveFeatures(
   return Object.fromEntries(
     FEATURES.map((f) => [
       f.id,
-      apply(layers, stands[f.id] ?? f.defaultStand, (s) => s.features[f.id], featureKey(f.id)),
+      apply(
+        layers,
+        stands[f.id] ?? f.defaultStand,
+        // A team has no say over an instance-only feature (BESLUIT-2026-11-05-11).
+        (s) => (f.instanceOnly ? undefined : s.features[f.id]),
+        featureKey(f.id),
+      ),
     ]),
   ) as Record<FeatureId, Decision>;
 }
