@@ -231,7 +231,7 @@ cursus-JSON, en beide voegen daar alleen optionele velden toe.
 - Toetsanalyse per leeruitkomst (zie *Raakvlakken*); importeren uit TestVision/ANS/Remindo (P25-vervolg).
 - Een live koppeling tussen cursus en dossier (zie besluit 3 hieronder).
 
-## Beslist door Bastiaan (5 november 2026, BESLUIT-2026-11-05-1)
+## Beslist door Bastiaan (5 november 2026, BESLUIT-2026-11-05-2)
 
 1. **Uit een OER importeren we leeruitkomsten én toetsen** (naam, soort, weging, week).
 2. **De AI stelt bij import een Bloom-niveau voor**, zichtbaar als voorstel dat de docent bevestigt.

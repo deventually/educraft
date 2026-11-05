@@ -55,6 +55,31 @@ P21-agenten bouwen.
    latere opruiming in plaats van het woord "project" te overladen.
 6. **Alleen docenten en beheerders.** Studenten zien in P20 nooit cursussen.
 
+## Aanvullingen (2026-11-05, BESLUIT-2026-11-05-1)
+
+Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijgesteld:
+
+- **Studielast hoort erbij.** `CourseData.ec?` (de cursus in EC, > 0 en ≤ 60) en `hours?` op
+  activiteiten en toetsen (geplande studie-uren). Eén extra bevinding, `study-load-exceeds-ec`
+  (info): de uren tellen op tot meer dan EC × 28 (WHW art. 7.4: één studiepunt is 28 uur studie).
+  Een te lage som is geen bevinding: zelfstudie staat zelden als activiteit in de cursus.
+- **20.4 geldt ook voor de P24-tools.** Naast de vijf velden hieronder krijgen ook deze velden
+  `prefillFromCourse`: `test-items.learningOutcomes`, `rubric-builder.learningOutcome`,
+  `bloom-by-design.learningOutcome`, `lesson-plan.learningGoal` en `differentiation.learningGoal`.
+  Een veld in het enkelvoud vraagt om één leeruitkomst; hoe de docent die kiest, beslist 20.4.
+- **Studenten bestaan niet meer als rol (P17).** De eisen "een student krijgt een 404" vervallen;
+  alleen ingelogde docenten en beheerders komen bij `/courses`. "Projects" heet sinds P19.5
+  "Mijn werk" (route `/projects`); "Cursussen" komt daarnaast.
+- **Geparkeerd naar de vervolgbrief P26:** toetsmatrijs per vraag (gekoppeld aan Toetsvragen),
+  leeruitkomsten importeren uit een OER of studiehandleiding (met AI), en de koppeling met het
+  BDB/BKE-dossier. Houd daarom `CourseDataSchema` uitbreidbaar (geen `.strict()`): P21 en P26 voegen
+  optionele velden toe zonder migratie.
+- **Volgorde van bevindingen (20.1, zoals gebouwd):** per leeruitkomst eerst de bevindingen per toets
+  (`assessed-before-taught`, `bloom-below-outcome`, in toetsvolgorde), dan `outcome-not-taught` en
+  `outcome-not-assessed`; daarna `activity-without-outcome` per activiteit; als laatste
+  `weights-not-100` en `study-load-exceeds-ec`. `coverageMatrix` geeft
+  `{ columns: { id, kind }[], rows: { outcomeId, cells }[] }`.
+
 ## Het model (`app/lib/courses/types.ts`)
 
 ```ts
@@ -82,7 +107,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
 - Item-id's zijn UUID's die in de JSON zelf leven. Koppelingen verwijzen ernaar, zodat ze herordenen
   en hernoemen overleven.
 
-## 20.1 — Puur domein (`app/lib/courses/`)
+## 20.1 — Puur domein (`app/lib/courses/`) (klaar)
 
 - `types.ts`, `schema.ts` (`CourseDataSchema`, `emptyCourseData()`), `bloom.ts` (`BLOOM_LEVELS`,
   `bloomRank(level)`, tweetalige labels als `LocalizedText`).
