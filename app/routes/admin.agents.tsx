@@ -20,7 +20,8 @@ const MAIN_DEFAULT = FEATURES.find((f) => f.id === "roleAgents")?.defaultStand ?
 
 /**
  * The role agents' switches. The main switch is the `roleAgents` feature (the same
- * setting as on /admin/tools, so teams and exceptions apply); below it each hat is On or
+ * setting as on /admin/tools; instance-only, so teams have no say, BESLUIT-2026-11-05-11,
+ * but an admin's exception per teacher applies); below it each hat is On or
  * Off for the whole instance. A hat that is off neither runs nor shows; its stored
  * advice stays and returns when it is switched on again.
  */
