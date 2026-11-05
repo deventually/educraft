@@ -116,6 +116,9 @@ Het denkwerk erachter staat in het document "LimeOnIt als één workflow" (Claud
   Beheer voor beheerders. BDB/BKE staat er alleen als de werkplaats voor die docent aanstaat. *Mijn werk* (`/projects`) blijft bestaan als "Eerder gemaakt", bereikbaar
   vanaf Tools en Start. *Onderwijscontext* gaat naar het accountmenu, *Help* wordt een vraagteken
   rechtsboven en blijft in de voettekst. Geen route verdwijnt.
+- **Bijgewerkt (BESLUIT-2026-11-05-5):** de schakelaar hieronder kwam al mee met P27.2 (#88). P28.3
+  maakt hem de uitzondering per docent naast teams; P27.3 vraagt voor het menu `portfolioAccess` /
+  `effectiveFeatures` en bouwt geen eigen schakelaar.
 - **BDB/BKE per docent (besluit 3).** Een beheerder zet de werkplaats aan of uit per docent, op
   `/admin/users`, met automatisch opslaan en een toast zoals de modelkeuze per docent (P18.5).
   Opslag zonder migratie: de sleutel `portfolioEnabled:<userId>` in `instance_settings`, naar het

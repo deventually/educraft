@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (brief P28 Teams in een PR)_
 
 ## Nu
 
@@ -121,6 +121,9 @@ _Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
   "voor de BDB/BKE functie zoveel mogelijk integratie van de tools en wellicht ook een aparte
   workflow" en "alle drie aanbieden?" → document "LimeOnIt als één workflow", BESLUIT-2026-11-05-4,
   brief P27.
+- 2026-11-05: "Ik vind dat het gebruikersmanagement in beheer veel beter kan … teams kunnen aanmaken
+  van meerdere collega docenten … per team features aan en uit" → document "Teams, privacy en
+  gebruikersbeheer", BESLUIT-2026-11-05-5, brief P28.
 
 ## Bezig
 
@@ -128,6 +131,7 @@ _Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
   in vijf stappen bovenaan het dossier en de BDB/BKE-schakelaar per docent (uit 27.3 naar voren) zijn
   klaar, net als de weg terug: vanuit een criterium open je de tool en zet je het resultaat met één
   knop bij dat criterium. PR open.
+- Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
   (architectuur en roadmap) en de README. Daarna is P20 af. PR open.
 
@@ -150,8 +154,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
 3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
-   BDB/BKE doet mee), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
-   (de docentweek, op Start), dan de rest van **P26** (BESLUIT-2026-11-05-4).
+   BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
+   (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
 
 ## Open vragen
 
