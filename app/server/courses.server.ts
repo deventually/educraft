@@ -18,6 +18,9 @@ import {
 } from "./repositories/courses.server";
 import { linkTargets, linksByGeneration, parseLinkTarget } from "~/lib/courses/links";
 import { applyCourseIntent } from "~/lib/courses/intents";
+import { resolveFramework } from "~/lib/context/frameworks";
+import type { DomainPack } from "~/lib/context/packs";
+import { getProfile } from "./repositories/profiles.server";
 import { applyImport, type ImportProposal, parseImportSelection } from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages, type Locale } from "~/lib/i18n";
@@ -62,6 +65,13 @@ export async function requireCourseUser(request: Request): Promise<User> {
   // Courses can be switched off per team (P28.3): then every page and action is a 404.
   await requireFeature(user, "courses");
   return user;
+}
+
+/** The pack of the course's own context profile (P21.6); undefined without profile or pack. */
+export async function coursePack(userId: string, course: Course): Promise<DomainPack | undefined> {
+  if (!course.contextProfileId) return undefined;
+  const p = await getProfile(userId, course.contextProfileId);
+  return p ? resolveFramework(p.country, p.sector, p.domain) : undefined;
 }
 
 export async function loadCourse(
@@ -171,7 +181,7 @@ export async function saveCourseIntent(
     return saved ? { ok: true } : { ok: false, error: m.errorInvalid };
   }
 
-  const result = applyCourseIntent(course.data, fd);
+  const result = applyCourseIntent(course.data, fd, { pack: await coursePack(user.id, course) });
   if (!result.ok)
     return { ok: false, error: result.error === "not-found" ? m.errorNotFound : m.errorInvalid };
   const saved = await updateCourse(user.id, course.id, { data: result.data }).catch(() => null);

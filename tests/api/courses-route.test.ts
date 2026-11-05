@@ -527,3 +527,56 @@ describe("/courses/:id", () => {
     });
   });
 });
+
+describe("pack tags on learning outcomes (P21.6)", () => {
+  const ictProfile = () =>
+    profiles.createProfile("teacher-a", {
+      name: "ICT jaar 2",
+      country: "NL",
+      sector: "hbo",
+      domain: "ICT",
+    } as never);
+
+  it("the loader offers the pack of the course's profile, or none", async () => {
+    const p = await ictProfile();
+    const tagged = await repo.createCourse("teacher-a", { name: "ICT", contextProfileId: p.id });
+    const r = (await detail.loader({
+      request: get(`/courses/${tagged.id}`),
+      params: { id: tagged.id },
+    } as never)) as { pack?: { source: unknown } };
+    expect(r.pack?.source).toEqual({
+      nl: "hbo-i domeinbeschrijving",
+      en: "hbo-i domain description",
+    });
+    const plain = await repo.createCourse("teacher-a", { name: "Zonder profiel" });
+    const r2 = (await detail.loader({
+      request: get(`/courses/${plain.id}`),
+      params: { id: plain.id },
+    } as never)) as { pack?: unknown };
+    expect(r2.pack).toBeUndefined();
+  });
+
+  it("saves tags from the pack and refuses an unknown option", async () => {
+    const p = await ictProfile();
+    const c = await repo.createCourse("teacher-a", { name: "ICT", contextProfileId: p.id });
+    expect(
+      await act(c.id, {
+        intent: "add-outcome",
+        text: "Je ontwerpt software.",
+        "tag:beheersingsniveau": "2",
+        "tag:activiteiten": ["Ontwerpen", "Realiseren"],
+      }),
+    ).toEqual({ ok: true });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.outcomes[0].packTags).toEqual({
+      beheersingsniveau: 2,
+      activiteiten: ["Ontwerpen", "Realiseren"],
+    });
+    const refused = (await act(c.id, {
+      intent: "add-outcome",
+      text: "Je danst.",
+      "tag:activiteiten": "Dansen",
+    })) as { ok: boolean };
+    expect(refused.ok).toBe(false);
+    expect((await repo.getCourse("teacher-a", c.id))!.data.outcomes).toHaveLength(1);
+  });
+});

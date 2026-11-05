@@ -34,6 +34,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
   thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
   menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, het paneel "Beoordeling" (P21.5, #104) gemerged op 2026-11-05:** knop, adviezen per
+  pet, Akkoord / Niet akkoord met reden, melding als de cursus daarna is gewijzigd.
 - **Rolagenten, "Laat beoordelen" aan de serverkant (P21.4, #103) gemerged op 2026-11-05:** beide
   petten kijken de cursus na op het gekozen model; besluiten worden vastgelegd.
 - **Rolagenten, opslag (P21.3, #102) gemerged op 2026-11-05:** beoordelingen van een pet en de
@@ -155,10 +157,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
   persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
   een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
   keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
-- P21.5 Rolagenten, het paneel "Beoordeling" op de cursuspagina: knop "Laat beoordelen" met
-  modelkeuze, de adviezen per pet met het item waar ze over gaan, Akkoord / Niet akkoord met een
-  reden, afgehandelde adviezen ingeklapt, en een melding als de cursus na de beoordeling is
-  gewijzigd. Werkt zonder JS; weg als rolagenten uit staan. Helptekst bij Cursussen. PR open.
+- P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
+  pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
+  beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen
+  tags; oude cursussen blijven geldig; een import laat tags leeg. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
   zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).
