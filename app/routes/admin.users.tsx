@@ -9,6 +9,7 @@ import {
   createInvite,
   createPasswordReset,
   createUser,
+  findClaimedEmails,
   getUserByEmail,
   getUserById,
   listPeople,
@@ -25,6 +26,7 @@ import {
 } from "~/server/repositories/teams.server";
 import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS, mayManage } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
+import { type PasteOutcome, type PasteReason, parsePastedPeople } from "~/lib/people/pasteList";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
@@ -32,6 +34,7 @@ import { Button, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { CreateAccountForm, type CreateAccountResult } from "~/components/admin/CreateAccountForm";
 import { CopyButton, LinkCard } from "~/components/admin/LinkCard";
+import { PasteListForm } from "~/components/admin/PasteListForm";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 
 const STATUSES = ["active", "invited", "disabled"] as const;
@@ -110,10 +113,11 @@ export async function action({ request }: Route.ActionArgs) {
   const teamId = String(fd.get("teamId") ?? "");
   const team = teamId ? await getTeamWithMembers(teamId) : null;
 
+  const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "14") || 14));
+  const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
+
   if (intent === "mint") {
     const note = String(fd.get("note") ?? "").trim() || null;
-    const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "14") || 14));
-    const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
     const invite = await createInvite({
       role: "teacher", // admins are never minted by invite
       note,
@@ -122,6 +126,47 @@ export async function action({ request }: Route.ActionArgs) {
       teamId: team?.id ?? null,
     });
     return { link: `${new URL(request.url).origin}/invite/${invite.token}` };
+  }
+
+  // ── A pasted list (P28.5): one invite link per person, or the reason why not ──
+  // Every line is judged on its own; a refused line never stops the others. There is no
+  // mail service: the admin passes each link on themselves.
+  if (intent === "mintList") {
+    const text = String(fd.get("people") ?? "").slice(0, 100_000);
+    const parsed = parsePastedPeople(text);
+    if (parsed.length === 0) return { error: "emptyList" as const };
+    const claimed = await findClaimedEmails(parsed.flatMap((r) => (r.ok ? [r.email] : [])));
+    const origin = new URL(request.url).origin;
+    const pasted: PasteOutcome[] = [];
+    for (const row of parsed) {
+      if (!row.ok) {
+        pasted.push({ line: row.line, text: row.text, reason: row.reason });
+        continue;
+      }
+      const clash: PasteReason | null = claimed.taken.has(row.email)
+        ? "emailTaken"
+        : claimed.invited.has(row.email)
+          ? "alreadyInvited"
+          : null;
+      if (clash) {
+        pasted.push({ line: row.line, text: row.text, reason: clash });
+        continue;
+      }
+      const invite = await createInvite({
+        role: "teacher", // admins are never minted by invite
+        note: `${row.name} <${row.email}>`,
+        expiresAt,
+        createdByUserId: admin.id,
+        teamId: team?.id ?? null,
+      });
+      pasted.push({
+        line: row.line,
+        name: row.name,
+        email: row.email,
+        link: `${origin}/invite/${invite.token}`,
+      });
+    }
+    return { pasted };
   }
 
   if (intent === "revoke") {
@@ -196,6 +241,8 @@ export async function action({ request }: Route.ActionArgs) {
   return { error: "unknown" as const };
 }
 
+type AddHow = "invite" | "list" | "account";
+
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const th = "px-4 py-2.5 font-semibold";
 const td = "px-4 py-2.5 text-slate-600";
@@ -221,7 +268,10 @@ function TeamSelect({ teams, id }: { teams: { id: string; name: string }[]; id: 
   );
 }
 
-/** "Add": an invite link, or (super admin only) an account right away (P18.7). */
+/**
+ * "Add": an invite link, a pasted list of invites (P28.5), or (super admin only) an
+ * account right away (P18.7).
+ */
 function AddPersonForm({
   viewerIsOwner,
   actionData,
@@ -235,8 +285,12 @@ function AddPersonForm({
 }) {
   const t = useT();
   const i = t.admin.invites;
-  const [how, setHow] = useState<"invite" | "account">("invite");
-  const radio = (value: "invite" | "account", label: string) => (
+  const [how, setHow] = useState<AddHow>("invite");
+  const pasted =
+    actionData && typeof actionData === "object" && "pasted" in actionData
+      ? (actionData.pasted as PasteOutcome[])
+      : undefined;
+  const radio = (value: AddHow, label: string) => (
     <div className="flex items-center gap-2">
       <input
         type="radio"
@@ -259,17 +313,18 @@ function AddPersonForm({
       className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <h2 className={h2}>{t.people.addHeading}</h2>
-      {viewerIsOwner && (
-        <fieldset>
-          <legend className="text-sm font-semibold text-slate-800">{t.people.addHow}</legend>
-          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
-            {radio("invite", t.people.addInvite)}
-            {radio("account", t.people.addAccount)}
-          </div>
-        </fieldset>
-      )}
+      <fieldset>
+        <legend className="text-sm font-semibold text-slate-800">{t.people.addHow}</legend>
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+          {radio("invite", t.people.addInvite)}
+          {radio("list", t.people.addList)}
+          {viewerIsOwner && radio("account", t.people.addAccount)}
+        </div>
+      </fieldset>
 
-      {how === "account" && viewerIsOwner ? (
+      {how === "list" ? (
+        <PasteListForm result={pasted} extraFields={<TeamSelect teams={teams} id="list-team" />} />
+      ) : how === "account" && viewerIsOwner ? (
         <CreateAccountForm
           result={actionData as CreateAccountResult}
           errorMessage={createError}
@@ -453,6 +508,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     passwordMismatch: t.auth.passwordMismatch,
     noneSelected: p.bulkNoneSelected,
     teamRequired: p.bulkTeamRequired,
+    emptyList: p.listEmpty,
   };
   const actionError =
     actionData && "error" in actionData && typeof actionData.error === "string"
@@ -460,27 +516,42 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
       : undefined;
   const createError = actionError ? errors[actionError] : undefined;
 
+  // The count of a pasted list; the table itself shows who got what (P28.5).
+  const pastedToast = (rows: PasteOutcome[]) => {
+    const made = rows.filter((r) => "link" in r).length;
+    const refused = rows.length - made;
+    return {
+      variant: refused ? ("info" as const) : ("success" as const),
+      message: fmt(made === 1 ? p.listSummary : p.listSummaryMany, {
+        made: String(made),
+        refused: String(refused),
+      }),
+    };
+  };
+
   useFormToast(actionData, {
     result: (d) =>
       !d
         ? null
         : "error" in d && typeof d.error === "string"
           ? { variant: "error", message: errors[d.error] ?? t.error.generic }
-          : "bulk" in d && d.bulk
-            ? {
-                variant: d.bulk.skipped ? "info" : "success",
-                message: fmt(d.bulk.skipped ? p.bulkSkipped : p.bulkDone, {
-                  done: String(d.bulk.done),
-                  skipped: String(d.bulk.skipped),
-                }),
-              }
-            : {
-                variant: "success",
-                message:
-                  "setPasswordLink" in d || "accountCreated" in d
-                    ? i.accountCreated
-                    : t.admin.console.saved,
-              },
+          : "pasted" in d && d.pasted
+            ? pastedToast(d.pasted)
+            : "bulk" in d && d.bulk
+              ? {
+                  variant: d.bulk.skipped ? "info" : "success",
+                  message: fmt(d.bulk.skipped ? p.bulkSkipped : p.bulkDone, {
+                    done: String(d.bulk.done),
+                    skipped: String(d.bulk.skipped),
+                  }),
+                }
+              : {
+                  variant: "success",
+                  message:
+                    "setPasswordLink" in d || "accountCreated" in d
+                      ? i.accountCreated
+                      : t.admin.console.saved,
+                },
   });
 
   return (
