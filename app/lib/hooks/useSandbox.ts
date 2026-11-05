@@ -24,6 +24,12 @@ export interface UseSandboxOptions {
   defaultProfileId?: string;
   /** The teacher's courses (empty/omitted → no course prefill). */
   courses?: SandboxCourse[];
+  /**
+   * The course to start on (P27.1, a next step opened with `?course=`). Its outcomes are
+   * filled in and its profile selected when it is in `courses`; otherwise the id is kept
+   * only so the result is still linked to it.
+   */
+  initialCourseId?: string;
 }
 
 export interface UseSandbox {
@@ -63,16 +69,24 @@ export function useSandbox({
   profiles,
   defaultProfileId = "",
   courses,
+  initialCourseId = "",
 }: UseSandboxOptions): UseSandbox {
   const profileList = profiles ?? [];
-  const [courseId, setCourseId] = useState("");
-  const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
+  const initialCourse = (courses ?? []).find((c) => c.id === initialCourseId);
+  const startProfileId =
+    initialCourse?.contextProfileId &&
+    profileList.some((p) => p.id === initialCourse.contextProfileId)
+      ? initialCourse.contextProfileId
+      : defaultProfileId;
+  const [courseId, setCourseId] = useState(initialCourseId);
+  const [contextProfileId, setContextProfileId] = useState(startProfileId);
   const [values, setValues] = useState<FormValues>(() => ({
     ...defaultValuesFor(inputs),
     ...profilePrefillValues(
       inputs,
-      profileList.find((p) => p.id === defaultProfileId),
+      profileList.find((p) => p.id === startProfileId),
     ),
+    ...coursePrefillValues(inputs, initialCourse),
   }));
 
   function selectProfile(id: string) {

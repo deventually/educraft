@@ -130,6 +130,11 @@ _Laatst bijgewerkt: 2026-11-05 (P20 af, P26.3 bezig)_
   voorstel dat de docent aanvinkt; met vijf fictieve eval-cases (`npm run eval:import`). PR open; de
   meting wacht op akkoord.
 
+- P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
+  register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
+  het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus
+  (`?course=`). Toetsvragen kreeg zo ook de cursuskiezer. PR open.
+
 ## Wacht op jou
 
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
