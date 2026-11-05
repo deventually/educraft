@@ -8,6 +8,8 @@ import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   contextProfiles,
+  courseLinks,
+  courses,
   portfolioDossiers,
   rubricScores,
   rubrics,
@@ -218,6 +220,8 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(portfolioDossiers).where(eq(portfolioDossiers.userId, id)).run();
     tx.delete(rubricScores).where(eq(rubricScores.userId, id)).run();
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
+    tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
+    tx.delete(courses).where(eq(courses.userId, id)).run();
     // The teacher's own model set lives in instance_settings, not on the user row.
     tx.delete(instanceSettings)
       .where(eq(instanceSettings.key, `assignedModels:${id}`))

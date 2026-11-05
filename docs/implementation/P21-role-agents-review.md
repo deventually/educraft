@@ -75,7 +75,7 @@ leeruitkomst, activiteit of toets valt in code weg, niet alleen via de prompt.
   `courseUpdatedAt` (om "verouderd" te tonen), `createdAt`.
 - `review_decisions`: `id`, `userId`, `reviewId`, `findingId`, `decision` (`accepted` |
   `rejected`), `reason` (≤ 500), `createdAt`; unieke index op (`reviewId`, `findingId`).
-- Eén migratie (na 0014 van P20.2). Repo `app/server/repositories/agentReviews.server.ts`: async,
+- Eén migratie (de eerste na 0014 van P20.2). Repo `app/server/repositories/agentReviews.server.ts`: async,
   per `userId`, lijsten begrensd. Opgeruimd bij `deleteCourse` en `deleteUserCascade`.
 - **RED:** `tests/api/agent-reviews-repo.test.ts` (rondreis, andermans cursus onzichtbaar, besluit
   op andermans review geweigerd, cascades, limiet).
@@ -129,8 +129,8 @@ leeruitkomst, activiteit of toets valt in code weg, niet alleen via de prompt.
 
 | Golf | Stappen | Wacht op |
 | --- | --- | --- |
-| 1 | 21.1 | P20.1 (gemerged) |
-| 2 | 21.2 en 21.3, naast elkaar | 21.1 · P20.2 |
+| 1 | 21.1 | P20.1 (gemerged) · kan nu |
+| 2 | 21.2 en 21.3, naast elkaar | 21.1 · P20.2 (gemerged, migratie 0014) |
 | 3 | 21.4 → 21.5 → 21.6 → 21.7 → 21.8 | 21.2 en 21.3 · P20.3 |
 
 Nooit meer dan twee werkers tegelijk.

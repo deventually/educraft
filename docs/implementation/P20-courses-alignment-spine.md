@@ -79,6 +79,10 @@ Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijges
   `outcome-not-assessed`; daarna `activity-without-outcome` per activiteit; als laatste
   `weights-not-100` en `study-load-exceeds-ec`. `coverageMatrix` geeft
   `{ columns: { id, kind }[], rows: { outcomeId, cells }[] }`.
+- **Opslag (20.2, zoals gebouwd):** de migratie is `0014` (niet 0008). `linkGeneration` geeft
+  `null` terug bij een vreemde of onbekende cursus, generatie of `itemId` en schrijft dan niets.
+  Verdwijnt een activiteit of toets uit de cursus, dan houdt de koppeling de cursus en vervalt
+  alleen haar `itemId`. Een cursus kan alleen naar een eigen contextprofiel wijzen.
 
 ## Het model (`app/lib/courses/types.ts`)
 
@@ -139,7 +143,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
   - `tests/courses/alignment.test.ts`: één gericht geval per bevindingscode, plus het negatieve geval
     (op elkaar afgestemde data → `[]`), de matrixvorm en de vaste volgorde.
 
-## 20.2 — Persistentie
+## 20.2 — Persistentie (klaar)
 
 - **Schema** (`schema.server.ts`):
   - `courses`: `id`, `userId` (notNull), `name`, `contextProfileId` (nullable), `dataJson`,
