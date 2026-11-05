@@ -75,6 +75,8 @@ export const HOURS_PER_EC = 28;
 export interface CourseData {
   /** Study load of the whole course in EC. */
   ec?: number;
+  /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */
+  startDate?: string;
   outcomes: LearningOutcome[];
   activities: Activity[];
   assessments: Assessment[];

@@ -8,6 +8,7 @@
  * field means "not set"; a decimal comma is accepted.
  */
 import { z } from "zod";
+import { IsoDateSchema } from "~/lib/calendar/weeks";
 import { BLOOM_LEVELS } from "./bloom";
 import * as edit from "./edit";
 import type { DomainPack } from "~/lib/context/packs";
@@ -37,6 +38,7 @@ export const COURSE_INTENTS = [
   "update-assessment",
   "remove-assessment",
   "set-ec",
+  "set-start-date",
   "add-item",
   "update-item",
   "remove-item",
@@ -228,6 +230,12 @@ function run(
     case "set-ec": {
       const { ec } = z.object({ ec: optionalNumber(0, COURSE_LIMITS.ec) }).parse(raw);
       return edit.setStudyLoad(d, ec === 0 ? undefined : ec);
+    }
+    case "set-start-date": {
+      const { startDate } = z
+        .object({ startDate: z.union([z.literal(""), IsoDateSchema]).default("") })
+        .parse(raw);
+      return edit.setStartDate(d, startDate || undefined);
     }
   }
 }

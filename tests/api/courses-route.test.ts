@@ -120,6 +120,31 @@ describe("/courses/:id", () => {
     expect(data.linkedWork).toEqual([]);
   });
 
+  it("saves the start date with the settings and gives the week dates (P22.1)", async () => {
+    const settings = await import("~/server/repositories/settings.server");
+    await settings.setBreakWeeks(["2026-09-14"]);
+    const c = await repo.createCourse("teacher-a", { name: "Datums", data: alignedCourse() });
+    const load = () =>
+      detail.loader({ request: get(`/courses/${c.id}`), params: { id: c.id } } as never);
+    expect((await load()).weekDates).toBeNull();
+    expect(
+      await act(c.id, { intent: "settings", name: "Datums", startDate: "2026-09-02" }),
+    ).toEqual({ ok: true });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.startDate).toBe("2026-09-02");
+    // Week 1 from the Monday of the start week; the break week is skipped.
+    expect((await load()).weekDates?.slice(0, 3)).toEqual([
+      "2026-08-31",
+      "2026-09-07",
+      "2026-09-21",
+    ]);
+    expect(
+      await act(c.id, { intent: "settings", name: "Datums", startDate: "morgen" }),
+    ).toMatchObject({ ok: false });
+    await act(c.id, { intent: "settings", name: "Datums", startDate: "" });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.startDate).toBeUndefined();
+    await settings.setBreakWeeks([]);
+  });
+
   it("loads the linked work with the tool name and the item title (20.4)", async () => {
     const gens = await import("~/server/repositories/generations.server");
     const c = await repo.createCourse("teacher-a", { name: "SE", data: alignedCourse() });
