@@ -5,8 +5,7 @@
 > **P21** als die er zijn. Zonder P21 en P27.4 werkt alles, alleen met minder knoppen. Zo voer je deze
 > brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens
 > `AGENTS.md` / de `/tdd`-skill, poort `npm test && npm run typecheck && npm run check`. Merge nooit
-> zelf; alleen Bastiaan merget. **Planner of niet is beslist** (BESLUIT-2026-11-05-7); punten 2 en 3
-> onder *Te beslissen* staan nog open en de brief volgt daar de aanbeveling.
+> zelf; alleen Bastiaan merget. Keuzes van Bastiaan: BESLUIT-2026-11-05-7.
 
 ## In gewone taal
 
@@ -194,22 +193,16 @@ niet bouwen.
 - Pushmeldingen, roosters voor studenten, de Cases-add-on.
 - Een eigen schoolkalender per team of per cursus.
 
-## Te beslissen door Bastiaan
-
-1. ~~Planner of niet.~~ Beslist, zie hieronder.
-2. **Vakantieweken: één lijst voor de instelling**, ingevuld door de beheerder. *Alternatief:* per
-   cursus door de docent (geen beheerscherm, wel meer typwerk).
-3. **Agenda: een bestand om te downloaden.** *Alternatief:* een feed met een geheime link die de agenda
-   zelf bijwerkt. Handiger, maar wie de link heeft, ziet de cursus; en agenda's van Google of
-   Microsoft halen hem dan op hun eigen servers op.
-
-Na de keuze legt de Producer het vast als BESLUIT in `besluiten.md` en zet hij de keuzes hier onder
-*Beslist door Bastiaan*.
-
 ## Beslist door Bastiaan
 
-1. **Geen planner** (5 november 2026, BESLUIT-2026-11-05-7). *Volgende week* staat vanaf vrijdag op
-   Start, berekend bij het openen; geen jobrunner en geen AI.
+Alle drie op 5 november 2026, BESLUIT-2026-11-05-7:
+
+1. **Geen planner.** *Volgende week* staat vanaf vrijdag op Start, berekend bij het openen; geen
+   jobrunner en geen AI. *Niet gekozen:* een jobrunner met een bewaarde zondagbriefing.
+2. **Vakantieweken: één lijst voor de instelling**, ingevuld door de beheerder. *Niet gekozen:* per
+   cursus door de docent.
+3. **Agenda: een bestand om te downloaden.** *Niet gekozen:* een feed met een geheime link (wie de
+   link heeft, ziet de cursus, en agenda's van Google of Microsoft halen hem op hun eigen servers op).
 
 ## Acceptatie
 

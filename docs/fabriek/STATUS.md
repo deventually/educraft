@@ -167,8 +167,6 @@ _Laatst bijgewerkt: 2026-11-05 (brief P22 open)_
 
 ## Wacht op jou
 
-- **Brief P22, nog twee keuzes:** vakantieweken per instelling of per cursus, agenda als download of
-  als feed. Aanbeveling staat in de brief; zonder planner is beslist (BESLUIT-2026-11-05-7).
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
   `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
 

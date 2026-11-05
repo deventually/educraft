@@ -231,5 +231,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).
 - **BESLUIT-2026-11-05-7:** **De week van de docent (P22) zonder planner.** De zondagbriefing is het
   blok *Volgende week* op Start, vanaf vrijdag, berekend bij het openen. Geen jobrunner, geen AI;
-  de jobrunner komt pas mee met e-mail of de Cases-add-on. Bastiaan, 2026-11-05. Uitwerking: brief
-  P22.
+  de jobrunner komt pas mee met e-mail of de Cases-add-on. Vakantieweken zijn één lijst voor de hele
+  instelling, ingevuld door de beheerder. De agenda is een `.ics`-bestand per cursus om te downloaden,
+  geen feed met een geheime link. Bastiaan, 2026-11-05. Uitwerking: brief P22.
