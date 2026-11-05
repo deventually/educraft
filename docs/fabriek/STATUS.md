@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Nu
 
+- **Beoordelingsmodel: een gebrek telt bij één criterium (#71) gemerged op 2026-11-04:** na meting q;
+  meting s zonder regressie.
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 16 tools (10 voor
   docenten, 6 tutors), tweetalig NL/EN, gericht op hbo.
 - **Gebruik:** pilot met een aantal docenten en leden van een examencommissie.
@@ -79,9 +81,17 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- Beoordelingsmodel: een gebrek telt bij één criterium, nooit bij twee (na meting q: in 1 van de 3
-  runs telde een ontbrekend testgeval dubbel). Meting s (1 run): die case weer 4,60, geen
-  case onder q, geen gefaalde check (`evals/reports/2026-11-04s.md`) — PR open.
+- P24.3 Toetsvragen en toetsmatrijs maken (`test-items`): in twee stappen een toetsmatrijs die
+  optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
+  matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
+  Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
+  bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
+  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte:
+  r2 (1 run) niets afgekapt, nog één dubbel verdedigbare vraag; ronde 2 verbiedt meerkeuze over
+  kwesties waarover vakmensen het oneens zijn. Eindmeting t (3 runs, batch): niets afgekapt,
+  aantallen kloppen; research-methods 4,07 en statistics 4,47 door vorm (af en toe een
+  correctiespoor in een kop, soms 3 opties). Ronde 3 gaf regressie (meting u) en is teruggedraaid;
+  de stand is die van t. Bastiaan koos voor mergen in deze stand — PR open.
 
 ## Wacht op jou
 
@@ -105,6 +115,9 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
+- Toetsvragen, bekende punten: af en toe een correctiespoor in een kop van het antwoordmodel en
+  soms 3 opties bij statistiek. Oplossing in code (vaste rijtoewijzing per vraag), niet met
+  prompttekst; twee rondes prompttekst hielpen niet (metingen t en u).
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
