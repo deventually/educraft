@@ -11,12 +11,14 @@ import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
 import { THINK_PAIR_SHARE_PROMPT } from "./think-pair-share.prompt";
 import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
+import { CLEAR_ASSIGNMENT_PROMPT } from "./clear-assignment@v1.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { DIFFERENTIATION_PROMPT } from "./differentiation@v1.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
+import { TEST_ANALYSIS_PROMPT } from "./test-analysis@v1.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
@@ -43,6 +45,7 @@ const ALL: PromptDef[] = [
   THINK_PAIR_SHARE_PROMPT,
   SOCRATIC_PARTNER_PROMPT,
   BLOOM_BY_DESIGN_PROMPT,
+  CLEAR_ASSIGNMENT_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
   DIFFERENTIATION_PROMPT,
@@ -54,6 +57,7 @@ const ALL: PromptDef[] = [
   STAGE_ASSESSMENT_PROMPT_V2,
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
+  TEST_ANALYSIS_PROMPT,
   PORTFOLIO_COACH_PROMPT,
   PORTFOLIO_DRAFT_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT,

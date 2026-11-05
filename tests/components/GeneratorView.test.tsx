@@ -85,3 +85,24 @@ describe("GeneratorView — profile prefill", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("GeneratorView — values handed over by a utility (P24.5)", () => {
+  it("fills the tool's own fields once, and ignores names it does not have", async () => {
+    const { writeHandoff } = await import("~/lib/forms/handoff");
+    const tool = getToolBySlug("rubric-builder")!;
+    writeHandoff(tool.slug, { assignment: "Handed over", notAField: "x" });
+    const { MemoryRouter } = await import("react-router");
+    const view = () => (
+      <MemoryRouter>
+        <GeneratorView tool={tool} profiles={[]} defaultProfileId="" />
+      </MemoryRouter>
+    );
+    const { unmount } = render(view());
+    expect(await screen.findByDisplayValue("Handed over")).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("x")).toBeNull();
+    unmount();
+    // Taken once: a second visit starts empty.
+    render(view());
+    expect(screen.queryByDisplayValue("Handed over")).toBeNull();
+  });
+});

@@ -37,6 +37,60 @@ export const utilities = {
   heading: "Hulpmiddelen",
   intro:
     "Hulpmiddelen rekenen of ordenen alleen. Ze gebruiken geen AI: ze zijn snel, gratis en geven altijd hetzelfde antwoord.",
+  itemAnalysis: {
+    alpha: "Cronbachs alfa: {value}",
+    alphaNone: "Cronbachs alfa: niet te berekenen, want alle totaalscores zijn gelijk.",
+    blanks: "{n} lege cellen telden als 0 punten.",
+    copied: "Gekopieerd",
+    copy: "Kopieer tabel",
+    errors: {
+      aboveMax: "Een score is hoger dan het maximum van die vraag. Controleer de maxima.",
+      empty: "Plak een scorelijst om de uitkomst te zien.",
+      maxCount: "Geef één maximum voor alle vragen, of precies één per vraag.",
+      maxInvalid:
+        "Vul de maxima in als getallen boven 0, gescheiden door een puntkomma of een spatie.",
+      negative: "Een score is negatief. Controleer de lijst.",
+      tooFewCandidates: "Er zijn minstens 3 kandidaten nodig.",
+      tooFewItems: "Er zijn minstens 2 vragen nodig.",
+      tooLarge: "De lijst is te groot: hooguit 5000 kandidaten en 200 vragen.",
+    },
+    explain: "Laat uitleggen",
+    explainHint:
+      "Opent de tool Toetsanalyse uitleggen met deze getallen ingevuld. Alleen de getallen per vraag gaan naar de AI, niet de scorelijst.",
+    legend:
+      "p: het deel van de punten dat kandidaten gemiddeld haalden. Rit: hoe sterk de vraag samenhangt met de totaalscore. Rir: hetzelfde, maar zonder de vraag zelf in het totaal. Alfa zonder deze vraag: de betrouwbaarheid als je de vraag weglaat.",
+    max: "Maximale punten per vraag (optioneel)",
+    maxFromData: "Je gaf geen maxima op: p gebruikt de hoogste behaalde score per vraag.",
+    maxHint:
+      "Eén getal voor alle vragen, of één per vraag, gescheiden door een puntkomma: 1; 1; 2; 4. Leeg laten: de hoogste behaalde score.",
+    meanTotal: "Gemiddelde totaalscore: {mean} van {max} (sd {sd}).",
+    privacy: "De scorelijst blijft in je browser. Er wordt niets bewaard of verstuurd.",
+    removed: "Weggehaald, want geen vraag of mogelijk persoonsgegevens: {columns}.",
+    report: {
+      alpha: "Cronbachs alfa: {value}",
+      blanks: "Lege cellen, geteld als 0 punten: {n}",
+      candidates: "Kandidaten: {n}",
+      columns: {
+        alphaIfDeleted: "Alfa zonder deze vraag",
+        max: "Max",
+        p: "p",
+        question: "Vraag",
+        rir: "Rir",
+        rit: "Rit",
+      },
+      items: "Vragen: {n}",
+      maxFromData: "Maximum per vraag: niet opgegeven, dus de hoogste behaalde score",
+      meanTotal: "Gemiddelde totaalscore: {mean} van {max} (sd {sd})",
+      notComputable: "niet te berekenen",
+      title: "Toetsanalyse, berekend door het hulpmiddel in LimeOnIt",
+    },
+    result: "Uitkomst",
+    scores: "Scorelijst",
+    scoresHint:
+      "Plak uit Excel: één rij per kandidaat, één kolom per vraag, eventueel met een kopregel. Laat namen en studentnummers weg; staan ze erin, dan haalt het hulpmiddel die kolom weg.",
+    summary: "{candidates} kandidaten, {items} vragen.",
+    tableCaption: "Per vraag: p-waarde, Rit, Rir en alfa zonder deze vraag",
+  },
   noAi: "Zonder AI",
   open: "Open hulpmiddel",
   rubric: {

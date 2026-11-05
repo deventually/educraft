@@ -58,6 +58,21 @@ describe("/utilities/:slug", () => {
   });
 });
 
+describe("/utilities/item-analysis (P24.5)", () => {
+  const page = (explainWith: string | null) =>
+    ({ loaderData: { slug: "item-analysis", explainWith } }) as unknown as ComponentProps<
+      typeof UtilityPage
+    >;
+
+  it("renders the item analysis under its task-first name", async () => {
+    renderAt(() => <UtilityPage {...page("test-analysis")} />);
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Toetsuitslag per vraag analyseren" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Scorelijst")).toBeInTheDocument();
+  });
+});
+
 describe("/utilities/rubric", () => {
   type ListProps = ComponentProps<typeof RubricList>;
   const renderList = (rubrics: ListProps["loaderData"]["rubrics"], locale: "nl" | "en" = "nl") => {

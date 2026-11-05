@@ -11,12 +11,14 @@ import {
   GraduationCap,
   BookOpen,
   CalendarClock,
+  FilePenLine,
   Route,
   Users,
   UsersRound,
   Wrench,
   Calculator,
   Table2,
+  ChartColumn,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -38,6 +40,8 @@ const ICONS: Record<string, LucideIcon> = {
   calculator: Calculator,
   table: Table2,
   "calendar-clock": CalendarClock,
+  "file-pen-line": FilePenLine,
+  "chart-column": ChartColumn,
   route: Route,
 };
 

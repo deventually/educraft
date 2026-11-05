@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
@@ -13,6 +13,7 @@ import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
 import { cn } from "~/lib/utils";
 import { streamPost } from "~/lib/streamClient";
+import { takeHandoff } from "~/lib/forms/handoff";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
@@ -51,6 +52,19 @@ export function GeneratorView({
     profiles,
     defaultProfileId,
   });
+  // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
+  // server render and hydration agree; only the tool's own text fields are filled.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: run once per tool
+  useEffect(() => {
+    const handed = takeHandoff(tool.slug);
+    if (!handed) return;
+    for (const field of tool.inputs) {
+      const value = handed[field.name];
+      if (value !== undefined && (field.kind === "text" || field.kind === "textarea")) {
+        setValue(field.name, value);
+      }
+    }
+  }, [tool.slug]);
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Check if tool has image inputs (a vision tool narrows the offered models).
   const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
