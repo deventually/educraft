@@ -64,7 +64,7 @@ export const courses = {
     courseName: "Naam van het vak in het document",
     courseNameHint: "Beschrijft het document meer vakken? Dan zoekt de AI alleen dit vak.",
     covers: "Welke leeruitkomsten toetst deze toets?",
-    done: "{outcomes} leeruitkomsten en {assessments} toetsen toegevoegd.",
+    done: "Toegevoegd: {outcomes} leeruitkomst(en) en {assessments} toets(en).",
     errors: {
       "empty-document": "Plak eerst de tekst van het document.",
       failed:
@@ -88,7 +88,7 @@ export const courses = {
     proposalTitle: "Voorstel",
     ready: "Voorstel klaar. Kies wat in de cursus komt.",
     readyCheck:
-      "Voorstel klaar. {n} leeruitkomsten staan niet letterlijk in het document; controleer die.",
+      "Voorstel klaar. Niet letterlijk in het document: {n} leeruitkomst(en). Controleer die.",
     text: "Tekst van het document",
     title: "Importeren uit OER of studiehandleiding",
     weightsOff: "De wegingen in het document tellen niet op tot 100%. LimeOnIt past ze niet aan.",

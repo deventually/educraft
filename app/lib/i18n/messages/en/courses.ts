@@ -67,7 +67,7 @@ export const courses: Messages["courses"] = {
     courseNameHint:
       "Does the document describe several courses? Then the AI looks for this one only.",
     covers: "Which learning outcomes does this assessment assess?",
-    done: "{outcomes} learning outcomes and {assessments} assessments added.",
+    done: "Added: {outcomes} learning outcome(s) and {assessments} assessment(s).",
     errors: {
       "empty-document": "Paste the text of the document first.",
       failed:
@@ -91,7 +91,7 @@ export const courses: Messages["courses"] = {
     proposalTitle: "Proposal",
     ready: "Proposal ready. Choose what goes into the course.",
     readyCheck:
-      "Proposal ready. {n} learning outcomes are not verbatim in the document; check them.",
+      "Proposal ready. Not verbatim in the document: {n} learning outcome(s). Check them.",
     text: "Text of the document",
     title: "Import from a course catalogue or study guide",
     weightsOff: "The weights in the document do not add up to 100%. LimeOnIt does not change them.",
