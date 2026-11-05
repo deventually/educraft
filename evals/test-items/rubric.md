@@ -30,7 +30,9 @@ Score each shared criterion 1–5.
   (questions a–b)" for each row, and below it "#### Vraag n" / "#### Question n" for each of its
   questions, with only the number. That grouping is the required format, not a deviation (the
   prompt asks for it since `@v3`; an output with "### Question n — Row Rx" per question is the
-  older `@v2` format and is fine too). "Controle tegen de matrijs/Check against the blueprint"
+  older `@v2` format and is fine too). The Questions section is not grouped: it has one
+  heading "### Vraag n (n pt)" / "### Question n (n pt)" per question, without row headings, so
+  students see no rows; only the answer model is grouped. "Controle tegen de matrijs/Check against the blueprint"
   with a table, and the A–D distribution as a line under the table (no second table needed),
   and a self-check. Both stages end with the exact
   closing sentence ("Dit is een concept. De docent stelt de toets vast." / "This is a draft.
