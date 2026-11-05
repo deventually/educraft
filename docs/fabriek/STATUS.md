@@ -4,15 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.4 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P21.1, P21.2 en brief P27 gemerged, P20.4 bezig)_
 
 ## Nu
 
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
-  thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen
-  (BESLUIT-2026-11-05-4).
-- **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** de Toetsdeskundige en de
-  Ontwerper als register, met de controle op hun antwoord; nog zonder AI en zonder scherm.
+  thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
+  menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** register van de twee petten,
+  de invoer onder korte sleutels en de controle op het antwoord; nog zonder AI en scherm.
+- **Rolagenten, de twee AI-teksten (P21.2, #85) gemerged op 2026-11-05:** Toetsdeskundige en
+  Ontwerper (NL/EN) met de meting `npm run eval:agents`; tussenronde ra1 10 van 10 geslaagd, de
+  eindmeting (3 runs) wacht op akkoord.
 - **Cursussen, de pagina's (P20.3, #82) gemerged op 2026-11-05:** menu-item "Cursussen", per
   cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, aandachtspunten en de
   dekkingsmatrix.

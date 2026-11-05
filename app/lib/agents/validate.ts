@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PROMPTS } from "~/lib/prompts";
 import { AGENT_TARGETS, type Agent } from "./types";
 
 export interface AgentValidationIssue {
@@ -24,6 +25,8 @@ export function validateAgents(agents: Agent[]): AgentValidationIssue[] {
         agent: agent.id,
         message: parsed.error.issues.map((i) => i.message).join("; "),
       });
+    else if (!PROMPTS[agent.promptId])
+      issues.push({ agent: agent.id, message: `Unknown prompt: ${agent.promptId}` });
     if (seen.has(agent.id)) issues.push({ agent: agent.id, message: "Duplicate agent id" });
     seen.add(agent.id);
   }

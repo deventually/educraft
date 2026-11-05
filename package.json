@@ -20,7 +20,8 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "set-owner": "tsx scripts/set-owner.ts",
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",
-    "eval:coach": "vite-node -c scripts/eval.config.ts scripts/eval-coach.ts"
+    "eval:coach": "vite-node -c scripts/eval.config.ts scripts/eval-coach.ts",
+    "eval:agents": "vite-node -c scripts/eval.config.ts scripts/eval-agents.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.8",

@@ -7,7 +7,7 @@ function valid(): Agent {
   return {
     id: "test-hat",
     role: { nl: "Testpet", en: "Test hat" },
-    promptId: "agent-test@v1",
+    promptId: "agent-design@v1",
     watches: ["course"],
   };
 }
@@ -43,6 +43,13 @@ describe("validateAgents", () => {
   it("rejects a role without both languages", () => {
     const a = { ...valid(), role: { nl: "Testpet", en: "" } };
     expect(validateAgents([a]).map((i) => i.agent)).toEqual(["test-hat"]);
+  });
+
+  it("rejects a prompt that is not registered", () => {
+    const a = { ...valid(), promptId: "agent-missing@v1" };
+    expect(validateAgents([a])).toEqual([
+      { agent: "test-hat", message: "Unknown prompt: agent-missing@v1" },
+    ]);
   });
 
   it("rejects a prompt id without a version", () => {

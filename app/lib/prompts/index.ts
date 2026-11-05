@@ -26,6 +26,7 @@ import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
 import { TEST_ITEMS_BLUEPRINT, TEST_ITEMS_ITEMS } from "./test-items.prompt";
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
+import { AGENT_ASSESSMENT_PROMPT, AGENT_DESIGN_PROMPT } from "./agents@v1.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -34,6 +35,8 @@ import {
 } from "./cognitive-architect.prompt";
 
 const ALL: PromptDef[] = [
+  AGENT_ASSESSMENT_PROMPT,
+  AGENT_DESIGN_PROMPT,
   GUIDED_REFLECTION_PROMPT,
   GUIDED_REFLECTION_PROMPT_V2,
   AUTHENTIC_ASSESSMENT_PROMPT,
