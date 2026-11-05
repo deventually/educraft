@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Tool } from "./types";
+import { COURSE_ITEM_KINDS, type Tool } from "./types";
 import { PROMPTS } from "~/lib/prompts";
 import { MODELS } from "~/lib/ai/models";
 import { placeholdersIn } from "~/lib/template/interpolate";
@@ -115,6 +115,10 @@ const toolSchema = z.object({
   usesContextProfile: z.boolean(),
   defaultOutputLanguage: z.enum(["nl", "en"]),
   next: z.array(z.string().min(1)).max(3).optional(),
+  courseActions: z
+    .array(z.enum(COURSE_ITEM_KINDS))
+    .refine((kinds) => new Set(kinds).size === kinds.length, "courseActions: a kind twice")
+    .optional(),
   enabled: z.boolean(),
   phase: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
 });

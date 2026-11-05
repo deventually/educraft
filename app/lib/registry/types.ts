@@ -199,6 +199,10 @@ export interface Theory {
   keyCitations: string[];
 }
 
+/** A kind of course item a tool can be offered at (P27.4). */
+export const COURSE_ITEM_KINDS = ["outcome", "activity", "assessment"] as const;
+export type CourseItemKind = (typeof COURSE_ITEM_KINDS)[number];
+
 export interface Tool {
   id: string;
   /** URL: /tools/<slug>. */
@@ -253,6 +257,12 @@ export interface Tool {
    * validated at boot; a tool the viewer may not use is left out by the loader.
    */
   next?: string[];
+
+  /**
+   * The kinds of course item this tool shows as a button at (P27.4): on the course page,
+   * in the week on Start. Data only; the button opens the tool with `?course=&item=`.
+   */
+  courseActions?: CourseItemKind[];
 
   /** Feature flag per roadmap phase. */
   enabled: boolean;

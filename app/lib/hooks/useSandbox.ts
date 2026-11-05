@@ -30,6 +30,11 @@ export interface UseSandboxOptions {
    * only so the result is still linked to it.
    */
   initialCourseId?: string;
+  /**
+   * The course item the tool was opened for (P27.4, `?item=`). It stays only while the
+   * initial course stays selected; picking a course drops it.
+   */
+  initialItemId?: string;
 }
 
 export interface UseSandbox {
@@ -50,6 +55,8 @@ export interface UseSandbox {
    * nothing) and, when the course has a context profile, select that profile too.
    */
   selectCourse: (id: string) => void;
+  /** The course item the result is linked to ("" = the course as a whole). */
+  itemId: string;
 }
 
 /**
@@ -70,6 +77,7 @@ export function useSandbox({
   defaultProfileId = "",
   courses,
   initialCourseId = "",
+  initialItemId = "",
 }: UseSandboxOptions): UseSandbox {
   const profileList = profiles ?? [];
   const initialCourse = (courses ?? []).find((c) => c.id === initialCourseId);
@@ -79,6 +87,7 @@ export function useSandbox({
       ? initialCourse.contextProfileId
       : defaultProfileId;
   const [courseId, setCourseId] = useState(initialCourseId);
+  const [itemId, setItemId] = useState(initialCourseId ? initialItemId : "");
   const [contextProfileId, setContextProfileId] = useState(startProfileId);
   const [values, setValues] = useState<FormValues>(() => ({
     ...defaultValuesFor(inputs),
@@ -107,6 +116,7 @@ export function useSandbox({
 
   function selectCourse(id: string) {
     setCourseId(id);
+    setItemId("");
     const course = (courses ?? []).find((c) => c.id === id);
     const prefill = coursePrefillValues(inputs, course);
     setValues((prev) => {
@@ -132,5 +142,6 @@ export function useSandbox({
     selectProfile,
     courseId,
     selectCourse,
+    itemId,
   };
 }

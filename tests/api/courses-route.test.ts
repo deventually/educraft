@@ -165,10 +165,48 @@ describe("/courses/:id", () => {
       {
         generationId: g.id,
         toolName: { nl: "Authentieke toets ontwerpen", en: "Design an authentic assessment" },
+        itemId: QUIZ,
         itemTitle: "Oefentoets",
         createdAt: g.createdAt,
       },
     ]);
+  });
+
+  it("gives the current course week, or null without a start date (P27.4)", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-25T10:00:00Z")); // Wednesday of week 2
+    try {
+      const dated = await repo.createCourse("teacher-a", {
+        name: "Met datum",
+        data: { ...alignedCourse(), startDate: "2026-11-16" },
+      });
+      const plain = await repo.createCourse("teacher-a", { name: "Zonder", data: alignedCourse() });
+      const load = (id: string) =>
+        detail.loader({ request: get(`/courses/${id}`), params: { id } } as never);
+      expect((await load(dated.id)).currentWeek).toBe(2);
+      expect((await load(plain.id)).currentWeek).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("offers the course tools the teacher may use, per kind and per finding (P27.4)", async () => {
+    const settings = await import("~/server/repositories/settings.server");
+    const c = await repo.createCourse("teacher-a", { name: "Tools", data: alignedCourse() });
+    const load = () =>
+      detail.loader({ request: get(`/courses/${c.id}`), params: { id: c.id } } as never);
+    const data = await load();
+    expect(data.tools.activity.map((t) => t.slug)).toContain("lesson-plan");
+    expect(data.tools.assessment.map((t) => t.slug)).toContain("test-items");
+    expect(data.tools.findings["outcome-not-assessed"]?.slug).toBe("test-items");
+    await settings.setToolStand("lesson-plan", "off");
+    try {
+      const off = await load();
+      expect(off.tools.activity.map((t) => t.slug)).not.toContain("lesson-plan");
+      expect(off.tools.findings["outcome-not-taught"]).toBeUndefined();
+    } finally {
+      await settings.setToolStand("lesson-plan", null);
+    }
   });
 
   it("is a 404 for someone else's course, for loader and action", async () => {

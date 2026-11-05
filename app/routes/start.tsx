@@ -7,6 +7,7 @@ import { getAvailableTools, isFeatureOn } from "~/server/availability.server";
 import { listCourseLinksForUser, listCourses } from "~/server/repositories/courses.server";
 import { getBreakWeeks, getTimeZone } from "~/server/repositories/settings.server";
 import { openAgentFindings } from "~/server/agentReview.server";
+import { courseToolsFor } from "~/server/courseTools.server";
 import { todayIn } from "~/lib/calendar/weeks";
 import { nextWeek, showsNextWeek, teacherWeek } from "~/lib/week/teacherWeek";
 import { TeacherWeekView } from "~/components/week/TeacherWeek";
@@ -82,7 +83,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const hasDates = dated.some((c) => c.data.startDate);
   let week = null;
   if (hasDates) {
-    const [links, breakWeeks, timeZone, agentFindings] = await Promise.all([
+    const [links, breakWeeks, timeZone, agentFindings, tools] = await Promise.all([
       listCourseLinksForUser(user.id, 500),
       getBreakWeeks(),
       getTimeZone(),
@@ -90,6 +91,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         user,
         dated.map((c) => c.id),
       ),
+      courseToolsFor(user),
     ]);
     const input = {
       courses: dated.map((c) => ({ id: c.id, name: c.name, data: c.data })),
@@ -98,7 +100,11 @@ export async function loader({ request }: Route.LoaderArgs) {
       today: todayIn(timeZone, new Date()),
       ...(agentFindings && { agentFindings }),
     };
-    week = { now: teacherWeek(input), next: showsNextWeek(input.today) ? nextWeek(input) : null };
+    week = {
+      now: teacherWeek(input),
+      next: showsNextWeek(input.today) ? nextWeek(input) : null,
+      tools,
+    };
   }
 
   return {
@@ -157,7 +163,7 @@ export default function Start({ loaderData }: Route.ComponentProps) {
       )}
 
       {hasCourses && teacherWeek && (
-        <TeacherWeekView now={teacherWeek.now} next={teacherWeek.next} />
+        <TeacherWeekView now={teacherWeek.now} next={teacherWeek.next} tools={teacherWeek.tools} />
       )}
       {hasCourses && !teacherWeek && <Week t={t} week={week} hint={startDateHint} />}
       {hasCourses && courses && <Courses t={t} courses={courses} />}

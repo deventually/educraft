@@ -39,6 +39,8 @@ interface Props {
   courses?: (SandboxCourse & { name: string })[];
   /** The course to start on (P27.1, `?course=`). */
   initialCourseId?: string;
+  /** The course item to link the result to (P27.4, `?item=`). */
+  initialItemId?: string;
   /** Next steps and places to keep the result (P27.1). */
   resultContext?: ResultContext;
 }
@@ -51,6 +53,7 @@ export function GeneratorView({
   catalogModels,
   courses,
   initialCourseId,
+  initialItemId,
   resultContext,
 }: Props) {
   const t = useT();
@@ -58,13 +61,15 @@ export function GeneratorView({
   const stage = tool.stages[0];
   // Shared sandbox: seeds field defaults + the default profile's prefill, and
   // re-derives profile-backed fields on `selectProfile` (see useSandbox).
-  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse } = useSandbox({
-    inputs: tool.inputs,
-    profiles,
-    defaultProfileId,
-    courses,
-    initialCourseId,
-  });
+  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
+    useSandbox({
+      inputs: tool.inputs,
+      profiles,
+      defaultProfileId,
+      courses,
+      initialCourseId,
+      initialItemId,
+    });
   // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
   // server render and hydration agree; only the tool's own text fields are filled.
   // biome-ignore lint/correctness/useExhaustiveDependencies: run once per tool
@@ -167,6 +172,7 @@ export function GeneratorView({
         model,
         images: images.length > 0 ? images : undefined,
         courseId: courseId || undefined,
+        itemId: (courseId && itemId) || undefined,
       },
       {
         onToken: (text) => setOutput((prev) => prev + text),
@@ -289,7 +295,12 @@ export function GeneratorView({
             for grading tools, driven by registry data. */}
         {resultContext && output && !streaming && !reviewing && (
           <div className="shrink-0">
-            <ResultActions {...resultContext} generationId={generationId} courseId={courseId} />
+            <ResultActions
+              {...resultContext}
+              generationId={generationId}
+              courseId={courseId}
+              itemId={itemId}
+            />
           </div>
         )}
         {codes && output && !reviewing && (

@@ -26,6 +26,8 @@ interface Props {
   courses?: (SandboxCourse & { name: string })[];
   /** The course to start on (P27.1, `?course=`). */
   initialCourseId?: string;
+  /** The course item to link the result to (P27.4, `?item=`). */
+  initialItemId?: string;
   /** Next steps and places to keep the result (P27.1). */
   resultContext?: ResultContext;
 }
@@ -44,6 +46,7 @@ export function StageStepper({
   catalogModels,
   courses,
   initialCourseId,
+  initialItemId,
   resultContext,
 }: Props) {
   const t = useT();
@@ -51,13 +54,15 @@ export function StageStepper({
   // Shared sandbox (see useSandbox). Cognitive Architect has no profile-backed
   // fields, so `selectProfile` here is just the context selector; the hook keeps
   // the door open for prefill without special-casing the multi-stage surface.
-  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse } = useSandbox({
-    inputs: tool.inputs,
-    profiles,
-    defaultProfileId,
-    courses,
-    initialCourseId,
-  });
+  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
+    useSandbox({
+      inputs: tool.inputs,
+      profiles,
+      defaultProfileId,
+      courses,
+      initialCourseId,
+      initialItemId,
+    });
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Pre-select an OFFERED model, not blindly the tool default: a teacher
   // whose set holds only a local model must not start on the frontier default.
@@ -112,6 +117,7 @@ export function StageStepper({
         model,
         priorOutputs: outputs(),
         courseId: courseId || undefined,
+        itemId: (courseId && itemId) || undefined,
       },
       {
         onToken: (text) =>
@@ -234,7 +240,12 @@ export function StageStepper({
         {resultContext &&
           Object.values(stages).some((st) => st.output) &&
           !Object.values(stages).some((st) => st.streaming) && (
-            <ResultActions {...resultContext} generationId={lastGenerationId} courseId={courseId} />
+            <ResultActions
+              {...resultContext}
+              generationId={lastGenerationId}
+              courseId={courseId}
+              itemId={itemId}
+            />
           )}
         {/* Persistent AI-transparency notice under the staged results. */}
         <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} />

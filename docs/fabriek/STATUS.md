@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.3 gemerged, P22.4 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Nu
 
@@ -175,6 +175,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.3 gemerged, P22.4 open)_
   zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten
   (geen studentnamen, BKE-minimum, AI-verantwoording) met datum. Een toets als bewijs telt zijn
   vragen (`itemCount`). Geen migratie. PR open.
+- P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
+  tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
+  aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
+  opent de tool met cursus en onderdeel, en het resultaat komt bij dat onderdeel. Plus de
+  documentatie van P27 (27.5). Geen migratie. PR open.
 - Rolagenten aan en uit in beheer: een eigen pagina `/admin/agents` (menu *Rolagenten*) met de
   hoofdschakelaar (dezelfde als bij Onderdelen, Aan / Op aanvraag / Uit) en per pet Aan of Uit
   voor de hele instantie. Een pet die uit staat, draait niet, staat niet op de cursuspagina en telt

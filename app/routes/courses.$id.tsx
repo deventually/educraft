@@ -6,8 +6,8 @@ import { blueprintOffer, coursePack, loadCourse, saveCourseIntent } from "~/serv
 import { dossierTargets } from "~/server/courseEvidence.server";
 import { loadReviewPanel } from "~/server/agentReview.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
-import { getBreakWeeks } from "~/server/repositories/settings.server";
-import { courseWeekDates } from "~/lib/calendar/weeks";
+import { getBreakWeeks, getTimeZone } from "~/server/repositories/settings.server";
+import { courseWeekDates, courseWeekOn, todayIn } from "~/lib/calendar/weeks";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
@@ -25,6 +25,9 @@ import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
+import { CourseWeekView } from "~/components/courses/CourseWeekView";
+import { courseToolsFor } from "~/server/courseTools.server";
+import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 
@@ -42,6 +45,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return {
         generationId: w.generationId,
         toolName: getToolBySlug(w.toolSlug)?.name ?? w.toolSlug,
+        itemId: w.itemId,
         itemTitle: items.find((i) => i.id === w.itemId)?.title ?? null,
         createdAt: w.createdAt,
         ...(blueprint && { blueprint }),
@@ -62,11 +66,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
     pack: await coursePack(user.id, course),
+    tools: await courseToolsFor(user),
     // The Monday of each course week (P22.1), or null without a start date.
     weekDates: course.data.startDate
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
+    currentWeek: await currentCourseWeek(course.data.startDate),
   };
+}
+
+/** The course week today falls in (P27.4), or null: no start date, a break, before or after. */
+async function currentCourseWeek(startDate: string | undefined): Promise<number | null> {
+  if (!startDate) return null;
+  const [breakWeeks, timeZone] = await Promise.all([getBreakWeeks(), getTimeZone()]);
+  const on = courseWeekOn(startDate, breakWeeks, todayIn(timeZone, new Date()), COURSE_LIMITS.week);
+  return on.kind === "week" ? on.week : null;
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -117,6 +131,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     review = null,
     pack,
     weekDates = null,
+    tools = NO_COURSE_TOOLS,
+    currentWeek = null,
   } = loaderData;
   const { data } = course;
 
@@ -156,9 +172,17 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           startOpen={data.outcomes.length === 0}
           proposal={proposal}
         />
-        <FindingsList data={data} findings={findings} />
-        {review && <CourseReviewPanel data={data} {...review} />}
-        <OutcomesSection data={data} pack={pack} />
+        <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
+        {review && <CourseReviewPanel data={data} {...review} courseId={course.id} tools={tools} />}
+        <CourseWeekView
+          courseId={course.id}
+          data={data}
+          tools={tools}
+          work={linkedWork}
+          weekDates={weekDates}
+          currentWeek={currentWeek}
+        />
+        <OutcomesSection data={data} pack={pack} courseId={course.id} tools={tools.outcome} />
         <ActivitiesSection data={data} weekDates={weekDates} />
         <AssessmentsSection data={data} weekDates={weekDates} />
         <CoverageMatrix data={data} matrix={matrix} />

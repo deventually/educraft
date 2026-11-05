@@ -78,6 +78,8 @@ const StreamBodySchema = z.object({
   sessionId: z.string().min(8).max(100).optional(),
   /** Course this work belongs to (P20.4); linked after saving, a foreign id is ignored. */
   courseId: z.string().max(100).nullish(),
+  /** The lesson or test of that course (P27.4); an unknown item refuses the link. */
+  itemId: z.string().max(100).nullish(),
   images: z.array(ImageInputSchema).max(10).optional(),
 });
 
@@ -342,7 +344,7 @@ export async function action({ request }: Route.ActionArgs) {
             });
             generationId = saved.id;
           }
-          if (body.courseId) await linkToCourse(user.id, body.courseId, generationId);
+          if (body.courseId) await linkToCourse(user.id, body.courseId, generationId, body.itemId);
           // The client needs the id to keep the result at a course or a dossier (P27.1).
           return { generationId };
         } catch (e) {
@@ -361,9 +363,16 @@ export async function action({ request }: Route.ActionArgs) {
 
 /** Links saved work to a course. Never fails the stream: a refusal (not the caller's
  *  course, or an unknown id) is only logged. */
-async function linkToCourse(userId: string, courseId: string, generationId: string) {
+async function linkToCourse(
+  userId: string,
+  courseId: string,
+  generationId: string,
+  itemId?: string | null,
+) {
   try {
-    const link = await linkGeneration(userId, courseId, generationId);
+    const link = itemId
+      ? await linkGeneration(userId, courseId, generationId, itemId)
+      : await linkGeneration(userId, courseId, generationId);
     if (!link) console.warn("Course link refused:", { courseId });
   } catch (e) {
     console.error("Failed to link generation to course:", e);

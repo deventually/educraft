@@ -202,6 +202,7 @@ describe("Start (P27.3)", () => {
       teacherWeek: {
         now: { monday: "2026-11-16", isoWeek: 47, courses: [], undated: [] },
         next: null,
+        tools: { outcome: [], activity: [], assessment: [], findings: {} },
       },
     });
     expect(await screen.findByRole("region", { name: "Deze week · week 47" })).toBeInTheDocument();

@@ -7,6 +7,7 @@ import { auth } from "./auth";
 import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { courseTools } from "./courseTools";
 import { courses } from "./courses";
 import { documents } from "./documents";
 import { error } from "./error";
@@ -59,6 +60,7 @@ export const nl = {
   chat,
   confirm,
   courses,
+  courseTools,
   documents,
   error,
   features,
