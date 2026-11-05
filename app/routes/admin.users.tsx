@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, Link, useActionData } from "react-router";
 import { z } from "zod";
 import { UserPlus } from "lucide-react";
@@ -13,16 +13,20 @@ import {
   getUserById,
   listPeople,
   revokeInvite,
+  setUserDisabled,
 } from "~/server/repositories/users.server";
 import { getOwnerUserId } from "~/server/repositories/settings.server";
 import {
+  addMember,
   getTeamWithMembers,
   joinTeamFromInvite,
   listTeams,
+  removeMember,
 } from "~/server/repositories/teams.server";
-import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS } from "~/server/userAdmin.server";
+import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS, mayManage } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
+import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
@@ -31,6 +35,13 @@ import { CopyButton, LinkCard } from "~/components/admin/LinkCard";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 
 const STATUSES = ["active", "invited", "disabled"] as const;
+
+/** What "With selected" can do; deactivate and reactivate are for the super admin only. */
+const BULK_ACTIONS = ["addTeam", "removeTeam", "deactivate", "reactivate"] as const;
+type BulkAction = (typeof BULK_ACTIONS)[number];
+const OWNER_ONLY_BULK: readonly BulkAction[] = ["deactivate", "reactivate"];
+/** The most people one bulk change may carry (the list shows at most 500). */
+const MAX_BULK = 500;
 
 /** The list's search and filters, from the query string; an unknown value means "all". */
 const FilterSchema = z.object({
@@ -150,6 +161,37 @@ export async function action({ request }: Route.ActionArgs) {
     return { setPasswordLink: `${new URL(request.url).origin}/reset/${reset.token}` };
   }
 
+  // ── Change many people at once ("With selected") ─────────────────────────
+  // Per person the same authority as on the person page: `mayManage` for teams, the
+  // super admin for (de)activation, never on yourself. Who is out of reach is skipped
+  // and counted, never an error for the whole batch.
+  if (intent === "bulk") {
+    const action = String(fd.get("action") ?? "") as BulkAction;
+    if (!BULK_ACTIONS.includes(action)) return { error: "unknown" as const };
+    if (OWNER_ONLY_BULK.includes(action) && !actorIsOwner) return { error: "ownerOnly" as const };
+    const ids = [...new Set(fd.getAll("userIds").map(String))].slice(0, MAX_BULK);
+    if (ids.length === 0) return { error: "noneSelected" as const };
+    const isTeamAction = action === "addTeam" || action === "removeTeam";
+    const bulkTeamId = team?.id;
+    if (isTeamAction && !bulkTeamId) return { error: "teamRequired" as const };
+    let done = 0;
+    for (const id of ids) {
+      const target = await getUserById(id);
+      if (!target || !isRole(target.role)) continue;
+      if (isTeamAction) {
+        if (!mayManage(actorIsOwner, target)) continue;
+        if (!bulkTeamId) continue;
+        if (action === "addTeam") await addMember(bulkTeamId, target.id);
+        else await removeMember(bulkTeamId, target.id);
+      } else {
+        if (target.id === admin.id) continue;
+        await setUserDisabled(target.id, action === "deactivate");
+      }
+      done++;
+    }
+    return { bulk: { done, skipped: ids.length - done } };
+  }
+
   // Everything about one account is on its own page now (P28.1).
   return { error: "unknown" as const };
 }
@@ -157,6 +199,8 @@ export async function action({ request }: Route.ActionArgs) {
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const th = "px-4 py-2.5 font-semibold";
 const td = "px-4 py-2.5 text-slate-600";
+const tick =
+  "size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500";
 
 /** The team a new person joins (P28.2); only shown when there are teams. */
 function TeamSelect({ teams, id }: { teams: { id: string; name: string }[]; id: string }) {
@@ -278,6 +322,100 @@ function AddPersonForm({
   );
 }
 
+/**
+ * "With selected": one action for every ticked person. The tick boxes live in the table
+ * and join this form through `form="bulk-form"`, so it works without JS too.
+ */
+function BulkBar({
+  selectedIds,
+  actions,
+  teams,
+}: {
+  selectedIds: string[];
+  actions: BulkAction[];
+  teams: { id: string; name: string }[];
+}) {
+  const t = useT();
+  const p = t.people;
+  const label: Record<BulkAction, string> = {
+    addTeam: p.bulkAddTeam,
+    removeTeam: p.bulkRemoveTeam,
+    deactivate: p.bulkDeactivate,
+    reactivate: p.bulkReactivate,
+  };
+  const [action, setAction] = useState<BulkAction>(actions[0]);
+  const needsTeam = action === "addTeam" || action === "removeTeam";
+  return (
+    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+      <Form
+        id="bulk-form"
+        method="post"
+        aria-label={p.bulkHeading}
+        className="flex flex-wrap items-end gap-3"
+      >
+        <input type="hidden" name="intent" value="bulk" />
+        <p className="self-center text-sm font-semibold text-slate-800">
+          {p.bulkHeading}
+          <span className="ml-2 font-normal text-slate-600">
+            {fmt(p.bulkSelected, { count: String(selectedIds.length) })}
+          </span>
+        </p>
+        <div>
+          <Label htmlFor="bulk-action">{p.bulkAction}</Label>
+          <Select
+            id="bulk-action"
+            name="action"
+            value={action}
+            onChange={(e) => setAction(e.target.value as BulkAction)}
+            className="mt-1 w-auto"
+          >
+            {actions.map((a) => (
+              <option key={a} value={a}>
+                {label[a]}
+              </option>
+            ))}
+          </Select>
+        </div>
+        {needsTeam && (
+          <div>
+            <Label htmlFor="bulk-team">{p.bulkTeam}</Label>
+            <Select id="bulk-team" name="teamId" className="mt-1 w-auto">
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
+        {action !== "deactivate" && (
+          <Button type="submit" variant="secondary">
+            {p.bulkApply}
+          </Button>
+        )}
+      </Form>
+      {/* Deactivating logs people out everywhere: ask first. The dialog posts its own
+          form (forms may not nest), carrying the ticked ids. */}
+      {action === "deactivate" && (
+        <ConfirmDialog
+          triggerLabel={p.bulkApply}
+          triggerVariant="secondary"
+          triggerSize="md"
+          title={fmt(p.bulkDeactivateTitle, { count: String(selectedIds.length) })}
+          description={p.bulkDeactivateBody}
+          confirmLabel={p.bulkDeactivate}
+          cancelLabel={t.confirm.cancel}
+          fields={{ intent: "bulk", action: "deactivate" }}
+        >
+          {selectedIds.map((id) => (
+            <input key={id} type="hidden" name="userIds" value={id} />
+          ))}
+        </ConfirmDialog>
+      )}
+    </div>
+  );
+}
+
 export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const p = t.people;
@@ -285,6 +423,25 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const { selfId, people, filter, teams, isOwner: viewerIsOwner, ownerId } = loaderData;
   const [adding, setAdding] = useState(false);
+  // The ticked accounts for "With selected"; cleared after a bulk change.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Team actions need a team; (de)activation is the super admin's. Nothing to do: no bar.
+  const bulkActions = BULK_ACTIONS.filter((a) =>
+    OWNER_ONLY_BULK.includes(a) ? viewerIsOwner : teams.length > 0,
+  );
+  const canBulk = bulkActions.length > 0;
+  const accountIds = people.filter((x) => x.kind === "user").map((x) => x.id);
+  const allTicked = accountIds.length > 0 && accountIds.every((id) => selected.has(id));
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  useEffect(() => {
+    if (actionData && "bulk" in actionData) setSelected(new Set());
+  }, [actionData]);
 
   const errors: Record<string, string> = {
     ownerOnly: i.ownerOnlyError,
@@ -294,6 +451,8 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     invalidRole: i.invalidRoleError,
     passwordTooShort: t.auth.passwordTooShort,
     passwordMismatch: t.auth.passwordMismatch,
+    noneSelected: p.bulkNoneSelected,
+    teamRequired: p.bulkTeamRequired,
   };
   const actionError =
     actionData && "error" in actionData && typeof actionData.error === "string"
@@ -307,13 +466,21 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         ? null
         : "error" in d && typeof d.error === "string"
           ? { variant: "error", message: errors[d.error] ?? t.error.generic }
-          : {
-              variant: "success",
-              message:
-                "setPasswordLink" in d || "accountCreated" in d
-                  ? i.accountCreated
-                  : t.admin.console.saved,
-            },
+          : "bulk" in d && d.bulk
+            ? {
+                variant: d.bulk.skipped ? "info" : "success",
+                message: fmt(d.bulk.skipped ? p.bulkSkipped : p.bulkDone, {
+                  done: String(d.bulk.done),
+                  skipped: String(d.bulk.skipped),
+                }),
+              }
+            : {
+                variant: "success",
+                message:
+                  "setPasswordLink" in d || "accountCreated" in d
+                    ? i.accountCreated
+                    : t.admin.console.saved,
+              },
   });
 
   return (
@@ -402,82 +569,120 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
       {people.length === 0 ? (
         <p className="text-sm text-slate-500">{p.none}</p>
       ) : (
-        /* `relative`: the box is the containing block of the absolutely positioned
-           sr-only labels, so they scroll with the table instead of widening the page. */
-        <div className="relative overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <caption className="sr-only">{p.heading}</caption>
-            <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th scope="col" className={th}>
-                  {p.colName}
-                </th>
-                <th scope="col" className={th}>
-                  {p.colEmail}
-                </th>
-                <th scope="col" className={th}>
-                  {p.colRole}
-                </th>
-                <th scope="col" className={th}>
-                  {p.colStatus}
-                </th>
-                <th scope="col" className={th}>
-                  {p.colLastActive}
-                </th>
-                <th scope="col" className={`${th} text-right`}>
-                  <span className="sr-only">{p.colActions}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {people.map((person) => (
-                <tr
-                  key={`${person.kind}-${person.id}`}
-                  className="border-b border-slate-50 align-top last:border-0"
-                >
-                  <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
-                    {person.kind === "user" ? (
-                      <Link
-                        to={`/admin/users/${person.id}`}
-                        className="rounded text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                      >
-                        {person.name || person.email || person.id}
-                      </Link>
-                    ) : (
-                      (person.name ?? i.linkOnly)
-                    )}
-                    {person.id === selfId && (
-                      <span className="ml-1.5 text-xs font-normal text-slate-500">({i.you})</span>
-                    )}
-                    {person.kind === "user" && person.id === ownerId && <OwnerBadge />}
+        <div className="space-y-3">
+          {canBulk && (
+            <BulkBar
+              selectedIds={accountIds.filter((id) => selected.has(id))}
+              actions={bulkActions}
+              teams={teams}
+            />
+          )}
+          {/* `relative`: the box is the containing block of the absolutely positioned
+           sr-only labels, so they scroll with the table instead of widening the page. */}
+          <div className="relative overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">{p.heading}</caption>
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  {canBulk && (
+                    <th scope="col" className="w-10 px-4 py-2.5">
+                      <input
+                        type="checkbox"
+                        checked={allTicked}
+                        onChange={() => setSelected(allTicked ? new Set() : new Set(accountIds))}
+                        aria-label={p.selectAll}
+                        className={tick}
+                      />
+                    </th>
+                  )}
+                  <th scope="col" className={th}>
+                    {p.colName}
                   </th>
-                  <td className={td}>{person.email ?? "—"}</td>
-                  <td className={td}>{roleLabel(t, person.role)}</td>
-                  <td className={td}>
-                    <StatusBadge status={person.status} />
-                  </td>
-                  <td className={td}>
-                    {person.kind === "user" ? <LastActive day={person.lastActiveDay} /> : "—"}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {person.kind === "invite" && person.link && (
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <CopyButton url={person.link} label={p.copyLink} />
-                        <ConfirmDialog
-                          triggerLabel={i.revoke}
-                          title={i.revokeTitle}
-                          description={i.revokeBody}
-                          confirmLabel={i.revoke}
-                          cancelLabel={t.confirm.cancel}
-                          fields={{ intent: "revoke", token: person.id }}
-                        />
-                      </div>
-                    )}
-                  </td>
+                  <th scope="col" className={th}>
+                    {p.colEmail}
+                  </th>
+                  <th scope="col" className={th}>
+                    {p.colRole}
+                  </th>
+                  <th scope="col" className={th}>
+                    {p.colStatus}
+                  </th>
+                  <th scope="col" className={th}>
+                    {p.colLastActive}
+                  </th>
+                  <th scope="col" className={`${th} text-right`}>
+                    <span className="sr-only">{p.colActions}</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {people.map((person) => (
+                  <tr
+                    key={`${person.kind}-${person.id}`}
+                    className="border-b border-slate-50 align-top last:border-0"
+                  >
+                    {canBulk && (
+                      <td className="px-4 py-2.5">
+                        {person.kind === "user" && (
+                          <input
+                            type="checkbox"
+                            form="bulk-form"
+                            name="userIds"
+                            value={person.id}
+                            checked={selected.has(person.id)}
+                            onChange={() => toggle(person.id)}
+                            aria-label={fmt(p.selectPerson, {
+                              name: person.name || person.email || person.id,
+                            })}
+                            className={tick}
+                          />
+                        )}
+                      </td>
+                    )}
+                    <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
+                      {person.kind === "user" ? (
+                        <Link
+                          to={`/admin/users/${person.id}`}
+                          className="rounded text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                        >
+                          {person.name || person.email || person.id}
+                        </Link>
+                      ) : (
+                        (person.name ?? i.linkOnly)
+                      )}
+                      {person.id === selfId && (
+                        <span className="ml-1.5 text-xs font-normal text-slate-500">({i.you})</span>
+                      )}
+                      {person.kind === "user" && person.id === ownerId && <OwnerBadge />}
+                    </th>
+                    <td className={td}>{person.email ?? "—"}</td>
+                    <td className={td}>{roleLabel(t, person.role)}</td>
+                    <td className={td}>
+                      <StatusBadge status={person.status} />
+                    </td>
+                    <td className={td}>
+                      {person.kind === "user" ? <LastActive day={person.lastActiveDay} /> : "—"}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {person.kind === "invite" && person.link && (
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <CopyButton url={person.link} label={p.copyLink} />
+                          <ConfirmDialog
+                            triggerLabel={i.revoke}
+                            title={i.revokeTitle}
+                            description={i.revokeBody}
+                            confirmLabel={i.revoke}
+                            cancelLabel={t.confirm.cancel}
+                            fields={{ intent: "revoke", token: person.id }}
+                          />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
