@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.1 gemerged, P22.2 open)_
 
 ## Nu
 
+- **De week van de docent, echte datums (P22.1b, #110) gemerged op 2026-11-05:** een startdatum
+  per cursus en bij elke les en toets "Week 3 · 17–23 nov", vakantieweken overgeslagen.
 - **Gebruikers aanvinken en in één keer aanpassen (#109) gemerged op 2026-11-05:** op
   `/admin/users` "Met geselecteerde": in of uit een team, en (superbeheerder) op non-actief of
   weer actief, met een bevestigingsvraag bij op non-actief zetten.
@@ -172,9 +174,9 @@ _Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
   `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
   bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P22.1b De week van de docent, echte datums: een startdatum per cursus (`startDate`, geen
-  migratie) en bij elke les en toets "Week 3 · 17–23 nov", met de vakantieweken van de school
-  overgeslagen. PR open.
+- P22.2 De week van de docent, puur: `teacherWeek` rekent per lopende cursus *Deze week*,
+  *Voorbereiden* (zonder gekoppeld werk), *Nakijken* (toetsen van de twee weken ervoor) en de
+  aandachtspunten; `nextWeek` is dezelfde functie een week later. Nog geen scherm. PR open.
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
