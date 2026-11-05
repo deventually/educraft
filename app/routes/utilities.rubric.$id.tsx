@@ -1,7 +1,7 @@
 import { Form, Link, redirect } from "react-router";
 import { ArrowLeft, ClipboardCheck, CopyPlus, Trash2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.$id";
-import { requireUser } from "~/server/auth.server";
+import { requireFeatureUser } from "~/server/features.server";
 import {
   deleteRubric,
   duplicateRubric,
@@ -19,7 +19,7 @@ import { useT } from "~/lib/i18n/useT";
 import { levelDistribution, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const rubric = await getRubric(user.id, params.id);
   if (!rubric) throw new Response("Not Found", { status: 404 });
   const scores = await listRubricScores(user.id, rubric.id);
@@ -37,7 +37,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 const MAX_JSON = 200_000;
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const fd = await request.formData();
   const intent = fd.get("intent");
   const existing = await getRubric(user.id, params.id);

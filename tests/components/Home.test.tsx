@@ -51,8 +51,8 @@ const tools: ToolData[] = [
   },
 ];
 
-function renderHome() {
-  const props = { loaderData: { tools } } as unknown as ComponentProps<typeof Home>;
+function renderHome(utilities = true) {
+  const props = { loaderData: { tools, utilities } } as unknown as ComponentProps<typeof Home>;
   const Stub = createRoutesStub([{ path: "/", Component: () => <Home {...props} /> }]);
   return render(<Stub initialEntries={["/"]} />);
 }
@@ -163,6 +163,11 @@ describe("Home / tools page", () => {
     await user.type(screen.getByRole("searchbox"), "zzzznotathing");
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText("0 tools")).toBeInTheDocument();
+  });
+
+  it("has no 'Hulpmiddelen' section when utilities are off for the user (P28.3)", () => {
+    renderHome(false);
+    expect(screen.queryByRole("region", { name: "Hulpmiddelen" })).toBeNull();
   });
 
   it("shows a 'Hulpmiddelen' section below the tools, with a card per utility", () => {

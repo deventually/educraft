@@ -9,6 +9,7 @@ import { confirm } from "./confirm";
 import { courses } from "./courses";
 import { documents } from "./documents";
 import { error } from "./error";
+import { features } from "./features";
 import { feedback } from "./feedback";
 import { footer } from "./footer";
 import { help } from "./help";
@@ -46,6 +47,7 @@ export const en: Messages = {
   courses,
   documents,
   error,
+  features,
   feedback,
   footer,
   help,

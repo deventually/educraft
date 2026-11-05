@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { ArrowRight, LayoutList, MessagesSquare, Search, SearchX, Sparkles, X } from "lucide-react";
 import type { Route } from "./+types/home";
-import { getAvailableTools } from "~/server/availability.server";
+import { getAvailableTools, isFeatureOn } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
 import {
@@ -71,13 +71,14 @@ export async function loader({ request }: Route.LoaderArgs) {
       stages: tool.stages.length,
     };
   });
-  return { tools };
+  // Utilities can be switched off per team (P28.3): then no section and no search hits.
+  return { tools, utilities: await isFeatureOn(user, "utilities") };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tools } = loaderData;
+  const { tools, utilities } = loaderData;
 
   const [query, setQuery] = useState("");
 
@@ -91,9 +92,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }, [tools, query]);
 
   const utilityResults = useMemo(() => {
+    if (!utilities) return [];
     const q = query.trim().toLowerCase();
     return UTILITY_SEARCH.filter((u) => u.search.includes(q)).map((u) => u.utility);
-  }, [query]);
+  }, [query, utilities]);
 
   const resultTotal = results.length + utilityResults.length;
 
@@ -128,7 +130,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       {!isFiltered ? (
         <>
           <GoalSections tools={tools} locale={locale} t={t} />
-          <UtilitiesSection t={t} />
+          {utilities && <UtilitiesSection t={t} />}
         </>
       ) : resultTotal === 0 ? (
         <div

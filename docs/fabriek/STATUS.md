@@ -17,6 +17,9 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
   toetsmatrijs staat "Zet matrijs in cursus"; de docent kiest de toets en per rij de leeruitkomst.
 - **Toetsmatrijs per vraag (P26.1, #92) gemerged op 2026-11-05:** per toets een tabel met per vraag
   leeruitkomst, denkniveau, vraagvorm en punten; de vragen bepalen de dekking.
+- **Teams en teamleiders (P28.2, #93) gemerged op 2026-11-05:** teams op `/admin/teams`, een
+  teamleider beheert zijn team op `/teams/:id`, uitnodigen in een team, "Mijn teams" op de
+  accountpagina.
 - **Gebruikersbeheer in een paar klikken (P28.1, #91) gemerged op 2026-11-05:** één lijst met
   zoeken en filteren, status en laatst actief, uitnodigingen als rij, één knop "Toevoegen" en een
   pagina per persoon (`/admin/users/:id`).
@@ -145,10 +148,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
 ## Bezig
 
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P28.2 Teams en teamleiders: een beheerder maakt teams (`/admin/teams`) en wijst teamleiders aan;
-  een teamleider beheert zijn team op `/teams/:id` (collega toevoegen op e-mail, weghalen,
-  teamleider maken, uitnodigen in het team). Persoonspagina met sectie Teams, Toevoegen en de lijst
-  met een teamkeuze, "Mijn teams" op de accountpagina. Migratie 0015. PR open.
+- P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
+  Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
+  teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
+  Cursussen en hulpmiddelen zijn een 404 als ze uit staan. Migraties 0016 en 0017. PR open.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder

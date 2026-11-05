@@ -106,7 +106,14 @@ export function AutoSaveForm({
     if (fetcher.state !== "idle" || !errorOf(d) || revertedFor.current === d) return;
     revertedFor.current = d;
     sent.current = new WeakMap();
-    formRef.current?.reset();
+    const form = formRef.current;
+    form?.reset();
+    // Not every DOM restores a select on reset; put each back on its saved option.
+    for (const el of Array.from(form?.elements ?? [])) {
+      if (!(el instanceof HTMLSelectElement)) continue;
+      const saved = Array.from(el.options).find((o) => o.defaultSelected);
+      if (saved) el.value = saved.value;
+    }
   }, [fetcher.state, fetcher.data]);
 
   return (

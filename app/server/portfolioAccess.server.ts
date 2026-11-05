@@ -1,13 +1,15 @@
 /**
- * Who may use the BDB/BKE workplace (brief P27, BESLUIT-2026-11-05-4): an admin
- * switches it on per teacher. Never set means off, except for a teacher who
- * already has a dossier (the transition: nobody loses their work). An admin
- * always has it. Switched off, the workplace is a 404; nothing is deleted.
+ * Who may use the BDB/BKE workplace (P27, P28.3): the feature `portfolio` through the
+ * three-layer rule (instance, team, exception). An admin always has it (P27.2). The transition: a teacher who already has a dossier and for whom nothing was
+ * chosen (the instance default, On request) keeps it, so nobody loses their work.
+ * Switched off, the workplace is a 404; nothing is deleted.
  */
+import { effectiveFeatures } from "./availability.server";
 import { hasDossier } from "./repositories/portfolio.server";
-import { getPortfolioEnabled } from "./repositories/users.server";
 
 export async function portfolioAccess(user: { id: string; role: string }): Promise<boolean> {
   if (user.role === "admin") return true;
-  return (await getPortfolioEnabled(user.id)) ?? (await hasDossier(user.id));
+  const stand = (await effectiveFeatures(user)).portfolio;
+  if (stand.on) return true;
+  return stand.source === "default" && (await hasDossier(user.id));
 }

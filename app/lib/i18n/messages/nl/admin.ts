@@ -120,14 +120,11 @@ export const admin = {
     colMode: "Modus",
     colName: "Tool",
     colPhase: "Fase",
-    colStatus: "Status",
-    enabledLabel: "Beschikbaar",
     heading: "Tools",
-    intro: "Zet tools aan of uit. Een tool die uit staat verdwijnt voor iedereen.",
+    intro:
+      "Zet elke tool op Aan, Op aanvraag of Uit. Uit: voor niemand. Op aanvraag: alleen via een team of een uitzondering.",
     modeChat: "Chat",
     modeOneShot: "Generator",
-    statusAvailable: "Beschikbaar",
-    statusDisabled: "Uitgeschakeld",
   },
   usage: {
     colChars: "Tekens",

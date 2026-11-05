@@ -10,31 +10,25 @@ beforeAll(async () => {
   repo = await import("~/server/repositories/settings.server");
 });
 
-describe("settings repository — tool settings", () => {
-  it("upserts a tool setting and reads it back", async () => {
-    await repo.setToolSetting("mentorai", { enabled: false });
-    const row = await repo.getToolSetting("mentorai");
-    expect(row?.enabled).toBe(false);
+describe("settings repository — tool and feature stands (P28.3)", () => {
+  it("stores a tool stand and reads it back", async () => {
+    await repo.setToolStand("mentorai", "request");
+    expect((await repo.getToolStands()).get("mentorai")).toBe("request");
+    await repo.setToolStand("mentorai", "off");
+    expect((await repo.getToolStands()).get("mentorai")).toBe("off");
   });
 
-  it("merges a patch in place (only provided keys change)", async () => {
-    await repo.setToolSetting("bloom-by-design", { enabled: true });
-    await repo.setToolSetting("bloom-by-design", {});
-    const row = await repo.getToolSetting("bloom-by-design");
-    // The earlier `enabled` survives an empty patch.
-    expect(row?.enabled).toBe(true);
+  it("null means back to the registry default (absent from the map)", async () => {
+    await repo.setToolStand("bloom-by-design", null);
+    expect((await repo.getToolStands()).has("bloom-by-design")).toBe(false);
+    expect((await repo.getToolStands()).has("socratic-partner")).toBe(false);
   });
 
-  it("returns null for an untouched tool (absent row = registry default)", async () => {
-    expect(await repo.getToolSetting("socratic-partner")).toBeNull();
-  });
-
-  it("lists every touched tool setting", async () => {
-    const all = await repo.getToolSettings();
-    const slugs = all.map((r) => r.toolSlug);
-    expect(slugs).toContain("mentorai");
-    expect(slugs).toContain("bloom-by-design");
-    expect(slugs).not.toContain("socratic-partner");
+  it("stores a feature stand; an untouched feature is absent", async () => {
+    await repo.setFeatureStand("courses", "off");
+    const stands = await repo.getFeatureStands();
+    expect(stands.courses).toBe("off");
+    expect(stands.utilities).toBeUndefined();
   });
 });
 

@@ -120,10 +120,32 @@ beforeEach(async () => {
 });
 
 describe("admin.tools action", () => {
-  it("upserts a tool's enabled flag", async () => {
-    await invoke(toolsRoute.action, post({ intent: "tool", slug: "mentorai", enabled: "on" }));
-    const row = await settings.getToolSetting("mentorai");
-    expect(row?.enabled).toBe(true);
+  it("sets a tool's instance stand (P28.3)", async () => {
+    await invoke(toolsRoute.action, post({ intent: "tool", slug: "mentorai", stand: "request" }));
+    expect((await settings.getToolStands()).get("mentorai")).toBe("request");
+  });
+
+  it("refuses an unknown stand or tool", async () => {
+    const bad = await invoke(
+      toolsRoute.action,
+      post({ intent: "tool", slug: "mentorai", stand: "x" }),
+    );
+    expect(bad).toEqual({ error: "invalid" });
+    const none = await invoke(
+      toolsRoute.action,
+      post({ intent: "tool", slug: "nope", stand: "on" }),
+    );
+    expect(none).toEqual({ error: "invalid" });
+  });
+
+  it("sets a feature's instance stand (P28.3)", async () => {
+    await invoke(toolsRoute.action, post({ intent: "feature", id: "courses", stand: "off" }));
+    expect((await settings.getFeatureStands()).courses).toBe("off");
+    const bad = await invoke(
+      toolsRoute.action,
+      post({ intent: "feature", id: "nope", stand: "on" }),
+    );
+    expect(bad).toEqual({ error: "invalid" });
   });
 });
 

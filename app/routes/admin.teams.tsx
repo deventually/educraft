@@ -9,8 +9,11 @@ import {
   listTeams,
   removeMember,
   renameTeam,
+  getTeamWithMembers,
   setLead,
+  setTeamSettings,
 } from "~/server/repositories/teams.server";
+import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
 import { getUserByEmail } from "~/server/repositories/users.server";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -19,6 +22,7 @@ import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
 
 /**
  * Teams (P28.2, admin): every team with its members and leads; create, rename, delete,
@@ -27,7 +31,8 @@ import { ConfirmDialog } from "~/components/ConfirmDialog";
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  return { teams: await listTeams() };
+  const [teams, offer] = await Promise.all([listTeams(), getTeamSettingsOffer()]);
+  return { teams, offer };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -60,6 +65,14 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (intent === "removeMember") {
     await removeMember(teamId, String(fd.get("userId") ?? ""));
+    return { saved: true as const };
+  }
+  if (intent === "settings") {
+    const team = await getTeamWithMembers(teamId);
+    if (!team) throw new Response("Not found", { status: 404 });
+    const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
+    if ("error" in next) return next;
+    await setTeamSettings(teamId, next);
     return { saved: true as const };
   }
   if (intent === "setLead") {
@@ -239,6 +252,22 @@ export default function AdminTeams({ loaderData }: Route.ComponentProps) {
                   {tt.add}
                 </Button>
               </Form>
+
+              <details className="mt-5 rounded-xl border border-slate-100 p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500">
+                  {t.features.teamFeaturesHeading}
+                </summary>
+                <p className="mt-2 text-xs text-slate-500">{t.features.teamFeaturesIntro}</p>
+                <div className="mt-3">
+                  <TeamSettingsForm
+                    idPrefix={`team-${team.id}`}
+                    settings={team.settings}
+                    offer={loaderData.offer}
+                    hidden={{ teamId: team.id }}
+                    errorMessage={errorOf}
+                  />
+                </div>
+              </details>
             </article>
           ))}
         </div>

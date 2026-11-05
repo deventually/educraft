@@ -8,37 +8,40 @@ import {
   leadCreateInvite,
   leadMakeLead,
   leadRemoveMember,
+  leadSetSettings,
   leadStepDown,
 } from "~/server/repositories/teams.server";
+import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { LinkCard } from "~/components/admin/LinkCard";
 import { teamError } from "~/components/teams/teamError";
+import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
 
 /** Days a lead's invite link stays valid (the admin's default). */
 const INVITE_DAYS = 14;
 
 /**
  * The team lead's page (P28.2, teacher side): the members (name, e-mail), add a colleague
- * by exact e-mail, remove a plain member, make a member lead, step down, and an invite
- * link that makes a new teacher a member. Anyone who is not lead of this team, an admin
+ * by exact e-mail, remove a plain member, make a member lead, step down, the team's
+ * choices for parts, tools and models within the instance (P28.3), and an invite link
+ * that makes a new teacher a member. Anyone who is not lead of this team, an admin
  * included, gets a 404: the admin works on /admin/teams.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const team = await getTeamForLead(user.id, params.id);
   if (!team) throw new Response("Not found", { status: 404 });
-  return { selfId: user.id, team };
+  return { selfId: user.id, team, offer: await getTeamSettingsOffer() };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
   const user = await requireUser(request);
   // notLead → 404, before anything is read from the form.
-  if (!(await getTeamForLead(user.id, params.id))) {
-    throw new Response("Not found", { status: 404 });
-  }
+  const team = await getTeamForLead(user.id, params.id);
+  if (!team) throw new Response("Not found", { status: 404 });
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
   const userId = String(fd.get("userId") ?? "");
@@ -50,6 +53,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
   if (intent === "removeMember") return done(await leadRemoveMember(user.id, params.id, userId));
   if (intent === "makeLead") return done(await leadMakeLead(user.id, params.id, userId));
+  if (intent === "settings") {
+    // Within the instance's limits: only what is not Off is offered and changed.
+    const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
+    if ("error" in next) return next;
+    return done(await leadSetSettings(user.id, params.id, next));
+  }
   if (intent === "stepDown") {
     await leadStepDown(user.id, params.id);
     // This page is no longer yours: back to the account page with your teams.
@@ -74,7 +83,7 @@ const th = "px-4 py-2.5 font-semibold";
 export default function LeadTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
-  const { team, selfId } = loaderData;
+  const { team, selfId, offer } = loaderData;
   const actionData = useActionData<typeof action>();
 
   useFormToast(actionData, {
@@ -187,6 +196,21 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
             {tt.add}
           </Button>
         </Form>
+      </section>
+
+      <section aria-labelledby="team-features">
+        <h2 id="team-features" className={h2}>
+          {t.features.teamFeaturesHeading}
+        </h2>
+        <p className="mt-1 max-w-2xl text-sm text-slate-600">{t.features.teamFeaturesIntro}</p>
+        <div className={`${card} max-w-xl`}>
+          <TeamSettingsForm
+            idPrefix="team"
+            settings={team.settings}
+            offer={offer}
+            errorMessage={(code) => (typeof code === "string" ? teamError(t, code) : undefined)}
+          />
+        </div>
       </section>
 
       <section>

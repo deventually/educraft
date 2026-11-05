@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/utilities.$slug";
-import { requireUser } from "~/server/auth.server";
+import { requireFeatureUser } from "~/server/features.server";
 import { getUtilityBySlug, type Utility } from "~/lib/utilities";
 import { GradeCalculator } from "~/components/utilities/GradeCalculator";
 import { ItemAnalysis } from "~/components/utilities/ItemAnalysis";
@@ -19,7 +19,7 @@ export function resolveUtility(slug: string | undefined): Utility {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const utility = resolveUtility(params.slug);
   // The explaining AI tool is offered only when this teacher may use it (enforced server-side
   // again by the tool loader and /api/stream).
