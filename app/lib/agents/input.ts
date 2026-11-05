@@ -63,8 +63,14 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
   const key = keyOf(c);
   const keys = (ids: string[]) => ids.map((id) => key.get(id) ?? "?").join(", ") || l.none;
 
+  // Pack tags (P21.6) as stored: stable keys and canonical option values, e.g.
+  // "beheersingsniveau: 3", so a hat can compare them with how the course tests.
+  const tags = (o: (typeof c.outcomes)[number]) =>
+    Object.entries(o.packTags ?? {}).map(
+      ([k, v]) => `${k}: ${Array.isArray(v) ? v.join(" + ") : v}`,
+    );
   const outcomes = c.outcomes.map(
-    (o) => `${key.get(o.id)}${details([o.bloom && `bloom: ${o.bloom}`])}: ${o.text}`,
+    (o) => `${key.get(o.id)}${details([o.bloom && `bloom: ${o.bloom}`, ...tags(o)])}: ${o.text}`,
   );
   const activities = c.activities.map(
     (a) =>

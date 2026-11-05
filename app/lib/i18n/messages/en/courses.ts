@@ -206,6 +206,8 @@ export const courses: Messages["courses"] = {
     add: "Add learning outcome",
     empty: "No learning outcomes yet.",
     intro: "What the student can do at the end, with the Bloom level you expect.",
+    tagNone: "None",
+    tagsSource: "Tags from {source}",
     text: "Learning outcome",
     title: "Learning outcomes",
   },

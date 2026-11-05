@@ -4,6 +4,7 @@
  * Item ids are UUIDs that live in the JSON, so links survive reorder and rename.
  */
 import type { BloomLevel } from "./bloom";
+import type { PackFieldValue } from "~/lib/context/types";
 
 export type { BloomLevel } from "./bloom";
 
@@ -17,6 +18,11 @@ export interface LearningOutcome {
   id: string;
   text: string;
   bloom?: BloomLevel;
+  /**
+   * Tags from the pack of the course's context profile (P21.6), keyed by `PackField.key`,
+   * e.g. `{ beheersingsniveau: 3 }`. No pack → no tags. An import never sets them.
+   */
+  packTags?: Record<string, PackFieldValue>;
 }
 
 export interface Activity {
