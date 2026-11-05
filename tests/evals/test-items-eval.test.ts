@@ -54,6 +54,7 @@ describe("test-items eval meets the P24 quality gate", () => {
         "blueprintMismatch",
         "inventedContent",
         "unmarkedProposal",
+        "correctionTrace", // meting t: traces of corrections in answer-model headings
       ]),
     );
   });

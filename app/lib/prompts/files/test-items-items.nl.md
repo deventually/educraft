@@ -53,10 +53,10 @@ De stam:
 De opties:
 
 - **Precies één goed antwoord.** Elke afleider is zonder twijfel fout volgens de leerstof, ook voor een deskundige. Een afleider is ook niet te verdedigen vanuit een andere gangbare opvatting in het vak of vanuit een strengere lezing van de leerstof. Kan dat wel, herschrijf dan de stam zo dat de leerstof beslist, of kies een andere afleider. Stel geen meerkeuzevraag over een kwestie waarover vakmensen het oneens zijn (bijvoorbeeld of een ontwerp zonder loting een causale vraag kan beantwoorden); vraag dan naar iets wat eenduidig uit de leerstof volgt, zoals wat een ontwerpkeuze wel en niet uitsluit. Een strenge, principiële stelling die sommige vakmensen verdedigen, is nooit een afleider. Opties overlappen niet, en geen optie is een deel van een andere.
-- Gebruik vier opties (A tot en met D), tenzij je geen drie aannemelijke afleiders kunt bedenken; gebruik dan drie opties. Nooit een opvuloptie.
+- Gebruik vier opties (A tot en met D). Drie opties alleen als er echt geen derde aannemelijke afleider bestaat; zeg dan in het antwoordmodel waarom er geen vierde optie is. Nooit een opvuloptie.
 - **Aannemelijke afleiders.** Elke afleider is een fout die studenten echt maken: een veelvoorkomende misvatting, een rekenfout of een verwisseling van begrippen. Een afleider is nooit belachelijk of grappig.
 - **Geen aanwijzing naar het goede antwoord** in de stam of de opties: het goede antwoord is niet het langste of het meest precieze, herhaalt geen opvallend woord uit de stam, en past grammaticaal niet beter bij de stam dan de afleiders. Vermijd absolute woorden als "altijd" en "nooit" in de opties.
-- De opties zijn gelijk van vorm: dezelfde soort inhoud, ongeveer even lang, dezelfde grammatica. Getallen staan van klein naar groot.
+- De opties zijn gelijk van vorm: dezelfde soort inhoud, ongeveer even lang, dezelfde grammatica. Geen optie valt op door zijn vorm: beginnen drie opties met dezelfde woorden ("Het kan…"), dan de vierde ook, en een ontkenning ("kan niet") staat niet alleen in één optie. Getallen staan van klein naar groot.
 - Gebruik geen "geen van bovenstaande" en geen "alle bovenstaande", en geen combinaties als "A en C".
 - Verdeel het goede antwoord over de posities A tot en met D, zodat geen positie opvalt.
 
@@ -71,7 +71,7 @@ Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde.
 
 Lever alleen de eindversie, ook in de kopjes: geen pijltjes of correctiesporen. Zie je tijdens het schrijven of in de zelfcheck een fout, herschrijf dan de vraag zelf: geen notities over correcties in de vragen of het antwoordmodel, geen tweede versie van een vraag, en niets na de slotzin.
 
-- **Vragen**: alle vragen, klaar voor studenten, zonder antwoorden. Per vraag een kopje "### Vraag n (n pt)", dan de stam, en bij meerkeuze de opties als "A. …", "B. …" enzovoort, elk op een eigen regel.
+- **Vragen**: alle vragen, klaar voor studenten, zonder antwoorden, in de volgorde van de matrijs: eerst alle vragen van R1, dan die van R2, enzovoort. Zo ligt voor elke vraag de rij vast voordat je het antwoordmodel schrijft. Per vraag een kopje "### Vraag n (n pt)", dan de stam, en bij meerkeuze de opties als "A. …", "B. …" enzovoort, elk op een eigen regel.
 - **Antwoordmodel**: per vraag een kopje "### Vraag n — Rij Rx, denkniveau", met één rij en één denkniveau, zonder pijltjes of correctiesporen, daarna:
   - bij meerkeuze: "**Goed antwoord:** letter", met één zin waarom het goed is, en per afleider "**A:** waarom fout, en welke fout of misvatting de afleider vangt";
   - bij een open vraag: het antwoordmodel met de punten per onderdeel, en de andere antwoorden die ook goed zijn.
