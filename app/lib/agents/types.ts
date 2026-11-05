@@ -17,6 +17,12 @@ export interface Agent {
   watches: AgentTarget[];
 }
 
+/** A hat's instance stand on /admin/agents: On or Off. An untouched hat is on. */
+export const AGENT_STANDS = ["on", "off"] as const;
+export type AgentStand = (typeof AGENT_STANDS)[number];
+export const isAgentStand = (v: unknown): v is AgentStand =>
+  typeof v === "string" && (AGENT_STANDS as readonly string[]).includes(v);
+
 export const SEVERITIES = ["warning", "info"] as const;
 export type Severity = (typeof SEVERITIES)[number];
 

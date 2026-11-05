@@ -32,6 +32,21 @@ describe("settings repository — tool and feature stands (P28.3)", () => {
   });
 });
 
+describe("settings repository — role agent stands", () => {
+  it("stores a hat's stand; an untouched hat is absent (= on)", async () => {
+    expect(await repo.getAgentStands()).toEqual({});
+    await repo.setAgentStand("designer", "off");
+    expect(await repo.getAgentStands()).toEqual({ designer: "off" });
+    await repo.setAgentStand("designer", "on");
+    expect(await repo.getAgentStands()).toEqual({ designer: "on" });
+  });
+
+  it("ignores a stored stand for a hat that no longer exists", async () => {
+    await repo.setAgentStand("retired-hat", "off");
+    expect(Object.keys(await repo.getAgentStands())).not.toContain("retired-hat");
+  });
+});
+
 describe("settings repository — enabled models", () => {
   it("returns null when unset (default = whole catalog)", async () => {
     expect(await repo.getEnabledModels()).toBeNull();

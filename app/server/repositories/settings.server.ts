@@ -14,6 +14,8 @@ import { eq, like } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { instanceSettings, toolSettings } from "../schema.server";
 import { type FeatureId, isFeatureId } from "~/lib/features";
+import { getAgent } from "~/lib/agents/registry";
+import { type AgentStand, isAgentStand } from "~/lib/agents/types";
 import { type InstanceStand, isInstanceStand } from "~/lib/features/rule";
 import {
   DEFAULT_TIME_ZONE,
@@ -66,6 +68,39 @@ export async function getFeatureStands(): Promise<Partial<Record<FeatureId, Inst
 
 export async function setFeatureStand(id: FeatureId, stand: InstanceStand): Promise<void> {
   const key = `${FEATURE_STAND_PREFIX}${id}`;
+  const valueJson = JSON.stringify(stand);
+  getDb()
+    .insert(instanceSettings)
+    .values({ key, valueJson, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: instanceSettings.key, set: { valueJson, updatedAt: new Date() } })
+    .run();
+}
+
+const AGENT_STAND_PREFIX = "agentStand:";
+
+/** Each role agent's stand an admin has set; absent = on. Retired hats are left out. */
+export async function getAgentStands(): Promise<Partial<Record<string, AgentStand>>> {
+  const rows = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(like(instanceSettings.key, `${AGENT_STAND_PREFIX}%`))
+    .all();
+  const out: Partial<Record<string, AgentStand>> = {};
+  for (const r of rows) {
+    const id = r.key.slice(AGENT_STAND_PREFIX.length);
+    let stand: unknown;
+    try {
+      stand = JSON.parse(r.valueJson);
+    } catch {
+      continue;
+    }
+    if (getAgent(id) && isAgentStand(stand)) out[id] = stand;
+  }
+  return out;
+}
+
+export async function setAgentStand(id: string, stand: AgentStand): Promise<void> {
+  const key = `${AGENT_STAND_PREFIX}${id}`;
   const valueJson = JSON.stringify(stand);
   getDb()
     .insert(instanceSettings)

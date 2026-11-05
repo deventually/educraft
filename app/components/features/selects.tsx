@@ -24,6 +24,25 @@ export function StandSelect({
   );
 }
 
+/** A role agent's stand on the instance: On or Off (an untouched hat is on). */
+export function OnOffSelect({
+  name = "stand",
+  label,
+  defaultValue,
+}: {
+  name?: string;
+  label: string;
+  defaultValue: "on" | "off";
+}) {
+  const f = useT().features;
+  return (
+    <select name={name} aria-label={label} defaultValue={defaultValue} className={selectClass}>
+      <option value="on">{f.on}</option>
+      <option value="off">{f.off}</option>
+    </select>
+  );
+}
+
 /**
  * A team's choice or a teacher's exception: On, Off or none (`""`). `noneLabel` names
  * the empty option ("No choice", "No exception").

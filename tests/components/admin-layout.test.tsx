@@ -18,7 +18,7 @@ function renderLayout() {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly five sections in order (Teams since P28.2)", () => {
+  it("shows exactly six sections in order (Rolagenten after Tools)", () => {
     renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
@@ -26,6 +26,7 @@ describe("Admin layout", () => {
       "Gebruikers",
       "Teams",
       "Tools en modellen",
+      "Rolagenten",
       "Onderwijscontext",
       "Gebruik en feedback",
     ]);
@@ -33,6 +34,7 @@ describe("Admin layout", () => {
       "/admin/users",
       "/admin/teams",
       "/admin/tools",
+      "/admin/agents",
       "/admin/context",
       "/admin/usage",
     ]);

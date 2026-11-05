@@ -158,7 +158,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `agent-design@v1`. `app/server/agentReview.server.ts` runs every hat that watches `"course"` on
   the teacher's chosen (allowed) model, one retry, and stores per hat in `agent_reviews` (findings
   with ids `f1…`, `courseUpdatedAt` for "verouderd"); `review_decisions` holds Akkoord / Niet
-  akkoord with a reason. Intents `review` and `decide` behind the `roleAgents` feature. Linked work
+  akkoord with a reason. Intents `review` and `decide` behind the `roleAgents` feature. An admin
+  switches each hat On or Off for the instance on `/admin/agents` (`instance_settings`
+  `agentStand:<id>`, absent = on; `activeAgents` in the registry). A hat that is off is not run,
+  not shown and not counted on Start; its stored reviews stay. No hat on = no panel. Linked work
   (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
   clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
   profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.

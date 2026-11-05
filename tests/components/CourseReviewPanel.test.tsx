@@ -72,6 +72,19 @@ function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0) {
 }
 
 describe("CourseReviewPanel", () => {
+  it("names the hats that are on in its intro (an admin can switch one off)", () => {
+    renderPanel(notYet);
+    expect(
+      screen.getByText(/kritische collega's kijken je cursus na: toetsdeskundige en ontwerper\./i),
+    ).toBeVisible();
+  });
+
+  it("names a single hat when only one is on", () => {
+    renderPanel([notYet[1]]);
+    expect(screen.getByText(/kijken je cursus na: ontwerper\./i)).toBeVisible();
+    expect(screen.queryByText(/toetsdeskundige/i)).toBeNull();
+  });
+
   it("offers the review with a model choice and says nothing was reviewed yet", async () => {
     const { container } = renderPanel(notYet);
     expect(screen.getByRole("heading", { name: "Beoordeling" })).toBeVisible();
