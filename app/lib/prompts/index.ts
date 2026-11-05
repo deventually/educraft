@@ -11,6 +11,7 @@ import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
 import { THINK_PAIR_SHARE_PROMPT } from "./think-pair-share.prompt";
 import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
+import { CLEAR_ASSIGNMENT_PROMPT } from "./clear-assignment@v1.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
@@ -42,6 +43,7 @@ const ALL: PromptDef[] = [
   THINK_PAIR_SHARE_PROMPT,
   SOCRATIC_PARTNER_PROMPT,
   BLOOM_BY_DESIGN_PROMPT,
+  CLEAR_ASSIGNMENT_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
   LESSON_PLAN_PROMPT,

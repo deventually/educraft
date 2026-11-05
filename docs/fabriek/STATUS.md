@@ -81,6 +81,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.6 Opdracht helder schrijven (`clear-assignment`): een opdrachtomschrijving of
+  studentenhandleiding herschreven op taalniveau B1 (of A2, B2, C1), met stappen, eisen,
+  inleverinfo, open punten ("je noemt geen deadline"), wat er veranderd is en een eisencheck; geen eis
+  verdwijnt of komt erbij. Bronnen: ERK (Council of Europe, 2020), UDL 3.0 (CAST, 2024). Zes
+  eval-casussen, drie met een bekende fout (ontbrekende info, tegenstrijdige eisen, vage criteria).
+  Meting volgt — PR open.
 - P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
   contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
   optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een

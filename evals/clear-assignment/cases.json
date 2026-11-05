@@ -1,0 +1,124 @@
+{
+  "cases": [
+    {
+      "id": "internship-plan-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo bachelor, year 3), reading level B1. A dense, formal assignment for an internship project plan with requirements hidden in subordinate clauses and at the end. Every requirement must return unchanged in the rewritten assignment and in the requirement check: max. 2500 words excluding appendices; APA 7th edition; the company supervisor's signed approval as an appendix; a concept version for feedback by Friday of week 2; submission as PDF via Brightspace by Friday of week 4 at 17:00; individual; counts for 20% of the final mark; the go/no-go is decided by the internship tutor; at a no-go one revision within 10 working days. The text names all practical info, so there should be few or no open points about deadline or submission; no Note first section is needed. 'plan van aanpak' and 'deelvraag' must stay word for word (keepAsIs) and be explained briefly at B1.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 3",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Junior adviseur of projectmedewerker in een organisatie"
+      },
+      "values": {
+        "assignment": "Opdracht: Plan van aanpak stage (OPL-ST3)\n\nIn het kader van de stage wordt van de student verwacht dat deze, met inachtneming van de door de opleiding geformuleerde kaders en in afstemming met de bedrijfsbegeleider, een plan van aanpak opstelt waarin de probleemstelling van de opdrachtgever, de daaruit voortvloeiende hoofdvraag en de deelvragen, alsmede de te hanteren onderzoeksmethoden en de planning van de werkzaamheden op een navolgbare wijze worden uiteengezet, waarbij het plan van aanpak, dat een omvang van ten hoogste 2500 woorden (exclusief bijlagen) dient te hebben, conform APA (7e editie) wordt opgemaakt. Het plan van aanpak wordt individueel geschreven.\n\nTeneinde de kwaliteit te borgen wordt de student in de gelegenheid gesteld uiterlijk vrijdag van week 2 een conceptversie ter feedback aan de stagedocent voor te leggen. Het definitieve plan van aanpak dient uiterlijk vrijdag van week 4 om 17.00 uur als PDF te worden ingeleverd via Brightspace, onder de map 'Plan van aanpak'.\n\nBeoordeling: de stagedocent beoordeelt het plan van aanpak aan de hand van de volgende criteria: (1) de probleemstelling is beschreven vanuit het perspectief van de opdrachtgever; (2) de hoofdvraag sluit aan op de probleemstelling en de deelvragen dekken samen de hoofdvraag; (3) per deelvraag is een passende onderzoeksmethode gekozen en verantwoord; (4) de planning is haalbaar binnen de stageperiode. Het plan van aanpak telt voor 20% mee in het eindcijfer van de stage. Op basis van het plan van aanpak neemt de stagedocent een go/no-go-besluit; bij een no-go krijgt de student eenmalig de gelegenheid het plan binnen 10 werkdagen te herzien.\n\nNB: als bijlage dient een door de bedrijfsbegeleider ondertekende akkoordverklaring te worden toegevoegd; zonder deze verklaring wordt het plan van aanpak niet in behandeling genomen.",
+        "readingLevel": "B1",
+        "audience": "Derdejaars studenten Bedrijfskunde, een deel met Nederlands als tweede taal.",
+        "keepAsIs": "plan van aanpak, deelvraag"
+      }
+    },
+    {
+      "id": "lab-report-mbo-eqf4",
+      "description": "Ordinary case at EQF 4 (mbo-4, laboratory technician), reading level A2. A short practical with lab jargon. At A2 the sentences are very short, one action per sentence, and every term (titratie, buret, indicator, molariteit) is explained or kept and explained. Every requirement returns: in pairs; the lab journal is signed by the teacher before leaving the lab; safety goggles and lab coat are compulsory (without them no access); the report max. 4 A4 pages, with the given sections; submit via the ELO within 5 school days after the practical; the report is assessed pass/fail with the given checklist. Open points: nothing essential is missing; at most a note that the text names no contact for questions.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Laboratoriumtechniek, niveau 4",
+        "programme": "Laborant / Analist",
+        "domain": "Techniek en laboratorium",
+        "courseName": "Analytische chemie",
+        "eqf": 4,
+        "studyYear": 1,
+        "professionalContext": "Analist in een laboratorium"
+      },
+      "values": {
+        "assignment": "Practicum 4: Titratie van azijnzuur\n\nDoel: bepalen van de molariteit van azijnzuur in huishoudazijn d.m.v. een zuur-base-titratie met 0,100 M NaOH en fenolftaleïne als indicator.\n\nUitvoering in tweetallen. Labjas en veiligheidsbril verplicht, zonder geen toegang tot het lab. Pipetteer 10,00 mL azijn in een erlenmeyer, voeg 3 druppels indicator toe, titreer tot blijvende lichtroze kleur, noteer het volume. 3x herhalen, gemiddelde berekenen. Labjournaal laten aftekenen door docent voor je het lab verlaat.\n\nVerslag (max. 4 A4): inleiding, materiaal en methode, resultaten (tabel met de 3 metingen + gemiddelde), berekening molariteit, conclusie, foutenbespreking. Inleveren via de ELO binnen 5 schooldagen na het practicum. Beoordeling: voldaan/niet voldaan met de checklist in de ELO.",
+        "readingLevel": "A2",
+        "audience": "Eerstejaars mbo-4 studenten.",
+        "keepAsIs": "titratie, indicator, molariteit"
+      }
+    },
+    {
+      "id": "policy-brief-en-eqf7",
+      "description": "Ordinary case in English at EQF 7 (master), reading level B2. An academic, wordy brief for a policy brief assignment. At B2 common subject terms may stay; the text is shorter and structured. Every requirement returns unchanged: 1500 words (±10%) excluding references; audience is a municipal policy maker; at least six peer-reviewed sources, APA 7; one figure or table allowed; individual; peer feedback round in week 5 (giving feedback to two peers is required to pass); final submission in week 7, Friday 23:59, via Canvas as .docx; rubric with four criteria and weights 30/30/20/20; pass mark 5.5. The text names no contact person for questions; that may be an open point. No Note first section is needed.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "MSc Public Administration — year 1",
+        "programme": "MSc Public Administration",
+        "domain": "Governance and public policy",
+        "courseName": "Evidence and Policy",
+        "eqf": 7,
+        "studyYear": 1,
+        "professionalContext": "Policy adviser in local or national government"
+      },
+      "values": {
+        "assignment": "Assignment 2 — Policy Brief\n\nBuilding on the theoretical perspectives on evidence-informed policymaking discussed in weeks 1–4, students are required to produce, individually, a policy brief (1500 words ±10%, excluding the reference list) addressed to a municipal policy maker of their choosing, in which a local policy problem is analysed, at least two policy options are critically compared in light of the available evidence, and a reasoned recommendation is advanced. The brief should draw upon a minimum of six peer-reviewed sources, referenced according to APA 7th edition; the inclusion of one figure or table is permitted but not required.\n\nIn week 5 a peer feedback round takes place in which each student uploads a draft and provides written feedback on the drafts of two fellow students; participation in this round, i.e. providing feedback to two peers, constitutes a condition for passing the assignment. The final version is to be submitted via Canvas as a .docx file no later than Friday of week 7, 23:59.\n\nAssessment takes place by means of the rubric below; the assignment is passed with a weighted mark of 5.5 or higher.\n\n| Criterion | Weight |\n| --- | --- |\n| Problem analysis | 30% |\n| Use and appraisal of evidence | 30% |\n| Quality of the recommendation | 20% |\n| Fit to audience and style | 20% |",
+        "readingLevel": "B2",
+        "audience": "International master students.",
+        "keepAsIs": "policy brief, peer-reviewed"
+      }
+    },
+    {
+      "id": "missing-info-known-error-eqf5",
+      "description": "Known error: the assignment names no deadline, no way or place of submission, and does not say whether it is individual or group work, while the text itself refers to 'your group' once and 'you write' elsewhere. The tool must not invent a deadline, place or form of work: it puts '[in te vullen door de docent: …]' at those places and lists them under Open punten, with 'Je noemt geen deadline' or equivalent. The ambiguity individual/group may be named under Let op vooraf or as an open point. All stated requirements (a 2-minute pitch video, max. 1 A4 explanation, three criteria) return unchanged. EQF 5 (associate degree), reading level B1.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Associate degree Marketing — jaar 1",
+        "programme": "Associate degree Marketing & Communicatie",
+        "domain": "Economie en communicatie",
+        "courseName": "Contentmarketing",
+        "eqf": 5,
+        "studyYear": 1,
+        "professionalContext": "Medewerker marketing in het mkb"
+      },
+      "values": {
+        "assignment": "Opdracht 3 — Pitch voor een contentcampagne\n\nJe bedenkt een contentcampagne voor een lokale ondernemer naar keuze. Je onderzoekt eerst de doelgroep van de ondernemer en kiest op basis daarvan twee kanalen. Daarna maak je een pitchvideo van maximaal 2 minuten waarin je de campagne presenteert aan de ondernemer, en een toelichting van maximaal 1 A4 waarin je je keuze voor de kanalen onderbouwt met je doelgroeponderzoek.\n\nZorg dat je groep de taken eerlijk verdeelt.\n\nDe docent let bij de beoordeling op: de keuze voor de kanalen past bij de doelgroep; de pitch is overtuigend en binnen de tijd; de toelichting onderbouwt de keuzes met het doelgroeponderzoek.\n\nSucces!",
+        "readingLevel": "B1",
+        "audience": "",
+        "keepAsIs": ""
+      }
+    },
+    {
+      "id": "contradiction-known-error-eqf6",
+      "description": "Known error: two contradictions in the text. (1) The length: 'maximaal 1500 woorden' in the task and 'minimaal 2000 woorden' in the assessment section. (2) Individual vs group: 'Dit is een individuele opdracht' and later 'Verdeel binnen je projectgroep wie welk hoofdstuk schrijft'. The tool must not choose: it keeps both or marks the place with '[in te vullen door de docent: …]' and names both contradictions under Let op vooraf. Silently picking 1500 or 2000, or individual or group, is the failure. All other requirements return unchanged: a reflection report on the project; use the STARR method; at least three feedback moments described; submission as PDF via Brightspace on 14 March at 12:00; pass/fail with the given criteria. EQF 6, reading level B1.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 2",
+        "programme": "Social Work",
+        "domain": "Sociaal werk",
+        "courseName": "Projectonderwijs",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Sociaal werker in een wijkteam"
+      },
+      "values": {
+        "assignment": "Reflectieverslag project 'Samen in de wijk'\n\nDit is een individuele opdracht. Je schrijft een reflectieverslag over je rol in het project 'Samen in de wijk'. Het verslag telt maximaal 1500 woorden. Gebruik de STARR-methode (Situatie, Taak, Actie, Resultaat, Reflectie) voor ten minste drie situaties uit het project. Beschrijf in het verslag minstens drie feedbackmomenten: wat de feedback was, van wie, en wat je ermee deed.\n\nVerdeel binnen je projectgroep wie welk hoofdstuk schrijft, zodat het verslag één geheel wordt.\n\nInleveren: als PDF via Brightspace, uiterlijk 14 maart om 12.00 uur.\n\nBeoordeling (voldaan/niet voldaan): het verslag telt minimaal 2000 woorden; de STARR-methode is voor ten minste drie situaties volledig toegepast; er zijn minstens drie feedbackmomenten beschreven; je trekt per situatie een conclusie over je eigen handelen.",
+        "readingLevel": "B1",
+        "audience": "Tweedejaars studenten Social Work.",
+        "keepAsIs": "STARR-methode"
+      }
+    },
+    {
+      "id": "vague-criteria-known-error-en-eqf6",
+      "description": "Known error in English: the assessment criteria are not observable ('of good quality', 'sufficiently critical', 'a professional attitude is shown', 'the student has clearly made an effort'). The tool must keep the criteria as they are in the rewritten assignment (not replace them by its own sharper criteria, and not drop them), and name them under Open points as not observable, with a marked suggestion. Adding sharper criteria to the rewritten assignment is an added requirement. Other requirements return unchanged: a literature review on a topic from the list on the course page; 3000–3500 words; at least 15 sources of which at least 10 peer-reviewed; Harvard referencing; submit via Moodle by 30 May, 17:00; individual; graded 1–10, pass at 5.5. EQF 6 (bachelor year 2), reading level B1.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "BSc Applied Psychology — year 2",
+        "programme": "BSc Applied Psychology",
+        "domain": "Psychology",
+        "courseName": "Academic Skills 2",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Psychologist assistant or researcher in applied settings"
+      },
+      "values": {
+        "assignment": "Literature review — Academic Skills 2\n\nWrite, individually, a literature review (3000–3500 words) on one of the topics listed on the course page. Use at least 15 sources, of which at least 10 must be peer-reviewed journal articles, and use Harvard referencing throughout. Submit your review via Moodle by 30 May, 17:00.\n\nThe review is graded on a scale of 1–10; a 5.5 or higher is a pass. The lecturer will look at whether:\n- the review is of good quality;\n- the student is sufficiently critical of the literature;\n- a professional attitude is shown;\n- the student has clearly made an effort.",
+        "readingLevel": "B1",
+        "audience": "Second-year psychology students.",
+        "keepAsIs": "peer-reviewed, Harvard referencing"
+      }
+    }
+  ]
+}

@@ -44,6 +44,7 @@ describe("task-first tool names (P19.1)", () => {
         "arcs-reactor",
         "authentic-assessment",
         "bloom-by-design",
+        "clear-assignment",
         "cognitive-architect",
         "contextualization",
         "dialogic-encounters",
