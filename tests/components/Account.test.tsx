@@ -11,9 +11,10 @@ function renderAccount(
   email: string | null = "teacher@example.com",
   role: "teacher" | "admin" = "teacher",
   isOwner = false,
+  teams: { id: string; name: string; isLead: boolean }[] = [],
 ) {
   const props = {
-    loaderData: { user: { name: "Teacher T", email, role }, isOwner },
+    loaderData: { user: { name: "Teacher T", email, role }, isOwner, teams },
   } as unknown as ComponentProps<typeof Account>;
   const Stub = createRoutesStub([
     { path: "/account", Component: () => <Account {...props} />, action: () => null },
@@ -78,5 +79,27 @@ describe("Account page", () => {
     expect((await axe(teacher.container, axeOpts)).violations).toEqual([]);
     const admin = renderAccount("admin@example.com", "admin");
     expect((await axe(admin.container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Account page — my teams (P28.2)", () => {
+  it("lists my teams and links a lead to the team page", async () => {
+    const { container } = renderAccount("t@example.com", "teacher", false, [
+      { id: "team-1", name: "Verpleegkunde", isLead: true },
+      { id: "team-2", name: "Techniek", isLead: false },
+    ]);
+    expect(screen.getByRole("heading", { name: /mijn teams|my teams/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /verpleegkunde/i })).toHaveAttribute(
+      "href",
+      "/teams/team-1",
+    );
+    expect(screen.getByText("Techniek")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /techniek/i })).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no teams section without teams", () => {
+    renderAccount();
+    expect(screen.queryByRole("heading", { name: /mijn teams|my teams/i })).toBeNull();
   });
 });

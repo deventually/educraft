@@ -26,6 +26,7 @@ import {
   portfolioDossiers,
   rubricScores,
   rubrics,
+  teamMembers,
   feedback,
   generations,
   instanceSettings,
@@ -91,6 +92,8 @@ export interface PeopleFilter {
   q?: string;
   role?: Role;
   status?: PersonStatus;
+  /** Members of this team, and open invites for it (P28.2). */
+  teamId?: string;
   limit?: number;
 }
 
@@ -117,6 +120,7 @@ export async function listPeople(filter: PeopleFilter): Promise<PersonRow[]> {
       isNull(invites.usedByUserId),
       or(isNull(invites.expiresAt), gt(invites.expiresAt, new Date())),
       q ? contains(invites.note, q) : undefined,
+      filter.teamId ? eq(invites.teamId, filter.teamId) : undefined,
     );
     for (const i of db
       .select()
@@ -144,6 +148,15 @@ export async function listPeople(filter: PeopleFilter): Promise<PersonRow[]> {
       filter.status === "active" ? isNull(users.disabledAt) : undefined,
       filter.status === "disabled" ? isNotNull(users.disabledAt) : undefined,
       q ? or(contains(users.name, q), contains(users.email, q)) : undefined,
+      filter.teamId
+        ? inArray(
+            users.id,
+            db
+              .select({ id: teamMembers.userId })
+              .from(teamMembers)
+              .where(eq(teamMembers.teamId, filter.teamId)),
+          )
+        : undefined,
     );
     const rows = db
       .select({
@@ -382,6 +395,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
+    tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
     // The teacher's own model set and BDB/BKE switch live in instance_settings.
     tx.delete(instanceSettings)
       .where(inArray(instanceSettings.key, [`assignedModels:${id}`, `portfolioEnabled:${id}`]))
@@ -396,6 +410,8 @@ export interface CreateInviteInput {
   expiresAt?: Date | null;
   /** Who issued the invite (teacher/admin). Null for legacy ops invites. */
   createdByUserId?: string | null;
+  /** The team the new account joins (P28.2); null = none. */
+  teamId?: string | null;
 }
 
 export async function createInvite(input: CreateInviteInput): Promise<InviteRow> {
@@ -406,6 +422,7 @@ export async function createInvite(input: CreateInviteInput): Promise<InviteRow>
     expiresAt: input.expiresAt ?? null,
     usedByUserId: null,
     createdByUserId: input.createdByUserId ?? null,
+    teamId: input.teamId ?? null,
     createdAt: new Date(),
   };
   getDb().insert(invites).values(row).run();

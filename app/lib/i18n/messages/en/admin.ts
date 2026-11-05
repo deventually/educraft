@@ -4,6 +4,7 @@ export const admin: Messages["admin"] = {
   console: {
     nav: {
       context: "Teaching context",
+      teams: "Teams",
       tools: "Tools and models",
       usage: "Usage and feedback",
       users: "Users",
