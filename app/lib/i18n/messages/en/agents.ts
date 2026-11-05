@@ -2,6 +2,24 @@ import type { Messages } from "../nl";
 
 /** Role agents ("Get a review", brief P21). */
 export const agents: Messages["agents"] = {
+  admin: {
+    caption: "Every hat with what it reviews and its stand.",
+    colHat: "Hat",
+    colStand: "Stand",
+    colWatches: "Looks at",
+    hatsHeading: "Hats",
+    hatsIntro:
+      "A hat that is off no longer reviews. Its earlier advice is kept and comes back when you switch it on again.",
+    heading: "Role agents",
+    intro:
+      "The hats are critical colleagues who advise teachers on their course. Switch the whole part on or off here, and each hat separately.",
+    mainHint:
+      "This is the same switch as under Parts on Tools and models. Teams and per-teacher exceptions work as they do there.",
+    mainLabel: "Role agents for teachers",
+    mainOff: "Role agents are off. Then every hat rests, whatever you choose below.",
+    standLabel: "Stand of {name}",
+    watches: { course: "course", generation: "linked test questions" },
+  },
   decide: {
     done: "Your decision is recorded.",
     invalid: "This decision could not be recorded. Check your reason (at most 500 characters).",
@@ -14,7 +32,7 @@ export const agents: Messages["agents"] = {
     decision: { accepted: "Agree", rejected: "Disagree" },
     includeLinked: "Also review the linked test questions ({n})",
     intro:
-      "Two critical colleagues review your course: an assessment expert and a designer. They advise; you decide on each piece of advice. Nothing in your course changes.",
+      "Critical colleagues review your course: {roles}. They advise; you decide on each piece of advice. Nothing in your course changes.",
     model: "Model",
     none: "No advice from this reviewer.",
     notYet: "Not reviewed yet.",

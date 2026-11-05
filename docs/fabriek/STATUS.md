@@ -168,6 +168,12 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
 
 ## Bezig
 
+- Rolagenten aan en uit in beheer: een eigen pagina `/admin/agents` (menu *Rolagenten*) met de
+  hoofdschakelaar (dezelfde als bij Onderdelen, Aan / Op aanvraag / Uit) en per pet Aan of Uit
+  voor de hele instantie. Een pet die uit staat, draait niet, staat niet op de cursuspagina en telt
+  niet mee bij de open adviezen op Start; zijn oude adviezen blijven bewaard. Staan alle petten
+  uit, dan verdwijnt "Beoordeling". De uitleg op de cursuspagina noemt nu de petten die aan staan.
+  Opslag in `instance_settings` (`agentStand:<id>`), geen migratie. PR open.
 - Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
   Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
