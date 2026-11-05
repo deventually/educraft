@@ -441,9 +441,9 @@ describe("/courses/:id", () => {
   describe("use-as-evidence (P26.4)", () => {
     async function setup() {
       const portfolio = await import("~/server/repositories/portfolio.server");
-      const users = await import("~/server/repositories/users.server");
+      const exceptions = await import("~/server/repositories/exceptions.server");
       const { sampleDossier, C1, C2 } = await import("../portfolio/fixtures");
-      await users.setPortfolioEnabled("teacher-a", true);
+      await exceptions.setException("teacher-a", exceptions.featureKey("portfolio"), "on");
       const data = alignedCourse();
       data.assessments[1].items = [
         { id: "q-1", label: "1", outcomeId: LO1, bloom: "create", points: 6 },
