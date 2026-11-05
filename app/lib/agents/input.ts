@@ -4,7 +4,7 @@
  * The model answers in those keys; `filter.ts` maps them back, so a hat can
  * never point at an item that does not exist. All teacher text is data.
  */
-import type { AlignmentFinding } from "~/lib/courses/alignment";
+import { type AlignmentFinding, effectiveCoverage } from "~/lib/courses/alignment";
 import type { CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
 import type { RejectedFinding } from "./types";
@@ -76,7 +76,7 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
   );
   const assessments = c.assessments.map((t) => {
     const coverage =
-      t.coverage
+      effectiveCoverage(t)
         .map((cv) => `${key.get(cv.outcomeId) ?? "?"}${cv.bloom ? ` (${cv.bloom})` : ""}`)
         .join(", ") || l.none;
     return `${key.get(t.id)}${details([

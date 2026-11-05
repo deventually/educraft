@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { alignedCourse, ACT1, LO1, LO2, QUIZ } from "../courses/fixtures";
+import { alignedCourse, ACT1, LO1, LO2, QUIZ, TEST1 } from "../courses/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -255,5 +255,55 @@ describe("/courses/:id", () => {
     expect(d.data).toEqual(alignedCourse());
     expect(d.name).toBe("Fout");
     expect(d.data.outcomes.map((o) => o.id)).toEqual([LO1, LO2]);
+  });
+
+  it("saves every question intent of the matrix (P26.1) and refuses a bad one", async () => {
+    const c = await repo.createCourse("teacher-a", { name: "Matrijs", data: alignedCourse() });
+    expect(
+      await act(c.id, {
+        intent: "add-item",
+        assessmentId: TEST1,
+        label: "1",
+        outcomeId: LO1,
+        bloom: "create",
+        format: "open",
+        points: "4",
+      }),
+    ).toEqual({ ok: true });
+    let items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items!;
+    expect(items).toMatchObject([{ label: "1", outcomeId: LO1, points: 4 }]);
+    const id = items[0].id;
+    expect(
+      await act(c.id, {
+        intent: "update-item",
+        assessmentId: TEST1,
+        id,
+        label: "1a",
+        outcomeId: LO2,
+        points: "",
+      }),
+    ).toEqual({ ok: true });
+    items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items!;
+    expect(items).toEqual([{ id, label: "1a", outcomeId: LO2 }]);
+
+    expect(
+      await act(c.id, { intent: "add-item", assessmentId: TEST1, label: "2", outcomeId: "ghost" }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await act(c.id, {
+        intent: "update-item",
+        assessmentId: TEST1,
+        id,
+        label: "1",
+        outcomeId: LO1,
+        points: "-3",
+      }),
+    ).toMatchObject({ ok: false });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items).toEqual(items);
+
+    expect(await act(c.id, { intent: "remove-item", assessmentId: TEST1, id })).toEqual({
+      ok: true,
+    });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items).toEqual([]);
   });
 });

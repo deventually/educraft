@@ -7,6 +7,7 @@ import type {
   Activity,
   Assessment,
   AssessmentCoverage,
+  AssessmentItem,
   CourseData,
   LearningOutcome,
 } from "./types";
@@ -78,6 +79,7 @@ export function removeOutcome(d: CourseData, id: string): CourseData {
     assessments: next.assessments.map((a) => ({
       ...a,
       coverage: a.coverage.filter((c) => c.outcomeId !== id),
+      ...(a.items && { items: a.items.filter((i) => i.outcomeId !== id) }),
     })),
   };
 }
@@ -115,6 +117,60 @@ export function updateAssessment(d: CourseData, id: string, patch: Patch<Assessm
 
 export function removeAssessment(d: CourseData, id: string): CourseData {
   return { ...structuredClone(d), assessments: without(d.assessments, id) };
+}
+
+// Questions of an assessment (P26.1)
+
+function withItems(
+  d: CourseData,
+  assessmentId: string,
+  change: (items: AssessmentItem[]) => AssessmentItem[],
+): CourseData {
+  const next = structuredClone(d);
+  if (!next.assessments.some((a) => a.id === assessmentId))
+    throw new Error(`Unknown item: ${assessmentId}`);
+  return {
+    ...next,
+    assessments: next.assessments.map((a) =>
+      a.id === assessmentId ? { ...a, items: change(a.items ?? []) } : a,
+    ),
+  };
+}
+
+/** Replaces the whole question-level matrix; every question gets a fresh id. */
+export function setAssessmentItems(
+  d: CourseData,
+  assessmentId: string,
+  items: Omit<AssessmentItem, "id">[],
+): CourseData {
+  assertOutcomes(
+    d,
+    items.map((i) => i.outcomeId),
+  );
+  return withItems(d, assessmentId, () => items.map((i) => create<AssessmentItem>(i)));
+}
+
+export function addItem(
+  d: CourseData,
+  assessmentId: string,
+  item: Omit<AssessmentItem, "id">,
+): CourseData {
+  assertOutcomes(d, [item.outcomeId]);
+  return withItems(d, assessmentId, (items) => [...items, create<AssessmentItem>(item)]);
+}
+
+export function updateItem(
+  d: CourseData,
+  assessmentId: string,
+  itemId: string,
+  patch: Patch<AssessmentItem>,
+): CourseData {
+  if (patch.outcomeId) assertOutcomes(d, [patch.outcomeId]);
+  return withItems(d, assessmentId, (items) => replace(items, itemId, patch));
+}
+
+export function removeItem(d: CourseData, assessmentId: string, itemId: string): CourseData {
+  return withItems(d, assessmentId, (items) => without(items, itemId));
 }
 
 // Study load
