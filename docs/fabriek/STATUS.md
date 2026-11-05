@@ -261,8 +261,6 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
-- Toetsvragen: in meting w nog één correctie midden in een zin van het antwoordmodel (1 van 18
-  runs). De vaste vraagindeling (#118) loste de rest op.
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
