@@ -147,6 +147,10 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
   voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
+- P28.1 Gebruikersbeheer in een paar klikken: één lijst met zoeken en filteren (naam/e-mail, rol,
+  status), status en laatst actief per persoon, openstaande uitnodigingen als rij, één knop
+  "Toevoegen", en per persoon een eigen pagina (`/admin/users/:id`) met account, modellen,
+  toegang en verwijderen. Geen migratie. PR open. 28.2 en 28.3 volgen elk op een eigen branch.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
