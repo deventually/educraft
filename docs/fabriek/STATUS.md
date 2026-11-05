@@ -106,6 +106,9 @@ _Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
   repository, per docent afgeschermd; een generatie koppel je alleen aan een eigen cursus. Nog geen
   scherm. Daarna 20.3 (pagina's) en 20.4 (koppelen en voorinvullen). PR open; na de merge
   `npm run db:migrate`.
+- Brief P21 *Rolagenten*: twee petten kijken een cursus na op verzoek, akkoord/niet akkoord gelogd,
+  pakket-tags, gekoppelde toetsvragen optioneel mee. Keuzes gemaakt (BESLUIT-2026-11-05-3); wacht op
+  merge — PR open. P20.1 en 20.2 staan op `main`, dus 21.1 kan na deze merge starten.
 
 ## Wacht op jou
 
