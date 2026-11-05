@@ -67,6 +67,7 @@ export const contextualization: Tool = {
     },
     {
       name: "learningObjectives",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: {
         nl: "Beoogde leeruitkomsten",
         en: "Intended learning outcomes",

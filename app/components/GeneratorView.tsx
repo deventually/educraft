@@ -5,8 +5,9 @@ import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
-import { useSandbox } from "~/lib/hooks/useSandbox";
+import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
+import { CoursePicker } from "./CoursePicker";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
@@ -33,6 +34,8 @@ interface Props {
   defaultProfileId: string;
   localModels?: PickerModel[];
   catalogModels?: PickerModel[];
+  /** The teacher's courses (P20.4), for the course picker and its prefill. */
+  courses?: (SandboxCourse & { name: string })[];
 }
 
 export function GeneratorView({
@@ -41,16 +44,18 @@ export function GeneratorView({
   defaultProfileId,
   localModels,
   catalogModels,
+  courses,
 }: Props) {
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
   // Shared sandbox: seeds field defaults + the default profile's prefill, and
   // re-derives profile-backed fields on `selectProfile` (see useSandbox).
-  const { values, setValue, contextProfileId, selectProfile } = useSandbox({
+  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse } = useSandbox({
     inputs: tool.inputs,
     profiles,
     defaultProfileId,
+    courses,
   });
   // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
   // server render and hydration agree; only the tool's own text fields are filled.
@@ -151,6 +156,7 @@ export function GeneratorView({
         outputLanguage,
         model,
         images: images.length > 0 ? images : undefined,
+        courseId: courseId || undefined,
       },
       {
         onToken: (text) => setOutput((prev) => prev + text),
@@ -174,6 +180,13 @@ export function GeneratorView({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
       <div className="space-y-4">
+        {/* First, because choosing a course fills the learning outcomes below it. */}
+        <CoursePicker
+          courses={courses ?? []}
+          value={courseId}
+          onChange={selectCourse}
+          disabled={streaming}
+        />
         <DynamicForm
           fields={tool.inputs}
           values={values}

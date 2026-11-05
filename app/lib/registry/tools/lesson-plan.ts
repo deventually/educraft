@@ -54,6 +54,7 @@ export const lessonPlan: Tool = {
   inputs: [
     {
       name: "learningGoal",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Leerdoel van deze les", en: "Learning goal of this lesson" },
       kind: "textarea",
       required: true,

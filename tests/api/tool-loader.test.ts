@@ -60,3 +60,48 @@ describe("tool loader — local models", () => {
     }
   });
 });
+
+function loadSlug(slug: string) {
+  return toolRoute.loader({
+    request: new Request(`http://localhost/tools/${slug}`),
+    params: { slug },
+    context: {},
+  } as unknown as Parameters<ToolRoute["loader"]>[0]) as Promise<{
+    courses: {
+      id: string;
+      name: string;
+      contextProfileId: string | null;
+      outcomes: { text: string }[];
+    }[];
+  }>;
+}
+
+describe("tool loader — courses (P20, 20.4)", () => {
+  it("offers the viewer's own courses with their outcomes to a tool with course fields", async () => {
+    const repo = await import("~/server/repositories/courses.server");
+    const mine = await repo.createCourse("tool-loader-teacher", {
+      name: "Biologie 4 havo",
+      data: {
+        outcomes: [{ id: "lu1", text: "Legt fotosynthese uit", bloom: "understand" }],
+        activities: [],
+        assessments: [],
+      },
+    });
+    await repo.createCourse("someone-else", { name: "Niet van mij" });
+
+    const data = await loadSlug("authentic-assessment");
+    expect(data.courses).toEqual([
+      {
+        id: mine.id,
+        name: "Biologie 4 havo",
+        contextProfileId: null,
+        outcomes: [{ text: "Legt fotosynthese uit" }],
+      },
+    ]);
+  });
+
+  it("offers no courses to a tool without course fields", async () => {
+    const data = await loadSlug("mentorai");
+    expect(data.courses).toEqual([]);
+  });
+});

@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
 import { loadCourse, saveCourseIntent } from "~/server/courses.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
+import { listLinkedWork } from "~/server/repositories/courses.server";
+import { getToolBySlug } from "~/lib/registry";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { HOURS_PER_EC } from "~/lib/courses/types";
@@ -15,6 +17,7 @@ import { AssessmentsSection } from "~/components/courses/AssessmentsSection";
 import { CoverageMatrix } from "~/components/courses/CoverageMatrix";
 import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { NumberField } from "~/components/courses/fields";
+import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 
@@ -25,6 +28,13 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, course } = await loadCourse(request, params.id);
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
+  const items = [...course.data.activities, ...course.data.assessments];
+  const linkedWork = (await listLinkedWork(user.id, course.id)).map((w) => ({
+    generationId: w.generationId,
+    toolName: getToolBySlug(w.toolSlug)?.name ?? w.toolSlug,
+    itemTitle: items.find((i) => i.id === w.itemId)?.title ?? null,
+    createdAt: w.createdAt,
+  }));
   return {
     course: {
       id: course.id,
@@ -35,6 +45,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     profiles,
     findings: checkAlignment(course.data),
     matrix: coverageMatrix(course.data),
+    linkedWork,
   };
 }
 
@@ -59,7 +70,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         : { variant: "error", message: r.error };
     },
   });
-  const { course, profiles, findings, matrix } = loaderData;
+  const { course, profiles, findings, matrix, linkedWork = [] } = loaderData;
   const { data } = course;
 
   return (
@@ -96,6 +107,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <ActivitiesSection data={data} />
         <AssessmentsSection data={data} />
         <CoverageMatrix data={data} matrix={matrix} />
+        <LinkedWorkSection work={linkedWork} />
       </div>
     </div>
   );

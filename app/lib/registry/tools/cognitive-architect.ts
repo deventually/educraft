@@ -74,6 +74,7 @@ export const cognitiveArchitect: Tool = {
     },
     {
       name: "learningObjective",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Leerdoel", en: "Learning objective" },
       kind: "textarea",
       required: true,

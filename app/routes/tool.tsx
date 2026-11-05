@@ -22,6 +22,7 @@ import { getVerbatimPrompt } from "~/lib/prompts";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { localModelsEnabled } from "~/server/env.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
+import { listCourses } from "~/server/repositories/courses.server";
 import { getToolHelpOverlay } from "~/lib/help/registry";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { GeneratorView } from "~/components/GeneratorView";
@@ -65,6 +66,17 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   // to the pickers so the module-scope catalog no longer wins.
   const catalogModels = await getSelectableModels(user);
   const helpOverlay = getToolHelpOverlay(tool.id, getLocale(request));
+  // Courses only for a tool that can take its learning outcomes (P20.4); the picker
+  // needs just the outcome texts, not the whole plan.
+  const usesCourses = tool.inputs.some((f) => f.prefillFromCourse);
+  const courses = usesCourses
+    ? (await listCourses(user.id)).map((c) => ({
+        id: c.id,
+        name: c.name,
+        contextProfileId: c.contextProfileId,
+        outcomes: c.data.outcomes.map((o) => ({ text: o.text })),
+      }))
+    : [];
   return {
     tool,
     profiles,
@@ -73,6 +85,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     localModels,
     catalogModels,
     helpOverlay,
+    courses,
   };
 }
 
@@ -85,8 +98,16 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tool, profiles, defaultProfileId, verbatim, localModels, catalogModels, helpOverlay } =
-    loaderData;
+  const {
+    tool,
+    profiles,
+    defaultProfileId,
+    verbatim,
+    localModels,
+    catalogModels,
+    helpOverlay,
+    courses,
+  } = loaderData;
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
@@ -112,6 +133,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             outputLanguage={undefined}
             localModels={localModels}
             catalogModels={catalogModels}
+            courses={courses}
           />
         ) : multiStage ? (
           <StageStepper
@@ -128,6 +150,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             defaultProfileId={defaultProfileId}
             localModels={localModels}
             catalogModels={catalogModels}
+            courses={courses}
           />
         )}
       </section>

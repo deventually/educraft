@@ -53,6 +53,7 @@ export const rubricBuilder: Tool = {
   inputs: [
     {
       name: "learningOutcome",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Leeruitkomst", en: "Learning outcome" },
       kind: "textarea",
       required: true,

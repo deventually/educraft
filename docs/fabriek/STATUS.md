@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.3 en P21.2 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P21.1, P21.2 en brief P27 gemerged, P20.4 bezig)_
 
 ## Nu
 
@@ -13,6 +13,12 @@ _Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.3 en P21.2 bezi
   menu van vier (BESLUIT-2026-11-05-4).
 - **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** register van de twee petten,
   de invoer onder korte sleutels en de controle op het antwoord; nog zonder AI en scherm.
+- **Rolagenten, de twee AI-teksten (P21.2, #85) gemerged op 2026-11-05:** Toetsdeskundige en
+  Ontwerper (NL/EN) met de meting `npm run eval:agents`; tussenronde ra1 10 van 10 geslaagd, de
+  eindmeting (3 runs) wacht op akkoord.
+- **Cursussen, de pagina's (P20.3, #82) gemerged op 2026-11-05:** menu-item "Cursussen", per
+  cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, aandachtspunten en de
+  dekkingsmatrix.
 - **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten kijken een cursus na op
   verzoek, met akkoord/niet akkoord (BESLUIT-2026-11-05-3); 21.1 kan starten.
 - **Cursussen, opslag (P20.2, #79) gemerged op 2026-11-05:** tabellen `courses` en `course_links`
@@ -115,13 +121,9 @@ _Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.3 en P21.2 bezi
 
 ## Bezig
 
-- P20.3 Cursussen, de pagina's: menu-item "Cursussen", een lijst met aanmaken en verwijderen, en
-  per cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, de aandachtspunten en de
-  dekkingsmatrix. Werkt zonder JavaScript; axe-tests; screenshots NL/EN desktop en mobiel. Daarna
-  20.4 (koppelen en voorinvullen). PR open.
-- P21.2 Rolagenten, de twee AI-teksten (Toetsdeskundige en Ontwerper, NL/EN) en de meting
-  `npm run eval:agents`: tien synthetische cursussen met een bekende fout, deterministisch gescoord.
-  Tussenronde ra1 (1 run): 10 van 10 geslaagd. Eindmeting (3 runs) wacht op akkoord. PR volgt.
+- P20.4 Cursussen koppelen: op tien toolpagina's een cursuskiezer die de leeruitkomsten invult en
+  het resultaat aan de cursus koppelt; op "Mijn werk" werk koppelen en ontkoppelen, met een
+  cursusbadge; op de cursuspagina "Gekoppeld werk". Daarna 20.5 (documentatie). PR open.
 
 ## Wacht op jou
 

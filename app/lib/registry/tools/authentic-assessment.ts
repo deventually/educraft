@@ -111,6 +111,7 @@ export const authenticAssessment: Tool = {
     },
     {
       name: "leeruitkomsten",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Gewenste leeruitkomst(en)", en: "Desired learning outcome(s)" },
       kind: "textarea",
       required: true,

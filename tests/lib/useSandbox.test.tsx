@@ -51,4 +51,45 @@ describe("useSandbox", () => {
     expect(result.current.values.topic).toBe("photosynthesis");
     expect(result.current.values.level).toBe("beginner"); // untouched
   });
+
+  describe("selectCourse (P20, 20.4)", () => {
+    const courseInputs: InputField[] = [
+      ...inputs,
+      {
+        name: "outcomes",
+        label: "Leeruitkomsten",
+        kind: "textarea",
+        prefillFromCourse: { source: "learningOutcomes" },
+      },
+    ];
+    const courses = [
+      { id: "c1", contextProfileId: "p4", outcomes: [{ id: "o1", text: "Je test." }] },
+      { id: "c2", contextProfileId: null, outcomes: [] },
+    ];
+
+    it("fills course-backed fields and selects the course's profile", () => {
+      const { result } = renderHook(() =>
+        useSandbox({ inputs: courseInputs, profiles, defaultProfileId: "p2", courses }),
+      );
+      expect(result.current.courseId).toBe("");
+      act(() => result.current.selectCourse("c1"));
+      expect(result.current.courseId).toBe("c1");
+      expect(result.current.values.outcomes).toBe("- Je test.");
+      expect(result.current.contextProfileId).toBe("p4");
+      expect(result.current.values.level).toBe("advanced");
+    });
+
+    it("resets course-backed fields when switching to a course without outcomes, keeping the profile", () => {
+      const { result } = renderHook(() =>
+        useSandbox({ inputs: courseInputs, profiles, defaultProfileId: "p2", courses }),
+      );
+      act(() => result.current.selectCourse("c1"));
+      act(() => result.current.selectCourse("c2"));
+      expect(result.current.values.outcomes).toBe("");
+      expect(result.current.contextProfileId).toBe("p4");
+      act(() => result.current.selectCourse(""));
+      expect(result.current.courseId).toBe("");
+      expect(result.current.values.outcomes).toBe("");
+    });
+  });
 });

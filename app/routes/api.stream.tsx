@@ -12,6 +12,7 @@ import {
   isToolAvailable,
 } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
+import { linkGeneration } from "~/server/repositories/courses.server";
 import { getUser } from "~/server/auth.server";
 import { buildChatTranscript } from "~/lib/chat/transcript";
 import type { OutputLanguage, ChatMessage, Tool } from "~/lib/registry/types";
@@ -75,6 +76,8 @@ const StreamBodySchema = z.object({
     .max(MAX_MESSAGES)
     .optional(),
   sessionId: z.string().min(8).max(100).optional(),
+  /** Course this work belongs to (P20.4); linked after saving, a foreign id is ignored. */
+  courseId: z.string().max(100).nullish(),
   images: z.array(ImageInputSchema).max(10).optional(),
 });
 
@@ -307,7 +310,9 @@ export async function action({ request }: Route.ActionArgs) {
         try {
           const sessionId =
             tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";
+          let generationId: string;
           if (sessionId.length >= 8 && sessionId.length <= 100) {
+            generationId = sessionId;
             // Chat: collapse the whole conversation into one project row,
             // rewritten on every turn rather than one row per message.
             await upsertChatGeneration({
@@ -325,7 +330,7 @@ export async function action({ request }: Route.ActionArgs) {
               ),
             });
           } else {
-            await saveGeneration({
+            const saved = await saveGeneration({
               userId: user.id,
               toolSlug: tool.slug,
               stageId: stage.id,
@@ -335,7 +340,9 @@ export async function action({ request }: Route.ActionArgs) {
               outputLanguage,
               outputMarkdown: full,
             });
+            generationId = saved.id;
           }
+          if (body.courseId) await linkToCourse(user.id, body.courseId, generationId);
         } catch (e) {
           console.error("Failed to save generation:", e);
         }
@@ -347,5 +354,16 @@ export async function action({ request }: Route.ActionArgs) {
     return new Response(sseError(localizeError(err, locale, m.error.unknown)), {
       headers: SSE_HEADERS,
     });
+  }
+}
+
+/** Links saved work to a course. Never fails the stream: a refusal (not the caller's
+ *  course, or an unknown id) is only logged. */
+async function linkToCourse(userId: string, courseId: string, generationId: string) {
+  try {
+    const link = await linkGeneration(userId, courseId, generationId);
+    if (!link) console.warn("Course link refused:", { courseId });
+  } catch (e) {
+    console.error("Failed to link generation to course:", e);
   }
 }

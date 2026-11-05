@@ -27,6 +27,12 @@ function pageData(data: CourseData = alignedCourse()) {
     profiles: [{ id: "p1", name: "SE jaar 2" }],
     findings: checkAlignment(data),
     matrix: coverageMatrix(data),
+    linkedWork: [] as {
+      generationId: string;
+      toolName: { nl: string; en: string } | string;
+      itemTitle: string | null;
+      createdAt: Date;
+    }[],
   };
 }
 
@@ -107,6 +113,37 @@ describe("Course editor (/courses/:id)", () => {
       screen.getByText("Voeg leeruitkomsten en activiteiten of toetsen toe om de matrix te zien."),
     ).toBeVisible();
     expect(screen.getAllByText("Voeg eerst leeruitkomsten toe.").length).toBeGreaterThan(0);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Course page — linked work (20.4)", () => {
+  it("guides an empty section to the tools and Mijn werk", () => {
+    renderRoute(CoursePage, pageData());
+    const section = screen.getByRole("region", { name: "Gekoppeld werk" });
+    expect(within(section).getByText(/Nog niets gekoppeld/)).toBeVisible();
+  });
+
+  it("lists linked work with its tool, item and a way back to Mijn werk", async () => {
+    const data = {
+      ...pageData(),
+      linkedWork: [
+        {
+          generationId: "g1",
+          toolName: { nl: "Authentieke toets ontwerpen", en: "Design an authentic assessment" },
+          itemTitle: "Eindopdracht",
+          createdAt: new Date("2026-11-05T10:00:00Z"),
+        },
+      ],
+    };
+    const { container } = renderRoute(CoursePage, data);
+    const section = screen.getByRole("region", { name: "Gekoppeld werk" });
+    expect(within(section).getByText("Authentieke toets ontwerpen")).toBeVisible();
+    expect(within(section).getByText(/Eindopdracht/)).toBeVisible();
+    expect(within(section).getByRole("link", { name: "Bekijk in Mijn werk" })).toHaveAttribute(
+      "href",
+      "/projects",
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

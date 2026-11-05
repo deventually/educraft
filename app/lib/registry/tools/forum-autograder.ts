@@ -72,6 +72,7 @@ export const forumAutograder: Tool = {
     },
     {
       name: "learningObjectives",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: {
         nl: "Leeruitkomsten voor deze discussie",
         en: "Learning objectives for this discussion",

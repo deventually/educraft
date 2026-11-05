@@ -26,4 +26,8 @@ De niveaus volgen de herziene taxonomie van Bloom (Anderson & Krathwohl, 2001): 
 
 ## De dekkingsmatrix
 
-Onderaan de cursus staat een tabel met de leeruitkomsten in de rijen en de activiteiten en toetsen in de kolommen. Een ✓ betekent dat de activiteit of toets die leeruitkomst dekt, met het niveau erbij als je dat hebt ingevuld.
+Op de cursuspagina staat een tabel met de leeruitkomsten in de rijen en de activiteiten en toetsen in de kolommen. Een ✓ betekent dat de activiteit of toets die leeruitkomst dekt, met het niveau erbij als je dat hebt ingevuld.
+
+## Werk koppelen
+
+Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOnIt vult dan de leeruitkomsten van de cursus in, één per regel; haal weg wat niet past. Wat je genereert, wordt aan de cursus gekoppeld. Je kunt werk ook achteraf koppelen of ontkoppelen op **Mijn werk**, aan de hele cursus of aan één activiteit of toets. Op de cursuspagina staat alles onder **Gekoppeld werk**.
