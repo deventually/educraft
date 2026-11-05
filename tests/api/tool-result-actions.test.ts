@@ -74,12 +74,12 @@ describe("tool loader — next steps (P27.1)", () => {
   });
 
   it("leaves out a next step the instance has switched off", async () => {
-    await settings.setToolSetting("test-analysis", { enabled: false });
+    await settings.setToolStand("test-analysis", "off");
     try {
       const data = await load("test-items");
       expect(data.nextTools.map((t) => t.slug)).toEqual(["rubric-builder"]);
     } finally {
-      await settings.setToolSetting("test-analysis", { enabled: null });
+      await settings.setToolStand("test-analysis", null);
     }
   });
 

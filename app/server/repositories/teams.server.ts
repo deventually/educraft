@@ -16,6 +16,11 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { invites, teamMembers, teams, users, type TeamRow } from "../schema.server";
 import { createInvite, getUserByEmail } from "./users.server";
+import {
+  type TeamSettings,
+  TeamSettingsSchema,
+  parseTeamSettings,
+} from "~/lib/features/teamSettings";
 
 export interface TeamMember {
   userId: string;
@@ -24,9 +29,16 @@ export interface TeamMember {
   isLead: boolean;
 }
 
-export interface TeamWithMembers extends TeamRow {
+export interface TeamWithMembers extends Omit<TeamRow, "settingsJson"> {
   members: TeamMember[];
+  /** The team's choices for features, tools and models (P28.3). */
+  settings: TeamSettings;
 }
+
+const withSettings = ({ settingsJson, ...team }: TeamRow) => ({
+  ...team,
+  settings: parseTeamSettings(settingsJson),
+});
 
 /** What a lead's write returns: done, or why not. */
 export type LeadResult =
@@ -61,7 +73,12 @@ function membersOf(teamIds: string[]): (TeamMember & { teamId: string })[] {
 // ── Admin functions ──────────────────────────────────────────────────────────
 
 export async function createTeam(name: string): Promise<TeamRow> {
-  const row: TeamRow = { id: randomUUID(), name: cleanName(name), createdAt: new Date() };
+  const row: TeamRow = {
+    id: randomUUID(),
+    name: cleanName(name),
+    settingsJson: "{}",
+    createdAt: new Date(),
+  };
   getDb().insert(teams).values(row).run();
   return row;
 }
@@ -91,7 +108,7 @@ export async function listTeams(): Promise<TeamWithMembers[]> {
   const rows = getDb().select().from(teams).orderBy(asc(teams.name)).all();
   const members = membersOf(rows.map((t) => t.id));
   return rows.map((t) => ({
-    ...t,
+    ...withSettings(t),
     members: members.filter((m) => m.teamId === t.id).map(({ teamId: _, ...m }) => m),
   }));
 }
@@ -99,7 +116,7 @@ export async function listTeams(): Promise<TeamWithMembers[]> {
 export async function getTeamWithMembers(id: string): Promise<TeamWithMembers | null> {
   const team = getDb().select().from(teams).where(eq(teams.id, id)).get();
   if (!team) return null;
-  return { ...team, members: membersOf([id]).map(({ teamId: _, ...m }) => m) };
+  return { ...withSettings(team), members: membersOf([id]).map(({ teamId: _, ...m }) => m) };
 }
 
 /** Add `userId` to the team (once; a second add changes nothing). */
@@ -171,6 +188,33 @@ export async function listTeamsForUser(
     .all();
 }
 
+/**
+ * Store a team's choices (P28.3). Validated here; what the instance has Off is kept but
+ * never counts (the rule checks the instance first).
+ */
+export async function setTeamSettings(teamId: string, settings: TeamSettings): Promise<void> {
+  const clean = TeamSettingsSchema.parse(settings);
+  getDb()
+    .update(teams)
+    .set({ settingsJson: JSON.stringify(clean) })
+    .where(eq(teams.id, teamId))
+    .run();
+}
+
+/** The teams `userId` is in, with their choices: the team layer of the rule. */
+export async function listTeamSettingsForUser(
+  userId: string,
+): Promise<{ id: string; name: string; settings: TeamSettings }[]> {
+  return getDb()
+    .select({ id: teams.id, name: teams.name, settingsJson: teams.settingsJson })
+    .from(teamMembers)
+    .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+    .where(eq(teamMembers.userId, userId))
+    .orderBy(asc(teams.name))
+    .all()
+    .map((t) => ({ id: t.id, name: t.name, settings: parseTeamSettings(t.settingsJson) }));
+}
+
 /** The new account of a team invite joins that team; a team that is gone is ignored. */
 export async function joinTeamFromInvite(teamId: string, userId: string): Promise<void> {
   const team = getDb().select({ id: teams.id }).from(teams).where(eq(teams.id, teamId)).get();
@@ -238,6 +282,17 @@ export async function leadMakeLead(
 export async function leadStepDown(callerId: string, teamId: string): Promise<LeadResult> {
   if (!(await getTeamForLead(callerId, teamId))) return { error: "notLead" };
   await setLead(teamId, callerId, false);
+  return { ok: true };
+}
+
+/** A lead sets their own team's choices (P28.3), within the instance's limits. */
+export async function leadSetSettings(
+  callerId: string,
+  teamId: string,
+  settings: TeamSettings,
+): Promise<LeadResult> {
+  if (!(await getTeamForLead(callerId, teamId))) return { error: "notLead" };
+  await setTeamSettings(teamId, settings);
   return { ok: true };
 }
 

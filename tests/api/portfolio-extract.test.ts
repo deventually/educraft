@@ -22,6 +22,7 @@ vi.mock("~/server/repositories/usage.server", () => ({
 vi.mock("~/server/availability.server", () => ({
   effectiveDefaultModel: vi.fn(async () => "claude-sonnet-5-5"),
   getAvailableTools: vi.fn(async () => []),
+  effectiveFeatures: vi.fn(async () => ({ portfolio: { on: true, source: "default" } })),
 }));
 
 let extract: typeof import("~/server/portfolioExtract.server");

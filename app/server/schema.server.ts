@@ -191,13 +191,14 @@ export const courseLinks = sqliteTable(
 
 /**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
- * touched; an absent row means "registry default" (safe defaults — a fresh
- * instance behaves exactly as before this phase). `enabled` null = registry
- * default.
+ * touched; an absent row means "registry default" (safe defaults: a fresh
+ * instance behaves exactly as before this phase).
  */
 export const toolSettings = sqliteTable("tool_settings", {
   toolSlug: text("tool_slug").primaryKey(),
-  enabled: integer("enabled", { mode: "boolean" }), // null = registry default
+  // P28.3: the instance stand "off" | "on" | "request"; null = registry default
+  // (`tool.enabled` → "on", else "off"). Replaces the boolean `enabled` (migration 0016).
+  stand: text("stand"),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -216,6 +217,8 @@ export const instanceSettings = sqliteTable("instance_settings", {
 export const teams = sqliteTable("teams", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  // P28.3: the team's choices for features, tools and models (`TeamSettingsSchema`).
+  settingsJson: text("settings_json").notNull().default("{}"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -235,6 +238,21 @@ export const teamMembers = sqliteTable(
     primaryKey({ columns: [t.teamId, t.userId] }),
     index("team_members_user_idx").on(t.userId),
   ],
+);
+
+/**
+ * A teacher's exception for one feature or tool (P28.3, admin only): `key` is
+ * `feature:<id>` or `tool:<slug>`, `choice` is "on" or "off". No row = no exception.
+ */
+export const featureExceptions = sqliteTable(
+  "feature_exceptions",
+  {
+    userId: text("user_id").notNull(),
+    key: text("key").notNull(),
+    choice: text("choice").notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.key] })],
 );
 
 export type UserRow = typeof users.$inferSelect;

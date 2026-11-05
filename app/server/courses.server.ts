@@ -4,6 +4,7 @@
  * `<Form intent>`. Routes stay thin.
  */
 import { requireRole, type User } from "./auth.server";
+import { requireFeature } from "./availability.server";
 import {
   type Course,
   getCourse,
@@ -37,7 +38,10 @@ export type CourseActionResult =
   | { ok: false; error: string; intent?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
-  return requireRole(request, "teacher", "admin");
+  const user = await requireRole(request, "teacher", "admin");
+  // Courses can be switched off per team (P28.3): then every page and action is a 404.
+  await requireFeature(user, "courses");
+  return user;
 }
 
 export async function loadCourse(

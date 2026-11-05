@@ -10,6 +10,19 @@ import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
+const offer = {
+  features: [
+    { id: "portfolio", name: { nl: "BDB/BKE-werkplaats", en: "BDB/BKE workplace" } },
+    { id: "utilities", name: { nl: "Hulpmiddelen", en: "Utilities" } },
+  ],
+  tools: [{ slug: "math-grading", name: { nl: "Wiskunde nakijken", en: "Math grading" } }],
+  models: [
+    { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6" },
+    { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5" },
+  ],
+};
+const noChoices = { features: {}, tools: {}, models: null };
+
 const members = [
   { userId: "u-lead", name: "Lea Lead", email: "lea@school.nl", isLead: true },
   { userId: "u-mem", name: "Mo Member", email: "mo@school.nl", isLead: false },
@@ -40,9 +53,15 @@ function renderWith(
 describe("/admin/teams (P28.2)", () => {
   const data = {
     teams: [
-      { id: "team-1", name: "Verpleegkunde", members },
-      { id: "team-2", name: "Techniek", members: [] },
+      {
+        id: "team-1",
+        name: "Verpleegkunde",
+        members,
+        settings: { features: { portfolio: "on" }, tools: {}, models: null },
+      },
+      { id: "team-2", name: "Techniek", members: [], settings: noChoices },
     ],
+    offer,
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
     renderWith(AdminTeams, "/admin/teams", d, action);
@@ -122,8 +141,29 @@ describe("/admin/teams (P28.2)", () => {
     expect(body?.get("teamId")).toBe("team-2");
   });
 
+  it("shows a team's choices and autosaves one, with the team (P28.3)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    page(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const vpk = card("Verpleegkunde");
+    const bdb = within(vpk).getByRole("combobox", { name: /bdb\/bke.*keuze van het team/i });
+    expect(bdb).toHaveValue("on");
+    await user.selectOptions(
+      within(vpk).getByRole("combobox", { name: /hulpmiddelen.*keuze van het team/i }),
+      "off",
+    );
+    await waitFor(() => expect(body?.get("intent")).toBe("settings"));
+    expect(body?.get("teamId")).toBe("team-1");
+    expect(body?.get("feature:utilities")).toBe("off");
+    expect(body?.get("feature:portfolio")).toBe("on");
+    expect(body?.get("modelMode")).toBeNull();
+  });
+
   it("says so when there are no teams", () => {
-    page(undefined, { teams: [] });
+    page(undefined, { teams: [], offer });
     expect(screen.getByText(/nog geen teams/i)).toBeInTheDocument();
   });
 
@@ -136,7 +176,8 @@ describe("/admin/teams (P28.2)", () => {
 describe("/teams/:id — the lead's page (P28.2)", () => {
   const data = {
     selfId: "u-lead",
-    team: { id: "team-1", name: "Verpleegkunde", members },
+    team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
+    offer,
   };
   const page = (action?: (args: { request: Request }) => unknown) =>
     renderWith(LeadTeam, "/teams/:id", data, action);
@@ -188,6 +229,30 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     page(() => ({ link: "http://localhost/invite/tok-team" }));
     await user.click(screen.getByRole("button", { name: /uitnodigingslink maken/i }));
     expect(await screen.findByText("http://localhost/invite/tok-team")).toBeInTheDocument();
+  });
+
+  it("lets the lead choose parts, tools and models for the team (P28.3)", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    page(async ({ request }) => {
+      bodies.push(await request.formData());
+      return { saved: true };
+    });
+    const box = screen.getByRole("region", { name: /onderdelen en tools/i });
+    const tool = within(box).getByRole("combobox", { name: /wiskunde nakijken/i });
+    expect(tool).toHaveValue("");
+    await user.selectOptions(tool, "on");
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("tool:math-grading")).toBe("on");
+
+    const models = within(box).getByRole("group", { name: /modellen voor dit team/i });
+    const haiku = within(models).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
+    expect(haiku.disabled).toBe(true);
+    await user.click(within(models).getByRole("radio", { name: /eigen keuze/i }));
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1].get("modelMode")).toBe("own");
+    expect(bodies[1].getAll("models")).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+    expect(bodies[1].get("feature:portfolio")).toBeNull();
   });
 
   it("lets the lead step down after a confirmation", async () => {

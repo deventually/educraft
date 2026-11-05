@@ -25,11 +25,20 @@ export default function AppShell() {
   const locale = useLocale();
   const location = useLocation();
   const root = useRouteLoaderData("root") as
-    | { user?: { name: string; role: string; portfolio?: boolean } | null }
+    | {
+        user?: {
+          name: string;
+          role: string;
+          portfolio?: boolean;
+          features?: Partial<Record<string, boolean>>;
+        } | null;
+      }
     | undefined;
   const user = root?.user ?? null;
   // BDB/BKE shows only when an admin switched the workplace on for this user (P27).
   const portfolio = user?.portfolio === true;
+  // Courses can be switched off per team (P28.3); unknown (signed out) = shown.
+  const courses = user?.features?.courses !== false;
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -63,7 +72,7 @@ export default function AppShell() {
     ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
     { to: "/tools", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
-    { to: "/courses", label: t.nav.courses, end: false },
+    ...(courses ? [{ to: "/courses", label: t.nav.courses, end: false }] : []),
     ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
     { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/help", label: t.nav.help, end: false },
@@ -174,7 +183,7 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        {!isChatRoute && <SiteFooter t={t} portfolio={portfolio} />}
+        {!isChatRoute && <SiteFooter t={t} portfolio={portfolio} courses={courses} />}
       </div>
     </div>
   );
@@ -209,7 +218,15 @@ function RouteAnnouncer() {
   );
 }
 
-function SiteFooter({ t, portfolio }: { t: Messages; portfolio: boolean }) {
+function SiteFooter({
+  t,
+  portfolio,
+  courses,
+}: {
+  t: Messages;
+  portfolio: boolean;
+  courses: boolean;
+}) {
   // A real website footer: brand + site map columns on a deep evergreen field
   // (one step darker than the brand button green). The book attribution lives in
   // the bottom bar to satisfy CC BY — the prominent link back to the book now
@@ -220,7 +237,7 @@ function SiteFooter({ t, portfolio }: { t: Messages; portfolio: boolean }) {
       links: [
         { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
-        { to: "/courses", label: t.nav.courses },
+        ...(courses ? [{ to: "/courses", label: t.nav.courses }] : []),
         ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio }] : []),
         { to: "/context-profiles", label: t.nav.settings },
       ],

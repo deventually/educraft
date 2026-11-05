@@ -315,3 +315,106 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(await memberIds(team.id)).toContain(lead.id);
   });
 });
+
+describe("a team's choices for parts, tools and models (P28.3)", () => {
+  const TOOL = "math-grading";
+  beforeEach(async () => {
+    await settings.setToolStand(TOOL, null);
+    await settings.setFeatureStand("courses", "on");
+    await settings.setEnabledModels(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+  });
+
+  async function leadOfNewTeam() {
+    const team = await teams.createTeam(`Choice team ${++n}`);
+    const lead = await mk("Choice Lead");
+    await teams.addMember(team.id, lead.id);
+    await teams.setLead(team.id, lead.id, true);
+    return { team, lead };
+  }
+  const stored = async (id: string) => (await teams.getTeamWithMembers(id))!.settings;
+
+  it("the lead's page offers only what the instance has not Off", async () => {
+    const { team, lead } = await leadOfNewTeam();
+    await settings.setFeatureStand("courses", "off");
+    await settings.setToolStand(TOOL, "off");
+    as(lead);
+    const data = await call(leadPage.loader, { request: get(), params: { id: team.id } });
+    expect(data.offer.features.map((f) => f.id)).not.toContain("courses");
+    expect(data.offer.features.map((f) => f.id)).toContain("portfolio");
+    expect(data.offer.tools.map((t) => t.slug)).not.toContain(TOOL);
+    expect(data.offer.models.map((m) => m.id).sort()).toEqual(
+      ["claude-haiku-4-5", "claude-sonnet-4-6"].sort(),
+    );
+  });
+
+  it("a lead stores choices; an empty choice is no choice; Off on the instance stays stored", async () => {
+    const { team, lead } = await leadOfNewTeam();
+    await teams.setTeamSettings(team.id, {
+      features: { courses: "off" },
+      tools: {},
+      models: null,
+    });
+    await settings.setFeatureStand("courses", "off");
+    as(lead);
+    const res = await call(leadPage.action, {
+      request: post({
+        intent: "settings",
+        "feature:portfolio": "on",
+        "feature:utilities": "",
+        [`tool:${TOOL}`]: "off",
+        modelMode: "own",
+        models: ["claude-haiku-4-5", "claude-opus-4-8"],
+      }),
+      params: { id: team.id },
+    });
+    expect(res).toEqual({ saved: true });
+    expect(await stored(team.id)).toEqual({
+      features: { courses: "off", portfolio: "on" },
+      tools: { [TOOL]: "off" },
+      // Only models the instance has on are kept.
+      models: ["claude-haiku-4-5"],
+    });
+  });
+
+  it("an own model set may not be empty; follows the instance clears it", async () => {
+    const { team, lead } = await leadOfNewTeam();
+    as(lead);
+    const act = (fields: Record<string, string | string[]>) =>
+      call(leadPage.action, {
+        request: post({ intent: "settings", ...fields }),
+        params: { id: team.id },
+      });
+    expect(await act({ modelMode: "own" })).toEqual({ error: "atLeastOne" });
+    await act({ modelMode: "own", models: "claude-sonnet-4-6" });
+    expect((await stored(team.id)).models).toEqual(["claude-sonnet-4-6"]);
+    await act({ modelMode: "inherit", models: "claude-sonnet-4-6" });
+    expect((await stored(team.id)).models).toBeNull();
+  });
+
+  it("refuses an unknown choice", async () => {
+    const { team, lead } = await leadOfNewTeam();
+    as(lead);
+    expect(
+      await call(leadPage.action, {
+        request: post({ intent: "settings", "feature:portfolio": "maybe" }),
+        params: { id: team.id },
+      }),
+    ).toEqual({ error: "invalid" });
+  });
+
+  it("the admin sets any team's choices on /admin/teams", async () => {
+    const { team } = await leadOfNewTeam();
+    const data = await call(adminTeams.loader, { request: get() });
+    expect(data.offer.features.length).toBeGreaterThan(0);
+    expect(data.teams.find((t) => t.id === team.id)?.settings).toEqual({
+      features: {},
+      tools: {},
+      models: null,
+    });
+    const res = await call(adminTeams.action, {
+      request: post({ intent: "settings", teamId: team.id, "feature:roleAgents": "off" }),
+    });
+    expect(res).toEqual({ saved: true });
+    expect((await stored(team.id)).features).toEqual({ roleAgents: "off" });
+  });
+});

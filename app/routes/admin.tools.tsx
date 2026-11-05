@@ -1,41 +1,49 @@
 import type { Route } from "./+types/admin.tools";
 import { requireRole } from "~/server/auth.server";
 import { ALL_TOOLS } from "~/lib/registry";
+import { FEATURES, isFeatureId } from "~/lib/features";
+import { isInstanceStand, type InstanceStand } from "~/lib/features/rule";
 import {
   getEnabledModels,
   setEnabledModels,
-  getToolSetting,
-  getToolSettings,
-  setToolSetting,
+  getFeatureStands,
+  getToolStands,
+  setFeatureStand,
+  setToolStand,
 } from "~/server/repositories/settings.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { fmt } from "~/lib/i18n/format";
 import { Badge } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { fullCatalog } from "~/server/modelCatalog.server";
+import { StandSelect } from "~/components/features/selects";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  const settings = await getToolSettings();
-  const map = new Map(settings.map((s) => [s.toolSlug, s]));
-  const rows = ALL_TOOLS.map((tool) => {
-    const s = map.get(tool.slug);
-    return {
-      slug: tool.slug,
-      name: tool.name,
-      userType: tool.userType,
-      mode: tool.mode,
-      phase: tool.phase,
-      enabled: s?.enabled ?? tool.enabled, // effective
-    };
-  });
+  // The instance layer (P28.3): Off, On or On request, per tool and per feature.
+  const stands = await getToolStands();
+  const rows = ALL_TOOLS.map((tool) => ({
+    slug: tool.slug,
+    name: tool.name,
+    userType: tool.userType,
+    mode: tool.mode,
+    phase: tool.phase,
+    stand: stands.get(tool.slug) ?? ((tool.enabled ? "on" : "off") as InstanceStand),
+  }));
+  const featureStands = await getFeatureStands();
+  const features = FEATURES.map((f) => ({
+    id: f.id,
+    name: f.name,
+    stand: featureStands[f.id] ?? f.defaultStand,
+  }));
   // Instance model allow-list (P14/P18): `null` stored = every model is on.
   const enabled = await getEnabledModels();
   const models = (await fullCatalog()).map((m) => ({
     ...m,
     checked: enabled === null || enabled.includes(m.id),
   }));
-  return { rows, models };
+  return { rows, features, models };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -53,14 +61,21 @@ export async function action({ request }: Route.ActionArgs) {
     return { saved: true as const };
   }
 
+  const stand = fd.get("stand");
   if (intent === "tool") {
     const slug = String(fd.get("slug") ?? "");
-    if (!ALL_TOOLS.some((tl) => tl.slug === slug)) {
+    if (!ALL_TOOLS.some((tl) => tl.slug === slug) || !isInstanceStand(stand)) {
       return { error: "invalid" as const };
     }
-    await setToolSetting(slug, { enabled: fd.get("enabled") === "on" });
-    const saved = await getToolSetting(slug);
-    return { savedSlug: slug, enabled: saved?.enabled ?? false };
+    await setToolStand(slug, stand);
+    return { saved: true as const };
+  }
+
+  if (intent === "feature") {
+    const id = fd.get("id");
+    if (!isFeatureId(id) || !isInstanceStand(stand)) return { error: "invalid" as const };
+    await setFeatureStand(id, stand);
+    return { saved: true as const };
   }
 
   return { error: "invalid" as const };
@@ -69,10 +84,58 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, models } = loaderData;
+  const { rows, features, models } = loaderData;
   const m = t.admin.models;
+  const f = t.features;
   return (
     <div className="space-y-10">
+      {/* ── Features: the large parts of the app (P28.3) ─────────────────── */}
+      <section>
+        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
+          {f.featuresHeading}
+        </h2>
+        <p className="mt-1 max-w-2xl text-sm text-slate-600">{f.featuresIntro}</p>
+        <div className="mt-4 max-w-xl overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <caption className="sr-only">{f.featuresCaption}</caption>
+            <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th scope="col" className="px-4 py-2.5 font-semibold">
+                  {f.colFeature}
+                </th>
+                <th scope="col" className="px-4 py-2.5 font-semibold">
+                  {f.colStand}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {features.map((feature) => {
+                const name = loc(feature.name, locale);
+                return (
+                  <tr key={feature.id} className="border-b border-slate-50 last:border-0">
+                    <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
+                      {name}
+                    </th>
+                    <td className="px-4 py-2.5">
+                      <AutoSaveForm
+                        intent="feature"
+                        hidden={{ id: feature.id }}
+                        errorMessage={() => t.error.invalidRequest}
+                      >
+                        <StandSelect
+                          label={fmt(f.standLabel, { name })}
+                          defaultValue={feature.stand}
+                        />
+                      </AutoSaveForm>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section>
         <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
           {t.admin.tools.heading}
@@ -94,7 +157,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                   {t.admin.tools.colPhase}
                 </th>
                 <th scope="col" className="px-4 py-2.5 font-semibold">
-                  {t.admin.tools.enabledLabel}
+                  {f.colStand}
                 </th>
               </tr>
             </thead>
@@ -123,13 +186,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                         hidden={{ slug: r.slug }}
                         errorMessage={() => t.error.invalidRequest}
                       >
-                        <input
-                          type="checkbox"
-                          name="enabled"
-                          defaultChecked={r.enabled}
-                          aria-label={`${t.admin.tools.enabledLabel} — ${name}`}
-                          className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                        />
+                        <StandSelect label={fmt(f.standLabel, { name })} defaultValue={r.stand} />
                       </AutoSaveForm>
                     </td>
                   </tr>

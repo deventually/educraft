@@ -12,7 +12,7 @@ export type TeacherRow = {
 };
 
 /** One checkbox per model in `base`, pre-checked by `checkedIds`; all disabled together. */
-function ModelCheckboxes({
+export function ModelCheckboxes({
   idPrefix,
   base,
   checkedIds,

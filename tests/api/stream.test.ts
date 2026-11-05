@@ -367,14 +367,14 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
   });
 
   it("[4] instance-disabled tool → notAllowed", async () => {
-    await settings.setToolSetting("socratic-partner", { enabled: false });
+    await settings.setToolStand("socratic-partner", "off");
     const res = await invoke(
       { slug: "socratic-partner", values: { chapter: "x" } },
       { userId: "r-disabled" },
     );
     expect(sseErrorMessage(await res.text())).toBe(m.error.notAllowed);
     expect(streamChatSpy).not.toHaveBeenCalled();
-    await settings.setToolSetting("socratic-partner", { enabled: true }); // reset
+    await settings.setToolStand("socratic-partner", null); // reset
   });
 
   it("[5a] non-JSON body → invalidRequest", async () => {

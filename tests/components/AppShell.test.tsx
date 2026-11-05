@@ -22,7 +22,12 @@ function renderShell(initialPath = "/") {
 
 /** Render the shell with a signed-in user via a `root` loader (async hydration). */
 function renderShellWithUser(
-  user: { name: string; role: string; portfolio?: boolean },
+  user: {
+    name: string;
+    role: string;
+    portfolio?: boolean;
+    features?: Partial<Record<string, boolean>>;
+  },
   locale: "nl" | "en" = "nl",
 ) {
   const Stub = createRoutesStub([
@@ -66,6 +71,12 @@ describe("AppShell top navigation", () => {
     renderShellWithUser({ name: "T", role: "teacher", portfolio: false });
     await screen.findAllByRole("link", { name: "Cursussen" });
     expect(screen.queryByRole("link", { name: "BDB/BKE" })).toBeNull();
+  });
+
+  it("leaves 'Cursussen' out of menu and footer when courses are off for the user (P28.3)", async () => {
+    renderShellWithUser({ name: "T", role: "teacher", features: { courses: false } });
+    await screen.findAllByRole("link", { name: "Mijn werk" });
+    expect(screen.queryByRole("link", { name: "Cursussen" })).toBeNull();
   });
 
   it("has a menu item 'Cursussen' next to 'Mijn werk' (P20)", () => {

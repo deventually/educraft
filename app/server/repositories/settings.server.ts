@@ -10,47 +10,60 @@
  * client-selectable catalog". A fresh instance with empty tables therefore
  * behaves exactly as it did before this phase.
  */
-import { eq } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { instanceSettings, toolSettings, type ToolSettingRow } from "../schema.server";
+import { instanceSettings, toolSettings } from "../schema.server";
+import { type FeatureId, isFeatureId } from "~/lib/features";
+import { type InstanceStand, isInstanceStand } from "~/lib/features/rule";
 
-/** Every tool setting an admin has touched (untouched tools have no row). */
-export async function getToolSettings(): Promise<ToolSettingRow[]> {
-  return getDb().select().from(toolSettings).all();
+/** Every tool stand an admin has set (P28.3); an untouched tool is absent (registry default). */
+export async function getToolStands(): Promise<Map<string, InstanceStand>> {
+  const rows = getDb().select().from(toolSettings).all();
+  return new Map(
+    rows.flatMap((r) => (isInstanceStand(r.stand) ? [[r.toolSlug, r.stand] as const] : [])),
+  );
 }
 
-/** One tool's setting, or null when untouched (= registry default). */
-export async function getToolSetting(slug: string): Promise<ToolSettingRow | null> {
-  return getDb().select().from(toolSettings).where(eq(toolSettings.toolSlug, slug)).get() ?? null;
+/** Set a tool's instance stand: Off, On or On request; null = back to the registry default. */
+export async function setToolStand(slug: string, stand: InstanceStand | null): Promise<void> {
+  getDb()
+    .insert(toolSettings)
+    .values({ toolSlug: slug, stand, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: toolSettings.toolSlug, set: { stand, updatedAt: new Date() } })
+    .run();
 }
 
-export interface ToolSettingPatch {
-  enabled?: boolean | null;
-}
+const FEATURE_STAND_PREFIX = "featureStand:";
 
-/**
- * Upsert a tool setting, merging in place — only the keys present in `patch`
- * change.
- */
-export async function setToolSetting(slug: string, patch: ToolSettingPatch): Promise<void> {
-  const db = getDb();
-  const existing = db.select().from(toolSettings).where(eq(toolSettings.toolSlug, slug)).get();
-  const next: ToolSettingRow = {
-    toolSlug: slug,
-    enabled: patch.enabled !== undefined ? patch.enabled : (existing?.enabled ?? null),
-    updatedAt: new Date(),
-  };
-  if (existing) {
-    db.update(toolSettings)
-      .set({
-        enabled: next.enabled,
-        updatedAt: next.updatedAt,
-      })
-      .where(eq(toolSettings.toolSlug, slug))
-      .run();
-  } else {
-    db.insert(toolSettings).values(next).run();
+/** The instance stand of each feature an admin has set (P28.3); absent = the register default. */
+export async function getFeatureStands(): Promise<Partial<Record<FeatureId, InstanceStand>>> {
+  const rows = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(like(instanceSettings.key, `${FEATURE_STAND_PREFIX}%`))
+    .all();
+  const out: Partial<Record<FeatureId, InstanceStand>> = {};
+  for (const r of rows) {
+    const id = r.key.slice(FEATURE_STAND_PREFIX.length);
+    let stand: unknown;
+    try {
+      stand = JSON.parse(r.valueJson);
+    } catch {
+      continue;
+    }
+    if (isFeatureId(id) && isInstanceStand(stand)) out[id] = stand;
   }
+  return out;
+}
+
+export async function setFeatureStand(id: FeatureId, stand: InstanceStand): Promise<void> {
+  const key = `${FEATURE_STAND_PREFIX}${id}`;
+  const valueJson = JSON.stringify(stand);
+  getDb()
+    .insert(instanceSettings)
+    .values({ key, valueJson, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: instanceSettings.key, set: { valueJson, updatedAt: new Date() } })
+    .run();
 }
 
 const ENABLED_MODELS_KEY = "enabledModels";

@@ -18,6 +18,14 @@ const firstName = loc(first.name, "nl");
 const secondName = loc(second.name, "nl");
 
 const loaderData = {
+  features: [
+    {
+      id: "portfolio",
+      name: { nl: "BDB/BKE-werkplaats", en: "BDB/BKE workplace" },
+      stand: "request",
+    },
+    { id: "courses", name: { nl: "Cursussen", en: "Courses" }, stand: "on" },
+  ],
   models: [
     { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6", checked: true, group: "frontier" },
     { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5", checked: true, group: "frontier" },
@@ -32,7 +40,7 @@ const loaderData = {
       userType: "student" as const,
       mode: "chat" as const,
       phase: 1 as const,
-      enabled: true,
+      stand: "on" as const,
     },
     {
       slug: "bloom-by-design",
@@ -40,7 +48,7 @@ const loaderData = {
       userType: "instructor" as const,
       mode: "chat" as const,
       phase: 3 as const,
-      enabled: false,
+      stand: "off" as const,
     },
   ],
 };
@@ -55,20 +63,43 @@ function renderRoute(action?: (args: { request: Request }) => unknown) {
           <AdminTools {...props} />
         </ToastProvider>
       ),
-      action: action ?? (() => ({ savedSlug: "mentorai", enabled: false })),
+      action: action ?? (() => ({ saved: true })),
     },
   ]);
   return render(<Stub initialEntries={["/admin/tools"]} />);
 }
 
 describe("Admin tools", () => {
-  it("lists every registry tool with an enabled toggle", () => {
+  const toolsTable = () => screen.getByRole("table", { name: /alle tools/i });
+  const featuresTable = () => screen.getByRole("table", { name: /grote onderdelen/i });
+
+  it("lists every registry tool with its three-way stand (P28.3)", () => {
     renderRoute();
     expect(screen.getByText(firstName, { exact: false })).toBeInTheDocument();
-    expect(screen.getByText(secondName, { exact: false })).toBeInTheDocument();
-    // One enabled checkbox per tool.
-    const table = screen.getByRole("table");
-    expect(within(table).getAllByRole("checkbox")).toHaveLength(2);
+    const first = within(toolsTable()).getByRole("combobox", { name: new RegExp(firstName) });
+    expect(first).toHaveValue("on");
+    const second = within(toolsTable()).getByRole("combobox", { name: new RegExp(secondName) });
+    expect(second).toHaveValue("off");
+    expect(
+      within(second)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Aan", "Op aanvraag", "Uit"]);
+  });
+
+  it("lists the features with their stand and autosaves one (P28.3)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const portfolio = within(featuresTable()).getByRole("combobox", { name: /bdb\/bke/i });
+    expect(portfolio).toHaveValue("request");
+    await user.selectOptions(portfolio, "on");
+    await waitFor(() => expect(body?.get("intent")).toBe("feature"));
+    expect(body?.get("id")).toBe("portfolio");
+    expect(body?.get("stand")).toBe("on");
   });
 
   it("renders a labelled checkbox per selectable model, pre-checked from settings", () => {
@@ -127,36 +158,32 @@ describe("Admin tools", () => {
     expect(haiku.checked).toBe(true); // sprong terug
   });
 
-  it("offers no audience select", () => {
-    renderRoute();
-    expect(screen.queryAllByRole("combobox")).toHaveLength(0);
-  });
-
-  it("autosaves a tool toggle per row with its slug (mutation)", async () => {
+  it("autosaves a tool stand per row with its slug (mutation)", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
     renderRoute(async ({ request }) => {
       body = await request.formData();
-      return { savedSlug: "bloom-by-design", enabled: true };
+      return { saved: true };
     });
-    const table = screen.getByRole("table");
-    await user.click(within(table).getByLabelText(new RegExp(secondName)));
+    await user.selectOptions(
+      within(toolsTable()).getByRole("combobox", { name: new RegExp(secondName) }),
+      "request",
+    );
     await waitFor(() => {
       expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen|saved/i);
     });
     expect(body?.get("intent")).toBe("tool");
     expect(body?.get("slug")).toBe("bloom-by-design");
-    expect(body?.get("enabled")).toBe("on");
+    expect(body?.get("stand")).toBe("request");
   });
 
-  it("reverts a tool toggle and says why when the action refuses", async () => {
+  it("reverts a tool stand and says why when the action refuses", async () => {
     const user = userEvent.setup();
     renderRoute(() => ({ error: "invalid" }));
-    const table = screen.getByRole("table");
-    const box = within(table).getByLabelText(new RegExp(secondName)) as HTMLInputElement;
-    await user.click(box);
+    const select = within(toolsTable()).getByRole("combobox", { name: new RegExp(secondName) });
+    await user.selectOptions(select, "on");
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
-    expect(box.checked).toBe(false);
+    await waitFor(() => expect(select).toHaveValue("off"));
   });
 
   it("has no a11y violations", async () => {

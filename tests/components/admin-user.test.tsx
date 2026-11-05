@@ -36,7 +36,38 @@ const loaderData = {
     mode: "own" | "inherit";
     models: string[];
   } | null,
-  portfolio: true as boolean | null,
+  features: [
+    {
+      key: "feature:portfolio",
+      kind: "feature",
+      name: { nl: "BDB/BKE-werkplaats", en: "BDB/BKE workplace" },
+      on: true,
+      source: "team",
+      team: "Verpleegkunde",
+      exception: null,
+      instanceOff: false,
+    },
+    {
+      key: "feature:courses",
+      kind: "feature",
+      name: { nl: "Cursussen", en: "Courses" },
+      on: false,
+      source: "instance",
+      team: null,
+      exception: null,
+      instanceOff: true,
+    },
+    {
+      key: "tool:mentorai",
+      kind: "tool",
+      name: { nl: "MentorAI", en: "MentorAI" },
+      on: false,
+      source: "exception",
+      team: null,
+      exception: "off",
+      instanceOff: false,
+    },
+  ] as unknown[] | null,
   teams: [
     { id: "team-1", name: "Verpleegkunde", member: true, lead: true },
     { id: "team-2", name: "Techniek", member: false, lead: false },
@@ -77,7 +108,14 @@ describe("Admin person page (P28.1)", () => {
       "/admin/users",
     );
     const h2 = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(h2).toEqual(["Account", "Teams", "Modellen", "Toegang", "Verwijderen"]);
+    expect(h2).toEqual([
+      "Account",
+      "Teams",
+      "Modellen",
+      "Onderdelen en tools",
+      "Toegang",
+      "Verwijderen",
+    ]);
   });
 
   it("shows status and last active in the account section", () => {
@@ -131,10 +169,10 @@ describe("Admin person page (P28.1)", () => {
 
   it("shows the role as text to a regular admin, and for a retired role", () => {
     const regular = renderPage(undefined, { isOwner: false });
-    expect(screen.queryByRole("combobox")).toBeNull();
+    expect(within(section(/^account$/i)).queryByRole("combobox")).toBeNull();
     expect(within(section(/^account$/i)).getByText("Docent")).toBeInTheDocument();
     regular.unmount();
-    renderPage(undefined, { person: { role: "student" }, models: null, portfolio: null });
+    renderPage(undefined, { person: { role: "student" }, models: null, features: null });
     expect(screen.queryByRole("combobox")).toBeNull();
     expect(screen.getByText("student")).toBeInTheDocument();
   });
@@ -155,28 +193,45 @@ describe("Admin person page (P28.1)", () => {
   });
 
   it("has no models section for an admin", () => {
-    renderPage(undefined, { person: { role: "admin" }, models: null, portfolio: null });
+    renderPage(undefined, { person: { role: "admin" }, models: null, features: null });
     expect(screen.queryByRole("heading", { level: 2, name: /^modellen$/i })).toBeNull();
   });
 
-  it("switches the BDB/BKE workplace with autosave (P27)", async () => {
+  it("shows each part's stand and where it comes from (P28.3)", () => {
+    renderPage();
+    const box = section(/^onderdelen en tools$/i);
+    const bdb = within(box).getByRole("row", { name: /bdb\/bke/i });
+    expect(within(bdb).getByText(/^aan$/i)).toBeInTheDocument();
+    expect(within(bdb).getByText(/via team verpleegkunde/i)).toBeInTheDocument();
+    const courses = within(box).getByRole("row", { name: /cursussen/i });
+    expect(within(courses).getByText(/staat uit op de instantie/i)).toBeInTheDocument();
+    // An exception cannot switch on what the instance has Off: no select there.
+    expect(within(courses).queryByRole("combobox")).toBeNull();
+  });
+
+  it("sets an exception with autosave (P28.3)", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
-    renderPage(
-      async ({ request }) => {
-        body = await request.formData();
-        return { saved: true };
-      },
-      { portfolio: false },
-    );
-    const box = within(section(/^toegang$/i)).getByRole("checkbox", {
-      name: /bdb\/bke-werkplaats/i,
+    renderPage(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
     });
-    expect(box).not.toBeChecked();
-    await user.click(box);
-    await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
-    expect(body?.get("intent")).toBe("portfolioAccess");
-    expect(body?.get("enabled")).toBe("1");
+    const select = within(section(/^onderdelen en tools$/i)).getByRole("combobox", {
+      name: /uitzondering voor bdb\/bke/i,
+    });
+    expect(select).toHaveValue("");
+    await user.selectOptions(select, "off");
+    await waitFor(() => expect(body?.get("intent")).toBe("exception"));
+    expect(body?.get("key")).toBe("feature:portfolio");
+    expect(body?.get("choice")).toBe("off");
+  });
+
+  it("lists the tools too, with their exception", () => {
+    renderPage();
+    const tool = within(section(/^onderdelen en tools$/i)).getByRole("combobox", {
+      name: /uitzondering voor mentorai/i,
+    });
+    expect(tool).toHaveValue("off");
   });
 
   it("shows the shareable reset link after a reset (mutation)", async () => {
@@ -258,7 +313,7 @@ describe("Admin person page (P28.1)", () => {
       canManage: false,
       person: { role: "admin", ownerBadge: true },
       models: null,
-      portfolio: null,
+      features: null,
     });
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.queryByRole("textbox")).toBeNull();
@@ -273,7 +328,7 @@ describe("Admin person page (P28.1)", () => {
       isSelf: true,
       person: { id: "admin-1", role: "admin" },
       models: null,
-      portfolio: null,
+      features: null,
     });
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByRole("link", { name: /accountpagina/i })).toHaveAttribute(
@@ -294,7 +349,7 @@ describe("Admin person page (P28.1)", () => {
       canManage: false,
       person: { role: "admin" },
       models: null,
-      portfolio: null,
+      features: null,
     });
     expect((await axe(readOnly.container, axeOpts)).violations).toEqual([]);
   });
@@ -334,7 +389,7 @@ describe("Admin person page — teams (P28.2)", () => {
       canManage: false,
       person: { role: "admin" },
       models: null,
-      portfolio: null,
+      features: null,
     });
     expect(within(section(/^teams$/i)).queryByRole("checkbox")).toBeNull();
     expect(within(section(/^teams$/i)).getByText(/verpleegkunde/i)).toBeInTheDocument();

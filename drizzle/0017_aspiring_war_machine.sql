@@ -1,0 +1,1 @@
+ALTER TABLE `tool_settings` DROP COLUMN `enabled`;

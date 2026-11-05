@@ -10,7 +10,6 @@ import {
   getUserAssignedModels,
   getUserByEmail,
   getUserById,
-  setPortfolioEnabled,
   setUserAssignedModels,
   setUserDisabled,
   setUserRole,
@@ -21,6 +20,16 @@ import { getLastActiveDay } from "~/server/repositories/usage.server";
 import { listTeams, listTeamsForUser, setUserTeams } from "~/server/repositories/teams.server";
 import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
+import { effectiveFeatures, effectiveTools } from "~/server/availability.server";
+import {
+  featureKey,
+  getExceptions,
+  setException,
+  toolKey,
+} from "~/server/repositories/exceptions.server";
+import { FEATURES } from "~/lib/features";
+import { isChoice } from "~/lib/features/rule";
+import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
 import { MIN_PASSWORD_LENGTH, mayManage } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
@@ -34,11 +43,12 @@ import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { LinkCard } from "~/components/admin/LinkCard";
 import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
+import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
 
 /**
  * One person's page (P28.1): everything about one account in one place: Account
- * (name, e-mail, role), Models, Access (reset link, password, deactivation, BDB/BKE)
- * and Delete. The user is the one in the URL; a `userId` in a form is ignored.
+ * (name, e-mail, role), Teams, Models, Parts and tools (the effective stand, its source
+ * and the admin's exception, P28.3), Access (reset link, password, deactivation) and Delete. The user is the one in the URL; a `userId` in a form is ignored.
  * Authority is exactly as on the old list: `mayManage`, `ownerOnly`, never on yourself.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -61,20 +71,24 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     lead: stand.get(team.id) ?? false,
   }));
 
-  // Models and BDB/BKE are per teacher (P18, P27).
+  // Models, parts and tools are per teacher (P18, P28.3).
   let models: {
     base: { id: string; displayName: string }[];
     mode: "own" | "inherit";
     models: string[];
   } | null = null;
-  let portfolio: boolean | null = null;
+  let features: FeatureRow[] | null = null;
   if (target.role === "teacher") {
-    const [catalog, instanceModels, own, access] = await Promise.all([
-      fullCatalog(),
-      getEnabledModels(),
-      getUserAssignedModels(target.id),
-      portfolioAccess(target),
-    ]);
+    const [catalog, instanceModels, own, access, featureStands, toolStands, exceptions] =
+      await Promise.all([
+        fullCatalog(),
+        getEnabledModels(),
+        getUserAssignedModels(target.id),
+        portfolioAccess(target),
+        effectiveFeatures(target),
+        effectiveTools(target),
+        getExceptions(target.id),
+      ]);
     // An own set replaces the instance and may be wider, so the boxes run over the
     // whole catalogue. Following the instance shows the instance set (greyed out), so
     // that switching to "own" autosaves a sensible, non-empty starting selection.
@@ -82,7 +96,35 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     models = own
       ? { base, mode: "own", models: [...own] }
       : { base, mode: "inherit", models: instanceModels ?? base.map((m) => m.id) };
-    portfolio = access;
+    const row = (
+      key: string,
+      kind: FeatureRow["kind"],
+      name: FeatureRow["name"],
+      d: (typeof featureStands)[keyof typeof featureStands],
+      on = d.on,
+    ): FeatureRow => ({
+      key,
+      kind,
+      name,
+      on,
+      source: d.source,
+      team: d.source === "team" ? d.team : null,
+      exception: exceptions.get(key) ?? null,
+      instanceOff: d.source === "instance",
+    });
+    features = [
+      // The BDB/BKE row shows the transition too (a dossier keeps it on).
+      ...FEATURES.map((f) =>
+        row(
+          featureKey(f.id),
+          "feature",
+          f.name,
+          featureStands[f.id],
+          f.id === "portfolio" ? access : undefined,
+        ),
+      ),
+      ...ALL_TOOLS.map((tool) => row(toolKey(tool.slug), "tool", tool.name, toolStands[tool.slug])),
+    ];
   }
 
   return {
@@ -99,10 +141,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       ownerBadge: target.id === storedOwnerId && target.role === "admin",
     },
     models,
-    portfolio,
+    features,
     teams,
   };
 }
+
+/** The keys an exception may be set on: every feature and every tool. */
+const EXCEPTION_KEYS = new Set([
+  ...FEATURES.map((f) => featureKey(f.id)),
+  ...ALL_TOOLS.map((tool) => toolKey(tool.slug)),
+]);
 
 /** The target of a manage action: 404 when missing, `null` when out of reach. */
 async function manageTarget(actorIsOwner: boolean, userId: string) {
@@ -155,11 +203,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     return { saved: true as const };
   }
 
-  // ── BDB/BKE workplace per teacher (P27): on or off, nothing is deleted ────
-  if (intent === "portfolioAccess") {
+  // ── An exception per teacher (P28.3, admin only): on, off or none ──────────
+  // Above every team, below the instance. Switching off deletes nothing.
+  if (intent === "exception") {
     const target = await getUserById(userId);
     if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    await setPortfolioEnabled(userId, fd.get("enabled") === "1");
+    const key = String(fd.get("key") ?? "");
+    const choice = String(fd.get("choice") ?? "");
+    if (!EXCEPTION_KEYS.has(key) || (choice !== "" && !isChoice(choice))) {
+      return { error: "invalid" as const };
+    }
+    await setException(userId, key, isChoice(choice) ? choice : null);
     return { saved: true as const };
   }
 
@@ -303,15 +357,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
   const p = t.people;
   const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const {
-    person,
-    isOwner: viewerIsOwner,
-    isSelf,
-    canManage,
-    models,
-    portfolio,
-    teams,
-  } = loaderData;
+  const { person, isOwner: viewerIsOwner, isSelf, canManage, models, features, teams } = loaderData;
   const manage = canManage && !isSelf;
   const displayName = person.name || person.email || person.id;
 
@@ -480,8 +526,11 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
         </section>
       )}
 
-      {/* ── Access: reset link, password, (de)activation, BDB/BKE ──────────── */}
-      {(manage || portfolio !== null) && (
+      {/* ── Parts and tools: effective stand, source, exception (P28.3) ─────── */}
+      {features && <PersonFeatures rows={features} errorMessage={autoSaveError} />}
+
+      {/* ── Access: reset link, password, (de)activation ───────────────────── */}
+      {manage && (
         <section>
           <h2 className={h2}>{p.access}</h2>
           {actionData && "resetLink" in actionData && actionData.resetLink && (
@@ -492,59 +541,36 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
               copyLabel={i.copy}
             />
           )}
-          <div className={`mt-3 space-y-4 ${card}`}>
-            {manage && (
-              <div className="flex flex-wrap items-center gap-2">
-                <Form method="post">
-                  <input type="hidden" name="intent" value="resetPassword" />
-                  <Button type="submit" variant="secondary" size="sm">
-                    <KeyRound className="size-3.5" aria-hidden />
-                    {i.resetPassword}
-                  </Button>
-                </Form>
-                {viewerIsOwner && (
-                  <>
-                    <SetPasswordDialog userId={person.id} name={displayName} />
-                    <Form method="post">
-                      <input
-                        type="hidden"
-                        name="intent"
-                        value={person.status === "disabled" ? "reactivate" : "deactivate"}
-                      />
-                      <Button type="submit" variant="secondary" size="sm">
-                        {person.status === "disabled" ? (
-                          <UserCheck className="size-3.5" aria-hidden />
-                        ) : (
-                          <UserX className="size-3.5" aria-hidden />
-                        )}
-                        {person.status === "disabled" ? i.reactivate : i.deactivate}
-                      </Button>
-                    </Form>
-                  </>
-                )}
-              </div>
-            )}
-            {portfolio !== null && (
-              <AutoSaveForm intent="portfolioAccess" errorMessage={autoSaveError}>
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    id="person-portfolio"
-                    name="enabled"
-                    value="1"
-                    defaultChecked={portfolio}
-                    aria-describedby="person-portfolio-hint"
-                    className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                  />
-                  <label htmlFor="person-portfolio" className="text-sm font-medium text-slate-800">
-                    {p.portfolioLabel}
-                  </label>
-                </div>
-                <p id="person-portfolio-hint" className="mt-1 text-xs text-slate-500">
-                  {p.portfolioHint}
-                </p>
-              </AutoSaveForm>
-            )}
+          <div className={`mt-3 ${card}`}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Form method="post">
+                <input type="hidden" name="intent" value="resetPassword" />
+                <Button type="submit" variant="secondary" size="sm">
+                  <KeyRound className="size-3.5" aria-hidden />
+                  {i.resetPassword}
+                </Button>
+              </Form>
+              {viewerIsOwner && (
+                <>
+                  <SetPasswordDialog userId={person.id} name={displayName} />
+                  <Form method="post">
+                    <input
+                      type="hidden"
+                      name="intent"
+                      value={person.status === "disabled" ? "reactivate" : "deactivate"}
+                    />
+                    <Button type="submit" variant="secondary" size="sm">
+                      {person.status === "disabled" ? (
+                        <UserCheck className="size-3.5" aria-hidden />
+                      ) : (
+                        <UserX className="size-3.5" aria-hidden />
+                      )}
+                      {person.status === "disabled" ? i.reactivate : i.deactivate}
+                    </Button>
+                  </Form>
+                </>
+              )}
+            </div>
           </div>
         </section>
       )}
