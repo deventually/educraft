@@ -156,11 +156,20 @@ export function ItemAnalysis({ explainWith }: { explainWith?: string }) {
               </Button>
             </div>
             {explainWith && <HelpText id={`${id}-explain-hint`}>{a.explainHint}</HelpText>}
-            <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-              <table className="w-full text-left text-sm">
-                <caption className="px-4 py-2 text-left font-medium text-slate-700">
-                  {a.tableCaption}
-                </caption>
+            <h3 id={`${id}-table`} className="mt-6 text-sm font-medium text-slate-700">
+              {a.tableCaption}
+            </h3>
+            {/* Scrolls sideways on a phone; focusable so keyboard users can scroll it too. */}
+            <section
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be focusable (WCAG 2.1.1)
+              tabIndex={0}
+              aria-labelledby={`${id}-table`}
+              className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-white focus-visible:outline-2 focus-visible:outline-violet-600"
+            >
+              <table
+                aria-labelledby={`${id}-table`}
+                className="w-full min-w-[34rem] text-left text-sm"
+              >
                 <thead className="bg-slate-50 text-slate-600">
                   <tr>
                     {[c.question, c.max, c.p, c.rit, c.rir, c.alphaIfDeleted].map((h) => (
@@ -186,7 +195,7 @@ export function ItemAnalysis({ explainWith }: { explainWith?: string }) {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
             <p className="mt-3 max-w-[70ch] text-sm text-slate-600">{a.legend}</p>
           </>
         )}
