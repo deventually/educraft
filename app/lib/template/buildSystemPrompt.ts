@@ -2,6 +2,7 @@ import { getRuntimePrompt } from "~/lib/prompts";
 import type { ContextProfile } from "~/lib/context/types";
 import { formatProfile, type Audience } from "~/lib/context/format";
 import type { ChatMessage, OutputLanguage, StageDependency } from "~/lib/registry/types";
+import { DERIVATIONS } from "./derivations";
 import { interpolate, type TemplateValues } from "./interpolate";
 
 const LANGUAGE_LABEL: Record<OutputLanguage, string> = {
@@ -46,7 +47,8 @@ export interface BuildSystemPromptArgs {
  *  - form `values`
  *  - {{contextProfile}}  ← formatted HBO-i profile (or "")
  *  - {{outputLanguage}}  ← "Nederlands" / "Engels"
- *  - consumed prior-stage outputs under their declared placeholders
+ *  - consumed prior-stage outputs under their declared placeholders, or what
+ *    a named derivation computes from them (`StageDependency.derive`)
  */
 export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
   const template = getRuntimePrompt(args.promptId, args.outputLanguage);
@@ -66,7 +68,9 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
         `Output of earlier stage "${dep.fromStageId}" is missing (required for {{${dep.placeholder}}}).`,
       );
     }
-    values[dep.placeholder] = output;
+    values[dep.placeholder] = dep.derive
+      ? DERIVATIONS[dep.derive](output, args.outputLanguage)
+      : output;
   }
 
   const filled = interpolate(template, values, { allowEmpty });

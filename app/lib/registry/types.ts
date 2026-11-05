@@ -1,3 +1,4 @@
+import type { DerivationId } from "~/lib/template/derivations";
 import type { LocalizedText } from "~/lib/i18n/localized";
 import type { ChatMessage as AIChatMessage } from "~/lib/ai/types";
 
@@ -113,6 +114,11 @@ export interface StageDependency {
   placeholder: string;
   /** Stage id whose output fills it. */
   fromStageId: string;
+  /**
+   * Fill the placeholder with something computed in code from that output instead
+   * of the output itself, e.g. "question-plan" (app/lib/template/derivations.ts).
+   */
+  derive?: DerivationId;
 }
 
 /** A single LLM step. One-shot generators and chat tools have exactly one. */

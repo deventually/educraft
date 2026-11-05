@@ -3,6 +3,8 @@ import blueprintEn from "./files/test-items-blueprint.en.md?raw";
 import blueprintNl from "./files/test-items-blueprint.nl.md?raw";
 import itemsEn from "./files/test-items-items.en.md?raw";
 import itemsNl from "./files/test-items-items.nl.md?raw";
+import itemsV2En from "./files/test-items-items@v2.en.md?raw";
+import itemsV2Nl from "./files/test-items-items@v2.nl.md?raw";
 
 /**
  * SOURCE: Original LimeOnIt tool (brief P24, 24.3), not from The Pedagogical
@@ -22,4 +24,16 @@ export const TEST_ITEMS_ITEMS: PromptDef = {
   id: "test-items-items@v1",
   verbatim: `Original LimeOnIt tool, not from The Pedagogical Promptbook. Step 2 of 2: you write every question in the blueprint from step 1, exactly as planned, with an answer model, following the multiple-choice item-writing guidelines of Haladyna, Downing & Rodriguez (2002): exactly one correct answer, no clues in the stem or options, plausible distractors based on real errors, each with the reason it is wrong. Everything follows from the teacher's material. A check against the blueprint and a self-check close the output; the teacher decides on the test.`,
   runtime: { nl: itemsNl, en: itemsEn },
+};
+
+/**
+ * What @v2 changes (metingen t and u, STATUS.md "Later"): the stage gets a fixed plan per
+ * question, computed in code from the blueprint table ({{questionPlan}}, derivation
+ * "question-plan"), so it no longer works out the row of each question itself; and every
+ * multiple-choice question has four options. @v1 stays registered for earlier results.
+ */
+export const TEST_ITEMS_ITEMS_V2: PromptDef = {
+  id: "test-items-items@v2",
+  verbatim: TEST_ITEMS_ITEMS.verbatim,
+  runtime: { nl: itemsV2Nl, en: itemsV2En },
 };
