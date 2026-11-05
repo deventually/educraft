@@ -102,8 +102,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
   vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
   nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
-  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Meting nog niet gedraaid
-  (sleutel nodig) — PR open.
+  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Meting dc1 (1 run, batch):
+  4,20–4,80, geen harde check gefaald, niets afgekapt; zwakste punt vetgedrukte labels in de
+  feedback. Ronde 1: gewone opsommingstekens en genderneutraal ook in non-verbale aanwijzingen;
+  eindmeting dc2 (3 runs) volgt — PR open.
 
 ## Wacht op jou
 

@@ -136,6 +136,9 @@ describe("tool: difficult-conversation", () => {
     }
     expect(p).toMatch(/### e[ée]n ding om te oefenen/);
     expect(p).toContain("dit is feedback op een oefengesprek met een gespeelde student.");
+    // Meting dc1: bold labels and numbered lists in the feedback; "zijn mouw", "haar neus".
+    expect(p).toContain("gewone opsommingstekens, zonder vet en zonder nummers");
+    expect(p).toContain("ook in de non-verbale aanwijzingen");
   });
 
   it("guards the brief's demands (en)", () => {
@@ -162,5 +165,7 @@ describe("tool: difficult-conversation", () => {
       expect(p, h).toContain(h);
     }
     expect(p).toContain("this is feedback on a practice conversation with a role-played student.");
+    expect(p).toContain("plain bullets, without bold and without numbers");
+    expect(p).toContain("also in the non-verbal cues");
   });
 });
