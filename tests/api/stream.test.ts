@@ -252,6 +252,38 @@ describe("api.stream — persistence", () => {
 // (5.1 lists 13; every one is covered below and counted in this block)
 // ════════════════════════════════════════════════════════════════════════════
 
+describe("api.stream — the done frame names the saved work (P27.1)", () => {
+  it("one-shot: the done frame carries the new generation id", async () => {
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "done-oneshot" },
+    );
+    expect(await res.text()).toContain('event: done\ndata: {"generationId":"gen-1"}');
+  });
+
+  it("chat: the done frame carries the session id", async () => {
+    const res = await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "Evolutie" },
+        messages: [{ role: "user", content: "hoi" }],
+        sessionId: "session-donechat",
+      },
+      { userId: "done-chat" },
+    );
+    expect(await res.text()).toContain('event: done\ndata: {"generationId":"session-donechat"}');
+  });
+
+  it("a failed save still completes, without an id", async () => {
+    saveGenerationSpy.mockRejectedValueOnce(new Error("db down"));
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "done-fail" },
+    );
+    expect(await res.text()).toContain("event: done\ndata: {}");
+  });
+});
+
 describe("api.stream — course link (P20, 20.4)", () => {
   it("links the saved generation to the caller's course", async () => {
     const res = await invoke(

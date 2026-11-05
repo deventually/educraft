@@ -49,6 +49,7 @@ export const authenticAssessment: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
+  next: ["rubric-builder", "test-items"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288, // nulmeting 2026-11-04: 6144 cut off the blueprint mid-sentence.
   defaultTemperature: 0.4,

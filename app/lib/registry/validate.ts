@@ -114,6 +114,7 @@ const toolSchema = z.object({
   defaultMaxTokens: maxTokens.optional(),
   usesContextProfile: z.boolean(),
   defaultOutputLanguage: z.enum(["nl", "en"]),
+  next: z.array(z.string().min(1)).max(3).optional(),
   enabled: z.boolean(),
   phase: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
 });
@@ -205,6 +206,16 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
           }
         }
       }
+    }
+  }
+
+  // Next steps (P27.1) point to another tool in the same list.
+  for (const tool of tools) {
+    for (const slug of tool.next ?? []) {
+      if (slug === tool.slug)
+        issues.push({ tool: tool.slug, message: "next: a tool cannot point to itself" });
+      else if (!slugs.has(slug))
+        issues.push({ tool: tool.slug, message: `next: unknown tool ${slug}` });
     }
   }
 

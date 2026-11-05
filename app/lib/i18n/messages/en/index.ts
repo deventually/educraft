@@ -21,6 +21,7 @@ import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { privacy } from "./privacy";
 import { projects } from "./projects";
+import { resultActions } from "./resultActions";
 import { settings } from "./settings";
 import { toast } from "./toast";
 import { tool } from "./tool";
@@ -55,6 +56,7 @@ export const en: Messages = {
   portfolioExport,
   privacy,
   projects,
+  resultActions,
   settings,
   tagline: "Design evidence-based education with generative AI",
   toast,
