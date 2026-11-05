@@ -143,6 +143,18 @@ describe("GeneratorView — course (P20, 20.4)", () => {
     expect(body.courseId).toBe("c1");
   });
 
+  it("puts the course picker first: choosing a course fills the form below it", () => {
+    const tool = getToolBySlug("authentic-assessment")!;
+    render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" courses={courses} />,
+    );
+    const picker = screen.getByRole("combobox", { name: "Course" });
+    const firstField = screen.getByLabelText(/discipline/i);
+    expect(
+      picker.compareDocumentPosition(firstField) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("sends no courseId when no course is chosen", async () => {
     const { streamPost } = await import("~/lib/streamClient");
     const post = streamPost as unknown as ReturnType<typeof vi.fn>;

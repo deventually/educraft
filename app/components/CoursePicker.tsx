@@ -16,7 +16,7 @@ export function CoursePicker({ courses, value, onChange, disabled }: Props) {
   const id = useId();
   if (courses.length === 0) return null;
   return (
-    <div>
+    <div className="rounded-xl border border-lime-200 bg-lime-50/60 p-3">
       <Label htmlFor={id} className="mb-1.5">
         {t.tool.course}
       </Label>

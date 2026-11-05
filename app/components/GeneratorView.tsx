@@ -7,6 +7,7 @@ import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
+import { CoursePicker } from "./CoursePicker";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { AiNotice } from "./AiNotice";
@@ -179,6 +180,13 @@ export function GeneratorView({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
       <div className="space-y-4">
+        {/* First, because choosing a course fills the learning outcomes below it. */}
+        <CoursePicker
+          courses={courses ?? []}
+          value={courseId}
+          onChange={selectCourse}
+          disabled={streaming}
+        />
         <DynamicForm
           fields={tool.inputs}
           values={values}
@@ -198,9 +206,6 @@ export function GeneratorView({
           catalogModels={catalogModels}
           disabled={streaming}
           requiresImages={hasImageInputs}
-          courses={courses}
-          courseId={courseId}
-          onCourse={selectCourse}
         />
         <div className="flex items-center gap-3">
           {streaming ? (

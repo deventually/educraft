@@ -22,9 +22,6 @@ vi.mock("~/lib/i18n/useT", () => ({
       advanced: "Advanced",
       noProfileHint: "No teaching context yet.",
       noProfileAction: "Set up teaching context",
-      course: "Course",
-      noCourse: "No course",
-      courseHint: "Fills in its learning outcomes and links the result to it.",
     },
   }),
 }));
@@ -198,33 +195,6 @@ describe("ToolControls", () => {
     const user = userEvent.setup();
     const { container } = renderControls();
     await openAdvanced(user);
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-});
-
-describe("ToolControls — course picker (P20, 20.4)", () => {
-  const courses = [
-    { id: "c1", name: "Biology 4 havo" },
-    { id: "c2", name: "Chemistry 5 vwo" },
-  ];
-
-  it("hides the course picker without courses", () => {
-    renderControls();
-    expect(screen.queryByRole("combobox", { name: "Course" })).toBeNull();
-  });
-
-  it("offers the courses and reports the choice", async () => {
-    const onCourse = vi.fn();
-    renderControls({ courses, courseId: "", onCourse });
-    const select = screen.getByRole("combobox", { name: "Course" });
-    expect(screen.getByRole("option", { name: "No course" })).toBeTruthy();
-    await userEvent.selectOptions(select, "c2");
-    expect(onCourse).toHaveBeenCalledWith("c2");
-    expect(screen.getByText(/links the result/)).toBeTruthy();
-  });
-
-  it("has no axe violations with the course picker", async () => {
-    const { container } = renderControls({ courses, courseId: "c1", onCourse: vi.fn() });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

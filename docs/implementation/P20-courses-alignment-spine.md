@@ -92,8 +92,9 @@ Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijges
   - Tien velden hebben `prefillFromCourse` (de vijf hieronder plus de vijf P24-velden hierboven).
     Een veld in het enkelvoud krijgt ook álle leeruitkomsten, één per regel; de docent haalt weg wat
     niet hoort. Een keuze per leeruitkomst kan later, als docenten erom vragen.
-  - De cursuskiezer (`CoursePicker`) staat in het blok met onderwijscontext en taal, en in de
-    startkaart van een chattool (`bloom-by-design`). Hij verschijnt alleen als de tool een
+  - De cursuskiezer (`CoursePicker`) staat bovenaan het formulier, omdat een keuze de velden
+    eronder invult (Bastiaan, 2026-11-05), en bovenaan de startkaart van een chattool
+    (`bloom-by-design`). Hij verschijnt alleen als de tool een
     cursusveld heeft én de docent een cursus heeft; de loader stuurt anders geen cursussen mee. Geen
     meerstapstool heeft een cursusveld, dus `StageStepper` blijft ongemoeid.
   - Op "Mijn werk" is het één `<select>` in plaats van twee: per cursus een groep met "hele cursus"
