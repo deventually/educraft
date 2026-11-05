@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (brief P26 bezig)_
 
 ## Nu
 
@@ -86,6 +86,8 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 - 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
   wijden." → BESLUIT-2026-11-04-11.
 - 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → BESLUIT-2026-11-04-16, vervolg op P25.
+- 2026-11-05: "Ik wil 2 t/m 5 wel hebben. Kunnen we die ook inplannen?" (aanvullingen op P20) → 1 en 4
+  in P20, 2, 3 en 5 in brief P26.
 
 ## Bezig
 
@@ -96,6 +98,8 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
   verduidelijkt (prompt blijft @v1). Eindmeting df2 (3 runs, batch): elke case 4,73–5,00, geen
   gefaalde harde check, niets afgekapt (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet;
   `evals/reports/2026-11-05df2.md`). Tien uitkomsten wachten op Bastiaan — PR open.
+- Brief P26 *Cursussen verder* (na P20): toetsmatrijs per vraag, OER-import, cursus als bewijs in het
+  BDB/BKE-dossier. Drie keuzes wachten op Bastiaan — PR open.
 
 ## Wacht op jou
 
@@ -110,7 +114,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
    Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
+3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten) en **P26** (cursussen verder),
+   dan **P22** (de docentweek).
 
 ## Open vragen
 
