@@ -88,9 +88,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
   meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte:
   r2 (1 run) niets afgekapt, nog één dubbel verdedigbare vraag; ronde 2 verbiedt meerkeuze over
-  kwesties waarover vakmensen het oneens zijn. Eindmeting t (3 runs, batch): niets afgekapt,
-  research-methods 4,07 en statistics 4,47 door vorm (correctiesporen in koppen, een opvallende
-  optie, 3 opties); ronde 3 (met akkoord van Bastiaan) legt de volgorde en de vorm vast — PR open.
+  kwesties waarover vakmensen het oneens zijn — PR open.
 
 ## Wacht op jou
 

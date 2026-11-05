@@ -107,10 +107,6 @@ describe("tool: test-items", () => {
     // Meting r2: a distractor that states a strict methodological position stayed defensible.
     expect(p).toContain("waarover vakmensen het oneens zijn");
     expect(p).toContain("geen pijltjes");
-    // Meting t: row traces in headings, three options, one option that stands out by form.
-    expect(p).toContain("in de volgorde van de matrijs");
-    expect(p).toContain("valt op door zijn vorm");
-    expect(p).toContain("waarom er geen vierde");
   });
 
   it("asks for one clean final version and only one defensible answer (en)", () => {
@@ -121,9 +117,6 @@ describe("tool: test-items", () => {
     expect(p).toContain("other common view");
     expect(p).toContain("on which experts disagree");
     expect(p).toContain("no arrows");
-    expect(p).toContain("in the order of the blueprint");
-    expect(p).toContain("stands out by its form");
-    expect(p).toContain("why there is no fourth");
   });
 
   for (const stage of ["blueprint", "items"] as const) {

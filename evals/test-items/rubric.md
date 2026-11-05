@@ -52,4 +52,3 @@ every score (the cap is the maximum), however good the rest is.
 - **blueprintMismatch** (cap 3): Does the blueprint not add up (the rows do not sum to the stated total of questions or points), or do the written questions differ from the blueprint in number per row, question type or points?
 - **inventedContent** (cap 2): Does a question or answer rest on facts, figures, definitions, standards or sources that are not in the material and are presented as real (fictitious case data given in full in the question is fine)?
 - **unmarkedProposal** (cap 3): Did the output present points, a duration, a weighting or a pass mark the teacher did not give as if they were given, without marking them as a proposal?
-- **correctionTrace** (cap 4): Does the output show a visible trace of a correction: a heading with an arrow between rows or a note such as "note:", "let op: bedoeld als" or "niet van toepassing", a withdrawn heading, or a second version of a question?

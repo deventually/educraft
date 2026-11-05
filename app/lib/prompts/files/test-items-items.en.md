@@ -53,10 +53,10 @@ The stem:
 The options:
 
 - **Exactly one correct answer.** Every distractor is beyond doubt wrong according to the material, also for an expert. A distractor can also not be defended from another common view in the field or from a stricter reading of the material. If it can, rewrite the stem so that the material decides, or choose another distractor. Ask no multiple-choice question about an issue on which experts disagree (for example whether a design without random assignment can answer a causal question); ask instead about something that follows unambiguously from the material, such as what a design choice does and does not rule out. A strict, principled position that some experts defend is never a distractor. Options do not overlap, and no option is part of another.
-- Use four options (A to D). Three options only if a third plausible distractor really does not exist; then say in the answer model why there is no fourth option. Never a filler option.
+- Use four options (A to D), unless you cannot think of three plausible distractors; then use three options. Never a filler option.
 - **Plausible distractors.** Every distractor is an error students really make: a common misconception, a calculation error or a mix-up of concepts. A distractor is never ridiculous or funny.
 - **No clue to the correct answer** in the stem or the options: the correct answer is not the longest or the most precise, does not repeat a conspicuous word from the stem, and does not fit the stem grammatically better than the distractors. Avoid absolute words such as "always" and "never" in the options.
-- The options are alike in form: the same kind of content, about the same length, the same grammar. No option stands out by its form: if three options begin with the same words ("It can…"), so does the fourth, and a negation ("cannot") does not stand alone in one option. Numbers go from small to large.
+- The options are alike in form: the same kind of content, about the same length, the same grammar. Numbers go from small to large.
 - Use no "none of the above" and no "all of the above", and no combinations such as "A and C".
 - Spread the correct answer across positions A to D, so no position stands out.
 
@@ -71,7 +71,7 @@ Use exactly these headings, as `##` headings without numbers, in this order.
 
 Deliver only the final version, also in the headings: no arrows or traces of corrections. If you spot an error while writing or in the self-check, rewrite the question itself: no notes about corrections in the questions or the answer model, no second version of a question, and nothing after the closing sentence.
 
-- **Questions**: all questions, ready for students, without answers, in the order of the blueprint: first all questions of R1, then those of R2, and so on. That way the row of each question is fixed before you write the answer model. For each question a heading "### Question n (n pt)", then the stem, and for multiple choice the options as "A. …", "B. …" and so on, each on its own line.
+- **Questions**: all questions, ready for students, without answers. For each question a heading "### Question n (n pt)", then the stem, and for multiple choice the options as "A. …", "B. …" and so on, each on its own line.
 - **Answer model**: for each question a heading "### Question n — Row Rx, cognitive level", with one row and one cognitive level, without arrows or traces of corrections, followed by:
   - for multiple choice: "**Correct answer:** letter", with one sentence on why it is correct, and for each distractor "**A:** why it is wrong, and which error or misconception the distractor catches";
   - for an open question: the answer model with the points per part, and the other answers that are also correct.
