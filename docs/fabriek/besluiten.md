@@ -229,3 +229,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Uitwerking: brief P28.
 - **BESLUIT-2026-11-05-6:** **Een beheerder heeft de BDB/BKE-werkplaats altijd**, los van de
   schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).
+- **BESLUIT-2026-11-05-8:** **Het proefassessment mag vóór de pilot, als onderdeel van BDB/BKE.**
+  Een uitzondering op "tot de pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4): het staat niet in
+  de toolcatalogus, alleen in stap 5 van de werkplaats, en gaat mee aan en uit met de werkplaats.
+  Bastiaan, 2026-11-05. Uitwerking: brief P29.

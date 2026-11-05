@@ -4,9 +4,8 @@
 > vijf stappen, `dossierStep`) en P26.4 (cursus als bewijs). Zo voer je deze brief uit: één
 > deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de
 > `/tdd`-skill, poort `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen
-> Bastiaan merget. **29.2 en 29.3 starten pas na een besluit van Bastiaan** (zie "Wat Bastiaan moet
-> beslissen"), omdat het proefassessment AI gebruikt en BESLUIT-2026-11-05-4 zegt: tot de pilot
-> geen nieuwe AI-tools.
+> Bastiaan merget. Het proefassessment (29.2, 29.3) mag vóór de pilot, als onderdeel van de
+> werkplaats: BESLUIT-2026-11-05-8, een uitzondering op BESLUIT-2026-11-05-4.
 
 ## In gewone taal
 
@@ -99,7 +98,7 @@ Geen migratie: alleen optionele velden in de dossier-JSON (`DossierDataSchema` i
 
 ### 29.2 — Proefassessment: de AI-tekst en de meting
 
-Alleen na het besluit van Bastiaan. Geen UI in deze PR.
+Geen UI in deze PR.
 
 - **Prompt** `app/lib/prompts/portfolio-rehearsal@v1.prompt.ts` + `files/portfolio-rehearsal.{nl,en}.md`,
   volgens `TEMPLATE.md` (Voice & Bounds). De AI speelt een commissie van twee assessoren en voert een
@@ -138,7 +137,7 @@ Alleen na het besluit van Bastiaan. Geen UI in deze PR.
 ### 29.3 — Proefassessment in de werkplaats
 
 - **Waar:** alleen vanuit het dossier, in stap 5 ("Oefen je eindgesprek"), en niet in de
-  toolcatalogus (zie besluit 1). Route `portfolio/:id/rehearsal` in `app/routing/portfolio.ts`,
+  toolcatalogus (BESLUIT-2026-11-05-8). Route `portfolio/:id/rehearsal` in `app/routing/portfolio.ts`,
   alleen voor de eigenaar (anders 404) en alleen als de werkplaats voor de docent aanstaat
   (`effectiveFeatures`, P28.3).
 - **Hoe:** hergebruik de bestaande chatcomponent en `/api/stream`; het verzoek krijgt een
@@ -169,7 +168,7 @@ Wiki (BDB/BKE-pagina), `docs/implementation/README.md` en het bord.
 | Stap | Wacht op | Tegelijk met |
 | --- | --- | --- |
 | 29.1 Inleverklaar-check | P26.4 (gemerged), P27.2 (gemerged) | alles; raakt alleen `app/lib/portfolio/` en stap 5 |
-| 29.2 Proefassessment, tekst en meting | besluit Bastiaan | 29.1 |
+| 29.2 Proefassessment, tekst en meting | — (BESLUIT-2026-11-05-8) | 29.1 |
 | 29.3 Proefassessment in de werkplaats | 29.2 (eindmeting gehaald), P28.3 voor `effectiveFeatures` | — |
 
 29.1 is klein, zonder AI en zonder migratie: die kan direct na het mergen van deze brief, naast
@@ -212,13 +211,14 @@ P27.3 of P22, binnen de WIP-limiet van twee.
 5. Hij bewaart de feedback in zijn dossier; die staat erin als bewijsstuk *feedback*.
 6. Een tweede docent kan dit dossier niet openen, niet checken en er geen proefassessment over starten.
 
-## Wat Bastiaan moet beslissen
+## Beslist door Bastiaan (5 november 2026)
 
-1. **Mag het proefassessment er vóór de pilot bij?** BESLUIT-2026-11-05-4 zegt: tot de pilot geen
-   nieuwe AI-tools. Advies: ja, als uitzondering, omdat het geen tool in de catalogus is maar een
-   onderdeel van de werkplaats (zoals de coach), alleen zichtbaar in stap 5. Nee betekent: 29.1 nu,
-   29.2 en 29.3 na de pilot.
-2. **Blokkeert rood de export?** Advies: nee, de check is advies (uitgangspunt 1). Een docent kent
-   soms een afspraak met zijn begeleider die de app niet kent.
-3. **Bewaren we het hele gesprek?** Advies: nee, alleen de feedback, en alleen als de docent op
-   "Bewaar" klikt.
+1. **Het proefassessment mag vóór de pilot**, als onderdeel van de BDB/BKE-werkplaats en niet in de
+   catalogus (BESLUIT-2026-11-05-8).
+
+## Nog te beslissen
+
+1. **Blokkeert rood de export?** Advies: nee, de check is advies (uitgangspunt 1). Een docent kent
+   soms een afspraak met zijn begeleider die de app niet kent. Zonder antwoord bouwt 29.1 het advies.
+2. **Bewaren we het hele gesprek?** Advies: nee, alleen de feedback, en alleen als de docent op
+   "Bewaar" klikt. Zonder antwoord bouwt 29.3 het advies.
