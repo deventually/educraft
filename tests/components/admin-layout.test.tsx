@@ -18,18 +18,20 @@ function renderLayout() {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly four sections in order", () => {
+  it("shows exactly five sections in order (Teams since P28.2)", () => {
     renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
     expect(links.map((a) => a.textContent)).toEqual([
       "Gebruikers",
+      "Teams",
       "Tools en modellen",
       "Onderwijscontext",
       "Gebruik en feedback",
     ]);
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/admin/users",
+      "/admin/teams",
       "/admin/tools",
       "/admin/context",
       "/admin/usage",
