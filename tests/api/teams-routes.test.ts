@@ -510,10 +510,11 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
       models: null,
     });
     const res = await call(adminTeam.action, {
-      request: post({ intent: "settings", "feature:roleAgents": "off" }),
+      request: post({ intent: "settings", "feature:courses": "off", "feature:roleAgents": "off" }),
       params: { id: team.id },
     });
     expect(res).toEqual({ saved: true });
-    expect((await stored(team.id)).features).toEqual({ roleAgents: "off" });
+    // Role agents are not a team's choice (BESLUIT-2026-11-05-11): that field is ignored.
+    expect((await stored(team.id)).features).toEqual({ courses: "off" });
   });
 });

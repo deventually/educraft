@@ -12,7 +12,7 @@ export const agents = {
     intro:
       "De petten zijn kritische collega's die docenten advies geven bij hun cursus. Zet hier het hele onderdeel aan of uit, en elke pet apart.",
     mainHint:
-      "Dit is dezelfde schakelaar als bij Onderdelen op Tools en modellen. Teams en uitzonderingen per docent werken zoals daar.",
+      "Dit is dezelfde schakelaar als bij Onderdelen op Tools en modellen. Een team kan rolagenten niet aan- of uitzetten; dat gaat voor de hele instelling. Een uitzondering voor één docent kan wel, op diens persoonspagina.",
     mainLabel: "Rolagenten voor docenten",
     mainOff: "Rolagenten staan uit. Dan staan alle petten stil, wat je hieronder ook kiest.",
     standLabel: "Stand van {name}",

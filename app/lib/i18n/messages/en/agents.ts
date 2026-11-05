@@ -14,7 +14,7 @@ export const agents: Messages["agents"] = {
     intro:
       "The hats are critical colleagues who advise teachers on their course. Switch the whole part on or off here, and each hat separately.",
     mainHint:
-      "This is the same switch as under Parts on Tools and models. Teams and per-teacher exceptions work as they do there.",
+      "This is the same switch as under Parts on Tools and models. A team cannot switch role agents on or off; that goes for the whole instance. An exception for one teacher is possible, on their person page.",
     mainLabel: "Role agents for teachers",
     mainOff: "Role agents are off. Then every hat rests, whatever you choose below.",
     standLabel: "Stand of {name}",
