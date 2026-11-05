@@ -61,6 +61,13 @@ out, and for the owner deactivates or reactivates them. Per person it applies th
 the person page (`mayManage`, owner only, never yourself); whoever is out of reach is skipped and
 counted (`{ bulk: { done, skipped } }`).
 
+**Paste a list** (P28.5, intent `mintList`, every admin) is the third way to add: one person per
+line, a name and an e-mail address. `parsePastedPeople` (`app/lib/people/pasteList.ts`, pure, Zod)
+judges each line; the action then refuses an address that already has an account or an open
+invite (`findClaimedEmails`) and mints one teacher invite per accepted line, with the note
+`Name <email>` and the chosen team. It returns `{ pasted }`: per line the link, or the reason. No
+mail is sent; the admin copies the links from the result table.
+
 | On `/admin/users` and `/admin/users/:id` | Admin | Super admin |
 |---|---|---|
 | Invite a teacher, revoke an invite, models and BDB/BKE per teacher | yes | yes |
