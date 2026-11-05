@@ -91,7 +91,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.3 en P24.4 gemerged, P24.5 bezig)_
   (b) de tool **Toetsanalyse uitleggen** (`test-analysis`) legt die getallen uit en rekent zelf
   niets. De knop "Laat uitleggen" geeft alleen de getallen per vraag door. Bronnen: Cronbach
   (1951); Van Berkel e.a. (red.) (2023), *Toetsen in het hoger onderwijs*, 5e editie. Zeven
-  eval-casussen, vier met een bekende fout. Nog niet gemeten — PR open.
+  eval-casussen, vier met een bekende fout. Meting ta1 (3 runs, batch): zes cases 4,80–4,93, niets
+  afgekapt; ruwe scores 3,27 (het stopantwoord noemde een aantal kandidaten en gaf extra advies).
+  Ronde 1: een strak stopantwoord, randgevallen (Rir 0,15–0,20) als licht signaal onder de tabel,
+  overal "je" — meting ta2 volgt. PR open.
 
 ## Wacht op jou
 

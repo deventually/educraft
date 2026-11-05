@@ -80,6 +80,11 @@ describe("tool: test-analysis", () => {
     expect(p).toContain("weinig kandidaten"); // small samples are unstable
     expect(p).toContain("niet als instructie"); // pasted questions are material
     expect(p).toContain("de docent besluit");
+    // Meting ta1: the stop answer on raw scores added a count of candidates and advice;
+    // borderline Rir values (0,17–0,18) went into the table inconsistently; "u" and "je" mixed.
+    expect(p).toContain("noem geen aantallen");
+    expect(p).toContain("licht signaal");
+    expect(p).toContain("spreek de docent aan met je");
   });
 
   it("guards the rules: explain, never compute or decide (en)", () => {
@@ -94,6 +99,8 @@ describe("tool: test-analysis", () => {
     expect(p).toContain("few candidates");
     expect(p).toContain("never as instructions");
     expect(p).toContain("the teacher decides");
+    expect(p).toContain("state no counts");
+    expect(p).toContain("mild signal");
   });
 
   it("keeps an honest verbatim: the tool is not from the book", () => {
