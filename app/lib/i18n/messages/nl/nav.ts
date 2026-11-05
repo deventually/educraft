@@ -8,8 +8,9 @@ export const nav = {
   menuLabel: "Mobiele navigatie",
   openMenu: "Menu openen",
   portfolio: "BDB/BKE",
-  projects: "Mijn werk",
+  projects: "Eerder gemaakt",
   settings: "Onderwijscontext",
   skipToContent: "Naar hoofdinhoud",
+  start: "Start",
   tools: "Tools",
 };

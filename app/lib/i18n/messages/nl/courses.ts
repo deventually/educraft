@@ -174,12 +174,13 @@ export const courses = {
   },
   kind: "Soort",
   links: {
-    empty: "Nog niets gekoppeld. Kies deze cursus in een tool, of koppel werk vanuit Mijn werk.",
+    empty:
+      "Nog niets gekoppeld. Kies deze cursus in een tool, of koppel werk vanuit Eerder gemaakt.",
     errorRefused: "Koppelen lukte niet. Vernieuw de pagina en probeer het opnieuw.",
     intro: "Wat je met de tools voor deze cursus hebt gemaakt.",
     label: "Koppel aan cursus",
     link: "Koppelen",
-    openInWork: "Bekijk in Mijn werk",
+    openInWork: "Bekijk in Eerder gemaakt",
     title: "Gekoppeld werk",
     toastLinked: "Gekoppeld aan de cursus.",
     toastUnlinked: "Ontkoppeld van de cursus.",

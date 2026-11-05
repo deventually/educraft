@@ -37,9 +37,9 @@ function renderProjects(
 }
 
 describe("Projects page", () => {
-  it("is titled 'Mijn werk'", () => {
+  it("is titled 'Eerder gemaakt' (P27.3)", () => {
     renderProjects([gen]);
-    expect(screen.getByRole("heading", { level: 1, name: "Mijn werk" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Eerder gemaakt" })).toBeInTheDocument();
     expect(screen.getByText("Alles wat je met de tools hebt gemaakt.")).toBeInTheDocument();
   });
 

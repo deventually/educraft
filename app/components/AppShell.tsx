@@ -8,7 +8,7 @@ import {
   useMatches,
   useRouteLoaderData,
 } from "react-router";
-import { ArrowUp, LogOut, Menu, X } from "lucide-react";
+import { ArrowUp, CircleHelp, LogOut, Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import type { Messages } from "~/lib/i18n/messages/nl";
@@ -67,15 +67,20 @@ export default function AppShell() {
       (m) => (m.loaderData as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
     );
 
+  // The menu of four (P27.3): Start · Cursussen · BDB/BKE · Tools, plus Beheer for an admin.
+  // "Eerder gemaakt" lives on Start and Tools, Onderwijscontext in the account menu, Help is the
+  // question mark at the top right; all of them stay in the footer.
   const nav: NavItem[] = [
     // Admin console — first for an admin, so they land on their console entry immediately.
     ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
-    { to: "/tools", label: t.nav.tools, end: true },
-    { to: "/projects", label: t.nav.projects, end: false },
+    { to: "/start", label: t.nav.start, end: true },
     ...(courses ? [{ to: "/courses", label: t.nav.courses, end: false }] : []),
     ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
+    { to: "/tools", label: t.nav.tools, end: false },
+  ];
+  const accountLinks: NavItem[] = [
+    { to: "/account", label: t.auth.accountArea, end: true },
     { to: "/context-profiles", label: t.nav.settings, end: false },
-    { to: "/help", label: t.nav.help, end: false },
   ];
 
   return (
@@ -118,9 +123,18 @@ export default function AppShell() {
               ))}
             </nav>
             <LanguageSwitcher current={locale} redirectTo={redirectTo} />
+            <Link
+              to="/help"
+              aria-label={t.nav.help}
+              title={t.nav.help}
+              className="grid size-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            >
+              <CircleHelp className="size-5" aria-hidden />
+            </Link>
             {user && (
               <UserArea
                 name={user.name}
+                links={accountLinks}
                 logoutLabel={t.auth.logout}
                 loggedInAs={t.auth.loggedInAs}
                 accountLabel={t.auth.accountArea}
@@ -147,20 +161,28 @@ export default function AppShell() {
             aria-label={t.nav.menuLabel}
             className="border-t border-slate-200 bg-white px-4 py-2 md:hidden"
           >
-            <ul className="flex flex-col gap-1">
-              {nav.map((item) => (
-                <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) => cn(navLinkClass(isActive), "block")}
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            {[nav, ...(user ? [accountLinks] : [])].map((items, i) => (
+              <ul
+                key={items[0]?.to}
+                className={cn(
+                  "flex flex-col gap-1",
+                  i > 0 && "mt-2 border-t border-slate-200 pt-2",
+                )}
+              >
+                {items.map((item) => (
+                  <li key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) => cn(navLinkClass(isActive), "block")}
+                    >
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            ))}
           </nav>
         )}
       </header>
@@ -235,10 +257,11 @@ function SiteFooter({
     {
       heading: t.footer.product,
       links: [
-        { to: "/tools", label: t.nav.tools },
-        { to: "/projects", label: t.nav.projects },
+        { to: "/start", label: t.nav.start },
         ...(courses ? [{ to: "/courses", label: t.nav.courses }] : []),
         ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio }] : []),
+        { to: "/tools", label: t.nav.tools },
+        { to: "/projects", label: t.nav.projects },
         { to: "/context-profiles", label: t.nav.settings },
       ],
     },
@@ -339,27 +362,54 @@ function navLinkClass(isActive: boolean) {
   );
 }
 
+/**
+ * The account menu (P27.3): the name opens a small disclosure with Account and
+ * Onderwijscontext; logging out stays one click. Native <details>, so it works without JS.
+ */
 function UserArea({
   name,
+  links,
   logoutLabel,
   loggedInAs,
   accountLabel,
 }: {
   name: string;
+  links: NavItem[];
   logoutLabel: string;
   loggedInAs: string;
   accountLabel: string;
 }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  const close = () => ref.current?.removeAttribute("open");
   return (
     <div className="ml-1 flex items-center gap-1.5">
-      <Link
-        to="/account"
-        aria-label={accountLabel}
-        title={loggedInAs.replace("{name}", name)}
-        className="hidden max-w-[10rem] truncate rounded-md px-1.5 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 sm:inline"
-      >
-        {name}
-      </Link>
+      <details ref={ref} className="relative hidden sm:block">
+        <summary
+          title={loggedInAs.replace("{name}", name)}
+          className="block max-w-[10rem] cursor-pointer list-none truncate rounded-md px-1.5 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 [&::-webkit-details-marker]:hidden"
+        >
+          {name}
+        </summary>
+        <nav
+          aria-label={accountLabel}
+          className="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
+        >
+          <ul className="flex flex-col gap-1">
+            {links.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.end}
+                  onClick={close}
+                  className={({ isActive }) => cn(navLinkClass(isActive), "block")}
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
       <Form method="post" action="/logout">
         <button
           type="submit"
