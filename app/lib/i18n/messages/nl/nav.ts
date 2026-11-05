@@ -2,6 +2,7 @@ export const nav = {
   about: "Over",
   admin: "Beheer",
   closeMenu: "Menu sluiten",
+  courses: "Cursussen",
   help: "Help",
   label: "Hoofdnavigatie",
   menuLabel: "Mobiele navigatie",

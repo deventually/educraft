@@ -1,0 +1,129 @@
+import { describe, expect, it } from "vitest";
+import { applyCourseIntent } from "~/lib/courses/intents";
+import { emptyCourseData } from "~/lib/courses/schema";
+import type { CourseData } from "~/lib/courses/types";
+import { ACT1, alignedCourse, LO1, LO2, QUIZ, TEST1 } from "./fixtures";
+
+function form(fields: Record<string, string | string[]>): FormData {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields))
+    for (const value of Array.isArray(v) ? v : [v]) fd.append(k, value);
+  return fd;
+}
+
+function ok(d: CourseData, fields: Record<string, string | string[]>): CourseData {
+  const r = applyCourseIntent(d, form(fields));
+  if (!r.ok) throw new Error(`expected ok, got ${r.error}`);
+  return r.data;
+}
+
+describe("applyCourseIntent (the form boundary of the course editor)", () => {
+  it("adds, updates and removes a learning outcome", () => {
+    let d = ok(emptyCourseData(), { intent: "add-outcome", text: " Je test. ", bloom: "apply" });
+    expect(d.outcomes[0]).toMatchObject({ text: "Je test.", bloom: "apply" });
+    const id = d.outcomes[0].id;
+    d = ok(d, { intent: "update-outcome", id, text: "Je test software.", bloom: "" });
+    expect(d.outcomes[0]).toEqual({ id, text: "Je test software." });
+    d = ok(d, { intent: "remove-outcome", id });
+    expect(d.outcomes).toEqual([]);
+  });
+
+  it("remove-outcome also removes references to it", () => {
+    const d = ok(alignedCourse(), { intent: "remove-outcome", id: LO2 });
+    expect(d.activities.find((a) => a.id === ACT1)?.outcomeIds).toEqual([]);
+    expect(d.assessments.find((a) => a.id === QUIZ)?.coverage).toEqual([]);
+  });
+
+  it("adds and updates an activity with week, hours and outcomes", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-activity",
+      title: "Werkcollege",
+      kind: "assignment",
+      week: "3",
+      hours: "2,5",
+      outcomeIds: [LO1, LO2],
+    });
+    const added = d.activities[2];
+    expect(added).toMatchObject({ title: "Werkcollege", kind: "assignment", week: 3, hours: 2.5 });
+    expect(added.outcomeIds).toEqual([LO1, LO2]);
+    d = ok(d, { intent: "update-activity", id: added.id, title: "Werkcollege 1", kind: "lesson" });
+    expect(d.activities[2]).toEqual({
+      id: added.id,
+      title: "Werkcollege 1",
+      kind: "lesson",
+      outcomeIds: [],
+    });
+    d = ok(d, { intent: "remove-activity", id: added.id });
+    expect(d.activities).toHaveLength(2);
+  });
+
+  it("adds and updates an assessment with coverage and a Bloom level per outcome", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-assessment",
+      title: "Tentamen",
+      kind: "summative",
+      week: "8",
+      weight: "40",
+      hours: "3",
+      coverage: [LO1],
+      [`bloom:${LO1}`]: "analyze",
+      [`bloom:${LO2}`]: "remember",
+    });
+    const added = d.assessments[2];
+    expect(added).toMatchObject({ title: "Tentamen", kind: "summative", week: 8, weight: 40 });
+    // A Bloom level only counts for a checked outcome.
+    expect(added.coverage).toEqual([{ outcomeId: LO1, bloom: "analyze" }]);
+    d = ok(d, {
+      intent: "update-assessment",
+      id: TEST1,
+      title: "Eindopdracht",
+      kind: "summative",
+      coverage: [LO1, LO2],
+      [`bloom:${LO1}`]: "",
+    });
+    expect(d.assessments[1].coverage).toEqual([{ outcomeId: LO1 }, { outcomeId: LO2 }]);
+    expect(d.assessments[1].weight).toBeUndefined();
+  });
+
+  it("sets and clears the course's EC", () => {
+    let d = ok(alignedCourse(), { intent: "set-ec", ec: "7,5" });
+    expect(d.ec).toBe(7.5);
+    d = ok(d, { intent: "set-ec", ec: "" });
+    expect(d.ec).toBeUndefined();
+  });
+
+  it("refuses invalid input", () => {
+    const bad = (fields: Record<string, string | string[]>) =>
+      applyCourseIntent(alignedCourse(), form(fields));
+    expect(bad({ intent: "nonsense" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ intent: "add-outcome", text: "" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ intent: "add-outcome", text: "x".repeat(1001) })).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(bad({ intent: "add-outcome", text: "a", bloom: "memorize" })).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(bad({ intent: "add-activity", title: "a", kind: "lesson", week: "61" })).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(
+      bad({ intent: "add-activity", title: "a", kind: "lesson", outcomeIds: ["ghost"] }),
+    ).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ intent: "set-ec", ec: "abc" })).toEqual({ ok: false, error: "invalid" });
+  });
+
+  it("reports an unknown item as not-found", () => {
+    expect(applyCourseIntent(alignedCourse(), form({ intent: "remove-outcome", id: "x" }))).toEqual(
+      { ok: false, error: "not-found" },
+    );
+    expect(
+      applyCourseIntent(
+        alignedCourse(),
+        form({ intent: "update-activity", id: "x", title: "a", kind: "lesson" }),
+      ),
+    ).toEqual({ ok: false, error: "not-found" });
+  });
+});
