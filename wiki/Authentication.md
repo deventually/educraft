@@ -123,7 +123,8 @@ effective = instance is Off              → off
   instance (nothing left = the instance) → the instance.
 - **Admins** have everything the instance has not Off, and always BDB/BKE (P27.2).
   `portfolioAccess` keeps the transition: no choice and a dossier → on.
-- **Who sets what:** the admin sets instance stands on `/admin/tools` and any team's choices on
+- **Who sets what:** the admin sets instance stands on `/admin/tools` (one at a time, or every
+  tool shown after a search or stand filter at once: intent `toolsBulk`) and any team's choices on
   `/admin/teams/:id`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
   exception, on the person page (section *Parts and tools*, which shows the source). A team only
   sees what the instance has not Off; a stored choice for an Off item stays but never counts.
