@@ -12,6 +12,8 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 - **Tools are data.** Every tool is one `Tool` registry entry (`app/lib/registry/tools/<id>.ts`)
   with modes `one-shot`, `chat` or `multi-stage`. Capability grows by adding data, never by a
   per-tool branch.
+- **A result has a place and a next step.** Next steps (`Tool.next`), course buttons
+  (`Tool.courseActions`) and "Los op met…" (`FINDING_TOOLS`) are registry data, validated at boot.
 - **Prompts are files.** `app/lib/prompts/<id>@vN.prompt.ts` + `app/lib/prompts/files/<id>.{nl,en}.md`
   with `{{placeholder}}` syntax, validated at build time.
 - **Providers are abstracted** behind `app/lib/ai/provider.ts`; tools never import an SDK.

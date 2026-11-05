@@ -4,6 +4,8 @@ import type { AlignmentFinding } from "~/lib/courses/alignment";
 import { findingText } from "~/lib/courses/findingText";
 import type { CourseData } from "~/lib/courses/types";
 import { useLocale, useT } from "~/lib/i18n/useT";
+import { type CourseTools, findingItemId, type ToolRef } from "~/lib/registry/courseActions";
+import { SolveWith } from "./ItemTools";
 
 export { plannedHours } from "~/lib/courses/findingText";
 
@@ -11,9 +13,14 @@ export { plannedHours } from "~/lib/courses/findingText";
 export function FindingsList({
   data,
   findings,
+  courseId,
+  tools,
 }: {
   data: CourseData;
   findings: AlignmentFinding[];
+  /** With both, a finding that has a tool gets "Los op met…" (P27.4). */
+  courseId?: string;
+  tools?: CourseTools;
 }) {
   const t = useT();
   const f = t.courses.findings;
@@ -40,10 +47,19 @@ export function FindingsList({
               ) : (
                 <Info className="mt-0.5 size-4 shrink-0 text-sky-600" aria-hidden />
               )}
-              <span>
-                <strong className="font-medium">{f.severity[finding.severity]}:</strong>{" "}
-                {findingText(finding, data, locale)}
-              </span>
+              <div>
+                <p>
+                  <strong className="font-medium">{f.severity[finding.severity]}:</strong>{" "}
+                  {findingText(finding, data, locale)}
+                </p>
+                {courseId && tools?.findings[finding.code] && (
+                  <SolveWith
+                    tool={tools.findings[finding.code] as ToolRef}
+                    courseId={courseId}
+                    itemId={findingItemId(data, finding.itemId)}
+                  />
+                )}
+              </div>
             </li>
           ))}
         </ul>

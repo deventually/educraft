@@ -324,3 +324,35 @@ describe("applyIntent — coach settings", () => {
     expect(again.draftNoticeSeenAt).toBe(1_000);
   });
 });
+
+describe("applyIntent — readiness self-checks (P29.1)", () => {
+  it("ticks a self-check with the date, keeps the first date, and unticks", () => {
+    const d = ok(
+      applyIntent(
+        sampleDossier(),
+        fd({ intent: "tickReadiness", code: "no-student-names", ticked: "on" }),
+        ctx,
+      ),
+    );
+    expect(d.readiness?.ticked).toEqual({ "no-student-names": 1_000 });
+    const again = ok(
+      applyIntent(d, fd({ intent: "tickReadiness", code: "no-student-names", ticked: "on" }), {
+        ...ctx,
+        now: 5_000,
+      }),
+    );
+    expect(again.readiness?.ticked).toEqual({ "no-student-names": 1_000 });
+    const off = ok(
+      applyIntent(again, fd({ intent: "tickReadiness", code: "no-student-names" }), ctx),
+    );
+    expect(off.readiness?.ticked).toEqual({});
+  });
+
+  it("refuses a code that is not a self-check", () => {
+    for (const code of ["criterion-without-evidence", "anything", ""]) {
+      expect(
+        applyIntent(sampleDossier(), fd({ intent: "tickReadiness", code, ticked: "on" }), ctx),
+      ).toEqual({ ok: false, error: "invalid" });
+    }
+  });
+});

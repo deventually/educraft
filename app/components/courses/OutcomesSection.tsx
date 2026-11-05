@@ -11,6 +11,8 @@ import { Button, Card, Label, Select, Textarea } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { BloomSelect, useOutcomeName } from "./fields";
 import { ItemActions } from "./ItemActions";
+import { ItemTools } from "./ItemTools";
+import type { ToolRef } from "~/lib/registry/courseActions";
 
 /** The pack's fields for one outcome (P21.6): checkboxes per multiselect, a select otherwise. */
 function PackTagFields({ pack, outcome }: { pack: DomainPack; outcome?: LearningOutcome }) {
@@ -113,7 +115,18 @@ function OutcomeForm({ outcome, pack }: { outcome?: LearningOutcome; pack?: Doma
   );
 }
 
-export function OutcomesSection({ data, pack }: { data: CourseData; pack?: DomainPack }) {
+export function OutcomesSection({
+  data,
+  pack,
+  courseId,
+  tools = [],
+}: {
+  data: CourseData;
+  pack?: DomainPack;
+  /** With it, every outcome shows its tool buttons (P27.4). */
+  courseId?: string;
+  tools?: ToolRef[];
+}) {
   const t = useT();
   const locale = useLocale();
   const outcomeName = useOutcomeName();
@@ -143,6 +156,14 @@ export function OutcomesSection({ data, pack }: { data: CourseData; pack?: Domai
                   {line}
                 </p>
               ))}
+              {courseId && (
+                <ItemTools
+                  tools={tools}
+                  courseId={courseId}
+                  itemId={null}
+                  itemTitle={outcomeName(i)}
+                />
+              )}
               <ItemActions name={outcomeName(i)} removeIntent="remove-outcome" id={o.id}>
                 <OutcomeForm outcome={o} pack={pack} />
               </ItemActions>

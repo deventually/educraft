@@ -66,7 +66,13 @@ export interface EvidenceItem {
   criterionIds: string[];
   sourceGenerationId?: string;
   /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */
-  sourceCourse?: { courseId: string; part: CourseEvidencePart; at: number };
+  sourceCourse?: {
+    courseId: string;
+    part: CourseEvidencePart;
+    at: number;
+    /** The number of questions in a test snapshot, set when fetched (P29.1). */
+    itemCount?: number;
+  };
 }
 
 /** Which part of a course a snapshot shows: outcomes with the coverage matrix, or one assessment. */
@@ -135,4 +141,6 @@ export interface DossierData {
   aiLog: AiLogEntry[];
   /** outcomeId → the latest coach review of that outcome. */
   reviews?: Record<string, StoredReview>;
+  /** Self-checks of "Klaar om in te leveren?" (P29.1): code → when the teacher ticked it. */
+  readiness?: { ticked: Partial<Record<string, number>> };
 }

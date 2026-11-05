@@ -46,6 +46,7 @@ export const testItems: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   next: ["rubric-builder", "test-analysis"],
+  courseActions: ["assessment"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 8192,
   defaultTemperature: 0.3,

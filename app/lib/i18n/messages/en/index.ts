@@ -8,6 +8,7 @@ import { auth } from "./auth";
 import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { courseTools } from "./courseTools";
 import { courses } from "./courses";
 import { documents } from "./documents";
 import { error } from "./error";
@@ -23,6 +24,7 @@ import { pages } from "./pages";
 import { people } from "./people";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
+import { portfolioReadiness } from "./portfolioReadiness";
 import { privacy } from "./privacy";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
@@ -51,6 +53,7 @@ export const en: Messages = {
   chat,
   confirm,
   courses,
+  courseTools,
   documents,
   error,
   features,
@@ -65,6 +68,7 @@ export const en: Messages = {
   people,
   portfolio,
   portfolioExport,
+  portfolioReadiness,
   privacy,
   projects,
   resultActions,

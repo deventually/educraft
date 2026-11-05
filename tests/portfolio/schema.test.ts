@@ -28,6 +28,22 @@ describe("DossierDataSchema", () => {
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 
+  it("keeps self-check ticks and a test's question count; an old dossier without them stays valid (P29.1)", () => {
+    const d = sampleDossier();
+    expect(d.readiness).toBeUndefined();
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+    d.readiness = { ticked: { "no-student-names": 1 } };
+    d.evidence[0].sourceCourse = {
+      courseId: "c1",
+      part: { assessmentId: "t1" },
+      at: 1,
+      itemCount: 12,
+    };
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+    d.readiness = { ticked: { "criterion-without-evidence": 1 } };
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
   it("rejects an evidence link to an unknown criterion", () => {
     const d = sampleDossier();
     d.evidence[0].criterionIds = ["00000000-0000-4000-8000-00000000dead"];

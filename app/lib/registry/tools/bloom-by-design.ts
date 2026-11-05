@@ -48,6 +48,7 @@ export const bloomByDesign: Tool = {
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
+  courseActions: ["outcome"],
   enabled: true,
   phase: 1,
   inputs: [

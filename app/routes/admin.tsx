@@ -1,5 +1,12 @@
 import { NavLink, Outlet } from "react-router";
-import { Activity, GraduationCap, SlidersHorizontal, Users, UsersRound } from "lucide-react";
+import {
+  Activity,
+  BotMessageSquare,
+  GraduationCap,
+  SlidersHorizontal,
+  Users,
+  UsersRound,
+} from "lucide-react";
 import type { Route } from "./+types/admin";
 import { requireRole } from "~/server/auth.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
@@ -26,6 +33,7 @@ const SECTIONS = [
   { to: "/admin/users", key: "users", Icon: Users },
   { to: "/admin/teams", key: "teams", Icon: UsersRound },
   { to: "/admin/tools", key: "tools", Icon: SlidersHorizontal },
+  { to: "/admin/agents", key: "agents", Icon: BotMessageSquare },
   { to: "/admin/context", key: "context", Icon: GraduationCap },
   { to: "/admin/usage", key: "usage", Icon: Activity },
 ] as const;

@@ -42,6 +42,8 @@ interface ChatViewProps {
   courses?: (SandboxCourse & { name: string })[];
   /** The course to start on (P27.1, `?course=`). */
   initialCourseId?: string;
+  /** The course item to link the result to (P27.4, `?item=`). */
+  initialItemId?: string;
   /** Next steps and places to keep the conversation (P27.1). */
   resultContext?: ResultContext;
 }
@@ -56,6 +58,7 @@ export function ChatView({
   onGenerationStart,
   courses,
   initialCourseId,
+  initialItemId,
   resultContext,
 }: ChatViewProps) {
   const t = useT();
@@ -67,7 +70,8 @@ export function ChatView({
     setValue: setSandboxValue,
     courseId,
     selectCourse,
-  } = useSandbox({ inputs: tool.inputs, courses, initialCourseId });
+    itemId,
+  } = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
   const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
@@ -190,6 +194,7 @@ export function ChatView({
           messages: messageHistory,
           sessionId: sessionIdRef.current,
           courseId: courseId || undefined,
+          itemId: (courseId && itemId) || undefined,
         },
         {
           onToken: (token: string) => {
@@ -466,7 +471,12 @@ export function ChatView({
                 ),
               )}
               {resultContext && savedId && !isStreaming && (
-                <ResultActions {...resultContext} generationId={savedId} courseId={courseId} />
+                <ResultActions
+                  {...resultContext}
+                  generationId={savedId}
+                  courseId={courseId}
+                  itemId={itemId}
+                />
               )}
               {/* Anchor the auto-scroll: scrolls the thread (md+) or the page
                   (mobile) so the latest turn stays in view while streaming. */}

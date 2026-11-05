@@ -7,6 +7,8 @@ import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { Button, Input, Label, Select } from "~/components/ui";
+import { type CourseTools, findingItemId, itemKind } from "~/lib/registry/courseActions";
+import { SolveWith } from "./ItemTools";
 
 export type { ReviewPanelAgent };
 
@@ -30,6 +32,8 @@ export function CourseReviewPanel({
   models,
   defaultModel,
   linkedTests = 0,
+  courseId,
+  tools,
 }: {
   data: CourseData;
   agents: ReviewPanelAgent[];
@@ -37,6 +41,9 @@ export function CourseReviewPanel({
   defaultModel: string;
   /** Linked test-question generations; the "also review" box shows only when there are any. */
   linkedTests?: number;
+  /** With both, an open finding about an item gets "Los op met…" (P27.4). */
+  courseId?: string;
+  tools?: CourseTools;
 }) {
   const p = useT().agents.panel;
   const locale = useLocale();
@@ -46,7 +53,13 @@ export function CourseReviewPanel({
       <h2 id={id} className="text-lg font-medium text-slate-900">
         {p.title}
       </h2>
-      <p className="mt-1 text-sm text-slate-600">{p.intro}</p>
+      <p className="mt-1 text-sm text-slate-600">
+        {fmt(p.intro, {
+          roles: new Intl.ListFormat(locale, { type: "conjunction" }).format(
+            agents.map((a) => loc(a.role, locale)),
+          ),
+        })}
+      </p>
       <Form method="post" className="mt-3 flex flex-wrap items-end gap-3">
         {models.length > 1 && (
           <div>
@@ -77,6 +90,7 @@ export function CourseReviewPanel({
             agent={agent}
             data={data}
             role={loc(agent.role, locale)}
+            solve={courseId && tools ? { courseId, tools } : null}
           />
         ))}
       </div>
@@ -88,10 +102,12 @@ function AgentReview({
   agent,
   data,
   role,
+  solve,
 }: {
   agent: ReviewPanelAgent;
   data: CourseData;
   role: string;
+  solve: { courseId: string; tools: CourseTools } | null;
 }) {
   const p = useT().agents.panel;
   const id = useId();
@@ -119,7 +135,13 @@ function AgentReview({
           {open.length > 0 && (
             <ul className="mt-2 space-y-2">
               {open.map((f) => (
-                <OpenFinding key={f.id} finding={f} reviewId={review.id} data={data} />
+                <OpenFinding
+                  key={f.id}
+                  finding={f}
+                  reviewId={review.id}
+                  data={data}
+                  solve={solve}
+                />
               ))}
             </ul>
           )}
@@ -177,14 +199,36 @@ function FindingBody({ finding, data }: { finding: ReviewFinding; data: CourseDa
   );
 }
 
+/** "Los op met…" (P27.4): the first tool for the kind of item the finding is about. */
+function SolveFinding({
+  finding,
+  data,
+  courseId,
+  tools,
+}: {
+  finding: ReviewFinding;
+  data: CourseData;
+  courseId: string;
+  tools: CourseTools;
+}) {
+  const kind = finding.targetId ? itemKind(data, finding.targetId) : null;
+  const tool = kind ? tools[kind][0] : undefined;
+  if (!tool) return null;
+  return (
+    <SolveWith tool={tool} courseId={courseId} itemId={findingItemId(data, finding.targetId)} />
+  );
+}
+
 function OpenFinding({
   finding,
   reviewId,
   data,
+  solve = null,
 }: {
   finding: PanelFinding;
   reviewId: string;
   data: CourseData;
+  solve?: { courseId: string; tools: CourseTools } | null;
 }) {
   const p = useT().agents.panel;
   const id = useId();
@@ -193,6 +237,7 @@ function OpenFinding({
       <div id={`${id}-body`}>
         <FindingBody finding={finding} data={data} />
       </div>
+      {solve && <SolveFinding finding={finding} data={data} {...solve} />}
       <Form method="post" className="mt-2 flex flex-wrap items-end gap-2">
         <input type="hidden" name="intent" value="decide" />
         <input type="hidden" name="reviewId" value={reviewId} />

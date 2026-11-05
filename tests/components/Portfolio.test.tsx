@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentType } from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import PortfolioList from "~/routes/portfolio._index";
@@ -10,6 +10,7 @@ import PortfolioOutcome from "~/routes/portfolio.$id.outcome.$outcomeId";
 import { outcomeProgress, nextStep, requirementFindings } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierStep } from "~/lib/portfolio/step";
+import { readinessCheck } from "~/lib/portfolio/readiness";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -44,9 +45,10 @@ function overviewData(d = sampleDossier()) {
       collect: `/portfolio/${ID}/outcome/${LU}`,
       fill: `/portfolio/${ID}/outcome/${LU}`,
       write: `/portfolio/${ID}/outcome/${LU}`,
-      finish: "#export",
+      finish: "#readiness",
     },
     practise: null as { slug: string; name: string } | null,
+    readiness: readinessCheck(d),
   };
 }
 
@@ -345,6 +347,21 @@ describe("Portfolio outcome page", () => {
     expect(
       screen.getByText("3 woorden; het hele verslag mag 100 woorden hebben"),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Portfolio overview — ready to hand in (P29.1)", () => {
+  it("shows the check, and its summary above the export button as a link", async () => {
+    const { container } = renderRoute(PortfolioOverview, overviewData());
+    expect(screen.getByRole("region", { name: "Klaar om in te leveren?" })).toBeInTheDocument();
+    const exportForm = screen.getByRole("form", { name: "Exporteren" });
+    expect(within(exportForm).getByRole("link", { name: /punten open/ })).toHaveAttribute(
+      "href",
+      "#readiness",
+    );
+    // Advice, never a gate: the export button still works.
+    expect(within(exportForm).getByRole("button")).toBeEnabled();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
 

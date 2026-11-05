@@ -1,7 +1,7 @@
 // P21.4: "Laat beoordelen" on /courses/:id. Every hat that watches courses runs on the model
 // the teacher picks, its answer is checked in code (21.1) and stored (21.3). One hat failing
 // never loses the other's advice. The teacher's decision is the `decide` intent.
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { alignedCourse, LO1 } from "../courses/fixtures";
 
 process.env.DATABASE_URL = "file::memory:";
@@ -359,5 +359,56 @@ describe("linked work in the review (P21.7)", () => {
       review: { linkedTests: number } | null;
     };
     expect(data.review?.linkedTests).toBe(1);
+  });
+});
+
+describe("hats an admin switched off (/admin/agents)", () => {
+  let settings: typeof import("~/server/repositories/settings.server");
+  let agentReview: typeof import("~/server/agentReview.server");
+  beforeAll(async () => {
+    settings = await import("~/server/repositories/settings.server");
+    agentReview = await import("~/server/agentReview.server");
+  });
+  afterEach(async () => {
+    await settings.setAgentStand("assessment-expert", "on");
+    await settings.setAgentStand("designer", "on");
+  });
+
+  async function load(id: string) {
+    const request = new Request(`http://localhost/courses/${id}`);
+    return (await detail.loader({ request, params: { id } } as never)) as {
+      review: { agents: { agentId: string }[] } | null;
+    };
+  }
+
+  it("runs and shows only the hats that are on", async () => {
+    await settings.setAgentStand("designer", "off");
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(GOOD);
+    const r = await post(c.id, [["intent", "review"]]);
+    expect(r).toMatchObject({ ok: true, intent: "review" });
+    expect(generate).toHaveBeenCalledTimes(1);
+    const saved = await reviews.listReviewsForCourse("teacher-r", c.id);
+    expect(saved.map((s) => s.agentId)).toEqual(["assessment-expert"]);
+    expect((await load(c.id)).review?.agents.map((a) => a.agentId)).toEqual(["assessment-expert"]);
+  });
+
+  it("no longer counts open advice of a hat that is off", async () => {
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    await post(c.id, [["intent", "review"]]);
+    expect((await agentReview.openAgentFindings(currentUser.value, [c.id]))?.[c.id]).toBe(2);
+    await settings.setAgentStand("assessment-expert", "off");
+    expect((await agentReview.openAgentFindings(currentUser.value, [c.id]))?.[c.id]).toBe(1);
+  });
+
+  it("leaves the panel out and runs nothing when every hat is off", async () => {
+    await settings.setAgentStand("assessment-expert", "off");
+    await settings.setAgentStand("designer", "off");
+    const c = await newCourse();
+    expect((await load(c.id)).review).toBeNull();
+    const r = await post(c.id, [["intent", "review"]]);
+    expect(r).toMatchObject({ ok: false, intent: "review" });
+    expect(generate).not.toHaveBeenCalled();
   });
 });

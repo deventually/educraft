@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AGENTS, agentsWatching, getAgent } from "~/lib/agents/registry";
+import { activeAgents, AGENTS, agentsWatching, getAgent } from "~/lib/agents/registry";
 import { validateAgents } from "~/lib/agents/validate";
 import type { Agent } from "~/lib/agents/types";
 
@@ -26,6 +26,14 @@ describe("agent registry (P21.1)", () => {
   it("lists the hats that watch a target", () => {
     expect(agentsWatching("course").map((a) => a.id)).toEqual(["assessment-expert", "designer"]);
     expect(agentsWatching("generation").map((a) => a.id)).toEqual(["assessment-expert"]);
+  });
+
+  it("leaves out the hats an admin switched off; an untouched hat is on", () => {
+    const ids = (stands: Record<string, "on" | "off">) =>
+      activeAgents("course", stands).map((a) => a.id);
+    expect(ids({})).toEqual(["assessment-expert", "designer"]);
+    expect(ids({ designer: "off" })).toEqual(["assessment-expert"]);
+    expect(ids({ designer: "on", "assessment-expert": "off" })).toEqual(["designer"]);
   });
 });
 
