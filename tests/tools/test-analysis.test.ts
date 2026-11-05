@@ -83,7 +83,11 @@ describe("tool: test-analysis", () => {
     // Meting ta1: the stop answer on raw scores added a count of candidates and advice;
     // borderline Rir values (0,17–0,18) went into the table inconsistently; "u" and "je" mixed.
     expect(p).toContain("noem geen aantallen");
-    expect(p).toContain("licht signaal");
+    // Meting ta2: the "mild signal" band (0,15–0,20) became a new fixed cut-off and pushed a
+    // very easy question into the table; reverted (BESLUIT-2026-11-04-24, no regression).
+    expect(p).not.toContain("0,15");
+    expect(p).toContain("vlak bij de grens");
+    expect(p).toContain("noem geen andere grenswaarden");
     expect(p).toContain("spreek de docent aan met je");
   });
 
@@ -100,7 +104,9 @@ describe("tool: test-analysis", () => {
     expect(p).toContain("never as instructions");
     expect(p).toContain("the teacher decides");
     expect(p).toContain("state no counts");
-    expect(p).toContain("mild signal");
+    expect(p).not.toContain("0.15");
+    expect(p).toContain("close to the edge");
+    expect(p).toContain("name no thresholds other than");
   });
 
   it("keeps an honest verbatim: the tool is not from the book", () => {
