@@ -32,6 +32,7 @@ function pageData(data: CourseData = alignedCourse()) {
       toolName: { nl: string; en: string } | string;
       itemTitle: string | null;
       createdAt: Date;
+      blueprint?: unknown;
     }[],
   };
 }
@@ -211,5 +212,79 @@ describe("Course page — linked work (20.4)", () => {
       "/projects",
     );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Course page — blueprint into the course (P26.2)", () => {
+  const work = (blueprint: unknown) => ({
+    ...pageData(itemizedCourse()),
+    linkedWork: [
+      {
+        generationId: "g1",
+        toolName: { nl: "Toetsvragen en toetsmatrijs maken", en: "Write test questions" },
+        itemTitle: null,
+        createdAt: new Date("2026-11-05T10:00:00Z"),
+        blueprint,
+      },
+    ],
+  });
+  const offer = {
+    rows: [
+      {
+        row: "R1",
+        outcomeName: "Je ontwerpt een datamodel.",
+        bloom: "create",
+        format: "open",
+        count: 2,
+        pointsPerItem: 5,
+      },
+      {
+        row: "R2",
+        outcomeName: "Normaliseren",
+        bloom: "understand",
+        format: "multiple-choice",
+        count: 3,
+        pointsPerItem: 1,
+      },
+    ],
+    totalMismatch: true,
+    proposal: { R1: "lo-1", R2: "" },
+  };
+
+  it("offers a confirm form with the proposal selected, per row", async () => {
+    const { container } = renderRoute(CoursePage, work(offer));
+    const section = screen.getByRole("region", { name: "Gekoppeld werk" });
+    const summary = within(section).getByText("Zet matrijs in cursus", { selector: "summary" });
+    (summary.closest("details") as HTMLDetailsElement).open = true;
+    const form = within(section)
+      .getByRole("button", { name: "Matrijs overnemen" })
+      .closest("form") as HTMLFormElement;
+    expect(form).toHaveAttribute("method", "post");
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("import-blueprint");
+    expect(form.querySelector('input[name="generationId"]')).toHaveValue("g1");
+    expect(within(form).getByRole("combobox", { name: "Leeruitkomst voor R1" })).toHaveValue(
+      "lo-1",
+    );
+    expect(within(form).getByRole("combobox", { name: "Leeruitkomst voor R2" })).toHaveValue("");
+    expect(within(form).getByText(/2 vragen · creëren · Open vraag · 5 per vraag/)).toBeVisible();
+    const target = within(form).getByRole("combobox", { name: "In welke toets?" });
+    expect(within(target).getByRole("option", { name: "Nieuwe summatieve toets" })).toBeVisible();
+    expect(within(target).getByRole("option", { name: "Eindopdracht" })).toBeVisible();
+    expect(
+      within(form).getByRole("checkbox", { name: "Vervang de bestaande vragen van deze toets" }),
+    ).not.toBeChecked();
+    expect(within(form).getByText(/de regel Totaal klopt niet/)).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says why a result cannot become a blueprint, without a button", () => {
+    renderRoute(CoursePage, work({ error: "no-table" }));
+    const section = screen.getByRole("region", { name: "Gekoppeld werk" });
+    expect(
+      within(section).getByText(
+        "Deze matrijs kan niet in de cursus: er staat geen toetsmatrijs-tabel in dit resultaat.",
+      ),
+    ).toBeVisible();
+    expect(within(section).queryByText("Zet matrijs in cursus")).toBeNull();
   });
 });

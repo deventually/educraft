@@ -136,6 +136,8 @@ export const testItems: Tool = {
         en: "For each learning outcome the cognitive level, question type, number of questions and points, in a table that adds up.",
       },
       systemPromptId: TEST_ITEMS_BLUEPRINT.id,
+      // The blueprint table becomes the course's question-level matrix (P26.2).
+      courseExport: "assessment-items",
       output: {
         kind: "structured-sections",
         hint: {

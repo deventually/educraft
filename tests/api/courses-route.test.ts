@@ -306,4 +306,135 @@ describe("/courses/:id", () => {
     });
     expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items).toEqual([]);
   });
+
+  describe("import-blueprint (P26.2)", () => {
+    const BLUEPRINT = [
+      "## Toetsmatrijs",
+      "",
+      "| Rij | Leeruitkomst | Denkniveau | Vraagvorm | Aantal vragen | Punten per vraag | Punten |",
+      "| --- | --- | --- | --- | --- | --- | --- |",
+      "| R1 | Je ontwerpt een datamodel. | Creëren | Open | 2 | 5 | 10 |",
+      "| R2 | Normaliseren | Begrijpen | Meerkeuze | 3 | 1 | 3 |",
+      "| Totaal | | | | 5 | | 13 |",
+    ].join("\n");
+
+    async function blueprintGeneration(userId: string, output = BLUEPRINT, stageId = "blueprint") {
+      const gens = await import("~/server/repositories/generations.server");
+      return gens.saveGeneration({
+        userId,
+        toolSlug: "test-items",
+        stageId,
+        input: {},
+        outputMarkdown: output,
+        model: "test",
+        outputLanguage: "nl",
+      });
+    }
+
+    async function linkedSetup() {
+      const c = await repo.createCourse("teacher-a", { name: "Matrijs", data: alignedCourse() });
+      const g = await blueprintGeneration("teacher-a");
+      await repo.linkGeneration("teacher-a", c.id, g.id);
+      return { c, g };
+    }
+
+    it("the loader offers the blueprint of linked work, with a proposal per row", async () => {
+      const { c, g } = await linkedSetup();
+      const data = await detail.loader({
+        request: get(`/courses/${c.id}`),
+        params: { id: c.id },
+      } as never);
+      const work = data.linkedWork.find((w) => w.generationId === g.id);
+      expect(work?.blueprint).toMatchObject({
+        rows: [
+          { row: "R1", count: 2 },
+          { row: "R2", count: 3 },
+        ],
+        totalMismatch: false,
+        proposal: { R1: LO1, R2: "" },
+      });
+    });
+
+    it("the loader explains why a result cannot become a blueprint", async () => {
+      const c = await repo.createCourse("teacher-a", { name: "Geen", data: alignedCourse() });
+      const g = await blueprintGeneration("teacher-a", "## Toetsmatrijs\n\nGeen tabel.");
+      const items = await blueprintGeneration("teacher-a", BLUEPRINT, "items");
+      await repo.linkGeneration("teacher-a", c.id, g.id);
+      await repo.linkGeneration("teacher-a", c.id, items.id);
+      const data = await detail.loader({
+        request: get(`/courses/${c.id}`),
+        params: { id: c.id },
+      } as never);
+      expect(data.linkedWork.find((w) => w.generationId === g.id)?.blueprint).toEqual({
+        error: "no-table",
+      });
+      // The questions stage is not a blueprint: no button, no reason.
+      expect(data.linkedWork.find((w) => w.generationId === items.id)?.blueprint).toBeUndefined();
+    });
+
+    it("puts the blueprint in a new summative test", async () => {
+      const { c, g } = await linkedSetup();
+      expect(
+        await act(c.id, {
+          intent: "import-blueprint",
+          generationId: g.id,
+          assessmentId: "new",
+          newTitle: "Tentamen",
+          "map:R1": LO1,
+          "map:R2": LO2,
+        }),
+      ).toEqual({ ok: true, intent: "import-blueprint", added: 5 });
+      const d = (await repo.getCourse("teacher-a", c.id))!.data;
+      const test = d.assessments.at(-1)!;
+      expect(test).toMatchObject({ title: "Tentamen", kind: "summative", coverage: [] });
+      expect(test.items?.map((i) => [i.label, i.outcomeId, i.points])).toEqual([
+        ["1", LO1, 5],
+        ["2", LO1, 5],
+        ["3", LO2, 1],
+        ["4", LO2, 1],
+        ["5", LO2, 1],
+      ]);
+    });
+
+    it("replaces existing questions only after the explicit choice", async () => {
+      const { c, g } = await linkedSetup();
+      const fields = {
+        intent: "import-blueprint",
+        generationId: g.id,
+        assessmentId: TEST1,
+        "map:R1": LO1,
+        "map:R2": "",
+      };
+      expect(await act(c.id, fields)).toMatchObject({ ok: true, added: 2 });
+      expect(await act(c.id, fields)).toEqual({
+        ok: false,
+        intent: "import-blueprint",
+        error:
+          'Deze toets heeft al vragen. Kies "Vervang de bestaande vragen" als je ze wilt overschrijven.',
+      });
+      expect(await act(c.id, { ...fields, "map:R2": LO2, replace: "1" })).toMatchObject({
+        ok: true,
+        added: 5,
+      });
+      const d = (await repo.getCourse("teacher-a", c.id))!.data;
+      expect(d.assessments.find((a) => a.id === TEST1)?.items).toHaveLength(5);
+    });
+
+    it("refuses a foreign or unlinked generation with a 404, and a bad mapping", async () => {
+      const { c } = await linkedSetup();
+      const theirs = await blueprintGeneration("teacher-b");
+      const unlinked = await blueprintGeneration("teacher-a");
+      const base = { intent: "import-blueprint", assessmentId: "new", "map:R1": LO1 };
+      expect(await status(act(c.id, { ...base, generationId: theirs.id }))).toBe(404);
+      expect(await status(act(c.id, { ...base, generationId: unlinked.id }))).toBe(404);
+      const { c: c2, g } = await linkedSetup();
+      expect(await act(c2.id, { ...base, generationId: g.id, "map:R1": "ghost" })).toMatchObject({
+        ok: false,
+      });
+      expect(await act(c2.id, { ...base, generationId: g.id, "map:R1": "" })).toMatchObject({
+        ok: false,
+      });
+      expect((await repo.getCourse("teacher-a", c2.id))!.data).toEqual(alignedCourse());
+    });
+  });
 });
