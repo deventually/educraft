@@ -8,18 +8,31 @@ import { z } from "zod";
 import { buildReviewMessage } from "~/lib/agents/input";
 import { parseAgentReview } from "~/lib/agents/filter";
 import { agentsWatching } from "~/lib/agents/registry";
-import { type Agent, DECISION_REASON_MAX, DECISIONS } from "~/lib/agents/types";
+import {
+  type Agent,
+  DECISION_REASON_MAX,
+  DECISIONS,
+  type ReviewPanelAgent,
+} from "~/lib/agents/types";
+import { DEFAULT_MODEL, resolveModelInfo } from "~/lib/ai/models";
 import { checkAlignment } from "~/lib/courses/alignment";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
-import { isModelSelectableForUser } from "./availability.server";
+import {
+  effectiveDefaultModel,
+  getSelectableModels,
+  isFeatureOn,
+  isModelSelectableForUser,
+} from "./availability.server";
 import { log } from "./log.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import type { Course } from "./repositories/courses.server";
 import {
   decideFinding,
   getReview,
+  listDecisions,
   listRejectedFindings,
+  listReviewsForCourse,
   saveReview,
 } from "./repositories/agentReviews.server";
 
@@ -121,4 +134,43 @@ export async function decideOnFinding(
   if (review?.courseId !== course.id) return { ok: false, error: "not-found" };
   const saved = await decideFinding(user.id, parsed.data);
   return saved ? { ok: true } : { ok: false, error: "not-found" };
+}
+
+export interface ReviewPanelData {
+  agents: ReviewPanelAgent[];
+  models: { id: string; displayName: string }[];
+  defaultModel: string;
+}
+
+/** The panel's loader data; null when role agents are switched off for this teacher. */
+export async function loadReviewPanel(user: User, course: Course): Promise<ReviewPanelData | null> {
+  if (!(await isFeatureOn(user, "roleAgents"))) return null;
+  const all = await listReviewsForCourse(user.id, course.id);
+  const agents = await Promise.all(
+    agentsWatching("course").map(async (agent): Promise<ReviewPanelAgent> => {
+      const latest = all.find((r) => r.agentId === agent.id);
+      if (!latest) return { agentId: agent.id, role: agent.role, review: null };
+      const decisions = new Map(
+        (await listDecisions(user.id, latest.id)).map((d) => [d.findingId, d]),
+      );
+      return {
+        agentId: agent.id,
+        role: agent.role,
+        review: {
+          id: latest.id,
+          model: resolveModelInfo(latest.model).displayName,
+          stale: course.updatedAt.getTime() > latest.courseUpdatedAt.getTime(),
+          findings: latest.findings.map((f) => {
+            const d = decisions.get(f.id);
+            return d ? { ...f, decision: d.decision, reason: d.reason } : f;
+          }),
+        },
+      };
+    }),
+  );
+  const models = (await getSelectableModels(user)).map((m) => ({
+    id: m.id,
+    displayName: m.displayName,
+  }));
+  return { agents, models, defaultModel: await effectiveDefaultModel(user, DEFAULT_MODEL) };
 }

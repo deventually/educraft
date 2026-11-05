@@ -47,3 +47,17 @@ export type Decision = (typeof DECISIONS)[number];
 
 /** Upper bound on the teacher's optional reason. */
 export const DECISION_REASON_MAX = 500;
+
+/** What the course page's review panel shows for one hat: its latest review, if any (P21.5). */
+export interface ReviewPanelAgent {
+  agentId: string;
+  role: LocalizedText;
+  review: null | {
+    id: string;
+    /** Display name of the model the hat ran on. */
+    model: string;
+    /** The course changed after this review. */
+    stale: boolean;
+    findings: (ReviewFinding & { decision?: Decision; reason?: string | null })[];
+  };
+}

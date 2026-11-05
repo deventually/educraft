@@ -31,3 +31,14 @@ On the course page is a table with the learning outcomes in the rows and the act
 ## Linking work
 
 On a tool page with a learning-outcome field, pick your course under **Course**. LimeOnIt then fills in the course's learning outcomes, one per line; remove what doesn't fit. What you generate is linked to the course. You can also link or unlink work afterwards on **Earlier work**, to the whole course or to one activity or assessment. The course page lists it all under **Linked work**.
+
+## Get a review
+
+Under **Review** on the course page, two critical colleagues look at your course: an **Assessment expert** (assessment blueprint, Bloom spread, wording, weighting) and a **Designer** (constructive alignment, active learning, study load). They are AI and run on the model you pick.
+
+- Each piece of advice points at a learning outcome, activity or assessment in your own course, or at the course as a whole.
+- For each piece of advice you choose **Agree** or **Disagree**, with a reason if you like. Agreeing only records your decision; nothing in your course changes.
+- Advice you disagreed with does not come back in a later review of the same course.
+- If you change the course after a review, you see a notice. Then get a new review.
+
+The fixed checks above stay facts; the review is an opinion you weigh against your own judgement.

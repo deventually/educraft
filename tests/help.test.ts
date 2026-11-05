@@ -32,6 +32,11 @@ describe("help registry — topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
+  it("explains the role-agent review in the courses topic (P21.5)", () => {
+    expect(getTopic("courses", "nl")).toContain("## Laat beoordelen");
+    expect(getTopic("courses", "en")).toContain("## Get a review");
+  });
+
   it("has both nl and en for every topic (no half-translated topics)", () => {
     expect(HELP_TOPIC_SLUGS.length).toBeGreaterThan(0);
     for (const slug of HELP_TOPIC_SLUGS) {

@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
 import { blueprintOffer, loadCourse, saveCourseIntent } from "~/server/courses.server";
 import { dossierTargets } from "~/server/courseEvidence.server";
+import { loadReviewPanel } from "~/server/agentReview.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -21,6 +22,7 @@ import { NumberField } from "~/components/courses/fields";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
+import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 
@@ -56,6 +58,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     matrix: coverageMatrix(course.data),
     linkedWork,
     dossiers: await dossierTargets(user),
+    review: await loadReviewPanel(user, course),
   };
 }
 
@@ -73,10 +76,12 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
   const c = t.courses;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
-    pending: (fd) =>
-      fd?.get("intent") === "import-extract"
-        ? { variant: "pending", message: c.import.pending }
-        : { variant: "pending", message: t.toast.saving },
+    pending: (fd) => {
+      const intent = fd?.get("intent");
+      if (intent === "import-extract") return { variant: "pending", message: c.import.pending };
+      if (intent === "review") return { variant: "pending", message: t.agents.panel.pending };
+      return { variant: "pending", message: t.toast.saving };
+    },
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
@@ -95,7 +100,15 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const proposal = useImportProposal(actionData);
-  const { course, profiles, findings, matrix, linkedWork = [], dossiers = [] } = loaderData;
+  const {
+    course,
+    profiles,
+    findings,
+    matrix,
+    linkedWork = [],
+    dossiers = [],
+    review = null,
+  } = loaderData;
   const { data } = course;
 
   return (
@@ -133,6 +146,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           proposal={proposal}
         />
         <FindingsList data={data} findings={findings} />
+        {review && <CourseReviewPanel data={data} {...review} />}
         <OutcomesSection data={data} />
         <ActivitiesSection data={data} />
         <AssessmentsSection data={data} />
