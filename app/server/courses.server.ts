@@ -8,6 +8,7 @@ import {
   type Course,
   getCourse,
   linkGeneration,
+  listLinkedWork,
   listCourseLinksForUser,
   listCourses,
   unlinkGeneration,
@@ -17,9 +18,21 @@ import { linkTargets, linksByGeneration, parseLinkTarget } from "~/lib/courses/l
 import { applyCourseIntent } from "~/lib/courses/intents";
 import { applyImport, type ImportProposal, parseImportSelection } from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
-import { getMessages } from "~/lib/i18n";
+import { getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { extractCourseImport } from "./courseImport.server";
+import { getGeneration } from "./repositories/generations.server";
+import { getToolBySlug } from "~/lib/registry";
+import {
+  type BlueprintOffer,
+  type BlueprintParse,
+  expandToItems,
+  type OutcomeMapping,
+  parseBlueprintTable,
+  proposeOutcomeMapping,
+} from "~/lib/courses/blueprintImport";
+import { addAssessment, setAssessmentItems } from "~/lib/courses/edit";
+import type { CourseData } from "~/lib/courses/types";
 
 /** The largest document text accepted for an import (the model sees the first 80 000). */
 export const IMPORT_DOCUMENT_MAX = 300_000;
@@ -34,6 +47,7 @@ export type CourseActionResult =
       clipped: boolean;
     }
   | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
+  | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: false; error: string; intent?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
@@ -88,6 +102,18 @@ export async function saveCourseIntent(
     return saved
       ? { ok: true, intent, added: applied.added }
       : { ok: false, error: m.errorInvalid };
+  }
+
+  if (intent === "import-blueprint") {
+    const result = await importBlueprint(user.id, course, fd, locale);
+    if (result.ok) return { ok: true, intent, added: result.added };
+    const error =
+      result.error === "not-found"
+        ? m.errorNotFound
+        : result.error === "invalid"
+          ? m.errorInvalid
+          : m.blueprint.errors[result.error];
+    return { ok: false, intent, error };
   }
 
   if (intent === "settings") {
@@ -149,4 +175,81 @@ export async function courseLinkIntent(
   if (!target) return refused;
   const link = await linkGeneration(userId, target.courseId, generationId, target.itemId);
   return link ? { ok: true, intent } : refused;
+}
+
+// Blueprint → questions (P26.2)
+
+/** Whether a generation's stage can become a test's questions: registry data, no tool branch. */
+function exportsItems(toolSlug: string, stageId: string | null): boolean {
+  const tool = getToolBySlug(toolSlug);
+  const stage =
+    tool?.stages.find((s) => s.id === stageId) ?? (stageId ? undefined : tool?.stages[0]);
+  return stage?.courseExport === "assessment-items";
+}
+
+/** The blueprint of one linked generation, parsed, with a proposal; undefined if it has none. */
+export async function blueprintOffer(
+  userId: string,
+  generationId: string,
+  data: CourseData,
+): Promise<BlueprintOffer | undefined> {
+  const g = await getGeneration(userId, generationId);
+  if (!g || !exportsItems(g.toolSlug, g.stageId)) return undefined;
+  const parsed: BlueprintParse = parseBlueprintTable(g.outputMarkdown);
+  if ("error" in parsed) return parsed;
+  return { ...parsed, proposal: proposeOutcomeMapping(parsed.rows, data.outcomes) };
+}
+
+type BlueprintError =
+  | "not-found"
+  | "invalid"
+  | "has-items"
+  | "limit"
+  | "nothing"
+  | "no-table"
+  | "no-rows";
+
+async function importBlueprint(
+  userId: string,
+  course: Course,
+  fd: FormData,
+  locale: Locale,
+): Promise<{ ok: true; added: number } | { ok: false; error: BlueprintError }> {
+  const generationId = String(fd.get("generationId") ?? "");
+  // Only the caller's own work that is linked to this course; anything else does not exist.
+  const linked = (await listLinkedWork(userId, course.id, 500)).some(
+    (w) => w.generationId === generationId,
+  );
+  const offer = linked ? await blueprintOffer(userId, generationId, course.data) : undefined;
+  if (!offer) throw new Response("Not Found", { status: 404 });
+  if ("error" in offer) return { ok: false, error: offer.error };
+
+  const known = new Set(course.data.outcomes.map((o) => o.id));
+  const mapping: OutcomeMapping = {};
+  for (const r of offer.rows) {
+    const value = String(fd.get(`map:${r.row}`) ?? "");
+    if (value && !known.has(value)) return { ok: false, error: "invalid" };
+    mapping[r.row] = value;
+  }
+  const items = expandToItems(offer.rows, mapping);
+  if (items.length === 0) return { ok: false, error: "nothing" };
+  if (items.length > COURSE_LIMITS.items) return { ok: false, error: "limit" };
+
+  let data = course.data;
+  let assessmentId = String(fd.get("assessmentId") ?? "");
+  if (assessmentId === "new") {
+    const title =
+      String(fd.get("newTitle") ?? "")
+        .trim()
+        .slice(0, COURSE_LIMITS.title) || getMessages(locale).courses.blueprint.newTitleDefault;
+    data = addAssessment(data, { title, kind: "summative", coverage: [] });
+    assessmentId = data.assessments[data.assessments.length - 1].id;
+  } else {
+    const target = data.assessments.find((a) => a.id === assessmentId);
+    if (!target) return { ok: false, error: "not-found" };
+    if (target.items?.length && fd.get("replace") !== "1") return { ok: false, error: "has-items" };
+  }
+  data = setAssessmentItems(data, assessmentId, items);
+  const saved = await updateCourse(userId, course.id, { data }).catch(() => null);
+  return saved ? { ok: true, added: items.length } : { ok: false, error: "invalid" };
 }

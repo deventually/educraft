@@ -1,18 +1,23 @@
 import { useId } from "react";
 import { Link } from "react-router";
 import { Card } from "~/components/ui";
+import type { BlueprintOffer } from "~/lib/courses/blueprintImport";
+import type { CourseData } from "~/lib/courses/types";
 import { type LocalizedText, loc } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
+import { BlueprintImport } from "./BlueprintImport";
 
 export interface LinkedWorkItem {
   generationId: string;
   toolName: LocalizedText | string;
   itemTitle: string | null;
   createdAt: Date | string;
+  /** A blueprint that can become a test's questions (P26.2). */
+  blueprint?: BlueprintOffer;
 }
 
 /** "Gekoppeld werk" (P20.4): what the teacher made with the tools for this course. */
-export function LinkedWorkSection({ work }: { work: LinkedWorkItem[] }) {
+export function LinkedWorkSection({ work, data }: { work: LinkedWorkItem[]; data: CourseData }) {
   const t = useT();
   const locale = useLocale();
   const m = t.courses.links;
@@ -49,6 +54,9 @@ export function LinkedWorkSection({ work }: { work: LinkedWorkItem[] }) {
                 >
                   {m.openInWork}
                 </Link>
+                {w.blueprint && (
+                  <BlueprintImport data={data} generationId={w.generationId} offer={w.blueprint} />
+                )}
               </li>
             ))}
           </ul>

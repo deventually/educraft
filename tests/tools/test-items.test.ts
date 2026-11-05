@@ -197,3 +197,9 @@ describe("tool: test-items", () => {
     expect(getPrompt("test-items-items@v1").verbatim).toMatch(/LimeOnIt/);
   });
 });
+
+describe("test-items → course (P26.2)", () => {
+  it("only the blueprint stage exports a question-level matrix, as data", () => {
+    expect(tool().stages.map((s) => s.courseExport)).toEqual(["assessment-items", undefined]);
+  });
+});
