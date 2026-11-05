@@ -162,6 +162,19 @@ describe("Course editor — real dates (P22.1)", () => {
     expect(itemIn("Toetsen", "Eindopdracht")).toHaveAttribute("id", "item-test-1");
   });
 
+  it("offers the calendar file with a start date, and not without (P22.4)", () => {
+    renderRoute(CoursePage, { ...pageData(dated()), weekDates });
+    const link = screen.getByRole("link", { name: "Zet in je agenda" });
+    expect(link).toHaveAttribute("href", "/courses/c1/calendar.ics");
+    expect(link).toHaveAttribute("download");
+    expect(link).toHaveAccessibleDescription(/agendabestand/i);
+  });
+
+  it("has no calendar link without a start date (P22.4)", () => {
+    renderRoute(CoursePage, { ...pageData(), weekDates: null });
+    expect(screen.queryByRole("link", { name: "Zet in je agenda" })).toBeNull();
+  });
+
   it("shows only the week number without a start date", () => {
     const { container } = renderRoute(CoursePage, { ...pageData(), weekDates: null });
     expect(screen.getByLabelText("Startdatum")).toHaveValue("");

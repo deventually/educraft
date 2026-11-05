@@ -143,6 +143,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
 
       <div className="mt-6 space-y-10">
         <CourseSettings
+          courseId={course.id}
           name={course.name}
           contextProfileId={course.contextProfileId}
           ec={data.ec}
@@ -169,6 +170,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
 }
 
 function CourseSettings({
+  courseId,
   name,
   contextProfileId,
   ec,
@@ -176,6 +178,7 @@ function CourseSettings({
   hours,
   profiles,
 }: {
+  courseId: string;
   name: string;
   contextProfileId: string | null;
   ec?: number;
@@ -243,6 +246,21 @@ function CourseSettings({
             <p id={`${id}-start-hint`} className="mt-1 text-xs text-slate-500">
               {c.settings.startDateHint}
             </p>
+            {startDate && (
+              <p className="mt-2 text-sm">
+                <a
+                  href={`/courses/${courseId}/calendar.ics`}
+                  download
+                  aria-describedby={`${id}-calendar-hint`}
+                  className="font-medium text-violet-700 underline underline-offset-2"
+                >
+                  {c.settings.calendar}
+                </a>
+                <span id={`${id}-calendar-hint`} className="block text-xs text-slate-500">
+                  {c.settings.calendarHint}
+                </span>
+              </p>
+            )}
           </div>
           {ec !== undefined && (
             <p className="text-sm text-slate-600">
