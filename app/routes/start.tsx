@@ -4,7 +4,12 @@ import { ArrowRight, GraduationCap, Search } from "lucide-react";
 import type { Route } from "./+types/start";
 import { requireUser } from "~/server/auth.server";
 import { getAvailableTools, isFeatureOn } from "~/server/availability.server";
-import { listCourses } from "~/server/repositories/courses.server";
+import { listCourseLinksForUser, listCourses } from "~/server/repositories/courses.server";
+import { getBreakWeeks, getTimeZone } from "~/server/repositories/settings.server";
+import { openAgentFindings } from "~/server/agentReview.server";
+import { todayIn } from "~/lib/calendar/weeks";
+import { nextWeek, showsNextWeek, teacherWeek } from "~/lib/week/teacherWeek";
+import { TeacherWeekView } from "~/components/week/TeacherWeek";
 import { listGenerations } from "~/server/repositories/generations.server";
 import { checkAlignment } from "~/lib/courses/alignment";
 import { findingText } from "~/lib/courses/findingText";
@@ -22,6 +27,8 @@ import { Button, Label, Select } from "~/components/ui";
 const MAX_RESULTS = 3;
 const MAX_WEEK = 5;
 const MAX_QUERY = 200;
+/** The teacher's week looks at this many courses at most (P22.3). */
+const WEEK_COURSES = 20;
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -31,8 +38,9 @@ export function meta({ matches }: Route.MetaArgs) {
 
 /**
  * Start (P27.3): the question box, *Deze week* and the teacher's courses on one page.
- * No AI: the question box uses the catalogue's search. *Deze week* is the open findings
- * of the courses and the latest work until P22 brings the real week.
+ * No AI: the question box uses the catalogue's search. *Deze week* is the teacher's
+ * real week (P22.3) as soon as one course has a start date; until then the open
+ * findings of the courses and the latest work, with a hint to set a start date.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
@@ -70,10 +78,35 @@ export async function loader({ request }: Route.LoaderArgs) {
     createdAt: g.createdAt,
   }));
 
+  const dated = (own ?? []).slice(0, WEEK_COURSES);
+  const hasDates = dated.some((c) => c.data.startDate);
+  let week = null;
+  if (hasDates) {
+    const [links, breakWeeks, timeZone, agentFindings] = await Promise.all([
+      listCourseLinksForUser(user.id, 500),
+      getBreakWeeks(),
+      getTimeZone(),
+      openAgentFindings(
+        user,
+        dated.map((c) => c.id),
+      ),
+    ]);
+    const input = {
+      courses: dated.map((c) => ({ id: c.id, name: c.name, data: c.data })),
+      links: links.map((l) => ({ courseId: l.courseId, itemId: l.itemId })),
+      breakWeeks,
+      today: todayIn(timeZone, new Date()),
+      ...(agentFindings && { agentFindings }),
+    };
+    week = { now: teacherWeek(input), next: showsNextWeek(input.today) ? nextWeek(input) : null };
+  }
+
   return {
     query,
     course,
     results,
+    teacherWeek: week,
+    startDateHint: own?.length && !hasDates ? { courseId: own[0].id } : null,
     courses: own
       ? checked.map(({ course: c, findings: fs }) => ({
           id: c.id,
@@ -90,7 +123,15 @@ type T = ReturnType<typeof useT>;
 export default function Start({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const s = t.start;
-  const { query, course, results, courses, week } = loaderData;
+  const {
+    query,
+    course,
+    results,
+    courses,
+    week,
+    teacherWeek = null,
+    startDateHint = null,
+  } = loaderData;
   const hasCourses = (courses?.length ?? 0) > 0;
 
   return (
@@ -115,7 +156,10 @@ export default function Start({ loaderData }: Route.ComponentProps) {
         </section>
       )}
 
-      {hasCourses && <Week t={t} week={week} />}
+      {hasCourses && teacherWeek && (
+        <TeacherWeekView now={teacherWeek.now} next={teacherWeek.next} />
+      )}
+      {hasCourses && !teacherWeek && <Week t={t} week={week} hint={startDateHint} />}
       {hasCourses && courses && <Courses t={t} courses={courses} />}
     </div>
   );
@@ -223,7 +267,15 @@ function QuestionBox({
   );
 }
 
-function Week({ t, week }: { t: T; week: Route.ComponentProps["loaderData"]["week"] }) {
+function Week({
+  t,
+  week,
+  hint,
+}: {
+  t: T;
+  week: Route.ComponentProps["loaderData"]["week"];
+  hint?: { courseId: string } | null;
+}) {
   const s = t.start;
   const locale = useLocale();
   const empty = week.findings.length === 0 && week.recent.length === 0;
@@ -232,6 +284,17 @@ function Week({ t, week }: { t: T; week: Route.ComponentProps["loaderData"]["wee
       <h2 id="start-week" className="font-display text-xl font-medium tracking-tight">
         {s.week}
       </h2>
+      {hint && (
+        <p className="mt-2 text-sm text-slate-600">
+          {t.week.startDateHint}{" "}
+          <Link
+            to={`/courses/${hint.courseId}`}
+            className="font-medium text-violet-700 underline underline-offset-2"
+          >
+            {t.week.startDateLink}
+          </Link>
+        </p>
+      )}
       {empty ? (
         <p className="mt-2 text-sm text-slate-600">{s.weekEmpty}</p>
       ) : (

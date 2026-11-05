@@ -13,6 +13,8 @@ const base: Data = {
   results: [],
   courses: [],
   week: { findings: [], recent: [] },
+  teacherWeek: null,
+  startDateHint: null,
 };
 
 const full: Data = {
@@ -182,5 +184,29 @@ describe("Start (P27.3)", () => {
     const empty = renderStart(base);
     await screen.findByRole("heading", { level: 1 });
     expect((await axe(empty.container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("hints at a start date when no course has one (P22.3)", async () => {
+    renderStart({ ...full, startDateHint: { courseId: "c1" } });
+    const week = await screen.findByRole("region", { name: "Deze week" });
+    expect(within(week).getByText(/Zet een startdatum bij je cursus/)).toBeInTheDocument();
+    expect(within(week).getByRole("link", { name: "Naar je cursus" })).toHaveAttribute(
+      "href",
+      "/courses/c1",
+    );
+  });
+
+  it("shows the teacher's week in place of the findings once a course has dates (P22.3)", async () => {
+    renderStart({
+      ...full,
+      teacherWeek: {
+        now: { monday: "2026-11-16", isoWeek: 47, courses: [], undated: [] },
+        next: null,
+      },
+    });
+    expect(await screen.findByRole("region", { name: "Deze week · week 47" })).toBeInTheDocument();
+    expect(screen.getByText("Niets gepland deze week.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Deze week" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Je cursussen" })).toBeInTheDocument();
   });
 });

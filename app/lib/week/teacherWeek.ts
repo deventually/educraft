@@ -135,6 +135,12 @@ export function teacherWeek(input: WeekInput): TeacherWeek {
   return { monday, isoWeek: isoWeek(monday), courses, undated };
 }
 
+/** From Friday to Sunday, Start also shows next week (the "Sunday briefing", BESLUIT-2026-11-05-7). */
+export function showsNextWeek(today: IsoDate): boolean {
+  const day = new Date(`${today}T00:00:00Z`).getUTCDay(); // Sunday = 0
+  return day === 0 || day >= 5;
+}
+
 /** Next week: the same function, a week later. */
 export function nextWeek(input: WeekInput): TeacherWeek {
   return teacherWeek({ ...input, today: addWeeks(input.today, 1) });

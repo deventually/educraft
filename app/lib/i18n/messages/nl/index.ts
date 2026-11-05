@@ -31,6 +31,7 @@ import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
 import { utilities } from "./utilities";
+import { week } from "./week";
 
 /**
  * Dutch UI strings — the canonical source of truth for the message shape.
@@ -81,6 +82,7 @@ export const nl = {
   toast,
   tool,
   utilities,
+  week,
 };
 
 export type Messages = typeof nl;

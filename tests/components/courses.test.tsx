@@ -153,6 +153,15 @@ describe("Course editor — real dates (P22.1)", () => {
     expect(exam).toHaveTextContent(/Week 4 · 7.13 dec/);
   });
 
+  it("gives each activity and assessment an anchor for the week on Start (P22.3)", () => {
+    renderRoute(CoursePage, { ...pageData(dated()), weekDates });
+    expect(itemIn("Onderwijsactiviteiten", "Opdracht datamodel")).toHaveAttribute(
+      "id",
+      "item-act-2",
+    );
+    expect(itemIn("Toetsen", "Eindopdracht")).toHaveAttribute("id", "item-test-1");
+  });
+
   it("shows only the week number without a start date", () => {
     const { container } = renderRoute(CoursePage, { ...pageData(), weekDates: null });
     expect(screen.getByLabelText("Startdatum")).toHaveValue("");
