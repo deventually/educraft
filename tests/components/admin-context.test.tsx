@@ -43,10 +43,15 @@ const loaderData = {
   // Instance domain axis: null = all enabled.
   enabledDomains: null,
   domainCatalogueSectors: [hboDomainSector, havoDomainSector],
+  // The school calendar (P22.1): the herfstvakantie of 2026.
+  breakWeeks: ["2026-10-19"],
 };
 
-function renderRoute(action?: (args: { request: Request }) => unknown) {
-  const props = { loaderData } as unknown as ComponentProps<typeof AdminContext>;
+function renderRoute(
+  action?: (args: { request: Request }) => unknown,
+  data: typeof loaderData = loaderData,
+) {
+  const props = { loaderData: data } as unknown as ComponentProps<typeof AdminContext>;
   const Stub = createRoutesStub([
     {
       path: "/admin/context",
@@ -77,7 +82,8 @@ describe("Admin context — instance toggle", () => {
     const { container } = renderRoute();
     expect(container.querySelector('input[name="customAccess"]')).toBeNull();
     expect(container.querySelector('input[name="userId"]')).toBeNull();
-    expect(screen.getAllByRole("form")).toHaveLength(1);
+    // The instance form and the school calendar; nothing per teacher.
+    expect(screen.getAllByRole("form")).toHaveLength(2);
   });
 
   it("renders a checkbox per sector, pre-checked from settings", () => {
@@ -148,6 +154,56 @@ describe("Admin context — instance toggle", () => {
     expect(ict.checked).toBe(true);
     // The vo profiel is offered too (grouped under its sector's details).
     expect(instanceForm().getByLabelText(/Natuur & Techniek/)).toBeInTheDocument();
+  });
+});
+
+describe("Admin context — school calendar (P22.1)", () => {
+  const calendarForm = () => within(screen.getByRole("form", { name: "Schoolkalender" }));
+
+  it("has a labelled field with one saved break week per line", () => {
+    renderRoute();
+    const field = calendarForm().getByLabelText("Vakantieweken") as HTMLTextAreaElement;
+    expect(field.tagName).toBe("TEXTAREA");
+    expect(field.value).toBe("2026-10-19");
+  });
+
+  it("lists each saved break week with its ISO week and dates", () => {
+    const { container } = renderRoute();
+    const list = calendarForm().getByRole("list", { name: /opgeslagen vakantieweken/i });
+    expect(list).toHaveTextContent(/Week 43 · 19.25 okt 2026/);
+    expect(container.querySelector('time[datetime="2026-10-19"]')).not.toBeNull();
+  });
+
+  it("says so when there are no break weeks", () => {
+    renderRoute(undefined, { ...loaderData, breakWeeks: [] });
+    expect(calendarForm().getByText("Nog geen vakantieweken.")).toBeInTheDocument();
+    expect(calendarForm().queryByRole("list")).toBeNull();
+  });
+
+  it("saves on blur with intent calendar and one toast", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const field = calendarForm().getByLabelText("Vakantieweken");
+    await user.click(field);
+    await user.type(field, "{Enter}2026-12-21");
+    await user.tab();
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen/i));
+    expect(body?.get("intent")).toBe("calendar");
+    expect(body?.get("breakWeeks")).toContain("2026-12-21");
+  });
+
+  it("explains a refused date as a toast", async () => {
+    const user = userEvent.setup();
+    renderRoute(async () => ({ error: "calendar-invalid" }));
+    const field = calendarForm().getByLabelText("Vakantieweken");
+    await user.click(field);
+    await user.type(field, "{Enter}31-12-2026");
+    await user.tab();
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/elke regel.*datum/i));
   });
 });
 

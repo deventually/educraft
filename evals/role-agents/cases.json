@@ -1134,6 +1134,114 @@
         ]
       },
       "maxWarnings": 0
+    },
+    {
+      "id": "ae-linked-items-too-low",
+      "agent": "assessment-expert",
+      "locale": "nl",
+      "description": "P21.7: de gekoppelde tentamenvragen toetsen L2 (analyseren) alleen op onthouden; de cursus zelf is op orde.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je legt de drie normaalvormen uit aan de hand van een voorbeeld.",
+            "bloom": "understand"
+          },
+          {
+            "id": "lo2",
+            "text": "Je analyseert een bestaand datamodel op redundantie en anomalieën.",
+            "bloom": "analyze"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les normaalvormen",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Werkcollege: datamodellen doorlichten",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 6
+          },
+          {
+            "id": "a3",
+            "title": "Oefenopdracht analyse webshop-database",
+            "week": 3,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 20
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefentoets normaalvormen",
+            "week": 2,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ]
+          },
+          {
+            "id": "t2",
+            "title": "Tentamen databases",
+            "week": 6,
+            "kind": "summative",
+            "weight": 100,
+            "hours": 3,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "analyze"
+              }
+            ]
+          }
+        ]
+      },
+      "linkedWork": [
+        {
+          "itemId": "t2",
+          "text": "## Tentamen databases\n\n1. (L2, 2 pt) Wat betekent de afkorting 3NF?\n2. (L2, 2 pt) Noem twee soorten anomalieën.\n3. (L2, 2 pt) Wat is een functionele afhankelijkheid? Geef de definitie.\n4. (L1, 4 pt) Leg met een eigen voorbeeld uit wat de tweede normaalvorm inhoudt.\n\nAntwoordmodel: 1. derde normaalvorm; 2. invoeg-, wijzig- of verwijderanomalie; 3. definitie uit de syllabus; 4. voorbeeld met partiële afhankelijkheid."
+        }
+      ],
+      "mustFind": [
+        {
+          "targets": [
+            "t2",
+            "lo2"
+          ],
+          "anyOf": [
+            "onthoud",
+            "reproduc",
+            "kennis",
+            "analy",
+            "niveau",
+            "laag"
+          ]
+        }
+      ],
+      "maxWarnings": 3
     }
   ]
 }

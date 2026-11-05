@@ -5,7 +5,17 @@ import {
   getEnabledDomains,
   setEnabledSectors,
   setEnabledDomains,
+  getBreakWeeks,
+  setBreakWeeks,
 } from "~/server/repositories/settings.server";
+import {
+  formatWeekRange,
+  isIsoDate,
+  isoWeek,
+  MAX_BREAK_WEEKS,
+  normalizeBreakWeeks,
+} from "~/lib/calendar/weeks";
+import { fmt } from "~/lib/i18n/format";
 import {
   SECTORS,
   SECTORS_INFO,
@@ -30,9 +40,10 @@ import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  const [enabledSectors, enabledDomains] = await Promise.all([
+  const [enabledSectors, enabledDomains, breakWeeks] = await Promise.all([
     getEnabledSectors(),
     getEnabledDomains(),
+    getBreakWeeks(),
   ]);
   const sectors = SECTORS.map((id) => ({
     id,
@@ -44,13 +55,28 @@ export async function loader({ request }: Route.LoaderArgs) {
     sector: s as string,
     groups: domainGroupsForSector("NL", s),
   })).filter((ds) => ds.groups.length > 0);
-  return { sectors, enabledDomains, domainCatalogueSectors };
+  return { sectors, enabledDomains, domainCatalogueSectors, breakWeeks };
+}
+
+/** The school calendar (P22.1): one date per line, any day counts as its whole week. */
+async function saveCalendar(text: string) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (!lines.every(isIsoDate)) return { error: "calendar-invalid" as const };
+  if (normalizeBreakWeeks(lines).length > MAX_BREAK_WEEKS) {
+    return { error: "calendar-too-many" as const };
+  }
+  await setBreakWeeks(lines);
+  return { saved: true as const };
 }
 
 export async function action({ request }: Route.ActionArgs) {
   await requireRole(request, "admin");
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
+  if (intent === "calendar") return saveCalendar(String(fd.get("breakWeeks") ?? ""));
   // Never trust the body: keep only shipped catalogue codes on every axis.
   const sectors = fd.getAll("sectors").map(String).filter(isSector);
   const knownDomains = new Set(allDomainValues("NL"));
@@ -211,10 +237,71 @@ function DomainAxis({
   );
 }
 
+/** The institution's break weeks (P22.1): a date per line, saved on blur. */
+function SchoolCalendar({ breakWeeks }: { breakWeeks: string[] }) {
+  const t = useT();
+  const locale = useLocale();
+  const c = t.calendar;
+  return (
+    <section aria-labelledby="school-calendar-heading" className="mt-8 max-w-xl">
+      <h3
+        id="school-calendar-heading"
+        className="font-display text-base font-medium tracking-tight text-slate-900"
+      >
+        {c.heading}
+      </h3>
+      <p className="mt-1 text-sm text-slate-600">{c.intro}</p>
+      <AutoSaveForm
+        intent="calendar"
+        aria-labelledby="school-calendar-heading"
+        errorMessage={(code) =>
+          code === "calendar-too-many"
+            ? c.tooMany
+            : code === "calendar-invalid"
+              ? c.invalid
+              : undefined
+        }
+        className="mt-2"
+      >
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <label htmlFor="break-weeks" className="text-sm font-semibold text-slate-800">
+            {c.breakWeeksLabel}
+          </label>
+          <p id="break-weeks-hint" className="mt-1 text-xs text-slate-500">
+            {c.breakWeeksHint}
+          </p>
+          <textarea
+            id="break-weeks"
+            name="breakWeeks"
+            rows={6}
+            aria-describedby="break-weeks-hint"
+            defaultValue={breakWeeks.join("\n")}
+            className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm focus-visible:outline-2 focus-visible:outline-violet-500"
+          />
+          {breakWeeks.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-500">{c.none}</p>
+          ) : (
+            <ul aria-label={c.saved} className="mt-3 space-y-1 text-sm text-slate-700">
+              {breakWeeks.map((monday) => (
+                <li key={monday}>
+                  <time dateTime={monday}>
+                    {fmt(c.week, { n: isoWeek(monday) })} ·{" "}
+                    {formatWeekRange(monday, locale, { year: true })}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </AutoSaveForm>
+    </section>
+  );
+}
+
 export default function AdminContext({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { sectors, enabledDomains, domainCatalogueSectors } = loaderData;
+  const { sectors, enabledDomains, domainCatalogueSectors, breakWeeks } = loaderData;
   const c = t.admin.context;
 
   return (
@@ -258,6 +345,8 @@ export default function AdminContext({ loaderData }: Route.ComponentProps) {
           />
         </div>
       </AutoSaveForm>
+
+      <SchoolCalendar breakWeeks={breakWeeks} />
     </section>
   );
 }
