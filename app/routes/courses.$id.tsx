@@ -3,6 +3,7 @@ import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
 import { blueprintOffer, loadCourse, saveCourseIntent } from "~/server/courses.server";
+import { dossierTargets } from "~/server/courseEvidence.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -18,6 +19,7 @@ import { CoverageMatrix } from "~/components/courses/CoverageMatrix";
 import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { NumberField } from "~/components/courses/fields";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
+import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -53,6 +55,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     findings: checkAlignment(course.data),
     matrix: coverageMatrix(course.data),
     linkedWork,
+    dossiers: await dossierTargets(user),
   };
 }
 
@@ -83,13 +86,14 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       }
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
+      if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
       if (r.intent === "import-blueprint")
         return { variant: "success", message: fmt(c.blueprint.done, { n: r.added }) };
       return { variant: "success", message: c.toastSaved };
     },
   });
   const proposal = useImportProposal(actionData);
-  const { course, profiles, findings, matrix, linkedWork = [] } = loaderData;
+  const { course, profiles, findings, matrix, linkedWork = [], dossiers = [] } = loaderData;
   const { data } = course;
 
   return (
@@ -131,6 +135,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <ActivitiesSection data={data} />
         <AssessmentsSection data={data} />
         <CoverageMatrix data={data} matrix={matrix} />
+        <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />
       </div>
     </div>

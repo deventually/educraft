@@ -16,6 +16,18 @@ describe("DossierDataSchema", () => {
     }
   });
 
+  it("accepts evidence from a course snapshot; old evidence without one stays valid (P26.4)", () => {
+    const d = sampleDossier();
+    expect(d.evidence[0].sourceCourse).toBeUndefined();
+    d.evidence[0].sourceCourse = { courseId: "c1", part: "outcomes-and-matrix", at: 1 };
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+    d.evidence[0].sourceCourse = { courseId: "c1", part: { assessmentId: "t1" }, at: 1 };
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+    // biome-ignore lint/suspicious/noExplicitAny: an invalid part on purpose
+    (d.evidence[0].sourceCourse as any).part = "everything";
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
   it("rejects an evidence link to an unknown criterion", () => {
     const d = sampleDossier();
     d.evidence[0].criterionIds = ["00000000-0000-4000-8000-00000000dead"];

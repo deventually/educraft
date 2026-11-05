@@ -142,6 +142,10 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
   toetsmatrijs* staat "Zet matrijs in cursus". De docent kiest de toets en per rij de leeruitkomst
   (voorstel staat al gekozen); daarna staan de vragen in de cursus. Geen promptwijziging. PR open,
   bouwt voort op P26.1.
+- P26.4 + 26.5 Cursus als bewijs in het BDB/BKE-dossier: op de cursuspagina "Gebruik als bewijs in
+  BDB/BKE" (leeruitkomsten en dekkingsmatrix, of de toetsmatrijs van één toets) als momentopname,
+  met "Opnieuw ophalen" in het dossier en een hint bij criteria over toetsmatrijs of afstemming.
+  Plus de documentatie. PR open, bouwt voort op P26.2.
 - P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
   voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.

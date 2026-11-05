@@ -19,9 +19,11 @@ import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ToolHints } from "~/components/portfolio/ToolHints";
 import { availableToolNames, loadSuggestions } from "~/server/portfolio.server";
 import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
-import { chapterHints, criterionHints } from "~/lib/portfolio/toolHints";
+import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
+import { snapshotCourses } from "~/server/courseEvidence.server";
+import { fmtDate } from "~/lib/portfolio/format";
 import { resolveModelInfo } from "~/lib/ai/models";
-import { useT } from "~/lib/i18n/useT";
+import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
 
@@ -65,6 +67,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         .map((c) => [c.id, view(criterionHints(outcome, c, available))]),
     ),
     chapterTools: view(chapterHints(outcome, available)),
+    courseHints: outcome.criteria
+      .filter((c) => !linked.has(c.id) && courseHint(c))
+      .map((c) => c.id),
+    snapshotCourses: await snapshotCourses(user.id, d),
     suggestions: Object.fromEntries(
       outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
     ),
@@ -104,11 +110,13 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
       const message =
-        r.intent === "review"
-          ? t.portfolio.coach.done
-          : r.intent === "draft"
-            ? t.portfolio.draft.done
-            : t.portfolio.toastSaved;
+        r.intent === "refreshCourseEvidence"
+          ? t.portfolio.outcome.refreshed
+          : r.intent === "review"
+            ? t.portfolio.coach.done
+            : r.intent === "draft"
+              ? t.portfolio.draft.done
+              : t.portfolio.toastSaved;
       return { variant: "success", message };
     },
   });
@@ -129,6 +137,8 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     toolHints,
     chapterTools,
     suggestions,
+    courseHints = [],
+    snapshotCourses = {},
   } = loaderData;
   const drafts =
     coachMode === "draft" && confirmed
@@ -178,6 +188,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 hints={toolHints[c.id] ?? []}
                 step="evidence"
                 from={{ dossierId: id, criterionId: c.id }}
+                course={courseHints.includes(c.id)}
                 className="mt-3"
               />
               <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
@@ -218,6 +229,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 item={e}
                 outcomeId={outcome.id}
                 criteria={outcome.criteria}
+                courses={snapshotCourses}
                 t={t.portfolio}
               />
             ))}
@@ -233,6 +245,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                   item={e}
                   outcomeId={outcome.id}
                   criteria={outcome.criteria}
+                  courses={snapshotCourses}
                   t={t.portfolio}
                 />
               ))}
@@ -365,11 +378,14 @@ function EvidenceRow({
   item,
   outcomeId,
   criteria,
+  courses,
   t,
 }: {
   item: EvidenceItem;
   outcomeId: string;
   criteria: Criterion[];
+  /** courseId → name, or null when the course is gone (P26.4). */
+  courses: Record<string, string | null>;
   t: PortfolioMessages;
 }) {
   return (
@@ -380,6 +396,14 @@ function EvidenceRow({
           <span className="text-sm text-slate-600">· {t.kinds[item.kind]}</span>
         </summary>
         <div className="border-t border-slate-100 p-4">
+          {item.sourceCourse && (
+            <CourseSnapshot
+              evidenceId={item.id}
+              source={item.sourceCourse}
+              courseName={courses[item.sourceCourse.courseId] ?? null}
+              t={t}
+            />
+          )}
           <Form method="post" className="grid gap-3">
             <input type="hidden" name="intent" value="updateEvidence" />
             <input type="hidden" name="outcomeId" value={outcomeId} />
@@ -407,5 +431,41 @@ function EvidenceRow({
         </div>
       </details>
     </li>
+  );
+}
+
+/** Where a snapshot comes from, with a way to the course and "Opnieuw ophalen" (P26.4). */
+function CourseSnapshot({
+  evidenceId,
+  source,
+  courseName,
+  t,
+}: {
+  evidenceId: string;
+  source: NonNullable<EvidenceItem["sourceCourse"]>;
+  courseName: string | null;
+  t: PortfolioMessages;
+}) {
+  const locale = useLocale();
+  const date = fmtDate(source.at, locale);
+  if (courseName === null)
+    return <p className="mb-3 text-sm text-slate-600">{fmt(t.outcome.fromGoneCourse, { date })}</p>;
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-700">
+      <p>{fmt(t.outcome.fromCourse, { course: courseName, date })}</p>
+      <Link
+        to={`/courses/${source.courseId}`}
+        className="font-medium text-violet-700 underline underline-offset-2"
+      >
+        {t.outcome.openCourse}
+      </Link>
+      <Form method="post">
+        <input type="hidden" name="intent" value="refreshCourseEvidence" />
+        <input type="hidden" name="evidenceId" value={evidenceId} />
+        <Button type="submit" variant="secondary" size="sm">
+          {t.outcome.refresh}
+        </Button>
+      </Form>
+    </div>
   );
 }

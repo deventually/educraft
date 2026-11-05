@@ -175,6 +175,7 @@ export const portfolio: Messages["portfolio"] = {
     chapterTitle: "Chapter",
     chapterWords: "{n} words",
     chapterWordsLimit: "{n} words; the whole report may have {limit} words",
+    courseGone: "This course or assessment no longer exists. The snapshot stays as it is.",
     criteriaIntro: "Only you set the status. It is your judgement, not LimeOnIt's.",
     criteriaTitle: "Criteria and status",
     evidenceCriteria: "Belongs to the criteria",
@@ -186,6 +187,11 @@ export const portfolio: Messages["portfolio"] = {
     evidenceUpload: "Take the text from a file (PDF or Word)",
     evidenceUploadFailed: "The text could not be taken from this file.",
     evidenceUploadHelp: "The file stays on your computer; only the text goes into the field.",
+    fromCourse: "From course {course}, snapshot of {date}.",
+    fromGoneCourse: "From a course that no longer exists, snapshot of {date}.",
+    openCourse: "Open the course",
+    refresh: "Fetch again",
+    refreshed: "Fetched again from the course.",
     removeEvidence: "Remove evidence",
     removeEvidenceBody: "This piece of evidence will be removed from the dossier.",
     saveChapter: "Save chapter",
@@ -235,6 +241,9 @@ export const portfolio: Messages["portfolio"] = {
   toastSaved: "Saved.",
   tools: {
     chapterTitle: "Help with thinking while you write",
+    course: "Use your course",
+    courseHow:
+      "Put your test blueprint or coverage matrix in your dossier as evidence: open the course and choose “Use as evidence in BDB/BKE”.",
     how: {
       "arcs-reactor":
         "Describe where your students' motivation falters and get concrete interventions based on the ARCS model.",

@@ -65,7 +65,12 @@ export interface EvidenceItem {
   text: string;
   criterionIds: string[];
   sourceGenerationId?: string;
+  /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */
+  sourceCourse?: { courseId: string; part: CourseEvidencePart; at: number };
 }
+
+/** Which part of a course a snapshot shows: outcomes with the coverage matrix, or one assessment. */
+export type CourseEvidencePart = "outcomes-and-matrix" | { assessmentId: string };
 
 export interface Chapter {
   id: string;

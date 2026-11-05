@@ -1,0 +1,68 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`courseAsEvidence: one assessment > gives the question-level matrix with a total that adds up 1`] = `
+"## Databases | jaar 1: Eindopdracht
+
+Summatief · week 4 · weging 100%
+
+### Toetsmatrijs
+
+| Vraag | Leeruitkomst | Denkniveau | Vraagvorm | Punten |
+| --- | --- | --- | --- | --- |
+| 1 | LU1 | creëren | Open vraag | 10 |
+| 2 | LU1 | creëren | Open vraag | 10 |
+| 3 | LU2 | analyseren | Meerkeuze | 2 |
+| 4 | LU2 | begrijpen | Anders | 3 |
+| **Totaal** | 4 vragen |  |  | 25 |
+
+Aandeel per leeruitkomst: LU1 80% · LU2 20%.
+
+### Leeruitkomsten
+
+- **LU1** Je ontwerpt een datamodel. (creëren)
+- **LU2** Je legt normaliseren uit. (begrijpen)"
+`;
+
+exports[`courseAsEvidence: outcomes and matrix (P26.4) > lists the outcomes with Bloom, the coverage matrix and the findings (NL) 1`] = `
+"## Databases | jaar 1
+
+Studielast: 5 EC.
+
+### Leeruitkomsten
+
+- **LU1** Je ontwerpt een datamodel. (creëren)
+- **LU2** Je legt normaliseren uit. (begrijpen)
+
+### Dekkingsmatrix
+
+| Leeruitkomst | Les normaliseren | Opdracht datamodel | Oefentoets | Eindopdracht |
+| --- | --- | --- | --- | --- |
+| LU1 | — | ✓ | — | ✓ creëren, 2 vragen |
+| LU2 | ✓ | — | ✓ begrijpen | ✓ begrijpen, 2 vragen |
+
+### Aandachtspunten
+
+Geen aandachtspunten. Alles sluit op elkaar aan."
+`;
+
+exports[`courseAsEvidence: outcomes and matrix (P26.4) > writes the findings as the course page does, in English too 1`] = `
+"## Databases | jaar 1
+
+Study load: 5 EC.
+
+### Learning outcomes
+
+- **LO1** Je ontwerpt een datamodel. (create)
+- **LO2** Je legt normaliseren uit. (understand)
+
+### Coverage matrix
+
+| Learning outcome | Les normaliseren | Opdracht datamodel | Oefentoets | Eindopdracht |
+| --- | --- | --- | --- | --- |
+| LO1 | — | ✓ | — | ✓ create, 1 question |
+| LO2 | ✓ | — | ✓ understand | ✓ understand, 2 questions |
+
+### Points of attention
+
+- Attention: Eindopdracht assesses LO1 with only one question. That is a narrow basis for a judgement."
+`;

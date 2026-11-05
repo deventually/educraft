@@ -21,6 +21,7 @@ import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { extractCourseImport } from "./courseImport.server";
+import { addCourseToDossier } from "./courseEvidence.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getToolBySlug } from "~/lib/registry";
 import {
@@ -48,6 +49,7 @@ export type CourseActionResult =
     }
   | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
   | { ok: true; intent: "import-blueprint"; added: number }
+  | { ok: true; intent: "use-as-evidence" }
   | { ok: false; error: string; intent?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
@@ -114,6 +116,11 @@ export async function saveCourseIntent(
           ? m.errorInvalid
           : m.blueprint.errors[result.error];
     return { ok: false, intent, error };
+  }
+
+  if (intent === "use-as-evidence") {
+    const result = await addCourseToDossier(user, course, fd, locale);
+    return result.ok ? { ok: true, intent } : { ok: false, intent, error: result.error };
   }
 
   if (intent === "settings") {
