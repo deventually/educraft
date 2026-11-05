@@ -67,7 +67,7 @@ describe("BDB/BKE per teacher", () => {
     expect(
       await status(list.action({ request: post({ intent: "create", name: "X" }) } as never)),
     ).toBe(404);
-    const r = await root.loader({ request: get() } as never);
+    const r = (await root.loader({ request: get() } as never)).data;
     expect(r.user).toMatchObject({ portfolio: false });
   });
 
@@ -78,7 +78,7 @@ describe("BDB/BKE per teacher", () => {
     expect(
       await status(overview.loader({ request: get(), params: { id: d.id } } as never)),
     ).toBeUndefined();
-    expect((await root.loader({ request: get() } as never)).user).toMatchObject({
+    expect((await root.loader({ request: get() } as never)).data.user).toMatchObject({
       portfolio: true,
     });
   });

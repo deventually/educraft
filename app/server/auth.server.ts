@@ -4,6 +4,8 @@ import { getUserById } from "./repositories/users.server";
 import { getOwnerUserId } from "./repositories/settings.server";
 import type { UserRow } from "./schema.server";
 import { isRole, type Role } from "~/lib/registry/access";
+import type { FlashKey } from "~/lib/flash";
+import { redirectWithFlash } from "./flash.server";
 
 /**
  * The public user shape passed to loaders/components — the password hash never
@@ -80,11 +82,19 @@ async function sessionCookie(userId: string): Promise<string> {
 }
 
 /**
- * Create a session for `userId` and redirect to `redirectTo`. Logging in does not
- * touch other sessions: the same account may be signed in on several devices.
+ * Create a session for `userId` and redirect to `redirectTo`, optionally with a
+ * flash toast for the landing page (P16). Logging in does not touch other
+ * sessions: the same account may be signed in on several devices.
  */
-export async function createUserSession(userId: string, redirectTo: string): Promise<Response> {
-  return redirect(redirectTo, { headers: { "Set-Cookie": await sessionCookie(userId) } });
+export async function createUserSession(
+  userId: string,
+  redirectTo: string,
+  flash?: FlashKey,
+): Promise<Response> {
+  const headers = { "Set-Cookie": await sessionCookie(userId) };
+  return flash
+    ? redirectWithFlash(redirectTo, flash, { headers })
+    : redirect(redirectTo, { headers });
 }
 
 /**
@@ -96,10 +106,9 @@ export async function reissueSessionCookie(userId: string): Promise<string> {
   return sessionCookie(userId);
 }
 
-/** Destroy the session and redirect to /login. */
-export async function logout(request: Request): Promise<Response> {
+/** Destroy the session and redirect to /login, optionally with a flash toast (P16). */
+export async function logout(request: Request, flash?: FlashKey): Promise<Response> {
   const session = await getSession(request.headers.get("Cookie"));
-  return redirect("/login", {
-    headers: { "Set-Cookie": await destroySession(session) },
-  });
+  const headers = { "Set-Cookie": await destroySession(session) };
+  return flash ? redirectWithFlash("/login", flash, { headers }) : redirect("/login", { headers });
 }

@@ -1,4 +1,4 @@
-import { Form, Link, redirect, useActionData } from "react-router";
+import { Form, Link, useActionData } from "react-router";
 import { z } from "zod";
 import { ArrowLeft, KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
 import type { Route } from "./+types/admin.users.$id";
@@ -44,6 +44,7 @@ import { LinkCard } from "~/components/admin/LinkCard";
 import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
+import { redirectWithFlash } from "~/server/flash.server";
 
 /**
  * One person's page (P28.1): everything about one account in one place: Account
@@ -238,7 +239,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     await deleteUserCascade(userId);
     // This page is gone with the account: back to the list.
-    return redirect("/admin/users");
+    return redirectWithFlash("/admin/users", "userDeleted");
   }
 
   if (intent === "resetPassword") {

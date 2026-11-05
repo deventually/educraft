@@ -47,7 +47,7 @@ export async function action({ request }: Route.ActionArgs) {
   // A deactivated account (P18.7) is told so — but only after a correct password, so
   // this message never reveals which addresses exist.
   if (row.disabledAt) return { error: m.auth.accountDisabled };
-  return createUserSession(row.id, "/");
+  return createUserSession(row.id, "/", "signedIn");
 }
 
 export default function Login() {

@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -230,6 +231,7 @@ describe("/admin/teams/:id, the team page", () => {
     const gone = await at({ intent: "delete" });
     expect(gone).toBeInstanceOf(Response);
     expect((gone as Response).headers.get("Location")).toBe("/admin/teams");
+    expect(await flashKeyOf(gone)).toBe("teamDeleted");
     expect(await teams.getTeamWithMembers(team.id)).toBeNull();
   });
 
@@ -409,6 +411,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     const res = (await act(team.id, { intent: "stepDown" })) as unknown as Response;
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("/account");
+    expect(await flashKeyOf(res)).toBe("steppedDown");
     expect(await teams.getTeamForLead(lead.id, team.id)).toBeNull();
     expect(await memberIds(team.id)).toContain(lead.id);
   });
