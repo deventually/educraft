@@ -1,6 +1,7 @@
-import { Form, useActionData } from "react-router";
+import { useState } from "react";
+import { Form, Link, useActionData } from "react-router";
 import { z } from "zod";
-import { KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import type { Route } from "./+types/admin.users";
 import { isOwner, requireRole } from "~/server/auth.server";
 import { NO_PASSWORD, hashPassword } from "~/server/password.server";
@@ -8,129 +9,71 @@ import {
   createInvite,
   createPasswordReset,
   createUser,
-  deleteUserCascade,
   getUserByEmail,
   getUserById,
-  listInvitesWithContext,
-  getUserAssignedModels,
-  listUsers,
+  listPeople,
   revokeInvite,
-  setUserAssignedModels,
-  setPortfolioEnabled,
-  setUserDisabled,
-  setUserRole,
-  updateUserEmail,
-  updateUserPassword,
 } from "~/server/repositories/users.server";
-import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
+import { getOwnerUserId } from "~/server/repositories/settings.server";
+import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
-import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label, Select } from "~/components/ui";
-import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
-import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
-import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { CreateAccountForm, type CreateAccountResult } from "~/components/admin/CreateAccountForm";
-import { LinkCard } from "~/components/admin/LinkCard";
-import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
-import { fullCatalog } from "~/server/modelCatalog.server";
+import { CopyButton, LinkCard } from "~/components/admin/LinkCard";
+import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
+
+const STATUSES = ["active", "invited", "disabled"] as const;
+
+/** The list's search and filters, from the query string; an unknown value means "all". */
+const FilterSchema = z.object({
+  q: z.string().trim().max(100).catch(""),
+  role: z.enum(ROLES).or(z.literal("")).catch(""),
+  status: z.enum(STATUSES).or(z.literal("")).catch(""),
+});
 
 /**
- * Whether the acting admin may manage `target` (P18.6): a teacher, or anyone when the
- * actor is the super admin. A regular admin never touches another admin (nor a
- * retired-role row — fail closed): that would be a way around the promotion rule.
+ * The user list (P28.1): one row per person (accounts and open invites), searched and
+ * filtered on the server, and one "Add" button. Everything about one person lives on
+ * their own page (`/admin/users/:id`).
  */
-function mayManage(actorIsOwner: boolean, target: { role: string }): boolean {
-  return actorIsOwner || target.role === "teacher";
-}
-
-/** The target of a manage action: 404 when missing, `ownerOnly` when out of reach. */
-async function manageTarget(actorIsOwner: boolean, userId: string) {
-  const target = await getUserById(userId);
-  if (!target) throw new Response("Not found", { status: 404 });
-  return mayManage(actorIsOwner, target) ? target : null;
-}
-
-/** Shortest password the app accepts (same rule as the reset and invite pages). */
-const MIN_PASSWORD_LENGTH = 10;
-
-/** Days a set-password link for a freshly created account stays valid. */
-const SET_PASSWORD_LINK_DAYS = 7;
-
-/**
- * The target of an owner-only account action (P18.7): 404 when missing or of a retired
- * role (never acted on here, like `role`), `null` when it is the actor themself.
- */
-async function ownerTarget(actorId: string, userId: string) {
-  const target = await getUserById(userId);
-  if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
-  return target.id === actorId ? null : target;
-}
-
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
-  const [invites, users, catalog, instanceModels, storedOwnerId, viewerIsOwner] = await Promise.all(
-    [
-      listInvitesWithContext(),
-      listUsers(),
-      fullCatalog(),
-      getEnabledModels(),
-      getOwnerUserId(),
-      isOwner(admin),
-    ],
-  );
+  const url = new URL(request.url);
+  const filter = FilterSchema.parse({
+    q: url.searchParams.get("q") ?? "",
+    role: url.searchParams.get("role") ?? "",
+    status: url.searchParams.get("status") ?? "",
+  });
+  const [rows, storedOwnerId, viewerIsOwner] = await Promise.all([
+    listPeople({
+      q: filter.q || undefined,
+      role: filter.role || undefined,
+      status: filter.status || undefined,
+    }),
+    getOwnerUserId(),
+    isOwner(admin),
+  ]);
   // The badge is for every admin to see; a stored id of a demoted or deleted account
   // counts as "no owner".
-  const ownerId = users.find((u) => u.id === storedOwnerId && u.role === "admin")?.id ?? null;
-  // Per-teacher model override (P18): a teacher either follows the instance ("inherit")
-  // or has an own set ("own") that replaces it and may be wider — so the checkboxes run
-  // over the whole catalogue, not over the instance set.
-  const base = catalog.map((m) => ({ id: m.id, displayName: m.displayName }));
-  // A teacher who follows the instance shows the instance set (greyed out), so that
-  // switching to "own" autosaves a sensible, non-empty starting selection.
-  const instanceIds = instanceModels ?? base.map((m) => m.id);
-  const teachers = await Promise.all(
-    users
-      .filter((u) => u.role === "teacher")
-      .map(async (u) => {
-        const [own, portfolio] = await Promise.all([
-          getUserAssignedModels(u.id),
-          portfolioAccess(u),
-        ]);
-        return {
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          mode: own ? ("own" as const) : ("inherit" as const),
-          models: own ? [...own] : instanceIds,
-          portfolio,
-        };
-      }),
-  );
+  const owner = storedOwnerId ? await getUserById(storedOwnerId) : null;
   return {
-    base,
-    teachers,
     selfId: admin.id,
     isOwner: viewerIsOwner,
-    ownerId,
-    invites: invites.map((i) => ({
-      token: i.token,
-      role: i.role,
-      note: i.note,
-      expiresAt: i.expiresAt,
-      used: Boolean(i.usedByUserId),
-      createdByName: i.createdByName,
-      createdAt: i.createdAt,
-    })),
-    users: users.map((u) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      role: u.role,
-      createdAt: u.createdAt,
-      disabled: Boolean(u.disabledAt),
+    ownerId: owner?.role === "admin" ? owner.id : null,
+    filter,
+    people: rows.map((r) => ({
+      kind: r.kind,
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      role: r.role,
+      status: r.status,
+      lastActiveDay: r.lastActiveDay,
+      // An open invite's link, to copy again (an admin already sees every invite).
+      ...(r.kind === "invite" ? { link: `${url.origin}/invite/${r.id}` } : {}),
     })),
   };
 }
@@ -160,105 +103,13 @@ export async function action({ request }: Route.ActionArgs) {
     return { revoked: true as const };
   }
 
-  // ── Per-teacher model override (P18): inherit the instance, or an own set ────
-  if (intent === "teacherModels") {
-    const userId = String(fd.get("userId") ?? "");
-    const target = await getUserById(userId);
-    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    if (fd.get("mode") === "own") {
-      // An own set replaces the instance, so it is checked against the catalogue,
-      // not the instance set. Exactly the chosen set is stored; empty is refused.
-      const catalogIds = new Set((await fullCatalog()).map((m) => m.id));
-      const chosen = [...new Set(fd.getAll("models").map(String))].filter((id) =>
-        catalogIds.has(id),
-      );
-      if (chosen.length === 0) return { error: "atLeastOne" as const };
-      await setUserAssignedModels(userId, chosen);
-    } else {
-      await setUserAssignedModels(userId, null);
-    }
-    return { saved: true as const };
-  }
-
-  // ── BDB/BKE workplace per teacher (P27): on or off, nothing is deleted ────
-  if (intent === "portfolioAccess") {
-    const userId = String(fd.get("userId") ?? "");
-    const target = await getUserById(userId);
-    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    await setPortfolioEnabled(userId, fd.get("enabled") === "1");
-    return { saved: true as const };
-  }
-
-  if (intent === "role") {
-    const userId = String(fd.get("userId") ?? "");
-    const role = String(fd.get("role") ?? "");
-    // An admin can never change their OWN role — no self-lockout.
-    if (userId === admin.id) return { error: "selfDemote" as const };
-    // Only the super admin promotes, demotes or otherwise changes a role (P18.6).
-    if (!actorIsOwner) return { error: "ownerOnly" as const };
-    // A legacy row whose role is no longer valid (e.g. "student") is never
-    // promoted by a role change — treat it as not manageable here.
-    const target = await getUserById(userId);
-    if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
-    if (isRole(role)) await setUserRole(userId, role);
-    return { roleChanged: true as const };
-  }
-
-  if (intent === "deleteUser") {
-    const userId = String(fd.get("userId") ?? "");
-    // An admin removes their own account via /account (type-to-confirm) — and
-    // since they can't remove themselves here, the instance always keeps an admin.
-    if (userId === admin.id) return { error: "selfDelete" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    await deleteUserCascade(userId);
-    return { userDeleted: true as const };
-  }
-
-  if (intent === "resetPassword") {
-    const userId = String(fd.get("userId") ?? "");
-    if (userId === admin.id) return { error: "selfReset" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    // No email service: mint a single-use link the admin shares out-of-band; the
-    // user opens it and sets their own new password. The admin never sees it.
-    const reset = await createPasswordReset(userId);
-    return { resetLink: `${new URL(request.url).origin}/reset/${reset.token}` };
-  }
-
-  if (intent === "setEmail") {
-    const userId = String(fd.get("userId") ?? "");
-    // Own email changes go via /account, which asks for the current password.
-    if (userId === admin.id) return { error: "selfEmail" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    const email = String(fd.get("email") ?? "").trim() || null;
-    if (email && !z.string().email().safeParse(email).success) {
-      return { error: "invalidEmail" as const };
-    }
-    // Reject a collision up front so the unique index never throws.
-    if (email) {
-      const existing = await getUserByEmail(email);
-      if (existing && existing.id !== userId) return { error: "emailTaken" as const };
-    }
-    await updateUserEmail(userId, email);
-    return { emailSet: true as const };
-  }
-
-  // ── Owner-only accounts (P18.7) ─────────────────────────────────────────────
-  // The super admin creates accounts directly, sets passwords and (de)activates.
-  // Authority first: a regular admin gets `ownerOnly` for all of these, whatever the
-  // target (even themself), before anything is read or written. No password is ever
-  // returned to the client; the only secret that leaves is the single-use link.
-  if (
-    intent === "createAccount" ||
-    intent === "setPassword" ||
-    intent === "deactivate" ||
-    intent === "reactivate"
-  ) {
-    if (!actorIsOwner) return { error: "ownerOnly" as const };
-  }
-
+  // ── A direct account (P18.7, super admin only) ─────────────────────────────
+  // No password is ever returned to the client; the only secret that leaves is the
+  // single-use link.
   if (intent === "createAccount") {
     // Tagged so the page shows a refusal inside the create form, next to its fields.
     const fail = <E extends string>(error: E) => ({ error, form: "create" as const });
+    if (!actorIsOwner) return fail("ownerOnly");
     const name = String(fd.get("name") ?? "").trim();
     const email = String(fd.get("email") ?? "").trim();
     const role = String(fd.get("role") ?? "");
@@ -283,52 +134,122 @@ export async function action({ request }: Route.ActionArgs) {
     return { setPasswordLink: `${new URL(request.url).origin}/reset/${reset.token}` };
   }
 
-  if (intent === "setPassword") {
-    const target = await ownerTarget(admin.id, String(fd.get("userId") ?? ""));
-    if (!target) return { error: "selfPassword" as const };
-    const password = String(fd.get("password") ?? "");
-    const confirm = String(fd.get("confirm") ?? "");
-    if (password.length < MIN_PASSWORD_LENGTH) return { error: "passwordTooShort" as const };
-    if (password !== confirm) return { error: "passwordMismatch" as const };
-    // Bumps sessionVersion: the user is logged out on every device.
-    await updateUserPassword(target.id, hashPassword(password));
-    return { passwordSet: true as const };
-  }
-
-  if (intent === "deactivate" || intent === "reactivate") {
-    const target = await ownerTarget(admin.id, String(fd.get("userId") ?? ""));
-    if (!target) return { error: "selfDeactivate" as const };
-    await setUserDisabled(target.id, intent === "deactivate");
-    return { statusChanged: true as const };
-  }
-
+  // Everything about one account is on its own page now (P28.1).
   return { error: "unknown" as const };
+}
+
+const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
+const th = "px-4 py-2.5 font-semibold";
+const td = "px-4 py-2.5 text-slate-600";
+
+/** "Add": an invite link, or (super admin only) an account right away (P18.7). */
+function AddPersonForm({
+  viewerIsOwner,
+  actionData,
+  createError,
+}: {
+  viewerIsOwner: boolean;
+  actionData: unknown;
+  createError?: string;
+}) {
+  const t = useT();
+  const i = t.admin.invites;
+  const [how, setHow] = useState<"invite" | "account">("invite");
+  const radio = (value: "invite" | "account", label: string) => (
+    <div className="flex items-center gap-2">
+      <input
+        type="radio"
+        id={`add-how-${value}`}
+        name="addHow"
+        value={value}
+        checked={how === value}
+        onChange={() => setHow(value)}
+        className="size-4 border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+      />
+      <label htmlFor={`add-how-${value}`} className="text-sm font-medium text-slate-800">
+        {label}
+      </label>
+    </div>
+  );
+
+  return (
+    <div
+      id="add-person"
+      className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
+      <h2 className={h2}>{t.people.addHeading}</h2>
+      {viewerIsOwner && (
+        <fieldset>
+          <legend className="text-sm font-semibold text-slate-800">{t.people.addHow}</legend>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+            {radio("invite", t.people.addInvite)}
+            {radio("account", t.people.addAccount)}
+          </div>
+        </fieldset>
+      )}
+
+      {how === "account" && viewerIsOwner ? (
+        <CreateAccountForm result={actionData as CreateAccountResult} errorMessage={createError} />
+      ) : (
+        <div>
+          <p className="text-sm text-slate-600">{i.mintIntro}</p>
+          {actionData && typeof actionData === "object" && "link" in actionData ? (
+            <LinkCard
+              heading={i.linkHeading}
+              hint={i.linkHint}
+              url={String(actionData.link)}
+              copyLabel={i.copy}
+            />
+          ) : (
+            <Form method="post" className="mt-4 max-w-xl space-y-4">
+              <input type="hidden" name="intent" value="mint" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="note">{i.noteLabel}</Label>
+                  <Input
+                    id="note"
+                    name="note"
+                    type="text"
+                    placeholder={i.notePlaceholder}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="expiryDays">{i.expiryLabel}</Label>
+                  <Input
+                    id="expiryDays"
+                    name="expiryDays"
+                    type="number"
+                    min={1}
+                    max={90}
+                    defaultValue={14}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <Button type="submit">{i.submit}</Button>
+            </Form>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const t = useT();
+  const p = t.people;
+  const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const { selfId, invites, users, base, teachers, isOwner: viewerIsOwner, ownerId } = loaderData;
+  const { selfId, people, filter, isOwner: viewerIsOwner, ownerId } = loaderData;
+  const [adding, setAdding] = useState(false);
 
-  const roleLabel: Record<string, string> = {
-    teacher: t.admin.invites.roleTeacher,
-    admin: t.admin.invites.roleAdmin,
-  };
-
-  // Errors of the action buttons (reset link, delete): inline in the Users section and
-  // as a toast. The autosaving controls (e-mail, role, models) report through their
-  // own fetcher toast, with `autoSaveErrors`.
-  const userErrors: Record<string, string> = {
-    selfDelete: t.admin.invites.selfDeleteError,
-    selfReset: t.admin.invites.selfResetError,
-    selfPassword: t.admin.invites.selfPasswordError,
-    selfDeactivate: t.admin.invites.selfDeactivateError,
-    ownerOnly: t.admin.invites.ownerOnlyError,
-    // The create form and the set-password dialog (P18.7).
+  const errors: Record<string, string> = {
+    ownerOnly: i.ownerOnlyError,
     nameRequired: t.auth.nameRequired,
-    invalidEmail: t.admin.invites.invalidEmailError,
-    emailTaken: t.admin.invites.emailTakenError,
-    invalidRole: t.admin.invites.invalidRoleError,
+    invalidEmail: i.invalidEmailError,
+    emailTaken: i.emailTakenError,
+    invalidRole: i.invalidRoleError,
     passwordTooShort: t.auth.passwordTooShort,
     passwordMismatch: t.auth.passwordMismatch,
   };
@@ -336,406 +257,173 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     actionData && "error" in actionData && typeof actionData.error === "string"
       ? actionData.error
       : undefined;
-  // The create form shows its own refusals inline; the Users section shows the others.
-  const fromCreateForm = actionData && "form" in actionData && actionData.form === "create";
-  const createError = actionError && fromCreateForm ? userErrors[actionError] : undefined;
-  const userError = actionError && !fromCreateForm ? userErrors[actionError] : undefined;
-  const autoSaveErrors: Record<string, string> = {
-    invalidEmail: t.admin.invites.invalidEmailError,
-    emailTaken: t.admin.invites.emailTakenError,
-    selfDemote: t.admin.invites.selfDemoteError,
-    selfEmail: t.admin.invites.selfEmailError,
-    ownerOnly: t.admin.invites.ownerOnlyError,
-    atLeastOne: t.admin.models.atLeastOne,
-  };
-  const autoSaveError = (code: string | true) =>
-    typeof code === "string" ? autoSaveErrors[code] : undefined;
+  const createError = actionError ? errors[actionError] : undefined;
 
   useFormToast(actionData, {
     result: (d) =>
       !d
         ? null
         : "error" in d && typeof d.error === "string"
-          ? { variant: "error", message: userErrors[d.error] ?? t.error.generic }
+          ? { variant: "error", message: errors[d.error] ?? t.error.generic }
           : {
               variant: "success",
               message:
                 "setPasswordLink" in d || "accountCreated" in d
-                  ? t.admin.invites.accountCreated
-                  : "passwordSet" in d
-                    ? t.admin.invites.passwordSet
-                    : t.admin.console.saved,
+                  ? i.accountCreated
+                  : t.admin.console.saved,
             },
   });
 
   return (
-    <div className="space-y-10">
-      {/* ── Create an account (super admin only, P18.7) ──────────────────── */}
-      {viewerIsOwner && (
-        <CreateAccountForm result={actionData as CreateAccountResult} errorMessage={createError} />
-      )}
-
-      {/* ── Mint a teacher invite ─────────────────────────────────────────── */}
+    <div className="space-y-6">
       <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {t.admin.invites.mintHeading}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{t.admin.invites.mintIntro}</p>
-
-        {actionData && "link" in actionData && actionData.link ? (
-          <LinkCard
-            heading={t.admin.invites.linkHeading}
-            hint={t.admin.invites.linkHint}
-            url={actionData.link}
-            copyLabel={t.admin.invites.copy}
-          />
-        ) : (
-          <Form method="post" className="mt-4 max-w-xl space-y-4">
-            <input type="hidden" name="intent" value="mint" />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="note">{t.admin.invites.noteLabel}</Label>
-                <Input
-                  id="note"
-                  name="note"
-                  type="text"
-                  placeholder={t.admin.invites.notePlaceholder}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="expiryDays">{t.admin.invites.expiryLabel}</Label>
-                <Input
-                  id="expiryDays"
-                  name="expiryDays"
-                  type="number"
-                  min={1}
-                  max={90}
-                  defaultValue={14}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            <Button type="submit">{t.admin.invites.submit}</Button>
-          </Form>
-        )}
-      </section>
-
-      {/* ── All invites (oversight) ───────────────────────────────────────── */}
-      <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {t.admin.invites.listHeading}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{t.admin.invites.listIntro}</p>
-        {invites.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">{t.admin.invites.none}</p>
-        ) : (
-          <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
-              <caption className="sr-only">{t.admin.invites.listHeading}</caption>
-              <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th scope="col" className="px-4 py-2.5 font-semibold">
-                    {t.admin.invites.colRole}
-                  </th>
-                  <th scope="col" className="px-4 py-2.5 font-semibold">
-                    {t.admin.invites.colRecipient}
-                  </th>
-                  <th scope="col" className="px-4 py-2.5 font-semibold">
-                    {t.admin.invites.colStatus}
-                  </th>
-                  <th scope="col" className="px-4 py-2.5 font-semibold">
-                    {t.admin.invites.colCreator}
-                  </th>
-                  <th scope="col" className="px-4 py-2.5 text-right font-semibold">
-                    <span className="sr-only">{t.admin.invites.revoke}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {invites.map((inv) => {
-                  const expired =
-                    !inv.used &&
-                    inv.expiresAt != null &&
-                    new Date(inv.expiresAt).getTime() < Date.now();
-                  const status = inv.used
-                    ? t.admin.invites.statusUsed
-                    : expired
-                      ? t.admin.invites.statusExpired
-                      : t.admin.invites.statusOpen;
-                  const open = !inv.used && !expired;
-                  return (
-                    <tr key={inv.token} className="border-b border-slate-50 last:border-0">
-                      <td className="px-4 py-2.5 text-slate-700">
-                        {roleLabel[inv.role] ?? inv.role}
-                      </td>
-                      <td className="px-4 py-2.5 text-slate-600">
-                        {inv.note ?? t.admin.invites.linkOnly}
-                      </td>
-                      <td className="px-4 py-2.5 text-slate-600">{status}</td>
-                      <td className="px-4 py-2.5 text-slate-600">{inv.createdByName ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-right">
-                        {open && (
-                          <ConfirmDialog
-                            triggerLabel={t.admin.invites.revoke}
-                            title={t.admin.invites.revokeTitle}
-                            description={t.admin.invites.revokeBody}
-                            confirmLabel={t.admin.invites.revoke}
-                            cancelLabel={t.confirm.cancel}
-                            fields={{ intent: "revoke", token: inv.token }}
-                          />
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className={h2}>{p.heading}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600">{p.intro}</p>
           </div>
+          <Button
+            type="button"
+            aria-expanded={adding}
+            aria-controls="add-person"
+            onClick={() => setAdding((v) => !v)}
+          >
+            <UserPlus className="size-4" aria-hidden />
+            {p.add}
+          </Button>
+        </div>
+
+        {adding && (
+          <AddPersonForm
+            viewerIsOwner={viewerIsOwner}
+            actionData={actionData}
+            createError={createError}
+          />
         )}
       </section>
 
-      {/* ── Users & roles ─────────────────────────────────────────────────── */}
-      <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {t.admin.invites.usersHeading}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{t.admin.invites.usersIntro}</p>
+      {/* ── Search and filters: a plain GET form, the loader filters ─────────── */}
+      <Form
+        method="get"
+        role="search"
+        aria-label={p.searchRegion}
+        className="flex flex-wrap items-end gap-3"
+      >
+        <div className="min-w-48 flex-1">
+          <Label htmlFor="people-q">{p.search}</Label>
+          <Input id="people-q" name="q" type="search" defaultValue={filter.q} className="mt-1" />
+        </div>
+        <div>
+          <Label htmlFor="people-role">{p.filterRole}</Label>
+          <Select id="people-role" name="role" defaultValue={filter.role} className="mt-1 w-auto">
+            <option value="">{p.all}</option>
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {roleLabel(t, r)}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="people-status">{p.filterStatus}</Label>
+          <Select
+            id="people-status"
+            name="status"
+            defaultValue={filter.status}
+            className="mt-1 w-auto"
+          >
+            <option value="">{p.all}</option>
+            <option value="active">{p.statusActive}</option>
+            <option value="invited">{p.statusInvited}</option>
+            <option value="disabled">{p.statusDisabled}</option>
+          </Select>
+        </div>
+        <Button type="submit" variant="secondary">
+          {p.filterSubmit}
+        </Button>
+      </Form>
 
-        {userError && (
-          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{userError}</p>
-        )}
-
-        {actionData && "resetLink" in actionData && actionData.resetLink && (
-          <LinkCard
-            heading={t.admin.invites.resetLinkHeading}
-            hint={t.admin.invites.resetLinkHint}
-            url={actionData.resetLink}
-            copyLabel={t.admin.invites.copy}
-          />
-        )}
-
-        {/* `relative`: the box is the containing block of the absolutely positioned
-            sr-only labels, so they scroll with the table instead of widening the page. */}
-        <div className="relative mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {people.length === 0 ? (
+        <p className="text-sm text-slate-500">{p.none}</p>
+      ) : (
+        /* `relative`: the box is the containing block of the absolutely positioned
+           sr-only labels, so they scroll with the table instead of widening the page. */
+        <div className="relative overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
-            <caption className="sr-only">{t.admin.invites.usersHeading}</caption>
+            <caption className="sr-only">{p.heading}</caption>
             <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th scope="col" className="px-4 py-2.5 font-semibold">
-                  {t.admin.invites.colName}
+                <th scope="col" className={th}>
+                  {p.colName}
                 </th>
-                <th scope="col" className="px-4 py-2.5 font-semibold">
-                  {t.admin.invites.colEmail}
+                <th scope="col" className={th}>
+                  {p.colEmail}
                 </th>
-                <th scope="col" className="px-4 py-2.5 font-semibold">
-                  {t.admin.invites.colUserRole}
+                <th scope="col" className={th}>
+                  {p.colRole}
                 </th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">
-                  <span className="sr-only">{t.admin.invites.userActions}</span>
+                <th scope="col" className={th}>
+                  {p.colStatus}
+                </th>
+                <th scope="col" className={th}>
+                  {p.colLastActive}
+                </th>
+                <th scope="col" className={`${th} text-right`}>
+                  <span className="sr-only">{p.colActions}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => {
-                const isSelf = u.id === selfId;
-                // Regular admins manage teachers only; the owner manages everyone.
-                const canManage = viewerIsOwner || u.role === "teacher";
-                return (
-                  <tr key={u.id} className="border-b border-slate-50 last:border-0 align-top">
-                    <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
-                      {u.name}
-                      {isSelf && (
-                        <span className="ml-1.5 text-xs font-normal text-slate-400">
-                          ({t.admin.invites.you})
-                        </span>
-                      )}
-                      {u.id === ownerId && (
-                        <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
-                          {t.admin.invites.ownerBadge}
-                        </span>
-                      )}
-                      {u.disabled && (
-                        <span className="ml-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
-                          {t.admin.invites.statusDisabled}
-                        </span>
-                      )}
-                    </th>
-                    <td className="px-4 py-2.5 text-slate-600">
-                      {isSelf || !canManage ? (
-                        (u.email ?? "—")
-                      ) : (
-                        <AutoSaveForm
-                          intent="setEmail"
-                          hidden={{ userId: u.id }}
-                          errorMessage={autoSaveError}
-                          className="flex items-center gap-1.5"
-                        >
-                          <label htmlFor={`email-${u.id}`} className="sr-only">
-                            {t.admin.invites.editEmailLabel} — {u.name}
-                          </label>
-                          <Input
-                            id={`email-${u.id}`}
-                            name="email"
-                            type="email"
-                            defaultValue={u.email ?? ""}
-                            placeholder={t.admin.invites.emailPlaceholder}
-                            className="h-8 w-40 text-sm"
-                          />
-                        </AutoSaveForm>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-600">{roleLabel[u.role] ?? u.role}</td>
-                    <td className="px-4 py-2.5">
-                      {isSelf || !canManage ? (
-                        <span className="block text-right text-xs text-slate-400">—</span>
-                      ) : (
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          {viewerIsOwner && isRole(u.role) && (
-                            <AutoSaveForm
-                              intent="role"
-                              hidden={{ userId: u.id }}
-                              errorMessage={autoSaveError}
-                              className="flex items-center gap-2"
-                            >
-                              <label htmlFor={`role-${u.id}`} className="sr-only">
-                                {t.admin.invites.changeRole} — {u.name}
-                              </label>
-                              <Select
-                                id={`role-${u.id}`}
-                                name="role"
-                                defaultValue={u.role}
-                                className="w-auto"
-                              >
-                                {ROLES.map((r) => (
-                                  <option key={r} value={r}>
-                                    {roleLabel[r]}
-                                  </option>
-                                ))}
-                              </Select>
-                            </AutoSaveForm>
-                          )}
-                          <Form method="post">
-                            <input type="hidden" name="intent" value="resetPassword" />
-                            <input type="hidden" name="userId" value={u.id} />
-                            <Button type="submit" variant="secondary" size="sm">
-                              <KeyRound className="size-3.5" aria-hidden />
-                              {t.admin.invites.resetPassword}
-                            </Button>
-                          </Form>
-                          {viewerIsOwner && (
-                            <>
-                              <SetPasswordDialog userId={u.id} name={u.name} />
-                              <Form method="post">
-                                <input
-                                  type="hidden"
-                                  name="intent"
-                                  value={u.disabled ? "reactivate" : "deactivate"}
-                                />
-                                <input type="hidden" name="userId" value={u.id} />
-                                <Button type="submit" variant="secondary" size="sm">
-                                  {u.disabled ? (
-                                    <UserCheck className="size-3.5" aria-hidden />
-                                  ) : (
-                                    <UserX className="size-3.5" aria-hidden />
-                                  )}
-                                  {u.disabled
-                                    ? t.admin.invites.reactivate
-                                    : t.admin.invites.deactivate}
-                                </Button>
-                              </Form>
-                            </>
-                          )}
-                          <ConfirmDialog
-                            triggerLabel={t.admin.invites.deleteUser}
-                            triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
-                            title={t.admin.invites.deleteUserTitle}
-                            description={t.admin.invites.deleteUserConfirm}
-                            confirmLabel={t.admin.invites.deleteUser}
-                            cancelLabel={t.confirm.cancel}
-                            fields={{ intent: "deleteUser", userId: u.id }}
-                            typeToConfirm={{
-                              word: u.name,
-                              label: fmt(t.admin.invites.deleteUserType, { name: u.name }),
-                            }}
-                          />
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+              {people.map((person) => (
+                <tr
+                  key={`${person.kind}-${person.id}`}
+                  className="border-b border-slate-50 align-top last:border-0"
+                >
+                  <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
+                    {person.kind === "user" ? (
+                      <Link
+                        to={`/admin/users/${person.id}`}
+                        className="rounded text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      >
+                        {person.name || person.email || person.id}
+                      </Link>
+                    ) : (
+                      (person.name ?? i.linkOnly)
+                    )}
+                    {person.id === selfId && (
+                      <span className="ml-1.5 text-xs font-normal text-slate-500">({i.you})</span>
+                    )}
+                    {person.kind === "user" && person.id === ownerId && <OwnerBadge />}
+                  </th>
+                  <td className={td}>{person.email ?? "—"}</td>
+                  <td className={td}>{roleLabel(t, person.role)}</td>
+                  <td className={td}>
+                    <StatusBadge status={person.status} />
+                  </td>
+                  <td className={td}>
+                    {person.kind === "user" ? <LastActive day={person.lastActiveDay} /> : "—"}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {person.kind === "invite" && person.link && (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <CopyButton url={person.link} label={p.copyLink} />
+                        <ConfirmDialog
+                          triggerLabel={i.revoke}
+                          title={i.revokeTitle}
+                          description={i.revokeBody}
+                          confirmLabel={i.revoke}
+                          cancelLabel={t.confirm.cancel}
+                          fields={{ intent: "revoke", token: person.id }}
+                        />
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </section>
-
-      {/* ── BDB/BKE workplace per teacher (P27): autosaving checkbox ───────── */}
-      <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {t.admin.portfolio.heading}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{t.admin.portfolio.intro}</p>
-        {teachers.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">{t.admin.models.teacherNone}</p>
-        ) : (
-          <ul className="mt-4 max-w-xl list-none space-y-2 p-0">
-            {teachers.map((teacher) => (
-              <li key={teacher.id}>
-                <AutoSaveForm
-                  intent="portfolioAccess"
-                  hidden={{ userId: teacher.id }}
-                  errorMessage={autoSaveError}
-                  className="flex items-center gap-2.5"
-                >
-                  <input
-                    type="checkbox"
-                    id={`portfolio-${teacher.id}`}
-                    name="enabled"
-                    value="1"
-                    defaultChecked={teacher.portfolio}
-                    className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                  />
-                  <label
-                    htmlFor={`portfolio-${teacher.id}`}
-                    className="text-sm font-medium text-slate-800"
-                  >
-                    {fmt(t.admin.portfolio.label, {
-                      name: teacher.name ?? teacher.email ?? teacher.id,
-                    })}
-                  </label>
-                </AutoSaveForm>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ── Models per teacher (P18): follow the instance, or an own set ───── */}
-      <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {t.admin.models.teacherLegend}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{t.admin.models.teacherIntro}</p>
-        {teachers.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">{t.admin.models.teacherNone}</p>
-        ) : (
-          <ul className="mt-4 max-w-xl list-none space-y-6 p-0">
-            {teachers.map((teacher) => (
-              <li key={teacher.id}>
-                <TeacherModelForm
-                  teacher={teacher}
-                  base={base}
-                  errorMessage={autoSaveError}
-                  inheritLabel={t.admin.models.teacherInherit}
-                  ownLabel={t.admin.models.teacherOwn}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      )}
     </div>
   );
 }

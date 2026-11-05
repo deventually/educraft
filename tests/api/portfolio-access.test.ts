@@ -23,7 +23,7 @@ let users: typeof import("~/server/repositories/users.server");
 let list: typeof import("~/routes/portfolio._index");
 let overview: typeof import("~/routes/portfolio.$id");
 let exportRoute: typeof import("~/routes/portfolio.$id.export");
-let adminUsers: typeof import("~/routes/admin.users");
+let adminUser: typeof import("~/routes/admin.users.$id");
 let root: typeof import("~/root");
 
 beforeAll(async () => {
@@ -32,7 +32,7 @@ beforeAll(async () => {
   list = await import("~/routes/portfolio._index");
   overview = await import("~/routes/portfolio.$id");
   exportRoute = await import("~/routes/portfolio.$id.export");
-  adminUsers = await import("~/routes/admin.users");
+  adminUser = await import("~/routes/admin.users.$id");
   root = await import("~/root");
 });
 
@@ -118,15 +118,17 @@ describe("admin switches the workplace per teacher", () => {
   it("turns it on and off with autosave, and shows the state in the loader", async () => {
     const t = await teacher("switch");
     as("admin-1", "admin");
-    const on = await adminUsers.action({
-      request: post({ intent: "portfolioAccess", userId: t.id, enabled: "1" }),
+    const on = await adminUser.action({
+      request: post({ intent: "portfolioAccess", enabled: "1" }),
+      params: { id: t.id },
     } as never);
     expect(on).toEqual({ saved: true });
     expect(await users.getPortfolioEnabled(t.id)).toBe(true);
-    const data = await adminUsers.loader({ request: get() } as never);
-    expect(data.teachers.find((x) => x.id === t.id)?.portfolio).toBe(true);
-    await adminUsers.action({
-      request: post({ intent: "portfolioAccess", userId: t.id }),
+    const data = await adminUser.loader({ request: get(), params: { id: t.id } } as never);
+    expect(data.portfolio).toBe(true);
+    await adminUser.action({
+      request: post({ intent: "portfolioAccess" }),
+      params: { id: t.id },
     } as never);
     expect(await users.getPortfolioEnabled(t.id)).toBe(false);
   });
@@ -135,8 +137,9 @@ describe("admin switches the workplace per teacher", () => {
     as("admin-1", "admin");
     expect(
       await status(
-        adminUsers.action({
-          request: post({ intent: "portfolioAccess", userId: "nobody", enabled: "1" }),
+        adminUser.action({
+          request: post({ intent: "portfolioAccess", enabled: "1" }),
+          params: { id: "nobody" },
         } as never),
       ),
     ).toBe(404);
