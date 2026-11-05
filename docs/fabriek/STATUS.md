@@ -177,7 +177,8 @@ _Laatst bijgewerkt: 2026-11-05 (#120 gemerged, clear-assignment@v2 open)_
 
 - Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
-  `tooManyOpenPoints` in de eval. PR open, meting volgt.
+  `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
+  nergens meer dan 8 punten. PR open.
 - P29.2 Proefassessment, de AI-tekst en de meting: `portfolio-rehearsal@v1` (NL/EN) speelt een
   commissie van twee assessoren die het dossier las, één vraag per beurt, dunste criterium eerst,
   doorvragen volgens STARR; op "Rond af" feedback per criterium als JSON. Controle in code
