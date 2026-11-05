@@ -4,13 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, meting P29.2 en clear-assignment@v2 open)_
 
 ## Nu
 
 - **Proefassessment, de AI-tekst en de meting (P29.2, #119) gemerged op 2026-11-05:**
   `portfolio-rehearsal@v1` speelt een commissie van twee assessoren met feedback per criterium,
   gecontroleerd in code; nog geen scherm. Eerste meting: één case 4,4, de rest faalt op de meting.
+- **Kleine fixes (#120) gemerged op 2026-11-05:** de wankele toast-test is stabiel, en in Lastig
+  gesprek staan de gebaren van de student in de ik-vorm (`difficult-conversation@v2`), zodat die
+  niet meer van "haar" naar "zijn" wisselt; meting dc4 elke case 4,67–4,93.
 - **Klaar om in te leveren? (P29.1, #117) gemerged op 2026-11-05:** in stap 5 van het
   BDB/BKE-dossier één lijst met per punt "Los op", zelf afvinken met datum; advies, geen poort.
 - **De week van de docent op Start (P22.3, #113) gemerged op 2026-11-05:** per cursus *In de les*,
@@ -175,6 +178,10 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
 
 ## Bezig
 
+- Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
+  eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
+  `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
+  nergens meer dan 8 punten. PR open.
 - Toetsvragen, vaste vraagindeling in code: de app rekent uit de toetsmatrijs per vraag de rij,
   het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
   (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
@@ -182,12 +189,6 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
   3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
   ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
   in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
-- Wankele toast-test: `tests/lib/useFormToast.test.tsx` faalde soms onder zware belasting (de
-  toast verdwijnt een tik na de nieuwe pagina); de test wacht daar nu op. Alleen een test. PR open.
-- Lastig gesprek, vaste student (`difficult-conversation@v2`): de gespeelde student wisselde soms
-  van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
-  grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
-  4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
 - P29.2 Meting proefassessment herstellen: de eerste meting (3 runs) faalde vooral op de meting
   zelf. De vraagteller telt vraagtekens in geciteerde tekst niet meer mee; "vitten" en "claim
   overgenomen" gelden alleen in de cases die daarover gaan; het sterke dossier heeft geen dunste

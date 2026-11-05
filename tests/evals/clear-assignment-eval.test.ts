@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
-import { parseHardChecks } from "../../scripts/eval-helpers";
+import { COUNTED_CHECKS, parseHardChecks } from "../../scripts/eval-helpers";
 
 const dir = join(__dirname, "../../evals/clear-assignment");
 const rubric = readFileSync(join(dir, "rubric.md"), "utf8");
@@ -57,7 +57,34 @@ describe("clear-assignment eval meets the P24 quality gate", () => {
         "silentChoice",
         "aboveLevel",
         "inventedSources",
+        "tooManyOpenPoints",
       ]),
     );
+    expect(parseHardChecks(rubric).find((c) => c.id === "tooManyOpenPoints")?.counted).toBe(true);
+  });
+});
+
+describe("tooManyOpenPoints (counted)", () => {
+  const output = (n: number, heading = "## Open punten") =>
+    [
+      "## Herschreven opdracht",
+      "### Stappen",
+      ...Array.from({ length: 12 }, (_, i) => `${i + 1}. Stap ${i + 1}.`),
+      heading,
+      ...Array.from({ length: n }, (_, i) => `${i + 1}. Je noemt punt ${i + 1} niet.`),
+      "",
+      "Ook: de bestandsnaam en de contactpersoon.",
+      "## Wat ik heb veranderd",
+      "- Zinnen ingekort.",
+    ].join("\n");
+
+  it("fails more than eight numbered open points (meting ca2 had 14)", () => {
+    expect(COUNTED_CHECKS.tooManyOpenPoints(output(14))).toBe(true);
+    expect(COUNTED_CHECKS.tooManyOpenPoints(output(9, "## Open points"))).toBe(true);
+  });
+
+  it("passes eight or fewer, and does not count the steps of the assignment", () => {
+    expect(COUNTED_CHECKS.tooManyOpenPoints(output(8))).toBe(false);
+    expect(COUNTED_CHECKS.tooManyOpenPoints(output(3, "## Open points"))).toBe(false);
   });
 });

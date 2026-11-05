@@ -63,3 +63,4 @@ score (the cap is the maximum), however good the rest is.
 - **silentChoice** (cap 3): Did the output resolve a contradiction or fill a gap by choosing a value or reading (for example one of two word counts, or individual instead of group) without naming it?
 - **aboveLevel** (cap 3): Is the rewritten assignment clearly above the chosen reading level: at A2 or B1 long sentences with several clauses, or technical terms and abbreviations used without explanation?
 - **inventedSources** (cap 2): Did the output cite a study, percentage, source or guideline that is not in the input and looks made up, or attribute to the CEFR or UDL something they do not say?
+- **tooManyOpenPoints** (cap 3, counted): Does the "Open points" list hold more than 8 numbered points?
