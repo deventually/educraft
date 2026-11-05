@@ -102,6 +102,9 @@ _Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 en brief P26 bezig)_
   scherm. Daarna 20.2 (opslag), 20.3 (pagina's), 20.4 (koppelen en voorinvullen). PR open.
 - Brief P26 *Cursussen verder* (na P20): toetsmatrijs per vraag, OER-import, cursus als bewijs in het
   BDB/BKE-dossier. Keuzes gemaakt (BESLUIT-2026-11-05-2); wacht op merge — PR open.
+- Brief P21 *Rolagenten*: twee petten kijken een cursus na op verzoek, akkoord/niet akkoord gelogd,
+  pakket-tags, gekoppelde toetsvragen optioneel mee. Keuzes gemaakt (BESLUIT-2026-11-05-3); wacht op
+  merge — PR open. Bouwen pas na P20.1/20.2.
 
 ## Wacht op jou
 

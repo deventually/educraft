@@ -203,3 +203,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   AI mag bij import een Bloom-niveau voorstellen, zichtbaar als voorstel dat de docent bevestigt. Een
   cursus komt als momentopname in het BDB/BKE-dossier, met "Opnieuw ophalen", geen live koppeling.
   Bastiaan, 2026-11-05. Uitwerking: brief P26.
+- **BESLUIT-2026-11-05-3:** **Rolagenten (P21): twee petten, alleen meningen krijgen knoppen.** Een
+  Toetsdeskundige en een Ontwerper kijken een cursus na op verzoek. De vaste P20-controles krijgen geen
+  knoppen; pet-bevindingen krijgen Akkoord / Niet akkoord, dat alleen wordt vastgelegd, en een
+  verworpen bevinding komt niet terug. Pakket-tags voor elk pakket. De pet draait op de modellen die
+  de docent aangeboden krijgt. Gekoppeld werk mee laten nakijken is een keuze per keer, nooit
+  automatisch, eerst alleen toetsvragen. Bastiaan, 2026-11-05. Uitwerking: brief P21.
