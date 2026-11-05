@@ -62,7 +62,9 @@ anonymous score list). A utility can name an explaining tool (`Utility.explainWi
 sessionStorage (`app/lib/forms/handoff.ts`).
 
 Next to the tools, the **BDB/BKE workplace** (`/portfolio`) helps a teacher build their
-teaching-qualification dossier (see [Architecture](Architecture.md#feature-modules)).
+teaching-qualification dossier (see [Architecture](Architecture.md#feature-modules)). Its last
+step has a check whether the dossier is ready to hand in and a rehearsal assessment: a played
+committee that read the teacher's own dossier. The rehearsal is not in the tool catalogue.
 
 ---
 

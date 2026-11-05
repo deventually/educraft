@@ -133,6 +133,20 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   form as `unverified` ("Controleer dit"; saving the criterion clears it) and refuses to replace a
   framework that work depends on (`frameworkInUse`). The proposal is stored unconfirmed. The model
   call is shared with the coach in `portfolioAi.server.ts`.
+  Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
+  of advisory points from the confirmed framework only, each with a "Los op" target; four points
+  are ticked by the teacher (`tickReadiness`). It never blocks the export (BESLUIT-2026-11-05-9).
+  The rehearsal assessment (`/portfolio/:id/rehearsal`, `portfolio-rehearsal@v2`) is a chat with a
+  played committee of two assessors. It is one registry entry in `WORKPLACE_TOOLS`, outside the
+  catalogue (`hiddenFromCatalogue`), governed by the workplace feature instead of tool
+  availability. With `contextFrom: "dossier"` the stream takes a `dossierId`, loads the caller's own
+  dossier and builds the prompt itself (`dossierPromptValues`: chapters, criteria with short keys,
+  evidence titles only); the body only chooses the length and the outcomes. The conversation is not
+  saved (`storesConversation: false`). On "Rond af" the model answers with JSON;
+  `parseRehearsalFeedback` keeps a quote only when the teacher typed it, drops unknown keys and
+  sources, and has no field for a grade. "Bewaar in je dossier" re-checks it on the server and keeps
+  only the feedback as evidence `kind: "feedback"` plus an `aiLog` line `rehearsal`
+  (BESLUIT-2026-11-05-10). Measurement: `npm run eval:rehearsal`.
 - **Courses and alignment (P20)** at `/courses`. Pure domain in `app/lib/courses/`: `types` (with
   `HOURS_PER_EC = 28`), `bloom`, `schema` (`CourseDataSchema`, `COURSE_LIMITS`, not strict),
   immutable `edit`, `alignment` (`coverageMatrix`, `checkAlignment`: seven advisory finding codes,

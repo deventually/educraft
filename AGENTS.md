@@ -47,7 +47,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | `npm run dev` · `npm run build` | Dev server (port 5173) · production build. |
 | `npm run db:generate` | Generate a Drizzle migration from the schema. |
 | `npm run db:migrate` | Apply migrations (also creates the local DB). |
-| `npm run eval` · `npm run eval:coach` | Prompt evals (need `ANTHROPIC_API_KEY`, see `evals/README.md`). |
+| `npm run eval` · `npm run eval:coach` · `npm run eval:rehearsal` | Prompt evals (need `ANTHROPIC_API_KEY`, see `evals/README.md`). |
 | `npm run invite` · `npm run set-owner -- --email …` | Mint an invite · set the owner. |
 
 ## Conventions
