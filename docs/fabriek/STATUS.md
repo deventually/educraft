@@ -168,6 +168,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
   dossier als echte tabel met kopregel en eigen kopjes onder de bijlage, niet meer als tekst met
   streepjes. Geplakt bewijs blijft letterlijk. PR open.
 
+- Brief P29 BDB/BKE afronden (inleverklaar-check en proefassessment): alleen tekst, PR open.
+
 ## Wacht op jou
 
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
