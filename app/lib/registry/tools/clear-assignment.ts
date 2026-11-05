@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { CLEAR_ASSIGNMENT_PROMPT } from "~/lib/prompts/clear-assignment@v1.prompt";
+import { CLEAR_ASSIGNMENT_PROMPT_V2 } from "~/lib/prompts/clear-assignment@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 
 const TEXT = { nl: "Je opdracht", en: "Your assignment" };
@@ -122,7 +122,7 @@ export const clearAssignment: Tool = {
     {
       id: "rewrite",
       name: { nl: "Herschreven opdracht", en: "Rewritten assignment" },
-      systemPromptId: CLEAR_ASSIGNMENT_PROMPT.id,
+      systemPromptId: CLEAR_ASSIGNMENT_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
         hint: {

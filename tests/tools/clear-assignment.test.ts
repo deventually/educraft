@@ -21,7 +21,7 @@ const values = {
   keepAsIs: "",
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "clear-assignment@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "clear-assignment@v2", values, outputLanguage: lang });
 
 describe("tool: clear-assignment", () => {
   it("registers as a one-shot, single-stage instructor tool that uses the context profile", () => {
@@ -32,7 +32,7 @@ describe("tool: clear-assignment", () => {
     expect(t.userType).toBe("instructor");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("clear-assignment@v1");
+    expect(t.stages[0]?.systemPromptId).toBe("clear-assignment@v2");
     expect(t.enabled).toBe(true);
   });
 
@@ -135,6 +135,21 @@ describe("tool: clear-assignment", () => {
     // ca1: explanations of terms ("kegelvormige glazen fles") above A2/B1.
     expect(nl).toContain("uitleg van een vakterm is zelf op het gekozen niveau");
     expect(en).toContain("explanation of a term is itself at the chosen level");
+  });
+
+  it("caps the open points at eight, most important first (ca2 once gave 14)", () => {
+    const nl = runtime("nl").toLowerCase();
+    const en = runtime("en").toLowerCase();
+    expect(nl).toContain("hooguit 8 punten, het belangrijkste eerst");
+    expect(en).toContain("at most 8 points, the most important first");
+    // Nothing is lost: the rest goes in one line under the list.
+    expect(nl).toContain('"ook:"');
+    expect(en).toContain('"also:"');
+  });
+
+  it("keeps @v1 registered for sessions that still use it", () => {
+    expect(getPrompt("clear-assignment@v1").id).toBe("clear-assignment@v1");
+    expect(getPrompt("clear-assignment@v2").verbatim).toMatch(/LimeOnIt/);
   });
 
   it("asks for a requirement check table, in both languages", () => {

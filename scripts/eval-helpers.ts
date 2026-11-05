@@ -181,8 +181,15 @@ function roleCues(turn: string): string[] {
 }
 const FEMALE = /\b(?:zij|haar|she|her|hers)\b/i;
 const MALE = /\b(?:hij|zijn|hem|he|his|him)\b/i;
+/** Numbered items in the "## Open punten" / "## Open points" section of an output. */
+function openPointCount(output: string): number {
+  const section = output.split(/^## /m).find((part) => /^Open (?:punten|points)\b/i.test(part));
+  return section ? (section.match(/^\s*\d+[.)]\s/gm) ?? []).length : 0;
+}
 
 export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
+  /** Clear assignment (#73): at most 8 open points; meting ca2 once listed 14. */
+  tooManyOpenPoints: (t) => openPointCount(t) > 8,
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
   severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
   /** Role-play (P24.8): every turn in the role, i.e. all but the final feedback turn. */
