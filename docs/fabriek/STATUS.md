@@ -159,7 +159,7 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
   toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
   zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
   `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
-  bijgewerkt. De meting van v2 wacht op een run met API-sleutel. PR open.
+  bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
 - Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
   persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
   een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
