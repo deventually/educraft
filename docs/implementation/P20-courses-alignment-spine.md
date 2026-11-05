@@ -83,6 +83,11 @@ Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijges
   `null` terug bij een vreemde of onbekende cursus, generatie of `itemId` en schrijft dan niets.
   Verdwijnt een activiteit of toets uit de cursus, dan houdt de koppeling de cursus en vervalt
   alleen haar `itemId`. Een cursus kan alleen naar een eigen contextprofiel wijzen.
+- **Pagina's (20.3, zoals gebouwd):** in plaats van `rename` is er één intent `settings` (naam,
+  contextprofiel en EC samen). De volgorde op de pagina is Cursusgegevens · Aandachtspunten ·
+  Leeruitkomsten · Onderwijsactiviteiten · Toetsen · Dekkingsmatrix: de adviezen staan bovenaan,
+  zodat de docent ze meteen ziet. De sectie *Gekoppeld werk* komt met 20.4, als er iets te koppelen
+  valt. De vormgrens is `applyCourseIntent` in `app/lib/courses/intents.ts` (puur, Zod).
 
 ## Het model (`app/lib/courses/types.ts`)
 
@@ -172,7 +177,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
   - `deleteUserCascade` ruimt beide tabellen op;
   - de lijstlimiet houdt stand.
 
-## 20.3 — Cursus-UI (`/courses`, `/courses/:id`)
+## 20.3 — Cursus-UI (`/courses`, `/courses/:id`) (klaar)
 
 - **Routes** (Engelse slugs): voeg `courses` en `courses/:id` toe aan `routes.ts`. Gebruik
   `requireRole("teacher", "admin")`; een student krijgt een 404. Een navigatie-item ("Cursussen" /
