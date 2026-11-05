@@ -5,7 +5,7 @@ export const portfolio = {
   backToList: "Alle dossiers",
   bar: {
     back: "Terug naar {dossier}",
-    for: "Voor je dossier:",
+    for: "Voor je dossier, {outcome}:",
     label: "Voor je dossier",
   },
   coach: {

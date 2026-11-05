@@ -7,7 +7,7 @@ export const portfolio: Messages["portfolio"] = {
   backToList: "All dossiers",
   bar: {
     back: "Back to {dossier}",
-    for: "For your dossier:",
+    for: "For your dossier, {outcome}:",
     label: "For your dossier",
   },
   coach: {

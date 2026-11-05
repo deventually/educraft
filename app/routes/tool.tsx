@@ -28,6 +28,7 @@ import { courseLinkIntent } from "~/server/courses.server";
 import { addGenerationToDossier } from "~/server/evidence.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { DossierBar } from "~/components/portfolio/DossierBar";
+import { outcomeLabel } from "~/lib/portfolio/format";
 import { linkTargets } from "~/lib/courses/links";
 import { getToolBySlug } from "~/lib/registry";
 import { getToolHelpOverlay } from "~/lib/help/registry";
@@ -139,6 +140,7 @@ function forCriterion(dossiers: Awaited<ReturnType<typeof listDossiers>>, params
         dossierId: dossier.id,
         dossierName: dossier.name,
         outcomeId: o.id,
+        outcomeLabel: outcomeLabel(o),
         criterionId: c.id,
         criterionText: c.text,
       };

@@ -36,6 +36,7 @@ interface ForCriterion {
   dossierId: string;
   dossierName: string;
   outcomeId: string;
+  outcomeLabel: string;
   criterionId: string;
   criterionText: string;
 }
@@ -79,6 +80,7 @@ describe("from a criterion to the tool and back (P27.2)", () => {
       dossierId: mine.id,
       dossierName: "Mijn BDB",
       outcomeId: LU,
+      outcomeLabel: "LU1 Doceren",
       criterionId: C1,
       criterionText: sampleDossier().framework.outcomes[0].criteria[0].text,
     });

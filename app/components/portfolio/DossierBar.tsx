@@ -7,6 +7,8 @@ export interface ForCriterion {
   dossierId: string;
   dossierName: string;
   outcomeId: string;
+  /** "BDB-4 Toetsen": which learning outcome the criterion belongs to. */
+  outcomeLabel: string;
   criterionId: string;
   criterionText: string;
 }
@@ -15,7 +17,13 @@ export interface ForCriterion {
  * A narrow bar on a tool page opened from a dossier criterion (P27.2, route step 3):
  * which criterion the work is for, and the way back.
  */
-export function DossierBar({ dossierId, dossierName, outcomeId, criterionText }: ForCriterion) {
+export function DossierBar({
+  dossierId,
+  dossierName,
+  outcomeId,
+  outcomeLabel,
+  criterionText,
+}: ForCriterion) {
   const t = useT();
   const tb = t.portfolio.bar;
   return (
@@ -26,7 +34,8 @@ export function DossierBar({ dossierId, dossierName, outcomeId, criterionText }:
       <p className="flex min-w-0 items-start gap-2 text-slate-800">
         <FolderCheck className="mt-0.5 size-4 shrink-0 text-violet-700" aria-hidden />
         <span>
-          <span className="font-medium">{tb.for}</span> <em>{criterionText}</em>
+          <span className="font-medium">{fmt(tb.for, { outcome: outcomeLabel })}</span>{" "}
+          <em>{criterionText}</em>
         </span>
       </p>
       <Link

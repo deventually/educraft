@@ -19,11 +19,13 @@ describe("DossierBar (P27.2)", () => {
         dossierId="d1"
         dossierName="Mijn BDB"
         outcomeId="o1"
+        outcomeLabel="BDB-4 Toetsen"
         criterionId="k1"
         criterionText="Je ontwerpt een toets"
       />,
     );
     expect(screen.getByText(/Voor je dossier/)).toBeInTheDocument();
+    expect(screen.getByText(/BDB-4 Toetsen/)).toBeInTheDocument();
     expect(screen.getByText("Je ontwerpt een toets")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Terug naar Mijn BDB/ })).toHaveAttribute(
       "href",
