@@ -404,7 +404,10 @@ describe("Admin user list: paste a list (P28.5)", () => {
     expect(within(table).getByRole("row", { name: /weer jan/i })).toHaveTextContent(
       /staat al eerder in de lijst/i,
     );
-    expect(screen.getByText(/1 uitnodiging gemaakt, 3 regels geweigerd/i)).toBeInTheDocument();
+    // The count is a toast, shown once navigation settles: after the table, so wait for it.
+    expect(
+      await screen.findByText(/1 uitnodiging gemaakt, 3 regels geweigerd/i),
+    ).toBeInTheDocument();
   });
 
   it("has no a11y violations, before and after", async () => {
