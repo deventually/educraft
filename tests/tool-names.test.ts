@@ -49,6 +49,7 @@ describe("task-first tool names (P19.1)", () => {
         "contextualization",
         "dialogic-encounters",
         "differentiation",
+        "difficult-conversation",
         "forum-autograder",
         "guided-reflection",
         "lesson-plan",
