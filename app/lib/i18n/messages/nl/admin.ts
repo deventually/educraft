@@ -2,6 +2,7 @@ export const admin = {
   console: {
     nav: {
       context: "Onderwijscontext",
+      teams: "Teams",
       tools: "Tools en modellen",
       usage: "Gebruik en feedback",
       users: "Gebruikers",

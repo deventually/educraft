@@ -1,0 +1,53 @@
+import type { Messages } from "../nl";
+
+export const teams: Messages["teams"] = {
+  add: "Add",
+  addEmailLabel: "Your colleague's email address",
+  addHeading: "Add a colleague",
+  addHint:
+    "Type exactly the email address your colleague signs in with. You cannot browse all accounts.",
+  addMemberLabel: "Add a member by email",
+  addTeam: "In team",
+  adminIntro:
+    "Make teams of colleagues and appoint team leads. A team lead adds colleagues themselves. Being a member shares nothing: everything stays private until someone shares it.",
+  colEmail: "Email",
+  colLead: "Team lead",
+  colName: "Name",
+  create: "Create team",
+  createLabel: "Name of the new team",
+  delete: "Delete team",
+  deleteBody: "Only the group goes. The accounts stay, and shared items become private again.",
+  deleteConfirm: "Delete",
+  deleteTitle: "Delete team {name}?",
+  filterTeam: "Team",
+  heading: "Teams",
+  inviteHeading: "Invite",
+  inviteIntro:
+    "Make a link for a new colleague. Whoever uses it becomes a teacher and a member of this team.",
+  inviteSubmit: "Create invite link",
+  isLeadError: "You cannot remove another team lead; an admin does that.",
+  leadBadge: "Team lead",
+  leadIntro:
+    "You lead this team. You add and remove colleagues and can make a colleague team lead too. Removing another team lead or taking the stand away is an admin's job.",
+  leadLabel: "Team lead: {name}",
+  leadOf: "Team lead of {name}",
+  makeLead: "Make team lead",
+  manageTeams: "Manage teams",
+  memberOf: "Member of {name}",
+  members: "Members",
+  myTeams: "My teams",
+  myTeamsIntro: "You are a member of these teams. Being a member shares none of your work.",
+  nameRequired: "Give the team a name.",
+  noMembers: "No members yet.",
+  noSuchUser: "There is no account with this email address.",
+  noTeam: "No team",
+  noTeams: "No teams yet.",
+  notMember: "This person is not in the team.",
+  remove: "Remove from the team",
+  removeLabel: "Remove {name} from the team",
+  renameLabel: "Name of team {name}",
+  stepDown: "Stop being team lead",
+  stepDownBody:
+    "You stay a member of the team. Becoming team lead again goes through an admin or another team lead.",
+  stepDownTitle: "Stop being team lead?",
+};

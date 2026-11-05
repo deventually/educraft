@@ -1,4 +1,4 @@
-import { Form, data, useActionData, useNavigation } from "react-router";
+import { Form, Link, data, useActionData, useNavigation } from "react-router";
 import { AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/account";
@@ -11,6 +11,7 @@ import {
   updateUserPassword,
 } from "~/server/repositories/users.server";
 import { hashPassword, verifyPassword } from "~/server/password.server";
+import { listTeamsForUser } from "~/server/repositories/teams.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
@@ -31,6 +32,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     user: { name: user.name, email: user.email, role: user.role },
     // The super admin hands ownership over (npm run set-owner) before deleting (P18.6).
     isOwner: await isOwner(user),
+    // My teams (P28.2); a lead gets a link to the team page.
+    teams: await listTeamsForUser(user.id),
   };
 }
 
@@ -137,6 +140,35 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           <dd className="text-sm text-slate-800">{roleLabel(user.role, t)}</dd>
         </dl>
       </Card>
+
+      {/* ── My teams (P28.2) ──────────────────────────────────────────────── */}
+      {loaderData.teams.length > 0 && (
+        <Card className="mt-6 p-6">
+          <h2 className="font-semibold text-slate-900">{t.teams.myTeams}</h2>
+          <p className="mt-1 text-sm text-slate-600">{t.teams.myTeamsIntro}</p>
+          <ul className="mt-3 space-y-1.5 text-sm">
+            {loaderData.teams.map((team) => (
+              <li key={team.id} className="text-slate-800">
+                {team.isLead ? (
+                  <Link
+                    to={`/teams/${team.id}`}
+                    className="font-medium text-violet-700 underline hover:no-underline"
+                  >
+                    {team.name}
+                  </Link>
+                ) : (
+                  team.name
+                )}
+                {team.isLead && (
+                  <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
+                    {t.teams.leadBadge}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* ── Change email ──────────────────────────────────────────────────── */}
       <Card className="mt-6 p-6">

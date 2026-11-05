@@ -15,6 +15,11 @@ import {
   revokeInvite,
 } from "~/server/repositories/users.server";
 import { getOwnerUserId } from "~/server/repositories/settings.server";
+import {
+  getTeamWithMembers,
+  joinTeamFromInvite,
+  listTeams,
+} from "~/server/repositories/teams.server";
 import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
@@ -32,6 +37,7 @@ const FilterSchema = z.object({
   q: z.string().trim().max(100).catch(""),
   role: z.enum(ROLES).or(z.literal("")).catch(""),
   status: z.enum(STATUSES).or(z.literal("")).catch(""),
+  team: z.string().max(64).catch(""),
 });
 
 /**
@@ -46,15 +52,18 @@ export async function loader({ request }: Route.LoaderArgs) {
     q: url.searchParams.get("q") ?? "",
     role: url.searchParams.get("role") ?? "",
     status: url.searchParams.get("status") ?? "",
+    team: url.searchParams.get("team") ?? "",
   });
-  const [rows, storedOwnerId, viewerIsOwner] = await Promise.all([
+  const [rows, storedOwnerId, viewerIsOwner, allTeams] = await Promise.all([
     listPeople({
       q: filter.q || undefined,
       role: filter.role || undefined,
       status: filter.status || undefined,
+      teamId: filter.team || undefined,
     }),
     getOwnerUserId(),
     isOwner(admin),
+    listTeams(),
   ]);
   // The badge is for every admin to see; a stored id of a demoted or deleted account
   // counts as "no owner".
@@ -64,6 +73,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     isOwner: viewerIsOwner,
     ownerId: owner?.role === "admin" ? owner.id : null,
     filter,
+    teams: allTeams.map((t) => ({ id: t.id, name: t.name })),
     people: rows.map((r) => ({
       kind: r.kind,
       id: r.id,
@@ -85,6 +95,10 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
 
+  // The team a new person joins (P28.2); an unknown id means none.
+  const teamId = String(fd.get("teamId") ?? "");
+  const team = teamId ? await getTeamWithMembers(teamId) : null;
+
   if (intent === "mint") {
     const note = String(fd.get("note") ?? "").trim() || null;
     const expiryDays = Math.min(90, Math.max(1, Number(fd.get("expiryDays") ?? "14") || 14));
@@ -94,6 +108,7 @@ export async function action({ request }: Route.ActionArgs) {
       note,
       expiresAt,
       createdByUserId: admin.id,
+      teamId: team?.id ?? null,
     });
     return { link: `${new URL(request.url).origin}/invite/${invite.token}` };
   }
@@ -129,6 +144,7 @@ export async function action({ request }: Route.ActionArgs) {
     // Reject a collision up front so the unique index never throws.
     if (await getUserByEmail(email)) return fail("emailTaken");
     const created = await createUser({ name, email, passwordHash, role });
+    if (team) await joinTeamFromInvite(team.id, created.id);
     if (mode === "password") return { accountCreated: true as const };
     const reset = await createPasswordReset(created.id, SET_PASSWORD_LINK_DAYS * 24);
     return { setPasswordLink: `${new URL(request.url).origin}/reset/${reset.token}` };
@@ -142,15 +158,36 @@ const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const th = "px-4 py-2.5 font-semibold";
 const td = "px-4 py-2.5 text-slate-600";
 
+/** The team a new person joins (P28.2); only shown when there are teams. */
+function TeamSelect({ teams, id }: { teams: { id: string; name: string }[]; id: string }) {
+  const t = useT();
+  if (teams.length === 0) return null;
+  return (
+    <div className="sm:w-1/2 sm:pr-2">
+      <Label htmlFor={id}>{t.teams.addTeam}</Label>
+      <Select id={id} name="teamId" defaultValue="" className="mt-1">
+        <option value="">{t.teams.noTeam}</option>
+        {teams.map((team) => (
+          <option key={team.id} value={team.id}>
+            {team.name}
+          </option>
+        ))}
+      </Select>
+    </div>
+  );
+}
+
 /** "Add": an invite link, or (super admin only) an account right away (P18.7). */
 function AddPersonForm({
   viewerIsOwner,
   actionData,
   createError,
+  teams,
 }: {
   viewerIsOwner: boolean;
   actionData: unknown;
   createError?: string;
+  teams: { id: string; name: string }[];
 }) {
   const t = useT();
   const i = t.admin.invites;
@@ -189,7 +226,11 @@ function AddPersonForm({
       )}
 
       {how === "account" && viewerIsOwner ? (
-        <CreateAccountForm result={actionData as CreateAccountResult} errorMessage={createError} />
+        <CreateAccountForm
+          result={actionData as CreateAccountResult}
+          errorMessage={createError}
+          extraFields={<TeamSelect teams={teams} id="create-team" />}
+        />
       ) : (
         <div>
           <p className="text-sm text-slate-600">{i.mintIntro}</p>
@@ -227,6 +268,7 @@ function AddPersonForm({
                   />
                 </div>
               </div>
+              <TeamSelect teams={teams} id="invite-team" />
               <Button type="submit">{i.submit}</Button>
             </Form>
           )}
@@ -241,7 +283,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const p = t.people;
   const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const { selfId, people, filter, isOwner: viewerIsOwner, ownerId } = loaderData;
+  const { selfId, people, filter, teams, isOwner: viewerIsOwner, ownerId } = loaderData;
   const [adding, setAdding] = useState(false);
 
   const errors: Record<string, string> = {
@@ -298,6 +340,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
             viewerIsOwner={viewerIsOwner}
             actionData={actionData}
             createError={createError}
+            teams={teams}
           />
         )}
       </section>
@@ -338,6 +381,19 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
             <option value="disabled">{p.statusDisabled}</option>
           </Select>
         </div>
+        {teams.length > 0 && (
+          <div>
+            <Label htmlFor="people-team">{t.teams.filterTeam}</Label>
+            <Select id="people-team" name="team" defaultValue={filter.team} className="mt-1 w-auto">
+              <option value="">{p.all}</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         <Button type="submit" variant="secondary">
           {p.filterSubmit}
         </Button>

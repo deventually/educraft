@@ -74,6 +74,23 @@ cannot delete their own account on `/account` until ownership is handed over.
 A role change voids the user's open reset links (`setUserRole`), so a link a regular admin
 minted for a teacher never opens that account once it is an admin.
 
+## Teams and team leads (P28.2)
+
+A **team** (`teams`, `team_members`) is a group of colleagues; joining shares nothing. **Team
+lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` stays
+`teacher | admin`. All access goes through `app/server/repositories/teams.server.ts`:
+
+- Admins work on every team at `/admin/teams` (create, rename, delete, members by e-mail,
+  lead on/off) and per person on the person page (section Teams).
+- A lead works on `/teams/:id` (teacher side). Every lead function goes through
+  `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team, so the
+  route answers a 404 to everyone else, admins included. A lead adds a colleague by **exact**
+  e-mail, removes a plain member, makes a member lead, steps down, and mints a team invite.
+  A lead never removes another lead or takes the stand away; an admin does.
+- An invite with a `team_id` makes the new teacher a member on redeem (`joinTeamFromInvite`).
+  Invites stay `teacher` (BESLUIT-2026-07-03-2). Deleting a team keeps the accounts and turns
+  its open invites into plain ones; deleting an account removes its memberships.
+
 ## Sessions & passwords
 
 - Cookie sessions via React Router's `createCookieSessionStorage`
