@@ -172,6 +172,24 @@ describe("/courses/:id", () => {
     ]);
   });
 
+  it("gives the current course week, or null without a start date (P27.4)", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-25T10:00:00Z")); // Wednesday of week 2
+    try {
+      const dated = await repo.createCourse("teacher-a", {
+        name: "Met datum",
+        data: { ...alignedCourse(), startDate: "2026-11-16" },
+      });
+      const plain = await repo.createCourse("teacher-a", { name: "Zonder", data: alignedCourse() });
+      const load = (id: string) =>
+        detail.loader({ request: get(`/courses/${id}`), params: { id } } as never);
+      expect((await load(dated.id)).currentWeek).toBe(2);
+      expect((await load(plain.id)).currentWeek).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("offers the course tools the teacher may use, per kind and per finding (P27.4)", async () => {
     const settings = await import("~/server/repositories/settings.server");
     const c = await repo.createCourse("teacher-a", { name: "Tools", data: alignedCourse() });

@@ -6,8 +6,8 @@ import { blueprintOffer, coursePack, loadCourse, saveCourseIntent } from "~/serv
 import { dossierTargets } from "~/server/courseEvidence.server";
 import { loadReviewPanel } from "~/server/agentReview.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
-import { getBreakWeeks } from "~/server/repositories/settings.server";
-import { courseWeekDates } from "~/lib/calendar/weeks";
+import { getBreakWeeks, getTimeZone } from "~/server/repositories/settings.server";
+import { courseWeekDates, courseWeekOn, todayIn } from "~/lib/calendar/weeks";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
@@ -71,7 +71,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     weekDates: course.data.startDate
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
+    currentWeek: await currentCourseWeek(course.data.startDate),
   };
+}
+
+/** The course week today falls in (P27.4), or null: no start date, a break, before or after. */
+async function currentCourseWeek(startDate: string | undefined): Promise<number | null> {
+  if (!startDate) return null;
+  const [breakWeeks, timeZone] = await Promise.all([getBreakWeeks(), getTimeZone()]);
+  const on = courseWeekOn(startDate, breakWeeks, todayIn(timeZone, new Date()), COURSE_LIMITS.week);
+  return on.kind === "week" ? on.week : null;
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -123,6 +132,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     pack,
     weekDates = null,
     tools = NO_COURSE_TOOLS,
+    currentWeek = null,
   } = loaderData;
   const { data } = course;
 
@@ -170,6 +180,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           tools={tools}
           work={linkedWork}
           weekDates={weekDates}
+          currentWeek={currentWeek}
         />
         <OutcomesSection data={data} pack={pack} courseId={course.id} tools={tools.outcome} />
         <ActivitiesSection data={data} weekDates={weekDates} />

@@ -22,6 +22,8 @@ export const FINDING_TOOLS: Partial<Record<FindingCode, string>> = {
 export interface ToolRef {
   slug: string;
   name: LocalizedText;
+  /** The tool's icon name (`ToolIcon`). */
+  icon?: string;
 }
 
 /** The buttons a teacher may use, per kind of item and per finding; the loader filters them. */

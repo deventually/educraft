@@ -4,6 +4,7 @@ export const courseTools = {
   intro: "Je lessen en toetsen per week. Bij elk onderdeel staan de tools die erbij passen.",
   made: "Gemaakt",
   solveWith: "Los op met {tool}",
+  thisWeek: "Deze week",
   title: "Per week",
   unscheduled: "Zonder week",
 };

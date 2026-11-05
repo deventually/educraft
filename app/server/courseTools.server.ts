@@ -13,9 +13,10 @@ import {
  */
 export async function courseToolsFor(user: AvailabilityUser): Promise<CourseTools> {
   const available = await getAvailableTools(user);
-  const ref = (t: { slug: string; name: ToolRef["name"] }): ToolRef => ({
+  const ref = (t: { slug: string; name: ToolRef["name"]; icon?: string }): ToolRef => ({
     slug: t.slug,
     name: t.name,
+    ...(t.icon && { icon: t.icon }),
   });
   const findings: CourseTools["findings"] = {};
   for (const [code, slug] of Object.entries(FINDING_TOOLS)) {

@@ -6,6 +6,7 @@ export const courseTools: Messages["courseTools"] = {
   intro: "Your lessons and tests by week. Each item shows the tools that fit it.",
   made: "Made",
   solveWith: "Solve with {tool}",
+  thisWeek: "This week",
   title: "By week",
   unscheduled: "No week",
 };

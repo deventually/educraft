@@ -137,3 +137,16 @@ describe("PREFERRED_TOOLS (P27.4)", () => {
     expect(getToolBySlugOrThrow(GRADE_TOOL).courseActions).toContain("assessment");
   });
 });
+
+describe("courseToolsFor (P27.4)", () => {
+  it("each button carries the tool's icon", async () => {
+    process.env.DATABASE_URL = "file::memory:";
+    const { courseToolsFor } = await import("~/server/courseTools.server");
+    const tools = await courseToolsFor({ id: "icon-teacher", role: "teacher" } as never);
+    expect(tools.activity[0]).toEqual({
+      slug: "lesson-plan",
+      name: getToolBySlugOrThrow("lesson-plan").name,
+      icon: "calendar-clock",
+    });
+  });
+});

@@ -35,7 +35,12 @@ const work = [
   },
 ];
 
-function renderWeek(data = alignedCourse(), locale = "nl", weekDates: string[] | null = null) {
+function renderWeek(
+  data = alignedCourse(),
+  locale = "nl",
+  weekDates: string[] | null = null,
+  currentWeek: number | null = null,
+) {
   const Stub = createRoutesStub([
     {
       id: "root",
@@ -51,6 +56,7 @@ function renderWeek(data = alignedCourse(), locale = "nl", weekDates: string[] |
               tools={tools}
               work={work}
               weekDates={weekDates}
+              currentWeek={currentWeek}
             />
           ),
         },
@@ -109,6 +115,20 @@ describe("CourseWeekView (P27.4)", () => {
     expect(
       within(region).getByRole("heading", { level: 3, name: /Week 1 · 16.22 nov/ }),
     ).toBeInTheDocument();
+  });
+
+  it("marks the current course week", async () => {
+    renderWeek(alignedCourse(), "nl", null, 2);
+    const region = await screen.findByRole("region", { name: "Per week" });
+    const current = within(region).getByText("Deze week").closest("li") as HTMLElement;
+    expect(current).toHaveAttribute("aria-current", "date");
+    expect(within(current).getByRole("heading", { level: 3, name: /Week 2/ })).toBeInTheDocument();
+  });
+
+  it("marks no week without a current week", async () => {
+    renderWeek();
+    await screen.findByRole("region", { name: "Per week" });
+    expect(screen.queryByText("Deze week")).toBeNull();
   });
 
   it("speaks English", async () => {
