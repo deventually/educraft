@@ -147,6 +147,29 @@ describe("/portfolio/:id and its pages", () => {
       criterionId: C2,
     });
     expect(data.next).toEqual({ step: "confirm-framework" });
+    // P29.1: "Klaar om in te leveren?" and step 5 points at it.
+    expect(data.readiness).toContainEqual({
+      code: "framework-unconfirmed",
+      level: "block",
+      fix: { to: "framework" },
+    });
+    expect(data.routeLinks.finish).toBe("#readiness");
+  });
+
+  it("ticks a self-check only in the caller's own dossier (P29.1)", async () => {
+    const mine = await repo.createDossier("teacher-a", "A", sampleDossier());
+    const theirs = await repo.createDossier("teacher-b", "Van B", sampleDossier());
+    const tick = (id: string, code: string) =>
+      overview.action({
+        request: post("/x", { intent: "tickReadiness", code, ticked: "on" }),
+        params: { id },
+      } as never);
+    expect(await tick(mine.id, "no-student-names")).toEqual({ ok: true, intent: "tickReadiness" });
+    const ticked = (await repo.getDossier("teacher-a", mine.id))!.data.readiness?.ticked;
+    expect(ticked?.["no-student-names"]).toBeGreaterThan(0);
+    expect(await tick(mine.id, "chapter-empty")).toMatchObject({ ok: false });
+    expect(await status(tick(theirs.id, "no-student-names"))).toBe(404);
+    expect((await repo.getDossier("teacher-b", theirs.id))!.data.readiness).toBeUndefined();
   });
 
   it("saves a framework intent and confirms the framework", async () => {

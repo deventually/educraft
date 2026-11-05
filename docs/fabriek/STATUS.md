@@ -168,6 +168,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
 
 ## Bezig
 
+- P29.1 Klaar om in te leveren?: in stap 5 van het BDB/BKE-dossier één lijst (groen / oranje /
+  rood, met pictogram en woord) of je dossier inleverklaar is, met per punt "Los op". Zonder AI en
+  zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten
+  (geen studentnamen, BKE-minimum, AI-verantwoording) met datum. Een toets als bewijs telt zijn
+  vragen (`itemCount`). Geen migratie. PR open.
 - Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
   Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde

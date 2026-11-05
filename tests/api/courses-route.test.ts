@@ -505,7 +505,8 @@ describe("/courses/:id", () => {
         title: "Databases: toetsmatrijs Eindopdracht",
         kind: "test-material",
         criterionIds: [C1, C2],
-        sourceCourse: { courseId: c.id, part: { assessmentId: TEST1 } },
+        // P29.1: the question count feeds "Klaar om in te leveren?".
+        sourceCourse: { courseId: c.id, part: { assessmentId: TEST1 }, itemCount: 2 },
       });
       expect(ev.text).toContain("| **Totaal** | 2 vragen |  |  | 10 |");
       expect(ev.sourceCourse?.at).toBeGreaterThan(0);
@@ -516,6 +517,7 @@ describe("/courses/:id", () => {
       await act(c.id, { intent: "use-as-evidence", dossierId: d.id, part: "outcomes-and-matrix" });
       const ev = (await portfolio.getDossier("teacher-a", d.id))!.data.evidence.at(-1)!;
       expect(ev).toMatchObject({ kind: "other", criterionIds: [] });
+      expect(ev.sourceCourse).not.toHaveProperty("itemCount");
       expect(ev.text).toContain("### Dekkingsmatrix");
     });
 
