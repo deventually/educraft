@@ -28,6 +28,7 @@ import {
   reviewDecisions,
   rubricScores,
   rubrics,
+  shares,
   teamMembers,
   featureExceptions,
   feedback,
@@ -406,6 +407,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
+    tx.delete(shares).where(eq(shares.ownerUserId, id)).run();
     tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();
     // The teacher's own model set lives in instance_settings.
     tx.delete(instanceSettings)

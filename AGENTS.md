@@ -80,6 +80,10 @@ English slugs, never shown.
 ### Database
 - All DB access goes through `app/server/repositories/`: every exported function is `async` and
   scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`.
+- Sharing (P28.4): **reading** is also allowed to a member of a team the owner shared the item
+  with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
+  owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared
+  ([Authentication](wiki/Authentication.md#sharing-with-your-team-p284)).
 - `getDb()` is the seam; tests set `DATABASE_URL=file::memory:` before importing server modules.
   List queries are capped (`Math.min(limit ?? 50, 500)`).
 - A schema change ships with a migration (`npm run db:generate`), applied with `npm run db:migrate`.

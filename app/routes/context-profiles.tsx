@@ -10,6 +10,11 @@ import {
   getDefaultProfile,
 } from "~/server/repositories/profiles.server";
 import { requireUser } from "~/server/auth.server";
+import { listItemShares, copySharedItem } from "~/server/repositories/shares.server";
+import { listTeamsForUser } from "~/server/repositories/teams.server";
+import { shareAction, sharedWithMe } from "~/server/sharing.server";
+import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
+import { SharedWithMe } from "~/components/sharing/SharedWithMe";
 import {
   getAvailableSectors,
   getAvailableDomains,
@@ -39,18 +44,38 @@ export async function loader({ request }: Route.LoaderArgs) {
     // filters each track catalogue by it client-side.
     getAvailableDomainSlugs(user),
   ]);
+  // Sharing (P28.4): the owner's teams, per own profile the teams it is shared with, and
+  // "Van mijn team".
+  const [teams, shared, sharedWith] = await Promise.all([
+    listTeamsForUser(user.id),
+    sharedWithMe(user, "contextProfile"),
+    Promise.all(profiles.map((p) => listItemShares(user.id, "contextProfile", p.id))),
+  ]);
   return {
     profiles,
     defaultId: def?.id ?? "",
     availableSectors,
     availableDomains,
+    teams: teams.map((t) => ({ id: t.id, name: t.name })),
+    sharedWith: Object.fromEntries(profiles.map((p, i) => [p.id, sharedWith[i]])),
+    shared,
   };
 }
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await requireUser(request);
+  // "Delen met team" (P28.4): the repository only shares the caller's own profile.
+  const shareId = String((await request.clone().formData()).get("id") ?? "");
+  const shared = await shareAction(request, user, "contextProfile", shareId);
+  if (shared) return shared;
   const fd = await request.formData();
   const intent = fd.get("intent");
+
+  if (intent === "copy-shared") {
+    const copyId = await copySharedItem(user.id, "contextProfile", String(fd.get("id") ?? ""));
+    if (copyId) return { ok: true, intent: "copy-shared" as const };
+    return { ok: false, error: getMessages(getLocale(request)).sharing.errorNotFound };
+  }
 
   if (intent === "delete") {
     await deleteProfile(user.id, String(fd.get("id")));
@@ -110,7 +135,15 @@ function ProfileMeta({ profile, locale }: { profile: ContextProfile; locale: "nl
 export default function Settings({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { profiles, defaultId, availableSectors, availableDomains } = loaderData;
+  const {
+    profiles,
+    defaultId,
+    availableSectors,
+    availableDomains,
+    teams = [],
+    sharedWith = {},
+    shared = [],
+  } = loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
   const busy = nav.state !== "idle";
@@ -125,6 +158,9 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
   useFormToast(actionData, {
     result: (d) => {
       if (!d) return null;
+      if (d.ok && "message" in d) return { variant: "success", message: d.message };
+      if (d.ok && "intent" in d && d.intent === "copy-shared")
+        return { variant: "success", message: t.sharing.toastCopied };
       if (d.ok) return { variant: "success", message: t.admin.console.saved };
       const err = "error" in d ? d.error : undefined;
       return err ? { variant: "error", message: err } : null;
@@ -165,6 +201,14 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
                   {p.id === defaultId && <Badge>{t.settings.defaultBadge}</Badge>}
                 </div>
                 <ProfileMeta profile={p} locale={locale} />
+                <div className="mt-3">
+                  <ShareWithTeam
+                    teams={teams}
+                    sharedWith={sharedWith[p.id] ?? []}
+                    fields={{ id: p.id }}
+                    collapsible
+                  />
+                </div>
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-2">
                 <Button
@@ -190,6 +234,8 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
           );
         })}
       </section>
+
+      <SharedWithMe items={shared} />
 
       {(profiles.length > 0 || editor) && (
         <Card className="mt-8 p-6">
