@@ -188,3 +188,57 @@ describe("chapter heading levels", () => {
     expect(styles).toEqual(["Heading1:LU1 Doceren", "Heading2:Een", "Heading3:Twee"]);
   });
 });
+
+describe("course snapshots in the appendices (P26.4)", () => {
+  const snapshot =
+    "## Didactiek 1\n\n### Dekkingsmatrix\n\n| Leeruitkomst | Toets A |\n| --- | --- |\n| LU1 | ✓ **2 vragen** |\n| LU2 | — |";
+
+  function withSnapshot(): DossierData {
+    const d = sampleDossier();
+    d.evidence.push({
+      id: "00000000-0000-4000-8000-0000000000e2",
+      title: "Didactiek 1: leeruitkomsten en dekking",
+      kind: "other",
+      text: snapshot,
+      criterionIds: [],
+      sourceCourse: { courseId: "c1", part: "outcomes-and-matrix", at: NOW },
+    });
+    return d;
+  }
+
+  it("lays out a course table as a real Word table, not as pipe text", async () => {
+    const xml = await documentXml(
+      await buildDossierDocx({ name: "BDB", data: withSnapshot(), locale: "nl", now: NOW }),
+    );
+    expect(xml).toContain("<w:tbl>");
+    expect(xml).toContain("<w:tblHeader");
+    const texts = paragraphs(xml).map((p) => p.text);
+    expect(texts.some((t) => t.includes("|"))).toBe(false);
+    expect(texts).toEqual(expect.arrayContaining(["Leeruitkomst", "Toets A", "LU1", "✓ 2 vragen"]));
+    expect(xml).toMatch(/<w:b\/>[\s\S]*?2 vragen/);
+  });
+
+  it("nests the snapshot's headings under its appendix heading", async () => {
+    const headings = paragraphs(
+      await documentXml(
+        await buildDossierDocx({ name: "BDB", data: withSnapshot(), locale: "nl", now: NOW }),
+      ),
+    )
+      .filter((p) => p.style?.startsWith("Heading"))
+      .map((p) => `${p.style}:${p.text}`);
+    expect(headings.slice(-3)).toEqual([
+      "Heading2:Bijlage 2. Didactiek 1: leeruitkomsten en dekking",
+      "Heading3:Didactiek 1",
+      "Heading4:Dekkingsmatrix",
+    ]);
+  });
+
+  it("keeps pasted evidence as plain text, markdown signs and all", async () => {
+    const d = sampleDossier();
+    d.evidence[0].text = "| a | b |\n|---|---|\n* geen lijst";
+    const texts = paragraphs(
+      await documentXml(await buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW })),
+    ).map((p) => p.text);
+    expect(texts).toEqual(expect.arrayContaining(["| a | b |", "* geen lijst"]));
+  });
+});

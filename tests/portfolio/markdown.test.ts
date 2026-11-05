@@ -54,3 +54,14 @@ describe("parseMarkdown (chapter → Word blocks)", () => {
     ]);
   });
 });
+
+describe("parseMarkdown tables with an escaped pipe", () => {
+  it("keeps \\| inside a cell instead of splitting the row", () => {
+    const [table] = parseMarkdown("| A | B |\n|---|---|\n| x \\| y | z |");
+    expect(table).toEqual({
+      type: "table",
+      header: [[{ text: "A" }], [{ text: "B" }]],
+      rows: [[[{ text: "x | y" }], [{ text: "z" }]]],
+    });
+  });
+});
