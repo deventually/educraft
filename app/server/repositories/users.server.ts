@@ -340,6 +340,47 @@ export async function getUserByEmail(email: string): Promise<UserRow | null> {
   return getDb().select().from(users).where(eq(users.email, email)).get() ?? null;
 }
 
+/**
+ * Which of these e-mail addresses are already spoken for (P28.5): `taken` has an account
+ * (compared case-insensitively), `invited` has an open invite whose note ends in
+ * `<email>` (the shape a pasted list writes). Not user-scoped by design: it serves the
+ * admin's "Add", like `listPeople`. Input is capped at 500 addresses.
+ */
+export async function findClaimedEmails(
+  emails: string[],
+): Promise<{ taken: Set<string>; invited: Set<string> }> {
+  const wanted = [...new Set(emails.map((e) => e.toLowerCase()))].slice(0, 500);
+  const taken = new Set<string>();
+  const invited = new Set<string>();
+  if (wanted.length === 0) return { taken, invited };
+  const db = getDb();
+  for (const u of db
+    .select({ email: users.email })
+    .from(users)
+    .where(inArray(sql`lower(${users.email})`, wanted))
+    .all()) {
+    if (u.email) taken.add(u.email.toLowerCase());
+  }
+  const open = db
+    .select({ note: invites.note })
+    .from(invites)
+    .where(
+      and(
+        isNull(invites.usedByUserId),
+        or(isNull(invites.expiresAt), gt(invites.expiresAt, new Date())),
+        isNotNull(invites.note),
+      ),
+    )
+    .all();
+  const wantedSet = new Set(wanted);
+  for (const { note } of open) {
+    const m = note?.match(/<([^<>\s]+)>\s*$/);
+    const email = m?.[1].toLowerCase();
+    if (email && wantedSet.has(email)) invited.add(email);
+  }
+  return { taken, invited };
+}
+
 export async function deleteUser(id: string): Promise<void> {
   getDb().delete(users).where(eq(users.id, id)).run();
 }
