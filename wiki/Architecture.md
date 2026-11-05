@@ -15,7 +15,10 @@ A *tool* is a declarative description, not a hand-written page. A `Tool`
   (see `DynamicForm`).
 - **`stages[]`** — one or more generation steps. A one-shot generator has a single
   stage; a multi-step tool (e.g. the 4-stage Cognitive Architect) chains stages,
-  where later stages pull earlier outputs via **`consumes`**.
+  where later stages pull earlier outputs via **`consumes`**. A dependency can name a
+  **`derive`** (`app/lib/template/derivations.ts`): the placeholder then gets something
+  computed in code from that output, such as Toetsvragen's `question-plan` (one line per
+  question with its row, level, type and points, from the blueprint table).
 
 Adding a tool is therefore *authoring data*, not writing a feature — see
 [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md). This is the property that lets

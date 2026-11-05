@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (#120 gemerged, clear-assignment@v2 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, meting P29.2 en clear-assignment@v2 open)_
 
 ## Nu
 
+- **Proefassessment, de AI-tekst en de meting (P29.2, #119) gemerged op 2026-11-05:**
+  `portfolio-rehearsal@v1` speelt een commissie van twee assessoren met feedback per criterium,
+  gecontroleerd in code; nog geen scherm. Eerste meting: één case 4,4, de rest faalt op de meting.
 - **Kleine fixes (#120) gemerged op 2026-11-05:** de wankele toast-test is stabiel, en in Lastig
   gesprek staan de gebaren van de student in de ik-vorm (`difficult-conversation@v2`), zodat die
   niet meer van "haar" naar "zijn" wisselt; meting dc4 elke case 4,67–4,93.
@@ -179,12 +182,18 @@ _Laatst bijgewerkt: 2026-11-05 (#120 gemerged, clear-assignment@v2 open)_
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
   `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
   nergens meer dan 8 punten. PR open.
-- P29.2 Proefassessment, de AI-tekst en de meting: `portfolio-rehearsal@v1` (NL/EN) speelt een
-  commissie van twee assessoren die het dossier las, één vraag per beurt, dunste criterium eerst,
-  doorvragen volgens STARR; op "Rond af" feedback per criterium als JSON. Controle in code
-  (`rehearsal.ts`): citaten alleen uit wat de docent typte, onbekende bronnen eruit, nooit een
-  cijfer. Bewijsstukken gaan alleen als titel mee. Meting `npm run eval:rehearsal` met vier
-  synthetische dossiers; nog niet gedraaid (geen API-sleutel in deze sessie). Geen UI. PR open.
+- Toetsvragen, vaste vraagindeling in code: de app rekent uit de toetsmatrijs per vraag de rij,
+  het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
+  (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
+  Pakt het punt onder Later aan (metingen t en u). Eindmeting v: vijf cases 4,60–4,93, statistics
+  3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
+  ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
+  in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
+- P29.2 Meting proefassessment herstellen: de eerste meting (3 runs) faalde vooral op de meting
+  zelf. De vraagteller telt vraagtekens in geciteerde tekst niet meer mee; "vitten" en "claim
+  overgenomen" gelden alleen in de cases die daarover gaan; het sterke dossier heeft geen dunste
+  criterium meer en het script volgt het hoofdstuk. Prompt ongewijzigd (v1); na de nieuwe meting
+  volgt eventueel een v2. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
@@ -253,9 +262,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
-- Toetsvragen, bekende punten: af en toe een correctiespoor in een kop van het antwoordmodel en
-  soms 3 opties bij statistiek. Oplossing in code (vaste rijtoewijzing per vraag), niet met
-  prompttekst; twee rondes prompttekst hielpen niet (metingen t en u).
+- Toetsvragen: in meting w nog één correctie midden in een zin van het antwoordmodel (1 van 18
+  runs). De vaste vraagindeling (#118) loste de rest op.
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
