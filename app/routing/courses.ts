@@ -6,6 +6,8 @@ export const courses: RouteArea = {
   shell: [
     ...prefix("courses", [
       index("routes/courses._index.tsx"),
+      // A colleague's course, shared with your team (P28.4): read only.
+      route("shared/:id", "routes/courses.shared.$id.tsx"),
       route(":id", "routes/courses.$id.tsx"),
     ]),
   ],

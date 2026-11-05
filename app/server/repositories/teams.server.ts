@@ -12,9 +12,9 @@
  * A lead never demotes or removes another lead; an admin does (`setLead`, `removeMember`).
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { invites, teamMembers, teams, users, type TeamRow } from "../schema.server";
+import { invites, shares, teamMembers, teams, users, type TeamRow } from "../schema.server";
 import { createInvite, getUserByEmail } from "./users.server";
 import {
   type TeamSettings,
@@ -92,11 +92,12 @@ export async function renameTeam(id: string, name: string): Promise<void> {
 }
 
 /**
- * Remove the group only: the memberships go, the accounts stay, and an open invite for
- * the team becomes a plain invite. (Shared items become private again in P28.4.)
+ * Remove the group only: the memberships go, the accounts stay, an open invite for the
+ * team becomes a plain invite, and what was shared with it is private again (P28.4).
  */
 export async function deleteTeam(id: string): Promise<void> {
   getDb().transaction((tx) => {
+    tx.delete(shares).where(eq(shares.teamId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.teamId, id)).run();
     tx.update(invites).set({ teamId: null }).where(eq(invites.teamId, id)).run();
     tx.delete(teams).where(eq(teams.id, id)).run();
@@ -128,11 +129,16 @@ export async function addMember(teamId: string, userId: string): Promise<void> {
     .run();
 }
 
+/** Take `userId` out of the team; what they shared with it lapses (P28.4). */
 export async function removeMember(teamId: string, userId: string): Promise<void> {
-  getDb()
-    .delete(teamMembers)
-    .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
-    .run();
+  getDb().transaction((tx) => {
+    tx.delete(shares)
+      .where(and(eq(shares.teamId, teamId), eq(shares.ownerUserId, userId)))
+      .run();
+    tx.delete(teamMembers)
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
+      .run();
+  });
 }
 
 /** Make a member lead, or take it away (admin). A non-member is left alone. */
@@ -166,6 +172,14 @@ export async function setUserTeams(
   );
   const leads = new Set(leadIds);
   db.transaction((tx) => {
+    // Shares with a team the user leaves lapse (P28.4).
+    tx.delete(shares)
+      .where(
+        known.size
+          ? and(eq(shares.ownerUserId, userId), notInArray(shares.teamId, [...known]))
+          : eq(shares.ownerUserId, userId),
+      )
+      .run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, userId)).run();
     for (const teamId of known) {
       tx.insert(teamMembers)

@@ -271,6 +271,12 @@ export interface Tool {
    */
   assistiveGrading?: boolean;
 
+  /**
+   * True for tools that process student work (P28.4). Their work never reaches a shared
+   * view, not even through a shared course (`isShareableWork`, BESLUIT-2026-11-05-5).
+   */
+  handlesStudentWork?: true;
+
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;
 

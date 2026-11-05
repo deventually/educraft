@@ -27,6 +27,8 @@ import { CourseImport, useImportProposal } from "~/components/courses/CourseImpo
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { courseToolsFor } from "~/server/courseTools.server";
+import { shareAction, shareControls } from "~/server/sharing.server";
+import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -72,6 +74,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
     currentWeek: await currentCourseWeek(course.data.startDate),
+    sharing: await shareControls(user, "course", course.id),
   };
 }
 
@@ -84,7 +87,11 @@ async function currentCourseWeek(startDate: string | undefined): Promise<number 
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  return saveCourseIntent(request, params.id);
+  // "Delen met team" (P28.4): only the owner gets here, since loadCourse is owner-scoped.
+  const { user, course } = await loadCourse(request, params.id);
+  return (
+    (await shareAction(request, user, "course", course.id)) ?? saveCourseIntent(request, params.id)
+  );
 }
 
 /**
@@ -113,6 +120,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
       if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
+      if (r.intent === "share" || r.intent === "unshare")
+        return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
         return { variant: r.partial ? "info" : "success", message: r.message };
       if (r.intent === "import-blueprint")
@@ -133,6 +142,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     weekDates = null,
     tools = NO_COURSE_TOOLS,
     currentWeek = null,
+    sharing = { teams: [], sharedWith: [] },
   } = loaderData;
   const { data } = course;
 
@@ -188,6 +198,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <CoverageMatrix data={data} matrix={matrix} />
         <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />
+        <ShareWithTeam {...sharing} />
       </div>
     </div>
   );

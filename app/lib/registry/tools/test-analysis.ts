@@ -24,6 +24,8 @@ export const testAnalysis: Tool = {
   },
   icon: "chart-column",
   userType: "instructor",
+  // Processes student work: never in a shared view (P28.4).
+  handlesStudentWork: true,
   mode: "one-shot",
   theory: {
     name: { nl: "Klassieke testtheorie", en: "Classical test theory" },

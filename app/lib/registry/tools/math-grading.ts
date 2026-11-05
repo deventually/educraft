@@ -19,6 +19,8 @@ export const mathGrading: Tool = {
   },
   icon: "square-root",
   userType: "instructor",
+  // Processes student work: never in a shared view (P28.4).
+  handlesStudentWork: true,
   mode: "one-shot",
   theory: {
     name: {

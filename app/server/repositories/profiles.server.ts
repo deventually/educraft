@@ -9,7 +9,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { contextProfiles } from "../schema.server";
+import { contextProfiles, shares } from "../schema.server";
 import type { ContextProfile } from "~/lib/context/types";
 import { migrateLegacyProfile } from "~/lib/context/migrate";
 
@@ -93,11 +93,24 @@ export async function updateProfile(
     .run();
 }
 
+/** Deletes the profile and its shares (P28.4). */
 export async function deleteProfile(userId: string, id: string): Promise<void> {
-  getDb()
-    .delete(contextProfiles)
-    .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
-    .run();
+  getDb().transaction((tx) => {
+    const result = tx
+      .delete(contextProfiles)
+      .where(and(eq(contextProfiles.id, id), eq(contextProfiles.userId, userId)))
+      .run();
+    if (result.changes === 0) return;
+    tx.delete(shares)
+      .where(
+        and(
+          eq(shares.kind, "contextProfile"),
+          eq(shares.itemId, id),
+          eq(shares.ownerUserId, userId),
+        ),
+      )
+      .run();
+  });
 }
 
 async function clearDefault(userId: string): Promise<void> {
