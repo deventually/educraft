@@ -63,8 +63,10 @@ describe("difficult-conversation eval meets the P24 quality gate", () => {
         "noFeedbackOnRequest",
         "legalOrMedicalAdvice",
         "inventedSources",
+        "mixedPronouns",
       ]),
     );
+    expect(parseHardChecks(rubric).find((c) => c.id === "mixedPronouns")?.counted).toBe(true);
     expect(parseHardChecks(rubric).find((c) => c.id === "longRoleTurn")?.counted).toBe(true);
   });
 });
@@ -92,5 +94,52 @@ describe("longRoleTurn (counted)", () => {
     expect(
       COUNTED_CHECKS.longRoleTurn(transcript(role("*kijkt naar de grond* Ik weet het niet."), end)),
     ).toBe(false);
+  });
+});
+
+describe("mixedPronouns (counted)", () => {
+  const role = (s: string) => `**Tutor:** ${s}`;
+  const transcript = (...turns: string[]) =>
+    [
+      "**Tutor (greeting):** Open het gesprek.",
+      ...turns.flatMap((t) => [`**Student:** Hoi.`, t]),
+    ].join("\n\n");
+  const end = role('### Wat goed ging\n- Je zei "hoi"; hij of zij voelde zich gehoord.');
+
+  it("fails when the cues switch between a female and a male student (#75)", () => {
+    const t = transcript(
+      role("*haalt haar schouders op* Weet ik niet."),
+      role("*wrijft over zijn gezicht* Ik slaap slecht."),
+      end,
+    );
+    expect(COUNTED_CHECKS.mixedPronouns(t)).toBe(true);
+    const en = transcript(
+      role("*shrugs her shoulders* No idea."),
+      role("*rubs his face* Fine."),
+      end,
+    );
+    expect(COUNTED_CHECKS.mixedPronouns(en)).toBe(true);
+  });
+
+  it("passes one consistent person, first-person cues and the feedback turn", () => {
+    expect(
+      COUNTED_CHECKS.mixedPronouns(
+        transcript(role("*haalt haar schouders op* Nee."), role("*kijkt haar aan* Oké."), end),
+      ),
+    ).toBe(false);
+    expect(
+      COUNTED_CHECKS.mixedPronouns(
+        transcript(
+          role("*ik kijk naar de grond* Nee."),
+          role("*ik haal mijn schouders op* Zijn er nog herkansingen?"),
+          end,
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("only reads the cues, not what the student says", () => {
+    const t = transcript(role("Mijn moeder zegt dat hij gelijk heeft. *kijkt haar aan*"), end);
+    expect(COUNTED_CHECKS.mixedPronouns(t)).toBe(false);
   });
 });

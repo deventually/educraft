@@ -172,6 +172,12 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Bezig
 
+- Wankele toast-test: `tests/lib/useFormToast.test.tsx` faalde soms onder zware belasting (de
+  toast verdwijnt een tik na de nieuwe pagina); de test wacht daar nu op. Alleen een test. PR open.
+- Lastig gesprek, vaste student (`difficult-conversation@v2`): de gespeelde student wisselde soms
+  van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
+  grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
+  4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
 - P29.2 Proefassessment, de AI-tekst en de meting: `portfolio-rehearsal@v1` (NL/EN) speelt een
   commissie van twee assessoren die het dossier las, één vraag per beurt, dunste criterium eerst,
   doorvragen volgens STARR; op "Rond af" feedback per criterium als JSON. Controle in code

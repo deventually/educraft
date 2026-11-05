@@ -16,6 +16,7 @@ import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { DIFFERENTIATION_PROMPT } from "./differentiation@v1.prompt";
 import { DIFFICULT_CONVERSATION_PROMPT } from "./difficult-conversation@v1.prompt";
+import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "./difficult-conversation@v2.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
@@ -58,6 +59,7 @@ const ALL: PromptDef[] = [
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
   DIFFERENTIATION_PROMPT,
   DIFFICULT_CONVERSATION_PROMPT,
+  DIFFICULT_CONVERSATION_PROMPT_V2,
   LESSON_PLAN_PROMPT,
   PEER_TUTORING_PROMPT,
   RUBRIC_BUILDER_PROMPT,
