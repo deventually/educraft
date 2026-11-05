@@ -150,6 +150,18 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (`import.ts`, `course-import@v1`) is a proposal the teacher ticks. `evidence.ts`
   (`courseAsEvidence`) makes a deterministic Markdown snapshot; `courseEvidence.server.ts` adds it
   to an own dossier as `EvidenceItem.sourceCourse` and "Opnieuw ophalen" refreshes it. No migration.
+- **Role agents (P21)** on the course page, section "Beoordeling". A hat is registry data in
+  `app/lib/agents/` (`registry`, `validate`, `schema`, `input`, `filter`): `buildReviewMessage`
+  puts the course under short keys (L1, A1, T1, with Bloom and pack tags), the P20 findings and the
+  rejected advice in the message; `parseAgentReview` maps keys back and drops anything unknown,
+  duplicated or rejected. Prompts `agent-assessment@v2` (also reads `<linkedWork>`) and
+  `agent-design@v1`. `app/server/agentReview.server.ts` runs every hat that watches `"course"` on
+  the teacher's chosen (allowed) model, one retry, and stores per hat in `agent_reviews` (findings
+  with ids `f1…`, `courseUpdatedAt` for "verouderd"); `review_decisions` holds Akkoord / Niet
+  akkoord with a reason. Intents `review` and `decide` behind the `roleAgents` feature. Linked work
+  (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
+  clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
+  profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.
 
 ---
 
@@ -176,7 +188,8 @@ app/
     i18n/            messages/{nl,en}/<ns>.ts · index · format · localized
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
-    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26), all pure
+    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21), all pure
+    agents/          types · registry · validate · schema · input · filter (P21 role agents), all pure
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
 docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7
 wiki/                this wiki
