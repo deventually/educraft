@@ -53,9 +53,14 @@ npm run set-owner -- --email <e-mail of an existing admin>
 The script refuses an unknown e-mail or a non-admin. The key is read per request, so the app
 can keep running. Until it has run there is **no owner** and nobody can change a role.
 
-| On `/admin/users` | Admin | Super admin |
+Since P28.1 the list (`/admin/users`) searches and filters people and holds the one **Add**
+button (invite link, or for the owner a direct account); everything about one account lives on
+its person page (`/admin/users/:id`), whose action takes the user from the URL, never from the
+form.
+
+| On `/admin/users` and `/admin/users/:id` | Admin | Super admin |
 |---|---|---|
-| Invite a teacher, revoke an invite, models per teacher | yes | yes |
+| Invite a teacher, revoke an invite, models and BDB/BKE per teacher | yes | yes |
 | E-mail, reset link, delete — on a **teacher** | yes | yes |
 | E-mail, reset link, delete — on an **admin** | no | yes |
 | Change a role (teacher ↔ admin) | no | yes |
@@ -92,7 +97,7 @@ minted for a teacher never opens that account once it is an admin.
 Every user (teacher or admin) deletes their own account on `/account`: type the
 confirmation word and `deleteUserCascade` removes the account and everything it owns,
 immediately and permanently. There is no request/holding state. An admin can remove
-other users from the user list in `/admin/users`. (Deactivating, below, is the reversible
+other users from their person page (`/admin/users/:id`). (Deactivating, below, is the reversible
 alternative, owner only.)
 
 ## Data scoping
@@ -115,7 +120,7 @@ approval first. Every link below is shown on the page for the admin to copy and 
   (`createPasswordReset`, 48 h); the user chooses their own new password and is signed in.
   A role change, a new password (`updateUserPassword`: reset, `/account`, the owner's
   `setPassword`) and a deactivation void the user's open links.
-- **Create an account** (owner only, `/admin/users`): name, e-mail (required, logging in
+- **Create an account** (owner only, **Add** on `/admin/users`): name, e-mail (required, logging in
   uses it), role teacher or admin, and either a **link** (default: the account exists with
   `passwordHash = NO_PASSWORD`, which no typed password matches, plus a 7-day single-use
   reset link) or an **initial password** (at least 10 characters, hashed by

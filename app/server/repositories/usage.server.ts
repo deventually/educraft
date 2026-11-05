@@ -7,7 +7,7 @@
  * (userId, day); `day` is a UTC date string so a rollover lands on a fresh row.
  */
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { usage, users } from "../schema.server";
 import { env } from "../env.server";
@@ -112,6 +112,16 @@ export async function checkQuota(userId: string, day = utcDay()): Promise<{ ok: 
 }
 
 /** Remove all usage rows for a user (delete-my-data cascade). */
+/** The newest UTC day this user used the app (a usage row), or null when never (P28.1). */
+export async function getLastActiveDay(userId: string): Promise<string | null> {
+  const row = getDb()
+    .select({ day: sql<string | null>`max(${usage.day})` })
+    .from(usage)
+    .where(eq(usage.userId, userId))
+    .get();
+  return row?.day ?? null;
+}
+
 export async function deleteUsageForUser(userId: string): Promise<void> {
   getDb().delete(usage).where(eq(usage.userId, userId)).run();
 }
