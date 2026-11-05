@@ -5,7 +5,7 @@
  * Layout: a title page (name, tracks, institution, year, date, word count
  * without appendices), one Heading 1 per learning outcome with its chapter, the
  * optional AI disclosure, the reference list (alphabetical, as typed), and the
- * evidence as numbered appendices. References come before appendices, as APA
+ * evidence as numbered appendices (a course snapshot keeps its tables). References come before appendices, as APA
  * asks. The document is accessible: real heading styles, the document language
  * set, tables with a repeating header row.
  */
@@ -67,16 +67,20 @@ function cell(rs: Run[], header: boolean): TableCell {
 }
 
 /**
- * Chapter blocks under an outcome heading. The outcome itself is Heading 1, so
- * the chapter's top heading level (# or ##, whichever the teacher used) becomes
- * Heading 2 and the rest follow, without skipping a level.
+ * Markdown blocks under a heading of level `parent` (an outcome is Heading 1, an
+ * appendix Heading 2). The text's top heading level (# or ##, whichever was used)
+ * becomes one deeper and the rest follow, without skipping a level.
  */
-function chapterBlocks(blocks: Block[], nextList: () => number): (Paragraph | Table)[] {
+function markdownBlocks(
+  blocks: Block[],
+  nextList: () => number,
+  parent: 1 | 2,
+): (Paragraph | Table)[] {
   const out: (Paragraph | Table)[] = [];
   const used = [...new Set(blocks.flatMap((b) => (b.type === "heading" ? [b.level] : [])))].sort();
   for (const b of blocks) {
     if (b.type === "heading") {
-      const level = Math.min(used.indexOf(b.level) + 1, 5);
+      const level = Math.min(used.indexOf(b.level) + parent, 5);
       out.push(new Paragraph({ heading: HEADINGS[level], children: runs(b.runs) }));
     } else if (b.type === "paragraph") {
       out.push(new Paragraph({ children: runs(b.runs) }));
@@ -159,7 +163,7 @@ export async function buildDossierDocx(
     body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(heading)] }));
     const chapter = data.chapters.find((ch) => ch.outcomeId === o.id);
     const blocks = chapter ? parseMarkdown(chapter.text) : [];
-    if (blocks.length) body.push(...chapterBlocks(blocks, nextList));
+    if (blocks.length) body.push(...markdownBlocks(blocks, nextList, 1));
     else
       body.push(new Paragraph({ children: [new TextRun({ text: t.noChapter, italics: true })] }));
   }
@@ -195,7 +199,13 @@ export async function buildDossierDocx(
           children: [new TextRun(fmt(t.appendix, { n: i + 1, title: e.title }))],
         }),
       );
-      body.push(...plainParagraphs(e.text));
+      // A course snapshot (P26.4) is our own Markdown, with tables; pasted
+      // evidence is the teacher's text and stays as typed.
+      body.push(
+        ...(e.sourceCourse
+          ? markdownBlocks(parseMarkdown(e.text), nextList, 2)
+          : plainParagraphs(e.text)),
+      );
     });
   }
 
