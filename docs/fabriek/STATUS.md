@@ -198,7 +198,8 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.4 en clear-assignment@v2 open)
   ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
   in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
 - P29.4 Documentatie van P29: de wiki (Architecture, Tools), `evals/README.md` met
-  `eval:rehearsal`, en het overzicht van de briefs (P29 af). Alleen docs. PR open.
+  `eval:rehearsal`, en het overzicht van de briefs (P29 af). Plus: het dubbele blok
+  "Aandachtspunten" op het dossieroverzicht is weg; de klaar-check toont dezelfde punten. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop

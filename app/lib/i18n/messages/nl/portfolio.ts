@@ -66,9 +66,6 @@ export const portfolio = {
   exportAiRequired: "Je formulier vraagt om een verantwoording van AI-gebruik.",
   exportTitle: "Exporteren",
   exportWord: "Download als Word-bestand",
-  findingNoEvidence: '{outcome}: "{criterion}" heeft nog geen bewijs.',
-  findingOverWords: "De hoofdstukken hebben samen {words} woorden; de grens is {limit}.",
-  findingsTitle: "Aandachtspunten",
   framework: {
     addCriterion: "Criterium toevoegen",
     addOutcome: "Toevoegen",
