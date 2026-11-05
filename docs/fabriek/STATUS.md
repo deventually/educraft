@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.3 gemerged, P22.4 open)_
 
 ## Nu
 
+- **De week van de docent op Start (P22.3, #113) gemerged op 2026-11-05:** per cursus *In de les*,
+  *Voorbereiden* en *Nakijken*, vanaf vrijdag ook *Volgende week*; zonder startdatum een hint.
 - **De week van de docent, puur (P22.2, #111) gemerged op 2026-11-05:** `teacherWeek` rekent per
   cursus deze week, voorbereiden, nakijken en aandachtspunten; nog geen scherm.
 - **De week van de docent, echte datums (P22.1b, #110) gemerged op 2026-11-05:** een startdatum
@@ -173,6 +175,12 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
   zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten
   (geen studentnamen, BKE-minimum, AI-verantwoording) met datum. Een toets als bewijs telt zijn
   vragen (`itemCount`). Geen migratie. PR open.
+- Rolagenten aan en uit in beheer: een eigen pagina `/admin/agents` (menu *Rolagenten*) met de
+  hoofdschakelaar (dezelfde als bij Onderdelen, Aan / Op aanvraag / Uit) en per pet Aan of Uit
+  voor de hele instantie. Een pet die uit staat, draait niet, staat niet op de cursuspagina en telt
+  niet mee bij de open adviezen op Start; zijn oude adviezen blijven bewaard. Staan alle petten
+  uit, dan verdwijnt "Beoordeling". De uitleg op de cursuspagina noemt nu de petten die aan staan.
+  Opslag in `instance_settings` (`agentStand:<id>`), geen migratie. PR open.
 - Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
   Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
@@ -181,9 +189,10 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
   `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
   bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P22.3 De week op Start: zodra een cursus een startdatum heeft, toont Start per cursus *In de
-  les*, *Voorbereiden* en *Nakijken* met links naar het onderdeel, de aandachtspunten en de open
-  adviezen van de petten; vanaf vrijdag ook *Volgende week*. Zonder startdatum een hint. PR open.
+- P22.4 + 22.5 De week van de docent, agenda en documentatie: "Zet in je agenda" op de cursus
+  (`/courses/:id/calendar.ics`, alleen de eigenaar, met vaste UID per onderdeel), het
+  helponderwerp "Je week" en de wiki. Daarmee is P22 af, op de toolknoppen na (wachten op P27.4).
+  PR open.
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".

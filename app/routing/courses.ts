@@ -9,4 +9,6 @@ export const courses: RouteArea = {
       route(":id", "routes/courses.$id.tsx"),
     ]),
   ],
+  // The calendar file (P22.4): a download, outside the app shell.
+  standalone: [route("courses/:id/calendar.ics", "routes/courses.$id.calendar.tsx")],
 };

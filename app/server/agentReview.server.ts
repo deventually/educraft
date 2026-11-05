@@ -7,7 +7,7 @@
 import { z } from "zod";
 import { buildReviewMessage, LINKED_LIMITS, type LinkedWorkInput } from "~/lib/agents/input";
 import { parseAgentReview } from "~/lib/agents/filter";
-import { agentsWatching } from "~/lib/agents/registry";
+import { activeAgents } from "~/lib/agents/registry";
 import {
   type Agent,
   DECISION_REASON_MAX,
@@ -36,8 +36,12 @@ import {
   listReviewsForCourse,
   saveReview,
 } from "./repositories/agentReviews.server";
+import { getAgentStands } from "./repositories/settings.server";
 
 const EVENT = "agent-review";
+
+/** The course hats an admin has not switched off on /admin/agents. */
+const courseAgents = async (): Promise<Agent[]> => activeAgents("course", await getAgentStands());
 
 export type ReviewError = "model" | "quota" | "failed";
 
@@ -113,6 +117,8 @@ export async function reviewCourse(
   locale: Locale,
   includeLinked = false,
 ): Promise<ReviewResult> {
+  const agents = await courseAgents();
+  if (agents.length === 0) return { ok: false, error: "failed" };
   const model = requestedModel || undefined;
   if (model && !(await isModelSelectableForUser(user, model))) return { ok: false, error: "model" };
   const blocked = await quotaGate(user);
@@ -127,7 +133,7 @@ export async function reviewCourse(
     : message;
   const reviewed: string[] = [];
   const failed: Agent[] = [];
-  for (const agent of agentsWatching("course")) {
+  for (const agent of agents) {
     const text = agent.watches.includes("generation") ? withLinked : message;
     const ok = await runAgent(user, course, agent, text, rejected, locale, model).catch(
       () => false,
@@ -173,12 +179,14 @@ export interface ReviewPanelData {
   defaultModel: string;
 }
 
-/** The panel's loader data; null when role agents are switched off for this teacher. */
+/** The panel's loader data; null when role agents, or every hat, are switched off. */
 export async function loadReviewPanel(user: User, course: Course): Promise<ReviewPanelData | null> {
   if (!(await isFeatureOn(user, "roleAgents"))) return null;
+  const active = await courseAgents();
+  if (active.length === 0) return null;
   const all = await listReviewsForCourse(user.id, course.id);
   const agents = await Promise.all(
-    agentsWatching("course").map(async (agent): Promise<ReviewPanelAgent> => {
+    active.map(async (agent): Promise<ReviewPanelAgent> => {
       const latest = all.find((r) => r.agentId === agent.id);
       if (!latest) return { agentId: agent.id, role: agent.role, review: null };
       const decisions = new Map(
@@ -212,19 +220,20 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
 }
 
 /**
- * Open role-agent findings per course (P22.3): findings of each agent's latest review
- * without a decision. Null when role agents are switched off for this teacher.
+ * Open role-agent findings per course (P22.3): findings of each active agent's latest
+ * review without a decision. Null when role agents are switched off for this teacher.
  */
 export async function openAgentFindings(
   user: User,
   courseIds: string[],
 ): Promise<Record<string, number> | null> {
   if (!(await isFeatureOn(user, "roleAgents"))) return null;
+  const agents = await courseAgents();
   const out: Record<string, number> = {};
   for (const courseId of courseIds) {
     const all = await listReviewsForCourse(user.id, courseId);
     let open = 0;
-    for (const agent of agentsWatching("course")) {
+    for (const agent of agents) {
       const latest = all.find((r) => r.agentId === agent.id);
       if (!latest) continue;
       const decided = new Set((await listDecisions(user.id, latest.id)).map((d) => d.findingId));

@@ -55,7 +55,7 @@ describe("P18.2 — per-teacher tool/context access and the country axis removed
 });
 
 describe("P18.4 — the admin console has four pages", () => {
-  it("the route table registers exactly the four admin pages (plus the person page P28.1, teams P28.2 and the team page)", () => {
+  it("the route table registers exactly the four admin pages (plus the person page P28.1, teams P28.2, the team page and role agents)", () => {
     const files = flatRoutes()
       .filter((r) => r.path.startsWith("/admin") && r.file !== "routes/admin.tsx")
       .map((r) => `${r.path.replace(/^\/admin\/?/, "")}:${r.file.replace(/^routes\//, "")}`);
@@ -66,6 +66,7 @@ describe("P18.4 — the admin console has four pages", () => {
       "teams:admin.teams.tsx",
       "teams/:id:admin.teams.$id.tsx",
       "tools:admin.tools.tsx",
+      "agents:admin.agents.tsx",
       "context:admin.context.tsx",
       "usage:admin.usage.tsx",
     ]);
@@ -87,9 +88,16 @@ describe("P18.4 — the admin console has four pages", () => {
     }
   });
 
-  it("the console nav has only users, teams (P28.2), tools, context and usage", () => {
+  it("the console nav has only users, teams (P28.2), tools, role agents, context and usage", () => {
     for (const nav of [nl.admin.console.nav, en.admin.console.nav]) {
-      expect(Object.keys(nav).sort()).toEqual(["context", "teams", "tools", "usage", "users"]);
+      expect(Object.keys(nav).sort()).toEqual([
+        "agents",
+        "context",
+        "teams",
+        "tools",
+        "usage",
+        "users",
+      ]);
     }
   });
 });
