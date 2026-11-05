@@ -14,6 +14,7 @@ export const admin: RouteArea = {
       route("teams", "routes/admin.teams.tsx"), // the team list (P28.2)
       route("teams/:id", "routes/admin.teams.$id.tsx"), // the team page
       route("tools", "routes/admin.tools.tsx"),
+      route("agents", "routes/admin.agents.tsx"), // the role agents' switches
       route("context", "routes/admin.context.tsx"),
       route("usage", "routes/admin.usage.tsx"),
     ]),

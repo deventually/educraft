@@ -37,6 +37,13 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("## Get a review");
   });
 
+  it("explains the teacher's week and the calendar file (P22.5)", () => {
+    expect(getTopicTitle("week", "nl")).toBe("Je week");
+    expect(getTopicTitle("week", "en")).toBe("Your week");
+    expect(getTopic("week", "nl")).toContain("## In je agenda");
+    expect(getTopic("week", "en")).toContain("## In your calendar");
+  });
+
   it("has both nl and en for every topic (no half-translated topics)", () => {
     expect(HELP_TOPIC_SLUGS.length).toBeGreaterThan(0);
     for (const slug of HELP_TOPIC_SLUGS) {

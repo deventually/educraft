@@ -216,6 +216,9 @@ export const courses: Messages["courses"] = {
   remove: "Remove",
   save: "Save",
   settings: {
+    calendar: "Add to your calendar",
+    calendarHint:
+      "A calendar file (.ics) with your lessons and assessments per week. Importing it again updates the events.",
     ec: "Study load (EC)",
     ecHint: "One EC is 28 hours of study.",
     planned: "Planned: {hours} of {budget} hours.",

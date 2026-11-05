@@ -53,7 +53,13 @@ export function CourseReviewPanel({
       <h2 id={id} className="text-lg font-medium text-slate-900">
         {p.title}
       </h2>
-      <p className="mt-1 text-sm text-slate-600">{p.intro}</p>
+      <p className="mt-1 text-sm text-slate-600">
+        {fmt(p.intro, {
+          roles: new Intl.ListFormat(locale, { type: "conjunction" }).format(
+            agents.map((a) => loc(a.role, locale)),
+          ),
+        })}
+      </p>
       <Form method="post" className="mt-3 flex flex-wrap items-end gap-3">
         {models.length > 1 && (
           <div>
