@@ -72,7 +72,7 @@ export async function saveCourseIntent(
       locale,
     ).catch(() => ({ ok: false as const, error: "failed" as const }));
     if (!result.ok) return { ok: false, intent, error: m.import.errors[result.error] };
-    return { ok: true, intent, ...result };
+    return { ...result, intent };
   }
 
   if (intent === "import-apply") {

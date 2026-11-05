@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20 af, P26.3 bezig)_
 
 ## Nu
 
+- **Cursussen, de documentatie (P20.5, #86) gemerged op 2026-11-05:** alinea in `AGENTS.md`, wiki
+  en README. Daarmee is P20 af.
 - **Cursussen koppelen (P20.4, #84) gemerged op 2026-11-05:** bovenaan tien toolpagina's een
   cursuskiezer die de leeruitkomsten invult en het resultaat aan de cursus koppelt; koppelen op
   "Mijn werk"; "Gekoppeld werk" op de cursuspagina.
@@ -124,8 +126,9 @@ _Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
 
 ## Bezig
 
-- P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
-  (architectuur en roadmap) en de README. Daarna is P20 af. PR open.
+- P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
+  voorstel dat de docent aanvinkt; met vijf fictieve eval-cases (`npm run eval:import`). PR open; de
+  meting wacht op akkoord.
 
 ## Wacht op jou
 
