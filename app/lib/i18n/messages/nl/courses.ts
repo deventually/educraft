@@ -214,6 +214,9 @@ export const courses = {
   remove: "Verwijderen",
   save: "Opslaan",
   settings: {
+    calendar: "Zet in je agenda",
+    calendarHint:
+      "Een agendabestand (.ics) met je lessen en toetsen per week. Opnieuw importeren werkt de afspraken bij.",
     ec: "Studielast (EC)",
     ecHint: "Eén EC is 28 uur studie.",
     planned: "Gepland: {hours} van {budget} uur.",

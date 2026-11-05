@@ -162,6 +162,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
   clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
   profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.
+- **The teacher's week (P22)** on Start. Derived, never stored, no planner and no AI
+  (BESLUIT-2026-11-05-7). `app/lib/calendar/weeks.ts` does ISO-week arithmetic in UTC on whole
+  days: `courseWeekDates` maps relative course weeks to Mondays, skipping the institution's break
+  weeks (`instance_settings.breakWeeks`, one list, edited on `/admin/context`); "today" is the
+  calendar day in `instance_settings.timeZone` (default Europe/Amsterdam). A course has an optional
+  `startDate` (no migration). `app/lib/week/teacherWeek.ts` computes per running course *In de
+  les*, *Voorbereiden* (no work linked to the item), *Nakijken* (assessments of the previous two
+  weeks) and the open findings; `nextWeek` is the same call a week later, shown on Start from
+  Friday to Sunday. `app/lib/calendar/ics.ts` writes the course as an RFC 5545 file (whole-week
+  events, stable UID per item), served by `/courses/:id/calendar.ics` to the owner only.
 
 ---
 
