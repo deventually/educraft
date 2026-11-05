@@ -4,7 +4,20 @@
  * used outside `db.server.ts`.
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import {
+  type AnyColumn,
+  type SQL,
+  and,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   contextProfiles,
@@ -53,6 +66,117 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
 /** Every account, newest first — the admin user list. Not user-scoped by design. */
 export async function listUsers(): Promise<UserRow[]> {
   return getDb().select().from(users).orderBy(desc(users.createdAt)).all();
+}
+
+/** Where a person stands on the admin list (P28.1). */
+export type PersonStatus = "active" | "invited" | "disabled";
+
+/**
+ * One row of the admin user list (P28.1): an account, or an open invite (`id` is then
+ * the invite token). `lastActiveDay` is the newest usage day, null when never used.
+ */
+export interface PersonRow {
+  kind: "user" | "invite";
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: string;
+  status: PersonStatus;
+  lastActiveDay: string | null;
+  createdAt: Date;
+}
+
+export interface PeopleFilter {
+  /** Part of a name or e-mail address (an invite: its note), case-insensitive. */
+  q?: string;
+  role?: Role;
+  status?: PersonStatus;
+  limit?: number;
+}
+
+/** `haystack` contains `needle`, case-insensitively, with no LIKE wildcards. */
+const contains = (haystack: SQL | AnyColumn, needle: string) =>
+  sql`instr(lower(coalesce(${haystack}, '')), ${needle.toLowerCase()}) > 0`;
+
+/**
+ * The admin user list (P28.1): accounts and open invites (not used, not expired), filtered
+ * on the server, open invites first, then newest first. Capped at `Math.min(limit ?? 50, 500)`.
+ * Not user-scoped by design (an admin sees every account and invite).
+ */
+export async function listPeople(filter: PeopleFilter): Promise<PersonRow[]> {
+  const cap = Math.min(filter.limit ?? 50, 500);
+  const q = filter.q?.trim() ?? "";
+  const db = getDb();
+  const out: PersonRow[] = [];
+
+  // An invite only ever makes a teacher (BESLUIT-2026-07-03-2).
+  const wantInvites =
+    (!filter.status || filter.status === "invited") && (!filter.role || filter.role === "teacher");
+  if (wantInvites) {
+    const open = and(
+      isNull(invites.usedByUserId),
+      or(isNull(invites.expiresAt), gt(invites.expiresAt, new Date())),
+      q ? contains(invites.note, q) : undefined,
+    );
+    for (const i of db
+      .select()
+      .from(invites)
+      .where(open)
+      .orderBy(desc(invites.createdAt))
+      .limit(cap)
+      .all()) {
+      out.push({
+        kind: "invite",
+        id: i.token,
+        name: i.note,
+        email: null,
+        role: i.role,
+        status: "invited",
+        lastActiveDay: null,
+        createdAt: i.createdAt,
+      });
+    }
+  }
+
+  if (filter.status !== "invited" && out.length < cap) {
+    const where = and(
+      filter.role ? eq(users.role, filter.role) : undefined,
+      filter.status === "active" ? isNull(users.disabledAt) : undefined,
+      filter.status === "disabled" ? isNotNull(users.disabledAt) : undefined,
+      q ? or(contains(users.name, q), contains(users.email, q)) : undefined,
+    );
+    const rows = db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        disabledAt: users.disabledAt,
+        createdAt: users.createdAt,
+        // Fully qualified: inside a subquery drizzle would print bare column names.
+        lastActiveDay: sql<
+          string | null
+        >`(select max(usage.day) from usage where usage.user_id = users.id)`,
+      })
+      .from(users)
+      .where(where)
+      .orderBy(desc(users.createdAt))
+      .limit(cap - out.length)
+      .all();
+    for (const u of rows) {
+      out.push({
+        kind: "user",
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        status: u.disabledAt ? "disabled" : "active",
+        lastActiveDay: u.lastActiveDay ?? null,
+        createdAt: u.createdAt,
+      });
+    }
+  }
+  return out;
 }
 
 /**

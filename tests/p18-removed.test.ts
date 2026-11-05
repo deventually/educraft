@@ -55,13 +55,14 @@ describe("P18.2 — per-teacher tool/context access and the country axis removed
 });
 
 describe("P18.4 — the admin console has four pages", () => {
-  it("the route table registers exactly the four admin pages", () => {
+  it("the route table registers exactly the four admin pages (plus the person page, P28.1)", () => {
     const files = flatRoutes()
       .filter((r) => r.path.startsWith("/admin") && r.file !== "routes/admin.tsx")
       .map((r) => `${r.path.replace(/^\/admin\/?/, "")}:${r.file.replace(/^routes\//, "")}`);
     expect(files).toEqual([
       ":admin._index.tsx",
       "users:admin.users.tsx",
+      "users/:id:admin.users.$id.tsx",
       "tools:admin.tools.tsx",
       "context:admin.context.tsx",
       "usage:admin.usage.tsx",
