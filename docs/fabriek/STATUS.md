@@ -86,7 +86,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   inleverinfo, open punten ("je noemt geen deadline"), wat er veranderd is en een eisencheck; geen eis
   verdwijnt of komt erbij. Bronnen: ERK (Council of Europe, 2020), UDL 3.0 (CAST, 2024). Zes
   eval-casussen, drie met een bekende fout (ontbrekende info, tegenstrijdige eisen, vage criteria).
-  Meting volgt — PR open.
+  Metingen ca1 → ca2 (ca2: 3 runs, batch): elke case 4,67–5,00, geen gefaalde harde check, niets
+  afgekapt, secties altijd in de vaste volgorde (BESLUIT-2026-11-04-24 gehaald;
+  `evals/reports/2026-11-05ca2.md`). Tien uitkomsten liggen klaar in `evals/reviews/clear-assignment/`
+  voor Bastiaan — PR open.
 - P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
   contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
   optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
