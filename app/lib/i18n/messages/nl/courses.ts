@@ -38,8 +38,13 @@ export const courses = {
       "activity-without-outcome": "{item} hoort bij geen enkele leeruitkomst.",
       "assessed-before-taught": "{item} toetst {outcome} eerder dan die wordt onderwezen.",
       "bloom-below-outcome": "{item} toetst {outcome} onder het niveau van de leeruitkomst.",
+      "item-bloom-below-outcome":
+        "Vraag {question} van {item} toetst {outcome} onder het niveau van de leeruitkomst.",
+      "items-without-points": "In {item} hebben niet alle vragen punten.",
       "outcome-not-assessed": "{outcome} wordt in geen enkele summatieve toets getoetst.",
       "outcome-not-taught": "{outcome} wordt in geen enkele onderwijsactiviteit behandeld.",
+      "outcome-single-item":
+        "{item} toetst {outcome} met maar één vraag. Dat is een smalle basis voor een oordeel.",
       "study-load-exceeds-ec":
         "De geplande uren zijn meer dan de studielast: {hours} van {budget} uur.",
       "weights-not-100": "De wegingen van de summatieve toetsen tellen niet op tot 100%.",
@@ -95,6 +100,29 @@ export const courses = {
   },
   intro:
     "Leg per cursus de leeruitkomsten, lessen en toetsen vast. Je ziet meteen wat nog niet onderwezen of getoetst wordt.",
+  items: {
+    actions: "Acties",
+    add: "Vraag toevoegen",
+    addTitle: "Nieuwe vraag",
+    bloom: "Denkniveau",
+    caption: "Toetsmatrijs: {assessment}",
+    count: "{n} vragen",
+    countOne: "1 vraag",
+    coverageFromItems:
+      "De dekking volgt uit de toetsmatrijs. Pas daar per vraag de leeruitkomst aan.",
+    empty: "Nog geen vragen. Voeg ze toe om per vraag te zien welke leeruitkomst je toetst.",
+    fieldOf: "{field} van vraag {label}",
+    format: "Vraagvorm",
+    formatNone: "Geen vraagvorm",
+    formats: { "multiple-choice": "Meerkeuze", open: "Open vraag", other: "Anders" },
+    label: "Vraag",
+    labelHint: "Leeg laten geeft het volgende nummer.",
+    points: "Punten",
+    question: "vraag {label}",
+    summary: "Toetsmatrijs ({n})",
+    total: "Totaal",
+    totalLine: "{count}, {points} punten",
+  },
   kind: "Soort",
   links: {
     empty: "Nog niets gekoppeld. Kies deze cursus in een tool, of koppel werk vanuit Mijn werk.",

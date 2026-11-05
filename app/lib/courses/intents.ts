@@ -11,7 +11,13 @@ import { z } from "zod";
 import { BLOOM_LEVELS } from "./bloom";
 import * as edit from "./edit";
 import { COURSE_LIMITS } from "./schema";
-import { ACTIVITY_KINDS, ASSESSMENT_KINDS, type CourseData, HOURS_PER_EC } from "./types";
+import {
+  ACTIVITY_KINDS,
+  ASSESSMENT_KINDS,
+  type CourseData,
+  HOURS_PER_EC,
+  ITEM_FORMATS,
+} from "./types";
 
 export type CourseIntentError = "invalid" | "not-found";
 export type CourseIntentResult =
@@ -29,6 +35,9 @@ export const COURSE_INTENTS = [
   "update-assessment",
   "remove-assessment",
   "set-ec",
+  "add-item",
+  "update-item",
+  "remove-item",
 ] as const;
 export type CourseIntent = (typeof COURSE_INTENTS)[number];
 
@@ -67,6 +76,19 @@ const assessment = z.object({
   hours,
   weight: optionalNumber(0, 100),
   coverage: ids,
+});
+
+/** One question of the matrix (P26.1); an empty select or number field means "not set". */
+const item = z.object({
+  assessmentId: Id,
+  label: z.string().trim().max(COURSE_LIMITS.itemLabel),
+  outcomeId: Id,
+  bloom,
+  format: z
+    .enum([...ITEM_FORMATS, ""])
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  points: optionalNumber(0, COURSE_LIMITS.points),
 });
 
 const MULTI = new Set(["outcomeIds", "coverage"]);
@@ -139,19 +161,48 @@ function run(d: CourseData, intent: CourseIntent, raw: Record<string, unknown>):
     case "update-assessment": {
       const { id, ...v } = assessment.extend({ id: Id }).parse(raw);
       assertItem(d.assessments, id);
+      const current = d.assessments.find((a) => a.id === id);
+      // With questions the form has no coverage fields: the matrix is the source.
+      const coverage = current?.items?.length ? current.coverage : coverageFrom(raw, v.coverage);
       return edit.updateAssessment(d, id, {
         title: v.title,
         kind: v.kind,
         week: v.week,
         hours: v.hours,
         weight: v.weight,
-        coverage: coverageFrom(raw, v.coverage),
+        coverage,
       });
     }
     case "remove-assessment": {
       const { id } = z.object({ id: Id }).parse(raw);
       assertItem(d.assessments, id);
       return edit.removeAssessment(d, id);
+    }
+    case "add-item": {
+      const { assessmentId, label, ...v } = item.parse(raw);
+      assertItem(d.assessments, assessmentId);
+      const count = d.assessments.find((a) => a.id === assessmentId)?.items?.length ?? 0;
+      return edit.addItem(d, assessmentId, { ...v, label: label || String(count + 1) });
+    }
+    case "update-item": {
+      const { assessmentId, id, ...v } = item
+        .extend({ id: Id, label: required(COURSE_LIMITS.itemLabel) })
+        .parse(raw);
+      assertItem(d.assessments, assessmentId);
+      assertItem(d.assessments.find((a) => a.id === assessmentId)?.items ?? [], id);
+      return edit.updateItem(d, assessmentId, id, {
+        label: v.label,
+        outcomeId: v.outcomeId,
+        bloom: v.bloom,
+        format: v.format,
+        points: v.points,
+      });
+    }
+    case "remove-item": {
+      const { assessmentId, id } = z.object({ assessmentId: Id, id: Id }).parse(raw);
+      assertItem(d.assessments, assessmentId);
+      assertItem(d.assessments.find((a) => a.id === assessmentId)?.items ?? [], id);
+      return edit.removeItem(d, assessmentId, id);
     }
     case "set-ec": {
       const { ec } = z.object({ ec: optionalNumber(0, COURSE_LIMITS.ec) }).parse(raw);

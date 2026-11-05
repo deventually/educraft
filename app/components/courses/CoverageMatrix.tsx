@@ -4,6 +4,7 @@ import { bloomLabel } from "~/lib/courses/bloom";
 import type { CourseData } from "~/lib/courses/types";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { useOutcomeName } from "./fields";
+import { useQuestionCount } from "./ItemsMatrix";
 
 /** Outcomes × (activities, then assessments). Coverage is shown as text, never colour alone. */
 export function CoverageMatrix({ data, matrix }: { data: CourseData; matrix: Matrix }) {
@@ -11,6 +12,7 @@ export function CoverageMatrix({ data, matrix }: { data: CourseData; matrix: Mat
   const m = t.courses.matrix;
   const locale = useLocale();
   const outcomeName = useOutcomeName();
+  const questions = useQuestionCount();
   const id = useId();
   const titleOf = (col: Matrix["columns"][number]) =>
     (col.kind === "activity" ? data.activities : data.assessments).find((i) => i.id === col.id)
@@ -68,6 +70,11 @@ export function CoverageMatrix({ data, matrix }: { data: CourseData; matrix: Mat
                           <span className="sr-only">{m.covered}</span>
                           {cell.bloom && (
                             <span className="ml-1">{bloomLabel(cell.bloom, locale)}</span>
+                          )}
+                          {cell.items !== undefined && (
+                            <span className="block text-xs text-slate-600">
+                              {questions(cell.items)}
+                            </span>
                           )}
                         </>
                       ) : (

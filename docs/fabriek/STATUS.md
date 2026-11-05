@@ -8,6 +8,9 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Nu
 
+- **Gebruikersbeheer in een paar klikken (P28.1, #91) gemerged op 2026-11-05:** één lijst met
+  zoeken en filteren, status en laatst actief, uitnodigingen als rij, één knop "Toevoegen" en een
+  pagina per persoon (`/admin/users/:id`).
 - **BDB/BKE doet mee (P27.2, #88) gemerged op 2026-11-05:** "Dit heb je misschien al" (eerder werk
   als bewijs voorstellen), de route in vijf stappen bovenaan het dossier, de BDB/BKE-schakelaar per
   docent en de weg terug van criterium naar tool en weer terug.
@@ -132,18 +135,17 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Bezig
 
+- P26.1 Toetsmatrijs per vraag: per toets een tabel met per vraag de leeruitkomst, het denkniveau,
+  de vraagvorm en de punten, met een totaalregel. De vragen bepalen dan de dekking; drie nieuwe
+  aandachtspunten (één vraag per leeruitkomst, vraag onder het niveau, punten half ingevuld). PR open.
 - P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
   voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P28.1 Gebruikersbeheer in een paar klikken: één lijst met zoeken en filteren (naam/e-mail, rol,
-  status), status en laatst actief per persoon, openstaande uitnodigingen als rij, één knop
-  "Toevoegen", en per persoon een eigen pagina (`/admin/users/:id`) met account, modellen,
-  toegang en verwijderen. Geen migratie. PR open. 28.2 en 28.3 volgen elk op een eigen branch.
 - P28.2 Teams en teamleiders: een beheerder maakt teams (`/admin/teams`) en wijst teamleiders aan;
   een teamleider beheert zijn team op `/teams/:id` (collega toevoegen op e-mail, weghalen,
   teamleider maken, uitnodigen in het team). Persoonspagina met sectie Teams, Toevoegen en de lijst
-  met een teamkeuze, "Mijn teams" op de accountpagina. Migratie 0015. PR open, bouwt op P28.1.
+  met een teamkeuze, "Mijn teams" op de accountpagina. Migratie 0015. PR open.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder

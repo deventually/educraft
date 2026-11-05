@@ -35,6 +35,20 @@ export interface AssessmentCoverage {
   bloom?: BloomLevel;
 }
 
+export const ITEM_FORMATS = ["multiple-choice", "open", "other"] as const;
+export type ItemFormat = (typeof ITEM_FORMATS)[number];
+
+/** One question of an assessment (brief P26, 26.1): the row of a question-level matrix. */
+export interface AssessmentItem {
+  id: string;
+  /** "1", "2a", "V3" … */
+  label: string;
+  outcomeId: string;
+  bloom?: BloomLevel;
+  format?: ItemFormat;
+  points?: number;
+}
+
 export interface Assessment {
   id: string;
   title: string;
@@ -45,6 +59,8 @@ export interface Assessment {
   coverage: AssessmentCoverage[];
   /** Planned study hours for this assessment. */
   hours?: number;
+  /** The question-level matrix. When present (non-empty) it is the source of coverage. */
+  items?: AssessmentItem[];
 }
 
 /** Hours of study per EC (WHW art. 7.4: one EC is 28 hours). */

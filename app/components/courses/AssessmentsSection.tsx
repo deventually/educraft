@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { Form } from "react-router";
+import { effectiveCoverage } from "~/lib/courses/alignment";
 import { bloomLabel } from "~/lib/courses/bloom";
 import { ASSESSMENT_KINDS, type Assessment, type CourseData } from "~/lib/courses/types";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
@@ -7,6 +8,7 @@ import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { BloomSelect, NumberField, useOutcomeName } from "./fields";
 import { ItemActions } from "./ItemActions";
+import { ItemsMatrix } from "./ItemsMatrix";
 
 function CoverageFields({ data, assessment }: { data: CourseData; assessment?: Assessment }) {
   const t = useT();
@@ -111,7 +113,11 @@ function AssessmentForm({ data, assessment }: { data: CourseData; assessment?: A
           value={assessment?.hours}
         />
       </div>
-      <CoverageFields data={data} assessment={assessment} />
+      {assessment?.items?.length ? (
+        <p className="text-sm text-slate-600">{t.courses.items.coverageFromItems}</p>
+      ) : (
+        <CoverageFields data={data} assessment={assessment} />
+      )}
       <Button type="submit" size="sm" variant={assessment ? "secondary" : "primary"}>
         {assessment ? t.courses.save : a.add}
       </Button>
@@ -146,7 +152,7 @@ export function AssessmentsSection({ data }: { data: CourseData }) {
                   as.week !== undefined ? `${t.courses.week} ${as.week}` : null,
                   as.weight !== undefined ? `${as.weight}%` : null,
                   as.hours !== undefined ? `${as.hours} ${t.courses.hours.toLowerCase()}` : null,
-                  as.coverage
+                  effectiveCoverage(as)
                     .map(
                       (c) =>
                         nameOf(c.outcomeId) + (c.bloom ? ` (${bloomLabel(c.bloom, locale)})` : ""),
@@ -159,6 +165,7 @@ export function AssessmentsSection({ data }: { data: CourseData }) {
               <ItemActions name={as.title} removeIntent="remove-assessment" id={as.id}>
                 <AssessmentForm data={data} assessment={as} />
               </ItemActions>
+              <ItemsMatrix data={data} assessment={as} />
             </li>
           ))}
         </ul>
