@@ -192,7 +192,10 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
   het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen kopje en in elk
   vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe rij soms de vorige
   rij mee ("Row R1 is not used; this is Row R2"): 7 keer in de oude metingen, 1 keer in meting w.
-  Nieuwe getelde check `correctionInHeading` in de eval. Meting nog niet gedraaid. PR open.
+  Nieuwe getelde check `correctionInHeading` in de eval. Eindmeting x: geen enkele correctie in
+  een kopje meer, geen gefaalde check, niets afgekapt; vijf cases 4,53–4,73, arithmetic 4,33
+  (zwakste punt in de matrijs van stap 1, die niet veranderde). Gemiddeld 4,58 (w: 4,77); de vorm
+  scoort overal iets lager. PR open, beslissing Bastiaan.
 - Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
   `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
