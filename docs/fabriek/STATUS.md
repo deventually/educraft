@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.1 gemerged, P22.2 open)_
 
 ## Nu
 
+- **De week van de docent, echte datums (P22.1b, #110) gemerged op 2026-11-05:** een startdatum
+  per cursus en bij elke les en toets "Week 3 · 17–23 nov", vakantieweken overgeslagen.
 - **De week van de docent, rekenhart en schoolkalender (P22.1a, #106) gemerged op 2026-11-05:**
   weken rekenen in ISO-weken en de vakantieweken als één lijst voor de instelling op
   `/admin/context`.
@@ -168,9 +170,9 @@ _Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
   een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
   keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P22.1b De week van de docent, echte datums: een startdatum per cursus (`startDate`, geen
-  migratie) en bij elke les en toets "Week 3 · 17–23 nov", met de vakantieweken van de school
-  overgeslagen. PR open.
+- P22.2 De week van de docent, puur: `teacherWeek` rekent per lopende cursus *Deze week*,
+  *Voorbereiden* (zonder gekoppeld werk), *Nakijken* (toetsen van de twee weken ervoor) en de
+  aandachtspunten; `nextWeek` is dezelfde functie een week later. Nog geen scherm. PR open.
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
