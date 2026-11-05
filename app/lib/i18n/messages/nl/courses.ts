@@ -217,6 +217,9 @@ export const courses = {
     ec: "Studielast (EC)",
     ecHint: "Eén EC is 28 uur studie.",
     planned: "Gepland: {hours} van {budget} uur.",
+    startDate: "Startdatum",
+    startDateHint:
+      "Week 1 begint in deze week. De vakantieweken van je school worden overgeslagen. Leeg = alleen weeknummers.",
     title: "Cursusgegevens",
   },
   summary: "{outcomes} leeruitkomsten · {findings} aandachtspunten",

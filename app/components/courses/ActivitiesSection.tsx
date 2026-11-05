@@ -4,7 +4,7 @@ import { ACTIVITY_KINDS, type Activity, type CourseData } from "~/lib/courses/ty
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
-import { NumberField, OutcomeChecks, useOutcomeName } from "./fields";
+import { MetaLine, NumberField, OutcomeChecks, useOutcomeName, WeekLabel } from "./fields";
 import { ItemActions } from "./ItemActions";
 
 function ActivityForm({ data, activity }: { data: CourseData; activity?: Activity }) {
@@ -63,7 +63,14 @@ function ActivityForm({ data, activity }: { data: CourseData; activity?: Activit
   );
 }
 
-export function ActivitiesSection({ data }: { data: CourseData }) {
+export function ActivitiesSection({
+  data,
+  weekDates,
+}: {
+  data: CourseData;
+  /** The Monday of each course week, or null without a start date (P22.1). */
+  weekDates?: string[] | null;
+}) {
   const t = useT();
   const a = t.courses.activities;
   const outcomeName = useOutcomeName();
@@ -84,14 +91,18 @@ export function ActivitiesSection({ data }: { data: CourseData }) {
             <li key={act.id} className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="font-medium text-slate-900">{act.title}</p>
               <p className="text-sm text-slate-600">
-                {[
-                  a.kinds[act.kind],
-                  act.week !== undefined ? `${t.courses.week} ${act.week}` : null,
-                  act.hours !== undefined ? `${act.hours} ${t.courses.hours.toLowerCase()}` : null,
-                  act.outcomeIds.map(nameOf).join(", ") || null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                <MetaLine
+                  parts={[
+                    a.kinds[act.kind],
+                    act.week !== undefined ? (
+                      <WeekLabel key="week" week={act.week} weekDates={weekDates} />
+                    ) : null,
+                    act.hours !== undefined
+                      ? `${act.hours} ${t.courses.hours.toLowerCase()}`
+                      : null,
+                    act.outcomeIds.map(nameOf).join(", ") || null,
+                  ]}
+                />
               </p>
               <ItemActions name={act.title} removeIntent="remove-activity" id={act.id}>
                 <ActivityForm data={data} activity={act} />

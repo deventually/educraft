@@ -92,6 +92,19 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     expect(d.ec).toBeUndefined();
   });
 
+  it("sets and clears the course's start date (P22.1)", () => {
+    let d = ok(alignedCourse(), { intent: "set-start-date", startDate: "2026-09-02" });
+    expect(d.startDate).toBe("2026-09-02");
+    d = ok(d, { intent: "set-start-date", startDate: "" });
+    expect(d.startDate).toBeUndefined();
+    expect("startDate" in d).toBe(false);
+    const r = applyCourseIntent(
+      alignedCourse(),
+      form({ intent: "set-start-date", startDate: "2026-02-30" }),
+    );
+    expect(r).toEqual({ ok: false, error: "invalid" });
+  });
+
   it("refuses invalid input", () => {
     const bad = (fields: Record<string, string | string[]>) =>
       applyCourseIntent(alignedCourse(), form(fields));

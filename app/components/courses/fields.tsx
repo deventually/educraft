@@ -1,3 +1,5 @@
+import { Fragment, type ReactNode } from "react";
+import { formatWeekRange } from "~/lib/calendar/weeks";
 import { BLOOM_LEVELS, type BloomLevel, bloomLabel } from "~/lib/courses/bloom";
 import type { LearningOutcome } from "~/lib/courses/types";
 import { Input, Label, Select } from "~/components/ui";
@@ -109,5 +111,39 @@ export function OutcomeChecks({
         </div>
       )}
     </fieldset>
+  );
+}
+
+/** "Week 3", or "Week 3 · 17–23 nov" when the course has dates (P22.1). */
+export function WeekLabel({ week, weekDates }: { week: number; weekDates?: string[] | null }) {
+  const t = useT();
+  const locale = useLocale();
+  const monday = weekDates?.[week - 1];
+  return (
+    <>
+      {t.courses.week} {week}
+      {monday && (
+        <>
+          {" · "}
+          <time dateTime={monday}>{formatWeekRange(monday, locale)}</time>
+        </>
+      )}
+    </>
+  );
+}
+
+/** The parts of an item's meta line, without the empty ones, joined with " · ". */
+export function MetaLine({ parts }: { parts: ReactNode[] }) {
+  const shown = parts.filter((p) => p !== null && p !== undefined && p !== false && p !== "");
+  return (
+    <>
+      {shown.map((part, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: a fixed, ordered list of parts
+        <Fragment key={i}>
+          {i > 0 && " · "}
+          {part}
+        </Fragment>
+      ))}
+    </>
   );
 }

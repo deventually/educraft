@@ -219,6 +219,9 @@ export const courses: Messages["courses"] = {
     ec: "Study load (EC)",
     ecHint: "One EC is 28 hours of study.",
     planned: "Planned: {hours} of {budget} hours.",
+    startDate: "Start date",
+    startDateHint:
+      "Week 1 starts in this week. Your school's break weeks are skipped. Empty = week numbers only.",
     title: "Course details",
   },
   summary: "{outcomes} learning outcomes · {findings} points of attention",

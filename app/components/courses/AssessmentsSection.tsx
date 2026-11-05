@@ -6,7 +6,7 @@ import { ASSESSMENT_KINDS, type Assessment, type CourseData } from "~/lib/course
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
-import { BloomSelect, NumberField, useOutcomeName } from "./fields";
+import { BloomSelect, MetaLine, NumberField, useOutcomeName, WeekLabel } from "./fields";
 import { ItemActions } from "./ItemActions";
 import { ItemsMatrix } from "./ItemsMatrix";
 
@@ -125,7 +125,14 @@ function AssessmentForm({ data, assessment }: { data: CourseData; assessment?: A
   );
 }
 
-export function AssessmentsSection({ data }: { data: CourseData }) {
+export function AssessmentsSection({
+  data,
+  weekDates,
+}: {
+  data: CourseData;
+  /** The Monday of each course week, or null without a start date (P22.1). */
+  weekDates?: string[] | null;
+}) {
   const t = useT();
   const locale = useLocale();
   const a = t.courses.assessments;
@@ -147,20 +154,23 @@ export function AssessmentsSection({ data }: { data: CourseData }) {
             <li key={as.id} className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="font-medium text-slate-900">{as.title}</p>
               <p className="text-sm text-slate-600">
-                {[
-                  a.kinds[as.kind],
-                  as.week !== undefined ? `${t.courses.week} ${as.week}` : null,
-                  as.weight !== undefined ? `${as.weight}%` : null,
-                  as.hours !== undefined ? `${as.hours} ${t.courses.hours.toLowerCase()}` : null,
-                  effectiveCoverage(as)
-                    .map(
-                      (c) =>
-                        nameOf(c.outcomeId) + (c.bloom ? ` (${bloomLabel(c.bloom, locale)})` : ""),
-                    )
-                    .join(", ") || null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                <MetaLine
+                  parts={[
+                    a.kinds[as.kind],
+                    as.week !== undefined ? (
+                      <WeekLabel key="week" week={as.week} weekDates={weekDates} />
+                    ) : null,
+                    as.weight !== undefined ? `${as.weight}%` : null,
+                    as.hours !== undefined ? `${as.hours} ${t.courses.hours.toLowerCase()}` : null,
+                    effectiveCoverage(as)
+                      .map(
+                        (c) =>
+                          nameOf(c.outcomeId) +
+                          (c.bloom ? ` (${bloomLabel(c.bloom, locale)})` : ""),
+                      )
+                      .join(", ") || null,
+                  ]}
+                />
               </p>
               <ItemActions name={as.title} removeIntent="remove-assessment" id={as.id}>
                 <AssessmentForm data={data} assessment={as} />

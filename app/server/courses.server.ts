@@ -165,18 +165,25 @@ export async function saveCourseIntent(
     const name = String(fd.get("name") ?? "").trim();
     if (!name || name.length > COURSE_LIMITS.title) return { ok: false, error: m.errorName };
     const contextProfileId = String(fd.get("contextProfileId") ?? "") || null;
-    // The settings form also carries the EC; it goes through the same intent boundary.
-    const ec = new FormData();
-    ec.set("intent", "set-ec");
-    ec.set("ec", String(fd.get("ec") ?? ""));
-    const withEc = fd.has("ec")
-      ? applyCourseIntent(course.data, ec)
-      : { ok: true as const, data: course.data };
-    if (!withEc.ok) return { ok: false, error: m.errorInvalid };
+    // The settings form also carries the EC and the start date (P22.1); each goes
+    // through the same intent boundary as the rest of the editor.
+    let data = course.data;
+    for (const [field, intent] of [
+      ["ec", "set-ec"],
+      ["startDate", "set-start-date"],
+    ] as const) {
+      if (!fd.has(field)) continue;
+      const one = new FormData();
+      one.set("intent", intent);
+      one.set(field, String(fd.get(field) ?? ""));
+      const r = applyCourseIntent(data, one);
+      if (!r.ok) return { ok: false, error: m.errorInvalid };
+      data = r.data;
+    }
     const saved = await updateCourse(user.id, course.id, {
       name,
       contextProfileId,
-      data: withEc.data,
+      data,
     }).catch(() => null);
     return saved ? { ok: true } : { ok: false, error: m.errorInvalid };
   }
