@@ -175,6 +175,11 @@ export function removeItem(d: CourseData, assessmentId: string, itemId: string):
 
 // Study load
 
+/** Sets the course's start date (P22.1); `undefined` clears it. */
+export function setStartDate(d: CourseData, startDate: string | undefined): CourseData {
+  return compact({ ...d, startDate });
+}
+
 /** Sets the course's EC; `undefined` clears it. */
 export function setStudyLoad(d: CourseData, ec: number | undefined): CourseData {
   return compact({ ...d, ec });

@@ -125,6 +125,43 @@ function openMatrix(name: string) {
   (summary.closest("details") as HTMLDetailsElement).open = true;
 }
 
+describe("Course editor — real dates (P22.1)", () => {
+  /** The list item of an activity or assessment, inside its own section. */
+  const itemIn = (section: string, title: string) =>
+    within(screen.getByRole("region", { name: section }))
+      .getByText(title)
+      .closest("li") as HTMLElement;
+  const dated = () => ({ ...alignedCourse(), startDate: "2026-11-11" });
+  const weekDates = ["2026-11-09", "2026-11-16", "2026-11-30", "2026-12-07"];
+
+  it("has a labelled start date field with a hint", async () => {
+    const { container } = renderRoute(CoursePage, { ...pageData(dated()), weekDates });
+    const field = screen.getByLabelText("Startdatum") as HTMLInputElement;
+    expect(field.type).toBe("date");
+    expect(field.name).toBe("startDate");
+    expect(field.value).toBe("2026-11-11");
+    expect(field).toHaveAccessibleDescription(/week 1 begint in deze week/i);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows the dates of each week next to the week number", () => {
+    const { container } = renderRoute(CoursePage, { ...pageData(dated()), weekDates });
+    const lesson = itemIn("Onderwijsactiviteiten", "Opdracht datamodel");
+    expect(lesson).toHaveTextContent(/Week 2 · 16.22 nov/);
+    expect(container.querySelector('time[datetime="2026-11-16"]')).not.toBeNull();
+    const exam = itemIn("Toetsen", "Eindopdracht");
+    expect(exam).toHaveTextContent(/Week 4 · 7.13 dec/);
+  });
+
+  it("shows only the week number without a start date", () => {
+    const { container } = renderRoute(CoursePage, { ...pageData(), weekDates: null });
+    expect(screen.getByLabelText("Startdatum")).toHaveValue("");
+    const lesson = itemIn("Onderwijsactiviteiten", "Opdracht datamodel");
+    expect(lesson).toHaveTextContent("Week 2");
+    expect(container.querySelector("time")).toBeNull();
+  });
+});
+
 describe("Course editor — question-level matrix (P26.1)", () => {
   it("shows each test's matrix as a real table with a caption and a total row", async () => {
     const { container } = renderRoute(CoursePage, pageData(itemizedCourse()));

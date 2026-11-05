@@ -187,6 +187,12 @@ describe("applyImport", () => {
     ...over,
   });
 
+  it("leaves the start date alone (P22.1)", () => {
+    const r = applyImport({ ...alignedCourse(), startDate: "2026-09-02" }, selection());
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.startDate).toBe("2026-09-02");
+  });
+
   it("adds only the picked items; coverage points at new or existing outcomes", () => {
     const r = applyImport(alignedCourse(), selection());
     if (!r.ok) throw new Error(r.error);

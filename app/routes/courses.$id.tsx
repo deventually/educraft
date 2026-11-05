@@ -6,6 +6,8 @@ import { blueprintOffer, coursePack, loadCourse, saveCourseIntent } from "~/serv
 import { dossierTargets } from "~/server/courseEvidence.server";
 import { loadReviewPanel } from "~/server/agentReview.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
+import { getBreakWeeks } from "~/server/repositories/settings.server";
+import { courseWeekDates } from "~/lib/calendar/weeks";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
@@ -60,6 +62,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
     pack: await coursePack(user.id, course),
+    // The Monday of each course week (P22.1), or null without a start date.
+    weekDates: course.data.startDate
+      ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
+      : null,
   };
 }
 
@@ -110,6 +116,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     dossiers = [],
     review = null,
     pack,
+    weekDates = null,
   } = loaderData;
   const { data } = course;
 
@@ -139,6 +146,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           name={course.name}
           contextProfileId={course.contextProfileId}
           ec={data.ec}
+          startDate={data.startDate}
           hours={plannedHours(data)}
           profiles={profiles}
         />
@@ -150,8 +158,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <FindingsList data={data} findings={findings} />
         {review && <CourseReviewPanel data={data} {...review} />}
         <OutcomesSection data={data} pack={pack} />
-        <ActivitiesSection data={data} />
-        <AssessmentsSection data={data} />
+        <ActivitiesSection data={data} weekDates={weekDates} />
+        <AssessmentsSection data={data} weekDates={weekDates} />
         <CoverageMatrix data={data} matrix={matrix} />
         <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />
@@ -164,12 +172,14 @@ function CourseSettings({
   name,
   contextProfileId,
   ec,
+  startDate,
   hours,
   profiles,
 }: {
   name: string;
   contextProfileId: string | null;
   ec?: number;
+  startDate?: string;
   hours: number;
   profiles: { id: string; name: string }[];
 }) {
@@ -219,6 +229,20 @@ function CourseSettings({
               value={ec}
               hint={c.settings.ecHint}
             />
+          </div>
+          <div className="max-w-xs">
+            <Label htmlFor={`${id}-start`}>{c.settings.startDate}</Label>
+            <Input
+              id={`${id}-start`}
+              name="startDate"
+              type="date"
+              defaultValue={startDate ?? ""}
+              aria-describedby={`${id}-start-hint`}
+              className="mt-1"
+            />
+            <p id={`${id}-start-hint`} className="mt-1 text-xs text-slate-500">
+              {c.settings.startDateHint}
+            </p>
           </div>
           {ec !== undefined && (
             <p className="text-sm text-slate-600">

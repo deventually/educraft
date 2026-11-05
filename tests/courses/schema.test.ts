@@ -11,6 +11,14 @@ describe("CourseDataSchema (the boundary)", () => {
     expect(parses(emptyCourseData())).toBe(true);
   });
 
+  it("accepts a real start date and refuses anything else (P22.1)", () => {
+    expect(parses({ ...alignedCourse(), startDate: "2026-09-02" })).toBe(true);
+    expect(parses({ ...alignedCourse(), startDate: "2026-02-30" })).toBe(false);
+    expect(parses({ ...alignedCourse(), startDate: "2-9-2026" })).toBe(false);
+    // Old data without a start date stays valid.
+    expect(parses(alignedCourse())).toBe(true);
+  });
+
   it("rejects an activity that points at an unknown outcome", () => {
     const d = alignedCourse();
     d.activities[0].outcomeIds.push("ghost");

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { IsoDateSchema } from "~/lib/calendar/weeks";
 import { BLOOM_LEVELS } from "./bloom";
 import {
   ACTIVITY_KINDS,
@@ -84,6 +85,7 @@ const AssessmentSchema = z.object({
 export const CourseDataSchema = z
   .object({
     ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
+    startDate: IsoDateSchema.optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
     activities: z.array(ActivitySchema).max(COURSE_LIMITS.activities),
     assessments: z.array(AssessmentSchema).max(COURSE_LIMITS.assessments),
