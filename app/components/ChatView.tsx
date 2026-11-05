@@ -18,6 +18,7 @@ import type { TemplateValues } from "~/lib/template/interpolate";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
 import { AiNotice } from "./AiNotice";
+import { ResultActions, type ResultContext } from "./ResultActions";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
 function newSessionId(): string {
@@ -39,6 +40,10 @@ interface ChatViewProps {
   onGenerationStart?: () => void;
   /** The teacher's courses (P20.4), offered in the setup card. */
   courses?: (SandboxCourse & { name: string })[];
+  /** The course to start on (P27.1, `?course=`). */
+  initialCourseId?: string;
+  /** Next steps and places to keep the conversation (P27.1). */
+  resultContext?: ResultContext;
 }
 
 export function ChatView({
@@ -50,6 +55,8 @@ export function ChatView({
   catalogModels,
   onGenerationStart,
   courses,
+  initialCourseId,
+  resultContext,
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
@@ -60,7 +67,7 @@ export function ChatView({
     setValue: setSandboxValue,
     courseId,
     selectCourse,
-  } = useSandbox({ inputs: tool.inputs, courses });
+  } = useSandbox({ inputs: tool.inputs, courses, initialCourseId });
   const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
@@ -92,6 +99,8 @@ export function ChatView({
   // One id for the whole conversation, so each turn updates the same project.
   const sessionIdRef = useRef<string | null>(null);
   if (sessionIdRef.current === null) sessionIdRef.current = newSessionId();
+  // The saved conversation (its id is the session id), once a reply is stored (P27.1).
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const greeting = tool.chat?.greeting;
   const starters = tool.chat?.starters;
@@ -186,7 +195,8 @@ export function ChatView({
           onToken: (token: string) => {
             setTurns((prev) => appendTokenToLastTurn(prev, token));
           },
-          onDone: () => {
+          onDone: (meta) => {
+            if (meta?.generationId) setSavedId(meta?.generationId);
             setIsStreaming(false);
           },
           onError: (error) => {
@@ -454,6 +464,9 @@ export function ChatView({
                     </div>
                   </div>
                 ),
+              )}
+              {resultContext && savedId && !isStreaming && (
+                <ResultActions {...resultContext} generationId={savedId} courseId={courseId} />
               )}
               {/* Anchor the auto-scroll: scrolls the thread (md+) or the page
                   (mobile) so the latest turn stays in view while streaming. */}

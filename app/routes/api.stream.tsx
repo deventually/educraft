@@ -343,6 +343,8 @@ export async function action({ request }: Route.ActionArgs) {
             generationId = saved.id;
           }
           if (body.courseId) await linkToCourse(user.id, body.courseId, generationId);
+          // The client needs the id to keep the result at a course or a dossier (P27.1).
+          return { generationId };
         } catch (e) {
           console.error("Failed to save generation:", e);
         }

@@ -89,4 +89,21 @@ describe("streamClient — localization-neutral errors", () => {
     expect(tokens.join("")).toBe("Hello");
     expect(done).toBe(true);
   });
+
+  it("passes the done frame's generation id to onDone (P27.1)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseResponse([
+            `data: ${JSON.stringify({ t: "x" })}\n\n`,
+            `event: done\ndata: ${JSON.stringify({ generationId: "gen-9" })}\n\n`,
+          ]),
+        ),
+    );
+    let meta: unknown;
+    await streamPost("/api/stream", {}, { onToken: () => {}, onDone: (m) => (meta = m) });
+    expect(meta).toEqual({ generationId: "gen-9" });
+  });
 });

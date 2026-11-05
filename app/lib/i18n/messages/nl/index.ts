@@ -20,6 +20,7 @@ import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { privacy } from "./privacy";
 import { projects } from "./projects";
+import { resultActions } from "./resultActions";
 import { settings } from "./settings";
 import { toast } from "./toast";
 import { tool } from "./tool";
@@ -62,6 +63,7 @@ export const nl = {
   portfolioExport,
   privacy,
   projects,
+  resultActions,
   settings,
   tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   toast,

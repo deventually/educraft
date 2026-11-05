@@ -23,6 +23,11 @@ import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { localModelsEnabled } from "~/server/env.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
 import { listCourses } from "~/server/repositories/courses.server";
+import { listDossiers } from "~/server/repositories/portfolio.server";
+import { courseLinkIntent } from "~/server/courses.server";
+import { addGenerationToDossier } from "~/server/evidence.server";
+import { linkTargets } from "~/lib/courses/links";
+import { getToolBySlug } from "~/lib/registry";
 import { getToolHelpOverlay } from "~/lib/help/registry";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { GeneratorView } from "~/components/GeneratorView";
@@ -33,7 +38,7 @@ import { Markdown } from "~/components/Markdown";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import { loc } from "~/lib/i18n/localized";
+import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { ToolSubtitle } from "~/components/ToolTitle";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
@@ -69,14 +74,26 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   // Courses only for a tool that can take its learning outcomes (P20.4); the picker
   // needs just the outcome texts, not the whole plan.
   const usesCourses = tool.inputs.some((f) => f.prefillFromCourse);
+  const ownCourses = await listCourses(user.id);
   const courses = usesCourses
-    ? (await listCourses(user.id)).map((c) => ({
+    ? ownCourses.map((c) => ({
         id: c.id,
         name: c.name,
         contextProfileId: c.contextProfileId,
         outcomes: c.data.outcomes.map((o) => ({ text: o.text })),
       }))
     : [];
+  // P27.1: a next step opens with `?course=`; only an own course is taken over.
+  const wanted = new URL(request.url).searchParams.get("course") ?? "";
+  const initialCourseId = ownCourses.some((c) => c.id === wanted) ? wanted : "";
+  const nextTools = await nextStepsFor(user, tool.next ?? []);
+  const dossiers = (await listDossiers(user.id)).map((d) => ({
+    id: d.id,
+    name: d.name,
+    criteria: d.data.framework.outcomes.flatMap((o) =>
+      o.criteria.map((c) => ({ id: c.id, label: `${o.code} · ${shorten(c.text, 90)}` })),
+    ),
+  }));
   return {
     tool,
     profiles,
@@ -86,7 +103,46 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     catalogModels,
     helpOverlay,
     courses,
+    initialCourseId,
+    nextTools,
+    linkTargets: linkTargets(ownCourses),
+    dossiers,
   };
+}
+
+/** The next steps the viewer may use, with their names (P27.1). */
+async function nextStepsFor(user: Awaited<ReturnType<typeof requireUser>>, slugs: string[]) {
+  const out: { slug: string; name: LocalizedText }[] = [];
+  for (const slug of slugs) {
+    const next = getToolBySlug(slug);
+    if (next && (await isToolAvailable(user, next))) out.push({ slug, name: next.name });
+  }
+  return out;
+}
+
+function shorten(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+}
+
+/** Keeping a result (P27.1): link it to a course, or add it to a dossier as evidence. */
+export async function action({ request }: Route.ActionArgs) {
+  const user = await requireUser(request);
+  const fd = await request.formData();
+  const linked = await courseLinkIntent(request, user.id, fd);
+  if (linked) return linked;
+  if (fd.get("intent") === "addToDossier") {
+    const added = await addGenerationToDossier(
+      user.id,
+      {
+        generationId: String(fd.get("id") ?? ""),
+        dossierId: String(fd.get("dossierId") ?? ""),
+        criterionId: String(fd.get("criterionId") ?? "") || null,
+      },
+      getLocale(request),
+    );
+    return added.ok ? { ok: true as const, intent: "addToDossier" as const } : added;
+  }
+  return { ok: false as const };
 }
 
 export function meta({ loaderData: data, matches }: Route.MetaArgs) {
@@ -107,7 +163,12 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     catalogModels,
     helpOverlay,
     courses,
+    initialCourseId,
+    nextTools,
+    linkTargets,
+    dossiers,
   } = loaderData;
+  const resultContext = { nextTools, linkTargets, dossiers };
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
@@ -134,6 +195,8 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             localModels={localModels}
             catalogModels={catalogModels}
             courses={courses}
+            initialCourseId={initialCourseId}
+            resultContext={resultContext}
           />
         ) : multiStage ? (
           <StageStepper
@@ -142,6 +205,9 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             defaultProfileId={defaultProfileId}
             localModels={localModels}
             catalogModels={catalogModels}
+            courses={courses}
+            initialCourseId={initialCourseId}
+            resultContext={resultContext}
           />
         ) : (
           <GeneratorView
@@ -151,6 +217,8 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             localModels={localModels}
             catalogModels={catalogModels}
             courses={courses}
+            initialCourseId={initialCourseId}
+            resultContext={resultContext}
           />
         )}
       </section>

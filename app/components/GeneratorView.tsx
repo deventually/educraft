@@ -10,6 +10,7 @@ import { ToolControls, type PickerModel } from "./ToolControls";
 import { CoursePicker } from "./CoursePicker";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
+import { ResultActions, type ResultContext } from "./ResultActions";
 import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
 import { cn } from "~/lib/utils";
@@ -36,6 +37,10 @@ interface Props {
   catalogModels?: PickerModel[];
   /** The teacher's courses (P20.4), for the course picker and its prefill. */
   courses?: (SandboxCourse & { name: string })[];
+  /** The course to start on (P27.1, `?course=`). */
+  initialCourseId?: string;
+  /** Next steps and places to keep the result (P27.1). */
+  resultContext?: ResultContext;
 }
 
 export function GeneratorView({
@@ -45,6 +50,8 @@ export function GeneratorView({
   localModels,
   catalogModels,
   courses,
+  initialCourseId,
+  resultContext,
 }: Props) {
   const t = useT();
   const locale = useLocale();
@@ -56,6 +63,7 @@ export function GeneratorView({
     profiles,
     defaultProfileId,
     courses,
+    initialCourseId,
   });
   // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
   // server render and hydration agree; only the tool's own text fields are filled.
@@ -82,6 +90,7 @@ export function GeneratorView({
     ),
   );
   const [output, setOutput] = useState("");
+  const [generationId, setGenerationId] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -124,6 +133,7 @@ export function GeneratorView({
 
   async function send(overrides: Record<string, string>) {
     setOutput("");
+    setGenerationId(null);
     setStreaming(true);
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -160,7 +170,10 @@ export function GeneratorView({
       },
       {
         onToken: (text) => setOutput((prev) => prev + text),
-        onDone: () => setStreaming(false),
+        onDone: (meta) => {
+          setGenerationId(meta?.generationId ?? null);
+          setStreaming(false);
+        },
         onError: (err) => {
           // Server errors arrive already localized; a client-side failure carries
           // only a machine code, mapped here to the localized generic message.
@@ -274,6 +287,11 @@ export function GeneratorView({
         </div>
         {/* Persistent AI-transparency notice; stronger "teacher decides" variant
             for grading tools, driven by registry data. */}
+        {resultContext && output && !streaming && !reviewing && (
+          <div className="shrink-0">
+            <ResultActions {...resultContext} generationId={generationId} courseId={courseId} />
+          </div>
+        )}
         {codes && output && !reviewing && (
           <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
         )}
