@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
+_Laatst bijgewerkt: 2026-11-05 (P24.3 en P24.4 gemerged, P24.5 bezig)_
 
 ## Nu
 
+- **Les voorbereiden (P24.4, #72) gemerged op 2026-11-05:** concept-lesopzet volgens Rosenshine
+  (2012), met een tijdsplan dat optelt tot de lesduur; elke case 4,53–5,00 in meting lp3.
+- **Toetsvragen en toetsmatrijs (P24.3, #67) gemerged op 2026-11-05,** in de stand van meting t;
+  de bekende punten staan onder Later.
 - **Beoordelingsmodel: een gebrek telt bij één criterium (#71) gemerged op 2026-11-04:** na meting q;
   meting s zonder regressie.
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 16 tools (10 voor
@@ -81,23 +85,21 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
-  contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
-  optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
-  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Metingen lp1 → lp2 → lp3
-  (lp2 en lp3: 3 runs, batch): elke case 4,53–5,00, geen gefaalde harde check, niets afgekapt, geen
-  regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-04lp3.md`) — PR open.
-- P24.3 Toetsvragen en toetsmatrijs maken (`test-items`): in twee stappen een toetsmatrijs die
-  optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
-  matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
-  Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
-  bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
-  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte:
-  r2 (1 run) niets afgekapt, nog één dubbel verdedigbare vraag; ronde 2 verbiedt meerkeuze over
-  kwesties waarover vakmensen het oneens zijn. Eindmeting t (3 runs, batch): niets afgekapt,
-  aantallen kloppen; research-methods 4,07 en statistics 4,47 door vorm (af en toe een
-  correctiespoor in een kop, soms 3 opties). Ronde 3 gaf regressie (meting u) en is teruggedraaid;
-  de stand is die van t. Bastiaan koos voor mergen in deze stand — PR open.
+- P24.5 Toetsanalyse na afloop: (a) het hulpmiddel **Toetsuitslag per vraag analyseren**
+  (`item-analysis`) rekent in code de p-waarde, Rit, Rir, Cronbachs alfa en alfa zonder elke vraag
+  uit een geplakte scorelijst; kolommen met namen of studentnummers gaan eruit vóór het rekenen;
+  (b) de tool **Toetsanalyse uitleggen** (`test-analysis`) legt die getallen uit en rekent zelf
+  niets. De knop "Laat uitleggen" geeft alleen de getallen per vraag door. Bronnen: Cronbach
+  (1951); Van Berkel e.a. (red.) (2023), *Toetsen in het hoger onderwijs*, 5e editie. Zeven
+  eval-casussen, vier met een bekende fout. Meting ta1 (3 runs, batch): zes cases 4,80–4,93, niets
+  afgekapt; ruwe scores 3,27 (het stopantwoord noemde een aantal kandidaten en gaf extra advies).
+  Ronde 1: een strak stopantwoord, randgevallen (Rir 0,15–0,20) als licht signaal onder de tabel,
+  overal "je". Meting ta2: ruwe scores 3,27 → 4,93, mc-knowledge 5,00, geen harde check gefaald;
+  maar mc-exam-en zakte naar 4,47 doordat de band 0,15–0,20 een nieuwe vaste grens werd. Ronde 2
+  draait dat terug (BESLUIT-2026-11-04-24) en houdt het stopantwoord en "je". Eindmeting ta3:
+  elke case 4,53–4,93, geen harde check gefaald, niets afgekapt (lat gehaald, 5,0 nog niet);
+  mc-knowledge 5,00 → 4,53 door hetzelfde randgeval als in ta1 (V6, Rir 0,18). Na twee rondes
+  gestopt (`evals/reports/2026-11-05ta3.md`) — PR open.
 
 ## Wacht op jou
 
