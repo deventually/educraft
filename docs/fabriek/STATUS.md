@@ -158,6 +158,13 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
   Cursussen en hulpmiddelen zijn een 404 als ze uit staan. Migraties 0016 en 0017. PR open.
 
+- P27.3 Start en een menu van vier: een docent landt op `/start` met het vraagvak "Waar wil je
+  mee aan de slag?" (hooguit drie tools, zelfde zoekfunctie als de catalogus, met de gekozen cursus
+  in de link), *Deze week* (open aandachtspunten en laatst gemaakt werk) en je cursussen. Menu:
+  Start · Cursussen · BDB/BKE · Tools (+ Beheer). "Mijn werk" heet nu "Eerder gemaakt",
+  Onderwijscontext zit in het accountmenu, Help is een vraagteken rechtsboven. Geen route weg,
+  geen migratie. PR open.
+
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
   het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus

@@ -75,26 +75,8 @@ describe("AppShell top navigation", () => {
 
   it("leaves 'Cursussen' out of menu and footer when courses are off for the user (P28.3)", async () => {
     renderShellWithUser({ name: "T", role: "teacher", features: { courses: false } });
-    await screen.findAllByRole("link", { name: "Mijn werk" });
+    await screen.findAllByRole("link", { name: "Eerder gemaakt" });
     expect(screen.queryByRole("link", { name: "Cursussen" })).toBeNull();
-  });
-
-  it("has a menu item 'Cursussen' next to 'Mijn werk' (P20)", () => {
-    renderShell();
-    const links = screen.getAllByRole("link", { name: "Cursussen" });
-    expect(links.length).toBeGreaterThan(0);
-    expect(links[0]).toHaveAttribute("href", "/courses");
-    const main = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
-    const names = within(main)
-      .getAllByRole("link")
-      .map((l) => l.textContent);
-    expect(names.indexOf("Cursussen")).toBe(names.indexOf("Mijn werk") + 1);
-    fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
-    const panel = screen.getByRole("navigation", { name: "Mobiele navigatie" });
-    expect(within(panel).getByRole("link", { name: "Cursussen" })).toHaveAttribute(
-      "href",
-      "/courses",
-    );
   });
 
   it("collapses behind a toggle on small screens", () => {
@@ -190,11 +172,11 @@ describe("AppShell top navigation", () => {
   });
 });
 
-describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => {
-  const ITEMS = ["Tools", "Mijn werk", "Cursussen", "BDB/BKE", "Onderwijscontext", "Help"];
-  const HREFS = ["/tools", "/projects", "/courses", "/portfolio", "/context-profiles", "/help"];
+describe("AppShell menu of four (P27.3)", () => {
+  const ITEMS = ["Start", "Cursussen", "BDB/BKE", "Tools"];
+  const HREFS = ["/start", "/courses", "/portfolio", "/tools"];
 
-  it("shows exactly six menu items in order for a teacher", async () => {
+  it("shows exactly four menu items in order for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
@@ -203,14 +185,69 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
     expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
   });
 
-  it("shows the same six items in the mobile menu", async () => {
+  it("shows three items when the BDB/BKE workplace is off", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: false });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    expect(
+      within(primary)
+        .getAllByRole("link")
+        .map((l) => l.textContent),
+    ).toEqual(["Start", "Cursussen", "Tools"]);
+  });
+
+  it("shows the same four items first in the mobile menu, then the account links", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
-    const links = within(mobile).getAllByRole("link");
+    const [menu, account] = within(mobile).getAllByRole("list");
+    const links = within(menu).getAllByRole("link");
     expect(links.map((l) => l.textContent)).toEqual(ITEMS);
     expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
+    expect(
+      within(account)
+        .getAllByRole("link")
+        .map((l) => l.getAttribute("href")),
+    ).toEqual(["/account", "/context-profiles"]);
+  });
+
+  it("moves 'Onderwijscontext' to the account menu", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    expect(within(primary).queryByRole("link", { name: "Onderwijscontext" })).toBeNull();
+    const menu = screen.getByRole("navigation", { name: "Account" });
+    expect(within(menu).getByRole("link", { name: "Onderwijscontext" })).toHaveAttribute(
+      "href",
+      "/context-profiles",
+    );
+    expect(within(menu).getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
+  });
+
+  it("makes Help a question mark at the top right, and keeps it in the footer", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    expect(within(primary).queryByRole("link", { name: "Help" })).toBeNull();
+    const banner = screen.getByRole("banner");
+    expect(within(banner).getByRole("link", { name: "Help" })).toHaveAttribute("href", "/help");
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("link", { name: "Help" })).toHaveAttribute("href", "/help");
+  });
+
+  it("keeps 'Eerder gemaakt' and Onderwijscontext in the footer; no route disappears", async () => {
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("link", { name: "Eerder gemaakt" })).toHaveAttribute(
+      "href",
+      "/projects",
+    );
+    expect(within(footer).getByRole("link", { name: "Onderwijscontext" })).toHaveAttribute(
+      "href",
+      "/context-profiles",
+    );
   });
 
   it("keeps Over in the footer, not in the menu", async () => {
@@ -230,7 +267,7 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
       within(primary)
         .getAllByRole("link")
         .map((l) => l.textContent),
-    ).toEqual(["Tools", "My work", "Courses", "BDB/BKE", "Teaching context", "Help"]);
+    ).toEqual(["Start", "Courses", "BDB/BKE", "Tools"]);
   });
 
   it("has no a11y violations with the mobile menu open", async () => {
@@ -296,12 +333,10 @@ describe("AppShell admin surface & role switch", () => {
     const links = within(primary).getAllByRole("link");
     expect(links.map((l) => l.textContent)).toEqual([
       "Beheer",
-      "Tools",
-      "Mijn werk",
+      "Start",
       "Cursussen",
       "BDB/BKE",
-      "Onderwijscontext",
-      "Help",
+      "Tools",
     ]);
     expect(links[0]).toHaveAttribute("href", "/admin");
   });
@@ -388,5 +423,15 @@ describe("AppShell footer extras", () => {
   it("has no link to a contact page", () => {
     renderShell();
     expect(document.querySelector('a[href="/contact"]')).toBeNull();
+  });
+});
+
+describe("AppShell account menu (P27.3)", () => {
+  it("has no a11y violations with the account menu open", async () => {
+    const { container } = renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    fireEvent.click(screen.getByText("Teacher T"));
+    expect(container.querySelector("details")).toHaveAttribute("open");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

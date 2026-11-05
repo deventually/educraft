@@ -83,6 +83,7 @@ describe("routes: one file per area", () => {
     expect(flatRoutes()).toEqual(
       expect.arrayContaining([
         { path: "/", file: "routes/index.tsx", inShell: true },
+        { path: "/start", file: "routes/start.tsx", inShell: true },
         { path: "/tools", file: "routes/home.tsx", inShell: true },
         { path: "/tools/:slug", file: "routes/tool.tsx", inShell: true },
         { path: "/utilities", file: "routes/utilities._index.tsx", inShell: true },

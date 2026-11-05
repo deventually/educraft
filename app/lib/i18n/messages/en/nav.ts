@@ -10,8 +10,9 @@ export const nav: Messages["nav"] = {
   menuLabel: "Mobile navigation",
   openMenu: "Open menu",
   portfolio: "BDB/BKE",
-  projects: "My work",
+  projects: "Earlier work",
   settings: "Teaching context",
   skipToContent: "Skip to main content",
+  start: "Start",
   tools: "Tools",
 };
