@@ -15,6 +15,14 @@ import { getDb } from "../db.server";
 import { instanceSettings, toolSettings } from "../schema.server";
 import { type FeatureId, isFeatureId } from "~/lib/features";
 import { type InstanceStand, isInstanceStand } from "~/lib/features/rule";
+import {
+  DEFAULT_TIME_ZONE,
+  type IsoDate,
+  isIsoDate,
+  isTimeZone,
+  MAX_BREAK_WEEKS,
+  normalizeBreakWeeks,
+} from "~/lib/calendar/weeks";
 
 /** Every tool stand an admin has set (P28.3); an untouched tool is absent (registry default). */
 export async function getToolStands(): Promise<Map<string, InstanceStand>> {
@@ -184,5 +192,42 @@ export async function setOwnerUserId(id: string | null): Promise<void> {
       .run();
   } else {
     db.insert(instanceSettings).values({ key: OWNER_KEY, valueJson, updatedAt: new Date() }).run();
+  }
+}
+
+const BREAK_WEEKS_KEY = "breakWeeks";
+const TIME_ZONE_KEY = "timeZone";
+
+/**
+ * The institution's break weeks (P22.1): one list for every course, as sorted
+ * Mondays. Unset = no breaks. Anything that is not a date is dropped on read.
+ */
+export async function getBreakWeeks(): Promise<IsoDate[]> {
+  const list = (await getInstanceList(BREAK_WEEKS_KEY)) ?? [];
+  return normalizeBreakWeeks(list.filter((d) => typeof d === "string" && isIsoDate(d))).slice(
+    0,
+    MAX_BREAK_WEEKS,
+  );
+}
+
+/** Store the break weeks (any day counts as its week); `[]` clears them. */
+export async function setBreakWeeks(dates: IsoDate[]): Promise<void> {
+  const weeks = normalizeBreakWeeks(dates.filter(isIsoDate)).slice(0, MAX_BREAK_WEEKS);
+  return setInstanceList(BREAK_WEEKS_KEY, weeks.length ? weeks : null);
+}
+
+/** The institution's IANA time zone ("today" is the calendar day there); no screen yet. */
+export async function getTimeZone(): Promise<string> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, TIME_ZONE_KEY))
+    .get();
+  if (!row) return DEFAULT_TIME_ZONE;
+  try {
+    const parsed = JSON.parse(row.valueJson);
+    return typeof parsed === "string" && isTimeZone(parsed) ? parsed : DEFAULT_TIME_ZONE;
+  } catch {
+    return DEFAULT_TIME_ZONE;
   }
 }

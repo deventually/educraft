@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
+_Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
 
 ## Nu
 
@@ -156,8 +156,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
   reden, afgehandelde adviezen ingeklapt, en een melding als de cursus na de beoordeling is
   gewijzigd. Werkt zonder JS; weg als rolagenten uit staan. Helptekst bij Cursussen. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
-  zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).
+- P22.1a De week van de docent, het rekenhart en de schoolkalender: weken rekenen in ISO-weken
+  (`app/lib/calendar/weeks.ts`), vakantieweken als één lijst voor de instelling (sectie
+  *Schoolkalender* op `/admin/context`) en de tijdzone (standaard Europe/Amsterdam). De startdatum
+  per cursus volgt in 22.1b. PR open.
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
