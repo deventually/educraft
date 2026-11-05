@@ -11,6 +11,7 @@
  *   dropped.
  */
 import { z } from "zod";
+import { extractJson } from "~/lib/ai/extractJson";
 import { COACH_LIMITS } from "./schema";
 import type { CoachReview, CriterionReview, DossierData, Outcome } from "./types";
 import { VERDICTS } from "./types";
@@ -174,20 +175,6 @@ const RawReview = z.object({ criteria: z.array(RawCriterion), overall: z.string(
 export type ParseResult =
   | { ok: true; review: CoachReview }
   | { ok: false; error: "unparseable" | "incomplete" };
-
-/** The first JSON object in a model answer, fenced or not. */
-function extractJson(raw: string): unknown {
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(raw)?.[1];
-  const text = fenced ?? raw;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) return undefined;
-  try {
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return undefined;
-  }
-}
 
 function normalize(s: string): string {
   return s

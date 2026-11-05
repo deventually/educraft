@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (brief P21 gemerged, P21.1 bezig)_
 
 ## Nu
 
+- **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten, akkoord/niet akkoord gelogd,
+  pakket-tags, gekoppelde toetsvragen optioneel mee (BESLUIT-2026-11-05-3).
 - **Brief P26 Cursussen verder (#77) gemerged op 2026-11-05:** toetsmatrijs per vraag,
   OER-import en de cursus als bewijs in het BDB/BKE-dossier, na P20 (BESLUIT-2026-11-05-2).
 - **Cursussen, het rekenhart (P20.1, #78) gemerged op 2026-11-05:** cursusmodel met
@@ -106,9 +108,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
   repository, per docent afgeschermd; een generatie koppel je alleen aan een eigen cursus. Nog geen
   scherm. Daarna 20.3 (pagina's) en 20.4 (koppelen en voorinvullen). PR open; na de merge
   `npm run db:migrate`.
-- Brief P21 *Rolagenten*: twee petten kijken een cursus na op verzoek, akkoord/niet akkoord gelogd,
-  pakket-tags, gekoppelde toetsvragen optioneel mee. Keuzes gemaakt (BESLUIT-2026-11-05-3); wacht op
-  merge — PR open. P20.1 en 20.2 staan op `main`, dus 21.1 kan na deze merge starten.
+- P21.1 Rolagenten, petten als data (`app/lib/agents/`): de Toetsdeskundige en de Ontwerper als
+  register, de invoer die een pet krijgt (cursus onder korte sleutels, vaste controles, verworpen
+  adviezen) en de controle op het antwoord (onbekende items, dubbelen en verworpen adviezen vallen
+  weg). Nog zonder AI en zonder scherm. Daarna 21.2 (prompts en meting) en 21.3 (opslag). PR open.
 
 ## Wacht op jou
 
