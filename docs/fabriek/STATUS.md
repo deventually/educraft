@@ -12,6 +12,9 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
   cursus deze week, voorbereiden, nakijken en aandachtspunten; nog geen scherm.
 - **De week van de docent, echte datums (P22.1b, #110) gemerged op 2026-11-05:** een startdatum
   per cursus en bij elke les en toets "Week 3 · 17–23 nov", vakantieweken overgeslagen.
+- **Gebruikers aanvinken en in één keer aanpassen (#109) gemerged op 2026-11-05:** op
+  `/admin/users` "Met geselecteerde": in of uit een team, en (superbeheerder) op non-actief of
+  weer actief, met een bevestigingsvraag bij op non-actief zetten.
 - **De week van de docent, rekenhart en schoolkalender (P22.1a, #106) gemerged op 2026-11-05:**
   weken rekenen in ISO-weken en de vakantieweken als één lijst voor de instelling op
   `/admin/context`.
@@ -165,10 +168,8 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
 
 ## Bezig
 
-- Beheer sneller, gebruikers in één keer aanpassen: op `/admin/users` een vinkje per account,
-  "Alles selecteren" en de balk "Met geselecteerde": in een team zetten, uit een team halen, en
-  (alleen superbeheerder) op non-actief zetten of weer activeren. Wie buiten je rechten valt, wordt
-  overgeslagen en geteld. Geen migratie. PR open.
+- Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
+  Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
   toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
   zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op

@@ -125,6 +125,23 @@ describe("admin.tools action", () => {
     expect((await settings.getToolStands()).get("mentorai")).toBe("request");
   });
 
+  it("sets many tools at once; an unknown slug is skipped", async () => {
+    const res = await invoke(
+      toolsRoute.action,
+      post({ intent: "toolsBulk", stand: "off", slugs: ["mentorai", "bloom-by-design", "nope"] }),
+    );
+    expect(res).toEqual({ saved: true, count: 2 });
+    const stands = await settings.getToolStands();
+    expect(stands.get("mentorai")).toBe("off");
+    expect(stands.get("bloom-by-design")).toBe("off");
+    expect(
+      await invoke(toolsRoute.action, post({ intent: "toolsBulk", stand: "x", slugs: "mentorai" })),
+    ).toEqual({ error: "invalid" });
+    expect(await invoke(toolsRoute.action, post({ intent: "toolsBulk", stand: "on" }))).toEqual({
+      error: "invalid",
+    });
+  });
+
   it("refuses an unknown stand or tool", async () => {
     const bad = await invoke(
       toolsRoute.action,
