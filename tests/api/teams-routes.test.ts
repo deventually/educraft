@@ -25,6 +25,7 @@ let teams: typeof import("~/server/repositories/teams.server");
 let users: typeof import("~/server/repositories/users.server");
 let settings: typeof import("~/server/repositories/settings.server");
 let adminTeams: typeof import("~/routes/admin.teams");
+let adminTeam: typeof import("~/routes/admin.teams.$id");
 let list: typeof import("~/routes/admin.users");
 let person: typeof import("~/routes/admin.users.$id");
 let leadPage: typeof import("~/routes/teams.$id");
@@ -35,6 +36,7 @@ beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
   settings = await import("~/server/repositories/settings.server");
   adminTeams = await import("~/routes/admin.teams");
+  adminTeam = await import("~/routes/admin.teams.$id");
   list = await import("~/routes/admin.users");
   person = await import("~/routes/admin.users.$id");
   leadPage = await import("~/routes/teams.$id");
@@ -85,21 +87,16 @@ async function status(p: Promise<unknown>): Promise<number | undefined> {
 const memberIds = async (teamId: string) =>
   ((await teams.getTeamWithMembers(teamId))?.members ?? []).map((m) => m.userId);
 
-describe("/admin/teams (P28.2)", () => {
-  it("creates, renames and deletes a team (admin)", async () => {
-    const created = (await call(adminTeams.action, {
+describe("/admin/teams, the list (P28.2, like the user list)", () => {
+  it("creates a team and goes straight to its page", async () => {
+    const res = await call(adminTeams.action, {
       request: post({ intent: "create", name: "Verpleegkunde" }),
-    })) as { saved?: boolean };
-    expect(created.saved).toBe(true);
-    const data = await call(adminTeams.loader, { request: get() });
-    const team = data.teams.find((t) => t.name === "Verpleegkunde")!;
-    expect(team).toBeDefined();
-    await call(adminTeams.action, {
-      request: post({ intent: "rename", teamId: team.id, name: "VPK" }),
     });
-    expect((await teams.getTeamWithMembers(team.id))?.name).toBe("VPK");
-    await call(adminTeams.action, { request: post({ intent: "delete", teamId: team.id }) });
-    expect(await teams.getTeamWithMembers(team.id)).toBeNull();
+    expect(res).toBeInstanceOf(Response);
+    const location = (res as Response).headers.get("Location") ?? "";
+    expect(location).toMatch(/^\/admin\/teams\/.+/);
+    const id = location.split("/").pop()!;
+    expect((await teams.getTeamWithMembers(id))?.name).toBe("Verpleegkunde");
   });
 
   it("refuses an empty name", async () => {
@@ -109,29 +106,29 @@ describe("/admin/teams (P28.2)", () => {
     expect(res.error).toBe("nameRequired");
   });
 
-  it("adds a member by e-mail, makes them lead, takes it away and removes them", async () => {
-    const team = await teams.createTeam("Beheer");
-    const a = await mk("Docent A");
-    const added = (await call(adminTeams.action, {
-      request: post({ intent: "addMember", teamId: team.id, email: a.email! }),
-    })) as { saved?: boolean };
-    expect(added.saved).toBe(true);
-    await call(adminTeams.action, {
-      request: post({ intent: "setLead", teamId: team.id, userId: a.id, lead: "1" }),
+  it("shows one row per team: members, leads, and searches on team or person", async () => {
+    const team = await teams.createTeam("Zoekteam Zorg");
+    const lead = await mk("Zoek Leider");
+    const plain = await mk("Zoek Lid");
+    await teams.addMember(team.id, lead.id);
+    await teams.addMember(team.id, plain.id);
+    await teams.setLead(team.id, lead.id, true);
+    await teams.createTeam("Zoekteam Techniek");
+
+    const all = await call(adminTeams.loader, { request: get("/admin/teams") });
+    const row = all.teams.find((t) => t.id === team.id)!;
+    expect(row).toEqual({
+      id: team.id,
+      name: "Zoekteam Zorg",
+      memberCount: 2,
+      leads: ["Zoek Leider"],
     });
-    expect(await teams.getTeamForLead(a.id, team.id)).not.toBeNull();
-    await call(adminTeams.action, {
-      request: post({ intent: "setLead", teamId: team.id, userId: a.id }),
-    });
-    expect(await teams.getTeamForLead(a.id, team.id)).toBeNull();
-    await call(adminTeams.action, {
-      request: post({ intent: "removeMember", teamId: team.id, userId: a.id }),
-    });
-    expect(await memberIds(team.id)).toEqual([]);
-    const unknown = (await call(adminTeams.action, {
-      request: post({ intent: "addMember", teamId: team.id, email: "nobody@school.nl" }),
-    })) as { error?: string };
-    expect(unknown.error).toBe("noSuchUser");
+
+    const byTeam = await call(adminTeams.loader, { request: get("/admin/teams?q=techniek") });
+    expect(byTeam.teams.map((t) => t.name)).toEqual(["Zoekteam Techniek"]);
+    expect(byTeam.q).toBe("techniek");
+    const byPerson = await call(adminTeams.loader, { request: get("/admin/teams?q=zoek%20lid") });
+    expect(byPerson.teams.map((t) => t.name)).toEqual(["Zoekteam Zorg"]);
   });
 
   it("is admin only: a teacher, even a lead, gets a 403", async () => {
@@ -144,6 +141,107 @@ describe("/admin/teams (P28.2)", () => {
     expect(
       await status(call(adminTeams.action, { request: post({ intent: "create", name: "Y" }) })),
     ).toBe(403);
+    expect(await status(call(adminTeam.loader, { request: get(), params: { id: team.id } }))).toBe(
+      403,
+    );
+    expect(
+      await status(
+        call(adminTeam.action, {
+          request: post({ intent: "rename", name: "Z" }),
+          params: { id: team.id },
+        }),
+      ),
+    ).toBe(403);
+  });
+});
+
+describe("/admin/teams/:id, the team page", () => {
+  it("is a 404 for an unknown team", async () => {
+    expect(await status(call(adminTeam.loader, { request: get(), params: { id: "nope" } }))).toBe(
+      404,
+    );
+    expect(
+      await status(
+        call(adminTeam.action, {
+          request: post({ intent: "rename", name: "X" }),
+          params: { id: "nope" },
+        }),
+      ),
+    ).toBe(404);
+  });
+
+  it("offers every active account that is not yet a member to add", async () => {
+    const team = await teams.createTeam("Kandidaten");
+    const inTeam = await mk("Kandidaat Lid");
+    const outside = await mk("Kandidaat Buiten");
+    const off = await mk("Kandidaat Uit");
+    await users.setUserDisabled(off.id, true);
+    await teams.addMember(team.id, inTeam.id);
+    const data = await call(adminTeam.loader, { request: get(), params: { id: team.id } });
+    expect(data.team.members.map((m) => m.userId)).toEqual([inTeam.id]);
+    const ids = data.candidates.map((c) => c.id);
+    expect(ids).toContain(outside.id);
+    expect(ids).not.toContain(inTeam.id);
+    expect(ids).not.toContain(off.id);
+    const names = data.candidates.map((c) => c.name);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+    expect(data.candidates.find((c) => c.id === outside.id)).toEqual({
+      id: outside.id,
+      name: "Kandidaat Buiten",
+      email: outside.email,
+    });
+  });
+
+  it("adds several people at once and ignores an unknown id", async () => {
+    const team = await teams.createTeam("Veel tegelijk");
+    const a = await mk("Veel A");
+    const b = await mk("Veel B");
+    const res = await call(adminTeam.action, {
+      request: post({ intent: "addMembers", userIds: [a.id, b.id, "ghost"] }),
+      params: { id: team.id },
+    });
+    expect(res).toEqual({ saved: true });
+    expect((await memberIds(team.id)).sort()).toEqual([a.id, b.id].sort());
+    const none = await call(adminTeam.action, {
+      request: post({ intent: "addMembers" }),
+      params: { id: team.id },
+    });
+    expect(none).toEqual({ error: "noneSelected" });
+  });
+
+  it("renames, makes a lead, takes it away, removes a member and deletes the team", async () => {
+    const team = await teams.createTeam("Beheer");
+    const a = await mk("Docent A");
+    await teams.addMember(team.id, a.id);
+    const at = (fields: Record<string, string>) =>
+      call(adminTeam.action, { request: post(fields), params: { id: team.id } });
+
+    expect(await at({ intent: "rename", name: "Beheer 2" })).toEqual({ saved: true });
+    expect((await teams.getTeamWithMembers(team.id))?.name).toBe("Beheer 2");
+    expect(await at({ intent: "rename", name: " " })).toEqual({ error: "nameRequired" });
+
+    await at({ intent: "setLead", userId: a.id, lead: "1" });
+    expect(await teams.getTeamForLead(a.id, team.id)).not.toBeNull();
+    await at({ intent: "setLead", userId: a.id });
+    expect(await teams.getTeamForLead(a.id, team.id)).toBeNull();
+    await at({ intent: "removeMember", userId: a.id });
+    expect(await memberIds(team.id)).toEqual([]);
+
+    const gone = await at({ intent: "delete" });
+    expect(gone).toBeInstanceOf(Response);
+    expect((gone as Response).headers.get("Location")).toBe("/admin/teams");
+    expect(await teams.getTeamWithMembers(team.id)).toBeNull();
+  });
+
+  it("acts on the team in the URL only; a teamId in the form is ignored", async () => {
+    const mine = await teams.createTeam("URL team");
+    const other = await teams.createTeam("Ander team");
+    await call(adminTeam.action, {
+      request: post({ intent: "rename", name: "Hernoemd", teamId: other.id }),
+      params: { id: mine.id },
+    });
+    expect((await teams.getTeamWithMembers(mine.id))?.name).toBe("Hernoemd");
+    expect((await teams.getTeamWithMembers(other.id))?.name).toBe("Ander team");
   });
 });
 
@@ -402,17 +500,18 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
     ).toEqual({ error: "invalid" });
   });
 
-  it("the admin sets any team's choices on /admin/teams", async () => {
+  it("the admin sets any team's choices on /admin/teams/:id", async () => {
     const { team } = await leadOfNewTeam();
-    const data = await call(adminTeams.loader, { request: get() });
+    const data = await call(adminTeam.loader, { request: get(), params: { id: team.id } });
     expect(data.offer.features.length).toBeGreaterThan(0);
-    expect(data.teams.find((t) => t.id === team.id)?.settings).toEqual({
+    expect(data.team.settings).toEqual({
       features: {},
       tools: {},
       models: null,
     });
-    const res = await call(adminTeams.action, {
-      request: post({ intent: "settings", teamId: team.id, "feature:roleAgents": "off" }),
+    const res = await call(adminTeam.action, {
+      request: post({ intent: "settings", "feature:roleAgents": "off" }),
+      params: { id: team.id },
     });
     expect(res).toEqual({ saved: true });
     expect((await stored(team.id)).features).toEqual({ roleAgents: "off" });

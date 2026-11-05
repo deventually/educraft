@@ -153,6 +153,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 
 ## Bezig
 
+- Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
+  persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
+  een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
+  keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
 - P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
   pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
   beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen

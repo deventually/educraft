@@ -80,8 +80,10 @@ A **team** (`teams`, `team_members`) is a group of colleagues; joining shares no
 lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` stays
 `teacher | admin`. All access goes through `app/server/repositories/teams.server.ts`:
 
-- Admins work on every team at `/admin/teams` (create, rename, delete, members by e-mail,
-  lead on/off) and per person on the person page (section Teams).
+- Admins work on every team: `/admin/teams` is the list (search on team or person, one
+  "New team" button) and `/admin/teams/:id` the team page (rename, delete, add several accounts
+  at once by ticking them, remove, lead on/off, the team's choices); and per person on the
+  person page (section Teams).
 - A lead works on `/teams/:id` (teacher side). Every lead function goes through
   `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team, so the
   route answers a 404 to everyone else, admins included. A lead adds a colleague by **exact**
@@ -119,7 +121,7 @@ effective = instance is Off              → off
 - **Admins** have everything the instance has not Off, and always BDB/BKE (P27.2).
   `portfolioAccess` keeps the transition: no choice and a dossier → on.
 - **Who sets what:** the admin sets instance stands on `/admin/tools` and any team's choices on
-  `/admin/teams`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
+  `/admin/teams/:id`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
   exception, on the person page (section *Parts and tools*, which shows the source). A team only
   sees what the instance has not Off; a stored choice for an Off item stays but never counts.
 
