@@ -156,7 +156,9 @@ export function ConfirmDialog({
                   type="button"
                   variant="secondary"
                   onClick={close}
-                  {...(typeToConfirm || children ? {} : { "data-autofocus": true })}
+                  // The fallback: a field marked earlier in the dialog (the type-to-confirm
+                  // input, or a child) comes first in document order and wins.
+                  data-autofocus
                 >
                   {cancelLabel}
                 </Button>
