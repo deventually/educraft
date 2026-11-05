@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
 
 ## Nu
 
+- **Proefassessment, de AI-tekst en de meting (P29.2, #119) gemerged op 2026-11-05:**
+  `portfolio-rehearsal@v1` speelt een commissie van twee assessoren met feedback per criterium,
+  gecontroleerd in code; nog geen scherm. Eerste meting: één case 4,4, de rest faalt op de meting.
 - **Klaar om in te leveren? (P29.1, #117) gemerged op 2026-11-05:** in stap 5 van het
   BDB/BKE-dossier één lijst met per punt "Los op", zelf afvinken met datum; advies, geen poort.
 - **De week van de docent op Start (P22.3, #113) gemerged op 2026-11-05:** per cursus *In de les*,
@@ -178,12 +181,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
   van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
   grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
   4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
-- P29.2 Proefassessment, de AI-tekst en de meting: `portfolio-rehearsal@v1` (NL/EN) speelt een
-  commissie van twee assessoren die het dossier las, één vraag per beurt, dunste criterium eerst,
-  doorvragen volgens STARR; op "Rond af" feedback per criterium als JSON. Controle in code
-  (`rehearsal.ts`): citaten alleen uit wat de docent typte, onbekende bronnen eruit, nooit een
-  cijfer. Bewijsstukken gaan alleen als titel mee. Meting `npm run eval:rehearsal` met vier
-  synthetische dossiers; nog niet gedraaid (geen API-sleutel in deze sessie). Geen UI. PR open.
+- P29.2 Meting proefassessment herstellen: de eerste meting (3 runs) faalde vooral op de meting
+  zelf. De vraagteller telt vraagtekens in geciteerde tekst niet meer mee; "vitten" en "claim
+  overgenomen" gelden alleen in de cases die daarover gaan; het sterke dossier heeft geen dunste
+  criterium meer en het script volgt het hoofdstuk. Prompt ongewijzigd (v1); na de nieuwe meting
+  volgt eventueel een v2. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop

@@ -48,13 +48,24 @@ export interface CountedInput {
   feedback: RehearsalFeedback | null;
 }
 
+/**
+ * Text without what it quotes: a question the committee quotes from the chapter
+ * ('Waar wacht een klant het langst?') is not a question it asks. A single quote
+ * opens only after a non-letter, so "zo'n" stays.
+ */
+export function withoutQuotes(text: string): string {
+  return text
+    .replace(/["“][^"”]*["”]/g, "")
+    .replace(/(^|[^\p{L}])['‘][^'’]*['’](?!\p{L})/gu, "$1");
+}
+
 /** Hard checks decided in code (true = the failure happened). */
 export const REHEARSAL_COUNTED: Record<string, (input: CountedInput) => boolean> = {
-  /** More than one question mark in any interview turn (the feedback excluded). */
+  /** More than one question mark in any interview turn (the feedback and quoted text excluded). */
   severalQuestions: ({ transcript }) =>
     committeeTurns(transcript)
       .slice(0, -1)
-      .some((turn) => (turn.match(/\?/g) ?? []).length > 1),
+      .some((turn) => (withoutQuotes(turn).match(/\?/g) ?? []).length > 1),
   feedbackUnparsed: ({ feedback }) => feedback === null,
   /** A quote the teacher never typed (dropped by `parseRehearsalFeedback`). */
   fabricatedQuote: ({ feedback }) => !!feedback?.criteria.some((c) => c.quoteUnverified),
