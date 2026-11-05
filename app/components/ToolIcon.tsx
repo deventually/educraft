@@ -11,6 +11,7 @@ import {
   GraduationCap,
   BookOpen,
   CalendarClock,
+  FilePenLine,
   Users,
   UsersRound,
   Wrench,
@@ -38,6 +39,7 @@ const ICONS: Record<string, LucideIcon> = {
   calculator: Calculator,
   table: Table2,
   "calendar-clock": CalendarClock,
+  "file-pen-line": FilePenLine,
   "chart-column": ChartColumn,
 };
 

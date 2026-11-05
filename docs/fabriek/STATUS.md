@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.3 en P24.4 gemerged, P24.5 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 
 ## Nu
 
+- **Toetsanalyse na afloop (P24.5, #74) gemerged op 2026-11-05:** hulpmiddel item-analysis rekent,
+  tool test-analysis legt uit; eindmeting ta3 elke case 4,53–4,93.
 - **Les voorbereiden (P24.4, #72) gemerged op 2026-11-05:** concept-lesopzet volgens Rosenshine
   (2012), met een tijdsplan dat optelt tot de lesduur; elke case 4,53–5,00 in meting lp3.
 - **Toetsvragen en toetsmatrijs (P24.3, #67) gemerged op 2026-11-05,** in de stand van meting t;
@@ -85,21 +87,15 @@ _Laatst bijgewerkt: 2026-11-05 (P24.3 en P24.4 gemerged, P24.5 bezig)_
 
 ## Bezig
 
-- P24.5 Toetsanalyse na afloop: (a) het hulpmiddel **Toetsuitslag per vraag analyseren**
-  (`item-analysis`) rekent in code de p-waarde, Rit, Rir, Cronbachs alfa en alfa zonder elke vraag
-  uit een geplakte scorelijst; kolommen met namen of studentnummers gaan eruit vóór het rekenen;
-  (b) de tool **Toetsanalyse uitleggen** (`test-analysis`) legt die getallen uit en rekent zelf
-  niets. De knop "Laat uitleggen" geeft alleen de getallen per vraag door. Bronnen: Cronbach
-  (1951); Van Berkel e.a. (red.) (2023), *Toetsen in het hoger onderwijs*, 5e editie. Zeven
-  eval-casussen, vier met een bekende fout. Meting ta1 (3 runs, batch): zes cases 4,80–4,93, niets
-  afgekapt; ruwe scores 3,27 (het stopantwoord noemde een aantal kandidaten en gaf extra advies).
-  Ronde 1: een strak stopantwoord, randgevallen (Rir 0,15–0,20) als licht signaal onder de tabel,
-  overal "je". Meting ta2: ruwe scores 3,27 → 4,93, mc-knowledge 5,00, geen harde check gefaald;
-  maar mc-exam-en zakte naar 4,47 doordat de band 0,15–0,20 een nieuwe vaste grens werd. Ronde 2
-  draait dat terug (BESLUIT-2026-11-04-24) en houdt het stopantwoord en "je". Eindmeting ta3:
-  elke case 4,53–4,93, geen harde check gefaald, niets afgekapt (lat gehaald, 5,0 nog niet);
-  mc-knowledge 5,00 → 4,53 door hetzelfde randgeval als in ta1 (V6, Rir 0,18). Na twee rondes
-  gestopt (`evals/reports/2026-11-05ta3.md`) — PR open.
+- P24.6 Opdracht helder schrijven (`clear-assignment`): een opdrachtomschrijving of
+  studentenhandleiding herschreven op taalniveau B1 (of A2, B2, C1), met stappen, eisen,
+  inleverinfo, open punten ("je noemt geen deadline"), wat er veranderd is en een eisencheck; geen eis
+  verdwijnt of komt erbij. Bronnen: ERK (Council of Europe, 2020), UDL 3.0 (CAST, 2024). Zes
+  eval-casussen, drie met een bekende fout (ontbrekende info, tegenstrijdige eisen, vage criteria).
+  Metingen ca1 → ca2 (ca2: 3 runs, batch): elke case 4,67–5,00, geen gefaalde harde check, niets
+  afgekapt, secties altijd in de vaste volgorde (BESLUIT-2026-11-04-24 gehaald;
+  `evals/reports/2026-11-05ca2.md`). Tien uitkomsten liggen klaar in `evals/reviews/clear-assignment/`
+  voor Bastiaan — PR open.
 
 ## Wacht op jou
 
