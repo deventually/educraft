@@ -132,6 +132,9 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Bezig
 
+- P26.1 Toetsmatrijs per vraag: per toets een tabel met per vraag de leeruitkomst, het denkniveau,
+  de vraagvorm en de punten, met een totaalregel. De vragen bepalen dan de dekking; drie nieuwe
+  aandachtspunten (één vraag per leeruitkomst, vraag onder het niveau, punten half ingevuld). PR open.
 - P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
   voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.

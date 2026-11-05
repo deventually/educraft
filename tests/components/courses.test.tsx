@@ -8,7 +8,7 @@ import CoursePage from "~/routes/courses.$id";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
 import { emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
-import { alignedCourse } from "../courses/fixtures";
+import { alignedCourse, itemizedCourse } from "../courses/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -114,6 +114,72 @@ describe("Course editor (/courses/:id)", () => {
     ).toBeVisible();
     expect(screen.getAllByText("Voeg eerst leeruitkomsten toe.").length).toBeGreaterThan(0);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+/** Opens the matrix disclosure of a test, as a user would. */
+function openMatrix(name: string) {
+  const summary = screen.getByText(name, { selector: "summary" });
+  (summary.closest("details") as HTMLDetailsElement).open = true;
+}
+
+describe("Course editor — question-level matrix (P26.1)", () => {
+  it("shows each test's matrix as a real table with a caption and a total row", async () => {
+    const { container } = renderRoute(CoursePage, pageData(itemizedCourse()));
+    expect(screen.getByText("Toetsmatrijs (4 vragen)", { exact: false })).toBeVisible();
+    openMatrix("Toetsmatrijs (4 vragen)");
+    const table = screen.getByRole("table", { name: "Toetsmatrijs: Eindopdracht" });
+    for (const name of ["Vraag", "Leeruitkomst", "Denkniveau", "Vraagvorm", "Punten"])
+      expect(within(table).getByRole("columnheader", { name })).toHaveAttribute("scope", "col");
+    expect(within(table).getByRole("combobox", { name: "Leeruitkomst van vraag 3" })).toHaveValue(
+      "lo-2",
+    );
+    expect(within(table).getByRole("textbox", { name: "Punten van vraag 1" })).toHaveValue("10");
+    const total = within(table).getByRole("rowheader", { name: "Totaal" });
+    const totalRow = total.closest("tr") as HTMLElement;
+    expect(totalRow).toHaveTextContent("4 vragen, 25 punten");
+    expect(totalRow).toHaveTextContent("LU1: 80%");
+    expect(totalRow).toHaveTextContent("LU2: 20%");
+    expect(
+      within(table).getByRole("button", { name: /Verwijderen\W+vraag 4/ }),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers a question form that works without JavaScript", () => {
+    renderRoute(CoursePage, pageData(itemizedCourse()));
+    openMatrix("Toetsmatrijs (4 vragen)");
+    const add = screen.getByRole("button", { name: /Vraag toevoegen\W+Eindopdracht/ });
+    const form = add.closest("form") as HTMLFormElement;
+    expect(form).toHaveAttribute("method", "post");
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("add-item");
+    expect(form.querySelector('input[name="assessmentId"]')).toHaveValue("test-1");
+  });
+
+  it("the coverage matrix counts the questions, and the test form says coverage follows them", () => {
+    renderRoute(CoursePage, pageData(itemizedCourse()));
+    const table = screen.getByRole("table", {
+      name: "Welke activiteit en welke toets dekt welke leeruitkomst",
+    });
+    const row = within(table).getByRole("rowheader", { name: "LU1" }).closest("tr") as HTMLElement;
+    expect(within(row).getAllByRole("cell")[3]).toHaveTextContent("2 vragen");
+    expect(
+      screen.getAllByText("De dekking volgt uit de toetsmatrijs.", { exact: false }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("names the question in a question-level finding", () => {
+    const d = itemizedCourse();
+    d.assessments[1].items![1].bloom = "apply";
+    renderRoute(CoursePage, pageData(d));
+    expect(
+      screen.getByText(
+        "Vraag 2 van Eindopdracht toetst LU1 onder het niveau van de leeruitkomst.",
+        {
+          exact: false,
+        },
+      ),
+    ).toBeVisible();
   });
 });
 
