@@ -18,7 +18,10 @@ export interface TeamSettingsOffer {
   models: { id: string; displayName: string }[];
 }
 
-/** The features, tools and models a team can choose: everything the instance has not Off. */
+/**
+ * The features, tools and models a team can choose: everything the instance has not Off,
+ * except an instance-only feature (the role agents, BESLUIT-2026-11-05-11).
+ */
 export async function getTeamSettingsOffer(): Promise<TeamSettingsOffer> {
   const [featureStands, toolStands, models] = await Promise.all([
     getFeatureStands(),
@@ -27,9 +30,9 @@ export async function getTeamSettingsOffer(): Promise<TeamSettingsOffer> {
   ]);
   const invalid = getInvalidToolSlugs();
   return {
-    features: FEATURES.filter((f) => (featureStands[f.id] ?? f.defaultStand) !== "off").map(
-      (f) => ({ id: f.id, name: f.name }),
-    ),
+    features: FEATURES.filter(
+      (f) => !f.instanceOnly && (featureStands[f.id] ?? f.defaultStand) !== "off",
+    ).map((f) => ({ id: f.id, name: f.name })),
     tools: ALL_TOOLS.filter(
       (t) =>
         !invalid.has(t.slug) && (toolStands.get(t.slug) ?? (t.enabled ? "on" : "off")) !== "off",

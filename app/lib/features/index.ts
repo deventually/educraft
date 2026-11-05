@@ -12,6 +12,11 @@ export interface Feature {
   id: FeatureId;
   name: { nl: string; en: string };
   defaultStand: InstanceStand;
+  /**
+   * Only the instance (and an admin's exception per teacher) switches it; a team has no
+   * say, and a stored team choice never counts (BESLUIT-2026-11-05-11).
+   */
+  instanceOnly?: true;
 }
 
 export const FEATURES: readonly Feature[] = [
@@ -21,7 +26,12 @@ export const FEATURES: readonly Feature[] = [
     defaultStand: "request",
   },
   { id: "courses", name: { nl: "Cursussen", en: "Courses" }, defaultStand: "on" },
-  { id: "roleAgents", name: { nl: "Rolagenten", en: "Role agents" }, defaultStand: "on" },
+  {
+    id: "roleAgents",
+    name: { nl: "Rolagenten", en: "Role agents" },
+    defaultStand: "on",
+    instanceOnly: true,
+  },
   { id: "utilities", name: { nl: "Hulpmiddelen", en: "Utilities" }, defaultStand: "on" },
 ];
 

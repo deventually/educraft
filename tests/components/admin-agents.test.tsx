@@ -58,6 +58,11 @@ describe("Admin role agents", () => {
     ).toEqual(["Aan", "Op aanvraag", "Uit"]);
   });
 
+  it("says that teams cannot switch the role agents (BESLUIT-2026-11-05-11)", () => {
+    renderRoute();
+    expect(screen.getByText(/een team kan rolagenten niet aan- of uitzetten/i)).toBeVisible();
+  });
+
   it("lists every hat with what it looks at and an On / Off switch", () => {
     renderRoute();
     const assessor = within(table()).getByRole("row", { name: /toetsdeskundige/i });

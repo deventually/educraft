@@ -233,4 +233,18 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     expect(await status(rubric.loader({ request: get("/utilities/rubric") } as never))).toBe(404);
     expect((await home.loader({ request: get("/") } as never)).utilities).toBe(false);
   });
+
+  it("role agents: a team cannot switch them; only the instance does (BESLUIT-2026-11-05-11)", async () => {
+    const { getTeamSettingsOffer } = await import("~/server/teamSettings.server");
+    const t = await teacher();
+    await teamWith(t, { ...none, features: { roleAgents: "off" } });
+    expect((await av.effectiveFeatures(t)).roleAgents).toEqual({ on: true, source: "default" });
+
+    await settings.setFeatureStand("roleAgents", "request");
+    const u = await teacher();
+    await teamWith(u, { ...none, features: { roleAgents: "on" } });
+    expect(await av.isFeatureOn(u, "roleAgents")).toBe(false);
+    expect((await getTeamSettingsOffer()).features.map((f) => f.id)).not.toContain("roleAgents");
+    await settings.setFeatureStand("roleAgents", "on");
+  });
 });
