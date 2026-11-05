@@ -124,11 +124,12 @@ describe("Admin tools", () => {
     );
   });
 
-  it("has no save buttons", () => {
+  it("has no save buttons: the only button is Apply for the shown tools", () => {
     renderRoute();
-    expect(screen.queryAllByRole("button", { name: /opslaan|save|toepassen|apply/i })).toHaveLength(
-      0,
-    );
+    expect(screen.queryAllByRole("button", { name: /opslaan|save/i })).toHaveLength(0);
+    const apply = screen.getAllByRole("button", { name: /toepassen|apply/i });
+    expect(apply).toHaveLength(1);
+    expect(apply[0].closest("form")).toHaveAccessibleName(/getoonde tools/i);
   });
 
   it("autosaves a model toggle with the whole list and one toast (mutation)", async () => {
@@ -188,6 +189,53 @@ describe("Admin tools", () => {
 
   it("has no a11y violations", async () => {
     const { container } = renderRoute();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin tools: find and change many at once", () => {
+  const toolsTable = () => screen.getByRole("table", { name: /alle tools/i });
+  const toolRow = (name: string) =>
+    within(toolsTable()).queryByRole("row", { name: new RegExp(name) });
+
+  it("narrows the tools with a search box", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await user.type(screen.getByLabelText(/zoek een tool/i), secondName.slice(0, 6));
+    expect(toolRow(firstName)).toBeNull();
+    expect(toolRow(secondName)).not.toBeNull();
+  });
+
+  it("filters the tools on their stand", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await user.selectOptions(screen.getByLabelText(/^toon$/i), "off");
+    expect(toolRow(firstName)).toBeNull();
+    expect(toolRow(secondName)).not.toBeNull();
+  });
+
+  it("sets every shown tool to one stand in one click", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    renderRoute(async ({ request }) => {
+      bodies.push(await request.formData());
+      return { saved: true, count: 1 };
+    });
+    await user.selectOptions(screen.getByLabelText(/^toon$/i), "off");
+    const bar = screen.getByRole("form", { name: /getoonde tools/i });
+    await user.selectOptions(within(bar).getByLabelText(/zet alle getoonde tools op/i), "request");
+    await user.click(within(bar).getByRole("button", { name: /toepassen/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("toolsBulk");
+    expect(bodies[0].get("stand")).toBe("request");
+    expect(bodies[0].getAll("slugs")).toEqual(["bloom-by-design"]);
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/1 tool aangepast/i));
+  });
+
+  it("has no a11y violations with a filter on", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute();
+    await user.selectOptions(screen.getByLabelText(/^toon$/i), "on");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
