@@ -18,6 +18,7 @@ import {
   updateUserPassword,
 } from "~/server/repositories/users.server";
 import { getLastActiveDay } from "~/server/repositories/usage.server";
+import { listTeams, listTeamsForUser, setUserTeams } from "~/server/repositories/teams.server";
 import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { fullCatalog } from "~/server/modelCatalog.server";
@@ -44,11 +45,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
   const target = await getUserById(params.id);
   if (!target) throw new Response("Not found", { status: 404 });
-  const [viewerIsOwner, storedOwnerId, lastActiveDay] = await Promise.all([
+  const [viewerIsOwner, storedOwnerId, lastActiveDay, allTeams, ownTeams] = await Promise.all([
     isOwner(admin),
     getOwnerUserId(),
     getLastActiveDay(target.id),
+    listTeams(),
+    listTeamsForUser(target.id),
   ]);
+  // Every team, with this person's membership and lead stand (P28.2).
+  const stand = new Map(ownTeams.map((team) => [team.id, team.isLead]));
+  const teams = allTeams.map((team) => ({
+    id: team.id,
+    name: team.name,
+    member: stand.has(team.id),
+    lead: stand.get(team.id) ?? false,
+  }));
 
   // Models and BDB/BKE are per teacher (P18, P27).
   let models: {
@@ -89,6 +100,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     models,
     portfolio,
+    teams,
   };
 }
 
@@ -133,6 +145,13 @@ export async function action({ request, params }: Route.ActionArgs) {
     } else {
       await setUserAssignedModels(userId, null);
     }
+    return { saved: true as const };
+  }
+
+  // ── Teams (P28.2): exactly the checked teams, lead where checked ───────────
+  if (intent === "teams") {
+    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
+    await setUserTeams(userId, fd.getAll("teams").map(String), fd.getAll("leads").map(String));
     return { saved: true as const };
   }
 
@@ -224,6 +243,58 @@ export async function action({ request, params }: Route.ActionArgs) {
   return { error: "unknown" as const };
 }
 
+/** One row per team: member, and lead (only for a member). Saves itself. */
+function TeamsForm({
+  teams,
+  errorMessage,
+}: {
+  teams: { id: string; name: string; member: boolean; lead: boolean }[];
+  errorMessage: (code: string | true) => string | undefined;
+}) {
+  const t = useT();
+  const box =
+    "size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500";
+  return (
+    <AutoSaveForm intent="teams" errorMessage={errorMessage}>
+      <ul className="space-y-2.5">
+        {teams.map((team) => (
+          <li key={team.id} className="flex flex-wrap items-center gap-x-6 gap-y-1.5">
+            <span className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                id={`team-member-${team.id}`}
+                name="teams"
+                value={team.id}
+                defaultChecked={team.member}
+                className={box}
+              />
+              <label
+                htmlFor={`team-member-${team.id}`}
+                className="text-sm font-medium text-slate-800"
+              >
+                {fmt(t.teams.memberOf, { name: team.name })}
+              </label>
+            </span>
+            <span className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                id={`team-lead-${team.id}`}
+                name="leads"
+                value={team.id}
+                defaultChecked={team.lead}
+                className={box}
+              />
+              <label htmlFor={`team-lead-${team.id}`} className="text-sm text-slate-700">
+                {fmt(t.teams.leadOf, { name: team.name })}
+              </label>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </AutoSaveForm>
+  );
+}
+
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const card = "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm";
 
@@ -232,7 +303,15 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
   const p = t.people;
   const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const { person, isOwner: viewerIsOwner, isSelf, canManage, models, portfolio } = loaderData;
+  const {
+    person,
+    isOwner: viewerIsOwner,
+    isSelf,
+    canManage,
+    models,
+    portfolio,
+    teams,
+  } = loaderData;
   const manage = canManage && !isSelf;
   const displayName = person.name || person.email || person.id;
 
@@ -347,6 +426,35 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
             <LastActive day={person.lastActiveDay} />
           </dd>
         </dl>
+      </section>
+
+      {/* ── Teams (P28.2): member and lead per team ────────────────────────── */}
+      <section>
+        <h2 className={h2}>{t.teams.heading}</h2>
+        <div className={`mt-3 ${card}`}>
+          {teams.length === 0 ? (
+            <p className="text-sm text-slate-600">
+              {t.teams.noTeams}{" "}
+              <Link to="/admin/teams" className="font-medium text-violet-700 underline">
+                {t.teams.manageTeams}
+              </Link>
+            </p>
+          ) : canManage ? (
+            <TeamsForm teams={teams} errorMessage={autoSaveError} />
+          ) : (
+            <ul className="list-disc space-y-1 pl-5 text-sm text-slate-800">
+              {teams
+                .filter((team) => team.member)
+                .map((team) => (
+                  <li key={team.id}>
+                    {team.name}
+                    {team.lead && ` (${t.teams.leadBadge})`}
+                  </li>
+                ))}
+              {!teams.some((team) => team.member) && <li>{t.teams.noTeam}</li>}
+            </ul>
+          )}
+        </div>
       </section>
 
       {/* ── Models (P18): follow the instance, or an own set ───────────────── */}

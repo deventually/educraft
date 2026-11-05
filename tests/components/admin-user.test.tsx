@@ -37,6 +37,10 @@ const loaderData = {
     models: string[];
   } | null,
   portfolio: true as boolean | null,
+  teams: [
+    { id: "team-1", name: "Verpleegkunde", member: true, lead: true },
+    { id: "team-2", name: "Techniek", member: false, lead: false },
+  ],
 };
 
 type Data = typeof loaderData;
@@ -73,7 +77,7 @@ describe("Admin person page (P28.1)", () => {
       "/admin/users",
     );
     const h2 = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(h2).toEqual(["Account", "Modellen", "Toegang", "Verwijderen"]);
+    expect(h2).toEqual(["Account", "Teams", "Modellen", "Toegang", "Verwijderen"]);
   });
 
   it("shows status and last active in the account section", () => {
@@ -293,5 +297,46 @@ describe("Admin person page (P28.1)", () => {
       portfolio: null,
     });
     expect((await axe(readOnly.container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin person page — teams (P28.2)", () => {
+  it("shows membership and lead per team, and autosaves both", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderPage(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const teams = section(/^teams$/i);
+    expect(within(teams).getByRole("checkbox", { name: /lid van verpleegkunde/i })).toBeChecked();
+    expect(
+      within(teams).getByRole("checkbox", { name: /teamleider van verpleegkunde/i }),
+    ).toBeChecked();
+    expect(within(teams).getByRole("checkbox", { name: /lid van techniek/i })).not.toBeChecked();
+    await user.click(within(teams).getByRole("checkbox", { name: /lid van techniek/i }));
+    await waitFor(() => expect(body?.get("intent")).toBe("teams"));
+    expect(body?.getAll("teams").sort()).toEqual(["team-1", "team-2"]);
+    expect(body?.getAll("leads")).toEqual(["team-1"]);
+  });
+
+  it("links to the teams page when there are no teams yet", () => {
+    renderPage(undefined, { teams: [] });
+    expect(within(section(/^teams$/i)).getByRole("link", { name: /teams/i })).toHaveAttribute(
+      "href",
+      "/admin/teams",
+    );
+  });
+
+  it("shows the teams read-only to an admin who cannot manage this person", () => {
+    renderPage(undefined, {
+      isOwner: false,
+      canManage: false,
+      person: { role: "admin" },
+      models: null,
+      portfolio: null,
+    });
+    expect(within(section(/^teams$/i)).queryByRole("checkbox")).toBeNull();
+    expect(within(section(/^teams$/i)).getByText(/verpleegkunde/i)).toBeInTheDocument();
   });
 });

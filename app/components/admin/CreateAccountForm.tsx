@@ -25,10 +25,13 @@ export type CreateAccountResult =
 export function CreateAccountForm({
   result,
   errorMessage,
+  extraFields,
 }: {
   result: CreateAccountResult;
   /** The text for a refused create (the action's error code, already translated). */
   errorMessage?: string;
+  /** More fields posted with the account, after the role (e.g. the team, P28.2). */
+  extraFields?: React.ReactNode;
 }) {
   const t = useT();
   const formRef = useRef<HTMLFormElement>(null);
@@ -100,6 +103,7 @@ export function CreateAccountForm({
             ))}
           </Select>
         </div>
+        {extraFields}
 
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-slate-800">{i.createModeLegend}</legend>

@@ -1,0 +1,53 @@
+/** Teams of colleagues and their leads (P28.2). */
+export const teams = {
+  add: "Toevoegen",
+  addEmailLabel: "E-mailadres van je collega",
+  addHeading: "Collega toevoegen",
+  addHint:
+    "Typ precies het e-mailadres waarmee je collega inlogt. Je kunt niet bladeren door alle accounts.",
+  addMemberLabel: "Lid toevoegen op e-mail",
+  addTeam: "In team",
+  adminIntro:
+    "Maak teams van collega's en wijs teamleiders aan. Een teamleider voegt zelf collega's toe. Lid zijn deelt niets: alles blijft privé tot iemand zelf iets deelt.",
+  colEmail: "E-mail",
+  colLead: "Teamleider",
+  colName: "Naam",
+  create: "Team aanmaken",
+  createLabel: "Naam van het nieuwe team",
+  delete: "Team opheffen",
+  deleteBody:
+    "Alleen de groep verdwijnt. De accounts blijven bestaan en gedeelde stukken worden weer privé.",
+  deleteConfirm: "Opheffen",
+  deleteTitle: "Team {name} opheffen?",
+  filterTeam: "Team",
+  heading: "Teams",
+  inviteHeading: "Uitnodigen",
+  inviteIntro:
+    "Maak een link voor een nieuwe collega. Wie hem gebruikt, wordt docent en lid van dit team.",
+  inviteSubmit: "Uitnodigingslink maken",
+  isLeadError: "Een andere teamleider haal je niet weg; dat doet een beheerder.",
+  leadBadge: "Teamleider",
+  leadIntro:
+    "Jij bent teamleider van dit team. Je voegt collega's toe, haalt ze weg en kunt een collega ook teamleider maken. Een andere teamleider weghalen of de stand afnemen doet een beheerder.",
+  leadLabel: "Teamleider: {name}",
+  leadOf: "Teamleider van {name}",
+  makeLead: "Teamleider maken",
+  manageTeams: "Teams beheren",
+  memberOf: "Lid van {name}",
+  members: "Leden",
+  myTeams: "Mijn teams",
+  myTeamsIntro: "Je bent lid van deze teams. Lid zijn deelt niets van je werk.",
+  nameRequired: "Geef het team een naam.",
+  noMembers: "Nog geen leden.",
+  noSuchUser: "Er is geen account met dit e-mailadres.",
+  noTeam: "Geen team",
+  noTeams: "Nog geen teams.",
+  notMember: "Deze persoon zit niet in het team.",
+  remove: "Uit het team halen",
+  removeLabel: "{name} uit het team halen",
+  renameLabel: "Naam van team {name}",
+  stepDown: "Stoppen als teamleider",
+  stepDownBody:
+    "Je blijft lid van het team. Weer teamleider worden kan via een beheerder of een andere teamleider.",
+  stepDownTitle: "Stoppen als teamleider?",
+};
