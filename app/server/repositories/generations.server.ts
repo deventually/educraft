@@ -7,7 +7,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { generations, type GenerationRow } from "../schema.server";
+import { courseLinks, generations, type GenerationRow } from "../schema.server";
 
 export interface SaveGenerationInput {
   userId: string;
@@ -136,9 +136,14 @@ export async function countGenerationsByTool(
     .all();
 }
 
+/** Deletes the generation and its course links in one transaction. */
 export async function deleteGeneration(userId: string, id: string): Promise<void> {
-  getDb()
-    .delete(generations)
-    .where(and(eq(generations.id, id), eq(generations.userId, userId)))
-    .run();
+  getDb().transaction((tx) => {
+    tx.delete(generations)
+      .where(and(eq(generations.id, id), eq(generations.userId, userId)))
+      .run();
+    tx.delete(courseLinks)
+      .where(and(eq(courseLinks.generationId, id), eq(courseLinks.userId, userId)))
+      .run();
+  });
 }
