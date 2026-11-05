@@ -147,6 +147,23 @@ npm run eval:coach -- --dry-run                                 # build messages
 ids and scores. `tests/lib/eval-coach.test.ts` fails when a file name from that folder shows
 up under `evals/`.
 
+## Proefassessment (`npm run eval:rehearsal`)
+
+Het proefassessment (brief P29, 29.2) is geen catalogustool en heeft een eigen runner,
+`scripts/eval-rehearsal.ts`. Hij speelt de echte prompt (`portfolio-rehearsal@v2`) tegen een
+gescripte docent op synthetische dossiers (`evals/portfolio-rehearsal/cases.json`), draait de echte
+controle op de feedback (`parseRehearsalFeedback`) en laat een beoordelaar het hele gesprek scoren
+tegen `evals/portfolio-rehearsal/rubric.md`. Drie harde checks worden in code geteld
+(`REHEARSAL_COUNTED`: meer dan één vraag per beurt, buiten citaten; feedback niet leesbaar; een
+verzonnen citaat). Het gesprek zelf gaat nooit via een batch; `--batch` geldt alleen voor de
+beoordelaar.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:rehearsal                   # elke case één keer
+ANTHROPIC_API_KEY=sk-… npm run eval:rehearsal -- --runs 3 --batch   # eindmeting
+npm run eval:rehearsal -- --dry-run                             # alleen de prompts bouwen
+```
+
 ## OER-import (`npm run eval:import`)
 
 De import van leeruitkomsten en toetsen (brief P26, 26.3) is geen registry-tool en heeft een eigen

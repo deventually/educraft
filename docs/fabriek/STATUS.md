@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.3 en clear-assignment@v2 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.4 en clear-assignment@v2 open)_
 
 ## Nu
 
+- **Proefassessment in de werkplaats (P29.3, #124) gemerged op 2026-11-05:** in stap 5 "Oefen je
+  eindgesprek met een proefassessment"; feedback als tabel per criterium, bewaren alleen op verzoek,
+  het gesprek nooit. Besluiten 9–11 vastgelegd.
 - **Proefassessment `@v2` (P29.2, #123) gemerged op 2026-11-05:** een sterk criterium krijgt één
   vraag, eerder stoppen mag; meting 11 van 12 runs zonder fout, elke case 3,73–4,53
   (`evals/reports/2026-11-05-portfolio-rehearsal-v2.md`).
@@ -194,13 +197,8 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.3 en clear-assignment@v2 open)
   3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
   ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
   in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
-- P29.3 Proefassessment in de werkplaats: in stap 5 "Oefen je eindgesprek met een proefassessment"
-  (`/portfolio/:id/rehearsal`, alleen eigenaar, mee aan en uit met de werkplaats). Kies kort of
-  volledig en de leeruitkomsten, dan een gesprek met een "Rond af"-knop; de feedback als tabel per
-  criterium met "Werk dit bij in je hoofdstuk" en "Bewaar in je dossier" (bewijsstuk `feedback`,
-  `aiLog` `rehearsal`). De server bouwt de context uit het dossier (`contextFrom: "dossier"`); het
-  gesprek wordt niet bewaard. Eén registerentry in `WORKPLACE_TOOLS`, buiten de catalogus. Geen
-  migratie. Besluiten 9–11 vastgelegd. PR open.
+- P29.4 Documentatie van P29: de wiki (Architecture, Tools), `evals/README.md` met
+  `eval:rehearsal`, en het overzicht van de briefs (P29 af). Alleen docs. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
