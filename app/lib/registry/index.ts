@@ -5,6 +5,7 @@ import { authenticAssessment } from "./tools/authentic-assessment";
 import { arcsReactor } from "./tools/arcs-reactor";
 import { forumAutograder } from "./tools/forum-autograder";
 import { contextualization } from "./tools/contextualization";
+import { clearAssignment } from "./tools/clear-assignment";
 import { mentorai } from "./tools/mentorai";
 import { mathGrading } from "./tools/math-grading";
 import { thinkPairShare } from "./tools/think-pair-share";
@@ -17,6 +18,7 @@ import { stageAssessment } from "./tools/stage-assessment";
 import { rubricBuilder } from "./tools/rubric-builder";
 import { testItems } from "./tools/test-items";
 import { lessonPlan } from "./tools/lesson-plan";
+import { testAnalysis } from "./tools/test-analysis";
 import { difficultConversation } from "./tools/difficult-conversation";
 
 /** All registered tools (any phase). */
@@ -27,6 +29,7 @@ export const ALL_TOOLS: Tool[] = [
   arcsReactor,
   forumAutograder,
   contextualization,
+  clearAssignment,
   mentorai,
   mathGrading,
   thinkPairShare,
@@ -39,6 +42,7 @@ export const ALL_TOOLS: Tool[] = [
   rubricBuilder,
   testItems,
   lessonPlan,
+  testAnalysis,
   difficultConversation,
 ];
 

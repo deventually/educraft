@@ -1,0 +1,9 @@
+{
+  "test-analysis/mc-knowledge-test-nl": 4.8,
+  "test-analysis/open-questions-nl": 4.87,
+  "test-analysis/mc-exam-en": 4.87,
+  "test-analysis/known-error-wrong-key-nl": 4.93,
+  "test-analysis/known-error-small-sample-nl": 4.87,
+  "test-analysis/known-error-raw-scores-nl": 3.27,
+  "test-analysis/known-error-asks-numbers-en": 4.93
+}

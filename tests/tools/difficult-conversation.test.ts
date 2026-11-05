@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loc } from "~/lib/i18n/localized";
+import { getToolHelpOverlay } from "~/lib/help/registry";
 import { getPrompt } from "~/lib/prompts";
 import { getToolBySlug } from "~/lib/registry";
 import { TOOL_GOALS, TOOL_KEYWORDS } from "~/lib/registry/goals";
@@ -99,6 +100,12 @@ describe("tool: difficult-conversation", () => {
         "spikes",
       ]),
     );
+  });
+
+  it("has a help page in both languages that explains how to get feedback", () => {
+    expect(getToolHelpOverlay("difficult-conversation", "nl")).toContain("Geef feedback");
+    expect(getToolHelpOverlay("difficult-conversation", "en")).toContain("Give feedback");
+    expect(getToolHelpOverlay("difficult-conversation", "nl")).toContain("Baile");
   });
 
   for (const lang of ["nl", "en"] as const) {

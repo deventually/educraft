@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
+_Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 
 ## Nu
 
+- **Toetsanalyse na afloop (P24.5, #74) gemerged op 2026-11-05:** hulpmiddel item-analysis rekent,
+  tool test-analysis legt uit; eindmeting ta3 elke case 4,53–4,93.
+- **Les voorbereiden (P24.4, #72) gemerged op 2026-11-05:** concept-lesopzet volgens Rosenshine
+  (2012), met een tijdsplan dat optelt tot de lesduur; elke case 4,53–5,00 in meting lp3.
+- **Toetsvragen en toetsmatrijs (P24.3, #67) gemerged op 2026-11-05,** in de stand van meting t;
+  de bekende punten staan onder Later.
 - **Beoordelingsmodel: een gebrek telt bij één criterium (#71) gemerged op 2026-11-04:** na meting q;
   meting s zonder regressie.
 - **Product:** LimeOnIt, docententools op basis van *The Pedagogical Promptbook*: 16 tools (10 voor
@@ -81,23 +87,15 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
-- P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
-  contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
-  optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
-  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Metingen lp1 → lp2 → lp3
-  (lp2 en lp3: 3 runs, batch): elke case 4,53–5,00, geen gefaalde harde check, niets afgekapt, geen
-  regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-04lp3.md`) — PR open.
-- P24.3 Toetsvragen en toetsmatrijs maken (`test-items`): in twee stappen een toetsmatrijs die
-  optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
-  matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:
-  Anderson & Krathwohl (2001), Haladyna, Downing & Rodriguez (2002). Zes eval-casussen, drie met een
-  bekende fout. Meting p haalde de stopregel niet (3 van 18 runs afgekapt bij rekenwerk, één
-  meerkeuzevraag met twee verdedigbare antwoorden); ronde 1 geeft stap 2 meer ruimte:
-  r2 (1 run) niets afgekapt, nog één dubbel verdedigbare vraag; ronde 2 verbiedt meerkeuze over
-  kwesties waarover vakmensen het oneens zijn. Eindmeting t (3 runs, batch): niets afgekapt,
-  aantallen kloppen; research-methods 4,07 en statistics 4,47 door vorm (af en toe een
-  correctiespoor in een kop, soms 3 opties). Ronde 3 gaf regressie (meting u) en is teruggedraaid;
-  de stand is die van t. Bastiaan koos voor mergen in deze stand — PR open.
+- P24.6 Opdracht helder schrijven (`clear-assignment`): een opdrachtomschrijving of
+  studentenhandleiding herschreven op taalniveau B1 (of A2, B2, C1), met stappen, eisen,
+  inleverinfo, open punten ("je noemt geen deadline"), wat er veranderd is en een eisencheck; geen eis
+  verdwijnt of komt erbij. Bronnen: ERK (Council of Europe, 2020), UDL 3.0 (CAST, 2024). Zes
+  eval-casussen, drie met een bekende fout (ontbrekende info, tegenstrijdige eisen, vage criteria).
+  Metingen ca1 → ca2 (ca2: 3 runs, batch): elke case 4,67–5,00, geen gefaalde harde check, niets
+  afgekapt, secties altijd in de vaste volgorde (BESLUIT-2026-11-04-24 gehaald;
+  `evals/reports/2026-11-05ca2.md`). Tien uitkomsten liggen klaar in `evals/reviews/clear-assignment/`
+  voor Bastiaan — PR open.
 - P24.8 Lastig gesprek oefenen (`difficult-conversation`, chat): de AI speelt een verzonnen student
   in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
   vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht

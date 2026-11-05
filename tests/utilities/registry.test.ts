@@ -39,3 +39,20 @@ describe("utility registry — rubric", () => {
     expect(getUtilityBySlug("rubric")?.id).toBe("rubric");
   });
 });
+
+describe("utility registry — item analysis (P24.5)", () => {
+  it("lists the item analysis, explained by a registered tool", async () => {
+    const { getToolBySlug } = await import("~/lib/registry");
+    const u = getUtilityBySlug("item-analysis");
+    expect(u?.id).toBe("item-analysis");
+    expect(u?.explainWith).toBe("test-analysis");
+    expect(getToolBySlug(u!.explainWith!)).toBeDefined();
+  });
+
+  it("only names registered tools as explainers", async () => {
+    const { getToolBySlug } = await import("~/lib/registry");
+    for (const u of UTILITIES) {
+      if (u.explainWith) expect(getToolBySlug(u.explainWith), u.id).toBeDefined();
+    }
+  });
+});
