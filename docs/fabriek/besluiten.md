@@ -215,4 +215,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Start-pagina; de docent kiest per moment, niet via een instelling. Wat een docent voor zijn cursus
   maakt, wordt zonder omweg bewijs in zijn dossier; het dossier krijgt een route in vijf stappen. Het
   menu gaat naar Start · Cursussen · BDB/BKE · Tools. Geen LLM in P27; tot de pilot geen nieuwe
-  AI-tools; P26.3 (OER-import) direct na P20. Bastiaan, 2026-11-05. Uitwerking: brief P27.
+  AI-tools; P26.3 (OER-import) direct na P20. Een beheerder blijft op de gebruikerslijst landen. De
+  BDB/BKE-werkplaats staat per docent aan of uit, standaard uit; de beheerder zet hem aan (wie al
+  een dossier heeft, staat aan). Bastiaan, 2026-11-05. Uitwerking: brief P27.

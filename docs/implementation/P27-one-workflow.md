@@ -101,8 +101,8 @@ Het denkwerk erachter staat in het document "LimeOnIt als één workflow" (Claud
 ### 27.3 — Startpagina en een menu van vier
 
 - **Route-onderdeel `start`** (`app/routing/start.ts`, `/start`). `index.tsx` stuurt een docent
-  voortaan naar `/start` in plaats van `/tools`. Een beheerder blijft op `/admin/users` landen (zie
-  *Open vragen*).
+  voortaan naar `/start` in plaats van `/tools`. Een beheerder blijft op `/admin/users` landen
+  (besluit 2 hieronder).
 - **Drie blokken, in deze volgorde:**
   1. **Vraagvak** "Waar wil je mee aan de slag?": een `<form method="get">` met een zoekveld. De
      uitkomst is hooguit drie tools uit dezelfde zoekfunctie als de catalogus (deel die, kopieer hem
@@ -113,13 +113,23 @@ Het denkwerk erachter staat in het document "LimeOnIt als één workflow" (Claud
 - **Lege start:** zonder cursus alleen het vraagvak, plus "Maak je eerste cursus" en (na P26.3)
   "Importeer je OER".
 - **Menu** (`AppShell`, desktop, mobiel en voettekst): **Start · Cursussen · BDB/BKE · Tools**, plus
-  Beheer voor beheerders. *Mijn werk* (`/projects`) blijft bestaan als "Eerder gemaakt", bereikbaar
+  Beheer voor beheerders. BDB/BKE staat er alleen als de werkplaats voor die docent aanstaat. *Mijn werk* (`/projects`) blijft bestaan als "Eerder gemaakt", bereikbaar
   vanaf Tools en Start. *Onderwijscontext* gaat naar het accountmenu, *Help* wordt een vraagteken
   rechtsboven en blijft in de voettekst. Geen route verdwijnt.
+- **BDB/BKE per docent (besluit 3).** Een beheerder zet de werkplaats aan of uit per docent, op
+  `/admin/users`, met automatisch opslaan en een toast zoals de modelkeuze per docent (P18.5).
+  Opslag zonder migratie: de sleutel `portfolioEnabled:<userId>` in `instance_settings`, naar het
+  patroon van `assignedModels` (`users.server.ts`). Standaard uit. **Overgang:** een docent die al
+  een dossier heeft, staat bij de uitrol aan, zodat niemand zijn werk kwijtraakt. Staat hij uit, dan
+  geven `/portfolio`, de export en de acties een 404 (server-side, zoals de toolbeschikbaarheid), en
+  verdwijnen de knop "Gebruik als bewijs" en de BDB/BKE-balk uit 27.1 en 27.2. Uitzetten wist
+  niets: zet de beheerder hem weer aan, dan is het dossier er nog.
 - **Techniek uit beeld:** de chips "Formulier", "Gesprek" en "N fasen" op de toolkaarten vervallen; de
   modelkeuze blijft onder *Geavanceerd*.
 - **RED:** `tests/routes/start.test.ts` (via `tests/helpers/routes.ts`), `tests/components/Start.test.tsx`
-  (drie blokken, lege start, axe), `tests/components/AppShell.test.tsx` (vier items + Beheer),
+  (drie blokken, lege start, axe), `tests/components/AppShell.test.tsx` (vier items + Beheer; drie
+  zonder BDB/BKE), `tests/api/portfolio-access.test.ts` (uit → 404 op pagina's, export en acties; aan
+  na een eerder dossier; uitzetten wist niets), een admin-test voor de schakelaar (axe),
   `tests/hotspots.test.ts` blijft groen (nieuwe i18n-namespace `start`).
 
 ### 27.4 — De cursus als werkplek
@@ -172,14 +182,16 @@ mag naast 27.x lopen (WIP-limiet 2).
   rubric). Logisch vervolg, maar eerst meten of docenten de volgende stap gebruiken.
 - Tellingen van gebruik per stap in `/admin/usage` (privacy; eerst Bastiaan).
 - Een instelling "mijn werkwijze" per docent.
+- De werkplaats per instelling of per groep aanzetten; per docent is genoeg voor de pilot.
 
-## Open vragen voor Bastiaan
+## Beslist door Bastiaan (5 november 2026, BESLUIT-2026-11-05-4)
 
-1. Waar landt een **beheerder** die ook lesgeeft: op Start (met Beheer in het menu) of op de
-   gebruikerslijst zoals nu? Voorstel: Start.
-2. Moet het menu-item **BDB/BKE** voor iedereen zichtbaar zijn, of alleen voor wie een dossier heeft
-   (en anders onder Tools)? Voorstel: voor iedereen, het is de reden dat veel beginnende docenten
-   komen.
+1. **Het besluit klopt zoals verwoord**, ook "tot de pilot geen nieuwe AI-tools" en "P26.3 naar
+   voren".
+2. **Een beheerder landt op de gebruikerslijst** (`/admin/users`), zoals nu: daar staat wat voor een
+   beheerder belangrijk is. Start is er voor docenten; een beheerder komt er via het menu.
+3. **De BDB/BKE-werkplaats staat per docent aan of uit, en de beheerder zet hem aan.** Standaard uit
+   voor een nieuwe docent. Zie 27.3.
 
 ## Acceptatie
 
@@ -191,6 +203,8 @@ mag naast 27.x lopen (WIP-limiet 2).
    klikt "Zet bij dit criterium" en ziet het bewijsstuk bij dat criterium staan.
 3. Het dossier stelt bij een criterium over lesontwerp een eerder gemaakte lesopzet voor; na
    aanvinken staat hij erbij.
-4. Een nieuwe docent zonder cursus ziet op Start alleen het vraagvak en "Maak je eerste cursus".
-5. Een tweede docent kan andermans cursus, dossier of generatie nergens via een link of formulier
+4. Een nieuwe docent zonder cursus ziet op Start alleen het vraagvak en "Maak je eerste cursus", en
+   geen BDB/BKE in het menu. De beheerder zet de werkplaats voor hem aan; na herladen staat hij erin.
+5. Een beheerder logt in en landt op de gebruikerslijst.
+6. Een tweede docent kan andermans cursus, dossier of generatie nergens via een link of formulier
    koppelen.
