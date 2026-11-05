@@ -136,6 +136,11 @@ export interface ToolStage {
   temperature?: number;
   /** Per-stage output-token cap; overrides the tool's `defaultMaxTokens`. */
   maxTokens?: number;
+  /**
+   * What this stage's output can become in a linked course (P26.2):
+   * "assessment-items" = a blueprint table that becomes a test's questions.
+   */
+  courseExport?: "assessment-items";
 }
 
 export interface ChatConfig {

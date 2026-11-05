@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
-import { loadCourse, saveCourseIntent } from "~/server/courses.server";
+import { blueprintOffer, loadCourse, saveCourseIntent } from "~/server/courses.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
 import { listLinkedWork } from "~/server/repositories/courses.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -30,12 +30,18 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, course } = await loadCourse(request, params.id);
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   const items = [...course.data.activities, ...course.data.assessments];
-  const linkedWork = (await listLinkedWork(user.id, course.id)).map((w) => ({
-    generationId: w.generationId,
-    toolName: getToolBySlug(w.toolSlug)?.name ?? w.toolSlug,
-    itemTitle: items.find((i) => i.id === w.itemId)?.title ?? null,
-    createdAt: w.createdAt,
-  }));
+  const linkedWork = await Promise.all(
+    (await listLinkedWork(user.id, course.id)).map(async (w) => {
+      const blueprint = await blueprintOffer(user.id, w.generationId, course.data);
+      return {
+        generationId: w.generationId,
+        toolName: getToolBySlug(w.toolSlug)?.name ?? w.toolSlug,
+        itemTitle: items.find((i) => i.id === w.itemId)?.title ?? null,
+        createdAt: w.createdAt,
+        ...(blueprint && { blueprint }),
+      };
+    }),
+  );
   return {
     course: {
       id: course.id,
@@ -77,6 +83,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       }
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
+      if (r.intent === "import-blueprint")
+        return { variant: "success", message: fmt(c.blueprint.done, { n: r.added }) };
       return { variant: "success", message: c.toastSaved };
     },
   });
@@ -123,7 +131,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <ActivitiesSection data={data} />
         <AssessmentsSection data={data} />
         <CoverageMatrix data={data} matrix={matrix} />
-        <LinkedWorkSection work={linkedWork} />
+        <LinkedWorkSection work={linkedWork} data={data} />
       </div>
     </div>
   );
