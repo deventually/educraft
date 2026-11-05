@@ -29,6 +29,9 @@ beforeAll(async () => {
   outcome = await import("~/routes/portfolio.$id.outcome.$outcomeId");
   projects = await import("~/routes/projects._index");
   generations = await import("~/server/repositories/generations.server");
+  // The workplace is switched on per teacher (P27); these tests are about the workplace itself.
+  const users = await import("~/server/repositories/users.server");
+  await users.setPortfolioEnabled("teacher-a", true);
 });
 
 beforeEach(() => {

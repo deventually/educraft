@@ -137,6 +137,12 @@ export const admin = {
     teacherNone: "Nog geen docenten.",
     teacherOwn: "Eigen keuze",
   },
+  portfolio: {
+    heading: "BDB/BKE per docent",
+    intro:
+      "Zet de BDB/BKE-werkplaats aan voor de docenten die eraan werken. Uitzetten verbergt de werkplaats; het dossier blijft bewaard.",
+    label: "BDB/BKE aan voor {name}",
+  },
   tools: {
     audienceInstructor: "Docent",
     audienceStudent: "Student",

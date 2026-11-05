@@ -4,6 +4,7 @@
  * save path for every `<Form intent>`. Routes stay thin.
  */
 import { requireRole } from "./auth.server";
+import { portfolioAccess } from "./portfolioAccess.server";
 import { getDossier, updateDossier, type Dossier } from "./repositories/portfolio.server";
 import type { User } from "./auth.server";
 import { applyIntent } from "~/lib/portfolio/intents";
@@ -20,8 +21,11 @@ import { getGeneration, listGenerations } from "./repositories/generations.serve
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
 
+/** A teacher or admin for whom the workplace is switched on; anyone else gets a 404. */
 export async function requirePortfolioUser(request: Request): Promise<User> {
-  return requireRole(request, "teacher", "admin");
+  const user = await requireRole(request, "teacher", "admin");
+  if (!(await portfolioAccess(user))) throw new Response("Not Found", { status: 404 });
+  return user;
 }
 
 export async function loadDossier(

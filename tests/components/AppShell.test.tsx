@@ -21,7 +21,10 @@ function renderShell(initialPath = "/") {
 }
 
 /** Render the shell with a signed-in user via a `root` loader (async hydration). */
-function renderShellWithUser(user: { name: string; role: string }, locale: "nl" | "en" = "nl") {
+function renderShellWithUser(
+  user: { name: string; role: string; portfolio?: boolean },
+  locale: "nl" | "en" = "nl",
+) {
   const Stub = createRoutesStub([
     {
       id: "root",
@@ -47,10 +50,9 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByText("Context & instellingen")).toBeNull();
   });
 
-  it("has a fifth menu item 'BDB/BKE' that leads to the workplace (P25)", () => {
-    renderShell();
-    const links = screen.getAllByRole("link", { name: "BDB/BKE" });
-    expect(links.length).toBeGreaterThan(0);
+  it("has a menu item 'BDB/BKE' when the workplace is on for the user (P25, P27)", async () => {
+    renderShellWithUser({ name: "T", role: "teacher", portfolio: true });
+    const links = await screen.findAllByRole("link", { name: "BDB/BKE" });
     expect(links[0]).toHaveAttribute("href", "/portfolio");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const panel = screen.getByRole("navigation", { name: "Mobiele navigatie" });
@@ -58,6 +60,12 @@ describe("AppShell top navigation", () => {
       "href",
       "/portfolio",
     );
+  });
+
+  it("leaves 'BDB/BKE' out of menu and footer when the workplace is off (P27)", async () => {
+    renderShellWithUser({ name: "T", role: "teacher", portfolio: false });
+    await screen.findAllByRole("link", { name: "Cursussen" });
+    expect(screen.queryByRole("link", { name: "BDB/BKE" })).toBeNull();
   });
 
   it("has a menu item 'Cursussen' next to 'Mijn werk' (P20)", () => {
@@ -176,7 +184,7 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
   const HREFS = ["/tools", "/projects", "/courses", "/portfolio", "/context-profiles", "/help"];
 
   it("shows exactly six menu items in order for a teacher", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     const links = within(primary).getAllByRole("link");
@@ -185,7 +193,7 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
   });
 
   it("shows the same six items in the mobile menu", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
@@ -195,7 +203,7 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
   });
 
   it("keeps Over in the footer, not in the menu", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     expect(within(primary).queryByRole("link", { name: "Over" })).toBeNull();
@@ -204,7 +212,7 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
   });
 
   it("renders the menu in English", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" }, "en");
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true }, "en");
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Main navigation" });
     expect(
@@ -215,7 +223,11 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
   });
 
   it("has no a11y violations with the mobile menu open", async () => {
-    const { container } = renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    const { container } = renderShellWithUser({
+      name: "Teacher T",
+      role: "teacher",
+      portfolio: true,
+    });
     await screen.findByText("Tools home");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
@@ -224,13 +236,13 @@ describe("AppShell menu (P19.5; BDB/BKE since P25, Cursussen since P20)", () => 
 
 describe("AppShell teaching-context visibility by role", () => {
   it("shows no Cohorten link for a teacher", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     expect(screen.queryByRole("link", { name: "Cohorten" })).toBeNull();
   });
 
   it("keeps the Onderwijscontext link for a teacher", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     expect(screen.getAllByRole("link", { name: "Onderwijscontext" }).length).toBeGreaterThan(0);
   });
@@ -261,13 +273,13 @@ describe("AppShell user area", () => {
 
 describe("AppShell admin surface & role switch", () => {
   it("shows the admin nav link only for the effective admin role", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin" });
+    renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
     await screen.findByText("Tools home");
     expect(screen.getAllByRole("link", { name: "Beheer" }).length).toBeGreaterThan(0);
   });
 
   it("adds Beheer first for an admin", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin" });
+    renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
     const links = within(primary).getAllByRole("link");
@@ -284,13 +296,13 @@ describe("AppShell admin surface & role switch", () => {
   });
 
   it("hides the admin nav link for a teacher", async () => {
-    renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     expect(screen.queryByRole("link", { name: "Beheer" })).toBeNull();
   });
 
   it("offers an admin no view-as switch", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin" });
+    renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
     await screen.findByText("Tools home");
     expect(screen.queryByRole("button", { name: /Bekijk als docent|View as teacher/ })).toBeNull();
   });
