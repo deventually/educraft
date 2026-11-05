@@ -82,8 +82,9 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 - P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
   contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
   optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
-  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Meting lp1 (1 run): elke case
-  4,60–5,00, geen gefaalde check (`evals/reports/2026-11-04lp1.md`); eindmeting volgt — PR open.
+  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Metingen lp1 → lp2 → lp3
+  (lp2 en lp3: 3 runs, batch): elke case 4,53–5,00, geen gefaalde harde check, niets afgekapt, geen
+  regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-04lp3.md`) — PR open.
 - Beoordelingsmodel: een gebrek telt bij één criterium, nooit bij twee (na meting q: in 1 van de 3
   runs telde een ontbrekend testgeval dubbel). Meting s (1 run): die case weer 4,60, geen
   case onder q, geen gefaalde check (`evals/reports/2026-11-04s.md`) — PR open.
