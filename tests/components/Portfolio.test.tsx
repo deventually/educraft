@@ -69,6 +69,8 @@ function outcomeData(d = sampleDossier()) {
     stored: undefined as unknown,
     toolHints: {} as Record<string, { slug: string; name: string }[]>,
     chapterTools: [] as { slug: string; name: string }[],
+    courseHints: [] as string[],
+    snapshotCourses: {} as Record<string, string | null>,
     suggestions: {} as Record<
       string,
       { generationId: string; toolName: string; createdAt: number; courses: string[] }[]
@@ -433,5 +435,48 @@ describe("Portfolio outcome page — coach", () => {
     ).toBeNull();
     expect(screen.getByText(/Criterium 2: koppel eerst bewijs/)).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
+  function withSnapshot(courseName: string | null) {
+    const d = sampleDossier();
+    d.evidence[0].sourceCourse = {
+      courseId: "c1",
+      part: "outcomes-and-matrix",
+      at: Date.UTC(2026, 10, 5),
+    };
+    return { ...outcomeData(d), snapshotCourses: { c1: courseName } };
+  }
+
+  it("names the course and the date, links to it and offers 'Opnieuw ophalen'", async () => {
+    const { container } = renderRoute(PortfolioOutcome, withSnapshot("Databases"));
+    const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
+    (summary.closest("details") as HTMLDetailsElement).open = true;
+    expect(screen.getByText(/Uit cursus Databases, momentopname van 5 nov\.? 2026/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "Open de cursus" })).toHaveAttribute(
+      "href",
+      "/courses/c1",
+    );
+    const button = screen.getByRole("button", { name: /Opnieuw ophalen/ });
+    const form = button.closest("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("refreshCourseEvidence");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("keeps the snapshot of a deleted course, without the button", () => {
+    renderRoute(PortfolioOutcome, withSnapshot(null));
+    const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
+    (summary.closest("details") as HTMLDetailsElement).open = true;
+    expect(screen.getByText(/Uit een cursus die niet meer bestaat/)).toBeVisible();
+    expect(screen.queryByRole("button", { name: /Opnieuw ophalen/ })).toBeNull();
+  });
+
+  it("points a blueprint criterion at the courses", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), courseHints: [C2] });
+    expect(screen.getByRole("link", { name: "Gebruik je cursus" })).toHaveAttribute(
+      "href",
+      "/courses",
+    );
   });
 });

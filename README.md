@@ -29,7 +29,8 @@ LimeOnIt draait als pilot met docenten in het hbo. De app is tweetalig (NL/EN).
   en de BKE op, met een coach en export naar Word.
 - **Cursussen** (`/courses`): leeruitkomsten, lessen en toetsen met Bloom-niveau
   en studielast, een dekkingsmatrix en adviezen over de afstemming. Werk uit de tools hangt aan de
-  cursus.
+  cursus. Per toets een toetsmatrijs per vraag (ook uit de toetsvragen-tool), leeruitkomsten
+  importeren uit een OER, en de cursus als bewijs in het BDB/BKE-dossier.
 - **Hulpmiddelen zonder AI**: een cijferrekenaar en rubrics bewaren.
 - **Privacy**: documenten worden in de browser gelezen en studentgegevens kunnen worden
   geanonimiseerd voordat er iets naar de AI gaat.

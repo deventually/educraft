@@ -92,6 +92,9 @@ Details: [Architecture](wiki/Architecture.md#feature-modules).
 - A tool reaches a course only through data: `InputField.prefillFromCourse`. No per-tool course code.
 - Links are owner-checked in the repository: `linkGeneration` returns `null` for anything that is
   not the caller's. The stream logs a refused link and still saves the generation.
+- P26: a test's questions (`items`) are the source of its coverage (`effectiveCoverage`); an import
+  (OER, blueprint) is a proposal the teacher confirms; a course in a dossier is a snapshot, never a
+  live link.
 
 Details: [Authentication](wiki/Authentication.md), model availability in
 [Architecture](wiki/Architecture.md#providers-model-agnostic).

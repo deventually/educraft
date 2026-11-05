@@ -437,4 +437,93 @@ describe("/courses/:id", () => {
       expect((await repo.getCourse("teacher-a", c2.id))!.data).toEqual(alignedCourse());
     });
   });
+
+  describe("use-as-evidence (P26.4)", () => {
+    async function setup() {
+      const portfolio = await import("~/server/repositories/portfolio.server");
+      const users = await import("~/server/repositories/users.server");
+      const { sampleDossier, C1, C2 } = await import("../portfolio/fixtures");
+      await users.setPortfolioEnabled("teacher-a", true);
+      const data = alignedCourse();
+      data.assessments[1].items = [
+        { id: "q-1", label: "1", outcomeId: LO1, bloom: "create", points: 6 },
+        { id: "q-2", label: "2", outcomeId: LO2, bloom: "analyze", points: 4 },
+      ];
+      const c = await repo.createCourse("teacher-a", { name: "Databases", data });
+      const d = await portfolio.createDossier("teacher-a", "Mijn BKE", sampleDossier());
+      return { portfolio, c, d, C1, C2 };
+    }
+
+    it("the loader offers the caller's dossiers with their criteria", async () => {
+      const { c, d, C1 } = await setup();
+      const data = await detail.loader({
+        request: get(`/courses/${c.id}`),
+        params: { id: c.id },
+      } as never);
+      const mine = data.dossiers.find((x) => x.id === d.id);
+      expect(mine).toMatchObject({ name: "Mijn BKE" });
+      expect(mine?.outcomes[0].criteria.map((x) => x.id)).toContain(C1);
+    });
+
+    it("adds a snapshot of one test's blueprint as test material, linked to the criteria", async () => {
+      const { portfolio, c, d, C1, C2 } = await setup();
+      expect(
+        await act(c.id, {
+          intent: "use-as-evidence",
+          dossierId: d.id,
+          part: `assessment:${TEST1}`,
+          criterionIds: [C1, C2],
+        }),
+      ).toEqual({ ok: true, intent: "use-as-evidence" });
+      const ev = (await portfolio.getDossier("teacher-a", d.id))!.data.evidence.at(-1)!;
+      expect(ev).toMatchObject({
+        title: "Databases: toetsmatrijs Eindopdracht",
+        kind: "test-material",
+        criterionIds: [C1, C2],
+        sourceCourse: { courseId: c.id, part: { assessmentId: TEST1 } },
+      });
+      expect(ev.text).toContain("| **Totaal** | 2 vragen |  |  | 10 |");
+      expect(ev.sourceCourse?.at).toBeGreaterThan(0);
+    });
+
+    it("the outcomes and matrix go in as 'other'", async () => {
+      const { portfolio, c, d } = await setup();
+      await act(c.id, { intent: "use-as-evidence", dossierId: d.id, part: "outcomes-and-matrix" });
+      const ev = (await portfolio.getDossier("teacher-a", d.id))!.data.evidence.at(-1)!;
+      expect(ev).toMatchObject({ kind: "other", criterionIds: [] });
+      expect(ev.text).toContain("### Dekkingsmatrix");
+    });
+
+    it("a foreign dossier is a 404 and nothing is written; an unknown criterion is an error", async () => {
+      const { portfolio, c, d } = await setup();
+      const { sampleDossier } = await import("../portfolio/fixtures");
+      const theirs = await portfolio.createDossier("teacher-b", "Van B", sampleDossier());
+      const fields = { intent: "use-as-evidence", part: "outcomes-and-matrix" };
+      expect(await status(act(c.id, { ...fields, dossierId: theirs.id }))).toBe(404);
+      expect((await portfolio.getDossier("teacher-b", theirs.id))!.data).toEqual(sampleDossier());
+      expect(await act(c.id, { ...fields, dossierId: d.id, criterionIds: "ghost" })).toEqual({
+        ok: false,
+        intent: "use-as-evidence",
+        error: "Dat criterium staat niet in dit dossier.",
+      });
+      expect(
+        await act(c.id, { ...fields, dossierId: d.id, part: "assessment:nope" }),
+      ).toMatchObject({ ok: false });
+      expect((await portfolio.getDossier("teacher-a", d.id))!.data).toEqual(sampleDossier());
+    });
+
+    it("a foreign course is a 404", async () => {
+      const { d } = await setup();
+      const theirs = await repo.createCourse("teacher-b", { name: "B" });
+      expect(
+        await status(
+          act(theirs.id, {
+            intent: "use-as-evidence",
+            dossierId: d.id,
+            part: "outcomes-and-matrix",
+          }),
+        ),
+      ).toBe(404);
+    });
+  });
 });

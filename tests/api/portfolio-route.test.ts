@@ -204,6 +204,79 @@ describe("/portfolio/:id and its pages", () => {
   });
 });
 
+describe("/portfolio — a course snapshot as evidence (P26.4)", () => {
+  async function withSnapshot() {
+    const courses = await import("~/server/repositories/courses.server");
+    const { alignedCourse } = await import("../courses/fixtures");
+    const c = await courses.createCourse("teacher-a", { name: "Databases", data: alignedCourse() });
+    const d = sampleDossier();
+    d.evidence.push({
+      id: "00000000-0000-4000-8000-0000000000e2",
+      title: "Databases: leeruitkomsten en dekkingsmatrix",
+      kind: "other",
+      text: "oude stand",
+      criterionIds: [C2],
+      sourceCourse: { courseId: c.id, part: "outcomes-and-matrix", at: 1 },
+    });
+    const mine = await repo.createDossier("teacher-a", "A", d);
+    return { courses, c, mine, evId: "00000000-0000-4000-8000-0000000000e2" };
+  }
+  const refresh = (id: string, evidenceId: string) =>
+    outcome.action({
+      request: post("/x", { intent: "refreshCourseEvidence", evidenceId }),
+      params: { id, outcomeId: LU },
+    } as never);
+
+  it("the outcome page names the course of a snapshot", async () => {
+    const { c, mine } = await withSnapshot();
+    const data = await outcome.loader({
+      request: get("/x"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(data.snapshotCourses).toEqual({ [c.id]: "Databases" });
+  });
+
+  it("'Opnieuw ophalen' replaces the text with the course as it is now", async () => {
+    const { mine, evId } = await withSnapshot();
+    expect(await refresh(mine.id, evId)).toEqual({ ok: true, intent: "refreshCourseEvidence" });
+    const ev = (await repo.getDossier("teacher-a", mine.id))!.data.evidence.find(
+      (e) => e.id === evId,
+    )!;
+    expect(ev.text).toContain("### Dekkingsmatrix");
+    expect(ev.sourceCourse!.at).toBeGreaterThan(1);
+  });
+
+  it("a deleted course leaves the snapshot and says so", async () => {
+    const { courses, c, mine, evId } = await withSnapshot();
+    await courses.deleteCourse("teacher-a", c.id);
+    expect(await refresh(mine.id, evId)).toEqual({
+      ok: false,
+      error: "Deze cursus of toets bestaat niet meer. De momentopname blijft staan.",
+    });
+    const ev = (await repo.getDossier("teacher-a", mine.id))!.data.evidence.find(
+      (e) => e.id === evId,
+    )!;
+    expect(ev.text).toBe("oude stand");
+    const data = await outcome.loader({
+      request: get("/x"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(data.snapshotCourses).toEqual({ [c.id]: null });
+  });
+
+  it("someone else's course is never fetched into my dossier", async () => {
+    const courses = await import("~/server/repositories/courses.server");
+    const theirs = await courses.createCourse("teacher-b", { name: "Van B" });
+    const d = sampleDossier();
+    d.evidence[0].sourceCourse = { courseId: theirs.id, part: "outcomes-and-matrix", at: 1 };
+    const mine = await repo.createDossier("teacher-a", "A", d);
+    expect(await refresh(mine.id, d.evidence[0].id)).toMatchObject({ ok: false });
+    expect((await repo.getDossier("teacher-a", mine.id))!.data.evidence[0].text).toBe(
+      "Goede opbouw.",
+    );
+  });
+});
+
 describe("/projects — add to dossier", () => {
   it("adds a generation as unlinked evidence to an own dossier", async () => {
     const mine = await repo.createDossier("teacher-a", "A", sampleDossier());

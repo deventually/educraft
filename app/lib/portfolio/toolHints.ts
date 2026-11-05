@@ -143,3 +143,14 @@ export function criterionTools(c: Criterion): Set<string> {
 export function chapterHints(o: Outcome, available: Set<string>): string[] {
   return rank("chapter", o.criteria.map((c) => c.text).join("\n"), outcomeText(o), available);
 }
+
+/**
+ * P26.4: a criterion about a test blueprint or (constructive) alignment can take
+ * a course snapshot as evidence. Only on the criterion's own words; no match, no hint.
+ */
+const COURSE_HINT =
+  /toetsmatrijs|toetsmatrix|constructi(ve|eve) alignment|afstemming|afgestemd|test blueprint|alignment/i;
+
+export function courseHint(c: Pick<Criterion, "text">): boolean {
+  return COURSE_HINT.test(c.text);
+}

@@ -93,6 +93,13 @@ const EvidenceSchema = z.object({
   text: z.string().max(LIMITS.documentText),
   criterionIds: z.array(Id).max(LIMITS.criteriaPerOutcome * LIMITS.outcomes),
   sourceGenerationId: Id.optional(),
+  sourceCourse: z
+    .object({
+      courseId: Id,
+      part: z.union([z.literal("outcomes-and-matrix"), z.object({ assessmentId: Id })]),
+      at: z.number().int().nonnegative(),
+    })
+    .optional(),
 });
 
 const ChapterSchema = z.object({

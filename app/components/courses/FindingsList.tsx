@@ -1,14 +1,11 @@
 import { useId } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import type { AlignmentFinding } from "~/lib/courses/alignment";
-import { type CourseData, HOURS_PER_EC } from "~/lib/courses/types";
-import { fmt } from "~/lib/i18n/format";
-import { useT } from "~/lib/i18n/useT";
-import { useOutcomeName } from "./fields";
+import { findingText } from "~/lib/courses/findingText";
+import type { CourseData } from "~/lib/courses/types";
+import { useLocale, useT } from "~/lib/i18n/useT";
 
-export function plannedHours(data: CourseData): number {
-  return [...data.activities, ...data.assessments].reduce((s, i) => s + (i.hours ?? 0), 0);
-}
+export { plannedHours } from "~/lib/courses/findingText";
 
 /** Advisory findings as plain text with a severity icon. Not a live region: the toast announces saves. */
 export function FindingsList({
@@ -20,17 +17,8 @@ export function FindingsList({
 }) {
   const t = useT();
   const f = t.courses.findings;
-  const outcomeName = useOutcomeName();
+  const locale = useLocale();
   const id = useId();
-  const outcome = (outcomeId?: string) => {
-    const i = data.outcomes.findIndex((o) => o.id === outcomeId);
-    return i < 0 ? "" : outcomeName(i);
-  };
-  const item = (itemId?: string) =>
-    [...data.activities, ...data.assessments].find((x) => x.id === itemId)?.title ?? "";
-  const question = (itemId?: string, questionId?: string) =>
-    data.assessments.find((a) => a.id === itemId)?.items?.find((q) => q.id === questionId)?.label ??
-    "";
 
   return (
     <section aria-labelledby={id}>
@@ -54,13 +42,7 @@ export function FindingsList({
               )}
               <span>
                 <strong className="font-medium">{f.severity[finding.severity]}:</strong>{" "}
-                {fmt(f.codes[finding.code], {
-                  outcome: outcome(finding.outcomeId),
-                  item: item(finding.itemId),
-                  question: question(finding.itemId, finding.questionId),
-                  hours: plannedHours(data),
-                  budget: (data.ec ?? 0) * HOURS_PER_EC,
-                })}
+                {findingText(finding, data, locale)}
               </span>
             </li>
           ))}

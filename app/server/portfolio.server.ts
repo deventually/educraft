@@ -19,6 +19,7 @@ import type { DossierData } from "~/lib/portfolio/types";
 import { suggestEvidence } from "~/lib/portfolio/suggest";
 import { listGenerations } from "./repositories/generations.server";
 import { addGenerationToDossier } from "./evidence.server";
+import { refreshCourseEvidence } from "./courseEvidence.server";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
 
@@ -142,6 +143,18 @@ export async function saveIntent(
       );
       if (!added.ok) return added;
     }
+    return { ok: true, intent };
+  }
+
+  if (intent === "refreshCourseEvidence") {
+    const refreshed = await refreshCourseEvidence(
+      user.id,
+      dossier.data,
+      String(fd.get("evidenceId") ?? ""),
+      locale,
+    );
+    if (!refreshed.ok) return refreshed;
+    await updateDossier(user.id, dossier.id, { data: refreshed.data });
     return { ok: true, intent };
   }
 
