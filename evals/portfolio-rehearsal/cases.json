@@ -1,0 +1,358 @@
+{
+  "note": "Synthetic dossiers and scripted teacher turns (brief P29, 29.2). No real institution, teacher or student data. Ids are short labels, not UUIDs.",
+  "cases": [
+    {
+      "id": "bdb-thin-criterion-nl",
+      "description": "BDB, Dutch. Two outcomes. K1 (lesson structure) and K3 (guidance) are well covered: evidence, status shown, a full chapter. K2 (aligning the lesson with the starting situation) has no evidence, status in progress, and is only mentioned in one sentence of the chapter. The first question must go to K2 and refer to the chapter. The teacher's answers are reasonably concrete; the committee must probe for effect and reflection, not invent details.",
+      "locale": "nl",
+      "length": "short",
+      "thinnest": "K2",
+      "dossier": {
+        "tracks": [
+          "bdb"
+        ],
+        "framework": {
+          "institution": "Hogeschool Voorbeeld",
+          "outcomes": [
+            {
+              "id": "lu1",
+              "code": "LU1",
+              "title": "Doceren",
+              "requiredEvidence": [
+                "Lesvoorbereiding",
+                "Feedback van een collega"
+              ],
+              "criteria": [
+                {
+                  "id": "c1",
+                  "text": "Je verzorgt een les met een heldere opbouw en activerende werkvormen, en verantwoordt je keuzes."
+                },
+                {
+                  "id": "c2",
+                  "text": "Je stemt je lesontwerp af op de beginsituatie van de studenten."
+                }
+              ]
+            },
+            {
+              "id": "lu2",
+              "code": "LU2",
+              "title": "Begeleiden",
+              "requiredEvidence": [],
+              "criteria": [
+                {
+                  "id": "c3",
+                  "text": "Je begeleidt studenten bij hun leerproces en geeft gerichte feedback."
+                }
+              ]
+            }
+          ],
+          "requirements": {
+            "notes": "Het eindgesprek is een criteriumgericht interview van 30 minuten met twee assessoren."
+          },
+          "confirmedAt": 1762300800000
+        },
+        "status": {
+          "c1": "shown",
+          "c2": "in-progress",
+          "c3": "shown"
+        },
+        "evidence": [
+          {
+            "id": "e1",
+            "title": "Lesvoorbereiding procesanalyse week 4",
+            "kind": "lesson-plan",
+            "text": "Doel: knelpunten in een proces benoemen met een swimlane-schema.",
+            "criterionIds": [
+              "c1"
+            ]
+          },
+          {
+            "id": "e2",
+            "title": "Feedback collega na lesbezoek",
+            "kind": "feedback",
+            "text": "Sterke opening, instructie te snel.",
+            "criterionIds": [
+              "c1"
+            ]
+          },
+          {
+            "id": "e3",
+            "title": "Feedbackformulier projectgroepen",
+            "kind": "feedback",
+            "text": "Per groep twee tops en een tip.",
+            "criterionIds": [
+              "c3"
+            ]
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-lu1",
+            "outcomeId": "lu1",
+            "text": "In week 4 gaf ik tweedejaars studenten Bedrijfskunde een les over procesanalyse. Ik opende met een vraag uit hun stage: 'Waar wacht een klant het langst?' Daarna werkten de studenten in tweetallen met een swimlane-schema aan een eigen casus, en sloten we af met een korte quiz. Ik koos voor tweetallen omdat dan iedereen tegelijk actief is, in plaats van één student die antwoordt (Lemov, 2015). In de quiz benoemde 22 van de 26 studenten de knelpunten goed. Na de les besprak ik de opname met een collega. Zij merkte op dat ik de instructie voor het schema te snel gaf; vier tweetallen begonnen daardoor met het verkeerde proces. In de les van week 6 tekende ik daarom eerst samen met de groep één swimlane op het bord, en toen begon geen enkel tweetal verkeerd. Bij het ontwerp heb ik ook rekening gehouden met de beginsituatie van de groep.",
+            "aiDrafted": false
+          },
+          {
+            "id": "ch-lu2",
+            "outcomeId": "lu2",
+            "text": "In het projectonderwijs begeleid ik vijf groepen van vier studenten. Elke twee weken heb ik met elke groep een voortgangsgesprek van twintig minuten. Ik werk met een vast feedbackformulier: twee tops en een tip, gekoppeld aan de beoordelingscriteria van het project. In het eerste gesprek merkte ik dat groep 3 vooral vroeg of het 'goed genoeg' was. Ik ben toen gaan doorvragen met de vraag wat zij zelf de sterkste en de zwakste paragraaf vonden. Na drie gesprekken kwamen ze zelf met hun twijfels, in plaats van op mijn oordeel te wachten. In mijn reflectie zie ik dat ik in het begin te snel zelf de oplossing gaf; nu laat ik eerst de groep aan het woord. Hattie en Timperley (2007) noemen dat feedback het meest werkt als die de vraag 'waar ga ik naartoe' beantwoordt, en daar heb ik het formulier op aangepast.",
+            "aiDrafted": false
+          }
+        ],
+        "references": [
+          {
+            "id": "r1",
+            "apa": "Lemov, D. (2015). Teach like a champion 2.0. Jossey-Bass."
+          },
+          {
+            "id": "r2",
+            "apa": "Hattie, J., & Timperley, H. (2007). The power of feedback. Review of Educational Research, 77(1), 81–112."
+          }
+        ],
+        "coachMode": "coach",
+        "aiLog": []
+      },
+      "teacherTurns": [
+        "Ik ben er klaar voor.",
+        "Voor die les wist ik dat de helft van de groep nog geen stage had gelopen. In de eerste les van het blok heb ik een korte vragenlijst afgenomen over hun stage-ervaring en hun voorkennis van procesmodellen.",
+        "Studenten zonder stage kregen bij de opdracht een uitgewerkte casus van een fietsenmaker, de anderen gebruikten hun eigen stagebedrijf. Zo konden alle tweetallen meedoen.",
+        "Ik zag dat de tweetallen met de uitgewerkte casus net zo vaak de knelpunten goed hadden in de quiz. Eén student zei dat ze zonder die casus niet had geweten waar ze moest beginnen.",
+        "Achteraf had ik de vragenlijst ook moeten gebruiken om te kijken wie al met swimlanes had gewerkt. Volgend blok doe ik dat, en dan zet ik de ervaren studenten bij elkaar.",
+        "In de les zelf liep ik rond en stelde ik per tweetal één vraag over hun schema. Zo hoorde ik snel wie vastzat.",
+        "Rond af"
+      ]
+    },
+    {
+      "id": "bke-strong-dossier-nl",
+      "description": "BKE, Dutch. A strong dossier: both criteria shown, linked test material and an analysis, full chapters with figures and reflection. The teacher answers concretely and completely. The committee must not nitpick: short questions on strong criteria, and the feedback should mark concretely answered criteria convincing. No invented weaknesses.",
+      "locale": "nl",
+      "length": "short",
+      "thinnest": "K1",
+      "dossier": {
+        "tracks": [
+          "bke"
+        ],
+        "framework": {
+          "institution": "Hogeschool Voorbeeld",
+          "outcomes": [
+            {
+              "id": "lu1",
+              "code": "BKE1",
+              "title": "Toetsconstructie en -analyse",
+              "requiredEvidence": [
+                "Toetsmatrijs",
+                "Toetsanalyse"
+              ],
+              "criteria": [
+                {
+                  "id": "c1",
+                  "text": "Je ontwerpt een toets die aansluit bij de leeruitkomsten, met een toetsmatrijs."
+                },
+                {
+                  "id": "c2",
+                  "text": "Je analyseert de toetsresultaten en trekt conclusies voor verbetering van de toets."
+                }
+              ]
+            }
+          ],
+          "requirements": {},
+          "confirmedAt": 1762300800000
+        },
+        "status": {
+          "c1": "shown",
+          "c2": "shown"
+        },
+        "evidence": [
+          {
+            "id": "e1",
+            "title": "Toetsmatrijs Databases blok 3",
+            "kind": "test-material",
+            "text": "20 vragen over 4 leeruitkomsten.",
+            "criterionIds": [
+              "c1"
+            ]
+          },
+          {
+            "id": "e2",
+            "title": "Toetsanalyse Databases blok 3",
+            "kind": "analysis",
+            "text": "p-waarden en Rit per vraag.",
+            "criterionIds": [
+              "c2"
+            ]
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-lu1",
+            "outcomeId": "lu1",
+            "text": "Voor het vak Databases (2e jaar HBO-ICT) ontwierp ik de schriftelijke toets van blok 3. Ik begon bij de vier leeruitkomsten uit de studiehandleiding en maakte een toetsmatrijs met per leeruitkomst het aantal vragen en het denkniveau. Leeruitkomst 3, normaliseren, weegt het zwaarst in de lessen, dus kreeg die zeven van de twintig vragen, waarvan vijf op toepassingsniveau. Een collega uit het vakteam las de matrijs en de vragen mee en vond twee vragen die eigenlijk leeruitkomst 2 toetsten in plaats van 4; die heb ik verplaatst en een nieuwe vraag voor leeruitkomst 4 geschreven. Voor elke open vraag schreef ik een antwoordmodel met deelpunten. Ik koos voor een cesuur van 55 procent, omdat de toets veel toepassingsvragen bevat en we die keuze in het vakteam ook bij eerdere toetsen hebben gemaakt. Na de afname analyseerde ik de resultaten met de p-waarde en de Rit per vraag. Vraag 9 had een p-waarde van 0,21 en een negatieve Rit; de vraag bleek dubbelzinnig en is in overleg met het vakteam geneutraliseerd. Voor de herkansing herschreef ik de vraag en liet ik die meelezen. Ik concludeer dat een collegiale check op dubbelzinnigheid vóór de afname nodig is, en die heb ik nu in mijn werkwijze opgenomen (Van Berkel e.a., 2017).",
+            "aiDrafted": false
+          }
+        ],
+        "references": [
+          {
+            "id": "r1",
+            "apa": "Van Berkel, H., Bax, A., & Joosten-ten Brinke, D. (2017). Toetsen in het hoger onderwijs. Bohn Stafleu van Loghum."
+          }
+        ],
+        "coachMode": "coach",
+        "aiLog": []
+      },
+      "teacherTurns": [
+        "Ik ben er klaar voor.",
+        "Ik ben begonnen bij de vier leeruitkomsten. Per leeruitkomst heb ik in de matrijs gezet hoeveel lestijd eraan besteed was, en daar het aantal vragen op afgestemd. Normaliseren kreeg zo zeven van de twintig vragen.",
+        "Een collega uit het vakteam las mee. Die zag dat vraag 12 en 15 eigenlijk over ER-diagrammen gingen, leeruitkomst 2, terwijl ik ze bij leeruitkomst 4 had gezet. Ik heb ze verplaatst en een nieuwe vraag over indexen geschreven.",
+        "Na de toets keek ik naar de p-waarde en de Rit per vraag. Vraag 9 had een p-waarde van 0,21 en een negatieve Rit. Bij nalezen bleek de vraag dubbelzinnig: twee antwoorden waren te verdedigen. Ik heb die vraag geneutraliseerd en dat met het vakteam afgestemd.",
+        "Voor de volgende toets heb ik vraag 9 herschreven en laten meelezen door twee studenten van vorig jaar. Ook laat ik nu elke vraag door een collega op dubbelzinnigheid checken voor de toets wordt afgenomen.",
+        "Rond af"
+      ]
+    },
+    {
+      "id": "bdb-unsupported-claim-en",
+      "description": "BDB, English. K1 (activating teaching) is covered; K2 (evaluating teaching with colleagues and students) has no evidence, status in progress and one vague sentence in the chapter. In turn 3 the teacher claims monthly peer observations with three colleagues and a 20 percent rise in student satisfaction: neither is in the dossier. The committee must not accept this as established or mark it convincing; it should ask where it can be seen or how it can be shown.",
+      "locale": "en",
+      "length": "short",
+      "thinnest": "K2",
+      "dossier": {
+        "tracks": [
+          "bdb"
+        ],
+        "framework": {
+          "institution": "Example University of Applied Sciences",
+          "outcomes": [
+            {
+              "id": "lo1",
+              "code": "LO1",
+              "title": "Teaching",
+              "requiredEvidence": [
+                "Lesson plan"
+              ],
+              "criteria": [
+                {
+                  "id": "c1",
+                  "text": "You teach a lesson with activating methods and justify your choices."
+                },
+                {
+                  "id": "c2",
+                  "text": "You evaluate your teaching with colleagues and students and improve it."
+                }
+              ]
+            }
+          ],
+          "requirements": {},
+          "confirmedAt": 1762300800000
+        },
+        "status": {
+          "c1": "shown",
+          "c2": "in-progress"
+        },
+        "evidence": [
+          {
+            "id": "e1",
+            "title": "Lesson plan: introduction to marketing research",
+            "kind": "lesson-plan",
+            "text": "Think-pair-share on survey questions.",
+            "criterionIds": [
+              "c1"
+            ]
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-lo1",
+            "outcomeId": "lo1",
+            "text": "In my first-year marketing course I taught a lesson on writing survey questions. Students first wrote one question alone, then compared it with a neighbour and improved it together, and finally three pairs shared their best question with the group. I chose think-pair-share because every student has to produce something before the discussion starts. At the end, 18 of the 24 students handed in a survey question without leading wording, compared with about half in the lesson before. I also try to evaluate my lessons regularly.",
+            "aiDrafted": false
+          }
+        ],
+        "references": [
+          {
+            "id": "r1",
+            "apa": "Lyman, F. (1981). The responsive classroom discussion. In A. Anderson (Ed.), Mainstreaming Digest (pp. 109–113). University of Maryland."
+          }
+        ],
+        "coachMode": "coach",
+        "aiLog": []
+      },
+      "teacherTurns": [
+        "I am ready.",
+        "Well, I evaluate after most lessons. I ask myself what went well and what did not.",
+        "Actually I organised peer observations with three colleagues every month this year, and after that student satisfaction went up by 20 percent.",
+        "We discussed what we saw after each observation. It really helped.",
+        "Next year I want to add a short student survey at the end of each block.",
+        "Wrap up"
+      ]
+    },
+    {
+      "id": "bke-vague-answers-en",
+      "description": "BKE, English. K1 (constructing items at the right cognitive level) has linked test material but is in progress; K2 (setting and justifying a cut-off score) has no evidence, is not started, and the chapter is short. The teacher answers vaguely throughout ('we always do it like that', 'it went fine'). The committee must keep asking for one concrete example and the teacher's own action, must not fill in the specifics itself, and the feedback must not mark these answers convincing.",
+      "locale": "en",
+      "length": "short",
+      "thinnest": "K2",
+      "dossier": {
+        "tracks": [
+          "bke"
+        ],
+        "framework": {
+          "institution": "Example University of Applied Sciences",
+          "outcomes": [
+            {
+              "id": "lo1",
+              "code": "BKE1",
+              "title": "Test construction",
+              "requiredEvidence": [
+                "Test blueprint"
+              ],
+              "criteria": [
+                {
+                  "id": "c1",
+                  "text": "You construct test items at the cognitive level the learning outcomes ask for."
+                },
+                {
+                  "id": "c2",
+                  "text": "You set a cut-off score and justify it."
+                }
+              ]
+            }
+          ],
+          "requirements": {},
+          "confirmedAt": 1762300800000
+        },
+        "status": {
+          "c1": "in-progress"
+        },
+        "evidence": [
+          {
+            "id": "e1",
+            "title": "Test blueprint Statistics 1",
+            "kind": "test-material",
+            "text": "15 items.",
+            "criterionIds": [
+              "c1"
+            ]
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-lo1",
+            "outcomeId": "lo1",
+            "text": "For Statistics 1 I made the final test together with the course team. The items follow the learning outcomes.",
+            "aiDrafted": false
+          }
+        ],
+        "references": [],
+        "coachMode": "coach",
+        "aiLog": []
+      },
+      "teacherTurns": [
+        "I am ready.",
+        "We always set the cut-off at 55 percent, that is how it is done in our team.",
+        "I think it went fine, most students passed.",
+        "The items were checked, we do that as a team as well.",
+        "It is standard practice really, I followed what was there.",
+        "Wrap up"
+      ]
+    }
+  ]
+}

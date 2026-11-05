@@ -169,6 +169,9 @@ describe("useFormToast", () => {
     await user.click(screen.getByRole("button", { name: "delete" }));
     await screen.findByText("done");
     // The route unmounted mid-flight → its pending toast must not linger.
-    expect(screen.queryByRole("listitem")).toBeNull();
+    // The unmount cleanup is a passive effect, so it may run a tick after the
+    // new page is in the DOM: wait for it instead of asserting in that gap
+    // (that gap made this test flaky under load).
+    await waitFor(() => expect(screen.queryByRole("listitem")).toBeNull());
   });
 });
