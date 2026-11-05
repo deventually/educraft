@@ -17,6 +17,11 @@ export interface Utility {
   icon: string;
   /** Extra search words for the /tools search box (both languages). */
   keywords: readonly string[];
+  /**
+   * Slug of an AI tool that explains this utility's result ("Laat uitleggen", P24.5). The
+   * utility computes; the tool only explains the numbers it is handed.
+   */
+  explainWith?: string;
 }
 
 export const UTILITIES: readonly Utility[] = [
@@ -59,6 +64,30 @@ export const UTILITIES: readonly Utility[] = [
       "nakijken",
       "fill in",
     ],
+  },
+  {
+    id: "item-analysis",
+    slug: "item-analysis",
+    name: { nl: "Toetsuitslag per vraag analyseren", en: "Analyse test results per question" },
+    summary: {
+      nl: "Plak de scores na een toets en zie per vraag de p-waarde, Rit en Rir, en Cronbachs alfa. Namen gaan er vooraf uit. Zonder AI; een AI-uitleg kan erbij.",
+      en: "Paste the scores after a test and see the p-value, Rit and Rir per question, and Cronbach's alpha. Names are removed first. No AI; an AI explanation is optional.",
+    },
+    icon: "chart-column",
+    keywords: [
+      "toetsanalyse",
+      "itemanalyse",
+      "p-waarde",
+      "rit",
+      "rir",
+      "cronbach",
+      "alfa",
+      "betrouwbaarheid",
+      "item analysis",
+      "reliability",
+      "test analysis",
+    ],
+    explainWith: "test-analysis",
   },
 ];
 

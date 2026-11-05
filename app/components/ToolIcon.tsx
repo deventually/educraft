@@ -16,6 +16,7 @@ import {
   Wrench,
   Calculator,
   Table2,
+  ChartColumn,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -37,6 +38,7 @@ const ICONS: Record<string, LucideIcon> = {
   calculator: Calculator,
   table: Table2,
   "calendar-clock": CalendarClock,
+  "chart-column": ChartColumn,
 };
 
 /** The icon names a tool may use (`Tool.icon`). */
