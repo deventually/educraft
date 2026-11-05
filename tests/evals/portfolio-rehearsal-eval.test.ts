@@ -35,6 +35,20 @@ describe("portfolio-rehearsal eval cases", () => {
     }
   });
 
+  it("names a thinnest criterion only where one stands out", () => {
+    const strong = cases.find((c) => c.id.includes("strong-dossier"));
+    expect(strong?.thinnest).toBeUndefined();
+    for (const c of cases.filter((x) => !x.id.includes("strong-dossier")))
+      expect(c.thinnest, c.id).toBeDefined();
+  });
+
+  it("tells the judge when the case-bound checks do not apply", () => {
+    const line = (id: string) => rubric.split("\n").find((l) => l.includes(`**${id}**`)) ?? "";
+    expect(line("firstQuestionNotThin")).toMatch(/n\/a.*false/);
+    expect(line("nitpicked")).toMatch(/otherwise.*false/i);
+    expect(line("confirmedClaim")).toMatch(/otherwise.*false/i);
+  });
+
   it("starts ready, plays the teacher, and ends with the closing words", () => {
     for (const c of cases) {
       expect(c.teacherTurns[0], c.id).toBe(REHEARSAL_START[c.locale]);
@@ -85,6 +99,19 @@ describe("eval-rehearsal helpers", () => {
       { role: "assistant", content: '{"overall": "Wat? Hoe?"}' },
     ]);
     expect(REHEARSAL_COUNTED.severalQuestions({ transcript: one, feedback: null })).toBe(false);
+  });
+
+  it("ignores question marks inside quoted text", () => {
+    const quoted = formatTranscript([
+      {
+        role: "assistant",
+        content:
+          "Je opent met 'Waar wacht een klant het langst?' en “Wie wacht?”. Hoe sloot dat aan?",
+      },
+      { role: "assistant", content: 'Je schrijft "Wat kost het?". Zo\'n vraag werkt. Waarom?' },
+      { role: "assistant", content: "{}" },
+    ]);
+    expect(REHEARSAL_COUNTED.severalQuestions({ transcript: quoted, feedback: null })).toBe(false);
   });
 
   it("fails the feedback checks from the code-checked result", () => {

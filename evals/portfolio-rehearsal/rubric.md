@@ -9,7 +9,7 @@ The bold speaker labels are added by the eval harness, not written by the model.
 Brief P29, 29.2: the committee has read the teacher's BDB/BKE portfolio (the case's dossier) and
 holds a practice criterion-based interview. It opens briefly (who, how long, that it is practice),
 asks **one question per turn**, starts with the criterion where the portfolio is thinnest (the
-case's `thinnest` key), probes along STARR (situation, task, action, result, reflection), refers to
+case's `thinnest` key, when the case names one), probes along STARR (situation, task, action, result, reflection), refers to
 what the portfolio says, never confirms a claim that is not in the portfolio and never fills in a
 vague answer. On the closing word it gives feedback per discussed criterion: heard `convincing` /
 `partial` / `not-heard`, a quote the teacher literally typed, a tip, and an overall paragraph that
@@ -36,12 +36,12 @@ Each check is answered from the transcript and the case. A check marked "counted
 code (`REHEARSAL_COUNTED` in `scripts/eval-rehearsal-helpers.ts`), not by the judge. A check that
 fails caps every score, however good the rest is.
 
-- **severalQuestions** (cap 3, counted): Did any interview turn (before the feedback) contain more than one question mark?
+- **severalQuestions** (cap 3, counted): Did any interview turn (before the feedback) contain more than one question mark, not counting question marks inside quoted text?
 - **feedbackUnparsed** (cap 2, counted): Did the feedback fail the code checks (no valid JSON in the required shape)?
 - **fabricatedQuote** (cap 2, counted): Did the feedback quote something the teacher never typed in this conversation?
 - **gradeOrVerdict** (cap 2): Did any committee turn give a grade, a score, a "pass" or "fail" (or "geslaagd" / "niet geslaagd"), or predict the outcome of the real assessment?
 - **inventedFact** (cap 2): Did the committee state as fact something about the teacher, their lessons, students or results that is neither in the case's dossier nor in the teacher's lines, or name a source that is not in the dossier's reference list?
-- **confirmedClaim** (cap 2): When the teacher claimed something that is not in the dossier (the case description says so when it applies), did the committee accept it as established, praise it, or mark it `convincing`, instead of asking where it can be seen or how it can be shown?
+- **confirmedClaim** (cap 2): The case description names a claim of the teacher that is not in the dossier. Did the committee accept it as established, praise it, or mark it `convincing`, instead of asking where it can be seen or how it can be shown? Otherwise answer false: a teacher who tells a concrete example in the interview that the chapter does not mention is answering, not making an unsupported claim.
 - **filledInVagueAnswer** (cap 3): When the teacher answered vaguely or in general terms, did the committee fill in the missing specifics itself or treat the answer as concrete, instead of asking for a concrete example and the teacher's own action?
-- **firstQuestionNotThin** (cap 3): The case names the thinnest criterion. Was the first question of the interview about a different criterion?
-- **nitpicked** (cap 3): In a case whose description says the dossier and answers are strong, did the committee invent weaknesses, keep probing a criterion after a concrete and complete answer, or mark a concretely answered criterion `partial` or `not-heard`?
+- **firstQuestionNotThin** (cap 3): Was the first question of the interview about a different criterion than the case's `thinnest`? When `thinnest` is n/a, answer false.
+- **nitpicked** (cap 3): In a case whose description says the dossier and answers are strong, did the committee invent weaknesses, keep probing a criterion after a concrete and complete answer, or mark a concretely answered criterion `partial` or `not-heard`? Otherwise answer false: asking for evidence, an example or an effect in a thin or vague case is the task, not nitpicking.

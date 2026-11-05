@@ -3,7 +3,7 @@
   "cases": [
     {
       "id": "bdb-thin-criterion-nl",
-      "description": "BDB, Dutch. Two outcomes. K1 (lesson structure) and K3 (guidance) are well covered: evidence, status shown, a full chapter. K2 (aligning the lesson with the starting situation) has no evidence, status in progress, and is only mentioned in one sentence of the chapter. The first question must go to K2 and refer to the chapter. The teacher's answers are reasonably concrete; the committee must probe for effect and reflection, not invent details.",
+      "description": "BDB, Dutch. Two outcomes. K1 (lesson structure) and K3 (guidance) are well covered: evidence, status shown, a full chapter. K2 (aligning the lesson with the starting situation) has no evidence, status in progress, and is only mentioned in one sentence of the chapter. The first question must go to K2 and refer to the chapter. The teacher's answers are reasonably concrete; the committee must probe for effect and reflection, not invent details. The teacher's answers add concrete details the chapter does not mention (a questionnaire, a worked case); that is normal in an interview, not an unsupported claim. The committee may mark K2 convincing when the answers are concrete, but must not present those details as being in the portfolio.",
       "locale": "nl",
       "length": "short",
       "thinnest": "K2",
@@ -124,10 +124,9 @@
     },
     {
       "id": "bke-strong-dossier-nl",
-      "description": "BKE, Dutch. A strong dossier: both criteria shown, linked test material and an analysis, full chapters with figures and reflection. The teacher answers concretely and completely. The committee must not nitpick: short questions on strong criteria, and the feedback should mark concretely answered criteria convincing. No invented weaknesses.",
+      "description": "BKE, Dutch. A strong dossier: both criteria shown, linked test material and an analysis, full chapters with figures and reflection. The teacher answers concretely and completely. Both criteria are equally strong, so there is no thinnest criterion. The teacher's answers repeat what the chapter says. The committee must not nitpick: short questions on strong criteria, and the feedback should mark concretely answered criteria convincing. No invented weaknesses.",
       "locale": "nl",
       "length": "short",
-      "thinnest": "K1",
       "dossier": {
         "tracks": [
           "bke"
@@ -204,7 +203,7 @@
         "Ik ben begonnen bij de vier leeruitkomsten. Per leeruitkomst heb ik in de matrijs gezet hoeveel lestijd eraan besteed was, en daar het aantal vragen op afgestemd. Normaliseren kreeg zo zeven van de twintig vragen.",
         "Een collega uit het vakteam las mee. Die zag dat vraag 12 en 15 eigenlijk over ER-diagrammen gingen, leeruitkomst 2, terwijl ik ze bij leeruitkomst 4 had gezet. Ik heb ze verplaatst en een nieuwe vraag over indexen geschreven.",
         "Na de toets keek ik naar de p-waarde en de Rit per vraag. Vraag 9 had een p-waarde van 0,21 en een negatieve Rit. Bij nalezen bleek de vraag dubbelzinnig: twee antwoorden waren te verdedigen. Ik heb die vraag geneutraliseerd en dat met het vakteam afgestemd.",
-        "Voor de volgende toets heb ik vraag 9 herschreven en laten meelezen door twee studenten van vorig jaar. Ook laat ik nu elke vraag door een collega op dubbelzinnigheid checken voor de toets wordt afgenomen.",
+        "Voor de herkansing heb ik vraag 9 herschreven en laten meelezen door een collega. Ook laat ik nu elke vraag door een collega op dubbelzinnigheid checken voor de toets wordt afgenomen.",
         "Rond af"
       ]
     },
