@@ -333,3 +333,38 @@ describe("Course page — use as evidence in BDB/BKE (P26.4)", () => {
     expect(screen.queryByText("Gebruik als bewijs in BDB/BKE")).toBeNull();
   });
 });
+
+describe("Course editor — pack tags on learning outcomes (P21.6)", () => {
+  async function withPack() {
+    const { getDomainPack } = await import("~/lib/context/packs");
+    const data = alignedCourse();
+    data.outcomes[0].packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen"] };
+    return { ...pageData(data), pack: getDomainPack("ICT") };
+  }
+
+  it("shows the tags and offers the pack's fields in the outcome forms", async () => {
+    const { container } = renderRoute(CoursePage, await withPack());
+    expect(screen.getByText(/Beheersingsniveau: 3/)).toBeVisible();
+    expect(screen.getAllByText(/Beroepsactiviteiten: Ontwerpen/).length).toBeGreaterThan(0);
+    // The add form: a fieldset per multiselect, a select for the level.
+    const add = screen
+      .getByRole("button", { name: "Leeruitkomst toevoegen" })
+      .closest("form") as HTMLElement;
+    const group = within(add).getByRole("group", { name: "Architectuurlagen" });
+    expect(within(group).getByRole("checkbox", { name: "Software" })).toHaveAttribute(
+      "name",
+      "tag:architectuurlagen",
+    );
+    expect(within(add).getByLabelText("Beheersingsniveau")).toHaveAttribute(
+      "name",
+      "tag:beheersingsniveau",
+    );
+    expect(within(add).getByText(/hbo-i domeinbeschrijving/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no tag fields without a pack", () => {
+    renderRoute(CoursePage, pageData());
+    expect(screen.queryByLabelText("Beheersingsniveau")).toBeNull();
+  });
+});

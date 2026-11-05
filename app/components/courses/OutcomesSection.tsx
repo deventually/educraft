@@ -1,14 +1,84 @@
 import { useId } from "react";
 import { Form } from "react-router";
 import type { CourseData, LearningOutcome } from "~/lib/courses/types";
+import type { DomainPack } from "~/lib/context/packs";
+import { packTagLines, TAG_PREFIX } from "~/lib/courses/packTags";
+import { fmt } from "~/lib/i18n/format";
+import { loc } from "~/lib/i18n/localized";
 import { bloomLabel } from "~/lib/courses/bloom";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
-import { Button, Card, Label, Textarea } from "~/components/ui";
+import { Button, Card, Label, Select, Textarea } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { BloomSelect, useOutcomeName } from "./fields";
 import { ItemActions } from "./ItemActions";
 
-function OutcomeForm({ outcome }: { outcome?: LearningOutcome }) {
+/** The pack's fields for one outcome (P21.6): checkboxes per multiselect, a select otherwise. */
+function PackTagFields({ pack, outcome }: { pack: DomainPack; outcome?: LearningOutcome }) {
+  const t = useT();
+  const locale = useLocale();
+  const id = useId();
+  const tags = outcome?.packTags ?? {};
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-slate-500">
+        {fmt(t.courses.outcomes.tagsSource, { source: loc(pack.source, locale) })}
+      </p>
+      {pack.fields.map((field) => {
+        const name = TAG_PREFIX + field.key;
+        const value = tags[field.key];
+        const label = loc(field.label, locale);
+        if (field.type === "multiselect") {
+          const picked = new Set(Array.isArray(value) ? value : []);
+          return (
+            <fieldset key={field.key}>
+              <legend className="text-sm font-medium text-slate-800">{label}</legend>
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                {field.options?.map((o) => (
+                  <label key={o.value} className="flex items-center gap-1.5 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      name={name}
+                      value={o.value}
+                      defaultChecked={picked.has(o.value)}
+                    />
+                    {loc(o.label, locale)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          );
+        }
+        const options =
+          field.type === "level"
+            ? Array.from({ length: field.levelMax ?? 1 }, (_, i) => ({
+                value: String(i + 1),
+                label: String(i + 1),
+              }))
+            : (field.options ?? []).map((o) => ({ value: o.value, label: loc(o.label, locale) }));
+        return (
+          <div key={field.key} className="sm:w-60">
+            <Label htmlFor={`${id}-${field.key}`}>{label}</Label>
+            <Select
+              id={`${id}-${field.key}`}
+              name={name}
+              defaultValue={value === undefined || Array.isArray(value) ? "" : String(value)}
+              className="mt-1"
+            >
+              <option value="">{t.courses.outcomes.tagNone}</option>
+              {options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function OutcomeForm({ outcome, pack }: { outcome?: LearningOutcome; pack?: DomainPack }) {
   const t = useT();
   const id = useId();
   return (
@@ -35,6 +105,7 @@ function OutcomeForm({ outcome }: { outcome?: LearningOutcome }) {
           label={t.courses.bloomLabel}
         />
       </div>
+      {pack && <PackTagFields pack={pack} outcome={outcome} />}
       <Button type="submit" size="sm" variant={outcome ? "secondary" : "primary"}>
         {outcome ? t.courses.save : t.courses.outcomes.add}
       </Button>
@@ -42,7 +113,7 @@ function OutcomeForm({ outcome }: { outcome?: LearningOutcome }) {
   );
 }
 
-export function OutcomesSection({ data }: { data: CourseData }) {
+export function OutcomesSection({ data, pack }: { data: CourseData; pack?: DomainPack }) {
   const t = useT();
   const locale = useLocale();
   const outcomeName = useOutcomeName();
@@ -67,15 +138,20 @@ export function OutcomesSection({ data }: { data: CourseData }) {
                   {t.courses.bloomLabel}: {bloomLabel(o.bloom, locale)}
                 </p>
               )}
+              {packTagLines(o.packTags, pack, (text) => loc(text, locale)).map((line) => (
+                <p key={line} className="text-sm text-slate-600">
+                  {line}
+                </p>
+              ))}
               <ItemActions name={outcomeName(i)} removeIntent="remove-outcome" id={o.id}>
-                <OutcomeForm outcome={o} />
+                <OutcomeForm outcome={o} pack={pack} />
               </ItemActions>
             </li>
           ))}
         </ul>
       )}
       <Card className="mt-3 p-4">
-        <OutcomeForm />
+        <OutcomeForm pack={pack} />
       </Card>
     </section>
   );

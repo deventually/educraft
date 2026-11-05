@@ -10,6 +10,8 @@
 import { z } from "zod";
 import { BLOOM_LEVELS } from "./bloom";
 import * as edit from "./edit";
+import type { DomainPack } from "~/lib/context/packs";
+import { parsePackTags } from "./packTags";
 import { COURSE_LIMITS } from "./schema";
 import {
   ACTIVITY_KINDS,
@@ -117,18 +119,37 @@ function coverageFrom(raw: Record<string, unknown>, outcomeIds: string[]) {
   });
 }
 
-function run(d: CourseData, intent: CourseIntent, raw: Record<string, unknown>): CourseData {
+/** Context the pure layer cannot know itself: the pack of the course's profile (P21.6). */
+export interface CourseIntentContext {
+  pack?: DomainPack;
+}
+
+/** The outcome's pack tags from the form; `{}` (no change) when the course has no pack. */
+function outcomeTags(fd: FormData, ctx: CourseIntentContext) {
+  if (!ctx.pack) return {};
+  const r = parsePackTags(fd, ctx.pack);
+  if (!r.ok) throw new Error("Invalid pack tags");
+  return { packTags: r.tags };
+}
+
+function run(
+  d: CourseData,
+  intent: CourseIntent,
+  raw: Record<string, unknown>,
+  fd: FormData,
+  ctx: CourseIntentContext,
+): CourseData {
   switch (intent) {
     case "add-outcome": {
       const v = z.object({ text: required(COURSE_LIMITS.text), bloom }).parse(raw);
-      return edit.addOutcome(d, v);
+      return edit.addOutcome(d, { ...v, ...outcomeTags(fd, ctx) });
     }
     case "update-outcome": {
       const { id, ...v } = z
         .object({ id: Id, text: required(COURSE_LIMITS.text), bloom })
         .parse(raw);
       assertItem(d.outcomes, id);
-      return edit.updateOutcome(d, id, { text: v.text, bloom: v.bloom });
+      return edit.updateOutcome(d, id, { text: v.text, bloom: v.bloom, ...outcomeTags(fd, ctx) });
     }
     case "remove-outcome": {
       const { id } = z.object({ id: Id }).parse(raw);
@@ -216,11 +237,15 @@ export function isCourseIntent(value: unknown): value is CourseIntent {
 }
 
 /** Applies one form submission to the course. Never throws. */
-export function applyCourseIntent(d: CourseData, fd: FormData): CourseIntentResult {
+export function applyCourseIntent(
+  d: CourseData,
+  fd: FormData,
+  ctx: CourseIntentContext = {},
+): CourseIntentResult {
   const intent = fd.get("intent");
   if (!isCourseIntent(intent)) return { ok: false, error: "invalid" };
   try {
-    return { ok: true, data: run(d, intent, fields(fd)) };
+    return { ok: true, data: run(d, intent, fields(fd), fd, ctx) };
   } catch (e) {
     return { ok: false, error: e instanceof NotFound ? "not-found" : "invalid" };
   }

@@ -204,6 +204,8 @@ export const courses = {
     add: "Leeruitkomst toevoegen",
     empty: "Nog geen leeruitkomsten.",
     intro: "Wat de student aan het eind kan, met het Bloom-niveau dat je verwacht.",
+    tagNone: "Geen",
+    tagsSource: "Kenmerken uit {source}",
     text: "Leeruitkomst",
     title: "Leeruitkomsten",
   },
