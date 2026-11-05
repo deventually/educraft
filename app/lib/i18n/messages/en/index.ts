@@ -17,6 +17,7 @@ import { language } from "./language";
 import { meta } from "./meta";
 import { nav } from "./nav";
 import { pages } from "./pages";
+import { people } from "./people";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { privacy } from "./privacy";
@@ -52,6 +53,7 @@ export const en: Messages = {
   meta,
   nav,
   pages,
+  people,
   portfolio,
   portfolioExport,
   privacy,

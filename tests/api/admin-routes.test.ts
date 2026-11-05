@@ -18,20 +18,23 @@ vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async ()
 
 type ToolsRoute = typeof import("~/routes/admin.tools");
 type UsersRoute = typeof import("~/routes/admin.users");
+type PersonRoute = typeof import("~/routes/admin.users.$id");
 type ContextRoute = typeof import("~/routes/admin.context");
 type Settings = typeof import("~/server/repositories/settings.server");
 type Users = typeof import("~/server/repositories/users.server");
 
 let toolsRoute: ToolsRoute;
 let usersRoute: UsersRoute;
+let personRoute: PersonRoute;
 let contextRoute: ContextRoute;
 let settings: Settings;
 let users: Users;
 
 beforeAll(async () => {
-  [toolsRoute, usersRoute, contextRoute, settings, users] = await Promise.all([
+  [toolsRoute, usersRoute, personRoute, contextRoute, settings, users] = await Promise.all([
     import("~/routes/admin.tools"),
     import("~/routes/admin.users"),
+    import("~/routes/admin.users.$id"),
     import("~/routes/admin.context"),
     import("~/server/repositories/settings.server"),
     import("~/server/repositories/users.server"),
@@ -58,13 +61,22 @@ function post(fields: Record<string, string | string[]>): Request {
   });
 }
 
-/** Invoke a route action with a form request, bypassing the RR arg-type ceremony. */
-function invoke<T extends (arg: never) => unknown>(action: T, request: Request): ReturnType<T> {
-  return action({
+/**
+ * Invoke a route action or loader with a request, bypassing the RR arg-type ceremony.
+ * The person page (P28.1) takes its user from the URL: a form's `userId` becomes
+ * `params.id`, as if the form was posted on `/admin/users/:id`.
+ */
+async function invoke<T extends (arg: never) => unknown>(
+  action: T,
+  request: Request,
+): Promise<Awaited<ReturnType<T>>> {
+  const body = request.method === "POST" ? await request.clone().formData() : null;
+  const id = body?.get("userId");
+  return (await action({
     request,
-    params: {},
+    params: id ? { id: String(id) } : {},
     context: {},
-  } as unknown as Parameters<T>[0]) as ReturnType<T>;
+  } as unknown as Parameters<T>[0])) as Awaited<ReturnType<T>>;
 }
 
 const OWNER_ID = "owner-1";
@@ -197,7 +209,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
     const teacher = await newTeacher("inherit");
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({
         intent: "teacherModels",
         userId: teacher.id,
@@ -213,7 +225,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
     await settings.setEnabledModels(["claude-sonnet-4-6"]); // haiku is not enabled instance-wide
     const teacher = await newTeacher("own");
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({
         intent: "teacherModels",
         userId: teacher.id,
@@ -233,7 +245,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
       .filter((mdl) => mdl.clientSelectable)
       .map((mdl) => mdl.id);
     await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "teacherModels", userId: teacher.id, mode: "own", models: all }),
     );
     expect([...(await users.getUserAssignedModels(teacher.id))!].sort()).toEqual([...all].sort());
@@ -242,7 +254,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
   it("[P14] mode=own persists a CLI model", async () => {
     const teacher = await newTeacher("cli");
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "teacherModels", userId: teacher.id, mode: "own", models: ["claude-code"] }),
     )) as { saved?: boolean };
     expect(res.saved).toBe(true);
@@ -253,7 +265,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
     const teacher = await newTeacher("empty");
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "teacherModels", userId: teacher.id, mode: "own" }),
     )) as { error?: string; saved?: boolean };
     expect(res.error).toBe("atLeastOne");
@@ -264,7 +276,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
   it("drops unknown ids", async () => {
     const teacher = await newTeacher("unknown");
     await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({
         intent: "teacherModels",
         userId: teacher.id,
@@ -275,7 +287,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
     expect([...(await users.getUserAssignedModels(teacher.id))!]).toEqual(["claude-haiku-4-5"]);
     // Only unknown ids = nothing chosen → refused.
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({
         intent: "teacherModels",
         userId: teacher.id,
@@ -289,7 +301,7 @@ describe("admin.users action — teacherModels override (P18)", () => {
   it("404s an unknown or non-teacher target", async () => {
     await expect(
       invoke(
-        usersRoute.action,
+        personRoute.action,
         post({
           intent: "teacherModels",
           userId: "nobody",
@@ -304,18 +316,17 @@ describe("admin.users action — teacherModels override (P18)", () => {
     await settings.setEnabledModels(["claude-sonnet-4-6"]);
     const teacher = await newTeacher("loader");
     await users.setUserAssignedModels(teacher.id, ["claude-haiku-4-5"]);
-    const data = (await usersRoute.loader({
-      request: new Request("http://localhost/admin/users"),
-      params: {},
+    const data = (await personRoute.loader({
+      request: new Request(`http://localhost/admin/users/${teacher.id}`),
+      params: { id: teacher.id },
       context: {},
-    } as unknown as Parameters<typeof usersRoute.loader>[0])) as {
-      base: { id: string }[];
-      teachers: { id: string; mode: string; models: string[] }[];
+    } as unknown as Parameters<typeof personRoute.loader>[0])) as {
+      models: { base: { id: string }[]; mode: string; models: string[] };
     };
-    const row = data.teachers.find((t) => t.id === teacher.id)!;
+    const row = data.models;
     expect(row.mode).toBe("own");
     expect(row.models).toEqual(["claude-haiku-4-5"]);
-    expect(data.base.map((b) => b.id)).toContain("claude-haiku-4-5"); // not in the instance set
+    expect(row.base.map((b) => b.id)).toContain("claude-haiku-4-5"); // not in the instance set
     await settings.setEnabledModels(null); // reset
   });
 
@@ -323,19 +334,19 @@ describe("admin.users action — teacherModels override (P18)", () => {
     await settings.setEnabledModels(["claude-sonnet-4-6"]);
     const teacher = await newTeacher("prefill");
     const load = () =>
-      usersRoute.loader({
-        request: new Request("http://localhost/admin/users"),
-        params: {},
+      personRoute.loader({
+        request: new Request(`http://localhost/admin/users/${teacher.id}`),
+        params: { id: teacher.id },
         context: {},
-      } as unknown as Parameters<typeof usersRoute.loader>[0]) as Promise<{
-        teachers: { id: string; mode: string; models: string[] }[];
+      } as unknown as Parameters<typeof personRoute.loader>[0]) as Promise<{
+        models: { mode: string; models: string[] };
       }>;
-    const row = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    const row = (await load()).models;
     expect(row.mode).toBe("inherit");
     expect(row.models).toEqual(["claude-sonnet-4-6"]);
     // Unset instance list = the whole catalogue.
     await settings.setEnabledModels(null);
-    const all = (await load()).teachers.find((t) => t.id === teacher.id)!;
+    const all = (await load()).models;
     expect(all.models.length).toBeGreaterThan(1);
   });
 });
@@ -433,7 +444,7 @@ describe("admin.users action", () => {
 
   it("blocks an admin from changing their OWN role (self-demote guard)", async () => {
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: "admin-1", role: "teacher" }),
     )) as { error?: string };
     expect(res.error).toBe("selfDemote");
@@ -448,7 +459,7 @@ describe("admin.users action", () => {
       role: "student" as never,
     });
     await expect(
-      invoke(usersRoute.action, post({ intent: "role", userId: legacy.id, role: "teacher" })),
+      invoke(personRoute.action, post({ intent: "role", userId: legacy.id, role: "teacher" })),
     ).rejects.toMatchObject({ status: 404 });
     expect((await users.getUserById(legacy.id))?.role).toBe("student");
   });
@@ -461,7 +472,7 @@ describe("admin.users action", () => {
       passwordHash: "scrypt:keep:me",
       role: "teacher",
     });
-    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
+    await invoke(personRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
     const after = await users.getUserById(teacher.id);
     expect(after?.role).toBe("admin");
     expect(after?.passwordHash).toBe("scrypt:keep:me"); // untouched
@@ -475,7 +486,7 @@ describe("admin.users action", () => {
       passwordHash: "scrypt:keep:me",
       role: "teacher",
     });
-    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "student" }));
+    await invoke(personRoute.action, post({ intent: "role", userId: teacher.id, role: "student" }));
     expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
   });
 
@@ -487,7 +498,7 @@ describe("admin.users action", () => {
 
   it("blocks an admin from deleting their OWN account (use /account instead)", async () => {
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "deleteUser", userId: "admin-1" }),
     )) as { error?: string };
     expect(res.error).toBe("selfDelete");
@@ -501,10 +512,12 @@ describe("admin.users action", () => {
       role: "teacher",
     });
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "deleteUser", userId: teacher.id }),
-    )) as { userDeleted?: boolean };
-    expect(res.userDeleted).toBe(true);
+    )) as unknown as Response;
+    // The person page is gone: back to the list (P28.1).
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("/admin/users");
     expect(await users.getUserById(teacher.id)).toBeNull();
   });
 
@@ -516,7 +529,7 @@ describe("admin.users action", () => {
       role: "teacher",
     });
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: teacher.id }),
     )) as { resetLink?: string };
     expect(res.resetLink).toMatch(/\/reset\//);
@@ -531,7 +544,7 @@ describe("admin.users action", () => {
       role: "teacher",
     });
     await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: student.id, email: "recovered@example.com" }),
     );
     expect((await users.getUserById(student.id))?.email).toBe("recovered@example.com");
@@ -549,13 +562,13 @@ describe("admin.users action — owner (P18.6)", () => {
     const teacher = await mkUser("RoleT", "teacher");
     const other = await mkUser("RoleA", "admin");
     const promote = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: teacher.id, role: "admin" }),
     )) as { error?: string };
     expect(promote.error).toBe("ownerOnly");
     expect((await users.getUserById(teacher.id))?.role).toBe("teacher");
     const demote = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: other.id, role: "teacher" }),
     )) as { error?: string };
     expect(demote.error).toBe("ownerOnly");
@@ -567,7 +580,7 @@ describe("admin.users action — owner (P18.6)", () => {
     await settings.setOwnerUserId(null);
     const teacher = await mkUser("NoOwnerT", "teacher");
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: teacher.id, role: "admin" }),
     )) as { error?: string };
     expect(res.error).toBe("ownerOnly");
@@ -580,7 +593,7 @@ describe("admin.users action — owner (P18.6)", () => {
     actAsRegularAdmin();
     const teacher = await mkUser("LookT", "teacher");
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: teacher.id, role: "admin" }),
     )) as { error?: string };
     expect(res.error).toBe("ownerOnly");
@@ -591,12 +604,12 @@ describe("admin.users action — owner (P18.6)", () => {
     const teacher = await mkUser("PromoT", "teacher");
     const admin = await mkUser("DemoA", "admin");
     const up = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: teacher.id, role: "admin" }),
     )) as { roleChanged?: boolean };
     expect(up.roleChanged).toBe(true);
     expect((await users.getUserById(teacher.id))?.role).toBe("admin");
-    await invoke(usersRoute.action, post({ intent: "role", userId: admin.id, role: "teacher" }));
+    await invoke(personRoute.action, post({ intent: "role", userId: admin.id, role: "teacher" }));
     expect((await users.getUserById(admin.id))?.role).toBe("teacher");
   });
 
@@ -607,14 +620,14 @@ describe("admin.users action — owner (P18.6)", () => {
     await settings.setOwnerUserId(OWNER_ID);
     const teacher = await mkUser("ResetThenPromote", "teacher");
     const minted = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: teacher.id }),
     )) as { resetLink?: string };
     const token = minted.resetLink!.split("/reset/")[1];
     expect(await users.getPasswordReset(token)).not.toBeNull();
 
     await actAsOwner();
-    await invoke(usersRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
+    await invoke(personRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
     expect((await users.getUserById(teacher.id))?.role).toBe("admin");
     expect(await users.getPasswordReset(token)).toBeNull();
     expect(await users.consumePasswordReset(token)).toBeNull();
@@ -623,7 +636,7 @@ describe("admin.users action — owner (P18.6)", () => {
   it("the owner cannot change their own role (never an accidental self-demotion)", async () => {
     await actAsOwner();
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "role", userId: OWNER_ID, role: "teacher" }),
     )) as { error?: string };
     expect(res.error).toBe("selfDemote");
@@ -634,12 +647,12 @@ describe("admin.users action — owner (P18.6)", () => {
   it("the owner cannot delete or reset themselves either", async () => {
     await actAsOwner();
     const del = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "deleteUser", userId: OWNER_ID }),
     )) as { error?: string };
     expect(del.error).toBe("selfDelete");
     const reset = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: OWNER_ID }),
     )) as { error?: string };
     expect(reset.error).toBe("selfReset");
@@ -650,7 +663,7 @@ describe("admin.users action — owner (P18.6)", () => {
     await actAsOwner();
     const before = (await users.getUserById(OWNER_ID))?.email;
     const own = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: OWNER_ID, email: "hijack@example.com" }),
     )) as { error?: string };
     expect(own.error).toBe("selfEmail");
@@ -658,7 +671,7 @@ describe("admin.users action — owner (P18.6)", () => {
 
     actAsRegularAdmin();
     const self = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: "admin-1", email: "hijack2@example.com" }),
     )) as { error?: string };
     expect(self.error).toBe("selfEmail");
@@ -670,21 +683,21 @@ describe("admin.users action — owner (P18.6)", () => {
     const target = await mkUser("Target", "admin", "target@example.com");
 
     const del = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "deleteUser", userId: target.id }),
     )) as { error?: string };
     expect(del.error).toBe("ownerOnly");
     expect(await users.getUserById(target.id)).not.toBeNull();
 
     const reset = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: target.id }),
     )) as { error?: string; resetLink?: string };
     expect(reset.error).toBe("ownerOnly");
     expect(reset.resetLink).toBeUndefined();
 
     const email = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: target.id, email: "hijack@example.com" }),
     )) as { error?: string };
     expect(email.error).toBe("ownerOnly");
@@ -700,7 +713,7 @@ describe("admin.users action — owner (P18.6)", () => {
       post({ intent: "setEmail", userId: OWNER_ID, email: "taken@example.com" }),
       post({ intent: "role", userId: OWNER_ID, role: "teacher" }),
     ]) {
-      const res = (await invoke(usersRoute.action, post_)) as { error?: string };
+      const res = (await invoke(personRoute.action, post_)) as { error?: string };
       expect(res.error).toBe("ownerOnly");
     }
     const row = await users.getUserById(OWNER_ID);
@@ -714,22 +727,23 @@ describe("admin.users action — owner (P18.6)", () => {
     const t = await mkUser("TeachOK", "teacher", "teachok@example.com");
 
     const email = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: t.id, email: "teachok2@example.com" }),
     )) as { emailSet?: boolean };
     expect(email.emailSet).toBe(true);
     expect((await users.getUserById(t.id))?.email).toBe("teachok2@example.com");
 
     const reset = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: t.id }),
     )) as { resetLink?: string };
     expect(reset.resetLink).toMatch(/\/reset\//);
 
-    const del = (await invoke(usersRoute.action, post({ intent: "deleteUser", userId: t.id }))) as {
-      userDeleted?: boolean;
-    };
-    expect(del.userDeleted).toBe(true);
+    const del = (await invoke(
+      personRoute.action,
+      post({ intent: "deleteUser", userId: t.id }),
+    )) as unknown as Response;
+    expect(del.status).toBe(302);
     expect(await users.getUserById(t.id)).toBeNull();
   });
 
@@ -743,7 +757,7 @@ describe("admin.users action — owner (P18.6)", () => {
       role: "student" as never,
     });
     const res = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "deleteUser", userId: legacy.id }),
     )) as { error?: string };
     expect(res.error).toBe("ownerOnly");
@@ -754,19 +768,20 @@ describe("admin.users action — owner (P18.6)", () => {
     await actAsOwner();
     const a = await mkUser("OwnerManaged", "admin", "managed@example.com");
     const email = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "setEmail", userId: a.id, email: "managed2@example.com" }),
     )) as { emailSet?: boolean };
     expect(email.emailSet).toBe(true);
     const reset = (await invoke(
-      usersRoute.action,
+      personRoute.action,
       post({ intent: "resetPassword", userId: a.id }),
     )) as { resetLink?: string };
     expect(reset.resetLink).toMatch(/\/reset\//);
-    const del = (await invoke(usersRoute.action, post({ intent: "deleteUser", userId: a.id }))) as {
-      userDeleted?: boolean;
-    };
-    expect(del.userDeleted).toBe(true);
+    const del = (await invoke(
+      personRoute.action,
+      post({ intent: "deleteUser", userId: a.id }),
+    )) as unknown as Response;
+    expect(del.status).toBe(302);
     expect(await users.getUserById(a.id)).toBeNull();
   });
 
@@ -774,7 +789,7 @@ describe("admin.users action — owner (P18.6)", () => {
     await actAsOwner();
     for (const intent of ["deleteUser", "resetPassword", "setEmail"]) {
       await expect(
-        invoke(usersRoute.action, post({ intent, userId: "ghost", email: "g@example.com" })),
+        invoke(personRoute.action, post({ intent, userId: "ghost", email: "g@example.com" })),
       ).rejects.toMatchObject({ status: 404 });
     }
   });
@@ -793,7 +808,7 @@ describe("admin.users action — owner (P18.6)", () => {
     for (const act of [actAsRegularAdmin, actAsOwner]) {
       await act();
       const res = (await invoke(
-        usersRoute.action,
+        personRoute.action,
         post({ intent: "teacherModels", userId: t.id, mode: "inherit" }),
       )) as { saved?: boolean };
       expect(res.saved).toBe(true);
@@ -840,7 +855,10 @@ describe("admin.users action — owner accounts (P18.7)", () => {
   }
   type R = Record<string, unknown> & { error?: string };
   const run = (fields: Record<string, string | string[]>) =>
-    invoke(usersRoute.action, post(fields)) as Promise<R>;
+    invoke(
+      fields.intent === "createAccount" ? usersRoute.action : personRoute.action,
+      post(fields),
+    ) as Promise<R>;
   const create = (extra: Record<string, string> = {}) =>
     run({
       intent: "createAccount",
@@ -1180,10 +1198,10 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const t = await mkUser("ListedOff", "teacher", "listedoff@example.com");
     await users.setUserDisabled(t.id, true);
     const data = (await invoke(usersRoute.loader, new Request("http://localhost/admin/users"))) as {
-      users: (Record<string, unknown> & { id: string; disabled: boolean })[];
+      people: (Record<string, unknown> & { id: string; status: string })[];
     };
-    expect(data.users.find((u) => u.id === t.id)?.disabled).toBe(true);
-    expect(data.users.find((u) => u.id === OWNER_ID)?.disabled).toBe(false);
+    expect(data.people.find((u) => u.id === t.id)?.status).toBe("disabled");
+    expect(data.people.find((u) => u.id === OWNER_ID)?.status).toBe("active");
     expect(JSON.stringify(data)).not.toContain("scrypt");
     expect(JSON.stringify(data)).not.toContain("passwordHash");
   });
@@ -1194,5 +1212,113 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     await users.setUserDisabled(t.id, true);
     const res = await run({ intent: "resetPassword", userId: t.id });
     expect(res.resetLink).toMatch(/\/reset\//);
+  });
+});
+
+describe("admin users — the list and the person page (P28.1)", () => {
+  const get = (path: string) => new Request(`http://localhost${path}`);
+  const loadPerson = (id: string) =>
+    personRoute.loader({
+      request: get(`/admin/users/${id}`),
+      params: { id },
+      context: {},
+    } as unknown as Parameters<typeof personRoute.loader>[0]);
+
+  it("the list loader filters on the server, from the query string", async () => {
+    const t = await users.createUser({
+      name: "Zoë Zoekbaar",
+      email: "zoe@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    await users.createInvite({ role: "teacher", note: "Zoë's collega" });
+    const data = (await invoke(usersRoute.loader, get("/admin/users?q=zoë&status=active"))) as {
+      people: { id: string; kind: string }[];
+      filter: { q: string; role: string; status: string };
+    };
+    expect(data.people.map((p) => p.id)).toEqual([t.id]);
+    expect(data.filter).toEqual({ q: "zoë", role: "", status: "active" });
+  });
+
+  it("the list loader ignores a filter value it does not know", async () => {
+    const data = (await invoke(
+      usersRoute.loader,
+      get("/admin/users?role=student&status=gone"),
+    )) as { people: unknown[]; filter: { role: string; status: string } };
+    expect(data.filter).toMatchObject({ role: "", status: "" });
+    expect(data.people.length).toBeGreaterThan(0);
+  });
+
+  it("the list gives an open invite its link to copy", async () => {
+    const invite = await users.createInvite({ role: "teacher", note: "Copy Me" });
+    const data = (await invoke(usersRoute.loader, get("/admin/users?q=copy%20me"))) as {
+      people: { kind: string; link?: string }[];
+    };
+    expect(data.people).toEqual([
+      expect.objectContaining({ kind: "invite", link: `http://localhost/invite/${invite.token}` }),
+    ]);
+  });
+
+  it("the person loader 404s an unknown id", async () => {
+    await expect(loadPerson("ghost")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("the person loader shows a regular admin another admin, without managing it", async () => {
+    actAsRegularAdmin();
+    const other = await users.createUser({
+      name: "Other Admin",
+      email: "otheradmin-p281@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "admin",
+    });
+    const data = (await loadPerson(other.id)) as {
+      person: { id: string; email: string | null };
+      canManage: boolean;
+      models: unknown;
+    };
+    expect(data.person.id).toBe(other.id);
+    expect(data.canManage).toBe(false);
+    expect(data.models).toBeNull(); // models are per teacher
+    expect(JSON.stringify(data)).not.toContain("scrypt");
+  });
+
+  it("the person action acts on the user in the URL, never on a userId in the form", async () => {
+    const inUrl = await users.createUser({
+      name: "In Url",
+      email: "inurl@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const inForm = await users.createUser({
+      name: "In Form",
+      email: "inform@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    await personRoute.action({
+      request: post({ intent: "setEmail", userId: inForm.id, email: "moved@example.com" }),
+      params: { id: inUrl.id },
+      context: {},
+    } as unknown as Parameters<typeof personRoute.action>[0]);
+    expect((await users.getUserById(inUrl.id))?.email).toBe("moved@example.com");
+    expect((await users.getUserById(inForm.id))?.email).toBe("inform@example.com");
+  });
+
+  it("the list action no longer takes the person intents", async () => {
+    const t = await users.createUser({
+      name: "Not Here",
+      email: "nothere@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    for (const intent of ["deleteUser", "resetPassword", "setEmail", "role", "teacherModels"]) {
+      const res = (await usersRoute.action({
+        request: post({ intent, userId: t.id, email: "x@example.com", role: "admin" }),
+        params: {},
+        context: {},
+      } as unknown as Parameters<typeof usersRoute.action>[0])) as { error?: string };
+      expect(res.error, intent).toBe("unknown");
+    }
+    expect(await users.getUserById(t.id)).toMatchObject({ email: "nothere@example.com" });
   });
 });
