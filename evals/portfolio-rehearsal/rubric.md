@@ -1,4 +1,4 @@
-# Rubric — Rehearsal assessment (portfolio-rehearsal@v1)
+# Rubric — Rehearsal assessment (portfolio-rehearsal@v2)
 
 **Read the transcript labels carefully.** `**Teacher:**` lines are written by the teacher who is
 practising (scripted by the eval); `**Committee:**` lines are the AI playing an assessment

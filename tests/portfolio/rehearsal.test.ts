@@ -121,6 +121,30 @@ describe("the rehearsal prompt", () => {
   });
 });
 
+describe("the rehearsal prompt, @v2", () => {
+  it("is the version the app uses, with @v1 still registered", () => {
+    expect(REHEARSAL_PROMPT_ID).toBe("portfolio-rehearsal@v2");
+    for (const locale of ["nl", "en"] as const)
+      expect(getRuntimePrompt("portfolio-rehearsal@v1", locale)).toBeTruthy();
+  });
+
+  it("does not keep probing a strong criterion and may stop early", () => {
+    const anchors = {
+      nl: [
+        "Ga daarna door naar het volgende criterium",
+        "eerder stoppen",
+        "dubbelepunt",
+        "of wat die ervan leerde",
+      ],
+      en: ["Then move on to the next criterion", "stop early", "colon", "or what they learned"],
+    };
+    for (const locale of ["nl", "en"] as const) {
+      const p = getRuntimePrompt(REHEARSAL_PROMPT_ID, locale);
+      for (const a of anchors[locale]) expect(p, `${locale}: ${a}`).toContain(a);
+    }
+  });
+});
+
 describe("parseRehearsalFeedback", () => {
   const keys = { K1: C1, K2: C2 };
   const turns = [

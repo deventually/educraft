@@ -4,13 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en P29.2 @v2 open)_
 
 ## Nu
 
 - **Proefassessment, de AI-tekst en de meting (P29.2, #119) gemerged op 2026-11-05:**
   `portfolio-rehearsal@v1` speelt een commissie van twee assessoren met feedback per criterium,
-  gecontroleerd in code; nog geen scherm. Eerste meting: één case 4,4, de rest faalt op de meting.
+  gecontroleerd in code; nog geen scherm.
+- **Meting van het proefassessment hersteld (#122) gemerged op 2026-11-05:** de vraagteller slaat
+  geciteerde vragen over; "vitten" en "claim overgenomen" gelden alleen in hun eigen case.
 - **Klaar om in te leveren? (P29.1, #117) gemerged op 2026-11-05:** in stap 5 van het
   BDB/BKE-dossier één lijst met per punt "Los op", zelf afvinken met datum; advies, geen poort.
 - **De week van de docent op Start (P22.3, #113) gemerged op 2026-11-05:** per cursus *In de les*,
@@ -188,11 +190,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4 en meting P29.2 open)_
   van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
   grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
   4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
-- P29.2 Meting proefassessment herstellen: de eerste meting (3 runs) faalde vooral op de meting
-  zelf. De vraagteller telt vraagtekens in geciteerde tekst niet meer mee; "vitten" en "claim
-  overgenomen" gelden alleen in de cases die daarover gaan; het sterke dossier heeft geen dunste
-  criterium meer en het script volgt het hoofdstuk. Prompt ongewijzigd (v1); na de nieuwe meting
-  volgt eventueel een v2. PR open.
+- P29.2 Proefassessment `@v2`: na de herstelde meting (#122) waren drie van de vier cases schoon
+  of bijna; bij het sterke dossier bleef de commissie doorvragen naar een gemeten effect. `@v2`:
+  een sterk criterium krijgt één vraag, eerder stoppen mag, geen deelvragen achter een dubbelepunt,
+  en "overtuigend" vraagt een effect of een reflectie. `@v1` blijft geregistreerd. Meting `@v1` in
+  `evals/reports/2026-11-05-portfolio-rehearsal.md`; meting `@v2` volgt. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop

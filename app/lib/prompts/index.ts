@@ -28,6 +28,7 @@ import { TEST_ITEMS_BLUEPRINT, TEST_ITEMS_ITEMS, TEST_ITEMS_ITEMS_V2 } from "./t
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
 import { PORTFOLIO_REHEARSAL_PROMPT } from "./portfolio-rehearsal@v1.prompt";
+import { PORTFOLIO_REHEARSAL_PROMPT_V2 } from "./portfolio-rehearsal@v2.prompt";
 import { COURSE_IMPORT_PROMPT } from "./course-import@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT, AGENT_DESIGN_PROMPT } from "./agents@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT_V2 } from "./agents@v2.prompt";
@@ -74,6 +75,7 @@ const ALL: PromptDef[] = [
   PORTFOLIO_DRAFT_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT,
   PORTFOLIO_REHEARSAL_PROMPT,
+  PORTFOLIO_REHEARSAL_PROMPT_V2,
   COURSE_IMPORT_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
