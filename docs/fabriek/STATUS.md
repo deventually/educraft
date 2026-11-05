@@ -8,6 +8,13 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **Toetsvragen zonder correctie in een kopje (`test-items-items@v3`, #128) gemerged op
+  2026-11-05:** het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen
+  kopje en in elk vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe
+  rij soms de vorige rij mee ("Row R1 is not used; this is Row R2"). Getelde check
+  `correctionInHeading` in de eval. Meting x: geen correctie meer in 18 runs, geen gefaalde check,
+  niets afgekapt; opnieuw beoordeeld als x2 met een duidelijkere rubric: gemiddeld 4,67 (w: 4,77),
+  create-with-mc 4,40. Dezelfde antwoorden schommelen per beoordeling tot 0,4.
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
 - **Wiskunde nakijken gemeten met een echte foto (#131 + meting mg1) op 2026-11-05:** een
@@ -228,15 +235,7 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- Toetsvragen, geen correctie meer in een kopje van het antwoordmodel (`test-items-items@v3`):
-  het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen kopje en in elk
-  vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe rij soms de vorige
-  rij mee ("Row R1 is not used; this is Row R2"): 7 keer in de oude metingen, 1 keer in meting w.
-  Nieuwe getelde check `correctionInHeading` in de eval. Eindmeting x: geen enkele correctie in
-  een kopje meer, geen gefaalde check, niets afgekapt. Opnieuw beoordeeld als x2 met een
-  duidelijkere rubric: gemiddeld 4,67 (w: 4,77), vijf cases 4,53–4,87, create-with-mc 4,40.
-  Dezelfde antwoorden schommelen per beoordeling tot 0,4 (arithmetic 4,33 in x, 4,73 in x2).
-  PR open, beslissing Bastiaan.
+- Niets.
 
 ## Wacht op jou
 
