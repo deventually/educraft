@@ -127,6 +127,13 @@
       "when": 1793886419058,
       "tag": "0017_aspiring_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1793900764295,
+      "tag": "0018_smart_iron_man",
+      "breakpoints": true
     }
   ]
 }

@@ -34,3 +34,16 @@ export interface RejectedFinding {
   targetId?: string;
   message: string;
 }
+
+/** A stored finding (P21.3): the filtered finding plus a stable id within its review. */
+export interface ReviewFinding extends AgentFinding {
+  /** `f1`, `f2`, ... in the order the hat returned them. */
+  id: string;
+}
+
+/** What the teacher says about one finding. Accepting only records it (no task list). */
+export const DECISIONS = ["accepted", "rejected"] as const;
+export type Decision = (typeof DECISIONS)[number];
+
+/** Upper bound on the teacher's optional reason. */
+export const DECISION_REASON_MAX = 500;

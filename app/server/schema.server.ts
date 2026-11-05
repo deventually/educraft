@@ -190,6 +190,44 @@ export const courseLinks = sqliteTable(
 );
 
 /**
+ * One role-agent review of a course (brief P21, 21.3): the hat's findings as JSON, each with
+ * a stable id (`f1`, `f2`, ...). `courseUpdatedAt` is the course's `updatedAt` at review time,
+ * so the UI can say the review is out of date. Scoped to its owner.
+ */
+export const agentReviews = sqliteTable(
+  "agent_reviews",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    courseId: text("course_id").notNull(),
+    agentId: text("agent_id").notNull(),
+    model: text("model").notNull(),
+    findingsJson: text("findings_json").notNull(),
+    courseUpdatedAt: integer("course_updated_at", { mode: "timestamp_ms" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [index("agent_reviews_user_course_idx").on(t.userId, t.courseId)],
+);
+
+/**
+ * The teacher's decision on one finding (brief P21): `accepted` | `rejected`, with an
+ * optional reason. One decision per (review, finding); deciding again replaces it.
+ */
+export const reviewDecisions = sqliteTable(
+  "review_decisions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    reviewId: text("review_id").notNull(),
+    findingId: text("finding_id").notNull(),
+    decision: text("decision").notNull(),
+    reason: text("reason"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [uniqueIndex("review_decisions_review_finding").on(t.reviewId, t.findingId)],
+);
+
+/**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
  * touched; an absent row means "registry default" (safe defaults: a fresh
  * instance behaves exactly as before this phase).
