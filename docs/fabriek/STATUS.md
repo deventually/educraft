@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 en P21.1 bezig, brief P27 open)_
+_Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.3 en P21.2 bezig)_
 
 ## Nu
 
+- **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
+  thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
+  menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** register van de twee petten,
+  de invoer onder korte sleutels en de controle op het antwoord; nog zonder AI en scherm.
 - **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten kijken een cursus na op
   verzoek, met akkoord/niet akkoord (BESLUIT-2026-11-05-3); 21.1 kan starten.
 - **Cursussen, opslag (P20.2, #79) gemerged op 2026-11-05:** tabellen `courses` en `course_links`
@@ -114,13 +119,9 @@ _Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 en P21.1 bezig, brief P27 
   per cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, de aandachtspunten en de
   dekkingsmatrix. Werkt zonder JavaScript; axe-tests; screenshots NL/EN desktop en mobiel. Daarna
   20.4 (koppelen en voorinvullen). PR open.
-- P21.1 Rolagenten, petten als data (`app/lib/agents/`): de Toetsdeskundige en de Ontwerper als
-  register, de invoer die een pet krijgt (cursus onder korte sleutels, vaste controles, verworpen
-  adviezen) en de controle op het antwoord (onbekende items, dubbelen en verworpen adviezen vallen
-  weg). Nog zonder AI en zonder scherm. Daarna 21.2 (prompts en meting) en 21.3 (opslag). PR open.
-- Brief P27 *De rode draad*: één workflow met de cursus als thuisbasis, volgende stap onder elk
-  resultaat, BDB/BKE doet mee (weg terug uit de tool, bewijs voorstellen, route in vijf stappen),
-  startscherm met drie ingangen en een menu van vier (BESLUIT-2026-11-05-4). Alleen tekst; PR open.
+- P21.2 Rolagenten, de twee AI-teksten (Toetsdeskundige en Ontwerper, NL/EN) en de meting
+  `npm run eval:agents`: tien synthetische cursussen met een bekende fout, deterministisch gescoord.
+  Tussenronde ra1 (1 run): 10 van 10 geslaagd. Eindmeting (3 runs) wacht op akkoord. PR volgt.
 
 ## Wacht op jou
 
