@@ -15,13 +15,13 @@ Two instance-level roles (no org/tenant structure):
 
 | Role | Sees / uses |
 |------|-------------|
-| `teacher` | every tool the instance enables |
-| `admin`   | every tool, plus the admin console |
+| `teacher` | what the three layers give them (see below) |
+| `admin`   | every tool and part the instance has not Off, plus the admin console |
 
 The roles live in **one place** — `ROLES`/`isRole` in
 [`app/lib/registry/access.ts`](../app/lib/registry/access.ts). Which tools a user
-may use is decided by `isToolAvailable` in `availability.server.ts` (instance
-settings) and enforced server-side in three spots:
+may use is decided by `isToolAvailable` in `availability.server.ts` (the three layers,
+P28.3) and enforced server-side in three spots:
 the home loader (list filter), the tool loader (404), and the `/api/stream` action
 (refuse with a localized SSE error). No per-tool branching. A legacy `student` row
 (from before P17) can neither log in nor redeem an invite.
@@ -90,6 +90,38 @@ lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` st
 - An invite with a `team_id` makes the new teacher a member on redeem (`joinTeamFromInvite`).
   Invites stay `teacher` (BESLUIT-2026-07-03-2). Deleting a team keeps the accounts and turns
   its open invites into plain ones; deleting an account removes its memberships.
+
+## Parts, tools and models per team (P28.3)
+
+One rule, three layers (`app/lib/features/rule.ts`, BESLUIT-2026-11-05-5):
+
+```
+effective = instance is Off              → off
+          | the teacher has an exception → that exception
+          | one of their teams says on   → on
+          | one of their teams says off  → off
+          | otherwise                    → the instance default (On = on, On request = off)
+```
+
+- **Register as data:** `app/lib/features/` lists the four parts (`portfolio` On request,
+  `courses`, `roleAgents`, `utilities` On), validated at boot. No `if (feature === …)`.
+- **Storage:** the instance stand of a tool in `tool_settings.stand`, of a part in
+  `instance_settings` (`featureStand:<id>`); a team's choices as JSON on `teams.settings_json`
+  (`features`, `tools`, `models`); a teacher's exceptions in `feature_exceptions`
+  (`feature:<id>` / `tool:<slug>`). Migrations 0016/0017 carried every `enabled` flag and every
+  P27.2 `portfolioEnabled:<id>` switch over.
+- **One deep module:** `availability.server.ts` (`effectiveFeatures`, `effectiveTools`,
+  `getAvailableTools`, `isToolAvailable`, `requireFeature`, the model gates). Routes use
+  `requireFeatureUser` / `requireCourseUser`, so a part that is off is a 404; the menu and the
+  tools page only hide. Switching off deletes nothing.
+- **Models:** the teacher's own set (P18) → the union of their teams' sets, kept within the
+  instance (nothing left = the instance) → the instance.
+- **Admins** have everything the instance has not Off, and always BDB/BKE (P27.2).
+  `portfolioAccess` keeps the transition: no choice and a dossier → on.
+- **Who sets what:** the admin sets instance stands on `/admin/tools` and any team's choices on
+  `/admin/teams`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
+  exception, on the person page (section *Parts and tools*, which shows the source). A team only
+  sees what the instance has not Off; a stored choice for an Off item stays but never counts.
 
 ## Sessions & passwords
 

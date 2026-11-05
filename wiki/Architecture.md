@@ -80,7 +80,9 @@ LimeOnIt is not tied to one model vendor.
 - **Availability (P4/P13/P14/P18).** Which models a caller may *pick* is an OVERRIDE:
   the instance sets `enabledModels`; a teacher with their own `assignedModels` gets
   exactly that set instead (it replaces the instance and may be wider); no own set =
-  follow the instance; an admin always gets the instance set. An own set that is
+  follow the instance; teams can narrow the instance with their own sets (P28.3, see
+  [Authentication](Authentication.md#parts-tools-and-models-per-team-p283)); an admin
+  always gets the instance set. An own set that is
   empty after filtering counts as not set. `availability.server.ts#isModelSelectableForUser`
   is a membership walk, so it also gates a volatile `ollama::…` id without
   enumerating any local server. Opus-class + `compat::` stay server-only.
