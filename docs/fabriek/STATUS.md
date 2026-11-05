@@ -127,8 +127,8 @@ _Laatst bijgewerkt: 2026-11-05 (P20 af, P26.3 bezig)_
 ## Bezig
 
 - P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
-  voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open; de
-  meting wacht op akkoord.
+  voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
+  (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
