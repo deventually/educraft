@@ -145,7 +145,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     page();
     expect(screen.getByRole("heading", { level: 1, name: /verpleegkunde/i })).toBeInTheDocument();
     const mo = screen.getByRole("row", { name: /mo member/i });
-    expect(within(mo).getByText("mo@school.nl")).toBeInTheDocument();
+    expect(within(mo).getAllByText("mo@school.nl").length).toBeGreaterThan(0);
     const lea = screen.getByRole("row", { name: /lea lead/i });
     expect(within(lea).getByText(/^teamleider$/i)).toBeInTheDocument();
   });

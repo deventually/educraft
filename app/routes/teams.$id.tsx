@@ -105,7 +105,7 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
                 <th scope="col" className={th}>
                   {tt.colName}
                 </th>
-                <th scope="col" className={th}>
+                <th scope="col" className={`${th} hidden sm:table-cell`}>
                   {tt.colEmail}
                 </th>
                 <th scope="col" className={th}>
@@ -128,11 +128,17 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
                         {tt.leadBadge}
                       </span>
                     )}
+                    {/* On a phone the e-mail sits under the name instead of in a column. */}
+                    <span className="block text-xs font-normal text-slate-500 sm:hidden">
+                      {m.email}
+                    </span>
                   </th>
-                  <td className="px-4 py-2.5 text-slate-600">{m.email ?? "—"}</td>
+                  <td className="hidden px-4 py-2.5 text-slate-600 sm:table-cell">
+                    {m.email ?? "—"}
+                  </td>
                   <td className="px-4 py-2.5">
                     {!m.isLead && (
-                      <div className="flex flex-wrap justify-end gap-2">
+                      <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
                         <Form method="post">
                           <input type="hidden" name="intent" value="makeLead" />
                           <input type="hidden" name="userId" value={m.userId} />
