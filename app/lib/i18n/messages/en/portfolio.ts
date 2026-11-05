@@ -69,9 +69,6 @@ export const portfolio: Messages["portfolio"] = {
   exportAiRequired: "Your form asks for an account of AI use.",
   exportTitle: "Export",
   exportWord: "Download as a Word file",
-  findingNoEvidence: '{outcome}: "{criterion}" has no evidence yet.',
-  findingOverWords: "The chapters have {words} words together; the limit is {limit}.",
-  findingsTitle: "Points of attention",
   framework: {
     addCriterion: "Add criterion",
     addOutcome: "Add",

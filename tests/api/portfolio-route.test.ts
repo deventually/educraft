@@ -137,15 +137,12 @@ describe("/portfolio/:id and its pages", () => {
     ).toBe(404);
   });
 
-  it("gives the overview its progress, findings and next step", async () => {
+  it("gives the overview its progress, readiness and next step", async () => {
     const mine = await repo.createDossier("teacher-a", "A", sampleDossier());
     const data = await overview.loader({ request: get("/x"), params: { id: mine.id } } as never);
     expect(data.progress[0]).toMatchObject({ outcomeId: LU, criteria: 2, shown: 1 });
-    expect(data.findings).toContainEqual({
-      code: "criterion-without-evidence",
-      outcomeId: LU,
-      criterionId: C2,
-    });
+    // The readiness check replaced the separate findings (Bastiaan, 2026-11-05).
+    expect(data).not.toHaveProperty("findings");
     expect(data.next).toEqual({ step: "confirm-framework" });
     // P29.1: "Klaar om in te leveren?" and step 5 points at it.
     expect(data.readiness).toContainEqual({

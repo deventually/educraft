@@ -8,7 +8,7 @@ import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
 import { readinessCheck } from "~/lib/portfolio/readiness";
-import { nextStep, outcomeProgress, requirementFindings } from "~/lib/portfolio/progress";
+import { nextStep, outcomeProgress } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, Card, Input, Label } from "~/components/ui";
@@ -54,7 +54,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     name: dossier.name,
     framework: d.framework,
     progress: outcomeProgress(d),
-    findings: requirementFindings(d),
     next,
     nextTools,
     step: dossierStep(d),
@@ -89,7 +88,6 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     name,
     framework,
     progress,
-    findings,
     next,
     references,
     coachMode,
@@ -257,26 +255,6 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
                     {fmt(t.portfolio.missingEvidence, { items: p.missingEvidence.join("; ") })}
                   </p>
                 )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {findings.length > 0 && (
-        <section className="mt-8" aria-labelledby="findings-title">
-          <h2 id="findings-title" className="text-lg font-medium text-slate-900">
-            {t.portfolio.findingsTitle}
-          </h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
-            {findings.map((f) => (
-              <li key={f.code === "over-word-limit" ? f.code : f.criterionId}>
-                {f.code === "over-word-limit"
-                  ? fmt(t.portfolio.findingOverWords, { words: f.words, limit: f.limit })
-                  : fmt(t.portfolio.findingNoEvidence, {
-                      outcome: labelOf(f.outcomeId),
-                      criterion: criterionText(f.outcomeId, f.criterionId),
-                    })}
               </li>
             ))}
           </ul>

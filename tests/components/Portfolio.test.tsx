@@ -7,7 +7,7 @@ import PortfolioList from "~/routes/portfolio._index";
 import PortfolioOverview from "~/routes/portfolio.$id";
 import PortfolioFramework from "~/routes/portfolio.$id.framework";
 import PortfolioOutcome from "~/routes/portfolio.$id.outcome.$outcomeId";
-import { outcomeProgress, nextStep, requirementFindings } from "~/lib/portfolio/progress";
+import { outcomeProgress, nextStep } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierStep } from "~/lib/portfolio/step";
 import { readinessCheck } from "~/lib/portfolio/readiness";
@@ -32,7 +32,6 @@ function overviewData(d = sampleDossier()) {
     name: "Mijn BDB",
     framework: d.framework,
     progress: outcomeProgress(d),
-    findings: requirementFindings(d),
     next: nextStep(d),
     references: d.references,
     coachMode: d.coachMode,
@@ -108,7 +107,7 @@ describe("Portfolio list", () => {
 });
 
 describe("Portfolio overview", () => {
-  it("shows one next step, progress per outcome, missing evidence and findings", async () => {
+  it("shows one next step, progress per outcome and missing evidence", async () => {
     const { container } = renderRoute(PortfolioOverview, overviewData());
     expect(screen.getByText("Controleer het kader en bevestig het.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "LU1 Doceren" })).toHaveAttribute(
@@ -117,9 +116,8 @@ describe("Portfolio overview", () => {
     );
     expect(screen.getByText(/1 van 2 criteria aangetoond/)).toBeInTheDocument();
     expect(screen.getByText(/Nog geen bewijs voor: Opname van de les/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/"De les sluit aan bij de beginsituatie." heeft nog geen bewijs/),
-    ).toBeInTheDocument();
+    // The old "Aandachtspunten" block is gone: "Klaar om in te leveren?" names it (P29.1).
+    expect(screen.queryByRole("heading", { name: "Aandachtspunten" })).toBeNull();
     expect(screen.getByLabelText("Bron (APA)")).toBeInTheDocument();
     const exportButton = screen.getByRole("button", { name: "Download als Word-bestand" });
     expect(exportButton.closest("form")).toHaveAttribute("action", `/portfolio/${ID}/export`);
