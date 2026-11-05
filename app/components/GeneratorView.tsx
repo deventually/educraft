@@ -5,7 +5,7 @@ import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
-import { useSandbox } from "~/lib/hooks/useSandbox";
+import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
@@ -33,6 +33,8 @@ interface Props {
   defaultProfileId: string;
   localModels?: PickerModel[];
   catalogModels?: PickerModel[];
+  /** The teacher's courses (P20.4), for the course picker and its prefill. */
+  courses?: (SandboxCourse & { name: string })[];
 }
 
 export function GeneratorView({
@@ -41,16 +43,18 @@ export function GeneratorView({
   defaultProfileId,
   localModels,
   catalogModels,
+  courses,
 }: Props) {
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
   // Shared sandbox: seeds field defaults + the default profile's prefill, and
   // re-derives profile-backed fields on `selectProfile` (see useSandbox).
-  const { values, setValue, contextProfileId, selectProfile } = useSandbox({
+  const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse } = useSandbox({
     inputs: tool.inputs,
     profiles,
     defaultProfileId,
+    courses,
   });
   // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
   // server render and hydration agree; only the tool's own text fields are filled.
@@ -151,6 +155,7 @@ export function GeneratorView({
         outputLanguage,
         model,
         images: images.length > 0 ? images : undefined,
+        courseId: courseId || undefined,
       },
       {
         onToken: (text) => setOutput((prev) => prev + text),
@@ -193,6 +198,9 @@ export function GeneratorView({
           catalogModels={catalogModels}
           disabled={streaming}
           requiresImages={hasImageInputs}
+          courses={courses}
+          courseId={courseId}
+          onCourse={selectCourse}
         />
         <div className="flex items-center gap-3">
           {streaming ? (

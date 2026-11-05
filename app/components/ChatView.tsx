@@ -3,7 +3,8 @@ import { Send, Square, RotateCcw, Pencil } from "lucide-react";
 import { Link } from "react-router";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
 import { DynamicForm } from "./DynamicForm";
-import { useSandbox } from "~/lib/hooks/useSandbox";
+import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
+import { CoursePicker } from "./CoursePicker";
 import { summarizeSandbox } from "~/lib/forms/summarize";
 import { streamPost } from "~/lib/streamClient";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -36,6 +37,8 @@ interface ChatViewProps {
   /** Admin-configured catalog allow-list (Phase 4); omitted → full client-selectable catalog. */
   catalogModels?: PickerModel[];
   onGenerationStart?: () => void;
+  /** The teacher's courses (P20.4), offered in the setup card. */
+  courses?: (SandboxCourse & { name: string })[];
 }
 
 export function ChatView({
@@ -46,14 +49,18 @@ export function ChatView({
   localModels,
   catalogModels,
   onGenerationStart,
+  courses,
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
-  const { values: sandboxValues, setValue: setSandboxValue } = useSandbox({
-    inputs: tool.inputs,
-  });
+  const {
+    values: sandboxValues,
+    setValue: setSandboxValue,
+    courseId,
+    selectCourse,
+  } = useSandbox({ inputs: tool.inputs, courses });
   const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
@@ -173,6 +180,7 @@ export function ChatView({
           thinking: selectedModelSupportsThinking ? thinking : undefined,
           messages: messageHistory,
           sessionId: sessionIdRef.current,
+          courseId: courseId || undefined,
         },
         {
           onToken: (token: string) => {
@@ -231,7 +239,10 @@ export function ChatView({
             <h2 className="font-semibold text-slate-900">{t.chat.setupHeading}</h2>
             <p className="mt-1 text-sm text-slate-600">{t.chat.sandboxHint}</p>
           </div>
-          <DynamicForm fields={tool.inputs} values={sandboxValues} onChange={setSandboxValue} />
+          <div className="space-y-4">
+            <CoursePicker courses={courses ?? []} value={courseId} onChange={selectCourse} />
+            <DynamicForm fields={tool.inputs} values={sandboxValues} onChange={setSandboxValue} />
+          </div>
           <Button onClick={handleSandboxSubmit} className="mt-4">
             {t.chat.continue}
           </Button>

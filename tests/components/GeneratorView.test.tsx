@@ -35,6 +35,9 @@ vi.mock("~/lib/i18n/useT", () => ({
       required: "Required",
       emptyResult: "Nothing yet",
       fileComingSoon: "File upload coming soon",
+      course: "Course",
+      noCourse: "No course",
+      courseHint: "Fills in its learning outcomes and links the result to it.",
     },
   }),
 }));
@@ -104,5 +107,62 @@ describe("GeneratorView — values handed over by a utility (P24.5)", () => {
     // Taken once: a second visit starts empty.
     render(view());
     expect(screen.queryByDisplayValue("Handed over")).toBeNull();
+  });
+});
+
+describe("GeneratorView — course (P20, 20.4)", () => {
+  const courses = [
+    {
+      id: "c1",
+      name: "Biology 4 havo",
+      contextProfileId: "p4",
+      outcomes: [{ text: "Explains photosynthesis" }, { text: "Designs an experiment" }],
+    },
+  ];
+
+  it("prefills the learning outcomes and the course's context, and sends the courseId", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const post = streamPost as unknown as ReturnType<typeof vi.fn>;
+    post.mockClear();
+    const user = userEvent.setup();
+    const base = getToolBySlug("authentic-assessment")!;
+    // Only the course field matters here; drop the other required fields.
+    const tool = { ...base, inputs: base.inputs.map((f) => ({ ...f, required: false })) };
+    render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" courses={courses} />,
+    );
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Course" }), "c1");
+    expect(screen.getByLabelText(/desired learning outcome/i)).toHaveValue(
+      "- Explains photosynthesis\n- Designs an experiment",
+    );
+    expect(screen.getByRole("combobox", { name: "Context" })).toHaveValue("p4");
+
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    const body = post.mock.calls.at(-1)?.[1] as { courseId?: string };
+    expect(body.courseId).toBe("c1");
+  });
+
+  it("sends no courseId when no course is chosen", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const post = streamPost as unknown as ReturnType<typeof vi.fn>;
+    post.mockClear();
+    const user = userEvent.setup();
+    const base = getToolBySlug("authentic-assessment")!;
+    const tool = { ...base, inputs: base.inputs.map((f) => ({ ...f, required: false })) };
+    render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" courses={courses} />,
+    );
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    const body = post.mock.calls.at(-1)?.[1] as { courseId?: string };
+    expect(body.courseId).toBeUndefined();
+  });
+
+  it("has no accessibility violations with the course picker", async () => {
+    const tool = getToolBySlug("authentic-assessment")!;
+    const { container } = render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" courses={courses} />,
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

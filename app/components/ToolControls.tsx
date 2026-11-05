@@ -4,6 +4,7 @@ import type { ContextProfile } from "~/lib/context/types";
 import type { OutputLanguage } from "~/lib/registry/types";
 import { pickableModels, type PickerModel } from "~/lib/ai/models";
 import { AdvancedSettings } from "./AdvancedSettings";
+import { CoursePicker } from "./CoursePicker";
 import { Label, Select } from "./ui";
 import { useT } from "~/lib/i18n/useT";
 
@@ -25,6 +26,10 @@ interface Props {
   disabled?: boolean;
   /** If true, filter to only vision-capable models. */
   requiresImages?: boolean;
+  /** The teacher's courses (P20.4); empty or omitted hides the course picker. */
+  courses?: { id: string; name: string }[];
+  courseId?: string;
+  onCourse?: (id: string) => void;
 }
 
 export function ToolControls(props: Props) {
@@ -45,6 +50,12 @@ export function ToolControls(props: Props) {
 
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+      <CoursePicker
+        courses={props.courses ?? []}
+        value={props.courseId ?? ""}
+        onChange={(id) => props.onCourse?.(id)}
+        disabled={props.disabled}
+      />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {props.usesContextProfile && (
           <div>

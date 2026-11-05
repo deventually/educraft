@@ -29,6 +29,10 @@ vi.mock("~/server/repositories/generations.server", () => ({
   saveGeneration: saveGenerationSpy,
   upsertChatGeneration: upsertChatSpy,
 }));
+// Course linking (P20.4): ownership is checked in the repository (courses-repo.test.ts);
+// here only that the route asks for the link, and survives a refusal.
+const { linkGenerationSpy } = vi.hoisted(() => ({ linkGenerationSpy: vi.fn() }));
+vi.mock("~/server/repositories/courses.server", () => ({ linkGeneration: linkGenerationSpy }));
 
 type ActionMod = typeof import("~/routes/api.stream");
 let action: ActionMod["action"];
@@ -60,7 +64,8 @@ beforeEach(() => {
   streamChatSpy.mockImplementation(async function* () {
     yield "ok";
   });
-  saveGenerationSpy.mockReset().mockResolvedValue({});
+  saveGenerationSpy.mockReset().mockResolvedValue({ id: "gen-1" });
+  linkGenerationSpy.mockReset().mockResolvedValue({ id: "link-1" });
   upsertChatSpy.mockReset().mockResolvedValue({});
   getUserMock.mockReset();
   getUserMock.mockImplementation(async (request: Request) => ({
@@ -246,6 +251,74 @@ describe("api.stream — persistence", () => {
 // Refusal paths — each returns a localized SSE error and never calls the provider
 // (5.1 lists 13; every one is covered below and counted in this block)
 // ════════════════════════════════════════════════════════════════════════════
+
+describe("api.stream — course link (P20, 20.4)", () => {
+  it("links the saved generation to the caller's course", async () => {
+    const res = await invoke(
+      {
+        slug: "authentic-assessment",
+        values: fullValues("authentic-assessment"),
+        courseId: "course-1",
+      },
+      { userId: "link-own" },
+    );
+    await res.text();
+    expect(linkGenerationSpy).toHaveBeenCalledWith("link-own", "course-1", "gen-1");
+  });
+
+  it("links a chat by its session id", async () => {
+    const res = await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "Evolutie" },
+        messages: [{ role: "user", content: "hoi" }],
+        sessionId: "session-linkchat",
+        courseId: "course-1",
+      },
+      { userId: "link-chat" },
+    );
+    await res.text();
+    expect(linkGenerationSpy).toHaveBeenCalledWith("link-chat", "course-1", "session-linkchat");
+  });
+
+  it("a refused link (someone else's course) is ignored: the generation is saved, the stream completes", async () => {
+    linkGenerationSpy.mockResolvedValueOnce(null);
+    const res = await invoke(
+      {
+        slug: "authentic-assessment",
+        values: fullValues("authentic-assessment"),
+        courseId: "not-mine",
+      },
+      { userId: "link-foreign" },
+    );
+    const text = await res.text();
+    expect(saveGenerationSpy).toHaveBeenCalledTimes(1);
+    expect(text).toContain("event: done");
+    expect(sseErrorMessage(text)).toBeNull();
+  });
+
+  it("no courseId → no link", async () => {
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "link-none" },
+    );
+    await res.text();
+    expect(saveGenerationSpy).toHaveBeenCalledTimes(1);
+    expect(linkGenerationSpy).not.toHaveBeenCalled();
+  });
+
+  it("an oversized courseId → invalidRequest", async () => {
+    const res = await invoke(
+      {
+        slug: "authentic-assessment",
+        values: fullValues("authentic-assessment"),
+        courseId: "x".repeat(101),
+      },
+      { userId: "link-big" },
+    );
+    expect(sseErrorMessage(await res.text())).toBe(m.error.invalidRequest);
+  });
+});
 
 describe("api.stream — refusals (localized SSE, no provider call)", () => {
   it("[1] unknown slug → unknownTool", async () => {

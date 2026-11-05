@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 bezig)_
 
 ## Nu
 
+- **Cursussen, de pagina's (P20.3, #82) gemerged op 2026-11-05:** menu-item "Cursussen", per
+  cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, aandachtspunten en de
+  dekkingsmatrix.
 - **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten kijken een cursus na op
   verzoek, met akkoord/niet akkoord (BESLUIT-2026-11-05-3); 21.1 kan starten.
 - **Cursussen, opslag (P20.2, #79) gemerged op 2026-11-05:** tabellen `courses` en `course_links`
@@ -106,10 +109,9 @@ _Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
 
 ## Bezig
 
-- P20.3 Cursussen, de pagina's: menu-item "Cursussen", een lijst met aanmaken en verwijderen, en
-  per cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, de aandachtspunten en de
-  dekkingsmatrix. Werkt zonder JavaScript; axe-tests; screenshots NL/EN desktop en mobiel. Daarna
-  20.4 (koppelen en voorinvullen). PR open.
+- P20.4 Cursussen koppelen: op tien toolpagina's een cursuskiezer die de leeruitkomsten invult en
+  het resultaat aan de cursus koppelt; op "Mijn werk" werk koppelen en ontkoppelen, met een
+  cursusbadge; op de cursuspagina "Gekoppeld werk". Daarna 20.5 (documentatie). PR open.
 
 ## Wacht op jou
 

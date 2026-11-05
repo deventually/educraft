@@ -1,7 +1,19 @@
 import { useState } from "react";
 import type { InputField } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
-import { defaultValuesFor, profilePrefillValues, type FormValues } from "~/lib/forms/values";
+import {
+  coursePrefillValues,
+  type CoursePrefillSource,
+  defaultValuesFor,
+  profilePrefillValues,
+  type FormValues,
+} from "~/lib/forms/values";
+
+/** A course as the tool page sees it (P20, 20.4). */
+export interface SandboxCourse extends CoursePrefillSource {
+  id: string;
+  contextProfileId: string | null;
+}
 
 export interface UseSandboxOptions {
   /** The tool's input fields — the sandbox seeds one value per field. */
@@ -10,6 +22,8 @@ export interface UseSandboxOptions {
   profiles?: ContextProfile[];
   /** Which profile is selected initially. */
   defaultProfileId?: string;
+  /** The teacher's courses (empty/omitted → no course prefill). */
+  courses?: SandboxCourse[];
 }
 
 export interface UseSandbox {
@@ -23,6 +37,13 @@ export interface UseSandbox {
   contextProfileId: string;
   /** Select a profile and re-derive its profile-backed fields. */
   selectProfile: (id: string) => void;
+  /** The selected course id ("" = no course). */
+  courseId: string;
+  /**
+   * Select a course: re-derive its course-backed fields (reset when it derives
+   * nothing) and, when the course has a context profile, select that profile too.
+   */
+  selectCourse: (id: string) => void;
 }
 
 /**
@@ -41,8 +62,10 @@ export function useSandbox({
   inputs,
   profiles,
   defaultProfileId = "",
+  courses,
 }: UseSandboxOptions): UseSandbox {
   const profileList = profiles ?? [];
+  const [courseId, setCourseId] = useState("");
   const [contextProfileId, setContextProfileId] = useState(defaultProfileId);
   const [values, setValues] = useState<FormValues>(() => ({
     ...defaultValuesFor(inputs),
@@ -68,8 +91,32 @@ export function useSandbox({
     });
   }
 
+  function selectCourse(id: string) {
+    setCourseId(id);
+    const course = (courses ?? []).find((c) => c.id === id);
+    const prefill = coursePrefillValues(inputs, course);
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const f of inputs) {
+        if (!f.prefillFromCourse) continue;
+        next[f.name] = f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name];
+      }
+      return next;
+    });
+    if (course?.contextProfileId && profileList.some((p) => p.id === course.contextProfileId))
+      selectProfile(course.contextProfileId);
+  }
+
   const setValue = (name: string, value: FormValues[string]) =>
     setValues((prev) => ({ ...prev, [name]: value }));
 
-  return { values, setValue, setValues, contextProfileId, selectProfile };
+  return {
+    values,
+    setValue,
+    setValues,
+    contextProfileId,
+    selectProfile,
+    courseId,
+    selectCourse,
+  };
 }

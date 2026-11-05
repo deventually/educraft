@@ -57,6 +57,19 @@ export const courses: Messages["courses"] = {
   intro:
     "Record the learning outcomes, lessons and assessments of each course. You see at once what is not yet taught or assessed.",
   kind: "Kind",
+  links: {
+    empty: "Nothing linked yet. Pick this course in a tool, or link work from My work.",
+    errorRefused: "That link didn't work. Refresh the page and try again.",
+    intro: "What you made with the tools for this course.",
+    label: "Link to course",
+    link: "Link",
+    openInWork: "View in My work",
+    title: "Linked work",
+    toastLinked: "Linked to the course.",
+    toastUnlinked: "Unlinked from the course.",
+    unlinkFrom: "Unlink from {course}",
+    wholeCourse: "{course} — whole course",
+  },
   listTitle: "Your courses",
   matrix: {
     caption: "Which activity and which assessment covers which learning outcome",

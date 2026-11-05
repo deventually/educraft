@@ -117,6 +117,33 @@ describe("/courses/:id", () => {
     expect(data.course.name).toBe("SE");
     expect(data.findings).toEqual([]);
     expect(data.matrix.rows).toHaveLength(2);
+    expect(data.linkedWork).toEqual([]);
+  });
+
+  it("loads the linked work with the tool name and the item title (20.4)", async () => {
+    const gens = await import("~/server/repositories/generations.server");
+    const c = await repo.createCourse("teacher-a", { name: "SE", data: alignedCourse() });
+    const g = await gens.saveGeneration({
+      userId: "teacher-a",
+      toolSlug: "authentic-assessment",
+      input: {},
+      outputMarkdown: "# Toets",
+      model: "test",
+      outputLanguage: "nl",
+    } as never);
+    await repo.linkGeneration("teacher-a", c.id, g.id, QUIZ);
+    const data = await detail.loader({
+      request: get(`/courses/${c.id}`),
+      params: { id: c.id },
+    } as never);
+    expect(data.linkedWork).toEqual([
+      {
+        generationId: g.id,
+        toolName: { nl: "Authentieke toets ontwerpen", en: "Design an authentic assessment" },
+        itemTitle: "Oefentoets",
+        createdAt: g.createdAt,
+      },
+    ]);
   });
 
   it("is a 404 for someone else's course, for loader and action", async () => {

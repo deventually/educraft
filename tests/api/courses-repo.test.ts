@@ -166,4 +166,20 @@ describe("course links", () => {
     expect(await repo.listLinksForCourse(A, c.id, 2)).toHaveLength(2);
     expect(await repo.listCourseLinksForUser(A, 2)).toHaveLength(2);
   });
+
+  it("lists the linked work of a course with its tool and date, owner-scoped (20.4)", async () => {
+    const c = await repo.createCourse(A, { name: "Gekoppeld", data: alignedCourse() });
+    const g = await generation(A);
+    await repo.linkGeneration(A, c.id, g.id, TEST1);
+    const work = await repo.listLinkedWork(A, c.id);
+    expect(work).toEqual([
+      {
+        generationId: g.id,
+        toolSlug: "authentic-assessment",
+        itemId: TEST1,
+        createdAt: g.createdAt,
+      },
+    ]);
+    expect(await repo.listLinkedWork(B, c.id)).toEqual([]);
+  });
 });

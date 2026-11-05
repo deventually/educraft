@@ -173,6 +173,7 @@ export const guidedReflection: Tool = {
     },
     {
       name: "leeruitkomsten",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: {
         nl: "3. Specifieke, meetbare leeruitkomsten",
         en: "3. Specific, measurable learning outcomes",

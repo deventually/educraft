@@ -49,6 +49,7 @@ export const differentiation: Tool = {
   inputs: [
     {
       name: "learningGoal",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Leerdoel", en: "Learning goal" },
       kind: "textarea",
       required: true,

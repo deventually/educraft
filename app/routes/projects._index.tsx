@@ -12,6 +12,8 @@ import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { requireUser } from "~/server/auth.server";
+import { courseLinkIntent, loadCourseLinks } from "~/server/courses.server";
+import { CourseLinkBadges, CourseLinkForm } from "~/components/courses/CourseLinks";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
@@ -25,6 +27,8 @@ import { loc } from "~/lib/i18n/localized";
 export async function action({ request }: Route.ActionArgs) {
   const user = await requireUser(request);
   const fd = await request.formData();
+  const linked = await courseLinkIntent(request, user.id, fd);
+  if (linked) return linked;
   if (fd.get("intent") === "delete") {
     await deleteGeneration(user.id, String(fd.get("id")));
     return { ok: true, intent: "delete" };
@@ -59,6 +63,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
+  const links = await loadCourseLinks(user.id);
   const generations = (await listGenerations(user.id, 50)).map((g) => ({
     id: g.id,
     toolSlug: g.toolSlug,
@@ -68,16 +73,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     outputLanguage: g.outputLanguage,
     outputMarkdown: g.outputMarkdown,
     createdAt: g.createdAt,
+    courseLinks: links.byGeneration[g.id] ?? [],
   }));
   const dossiers = (await listDossiers(user.id)).map((d) => ({ id: d.id, name: d.name }));
-  return { generations, dossiers };
+  return { generations, dossiers, courses: links.targets };
 }
 
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
-  const { generations, dossiers = [] } = loaderData;
+  const { generations, dossiers = [], courses = [] } = loaderData;
   useFormToast(actionData, {
     result: (d) => {
       if (!d) return null;
@@ -85,12 +91,18 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
       return {
         variant: "success",
         message:
-          d.intent === "addToDossier" ? t.portfolio.toastAddedToDossier : t.projects.toastDeleted,
+          d.intent === "addToDossier"
+            ? t.portfolio.toastAddedToDossier
+            : d.intent === "linkCourse"
+              ? t.courses.links.toastLinked
+              : d.intent === "unlinkCourse"
+                ? t.courses.links.toastUnlinked
+                : t.projects.toastDeleted,
       };
     },
   });
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto w-full min-w-0 max-w-4xl">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.nav.projects}
       </h1>
@@ -113,9 +125,10 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
               <details>
                 <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pr-14">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <span className="font-medium text-slate-900">{loc(g.toolName, locale)}</span>
                       {g.stageId && <Badge>{g.stageId}</Badge>}
+                      <CourseLinkBadges links={g.courseLinks ?? []} />
                     </div>
                     <p className="truncate text-xs text-slate-400">
                       {fmtDate(g.createdAt, locale)} · {g.model} · {g.outputLanguage.toUpperCase()}
@@ -132,6 +145,11 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                       multi-stage, and chat sessions (saved as one row) — is ratable
                       here by its known id, without plumbing ids through the SSE stream. */}
                   <FeedbackWidget generationId={g.id} />
+                  <CourseLinkForm
+                    generationId={g.id}
+                    targets={courses}
+                    links={g.courseLinks ?? []}
+                  />
                   {dossiers.length > 0 && (
                     <Form method="post" className="flex flex-wrap items-end gap-2">
                       <input type="hidden" name="intent" value="addToDossier" />

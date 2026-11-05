@@ -234,3 +234,34 @@ export async function listCourseLinksForUser(
     .limit(cap(limit))
     .all();
 }
+
+export interface LinkedWork {
+  generationId: string;
+  toolSlug: string;
+  itemId: string | null;
+  createdAt: Date;
+}
+
+/** The caller's work linked to one course, newest link first (the course page, 20.4). */
+export async function listLinkedWork(
+  userId: string,
+  courseId: string,
+  limit?: number,
+): Promise<LinkedWork[]> {
+  return getDb()
+    .select({
+      generationId: generations.id,
+      toolSlug: generations.toolSlug,
+      itemId: courseLinks.itemId,
+      createdAt: generations.createdAt,
+    })
+    .from(courseLinks)
+    .innerJoin(
+      generations,
+      and(eq(generations.id, courseLinks.generationId), eq(generations.userId, userId)),
+    )
+    .where(and(eq(courseLinks.courseId, courseId), eq(courseLinks.userId, userId)))
+    .orderBy(desc(courseLinks.createdAt))
+    .limit(cap(limit))
+    .all();
+}

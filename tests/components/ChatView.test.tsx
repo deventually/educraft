@@ -38,6 +38,9 @@ vi.mock("~/lib/i18n/useT", () => ({
       reasoningHint: "Off is much faster.",
       advanced: "Advanced",
       noProfileAction: "Set up teaching context",
+      course: "Course",
+      noCourse: "No course",
+      courseHint: "Fills in its learning outcomes and links the result to it.",
     },
     chat: {
       send: "Send",
@@ -629,5 +632,66 @@ describe("ChatView", () => {
       messages: { role: string; content: string }[];
     };
     expect(resentBody.messages.at(-1)).toEqual({ role: "user", content: "What is OOP?" });
+  });
+});
+
+describe("ChatView — course (P20, 20.4)", () => {
+  const courseTool: Tool = {
+    ...mockTool,
+    inputs: [
+      {
+        name: "learningOutcome",
+        prefillFromCourse: { source: "learningOutcomes" },
+        label: { nl: "Leeruitkomst", en: "Learning outcome" },
+        kind: "textarea",
+        required: true,
+      },
+    ],
+  };
+  const courses = [
+    {
+      id: "c1",
+      name: "Biology",
+      contextProfileId: null,
+      outcomes: [{ text: "Explains photosynthesis" }],
+    },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("offers the course in the setup card, prefills the outcomes and sends the courseId", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+      onToken("ok");
+      onDone?.("ok");
+    });
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <ChatView tool={courseTool} courses={courses} />
+      </MemoryRouter>,
+    );
+    await user.selectOptions(screen.getByRole("combobox", { name: "Course" }), "c1");
+    expect(screen.getByLabelText(/Learning outcome/)).toHaveValue("- Explains photosynthesis");
+    expect((await axe(container)).violations).toEqual([]);
+
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByPlaceholderText("Your message…"), "Hello");
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+    const body = mockStreamPost.mock.calls.at(-1)?.[1] as { courseId?: string };
+    expect(body.courseId).toBe("c1");
+  });
+
+  it("shows no course picker without courses and sends no courseId", async () => {
+    render(
+      <MemoryRouter>
+        <ChatView tool={courseTool} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole("combobox", { name: "Course" })).toBeNull();
   });
 });

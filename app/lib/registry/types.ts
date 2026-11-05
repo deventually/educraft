@@ -59,6 +59,11 @@ export interface ProfilePrefill {
   map?: Record<string, string>;
 }
 
+/** Which part of a course fills a field (P20, 20.4). Data, not control flow. */
+export interface CoursePrefill {
+  source: "learningOutcomes";
+}
+
 export interface InputField {
   /** Becomes a {{name}} placeholder key in the prompt template. */
   name: string;
@@ -85,6 +90,8 @@ export interface InputField {
   rows?: number;
   /** Optional: derive this field's initial value from the selected profile. */
   prefillFromProfile?: ProfilePrefill;
+  /** Optional: fill this field from the selected course (P20): one learning outcome per line. */
+  prefillFromCourse?: CoursePrefill;
   /**
    * Student work: before sending, the browser replaces names and other personal
    * details in this field by codes the teacher reviews (P24, 24.0b).

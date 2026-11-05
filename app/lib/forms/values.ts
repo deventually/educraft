@@ -73,3 +73,25 @@ export function profilePrefillValues(
   }
   return out;
 }
+
+/** The part of a course that fills course-backed fields (P20, 20.4). */
+export interface CoursePrefillSource {
+  outcomes: { text: string }[];
+}
+
+/**
+ * Initial values for fields that declare `prefillFromCourse`: the course's
+ * learning outcomes, one per line (`- <text>`). Only fields that resolve to a
+ * non-empty value are returned; the prefilled fields stay editable.
+ */
+export function coursePrefillValues(
+  fields: InputField[],
+  course: CoursePrefillSource | null | undefined,
+): FormValues {
+  const out: FormValues = {};
+  if (!course || course.outcomes.length === 0) return out;
+  const text = course.outcomes.map((o) => `- ${o.text}`).join("\n");
+  for (const f of fields)
+    if (f.prefillFromCourse?.source === "learningOutcomes") out[f.name] = text;
+  return out;
+}

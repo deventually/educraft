@@ -4,7 +4,16 @@
  * `<Form intent>`. Routes stay thin.
  */
 import { requireRole, type User } from "./auth.server";
-import { type Course, getCourse, updateCourse } from "./repositories/courses.server";
+import {
+  type Course,
+  getCourse,
+  linkGeneration,
+  listCourseLinksForUser,
+  listCourses,
+  unlinkGeneration,
+  updateCourse,
+} from "./repositories/courses.server";
+import { linkTargets, linksByGeneration, parseLinkTarget } from "~/lib/courses/links";
 import { applyCourseIntent } from "~/lib/courses/intents";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages } from "~/lib/i18n";
@@ -60,4 +69,38 @@ export async function saveCourseIntent(
     return { ok: false, error: result.error === "not-found" ? m.errorNotFound : m.errorInvalid };
   const saved = await updateCourse(user.id, course.id, { data: result.data }).catch(() => null);
   return saved ? { ok: true } : { ok: false, error: m.errorInvalid };
+}
+
+/** The course targets and the links per generation, for "Mijn werk" (P20.4). */
+export async function loadCourseLinks(userId: string) {
+  const [courses, links] = await Promise.all([listCourses(userId), listCourseLinksForUser(userId)]);
+  return { targets: linkTargets(courses), byGeneration: linksByGeneration(links, courses) };
+}
+
+export type CourseLinkResult =
+  | { ok: true; intent: "linkCourse" | "unlinkCourse" }
+  | { ok: false; error: string };
+
+/** The `linkCourse` / `unlinkCourse` intents of "Mijn werk"; null for any other intent.
+ *  A foreign course or generation, or an unknown item, is refused by the repository. */
+export async function courseLinkIntent(
+  request: Request,
+  userId: string,
+  fd: FormData,
+): Promise<CourseLinkResult | null> {
+  const intent = fd.get("intent");
+  if (intent !== "linkCourse" && intent !== "unlinkCourse") return null;
+  const refused = {
+    ok: false as const,
+    error: getMessages(getLocale(request)).courses.links.errorRefused,
+  };
+  const generationId = String(fd.get("id") ?? "");
+  if (intent === "unlinkCourse") {
+    const done = await unlinkGeneration(userId, String(fd.get("courseId") ?? ""), generationId);
+    return done ? { ok: true, intent } : refused;
+  }
+  const target = parseLinkTarget(String(fd.get("target") ?? ""));
+  if (!target) return refused;
+  const link = await linkGeneration(userId, target.courseId, generationId, target.itemId);
+  return link ? { ok: true, intent } : refused;
 }

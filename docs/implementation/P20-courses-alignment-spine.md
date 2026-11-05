@@ -88,6 +88,19 @@ Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijges
   Leeruitkomsten · Onderwijsactiviteiten · Toetsen · Dekkingsmatrix: de adviezen staan bovenaan,
   zodat de docent ze meteen ziet. De sectie *Gekoppeld werk* komt met 20.4, als er iets te koppelen
   valt. De vormgrens is `applyCourseIntent` in `app/lib/courses/intents.ts` (puur, Zod).
+- **Koppelen (20.4, zoals gebouwd):**
+  - Tien velden hebben `prefillFromCourse` (de vijf hieronder plus de vijf P24-velden hierboven).
+    Een veld in het enkelvoud krijgt ook álle leeruitkomsten, één per regel; de docent haalt weg wat
+    niet hoort. Een keuze per leeruitkomst kan later, als docenten erom vragen.
+  - De cursuskiezer (`CoursePicker`) staat in het blok met onderwijscontext en taal, en in de
+    startkaart van een chattool (`bloom-by-design`). Hij verschijnt alleen als de tool een
+    cursusveld heeft én de docent een cursus heeft; de loader stuurt anders geen cursussen mee. Geen
+    meerstapstool heeft een cursusveld, dus `StageStepper` blijft ongemoeid.
+  - Op "Mijn werk" is het één `<select>` in plaats van twee: per cursus een groep met "hele cursus"
+    en daaronder de activiteiten en toetsen (waarde `cursusId` of `cursusId::itemId`). Zo werkt het
+    zonder JavaScript. De intents heten `linkCourse` en `unlinkCourse`, naast het bestaande `delete`.
+  - "Gekoppeld werk" op de cursuspagina staat onderaan, na de dekkingsmatrix
+    (`listLinkedWork`, één join, per docent afgeschermd).
 
 ## Het model (`app/lib/courses/types.ts`)
 
@@ -216,7 +229,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
     - `remove-outcome` haalt verwijzingen weg.
   - `AppShell.test.tsx`: de navigatie toont Cursussen voor een docent, niet voor een student.
 
-## 20.4 — Generaties aan cursussen koppelen
+## 20.4 — Generaties aan cursussen koppelen (klaar)
 
 - **`/projects`:** per generatie een klein formulier "Koppel aan cursus" (cursus-`<select>` plus een
   optionele activiteit/toets-`<select>`) → `intent="link"` / `intent="unlink"`. Gekoppelde

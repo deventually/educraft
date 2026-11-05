@@ -53,6 +53,7 @@ export const bloomByDesign: Tool = {
   inputs: [
     {
       name: "learningOutcome",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: {
         nl: "Wat moeten studenten kunnen doen?",
         en: "What should students be able to do?",

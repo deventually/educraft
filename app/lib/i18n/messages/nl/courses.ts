@@ -55,6 +55,19 @@ export const courses = {
   intro:
     "Leg per cursus de leeruitkomsten, lessen en toetsen vast. Je ziet meteen wat nog niet onderwezen of getoetst wordt.",
   kind: "Soort",
+  links: {
+    empty: "Nog niets gekoppeld. Kies deze cursus in een tool, of koppel werk vanuit Mijn werk.",
+    errorRefused: "Koppelen lukte niet. Vernieuw de pagina en probeer het opnieuw.",
+    intro: "Wat je met de tools voor deze cursus hebt gemaakt.",
+    label: "Koppel aan cursus",
+    link: "Koppelen",
+    openInWork: "Bekijk in Mijn werk",
+    title: "Gekoppeld werk",
+    toastLinked: "Gekoppeld aan de cursus.",
+    toastUnlinked: "Ontkoppeld van de cursus.",
+    unlinkFrom: "Ontkoppel van {course}",
+    wholeCourse: "{course} — hele cursus",
+  },
   listTitle: "Jouw cursussen",
   matrix: {
     caption: "Welke activiteit en welke toets dekt welke leeruitkomst",

@@ -16,14 +16,20 @@ const gen = {
   createdAt: new Date("2026-05-01T10:00:00Z"),
 };
 
+type Gen = typeof gen & {
+  courseLinks?: { courseId: string; courseName: string; itemTitle: string | null }[];
+};
+type Target = { courseId: string; courseName: string; items: { id: string; title: string }[] };
+
 function renderProjects(
-  generations: (typeof gen)[],
+  generations: Gen[],
   dossiers: { id: string; name: string }[] = [],
+  courses: Target[] = [],
 ) {
   // createRoutesStub renders route components without injecting the loaderData
   // prop (that's framework-mode behaviour), so we pass it via a wrapper while
   // still rendering inside the stub's data router (needed for Form/useNavigation).
-  const props = { loaderData: { generations, dossiers } } as unknown as ComponentProps<
+  const props = { loaderData: { generations, dossiers, courses } } as unknown as ComponentProps<
     typeof Projects
   >;
   const Stub = createRoutesStub([{ path: "/", Component: () => <Projects {...props} /> }]);
@@ -77,5 +83,38 @@ describe("Projects page", () => {
     const { container } = renderProjects([]);
     const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
     expect(results.violations).toEqual([]);
+  });
+});
+
+describe("Projects page — course links (P20, 20.4)", () => {
+  const courses: Target[] = [
+    { courseId: "c1", courseName: "SE jaar 2", items: [{ id: "t1", title: "Eindopdracht" }] },
+  ];
+  const axeOpts = { rules: { "color-contrast": { enabled: false } } };
+
+  it("offers the link form only when the teacher has a course", () => {
+    renderProjects([gen]);
+    expect(screen.queryByRole("button", { name: "Koppelen" })).toBeNull();
+  });
+
+  it("offers each course, and each of its items, as a link target", async () => {
+    const { container } = renderProjects([gen], [], courses);
+    const select = screen.getByRole("combobox", { name: "Koppel aan cursus" });
+    expect(select).toHaveAttribute("name", "target");
+    expect(screen.getByRole("option", { name: "SE jaar 2 — hele cursus" })).toHaveValue("c1");
+    expect(screen.getByRole("option", { name: "Eindopdracht" })).toHaveValue("c1::t1");
+    expect(screen.getByRole("button", { name: "Koppelen" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows a badge per linked course and an unlink button", async () => {
+    const linked = {
+      ...gen,
+      courseLinks: [{ courseId: "c1", courseName: "SE jaar 2", itemTitle: "Eindopdracht" }],
+    };
+    const { container } = renderProjects([linked], [], courses);
+    expect(screen.getByText("SE jaar 2 · Eindopdracht")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ontkoppel van SE jaar 2" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

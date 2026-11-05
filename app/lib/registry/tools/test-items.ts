@@ -53,6 +53,7 @@ export const testItems: Tool = {
   inputs: [
     {
       name: "learningOutcomes",
+      prefillFromCourse: { source: "learningOutcomes" },
       label: { nl: "Leeruitkomsten", en: "Learning outcomes" },
       kind: "textarea",
       required: true,
