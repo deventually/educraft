@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.1 gemerged, P20.2 bezig)_
 
 ## Nu
 
+- **Cursussen, het rekenhart (P20.1, #78) gemerged op 2026-11-05:** cursusmodel met
+  leeruitkomsten, activiteiten, toetsen, Bloom en studielast, en de afstemmingscontroles; nog geen
+  scherm.
 - **Lastig gesprek oefenen (P24.8, #75) gemerged op 2026-11-05:** de AI speelt een verzonnen
   student in een moeilijk gesprek en geeft daarna feedback met citaten; eindmeting dc3 elke case
   4,60–4,93.
@@ -97,9 +100,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 bezig)_
 
 ## Bezig
 
-- P20.1 Cursussen, puur domein (`app/lib/courses/`): het cursusmodel (leeruitkomsten, activiteiten,
-  toetsen, Bloom, studielast), bewerkingen en de afstemmingscontroles, zonder AI en nog zonder
-  scherm. Daarna 20.2 (opslag), 20.3 (pagina's), 20.4 (koppelen en voorinvullen). PR open.
+- P20.2 Cursussen, opslag: de tabellen `courses` en `course_links` (migratie 0014) en de
+  repository, per docent afgeschermd; een generatie koppel je alleen aan een eigen cursus. Nog geen
+  scherm. Daarna 20.3 (pagina's) en 20.4 (koppelen en voorinvullen). PR open; na de merge
+  `npm run db:migrate`.
 
 ## Wacht op jou
 
