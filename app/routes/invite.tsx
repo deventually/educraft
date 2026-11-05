@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { Route } from "./+types/invite";
 import { createUserSession } from "~/server/auth.server";
 import { consumeInvite, createUser, getInvite } from "~/server/repositories/users.server";
+import { joinTeamFromInvite } from "~/server/repositories/teams.server";
 import { hashPassword } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -69,6 +70,8 @@ export async function action({ params, request }: Route.ActionArgs) {
     passwordHash: hashPassword(password),
     role: "teacher", // never taken from the invite row or the form
   });
+  // A team invite (P28.2) makes the new teacher a member of that team.
+  if (consumed.teamId) await joinTeamFromInvite(consumed.teamId, userId);
 
   return createUserSession(userId, "/");
 }

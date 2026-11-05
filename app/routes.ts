@@ -8,6 +8,7 @@ import { help } from "./routing/help";
 import { info } from "./routing/info";
 import { portfolio } from "./routing/portfolio";
 import { projects } from "./routing/projects";
+import { teams } from "./routing/teams";
 import { tools } from "./routing/tools";
 import { utilities } from "./routing/utilities";
 import type { RouteArea } from "./routing/types";
@@ -27,6 +28,7 @@ const areas: RouteArea[] = [
   info,
   portfolio,
   projects,
+  teams,
   tools,
   utilities,
 ];

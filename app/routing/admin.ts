@@ -11,6 +11,7 @@ export const admin: RouteArea = {
       index("routes/admin._index.tsx"), // redirects to /admin/users
       route("users", "routes/admin.users.tsx"),
       route("users/:id", "routes/admin.users.$id.tsx"), // the person page (P28.1)
+      route("teams", "routes/admin.teams.tsx"), // teams and leads (P28.2)
       route("tools", "routes/admin.tools.tsx"),
       route("context", "routes/admin.context.tsx"),
       route("usage", "routes/admin.usage.tsx"),

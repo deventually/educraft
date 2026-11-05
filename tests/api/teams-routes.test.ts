@@ -1,0 +1,317 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Isolated in-memory SQLite before any server module loads.
+process.env.DATABASE_URL = "file::memory:";
+
+// Who is signed in; isOwner stays real (it reads the stored owner id).
+const { currentUser } = vi.hoisted(() => ({
+  currentUser: { value: null as unknown },
+}));
+vi.mock("~/server/auth.server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("~/server/auth.server")>();
+  return {
+    ...actual,
+    requireUser: vi.fn(async () => currentUser.value),
+    requireRole: vi.fn(async (_req: Request, ...roles: string[]) => {
+      const u = currentUser.value as { role: string };
+      if (!roles.includes(u.role)) throw new Response("Forbidden", { status: 403 });
+      return u;
+    }),
+  };
+});
+vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
+
+let teams: typeof import("~/server/repositories/teams.server");
+let users: typeof import("~/server/repositories/users.server");
+let settings: typeof import("~/server/repositories/settings.server");
+let adminTeams: typeof import("~/routes/admin.teams");
+let list: typeof import("~/routes/admin.users");
+let person: typeof import("~/routes/admin.users.$id");
+let leadPage: typeof import("~/routes/teams.$id");
+let invite: typeof import("~/routes/invite");
+
+beforeAll(async () => {
+  teams = await import("~/server/repositories/teams.server");
+  users = await import("~/server/repositories/users.server");
+  settings = await import("~/server/repositories/settings.server");
+  adminTeams = await import("~/routes/admin.teams");
+  list = await import("~/routes/admin.users");
+  person = await import("~/routes/admin.users.$id");
+  leadPage = await import("~/routes/teams.$id");
+  invite = await import("~/routes/invite");
+});
+
+let n = 0;
+async function mk(name: string, role: "teacher" | "admin" = "teacher") {
+  n++;
+  return users.createUser({
+    name,
+    email: `${name.toLowerCase().replace(/\s+/g, ".")}.${n}@school.nl`,
+    passwordHash: "scrypt:a:b",
+    role,
+  });
+}
+const as = (u: { id: string; role: string; name?: string }) => {
+  currentUser.value = { email: null, name: "x", ...u };
+};
+
+let admin: Awaited<ReturnType<typeof mk>>;
+beforeEach(async () => {
+  admin ??= await mk("Admin", "admin");
+  as(admin);
+});
+
+function post(fields: Record<string, string | string[]>, path = "/x"): Request {
+  const body = new URLSearchParams();
+  for (const [k, v] of Object.entries(fields))
+    for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
+  return new Request(`http://localhost${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+}
+const get = (path = "/x") => new Request(`http://localhost${path}`);
+const call = <F extends (a: never) => unknown>(fn: F, args: object) =>
+  fn({ params: {}, context: {}, ...args } as never) as Promise<Awaited<ReturnType<F>>>;
+async function status(p: Promise<unknown>): Promise<number | undefined> {
+  try {
+    await p;
+    return undefined;
+  } catch (e) {
+    return e instanceof Response ? e.status : -1;
+  }
+}
+const memberIds = async (teamId: string) =>
+  ((await teams.getTeamWithMembers(teamId))?.members ?? []).map((m) => m.userId);
+
+describe("/admin/teams (P28.2)", () => {
+  it("creates, renames and deletes a team (admin)", async () => {
+    const created = (await call(adminTeams.action, {
+      request: post({ intent: "create", name: "Verpleegkunde" }),
+    })) as { saved?: boolean };
+    expect(created.saved).toBe(true);
+    const data = await call(adminTeams.loader, { request: get() });
+    const team = data.teams.find((t) => t.name === "Verpleegkunde")!;
+    expect(team).toBeDefined();
+    await call(adminTeams.action, {
+      request: post({ intent: "rename", teamId: team.id, name: "VPK" }),
+    });
+    expect((await teams.getTeamWithMembers(team.id))?.name).toBe("VPK");
+    await call(adminTeams.action, { request: post({ intent: "delete", teamId: team.id }) });
+    expect(await teams.getTeamWithMembers(team.id)).toBeNull();
+  });
+
+  it("refuses an empty name", async () => {
+    const res = (await call(adminTeams.action, {
+      request: post({ intent: "create", name: " " }),
+    })) as { error?: string };
+    expect(res.error).toBe("nameRequired");
+  });
+
+  it("adds a member by e-mail, makes them lead, takes it away and removes them", async () => {
+    const team = await teams.createTeam("Beheer");
+    const a = await mk("Docent A");
+    const added = (await call(adminTeams.action, {
+      request: post({ intent: "addMember", teamId: team.id, email: a.email! }),
+    })) as { saved?: boolean };
+    expect(added.saved).toBe(true);
+    await call(adminTeams.action, {
+      request: post({ intent: "setLead", teamId: team.id, userId: a.id, lead: "1" }),
+    });
+    expect(await teams.getTeamForLead(a.id, team.id)).not.toBeNull();
+    await call(adminTeams.action, {
+      request: post({ intent: "setLead", teamId: team.id, userId: a.id }),
+    });
+    expect(await teams.getTeamForLead(a.id, team.id)).toBeNull();
+    await call(adminTeams.action, {
+      request: post({ intent: "removeMember", teamId: team.id, userId: a.id }),
+    });
+    expect(await memberIds(team.id)).toEqual([]);
+    const unknown = (await call(adminTeams.action, {
+      request: post({ intent: "addMember", teamId: team.id, email: "nobody@school.nl" }),
+    })) as { error?: string };
+    expect(unknown.error).toBe("noSuchUser");
+  });
+
+  it("is admin only: a teacher, even a lead, gets a 403", async () => {
+    const team = await teams.createTeam("Alleen beheer");
+    const lead = await mk("Lead X");
+    await teams.addMember(team.id, lead.id);
+    await teams.setLead(team.id, lead.id, true);
+    as(lead);
+    expect(await status(call(adminTeams.loader, { request: get() }))).toBe(403);
+    expect(
+      await status(call(adminTeams.action, { request: post({ intent: "create", name: "Y" }) })),
+    ).toBe(403);
+  });
+});
+
+describe("the person page and the list know teams (P28.2)", () => {
+  it("the person page sets a person's teams and leads", async () => {
+    const a = await teams.createTeam("PA");
+    const b = await teams.createTeam("PB");
+    const t = await mk("Person Teams");
+    const res = (await call(person.action, {
+      request: post({ intent: "teams", teams: [a.id, b.id], leads: [b.id] }),
+      params: { id: t.id },
+    })) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    const data = await call(person.loader, { request: get(), params: { id: t.id } });
+    expect(data.teams).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: a.id, member: true, lead: false }),
+        expect.objectContaining({ id: b.id, member: true, lead: true }),
+      ]),
+    );
+  });
+
+  it("a regular admin cannot set the teams of another admin", async () => {
+    await settings.setOwnerUserId(null);
+    const team = await teams.createTeam("PC");
+    const other = await mk("Other Admin", "admin");
+    const res = (await call(person.action, {
+      request: post({ intent: "teams", teams: [team.id] }),
+      params: { id: other.id },
+    })) as { error?: string };
+    expect(res.error).toBe("ownerOnly");
+    expect(await teams.listTeamsForUser(other.id)).toEqual([]);
+  });
+
+  it("the list filters on team and Add mints an invite for a team", async () => {
+    const team = await teams.createTeam("Filter");
+    const inTeam = await mk("In Team");
+    await mk("Not In Team");
+    await teams.addMember(team.id, inTeam.id);
+    const minted = (await call(list.action, {
+      request: post({ intent: "mint", teamId: team.id, note: "Team Invite" }),
+    })) as { link: string };
+    const token = minted.link.split("/invite/")[1];
+    expect((await users.getInvite(token))?.teamId).toBe(team.id);
+    const data = await call(list.loader, { request: get(`/admin/users?team=${team.id}`) });
+    expect(data.people.map((p) => p.name).sort()).toEqual(["In Team", "Team Invite"]);
+    expect(data.teams.map((t) => t.id)).toContain(team.id);
+  });
+
+  it("a direct account (owner) joins the chosen team", async () => {
+    await settings.setOwnerUserId(admin.id);
+    const team = await teams.createTeam("Direct");
+    await call(list.action, {
+      request: post({
+        intent: "createAccount",
+        name: "Direct Person",
+        email: "direct.person@school.nl",
+        role: "teacher",
+        passwordMode: "link",
+        teamId: team.id,
+      }),
+    });
+    const created = await users.getUserByEmail("direct.person@school.nl");
+    expect(await memberIds(team.id)).toEqual([created!.id]);
+    await settings.setOwnerUserId(null);
+  });
+});
+
+describe("redeeming a team invite (P28.2)", () => {
+  it("makes the new account a member of that team, as a teacher", async () => {
+    const team = await teams.createTeam("Uitnodiging");
+    const inv = await users.createInvite({ role: "teacher", teamId: team.id });
+    await invite.action({
+      params: { token: inv.token },
+      request: post({
+        name: "Nieuw Lid",
+        email: "nieuw.lid@school.nl",
+        password: "supersecret10",
+        confirm: "supersecret10",
+      }),
+    } as never);
+    const u = await users.getUserByEmail("nieuw.lid@school.nl");
+    expect(u?.role).toBe("teacher");
+    expect(await memberIds(team.id)).toEqual([u!.id]);
+  });
+});
+
+describe("/teams/:id — the lead's page (P28.2)", () => {
+  async function setup() {
+    const team = await teams.createTeam(`Lead team ${++n}`);
+    const lead = await mk("The Lead");
+    const member = await mk("The Member");
+    await teams.addMember(team.id, lead.id);
+    await teams.setLead(team.id, lead.id, true);
+    await teams.addMember(team.id, member.id);
+    return { team, lead, member };
+  }
+  const act = (teamId: string, fields: Record<string, string>) =>
+    call(leadPage.action, { request: post(fields), params: { id: teamId } });
+
+  it("shows the lead their team: members with name and e-mail", async () => {
+    const { team, lead, member } = await setup();
+    as(lead);
+    const data = await call(leadPage.loader, { request: get(), params: { id: team.id } });
+    expect(data.team.name).toBe(team.name);
+    expect(data.team.members).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userId: member.id, email: member.email, isLead: false }),
+      ]),
+    );
+    expect(data.selfId).toBe(lead.id);
+  });
+
+  it("is a 404 for a plain member, a lead of another team and an admin who is no lead", async () => {
+    const { team, member } = await setup();
+    const other = await setup();
+    for (const who of [member, other.lead, admin]) {
+      as(who);
+      expect(
+        await status(call(leadPage.loader, { request: get(), params: { id: team.id } })),
+        who.name,
+      ).toBe(404);
+      expect(
+        await status(act(team.id, { intent: "addMember", email: other.member.email! })),
+        who.name,
+      ).toBe(404);
+    }
+    expect(await memberIds(team.id)).not.toContain(other.member.id);
+  });
+
+  it("adds by exact e-mail, makes a member lead, and removes a plain member", async () => {
+    const { team, lead, member } = await setup();
+    const colleague = await mk("Colleague");
+    as(lead);
+    expect(await act(team.id, { intent: "addMember", email: colleague.email! })).toEqual({
+      saved: true,
+    });
+    expect(await act(team.id, { intent: "addMember", email: "nobody@school.nl" })).toEqual({
+      error: "noSuchUser",
+    });
+    expect(await act(team.id, { intent: "makeLead", userId: member.id })).toEqual({
+      saved: true,
+    });
+    // Now a lead: a lead cannot remove them.
+    expect(await act(team.id, { intent: "removeMember", userId: member.id })).toEqual({
+      error: "isLead",
+    });
+    expect(await act(team.id, { intent: "removeMember", userId: colleague.id })).toEqual({
+      saved: true,
+    });
+    expect((await memberIds(team.id)).sort()).toEqual([lead.id, member.id].sort());
+  });
+
+  it("mints a teacher invite for this team", async () => {
+    const { team, lead } = await setup();
+    as(lead);
+    const res = (await act(team.id, { intent: "invite", note: "Collega" })) as { link: string };
+    const token = res.link.split("/invite/")[1];
+    expect(await users.getInvite(token)).toMatchObject({ role: "teacher", teamId: team.id });
+  });
+
+  it("steps down and goes back to the account page", async () => {
+    const { team, lead } = await setup();
+    as(lead);
+    const res = (await act(team.id, { intent: "stepDown" })) as unknown as Response;
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("/account");
+    expect(await teams.getTeamForLead(lead.id, team.id)).toBeNull();
+    expect(await memberIds(team.id)).toContain(lead.id);
+  });
+});

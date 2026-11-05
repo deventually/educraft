@@ -1237,7 +1237,7 @@ describe("admin users — the list and the person page (P28.1)", () => {
       filter: { q: string; role: string; status: string };
     };
     expect(data.people.map((p) => p.id)).toEqual([t.id]);
-    expect(data.filter).toEqual({ q: "zoë", role: "", status: "active" });
+    expect(data.filter).toEqual({ q: "zoë", role: "", status: "active", team: "" });
   });
 
   it("the list loader ignores a filter value it does not know", async () => {

@@ -1,4 +1,11 @@
-import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  uniqueIndex,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
 /** An authenticated account. Created via invite link (see `invites`). */
 export const users = sqliteTable("users", {
@@ -37,6 +44,8 @@ export const invites = sqliteTable("invites", {
   usedByUserId: text("used_by_user_id"),
   // Who issued it. Nullable: role-only ops invites (scripts/invite.ts) carry none.
   createdByUserId: text("created_by_user_id"),
+  // P28.2: the team the new account joins on redeem; null = no team.
+  teamId: text("team_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -203,8 +212,34 @@ export const instanceSettings = sqliteTable("instance_settings", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+/** A team of colleagues (P28.2). Joining shares nothing; it is a group, not a role. */
+export const teams = sqliteTable("teams", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
+ * Who is in which team (P28.2). `isLead` is a stand per team, not a role: `users.role`
+ * stays `teacher | admin`. One row per (team, user).
+ */
+export const teamMembers = sqliteTable(
+  "team_members",
+  {
+    teamId: text("team_id").notNull(),
+    userId: text("user_id").notNull(),
+    isLead: integer("is_lead", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.teamId, t.userId] }),
+    index("team_members_user_idx").on(t.userId),
+  ],
+);
+
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
+export type TeamRow = typeof teams.$inferSelect;
 export type PasswordResetRow = typeof passwordResets.$inferSelect;
 export type ToolSettingRow = typeof toolSettings.$inferSelect;
 export type InstanceSettingRow = typeof instanceSettings.$inferSelect;

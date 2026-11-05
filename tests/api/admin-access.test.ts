@@ -53,7 +53,7 @@ beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
   teacherCookie = await cookieFor("teacher");
 
-  const [layout, index, tools, usersRoute, context, usage, person] = await Promise.all([
+  const [layout, index, tools, usersRoute, context, usage, person, teamsRoute] = await Promise.all([
     import("~/routes/admin"),
     import("~/routes/admin._index"),
     import("~/routes/admin.tools"),
@@ -61,6 +61,7 @@ beforeAll(async () => {
     import("~/routes/admin.context"),
     import("~/routes/admin.usage"),
     import("~/routes/admin.users.$id"),
+    import("~/routes/admin.teams"),
   ]);
   const g = (name: string, fn: unknown) => ({ name, fn: fn as Guarded["fn"] });
   guarded = [
@@ -75,6 +76,8 @@ beforeAll(async () => {
     g("admin.usage loader", usage.loader),
     g("admin.users.$id loader", person.loader),
     g("admin.users.$id action", person.action),
+    g("admin.teams loader", teamsRoute.loader),
+    g("admin.teams action", teamsRoute.action),
   ];
 });
 

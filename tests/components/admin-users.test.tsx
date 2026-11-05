@@ -65,7 +65,11 @@ const loaderData = {
   // Default viewer: the owner (super admin). Tests for a regular admin override this.
   isOwner: true,
   ownerId: "admin-1",
-  filter: { q: "", role: "", status: "" },
+  filter: { q: "", role: "", status: "", team: "" },
+  teams: [
+    { id: "team-1", name: "Verpleegkunde" },
+    { id: "team-2", name: "Techniek" },
+  ],
   people,
 };
 
@@ -163,7 +167,9 @@ describe("Admin user list (P28.1)", () => {
   });
 
   it("searches and filters with a GET form, prefilled from the query", () => {
-    renderRoute(undefined, { filter: { q: "zoë", role: "teacher", status: "invited" } });
+    renderRoute(undefined, {
+      filter: { q: "zoë", role: "teacher", status: "invited", team: "team-2" },
+    });
     const search = screen.getByRole("search");
     const form = search.tagName === "FORM" ? search : search.querySelector("form");
     expect(form?.getAttribute("method")).toBe("get");
@@ -179,6 +185,8 @@ describe("Admin user list (P28.1)", () => {
     ).map((o) => o.value);
     expect(statuses).toEqual(["", "active", "invited", "disabled"]);
     expect(within(search).getByRole("button", { name: /^zoeken$/i })).toBeInTheDocument();
+    // P28.2: a filter on team.
+    expect(screen.getByLabelText(/^team$/i)).toHaveValue("team-2");
   });
 
   it("says so when nobody matches", () => {
@@ -288,5 +296,44 @@ describe("Admin user list — one Add button (P28.1)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     await user.click(screen.getByRole("radio", { name: /account met wachtwoord/i }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin user list — teams (P28.2)", () => {
+  it("lets Add choose a team for the invite", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { link: "http://localhost/invite/tok-new" };
+    });
+    await openAdd(user);
+    await user.selectOptions(screen.getByLabelText(/in team/i), "team-1");
+    await user.click(screen.getByRole("button", { name: /uitnodiging aanmaken/i }));
+    await waitFor(() => expect(body?.get("teamId")).toBe("team-1"));
+  });
+
+  it("lets Add choose a team for a direct account too", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { setPasswordLink: "http://localhost/reset/tok" };
+    });
+    await openAdd(user);
+    await user.click(screen.getByRole("radio", { name: /account met wachtwoord/i }));
+    await user.type(screen.getByLabelText(/^naam$/i), "Nieuw");
+    await user.type(screen.getByLabelText(/^e-mailadres$/i), "n@x.nl");
+    await user.selectOptions(screen.getByLabelText(/in team/i), "team-2");
+    await user.click(screen.getByRole("button", { name: /^account aanmaken$/i }));
+    await waitFor(() => expect(body?.get("teamId")).toBe("team-2"));
+  });
+
+  it("offers no team choice when there are no teams", async () => {
+    const user = userEvent.setup();
+    renderRoute(undefined, { teams: [] });
+    await openAdd(user);
+    expect(screen.queryByLabelText(/in team/i)).toBeNull();
+    expect(screen.queryByLabelText(/^team$/i)).toBeNull();
   });
 });
