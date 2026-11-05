@@ -1,21 +1,24 @@
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   useRouteLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { ToastProvider } from "~/components/Toast";
+import { ToastProvider, useFlashToast } from "~/components/Toast";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures } from "~/server/availability.server";
+import { takeFlash } from "~/server/flash.server";
 import type { FeatureId } from "~/lib/features";
 
 export const links: Route.LinksFunction = () => [
@@ -33,8 +36,11 @@ export const links: Route.LinksFunction = () => [
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);
-  return {
+  // A redirecting action's one-shot toast (P16), cleared as it is read.
+  const { flash, clearCookie } = await takeFlash(request);
+  const body = {
     locale: getLocale(request),
+    flash,
     // Only the display-safe fields reach the client (never the password hash).
     // `portfolio` and `features`: which parts the menu shows (P27, P28.3); the routes
     // enforce them.
@@ -49,6 +55,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         }
       : null,
   };
+  return data(body, clearCookie ? { headers: { "Set-Cookie": clearCookie } } : undefined);
 }
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
@@ -83,9 +90,16 @@ export default function App() {
   // context useT() needs.
   return (
     <ToastProvider>
+      <FlashToast />
       <Outlet />
     </ToastProvider>
   );
+}
+
+/** Shows the root loader's flash (P16) inside the provider. */
+function FlashToast() {
+  useFlashToast(useLoaderData<typeof loader>().flash);
+  return null;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

@@ -222,6 +222,10 @@ _Laatst bijgewerkt: 2026-11-05 (bord opgeruimd; P28.4 en test-items@v3 open)_
   een kopje meer, geen gefaalde check, niets afgekapt; vijf cases 4,53–4,73, arithmetic 4,33
   (zwakste punt in de matrijs van stap 1, die niet veranderde). Gemiddeld 4,58 (w: 4,77); de vorm
   scoort overal iets lager. PR open, beslissing Bastiaan.
+- P16 Flash-toasts na een redirect: na inloggen, uitloggen, een uitnodiging, een nieuw
+  wachtwoord, account verwijderen, een gebruiker, team of rubric verwijderen, een rubric kopiëren
+  en stoppen als teamleider verschijnt op de volgende pagina een korte melding. Een kort cookie
+  van één minuut, één keer gelezen; geen migratie. PR open.
 - P28.4 Delen met je team: een cursus, rubric of onderwijscontext deel je met een team waar je in
   zit ("Delen met je team"); teamleden zien hem onder *Van mijn team*, alleen lezen, en maken een
   eigen kopie. Werk van tools die studentwerk verwerken (`Tool.handlesStudentWork`), chats en het
@@ -259,4 +263,3 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
 - Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.
-- Flash-toasts na een redirect (stub P16).

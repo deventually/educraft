@@ -92,7 +92,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
   await deleteUserCascade(user.id);
   // Destroy the session and land on /login — the account is gone.
-  return logout(request);
+  return logout(request, "accountDeleted");
 }
 
 function roleLabel(role: Role, m: ReturnType<typeof getMessages>): string {
