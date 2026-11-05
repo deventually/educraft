@@ -118,6 +118,26 @@ describe("buildSystemPrompt", () => {
     expect(sys).toContain("Voorbeeldinhoud");
   });
 
+  it("fills a derived placeholder from a prior stage, computed in code", () => {
+    const sys = buildSystemPrompt({
+      promptId: "test-items-items@v2",
+      values: { learningOutcomes: "LU", material: "Stof", conditions: "" },
+      outputLanguage: "nl",
+      consumes: [
+        { placeholder: "blueprint", fromStageId: "blueprint" },
+        { placeholder: "questionPlan", fromStageId: "blueprint", derive: "question-plan" },
+      ],
+      priorOutputs: {
+        blueprint: [
+          "| Rij | Leeruitkomst | Denkniveau | Vraagvorm | Aantal vragen | Punten per vraag | Punten |",
+          "| --- | --- | --- | --- | --- | --- | --- |",
+          "| R1 | LU | Toepassen | Meerkeuze | 2 | 1 | 2 |",
+        ].join("\n"),
+      },
+    });
+    expect(sys).toContain("- Vraag 2 (1 pt): Rij R1, toepassen, meerkeuze");
+  });
+
   it("throws when a required prior-stage output is missing", () => {
     const validatorStage = cognitiveArchitect.stages.find((s) => s.id === "validator")!;
     expect(() =>

@@ -172,6 +172,13 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Bezig
 
+- Toetsvragen, vaste vraagindeling in code: de app rekent uit de toetsmatrijs per vraag de rij,
+  het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
+  (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
+  Pakt het punt onder Later aan (metingen t en u). Eindmeting v: vijf cases 4,60–4,93, statistics
+  3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
+  ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
+  in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
 - Wankele toast-test: `tests/lib/useFormToast.test.tsx` faalde soms onder zware belasting (de
   toast verdwijnt een tik na de nieuwe pagina); de test wacht daar nu op. Alleen een test. PR open.
 - Lastig gesprek, vaste student (`difficult-conversation@v2`): de gespeelde student wisselde soms
@@ -252,9 +259,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
-- Toetsvragen, bekende punten: af en toe een correctiespoor in een kop van het antwoordmodel en
-  soms 3 opties bij statistiek. Oplossing in code (vaste rijtoewijzing per vraag), niet met
-  prompttekst; twee rondes prompttekst hielpen niet (metingen t en u).
+- Toetsvragen: in meting w nog één correctie midden in een zin van het antwoordmodel (1 van 18
+  runs). De vaste vraagindeling (#118) loste de rest op.
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
