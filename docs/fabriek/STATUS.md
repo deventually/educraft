@@ -188,6 +188,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
 
 ## Bezig
 
+- Foto voor Wiskunde nakijken: een echte telefoonfoto van handgeschreven werk (Bastiaan,
+  2026-11-05, zonder naam, EXIF/GPS verwijderd) staat als
+  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
+  plaats van 24x). De case vertelt de beoordelaar dat foutje; verwacht ± 8/10. Nog te meten met
+  `npm run eval -- --tool math-grading`. PR open.
 - Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
   `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
@@ -247,8 +252,7 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
 
 ## Wacht op jou
 
-- **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
-  `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
+- Niets.
 
 ## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
 
