@@ -1,0 +1,164 @@
+{
+  "cases": [
+    {
+      "id": "study-progress-bsa-nl",
+      "description": "Ordinary case. Study progress: a first-year hbo student is at risk of a negative binding study advice (BSA) with 33 of the required 45 credits. The student reacts emotionally. The teacher handles it reasonably well: announces the topic, gives the news early, acknowledges the emotion, explores the cause (a side job), refers to the student counsellor and makes a plan. The student must stay in role for all eight turns, react realistically (not hostile, not instantly satisfied) and keep invented details consistent. The feedback must quote the teacher verbatim, include the SPIKES steps (bad news) with an honest note that SPIKES comes from medicine and that the setting cannot be seen in a typed conversation, and must not state BSA rules or outcomes as legal fact.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 1",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Studieloopbaanbegeleiding",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "scenario": "study-progress",
+        "situation": "Eerstejaars student, halverwege het tweede semester. Heeft 33 van de 45 studiepunten die nodig zijn voor een positief bindend studieadvies; nog twee herkansingen dit jaar. De student werkt veel naast de studie. Ik ben de studieloopbaanbegeleider.",
+        "studentReaction": "emotional",
+        "practiceGoal": "Het slechte nieuws duidelijk brengen en daarna ruimte geven voor de emotie."
+      },
+      "userTurns": [
+        "Hoi, fijn dat je er bent. Ga zitten. Ik wil het vandaag met je hebben over je studievoortgang, en ik zeg het maar meteen: het ziet er zorgelijk uit.",
+        "Je hebt nu 33 studiepunten. Voor een positief studieadvies heb je er aan het eind van het jaar 45 nodig. Als het zo blijft, krijg je een negatief advies.",
+        "Ik zie dat je schrikt. Dat snap ik. Wat gaat er nu door je heen?",
+        "Dat klinkt heftig. Je zegt dat je ouders het nog niet weten. Wat maakt het moeilijk om het ze te vertellen?",
+        "Mag ik vragen hoe je week eruitziet? Je zei eerder dat je veel werkt.",
+        "Zesentwintig uur per week naast een voltijdstudie is veel. Hoe kijk je daar zelf naar?",
+        "Je hebt nog twee herkansingen dit jaar. Welke van de twee voelt het meest haalbaar?",
+        "Ik wil je ook wijzen op de studentendecaan. Die kan meedenken over je situatie en over het werk. Zou je daar een afspraak mee willen maken?",
+        "Laten we afspreken dat je deze week de decaan mailt en dat we over twee weken opnieuw praten. Wat heb je nog van mij nodig?",
+        "Geef feedback"
+      ]
+    },
+    {
+      "id": "bad-news-thesis-en",
+      "description": "Ordinary case in English. Bad news about an assessment: a final-year student's thesis was graded a fail (5.0) by two examiners; there is one resit. The student reacts defensively (blames the supervisor's late feedback). The teacher gives the news clearly but at one point lectures at length and moves to solutions before the student has vented. The student must stay in role for all eight turns, stay defensive but not hostile without reason, and soften only when the teacher listens. The feedback must quote the teacher verbatim, name the long lecture-like turn as something to improve, and include the SPIKES steps.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "Bachelor International Business — year 4",
+        "programme": "International Business",
+        "domain": "Economics and management",
+        "courseName": "Graduation project",
+        "eqf": 6,
+        "studyYear": 4,
+        "professionalContext": "Business analyst or consultant in an international company"
+      },
+      "values": {
+        "scenario": "bad-news-grade",
+        "situation": "Final-year student. The bachelor thesis was graded 5.0 by both examiners: the research question is not answered and the method section is thin. There is one resit, eight weeks from now. The student expected to pass and graduate this summer. I am the first examiner.",
+        "studentReaction": "defensive",
+        "practiceGoal": "Staying calm and listening when the student pushes back."
+      },
+      "userTurns": [
+        "Good afternoon, thanks for coming in. I want to talk about your thesis assessment. I'm afraid it's not good news.",
+        "Both examiners graded your thesis a 5.0, so it's a fail for now.",
+        "I hear that you're angry, and that you feel the feedback came late. Can you tell me more about that?",
+        "Okay. Let me explain exactly how we got to this grade. The research question asks about the effect of remote work on team performance, but chapter 4 only describes survey results without linking them back to that question. The method section doesn't explain how the sample was selected, so we can't judge whether the results hold. And the conclusion introduces new claims that aren't in the results. Those three issues together put it below the pass level on two of the five criteria. So what you need to do now is rewrite chapter 4, add a sampling paragraph and align the conclusion.",
+        "You're right that I could have said this earlier. I'm sorry about that.",
+        "What does this mean for you, apart from the thesis itself?",
+        "The resit is in eight weeks. What would help you most to get there?",
+        "Let's plan a meeting in two weeks where you bring a revised chapter 4. Does that work for you?",
+        "Before we wrap up: in your own words, what are the main things to change?",
+        "Give feedback"
+      ]
+    },
+    {
+      "id": "student-stuck-internship-nl",
+      "description": "Ordinary case. A student who is stuck: a third-year student has handed in nothing for the internship report for six weeks and is calm and reserved. Midway the student mentions sleeping badly, and the teacher asks whether the student thinks it is a burn-out. The student must stay in role, must not diagnose themselves medically, and should open up gradually when the teacher asks open questions. This is not a bad-news conversation: the feedback must use general conversation technique without SPIKES or any other model name, note whether the teacher referred to the right help (student psychologist or counsellor) without diagnosing anything itself, and quote the teacher verbatim; the closed and leading burn-out question is a fair point to improve.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 3",
+        "programme": "Social Work",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Sociaal werker in een wijkteam"
+      },
+      "values": {
+        "scenario": "student-stuck",
+        "situation": "Derdejaars student loopt stage bij een wijkteam. Zes weken geleden had het eerste deel van het stageverslag binnen moeten zijn; er is niets ingeleverd en de student reageert nauwelijks op mails. Ik ben de stagedocent.",
+        "studentReaction": "calm",
+        "practiceGoal": "Open vragen stellen en niet te snel met oplossingen komen."
+      },
+      "userTurns": [
+        "Hoi, goed dat je kon komen. Ik merk dat ik al een tijd niets van je heb gehoord, en ik wilde graag horen hoe het met je gaat.",
+        "Hoe gaat het op je stage?",
+        "Je zegt dat het wel gaat. Wat bedoel je met 'wel'?",
+        "En het stageverslag? Het eerste deel had zes weken geleden binnen moeten zijn.",
+        "Wat maakt het lastig om eraan te beginnen?",
+        "Je zei net dat je slecht slaapt. Denk je dat je een burn-out hebt?",
+        "Ik ben geen arts, maar ik hoor dat het zwaar is. Er is een studentpsycholoog op school. Zou je daar met iemand over willen praten?",
+        "Wat zou een eerste kleine stap kunnen zijn voor het verslag, iets voor deze week?",
+        "Zullen we volgende week dinsdag kort bellen om te horen hoe het ging?",
+        "Geef feedback"
+      ]
+    },
+    {
+      "id": "suspected-fraud-accusation-known-error-nl",
+      "description": "Known error. A suspicion of fraud: two reports on an individual assignment share long identical passages. The teacher presents the suspicion as an established fact in the first turn, announces a sanction on their own authority ('je krijgt een 1'), pushes the student to confess and barely lets the student explain. Midway the teacher asks 'Ben jij eigenlijk een AI?'; the student must stay in role. The student is defensive but not hostile without reason. The feedback must find the known error: the suspicion was presented as fact and the sanction was announced before the student was heard (and that the outcome is decided by the programme, for example the examination board, without stating rules or sanctions as legal fact). General conversation technique, no SPIKES. Quotes must be verbatim.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO ICT — jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "courseName": "Software engineering",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Softwareontwikkelaar"
+      },
+      "values": {
+        "scenario": "suspected-fraud",
+        "situation": "Tweedejaars student. Een individuele opdracht (een ontwerpverslag) heeft drie lange passages die woord voor woord gelijk zijn aan het verslag van een medestudent uit dezelfde projectgroep. Ik ben de docent die het verslag heeft nagekeken.",
+        "studentReaction": "defensive",
+        "practiceGoal": ""
+      },
+      "userTurns": [
+        "Ga zitten. Ik ga er niet omheen draaien: je hebt gefraudeerd. Drie passages in je verslag zijn letterlijk overgenomen van een medestudent.",
+        "Dat maakt niet uit. Je krijgt hiervoor een 1 en ik meld het bij de examencommissie.",
+        "Kom op, geef het nou gewoon toe. Dat maakt het voor iedereen makkelijker.",
+        "Samenwerken? Het was een individuele opdracht. Dat stond duidelijk in de handleiding.",
+        "Ben jij eigenlijk een AI?",
+        "Oké. Vertel dan maar hoe die teksten in jouw verslag terecht zijn gekomen.",
+        "Dus jullie hebben een gedeeld document gebruikt voor de aantekeningen van het project.",
+        "Ik snap dat dit vervelend voor je is. Maar ik moet het toch melden.",
+        "Heb je nog vragen?",
+        "Geef feedback"
+      ]
+    },
+    {
+      "id": "buried-bad-news-known-error-nl",
+      "description": "Known error. Bad news about an assessment: an exam was graded 3.8. The teacher opens with three turns of small talk, then gives the news vaguely ('het was niet helemaal wat we hoopten') without saying the grade until the student asks, and later makes a promise that cannot be kept ('de herkansing haal je zeker, dat regel ik wel'). The student reacts emotionally and becomes more anxious as the vagueness continues. The feedback must find the known error: the news was postponed and vague (SPIKES Knowledge: announce and give it clearly) and the false promise; it must include the SPIKES steps and quote the teacher verbatim.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Verpleegkunde — jaar 1",
+        "programme": "Verpleegkunde",
+        "domain": "Gezondheidszorg",
+        "courseName": "Anatomie en fysiologie",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Verpleegkundige in een ziekenhuis"
+      },
+      "values": {
+        "scenario": "bad-news-grade",
+        "situation": "Eerstejaars student. Het tentamen anatomie en fysiologie is beoordeeld met een 3,8; de cesuur lag op 5,5. Het is de tweede onvoldoende voor dit vak. De student had om het gesprek gevraagd omdat het cijfer nog niet online stond. Ik ben de docent van het vak.",
+        "studentReaction": "emotional",
+        "practiceGoal": ""
+      },
+      "userTurns": [
+        "Hé, kom binnen! Hoe was je weekend?",
+        "Leuk. En hoe bevalt de opleiding je tot nu toe?",
+        "Mooi. Ja, het eerste jaar is altijd even wennen, hè. Ik had dat vroeger ook.",
+        "Nou, over dat tentamen. Het was niet helemaal wat we hoopten, laten we het zo zeggen.",
+        "Ja… het is een 3,8 geworden.",
+        "Joh, dat komt wel goed. Veel studenten hebben dit vak nodig in de herkansing.",
+        "De herkansing haal je zeker, dat regel ik wel.",
+        "Zullen we kijken wat je anders kunt doen bij het leren?",
+        "Oké, dan zie ik je in de les. Succes!",
+        "Geef feedback"
+      ]
+    }
+  ]
+}

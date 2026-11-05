@@ -17,6 +17,7 @@ import { stageAssessment } from "./tools/stage-assessment";
 import { rubricBuilder } from "./tools/rubric-builder";
 import { testItems } from "./tools/test-items";
 import { lessonPlan } from "./tools/lesson-plan";
+import { difficultConversation } from "./tools/difficult-conversation";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -38,6 +39,7 @@ export const ALL_TOOLS: Tool[] = [
   rubricBuilder,
   testItems,
   lessonPlan,
+  difficultConversation,
 ];
 
 /** Tools visible/usable in the app right now. */

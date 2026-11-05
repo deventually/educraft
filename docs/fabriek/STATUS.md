@@ -98,6 +98,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   aantallen kloppen; research-methods 4,07 en statistics 4,47 door vorm (af en toe een
   correctiespoor in een kop, soms 3 opties). Ronde 3 gaf regressie (meting u) en is teruggedraaid;
   de stand is die van t. Bastiaan koos voor mergen in deze stand — PR open.
+- P24.8 Lastig gesprek oefenen (`difficult-conversation`, chat): de AI speelt een verzonnen student
+  in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
+  vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
+  nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
+  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Meting nog niet gedraaid
+  (sleutel nodig) — PR open.
 
 ## Wacht op jou
 
