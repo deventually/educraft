@@ -4,6 +4,7 @@ import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { TeacherWeekView } from "~/components/week/TeacherWeek";
 import type { TeacherWeek } from "~/lib/week/teacherWeek";
+import type { CourseTools } from "~/lib/registry/courseActions";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -66,7 +67,22 @@ const next: TeacherWeek = {
   undated: [],
 };
 
-function renderWeek(props: { now: TeacherWeek; next: TeacherWeek | null }, locale = "nl") {
+const tools: CourseTools = {
+  outcome: [],
+  activity: [{ slug: "lesson-plan", name: { nl: "Les voorbereiden", en: "Prepare a lesson" } }],
+  assessment: [
+    {
+      slug: "test-analysis",
+      name: { nl: "Toetsanalyse uitleggen", en: "Explain a test analysis" },
+    },
+  ],
+  findings: {},
+};
+
+function renderWeek(
+  props: { now: TeacherWeek; next: TeacherWeek | null; tools?: CourseTools },
+  locale = "nl",
+) {
   const Stub = createRoutesStub([
     {
       id: "root",
@@ -135,6 +151,24 @@ describe("TeacherWeekView (P22.3)", () => {
     expect(within(later).getByRole("link", { name: /Les SQL/ })).toBeInTheDocument();
   });
 
+  it("gives every row the tools for its kind, carrying course and item (P27.4)", async () => {
+    renderWeek({ now, next: null, tools });
+    const region = await screen.findByRole("region", { name: "Deze week · week 47" });
+    const lessonTools = within(region).getAllByRole("link", {
+      name: "Les voorbereiden: Les normaliseren",
+    });
+    expect(lessonTools[0]).toHaveAttribute("href", "/tools/lesson-plan?course=c1&item=a3");
+    expect(
+      within(region).getByRole("link", { name: "Toetsanalyse uitleggen: Instaptoets" }),
+    ).toHaveAttribute("href", "/tools/test-analysis?course=c1&item=t0");
+  });
+
+  it("shows no tool links without tools", async () => {
+    renderWeek({ now, next: null });
+    const region = await screen.findByRole("region", { name: "Deze week · week 47" });
+    expect(within(region).queryByRole("link", { name: /Les voorbereiden/ })).toBeNull();
+  });
+
   it("speaks English", async () => {
     renderWeek({ now, next }, "en");
     expect(await screen.findByRole("region", { name: "This week · week 47" })).toBeInTheDocument();
@@ -143,7 +177,7 @@ describe("TeacherWeekView (P22.3)", () => {
   });
 
   it("has no a11y violations", async () => {
-    const { container } = renderWeek({ now, next });
+    const { container } = renderWeek({ now, next, tools });
     await screen.findByRole("region", { name: "Deze week · week 47" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });

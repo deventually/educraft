@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.3 gemerged, P27.4 open)_
 
 ## Nu
 
@@ -168,6 +168,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
 
 ## Bezig
 
+- P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
+  tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
+  aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
+  opent de tool met cursus en onderdeel, en het resultaat komt bij dat onderdeel. Plus de
+  documentatie van P27 (27.5). Geen migratie. PR open.
 - Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
   Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde

@@ -4,6 +4,7 @@ import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { CourseReviewPanel, type ReviewPanelAgent } from "~/components/courses/CourseReviewPanel";
 import { alignedCourse, LO1, TEST1 } from "../courses/fixtures";
+import type { CourseTools } from "~/lib/registry/courseActions";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -53,7 +54,14 @@ function reviewed(stale = false): ReviewPanelAgent[] {
   ];
 }
 
-function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0) {
+const tools: CourseTools = {
+  outcome: [{ slug: "bloom-by-design", name: { nl: "Onderwijstechnologie kiezen", en: "Choose" } }],
+  activity: [],
+  assessment: [{ slug: "test-items", name: { nl: "Toetsvragen maken", en: "Write" } }],
+  findings: {},
+};
+
+function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0, withTools?: CourseTools) {
   const Stub = createRoutesStub([
     {
       path: "/",
@@ -64,6 +72,8 @@ function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0) {
           models={models}
           defaultModel="claude-sonnet-5-5"
           linkedTests={linkedTests}
+          courseId="c1"
+          tools={withTools}
         />
       ),
     },
@@ -133,5 +143,33 @@ describe("CourseReviewPanel", () => {
   it("hides the box without linked test questions", () => {
     renderPanel(notYet, 0);
     expect(screen.queryByRole("checkbox")).toBeNull();
+  });
+
+  it("offers Los op met… for an open finding about an item (P27.4)", async () => {
+    const agents = reviewed();
+    const review = agents[0].review;
+    if (!review) throw new Error("fixture");
+    review.findings.push({
+      id: "f3",
+      severity: "warning",
+      targetId: TEST1,
+      message: "Te weinig vragen.",
+      suggestion: "",
+    });
+    const { container } = renderPanel(agents, 0, tools);
+    const outcome = screen.getByText("De leeruitkomst is vaag.").closest("li") as HTMLElement;
+    expect(
+      within(outcome).getByRole("link", { name: /Los op met Onderwijstechnologie kiezen/ }),
+    ).toHaveAttribute("href", "/tools/bloom-by-design?course=c1");
+    const test = screen.getByText("Te weinig vragen.").closest("li") as HTMLElement;
+    expect(
+      within(test).getByRole("link", { name: /Los op met Toetsvragen maken/ }),
+    ).toHaveAttribute("href", `/tools/test-items?course=c1&item=${TEST1}`);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no tool without tools (P27.4)", () => {
+    renderPanel(reviewed());
+    expect(screen.queryByRole("link", { name: /Los op met/ })).toBeNull();
   });
 });

@@ -17,6 +17,7 @@ import { validateTools, type ValidationIssue } from "./validate";
 import type { Tool } from "./types";
 import { log } from "~/server/log.server";
 import { FEATURES, validateFeatures } from "~/lib/features";
+import { FINDING_TOOLS, validateFindingTools } from "./courseActions";
 
 export interface RegistryValidationResult {
   /** Tools that passed validation (all of them in a healthy build). */
@@ -62,7 +63,11 @@ export function ensureRegistryValidated(): RegistryValidationResult {
     const throwOnInvalid = process.env.NODE_ENV !== "production";
     cached = validateRegistry(ALL_TOOLS, { throwOnInvalid });
     // The feature register (P28.3) is data too: the same dev-fails-fast rule.
-    const featureIssues = validateFeatures(FEATURES);
+    // So is "Los op met…" (P27.4): every finding points to a known tool.
+    const featureIssues = [
+      ...validateFeatures(FEATURES),
+      ...validateFindingTools(FINDING_TOOLS, ALL_TOOLS),
+    ];
     if (featureIssues.length > 0) {
       if (throwOnInvalid) throw new Error(`Invalid feature register:\n${featureIssues.join("\n")}`);
       for (const message of featureIssues) log("registry_invalid_feature", { message });

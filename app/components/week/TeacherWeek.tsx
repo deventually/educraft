@@ -4,22 +4,43 @@ import { formatWeekRange } from "~/lib/calendar/weeks";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import type { CourseWeek, TeacherWeek, WeekList } from "~/lib/week/teacherWeek";
+import { type CourseTools, NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
+import { ItemTools } from "~/components/courses/ItemTools";
 
 /**
  * The teacher's week on Start (P22.3): this week, and from Friday next week too.
  * It only shows and links; nothing is changed without a click (BESLUIT-2026-11-02-4).
  */
-export function TeacherWeekView({ now, next }: { now: TeacherWeek; next: TeacherWeek | null }) {
+export function TeacherWeekView({
+  now,
+  next,
+  tools = NO_COURSE_TOOLS,
+}: {
+  now: TeacherWeek;
+  next: TeacherWeek | null;
+  /** The tool buttons per row (P27.4); without them a row only links to its item. */
+  tools?: CourseTools;
+}) {
   const t = useT();
   return (
     <>
-      <WeekSection week={now} title={fmt(t.week.heading, { n: now.isoWeek })} />
-      {next && <WeekSection week={next} title={fmt(t.week.next, { n: next.isoWeek })} />}
+      <WeekSection week={now} title={fmt(t.week.heading, { n: now.isoWeek })} tools={tools} />
+      {next && (
+        <WeekSection week={next} title={fmt(t.week.next, { n: next.isoWeek })} tools={tools} />
+      )}
     </>
   );
 }
 
-function WeekSection({ week, title }: { week: TeacherWeek; title: string }) {
+function WeekSection({
+  week,
+  title,
+  tools,
+}: {
+  week: TeacherWeek;
+  title: string;
+  tools: CourseTools;
+}) {
   const t = useT();
   const locale = useLocale();
   const id = useId();
@@ -38,7 +59,7 @@ function WeekSection({ week, title }: { week: TeacherWeek; title: string }) {
         <ul className="mt-4 grid list-none gap-4 p-0">
           {week.courses.map((c) => (
             <li key={c.courseId} className="rounded-2xl border border-slate-200 bg-white p-4">
-              <CourseBlock course={c} />
+              <CourseBlock course={c} tools={tools} />
             </li>
           ))}
         </ul>
@@ -63,7 +84,7 @@ function WeekSection({ week, title }: { week: TeacherWeek; title: string }) {
   );
 }
 
-function CourseBlock({ course }: { course: CourseWeek }) {
+function CourseBlock({ course, tools }: { course: CourseWeek; tools: CourseTools }) {
   const t = useT();
   const w = t.week;
   const heading = (
@@ -100,7 +121,13 @@ function CourseBlock({ course }: { course: CourseWeek }) {
       ) : (
         <div className="mt-3 grid gap-4 sm:grid-cols-3">
           {lists.map((l) => (
-            <Rows key={l.key} courseId={course.courseId} title={l.title} list={l.list} />
+            <Rows
+              key={l.key}
+              courseId={course.courseId}
+              title={l.title}
+              list={l.list}
+              tools={tools}
+            />
           ))}
         </div>
       )}
@@ -125,7 +152,17 @@ function CourseBlock({ course }: { course: CourseWeek }) {
   );
 }
 
-function Rows({ courseId, title, list }: { courseId: string; title: string; list: WeekList }) {
+function Rows({
+  courseId,
+  title,
+  list,
+  tools,
+}: {
+  courseId: string;
+  title: string;
+  list: WeekList;
+  tools: CourseTools;
+}) {
   const t = useT();
   return (
     <div>
@@ -144,6 +181,12 @@ function Rows({ courseId, title, list }: { courseId: string; title: string; list
               · {r.kind === "activity" ? t.week.kindActivity : t.week.kindAssessment},{" "}
               {fmt(t.week.courseWeek, { n: r.week })}
             </span>
+            <ItemTools
+              tools={tools[r.kind]}
+              courseId={courseId}
+              itemId={r.itemId}
+              itemTitle={r.title}
+            />
           </li>
         ))}
       </ul>
