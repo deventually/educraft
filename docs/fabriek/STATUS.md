@@ -151,6 +151,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 
 ## Bezig
 
+- Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
+  persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
+  een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
+  keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
 - P21.5 Rolagenten, het paneel "Beoordeling" op de cursuspagina: knop "Laat beoordelen" met
   modelkeuze, de adviezen per pet met het item waar ze over gaan, Akkoord / Niet akkoord met een
   reden, afgehandelde adviezen ingeklapt, en een melding als de cursus na de beoordeling is

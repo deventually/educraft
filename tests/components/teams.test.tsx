@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminTeams from "~/routes/admin.teams";
+import AdminTeam from "~/routes/admin.teams.$id";
 import LeadTeam from "~/routes/teams.$id";
 import { ToastProvider } from "~/components/Toast";
 
@@ -50,121 +51,191 @@ function renderWith(
   return render(<Stub initialEntries={[path.replace(":id", "team-1")]} />);
 }
 
-describe("/admin/teams (P28.2)", () => {
+describe("/admin/teams, the list (like the user list)", () => {
   const data = {
+    q: "",
     teams: [
-      {
-        id: "team-1",
-        name: "Verpleegkunde",
-        members,
-        settings: { features: { portfolio: "on" }, tools: {}, models: null },
-      },
-      { id: "team-2", name: "Techniek", members: [], settings: noChoices },
+      { id: "team-1", name: "Verpleegkunde", memberCount: 2, leads: ["Lea Lead"] },
+      { id: "team-2", name: "Techniek", memberCount: 0, leads: [] },
     ],
-    offer,
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
     renderWith(AdminTeams, "/admin/teams", d, action);
-  const card = (name: string) =>
-    screen.getByRole("heading", { level: 3, name }).closest("article") as HTMLElement;
 
-  it("lists each team with its members and who leads", () => {
+  it("shows one row per team with a link, the member count and who leads", () => {
     page();
-    const vpk = card("Verpleegkunde");
+    const vpk = screen.getByRole("row", { name: /verpleegkunde/i });
+    expect(within(vpk).getByRole("link", { name: "Verpleegkunde" })).toHaveAttribute(
+      "href",
+      "/admin/teams/team-1",
+    );
+    expect(within(vpk).getByText("2")).toBeInTheDocument();
     expect(within(vpk).getByText("Lea Lead")).toBeInTheDocument();
-    expect(within(vpk).getByText("mo@school.nl")).toBeInTheDocument();
-    expect(within(vpk).getByRole("checkbox", { name: /teamleider.*lea lead/i })).toBeChecked();
-    expect(within(vpk).getByRole("checkbox", { name: /teamleider.*mo member/i })).not.toBeChecked();
-    expect(within(card("Techniek")).getByText(/nog geen leden/i)).toBeInTheDocument();
+    const tech = screen.getByRole("row", { name: /techniek/i });
+    expect(within(tech).getByText("0")).toBeInTheDocument();
   });
 
-  it("creates a team", async () => {
+  it("has a search on team or person", () => {
+    page(undefined, { ...data, q: "zorg" });
+    const search = screen.getByRole("search", { name: /teams zoeken/i });
+    expect(within(search).getByLabelText(/zoek op team of persoon/i)).toHaveValue("zorg");
+  });
+
+  it("creates a team behind one button", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
     page(async ({ request }) => {
       body = await request.formData();
       return { saved: true };
     });
+    expect(screen.queryByLabelText(/naam van het nieuwe team/i)).toBeNull();
+    const add = screen.getByRole("button", { name: /nieuw team/i });
+    expect(add).toHaveAttribute("aria-expanded", "false");
+    await user.click(add);
+    expect(add).toHaveAttribute("aria-expanded", "true");
     await user.type(screen.getByLabelText(/naam van het nieuwe team/i), "Zorg");
     await user.click(screen.getByRole("button", { name: /team aanmaken/i }));
     await waitFor(() => expect(body?.get("intent")).toBe("create"));
     expect(body?.get("name")).toBe("Zorg");
   });
 
-  it("autosaves the lead stand of a member", async () => {
-    const user = userEvent.setup();
-    let body: FormData | undefined;
-    page(async ({ request }) => {
-      body = await request.formData();
-      return { saved: true };
-    });
-    await user.click(
-      within(card("Verpleegkunde")).getByRole("checkbox", { name: /teamleider.*mo member/i }),
-    );
-    await waitFor(() => expect(body?.get("intent")).toBe("setLead"));
-    expect(body?.get("teamId")).toBe("team-1");
-    expect(body?.get("userId")).toBe("u-mem");
-    expect(body?.get("lead")).toBe("1");
+  it("says so when there are no teams, and when a search finds none", () => {
+    const { unmount } = page(undefined, { q: "", teams: [] });
+    expect(screen.getByText(/nog geen teams/i)).toBeInTheDocument();
+    unmount();
+    page(undefined, { q: "xyz", teams: [] });
+    expect(screen.getByText(/geen teams gevonden/i)).toBeInTheDocument();
   });
 
-  it("adds a member by e-mail and removes one", async () => {
-    const user = userEvent.setup();
+  it("has no a11y violations", async () => {
+    const { container } = page();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("/admin/teams/:id, the team page", () => {
+  const data = {
+    team: {
+      id: "team-1",
+      name: "Verpleegkunde",
+      members,
+      settings: { features: { portfolio: "on" }, tools: {}, models: null },
+    },
+    candidates: [
+      { id: "u-a", name: "Anna Aal", email: "anna@school.nl" },
+      { id: "u-b", name: "Bram Beuk", email: "bram@school.nl" },
+    ],
+    offer,
+  };
+  const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
+    renderWith(AdminTeam, "/admin/teams/:id", d, action);
+  const recorder = () => {
     const bodies: FormData[] = [];
-    page(async ({ request }) => {
+    const action = async ({ request }: { request: Request }) => {
       bodies.push(await request.formData());
       return { saved: true };
-    });
-    const vpk = card("Verpleegkunde");
-    await user.type(within(vpk).getByLabelText(/lid toevoegen op e-mail/i), "new@school.nl");
-    await user.click(within(vpk).getByRole("button", { name: /^toevoegen$/i }));
-    await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("addMember");
-    expect(bodies[0].get("email")).toBe("new@school.nl");
-    await user.click(within(vpk).getByRole("button", { name: /mo member uit het team halen/i }));
-    await waitFor(() => expect(bodies).toHaveLength(2));
-    expect(bodies[1].get("intent")).toBe("removeMember");
-    expect(bodies[1].get("userId")).toBe("u-mem");
+    };
+    return { bodies, action };
+  };
+
+  it("shows the team with a way back to the list", () => {
+    page();
+    expect(screen.getByRole("heading", { level: 2, name: "Verpleegkunde" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /alle teams/i })).toHaveAttribute(
+      "href",
+      "/admin/teams",
+    );
   });
 
-  it("deletes a team only after a confirmation", async () => {
+  it("lists the members with who leads, and autosaves the lead stand", async () => {
     const user = userEvent.setup();
-    let body: FormData | undefined;
-    page(async ({ request }) => {
-      body = await request.formData();
-      return { saved: true };
-    });
-    await user.click(within(card("Techniek")).getByRole("button", { name: /team opheffen/i }));
+    const { bodies, action } = recorder();
+    page(action);
+    expect(screen.getByRole("checkbox", { name: /teamleider.*lea lead/i })).toBeChecked();
+    await user.click(screen.getByRole("checkbox", { name: /teamleider.*mo member/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("setLead");
+    expect(bodies[0].get("userId")).toBe("u-mem");
+    expect(bodies[0].get("lead")).toBe("1");
+  });
+
+  it("removes a member in one click", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    await user.click(screen.getByRole("button", { name: /mo member uit het team halen/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("removeMember");
+    expect(bodies[0].get("userId")).toBe("u-mem");
+  });
+
+  it("adds several colleagues at once by ticking them", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    const box = screen.getByRole("group", { name: /leden toevoegen/i });
+    await user.click(within(box).getByRole("checkbox", { name: /anna aal/i }));
+    await user.click(within(box).getByRole("checkbox", { name: /bram beuk/i }));
+    await user.click(within(box).getByRole("button", { name: /aangevinkte toevoegen/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("addMembers");
+    expect(bodies[0].getAll("userIds")).toEqual(["u-a", "u-b"]);
+  });
+
+  it("narrows the colleagues to tick with a search box", async () => {
+    const user = userEvent.setup();
+    page();
+    const box = screen.getByRole("group", { name: /leden toevoegen/i });
+    await user.type(within(box).getByLabelText(/zoek een collega/i), "bram");
+    expect(within(box).queryByRole("checkbox", { name: /anna aal/i })).toBeNull();
+    expect(within(box).getByRole("checkbox", { name: /bram beuk/i })).toBeInTheDocument();
+  });
+
+  it("says so when everyone is already in the team", () => {
+    page(undefined, { ...data, candidates: [] });
+    expect(screen.getByText(/iedereen zit al in dit team/i)).toBeInTheDocument();
+  });
+
+  it("autosaves the name", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    const name = screen.getByLabelText(/naam van het team/i);
+    await user.clear(name);
+    await user.type(name, "VPK");
+    await user.tab();
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("rename");
+    expect(bodies[0].get("name")).toBe("VPK");
+  });
+
+  it("shows the team's choices and autosaves one (P28.3)", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    expect(screen.getByRole("combobox", { name: /bdb\/bke.*keuze van het team/i })).toHaveValue(
+      "on",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: /hulpmiddelen.*keuze van het team/i }),
+      "off",
+    );
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("settings");
+    expect(bodies[0].get("feature:utilities")).toBe("off");
+    expect(bodies[0].get("feature:portfolio")).toBe("on");
+  });
+
+  it("deletes the team only after a confirmation", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    await user.click(screen.getByRole("button", { name: /team opheffen/i }));
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByText(/gedeelde stukken worden weer privé/i)).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: /opheffen/i }));
-    await waitFor(() => expect(body?.get("intent")).toBe("delete"));
-    expect(body?.get("teamId")).toBe("team-2");
-  });
-
-  it("shows a team's choices and autosaves one, with the team (P28.3)", async () => {
-    const user = userEvent.setup();
-    let body: FormData | undefined;
-    page(async ({ request }) => {
-      body = await request.formData();
-      return { saved: true };
-    });
-    const vpk = card("Verpleegkunde");
-    const bdb = within(vpk).getByRole("combobox", { name: /bdb\/bke.*keuze van het team/i });
-    expect(bdb).toHaveValue("on");
-    await user.selectOptions(
-      within(vpk).getByRole("combobox", { name: /hulpmiddelen.*keuze van het team/i }),
-      "off",
-    );
-    await waitFor(() => expect(body?.get("intent")).toBe("settings"));
-    expect(body?.get("teamId")).toBe("team-1");
-    expect(body?.get("feature:utilities")).toBe("off");
-    expect(body?.get("feature:portfolio")).toBe("on");
-    expect(body?.get("modelMode")).toBeNull();
-  });
-
-  it("says so when there are no teams", () => {
-    page(undefined, { teams: [], offer });
-    expect(screen.getByText(/nog geen teams/i)).toBeInTheDocument();
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("delete");
   });
 
   it("has no a11y violations", async () => {

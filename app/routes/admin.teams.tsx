@@ -1,275 +1,163 @@
-import { Form, useActionData } from "react-router";
-import { Plus, Trash2, UserMinus } from "lucide-react";
+import { useState } from "react";
+import { Form, Link, redirect, useActionData } from "react-router";
+import { z } from "zod";
+import { Plus } from "lucide-react";
 import type { Route } from "./+types/admin.teams";
 import { requireRole } from "~/server/auth.server";
-import {
-  addMember,
-  createTeam,
-  deleteTeam,
-  listTeams,
-  removeMember,
-  renameTeam,
-  getTeamWithMembers,
-  setLead,
-  setTeamSettings,
-} from "~/server/repositories/teams.server";
-import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
-import { getUserByEmail } from "~/server/repositories/users.server";
+import { createTeam, listTeams } from "~/server/repositories/teams.server";
 import { useT } from "~/lib/i18n/useT";
-import { fmt } from "~/lib/i18n/format";
 import { teamError } from "~/components/teams/teamError";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
-import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
-import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
+
+const SearchSchema = z.string().trim().max(100).catch("");
 
 /**
- * Teams (P28.2, admin): every team with its members and leads; create, rename, delete,
- * add a member by e-mail, remove one, and make or unmake a lead. The admin sees who is
- * in which team, never anyone's content.
+ * The team list (P28.2, shaped like the user list of P28.1): one row per team with its
+ * member count and leads, a search on team or person, and one "New team" button.
+ * Everything about one team lives on its own page (`/admin/teams/:id`). The admin sees
+ * who is in which team, never anyone's content.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  const [teams, offer] = await Promise.all([listTeams(), getTeamSettingsOffer()]);
-  return { teams, offer };
+  const q = SearchSchema.parse(new URL(request.url).searchParams.get("q") ?? "");
+  const needle = q.toLowerCase();
+  const hit = (text: string | null) => !!text && text.toLowerCase().includes(needle);
+  const teams = (await listTeams()).filter(
+    (team) => !needle || hit(team.name) || team.members.some((m) => hit(m.name) || hit(m.email)),
+  );
+  return {
+    q,
+    teams: teams.map((team) => ({
+      id: team.id,
+      name: team.name,
+      memberCount: team.members.length,
+      leads: team.members.filter((m) => m.isLead).map((m) => m.name),
+    })),
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {
   await requireRole(request, "admin");
   const fd = await request.formData();
-  const intent = String(fd.get("intent") ?? "");
-  const teamId = String(fd.get("teamId") ?? "");
+  if (fd.get("intent") !== "create") return { error: "unknown" as const };
   const name = String(fd.get("name") ?? "").trim();
-
-  if (intent === "create") {
-    if (!name) return { error: "nameRequired" as const };
-    await createTeam(name);
-    return { saved: true as const };
-  }
-  if (intent === "rename") {
-    if (!name) return { error: "nameRequired" as const };
-    await renameTeam(teamId, name);
-    return { saved: true as const };
-  }
-  if (intent === "delete") {
-    await deleteTeam(teamId);
-    return { saved: true as const };
-  }
-  if (intent === "addMember") {
-    const email = String(fd.get("email") ?? "").trim();
-    const user = email ? await getUserByEmail(email) : null;
-    if (!user) return { error: "noSuchUser" as const };
-    await addMember(teamId, user.id);
-    return { saved: true as const };
-  }
-  if (intent === "removeMember") {
-    await removeMember(teamId, String(fd.get("userId") ?? ""));
-    return { saved: true as const };
-  }
-  if (intent === "settings") {
-    const team = await getTeamWithMembers(teamId);
-    if (!team) throw new Response("Not found", { status: 404 });
-    const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
-    if ("error" in next) return next;
-    await setTeamSettings(teamId, next);
-    return { saved: true as const };
-  }
-  if (intent === "setLead") {
-    await setLead(teamId, String(fd.get("userId") ?? ""), fd.get("lead") === "1");
-    return { saved: true as const };
-  }
-  return { error: "unknown" as const };
+  if (!name) return { error: "nameRequired" as const };
+  // A new team is empty: go straight to its page to add people.
+  const team = await createTeam(name);
+  return redirect(`/admin/teams/${team.id}`);
 }
 
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const th = "px-4 py-2.5 font-semibold";
+const td = "px-4 py-2.5 text-slate-600";
 
 export default function AdminTeams({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
   const actionData = useActionData<typeof action>();
-  const errorOf = (code: string | true) =>
-    typeof code === "string" ? teamError(t, code) : undefined;
+  const [adding, setAdding] = useState(false);
+  const { q, teams } = loaderData;
 
   useFormToast(actionData, {
     result: (d) =>
-      !d
-        ? null
-        : "error" in d && d.error
-          ? { variant: "error", message: teamError(t, d.error) }
-          : { variant: "success", message: t.admin.console.saved },
+      d && "error" in d && d.error ? { variant: "error", message: teamError(t, d.error) } : null,
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <section>
-        <h2 className={h2}>{tt.heading}</h2>
-        <p className="mt-1 max-w-2xl text-sm text-slate-600">{tt.adminIntro}</p>
-        <Form method="post" className="mt-4 flex max-w-xl flex-wrap items-end gap-3">
-          <input type="hidden" name="intent" value="create" />
-          <div className="min-w-48 flex-1">
-            <Label htmlFor="team-new">{tt.createLabel}</Label>
-            <Input
-              id="team-new"
-              name="name"
-              type="text"
-              required
-              maxLength={100}
-              className="mt-1"
-            />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className={h2}>{tt.heading}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600">{tt.adminIntro}</p>
           </div>
-          <Button type="submit">
+          <Button
+            type="button"
+            aria-expanded={adding}
+            aria-controls="new-team"
+            onClick={() => setAdding((v) => !v)}
+          >
             <Plus className="size-4" aria-hidden />
-            {tt.create}
+            {tt.newTeam}
           </Button>
-        </Form>
+        </div>
+
+        {adding && (
+          <Form
+            id="new-team"
+            method="post"
+            className="mt-4 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <input type="hidden" name="intent" value="create" />
+            <div className="min-w-48 flex-1 sm:max-w-sm">
+              <Label htmlFor="team-new">{tt.createLabel}</Label>
+              <Input
+                id="team-new"
+                name="name"
+                type="text"
+                required
+                maxLength={100}
+                className="mt-1"
+              />
+            </div>
+            <Button type="submit">{tt.create}</Button>
+          </Form>
+        )}
       </section>
 
-      {loaderData.teams.length === 0 ? (
-        <p className="text-sm text-slate-500">{tt.noTeams}</p>
+      {/* ── Search: a plain GET form, the loader filters ─────────────────────── */}
+      <Form
+        method="get"
+        role="search"
+        aria-label={tt.searchRegion}
+        className="flex flex-wrap items-end gap-3"
+      >
+        <div className="min-w-48 flex-1 sm:max-w-md">
+          <Label htmlFor="teams-q">{tt.search}</Label>
+          <Input id="teams-q" name="q" type="search" defaultValue={q} className="mt-1" />
+        </div>
+        <Button type="submit" variant="secondary">
+          {t.people.filterSubmit}
+        </Button>
+      </Form>
+
+      {teams.length === 0 ? (
+        <p className="text-sm text-slate-500">{q ? tt.noMatch : tt.noTeams}</p>
       ) : (
-        <div className="space-y-6">
-          {loaderData.teams.map((team) => (
-            <article
-              key={team.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <h3 className="font-semibold text-slate-900">{team.name}</h3>
-                <ConfirmDialog
-                  triggerLabel={tt.delete}
-                  triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
-                  title={fmt(tt.deleteTitle, { name: team.name })}
-                  description={tt.deleteBody}
-                  confirmLabel={tt.deleteConfirm}
-                  cancelLabel={t.confirm.cancel}
-                  fields={{ intent: "delete", teamId: team.id }}
-                />
-              </div>
-
-              <AutoSaveForm
-                intent="rename"
-                hidden={{ teamId: team.id }}
-                errorMessage={errorOf}
-                className="mt-3 max-w-sm"
-              >
-                <Label htmlFor={`team-name-${team.id}`}>
-                  {fmt(tt.renameLabel, { name: team.name })}
-                </Label>
-                <Input
-                  id={`team-name-${team.id}`}
-                  name="name"
-                  type="text"
-                  defaultValue={team.name}
-                  maxLength={100}
-                  className="mt-1"
-                />
-              </AutoSaveForm>
-
-              <h4 className="mt-5 text-sm font-semibold text-slate-800">{tt.members}</h4>
-              {team.members.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500">{tt.noMembers}</p>
-              ) : (
-                <div className="relative mt-2 overflow-x-auto rounded-xl border border-slate-100">
-                  <table className="w-full text-left text-sm">
-                    <caption className="sr-only">{`${tt.members} — ${team.name}`}</caption>
-                    <thead className="bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
-                      <tr>
-                        <th scope="col" className={th}>
-                          {tt.colName}
-                        </th>
-                        <th scope="col" className={th}>
-                          {tt.colEmail}
-                        </th>
-                        <th scope="col" className={th}>
-                          {tt.colLead}
-                        </th>
-                        <th scope="col" className={th}>
-                          <span className="sr-only">{tt.remove}</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {team.members.map((m) => (
-                        <tr key={m.userId} className="border-t border-slate-50">
-                          <th scope="row" className="px-4 py-2 font-medium text-slate-800">
-                            {m.name}
-                          </th>
-                          <td className="px-4 py-2 text-slate-600">{m.email ?? "—"}</td>
-                          <td className="px-4 py-2">
-                            <AutoSaveForm
-                              intent="setLead"
-                              hidden={{ teamId: team.id, userId: m.userId }}
-                              errorMessage={errorOf}
-                            >
-                              <input
-                                type="checkbox"
-                                name="lead"
-                                value="1"
-                                defaultChecked={m.isLead}
-                                aria-label={fmt(tt.leadLabel, { name: m.name })}
-                                className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                              />
-                            </AutoSaveForm>
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            <Form method="post">
-                              <input type="hidden" name="intent" value="removeMember" />
-                              <input type="hidden" name="teamId" value={team.id} />
-                              <input type="hidden" name="userId" value={m.userId} />
-                              <Button
-                                type="submit"
-                                variant="ghost"
-                                size="sm"
-                                aria-label={fmt(tt.removeLabel, { name: m.name })}
-                              >
-                                <UserMinus className="size-3.5" aria-hidden />
-                              </Button>
-                            </Form>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <Form method="post" className="mt-4 flex max-w-xl flex-wrap items-end gap-3">
-                <input type="hidden" name="intent" value="addMember" />
-                <input type="hidden" name="teamId" value={team.id} />
-                <div className="min-w-48 flex-1">
-                  <Label htmlFor={`team-add-${team.id}`}>{tt.addMemberLabel}</Label>
-                  <Input
-                    id={`team-add-${team.id}`}
-                    name="email"
-                    type="email"
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <Button type="submit" variant="secondary">
-                  {tt.add}
-                </Button>
-              </Form>
-
-              <details className="mt-5 rounded-xl border border-slate-100 p-4">
-                <summary className="cursor-pointer text-sm font-semibold text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500">
-                  {t.features.teamFeaturesHeading}
-                </summary>
-                <p className="mt-2 text-xs text-slate-500">{t.features.teamFeaturesIntro}</p>
-                <div className="mt-3">
-                  <TeamSettingsForm
-                    idPrefix={`team-${team.id}`}
-                    settings={team.settings}
-                    offer={loaderData.offer}
-                    hidden={{ teamId: team.id }}
-                    errorMessage={errorOf}
-                  />
-                </div>
-              </details>
-            </article>
-          ))}
+        <div className="relative overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <caption className="sr-only">{tt.heading}</caption>
+            <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th scope="col" className={th}>
+                  {tt.colName}
+                </th>
+                <th scope="col" className={th}>
+                  {tt.colMembers}
+                </th>
+                <th scope="col" className={th}>
+                  {tt.colLeads}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {teams.map((team) => (
+                <tr key={team.id} className="border-b border-slate-50 last:border-0">
+                  <th scope="row" className="px-4 py-2.5 text-left font-medium">
+                    <Link
+                      to={`/admin/teams/${team.id}`}
+                      className="rounded text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                    >
+                      {team.name}
+                    </Link>
+                  </th>
+                  <td className={td}>{team.memberCount}</td>
+                  <td className={td}>{team.leads.length ? team.leads.join(", ") : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
