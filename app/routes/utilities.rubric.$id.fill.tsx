@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.$id.fill";
-import { requireUser } from "~/server/auth.server";
+import { requireFeatureUser } from "~/server/features.server";
 import { getRubric } from "~/server/repositories/rubrics.server";
 import { addRubricScores } from "~/server/repositories/rubricScores.server";
 import { RubricFill } from "~/components/utilities/RubricFill";
@@ -9,7 +9,7 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const rubric = await getRubric(user.id, params.id);
   if (!rubric) throw new Response("Not Found", { status: 404 });
   return { rubric: { id: rubric.id, name: rubric.name, data: rubric.data } };
@@ -23,7 +23,7 @@ const MAX_JSON = 600_000;
  * criterion → level pairs; `addRubricScores` refuses anything else (extra keys, unknown ids).
  */
 export async function action({ request, params }: Route.ActionArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const fd = await request.formData();
   if (fd.get("intent") !== "closeBatch") return { error: "invalid" as const };
   const raw = String(fd.get("scoresJson") ?? "");

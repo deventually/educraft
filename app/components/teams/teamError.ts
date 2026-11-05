@@ -7,6 +7,8 @@ export function teamError(t: Messages, code: string): string {
     noSuchUser: t.teams.noSuchUser,
     isLead: t.teams.isLeadError,
     notMember: t.teams.notMember,
+    atLeastOne: t.admin.models.atLeastOne,
+    invalid: t.error.invalidRequest,
   };
   return map[code] ?? t.error.generic;
 }

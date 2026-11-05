@@ -20,6 +20,7 @@ vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async ()
 
 let repo: typeof import("~/server/repositories/portfolio.server");
 let users: typeof import("~/server/repositories/users.server");
+let exceptions: typeof import("~/server/repositories/exceptions.server");
 let list: typeof import("~/routes/portfolio._index");
 let overview: typeof import("~/routes/portfolio.$id");
 let exportRoute: typeof import("~/routes/portfolio.$id.export");
@@ -29,6 +30,7 @@ let root: typeof import("~/root");
 beforeAll(async () => {
   repo = await import("~/server/repositories/portfolio.server");
   users = await import("~/server/repositories/users.server");
+  exceptions = await import("~/server/repositories/exceptions.server");
   list = await import("~/routes/portfolio._index");
   overview = await import("~/routes/portfolio.$id");
   exportRoute = await import("~/routes/portfolio.$id.export");
@@ -83,7 +85,7 @@ describe("BDB/BKE per teacher", () => {
 
   it("switched off: pages, export and actions are 404; switching back loses nothing", async () => {
     const d = await repo.createDossier("t-off", "Mijn BDB", sampleDossier());
-    await users.setPortfolioEnabled("t-off", false);
+    await exceptions.setException("t-off", exceptions.featureKey("portfolio"), "off");
     as("t-off");
     const params = { id: d.id };
     expect(await status(list.loader({ request: get() } as never))).toBe(404);
@@ -94,7 +96,7 @@ describe("BDB/BKE per teacher", () => {
         overview.action({ request: post({ intent: "coachMode", mode: "draft" }), params } as never),
       ),
     ).toBe(404);
-    await users.setPortfolioEnabled("t-off", true);
+    await exceptions.setException("t-off", exceptions.featureKey("portfolio"), "on");
     const page = await overview.loader({ request: get(), params } as never);
     expect(page.name).toBe("Mijn BDB");
   });
@@ -115,30 +117,45 @@ describe("admin switches the workplace per teacher", () => {
     });
   }
 
-  it("turns it on and off with autosave, and shows the state in the loader", async () => {
+  const portfolioKey = "feature:portfolio";
+  const portfolioRow = (d: { features: { key: string }[] | null }) =>
+    d.features?.find((r) => r.key === portfolioKey);
+
+  it("sets and clears an exception (P28.3), and the loader shows where the stand comes from", async () => {
     const t = await teacher("switch");
     as("admin-1", "admin");
+    const before = await adminUser.loader({ request: get(), params: { id: t.id } } as never);
+    expect(portfolioRow(before)).toMatchObject({ on: false, source: "default" });
     const on = await adminUser.action({
-      request: post({ intent: "portfolioAccess", enabled: "1" }),
+      request: post({ intent: "exception", key: portfolioKey, choice: "on" }),
       params: { id: t.id },
     } as never);
     expect(on).toEqual({ saved: true });
-    expect(await users.getPortfolioEnabled(t.id)).toBe(true);
+    expect((await exceptions.getExceptions(t.id)).get(portfolioKey)).toBe("on");
     const data = await adminUser.loader({ request: get(), params: { id: t.id } } as never);
-    expect(data.portfolio).toBe(true);
+    expect(portfolioRow(data)).toMatchObject({ on: true, source: "exception", exception: "on" });
     await adminUser.action({
-      request: post({ intent: "portfolioAccess" }),
+      request: post({ intent: "exception", key: portfolioKey, choice: "" }),
       params: { id: t.id },
     } as never);
-    expect(await users.getPortfolioEnabled(t.id)).toBe(false);
+    expect((await exceptions.getExceptions(t.id)).has(portfolioKey)).toBe(false);
   });
 
-  it("refuses a non-teacher target", async () => {
+  it("refuses an unknown key or choice, and a non-teacher target", async () => {
+    const t = await teacher("bad");
     as("admin-1", "admin");
+    for (const fields of [
+      { intent: "exception", key: "feature:nope", choice: "on" },
+      { intent: "exception", key: portfolioKey, choice: "maybe" },
+    ]) {
+      expect(
+        await adminUser.action({ request: post(fields), params: { id: t.id } } as never),
+      ).toEqual({ error: "invalid" });
+    }
     expect(
       await status(
         adminUser.action({
-          request: post({ intent: "portfolioAccess", enabled: "1" }),
+          request: post({ intent: "exception", key: portfolioKey, choice: "on" }),
           params: { id: "nobody" },
         } as never),
       ),

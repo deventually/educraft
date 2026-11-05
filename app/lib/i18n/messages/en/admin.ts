@@ -121,14 +121,11 @@ export const admin: Messages["admin"] = {
     colMode: "Mode",
     colName: "Tool",
     colPhase: "Phase",
-    colStatus: "Status",
-    enabledLabel: "Available",
     heading: "Tools",
-    intro: "Turn tools on or off. A tool that is switched off disappears for everyone.",
+    intro:
+      "Set each tool to On, On request or Off. Off: for nobody. On request: only through a team or an exception.",
     modeChat: "Chat",
     modeOneShot: "Generator",
-    statusAvailable: "Available",
-    statusDisabled: "Disabled",
   },
   usage: {
     colChars: "Characters",

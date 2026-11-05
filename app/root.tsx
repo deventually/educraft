@@ -15,6 +15,8 @@ import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
+import { effectiveFeatures } from "~/server/availability.server";
+import type { FeatureId } from "~/lib/features";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -34,9 +36,17 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     locale: getLocale(request),
     // Only the display-safe fields reach the client (never the password hash).
-    // `portfolio`: whether the BDB/BKE menu item shows (P27); the routes enforce it.
+    // `portfolio` and `features`: which parts the menu shows (P27, P28.3); the routes
+    // enforce them.
     user: user
-      ? { name: user.name, role: user.role, portfolio: await portfolioAccess(user) }
+      ? {
+          name: user.name,
+          role: user.role,
+          portfolio: await portfolioAccess(user),
+          features: Object.fromEntries(
+            Object.entries(await effectiveFeatures(user)).map(([id, d]) => [id, d.on]),
+          ) as Record<FeatureId, boolean>,
+        }
       : null,
   };
 }

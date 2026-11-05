@@ -16,6 +16,7 @@ import { ALL_TOOLS } from "./index";
 import { validateTools, type ValidationIssue } from "./validate";
 import type { Tool } from "./types";
 import { log } from "~/server/log.server";
+import { FEATURES, validateFeatures } from "~/lib/features";
 
 export interface RegistryValidationResult {
   /** Tools that passed validation (all of them in a healthy build). */
@@ -58,9 +59,14 @@ let cached: RegistryValidationResult | null = null;
  */
 export function ensureRegistryValidated(): RegistryValidationResult {
   if (!cached) {
-    cached = validateRegistry(ALL_TOOLS, {
-      throwOnInvalid: process.env.NODE_ENV !== "production",
-    });
+    const throwOnInvalid = process.env.NODE_ENV !== "production";
+    cached = validateRegistry(ALL_TOOLS, { throwOnInvalid });
+    // The feature register (P28.3) is data too: the same dev-fails-fast rule.
+    const featureIssues = validateFeatures(FEATURES);
+    if (featureIssues.length > 0) {
+      if (throwOnInvalid) throw new Error(`Invalid feature register:\n${featureIssues.join("\n")}`);
+      for (const message of featureIssues) log("registry_invalid_feature", { message });
+    }
   }
   return cached;
 }

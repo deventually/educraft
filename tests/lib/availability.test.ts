@@ -50,7 +50,7 @@ describe("getAvailableTools — registry defaults (empty settings)", () => {
 
 describe("getAvailableTools — instance overrides", () => {
   it("a disabled tool disappears for everyone, including admins", async () => {
-    await settings.setToolSetting(DISABLED_TOOL, { enabled: false });
+    await settings.setToolStand(DISABLED_TOOL, "off");
     const forAdmin = (await availability.getAvailableTools(admin)).map((t) => t.slug);
     expect(forAdmin).not.toContain(DISABLED_TOOL);
     // And the single-tool gate agrees (drives tool.tsx 404 + api.stream refusal).

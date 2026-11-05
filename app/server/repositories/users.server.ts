@@ -27,6 +27,7 @@ import {
   rubricScores,
   rubrics,
   teamMembers,
+  featureExceptions,
   feedback,
   generations,
   instanceSettings,
@@ -329,42 +330,6 @@ export async function setUserAssignedModels(userId: string, ids: string[] | null
   return setAssignedList("assignedModels", userId, ids);
 }
 
-/**
- * The BDB/BKE workplace switch per teacher (brief P27, `portfolioEnabled:<userId>`,
- * migration-free like `assignedModels`): true/false once an admin set it, null
- * when never set. The default for null is decided in `portfolioAccess.server.ts`.
- */
-export async function getPortfolioEnabled(userId: string): Promise<boolean | null> {
-  const row = getDb()
-    .select()
-    .from(instanceSettings)
-    .where(eq(instanceSettings.key, `portfolioEnabled:${userId}`))
-    .get();
-  if (!row) return null;
-  try {
-    const parsed: unknown = JSON.parse(row.valueJson);
-    return typeof parsed === "boolean" ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Switch the workplace on or off for one user. Switching off deletes nothing. */
-export async function setPortfolioEnabled(userId: string, on: boolean): Promise<void> {
-  const db = getDb();
-  const key = `portfolioEnabled:${userId}`;
-  const valueJson = JSON.stringify(on);
-  const existing = db.select().from(instanceSettings).where(eq(instanceSettings.key, key)).get();
-  if (existing) {
-    db.update(instanceSettings)
-      .set({ valueJson, updatedAt: new Date() })
-      .where(eq(instanceSettings.key, key))
-      .run();
-  } else {
-    db.insert(instanceSettings).values({ key, valueJson, updatedAt: new Date() }).run();
-  }
-}
-
 export async function getUserById(id: string): Promise<UserRow | null> {
   return getDb().select().from(users).where(eq(users.id, id)).get() ?? null;
 }
@@ -396,9 +361,10 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
-    // The teacher's own model set and BDB/BKE switch live in instance_settings.
+    tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();
+    // The teacher's own model set lives in instance_settings.
     tx.delete(instanceSettings)
-      .where(inArray(instanceSettings.key, [`assignedModels:${id}`, `portfolioEnabled:${id}`]))
+      .where(eq(instanceSettings.key, `assignedModels:${id}`))
       .run();
     tx.delete(users).where(eq(users.id, id)).run();
   });

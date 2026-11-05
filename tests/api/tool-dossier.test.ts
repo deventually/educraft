@@ -17,14 +17,14 @@ let toolRoute: typeof import("~/routes/tool");
 let projects: typeof import("~/routes/projects._index");
 let generations: typeof import("~/server/repositories/generations.server");
 let portfolio: typeof import("~/server/repositories/portfolio.server");
-let users: typeof import("~/server/repositories/users.server");
+let exceptions: typeof import("~/server/repositories/exceptions.server");
 
 beforeAll(async () => {
   toolRoute = await import("~/routes/tool");
   projects = await import("~/routes/projects._index");
   generations = await import("~/server/repositories/generations.server");
   portfolio = await import("~/server/repositories/portfolio.server");
-  users = await import("~/server/repositories/users.server");
+  exceptions = await import("~/server/repositories/exceptions.server");
 });
 
 const as = (id: string) => {
@@ -104,7 +104,7 @@ describe("workplace switched off (P27)", () => {
   it("hides the bar and the evidence choice, and refuses the action on both pages", async () => {
     as("td-off");
     const mine = await portfolio.createDossier("td-off", "Mijn BDB", sampleDossier());
-    await users.setPortfolioEnabled("td-off", false);
+    await exceptions.setException("td-off", exceptions.featureKey("portfolio"), "off");
     const g = await generation("td-off");
     const data = await load(`?dossier=${mine.id}&criterion=${C1}`);
     expect(data.forCriterion).toBeNull();

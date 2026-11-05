@@ -1,23 +1,20 @@
 /**
  * Effective availability — the single module every consumer uses to answer "which
- * tools/models may THIS user see?". One gate sits on top of the registry's
- * boot-validity check: instance availability, an admin's `tool_settings`
- * (enabled). There is no per-teacher tool gate (P18): every teacher and admin
- * sees what the instance enables. Models: the instance `enabledModels`, which a
- * teacher's own set (`assignedModels`) replaces (P18); CLI/local models exist only
- * outside production.
+ * features/tools/models may THIS user see?" (P28.3, BESLUIT-2026-11-05-5).
  *
- * Safe defaults: with empty settings tables this reduces exactly to `tool.enabled`,
- * so a fresh instance shows every tool to every teacher and admin.
- * Nothing is cached — a write takes effect on the next request (no bust needed).
+ * Three layers, one rule (`~/lib/features/rule.ts`): the instance stand (Off, On,
+ * On request), the teams the teacher is in, and the teacher's exception (admin only).
+ * An admin has everything the instance has not Off. Boot-invalid tools are never
+ * available. Models: the teacher's own set (P18) replaces everything; otherwise the
+ * union of their teams' sets, kept within the instance; otherwise the instance.
  *
- * Context-editor axes (sector/domain) follow the instance settings too
- * (`enabledSectors`/`enabledDomains`); there is no per-teacher access (P18) and no
- * country axis (the country is a data seam in the packs, not a choice).
+ * Safe defaults: with empty settings tables a tool reduces to `tool.enabled` and a
+ * feature to its register default. Nothing is cached — a write counts on the next request.
+ *
+ * Context-editor axes (sector/domain) follow the instance settings only.
  */
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
-import type { Role } from "~/lib/registry/access";
 import {
   DEFAULT_MODEL,
   isResolvableModel,
@@ -28,56 +25,115 @@ import {
 import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { SECTORS, type Sector } from "~/lib/context/sectors";
 import { getDomainsForTrack } from "~/lib/context/domains";
+import { FEATURES, type FeatureId } from "~/lib/features";
+import { type Choice, type Decision, type InstanceStand, decide } from "~/lib/features/rule";
+import type { TeamSettings } from "~/lib/features/teamSettings";
 import { log } from "./log.server";
 import {
-  getToolSettings,
+  getToolStands,
+  getFeatureStands,
   getEnabledModels,
   getEnabledSectors,
   getEnabledDomains,
 } from "./repositories/settings.server";
 import { getUserAssignedModels } from "./repositories/users.server";
+import { listTeamSettingsForUser } from "./repositories/teams.server";
+import { featureKey, getExceptions, toolKey } from "./repositories/exceptions.server";
 import { localModelsEnabled } from "./env.server";
 
+/** The caller: an account id and its role (`teacher` or `admin`). */
 export interface AvailabilityUser {
   id: string;
-  role: Role;
+  role: string;
 }
 
-interface AvailabilityContext {
-  settings: Map<string, { enabled: boolean | null }>;
+export type { Decision };
+
+interface Layers {
+  isAdmin: boolean;
+  teams: { name: string; settings: TeamSettings }[];
+  exceptions: Map<string, Choice>;
 }
 
-/** Resolve every gate input once per request, so a list filter is a pure map. */
-async function resolveContext(): Promise<AvailabilityContext> {
-  const rows = await getToolSettings();
-  const settings = new Map(rows.map((r) => [r.toolSlug, { enabled: r.enabled }]));
-  return { settings };
+/** The team and exception layers of one user, read once per request. */
+async function resolveLayers(user: AvailabilityUser): Promise<Layers> {
+  if (user.role === "admin") return { isAdmin: true, teams: [], exceptions: new Map() };
+  const [teams, exceptions] = await Promise.all([
+    listTeamSettingsForUser(user.id),
+    getExceptions(user.id),
+  ]);
+  return { isAdmin: false, teams, exceptions };
 }
 
-/** Whether a tool passes the boot-validity check and the instance gate, given a resolved context. */
-function passes(tool: Tool, ctx: AvailabilityContext): boolean {
-  // Boot-invalid tools (Phase 5.5) are excluded from every listing and refused by
-  // the stream, in production, rather than crashing the instance.
-  if (getInvalidToolSlugs().has(tool.slug)) return false;
-
-  const setting = ctx.settings.get(tool.slug);
-  const enabled = setting?.enabled ?? tool.enabled;
-  return enabled;
+/** The rule for one item, given its instance stand and where to find the team choice. */
+function apply(
+  layers: Layers,
+  instance: InstanceStand,
+  teamChoice: (s: TeamSettings) => Choice | undefined,
+  key: string,
+): Decision {
+  if (layers.isAdmin) return { on: instance !== "off", source: "admin" };
+  return decide(
+    instance,
+    layers.teams.map((t) => ({ name: t.name, choice: teamChoice(t.settings) })),
+    layers.exceptions.get(key),
+  );
 }
 
-/**
- * Every tool `user` may see: the instance gate. `user` is kept in the signature so
- * every caller stays unchanged (and a future gate has the seam).
- */
-export async function getAvailableTools(_user: AvailabilityUser): Promise<Tool[]> {
-  const ctx = await resolveContext();
-  return ALL_TOOLS.filter((tool) => passes(tool, ctx));
+/** A tool's instance stand: the admin's choice, else the registry (`enabled` = On). */
+const toolInstanceStand = (tool: Tool, stands: Map<string, InstanceStand>): InstanceStand =>
+  stands.get(tool.slug) ?? (tool.enabled ? "on" : "off");
+
+/** Every tool's effective stand for `user`, with its source (boot-invalid tools: off). */
+export async function effectiveTools(user: AvailabilityUser): Promise<Record<string, Decision>> {
+  const [stands, layers] = await Promise.all([getToolStands(), resolveLayers(user)]);
+  const invalid = getInvalidToolSlugs();
+  const out: Record<string, Decision> = {};
+  for (const tool of ALL_TOOLS) {
+    out[tool.slug] = invalid.has(tool.slug)
+      ? { on: false, source: "instance" }
+      : apply(
+          layers,
+          toolInstanceStand(tool, stands),
+          (s) => s.tools[tool.slug],
+          toolKey(tool.slug),
+        );
+  }
+  return out;
+}
+
+/** Every feature's effective stand for `user`, with its source. */
+export async function effectiveFeatures(
+  user: AvailabilityUser,
+): Promise<Record<FeatureId, Decision>> {
+  const [stands, layers] = await Promise.all([getFeatureStands(), resolveLayers(user)]);
+  return Object.fromEntries(
+    FEATURES.map((f) => [
+      f.id,
+      apply(layers, stands[f.id] ?? f.defaultStand, (s) => s.features[f.id], featureKey(f.id)),
+    ]),
+  ) as Record<FeatureId, Decision>;
+}
+
+/** Whether one feature is on for `user`. */
+export async function isFeatureOn(user: AvailabilityUser, id: FeatureId): Promise<boolean> {
+  return (await effectiveFeatures(user))[id].on;
+}
+
+/** Route gate: a feature that is off for `user` is a 404 (nothing is deleted). */
+export async function requireFeature(user: AvailabilityUser, id: FeatureId): Promise<void> {
+  if (!(await isFeatureOn(user, id))) throw new Response("Not Found", { status: 404 });
+}
+
+/** Every tool `user` may see. */
+export async function getAvailableTools(user: AvailabilityUser): Promise<Tool[]> {
+  const stands = await effectiveTools(user);
+  return ALL_TOOLS.filter((tool) => stands[tool.slug]?.on);
 }
 
 /** Single-tool gate — drives the tool.tsx 404 and the api.stream refusal. */
-export async function isToolAvailable(_user: AvailabilityUser, tool: Tool): Promise<boolean> {
-  const ctx = await resolveContext();
-  return passes(tool, ctx);
+export async function isToolAvailable(user: AvailabilityUser, tool: Tool): Promise<boolean> {
+  return (await effectiveTools(user))[tool.slug]?.on ?? false;
 }
 
 /**
@@ -119,8 +175,30 @@ async function teacherOwnSet(user?: AvailabilityUser): Promise<Set<string> | nul
 }
 
 /**
+ * The team layer for models (P28.3): the union of the sets of the teacher's teams, kept
+ * within the instance (allowed here and in `enabledModels`). Null when no team has a set,
+ * or when nothing of it is left inside the instance (then the instance counts).
+ */
+async function teamModelSet(user?: AvailabilityUser): Promise<Set<string> | null> {
+  if (user?.role !== "teacher") return null;
+  const teams = await listTeamSettingsForUser(user.id);
+  const union = new Set(teams.flatMap((t) => t.settings.models ?? []));
+  if (union.size === 0) return null;
+  const enabled = await getEnabledModels();
+  const inside = [...union].filter(
+    (id) => isAllowedHere(id) && (enabled === null || enabled.length === 0 || enabled.includes(id)),
+  );
+  return inside.length > 0 ? new Set(inside) : null;
+}
+
+/** The set that decides for `user`: own set, else the team union, else null (the instance). */
+async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null> {
+  return (await teacherOwnSet(user)) ?? (await teamModelSet(user));
+}
+
+/**
  * The catalog model ids a caller may select. Instance base = the admin's `enabledModels`;
- * a teacher with an own set (`assignedModels`) gets exactly that set instead — it
+ * a teacher's team sets narrow it (P28.3); a teacher with an own set (`assignedModels`) gets exactly that set instead — it
  * OVERRIDES the instance and may be wider (P18). No own set = follow the instance;
  * an admin always gets the instance set. Local/discovered models are added by the
  * caller via `narrowLocalModels`, not here. Lockout guard: an empty instance set (a
@@ -129,7 +207,7 @@ async function teacherOwnSet(user?: AvailabilityUser): Promise<Set<string> | nul
  * disabled frontier default would be re-offered (the P14 bug).
  */
 export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
-  const own = await teacherOwnSet(user);
+  const own = await userModelSet(user);
   if (own) {
     return new Set(
       listModels()
@@ -159,7 +237,7 @@ export async function effectiveDefaultModel(
   preferred: string,
 ): Promise<string> {
   if (await isModelSelectableForUser(user, preferred)) return preferred;
-  const own = await teacherOwnSet(user);
+  const own = await userModelSet(user);
   if (own) {
     for (const id of own) {
       if (await isModelSelectableForUser(user, id)) return id;
@@ -195,7 +273,7 @@ export async function isModelSelectableForUser(
   id: string,
 ): Promise<boolean> {
   if (!isAllowedHere(id)) return false;
-  const own = await teacherOwnSet(user);
+  const own = await userModelSet(user);
   if (own) return own.has(id);
   const enabled = await getEnabledModels();
   return enabled === null || enabled.length === 0 || enabled.includes(id);

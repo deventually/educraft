@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Link, redirect } from "react-router";
 import { ArrowLeft, Plus, Table2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric._index";
-import { requireUser } from "~/server/auth.server";
+import { requireFeatureUser } from "~/server/features.server";
 import { createRubric, listRubrics } from "~/server/repositories/rubrics.server";
 import { maxPoints, newRubricData, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
 import { getUtilityBySlug } from "~/lib/utilities";
@@ -17,7 +17,7 @@ import { loc } from "~/lib/i18n/localized";
 import { formatNumber } from "~/components/utilities/format";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const rubrics = (await listRubrics(user.id)).map((r) => ({
     id: r.id,
     name: r.name,
@@ -29,7 +29,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const user = await requireUser(request);
+  const user = await requireFeatureUser(request, "utilities");
   const fd = await request.formData();
   if (fd.get("intent") !== "create") return { error: "invalid" as const };
   const name = String(fd.get("name") ?? "").trim();

@@ -1,12 +1,12 @@
 import type { Route } from "./+types/utilities._index";
-import { requireUser } from "~/server/auth.server";
+import { requireFeatureUser } from "~/server/features.server";
 import { UTILITIES } from "~/lib/utilities";
 import { UtilityCard } from "~/components/utilities/UtilityCard";
 import { useT } from "~/lib/i18n/useT";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  await requireUser(request);
+  await requireFeatureUser(request, "utilities");
   return null;
 }
 
