@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -333,5 +334,33 @@ describe("deactivated accounts (P18.7)", () => {
     await users.setUserRole(u.id, "teacher");
     expect((await users.getUserById(u.id))!.sessionVersion).toBe(v0);
     expect((await auth.getUser(requestWithCookie(cookie)))?.id).toBe(u.id);
+  });
+});
+
+describe("redirect toasts (P16)", () => {
+  it("a successful login lands with a 'signed in' toast", async () => {
+    const pw = "correct horse battery staple";
+    await users.createUser({
+      name: "Flash Login",
+      email: "flashlogin@example.com",
+      passwordHash: password.hashPassword(pw),
+      role: "teacher",
+    });
+    const req = new Request("http://localhost/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: "flashlogin@example.com", password: pw }).toString(),
+    });
+    const res = await login.action({ request: req } as Parameters<typeof login.action>[0]);
+    expect(await flashKeyOf(res)).toBe("signedIn");
+  });
+
+  it("logging out lands on /login with a 'signed out' toast", async () => {
+    const logoutRoute = await import("~/routes/logout");
+    const res = await logoutRoute.action({
+      request: new Request("http://localhost/logout", { method: "POST" }),
+    } as Parameters<typeof logoutRoute.action>[0]);
+    expect((res as Response).headers.get("Location")).toBe("/login");
+    expect(await flashKeyOf(res)).toBe("signedOut");
   });
 });

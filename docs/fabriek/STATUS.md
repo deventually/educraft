@@ -188,6 +188,10 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
 
 ## Bezig
 
+- P16 Flash-toasts na een redirect: na inloggen, uitloggen, een uitnodiging, een nieuw
+  wachtwoord, account verwijderen, een gebruiker, team of rubric verwijderen, een rubric kopiëren
+  en stoppen als teamleider verschijnt op de volgende pagina een korte melding. Een kort cookie
+  van één minuut, één keer gelezen; geen migratie. PR open.
 - Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
   `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,
@@ -275,4 +279,3 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
 - Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.
-- Flash-toasts na een redirect (stub P16).

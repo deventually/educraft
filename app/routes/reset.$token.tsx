@@ -58,7 +58,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   await updateUserPassword(reset.userId, hashPassword(password));
   // `updateUserPassword` bumped sessionVersion, so every older cookie is logged out;
   // the fresh session below carries the new version.
-  return createUserSession(reset.userId, "/");
+  return createUserSession(reset.userId, "/", "passwordReset");
 }
 
 export default function ResetPassword({ loaderData }: Route.ComponentProps) {

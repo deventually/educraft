@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -76,6 +77,8 @@ describe("reset route action", () => {
     );
     // A successful reset logs the user in (redirect Response), not a JSON error.
     expect(res instanceof Response).toBe(true);
+    // P16: the landing page confirms the new password with a toast.
+    expect(await flashKeyOf(res)).toBe("passwordReset");
 
     const after = await users.getUserById(u.id);
     expect(password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(true);

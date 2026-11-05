@@ -109,6 +109,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `useFormToast(actionData, { result, pending? })` once; admin tables autosave through
   `AutoSaveForm` (fetcher + `useActionToast`, revert on error). Transient confirmations on a wired
   route carry no `role="status"`/`aria-live` of their own, so only the toast announces.
+  **Across a redirect (P16):** an action that redirects returns `redirectWithFlash(url, key)`
+  (`app/server/flash.server.ts`; `createUserSession` and `logout` take an optional key). The key
+  (`FLASH_KEYS` in `app/lib/flash.ts`, text in `toast.flash`) rides a signed one-minute `__flash`
+  cookie; the root loader reads and clears it, and `useFlashToast` shows it once per flash id.
 - **Document upload** (`app/lib/documents/extract.ts`). `fileToText` lazily loads `unpdf` (PDF) and
   `mammoth` (DOCX) and extracts text in the browser into a `kind: "document"` field (300k chars,
   checked by `fieldCapError`). No server endpoint; fixtures in `tests/fixtures/generate.mjs`.

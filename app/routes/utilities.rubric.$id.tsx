@@ -17,6 +17,7 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { levelDistribution, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
+import { redirectWithFlash } from "~/server/flash.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireFeatureUser(request, "utilities");
@@ -61,11 +62,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     const suffix = getMessages(getLocale(request)).utilities.rubric.copySuffix;
     const name = `${existing.name} ${suffix}`.slice(0, RUBRIC_LIMITS.name);
     const copy = await duplicateRubric(user.id, existing.id, name);
-    return redirect(copy ? `/utilities/rubric/${copy.id}` : "/utilities/rubric");
+    if (!copy) return redirect("/utilities/rubric");
+    return redirectWithFlash(`/utilities/rubric/${copy.id}`, "rubricDuplicated");
   }
   if (intent === "delete") {
     await deleteRubric(user.id, existing.id);
-    return redirect("/utilities/rubric");
+    return redirectWithFlash("/utilities/rubric", "rubricDeleted");
   }
   return { error: "invalid" as const };
 }

@@ -3,6 +3,7 @@ import { useLocation, useNavigation } from "react-router";
 import { Check, Info, Loader2, ShieldAlert, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
+import type { Flash } from "~/lib/flash";
 
 export type ToastVariant = "pending" | "success" | "error" | "info";
 
@@ -81,6 +82,26 @@ export function useActionToast<T>(
     const input = mapperRef.current(data);
     if (input) showToast(input);
   }, [data, showToast]);
+}
+
+/**
+ * Flash-across-redirect bridge (P16): show the root loader's one-shot flash as
+ * a success toast, once per flash `id`. A re-render, or a later navigation
+ * without a new flash, shows nothing; the same message again (a new id) shows
+ * again.
+ */
+export function useFlashToast(flash: Flash | null | undefined): void {
+  const { showToast } = useToast();
+  const t = useT();
+  const messagesRef = useRef(t.toast.flash);
+  messagesRef.current = t.toast.flash;
+  const seenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!flash || flash.id === seenRef.current) return;
+    seenRef.current = flash.id;
+    showToast({ variant: "success", message: messagesRef.current[flash.key] });
+  }, [flash, showToast]);
 }
 
 interface FormToastOptions<T> {
@@ -170,7 +191,7 @@ export function useFormToast<T>(data: T | undefined, options: FormToastOptions<T
 
   // A redirecting action (delete → redirect) never returns this route to `idle`
   // — it unmounts mid-flight. Dismiss any still-pending toast on unmount so it
-  // doesn't hang on the next page. (Flash-across-redirect success is P16.)
+  // doesn't hang on the next page; the action's flash (P16) reports the result there.
   useEffect(() => {
     return () => {
       if (pendingIdRef.current != null) dismiss(pendingIdRef.current);

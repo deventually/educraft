@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 import { listModels } from "~/lib/ai/models";
 
 // Isolated in-memory SQLite before any server module loads.
@@ -554,8 +555,9 @@ describe("admin.users action", () => {
       personRoute.action,
       post({ intent: "deleteUser", userId: teacher.id }),
     )) as unknown as Response;
-    // The person page is gone: back to the list (P28.1).
+    // The person page is gone: back to the list (P28.1), with a toast (P16).
     expect(res.status).toBe(302);
+    expect(await flashKeyOf(res)).toBe("userDeleted");
     expect(res.headers.get("Location")).toBe("/admin/users");
     expect(await users.getUserById(teacher.id)).toBeNull();
   });
