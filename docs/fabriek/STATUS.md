@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
 
 ## Nu
 
+- **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten kijken een cursus na op
+  verzoek, met akkoord/niet akkoord (BESLUIT-2026-11-05-3); 21.1 kan starten.
 - **Cursussen, opslag (P20.2, #79) gemerged op 2026-11-05:** tabellen `courses` en `course_links`
   (migratie 0014), per docent afgeschermd.
 - **Brief P26 Cursussen verder (#77) gemerged op 2026-11-05:** toetsmatrijs per vraag,
