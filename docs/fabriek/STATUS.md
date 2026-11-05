@@ -10,6 +10,10 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Wiskunde nakijken gemeten met een echte foto (#131 + meting mg1) op 2026-11-05:** een
+  telefoonfoto van handgeschreven werk met één bewuste rekenfout (18x in plaats van 24x). Meting
+  `2026-11-05mg1`: 4,80, geen gefaalde check; de tool vindt precies dat foutje en geeft een
+  concept-8/10. Zwakste punt: een vervolgstap (numeriek controleren) is zwaar voor mbo-4.
 - **Rolagenten alleen voor de hele instelling (#132) gemerged op 2026-11-05:** een team kan de
   schakelaar *Rolagenten* niet meer zien of omzetten; een eerder bewaarde teamkeuze telt niet meer
   mee (BESLUIT-2026-11-05-11, keuze Bastiaan). Een uitzondering per docent door de beheerder
@@ -224,11 +228,7 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- Foto voor Wiskunde nakijken: een echte telefoonfoto van handgeschreven werk (Bastiaan,
-  2026-11-05, zonder naam, EXIF/GPS verwijderd) staat als
-  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
-  plaats van 24x). De case vertelt de beoordelaar dat foutje; verwacht ± 8/10. Nog te meten met
-  `npm run eval -- --tool math-grading`. PR open.
+- Niets.
 
 ## Wacht op jou
 
