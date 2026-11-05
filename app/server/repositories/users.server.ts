@@ -20,10 +20,12 @@ import {
 } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
+  agentReviews,
   contextProfiles,
   courseLinks,
   courses,
   portfolioDossiers,
+  reviewDecisions,
   rubricScores,
   rubrics,
   teamMembers,
@@ -358,6 +360,8 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(portfolioDossiers).where(eq(portfolioDossiers.userId, id)).run();
     tx.delete(rubricScores).where(eq(rubricScores.userId, id)).run();
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
+    tx.delete(reviewDecisions).where(eq(reviewDecisions.userId, id)).run();
+    tx.delete(agentReviews).where(eq(agentReviews.userId, id)).run();
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();

@@ -8,7 +8,14 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { CourseDataSchema, COURSE_LIMITS, emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
 import { getDb } from "../db.server";
-import { contextProfiles, courseLinks, courses, generations } from "../schema.server";
+import {
+  agentReviews,
+  contextProfiles,
+  courseLinks,
+  courses,
+  generations,
+  reviewDecisions,
+} from "../schema.server";
 
 export interface Course {
   id: string;
@@ -132,7 +139,7 @@ export async function updateCourse(
   return { ...existing, name, contextProfileId, data, updatedAt };
 }
 
-/** Deletes the course and its links in one transaction. */
+/** Deletes the course, its links and its reviews in one transaction. */
 export async function deleteCourse(userId: string, id: string): Promise<boolean> {
   return getDb().transaction((tx) => {
     const result = tx.delete(courses).where(ownCourse(userId, id)).run();
@@ -140,6 +147,21 @@ export async function deleteCourse(userId: string, id: string): Promise<boolean>
     tx.delete(courseLinks)
       .where(and(eq(courseLinks.courseId, id), eq(courseLinks.userId, userId)))
       .run();
+    // P21.3: the course's role-agent reviews and the decisions on them.
+    const reviewIds = tx
+      .select({ id: agentReviews.id })
+      .from(agentReviews)
+      .where(and(eq(agentReviews.courseId, id), eq(agentReviews.userId, userId)))
+      .all()
+      .map((r) => r.id);
+    if (reviewIds.length) {
+      tx.delete(reviewDecisions)
+        .where(
+          and(inArray(reviewDecisions.reviewId, reviewIds), eq(reviewDecisions.userId, userId)),
+        )
+        .run();
+      tx.delete(agentReviews).where(inArray(agentReviews.id, reviewIds)).run();
+    }
     return true;
   });
 }

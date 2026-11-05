@@ -147,6 +147,10 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 
 ## Bezig
 
+- P21.3 Rolagenten, opslag: twee tabellen (`agent_reviews` met de bevindingen van een pet,
+  `review_decisions` met Akkoord / Niet akkoord en een reden van hooguit 500 tekens), migratie 0018
+  en een repository per docent. Eerder verworpen bevindingen zijn op te vragen voor de volgende
+  beoordeling. Weg bij het verwijderen van de cursus of het account. Nog geen scherm. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
   zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).
