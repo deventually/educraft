@@ -96,6 +96,14 @@ Details: [Architecture](wiki/Architecture.md#feature-modules).
   (OER, blueprint) is a proposal the teacher confirms; a course in a dossier is a snapshot, never a
   live link.
 
+### Role agents (P21)
+Details: [Architecture](wiki/Architecture.md#feature-modules).
+- A hat is data (`app/lib/agents/registry.ts`: `{ id, role, promptId, watches }`); no per-hat branch.
+- Hats advise, never change a course. P20 checks are facts without buttons; only hat findings get
+  Akkoord / Niet akkoord, stored in `review_decisions`; a rejected finding never comes back.
+- Anti-fabrication lives in code: `parseAgentReview` drops unknown keys, duplicates and rejected
+  advice. Linked work goes in only when the teacher ticks the box, only own `test-items` work.
+
 Details: [Authentication](wiki/Authentication.md), model availability in
 [Architecture](wiki/Architecture.md#providers-model-agnostic).
 - Roles are `teacher | admin`. `"student"` survives only as tool data (`Tool.userType`), never as

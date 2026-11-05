@@ -154,7 +154,13 @@ export async function saveCourseIntent(
         error: r.error === "invalid" ? a.decide.invalid : a.decide.notFound,
       };
     }
-    const r = await reviewCourse(user, course, String(fd.get("model") ?? "") || null, locale);
+    const r = await reviewCourse(
+      user,
+      course,
+      String(fd.get("model") ?? "") || null,
+      locale,
+      fd.get("includeLinked") === "1",
+    );
     if (!r.ok) return { ok: false, intent, error: a.review[r.error] };
     if (r.failed.length === 0) return { ok: true, intent, message: a.review.done };
     const names = r.failed.map((agent) => loc(agent.role, locale)).join(", ");

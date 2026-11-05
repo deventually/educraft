@@ -6,6 +6,7 @@ import { extractJson } from "../app/lib/ai/structuredAnswer";
 import type { AgentParseResult } from "../app/lib/agents/filter";
 import { courseKeys } from "../app/lib/agents/input";
 import { RawAgentReviewSchema } from "../app/lib/agents/schema";
+import type { LinkedWorkInput } from "../app/lib/agents/input";
 import type { RejectedFinding } from "../app/lib/agents/types";
 import type { CourseData } from "../app/lib/courses/types";
 
@@ -22,6 +23,8 @@ export interface AgentCase {
   description?: string;
   course: CourseData;
   rejected?: RejectedFinding[];
+  /** Linked test questions (P21.7): the case then reviews "also the linked work". */
+  linkedWork?: LinkedWorkInput[];
   /** Each expectation must be met by at least one finding (the known fault). */
   mustFind?: FindingExpectation[];
   /** No finding may meet these (rejected advice, an injected instruction). */
