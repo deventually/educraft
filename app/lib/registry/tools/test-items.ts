@@ -160,8 +160,9 @@ export const testItems: Tool = {
         { placeholder: "blueprint", fromStageId: "blueprint" },
         { placeholder: "questionPlan", fromStageId: "blueprint", derive: "question-plan" },
       ],
-      // Meting p: calculation-heavy sets ran out of budget while thinking.
-      maxTokens: 24576,
+      // Meting p: calculation-heavy sets ran out of budget while thinking; meting v: one
+      // statistics run was still cut off at 24576, so the registry maximum.
+      maxTokens: 32000,
       output: {
         kind: "structured-sections",
         hint: {

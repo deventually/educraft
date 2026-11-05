@@ -174,7 +174,9 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
   het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
   (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
   Pakt het punt onder Later aan (metingen t en u). Eindmeting v: vijf cases 4,60–4,93, statistics
-  3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). PR open.
+  3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
+  ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
+  in de vraag. PR open.
 
 - P29.1 Klaar om in te leveren?: in stap 5 van het BDB/BKE-dossier één lijst (groen / oranje /
   rood, met pictogram en woord) of je dossier inleverklaar is, met per punt "Los op". Zonder AI en

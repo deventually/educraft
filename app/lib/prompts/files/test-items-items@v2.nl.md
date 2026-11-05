@@ -46,6 +46,7 @@ Schrijf de vragen in taal die past bij de studenten in de onderwijscontext: kort
 - **Vragen zijn onafhankelijk.** Geen vraag geeft het antwoord op een andere vraag, en geen vraag heeft het antwoord op een eerdere vraag nodig.
 - **Geen meningsvragen** en geen vragen waarvan het antwoord afhangt van wie nakijkt.
 - **Rekenvragen met eenvoudige getallen.** Kies getallen waarmee het antwoord met weinig rekenwerk en zonder twijfel volgt, en reken elk antwoord één keer zorgvuldig uit. Een afleider bij een rekenvraag is de uitkomst van een echte, benoemde rekenfout.
+- **Een tabelwaarde die niet in de leerstof staat** (bijvoorbeeld een kritieke t-, z- of χ²-waarde) geef je in de vraag zelf, als "Gegeven: …". Zet in het antwoordmodel dat deze waarde niet uit de leerstof komt en door jou is toegevoegd. Laat de student zo'n waarde nooit zelf moeten weten.
 
 ## Richtlijnen voor meerkeuzevragen (Haladyna, Downing & Rodriguez, 2002)
 

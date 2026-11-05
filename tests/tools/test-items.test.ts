@@ -233,6 +233,21 @@ describe("tool: test-items", () => {
     expect(en).not.toContain("use three options");
   });
 
+  // Meting v: one statistics run was cut off at question 8 at 24576 tokens.
+  it("gives the questions stage the largest output budget the registry allows", () => {
+    expect(tool().stages[1]!.maxTokens).toBe(32000);
+  });
+
+  // Meting v: a correct t-value (2,131) that was not in the material failed inventedContent.
+  it("puts a table value that is not in the material in the question, as given (nl, en)", () => {
+    const nl = runtime("items", "nl").toLowerCase();
+    expect(nl).toContain("tabelwaarde");
+    expect(nl).toContain("gegeven:");
+    const en = runtime("items", "en").toLowerCase();
+    expect(en).toContain("table value");
+    expect(en).toContain("given:");
+  });
+
   it("keeps @v1 registered for results made with it", () => {
     expect(getPrompt("test-items-items@v1")).toBeDefined();
   });

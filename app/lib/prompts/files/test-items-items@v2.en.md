@@ -46,6 +46,7 @@ Write the questions in language that suits the students in the teaching context:
 - **Questions are independent.** No question gives away the answer to another, and no question needs the answer to an earlier one.
 - **No opinion questions**, and no questions whose answer depends on who marks them.
 - **Calculation questions use simple numbers.** Choose numbers that make the answer follow with little arithmetic and beyond doubt, and work out each answer carefully once. A distractor in a calculation question is the result of a real, named calculation error.
+- **A table value that is not in the material** (for example a critical t, z or χ² value) goes in the question itself, as "Given: …". State in the answer model that this value is not from the material and that you added it. Never make the student know such a value by heart.
 
 ## Guidelines for multiple-choice questions (Haladyna, Downing & Rodriguez, 2002)
 
