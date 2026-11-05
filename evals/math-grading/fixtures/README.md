@@ -17,3 +17,10 @@ The harness base64-encodes the file and sends it to a vision-capable model. If t
 file is missing, that case fails with a clear message and the rest of the run
 continues. (This directory is otherwise gitignored via `evals/output/` only —
 fixtures here ARE committed if you add them.)
+
+## Current fixture
+
+`handwritten-derivative.png` is a real phone photo (cropped, downscaled to 1200 px, EXIF
+and GPS stripped) of f(x) = (3x² − 5)⁴ worked out with the chain rule. It has one deliberate
+slip in the last line: 18x instead of 24x. The case description gives the judge this ground
+truth. Replacing the photo means updating that description too.

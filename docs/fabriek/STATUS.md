@@ -4,12 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten per instelling en test-items@v3 open)_
+_Laatst bijgewerkt: 2026-11-05 (Wiskunde-foto gemerged; test-items@v3 open)_
 
 ## Nu
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Foto voor Wiskunde nakijken (#131) gemerged op 2026-11-05:** een echte telefoonfoto van
+  handgeschreven werk (zonder naam, EXIF/GPS verwijderd) staat als
+  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
+  plaats van 24x); verwacht ± 8/10. Nog te meten met `npm run eval -- --tool math-grading`.
+- **Rolagenten alleen voor de hele instelling (#132) gemerged op 2026-11-05:** een team kan de
+  schakelaar *Rolagenten* niet meer zien of omzetten; een eerder bewaarde teamkeuze telt niet meer
+  mee (BESLUIT-2026-11-05-11, keuze Bastiaan). Een uitzondering per docent door de beheerder
+  blijft. Geen migratie.
 - **Flash-toasts na een redirect (P16, #130) gemerged op 2026-11-05:** na inloggen, uitloggen,
   een uitnodiging, een nieuw wachtwoord, verwijderen, een rubric kopiëren en stoppen als
   teamleider verschijnt op de volgende pagina een korte melding. Daarmee is P16 af.
@@ -228,14 +236,10 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten per instelling en test-items@
   een kopje meer, geen gefaalde check, niets afgekapt; gemiddeld 4,58 (w: 4,77), arithmetic 4,33.
   De beoordelaar rekende in 4 runs de indeling per rij als vormfout aan; de rubric zegt nu dat die
   indeling de gevraagde vorm is. PR open, beslissing Bastiaan.
-- Rolagenten alleen voor de hele instelling: een team kan de schakelaar *Rolagenten* niet meer
-  zien of omzetten; een eerder bewaarde teamkeuze telt niet meer mee (BESLUIT-2026-11-05-11,
-  keuze Bastiaan). Een uitzondering per docent door de beheerder blijft. Geen migratie. PR open.
 
 ## Wacht op jou
 
-- **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
-  `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
+- Niets.
 
 ## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
 
