@@ -5,6 +5,9 @@ import type { Route } from "./+types/courses._index";
 import { requireCourseUser } from "~/server/courses.server";
 import { createCourse, deleteCourse, listCourses } from "~/server/repositories/courses.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
+import { copySharedItem } from "~/server/repositories/shares.server";
+import { sharedWithMe } from "~/server/sharing.server";
+import { SharedWithMe } from "~/components/sharing/SharedWithMe";
 import { checkAlignment } from "~/lib/courses/alignment";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
@@ -29,7 +32,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     findings: checkAlignment(c.data).length,
   }));
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
-  return { courses, profiles };
+  // "Van mijn team" (P28.4): colleagues' courses shared with the viewer's teams.
+  const shared = await sharedWithMe(user, "course");
+  return { courses, profiles, shared };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -42,6 +47,12 @@ export async function action({ request }: Route.ActionArgs) {
     return deleted
       ? { ok: true as const, intent: "delete" as const }
       : { ok: false as const, error: m.errorNotFound };
+  }
+  if (intent === "copy-shared") {
+    const copyId = await copySharedItem(user.id, "course", String(fd.get("id") ?? ""));
+    if (!copyId)
+      return { ok: false as const, error: getMessages(getLocale(request)).sharing.errorNotFound };
+    return redirect(`/courses/${copyId}`);
   }
   if (intent === "create") {
     const name = String(fd.get("name") ?? "").trim();
@@ -67,7 +78,7 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
       return { variant: "success", message: c.toastDeleted };
     },
   });
-  const { courses, profiles } = loaderData;
+  const { courses, profiles, shared = [] } = loaderData;
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -163,6 +174,7 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
           </ul>
         </section>
       )}
+      <SharedWithMe items={shared} viewHref={(id) => `/courses/shared/${id}`} />
     </div>
   );
 }
