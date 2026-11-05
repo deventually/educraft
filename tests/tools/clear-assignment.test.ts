@@ -123,6 +123,20 @@ describe("tool: clear-assignment", () => {
     );
   });
 
+  it("fixes what meting ca1 showed: section order, an invented purpose, term explanations above the level", () => {
+    const nl = runtime("nl").toLowerCase();
+    const en = runtime("en").toLowerCase();
+    // ca1: four of six outputs put the sections in a different order.
+    expect(nl).toContain("begin je uitvoer met");
+    expect(en).toContain("start your output with");
+    // ca1 (policy brief): "Why this assignment?" gave a purpose the teacher did not name.
+    expect(nl).toContain("alleen de markering");
+    expect(en).toContain("only the marker");
+    // ca1: explanations of terms ("kegelvormige glazen fles") above A2/B1.
+    expect(nl).toContain("uitleg van een vakterm is zelf op het gekozen niveau");
+    expect(en).toContain("explanation of a term is itself at the chosen level");
+  });
+
   it("asks for a requirement check table, in both languages", () => {
     expect(runtime("nl")).toContain("| Eis in het origineel | Waar in de herschreven opdracht |");
     expect(runtime("en")).toContain(
