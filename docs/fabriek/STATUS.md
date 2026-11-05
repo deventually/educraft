@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Nu
 
+- **Klaar om in te leveren? (P29.1, #117) gemerged op 2026-11-05:** in stap 5 van het
+  BDB/BKE-dossier één lijst met per punt "Los op", zelf afvinken met datum; advies, geen poort.
 - **De week van de docent op Start (P22.3, #113) gemerged op 2026-11-05:** per cursus *In de les*,
   *Voorbereiden* en *Nakijken*, vanaf vrijdag ook *Volgende week*; zonder startdatum een hint.
 - **De week van de docent, puur (P22.2, #111) gemerged op 2026-11-05:** `teacherWeek` rekent per
@@ -176,11 +178,12 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
   van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
   grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
   4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
-- P29.1 Klaar om in te leveren?: in stap 5 van het BDB/BKE-dossier één lijst (groen / oranje /
-  rood, met pictogram en woord) of je dossier inleverklaar is, met per punt "Los op". Zonder AI en
-  zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten
-  (geen studentnamen, BKE-minimum, AI-verantwoording) met datum. Een toets als bewijs telt zijn
-  vragen (`itemCount`). Geen migratie. PR open.
+- P29.2 Proefassessment, de AI-tekst en de meting: `portfolio-rehearsal@v1` (NL/EN) speelt een
+  commissie van twee assessoren die het dossier las, één vraag per beurt, dunste criterium eerst,
+  doorvragen volgens STARR; op "Rond af" feedback per criterium als JSON. Controle in code
+  (`rehearsal.ts`): citaten alleen uit wat de docent typte, onbekende bronnen eruit, nooit een
+  cijfer. Bewijsstukken gaan alleen als titel mee. Meting `npm run eval:rehearsal` met vier
+  synthetische dossiers; nog niet gedraaid (geen API-sleutel in deze sessie). Geen UI. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop
@@ -224,7 +227,6 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
   dossier als echte tabel met kopregel en eigen kopjes onder de bijlage, niet meer als tekst met
   streepjes. Geplakt bewijs blijft letterlijk. PR open.
 
-- Brief P29 BDB/BKE afronden (inleverklaar-check en proefassessment): alleen tekst, PR open.
 
 ## Wacht op jou
 

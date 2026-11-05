@@ -22,7 +22,8 @@
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",
     "eval:coach": "vite-node -c scripts/eval.config.ts scripts/eval-coach.ts",
     "eval:agents": "vite-node -c scripts/eval.config.ts scripts/eval-agents.ts",
-    "eval:import": "vite-node -c scripts/eval.config.ts scripts/eval-import.ts"
+    "eval:import": "vite-node -c scripts/eval.config.ts scripts/eval-import.ts",
+    "eval:rehearsal": "vite-node -c scripts/eval.config.ts scripts/eval-rehearsal.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.8",

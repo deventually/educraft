@@ -433,11 +433,16 @@ describe("counted checks (decided in code, not by the judge)", () => {
 
   it("every counted check in a committed rubric has a counter", async () => {
     const { readdirSync, readFileSync, existsSync } = await import("node:fs");
+    // The rehearsal eval (P29.2) has its own runner and counters.
+    const { REHEARSAL_COUNTED } = await import("../../scripts/eval-rehearsal-helpers");
+    const own: Record<string, Record<string, unknown>> = {
+      "portfolio-rehearsal": REHEARSAL_COUNTED,
+    };
     for (const tool of readdirSync("evals")) {
       const path = `evals/${tool}/rubric.md`;
       if (!existsSync(path)) continue;
       for (const c of parseHardChecks(readFileSync(path, "utf8")).filter((c) => c.counted)) {
-        expect(COUNTED_CHECKS[c.id], `${tool}/${c.id}`).toBeTypeOf("function");
+        expect((own[tool] ?? COUNTED_CHECKS)[c.id], `${tool}/${c.id}`).toBeTypeOf("function");
       }
     }
   });
