@@ -5,6 +5,28 @@ export const agents = {
     invalid: "Dit besluit kon niet worden vastgelegd. Controleer je reden (hooguit 500 tekens).",
     notFound: "Dit advies bestaat niet (meer).",
   },
+  panel: {
+    about: "Over: {item}",
+    accept: "Akkoord",
+    decided: "Afgehandeld ({n})",
+    decision: { accepted: "Akkoord", rejected: "Niet akkoord" },
+    intro:
+      "Twee kritische collega's kijken je cursus na: een toetsdeskundige en een ontwerper. Ze geven advies; jij beslist per advies. Er verandert niets aan je cursus.",
+    model: "Model",
+    none: "Geen adviezen van deze pet.",
+    notYet: "Nog niet beoordeeld.",
+    pending: "De petten kijken je cursus na…",
+    reason: "Reden (optioneel)",
+    reject: "Niet akkoord",
+    reviewedWith: "Beoordeeld met {model}",
+    run: "Laat beoordelen",
+    severity: { info: "Tip", warning: "Let op" },
+    stale:
+      "Je cursus is gewijzigd na deze beoordeling. Laat opnieuw beoordelen voor actueel advies.",
+    suggestion: "Voorstel",
+    title: "Beoordeling",
+    wholeCourse: "Over de hele cursus",
+  },
   review: {
     done: "De beoordeling is klaar.",
     failed: "De beoordeling is mislukt. Probeer het later opnieuw.",

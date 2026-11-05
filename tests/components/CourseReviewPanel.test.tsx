@@ -1,0 +1,123 @@
+import { describe, expect, it } from "vitest";
+import { render, screen, within } from "@testing-library/react";
+import { axe } from "vitest-axe";
+import { createRoutesStub } from "react-router";
+import { CourseReviewPanel, type ReviewPanelAgent } from "~/components/courses/CourseReviewPanel";
+import { alignedCourse, LO1, TEST1 } from "../courses/fixtures";
+
+const axeOpts = { rules: { "color-contrast": { enabled: false } } };
+
+const models = [
+  { id: "claude-sonnet-5-5", displayName: "Sonnet 5.5" },
+  { id: "claude-opus-5-5", displayName: "Opus 5.5" },
+];
+
+const notYet: ReviewPanelAgent[] = [
+  {
+    agentId: "assessment-expert",
+    role: { nl: "Toetsdeskundige", en: "Assessment expert" },
+    review: null,
+  },
+  { agentId: "designer", role: { nl: "Ontwerper", en: "Designer" }, review: null },
+];
+
+function reviewed(stale = false): ReviewPanelAgent[] {
+  return [
+    {
+      ...notYet[0],
+      review: {
+        id: "rev-1",
+        model: "Opus 5.5",
+        stale,
+        findings: [
+          {
+            id: "f1",
+            severity: "warning",
+            targetId: LO1,
+            message: "De leeruitkomst is vaag.",
+            suggestion: "Maak hem toetsbaar.",
+          },
+          {
+            id: "f2",
+            severity: "info",
+            targetId: TEST1,
+            message: "Weging ontbreekt.",
+            suggestion: "",
+            decision: "rejected",
+            reason: "Bewuste keuze.",
+          },
+        ],
+      },
+    },
+    { ...notYet[1], review: { id: "rev-2", model: "Opus 5.5", stale, findings: [] } },
+  ];
+}
+
+function renderPanel(agents: ReviewPanelAgent[]) {
+  const Stub = createRoutesStub([
+    {
+      path: "/",
+      Component: () => (
+        <CourseReviewPanel
+          data={alignedCourse()}
+          agents={agents}
+          models={models}
+          defaultModel="claude-sonnet-5-5"
+        />
+      ),
+    },
+  ]);
+  return render(<Stub initialEntries={["/"]} />);
+}
+
+describe("CourseReviewPanel", () => {
+  it("offers the review with a model choice and says nothing was reviewed yet", async () => {
+    const { container } = renderPanel(notYet);
+    expect(screen.getByRole("heading", { name: "Beoordeling" })).toBeVisible();
+    expect(screen.getByLabelText("Model")).toHaveValue("claude-sonnet-5-5");
+    const run = screen.getByRole("button", { name: "Laat beoordelen" });
+    expect(run).toHaveAttribute("name", "intent");
+    expect(run).toHaveAttribute("value", "review");
+    expect(screen.getAllByText("Nog niet beoordeeld.")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Toetsdeskundige" })).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows open findings with the item they are about and Akkoord / Niet akkoord", async () => {
+    const { container } = renderPanel(reviewed());
+    const open = screen.getByText("De leeruitkomst is vaag.").closest("li") as HTMLElement;
+    expect(within(open).getByText(/Je ontwerpt een datamodel\./)).toBeVisible();
+    expect(within(open).getByText(/Maak hem toetsbaar\./)).toBeVisible();
+    expect(within(open).getByLabelText("Reden (optioneel)")).toHaveAttribute("maxLength", "500");
+    const accept = within(open).getByRole("button", { name: /^Akkoord/ });
+    expect(accept).toHaveAttribute("name", "decision");
+    expect(accept).toHaveAttribute("value", "accepted");
+    expect(within(open).getByRole("button", { name: /^Niet akkoord/ })).toHaveAttribute(
+      "value",
+      "rejected",
+    );
+    const form = accept.closest("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("decide");
+    expect(form.querySelector('input[name="reviewId"]')).toHaveValue("rev-1");
+    expect(form.querySelector('input[name="findingId"]')).toHaveValue("f1");
+    expect(screen.getByText("Geen adviezen van deze pet.")).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("folds decided findings away with the decision and the reason", () => {
+    renderPanel(reviewed());
+    const summary = screen.getByText("Afgehandeld (1)");
+    const details = summary.closest("details") as HTMLElement;
+    expect(details).not.toHaveAttribute("open");
+    expect(within(details).getByText("Weging ontbreekt.")).toBeInTheDocument();
+    expect(within(details).getByText(/Niet akkoord/)).toBeInTheDocument();
+    expect(within(details).getByText(/Bewuste keuze\./)).toBeInTheDocument();
+    expect(within(details).queryByRole("button")).toBeNull();
+  });
+
+  it("says when the course changed after the review", async () => {
+    const { container } = renderPanel(reviewed(true));
+    expect(screen.getAllByText(/gewijzigd na deze beoordeling/)).toHaveLength(2);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});

@@ -25,6 +25,11 @@ vi.mock("~/server/availability.server", () => ({
   effectiveDefaultModel: vi.fn(async () => "claude-sonnet-5-5"),
   isModelSelectableForUser: vi.fn(async () => gates.model),
   getAvailableTools: vi.fn(async () => []),
+  isFeatureOn: vi.fn(async (_u: unknown, id: string) => id !== "roleAgents" || gates.roleAgents),
+  effectiveFeatures: vi.fn(async () => ({ portfolio: { on: false } })),
+  getSelectableModels: vi.fn(async () => [
+    { id: "claude-sonnet-5-5", displayName: "Sonnet 5.5", supportsImages: true },
+  ]),
   requireFeature: vi.fn(async (_u: unknown, id: string) => {
     if (id === "roleAgents" && !gates.roleAgents) throw new Response("Not Found", { status: 404 });
   }),
@@ -246,5 +251,59 @@ describe("decide intent", () => {
     ]);
     expect(r).toMatchObject({ ok: false, intent: "decide" });
     expect(await reviews.listDecisions("teacher-r", review.id)).toEqual([]);
+  });
+});
+
+describe("course page loader (P21.5)", () => {
+  async function load(id: string) {
+    const request = new Request(`http://localhost/courses/${id}`);
+    return (await detail.loader({ request, params: { id } } as never)) as {
+      review: {
+        agents: { agentId: string; review: null | Record<string, unknown> }[];
+        models: unknown[];
+        defaultModel: string;
+      } | null;
+    };
+  }
+
+  it("gives each course hat its latest review, with decisions and a stale flag", async () => {
+    const c = await newCourse();
+    const before = await load(c.id);
+    expect(before.review?.agents.map((a) => [a.agentId, a.review])).toEqual([
+      ["assessment-expert", null],
+      ["designer", null],
+    ]);
+    expect(before.review?.defaultModel).toBe("claude-sonnet-5-5");
+
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    await post(c.id, [["intent", "review"]]);
+    const review = (await reviews.listReviewsForCourse("teacher-r", c.id)).find(
+      (s) => s.agentId === "assessment-expert",
+    )!;
+    await reviews.decideFinding("teacher-r", {
+      reviewId: review.id,
+      findingId: "f1",
+      decision: "rejected",
+      reason: "Nee.",
+    });
+    const after = await load(c.id);
+    const shown = after.review?.agents[0].review as {
+      id: string;
+      stale: boolean;
+      findings: { id: string; decision?: string; reason?: string | null }[];
+    };
+    expect(shown.id).toBe(review.id);
+    expect(shown.stale).toBe(false);
+    expect(shown.findings[0]).toMatchObject({ id: "f1", decision: "rejected", reason: "Nee." });
+
+    await courses.updateCourse("teacher-r", c.id, { name: "Nieuwe naam" });
+    const stale = (await load(c.id)).review?.agents[0].review as { stale: boolean };
+    expect(stale.stale).toBe(true);
+  });
+
+  it("leaves the panel out when role agents are switched off", async () => {
+    const c = await newCourse();
+    gates.roleAgents = false;
+    expect((await load(c.id)).review).toBeNull();
   });
 });
