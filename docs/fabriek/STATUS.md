@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 en P21.1 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P21.1 en brief P27 gemerged, P20.4 bezig)_
 
 ## Nu
 
+- **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
+  thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen
+  (BESLUIT-2026-11-05-4).
+- **Rolagenten, petten als data (P21.1, #81) gemerged op 2026-11-05:** de Toetsdeskundige en de
+  Ontwerper als register, met de controle op hun antwoord; nog zonder AI en zonder scherm.
 - **Cursussen, de pagina's (P20.3, #82) gemerged op 2026-11-05:** menu-item "Cursussen", per
   cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, aandachtspunten en de
   dekkingsmatrix.
@@ -106,16 +111,16 @@ _Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 en P21.1 bezig)_
 - 2026-11-05: "Kunnen we niet alvast beginnen met de volgende P20 features?" en "Ik wil 2 t/m 5 wel
   hebben" → P20 met studielast en de P24-tools erbij; toetsmatrijs, OER-import en BDB/BKE naar P26
   (BESLUIT-2026-11-05-1).
+- 2026-11-05: "Hoe kunnen we deze applicatie super effectief maken en een genot om mee te werken?",
+  "voor de BDB/BKE functie zoveel mogelijk integratie van de tools en wellicht ook een aparte
+  workflow" en "alle drie aanbieden?" → document "LimeOnIt als één workflow", BESLUIT-2026-11-05-4,
+  brief P27.
 
 ## Bezig
 
 - P20.4 Cursussen koppelen: op tien toolpagina's een cursuskiezer die de leeruitkomsten invult en
   het resultaat aan de cursus koppelt; op "Mijn werk" werk koppelen en ontkoppelen, met een
   cursusbadge; op de cursuspagina "Gekoppeld werk". Daarna 20.5 (documentatie). PR open.
-- P21.1 Rolagenten, petten als data (`app/lib/agents/`): de Toetsdeskundige en de Ontwerper als
-  register, de invoer die een pet krijgt (cursus onder korte sleutels, vaste controles, verworpen
-  adviezen) en de controle op het antwoord (onbekende items, dubbelen en verworpen adviezen vallen
-  weg). Nog zonder AI en zonder scherm. Daarna 21.2 (prompts en meting) en 21.3 (opslag). PR open.
 
 ## Wacht op jou
 
@@ -130,8 +135,9 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
    Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten) en **P26** (cursussen verder),
-   dan **P22** (de docentweek).
+3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
+   BDB/BKE doet mee), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
+   (de docentweek, op Start), dan de rest van **P26** (BESLUIT-2026-11-05-4).
 
 ## Open vragen
 

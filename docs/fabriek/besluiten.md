@@ -209,3 +209,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   verworpen bevinding komt niet terug. Pakket-tags voor elk pakket. De pet draait op de modellen die
   de docent aangeboden krijgt. Gekoppeld werk mee laten nakijken is een keuze per keer, nooit
   automatisch, eerst alleen toetsvragen. Bastiaan, 2026-11-05. Uitwerking: brief P21.
+- **BESLUIT-2026-11-05-4:** **Eén workflow: de cursus is de thuisbasis, drie ingangen op één
+  startscherm, BDB/BKE doet mee.** Tools vertrekken uit de cursus of het dossier en het resultaat komt
+  daar terug, met een volgende stap. Vraagvak, *Deze week* en cursussen staan samen op de
+  Start-pagina; de docent kiest per moment, niet via een instelling. Wat een docent voor zijn cursus
+  maakt, wordt zonder omweg bewijs in zijn dossier; het dossier krijgt een route in vijf stappen. Het
+  menu gaat naar Start · Cursussen · BDB/BKE · Tools. Geen LLM in P27; tot de pilot geen nieuwe
+  AI-tools; P26.3 (OER-import) direct na P20. Een beheerder blijft op de gebruikerslijst landen. De
+  BDB/BKE-werkplaats staat per docent aan of uit, standaard uit; de beheerder zet hem aan (wie al
+  een dossier heeft, staat aan). Bastiaan, 2026-11-05. Uitwerking: brief P27.
