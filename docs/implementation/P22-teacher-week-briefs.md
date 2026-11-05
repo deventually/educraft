@@ -5,8 +5,8 @@
 > **P21** als die er zijn. Zonder P21 en P27.4 werkt alles, alleen met minder knoppen. Zo voer je deze
 > brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens
 > `AGENTS.md` / de `/tdd`-skill, poort `npm test && npm run typecheck && npm run check`. Merge nooit
-> zelf; alleen Bastiaan merget. **Eerst kiest Bastiaan** de punten onder *Te beslissen*; deze brief
-> is geschreven op de aanbevolen keuzes.
+> zelf; alleen Bastiaan merget. **Planner of niet is beslist** (BESLUIT-2026-11-05-7); punten 2 en 3
+> onder *Te beslissen* staan nog open en de brief volgt daar de aanbeveling.
 
 ## In gewone taal
 
@@ -43,12 +43,12 @@ zijn cursus heeft staan.
 - **Productie** is één Node-proces (`react-router-serve`) met één SQLite-bestand
   ([Deployment](../../wiki/Deployment.md)). Er is geen eigen serverbestand en geen achtergrondproces.
 
-## Uitgangspunten (aanbevolen, zie *Te beslissen*)
+## Uitgangspunten
 
 1. **Afgeleid, niet bijgehouden.** De week is een pure functie van de cursussen, de koppelingen en de
    datum van vandaag. Er komt geen takenlijst om af te vinken: "voorbereid" betekent dat er werk aan
    de les hangt. Dat sluit aan op P21 ("Akkoord = alleen vastleggen, geen takenlijst").
-2. **Geen planner in P22.** De "zondagbriefing" is het blok *Volgende week* op Start, berekend bij het
+2. **Geen planner in P22** (BESLUIT-2026-11-05-7). De "zondagbriefing" is het blok *Volgende week* op Start, berekend bij het
    openen. De jobrunner uit de oude stub vervalt hier; hij komt pas als er iets echt op de
    achtergrond moet (e-mail, de Cases-add-on). Zie *Waarom geen jobrunner*.
 3. **Geen AI.** Geen samenvatting door een model en geen geplande beoordeling door de petten van P21.
@@ -196,9 +196,7 @@ niet bouwen.
 
 ## Te beslissen door Bastiaan
 
-1. **Planner of niet.** *Aanbevolen:* geen jobrunner; *Volgende week* verschijnt vanaf vrijdag op
-   Start. *Alternatief:* de stub zoals hij was, met jobrunner en een bewaarde zondagbriefing in de
-   app (één deelstap extra, plus een eigen serverbestand).
+1. ~~Planner of niet.~~ Beslist, zie hieronder.
 2. **Vakantieweken: één lijst voor de instelling**, ingevuld door de beheerder. *Alternatief:* per
    cursus door de docent (geen beheerscherm, wel meer typwerk).
 3. **Agenda: een bestand om te downloaden.** *Alternatief:* een feed met een geheime link die de agenda
@@ -207,6 +205,11 @@ niet bouwen.
 
 Na de keuze legt de Producer het vast als BESLUIT in `besluiten.md` en zet hij de keuzes hier onder
 *Beslist door Bastiaan*.
+
+## Beslist door Bastiaan
+
+1. **Geen planner** (5 november 2026, BESLUIT-2026-11-05-7). *Volgende week* staat vanaf vrijdag op
+   Start, berekend bij het openen; geen jobrunner en geen AI.
 
 ## Acceptatie
 

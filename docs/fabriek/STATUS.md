@@ -154,7 +154,7 @@ _Laatst bijgewerkt: 2026-11-05 (brief P22 open)_
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
-  aanbevolen zonder jobrunner en zonder AI. Wacht op de keuze van Bastiaan (drie punten in de brief).
+  zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
@@ -167,8 +167,8 @@ _Laatst bijgewerkt: 2026-11-05 (brief P22 open)_
 
 ## Wacht op jou
 
-- **Brief P22, drie keuzes:** planner of niet, vakantieweken per instelling of per cursus, agenda als
-  download of als feed. Aanbeveling staat in de brief.
+- **Brief P22, nog twee keuzes:** vakantieweken per instelling of per cursus, agenda als download of
+  als feed. Aanbeveling staat in de brief; zonder planner is beslist (BESLUIT-2026-11-05-7).
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
   `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
 

@@ -229,3 +229,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Uitwerking: brief P28.
 - **BESLUIT-2026-11-05-6:** **Een beheerder heeft de BDB/BKE-werkplaats altijd**, los van de
   schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).
+- **BESLUIT-2026-11-05-7:** **De week van de docent (P22) zonder planner.** De zondagbriefing is het
+  blok *Volgende week* op Start, vanaf vrijdag, berekend bij het openen. Geen jobrunner, geen AI;
+  de jobrunner komt pas mee met e-mail of de Cases-add-on. Bastiaan, 2026-11-05. Uitwerking: brief
+  P22.
