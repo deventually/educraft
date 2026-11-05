@@ -187,7 +187,20 @@ function openPointCount(output: string): number {
   return section ? (section.match(/^\s*\d+[.)]\s/gm) ?? []).length : 0;
 }
 
+/**
+ * A heading that corrects itself (metingen p, r2, u and w): "Row R1 is not used; this is
+ * Row R2", "Row R1→R2". An arrow, a semicolon or a second row in one heading line.
+ */
+function hasCorrectionInHeading(output: string): boolean {
+  return output
+    .split("\n")
+    .filter((line) => /^#{1,6}\s/.test(line))
+    .some((h) => /→|->|;/.test(h) || (h.match(/\bR\d+\b/g) ?? []).length > 1);
+}
+
 export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
+  /** Test items (#118 follow-up): a correction trace in a heading, see above. */
+  correctionInHeading: hasCorrectionInHeading,
   /** Clear assignment (#73): at most 8 open points; meting ca2 once listed 14. */
   tooManyOpenPoints: (t) => openPointCount(t) > 8,
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),

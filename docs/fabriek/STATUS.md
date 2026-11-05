@@ -8,6 +8,13 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **Toetsvragen zonder correctie in een kopje (`test-items-items@v3`, #128) gemerged op
+  2026-11-05:** het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen
+  kopje en in elk vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe
+  rij soms de vorige rij mee ("Row R1 is not used; this is Row R2"). Getelde check
+  `correctionInHeading` in de eval. Meting x: geen correctie meer in 18 runs, geen gefaalde check,
+  niets afgekapt; opnieuw beoordeeld als x2 met een duidelijkere rubric: gemiddeld 4,67 (w: 4,77),
+  create-with-mc 4,40. Dezelfde antwoorden schommelen per beoordeling tot 0,4.
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
 - **Wiskunde nakijken gemeten met een echte foto (#131 + meting mg1) op 2026-11-05:** een
@@ -254,8 +261,6 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
-- Toetsvragen: in meting w nog één correctie midden in een zin van het antwoordmodel (1 van 18
-  runs). De vaste vraagindeling (#118) loste de rest op.
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
-import { parseHardChecks } from "../../scripts/eval-helpers";
+import { COUNTED_CHECKS, parseHardChecks } from "../../scripts/eval-helpers";
 
 const dir = join(__dirname, "../../evals/test-items");
 const rubric = readFileSync(join(dir, "rubric.md"), "utf8");
@@ -55,6 +55,54 @@ describe("test-items eval meets the P24 quality gate", () => {
         "inventedContent",
         "unmarkedProposal",
       ]),
+    );
+  });
+});
+
+// Meting x: the judge took the @v3 layout (one heading per row, the question numbers below
+// it) for a deviation, and a line with the A–D distribution for a missing table.
+it("tells the judge the @v3 answer-model layout and the A–D line are the required format", () => {
+  const flat = rubric.replace(/\s+/g, " ");
+  expect(flat).toContain('"### Row Rx — level (questions a–b)"');
+  expect(flat).toContain('"#### Question n"');
+  expect(flat).toContain("is the required format, not a deviation");
+  expect(flat).toContain("a line under the table");
+  // Meting x2: the judge then wanted the row headings in the Questions section as well.
+  expect(flat).toContain("The Questions section is not grouped");
+});
+
+// Metingen p, r2, u and w: a correction inside an answer-model heading, always at the first
+// question of a new row. Counted in code: the judge named it only as the weakest aspect.
+describe("correctionInHeading (counted)", () => {
+  const output = (heading: string) =>
+    ["### Stage: items", "", "## Answer model", "", heading, "", "**Correct answer:** B."].join(
+      "\n",
+    );
+  const check = COUNTED_CHECKS.correctionInHeading!;
+
+  it("is a counted hard check in the rubric", () => {
+    expect(parseHardChecks(rubric).find((c) => c.id === "correctionInHeading")?.counted).toBe(true);
+  });
+
+  it("fails a heading that corrects its row", () => {
+    expect(check(output("### Question 6 — Row R1 is not used here; Row R2, Evaluate"))).toBe(true);
+    expect(check(output("### Question 6 — Row R1 is not used; this is Row R2, Evaluate"))).toBe(
+      true,
+    );
+    expect(check(output("### Question 6 — Row R1→R2 note: Row R2, Evaluate"))).toBe(true);
+    expect(check(output("### Question 5 — Row R1→R2: Row R2, Evaluate"))).toBe(true);
+    expect(check(output("#### Vraag 6 — Rij R1 -> Rij R2"))).toBe(true);
+  });
+
+  it("passes clean headings, in the @v2 and the @v3 layout", () => {
+    expect(check(output("### Question 6 — Row R2, Evaluate"))).toBe(false);
+    expect(check(output("### Rij R2 — Evalueren (vraag 6–10)"))).toBe(false);
+    expect(check(output("#### Vraag 6"))).toBe(false);
+  });
+
+  it("ignores arrows outside headings, such as a worked calculation", () => {
+    expect(check(output("### Question 6 — Row R2, Apply\n\n- pulse 96 → 1 (band 91–110)"))).toBe(
+      false,
     );
   });
 });

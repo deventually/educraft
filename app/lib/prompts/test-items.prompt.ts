@@ -5,6 +5,8 @@ import itemsEn from "./files/test-items-items.en.md?raw";
 import itemsNl from "./files/test-items-items.nl.md?raw";
 import itemsV2En from "./files/test-items-items@v2.en.md?raw";
 import itemsV2Nl from "./files/test-items-items@v2.nl.md?raw";
+import itemsV3En from "./files/test-items-items@v3.en.md?raw";
+import itemsV3Nl from "./files/test-items-items@v3.nl.md?raw";
 
 /**
  * SOURCE: Original LimeOnIt tool (brief P24, 24.3), not from The Pedagogical
@@ -36,4 +38,16 @@ export const TEST_ITEMS_ITEMS_V2: PromptDef = {
   id: "test-items-items@v2",
   verbatim: TEST_ITEMS_ITEMS.verbatim,
   runtime: { nl: itemsV2Nl, en: itemsV2En },
+};
+
+/**
+ * What @v3 changes (metingen p, r2, u and w): the answer model is grouped per row, with the
+ * row once in its own heading and only the number in each question heading. Under @v2 every
+ * heading repeated "Row Rx", and the first question of a new row got the previous row by
+ * carry-over ("Row R1 is not used; this is Row R2"). @v2 stays registered for earlier results.
+ */
+export const TEST_ITEMS_ITEMS_V3: PromptDef = {
+  id: "test-items-items@v3",
+  verbatim: TEST_ITEMS_ITEMS.verbatim,
+  runtime: { nl: itemsV3Nl, en: itemsV3En },
 };

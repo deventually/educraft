@@ -26,8 +26,15 @@ Score each shared criterion 1–5.
   outcome is left out, self-check), one table `| Rij | Leeruitkomst | Denkniveau | Vraagvorm |
   Aantal vragen | Punten per vraag | Punten |` (or the English equivalent) with rows R1, R2, …
   and a Total row. The items stage: "Vragen/Questions" without answers, "Antwoordmodel/Answer
-  model" per question with its row, "Controle tegen de matrijs/Check against the blueprint"
-  with a table and the A–D distribution, and a self-check. Both stages end with the exact
+  model" grouped per row: a heading "### Rij Rx — denkniveau (vraag a–b)" / "### Row Rx — level
+  (questions a–b)" for each row, and below it "#### Vraag n" / "#### Question n" for each of its
+  questions, with only the number. That grouping is the required format, not a deviation (the
+  prompt asks for it since `@v3`; an output with "### Question n — Row Rx" per question is the
+  older `@v2` format and is fine too). The Questions section is not grouped: it has one
+  heading "### Vraag n (n pt)" / "### Question n (n pt)" per question, without row headings, so
+  students see no rows; only the answer model is grouped. "Controle tegen de matrijs/Check against the blueprint"
+  with a table, and the A–D distribution as a line under the table (no second table needed),
+  and a self-check. Both stages end with the exact
   closing sentence ("Dit is een concept. De docent stelt de toets vast." / "This is a draft.
   The teacher decides on the test."). Finished, not cut off.
 - **levelFit** — The questions fit the case's EQF level and study year: plain, concrete
@@ -52,3 +59,4 @@ every score (the cap is the maximum), however good the rest is.
 - **blueprintMismatch** (cap 3): Does the blueprint not add up (the rows do not sum to the stated total of questions or points), or do the written questions differ from the blueprint in number per row, question type or points?
 - **inventedContent** (cap 2): Does a question or answer rest on facts, figures, definitions, standards or sources that are not in the material and are presented as real (fictitious case data given in full in the question is fine)?
 - **unmarkedProposal** (cap 3): Did the output present points, a duration, a weighting or a pass mark the teacher did not give as if they were given, without marking them as a proposal?
+- **correctionInHeading** (cap 3, counted): Does a heading in the output carry a trace of a correction (an arrow, a semicolon, or more than one row such as "Row R1 is not used; this is Row R2")?
