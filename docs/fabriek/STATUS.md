@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 en P21.1 bezig)_
 
 ## Nu
 
@@ -110,6 +110,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
   per cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, de aandachtspunten en de
   dekkingsmatrix. Werkt zonder JavaScript; axe-tests; screenshots NL/EN desktop en mobiel. Daarna
   20.4 (koppelen en voorinvullen). PR open.
+- P21.1 Rolagenten, petten als data (`app/lib/agents/`): de Toetsdeskundige en de Ontwerper als
+  register, de invoer die een pet krijgt (cursus onder korte sleutels, vaste controles, verworpen
+  adviezen) en de controle op het antwoord (onbekende items, dubbelen en verworpen adviezen vallen
+  weg). Nog zonder AI en zonder scherm. Daarna 21.2 (prompts en meting) en 21.3 (opslag). PR open.
 
 ## Wacht op jou
 
