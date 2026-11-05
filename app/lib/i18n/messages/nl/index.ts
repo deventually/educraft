@@ -24,6 +24,7 @@ import { privacy } from "./privacy";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
+import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
@@ -70,6 +71,7 @@ export const nl = {
   projects,
   resultActions,
   settings,
+  start,
   tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   teams,
   toast,

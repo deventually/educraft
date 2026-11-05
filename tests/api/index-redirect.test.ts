@@ -35,9 +35,9 @@ describe("home redirector", () => {
     expect(res.headers.get("Location")).toBe("/admin/users");
   });
 
-  it("sends a teacher to the tool catalogue at /tools", async () => {
+  it("sends a teacher to Start (P27.3)", async () => {
     const res = (await loaderWith("teacher").catch((r) => r)) as Response;
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("/tools");
+    expect(res.headers.get("Location")).toBe("/start");
   });
 });

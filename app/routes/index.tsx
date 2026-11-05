@@ -9,7 +9,7 @@ import { requireUser } from "~/server/auth.server";
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  throw redirect(user.role === "admin" ? "/admin/users" : "/tools");
+  throw redirect(user.role === "admin" ? "/admin/users" : "/start");
 }
 
 export default function Index() {

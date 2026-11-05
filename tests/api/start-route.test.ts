@@ -1,0 +1,131 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { alignedCourse } from "../courses/fixtures";
+
+// Isolated in-memory SQLite before any server module loads.
+process.env.DATABASE_URL = "file::memory:";
+
+const { currentUser } = vi.hoisted(() => ({
+  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
+}));
+vi.mock("~/server/auth.server", () => ({
+  requireUser: vi.fn(async () => currentUser.value),
+  requireRole: vi.fn(async () => currentUser.value),
+}));
+
+let courses: typeof import("~/server/repositories/courses.server");
+let generations: typeof import("~/server/repositories/generations.server");
+let settings: typeof import("~/server/repositories/settings.server");
+let start: typeof import("~/routes/start");
+
+beforeAll(async () => {
+  courses = await import("~/server/repositories/courses.server");
+  generations = await import("~/server/repositories/generations.server");
+  settings = await import("~/server/repositories/settings.server");
+  start = await import("~/routes/start");
+});
+
+beforeEach(() => {
+  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
+});
+
+const load = (path = "/start", locale = "nl") =>
+  start.loader({
+    request: new Request(`http://localhost${path}`, { headers: { Cookie: `lang=${locale}` } }),
+    params: {},
+    context: {},
+  } as never);
+
+/** A course with one outcome and nothing else: "not taught" and "not assessed". */
+const gappyCourse = () => ({
+  outcomes: [{ id: "lo-x", text: "Je schrijft een plan.", bloom: "create" as const }],
+  activities: [],
+  assessments: [],
+});
+
+const save = (userId: string, toolSlug: string) =>
+  generations.saveGeneration({
+    userId,
+    toolSlug,
+    model: "m",
+    input: {},
+    outputLanguage: "nl",
+    outputMarkdown: "x",
+  });
+
+describe("/start (P27.3)", () => {
+  it("is empty for a new teacher: no courses, no week, no results", async () => {
+    currentUser.value = { id: "new", name: "N", email: null, role: "teacher" } as never;
+    expect(await load()).toMatchObject({
+      query: "",
+      results: [],
+      courses: [],
+      week: { findings: [], recent: [] },
+    });
+  });
+
+  it("lists own courses with their number of open findings, never someone else's", async () => {
+    const mine = await courses.createCourse("teacher-a", { name: "Plan", data: gappyCourse() });
+    await courses.createCourse("teacher-a", { name: "Netjes", data: alignedCourse() });
+    await courses.createCourse("teacher-b", { name: "Van B", data: gappyCourse() });
+    const data = await load();
+    expect(data.courses).toEqual(
+      expect.arrayContaining([
+        { id: mine.id, name: "Plan", findings: 2 },
+        expect.objectContaining({ name: "Netjes", findings: 0 }),
+      ]),
+    );
+    expect(data.courses?.map((c) => c.name)).not.toContain("Van B");
+    // This week: the open findings, in words, with their course.
+    expect(data.week.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          courseId: mine.id,
+          courseName: "Plan",
+          text: expect.any(String),
+        }),
+      ]),
+    );
+    expect(data.week.findings.every((f) => f.courseName !== "Van B")).toBe(true);
+  });
+
+  it("shows at most five findings and the five newest own results", async () => {
+    currentUser.value = { id: "busy", name: "B", email: null, role: "teacher" } as never;
+    for (const n of [1, 2, 3])
+      await courses.createCourse("busy", { name: `C${n}`, data: gappyCourse() });
+    for (let i = 0; i < 7; i++) await save("busy", "rubric-builder");
+    await save("someone-else", "test-items");
+    const data = await load();
+    expect(data.week.findings).toHaveLength(5);
+    expect(data.week.recent).toHaveLength(5);
+    expect(data.week.recent[0]).toMatchObject({
+      toolName: { nl: expect.any(String), en: expect.any(String) },
+    });
+  });
+
+  it("answers the question box with at most three tools from the catalogue search", async () => {
+    const data = await load("/start?q=toetsvragen+rubric+maken");
+    expect(data.query).toBe("toetsvragen rubric maken");
+    expect(data.results.length).toBeGreaterThan(0);
+    expect(data.results.length).toBeLessThanOrEqual(3);
+    expect(data.results.map((r) => r.slug)).toContain("test-items");
+  });
+
+  it("keeps a chosen course only when it is the teacher's own", async () => {
+    const mine = await courses.createCourse("teacher-a", { name: "Eigen", data: alignedCourse() });
+    const theirs = await courses.createCourse("teacher-b", { name: "Niet", data: alignedCourse() });
+    expect((await load(`/start?q=rubric&course=${mine.id}`)).course).toBe(mine.id);
+    expect((await load(`/start?q=rubric&course=${theirs.id}`)).course).toBeNull();
+  });
+
+  it("leaves courses and findings out when courses are switched off", async () => {
+    await courses.createCourse("teacher-a", { name: "Plan", data: gappyCourse() });
+    await settings.setFeatureStand("courses", "off");
+    try {
+      const data = await load();
+      expect(data.courses).toBeNull();
+      expect(data.week.findings).toEqual([]);
+    } finally {
+      await settings.setFeatureStand("courses", "on");
+    }
+  });
+});

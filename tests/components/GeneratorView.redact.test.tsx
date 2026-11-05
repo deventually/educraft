@@ -66,7 +66,7 @@ describe("GeneratorView with student work", () => {
     expect(
       await screen.findByText(/Goed werk van Jan de Vries bij SportShop BV\./),
     ).toBeInTheDocument();
-    expect(screen.getByText(/My work keeps the version with codes/)).toBeInTheDocument();
+    expect(screen.getByText(/Earlier work keeps the version with codes/)).toBeInTheDocument();
   });
 
   it("sends a tool without such fields straight away", async () => {

@@ -14,7 +14,7 @@ export const privacy = {
   preview: "Wat de AI krijgt: {field}",
   replaced: "{original} wordt {code}",
   restoredNote:
-    "De namen zijn in je browser teruggezet. In Mijn werk staat de versie met codes; daar komen de namen niet terug.",
+    "De namen zijn in je browser teruggezet. In Eerder gemaakt staat de versie met codes; daar komen de namen niet terug.",
   send: "Verstuur geanonimiseerd",
   student: "Naam student",
   studentNumber: "Studentnummer",

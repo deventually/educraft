@@ -1,19 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { ArrowRight, LayoutList, MessagesSquare, Search, SearchX, Sparkles, X } from "lucide-react";
+import { ArrowRight, LayoutList, Search, SearchX, X } from "lucide-react";
 import type { Route } from "./+types/home";
 import { getAvailableTools, isFeatureOn } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
 import type { InteractionMode, UserType } from "~/lib/registry/types";
-import {
-  GOAL_ORDER,
-  GOALS,
-  TOOL_GOALS,
-  TOOL_KEYWORDS,
-  type TeachingGoal,
-} from "~/lib/registry/goals";
+import { GOAL_ORDER, GOALS, TOOL_GOALS, type TeachingGoal } from "~/lib/registry/goals";
+import { searchTools, toolSearchText } from "~/lib/registry/search";
 import { ToolIcon } from "~/components/ToolIcon";
-import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
@@ -35,10 +29,8 @@ interface ToolCardData {
   mode: InteractionMode;
   theory: LocalizedText;
   goal: TeachingGoal;
-  /** Pre-joined, lower-cased haystack for search (name + tagline + theory + keywords, both locales). */
+  /** Pre-joined, lower-cased haystack for search (`toolSearchText`, shared with Start). */
   search: string;
-  /** > 1 for the multi-stage tools (drives the "N fasen" chip). */
-  stages: number;
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -46,31 +38,18 @@ export async function loader({ request }: Route.LoaderArgs) {
   // Server-side gate (Phase 4): effective availability composes instance settings
   // (enabled) and any per-teacher allow-list — a disabled tool vanishes for
   // everyone.
-  const tools: ToolCardData[] = (await getAvailableTools(user)).map((tool) => {
-    const keywords = TOOL_KEYWORDS[tool.slug] ?? [];
-    const text = (v: LocalizedText) => [loc(v, "nl"), loc(v, "en")].join(" ");
-    return {
-      slug: tool.slug,
-      name: tool.name,
-      tagline: tool.tagline,
-      subtitle: tool.subtitle,
-      icon: tool.icon,
-      userType: tool.userType,
-      mode: tool.mode,
-      theory: tool.theory.name,
-      goal: TOOL_GOALS[tool.slug] ?? "design",
-      search: [
-        text(tool.name),
-        tool.subtitle ? text(tool.subtitle) : "",
-        text(tool.tagline),
-        text(tool.theory.name),
-        keywords.join(" "),
-      ]
-        .join(" ")
-        .toLowerCase(),
-      stages: tool.stages.length,
-    };
-  });
+  const tools: ToolCardData[] = (await getAvailableTools(user)).map((tool) => ({
+    slug: tool.slug,
+    name: tool.name,
+    tagline: tool.tagline,
+    subtitle: tool.subtitle,
+    icon: tool.icon,
+    userType: tool.userType,
+    mode: tool.mode,
+    theory: tool.theory.name,
+    goal: TOOL_GOALS[tool.slug] ?? "design",
+    search: toolSearchText(tool),
+  }));
   // Utilities can be switched off per team (P28.3): then no section and no search hits.
   return { tools, utilities: await isFeatureOn(user, "utilities") };
 }
@@ -86,15 +65,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   const isFiltered = query.trim() !== "";
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return tools.filter((tool) => tool.search.includes(q));
-  }, [tools, query]);
+  const results = useMemo(() => searchTools(tools, query), [tools, query]);
 
   const utilityResults = useMemo(() => {
     if (!utilities) return [];
-    const q = query.trim().toLowerCase();
-    return UTILITY_SEARCH.filter((u) => u.search.includes(q)).map((u) => u.utility);
+    return searchTools(UTILITY_SEARCH, query).map((u) => u.utility);
   }, [query, utilities]);
 
   const resultTotal = results.length + utilityResults.length;
@@ -109,6 +84,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           {t.home.heading}
         </h1>
         <p className="mt-3 max-w-[60ch] text-pretty text-slate-600">{t.home.intro}</p>
+        <p className="mt-2 text-sm">
+          <Link to="/projects" className="font-medium text-violet-700 hover:underline">
+            {t.nav.projects}
+          </Link>
+        </p>
       </div>
 
       {/* Toolbar: search */}
@@ -277,7 +257,7 @@ function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: 
     <Link
       to={`/tools/${tool.slug}`}
       aria-label={toolAria(tool, locale, t)}
-      className="group row-span-4 grid grid-rows-subgrid items-start gap-y-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+      className="group row-span-3 grid grid-rows-subgrid items-start gap-y-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
     >
       <div className="flex items-start gap-3">
         <span className="grid size-[42px] shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
@@ -290,10 +270,6 @@ function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: 
           <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <ModePill mode={tool.mode} t={t} />
-        {tool.stages > 1 && <StageChip count={tool.stages} t={t} />}
-      </div>
       <p className="text-sm leading-relaxed text-slate-600">{loc(tool.tagline, locale)}</p>
       <div className="flex items-center justify-end self-end">
         <ArrowRight className="size-4 shrink-0 text-violet-500 transition-transform group-hover:translate-x-0.5" />
@@ -303,33 +279,6 @@ function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: 
 }
 
 // ── Small primitives ────────────────────────────────────────────────────────
-
-function ModePill({ mode, t }: { mode: InteractionMode; t: T }) {
-  const isChat = mode === "chat";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full py-0.5 pl-1.5 pr-2 text-[11px] font-semibold",
-        isChat ? "bg-slate-100 text-slate-600" : "bg-violet-50 text-violet-700",
-      )}
-    >
-      {isChat ? (
-        <MessagesSquare className="size-3" aria-hidden />
-      ) : (
-        <Sparkles className="size-3" aria-hidden />
-      )}
-      {isChat ? t.home.mode.chatbot : t.home.mode.generator}
-    </span>
-  );
-}
-
-function StageChip({ count, t }: { count: number; t: T }) {
-  return (
-    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#ecdcc0] bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-brass-600">
-      {fmt(t.home.stages, { count })}
-    </span>
-  );
-}
 
 function SearchBox({
   value,
