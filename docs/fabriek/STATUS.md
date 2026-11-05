@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
+_Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
 
 ## Nu
 
@@ -160,9 +160,19 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
   zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
   `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
   bijgewerkt. De meting van v2 wacht op een run met API-sleutel. PR open.
+- Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
+  persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
+  een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
+  keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
+- P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
+  pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
+  beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen
+  tags; oude cursussen blijven geldig; een import laat tags leeg. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
-  zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).
+- P22.1a De week van de docent, het rekenhart en de schoolkalender: weken rekenen in ISO-weken
+  (`app/lib/calendar/weeks.ts`), vakantieweken als één lijst voor de instelling (sectie
+  *Schoolkalender* op `/admin/context`) en de tijdzone (standaard Europe/Amsterdam). De startdatum
+  per cursus volgt in 22.1b. PR open.
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".

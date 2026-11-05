@@ -5,6 +5,7 @@ import { admin } from "./admin";
 import { agents } from "./agents";
 import { aiNotice } from "./aiNotice";
 import { auth } from "./auth";
+import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
 import { courses } from "./courses";
@@ -45,6 +46,7 @@ export const en: Messages = {
   aiNotice,
   appName: "LimeOnIt",
   auth,
+  calendar,
   chat,
   confirm,
   courses,
