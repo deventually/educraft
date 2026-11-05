@@ -19,6 +19,7 @@ import { rubricBuilder } from "./tools/rubric-builder";
 import { testItems } from "./tools/test-items";
 import { lessonPlan } from "./tools/lesson-plan";
 import { testAnalysis } from "./tools/test-analysis";
+import { differentiation } from "./tools/differentiation";
 import { difficultConversation } from "./tools/difficult-conversation";
 
 /** All registered tools (any phase). */
@@ -43,6 +44,7 @@ export const ALL_TOOLS: Tool[] = [
   testItems,
   lessonPlan,
   testAnalysis,
+  differentiation,
   difficultConversation,
 ];
 

@@ -21,9 +21,9 @@ the [prompt pipeline](Architecture.md#the-prompt-pipeline).
 
 ---
 
-## Current tools (20)
+## Current tools (21)
 
-All 14 tools from the book plus six originals are shipped. *For* = who the tool speaks to
+All 14 tools from the book plus seven originals are shipped. *For* = who the tool speaks to
 (`Tool.userType`): the teacher, or the learner through a tutor the teacher sets up.
 
 | # | Chapter | Tool (slug) | Mode | For |
@@ -48,6 +48,7 @@ All 14 tools from the book plus six originals are shipped. *For* = who the tool 
 | 18 | — (original, P24.4) | Prepare a lesson (`lesson-plan`) | one-shot | teacher |
 | 19 | — (original, P24.5) | Explain a test analysis (`test-analysis`; the numbers come from the item-analysis utility, the AI computes nothing) | one-shot | teacher |
 | 20 | — (original, P24.6) | Write a clear assignment (`clear-assignment`) | one-shot | teacher |
+| 21 | — (original, P24.7) | Differentiate a task (`differentiation`, three variants with the same learning goal) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later

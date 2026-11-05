@@ -14,6 +14,7 @@ import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
 import { CLEAR_ASSIGNMENT_PROMPT } from "./clear-assignment@v1.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
+import { DIFFERENTIATION_PROMPT } from "./differentiation@v1.prompt";
 import { DIFFICULT_CONVERSATION_PROMPT } from "./difficult-conversation@v1.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
@@ -48,6 +49,7 @@ const ALL: PromptDef[] = [
   CLEAR_ASSIGNMENT_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
+  DIFFERENTIATION_PROMPT,
   DIFFICULT_CONVERSATION_PROMPT,
   LESSON_PLAN_PROMPT,
   PEER_TUTORING_PROMPT,

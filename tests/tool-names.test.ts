@@ -48,6 +48,7 @@ describe("task-first tool names (P19.1)", () => {
         "cognitive-architect",
         "contextualization",
         "dialogic-encounters",
+        "differentiation",
         "difficult-conversation",
         "forum-autograder",
         "guided-reflection",

@@ -8,6 +8,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 
 ## Nu
 
+- **Opdracht differentiëren (P24.7, #76) gemerged op 2026-11-05:** drie varianten met hetzelfde
+  leerdoel naar Tomlinson (2017); eindmeting df2 elke case 4,73–5,00.
+- **Opdracht helder schrijven (P24.6, #73) gemerged op 2026-11-05:** opdracht of handleiding
+  herschreven op taalniveau B1 met open punten en eisencheck; eindmeting ca2 elke case 4,67–5,00.
 - **Toetsanalyse na afloop (P24.5, #74) gemerged op 2026-11-05:** hulpmiddel item-analysis rekent,
   tool test-analysis legt uit; eindmeting ta3 elke case 4,53–4,93.
 - **Les voorbereiden (P24.4, #72) gemerged op 2026-11-05:** concept-lesopzet volgens Rosenshine
@@ -87,15 +91,6 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 
 ## Bezig
 
-- P24.6 Opdracht helder schrijven (`clear-assignment`): een opdrachtomschrijving of
-  studentenhandleiding herschreven op taalniveau B1 (of A2, B2, C1), met stappen, eisen,
-  inleverinfo, open punten ("je noemt geen deadline"), wat er veranderd is en een eisencheck; geen eis
-  verdwijnt of komt erbij. Bronnen: ERK (Council of Europe, 2020), UDL 3.0 (CAST, 2024). Zes
-  eval-casussen, drie met een bekende fout (ontbrekende info, tegenstrijdige eisen, vage criteria).
-  Metingen ca1 → ca2 (ca2: 3 runs, batch): elke case 4,67–5,00, geen gefaalde harde check, niets
-  afgekapt, secties altijd in de vaste volgorde (BESLUIT-2026-11-04-24 gehaald;
-  `evals/reports/2026-11-05ca2.md`). Tien uitkomsten liggen klaar in `evals/reviews/clear-assignment/`
-  voor Bastiaan — PR open.
 - P24.8 Lastig gesprek oefenen (`difficult-conversation`, chat): de AI speelt een verzonnen student
   in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
   vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
