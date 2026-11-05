@@ -164,10 +164,6 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
   persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
   een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
   keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
-- P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
-  pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
-  beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen
-  tags; oude cursussen blijven geldig; een import laat tags leeg. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P22.1a De week van de docent, het rekenhart en de schoolkalender: weken rekenen in ISO-weken
   (`app/lib/calendar/weeks.ts`), vakantieweken als één lijst voor de instelling (sectie
