@@ -188,6 +188,11 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, dubbele aandachtspunten en clear-a
 
 ## Bezig
 
+- Toetsvragen, geen correctie meer in een kopje van het antwoordmodel (`test-items-items@v3`):
+  het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen kopje en in elk
+  vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe rij soms de vorige
+  rij mee ("Row R1 is not used; this is Row R2"): 7 keer in de oude metingen, 1 keer in meting w.
+  Nieuwe getelde check `correctionInHeading` in de eval. Meting nog niet gedraaid. PR open.
 - Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`): de belangrijkste
   eerst, de rest in één regel "Ook:" eronder (#73, keuze Bastiaan). Nieuwe geteld check
   `tooManyOpenPoints` in de eval. Meting ca3 (3 runs): elke case 4,53–5,00, geen gefaalde check,

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
-import { parseHardChecks } from "../../scripts/eval-helpers";
+import { COUNTED_CHECKS, parseHardChecks } from "../../scripts/eval-helpers";
 
 const dir = join(__dirname, "../../evals/test-items");
 const rubric = readFileSync(join(dir, "rubric.md"), "utf8");
@@ -55,6 +55,42 @@ describe("test-items eval meets the P24 quality gate", () => {
         "inventedContent",
         "unmarkedProposal",
       ]),
+    );
+  });
+});
+
+// Metingen p, r2, u and w: a correction inside an answer-model heading, always at the first
+// question of a new row. Counted in code: the judge named it only as the weakest aspect.
+describe("correctionInHeading (counted)", () => {
+  const output = (heading: string) =>
+    ["### Stage: items", "", "## Answer model", "", heading, "", "**Correct answer:** B."].join(
+      "\n",
+    );
+  const check = COUNTED_CHECKS.correctionInHeading!;
+
+  it("is a counted hard check in the rubric", () => {
+    expect(parseHardChecks(rubric).find((c) => c.id === "correctionInHeading")?.counted).toBe(true);
+  });
+
+  it("fails a heading that corrects its row", () => {
+    expect(check(output("### Question 6 — Row R1 is not used here; Row R2, Evaluate"))).toBe(true);
+    expect(check(output("### Question 6 — Row R1 is not used; this is Row R2, Evaluate"))).toBe(
+      true,
+    );
+    expect(check(output("### Question 6 — Row R1→R2 note: Row R2, Evaluate"))).toBe(true);
+    expect(check(output("### Question 5 — Row R1→R2: Row R2, Evaluate"))).toBe(true);
+    expect(check(output("#### Vraag 6 — Rij R1 -> Rij R2"))).toBe(true);
+  });
+
+  it("passes clean headings, in the @v2 and the @v3 layout", () => {
+    expect(check(output("### Question 6 — Row R2, Evaluate"))).toBe(false);
+    expect(check(output("### Rij R2 — Evalueren (vraag 6–10)"))).toBe(false);
+    expect(check(output("#### Vraag 6"))).toBe(false);
+  });
+
+  it("ignores arrows outside headings, such as a worked calculation", () => {
+    expect(check(output("### Question 6 — Row R2, Apply\n\n- pulse 96 → 1 (band 91–110)"))).toBe(
+      false,
     );
   });
 });

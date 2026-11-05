@@ -50,7 +50,7 @@ describe("tool: test-items", () => {
     expect(t.enabled).toBe(true);
     expect(t.stages.map((s) => s.id)).toEqual(["blueprint", "items"]);
     expect(t.stages[0]?.systemPromptId).toBe("test-items-blueprint@v1");
-    expect(t.stages[1]?.systemPromptId).toBe("test-items-items@v2");
+    expect(t.stages[1]?.systemPromptId).toBe("test-items-items@v3");
     expect(t.stages[1]?.consumes).toEqual([
       { placeholder: "blueprint", fromStageId: "blueprint" },
       { placeholder: "questionPlan", fromStageId: "blueprint", derive: "question-plan" },
@@ -207,6 +207,7 @@ describe("tool: test-items", () => {
     expect(getPrompt("test-items-blueprint@v1").verbatim).toMatch(/LimeOnIt/);
     expect(getPrompt("test-items-items@v1").verbatim).toMatch(/LimeOnIt/);
     expect(getPrompt("test-items-items@v2").verbatim).toMatch(/LimeOnIt/);
+    expect(getPrompt("test-items-items@v3").verbatim).toMatch(/LimeOnIt/);
   });
 
   // Metingen t and u: correction traces in the answer-model headings and three options in
@@ -248,8 +249,29 @@ describe("tool: test-items", () => {
     expect(en).toContain("given:");
   });
 
-  it("keeps @v1 registered for results made with it", () => {
+  it("keeps @v1 and @v2 registered for results made with them", () => {
     expect(getPrompt("test-items-items@v1")).toBeDefined();
+    expect(getPrompt("test-items-items@v2")).toBeDefined();
+  });
+
+  // Metingen p, r2, u and w: the first question of a new row got the previous row in its
+  // answer-model heading ("Row R1 is not used; this is Row R2"), carried over from the
+  // identical headings above it. @v3 states the row once, in its own heading above its
+  // questions, so no question heading repeats a row.
+  it("groups the answer model per row, with the row in its own heading (nl)", () => {
+    const p = runtime("items", "nl");
+    expect(p).toContain("### Rij Rx — denkniveau (vraag a–b)");
+    expect(p).toContain("#### Vraag n");
+    expect(p).not.toContain("### Vraag n — Rij Rx");
+    expect(p.toLowerCase()).toContain("onder het kopje van zijn rij");
+  });
+
+  it("groups the answer model per row, with the row in its own heading (en)", () => {
+    const p = runtime("items", "en");
+    expect(p).toContain("### Row Rx — cognitive level (questions a–b)");
+    expect(p).toContain("#### Question n");
+    expect(p).not.toContain("### Question n — Row Rx");
+    expect(p.toLowerCase()).toContain("under the heading of its row");
   });
 });
 
