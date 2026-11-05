@@ -47,7 +47,7 @@ function overviewData(d = sampleDossier()) {
       write: `/portfolio/${ID}/outcome/${LU}`,
       finish: "#readiness",
     },
-    practise: null as { slug: string; name: string } | null,
+    practise: null as string | null,
     readiness: readinessCheck(d),
   };
 }
@@ -155,14 +155,14 @@ describe("Portfolio route in five steps", () => {
     d.evidence[0].criterionIds = [C1, C2];
     const data = {
       ...overviewData(d),
-      practise: { slug: "difficult-conversation", name: "Lastig gesprek oefenen" },
+      practise: "/portfolio/d1/rehearsal",
     };
     const { container } = renderRoute(PortfolioOverview, data);
     expect(screen.getByRole("link", { current: "step" })).toHaveTextContent("Rond af");
     expect(screen.getByText(/Laatste stap/)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Oefen het eindgesprek met Lastig gesprek oefenen" }),
-    ).toHaveAttribute("href", "/tools/difficult-conversation");
+      screen.getByRole("link", { name: "Oefen je eindgesprek met een proefassessment" }),
+    ).toHaveAttribute("href", "/portfolio/d1/rehearsal");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

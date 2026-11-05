@@ -20,9 +20,6 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.name ?? "BDB/BKE"} — LimeOnIt` }];
 }
 
-/** Step 5 of the route points at practising the final interview. */
-const PRACTISE_TOOL = "difficult-conversation";
-
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
@@ -50,9 +47,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     write: work,
     finish: "#readiness",
   };
-  const practise = names.has(PRACTISE_TOOL)
-    ? { slug: PRACTISE_TOOL, name: names.get(PRACTISE_TOOL) ?? PRACTISE_TOOL }
-    : null;
+  // Step 5: practise the final interview with the rehearsal of this dossier (P29.3).
+  const practise = `${base}/rehearsal`;
   return {
     id: dossier.id,
     name: dossier.name,

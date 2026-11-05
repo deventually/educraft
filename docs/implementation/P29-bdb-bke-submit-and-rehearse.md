@@ -218,7 +218,8 @@ P27.3 of P22, binnen de WIP-limiet van twee.
 
 ## Nog te beslissen
 
-1. **Blokkeert rood de export?** Advies: nee, de check is advies (uitgangspunt 1). Een docent kent
-   soms een afspraak met zijn begeleider die de app niet kent. Zonder antwoord bouwt 29.1 het advies.
-2. **Bewaren we het hele gesprek?** Advies: nee, alleen de feedback, en alleen als de docent op
-   "Bewaar" klikt. Zonder antwoord bouwt 29.3 het advies.
+Beslist door Bastiaan op 2026-11-05:
+
+1. **Blokkeert rood de export?** Nee: de check is advies (BESLUIT-2026-11-05-9).
+2. **Bewaren we het hele gesprek?** Nee: alleen de feedback, en alleen als de docent op "Bewaar in je
+   dossier" klikt (BESLUIT-2026-11-05-10).

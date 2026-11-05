@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.2 @v2 en clear-assignment@v2 open)_
+_Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.3 en clear-assignment@v2 open)_
 
 ## Nu
 
+- **Proefassessment `@v2` (P29.2, #123) gemerged op 2026-11-05:** een sterk criterium krijgt één
+  vraag, eerder stoppen mag; meting 11 van 12 runs zonder fout, elke case 3,73–4,53
+  (`evals/reports/2026-11-05-portfolio-rehearsal-v2.md`).
 - **Proefassessment, de AI-tekst en de meting (P29.2, #119) gemerged op 2026-11-05:**
   `portfolio-rehearsal@v1` speelt een commissie van twee assessoren met feedback per criterium,
   gecontroleerd in code; nog geen scherm.
@@ -191,11 +194,13 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4, P27.4, P29.2 @v2 en clear-assignment@v2 o
   3,26 door één afgekapt antwoord en één harde check (t-waarde niet uit de leerstof). Laatste
   ronde (Bastiaan, 2026-11-05): stap 2 krijgt 32000 tokens, en een tabelwaarde staat als "Gegeven"
   in de vraag. Eindmeting w: elke case 4,67–4,87, geen gefaalde check, niets afgekapt. PR open.
-- P29.2 Proefassessment `@v2`: na de herstelde meting (#122) waren drie van de vier cases schoon
-  of bijna; bij het sterke dossier bleef de commissie doorvragen naar een gemeten effect. `@v2`:
-  een sterk criterium krijgt één vraag, eerder stoppen mag, geen deelvragen achter een dubbelepunt,
-  en "overtuigend" vraagt een effect of een reflectie. `@v1` blijft geregistreerd. Meting `@v1` in
-  `evals/reports/2026-11-05-portfolio-rehearsal.md`; meting `@v2` volgt. PR open.
+- P29.3 Proefassessment in de werkplaats: in stap 5 "Oefen je eindgesprek met een proefassessment"
+  (`/portfolio/:id/rehearsal`, alleen eigenaar, mee aan en uit met de werkplaats). Kies kort of
+  volledig en de leeruitkomsten, dan een gesprek met een "Rond af"-knop; de feedback als tabel per
+  criterium met "Werk dit bij in je hoofdstuk" en "Bewaar in je dossier" (bewijsstuk `feedback`,
+  `aiLog` `rehearsal`). De server bouwt de context uit het dossier (`contextFrom: "dossier"`); het
+  gesprek wordt niet bewaard. Eén registerentry in `WORKPLACE_TOOLS`, buiten de catalogus. Geen
+  migratie. Besluiten 9–11 vastgelegd. PR open.
 - P27.4 De cursus als werkplek: bij elke les, toets en leeruitkomst knoppen naar de passende
   tools (`Tool.courseActions`), ook per regel van de week op Start; "Los op met…" bij
   aandachtspunten en pet-adviezen (`FINDING_TOOLS`); op de cursuspagina "Per week". Een knop

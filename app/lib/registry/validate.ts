@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DOSSIER_PLACEHOLDERS } from "~/lib/portfolio/rehearsal";
 import { COURSE_ITEM_KINDS, type Tool } from "./types";
 import { PROMPTS } from "~/lib/prompts";
 import { MODELS } from "~/lib/ai/models";
@@ -109,12 +110,16 @@ const toolSchema = z.object({
       starters: z.array(localizedText).optional(),
       allowRegenerate: z.boolean().optional(),
       allowStop: z.boolean().optional(),
+      quickReplies: z.array(localizedText).max(3).optional(),
     })
     .optional(),
   defaultModel: z.string().min(1),
   defaultTemperature: z.number().optional(),
   defaultMaxTokens: maxTokens.optional(),
   usesContextProfile: z.boolean(),
+  contextFrom: z.literal("dossier").optional(),
+  hiddenFromCatalogue: z.literal(true).optional(),
+  storesConversation: z.literal(false).optional(),
   defaultOutputLanguage: z.enum(["nl", "en"]),
   next: z.array(z.string().min(1)).max(3).optional(),
   courseActions: z
@@ -191,6 +196,7 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
         ...(stage.inputs?.map((f) => f.name) ?? []),
         ...INJECTED,
         ...(stage.consumes?.map((c) => c.placeholder) ?? []),
+        ...(tool.contextFrom === "dossier" ? DOSSIER_PLACEHOLDERS : []),
       ]);
 
       for (const dep of stage.consumes ?? []) {

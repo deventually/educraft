@@ -156,6 +156,11 @@ export interface ChatConfig {
   starters?: LocalizedText[];
   allowRegenerate?: boolean;
   allowStop?: boolean;
+  /**
+   * Fixed replies offered as buttons once the conversation runs, e.g. the closing
+   * words of the rehearsal ("Rond af", P29.3). Data, not a per-tool branch.
+   */
+  quickReplies?: LocalizedText[];
 }
 
 export interface Attribution {
@@ -247,6 +252,17 @@ export interface Tool {
 
   /** Whether the HBO-i context profile is injected by default. */
   usesContextProfile: boolean;
+
+  /**
+   * Where the prompt's material comes from besides the inputs (P29.3). "dossier": the
+   * server builds it from the caller's own BDB/BKE dossier (`dossierPromptValues`),
+   * never from the request body; the tool then falls under the workplace feature.
+   */
+  contextFrom?: "dossier";
+  /** Not in the tool catalogue: reached only from its own place (P29.3, BESLUIT-2026-11-05-8). */
+  hiddenFromCatalogue?: true;
+  /** false: the conversation is not saved as a project (P29.3, Bastiaan's choice). */
+  storesConversation?: false;
 
   /**
    * True for learning-outcome evaluation tools (grading/assessment). Drives the

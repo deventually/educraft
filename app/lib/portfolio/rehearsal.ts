@@ -17,9 +17,11 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { Locale } from "~/lib/i18n";
+import { LIMITS } from "./schema";
 import { COACH_INPUT_LIMITS, citesUnknownSource, quoteInChapter } from "./coach";
+import { fmtDate, outcomeLabel } from "./format";
 import { wordCount } from "./progress";
-import type { DossierData } from "./types";
+import type { DossierData, Framework } from "./types";
 
 export const REHEARSAL_PROMPT_ID = "portfolio-rehearsal@v2";
 
@@ -99,6 +101,22 @@ function clip(text: string, max: number, marker: string): string {
   return text.length <= max ? text : `${text.slice(0, max)}\n${marker}`;
 }
 
+/** The chosen outcomes, in framework order; absent or empty = all. */
+function chosenOutcomes(framework: Framework, outcomeIds?: string[]) {
+  const chosen = outcomeIds?.length ? new Set(outcomeIds) : null;
+  return framework.outcomes.filter((o) => !chosen || chosen.has(o.id));
+}
+
+/**
+ * The key → criterion map the feedback is checked against, from the framework
+ * alone, numbered exactly as `buildRehearsalContext` numbers it. The browser
+ * needs it to read the feedback; it never sees the prompt.
+ */
+export function rehearsalKeys(framework: Framework, outcomeIds?: string[]): Record<string, string> {
+  const ids = chosenOutcomes(framework, outcomeIds).flatMap((o) => o.criteria.map((c) => c.id));
+  return Object.fromEntries(ids.map((id, i) => [`K${i + 1}`, id]));
+}
+
 /**
  * The placeholder values for the rehearsal prompt (all but `contextProfile`),
  * built on the server from the dossier only, plus the key → criterion map the
@@ -109,8 +127,7 @@ export function buildRehearsalContext(
   opts: RehearsalOptions,
 ): { values: Record<string, string>; keys: Record<string, string> } {
   const l = LABELS[opts.locale];
-  const chosen = opts.outcomeIds?.length ? new Set(opts.outcomeIds) : null;
-  const outcomes = d.framework.outcomes.filter((o) => !chosen || chosen.has(o.id));
+  const outcomes = chosenOutcomes(d.framework, opts.outcomeIds);
   const chapterOf = new Map(d.chapters.map((ch) => [ch.outcomeId, ch.text.trim()]));
 
   const keys: Record<string, string> = {};
@@ -175,6 +192,36 @@ export function buildRehearsalContext(
   };
 }
 
+/** The placeholders `dossierPromptValues` fills (all but `contextProfile`). */
+export const DOSSIER_PLACEHOLDERS = [
+  "framework",
+  "chapters",
+  "evidenceTitles",
+  "references",
+  "formNotes",
+  "length",
+] as const;
+
+/** The two choices the teacher makes before the conversation; anything else is ignored. */
+const RehearsalChoices = z.object({
+  length: z.enum(REHEARSAL_LENGTHS).catch("short"),
+  outcomeIds: z.array(z.string().max(100)).max(100).optional().catch(undefined),
+});
+
+/**
+ * The prompt values of a tool with `contextFrom: "dossier"` (P29.3), built on the
+ * server from the owner's dossier. Of what the browser sends only the length and
+ * the chosen outcomes count; a placeholder in the body never reaches the prompt.
+ */
+export function dossierPromptValues(
+  d: DossierData,
+  sent: Record<string, unknown>,
+  locale: Locale,
+): Record<string, string> {
+  const { length, outcomeIds } = RehearsalChoices.parse(sent);
+  return buildRehearsalContext(d, { length, locale, outcomeIds }).values;
+}
+
 // ── Checking the feedback ───────────────────────────────────────────────────
 
 const RawCriterion = z.object({
@@ -207,7 +254,7 @@ const trimTo = (s: string | null | undefined, max: number) => {
 export function parseRehearsalFeedback(
   raw: string,
   keys: Record<string, string>,
-  d: DossierData,
+  d: Pick<DossierData, "references">,
   teacherTurns: string[],
 ): RehearsalParseResult {
   const parsed = RawFeedback.safeParse(extractJson(raw));
@@ -241,5 +288,85 @@ export function parseRehearsalFeedback(
   return {
     ok: true,
     feedback: { criteria, overall: clean(parsed.data.overall, REHEARSAL_LIMITS.overall) ?? "" },
+  };
+}
+
+// ── Keeping the feedback (29.3) ─────────────────────────────────────────────
+
+const KEEP = {
+  nl: {
+    title: "Proefassessment",
+    intro:
+      "Feedback uit een oefengesprek met een gespeelde assessmentcommissie in LimeOnIt. Het is oefenen, geen oordeel.",
+    heard: { convincing: "Overtuigend", partial: "Deels", "not-heard": "Nog niet gehoord" },
+    heardLabel: "Gehoord",
+    quote: "Citaat",
+    tip: "Tip",
+    overall: "Samenvatting",
+  },
+  en: {
+    title: "Rehearsal assessment",
+    intro:
+      "Feedback from a practice conversation with a simulated assessment committee in LimeOnIt. It is practice, not a judgement.",
+    heard: { convincing: "Convincing", partial: "Partly", "not-heard": "Not yet heard" },
+    heardLabel: "Heard",
+    quote: "Quote",
+    tip: "Tip",
+    overall: "Summary",
+  },
+} as const;
+
+/** The labels for "heard", for the feedback table and the kept text. */
+export const HEARD_LABELS: Record<Locale, Record<Heard, string>> = {
+  nl: KEEP.nl.heard,
+  en: KEEP.en.heard,
+};
+
+/**
+ * The dossier with the rehearsal feedback kept as one evidence item (the feedback,
+ * never the conversation), linked to no criterion until the teacher chooses, and
+ * one `aiLog` line. Bastiaan's choice: only on "Bewaar in je dossier".
+ */
+export function addRehearsalFeedback(
+  d: DossierData,
+  feedback: RehearsalFeedback,
+  opts: { at: number; model: string; locale: Locale; id: string },
+): DossierData {
+  const t = KEEP[opts.locale];
+  const criteria = new Map(
+    d.framework.outcomes.flatMap((o) => o.criteria.map((c) => [c.id, { o, c }] as const)),
+  );
+  const blocks = feedback.criteria.flatMap((f) => {
+    const found = criteria.get(f.criterionId);
+    if (!found) return [];
+    return [
+      [
+        `${outcomeLabel(found.o)}: ${found.c.text}`,
+        `${t.heardLabel}: ${t.heard[f.heard]}`,
+        f.quote ? `${t.quote}: "${f.quote}"` : null,
+        f.tip ? `${t.tip}: ${f.tip}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    ];
+  });
+  const text = [t.intro, ...blocks, feedback.overall ? `${t.overall}: ${feedback.overall}` : null]
+    .filter(Boolean)
+    .join("\n\n");
+  return {
+    ...d,
+    evidence: [
+      ...d.evidence,
+      {
+        id: opts.id,
+        title: `${t.title}, ${fmtDate(opts.at, opts.locale)}`,
+        kind: "feedback",
+        text,
+        criterionIds: [],
+      },
+    ],
+    aiLog: [...d.aiLog, { at: opts.at, action: "rehearsal" as const, model: opts.model }].slice(
+      -LIMITS.aiLog,
+    ),
   };
 }

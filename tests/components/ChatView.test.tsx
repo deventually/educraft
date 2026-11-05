@@ -694,4 +694,71 @@ describe("ChatView — course (P20, 20.4)", () => {
     );
     expect(screen.queryByRole("combobox", { name: "Course" })).toBeNull();
   });
+
+  describe("set up elsewhere (P29.3)", () => {
+    const presetTool: Tool = {
+      ...mockTool,
+      chat: {
+        starters: [{ nl: "Ik ben er klaar voor.", en: "I am ready." }],
+        quickReplies: [{ nl: "Rond af", en: "Wrap up" }],
+        allowStop: true,
+      },
+    };
+
+    async function mockReply(reply: string) {
+      const { streamPost } = await import("~/lib/streamClient");
+      const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+      mockStreamPost.mockImplementation(async (_url, _body, { onToken, onDone }) => {
+        onToken(reply);
+        onDone?.({});
+      });
+      return mockStreamPost;
+    }
+
+    it("skips its own setup with preset values and sends the extras with each turn", async () => {
+      const mockStreamPost = await mockReply("Welkom.");
+      const user = userEvent.setup();
+      render(
+        <ChatView
+          tool={presetTool}
+          values={{ discipline: "x", length: "full" }}
+          settingsSummary={[{ name: "length", label: "How long?", value: "Full" }]}
+          streamExtras={{ dossierId: "d1" }}
+        />,
+      );
+      expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
+      expect(screen.getByText("Full")).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "I am ready." }));
+      await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
+      const body = mockStreamPost.mock.calls.at(-1)?.[1] as Record<string, unknown>;
+      expect(body.dossierId).toBe("d1");
+      expect(body.values).toEqual({ discipline: "x", length: "full" });
+    });
+
+    it("offers the quick replies once the conversation runs, by keyboard too", async () => {
+      const mockStreamPost = await mockReply("Welkom.");
+      const user = userEvent.setup();
+      const { container } = render(<ChatView tool={presetTool} values={{}} />);
+      expect(screen.queryByRole("button", { name: "Wrap up" })).toBeNull();
+      await user.click(screen.getByRole("button", { name: "I am ready." }));
+      const wrap = await screen.findByRole("button", { name: "Wrap up" });
+      wrap.focus();
+      await user.keyboard("{Enter}");
+      await waitFor(() => expect(mockStreamPost).toHaveBeenCalledTimes(2));
+      const body = mockStreamPost.mock.calls.at(-1)?.[1] as { messages: { content: string }[] };
+      expect(body.messages.at(-1)?.content).toBe("Wrap up");
+      expect((await axe(container)).violations).toEqual([]);
+    });
+
+    it("lets the page render an answer itself, with the teacher's turns", async () => {
+      await mockReply('{"criteria": []}');
+      const user = userEvent.setup();
+      const render2 = vi.fn((content: string, ctx: { userTurns: string[] }) =>
+        content.startsWith("{") ? <p>Feedback for {ctx.userTurns.length} turns</p> : undefined,
+      );
+      render(<ChatView tool={presetTool} values={{}} renderAssistant={render2} />);
+      await user.click(screen.getByRole("button", { name: "I am ready." }));
+      expect(await screen.findByText("Feedback for 1 turns")).toBeInTheDocument();
+    });
+  });
 });

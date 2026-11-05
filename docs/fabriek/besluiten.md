@@ -238,3 +238,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Een uitzondering op "tot de pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4): het staat niet in
   de toolcatalogus, alleen in stap 5 van de werkplaats, en gaat mee aan en uit met de werkplaats.
   Bastiaan, 2026-11-05. Uitwerking: brief P29.
+- **BESLUIT-2026-11-05-9:** **Rood blokkeert de export niet.** De inleverklaar-check (P29.1) is
+  alleen advies; een docent kan altijd exporteren. Bastiaan, 2026-11-05 (keuzekaart).
+- **BESLUIT-2026-11-05-10:** **Van een proefassessment bewaren we alleen de feedback**, en alleen
+  als de docent op "Bewaar in je dossier" klikt. Het gesprek zelf wordt nergens bewaard, ook niet
+  als project. Bastiaan, 2026-11-05 (keuzekaart). Uitwerking: P29.3.
+- **BESLUIT-2026-11-05-11:** **Rolagenten staan aan of uit voor de hele instelling, niet per team.**
+  Bastiaan, 2026-11-05 (keuzekaart).
