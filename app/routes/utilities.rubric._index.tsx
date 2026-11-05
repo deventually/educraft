@@ -4,6 +4,9 @@ import { ArrowLeft, Plus, Table2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric._index";
 import { requireFeatureUser } from "~/server/features.server";
 import { createRubric, listRubrics } from "~/server/repositories/rubrics.server";
+import { copySharedItem } from "~/server/repositories/shares.server";
+import { sharedWithMe } from "~/server/sharing.server";
+import { SharedWithMe } from "~/components/sharing/SharedWithMe";
 import { maxPoints, newRubricData, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
 import { getUtilityBySlug } from "~/lib/utilities";
 import { EmptyState } from "~/components/EmptyState";
@@ -25,12 +28,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     maxPoints: maxPoints(r.data),
     updatedAt: r.updatedAt.toISOString(),
   }));
-  return { rubrics };
+  // "Van mijn team" (P28.4): colleagues' rubrics shared with the viewer's teams.
+  return { rubrics, shared: await sharedWithMe(user, "rubric") };
 }
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await requireFeatureUser(request, "utilities");
   const fd = await request.formData();
+  if (fd.get("intent") === "copy-shared") {
+    const copyId = await copySharedItem(user.id, "rubric", String(fd.get("id") ?? ""));
+    return redirect(copyId ? `/utilities/rubric/${copyId}` : "/utilities/rubric");
+  }
   if (fd.get("intent") !== "create") return { error: "invalid" as const };
   const name = String(fd.get("name") ?? "").trim();
   if (name.length < 1 || name.length > RUBRIC_LIMITS.name) return { error: "name" as const };
@@ -60,7 +68,7 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
   const r = t.utilities.rubric;
   const locale = useLocale();
   const utility = getUtilityBySlug("rubric");
-  const { rubrics } = loaderData;
+  const { rubrics, shared = [] } = loaderData;
   const dateFmt = new Intl.DateTimeFormat(locale === "nl" ? "nl-NL" : "en-GB", {
     dateStyle: "medium",
   });
@@ -113,6 +121,7 @@ export default function RubricList({ loaderData }: Route.ComponentProps) {
           ))}
         </ul>
       )}
+      <SharedWithMe items={shared} viewHref={(id) => `/utilities/rubric/shared/${id}`} />
     </div>
   );
 }

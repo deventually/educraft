@@ -120,6 +120,7 @@ const toolSchema = z.object({
   contextFrom: z.literal("dossier").optional(),
   hiddenFromCatalogue: z.literal(true).optional(),
   storesConversation: z.literal(false).optional(),
+  handlesStudentWork: z.literal(true).optional(),
   defaultOutputLanguage: z.enum(["nl", "en"]),
   next: z.array(z.string().min(1)).max(3).optional(),
   courseActions: z

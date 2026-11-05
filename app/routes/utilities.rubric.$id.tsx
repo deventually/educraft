@@ -1,4 +1,4 @@
-import { Form, Link, redirect } from "react-router";
+import { Form, Link, redirect, useActionData } from "react-router";
 import { ArrowLeft, ClipboardCheck, CopyPlus, Trash2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.$id";
 import { requireFeatureUser } from "~/server/features.server";
@@ -9,10 +9,13 @@ import {
   updateRubric,
 } from "~/server/repositories/rubrics.server";
 import { listRubricScores } from "~/server/repositories/rubricScores.server";
+import { shareAction, shareControls } from "~/server/sharing.server";
+import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { RubricInsight } from "~/components/utilities/RubricInsight";
 import { RubricEditor } from "~/components/utilities/RubricEditor";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { Button } from "~/components/ui";
+import { useFormToast } from "~/components/Toast";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
@@ -31,6 +34,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       rubric.data,
       scores.map((s) => s.levels),
     ),
+    sharing: await shareControls(user, "rubric", rubric.id),
   };
 }
 
@@ -38,10 +42,13 @@ const MAX_JSON = 200_000;
 
 export async function action({ request, params }: Route.ActionArgs) {
   const user = await requireFeatureUser(request, "utilities");
-  const fd = await request.formData();
-  const intent = fd.get("intent");
   const existing = await getRubric(user.id, params.id);
   if (!existing) return { error: "notFound" as const };
+  // "Delen met team" (P28.4): only the owner gets here (getRubric is owner-scoped).
+  const shared = await shareAction(request, user, "rubric", existing.id);
+  if (shared) return shared;
+  const fd = await request.formData();
+  const intent = fd.get("intent");
 
   if (intent === "save") {
     const raw = String(fd.get("dataJson") ?? "");
@@ -77,7 +84,16 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export default function RubricPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const r = t.utilities.rubric;
-  const { rubric, insight, scoreCount } = loaderData;
+  const { rubric, insight, scoreCount, sharing = { teams: [], sharedWith: [] } } = loaderData;
+  const actionData = useActionData<typeof action>();
+  useFormToast(actionData, {
+    result: (d) => {
+      if (!d || !("intent" in d)) return null;
+      return d.ok
+        ? { variant: "success", message: d.message }
+        : { variant: "error", message: d.error };
+    },
+  });
   return (
     <div>
       <Link
@@ -120,6 +136,9 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
       {/* Keyed on id: a duplicate opens with fresh editor state. */}
       <RubricEditor key={rubric.id} rubric={rubric} />
       <RubricInsight insight={insight} count={scoreCount} />
+      <div className="mt-10">
+        <ShareWithTeam {...sharing} />
+      </div>
     </div>
   );
 }

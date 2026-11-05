@@ -15,6 +15,7 @@ import {
   courses,
   generations,
   reviewDecisions,
+  shares,
 } from "../schema.server";
 
 export interface Course {
@@ -139,13 +140,16 @@ export async function updateCourse(
   return { ...existing, name, contextProfileId, data, updatedAt };
 }
 
-/** Deletes the course, its links and its reviews in one transaction. */
+/** Deletes the course, its links, its reviews and its shares (P28.4) in one transaction. */
 export async function deleteCourse(userId: string, id: string): Promise<boolean> {
   return getDb().transaction((tx) => {
     const result = tx.delete(courses).where(ownCourse(userId, id)).run();
     if (result.changes === 0) return false;
     tx.delete(courseLinks)
       .where(and(eq(courseLinks.courseId, id), eq(courseLinks.userId, userId)))
+      .run();
+    tx.delete(shares)
+      .where(and(eq(shares.kind, "course"), eq(shares.itemId, id), eq(shares.ownerUserId, userId)))
       .run();
     // P21.3: the course's role-agent reviews and the decisions on them.
     const reviewIds = tx

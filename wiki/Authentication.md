@@ -61,6 +61,13 @@ out, and for the owner deactivates or reactivates them. Per person it applies th
 the person page (`mayManage`, owner only, never yourself); whoever is out of reach is skipped and
 counted (`{ bulk: { done, skipped } }`).
 
+**Paste a list** (P28.5, intent `mintList`, every admin) is the third way to add: one person per
+line, a name and an e-mail address. `parsePastedPeople` (`app/lib/people/pasteList.ts`, pure, Zod)
+judges each line; the action then refuses an address that already has an account or an open
+invite (`findClaimedEmails`) and mints one teacher invite per accepted line, with the note
+`Name <email>` and the chosen team. It returns `{ pasted }`: per line the link, or the reason. No
+mail is sent; the admin copies the links from the result table.
+
 | On `/admin/users` and `/admin/users/:id` | Admin | Super admin |
 |---|---|---|
 | Invite a teacher, revoke an invite, models and BDB/BKE per teacher | yes | yes |
@@ -128,6 +135,32 @@ effective = instance is Off              → off
   `/admin/teams/:id`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
   exception, on the person page (section *Parts and tools*, which shows the source). A team only
   sees what the instance has not Off; a stored choice for an Off item stays but never counts.
+
+## Sharing with your team (P28.4)
+
+Everything stays private until its owner shares it (BESLUIT-2026-11-05-5). One table, `shares`
+(`ownerUserId`, `kind`, `itemId`, `teamId`; unique on kind + item + team, migration 0019), and one
+repository, `app/server/repositories/shares.server.ts`.
+
+- **Shareable kinds** are data: `SHARE_KINDS` in `app/lib/sharing.ts` is `course`, `rubric`,
+  `contextProfile`. A dossier, rubric fill-ins (`rubric_scores`) and chats are never among them.
+- **Read rule:** a team-mate reads an item when its owner shares it with a team that **both** are
+  in, as one condition in the WHERE clause (`sharedWith`). Writing, linking and deleting stay in
+  the owner-scoped repositories, so `updateCourse`, `deleteRubric` and `linkGeneration` find
+  nothing for a team-mate.
+- **Student work never travels:** `Tool.handlesStudentWork` (Studentwerk beoordelen, Wiskunde
+  nakijken, Toetsanalyse, Forum nakijken; validated at boot) and `isShareableWork` (no student
+  work, no chat, no dossier work) give `SHAREABLE_WORK_SLUGS`, which `listSharedCourseWork` puts
+  in its WHERE. A shared course shows only that linked work.
+- **Pages:** "Delen met je team" (`ShareWithTeam`, intents `share` / `unshare`, parsed with Zod in
+  `app/server/sharing.server.ts`) on the course page, the rubric page and per context profile.
+  "Van mijn team" (`SharedWithMe`) on `/courses`, `/utilities/rubric` and `/context-profiles`,
+  with "Maak een kopie" (`copySharedItem`: own copy, no links, no shares, no context profile).
+  A colleague's course or rubric opens read only on `/courses/shared/:id` and
+  `/utilities/rubric/shared/:id`; not shared (any more) is a 404.
+- **When a share lapses:** stopping, leaving the team (`removeMember`, `setUserTeams`: the
+  leaver's shares for that team go), removing the team, deleting the item or the account. A copy
+  stays with whoever made it.
 
 ## Sessions & passwords
 

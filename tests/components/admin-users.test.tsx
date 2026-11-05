@@ -240,7 +240,12 @@ describe("Admin user list — one Add button (P28.1)", () => {
     const user = userEvent.setup();
     renderRoute(undefined, asRegular);
     await openAdd(user);
-    expect(screen.queryByRole("radio")).toBeNull();
+    // P28.5: a regular admin chooses between one link and a pasted list; never an account.
+    expect(screen.getAllByRole("radio").map((r) => r.getAttribute("value"))).toEqual([
+      "invite",
+      "list",
+    ]);
+    expect(screen.queryByRole("radio", { name: /account met wachtwoord/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^account aanmaken$/i })).toBeNull();
     expect(screen.getByRole("button", { name: /uitnodiging aanmaken/i })).toBeInTheDocument();
     expect(screen.getByText(/nooit een beheerder/i)).toBeInTheDocument();
@@ -335,6 +340,82 @@ describe("Admin user list — teams (P28.2)", () => {
     await openAdd(user);
     expect(screen.queryByLabelText(/in team/i)).toBeNull();
     expect(screen.queryByLabelText(/^team$/i)).toBeNull();
+  });
+});
+
+describe("Admin user list: paste a list (P28.5)", () => {
+  const pasted = [
+    {
+      line: 1,
+      name: "Jan de Vries",
+      email: "jan@school.nl",
+      link: "http://localhost/invite/tok-jan",
+    },
+    { line: 2, text: "Zonder adres", reason: "invalidEmail" },
+    { line: 3, text: "Bestaand, b@school.nl", reason: "emailTaken" },
+    { line: 4, text: "Weer Jan, jan@school.nl", reason: "duplicate" },
+  ];
+  const chooseList = async (user: ReturnType<typeof userEvent.setup>) => {
+    await openAdd(user);
+    await user.click(screen.getByRole("radio", { name: /lijst plakken/i }));
+  };
+
+  it("posts the pasted text and the chosen team", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(
+      async ({ request }) => {
+        body = await request.formData();
+        return { pasted };
+      },
+      { isOwner: false, ownerId: "admin-2" },
+    );
+    await chooseList(user);
+    const box = screen.getByLabelText(/persoon per regel/i);
+    await user.type(box, "Jan de Vries, jan@school.nl{enter}Anna, anna@school.nl");
+    await user.selectOptions(
+      screen.getByLabelText(/^in team$/i, { selector: "#list-team" }),
+      "team-2",
+    );
+    await user.click(screen.getByRole("button", { name: /uitnodigingen aanmaken/i }));
+    await waitFor(() => expect(body).toBeDefined());
+    expect(body?.get("intent")).toBe("mintList");
+    expect(body?.get("people")).toBe("Jan de Vries, jan@school.nl\nAnna, anna@school.nl");
+    expect(body?.get("teamId")).toBe("team-2");
+  });
+
+  it("shows a table: a link to copy per person, or the reason it was refused", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ pasted }));
+    await chooseList(user);
+    await user.type(screen.getByLabelText(/persoon per regel/i), "x");
+    await user.click(screen.getByRole("button", { name: /uitnodigingen aanmaken/i }));
+    const table = await screen.findByRole("table", { name: /uitkomst/i });
+    const jan = within(table).getByRole("row", { name: /jan de vries/i });
+    expect(within(jan).getByText("jan@school.nl")).toBeInTheDocument();
+    expect(within(jan).getByText("http://localhost/invite/tok-jan")).toBeInTheDocument();
+    expect(within(jan).getByRole("button", { name: /link kopiëren/i })).toBeInTheDocument();
+    expect(within(table).getByRole("row", { name: /zonder adres/i })).toHaveTextContent(
+      /geen geldig e-mailadres/i,
+    );
+    expect(within(table).getByRole("row", { name: /bestaand/i })).toHaveTextContent(
+      /heeft al een account/i,
+    );
+    expect(within(table).getByRole("row", { name: /weer jan/i })).toHaveTextContent(
+      /staat al eerder in de lijst/i,
+    );
+    expect(screen.getByText(/1 uitnodiging gemaakt, 3 regels geweigerd/i)).toBeInTheDocument();
+  });
+
+  it("has no a11y violations, before and after", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute(() => ({ pasted }));
+    await chooseList(user);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.type(screen.getByLabelText(/persoon per regel/i), "x");
+    await user.click(screen.getByRole("button", { name: /uitnodigingen aanmaken/i }));
+    await screen.findByRole("table", { name: /uitkomst/i });
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
 
