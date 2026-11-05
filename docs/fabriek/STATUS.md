@@ -11,6 +11,9 @@ _Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
 - **De week van de docent, rekenhart en schoolkalender (P22.1a, #106) gemerged op 2026-11-05:**
   weken rekenen in ISO-weken en de vakantieweken als één lijst voor de instelling op
   `/admin/context`.
+- **Teams als lijst met een pagina per team (#107) gemerged op 2026-11-05:** `/admin/teams` met
+  zoeken en één knop "Nieuw team", per team een pagina waar je meerdere collega's tegelijk
+  aanvinkt en toevoegt.
 - **Cursus als bewijs in het BDB/BKE-dossier (P26.4 + 26.5, #95) gemerged op 2026-11-05:** op de
   cursuspagina "Gebruik als bewijs in BDB/BKE" als momentopname, "Opnieuw ophalen" in het dossier en
   een hint bij criteria over toetsmatrijs of afstemming. Plus de documentatie. Daarmee is P26 af.
@@ -158,15 +161,15 @@ _Laatst bijgewerkt: 2026-11-05 (P22.1a gemerged, P22.1b open)_
 
 ## Bezig
 
+- Beheer sneller, gebruikers in één keer aanpassen: op `/admin/users` een vinkje per account,
+  "Alles selecteren" en de balk "Met geselecteerde": in een team zetten, uit een team halen, en
+  (alleen superbeheerder) op non-actief zetten of weer activeren. Wie buiten je rechten valt, wordt
+  overgeslagen en geteld. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
   toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
   zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
   `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
   bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
-- Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
-  persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
-  een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
-  keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P22.1b De week van de docent, echte datums: een startdatum per cursus (`startDate`, geen
   migratie) en bij elke les en toets "Week 3 · 17–23 nov", met de vakantieweken van de school

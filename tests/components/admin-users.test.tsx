@@ -337,3 +337,117 @@ describe("Admin user list — teams (P28.2)", () => {
     expect(screen.queryByLabelText(/^team$/i)).toBeNull();
   });
 });
+
+describe("Admin user list: change many people at once", () => {
+  const recorder = () => {
+    const bodies: FormData[] = [];
+    const action = async ({ request }: { request: Request }) => {
+      bodies.push(await request.formData());
+      return { bulk: { done: 2, skipped: 0 } };
+    };
+    return { bodies, action };
+  };
+
+  it("has a tick box per account, none on an open invite", () => {
+    renderRoute();
+    expect(
+      within(row(/Teacher T/)).getByRole("checkbox", { name: /teacher t selecteren/i }),
+    ).toBeInTheDocument();
+    expect(within(row(/Jan de Vries/)).queryByRole("checkbox")).toBeNull();
+  });
+
+  it("ticks every account at once and counts them", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await user.click(screen.getByRole("checkbox", { name: /alles selecteren/i }));
+    for (const name of [/admin a selecteren/i, /teacher t selecteren/i, /dark teacher selecteren/i])
+      expect(screen.getByRole("checkbox", { name })).toBeChecked();
+    expect(screen.getByText(/3 geselecteerd/i)).toBeInTheDocument();
+  });
+
+  it("puts the ticked people in a team in one go", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    renderRoute(action);
+    await user.click(screen.getByRole("checkbox", { name: /teacher t selecteren/i }));
+    await user.click(screen.getByRole("checkbox", { name: /dark teacher selecteren/i }));
+    const bar = screen.getByRole("form", { name: /met geselecteerde/i });
+    await user.selectOptions(within(bar).getByLabelText(/^actie$/i), "addTeam");
+    await user.selectOptions(within(bar).getByLabelText(/^welk team$/i), "team-2");
+    await user.click(within(bar).getByRole("button", { name: /toepassen/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("bulk");
+    expect(bodies[0].get("action")).toBe("addTeam");
+    expect(bodies[0].get("teamId")).toBe("team-2");
+    expect(bodies[0].getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/2 aangepast/i));
+  });
+
+  it("offers deactivate and reactivate to the owner only", () => {
+    const { unmount } = renderRoute();
+    const actions = () =>
+      within(screen.getByLabelText(/^actie$/i))
+        .getAllByRole("option")
+        .map((o) => (o as HTMLOptionElement).value);
+    expect(actions()).toEqual(expect.arrayContaining(["deactivate", "reactivate"]));
+    unmount();
+    renderRoute(undefined, { isOwner: false });
+    expect(actions()).not.toContain("deactivate");
+    expect(actions()).toEqual(["addTeam", "removeTeam"]);
+  });
+
+  it("asks before deactivating, then posts every ticked person", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    renderRoute(action);
+    await user.click(screen.getByRole("checkbox", { name: /teacher t selecteren/i }));
+    await user.click(screen.getByRole("checkbox", { name: /dark teacher selecteren/i }));
+    await user.selectOptions(screen.getByLabelText(/^actie$/i), "deactivate");
+    await user.click(screen.getByRole("button", { name: /toepassen/i }));
+    expect(bodies).toHaveLength(0);
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/2 mensen op non-actief zetten/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/overal uitgelogd/i)).toBeInTheDocument();
+    // Only hidden fields inside: the focus still moves into the dialog, onto Cancel.
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: /annuleren/i })).toHaveFocus(),
+    );
+    await user.click(within(dialog).getByRole("button", { name: /op non-actief zetten/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("bulk");
+    expect(bodies[0].get("action")).toBe("deactivate");
+    expect(bodies[0].getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
+  });
+
+  it("says how many were skipped", async () => {
+    const user = userEvent.setup();
+    renderRoute(() => ({ bulk: { done: 1, skipped: 1 } }));
+    await user.click(screen.getByRole("checkbox", { name: /admin a selecteren/i }));
+    await user.click(screen.getByRole("button", { name: /toepassen/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(/1 aangepast, 1 overgeslagen/i),
+    );
+  });
+
+  it("has no a11y violations with people ticked", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute();
+    await user.click(screen.getByRole("checkbox", { name: /alles selecteren/i }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin user list: with nothing to do in bulk", () => {
+  it("shows team actions only when there are teams, and no tick boxes when nothing is left", () => {
+    const { unmount } = renderRoute(undefined, { teams: [] });
+    expect(
+      within(screen.getByLabelText(/^actie$/i))
+        .getAllByRole("option")
+        .map((o) => (o as HTMLOptionElement).value),
+    ).toEqual(["deactivate", "reactivate"]);
+    unmount();
+    renderRoute(undefined, { teams: [], isOwner: false });
+    expect(screen.queryByRole("form", { name: /met geselecteerde/i })).toBeNull();
+    expect(screen.queryByRole("checkbox", { name: /selecteren/i })).toBeNull();
+  });
+});

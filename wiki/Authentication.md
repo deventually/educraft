@@ -56,7 +56,10 @@ can keep running. Until it has run there is **no owner** and nobody can change a
 Since P28.1 the list (`/admin/users`) searches and filters people and holds the one **Add**
 button (invite link, or for the owner a direct account); everything about one account lives on
 its person page (`/admin/users/:id`), whose action takes the user from the URL, never from the
-form.
+form. **With selected** on the list (intent `bulk`) puts ticked accounts in a team or takes them
+out, and for the owner deactivates or reactivates them. Per person it applies the same rules as
+the person page (`mayManage`, owner only, never yourself); whoever is out of reach is skipped and
+counted (`{ bulk: { done, skipped } }`).
 
 | On `/admin/users` and `/admin/users/:id` | Admin | Super admin |
 |---|---|---|
