@@ -10,6 +10,10 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Rolagenten alleen voor de hele instelling (#132) gemerged op 2026-11-05:** een team kan de
+  schakelaar *Rolagenten* niet meer zien of omzetten; een eerder bewaarde teamkeuze telt niet meer
+  mee (BESLUIT-2026-11-05-11, keuze Bastiaan). Een uitzondering per docent door de beheerder
+  blijft. Geen migratie.
 - **Flash-toasts na een redirect (P16, #130) gemerged op 2026-11-05:** na inloggen, uitloggen,
   een uitnodiging, een nieuw wachtwoord, verwijderen, een rubric kopiëren en stoppen als
   teamleider verschijnt op de volgende pagina een korte melding. Daarmee is P16 af.
@@ -220,14 +224,15 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- Rolagenten alleen voor de hele instelling: een team kan de schakelaar *Rolagenten* niet meer
-  zien of omzetten; een eerder bewaarde teamkeuze telt niet meer mee (BESLUIT-2026-11-05-11,
-  keuze Bastiaan). Een uitzondering per docent door de beheerder blijft. Geen migratie. PR open.
+- Foto voor Wiskunde nakijken: een echte telefoonfoto van handgeschreven werk (Bastiaan,
+  2026-11-05, zonder naam, EXIF/GPS verwijderd) staat als
+  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
+  plaats van 24x). De case vertelt de beoordelaar dat foutje; verwacht ± 8/10. Nog te meten met
+  `npm run eval -- --tool math-grading`. PR open.
 
 ## Wacht op jou
 
-- **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
-  `evals/math-grading/fixtures/handwritten-derivative.png`; zonder foto meet de eval deze tool niet.
+- Niets.
 
 ## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
 

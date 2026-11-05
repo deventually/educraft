@@ -2,7 +2,7 @@
   "cases": [
     {
       "id": "derivative-eqf4",
-      "description": "Vision grader. Requires a real handwritten-math image at the imagePath below (see fixtures/README.md) — the harness base64-encodes it and sends it to a vision model. Checks that grading is grounded in the image and flags unreadable parts instead of guessing.",
+      "description": "Vision grader. The image (fixtures/handwritten-derivative.png, a real phone photo of handwriting, no name) shows the derivative of f(x) = (3x² − 5)⁴: u = 3x² − 5, u' = 6x; f'(x) = 4u³ · u'; f'(x) = 4(3x² − 5)³ · 6x; f'(x) = 18x(3x² − 5)³. Ground truth: chain rule and intermediate steps are correct; the last line has one arithmetic slip (4 · 6 = 24, so the correct answer is 24x(3x² − 5)³, not 18x). Expected draft score about 8/10 (chain rule 4, steps 3, final answer 0, notation 1). The output must name this slip concretely and must not invent other errors or steps.",
       "outputLanguage": "nl",
       "imagePath": "fixtures/handwritten-derivative.png",
       "profile": {
