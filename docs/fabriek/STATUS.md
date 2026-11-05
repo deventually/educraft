@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig, brief P27 open)_
 
 ## Nu
 
@@ -99,6 +99,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
 - 2026-11-05: "Kunnen we niet alvast beginnen met de volgende P20 features?" en "Ik wil 2 t/m 5 wel
   hebben" → P20 met studielast en de P24-tools erbij; toetsmatrijs, OER-import en BDB/BKE naar P26
   (BESLUIT-2026-11-05-1).
+- 2026-11-05: "Hoe kunnen we deze applicatie super effectief maken en een genot om mee te werken?",
+  "voor de BDB/BKE functie zoveel mogelijk integratie van de tools en wellicht ook een aparte
+  workflow" en "alle drie aanbieden?" → document "LimeOnIt als één workflow", BESLUIT-2026-11-05-4,
+  brief P27.
 
 ## Bezig
 
@@ -109,6 +113,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
 - Brief P21 *Rolagenten*: twee petten kijken een cursus na op verzoek, akkoord/niet akkoord gelogd,
   pakket-tags, gekoppelde toetsvragen optioneel mee. Keuzes gemaakt (BESLUIT-2026-11-05-3); wacht op
   merge — PR open. P20.1 en 20.2 staan op `main`, dus 21.1 kan na deze merge starten.
+
+- Brief P27 *De rode draad*: één workflow met de cursus als thuisbasis, volgende stap onder elk
+  resultaat, BDB/BKE doet mee (weg terug uit de tool, bewijs voorstellen, route in vijf stappen),
+  startscherm met drie ingangen en een menu van vier (BESLUIT-2026-11-05-4). Alleen tekst; PR open.
 
 ## Wacht op jou
 
@@ -123,8 +131,9 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
    Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten) en **P26** (cursussen verder),
-   dan **P22** (de docentweek).
+3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
+   BDB/BKE doet mee), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
+   (de docentweek, op Start), dan de rest van **P26** (BESLUIT-2026-11-05-4).
 
 ## Open vragen
 
