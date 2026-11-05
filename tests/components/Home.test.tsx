@@ -23,7 +23,6 @@ const tools: ToolData[] = [
     theory: { nl: "Backward Design", en: "Backward Design" },
     goal: "design",
     search: "begeleide reflectie guided reflection backward design les lesson",
-    stages: 1,
   },
   {
     slug: "cognitive-architect",
@@ -35,7 +34,6 @@ const tools: ToolData[] = [
     theory: { nl: "Science of Learning", en: "Science of Learning" },
     goal: "design",
     search: "cognitive architect gagné rosenshine",
-    stages: 4,
   },
   {
     slug: "mentorai",
@@ -47,7 +45,6 @@ const tools: ToolData[] = [
     theory: { nl: "Cognitief Leermeesterschap", en: "Cognitive Apprenticeship" },
     goal: "coach",
     search: "mentorai mentor leermeester apprenticeship coaching",
-    stages: 1,
   },
 ];
 
@@ -76,20 +73,19 @@ describe("Home / tools page", () => {
     expect(screen.queryByText("Motiveren & activeren")).toBeNull();
   });
 
-  it("shows the multi-stage chip only for multi-stage tools", () => {
+  it("shows no technique chips on the cards (P27.3)", () => {
     renderHome();
-    expect(screen.getByText("4 fasen")).toBeInTheDocument();
+    expect(screen.queryByText("4 fasen")).toBeNull();
+    expect(screen.queryByText("Formulier")).toBeNull();
+    expect(screen.queryByText("Gesprek")).toBeNull();
   });
 
-  it("places the stage chip in the meta row next to the mode pill, not inside the title", () => {
+  it("links to earlier work ('Eerder gemaakt', P27.3)", () => {
     renderHome();
-    const stageChip = screen.getByText("4 fasen");
-    // It must not live inside the card's <h3> title (which would make titles wrap unevenly).
-    expect(stageChip.closest("h3")).toBeNull();
-    // It shares its row with the mode pill so all the meta chips line up together.
-    const metaRow = stageChip.parentElement;
-    expect(metaRow).not.toBeNull();
-    expect(metaRow).toHaveTextContent("Formulier");
+    expect(screen.getByRole("link", { name: "Eerder gemaakt" })).toHaveAttribute(
+      "href",
+      "/projects",
+    );
   });
 
   it("shows full tool titles without clamping or truncating them", () => {
@@ -128,14 +124,6 @@ describe("Home / tools page", () => {
     renderHome();
     const link = screen.getByRole("link", { name: /MentorAI/ });
     expect(link.getAttribute("aria-label")).not.toMatch(/Student/);
-  });
-
-  it("labels the kind of tool in plain words", () => {
-    renderHome();
-    expect(screen.getByRole("link", { name: /MentorAI/ })).toHaveTextContent("Gesprek");
-    expect(screen.getByRole("link", { name: /Begeleide reflectie/ })).toHaveTextContent(
-      "Formulier",
-    );
   });
 
   it("offers no type filter and no grid/list switch", () => {

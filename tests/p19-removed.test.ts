@@ -25,8 +25,8 @@ describe("P19.5 — menu with four items, no contact page", () => {
     }
   });
 
-  it("calls the projects page 'Mijn werk' / 'My work'", () => {
-    expect(nl.nav.projects).toBe("Mijn werk");
-    expect(en.nav.projects).toBe("My work");
+  it('calls the projects page "Eerder gemaakt" / "Earlier work" (P27.3)', () => {
+    expect(nl.nav.projects).toBe("Eerder gemaakt");
+    expect(en.nav.projects).toBe("Earlier work");
   });
 });

@@ -25,6 +25,7 @@ import { privacy } from "./privacy";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
+import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
@@ -63,6 +64,7 @@ export const en: Messages = {
   projects,
   resultActions,
   settings,
+  start,
   tagline: "Design evidence-based education with generative AI",
   teams,
   toast,
