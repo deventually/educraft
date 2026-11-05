@@ -59,3 +59,16 @@ describe("maxTokens validation", () => {
     expect(validateTools([tool]).some((i) => /maxTokens/i.test(i.message))).toBe(true);
   });
 });
+
+describe("stage dependency validation", () => {
+  const base = structuredClone(ALL_TOOLS.find((t) => t.slug === "test-items"));
+  if (!base) throw new Error("test-items fixture missing");
+
+  it("rejects an unknown derivation", () => {
+    const tool = structuredClone(base);
+    const dep = tool.stages[1].consumes?.[0];
+    if (!dep) throw new Error("test-items consumes nothing");
+    Object.assign(dep, { derive: "made-up" });
+    expect(validateTools([tool]).some((i) => /derive/i.test(i.message))).toBe(true);
+  });
+});

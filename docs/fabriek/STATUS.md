@@ -170,6 +170,12 @@ _Laatst bijgewerkt: 2026-11-05 (P22.4 en P27.4 open)_
 
 ## Bezig
 
+- Toetsvragen, vaste vraagindeling in code: de app rekent uit de toetsmatrijs per vraag de rij,
+  het denkniveau, de vraagvorm en de punten uit en geeft die lijst aan stap 2
+  (`test-items-items@v2`, derivatie `question-plan`); elke meerkeuzevraag krijgt vier opties.
+  Pakt het punt onder Later aan (metingen t en u). Meting nog niet gedraaid: wacht op akkoord van
+  Bastiaan. PR open.
+
 - P29.1 Klaar om in te leveren?: in stap 5 van het BDB/BKE-dossier één lijst (groen / oranje /
   rood, met pictogram en woord) of je dossier inleverklaar is, met per punt "Los op". Zonder AI en
   zonder poort: de export werkt altijd, boven de knop staat "Nog N punten open". Zelf-afvinkpunten

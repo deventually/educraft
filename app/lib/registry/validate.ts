@@ -3,6 +3,7 @@ import { COURSE_ITEM_KINDS, type Tool } from "./types";
 import { PROMPTS } from "~/lib/prompts";
 import { MODELS } from "~/lib/ai/models";
 import { placeholdersIn } from "~/lib/template/interpolate";
+import { DERIVATION_IDS } from "~/lib/template/derivations";
 
 /** Placeholders that buildSystemPrompt always injects (not from form fields). */
 const INJECTED = new Set(["contextProfile", "outputLanguage"]);
@@ -52,6 +53,7 @@ const inputField = z.object({
 const stageDependency = z.object({
   placeholder: z.string().regex(/^[a-zA-Z0-9_]+$/),
   fromStageId: z.string().min(1),
+  derive: z.enum(DERIVATION_IDS).optional(),
 });
 
 const toolStage = z.object({

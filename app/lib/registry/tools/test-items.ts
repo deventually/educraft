@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { TEST_ITEMS_BLUEPRINT, TEST_ITEMS_ITEMS } from "~/lib/prompts/test-items.prompt";
+import { TEST_ITEMS_BLUEPRINT, TEST_ITEMS_ITEMS_V2 } from "~/lib/prompts/test-items.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 
 const CONTENT = { nl: "Leeruitkomsten en leerstof", en: "Learning outcomes and material" };
@@ -154,8 +154,12 @@ export const testItems: Tool = {
         nl: "De vragen volgens de matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is.",
         en: "The questions from the blueprint, with an answer model and, for multiple choice, why each distractor is wrong.",
       },
-      systemPromptId: TEST_ITEMS_ITEMS.id,
-      consumes: [{ placeholder: "blueprint", fromStageId: "blueprint" }],
+      systemPromptId: TEST_ITEMS_ITEMS_V2.id,
+      // Metingen t and u: the row of each question is computed in code, not by the model.
+      consumes: [
+        { placeholder: "blueprint", fromStageId: "blueprint" },
+        { placeholder: "questionPlan", fromStageId: "blueprint", derive: "question-plan" },
+      ],
       // Meting p: calculation-heavy sets ran out of budget while thinking.
       maxTokens: 24576,
       output: {

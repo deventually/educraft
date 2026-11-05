@@ -22,10 +22,18 @@ const values = {
   questionTypes: "mixed",
   conditions: "",
 };
-const blueprintOutput = "## Toetsmatrijs\n\n| Rij | … |";
+const blueprintOutput = [
+  "## Toetsmatrijs",
+  "",
+  "| Rij | Leeruitkomst | Denkniveau | Vraagvorm | Aantal vragen | Punten per vraag | Punten |",
+  "| --- | --- | --- | --- | --- | --- | --- |",
+  "| R1 | Betrouwbaarheidsinterval | Toepassen | Meerkeuze | 8 | 1 | 8 |",
+  "| R2 | Passende toets kiezen | Analyseren | Open | 4 | 3 | 12 |",
+  "| Totaal | | | | 12 | | 20 |",
+].join("\n");
 const runtime = (stage: "blueprint" | "items", lang: "nl" | "en") =>
   buildSystemPrompt({
-    promptId: `test-items-${stage}@v1`,
+    promptId: tool().stages.find((s) => s.id === stage)!.systemPromptId,
     values,
     outputLanguage: lang,
     priorOutputs: { blueprint: blueprintOutput },
@@ -42,8 +50,11 @@ describe("tool: test-items", () => {
     expect(t.enabled).toBe(true);
     expect(t.stages.map((s) => s.id)).toEqual(["blueprint", "items"]);
     expect(t.stages[0]?.systemPromptId).toBe("test-items-blueprint@v1");
-    expect(t.stages[1]?.systemPromptId).toBe("test-items-items@v1");
-    expect(t.stages[1]?.consumes).toEqual([{ placeholder: "blueprint", fromStageId: "blueprint" }]);
+    expect(t.stages[1]?.systemPromptId).toBe("test-items-items@v2");
+    expect(t.stages[1]?.consumes).toEqual([
+      { placeholder: "blueprint", fromStageId: "blueprint" },
+      { placeholder: "questionPlan", fromStageId: "blueprint", derive: "question-plan" },
+    ]);
   });
 
   it("names the task first, in both languages", () => {
@@ -195,6 +206,35 @@ describe("tool: test-items", () => {
   it("keeps an honest verbatim: the tool is not from the book", () => {
     expect(getPrompt("test-items-blueprint@v1").verbatim).toMatch(/LimeOnIt/);
     expect(getPrompt("test-items-items@v1").verbatim).toMatch(/LimeOnIt/);
+    expect(getPrompt("test-items-items@v2").verbatim).toMatch(/LimeOnIt/);
+  });
+
+  // Metingen t and u: correction traces in the answer-model headings and three options in
+  // statistics; two rounds of prompt text did not help. @v2 gets a fixed plan per question,
+  // computed in code from the blueprint table (STATUS.md, Later).
+  it("gives the questions stage a fixed plan per question, computed from the blueprint", () => {
+    const nl = runtime("items", "nl");
+    expect(nl).toContain(
+      "- Vraag 1 (1 pt): Rij R1, toepassen, meerkeuze met vier opties (A tot en met D)",
+    );
+    expect(nl).toContain("- Vraag 12 (3 pt): Rij R2, analyseren, open vraag");
+    expect(nl.toLowerCase()).toContain("vaste vraagindeling");
+    const en = runtime("items", "en");
+    expect(en).toContain("- Question 9 (3 pt): Row R2, analyze, open question");
+    expect(en.toLowerCase()).toContain("fixed question plan");
+  });
+
+  it("always asks for four options, no longer three (nl, en)", () => {
+    const nl = runtime("items", "nl").toLowerCase();
+    expect(nl).toContain("vier opties");
+    expect(nl).not.toContain("gebruik dan drie opties");
+    const en = runtime("items", "en").toLowerCase();
+    expect(en).toContain("four options");
+    expect(en).not.toContain("use three options");
+  });
+
+  it("keeps @v1 registered for results made with it", () => {
+    expect(getPrompt("test-items-items@v1")).toBeDefined();
   });
 });
 
