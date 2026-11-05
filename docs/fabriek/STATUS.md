@@ -97,8 +97,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
   nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
   eval-casussen van acht beurten plus feedback, twee met een bekende fout. Meting dc1 (1 run, batch):
   4,20–4,80, geen harde check gefaald, niets afgekapt; zwakste punt vetgedrukte labels in de
-  feedback. Ronde 1: gewone opsommingstekens en genderneutraal ook in non-verbale aanwijzingen;
-  eindmeting dc2 (3 runs) volgt — PR open.
+  feedback. Ronde 1 (gewone opsommingstekens, genderneutraal ook in non-verbale aanwijzingen), meting
+  dc2 (3 runs): vier cases 4,60–4,80, maar student-stuck 2,80: de student verbeterde zich hardop
+  ("Oeps, ik had genderneutraal moeten blijven"). Ronde 2 draait die regel terug (regressieregel
+  BESLUIT-2026-11-04-24); de opsommingstekens blijven. Eindmeting dc3 volgt — PR open.
 
 ## Wacht op jou
 

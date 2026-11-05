@@ -33,7 +33,8 @@ Score each shared criterion 1–5, judging the role-play and the feedback togeth
   "Wat goed ging", "Wat beter kan", "Het gesprek in stappen" only for bad news, "Eén ding om te
   oefenen"; English "Feedback on your conversation", "What went well", "What could be better",
   "The conversation in steps" only for bad news, "One thing to practise"), plain bullets under them
-  (the prompt asks for no bold labels and no numbering inside the feedback), and the exact closing sentence ("Dit is feedback op een oefengesprek met een gespeelde
+  (the prompt asks for no bold labels and no numbering inside the points; the `##` and `###`
+  headings themselves are required, not a deviation), and the exact closing sentence ("Dit is feedback op een oefengesprek met een gespeelde
   student. Jij beslist wat je ermee doet." / "This is feedback on a practice conversation with a
   role-played student. You decide what to do with it."). Finished, not cut off.
 - **levelFit** — The student talks like a student of the programme and year in the case; the
