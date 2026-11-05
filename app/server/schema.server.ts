@@ -146,6 +146,41 @@ export const rubricScores = sqliteTable(
 );
 
 /**
+ * A teacher's course (brief P20): learning outcomes, activities and assessments as one
+ * Zod-validated JSON document (`CourseDataSchema`), edited as a whole, like a context profile.
+ * Scoped to its owner.
+ */
+export const courses = sqliteTable("courses", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  contextProfileId: text("context_profile_id"),
+  dataJson: text("data_json").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
+ * A generation linked to a course (brief P20), optionally to one activity or assessment
+ * (`itemId`, an id inside the course JSON). One link per (course, generation).
+ */
+export const courseLinks = sqliteTable(
+  "course_links",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    courseId: text("course_id").notNull(),
+    generationId: text("generation_id").notNull(),
+    itemId: text("item_id"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [
+    uniqueIndex("course_links_course_generation").on(t.courseId, t.generationId),
+    index("course_links_user_idx").on(t.userId),
+  ],
+);
+
+/**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
  * touched; an absent row means "registry default" (safe defaults — a fresh
  * instance behaves exactly as before this phase). `enabled` null = registry
