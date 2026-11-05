@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { BLOOM_LEVELS } from "./bloom";
-import { ACTIVITY_KINDS, ASSESSMENT_KINDS, type CourseData } from "./types";
+import { ACTIVITY_KINDS, ASSESSMENT_KINDS, type CourseData, HOURS_PER_EC } from "./types";
 
 /** Boundary limits for a course (brief P20, "Het model"). */
 export const COURSE_LIMITS = {
@@ -11,11 +11,16 @@ export const COURSE_LIMITS = {
   activities: 100,
   assessments: 30,
   week: 60,
+  ec: 60,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
 const Bloom = z.enum(BLOOM_LEVELS);
 const Week = z.number().int().min(1).max(COURSE_LIMITS.week);
+const Hours = z
+  .number()
+  .min(0)
+  .max(COURSE_LIMITS.ec * HOURS_PER_EC);
 
 const OutcomeSchema = z.object({
   id: Id,
@@ -29,6 +34,7 @@ const ActivitySchema = z.object({
   week: Week.optional(),
   kind: z.enum(ACTIVITY_KINDS),
   outcomeIds: z.array(Id).max(COURSE_LIMITS.outcomes),
+  hours: Hours.optional(),
 });
 
 const AssessmentSchema = z.object({
@@ -40,10 +46,12 @@ const AssessmentSchema = z.object({
   coverage: z
     .array(z.object({ outcomeId: Id, bloom: Bloom.optional() }))
     .max(COURSE_LIMITS.outcomes),
+  hours: Hours.optional(),
 });
 
 export const CourseDataSchema = z
   .object({
+    ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
     activities: z.array(ActivitySchema).max(COURSE_LIMITS.activities),
     assessments: z.array(AssessmentSchema).max(COURSE_LIMITS.assessments),

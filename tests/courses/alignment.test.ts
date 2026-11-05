@@ -78,6 +78,22 @@ describe("checkAlignment (pure, advisory)", () => {
     expect(codes(d)).toEqual([]);
   });
 
+  it("study-load-exceeds-ec: planned hours exceed EC × 28 hours", () => {
+    const d = alignedCourse();
+    d.ec = 1; // 28 hours
+    d.activities[0].hours = 20;
+    d.assessments[1].hours = 10;
+    expect(checkAlignment(d)).toEqual([{ code: "study-load-exceeds-ec", severity: "info" }]);
+    d.assessments[1].hours = 8;
+    expect(codes(d)).toEqual([]);
+  });
+
+  it("study-load-exceeds-ec needs an EC value", () => {
+    const d = alignedCourse();
+    d.activities[0].hours = 500;
+    expect(codes(d)).toEqual([]);
+  });
+
   it("orders findings by outcome, then by item, weights last", () => {
     const d: CourseData = {
       outcomes: [
@@ -96,7 +112,8 @@ describe("checkAlignment (pure, advisory)", () => {
         },
       ],
     };
-    d.activities.push({ id: ACT2, title: "y", kind: "assignment", outcomeIds: [] });
+    d.activities.push({ id: ACT2, title: "y", kind: "assignment", outcomeIds: [], hours: 60 });
+    d.ec = 2;
     expect(checkAlignment(d)).toEqual([
       { code: "assessed-before-taught", severity: "warning", outcomeId: LO1, itemId: TEST1 },
       { code: "bloom-below-outcome", severity: "warning", outcomeId: LO1, itemId: TEST1 },
@@ -104,6 +121,7 @@ describe("checkAlignment (pure, advisory)", () => {
       { code: "outcome-not-assessed", severity: "warning", outcomeId: LO2 },
       { code: "activity-without-outcome", severity: "info", itemId: ACT2 },
       { code: "weights-not-100", severity: "info" },
+      { code: "study-load-exceeds-ec", severity: "info" },
     ]);
   });
 });

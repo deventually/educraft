@@ -86,6 +86,9 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
 - 2026-11-04: "Voor de BDB/BKE denk ik dat we een dedicated deel van de applicatie hieraan moeten
   wijden." → BESLUIT-2026-11-04-11.
 - 2026-11-04: "Maak het ook mogelijk om te importeren van tools als TestVision, ANS, Remindo" → BESLUIT-2026-11-04-16, vervolg op P25.
+- 2026-11-05: "Kunnen we niet alvast beginnen met de volgende P20 features?" en "Ik wil 2 t/m 5 wel
+  hebben" → P20 met studielast en de P24-tools erbij; toetsmatrijs, OER-import en BDB/BKE naar P26
+  (BESLUIT-2026-11-05-1).
 
 ## Bezig
 
@@ -96,6 +99,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
   verduidelijkt (prompt blijft @v1). Eindmeting df2 (3 runs, batch): elke case 4,73–5,00, geen
   gefaalde harde check, niets afgekapt (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet;
   `evals/reports/2026-11-05df2.md`). Tien uitkomsten wachten op Bastiaan — PR open.
+
+- P20.1 Cursussen, puur domein (`app/lib/courses/`): het cursusmodel (leeruitkomsten, activiteiten,
+  toetsen, Bloom, studielast), bewerkingen en de afstemmingscontroles, zonder AI en nog zonder
+  scherm. Daarna 20.2 (opslag), 20.3 (pagina's), 20.4 (koppelen en voorinvullen). PR open.
 
 ## Wacht op jou
 

@@ -54,6 +54,18 @@ describe("CourseDataSchema (the boundary)", () => {
     expect(parses(badWeight)).toBe(false);
   });
 
+  it("accepts study load (EC per course, hours per item) within limits", () => {
+    const d = alignedCourse();
+    d.ec = 5;
+    d.activities[0].hours = 4;
+    d.assessments[1].hours = 3;
+    expect(parses(d)).toBe(true);
+    expect(parses({ ...d, ec: 0 })).toBe(false);
+    expect(parses({ ...d, ec: COURSE_LIMITS.ec + 1 })).toBe(false);
+    d.activities[0].hours = -1;
+    expect(parses(d)).toBe(false);
+  });
+
   it("rejects an unknown Bloom level", () => {
     const d = alignedCourse() as unknown as { outcomes: { id: string; bloom: string }[] };
     d.outcomes.find((o) => o.id === LO1)!.bloom = "memorize";

@@ -26,6 +26,8 @@ export interface Activity {
   week?: number;
   kind: ActivityKind;
   outcomeIds: string[];
+  /** Planned study hours for this activity. */
+  hours?: number;
 }
 
 export interface AssessmentCoverage {
@@ -41,9 +43,16 @@ export interface Assessment {
   /** % of the final grade; only summative weights count. */
   weight?: number;
   coverage: AssessmentCoverage[];
+  /** Planned study hours for this assessment. */
+  hours?: number;
 }
 
+/** Hours of study per EC (WHW art. 7.4: one EC is 28 hours). */
+export const HOURS_PER_EC = 28;
+
 export interface CourseData {
+  /** Study load of the whole course in EC. */
+  ec?: number;
   outcomes: LearningOutcome[];
   activities: Activity[];
   assessments: Assessment[];

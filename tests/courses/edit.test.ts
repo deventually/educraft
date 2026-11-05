@@ -18,6 +18,7 @@ describe("course edits", () => {
     edit.addAssessment(d, { title: "Toets", kind: "summative", coverage: [] });
     edit.updateAssessment(d, TEST1, { weight: 50 });
     edit.removeAssessment(d, TEST1);
+    edit.setStudyLoad(d, 3);
     expect(JSON.stringify(d)).toBe(snapshot);
   });
 
@@ -59,6 +60,12 @@ describe("course edits", () => {
       LO1,
     ]);
     expect(valid(d)).toBe(true);
+  });
+
+  it("sets and clears the course's EC", () => {
+    const d = edit.setStudyLoad(alignedCourse(), 5);
+    expect(d.ec).toBe(5);
+    expect("ec" in edit.setStudyLoad(d, undefined)).toBe(false);
   });
 
   it("removes an activity and an assessment", () => {

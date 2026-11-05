@@ -193,3 +193,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   API.** Alleen de eindmeting van een tool draait met 3 runs. `npm run eval -- --batch` stuurt
   genereren en beoordelen via de Message Batches API van Anthropic, die de helft kost; de uitslag
   duurt dan iets langer. Samen ongeveer 60–70% minder per tool. Bastiaan, 2026-11-04.
+- **BESLUIT-2026-11-05-1:** **P20 krijgt studielast en geldt ook voor de nieuwe tools; de rest gaat
+  naar P26.** De cursus krijgt een EC-waarde en uren per activiteit en toets, met een advies als de
+  uren boven EC × 28 uitkomen. Het voorinvullen van leeruitkomsten geldt ook voor de P24-tools.
+  Toetsmatrijs per vraag, importeren uit een OER en de koppeling met het BDB/BKE-dossier komen in een
+  eigen vervolgbrief (P26). Bastiaan, 2026-11-05.

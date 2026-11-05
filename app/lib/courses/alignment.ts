@@ -3,7 +3,7 @@
  * describe gaps, they never change the course. The base for the P21 agents.
  */
 import { type BloomLevel, bloomRank } from "./bloom";
-import type { CourseData } from "./types";
+import { type CourseData, HOURS_PER_EC } from "./types";
 
 export const FINDING_CODES = [
   "outcome-not-taught",
@@ -12,6 +12,7 @@ export const FINDING_CODES = [
   "bloom-below-outcome",
   "activity-without-outcome",
   "weights-not-100",
+  "study-load-exceeds-ec",
 ] as const;
 export type FindingCode = (typeof FINDING_CODES)[number];
 
@@ -56,7 +57,7 @@ export function coverageMatrix(d: CourseData): CoverageMatrix {
 /**
  * Findings in a fixed order: per outcome (in outcome order: assessment-level
  * findings in assessment order, then not-taught, then not-assessed), then per
- * activity, then the course-wide weight check.
+ * activity, then the course-wide weight and study-load checks.
  */
 export function checkAlignment(d: CourseData): AlignmentFinding[] {
   const findings: AlignmentFinding[] = [];
@@ -103,6 +104,10 @@ export function checkAlignment(d: CourseData): AlignmentFinding[] {
   const weights = summative.flatMap((a) => (a.weight === undefined ? [] : [a.weight]));
   if (weights.length > 0 && Math.abs(weights.reduce((s, w) => s + w, 0) - 100) > 0.01)
     findings.push({ code: "weights-not-100", severity: "info" });
+
+  const hours = [...d.activities, ...d.assessments].reduce((s, i) => s + (i.hours ?? 0), 0);
+  if (d.ec !== undefined && hours > d.ec * HOURS_PER_EC)
+    findings.push({ code: "study-load-exceeds-ec", severity: "info" });
 
   return findings;
 }

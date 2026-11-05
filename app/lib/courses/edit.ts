@@ -115,3 +115,10 @@ export function updateAssessment(d: CourseData, id: string, patch: Patch<Assessm
 export function removeAssessment(d: CourseData, id: string): CourseData {
   return { ...structuredClone(d), assessments: without(d.assessments, id) };
 }
+
+// Study load
+
+/** Sets the course's EC; `undefined` clears it. */
+export function setStudyLoad(d: CourseData, ec: number | undefined): CourseData {
+  return compact({ ...d, ec });
+}
