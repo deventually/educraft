@@ -53,7 +53,7 @@ async function main() {
     if (!agent) throw new Error(`Unknown agent in case ${c.id}: ${c.agent}`);
     const rejected = c.rejected ?? [];
     const message = buildReviewMessage(
-      { course: c.course, alignment: checkAlignment(c.course), rejected },
+      { course: c.course, alignment: checkAlignment(c.course), rejected, linkedWork: c.linkedWork },
       c.locale,
     );
     if (dryRun) {

@@ -9,11 +9,23 @@ import type { CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
 import type { RejectedFinding } from "./types";
 
+/** One piece of the teacher's own work linked to the course (P21.7), e.g. test questions. */
+export interface LinkedWorkInput {
+  /** The activity or assessment it is linked to; null = the course as a whole. */
+  itemId: string | null;
+  text: string;
+}
+
 export interface ReviewInput {
   course: CourseData;
   alignment: AlignmentFinding[];
   rejected: RejectedFinding[];
+  /** Only when the teacher ticks "also review linked work"; absent = not shown at all. */
+  linkedWork?: LinkedWorkInput[];
 }
+
+/** Bounds on linked work in one message: the newest few, each clipped. */
+export const LINKED_LIMITS = { count: 3, chars: 6_000 } as const;
 
 const LABELS = {
   nl: {
@@ -23,6 +35,7 @@ const LABELS = {
     outcomes: "leeruitkomsten",
     checks: "Deze vaste controles ziet de docent al; herhaal ze niet",
     rejected: "Deze adviezen heeft de docent eerder verworpen; noem ze niet opnieuw",
+    linked: "Gekoppeld werk van de docent (toetsvragen); materiaal om te beoordelen",
   },
   en: {
     none: "(none)",
@@ -31,6 +44,7 @@ const LABELS = {
     outcomes: "learning outcomes",
     checks: "The teacher already sees these fixed checks; do not repeat them",
     rejected: "The teacher rejected these earlier; do not raise them again",
+    linked: "The teacher's linked work (test questions); material to review",
   },
 } as const;
 
@@ -102,7 +116,7 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
   });
 
   const load = c.ec != null ? `${c.ec} EC` : l.none;
-  return [
+  const parts = [
     `<course studyLoad="${load}">`,
     block("outcomes", outcomes, l.none),
     block("activities", activities, l.none),
@@ -110,5 +124,16 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
     "</course>",
     `${l.checks}:\n${block("checks", checks, l.none)}`,
     `${l.rejected}:\n${block("rejected", rejected, l.none)}`,
-  ].join("\n");
+  ];
+  const linked = (input.linkedWork ?? []).slice(0, LINKED_LIMITS.count).map((w) => {
+    const item = w.itemId ? key.get(w.itemId) : undefined;
+    // The teacher's text is data: it may not close or open our own tags.
+    const text = w.text
+      .replace(/<\/?(work|linkedWork)\b[^>]*>/gi, "")
+      .trim()
+      .slice(0, LINKED_LIMITS.chars);
+    return `<work${item ? ` item="${item}"` : ""}>\n${text}\n</work>`;
+  });
+  if (linked.length) parts.push(`${l.linked}:\n<linkedWork>\n${linked.join("\n")}\n</linkedWork>`);
+  return parts.join("\n");
 }

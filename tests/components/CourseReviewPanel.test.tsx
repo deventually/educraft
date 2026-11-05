@@ -53,7 +53,7 @@ function reviewed(stale = false): ReviewPanelAgent[] {
   ];
 }
 
-function renderPanel(agents: ReviewPanelAgent[]) {
+function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0) {
   const Stub = createRoutesStub([
     {
       path: "/",
@@ -63,6 +63,7 @@ function renderPanel(agents: ReviewPanelAgent[]) {
           agents={agents}
           models={models}
           defaultModel="claude-sonnet-5-5"
+          linkedTests={linkedTests}
         />
       ),
     },
@@ -119,5 +120,18 @@ describe("CourseReviewPanel", () => {
     const { container } = renderPanel(reviewed(true));
     expect(screen.getAllByText(/gewijzigd na deze beoordeling/)).toHaveLength(2);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers to review linked test questions too, off by default, only when there are any (P21.7)", async () => {
+    const { container } = renderPanel(notYet, 2);
+    const box = screen.getByRole("checkbox", { name: /Ook de gekoppelde toetsvragen nakijken/ });
+    expect(box).not.toBeChecked();
+    expect(box).toHaveAttribute("name", "includeLinked");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("hides the box without linked test questions", () => {
+    renderPanel(notYet, 0);
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 });

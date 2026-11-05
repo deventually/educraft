@@ -38,11 +38,13 @@ vi.mock("~/server/availability.server", () => ({
 let courses: typeof import("~/server/repositories/courses.server");
 let reviews: typeof import("~/server/repositories/agentReviews.server");
 let detail: typeof import("~/routes/courses.$id");
+let gens: typeof import("~/server/repositories/generations.server");
 
 beforeAll(async () => {
   courses = await import("~/server/repositories/courses.server");
   reviews = await import("~/server/repositories/agentReviews.server");
   detail = await import("~/routes/courses.$id");
+  gens = await import("~/server/repositories/generations.server");
 });
 
 beforeEach(() => {
@@ -305,5 +307,57 @@ describe("course page loader (P21.5)", () => {
     const c = await newCourse();
     gates.roleAgents = false;
     expect((await load(c.id)).review).toBeNull();
+  });
+});
+
+describe("linked work in the review (P21.7)", () => {
+  async function courseWithWork() {
+    const c = await newCourse();
+    const save = (toolSlug: string, outputMarkdown: string) =>
+      gens.saveGeneration({
+        userId: "teacher-r",
+        toolSlug,
+        model: "test",
+        input: {},
+        outputLanguage: "nl",
+        outputMarkdown,
+      });
+    const items = await save("test-items", "Vraag 1: Noem de drie normaalvormen.");
+    const other = await save("authentic-assessment", "Een authentieke opdracht.");
+    await courses.linkGeneration("teacher-r", c.id, items.id, "test-1");
+    await courses.linkGeneration("teacher-r", c.id, other.id, null);
+    return c;
+  }
+  const messages = () => generate.mock.calls.map(([req]) => String(req.messages[0].content));
+
+  it("leaves linked work out unless the teacher ticks the box", async () => {
+    const c = await courseWithWork();
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    await post(c.id, [["intent", "review"]]);
+    for (const m of messages()) expect(m).not.toContain("normaalvormen");
+  });
+
+  it("gives only the assessment expert only the linked test questions", async () => {
+    const c = await courseWithWork();
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    await post(c.id, [
+      ["intent", "review"],
+      ["includeLinked", "1"],
+    ]);
+    const [assessment, design] = messages();
+    expect(assessment).toContain("Vraag 1: Noem de drie normaalvormen.");
+    expect(assessment).toContain('<work item="T2">');
+    expect(assessment).not.toContain("authentieke opdracht");
+    expect(design).not.toContain("normaalvormen");
+    expect(generate.mock.calls[0][0].system).toContain("<linkedWork>");
+  });
+
+  it("the loader counts the linked test questions, so the box only shows when useful", async () => {
+    const c = await courseWithWork();
+    const request = new Request(`http://localhost/courses/${c.id}`);
+    const data = (await detail.loader({ request, params: { id: c.id } } as never)) as {
+      review: { linkedTests: number } | null;
+    };
+    expect(data.review?.linkedTests).toBe(1);
   });
 });

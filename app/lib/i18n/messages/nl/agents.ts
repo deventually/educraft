@@ -10,6 +10,7 @@ export const agents = {
     accept: "Akkoord",
     decided: "Afgehandeld ({n})",
     decision: { accepted: "Akkoord", rejected: "Niet akkoord" },
+    includeLinked: "Ook de gekoppelde toetsvragen nakijken ({n})",
     intro:
       "Twee kritische collega's kijken je cursus na: een toetsdeskundige en een ontwerper. Ze geven advies; jij beslist per advies. Er verandert niets aan je cursus.",
     model: "Model",

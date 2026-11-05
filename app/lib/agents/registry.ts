@@ -5,7 +5,7 @@ export const AGENTS: Agent[] = [
   {
     id: "assessment-expert",
     role: { nl: "Toetsdeskundige", en: "Assessment expert" },
-    promptId: "agent-assessment@v1",
+    promptId: "agent-assessment@v2",
     watches: ["course", "generation"],
   },
   {

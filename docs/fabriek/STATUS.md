@@ -34,6 +34,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
   thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
   menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, pakket-tags bij leeruitkomsten (P21.6, #105) gemerged op 2026-11-05:** kenmerken
+  uit het pakket van de cursus per leeruitkomst; de petten krijgen ze mee.
 - **Rolagenten, het paneel "Beoordeling" (P21.5, #104) gemerged op 2026-11-05:** knop, adviezen per
   pet, Akkoord / Niet akkoord met reden, melding als de cursus daarna is gewijzigd.
 - **Rolagenten, "Laat beoordelen" aan de serverkant (P21.4, #103) gemerged op 2026-11-05:** beide
@@ -153,10 +155,11 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, brief P22 open)_
 
 ## Bezig
 
-- P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
-  pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
-  beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen
-  tags; oude cursussen blijven geldig; een import laat tags leeg. Geen migratie. PR open.
+- P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
+  toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
+  zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
+  `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
+  bijgewerkt. De meting van v2 wacht op een run met API-sleutel. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - Brief P22 De week van de docent: alleen tekst, PR open. Echte datums, de week op Start, ICS;
   zonder jobrunner en zonder AI (BESLUIT-2026-11-05-7).

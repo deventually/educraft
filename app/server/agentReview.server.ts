@@ -5,7 +5,7 @@
  * hat failing never loses another hat's advice. Hats advise; the course is never changed.
  */
 import { z } from "zod";
-import { buildReviewMessage } from "~/lib/agents/input";
+import { buildReviewMessage, LINKED_LIMITS, type LinkedWorkInput } from "~/lib/agents/input";
 import { parseAgentReview } from "~/lib/agents/filter";
 import { agentsWatching } from "~/lib/agents/registry";
 import {
@@ -26,7 +26,8 @@ import {
 } from "./availability.server";
 import { log } from "./log.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
-import type { Course } from "./repositories/courses.server";
+import { type Course, listLinkedWork } from "./repositories/courses.server";
+import { getGeneration } from "./repositories/generations.server";
 import {
   decideFinding,
   getReview,
@@ -80,12 +81,37 @@ async function runAgent(
   return false;
 }
 
-/** The `review` intent: every course hat reviews the caller's (already loaded) course. */
+/** The only tool whose linked work a hat may review, for now (brief P21: other tools later). */
+const REVIEWABLE_TOOL = "test-items";
+
+async function linkedTestItems(userId: string, courseId: string) {
+  return (await listLinkedWork(userId, courseId, 500)).filter(
+    (w) => w.toolSlug === REVIEWABLE_TOOL,
+  );
+}
+
+/** The caller's own linked test questions, newest first, as hat input (P21.7). */
+async function loadLinkedWork(userId: string, courseId: string): Promise<LinkedWorkInput[]> {
+  const links = (await linkedTestItems(userId, courseId)).slice(0, LINKED_LIMITS.count);
+  const work = await Promise.all(
+    links.map(async (w) => {
+      const g = await getGeneration(userId, w.generationId);
+      return g ? { itemId: w.itemId, text: g.outputMarkdown } : null;
+    }),
+  );
+  return work.filter((w): w is LinkedWorkInput => w !== null);
+}
+
+/**
+ * The `review` intent: every course hat reviews the caller's (already loaded) course. With
+ * `includeLinked`, hats that watch generations also get the linked test questions.
+ */
 export async function reviewCourse(
   user: User,
   course: Course,
   requestedModel: string | null,
   locale: Locale,
+  includeLinked = false,
 ): Promise<ReviewResult> {
   const model = requestedModel || undefined;
   if (model && !(await isModelSelectableForUser(user, model))) return { ok: false, error: "model" };
@@ -93,14 +119,17 @@ export async function reviewCourse(
   if (blocked) return { ok: false, error: blocked };
 
   const rejected = await listRejectedFindings(user.id, course.id, 500);
-  const message = buildReviewMessage(
-    { course: course.data, alignment: checkAlignment(course.data), rejected },
-    locale,
-  );
+  const input = { course: course.data, alignment: checkAlignment(course.data), rejected };
+  const message = buildReviewMessage(input, locale);
+  const linkedWork = includeLinked ? await loadLinkedWork(user.id, course.id) : [];
+  const withLinked = linkedWork.length
+    ? buildReviewMessage({ ...input, linkedWork }, locale)
+    : message;
   const reviewed: string[] = [];
   const failed: Agent[] = [];
   for (const agent of agentsWatching("course")) {
-    const ok = await runAgent(user, course, agent, message, rejected, locale, model).catch(
+    const text = agent.watches.includes("generation") ? withLinked : message;
+    const ok = await runAgent(user, course, agent, text, rejected, locale, model).catch(
       () => false,
     );
     if (ok) reviewed.push(agent.id);
@@ -138,6 +167,8 @@ export async function decideOnFinding(
 
 export interface ReviewPanelData {
   agents: ReviewPanelAgent[];
+  /** How many test-question generations are linked to the course (the "also review" box). */
+  linkedTests: number;
   models: { id: string; displayName: string }[];
   defaultModel: string;
 }
@@ -172,5 +203,10 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
     id: m.id,
     displayName: m.displayName,
   }));
-  return { agents, models, defaultModel: await effectiveDefaultModel(user, DEFAULT_MODEL) };
+  return {
+    agents,
+    models,
+    defaultModel: await effectiveDefaultModel(user, DEFAULT_MODEL),
+    linkedTests: (await linkedTestItems(user.id, course.id)).length,
+  };
 }

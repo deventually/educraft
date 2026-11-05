@@ -5,6 +5,11 @@
 > (`npm test && npm run typecheck && npm run check`) is groen vóór de PR. **Hangt af van P20**
 > (cursussen, `checkAlignment`, `course_links`). Keuzes van Bastiaan: BESLUIT-2026-11-05-3.
 
+> **Stand (2026-11-05):** uitgevoerd in #81, #85, #102, #103, #104, #105 en de PR van 21.7/21.8.
+> Afwijkingen: migratie 0018 (niet 0015); de Toetsdeskundige draait sinds 21.7 op
+> `agent-assessment@v2` (leest ook gekoppelde toetsvragen en pakket-tags); de eindmeting van v2
+> staat nog open. Deze brief is nu geschiedenis.
+
 ## In gewone taal
 
 P21 geeft de docent twee kritische collega's die op verzoek een cursus nakijken: een
