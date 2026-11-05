@@ -13,6 +13,9 @@ export const people = {
   bulkAddTeam: "In team zetten",
   bulkApply: "Toepassen",
   bulkDeactivate: "Op non-actief zetten",
+  bulkDeactivateBody:
+    "Ze worden overal uitgelogd en kunnen niet meer inloggen tot je ze weer activeert.",
+  bulkDeactivateTitle: "{count} mensen op non-actief zetten?",
   bulkDone: "{done} aangepast.",
   bulkHeading: "Met geselecteerde",
   bulkNoneSelected: "Vink eerst iemand aan.",

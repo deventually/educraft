@@ -327,11 +327,11 @@ function AddPersonForm({
  * and join this form through `form="bulk-form"`, so it works without JS too.
  */
 function BulkBar({
-  count,
+  selectedIds,
   actions,
   teams,
 }: {
-  count: number;
+  selectedIds: string[];
   actions: BulkAction[];
   teams: { id: string; name: string }[];
 }) {
@@ -346,51 +346,73 @@ function BulkBar({
   const [action, setAction] = useState<BulkAction>(actions[0]);
   const needsTeam = action === "addTeam" || action === "removeTeam";
   return (
-    <Form
-      id="bulk-form"
-      method="post"
-      aria-label={p.bulkHeading}
-      className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
-    >
-      <input type="hidden" name="intent" value="bulk" />
-      <p className="self-center text-sm font-semibold text-slate-800">
-        {p.bulkHeading}
-        <span className="ml-2 font-normal text-slate-600">
-          {fmt(p.bulkSelected, { count: String(count) })}
-        </span>
-      </p>
-      <div>
-        <Label htmlFor="bulk-action">{p.bulkAction}</Label>
-        <Select
-          id="bulk-action"
-          name="action"
-          value={action}
-          onChange={(e) => setAction(e.target.value as BulkAction)}
-          className="mt-1 w-auto"
-        >
-          {actions.map((a) => (
-            <option key={a} value={a}>
-              {label[a]}
-            </option>
-          ))}
-        </Select>
-      </div>
-      {needsTeam && (
+    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+      <Form
+        id="bulk-form"
+        method="post"
+        aria-label={p.bulkHeading}
+        className="flex flex-wrap items-end gap-3"
+      >
+        <input type="hidden" name="intent" value="bulk" />
+        <p className="self-center text-sm font-semibold text-slate-800">
+          {p.bulkHeading}
+          <span className="ml-2 font-normal text-slate-600">
+            {fmt(p.bulkSelected, { count: String(selectedIds.length) })}
+          </span>
+        </p>
         <div>
-          <Label htmlFor="bulk-team">{p.bulkTeam}</Label>
-          <Select id="bulk-team" name="teamId" className="mt-1 w-auto">
-            {teams.map((team) => (
-              <option key={team.id} value={team.id}>
-                {team.name}
+          <Label htmlFor="bulk-action">{p.bulkAction}</Label>
+          <Select
+            id="bulk-action"
+            name="action"
+            value={action}
+            onChange={(e) => setAction(e.target.value as BulkAction)}
+            className="mt-1 w-auto"
+          >
+            {actions.map((a) => (
+              <option key={a} value={a}>
+                {label[a]}
               </option>
             ))}
           </Select>
         </div>
+        {needsTeam && (
+          <div>
+            <Label htmlFor="bulk-team">{p.bulkTeam}</Label>
+            <Select id="bulk-team" name="teamId" className="mt-1 w-auto">
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
+        {action !== "deactivate" && (
+          <Button type="submit" variant="secondary">
+            {p.bulkApply}
+          </Button>
+        )}
+      </Form>
+      {/* Deactivating logs people out everywhere: ask first. The dialog posts its own
+          form (forms may not nest), carrying the ticked ids. */}
+      {action === "deactivate" && (
+        <ConfirmDialog
+          triggerLabel={p.bulkApply}
+          triggerVariant="secondary"
+          triggerSize="md"
+          title={fmt(p.bulkDeactivateTitle, { count: String(selectedIds.length) })}
+          description={p.bulkDeactivateBody}
+          confirmLabel={p.bulkDeactivate}
+          cancelLabel={t.confirm.cancel}
+          fields={{ intent: "bulk", action: "deactivate" }}
+        >
+          {selectedIds.map((id) => (
+            <input key={id} type="hidden" name="userIds" value={id} />
+          ))}
+        </ConfirmDialog>
       )}
-      <Button type="submit" variant="secondary">
-        {p.bulkApply}
-      </Button>
-    </Form>
+    </div>
   );
 }
 
@@ -548,7 +570,13 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         <p className="text-sm text-slate-500">{p.none}</p>
       ) : (
         <div className="space-y-3">
-          {canBulk && <BulkBar count={selected.size} actions={bulkActions} teams={teams} />}
+          {canBulk && (
+            <BulkBar
+              selectedIds={accountIds.filter((id) => selected.has(id))}
+              actions={bulkActions}
+              teams={teams}
+            />
+          )}
           {/* `relative`: the box is the containing block of the absolutely positioned
            sr-only labels, so they scroll with the table instead of widening the page. */}
           <div className="relative overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">

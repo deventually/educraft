@@ -396,6 +396,29 @@ describe("Admin user list: change many people at once", () => {
     expect(actions()).toEqual(["addTeam", "removeTeam"]);
   });
 
+  it("asks before deactivating, then posts every ticked person", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    renderRoute(action);
+    await user.click(screen.getByRole("checkbox", { name: /teacher t selecteren/i }));
+    await user.click(screen.getByRole("checkbox", { name: /dark teacher selecteren/i }));
+    await user.selectOptions(screen.getByLabelText(/^actie$/i), "deactivate");
+    await user.click(screen.getByRole("button", { name: /toepassen/i }));
+    expect(bodies).toHaveLength(0);
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/2 mensen op non-actief zetten/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/overal uitgelogd/i)).toBeInTheDocument();
+    // Only hidden fields inside: the focus still moves into the dialog, onto Cancel.
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: /annuleren/i })).toHaveFocus(),
+    );
+    await user.click(within(dialog).getByRole("button", { name: /op non-actief zetten/i }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].get("intent")).toBe("bulk");
+    expect(bodies[0].get("action")).toBe("deactivate");
+    expect(bodies[0].getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
+  });
+
   it("says how many were skipped", async () => {
     const user = userEvent.setup();
     renderRoute(() => ({ bulk: { done: 1, skipped: 1 } }));

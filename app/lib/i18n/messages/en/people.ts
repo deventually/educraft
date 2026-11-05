@@ -14,6 +14,9 @@ export const people: Messages["people"] = {
   bulkAddTeam: "Put in team",
   bulkApply: "Apply",
   bulkDeactivate: "Deactivate",
+  bulkDeactivateBody:
+    "They are signed out everywhere and cannot sign in until you reactivate them.",
+  bulkDeactivateTitle: "Deactivate {count} people?",
   bulkDone: "{done} changed.",
   bulkHeading: "With selected",
   bulkNoneSelected: "Tick someone first.",
