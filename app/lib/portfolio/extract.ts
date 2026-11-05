@@ -8,20 +8,22 @@
  * `unverified`, so the teacher checks it before confirming.
  */
 import { z } from "zod";
+import {
+  STRUCTURED_INPUT_LIMIT,
+  extractJson,
+  verbatimIn,
+  wrapAsData,
+} from "~/lib/ai/structuredAnswer";
 import { normalizeForMatch } from "~/lib/documents/locate";
 import { LIMITS } from "./schema";
 import type { DossierData, FormRequirements, Framework, Outcome } from "./types";
 
 /** At most this much form text goes to the model (cost and context bound). */
-export const EXTRACT_INPUT_LIMIT = 80_000;
+export const EXTRACT_INPUT_LIMIT = STRUCTURED_INPUT_LIMIT;
 
 /** The user message: the form text, as data. */
 export function buildExtractMessage(formText: string): string {
-  const text =
-    formText.length <= EXTRACT_INPUT_LIMIT
-      ? formText
-      : `${formText.slice(0, EXTRACT_INPUT_LIMIT)}\n[…]`;
-  return `<form>\n${text}\n</form>`;
+  return wrapAsData("form", formText);
 }
 
 // ── Checking the answer ─────────────────────────────────────────────────────
@@ -54,26 +56,6 @@ export type ExtractParseResult =
   | { ok: true; framework: Framework; flagged: number; clipped: boolean }
   | { ok: false; error: "unparseable" | "empty" };
 
-/** The first JSON object in a model answer, fenced or not. */
-function extractJson(raw: string): unknown {
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(raw)?.[1];
-  const text = fenced ?? raw;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) return undefined;
-  try {
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return undefined;
-  }
-}
-
-/** Is `criterion` in the form, ignoring layout, case and a closing full stop? */
-export function verbatimInForm(criterion: string, formNormalized: string): boolean {
-  const needle = normalizeForMatch(criterion).replace(/[.;:]$/, "");
-  return needle.length > 0 && formNormalized.includes(needle);
-}
-
 /** Parses, clips to the dossier limits and checks a raw model answer. Never throws. */
 export function parseExtraction(raw: string, formText: string): ExtractParseResult {
   const parsed = RawFramework.safeParse(extractJson(raw));
@@ -103,7 +85,7 @@ export function parseExtraction(raw: string, formText: string): ExtractParseResu
     ).map((c) => {
       const text = cut(c.text, LIMITS.criterionText);
       const strongLevel = cut(c.strongLevel, LIMITS.criterionText);
-      const unverified = !verbatimInForm(text, form);
+      const unverified = !verbatimIn(text, form);
       if (unverified) flagged++;
       return {
         id: crypto.randomUUID(),

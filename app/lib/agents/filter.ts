@@ -4,7 +4,7 @@
  * points at a key the course does not have is dropped, as are duplicates and
  * advice the teacher rejected before. Long text is clipped, never trusted.
  */
-import { extractJson } from "~/lib/ai/extractJson";
+import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { CourseData } from "~/lib/courses/types";
 import { courseKeys } from "./input";
 import { AGENT_LIMITS, RawAgentReviewSchema } from "./schema";

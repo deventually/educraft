@@ -2,7 +2,7 @@
  * Pure helpers for the role-agent eval (`npm run eval:agents`, brief P21 21.2):
  * score a checked review deterministically against a course whose fault is known.
  */
-import { extractJson } from "../app/lib/ai/extractJson";
+import { extractJson } from "../app/lib/ai/structuredAnswer";
 import type { AgentParseResult } from "../app/lib/agents/filter";
 import { courseKeys } from "../app/lib/agents/input";
 import { RawAgentReviewSchema } from "../app/lib/agents/schema";
