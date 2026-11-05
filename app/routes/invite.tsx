@@ -73,7 +73,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   // A team invite (P28.2) makes the new teacher a member of that team.
   if (consumed.teamId) await joinTeamFromInvite(consumed.teamId, userId);
 
-  return createUserSession(userId, "/");
+  return createUserSession(userId, "/", "welcome");
 }
 
 export default function Invite({ loaderData }: Route.ComponentProps) {

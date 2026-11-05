@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -58,6 +59,8 @@ describe("invite flow (loader + action)", () => {
     const response = res as Response;
     expect(response.status).toBe(302);
     expect(response.headers.get("Location")).toBe("/");
+    // P16: the landing page welcomes the new user with a toast.
+    expect(await flashKeyOf(response)).toBe("welcome");
     expect(response.headers.get("Set-Cookie") ?? "").toContain("__session=");
 
     // The account exists with the invite's role.

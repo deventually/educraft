@@ -208,13 +208,17 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     const t = await teacher();
     currentUser.value = t;
     expect(await status(courses.loader({ request: get("/courses") } as never))).toBeUndefined();
-    expect((await root.loader({ request: get("/") } as never)).user?.features.courses).toBe(true);
+    expect((await root.loader({ request: get("/") } as never)).data.user?.features.courses).toBe(
+      true,
+    );
     await teamWith(t, { ...none, features: { courses: "off" } });
     expect(await status(courses.loader({ request: get("/courses") } as never))).toBe(404);
     expect(
       await status(course.loader({ request: get("/courses/x"), params: { id: "x" } } as never)),
     ).toBe(404);
-    expect((await root.loader({ request: get("/") } as never)).user?.features.courses).toBe(false);
+    expect((await root.loader({ request: get("/") } as never)).data.user?.features.courses).toBe(
+      false,
+    );
   });
 
   it("utilities: the pages are a 404 and the home page has no section", async () => {

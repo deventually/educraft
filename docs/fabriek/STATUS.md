@@ -10,6 +10,9 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Flash-toasts na een redirect (P16, #130) gemerged op 2026-11-05:** na inloggen, uitloggen,
+  een uitnodiging, een nieuw wachtwoord, verwijderen, een rubric kopiëren en stoppen als
+  teamleider verschijnt op de volgende pagina een korte melding. Daarmee is P16 af.
 - **Delen met je team (P28.4, #129) gemerged op 2026-11-05:** een cursus, rubric of
   onderwijscontext delen met een team; collega's bekijken en kopiëren. Studentwerk, chats en het
   dossier nooit. Migratie 0019 (`npm run db:migrate`). Daarmee is P28 af.
@@ -252,4 +255,3 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
 - Het evaluatie-harnas: de nulmeting is nog nooit gedraaid.
-- Flash-toasts na een redirect (stub P16).

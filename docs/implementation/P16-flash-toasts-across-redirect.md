@@ -1,8 +1,9 @@
-# Phase 16 — Flash toasts across redirects (STUB / deferred)
+# Phase 16 — Flash toasts across redirects
 
-> **Status:** ⚪ stub — deferred out of [P15](P15-user-feedback-toasts-a11y.md). This file records the
-> intent so the follow-on can be picked up cold. Not scoped or scheduled yet. **Depends on P15**
-> (the toast provider + `useToast`/viewport must exist first). Branch from `main`.
+> **Status:** ✅ klaar (#130, gemerged 2026-11-05). Deviation from the sketch below: the flash rides its own
+> signed `__flash` cookie, not the session cookie, so it survives `logout` and never touches auth.
+> Wired: login, invite, reset, logout, account delete, and the redirecting deletes (user, team,
+> rubric), rubric duplicate and team-lead step-down. How it works: [Architecture](../../wiki/Architecture.md).
 
 ## Why this exists
 
