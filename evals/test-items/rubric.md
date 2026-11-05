@@ -26,8 +26,13 @@ Score each shared criterion 1–5.
   outcome is left out, self-check), one table `| Rij | Leeruitkomst | Denkniveau | Vraagvorm |
   Aantal vragen | Punten per vraag | Punten |` (or the English equivalent) with rows R1, R2, …
   and a Total row. The items stage: "Vragen/Questions" without answers, "Antwoordmodel/Answer
-  model" per question with its row (from `@v3` grouped under one heading per row), "Controle tegen de matrijs/Check against the blueprint"
-  with a table and the A–D distribution, and a self-check. Both stages end with the exact
+  model" grouped per row: a heading "### Rij Rx — denkniveau (vraag a–b)" / "### Row Rx — level
+  (questions a–b)" for each row, and below it "#### Vraag n" / "#### Question n" for each of its
+  questions, with only the number. That grouping is the required format, not a deviation (the
+  prompt asks for it since `@v3`; an output with "### Question n — Row Rx" per question is the
+  older `@v2` format and is fine too). "Controle tegen de matrijs/Check against the blueprint"
+  with a table, and the A–D distribution as a line under the table (no second table needed),
+  and a self-check. Both stages end with the exact
   closing sentence ("Dit is een concept. De docent stelt de toets vast." / "This is a draft.
   The teacher decides on the test."). Finished, not cut off.
 - **levelFit** — The questions fit the case's EQF level and study year: plain, concrete

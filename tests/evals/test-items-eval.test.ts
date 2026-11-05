@@ -59,6 +59,16 @@ describe("test-items eval meets the P24 quality gate", () => {
   });
 });
 
+// Meting x: the judge took the @v3 layout (one heading per row, the question numbers below
+// it) for a deviation, and a line with the A–D distribution for a missing table.
+it("tells the judge the @v3 answer-model layout and the A–D line are the required format", () => {
+  const flat = rubric.replace(/\s+/g, " ");
+  expect(flat).toContain('"### Row Rx — level (questions a–b)"');
+  expect(flat).toContain('"#### Question n"');
+  expect(flat).toContain("is the required format, not a deviation");
+  expect(flat).toContain("a line under the table");
+});
+
 // Metingen p, r2, u and w: a correction inside an answer-model heading, always at the first
 // question of a new row. Counted in code: the judge named it only as the weakest aspect.
 describe("correctionInHeading (counted)", () => {
