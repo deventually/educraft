@@ -45,6 +45,17 @@ export async function listDossiers(userId: string, limit?: number): Promise<Doss
     .map(rowToDossier);
 }
 
+/** Whether the user owns at least one dossier (the P27 access transition). */
+export async function hasDossier(userId: string): Promise<boolean> {
+  const row = getDb()
+    .select({ id: portfolioDossiers.id })
+    .from(portfolioDossiers)
+    .where(eq(portfolioDossiers.userId, userId))
+    .limit(1)
+    .get();
+  return row !== undefined;
+}
+
 export async function getDossier(userId: string, id: string): Promise<Dossier | null> {
   const row = getDb()
     .select()

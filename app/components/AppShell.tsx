@@ -25,9 +25,11 @@ export default function AppShell() {
   const locale = useLocale();
   const location = useLocation();
   const root = useRouteLoaderData("root") as
-    | { user?: { name: string; role: string } | null }
+    | { user?: { name: string; role: string; portfolio?: boolean } | null }
     | undefined;
   const user = root?.user ?? null;
+  // BDB/BKE shows only when an admin switched the workplace on for this user (P27).
+  const portfolio = user?.portfolio === true;
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -62,7 +64,7 @@ export default function AppShell() {
     { to: "/tools", label: t.nav.tools, end: true },
     { to: "/projects", label: t.nav.projects, end: false },
     { to: "/courses", label: t.nav.courses, end: false },
-    { to: "/portfolio", label: t.nav.portfolio, end: false },
+    ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
     { to: "/context-profiles", label: t.nav.settings, end: false },
     { to: "/help", label: t.nav.help, end: false },
   ];
@@ -172,7 +174,7 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        {!isChatRoute && <SiteFooter t={t} />}
+        {!isChatRoute && <SiteFooter t={t} portfolio={portfolio} />}
       </div>
     </div>
   );
@@ -207,7 +209,7 @@ function RouteAnnouncer() {
   );
 }
 
-function SiteFooter({ t }: { t: Messages }) {
+function SiteFooter({ t, portfolio }: { t: Messages; portfolio: boolean }) {
   // A real website footer: brand + site map columns on a deep evergreen field
   // (one step darker than the brand button green). The book attribution lives in
   // the bottom bar to satisfy CC BY — the prominent link back to the book now
@@ -219,7 +221,7 @@ function SiteFooter({ t }: { t: Messages }) {
         { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
         { to: "/courses", label: t.nav.courses },
-        { to: "/portfolio", label: t.nav.portfolio },
+        ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio }] : []),
         { to: "/context-profiles", label: t.nav.settings },
       ],
     },

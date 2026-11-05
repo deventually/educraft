@@ -6,6 +6,7 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { requireUser } from "~/server/auth.server";
 import { listDossiers } from "~/server/repositories/portfolio.server";
 import { addGenerationToDossier } from "~/server/evidence.server";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { courseLinkIntent, loadCourseLinks } from "~/server/courses.server";
 import { CourseLinkBadges, CourseLinkForm } from "~/components/courses/CourseLinks";
 import { getToolBySlug } from "~/lib/registry";
@@ -31,7 +32,7 @@ export async function action({ request }: Route.ActionArgs) {
     // "Voeg toe aan dossier" (P25, 25.3): the output becomes unlinked evidence;
     // the teacher links it to criteria on the outcome page.
     const added = await addGenerationToDossier(
-      user.id,
+      user,
       { generationId: String(fd.get("id") ?? ""), dossierId: String(fd.get("dossierId") ?? "") },
       getLocale(request),
     );
@@ -54,7 +55,10 @@ export async function loader({ request }: Route.LoaderArgs) {
     createdAt: g.createdAt,
     courseLinks: links.byGeneration[g.id] ?? [],
   }));
-  const dossiers = (await listDossiers(user.id)).map((d) => ({ id: d.id, name: d.name }));
+  // The BDB/BKE workplace switched off (P27): no "Toevoegen aan dossier".
+  const dossiers = (await portfolioAccess(user))
+    ? (await listDossiers(user.id)).map((d) => ({ id: d.id, name: d.name }))
+    : [];
   return { generations, dossiers, courses: links.targets };
 }
 

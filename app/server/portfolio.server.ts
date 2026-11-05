@@ -4,6 +4,7 @@
  * save path for every `<Form intent>`. Routes stay thin.
  */
 import { requireRole } from "./auth.server";
+import { portfolioAccess } from "./portfolioAccess.server";
 import { getDossier, updateDossier, type Dossier } from "./repositories/portfolio.server";
 import type { User } from "./auth.server";
 import { applyIntent } from "~/lib/portfolio/intents";
@@ -14,9 +15,18 @@ import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getAvailableTools } from "./availability.server";
 import { loc } from "~/lib/i18n/localized";
+import type { DossierData } from "~/lib/portfolio/types";
+import { suggestEvidence } from "~/lib/portfolio/suggest";
+import { listGenerations } from "./repositories/generations.server";
+import { addGenerationToDossier } from "./evidence.server";
+import { loadCourseLinks } from "./courses.server";
+import { getToolBySlug } from "~/lib/registry";
 
+/** A teacher or admin for whom the workplace is switched on; anyone else gets a 404. */
 export async function requirePortfolioUser(request: Request): Promise<User> {
-  return requireRole(request, "teacher", "admin");
+  const user = await requireRole(request, "teacher", "admin");
+  if (!(await portfolioAccess(user))) throw new Response("Not Found", { status: 404 });
+  return user;
 }
 
 export async function loadDossier(
@@ -37,6 +47,34 @@ export async function availableToolNames(
   const locale = getLocale(request);
   const tools = await getAvailableTools(user);
   return new Map(tools.map((t) => [t.slug, loc(t.name, locale)]));
+}
+
+/** A tool's display name for a generation, falling back to its slug. */
+function toolName(slug: string, locale: ReturnType<typeof getLocale>): string {
+  const name = getToolBySlug(slug)?.name;
+  return name ? loc(name, locale) : slug;
+}
+
+/** How many recent generations "Dit heb je misschien al" looks at. */
+const SUGGEST_FROM = 200;
+
+/**
+ * "Dit heb je misschien al" (27.2): the teacher's own earlier work that fits a
+ * criterion, per criterion id, with the tool's name for display.
+ */
+export async function loadSuggestions(request: Request, user: User, d: DossierData) {
+  const locale = getLocale(request);
+  const [gens, links] = await Promise.all([
+    listGenerations(user.id, SUGGEST_FROM),
+    loadCourseLinks(user.id),
+  ]);
+  const byCriterion = suggestEvidence(d, gens, links.byGeneration);
+  return Object.fromEntries(
+    Object.entries(byCriterion).map(([id, list]) => [
+      id,
+      list.map((s) => ({ ...s, toolName: toolName(s.toolSlug, locale) })),
+    ]),
+  );
 }
 
 export type PortfolioActionResult =
@@ -89,6 +127,22 @@ export async function saveIntent(
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
     return { ok: true, intent: intent === "review" ? "review" : "draft" };
+  }
+
+  if (intent === "adoptSuggestions") {
+    // One path with "Gebruik als bewijs" (P27.1): owner-checked, never a duplicate.
+    const criterionId = String(fd.get("criterionId") ?? "");
+    const ids = [...new Set(fd.getAll("generationIds").map(String))].slice(0, 20);
+    if (ids.length === 0) return { ok: false, error: m.portfolio.errorNotFound };
+    for (const generationId of ids) {
+      const added = await addGenerationToDossier(
+        user,
+        { generationId, dossierId: dossier.id, criterionId },
+        locale,
+      );
+      if (!added.ok) return added;
+    }
+    return { ok: true, intent };
   }
 
   const result = applyIntent(dossier.data, fd, { now: Date.now(), locale });

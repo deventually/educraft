@@ -14,6 +14,7 @@ import { ToastProvider } from "~/components/Toast";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -33,7 +34,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     locale: getLocale(request),
     // Only the display-safe fields reach the client (never the password hash).
-    user: user ? { name: user.name, role: user.role } : null,
+    // `portfolio`: whether the BDB/BKE menu item shows (P27); the routes enforce it.
+    user: user
+      ? { name: user.name, role: user.role, portfolio: await portfolioAccess(user) }
+      : null,
   };
 }
 

@@ -9,6 +9,7 @@ import PortfolioFramework from "~/routes/portfolio.$id.framework";
 import PortfolioOutcome from "~/routes/portfolio.$id.outcome.$outcomeId";
 import { outcomeProgress, nextStep, requirementFindings } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
+import { dossierStep } from "~/lib/portfolio/step";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -37,6 +38,15 @@ function overviewData(d = sampleDossier()) {
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
     nextTools: [] as { slug: string; name: string }[],
+    step: dossierStep(d),
+    routeLinks: {
+      framework: `/portfolio/${ID}/framework`,
+      collect: `/portfolio/${ID}/outcome/${LU}`,
+      fill: `/portfolio/${ID}/outcome/${LU}`,
+      write: `/portfolio/${ID}/outcome/${LU}`,
+      finish: "#export",
+    },
+    practise: null as { slug: string; name: string } | null,
   };
 }
 
@@ -59,6 +69,10 @@ function outcomeData(d = sampleDossier()) {
     stored: undefined as unknown,
     toolHints: {} as Record<string, { slug: string; name: string }[]>,
     chapterTools: [] as { slug: string; name: string }[],
+    suggestions: {} as Record<
+      string,
+      { generationId: string; toolName: string; createdAt: number; courses: string[] }[]
+    >,
   };
 }
 
@@ -109,6 +123,74 @@ describe("Portfolio overview", () => {
     expect(screen.queryByRole("checkbox", { name: /verantwoording/ })).toBeNull();
     expect(screen.getByRole("radio", { name: /Alleen feedback/ })).toBeChecked();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio route in five steps", () => {
+  it("marks the current step and links each step to where you do it", async () => {
+    const d = sampleDossier();
+    d.framework.confirmedAt = 1;
+    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    const nav = screen.getByRole("navigation", { name: "Route van je dossier" });
+    const steps = nav.querySelectorAll("ol > li");
+    expect(steps).toHaveLength(5);
+    const current = screen.getByRole("link", { current: "step" });
+    expect(current).toHaveTextContent("Stap 3 van 5: Vul aan met een tool");
+    expect(current).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}`);
+    expect(screen.getByRole("link", { name: /Stap 1 van 5: Kader/ })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/framework`,
+    );
+    expect(screen.queryByText(/Laatste stap/)).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("names the export and the interview practice at the last step", async () => {
+    const d = sampleDossier();
+    d.framework.confirmedAt = 1;
+    d.evidence[0].criterionIds = [C1, C2];
+    const data = {
+      ...overviewData(d),
+      practise: { slug: "difficult-conversation", name: "Lastig gesprek oefenen" },
+    };
+    const { container } = renderRoute(PortfolioOverview, data);
+    expect(screen.getByRole("link", { current: "step" })).toHaveTextContent("Rond af");
+    expect(screen.getByText(/Laatste stap/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Oefen het eindgesprek met Lastig gesprek oefenen" }),
+    ).toHaveAttribute("href", "/tools/difficult-conversation");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio evidence suggestions", () => {
+  it("offers earlier work per criterion with checkboxes, nothing ticked", async () => {
+    const data = {
+      ...outcomeData(),
+      suggestions: {
+        [C2]: [
+          {
+            generationId: "g1",
+            toolName: "Les voorbereiden",
+            createdAt: Date.UTC(2026, 10, 1),
+            courses: ["Statistiek 1"],
+          },
+        ],
+      },
+    };
+    const { container } = renderRoute(PortfolioOutcome, data);
+    const group = screen.getByRole("group", { name: /Dit heb je misschien al/ });
+    const box = screen.getByRole("checkbox", { name: /Les voorbereiden.*bij Statistiek 1/ });
+    expect(box).not.toBeChecked();
+    expect(box).toHaveAttribute("name", "generationIds");
+    expect(group.closest("form")?.querySelector('input[name="criterionId"]')).toHaveValue(C2);
+    expect(screen.getByRole("button", { name: "Zet bij criterium 2" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows nothing without suggestions", () => {
+    renderRoute(PortfolioOutcome, outcomeData());
+    expect(screen.queryByText("Dit heb je misschien al")).toBeNull();
   });
 });
 
@@ -197,9 +279,10 @@ describe("Portfolio — which tool helps now", () => {
       chapterTools: [{ slug: "dialogic-encounters", name: "Dialogic Encounters" }],
     });
     const tool = screen.getByRole("link", { name: "Open Les of cursus ontwerpen" });
-    expect(tool).toHaveAttribute("href", "/tools/guided-reflection");
+    // P27.2: the tool opens for this criterion, so its result can go straight back.
+    expect(tool).toHaveAttribute("href", `/tools/guided-reflection?dossier=${ID}&criterion=${C2}`);
     expect(screen.getByText(/Backward Design/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Toevoegen aan dossier/).length).toBe(1);
+    expect(screen.getAllByText(/Zet bij dit criterium/).length).toBe(1);
     expect(screen.getByRole("link", { name: "Open Dialogic Encounters" })).toHaveAttribute(
       "href",
       "/tools/dialogic-encounters",

@@ -218,3 +218,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   AI-tools; P26.3 (OER-import) direct na P20. Een beheerder blijft op de gebruikerslijst landen. De
   BDB/BKE-werkplaats staat per docent aan of uit, standaard uit; de beheerder zet hem aan (wie al
   een dossier heeft, staat aan). Bastiaan, 2026-11-05. Uitwerking: brief P27.
+- **BESLUIT-2026-11-05-5:** **Teams: privé tenzij gedeeld, teamleiders, aan/uit per team.** Alles
+  van een docent blijft privé tot hij een cursus, rubric of onderwijscontext deelt met een team;
+  teamleden bekijken en kopiëren, alleen de eigenaar bewerkt. Het BDB/BKE-dossier, ingevulde rubrics,
+  chats en werk van tools die studentwerk verwerken zijn nooit deelbaar. Een docent mag in meer
+  teams. Beheerders en teamleiders beheren een team; een teamleider kan een ander lid teamleider
+  maken. Onderdelen, tools en modellen gaan aan of uit in drie lagen (instelling, team, uitzondering
+  per docent); de BDB/BKE-schakelaar per docent uit P27.2 wordt daarin de uitzondering per docent,
+  en P28.1–28.3 komen vóór P27.3. Privacy: akkoord zonder extra toets. Bastiaan, 2026-11-05.
+  Uitwerking: brief P28.
+- **BESLUIT-2026-11-05-6:** **Een beheerder heeft de BDB/BKE-werkplaats altijd**, los van de
+  schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).

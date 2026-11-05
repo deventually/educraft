@@ -4,6 +4,8 @@ import type { Route } from "./+types/portfolio.$id";
 import { availableToolNames, loadDossier, saveIntent } from "~/server/portfolio.server";
 import { criterionHints } from "~/lib/portfolio/toolHints";
 import { ToolHints } from "~/components/portfolio/ToolHints";
+import { dossierStep } from "~/lib/portfolio/step";
+import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { nextStep, outcomeProgress, requirementFindings } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
@@ -16,22 +18,39 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.name ?? "BDB/BKE"} — LimeOnIt` }];
 }
 
+/** Step 5 of the route points at practising the final interview. */
+const PRACTISE_TOOL = "difficult-conversation";
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
   const next = nextStep(d);
+  const names = await availableToolNames(request, user);
   let nextTools: { slug: string; name: string }[] = [];
   if (next.step === "add-evidence") {
     const outcome = d.framework.outcomes.find((o) => o.id === next.outcomeId);
     const criterion = outcome?.criteria.find((c) => c.id === next.criterionId);
     if (outcome && criterion) {
-      const names = await availableToolNames(request, user);
       nextTools = criterionHints(outcome, criterion, new Set(names.keys())).map((slug) => ({
         slug,
         name: names.get(slug) ?? slug,
       }));
     }
   }
+  // The five-step route: each step links to where you do it.
+  const base = `/portfolio/${dossier.id}`;
+  const outcomeId = "outcomeId" in next ? next.outcomeId : d.framework.outcomes[0]?.id;
+  const work = outcomeId ? `${base}/outcome/${outcomeId}` : `${base}/framework`;
+  const routeLinks = {
+    framework: `${base}/framework`,
+    collect: work,
+    fill: work,
+    write: work,
+    finish: "#export",
+  };
+  const practise = names.has(PRACTISE_TOOL)
+    ? { slug: PRACTISE_TOOL, name: names.get(PRACTISE_TOOL) ?? PRACTISE_TOOL }
+    : null;
   return {
     id: dossier.id,
     name: dossier.name,
@@ -40,6 +59,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     findings: requirementFindings(d),
     next,
     nextTools,
+    step: dossierStep(d),
+    routeLinks,
+    practise,
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -75,6 +97,9 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     aiUsed,
     aiRequired,
     nextTools,
+    step: routeStep,
+    routeLinks,
+    practise,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -124,6 +149,8 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         {name}
       </h1>
 
+      <DossierRoute current={routeStep} links={routeLinks} practise={practise} />
+
       <Card className="mt-6 border-violet-200 bg-violet-50 p-5">
         <h2 className="text-sm font-medium uppercase tracking-wide text-violet-800">
           {t.portfolio.nextStepTitle}
@@ -137,7 +164,16 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             {t.portfolio.goThere}
           </Link>
         )}
-        <ToolHints hints={nextTools} step="evidence" className="mt-3 bg-white" />
+        <ToolHints
+          hints={nextTools}
+          step="evidence"
+          from={
+            next.step === "add-evidence"
+              ? { dossierId: id, criterionId: next.criterionId }
+              : undefined
+          }
+          className="mt-3 bg-white"
+        />
       </Card>
 
       <p className="mt-6 text-sm text-slate-600">
@@ -154,6 +190,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
 
       {/* Word export (25.6): a plain GET form, works without JS. */}
       <form
+        id="export"
         method="get"
         action={`/portfolio/${id}/export`}
         className="mt-4 flex flex-wrap items-center gap-3"

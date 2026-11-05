@@ -15,16 +15,22 @@ export interface ToolHintView {
 export function ToolHints({
   hints,
   step,
+  from,
   className = "",
 }: {
   hints: ToolHintView[];
   step: HintStep;
+  /** P27.2: the tool opens for this criterion and its result can go straight back. */
+  from?: { dossierId: string; criterionId: string };
   className?: string;
 }) {
   const t = useT();
   const tt = t.portfolio.tools;
   if (hints.length === 0) return null;
   const how = tt.how as Record<string, string>;
+  const query = from
+    ? `?${new URLSearchParams({ dossier: from.dossierId, criterion: from.criterionId })}`
+    : "";
   return (
     <div className={`rounded-xl bg-slate-50 p-3 text-sm ${className}`}>
       <p className="font-medium text-slate-900">
@@ -34,7 +40,7 @@ export function ToolHints({
         {hints.map((h) => (
           <li key={h.slug} className="text-slate-700">
             <Link
-              to={`/tools/${h.slug}`}
+              to={`/tools/${h.slug}${query}`}
               className="font-medium text-violet-700 underline underline-offset-2"
             >
               {fmt(tt.open, { tool: h.name })}

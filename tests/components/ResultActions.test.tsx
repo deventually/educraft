@@ -81,3 +81,30 @@ describe("ResultActions (P27.1)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("ResultActions from a dossier criterion (P27.2)", () => {
+  const forCriterion = {
+    dossierId: "d1",
+    dossierName: "Mijn BDB",
+    outcomeId: "o1",
+    criterionId: "k1",
+    criterionText: "De les heeft een heldere structuur",
+  };
+
+  it("offers one button that puts the result at that criterion", async () => {
+    const { container } = show({ forCriterion });
+    const button = screen.getByRole("button", { name: "Zet bij dit criterium" });
+    const form = button.closest("form");
+    expect(form?.querySelector('input[name="intent"]')).toHaveValue("addToDossier");
+    expect(form?.querySelector('input[name="id"]')).toHaveValue("gen-1");
+    expect(form?.querySelector('input[name="dossierId"]')).toHaveValue("d1");
+    expect(form?.querySelector('input[name="criterionId"]')).toHaveValue("k1");
+    expect(screen.queryByLabelText("Dossier en criterium")).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers nothing before the result is saved", () => {
+    show({ forCriterion, generationId: null });
+    expect(screen.queryByRole("button", { name: "Zet bij dit criterium" })).toBeNull();
+  });
+});

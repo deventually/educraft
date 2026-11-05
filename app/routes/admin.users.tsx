@@ -16,6 +16,7 @@ import {
   listUsers,
   revokeInvite,
   setUserAssignedModels,
+  setPortfolioEnabled,
   setUserDisabled,
   setUserRole,
   updateUserEmail,
@@ -28,6 +29,7 @@ import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label, Select } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { CreateAccountForm, type CreateAccountResult } from "~/components/admin/CreateAccountForm";
@@ -93,13 +95,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     users
       .filter((u) => u.role === "teacher")
       .map(async (u) => {
-        const own = await getUserAssignedModels(u.id);
+        const [own, portfolio] = await Promise.all([
+          getUserAssignedModels(u.id),
+          portfolioAccess(u),
+        ]);
         return {
           id: u.id,
           name: u.name,
           email: u.email,
           mode: own ? ("own" as const) : ("inherit" as const),
           models: own ? [...own] : instanceIds,
+          portfolio,
         };
       }),
   );
@@ -171,6 +177,15 @@ export async function action({ request }: Route.ActionArgs) {
     } else {
       await setUserAssignedModels(userId, null);
     }
+    return { saved: true as const };
+  }
+
+  // ── BDB/BKE workplace per teacher (P27): on or off, nothing is deleted ────
+  if (intent === "portfolioAccess") {
+    const userId = String(fd.get("userId") ?? "");
+    const target = await getUserById(userId);
+    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
+    await setPortfolioEnabled(userId, fd.get("enabled") === "1");
     return { saved: true as const };
   }
 
@@ -654,6 +669,47 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* ── BDB/BKE workplace per teacher (P27): autosaving checkbox ───────── */}
+      <section>
+        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
+          {t.admin.portfolio.heading}
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">{t.admin.portfolio.intro}</p>
+        {teachers.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-500">{t.admin.models.teacherNone}</p>
+        ) : (
+          <ul className="mt-4 max-w-xl list-none space-y-2 p-0">
+            {teachers.map((teacher) => (
+              <li key={teacher.id}>
+                <AutoSaveForm
+                  intent="portfolioAccess"
+                  hidden={{ userId: teacher.id }}
+                  errorMessage={autoSaveError}
+                  className="flex items-center gap-2.5"
+                >
+                  <input
+                    type="checkbox"
+                    id={`portfolio-${teacher.id}`}
+                    name="enabled"
+                    value="1"
+                    defaultChecked={teacher.portfolio}
+                    className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
+                  />
+                  <label
+                    htmlFor={`portfolio-${teacher.id}`}
+                    className="text-sm font-medium text-slate-800"
+                  >
+                    {fmt(t.admin.portfolio.label, {
+                      name: teacher.name ?? teacher.email ?? teacher.id,
+                    })}
+                  </label>
+                </AutoSaveForm>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* ── Models per teacher (P18): follow the instance, or an own set ───── */}

@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20 af, P26.3 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Nu
 
+- **BDB/BKE doet mee (P27.2, #88) gemerged op 2026-11-05:** "Dit heb je misschien al" (eerder werk
+  als bewijs voorstellen), de route in vijf stappen bovenaan het dossier, de BDB/BKE-schakelaar per
+  docent en de weg terug van criterium naar tool en weer terug.
 - **Cursussen, de documentatie (P20.5, #86) gemerged op 2026-11-05:** alinea in `AGENTS.md`, wiki
   en README. Daarmee is P20 af.
 - **Cursussen koppelen (P20.4, #84) gemerged op 2026-11-05:** bovenaan tien toolpagina's een
@@ -123,12 +126,16 @@ _Laatst bijgewerkt: 2026-11-05 (P20 af, P26.3 bezig)_
   "voor de BDB/BKE functie zoveel mogelijk integratie van de tools en wellicht ook een aparte
   workflow" en "alle drie aanbieden?" → document "LimeOnIt als één workflow", BESLUIT-2026-11-05-4,
   brief P27.
+- 2026-11-05: "Ik vind dat het gebruikersmanagement in beheer veel beter kan … teams kunnen aanmaken
+  van meerdere collega docenten … per team features aan en uit" → document "Teams, privacy en
+  gebruikersbeheer", BESLUIT-2026-11-05-5, brief P28.
 
 ## Bezig
 
 - P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
   voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
   (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
+- Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
@@ -149,8 +156,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
 3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
-   BDB/BKE doet mee), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
-   (de docentweek, op Start), dan de rest van **P26** (BESLUIT-2026-11-05-4).
+   BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
+   (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
 
 ## Open vragen
 
