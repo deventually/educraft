@@ -21,7 +21,7 @@ import { COACH_INPUT_LIMITS, citesUnknownSource, quoteInChapter } from "./coach"
 import { wordCount } from "./progress";
 import type { DossierData } from "./types";
 
-export const REHEARSAL_PROMPT_ID = "portfolio-rehearsal@v1";
+export const REHEARSAL_PROMPT_ID = "portfolio-rehearsal@v2";
 
 /** What the app sends first: the committee answers with its opening and first question. */
 export const REHEARSAL_START: Record<Locale, string> = {
