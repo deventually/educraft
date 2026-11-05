@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { buildReviewMessage, courseKeys } from "~/lib/agents/input";
 import { checkAlignment } from "~/lib/courses/alignment";
-import { ACT1, ACT2, LO1, LO2, QUIZ, TEST1, alignedCourse } from "../courses/fixtures";
+import {
+  ACT1,
+  ACT2,
+  LO1,
+  LO2,
+  QUIZ,
+  TEST1,
+  alignedCourse,
+  itemizedCourse,
+} from "../courses/fixtures";
 
 describe("courseKeys (P21.1)", () => {
   it("maps short keys to real item ids, in course order", () => {
@@ -26,6 +35,11 @@ describe("buildReviewMessage", () => {
     expect(msg).toMatch(/T2[^\n]*L1 \(create\)/);
     expect(msg).not.toContain(LO1);
     expect(msg).not.toContain(TEST1);
+  });
+
+  it("shows the coverage that follows from the questions (P26.1)", () => {
+    const msg = buildReviewMessage({ course: itemizedCourse(), alignment: [], rejected: [] }, "en");
+    expect(msg).toMatch(/T2[^\n]*L1 \(create\), L2 \(understand\)/);
   });
 
   it("includes the study load when set", () => {

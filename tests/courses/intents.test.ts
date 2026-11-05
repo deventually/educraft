@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyCourseIntent } from "~/lib/courses/intents";
 import { emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
-import { ACT1, alignedCourse, LO1, LO2, QUIZ, TEST1 } from "./fixtures";
+import { ACT1, alignedCourse, itemizedCourse, LO1, LO2, QUIZ, TEST1 } from "./fixtures";
 
 function form(fields: Record<string, string | string[]>): FormData {
   const fd = new FormData();
@@ -125,5 +125,76 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
         form({ intent: "update-activity", id: "x", title: "a", kind: "lesson" }),
       ),
     ).toEqual({ ok: false, error: "not-found" });
+  });
+
+  it("adds, updates and removes a question of the matrix (P26.1)", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-item",
+      assessmentId: TEST1,
+      label: " 1a ",
+      outcomeId: LO1,
+      bloom: "create",
+      format: "open",
+      points: "2,5",
+    });
+    const item = d.assessments[1].items![0];
+    expect(item).toMatchObject({
+      label: "1a",
+      outcomeId: LO1,
+      bloom: "create",
+      format: "open",
+      points: 2.5,
+    });
+    d = ok(d, {
+      intent: "update-item",
+      assessmentId: TEST1,
+      id: item.id,
+      label: "2",
+      outcomeId: LO2,
+      bloom: "",
+      format: "",
+      points: "",
+    });
+    expect(d.assessments[1].items).toEqual([{ id: item.id, label: "2", outcomeId: LO2 }]);
+    d = ok(d, { intent: "remove-item", assessmentId: TEST1, id: item.id });
+    expect(d.assessments[1].items).toEqual([]);
+  });
+
+  it("add-item numbers the question when the label is left empty", () => {
+    const d = ok(itemizedCourse(), {
+      intent: "add-item",
+      assessmentId: TEST1,
+      label: "",
+      outcomeId: LO2,
+    });
+    expect(d.assessments[1].items!.at(-1)).toMatchObject({ label: "5", outcomeId: LO2 });
+  });
+
+  it("refuses an invalid question and reports unknown ones as not-found", () => {
+    const bad = (f: Record<string, string>) => applyCourseIntent(itemizedCourse(), form(f));
+    const add = { intent: "add-item", assessmentId: TEST1, label: "1", outcomeId: LO1 };
+    expect(bad({ ...add, outcomeId: "ghost" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ ...add, points: "1001" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ ...add, format: "essay" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ ...add, label: "x".repeat(21) })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ ...add, assessmentId: "nope" })).toEqual({ ok: false, error: "not-found" });
+    expect(bad({ intent: "remove-item", assessmentId: TEST1, id: "nope" })).toEqual({
+      ok: false,
+      error: "not-found",
+    });
+    expect(
+      bad({ intent: "update-item", assessmentId: TEST1, id: "q-1", label: "", outcomeId: LO1 }),
+    ).toEqual({ ok: false, error: "invalid" });
+  });
+
+  it("update-assessment keeps the hand-set coverage of an assessment with questions", () => {
+    const d = ok(itemizedCourse(), {
+      intent: "update-assessment",
+      id: TEST1,
+      title: "Eindtoets",
+      kind: "summative",
+    });
+    expect(d.assessments[1].coverage).toEqual(itemizedCourse().assessments[1].coverage);
+    expect(d.assessments[1].items).toHaveLength(4);
   });
 });

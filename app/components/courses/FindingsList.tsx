@@ -28,6 +28,9 @@ export function FindingsList({
   };
   const item = (itemId?: string) =>
     [...data.activities, ...data.assessments].find((x) => x.id === itemId)?.title ?? "";
+  const question = (itemId?: string, questionId?: string) =>
+    data.assessments.find((a) => a.id === itemId)?.items?.find((q) => q.id === questionId)?.label ??
+    "";
 
   return (
     <section aria-labelledby={id}>
@@ -41,7 +44,7 @@ export function FindingsList({
         <ul className="mt-3 space-y-2">
           {findings.map((finding) => (
             <li
-              key={`${finding.code}-${finding.outcomeId ?? ""}-${finding.itemId ?? ""}`}
+              key={`${finding.code}-${finding.outcomeId ?? ""}-${finding.itemId ?? ""}-${finding.questionId ?? ""}`}
               className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-800"
             >
               {finding.severity === "warning" ? (
@@ -54,6 +57,7 @@ export function FindingsList({
                 {fmt(f.codes[finding.code], {
                   outcome: outcome(finding.outcomeId),
                   item: item(finding.itemId),
+                  question: question(finding.itemId, finding.questionId),
                   hours: plannedHours(data),
                   budget: (data.ec ?? 0) * HOURS_PER_EC,
                 })}

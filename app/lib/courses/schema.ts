@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { BLOOM_LEVELS } from "./bloom";
-import { ACTIVITY_KINDS, ASSESSMENT_KINDS, type CourseData, HOURS_PER_EC } from "./types";
+import {
+  ACTIVITY_KINDS,
+  ASSESSMENT_KINDS,
+  ITEM_FORMATS,
+  type CourseData,
+  HOURS_PER_EC,
+} from "./types";
 
 /** Boundary limits for a course (brief P20, "Het model"). */
 export const COURSE_LIMITS = {
@@ -12,6 +18,9 @@ export const COURSE_LIMITS = {
   assessments: 30,
   week: 60,
   ec: 60,
+  items: 200,
+  itemLabel: 20,
+  points: 1_000,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
@@ -37,6 +46,15 @@ const ActivitySchema = z.object({
   hours: Hours.optional(),
 });
 
+const ItemSchema = z.object({
+  id: Id,
+  label: z.string().min(1).max(COURSE_LIMITS.itemLabel),
+  outcomeId: Id,
+  bloom: Bloom.optional(),
+  format: z.enum(ITEM_FORMATS).optional(),
+  points: z.number().min(0).max(COURSE_LIMITS.points).optional(),
+});
+
 const AssessmentSchema = z.object({
   id: Id,
   title: z.string().min(1).max(COURSE_LIMITS.title),
@@ -47,6 +65,7 @@ const AssessmentSchema = z.object({
     .array(z.object({ outcomeId: Id, bloom: Bloom.optional() }))
     .max(COURSE_LIMITS.outcomes),
   hours: Hours.optional(),
+  items: z.array(ItemSchema).max(COURSE_LIMITS.items).optional(),
 });
 
 export const CourseDataSchema = z
@@ -59,7 +78,8 @@ export const CourseDataSchema = z
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: unique ids, no dangling references.
     const seen = new Set<string>();
-    for (const item of [...d.outcomes, ...d.activities, ...d.assessments]) {
+    const questions = d.assessments.flatMap((a) => a.items ?? []);
+    for (const item of [...d.outcomes, ...d.activities, ...d.assessments, ...questions]) {
       if (seen.has(item.id)) ctx.addIssue({ code: "custom", message: `Duplicate id: ${item.id}` });
       seen.add(item.id);
     }
@@ -67,6 +87,7 @@ export const CourseDataSchema = z
     const refs = [
       ...d.activities.flatMap((a) => a.outcomeIds),
       ...d.assessments.flatMap((a) => a.coverage.map((c) => c.outcomeId)),
+      ...questions.map((q) => q.outcomeId),
     ];
     for (const ref of refs)
       if (!outcomeIds.has(ref))

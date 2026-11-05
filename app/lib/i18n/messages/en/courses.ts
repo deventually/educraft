@@ -40,8 +40,13 @@ export const courses: Messages["courses"] = {
       "activity-without-outcome": "{item} serves no learning outcome.",
       "assessed-before-taught": "{item} assesses {outcome} before it is taught.",
       "bloom-below-outcome": "{item} assesses {outcome} below the level of the learning outcome.",
+      "item-bloom-below-outcome":
+        "Question {question} of {item} assesses {outcome} below the level of the learning outcome.",
+      "items-without-points": "In {item}, not every question has points.",
       "outcome-not-assessed": "{outcome} is not assessed in any summative assessment.",
       "outcome-not-taught": "{outcome} is not taught in any teaching activity.",
+      "outcome-single-item":
+        "{item} assesses {outcome} with only one question. That is a narrow basis for a judgement.",
       "study-load-exceeds-ec":
         "The planned hours exceed the study load: {hours} of {budget} hours.",
       "weights-not-100": "The weights of the summative assessments do not add up to 100%.",
@@ -98,6 +103,29 @@ export const courses: Messages["courses"] = {
   },
   intro:
     "Record the learning outcomes, lessons and assessments of each course. You see at once what is not yet taught or assessed.",
+  items: {
+    actions: "Actions",
+    add: "Add question",
+    addTitle: "New question",
+    bloom: "Thinking level",
+    caption: "Test blueprint: {assessment}",
+    count: "{n} questions",
+    countOne: "1 question",
+    coverageFromItems:
+      "Coverage follows from the test blueprint. Change the learning outcome per question there.",
+    empty: "No questions yet. Add them to see which learning outcome each question assesses.",
+    fieldOf: "{field} of question {label}",
+    format: "Question type",
+    formatNone: "No question type",
+    formats: { "multiple-choice": "Multiple choice", open: "Open question", other: "Other" },
+    label: "Question",
+    labelHint: "Leave empty for the next number.",
+    points: "Points",
+    question: "question {label}",
+    summary: "Test blueprint ({n})",
+    total: "Total",
+    totalLine: "{count}, {points} points",
+  },
   kind: "Kind",
   links: {
     empty: "Nothing linked yet. Pick this course in a tool, or link work from My work.",
