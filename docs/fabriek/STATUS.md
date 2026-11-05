@@ -95,12 +95,11 @@ _Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
   in een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die
   vastloopt, en geeft op "Geef feedback" feedback met letterlijke citaten van de docent. Slecht
   nieuws volgt SPIKES (Baile e.a., 2000, gecontroleerd); de rest algemene gesprekstechniek. Vijf
-  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Meting dc1 (1 run, batch):
-  4,20–4,80, geen harde check gefaald, niets afgekapt; zwakste punt vetgedrukte labels in de
-  feedback. Ronde 1 (gewone opsommingstekens, genderneutraal ook in non-verbale aanwijzingen), meting
-  dc2 (3 runs): vier cases 4,60–4,80, maar student-stuck 2,80: de student verbeterde zich hardop
-  ("Oeps, ik had genderneutraal moeten blijven"). Ronde 2 draait die regel terug (regressieregel
-  BESLUIT-2026-11-04-24); de opsommingstekens blijven. Eindmeting dc3 volgt — PR open.
+  eval-casussen van acht beurten plus feedback, twee met een bekende fout. Metingen dc1 → dc2 → dc3:
+  ronde 1 (gewone opsommingstekens) hielp, de extra genderregel voor gebaren gaf regressie en is in
+  ronde 2 teruggedraaid. Eindmeting dc3 (3 runs, batch): elke case 4,60–4,93, geen gefaalde harde
+  check (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-05dc3.md`). Tien
+  uitkomsten liggen klaar in `evals/reviews/difficult-conversation/` voor Bastiaan — PR open.
 
 ## Wacht op jou
 
