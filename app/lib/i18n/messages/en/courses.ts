@@ -54,6 +54,48 @@ export const courses: Messages["courses"] = {
   heading: "Courses",
   help: "How does this work?",
   hours: "Hours",
+  import: {
+    addTo: "Add to the course",
+    apply: "Add the chosen items",
+    assessmentN: "Assessment {n}",
+    assessmentsTitle: "Assessments",
+    bloom: "Bloom level (AI proposal)",
+    body: "Paste the text of the course catalogue (OER) or study guide, or choose the file. The AI prepares the learning outcomes and assessments as a proposal; you choose what goes into the course.",
+    check: "Check this: this text is not verbatim in the document.",
+    clipped: "The document had more than fits in a course; the rest was left out.",
+    courseName: "Name of the course in the document",
+    courseNameHint:
+      "Does the document describe several courses? Then the AI looks for this one only.",
+    covers: "Which learning outcomes does this assessment assess?",
+    done: "Added: {outcomes} learning outcome(s) and {assessments} assessment(s).",
+    errors: {
+      "empty-document": "Paste the text of the document first.",
+      failed:
+        "The learning outcomes and assessments could not be taken from the document. Try again, or enter them by hand.",
+      limit:
+        "That does not fit in one course (at most 30 learning outcomes and 30 assessments). Tick fewer.",
+      quota: "Daily limit reached; try again tomorrow.",
+    },
+    existing: "Already in your course; it is not added twice and not changed.",
+    extract: "Make a proposal",
+    file: "Or choose the file (PDF or Word)",
+    fileFailed: "This file could not be read. Paste the text yourself instead.",
+    fileHelp:
+      "The file is read on your computer and not stored. Only the text goes to the AI model.",
+    notes: "Notes from the AI",
+    outcomeN: "Learning outcome {n}",
+    outcomesTitle: "Learning outcomes",
+    pending: "Reading the document…",
+    proposalIntro:
+      "Tick what goes into the course and edit the text where needed. Whatever is not verbatim in the document is unticked.",
+    proposalTitle: "Proposal",
+    ready: "Proposal ready. Choose what goes into the course.",
+    readyCheck:
+      "Proposal ready. Not verbatim in the document: {n} learning outcome(s). Check them.",
+    text: "Text of the document",
+    title: "Import from a course catalogue or study guide",
+    weightsOff: "The weights in the document do not add up to 100%. LimeOnIt does not change them.",
+  },
   intro:
     "Record the learning outcomes, lessons and assessments of each course. You see at once what is not yet taught or assessed.",
   kind: "Kind",

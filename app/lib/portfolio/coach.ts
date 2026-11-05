@@ -11,7 +11,7 @@
  *   dropped.
  */
 import { z } from "zod";
-import { extractJson } from "~/lib/ai/extractJson";
+import { extractJson } from "~/lib/ai/structuredAnswer";
 import { COACH_LIMITS } from "./schema";
 import type { CoachReview, CriterionReview, DossierData, Outcome } from "./types";
 import { VERDICTS } from "./types";

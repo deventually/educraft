@@ -1,7 +1,8 @@
 /**
- * The one model call of the BDB/BKE workplace (coach, draft, framework
- * extraction): the user's selectable default model, the quota gate, usage
- * accounting and a log line. Never throws; `null` = no usable call.
+ * The one structured model call outside the tool stream (BDB/BKE coach, draft,
+ * framework extraction; the course import of P26.3): the user's selectable
+ * default model, the quota gate, usage accounting and a log line. Never throws;
+ * `null` = no usable call.
  */
 import { providerForModel } from "~/lib/ai/provider";
 import { DEFAULT_MODEL } from "~/lib/ai/models";

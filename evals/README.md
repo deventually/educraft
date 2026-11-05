@@ -146,3 +146,17 @@ npm run eval:coach -- --dry-run                                 # build messages
 `cases.json`). The report (`evals/reports/<date>-portfolio-coach.md`) names only their case
 ids and scores. `tests/lib/eval-coach.test.ts` fails when a file name from that folder shows
 up under `evals/`.
+
+## OER-import (`npm run eval:import`)
+
+De import van leeruitkomsten en toetsen (brief P26, 26.3) is geen registry-tool en heeft een eigen
+runner, `scripts/eval-import.ts`. Hij draait de echte prompt `course-import@v1` en de echte controle
+(`app/lib/courses/import.ts`) op `evals/course-import/cases.json`: zelf geschreven, fictieve
+fragmenten van een OER of studiehandleiding. De score is **deterministisch** (geen beoordelaar):
+geldig JSON, niets verzonnen, alles letterlijk. Zie `evals/course-import/rubric.md`.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:import                  # elke case één keer
+ANTHROPIC_API_KEY=sk-… npm run eval:import -- --repeat 3    # eindmeting
+npm run eval:import -- --dry-run                            # alleen de berichten bouwen
+```

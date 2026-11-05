@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (brief P28 Teams in een PR)_
+_Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Nu
 
+- **BDB/BKE doet mee (P27.2, #88) gemerged op 2026-11-05:** "Dit heb je misschien al" (eerder werk
+  als bewijs voorstellen), de route in vijf stappen bovenaan het dossier, de BDB/BKE-schakelaar per
+  docent en de weg terug van criterium naar tool en weer terug.
+- **Cursussen, de documentatie (P20.5, #86) gemerged op 2026-11-05:** alinea in `AGENTS.md`, wiki
+  en README. Daarmee is P20 af.
 - **Cursussen koppelen (P20.4, #84) gemerged op 2026-11-05:** bovenaan tien toolpagina's een
   cursuskiezer die de leeruitkomsten invult en het resultaat aan de cursus koppelt; koppelen op
   "Mijn werk"; "Gekoppeld werk" op de cursuspagina.
@@ -127,13 +132,10 @@ _Laatst bijgewerkt: 2026-11-05 (brief P28 Teams in een PR)_
 
 ## Bezig
 
-- P27.2 BDB/BKE doet mee: "Dit heb je misschien al" (eerder werk als bewijs voorstellen), de route
-  in vijf stappen bovenaan het dossier en de BDB/BKE-schakelaar per docent (uit 27.3 naar voren) zijn
-  klaar, net als de weg terug: vanuit een criterium open je de tool en zet je het resultaat met één
-  knop bij dat criterium. PR open.
+- P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
+  voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
+  (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
-- P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
-  (architectuur en roadmap) en de README. Daarna is P20 af. PR open.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
