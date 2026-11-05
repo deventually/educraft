@@ -53,16 +53,18 @@ beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
   teacherCookie = await cookieFor("teacher");
 
-  const [layout, index, tools, usersRoute, context, usage, person, teamsRoute] = await Promise.all([
-    import("~/routes/admin"),
-    import("~/routes/admin._index"),
-    import("~/routes/admin.tools"),
-    import("~/routes/admin.users"),
-    import("~/routes/admin.context"),
-    import("~/routes/admin.usage"),
-    import("~/routes/admin.users.$id"),
-    import("~/routes/admin.teams"),
-  ]);
+  const [layout, index, tools, usersRoute, context, usage, person, teamsRoute, team] =
+    await Promise.all([
+      import("~/routes/admin"),
+      import("~/routes/admin._index"),
+      import("~/routes/admin.tools"),
+      import("~/routes/admin.users"),
+      import("~/routes/admin.context"),
+      import("~/routes/admin.usage"),
+      import("~/routes/admin.users.$id"),
+      import("~/routes/admin.teams"),
+      import("~/routes/admin.teams.$id"),
+    ]);
   const g = (name: string, fn: unknown) => ({ name, fn: fn as Guarded["fn"] });
   guarded = [
     g("admin layout loader", layout.loader),
@@ -78,6 +80,8 @@ beforeAll(async () => {
     g("admin.users.$id action", person.action),
     g("admin.teams loader", teamsRoute.loader),
     g("admin.teams action", teamsRoute.action),
+    g("admin.teams.$id loader", team.loader),
+    g("admin.teams.$id action", team.action),
   ];
 });
 

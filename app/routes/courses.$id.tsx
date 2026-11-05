@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
-import { blueprintOffer, loadCourse, saveCourseIntent } from "~/server/courses.server";
+import { blueprintOffer, coursePack, loadCourse, saveCourseIntent } from "~/server/courses.server";
 import { dossierTargets } from "~/server/courseEvidence.server";
 import { loadReviewPanel } from "~/server/agentReview.server";
 import { listProfiles } from "~/server/repositories/profiles.server";
@@ -59,6 +59,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     linkedWork,
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
+    pack: await coursePack(user.id, course),
   };
 }
 
@@ -108,6 +109,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     linkedWork = [],
     dossiers = [],
     review = null,
+    pack,
   } = loaderData;
   const { data } = course;
 
@@ -147,7 +149,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         />
         <FindingsList data={data} findings={findings} />
         {review && <CourseReviewPanel data={data} {...review} />}
-        <OutcomesSection data={data} />
+        <OutcomesSection data={data} pack={pack} />
         <ActivitiesSection data={data} />
         <AssessmentsSection data={data} />
         <CoverageMatrix data={data} matrix={matrix} />

@@ -31,10 +31,23 @@ const Hours = z
   .min(0)
   .max(COURSE_LIMITS.ec * HOURS_PER_EC);
 
+/** Shape only: which keys and options are allowed comes from the pack (`packTags.ts`). */
+const PackTagsSchema = z
+  .record(
+    z.string().min(1).max(60),
+    z.union([
+      z.string().min(1).max(200),
+      z.array(z.string().min(1).max(200)).max(30),
+      z.number().int().min(0).max(10),
+    ]),
+  )
+  .refine((tags) => Object.keys(tags).length <= 20);
+
 const OutcomeSchema = z.object({
   id: Id,
   text: z.string().min(1).max(COURSE_LIMITS.text),
   bloom: Bloom.optional(),
+  packTags: PackTagsSchema.optional(),
 });
 
 const ActivitySchema = z.object({
