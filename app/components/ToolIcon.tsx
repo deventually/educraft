@@ -10,6 +10,7 @@ import {
   Brain,
   GraduationCap,
   BookOpen,
+  CalendarClock,
   Users,
   UsersRound,
   Wrench,
@@ -35,7 +36,11 @@ const ICONS: Record<string, LucideIcon> = {
   "users-round": UsersRound,
   calculator: Calculator,
   table: Table2,
+  "calendar-clock": CalendarClock,
 };
+
+/** The icon names a tool may use (`Tool.icon`). */
+export const TOOL_ICON_NAMES: readonly string[] = Object.keys(ICONS);
 
 export function ToolIcon({ name, className }: { name?: string; className?: string }) {
   const Icon = (name && ICONS[name]) || Wrench;

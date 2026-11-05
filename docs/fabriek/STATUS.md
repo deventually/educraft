@@ -81,6 +81,12 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
+  contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
+  optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
+  bekende fout (te veel stof, ontbrekende voorkennis, vaag leerdoel). Metingen lp1 → lp2 → lp3
+  (lp2 en lp3: 3 runs, batch): elke case 4,53–5,00, geen gefaalde harde check, niets afgekapt, geen
+  regressie (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet; `evals/reports/2026-11-04lp3.md`) — PR open.
 - P24.3 Toetsvragen en toetsmatrijs maken (`test-items`): in twee stappen een toetsmatrijs die
   optelt (leeruitkomst × denkniveau, vraagvorm, aantal vragen, punten) en de vragen volgens die
   matrijs, met antwoordmodel en bij meerkeuze de reden waarom elke afleider fout is. Bronnen:

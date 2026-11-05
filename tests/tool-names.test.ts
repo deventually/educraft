@@ -49,6 +49,7 @@ describe("task-first tool names (P19.1)", () => {
         "dialogic-encounters",
         "forum-autograder",
         "guided-reflection",
+        "lesson-plan",
         "math-grading",
         "mentorai",
         "peer-tutoring",

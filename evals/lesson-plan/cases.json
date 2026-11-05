@@ -1,0 +1,165 @@
+{
+  "cases": [
+    {
+      "id": "share-valuation-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo bachelor, year 2), 90 minutes, 28 students, in person. The teacher has a fixed part: the first 5 minutes are announcements. The time plan must include that row and add up to exactly 90. The worked examples must use the Gordon growth model correctly (P0 = D1 / (r - g), with r > g) and the expected answers must be arithmetically right. The check for understanding must be answered by all students, with a decision point.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Finance & Control — jaar 2",
+        "programme": "Finance & Control",
+        "domain": "Economie en management",
+        "courseName": "Ondernemingsfinanciering",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Controller of financieel adviseur in het mkb"
+      },
+      "values": {
+        "learningGoal": "De student berekent met het dividendgroeimodel van Gordon de intrinsieke waarde van een aandeel en beoordeelt of het aandeel op de beurs over- of ondergewaardeerd is.",
+        "content": "Het dividendgroeimodel van Gordon (constante dividendgroei), het verschil tussen D0 en D1, de voorwaarde dat het vereiste rendement hoger is dan de groei, en de vergelijking van de intrinsieke waarde met de beurskoers.",
+        "priorKnowledge": "Contante waarde, vereist rendement en dividend zijn vorige week behandeld.",
+        "duration": "90",
+        "groupSize": "28",
+        "deliveryMode": "in-person",
+        "constraints": "De eerste 5 minuten zijn mededelingen van de opleiding."
+      }
+    },
+    {
+      "id": "sql-query-mbo4-eqf4",
+      "description": "Ordinary case at EQF 4 (mbo-4), 50 minutes, 26 students, in person, no constraints. The steps must be small and concrete for mbo-4 students, the SQL examples must be correct (WHERE before ORDER BY, correct syntax), and the expected results must match the example table. The time plan must add up to exactly 50; at 50 minutes no break is proposed.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Software Developer, niveau 4",
+        "programme": "Software Developer",
+        "domain": "ICT",
+        "courseName": "Databases",
+        "eqf": 4,
+        "studyYear": 1,
+        "professionalContext": "Junior developer in een softwarebedrijf"
+      },
+      "values": {
+        "learningGoal": "De student schrijft een SQL-query met SELECT, WHERE en ORDER BY die de gevraagde rijen uit één tabel ophaalt in de gevraagde volgorde.",
+        "content": "SELECT met kolomnamen, WHERE met =, > en AND, en ORDER BY oplopend en aflopend, op een voorbeeldtabel met klanten.",
+        "priorKnowledge": "De studenten weten wat een tabel, een rij en een kolom is, en hebben al SELECT * FROM gebruikt.",
+        "duration": "50",
+        "groupSize": "26",
+        "deliveryMode": "in-person",
+        "constraints": ""
+      }
+    },
+    {
+      "id": "effect-size-online-en-eqf7",
+      "description": "Ordinary case in English at EQF 7 (master), a live online lesson of 60 minutes with 14 students. The activities must work online: all students answer at once (chat, poll or shared document), not one student called on, and during independent practice in breakout groups the teacher visits the groups. The worked example of Cohen's d must be correct (difference in means divided by the (pooled) standard deviation). The time plan must add up to exactly 60. The table must use the English layout (Phase | Minutes …).",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "MSc Educational Sciences — year 1",
+        "programme": "MSc Educational Sciences",
+        "domain": "Education",
+        "courseName": "Quantitative Research Methods",
+        "eqf": 7,
+        "studyYear": 1,
+        "professionalContext": "Educational researcher or policy adviser"
+      },
+      "values": {
+        "learningGoal": "The student interprets an effect size (Cohen's d) reported in an empirical study in education and explains its practical meaning for a school.",
+        "content": "Calculating Cohen's d from two group means and a standard deviation, common rules of thumb for small, medium and large effects and their limits, and translating an effect size into practical terms for a school.",
+        "priorKnowledge": "Students know means, standard deviations and the logic of a t-test.",
+        "duration": "60",
+        "groupSize": "14",
+        "deliveryMode": "online",
+        "constraints": ""
+      }
+    },
+    {
+      "id": "lecture-conditioning-eqf6",
+      "description": "Ordinary case at EQF 6 (hbo year 1), a lecture of 120 minutes for 220 students in person. Circulating and looking at everyone's work is impossible at this size: the check for understanding must use a way in which all students answer at once (voting tool, cards, hands with options), pairs can compare answers, and the plan says honestly what the teacher cannot see. With 120 minutes and no break given, the tool proposes a break, marked as a proposal, and the time plan still adds up to exactly 120.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Toegepaste Psychologie — jaar 1",
+        "programme": "Toegepaste Psychologie",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Leren en gedrag",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Toegepast psycholoog in zorg, onderwijs of bedrijf"
+      },
+      "values": {
+        "learningGoal": "De student legt met een eigen voorbeeld uit de praktijk uit wat het verschil is tussen klassiek en operant conditioneren.",
+        "content": "Klassiek conditioneren (Pavlov: ongeconditioneerde en geconditioneerde prikkel en respons) en operant conditioneren (Skinner: bekrachtiging en straf, positief en negatief).",
+        "priorKnowledge": "",
+        "duration": "120",
+        "groupSize": "220",
+        "deliveryMode": "in-person",
+        "constraints": "Hoorcollege in een collegezaal met vaste stoelen."
+      }
+    },
+    {
+      "id": "too-much-content-known-error-eqf5",
+      "description": "KNOWN ERROR: the content is far too much for a lesson of 45 minutes: five different budgets and analyses, each with a worked example. The tool must say under the 'Note first' heading that the content does not fit, choose the part that serves the learning goal (the cash budget) as a proposal, and name what moves to later lessons, instead of cramming all five into 45 minutes. The time plan must add up to exactly 45 and keep real time for practice.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Associate degree Ondernemen — jaar 1",
+        "programme": "Associate degree Ondernemen",
+        "domain": "Economie en management",
+        "courseName": "Financieel management voor ondernemers",
+        "eqf": 5,
+        "studyYear": 1,
+        "professionalContext": "Ondernemer of leidinggevende in een kleine onderneming"
+      },
+      "values": {
+        "learningGoal": "De student stelt een liquiditeitsbegroting per maand op voor een kleine onderneming en wijst de maanden aan waarin een tekort ontstaat.",
+        "content": "De liquiditeitsbegroting, de exploitatiebegroting, de investeringsbegroting, de openingsbalans en de break-evenanalyse, elk met een uitgewerkt voorbeeld.",
+        "priorKnowledge": "De studenten kennen het verschil tussen ontvangsten en opbrengsten.",
+        "duration": "45",
+        "groupSize": "20",
+        "deliveryMode": "in-person",
+        "constraints": ""
+      }
+    },
+    {
+      "id": "missing-prerequisite-known-error-eqf6",
+      "description": "KNOWN ERROR: the goal asks for a simple linear regression in SPSS and interpreting the coefficient, but the stated prior knowledge says the students have had no statistics yet and only know means and percentages: correlation, scatterplots and standard deviation are missing, and so is working in SPSS. The tool must name this under 'Note first' and either plan the missing knowledge as a short explanation if it fits, or propose making the goal for this lesson smaller; it must not silently assume the knowledge. Hybrid lesson of 90 minutes with 30 students: every activity must work for students in the room and online, with one answer channel for everyone. The time plan must add up to exactly 90.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Sociaal Werk — jaar 2",
+        "programme": "Sociaal Werk",
+        "domain": "Gedrag en maatschappij",
+        "courseName": "Praktijkgericht onderzoek",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Sociaal werker die eigen praktijkonderzoek doet"
+      },
+      "values": {
+        "learningGoal": "De student voert in SPSS een enkelvoudige lineaire regressieanalyse uit en interpreteert de regressiecoëfficiënt in gewone taal.",
+        "content": "Enkelvoudige lineaire regressie: de regressielijn, de regressiecoëfficiënt en de verklaarde variantie, uitgevoerd in SPSS op een dataset over werkdruk en ziekteverzuim.",
+        "priorKnowledge": "De studenten hebben nog geen statistiek gehad. Ze kennen alleen het gemiddelde en percentages, en hebben SPSS nog niet gebruikt.",
+        "duration": "90",
+        "groupSize": "30",
+        "deliveryMode": "hybrid",
+        "constraints": "Ongeveer tien studenten volgen de les online."
+      }
+    },
+    {
+      "id": "vague-goal-known-error-eqf4",
+      "description": "KNOWN ERROR: the learning goal has no observable verb ('begrijpt het belang van'), so a check for understanding cannot measure it. The tool must name this under 'Note first', give one sharper goal with an observable verb marked as a proposal, build the lesson on that proposal and say the teacher can adjust the goal in the form. Ordinary otherwise: mbo, 60 minutes, 18 students, in a practical kitchen; the time plan must add up to exactly 60.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Kok, niveau 3",
+        "programme": "Zelfstandig werkend kok",
+        "domain": "Horeca en voeding",
+        "courseName": "Hygiëne en voedselveiligheid",
+        "eqf": 3,
+        "studyYear": 1,
+        "professionalContext": "Kok in een restaurant of grootkeuken"
+      },
+      "values": {
+        "learningGoal": "De student begrijpt het belang van hygiëne in de keuken.",
+        "content": "Kruisbesmetting, de temperatuurzones voor bewaren (koelen, invriezen, warmhouden) en persoonlijke hygiëne volgens de hygiënecode voor de horeca.",
+        "priorKnowledge": "",
+        "duration": "60",
+        "groupSize": "18",
+        "deliveryMode": "in-person",
+        "constraints": "De les is in de praktijkkeuken; er is een whiteboard maar geen beamer."
+      }
+    }
+  ]
+}
