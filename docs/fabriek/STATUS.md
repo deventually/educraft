@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P21.1, P21.2 en brief P27 gemerged, P20.4 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
 
 ## Nu
 
+- **Cursussen koppelen (P20.4, #84) gemerged op 2026-11-05:** bovenaan tien toolpagina's een
+  cursuskiezer die de leeruitkomsten invult en het resultaat aan de cursus koppelt; koppelen op
+  "Mijn werk"; "Gekoppeld werk" op de cursuspagina.
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
   thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
   menu van vier (BESLUIT-2026-11-05-4).
@@ -121,9 +124,8 @@ _Laatst bijgewerkt: 2026-11-05 (P21.1, P21.2 en brief P27 gemerged, P20.4 bezig)
 
 ## Bezig
 
-- P20.4 Cursussen koppelen: op tien toolpagina's een cursuskiezer die de leeruitkomsten invult en
-  het resultaat aan de cursus koppelt; op "Mijn werk" werk koppelen en ontkoppelen, met een
-  cursusbadge; op de cursuspagina "Gekoppeld werk". Daarna 20.5 (documentatie). PR open.
+- P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
+  (architectuur en roadmap) en de README. Daarna is P20 af. PR open.
 
 ## Wacht op jou
 

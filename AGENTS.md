@@ -82,7 +82,17 @@ English slugs, never shown.
   List queries are capped (`Math.min(limit ?? 50, 500)`).
 - A schema change ships with a migration (`npm run db:generate`), applied with `npm run db:migrate`.
 
-### Access invariants
+### Courses & alignment (P20)
+Details: [Architecture](wiki/Architecture.md#feature-modules).
+- A course is one JSON graph per course (`CourseDataSchema`, `app/lib/courses/`): outcomes with an
+  optional Bloom level, activities, assessments with coverage, optional EC. The schema is not
+  `.strict()`, so later phases add optional fields without a migration.
+- `checkAlignment` and `coverageMatrix` are pure and advisory: they report, never change the
+  course, and use no AI.
+- A tool reaches a course only through data: `InputField.prefillFromCourse`. No per-tool course code.
+- Links are owner-checked in the repository: `linkGeneration` returns `null` for anything that is
+  not the caller's. The stream logs a refused link and still saves the generation.
+
 Details: [Authentication](wiki/Authentication.md), model availability in
 [Architecture](wiki/Architecture.md#providers-model-agnostic).
 - Roles are `teacher | admin`. `"student"` survives only as tool data (`Tool.userType`), never as

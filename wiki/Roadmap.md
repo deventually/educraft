@@ -16,21 +16,21 @@ lives in the [README](../README.md).
 - Documents read in the browser, a document viewer, and anonymisation before sending.
 - The BDB/BKE workplace (`/portfolio`) with a coach and Word export.
 - Utilities without AI: the grade calculator and saved rubrics.
+- Courses and the alignment spine (P20): learning outcomes, activities and assessments with Bloom
+  and study load, a coverage matrix and advisory checks, and work from the tools linked to a course.
 
 ## Next (proposed order)
 
 The live order is on the board ([`docs/fabriek/STATUS.md`](../docs/fabriek/STATUS.md)); briefs
 live in [`docs/implementation/`](../docs/implementation/README.md).
 
-1. **Eight new AI tools** (brief P24): after the baseline measurement, one PR per tool with a
-   measurable quality bar.
-2. **Utilities without AI, part 3** (brief P23): fill in a rubric in batches.
-3. **Simplification V3** (brief P19): the teacher side — no audience labels, technique behind
-   "Advanced", empty pages that guide, a clearer menu and a short context form.
-4. **BDB/BKE workplace follow-up** (brief P25): framework extraction, imports from assessment
-   tools, the BKE parts with the P23/P24 tools.
-5. **Courses and the alignment spine** (brief P20).
-6. **Role agents** (brief P21), then the **teacher week** (brief P22).
+The teacher-assistant track builds on the course from P20:
+
+1. **Courses further** (brief P26): an assessment blueprint per question, outcomes imported from a
+   course guide, the course as BDB/BKE evidence.
+2. **One workflow** (brief P27): a next step under every result, BDB/BKE joining in, a Start page.
+3. **Role agents** (brief P21): two "hats" review a course on request.
+4. **The teacher week** (brief P22): planning and weekly briefings.
 
 ## Later (parked on purpose)
 
