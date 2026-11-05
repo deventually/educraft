@@ -1,0 +1,28 @@
+export const portfolioRehearsal = {
+  allOutcomes: "All learning outcomes",
+  back: "Back to your portfolio",
+  caption: "Feedback per criterion",
+  columns: { criterion: "Criterion", heard: "What we heard", quote: "Your words", tip: "Tip" },
+  errorUnreadable: 'The feedback could not be read. Type "Wrap up" again to try once more.',
+  intro:
+    'A simulated committee of two assessors has read your portfolio and asks one question at a time. Type or click "Wrap up" at any moment for feedback per criterion. It is practice, not a judgement. The conversation is not saved; the feedback only if you want it.',
+  keep: "Keep in your portfolio",
+  kept: "The feedback is now an evidence item in your portfolio.",
+  keptLink: "View your portfolio",
+  length: "How long?",
+  lengths: {
+    full: "Full: about 12 questions, like a 30-minute final interview",
+    short: "Short: about 6 questions, about 15 minutes",
+  },
+  making: "Making the feedback…",
+  noCriteria: "Your framework has no criteria yet. Confirm your framework first.",
+  noQuote: "—",
+  notAJudgement: "Practice, not a judgement: the real committee may judge differently.",
+  outcomes: "Which learning outcomes?",
+  outcomesHint: "All by default. Choose fewer for a shorter, more focused conversation.",
+  pickOne: "Choose at least one learning outcome.",
+  start: "Start the conversation",
+  summary: "Summary",
+  title: "Practise your final interview",
+  updateChapter: "Update this in your chapter",
+};

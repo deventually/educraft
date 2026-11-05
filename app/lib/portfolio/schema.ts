@@ -127,8 +127,8 @@ export const DossierDataSchema = z
       .array(
         z.object({
           at: z.number().int().nonnegative(),
-          action: z.enum(["review", "draft"]),
-          outcomeId: Id,
+          action: z.enum(["review", "draft", "rehearsal"]),
+          outcomeId: Id.optional(),
           model: z.string().max(200),
         }),
       )

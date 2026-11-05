@@ -25,6 +25,7 @@ import { people } from "./people";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioReadiness } from "./portfolioReadiness";
+import { portfolioRehearsal } from "./portfolioRehearsal";
 import { privacy } from "./privacy";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
@@ -69,6 +70,7 @@ export const en: Messages = {
   portfolio,
   portfolioExport,
   portfolioReadiness,
+  portfolioRehearsal,
   privacy,
   projects,
   resultActions,

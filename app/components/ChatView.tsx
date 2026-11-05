@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Send, Square, RotateCcw, Pencil } from "lucide-react";
 import { Link } from "react-router";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
@@ -15,6 +15,7 @@ import { initialPickerModel, pickableModels, type PickerModel } from "~/lib/ai/m
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
+import type { FormValues } from "~/lib/forms/values";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
 import { AiNotice } from "./AiNotice";
@@ -46,6 +47,23 @@ interface ChatViewProps {
   initialItemId?: string;
   /** Next steps and places to keep the conversation (P27.1). */
   resultContext?: ResultContext;
+  /**
+   * Values chosen on the page itself (P29.3): the setup card is skipped and these
+   * are sent with every turn.
+   */
+  values?: FormValues;
+  /** What the settings aside shows instead of the summary of `tool.inputs`. */
+  settingsSummary?: { name: string; label: string; value: string }[];
+  /** Extra fields for /api/stream, e.g. `{ dossierId }` (P29.3). */
+  streamExtras?: Record<string, unknown>;
+  /**
+   * Renders an answer itself (e.g. the rehearsal feedback as a table); `undefined`
+   * falls back to Markdown. Gets the user's own turns for checks on quotes.
+   */
+  renderAssistant?: (
+    content: string,
+    ctx: { streaming: boolean; userTurns: string[]; model: string },
+  ) => ReactNode | undefined;
 }
 
 export function ChatView({
@@ -60,19 +78,24 @@ export function ChatView({
   initialCourseId,
   initialItemId,
   resultContext,
+  values: presetValues,
+  settingsSummary,
+  streamExtras,
+  renderAssistant,
 }: ChatViewProps) {
   const t = useT();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
   const {
-    values: sandboxValues,
+    values: ownValues,
     setValue: setSandboxValue,
     courseId,
     selectCourse,
     itemId,
   } = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
-  const [sandboxSubmitted, setSandboxSubmitted] = useState(false);
+  const sandboxValues = presetValues ?? ownValues;
+  const [sandboxSubmitted, setSandboxSubmitted] = useState(!!presetValues);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -195,6 +218,7 @@ export function ChatView({
           sessionId: sessionIdRef.current,
           courseId: courseId || undefined,
           itemId: (courseId && itemId) || undefined,
+          ...streamExtras,
         },
         {
           onToken: (token: string) => {
@@ -281,7 +305,9 @@ export function ChatView({
   const isEmpty = turns.length === 0;
   // What the user entered in the one-time sandbox, shown so the chat makes clear
   // which settings (e.g. which theorist) it's running with.
-  const sandboxSummary = summarizeSandbox(tool.inputs, sandboxValues, locale);
+  const sandboxSummary = settingsSummary ?? summarizeSandbox(tool.inputs, sandboxValues, locale);
+  const userTurns = turns.filter((x) => x.role === "user").map((x) => x.content);
+  const quickReplies = tool.chat?.quickReplies ?? [];
 
   return (
     // Two-pane chat. On a wide screen it's a fixed-height layout: the aside sits
@@ -314,7 +340,7 @@ export function ChatView({
           </dl>
         )}
 
-        {tool.inputs.length > 0 && (
+        {tool.inputs.length > 0 && !presetValues && (
           <button
             type="button"
             onClick={() => setSandboxSubmitted(false)}
@@ -439,7 +465,7 @@ export function ChatView({
             </div>
           ) : (
             <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
-              {turns.map((turn) =>
+              {turns.map((turn, i) =>
                 turn.role === "user" ? (
                   <div key={turn.id} className="flex justify-end">
                     <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-violet-600 px-4 py-2.5 text-sm leading-relaxed text-white">
@@ -453,7 +479,11 @@ export function ChatView({
                     </span>
                     <div className="min-w-0 flex-1 text-sm text-slate-800">
                       {turn.content ? (
-                        <Markdown>{turn.content}</Markdown>
+                        (renderAssistant?.(turn.content, {
+                          streaming: isStreaming && i === turns.length - 1,
+                          userTurns,
+                          model: selectedModel,
+                        }) ?? <Markdown>{turn.content}</Markdown>)
                       ) : (
                         <span className="italic text-slate-500">
                           {turn.interrupted ? (
@@ -490,6 +520,22 @@ export function ChatView({
           <div className="mx-auto w-full max-w-3xl">
             {/* Persistent AI-transparency notice above the composer. */}
             <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="mb-2" />
+            {/* Fixed replies (P29.3), once the conversation runs: real buttons, so the
+                keyboard reaches them as well as the composer. */}
+            {!isEmpty && !isStreaming && quickReplies.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {quickReplies.map((reply) => (
+                  <button
+                    key={loc(reply, outputLanguage)}
+                    type="button"
+                    onClick={() => sendMessage(loc(reply, outputLanguage))}
+                    className="rounded-full border border-violet-300 bg-white px-4 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                  >
+                    {loc(reply, outputLanguage)}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-violet-500 focus-within:ring-1 focus-within:ring-violet-500">
               <textarea
                 ref={inputRef}

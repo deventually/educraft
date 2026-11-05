@@ -16,8 +16,8 @@ export function DossierRoute({
 }: {
   current: DossierStep;
   links: Record<DossierStep, string>;
-  /** The "Lastig gesprek oefenen" tool, when it is available to this teacher. */
-  practise?: { slug: string; name: string } | null;
+  /** The rehearsal assessment of this dossier (P29.3). */
+  practise?: string | null;
 }) {
   const t = useT();
   const tr = t.portfolio.route;
@@ -67,10 +67,10 @@ export function DossierRoute({
           {tr.finishHint}{" "}
           {practise && (
             <Link
-              to={`/tools/${practise.slug}`}
+              to={practise}
               className="font-medium text-violet-700 underline underline-offset-2"
             >
-              {fmt(tr.practise, { tool: practise.name })}
+              {tr.practise}
             </Link>
           )}
         </p>

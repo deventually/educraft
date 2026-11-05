@@ -24,6 +24,10 @@ import { createRateLimiter } from "~/server/rateLimit.server";
 import { env } from "~/server/env.server";
 import { log } from "~/server/log.server";
 import { checkQuota, recordUsage } from "~/server/repositories/usage.server";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
+import { getDossier } from "~/server/repositories/portfolio.server";
+import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
+import { dossierPromptValues } from "~/lib/portfolio/rehearsal";
 
 // Boundaries: every value is length/count-capped so a hostile body can never
 // balloon the prompt (and thus the owner's token bill) or exhaust memory.
@@ -81,7 +85,19 @@ const StreamBodySchema = z.object({
   /** The lesson or test of that course (P27.4); an unknown item refuses the link. */
   itemId: z.string().max(100).nullish(),
   images: z.array(ImageInputSchema).max(10).optional(),
+  /** The caller's own dossier, for a tool with `contextFrom: "dossier"` (P29.3). */
+  dossierId: z.string().max(100).optional(),
 });
+
+/**
+ * May this user drive this tool? A catalogue tool follows tool availability; a tool
+ * that takes its context from the dossier follows the BDB/BKE workplace (P28.3).
+ */
+async function mayUse(user: { id: string; role: string }, tool: Tool): Promise<boolean> {
+  if (tool.contextFrom === "dossier")
+    return !getInvalidToolSlugs().has(tool.slug) && (await portfolioAccess(user));
+  return isToolAvailable(user, tool);
+}
 
 // Process-local abuse limits. Single-instance deployment makes in-memory state
 // sound (see rateLimit.server). One map for the whole process.
@@ -155,7 +171,7 @@ export async function action({ request }: Route.ActionArgs) {
     // Effective-availability gate (server-side, not just UI): a disabled tool or a
     // tool outside a narrowed teacher's allow-list can't be driven via a
     // hand-crafted POST.
-    if (!(await isToolAvailable(user, tool))) {
+    if (!(await mayUse(user, tool))) {
       return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
     }
     const capError = fieldCapError(tool, body.values ?? {});
@@ -179,7 +195,15 @@ export async function action({ request }: Route.ActionArgs) {
       tool.usesContextProfile && body.contextProfileId
         ? await getProfile(user.id, body.contextProfileId)
         : null;
-    const values = body.values ?? {};
+    // A dossier tool (P29.3): the material comes from the caller's own dossier, built
+    // here; of the body only the teacher's choices count. A foreign or unknown dossier
+    // is refused like a disabled tool.
+    let values = body.values ?? {};
+    if (tool.contextFrom === "dossier") {
+      const dossier = body.dossierId ? await getDossier(user.id, body.dossierId) : null;
+      if (!dossier) return new Response(sseError(m.error.notAllowed), { headers: SSE_HEADERS });
+      values = dossierPromptValues(dossier.data, values, outputLanguage);
+    }
 
     const system = buildSystemPrompt({
       promptId: stage.systemPromptId,
@@ -309,6 +333,8 @@ export async function action({ request }: Route.ActionArgs) {
           durationMs: Date.now() - startedAt,
           chars: full.length,
         });
+        // Not every conversation is kept (P29.3: only the feedback, on request).
+        if (tool.storesConversation === false) return;
         try {
           const sessionId =
             tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";

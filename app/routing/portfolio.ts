@@ -10,6 +10,8 @@ export const portfolio: RouteArea = {
       route(":id", "routes/portfolio.$id.tsx"),
       route(":id/framework", "routes/portfolio.$id.framework.tsx"),
       route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
+      // 29.3: the rehearsal assessment, from step 5 only.
+      route(":id/rehearsal", "routes/portfolio.$id.rehearsal.tsx"),
     ]),
   ],
   // Resource route (no UI) — a dossier as a Word (.docx) download (P25.6).

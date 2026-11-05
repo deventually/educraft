@@ -95,8 +95,9 @@ export interface Reference {
 
 export interface AiLogEntry {
   at: number;
-  action: "review" | "draft";
-  outcomeId: string;
+  /** "rehearsal" (P29.3): written when the teacher keeps rehearsal feedback; no outcome. */
+  action: "review" | "draft" | "rehearsal";
+  outcomeId?: string;
   model: string;
 }
 

@@ -12,7 +12,7 @@
  * are consumed by `availability.server` so an invalid tool disappears from every
  * listing and the stream refuses it.
  */
-import { ALL_TOOLS } from "./index";
+import { ALL_TOOLS, WORKPLACE_TOOLS } from "./index";
 import { validateTools, type ValidationIssue } from "./validate";
 import type { Tool } from "./types";
 import { log } from "~/server/log.server";
@@ -61,7 +61,7 @@ let cached: RegistryValidationResult | null = null;
 export function ensureRegistryValidated(): RegistryValidationResult {
   if (!cached) {
     const throwOnInvalid = process.env.NODE_ENV !== "production";
-    cached = validateRegistry(ALL_TOOLS, { throwOnInvalid });
+    cached = validateRegistry([...ALL_TOOLS, ...WORKPLACE_TOOLS], { throwOnInvalid });
     // The feature register (P28.3) is data too: the same dev-fails-fast rule.
     // So is "Los op met…" (P27.4): every finding points to a known tool.
     const featureIssues = [

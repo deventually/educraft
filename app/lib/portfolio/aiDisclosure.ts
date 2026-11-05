@@ -25,6 +25,8 @@ const TEXT = {
       "Bij het schrijven van dit verslag heb ik {models} gebruikt via LimeOnIt, als coach: het gaf feedback op mijn hoofdstukken aan de hand van de criteria van het beoordelingsformulier.",
     draft:
       "Bij {outcomes} liet ik een eerste versie van een alinea opstellen, met mijn eigen bewijs als enige bron. Die tekst heb ik daarna zelf bewerkt.",
+    rehearsal:
+      "Ter voorbereiding op het eindgesprek oefende ik met een proefassessment in LimeOnIt: {models} speelde een assessmentcommissie. Dat leverde geen tekst op; de feedback staat als bewijsstuk in dit dossier.",
     close:
       "De keuzes, de inhoud en de eindtekst zijn van mij; ik heb de feedback zelf afgewogen. De verantwoordelijkheid voor de tekst ligt bij mij.",
     and: " en ",
@@ -34,6 +36,8 @@ const TEXT = {
       "While writing this report I used {models} through LimeOnIt as a coach: it gave feedback on my chapters against the criteria of the assessment form.",
     draft:
       "For {outcomes} I had a first version of a paragraph drafted, with my own evidence as the only source. I then edited that text myself.",
+    rehearsal:
+      "To prepare for the final interview I practised with a rehearsal assessment in LimeOnIt: {models} played an assessment committee. It produced no text; the feedback is an evidence item in this portfolio.",
     close:
       "The choices, the content and the final text are mine; I weighed the feedback myself. I am responsible for the text.",
     and: " and ",
@@ -50,19 +54,22 @@ export function aiDisclosure(d: DossierData, locale: Locale): string | null {
   if (d.aiLog.length === 0) return null;
   const t = TEXT[locale];
   const models = [...new Set(d.aiLog.map((e) => e.model))].map(modelName);
+  const namesOf = (entries: typeof d.aiLog) =>
+    list(
+      [...new Set(entries.map((e) => e.model))].map((id) => modelName(id).name),
+      t.and,
+    );
+  const writing = d.aiLog.filter((e) => e.action !== "rehearsal");
+  const rehearsals = d.aiLog.filter((e) => e.action === "rehearsal");
   const drafted = [...new Set(d.aiLog.filter((e) => e.action === "draft").map((e) => e.outcomeId))]
     .map((id) => d.framework.outcomes.find((o) => o.id === id))
     .flatMap((o) => (o ? [[o.code, o.title].filter(Boolean).join(" ")] : []));
   const year = new Date(Math.max(...d.aiLog.map((e) => e.at))).getUTCFullYear();
 
+  // A rehearsal (P29.3) made no text, so it is named apart from the help with writing.
   const paragraph = [
-    t.review.replace(
-      "{models}",
-      list(
-        models.map((m) => m.name),
-        t.and,
-      ),
-    ),
+    writing.length ? t.review.replace("{models}", namesOf(writing)) : null,
+    rehearsals.length ? t.rehearsal.replace("{models}", namesOf(rehearsals)) : null,
     drafted.length ? t.draft.replace("{outcomes}", list(drafted, t.and)) : null,
     t.close,
   ]

@@ -21,6 +21,7 @@ import { lessonPlan } from "./tools/lesson-plan";
 import { testAnalysis } from "./tools/test-analysis";
 import { differentiation } from "./tools/differentiation";
 import { difficultConversation } from "./tools/difficult-conversation";
+import { portfolioRehearsal } from "./tools/portfolio-rehearsal";
 
 /** All registered tools (any phase). */
 export const ALL_TOOLS: Tool[] = [
@@ -48,13 +49,19 @@ export const ALL_TOOLS: Tool[] = [
   difficultConversation,
 ];
 
+/**
+ * Tools of a workplace, outside the catalogue (P29.3): reached only from their own
+ * place, never listed, and not governed by tool availability but by their feature.
+ */
+export const WORKPLACE_TOOLS: Tool[] = [portfolioRehearsal];
+
 /** Tools visible/usable in the app right now. */
 export function getEnabledTools(): Tool[] {
   return ALL_TOOLS.filter((t) => t.enabled);
 }
 
 export function getToolBySlug(slug: string): Tool | undefined {
-  return ALL_TOOLS.find((t) => t.slug === slug);
+  return ALL_TOOLS.find((t) => t.slug === slug) ?? WORKPLACE_TOOLS.find((t) => t.slug === slug);
 }
 
 export function getToolBySlugOrThrow(slug: string): Tool {

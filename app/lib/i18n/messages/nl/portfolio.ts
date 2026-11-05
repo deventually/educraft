@@ -211,7 +211,7 @@ export const portfolio = {
     finishHint:
       "Laatste stap: zet elk criterium op aangetoond, kies of je de AI-verantwoording opneemt en download je dossier als Word-bestand.",
     label: "Route van je dossier",
-    practise: "Oefen het eindgesprek met {tool}",
+    practise: "Oefen je eindgesprek met een proefassessment",
     stepOf: "Stap {n} van 5",
     steps: {
       collect: "Verzamel wat je al hebt",

@@ -212,7 +212,7 @@ export const portfolio: Messages["portfolio"] = {
     finishHint:
       "Last step: mark each criterion as shown, choose whether to include the AI disclosure and download your dossier as a Word file.",
     label: "Your dossier's route",
-    practise: "Practise the final interview with {tool}",
+    practise: "Practise your final interview with a rehearsal assessment",
     stepOf: "Step {n} of 5",
     steps: {
       collect: "Collect what you already have",
