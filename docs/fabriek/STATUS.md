@@ -91,7 +91,7 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
   kwesties waarover vakmensen het oneens zijn. Eindmeting t (3 runs, batch): niets afgekapt,
   aantallen kloppen; research-methods 4,07 en statistics 4,47 door vorm (af en toe een
   correctiespoor in een kop, soms 3 opties). Ronde 3 gaf regressie (meting u) en is teruggedraaid;
-  de stand is die van t — PR open, wacht op Bastiaans besluit.
+  de stand is die van t. Bastiaan koos voor mergen in deze stand — PR open.
 
 ## Wacht op jou
 
@@ -115,6 +115,9 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
+- Toetsvragen, bekende punten: af en toe een correctiespoor in een kop van het antwoordmodel en
+  soms 3 opties bij statistiek. Oplossing in code (vaste rijtoewijzing per vraag), niet met
+  prompttekst; twee rondes prompttekst hielpen niet (metingen t en u).
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.
