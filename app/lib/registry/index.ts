@@ -15,6 +15,7 @@ import { peerTutoring } from "./tools/peer-tutoring";
 import { scaffoldingFeedback } from "./tools/scaffolding-feedback";
 import { stageAssessment } from "./tools/stage-assessment";
 import { rubricBuilder } from "./tools/rubric-builder";
+import { testItems } from "./tools/test-items";
 import { lessonPlan } from "./tools/lesson-plan";
 
 /** All registered tools (any phase). */
@@ -35,6 +36,7 @@ export const ALL_TOOLS: Tool[] = [
   scaffoldingFeedback,
   stageAssessment,
   rubricBuilder,
+  testItems,
   lessonPlan,
 ];
 
