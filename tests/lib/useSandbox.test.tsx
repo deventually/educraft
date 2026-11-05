@@ -93,3 +93,34 @@ describe("useSandbox", () => {
     });
   });
 });
+
+describe("useSandbox — a course from the link (P27.1)", () => {
+  const courseInputs: InputField[] = [
+    {
+      name: "outcomes",
+      label: { nl: "Leeruitkomsten", en: "Outcomes" },
+      kind: "textarea",
+      prefillFromCourse: { source: "learningOutcomes" },
+    },
+  ];
+  const courses = [
+    { id: "c1", contextProfileId: "p4", outcomes: [{ text: "Legt fotosynthese uit" }] },
+  ];
+
+  it("starts on the initial course: its outcomes filled in and its profile selected", () => {
+    const { result } = renderHook(() =>
+      useSandbox({ inputs: courseInputs, profiles, courses, initialCourseId: "c1" }),
+    );
+    expect(result.current.courseId).toBe("c1");
+    expect(result.current.values.outcomes).toBe("- Legt fotosynthese uit");
+    expect(result.current.contextProfileId).toBe("p4");
+  });
+
+  it("keeps a course id it has no outcomes for, so the result is still linked", () => {
+    const { result } = renderHook(() =>
+      useSandbox({ inputs, profiles, defaultProfileId: "p2", initialCourseId: "c9" }),
+    );
+    expect(result.current.courseId).toBe("c9");
+    expect(result.current.contextProfileId).toBe("p2");
+  });
+});

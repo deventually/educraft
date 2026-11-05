@@ -73,6 +73,7 @@ export const guidedReflection: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
+  next: ["lesson-plan", "authentic-assessment"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288,
   defaultTemperature: 0.4,

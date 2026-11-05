@@ -41,6 +41,7 @@ export const differentiation: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
+  next: ["clear-assignment"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288,
   defaultTemperature: 0.3,
