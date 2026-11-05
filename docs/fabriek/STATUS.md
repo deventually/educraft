@@ -10,6 +10,8 @@ _Laatst bijgewerkt: 2026-11-05 (bord opgeruimd: alles onder Bezig was gemerged; 
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
+- **Lijst plakken bij Toevoegen (P28.5, #127) gemerged op 2026-11-05:** per regel naam en e-mail,
+  een team kiezen, per persoon een uitnodigingslink of de reden van weigering.
 - **Dubbel blok "Aandachtspunten" weg uit het dossieroverzicht (#126) gemerged op 2026-11-05.**
 - **Opdracht helder schrijven, hooguit 8 open punten (`clear-assignment@v2`, #121) gemerged op
   2026-11-05:** meting ca3 elke case 4,53–5,00.
@@ -234,7 +236,7 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
    BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
    (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
-   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.4 en P28.5 lopen.
+   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.5 ook (#127); P28.4 loopt.
 
 ## Open vragen
 

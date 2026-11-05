@@ -1,6 +1,6 @@
 # Fase 28 — Teams, delen en efficiënt gebruikersbeheer
 
-> **Status:** 🟡 28.1–28.3 gemerged (#91, #93, #96), 28.4 PR open, 28.5 bezig. Rolagenten gaan
+> **Status:** 🟡 28.1–28.3 gemerged (#91, #93, #96), 28.5 gemerged (#127), 28.4 PR open. Rolagenten gaan
 > alleen voor de hele instelling aan of uit, niet per team (BESLUIT-2026-11-05-11). **Hing af van** P27.2 (#88, de BDB/BKE-schakelaar per
 > docent), en 28.1 t/m 28.3 komen **vóór P27.3**. Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
