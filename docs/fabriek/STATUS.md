@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.2 gemerged, P20.3 bezig)_
 
 ## Nu
 
+- **Brief P21 Rolagenten (#80) gemerged op 2026-11-05:** twee petten kijken een cursus na op
+  verzoek, met akkoord/niet akkoord (BESLUIT-2026-11-05-3); 21.1 kan starten.
+- **Cursussen, opslag (P20.2, #79) gemerged op 2026-11-05:** tabellen `courses` en `course_links`
+  (migratie 0014), per docent afgeschermd.
 - **Brief P26 Cursussen verder (#77) gemerged op 2026-11-05:** toetsmatrijs per vraag,
   OER-import en de cursus als bewijs in het BDB/BKE-dossier, na P20 (BESLUIT-2026-11-05-2).
 - **Cursussen, het rekenhart (P20.1, #78) gemerged op 2026-11-05:** cursusmodel met
@@ -102,13 +106,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
 
 ## Bezig
 
-- P20.2 Cursussen, opslag: de tabellen `courses` en `course_links` (migratie 0014) en de
-  repository, per docent afgeschermd; een generatie koppel je alleen aan een eigen cursus. Nog geen
-  scherm. Daarna 20.3 (pagina's) en 20.4 (koppelen en voorinvullen). PR open; na de merge
-  `npm run db:migrate`.
-- Brief P21 *Rolagenten*: twee petten kijken een cursus na op verzoek, akkoord/niet akkoord gelogd,
-  pakket-tags, gekoppelde toetsvragen optioneel mee. Keuzes gemaakt (BESLUIT-2026-11-05-3); wacht op
-  merge — PR open. P20.1 en 20.2 staan op `main`, dus 21.1 kan na deze merge starten.
+- P20.3 Cursussen, de pagina's: menu-item "Cursussen", een lijst met aanmaken en verwijderen, en
+  per cursus de gegevens met EC, leeruitkomsten, activiteiten, toetsen, de aandachtspunten en de
+  dekkingsmatrix. Werkt zonder JavaScript; axe-tests; screenshots NL/EN desktop en mobiel. Daarna
+  20.4 (koppelen en voorinvullen). PR open.
 
 ## Wacht op jou
 

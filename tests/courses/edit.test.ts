@@ -51,6 +51,11 @@ describe("course edits", () => {
     });
   });
 
+  it("removing an outcome keeps the course's EC", () => {
+    const d = edit.removeOutcome(edit.setStudyLoad(alignedCourse(), 5), LO1);
+    expect(d.ec).toBe(5);
+  });
+
   it("removing an outcome also removes every reference to it", () => {
     const d = edit.removeOutcome(alignedCourse(), LO2);
     expect(d.outcomes.map((o) => o.id)).toEqual([LO1]);

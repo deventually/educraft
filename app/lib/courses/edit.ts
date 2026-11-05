@@ -69,6 +69,7 @@ export function updateOutcome(
 export function removeOutcome(d: CourseData, id: string): CourseData {
   const next = structuredClone(d);
   return {
+    ...next,
     outcomes: without(next.outcomes, id),
     activities: next.activities.map((a) => ({
       ...a,
