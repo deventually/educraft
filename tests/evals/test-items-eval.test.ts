@@ -67,6 +67,8 @@ it("tells the judge the @v3 answer-model layout and the A–D line are the requi
   expect(flat).toContain('"#### Question n"');
   expect(flat).toContain("is the required format, not a deviation");
   expect(flat).toContain("a line under the table");
+  // Meting x2: the judge then wanted the row headings in the Questions section as well.
+  expect(flat).toContain("The Questions section is not grouped");
 });
 
 // Metingen p, r2, u and w: a correction inside an answer-model heading, always at the first

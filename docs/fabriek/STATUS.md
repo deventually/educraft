@@ -4,16 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (Wiskunde-foto gemerged; test-items@v3 open)_
+_Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
 - **Opgeruimd op 2026-11-05:** onder *Bezig* stonden nog twaalf PR's als "open" die al gemerged
   waren. Ze staan hieronder met hun nummer.
-- **Foto voor Wiskunde nakijken (#131) gemerged op 2026-11-05:** een echte telefoonfoto van
-  handgeschreven werk (zonder naam, EXIF/GPS verwijderd) staat als
-  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
-  plaats van 24x); verwacht ± 8/10. Nog te meten met `npm run eval -- --tool math-grading`.
 - **Rolagenten alleen voor de hele instelling (#132) gemerged op 2026-11-05:** een team kan de
   schakelaar *Rolagenten* niet meer zien of omzetten; een eerder bewaarde teamkeuze telt niet meer
   mee (BESLUIT-2026-11-05-11, keuze Bastiaan). Een uitzondering per docent door de beheerder
@@ -233,9 +229,15 @@ _Laatst bijgewerkt: 2026-11-05 (Wiskunde-foto gemerged; test-items@v3 open)_
   vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe rij soms de vorige
   rij mee ("Row R1 is not used; this is Row R2"): 7 keer in de oude metingen, 1 keer in meting w.
   Nieuwe getelde check `correctionInHeading` in de eval. Eindmeting x: geen enkele correctie in
-  een kopje meer, geen gefaalde check, niets afgekapt; gemiddeld 4,58 (w: 4,77), arithmetic 4,33.
-  De beoordelaar rekende in 4 runs de indeling per rij als vormfout aan; de rubric zegt nu dat die
-  indeling de gevraagde vorm is. PR open, beslissing Bastiaan.
+  een kopje meer, geen gefaalde check, niets afgekapt. Opnieuw beoordeeld als x2 met een
+  duidelijkere rubric: gemiddeld 4,67 (w: 4,77), vijf cases 4,53–4,87, create-with-mc 4,40.
+  Dezelfde antwoorden schommelen per beoordeling tot 0,4 (arithmetic 4,33 in x, 4,73 in x2).
+  PR open, beslissing Bastiaan.
+- Foto voor Wiskunde nakijken: een echte telefoonfoto van handgeschreven werk (Bastiaan,
+  2026-11-05, zonder naam, EXIF/GPS verwijderd) staat als
+  `evals/math-grading/fixtures/handwritten-derivative.png`, met één bewuste rekenfout (18x in
+  plaats van 24x). De case vertelt de beoordelaar dat foutje; verwacht ± 8/10. Nog te meten met
+  `npm run eval -- --tool math-grading`. PR open.
 
 ## Wacht op jou
 
