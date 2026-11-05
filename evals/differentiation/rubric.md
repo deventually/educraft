@@ -29,7 +29,9 @@ to use the variants in class. Score each shared criterion 1–5.
   support", "Base variant", "Variant with extra challenge", "How to use the variants", "Check of
   the variants". The first heading appears only when there is a problem in the input (a goal that
   is not observable, a task that misses the goal, a wish that would lower the goal); bullets under
-  it are fine. Each variant has one sentence for the teacher and then the student text under a
+  it are fine. When the input has none of these three problems, leaving the first heading out is
+  the required form and costs nothing: an empty group description, or a small change to the base
+  variant that the sentence for the teacher names, is not such a problem. Each variant has one sentence for the teacher and then the student text under a
   `###` heading with a neutral name (Route A/B/C), with expected answers for the teacher where
   there is one right answer. The exact closing sentence ("Dit is een concept. De docent kent de
   groep en past de varianten aan." / "This is a draft. The teacher knows the group and adapts the
