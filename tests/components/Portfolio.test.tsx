@@ -279,9 +279,10 @@ describe("Portfolio — which tool helps now", () => {
       chapterTools: [{ slug: "dialogic-encounters", name: "Dialogic Encounters" }],
     });
     const tool = screen.getByRole("link", { name: "Open Les of cursus ontwerpen" });
-    expect(tool).toHaveAttribute("href", "/tools/guided-reflection");
+    // P27.2: the tool opens for this criterion, so its result can go straight back.
+    expect(tool).toHaveAttribute("href", `/tools/guided-reflection?dossier=${ID}&criterion=${C2}`);
     expect(screen.getByText(/Backward Design/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Toevoegen aan dossier/).length).toBe(1);
+    expect(screen.getAllByText(/Zet bij dit criterium/).length).toBe(1);
     expect(screen.getByRole("link", { name: "Open Dialogic Encounters" })).toHaveAttribute(
       "href",
       "/tools/dialogic-encounters",

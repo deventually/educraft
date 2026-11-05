@@ -164,7 +164,16 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             {t.portfolio.goThere}
           </Link>
         )}
-        <ToolHints hints={nextTools} step="evidence" className="mt-3 bg-white" />
+        <ToolHints
+          hints={nextTools}
+          step="evidence"
+          from={
+            next.step === "add-evidence"
+              ? { dossierId: id, criterionId: next.criterionId }
+              : undefined
+          }
+          className="mt-3 bg-white"
+        />
       </Card>
 
       <p className="mt-6 text-sm text-slate-600">

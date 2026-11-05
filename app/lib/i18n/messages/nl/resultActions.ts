@@ -4,6 +4,7 @@ export const resultActions = {
   evidenceLabel: "Dossier en criterium",
   heading: "Verder met dit resultaat",
   next: "Volgende stap",
+  putAtCriterion: "Zet bij dit criterium",
   savedIn: "Bewaard bij {course}",
   saveToCourse: "Bewaar bij cursus",
   toastEvidence: "Toegevoegd aan je dossier.",

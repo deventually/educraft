@@ -126,7 +126,8 @@ _Laatst bijgewerkt: 2026-11-05 (P20.4 gemerged, P20.5 bezig)_
 
 - P27.2 BDB/BKE doet mee: "Dit heb je misschien al" (eerder werk als bewijs voorstellen), de route
   in vijf stappen bovenaan het dossier en de BDB/BKE-schakelaar per docent (uit 27.3 naar voren) zijn
-  klaar; na de merge van 27.1 volgt de weg terug van de tool naar het criterium. PR open.
+  klaar, net als de weg terug: vanuit een criterium open je de tool en zet je het resultaat met één
+  knop bij dat criterium. PR open.
 - P20.5 Cursussen, de documentatie: een korte alinea in `AGENTS.md` (akkoord Bastiaan), de wiki
   (architectuur en roadmap) en de README. Daarna is P20 af. PR open.
 

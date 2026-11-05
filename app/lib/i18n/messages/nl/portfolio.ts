@@ -3,6 +3,11 @@ export const portfolio = {
   addToDossierLabel: "Dossier",
   backToDossier: "Terug naar het dossier",
   backToList: "Alle dossiers",
+  bar: {
+    back: "Terug naar {dossier}",
+    for: "Voor je dossier:",
+    label: "Voor je dossier",
+  },
   coach: {
     alreadyShown: "Je hebt dit criterium als aangetoond gemarkeerd.",
     done: "De beoordeling staat klaar.",
@@ -264,8 +269,7 @@ export const portfolio = {
         "Schrijf toetsvragen met een toetsmatrijs die passen bij je leeruitkomsten. Vragen en matrijs laten je toetsontwerp zien.",
     },
     open: "Open {tool}",
-    saveHow:
-      "Wat je in de tool maakt, staat daarna bij Projecten. Kies daar “Toevoegen aan dossier” en koppel het hier aan het criterium.",
+    saveHow: "Klik na het maken op “Zet bij dit criterium”. Dan staat het hier als bewijs.",
     thinkHow: "Een gesprek helpt je denken, maar is geen bewijs en geen bron.",
     title: "Hulp uit LimeOnIt",
   },

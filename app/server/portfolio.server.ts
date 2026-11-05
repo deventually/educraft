@@ -16,8 +16,9 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { getAvailableTools } from "./availability.server";
 import { loc } from "~/lib/i18n/localized";
 import type { DossierData } from "~/lib/portfolio/types";
-import { adoptGenerations, suggestEvidence } from "~/lib/portfolio/suggest";
-import { getGeneration, listGenerations } from "./repositories/generations.server";
+import { suggestEvidence } from "~/lib/portfolio/suggest";
+import { listGenerations } from "./repositories/generations.server";
+import { addGenerationToDossier } from "./evidence.server";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
 
@@ -129,29 +130,18 @@ export async function saveIntent(
   }
 
   if (intent === "adoptSuggestions") {
-    // Owner-scoped: someone else's generation is simply not found.
-    const ids = fd.getAll("generationIds").map(String).slice(0, 20);
-    const found = await Promise.all(ids.map((gid) => getGeneration(user.id, gid)));
-    const picked = found.flatMap((g) =>
-      g
-        ? [
-            {
-              id: g.id,
-              title: toolName(g.toolSlug, locale).slice(0, LIMITS.title),
-              text: g.outputMarkdown.slice(0, LIMITS.documentText),
-            },
-          ]
-        : [],
-    );
-    if (picked.length === 0) return { ok: false, error: m.portfolio.errorNotFound };
-    let data: DossierData;
-    try {
-      data = adoptGenerations(dossier.data, String(fd.get("criterionId") ?? ""), picked);
-    } catch {
-      return { ok: false, error: m.portfolio.errorNotFound };
+    // One path with "Gebruik als bewijs" (P27.1): owner-checked, never a duplicate.
+    const criterionId = String(fd.get("criterionId") ?? "");
+    const ids = [...new Set(fd.getAll("generationIds").map(String))].slice(0, 20);
+    if (ids.length === 0) return { ok: false, error: m.portfolio.errorNotFound };
+    for (const generationId of ids) {
+      const added = await addGenerationToDossier(
+        user,
+        { generationId, dossierId: dossier.id, criterionId },
+        locale,
+      );
+      if (!added.ok) return added;
     }
-    const saved = await updateDossier(user.id, dossier.id, { data }).catch(() => null);
-    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
     return { ok: true, intent };
   }
 

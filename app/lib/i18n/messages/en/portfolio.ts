@@ -5,6 +5,11 @@ export const portfolio: Messages["portfolio"] = {
   addToDossierLabel: "Dossier",
   backToDossier: "Back to the dossier",
   backToList: "All dossiers",
+  bar: {
+    back: "Back to {dossier}",
+    for: "For your dossier:",
+    label: "For your dossier",
+  },
   coach: {
     alreadyShown: "You have marked this criterion as shown.",
     done: "The feedback is ready.",
@@ -264,8 +269,7 @@ export const portfolio: Messages["portfolio"] = {
         "Write test items with a test blueprint that fit your learning outcomes. Items and blueprint show your test design.",
     },
     open: "Open {tool}",
-    saveHow:
-      "What you make in the tool then appears under Projects. Choose “Add to dossier” there and link it to the criterion here.",
+    saveHow: "After making it, click “Add to this criterion”. It then appears here as evidence.",
     thinkHow: "A conversation helps you think, but it is neither evidence nor a source.",
     title: "Help from LimeOnIt",
   },

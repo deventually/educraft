@@ -4,7 +4,6 @@
  * is suggested when its tool fits the criterion's own words (TOOL_HINTS), and
  * nothing is added until the teacher ticks it.
  */
-import { addEvidence, updateEvidence } from "./edit";
 import { criterionTools } from "./toolHints";
 import type { DossierData } from "./types";
 
@@ -59,40 +58,4 @@ export function suggestEvidence(
     }
   }
   return out;
-}
-
-export interface PickedGeneration {
-  id: string;
-  title: string;
-  text: string;
-}
-
-/**
- * Puts the ticked generations at the criterion. A generation that is already
- * evidence in this dossier gets the criterion added; it is never copied twice.
- * Throws on an unknown criterion, like the other edits.
- */
-export function adoptGenerations(
-  d: DossierData,
-  criterionId: string,
-  picked: readonly PickedGeneration[],
-): DossierData {
-  let next = d;
-  for (const g of picked) {
-    const existing = next.evidence.find((e) => e.sourceGenerationId === g.id);
-    next = existing
-      ? updateEvidence(next, existing.id, {
-          criterionIds: existing.criterionIds.includes(criterionId)
-            ? existing.criterionIds
-            : [...existing.criterionIds, criterionId],
-        })
-      : addEvidence(next, {
-          title: g.title,
-          kind: "other",
-          text: g.text,
-          criterionIds: [criterionId],
-          sourceGenerationId: g.id,
-        });
-  }
-  return next;
 }

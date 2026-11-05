@@ -26,6 +26,8 @@ import { listCourses } from "~/server/repositories/courses.server";
 import { listDossiers } from "~/server/repositories/portfolio.server";
 import { courseLinkIntent } from "~/server/courses.server";
 import { addGenerationToDossier } from "~/server/evidence.server";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
+import { DossierBar } from "~/components/portfolio/DossierBar";
 import { linkTargets } from "~/lib/courses/links";
 import { getToolBySlug } from "~/lib/registry";
 import { getToolHelpOverlay } from "~/lib/help/registry";
@@ -87,7 +89,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const wanted = new URL(request.url).searchParams.get("course") ?? "";
   const initialCourseId = ownCourses.some((c) => c.id === wanted) ? wanted : "";
   const nextTools = await nextStepsFor(user, tool.next ?? []);
-  const dossiers = (await listDossiers(user.id)).map((d) => ({
+  // The BDB/BKE workplace switched off (P27): no dossiers, so no evidence choice.
+  const ownDossiers = (await portfolioAccess(user)) ? await listDossiers(user.id) : [];
+  const dossiers = ownDossiers.map((d) => ({
     id: d.id,
     name: d.name,
     criteria: d.data.framework.outcomes.flatMap((o) =>
@@ -95,6 +99,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     ),
   }));
   return {
+    forCriterion: forCriterion(ownDossiers, new URL(request.url).searchParams),
     tool,
     profiles,
     defaultProfileId: defaultProfile?.id ?? "",
@@ -120,6 +125,27 @@ async function nextStepsFor(user: Awaited<ReturnType<typeof requireUser>>, slugs
   return out;
 }
 
+/**
+ * P27.2: a tool opened from a dossier criterion (`?dossier=&criterion=`). Only the
+ * caller's own dossier and an existing criterion count; anything else is no bar, no error.
+ */
+function forCriterion(dossiers: Awaited<ReturnType<typeof listDossiers>>, params: URLSearchParams) {
+  const dossier = dossiers.find((d) => d.id === params.get("dossier"));
+  const criterionId = params.get("criterion");
+  for (const o of dossier?.data.framework.outcomes ?? []) {
+    const c = o.criteria.find((x) => x.id === criterionId);
+    if (dossier && c)
+      return {
+        dossierId: dossier.id,
+        dossierName: dossier.name,
+        outcomeId: o.id,
+        criterionId: c.id,
+        criterionText: c.text,
+      };
+  }
+  return null;
+}
+
 function shorten(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
@@ -132,7 +158,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (linked) return linked;
   if (fd.get("intent") === "addToDossier") {
     const added = await addGenerationToDossier(
-      user.id,
+      user,
       {
         generationId: String(fd.get("id") ?? ""),
         dossierId: String(fd.get("dossierId") ?? ""),
@@ -167,13 +193,15 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     nextTools,
     linkTargets,
     dossiers,
+    forCriterion,
   } = loaderData;
-  const resultContext = { nextTools, linkTargets, dossiers };
+  const resultContext = { nextTools, linkTargets, dossiers, forCriterion };
   const multiStage = tool.stages.length > 1;
   const isChat = tool.mode === "chat";
 
   return (
     <div className={cn(isChat && "flex min-h-0 flex-1 flex-col")}>
+      {forCriterion && <DossierBar {...forCriterion} />}
       <ToolHeader tool={tool} verbatim={verbatim} helpOverlay={helpOverlay} locale={locale} t={t} />
 
       <section

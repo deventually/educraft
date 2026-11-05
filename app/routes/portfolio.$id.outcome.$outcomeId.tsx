@@ -174,7 +174,12 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 suggestions={suggestions[c.id] ?? []}
                 className="mt-3"
               />
-              <ToolHints hints={toolHints[c.id] ?? []} step="evidence" className="mt-3" />
+              <ToolHints
+                hints={toolHints[c.id] ?? []}
+                step="evidence"
+                from={{ dossierId: id, criterionId: c.id }}
+                className="mt-3"
+              />
               <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
                 <input type="hidden" name="intent" value="setStatus" />
                 <input type="hidden" name="criterionId" value={c.id} />

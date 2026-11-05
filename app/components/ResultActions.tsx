@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from "react";
 import { Link, useFetcher } from "react-router";
-import { ArrowRight, BookmarkCheck, GraduationCap } from "lucide-react";
+import { ArrowRight, BookmarkCheck, FolderCheck, GraduationCap } from "lucide-react";
 import { Button, Label, Select } from "./ui";
 import { useActionToast } from "./Toast";
 import { type LinkTarget, linkTargetValue } from "~/lib/courses/links";
@@ -16,6 +16,8 @@ export interface ResultActionsProps {
   nextTools: { slug: string; name: LocalizedText }[];
   linkTargets: LinkTarget[];
   dossiers: { id: string; name: string; criteria: { id: string; label: string }[] }[];
+  /** P27.2: the tool was opened from this dossier criterion; one button puts the result there. */
+  forCriterion?: { dossierId: string; criterionId: string } | null;
 }
 
 /** What the tool page passes down to every result surface (P27.1). */
@@ -36,6 +38,7 @@ export function ResultActions({
   nextTools,
   linkTargets,
   dossiers,
+  forCriterion = null,
 }: ResultActionsProps) {
   const t = useT();
   const m = t.resultActions;
@@ -66,8 +69,9 @@ export function ResultActions({
   const keptName = linkTargets.find((c) => c.courseId === keptAt)?.courseName;
   const canKeep = Boolean(generationId);
   const showCourse = canKeep && (keptName || linkTargets.length > 0);
-  const showEvidence = canKeep && dossiers.length > 0;
-  if (nextTools.length === 0 && !showCourse && !showEvidence) return null;
+  const showCriterion = canKeep && forCriterion !== null;
+  const showEvidence = canKeep && !showCriterion && dossiers.length > 0;
+  if (nextTools.length === 0 && !showCourse && !showEvidence && !showCriterion) return null;
 
   const query = courseId ? `?course=${encodeURIComponent(courseId)}` : "";
 
@@ -152,6 +156,19 @@ export function ResultActions({
             {m.saveToCourse}
           </Button>
         </courseFetcher.Form>
+      )}
+
+      {showCriterion && forCriterion && (
+        <evidenceFetcher.Form method="post">
+          <input type="hidden" name="intent" value="addToDossier" />
+          <input type="hidden" name="id" value={generationId ?? ""} />
+          <input type="hidden" name="dossierId" value={forCriterion.dossierId} />
+          <input type="hidden" name="criterionId" value={forCriterion.criterionId} />
+          <Button type="submit" size="sm">
+            <FolderCheck className="size-4" aria-hidden />
+            {m.putAtCriterion}
+          </Button>
+        </evidenceFetcher.Form>
       )}
 
       {showEvidence && (

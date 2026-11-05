@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { adoptGenerations, suggestEvidence } from "~/lib/portfolio/suggest";
-import { DossierDataSchema } from "~/lib/portfolio/schema";
+import { suggestEvidence } from "~/lib/portfolio/suggest";
 import type { DossierData } from "~/lib/portfolio/types";
-import { C1, C2, LU, sampleDossier } from "./fixtures";
+import { C1, C2, sampleDossier } from "./fixtures";
 
 const G1 = "00000000-0000-4000-8000-0000000000f1";
 const G2 = "00000000-0000-4000-8000-0000000000f2";
@@ -67,32 +66,5 @@ describe("suggestEvidence", () => {
       [G1]: [{ courseName: "Statistiek 1" }],
     });
     expect(s[C1][0]).toMatchObject({ toolSlug: "lesson-plan", courses: ["Statistiek 1"] });
-  });
-});
-
-describe("adoptGenerations", () => {
-  const out = { title: "Les voorbereiden", text: "# Lesopzet" };
-
-  it("adds each picked generation as evidence linked to the criterion", () => {
-    const d = adoptGenerations(dossier(), C1, [{ id: G1, ...out }]);
-    expect(d.evidence).toHaveLength(1);
-    expect(d.evidence[0]).toMatchObject({
-      title: "Les voorbereiden",
-      text: "# Lesopzet",
-      criterionIds: [C1],
-      sourceGenerationId: G1,
-    });
-    expect(DossierDataSchema.safeParse(d).success).toBe(true);
-  });
-
-  it("links existing evidence from the same generation instead of copying it", () => {
-    const base = adoptGenerations(dossier(), C2, [{ id: G1, ...out }]);
-    const d = adoptGenerations(base, C1, [{ id: G1, ...out }]);
-    expect(d.evidence).toHaveLength(1);
-    expect(d.evidence[0].criterionIds).toEqual([C2, C1]);
-  });
-
-  it("refuses an unknown criterion", () => {
-    expect(() => adoptGenerations(dossier(), LU, [{ id: G1, ...out }])).toThrow();
   });
 });

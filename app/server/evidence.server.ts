@@ -2,8 +2,10 @@
  * Saved work as evidence in a BDB/BKE dossier (P25 "Mijn werk", P27.1 under the result).
  * One path for every caller: both the dossier and the generation must be the caller's,
  * a named criterion must exist in the dossier, and the same work is never added twice
- * (a second add only links the extra criterion to the evidence already there).
+ * (a second add only links the extra criterion to the evidence already there). The
+ * workplace must be switched on for the caller (P27.2).
  */
+import { portfolioAccess } from "./portfolioAccess.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getDossier, updateDossier } from "./repositories/portfolio.server";
 import { addEvidence, updateEvidence } from "~/lib/portfolio/edit";
@@ -22,11 +24,14 @@ export interface AddToDossierInput {
 export type AddToDossierResult = { ok: true } | { ok: false; error: string };
 
 export async function addGenerationToDossier(
-  userId: string,
+  user: { id: string; role: string },
   input: AddToDossierInput,
   locale: Locale,
 ): Promise<AddToDossierResult> {
   const m = getMessages(locale).portfolio;
+  // The workplace switched off (P27): as if the dossier did not exist.
+  if (!(await portfolioAccess(user))) return { ok: false, error: m.errorNotFound };
+  const userId = user.id;
   const [generation, dossier] = await Promise.all([
     getGeneration(userId, input.generationId),
     getDossier(userId, input.dossierId),

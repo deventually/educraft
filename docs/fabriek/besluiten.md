@@ -218,3 +218,5 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   AI-tools; P26.3 (OER-import) direct na P20. Een beheerder blijft op de gebruikerslijst landen. De
   BDB/BKE-werkplaats staat per docent aan of uit, standaard uit; de beheerder zet hem aan (wie al
   een dossier heeft, staat aan). Bastiaan, 2026-11-05. Uitwerking: brief P27.
+- **BESLUIT-2026-11-05-5:** **Een beheerder heeft de BDB/BKE-werkplaats altijd**, los van de
+  schakelaar per docent, zodat niemand zichzelf buitensluit. Bastiaan, 2026-11-05 (P27.2, #88).
