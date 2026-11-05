@@ -138,6 +138,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   course's outcomes (`coursePrefillValues`, `useSandbox.selectCourse`), and `CoursePicker` sits at
   the top of the form. `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
+- **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
+  question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
+  level per outcome) for the matrix, the findings and the role agents; three extra findings
+  (`outcome-single-item`, `item-bloom-below-outcome`, `items-without-points`); `items.ts` gives the
+  total row. `blueprintImport.ts` reads the blueprint table of a stage marked
+  `ToolStage.courseExport = "assessment-items"` (data, no tool branch) and proposes an outcome per
+  row only when certain; intent `import-blueprint` (owner- and link-checked). The OER import
+  (`import.ts`, `course-import@v1`) is a proposal the teacher ticks. `evidence.ts`
+  (`courseAsEvidence`) makes a deterministic Markdown snapshot; `courseEvidence.server.ts` adds it
+  to an own dossier as `EvidenceItem.sourceCourse` and "Opnieuw ophalen" refreshes it. No migration.
 
 ---
 
@@ -164,7 +174,7 @@ app/
     i18n/            messages/{nl,en}/<ns>.ts · index · format · localized
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
-    courses/         types · bloom · schema · edit · alignment · intents · links (P20, pure)
+    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26), all pure
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
 docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7
 wiki/                this wiki

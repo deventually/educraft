@@ -34,6 +34,7 @@ function pageData(data: CourseData = alignedCourse()) {
       createdAt: Date;
       blueprint?: unknown;
     }[],
+    dossiers: [] as unknown[],
   };
 }
 
@@ -286,5 +287,49 @@ describe("Course page — blueprint into the course (P26.2)", () => {
       ),
     ).toBeVisible();
     expect(within(section).queryByText("Zet matrijs in cursus")).toBeNull();
+  });
+});
+
+describe("Course page — use as evidence in BDB/BKE (P26.4)", () => {
+  const dossiers = [
+    {
+      id: "d1",
+      name: "Mijn BKE",
+      outcomes: [
+        {
+          code: "K2",
+          title: "Toetsconstructie",
+          criteria: [{ id: "k2a", text: "Je stelt een toetsmatrijs op." }],
+        },
+      ],
+    },
+  ];
+
+  it("offers part, dossier and criteria in a plain form", async () => {
+    const { container } = renderRoute(CoursePage, { ...pageData(itemizedCourse()), dossiers });
+    const summary = screen.getByText("Gebruik als bewijs in BDB/BKE", { selector: "summary" });
+    (summary.closest("details") as HTMLDetailsElement).open = true;
+    const form = screen
+      .getByRole("button", { name: "Toevoegen aan dossier" })
+      .closest("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("use-as-evidence");
+    const part = within(form).getByRole("combobox", { name: "Wat wil je als bewijs gebruiken?" });
+    expect(
+      within(part).getByRole("option", { name: "Leeruitkomsten en dekkingsmatrix" }),
+    ).toHaveValue("outcomes-and-matrix");
+    expect(within(part).getByRole("option", { name: "Toetsmatrijs: Eindopdracht" })).toHaveValue(
+      "assessment:test-1",
+    );
+    expect(within(form).getByRole("combobox", { name: "Dossier" })).toHaveValue("d1");
+    const group = within(form).getByRole("group", { name: "Mijn BKE: K2 Toetsconstructie" });
+    expect(
+      within(group).getByRole("checkbox", { name: "Je stelt een toetsmatrijs op." }),
+    ).toHaveAttribute("value", "k2a");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("is absent without dossiers", () => {
+    renderRoute(CoursePage, pageData());
+    expect(screen.queryByText("Gebruik als bewijs in BDB/BKE")).toBeNull();
   });
 });

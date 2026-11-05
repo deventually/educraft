@@ -16,17 +16,20 @@ export function ToolHints({
   hints,
   step,
   from,
+  course = false,
   className = "",
 }: {
   hints: ToolHintView[];
   step: HintStep;
   /** P27.2: the tool opens for this criterion and its result can go straight back. */
   from?: { dossierId: string; criterionId: string };
+  /** P26.4: this criterion can take a course snapshot as evidence. */
+  course?: boolean;
   className?: string;
 }) {
   const t = useT();
   const tt = t.portfolio.tools;
-  if (hints.length === 0) return null;
+  if (hints.length === 0 && !course) return null;
   const how = tt.how as Record<string, string>;
   const query = from
     ? `?${new URLSearchParams({ dossier: from.dossierId, criterion: from.criterionId })}`
@@ -48,6 +51,17 @@ export function ToolHints({
             {how[h.slug] ? ` — ${how[h.slug]}` : null}
           </li>
         ))}
+        {course && (
+          <li className="text-slate-700">
+            <Link
+              to="/courses"
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              {tt.course}
+            </Link>
+            {` — ${tt.courseHow}`}
+          </li>
+        )}
       </ul>
       <p className="mt-1 text-slate-600">{step === "evidence" ? tt.saveHow : tt.thinkHow}</p>
     </div>

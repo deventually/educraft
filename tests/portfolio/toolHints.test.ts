@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TOOL_HINTS, chapterHints, criterionHints } from "~/lib/portfolio/toolHints";
+import { TOOL_HINTS, chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { skeletonOutcomes } from "~/lib/portfolio/skeleton";
 import { getToolBySlug } from "~/lib/registry";
 import { getMessages } from "~/lib/i18n";
@@ -87,5 +87,21 @@ describe("tool hints", () => {
     };
     expect(criterionHints(o, o.criteria[0], ALL)).toEqual([]);
     expect(chapterHints(o, ALL)).toEqual([]);
+  });
+});
+
+describe("course hint (P26.4)", () => {
+  const c = (text: string) => ({ id: "c", text });
+  it("points at the courses only for a blueprint or alignment criterion", () => {
+    expect(courseHint(c("Je stelt een toetsmatrijs op die past bij de leerdoelen."))).toBe(true);
+    expect(courseHint(c("Er is constructive alignment tussen doelen, onderwijs en toets."))).toBe(
+      true,
+    );
+    expect(courseHint(c("The test blueprint covers every learning outcome."))).toBe(true);
+    expect(courseHint(c("Leerdoelen, werkvormen en toetsing zijn op elkaar afgestemd."))).toBe(
+      true,
+    );
+    expect(courseHint(c("De les sluit aan bij de beginsituatie."))).toBe(false);
+    expect(courseHint(c("Je motiveert studenten."))).toBe(false);
   });
 });

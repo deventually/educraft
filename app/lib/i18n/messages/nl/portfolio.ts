@@ -174,6 +174,7 @@ export const portfolio = {
     chapterTitle: "Hoofdstuk",
     chapterWords: "{n} woorden",
     chapterWordsLimit: "{n} woorden; het hele verslag mag {limit} woorden hebben",
+    courseGone: "Deze cursus of toets bestaat niet meer. De momentopname blijft staan.",
     criteriaIntro: "Alleen jij zet de status. Het is jouw oordeel, niet dat van LimeOnIt.",
     criteriaTitle: "Criteria en status",
     evidenceCriteria: "Hoort bij de criteria",
@@ -185,6 +186,11 @@ export const portfolio = {
     evidenceUpload: "Tekst uit een bestand halen (PDF of Word)",
     evidenceUploadFailed: "De tekst kon niet uit dit bestand worden gehaald.",
     evidenceUploadHelp: "Het bestand blijft op je computer; alleen de tekst komt in het veld.",
+    fromCourse: "Uit cursus {course}, momentopname van {date}.",
+    fromGoneCourse: "Uit een cursus die niet meer bestaat, momentopname van {date}.",
+    openCourse: "Open de cursus",
+    refresh: "Opnieuw ophalen",
+    refreshed: "Opnieuw opgehaald uit de cursus.",
     removeEvidence: "Bewijs verwijderen",
     removeEvidenceBody: "Dit bewijsstuk wordt uit het dossier verwijderd.",
     saveChapter: "Hoofdstuk opslaan",
@@ -235,6 +241,9 @@ export const portfolio = {
   toastSaved: "Opgeslagen.",
   tools: {
     chapterTitle: "Denkhulp bij het schrijven",
+    course: "Gebruik je cursus",
+    courseHow:
+      "Zet je toetsmatrijs of dekkingsmatrix als bewijs in je dossier: open de cursus en kies “Gebruik als bewijs in BDB/BKE”.",
     how: {
       "arcs-reactor":
         "Beschrijf waar de motivatie van je studenten hapert en krijg concrete ingrepen volgens het ARCS-model.",
