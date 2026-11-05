@@ -198,3 +198,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   uren boven EC × 28 uitkomen. Het voorinvullen van leeruitkomsten geldt ook voor de P24-tools.
   Toetsmatrijs per vraag, importeren uit een OER en de koppeling met het BDB/BKE-dossier komen in een
   eigen vervolgbrief (P26). Bastiaan, 2026-11-05.
+- **BESLUIT-2026-11-05-2:** **Cursussen verder (P26): importeren, Bloom-voorstel, momentopname.** Uit
+  een OER of studiehandleiding importeren we leeruitkomsten én toetsen (naam, soort, weging, week). De
+  AI mag bij import een Bloom-niveau voorstellen, zichtbaar als voorstel dat de docent bevestigt. Een
+  cursus komt als momentopname in het BDB/BKE-dossier, met "Opnieuw ophalen", geen live koppeling.
+  Bastiaan, 2026-11-05. Uitwerking: brief P26.

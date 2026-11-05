@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.1 gemerged, P20.2 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.1 en brief P26 gemerged, P20.2 bezig)_
 
 ## Nu
 
+- **Brief P26 Cursussen verder (#77) gemerged op 2026-11-05:** toetsmatrijs per vraag,
+  OER-import en de cursus als bewijs in het BDB/BKE-dossier, na P20 (BESLUIT-2026-11-05-2).
 - **Cursussen, het rekenhart (P20.1, #78) gemerged op 2026-11-05:** cursusmodel met
   leeruitkomsten, activiteiten, toetsen, Bloom en studielast, en de afstemmingscontroles; nog geen
   scherm.
@@ -118,7 +120,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
    Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
+3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten) en **P26** (cursussen verder),
+   dan **P22** (de docentweek).
 
 ## Open vragen
 
