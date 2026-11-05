@@ -34,6 +34,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
 - **Brief P27 De rode draad (#83) gemerged op 2026-11-05:** één workflow met de cursus als
   thuisbasis, volgende stap onder elk resultaat, BDB/BKE doet mee, startscherm met drie ingangen en een
   menu van vier (BESLUIT-2026-11-05-4).
+- **Rolagenten, pakket-tags bij leeruitkomsten (P21.6, #105) gemerged op 2026-11-05:** kenmerken
+  uit het pakket van de cursus per leeruitkomst; de petten krijgen ze mee.
 - **Rolagenten, het paneel "Beoordeling" (P21.5, #104) gemerged op 2026-11-05:** knop, adviezen per
   pet, Akkoord / Niet akkoord met reden, melding als de cursus daarna is gewijzigd.
 - **Rolagenten, "Laat beoordelen" aan de serverkant (P21.4, #103) gemerged op 2026-11-05:** beide
@@ -153,14 +155,15 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged, P22.1a open)_
 
 ## Bezig
 
+- P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
+  toetsvragen nakijken" bij "Laat beoordelen" (standaard uit, alleen als er toetsvragen gekoppeld
+  zijn). De Toetsdeskundige krijgt dan de eigen gekoppelde toetsvragen mee en draait op
+  `agent-assessment@v2`; eval-casus "toets op te laag niveau" erbij. AGENTS.md, wiki en brief
+  bijgewerkt. Meting v2 (claude-sonnet-5-5): ra2 11/11, ra3 33/33 geslaagd. PR open.
 - Beheer sneller (P28.1-stijl voor teams): `/admin/teams` is een lijst met zoeken (team of
   persoon), per team het aantal leden en de teamleiders, en één knop "Nieuw team". Elk team heeft
   een eigen pagina `/admin/teams/:id`: naam, leden, teamleider aan/uit, meerdere collega's in één
   keer toevoegen door ze aan te vinken, en de keuzes van het team. Geen migratie. PR open.
-- P21.6 Rolagenten, pakket-tags bij leeruitkomsten: heeft de cursus een onderwijscontext met een
-  pakket (zoals hbo-i), dan kies je per leeruitkomst de kenmerken van dat pakket (bijv.
-  beheersingsniveau 2, beroepsactiviteit Ontwerpen). De petten krijgen die mee. Geen pakket, geen
-  tags; oude cursussen blijven geldig; een import laat tags leeg. Geen migratie. PR open.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P22.1a De week van de docent, het rekenhart en de schoolkalender: weken rekenen in ISO-weken
   (`app/lib/calendar/weeks.ts`), vakantieweken als één lijst voor de instelling (sectie

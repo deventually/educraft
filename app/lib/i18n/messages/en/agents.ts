@@ -12,6 +12,7 @@ export const agents: Messages["agents"] = {
     accept: "Agree",
     decided: "Handled ({n})",
     decision: { accepted: "Agree", rejected: "Disagree" },
+    includeLinked: "Also review the linked test questions ({n})",
     intro:
       "Two critical colleagues review your course: an assessment expert and a designer. They advise; you decide on each piece of advice. Nothing in your course changes.",
     model: "Model",

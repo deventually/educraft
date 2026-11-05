@@ -28,6 +28,7 @@ import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coac
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
 import { COURSE_IMPORT_PROMPT } from "./course-import@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT, AGENT_DESIGN_PROMPT } from "./agents@v1.prompt";
+import { AGENT_ASSESSMENT_PROMPT_V2 } from "./agents@v2.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -37,6 +38,7 @@ import {
 
 const ALL: PromptDef[] = [
   AGENT_ASSESSMENT_PROMPT,
+  AGENT_ASSESSMENT_PROMPT_V2,
   AGENT_DESIGN_PROMPT,
   GUIDED_REFLECTION_PROMPT,
   GUIDED_REFLECTION_PROMPT_V2,

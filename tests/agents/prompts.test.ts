@@ -41,3 +41,15 @@ describe("hat prompts (P21.2)", () => {
     expect(a).not.toBe(d);
   });
 });
+
+describe("linked work (P21.7)", () => {
+  it("every hat that watches generations names the linked-work tag; v1 stays registered", () => {
+    for (const agent of AGENTS.filter((a) => a.watches.includes("generation")))
+      for (const locale of ["nl", "en"] as const)
+        expect(getRuntimePrompt(agent.promptId, locale), `${agent.id} ${locale}`).toContain(
+          "<linkedWork>",
+        );
+    expect(PROMPTS["agent-assessment@v1"]).toBeDefined();
+    expect(PROMPTS["agent-assessment@v2"]).toBeDefined();
+  });
+});

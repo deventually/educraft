@@ -29,11 +29,14 @@ export function CourseReviewPanel({
   agents,
   models,
   defaultModel,
+  linkedTests = 0,
 }: {
   data: CourseData;
   agents: ReviewPanelAgent[];
   models: { id: string; displayName: string }[];
   defaultModel: string;
+  /** Linked test-question generations; the "also review" box shows only when there are any. */
+  linkedTests?: number;
 }) {
   const p = useT().agents.panel;
   const locale = useLocale();
@@ -56,6 +59,12 @@ export function CourseReviewPanel({
               ))}
             </Select>
           </div>
+        )}
+        {linkedTests > 0 && (
+          <label className="flex basis-full items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" name="includeLinked" value="1" />
+            {fmt(p.includeLinked, { n: linkedTests })}
+          </label>
         )}
         <Button type="submit" name="intent" value="review">
           {p.run}
