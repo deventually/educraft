@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
+_Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
 
 ## Nu
 
+- **Cursus als bewijs in het BDB/BKE-dossier (P26.4 + 26.5, #95) gemerged op 2026-11-05:** op de
+  cursuspagina "Gebruik als bewijs in BDB/BKE" als momentopname, "Opnieuw ophalen" in het dossier en
+  een hint bij criteria over toetsmatrijs of afstemming. Plus de documentatie. Daarmee is P26 af.
+- **OER-import (P26.3, #89) gemerged op 2026-11-05:** leeruitkomsten en toetsen uit een OER of
+  studiehandleiding als voorstel dat de docent aanvinkt; eindmeting 18 van 18 runs geslaagd.
+- **Matrijs uit de tool in de cursus (P26.2, #94) gemerged op 2026-11-05:** bij een gekoppelde
+  toetsmatrijs staat "Zet matrijs in cursus"; de docent kiest de toets en per rij de leeruitkomst.
+- **Toetsmatrijs per vraag (P26.1, #92) gemerged op 2026-11-05:** per toets een tabel met per vraag
+  leeruitkomst, denkniveau, vraagvorm en punten; de vragen bepalen de dekking.
 - **Teams en teamleiders (P28.2, #93) gemerged op 2026-11-05:** teams op `/admin/teams`, een
   teamleider beheert zijn team op `/teams/:id`, uitnodigen in een team, "Mijn teams" op de
   accountpagina.
@@ -138,20 +147,6 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 
 ## Bezig
 
-- P26.1 Toetsmatrijs per vraag: per toets een tabel met per vraag de leeruitkomst, het denkniveau,
-  de vraagvorm en de punten, met een totaalregel. De vragen bepalen dan de dekking; drie nieuwe
-  aandachtspunten (één vraag per leeruitkomst, vraag onder het niveau, punten half ingevuld). PR open.
-- P26.2 Matrijs uit de tool in de cursus: bij een gekoppelde toetsmatrijs van *Toetsvragen en
-  toetsmatrijs* staat "Zet matrijs in cursus". De docent kiest de toets en per rij de leeruitkomst
-  (voorstel staat al gekozen); daarna staan de vragen in de cursus. Geen promptwijziging. PR open,
-  bouwt voort op P26.1.
-- P26.4 + 26.5 Cursus als bewijs in het BDB/BKE-dossier: op de cursuspagina "Gebruik als bewijs in
-  BDB/BKE" (leeruitkomsten en dekkingsmatrix, of de toetsmatrijs van één toets) als momentopname,
-  met "Opnieuw ophalen" in het dossier en een hint bij criteria over toetsmatrijs of afstemming.
-  Plus de documentatie. PR open, bouwt voort op P26.2.
-- P26.3 OER-import: leeruitkomsten en toetsen uit een OER of studiehandleiding halen met AI, als
-  voorstel dat de docent aanvinkt; met zes fictieve eval-cases (`npm run eval:import`). PR open. Eindmeting
-  (`evals/reports/2026-11-05b-course-import.md`): 18 van 18 runs geslaagd.
 - Brief P28 Teams, delen en efficiënt gebruikersbeheer: alleen tekst, PR open (BESLUIT-2026-11-05-5).
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
@@ -169,6 +164,9 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
   het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus
   (`?course=`). Toetsvragen kreeg zo ook de cursuskiezer. PR open.
+- Word-tabellen in de export: een cursus als bewijs (P26.4) komt in de Word-export van het
+  dossier als echte tabel met kopregel en eigen kopjes onder de bijlage, niet meer als tekst met
+  streepjes. Geplakt bewijs blijft letterlijk. PR open.
 
 ## Wacht op jou
 
