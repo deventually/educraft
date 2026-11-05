@@ -62,9 +62,13 @@ function merge(runs: Run[]): Run[] {
   return out;
 }
 
+/** A row's cells; an escaped pipe (`\|`) stays inside its cell. */
 function cells(line: string): string[] {
-  const trimmed = line.trim().replace(/^\|/, "").replace(/\|$/, "");
-  return trimmed.split("|").map((c) => c.trim());
+  const trimmed = line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/(?<!\\)\|$/, "");
+  return trimmed.split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
 }
 
 /** Reads a chapter's markdown into blocks, in order. */

@@ -157,6 +157,9 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
   het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus
   (`?course=`). Toetsvragen kreeg zo ook de cursuskiezer. PR open.
+- Word-tabellen in de export: een cursus als bewijs (P26.4) komt in de Word-export van het
+  dossier als echte tabel met kopregel en eigen kopjes onder de bijlage, niet meer als tekst met
+  streepjes. Geplakt bewijs blijft letterlijk. PR open.
 
 - Brief P29 BDB/BKE afronden (inleverklaar-check en proefassessment): alleen tekst, PR open.
 
