@@ -234,3 +234,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de jobrunner komt pas mee met e-mail of de Cases-add-on. Vakantieweken zijn één lijst voor de hele
   instelling, ingevuld door de beheerder. De agenda is een `.ics`-bestand per cursus om te downloaden,
   geen feed met een geheime link. Bastiaan, 2026-11-05. Uitwerking: brief P22.
+- **BESLUIT-2026-11-05-8:** **Het proefassessment mag vóór de pilot, als onderdeel van BDB/BKE.**
+  Een uitzondering op "tot de pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4): het staat niet in
+  de toolcatalogus, alleen in stap 5 van de werkplaats, en gaat mee aan en uit met de werkplaats.
+  Bastiaan, 2026-11-05. Uitwerking: brief P29.
