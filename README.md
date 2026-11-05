@@ -27,6 +27,9 @@ LimeOnIt draait als pilot met docenten in het hbo. De app is tweetalig (NL/EN).
   studenten. Zie [Tools](wiki/Tools.md).
 - **BDB/BKE-werkplaats** (`/portfolio`): een beginnende docent bouwt hier het dossier voor de BDB
   en de BKE op, met een coach en export naar Word.
+- **Cursussen** (`/courses`): leeruitkomsten, lessen en toetsen met Bloom-niveau
+  en studielast, een dekkingsmatrix en adviezen over de afstemming. Werk uit de tools hangt aan de
+  cursus.
 - **Hulpmiddelen zonder AI**: een cijferrekenaar en rubrics bewaren.
 - **Privacy**: documenten worden in de browser gelezen en studentgegevens kunnen worden
   geanonimiseerd voordat er iets naar de AI gaat.
@@ -55,11 +58,10 @@ npm run eval                                     # promptkwaliteit meten (ANTHRO
 
 Richting, geen belofte. De volledige roadmap staat in [wiki/Roadmap.md](wiki/Roadmap.md).
 
-- **Nu:** de acht nieuwe AI-tools, één voor één met een meetbare kwaliteitslat, en rubrics in
-  batches invullen.
-- **Daarna:** de docentkant eenvoudiger maken, cursussen als rode draad, en het vervolg op de
-  BDB/BKE-werkplaats.
-- **Later:** rolagenten, de docentweek, praktijksimulaties en spraak.
+- **Nu:** cursussen verder (toetsmatrijs per vraag, leeruitkomsten uit de studiehandleiding) en
+  één workflow met de cursus als thuisbasis.
+- **Daarna:** rolagenten die een cursus nakijken, en de docentweek.
+- **Later:** praktijksimulaties en spraak.
 
 ## Licentie & attributie
 

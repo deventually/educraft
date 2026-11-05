@@ -128,6 +128,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   form as `unverified` ("Controleer dit"; saving the criterion clears it) and refuses to replace a
   framework that work depends on (`frameworkInUse`). The proposal is stored unconfirmed. The model
   call is shared with the coach in `portfolioAi.server.ts`.
+- **Courses and alignment (P20)** at `/courses`. Pure domain in `app/lib/courses/`: `types` (with
+  `HOURS_PER_EC = 28`), `bloom`, `schema` (`CourseDataSchema`, `COURSE_LIMITS`, not strict),
+  immutable `edit`, `alignment` (`coverageMatrix`, `checkAlignment`: seven advisory finding codes,
+  identified by code, outcome and item), `intents.ts` → `applyCourseIntent`, and `links.ts` (link
+  targets and links per generation). Routes stay thin via `app/server/courses.server.ts`; storage is
+  `courses` (one JSON graph) and `course_links` (generation ↔ course, optional activity or
+  assessment). Tools take part through data only: a field with `prefillFromCourse` gets the
+  course's outcomes (`coursePrefillValues`, `useSandbox.selectCourse`), and `CoursePicker` sits at
+  the top of the form. `/api/stream` takes an optional `courseId` and links the saved generation;
+  "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
 
 ---
 
@@ -153,7 +163,8 @@ app/
     context/         types · format  (the context profile + hbo-i pack)
     i18n/            messages/{nl,en}/<ns>.ts · index · format · localized
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
-    hooks/           useSandbox (shared values/profile/locked-mode across the tool surfaces)
+    hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
+    courses/         types · bloom · schema · edit · alignment · intents · links (P20, pure)
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
 docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7
 wiki/                this wiki

@@ -102,6 +102,9 @@ Deze brief is geschreven vóór P17–P25. Bij de start van P20 is hij zo bijges
     zonder JavaScript. De intents heten `linkCourse` en `unlinkCourse`, naast het bestaande `delete`.
   - "Gekoppeld werk" op de cursuspagina staat onderaan, na de dekkingsmatrix
     (`listLinkedWork`, één join, per docent afgeschermd).
+- **Documentatie (20.5, zoals gebouwd):** `AGENTS.md` heeft sinds #57 geen Key Files-lijst meer.
+  De korte alinea staat onder Conventions; de bestanden staan in `wiki/Architecture.md` (Feature
+  modules en Repository map). Akkoord van Bastiaan voor `AGENTS.md`: 2026-11-05.
 
 ## Het model (`app/lib/courses/types.ts`)
 
@@ -270,7 +273,7 @@ export interface CourseData { outcomes: LearningOutcome[]; activities: Activity[
   - `tests/components/Projects.test.tsx`: koppelbediening + badge; axe.
   - `tests/tools/*.test.ts` voor de vijf tools: het veld declareert `prefillFromCourse`.
 
-## 20.5 — Documentatie
+## 20.5 — Documentatie (klaar)
 
 - `AGENTS.md`:
   - een korte alinea **Courses & alignment (P20)** onder Conventions: het model; controles zijn
