@@ -158,6 +158,8 @@ _Laatst bijgewerkt: 2026-11-05 (P26 helemaal gemerged)_
   het resultaat, ook bij meerfasige tools en gesprekken. Een vervolgtool opent met dezelfde cursus
   (`?course=`). Toetsvragen kreeg zo ook de cursuskiezer. PR open.
 
+- Brief P29 BDB/BKE afronden (inleverklaar-check en proefassessment): alleen tekst, PR open.
+
 ## Wacht op jou
 
 - **Foto voor Wiskunde nakijken:** een echte foto van handgeschreven werk (zonder naam) als
