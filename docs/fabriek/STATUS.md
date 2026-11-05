@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.5 gemerged, P24.6 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P24.5–24.7 gemerged, P24.8 bezig)_
 
 ## Nu
 
