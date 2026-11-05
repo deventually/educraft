@@ -6,6 +6,7 @@ import { aiNotice } from "./aiNotice";
 import { auth } from "./auth";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { courses } from "./courses";
 import { documents } from "./documents";
 import { error } from "./error";
 import { feedback } from "./feedback";
@@ -39,6 +40,7 @@ export const en: Messages = {
   auth,
   chat,
   confirm,
+  courses,
   documents,
   error,
   feedback,

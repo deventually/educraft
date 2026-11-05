@@ -4,6 +4,7 @@ export const nav: Messages["nav"] = {
   about: "About",
   admin: "Admin",
   closeMenu: "Close menu",
+  courses: "Courses",
   help: "Help",
   label: "Main navigation",
   menuLabel: "Mobile navigation",

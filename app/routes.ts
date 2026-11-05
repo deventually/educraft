@@ -3,6 +3,7 @@ import { account } from "./routing/account";
 import { admin } from "./routing/admin";
 import { api } from "./routing/api";
 import { auth } from "./routing/auth";
+import { courses } from "./routing/courses";
 import { help } from "./routing/help";
 import { info } from "./routing/info";
 import { portfolio } from "./routing/portfolio";
@@ -21,6 +22,7 @@ const areas: RouteArea[] = [
   admin,
   api,
   auth,
+  courses,
   help,
   info,
   portfolio,

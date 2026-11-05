@@ -29,6 +29,7 @@ describe("help registry — topics", () => {
   it("ships the core topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("getting-started");
     expect(HELP_TOPIC_SLUGS).toContain("context-profiles");
+    expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
   it("has both nl and en for every topic (no half-translated topics)", () => {

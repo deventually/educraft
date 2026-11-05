@@ -42,17 +42,19 @@ leeruitkomst, activiteit of toets valt in code weg, niet alleen via de prompt.
 
 ### 21.1 — Petten als data (puur, geen LLM)
 
-- `app/lib/agents/`: `types.ts`, `registry.ts`, `schema.ts`, `input.ts`, `filter.ts`.
+- `app/lib/agents/`: `types.ts`, `registry.ts`, `validate.ts`, `schema.ts`, `input.ts`, `filter.ts`.
 - Een pet is data: `{ id, role: LocalizedText, promptId, watches: ("course" | "generation")[] }`.
-  Registervalidatie bij opstart, zoals `registry/validate.ts`. Geen `if (agent.id === …)`.
-- `AgentFindingSchema` (Zod): `{ severity: "warning" | "info", targetId?, message, suggestion }`,
-  tekst begrensd; `AgentReviewOutputSchema = { findings: AgentFinding[] }` (≤ 15).
-- `buildAgentInput(course, alignmentFindings, profile, rejected)`: de cursus (leeruitkomsten met
+  `validateAgents` controleert de vorm; 21.2 voegt toe dat de prompt bestaat, 21.4 draait het bij
+  opstart. Geen `if (agent.id === …)`.
+- Het model antwoordt `{ "findings": [{ severity, target?, message, suggestion }] }` met korte
+  sleutels (L1, A1, T1), met Zod gecontroleerd; tekst begrensd, hooguit 15 bevindingen.
+- `buildReviewMessage({ course, alignment, rejected }, locale)`: de cursus onder korte sleutels (leeruitkomsten met
   Bloom en pakket-tags, activiteiten, toetsen, studielast), de P20-bevindingen (zodat de pet die niet
   herhaalt) en de eerder verworpen bevindingen (zodat hij die niet terugbrengt).
-- `filterFindings(output, course)`: weg met bevindingen met een onbekende `targetId`, dubbelen en
-  bevindingen die gelijk zijn aan een eerder verworpen bevinding.
-- **RED:** `tests/agents/registry.test.ts`, `schema.test.ts`, `input.test.ts`, `filter.test.ts`.
+- `parseAgentReview(raw, course, rejected)`: zet sleutels terug naar echte id's; weg met bevindingen
+  met een onbekende sleutel, dubbelen en eerder verworpen bevindingen. `extractJson` is nu gedeeld
+  met de portfoliocoach (`app/lib/ai/extractJson.ts`).
+- **RED:** `tests/agents/registry.test.ts`, `input.test.ts`, `filter.test.ts`.
 
 ### 21.2 — Twee pet-prompts en de meting
 
