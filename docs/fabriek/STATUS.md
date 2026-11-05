@@ -148,8 +148,7 @@ _Laatst bijgewerkt: 2026-11-05 (P27.2 gemerged, P26.3 klaar om te mergen)_
 - P28.3 Onderdelen, tools en modellen per team: per tool en per onderdeel de stand Uit / Aan /
   Op aanvraag (`/admin/tools`), per team aan / uit / geen keuze en een eigen modelset (beheerder en
   teamleider), uitzonderingen per docent op de persoonspagina met "waar komt het vandaan".
-  Cursussen en hulpmiddelen zijn een 404 als ze uit staan. Migraties 0016 en 0017. PR open, bouwt
-  op `main`.
+  Cursussen en hulpmiddelen zijn een 404 als ze uit staan. Migraties 0016 en 0017. PR open.
 
 - P27.1 Volgende stap onder elk resultaat: twee of drie logische vervolgtools (data in het
   register, `Tool.next`), "Bewaar bij cursus" en "Gebruik als bewijs" (met criterium) direct onder
