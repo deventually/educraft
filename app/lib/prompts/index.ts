@@ -17,6 +17,7 @@ import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
+import { TEST_ANALYSIS_PROMPT } from "./test-analysis@v1.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
@@ -54,6 +55,7 @@ const ALL: PromptDef[] = [
   STAGE_ASSESSMENT_PROMPT_V2,
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
+  TEST_ANALYSIS_PROMPT,
   PORTFOLIO_COACH_PROMPT,
   PORTFOLIO_DRAFT_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT,

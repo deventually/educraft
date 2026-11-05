@@ -21,9 +21,9 @@ the [prompt pipeline](Architecture.md#the-prompt-pipeline).
 
 ---
 
-## Current tools (19)
+## Current tools (20)
 
-All 14 tools from the book plus five originals are shipped. *For* = who the tool speaks to
+All 14 tools from the book plus six originals are shipped. *For* = who the tool speaks to
 (`Tool.userType`): the teacher, or the learner through a tutor the teacher sets up.
 
 | # | Chapter | Tool (slug) | Mode | For |
@@ -46,12 +46,19 @@ All 14 tools from the book plus five originals are shipped. *For* = who the tool
 | 16 | — (original, P24.2) | Create an assessment rubric (`rubric-builder`) | one-shot | teacher |
 | 17 | — (original, P24.3) | Write test questions and a blueprint (`test-items`, two stages: blueprint → questions) | one-shot | teacher |
 | 18 | — (original, P24.4) | Prepare a lesson (`lesson-plan`) | one-shot | teacher |
-| 19 | — (original, P24.6) | Write a clear assignment (`clear-assignment`) | one-shot | teacher |
+| 19 | — (original, P24.5) | Explain a test analysis (`test-analysis`; the numbers come from the item-analysis utility, the AI computes nothing) | one-shot | teacher |
+| 20 | — (original, P24.6) | Write a clear assignment (`clear-assignment`) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later
 stages consuming earlier artifacts (the Instructional Coordinates Document, the
 Student System Prompt).
+
+The **utilities** (`/utilities`, P23) compute without AI: the grade calculator, rubrics, and the
+item analysis (`item-analysis`, P24.5: p-value, Rit, Rir and Cronbach's alpha from a pasted,
+anonymous score list). A utility can name an explaining tool (`Utility.explainWith`): its
+"Explain this" button hands only the per-question numbers to that tool's form through
+sessionStorage (`app/lib/forms/handoff.ts`).
 
 Next to the tools, the **BDB/BKE workplace** (`/portfolio`) helps a teacher build their
 teaching-qualification dossier (see [Architecture](Architecture.md#feature-modules)).

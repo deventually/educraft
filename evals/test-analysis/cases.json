@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "id": "mc-knowledge-test-nl",
+      "description": "Ordinary case: 148 candidates, 30 multiple-choice questions with 4 options, alpha 0.75. Questions to look at first are the weakly discriminating V5 (Rir 0.03), V18 (Rir 0.05) and V24 (Rir 0.06), then V1 and V19 (Rir 0.12–0.13). V23 has p 0.99: very easy, so its low Rit is no reason to reject it, and the output must not treat it as faulty. No question is below the guessing level of 0.25 and no Rir is negative. Alpha 0.75 for a summative test is acceptable by the rule of thumb, with room to improve by revising the weak questions.",
+      "outputLanguage": "nl",
+      "values": {
+        "analysis": "**Toetsanalyse, berekend door het hulpmiddel in LimeOnIt**\n\n- Kandidaten: 148\n- Vragen: 30\n- Gemiddelde totaalscore: 19,66 van 30 (sd 4,84)\n- Cronbachs alfa: 0,75\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,78 | 0,21 | 0,12 | 0,75 |\n| V2 | 1 | 0,73 | 0,50 | 0,42 | 0,73 |\n| V3 | 1 | 0,68 | 0,48 | 0,40 | 0,74 |\n| V4 | 1 | 0,56 | 0,36 | 0,26 | 0,74 |\n| V5 | 1 | 0,71 | 0,13 | 0,03 | 0,76 |\n| V6 | 1 | 0,66 | 0,27 | 0,18 | 0,75 |\n| V7 | 1 | 0,69 | 0,43 | 0,34 | 0,74 |\n| V8 | 1 | 0,62 | 0,40 | 0,31 | 0,74 |\n| V9 | 1 | 0,49 | 0,40 | 0,31 | 0,74 |\n| V10 | 1 | 0,79 | 0,38 | 0,30 | 0,74 |\n| V11 | 1 | 0,69 | 0,37 | 0,29 | 0,74 |\n| V12 | 1 | 0,61 | 0,34 | 0,25 | 0,74 |\n| V13 | 1 | 0,52 | 0,37 | 0,28 | 0,74 |\n| V14 | 1 | 0,80 | 0,40 | 0,33 | 0,74 |\n| V15 | 1 | 0,75 | 0,48 | 0,41 | 0,74 |\n| V16 | 1 | 0,64 | 0,44 | 0,36 | 0,74 |\n| V17 | 1 | 0,59 | 0,35 | 0,26 | 0,74 |\n| V18 | 1 | 0,64 | 0,15 | 0,05 | 0,76 |\n| V19 | 1 | 0,68 | 0,22 | 0,13 | 0,75 |\n| V20 | 1 | 0,65 | 0,31 | 0,22 | 0,75 |\n| V21 | 1 | 0,62 | 0,32 | 0,22 | 0,75 |\n| V22 | 1 | 0,44 | 0,39 | 0,30 | 0,74 |\n| V23 | 1 | 0,99 | 0,23 | 0,21 | 0,75 |\n| V24 | 1 | 0,63 | 0,16 | 0,06 | 0,75 |\n| V25 | 1 | 0,57 | 0,32 | 0,22 | 0,75 |\n| V26 | 1 | 0,52 | 0,40 | 0,31 | 0,74 |\n| V27 | 1 | 0,80 | 0,33 | 0,26 | 0,74 |\n| V28 | 1 | 0,69 | 0,58 | 0,51 | 0,73 |\n| V29 | 1 | 0,61 | 0,36 | 0,27 | 0,74 |\n| V30 | 1 | 0,51 | 0,37 | 0,28 | 0,74 |",
+        "testInfo": "Kennistoets Marketing (jaar 1), 30 meerkeuzevragen met 4 antwoordopties, cesuur 55%. Eindtoets van blok 1.",
+        "questions": ""
+      }
+    },
+    {
+      "id": "open-questions-nl",
+      "description": "Ordinary case: 62 candidates, 8 open questions with different maxima (2–8 points), alpha 0.78. V4 stands out clearly: Rir −0.08 and alpha without it 0.84 (higher than 0.78), so it works against the rest; with open questions the output should point to the answer model and scoring of V4 (and whether it measures something else), not to a multiple-choice key. The other questions discriminate well (Rir 0.38–0.69). V7 is hard (p 0.33) but discriminates well, so it is not a problem. 62 candidates is moderate: a short caution fits.",
+      "outputLanguage": "nl",
+      "values": {
+        "analysis": "**Toetsanalyse, berekend door het hulpmiddel in LimeOnIt**\n\n- Kandidaten: 62\n- Vragen: 8\n- Gemiddelde totaalscore: 20,98 van 40 (sd 6,87)\n- Cronbachs alfa: 0,78\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 4 | 0,66 | 0,71 | 0,62 | 0,75 |\n| V2 | 6 | 0,60 | 0,80 | 0,69 | 0,72 |\n| V3 | 4 | 0,45 | 0,75 | 0,65 | 0,74 |\n| V4 | 6 | 0,53 | 0,10 | -0,08 | 0,84 |\n| V5 | 8 | 0,46 | 0,78 | 0,60 | 0,75 |\n| V6 | 4 | 0,74 | 0,61 | 0,52 | 0,76 |\n| V7 | 6 | 0,33 | 0,80 | 0,69 | 0,72 |\n| V8 | 2 | 0,56 | 0,48 | 0,38 | 0,78 |",
+        "testInfo": "Schriftelijke toets Bedrijfseconomie (jaar 2) met 8 open vragen, nagekeken met een antwoordmodel door twee docenten.",
+        "questions": ""
+      }
+    },
+    {
+      "id": "mc-exam-en",
+      "description": "Ordinary case in English: 210 candidates, 25 multiple-choice questions with 4 options, alpha 0.77. Q20 has p 0.95 and a slightly negative Rir (−0.14): very easy, so the correlation says little, but a negative value is still worth a quick key check; the output must not call it a clear fault. Q10 (Rir 0.13) and Q15 (Rir 0.15) discriminate weakly. Q7 is hard (p 0.30) but discriminates acceptably (Rir 0.27), which is fine. 210 candidates: numbers are fairly stable.",
+      "outputLanguage": "en",
+      "values": {
+        "analysis": "**Test analysis, computed by the utility in LimeOnIt**\n\n- Candidates: 210\n- Questions: 25\n- Mean total score: 15.67 out of 25 (sd 4.48)\n- Cronbach's alpha: 0.77\n\n| Question | Max | p | Rit | Rir | Alpha without this question |\n| --- | --- | --- | --- | --- | --- |\n| Q1 | 1 | 0.80 | 0.44 | 0.37 | 0.76 |\n| Q2 | 1 | 0.66 | 0.47 | 0.38 | 0.76 |\n| Q3 | 1 | 0.42 | 0.41 | 0.32 | 0.76 |\n| Q4 | 1 | 0.73 | 0.49 | 0.41 | 0.76 |\n| Q5 | 1 | 0.52 | 0.41 | 0.31 | 0.76 |\n| Q6 | 1 | 0.77 | 0.43 | 0.35 | 0.76 |\n| Q7 | 1 | 0.30 | 0.36 | 0.27 | 0.76 |\n| Q8 | 1 | 0.78 | 0.52 | 0.44 | 0.75 |\n| Q9 | 1 | 0.65 | 0.57 | 0.49 | 0.75 |\n| Q10 | 1 | 0.48 | 0.24 | 0.13 | 0.77 |\n| Q11 | 1 | 0.65 | 0.32 | 0.22 | 0.77 |\n| Q12 | 1 | 0.48 | 0.32 | 0.22 | 0.77 |\n| Q13 | 1 | 0.71 | 0.55 | 0.48 | 0.75 |\n| Q14 | 1 | 0.50 | 0.55 | 0.46 | 0.75 |\n| Q15 | 1 | 0.77 | 0.24 | 0.15 | 0.77 |\n| Q16 | 1 | 0.56 | 0.38 | 0.28 | 0.76 |\n| Q17 | 1 | 0.77 | 0.27 | 0.18 | 0.77 |\n| Q18 | 1 | 0.61 | 0.31 | 0.20 | 0.77 |\n| Q19 | 1 | 0.41 | 0.50 | 0.41 | 0.75 |\n| Q20 | 1 | 0.95 | -0.10 | -0.14 | 0.78 |\n| Q21 | 1 | 0.50 | 0.37 | 0.26 | 0.76 |\n| Q22 | 1 | 0.68 | 0.40 | 0.31 | 0.76 |\n| Q23 | 1 | 0.49 | 0.39 | 0.29 | 0.76 |\n| Q24 | 1 | 0.86 | 0.37 | 0.29 | 0.76 |\n| Q25 | 1 | 0.63 | 0.38 | 0.29 | 0.76 |",
+        "testInfo": "End-of-term exam Introduction to Psychology (year 1), 25 multiple-choice questions, 4 options each, pass mark 55%.",
+        "questions": ""
+      }
+    },
+    {
+      "id": "known-error-wrong-key-nl",
+      "description": "Known error: V13 has a wrong answer key. Its p is 0.15, below the guessing level of 0.25 for 4 options, its Rit (−0.06) and Rir (−0.16) are negative, and alpha without it (0.68) is higher than the test's 0.66. The pasted question shows the cause: for a skewed income distribution the median (B) is the right measure, but the key says A (the mean). The output must name V13 first, point to the key, quote the question and suggest the median as the probable correct answer, and list the options (correct the key, accept B, give everyone the point, leave it out) without choosing, with the note that the numbers must then be recomputed.",
+      "outputLanguage": "nl",
+      "values": {
+        "analysis": "**Toetsanalyse, berekend door het hulpmiddel in LimeOnIt**\n\n- Kandidaten: 96\n- Vragen: 20\n- Gemiddelde totaalscore: 12,22 van 20 (sd 3,43)\n- Cronbachs alfa: 0,66\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,77 | 0,51 | 0,41 | 0,63 |\n| V2 | 1 | 0,78 | 0,23 | 0,11 | 0,66 |\n| V3 | 1 | 0,67 | 0,23 | 0,09 | 0,67 |\n| V4 | 1 | 0,63 | 0,44 | 0,32 | 0,64 |\n| V5 | 1 | 0,63 | 0,40 | 0,27 | 0,65 |\n| V6 | 1 | 0,49 | 0,25 | 0,11 | 0,66 |\n| V7 | 1 | 0,59 | 0,40 | 0,27 | 0,65 |\n| V8 | 1 | 0,81 | 0,50 | 0,41 | 0,63 |\n| V9 | 1 | 0,69 | 0,17 | 0,04 | 0,67 |\n| V10 | 1 | 0,63 | 0,34 | 0,21 | 0,65 |\n| V11 | 1 | 0,56 | 0,63 | 0,53 | 0,61 |\n| V12 | 1 | 0,61 | 0,31 | 0,17 | 0,66 |\n| V13 | 1 | 0,15 | -0,06 | -0,16 | 0,68 |\n| V14 | 1 | 0,49 | 0,53 | 0,41 | 0,63 |\n| V15 | 1 | 0,77 | 0,43 | 0,32 | 0,64 |\n| V16 | 1 | 0,61 | 0,35 | 0,21 | 0,65 |\n| V17 | 1 | 0,72 | 0,54 | 0,43 | 0,63 |\n| V18 | 1 | 0,56 | 0,41 | 0,28 | 0,64 |\n| V19 | 1 | 0,52 | 0,28 | 0,13 | 0,66 |\n| V20 | 1 | 0,54 | 0,40 | 0,27 | 0,65 |",
+        "testInfo": "Tussentoets Statistiek (jaar 1), 20 meerkeuzevragen met 4 antwoordopties. Vraag 13 vond ik zelf ook vreemd uitpakken.",
+        "questions": "Vraag 13. Een gemeente wil het typische inkomen van haar inwoners beschrijven. De inkomensverdeling is sterk rechtsscheef. Welke maat voor de centrale tendens is het meest geschikt?\nA. Het rekenkundig gemiddelde\nB. De mediaan\nC. De modus\nD. De standaarddeviatie\nSleutel: A"
+      }
+    },
+    {
+      "id": "known-error-small-sample-nl",
+      "description": "Known error: only 14 candidates. With so few candidates every statement per question is provisional and alpha (0.49) is very uncertain. The output must say so up front and keep per-question statements cautious (no firm advice to drop V2, V4, V13 or V15 on these numbers alone), while still naming V15 (p 0.21, Rir −0.23) as the one to check first (the key, the wording). It should suggest combining with a later group or looking at the content before deciding.",
+      "outputLanguage": "nl",
+      "values": {
+        "analysis": "**Toetsanalyse, berekend door het hulpmiddel in LimeOnIt**\n\n- Kandidaten: 14\n- Vragen: 15\n- Gemiddelde totaalscore: 8,00 van 15 (sd 2,60)\n- Cronbachs alfa: 0,49\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,71 | 0,57 | 0,43 | 0,41 |\n| V2 | 1 | 0,79 | 0,14 | -0,03 | 0,51 |\n| V3 | 1 | 0,71 | 0,19 | 0,01 | 0,51 |\n| V4 | 1 | 0,57 | 0,17 | -0,03 | 0,52 |\n| V5 | 1 | 0,64 | 0,65 | 0,52 | 0,38 |\n| V6 | 1 | 0,43 | 0,40 | 0,22 | 0,46 |\n| V7 | 1 | 0,43 | 0,40 | 0,22 | 0,46 |\n| V8 | 1 | 0,43 | 0,23 | 0,03 | 0,50 |\n| V9 | 1 | 0,57 | 0,69 | 0,56 | 0,37 |\n| V10 | 1 | 0,36 | 0,54 | 0,38 | 0,42 |\n| V11 | 1 | 0,50 | 0,28 | 0,09 | 0,49 |\n| V12 | 1 | 0,57 | 0,63 | 0,49 | 0,39 |\n| V13 | 1 | 0,50 | 0,11 | -0,09 | 0,53 |\n| V14 | 1 | 0,57 | 0,23 | 0,03 | 0,50 |\n| V15 | 1 | 0,21 | -0,07 | -0,23 | 0,55 |",
+        "testInfo": "Kleine herkansing Recht (hbo jaar 2), 15 meerkeuzevragen met 4 opties.",
+        "questions": ""
+      }
+    },
+    {
+      "id": "known-error-raw-scores-nl",
+      "description": "Known error: the teacher pasted raw scores per candidate (rows K1–K12, 8 questions), not numbers per question, and asks for the mean grade and the alpha. The tool must compute nothing: no p-values, no alpha, no mean and no grade. It must say it needs the numbers per question and refer to the utility 'Toetsuitslag per vraag analyseren' in LimeOnIt, using only the heading '## Eerst de getallen per vraag' followed by the closing sentence.",
+      "outputLanguage": "nl",
+      "values": {
+        "analysis": "K1\t1\t0\t1\t1\t0\t1\t1\t0\nK2\t1\t1\t1\t0\t1\t1\t0\t1\nK3\t0\t0\t1\t0\t0\t1\t0\t0\nK4\t1\t1\t1\t1\t1\t1\t1\t1\nK5\t1\t0\t0\t1\t0\t1\t1\t0\nK6\t0\t1\t1\t0\t0\t0\t1\t0\nK7\t1\t1\t0\t1\t1\t1\t1\t1\nK8\t1\t0\t1\t0\t0\t1\t0\t1\nK9\t0\t0\t0\t1\t0\t0\t1\t0\nK10\t1\t1\t1\t1\t0\t1\t1\t1\nK11\t1\t0\t1\t1\t1\t0\t1\t0\nK12\t0\t1\t0\t0\t1\t1\t0\t1",
+        "testInfo": "Quiz Anatomie, 8 vragen goed/fout. Kun je ook het gemiddelde cijfer en de alfa uitrekenen?",
+        "questions": ""
+      }
+    },
+    {
+      "id": "known-error-asks-numbers-en",
+      "description": "Known error in English: the numbers per question are fine (210 candidates, 25 questions, alpha 0.77, same data as mc-exam-en), but the teacher asks how many students passed and what alpha becomes without Q10 and Q15 together. Neither is in the input: the tool must say it does not compute these and that the utility can, and must not state a number of passes or a new alpha for dropping two questions. Alpha without one question (Q10: 0.77, Q15: 0.77) may be quoted as given. The rest is explained as usual.",
+      "outputLanguage": "en",
+      "values": {
+        "analysis": "**Test analysis, computed by the utility in LimeOnIt**\n\n- Candidates: 210\n- Questions: 25\n- Mean total score: 15.67 out of 25 (sd 4.48)\n- Cronbach's alpha: 0.77\n\n| Question | Max | p | Rit | Rir | Alpha without this question |\n| --- | --- | --- | --- | --- | --- |\n| Q1 | 1 | 0.80 | 0.44 | 0.37 | 0.76 |\n| Q2 | 1 | 0.66 | 0.47 | 0.38 | 0.76 |\n| Q3 | 1 | 0.42 | 0.41 | 0.32 | 0.76 |\n| Q4 | 1 | 0.73 | 0.49 | 0.41 | 0.76 |\n| Q5 | 1 | 0.52 | 0.41 | 0.31 | 0.76 |\n| Q6 | 1 | 0.77 | 0.43 | 0.35 | 0.76 |\n| Q7 | 1 | 0.30 | 0.36 | 0.27 | 0.76 |\n| Q8 | 1 | 0.78 | 0.52 | 0.44 | 0.75 |\n| Q9 | 1 | 0.65 | 0.57 | 0.49 | 0.75 |\n| Q10 | 1 | 0.48 | 0.24 | 0.13 | 0.77 |\n| Q11 | 1 | 0.65 | 0.32 | 0.22 | 0.77 |\n| Q12 | 1 | 0.48 | 0.32 | 0.22 | 0.77 |\n| Q13 | 1 | 0.71 | 0.55 | 0.48 | 0.75 |\n| Q14 | 1 | 0.50 | 0.55 | 0.46 | 0.75 |\n| Q15 | 1 | 0.77 | 0.24 | 0.15 | 0.77 |\n| Q16 | 1 | 0.56 | 0.38 | 0.28 | 0.76 |\n| Q17 | 1 | 0.77 | 0.27 | 0.18 | 0.77 |\n| Q18 | 1 | 0.61 | 0.31 | 0.20 | 0.77 |\n| Q19 | 1 | 0.41 | 0.50 | 0.41 | 0.75 |\n| Q20 | 1 | 0.95 | -0.10 | -0.14 | 0.78 |\n| Q21 | 1 | 0.50 | 0.37 | 0.26 | 0.76 |\n| Q22 | 1 | 0.68 | 0.40 | 0.31 | 0.76 |\n| Q23 | 1 | 0.49 | 0.39 | 0.29 | 0.76 |\n| Q24 | 1 | 0.86 | 0.37 | 0.29 | 0.76 |\n| Q25 | 1 | 0.63 | 0.38 | 0.29 | 0.76 |",
+        "testInfo": "End-of-term exam Introduction to Psychology, 25 multiple-choice questions, 4 options. Please also tell me how many students passed, and what the alpha would be if I drop Q10 and Q15.",
+        "questions": ""
+      }
+    }
+  ]
+}
