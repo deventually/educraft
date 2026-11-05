@@ -13,6 +13,7 @@ import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
+import { DIFFERENTIATION_PROMPT } from "./differentiation@v1.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
@@ -44,6 +45,7 @@ const ALL: PromptDef[] = [
   BLOOM_BY_DESIGN_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
+  DIFFERENTIATION_PROMPT,
   LESSON_PLAN_PROMPT,
   PEER_TUTORING_PROMPT,
   RUBRIC_BUILDER_PROMPT,

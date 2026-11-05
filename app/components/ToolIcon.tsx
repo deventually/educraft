@@ -11,6 +11,7 @@ import {
   GraduationCap,
   BookOpen,
   CalendarClock,
+  Route,
   Users,
   UsersRound,
   Wrench,
@@ -37,6 +38,7 @@ const ICONS: Record<string, LucideIcon> = {
   calculator: Calculator,
   table: Table2,
   "calendar-clock": CalendarClock,
+  route: Route,
 };
 
 /** The icon names a tool may use (`Tool.icon`). */

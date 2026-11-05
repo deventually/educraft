@@ -81,6 +81,10 @@ _Laatst bijgewerkt: 2026-11-04 (V2 (P18) klaar en uitgerold)_
 
 ## Bezig
 
+- P24.7 Opdracht differentiëren (`differentiation`): een opdracht of uitleg in drie varianten (extra
+  steun, basis, extra uitdaging) met hetzelfde leerdoel en een tip voor de les, naar Tomlinson (2017).
+  Zeven eval-casussen, drie met een bekende fout (vaag leerdoel, opdracht mist het leerdoel, wens die
+  het leerdoel verlaagt). Wacht op de eerste meting — PR open.
 - P24.4 Les voorbereiden (`lesson-plan`): uit leerdoel, inhoud, lesduur, groepsgrootte en
   contactvorm een concept-lesopzet volgens de principes van Rosenshine (2012), met een tijdsplan dat
   optelt tot de lesduur en per fase hoe die het leerdoel dient. Zeven eval-casussen, drie met een
