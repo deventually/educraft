@@ -47,11 +47,16 @@ describe("Tool.courseActions — the data (P27.4)", () => {
     expect(kinds(slug)).toEqual(expected);
   });
 
-  it("toolsForKind keeps registry order and leaves out tools for another kind", () => {
+  it("toolsForKind puts the preferred tool first, then registry order", () => {
     expect(toolsForKind(ALL_TOOLS, "activity").map((t) => t.slug)).toEqual([
-      "clear-assignment",
       "lesson-plan",
+      "clear-assignment",
       "differentiation",
+    ]);
+    expect(toolsForKind(ALL_TOOLS, "assessment").map((t) => t.slug)).toEqual([
+      "test-items",
+      "rubric-builder",
+      "test-analysis",
     ]);
     expect(toolsForKind(ALL_TOOLS, "outcome").map((t) => t.slug)).toEqual([
       "authentic-assessment",
@@ -121,5 +126,14 @@ describe("itemKind (P27.4)", () => {
     expect(itemKind(data, ACT1)).toBe("activity");
     expect(itemKind(data, QUIZ)).toBe("assessment");
     expect(itemKind(data, "gone")).toBeNull();
+  });
+});
+
+describe("PREFERRED_TOOLS (P27.4)", () => {
+  it("each preferred tool is offered at that kind", async () => {
+    const { PREFERRED_TOOLS, GRADE_TOOL } = await import("~/lib/registry/courseActions");
+    for (const [kind, slug] of Object.entries(PREFERRED_TOOLS))
+      expect(getToolBySlugOrThrow(slug).courseActions).toContain(kind);
+    expect(getToolBySlugOrThrow(GRADE_TOOL).courseActions).toContain("assessment");
   });
 });

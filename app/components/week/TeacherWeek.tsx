@@ -4,7 +4,7 @@ import { formatWeekRange } from "~/lib/calendar/weeks";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import type { CourseWeek, TeacherWeek, WeekList } from "~/lib/week/teacherWeek";
-import { type CourseTools, NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
+import { type CourseTools, NO_COURSE_TOOLS, weekRowTool } from "~/lib/registry/courseActions";
 import { ItemTools } from "~/components/courses/ItemTools";
 
 /**
@@ -127,6 +127,7 @@ function CourseBlock({ course, tools }: { course: CourseWeek; tools: CourseTools
               title={l.title}
               list={l.list}
               tools={tools}
+              grading={l.key === "grade"}
             />
           ))}
         </div>
@@ -157,11 +158,14 @@ function Rows({
   title,
   list,
   tools,
+  grading,
 }: {
   courseId: string;
   title: string;
   list: WeekList;
   tools: CourseTools;
+  /** The "to grade" list: offer the grading tool. */
+  grading: boolean;
 }) {
   const t = useT();
   return (
@@ -182,7 +186,7 @@ function Rows({
               {fmt(t.week.courseWeek, { n: r.week })}
             </span>
             <ItemTools
-              tools={tools[r.kind]}
+              tools={weekRowTool(tools[r.kind], grading)}
               courseId={courseId}
               itemId={r.itemId}
               itemTitle={r.title}

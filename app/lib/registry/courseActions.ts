@@ -39,9 +39,27 @@ export const NO_COURSE_TOOLS: CourseTools = {
   findings: {},
 };
 
-/** The tools offered at a kind of item, in registry order. */
+/** The tool that comes first at a kind of item; the week on Start shows only the first. */
+export const PREFERRED_TOOLS: Record<CourseItemKind, string> = {
+  outcome: "authentic-assessment",
+  activity: "lesson-plan",
+  assessment: "test-items",
+};
+
+/** At a test that is being graded, the week on Start offers this tool instead. */
+export const GRADE_TOOL = "test-analysis";
+
+/** The tools offered at a kind of item: the preferred one first, then registry order. */
 export function toolsForKind(tools: Tool[], kind: CourseItemKind): Tool[] {
-  return tools.filter((t) => t.courseActions?.includes(kind));
+  const offered = tools.filter((t) => t.courseActions?.includes(kind));
+  const first = offered.filter((t) => t.slug === PREFERRED_TOOLS[kind]);
+  return [...first, ...offered.filter((t) => t.slug !== PREFERRED_TOOLS[kind])];
+}
+
+/** The one tool a row of the week shows (P27.4): the grading tool when grading, else the first. */
+export function weekRowTool(tools: ToolRef[], grading: boolean): ToolRef[] {
+  const pick = (grading && tools.find((t) => t.slug === GRADE_TOOL)) || tools[0];
+  return pick ? [pick] : [];
 }
 
 /** Boot check for `FINDING_TOOLS`: a known finding code and a known tool. */

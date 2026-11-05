@@ -71,6 +71,7 @@ const tools: CourseTools = {
   outcome: [],
   activity: [{ slug: "lesson-plan", name: { nl: "Les voorbereiden", en: "Prepare a lesson" } }],
   assessment: [
+    { slug: "test-items", name: { nl: "Toetsvragen maken", en: "Write test questions" } },
     {
       slug: "test-analysis",
       name: { nl: "Toetsanalyse uitleggen", en: "Explain a test analysis" },
@@ -161,6 +162,20 @@ describe("TeacherWeekView (P22.3)", () => {
     expect(
       within(region).getByRole("link", { name: "Toetsanalyse uitleggen: Instaptoets" }),
     ).toHaveAttribute("href", "/tools/test-analysis?course=c1&item=t0");
+  });
+
+  it("keeps Start calm: one tool per row, the test analysis when grading (P27.4)", async () => {
+    renderWeek({ now, next: null, tools });
+    const region = await screen.findByRole("region", { name: "Deze week · week 47" });
+    expect(
+      within(region).getByRole("link", { name: "Toetsvragen maken: Oefentoets" }),
+    ).toBeInTheDocument();
+    expect(
+      within(region).queryByRole("link", { name: "Toetsanalyse uitleggen: Oefentoets" }),
+    ).toBeNull();
+    expect(
+      within(region).queryByRole("link", { name: "Toetsvragen maken: Instaptoets" }),
+    ).toBeNull();
   });
 
   it("shows no tool links without tools", async () => {

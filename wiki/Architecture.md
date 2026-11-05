@@ -170,7 +170,8 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   only available tools. A button opens `/tools/<slug>?course=&item=`; the tool loader takes the item
   only from the own course, `useSandbox` drops it when another course is picked, and `/api/stream`
   links the result to that lesson or test (`itemId`). The course page shows "Per week"
-  (`weekPlan`, pure); the week on Start (P22.3) carries the same buttons per row.
+  (`weekPlan`, pure); the week on Start (P22.3) shows one button per row: the preferred tool of
+  its kind (`PREFERRED_TOOLS`), or the test analysis in *Nakijken* (`GRADE_TOOL`).
 
 ---
 
