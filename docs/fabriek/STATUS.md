@@ -96,8 +96,10 @@ _Laatst bijgewerkt: 2026-11-05 (P24.3 en P24.4 gemerged, P24.5 bezig)_
   Ronde 1: een strak stopantwoord, randgevallen (Rir 0,15–0,20) als licht signaal onder de tabel,
   overal "je". Meting ta2: ruwe scores 3,27 → 4,93, mc-knowledge 5,00, geen harde check gefaald;
   maar mc-exam-en zakte naar 4,47 doordat de band 0,15–0,20 een nieuwe vaste grens werd. Ronde 2
-  draait dat terug (BESLUIT-2026-11-04-24) en houdt het stopantwoord en "je" — meting ta3 volgt.
-  PR open.
+  draait dat terug (BESLUIT-2026-11-04-24) en houdt het stopantwoord en "je". Eindmeting ta3:
+  elke case 4,53–4,93, geen harde check gefaald, niets afgekapt (lat gehaald, 5,0 nog niet);
+  mc-knowledge 5,00 → 4,53 door hetzelfde randgeval als in ta1 (V6, Rir 0,18). Na twee rondes
+  gestopt (`evals/reports/2026-11-05ta3.md`) — PR open.
 
 ## Wacht op jou
 
