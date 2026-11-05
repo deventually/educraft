@@ -16,7 +16,7 @@ export const privacy: Messages["privacy"] = {
   preview: "What the AI receives: {field}",
   replaced: "{original} becomes {code}",
   restoredNote:
-    "The names were put back in your browser. My work keeps the version with codes; the names do not come back there.",
+    "The names were put back in your browser. Earlier work keeps the version with codes; the names do not come back there.",
   send: "Send anonymised",
   student: "Student name",
   studentNumber: "Student number",

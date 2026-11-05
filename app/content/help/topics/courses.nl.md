@@ -30,4 +30,4 @@ Op de cursuspagina staat een tabel met de leeruitkomsten in de rijen en de activ
 
 ## Werk koppelen
 
-Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOnIt vult dan de leeruitkomsten van de cursus in, één per regel; haal weg wat niet past. Wat je genereert, wordt aan de cursus gekoppeld. Je kunt werk ook achteraf koppelen of ontkoppelen op **Mijn werk**, aan de hele cursus of aan één activiteit of toets. Op de cursuspagina staat alles onder **Gekoppeld werk**.
+Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOnIt vult dan de leeruitkomsten van de cursus in, één per regel; haal weg wat niet past. Wat je genereert, wordt aan de cursus gekoppeld. Je kunt werk ook achteraf koppelen of ontkoppelen op **Eerder gemaakt**, aan de hele cursus of aan één activiteit of toets. Op de cursuspagina staat alles onder **Gekoppeld werk**.

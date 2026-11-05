@@ -8,6 +8,7 @@ import { help } from "./routing/help";
 import { info } from "./routing/info";
 import { portfolio } from "./routing/portfolio";
 import { projects } from "./routing/projects";
+import { start } from "./routing/start";
 import { teams } from "./routing/teams";
 import { tools } from "./routing/tools";
 import { utilities } from "./routing/utilities";
@@ -28,6 +29,7 @@ const areas: RouteArea[] = [
   info,
   portfolio,
   projects,
+  start,
   teams,
   tools,
   utilities,
@@ -35,7 +37,7 @@ const areas: RouteArea[] = [
 
 export default [
   layout("components/AppShell.tsx", [
-    // `/` is a role-aware redirector (admin → /admin/users, else → /tools).
+    // `/` is a role-aware redirector (admin → /admin/users, else → /start).
     index("routes/index.tsx"),
     ...areas.flatMap((a) => a.shell ?? []),
   ]),

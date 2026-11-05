@@ -186,13 +186,13 @@ describe("Course editor — question-level matrix (P26.1)", () => {
 });
 
 describe("Course page — linked work (20.4)", () => {
-  it("guides an empty section to the tools and Mijn werk", () => {
+  it("guides an empty section to the tools and Eerder gemaakt", () => {
     renderRoute(CoursePage, pageData());
     const section = screen.getByRole("region", { name: "Gekoppeld werk" });
     expect(within(section).getByText(/Nog niets gekoppeld/)).toBeVisible();
   });
 
-  it("lists linked work with its tool, item and a way back to Mijn werk", async () => {
+  it("lists linked work with its tool, item and a way back to Eerder gemaakt", async () => {
     const data = {
       ...pageData(),
       linkedWork: [
@@ -208,7 +208,7 @@ describe("Course page — linked work (20.4)", () => {
     const section = screen.getByRole("region", { name: "Gekoppeld werk" });
     expect(within(section).getByText("Authentieke toets ontwerpen")).toBeVisible();
     expect(within(section).getByText(/Eindopdracht/)).toBeVisible();
-    expect(within(section).getByRole("link", { name: "Bekijk in Mijn werk" })).toHaveAttribute(
+    expect(within(section).getByRole("link", { name: "Bekijk in Eerder gemaakt" })).toHaveAttribute(
       "href",
       "/projects",
     );
