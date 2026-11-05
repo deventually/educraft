@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 en P21.1 bezig)_
 
 ## Nu
 
@@ -112,6 +112,10 @@ _Laatst bijgewerkt: 2026-11-05 (P20.3 gemerged, P20.4 bezig)_
 - P20.4 Cursussen koppelen: op tien toolpagina's een cursuskiezer die de leeruitkomsten invult en
   het resultaat aan de cursus koppelt; op "Mijn werk" werk koppelen en ontkoppelen, met een
   cursusbadge; op de cursuspagina "Gekoppeld werk". Daarna 20.5 (documentatie). PR open.
+- P21.1 Rolagenten, petten als data (`app/lib/agents/`): de Toetsdeskundige en de Ontwerper als
+  register, de invoer die een pet krijgt (cursus onder korte sleutels, vaste controles, verworpen
+  adviezen) en de controle op het antwoord (onbekende items, dubbelen en verworpen adviezen vallen
+  weg). Nog zonder AI en zonder scherm. Daarna 21.2 (prompts en meting) en 21.3 (opslag). PR open.
 
 ## Wacht op jou
 
