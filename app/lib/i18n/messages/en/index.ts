@@ -2,6 +2,7 @@ import type { Messages } from "../nl";
 import { about } from "./about";
 import { account } from "./account";
 import { admin } from "./admin";
+import { agents } from "./agents";
 import { aiNotice } from "./aiNotice";
 import { auth } from "./auth";
 import { chat } from "./chat";
@@ -40,6 +41,7 @@ export const en: Messages = {
   about,
   account,
   admin,
+  agents,
   aiNotice,
   appName: "LimeOnIt",
   auth,
