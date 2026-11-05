@@ -231,15 +231,12 @@ cursus-JSON, en beide voegen daar alleen optionele velden toe.
 - Toetsanalyse per leeruitkomst (zie *Raakvlakken*); importeren uit TestVision/ANS/Remindo (P25-vervolg).
 - Een live koppeling tussen cursus en dossier (zie besluit 3 hieronder).
 
-## Wat Bastiaan moet beslissen
+## Beslist door Bastiaan (5 november 2026, BESLUIT-2026-11-05-1)
 
-1. **Wat importeren we uit een OER?** Advies: leeruitkomsten **en** toetsen (naam, soort, weging,
-   week). Alleen leeruitkomsten is kleiner, maar de weging overtypen is juist foutgevoelig.
-2. **Mag de AI bij import een Bloom-niveau voorstellen?** Advies: ja, als zichtbaar voorstel dat de
-   docent bevestigt; anders vult de docent het voor elke leeruitkomst zelf in.
-3. **Cursus in het dossier: momentopname of live?** Advies: momentopname met "Opnieuw ophalen". Een
-   assessor beoordeelt een vaste versie, en een latere wijziging aan de cursus mag een ingeleverd
-   dossier niet ongemerkt veranderen.
+1. **Uit een OER importeren we leeruitkomsten én toetsen** (naam, soort, weging, week).
+2. **De AI stelt bij import een Bloom-niveau voor**, zichtbaar als voorstel dat de docent bevestigt.
+3. **De cursus komt als momentopname in het dossier**, met een knop "Opnieuw ophalen". Een latere
+   wijziging aan de cursus verandert een ingeleverd dossier niet ongemerkt.
 
 ## Acceptatie
 

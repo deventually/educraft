@@ -193,3 +193,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   API.** Alleen de eindmeting van een tool draait met 3 runs. `npm run eval -- --batch` stuurt
   genereren en beoordelen via de Message Batches API van Anthropic, die de helft kost; de uitslag
   duurt dan iets langer. Samen ongeveer 60–70% minder per tool. Bastiaan, 2026-11-04.
+- **BESLUIT-2026-11-05-1:** **Cursussen verder (P26): importeren, Bloom-voorstel, momentopname.** Uit
+  een OER of studiehandleiding importeren we leeruitkomsten én toetsen (naam, soort, weging, week). De
+  AI mag bij import een Bloom-niveau voorstellen, zichtbaar als voorstel dat de docent bevestigt. Een
+  cursus komt als momentopname in het BDB/BKE-dossier, met "Opnieuw ophalen", geen live koppeling.
+  Bastiaan, 2026-11-05. Uitwerking: brief P26.

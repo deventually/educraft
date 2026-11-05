@@ -99,7 +99,7 @@ _Laatst bijgewerkt: 2026-11-05 (brief P26 bezig)_
   gefaalde harde check, niets afgekapt (BESLUIT-2026-11-04-24 gehaald, 5,0 nog niet;
   `evals/reports/2026-11-05df2.md`). Tien uitkomsten wachten op Bastiaan — PR open.
 - Brief P26 *Cursussen verder* (na P20): toetsmatrijs per vraag, OER-import, cursus als bewijs in het
-  BDB/BKE-dossier. Drie keuzes wachten op Bastiaan — PR open.
+  BDB/BKE-dossier. Keuzes gemaakt (BESLUIT-2026-11-05-1); wacht op merge — PR open.
 
 ## Wacht op jou
 
