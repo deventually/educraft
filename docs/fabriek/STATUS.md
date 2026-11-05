@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 bezig)_
+_Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 en brief P26 bezig)_
 
 ## Nu
 
@@ -100,6 +100,8 @@ _Laatst bijgewerkt: 2026-11-05 (P24.8 gemerged, P20.1 bezig)_
 - P20.1 Cursussen, puur domein (`app/lib/courses/`): het cursusmodel (leeruitkomsten, activiteiten,
   toetsen, Bloom, studielast), bewerkingen en de afstemmingscontroles, zonder AI en nog zonder
   scherm. Daarna 20.2 (opslag), 20.3 (pagina's), 20.4 (koppelen en voorinvullen). PR open.
+- Brief P26 *Cursussen verder* (na P20): toetsmatrijs per vraag, OER-import, cursus als bewijs in het
+  BDB/BKE-dossier. Keuzes gemaakt (BESLUIT-2026-11-05-2); wacht op merge — PR open.
 
 ## Wacht op jou
 
@@ -114,7 +116,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
    Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
 2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
    (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten), dan **P22** (de docentweek).
+3. **P20** (cursussen en de rode draad), dan **P21** (rolagenten) en **P26** (cursussen verder),
+   dan **P22** (de docentweek).
 
 ## Open vragen
 
