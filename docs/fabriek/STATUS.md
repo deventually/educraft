@@ -172,7 +172,8 @@ _Laatst bijgewerkt: 2026-11-05 (P22.2 gemerged, P22.3 open)_
   toast verdwijnt een tik na de nieuwe pagina); de test wacht daar nu op. Alleen een test. PR open.
 - Lastig gesprek, vaste student (`difficult-conversation@v2`): de gespeelde student wisselde soms
   van "haar" naar "zijn" in de gebaren (#75). De gebaren staan nu in de ik-vorm (*ik kijk naar de
-  grond*); nieuwe geteld check `mixedPronouns` in de eval. PR open, meting volgt.
+  grond*); nieuwe geteld check `mixedPronouns` in de eval. Meting dc4 (3 runs): elke case
+  4,67–4,93, geen gefaalde check, alle 198 gebaren in de ik-vorm. PR open.
 - Beheer sneller, tools: op `/admin/tools` zoeken op naam, filteren op stand (Aan / Op aanvraag /
   Uit) en "Zet alle getoonde tools op …" in één klik. Geen migratie. PR open.
 - P21.7 + 21.8 Rolagenten, gekoppeld werk en documentatie: een vinkje "Ook de gekoppelde
