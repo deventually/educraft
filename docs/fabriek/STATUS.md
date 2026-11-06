@@ -241,6 +241,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **LimeOnIt uitleveren als Docker-build** (branch `claude/project-thread-ksu94j`): één
+  `docker compose up -d` met een `.env` voor de sleutels van het taalmodel; de database staat op
+  een volume of een eigen map. De beheerscripts (eerste beheerder, eigenaar, uitnodiging,
+  migratie) draaien in de container zonder ontwikkelgereedschap. Nederlandse gids:
+  `docs/installatie-docker.md`.
 - **OER-import met echte PDF's** (branch `claude/project-thread-0b9zht`): de import kapte het
   document af op 80.000 tekens, zodat het vakdeel (Deel B) van een echte OER nooit bij het model
   kwam; de PDF-tekst verloor bovendien alle regels. Nu gaat het hele document mee (tot 300.000

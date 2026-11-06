@@ -1,0 +1,22 @@
+# LimeOnIt with one command:  docker compose up -d
+# Configuration lives in .env (copy .env.example). The database is a SQLite file on the
+# named volume `limeonit-data` (or the folder in LIMEONIT_DATA). See docs/installatie-docker.md.
+services:
+  app:
+    build: .
+    image: ${LIMEONIT_IMAGE:-limeonit:latest}
+    env_file:
+      - .env
+    # The database always lives on /data inside the container, whatever .env says.
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/limeonit.db
+    ports:
+      - "${LIMEONIT_PORT:-3000}:3000"
+    volumes:
+      # Set LIMEONIT_DATA to a host folder (e.g. /srv/limeonit) to keep the database there.
+      - ${LIMEONIT_DATA:-limeonit-data}:/data
+    restart: unless-stopped
+
+volumes:
+  limeonit-data:

@@ -18,6 +18,9 @@ npm run dev                 # http://localhost:5173
 Zonder `ANTHROPIC_API_KEY` start de app wel, maar genereren geeft een nette
 foutmelding. Een key haal je op via https://console.anthropic.com/.
 
+**Uitleveren zonder ontwikkelomgeving:** `docker compose up -d`. Zie
+[`docs/installatie-docker.md`](docs/installatie-docker.md).
+
 ## Waar we staan (november 2026)
 
 LimeOnIt draait als pilot met docenten in het hbo. De app is tweetalig (NL/EN).

@@ -1,4 +1,16 @@
-.react-router
-build
+# Keep secrets, local data and tooling out of the build context.
+.env
+.env.*
+!.env.example
+.git
+.github
+.claude
+.DS_Store
+data
 node_modules
+build
+.react-router
+evals/output
+book
+teaching*
 README.md
