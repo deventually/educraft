@@ -241,7 +241,7 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved
-  (0/15/30/60+ min), quality 1-5 and a comment (`/api/feedback`). The home page shows a short
+  (0/15/30/60+ min), quality 1-5 and a comment (`/api/feedback`). The Start page shows a short
   check-in (helped / annoyed / missing, `/api/checkin`) when the feature `pilotCheckin` is on and
   it is due: after 3 results, then at most once per 14 days; "Niet nu" counts too. `/admin/usage`
   has *Pilot per tool*: uses, thumbs, time, quality and comments since the start, plus the

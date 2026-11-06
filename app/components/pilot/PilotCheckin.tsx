@@ -10,7 +10,7 @@ type Answers = Record<CheckinQuestion, string>;
 const EMPTY: Answers = { helped: "", annoyed: "", missing: "" };
 
 /**
- * The periodic pilot check-in (the home loader decides when it is due): three short,
+ * The periodic pilot check-in on Start (the start loader decides when it is due): three short,
  * optional questions. "Not now" closes it and is remembered, so it stays away for a
  * while. Posts JSON to `/api/checkin`; thanks go through the toast system.
  */
@@ -54,7 +54,7 @@ export function PilotCheckin() {
   return (
     <section
       aria-labelledby={headingId}
-      className="mb-8 rounded-2xl border border-lime-200 bg-lime-50/60 p-4 shadow-sm sm:p-5"
+      className="rounded-2xl border border-lime-200 bg-lime-50/60 p-4 shadow-sm sm:p-5"
     >
       <h2
         id={headingId}

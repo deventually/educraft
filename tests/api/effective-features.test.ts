@@ -235,11 +235,11 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
   });
 
   it("pilot check-in: due after a few results, and a team can switch it off", async () => {
-    const home = await import("~/routes/home");
+    const start = await import("~/routes/start");
     const generations = await import("~/server/repositories/generations.server");
     const t = await teacher();
     currentUser.value = t;
-    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(false);
+    expect((await start.loader({ request: get("/start") } as never)).checkin).toBe(false);
     for (let i = 0; i < 3; i++) {
       await generations.saveGeneration({
         userId: t.id,
@@ -250,9 +250,9 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
         outputMarkdown: "x",
       });
     }
-    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(true);
+    expect((await start.loader({ request: get("/start") } as never)).checkin).toBe(true);
     await teamWith(t, { ...none, features: { pilotCheckin: "off" } });
-    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(false);
+    expect((await start.loader({ request: get("/start") } as never)).checkin).toBe(false);
   });
 
   it("role agents: a team cannot switch them; only the instance does (BESLUIT-2026-11-05-11)", async () => {

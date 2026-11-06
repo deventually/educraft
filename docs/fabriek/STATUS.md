@@ -252,7 +252,7 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 - **Pilotfeedback van docenten (PR open):** onder elk bewaard resultaat geeft een docent een
   duim, en daarna als hij wil: hoeveel tijd het scheelde (0, 15, 30 of 60+ minuten), een
-  kwaliteitscijfer van 1 tot 5 en een opmerking. Op de startpagina staat af en toe een korte
+  kwaliteitscijfer van 1 tot 5 en een opmerking. Op Start staat af en toe een korte
   check-in (wat hielp, wat ergerde, wat mis je), na drie resultaten en dan hooguit eens per twee
   weken; "Niet nu" klikt hem weg. Het onderdeel *Pilot-check-in* kan uit per team of voor
   iedereen. In Beheer → Gebruik en feedback staat *Pilot per tool*: gebruik, duimen, tijd,
