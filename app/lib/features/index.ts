@@ -6,7 +6,7 @@
  */
 import { INSTANCE_STANDS, type InstanceStand } from "./rule";
 
-export type FeatureId = "portfolio" | "courses" | "roleAgents" | "utilities";
+export type FeatureId = "portfolio" | "courses" | "roleAgents" | "utilities" | "pilotCheckin";
 
 export interface Feature {
   id: FeatureId;
@@ -33,6 +33,8 @@ export const FEATURES: readonly Feature[] = [
     instanceOnly: true,
   },
   { id: "utilities", name: { nl: "Hulpmiddelen", en: "Utilities" }, defaultStand: "on" },
+  // The periodic pilot check-in on the home page; switch it off when the pilot ends.
+  { id: "pilotCheckin", name: { nl: "Pilot-check-in", en: "Pilot check-in" }, defaultStand: "on" },
 ];
 
 export const FEATURE_IDS = FEATURES.map((f) => f.id);

@@ -249,15 +249,22 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
   gebruikersbeheer", BESLUIT-2026-11-05-5, brief P28.
 - 2026-11-06: "Ik wil sowieso export mogelijkheden voor BrightSpace, GradeWork, MS Excel, MS Word,
   Presentaties naar MS Powerpoint, PDF export, etc", plus sjablonen voor PowerPoint en viewers in
-  LimeOnIt → brief P30, BESLUIT-2026-11-06-3.
+  LimeOnIt → brief P30, BESLUIT-2026-11-06-4.
 
 ## Bezig
 
 - **Brief P30 Exporteren (PR open):** Word en PDF voor elk resultaat, Excel voor tabellen en
   rubrics, PowerPoint uit een lesopzet met een voorbeeld in de app, Brightspace (vragen en
   cijfers), GradeWork eerst onderzoeken, en de huisstijl of een eigen sjabloon van de hogeschool.
-  Word en PDF (30.1, 30.2) mogen nu, de rest na de pilot (BESLUIT-2026-11-06-4). Twee vragen voor
+  Word en PDF (30.1, 30.2) mogen nu, de rest na de pilot (BESLUIT-2026-11-06-5). Twee vragen voor
   Bastiaan staan in de brief.
+- **Pilotfeedback van docenten (PR open):** onder elk bewaard resultaat geeft een docent een
+  duim, en daarna als hij wil: hoeveel tijd het scheelde (0, 15, 30 of 60+ minuten), een
+  kwaliteitscijfer van 1 tot 5 en een opmerking. Op Start staat af en toe een korte
+  check-in (wat hielp, wat ergerde, wat mis je), na drie resultaten en dan hooguit eens per twee
+  weken; "Niet nu" klikt hem weg. Het onderdeel *Pilot-check-in* kan uit per team of voor
+  iedereen. In Beheer → Gebruik en feedback staat *Pilot per tool*: gebruik, duimen, tijd,
+  kwaliteit en opmerkingen, te filteren per team. Migratie 0020 (`npm run db:migrate`).
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

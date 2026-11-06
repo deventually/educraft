@@ -23,6 +23,7 @@ import { modelAdmin } from "./modelAdmin";
 import { nav } from "./nav";
 import { pages } from "./pages";
 import { people } from "./people";
+import { pilot } from "./pilot";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioReadiness } from "./portfolioReadiness";
@@ -70,6 +71,7 @@ export const en: Messages = {
   nav,
   pages,
   people,
+  pilot,
   portfolio,
   portfolioExport,
   portfolioReadiness,

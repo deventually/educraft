@@ -254,10 +254,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de aanbieder (`DeepSeek` → `DEEPSEEK_API_KEY`) en mag nooit die van een andere aanbieder zijn,
   zodat een sleutel niet naar een vreemd adres kan. Adressen op internet zijn `https`; een eigen
   server op het schoolnetwerk mag `http` en zonder sleutel, ook in productie. Bastiaan, 2026-11-06.
-- **BESLUIT-2026-11-06-3:** **Twee nieuwe bibliotheken voor export: Excel en PowerPoint.** Voor
+- **BESLUIT-2026-11-06-3:** **Pilotfeedback:** onder elk resultaat een duim, dan optioneel tijdwinst
+  (0/15/30/60+ min), kwaliteit 1-5 en een opmerking. De pilot-check-in staat op Start, komt na 3
+  resultaten en daarna hooguit eens per 14 dagen; "Niet nu" telt ook. Het beheeroverzicht per tool
+  is te filteren per team. Bastiaan, 2026-11-06 (#142).
+- **BESLUIT-2026-11-06-4:** **Twee nieuwe bibliotheken voor export: Excel en PowerPoint.** Voor
   de export naar Excel en PowerPoint mogen er twee bibliotheken bij (`exceljs` en `pptxgenjs`,
   beide MIT). Een derde, om een geüpload PowerPoint-sjabloon te vullen, is apart te vragen.
   Bastiaan, 2026-11-06. Uitwerking: brief P30.
-- **BESLUIT-2026-11-06-4:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
+- **BESLUIT-2026-11-06-5:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
   en PDF voor elk resultaat, geen nieuwe bibliotheek) mogen vóór de pilot; Excel, PowerPoint,
   Brightspace en de huisstijl volgen na de pilotfeedback. Bastiaan, 2026-11-06 (keuzekaart).

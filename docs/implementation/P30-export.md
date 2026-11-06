@@ -1,7 +1,7 @@
 # Fase 30 — Exporteren: Word, PDF, Excel, PowerPoint en Brightspace
 
 > **Status:** ⚪ brief. **30.1 en 30.2 (Word en PDF) mogen nu**; de rest volgt na de pilot en de
-> feedback daarop (BESLUIT-2026-11-06-4). Zo voer je deze brief uit: één deelstap per
+> feedback daarop (BESLUIT-2026-11-06-5). Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 
@@ -83,7 +83,7 @@ importformaat te vinden (zie 30.6). We bouwen het pas als we het echte formaat h
 ## Nieuwe bibliotheken
 
 Bastiaan keurde op 6 november 2026 twee nieuwe bibliotheken goed, voor Excel en voor PowerPoint
-(BESLUIT-2026-11-06-3). De keuze:
+(BESLUIT-2026-11-06-4). De keuze:
 
 | Formaat | Bibliotheek | Licentie | Waarom |
 | --- | --- | --- | --- |
@@ -220,7 +220,7 @@ hebben we **niet gevonden**; het kennisplein van Xebic was niet bereikbaar. We v
 zulke systemen kandidaten en cijfers uitwisselen, maar welke kolommen, welk scheidingsteken en of
 het om formulieren, kandidaten of cijfers gaat, weten we nog niet.
 
-**Doen (na de pilot, BESLUIT-2026-11-06-4):** haal via de GradeWork-beheerder van de hogeschool
+**Doen (na de pilot, BESLUIT-2026-11-06-5):** haal via de GradeWork-beheerder van de hogeschool
 (of Xebic-support) één **voorbeeld-CSV** op, met wat GradeWork inleest of uitvoert, en lees de
 kolommen daarvan af. Is het een cijfer- of kandidatenbestand, dan bouwen we het zoals de
 Brightspace-cijfers (30.5): in de browser, gekoppeld op studentnummer, niets geraden. Is het een
@@ -315,7 +315,7 @@ data via `exportAs`), `docs/implementation/README.md` en het bord.
 
 ## Beslist door Bastiaan (6 november 2026)
 
-1. **Wanneer bouwen:** Word en PDF (30.1, 30.2) nu, de rest na de pilot (BESLUIT-2026-11-06-4,
+1. **Wanneer bouwen:** Word en PDF (30.1, 30.2) nu, de rest na de pilot (BESLUIT-2026-11-06-5,
    keuzekaart).
 
 ## Nog te beslissen door Bastiaan
