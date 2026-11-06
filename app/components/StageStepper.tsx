@@ -225,6 +225,7 @@ export function StageStepper({
                     title={loc(stage.name, locale)}
                     filenameBase={`${tool.slug}-${stage.id}`}
                     streaming={st?.streaming}
+                    lang={outputLanguage}
                   />
                 </div>
               )}

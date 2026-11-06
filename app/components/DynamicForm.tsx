@@ -1,6 +1,8 @@
 import type { InputField } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { Label, Input, Textarea, Select, HelpText, Button, Spinner } from "./ui";
+import { DictateButton } from "./DictateButton";
+import { appendDictation } from "~/lib/speech/dictation";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
@@ -71,10 +73,25 @@ function FieldControl({
   const id = `f-${field.name}`;
   return (
     <div>
-      {field.kind !== "boolean" && field.kind !== "image" && (
-        <Label htmlFor={id} required={field.required} className="mb-1.5">
-          {loc(field.label, locale)}
-        </Label>
+      {field.kind === "textarea" ? (
+        // A textarea can be dictated: the microphone sits at the end of its label row.
+        <div className="mb-1.5 flex items-end justify-between gap-2">
+          <Label htmlFor={id} required={field.required}>
+            {loc(field.label, locale)}
+          </Label>
+          <DictateButton
+            lang={locale}
+            field={loc(field.label, locale)}
+            onText={(text) => onChange(appendDictation(String(value ?? ""), text))}
+          />
+        </div>
+      ) : (
+        field.kind !== "boolean" &&
+        field.kind !== "image" && (
+          <Label htmlFor={id} required={field.required} className="mb-1.5">
+            {loc(field.label, locale)}
+          </Label>
+        )
       )}
       {renderControl(field, id, value, onChange, locale, onFiles)}
       {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}

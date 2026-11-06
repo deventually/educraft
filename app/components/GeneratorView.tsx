@@ -284,6 +284,7 @@ export function GeneratorView({
               filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
               streaming={streaming}
               fill
+              lang={outputLanguage}
             />
           ) : docFiles ? null : (
             <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
