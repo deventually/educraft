@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyImport,
   buildImportMessage,
+  IMPORT_DOCUMENT_MAX,
   type ImportSelection,
   parseImport,
   parseImportSelection,
@@ -51,6 +52,17 @@ describe("buildImportMessage", () => {
     expect(m).toContain(`<document>\n${DOC}\n</document>`);
     expect(m).toContain("<course>Databases</course>");
     expect(buildImportMessage(DOC, " ")).not.toContain("<course>");
+  });
+
+  it("sends a whole OER, so a course in its back part is in reach", () => {
+    // A real OER (Deel A + Deel B) is ~180k characters; its course tables sit
+    // past the 80k that other structured calls are clipped at.
+    const deelA = "Artikel 1.1 Algemene bepaling over tentamens.\n".repeat(3_500);
+    const doc = `${deelA}\nINHELWO Hello World 10 TOETS-01 Schriftelijk 1`;
+    expect(doc.length).toBeGreaterThan(160_000);
+    expect(buildImportMessage(doc, "Hello World")).toContain("INHELWO Hello World");
+    const huge = "x".repeat(IMPORT_DOCUMENT_MAX + 1_000);
+    expect(buildImportMessage(huge).length).toBeLessThan(IMPORT_DOCUMENT_MAX + 100);
   });
 });
 
@@ -161,6 +173,9 @@ describe("parseImport", () => {
         DOC,
         emptyCourseData(),
       ),
+    ).toEqual({ ok: false, error: "empty", notes: "Geen OER" });
+    expect(
+      parseImport(JSON.stringify({ outcomes: [], assessments: [] }), DOC, emptyCourseData()),
     ).toEqual({ ok: false, error: "empty" });
   });
 });

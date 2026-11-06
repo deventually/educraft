@@ -10,11 +10,12 @@ import type { User } from "./auth.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 
-export type CourseImportError = "empty-document" | "quota" | "failed";
+export type CourseImportError = "empty-document" | "quota" | "failed" | "nothing";
 
 export type CourseImportResult =
   | { ok: true; proposal: ImportProposal; flagged: number; clipped: boolean }
-  | { ok: false; error: CourseImportError };
+  /** `notes`: the model's own explanation when it found nothing to import. */
+  | { ok: false; error: CourseImportError; notes?: string };
 
 const PROMPT_ID = "course-import@v1";
 const EVENT = "course-import";
@@ -39,6 +40,12 @@ export async function extractCourseImport(
     if (parsed.ok) {
       log(EVENT, { outcome: "proposed", flagged: parsed.flagged, clipped: parsed.clipped });
       return parsed;
+    }
+    // A valid answer with nothing in it is the model's verdict on the document,
+    // not a glitch: asking again costs a call and gives the same answer.
+    if (parsed.error === "empty") {
+      log(EVENT, { outcome: "nothing", attempt });
+      return { ok: false, error: "nothing", ...(parsed.notes ? { notes: parsed.notes } : {}) };
     }
     log(EVENT, { outcome: "rejected", reason: parsed.error, attempt });
   }

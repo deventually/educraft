@@ -1,16 +1,18 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
 import { DOC_ACCEPT_ATTR, fileToText } from "~/lib/documents/extract";
-import type { ImportAssessment, ImportOutcome, ImportProposal } from "~/lib/courses/import";
+import {
+  IMPORT_DOCUMENT_MAX,
+  type ImportAssessment,
+  type ImportOutcome,
+  type ImportProposal,
+} from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { ASSESSMENT_KINDS } from "~/lib/courses/types";
 import { Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
 import { BloomSelect, NumberField } from "./fields";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
-
-/** The largest text the browser posts (the server clips at the same bound). */
-const DOCUMENT_MAX = 300_000;
 
 type ImportAction = { ok: boolean; intent?: string; proposal?: ImportProposal } | undefined;
 
@@ -39,10 +41,13 @@ export function CourseImport({
   courseName,
   startOpen,
   proposal,
+  notes,
 }: {
   courseName: string;
   startOpen: boolean;
   proposal: ImportProposal | null;
+  /** The AI's explanation when the last `import-extract` found nothing to import. */
+  notes?: string;
 }) {
   const ti = useT().courses.import;
   const nav = useNavigation();
@@ -56,7 +61,7 @@ export function CourseImport({
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      setValue((await fileToText(file)).text.trim().slice(0, DOCUMENT_MAX));
+      setValue((await fileToText(file)).text.trim().slice(0, IMPORT_DOCUMENT_MAX));
       setFailed(false);
     } catch {
       setFailed(true);
@@ -68,7 +73,7 @@ export function CourseImport({
   return (
     <section aria-labelledby={`${id}-title`}>
       <Card className="p-4">
-        <details open={startOpen || !!proposal}>
+        <details open={startOpen || !!proposal || !!notes}>
           <summary className="cursor-pointer text-lg font-medium text-slate-900">
             <span id={`${id}-title`}>{ti.title}</span>
           </summary>
@@ -83,7 +88,7 @@ export function CourseImport({
                 rows={6}
                 required
                 value={value}
-                maxLength={DOCUMENT_MAX}
+                maxLength={IMPORT_DOCUMENT_MAX}
                 onChange={(e) => setValue(e.target.value)}
                 className="mt-1"
               />
@@ -119,6 +124,7 @@ export function CourseImport({
               </Button>
             </div>
           </Form>
+          {notes && !proposal && <AiNotes notes={notes} />}
           {proposal && <ProposalForm proposal={proposal} />}
         </details>
       </Card>
@@ -140,12 +146,7 @@ function ProposalForm({ proposal }: { proposal: ImportProposal }) {
         {ti.proposalTitle}
       </h3>
       <p className="text-sm text-slate-600">{ti.proposalIntro}</p>
-      {proposal.notes && (
-        <div className="rounded-md bg-slate-50 p-3 text-sm text-slate-700">
-          <p className="font-medium">{ti.notes}</p>
-          <p className="mt-1 whitespace-pre-line">{proposal.notes}</p>
-        </div>
-      )}
+      {proposal.notes && <AiNotes notes={proposal.notes} />}
       {proposal.outcomes.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-medium text-slate-900">{ti.outcomesTitle}</h4>
@@ -165,6 +166,23 @@ function ProposalForm({ proposal }: { proposal: ImportProposal }) {
       )}
       <Button type="submit">{ti.apply}</Button>
     </Form>
+  );
+}
+
+/** The model's own remarks on the document, as a labelled region. */
+function AiNotes({ notes }: { notes: string }) {
+  const ti = useT().courses.import;
+  const id = useId();
+  return (
+    <section
+      aria-labelledby={`${id}-notes`}
+      className="mt-4 rounded-md bg-slate-50 p-3 text-sm text-slate-700"
+    >
+      <h4 id={`${id}-notes`} className="font-medium">
+        {ti.notes}
+      </h4>
+      <p className="mt-1 whitespace-pre-line">{notes}</p>
+    </section>
   );
 }
 

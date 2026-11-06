@@ -235,7 +235,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- Niets.
+- **OER-import met echte PDF's** (branch `claude/project-thread-0b9zht`): de import kapte het
+  document af op 80.000 tekens, zodat het vakdeel (Deel B) van een echte OER nooit bij het model
+  kwam; de PDF-tekst verloor bovendien alle regels. Nu gaat het hele document mee (tot 300.000
+  tekens), blijven tabelrijen rijen, en ziet de docent de uitleg van de AI als er niets te
+  importeren valt (zonder tweede betaalde aanroep).
 
 ## Wacht op jou
 

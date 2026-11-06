@@ -11,9 +11,8 @@ import { normalizeForMatch } from "~/lib/documents/locate";
 export const STRUCTURED_INPUT_LIMIT = 80_000;
 
 /** `<tag>text</tag>`: the source as data, clipped at the input limit. */
-export function wrapAsData(tag: string, text: string): string {
-  const body =
-    text.length <= STRUCTURED_INPUT_LIMIT ? text : `${text.slice(0, STRUCTURED_INPUT_LIMIT)}\n[…]`;
+export function wrapAsData(tag: string, text: string, limit = STRUCTURED_INPUT_LIMIT): string {
+  const body = text.length <= limit ? text : `${text.slice(0, limit)}\n[…]`;
   return `<${tag}>\n${body}\n</${tag}>`;
 }
 

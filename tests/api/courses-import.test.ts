@@ -120,6 +120,24 @@ describe("import-extract", () => {
     expect(failed.error).toMatch(/could not/i);
   });
 
+  it("says why when the document has nothing to import, without a pointless retry", async () => {
+    // A domain description or an OER without course outcomes is not an error
+    // to retry: the model explains it in `notes`, and the teacher reads that.
+    const course = await repo.createCourse("teacher-i", { name: "Leeg" });
+    const why = "Dit is een domeinbeschrijving, geen OER: er staan geen vakken in.";
+    generate.mockResolvedValue({
+      text: JSON.stringify({ outcomes: [], assessments: [], notes: why }),
+    });
+    const r = await post(course.id, [
+      ["intent", "import-extract"],
+      ["documentText", DOC],
+    ]);
+    expect(generate).toHaveBeenCalledOnce();
+    expect(r).toMatchObject({ ok: false, intent: "import-extract", notes: why });
+    if (r.ok) throw new Error("expected nothing found");
+    expect(r.error).toMatch(/geen leeruitkomsten of toetsen/);
+  });
+
   it("refuses an empty document and a teacher over the quota, without a model call", async () => {
     const course = await repo.createCourse("teacher-i", { name: "Gates" });
     expect(

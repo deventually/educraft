@@ -197,7 +197,11 @@ writeFileSync(
 writeFileSync(
   join(here, "sample-table.pdf"),
   buildPdf([
-    ["Code Naam EC Toetscode Toetswijze Weging", "INHELWO Hello World 10 TOETS-01 Schriftelijk 1", "INDATFI Data First 10 TOETS-01 Andere wijze 1"],
+    [
+      "Code Naam EC Toetscode Toetswijze Weging",
+      "INHELWO Hello World 10 TOETS-01 Schriftelijk 1",
+      "INDATFI Data First 10 TOETS-01 Andere wijze 1",
+    ],
     ["Leeruitkomst 1 De student ontwerpt een webapplicatie."],
   ]),
 );
