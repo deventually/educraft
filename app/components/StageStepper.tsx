@@ -73,6 +73,8 @@ export function StageStepper({
   const [formError, setFormError] = useState<string | null>(null);
   // The work saved by the latest finished stage (P27.1): what "keep" and "next" act on.
   const [lastGenerationId, setLastGenerationId] = useState<string | null>(null);
+  // P30.1: the saved result of each step, so the export holds all of them in one file.
+  const [savedIds, setSavedIds] = useState<Record<string, string>>({});
   const abortRefs = useRef<Record<string, AbortController>>({});
 
   const outputs = (): Record<string, string> =>
@@ -134,7 +136,11 @@ export function StageStepper({
           }),
         onDone: (meta) => {
           setStage(stage.id, { streaming: false });
-          if (meta?.generationId) setLastGenerationId(meta?.generationId);
+          const savedId = meta?.generationId;
+          if (savedId) {
+            setLastGenerationId(savedId);
+            setSavedIds((prev) => ({ ...prev, [stage.id]: savedId }));
+          }
         },
         onError: (err) =>
           setStage(stage.id, { streaming: false, error: err.message ?? t.error.unknown }),
@@ -243,6 +249,7 @@ export function StageStepper({
             <ResultActions
               {...resultContext}
               generationId={lastGenerationId}
+              exportWith={Object.values(savedIds).filter((id) => id !== lastGenerationId)}
               courseId={courseId}
               itemId={itemId}
             />

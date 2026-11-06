@@ -1,9 +1,9 @@
 /**
- * A small markdown reader for dossier chapters (brief P25.6). It covers what a
- * teacher writes in a chapter textarea — headings, paragraphs, bullet and
- * numbered lists, GFM tables, bold and italic — and turns it into plain blocks
- * the Word export can lay out. Anything it does not know stays as text, so
- * nothing the teacher wrote is ever dropped.
+ * A small markdown reader for exports (brief P25.6, moved here in P30.1). It
+ * covers what a teacher writes in a dossier chapter and what a tool returns —
+ * headings, paragraphs, bullet and numbered lists, GFM tables, bold and italic —
+ * and turns it into plain blocks every export writer can lay out. Anything it
+ * does not know stays as text, so nothing the teacher wrote is ever dropped.
  */
 
 export interface Run {

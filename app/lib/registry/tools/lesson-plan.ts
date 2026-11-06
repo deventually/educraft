@@ -153,6 +153,7 @@ export const lessonPlan: Tool = {
       systemPromptId: LESSON_PLAN_PROMPT.id,
       output: {
         kind: "structured-sections",
+        exportAs: "slides",
         hint: {
           nl: "Leerdoel en succescriterium, een tijdsplan dat optelt tot de lesduur, het verloop per fase, terugkomen in volgende lessen en een check op de opzet.",
           en: "Learning goal and success criterion, a time plan that adds up to the lesson length, the outline per phase, coming back in later lessons and a check of the plan.",

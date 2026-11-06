@@ -304,6 +304,34 @@ export async function listSharedCourseWork(
 }
 
 /**
+ * One piece of the owner's work, for a team-mate who may read it (P30.1, export): linked to a
+ * course shared with the viewer, and from a tool whose work may be shared. Null otherwise.
+ */
+export async function getSharedWork(
+  viewerId: string,
+  generationId: string,
+): Promise<typeof generations.$inferSelect | null> {
+  const link = getDb()
+    .select({ courseId: courseLinks.courseId })
+    .from(courseLinks)
+    .innerJoin(generations, eq(generations.id, courseLinks.generationId))
+    .innerJoin(courses, eq(courses.id, courseLinks.courseId))
+    .where(
+      and(
+        eq(courseLinks.generationId, generationId),
+        eq(courseLinks.userId, generations.userId),
+        eq(courses.userId, generations.userId),
+        ne(generations.userId, viewerId),
+        inArray(generations.toolSlug, [...SHAREABLE_WORK_SLUGS]),
+        sharedWith(viewerId, "course", courses.id, courses.userId),
+      ),
+    )
+    .get();
+  if (!link) return null;
+  return getDb().select().from(generations).where(eq(generations.id, generationId)).get() ?? null;
+}
+
+/**
  * "Maak een kopie": the viewer's own copy of a shared item. The copy has no links, no
  * shares and (for a course) no context profile, since that profile is the owner's.
  */

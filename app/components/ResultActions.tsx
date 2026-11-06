@@ -3,6 +3,7 @@ import { Link, useFetcher } from "react-router";
 import { ArrowRight, BookmarkCheck, FolderCheck, GraduationCap } from "lucide-react";
 import { Button, Label, Select } from "./ui";
 import { useActionToast } from "./Toast";
+import { ExportMenu } from "./export/ExportMenu";
 import { type LinkTarget, linkTargetValue } from "~/lib/courses/links";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
@@ -20,10 +21,15 @@ export interface ResultActionsProps {
   dossiers: { id: string; name: string; criteria: { id: string; label: string }[] }[];
   /** P27.2: the tool was opened from this dossier criterion; one button puts the result there. */
   forCriterion?: { dossierId: string; criterionId: string } | null;
+  /** P30.1: the other saved steps of a multi-step tool, exported along with this one. */
+  exportWith?: string[];
 }
 
 /** What the tool page passes down to every result surface (P27.1). */
-export type ResultContext = Omit<ResultActionsProps, "generationId" | "courseId" | "itemId">;
+export type ResultContext = Omit<
+  ResultActionsProps,
+  "generationId" | "courseId" | "itemId" | "exportWith"
+>;
 
 type ActionResult = { ok: true; intent?: string } | { ok: false; error?: string };
 
@@ -42,6 +48,7 @@ export function ResultActions({
   linkTargets,
   dossiers,
   forCriterion = null,
+  exportWith = [],
 }: ResultActionsProps) {
   const t = useT();
   const m = t.resultActions;
@@ -71,10 +78,9 @@ export function ResultActions({
   const keptAt = courseId || (courseFetcher.data?.ok ? linkedTo : "");
   const keptName = linkTargets.find((c) => c.courseId === keptAt)?.courseName;
   const canKeep = Boolean(generationId);
-  const showCourse = canKeep && (keptName || linkTargets.length > 0);
   const showCriterion = canKeep && forCriterion !== null;
   const showEvidence = canKeep && !showCriterion && dossiers.length > 0;
-  if (nextTools.length === 0 && !showCourse && !showEvidence && !showCriterion) return null;
+  if (nextTools.length === 0 && !canKeep) return null;
 
   const query = courseId
     ? `?course=${encodeURIComponent(courseId)}${itemId ? `&item=${encodeURIComponent(itemId)}` : ""}`
@@ -123,6 +129,8 @@ export function ResultActions({
           </ul>
         </div>
       )}
+
+      {generationId && <ExportMenu generationId={generationId} with={exportWith} />}
 
       {canKeep && keptName && (
         <p className="flex items-center gap-1.5 text-sm text-slate-700">
