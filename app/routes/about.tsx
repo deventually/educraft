@@ -13,7 +13,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function About() {
   const t = useT();
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full min-w-0 max-w-3xl">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.about.heading}
       </h1>

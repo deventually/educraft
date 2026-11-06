@@ -97,7 +97,7 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8">
+    <div className="w-full min-w-0 space-y-8">
       <header>
         <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
           {team.name}

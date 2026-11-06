@@ -81,7 +81,7 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
   const { courses, profiles, shared = [] } = loaderData;
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="w-full min-w-0">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {c.heading}
       </h1>

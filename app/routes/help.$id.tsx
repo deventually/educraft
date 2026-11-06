@@ -38,7 +38,7 @@ export default function HelpPage({ loaderData }: Route.ComponentProps) {
   const locale = useLocale();
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full min-w-0 max-w-3xl">
       <Link
         to="/help"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800"
