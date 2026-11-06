@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 const DEV_SESSION_SECRET = "dev-only-insecure-session-secret-change-me-please";
 
-const schema = z.object({
+export const envSchema = z.object({
   // Optional at boot so the app can run/browse without a key; the Anthropic
   // adapter throws a friendly error only when a generation is actually requested.
   ANTHROPIC_API_KEY: z.string().optional(),
@@ -40,7 +40,7 @@ const schema = z.object({
   DAILY_OUTPUT_TOKEN_LIMIT: z.coerce.number().default(200_000),
 });
 
-export const env = schema.parse(process.env);
+export const env = envSchema.parse(process.env);
 
 // Refuse to boot in production with the guessable dev signing key.
 if (process.env.NODE_ENV === "production" && env.SESSION_SECRET === DEV_SESSION_SECRET) {
