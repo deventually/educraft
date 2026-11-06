@@ -7,12 +7,14 @@ type Profiles = typeof import("~/server/repositories/profiles.server");
 type Generations = typeof import("~/server/repositories/generations.server");
 type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
+type Pilot = typeof import("~/server/repositories/pilot.server");
 
 let users: Users;
 let profiles: Profiles;
 let generations: Generations;
 let usage: Usage;
 let feedback: Feedback;
+let pilot: Pilot;
 
 beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
@@ -20,6 +22,7 @@ beforeAll(async () => {
   generations = await import("~/server/repositories/generations.server");
   usage = await import("~/server/repositories/usage.server");
   feedback = await import("~/server/repositories/feedback.server");
+  pilot = await import("~/server/repositories/pilot.server");
 });
 
 async function seedUser(id: string) {
@@ -35,6 +38,7 @@ async function seedUser(id: string) {
   await profiles.createProfile(id, { name: "Profile" });
   await usage.recordUsage(id, { chars: 10 }, "2026-07-01");
   await feedback.upsertFeedback({ userId: id, generationId: gen.id, rating: 1 });
+  await pilot.saveCheckin(id, { helped: "Alles" });
   return gen.id;
 }
 
@@ -49,6 +53,7 @@ describe("deleteUserCascade", () => {
     expect(await profiles.listProfiles("del-user-a")).toHaveLength(0);
     expect((await usage.getTodayUsage("del-user-a", "2026-07-01")).requests).toBe(0);
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === genId)).toBe(false);
+    expect((await pilot.listCheckins()).some((c) => c.userId === "del-user-a")).toBe(false);
   });
 
   it("removes the user's assignedModels key", async () => {

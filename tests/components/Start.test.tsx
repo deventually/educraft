@@ -15,6 +15,7 @@ const base: Data = {
   week: { findings: [], recent: [] },
   teacherWeek: null,
   startDateHint: null,
+  checkin: false,
 };
 
 const full: Data = {
@@ -53,6 +54,15 @@ function renderStart(data: Data, locale: "nl" | "en" = "nl") {
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 describe("Start (P27.3)", () => {
+  it("shows the pilot check-in right under the question box, only when it is due", async () => {
+    const { unmount } = renderStart(base);
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByRole("region", { name: /hoe gaat de pilot/i })).toBeNull();
+    unmount();
+    renderStart({ ...base, checkin: true });
+    expect(await screen.findByRole("region", { name: /hoe gaat de pilot/i })).toBeInTheDocument();
+  });
+
   it("shows the three blocks in order: question box, this week, your courses", async () => {
     renderStart(full);
     const h1 = await screen.findByRole("heading", {

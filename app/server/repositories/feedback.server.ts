@@ -8,15 +8,18 @@
  * generation is verified by the route before calling `upsertFeedback`.
  */
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { feedback, generations, users, type FeedbackRow } from "../schema.server";
+import { feedback, generations, teamMembers, users, type FeedbackRow } from "../schema.server";
 
 export interface UpsertFeedbackInput {
   userId: string;
   generationId: string;
   rating: number; // +1 / -1
   comment?: string | null;
+  /** Pilot: minutes saved (0/15/30/60) and quality (1-5); absent = not answered. */
+  minutesSaved?: number | null;
+  quality?: number | null;
 }
 
 /** Insert or update the user's single feedback row for a generation. */
@@ -33,9 +36,16 @@ export async function upsertFeedback(input: UpsertFeedbackInput): Promise<Feedba
       ...existing,
       rating: input.rating,
       comment: input.comment ?? null,
+      minutesSaved: input.minutesSaved ?? null,
+      quality: input.quality ?? null,
     };
     db.update(feedback)
-      .set({ rating: row.rating, comment: row.comment })
+      .set({
+        rating: row.rating,
+        comment: row.comment,
+        minutesSaved: row.minutesSaved,
+        quality: row.quality,
+      })
       .where(and(eq(feedback.userId, input.userId), eq(feedback.generationId, input.generationId)))
       .run();
     return row;
@@ -47,6 +57,8 @@ export async function upsertFeedback(input: UpsertFeedbackInput): Promise<Feedba
     userId: input.userId,
     rating: input.rating,
     comment: input.comment ?? null,
+    minutesSaved: input.minutesSaved ?? null,
+    quality: input.quality ?? null,
     createdAt: new Date(),
   };
   db.insert(feedback).values(row).run();
@@ -62,6 +74,8 @@ export interface FeedbackWithContext {
   id: string;
   rating: number;
   comment: string | null;
+  minutesSaved: number | null;
+  quality: number | null;
   createdAt: Date;
   userId: string;
   userName: string | null;
@@ -70,15 +84,35 @@ export interface FeedbackWithContext {
 }
 
 /**
- * All feedback joined with the tool it targeted and the rater's name — the
- * owner-only admin list. Not user-scoped by design (an admin sees everything).
+ * The users of a team, as a WHERE condition on `column` (pilot filter per team); no team
+ * = no condition. Admin views only.
  */
-export async function listFeedbackWithContext(): Promise<FeedbackWithContext[]> {
+export function inTeam(column: Parameters<typeof eq>[0], teamId?: string): SQL | undefined {
+  if (!teamId) return undefined;
+  return inArray(
+    column,
+    getDb()
+      .select({ userId: teamMembers.userId })
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId)),
+  );
+}
+
+/**
+ * All feedback joined with the tool it targeted and the rater's name — the
+ * owner-only admin list, optionally only of one team's members. Not user-scoped by
+ * design (an admin sees everything).
+ */
+export async function listFeedbackWithContext(
+  opts: { teamId?: string } = {},
+): Promise<FeedbackWithContext[]> {
   return getDb()
     .select({
       id: feedback.id,
       rating: feedback.rating,
       comment: feedback.comment,
+      minutesSaved: feedback.minutesSaved,
+      quality: feedback.quality,
       createdAt: feedback.createdAt,
       userId: feedback.userId,
       userName: users.name,
@@ -88,6 +122,7 @@ export async function listFeedbackWithContext(): Promise<FeedbackWithContext[]> 
     .from(feedback)
     .leftJoin(generations, eq(feedback.generationId, generations.id))
     .leftJoin(users, eq(feedback.userId, users.id))
+    .where(inTeam(feedback.userId, opts.teamId))
     .orderBy(desc(feedback.createdAt))
     .all();
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
@@ -25,6 +25,8 @@ const feedback = [
     userName: "Anna",
     toolSlug: first.slug,
     toolName: first.name,
+    minutesSaved: 60,
+    quality: 5,
   },
   {
     id: "f2",
@@ -34,6 +36,8 @@ const feedback = [
     userName: "Piet",
     toolSlug: second.slug,
     toolName: second.name,
+    minutesSaved: null,
+    quality: null,
   },
 ];
 
@@ -44,9 +48,46 @@ const loaderData = {
     { userId: "u2", userName: "Kim", day: "2026-07-04", requests: 1, outputChars: 400 },
   ],
   perTool: [{ slug: first.slug, name: first.name, count: 4 }],
+  teams: [
+    { id: "t-hsl", name: "HSL" },
+    { id: "t-hhs", name: "HHS" },
+  ],
+  teamId: "",
+  pilot: [
+    {
+      toolSlug: first.slug,
+      name: first.name,
+      uses: 7,
+      up: 2,
+      down: 1,
+      minutesSaved: 90,
+      timeAnswers: 3,
+      qualityAvg: 4.5,
+      qualityAnswers: 2,
+      comments: 2,
+    },
+  ],
+  checkins: [
+    {
+      id: "c1",
+      userName: "Anna",
+      helped: "De rubric-tool",
+      annoyed: null,
+      missing: "Voorlezen",
+      createdAt: new Date("2026-11-01T10:00:00Z"),
+    },
+  ],
 };
 
-const emptyData = { rows: [], perTool: [], feedback: [] };
+const emptyData = {
+  rows: [],
+  perTool: [],
+  feedback: [],
+  teams: [],
+  teamId: "",
+  pilot: [],
+  checkins: [],
+};
 
 function renderRoute(data: unknown = loaderData) {
   const props = { loaderData: data } as unknown as ComponentProps<typeof AdminUsage>;
@@ -65,13 +106,57 @@ describe("Admin usage", () => {
     expect(screen.getAllByText(firstName).length).toBeGreaterThan(0);
   });
 
-  it("has two headings: usage and tester feedback", () => {
+  it("has three headings: usage, the pilot per tool and tester feedback", () => {
     renderRoute();
     const names = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
     expect(names).toEqual([
       expect.stringMatching(/^gebruik|^usage/i),
+      expect.stringMatching(/^pilot per tool/i),
       expect.stringMatching(/feedback van testers|tester feedback/i),
     ]);
+  });
+
+  it("shows the pilot per tool: uses, thumbs, time saved, quality, comments", () => {
+    renderRoute();
+    const table = screen.getByRole("table", { name: /pilot per tool/i });
+    const row = within(table).getByRole("row", { name: new RegExp(firstName) });
+    const cells = within(row)
+      .getAllByRole("cell")
+      .map((c) => c.textContent);
+    expect(within(row).getByRole("rowheader")).toHaveTextContent(firstName);
+    expect(cells).toEqual([
+      "7",
+      expect.stringContaining("2"),
+      expect.stringContaining("1"),
+      "1 u 30 min (3)",
+      "4,5 (2)",
+      "2",
+    ]);
+  });
+
+  it("filters the pilot by team with a plain GET form", () => {
+    renderRoute();
+    const select = screen.getByRole("combobox", { name: "Team" });
+    expect(select.closest("form")).toHaveAttribute("method", "get");
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Alle teams", "HSL", "HHS"]);
+    expect(screen.getByRole("button", { name: "Toon" })).toBeInTheDocument();
+  });
+
+  it("lists what teachers said in the check-in", () => {
+    renderRoute();
+    expect(screen.getByText("De rubric-tool")).toBeInTheDocument();
+    expect(screen.getByText("Voorlezen")).toBeInTheDocument();
+  });
+
+  it("shows time saved and quality in the feedback list", () => {
+    renderRoute();
+    const table = screen.getByRole("table", { name: /feedback van testers/i });
+    expect(within(table).getByText("60+ min")).toBeInTheDocument();
+    expect(within(table).getByText("5")).toBeInTheDocument();
   });
 
   it("renders each feedback row with its tool and rater", () => {
@@ -84,7 +169,10 @@ describe("Admin usage", () => {
   it("filters the feedback by tool (client side)", async () => {
     const user = userEvent.setup();
     renderRoute();
-    await user.selectOptions(screen.getByRole("combobox"), second.slug);
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: /filter op tool/i }),
+      second.slug,
+    );
     expect(screen.queryByText("Sterk resultaat")).toBeNull();
     expect(screen.getByText("Piet")).toBeInTheDocument();
   });

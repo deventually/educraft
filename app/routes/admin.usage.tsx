@@ -9,23 +9,47 @@ import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { listFeedbackWithContext } from "~/server/repositories/feedback.server";
 import { Label, Select } from "~/components/ui";
+import { listTeams } from "~/server/repositories/teams.server";
+import { listCheckins, pilotOverview } from "~/server/repositories/pilot.server";
+import { PilotOverview } from "~/components/pilot/PilotOverview";
+import { fmt } from "~/lib/i18n/format";
 
 const WINDOW_DAYS = 14;
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  const [rows, perTool, feedbackRows] = await Promise.all([
+  // Pilot filter per team (?team=<id>); an unknown id means everyone.
+  const teams = (await listTeams()).map((t) => ({ id: t.id, name: t.name }));
+  const asked = new URL(request.url).searchParams.get("team") ?? "";
+  const teamId = teams.some((t) => t.id === asked) ? asked : "";
+  const scope = { teamId: teamId || undefined };
+  const [rows, perTool, feedbackRows, pilot, checkins] = await Promise.all([
     listRecentUsage(WINDOW_DAYS),
     countGenerationsByTool(WINDOW_DAYS),
-    listFeedbackWithContext(),
+    listFeedbackWithContext(scope),
+    pilotOverview(scope),
+    listCheckins(scope),
   ]);
   return {
+    teams,
+    teamId,
+    pilot: pilot.map((p) => ({ ...p, name: getToolBySlug(p.toolSlug)?.name ?? null })),
+    checkins: checkins.map((c) => ({
+      id: c.id,
+      userName: c.userName ?? c.userId,
+      helped: c.helped,
+      annoyed: c.annoyed,
+      missing: c.missing,
+      createdAt: c.createdAt,
+    })),
     feedback: feedbackRows.map((r) => {
       const tool = r.toolSlug ? getToolBySlug(r.toolSlug) : undefined;
       return {
         id: r.id,
         rating: r.rating,
         comment: r.comment,
+        minutesSaved: r.minutesSaved,
+        quality: r.quality,
         createdAt: r.createdAt,
         userName: r.userName ?? r.userId,
         toolSlug: r.toolSlug ?? "",
@@ -49,7 +73,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function AdminUsage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, perTool, feedback } = loaderData;
+  const { rows, perTool, feedback, teams, teamId, pilot, checkins } = loaderData;
 
   return (
     <div className="space-y-10">
@@ -148,6 +172,8 @@ export default function AdminUsage({ loaderData }: Route.ComponentProps) {
         )}
       </section>
 
+      <PilotOverview teams={teams} teamId={teamId} pilot={pilot} checkins={checkins} />
+
       <FeedbackSection rows={feedback} />
     </div>
   );
@@ -219,6 +245,12 @@ function FeedbackSection({ rows }: { rows: Route.ComponentProps["loaderData"]["f
                   {t.admin.feedback.rating}
                 </th>
                 <th scope="col" className="px-4 py-2.5 font-semibold">
+                  {t.pilot.overview.colTime}
+                </th>
+                <th scope="col" className="px-4 py-2.5 font-semibold">
+                  {t.pilot.overview.colQuality}
+                </th>
+                <th scope="col" className="px-4 py-2.5 font-semibold">
                   {t.admin.feedback.comment}
                 </th>
                 <th scope="col" className="px-4 py-2.5 font-semibold">
@@ -246,6 +278,16 @@ function FeedbackSection({ rows }: { rows: Route.ComponentProps["loaderData"]["f
                       </span>
                     )}
                   </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-slate-600">
+                    {r.minutesSaved === null || r.minutesSaved === undefined
+                      ? "—"
+                      : r.minutesSaved === 0
+                        ? t.feedback.timeNone
+                        : fmt(r.minutesSaved >= 60 ? t.feedback.timeMax : t.feedback.timeMinutes, {
+                            n: r.minutesSaved,
+                          })}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-slate-600">{r.quality ?? "—"}</td>
                   <td className="max-w-xs px-4 py-2.5 text-slate-600">{r.comment ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-400">
                     {fmtDate(r.createdAt, locale)}
