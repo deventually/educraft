@@ -250,6 +250,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **Voorlezen (spraak, deel 1, PR open):** onder elk toolresultaat en onder elk chatantwoord een
+  knop *Voorlezen* / *Read aloud*. De browser leest voor met een stem die op het apparaat zelf
+  draait; een online stem (die de tekst naar bijv. Google stuurt) wordt nooit gebruikt. Heeft het
+  apparaat geen eigen stem voor die taal, dan verschijnt de knop niet. Dicteren (deel 2) wacht op
+  de keuze van Bastiaan voor de server die spraak omzet naar tekst.
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

@@ -19,6 +19,7 @@ import type { FormValues } from "~/lib/forms/values";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
 import { AiNotice } from "./AiNotice";
+import { ReadAloudButton } from "./ReadAloudButton";
 import { ResultActions, type ResultContext } from "./ResultActions";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
@@ -479,11 +480,18 @@ export function ChatView({
                     </span>
                     <div className="min-w-0 flex-1 text-sm text-slate-800">
                       {turn.content ? (
-                        (renderAssistant?.(turn.content, {
-                          streaming: isStreaming && i === turns.length - 1,
-                          userTurns,
-                          model: selectedModel,
-                        }) ?? <Markdown>{turn.content}</Markdown>)
+                        <>
+                          {renderAssistant?.(turn.content, {
+                            streaming: isStreaming && i === turns.length - 1,
+                            userTurns,
+                            model: selectedModel,
+                          }) ?? <Markdown>{turn.content}</Markdown>}
+                          {!(isStreaming && i === turns.length - 1) && (
+                            <div className="mt-1 -ml-3">
+                              <ReadAloudButton text={turn.content} lang={outputLanguage} />
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <span className="italic text-slate-500">
                           {turn.interrupted ? (

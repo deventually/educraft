@@ -31,6 +31,7 @@ import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
 import { sharing } from "./sharing";
+import { speech } from "./speech";
 import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
@@ -86,6 +87,7 @@ export const nl = {
   resultActions,
   settings,
   sharing,
+  speech,
   start,
   tagline: "Evidence-based onderwijs ontwerpen met generatieve AI",
   teams,

@@ -32,6 +32,7 @@ import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
 import { sharing } from "./sharing";
+import { speech } from "./speech";
 import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
@@ -79,6 +80,7 @@ export const en: Messages = {
   resultActions,
   settings,
   sharing,
+  speech,
   start,
   tagline: "Design evidence-based education with generative AI",
   teams,

@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { axe } from "vitest-axe";
 import { ChatView } from "~/components/ChatView";
 import type { Tool } from "~/lib/registry/types";
+import { stubSpeech } from "../helpers/speech";
 
 // Mock streamPost to avoid actual API calls
 vi.mock("~/lib/streamClient", () => ({
@@ -61,6 +62,7 @@ vi.mock("~/lib/i18n/useT", () => ({
     error: {
       unknown: "Something went wrong",
     },
+    speech: { readAloud: "Read aloud", stopReading: "Stop reading" },
   }),
 }));
 
@@ -522,6 +524,32 @@ describe("ChatView", () => {
     await screen.findByText("Hi");
     expect(screen.queryByRole("button", { name: /end session|sessie beëindigen/i })).toBeNull();
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("reads a finished answer aloud in the output language, not while it streams", async () => {
+    const speech = stubSpeech();
+    const { streamPost } = await import("~/lib/streamClient");
+    let finish: () => void = () => {};
+    (streamPost as ReturnType<typeof vi.fn>).mockImplementation(
+      async (_url, _body, { onToken, onDone }) => {
+        onToken("**Hi** there");
+        finish = () => onDone("**Hi** there");
+      },
+    );
+    const { container } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(await screen.findByPlaceholderText("Your message…"), "What is OOP?");
+    await user.keyboard("{Enter}");
+    await screen.findByText("Hi");
+    const log = screen.getByRole("log");
+    expect(within(log).queryByRole("button", { name: "Read aloud" })).toBeNull();
+    act(() => finish());
+    await user.click(await within(log).findByRole("button", { name: "Read aloud" }));
+    expect(speech.spoken.map((u) => u.text)).toEqual(["Hi there"]);
+    expect(speech.spoken[0].lang).toBe("en-GB");
+    expect((await axe(container)).violations).toEqual([]);
+    speech.restore();
   });
 
   it("shows live region for streaming with aria-live=polite", async () => {
