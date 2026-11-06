@@ -1,3 +1,5 @@
+import { z } from "zod";
+import modelsConfig from "../../../config/models.json";
 import type { ModelRegistry, ModelState } from "./modelRegistry";
 
 /**
@@ -59,96 +61,75 @@ export interface ModelInfo {
   clientSelectable: boolean;
 }
 
-export const MODELS = {
-  "claude-opus-5-5": {
-    provider: "anthropic",
-    apiId: "claude-opus-5-5",
-    displayName: "Claude Opus 5.5",
-    supportsImages: true,
-    alwaysThinks: true,
-    tier: 3,
-    // Opus-class: a tool/stage default only, never forced by a caller.
-    clientSelectable: false,
-  },
-  "claude-sonnet-5-5": {
-    provider: "anthropic",
-    apiId: "claude-sonnet-5-5",
-    displayName: "Claude Sonnet 5.5",
-    supportsImages: true,
-    alwaysThinks: true,
-    tier: 2,
-    clientSelectable: true,
-  },
-  "claude-opus-4-8": {
-    provider: "anthropic",
-    apiId: "claude-opus-4-8",
-    displayName: "Claude Opus 4.8",
-    supportsImages: true,
-    tier: 3,
-    // Opus is expensive: reachable only as a tool/stage default, never forced by a caller.
-    clientSelectable: false,
-  },
-  "claude-sonnet-4-6": {
-    provider: "anthropic",
-    apiId: "claude-sonnet-4-6",
-    displayName: "Claude Sonnet 4.6",
-    supportsImages: true,
-    tier: 2,
-    clientSelectable: true,
-  },
-  "claude-haiku-4-5": {
-    provider: "anthropic",
-    apiId: "claude-haiku-4-5",
-    displayName: "Claude Haiku 4.5",
-    supportsImages: true,
-    tier: 1,
-    clientSelectable: true,
-  },
-  // NB: local OpenAI-compatible models (Ollama / LM Studio) are NOT listed here.
-  // They are discovered at runtime from each server's /v1/models endpoint
-  // (see discover.server.ts) and resolved via resolveModelInfo().
-  //
-  // Local CLI agents — run on the user's machine, choose their own model.
-  "claude-code": {
-    provider: "claude-code",
-    apiId: "claude-code",
-    displayName: "Claude Code (CLI)",
-    supportsImages: false,
-    tier: 3,
-    local: true,
-    // Runs on the caller's own machine; costs the owner nothing.
-    clientSelectable: true,
-  },
-  opencode: {
-    provider: "opencode",
-    apiId: "opencode",
-    displayName: "opencode (CLI)",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-  codex: {
-    provider: "codex",
-    apiId: "codex",
-    displayName: "Codex (CLI)",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-  "gemini-cli": {
-    provider: "gemini-cli",
-    apiId: "gemini-cli",
-    displayName: "Gemini CLI",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-} as const satisfies Record<string, ModelInfo>;
+const PROVIDER_IDS = [
+  "anthropic",
+  "openai",
+  "google",
+  "mistral",
+  "openai-compat",
+  "ollama",
+  "lmstudio",
+  "claude-code",
+  "opencode",
+  "codex",
+  "gemini-cli",
+] as const satisfies readonly ProviderId[];
 
-export type ModelId = keyof typeof MODELS;
+const ConfigModelSchema = z.object({
+  id: z.string().min(1),
+  provider: z.enum(PROVIDER_IDS),
+  apiId: z.string().min(1),
+  displayName: z.string().min(1),
+  supportsImages: z.boolean(),
+  supportsThinking: z.boolean().optional(),
+  alwaysThinks: z.boolean().optional(),
+  tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  local: z.boolean().optional(),
+  clientSelectable: z.boolean(),
+});
+
+const ModelsConfigSchema = z.object({
+  default: z.string().min(1),
+  models: z.array(ConfigModelSchema).min(1),
+});
+
+export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
+
+/**
+ * Validate `config/models.json`. A broken file stops the app at boot with a message that
+ * names the file and the problem, instead of failing on the first AI call.
+ */
+export function parseModelsConfig(raw: unknown): ModelsConfig {
+  const res = ModelsConfigSchema.safeParse(raw);
+  if (!res.success) {
+    const where = res.error.issues
+      .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+      .join("; ");
+    throw new Error(`config/models.json is invalid (check provider, tier, fields): ${where}`);
+  }
+  const seen = new Set<string>();
+  for (const m of res.data.models) {
+    if (seen.has(m.id)) throw new Error(`config/models.json: model "${m.id}" is listed twice.`);
+    seen.add(m.id);
+  }
+  if (!seen.has(res.data.default)) {
+    throw new Error(`config/models.json: the default "${res.data.default}" is not in the list.`);
+  }
+  return res.data;
+}
+
+const config = parseModelsConfig(modelsConfig);
+
+/**
+ * The built-in catalog, read from `config/models.json` (edit that file, not this code, to
+ * add or change a model; restart or rebuild to apply). Models an admin adds on screen
+ * come on top of it through `installModelRegistry`.
+ */
+export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
+  config.models.map(({ id, ...info }) => [id, info]),
+);
+
+export type ModelId = string;
 
 /** Answer budget when a tool sets none. */
 export const DEFAULT_MAX_TOKENS = 8192;
@@ -169,7 +150,8 @@ export function outputTokenBudget(
   return info.alwaysThinks ? answer + THINKING_HEADROOM : answer;
 }
 
-export const DEFAULT_MODEL: ModelId = "claude-sonnet-5-5";
+/** The app-wide default model (`default` in `config/models.json`). */
+export const DEFAULT_MODEL: ModelId = config.default;
 
 // ── The admin's registry (added models, upgrades), installed by the server ─────────
 // `modelRegistry.server` reads it from the database and installs it here, so every

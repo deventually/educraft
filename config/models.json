@@ -1,0 +1,92 @@
+{
+  "default": "claude-sonnet-5-5",
+  "models": [
+    {
+      "id": "claude-opus-5-5",
+      "provider": "anthropic",
+      "apiId": "claude-opus-5-5",
+      "displayName": "Claude Opus 5.5",
+      "supportsImages": true,
+      "alwaysThinks": true,
+      "tier": 3,
+      "clientSelectable": false
+    },
+    {
+      "id": "claude-sonnet-5-5",
+      "provider": "anthropic",
+      "apiId": "claude-sonnet-5-5",
+      "displayName": "Claude Sonnet 5.5",
+      "supportsImages": true,
+      "alwaysThinks": true,
+      "tier": 2,
+      "clientSelectable": true
+    },
+    {
+      "id": "claude-opus-4-8",
+      "provider": "anthropic",
+      "apiId": "claude-opus-4-8",
+      "displayName": "Claude Opus 4.8",
+      "supportsImages": true,
+      "tier": 3,
+      "clientSelectable": false
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "apiId": "claude-sonnet-4-6",
+      "displayName": "Claude Sonnet 4.6",
+      "supportsImages": true,
+      "tier": 2,
+      "clientSelectable": true
+    },
+    {
+      "id": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "apiId": "claude-haiku-4-5",
+      "displayName": "Claude Haiku 4.5",
+      "supportsImages": true,
+      "tier": 1,
+      "clientSelectable": true
+    },
+    {
+      "id": "claude-code",
+      "provider": "claude-code",
+      "apiId": "claude-code",
+      "displayName": "Claude Code (CLI)",
+      "supportsImages": false,
+      "tier": 3,
+      "local": true,
+      "clientSelectable": true
+    },
+    {
+      "id": "opencode",
+      "provider": "opencode",
+      "apiId": "opencode",
+      "displayName": "opencode (CLI)",
+      "supportsImages": false,
+      "tier": 2,
+      "local": true,
+      "clientSelectable": true
+    },
+    {
+      "id": "codex",
+      "provider": "codex",
+      "apiId": "codex",
+      "displayName": "Codex (CLI)",
+      "supportsImages": false,
+      "tier": 2,
+      "local": true,
+      "clientSelectable": true
+    },
+    {
+      "id": "gemini-cli",
+      "provider": "gemini-cli",
+      "apiId": "gemini-cli",
+      "displayName": "Gemini CLI",
+      "supportsImages": false,
+      "tier": 2,
+      "local": true,
+      "clientSelectable": true
+    }
+  ]
+}
