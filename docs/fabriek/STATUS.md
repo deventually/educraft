@@ -256,7 +256,8 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 - **Brief P30 Exporteren (PR open):** Word en PDF voor elk resultaat, Excel voor tabellen en
   rubrics, PowerPoint uit een lesopzet met een voorbeeld in de app, Brightspace (vragen en
   cijfers), GradeWork eerst onderzoeken, en de huisstijl of een eigen sjabloon van de hogeschool.
-  Bouwen na de pilot, tenzij Bastiaan anders kiest. Drie vragen voor Bastiaan staan in de brief.
+  Word en PDF (30.1, 30.2) mogen nu, de rest na de pilot (BESLUIT-2026-11-06-4). Twee vragen voor
+  Bastiaan staan in de brief.
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

@@ -258,3 +258,6 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de export naar Excel en PowerPoint mogen er twee bibliotheken bij (`exceljs` en `pptxgenjs`,
   beide MIT). Een derde, om een geüpload PowerPoint-sjabloon te vullen, is apart te vragen.
   Bastiaan, 2026-11-06. Uitwerking: brief P30.
+- **BESLUIT-2026-11-06-4:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
+  en PDF voor elk resultaat, geen nieuwe bibliotheek) mogen vóór de pilot; Excel, PowerPoint,
+  Brightspace en de huisstijl volgen na de pilotfeedback. Bastiaan, 2026-11-06 (keuzekaart).

@@ -1,7 +1,7 @@
 # Fase 30 — Exporteren: Word, PDF, Excel, PowerPoint en Brightspace
 
-> **Status:** ⚪ brief, nog niet bouwen. Volgens de afgesproken volgorde start de bouw na de pilot
-> en de feedback daarop, tenzij Bastiaan anders zegt. Zo voer je deze brief uit: één deelstap per
+> **Status:** ⚪ brief. **30.1 en 30.2 (Word en PDF) mogen nu**; de rest volgt na de pilot en de
+> feedback daarop (BESLUIT-2026-11-06-4). Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 
@@ -305,6 +305,11 @@ data via `exportAs`), `docs/implementation/README.md` en het bord.
 7. Na het uploaden van het Word-sjabloon van de hogeschool heeft een export de koppen en kleuren
    van dat sjabloon.
 
+## Beslist door Bastiaan (6 november 2026)
+
+1. **Wanneer bouwen:** Word en PDF (30.1, 30.2) nu, de rest na de pilot (BESLUIT-2026-11-06-4,
+   keuzekaart).
+
 ## Nog te beslissen door Bastiaan
 
 1. **Toetsvragen naar Brightspace vraagt een nieuwe versie van de AI-tekst** (`test-items-items@v4`)
@@ -312,8 +317,6 @@ data via `exportAs`), `docs/implementation/README.md` en het bord.
    PDF en open vragen?
 2. **Een derde bibliotheek voor PowerPoint-sjablonen** (`pptx-automizer`, MIT), of alleen logo,
    kleuren en lettertype (30.7a)?
-3. **Wanneer bouwen:** na de pilot (de afgesproken volgorde), of 30.1 + 30.2 (Word en PDF voor
-   alles, geen nieuwe dependency) al eerder?
 
 ## Bronnen
 
