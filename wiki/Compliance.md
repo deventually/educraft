@@ -40,7 +40,7 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
   per-generation log line in `app/routes/api.stream.tsx`.
 - **Right to erasure.** "Delete my account and data" (`/account`) runs
   `deleteUserCascade` (`app/server/repositories/users.server.ts`) — a single
-  transaction removing the user's feedback, usage counters, generations, context
+  transaction removing the user's feedback, pilot check-ins, usage counters, generations, context
   profiles, and their chat history, then the user row — and
   ends the session. Scoped by user id, so no other account is touched.
 - **Access control & scoping.** Invite-only accounts, two roles
