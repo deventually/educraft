@@ -18,5 +18,25 @@ services:
       - ${LIMEONIT_DATA:-limeonit-data}:/data
     restart: unless-stopped
 
+  # Optional: dictation (speech to text) with whisper.cpp on the internal network only.
+  # Start with:  docker compose --profile speech up -d   and set WHISPER_BASE_URL in .env.
+  # The first start downloads the model (WHISPER_MODEL, default ~550 MB) to its volume.
+  whisper:
+    image: ghcr.io/ggml-org/whisper.cpp:main
+    profiles: ["speech"]
+    # The image runs its command with `bash -c`.
+    command:
+      - >-
+        m=$${WHISPER_MODEL:-large-v3-turbo-q5_0};
+        [ -f /models/ggml-$$m.bin ] || download-ggml-model.sh $$m /models;
+        exec whisper-server --host 0.0.0.0 --port 8178 -m /models/ggml-$$m.bin
+        --inference-path /v1/audio/transcriptions --suppress-nst --no-timestamps
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3-turbo-q5_0}
+    volumes:
+      - whisper-models:/models
+    restart: unless-stopped
+
 volumes:
   limeonit-data:
+  whisper-models:

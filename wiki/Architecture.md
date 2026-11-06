@@ -127,6 +127,20 @@ LimeOnIt is not tied to one model vendor.
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 
+### Speech
+
+- **Read aloud (TTS)** is browser-only: `ReadAloudButton` uses `speechSynthesis` with a
+  device-local voice (`localService`); an online voice would send the text away, so with no
+  local voice for the language the button is not shown (`app/lib/speech/readAloud.ts`).
+- **Dictation (STT)** goes through the server: `DictateButton` records 16 kHz mono WAV in the
+  browser (`app/lib/speech/recorder.ts`, `wav.ts`), posts it to `/api/transcribe`, and
+  `speechToText.server.ts` forwards it to the OpenAI-compatible `/audio/transcriptions` of the
+  provider named in `speechToText` in `config/models.json` (by default `whisper`, address in
+  `WHISPER_BASE_URL`): whisper.cpp in Docker (`--profile speech`), on the machine, or OpenAI.
+  No address → `dictationEnabled()` is false and no microphone shows. Nothing is stored;
+  never the browser's Web Speech API (it sends audio to Google). The `Permissions-Policy`
+  allows the microphone for `self` only.
+
 ---
 
 ## Feature modules
@@ -237,6 +251,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   its kind (`PREFERRED_TOOLS`), or the test analysis in *Nakijken* (`GRADE_TOOL`).
 
 ---
+
+- **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
+  `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
+  result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved
+  (0/15/30/60+ min), quality 1-5 and a comment (`/api/feedback`). The Start page shows a short
+  check-in (helped / annoyed / missing, `/api/checkin`) when the feature `pilotCheckin` is on and
+  it is due: after 3 results, then at most once per 14 days; "Niet nu" counts too. `/admin/usage`
+  has *Pilot per tool*: uses, thumbs, time, quality and comments since the start, plus the
+  check-in answers, filtered per team with `?team=`.
 
 ## Stack
 

@@ -13,11 +13,13 @@ vi.mock("~/lib/i18n/useT", () => ({
       exportMd: "Export (Markdown)",
       generating: "Generating…",
     },
+    speech: { readAloud: "Read aloud", stopReading: "Stop reading" },
   }),
 }));
 
 import * as utils from "~/lib/utils";
 import { ResultPanel } from "~/components/ResultPanel";
+import { stubSpeech } from "../helpers/speech";
 
 // happy-dom loads no stylesheet, so axe can't compute real contrast.
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -85,5 +87,22 @@ describe("ResultPanel", () => {
   it("has no a11y violations with a rendered result", async () => {
     const { container } = render(<ResultPanel markdown={MD} filenameBase="Feedback" />);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("reads a finished result aloud in the result's language", async () => {
+    const speech = stubSpeech();
+    const user = userEvent.setup();
+    render(<ResultPanel markdown={MD} filenameBase="Feedback" lang="nl" />);
+    await user.click(screen.getByRole("button", { name: "Read aloud" }));
+    expect(speech.spoken.map((u) => u.text)).toEqual(["Heading one", "Some bold body text."]);
+    expect(speech.spoken[0].lang).toBe("nl-NL");
+    speech.restore();
+  });
+
+  it("offers no read-aloud while the result is still streaming", () => {
+    const speech = stubSpeech();
+    render(<ResultPanel markdown={MD} filenameBase="Feedback" streaming />);
+    expect(screen.queryByRole("button", { name: "Read aloud" })).toBeNull();
+    speech.restore();
   });
 });

@@ -86,6 +86,17 @@ describe("ResultActions (P27.1)", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("asks for pilot feedback under every saved result, even with nothing else to offer", () => {
+    show({ nextTools: [], linkTargets: [], dossiers: [] });
+    expect(screen.getByText("Was dit nuttig?")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Nuttig" })).toBeTruthy();
+  });
+
+  it("asks no feedback before the result is saved", () => {
+    show({ generationId: null });
+    expect(screen.queryByText("Was dit nuttig?")).toBeNull();
+  });
+
   it("has no axe violations", async () => {
     const { container } = show();
     expect((await axe(container, axeOpts)).violations).toEqual([]);

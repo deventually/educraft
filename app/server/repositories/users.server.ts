@@ -33,6 +33,7 @@ import {
   teamMembers,
   featureExceptions,
   feedback,
+  pilotCheckins,
   generations,
   instanceSettings,
   invites,
@@ -411,7 +412,7 @@ export async function deleteUser(id: string): Promise<void> {
 
 /**
  * Delete-my-data cascade (AVG / AI Act, audit finding). Removes everything the
- * user owns — feedback, usage counters, generations and context profiles,
+ * user owns — feedback, pilot check-ins, usage counters, generations and context profiles,
  * then the user row, in a single transaction so a partial
  * failure leaves nothing orphaned. Scoped by `userId`/`id`, so another user's
  * rows are never touched.
@@ -419,6 +420,7 @@ export async function deleteUser(id: string): Promise<void> {
 export async function deleteUserCascade(id: string): Promise<void> {
   getDb().transaction((tx) => {
     tx.delete(feedback).where(eq(feedback.userId, id)).run();
+    tx.delete(pilotCheckins).where(eq(pilotCheckins.userId, id)).run();
     tx.delete(usage).where(eq(usage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();

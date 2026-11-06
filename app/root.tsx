@@ -19,6 +19,8 @@ import { getUser } from "~/server/auth.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures } from "~/server/availability.server";
 import { takeFlash } from "~/server/flash.server";
+import { dictationEnabled } from "~/server/speechToText.server";
+import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
 export const links: Route.LinksFunction = () => [
@@ -54,6 +56,8 @@ export async function loader({ request }: Route.LoaderArgs) {
           ) as Record<FeatureId, boolean>,
         }
       : null,
+    // Dictation needs a speech server (`speechToText` in config/models.json).
+    dictation: user ? dictationEnabled() : false,
   };
   return data(body, clearCookie ? { headers: { "Set-Cookie": clearCookie } } : undefined);
 }
@@ -91,7 +95,9 @@ export default function App() {
   return (
     <ToastProvider>
       <FlashToast />
-      <Outlet />
+      <DictationProvider enabled={useLoaderData<typeof loader>().dictation}>
+        <Outlet />
+      </DictationProvider>
     </ToastProvider>
   );
 }

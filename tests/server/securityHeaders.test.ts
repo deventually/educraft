@@ -6,7 +6,10 @@ describe("security headers", () => {
     expect(SECURITY_HEADERS["X-Frame-Options"]).toBe("DENY");
     expect(SECURITY_HEADERS["X-Content-Type-Options"]).toBe("nosniff");
     expect(SECURITY_HEADERS["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
-    expect(SECURITY_HEADERS["Permissions-Policy"]).toBe("camera=(), microphone=(), geolocation=()");
+    // The microphone only for LimeOnIt itself (dictation), never for an embedded frame.
+    expect(SECURITY_HEADERS["Permissions-Policy"]).toBe(
+      "camera=(), microphone=(self), geolocation=()",
+    );
   });
 
   it("ships the CSP as enforcing (verified clean in the browser, P2 deploy)", () => {

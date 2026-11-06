@@ -8,6 +8,10 @@ export const api: RouteArea = {
     route("api/stream", "routes/api.stream.tsx"),
     // Records tester feedback on a generation.
     route("api/feedback", "routes/api.feedback.tsx"),
+    // Dictation: one recording in, its text out (speech server from config/models.json).
+    route("api/transcribe", "routes/api.transcribe.tsx"),
+    // Stores or dismisses a teacher's periodic pilot check-in.
+    route("api/checkin", "routes/api.checkin.tsx"),
     // Public health probe for orchestrators (no auth, no chrome).
     route("healthz", "routes/healthz.tsx"),
     // Persists the chosen UI locale in a cookie.

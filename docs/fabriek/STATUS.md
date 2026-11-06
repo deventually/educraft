@@ -250,6 +250,19 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
+  *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
+  microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar
+  een Whisper-server (whisper.cpp in Docker met `--profile speech`, op de eigen computer, of
+  OpenAI) en komt terug als tekst. Zonder `WHISPER_BASE_URL` in `.env` is er geen microfoonknop.
+  Nooit de spraakdienst van Chrome (die stuurt audio naar Google).
+- **Pilotfeedback van docenten (PR open):** onder elk bewaard resultaat geeft een docent een
+  duim, en daarna als hij wil: hoeveel tijd het scheelde (0, 15, 30 of 60+ minuten), een
+  kwaliteitscijfer van 1 tot 5 en een opmerking. Op Start staat af en toe een korte
+  check-in (wat hielp, wat ergerde, wat mis je), na drie resultaten en dan hooguit eens per twee
+  weken; "Niet nu" klikt hem weg. Het onderdeel *Pilot-check-in* kan uit per team of voor
+  iedereen. In Beheer → Gebruik en feedback staat *Pilot per tool*: gebruik, duimen, tijd,
+  kwaliteit en opmerkingen, te filteren per team. Migratie 0020 (`npm run db:migrate`).
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

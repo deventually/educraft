@@ -24,6 +24,7 @@ import { modelAdmin } from "./modelAdmin";
 import { nav } from "./nav";
 import { pages } from "./pages";
 import { people } from "./people";
+import { pilot } from "./pilot";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioReadiness } from "./portfolioReadiness";
@@ -33,6 +34,7 @@ import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
 import { sharing } from "./sharing";
+import { speech } from "./speech";
 import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
@@ -72,6 +74,7 @@ export const en: Messages = {
   nav,
   pages,
   people,
+  pilot,
   portfolio,
   portfolioExport,
   portfolioReadiness,
@@ -81,6 +84,7 @@ export const en: Messages = {
   resultActions,
   settings,
   sharing,
+  speech,
   start,
   tagline: "Design evidence-based education with generative AI",
   teams,

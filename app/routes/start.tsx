@@ -1,3 +1,5 @@
+import { PilotCheckin } from "~/components/pilot/PilotCheckin";
+import { isCheckinDue } from "~/server/repositories/pilot.server";
 import { useId } from "react";
 import { Form, Link } from "react-router";
 import { ArrowRight, GraduationCap, Search } from "lucide-react";
@@ -107,7 +109,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     };
   }
 
+  // The pilot check-in shows when it is on for this teacher and due (`checkinDue`).
+  const checkin = (await isFeatureOn(user, "pilotCheckin")) && (await isCheckinDue(user.id));
+
   return {
+    checkin,
     query,
     course,
     results,
@@ -137,12 +143,15 @@ export default function Start({ loaderData }: Route.ComponentProps) {
     week,
     teacherWeek = null,
     startDateHint = null,
+    checkin = false,
   } = loaderData;
   const hasCourses = (courses?.length ?? 0) > 0;
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-10">
       <QuestionBox t={t} query={query} course={course} courses={courses ?? []} results={results} />
+
+      {checkin && <PilotCheckin />}
 
       {courses && !hasCourses && (
         <section
