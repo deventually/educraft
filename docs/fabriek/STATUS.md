@@ -235,7 +235,8 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- Niets.
+- **Bestandsknop als echte knop (NL/EN):** de kale bladerknop van de browser wordt overal een
+  LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast. PR open.
 
 ## Wacht op jou
 

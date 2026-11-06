@@ -5,6 +5,7 @@ import type { ImportAssessment, ImportOutcome, ImportProposal } from "~/lib/cour
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { ASSESSMENT_KINDS } from "~/lib/courses/types";
 import { Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
+import { FileInput } from "~/components/FileInput";
 import { BloomSelect, NumberField } from "./fields";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
@@ -90,14 +91,13 @@ export function CourseImport({
             </div>
             <div>
               <Label htmlFor={`${id}-file`}>{ti.file}</Label>
-              <input
+              <FileInput
                 ref={fileRef}
                 id={`${id}-file`}
-                type="file"
                 accept={DOC_ACCEPT_ATTR}
                 aria-describedby={`${id}-file-help`}
                 onChange={onFile}
-                className="mt-1 block text-sm text-slate-700"
+                className="mt-1"
               />
               <HelpText id={`${id}-file-help`}>{failed ? ti.fileFailed : ti.fileHelp}</HelpText>
             </div>
