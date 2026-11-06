@@ -8,6 +8,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **Bestandsknop als echte knop (NL/EN, #135) gemerged op 2026-11-06:** de kale bladerknop van de
+  browser is overal een LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast.
+- **Alle schermen even breed op desktop (#136) gemerged op 2026-11-06:** elke pagina vult dezelfde
+  breedte als de kopbalk (`max-w-6xl` in de AppShell); alleen leestekst (Over, Disclaimer, Cookies,
+  een helpartikel) blijft een smallere, links uitgelijnde kolom. `tests/page-width.test.ts`
+  bewaakt het.
 - **Toetsvragen zonder correctie in een kopje (`test-items-items@v3`, #128) gemerged op
   2026-11-05:** het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen
   kopje en in elk vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe
@@ -240,11 +246,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
   model naar een nieuwe versie (bijv. Haiku 4.5 → Haiku 5.5) en faseert het in twee stappen uit:
   eerst gaat nieuw werk naar de nieuwe versie en mogen lopende gesprekken afmaken, daarna gaat
   alles naar de nieuwe. Per model zie je het gebruik. Sleutels blijven op de server.
-- **Bestandsknop als echte knop (NL/EN):** de kale bladerknop van de browser wordt overal een
-  LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast. PR open.
-- **Alle schermen even breed op desktop (PR open):** elke pagina vult dezelfde breedte als de
-  kopbalk (`max-w-6xl` in de AppShell); alleen leestekst (Over, Disclaimer, Cookies, een
-  helpartikel) blijft een smallere, links uitgelijnde kolom. `tests/page-width.test.ts` bewaakt het.
+- **OER-import met echte PDF's** (branch `claude/project-thread-0b9zht`): de import kapte het
+  document af op 80.000 tekens, zodat het vakdeel (Deel B) van een echte OER nooit bij het model
+  kwam; de PDF-tekst verloor bovendien alle regels. Nu gaat het hele document mee (tot 300.000
+  tekens), blijven tabelrijen rijen, en ziet de docent de uitleg van de AI als er niets te
+  importeren valt (zonder tweede betaalde aanroep).
 
 ## Wacht op jou
 

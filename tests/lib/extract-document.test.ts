@@ -30,6 +30,16 @@ describe("document extraction", () => {
     expect(result.text).toContain("STAGEFIXTUREPAGETWO");
   });
 
+  it("keeps a PDF's lines and pages apart, so a table row stays one row", async () => {
+    // An OER's course table only makes sense row by row; collapsing all
+    // whitespace into one line made the import guess which cell went where.
+    const { text } = await extractTextFromBytes(fixture("sample-table.pdf"), PDF_MIME);
+    const lines = text.split("\n").map((l) => l.trim());
+    expect(lines).toContain("INHELWO Hello World 10 TOETS-01 Schriftelijk 1");
+    expect(lines).toContain("INDATFI Data First 10 TOETS-01 Andere wijze 1");
+    expect(text).toMatch(/Andere wijze 1\n\n+Leeruitkomst 1/);
+  });
+
   it("extracts text from a DOCX", async () => {
     const result = await extractTextFromBytes(fixture("sample.docx"), DOCX_MIME);
     expect(result.empty).toBe(false);

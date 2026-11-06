@@ -7,12 +7,17 @@ import type { ImportProposal } from "~/lib/courses/import";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-function renderImport(proposal: ImportProposal | null, startOpen = true) {
+function renderImport(proposal: ImportProposal | null, startOpen = true, notes?: string) {
   const Stub = createRoutesStub([
     {
       path: "/",
       Component: () => (
-        <CourseImport courseName="Databases" startOpen={startOpen} proposal={proposal} />
+        <CourseImport
+          courseName="Databases"
+          startOpen={startOpen}
+          proposal={proposal}
+          notes={notes}
+        />
       ),
     },
   ]);
@@ -91,6 +96,15 @@ describe("CourseImport", () => {
     expect(within(review).getByText(/tellen niet op tot 100%/)).toBeVisible();
     expect(within(review).getByText("Het document noemt ook een herkansing.")).toBeVisible();
     expect(within(review).getByRole("button", { name: "Gekozen items toevoegen" })).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows the AI's explanation when the document had nothing to import", async () => {
+    const why = "Dit is een domeinbeschrijving; er staan geen vakken in.";
+    const { container } = renderImport(null, false, why);
+    const box = screen.getByRole("region", { name: "Opmerkingen van de AI" });
+    expect(box).toBeVisible();
+    expect(within(box).getByText(why)).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
