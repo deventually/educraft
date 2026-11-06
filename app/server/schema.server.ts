@@ -94,9 +94,30 @@ export const feedback = sqliteTable(
     userId: text("user_id").notNull(),
     rating: integer("rating").notNull(), // +1 / -1
     comment: text("comment"),
+    // Pilot: "how much time did this save?" (0/15/30/60, 60 = 60+) and quality 1-5.
+    minutesSaved: integer("minutes_saved"),
+    quality: integer("quality"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
   (t) => [uniqueIndex("feedback_user_generation").on(t.userId, t.generationId)],
+);
+
+/**
+ * A teacher's periodic pilot check-in: what helped, what annoyed, what is missing.
+ * `dismissed` rows ("not now") hold no answers; they only space out the next prompt.
+ */
+export const pilotCheckins = sqliteTable(
+  "pilot_checkins",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    helped: text("helped"),
+    annoyed: text("annoyed"),
+    missing: text("missing"),
+    dismissed: integer("dismissed", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [index("pilot_checkins_user_idx").on(t.userId, t.createdAt)],
 );
 
 /** A reusable HBO-i context profile. */
@@ -324,3 +345,4 @@ export type GenerationRow = typeof generations.$inferSelect;
 export type ContextProfileRow = typeof contextProfiles.$inferSelect;
 export type UsageRow = typeof usage.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;
+export type PilotCheckinRow = typeof pilotCheckins.$inferSelect;

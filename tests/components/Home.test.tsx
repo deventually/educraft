@@ -48,13 +48,23 @@ const tools: ToolData[] = [
   },
 ];
 
-function renderHome(utilities = true) {
-  const props = { loaderData: { tools, utilities } } as unknown as ComponentProps<typeof Home>;
+function renderHome(utilities = true, checkin = false) {
+  const props = { loaderData: { tools, utilities, checkin } } as unknown as ComponentProps<
+    typeof Home
+  >;
   const Stub = createRoutesStub([{ path: "/", Component: () => <Home {...props} /> }]);
   return render(<Stub initialEntries={["/"]} />);
 }
 
 describe("Home / tools page", () => {
+  it("shows the pilot check-in only when it is due", () => {
+    const { unmount } = renderHome(true, false);
+    expect(screen.queryByRole("region", { name: /hoe gaat de pilot/i })).toBeNull();
+    unmount();
+    renderHome(true, true);
+    expect(screen.getByRole("region", { name: /hoe gaat de pilot/i })).toBeInTheDocument();
+  });
+
   it("groups tools by teaching goal by default", () => {
     renderHome();
     expect(screen.getByText("Plannen & ontwerpen")).toBeInTheDocument();

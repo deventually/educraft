@@ -234,6 +234,27 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     expect((await home.loader({ request: get("/") } as never)).utilities).toBe(false);
   });
 
+  it("pilot check-in: due after a few results, and a team can switch it off", async () => {
+    const home = await import("~/routes/home");
+    const generations = await import("~/server/repositories/generations.server");
+    const t = await teacher();
+    currentUser.value = t;
+    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(false);
+    for (let i = 0; i < 3; i++) {
+      await generations.saveGeneration({
+        userId: t.id,
+        toolSlug: "mentorai",
+        model: "m",
+        input: {},
+        outputLanguage: "nl",
+        outputMarkdown: "x",
+      });
+    }
+    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(true);
+    await teamWith(t, { ...none, features: { pilotCheckin: "off" } });
+    expect((await home.loader({ request: get("/") } as never)).checkin).toBe(false);
+  });
+
   it("role agents: a team cannot switch them; only the instance does (BESLUIT-2026-11-05-11)", async () => {
     const { getTeamSettingsOffer } = await import("~/server/teamSettings.server");
     const t = await teacher();

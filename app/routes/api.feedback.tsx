@@ -3,11 +3,17 @@ import { z } from "zod";
 import { requireUser } from "~/server/auth.server";
 import { getGeneration } from "~/server/repositories/generations.server";
 import { upsertFeedback } from "~/server/repositories/feedback.server";
+import { QUALITY_SCORES, TIME_SAVED_OPTIONS } from "~/lib/pilot";
+
+const oneOf = (values: readonly number[]) =>
+  z.number().refine((n) => values.includes(n), { message: "not an option" });
 
 const FeedbackSchema = z.object({
   generationId: z.string().min(1).max(100),
   rating: z.union([z.literal(1), z.literal(-1)]),
   comment: z.string().max(2000).optional(),
+  minutesSaved: oneOf(TIME_SAVED_OPTIONS).optional(),
+  quality: oneOf(QUALITY_SCORES).optional(),
 });
 
 /**
@@ -40,6 +46,8 @@ export async function action({ request }: Route.ActionArgs) {
     generationId: parsed.data.generationId,
     rating: parsed.data.rating,
     comment: parsed.data.comment ?? null,
+    minutesSaved: parsed.data.minutesSaved ?? null,
+    quality: parsed.data.quality ?? null,
   });
   return Response.json({ ok: true });
 }

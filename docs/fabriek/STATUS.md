@@ -250,6 +250,13 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **Pilotfeedback van docenten (PR open):** onder elk bewaard resultaat geeft een docent een
+  duim, en daarna als hij wil: hoeveel tijd het scheelde (0, 15, 30 of 60+ minuten), een
+  kwaliteitscijfer van 1 tot 5 en een opmerking. Op de startpagina staat af en toe een korte
+  check-in (wat hielp, wat ergerde, wat mis je), na drie resultaten en dan hooguit eens per twee
+  weken; "Niet nu" klikt hem weg. Het onderdeel *Pilot-check-in* kan uit per team of voor
+  iedereen. In Beheer → Gebruik en feedback staat *Pilot per tool*: gebruik, duimen, tijd,
+  kwaliteit en opmerkingen, te filteren per team. Migratie 0020 (`npm run db:migrate`).
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

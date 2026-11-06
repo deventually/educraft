@@ -14,6 +14,8 @@ import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { ToolSubtitle } from "~/components/ToolTitle";
 import { UTILITIES, utilitySearchText } from "~/lib/utilities";
 import { UtilityCard } from "~/components/utilities/UtilityCard";
+import { PilotCheckin } from "~/components/pilot/PilotCheckin";
+import { isCheckinDue } from "~/server/repositories/pilot.server";
 
 // Utilities are static data (no AI, always on), so the search haystack is built once.
 const UTILITY_SEARCH = UTILITIES.map((u) => ({ utility: u, search: utilitySearchText(u) }));
@@ -51,13 +53,15 @@ export async function loader({ request }: Route.LoaderArgs) {
     search: toolSearchText(tool),
   }));
   // Utilities can be switched off per team (P28.3): then no section and no search hits.
-  return { tools, utilities: await isFeatureOn(user, "utilities") };
+  // The pilot check-in shows when it is on for this teacher and due (`checkinDue`).
+  const checkin = (await isFeatureOn(user, "pilotCheckin")) && (await isCheckinDue(user.id));
+  return { tools, utilities: await isFeatureOn(user, "utilities"), checkin };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { tools, utilities } = loaderData;
+  const { tools, utilities, checkin } = loaderData;
 
   const [query, setQuery] = useState("");
 
@@ -90,6 +94,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </Link>
         </p>
       </div>
+
+      {checkin && <PilotCheckin />}
 
       {/* Toolbar: search */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">

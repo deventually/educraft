@@ -96,4 +96,32 @@ describe("api.feedback", () => {
     const res = await post({ generationId: genId, rating: 1, comment: "x".repeat(2001) }, USER_A);
     expect(res.status).toBe(400);
   });
+
+  it("stores how much time it saved and a quality score", async () => {
+    const genId = await seedGeneration(USER_A);
+    const res = await post(
+      { generationId: genId, rating: 1, minutesSaved: 30, quality: 4 },
+      USER_A,
+    );
+    expect(res.status).toBeLessThan(400);
+    const row = (await feedback.listAllFeedback()).find((f) => f.generationId === genId);
+    expect(row?.minutesSaved).toBe(30);
+    expect(row?.quality).toBe(4);
+  });
+
+  it("leaves time and quality empty when they are not given", async () => {
+    const genId = await seedGeneration(USER_A);
+    await post({ generationId: genId, rating: -1 }, USER_A);
+    const row = (await feedback.listAllFeedback()).find((f) => f.generationId === genId);
+    expect(row?.minutesSaved).toBeNull();
+    expect(row?.quality).toBeNull();
+  });
+
+  it("rejects a time or quality that is not one of the options", async () => {
+    const genId = await seedGeneration(USER_A);
+    expect((await post({ generationId: genId, rating: 1, minutesSaved: 20 }, USER_A)).status).toBe(
+      400,
+    );
+    expect((await post({ generationId: genId, rating: 1, quality: 6 }, USER_A)).status).toBe(400);
+  });
 });
