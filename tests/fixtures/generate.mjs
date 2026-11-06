@@ -18,18 +18,21 @@ const DOCX_TOKEN = "STAGEFIXTUREDOCX";
 // from the assembled buffer so the file is well-formed (no reliance on pdf.js
 // recovery).
 // ---------------------------------------------------------------------------
-function buildPdf() {
-  const page = (token) => `BT /F1 24 Tf 72 700 Td (Pagina tekst ${token}) Tj ET`;
-  const c1 = page(PDF_TOKEN_ONE);
-  const c2 = page(PDF_TOKEN_TWO);
-
+// Each page is a list of lines, drawn top-down, so a fixture can carry a table.
+function buildPdf(pages) {
+  const content = (lines) =>
+    lines.map((line, i) => `BT /F1 12 Tf 72 ${700 - i * 20} Td (${line}) Tj ET`).join("\n");
+  const font = 3 + pages.length * 2;
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 7 0 R >> >> >>",
-    `<< /Length ${c1.length} >>\nstream\n${c1}\nendstream`,
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 7 0 R >> >> >>",
-    `<< /Length ${c2.length} >>\nstream\n${c2}\nendstream`,
+    `<< /Type /Pages /Kids [${pages.map((_, i) => `${3 + i * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`,
+    ...pages.flatMap((lines, i) => {
+      const c = content(lines);
+      return [
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${4 + i * 2} 0 R /Resources << /Font << /F1 ${font} 0 R >> >> >>`,
+        `<< /Length ${c.length} >>\nstream\n${c}\nendstream`,
+      ];
+    }),
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
   ];
 
@@ -186,7 +189,18 @@ function buildEmptyPdf() {
   return Buffer.from(body + xref + trailer, "latin1");
 }
 
-writeFileSync(join(here, "sample.pdf"), buildPdf());
+writeFileSync(
+  join(here, "sample.pdf"),
+  buildPdf([[`Pagina tekst ${PDF_TOKEN_ONE}`], [`Pagina tekst ${PDF_TOKEN_TWO}`]]),
+);
+// An OER-like course table: rows must stay rows after extraction.
+writeFileSync(
+  join(here, "sample-table.pdf"),
+  buildPdf([
+    ["Code Naam EC Toetscode Toetswijze Weging", "INHELWO Hello World 10 TOETS-01 Schriftelijk 1", "INDATFI Data First 10 TOETS-01 Andere wijze 1"],
+    ["Leeruitkomst 1 De student ontwerpt een webapplicatie."],
+  ]),
+);
 writeFileSync(join(here, "sample.docx"), buildDocx());
 writeFileSync(join(here, "sample-empty.pdf"), buildEmptyPdf());
 console.log("Wrote sample.pdf, sample.docx and sample-empty.pdf");
