@@ -254,3 +254,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de aanbieder (`DeepSeek` → `DEEPSEEK_API_KEY`) en mag nooit die van een andere aanbieder zijn,
   zodat een sleutel niet naar een vreemd adres kan. Adressen op internet zijn `https`; een eigen
   server op het schoolnetwerk mag `http` en zonder sleutel, ook in productie. Bastiaan, 2026-11-06.
+- **BESLUIT-2026-11-06-3:** **Twee nieuwe bibliotheken voor export: Excel en PowerPoint.** Voor
+  de export naar Excel en PowerPoint mogen er twee bibliotheken bij (`exceljs` en `pptxgenjs`,
+  beide MIT). Een derde, om een geüpload PowerPoint-sjabloon te vullen, is apart te vragen.
+  Bastiaan, 2026-11-06. Uitwerking: brief P30.

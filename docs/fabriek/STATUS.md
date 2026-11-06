@@ -247,9 +247,16 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 - 2026-11-05: "Ik vind dat het gebruikersmanagement in beheer veel beter kan … teams kunnen aanmaken
   van meerdere collega docenten … per team features aan en uit" → document "Teams, privacy en
   gebruikersbeheer", BESLUIT-2026-11-05-5, brief P28.
+- 2026-11-06: "Ik wil sowieso export mogelijkheden voor BrightSpace, GradeWork, MS Excel, MS Word,
+  Presentaties naar MS Powerpoint, PDF export, etc", plus sjablonen voor PowerPoint en viewers in
+  LimeOnIt → brief P30, BESLUIT-2026-11-06-3.
 
 ## Bezig
 
+- **Brief P30 Exporteren (PR open):** Word en PDF voor elk resultaat, Excel voor tabellen en
+  rubrics, PowerPoint uit een lesopzet met een voorbeeld in de app, Brightspace (vragen en
+  cijfers), GradeWork eerst onderzoeken, en de huisstijl of een eigen sjabloon van de hogeschool.
+  Bouwen na de pilot, tenzij Bastiaan anders kiest. Drie vragen voor Bastiaan staan in de brief.
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt
