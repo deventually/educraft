@@ -147,7 +147,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
   const { data } = course;
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-5xl">
+    <div className="w-full min-w-0">
       <Link
         to="/courses"
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"

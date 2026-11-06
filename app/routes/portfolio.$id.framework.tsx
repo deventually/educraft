@@ -65,7 +65,7 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
   const hasCriteria = framework.outcomes.some((o) => o.criteria.length > 0);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="w-full min-w-0">
       <Link
         to={`/portfolio/${id}`}
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"

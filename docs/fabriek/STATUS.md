@@ -8,6 +8,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **Bestandsknop als echte knop (NL/EN, #135) gemerged op 2026-11-06:** de kale bladerknop van de
+  browser is overal een LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast.
+- **Alle schermen even breed op desktop (#136) gemerged op 2026-11-06:** elke pagina vult dezelfde
+  breedte als de kopbalk (`max-w-6xl` in de AppShell); alleen leestekst (Over, Disclaimer, Cookies,
+  een helpartikel) blijft een smallere, links uitgelijnde kolom. `tests/page-width.test.ts`
+  bewaakt het.
 - **Toetsvragen zonder correctie in een kopje (`test-items-items@v3`, #128) gemerged op
   2026-11-05:** het antwoordmodel staat per rij gegroepeerd, met de rij één keer in een eigen
   kopje en in elk vraagkopje alleen het nummer. Onder `@v2` kreeg de eerste vraag van een nieuwe

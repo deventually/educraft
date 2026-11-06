@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react";
 import { DOC_ACCEPT_ATTR, fileToText } from "~/lib/documents/extract";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { HelpText, Label, Textarea } from "~/components/ui";
+import { FileInput } from "~/components/FileInput";
 import { useT } from "~/lib/i18n/useT";
 
 /**
@@ -50,14 +51,13 @@ export function EvidenceTextField({
       </div>
       <div>
         <Label htmlFor={`${id}-file`}>{t.evidenceUpload}</Label>
-        <input
+        <FileInput
           ref={fileRef}
           id={`${id}-file`}
-          type="file"
           accept={DOC_ACCEPT_ATTR}
           aria-describedby={helpId}
           onChange={onFile}
-          className="block text-sm text-slate-700"
+          className="mt-1"
         />
         <HelpText id={helpId}>{failed ? t.evidenceUploadFailed : t.evidenceUploadHelp}</HelpText>
       </div>

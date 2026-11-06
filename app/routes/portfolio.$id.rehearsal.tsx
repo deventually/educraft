@@ -117,7 +117,7 @@ export default function PortfolioRehearsal({ loaderData }: Route.ComponentProps)
   const keys = rehearsalKeys(framework, outcomeIds);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col md:h-[calc(100vh-8rem)]">
+    <div className="flex w-full min-w-0 flex-col md:h-[calc(100vh-8rem)]">
       <Link
         to={`/portfolio/${id}`}
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
