@@ -6,11 +6,7 @@ import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
-import {
-  effectiveDefaultModel,
-  isModelSelectableForUser,
-  isToolAvailable,
-} from "~/server/availability.server";
+import { servedModelFor, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
 import { linkGeneration } from "~/server/repositories/courses.server";
 import { getUser } from "~/server/auth.server";
@@ -221,14 +217,12 @@ export async function action({ request }: Route.ActionArgs) {
     // only outside production. Anything else falls back to the tool/stage
     // default, so a hostile body can't force an expensive, disabled, or un-granted
     // model on the owner.
-    const mayPickModel = !!body.model && (await isModelSelectableForUser(user, body.model));
-    // A stage may pin a specific model (infra), respected as-is; otherwise the
-    // soft default (tool.defaultModel) is resolved to a model THIS caller may
-    // actually use — so a disabled/un-granted default can't leak past the
-    // teacher gate when the requested model is refused (Phase 14 bugfix).
-    const model = mayPickModel
-      ? (body.model as string)
-      : (stage.model ?? (await effectiveDefaultModel(user, tool.defaultModel)));
+    // A stage may pin a specific model (infra), respected as-is (but upgraded);
+    // otherwise the soft default (tool.defaultModel) is resolved to a model THIS
+    // caller may actually use — so a disabled/un-granted default can't leak past the
+    // teacher gate when the requested model is refused (Phase 14 bugfix). A retired
+    // model hands over to its newest version; a retiring one still finishes a chat.
+    const model = await servedModelFor(user, body.model, tool.defaultModel, stage.model);
     const provider = providerForModel(model);
 
     // Vision gate. The image array is already shape/size/count-validated by the

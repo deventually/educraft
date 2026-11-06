@@ -1,3 +1,5 @@
+import type { ModelRegistry, ModelState } from "./modelRegistry";
+
 /**
  * Model catalog. Decouples the registry's model ids from raw provider API ids,
  * so swapping or pinning model versions is a one-line change here. Each model
@@ -169,8 +171,69 @@ export function outputTokenBudget(
 
 export const DEFAULT_MODEL: ModelId = "claude-sonnet-5-5";
 
+// ── The admin's registry (added models, upgrades), installed by the server ─────────
+// `modelRegistry.server` reads it from the database and installs it here, so every
+// lookup below sees added and retiring models without a second code path.
+let installed: ModelRegistry = { added: [], lifecycle: {} };
+let addedById = new Map<string, ModelInfo>();
+
+/** Install the admin's registry (server only; tests reset it with the empty one). */
+export function installModelRegistry(registry: ModelRegistry): void {
+  installed = registry;
+  addedById = new Map(
+    registry.added
+      // A catalog id always wins: an added model can never shadow a built-in one.
+      .filter((m) => !(m.id in MODELS))
+      .map((m) => [
+        m.id,
+        {
+          provider: m.provider,
+          apiId: m.apiId,
+          displayName: m.displayName,
+          supportsImages: m.supportsImages,
+          alwaysThinks: m.alwaysThinks,
+          clientSelectable: m.clientSelectable,
+          tier: 2 as const,
+        },
+      ]),
+  );
+}
+
+/** The installed registry (read-only view for the admin screen). */
+export function installedModelRegistry(): ModelRegistry {
+  return installed;
+}
+
+/** Where a model is in its life: active, retiring (upgraded) or retired. */
+export function modelState(id: string): ModelState {
+  return installed.lifecycle[id]?.state ?? "active";
+}
+
+/** Follow the upgrade chain from `id`, retiring or retired, to the model for new work. */
+export function currentModelId(id: string): string {
+  let current = id;
+  const seen = new Set<string>();
+  while (installed.lifecycle[current] && !seen.has(current)) {
+    seen.add(current);
+    current = installed.lifecycle[current].successor;
+  }
+  return current;
+}
+
+/**
+ * The model to serve for a request that names `id`: a retiring model still serves (a
+ * running conversation finishes on it), a retired one hands over to its successor.
+ */
+export function forwardRetired(id: string): string {
+  return modelState(id) === "retired" ? currentModelId(id) : id;
+}
+
+function staticOrAdded(id: string): ModelInfo | undefined {
+  return (MODELS as Record<string, ModelInfo>)[id] ?? addedById.get(id);
+}
+
 export function getModel(id: string): ModelInfo {
-  const info = (MODELS as Record<string, ModelInfo>)[id];
+  const info = staticOrAdded(id);
   if (!info) throw new Error(`Unknown model id: ${id}`);
   return info;
 }
@@ -240,12 +303,7 @@ function parseCompatModel(id: string): ModelInfo | null {
  * OpenAI-compatible endpoint ("compat::<apiId>"). Throws if none.
  */
 export function resolveModelInfo(id: string): ModelInfo {
-  return (
-    (MODELS as Record<string, ModelInfo>)[id] ??
-    parseDynamicModel(id) ??
-    parseCompatModel(id) ??
-    throwUnknown(id)
-  );
+  return staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id) ?? throwUnknown(id);
 }
 
 function throwUnknown(id: string): never {
@@ -254,7 +312,11 @@ function throwUnknown(id: string): never {
 
 /** Whether an id resolves to a usable model (catalog, dynamic local, or configured compat). */
 export function isResolvableModel(id: string): boolean {
-  return id in MODELS || parseDynamicModel(id) !== null || parseCompatModel(id) !== null;
+  return (
+    staticOrAdded(id) !== undefined ||
+    parseDynamicModel(id) !== null ||
+    parseCompatModel(id) !== null
+  );
 }
 
 /**
@@ -264,16 +326,15 @@ export function isResolvableModel(id: string): boolean {
  * Phase 4 swaps this body for an admin-configured allow-list.
  */
 export function isClientSelectable(id: string): boolean {
-  const info =
-    (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id) ?? parseCompatModel(id);
+  const info = staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id);
   return info?.clientSelectable === true;
 }
 
-export function listModels(): Array<{ id: ModelId } & ModelInfo> {
-  return (Object.entries(MODELS) as Array<[ModelId, ModelInfo]>).map(([id, info]) => ({
-    id,
-    ...info,
-  }));
+/** The catalog plus the admin's added models, in every state (filter on `modelState`). */
+export function listModels(): Array<{ id: string } & ModelInfo> {
+  return [...(Object.entries(MODELS) as Array<[string, ModelInfo]>), ...addedById.entries()].map(
+    ([id, info]) => ({ id, ...info }),
+  );
 }
 
 /** Minimal shape needed to render a model <option> (static catalog or discovered local). */
@@ -302,7 +363,8 @@ export function pickableModels(
 ): PickerModel[] {
   // Never offer a model the server would silently swap: default to the catalog's
   // client-selectable entries. Discovered local models are free and always shown.
-  const base = catalog ?? listModels().filter((m) => m.clientSelectable);
+  const base =
+    catalog ?? listModels().filter((m) => m.clientSelectable && modelState(m.id) === "active");
   const all: PickerModel[] = [...base, ...localModels];
   // A vision tool must only offer models KNOWN to support images: an unknown
   // (undefined) flag is treated as non-vision, not waved through.

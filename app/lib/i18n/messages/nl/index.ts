@@ -18,6 +18,7 @@ import { help } from "./help";
 import { home } from "./home";
 import { language } from "./language";
 import { meta } from "./meta";
+import { modelAdmin } from "./modelAdmin";
 import { nav } from "./nav";
 import { pages } from "./pages";
 import { people } from "./people";
@@ -72,6 +73,7 @@ export const nl = {
   home,
   language,
   meta,
+  modelAdmin,
   nav,
   pages,
   people,

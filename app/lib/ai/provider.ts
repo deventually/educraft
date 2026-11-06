@@ -9,12 +9,16 @@ import { cliProvider } from "./adapters/cli";
  *
  * Anthropic and LM Studio are served by the AI SDK adapter. Ollama uses its own
  * native adapter (`/api/chat`) so the reasoning ("thinking") switch works — the
- * AI SDK's `/v1` path ignores it. OpenAI / Google / Mistral slot in by adding a
- * catalog entry + key — same AI SDK adapter, no new code. CLI agents (claude
+ * AI SDK's `/v1` path ignores it. OpenAI / Google / Mistral are served on their
+ * OpenAI-compatible address by the same adapter; an admin adds their models on screen. CLI agents (claude
  * code, opencode, codex, gemini cli) use the subprocess adapter.
  */
 const providers: Partial<Record<ProviderId, LLMProvider>> = {
   anthropic: aiSdkProvider,
+  // Frontier APIs on their OpenAI-compatible address (`providers.ts`).
+  openai: aiSdkProvider,
+  google: aiSdkProvider,
+  mistral: aiSdkProvider,
   ollama: ollamaProvider,
   lmstudio: aiSdkProvider,
   // Any configured OpenAI-compatible endpoint (frontier or self-hosted).

@@ -1,12 +1,27 @@
 import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { outputTokenBudget, resolveModelInfo } from "../models";
+import { outputTokenBudget, resolveModelInfo, type ProviderId } from "../models";
+import { credentialKeyFor } from "../credentials";
+import { getAddableProvider } from "../providers";
 import type { GenerateOptions, LLMProvider } from "../types";
 import { env } from "~/server/env.server";
 import { LocalizedError } from "~/lib/i18n/errors";
 
 const DEFAULT_TEMPERATURE = 0.4;
+
+/** The provider's key from the server environment, or a message naming the setting. */
+function requireKey(provider: ProviderId): string {
+  const name = credentialKeyFor(provider);
+  const value = name ? (env as Record<string, unknown>)[name] : undefined;
+  if (!name || typeof value !== "string" || !value) {
+    throw new LocalizedError({
+      nl: `${name ?? provider} ontbreekt. Vul deze in je .env in (zie .env.example).`,
+      en: `${name ?? provider} is missing. Add it to your .env (see .env.example).`,
+    });
+  }
+  return value;
+}
 
 /** Resolve a catalog or dynamic local model id to a concrete AI SDK LanguageModel. */
 function resolveModel(catalogId: string): LanguageModel {
@@ -47,6 +62,16 @@ function resolveModel(catalogId: string): LanguageModel {
         apiKey: env.OPENAI_COMPAT_API_KEY,
       }).chatModel(info.apiId);
     }
+    case "openai":
+    case "google":
+    case "mistral":
+      // A frontier API that speaks the OpenAI protocol at a known address
+      // (`providers.ts`); its key lives on the server.
+      return createOpenAICompatible({
+        name: info.provider,
+        baseURL: getAddableProvider(info.provider)?.baseURL ?? "",
+        apiKey: requireKey(info.provider),
+      }).chatModel(info.apiId);
     default:
       throw new Error(`Provider "${info.provider}" is not (yet) served via the AI SDK.`);
   }

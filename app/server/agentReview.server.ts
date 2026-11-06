@@ -14,7 +14,13 @@ import {
   DECISIONS,
   type ReviewPanelAgent,
 } from "~/lib/agents/types";
-import { DEFAULT_MODEL, resolveModelInfo } from "~/lib/ai/models";
+import {
+  DEFAULT_MODEL,
+  forwardRetired,
+  isResolvableModel,
+  resolveModelInfo,
+} from "~/lib/ai/models";
+import { syncModelRegistry } from "./modelRegistry.server";
 import { checkAlignment } from "~/lib/courses/alignment";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
@@ -119,7 +125,9 @@ export async function reviewCourse(
 ): Promise<ReviewResult> {
   const agents = await courseAgents();
   if (agents.length === 0) return { ok: false, error: "failed" };
-  const model = requestedModel || undefined;
+  // A retired model hands over to its newest version (the page may be older than the upgrade).
+  await syncModelRegistry();
+  const model = requestedModel ? forwardRetired(requestedModel) : undefined;
   if (model && !(await isModelSelectableForUser(user, model))) return { ok: false, error: "model" };
   const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
@@ -197,7 +205,10 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
         role: agent.role,
         review: {
           id: latest.id,
-          model: resolveModelInfo(latest.model).displayName,
+          // An added model may not be installed yet on a fresh process: keep its id then.
+          model: isResolvableModel(latest.model)
+            ? resolveModelInfo(latest.model).displayName
+            : latest.model,
           stale: course.updatedAt.getTime() > latest.courseUpdatedAt.getTime(),
           findings: latest.findings.map((f) => {
             const d = decisions.get(f.id);

@@ -6,8 +6,6 @@ import { ALL_TOOLS } from "~/lib/registry";
 import { FEATURES, isFeatureId } from "~/lib/features";
 import { isInstanceStand, type InstanceStand } from "~/lib/features/rule";
 import {
-  getEnabledModels,
-  setEnabledModels,
   getFeatureStands,
   getToolStands,
   setFeatureStand,
@@ -19,8 +17,9 @@ import { fmt } from "~/lib/i18n/format";
 import { Badge, Button, Input, Label, Select } from "~/components/ui";
 import { useActionToast } from "~/components/Toast";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
-import { fullCatalog } from "~/server/modelCatalog.server";
 import { StandSelect } from "~/components/features/selects";
+import { isModelIntent, modelAdminAction, modelAdminData } from "~/server/modelAdmin.server";
+import { ModelManagement } from "~/components/admin/models";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
@@ -40,13 +39,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     name: f.name,
     stand: featureStands[f.id] ?? f.defaultStand,
   }));
-  // Instance model allow-list (P14/P18): `null` stored = every model is on.
-  const enabled = await getEnabledModels();
-  const models = (await fullCatalog()).map((m) => ({
-    ...m,
-    checked: enabled === null || enabled.includes(m.id),
-  }));
-  return { rows, features, models };
+  return { rows, features, ...(await modelAdminData()) };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -54,15 +47,8 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
 
-  // ── Instance model allow-list ──────────────────────────────────────────────
-  if (intent === "models") {
-    const catalogIds = new Set((await fullCatalog()).map((m) => m.id));
-    const chosen = [...new Set(fd.getAll("models").map(String))].filter((id) => catalogIds.has(id));
-    // Lockout guard at the boundary: an admin may not unselect everything.
-    if (chosen.length === 0) return { error: true as const };
-    await setEnabledModels(chosen);
-    return { saved: true as const };
-  }
+  // ── Models: allow-list, add, upgrade, phase out ──────────────────────────────
+  if (isModelIntent(intent)) return modelAdminAction(intent, fd);
 
   const stand = fd.get("stand");
   if (intent === "tool") {
@@ -132,8 +118,7 @@ function ToolsBulkForm({ slugs }: { slugs: string[] }) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, features, models } = loaderData;
-  const m = t.admin.models;
+  const { rows, features, providers, models, choices } = loaderData;
   const f = t.features;
   const at = t.admin.tools;
   // Find and filter on the page: the registry is small, so no round trip.
@@ -291,59 +276,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      {/* ── Instance model allow-list ─────────────────────────────────────── */}
-      <section>
-        <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
-          {m.heading}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{m.intro}</p>
-
-        <AutoSaveForm intent="models" errorMessage={() => m.atLeastOne} className="mt-2 max-w-xl">
-          <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <legend className="px-1 text-sm font-semibold text-slate-800">{m.available}</legend>
-            {(
-              [
-                { group: "frontier", label: m.frontierGroup },
-                { group: "cli", label: m.cliGroup },
-                { group: "local", label: m.localGroup },
-              ] as const
-            ).map(({ group, label }) => {
-              const items = models.filter((mdl) => mdl.group === group);
-              if (items.length === 0) return null;
-              return (
-                <div key={group} className="mt-4 first:mt-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {label}
-                  </p>
-                  <ul className="mt-2 space-y-2.5">
-                    {items.map((mdl) => (
-                      <li key={mdl.id} className="flex items-center gap-2.5">
-                        <input
-                          type="checkbox"
-                          id={`model-${mdl.id}`}
-                          name="models"
-                          value={mdl.id}
-                          defaultChecked={mdl.checked}
-                          className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                        />
-                        <label
-                          htmlFor={`model-${mdl.id}`}
-                          className="text-sm font-medium text-slate-800"
-                        >
-                          {mdl.displayName}
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-            {models.some((mdl) => mdl.group !== "frontier") && (
-              <p className="mt-4 text-xs text-slate-500">{m.localGroupHint}</p>
-            )}
-          </fieldset>
-        </AutoSaveForm>
-      </section>
+      <ModelManagement providers={providers} models={models} choices={choices} />
     </div>
   );
 }

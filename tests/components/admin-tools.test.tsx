@@ -26,7 +26,9 @@ const loaderData = {
     },
     { id: "courses", name: { nl: "Cursussen", en: "Courses" }, stand: "on" },
   ],
-  models: [
+  providers: [],
+  models: [],
+  choices: [
     { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6", checked: true, group: "frontier" },
     { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5", checked: true, group: "frontier" },
     // P14: local/CLI models are curatable here too, grouped by origin.

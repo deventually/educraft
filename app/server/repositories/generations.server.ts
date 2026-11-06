@@ -136,6 +136,22 @@ export async function countGenerationsByTool(
     .all();
 }
 
+/**
+ * Generation counts per model over the last `days` days — how much a model is still
+ * used, on the admin's models page. Not user-scoped by design (instance totals).
+ */
+export async function countGenerationsByModel(
+  days = 30,
+): Promise<{ model: string; count: number }[]> {
+  const cutoff = new Date(Date.now() - days * 86_400_000);
+  return getDb()
+    .select({ model: generations.model, count: sql<number>`count(*)` })
+    .from(generations)
+    .where(gte(generations.createdAt, cutoff))
+    .groupBy(generations.model)
+    .all();
+}
+
 /** Deletes the generation and its course links in one transaction. */
 export async function deleteGeneration(userId: string, id: string): Promise<void> {
   getDb().transaction((tx) => {

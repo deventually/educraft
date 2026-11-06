@@ -16,12 +16,16 @@
 import { ALL_TOOLS, type Tool } from "~/lib/registry";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import {
+  currentModelId,
   DEFAULT_MODEL,
+  forwardRetired,
   isResolvableModel,
   listModels,
+  modelState,
   resolveModelInfo,
   type PickerModel,
 } from "~/lib/ai/models";
+import { syncModelRegistry } from "./modelRegistry.server";
 import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { SECTORS, type Sector } from "~/lib/context/sectors";
 import { getDomainsForTrack } from "~/lib/context/domains";
@@ -144,39 +148,58 @@ export async function isToolAvailable(user: AvailabilityUser, tool: Tool): Promi
 
 /**
  * Whether a model id may exist for this process at all: resolvable, client-selectable
- * (Opus-class stays server-only) and — for CLI agents and local models — only outside
- * production (`localModelsEnabled`).
+ * (Opus-class stays server-only), not retired, and — for CLI agents and local models —
+ * only outside production (`localModelsEnabled`). A retiring model is still allowed:
+ * a running conversation may finish on it.
  */
 function isAllowedHere(id: string): boolean {
-  if (!isResolvableModel(id)) return false;
+  if (!isResolvableModel(id) || modelState(id) === "retired") return false;
   const info = resolveModelInfo(id);
   return info.clientSelectable && (!info.local || localModelsEnabled());
 }
 
 /**
- * The instance base for the model gates: the catalog models allowed here ∩ the admin's
+ * A stored set (allow-list, own set, team set) as it counts today: each id that was
+ * upgraded stands for its newest version, so "Haiku 4.5" in a set offers "Haiku 5.5".
+ */
+function upgraded(ids: Iterable<string>): Set<string> {
+  return new Set([...ids].map(currentModelId));
+}
+
+/** The admin's allow-list, upgraded; null = no list (every model). */
+async function enabledSet(): Promise<Set<string> | null> {
+  const enabled = await getEnabledModels();
+  return enabled === null || enabled.length === 0 ? null : upgraded(enabled);
+}
+
+/** Catalog models for new work: allowed here and active (not on their way out). */
+function activeCatalogIds(): string[] {
+  return listModels()
+    .filter((m) => modelState(m.id) === "active" && isAllowedHere(m.id))
+    .map((m) => m.id);
+}
+
+/**
+ * The instance base for the model gates: the active catalog models ∩ the admin's
  * `enabledModels` allow-list (null = the whole catalog). No lockout fallback here — that
  * is applied once, in `getSelectableModelIds`.
  */
 async function selectableCatalogIds(): Promise<Set<string>> {
-  const enabled = await getEnabledModels();
-  const catalog = listModels()
-    .filter((m) => isAllowedHere(m.id))
-    .map((m) => m.id);
-  return new Set(catalog.filter((id) => enabled === null || enabled.includes(id)));
+  const enabled = await enabledSet();
+  return new Set(activeCatalogIds().filter((id) => enabled === null || enabled.has(id)));
 }
 
 /**
  * A teacher's own model set (P18), or null when they follow the instance. The stored
- * ids are filtered with `isAllowedHere`; a set that is empty after filtering (only
- * unknown ids, or only CLI/local ids in production) counts as "not set". An admin has
- * no own set.
+ * ids are upgraded and filtered with `isAllowedHere`; a set that is empty after
+ * filtering (only unknown ids, or only CLI/local ids in production) counts as "not
+ * set". An admin has no own set.
  */
 async function teacherOwnSet(user?: AvailabilityUser): Promise<Set<string> | null> {
   if (user?.role !== "teacher") return null;
   const assigned = await getUserAssignedModels(user.id);
   if (!assigned) return null;
-  const own = new Set([...assigned].filter(isAllowedHere));
+  const own = new Set([...upgraded(assigned)].filter(isAllowedHere));
   return own.size > 0 ? own : null;
 }
 
@@ -188,17 +211,18 @@ async function teacherOwnSet(user?: AvailabilityUser): Promise<Set<string> | nul
 async function teamModelSet(user?: AvailabilityUser): Promise<Set<string> | null> {
   if (user?.role !== "teacher") return null;
   const teams = await listTeamSettingsForUser(user.id);
-  const union = new Set(teams.flatMap((t) => t.settings.models ?? []));
+  const union = upgraded(teams.flatMap((t) => t.settings.models ?? []));
   if (union.size === 0) return null;
-  const enabled = await getEnabledModels();
+  const enabled = await enabledSet();
   const inside = [...union].filter(
-    (id) => isAllowedHere(id) && (enabled === null || enabled.length === 0 || enabled.includes(id)),
+    (id) => isAllowedHere(id) && (enabled === null || enabled.has(id)),
   );
   return inside.length > 0 ? new Set(inside) : null;
 }
 
 /** The set that decides for `user`: own set, else the team union, else null (the instance). */
 async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null> {
+  await syncModelRegistry();
   return (await teacherOwnSet(user)) ?? (await teamModelSet(user));
 }
 
@@ -207,7 +231,8 @@ async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null
  * a teacher's team sets narrow it (P28.3); a teacher with an own set (`assignedModels`) gets exactly that set instead — it
  * OVERRIDES the instance and may be wider (P18). No own set = follow the instance;
  * an admin always gets the instance set. Local/discovered models are added by the
- * caller via `narrowLocalModels`, not here. Lockout guard: an empty instance set (a
+ * caller via `narrowLocalModels`, not here. A model being upgraded is never offered:
+ * its newest version stands in for it. Lockout guard: an empty instance set (a
  * stale allow-list) falls back to the catalog default and warns. An own set holding
  * only a local model leaves the catalog half legitimately empty — no fallback, or the
  * disabled frontier default would be re-offered (the P14 bug).
@@ -215,34 +240,33 @@ async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null
 export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
   const own = await userModelSet(user);
   if (own) {
-    return new Set(
-      listModels()
-        .filter((m) => own.has(m.id))
-        .map((m) => m.id),
-    );
+    return new Set(activeCatalogIds().filter((id) => own.has(id)));
   }
   const ids = await selectableCatalogIds();
   if (ids.size === 0) {
-    log("availability_no_selectable_models", { fallback: DEFAULT_MODEL });
-    return new Set([DEFAULT_MODEL]);
+    const fallback = currentModelId(DEFAULT_MODEL);
+    log("availability_no_selectable_models", { fallback });
+    return new Set([fallback]);
   }
   return ids;
 }
 
 /**
  * The model to serve when a request doesn't force a selectable one (Phase 14
- * bugfix). `preferred` is the intended fallback (a tool's `defaultModel`); this
- * returns it only when the caller may actually use it — otherwise it substitutes
- * a model the caller IS allowed, so a disabled/un-granted frontier default can
- * never leak past the teacher gate. Order: the preferred default, then the
- * caller's own set (this is where a local-only teacher's model comes from),
- * then any catalog model, then `DEFAULT_MODEL` as a last resort.
+ * bugfix). `preferred` is the intended fallback (a tool's `defaultModel`), upgraded
+ * to its newest version; this returns it only when the caller may actually use it —
+ * otherwise it substitutes a model the caller IS allowed, so a disabled/un-granted
+ * frontier default can never leak past the teacher gate. Order: the preferred
+ * default, then the caller's own set (this is where a local-only teacher's model
+ * comes from), then any catalog model, then `DEFAULT_MODEL` as a last resort.
  */
 export async function effectiveDefaultModel(
   user: AvailabilityUser,
   preferred: string,
 ): Promise<string> {
-  if (await isModelSelectableForUser(user, preferred)) return preferred;
+  await syncModelRegistry();
+  const wanted = currentModelId(preferred);
+  if (await isModelSelectableForUser(user, wanted)) return wanted;
   const own = await userModelSet(user);
   if (own) {
     for (const id of own) {
@@ -250,7 +274,26 @@ export async function effectiveDefaultModel(
     }
   }
   for (const id of await getSelectableModelIds(user)) return id;
-  return DEFAULT_MODEL;
+  return currentModelId(DEFAULT_MODEL);
+}
+
+/**
+ * The model a stream request is served with. A requested model is honoured when the
+ * caller may select it — a retired one hands over to its successor first. Otherwise a
+ * stage's pinned model (infra, respected as-is, but upgraded), else the tool default
+ * resolved for this caller (`effectiveDefaultModel`).
+ */
+export async function servedModelFor(
+  user: AvailabilityUser,
+  requested: string | undefined,
+  toolDefault: string,
+  stagePin?: string,
+): Promise<string> {
+  await syncModelRegistry();
+  const asked = requested ? forwardRetired(requested) : undefined;
+  if (asked && (await isModelSelectableForUser(user, asked))) return asked;
+  if (stagePin) return currentModelId(stagePin);
+  return effectiveDefaultModel(user, toolDefault);
 }
 
 /**
@@ -270,19 +313,23 @@ export async function getSelectableModels(user?: AvailabilityUser): Promise<Pick
  * local/CLI/discovered models too. Unlike `getSelectableModelIds`, which enumerates
  * the static catalog, this is a membership walk so it works for volatile discovered
  * ids (`ollama::…`) without enumerating any local server. The id must be allowed here
- * (resolvable, client-selectable, CLI/local only outside production); then a teacher
- * with an own set is decided by it alone (override), everyone else by the instance's
- * `enabledModels` (null/empty = all).
+ * (resolvable, client-selectable, not retired, CLI/local only outside production); a
+ * retiring id counts when its newest version does (a running conversation finishes
+ * on it). Then a teacher with an own set is decided by it alone (override), everyone
+ * else by the instance's `enabledModels` (null/empty = all).
  */
 export async function isModelSelectableForUser(
   user: AvailabilityUser | undefined,
   id: string,
 ): Promise<boolean> {
+  await syncModelRegistry();
   if (!isAllowedHere(id)) return false;
+  const effective = currentModelId(id);
+  if (effective !== id && !isAllowedHere(effective)) return false;
   const own = await userModelSet(user);
-  if (own) return own.has(id);
-  const enabled = await getEnabledModels();
-  return enabled === null || enabled.length === 0 || enabled.includes(id);
+  if (own) return own.has(effective);
+  const enabled = await enabledSet();
+  return enabled === null || enabled.has(effective);
 }
 
 /**

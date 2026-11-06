@@ -235,6 +235,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **AI-modellen beheren (PR open):** op "Tools en modellen" voegt een beheerder een model toe van
+  elke gekoppelde aanbieder (Anthropic, OpenAI, Google, Mistral, eigen adres), upgradet een oud
+  model naar een nieuwe versie (bijv. Haiku 4.5 → Haiku 5.5) en faseert het in twee stappen uit:
+  eerst gaat nieuw werk naar de nieuwe versie en mogen lopende gesprekken afmaken, daarna gaat
+  alles naar de nieuwe. Per model zie je het gebruik. Sleutels blijven op de server.
 - **Bestandsknop als echte knop (NL/EN):** de kale bladerknop van de browser wordt overal een
   LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast. PR open.
 - **Alle schermen even breed op desktop (PR open):** elke pagina vult dezelfde breedte als de
