@@ -100,6 +100,15 @@ LimeOnIt is not tied to one model vendor.
   installed into the catalog by `modelRegistry.server.ts`, so every `resolveModelInfo` call
   sees it; `currentModelId` / `forwardRetired` in `models.ts` follow the upgrade chain and
   `availability.server.ts#servedModelFor` decides the model of a stream request.
+  An admin can also **add a provider** (name, API kind, address; `addProvider` in
+  `modelRegistry.ts`). It sits in the same registry on top of the config's providers
+  (`listProviders`/`getProvider` in `models.ts`). Its id and key setting are derived from the
+  name (`<ID>_API_KEY`) and may never equal a config provider's, so a key cannot be sent to
+  another address. Internet addresses must be https; plain http only to a host on the own
+  network (`isPrivateHost`), which may also need no key. Such a provider is an API provider,
+  not a local one, so it works in production. It can be removed while no added model uses it.
+  The page has three tabs in the URL (`?tab=tools|models|providers`, `admin.tools.tsx`): one
+  page, so no extra admin route (BESLUIT-2026-11-03-14).
 - **Availability (P4/P13/P14/P18).** Which models a caller may *pick* is an OVERRIDE:
   the instance sets `enabledModels`; a teacher with their own `assignedModels` gets
   exactly that set instead (it replaces the instance and may be wider); no own set =

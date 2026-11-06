@@ -4,7 +4,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
-import { ModelManagement } from "~/components/admin/models";
+import { ModelsTab, ProvidersTab } from "~/components/admin/models";
 import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -19,6 +19,7 @@ const loaderData = {
       setting: "ANTHROPIC_API_KEY",
       modelsUrl: "https://docs.anthropic.com/en/docs/about-claude/models",
       example: "claude-haiku-5-5",
+      added: false,
     },
     {
       id: "openai",
@@ -26,6 +27,16 @@ const loaderData = {
       connected: false,
       setting: "OPENAI_API_KEY",
       example: "gpt-5-mini",
+      added: false,
+    },
+    {
+      id: "eigen-server",
+      name: "Eigen server",
+      connected: true,
+      setting: "EIGEN_SERVER_API_KEY",
+      example: "",
+      added: true,
+      baseURL: "http://10.0.0.5:8000/v1",
     },
   ],
   models: [
@@ -84,13 +95,15 @@ const loaderData = {
 };
 
 function renderRoute(action?: (args: { request: Request }) => unknown) {
-  const props = loaderData as unknown as ComponentProps<typeof ModelManagement>;
+  const props = loaderData as unknown as ComponentProps<typeof ModelsTab> &
+    ComponentProps<typeof ProvidersTab>;
   const Stub = createRoutesStub([
     {
       path: "/admin/tools",
       Component: () => (
         <ToastProvider>
-          <ModelManagement {...props} />
+          <ModelsTab {...props} />
+          <ProvidersTab {...props} />
         </ToastProvider>
       ),
       action: action ?? (() => ({ saved: true })),
@@ -127,7 +140,7 @@ describe("Admin — models part of Tools and models", () => {
       within(provider)
         .getAllByRole("option")
         .map((o) => o.textContent),
-    ).toEqual(["Anthropic (Claude)"]);
+    ).toEqual(["Anthropic (Claude)", "Eigen server"]);
     await user.type(within(form).getByLabelText("Model-id bij de aanbieder"), "claude-haiku-5-5");
     await user.type(within(form).getByLabelText("Naam in LimeOnIt"), "Claude Haiku 5.5");
     await user.click(within(form).getByLabelText(/denkt eerst na/i));
@@ -213,6 +226,54 @@ describe("Admin — models part of Tools and models", () => {
     expect((within(group).getByLabelText("Claude Code (CLI)") as HTMLInputElement).checked).toBe(
       false,
     );
+  });
+
+  it("adds a provider: name, kind of API, address, and whether it needs a key", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { providerAdded: { name: "DeepSeek", setting: "DEEPSEEK_API_KEY" } };
+    });
+    const form = screen.getByRole("form", { name: "Aanbieder toevoegen" });
+    await user.type(within(form).getByLabelText("Naam"), "DeepSeek");
+    await user.selectOptions(within(form).getByLabelText("Soort koppeling"), "openai-compatible");
+    await user.type(within(form).getByLabelText("Adres (base URL)"), "https://api.deepseek.com/v1");
+    await user.click(within(form).getByRole("button", { name: "Aanbieder toevoegen" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("addProvider"));
+    expect(body?.get("name")).toBe("DeepSeek");
+    expect(body?.get("baseURL")).toBe("https://api.deepseek.com/v1");
+    expect(body?.get("noKey")).toBeNull();
+    expect(
+      await screen.findByText(
+        "DeepSeek is toegevoegd. Zet DEEPSEEK_API_KEY in .env en start LimeOnIt opnieuw.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("an added provider shows its address and can be removed; a built-in one cannot", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { providerRemoved: { name: "Eigen server" } };
+    });
+    const providers = screen.getByRole("list", { name: /aanbieders/i });
+    const own = within(providers).getByText("Eigen server").closest("li")!;
+    expect(within(own).getByText("http://10.0.0.5:8000/v1")).toBeInTheDocument();
+    const anthropic = within(providers).getByText("Anthropic (Claude)").closest("li")!;
+    expect(within(anthropic).queryByRole("button")).toBeNull();
+    await user.click(within(own).getByRole("button", { name: "Eigen server verwijderen" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("removeProvider"));
+    expect(body?.get("id")).toBe("eigen-server");
+    expect(await screen.findByText("Eigen server is verwijderd.")).toBeInTheDocument();
+  });
+
+  it("says in plain words why expensive models are not in the teachers' list", () => {
+    renderRoute();
+    const allow = screen.getByRole("region", { name: "Beschikbaar voor gebruikers" });
+    expect(allow.textContent).not.toMatch(/serverzijdig|Opus-klasse/);
+    expect(allow.textContent).toMatch(/alleen een tool/i);
   });
 
   it("has no axe violations", async () => {

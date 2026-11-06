@@ -14,14 +14,17 @@ import {
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import {
   addModel,
+  addProvider,
   cancelUpgrade,
+  removeProvider,
   finishUpgrade,
   startUpgrade,
   type AddModelInput,
+  type AddProviderInput,
   type ModelState,
 } from "~/lib/ai/modelRegistry";
 import {
-  ADDABLE_PROVIDERS,
+  addableProviders,
   type AddableProvider,
   getAddableProvider,
   isAddableProvider,
@@ -43,6 +46,10 @@ export interface ProviderStatus {
   setting: string;
   modelsUrl?: string;
   example: string;
+  /** Added on this screen (can be removed while no model uses it). */
+  added: boolean;
+  /** The address it is reached at (not a secret; shown so the admin can check it). */
+  baseURL?: string;
 }
 
 export interface ModelUsage {
@@ -77,14 +84,17 @@ function isConnected(id: string): boolean {
   return p !== undefined && missingSetting(p) === null;
 }
 
-export function providerStatuses(): ProviderStatus[] {
-  return ADDABLE_PROVIDERS.map((p) => ({
+export async function providerStatuses(): Promise<ProviderStatus[]> {
+  const added = new Set((await getModelRegistry()).providers.map((p) => p.id));
+  return addableProviders().map((p) => ({
     id: p.id,
     name: p.name,
     connected: missingSetting(p) === null,
     setting: missingSetting(p) ?? p.keyEnv,
     ...(p.modelsUrl ? { modelsUrl: p.modelsUrl } : {}),
     example: p.example,
+    added: added.has(p.id),
+    ...(p.baseURL ? { baseURL: p.baseURL } : {}),
   }));
 }
 
@@ -147,6 +157,39 @@ export async function addAdminModel(input: AddModelInput): Promise<AddResult> {
   const enabled = await getEnabledModels();
   if (enabled !== null && enabled.length > 0) await setEnabledModels([...enabled, res.id]);
   return { added: input.displayName.trim() };
+}
+
+export type ProviderResult =
+  | { providerAdded: { name: string; setting?: string } }
+  | { providerRemoved: { name: string } }
+  | { error: string };
+
+/** Provider errors get their own toast texts (a model's "duplicate" reads wrong here). */
+const PROVIDER_ERROR = {
+  invalid: "providerInvalid",
+  insecure: "insecure",
+  duplicate: "providerTaken",
+  unknown: "providerInvalid",
+  inUse: "inUse",
+} as const;
+
+/** Add a provider: its key setting is derived from its name and stays in `.env`. */
+export async function addAdminProvider(input: AddProviderInput): Promise<ProviderResult> {
+  const res = addProvider(await getModelRegistry(), input);
+  if (!res.ok) return { error: PROVIDER_ERROR[res.error] };
+  await saveModelRegistry(res.registry);
+  const name = input.name.trim();
+  // An own server without a key is ready at once; otherwise name the setting to add.
+  return { providerAdded: input.noKey ? { name } : { name, setting: res.keyEnv } };
+}
+
+export async function removeAdminProvider(id: string): Promise<ProviderResult> {
+  const registry = await getModelRegistry();
+  const name = registry.providers.find((p) => p.id === id)?.name ?? id;
+  const res = removeProvider(registry, id);
+  if (!res.ok) return { error: PROVIDER_ERROR[res.error] };
+  await saveModelRegistry(res.registry);
+  return { providerRemoved: { name } };
 }
 
 const nameOf = (id: string) => resolveModelInfo(id).displayName;
@@ -220,7 +263,7 @@ export async function modelAdminData() {
     checked: enabled === null || enabled.includes(m.id),
   }));
   return {
-    providers: providerStatuses(),
+    providers: await providerStatuses(),
     models: await adminModelRows(),
     choices,
     local: await localOverview(),
@@ -228,7 +271,15 @@ export async function modelAdminData() {
 }
 
 /** The intents of the models part. */
-export const MODEL_INTENTS = ["models", "add", "upgrade", "finish", "cancel"] as const;
+export const MODEL_INTENTS = [
+  "models",
+  "add",
+  "upgrade",
+  "finish",
+  "cancel",
+  "addProvider",
+  "removeProvider",
+] as const;
 export type ModelIntent = (typeof MODEL_INTENTS)[number];
 
 export function isModelIntent(intent: string): intent is ModelIntent {
@@ -287,5 +338,18 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData) {
       return finishAdminUpgrade(text(fd, "id"));
     case "cancel":
       return cancelAdminUpgrade(text(fd, "id"));
+    case "addProvider": {
+      const api = text(fd, "api");
+      if (api !== "anthropic" && api !== "openai-compatible") return { error: "providerInvalid" };
+      return addAdminProvider({
+        name: text(fd, "name"),
+        api,
+        baseURL: text(fd, "baseURL"),
+        modelsUrl: text(fd, "modelsUrl"),
+        noKey: fd.get("noKey") === "on",
+      });
+    }
+    case "removeProvider":
+      return removeAdminProvider(text(fd, "id"));
   }
 }

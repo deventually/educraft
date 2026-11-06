@@ -178,8 +178,14 @@ export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
 /** The API providers of `config/models.json`, in file order. */
 export const PROVIDERS: readonly ConfigProvider[] = config.providers;
 
+/** A provider of the config or one the admin added (installed with the registry). */
 export function getProvider(id: string): ConfigProvider | undefined {
-  return PROVIDERS.find((p) => p.id === id);
+  return PROVIDERS.find((p) => p.id === id) ?? addedProviders.find((p) => p.id === id);
+}
+
+/** Every API provider: the config's first, then the ones the admin added. */
+export function listProviders(): ConfigProvider[] {
+  return [...PROVIDERS, ...addedProviders];
 }
 
 export type ModelId = string;
@@ -209,12 +215,26 @@ export const DEFAULT_MODEL: ModelId = config.default;
 // ── The admin's registry (added models, upgrades), installed by the server ─────────
 // `modelRegistry.server` reads it from the database and installs it here, so every
 // lookup below sees added and retiring models without a second code path.
-let installed: ModelRegistry = { added: [], lifecycle: {} };
+let installed: ModelRegistry = { added: [], lifecycle: {}, providers: [] };
 let addedById = new Map<string, ModelInfo>();
+let addedProviders: ConfigProvider[] = [];
 
 /** Install the admin's registry (server only; tests reset it with the empty one). */
 export function installModelRegistry(registry: ModelRegistry): void {
   installed = registry;
+  // A config provider always wins: an added one can never shadow it.
+  addedProviders = registry.providers
+    .filter((p) => !PROVIDERS.some((c) => c.id === p.id))
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      api: p.api,
+      baseURL: p.baseURL,
+      keyEnv: p.keyEnv,
+      ...(p.keyOptional ? { keyOptional: true } : {}),
+      ...(p.modelsUrl ? { modelsUrl: p.modelsUrl } : {}),
+      example: "",
+    }));
   addedById = new Map(
     registry.added
       // A catalog id always wins: an added model can never shadow a built-in one.

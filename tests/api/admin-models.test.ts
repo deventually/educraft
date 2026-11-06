@@ -162,3 +162,86 @@ describe("admin.tools models — upgrade, finish, undo", () => {
     expect(sonnet.usage.tools).toBeGreaterThan(10);
   });
 });
+
+describe("admin.tools models — adding a provider (Aanbieder)", () => {
+  const DEEPSEEK = {
+    intent: "addProvider",
+    name: "DeepSeek",
+    api: "openai-compatible",
+    baseURL: "https://api.deepseek.com/v1",
+    modelsUrl: "https://api-docs.deepseek.com/quick_start/pricing",
+  };
+
+  afterEach(() => {
+    delete process.env.DEEPSEEK_API_KEY;
+  });
+
+  it("adds a provider; it waits for its own key setting in .env", async () => {
+    expect(await act(DEEPSEEK)).toEqual({
+      providerAdded: { name: "DeepSeek", setting: "DEEPSEEK_API_KEY" },
+    });
+    const p = (await load()).providers.find((x) => x.id === "deepseek")!;
+    expect(p).toMatchObject({
+      added: true,
+      connected: false,
+      setting: "DEEPSEEK_API_KEY",
+      baseURL: "https://api.deepseek.com/v1",
+    });
+    expect(await act({ ...HAIKU55, provider: "deepseek", apiId: "deepseek-chat" })).toEqual({
+      error: "notConnected",
+    });
+  });
+
+  it("with its key set, a model can be added on it", async () => {
+    await act(DEEPSEEK);
+    process.env.DEEPSEEK_API_KEY = "ds-test";
+    expect((await load()).providers.find((x) => x.id === "deepseek")!.connected).toBe(true);
+    expect(
+      await act({ ...HAIKU55, provider: "deepseek", apiId: "deepseek-chat", displayName: "DS" }),
+    ).toEqual({ added: "DS" });
+    expect(JSON.stringify(await load())).not.toContain("ds-test");
+  });
+
+  it("an intranet server without a key is connected at once", async () => {
+    const res = await act({
+      intent: "addProvider",
+      name: "Eigen server",
+      api: "openai-compatible",
+      baseURL: "http://10.0.0.5:8000/v1",
+      noKey: "on",
+    });
+    // Nothing to set in .env: the toast says it is ready.
+    expect(res).toEqual({ providerAdded: { name: "Eigen server" } });
+    expect((await load()).providers.find((x) => x.id === "eigen-server")).toMatchObject({
+      connected: true,
+      added: true,
+    });
+  });
+
+  it("refuses http on the internet, a taken name and a bad address", async () => {
+    expect(await act({ ...DEEPSEEK, baseURL: "http://api.deepseek.com/v1" })).toEqual({
+      error: "insecure",
+    });
+    expect(await act({ ...DEEPSEEK, name: "OpenAI" })).toEqual({ error: "providerTaken" });
+    expect(await act({ ...DEEPSEEK, baseURL: "nope" })).toEqual({ error: "providerInvalid" });
+    expect(await act({ ...DEEPSEEK, api: "smtp" })).toEqual({ error: "providerInvalid" });
+  });
+
+  it("removes a provider while no model uses it", async () => {
+    await act(DEEPSEEK);
+    process.env.DEEPSEEK_API_KEY = "ds-test";
+    await act({ ...HAIKU55, provider: "deepseek", apiId: "deepseek-chat" });
+    expect(await act({ intent: "removeProvider", id: "deepseek" })).toEqual({ error: "inUse" });
+    await store.saveModelRegistry({
+      ...(await store.getModelRegistry()),
+      added: [],
+    });
+    expect(await act({ intent: "removeProvider", id: "deepseek" })).toEqual({
+      providerRemoved: { name: "DeepSeek" },
+    });
+    expect((await load()).providers.some((x) => x.id === "deepseek")).toBe(false);
+    expect(await act({ intent: "removeProvider", id: "anthropic" })).toEqual({
+      error: "providerInvalid",
+    });
+  });
+});
