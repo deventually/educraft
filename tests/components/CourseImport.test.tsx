@@ -53,6 +53,7 @@ describe("CourseImport", () => {
     expect(screen.getByLabelText("Tekst van het document")).toBeRequired();
     expect(screen.getByLabelText("Naam van het vak in het document")).toHaveValue("Databases");
     expect(screen.getByLabelText(/Of kies het bestand/)).toHaveAttribute("type", "file");
+    expect(screen.getByText("Kies bestand")).toBeVisible();
     expect(screen.getByText(/niet bewaard/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Voorstel maken" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);

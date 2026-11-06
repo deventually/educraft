@@ -3,6 +3,7 @@ import { Form, useNavigation } from "react-router";
 import { DOC_ACCEPT_ATTR, fileToText } from "~/lib/documents/extract";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
+import { FileInput } from "~/components/FileInput";
 import { useT } from "~/lib/i18n/useT";
 
 /**
@@ -60,15 +61,14 @@ export function FrameworkExtract({ replaces }: { replaces: boolean }) {
         </div>
         <div>
           <Label htmlFor={`${id}-file`}>{tf.extractFile}</Label>
-          <input
+          <FileInput
             ref={fileRef}
             id={`${id}-file`}
-            type="file"
             multiple
             accept={DOC_ACCEPT_ATTR}
             aria-describedby={helpId}
             onChange={onFile}
-            className="block text-sm text-slate-700"
+            className="mt-1"
           />
           <HelpText id={helpId}>{failed ? tf.extractFileFailed : tf.extractFileHelp}</HelpText>
         </div>

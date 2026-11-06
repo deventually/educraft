@@ -4,6 +4,7 @@ export const documents = {
   aiTab: "Wat de AI krijgt",
   cannotShow:
     "Dit bestand kan hier niet getoond worden. De uitgehaalde tekst gaat wel gewoon naar de AI.",
+  chooseFile: "Kies bestand",
   file: "Bestand",
   foundDocx: "Gevonden en gemarkeerd in het document.",
   foundPage: "Gevonden op pagina {page}.",
@@ -14,6 +15,7 @@ export const documents = {
   locate: "Toon in document",
   match: "Treffer {i} van {n}",
   matchPage: "Treffer {i} van {n} (pagina {page})",
+  noFileChosen: "Geen bestand gekozen",
   noMatches: "Geen treffers.",
   notFound:
     "Niet precies gevonden in het origineel (misschien anders geformuleerd). Zoek zelf met het zoekveld.",

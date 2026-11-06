@@ -235,6 +235,8 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
+- **Bestandsknop als echte knop (NL/EN):** de kale bladerknop van de browser wordt overal een
+  LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast. PR open.
 - **Alle schermen even breed op desktop (PR open):** elke pagina vult dezelfde breedte als de
   kopbalk (`max-w-6xl` in de AppShell); alleen leestekst (Over, Disclaimer, Cookies, een
   helpartikel) blijft een smallere, links uitgelijnde kolom. `tests/page-width.test.ts` bewaakt het.

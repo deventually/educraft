@@ -5,6 +5,7 @@ export const documents: Messages["documents"] = {
   aiHint: "This is exactly the text that goes to the AI. You edit it in the form.",
   aiTab: "What the AI receives",
   cannotShow: "This file cannot be shown here. Its extracted text still goes to the AI as usual.",
+  chooseFile: "Choose file",
   file: "File",
   foundDocx: "Found and marked in the document.",
   foundPage: "Found on page {page}.",
@@ -15,6 +16,7 @@ export const documents: Messages["documents"] = {
   locate: "Show in document",
   match: "Match {i} of {n}",
   matchPage: "Match {i} of {n} (page {page})",
+  noFileChosen: "No file chosen",
   noMatches: "No matches.",
   notFound:
     "Not found exactly in the original (perhaps worded differently). Use the search field yourself.",
