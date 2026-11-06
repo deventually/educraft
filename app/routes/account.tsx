@@ -124,7 +124,7 @@ export default function Account({ loaderData }: Route.ComponentProps) {
   });
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="w-full min-w-0">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.account.heading}
       </h1>

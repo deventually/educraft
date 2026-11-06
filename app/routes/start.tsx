@@ -141,7 +141,7 @@ export default function Start({ loaderData }: Route.ComponentProps) {
   const hasCourses = (courses?.length ?? 0) > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-10">
+    <div className="flex w-full min-w-0 flex-col gap-10">
       <QuestionBox t={t} query={query} course={course} courses={courses ?? []} results={results} />
 
       {courses && !hasCourses && (

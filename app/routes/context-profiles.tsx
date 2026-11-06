@@ -170,7 +170,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
   const editing = editor?.profile;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full min-w-0">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.settings.heading}
       </h1>
