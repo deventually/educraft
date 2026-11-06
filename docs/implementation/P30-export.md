@@ -216,9 +216,17 @@ beoordelingsformulier in GradeWork zelf: criteria, punten, mogelijke waarden. Gr
 punten op maar rekent geen cijfer uit. Een openbaar importformaat voor formulieren of criteria
 hebben we **niet gevonden**; het kennisplein van Xebic was niet bereikbaar. We verzinnen het niet.
 
-**Doen:** vraag via de GradeWork-beheerder van de hogeschool (of Xebic-support) of formulieren te
-importeren zijn en in welk formaat, met een voorbeeldbestand. Daarna een eigen korte brief of een
-deelstap hier. Tot dan: rubric naar Excel en Word (30.3), zodat overtypen in GradeWork snel gaat.
+**Wat Bastiaan weet (6 november 2026):** GradeWork werkt volgens hem met CSV. Dat past bij hoe
+zulke systemen kandidaten en cijfers uitwisselen, maar welke kolommen, welk scheidingsteken en of
+het om formulieren, kandidaten of cijfers gaat, weten we nog niet.
+
+**Doen (na de pilot, BESLUIT-2026-11-06-4):** haal via de GradeWork-beheerder van de hogeschool
+(of Xebic-support) één **voorbeeld-CSV** op, met wat GradeWork inleest of uitvoert, en lees de
+kolommen daarvan af. Is het een cijfer- of kandidatenbestand, dan bouwen we het zoals de
+Brightspace-cijfers (30.5): in de browser, gekoppeld op studentnummer, niets geraden. Is het een
+beoordelingsformulier, dan vanuit `RubricData` (30.3). Daarna een deelstap hier, met het
+voorbeeldbestand (zonder echte studentgegevens) als testgeval. Tot dan: rubric naar Excel en Word
+(30.3), zodat overtypen in GradeWork snel gaat.
 
 ### 30.7 — De huisstijl: eigen sjablonen voor Word en PowerPoint
 
@@ -264,7 +272,7 @@ data via `exportAs`), `docs/implementation/README.md` en het bord.
 | 30.3 Excel | 30.1 | 30.2 |
 | 30.4 PowerPoint en voorbeeld | 30.1 | 30.5 |
 | 30.5 Brightspace | 30.1; vragen ook `test-items-items@v4` met meting | 30.4 |
-| 30.6 GradeWork | antwoord van de GradeWork-beheerder of Xebic | alles |
+| 30.6 GradeWork (CSV) | een voorbeeld-CSV van de GradeWork-beheerder of Xebic; na de pilot | alles |
 | 30.7a Huisstijl als instellingen | 30.4 | — |
 | 30.7b Eigen sjabloon | 30.7a; PowerPoint ook akkoord op een derde bibliotheek | — |
 
