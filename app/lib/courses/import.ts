@@ -49,14 +49,24 @@ export interface ImportProposal {
 
 export type ImportParseResult =
   | { ok: true; proposal: ImportProposal; flagged: number; clipped: boolean }
-  | { ok: false; error: "unparseable" | "empty" };
+  | { ok: false; error: "unparseable" }
+  /** Valid answer, nothing to import; `notes` is the model's explanation, if any. */
+  | { ok: false; error: "empty"; notes?: string };
 
 const NOTES_MAX = 2_000;
+
+/**
+ * The largest document text the import takes (browser, server and model call).
+ * A whole OER, Deel A plus Deel B, runs to ~180k characters and its course
+ * tables come last, so the 80k structured-input default would cut them off.
+ * 300k characters is ~100k tokens: within the default model's context.
+ */
+export const IMPORT_DOCUMENT_MAX = 300_000;
 
 /** The user message: the document as data, and the course name to find the right part. */
 export function buildImportMessage(documentText: string, courseName?: string): string {
   const name = courseName?.trim().slice(0, COURSE_LIMITS.title);
-  const doc = wrapAsData("document", documentText);
+  const doc = wrapAsData("document", documentText, IMPORT_DOCUMENT_MAX);
   return name ? `<course>${name}</course>\n\n${doc}` : doc;
 }
 
@@ -155,8 +165,9 @@ export function parseImport(
     };
   });
 
-  if (outcomes.length === 0 && assessments.length === 0) return { ok: false, error: "empty" };
   const notes = cut(r.notes ?? "", NOTES_MAX);
+  if (outcomes.length === 0 && assessments.length === 0)
+    return { ok: false, error: "empty", ...(notes ? { notes } : {}) };
   return {
     ok: true,
     proposal: {

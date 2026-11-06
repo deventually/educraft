@@ -71,11 +71,24 @@ function finalize(text: string, pageCount?: number): ExtractResult {
   };
 }
 
+/**
+ * One page's text with its line breaks kept: spaces collapsed per line, empty
+ * lines dropped. A table row stays one line, which a model needs to read an
+ * OER's course table (`mergePages: true` collapses ALL whitespace to spaces).
+ */
+function tidyPage(page: string): string {
+  return page
+    .split("\n")
+    .map((line) => line.replace(/[ \t\u00a0]+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 async function extractPdf(bytes: Uint8Array): Promise<ExtractResult> {
   const { extractText, getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(bytes);
-  const { totalPages, text } = await extractText(pdf, { mergePages: true });
-  return finalize(text, totalPages);
+  const { totalPages, text } = await extractText(pdf, { mergePages: false });
+  return finalize(text.map(tidyPage).filter(Boolean).join("\n\n"), totalPages);
 }
 
 async function extractDocx(bytes: Uint8Array): Promise<ExtractResult> {

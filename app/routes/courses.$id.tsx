@@ -181,6 +181,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           courseName={course.name}
           startOpen={data.outcomes.length === 0}
           proposal={proposal}
+          notes={
+            actionData && !actionData.ok && actionData.intent === "import-extract"
+              ? actionData.notes
+              : undefined
+          }
         />
         <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
         {review && <CourseReviewPanel data={data} {...review} courseId={course.id} tools={tools} />}

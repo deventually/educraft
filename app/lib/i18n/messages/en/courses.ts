@@ -127,6 +127,8 @@ export const courses: Messages["courses"] = {
         "The learning outcomes and assessments could not be taken from the document. Try again, or enter them by hand.",
       limit:
         "That does not fit in one course (at most 30 learning outcomes and 30 assessments). Tick fewer.",
+      nothing:
+        "According to the AI, this document has no learning outcomes or assessments for this course. Read the explanation below, or enter them by hand.",
       quota: "Daily limit reached; try again tomorrow.",
     },
     existing: "Already in your course; it is not added twice and not changed.",

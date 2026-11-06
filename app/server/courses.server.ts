@@ -21,13 +21,18 @@ import { applyCourseIntent } from "~/lib/courses/intents";
 import { resolveFramework } from "~/lib/context/frameworks";
 import type { DomainPack } from "~/lib/context/packs";
 import { getProfile } from "./repositories/profiles.server";
-import { applyImport, type ImportProposal, parseImportSelection } from "~/lib/courses/import";
+import {
+  applyImport,
+  IMPORT_DOCUMENT_MAX,
+  type ImportProposal,
+  parseImportSelection,
+} from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
-import { extractCourseImport } from "./courseImport.server";
+import { type CourseImportResult, extractCourseImport } from "./courseImport.server";
 import { addCourseToDossier } from "./courseEvidence.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -42,9 +47,6 @@ import {
 import { addAssessment, setAssessmentItems } from "~/lib/courses/edit";
 import type { CourseData } from "~/lib/courses/types";
 
-/** The largest document text accepted for an import (the model sees the first 80 000). */
-export const IMPORT_DOCUMENT_MAX = 300_000;
-
 export type CourseActionResult =
   | { ok: true; intent?: undefined }
   | {
@@ -58,7 +60,7 @@ export type CourseActionResult =
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
   | { ok: true; intent: "review" | "decide"; message: string; partial?: boolean }
-  | { ok: false; error: string; intent?: string };
+  | { ok: false; error: string; intent?: string; notes?: string };
 
 export async function requireCourseUser(request: Request): Promise<User> {
   const user = await requireRole(request, "teacher", "admin");
@@ -104,8 +106,14 @@ export async function saveCourseIntent(
       documentText,
       courseName,
       locale,
-    ).catch(() => ({ ok: false as const, error: "failed" as const }));
-    if (!result.ok) return { ok: false, intent, error: m.import.errors[result.error] };
+    ).catch((): CourseImportResult => ({ ok: false, error: "failed" }));
+    if (!result.ok)
+      return {
+        ok: false,
+        intent,
+        error: m.import.errors[result.error],
+        ...(result.notes ? { notes: result.notes } : {}),
+      };
     return { ...result, intent };
   }
 
