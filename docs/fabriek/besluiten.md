@@ -254,3 +254,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de aanbieder (`DeepSeek` → `DEEPSEEK_API_KEY`) en mag nooit die van een andere aanbieder zijn,
   zodat een sleutel niet naar een vreemd adres kan. Adressen op internet zijn `https`; een eigen
   server op het schoolnetwerk mag `http` en zonder sleutel, ook in productie. Bastiaan, 2026-11-06.
+- **BESLUIT-2026-11-06-3:** **Pilotfeedback:** onder elk resultaat een duim, dan optioneel tijdwinst
+  (0/15/30/60+ min), kwaliteit 1-5 en een opmerking. De pilot-check-in staat op Start, komt na 3
+  resultaten en daarna hooguit eens per 14 dagen; "Niet nu" telt ook. Het beheeroverzicht per tool
+  is te filteren per team. Bastiaan, 2026-11-06 (#142).
