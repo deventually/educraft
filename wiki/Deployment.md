@@ -9,20 +9,32 @@ container with one persistent volume. No external SaaS is required.
 ## Container
 
 The [`Dockerfile`](../Dockerfile) is a multi-stage build on `node:24-alpine`
-(aligned with the Volta pin). The final image ships:
+(aligned with the Volta pin), run with [`docker-compose.yml`](../docker-compose.yml)
+and a `.env` (from `.env.example`). The installer's guide, in Dutch, is
+[`docs/installatie-docker.md`](../docs/installatie-docker.md). The final image ships
+only what runs, as the non-root `node` user with `NODE_ENV=production`:
 
-- the production `build/`,
-- production `node_modules`,
-- the **`drizzle/` migrations folder** — required at runtime.
+- the production `build/`, including the **ops scripts** bundled to plain JS
+  (`build/ops/{migrate,create-admin,set-owner,invite}.js`, built by
+  `scripts/ops.config.ts` as part of `npm run build`), so they run with bare `node`
+  (no tsx, no TypeScript source);
+- production `node_modules`;
+- the **`drizzle/` migrations folder** (`MIGRATIONS_DIR=/app/drizzle`).
 
 Migrations apply automatically on the first DB access (`getDb()` runs the
 drizzle migrator on connect, see `app/server/db.server.ts`), so a fresh volume is
-provisioned on boot. `CMD` is `npm run start`.
+provisioned on boot; `node build/ops/migrate.js` runs the same migrator by hand.
+`CMD` is `npm run start`; a `HEALTHCHECK` probes `/healthz`. `tests/deploy/` pins
+the image shape and runs the ops bundle against a throwaway database.
+
+Production cookies are `Secure`: serve the container behind HTTPS (a reverse proxy)
+unless it is only opened on `localhost`.
 
 ## Volume (production DB shape)
 
-Set `DATABASE_URL=file:/data/limeonit.db` and **mount a persistent volume at
-`/data`**. The SQLite file (plus its WAL sidecars) lives there and survives
+The image defaults to `DATABASE_URL=file:/data/limeonit.db` and declares `/data` a
+volume; `docker-compose.yml` pins that URL and mounts the named volume
+`limeonit-data` (or the host folder in `LIMEONIT_DATA`, writable by uid 1000) there. The SQLite file (plus its WAL sidecars) lives there and survives
 redeploys. Without a mounted volume the database is ephemeral and every deploy
 starts empty.
 

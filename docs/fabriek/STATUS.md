@@ -8,6 +8,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **OER-import met echte PDF's (#137) gemerged op 2026-11-06:** het hele document gaat mee (tot
+  300.000 tekens), tabelrijen blijven rijen, en de docent ziet de uitleg van de AI als er niets te
+  importeren valt.
+- **LimeOnIt als Docker-build (#138) gemerged op 2026-11-06:** één `docker compose up -d` met een
+  `.env` voor de sleutels; de database op een volume of eigen map. Gids: `docs/installatie-docker.md`.
 - **Bestandsknop als echte knop (NL/EN, #135) gemerged op 2026-11-06:** de kale bladerknop van de
   browser is overal een LimeOnIt-knop "Kies bestand" met de gekozen bestandsnaam ernaast.
 - **Alle schermen even breed op desktop (#136) gemerged op 2026-11-06:** elke pagina vult dezelfde
@@ -242,15 +247,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 ## Bezig
 
 - **AI-modellen beheren (PR open):** op "Tools en modellen" voegt een beheerder een model toe van
-  elke gekoppelde aanbieder (Anthropic, OpenAI, Google, Mistral, eigen adres), upgradet een oud
-  model naar een nieuwe versie (bijv. Haiku 4.5 → Haiku 5.5) en faseert het in twee stappen uit:
-  eerst gaat nieuw werk naar de nieuwe versie en mogen lopende gesprekken afmaken, daarna gaat
-  alles naar de nieuwe. Per model zie je het gebruik. Sleutels blijven op de server.
-- **OER-import met echte PDF's** (branch `claude/project-thread-0b9zht`): de import kapte het
-  document af op 80.000 tekens, zodat het vakdeel (Deel B) van een echte OER nooit bij het model
-  kwam; de PDF-tekst verloor bovendien alle regels. Nu gaat het hele document mee (tot 300.000
-  tekens), blijven tabelrijen rijen, en ziet de docent de uitleg van de AI als er niets te
-  importeren valt (zonder tweede betaalde aanroep).
+  elke gekoppelde aanbieder (Anthropic, OpenAI, Google, Mistral, MiniMax, OpenCode Zen,
+  OpenRouter, eigen adres), upgradet een oud model naar een nieuwe versie (bijv. Haiku 4.5 →
+  Haiku 5.5) en faseert het in twee stappen uit: eerst gaat nieuw werk naar de nieuwe versie en
+  mogen lopende gesprekken afmaken, daarna gaat alles naar de nieuwe. Per model zie je het
+  gebruik. Sleutels blijven op de server. De vaste lijst met aanbieders, modellen en hun
+  instellingen (effort, temperatuur) staat in `config/models.json`.
 
 ## Wacht op jou
 
