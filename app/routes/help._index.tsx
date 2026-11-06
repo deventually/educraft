@@ -27,7 +27,7 @@ export default function HelpIndex({ loaderData }: Route.ComponentProps) {
   const { topics, tools } = loaderData;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full min-w-0">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.help.heading}
       </h1>

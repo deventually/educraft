@@ -43,7 +43,7 @@ export default function AdminLayout() {
   const nav = t.admin.console.nav;
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="w-full min-w-0">
       <header className="mb-6">
         <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
           {t.admin.console.title}

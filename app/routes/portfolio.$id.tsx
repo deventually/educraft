@@ -135,7 +135,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
   })();
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="w-full min-w-0">
       <Link
         to="/portfolio"
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
