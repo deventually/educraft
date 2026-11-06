@@ -19,6 +19,9 @@ export const modelAdmin: Messages["modelAdmin"] = {
   clientSelectableHint: "Off for an expensive model: then only a tool uses it as its default.",
   connected: "Connected",
   displayName: "Name in LimeOnIt",
+  effort: "Reasoning level (effort)",
+  effortDefault: "The provider's default",
+  effortHint: "How hard the model thinks. Higher is more thorough, but slower and more expensive.",
   error: {
     alreadyRetiring: "This model is already being replaced.",
     duplicate: "This model is already here.",
@@ -31,9 +34,18 @@ export const modelAdmin: Messages["modelAdmin"] = {
   },
   finish: "Finish phasing out",
   finishDone: "{name} has been phased out. Everything now goes to {successor}.",
+  foundMany: "{count} models found",
+  foundNone: "Nothing found. Is the program running?",
+  foundOne: "1 model found",
   heading: "All models",
   intro:
     "Upgrade a model to a newer version. New work goes to the new version at once; conversations already running may finish on the old one. Finish phasing out when the old one is no longer in use.",
+  localAgents: "CLI agents",
+  localHeading: "On this computer",
+  localIntro:
+    "Models that run on your own computer, without a key. They only work in development mode (npm run dev), not in production or Docker.",
+  localOff: "This installation runs in production: CLI agents and local models are off.",
+  localServers: "Local servers",
   modelsCaption: "All models with their status and use.",
   noConnected: "No provider is connected yet. Connect one above first.",
   notConnected: "Not connected",
@@ -51,6 +63,9 @@ export const modelAdmin: Messages["modelAdmin"] = {
   stateRetired: "Phased out",
   stateRetiring: "Being replaced",
   supportsImages: "Can read photos and images",
+  temperature: "Temperature",
+  temperatureHint:
+    "0 is predictable, 1 is more creative. Empty = default. Some reasoning models refuse a temperature.",
   upgrade: "Upgrade",
   upgradeDone: "{name} is being replaced by {successor}.",
   upgradeTo: "Upgrade to",

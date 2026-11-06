@@ -224,6 +224,45 @@ export function AddModelForm({ providers }: { providers: ProviderView[] }) {
               />
             </div>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="add-effort">{a.effort}</Label>
+              <Select
+                id="add-effort"
+                name="effort"
+                defaultValue=""
+                aria-describedby="add-effort-hint"
+                className="mt-1"
+              >
+                <option value="">{a.effortDefault}</option>
+                {(["low", "medium", "high", "xhigh", "max"] as const).map((e) => (
+                  <option key={e} value={e}>
+                    {e}
+                  </option>
+                ))}
+              </Select>
+              <p id="add-effort-hint" className="mt-1 text-xs text-slate-500">
+                {a.effortHint}
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="add-temperature">{a.temperature}</Label>
+              <Input
+                id="add-temperature"
+                name="temperature"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                max={2}
+                step={0.1}
+                aria-describedby="add-temperature-hint"
+                className="mt-1"
+              />
+              <p id="add-temperature-hint" className="mt-1 text-xs text-slate-500">
+                {a.temperatureHint}
+              </p>
+            </div>
+          </div>
           <div className="space-y-3">
             <CheckField id="add-images" name="supportsImages" label={a.supportsImages} />
             <CheckField
@@ -421,6 +460,63 @@ export function ModelList({ models }: { models: ModelView[] }) {
   );
 }
 
+export interface LocalView {
+  enabled: boolean;
+  agents: { id: string; displayName: string }[];
+  servers: { id: string; name: string; found: number }[];
+}
+
+/** CLI agents and local servers: always shown, usable only outside production. */
+export function LocalModels({ local }: { local: LocalView }) {
+  const t = useT();
+  const a = t.modelAdmin;
+  const found = (n: number) =>
+    n === 0 ? a.foundNone : n === 1 ? a.foundOne : fmt(a.foundMany, { count: String(n) });
+  const item = "rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm";
+  return (
+    <section aria-labelledby="local-heading">
+      <h2 id="local-heading" className={sectionHeading}>
+        {a.localHeading}
+      </h2>
+      <p className="mt-1 max-w-2xl text-sm text-slate-600">{a.localIntro}</p>
+      {!local.enabled && (
+        <p className="mt-3 max-w-xl rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">
+          {a.localOff}
+        </p>
+      )}
+      <div className="mt-4 grid max-w-3xl gap-6 sm:grid-cols-2">
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {a.localServers}
+          </h3>
+          <ul className="mt-2 space-y-2">
+            {local.servers.map((srv) => (
+              <li key={srv.id} className={item}>
+                <span className="block text-sm font-medium text-slate-800">{srv.name}</span>
+                {local.enabled && (
+                  <span className="text-xs text-slate-500">{found(srv.found)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {a.localAgents}
+          </h3>
+          <ul className="mt-2 space-y-2">
+            {local.agents.map((agent) => (
+              <li key={agent.id} className={cn(item, "text-sm font-medium text-slate-800")}>
+                {agent.displayName}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** The instance allow-list (P14/P18): which models users may pick. Moved from Tools. */
 export function ModelAllowList({ choices }: { choices: ChoiceView[] }) {
   const t = useT();
@@ -485,16 +581,19 @@ export function ModelManagement({
   providers,
   models,
   choices,
+  local,
 }: {
   providers: ProviderView[];
   models: ModelView[];
   choices: ChoiceView[];
+  local: LocalView;
 }) {
   return (
     <>
       <ModelList models={models} />
       <AddModelForm providers={providers} />
       <ProviderList providers={providers} />
+      <LocalModels local={local} />
       <ModelAllowList choices={choices} />
     </>
   );

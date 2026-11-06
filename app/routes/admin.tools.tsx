@@ -118,7 +118,7 @@ function ToolsBulkForm({ slugs }: { slugs: string[] }) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, features, providers, models, choices } = loaderData;
+  const { rows, features, providers, models, choices, local } = loaderData;
   const f = t.features;
   const at = t.admin.tools;
   // Find and filter on the page: the registry is small, so no round trip.
@@ -276,7 +276,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      <ModelManagement providers={providers} models={models} choices={choices} />
+      <ModelManagement providers={providers} models={models} choices={choices} local={local} />
     </div>
   );
 }

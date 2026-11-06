@@ -75,9 +75,14 @@ LimeOnIt is not tied to one model vendor.
   DeepSeek, OpenRouter, vLLM, …), via `OPENAI_COMPAT_BASE_URL` /
   `OPENAI_COMPAT_API_KEY` in `.env`. It's a *paid remote* model, so — like Opus —
   it is **not** client-selectable: reachable only as a configured default, never forced from a request body.
-- The built-in catalog and the default model live in **`config/models.json`** (fields in
-  `config/README.md`), validated with Zod when `models.ts` loads: a broken file stops the boot
-  with a message naming the problem. `models.ts` holds the `compat::`/local id schemes;
+- The API providers (id, `api`: `anthropic` | `openai-compatible`, `baseURL`, the *name* of the
+  key setting `keyEnv`), the built-in catalog, each model's `settings` (`effort`, `temperature`
+  — `null` = never sent —, `maxTokens`) and the default model live in **`config/models.json`**
+  (fields in `config/README.md`), validated with Zod when `models.ts` loads: a broken file stops
+  the boot with a message naming the problem. Keys stay in `.env`; `env.server#providerSetting`
+  reads only `*_API_KEY` / `*_BASE_URL` names. The AI SDK adapter serves every config provider
+  and maps `effort` to `providerOptions.anthropic.effort` or `providerOptions.<id>.reasoningEffort`.
+  Changes made on the admin screen go to the database on top of the file, never into it. `models.ts` holds the `compat::`/local id schemes;
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.

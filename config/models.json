@@ -6,7 +6,6 @@
       "name": "Anthropic (Claude)",
       "api": "anthropic",
       "baseURL": "https://api.anthropic.com/v1",
-      "baseURLEnv": "ANTHROPIC_BASE_URL",
       "keyEnv": "ANTHROPIC_API_KEY",
       "modelsUrl": "https://docs.anthropic.com/en/docs/about-claude/models",
       "example": "claude-haiku-5-5"
@@ -16,7 +15,6 @@
       "name": "OpenAI (ChatGPT)",
       "api": "openai-compatible",
       "baseURL": "https://api.openai.com/v1",
-      "baseURLEnv": "OPENAI_BASE_URL",
       "keyEnv": "OPENAI_API_KEY",
       "modelsUrl": "https://developers.openai.com/api/docs/models",
       "example": "gpt-6.1-sol"
@@ -26,7 +24,6 @@
       "name": "Google (Gemini)",
       "api": "openai-compatible",
       "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/",
-      "baseURLEnv": "GOOGLE_BASE_URL",
       "keyEnv": "GOOGLE_GENERATIVE_AI_API_KEY",
       "modelsUrl": "https://ai.google.dev/gemini-api/docs/models",
       "example": "gemini-4-argon"
@@ -36,7 +33,6 @@
       "name": "Mistral",
       "api": "openai-compatible",
       "baseURL": "https://api.mistral.ai/v1",
-      "baseURLEnv": "MISTRAL_BASE_URL",
       "keyEnv": "MISTRAL_API_KEY",
       "modelsUrl": "https://docs.mistral.ai/getting-started/models/",
       "example": "mistral-large-4"
@@ -46,7 +42,6 @@
       "name": "MiniMax",
       "api": "openai-compatible",
       "baseURL": "https://api.minimax.io/v1",
-      "baseURLEnv": "MINIMAX_BASE_URL",
       "keyEnv": "MINIMAX_API_KEY",
       "modelsUrl": "https://platform.minimax.io/docs/guides/text-chat",
       "example": "MiniMax-M3"
@@ -56,7 +51,6 @@
       "name": "OpenCode Zen",
       "api": "openai-compatible",
       "baseURL": "https://opencode.ai/inference/openai/v1",
-      "baseURLEnv": "OPENCODE_ZEN_BASE_URL",
       "keyEnv": "OPENCODE_ZEN_API_KEY",
       "modelsUrl": "https://opencode.ai/docs/zen/",
       "example": "kimi-k3"
@@ -66,7 +60,6 @@
       "name": "OpenRouter",
       "api": "openai-compatible",
       "baseURL": "https://openrouter.ai/api/v1",
-      "baseURLEnv": "OPENROUTER_BASE_URL",
       "keyEnv": "OPENROUTER_API_KEY",
       "modelsUrl": "https://openrouter.ai/models",
       "example": "openrouter/auto"

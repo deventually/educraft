@@ -93,6 +93,18 @@ describe("admin.tools models — providers and adding a model", () => {
     expect(data.choices.some((c) => c.id === "anthropic/claude-haiku-5-5")).toBe(true);
   });
 
+  it("keeps the effort and temperature chosen on screen", async () => {
+    await act({ ...HAIKU55, effort: "high", temperature: "0,2" });
+    const { resolveModelInfo } = await import("~/lib/ai/models");
+    expect(resolveModelInfo("anthropic/claude-haiku-5-5").settings).toEqual({
+      effort: "high",
+      temperature: 0.2,
+    });
+    expect(await act({ ...HAIKU55, apiId: "other", temperature: "9" })).toEqual({
+      error: "invalid",
+    });
+  });
+
   it("an existing allow-list gets the new model, so it is not hidden by surprise", async () => {
     await settings.setEnabledModels(["claude-sonnet-5-5"]);
     await act(HAIKU55);

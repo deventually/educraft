@@ -66,6 +66,17 @@ const loaderData = {
       usage: none,
     },
   ],
+  local: {
+    enabled: true,
+    agents: [
+      { id: "claude-code", displayName: "Claude Code (CLI)" },
+      { id: "codex", displayName: "Codex (CLI)" },
+    ],
+    servers: [
+      { id: "ollama", name: "Ollama", found: 2 },
+      { id: "lmstudio", name: "LM Studio", found: 0 },
+    ],
+  },
   choices: [
     { id: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5", checked: true, group: "frontier" },
     { id: "claude-code", displayName: "Claude Code (CLI)", checked: false, group: "cli" },
@@ -120,12 +131,16 @@ describe("Admin — models part of Tools and models", () => {
     await user.type(within(form).getByLabelText("Model-id bij de aanbieder"), "claude-haiku-5-5");
     await user.type(within(form).getByLabelText("Naam in LimeOnIt"), "Claude Haiku 5.5");
     await user.click(within(form).getByLabelText(/denkt eerst na/i));
+    await user.selectOptions(within(form).getByLabelText("Denkniveau (effort)"), "high");
+    await user.type(within(form).getByLabelText("Temperatuur"), "0.2");
     await user.click(within(form).getByRole("button", { name: "Toevoegen" }));
     await waitFor(() => expect(body?.get("intent")).toBe("add"));
     expect(body?.get("provider")).toBe("anthropic");
     expect(body?.get("apiId")).toBe("claude-haiku-5-5");
     expect(body?.get("displayName")).toBe("Claude Haiku 5.5");
     expect(body?.get("alwaysThinks")).toBe("on");
+    expect(body?.get("effort")).toBe("high");
+    expect(body?.get("temperature")).toBe("0.2");
     expect(await screen.findByText("Claude Haiku 5.5 is toegevoegd.")).toBeInTheDocument();
   });
 
@@ -176,6 +191,17 @@ describe("Admin — models part of Tools and models", () => {
     const old = card("Claude Sonnet 4.6");
     expect(within(old).getByText("Uitgefaseerd")).toBeInTheDocument();
     expect(within(old).getByRole("button", { name: "Terugzetten" })).toBeInTheDocument();
+  });
+
+  it("shows the CLI agents and the local servers with what was found", () => {
+    renderRoute();
+    const local = screen.getByRole("region", { name: "Op deze computer" });
+    expect(within(local).getByText("Codex (CLI)")).toBeInTheDocument();
+    expect(within(local).getByText("Claude Code (CLI)")).toBeInTheDocument();
+    const ollama = within(local).getByText("Ollama").closest("li")!;
+    expect(within(ollama).getByText("2 modellen gevonden")).toBeInTheDocument();
+    const lms = within(local).getByText("LM Studio").closest("li")!;
+    expect(within(lms).getByText(/niets gevonden/i)).toBeInTheDocument();
   });
 
   it("keeps the allow-list of models users may choose", () => {

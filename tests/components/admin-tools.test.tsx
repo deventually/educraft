@@ -28,6 +28,7 @@ const loaderData = {
   ],
   providers: [],
   models: [],
+  local: { enabled: true, agents: [], servers: [] },
   choices: [
     { id: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6", checked: true, group: "frontier" },
     { id: "claude-haiku-4-5", displayName: "Claude Haiku 4.5", checked: true, group: "frontier" },
