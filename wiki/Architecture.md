@@ -127,6 +127,20 @@ LimeOnIt is not tied to one model vendor.
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 
+### Speech
+
+- **Read aloud (TTS)** is browser-only: `ReadAloudButton` uses `speechSynthesis` with a
+  device-local voice (`localService`); an online voice would send the text away, so with no
+  local voice for the language the button is not shown (`app/lib/speech/readAloud.ts`).
+- **Dictation (STT)** goes through the server: `DictateButton` records 16 kHz mono WAV in the
+  browser (`app/lib/speech/recorder.ts`, `wav.ts`), posts it to `/api/transcribe`, and
+  `speechToText.server.ts` forwards it to the OpenAI-compatible `/audio/transcriptions` of the
+  provider named in `speechToText` in `config/models.json` (by default `whisper`, address in
+  `WHISPER_BASE_URL`): whisper.cpp in Docker (`--profile speech`), on the machine, or OpenAI.
+  No address → `dictationEnabled()` is false and no microphone shows. Nothing is stored;
+  never the browser's Web Speech API (it sends audio to Google). The `Permissions-Policy`
+  allows the microphone for `self` only.
+
 ---
 
 ## Feature modules

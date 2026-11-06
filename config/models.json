@@ -75,6 +75,18 @@
       "keyEnv": "OPENAI_COMPAT_API_KEY",
       "keyOptional": true,
       "example": "glm-4-plus"
+    },
+    {
+      "id": "whisper",
+      "name": {
+        "nl": "Spraakherkenning (Whisper)",
+        "en": "Speech recognition (Whisper)"
+      },
+      "api": "openai-compatible",
+      "baseURLEnv": "WHISPER_BASE_URL",
+      "keyEnv": "WHISPER_API_KEY",
+      "keyOptional": true,
+      "example": "whisper-1"
     }
   ],
   "models": [
@@ -272,5 +284,9 @@
       "local": true,
       "clientSelectable": true
     }
-  ]
+  ],
+  "speechToText": {
+    "provider": "whisper",
+    "model": "whisper-1"
+  }
 }

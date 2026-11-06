@@ -7,6 +7,15 @@ import { ChatView } from "~/components/ChatView";
 import type { Tool } from "~/lib/registry/types";
 import { stubSpeech } from "../helpers/speech";
 
+// The dictation button is tested on its own; here only the wiring into the composer.
+vi.mock("~/components/DictateButton", () => ({
+  DictateButton: ({ lang, onText }: { lang: string; onText: (t: string) => void }) => (
+    <button type="button" onClick={() => onText("dictated question")}>
+      {`mic ${lang}`}
+    </button>
+  ),
+}));
+
 // Mock streamPost to avoid actual API calls
 vi.mock("~/lib/streamClient", () => ({
   streamPost: vi.fn(),
@@ -550,6 +559,16 @@ describe("ChatView", () => {
     expect(speech.spoken[0].lang).toBe("en-GB");
     expect((await axe(container)).violations).toEqual([]);
     speech.restore();
+  });
+
+  it("puts dictated text in the composer, in the conversation's language", async () => {
+    const user = userEvent.setup();
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    const box = await screen.findByPlaceholderText("Your message…");
+    await user.type(box, "Hi,");
+    await user.click(screen.getByRole("button", { name: "mic en" }));
+    expect(box).toHaveValue("Hi, dictated question");
   });
 
   it("shows live region for streaming with aria-live=polite", async () => {

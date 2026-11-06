@@ -70,6 +70,25 @@ Een externe databaseserver (PostgreSQL, MySQL) wordt nog niet ondersteund.
 
 Andere poort dan 3000? Zet `LIMEONIT_PORT=8080` in `.env`.
 
+### Dicteren (optioneel)
+
+Met een microfoonknop spreekt een docent tekst in, in de chat en in elk tekstvak. Een
+Whisper-server (whisper.cpp) schrijft het uit, in een eigen container naast LimeOnIt, alleen
+bereikbaar voor LimeOnIt. De opname gaat niet naar buiten en wordt niet bewaard.
+
+1. Zet in `.env`: `WHISPER_BASE_URL=http://whisper:8178/v1`
+2. Start met het profiel `speech`:
+
+   ```sh
+   docker compose --profile speech up -d
+   ```
+
+De eerste start downloadt het model (standaard `large-v3-turbo-q5_0`, ongeveer 550 MB) naar het
+volume `whisper-models`; dat duurt even. Docker draait op de processor, ook op een Mac (Docker
+heeft daar geen toegang tot de GPU). Is uitschrijven te traag, kies dan een kleiner model met
+`WHISPER_MODEL=small-q5_1` in `.env`. Zonder het profiel draait LimeOnIt gewoon, zonder
+microfoonknop. De browser geeft de microfoon alleen via HTTPS (of op `localhost`).
+
 ## 3. Starten
 
 ```sh

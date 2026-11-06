@@ -250,11 +250,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- **Voorlezen (spraak, deel 1, PR open):** onder elk toolresultaat en onder elk chatantwoord een
-  knop *Voorlezen* / *Read aloud*. De browser leest voor met een stem die op het apparaat zelf
-  draait; een online stem (die de tekst naar bijv. Google stuurt) wordt nooit gebruikt. Heeft het
-  apparaat geen eigen stem voor die taal, dan verschijnt de knop niet. Dicteren (deel 2) wacht op
-  de keuze van Bastiaan voor de server die spraak omzet naar tekst.
+- **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
+  *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
+  microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar
+  een Whisper-server (whisper.cpp in Docker met `--profile speech`, op de eigen computer, of
+  OpenAI) en komt terug als tekst. Zonder `WHISPER_BASE_URL` in `.env` is er geen microfoonknop.
+  Nooit de spraakdienst van Chrome (die stuurt audio naar Google).
 - **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
   nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
   school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt

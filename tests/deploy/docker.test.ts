@@ -59,6 +59,18 @@ describe(".dockerignore", () => {
 });
 
 describe("docker-compose.yml", () => {
+  it("can start a Whisper speech server for dictation, only on request", () => {
+    // `docker compose --profile speech up -d`: whisper.cpp on the internal network only.
+    const whisper = compose.slice(compose.indexOf("  whisper:"));
+    expect(compose).toContain("  whisper:");
+    expect(whisper).toMatch(/image: ghcr\.io\/ggml-org\/whisper\.cpp:main/);
+    expect(whisper).toMatch(/profiles: \["speech"\]/);
+    expect(whisper).toContain("--inference-path /v1/audio/transcriptions");
+    expect(whisper).not.toMatch(/^\s+ports:/m);
+    expect(compose).toMatch(/^\s+whisper-models:/m);
+    expect(envExample).toMatch(/WHISPER_BASE_URL=http:\/\/whisper:8178\/v1/);
+  });
+
   it("reads its configuration from .env", () => {
     expect(compose).toMatch(/env_file:[\s\S]*\.env/);
   });

@@ -28,7 +28,8 @@ export const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  // microphone: dictation, only for LimeOnIt itself.
+  "Permissions-Policy": "camera=(), microphone=(self), geolocation=()",
   "Content-Security-Policy": CSP,
 };
 

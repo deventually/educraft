@@ -19,7 +19,9 @@ import type { FormValues } from "~/lib/forms/values";
 import { Markdown } from "./Markdown";
 import { ToolIcon } from "./ToolIcon";
 import { AiNotice } from "./AiNotice";
+import { DictateButton } from "./DictateButton";
 import { ReadAloudButton } from "./ReadAloudButton";
+import { appendDictation } from "~/lib/speech/dictation";
 import { ResultActions, type ResultContext } from "./ResultActions";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
@@ -573,6 +575,14 @@ export function ChatView({
                 )
               ) : (
                 <>
+                  <DictateButton
+                    lang={outputLanguage}
+                    className="size-9 rounded-xl"
+                    onText={(text) => {
+                      setMessageInput((cur) => appendDictation(cur, text));
+                      inputRef.current?.focus();
+                    }}
+                  />
                   {tool.chat?.allowRegenerate && turns.length > 0 && (
                     <button
                       onClick={handleRegenerate}
