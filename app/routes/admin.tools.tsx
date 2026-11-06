@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useFetcher } from "react-router";
+import { Link, useFetcher, useSearchParams } from "react-router";
 import type { Route } from "./+types/admin.tools";
 import { requireRole } from "~/server/auth.server";
 import { ALL_TOOLS } from "~/lib/registry";
@@ -19,7 +19,44 @@ import { useActionToast } from "~/components/Toast";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { StandSelect } from "~/components/features/selects";
 import { isModelIntent, modelAdminAction, modelAdminData } from "~/server/modelAdmin.server";
-import { ModelManagement } from "~/components/admin/models";
+import { ModelsTab, ProvidersTab } from "~/components/admin/models";
+import { cn } from "~/lib/utils";
+
+/** The page's tabs, in the URL (`?tab=`) so a tab can be linked and survives a reload. */
+const TABS = ["tools", "models", "providers"] as const;
+type Tab = (typeof TABS)[number];
+
+function tabFrom(value: string | null): Tab {
+  return (TABS as readonly string[]).includes(value ?? "") ? (value as Tab) : "tools";
+}
+
+function TabNav({ current }: { current: Tab }) {
+  const t = useT();
+  const labels = t.admin.tools.tabs;
+  return (
+    <nav aria-label={labels.label} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+      <ul className="flex gap-1 border-b border-slate-200">
+        {TABS.map((tab) => (
+          <li key={tab}>
+            <Link
+              to={tab === "tools" ? "?" : `?tab=${tab}`}
+              aria-current={tab === current ? "page" : undefined}
+              preventScrollReset
+              className={cn(
+                "-mb-px inline-block whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-violet-500",
+                tab === current
+                  ? "border-violet-600 text-violet-800"
+                  : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900",
+              )}
+            >
+              {labels[tab]}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
@@ -119,6 +156,8 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
   const { rows, features, providers, models, choices, local } = loaderData;
+  const [params] = useSearchParams();
+  const tab = tabFrom(params.get("tab"));
   const f = t.features;
   const at = t.admin.tools;
   // Find and filter on the page: the registry is small, so no round trip.
@@ -130,8 +169,21 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
       (!standFilter || r.stand === standFilter) &&
       (!needle || loc(r.name, locale).toLowerCase().includes(needle)),
   );
+  if (tab !== "tools") {
+    return (
+      <div className="space-y-10">
+        <TabNav current={tab} />
+        {tab === "models" ? (
+          <ModelsTab providers={providers} models={models} choices={choices} />
+        ) : (
+          <ProvidersTab providers={providers} local={local} />
+        )}
+      </div>
+    );
+  }
   return (
     <div className="space-y-10">
+      <TabNav current={tab} />
       {/* ── Features: the large parts of the app (P28.3) ─────────────────── */}
       <section>
         <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
@@ -275,8 +327,6 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
           </table>
         </div>
       </section>
-
-      <ModelManagement providers={providers} models={models} choices={choices} local={local} />
     </div>
   );
 }

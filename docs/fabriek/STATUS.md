@@ -8,6 +8,10 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **AI-modellen beheren (#139) gemerged op 2026-11-06:** op "Tools en modellen" voegt een
+  beheerder een model toe van elke gekoppelde aanbieder, upgradet een oud model naar een nieuwe
+  versie (bijv. Haiku 4.5 → Haiku 5.5) en faseert het in twee stappen uit. De vaste lijst met
+  aanbieders, modellen en hun instellingen (effort, temperatuur) staat in `config/models.json`.
 - **OER-import met echte PDF's (#137) gemerged op 2026-11-06:** het hele document gaat mee (tot
   300.000 tekens), tabelrijen blijven rijen, en de docent ziet de uitleg van de AI als er niets te
   importeren valt.
@@ -246,13 +250,14 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- **AI-modellen beheren (PR open):** op "Tools en modellen" voegt een beheerder een model toe van
-  elke gekoppelde aanbieder (Anthropic, OpenAI, Google, Mistral, MiniMax, OpenCode Zen,
-  OpenRouter, eigen adres), upgradet een oud model naar een nieuwe versie (bijv. Haiku 4.5 →
-  Haiku 5.5) en faseert het in twee stappen uit: eerst gaat nieuw werk naar de nieuwe versie en
-  mogen lopende gesprekken afmaken, daarna gaat alles naar de nieuwe. Per model zie je het
-  gebruik. Sleutels blijven op de server. De vaste lijst met aanbieders, modellen en hun
-  instellingen (effort, temperatuur) staat in `config/models.json`.
+- **Aanbieders toevoegen in Beheer (PR open):** op "Tools en modellen" voegt een beheerder een
+  nieuwe aanbieder toe met een naam en een adres, ook een eigen server op het netwerk van de
+  school (die mag `http` gebruiken en hoeft geen sleutel; werkt ook in productie). De sleutel komt
+  in `.env` onder een eigen naam (`<NAAM>_API_KEY`), nooit in het scherm. Een aanbieder zonder
+  modellen kan weer weg. De zin "Opus-klasse blijft serverzijdig" is gewone taal geworden. De
+  lange pagina is opgedeeld in drie tabbladen: *Tools* (onderdelen en tools aan/uit), *Modellen*
+  (alle modellen, wat docenten mogen kiezen, model toevoegen) en *Aanbieders* (koppelen,
+  toevoegen, modellen op deze computer). Nog steeds één pagina (BESLUIT-2026-11-03-14).
 
 ## Wacht op jou
 

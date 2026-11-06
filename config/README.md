@@ -7,8 +7,10 @@ een nieuwe versie zetten of instellingen aanpassen doe je hier, niet in de code.
 wijziging: `npm run dev` opnieuw starten, of opnieuw bouwen (`npm run build`, het Docker-image).
 Een fout in het bestand stopt de app bij het opstarten, met een melding die zegt wat er mis is.
 
-Modellen toevoegen, upgraden en uitfaseren kan ook zonder dit bestand, in het beheerscherm
-**Tools en modellen**. Dat werkt meteen, zonder herstart.
+Modellen en aanbieders toevoegen, upgraden en uitfaseren kan ook zonder dit bestand, in het
+beheerscherm **Tools en modellen**. Dat werkt meteen, zonder herstart. Een aanbieder uit het scherm
+krijgt een sleutelinstelling op basis van zijn naam (`DeepSeek` → `DEEPSEEK_API_KEY`); die zet je
+in `.env`. Een eigen server op het schoolnetwerk mag `http://` gebruiken en hoeft geen sleutel.
 
 De **sleutels** staan nooit hier, maar in `.env` op de server (BESLUIT-2026-11-06-1). Dit bestand
 noemt alleen de naam van de instelling (`keyEnv`).

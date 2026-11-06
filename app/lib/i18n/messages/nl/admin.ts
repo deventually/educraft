@@ -105,7 +105,8 @@ export const admin = {
     cliGroup: "CLI-agents",
     frontierGroup: "Frontier-API",
     heading: "Modellen",
-    intro: "Kies welke modellen gebruikers mogen selecteren. Opus-klasse blijft serverzijdig.",
+    intro:
+      "Kies welke modellen docenten zelf mogen kiezen. Dure modellen (zoals Opus) staan hier niet: die gebruikt alleen een tool, als vaste standaard.",
     localGroup: "Lokaal (gevonden)",
     localGroupHint:
       "Alleen zichtbaar in ontwikkelmodus (npm run dev). In productie bestaan CLI-agents en lokale modellen niet. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",
@@ -135,6 +136,12 @@ export const admin = {
     modeOneShot: "Generator",
     noMatch: "Geen tools gevonden.",
     search: "Zoek een tool",
+    tabs: {
+      label: "Onderdelen van deze pagina",
+      models: "Modellen",
+      providers: "Aanbieders",
+      tools: "Tools",
+    },
   },
   usage: {
     colChars: "Tekens",

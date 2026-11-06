@@ -21,6 +21,9 @@ export interface ProviderView {
   setting: string;
   modelsUrl?: string;
   example: string;
+  /** Added on this screen: shows its address and can be removed. */
+  added?: boolean;
+  baseURL?: string;
 }
 
 export interface ModelView {
@@ -46,7 +49,9 @@ export type ModelActionResult =
   | { upgraded?: { name: string; successor: string } }
   | { finished?: { name: string; successor: string } }
   | { cancelled?: { name: string; restored: boolean } }
-  | { saved?: true; error?: string | true };
+  | { saved?: true; error?: string | true }
+  | { providerAdded?: { name: string; setting?: string } }
+  | { providerRemoved?: { name: string } };
 
 /** Toast every models action the same way: the done text, or the error text. */
 function useModelToast(data: ModelActionResult | undefined) {
@@ -64,6 +69,17 @@ function useModelToast(data: ModelActionResult | undefined) {
       return { variant: "success", message: fmt(a.upgradeDone, d.upgraded) };
     if ("finished" in d && d.finished)
       return { variant: "success", message: fmt(a.finishDone, d.finished) };
+    if ("providerAdded" in d && d.providerAdded) {
+      const { name, setting } = d.providerAdded;
+      return {
+        variant: "success",
+        message: setting
+          ? fmt(a.providerAddDone, { name, setting })
+          : fmt(a.providerAddReady, { name }),
+      };
+    }
+    if ("providerRemoved" in d && d.providerRemoved)
+      return { variant: "success", message: fmt(a.providerRemoveDone, d.providerRemoved) };
     if ("cancelled" in d && d.cancelled) {
       const text = d.cancelled.restored ? a.restoreDone : a.cancelDone;
       return { variant: "success", message: fmt(text, { name: d.cancelled.name }) };
@@ -109,10 +125,142 @@ export function ProviderList({ providers }: { providers: ProviderView[] }) {
                 {fmt(a.notConnectedHint, { setting: p.setting })}
               </p>
             )}
+            {p.added && <AddedProviderFooter provider={p} />}
           </li>
         ))}
       </ul>
+      <AddProviderForm />
     </section>
+  );
+}
+
+/** An added provider: where it points, and a way to remove it (refused while in use). */
+function AddedProviderFooter({ provider }: { provider: ProviderView }) {
+  const t = useT();
+  const locale = useLocale();
+  const a = t.modelAdmin;
+  const fetcher = useFetcher<ModelActionResult>();
+  useModelToast(fetcher.data);
+  const name = loc(provider.name, locale);
+  return (
+    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2">
+      <div className="min-w-0 text-xs text-slate-500">
+        <span className="block">{a.providerOwn}</span>
+        {provider.baseURL && (
+          <span className="block break-all font-mono text-slate-600">{provider.baseURL}</span>
+        )}
+      </div>
+      <fetcher.Form method="post">
+        <input type="hidden" name="intent" value="removeProvider" />
+        <input type="hidden" name="id" value={provider.id} />
+        <Button
+          type="submit"
+          variant="ghost"
+          size="sm"
+          disabled={fetcher.state !== "idle"}
+          aria-label={fmt(a.providerRemoveLabel, { name })}
+        >
+          {a.providerRemove}
+        </Button>
+      </fetcher.Form>
+    </div>
+  );
+}
+
+/** Add a provider: an API at an address. Its key setting is derived and stays in .env. */
+export function AddProviderForm() {
+  const t = useT();
+  const a = t.modelAdmin;
+  const fetcher = useFetcher<ModelActionResult>();
+  const formRef = useRef<HTMLFormElement>(null);
+  useModelToast(fetcher.data);
+
+  useEffect(() => {
+    if (fetcher.data && "providerAdded" in fetcher.data && fetcher.data.providerAdded)
+      formRef.current?.reset();
+  }, [fetcher.data]);
+
+  return (
+    <fetcher.Form
+      method="post"
+      ref={formRef}
+      aria-labelledby="add-provider-heading"
+      className="mt-4 max-w-xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
+      <input type="hidden" name="intent" value="addProvider" />
+      <div>
+        <h3 id="add-provider-heading" className="text-sm font-semibold text-slate-900">
+          {a.providerAdd}
+        </h3>
+        <p className="mt-1 text-xs text-slate-500">{a.providerAddIntro}</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="provider-name">{a.providerName}</Label>
+          <Input
+            id="provider-name"
+            name="name"
+            required
+            maxLength={60}
+            autoComplete="off"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="provider-api">{a.providerApi}</Label>
+          <Select
+            id="provider-api"
+            name="api"
+            defaultValue="openai-compatible"
+            aria-describedby="provider-api-hint"
+            className="mt-1"
+          >
+            <option value="openai-compatible">{a.providerApiCompat}</option>
+            <option value="anthropic">{a.providerApiAnthropic}</option>
+          </Select>
+          <p id="provider-api-hint" className="mt-1 text-xs text-slate-500">
+            {a.providerApiHint}
+          </p>
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="provider-url">{a.providerBaseUrl}</Label>
+        <Input
+          id="provider-url"
+          name="baseURL"
+          type="url"
+          required
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="https://"
+          aria-describedby="provider-url-hint"
+          className="mt-1 font-mono"
+        />
+        <p id="provider-url-hint" className="mt-1 text-xs text-slate-500">
+          {a.providerBaseUrlHint}
+        </p>
+      </div>
+      <div>
+        <Label htmlFor="provider-models-url">{a.providerModelsUrl}</Label>
+        <Input
+          id="provider-models-url"
+          name="modelsUrl"
+          type="url"
+          autoComplete="off"
+          spellCheck={false}
+          className="mt-1 font-mono"
+        />
+      </div>
+      <CheckField
+        id="provider-no-key"
+        name="noKey"
+        label={a.providerNoKey}
+        hint={a.providerNoKeyHint}
+      />
+      <Button type="submit" variant="secondary" disabled={fetcher.state !== "idle"}>
+        {a.providerAdd}
+      </Button>
+    </fetcher.Form>
   );
 }
 
@@ -576,25 +724,37 @@ export function ModelAllowList({ choices }: { choices: ChoiceView[] }) {
   );
 }
 
-/** The whole models part of "Tools and models": in use, add, providers, allow-list. */
-export function ModelManagement({
+/** The "Modellen" tab: every model (upgrade, phase out), what teachers may pick, adding one. */
+export function ModelsTab({
   providers,
   models,
   choices,
-  local,
 }: {
   providers: ProviderView[];
   models: ModelView[];
   choices: ChoiceView[];
-  local: LocalView;
 }) {
   return (
     <>
       <ModelList models={models} />
+      <ModelAllowList choices={choices} />
       <AddModelForm providers={providers} />
+    </>
+  );
+}
+
+/** The "Aanbieders" tab: API providers (connect, add, remove) and the models on this computer. */
+export function ProvidersTab({
+  providers,
+  local,
+}: {
+  providers: ProviderView[];
+  local: LocalView;
+}) {
+  return (
+    <>
       <ProviderList providers={providers} />
       <LocalModels local={local} />
-      <ModelAllowList choices={choices} />
     </>
   );
 }

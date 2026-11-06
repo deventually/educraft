@@ -23,9 +23,13 @@ export const modelAdmin = {
   error: {
     alreadyRetiring: "Dit model wordt al vervangen.",
     duplicate: "Dit model staat er al.",
+    insecure: "Gebruik een https-adres. Alleen op het eigen netwerk mag http.",
+    inUse: "Deze aanbieder heeft nog modellen en kan daarom niet weg.",
     invalid: "Vul een naam en een geldig model-id in (zonder spaties).",
     notConnected: "Deze aanbieder is nog niet gekoppeld.",
     notRetiring: "Dit model wordt niet vervangen.",
+    providerInvalid: "Vul een naam en een geldig adres in.",
+    providerTaken: "Deze aanbieder staat er al. Kies een andere naam.",
     self: "Kies een ander model om naar te upgraden.",
     successorRetiring: "Het nieuwe model wordt zelf al vervangen. Kies een ander.",
     unknown: "Dat model bestaat niet.",
@@ -49,6 +53,28 @@ export const modelAdmin = {
   notConnected: "Niet gekoppeld",
   notConnectedHint: "Zet {setting} in de serverinstellingen (.env) en start LimeOnIt opnieuw.",
   provider: "Aanbieder",
+  providerAdd: "Aanbieder toevoegen",
+  providerAddDone: "{name} is toegevoegd. Zet {setting} in .env en start LimeOnIt opnieuw.",
+  providerAddIntro:
+    "Een aanbieder die er nog niet bij staat, of een eigen server op het netwerk van je school. De sleutel zet je daarna in .env; die komt nooit in dit scherm.",
+  providerAddReady: "{name} is toegevoegd en klaar voor gebruik.",
+  providerApi: "Soort koppeling",
+  providerApiAnthropic: "Anthropic-API",
+  providerApiCompat: "OpenAI-compatibel",
+  providerApiHint:
+    "De meeste aanbieders en eigen servers (vLLM, Ollama) gebruiken OpenAI-compatibel.",
+  providerBaseUrl: "Adres (base URL)",
+  providerBaseUrlHint:
+    "Begint met https://. Op het eigen netwerk mag ook http://, bijvoorbeeld http://10.0.0.5:8000/v1.",
+  providerModelsUrl: "Pagina met modellen (mag leeg)",
+  providerName: "Naam",
+  providerNoKey: "Geen sleutel nodig (eigen server)",
+  providerNoKeyHint:
+    "Voor een server op het netwerk van je school zonder sleutel. Werkt ook in productie.",
+  providerOwn: "Zelf toegevoegd",
+  providerRemove: "Verwijderen",
+  providerRemoveDone: "{name} is verwijderd.",
+  providerRemoveLabel: "{name} verwijderen",
   providersHeading: "Aanbieders",
   providersIntro:
     "Een aanbieder is gekoppeld als zijn sleutel op de server staat. De sleutel komt nooit in dit scherm.",

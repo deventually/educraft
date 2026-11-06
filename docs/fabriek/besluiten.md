@@ -249,3 +249,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   (`.env`), niet in de database of het beheerscherm. Het scherm laat alleen zien of een aanbieder
   gekoppeld is; de beheerder voegt daar modellen aan toe, upgradet ze en faseert ze uit. Bastiaan,
   2026-11-06 (keuzekaart, #139).
+- **BESLUIT-2026-11-06-2:** **Een beheerder kan in het scherm een aanbieder toevoegen**, maar de
+  sleutel blijft in `.env` (BESLUIT-2026-11-06-1). De naam van de instelling volgt uit de naam van
+  de aanbieder (`DeepSeek` → `DEEPSEEK_API_KEY`) en mag nooit die van een andere aanbieder zijn,
+  zodat een sleutel niet naar een vreemd adres kan. Adressen op internet zijn `https`; een eigen
+  server op het schoolnetwerk mag `http` en zonder sleutel, ook in productie. Bastiaan, 2026-11-06.

@@ -106,7 +106,8 @@ export const admin: Messages["admin"] = {
     cliGroup: "CLI agents",
     frontierGroup: "Frontier API",
     heading: "Models",
-    intro: "Choose which models users may select. Opus-class stays server-side.",
+    intro:
+      "Choose which models teachers may pick themselves. Expensive models (such as Opus) are not listed: only a tool uses them, as its fixed default.",
     localGroup: "Local (discovered)",
     localGroupHint:
       "Only visible in development mode (npm run dev). In production, CLI agents and local models do not exist. Discovered models depend on what is running now (Ollama/LM Studio).",
@@ -136,6 +137,7 @@ export const admin: Messages["admin"] = {
     modeOneShot: "Generator",
     noMatch: "No tools found.",
     search: "Search for a tool",
+    tabs: { label: "Parts of this page", models: "Models", providers: "Providers", tools: "Tools" },
   },
   usage: {
     colChars: "Characters",

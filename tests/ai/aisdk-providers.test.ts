@@ -97,3 +97,33 @@ describe("AI SDK adapter — providers and settings from config/models.json", ()
     expect(opts.temperature).toBe(0.4);
   });
 });
+
+describe("AI SDK adapter — a provider the admin added", () => {
+  it("serves its model at its own address, on the intranet without a key", async () => {
+    const { addProvider } = await import("~/lib/ai/modelRegistry");
+    const p = addProvider(EMPTY_REGISTRY, {
+      name: "Eigen server",
+      api: "openai-compatible",
+      baseURL: "http://10.0.0.5:8000/v1",
+      noKey: true,
+    });
+    if (!p.ok) throw new Error(p.error);
+    const m = addModel(p.registry, {
+      provider: "eigen-server",
+      apiId: "qwen3-32b",
+      displayName: "Qwen 3 (intranet)",
+      supportsImages: false,
+      alwaysThinks: false,
+      clientSelectable: true,
+    });
+    if (!m.ok) throw new Error(m.error);
+    installModelRegistry(m.registry);
+    expect(providerForModel(m.id)).toBe(aiSdkProvider);
+    await call(m.id);
+    expect(compatCalls.at(-1)).toMatchObject({
+      name: "eigen-server",
+      baseURL: "http://10.0.0.5:8000/v1",
+    });
+    expect(compatCalls.at(-1)?.apiKey).toBeUndefined();
+  });
+});

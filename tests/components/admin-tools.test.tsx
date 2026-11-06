@@ -56,7 +56,7 @@ const loaderData = {
   ],
 };
 
-function renderRoute(action?: (args: { request: Request }) => unknown) {
+function renderRoute(action?: (args: { request: Request }) => unknown, entry = "/admin/tools") {
   const props = { loaderData } as unknown as ComponentProps<typeof AdminTools>;
   const Stub = createRoutesStub([
     {
@@ -69,8 +69,65 @@ function renderRoute(action?: (args: { request: Request }) => unknown) {
       action: action ?? (() => ({ saved: true })),
     },
   ]);
-  return render(<Stub initialEntries={["/admin/tools"]} />);
+  return render(<Stub initialEntries={[entry]} />);
 }
+
+const MODELS_TAB = "/admin/tools?tab=models";
+
+describe("Admin tools: one page, three tabs (tools, models, providers)", () => {
+  const tabs = () => screen.getByRole("navigation", { name: "Onderdelen van deze pagina" });
+  const heading = (name: string) => screen.queryByRole("heading", { level: 2, name });
+
+  it("opens on Tools: the features and the tools, no models", () => {
+    renderRoute();
+    const links = within(tabs()).getAllByRole("link");
+    expect(links.map((l) => l.textContent)).toEqual(["Tools", "Modellen", "Aanbieders"]);
+    expect(within(tabs()).getByRole("link", { name: "Tools" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("table", { name: /alle tools/i })).toBeInTheDocument();
+    expect(heading("Alle modellen")).toBeNull();
+    expect(heading("Aanbieders")).toBeNull();
+  });
+
+  it("Modellen: the models, what teachers may pick, and adding one", () => {
+    renderRoute(undefined, MODELS_TAB);
+    expect(within(tabs()).getByRole("link", { name: "Modellen" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(tabs()).getByRole("link", { name: "Modellen" })).toHaveAttribute(
+      "href",
+      "/admin/tools?tab=models",
+    );
+    expect(heading("Alle modellen")).not.toBeNull();
+    expect(heading("Beschikbaar voor gebruikers")).not.toBeNull();
+    expect(heading("Model toevoegen")).not.toBeNull();
+    expect(screen.queryByRole("table", { name: /alle tools/i })).toBeNull();
+    expect(heading("Aanbieders")).toBeNull();
+  });
+
+  it("Aanbieders: the providers, adding one, and the models on this computer", () => {
+    renderRoute(undefined, "/admin/tools?tab=providers");
+    expect(heading("Aanbieders")).not.toBeNull();
+    expect(heading("Op deze computer")).not.toBeNull();
+    expect(heading("Alle modellen")).toBeNull();
+  });
+
+  it("an unknown tab falls back to Tools", () => {
+    renderRoute(undefined, "/admin/tools?tab=nope");
+    expect(screen.getByRole("table", { name: /alle tools/i })).toBeInTheDocument();
+  });
+
+  it("has no a11y violations on each tab", async () => {
+    for (const entry of ["/admin/tools", MODELS_TAB, "/admin/tools?tab=providers"]) {
+      const { container, unmount } = renderRoute(undefined, entry);
+      expect((await axe(container, axeOpts)).violations, entry).toEqual([]);
+      unmount();
+    }
+  });
+});
 
 describe("Admin tools", () => {
   const toolsTable = () => screen.getByRole("table", { name: /alle tools/i });
@@ -106,7 +163,7 @@ describe("Admin tools", () => {
   });
 
   it("renders a labelled checkbox per selectable model, pre-checked from settings", () => {
-    renderRoute();
+    renderRoute(undefined, MODELS_TAB);
     const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
     expect((within(instance).getByLabelText("Claude Sonnet 4.6") as HTMLInputElement).checked).toBe(
       true,
@@ -117,7 +174,7 @@ describe("Admin tools", () => {
   });
 
   it("[P14] renders local/CLI models as instance toggles too", () => {
-    renderRoute();
+    renderRoute(undefined, MODELS_TAB);
     const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
     expect((within(instance).getByLabelText("Claude Code (CLI)") as HTMLInputElement).checked).toBe(
       true,
@@ -141,7 +198,7 @@ describe("Admin tools", () => {
     renderRoute(async ({ request }) => {
       body = await request.formData();
       return { saved: true };
-    });
+    }, MODELS_TAB);
     const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
     await user.click(within(instance).getByLabelText("Claude Haiku 4.5"));
     await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
@@ -152,7 +209,7 @@ describe("Admin tools", () => {
 
   it("reverts the last model and shows an error toast when the action refuses", async () => {
     const user = userEvent.setup();
-    renderRoute(() => ({ error: true }));
+    renderRoute(() => ({ error: true }), MODELS_TAB);
     const instance = screen.getByRole("group", { name: /beschikbaar voor gebruikers/i });
     const haiku = within(instance).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
     await user.click(haiku);
