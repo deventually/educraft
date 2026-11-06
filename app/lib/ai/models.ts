@@ -1,25 +1,38 @@
+import { z } from "zod";
+import modelsConfig from "../../../config/models.json";
+import type { ModelRegistry, ModelState } from "./modelRegistry";
+
 /**
  * Model catalog. Decouples the registry's model ids from raw provider API ids,
  * so swapping or pinning model versions is a one-line change here. Each model
  * names a `provider`; `provider.ts` maps that to a concrete adapter.
  */
 
-export type ProviderId =
-  | "anthropic"
-  | "openai"
-  | "google"
-  | "mistral"
-  // A configured OpenAI-compatible endpoint (base URL + optional key in .env):
-  // covers ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, … — any
-  // frontier or self-hosted model that speaks the OpenAI API.
-  | "openai-compat"
-  | "ollama"
-  | "lmstudio"
-  // Local CLI agents (subprocess; pick their own model internally).
-  | "claude-code"
-  | "opencode"
-  | "codex"
-  | "gemini-cli";
+/**
+ * A provider id: one from `providers` in `config/models.json` (an API with a key on the
+ * server), or a built-in local kind below (no key; only outside production).
+ */
+export type ProviderId = string;
+
+/** Local servers and CLI agents: built in, because they need code, not a key. */
+export const LOCAL_PROVIDERS = [
+  "ollama",
+  "lmstudio",
+  "claude-code",
+  "opencode",
+  "codex",
+  "gemini-cli",
+] as const;
+
+/** How a model answers: the effort it puts in, its temperature, its answer length. */
+export interface ModelSettings {
+  /** Sampling temperature; `null` = never send one (reasoning models that refuse it). */
+  temperature?: number | null;
+  /** Reasoning effort, for providers that support it (Claude, GPT, …). */
+  effort?: "none" | "low" | "medium" | "high" | "xhigh" | "max";
+  /** Answer budget when a tool sets none. */
+  maxTokens?: number;
+}
 
 export interface ModelInfo {
   provider: ProviderId;
@@ -55,98 +68,121 @@ export interface ModelInfo {
    * implementation changes.
    */
   clientSelectable: boolean;
+  /** How the model answers (`settings` in `config/models.json`). */
+  settings?: ModelSettings;
 }
 
-export const MODELS = {
-  "claude-opus-5-5": {
-    provider: "anthropic",
-    apiId: "claude-opus-5-5",
-    displayName: "Claude Opus 5.5",
-    supportsImages: true,
-    alwaysThinks: true,
-    tier: 3,
-    // Opus-class: a tool/stage default only, never forced by a caller.
-    clientSelectable: false,
-  },
-  "claude-sonnet-5-5": {
-    provider: "anthropic",
-    apiId: "claude-sonnet-5-5",
-    displayName: "Claude Sonnet 5.5",
-    supportsImages: true,
-    alwaysThinks: true,
-    tier: 2,
-    clientSelectable: true,
-  },
-  "claude-opus-4-8": {
-    provider: "anthropic",
-    apiId: "claude-opus-4-8",
-    displayName: "Claude Opus 4.8",
-    supportsImages: true,
-    tier: 3,
-    // Opus is expensive: reachable only as a tool/stage default, never forced by a caller.
-    clientSelectable: false,
-  },
-  "claude-sonnet-4-6": {
-    provider: "anthropic",
-    apiId: "claude-sonnet-4-6",
-    displayName: "Claude Sonnet 4.6",
-    supportsImages: true,
-    tier: 2,
-    clientSelectable: true,
-  },
-  "claude-haiku-4-5": {
-    provider: "anthropic",
-    apiId: "claude-haiku-4-5",
-    displayName: "Claude Haiku 4.5",
-    supportsImages: true,
-    tier: 1,
-    clientSelectable: true,
-  },
-  // NB: local OpenAI-compatible models (Ollama / LM Studio) are NOT listed here.
-  // They are discovered at runtime from each server's /v1/models endpoint
-  // (see discover.server.ts) and resolved via resolveModelInfo().
-  //
-  // Local CLI agents — run on the user's machine, choose their own model.
-  "claude-code": {
-    provider: "claude-code",
-    apiId: "claude-code",
-    displayName: "Claude Code (CLI)",
-    supportsImages: false,
-    tier: 3,
-    local: true,
-    // Runs on the caller's own machine; costs the owner nothing.
-    clientSelectable: true,
-  },
-  opencode: {
-    provider: "opencode",
-    apiId: "opencode",
-    displayName: "opencode (CLI)",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-  codex: {
-    provider: "codex",
-    apiId: "codex",
-    displayName: "Codex (CLI)",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-  "gemini-cli": {
-    provider: "gemini-cli",
-    apiId: "gemini-cli",
-    displayName: "Gemini CLI",
-    supportsImages: false,
-    tier: 2,
-    local: true,
-    clientSelectable: true,
-  },
-} as const satisfies Record<string, ModelInfo>;
+const LocalizedNameSchema = z.union([
+  z.string().min(1),
+  z.object({ nl: z.string().min(1), en: z.string().min(1) }),
+]);
 
-export type ModelId = keyof typeof MODELS;
+/** Only names of server settings may be given, never values (keys stay in `.env`). */
+const SETTING_NAME = /^[A-Z][A-Z0-9_]*_(API_KEY|BASE_URL)$/;
+
+const ConfigProviderSchema = z
+  .object({
+    id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+    name: LocalizedNameSchema,
+    /** "anthropic" = Anthropic's own API; "openai-compatible" = the OpenAI chat API. */
+    api: z.enum(["anthropic", "openai-compatible"]),
+    /** The provider's address (for Anthropic: its API root). */
+    baseURL: z.url().optional(),
+    /** A server setting that overrides the address (a proxy, an EU region, an own endpoint). */
+    baseURLEnv: z.string().regex(SETTING_NAME).optional(),
+    keyEnv: z.string().regex(SETTING_NAME),
+    keyOptional: z.boolean().optional(),
+    modelsUrl: z.url().optional(),
+    example: z.string().min(1),
+  })
+  .refine((p) => p.api === "anthropic" || p.baseURL || p.baseURLEnv, {
+    message: "an openai-compatible provider needs baseURL or baseURLEnv",
+  });
+
+export type ConfigProvider = z.infer<typeof ConfigProviderSchema>;
+
+const SettingsSchema = z.object({
+  temperature: z.number().min(0).max(2).nullable().optional(),
+  effort: z.enum(["none", "low", "medium", "high", "xhigh", "max"]).optional(),
+  maxTokens: z.int().min(256).max(200_000).optional(),
+});
+
+const ConfigModelSchema = z.object({
+  id: z.string().min(1),
+  provider: z.string().min(1),
+  apiId: z.string().min(1),
+  displayName: z.string().min(1),
+  supportsImages: z.boolean(),
+  supportsThinking: z.boolean().optional(),
+  alwaysThinks: z.boolean().optional(),
+  tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  local: z.boolean().optional(),
+  clientSelectable: z.boolean(),
+  settings: SettingsSchema.optional(),
+});
+
+const ModelsConfigSchema = z.object({
+  default: z.string().min(1),
+  providers: z.array(ConfigProviderSchema).default([]),
+  models: z.array(ConfigModelSchema).min(1),
+});
+
+export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
+
+/**
+ * Validate `config/models.json`. A broken file stops the app at boot with a message that
+ * names the file and the problem, instead of failing on the first AI call.
+ */
+export function parseModelsConfig(raw: unknown): ModelsConfig {
+  const res = ModelsConfigSchema.safeParse(raw);
+  if (!res.success) {
+    const where = res.error.issues
+      .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+      .join("; ");
+    throw new Error(`config/models.json is invalid (check provider, tier, fields): ${where}`);
+  }
+  const providerIds = new Set<string>(LOCAL_PROVIDERS);
+  for (const p of res.data.providers) {
+    if (providerIds.has(p.id)) {
+      throw new Error(`config/models.json: provider "${p.id}" is listed twice.`);
+    }
+    providerIds.add(p.id);
+  }
+  const seen = new Set<string>();
+  for (const m of res.data.models) {
+    if (!providerIds.has(m.provider)) {
+      throw new Error(
+        `config/models.json: model "${m.id}" names provider "${m.provider}", which is not in "providers".`,
+      );
+    }
+    if (seen.has(m.id)) throw new Error(`config/models.json: model "${m.id}" is listed twice.`);
+    seen.add(m.id);
+  }
+  if (!seen.has(res.data.default)) {
+    throw new Error(`config/models.json: the default "${res.data.default}" is not in the list.`);
+  }
+  return res.data;
+}
+
+const config = parseModelsConfig(modelsConfig);
+
+/**
+ * The built-in catalog, read from `config/models.json` (edit that file, not this code, to
+ * add or change a model; restart or rebuild to apply). Models an admin adds on screen
+ * come on top of it through `installModelRegistry`.
+ */
+export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
+  config.models.map(({ id, ...info }) => [id, info]),
+);
+
+/** The API providers of `config/models.json`, in file order. */
+export const PROVIDERS: readonly ConfigProvider[] = config.providers;
+
+export function getProvider(id: string): ConfigProvider | undefined {
+  return PROVIDERS.find((p) => p.id === id);
+}
+
+export type ModelId = string;
 
 /** Answer budget when a tool sets none. */
 export const DEFAULT_MAX_TOKENS = 8192;
@@ -167,10 +203,73 @@ export function outputTokenBudget(
   return info.alwaysThinks ? answer + THINKING_HEADROOM : answer;
 }
 
-export const DEFAULT_MODEL: ModelId = "claude-sonnet-5-5";
+/** The app-wide default model (`default` in `config/models.json`). */
+export const DEFAULT_MODEL: ModelId = config.default;
+
+// ── The admin's registry (added models, upgrades), installed by the server ─────────
+// `modelRegistry.server` reads it from the database and installs it here, so every
+// lookup below sees added and retiring models without a second code path.
+let installed: ModelRegistry = { added: [], lifecycle: {} };
+let addedById = new Map<string, ModelInfo>();
+
+/** Install the admin's registry (server only; tests reset it with the empty one). */
+export function installModelRegistry(registry: ModelRegistry): void {
+  installed = registry;
+  addedById = new Map(
+    registry.added
+      // A catalog id always wins: an added model can never shadow a built-in one.
+      .filter((m) => !(m.id in MODELS))
+      .map((m) => [
+        m.id,
+        {
+          provider: m.provider,
+          apiId: m.apiId,
+          displayName: m.displayName,
+          supportsImages: m.supportsImages,
+          alwaysThinks: m.alwaysThinks,
+          clientSelectable: m.clientSelectable,
+          tier: 2 as const,
+          ...(m.settings ? { settings: m.settings } : {}),
+        },
+      ]),
+  );
+}
+
+/** The installed registry (read-only view for the admin screen). */
+export function installedModelRegistry(): ModelRegistry {
+  return installed;
+}
+
+/** Where a model is in its life: active, retiring (upgraded) or retired. */
+export function modelState(id: string): ModelState {
+  return installed.lifecycle[id]?.state ?? "active";
+}
+
+/** Follow the upgrade chain from `id`, retiring or retired, to the model for new work. */
+export function currentModelId(id: string): string {
+  let current = id;
+  const seen = new Set<string>();
+  while (installed.lifecycle[current] && !seen.has(current)) {
+    seen.add(current);
+    current = installed.lifecycle[current].successor;
+  }
+  return current;
+}
+
+/**
+ * The model to serve for a request that names `id`: a retiring model still serves (a
+ * running conversation finishes on it), a retired one hands over to its successor.
+ */
+export function forwardRetired(id: string): string {
+  return modelState(id) === "retired" ? currentModelId(id) : id;
+}
+
+function staticOrAdded(id: string): ModelInfo | undefined {
+  return (MODELS as Record<string, ModelInfo>)[id] ?? addedById.get(id);
+}
 
 export function getModel(id: string): ModelInfo {
-  const info = (MODELS as Record<string, ModelInfo>)[id];
+  const info = staticOrAdded(id);
   if (!info) throw new Error(`Unknown model id: ${id}`);
   return info;
 }
@@ -240,12 +339,7 @@ function parseCompatModel(id: string): ModelInfo | null {
  * OpenAI-compatible endpoint ("compat::<apiId>"). Throws if none.
  */
 export function resolveModelInfo(id: string): ModelInfo {
-  return (
-    (MODELS as Record<string, ModelInfo>)[id] ??
-    parseDynamicModel(id) ??
-    parseCompatModel(id) ??
-    throwUnknown(id)
-  );
+  return staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id) ?? throwUnknown(id);
 }
 
 function throwUnknown(id: string): never {
@@ -254,7 +348,11 @@ function throwUnknown(id: string): never {
 
 /** Whether an id resolves to a usable model (catalog, dynamic local, or configured compat). */
 export function isResolvableModel(id: string): boolean {
-  return id in MODELS || parseDynamicModel(id) !== null || parseCompatModel(id) !== null;
+  return (
+    staticOrAdded(id) !== undefined ||
+    parseDynamicModel(id) !== null ||
+    parseCompatModel(id) !== null
+  );
 }
 
 /**
@@ -264,16 +362,15 @@ export function isResolvableModel(id: string): boolean {
  * Phase 4 swaps this body for an admin-configured allow-list.
  */
 export function isClientSelectable(id: string): boolean {
-  const info =
-    (MODELS as Record<string, ModelInfo>)[id] ?? parseDynamicModel(id) ?? parseCompatModel(id);
+  const info = staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id);
   return info?.clientSelectable === true;
 }
 
-export function listModels(): Array<{ id: ModelId } & ModelInfo> {
-  return (Object.entries(MODELS) as Array<[ModelId, ModelInfo]>).map(([id, info]) => ({
-    id,
-    ...info,
-  }));
+/** The catalog plus the admin's added models, in every state (filter on `modelState`). */
+export function listModels(): Array<{ id: string } & ModelInfo> {
+  return [...(Object.entries(MODELS) as Array<[string, ModelInfo]>), ...addedById.entries()].map(
+    ([id, info]) => ({ id, ...info }),
+  );
 }
 
 /** Minimal shape needed to render a model <option> (static catalog or discovered local). */
@@ -302,7 +399,8 @@ export function pickableModels(
 ): PickerModel[] {
   // Never offer a model the server would silently swap: default to the catalog's
   // client-selectable entries. Discovered local models are free and always shown.
-  const base = catalog ?? listModels().filter((m) => m.clientSelectable);
+  const base =
+    catalog ?? listModels().filter((m) => m.clientSelectable && modelState(m.id) === "active");
   const all: PickerModel[] = [...base, ...localModels];
   // A vision tool must only offer models KNOWN to support images: an unknown
   // (undefined) flag is treated as non-vision, not waved through.

@@ -9,7 +9,10 @@ vi.mock("ai", () => ({
   })),
 }));
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic: () => () => ({ id: "mock-anthropic" }) }));
-vi.mock("~/server/env.server", () => ({ env: { ANTHROPIC_API_KEY: "test-key" } }));
+vi.mock("~/server/env.server", () => ({
+  env: { ANTHROPIC_API_KEY: "test-key" },
+  providerSetting: (name: string) => (name === "ANTHROPIC_API_KEY" ? "test-key" : undefined),
+}));
 
 import { generateText, streamText } from "ai";
 import { aiSdkProvider } from "~/lib/ai/adapters/aisdk";

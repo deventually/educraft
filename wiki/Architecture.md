@@ -75,11 +75,31 @@ LimeOnIt is not tied to one model vendor.
   DeepSeek, OpenRouter, vLLM, …), via `OPENAI_COMPAT_BASE_URL` /
   `OPENAI_COMPAT_API_KEY` in `.env`. It's a *paid remote* model, so — like Opus —
   it is **not** client-selectable: reachable only as a configured default, never forced from a request body.
-- `models.ts` holds the static catalog + the `compat::`/local id schemes;
+- The API providers (id, `api`: `anthropic` | `openai-compatible`, `baseURL`, the *name* of the
+  key setting `keyEnv`), the built-in catalog, each model's `settings` (`effort`, `temperature`
+  — `null` = never sent —, `maxTokens`) and the default model live in **`config/models.json`**
+  (fields in `config/README.md`), validated with Zod when `models.ts` loads: a broken file stops
+  the boot with a message naming the problem. Keys stay in `.env`; `env.server#providerSetting`
+  reads only `*_API_KEY` / `*_BASE_URL` names. The AI SDK adapter serves every config provider
+  and maps `effort` to `providerOptions.anthropic.effort` or `providerOptions.<id>.reasoningEffort`.
+  Changes made on the admin screen go to the database on top of the file, never into it. `models.ts` holds the `compat::`/local id schemes;
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
 - Default model: `claude-sonnet-5-5` (`DEFAULT_MODEL` in `models.ts`).
+- **Model management (admin, "Tools en modellen").** An admin adds a model of any connected
+  provider on screen (`app/lib/ai/providers.ts`: Anthropic, OpenAI, Google, Mistral on their
+  OpenAI-compatible address, or the own `OPENAI_COMPAT_BASE_URL`); a provider is *connected*
+  when its key is in `.env` — keys never enter the database or the screen. An added model gets
+  the id `<provider>/<apiId>`. **Upgrade** puts an old model in `retiring` with a successor:
+  new work (pickers, tool defaults, stage pins, allow-list, own and team sets) goes to the
+  successor at once, a running conversation may finish on the old id. **Finish** makes it
+  `retired`: every request naming it is served by the successor. **Undo/restore** makes it
+  active again. Nothing is deleted, so old results keep their model's name. The registry is one
+  `instance_settings` JSON (`modelRegistry`), parsed by `app/lib/ai/modelRegistry.ts` and
+  installed into the catalog by `modelRegistry.server.ts`, so every `resolveModelInfo` call
+  sees it; `currentModelId` / `forwardRetired` in `models.ts` follow the upgrade chain and
+  `availability.server.ts#servedModelFor` decides the model of a stream request.
 - **Availability (P4/P13/P14/P18).** Which models a caller may *pick* is an OVERRIDE:
   the instance sets `enabledModels`; a teacher with their own `assignedModels` gets
   exactly that set instead (it replaces the instance and may be wider); no own set =

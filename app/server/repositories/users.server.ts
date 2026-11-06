@@ -14,6 +14,7 @@ import {
   inArray,
   isNotNull,
   isNull,
+  like,
   ne,
   or,
   sql,
@@ -326,6 +327,28 @@ async function setAssignedList(
   } else {
     db.insert(instanceSettings).values({ key, valueJson, updatedAt: new Date() }).run();
   }
+}
+
+/**
+ * Every teacher's own model set, as stored (the admin's models page counts who still
+ * names a model). Not user-scoped by design: an admin sees the whole instance.
+ */
+export async function listAssignedModelSets(): Promise<string[][]> {
+  const rows = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(like(instanceSettings.key, "assignedModels:%"))
+    .all();
+  return rows.flatMap((r) => {
+    try {
+      const parsed = JSON.parse(r.valueJson);
+      return Array.isArray(parsed)
+        ? [parsed.filter((x): x is string => typeof x === "string")]
+        : [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** Set (or clear, with null/[]) a per-teacher model assignment (Phase 13). */

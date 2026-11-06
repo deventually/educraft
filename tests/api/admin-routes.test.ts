@@ -209,10 +209,10 @@ describe("admin.tools action — instance models lockout guard", () => {
         params: {},
         context: {},
       } as unknown as Parameters<typeof toolsRoute.loader>[0])) as {
-        models: { id: string; group: string }[];
+        choices: { id: string; group: string }[];
       };
-      expect(data.models.some((r) => r.group !== "frontier")).toBe(false);
-      expect(data.models.some((r) => r.id === "claude-code")).toBe(false);
+      expect(data.choices.some((r) => r.group !== "frontier")).toBe(false);
+      expect(data.choices.some((r) => r.id === "claude-code")).toBe(false);
       expect(discover.discoverLocalModels).not.toHaveBeenCalled();
     } finally {
       vi.unstubAllEnvs();

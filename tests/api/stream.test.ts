@@ -696,6 +696,34 @@ describe("api.stream — model allow-list & budget", () => {
     expect(streamChatSpy.mock.calls[0][0].thinking).toBeUndefined();
   });
 
+  it("[models] a retired model hands over to its newest version; a retiring one may finish", async () => {
+    const store = await import("~/server/modelRegistry.server");
+    const reg = await import("~/lib/ai/modelRegistry");
+    const added = reg.addModel(reg.EMPTY_REGISTRY, {
+      provider: "anthropic",
+      apiId: "claude-haiku-5-5",
+      displayName: "Claude Haiku 5.5",
+      supportsImages: true,
+      alwaysThinks: true,
+      clientSelectable: true,
+    });
+    if (!added.ok) throw new Error(added.error);
+    const up = reg.startUpgrade(added.registry, "claude-haiku-4-5", added.id);
+    if (!up.ok) throw new Error(up.error);
+    await store.saveModelRegistry(up.registry);
+    const body = { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" };
+    await invoke(body, { userId: "retiring-chat" });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-haiku-4-5");
+
+    const done = reg.finishUpgrade(up.registry, "claude-haiku-4-5");
+    if (!done.ok) throw new Error(done.error);
+    await store.saveModelRegistry(done.registry);
+    streamChatSpy.mockClear();
+    await invoke(body, { userId: "retired-chat" });
+    expect(streamChatSpy.mock.calls[0][0].model).toBe(added.id);
+    await store.saveModelRegistry(reg.EMPTY_REGISTRY); // reset
+  });
+
   it("[bugfix] a teacher assigned ONLY a local model is served it, never the disabled tool default", async () => {
     await settings.setEnabledModels(null); // uncurated instance → local model is free
     const teacherId = "local-only-teacher";

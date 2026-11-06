@@ -245,3 +245,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   als project. Bastiaan, 2026-11-05 (keuzekaart). Uitwerking: P29.3.
 - **BESLUIT-2026-11-05-11:** **Rolagenten staan aan of uit voor de hele instelling, niet per team.**
   Bastiaan, 2026-11-05 (keuzekaart).
+- **BESLUIT-2026-11-06-1:** **De sleutels (API-keys) van AI-aanbieders blijven op de server**
+  (`.env`), niet in de database of het beheerscherm. Het scherm laat alleen zien of een aanbieder
+  gekoppeld is; de beheerder voegt daar modellen aan toe, upgradet ze en faseert ze uit. Bastiaan,
+  2026-11-06 (keuzekaart, #139).

@@ -185,6 +185,30 @@ export async function setEnabledDomains(ids: string[] | null): Promise<void> {
   return setInstanceList(ENABLED_DOMAINS_KEY, ids);
 }
 
+const MODEL_REGISTRY_KEY = "modelRegistry";
+
+/** The admin's model registry as stored JSON (added models, upgrades), or null when unset. */
+export async function getModelRegistryJson(): Promise<string | null> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, MODEL_REGISTRY_KEY))
+    .get();
+  return row?.valueJson ?? null;
+}
+
+/** Store the model registry JSON (validated by `modelRegistry.server` before it gets here). */
+export async function setModelRegistryJson(valueJson: string): Promise<void> {
+  getDb()
+    .insert(instanceSettings)
+    .values({ key: MODEL_REGISTRY_KEY, valueJson, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: instanceSettings.key,
+      set: { valueJson, updatedAt: new Date() },
+    })
+    .run();
+}
+
 const OWNER_KEY = "ownerUserId";
 
 /**

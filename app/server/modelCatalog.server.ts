@@ -1,4 +1,5 @@
-import { listModels } from "~/lib/ai/models";
+import { listModels, modelState } from "~/lib/ai/models";
+import { syncModelRegistry } from "./modelRegistry.server";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { localModelsEnabled } from "~/server/env.server";
 
@@ -11,12 +12,14 @@ export type CatalogModel = { id: string; displayName: string; group: ModelGroup 
  * Every model that can be offered — client-selectable only (Opus-class stays
  * server-side). CLI agents and discovered local models are part of the catalogue
  * only outside production (`localModelsEnabled`, P18): in production they do not
- * exist for the app, so they are neither listed nor probed.
+ * exist for the app, so they are neither listed nor probed. A model being upgraded is
+ * not a choice any more: its newest version stands in for it.
  */
 export async function fullCatalog(): Promise<CatalogModel[]> {
+  await syncModelRegistry();
   const local = localModelsEnabled();
   const staticModels: CatalogModel[] = listModels()
-    .filter((m) => m.clientSelectable && (local || !m.local))
+    .filter((m) => m.clientSelectable && (local || !m.local) && modelState(m.id) === "active")
     .map((m) => ({
       id: m.id as string,
       displayName: m.displayName,
