@@ -4,8 +4,14 @@
  * never leave the server: a provider is "connected" when its setting is present.
  */
 import { ALL_TOOLS } from "~/lib/registry";
-import { credentialKeyFor } from "~/lib/ai/credentials";
-import { listModels, modelState, resolveModelInfo, type ModelInfo } from "~/lib/ai/models";
+import {
+  listModels,
+  modelState,
+  resolveModelInfo,
+  type ModelInfo,
+  type ModelSettings,
+} from "~/lib/ai/models";
+import { discoverLocalModels } from "~/lib/ai/discover.server";
 import {
   addModel,
   cancelUpgrade,
@@ -14,9 +20,14 @@ import {
   type AddModelInput,
   type ModelState,
 } from "~/lib/ai/modelRegistry";
-import { ADDABLE_PROVIDERS, getAddableProvider, isAddableProvider } from "~/lib/ai/providers";
+import {
+  ADDABLE_PROVIDERS,
+  type AddableProvider,
+  getAddableProvider,
+  isAddableProvider,
+} from "~/lib/ai/providers";
 import type { LocalizedText } from "~/lib/i18n/localized";
-import { env } from "./env.server";
+import { localModelsEnabled, providerSetting } from "./env.server";
 import { getModelRegistry, saveModelRegistry } from "./modelRegistry.server";
 import { fullCatalog } from "./modelCatalog.server";
 import { getEnabledModels, setEnabledModels } from "./repositories/settings.server";
@@ -54,23 +65,24 @@ export interface AdminModelRow {
   usage: ModelUsage;
 }
 
-/** The setting a provider needs: its key, or for an own endpoint its address. */
-function settingFor(id: string): string {
-  if (id === "openai-compat") return "OPENAI_COMPAT_BASE_URL";
-  return credentialKeyFor(id as never) ?? id;
+/** The setting a provider still needs: its address (own endpoint) first, then its key. */
+function missingSetting(p: AddableProvider): string | null {
+  if (!p.baseURL && p.baseURLEnv && !providerSetting(p.baseURLEnv)) return p.baseURLEnv;
+  if (!p.keyOptional && !providerSetting(p.keyEnv)) return p.keyEnv;
+  return null;
 }
 
 function isConnected(id: string): boolean {
-  const value = (env as Record<string, unknown>)[settingFor(id)];
-  return typeof value === "string" && value.length > 0;
+  const p = getAddableProvider(id);
+  return p !== undefined && missingSetting(p) === null;
 }
 
 export function providerStatuses(): ProviderStatus[] {
   return ADDABLE_PROVIDERS.map((p) => ({
     id: p.id,
     name: p.name,
-    connected: isConnected(p.id),
-    setting: settingFor(p.id),
+    connected: missingSetting(p) === null,
+    setting: missingSetting(p) ?? p.keyEnv,
     ...(p.modelsUrl ? { modelsUrl: p.modelsUrl } : {}),
     example: p.example,
   }));
@@ -173,6 +185,32 @@ export async function cancelAdminUpgrade(id: string): Promise<UpgradeResult> {
   return { cancelled: { name: nameOf(id), restored: wasRetired } };
 }
 
+export interface LocalOverview {
+  /** Local models exist only outside production (`localModelsEnabled`). */
+  enabled: boolean;
+  /** The CLI agents in `config/models.json`. */
+  agents: { id: string; displayName: string }[];
+  /** Ollama and LM Studio: how many models were found running just now. */
+  servers: { id: "ollama" | "lmstudio"; name: string; found: number }[];
+}
+
+/** The CLI agents and local servers: shown always, usable only outside production. */
+async function localOverview(): Promise<LocalOverview> {
+  const enabled = localModelsEnabled();
+  const found = enabled ? await discoverLocalModels() : [];
+  const count = (p: string) => found.filter((m) => m.provider === p).length;
+  return {
+    enabled,
+    agents: listModels()
+      .filter((m) => m.local)
+      .map((m) => ({ id: m.id, displayName: m.displayName })),
+    servers: [
+      { id: "ollama", name: "Ollama", found: count("ollama") },
+      { id: "lmstudio", name: "LM Studio", found: count("lmstudio") },
+    ],
+  };
+}
+
 /** Everything the models part of the admin page shows. */
 export async function modelAdminData() {
   // Instance model allow-list (P14/P18): `null` stored = every model is on.
@@ -181,7 +219,12 @@ export async function modelAdminData() {
     ...m,
     checked: enabled === null || enabled.includes(m.id),
   }));
-  return { providers: providerStatuses(), models: await adminModelRows(), choices };
+  return {
+    providers: providerStatuses(),
+    models: await adminModelRows(),
+    choices,
+    local: await localOverview(),
+  };
 }
 
 /** The intents of the models part. */
@@ -193,6 +236,24 @@ export function isModelIntent(intent: string): intent is ModelIntent {
 }
 
 const text = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
+
+const EFFORTS = ["none", "low", "medium", "high", "xhigh", "max"] as const;
+
+/** Effort and temperature from the add form; empty = the provider's default. */
+function addedSettings(fd: FormData): { settings?: ModelSettings } {
+  const settings: ModelSettings = {};
+  const effort = text(fd, "effort");
+  if ((EFFORTS as readonly string[]).includes(effort)) {
+    settings.effort = effort as ModelSettings["effort"];
+  }
+  const temp = text(fd, "temperature").replace(",", ".");
+  if (temp !== "") {
+    const n = Number(temp);
+    // Out of range is refused by the registry's own check (an "invalid" toast).
+    settings.temperature = Number.isFinite(n) ? n : -1;
+  }
+  return Object.keys(settings).length ? { settings } : {};
+}
 
 /** Run one models intent from the admin page's form data (the caller checked the role). */
 export async function modelAdminAction(intent: ModelIntent, fd: FormData) {
@@ -217,6 +278,7 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData) {
         supportsImages: fd.get("supportsImages") === "on",
         alwaysThinks: fd.get("alwaysThinks") === "on",
         clientSelectable: fd.get("clientSelectable") === "on",
+        ...addedSettings(fd),
       });
     }
     case "upgrade":

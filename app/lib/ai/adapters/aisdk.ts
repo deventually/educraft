@@ -1,25 +1,24 @@
 import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { outputTokenBudget, resolveModelInfo, type ProviderId } from "../models";
-import { credentialKeyFor } from "../credentials";
-import { getAddableProvider } from "../providers";
+import { getProvider, outputTokenBudget, resolveModelInfo, type ConfigProvider } from "../models";
 import type { GenerateOptions, LLMProvider } from "../types";
-import { env } from "~/server/env.server";
+import { env, providerSetting } from "~/server/env.server";
 import { LocalizedError } from "~/lib/i18n/errors";
 
 const DEFAULT_TEMPERATURE = 0.4;
 
-/** The provider's key from the server environment, or a message naming the setting. */
-function requireKey(provider: ProviderId): string {
-  const name = credentialKeyFor(provider);
-  const value = name ? (env as Record<string, unknown>)[name] : undefined;
-  if (!name || typeof value !== "string" || !value) {
-    throw new LocalizedError({
-      nl: `${name ?? provider} ontbreekt. Vul deze in je .env in (zie .env.example).`,
-      en: `${name ?? provider} is missing. Add it to your .env (see .env.example).`,
-    });
-  }
+function missing(name: string): LocalizedError {
+  return new LocalizedError({
+    nl: `${name} ontbreekt. Vul deze in je .env in (zie .env.example).`,
+    en: `${name} is missing. Add it to your .env (see .env.example).`,
+  });
+}
+
+/** A provider's key from the server environment, or a message naming the setting. */
+function requireKey(provider: ConfigProvider): string | undefined {
+  const value = providerSetting(provider.keyEnv);
+  if (!value && !provider.keyOptional) throw missing(provider.keyEnv);
   return value;
 }
 
@@ -27,15 +26,6 @@ function requireKey(provider: ProviderId): string {
 function resolveModel(catalogId: string): LanguageModel {
   const info = resolveModelInfo(catalogId);
   switch (info.provider) {
-    case "anthropic": {
-      if (!env.ANTHROPIC_API_KEY) {
-        throw new LocalizedError({
-          nl: "ANTHROPIC_API_KEY ontbreekt. Vul deze in je .env in (zie .env.example).",
-          en: "ANTHROPIC_API_KEY is missing. Add it to your .env (see .env.example).",
-        });
-      }
-      return createAnthropic({ apiKey: env.ANTHROPIC_API_KEY })(info.apiId);
-    }
     case "ollama":
       return createOpenAICompatible({ name: "ollama", baseURL: env.OLLAMA_BASE_URL }).chatModel(
         info.apiId,
@@ -46,35 +36,49 @@ function resolveModel(catalogId: string): LanguageModel {
         baseURL: env.LMSTUDIO_BASE_URL,
         apiKey: "lm-studio",
       }).chatModel(info.apiId);
-    case "openai-compat": {
-      // A configured frontier / self-hosted OpenAI-compatible endpoint. The
-      // model id ("compat::<apiId>") carries only the model; the endpoint lives
-      // in .env. Key is optional (a self-hosted endpoint may need none).
-      if (!env.OPENAI_COMPAT_BASE_URL) {
-        throw new LocalizedError({
-          nl: "OPENAI_COMPAT_BASE_URL ontbreekt. Vul de endpoint-URL in je .env in (zie .env.example).",
-          en: "OPENAI_COMPAT_BASE_URL is missing. Add the endpoint URL to your .env (see .env.example).",
-        });
-      }
-      return createOpenAICompatible({
-        name: "openai-compat",
-        baseURL: env.OPENAI_COMPAT_BASE_URL,
-        apiKey: env.OPENAI_COMPAT_API_KEY,
-      }).chatModel(info.apiId);
-    }
-    case "openai":
-    case "google":
-    case "mistral":
-      // A frontier API that speaks the OpenAI protocol at a known address
-      // (`providers.ts`); its key lives on the server.
-      return createOpenAICompatible({
-        name: info.provider,
-        baseURL: getAddableProvider(info.provider)?.baseURL ?? "",
-        apiKey: requireKey(info.provider),
-      }).chatModel(info.apiId);
-    default:
-      throw new Error(`Provider "${info.provider}" is not (yet) served via the AI SDK.`);
   }
+  // An API provider from `config/models.json`: Anthropic's own API, or the OpenAI
+  // chat API at a known address (or one from a server setting, for an own endpoint).
+  const provider = getProvider(info.provider);
+  if (!provider) {
+    throw new Error(`Provider "${info.provider}" is not (yet) served via the AI SDK.`);
+  }
+  // A server setting may override the address (a proxy, a region, an own endpoint).
+  const baseURL =
+    (provider.baseURLEnv ? providerSetting(provider.baseURLEnv) : undefined) ?? provider.baseURL;
+  if (provider.api === "anthropic") {
+    return createAnthropic({ apiKey: requireKey(provider), baseURL })(info.apiId);
+  }
+  if (!baseURL) throw missing(provider.baseURLEnv ?? provider.id);
+  return createOpenAICompatible({
+    name: provider.id,
+    baseURL,
+    apiKey: requireKey(provider),
+  }).chatModel(info.apiId);
+}
+
+/**
+ * The model's settings as AI SDK call options: temperature (`null` = none sent, which
+ * wins over the caller), and its reasoning effort in the form its API expects.
+ */
+function settingsOptions(opts: GenerateOptions) {
+  const info = resolveModelInfo(opts.model);
+  const s = info.settings ?? {};
+  const temperature =
+    s.temperature === null ? undefined : (opts.temperature ?? s.temperature ?? DEFAULT_TEMPERATURE);
+  const provider = getProvider(info.provider);
+  const effort = s.effort;
+  const providerOptions =
+    effort && provider
+      ? provider.api === "anthropic"
+        ? { anthropic: { effort } }
+        : { [provider.id]: { reasoningEffort: effort } }
+      : undefined;
+  return {
+    temperature,
+    maxOutputTokens: outputTokenBudget(info, opts.maxTokens ?? s.maxTokens),
+    ...(providerOptions ? { providerOptions } : {}),
+  };
 }
 
 /** Build AI SDK messages, attaching images to the LAST user message if present. */
@@ -113,8 +117,7 @@ export const aiSdkProvider: LLMProvider = {
       model: resolveModel(opts.model),
       system: opts.system,
       messages: toMessages(opts),
-      temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
-      maxOutputTokens: outputTokenBudget(resolveModelInfo(opts.model), opts.maxTokens),
+      ...settingsOptions(opts),
     });
     return {
       text,
@@ -128,8 +131,7 @@ export const aiSdkProvider: LLMProvider = {
       model: resolveModel(opts.model),
       system: opts.system,
       messages: toMessages(opts),
-      temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
-      maxOutputTokens: outputTokenBudget(resolveModelInfo(opts.model), opts.maxTokens),
+      ...settingsOptions(opts),
     });
     for await (const delta of result.textStream) {
       yield delta;

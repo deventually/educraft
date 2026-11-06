@@ -8,22 +8,31 @@ import type { ModelRegistry, ModelState } from "./modelRegistry";
  * names a `provider`; `provider.ts` maps that to a concrete adapter.
  */
 
-export type ProviderId =
-  | "anthropic"
-  | "openai"
-  | "google"
-  | "mistral"
-  // A configured OpenAI-compatible endpoint (base URL + optional key in .env):
-  // covers ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, … — any
-  // frontier or self-hosted model that speaks the OpenAI API.
-  | "openai-compat"
-  | "ollama"
-  | "lmstudio"
-  // Local CLI agents (subprocess; pick their own model internally).
-  | "claude-code"
-  | "opencode"
-  | "codex"
-  | "gemini-cli";
+/**
+ * A provider id: one from `providers` in `config/models.json` (an API with a key on the
+ * server), or a built-in local kind below (no key; only outside production).
+ */
+export type ProviderId = string;
+
+/** Local servers and CLI agents: built in, because they need code, not a key. */
+export const LOCAL_PROVIDERS = [
+  "ollama",
+  "lmstudio",
+  "claude-code",
+  "opencode",
+  "codex",
+  "gemini-cli",
+] as const;
+
+/** How a model answers: the effort it puts in, its temperature, its answer length. */
+export interface ModelSettings {
+  /** Sampling temperature; `null` = never send one (reasoning models that refuse it). */
+  temperature?: number | null;
+  /** Reasoning effort, for providers that support it (Claude, GPT, …). */
+  effort?: "none" | "low" | "medium" | "high" | "xhigh" | "max";
+  /** Answer budget when a tool sets none. */
+  maxTokens?: number;
+}
 
 export interface ModelInfo {
   provider: ProviderId;
@@ -59,25 +68,48 @@ export interface ModelInfo {
    * implementation changes.
    */
   clientSelectable: boolean;
+  /** How the model answers (`settings` in `config/models.json`). */
+  settings?: ModelSettings;
 }
 
-const PROVIDER_IDS = [
-  "anthropic",
-  "openai",
-  "google",
-  "mistral",
-  "openai-compat",
-  "ollama",
-  "lmstudio",
-  "claude-code",
-  "opencode",
-  "codex",
-  "gemini-cli",
-] as const satisfies readonly ProviderId[];
+const LocalizedNameSchema = z.union([
+  z.string().min(1),
+  z.object({ nl: z.string().min(1), en: z.string().min(1) }),
+]);
+
+/** Only names of server settings may be given, never values (keys stay in `.env`). */
+const SETTING_NAME = /^[A-Z][A-Z0-9_]*_(API_KEY|BASE_URL)$/;
+
+const ConfigProviderSchema = z
+  .object({
+    id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+    name: LocalizedNameSchema,
+    /** "anthropic" = Anthropic's own API; "openai-compatible" = the OpenAI chat API. */
+    api: z.enum(["anthropic", "openai-compatible"]),
+    /** The provider's address (for Anthropic: its API root). */
+    baseURL: z.url().optional(),
+    /** A server setting that overrides the address (a proxy, an EU region, an own endpoint). */
+    baseURLEnv: z.string().regex(SETTING_NAME).optional(),
+    keyEnv: z.string().regex(SETTING_NAME),
+    keyOptional: z.boolean().optional(),
+    modelsUrl: z.url().optional(),
+    example: z.string().min(1),
+  })
+  .refine((p) => p.api === "anthropic" || p.baseURL || p.baseURLEnv, {
+    message: "an openai-compatible provider needs baseURL or baseURLEnv",
+  });
+
+export type ConfigProvider = z.infer<typeof ConfigProviderSchema>;
+
+const SettingsSchema = z.object({
+  temperature: z.number().min(0).max(2).nullable().optional(),
+  effort: z.enum(["none", "low", "medium", "high", "xhigh", "max"]).optional(),
+  maxTokens: z.int().min(256).max(200_000).optional(),
+});
 
 const ConfigModelSchema = z.object({
   id: z.string().min(1),
-  provider: z.enum(PROVIDER_IDS),
+  provider: z.string().min(1),
   apiId: z.string().min(1),
   displayName: z.string().min(1),
   supportsImages: z.boolean(),
@@ -86,10 +118,12 @@ const ConfigModelSchema = z.object({
   tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   local: z.boolean().optional(),
   clientSelectable: z.boolean(),
+  settings: SettingsSchema.optional(),
 });
 
 const ModelsConfigSchema = z.object({
   default: z.string().min(1),
+  providers: z.array(ConfigProviderSchema).default([]),
   models: z.array(ConfigModelSchema).min(1),
 });
 
@@ -107,8 +141,20 @@ export function parseModelsConfig(raw: unknown): ModelsConfig {
       .join("; ");
     throw new Error(`config/models.json is invalid (check provider, tier, fields): ${where}`);
   }
+  const providerIds = new Set<string>(LOCAL_PROVIDERS);
+  for (const p of res.data.providers) {
+    if (providerIds.has(p.id)) {
+      throw new Error(`config/models.json: provider "${p.id}" is listed twice.`);
+    }
+    providerIds.add(p.id);
+  }
   const seen = new Set<string>();
   for (const m of res.data.models) {
+    if (!providerIds.has(m.provider)) {
+      throw new Error(
+        `config/models.json: model "${m.id}" names provider "${m.provider}", which is not in "providers".`,
+      );
+    }
     if (seen.has(m.id)) throw new Error(`config/models.json: model "${m.id}" is listed twice.`);
     seen.add(m.id);
   }
@@ -128,6 +174,13 @@ const config = parseModelsConfig(modelsConfig);
 export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
   config.models.map(({ id, ...info }) => [id, info]),
 );
+
+/** The API providers of `config/models.json`, in file order. */
+export const PROVIDERS: readonly ConfigProvider[] = config.providers;
+
+export function getProvider(id: string): ConfigProvider | undefined {
+  return PROVIDERS.find((p) => p.id === id);
+}
 
 export type ModelId = string;
 
@@ -176,6 +229,7 @@ export function installModelRegistry(registry: ModelRegistry): void {
           alwaysThinks: m.alwaysThinks,
           clientSelectable: m.clientSelectable,
           tier: 2 as const,
+          ...(m.settings ? { settings: m.settings } : {}),
         },
       ]),
   );

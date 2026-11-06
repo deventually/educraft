@@ -1,5 +1,89 @@
 {
   "default": "claude-sonnet-5-5",
+  "providers": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic (Claude)",
+      "api": "anthropic",
+      "baseURL": "https://api.anthropic.com/v1",
+      "baseURLEnv": "ANTHROPIC_BASE_URL",
+      "keyEnv": "ANTHROPIC_API_KEY",
+      "modelsUrl": "https://docs.anthropic.com/en/docs/about-claude/models",
+      "example": "claude-haiku-5-5"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI (ChatGPT)",
+      "api": "openai-compatible",
+      "baseURL": "https://api.openai.com/v1",
+      "baseURLEnv": "OPENAI_BASE_URL",
+      "keyEnv": "OPENAI_API_KEY",
+      "modelsUrl": "https://developers.openai.com/api/docs/models",
+      "example": "gpt-6.1-sol"
+    },
+    {
+      "id": "google",
+      "name": "Google (Gemini)",
+      "api": "openai-compatible",
+      "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "baseURLEnv": "GOOGLE_BASE_URL",
+      "keyEnv": "GOOGLE_GENERATIVE_AI_API_KEY",
+      "modelsUrl": "https://ai.google.dev/gemini-api/docs/models",
+      "example": "gemini-4-argon"
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "api": "openai-compatible",
+      "baseURL": "https://api.mistral.ai/v1",
+      "baseURLEnv": "MISTRAL_BASE_URL",
+      "keyEnv": "MISTRAL_API_KEY",
+      "modelsUrl": "https://docs.mistral.ai/getting-started/models/",
+      "example": "mistral-large-4"
+    },
+    {
+      "id": "minimax",
+      "name": "MiniMax",
+      "api": "openai-compatible",
+      "baseURL": "https://api.minimax.io/v1",
+      "baseURLEnv": "MINIMAX_BASE_URL",
+      "keyEnv": "MINIMAX_API_KEY",
+      "modelsUrl": "https://platform.minimax.io/docs/guides/text-chat",
+      "example": "MiniMax-M3"
+    },
+    {
+      "id": "opencode-zen",
+      "name": "OpenCode Zen",
+      "api": "openai-compatible",
+      "baseURL": "https://opencode.ai/inference/openai/v1",
+      "baseURLEnv": "OPENCODE_ZEN_BASE_URL",
+      "keyEnv": "OPENCODE_ZEN_API_KEY",
+      "modelsUrl": "https://opencode.ai/docs/zen/",
+      "example": "kimi-k3"
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "api": "openai-compatible",
+      "baseURL": "https://openrouter.ai/api/v1",
+      "baseURLEnv": "OPENROUTER_BASE_URL",
+      "keyEnv": "OPENROUTER_API_KEY",
+      "modelsUrl": "https://openrouter.ai/models",
+      "example": "openrouter/auto"
+    },
+    {
+      "id": "openai-compat",
+      "name": {
+        "nl": "Eigen OpenAI-compatibel adres",
+        "en": "Own OpenAI-compatible endpoint"
+      },
+      "api": "openai-compatible",
+      "baseURLEnv": "OPENAI_COMPAT_BASE_URL",
+      "keyEnv": "OPENAI_COMPAT_API_KEY",
+      "keyOptional": true,
+      "example": "glm-4-plus"
+    }
+  ],
   "models": [
     {
       "id": "claude-opus-5-5",
@@ -9,7 +93,10 @@
       "supportsImages": true,
       "alwaysThinks": true,
       "tier": 3,
-      "clientSelectable": false
+      "clientSelectable": false,
+      "settings": {
+        "effort": "high"
+      }
     },
     {
       "id": "claude-sonnet-5-5",
@@ -19,7 +106,25 @@
       "supportsImages": true,
       "alwaysThinks": true,
       "tier": 2,
-      "clientSelectable": true
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4,
+        "effort": "medium"
+      }
+    },
+    {
+      "id": "claude-haiku-5-5",
+      "provider": "anthropic",
+      "apiId": "claude-haiku-5-5",
+      "displayName": "Claude Haiku 5.5",
+      "supportsImages": true,
+      "alwaysThinks": true,
+      "tier": 1,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4,
+        "effort": "low"
+      }
     },
     {
       "id": "claude-opus-4-8",
@@ -47,6 +152,92 @@
       "supportsImages": true,
       "tier": 1,
       "clientSelectable": true
+    },
+    {
+      "id": "gpt-6-astra",
+      "provider": "openai",
+      "apiId": "gpt-6-astra",
+      "displayName": "GPT-6 Astra",
+      "supportsImages": true,
+      "tier": 3,
+      "clientSelectable": false,
+      "settings": {
+        "temperature": null,
+        "effort": "medium"
+      }
+    },
+    {
+      "id": "gpt-6.1-sol",
+      "provider": "openai",
+      "apiId": "gpt-6.1-sol",
+      "displayName": "GPT-6.1 Sol",
+      "supportsImages": true,
+      "tier": 2,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": null,
+        "effort": "medium"
+      }
+    },
+    {
+      "id": "gemini-4-argon",
+      "provider": "google",
+      "apiId": "gemini-4-argon",
+      "displayName": "Gemini 4 Argon",
+      "supportsImages": true,
+      "tier": 3,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "mistral-large-4",
+      "provider": "mistral",
+      "apiId": "mistral-large-4",
+      "displayName": "Mistral Large 4",
+      "supportsImages": false,
+      "tier": 3,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "minimax-m3",
+      "provider": "minimax",
+      "apiId": "MiniMax-M3",
+      "displayName": "MiniMax M3",
+      "supportsImages": false,
+      "tier": 2,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "zen-kimi-k3",
+      "provider": "opencode-zen",
+      "apiId": "kimi-k3",
+      "displayName": "Kimi K3 (OpenCode Zen)",
+      "supportsImages": false,
+      "tier": 2,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "openrouter-auto",
+      "provider": "openrouter",
+      "apiId": "openrouter/auto",
+      "displayName": "OpenRouter (automatisch)",
+      "supportsImages": false,
+      "tier": 2,
+      "clientSelectable": true,
+      "settings": {
+        "temperature": 0.4
+      }
     },
     {
       "id": "claude-code",

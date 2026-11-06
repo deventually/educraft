@@ -9,7 +9,7 @@
  * successor). A model is never deleted: old results keep their model's name.
  */
 import { z } from "zod";
-import { isResolvableModel, type ProviderId } from "./models";
+import { isResolvableModel, type ModelSettings, type ProviderId } from "./models";
 import { isAddableProvider } from "./providers";
 
 export type PhaseOutState = "retiring" | "retired";
@@ -24,6 +24,8 @@ export interface AddedModel {
   supportsImages: boolean;
   alwaysThinks: boolean;
   clientSelectable: boolean;
+  /** Effort and temperature chosen on screen; absent = the provider's default. */
+  settings?: ModelSettings;
 }
 
 export interface ModelRegistry {
@@ -45,6 +47,12 @@ const AddedModelSchema = z.object({
   supportsImages: z.boolean(),
   alwaysThinks: z.boolean(),
   clientSelectable: z.boolean(),
+  settings: z
+    .object({
+      temperature: z.number().min(0).max(2).nullable().optional(),
+      effort: z.enum(["none", "low", "medium", "high", "xhigh", "max"]).optional(),
+    })
+    .optional(),
 });
 
 const LifecycleSchema = z.object({

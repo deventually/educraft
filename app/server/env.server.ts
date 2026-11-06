@@ -14,10 +14,9 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
   MISTRAL_API_KEY: z.string().optional(),
-  // A configured OpenAI-compatible endpoint — the one knob for "any frontier or
-  // self-hosted model that speaks the OpenAI API" (ChatGPT, Gemini, Mistral, GLM,
-  // DeepSeek, OpenRouter, vLLM, …). Used by `compat::<model>` ids. The key is
-  // optional (a self-hosted endpoint may need none).
+  // An own OpenAI-compatible endpoint (provider "openai-compat" in config/models.json;
+  // also `compat::<model>` ids). The key is optional (a self-hosted endpoint may need
+  // none). Other providers' keys are read by name through `providerSetting` below.
   OPENAI_COMPAT_BASE_URL: z.string().optional(),
   OPENAI_COMPAT_API_KEY: z.string().optional(),
   // Local OpenAI-compatible servers (no API key needed).
@@ -59,4 +58,15 @@ export const DB_PATH = env.DATABASE_URL.replace(/^file:/, "");
  */
 export function localModelsEnabled(): boolean {
   return process.env.NODE_ENV !== "production";
+}
+
+/**
+ * A provider's server setting by name, as `config/models.json` names it (`keyEnv`,
+ * `baseURLEnv`). Only `*_API_KEY` and `*_BASE_URL` names are read, so the config can
+ * never point at another secret (the session key, the database). Read at call time.
+ */
+export function providerSetting(name: string): string | undefined {
+  if (!/^[A-Z][A-Z0-9_]*_(API_KEY|BASE_URL)$/.test(name)) return undefined;
+  const value = process.env[name];
+  return value ? value : undefined;
 }
