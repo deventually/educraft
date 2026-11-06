@@ -258,6 +258,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
   cijfers), GradeWork eerst onderzoeken, en de huisstijl of een eigen sjabloon van de hogeschool.
   Word en PDF (30.1, 30.2) mogen nu, de rest na de pilot (BESLUIT-2026-11-06-5). Twee vragen voor
   Bastiaan staan in de brief.
+- **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
+  *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
+  microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar
+  een Whisper-server (whisper.cpp in Docker met `--profile speech`, op de eigen computer, of
+  OpenAI) en komt terug als tekst. Zonder `WHISPER_BASE_URL` in `.env` is er geen microfoonknop.
+  Nooit de spraakdienst van Chrome (die stuurt audio naar Google).
 - **Pilotfeedback van docenten (PR open):** onder elk bewaard resultaat geeft een docent een
   duim, en daarna als hij wil: hoeveel tijd het scheelde (0, 15, 30 of 60+ minuten), een
   kwaliteitscijfer van 1 tot 5 en een opmerking. Op Start staat af en toe een korte

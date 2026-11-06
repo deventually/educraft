@@ -60,3 +60,35 @@ Ingebouwd en dus niet in `providers`: de lokale servers `ollama` en `lmstudio` e
 | `maxTokens` | Hoe lang een antwoord maximaal mag zijn, als een tool zelf niets zegt. |
 
 De model-id's zijn op 2026-11-06 nagekeken bij de aanbieders zelf.
+
+### `speechToText`: dicteren
+
+Welke server gesproken tekst uitschrijft als een docent op de microfoonknop drukt (in de
+chat en in elk tekstvak van een formulier). Het is een `provider` met `api:
+"openai-compatible"` en een `model`; LimeOnIt stuurt de opname (WAV) naar
+`<adres>/audio/transcriptions`, de vorm van OpenAI die Whisper-servers ook spreken. Er wordt
+niets bewaard. De browser praat nooit zelf met de server, en nooit met de spraakdienst van
+Chrome (die stuurt audio naar Google).
+
+Standaard staat hier de aanbieder `whisper`, met zijn adres in `.env` onder
+`WHISPER_BASE_URL`. **Zonder adres is er geen microfoonknop.** Kies één van drie:
+
+| Waar | `.env` |
+| --- | --- |
+| De Whisper-dienst in Docker (`docker compose --profile speech up -d`) | `WHISPER_BASE_URL=http://whisper:8178/v1` |
+| whisper.cpp op deze computer | `WHISPER_BASE_URL=http://127.0.0.1:8178/v1` |
+| OpenAI in de cloud (audio gaat de school uit: eerst AVG nakijken) | `WHISPER_BASE_URL=https://api.openai.com/v1` en `WHISPER_API_KEY=…` |
+
+whisper.cpp op een Mac (gebruikt de GPU via Metal, snel):
+
+```sh
+brew install whisper-cpp
+# model van ~550 MB, eenmalig:
+curl -L -o ggml-large-v3-turbo-q5_0.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin
+whisper-server --host 127.0.0.1 --port 8178 -m ggml-large-v3-turbo-q5_0.bin \
+  --inference-path /v1/audio/transcriptions --suppress-nst --no-timestamps
+```
+
+Een eigen Whisper-server van de school: zet zijn adres in `WHISPER_BASE_URL` (een server op het
+schoolnetwerk mag `http://`), en eventueel een sleutel in `WHISPER_API_KEY`.

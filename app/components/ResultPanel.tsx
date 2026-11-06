@@ -4,7 +4,9 @@ import { remarkPlugins, rehypePlugins } from "./markdownPlugins";
 import { Check, Copy, Download } from "lucide-react";
 import { Button, Spinner } from "./ui";
 import { cn, downloadText, slugifyFilename } from "~/lib/utils";
-import { useT } from "~/lib/i18n/useT";
+import { useLocale, useT } from "~/lib/i18n/useT";
+import { ReadAloudButton } from "./ReadAloudButton";
+import type { SpeechLanguage } from "~/lib/speech/readAloud";
 
 interface Props {
   markdown: string;
@@ -17,10 +19,13 @@ interface Props {
    * panel can be sticky and viewport-tall; left off for inline/stacked uses.
    */
   fill?: boolean;
+  /** Language of the result, for reading it aloud; defaults to the UI language. */
+  lang?: SpeechLanguage;
 }
 
-export function ResultPanel({ markdown, title, filenameBase, streaming, fill }: Props) {
+export function ResultPanel({ markdown, title, filenameBase, streaming, fill, lang }: Props) {
   const t = useT();
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -41,7 +46,8 @@ export function ResultPanel({ markdown, title, filenameBase, streaming, fill }: 
           {streaming && <Spinner className="text-violet-600" />}
           {title ?? t.tool.result}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {!streaming && <ReadAloudButton text={markdown} lang={lang ?? locale} />}
           <Button size="sm" variant="ghost" onClick={copy} disabled={!markdown}>
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
             {copied ? t.tool.copied : t.tool.copy}

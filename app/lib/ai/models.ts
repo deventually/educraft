@@ -121,10 +121,21 @@ const ConfigModelSchema = z.object({
   settings: SettingsSchema.optional(),
 });
 
+/**
+ * Dictation (speech to text): an OpenAI-compatible provider with a transcription model
+ * (`/audio/transcriptions`), e.g. whisper.cpp's `whisper-server` on the school network,
+ * or OpenAI. Absent = no dictation.
+ */
+const SpeechToTextSchema = z.object({
+  provider: z.string().min(1),
+  model: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}$/),
+});
+
 const ModelsConfigSchema = z.object({
   default: z.string().min(1),
   providers: z.array(ConfigProviderSchema).default([]),
   models: z.array(ConfigModelSchema).min(1),
+  speechToText: SpeechToTextSchema.optional(),
 });
 
 export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
@@ -161,6 +172,18 @@ export function parseModelsConfig(raw: unknown): ModelsConfig {
   if (!seen.has(res.data.default)) {
     throw new Error(`config/models.json: the default "${res.data.default}" is not in the list.`);
   }
+  // A provider added on screen is only known at run time; a listed one must speak OpenAI.
+  const stt = res.data.speechToText;
+  const sttProvider = stt && res.data.providers.find((p) => p.id === stt.provider);
+  if (
+    stt &&
+    ((LOCAL_PROVIDERS as readonly string[]).includes(stt.provider) ||
+      (sttProvider && sttProvider.api !== "openai-compatible"))
+  ) {
+    throw new Error(
+      `config/models.json: speechToText needs an openai-compatible provider, not "${stt.provider}".`,
+    );
+  }
   return res.data;
 }
 
@@ -174,6 +197,10 @@ const config = parseModelsConfig(modelsConfig);
 export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
   config.models.map(({ id, ...info }) => [id, info]),
 );
+
+/** Dictation's provider and model (`speechToText` in `config/models.json`), or null. */
+export const SPEECH_TO_TEXT: Readonly<{ provider: string; model: string }> | null =
+  config.speechToText ?? null;
 
 /** The API providers of `config/models.json`, in file order. */
 export const PROVIDERS: readonly ConfigProvider[] = config.providers;
