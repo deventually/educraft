@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakijken in een open PR)_
+_Laatst bijgewerkt: 2026-11-07 (eerlijker meten bij Verdedig je werk in een open PR)_
 
 ## Nu
 
@@ -275,6 +275,13 @@ _Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakij
 
 ## Bezig
 
+- **Eerlijker meten bij Verdedig je werk (PR open):** de beoordelaar ziet alleen de checks die
+  hij zelf beoordeelt, en moet elke fout bewijzen met een letterlijk citaat dat de code in het
+  gesprek terugvindt; een dubbele vraag in één zin (`compoundQuestion`, cap 4) telt de code zelf.
+  Geldt voor alle tools. Nulmeting dyw4r: de dyw4-gesprekken opnieuw beoordeeld, 3,57; alle
+  verzonnen fouten weg. Twee pogingen tot een `@v3` (dyw5 3,46, dyw6 3,59) waren niet beter:
+  `@v2` blijft live. Een dubbele vraag blijft in 26 van 30 gesprekken staan; met alleen
+  promptwoorden lukt dat niet.
 - **"Wat de AI krijgt" toont de geanonimiseerde tekst (PR open):** na *Verstuur geanonimiseerd*
   liet de documentviewer bij Stagebeoordeling nog de tekst met namen zien. De AI kreeg wel al
   alleen codes (geen privacylek); nu toont het tabblad ook precies die tekst, tot de docent het
