@@ -260,13 +260,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Bezig
 
-- **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
-  (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
-  deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
-  verdedigen: één vraag tegelijk, vage antwoorden worden doorgevraagd, nooit een cijfer. Met een
-  knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
-  Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
-  anonimiseren).
+- **P31.1b Kerncijfers bij Verdedig je werk (PR open):** een vinkje *Student plakt eerst de
+  kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
+  bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt
+  `@v2`, `@v1` blijft. Met de nulmeting van de tutor en een meting van `@v2` erna. Daarna 31.2
+  (nakijken, met verplicht anonimiseren).
 - **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
   opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
   van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,

@@ -7,7 +7,7 @@ Studenten werken niet in LimeOnIt. Je gebruikt de tool zelf: om te oefenen, om t
 ## Hoe werkt het?
 
 1. **Kies het soort werk** en vul het vak of de opleiding en het leerdoel in. Heb je een cursus, dan kun je de leeruitkomsten overnemen.
-2. **Noem eventueel de keuzes** die de student moet kunnen verdedigen, en kies hoe lang het gesprek duurt.
+2. **Noem eventueel de keuzes** die de student moet kunnen verdedigen, en kies hoe lang het gesprek duurt. Met **Student plakt eerst de kerncijfers** vraagt de deskundige na de opening om een paar cijfers of bevindingen, zonder namen, en vraagt daar scherper op door. Nooit het verslag zelf.
 3. **Speel zelf de student** om te zien hoe de deskundige doorvraagt.
 4. **Kopieer voor je studenten:** de knop in *Jouw instellingen* kopieert de hele tekst, met jouw invoer erin. Je studenten plakken die in hun eigen AI-chat en voeren daar de verdediging.
 

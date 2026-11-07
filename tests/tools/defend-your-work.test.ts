@@ -20,9 +20,10 @@ const values = {
     "De student verantwoordt de zorgkeuzes in het eigen stageverslag met gegevens.",
   focusAreas: "De keuze voor de valrisicoscreening en wat de metingen zeggen.",
   durationMinutes: 15,
+  askKeyFigures: false,
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "defend-your-work@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "defend-your-work@v2", values, outputLanguage: lang });
 
 describe("tool: defend-your-work", () => {
   it("registers as a student chat tutor that uses the context profile", () => {
@@ -33,7 +34,7 @@ describe("tool: defend-your-work", () => {
     expect(t.userType).toBe("student");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v1");
+    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v2");
     expect(t.enabled).toBe(true);
     expect(t.chat?.allowStop).toBe(true);
     expect(t.chat?.allowRegenerate).toBe(true);
@@ -71,6 +72,49 @@ describe("tool: defend-your-work", () => {
     expect(duration?.kind).toBe("number");
     expect(duration?.defaultValue).toBe(15);
   });
+
+  it("keeps @v1 registered for conversations that still use it", () => {
+    expect(getPrompt("defend-your-work@v1").id).toBe("defend-your-work@v1");
+    expect(getPrompt("defend-your-work@v2").verbatim).toBe(
+      getPrompt("defend-your-work@v1").verbatim,
+    );
+  });
+
+  it("offers the key figures as an optional checkbox, off by default (BESLUIT-2026-11-07-3)", () => {
+    const field = tool().inputs.find((f) => f.name === "askKeyFigures");
+    expect(field?.kind).toBe("boolean");
+    expect(field?.required).not.toBe(true);
+    expect(field?.defaultValue).toBe(false);
+    expect(loc(field?.label, "nl")).toBe("Student plakt eerst de kerncijfers");
+    expect(loc(field?.label, "en")).toBe("Student first pastes the key figures");
+  });
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`asks for key figures only when ticked, never the report or names (${lang})`, () => {
+      const on = buildSystemPrompt({
+        promptId: "defend-your-work@v2",
+        values: { ...values, askKeyFigures: true },
+        outputLanguage: lang,
+      });
+      expect(on).toContain(
+        lang === "nl" ? "Kerncijfers gevraagd: true" : "Key figures asked: true",
+      );
+      const p = on.toLowerCase();
+      if (lang === "nl") {
+        expect(p).toContain("### kerncijfers");
+        expect(p).toContain("niet het verslag zelf");
+        expect(p).toContain("zonder namen");
+        expect(p).toContain("leg de cijfers niet uit");
+        expect(p).toContain("als dit `false` is, sla dit deel over");
+      } else {
+        expect(p).toContain("### key figures");
+        expect(p).toContain("not the report itself");
+        expect(p).toContain("without names");
+        expect(p).toContain("don't explain the figures");
+        expect(p).toContain("if this is `false`, skip this part");
+      }
+    });
+  }
 
   it("offers the text to copy for students", () => {
     expect(tool().copyableStudentPrompt).toBe(true);
@@ -127,7 +171,7 @@ describe("tool: defend-your-work", () => {
 
   it("resolves with the optional focus left empty", () => {
     const p = buildSystemPrompt({
-      promptId: "defend-your-work@v1",
+      promptId: "defend-your-work@v2",
       values: { ...values, focusAreas: "" },
       outputLanguage: "nl",
     });
