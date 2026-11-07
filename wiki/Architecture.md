@@ -173,6 +173,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   A field with `redact: true` shows `RedactReview` before `streamPost`; names, e-mail, phone,
   postcode, IBAN and 6–8-digit numbers become codes. The code → name table lives only in component
   memory; `restoreNames` restores them for the teacher, `generations` keeps the coded version.
+- **Figures from the document** (`app/lib/documents/figures.ts`,
+  `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
+  field>"` offers the figures of the files uploaded there: Word images the model can read (icons
+  dropped, EMF/WMF counted as skipped) and PDF pages that draw a figure-sized image, rendered as a
+  picture of the page. Nothing is ticked by default: anonymisation covers text only.
 - **BDB/BKE workplace (P25)** at `/portfolio`. Pure domain in `app/lib/portfolio/` (`schema` with
   `LIMITS`, immutable `edit`, `progress`, `intents.ts` → `applyIntent`, Zod per intent); routes stay
   thin via `app/server/portfolio.server.ts`; storage is one JSON graph per dossier in

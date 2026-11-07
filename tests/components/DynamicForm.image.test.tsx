@@ -16,6 +16,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       imageFileTooLarge: "File too large",
       imageWrongType: "Wrong file type",
       imagePreview: "Preview",
+      imageCount: "{count} image(s) will be sent",
     },
   }),
 }));
@@ -86,6 +87,36 @@ describe("DynamicForm — image input", () => {
     expect(removeButton).toBeInTheDocument();
   });
 
+  it("keeps the preview visible: the remove overlay is see-through until hover", () => {
+    const fields: InputField[] = [
+      { name: "mathImages", label: { nl: "A", en: "A" }, kind: "image", accept: "image/png" },
+    ];
+    render(
+      <DynamicForm
+        fields={fields}
+        values={{ mathImages: [{ mediaType: "image/png", dataBase64: "fake1" }] }}
+        onChange={vi.fn()}
+      />,
+    );
+    const overlay = screen.getByRole("button", { name: /Remove image/i });
+    // Tailwind 4 has no bg-opacity-*: a plain bg-black covered the preview in black.
+    expect(overlay.className).not.toMatch(/bg-opacity/);
+    expect(overlay.className).toMatch(/bg-black\/0/);
+  });
+
+  it("marks only a required image field as required", () => {
+    const optional: InputField = {
+      name: "figures",
+      label: { nl: "Kernfiguren", en: "Key figures" },
+      kind: "image",
+      accept: "image/png",
+    };
+    const { container } = render(
+      <DynamicForm fields={[optional]} values={{}} onChange={vi.fn()} />,
+    );
+    expect(container.querySelector("label")?.textContent).toBe("Key figures");
+  });
+
   it("displays image count indicator", () => {
     const mockImages: ImageInput[] = [
       {
@@ -113,7 +144,7 @@ describe("DynamicForm — image input", () => {
     render(<DynamicForm fields={fields} values={values} onChange={onChange} />);
 
     // Verify count indicator
-    expect(screen.getByText(/2 images uploaded/i)).toBeInTheDocument();
+    expect(screen.getByText("2 image(s) will be sent")).toBeInTheDocument();
   });
 
   it("calls onChange when remove button is clicked", () => {
