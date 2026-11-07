@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ExportDoc } from "~/lib/export/doc";
+import { CODE_BACKGROUND, CODE_FONT, highlightCode } from "~/lib/export/highlight";
 import type { Block, Run } from "~/lib/export/markdown";
 
 const H = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
@@ -14,6 +15,7 @@ function Heading({ level, children }: { level: number; children: ReactNode }) {
 function Runs({ runs }: { runs: Run[] }) {
   return runs.map((r, i) => {
     let node: ReactNode = r.text;
+    if (r.code) node = <code style={{ fontFamily: `${CODE_FONT}, monospace` }}>{node}</code>;
     if (r.italic) node = <em>{node}</em>;
     if (r.bold) node = <strong>{node}</strong>;
     // biome-ignore lint/suspicious/noArrayIndexKey: runs are static, in order
@@ -37,6 +39,35 @@ function Blocks({ blocks, parent }: { blocks: Block[]; parent: number }) {
         <p key={key}>
           <Runs runs={b.runs} />
         </p>
+      );
+    if (b.type === "code")
+      return (
+        <pre
+          key={key}
+          className="overflow-x-auto whitespace-pre-wrap break-words rounded-md p-3 text-xs leading-relaxed text-slate-900"
+          style={{ background: `#${CODE_BACKGROUND}`, fontFamily: `${CODE_FONT}, monospace` }}
+        >
+          <code>
+            {highlightCode(b.text, b.lang).map((line, j) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: lines are static, in order
+              <span key={j}>
+                {j > 0 && "\n"}
+                {line.map((t, k) => (
+                  <span
+                    // biome-ignore lint/suspicious/noArrayIndexKey: tokens are static, in order
+                    key={k}
+                    style={{
+                      color: t.color ? `#${t.color}` : undefined,
+                      fontStyle: t.italic ? "italic" : undefined,
+                    }}
+                  >
+                    {t.text}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </code>
+        </pre>
       );
     if (b.type === "list") {
       const List = b.ordered ? "ol" : "ul";

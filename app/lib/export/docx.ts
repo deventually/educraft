@@ -11,6 +11,7 @@ import {
   LevelFormat,
   Packer,
   Paragraph,
+  ShadingType,
   Table,
   TableCell,
   TableRow,
@@ -19,6 +20,7 @@ import {
 } from "docx";
 import type { Locale } from "~/lib/i18n";
 import type { ExportDoc } from "./doc";
+import { CODE_BACKGROUND, CODE_FONT, highlightCode } from "./highlight";
 import type { Block, Run } from "./markdown";
 
 export const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -36,7 +38,40 @@ const HEADINGS = [
 ] as const;
 
 export function runs(rs: Run[]): TextRun[] {
-  return rs.map((r) => new TextRun({ text: r.text, bold: r.bold, italics: r.italic }));
+  return rs.map(
+    (r) =>
+      new TextRun({
+        text: r.text,
+        bold: r.bold,
+        italics: r.italic,
+        ...(r.code ? { font: CODE_FONT } : {}),
+      }),
+  );
+}
+
+/** A code block: one paragraph per line on a light band, monospace, coloured by language. */
+function codeParagraphs(text: string, lang: string | null): Paragraph[] {
+  const lines = highlightCode(text, lang);
+  return lines.map(
+    (line, i) =>
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: "auto", fill: CODE_BACKGROUND },
+        // A little air above and below the band, none between its lines.
+        spacing: { before: i === 0 ? 120 : 0, after: i === lines.length - 1 ? 160 : 0 },
+        children: line.length
+          ? line.map(
+              (t) =>
+                new TextRun({
+                  text: t.text,
+                  font: CODE_FONT,
+                  size: 20,
+                  color: t.color,
+                  italics: t.italic,
+                }),
+            )
+          : [new TextRun({ text: "", font: CODE_FONT, size: 20 })],
+      }),
+  );
 }
 
 function cell(rs: Run[], header: boolean): TableCell {
@@ -71,6 +106,8 @@ export function blocksToDocx(
       out.push(new Paragraph({ heading: HEADINGS[level], children: runs(b.runs) }));
     } else if (b.type === "paragraph") {
       out.push(new Paragraph({ children: runs(b.runs) }));
+    } else if (b.type === "code") {
+      out.push(...codeParagraphs(b.text, b.lang));
     } else if (b.type === "list") {
       const instance = nextList();
       for (const item of b.items) {
