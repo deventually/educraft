@@ -3,6 +3,7 @@
 // to make fixtures). Run once with `node tests/fixtures/generate.mjs`; the produced
 // sample.pdf / sample.docx are committed alongside this script.
 import { writeFileSync } from "node:fs";
+import { deflateSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -74,7 +75,7 @@ function crc32(buf) {
 }
 
 function buildDocx() {
-  const parts = [
+  return zipParts([
     {
       name: "[Content_Types].xml",
       data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -101,15 +102,18 @@ function buildDocx() {
   </w:body>
 </w:document>`,
     },
-  ];
+  ]);
+}
 
+/** A STORED zip of `{ name, data }` parts (data: string or Buffer). */
+function zipParts(parts) {
   const locals = [];
   const centrals = [];
   let offset = 0;
 
   for (const part of parts) {
     const nameBuf = Buffer.from(part.name, "utf8");
-    const dataBuf = Buffer.from(part.data, "utf8");
+    const dataBuf = Buffer.isBuffer(part.data) ? part.data : Buffer.from(part.data, "utf8");
     const crc = crc32(dataBuf);
 
     const local = Buffer.alloc(30);
@@ -189,6 +193,139 @@ function buildEmptyPdf() {
   return Buffer.from(body + xref + trailer, "latin1");
 }
 
+// ---------------------------------------------------------------------------
+// Fixtures with images (stage-assessment figures): a DOCX with a figure, a tiny
+// icon and an EMF drawing, and a PDF with a figure page and a logo-only page.
+// ---------------------------------------------------------------------------
+const PNG_CRC = (type, data) => {
+  const b = Buffer.alloc(4);
+  b.writeUInt32BE(crc32(Buffer.concat([Buffer.from(type, "latin1"), data])), 0);
+  return b;
+};
+
+/** A solid-colour RGB PNG of `width` × `height`, built with node:zlib only. */
+function buildPng(width, height, [r, g, b]) {
+  const chunk = (type, data) => {
+    const len = Buffer.alloc(4);
+    len.writeUInt32BE(data.length, 0);
+    return Buffer.concat([len, Buffer.from(type, "latin1"), data, PNG_CRC(type, data)]);
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 2; // colour type RGB
+  const row = Buffer.alloc(1 + width * 3);
+  for (let x = 0; x < width; x++) row.set([r, g, b], 1 + x * 3);
+  const raw = Buffer.concat(Array.from({ length: height }, () => row));
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", deflateSync(raw)),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+function buildDocxWithImages() {
+  const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const drawing = (rid, name) => `<w:p><w:r><w:drawing>
+      <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+        <wp:extent cx="1905000" cy="1428750"/>
+        <wp:docPr id="1" name="${name}" descr="${name}"/>
+        <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+              <pic:nvPicPr><pic:cNvPr id="0" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr>
+              <pic:blipFill><a:blip r:embed="${rid}"/></pic:blipFill>
+            </pic:pic>
+          </a:graphicData>
+        </a:graphic>
+      </wp:inline>
+    </w:drawing></w:r></w:p>`;
+  return zipParts([
+    {
+      name: "[Content_Types].xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Default Extension="png" ContentType="image/png"/>
+  <Default Extension="emf" ContentType="image/x-emf"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`,
+    },
+    {
+      name: "_rels/.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`,
+    },
+    {
+      name: "word/_rels/document.xml.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rIdFig" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/figure.png"/>
+  <Relationship Id="rIdIcon" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/icon.png"/>
+  <Relationship Id="rIdEmf" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/diagram.emf"/>
+</Relationships>`,
+    },
+    {
+      name: "word/document.xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="${W}" xmlns:r="${R}">
+  <w:body>
+    <w:p><w:r><w:t>Verslag met figuren ${DOCX_TOKEN}.</w:t></w:r></w:p>
+    ${drawing("rIdIcon", "Pictogram")}
+    ${drawing("rIdFig", "Architectuurschets")}
+    ${drawing("rIdEmf", "Visio-tekening")}
+  </w:body>
+</w:document>`,
+    },
+    { name: "word/media/figure.png", data: buildPng(200, 150, [40, 120, 200]) },
+    { name: "word/media/icon.png", data: buildPng(16, 16, [200, 40, 40]) },
+    { name: "word/media/diagram.emf", data: Buffer.from("not really an emf", "latin1") },
+  ]);
+}
+
+/**
+ * A three-page PDF: page 1 text only, page 2 a figure (300 × 200 pt image), page 3
+ * only a small logo (40 × 20 pt). Only page 2 is worth offering as a figure.
+ */
+function buildPdfWithImages() {
+  const pixels = Buffer.alloc(4 * 4 * 3, 0x80);
+  const pageContents = [
+    "BT /F1 12 Tf 72 700 Td (Inleiding zonder figuur) Tj ET",
+    "BT /F1 12 Tf 72 700 Td (Figuur 1 Architectuur) Tj ET\nq 300 0 0 200 72 400 cm /Im1 Do Q",
+    "q 40 0 0 20 500 750 cm /Im1 Do Q\nBT /F1 12 Tf 72 700 Td (Alleen een logo) Tj ET",
+  ];
+  const n = pageContents.length;
+  const font = 3 + n * 2;
+  const image = font + 1;
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${pageContents.map((_, i) => `${3 + i * 2} 0 R`).join(" ")}] /Count ${n} >>`,
+    ...pageContents.flatMap((c, i) => [
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${4 + i * 2} 0 R /Resources << /Font << /F1 ${font} 0 R >> /XObject << /Im1 ${image} 0 R >> >> >>`,
+      `<< /Length ${c.length} >>\nstream\n${c}\nendstream`,
+    ]),
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Type /XObject /Subtype /Image /Width 4 /Height 4 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length ${pixels.length} >>\nstream\n${pixels.toString("latin1")}\nendstream`,
+  ];
+  let body = "%PDF-1.4\n";
+  const offsets = [];
+  objects.forEach((obj, i) => {
+    offsets[i] = body.length;
+    body += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+  const xrefStart = body.length;
+  let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) xref += `${String(off).padStart(10, "0")} 00000 n \n`;
+  const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+  return Buffer.from(body + xref + trailer, "latin1");
+}
+
 writeFileSync(
   join(here, "sample.pdf"),
   buildPdf([[`Pagina tekst ${PDF_TOKEN_ONE}`], [`Pagina tekst ${PDF_TOKEN_TWO}`]]),
@@ -207,5 +344,7 @@ writeFileSync(
 );
 writeFileSync(join(here, "sample.docx"), buildDocx());
 writeFileSync(join(here, "sample-empty.pdf"), buildEmptyPdf());
-console.log("Wrote sample.pdf, sample.docx and sample-empty.pdf");
+writeFileSync(join(here, "sample-images.docx"), buildDocxWithImages());
+writeFileSync(join(here, "sample-images.pdf"), buildPdfWithImages());
+console.log("Wrote sample.pdf, sample.docx, sample-empty.pdf and the sample-images fixtures");
 console.log({ PDF_TOKEN_ONE, PDF_TOKEN_TWO, DOCX_TOKEN });

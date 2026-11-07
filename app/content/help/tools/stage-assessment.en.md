@@ -6,7 +6,7 @@ Use it to draft a fast, consistent first assessment, to check your own judgement
 
 ## How it works
 
-1. **Upload the document** (PDF or Word) you want to assess, or **paste the text**. When you upload, the tool extracts the text into the field so you can review and edit it before generating. Tables and figures are lost — upload key figures separately as images. Is it a scan (images only)? Then the tool finds no text and you paste it yourself.
+1. **Upload the document** (PDF or Word) you want to assess, or **paste the text**. When you upload, the tool extracts the text into the field so you can review and edit it before generating. You can then tick figures from Word and PDF pages with a figure under **Key figures**; nothing is sent by default, because images are not anonymised. Tables come along as text. Is it a scan (images only)? Then the tool finds no text and you paste it yourself.
 2. **Choose document type, track, study year and duration.** The track (UX/Software/Data) determines which variant of the success criteria applies.
 3. **Optionally add notes about this submission.** State what does or doesn't count, or what is assessed later or separately — for example: "only the research and internship reports are assessed now; the work product follows and is graded separately via the final presentation." The assistant follows these notes and leaves the stated parts out of the judgement.
 4. **Check the assessment framework.** The HBO-i internship rubric (level 2) is pre-filled by default. Assessing a different programme? Edit or fully replace the framework and scale — this framework drives the judgement.

@@ -1,0 +1,106 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { axe } from "vitest-axe";
+import { DocumentFigurePicker } from "~/components/documents/DocumentFigurePicker";
+import type { ImageInput } from "~/lib/ai/types";
+import type { DocFigures } from "~/lib/documents/figures";
+
+vi.mock("~/lib/i18n/useT", () => ({
+  useLocale: () => "en",
+  useT: () => ({
+    tool: {
+      figuresLegend: "Figures from the document",
+      figuresLoading: "Looking for figures…",
+      figuresNone: "No figures found in the document.",
+      figuresPrivacy: "Figures are not anonymised.",
+      figuresUnsupported: "{count} image(s) in a format the AI cannot read were skipped.",
+      figuresMax: "Maximum of {max} images reached.",
+      figureFromFile: "Image {index} from {source}",
+      figureFromPage: "Page {page} from {source}",
+    },
+  }),
+}));
+
+const documentFigures = vi.fn<(files: File[]) => Promise<DocFigures>>();
+vi.mock("~/lib/documents/figures", () => ({
+  documentFigures: (files: File[]) => documentFigures(files),
+}));
+
+const img = (s: string): ImageInput => ({ mediaType: "image/png", dataBase64: s });
+const FIGS: DocFigures = {
+  figures: [
+    { source: "report.docx", index: 1, image: img("QUFB") },
+    { source: "report.pdf", page: 4, index: 2, image: img("QkJC") },
+  ],
+  unsupported: 1,
+};
+const files = [new File(["x"], "report.docx")];
+
+describe("DocumentFigurePicker", () => {
+  beforeEach(() => {
+    documentFigures.mockReset();
+    documentFigures.mockResolvedValue(FIGS);
+  });
+
+  it("shows nothing before a document is uploaded", () => {
+    const { container } = render(<DocumentFigurePicker files={[]} value={[]} onChange={vi.fn()} />);
+    expect(container).toBeEmptyDOMElement();
+    expect(documentFigures).not.toHaveBeenCalled();
+  });
+
+  it("offers each figure unticked, with its source and the privacy warning", async () => {
+    render(<DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />);
+    const boxes = await screen.findAllByRole("checkbox");
+    expect(boxes).toHaveLength(2);
+    for (const box of boxes) expect(box).not.toBeChecked();
+    expect(screen.getByLabelText("Image 1 from report.docx")).toBeInTheDocument();
+    expect(screen.getByLabelText("Page 4 from report.pdf")).toBeInTheDocument();
+    expect(screen.getByText("Figures are not anonymised.")).toBeInTheDocument();
+    expect(
+      screen.getByText("1 image(s) in a format the AI cannot read were skipped."),
+    ).toBeInTheDocument();
+  });
+
+  it("adds a ticked figure to the images and removes it when unticked", async () => {
+    const onChange = vi.fn();
+    const own = img("T1dO");
+    const { rerender } = render(
+      <DocumentFigurePicker files={files} value={[own]} onChange={onChange} />,
+    );
+    fireEvent.click(await screen.findByLabelText("Page 4 from report.pdf"));
+    expect(onChange).toHaveBeenLastCalledWith([own, FIGS.figures[1].image]);
+
+    rerender(
+      <DocumentFigurePicker
+        files={files}
+        value={[own, FIGS.figures[1].image]}
+        onChange={onChange}
+      />,
+    );
+    const box = screen.getByLabelText("Page 4 from report.pdf");
+    expect(box).toBeChecked();
+    fireEvent.click(box);
+    expect(onChange).toHaveBeenLastCalledWith([own]);
+  });
+
+  it("cannot tick more once the maximum is reached", async () => {
+    const full = Array.from({ length: 10 }, (_, i) => img(`RlVMT${i}`));
+    render(<DocumentFigurePicker files={files} value={full} onChange={vi.fn()} />);
+    for (const box of await screen.findAllByRole("checkbox")) expect(box).toBeDisabled();
+    expect(screen.getByText("Maximum of 10 images reached.")).toBeInTheDocument();
+  });
+
+  it("says so when the document has no figures", async () => {
+    documentFigures.mockResolvedValue({ figures: [], unsupported: 0 });
+    render(<DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />);
+    expect(await screen.findByText("No figures found in the document.")).toBeInTheDocument();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />,
+    );
+    await screen.findAllByRole("checkbox");
+    await waitFor(async () => expect((await axe(container)).violations).toEqual([]));
+  });
+});
