@@ -16,13 +16,13 @@ import { useFormToast } from "~/components/Toast";
 import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
+import { ProofreadPanel } from "~/components/portfolio/ProofreadPanel";
 import { ToolHints } from "~/components/portfolio/ToolHints";
-import { availableToolNames, loadSuggestions } from "~/server/portfolio.server";
+import { availableToolNames, loadSuggestions, modelDisplayName } from "~/server/portfolio.server";
 import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
 import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { snapshotCourses } from "~/server/courseEvidence.server";
 import { fmtDate } from "~/lib/portfolio/format";
-import { resolveModelInfo } from "~/lib/ai/models";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
@@ -64,6 +64,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id) && !evidencePending(e)))
       .map((c) => c.id),
     stored: storedReview(d.reviews?.[outcome.id]),
+    proofread: storedProofread(d, outcome.id),
     toolHints: Object.fromEntries(
       outcome.criteria
         .filter((c) => !linked.has(c.id))
@@ -82,13 +83,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 function storedReview(r: NonNullable<DossierData["reviews"]>[string] | undefined) {
   if (!r) return undefined;
-  let modelName = r.model;
-  try {
-    modelName = resolveModelInfo(r.model).displayName;
-  } catch {
-    // A model that left the catalog keeps its id as its name.
-  }
-  return { ...r, modelName };
+  return { ...r, modelName: modelDisplayName(r.model) };
+}
+
+/** The latest proofreading, with only the proposals whose span is still in the chapter. */
+function storedProofread(d: DossierData, outcomeId: string) {
+  const p = d.proofreads?.[outcomeId];
+  if (!p) return undefined;
+  const chapter = d.chapters.find((ch) => ch.outcomeId === outcomeId)?.text ?? "";
+  return {
+    at: p.at,
+    modelName: modelDisplayName(p.model),
+    suggestions: p.suggestions.flatMap((s, index) =>
+      chapter.includes(s.quote) ? [{ ...s, index }] : [],
+    ),
+  };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -105,6 +114,8 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     pending: (fd) => {
       const intent = String(fd?.get("intent") ?? "");
       if (intent === "review") return { variant: "pending", message: t.portfolio.coach.pending };
+      if (intent === "proofread")
+        return { variant: "pending", message: t.portfolio.proofread.pending };
       if (intent.startsWith("draft:"))
         return { variant: "pending", message: t.portfolio.draft.pending };
       return { variant: "pending", message: t.toast.saving };
@@ -112,6 +123,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
+      const tr = t.portfolio.proofread;
       const message =
         r.intent === "refreshCourseEvidence"
           ? t.portfolio.outcome.refreshed
@@ -119,7 +131,15 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
             ? t.portfolio.coach.done
             : r.intent === "draft"
               ? t.portfolio.draft.done
-              : t.portfolio.toastSaved;
+              : r.intent === "proofread"
+                ? r.proposals
+                  ? tr.done
+                  : tr.doneNone
+                : r.intent === "takeProofread"
+                  ? tr.taken
+                  : r.intent === "skipProofread"
+                    ? tr.skipped
+                    : t.portfolio.toastSaved;
       return { variant: "success", message };
     },
   });
@@ -138,6 +158,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     showDraftNotice,
     withEvidence,
     stored,
+    proofread,
     toolHints,
     chapterTools,
     suggestions,
@@ -310,7 +331,9 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
         confirmed={confirmed}
         hasChapter={chapter.trim().length > 0}
         stored={stored}
+        proofread={!!proofread}
       />
+      {proofread && <ProofreadPanel outcomeId={outcome.id} view={proofread} />}
     </div>
   );
 }

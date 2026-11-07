@@ -9,7 +9,12 @@ import { getDossier, updateDossier, type Dossier } from "./repositories/portfoli
 import type { User } from "./auth.server";
 import { applyIntent } from "~/lib/portfolio/intents";
 import { LIMITS } from "~/lib/portfolio/schema";
-import { draftParagraph, reviewOutcome } from "./portfolioCoach.server";
+import {
+  draftParagraph,
+  proofreadOutcome,
+  reviewDossier,
+  reviewOutcome,
+} from "./portfolioCoach.server";
 import { extractFramework } from "./portfolioExtract.server";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -22,6 +27,7 @@ import { addGenerationToDossier } from "./evidence.server";
 import { refreshCourseEvidence } from "./courseEvidence.server";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
+import { resolveModelInfo } from "~/lib/ai/models";
 
 /** A teacher or admin for whom the workplace is switched on; anyone else gets a 404. */
 export async function requirePortfolioUser(request: Request): Promise<User> {
@@ -56,6 +62,39 @@ function toolName(slug: string, locale: ReturnType<typeof getLocale>): string {
   return name ? loc(name, locale) : slug;
 }
 
+/** A model's display name; a model that left the catalog keeps its id as its name. */
+export function modelDisplayName(id: string): string {
+  try {
+    return resolveModelInfo(id).displayName;
+  } catch {
+    return id;
+  }
+}
+
+/**
+ * "Beoordeel het hele dossier": the latest coach review per outcome, counted
+ * per verdict, in framework order. Outcomes never reviewed are left out.
+ */
+export function dossierReviewOverview(d: DossierData) {
+  return d.framework.outcomes.flatMap((o) => {
+    const stored = d.reviews?.[o.id];
+    if (!stored) return [];
+    const count = (v: string) => stored.review.criteria.filter((c) => c.verdict === v).length;
+    return [
+      {
+        outcomeId: o.id,
+        at: stored.at,
+        modelName: modelDisplayName(stored.model),
+        ...(stored.provisional ? { provisional: true as const } : {}),
+        shown: count("shown"),
+        partial: count("partial"),
+        missing: count("missing"),
+        overall: stored.review.overall,
+      },
+    ];
+  });
+}
+
 /** How many recent generations "Dit heb je misschien al" looks at. */
 const SUGGEST_FROM = 200;
 
@@ -79,13 +118,24 @@ export async function loadSuggestions(request: Request, user: User, d: DossierDa
 }
 
 export type PortfolioActionResult =
-  | { ok: true; intent: string; flagged?: number; clipped?: boolean }
+  | {
+      ok: true;
+      intent: string;
+      flagged?: number;
+      clipped?: boolean;
+      /** proofread: how many proposals came back. */
+      proposals?: number;
+      /** reviewAll: chapters reviewed, and chapters whose review failed. */
+      reviewed?: number;
+      failed?: number;
+    }
   | { ok: false; error: string };
 
 /**
- * Applies the posted intent to the dossier and stores it. Three intents call a
- * model (`extract` on the framework page; `review`, `draft:<criterionId>` for
- * the coach); every other one is a pure edit.
+ * Applies the posted intent to the dossier and stores it. Five intents call a
+ * model (`extract` on the framework page; `review`, `draft:<criterionId>` and
+ * `proofread` for one chapter; `reviewAll` for the whole dossier); every other
+ * one is a pure edit.
  */
 export async function saveIntent(
   request: Request,
@@ -128,6 +178,45 @@ export async function saveIntent(
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
     return { ok: true, intent: intent === "review" ? "review" : "draft" };
+  }
+
+  if (intent === "proofread") {
+    const outcomeId = String(fd.get("outcomeId") ?? "");
+    if (!dossier.data.framework.outcomes.some((o) => o.id === outcomeId))
+      return { ok: false, error: m.portfolio.errorNotFound };
+    const result = await proofreadOutcome(user, dossier.data, outcomeId, locale).catch(() => ({
+      ok: false as const,
+      error: "failed" as const,
+    }));
+    if (!result.ok)
+      return {
+        ok: false,
+        error:
+          result.error === "failed"
+            ? m.portfolio.proofread.failed
+            : m.portfolio.coach.errors[result.error],
+      };
+    const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
+    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
+    return { ok: true, intent, proposals: result.suggestions.length };
+  }
+
+  if (intent === "reviewAll") {
+    const result = await reviewDossier(user, dossier.data, locale).catch(() => ({
+      ok: false as const,
+      error: "failed" as const,
+    }));
+    if (!result.ok)
+      return {
+        ok: false,
+        error:
+          result.error === "empty-chapter"
+            ? m.portfolio.dossierReview.noChapters
+            : m.portfolio.coach.errors[result.error],
+      };
+    const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
+    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
+    return { ok: true, intent, reviewed: result.reviewed.length, failed: result.failed.length };
   }
 
   if (intent === "adoptSuggestions") {

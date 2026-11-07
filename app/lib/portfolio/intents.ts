@@ -102,6 +102,8 @@ const SCHEMAS = {
   dismissDraftNotice: z.object({}),
   addReference: z.object({ apa: required(LIMITS.reference) }),
   removeReference: z.object({ referenceId: Id }),
+  takeProofread: z.object({ outcomeId: Id, index: z.coerce.number().int().nonnegative().max(100) }),
+  skipProofread: z.object({ outcomeId: Id, index: z.coerce.number().int().nonnegative().max(100) }),
   tickReadiness: z.object({ code: z.enum(TICKABLE_CODES), ticked: z.literal("on").optional() }),
   /** Back from Word: the chapters the teacher chose to take over, and new references. */
   importChapters: z.object({
@@ -286,6 +288,14 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
         next = edit.addReference(next, apa);
       }
       return next;
+    }
+    case "takeProofread": {
+      const v = input as z.infer<(typeof SCHEMAS)["takeProofread"]>;
+      return edit.takeProofread(d, v.outcomeId, v.index);
+    }
+    case "skipProofread": {
+      const v = input as z.infer<(typeof SCHEMAS)["skipProofread"]>;
+      return edit.skipProofread(d, v.outcomeId, v.index);
     }
     case "tickReadiness": {
       const v = input as z.infer<(typeof SCHEMAS)["tickReadiness"]>;
