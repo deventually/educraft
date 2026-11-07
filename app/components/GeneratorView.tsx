@@ -110,6 +110,11 @@ export function GeneratorView({
   const [reviewing, setReviewing] = useState(false);
   const [redactDraft, setRedactDraft] = useState<RedactDraft>(emptyRedactDraft);
   const [codes, setCodes] = useState<CodeTable | null>(null);
+  // What was last sent for each anonymised field, next to the form text it came from,
+  // so "What the AI receives" shows the codes until the teacher edits that text.
+  const [sentRedacted, setSentRedacted] = useState<Record<string, { from: string; to: string }>>(
+    {},
+  );
   const redactFields = tool.inputs.filter(
     (f) => f.redact && String(values[f.name] ?? "").trim() !== "",
   );
@@ -132,6 +137,13 @@ export function GeneratorView({
     el.focus();
   }, []);
 
+  /** The text that goes (or went) to the AI for a field: the codes once it was anonymised. */
+  function aiText(name: string): string {
+    const current = String(values[name] ?? "");
+    const sent = sentRedacted[name];
+    return sent && sent.from === current ? sent.to : current;
+  }
+
   function generate() {
     const missing = missingRequired(tool.inputs, values);
     if (missing.length) {
@@ -144,12 +156,21 @@ export function GeneratorView({
       return;
     }
     setCodes(null);
+    setSentRedacted({});
     void send({});
   }
 
   function sendRedacted(result: RedactResult) {
     setReviewing(false);
     setCodes(result.codes);
+    setSentRedacted(
+      Object.fromEntries(
+        Object.entries(result.values).map(([name, to]) => [
+          name,
+          { from: String(values[name] ?? ""), to },
+        ]),
+      ),
+    );
     void send(result.values);
   }
 
@@ -262,7 +283,9 @@ export function GeneratorView({
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
+      {/* Sticky in the shell's scroll region, which starts under the 4rem header (+1px
+          border): 1rem gap above and below, so the notice at its foot stays on screen. */}
+      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start">
         <div
           className={cn(
             "min-h-0 flex-1",
@@ -283,7 +306,7 @@ export function GeneratorView({
             >
               <DocumentViewer
                 files={docFiles}
-                text={String(values[docField.name] ?? "")}
+                text={aiText(docField.name)}
                 quotes={quotes}
                 onFoundQuotes={setFoundQuotes}
                 focus={focus}

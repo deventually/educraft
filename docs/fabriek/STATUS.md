@@ -4,10 +4,17 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
+_Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakijken in een open PR)_
 
 ## Nu
 
+- **Het model op één plek (#156) gemerged op 2026-11-07:** `default` in `config/models.json` is
+  de enige plek waar het standaardmodel staat; alle tools en de beoordelaar van de meetscripts
+  halen het daar vandaan, en `tests/model-ids.test.ts` faalt op een model-id ergens anders.
+  Stagebeoordeling opnieuw gemeten met Sonnet 5.5 als model en beoordelaar (sa55): gemiddeld
+  4,06. Niet één op één te vergelijken met de oude meting (rond 5,0, andere beoordelaar). De
+  beoordelaar ziet vooral eisen die niet in het kader staan (APA, MoSCoW) en oordelen die niet
+  bij de uitleg passen; dat is een kandidaat voor een `@v2`.
 - **P31.1b Kerncijfers bij Verdedig je werk (#152) gemerged op 2026-11-07:** een vinkje
   *Student plakt eerst de kerncijfers*, een herinnering per beurt (`ChatConfig.turnReminder`) en
   prompt `@v2`. Meting dyw4: gemiddeld 3,55 (was 3,2); één vraag per beurt nog niet helemaal.
@@ -268,11 +275,15 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
 
 ## Bezig
 
-- **Het model op één plek (PR open):** `default` in `config/models.json` is de enige plek waar
-  het standaardmodel staat. Alle tools en de beoordelaar van de meetscripts halen het daar
-  vandaan; `tests/model-ids.test.ts` faalt als er ergens anders in `app/` of `scripts/` een
-  model-id staat. Verhoog je het model, dan gaat alles mee. De beoordelaar ging zo van
-  Sonnet 4.6 naar Sonnet 5.5.
+- **"Wat de AI krijgt" toont de geanonimiseerde tekst (PR open):** na *Verstuur geanonimiseerd*
+  liet de documentviewer bij Stagebeoordeling nog de tekst met namen zien. De AI kreeg wel al
+  alleen codes (geen privacylek); nu toont het tabblad ook precies die tekst, tot de docent het
+  formulier weer aanpast.
+- **Pagina met documentviewer scrolt niet meer voorbij de footer (PR open):** de verborgen
+  voorleestekst in de klikbare citaten (#155) rekte op een telefoon de pagina op tot ver na de
+  footer; de scrollzone van de app verankert zulke tekst nu voor alle pagina's. Daarnaast past de
+  meescrollende rechterkolom (viewer en resultaat) nu precies onder de kop, in plaats van 49px onder
+  het scherm, en sleept scrollen in de viewer of het resultaat de pagina niet meer mee.
 - **P31.2 Een verdediging nakijken (PR open):** de docent plakt het gesprek van een
   mondelinge verdediging en krijgt een concept (bijlage F.4, letterlijk overgenomen en algemeen
   gemaakt): het niveau van begrip (uitstekend, op niveau, in ontwikkeling, beginnend), opvallende
