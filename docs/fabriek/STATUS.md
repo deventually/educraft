@@ -276,6 +276,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
   Wat de AI in het gesprek zei, telt niet mee. Volgende stap onder *Verdedig je werk*. Meting dr1:
   gemiddeld 4,52 (één vals alarm van de judge); F.4 woord voor woord gecontroleerd. Met de docs
   van 31.4.
+- **Documentviewer past op de pagina, met zoomen (PR open):** een geüploade PDF of Word bij
+  *Studentwerk beoordelen* (en de twee andere tools met een documentveld) brak de pagina: een brede
+  tabel of lange link maakte de viewer breder dan het scherm, een lang document groeide onder de
+  kolom uit, en de verborgen voorleestekst per PDF-pagina rekte de hele pagina op. Nu blijft de
+  viewer binnen zijn kolom en scrolt het document erin. Nieuw: in- en uitzoomen (50–300%).
 - **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
   model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
   Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg

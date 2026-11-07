@@ -253,11 +253,18 @@ export function GeneratorView({
             docFiles &&
               (output || streaming) &&
               !reviewing &&
-              "grid gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1",
+              "grid grid-cols-1 gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1",
           )}
         >
           {docFiles && docField && !reviewing && (
-            <div className={cn("min-h-0", (output || streaming) && "2xl:order-2")}>
+            <div
+              data-viewer-box
+              className={cn(
+                // A height of its own, so a long document scrolls inside the viewer.
+                "h-[80dvh] min-h-0 min-w-0 lg:h-full",
+                (output || streaming) && "2xl:order-2",
+              )}
+            >
               <DocumentViewer
                 files={docFiles}
                 text={String(values[docField.name] ?? "")}

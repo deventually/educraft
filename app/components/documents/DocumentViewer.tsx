@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Search } from "lucide-react";
+import { Search, ZoomIn, ZoomOut } from "lucide-react";
 import { Button, Input, Select, Spinner } from "~/components/ui";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
@@ -27,13 +27,19 @@ type Tab = "original" | "ai";
 /** Context shown around a hit in the status line. */
 const CONTEXT_CHARS = 80;
 
+/** Zoom steps for the original; 1 is "fit the pane". */
+const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const;
+const ZOOM_FIT = ZOOM_STEPS.indexOf(1);
+
 /**
  * The original next to the text for the AI (brief P24, 24.0c).
  *
  * A deep module: hand it the files, the text and the quotes; it loads the
  * original in the browser (PDF pages or a safe Word view), searches it, and
  * jumps from a quote to its place. Side by side when its container is wide,
- * two tabs when it is narrow. Nothing is uploaded or stored.
+ * two tabs when it is narrow. Never wider than its container: a wide table
+ * scrolls inside the pane and a long link wraps. The original can be zoomed
+ * (PDF pages grow, a Word view reflows). Nothing is uploaded or stored.
  */
 export function DocumentViewer({ files, text, quotes = [] }: Props) {
   const t = useT().documents;
@@ -45,6 +51,8 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
   const [located, setLocated] = useState<Hit | null>(null);
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState("");
+  const [zoomStep, setZoomStep] = useState<number>(ZOOM_FIT);
+  const zoom = ZOOM_STEPS[zoomStep];
   const searchRef = useRef<{ query: string; hits: Hit[]; index: number }>({
     query: "",
     hits: [],
@@ -171,7 +179,7 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
   ];
 
   return (
-    <div className="@container flex h-full min-h-0 flex-col gap-2">
+    <div className="@container relative flex h-full min-h-0 min-w-0 flex-col gap-2">
       <div role="tablist" aria-label={t.tabs} className="flex gap-1 @3xl:hidden">
         {tabs.map(([key, label]) => (
           <button
@@ -199,13 +207,13 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-3 @3xl:grid-cols-2">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 @3xl:grid-cols-2">
         {/* Original */}
         <div
           role="tabpanel"
           id={panelId("original")}
           aria-labelledby={tabId("original")}
-          className={cn("min-h-0", tab !== "original" && "hidden @3xl:block")}
+          className={cn("min-h-0 min-w-0", tab !== "original" && "hidden @3xl:block")}
         >
           <section
             aria-labelledby={headingId("original")}
@@ -238,22 +246,59 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
                 )}
               </div>
               {load.status === "ready" && (
-                <search>
-                  <form onSubmit={runSearch} className="flex gap-2">
-                    <Input
-                      type="search"
-                      aria-label={t.search}
-                      placeholder={t.search}
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      className="h-8 text-sm"
-                    />
-                    <Button type="submit" size="sm" variant="secondary">
-                      <Search className="size-4" aria-hidden />
-                      {t.searchButton}
+                <div className="flex flex-wrap items-center gap-2">
+                  <search className="min-w-48 flex-1">
+                    <form onSubmit={runSearch} className="flex gap-2">
+                      <Input
+                        type="search"
+                        aria-label={t.search}
+                        placeholder={t.search}
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                      <Button type="submit" size="sm" variant="secondary">
+                        <Search className="size-4" aria-hidden />
+                        {t.searchButton}
+                      </Button>
+                    </form>
+                  </search>
+                  <fieldset className="flex shrink-0 items-center gap-1">
+                    <legend className="sr-only">{t.zoom}</legend>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={t.zoomOut}
+                      title={t.zoomOut}
+                      disabled={zoomStep === 0}
+                      onClick={() => setZoomStep((z) => Math.max(0, z - 1))}
+                    >
+                      <ZoomOut className="size-4" aria-hidden />
                     </Button>
-                  </form>
-                </search>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={fmt(t.zoomReset, { pct: Math.round(zoom * 100) })}
+                      onClick={() => setZoomStep(ZOOM_FIT)}
+                      className="min-w-14 tabular-nums"
+                    >
+                      {Math.round(zoom * 100)}%
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={t.zoomIn}
+                      title={t.zoomIn}
+                      disabled={zoomStep === ZOOM_STEPS.length - 1}
+                      onClick={() => setZoomStep((z) => Math.min(ZOOM_STEPS.length - 1, z + 1))}
+                    >
+                      <ZoomIn className="size-4" aria-hidden />
+                    </Button>
+                  </fieldset>
+                </div>
               )}
               <div role="status" className="text-xs text-slate-700">
                 {message && <p>{message}</p>}
@@ -271,8 +316,12 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
               </div>
             </div>
 
-            {/* biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable */}
-            <div ref={bodyRef} tabIndex={0} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            <div
+              ref={bodyRef}
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable
+              tabIndex={0}
+              className="relative min-h-0 min-w-0 flex-1 overflow-auto px-4 py-3"
+            >
               {load.status === "loading" && (
                 <p className="flex items-center gap-2 text-sm text-slate-500">
                   <Spinner /> {t.loading}
@@ -291,6 +340,7 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
               {load.status === "ready" && load.doc.kind === "pdf" && (
                 <PdfPages
                   doc={load.doc}
+                  zoom={zoom}
                   idPrefix={`${uid}-page-`}
                   locatedPage={located?.segment}
                   pageLabel={t.page}
@@ -300,7 +350,7 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
               {load.status === "ready" && load.doc.kind === "docx" && (
                 <div className="space-y-2">
                   <p className="text-xs text-slate-500">{t.wordNote}</p>
-                  <div className="md">
+                  <div data-zoom-target className="md [overflow-wrap:break-word]" style={{ zoom }}>
                     <SafeNodes nodes={load.doc.nodes} imageAlt={t.imageAlt} headingOffset={3} />
                   </div>
                 </div>
@@ -314,7 +364,7 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
           role="tabpanel"
           id={panelId("ai")}
           aria-labelledby={tabId("ai")}
-          className={cn("min-h-0", tab !== "ai" && "hidden @3xl:block")}
+          className={cn("min-h-0 min-w-0", tab !== "ai" && "hidden @3xl:block")}
         >
           <section
             aria-labelledby={headingId("ai")}
@@ -375,15 +425,17 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
 
 interface PdfPagesProps {
   doc: Extract<OriginalDoc, { kind: "pdf" }>;
+  /** 1 fits the pane; more makes the pages wider than the pane (it scrolls). */
+  zoom: number;
   idPrefix: string;
   locatedPage?: number;
   pageLabel: string;
   fallbackLabel: string;
 }
 
-function PdfPages({ doc, idPrefix, locatedPage, pageLabel, fallbackLabel }: PdfPagesProps) {
+function PdfPages({ doc, zoom, idPrefix, locatedPage, pageLabel, fallbackLabel }: PdfPagesProps) {
   return (
-    <div className="space-y-4">
+    <div data-zoom-target className="mx-auto space-y-4" style={{ width: `${zoom * 100}%` }}>
       {doc.pages.map((pageText, i) => (
         <PdfPage
           // biome-ignore lint/suspicious/noArrayIndexKey: pages are fixed and ordered
