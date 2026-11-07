@@ -310,6 +310,14 @@ describe("tool: stage-assessment", () => {
     expect(tool.attribution.bookTitle).toBeUndefined();
   });
 
+  it("names the model of its latest measurement (evals/reports/2026-11-07sa55.md)", () => {
+    const tool = getToolBySlug("stage-assessment")!;
+    expect(tool.attribution.evaluatedWith).toEqual({
+      nl: "Claude Sonnet 5.5",
+      en: "Claude Sonnet 5.5",
+    });
+  });
+
   it("has structured output and is enabled for phase 1", () => {
     const tool = getToolBySlug("stage-assessment")!;
     expect(["markdown", "json", "structured-sections"]).toContain(tool.stages[0].output.kind);
