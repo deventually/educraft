@@ -382,6 +382,23 @@ describe("Portfolio outcome page", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("marks evidence without text as still to come (BDB/BKE plan, PR 3)", async () => {
+    const d = sampleDossier();
+    const evidence = [{ ...d.evidence[0], text: "" }];
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), evidence });
+    expect(screen.getByText("Volgt nog")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Nog geen tekst? Laat dit leeg; het bewijsstuk staat dan als Volgt nog.")
+        .length,
+    ).toBeGreaterThan(0);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no Volgt nog for evidence with text", () => {
+    renderRoute(PortfolioOutcome, outcomeData());
+    expect(screen.queryByText("Volgt nog")).toBeNull();
+  });
+
   it("counts the chapter's words as the teacher types", () => {
     renderRoute(PortfolioOutcome, outcomeData());
     const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");

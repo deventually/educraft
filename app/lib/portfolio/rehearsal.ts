@@ -21,6 +21,7 @@ import { LIMITS } from "./schema";
 import { COACH_INPUT_LIMITS, citesUnknownSource, quoteInChapter } from "./coach";
 import { fmtDate, outcomeLabel } from "./format";
 import { wordCount } from "./progress";
+import { evidencePending } from "./evidence";
 import type { DossierData, Framework } from "./types";
 
 export const REHEARSAL_PROMPT_ID = "portfolio-rehearsal@v2";
@@ -74,6 +75,7 @@ const LABELS = {
     empty: "(Nog geen tekst.)",
     truncated: "[… ingekort]",
     linkedTo: "hoort bij",
+    pending: "volgt nog",
     provisional: "Voorlopig kader: het landelijke startpunt, niet het formulier van de hogeschool.",
     length: {
       short: "Kort: ongeveer 6 vragen, ongeveer 15 minuten.",
@@ -88,6 +90,7 @@ const LABELS = {
     empty: "(No text yet.)",
     truncated: "[… shortened]",
     linkedTo: "belongs to",
+    pending: "still to come",
     provisional: "Provisional framework: the national starting point, not the institution's form.",
     length: {
       short: "Short: about 6 questions, about 15 minutes.",
@@ -139,7 +142,9 @@ export function buildRehearsalContext(
       const key = `K${keyOf.size + 1}`;
       keys[key] = c.id;
       keyOf.set(c.id, key);
-      const evidence = d.evidence.filter((e) => e.criterionIds.includes(c.id)).length;
+      const evidence = d.evidence.filter(
+        (e) => e.criterionIds.includes(c.id) && !evidencePending(e),
+      ).length;
       const status = d.status[c.id] ?? "not-started";
       const words = wordCount(chapterOf.get(o.id) ?? "");
       // Higher = thinner: no evidence, not shown, an empty or short chapter.
@@ -180,7 +185,10 @@ export function buildRehearsalContext(
   const evidence = d.evidence
     .map((e) => ({ e, linked: e.criterionIds.flatMap((id) => keyOf.get(id) ?? []) }))
     .filter(({ linked }) => linked.length > 0)
-    .map(({ e, linked }, i) => `- B${i + 1}: ${e.title} (${l.linkedTo} ${linked.join(", ")})`);
+    .map(
+      ({ e, linked }, i) =>
+        `- B${i + 1}: ${e.title} (${evidencePending(e) ? `${l.pending}; ` : ""}${l.linkedTo} ${linked.join(", ")})`,
+    );
 
   return {
     keys,
