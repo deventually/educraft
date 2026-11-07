@@ -29,6 +29,7 @@ vi.mock("~/lib/documents/original", () => ({
   loadOriginal: async () => ({
     kind: "pdf",
     pages: ["Reflectie van Jan de Vries: ik heb de klant elke week gesproken."],
+    layouts: [{ text: "", aspect: 0.75, items: [] }],
     renderPage: () => Promise.reject(new Error("no canvas")),
   }),
 }));

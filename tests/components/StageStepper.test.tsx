@@ -100,6 +100,32 @@ describe("StageStepper (multi-stage)", () => {
     expect(genCall![1].priorOutputs.analyst).toBe("COORDS-DOC");
   });
 
+  it("folds the form away once a step has a result, and keeps what was filled in", async () => {
+    const spy = await streamSpy();
+    spy.mockImplementation(async (_url, _body, handlers) => {
+      handlers.onToken("out");
+      handlers.onDone?.();
+    });
+    const user = userEvent.setup();
+    const { container } = renderStepper();
+    expect(screen.queryByRole("button", { name: m.tool.formHide })).toBeNull();
+    await fillRequired(user);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+
+    await user.click(screen.getByRole("button", { name: m.tool.formHide }));
+    const show = screen.getByRole("button", { name: m.tool.formShow });
+    expect(show).toHaveAttribute("aria-expanded", "false");
+    const form = document.getElementById(show.getAttribute("aria-controls") ?? "");
+    expect(form).toHaveAttribute("hidden");
+    // The steps stay usable while the form is away.
+    expect(screen.getAllByRole("button", { name: m.tool.runStage })[0]).toBeEnabled();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+
+    await user.click(show);
+    expect(form).not.toHaveAttribute("hidden");
+    expect(screen.getAllByRole("textbox")[0]).toHaveValue("x");
+  });
+
   it("exports every saved step together (P30.1)", async () => {
     const spy = await streamSpy();
     spy.mockImplementation(async (_url, body, handlers) => {
