@@ -293,10 +293,12 @@ export function GeneratorView({
       {(folded) => (
         // Sticky in the shell's scroll region, which starts under the 4rem header (+1px
         // border): 1rem gap above and below, so the notice at its foot stays on screen.
-        <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start">
+        // When "Export" opens below, the result and the viewer keep a minimum height and
+        // the column scrolls, instead of squashing them to their headers.
+        <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start lg:overflow-y-auto lg:overscroll-contain">
           <div
             className={cn(
-              "min-h-0 flex-1",
+              "min-h-0 flex-1 lg:min-h-[60dvh]",
               docFiles &&
                 (output || streaming) &&
                 !reviewing &&

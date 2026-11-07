@@ -275,6 +275,10 @@ _Laatst bijgewerkt: 2026-11-07 (eerlijker meten bij Verdedig je werk in een open
 
 ## Bezig
 
+- **Minder witruimte onder *Formulier uitklappen* (PR open):** het ingeklapte formulier liet
+  nog 16px extra ruimte achter onder de knop; nu staat er evenveel ruimte boven als onder. En:
+  *Exporteer* openklappen drukte resultaat en viewer plat tot alleen hun kop (de tekst onder de
+  viewer liep over de lijnen); ze houden nu een minimumhoogte en de kolom scrolt zelf.
 - **Formulier in- en uitklappen bij een resultaat (PR open):** zodra er een resultaat staat, klapt
   de docent het formulier weg met *Formulier inklappen*; resultaat en documentviewer krijgen dan de
   volle breedte (op een breed scherm naast elkaar). *Formulier uitklappen* haalt het terug, met alle

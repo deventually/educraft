@@ -73,6 +73,12 @@ describe("GeneratorView with a document field", () => {
     const column = box?.closest(".lg\\:sticky");
     expect(column?.className).toMatch(/(^|\s)lg:top-4(\s|$)/);
     expect(column?.className).toMatch(/(^|\s)lg:h-\[calc\(100dvh-6rem-1px\)\](\s|$)/);
+    // Opening "Export" under the result must not squash the viewer and the result to their
+    // headers: they keep a minimum height and the column scrolls instead.
+    const area = box?.parentElement;
+    expect(area?.className).toMatch(/(^|\s)lg:min-h-\[\d+dvh\](\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:overflow-y-auto(\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:overscroll-contain(\s|$)/);
     // Scrolling inside the viewer stops at its end instead of dragging the page along.
     const pane = screen.getByRole("region", { name: "Original" }).querySelector("[tabindex='0']");
     expect(pane?.className).toMatch(/(^|\s)overscroll-contain(\s|$)/);
@@ -217,6 +223,12 @@ describe("GeneratorView with a document field", () => {
     // Folded, the toggle sits on its own row: no side column eats the width.
     const page = box?.parentElement?.parentElement?.parentElement;
     expect(page?.className).not.toMatch(/lg:grid-cols-\[/);
+    // The hidden form adds no space under the toggle: its column spaces children with a
+    // flex gap (which skips hidden ones), not space-y margins (which do not), so there is
+    // as much room under the toggle as above it.
+    const column = show.parentElement;
+    expect(column?.className).toMatch(/(^|\s)flex-col(\s|$)/);
+    expect(column?.className).not.toMatch(/space-y-/);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
 
     await user.click(show);
