@@ -3,6 +3,9 @@ import { applyIntent } from "~/lib/portfolio/intents";
 import * as edit from "~/lib/portfolio/edit";
 import { buildCoachMessage } from "~/lib/portfolio/coach";
 import { applyExtraction } from "~/lib/portfolio/extract";
+import { buildDossierDocx, OpenSpotsError } from "~/lib/portfolio/export";
+import { openSpots } from "~/lib/portfolio/openSpots";
+import { readinessCheck } from "~/lib/portfolio/readiness";
 import { addRehearsalFeedback, buildRehearsalContext } from "~/lib/portfolio/rehearsal";
 import { DossierDataSchema, emptyDossier } from "~/lib/portfolio/schema";
 import type { DossierData } from "~/lib/portfolio/types";
@@ -116,5 +119,34 @@ describe("provisional framework in the rehearsal", () => {
     expect(kept.text).toContain("Op het landelijke startpunt (voorlopig kader).");
     const own = addRehearsalFeedback(sampleDossier(), feedback, opts).evidence.at(-1)!;
     expect(own.text).not.toContain("landelijke startpunt");
+  });
+});
+
+describe("provisional framework at hand-in time (BESLUIT-2026-11-07-5)", () => {
+  const provisional = (): DossierData => {
+    const d = sampleDossier();
+    d.framework = { ...d.framework, confirmedAt: 1, national: true, provisional: true };
+    return d;
+  };
+
+  it("is an open spot: the final export waits, the draft version works", async () => {
+    expect(openSpots(provisional())).toContainEqual({
+      kind: "provisional",
+      where: "framework",
+      text: "",
+    });
+    expect(openSpots(sampleDossier()).some((s) => s.kind === "provisional")).toBe(false);
+    const input = { name: "Mijn BDB", data: provisional(), locale: "nl" as const, now: 1 };
+    await expect(buildDossierDocx(input)).rejects.toBeInstanceOf(OpenSpotsError);
+    expect((await buildDossierDocx({ ...input, draft: true })).byteLength).toBeGreaterThan(0);
+  });
+
+  it("is a red point in the check, fixed on the framework page", () => {
+    expect(readinessCheck(provisional()).filter((i) => i.code === "framework-provisional")).toEqual(
+      [{ code: "framework-provisional", level: "block", fix: { to: "framework" } }],
+    );
+    expect(readinessCheck(sampleDossier()).some((i) => i.code === "framework-provisional")).toBe(
+      false,
+    );
   });
 });
