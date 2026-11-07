@@ -2,6 +2,7 @@ import type { Route } from "./+types/api.stream";
 import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
+import { loc } from "~/lib/i18n/localized";
 import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
@@ -274,7 +275,9 @@ export async function action({ request }: Route.ActionArgs) {
     // switch overrides the momentum of earlier turns. The saved transcript keeps
     // the untouched `messages`.
     const promptMessages =
-      tool.mode === "chat" ? reinforceLanguage(messages, outputLanguage) : messages;
+      tool.mode === "chat"
+        ? reinforceLanguage(messages, outputLanguage, loc(tool.chat?.turnReminder, outputLanguage))
+        : messages;
 
     // Reserve a rate + concurrency slot as late as possible: only a request that
     // will actually stream counts against the budget. The slot is freed in

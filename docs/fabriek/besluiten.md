@@ -273,3 +273,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-07-2:** **De AI mag de verdediging van een student nakijken (P31.2)**, als advies
   (de docent beslist, AI Act) en alleen na anonimiseren in de browser: naam, studentnummer, bedrijf,
   begeleiders en genoemde klanten of patiënten. Nooit gedeeld. Bastiaan, 2026-11-07.
+- **BESLUIT-2026-11-07-3:** **Verdedig je werk krijgt een vinkje "Student plakt eerst de
+  kerncijfers"** (prompt `defend-your-work@v2`, standaard uit). De tutor vraagt dan na de opening
+  om een paar cijfers of bevindingen uit het eigen werk, zonder namen, en vraagt daarop scherper
+  door. Nooit het hele verslag: dan leest de AI de antwoorden mee en kan de student erop leunen,
+  en een stageverslag staat vol namen. Bastiaan, 2026-11-07 ("Ja").

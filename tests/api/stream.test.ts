@@ -182,6 +182,22 @@ describe("api.stream — mode happy paths", () => {
     expect(messages[2].content).toContain("always respond entirely in English"); // reinforced
   });
 
+  it("chat: adds the tool's own turn reminder to the LAST turn only (P31.1b)", async () => {
+    const history = [
+      { role: "user", content: "eerste" },
+      { role: "assistant", content: "antwoord" },
+      { role: "user", content: "laatste" },
+    ];
+    await invoke(
+      { slug: "defend-your-work", values: fullValues("defend-your-work"), messages: history },
+      { userId: "chat-turn-reminder" },
+    );
+    const { messages } = streamChatSpy.mock.calls[0][0];
+    expect(messages[0].content).toBe("eerste");
+    expect(messages[2].content).toContain("laatste");
+    expect(messages[2].content.toLowerCase()).toContain("precies één vraagteken");
+  });
+
   it("multi-stage: injects the consumed prior-stage output under its placeholder", async () => {
     await invoke(
       {

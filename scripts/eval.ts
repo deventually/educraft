@@ -30,6 +30,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
+import { loc } from "~/lib/i18n/localized";
 import { ALL_TOOLS, getToolBySlug } from "~/lib/registry";
 import type { Tool, ToolStage, OutputLanguage, ChatMessage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
@@ -343,7 +344,7 @@ async function runChat(
     const { text, finishReason } = await provider.generate({
       model,
       system,
-      messages: reinforceLanguage(history, c.outputLanguage),
+      messages: reinforceLanguage(history, c.outputLanguage, loc(tool.chat?.turnReminder, c.outputLanguage)),
       ...stageParams(tool, stage),
     });
     if (finishReason === "length") truncated = true;
