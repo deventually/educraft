@@ -105,12 +105,19 @@ describe("tool: defend-your-work", () => {
         expect(p).toContain("niet het verslag zelf");
         expect(p).toContain("zonder namen");
         expect(p).toContain("leg de cijfers niet uit");
+        // Meting dyw2: the expert still read the figures out for the student.
+        expect(p).toContain("zeg dus nooit zelf wat een cijfer betekent");
+        expect(p).toContain("tel voor je antwoordt de vraagtekens");
+        expect(p).toContain("niet blijven hangen");
         expect(p).toContain("als dit `false` is, sla dit deel over");
       } else {
         expect(p).toContain("### key figures");
         expect(p).toContain("not the report itself");
         expect(p).toContain("without names");
         expect(p).toContain("don't explain the figures");
+        expect(p).toContain("so never say yourself what a figure means");
+        expect(p).toContain("count the question marks in your turn");
+        expect(p).toContain("don't get stuck");
         expect(p).toContain("if this is `false`, skip this part");
       }
     });
