@@ -71,8 +71,13 @@ describe("GeneratorView with a document field", () => {
     // The sticky right column fits the scroll region under the 4rem header (1px border),
     // with 1rem above and below; with 100vh its bottom (the notice) fell below the screen.
     const column = box?.closest(".lg\\:sticky");
-    expect(column?.className).toMatch(/(^|\s)lg:top-4(\s|$)/);
-    expect(column?.className).toMatch(/(^|\s)lg:h-\[calc\(100dvh-6rem-1px\)\](\s|$)/);
+    // It scrolls, so it keeps 0.25rem of room inside its edges (pulled back with a
+    // negative margin): a tab's outline or a focus ring there is not cut off. Top and
+    // height grow by that room, so its content still sits 1rem from the header and the foot.
+    expect(column?.className).toMatch(/(^|\s)lg:top-3(\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:-m-1(\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:p-1(\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:h-\[calc\(100dvh-5\.5rem-1px\)\](\s|$)/);
     // Opening "Export" under the result must not squash the viewer and the result to their
     // headers: they keep a minimum height and the column scrolls instead.
     const area = box?.parentElement;

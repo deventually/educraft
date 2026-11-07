@@ -280,6 +280,9 @@ _Laatst bijgewerkt: 2026-11-07 (figuren uit het document meesturen bij Studentwe
   *Kernfiguren*. Standaard gaat er niets mee; wat je aanvinkt gaat naar het model (max. 10), met
   de melding dat afbeeldingen niet geanonimiseerd worden. Ook: geüploade plaatjes waren zwart in
   het voorbeeld, de teller was Engels en *Kernfiguren* had onterecht een sterretje.
+- **Tabbladen boven de viewer niet meer afgesneden (PR open):** sinds de rechterkolom zelf scrolt
+  (#162) viel de rand van *Origineel* en *Wat de AI krijgt* weg; de kolom houdt nu 4px ruimte
+  binnen haar randen voor zulke randen en focusringen.
 - **Minder witruimte onder *Formulier uitklappen* (PR open):** het ingeklapte formulier liet
   nog 16px extra ruimte achter onder de knop; nu staat er evenveel ruimte boven als onder. En:
   *Exporteer* openklappen drukte resultaat en viewer plat tot alleen hun kop (de tekst onder de
