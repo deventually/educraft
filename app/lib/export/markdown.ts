@@ -12,6 +12,8 @@ export interface Run {
   italic?: boolean;
   /** Inline code (`like this`): a monospace font. */
   code?: boolean;
+  /** Marked in yellow, e.g. an open spot in a draft dossier. */
+  highlight?: boolean;
 }
 
 export type Block =

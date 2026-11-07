@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (figuren uit het document meesturen bij Studentwerk beoordelen, PR open)_
+_Laatst bijgewerkt: 2026-11-07 (geen open plek in het ingeleverde BDB/BKE-werk, PR open)_
 
 ## Nu
 
@@ -275,6 +275,12 @@ _Laatst bijgewerkt: 2026-11-07 (figuren uit het document meesturen bij Studentwe
 
 ## Bezig
 
+- **Geen open plek in het ingeleverde BDB/BKE-werk (PR open):** `[aanvullen: …]` uit een
+  opgestelde alinea, `[invullen]`, TODO, een leeg hoofdstuk of bewijs zonder tekst zijn een rood
+  punt in *Klaar om in te leveren?* (`open-spot`, `evidence-pending`). Zolang er een staat, geeft
+  de export alleen een conceptversie: CONCEPT, NIET INLEVEREN boven en onder elke pagina en op de
+  titelpagina, "(concept)" in de bestandsnaam, open plekken geel (BESLUIT-2026-11-07-4). Eerste
+  van vier PR's uit het plan *BDB en BKE: bevindingen en plan*; de handleiding volgt in PR 2.
 - **Figuren uit het document meesturen (PR open):** bij *Studentwerk beoordelen* zie je na het
   uploaden de afbeeldingen uit Word en de PDF-pagina's met een figuur als plaatjes bij
   *Kernfiguren*. Standaard gaat er niets mee; wat je aanvinkt gaat naar het model (max. 10), met

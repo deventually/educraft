@@ -8,6 +8,7 @@ import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
 import { readinessCheck } from "~/lib/portfolio/readiness";
+import { openSpots } from "~/lib/portfolio/openSpots";
 import { nextStep, outcomeProgress } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
@@ -60,6 +61,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     routeLinks,
     practise,
     readiness: readinessCheck(d),
+    openSpots: openSpots(d).length,
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -98,6 +100,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     routeLinks,
     practise,
     readiness,
+    openSpots: open,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -203,9 +206,39 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             {t.portfolio.exportAi}
           </label>
         )}
-        <Button type="submit" variant="secondary" size="sm">
-          {t.portfolio.exportWord}
-        </Button>
+        {open > 0 ? (
+          <>
+            {/* An open spot never reaches the handed-in work (BESLUIT-2026-11-07-4). */}
+            <p className="w-full text-sm text-slate-800">
+              {fmt(open === 1 ? t.portfolio.exportBlocked : t.portfolio.exportBlockedMany, {
+                n: open,
+              })}{" "}
+              <a
+                href="#readiness"
+                className="font-medium text-violet-700 underline underline-offset-2"
+              >
+                {t.portfolio.exportBlockedLink}
+              </a>
+            </p>
+            <Button
+              type="submit"
+              name="draft"
+              value="1"
+              variant="secondary"
+              size="sm"
+              aria-describedby="export-draft-help"
+            >
+              {t.portfolio.exportDraft}
+            </Button>
+            <p id="export-draft-help" className="w-full text-sm text-slate-600">
+              {t.portfolio.exportDraftHelp}
+            </p>
+          </>
+        ) : (
+          <Button type="submit" variant="secondary" size="sm">
+            {t.portfolio.exportWord}
+          </Button>
+        )}
         {aiUsed && aiRequired && (
           <p className="w-full text-sm text-slate-600">{t.portfolio.exportAiRequired}</p>
         )}
