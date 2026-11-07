@@ -268,6 +268,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
 
 ## Bezig
 
+- **Pagina met documentviewer scrolt niet meer voorbij de footer (PR open):** de verborgen
+  voorleestekst in de klikbare citaten (#155) rekte op een telefoon de pagina op tot ver na de
+  footer; de scrollzone van de app verankert zulke tekst nu voor alle pagina's. Daarnaast past de
+  meescrollende rechterkolom (viewer en resultaat) nu precies onder de kop, in plaats van 49px onder
+  het scherm, en sleept scrollen in de viewer of het resultaat de pagina niet meer mee.
 - **Het model op één plek (PR open):** `default` in `config/models.json` is de enige plek waar
   het standaardmodel staat. Alle tools en de beoordelaar van de meetscripts halen het daar
   vandaan; `tests/model-ids.test.ts` faalt als er ergens anders in `app/` of `scripts/` een

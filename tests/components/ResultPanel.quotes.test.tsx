@@ -3,6 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { ResultPanel } from "~/components/ResultPanel";
+import { escapingSrOnly } from "../helpers/layout";
 
 vi.mock("~/lib/i18n/useT", async () => {
   const { messages } = await import("~/lib/i18n");
@@ -61,6 +62,8 @@ describe("ResultPanel with quotes that can be shown in the document", () => {
     expect(screen.queryByRole("link", { name: /code met een citaat/i })).toBeNull();
     expect(screen.getByText(/de klant was blij met de samenwerking/)).toBeInTheDocument();
 
+    // The hidden "(Show in document)" text stays inside the panel, so the page does not grow.
+    expect(escapingSrOnly(container.firstElementChild as Element)).toEqual([]);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
