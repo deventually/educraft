@@ -295,7 +295,9 @@ export function GeneratorView({
         // border): 1rem gap above and below, so the notice at its foot stays on screen.
         // When "Export" opens below, the result and the viewer keep a minimum height and
         // the column scrolls, instead of squashing them to their headers.
-        <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start lg:overflow-y-auto lg:overscroll-contain">
+        // Scrolling clips at the padding edge, so it keeps 0.25rem of room (pulled back with
+        // -m-1) for a tab's outline or a focus ring.
+        <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-3 lg:-m-1 lg:h-[calc(100dvh-5.5rem-1px)] lg:self-start lg:overflow-y-auto lg:p-1 lg:overscroll-contain">
           <div
             className={cn(
               "min-h-0 flex-1 lg:min-h-[60dvh]",
