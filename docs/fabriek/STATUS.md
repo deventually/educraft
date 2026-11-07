@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
+_Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Nu
 
@@ -258,10 +258,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- **Brief P31 Verdedig je werk en de leercheck (PR open):** een chat-tutor waarin een kritische
-  deskundige de student zijn eigen verslag, stage of project mondeling laat verdedigen (bijlage F),
-  en de leercheck "Hoe actief leren je studenten?" die een opdracht of les scoort op zes
-  leerprincipes (bijlage G). Allebei mogen nu, vóór de pilot (BESLUIT-2026-11-07-1).
+- **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
+  opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
+  van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,
+  50%) rekent LimeOnIt zelf uit en staat onder het resultaat, niet de AI. Volgende stap na een
+  lesopzet, een heldere opdracht en differentiëren. Meting nog te draaien (`npm run eval -- --tool
+  engagement-check`).
 - **P30.1 Exporteren naar Word (PR open):** onder elk resultaat een knop *Exporteer*. Die toont
   eerst een voorbeeld van het bestand en daarna *Download als Word*. Een tool met meerdere stappen
   geeft alle bewaarde stappen in één bestand, met een kop per stap. Een teamlid kan werk exporteren
