@@ -5,7 +5,6 @@ import { getPrompt } from "~/lib/prompts";
 import { getToolBySlug } from "~/lib/registry";
 import { TOOL_GOALS, TOOL_KEYWORDS } from "~/lib/registry/goals";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
-import { COMPOUND_QUESTION } from "../../scripts/eval-helpers";
 
 /**
  * P31.1 — Verdedig je werk. A chat tutor after Appendix F.3 of "From Oracle to Socratic
@@ -24,7 +23,7 @@ const values = {
   askKeyFigures: false,
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "defend-your-work@v3", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "defend-your-work@v2", values, outputLanguage: lang });
 
 describe("tool: defend-your-work", () => {
   it("registers as a student chat tutor that uses the context profile", () => {
@@ -35,7 +34,7 @@ describe("tool: defend-your-work", () => {
     expect(t.userType).toBe("student");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v3");
+    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v2");
     expect(t.enabled).toBe(true);
     expect(t.chat?.allowStop).toBe(true);
     expect(t.chat?.allowRegenerate).toBe(true);
@@ -74,12 +73,8 @@ describe("tool: defend-your-work", () => {
     expect(duration?.defaultValue).toBe(15);
   });
 
-  it("keeps @v1 and @v2 registered for conversations that still use them", () => {
+  it("keeps @v1 registered for conversations that still use it", () => {
     expect(getPrompt("defend-your-work@v1").id).toBe("defend-your-work@v1");
-    expect(getPrompt("defend-your-work@v2").id).toBe("defend-your-work@v2");
-    expect(getPrompt("defend-your-work@v3").verbatim).toBe(
-      getPrompt("defend-your-work@v1").verbatim,
-    );
     expect(getPrompt("defend-your-work@v2").verbatim).toBe(
       getPrompt("defend-your-work@v1").verbatim,
     );
@@ -97,7 +92,7 @@ describe("tool: defend-your-work", () => {
   for (const lang of ["nl", "en"] as const) {
     it(`asks for key figures only when ticked, never the report or names (${lang})`, () => {
       const on = buildSystemPrompt({
-        promptId: "defend-your-work@v3",
+        promptId: "defend-your-work@v2",
         values: { ...values, askKeyFigures: true },
         outputLanguage: lang,
       });
@@ -112,9 +107,7 @@ describe("tool: defend-your-work", () => {
         expect(p).toContain("leg de cijfers niet uit");
         // Meting dyw2: the expert still read the figures out for the student.
         expect(p).toContain("zeg dus nooit zelf wat een cijfer betekent");
-        // Meting dyw5: "count and delete" made the expert correct itself out loud.
-        expect(p).not.toContain("tel voor je antwoordt de vraagtekens");
-        expect(p).toContain("praat nooit over je eigen vragen");
+        expect(p).toContain("tel voor je antwoordt de vraagtekens");
         expect(p).toContain("niet blijven hangen");
         expect(p).toContain("als dit `false` is, sla dit deel over");
       } else {
@@ -123,8 +116,7 @@ describe("tool: defend-your-work", () => {
         expect(p).toContain("without names");
         expect(p).toContain("don't explain the figures");
         expect(p).toContain("so never say yourself what a figure means");
-        expect(p).not.toContain("count the question marks in your turn");
-        expect(p).toContain("never talk about your own questions");
+        expect(p).toContain("count the question marks in your turn");
         expect(p).toContain("don't get stuck");
         expect(p).toContain("if this is `false`, skip this part");
       }
@@ -135,9 +127,7 @@ describe("tool: defend-your-work", () => {
     it(`models one question per turn, never two in one line (meting dyw1, ${lang})`, () => {
       const p = runtime(lang);
       expect(p.toLowerCase()).toContain(
-        lang === "nl"
-          ? "één korte vraag over één ding, met één vraagteken"
-          : "one short question about one thing, with one question mark",
+        lang === "nl" ? "precies één vraagteken" : "exactly one question mark",
       );
       for (const line of p.split("\n")) {
         expect((line.match(/\?/g) ?? []).length, line).toBeLessThanOrEqual(1);
@@ -145,28 +135,11 @@ describe("tool: defend-your-work", () => {
     });
   }
 
-  for (const lang of ["nl", "en"] as const) {
-    it(`models no compound question either: one sentence, one question (meting dyw4, ${lang})`, () => {
-      const p = runtime(lang);
-      for (const q of p.match(/[^.!?\n]*\?/g) ?? []) {
-        expect(COMPOUND_QUESTION.test(q), q).toBe(false);
-      }
-      const low = p.toLowerCase();
-      expect(low).toContain(
-        lang === "nl"
-          ? 'ook een die met "en" of "of" aan de eerste vastzit'
-          : 'including one tied to the first with "and" or "or"',
-      );
-    });
-  }
-
   it("reminds the tutor every turn: one short reaction, one question, probe vague answers", () => {
     const nl = loc(tool().chat?.turnReminder, "nl");
     const en = loc(tool().chat?.turnReminder, "en");
-    expect(nl).toContain("één korte vraag over één ding");
-    expect(en).toContain("one short question about one thing");
-    expect(nl).toContain("bewaar je voor de volgende beurt");
-    expect(en).toContain("keep for your next turn");
+    expect(nl.toLowerCase()).toContain("precies één vraagteken");
+    expect(en.toLowerCase()).toContain("exactly one question mark");
     expect(nl).toContain("hooguit twee korte zinnen");
     expect(en).toContain("at most two short sentences");
     expect(nl).toContain("vaag");
@@ -174,9 +147,6 @@ describe("tool: defend-your-work", () => {
     // The reminder itself asks nothing, so it cannot model a second question.
     expect(nl).not.toContain("?");
     expect(en).not.toContain("?");
-    // Meting dyw5: quoting the forbidden ", en" in the reminder leaked into a turn.
-    expect(nl).not.toContain("“, en”");
-    expect(en).not.toContain("“, and”");
   });
 
   for (const lang of ["nl", "en"] as const) {
@@ -251,7 +221,7 @@ describe("tool: defend-your-work", () => {
 
   it("resolves with the optional focus left empty", () => {
     const p = buildSystemPrompt({
-      promptId: "defend-your-work@v3",
+      promptId: "defend-your-work@v2",
       values: { ...values, focusAreas: "" },
       outputLanguage: "nl",
     });

@@ -1,4 +1,4 @@
-# Rubric — Defend your own work out loud (defend-your-work@v3)
+# Rubric — Defend your own work out loud (defend-your-work@v2)
 
 The harness labels the human side `**Student:**` and the model side `**Tutor:**`. Here the
 `**Tutor:**` is the AI playing a critical but friendly expert from the field, and the

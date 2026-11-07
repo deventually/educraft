@@ -195,7 +195,7 @@ describe("api.stream — mode happy paths", () => {
     const { messages } = streamChatSpy.mock.calls[0][0];
     expect(messages[0].content).toBe("eerste");
     expect(messages[2].content).toContain("laatste");
-    expect(messages[2].content).toContain("één korte vraag over één ding");
+    expect(messages[2].content.toLowerCase()).toContain("precies één vraagteken");
   });
 
   it("multi-stage: injects the consumed prior-stage output under its placeholder", async () => {
