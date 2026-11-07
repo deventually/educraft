@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 // (http://localhost:11434/v1), which the adapter strips to hit the native API.
 process.env.DATABASE_URL = "file::memory:";
 
-import { ollamaProvider } from "~/lib/ai/adapters/ollama";
+import { OLLAMA_DEFAULT_NUM_CTX, ollamaProvider } from "~/lib/ai/adapters/ollama";
 import type { GenerateOptions } from "~/lib/ai/types";
 
 /** A stub Response whose body streams the given NDJSON lines. */
@@ -89,7 +89,16 @@ describe("ollamaProvider — native /api/chat adapter", () => {
     })) {
       void _;
     }
-    expect(lastBody().options).toEqual({ temperature: 0.2, num_predict: 1234 });
+    expect(lastBody().options).toEqual({ temperature: 0.2, num_predict: 1234, num_ctx: 32768 });
+  });
+
+  it("sends a context window, so a long document is not silently cut off", async () => {
+    // Without num_ctx Ollama falls back to its own small default (a few thousand
+    // tokens) and drops the start of a long prompt without telling anyone.
+    fetchMock.mockResolvedValue(ndjsonResponse([`{"message":{"content":"x"},"done":true}`]));
+    await ollamaProvider.generate(base);
+    expect((lastBody().options as Record<string, unknown>).num_ctx).toBe(OLLAMA_DEFAULT_NUM_CTX);
+    expect(OLLAMA_DEFAULT_NUM_CTX).toBeGreaterThanOrEqual(32768);
   });
 
   it("attaches images as raw base64 on the last user message", async () => {

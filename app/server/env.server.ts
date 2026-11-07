@@ -22,6 +22,9 @@ export const envSchema = z.object({
   // Local OpenAI-compatible servers (no API key needed).
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434/v1"),
   LMSTUDIO_BASE_URL: z.string().default("http://localhost:1234/v1"),
+  // Ollama's context window in tokens (see adapters/ollama.ts). Optional: the adapter
+  // has a default that fits a long document; lower it on a machine with little memory.
+  OLLAMA_NUM_CTX: z.coerce.number().int().min(2048).optional(),
   DATABASE_URL: z.string().default("file:./data/limeonit.db"),
   // Where the drizzle migrations live; overridable for the built/Docker image.
   MIGRATIONS_DIR: z.string().default("./drizzle"),

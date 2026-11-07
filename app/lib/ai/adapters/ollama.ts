@@ -7,6 +7,15 @@ const DEFAULT_MAX_TOKENS = 8192;
 const DEFAULT_TEMPERATURE = 0.4;
 
 /**
+ * The context window sent as `num_ctx`. Without it Ollama uses its own small default
+ * (a few thousand tokens) and silently drops the start of a longer prompt: a portfolio
+ * chapter or a course document (up to 80,000 characters, see STRUCTURED_INPUT_LIMIT)
+ * would lose its beginning without any error. Fixed rather than per request, because
+ * Ollama reloads the model whenever num_ctx changes. `OLLAMA_NUM_CTX` overrides it.
+ */
+export const OLLAMA_DEFAULT_NUM_CTX = 32768;
+
+/**
  * Native Ollama adapter (`/api/chat`). The AI SDK's OpenAI-compatible provider
  * talks to Ollama's `/v1` endpoint, which does NOT honor the `think` parameter —
  * so reasoning ("thinking") models always reason before answering, adding many
@@ -46,6 +55,7 @@ function buildBody(opts: GenerateOptions, stream: boolean): Record<string, unkno
     options: {
       temperature: opts.temperature ?? DEFAULT_TEMPERATURE,
       num_predict: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
+      num_ctx: env.OLLAMA_NUM_CTX ?? OLLAMA_DEFAULT_NUM_CTX,
     },
   };
   // Only send `think` when the caller expressed a preference; omitting it lets the
