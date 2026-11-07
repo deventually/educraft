@@ -9,7 +9,8 @@
  * pure template helpers, which are network-free too.)
  */
 
-import type { Tool } from "~/lib/registry/types";
+import type { Tool, ToolStage } from "~/lib/registry/types";
+import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { defaultValuesFor, toTemplateValues } from "~/lib/forms/values";
@@ -427,6 +428,23 @@ export function unjudgeableReason(output: string): string | null {
  */
 export function caseValues(tool: Tool, values: TemplateValues | undefined): TemplateValues {
   return { ...toTemplateValues(defaultValuesFor(tool.inputs)), ...(values ?? {}) };
+}
+
+/**
+ * The model that generates a stage's answer: `--model` for every stage when given (to
+ * measure how another model does on the same cases, judged by the same judge), else
+ * the stage's own model, else the tool's. An unknown id fails here, before any call.
+ */
+export function generationModel(tool: Tool, stage: ToolStage, override?: string): string {
+  if (override !== undefined && !isResolvableModel(override)) {
+    throw new Error(`--model ${override}: unknown model id (see config/models.json).`);
+  }
+  return override ?? stage.model ?? tool.defaultModel;
+}
+
+/** Only Anthropic models go through `--batch`: the Message Batches API is Anthropic's. */
+export function batchableModel(model: string): boolean {
+  return resolveModelInfo(model).provider === "anthropic";
 }
 
 /** The judge's JSON for one run, saved next to its output (`<case>.judge.json`, `<case>.run2.judge.json`). */

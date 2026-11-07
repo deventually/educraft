@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
+_Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
 
 ## Nu
 
+- **Typfouten in de prompts (#150) gemerged op 2026-11-07:** zeven oudere Nederlandse
+  chatprompts zonder kapotte woorden en Engelse resten; de Socratische partner (NL) vraagt net
+  als de Engelse algemeen naar voorbeelden in plaats van naar selectiedruk.
 - **P30.2 PDF en Markdown in het menu Exporteer (#146) gemerged op 2026-11-07:** het menu
   *Exporteer* biedt Word, *Print of bewaar als PDF* en Markdown; de losse Markdown-knop is weg.
 - **P30.1 Exporteren naar Word (#144) gemerged op 2026-11-07:** onder elk resultaat een knop
@@ -272,13 +275,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
   lijst vage antwoorden in `@v2`, en de judge-uitslag wordt gered als een aanhalingsteken de JSON
   breekt. Meting dyw4 (5 runs): gemiddeld 3,55, was 3,2; 4,5 nog niet. Daarna 31.2
   (nakijken, met verplicht anonimiseren).
-- **Typfouten in de prompts (PR open):** zeven oudere Nederlandse chatprompts (peer tutoring,
-  MentorAI v1, scaffolding feedback, think-pair-share, dialogische ontmoetingen v1, Bloom by
-  Design, Socratische partner) bevatten kapotte woorden, een Cyrillische letter en Engelse
-  resten ("guide de denkproces", "medical"). Hersteld op dezelfde plek, zonder `@v2`: de
-  betekenis verandert niet. `tests/prompts.typos.test.ts` houdt ze weg.
-  Ook de Socratische partner (NL) vraagt nu, net als de Engelse, algemeen naar voorbeelden in
-  plaats van naar selectiedruk en generaties (biologie uit het boek).
+- **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
+  model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
+  Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg
+  €1–3 en wacht op Bastiaans akkoord. Daarbij een fix: Ollama kreeg geen contextgrootte mee en
+  kapte een lang document zonder melding af; nu 32768 tokens (`OLLAMA_NUM_CTX`).
 - **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
   opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
   van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,

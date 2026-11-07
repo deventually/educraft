@@ -1,6 +1,8 @@
 import { getToolBySlug } from "~/lib/registry";
 import {
+  batchableModel,
   caseValues,
+  generationModel,
   evalGreeting,
   scoresForNextRun,
   unjudgeableReason,
@@ -486,5 +488,32 @@ describe("the judge's verdict is kept next to each output (meting n, 2026-11-04)
       worst: "w",
       verdict: "v",
     });
+  });
+});
+
+describe("--model: generate with another model, judge with the same one", () => {
+  const tool = getToolBySlug("mentorai")!;
+  const stage = tool.stages[0];
+
+  it("uses the stage's or tool's own model without an override", () => {
+    expect(generationModel(tool, stage)).toBe(stage.model ?? tool.defaultModel);
+  });
+
+  it("uses the override for every stage, also a pinned one", () => {
+    expect(generationModel(tool, { ...stage, model: "claude-haiku-5-5" }, "gpt-6.1-sol")).toBe(
+      "gpt-6.1-sol",
+    );
+  });
+
+  it("accepts catalog and local models, refuses an unknown id before anything is paid", () => {
+    expect(generationModel(tool, stage, "gemini-4-argon")).toBe("gemini-4-argon");
+    expect(generationModel(tool, stage, "ollama::qwen3:32b")).toBe("ollama::qwen3:32b");
+    expect(() => generationModel(tool, stage, "gpt-nonexistent")).toThrow(/gpt-nonexistent/);
+  });
+
+  it("batches only Anthropic models (the Message Batches API is Anthropic's)", () => {
+    expect(batchableModel("claude-sonnet-5-5")).toBe(true);
+    expect(batchableModel("gpt-6.1-sol")).toBe(false);
+    expect(batchableModel("ollama::qwen3:32b")).toBe(false);
   });
 });
