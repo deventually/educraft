@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles, Square, AlertTriangle } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
@@ -115,6 +115,22 @@ export function GeneratorView({
   );
   const shown = codes ? restoreNames(output, codes) : output;
   const quotes = docFiles && shown && !streaming ? extractQuotes(shown) : [];
+  // Quotes the viewer found in the original become buttons in the result (P24 follow-up);
+  // clicking one asks the viewer to show it.
+  const [foundQuotes, setFoundQuotes] = useState<string[]>([]);
+  const [focus, setFocus] = useState<{ quote: string; id: number } | undefined>();
+  const quoteButtonRef = useRef<HTMLElement | null>(null);
+  const showQuote = useCallback((quote: string) => {
+    // The clicked quote button, to come back to from the viewer.
+    quoteButtonRef.current = document.activeElement as HTMLElement | null;
+    setFocus((prev) => ({ quote, id: (prev?.id ?? 0) + 1 }));
+  }, []);
+  const backToQuote = useCallback(() => {
+    const el = quoteButtonRef.current;
+    if (!el?.isConnected) return;
+    el.scrollIntoView?.({ block: "center", behavior: "smooth" });
+    el.focus();
+  }, []);
 
   function generate() {
     const missing = missingRequired(tool.inputs, values);
@@ -269,6 +285,9 @@ export function GeneratorView({
                 files={docFiles}
                 text={String(values[docField.name] ?? "")}
                 quotes={quotes}
+                onFoundQuotes={setFoundQuotes}
+                focus={focus}
+                onBack={backToQuote}
               />
             </div>
           )}
@@ -295,6 +314,8 @@ export function GeneratorView({
               computed={
                 streaming ? null : computeResultNote(stage.output.computed, shown, outputLanguage)
               }
+              quotes={docFiles ? foundQuotes : undefined}
+              onQuote={docFiles ? showQuote : undefined}
             />
           ) : docFiles ? null : (
             <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">

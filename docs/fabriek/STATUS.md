@@ -276,6 +276,12 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
   Wat de AI in het gesprek zei, telt niet mee. Volgende stap onder *Verdedig je werk*. Meting dr1:
   gemiddeld 4,52 (één vals alarm van de judge); F.4 woord voor woord gecontroleerd. Met de docs
   van 31.4.
+- **Vanuit de feedback naar de tekst springen (PR open):** bij de drie tools met een document
+  wordt elk letterlijk citaat in het resultaat een link. Klik erop en de viewer springt naar die
+  plek en kleurt hem geel (bij een PDF met paginanummer). Alleen citaten die echt in het origineel
+  staan worden een link; een parafrase blijft gewone tekst. Op telefoon en laptop brengt *Terug naar
+  de feedback* je terug. Het oude lijstje citaten onder de viewer is weg. Geen promptwijziging;
+  stap 2 (een anker bij élk feedbackpunt, nieuwe prompt plus meting) wacht op Bastiaan.
 - **Documentviewer past op de pagina, met zoomen (PR open):** een geüploade PDF of Word bij
   *Studentwerk beoordelen* (en de twee andere tools met een documentveld) brak de pagina: een brede
   tabel of lange link maakte de viewer breder dan het scherm, een lang document groeide onder de

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { extractQuotes, locateAll, locateQuote, normalizeForMatch } from "~/lib/documents/locate";
+import {
+  extractQuotes,
+  locateAll,
+  locateQuote,
+  normalizeForMatch,
+  quoteSpans,
+} from "~/lib/documents/locate";
 
 /**
  * "Toon in document": a quote from the AI result is found back in the original,
@@ -106,5 +112,24 @@ describe("extractQuotes", () => {
     expect(
       extractQuotes("De auto's en foto's van de cliënt's bedrijf zijn niet relevant."),
     ).toEqual([]);
+  });
+});
+
+describe("quoteSpans", () => {
+  it("finds the quoted passages in one line of text, with their place", () => {
+    const text = 'Zij schrijft “ik heb de klant elke week gesproken” en "ja" (p. 2).';
+    const spans = quoteSpans(text);
+    expect(spans).toEqual([
+      {
+        start: text.indexOf("“"),
+        end: text.indexOf("”") + 1,
+        quote: "ik heb de klant elke week gesproken",
+      },
+    ]);
+  });
+
+  it("returns the same quotes as extractQuotes, so a found quote can be matched back", () => {
+    const line = "„de planning liep twee weken uit door de migratie” en ‘stage’";
+    expect(quoteSpans(line).map((s) => s.quote)).toEqual(extractQuotes(line));
   });
 });
