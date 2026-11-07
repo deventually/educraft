@@ -31,6 +31,18 @@ describe("ExportPreview (P30.1)", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
+  it("shows code as a coloured monospace block (code export)", () => {
+    const code = toExportDoc({
+      title: "Code",
+      locale: "nl",
+      sections: [{ heading: null, markdown: "```python\ndef f():\n    return 1\n```" }],
+    });
+    const { container } = render(<ExportPreview doc={code} />);
+    const pre = container.querySelector("pre code");
+    expect(pre?.textContent).toBe("def f():\n    return 1");
+    expect(pre?.querySelector("span[style]")?.getAttribute("style")).toContain("color");
+  });
+
   it("has no axe violations", async () => {
     const { container } = render(<ExportPreview doc={doc} />);
     expect((await axe(container, axeOpts)).violations).toEqual([]);

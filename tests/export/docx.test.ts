@@ -55,4 +55,19 @@ describe("exportDocToDocx (P30.1)", () => {
     const styles = await zip.file("word/styles.xml")?.async("string");
     expect(styles).toContain('w:val="nl-NL"');
   });
+
+  it("shows code in a monospace font on a grey band, coloured, with its indentation", async () => {
+    const doc = toExportDoc({
+      title: "Code",
+      locale: "nl",
+      sections: [{ heading: null, markdown: "```python\ndef f():\n    return 'x'\n```" }],
+    });
+    const xml = await documentXml(await exportDocToDocx(doc));
+    expect(xml).toContain('w:ascii="Consolas"');
+    expect(xml).toMatch(/<w:shd [^>]*w:fill="F1F5F9"/);
+    expect(xml).toMatch(/<w:color w:val="6D28D9"\/>[\s\S]*?def/);
+    expect(xml).toMatch(
+      /<w:t xml:space="preserve"> {4}<\/w:t>|<w:t xml:space="preserve"> {4}return/,
+    );
+  });
 });
