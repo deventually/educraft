@@ -172,6 +172,22 @@ npm run eval:coach -- --dry-run                                 # build messages
 ids and scores. `tests/lib/eval-coach.test.ts` fails when a file name from that folder shows
 up under `evals/`.
 
+## Proeflezer (`npm run eval:proofread`)
+
+De proeflezer van het BDB/BKE-dossier (`portfolio-proofread@v1`) is geen catalogustool en heeft een
+eigen runner, `scripts/eval-proofread.ts`. Hij draait de echte prompt en de echte controle
+(`parseProofread`) op synthetische hoofdstukken met ingeplante taalfouten
+(`evals/portfolio-proofread/cases.json`). De score is **deterministisch**: elke ingeplante fout
+gevonden en verbeterd, geen weggevallen voorstellen (een citaat dat niet letterlijk in het hoofdstuk
+staat), feiten intact, en een goed hoofdstuk krijgt hooguit twee voorstellen. Zie
+`evals/portfolio-proofread/rubric.md`.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:proofread                   # elke case één keer
+ANTHROPIC_API_KEY=sk-… npm run eval:proofread -- --repeat 3     # consistentie
+npm run eval:proofread -- --dry-run                             # alleen de berichten bouwen
+```
+
 ## Proefassessment (`npm run eval:rehearsal`)
 
 Het proefassessment (brief P29, 29.2) is geen catalogustool en heeft een eigen runner,

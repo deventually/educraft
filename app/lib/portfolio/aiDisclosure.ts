@@ -25,6 +25,8 @@ const TEXT = {
       "Bij het schrijven van dit verslag heb ik {models} gebruikt via LimeOnIt, als coach: het gaf feedback op mijn hoofdstukken aan de hand van de criteria van het beoordelingsformulier.",
     draft:
       "Bij {outcomes} liet ik een eerste versie van een alinea opstellen, met mijn eigen bewijs als enige bron. Die tekst heb ik daarna zelf bewerkt.",
+    proofread:
+      "Ik liet {models} mijn hoofdstukken proeflezen op taal en vorm; elk voorstel heb ik zelf overgenomen of niet.",
     rehearsal:
       "Ter voorbereiding op het eindgesprek oefende ik met een proefassessment in LimeOnIt: {models} speelde een assessmentcommissie. Dat leverde geen tekst op; de feedback staat als bewijsstuk in dit dossier.",
     close:
@@ -36,6 +38,8 @@ const TEXT = {
       "While writing this report I used {models} through LimeOnIt as a coach: it gave feedback on my chapters against the criteria of the assessment form.",
     draft:
       "For {outcomes} I had a first version of a paragraph drafted, with my own evidence as the only source. I then edited that text myself.",
+    proofread:
+      "I had {models} proofread my chapters for language and form; I took over each proposal or not myself.",
     rehearsal:
       "To prepare for the final interview I practised with a rehearsal assessment in LimeOnIt: {models} played an assessment committee. It produced no text; the feedback is an evidence item in this portfolio.",
     close:
@@ -59,16 +63,19 @@ export function aiDisclosure(d: DossierData, locale: Locale): string | null {
       [...new Set(entries.map((e) => e.model))].map((id) => modelName(id).name),
       t.and,
     );
-  const writing = d.aiLog.filter((e) => e.action !== "rehearsal");
+  const writing = d.aiLog.filter((e) => e.action === "review" || e.action === "draft");
+  const proofreads = d.aiLog.filter((e) => e.action === "proofread");
   const rehearsals = d.aiLog.filter((e) => e.action === "rehearsal");
   const drafted = [...new Set(d.aiLog.filter((e) => e.action === "draft").map((e) => e.outcomeId))]
     .map((id) => d.framework.outcomes.find((o) => o.id === id))
     .flatMap((o) => (o ? [[o.code, o.title].filter(Boolean).join(" ")] : []));
   const year = new Date(Math.max(...d.aiLog.map((e) => e.at))).getUTCFullYear();
 
-  // A rehearsal (P29.3) made no text, so it is named apart from the help with writing.
+  // A rehearsal (P29.3) made no text, so it is named apart from the help with writing;
+  // proofreading touched only language and form, so it is named apart too.
   const paragraph = [
     writing.length ? t.review.replace("{models}", namesOf(writing)) : null,
+    proofreads.length ? t.proofread.replace("{models}", namesOf(proofreads)) : null,
     rehearsals.length ? t.rehearsal.replace("{models}", namesOf(rehearsals)) : null,
     drafted.length ? t.draft.replace("{outcomes}", list(drafted, t.and)) : null,
     t.close,
