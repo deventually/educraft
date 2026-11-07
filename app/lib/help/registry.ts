@@ -70,3 +70,19 @@ export function getTopicTitle(slug: string, lang: HelpLang): string {
   const m = body.match(/^#\s+(.+)$/m);
   return m ? m[1].trim() : slug;
 }
+
+/** A heading's anchor: lower case, without accents, words joined by "-". */
+export function headingSlug(text: string): string {
+  return text
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** The anchors of a topic's section headings (## and deeper), as the help page sets them. */
+export function topicAnchors(slug: string, lang: HelpLang): string[] {
+  const body = getTopic(slug, lang) ?? "";
+  return [...body.matchAll(/^#{2,6}\s+(.+)$/gm)].map((m) => headingSlug(m[1]));
+}

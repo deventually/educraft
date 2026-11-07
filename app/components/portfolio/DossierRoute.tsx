@@ -62,6 +62,14 @@ export function DossierRoute({
           );
         })}
       </ol>
+      <p className="mt-2 text-sm">
+        <Link
+          to={`/help/bdb-bke#${tr.guideAnchors[current]}`}
+          className="font-medium text-violet-700 underline underline-offset-2"
+        >
+          {fmt(tr.guide, { n: at + 1, step: tr.steps[current] })}
+        </Link>
+      </p>
       {current === "finish" && (
         <p className="mt-3 text-sm text-slate-700">
           {tr.finishHint}{" "}

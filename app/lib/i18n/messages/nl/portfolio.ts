@@ -306,6 +306,14 @@ export const portfolio = {
   route: {
     finishHint:
       "Laatste stap: zet elk criterium op aangetoond, kies of je de AI-verantwoording opneemt en download je dossier als Word-bestand.",
+    guide: "Handleiding bij stap {n}: {step}",
+    guideAnchors: {
+      collect: "stap-2-verzamel-wat-je-al-hebt",
+      fill: "stap-3-vul-aan-met-een-tool",
+      finish: "stap-5-rond-af",
+      framework: "stap-1-dossier-en-kader",
+      write: "stap-4-schrijf-je-hoofdstukken",
+    },
     label: "Route van je dossier",
     practise: "Oefen je eindgesprek met een proefassessment",
     stepOf: "Stap {n} van 5",

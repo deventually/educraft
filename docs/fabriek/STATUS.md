@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
+_Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Nu
 
+- **Terughalen uit Word (#170) gemerged op 2026-11-07:** wie een export in Word verder bewerkt, kiest het bestand bij
+  *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
+  hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
+  de docent aanvinkt wordt overgenomen (`importChapters`), plus aangevinkte nieuwe bronnen.
+  Bijlagen blijven in LimeOnIt leidend.
 - **Elke leeruitkomst apart inleveren, als Word of PDF (#168) gemerged op 2026-11-07:** bij elke leeruitkomst in het
   overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
   de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
@@ -285,11 +290,10 @@ _Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
 
 ## Bezig
 
-- **Terughalen uit Word (PR open):** wie een export in Word verder bewerkt, kiest het bestand bij
-  *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
-  hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
-  de docent aanvinkt wordt overgenomen (`importChapters`), plus aangevinkte nieuwe bronnen.
-  Bijlagen blijven in LimeOnIt leidend.
+- **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
+  `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
+  leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de
+  stap waar je bent; helponderwerpen geven hun koppen daarvoor een anker (`headingSlug`).
 - **Proeflezen en het hele dossier laten beoordelen (BDB/BKE, PR 4 van het plan; PR open):**
   naast *Laat beoordelen* staat *Lees proef*: voorstellen voor spelling, zinsbouw, ik-vorm,
   herhaling en APA, elk met de zin zoals hij nu is en een betere versie. *Overnemen* vervangt

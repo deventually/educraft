@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
+import { getMessages, LOCALES } from "~/lib/i18n";
 import {
+  headingSlug,
+  topicAnchors,
   getToolById,
   getToolHelpOverlay,
   getTopic,
@@ -35,6 +38,38 @@ describe("help registry — topics", () => {
   it("explains the role-agent review in the courses topic (P21.5)", () => {
     expect(getTopic("courses", "nl")).toContain("## Laat beoordelen");
     expect(getTopic("courses", "en")).toContain("## Get a review");
+  });
+
+  it("guides a teacher through the BDB and BKE, from switching it on to handing in", () => {
+    expect(getTopicTitle("bdb-bke", "nl")).toBe("Je BDB en BKE maken");
+    expect(getTopicTitle("bdb-bke", "en")).toBe("Making your BDB and BKE");
+    for (const heading of [
+      "## Stap 0: de werkplaats aanzetten",
+      "## Stap 5: rond af",
+      "## Open plekken en het ingeleverde werk",
+      "## Elke leeruitkomst apart inleveren",
+      "## Verder in Word, en weer terug",
+    ])
+      expect(getTopic("bdb-bke", "nl")).toContain(heading);
+    for (const heading of [
+      "## Step 0: switch the workplace on",
+      "## Step 5: finish",
+      "## Open spots and the work you hand in",
+      "## Hand in each learning outcome on its own",
+      "## On in Word, and back again",
+    ])
+      expect(getTopic("bdb-bke", "en")).toContain(heading);
+    expect(getTopic("bdb-bke", "nl")).toContain("Op aanvraag");
+  });
+
+  it("gives each heading an anchor, and the dossier route links to anchors that exist", () => {
+    expect(headingSlug("Stap 3: vul aan met een tool")).toBe("stap-3-vul-aan-met-een-tool");
+    expect(headingSlug("Één ÿ — café!")).toBe("een-y-cafe");
+    for (const lang of LOCALES) {
+      const anchors = topicAnchors("bdb-bke", lang);
+      for (const a of Object.values(getMessages(lang).portfolio.route.guideAnchors))
+        expect(anchors, `${lang}: #${a}`).toContain(a);
+    }
   });
 
   it("explains the teacher's week and the calendar file (P22.5)", () => {
