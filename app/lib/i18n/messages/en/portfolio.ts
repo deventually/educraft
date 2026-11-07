@@ -163,6 +163,25 @@ export const portfolio: Messages["portfolio"] = {
   frameworkNotConfirmed: "The framework has not been confirmed yet.",
   frameworkProvisional:
     "Provisional framework, confirmed on {date}: the national starting point. Copy in your institution's form and confirm the framework for the final Word file.",
+  fromWord: {
+    changed: "Differs from LimeOnIt: {now} words now, {word} from Word.",
+    chaptersLegend: "Chapters from Word",
+    file: "Word file (.docx)",
+    intro:
+      "Did you keep editing an export in Word? Choose the file. LimeOnIt reads it in your browser and shows per chapter what is different. Nothing is overwritten until you tick Take over. Open spots stay open spots, and your appendices stay as they are in LimeOnIt.",
+    noneFound:
+      'No chapter found. LimeOnIt recognises a chapter by the heading the export wrote, such as "{example}". Is that heading still there, in the Heading 1 style?',
+    preview: "View the text from Word",
+    reading: "Reading…",
+    referencesLegend: "New references from Word",
+    submit: "Take over what you chose",
+    take: "Take over: {outcome}",
+    title: "Back from Word",
+    unchanged: "{outcome}: same as in LimeOnIt.",
+    unknown:
+      "Nothing was read under these headings, because they belong to no learning outcome: {headings}. Move that text under a learning outcome's heading, or copy it over by hand.",
+    unreadable: "This file could not be read. Choose a .docx you exported from LimeOnIt.",
+  },
   goThere: "Go there",
   heading: "BDB/BKE",
   intro:
