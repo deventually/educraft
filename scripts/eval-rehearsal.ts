@@ -37,6 +37,7 @@ import {
   meanScores,
   parseHardChecks,
   parseJudgeResult,
+  rubricForJudge,
   runSpread,
 } from "./eval-helpers";
 import {
@@ -108,7 +109,7 @@ async function judge(
   const checks = parseHardChecks(rubric).filter((x) => !x.counted);
   const prompt = [
     JUDGE_SPINE,
-    `\n# RUBRIC\n${rubric}`,
+    `\n# RUBRIC\n${rubricForJudge(rubric)}`,
     `\n# HARD CHECKS\n${hardChecksInstruction(checks)}`,
     `\n# CASE\nid: ${c.id}\nlanguage: ${c.locale}\nthinnest: ${c.thinnest ?? "n/a"}\ndescription: ${c.description}`,
     `\n# DOSSIER\n${JSON.stringify(c.dossier, null, 2)}`,

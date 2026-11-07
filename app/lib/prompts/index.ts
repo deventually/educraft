@@ -15,6 +15,7 @@ import { CLEAR_ASSIGNMENT_PROMPT } from "./clear-assignment@v1.prompt";
 import { CLEAR_ASSIGNMENT_PROMPT_V2 } from "./clear-assignment@v2.prompt";
 import { DEFEND_YOUR_WORK_PROMPT } from "./defend-your-work@v1.prompt";
 import { DEFEND_YOUR_WORK_PROMPT_V2 } from "./defend-your-work@v2.prompt";
+import { DEFEND_YOUR_WORK_PROMPT_V3 } from "./defend-your-work@v3.prompt";
 import { DEFENSE_REVIEW_PROMPT } from "./defense-review@v1.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
@@ -69,6 +70,7 @@ const ALL: PromptDef[] = [
   CLEAR_ASSIGNMENT_PROMPT_V2,
   DEFEND_YOUR_WORK_PROMPT,
   DEFEND_YOUR_WORK_PROMPT_V2,
+  DEFEND_YOUR_WORK_PROMPT_V3,
   DEFENSE_REVIEW_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,

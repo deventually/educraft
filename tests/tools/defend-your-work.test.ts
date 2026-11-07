@@ -5,6 +5,7 @@ import { getPrompt } from "~/lib/prompts";
 import { getToolBySlug } from "~/lib/registry";
 import { TOOL_GOALS, TOOL_KEYWORDS } from "~/lib/registry/goals";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { COMPOUND_QUESTION } from "../../scripts/eval-helpers";
 
 /**
  * P31.1 — Verdedig je werk. A chat tutor after Appendix F.3 of "From Oracle to Socratic
@@ -23,7 +24,7 @@ const values = {
   askKeyFigures: false,
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "defend-your-work@v2", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "defend-your-work@v3", values, outputLanguage: lang });
 
 describe("tool: defend-your-work", () => {
   it("registers as a student chat tutor that uses the context profile", () => {
@@ -34,7 +35,7 @@ describe("tool: defend-your-work", () => {
     expect(t.userType).toBe("student");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v2");
+    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v3");
     expect(t.enabled).toBe(true);
     expect(t.chat?.allowStop).toBe(true);
     expect(t.chat?.allowRegenerate).toBe(true);
@@ -73,8 +74,12 @@ describe("tool: defend-your-work", () => {
     expect(duration?.defaultValue).toBe(15);
   });
 
-  it("keeps @v1 registered for conversations that still use it", () => {
+  it("keeps @v1 and @v2 registered for conversations that still use them", () => {
     expect(getPrompt("defend-your-work@v1").id).toBe("defend-your-work@v1");
+    expect(getPrompt("defend-your-work@v2").id).toBe("defend-your-work@v2");
+    expect(getPrompt("defend-your-work@v3").verbatim).toBe(
+      getPrompt("defend-your-work@v1").verbatim,
+    );
     expect(getPrompt("defend-your-work@v2").verbatim).toBe(
       getPrompt("defend-your-work@v1").verbatim,
     );
@@ -92,7 +97,7 @@ describe("tool: defend-your-work", () => {
   for (const lang of ["nl", "en"] as const) {
     it(`asks for key figures only when ticked, never the report or names (${lang})`, () => {
       const on = buildSystemPrompt({
-        promptId: "defend-your-work@v2",
+        promptId: "defend-your-work@v3",
         values: { ...values, askKeyFigures: true },
         outputLanguage: lang,
       });
@@ -135,6 +140,21 @@ describe("tool: defend-your-work", () => {
     });
   }
 
+  for (const lang of ["nl", "en"] as const) {
+    it(`models no compound question either: one sentence, one question (meting dyw4, ${lang})`, () => {
+      const p = runtime(lang);
+      for (const q of p.match(/[^.!?\n]*\?/g) ?? []) {
+        expect(COMPOUND_QUESTION.test(q), q).toBe(false);
+      }
+      const low = p.toLowerCase();
+      expect(low).toContain(
+        lang === "nl"
+          ? 'geen tweede vraag na ", en" of ", of"'
+          : 'no second question after ", and" or ", or"',
+      );
+    });
+  }
+
   it("reminds the tutor every turn: one short reaction, one question, probe vague answers", () => {
     const nl = loc(tool().chat?.turnReminder, "nl");
     const en = loc(tool().chat?.turnReminder, "en");
@@ -147,6 +167,9 @@ describe("tool: defend-your-work", () => {
     // The reminder itself asks nothing, so it cannot model a second question.
     expect(nl).not.toContain("?");
     expect(en).not.toContain("?");
+    // Meting dyw4: 95 of 215 turns joined two questions with ", and".
+    expect(nl).toContain("geen tweede vraag na “, en”");
+    expect(en).toContain("no second question after “, and”");
   });
 
   for (const lang of ["nl", "en"] as const) {
@@ -221,7 +244,7 @@ describe("tool: defend-your-work", () => {
 
   it("resolves with the optional focus left empty", () => {
     const p = buildSystemPrompt({
-      promptId: "defend-your-work@v2",
+      promptId: "defend-your-work@v3",
       values: { ...values, focusAreas: "" },
       outputLanguage: "nl",
     });

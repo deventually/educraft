@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { DEFEND_YOUR_WORK_PROMPT_V2 } from "~/lib/prompts/defend-your-work@v2.prompt";
+import { DEFEND_YOUR_WORK_PROMPT_V3 } from "~/lib/prompts/defend-your-work@v3.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 
 const WORK = { nl: "Het werk", en: "The work" };
@@ -153,7 +153,7 @@ export const defendYourWork: Tool = {
         nl: "Een deskundige uit het werkveld vraagt door op je keuzes, je gegevens en je conclusie.",
         en: "An expert from the field probes your choices, your data and your conclusion.",
       },
-      systemPromptId: DEFEND_YOUR_WORK_PROMPT_V2.id,
+      systemPromptId: DEFEND_YOUR_WORK_PROMPT_V3.id,
       output: {
         kind: "markdown",
         hint: {
@@ -182,8 +182,8 @@ export const defendYourWork: Tool = {
     allowRegenerate: true,
     // Meting dyw3: in a long chat the tutor drifted to two questions and praised vague answers.
     turnReminder: {
-      nl: "Herinnering voor deze beurt: hooguit twee korte zinnen reactie, dan één vraag. Precies één vraagteken in je beurt, aan het eind. Is het antwoord vaag, prijs het dan niet, maar vraag eerst om het concreet te maken. Leg niet uit wat de student zelf moet zeggen.",
-      en: "Reminder for this turn: at most two short sentences of reaction, then one question. Exactly one question mark in your turn, at the end. If the answer is vague, don't praise it, but first ask to make it specific. Don't explain what the student should say themselves.",
+      nl: "Herinnering voor deze beurt: hooguit twee korte zinnen reactie, dan één vraag. Precies één vraagteken in je beurt, aan het eind, en geen tweede vraag na “, en” of “, of”. Is het antwoord vaag, prijs het dan niet, maar vraag eerst om het concreet te maken. Leg niet uit wat de student zelf moet zeggen.",
+      en: "Reminder for this turn: at most two short sentences of reaction, then one question. Exactly one question mark in your turn, at the end, and no second question after “, and” or “, or”. If the answer is vague, don't praise it, but first ask to make it specific. Don't explain what the student should say themselves.",
     },
   },
 };
