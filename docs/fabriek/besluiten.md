@@ -286,3 +286,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   in de bestandsnaam, elke open plek geel. Een uitzondering op BESLUIT-2026-11-05-9 (rood
   blokkeert de export niet), alleen voor open plekken. Bastiaan, 2026-11-07 ("Ik wil het wel
   kunnen exporteren, maar dan moet het wel HEEL ERG DUIDELIJK zijn dat het een concept betreft").
+- **BESLUIT-2026-11-07-5:** **Open plekken mogen in het BDB/BKE-dossier zelf** (plan BDB en BKE,
+  PR 3). Het landelijke startpunt mag je bevestigen als *voorlopig kader*: coach, alinea's en
+  proefassessment werken, en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder
+  tekst heet *Volgt nog* en telt niet als bewijs. Een voorlopig kader is een open plek in de zin
+  van BESLUIT-2026-11-07-4: dan geeft de export alleen de conceptversie. Bastiaan, 2026-11-07
+  ("Akkoord op PR 3 en 4").

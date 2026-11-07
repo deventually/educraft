@@ -275,6 +275,14 @@ _Laatst bijgewerkt: 2026-11-07 (geen open plek in het ingeleverde BDB/BKE-werk, 
 
 ## Bezig
 
+- **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
+  startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
+  en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:
+  de coach weet dat het komt, het is geen bron voor een alinea. *AI-leeractiviteit ontwerpen* kan
+  zonder huidige activiteit (prompt `@v2`) en *Cursus op samenhang controleren* zonder pedagogische
+  benadering (prompt `@v2`); beide met een nieuwe eval-case, de meting moet nog. Vak, discipline en
+  onderwerp komen in negen tools uit je onderwijscontext. Een voorlopig kader is een rood
+  punt in *Klaar om in te leveren?*: de export geeft dan alleen de conceptversie (BESLUIT-2026-11-07-5).
 - **Geen open plek in het ingeleverde BDB/BKE-werk (PR open):** `[aanvullen: …]` uit een
   opgestelde alinea, `[invullen]`, TODO, een leeg hoofdstuk of bewijs zonder tekst zijn een rood
   punt in *Klaar om in te leveren?* (`open-spot`, `evidence-pending`). Zolang er een staat, geeft

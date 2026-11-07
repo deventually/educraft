@@ -12,7 +12,7 @@ function clone(d: DossierData): DossierData {
 }
 
 function unconfirm(f: Framework): Framework {
-  const { confirmedAt: _drop, ...rest } = f;
+  const { confirmedAt: _drop, provisional: _provisional, ...rest } = f;
   return rest;
 }
 
@@ -143,7 +143,15 @@ export function updateFrameworkMeta(
 
 export function confirmFramework(d: DossierData, at: number): DossierData {
   const next = clone(d);
-  next.framework = { ...next.framework, confirmedAt: at };
+  next.framework = { ...unconfirm(next.framework), confirmedAt: at };
+  return next;
+}
+
+/** Confirms the national starting point as a stand-in until the institution's form is in. */
+export function confirmProvisional(d: DossierData, at: number): DossierData {
+  if (!d.framework.national) throw new Error("Only the national starting point is provisional");
+  const next = clone(d);
+  next.framework = { ...next.framework, confirmedAt: at, provisional: true };
   return next;
 }
 

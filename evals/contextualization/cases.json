@@ -35,6 +35,23 @@
         "learningObjectives": "De student analyseert de sterkte van een authenticatie-ontwerp tegen een dreigingsmodel; de student onderbouwt een keuze voor MFA-factoren met risico-afwegingen; de student ontwerpt een incidentresponsstap bij gelekte credentials.",
         "pedagogicalApproach": "Onderzoekend en casusgestuurd; studenten verantwoorden ontwerpkeuzes met argumenten en bronnen."
       }
+    },
+    {
+      "id": "no-approach-eqf6",
+      "description": "BDB/BKE plan PR 3, prompt @v2: the pedagogical approach is empty. The analysis must infer the approach from the outline, say so with 'afgeleid uit je cursusopzet', and never present it as the teacher's own view.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 1",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie & management",
+        "courseName": "Inleiding marketing",
+        "eqf": 6
+      },
+      "values": {
+        "courseOutline": "Acht weken: elke week een hoorcollege over één hoofdstuk van het boek, een werkcollege met oefenvragen uit het boek, en in week 8 een schriftelijk tentamen met meerkeuzevragen. Daarnaast een groepsopdracht: een marketingplan voor een bestaand bedrijf, ingeleverd in week 7, niet beoordeeld.",
+        "learningObjectives": "De student past het marketingmixmodel toe op een bestaand bedrijf; de student onderbouwt een doelgroepkeuze met marktgegevens.",
+        "pedagogicalApproach": ""
+      }
     }
   ]
 }

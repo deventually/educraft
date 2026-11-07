@@ -83,6 +83,8 @@ export const guidedReflection: Tool = {
   inputs: [
     {
       name: "onderwerp",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: "courseName" },
       label: { nl: "Onderwerp van de les/cursus", en: "Lesson/course topic" },
       kind: "text",
       required: true,

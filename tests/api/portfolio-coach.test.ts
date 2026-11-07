@@ -109,6 +109,18 @@ describe("reviewOutcome", () => {
     expect(call.temperature).toBe(0);
   });
 
+  it("marks a review made on a provisional framework (BDB/BKE plan, PR 3)", async () => {
+    generate.mockResolvedValue({ text: goodAnswer });
+    const d = confirmed();
+    d.framework = { ...d.framework, national: true, provisional: true };
+    const r = await coach.reviewOutcome(user, d, LU, "nl", 42);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.reviews?.[LU]?.provisional).toBe(true);
+    const own = await coach.reviewOutcome(user, confirmed(), LU, "nl", 42);
+    if (!own.ok) throw new Error(own.error);
+    expect(own.data.reviews?.[LU]?.provisional).toBeUndefined();
+  });
+
   it("retries once on an unusable answer, then gives up", async () => {
     generate
       .mockResolvedValueOnce({ text: "geen json" })

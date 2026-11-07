@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { CONTEXTUALIZATION_PROMPT } from "~/lib/prompts/contextualization.prompt";
+import { CONTEXTUALIZATION_PROMPT_V2 } from "~/lib/prompts/contextualization@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -84,12 +84,13 @@ export const contextualization: Tool = {
     },
     {
       name: "pedagogicalApproach",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: "pedagogy" },
       label: {
-        nl: "Jouw pedagogische benadering",
-        en: "Your pedagogical approach",
+        nl: "Jouw pedagogische benadering (optioneel)",
+        en: "Your pedagogical approach (optional)",
       },
       kind: "textarea",
-      required: true,
       rows: 4,
       placeholder: {
         nl: "Welke onderwijsfilosofie, leertheorieën en werkvormen (college, groepwerk, etc.) gebruik je en waarom?",
@@ -102,7 +103,7 @@ export const contextualization: Tool = {
     {
       id: "analyze",
       name: { nl: "Analyse", en: "Analysis" },
-      systemPromptId: CONTEXTUALIZATION_PROMPT.id,
+      systemPromptId: CONTEXTUALIZATION_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
         hint: {

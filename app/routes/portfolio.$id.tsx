@@ -179,7 +179,12 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
 
       <p className="mt-6 text-sm text-slate-600">
         {framework.confirmedAt
-          ? fmt(t.portfolio.frameworkConfirmed, { date: fmtDate(framework.confirmedAt, locale) })
+          ? fmt(
+              framework.provisional
+                ? t.portfolio.frameworkProvisional
+                : t.portfolio.frameworkConfirmed,
+              { date: fmtDate(framework.confirmedAt, locale) },
+            )
           : t.portfolio.frameworkNotConfirmed}{" "}
         <Link
           to={`/portfolio/${id}/framework`}

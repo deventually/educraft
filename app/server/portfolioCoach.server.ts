@@ -61,7 +61,12 @@ export async function reviewOutcome(
           ...d,
           reviews: {
             ...d.reviews,
-            [outcomeId]: { at: now, model: answer.model, review: parsed.review },
+            [outcomeId]: {
+              at: now,
+              model: answer.model,
+              ...(d.framework.provisional ? { provisional: true as const } : {}),
+              review: parsed.review,
+            },
           },
         },
         { at: now, action: "review", outcomeId, model: answer.model },
