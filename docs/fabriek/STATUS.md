@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
+_Laatst bijgewerkt: 2026-11-07 (meting oc1, PR open)_
 
 ## Nu
 
+- **Open plekken toestaan in het BDB/BKE-dossier (#167) gemerged op 2026-11-07:** het landelijke
+  startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
+  elk oordeel zegt "op het landelijke startpunt", en de export geeft alleen de conceptversie
+  (BESLUIT-2026-11-07-5). Bewijs zonder tekst heet *Volgt nog*. *AI-leeractiviteit ontwerpen* kan
+  zonder huidige activiteit en *Cursus op samenhang controleren* zonder pedagogische benadering
+  (prompts `@v2`); vak, discipline en onderwerp komen in negen tools uit je onderwijscontext.
+  Meting oc1: de nieuwe cases 4,20 en 4,40, geen gefaalde check. De oude contextualization-cases
+  zakten (3,80 en 4,20, één run): de beoordelaar ziet een verzonnen werkveldcontext, iets wat de
+  wijziging niet raakt; kandidaat voor een volgende `@v`.
 - **Elke leeruitkomst apart inleveren, als Word of PDF (#168) gemerged op 2026-11-07:** bij elke leeruitkomst in het
   overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
   de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
@@ -297,14 +306,6 @@ _Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
   letterlijk in je hoofdstuk staat, valt weg in code. In stap 5 beoordeelt *Beoordeel het hele
   dossier* alle hoofdstukken in één keer, met per leeruitkomst een overzicht. Nieuwe prompt
   `portfolio-proofread@v1` met evals (`npm run eval:proofread`); geen migratie.
-- **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
-  startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
-  en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:
-  de coach weet dat het komt, het is geen bron voor een alinea. *AI-leeractiviteit ontwerpen* kan
-  zonder huidige activiteit (prompt `@v2`) en *Cursus op samenhang controleren* zonder pedagogische
-  benadering (prompt `@v2`); beide met een nieuwe eval-case, de meting moet nog. Vak, discipline en
-  onderwerp komen in negen tools uit je onderwijscontext. Een voorlopig kader is een rood
-  punt in *Klaar om in te leveren?*: de export geeft dan alleen de conceptversie (BESLUIT-2026-11-07-5).
 - **Figuren uit het document meesturen (PR open):** bij *Studentwerk beoordelen* zie je na het
   uploaden de afbeeldingen uit Word en de PDF-pagina's met een figuur als plaatjes bij
   *Kernfiguren*. Standaard gaat er niets mee; wat je aanvinkt gaat naar het model (max. 10), met
