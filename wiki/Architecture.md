@@ -90,7 +90,9 @@ LimeOnIt is not tied to one model vendor.
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
-- Default model: `claude-sonnet-5-5` (`DEFAULT_MODEL` in `models.ts`).
+- Default model: `default` in `config/models.json`, read as `DEFAULT_MODEL` (`models.ts`). It is the
+  only place a model is chosen: every tool's `defaultModel` and the eval judge point at it, and
+  `tests/model-ids.test.ts` fails on a model id written anywhere else in `app/` or `scripts/`.
 - **Model management (admin, "Tools en modellen").** An admin adds a model of any connected
   provider on screen (`app/lib/ai/providers.ts`: Anthropic, OpenAI, Google, Mistral on their
   OpenAI-compatible address, or the own `OPENAI_COMPAT_BASE_URL`); a provider is *connected*

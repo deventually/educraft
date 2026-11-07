@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { RUBRIC_BUILDER_PROMPT } from "~/lib/prompts/rubric-builder@v1.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const OUTCOME = { nl: "Leeruitkomst en opdracht", en: "Learning outcome and assignment" };
 const RUBRIC = { nl: "Beoordelingsmodel", en: "Rubric" };
@@ -47,7 +48,7 @@ export const rubricBuilder: Tool = {
   defaultOutputLanguage: "nl",
   next: ["stage-assessment"],
   courseActions: ["assessment"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 8192,
   defaultTemperature: 0.3,
   enabled: true,

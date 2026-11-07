@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { CLEAR_ASSIGNMENT_PROMPT_V2 } from "~/lib/prompts/clear-assignment@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const TEXT = { nl: "Je opdracht", en: "Your assignment" };
 const READER = { nl: "Voor de student", en: "For the student" };
@@ -45,7 +46,7 @@ export const clearAssignment: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288,
   defaultTemperature: 0.3,
   next: ["engagement-check"],

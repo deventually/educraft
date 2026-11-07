@@ -13,7 +13,7 @@ It is **not** part of `npm test`. Run it yourself:
 ```bash
 ANTHROPIC_API_KEY=sk-… npm run eval                      # every tool that has cases
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool forum-autograder
-ANTHROPIC_API_KEY=sk-… npm run eval -- --judge-model claude-sonnet-4-6
+ANTHROPIC_API_KEY=sk-… npm run eval -- --judge-model <model-id>  # default judge: the app default (config/models.json)
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai --runs 3   # mean + spread
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool mentorai,guided-reflection --label d  # one report, evals/reports/<date>d.md
 ANTHROPIC_API_KEY=sk-… npm run eval -- --tool rubric-builder --batch   # half price, Message Batches API

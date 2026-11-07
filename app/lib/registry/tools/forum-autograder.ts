@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { FORUM_AUTOGRADER_PROMPT } from "~/lib/prompts/forum-autograder.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -47,7 +48,7 @@ export const forumAutograder: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 8192, // nulmeting 2026-11-04: 4096 cut off the alignment advice.
   // Grading tool: use the grading-mode default (0.3) for consistent scores. The
   // facilitation advice it also produces is secondary to scoring stability.
