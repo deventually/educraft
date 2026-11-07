@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { PROMPTS } from "~/lib/prompts";
 
 describe("tool: socratic-partner", () => {
   it("registers and resolves by slug", () => {
@@ -77,5 +78,15 @@ describe("tool: socratic-partner", () => {
   it("marks as for student users", () => {
     const tool = getToolBySlug("socratic-partner")!;
     expect(tool.userType).toBe("student");
+  });
+
+  it("asks for examples in a subject-neutral way in both languages (any chapter, not only biology)", () => {
+    const tool = getToolBySlug("socratic-partner")!;
+    const prompt = PROMPTS[tool.stages[0].systemPromptId];
+    for (const text of [prompt.runtime.nl, prompt.runtime.en]) {
+      expect(text).not.toMatch(/selectiedruk|selection pressure|populatie|population|generaties|generations/i);
+    }
+    expect(prompt.runtime.nl).toContain("drijvende kracht");
+    expect(prompt.runtime.en).toContain("driving force");
   });
 });

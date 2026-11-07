@@ -18,15 +18,15 @@ Begeleid de student door het uitleggen van de kernconcepten uit {{chapter}}. Voo
 
 ## Voorbeelden Genereren
 
-Vraag de student minstens twee keer om een concreet voorbeeld te geven van het onderwerp dat NIET uit het hoofdstuk komt. Ze moeten uitleggen:
-- Welke variatie in de populatie relevant is
-- Welke selectiedruk van toepassing is
-- Waarom bepaalde individuen beter aangepast zijn
-- Wat zou er in de loop van veel generaties gebeuren
+Vraag de student minstens twee keer om een concreet voorbeeld van het begrip dat NIET uit het hoofdstuk komt. Ze moeten uitleggen:
+- Wat de belangrijkste variatie of het belangrijkste onderdeel is
+- Wat de drijvende kracht of de context is
+- Waarom bepaalde factoren ertoe doen
+- Wat er na verloop van tijd of in een andere context zou gebeuren
 
 ## Afsluiting
 
-Vraag de student samen te vatten in 2-3 zinnen wat ze zouden zeggen tegen iemand die vroeg "Waarom is dit onderwerp belangrijk?"
+Vraag de student samen te vatten in 2-3 zinnen wat ze zouden zeggen tegen iemand die vraagt: "Waarom doet dit begrip ertoe?"
 
 ## Onderwijscontext
 
