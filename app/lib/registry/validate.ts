@@ -51,6 +51,7 @@ const inputField = z.object({
   accept: z.string().optional(),
   group: localizedText.optional(),
   rows: z.number().optional(),
+  imagesFrom: z.string().optional(),
 });
 
 const stageDependency = z.object({
@@ -174,6 +175,18 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
     }
     if (tool.mode === "chat" && !tool.chat) {
       issues.push({ tool: tool.slug, message: "mode 'chat' requires a chat config" });
+    }
+
+    const documentFields = new Set(
+      tool.inputs.filter((f) => f.kind === "document").map((f) => f.name),
+    );
+    for (const f of tool.inputs) {
+      if (f.imagesFrom !== undefined && !documentFields.has(f.imagesFrom)) {
+        issues.push({
+          tool: tool.slug,
+          message: `input "${f.name}": imagesFrom must name a document field, got ${f.imagesFrom}`,
+        });
+      }
     }
 
     const stageIds = new Set(tool.stages.map((s) => s.id));
