@@ -270,7 +270,7 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
   Daarom nu ook: een herinnering per beurt als tooldata (`ChatConfig.turnReminder`, naast de
   taalherinnering op de laatste beurt, nooit in het transcript), een vaste vorm per beurt en een
   lijst vage antwoorden in `@v2`, en de judge-uitslag wordt gered als een aanhalingsteken de JSON
-  breekt. Meting dyw4 volgt. Daarna 31.2
+  breekt. Meting dyw4 (5 runs): gemiddeld 3,55, was 3,2; 4,5 nog niet. Daarna 31.2
   (nakijken, met verplicht anonimiseren).
 - **Typfouten in de prompts (PR open):** zeven oudere Nederlandse chatprompts (peer tutoring,
   MentorAI v1, scaffolding feedback, think-pair-share, dialogische ontmoetingen v1, Bloom by
