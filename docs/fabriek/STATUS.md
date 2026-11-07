@@ -280,6 +280,13 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
 
 ## Bezig
 
+- **Proeflezen en het hele dossier laten beoordelen (BDB/BKE, PR 4 van het plan; PR open):**
+  naast *Laat beoordelen* staat *Lees proef*: voorstellen voor spelling, zinsbouw, ik-vorm,
+  herhaling en APA, elk met de zin zoals hij nu is en een betere versie. *Overnemen* vervangt
+  precies die zin in je hoofdstuk, *Negeren* haalt het voorstel weg. Een voorstel dat niet
+  letterlijk in je hoofdstuk staat, valt weg in code. In stap 5 beoordeelt *Beoordeel het hele
+  dossier* alle hoofdstukken in één keer, met per leeruitkomst een overzicht. Nieuwe prompt
+  `portfolio-proofread@v1` met evals (`npm run eval:proofread`); geen migratie.
 - **Elke leeruitkomst apart inleveren, als Word of PDF (PR open):** bij elke leeruitkomst in het
   overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
   de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft

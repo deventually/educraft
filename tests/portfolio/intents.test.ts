@@ -356,3 +356,65 @@ describe("applyIntent — readiness self-checks (P29.1)", () => {
     }
   });
 });
+
+describe("applyIntent — proofreading proposals", () => {
+  const proposals = (d = sampleDossier()) => ({
+    ...d,
+    chapters: [{ ...d.chapters[0], text: "Mijn les begon met een vraag. Ik vroeg het de groep." }],
+    proofreads: {
+      [LU]: {
+        at: 1,
+        model: "m",
+        suggestions: [
+          {
+            quote: "Ik vroeg het de groep.",
+            issue: "style" as const,
+            explanation: "Wat vroeg je?",
+            suggestion: "Ik stelde de vraag aan de hele groep.",
+          },
+          {
+            quote: "Mijn les begon",
+            issue: "style" as const,
+            explanation: "x",
+            suggestion: "De les begon",
+          },
+        ],
+      },
+    },
+  });
+
+  it("takes a proposal over into the chapter and removes it from the list", () => {
+    const d = ok(
+      applyIntent(proposals(), fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
+    );
+    expect(d.chapters[0].text).toBe(
+      "Mijn les begon met een vraag. Ik stelde de vraag aan de hele groep.",
+    );
+    expect(d.proofreads?.[LU].suggestions.map((s) => s.quote)).toEqual(["Mijn les begon"]);
+    expect(d.chapters[0].aiDrafted).toBe(false);
+  });
+
+  it("ignores a proposal: the chapter stays, the proposal leaves the list", () => {
+    const d = ok(
+      applyIntent(proposals(), fd({ intent: "skipProofread", outcomeId: LU, index: "1" }), ctx),
+    );
+    expect(d.chapters[0].text).toBe("Mijn les begon met een vraag. Ik vroeg het de groep.");
+    expect(d.proofreads?.[LU].suggestions).toHaveLength(1);
+  });
+
+  it("is not-found for a missing proposal or a sentence that is no longer there", () => {
+    expect(
+      applyIntent(proposals(), fd({ intent: "takeProofread", outcomeId: LU, index: "5" }), ctx),
+    ).toEqual({ ok: false, error: "not-found" });
+    const changed = proposals();
+    changed.chapters[0].text = "Alles herschreven.";
+    expect(
+      applyIntent(changed, fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
+    ).toEqual({ ok: false, error: "not-found" });
+  });
+
+  it("forgets the proposals when the outcome is removed", () => {
+    const d = ok(applyIntent(proposals(), fd({ intent: "removeOutcome", outcomeId: LU }), ctx));
+    expect(d.proofreads).toEqual({});
+  });
+});
