@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "~/lib/prompts/dialogic-encounters@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -55,7 +56,7 @@ export const dialogicEncounters: Tool = {
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

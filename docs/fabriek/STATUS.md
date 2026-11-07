@@ -268,6 +268,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
 
 ## Bezig
 
+- **Het model op één plek (PR open):** `default` in `config/models.json` is de enige plek waar
+  het standaardmodel staat. Alle tools en de beoordelaar van de meetscripts halen het daar
+  vandaan; `tests/model-ids.test.ts` faalt als er ergens anders in `app/` of `scripts/` een
+  model-id staat. Verhoog je het model, dan gaat alles mee. De beoordelaar ging zo van
+  Sonnet 4.6 naar Sonnet 5.5.
 - **P31.2 Een verdediging nakijken (PR open):** de docent plakt het gesprek van een
   mondelinge verdediging en krijgt een concept (bijlage F.4, letterlijk overgenomen en algemeen
   gemaakt): het niveau van begrip (uitstekend, op niveau, in ontwikkeling, beginnend), opvallende

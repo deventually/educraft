@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { SOCRATIC_PARTNER_PROMPT } from "~/lib/prompts/socratic-partner.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -47,7 +48,7 @@ export const socraticPartner: Tool = {
   // direct-address register directive (P6.8).
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

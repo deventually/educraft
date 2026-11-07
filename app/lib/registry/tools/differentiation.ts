@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { DIFFERENTIATION_PROMPT } from "~/lib/prompts/differentiation@v1.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 /**
  * Opdracht differentiëren — brief P24, 24.7. An original LimeOnIt tool: the teacher's task
@@ -43,7 +44,7 @@ export const differentiation: Tool = {
   defaultOutputLanguage: "nl",
   next: ["clear-assignment", "engagement-check"],
   courseActions: ["activity"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288,
   defaultTemperature: 0.3,
   enabled: true,

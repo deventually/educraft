@@ -11,7 +11,7 @@
  *    ANTHROPIC_API_KEY=sk-… npm run eval -- --tool forum-autograder
  *    npm run eval -- --cases-only            # regenerate outputs, don't judge
  *    npm run eval -- --judge-only            # re-judge the latest outputs
- *    npm run eval -- --judge-model claude-sonnet-4-6
+ *    npm run eval -- --judge-model <model-id>  # default: the app default
  *    npm run eval -- --dry-run               # build every prompt, NO API calls (free)
  *    npm run eval -- --tool mentorai --runs 3 # mean + spread over 3 runs per case
  *    npm run eval -- --tool a,b --label d     # several tools, report <date>d.md
@@ -63,6 +63,7 @@ import {
   reportRowKey,
   countWords,
   type ReportRow,
+  DEFAULT_JUDGE_MODEL,
 } from "./eval-helpers";
 
 // ---------------------------------------------------------------------------
@@ -107,7 +108,6 @@ interface Cli {
 const EVALS_DIR = join(process.cwd(), "evals");
 const OUTPUT_DIR = join(EVALS_DIR, "output");
 const REPORTS_DIR = join(EVALS_DIR, "reports");
-const DEFAULT_JUDGE_MODEL = "claude-sonnet-4-6";
 
 function parseCli(argv: string[]): Cli {
   const cli: Cli = {

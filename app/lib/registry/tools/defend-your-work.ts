@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { DEFEND_YOUR_WORK_PROMPT_V2 } from "~/lib/prompts/defend-your-work@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const WORK = { nl: "Het werk", en: "The work" };
 
@@ -69,7 +70,7 @@ export const defendYourWork: Tool = {
   // The teacher reviews the conversation the student hands in (P31.2).
   next: ["defense-review"],
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

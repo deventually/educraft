@@ -2,6 +2,7 @@ import type { Tool } from "../types";
 import { DEFENSE_REVIEW_PROMPT } from "~/lib/prompts/defense-review@v1.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 import { WORK_TYPE_OPTIONS } from "./defend-your-work";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONVERSATION = { nl: "Het gesprek", en: "The conversation" };
 const WORK = { nl: "Het werk", en: "The work" };
@@ -58,7 +59,7 @@ export const defenseReview: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 4096,
   defaultTemperature: 0.3, // Grading tool: grading-mode default.
   enabled: true,

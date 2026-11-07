@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { ENGAGEMENT_CHECK_PROMPT } from "~/lib/prompts/engagement-check@v1.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 /**
  * De leercheck — brief P31.3. Rates an assignment, lesson or activity on the six principles
@@ -53,7 +54,7 @@ export const engagementCheck: Tool = {
   defaultOutputLanguage: "nl",
   next: ["cognitive-architect", "differentiation"],
   courseActions: ["activity"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 4096,
   defaultTemperature: 0.2,
   enabled: true,

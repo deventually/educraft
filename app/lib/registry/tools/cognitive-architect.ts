@@ -6,6 +6,7 @@ import {
   COGNITIVE_ARCHITECT_ANALYST_GEN,
 } from "~/lib/prompts/cognitive-architect.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const COORDS = { nl: "Instructional Coordinates", en: "Instructional Coordinates" };
 
@@ -58,7 +59,7 @@ export const cognitiveArchitect: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288, // nulmeting 2026-11-04: 6144 truncated the stage 3–4 artefacts.
   defaultTemperature: 0.4,
   enabled: true,

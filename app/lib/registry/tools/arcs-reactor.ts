@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { ARCS_REACTOR_PROMPT } from "~/lib/prompts/arcs-reactor.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -41,7 +42,7 @@ export const arcsReactor: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288, // nulmeting 2026-11-04: 6144 cut off the remixes mid-sentence.
   defaultTemperature: 0.5,
   enabled: true,

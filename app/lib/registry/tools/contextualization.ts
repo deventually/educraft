@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { CONTEXTUALIZATION_PROMPT } from "~/lib/prompts/contextualization.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -44,7 +45,7 @@ export const contextualization: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 6144,
   defaultTemperature: 0.5,
   enabled: true,
