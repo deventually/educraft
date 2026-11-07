@@ -21,7 +21,6 @@ export const tool: Messages["tool"] = {
   english: "English",
   errorPrefix: "Something went wrong",
   evaluatedWith: "Evaluated with {model}.",
-  exportMd: "Export (Markdown)",
   fileComingSoon: "File/image input will become available in a later phase.",
   generate: "Generate",
   generating: "Generating…",

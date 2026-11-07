@@ -1,21 +1,22 @@
 /**
  * Which file formats a result can become (brief P30). A tool stage says what its
  * result *is* (`OutputFormat.exportAs`); this table picks the formats. Pure data,
- * no branch per tool. A format is listed only once its writer exists: Word now
- * (30.1); PDF, Excel, PowerPoint and Brightspace join in later steps.
+ * no branch per tool. A format is listed only once its writer exists: Word (30.1),
+ * PDF through the print page and Markdown (30.2); Excel, PowerPoint and
+ * Brightspace join in later steps.
  */
 export const EXPORT_KINDS = ["document", "table", "rubric", "slides", "test-items"] as const;
 export type ExportKind = (typeof EXPORT_KINDS)[number];
 
-export const EXPORT_FORMATS = ["docx"] as const;
+export const EXPORT_FORMATS = ["docx", "pdf", "md"] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 const FORMATS: Record<ExportKind, readonly ExportFormat[]> = {
-  document: ["docx"],
-  table: ["docx"],
-  rubric: ["docx"],
-  slides: ["docx"],
-  "test-items": ["docx"],
+  document: ["docx", "pdf", "md"],
+  table: ["docx", "pdf", "md"],
+  rubric: ["docx", "pdf", "md"],
+  slides: ["docx", "pdf", "md"],
+  "test-items": ["docx", "pdf", "md"],
 };
 
 /** The formats for a result made of these kinds, each once, in a fixed order. */

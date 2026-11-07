@@ -1,9 +1,9 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { remarkPlugins, rehypePlugins } from "./markdownPlugins";
-import { Check, Copy, Download } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { Button, Spinner } from "./ui";
-import { cn, downloadText, slugifyFilename } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { ReadAloudButton } from "./ReadAloudButton";
 import type { SpeechLanguage } from "~/lib/speech/readAloud";
@@ -11,7 +11,6 @@ import type { SpeechLanguage } from "~/lib/speech/readAloud";
 interface Props {
   markdown: string;
   title?: string;
-  filenameBase: string;
   streaming?: boolean;
   /**
    * Fill the parent's height (flex column, internal scroll) instead of growing
@@ -23,7 +22,7 @@ interface Props {
   lang?: SpeechLanguage;
 }
 
-export function ResultPanel({ markdown, title, filenameBase, streaming, fill, lang }: Props) {
+export function ResultPanel({ markdown, title, streaming, fill, lang }: Props) {
   const t = useT();
   const locale = useLocale();
   const [copied, setCopied] = useState(false);
@@ -51,17 +50,6 @@ export function ResultPanel({ markdown, title, filenameBase, streaming, fill, la
           <Button size="sm" variant="ghost" onClick={copy} disabled={!markdown}>
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
             {copied ? t.tool.copied : t.tool.copy}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() =>
-              downloadText(`${slugifyFilename(filenameBase) || "limeonit"}.md`, markdown)
-            }
-            disabled={!markdown}
-          >
-            <Download className="size-4" />
-            {t.tool.exportMd}
           </Button>
         </div>
       </div>

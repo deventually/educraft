@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { useFetcher } from "react-router";
-import { Download } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 import type { ExportDoc } from "~/lib/export/doc";
 import type { ExportFormat } from "~/lib/export/formats";
 import { fmt } from "~/lib/i18n/format";
@@ -13,6 +13,9 @@ export interface ExportMenuProps {
   /** The other saved steps of the same tool, so a multi-step result is one file. */
   with?: string[];
 }
+
+const LINK =
+  "inline-flex items-center gap-1.5 rounded-full border border-lime-300 bg-lime-50 px-3 py-1.5 text-sm font-medium text-lime-900 hover:bg-lime-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700";
 
 interface ExportData {
   doc: ExportDoc;
@@ -59,14 +62,19 @@ export function ExportMenu({ generationId, with: withIds = [] }: ExportMenuProps
             <ul className="flex flex-wrap gap-2">
               {data.downloads.map((d) => (
                 <li key={d.format}>
-                  <a
-                    href={d.href}
-                    download
-                    className="inline-flex items-center gap-1.5 rounded-full border border-lime-300 bg-lime-50 px-3 py-1.5 text-sm font-medium text-lime-900 hover:bg-lime-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700"
-                  >
-                    <Download className="size-4" aria-hidden />
-                    {fmt(m.download, { format: m.formats[d.format] })}
-                  </a>
+                  {d.format === "pdf" ? (
+                    // PDF: the print page in a new tab; the browser saves it as PDF (P30.2).
+                    <a href={d.href} target="_blank" rel="noopener" className={LINK}>
+                      <Printer className="size-4" aria-hidden />
+                      {m.print}
+                      <span className="sr-only"> {m.newTab}</span>
+                    </a>
+                  ) : (
+                    <a href={d.href} download className={LINK}>
+                      <Download className="size-4" aria-hidden />
+                      {fmt(m.download, { format: m.formats[d.format] })}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
