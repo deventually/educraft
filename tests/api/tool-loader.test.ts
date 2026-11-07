@@ -141,3 +141,19 @@ describe("tool loader — the item a tool was opened for (P27.4)", () => {
     expect(foreign.initialItemId).toBe("");
   });
 });
+
+describe("tool loader — text for students (P31.1)", () => {
+  it("gives a copyable tutor its student text per language, form fields still open", async () => {
+    const data = (await loadSlug("defend-your-work")) as unknown as {
+      studentPrompt: Record<"nl" | "en", string> | null;
+    };
+    expect(data.studentPrompt?.nl).toContain("{{subject}}");
+    expect(data.studentPrompt?.en).toContain("{{learningObjective}}");
+    expect(data.studentPrompt?.nl).not.toContain("{{contextProfile}}");
+  });
+
+  it("gives other tools none, so their prompt never reaches the browser", async () => {
+    const data = (await loadSlug("mentorai")) as unknown as { studentPrompt: unknown };
+    expect(data.studentPrompt).toBeNull();
+  });
+});
