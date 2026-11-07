@@ -3,6 +3,16 @@ import { DEFEND_YOUR_WORK_PROMPT_V2 } from "~/lib/prompts/defend-your-work@v2.pr
 import { attribution } from "~/lib/prompts/attribution";
 
 const WORK = { nl: "Het werk", en: "The work" };
+
+/** The kinds of own work, shared with the review of the defense (P31.2). Stable English slugs. */
+export const WORK_TYPE_OPTIONS = [
+  { value: "report", label: { nl: "Verslag", en: "Report" } },
+  { value: "internship", label: { nl: "Stage", en: "Internship" } },
+  { value: "project", label: { nl: "Project", en: "Project" } },
+  { value: "professional-product", label: { nl: "Beroepsproduct", en: "Professional product" } },
+  { value: "lab", label: { nl: "Practicum of experiment", en: "Lab or experiment" } },
+  { value: "other", label: { nl: "Iets anders", en: "Something else" } },
+];
 const DEFENSE = { nl: "De verdediging", en: "The defense" };
 
 /**
@@ -56,6 +66,8 @@ export const defendYourWork: Tool = {
   // Learner tutor: the teacher's context profile seeds the level with the learner register.
   usesContextProfile: true,
   copyableStudentPrompt: true,
+  // The teacher reviews the conversation the student hands in (P31.2).
+  next: ["defense-review"],
   defaultOutputLanguage: "nl",
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 2048,
@@ -69,17 +81,7 @@ export const defendYourWork: Tool = {
       kind: "select",
       required: true,
       defaultValue: "report",
-      options: [
-        { value: "report", label: { nl: "Verslag", en: "Report" } },
-        { value: "internship", label: { nl: "Stage", en: "Internship" } },
-        { value: "project", label: { nl: "Project", en: "Project" } },
-        {
-          value: "professional-product",
-          label: { nl: "Beroepsproduct", en: "Professional product" },
-        },
-        { value: "lab", label: { nl: "Practicum of experiment", en: "Lab or experiment" } },
-        { value: "other", label: { nl: "Iets anders", en: "Something else" } },
-      ],
+      options: WORK_TYPE_OPTIONS,
       group: WORK,
     },
     {

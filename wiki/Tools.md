@@ -50,6 +50,8 @@ All 14 tools from the book plus seven originals are shipped. *For* = who the too
 | 20 | — (original, P24.6) | Write a clear assignment (`clear-assignment`) | one-shot | teacher |
 | 21 | — (original, P24.7) | Differentiate a task (`differentiation`, three variants with the same learning goal) | one-shot | teacher |
 | 22 | Oracle to Socratic (Appendix G, P31.3) | How actively do your students learn? (`engagement-check`, the leercheck: a level 0–3 per principle of the book's rubric; the score out of 18 is computed in code, `output.computed`) | one-shot | teacher |
+| 23 | Oracle to Socratic (Appendix F.3, P31.1) | Defend your own work out loud (`defend-your-work`, prompt `@v2`: an expert from the field probes the student's own work one question at a time; optional key figures; a per-turn reminder, `chat.turnReminder`; *Copy for your students*) | chat | learner |
+| 24 | Oracle to Socratic (Appendix F.4, P31.2) | Review an oral defense (`defense-review`: a draft analysis of a pasted transcript, anonymised first with `redact`; only what the student said counts) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later

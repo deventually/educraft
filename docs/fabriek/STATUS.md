@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
+_Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
 
 ## Nu
 
+- **P31.1b Kerncijfers bij Verdedig je werk (#152) gemerged op 2026-11-07:** een vinkje
+  *Student plakt eerst de kerncijfers*, een herinnering per beurt (`ChatConfig.turnReminder`) en
+  prompt `@v2`. Meting dyw4: gemiddeld 3,55 (was 3,2); één vraag per beurt nog niet helemaal.
 - **Typfouten in de prompts (#150) gemerged op 2026-11-07:** zeven oudere Nederlandse
   chatprompts zonder kapotte woorden en Engelse resten; de Socratische partner (NL) vraagt net
   als de Engelse algemeen naar voorbeelden in plaats van naar selectiedruk.
@@ -265,16 +268,13 @@ _Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
 
 ## Bezig
 
-- **P31.1b Kerncijfers bij Verdedig je werk (PR open):** een vinkje *Student plakt eerst de
-  kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
-  bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt
-  `@v2`, `@v1` blijft. Drie metingen (dyw1–3): het kerncijfer-gesprek ging van 2,8 naar 3,7; één
-  vraag per beurt is beter maar nog niet opgelost, en de judge kan het Engelse gesprek niet lezen.
-  Daarom nu ook: een herinnering per beurt als tooldata (`ChatConfig.turnReminder`, naast de
-  taalherinnering op de laatste beurt, nooit in het transcript), een vaste vorm per beurt en een
-  lijst vage antwoorden in `@v2`, en de judge-uitslag wordt gered als een aanhalingsteken de JSON
-  breekt. Meting dyw4 (5 runs): gemiddeld 3,55, was 3,2; 4,5 nog niet. Daarna 31.2
-  (nakijken, met verplicht anonimiseren).
+- **P31.2 Een verdediging nakijken (PR open):** de docent plakt het gesprek van een
+  mondelinge verdediging en krijgt een concept (bijlage F.4, letterlijk overgenomen en algemeen
+  gemaakt): het niveau van begrip (uitstekend, op niveau, in ontwikkeling, beginnend), opvallende
+  leerhoudingen, feedback voor de student en notities voor de docent. Studentwerk: eerst
+  anonimiseren in de browser (verplicht, BESLUIT-2026-11-07-2), de docent beslist, nooit gedeeld.
+  Wat de AI in het gesprek zei, telt niet mee. Volgende stap onder *Verdedig je werk*. Meting nog
+  te draaien (`npm run eval -- --tool defense-review`). Met de docs van 31.4.
 - **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
   model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
   Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg
