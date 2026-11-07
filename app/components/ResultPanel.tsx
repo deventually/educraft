@@ -98,7 +98,12 @@ export function ResultPanel({
           </Button>
         </div>
       </div>
-      <div className={cn("md overflow-y-auto px-5 py-4", fill ? "flex-1" : "max-h-[70vh]")}>
+      <div
+        className={cn(
+          "md relative overflow-y-auto overscroll-contain px-5 py-4",
+          fill ? "flex-1" : "max-h-[70vh]",
+        )}
+      >
         {markdown ? (
           <ReactMarkdown
             remarkPlugins={remarkPlugins}

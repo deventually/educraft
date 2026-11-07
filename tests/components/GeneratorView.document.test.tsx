@@ -66,6 +66,15 @@ describe("GeneratorView with a document field", () => {
     const box = screen.getByRole("region", { name: "Original" }).closest("[data-viewer-box]");
     expect(box?.className).toMatch(/(^|\s)h-\[\d+dvh\](\s|$)/);
     expect(box?.className).toMatch(/(^|\s)lg:h-full(\s|$)/);
+
+    // The sticky right column fits the scroll region under the 4rem header (1px border),
+    // with 1rem above and below; with 100vh its bottom (the notice) fell below the screen.
+    const column = box?.closest(".lg\\:sticky");
+    expect(column?.className).toMatch(/(^|\s)lg:top-4(\s|$)/);
+    expect(column?.className).toMatch(/(^|\s)lg:h-\[calc\(100dvh-6rem-1px\)\](\s|$)/);
+    // Scrolling inside the viewer stops at its end instead of dragging the page along.
+    const pane = screen.getByRole("region", { name: "Original" }).querySelector("[tabindex='0']");
+    expect(pane?.className).toMatch(/(^|\s)overscroll-contain(\s|$)/);
     expect(streamPost).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
