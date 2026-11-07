@@ -357,6 +357,31 @@ describe("applyIntent — readiness self-checks (P29.1)", () => {
   });
 });
 
+describe("applyIntent — back from Word", () => {
+  it("takes over the chosen chapters and adds only new references", () => {
+    const d = ok(
+      applyIntent(
+        sampleDossier(),
+        fd({
+          intent: "importChapters",
+          chapters: JSON.stringify([{ outcomeId: LU, text: "Uit Word." }]),
+          reference: ["Biggs, J. (2011). Teaching.", "Biggs, J. (2011). Teaching.", "  "],
+        }),
+        ctx,
+      ),
+    );
+    expect(d.chapters).toEqual([{ id: CH, outcomeId: LU, text: "Uit Word.", aiDrafted: false }]);
+    expect(d.references.map((r) => r.apa)).toEqual(["Biggs, J. (2011). Teaching."]);
+  });
+
+  it("refuses chapters that are not valid JSON, or for an outcome the dossier does not have", () => {
+    for (const chapters of ["{", JSON.stringify([{ outcomeId: "nope", text: "x" }])]) {
+      const r = applyIntent(sampleDossier(), fd({ intent: "importChapters", chapters }), ctx);
+      expect(r.ok).toBe(false);
+    }
+  });
+});
+
 describe("applyIntent — proofreading proposals", () => {
   const proposals = (d = sampleDossier()) => ({
     ...d,

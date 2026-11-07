@@ -105,10 +105,31 @@ const SCHEMAS = {
   takeProofread: z.object({ outcomeId: Id, index: z.coerce.number().int().nonnegative().max(100) }),
   skipProofread: z.object({ outcomeId: Id, index: z.coerce.number().int().nonnegative().max(100) }),
   tickReadiness: z.object({ code: z.enum(TICKABLE_CODES), ticked: z.literal("on").optional() }),
+  /** Back from Word: the chapters the teacher chose to take over, and new references. */
+  importChapters: z.object({
+    chapters: z
+      .string()
+      .max(LIMITS.documentText * LIMITS.outcomes)
+      .transform((raw, ctx) => {
+        try {
+          return JSON.parse(raw) as unknown;
+        } catch {
+          ctx.addIssue({ code: "custom", message: "invalid JSON" });
+          return z.NEVER;
+        }
+      })
+      .pipe(
+        z
+          .array(z.object({ outcomeId: Id, text: z.string().max(LIMITS.documentText) }))
+          .max(LIMITS.outcomes),
+      )
+      .default([]),
+    reference: z.array(z.string().max(LIMITS.reference)).max(LIMITS.references).default([]),
+  }),
 } as const;
 
 export type Intent = keyof typeof SCHEMAS;
-const MULTI = new Set(["criterionIds"]);
+const MULTI = new Set(["criterionIds", "reference"]);
 
 function fields(fd: FormData): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -251,6 +272,22 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
     case "removeReference": {
       const v = input as z.infer<(typeof SCHEMAS)["removeReference"]>;
       return edit.removeReference(d, v.referenceId);
+    }
+    case "importChapters": {
+      const v = input as z.infer<(typeof SCHEMAS)["importChapters"]>;
+      let next = d;
+      for (const ch of v.chapters) {
+        criteriaOf(d, ch.outcomeId);
+        next = edit.writeChapter(next, ch.outcomeId, ch.text);
+      }
+      const have = new Set(next.references.map((r) => r.apa.trim()));
+      for (const raw of v.reference) {
+        const apa = raw.trim();
+        if (!apa || have.has(apa)) continue;
+        have.add(apa);
+        next = edit.addReference(next, apa);
+      }
+      return next;
     }
     case "takeProofread": {
       const v = input as z.infer<(typeof SCHEMAS)["takeProofread"]>;

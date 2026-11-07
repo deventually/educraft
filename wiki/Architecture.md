@@ -204,6 +204,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   page (`/portfolio/:id/print`, PDF through the browser) both read it. `dossierExport`
   (`portfolioExport.server.ts`) reads `?lu=` (one outcome via `dossierPart`, handed in on its
   own), `?draft=1` and `?ai=1`, and applies the open-spot rule to what is exported.
+  Back from Word (`wordImport.ts`): the browser reads an edited export (`docxToSafeNodes`),
+  `readBack` finds each chapter under the Heading 1 the export wrote and compares it with
+  `sameChapter` (heading levels and table rules ignored). The teacher ticks what to take over; the
+  `importChapters` intent writes only that. Appendices are never read back.
   The rehearsal assessment (`/portfolio/:id/rehearsal`, `portfolio-rehearsal@v2`) is a chat with a
   played committee of two assessors. It is one registry entry in `WORKPLACE_TOOLS`, outside the
   catalogue (`hiddenFromCatalogue`), governed by the workplace feature instead of tool
