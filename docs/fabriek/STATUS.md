@@ -275,6 +275,10 @@ _Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakij
 
 ## Bezig
 
+- **"Wat de AI krijgt" toont de geanonimiseerde tekst (PR open):** na *Verstuur geanonimiseerd*
+  liet de documentviewer bij Stagebeoordeling nog de tekst met namen zien. De AI kreeg wel al
+  alleen codes (geen privacylek); nu toont het tabblad ook precies die tekst, tot de docent het
+  formulier weer aanpast.
 - **Pagina met documentviewer scrolt niet meer voorbij de footer (PR open):** de verborgen
   voorleestekst in de klikbare citaten (#155) rekte op een telefoon de pagina op tot ver na de
   footer; de scrollzone van de app verankert zulke tekst nu voor alle pagina's. Daarnaast past de
