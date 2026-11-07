@@ -13,6 +13,7 @@ const COURSE_FIELDS: [slug: string, field: string][] = [
   ["bloom-by-design", "learningOutcome"],
   ["lesson-plan", "learningGoal"],
   ["differentiation", "learningGoal"],
+  ["defend-your-work", "learningObjective"],
 ];
 
 describe("prefillFromCourse (data hook, no control flow)", () => {

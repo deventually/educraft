@@ -283,6 +283,12 @@ export interface Tool {
    */
   handlesStudentWork?: true;
 
+  /**
+   * A student tutor whose prompt the teacher may copy for students to paste into their own
+   * AI, as the book intends (P31.1). Data only: the chat shows "Kopieer voor je studenten".
+   */
+  copyableStudentPrompt?: true;
+
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;
 

@@ -258,10 +258,13 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- **Brief P31 Verdedig je werk en de leercheck (PR open):** een chat-tutor waarin een kritische
-  deskundige de student zijn eigen verslag, stage of project mondeling laat verdedigen (bijlage F),
-  en de leercheck "Hoe actief leren je studenten?" die een opdracht of les scoort op zes
-  leerprincipes (bijlage G). Allebei mogen nu, vóór de pilot (BESLUIT-2026-11-07-1).
+- **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
+  (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
+  deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
+  verdedigen: één vraag tegelijk, vage antwoorden worden doorgevraagd, nooit een cijfer. Met een
+  knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
+  Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
+  anonimiseren). De leercheck (31.3) loopt tegelijk in een eigen PR.
 - **P30.1 Exporteren naar Word (PR open):** onder elk resultaat een knop *Exporteer*. Die toont
   eerst een voorbeeld van het bestand en daarna *Download als Word*. Een tool met meerdere stappen
   geeft alle bewaarde stappen in één bestand, met een kop per stap. Een teamlid kan werk exporteren

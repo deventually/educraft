@@ -13,6 +13,7 @@ import { SOCRATIC_PARTNER_PROMPT } from "./socratic-partner.prompt";
 import { BLOOM_BY_DESIGN_PROMPT } from "./bloom-by-design.prompt";
 import { CLEAR_ASSIGNMENT_PROMPT } from "./clear-assignment@v1.prompt";
 import { CLEAR_ASSIGNMENT_PROMPT_V2 } from "./clear-assignment@v2.prompt";
+import { DEFEND_YOUR_WORK_PROMPT } from "./defend-your-work@v1.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT } from "./dialogic-encounters.prompt";
 import { DIALOGIC_ENCOUNTERS_PROMPT_V2 } from "./dialogic-encounters@v2.prompt";
 import { DIFFERENTIATION_PROMPT } from "./differentiation@v1.prompt";
@@ -63,6 +64,7 @@ const ALL: PromptDef[] = [
   BLOOM_BY_DESIGN_PROMPT,
   CLEAR_ASSIGNMENT_PROMPT,
   CLEAR_ASSIGNMENT_PROMPT_V2,
+  DEFEND_YOUR_WORK_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT,
   DIALOGIC_ENCOUNTERS_PROMPT_V2,
   DIFFERENTIATION_PROMPT,
