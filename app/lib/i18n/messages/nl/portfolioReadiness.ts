@@ -4,7 +4,7 @@ export const portfolioReadiness = {
   counted: "Geteld in je gekoppelde toetsen: {count}.",
   fix: "Los op",
   intro:
-    "Advies, geen poort: je kunt altijd exporteren. Alleen wat het kader van je hogeschool vraagt, wordt gecontroleerd.",
+    "Advies, met één harde regel: een open plek komt nooit in je ingeleverde werk. Zolang er een staat, download je alleen een conceptversie. Verder wordt alleen gecontroleerd wat het kader van je hogeschool vraagt.",
   items: {
     "ai-disclosure-missing": {
       ok: "De AI-verantwoording staat aan bij mijn export",
@@ -30,6 +30,10 @@ export const portfolioReadiness = {
       ok: "Elk criterium heeft bewijs.",
       problem: "Nog geen bewijs bij: {criterion}",
     },
+    "evidence-pending": {
+      ok: "Elk bewijsstuk heeft tekst.",
+      problem: "Dit bewijsstuk volgt nog, er staat geen tekst in: {detail}",
+    },
     "framework-unconfirmed": {
       ok: "Je kader is bevestigd.",
       problem: "Je kader is nog niet bevestigd.",
@@ -45,6 +49,10 @@ export const portfolioReadiness = {
     "no-student-names": {
       ok: "Er staan geen namen van studenten in je bewijs",
       problem: "Er staan geen namen van studenten in je bewijs",
+    },
+    "open-spot": {
+      ok: "Er staan geen open plekken meer in je tekst.",
+      problem: "Open plek in je tekst: {detail}",
     },
     "over-word-limit": {
       ok: "Je blijft binnen het maximum aantal woorden.",

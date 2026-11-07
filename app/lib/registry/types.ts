@@ -106,6 +106,11 @@ export interface InputField {
    * details in this field by codes the teacher reviews (P24, 24.0b).
    */
   redact?: boolean;
+  /**
+   * For an image field: also offer the figures of the files uploaded in this
+   * `document` field, each to tick on or off (never sent unless ticked).
+   */
+  imagesFrom?: string;
 }
 
 export interface OutputFormat {

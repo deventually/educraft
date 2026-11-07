@@ -6,6 +6,8 @@
 import {
   AlignmentType,
   Document,
+  Footer,
+  Header,
   HeadingLevel,
   type ISectionOptions,
   LevelFormat,
@@ -45,6 +47,7 @@ export function runs(rs: Run[]): TextRun[] {
         bold: r.bold,
         italics: r.italic,
         ...(r.code ? { font: CODE_FONT } : {}),
+        ...(r.highlight ? { highlight: "yellow" } : {}),
       }),
   );
 }
@@ -137,11 +140,19 @@ export function blocksToDocx(
   return out;
 }
 
-/** A Word document with our language, numbering and the given body. */
+/** One bold, red, centred line: a banner at the top and bottom of every page. */
+const bannerLine = (text: string) =>
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    children: [new TextRun({ text, bold: true, color: "C00000", size: 28 })],
+  });
+
+/** A Word document with our language, numbering and the given body; `banner` on every page. */
 export async function packDocx(
   title: string,
   locale: Locale,
   children: ISectionOptions["children"],
+  opts: { banner?: string } = {},
 ): Promise<Uint8Array<ArrayBuffer>> {
   const doc = new Document({
     title,
@@ -162,7 +173,17 @@ export async function packDocx(
         },
       ],
     },
-    sections: [{ children }],
+    sections: [
+      {
+        ...(opts.banner
+          ? {
+              headers: { default: new Header({ children: [bannerLine(opts.banner)] }) },
+              footers: { default: new Footer({ children: [bannerLine(opts.banner)] }) },
+            }
+          : {}),
+        children,
+      },
+    ],
   });
   return new Uint8Array(await Packer.toBuffer(doc));
 }

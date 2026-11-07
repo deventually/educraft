@@ -90,8 +90,8 @@ export const stageAssessment: Tool = {
         en: "Upload the PDF or Word file, or paste the full text of the essay, report, work product, portfolio or internship report here.",
       },
       help: {
-        nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Je kunt meerdere bestanden tegelijk selecteren (bijv. onderzoeksverslag + beroepsproduct voor een geheel portfolio); de teksten worden samengevoegd. Tabellen en figuren gaan verloren; upload kernfiguren los hieronder.",
-        en: "Upload the file (PDF or Word) — the text appears below for you to review and edit. Or paste it yourself. You can select multiple files at once (e.g. research report + work product for a whole portfolio); their texts are merged. Tables and figures are lost; upload key figures separately below.",
+        nl: "Upload het bestand (PDF of Word) — de tekst verschijnt hieronder en je kunt hem nog bijwerken. Of plak de tekst zelf. Je kunt meerdere bestanden tegelijk selecteren (bijv. onderzoeksverslag + beroepsproduct voor een geheel portfolio); de teksten worden samengevoegd. Figuren uit het bestand kun je hieronder bij Kernfiguren aanvinken.",
+        en: "Upload the file (PDF or Word) — the text appears below for you to review and edit. Or paste it yourself. You can select multiple files at once (e.g. research report + work product for a whole portfolio); their texts are merged. You can tick figures from the file below under Key figures.",
       },
       group: DOC,
     },
@@ -101,13 +101,14 @@ export const stageAssessment: Tool = {
       kind: "image",
       required: false,
       accept: "image/png,image/jpeg",
+      imagesFrom: "document",
       placeholder: {
         nl: "Upload eventueel belangrijke figuren (organogram, ontwerp, diagram) als afbeelding.",
         en: "Optionally upload important figures (org chart, design, diagram) as images.",
       },
       help: {
-        nl: "Tekst-only beoordeling mist figuren. Upload hier de figuren die het oordeel raken (max. 10).",
-        en: "A text-only assessment misses figures. Upload the figures that affect the judgement here (max. 10).",
+        nl: "Na het uploaden van het document kun je hier de figuren aanvinken die het oordeel raken, of zelf afbeeldingen uploaden (max. 10). Afbeeldingen worden niet geanonimiseerd.",
+        en: "After uploading the document you can tick the figures that affect the judgement here, or upload images yourself (max. 10). Images are not anonymised.",
       },
       group: DOC,
     },

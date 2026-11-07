@@ -238,7 +238,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Een uitzondering op "tot de pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4): het staat niet in
   de toolcatalogus, alleen in stap 5 van de werkplaats, en gaat mee aan en uit met de werkplaats.
   Bastiaan, 2026-11-05. Uitwerking: brief P29.
-- **BESLUIT-2026-11-05-9:** **Rood blokkeert de export niet.** De inleverklaar-check (P29.1) is
+- **BESLUIT-2026-11-05-9:** **Rood blokkeert de export niet** (behalve een open plek: BESLUIT-2026-11-07-4). De inleverklaar-check (P29.1) is
   alleen advies; een docent kan altijd exporteren. Bastiaan, 2026-11-05 (keuzekaart).
 - **BESLUIT-2026-11-05-10:** **Van een proefassessment bewaren we alleen de feedback**, en alleen
   als de docent op "Bewaar in je dossier" klikt. Het gesprek zelf wordt nergens bewaard, ook niet
@@ -278,9 +278,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   om een paar cijfers of bevindingen uit het eigen werk, zonder namen, en vraagt daarop scherper
   door. Nooit het hele verslag: dan leest de AI de antwoorden mee en kan de student erop leunen,
   en een stageverslag staat vol namen. Bastiaan, 2026-11-07 ("Ja").
-- **BESLUIT-2026-11-07-4:** **Open plekken mogen in het BDB/BKE-dossier, nooit in het ingeleverde
-  werk** (plan BDB en BKE, PR 3). Het landelijke startpunt mag je bevestigen als *voorlopig kader*:
-  coach, alinea's en proefassessment werken, en elk oordeel zegt "op het landelijke startpunt". Een
-  bewijsstuk zonder tekst heet *Volgt nog* en telt niet als bewijs. Het definitieve Word-bestand
-  wacht tot het kader van je hogeschool bevestigd is; een conceptversie mag, maar dan heel duidelijk
-  als concept. Bastiaan, 2026-11-07 ("Akkoord op PR 3 en 4").
+- **BESLUIT-2026-11-07-4:** **Een open plek komt nooit in het ingeleverde BDB/BKE-werk.** Een
+  open plek is `[aanvullen: …]` / `[to add: …]` (zoals een opgestelde alinea die achterlaat),
+  `[invullen]`, TODO, een leeg hoofdstuk of bewijs zonder tekst ("volgt nog"). Zolang er een staat,
+  geeft de Word-export geen echte versie, alleen een conceptversie die je niet kunt verwarren met
+  de echte: CONCEPT, NIET INLEVEREN boven en onder elke pagina en op de titelpagina, "(concept)"
+  in de bestandsnaam, elke open plek geel. Een uitzondering op BESLUIT-2026-11-05-9 (rood
+  blokkeert de export niet), alleen voor open plekken. Bastiaan, 2026-11-07 ("Ik wil het wel
+  kunnen exporteren, maar dan moet het wel HEEL ERG DUIDELIJK zijn dat het een concept betreft").
+- **BESLUIT-2026-11-07-5:** **Open plekken mogen in het BDB/BKE-dossier zelf** (plan BDB en BKE,
+  PR 3). Het landelijke startpunt mag je bevestigen als *voorlopig kader*: coach, alinea's en
+  proefassessment werken, en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder
+  tekst heet *Volgt nog* en telt niet als bewijs. Een voorlopig kader is een open plek in de zin
+  van BESLUIT-2026-11-07-4: dan geeft de export alleen de conceptversie. Bastiaan, 2026-11-07
+  ("Akkoord op PR 3 en 4").

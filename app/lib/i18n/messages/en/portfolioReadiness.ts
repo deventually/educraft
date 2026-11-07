@@ -4,7 +4,7 @@ export const portfolioReadiness = {
   counted: "Counted in your linked tests: {count}.",
   fix: "Fix it",
   intro:
-    "Advice, not a gate: you can always export. Only what your institution's framework asks for is checked.",
+    "Advice, with one firm rule: an open spot never ends up in the work you hand in. While one is left, you can only download a draft version. Otherwise only what your institution's framework asks for is checked.",
   items: {
     "ai-disclosure-missing": {
       ok: "The AI disclosure is switched on in my export",
@@ -30,6 +30,10 @@ export const portfolioReadiness = {
       ok: "Every criterion has evidence.",
       problem: "No evidence yet for: {criterion}",
     },
+    "evidence-pending": {
+      ok: "Every piece of evidence has text.",
+      problem: "This evidence is still to come, it has no text: {detail}",
+    },
     "framework-unconfirmed": {
       ok: "Your framework is confirmed.",
       problem: "Your framework is not confirmed yet.",
@@ -45,6 +49,10 @@ export const portfolioReadiness = {
     "no-student-names": {
       ok: "There are no student names in your evidence",
       problem: "There are no student names in your evidence",
+    },
+    "open-spot": {
+      ok: "No open spots left in your text.",
+      problem: "Open spot in your text: {detail}",
     },
     "over-word-limit": {
       ok: "You are within the word limit.",

@@ -6,10 +6,12 @@ import { appendDictation } from "~/lib/speech/dictation";
 import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { fmt } from "~/lib/i18n/format";
 import type { Locale } from "~/lib/i18n";
 import { filesToImageInputs } from "~/lib/images/process";
 import { filesToDocumentText, DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
 import { useState, useCallback } from "react";
+import { DocumentFigurePicker } from "./documents/DocumentFigurePicker";
 
 // Form value shape and defaults live in a framework-free module so they can be
 // imported in node tests without pulling in React. Re-exported here for the
@@ -34,6 +36,13 @@ interface Props {
 export function DynamicForm({ fields, values, onChange, onDocumentFiles }: Props) {
   const locale = useLocale();
   const groups = groupBy(fields, locale);
+  // The files picked per document field, so an image field with `imagesFrom`
+  // can offer their figures. They stay in browser memory.
+  const [docFiles, setDocFiles] = useState<Record<string, File[]>>({});
+  const handleFiles = (name: string, files: File[]) => {
+    setDocFiles((prev) => ({ ...prev, [name]: files }));
+    onDocumentFiles?.(name, files);
+  };
   return (
     <div className="space-y-6">
       {groups.map(([group, groupFields]) => (
@@ -49,7 +58,8 @@ export function DynamicForm({ fields, values, onChange, onDocumentFiles }: Props
               field={field}
               value={values[field.name]}
               onChange={(v) => onChange(field.name, v)}
-              onFiles={onDocumentFiles && ((files) => onDocumentFiles(field.name, files))}
+              onFiles={(files) => handleFiles(field.name, files)}
+              sourceFiles={field.imagesFrom ? docFiles[field.imagesFrom] : undefined}
             />
           ))}
         </fieldset>
@@ -63,11 +73,14 @@ function FieldControl({
   value,
   onChange,
   onFiles,
+  sourceFiles,
 }: {
   field: InputField;
   value: FormValues[string];
   onChange: (v: FormValues[string]) => void;
   onFiles?: (files: File[]) => void;
+  /** For an image field with `imagesFrom`: the files uploaded in that document field. */
+  sourceFiles?: File[];
 }) {
   const locale = useLocale();
   const id = `f-${field.name}`;
@@ -95,6 +108,9 @@ function FieldControl({
       )}
       {renderControl(field, id, value, onChange, locale, onFiles)}
       {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}
+      {field.kind === "image" && sourceFiles && (
+        <DocumentFigurePicker files={sourceFiles} value={asImages(value)} onChange={onChange} />
+      )}
     </div>
   );
 }
@@ -190,10 +206,11 @@ function renderControl(
       return (
         <ImageInputControl
           id={id}
-          value={(value as ImageInput[]) ?? []}
+          value={asImages(value)}
           accept={field.accept ?? "image/*"}
           onChange={onChange}
           label={loc(field.label, locale)}
+          required={field.required}
         />
       );
     case "document":
@@ -233,9 +250,17 @@ interface ImageInputControlProps {
   accept: string;
   onChange: (v: ImageInput[]) => void;
   label: string;
+  required?: boolean;
 }
 
-function ImageInputControl({ id, value, accept, onChange, label }: ImageInputControlProps) {
+function ImageInputControl({
+  id,
+  value,
+  accept,
+  onChange,
+  label,
+  required,
+}: ImageInputControlProps) {
   const t = useT();
   const [error, setError] = useState<string | undefined>();
 
@@ -269,7 +294,7 @@ function ImageInputControl({ id, value, accept, onChange, label }: ImageInputCon
 
   return (
     <div className="space-y-3">
-      <Label required htmlFor={id} className="mb-1.5">
+      <Label required={required} htmlFor={id} className="mb-1.5">
         {label}
       </Label>
 
@@ -321,11 +346,11 @@ function ImageInputControl({ id, value, accept, onChange, label }: ImageInputCon
               <button
                 type="button"
                 onClick={() => handleRemove(i)}
-                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-all group-hover:bg-opacity-50"
+                className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/50 focus-visible:bg-black/50"
                 title={t.tool.imageRemove}
                 aria-label={`${t.tool.imageRemove} image ${i + 1}`}
               >
-                <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-900 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-900 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                   {t.tool.imageRemove}
                 </span>
               </button>
@@ -336,9 +361,7 @@ function ImageInputControl({ id, value, accept, onChange, label }: ImageInputCon
 
       {/* Image count indicator */}
       {value.length > 0 && (
-        <p className="text-xs text-slate-600">
-          {value.length} image{value.length !== 1 ? "s" : ""} uploaded
-        </p>
+        <p className="text-xs text-slate-600">{fmt(t.tool.imageCount, { count: value.length })}</p>
       )}
     </div>
   );
@@ -450,6 +473,11 @@ function DocumentInputControl({
       />
     </div>
   );
+}
+
+/** An image field's value; a fresh form seeds every field with "". */
+function asImages(value: FormValues[string]): ImageInput[] {
+  return Array.isArray(value) ? (value as unknown as ImageInput[]) : [];
 }
 
 function groupBy(fields: InputField[], locale: Locale): Array<[string | undefined, InputField[]]> {
