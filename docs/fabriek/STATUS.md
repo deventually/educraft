@@ -252,9 +252,16 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 - 2026-11-06: "Ik wil sowieso export mogelijkheden voor BrightSpace, GradeWork, MS Excel, MS Word,
   Presentaties naar MS Powerpoint, PDF export, etc", plus sjablonen voor PowerPoint en viewers in
   LimeOnIt → brief P30, BESLUIT-2026-11-06-4.
+- 2026-11-07: "Welke tools uit het boek missen we nog?" → bijlage F (mondelinge verdediging) en G
+  (zes leerprincipes) van *From Oracle to Socratic Partner* worden nog niet gebruikt; "Ja" → brief
+  P31, BESLUIT-2026-11-07-1.
 
 ## Bezig
 
+- **Brief P31 Verdedig je werk en de leercheck (PR open):** een chat-tutor waarin een kritische
+  deskundige de student zijn eigen verslag, stage of project mondeling laat verdedigen (bijlage F),
+  en de leercheck "Hoe actief leren je studenten?" die een opdracht of les scoort op zes
+  leerprincipes (bijlage G). Allebei mogen nu, vóór de pilot (BESLUIT-2026-11-07-1).
 - **P30.1 Exporteren naar Word (PR open):** onder elk resultaat een knop *Exporteer*. Die toont
   eerst een voorbeeld van het bestand en daarna *Download als Word*. Een tool met meerdere stappen
   geeft alle bewaarde stappen in één bestand, met een kop per stap. Een teamlid kan werk exporteren
