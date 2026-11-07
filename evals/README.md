@@ -104,6 +104,31 @@ because every turn waits on the previous one; their judging is still batched.
 npm run eval -- --tool test-items --runs 3 --batch --label q
 ```
 
+## Another model (`--model`)
+
+The prompts were tuned on Claude. To see how another model does on the same cases,
+`--model` makes that model answer every stage of every case, while the judge stays the
+same (`--judge-model`, Claude by default), so the scores are comparable:
+
+```bash
+npm run eval -- --tool mentorai,socratic-partner,test-items --model gpt-6.1-sol --runs 3 --label gpt
+npm run eval -- --tool mentorai --model ollama::qwen3:32b --label qwen   # a local model
+npm run eval -- --tool mentorai --model gpt-6.1-sol --dry-run            # free: checks the id
+```
+
+- The id is one from `config/models.json` (or `ollama::…`, `compat::…`); an unknown id
+  stops the run before any call. The generating model's key must be in `.env`
+  (e.g. `OPENAI_API_KEY`), plus `ANTHROPIC_API_KEY` for the judge.
+- Use a `--label`, so the report does not land on top of a Claude report of the same day.
+  The report's model column shows which model answered.
+- `--batch` still halves the judge's cost; another model's answers go through its own
+  API, because the Message Batches API is Anthropic's.
+- Compare against a Claude measurement of the same tools with `--runs 3`; a difference
+  smaller than the spread is noise. Where to look first: the hard checks of the chat
+  tutors (giving the answer away, more than one question per turn).
+- `--model` is for `npm run eval` only. The separate runners (`eval:coach`, `eval:import`,
+  `eval:agents`, `eval:rehearsal`), which test the JSON answers, still use their own model.
+
 ## Reports & deltas
 
 Each run writes `evals/reports/<date>.md` (human) and `<date>.scores.json`

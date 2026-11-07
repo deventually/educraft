@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
+_Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
 
 ## Nu
 
+- **Typfouten in de prompts (#150) gemerged op 2026-11-07:** zeven oudere Nederlandse
+  chatprompts zonder kapotte woorden en Engelse resten; de Socratische partner (NL) vraagt net
+  als de Engelse algemeen naar voorbeelden in plaats van naar selectiedruk.
 - **P30.2 PDF en Markdown in het menu Exporteer (#146) gemerged op 2026-11-07:** het menu
   *Exporteer* biedt Word, *Print of bewaar als PDF* en Markdown; de losse Markdown-knop is weg.
 - **P30.1 Exporteren naar Word (#144) gemerged op 2026-11-07:** onder elk resultaat een knop
@@ -262,13 +265,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Bezig
 
-- **Typfouten in de prompts (PR open):** zeven oudere Nederlandse chatprompts (peer tutoring,
-  MentorAI v1, scaffolding feedback, think-pair-share, dialogische ontmoetingen v1, Bloom by
-  Design, Socratische partner) bevatten kapotte woorden, een Cyrillische letter en Engelse
-  resten ("guide de denkproces", "medical"). Hersteld op dezelfde plek, zonder `@v2`: de
-  betekenis verandert niet. `tests/prompts.typos.test.ts` houdt ze weg.
-  Ook de Socratische partner (NL) vraagt nu, net als de Engelse, algemeen naar voorbeelden in
-  plaats van naar selectiedruk en generaties (biologie uit het boek).
+- **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
+  model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
+  Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg
+  €1–3 en wacht op Bastiaans akkoord. Daarbij een fix: Ollama kreeg geen contextgrootte mee en
+  kapte een lang document zonder melding af; nu 32768 tokens (`OLLAMA_NUM_CTX`).
 - **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
   (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
   deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
