@@ -183,3 +183,35 @@ body {
 .md hr {
   @apply my-6 border-slate-200;
 }
+
+/*
+ * Print (brief P30.2): one stylesheet for the print page, the grade calculator and the
+ * rubric. A4 with margins; a table's header row repeats on every page and rows stay whole.
+ * The app's header and footer carry `print:hidden`.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+  body {
+    background: white;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr,
+  li,
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-inside: avoid;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+}

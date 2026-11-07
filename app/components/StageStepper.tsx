@@ -229,7 +229,6 @@ export function StageStepper({
                   <ResultPanel
                     markdown={st?.output ?? ""}
                     title={loc(stage.name, locale)}
-                    filenameBase={`${tool.slug}-${stage.id}`}
                     streaming={st?.streaming}
                     lang={outputLanguage}
                   />

@@ -2,12 +2,13 @@ import type { ReactNode } from "react";
 import type { ExportDoc } from "~/lib/export/doc";
 import type { Block, Run } from "~/lib/export/markdown";
 
-type Level = 3 | 4 | 5 | 6;
-const H = { 3: "h3", 4: "h4", 5: "h5", 6: "h6" } as const;
+const H = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+const SIZE = ["text-2xl", "text-xl", "", "", "", ""] as const;
 
 function Heading({ level, children }: { level: number; children: ReactNode }) {
-  const Tag = H[Math.min(Math.max(level, 3), 6) as Level];
-  return <Tag className="font-semibold text-slate-900">{children}</Tag>;
+  const i = Math.min(Math.max(level, 1), 6) - 1;
+  const Tag = H[i];
+  return <Tag className={`font-semibold text-slate-900 ${SIZE[i]}`}>{children}</Tag>;
 }
 
 function Runs({ runs }: { runs: Run[] }) {
@@ -82,17 +83,27 @@ function Blocks({ blocks, parent }: { blocks: Block[]; parent: number }) {
 
 /**
  * An `ExportDoc` as HTML (brief P30.1): the same model the file is written from, so the
- * preview shows what the download will hold. The title is an h3, under the result's h2.
+ * preview shows what the download will hold. The title is an h3 under the result's h2 by
+ * default; the print page (P30.2) makes it the page's h1.
  */
-export function ExportPreview({ doc }: { doc: ExportDoc }) {
+export function ExportPreview({
+  doc,
+  level = 3,
+  className = "space-y-3 text-sm text-slate-800",
+}: {
+  doc: ExportDoc;
+  /** The title's heading level; steps and their own headings follow one deeper. */
+  level?: number;
+  className?: string;
+}) {
   return (
-    <div lang={doc.locale} className="space-y-3 text-sm text-slate-800">
-      <Heading level={3}>{doc.title}</Heading>
+    <div lang={doc.locale} className={className}>
+      <Heading level={level}>{doc.title}</Heading>
       {doc.sections.map((s, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: sections are static, in order
         <div key={i} className="space-y-2">
-          {s.heading && <Heading level={4}>{s.heading}</Heading>}
-          <Blocks blocks={s.blocks} parent={s.heading ? 4 : 3} />
+          {s.heading && <Heading level={level + 1}>{s.heading}</Heading>}
+          <Blocks blocks={s.blocks} parent={s.heading ? level + 1 : level} />
         </div>
       ))}
     </div>

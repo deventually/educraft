@@ -6,8 +6,8 @@ describe("formatsFor (P30.1)", () => {
     expect([...EXPORT_KINDS]).toEqual(["document", "table", "rubric", "slides", "test-items"]);
   });
 
-  it("offers Word for every kind", () => {
-    for (const kind of EXPORT_KINDS) expect(formatsFor([kind])).toContain("docx");
+  it("offers Word, PDF and Markdown for every kind, in that order", () => {
+    for (const kind of EXPORT_KINDS) expect(formatsFor([kind])).toEqual(["docx", "pdf", "md"]);
   });
 
   it("offers each format once for a result with several kinds", () => {

@@ -103,6 +103,12 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByRole("navigation", { name: "Mobiele navigatie" })).toBeNull();
   });
 
+  it("leaves its header and footer off a printed page (P30.2)", () => {
+    renderShell();
+    expect(screen.getByRole("banner")).toHaveClass("print:hidden");
+    expect(screen.getByRole("contentinfo")).toHaveClass("print:hidden");
+  });
+
   it("shows the footer on normal pages", () => {
     renderShell();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();

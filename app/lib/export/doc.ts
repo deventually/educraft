@@ -12,6 +12,8 @@ export interface ExportSection {
   heading: string | null;
   kind: ExportKind;
   blocks: Block[];
+  /** The step's markdown as written, for the Markdown file. */
+  markdown: string;
 }
 
 export interface ExportDoc {
@@ -37,6 +39,7 @@ export function toExportDoc({ title, locale, sections }: ExportInput): ExportDoc
         heading: s.heading,
         kind: s.kind ?? "document",
         blocks: parseMarkdown(s.markdown),
+        markdown: s.markdown.trim(),
       }))
       .filter((s) => s.blocks.length > 0),
   };

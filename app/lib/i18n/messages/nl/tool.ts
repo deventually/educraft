@@ -19,7 +19,6 @@ export const tool = {
   english: "Engels",
   errorPrefix: "Er ging iets mis",
   evaluatedWith: "Geëvalueerd met {model}.",
-  exportMd: "Exporteer (Markdown)",
   fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
   generate: "Genereer",
   generating: "Bezig met genereren…",

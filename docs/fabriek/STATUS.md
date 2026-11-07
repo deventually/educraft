@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **P30.1 Exporteren naar Word (#144) gemerged op 2026-11-07:** onder elk resultaat een knop
+  *Exporteer* met eerst een voorbeeld en dan *Download als Word*; meerdere stappen in één bestand.
 - **Brief P30 Exporteren (#143) gemerged op 2026-11-07:** Word en PDF nu (30.1, 30.2), de
   rest na de pilot (BESLUIT-2026-11-06-5). Twee vragen voor Bastiaan staan in de brief.
 - **AI-modellen beheren (#139) gemerged op 2026-11-06:** op "Tools en modellen" voegt een
@@ -265,11 +267,12 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
   knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
   Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
   anonimiseren). De leercheck (31.3) loopt tegelijk in een eigen PR.
-- **P30.1 Exporteren naar Word (PR open):** onder elk resultaat een knop *Exporteer*. Die toont
-  eerst een voorbeeld van het bestand en daarna *Download als Word*. Een tool met meerdere stappen
-  geeft alle bewaarde stappen in één bestand, met een kop per stap. Een teamlid kan werk exporteren
-  dat bij een gedeelde cursus hoort, maar nooit werk van een tool met studentwerk. Het dossier
-  gebruikt dezelfde Word-code. Geen nieuwe bibliotheek. PDF (30.2) volgt na deze PR.
+- **P30.2 PDF en Markdown in het menu Exporteer (PR open):** *Print of bewaar als PDF* opent
+  het resultaat als nette pagina in een nieuw tabblad, met het printvenster van de browser
+  ("Opslaan als PDF"); geen bibliotheek. Markdown is een derde keuze in hetzelfde menu; de losse
+  knop "Exporteer (Markdown)" boven het resultaat is weg (keuze Bastiaan, 2026-11-07). Het menu
+  staat ook bij *Eerder gemaakt*. Bij printen vallen de kop en voet van de app weg, ook bij de
+  cijferrekenaar en de rubric.
 - **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
   *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
   microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar

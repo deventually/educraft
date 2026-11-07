@@ -11,6 +11,7 @@ import { courseLinkIntent, loadCourseLinks } from "~/server/courses.server";
 import { CourseLinkBadges, CourseLinkForm } from "~/components/courses/CourseLinks";
 import { getToolBySlug } from "~/lib/registry";
 import { ResultPanel } from "~/components/ResultPanel";
+import { ExportMenu } from "~/components/export/ExportMenu";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
 import { Badge, Button, Label, Select } from "~/components/ui";
 import { EmptyState } from "~/components/EmptyState";
@@ -119,14 +120,11 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                   </div>
                 </summary>
                 <div className="space-y-3 border-t border-slate-100 p-3">
-                  <ResultPanel
-                    markdown={g.outputMarkdown}
-                    title={loc(g.toolName, locale)}
-                    filenameBase={`${g.toolSlug}-${g.id.slice(0, 8)}`}
-                  />
+                  <ResultPanel markdown={g.outputMarkdown} title={loc(g.toolName, locale)} />
                   {/* Feedback lives on the projects list: every generation — one-shot,
                       multi-stage, and chat sessions (saved as one row) — is ratable
                       here by its known id, without plumbing ids through the SSE stream. */}
+                  <ExportMenu generationId={g.id} />
                   <FeedbackWidget generationId={g.id} />
                   <CourseLinkForm
                     generationId={g.id}
