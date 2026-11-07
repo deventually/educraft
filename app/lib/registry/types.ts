@@ -44,7 +44,13 @@ export interface FieldOption {
 }
 
 /** Scalar teaching-context attributes a field may derive its default from. */
-export type ProfilePrefillSource = "studyYear" | "eqf" | "programme" | "courseName" | "domain";
+export type ProfilePrefillSource =
+  | "studyYear"
+  | "eqf"
+  | "programme"
+  | "courseName"
+  | "domain"
+  | "pedagogy";
 
 /**
  * Declares that a field's initial value can be derived from the selected
@@ -52,8 +58,8 @@ export type ProfilePrefillSource = "studyYear" | "eqf" | "programme" | "courseNa
  * already states. The field stays editable — a per-task override.
  */
 export interface ProfilePrefill {
-  /** Profile attribute to read. */
-  source: ProfilePrefillSource;
+  /** Profile attribute to read; with a list, the first one the profile has. */
+  source: ProfilePrefillSource | ProfilePrefillSource[];
   /**
    * Optional lookup from the (stringified) source value to this field's value —
    * e.g. mapping a study year 1–4 onto a course-level option. When omitted, the

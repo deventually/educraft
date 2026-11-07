@@ -50,6 +50,8 @@ export const arcsReactor: Tool = {
   inputs: [
     {
       name: "discipline",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: ["programme", "domain"] },
       label: { nl: "Discipline", en: "Discipline" },
       kind: "text",
       required: true,

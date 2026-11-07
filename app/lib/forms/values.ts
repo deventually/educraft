@@ -64,8 +64,9 @@ export function profilePrefillValues(
   for (const f of fields) {
     const spec = f.prefillFromProfile;
     if (!spec) continue;
-    const raw = attrs[spec.source];
-    if (raw == null || raw === "") continue;
+    const sources = Array.isArray(spec.source) ? spec.source : [spec.source];
+    const raw = sources.map((s) => attrs[s]).find((v) => v != null && v !== "");
+    if (raw == null) continue;
     // With a map, translate the (stringified) source value; without one, copy
     // the raw value through, preserving its type (e.g. a numeric study year).
     const value = spec.map ? spec.map[String(raw)] : (raw as string | number);
