@@ -84,7 +84,9 @@ describe("tool: socratic-partner", () => {
     const tool = getToolBySlug("socratic-partner")!;
     const prompt = PROMPTS[tool.stages[0].systemPromptId];
     for (const text of [prompt.runtime.nl, prompt.runtime.en]) {
-      expect(text).not.toMatch(/selectiedruk|selection pressure|populatie|population|generaties|generations/i);
+      expect(text).not.toMatch(
+        /selectiedruk|selection pressure|populatie|population|generaties|generations/i,
+      );
     }
     expect(prompt.runtime.nl).toContain("drijvende kracht");
     expect(prompt.runtime.en).toContain("driving force");
