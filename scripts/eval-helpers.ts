@@ -89,7 +89,7 @@ export function parseJudgeResult(raw: string): JudgeResult | null {
   try {
     obj = JSON.parse(stripped.slice(first, last + 1));
   } catch {
-    return null;
+    obj = salvageJudgeJson(stripped);
   }
   if (typeof obj !== "object" || obj === null) return null;
 
@@ -114,6 +114,27 @@ export function parseJudgeResult(raw: string): JudgeResult | null {
           .map(([k]) => k)
       : [];
   return { scores, failedChecks, worst: strField("worst"), verdict: strField("verdict") };
+}
+
+/**
+ * Rescue a verdict whose JSON broke on free text, such as an unescaped quote in "worst"
+ * (meting dyw3: the English case was not judged in all three runs). The `scores` and
+ * `checks` objects hold only numbers and booleans, so they parse on their own; the free
+ * text is kept as it stands, up to the next field.
+ */
+function salvageJudgeJson(raw: string): unknown {
+  const object = (name: string): unknown => {
+    const m = new RegExp(`"${name}"\\s*:\\s*(\\{[^{}]*\\})`).exec(raw);
+    if (!m) return undefined;
+    try {
+      return JSON.parse(m[1]);
+    } catch {
+      return undefined;
+    }
+  };
+  const text = (name: string): string | undefined =>
+    new RegExp(`"${name}"\\s*:\\s*"([\\s\\S]*?)"\\s*(?:,\\s*"\\w+"\\s*:|\\}\\s*$)`).exec(raw)?.[1];
+  return { scores: object("scores"), checks: object("checks"), worst: text("worst"), verdict: text("verdict") };
 }
 
 /**

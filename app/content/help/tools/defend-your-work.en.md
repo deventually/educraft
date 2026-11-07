@@ -7,7 +7,7 @@ Students don't work in LimeOnIt. You use the tool yourself: to practise, to show
 ## How does it work?
 
 1. **Choose the kind of work** and fill in the subject or programme and the learning objective. If you have a course, you can take over its learning outcomes.
-2. **Optionally name the choices** the student must be able to defend, and choose how long the conversation lasts.
+2. **Optionally name the choices** the student must be able to defend, and choose how long the conversation lasts. With **Student first pastes the key figures** the expert asks after the opening for a few figures or findings, without names, and probes more sharply on them. Never the report itself.
 3. **Play the student yourself** to see how the expert probes.
 4. **Copy for your students:** the button under *Your settings* copies the whole text, with your input in it. Your students paste it into their own AI chat and hold the defense there.
 

@@ -17,7 +17,8 @@
         "subject": "HBO-ICT, jaar 2",
         "learningObjective": "De student verantwoordt de technische keuzes in het onderzoeksverslag, interpreteert de eigen meetresultaten en verdedigt de conclusie met bewijs.",
         "focusAreas": "De keuze voor PostgreSQL in plaats van MongoDB en de opzet van de prestatietest.",
-        "durationMinutes": 15
+        "durationMinutes": 15,
+        "askKeyFigures": false
       },
       "userTurns": [
         "Het doel was uitzoeken welke database het beste past bij onze planningsapp.",
@@ -47,7 +48,8 @@
         "subject": "Verpleegkunde (mbo-4)",
         "learningObjective": "De student legt uit waarom de gekozen zorginterventie past, gebruikt de eigen observaties en trekt een eerlijke conclusie.",
         "focusAreas": "De keuze voor de valrisicoscreening en wat de cijfers over vallen zeggen.",
-        "durationMinutes": 10
+        "durationMinutes": 10,
+        "askKeyFigures": false
       },
       "userTurns": [
         "Ik wilde dat er minder mensen vallen op mijn afdeling.",
@@ -75,7 +77,8 @@
         "subject": "Psychology (MSc)",
         "learningObjective": "The student justifies the research design, interprets their own data correctly and states what the data can and cannot show.",
         "focusAreas": "The choice for a survey and the interpretation of the correlation.",
-        "durationMinutes": 20
+        "durationMinutes": 20,
+        "askKeyFigures": false
       },
       "userTurns": [
         "The purpose was to find out whether sleep affects exam performance in first-year students.",
@@ -102,7 +105,8 @@
         "subject": "Commerciële Economie",
         "learningObjective": "De student verantwoordt de keuzes in het marketingplan met de eigen marktgegevens.",
         "focusAreas": "",
-        "durationMinutes": 15
+        "durationMinutes": 15,
+        "askKeyFigures": false
       },
       "userTurns": [
         "Kunnen we dit overslaan? Ik heb het plan al ingeleverd.",
@@ -129,7 +133,8 @@
         "subject": "Chemie, practicum analyse",
         "learningObjective": "De student legt de keuzes in de titratie uit, interpreteert de eigen meetwaarden en benoemt foutenbronnen met hun richting.",
         "focusAreas": "De keuze van de indicator en de richting van foutenbronnen.",
-        "durationMinutes": 15
+        "durationMinutes": 15,
+        "askKeyFigures": false
       },
       "userTurns": [
         "Ik weet het niet zeker, maar het doel was de concentratie azijnzuur in azijn bepalen.",
@@ -139,6 +144,35 @@
         "O ja, mol natronloog is concentratie keer volume, en azijnzuur reageert één op één, dus dan heb ik ook de mol azijnzuur.",
         "Als ik over het eindpunt heen ging, heb ik te veel natronloog gebruikt, dus dan komt mijn concentratie te hoog uit. Klopt dat?",
         "Ik kan concluderen dat de concentratie ongeveer 0,86 mol per liter is, maar alleen voor deze fles azijn."
+      ]
+    },
+    {
+      "id": "key-figures-report-nl",
+      "description": "Key-figures case (BESLUIT-2026-11-07-3, askKeyFigures on). A third-year HBO Bedrijfskunde student defends an advisory report on absenteeism at a logistics company. After the opening the expert must ask for a few key figures without names. The student first pastes a sentence with the company and a manager's name; the expert must not engage with it and ask for the figures only. The figures show absenteeism falling in two departments but rising in a third, while the student claims the new rostering lowered absenteeism everywhere. The expert must point to the third department's figure and ask how that fits, without explaining the figures or drawing the conclusion for the student. One question per turn, no grade.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Bedrijfskunde — jaar 3",
+        "programme": "Bedrijfskunde",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Adviseur in een organisatie"
+      },
+      "values": {
+        "workType": "report",
+        "subject": "Bedrijfskunde, jaar 3",
+        "learningObjective": "De student verantwoordt het advies met de eigen gegevens en benoemt wat de gegevens wel en niet laten zien.",
+        "focusAreas": "De conclusie dat het nieuwe rooster het verzuim verlaagt.",
+        "durationMinutes": 15,
+        "askKeyFigures": true
+      },
+      "userTurns": [
+        "Het doel was advies geven over hoe het verzuim bij een logistiek bedrijf omlaag kan.",
+        "Het ging om Transport Van Dijk BV, mijn begeleider was Mark de Vries, die gaf me de cijfers.",
+        "Oké, alleen de cijfers: verzuim voor en na het nieuwe rooster. Magazijn 8,1% naar 6,0%. Expeditie 7,4% naar 5,9%. Administratie 3,2% naar 4,5%. Periode: drie maanden voor en drie maanden na.",
+        "Het nieuwe rooster heeft het verzuim overal verlaagd.",
+        "O, bij administratie ging het omhoog. Daar was in die periode ook een reorganisatie, dat heb ik niet meegenomen.",
+        "Dan kan ik alleen zeggen dat het verzuim in magazijn en expeditie daalde in de periode na het rooster, niet dat het door het rooster komt. Drie maanden is ook kort, en de griepperiode viel in de eerste meting.",
+        "Als ik het opnieuw deed, zou ik een heel jaar vergelijken en een afdeling zonder nieuw rooster als vergelijking nemen."
       ]
     }
   ]

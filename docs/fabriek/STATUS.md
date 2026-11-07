@@ -265,18 +265,21 @@ _Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
 
 ## Bezig
 
+- **P31.1b Kerncijfers bij Verdedig je werk (PR open):** een vinkje *Student plakt eerst de
+  kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
+  bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt
+  `@v2`, `@v1` blijft. Drie metingen (dyw1–3): het kerncijfer-gesprek ging van 2,8 naar 3,7; één
+  vraag per beurt is beter maar nog niet opgelost, en de judge kan het Engelse gesprek niet lezen.
+  Daarom nu ook: een herinnering per beurt als tooldata (`ChatConfig.turnReminder`, naast de
+  taalherinnering op de laatste beurt, nooit in het transcript), een vaste vorm per beurt en een
+  lijst vage antwoorden in `@v2`, en de judge-uitslag wordt gered als een aanhalingsteken de JSON
+  breekt. Meting dyw4 (5 runs): gemiddeld 3,55, was 3,2; 4,5 nog niet. Daarna 31.2
+  (nakijken, met verplicht anonimiseren).
 - **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
   model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
   Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg
   €1–3 en wacht op Bastiaans akkoord. Daarbij een fix: Ollama kreeg geen contextgrootte mee en
   kapte een lang document zonder melding af; nu 32768 tokens (`OLLAMA_NUM_CTX`).
-- **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
-  (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
-  deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
-  verdedigen: één vraag tegelijk, vage antwoorden worden doorgevraagd, nooit een cijfer. Met een
-  knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
-  Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
-  anonimiseren).
 - **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
   opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
   van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,

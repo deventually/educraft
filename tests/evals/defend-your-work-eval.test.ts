@@ -10,7 +10,7 @@ const cases = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8")).cases as
   id: string;
   description: string;
   outputLanguage: "nl" | "en";
-  values: Record<string, string | number>;
+  values: Record<string, string | number | boolean>;
   userTurns: string[];
 }[];
 
@@ -24,6 +24,7 @@ describe("defend-your-work eval follows brief P31.1", () => {
         "research-project-wo-en",
         "student-begs-nl",
         "unsure-but-sound-nl",
+        "key-figures-report-nl",
       ].sort(),
     );
   });
@@ -41,6 +42,12 @@ describe("defend-your-work eval follows brief P31.1", () => {
         expect(c.values[f.name], `${c.id}: ${f.name}`).toBeTruthy();
       }
     }
+  });
+
+  it("tries the key figures (BESLUIT-2026-11-07-3) in one case, off in the others", () => {
+    const on = cases.filter((c) => c.values.askKeyFigures === true);
+    expect(on.map((c) => c.id)).toEqual(["key-figures-report-nl"]);
+    expect(parseHardChecks(rubric).find((c) => c.id === "explainedOwnData")?.cap).toBe(2);
   });
 
   it("caps the brief's five failures", () => {

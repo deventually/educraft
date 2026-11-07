@@ -20,9 +20,10 @@ const values = {
     "De student verantwoordt de zorgkeuzes in het eigen stageverslag met gegevens.",
   focusAreas: "De keuze voor de valrisicoscreening en wat de metingen zeggen.",
   durationMinutes: 15,
+  askKeyFigures: false,
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "defend-your-work@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "defend-your-work@v2", values, outputLanguage: lang });
 
 describe("tool: defend-your-work", () => {
   it("registers as a student chat tutor that uses the context profile", () => {
@@ -33,7 +34,7 @@ describe("tool: defend-your-work", () => {
     expect(t.userType).toBe("student");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v1");
+    expect(t.stages[0]?.systemPromptId).toBe("defend-your-work@v2");
     expect(t.enabled).toBe(true);
     expect(t.chat?.allowStop).toBe(true);
     expect(t.chat?.allowRegenerate).toBe(true);
@@ -71,6 +72,99 @@ describe("tool: defend-your-work", () => {
     expect(duration?.kind).toBe("number");
     expect(duration?.defaultValue).toBe(15);
   });
+
+  it("keeps @v1 registered for conversations that still use it", () => {
+    expect(getPrompt("defend-your-work@v1").id).toBe("defend-your-work@v1");
+    expect(getPrompt("defend-your-work@v2").verbatim).toBe(
+      getPrompt("defend-your-work@v1").verbatim,
+    );
+  });
+
+  it("offers the key figures as an optional checkbox, off by default (BESLUIT-2026-11-07-3)", () => {
+    const field = tool().inputs.find((f) => f.name === "askKeyFigures");
+    expect(field?.kind).toBe("boolean");
+    expect(field?.required).not.toBe(true);
+    expect(field?.defaultValue).toBe(false);
+    expect(loc(field?.label, "nl")).toBe("Student plakt eerst de kerncijfers");
+    expect(loc(field?.label, "en")).toBe("Student first pastes the key figures");
+  });
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`asks for key figures only when ticked, never the report or names (${lang})`, () => {
+      const on = buildSystemPrompt({
+        promptId: "defend-your-work@v2",
+        values: { ...values, askKeyFigures: true },
+        outputLanguage: lang,
+      });
+      expect(on).toContain(
+        lang === "nl" ? "Kerncijfers gevraagd: true" : "Key figures asked: true",
+      );
+      const p = on.toLowerCase();
+      if (lang === "nl") {
+        expect(p).toContain("### kerncijfers");
+        expect(p).toContain("niet het verslag zelf");
+        expect(p).toContain("zonder namen");
+        expect(p).toContain("leg de cijfers niet uit");
+        // Meting dyw2: the expert still read the figures out for the student.
+        expect(p).toContain("zeg dus nooit zelf wat een cijfer betekent");
+        expect(p).toContain("tel voor je antwoordt de vraagtekens");
+        expect(p).toContain("niet blijven hangen");
+        expect(p).toContain("als dit `false` is, sla dit deel over");
+      } else {
+        expect(p).toContain("### key figures");
+        expect(p).toContain("not the report itself");
+        expect(p).toContain("without names");
+        expect(p).toContain("don't explain the figures");
+        expect(p).toContain("so never say yourself what a figure means");
+        expect(p).toContain("count the question marks in your turn");
+        expect(p).toContain("don't get stuck");
+        expect(p).toContain("if this is `false`, skip this part");
+      }
+    });
+  }
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`models one question per turn, never two in one line (meting dyw1, ${lang})`, () => {
+      const p = runtime(lang);
+      expect(p.toLowerCase()).toContain(
+        lang === "nl" ? "precies één vraagteken" : "exactly one question mark",
+      );
+      for (const line of p.split("\n")) {
+        expect((line.match(/\?/g) ?? []).length, line).toBeLessThanOrEqual(1);
+      }
+    });
+  }
+
+  it("reminds the tutor every turn: one short reaction, one question, probe vague answers", () => {
+    const nl = loc(tool().chat?.turnReminder, "nl");
+    const en = loc(tool().chat?.turnReminder, "en");
+    expect(nl.toLowerCase()).toContain("precies één vraagteken");
+    expect(en.toLowerCase()).toContain("exactly one question mark");
+    expect(nl).toContain("hooguit twee korte zinnen");
+    expect(en).toContain("at most two short sentences");
+    expect(nl).toContain("vaag");
+    expect(en).toContain("vague");
+    // The reminder itself asks nothing, so it cannot model a second question.
+    expect(nl).not.toContain("?");
+    expect(en).not.toContain("?");
+  });
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`names the vague answers of meting dyw3 and forbids praising them first (${lang})`, () => {
+      const p = runtime(lang).toLowerCase();
+      if (lang === "nl") {
+        expect(p).toContain("iedereen gebruikt het");
+        expect(p).toContain("het ging beter");
+        expect(p).toContain("prijs of bedank een vaag antwoord niet");
+        expect(p).toContain("vaste vorm van je beurt");
+      } else {
+        expect(p).toContain("everyone uses it");
+        expect(p).toContain("it went better");
+        expect(p).toContain("don't praise or thank a vague answer");
+        expect(p).toContain("fixed shape of your turn");
+      }
+    });
+  }
 
   it("offers the text to copy for students", () => {
     expect(tool().copyableStudentPrompt).toBe(true);
@@ -127,7 +221,7 @@ describe("tool: defend-your-work", () => {
 
   it("resolves with the optional focus left empty", () => {
     const p = buildSystemPrompt({
-      promptId: "defend-your-work@v1",
+      promptId: "defend-your-work@v2",
       values: { ...values, focusAreas: "" },
       outputLanguage: "nl",
     });

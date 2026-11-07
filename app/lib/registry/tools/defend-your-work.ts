@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { DEFEND_YOUR_WORK_PROMPT } from "~/lib/prompts/defend-your-work@v1.prompt";
+import { DEFEND_YOUR_WORK_PROMPT_V2 } from "~/lib/prompts/defend-your-work@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 
 const WORK = { nl: "Het werk", en: "The work" };
@@ -127,6 +127,21 @@ export const defendYourWork: Tool = {
       step: 5,
       group: DEFENSE,
     },
+    {
+      // BESLUIT-2026-11-07-3: a few figures, never the report itself, to probe more sharply.
+      name: "askKeyFigures",
+      label: {
+        nl: "Student plakt eerst de kerncijfers",
+        en: "Student first pastes the key figures",
+      },
+      kind: "boolean",
+      defaultValue: false,
+      help: {
+        nl: "De tutor vraagt na de opening om een paar cijfers of bevindingen uit het eigen werk, zonder namen, en vraagt daarop scherper door. Nooit het verslag zelf.",
+        en: "After the opening the tutor asks for a few figures or findings from the student's own work, without names, and probes more sharply on them. Never the report itself.",
+      },
+      group: DEFENSE,
+    },
   ],
   stages: [
     {
@@ -136,7 +151,7 @@ export const defendYourWork: Tool = {
         nl: "Een deskundige uit het werkveld vraagt door op je keuzes, je gegevens en je conclusie.",
         en: "An expert from the field probes your choices, your data and your conclusion.",
       },
-      systemPromptId: DEFEND_YOUR_WORK_PROMPT.id,
+      systemPromptId: DEFEND_YOUR_WORK_PROMPT_V2.id,
       output: {
         kind: "markdown",
         hint: {
@@ -163,5 +178,10 @@ export const defendYourWork: Tool = {
     ],
     allowStop: true,
     allowRegenerate: true,
+    // Meting dyw3: in a long chat the tutor drifted to two questions and praised vague answers.
+    turnReminder: {
+      nl: "Herinnering voor deze beurt: hooguit twee korte zinnen reactie, dan één vraag. Precies één vraagteken in je beurt, aan het eind. Is het antwoord vaag, prijs het dan niet, maar vraag eerst om het concreet te maken. Leg niet uit wat de student zelf moet zeggen.",
+      en: "Reminder for this turn: at most two short sentences of reaction, then one question. Exactly one question mark in your turn, at the end. If the answer is vague, don't praise it, but first ask to make it specific. Don't explain what the student should say themselves.",
+    },
   },
 };
