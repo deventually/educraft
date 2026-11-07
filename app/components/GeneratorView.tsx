@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Sparkles, Square, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Sparkles, Square } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
@@ -20,6 +20,7 @@ import { takeHandoff } from "~/lib/forms/handoff";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
+import { FormResultLayout } from "~/components/FormResultLayout";
 import { DocumentViewer } from "./documents/DocumentViewer";
 import { extractQuotes } from "~/lib/documents/locate";
 import { restoreNames, type CodeTable } from "~/lib/privacy/redact";
@@ -234,135 +235,148 @@ export function GeneratorView({
     setStreaming(false);
   }
 
-  return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-      <div className="space-y-4">
-        {/* First, because choosing a course fills the learning outcomes below it. */}
-        <CoursePicker
-          courses={courses ?? []}
-          value={courseId}
-          onChange={selectCourse}
-          disabled={streaming}
-        />
-        <DynamicForm
-          fields={tool.inputs}
-          values={values}
-          onChange={setValue}
-          onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
-        />
-        <ToolControls
-          usesContextProfile={tool.usesContextProfile}
-          profiles={profiles}
-          contextProfileId={contextProfileId}
-          onProfile={selectProfile}
-          outputLanguage={outputLanguage}
-          onLanguage={setOutputLanguage}
-          model={model}
-          onModel={setModel}
-          localModels={localModels}
-          catalogModels={catalogModels}
-          disabled={streaming}
-          requiresImages={hasImageInputs}
-        />
-        <div className="flex items-center gap-3">
-          {streaming ? (
-            <Button variant="secondary" onClick={stop}>
-              <Square className="size-4" /> {t.tool.stop}
-            </Button>
-          ) : (
-            <Button onClick={generate} disabled={reviewing}>
-              <Sparkles className="size-4" /> {t.tool.generate}
-            </Button>
-          )}
-        </div>
-        {error && (
-          <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            {error}
-          </p>
-        )}
-      </div>
+  // After a result the form can fold away, so the viewer and the result get the width.
+  const canFold = Boolean(output) && !streaming && !reviewing;
 
-      {/* Sticky in the shell's scroll region, which starts under the 4rem header (+1px
-          border): 1rem gap above and below, so the notice at its foot stays on screen. */}
-      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start">
-        <div
-          className={cn(
-            "min-h-0 flex-1",
-            docFiles &&
-              (output || streaming) &&
-              !reviewing &&
-              "grid grid-cols-1 gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1",
-          )}
-        >
-          {docFiles && docField && !reviewing && (
-            <div
-              data-viewer-box
-              className={cn(
-                // A height of its own, so a long document scrolls inside the viewer.
-                "h-[80dvh] min-h-0 min-w-0 lg:h-full",
-                (output || streaming) && "2xl:order-2",
-              )}
-            >
-              <DocumentViewer
-                files={docFiles}
-                text={aiText(docField.name)}
-                quotes={quotes}
-                onFoundQuotes={setFoundQuotes}
-                focus={focus}
-                onBack={backToQuote}
-              />
-            </div>
-          )}
-          {reviewing ? (
-            <div className="h-full min-h-0 overflow-y-auto">
-              <RedactReview
-                fields={redactFields.map((f) => ({
-                  name: f.name,
-                  label: loc(f.label, locale),
-                  text: String(values[f.name] ?? ""),
-                }))}
-                draft={redactDraft}
-                onDraft={setRedactDraft}
-                onConfirm={sendRedacted}
-                onCancel={() => setReviewing(false)}
-              />
-            </div>
-          ) : output || streaming ? (
-            <ResultPanel
-              markdown={shown}
-              streaming={streaming}
-              fill
-              lang={outputLanguage}
-              computed={
-                streaming ? null : computeResultNote(stage.output.computed, shown, outputLanguage)
-              }
-              quotes={docFiles ? foundQuotes : undefined}
-              onQuote={docFiles ? showQuote : undefined}
-            />
-          ) : docFiles ? null : (
-            <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
-              {fmt(t.tool.emptyResult, { action: t.tool.generate })}
-            </div>
-          )}
-        </div>
-        {/* Persistent AI-transparency notice; stronger "teacher decides" variant
-            for grading tools, driven by registry data. */}
-        {resultContext && output && !streaming && !reviewing && (
-          <div className="shrink-0">
-            <ResultActions
-              {...resultContext}
-              generationId={generationId}
-              courseId={courseId}
-              itemId={itemId}
-            />
+  return (
+    <FormResultLayout
+      canFold={canFold}
+      form={
+        <>
+          {/* First, because choosing a course fills the learning outcomes below it. */}
+          <CoursePicker
+            courses={courses ?? []}
+            value={courseId}
+            onChange={selectCourse}
+            disabled={streaming}
+          />
+          <DynamicForm
+            fields={tool.inputs}
+            values={values}
+            onChange={setValue}
+            onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
+          />
+          <ToolControls
+            usesContextProfile={tool.usesContextProfile}
+            profiles={profiles}
+            contextProfileId={contextProfileId}
+            onProfile={selectProfile}
+            outputLanguage={outputLanguage}
+            onLanguage={setOutputLanguage}
+            model={model}
+            onModel={setModel}
+            localModels={localModels}
+            catalogModels={catalogModels}
+            disabled={streaming}
+            requiresImages={hasImageInputs}
+          />
+          <div className="flex items-center gap-3">
+            {streaming ? (
+              <Button variant="secondary" onClick={stop}>
+                <Square className="size-4" /> {t.tool.stop}
+              </Button>
+            ) : (
+              <Button onClick={generate} disabled={reviewing}>
+                <Sparkles className="size-4" /> {t.tool.generate}
+              </Button>
+            )}
           </div>
-        )}
-        {codes && output && !reviewing && (
-          <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
-        )}
-        <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="shrink-0" />
-      </div>
-    </div>
+          {error && (
+            <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              {error}
+            </p>
+          )}
+        </>
+      }
+    >
+      {(folded) => (
+        // Sticky in the shell's scroll region, which starts under the 4rem header (+1px
+        // border): 1rem gap above and below, so the notice at its foot stays on screen.
+        <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start">
+          <div
+            className={cn(
+              "min-h-0 flex-1",
+              docFiles &&
+                (output || streaming) &&
+                !reviewing &&
+                (folded
+                  ? "grid grid-cols-1 gap-3 lg:grid-cols-2"
+                  : "grid grid-cols-1 gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1"),
+            )}
+          >
+            {docFiles && docField && !reviewing && (
+              <div
+                data-viewer-box
+                className={cn(
+                  // A height of its own, so a long document scrolls inside the viewer.
+                  "h-[80dvh] min-h-0 min-w-0 lg:h-full",
+                  (output || streaming) && (folded ? "lg:order-2" : "2xl:order-2"),
+                )}
+              >
+                <DocumentViewer
+                  files={docFiles}
+                  text={aiText(docField.name)}
+                  quotes={quotes}
+                  onFoundQuotes={setFoundQuotes}
+                  focus={focus}
+                  onBack={backToQuote}
+                />
+              </div>
+            )}
+            {reviewing ? (
+              <div className="h-full min-h-0 overflow-y-auto">
+                <RedactReview
+                  fields={redactFields.map((f) => ({
+                    name: f.name,
+                    label: loc(f.label, locale),
+                    text: String(values[f.name] ?? ""),
+                  }))}
+                  draft={redactDraft}
+                  onDraft={setRedactDraft}
+                  onConfirm={sendRedacted}
+                  onCancel={() => setReviewing(false)}
+                />
+              </div>
+            ) : output || streaming ? (
+              <ResultPanel
+                markdown={shown}
+                streaming={streaming}
+                fill
+                lang={outputLanguage}
+                computed={
+                  streaming ? null : computeResultNote(stage.output.computed, shown, outputLanguage)
+                }
+                quotes={docFiles ? foundQuotes : undefined}
+                onQuote={docFiles ? showQuote : undefined}
+              />
+            ) : docFiles ? null : (
+              <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">
+                {fmt(t.tool.emptyResult, { action: t.tool.generate })}
+              </div>
+            )}
+          </div>
+          {/* Persistent AI-transparency notice; stronger "teacher decides" variant
+            for grading tools, driven by registry data. */}
+          {resultContext && output && !streaming && !reviewing && (
+            <div className="shrink-0">
+              <ResultActions
+                {...resultContext}
+                generationId={generationId}
+                courseId={courseId}
+                itemId={itemId}
+              />
+            </div>
+          )}
+          {codes && output && !reviewing && (
+            <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
+          )}
+          <AiNotice
+            variant={tool.assistiveGrading ? "assistive" : "generic"}
+            className="shrink-0"
+          />
+        </div>
+      )}
+    </FormResultLayout>
   );
 }

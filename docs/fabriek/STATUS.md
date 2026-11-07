@@ -275,6 +275,13 @@ _Laatst bijgewerkt: 2026-11-07 (eerlijker meten bij Verdedig je werk in een open
 
 ## Bezig
 
+- **Formulier in- en uitklappen bij een resultaat (PR open):** zodra er een resultaat staat, klapt
+  de docent het formulier weg met *Formulier inklappen*; resultaat en documentviewer krijgen dan de
+  volle breedte (op een breed scherm naast elkaar). *Formulier uitklappen* haalt het terug, met alle
+  invoer nog ingevuld. Geldt voor elke formulier-tool en ook voor de tools met stappen
+  (`FormResultLayout`). In dezelfde PR twee viewer-verbeteringen: een klik op een citaat markeert
+  de woorden zelf op de PDF-pagina (of in de Word-alinea) en scrolt daarheen, en een PDF wordt bij
+  inzoomen opnieuw getekend op de getoonde grootte, zodat de tekst scherp blijft.
 - **Eerlijker meten bij Verdedig je werk (PR open):** de beoordelaar ziet alleen de checks die
   hij zelf beoordeelt, en moet elke fout bewijzen met een letterlijk citaat dat de code in het
   gesprek terugvindt; een dubbele vraag in één zin (`compoundQuestion`, cap 4) telt de code zelf.

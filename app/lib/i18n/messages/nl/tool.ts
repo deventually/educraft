@@ -21,6 +21,8 @@ export const tool = {
   errorPrefix: "Er ging iets mis",
   evaluatedWith: "Geëvalueerd met {model}.",
   fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
+  formHide: "Formulier inklappen",
+  formShow: "Formulier uitklappen",
   generate: "Genereer",
   generating: "Bezig met genereren…",
   imageRemove: "Verwijderen",

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { FormResultLayout } from "~/components/FormResultLayout";
 import { Sparkles, Square, AlertTriangle, Lock, RotateCcw } from "lucide-react";
 import type { Tool, OutputLanguage, ToolStage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
@@ -154,32 +155,39 @@ export function StageStepper({
     setStage(id, { streaming: false });
   }
 
-  return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
-      <div className="space-y-4">
-        {/* First, because choosing a course fills the learning outcomes below it. */}
-        <CoursePicker courses={courses ?? []} value={courseId} onChange={selectCourse} />
-        <ToolControls
-          usesContextProfile={tool.usesContextProfile}
-          profiles={profiles}
-          contextProfileId={contextProfileId}
-          onProfile={selectProfile}
-          outputLanguage={outputLanguage}
-          onLanguage={setOutputLanguage}
-          model={model}
-          onModel={setModel}
-          localModels={localModels}
-          catalogModels={catalogModels}
-        />
-        <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
-        {formError && (
-          <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            {formError}
-          </p>
-        )}
-      </div>
+  // Once a step has a result the form can fold away; a missing field keeps it open.
+  const canFold = Object.values(stages).some((st) => st.output) && !formError;
 
+  return (
+    <FormResultLayout
+      canFold={canFold}
+      formWidth="narrow"
+      form={
+        <>
+          {/* First, because choosing a course fills the learning outcomes below it. */}
+          <CoursePicker courses={courses ?? []} value={courseId} onChange={selectCourse} />
+          <ToolControls
+            usesContextProfile={tool.usesContextProfile}
+            profiles={profiles}
+            contextProfileId={contextProfileId}
+            onProfile={selectProfile}
+            outputLanguage={outputLanguage}
+            onLanguage={setOutputLanguage}
+            model={model}
+            onModel={setModel}
+            localModels={localModels}
+            catalogModels={catalogModels}
+          />
+          <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
+          {formError && (
+            <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              {formError}
+            </p>
+          )}
+        </>
+      }
+    >
       <div className="min-w-0 space-y-4">
         {tool.stages.map((stage) => {
           const st = stages[stage.id];
@@ -257,6 +265,6 @@ export function StageStepper({
         {/* Persistent AI-transparency notice under the staged results. */}
         <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} />
       </div>
-    </div>
+    </FormResultLayout>
   );
 }

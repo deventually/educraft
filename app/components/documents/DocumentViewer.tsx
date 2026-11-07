@@ -6,6 +6,7 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loadOriginal, type OriginalDoc } from "~/lib/documents/original";
 import { locateAll, locateQuote, type Hit } from "~/lib/documents/locate";
+import { highlightRects, renderWidth, type PageLayout } from "~/lib/documents/pdfLayout";
 import { BLOCK_SELECTOR, SafeNodes } from "./SafeNodes";
 import { VIEWER_ID } from "../quoteLinks";
 
@@ -120,14 +121,20 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
       for (const el of blocks) el.removeAttribute("data-located");
       target = located ? blocks[located.segment] : undefined;
       target?.setAttribute("data-located", "true");
+      highlightWords(target, located);
     } else if (located) {
       target = document.getElementById(`${uid}-page-${located.segment}`);
     }
     const pane = bodyRef.current;
     if (!target || !pane || typeof pane.scrollTo !== "function") return;
-    const top =
-      target.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop - 8;
-    pane.scrollTo({ top, behavior: "smooth" });
+    // The marked words themselves when the page knows where they are, else the block or page.
+    const mark = target.querySelector<HTMLElement>("[data-highlight]") ?? target;
+    const box = mark.getBoundingClientRect();
+    const paneBox = pane.getBoundingClientRect();
+    const room = mark === target ? 8 : pane.clientHeight / 3;
+    const top = box.top - paneBox.top + pane.scrollTop - room;
+    const left = box.left - paneBox.left + pane.scrollLeft - 16;
+    pane.scrollTo({ top, left: Math.max(0, left), behavior: "smooth" });
   }, [located, load, docxBlocks, uid]);
 
   const isPdf = load.status === "ready" && load.doc.kind === "pdf";
@@ -388,7 +395,7 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
                   doc={load.doc}
                   zoom={zoom}
                   idPrefix={`${uid}-page-`}
-                  locatedPage={located?.segment}
+                  located={located}
                   pageLabel={t.page}
                   fallbackLabel={t.pageTextFallback}
                 />
@@ -450,12 +457,12 @@ interface PdfPagesProps {
   /** 1 fits the pane; more makes the pages wider than the pane (it scrolls). */
   zoom: number;
   idPrefix: string;
-  locatedPage?: number;
+  located: Hit | null;
   pageLabel: string;
   fallbackLabel: string;
 }
 
-function PdfPages({ doc, zoom, idPrefix, locatedPage, pageLabel, fallbackLabel }: PdfPagesProps) {
+function PdfPages({ doc, zoom, idPrefix, located, pageLabel, fallbackLabel }: PdfPagesProps) {
   return (
     <div data-zoom-target className="mx-auto space-y-4" style={{ width: `${zoom * 100}%` }}>
       {doc.pages.map((pageText, i) => (
@@ -466,8 +473,10 @@ function PdfPages({ doc, zoom, idPrefix, locatedPage, pageLabel, fallbackLabel }
           id={`${idPrefix}${i}`}
           caption={fmt(pageLabel, { n: i + 1, total: doc.pages.length })}
           text={pageText}
+          layout={doc.layouts[i]}
+          zoom={zoom}
           renderPage={doc.renderPage}
-          located={locatedPage === i}
+          hit={located?.segment === i ? located : undefined}
           fallbackLabel={fallbackLabel}
         />
       ))}
@@ -483,16 +492,51 @@ interface PdfPageProps {
   id: string;
   caption: string;
   text: string;
-  renderPage: (pageNumber: number) => Promise<string>;
-  located: boolean;
+  layout?: PageLayout;
+  zoom: number;
+  renderPage: (pageNumber: number, width: number) => Promise<string>;
+  /** The hit on this page, marked on the drawing where its words are. */
+  hit?: Hit;
   fallbackLabel: string;
 }
 
-function PdfPage({ index, id, caption, text, renderPage, located, fallbackLabel }: PdfPageProps) {
+/** A page's width in CSS pixels at zoom 1, until the page has been measured. */
+const ESTIMATED_PAGE_WIDTH = 640;
+
+function PdfPage({
+  index,
+  id,
+  caption,
+  text,
+  layout,
+  zoom,
+  renderPage,
+  hit,
+  fallbackLabel,
+}: PdfPageProps) {
   const ref = useRef<HTMLElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const located = hit !== undefined;
   const [near, setNear] = useState(index < EAGER_PAGES);
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<{ url: string; width: number } | null>(null);
   const [failed, setFailed] = useState(false);
+  const [cssWidth, setCssWidth] = useState(0);
+
+  // Measure the page as it shows (zoom and pane width), so it is drawn that sharp.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const measure = () => setCssWidth(sheet.getBoundingClientRect().width);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(sheet);
+    return () => ro.disconnect();
+  }, []);
+  const wanted = renderWidth(
+    cssWidth || ESTIMATED_PAGE_WIDTH * zoom,
+    typeof window === "undefined" ? 1 : window.devicePixelRatio,
+  );
 
   useEffect(() => {
     if (near || !ref.current) return;
@@ -510,17 +554,21 @@ function PdfPage({ index, id, caption, text, renderPage, located, fallbackLabel 
     return () => io.disconnect();
   }, [near]);
 
+  // Draw when near; draw again only when shown larger than drawn (zooming out keeps it).
   useEffect(() => {
-    if (!(near || located) || image || failed) return;
+    if (!(near || located) || failed || (image && image.width >= wanted)) return;
     let cancelled = false;
-    renderPage(index + 1).then(
-      (url) => !cancelled && setImage(url),
+    renderPage(index + 1, wanted).then(
+      (url) => !cancelled && setImage({ url, width: wanted }),
       () => !cancelled && setFailed(true),
     );
     return () => {
       cancelled = true;
     };
-  }, [near, located, image, failed, renderPage, index]);
+  }, [near, located, image, failed, renderPage, index, wanted]);
+
+  const rects = hit && layout ? highlightRects(layout, hit.start, hit.end) : [];
+  const pct = (n: number) => `${n * 100}%`;
 
   return (
     <figure
@@ -530,22 +578,84 @@ function PdfPage({ index, id, caption, text, renderPage, located, fallbackLabel 
       className="scroll-mt-2 rounded-lg border border-slate-200 p-2 data-[located=true]:ring-2 data-[located=true]:ring-amber-400"
     >
       <figcaption className="mb-1 text-xs text-slate-500">{caption}</figcaption>
-      {image ? (
-        <>
-          <img src={image} alt="" className="w-full" />
-          <p className="sr-only">{text}</p>
-        </>
-      ) : failed ? (
+      {failed ? (
         <>
           <p className="text-xs text-slate-500">{fallbackLabel}</p>
-          <p className="whitespace-pre-wrap text-sm text-slate-800">{text}</p>
+          <p className="whitespace-pre-wrap text-sm text-slate-800">
+            {hit ? (
+              <>
+                {text.slice(0, hit.start)}
+                <mark data-highlight className="bg-amber-200">
+                  {text.slice(hit.start, hit.end)}
+                </mark>
+                {text.slice(hit.end)}
+              </>
+            ) : (
+              text
+            )}
+          </p>
         </>
       ) : (
-        <>
-          <div aria-hidden className="aspect-[3/4] w-full animate-pulse rounded bg-slate-100" />
+        <div
+          ref={sheetRef}
+          className="relative w-full"
+          style={{ aspectRatio: layout ? String(layout.aspect) : "3 / 4" }}
+        >
+          {image ? (
+            <img src={image.url} alt="" className="absolute inset-0 size-full" />
+          ) : (
+            <div aria-hidden className="absolute inset-0 animate-pulse rounded bg-slate-100" />
+          )}
+          {rects.map((r, i) => (
+            <span
+              // biome-ignore lint/suspicious/noArrayIndexKey: rectangles are fixed for a hit
+              key={i}
+              aria-hidden
+              data-highlight
+              className="pointer-events-none absolute rounded-sm bg-amber-300/40 ring-2 ring-amber-500"
+              style={{
+                left: pct(r.left),
+                top: pct(r.top),
+                width: pct(r.width),
+                height: pct(r.height),
+              }}
+            />
+          ))}
           <p className="sr-only">{text}</p>
-        </>
+        </div>
       )}
     </figure>
   );
+}
+
+/** The name of the CSS Custom Highlight that marks a hit's words in a Word view (app.css). */
+const HIT_HIGHLIGHT = "document-hit";
+
+/**
+ * Marks the hit's words inside a Word paragraph without touching React's DOM,
+ * through the CSS Custom Highlight API. Where a browser lacks it, the paragraph
+ * mark alone shows the place.
+ */
+function highlightWords(block: HTMLElement | undefined, hit: Hit | null) {
+  const registry = typeof CSS === "undefined" ? undefined : CSS.highlights;
+  if (!registry || typeof Highlight === "undefined") return;
+  registry.delete(HIT_HIGHLIGHT);
+  if (!block || !hit) return;
+  const range = document.createRange();
+  let offset = 0;
+  let started = false;
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const length = node.textContent?.length ?? 0;
+    if (!started && hit.start <= offset + length) {
+      range.setStart(node, hit.start - offset);
+      started = true;
+    }
+    if (started && hit.end <= offset + length) {
+      range.setEnd(node, hit.end - offset);
+      registry.set(HIT_HIGHLIGHT, new Highlight(range));
+      return;
+    }
+    offset += length;
+  }
 }

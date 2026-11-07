@@ -23,6 +23,8 @@ export const tool: Messages["tool"] = {
   errorPrefix: "Something went wrong",
   evaluatedWith: "Evaluated with {model}.",
   fileComingSoon: "File/image input will become available in a later phase.",
+  formHide: "Hide the form",
+  formShow: "Show the form",
   generate: "Generate",
   generating: "Generating…",
   imageRemove: "Remove",

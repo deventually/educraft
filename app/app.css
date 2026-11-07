@@ -215,3 +215,9 @@ body {
     break-after: avoid;
   }
 }
+
+/* A found quote's words in the document viewer's Word view (DocumentViewer). */
+::highlight(document-hit) {
+  background-color: rgb(252 211 77); /* amber-300 */
+  color: inherit;
+}
