@@ -283,7 +283,9 @@ export function GeneratorView({
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
+      {/* Sticky in the shell's scroll region, which starts under the 4rem header (+1px
+          border): 1rem gap above and below, so the notice at its foot stays on screen. */}
+      <div className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100dvh-6rem-1px)] lg:self-start">
         <div
           className={cn(
             "min-h-0 flex-1",

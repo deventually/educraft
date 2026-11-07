@@ -192,7 +192,9 @@ export default function AppShell() {
           height and scrolls its own thread — but the region stays `overflow-y-auto`
           (never clipped): when the header's disclosures are expanded past the
           viewport the page itself scrolls so that content is always reachable. */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      {/* `relative`: hidden screen-reader text (sr-only, absolutely positioned) anchors
+          here instead of against the viewport, so it never makes a page scroll past its footer. */}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
         <main
           id="top"
           ref={mainRef}
