@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Search, ZoomIn, ZoomOut } from "lucide-react";
+import { ArrowUp, Search, ZoomIn, ZoomOut } from "lucide-react";
 import { Button, Input, Select, Spinner } from "~/components/ui";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
@@ -7,14 +7,21 @@ import { fmt } from "~/lib/i18n/format";
 import { loadOriginal, type OriginalDoc } from "~/lib/documents/original";
 import { locateAll, locateQuote, type Hit } from "~/lib/documents/locate";
 import { BLOCK_SELECTOR, SafeNodes } from "./SafeNodes";
+import { VIEWER_ID } from "../quoteLinks";
 
 interface Props {
   /** The uploaded files, kept in browser memory only. */
   files: File[];
   /** The text that goes to the AI (the form field's value). */
   text: string;
-  /** Quotes from the AI result; each gets a "Show in document" button. */
+  /** Quotes from the AI result; the ones found in the original go to `onFoundQuotes`. */
   quotes?: string[];
+  /** Called with the quotes that are really in the original (the result links only those). */
+  onFoundQuotes?: (found: string[]) => void;
+  /** A quote to show, asked for from the result; a new `id` asks again. */
+  focus?: { quote: string; id: number };
+  /** Back to the quote in the result, offered after a jump when the two are stacked. */
+  onBack?: () => void;
 }
 
 type LoadState =
@@ -41,7 +48,7 @@ const ZOOM_FIT = ZOOM_STEPS.indexOf(1);
  * scrolls inside the pane and a long link wraps. The original can be zoomed
  * (PDF pages grow, a Word view reflows). Nothing is uploaded or stored.
  */
-export function DocumentViewer({ files, text, quotes = [] }: Props) {
+export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus, onBack }: Props) {
   const t = useT().documents;
   const uid = useId();
   const [fileIndex, setFileIndex] = useState(0);
@@ -59,6 +66,7 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
     index: -1,
   });
   const bodyRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ original: null, ai: null });
 
   // Load the picked file; a newer pick cancels an older load.
@@ -142,6 +150,28 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
     show(result, where + times);
   }
 
+  // Tell the result which of its quotes are really in the original.
+  const quoteList = quotes.join("\n");
+  useEffect(() => {
+    if (!onFoundQuotes || load.status !== "ready") return;
+    const segs = segments();
+    const wanted = quoteList ? quoteList.split("\n") : [];
+    onFoundQuotes(wanted.filter((q) => locateQuote(segs, q).status === "found"));
+  }, [quoteList, load, segments, onFoundQuotes]);
+
+  // A quote clicked in the result: show it, and bring the viewer into view when
+  // it is stacked under or above the result (phone, laptop).
+  const locateRef = useRef(locate);
+  locateRef.current = locate;
+  useEffect(() => {
+    if (!focus || load.status !== "ready") return;
+    locateRef.current(focus.quote);
+    const root = rootRef.current;
+    if (root && typeof root.scrollIntoView === "function") {
+      root.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [focus, load.status]);
+
   function runSearch(e: React.FormEvent) {
     e.preventDefault();
     const s = searchRef.current;
@@ -179,7 +209,11 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
   ];
 
   return (
-    <div className="@container relative flex h-full min-h-0 min-w-0 flex-col gap-2">
+    <div
+      ref={rootRef}
+      id={VIEWER_ID}
+      className="@container relative flex h-full min-h-0 min-w-0 flex-col gap-2"
+    >
       <div role="tablist" aria-label={t.tabs} className="flex gap-1 @3xl:hidden">
         {tabs.map(([key, label]) => (
           <button
@@ -300,6 +334,18 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
                   </fieldset>
                 </div>
               )}
+              {focus && onBack && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={onBack}
+                  className="2xl:hidden"
+                >
+                  <ArrowUp className="size-4" aria-hidden />
+                  {t.backToResult}
+                </Button>
+              )}
               <div role="status" className="text-xs text-slate-700">
                 {message && <p>{message}</p>}
                 {located && snippet !== undefined && (
@@ -390,33 +436,6 @@ export function DocumentViewer({ files, text, quotes = [] }: Props) {
           </section>
         </div>
       </div>
-
-      {quotes.length > 0 && load.status === "ready" && (
-        <details open className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm">
-          <summary className="cursor-pointer font-medium text-slate-700">
-            {fmt(t.quotes, { n: quotes.length })}
-          </summary>
-          <ul className="mt-2 max-h-36 space-y-2 overflow-y-auto">
-            {quotes.map((q, i) => (
-              <li key={q} className="flex items-start justify-between gap-3">
-                <q id={`${uid}-quote-${i}`} className="text-slate-700">
-                  {q.length > 160 ? `${q.slice(0, 157)}…` : q}
-                </q>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  aria-describedby={`${uid}-quote-${i}`}
-                  onClick={() => locate(q)}
-                  className="shrink-0"
-                >
-                  {t.locate}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
 
       <p className="text-xs text-slate-500">{t.notStored}</p>
     </div>
