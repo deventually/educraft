@@ -60,4 +60,16 @@ describe("defend-your-work eval follows brief P31.1", () => {
     expect(cap("wroteTheDefense")).toBe(1);
     expect(cap("gaveGrade")).toBe(2);
   });
+
+  it("counts a compound question in code, with a soft cap (plan 4.5, step 3)", () => {
+    const check = parseHardChecks(rubric).find((c) => c.id === "compoundQuestion");
+    expect(check?.counted).toBe(true);
+    expect(check?.cap).toBe(4);
+  });
+
+  it("does not blame the expert for the scripted student (plan 4.5, step 4)", () => {
+    expect(rubric).toMatch(/scripted/i);
+    expect(rubric).toMatch(/no closing/i);
+    expect(rubric).toMatch(/not .*(fault|failure)/i);
+  });
 });

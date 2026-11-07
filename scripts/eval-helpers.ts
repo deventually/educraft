@@ -26,6 +26,8 @@ export interface JudgeResult {
   scores: Record<string, number>;
   /** Ids of the rubric's hard checks the judge answered `true` (the failure happened). */
   failedChecks: string[];
+  /** Per failed check, the judge's verbatim quote from the output (see {@link verifyEvidence}). */
+  evidence?: Record<string, string>;
   worst: string;
   verdict: string;
 }
@@ -119,7 +121,20 @@ export function parseJudgeResult(raw: string): JudgeResult | null {
           .filter(([, v]) => v === true)
           .map(([k]) => k)
       : [];
-  return { scores, failedChecks, worst: strField("worst"), verdict: strField("verdict") };
+  const rawEvidence = (obj as Record<string, unknown>).evidence;
+  const evidence: Record<string, string> = {};
+  if (typeof rawEvidence === "object" && rawEvidence !== null) {
+    for (const [k, v] of Object.entries(rawEvidence as Record<string, unknown>)) {
+      if (typeof v === "string" && v.trim()) evidence[k] = v;
+    }
+  }
+  return {
+    scores,
+    failedChecks,
+    ...(Object.keys(evidence).length ? { evidence } : {}),
+    worst: strField("worst"),
+    verdict: strField("verdict"),
+  };
 }
 
 /**
@@ -140,7 +155,13 @@ function salvageJudgeJson(raw: string): unknown {
   };
   const text = (name: string): string | undefined =>
     new RegExp(`"${name}"\\s*:\\s*"([\\s\\S]*?)"\\s*(?:,\\s*"\\w+"\\s*:|\\}\\s*$)`).exec(raw)?.[1];
-  return { scores: object("scores"), checks: object("checks"), worst: text("worst"), verdict: text("verdict") };
+  return {
+    scores: object("scores"),
+    checks: object("checks"),
+    evidence: object("evidence"),
+    worst: text("worst"),
+    verdict: text("verdict"),
+  };
 }
 
 /**
@@ -175,9 +196,72 @@ export function hardChecksInstruction(checks: HardCheck[]): string {
   const lines = asked.map((c) => `- "${c.id}" (cap ${c.cap}): ${c.question}`);
   return [
     'Also answer each HARD CHECK below in a "checks" object: true means the failure DID happen anywhere in the output, false means it did not. Answer from the output itself, not from intent. A turn marked "(greeting)" is fixed app text, not written by the model: ignore it for the checks.',
+    'For every check you answer true, put a verbatim quote from the output that shows the failure in an "evidence" object under the same id, e.g. {"evidence": {"<id>": "<words copied exactly from the output>"}}. Copy the words exactly; a check whose quote is not in the output does not count.',
     ...lines,
   ].join("\n");
 }
+
+/**
+ * The rubric as the judge sees it: without its `## Hard checks` section. The judged checks
+ * reach the judge through {@link hardChecksInstruction}; the counted ones are decided in code.
+ * Meting dyw4: shown the counted "more than one question mark" check, the judge pinned that
+ * complaint on another check in runs with one question mark per turn.
+ */
+export function rubricForJudge(rubric: string): string {
+  const out: string[] = [];
+  let skip = false;
+  for (const line of rubric.split("\n")) {
+    if (/^##\s/.test(line)) skip = /^##\s+hard checks\b/i.test(line);
+    if (!skip) out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+/** Lowercase, straight quotes, one space: a quote matches however the judge spaced or quoted it. */
+function normaliseForQuote(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[‘’‚′]/g, "'")
+    .replace(/[“”„″]/g, '"')
+    .replace(/\*\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Keep a failed judged check only when the judge's quote for it is in the output (meting
+ * dyw4: a run was capped at 1 on a sentence that was not in the transcript). A quote may
+ * leave words out with an ellipsis; every part must then be found. No quote: rejected.
+ */
+export function verifyEvidence(
+  failed: string[],
+  evidence: Record<string, string> | undefined,
+  output: string,
+): { kept: string[]; rejected: string[] } {
+  const haystack = normaliseForQuote(output);
+  const found = (quote: string) => {
+    const parts = normaliseForQuote(quote)
+      .replace(/^["']|["']$/g, "")
+      .split(/\s*(?:…|\.\.\.)\s*/)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    return parts.length > 0 && parts.every((p) => haystack.includes(p));
+  };
+  const kept: string[] = [];
+  const rejected: string[] = [];
+  for (const id of failed) {
+    const quote = evidence?.[id];
+    (quote && found(quote) ? kept : rejected).push(id);
+  }
+  return { kept, rejected };
+}
+
+/**
+ * Two questions in one sentence that ends in a single question mark (meting dyw4: 44% of the
+ * tutor's turns): "…, en wat doet die met je resultaat?", "…, and how do you know?".
+ */
+export const COMPOUND_QUESTION =
+  /,\s*(?:en|of|and|or)\s+(?:wat|hoe|waarom|welke|welk|wie|waar|wanneer|hoeveel|in hoeverre|is|zijn|was|waren|kun|kan|zou|zouden|heb|had|maakt|doet|wordt|klopt|what|how|why|which|who|where|when|to what extent|are|were|do|does|did|can|could|would|has|have)\b[^.!?]*\?/i;
 
 /**
  * The model's turns in a chat transcript (`**Tutor:** …`), without the fixed
@@ -233,6 +317,11 @@ export const COUNTED_CHECKS: Record<string, (transcript: string) => boolean> = {
   tooManyOpenPoints: (t) => openPointCount(t) > 8,
   longTurn: (t) => tutorTurns(t).some((turn) => countWords(turn) > 150 || LIST_OR_HEADING.test(turn)),
   severalQuestions: (t) => tutorTurns(t).some((turn) => (turn.match(/\?/g) ?? []).length > 1),
+  compoundQuestion: (t) =>
+    tutorTurns(t).some((turn) =>
+      // Only the sentence that holds the question: "9 en 4, en dat is een verschil." is not one.
+      (turn.match(/[^.!?]*\?/g) ?? []).some((q) => COMPOUND_QUESTION.test(q)),
+    ),
   /** Role-play (P24.8): every turn in the role, i.e. all but the final feedback turn. */
   longRoleTurn: (t) =>
     tutorTurns(t)
@@ -462,11 +551,21 @@ export function judgeFileName(caseId: string, run: number): string {
 export function judgeRecord(j: {
   scores: Record<string, number>;
   failedChecks?: string[];
+  /** Checks the judge failed without a quote that is in the output: not applied (meting dyw4). */
+  rejectedChecks?: string[];
+  evidence?: Record<string, string>;
   worst: string;
   verdict: string;
 }): string {
   return `${JSON.stringify(
-    { scores: j.scores, failedChecks: j.failedChecks ?? [], worst: j.worst, verdict: j.verdict },
+    {
+      scores: j.scores,
+      failedChecks: j.failedChecks ?? [],
+      ...(j.rejectedChecks?.length ? { rejectedChecks: j.rejectedChecks } : {}),
+      ...(j.evidence ? { evidence: j.evidence } : {}),
+      worst: j.worst,
+      verdict: j.verdict,
+    },
     null,
     2,
   )}\n`;

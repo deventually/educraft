@@ -29,6 +29,8 @@ import {
   JUDGE_MAX_TOKENS,
   judgeFileName,
   judgeRecord,
+  rubricForJudge,
+  verifyEvidence,
 } from "../../scripts/eval-helpers";
 
 describe("clampScore", () => {
@@ -431,6 +433,87 @@ describe("counted checks (decided in code, not by the judge)", () => {
     expect(COUNTED_CHECKS.severalQuestions("**Tutor:** Wat is f? En wat is g?")).toBe(true);
   });
 
+  it("compoundQuestion fails on two questions in one sentence with one question mark (meting dyw4)", () => {
+    const fails = [
+      "Dat is te vaag. Welke fout precies, en wat doet die met je resultaat?",
+      "Maakt die griepperiode het verschil groter of kleiner, en hoe weet je dat?",
+      "Verwacht je bij opgelost natriumacetaat een pH onder, rond of boven 7, en waarom?",
+      "Hoe kwam je aan die 62 studenten, en in hoeverre lijken zij op je klanten?",
+      "Welke zorginterventie heb je ingezet, en waarom koos je juist die?",
+      "Which error exactly, and what does it do to your result?",
+      "Was it larger or smaller, and how do you know?",
+    ];
+    for (const q of fails)
+      expect(COUNTED_CHECKS.compoundQuestion(`**Tutor:** Goed. ${q}`), q).toBe(true);
+    const passes = [
+      "Wat zou er nog meer veranderd kunnen zijn op je afdeling, los van de screening?",
+      "Maakt die fout je uitkomst groter of kleiner?",
+      "Welke bron, techniek of doelgroep koos je?",
+      "Je noemt 9 en 4, en dat is een verschil. Wat zegt dat verschil volgens jou?",
+      "What did your data show, step by step?",
+    ];
+    for (const q of passes)
+      expect(COUNTED_CHECKS.compoundQuestion(`**Tutor:** ${q}`), q).toBe(false);
+    // The fixed greeting is not the model's.
+    expect(
+      COUNTED_CHECKS.compoundQuestion(
+        "**Tutor (greeting):** Wat deed je, en waarom?\n\n**Student:** x",
+      ),
+    ).toBe(false);
+  });
+
+  it("shows the judge the rubric without its hard-check section (meting dyw4)", () => {
+    const rubric =
+      "# Rubric\n\n- **taskFidelity** — does it.\n\n## Hard checks\n\nIntro.\n\n- **severalQuestions** (cap 2, counted): more than one question mark?\n- **gaveGrade** (cap 2): a grade?\n\n## Notes\n\nKeep me.";
+    const shown = rubricForJudge(rubric);
+    expect(shown).toContain("taskFidelity");
+    expect(shown).toContain("Keep me.");
+    expect(shown).not.toContain("severalQuestions");
+    expect(shown).not.toContain("question mark");
+    // The judged checks still reach the judge, through the HARD CHECKS instruction.
+    expect(hardChecksInstruction(parseHardChecks(rubric))).toContain('"gaveGrade"');
+  });
+
+  it("asks the judge for a verbatim quote per failed check", () => {
+    const text = hardChecksInstruction(
+      parseHardChecks("## Hard checks\n- **gaveGrade** (cap 2): grade?"),
+    );
+    expect(text).toContain('"evidence"');
+    expect(text).toContain("verbatim");
+  });
+
+  it("keeps a failed check only when its quote is in the transcript (meting dyw4)", () => {
+    const out =
+      "**Tutor:** Dat is een duidelijk doel. Welke keuze maakte je?\n\n**Student:** Iedereen gebruikt het.\n\n**Tutor:** Goed. Wat zeggen jouw cijfers?";
+    const r = verifyEvidence(
+      ["acceptedVagueAnswer", "wroteTheDefense", "gaveGrade"],
+      {
+        // Curly quotes, other spacing and case still match.
+        acceptedVagueAnswer: "iedereen  gebruikt het",
+        // An invented quote (internship run 5).
+        wroteTheDefense: "Precies, als er vallen niet zijn gemeld",
+      },
+      out,
+    );
+    expect(r.kept).toEqual(["acceptedVagueAnswer"]);
+    expect(r.rejected).toEqual(["wroteTheDefense", "gaveGrade"]);
+  });
+
+  it("accepts a quote with an ellipsis when every part is in the transcript", () => {
+    const out = "**Tutor:** Dat is een duidelijk doel. Welke keuze maakte je?";
+    expect(
+      verifyEvidence(["x"], { x: "Dat is een duidelijk doel… Welke keuze" }, out).kept,
+    ).toEqual(["x"]);
+    expect(verifyEvidence(["x"], { x: "Dat is… iets anders dan dit" }, out).kept).toEqual([]);
+  });
+
+  it("parses the judge's evidence", () => {
+    const r = parseJudgeResult(
+      '{"scores":{"a":4},"checks":{"gaveGrade":true},"evidence":{"gaveGrade":"een 7"},"worst":"","verdict":""}',
+    );
+    expect(r?.evidence).toEqual({ gaveGrade: "een 7" });
+  });
+
   it("decides counted checks in code and asks the judge only the others", () => {
     const checks = parseHardChecks(
       "## Hard checks\n- **longTurn** (cap 3, counted): lists?\n- **gaveAnswer** (cap 2): answer?",
@@ -488,6 +571,19 @@ describe("the judge's verdict is kept next to each output (meting n, 2026-11-04)
       worst: "w",
       verdict: "v",
     });
+  });
+
+  it("keeps the checks whose quote was not in the output, as judge errors", () => {
+    const rec = judgeRecord({
+      scores: { taskFidelity: 4 },
+      failedChecks: [],
+      rejectedChecks: ["wroteTheDefense"],
+      evidence: { wroteTheDefense: "Precies, als er vallen…" },
+      worst: "w",
+      verdict: "v",
+    });
+    expect(JSON.parse(rec).rejectedChecks).toEqual(["wroteTheDefense"]);
+    expect(JSON.parse(rec).evidence).toEqual({ wroteTheDefense: "Precies, als er vallen…" });
   });
 });
 
