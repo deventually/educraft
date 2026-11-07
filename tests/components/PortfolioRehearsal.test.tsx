@@ -16,8 +16,10 @@ const Page = PortfolioRehearsal as ComponentType<any>;
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const ID = "dossier-1";
 
-function renderPage() {
+function renderPage(provisional = false) {
   const d = sampleDossier();
+  if (provisional)
+    d.framework = { ...d.framework, national: true, provisional: true, confirmedAt: 1 };
   const loaderData = {
     id: ID,
     name: "Mijn BDB",
@@ -42,6 +44,20 @@ function renderPage() {
 }
 
 describe("Oefen je eindgesprek (29.3)", () => {
+  it("says the committee judges on the national starting point when the framework is provisional", () => {
+    renderPage(true);
+    expect(
+      screen.getByText(
+        "Voorlopig kader: de AI beoordeelt op het landelijke startpunt, niet op het formulier van je hogeschool.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows no provisional notice on the institution's own framework", () => {
+    renderPage();
+    expect(screen.queryByText(/landelijke startpunt/)).toBeNull();
+  });
+
   it("asks for the length and the outcomes first, accessibly", async () => {
     const { container } = renderPage();
     expect(screen.getByRole("heading", { name: "Oefen je eindgesprek" })).toBeInTheDocument();

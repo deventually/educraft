@@ -72,6 +72,8 @@ export const peerTutoring: Tool = {
     },
     {
       name: "discipline",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: ["programme", "domain"] },
       label: {
         nl: "Vakgebied",
         en: "Discipline",

@@ -21,6 +21,7 @@ export function EvidenceTextField({
   const [failed, setFailed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const helpId = useId();
+  const textHelpId = useId();
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -46,8 +47,10 @@ export function EvidenceTextField({
           rows={5}
           value={value}
           maxLength={LIMITS.documentText}
+          aria-describedby={textHelpId}
           onChange={(e) => setValue(e.target.value)}
         />
+        <HelpText id={textHelpId}>{t.evidenceTextHelp}</HelpText>
       </div>
       <div>
         <Label htmlFor={`${id}-file`}>{t.evidenceUpload}</Label>

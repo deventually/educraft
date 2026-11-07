@@ -19,6 +19,26 @@
         "sourceMaterials": "Hoofdstuk 'Normalisatie' met definities van 1NF, 2NF, 3NF en twee uitgewerkte voorbeelden.",
         "preferredApproach": "Een Socratische begeleider die studenten zelf de normalisatiestappen laat ontdekken."
       }
+    },
+    {
+      "id": "new-design-eqf6",
+      "description": "BDB/BKE plan PR 3, prompt @v2: no legacy activity (a new design). The analyst must invent no existing activity, give no CEI or ratings, write 'Nieuw ontwerp: geen bestaande activiteit', and still pick 2-3 Priority Principles with a reason. ~4 API calls.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Verpleegkunde — jaar 2",
+        "programme": "Verpleegkunde",
+        "domain": "Zorg & welzijn",
+        "courseName": "Klinisch redeneren",
+        "eqf": 6
+      },
+      "values": {
+        "gradeSubject": "hbo jaar 2, Klinisch redeneren",
+        "learningObjective": "De student stelt bij een casus met een verslechterende patiënt een prioriteitenlijst op en onderbouwt elke prioriteit met de ABCDE-methode.",
+        "legacyActivity": "",
+        "instructionalPhase": "Begeleide oefening",
+        "sourceMaterials": "Een casus van een 72-jarige patiënt op dag 2 na een heupoperatie, met vitale waarden op drie meetmomenten, en een overzicht van de ABCDE-methode.",
+        "preferredApproach": ""
+      }
     }
   ]
 }
