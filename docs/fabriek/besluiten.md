@@ -265,3 +265,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-06-5:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
   en PDF voor elk resultaat, geen nieuwe bibliotheek) mogen vóór de pilot; Excel, PowerPoint,
   Brightspace en de huisstijl volgen na de pilotfeedback. Bastiaan, 2026-11-06 (keuzekaart).
+- **BESLUIT-2026-11-07-1:** **Bijlagen F en G uit het boek worden brief P31:** een tutor voor de
+  mondelinge verdediging van eigen werk (F) en de leercheck met de zes leerprincipes (G). Bouwen
+  valt onder "tot de pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4), tenzij Bastiaan een
+  uitzondering maakt. Bastiaan, 2026-11-07. Uitwerking: brief P31.
