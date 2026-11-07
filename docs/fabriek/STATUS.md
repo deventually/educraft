@@ -273,8 +273,9 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
   gemaakt): het niveau van begrip (uitstekend, op niveau, in ontwikkeling, beginnend), opvallende
   leerhoudingen, feedback voor de student en notities voor de docent. Studentwerk: eerst
   anonimiseren in de browser (verplicht, BESLUIT-2026-11-07-2), de docent beslist, nooit gedeeld.
-  Wat de AI in het gesprek zei, telt niet mee. Volgende stap onder *Verdedig je werk*. Meting nog
-  te draaien (`npm run eval -- --tool defense-review`). Met de docs van 31.4.
+  Wat de AI in het gesprek zei, telt niet mee. Volgende stap onder *Verdedig je werk*. Meting dr1:
+  gemiddeld 4,52 (één vals alarm van de judge); F.4 woord voor woord gecontroleerd. Met de docs
+  van 31.4.
 - **Andere AI-modellen meten (PR open):** `npm run eval -- --model gpt-6.1-sol` laat een ander
   model dezelfde cases beantwoorden, met dezelfde (Claude-)beoordelaar, zodat je ziet of de op
   Claude afgestemde prompts ook elders werken. Nog niets gemeten; dat kost per model ruwweg

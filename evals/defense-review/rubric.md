@@ -35,4 +35,4 @@ A failed check caps every score (the cap is the maximum), however good the rest 
 - **guessedIdentity** (cap 2): Did the output replace a code such as [BEDRIJF] or [BEGELEIDER-1] with a made-up name, or guess who is behind a code?
 - **attributeWithoutEvidence** (cap 3): Did the output name a learner attribute without tying it to a concrete moment in the transcript?
 - **analysedNonDefense** (cap 1): Only for the case whose transcript is not a conversation: did the output produce an analysis anyway instead of asking for the right transcript? For the other cases, answer false.
-- **implausibleRating** (cap 2): Is the rating clearly outside the expected band named in the case description?
+- **implausibleRating** (cap 2): Is the rating clearly outside the expected band named in the case description? A rating inside the expected band never fails this check, even if you would have chosen the other level in the band or a caveat is attached to it.

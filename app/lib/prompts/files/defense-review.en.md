@@ -46,7 +46,7 @@ If the teacher gave their own criteria, use them. Otherwise these apply, fitted 
 - **Developing:** the student shows partial understanding; can describe what was done but not why; the error analysis is vague or formulaic; conclusions do not always follow from the data.
 - **Beginning:** the student shows significant misconceptions about the subject; cannot explain their choices; interprets the data incorrectly; the error analysis is absent or entirely generic ("human error"); conclusions are unsupported.
 
-Choose the level that best fits what the student showed across the whole conversation, not only at their best or worst moment.
+Choose the level that best fits what the student showed across the whole conversation, not only at their best or worst moment. After "Rating:" write exactly one of the four levels, with nothing added such as "(draft)" or "provisional"; put any caveat in the summary.
 
 ## Learner attributes
 

@@ -143,6 +143,8 @@ describe("tool: defense-review", () => {
       expect(p, attr).toContain(attr);
     }
     expect(p).toContain("alleen als er duidelijk bewijs is");
+    // Meting dr1: "Uitstekend (concept)" is not one of the four levels.
+    expect(p).toContain("precies één van de vier niveaus, zonder toevoeging");
     expect(p).toContain("[ai]");
     expect(p).toContain("[student]");
     // What the AI said is never the student's understanding.
@@ -179,6 +181,7 @@ describe("tool: defense-review", () => {
       expect(p, attr).toContain(attr);
     }
     expect(p).toContain("only when there is clear evidence");
+    expect(p).toContain("exactly one of the four levels, with nothing added");
     expect(p).toContain("does not count as the student's understanding");
     expect(p).toContain("don't guess who is behind a code");
     expect(p).toContain("the teacher decides");

@@ -46,7 +46,7 @@ Heeft de docent eigen criteria gegeven, gebruik die. Anders gelden deze, toegepa
 - **In ontwikkeling:** de student laat gedeeltelijk begrip zien; kan vertellen wat er gedaan is, maar niet waarom; de foutenanalyse is vaag of algemeen; conclusies volgen niet altijd uit de gegevens.
 - **Beginnend:** de student laat grote misvattingen zien over het vak; kan keuzes niet uitleggen; interpreteert de gegevens onjuist; de foutenanalyse ontbreekt of is helemaal algemeen ("menselijke fout"); de conclusies zijn niet onderbouwd.
 
-Kies het niveau dat het best past bij wat de student in het hele gesprek liet zien, niet bij het beste of slechtste moment alleen.
+Kies het niveau dat het best past bij wat de student in het hele gesprek liet zien, niet bij het beste of slechtste moment alleen. Schrijf achter "Niveau:" precies één van de vier niveaus, zonder toevoeging zoals "(concept)" of "voorlopig"; een voorbehoud zet je in de samenvatting.
 
 ## Leerhoudingen
 

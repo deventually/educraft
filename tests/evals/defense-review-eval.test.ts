@@ -54,5 +54,9 @@ describe("defense-review eval follows brief P31.2", () => {
     expect(cap("gaveGrade")).toBe(2);
     expect(cap("guessedIdentity")).toBe(2);
     expect(cap("analysedNonDefense")).toBe(1);
+    // Meting dr1: the judge failed "Uitstekend" while the case expected Proficient or Exemplary.
+    expect(checks.find((c) => c.id === "implausibleRating")?.question).toContain(
+      "A rating inside the expected band never fails",
+    );
   });
 });
