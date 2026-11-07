@@ -13,6 +13,7 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import { COACH_LIMITS } from "./schema";
+import { evidencePending } from "./evidence";
 import type { CoachReview, CriterionReview, DossierData, Outcome } from "./types";
 import { VERDICTS } from "./types";
 import type { Locale } from "~/lib/i18n";
@@ -47,6 +48,8 @@ const LABELS = {
     empty: "(Het hoofdstuk is nog leeg.)",
     truncated: "[… ingekort]",
     linkedTo: "hoort bij",
+    provisional: "Voorlopig kader: het landelijke startpunt, niet het formulier van de hogeschool.",
+    pending: "(Volgt nog: hier is nog geen tekst. Telt nog niet als bewijs.)",
   },
   en: {
     institution: "Institution",
@@ -59,6 +62,8 @@ const LABELS = {
     empty: "(The chapter is still empty.)",
     truncated: "[… shortened]",
     linkedTo: "belongs to",
+    provisional: "Provisional framework: the national starting point, not the institution's form.",
+    pending: "(Still to come: there is no text yet. Does not count as evidence yet.)",
   },
 } as const;
 
@@ -92,7 +97,9 @@ function evidenceBlock(
   items.forEach((e, i) => {
     if (budget <= 0) return;
     const keys = e.criterionIds.flatMap((id) => keyOf.get(id) ?? []).join(", ");
-    const text = clip(e.text, Math.min(COACH_INPUT_LIMITS.evidenceItem, budget), l.truncated);
+    const text = evidencePending(e)
+      ? l.pending
+      : clip(e.text, Math.min(COACH_INPUT_LIMITS.evidenceItem, budget), l.truncated);
     budget -= text.length;
     parts.push(
       `<item id="B${i + 1}" kind="${e.kind}" ${l.linkedTo}="${keys}">\n# ${e.title}\n${text}\n</item>`,
@@ -124,6 +131,7 @@ export function buildCoachMessage(d: DossierData, outcomeId: string, locale: Loc
     : l.none;
   return [
     `${l.institution}: ${d.framework.institution || l.none}`,
+    ...(d.framework.provisional ? [l.provisional] : []),
     `${l.outcome}: ${[o.code, o.title].filter(Boolean).join(" ")}`,
     `<criteria>\n${criteriaBlock(o, l)}\n</criteria>`,
     `<required-evidence>\n${l.required}:\n${required}\n</required-evidence>`,
@@ -148,7 +156,8 @@ export function buildDraftMessage(
   const o = outcomeOf(d, outcomeId);
   if (!o.criteria.some((c) => c.id === criterionId))
     throw new Error(`Unknown criterion: ${criterionId}`);
-  if (!d.evidence.some((e) => e.criterionIds.includes(criterionId))) return null;
+  if (!d.evidence.some((e) => e.criterionIds.includes(criterionId) && !evidencePending(e)))
+    return null;
   const l = LABELS[locale];
   const chapter = d.chapters.find((ch) => ch.outcomeId === outcomeId)?.text.trim() ?? "";
   return [

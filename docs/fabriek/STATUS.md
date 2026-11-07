@@ -290,6 +290,14 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
   hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
   de docent aanvinkt wordt overgenomen (`importChapters`), plus aangevinkte nieuwe bronnen.
   Bijlagen blijven in LimeOnIt leidend.
+- **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
+  startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
+  en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:
+  de coach weet dat het komt, het is geen bron voor een alinea. *AI-leeractiviteit ontwerpen* kan
+  zonder huidige activiteit (prompt `@v2`) en *Cursus op samenhang controleren* zonder pedagogische
+  benadering (prompt `@v2`); beide met een nieuwe eval-case, de meting moet nog. Vak, discipline en
+  onderwerp komen in negen tools uit je onderwijscontext. Een voorlopig kader is een rood
+  punt in *Klaar om in te leveren?*: de export geeft dan alleen de conceptversie (BESLUIT-2026-11-07-5).
 - **Figuren uit het document meesturen (PR open):** bij *Studentwerk beoordelen* zie je na het
   uploaden de afbeeldingen uit Word en de PDF-pagina's met een figuur als plaatjes bij
   *Kernfiguren*. Standaard gaat er niets mee; wat je aanvinkt gaat naar het model (max. 10), met

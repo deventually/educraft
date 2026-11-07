@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
-import { getRuntimePrompt } from "~/lib/prompts";
+import { getPrompt, getRuntimePrompt } from "~/lib/prompts";
 
 // Covers every input field name so `buildSystemPrompt` can resolve the analyst
 // stage (the only stage that reads the tool inputs).
@@ -133,6 +133,50 @@ describe("tool: cognitive-architect", () => {
       }
     }
   });
+
+  it("lets the current activity stay empty: a new design (BDB/BKE plan, PR 3)", () => {
+    const field = getToolBySlug("cognitive-architect")!.inputs.find(
+      (f) => f.name === "legacyActivity",
+    );
+    expect(field?.required).not.toBe(true);
+    expect(field?.label).toEqual({
+      nl: "Huidige activiteit (optioneel)",
+      en: "Current activity (optional)",
+    });
+    expect(field?.help).toEqual({
+      nl: "Laat leeg voor een nieuw ontwerp.",
+      en: "Leave empty for a new design.",
+    });
+  });
+
+  it("runs the analyst on @v2 and keeps @v1 registered", () => {
+    const analyst = getToolBySlug("cognitive-architect")!.stages[0];
+    expect(analyst.systemPromptId).toBe("cognitive-architect-analyst@v2");
+    expect(getPrompt("cognitive-architect-analyst@v1").id).toBe("cognitive-architect-analyst@v1");
+    expect(getPrompt("cognitive-architect-analyst@v2").verbatim).toBe(
+      getPrompt("cognitive-architect-analyst@v1").verbatim,
+    );
+  });
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`@v2 diagnoses a new design without inventing an activity or a score (${lang})`, () => {
+      const prompt = buildSystemPrompt({
+        promptId: "cognitive-architect-analyst@v2",
+        values: { ...SAMPLE_INPUTS, legacyActivity: "" },
+        outputLanguage: lang,
+      }).toLowerCase();
+      expect(prompt).not.toMatch(/\{\{\w+\}\}/);
+      if (lang === "nl") {
+        expect(prompt).toContain("nieuw ontwerp");
+        expect(prompt).toContain("verzin geen bestaande activiteit");
+        expect(prompt).toContain("geen cei");
+      } else {
+        expect(prompt).toContain("new design");
+        expect(prompt).toContain("do not invent an existing activity");
+        expect(prompt).toContain("no cei");
+      }
+    });
+  }
 
   it("carries CC BY 4.0 attribution and is flagged as adapted", () => {
     const tool = getToolBySlug("cognitive-architect")!;

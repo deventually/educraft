@@ -94,6 +94,8 @@ export const defenseReview: Tool = {
     },
     {
       name: "subject",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: ["courseName", "programme"] },
       label: { nl: "Vak of opleiding", en: "Subject or programme" },
       kind: "text",
       required: true,

@@ -34,6 +34,11 @@ export const portfolioReadiness = {
       ok: "Every piece of evidence has text.",
       problem: "This evidence is still to come, it has no text: {detail}",
     },
+    "framework-provisional": {
+      ok: "Your framework is your institution's form.",
+      problem:
+        "You are still working with a provisional framework: the national starting point. Copy in your institution's form and confirm the framework.",
+    },
     "framework-unconfirmed": {
       ok: "Your framework is confirmed.",
       problem: "Your framework is not confirmed yet.",

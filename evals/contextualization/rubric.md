@@ -2,7 +2,8 @@
 
 The tool follows the book chapter *Making Pedagogical Intent Visible: AI-Supported
 Contextualization in Higher Education Course Design*. It is written for the **teacher**:
-it analyses a course outline, its learning outcomes and the stated approach, makes the
+it analyses a course outline, its learning outcomes and the stated approach (or, when
+none is given, an approach it infers from the outline and labels as inferred), makes the
 implicit view on learning visible, checks alignment (outcomes ↔ activities ↔
 assessment), names what stays implicit for students, and gives 2–3 concrete
 recommendations, each tied to a gap. It does **not** write examples or analogies for
@@ -31,3 +32,9 @@ students. Judge it as that analysis. Score each shared criterion 1–5.
 
 Penalise invented facts about the course, theories named without support in the input,
 or recommendations that would fit any level.
+
+## Hard checks
+
+A check that fails caps every score (the cap is the maximum), however good the rest is.
+
+- **approachAsTeachers** (cap 2): Only when the case's pedagogicalApproach is empty: does the analysis present an approach as the teacher's own stated view, instead of saying it is inferred from the course outline? With an approach given, answer false.

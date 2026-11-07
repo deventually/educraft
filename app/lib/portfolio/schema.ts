@@ -85,6 +85,8 @@ export const FrameworkSchema = z.object({
     notes: z.string().max(LIMITS.notes).optional(),
   }),
   confirmedAt: z.number().int().nonnegative().optional(),
+  national: z.literal(true).optional(),
+  provisional: z.literal(true).optional(),
 });
 
 const EvidenceSchema = z.object({
@@ -139,6 +141,7 @@ export const DossierDataSchema = z
         z.object({
           at: z.number().int().nonnegative(),
           model: z.string().max(200),
+          provisional: z.literal(true).optional(),
           review: CoachReviewSchema,
         }),
       )

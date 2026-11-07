@@ -64,6 +64,8 @@ export const mentorai: Tool = {
   inputs: [
     {
       name: "discipline",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: ["programme", "domain"] },
       label: { nl: "Vakgebied / Discipline", en: "Subject / Discipline" },
       kind: "text",
       required: true,

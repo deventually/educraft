@@ -44,15 +44,18 @@ export function markersIn(text: string): string[] {
 
 export type OpenSpot =
   | { kind: "marker" | "empty"; where: "chapter"; outcomeId: string; text: string }
-  | { kind: "marker" | "empty"; where: "evidence"; evidenceId: string; text: string };
+  | { kind: "marker" | "empty"; where: "evidence"; evidenceId: string; text: string }
+  /** A provisional framework (BESLUIT-2026-11-07-5): the institution's form is still to come. */
+  | { kind: "provisional"; where: "framework"; text: "" };
 
 /**
- * Every open spot the export would carry, in export order: per outcome its
+ * Every open spot the export would carry, in export order: a provisional framework, per outcome its
  * chapter (a marker, or empty), then per evidence item (a marker, or no text;
  * `text` is then its title).
  */
 export function openSpots(d: DossierData): OpenSpot[] {
   const spots: OpenSpot[] = [];
+  if (d.framework.provisional) spots.push({ kind: "provisional", where: "framework", text: "" });
   for (const o of d.framework.outcomes) {
     const text = d.chapters.find((ch) => ch.outcomeId === o.id)?.text ?? "";
     if (!text.trim()) spots.push({ kind: "empty", where: "chapter", outcomeId: o.id, text: "" });
