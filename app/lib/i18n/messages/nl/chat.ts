@@ -1,5 +1,10 @@
 export const chat = {
   continue: "Doorgaan",
+  copiedForStudents: "Gekopieerd. Je studenten kunnen de tekst nu in hun eigen AI-chat plakken.",
+  copyFailed: "Kopiëren lukte niet. Probeer het opnieuw.",
+  copyForStudents: "Kopieer voor je studenten",
+  copyForStudentsHint:
+    "Je studenten plakken deze tekst in hun eigen AI-chat. Jouw invoer staat erin.",
   edit: "Aanpassen",
   enterHint: "Enter om te versturen · Shift+Enter voor een nieuwe regel",
   inputPlaceholder: "Jouw bericht…",

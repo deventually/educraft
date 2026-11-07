@@ -178,3 +178,44 @@ describe("GeneratorView — course (P20, 20.4)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("GeneratorView — a note computed in code (P31.3)", () => {
+  it("shows the score under a finished result, never while streaming", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const post = streamPost as unknown as ReturnType<typeof vi.fn>;
+    let finish: () => void = () => {};
+    post.mockImplementationOnce(
+      async (
+        _url: string,
+        _body: unknown,
+        cb: { onToken: (t: string) => void; onDone: (m?: unknown) => void },
+      ) => {
+        cb.onToken(
+          [
+            "| Principle | Level | Reason |",
+            "| --- | --- | --- |",
+            "| Retrieval Practice | Low (1) | x |",
+            "| Spaced Practice | Absent (0) | x |",
+            "| Interleaving | Absent (0) | x |",
+            "| Dual Coding | Medium (2) | x |",
+            "| Concrete Examples | High (3) | x |",
+            "| Elaboration | High (3) | x |",
+          ].join("\n"),
+        );
+        await new Promise<void>((r) => {
+          finish = r;
+        });
+        cb.onDone();
+      },
+    );
+    const user = userEvent.setup();
+    const base = getToolBySlug("engagement-check")!;
+    const tool = { ...base, inputs: base.inputs.map((f) => ({ ...f, required: false })) };
+    render(<GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" />);
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    expect(await screen.findByText(/Retrieval Practice/)).toBeInTheDocument();
+    expect(screen.queryByText(/Leerscore/)).toBeNull();
+    finish();
+    expect(await screen.findByText("Leerscore: 9 van 18 punten (50%).")).toBeInTheDocument();
+  });
+});

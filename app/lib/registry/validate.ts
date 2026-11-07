@@ -1,3 +1,4 @@
+import { COMPUTATION_IDS } from "~/lib/template/computations";
 import { z } from "zod";
 import { DOSSIER_PLACEHOLDERS } from "~/lib/portfolio/rehearsal";
 import { COURSE_ITEM_KINDS, type Tool } from "./types";
@@ -71,6 +72,7 @@ const toolStage = z.object({
     hint: localizedText.optional(),
     sections: z.array(z.string()).optional(),
     exportAs: z.enum(EXPORT_KINDS).optional(),
+    computed: z.enum(COMPUTATION_IDS).optional(),
   }),
   model: z.string().optional(),
   temperature: z.number().optional(),

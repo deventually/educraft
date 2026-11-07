@@ -52,6 +52,7 @@ describe("Tool.courseActions — the data (P27.4)", () => {
       "lesson-plan",
       "clear-assignment",
       "differentiation",
+      "engagement-check",
     ]);
     expect(toolsForKind(ALL_TOOLS, "assessment").map((t) => t.slug)).toEqual([
       "test-items",

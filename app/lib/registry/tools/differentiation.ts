@@ -41,7 +41,7 @@ export const differentiation: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  next: ["clear-assignment"],
+  next: ["clear-assignment", "engagement-check"],
   courseActions: ["activity"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288,

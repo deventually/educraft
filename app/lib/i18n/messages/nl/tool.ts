@@ -3,6 +3,7 @@ export const tool = {
     "Deze prompt is aangepast (interview → één keer genereren, en vertaald). Bekijk de originele prompt voor de exacte tekst uit het boek.",
   advanced: "Geavanceerd",
   breadcrumb: "Kruimelpad",
+  computedByApp: "Berekend door LimeOnIt, niet door de AI",
   contextProfile: "Onderwijscontext",
   copied: "Gekopieerd!",
   copy: "Kopieer",

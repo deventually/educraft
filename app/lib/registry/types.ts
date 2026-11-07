@@ -1,3 +1,4 @@
+import type { ComputationId } from "~/lib/template/computations";
 import type { ExportKind } from "~/lib/export/formats";
 import type { DerivationId } from "~/lib/template/derivations";
 import type { LocalizedText } from "~/lib/i18n/localized";
@@ -112,6 +113,11 @@ export interface OutputFormat {
    * formats for it (`app/lib/export/formats.ts`). Absent = "document".
    */
   exportAs?: ExportKind;
+  /**
+   * A note computed in code from the finished output and shown under it (P31.3), so a
+   * number never depends on the AI's arithmetic. Ids live in `app/lib/template/computations.ts`.
+   */
+  computed?: ComputationId;
 }
 
 /** Injects an earlier stage's output into this stage's prompt under a placeholder. */
@@ -282,6 +288,12 @@ export interface Tool {
    * view, not even through a shared course (`isShareableWork`, BESLUIT-2026-11-05-5).
    */
   handlesStudentWork?: true;
+
+  /**
+   * A student tutor whose prompt the teacher may copy for students to paste into their own
+   * AI, as the book intends (P31.1). Data only: the chat shows "Kopieer voor je studenten".
+   */
+  copyableStudentPrompt?: true;
 
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;

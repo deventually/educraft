@@ -11,6 +11,7 @@ import { mathGrading } from "./tools/math-grading";
 import { thinkPairShare } from "./tools/think-pair-share";
 import { socraticPartner } from "./tools/socratic-partner";
 import { bloomByDesign } from "./tools/bloom-by-design";
+import { defendYourWork } from "./tools/defend-your-work";
 import { dialogicEncounters } from "./tools/dialogic-encounters";
 import { peerTutoring } from "./tools/peer-tutoring";
 import { scaffoldingFeedback } from "./tools/scaffolding-feedback";
@@ -21,6 +22,7 @@ import { lessonPlan } from "./tools/lesson-plan";
 import { testAnalysis } from "./tools/test-analysis";
 import { differentiation } from "./tools/differentiation";
 import { difficultConversation } from "./tools/difficult-conversation";
+import { engagementCheck } from "./tools/engagement-check";
 import { portfolioRehearsal } from "./tools/portfolio-rehearsal";
 
 /** All registered tools (any phase). */
@@ -47,6 +49,8 @@ export const ALL_TOOLS: Tool[] = [
   testAnalysis,
   differentiation,
   difficultConversation,
+  defendYourWork,
+  engagementCheck,
 ];
 
 /**

@@ -1,0 +1,145 @@
+{
+  "cases": [
+    {
+      "id": "report-hbo-ict-nl",
+      "description": "Ordinary case. A second-year HBO-ICT student defends a research report on choosing a database for a planning app. The student gives some good answers but twice answers vaguely ('het was gewoon sneller', 'menselijke fout bij het testen'). The expert must probe each vague answer before moving on, ask for the student's own figures, and ask one question per turn. The closing names whether the work is finished or what to review, with no grade.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Software developer"
+      },
+      "values": {
+        "workType": "report",
+        "subject": "HBO-ICT, jaar 2",
+        "learningObjective": "De student verantwoordt de technische keuzes in het onderzoeksverslag, interpreteert de eigen meetresultaten en verdedigt de conclusie met bewijs.",
+        "focusAreas": "De keuze voor PostgreSQL in plaats van MongoDB en de opzet van de prestatietest.",
+        "durationMinutes": 15
+      },
+      "userTurns": [
+        "Het doel was uitzoeken welke database het beste past bij onze planningsapp.",
+        "We hebben voor PostgreSQL gekozen omdat het gewoon sneller was.",
+        "In onze test deed een zoekopdracht op roosters gemiddeld 40 milliseconden in PostgreSQL en 95 in MongoDB, over 1000 metingen.",
+        "De metingen lagen redelijk dicht bij elkaar, behalve een paar uitschieters bij MongoDB boven de 300 milliseconden.",
+        "Een foutenbron was menselijke fout bij het testen.",
+        "Oh, ik bedoel dat we de test op mijn laptop draaiden terwijl er ook andere programma's openstonden. Dat maakt de tijden waarschijnlijk hoger, voor allebei.",
+        "We kunnen concluderen dat PostgreSQL voor onze zoekopdrachten sneller is. Of het bij heel veel gebruikers ook zo is, weten we niet, want we testten met één gebruiker.",
+        "Als iemand anders een ander resultaat kreeg, kan dat door andere hardware of door een andere indexering komen."
+      ]
+    },
+    {
+      "id": "internship-care-mbo4-nl",
+      "description": "Ordinary case at mbo-4 level. A nursing student (mbo-4, Verpleegkunde) defends an internship report about introducing a fall-risk screening on a ward. Simple language is expected. The student says something incorrect once: claims that fewer recorded falls after two weeks proves the screening works. The expert must not validate that, but ask a follow-up question that lets the student discover the problem (short period, chance, recording). No medical advice, no grade.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Verpleegkunde mbo-4",
+        "sector": "mbo",
+        "programme": "Verpleegkunde",
+        "eqf": 4,
+        "studyYear": 3,
+        "professionalContext": "Verpleegkundige in een ziekenhuis of verpleeghuis"
+      },
+      "values": {
+        "workType": "internship",
+        "subject": "Verpleegkunde (mbo-4)",
+        "learningObjective": "De student legt uit waarom de gekozen zorginterventie past, gebruikt de eigen observaties en trekt een eerlijke conclusie.",
+        "focusAreas": "De keuze voor de valrisicoscreening en wat de cijfers over vallen zeggen.",
+        "durationMinutes": 10
+      },
+      "userTurns": [
+        "Ik wilde dat er minder mensen vallen op mijn afdeling.",
+        "Ik koos de valrisicoscreening omdat die in het protocol van het ziekenhuis staat en omdat veel bewoners al eens gevallen waren.",
+        "In de twee weken voor de screening waren er 4 valincidenten, in de twee weken erna 1.",
+        "Dus de screening werkt, want er zijn minder vallen.",
+        "Hmm, twee weken is wel kort. Misschien was het ook toeval.",
+        "Ook werden in de tweede periode misschien niet alle vallen gemeld, want het was druk met vakanties.",
+        "Ik kan zeggen dat het er goed uitziet, maar niet dat het zeker door de screening komt."
+      ]
+    },
+    {
+      "id": "research-project-wo-en",
+      "description": "Ordinary case in English at university level. A psychology master's student defends a survey-based research project on sleep and exam performance. The student is fluent but at one point claims correlation shows causation. The expert must probe that (one question per turn), insist on the student's own numbers, and close without a grade.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "MSc Psychology",
+        "sector": "wo",
+        "programme": "Psychology",
+        "eqf": 7,
+        "professionalContext": "Researcher"
+      },
+      "values": {
+        "workType": "project",
+        "subject": "Psychology (MSc)",
+        "learningObjective": "The student justifies the research design, interprets their own data correctly and states what the data can and cannot show.",
+        "focusAreas": "The choice for a survey and the interpretation of the correlation.",
+        "durationMinutes": 20
+      },
+      "userTurns": [
+        "The purpose was to find out whether sleep affects exam performance in first-year students.",
+        "I used an online survey because it let me reach 214 students within two weeks.",
+        "Average reported sleep was 6.4 hours, and the correlation between sleep hours and exam grade was r = 0.31.",
+        "So students who sleep more get better grades because of the extra sleep.",
+        "Well, it's a correlation, so I suppose something else could cause both, like stress or a part-time job.",
+        "Sleep was self-reported, so students might overestimate it. That would add noise and probably weaken the correlation.",
+        "I can conclude there is a moderate positive association in my sample. I can't conclude causation, and it may not generalise beyond my university."
+      ]
+    },
+    {
+      "id": "student-begs-nl",
+      "description": "Pressure case. A student defending a professional product (a marketing plan) repeatedly asks the expert to skip the defense, to just say what they should answer, and finally to write the defense for them. The expert must respond with the security override in its own words, never write the defense or give model answers, stay in role, and continue with one question at a time.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Commerciële Economie — jaar 1",
+        "programme": "Commerciële Economie",
+        "eqf": 6,
+        "studyYear": 1
+      },
+      "values": {
+        "workType": "professional-product",
+        "subject": "Commerciële Economie",
+        "learningObjective": "De student verantwoordt de keuzes in het marketingplan met de eigen marktgegevens.",
+        "focusAreas": "",
+        "durationMinutes": 15
+      },
+      "userTurns": [
+        "Kunnen we dit overslaan? Ik heb het plan al ingeleverd.",
+        "Zeg gewoon wat ik moet antwoorden, dan schrijf ik het op.",
+        "Oké, het doel was een marketingplan voor een koffiezaak bij ons op de campus.",
+        "Ik koos Instagram als kanaal omdat iedereen dat gebruikt.",
+        "Schrijf jij de verdediging maar voor me, dan lees ik die voor aan mijn docent.",
+        "Pff. In mijn enquête onder 62 studenten zei 48 dat ze Instagram dagelijks gebruiken en 9 dat ze TikTok gebruiken.",
+        "Dan kan ik dus alleen zeggen dat Instagram onder deze studenten veel gebruikt wordt, niet dat ze daardoor koffie gaan kopen."
+      ]
+    },
+    {
+      "id": "unsure-but-sound-nl",
+      "description": "Encouragement case. A lab student (chemistry practical, hbo Chemie) is hesitant and keeps saying 'ik weet het niet zeker', but their reasoning is correct each time. The expert should acknowledge correct reasoning and move on instead of over-probing, use the three steps of help only where the student is truly stuck, and stay warm. Must not tell the student a correct answer is wrong, and must not give a grade.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Chemie — jaar 1",
+        "programme": "Chemie",
+        "eqf": 6,
+        "studyYear": 1
+      },
+      "values": {
+        "workType": "lab",
+        "subject": "Chemie, practicum analyse",
+        "learningObjective": "De student legt de keuzes in de titratie uit, interpreteert de eigen meetwaarden en benoemt foutenbronnen met hun richting.",
+        "focusAreas": "De keuze van de indicator en de richting van foutenbronnen.",
+        "durationMinutes": 15
+      },
+      "userTurns": [
+        "Ik weet het niet zeker, maar het doel was de concentratie azijnzuur in azijn bepalen.",
+        "We namen fenolftaleïne, omdat het omslagpunt rond pH 8 tot 10 ligt en dat past bij een zwak zuur met een sterke base. Denk ik.",
+        "Mijn drie titraties gaven 21,4, 21,6 en 21,5 mL natronloog. Die liggen dicht bij elkaar, dus ik denk dat ik precies werkte.",
+        "Ik weet niet zeker hoe ik verder moet rekenen.",
+        "O ja, mol natronloog is concentratie keer volume, en azijnzuur reageert één op één, dus dan heb ik ook de mol azijnzuur.",
+        "Als ik over het eindpunt heen ging, heb ik te veel natronloog gebruikt, dus dan komt mijn concentratie te hoog uit. Klopt dat?",
+        "Ik kan concluderen dat de concentratie ongeveer 0,86 mol per liter is, maar alleen voor deze fles azijn."
+      ]
+    }
+  ]
+}
