@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
+_Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
 
 ## Nu
 
+- **Elke leeruitkomst apart inleveren, als Word of PDF (#168) gemerged op 2026-11-07:** bij elke leeruitkomst in het
+  overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
+  de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
+  alleen een concept; zo kan LU1 al definitief terwijl LU3 nog concept is. Het hele dossier kan nu
+  ook als PDF (printpagina, zoals P30.2), met CONCEPT boven en onder elke pagina bij een concept.
 - **Geen open plek in het ingeleverde BDB/BKE-werk (#165) gemerged op 2026-11-07:**
   `[aanvullen: …]`, `[invullen]`, TODO, een leeg hoofdstuk of bewijs zonder tekst is een rood punt
   in *Klaar om in te leveren?*, en de schrijfpagina telt ze. Zolang er een staat, geeft de export
@@ -280,6 +285,11 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
 
 ## Bezig
 
+- **Terughalen uit Word (PR open):** wie een export in Word verder bewerkt, kiest het bestand bij
+  *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
+  hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
+  de docent aanvinkt wordt overgenomen (`importChapters`), plus aangevinkte nieuwe bronnen.
+  Bijlagen blijven in LimeOnIt leidend.
 - **Proeflezen en het hele dossier laten beoordelen (BDB/BKE, PR 4 van het plan; PR open):**
   naast *Laat beoordelen* staat *Lees proef*: voorstellen voor spelling, zinsbouw, ik-vorm,
   herhaling en APA, elk met de zin zoals hij nu is en een betere versie. *Overnemen* vervangt
@@ -287,11 +297,6 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
   letterlijk in je hoofdstuk staat, valt weg in code. In stap 5 beoordeelt *Beoordeel het hele
   dossier* alle hoofdstukken in één keer, met per leeruitkomst een overzicht. Nieuwe prompt
   `portfolio-proofread@v1` met evals (`npm run eval:proofread`); geen migratie.
-- **Elke leeruitkomst apart inleveren, als Word of PDF (PR open):** bij elke leeruitkomst in het
-  overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
-  de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
-  alleen een concept; zo kan LU1 al definitief terwijl LU3 nog concept is. Het hele dossier kan nu
-  ook als PDF (printpagina, zoals P30.2), met CONCEPT boven en onder elke pagina bij een concept.
 - **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
   startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
   en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:
