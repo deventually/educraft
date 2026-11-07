@@ -263,7 +263,8 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 - **P31.1b Kerncijfers bij Verdedig je werk (PR open):** een vinkje *Student plakt eerst de
   kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
   bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt
-  `@v2`, `@v1` blijft. Met de nulmeting van de tutor en een meting van `@v2` erna. Daarna 31.2
+  `@v2`, `@v1` blijft. Drie metingen (dyw1–3): het kerncijfer-gesprek ging van 2,8 naar 3,7; één
+  vraag per beurt is beter maar nog niet opgelost, en de judge kan het Engelse gesprek niet lezen. Daarna 31.2
   (nakijken, met verplicht anonimiseren).
 - **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
   opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
