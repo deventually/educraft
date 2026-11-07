@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { GeneratorView } from "~/components/GeneratorView";
 import { getToolBySlug } from "~/lib/registry";
+import { gridBlowoutRisks } from "../helpers/layout";
 
 vi.mock("~/lib/i18n/useT", async () => {
   const { messages } = await import("~/lib/i18n");
@@ -57,6 +58,14 @@ describe("GeneratorView with a document field", () => {
 
     expect(await screen.findByRole("region", { name: "Original" })).toBeInTheDocument();
     expect(await screen.findByText("Page 1 of 1")).toBeInTheDocument();
+    expect(gridBlowoutRisks(screen.getByRole("region", { name: "Original" }), container)).toEqual(
+      [],
+    );
+    // A long document scrolls inside the viewer instead of growing past its column: the
+    // viewer's box has a height (a share of the screen on a phone, the column on desktop).
+    const box = screen.getByRole("region", { name: "Original" }).closest("[data-viewer-box]");
+    expect(box?.className).toMatch(/(^|\s)h-\[\d+dvh\](\s|$)/);
+    expect(box?.className).toMatch(/(^|\s)lg:h-full(\s|$)/);
     expect(streamPost).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
@@ -95,7 +104,9 @@ describe("GeneratorView with a document field", () => {
     await user.click(screen.getByRole("button", { name: "Send anonymised" }));
     await waitFor(() => expect(streamPost).toHaveBeenCalled());
 
-    expect(screen.getByRole("region", { name: "Original" })).toBeInTheDocument();
+    const original = screen.getByRole("region", { name: "Original" });
+    // Next to a result, a wide document still fits the page (no grid blow-out).
+    expect(gridBlowoutRisks(original, document.body)).toEqual([]);
     await user.click(screen.getByRole("button", { name: /show in document/i }));
     expect(await screen.findByText(/Found on page 1/i)).toBeInTheDocument();
   });

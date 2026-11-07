@@ -265,6 +265,11 @@ _Laatst bijgewerkt: 2026-11-07 (andere AI-modellen meten in een open PR)_
 
 ## Bezig
 
+- **Documentviewer past op de pagina, met zoomen (PR open):** een geüploade PDF of Word bij
+  *Studentwerk beoordelen* (en de twee andere tools met een documentveld) brak de pagina: een brede
+  tabel of lange link maakte de viewer breder dan het scherm, een lang document groeide onder de
+  kolom uit, en de verborgen voorleestekst per PDF-pagina rekte de hele pagina op. Nu blijft de
+  viewer binnen zijn kolom en scrolt het document erin. Nieuw: in- en uitzoomen (50–300%).
 - **P31.1b Kerncijfers bij Verdedig je werk (PR open):** een vinkje *Student plakt eerst de
   kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
   bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt

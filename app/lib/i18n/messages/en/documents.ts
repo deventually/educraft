@@ -32,4 +32,8 @@ export const documents: Messages["documents"] = {
   title: "Document",
   tooShort: "This quote is too short to find back reliably.",
   wordNote: "Word view: headings, lists, tables and images are kept; colour and font are lost.",
+  zoom: "Zoom",
+  zoomIn: "Zoom in",
+  zoomOut: "Zoom out",
+  zoomReset: "{pct}%, back to 100%",
 };
