@@ -34,7 +34,8 @@ export function FormResultLayout({ form, canFold, formWidth = "wide", children }
 
   return (
     <div className={cn("grid grid-cols-1 gap-6", !folded && FORM_COLUMN[formWidth])}>
-      <div className="min-w-0 space-y-4">
+      {/* A flex gap, not space-y: margins would still space the hidden form. */}
+      <div className="flex min-w-0 flex-col items-start gap-4">
         {canFold && (
           <Button
             type="button"
@@ -52,7 +53,7 @@ export function FormResultLayout({ form, canFold, formWidth = "wide", children }
             {folded ? t.tool.formShow : t.tool.formHide}
           </Button>
         )}
-        <div id={formId} hidden={folded} className="space-y-4">
+        <div id={formId} hidden={folded} className="w-full space-y-4">
           {form}
         </div>
       </div>

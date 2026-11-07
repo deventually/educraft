@@ -217,6 +217,12 @@ describe("GeneratorView with a document field", () => {
     // Folded, the toggle sits on its own row: no side column eats the width.
     const page = box?.parentElement?.parentElement?.parentElement;
     expect(page?.className).not.toMatch(/lg:grid-cols-\[/);
+    // The hidden form adds no space under the toggle: its column spaces children with a
+    // flex gap (which skips hidden ones), not space-y margins (which do not), so there is
+    // as much room under the toggle as above it.
+    const column = show.parentElement;
+    expect(column?.className).toMatch(/(^|\s)flex-col(\s|$)/);
+    expect(column?.className).not.toMatch(/space-y-/);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
 
     await user.click(show);
