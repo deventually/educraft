@@ -20,7 +20,7 @@ Studenten werken niet in LimeOnIt. Je gebruikt de tool zelf: om te oefenen, om t
 
 ## Tips
 
-- **Vraag het gesprek op:** laat studenten het gesprek inleveren naast hun verslag, zoals het boek voorstelt.
+- **Vraag het gesprek op:** laat studenten het gesprek inleveren naast hun verslag, zoals het boek voorstelt. Kijk het daarna na met **Een mondelinge verdediging nakijken**: die staat als volgende stap onder het gesprek.
 - **Geen persoonsgegevens:** de deskundige heeft het werk niet gelezen en vraagt er niet naar. Een student hoeft geen namen te noemen.
 
 > Gebaseerd op bijlage F.3 (Lab Oral Defense) uit *From Oracle to Socratic Partner* (Andy Van Schaack & Roman Sarlo), in *The Pedagogical Promptbook* (red. David Wiley), CC BY 4.0. Wij maakten het scheikundepracticum algemeen voor eigen werk.

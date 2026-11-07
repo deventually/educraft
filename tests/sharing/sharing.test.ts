@@ -12,6 +12,7 @@ describe("Tool.handlesStudentWork (P28.4)", () => {
       .map((t) => t.slug)
       .sort();
     expect(marked).toEqual([
+      "defense-review",
       "forum-autograder",
       "math-grading",
       "stage-assessment",
@@ -34,7 +35,13 @@ describe("Tool.handlesStudentWork (P28.4)", () => {
 
 describe("isShareableWork (P28.4)", () => {
   it("never lets student work, a chat or dossier work reach a colleague", () => {
-    for (const slug of ["stage-assessment", "math-grading", "test-analysis", "forum-autograder"])
+    for (const slug of [
+      "stage-assessment",
+      "math-grading",
+      "test-analysis",
+      "forum-autograder",
+      "defense-review",
+    ])
       expect(isShareableWork(getToolBySlugOrThrow(slug))).toBe(false);
     // Chats are never shareable (BESLUIT-2026-11-05-5, 2).
     expect(isShareableWork(getToolBySlugOrThrow("mentorai"))).toBe(false);

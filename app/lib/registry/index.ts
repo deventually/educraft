@@ -12,6 +12,7 @@ import { thinkPairShare } from "./tools/think-pair-share";
 import { socraticPartner } from "./tools/socratic-partner";
 import { bloomByDesign } from "./tools/bloom-by-design";
 import { defendYourWork } from "./tools/defend-your-work";
+import { defenseReview } from "./tools/defense-review";
 import { dialogicEncounters } from "./tools/dialogic-encounters";
 import { peerTutoring } from "./tools/peer-tutoring";
 import { scaffoldingFeedback } from "./tools/scaffolding-feedback";
@@ -50,6 +51,7 @@ export const ALL_TOOLS: Tool[] = [
   differentiation,
   difficultConversation,
   defendYourWork,
+  defenseReview,
   engagementCheck,
 ];
 

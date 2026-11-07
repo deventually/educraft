@@ -20,7 +20,7 @@ Students don't work in LimeOnIt. You use the tool yourself: to practise, to show
 
 ## Tips
 
-- **Ask for the conversation:** have students hand in the conversation next to their report, as the book suggests.
+- **Ask for the conversation:** have students hand in the conversation next to their report, as the book suggests. Then review it with **Review an oral defense**: it is offered as the next step under the conversation.
 - **No personal data:** the expert has not read the work and does not ask for it. A student doesn't need to name anyone.
 
 > Based on Appendix F.3 (Lab Oral Defense) of *From Oracle to Socratic Partner* (Andy Van Schaack & Roman Sarlo), in *The Pedagogical Promptbook* (ed. David Wiley), CC BY 4.0. We made the chemistry lab general for own work.

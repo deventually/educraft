@@ -1,0 +1,94 @@
+{
+  "cases": [
+    {
+      "id": "internship-care-mbo4-nl",
+      "description": "A solid defense of a care internship (mbo-4): the student explains the choice for fall-risk screening, reads their own figures, names under-reporting and its direction, and limits the conclusion. Expected rating: Proficient (Op niveau) or Exemplary. Contains anonymisation codes.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Verpleegkunde mbo-4, jaar 3",
+        "programme": "Verpleegkunde",
+        "domain": "Zorg",
+        "eqf": 4
+      },
+      "values": {
+        "workType": "internship",
+        "subject": "Verpleegkunde (mbo-4)",
+        "learningObjective": "De student verantwoordt de zorgkeuzes in het eigen stageverslag met gegevens.",
+        "masteryCriteria": "",
+        "transcript": "[AI] Goedendag. Ik neem je mondelinge verdediging af. Wat was het doel van je werk?\n[Student] Ik wilde het aantal valincidenten op mijn afdeling bij [BEDRIJF] verlagen met een valrisicoscreening bij opname.\n[AI] Waarom koos je juist voor die screening?\n[Student] Hij staat in het protocol, maar vooral omdat ik in het incidentenoverzicht zag dat de meeste vallen in de eerste week na opname gebeurden. Daar grijpt een screening bij opname precies in. Mijn begeleider [BEGELEIDER-1] stelde eerst een beweegprogramma voor, maar dat duurt weken voor het werkt.\n[AI] Wat lieten jouw gegevens zien?\n[Student] In de vier weken voor de screening waren er 9 valincidenten, in de vier weken erna 4. Op dezelfde afdeling, met ongeveer evenveel bewoners, 22 en 23.\n[AI] Wat kun je daar met zekerheid uit concluderen?\n[Student] Dat er minder vallen waren. Niet dat het zeker door de screening komt: vier weken is kort en er kan toeval in zitten.\n[AI] Welke foutenbronnen zie je nog meer?\n[Student] In de tweede periode was het druk door vakanties. Ik denk dat er toen minder werd gemeld.\n[AI] Maakt dat je verschil groter of kleiner?\n[Student] Als er minder gemeld is, was het echte aantal na de screening hoger dan 4. Dan is het verschil in werkelijkheid kleiner dan het lijkt. Dus mijn resultaat ziet er beter uit dan het is.\n[AI] Wat zou je anders doen?\n[Student] Langer meten, en vragen of het team in beide periodes even trouw meldt. Eigenlijk weet ik niet goed hoe je dat controleert. Kun jij zeggen hoe dat in andere afdelingen gaat?\n[AI] Dat is een goede vraag om aan je begeleider te stellen. Dank je, wat mij betreft is je werk klaar."
+      }
+    },
+    {
+      "id": "vague-report-hbo-nl",
+      "description": "A weak defense of a research report (hbo): generic answers ('menselijke fout', 'het klopte gewoon'), no own figures, conclusion overreaches. Expected rating: Developing (In ontwikkeling) or Beginning.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "workType": "report",
+        "subject": "HBO-ICT, jaar 2",
+        "learningObjective": "De student verantwoordt de onderzoeksaanpak en verdedigt de conclusie met eigen gegevens.",
+        "masteryCriteria": "",
+        "transcript": "[AI] Wat was het doel van je onderzoek?\n[Student] Onderzoeken of de nieuwe app beter is.\n[AI] Beter in welk opzicht?\n[Student] Gewoon, gebruiksvriendelijker.\n[AI] Waarom koos je voor een enquête?\n[Student] Dat doet iedereen, en het is makkelijk.\n[AI] Wat kwam er uit je enquête?\n[Student] Dat mensen de app beter vonden.\n[AI] Hoeveel mensen deden mee, en wat zeiden ze precies?\n[Student] Een stuk of twintig, weet ik niet precies. De meesten waren positief.\n[AI] Welke foutenbronnen zie je?\n[Student] Menselijke fout misschien. Verder klopte het gewoon.\n[AI] Welke fout precies, en wat doet die met je uitkomst?\n[Student] Dat sommige mensen het verkeerd invulden.\n[AI] Wat kun je concluderen?\n[Student] Dat de app beter is en dat het bedrijf hem moet invoeren.\n[AI] Wat kun je op basis van twintig positieve antwoorden niet concluderen?\n[Student] Ik weet het niet. Dat het voor iedereen geldt misschien?\n[AI] Dank je. Bekijk nog eens hoe je van je gegevens naar je conclusie komt; daarna praten we verder."
+      }
+    },
+    {
+      "id": "ai-gave-answers-nl",
+      "description": "The AI tutor drifted and explained the answers; the student mostly agreed ('ja, klopt'). The analysis must not credit the AI's explanations to the student and should say so in the notes for the teacher. Expected rating: Developing (In ontwikkeling) or Beginning.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Bedrijfskunde hbo, jaar 3",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie",
+        "eqf": 6
+      },
+      "values": {
+        "workType": "project",
+        "subject": "Bedrijfskunde, jaar 3",
+        "learningObjective": "De student verdedigt het advies uit het groepsproject met de eigen analyse.",
+        "masteryCriteria": "",
+        "transcript": "[AI] Wat was het doel van je project?\n[Student] Een advies voor [BEDRIJF] over thuiswerken.\n[AI] Je koos voor interviews in plaats van een enquête, omdat interviews diepere inzichten geven in motivatie en je met acht medewerkers geen representatieve enquête kunt doen. Klopt dat?\n[Student] Ja, klopt.\n[AI] En je bevindingen lieten zien dat zes van de acht medewerkers productiever zijn thuis, maar dat de teamsamenhang daalt, wat een afweging vraagt. Zie je dat ook zo?\n[Student] Ja, precies.\n[AI] Een belangrijke foutenbron is dan sociale wenselijkheid: medewerkers zeggen misschien dat ze productiever zijn omdat ze thuis willen blijven werken. Dat maakt je uitkomst te positief.\n[Student] Ja, dat is waar.\n[AI] Wat zou je daarom anders doen?\n[Student] Misschien ook de leidinggevende vragen.\n[AI] Goed. Je kunt dus concluderen dat thuiswerken voor deze groep lijkt te werken, maar niet dat het voor het hele bedrijf geldt.\n[Student] Oké."
+      }
+    },
+    {
+      "id": "research-project-wo-en",
+      "description": "An English defense of a university research project: mostly strong reasoning about a regression analysis, one moment where the student rightly questions the expert's premise (skepticism), one honest admission of uncertainty. Expected rating: Proficient or Exemplary.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "Psychology, master year 1",
+        "programme": "Psychology",
+        "domain": "Social sciences",
+        "eqf": 7
+      },
+      "values": {
+        "workType": "project",
+        "subject": "Psychology, master year 1",
+        "learningObjective": "The student justifies the design and analysis of their own research project and defends the conclusion with evidence.",
+        "masteryCriteria": "",
+        "transcript": "[AI] What was the purpose of your project?\n[Student] To test whether sleep duration predicts exam performance in first-year students, controlling for study hours.\n[AI] Why a regression rather than comparing two groups?\n[Student] Sleep is continuous; splitting it into short and long sleepers would throw away information and make the cut-off arbitrary.\n[AI] What did your data show?\n[Student] With 112 students, each extra hour of sleep went with 0.3 grade points higher, p = .02, after controlling for study hours. R squared was only .08 though.\n[AI] So sleep causes better grades?\n[Student] No, and I'd push back on the question a bit: it's cross-sectional, so I can't speak about causes. Students who are less stressed may both sleep more and do better.\n[AI] What are the main sources of error?\n[Student] Sleep was self-reported over a week, so people probably overestimate it. If everyone overestimates by the same amount, the slope barely changes. If poor sleepers overestimate more, the effect would be underestimated. Honestly, I'm not sure which of the two happened.\n[AI] What would you do differently?\n[Student] Use actigraphy for at least part of the sample, to check the self-reports.\n[AI] Thank you. As far as I'm concerned, the work is finished."
+      }
+    },
+    {
+      "id": "not-a-defense-nl",
+      "description": "The teacher pasted part of a report instead of a conversation. The tool should say so in a sentence and ask for the right transcript, not produce an analysis.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT, jaar 2",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "workType": "report",
+        "subject": "HBO-ICT, jaar 2",
+        "learningObjective": "De student verantwoordt de onderzoeksaanpak.",
+        "masteryCriteria": "",
+        "transcript": "Hoofdstuk 3 Methode\n\nIn dit onderzoek is gekozen voor een kwalitatieve aanpak met zes semigestructureerde interviews. De respondenten zijn geselecteerd via [BEGELEIDER-1]. De interviews zijn opgenomen, getranscribeerd en thematisch gecodeerd volgens Braun en Clarke. Paragraaf 3.2 beschrijft de betrouwbaarheid."
+      }
+    }
+  ]
+}
