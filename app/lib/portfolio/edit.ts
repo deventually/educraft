@@ -4,6 +4,7 @@
  * clears `confirmedAt`: the teacher must look at the framework again.
  */
 import type { CriterionStatus, DossierData, EvidenceItem, Framework, Outcome } from "./types";
+import { applySuggestion } from "./proofread";
 
 const newId = (): string => crypto.randomUUID();
 
@@ -48,6 +49,10 @@ function prune(d: DossierData): DossierData {
   d.chapters = d.chapters.filter((ch) => outcomes.has(ch.outcomeId));
   if (d.reviews)
     d.reviews = Object.fromEntries(Object.entries(d.reviews).filter(([id]) => outcomes.has(id)));
+  if (d.proofreads)
+    d.proofreads = Object.fromEntries(
+      Object.entries(d.proofreads).filter(([id]) => outcomes.has(id)),
+    );
   return d;
 }
 
@@ -216,6 +221,35 @@ export function updateChapter(d: DossierData, chapterId: string, text: string): 
   const chapter = d.chapters.find((ch) => ch.id === chapterId);
   if (!chapter) throw new Error(`Unknown chapter: ${chapterId}`);
   return writeChapter(d, chapter.outcomeId, text);
+}
+
+// ── Proofreading ────────────────────────────────────────────────────────────
+
+function withoutProposal(d: DossierData, outcomeId: string, index: number): DossierData {
+  const stored = d.proofreads?.[outcomeId];
+  if (!stored?.suggestions[index]) throw new Error(`Unknown proposal: ${outcomeId}#${index}`);
+  return {
+    ...d,
+    proofreads: {
+      ...d.proofreads,
+      [outcomeId]: { ...stored, suggestions: stored.suggestions.filter((_, i) => i !== index) },
+    },
+  };
+}
+
+/** Takes one proofreading proposal over into the chapter: exactly its span is replaced. */
+export function takeProofread(d: DossierData, outcomeId: string, index: number): DossierData {
+  const proposal = d.proofreads?.[outcomeId]?.suggestions[index];
+  if (!proposal) throw new Error(`Unknown proposal: ${outcomeId}#${index}`);
+  const chapter = d.chapters.find((ch) => ch.outcomeId === outcomeId)?.text ?? "";
+  const text = applySuggestion(chapter, proposal);
+  if (text === null) throw new Error(`Unknown span: ${outcomeId}#${index}`);
+  return writeChapter(withoutProposal(d, outcomeId, index), outcomeId, text);
+}
+
+/** Ignores one proofreading proposal: it leaves the list, the chapter stays. */
+export function skipProofread(d: DossierData, outcomeId: string, index: number): DossierData {
+  return withoutProposal(d, outcomeId, index);
 }
 
 // ── References ──────────────────────────────────────────────────────────────

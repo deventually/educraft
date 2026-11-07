@@ -1,12 +1,18 @@
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id";
-import { availableToolNames, loadDossier, saveIntent } from "~/server/portfolio.server";
+import {
+  availableToolNames,
+  dossierReviewOverview,
+  loadDossier,
+  saveIntent,
+} from "~/server/portfolio.server";
 import { criterionHints } from "~/lib/portfolio/toolHints";
 import { ToolHints } from "~/components/portfolio/ToolHints";
 import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
+import { DossierReviewPanel } from "~/components/portfolio/DossierReviewPanel";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { nextStep, outcomeProgress } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
@@ -60,6 +66,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     routeLinks,
     practise,
     readiness: readinessCheck(d),
+    dossierReview: dossierReviewOverview(d),
+    canReviewAll:
+      d.framework.confirmedAt !== undefined && d.chapters.some((ch) => ch.text.trim() !== ""),
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -75,13 +84,23 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
   const t = useT();
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
+  const tr = t.portfolio.dossierReview;
   useFormToast(actionData, {
-    result: (r) =>
-      !r
-        ? null
-        : r.ok
-          ? { variant: "success", message: t.portfolio.toastSaved }
-          : { variant: "error", message: r.error },
+    pending: (fd) =>
+      fd?.get("intent") === "reviewAll"
+        ? { variant: "pending", message: tr.pending }
+        : { variant: "pending", message: t.toast.saving },
+    result: (r) => {
+      if (!r) return null;
+      if (!r.ok) return { variant: "error", message: r.error };
+      if (r.intent !== "reviewAll") return { variant: "success", message: t.portfolio.toastSaved };
+      return r.failed
+        ? {
+            variant: "error",
+            message: fmt(tr.doneWithFailures, { n: r.reviewed ?? 0, failed: r.failed }),
+          }
+        : { variant: "success", message: fmt(tr.done, { n: r.reviewed ?? 0 }) };
+    },
   });
   const {
     id,
@@ -98,6 +117,8 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     routeLinks,
     practise,
     readiness,
+    dossierReview,
+    canReviewAll,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -185,6 +206,14 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
           {t.portfolio.frameworkLink}
         </Link>
       </p>
+
+      {/* Step 5: assess the whole dossier, check it, then export. */}
+      <DossierReviewPanel
+        dossierId={id}
+        outcomes={framework.outcomes}
+        rows={dossierReview}
+        canRun={canReviewAll}
+      />
 
       <ReadinessCheck dossierId={id} items={readiness} framework={framework} />
 

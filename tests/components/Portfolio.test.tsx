@@ -48,6 +48,8 @@ function overviewData(d = sampleDossier()) {
     },
     practise: null as string | null,
     readiness: readinessCheck(d),
+    dossierReview: [] as unknown[],
+    canReviewAll: false,
   };
 }
 
@@ -68,6 +70,7 @@ function outcomeData(d = sampleDossier()) {
     showDraftNotice: false,
     withEvidence: [C1],
     stored: undefined as unknown,
+    proofread: undefined as unknown,
     toolHints: {} as Record<string, { slug: string; name: string }[]>,
     chapterTools: [] as { slug: string; name: string }[],
     courseHints: [] as string[],
@@ -449,6 +452,111 @@ describe("Portfolio outcome page — coach", () => {
       screen.queryByRole("button", { name: "Stel een alinea op voor criterium 2" }),
     ).toBeNull();
     expect(screen.getByText(/Criterium 2: koppel eerst bewijs/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio outcome page — proofreading", () => {
+  const proofread = {
+    at: Date.UTC(2026, 10, 7),
+    modelName: "Claude Sonnet 5.5",
+    suggestions: [
+      {
+        index: 0,
+        quote: "Mijn les begon met een vraag.",
+        issue: "style",
+        explanation: "Noem welke vraag.",
+        suggestion: "Mijn les begon met een vraag over hun stage.",
+      },
+    ],
+  };
+
+  it("offers proofreading next to the coach, even before the framework is confirmed", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false });
+    const button = screen.getByRole("button", { name: "Lees proef" });
+    expect(button).toBeEnabled();
+    expect(button.closest("form")?.querySelector("input[name=intent]")).toHaveAttribute(
+      "value",
+      "proofread",
+    );
+  });
+
+  it("sits beside Laat beoordelen and needs a saved chapter", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), chapter: "" });
+    expect(screen.getByRole("button", { name: "Laat beoordelen" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Lees proef" })).toBeDisabled();
+  });
+
+  it("shows each proposal with the sentence now, the better one, and take over or ignore", async () => {
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), proofread });
+    const region = screen.getByRole("region", { name: "Proeflezen" });
+    expect(
+      within(region).getByText(/Proefgelezen op .* met Claude Sonnet 5.5/),
+    ).toBeInTheDocument();
+    expect(within(region).getByText("Stijl")).toBeInTheDocument();
+    expect(within(region).getByText("Mijn les begon met een vraag.")).toBeInTheDocument();
+    expect(
+      within(region).getByText("Mijn les begon met een vraag over hun stage."),
+    ).toBeInTheDocument();
+    const take = within(region).getByRole("button", { name: "Voorstel 1 overnemen" });
+    expect(take).toHaveAttribute("value", "takeProofread");
+    expect(take.closest("form")?.querySelector("input[name=index]")).toHaveAttribute("value", "0");
+    expect(within(region).getByRole("button", { name: "Voorstel 1 negeren" })).toHaveAttribute(
+      "value",
+      "skipProofread",
+    );
+    expect(screen.getByRole("button", { name: "Opnieuw proeflezen" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says so when no proposals are open", () => {
+    renderRoute(PortfolioOutcome, {
+      ...outcomeData(),
+      proofread: { ...proofread, suggestions: [] },
+    });
+    expect(screen.getByText("Geen open voorstellen.")).toBeInTheDocument();
+  });
+});
+
+describe("Portfolio overview — the whole dossier assessed", () => {
+  it("offers one button that needs a confirmed framework and a chapter", () => {
+    renderRoute(PortfolioOverview, overviewData());
+    const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
+    expect(
+      within(region).getByRole("button", { name: "Beoordeel het hele dossier" }),
+    ).toBeDisabled();
+  });
+
+  it("lists the verdicts per outcome, with a link to each chapter's assessment", async () => {
+    const { container } = renderRoute(PortfolioOverview, {
+      ...overviewData(),
+      canReviewAll: true,
+      dossierReview: [
+        {
+          outcomeId: LU,
+          at: Date.UTC(2026, 10, 7),
+          modelName: "Claude Sonnet 5.5",
+          shown: 1,
+          partial: 0,
+          missing: 1,
+          overall: "Helder begin.",
+        },
+      ],
+    });
+    const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
+    const button = within(region).getByRole("button", {
+      name: "Opnieuw het hele dossier beoordelen",
+    });
+    expect(button).toBeEnabled();
+    expect(button.closest("form")?.querySelector("input[name=intent]")).toHaveAttribute(
+      "value",
+      "reviewAll",
+    );
+    expect(within(region).getByText("1 aangetoond · 0 deels · 1 nog niet")).toBeInTheDocument();
+    expect(within(region).getByText("Helder begin.")).toBeInTheDocument();
+    expect(
+      within(region).getByRole("link", { name: "Bekijk de beoordeling van LU1 Doceren" }),
+    ).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}#coach-title`);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

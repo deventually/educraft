@@ -13,9 +13,9 @@ const VERDICT_STYLE: Record<Verdict, string> = {
 };
 
 /**
- * The coach on an outcome page: one button, and the latest review per
- * criterion. Advice only; the one action it offers is the teacher's own
- * "mark as shown".
+ * The coach on an outcome page: "Laat beoordelen" with "Lees proef" beside
+ * it, and the latest review per criterion. Advice only; the one action it
+ * offers is the teacher's own "mark as shown".
  */
 export function CoachPanel({
   dossierId,
@@ -25,6 +25,7 @@ export function CoachPanel({
   confirmed,
   hasChapter,
   stored,
+  proofread,
 }: {
   dossierId: string;
   outcomeId: string;
@@ -33,6 +34,8 @@ export function CoachPanel({
   confirmed: boolean;
   hasChapter: boolean;
   stored?: { at: number; model: string; modelName: string; review: CoachReview };
+  /** True once the chapter was proofread: the button then says "again". */
+  proofread?: boolean;
 }) {
   const tp = useT().portfolio;
   const t = tp.coach;
@@ -46,7 +49,7 @@ export function CoachPanel({
       </h2>
       <p className="mt-1 text-sm text-slate-600">{t.intro}</p>
 
-      {!confirmed ? (
+      {!confirmed && (
         <p className="mt-3 text-sm text-slate-700">
           {t.needsConfirm}{" "}
           <Link
@@ -56,16 +59,27 @@ export function CoachPanel({
             {tp.frameworkLink}
           </Link>
         </p>
-      ) : (
-        <Form method="post" className="mt-3">
-          <input type="hidden" name="intent" value="review" />
-          <input type="hidden" name="outcomeId" value={outcomeId} />
-          <Button type="submit" disabled={!hasChapter}>
-            {stored ? t.rerun : t.run}
-          </Button>
-          {!hasChapter && <p className="mt-1 text-sm text-slate-600">{t.needsChapter}</p>}
-        </Form>
       )}
+      {/* Proofreading sits beside the coach; it needs no confirmed framework. */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {confirmed && (
+          <Form method="post">
+            <input type="hidden" name="intent" value="review" />
+            <input type="hidden" name="outcomeId" value={outcomeId} />
+            <Button type="submit" disabled={!hasChapter}>
+              {stored ? t.rerun : t.run}
+            </Button>
+          </Form>
+        )}
+        <Form method="post">
+          <input type="hidden" name="intent" value="proofread" />
+          <input type="hidden" name="outcomeId" value={outcomeId} />
+          <Button type="submit" variant="secondary" disabled={!hasChapter}>
+            {proofread ? tp.proofread.rerun : tp.proofread.run}
+          </Button>
+        </Form>
+      </div>
+      {!hasChapter && <p className="mt-1 text-sm text-slate-600">{t.needsChapter}</p>}
 
       {stored && (
         <div className="mt-4 space-y-3">

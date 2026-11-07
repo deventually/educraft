@@ -4,6 +4,7 @@ import {
   CRITERION_STATUSES,
   type DossierData,
   EVIDENCE_KINDS,
+  PROOFREAD_ISSUES,
   type Track,
   TRACKS,
   VERDICTS,
@@ -54,6 +55,21 @@ export const CriterionReviewSchema = z.object({
 export const CoachReviewSchema = z.object({
   criteria: z.array(CriterionReviewSchema).max(LIMITS.criteriaPerOutcome),
   overall: z.string().max(COACH_LIMITS.overall),
+});
+
+/** Proofreading output limits. */
+export const PROOFREAD_LIMITS = {
+  suggestions: 12,
+  quote: 600,
+  explanation: 400,
+  suggestion: 800,
+} as const;
+
+export const ProofreadSuggestionSchema = z.object({
+  quote: z.string().min(1).max(PROOFREAD_LIMITS.quote),
+  issue: z.enum(PROOFREAD_ISSUES),
+  explanation: z.string().max(PROOFREAD_LIMITS.explanation),
+  suggestion: z.string().max(PROOFREAD_LIMITS.suggestion),
 });
 
 export const CriterionSchema = z.object({
@@ -127,7 +143,7 @@ export const DossierDataSchema = z
       .array(
         z.object({
           at: z.number().int().nonnegative(),
-          action: z.enum(["review", "draft", "rehearsal"]),
+          action: z.enum(["review", "draft", "rehearsal", "proofread"]),
           outcomeId: Id.optional(),
           model: z.string().max(200),
         }),
@@ -140,6 +156,16 @@ export const DossierDataSchema = z
           at: z.number().int().nonnegative(),
           model: z.string().max(200),
           review: CoachReviewSchema,
+        }),
+      )
+      .optional(),
+    proofreads: z
+      .record(
+        Id,
+        z.object({
+          at: z.number().int().nonnegative(),
+          model: z.string().max(200),
+          suggestions: z.array(ProofreadSuggestionSchema).max(PROOFREAD_LIMITS.suggestions),
         }),
       )
       .optional(),

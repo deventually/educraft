@@ -180,6 +180,12 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `portfolioCoach.server.ts`) drops quotes that are not verbatim in the chapter and advice that
   cites a source not in the teacher's references. `toolHints.ts` suggests at most two available
   tools per step.
+  Proofreading ("Lees proef", next to "Laat beoordelen", `portfolio-proofread@v1`, `proofread.ts`):
+  proposals for language and form only, each a span that `locateQuote` finds literally in the saved
+  chapter (else dropped), stored per outcome in `proofreads`. "Overnemen" (`takeProofread`) replaces
+  exactly that span; "Negeren" (`skipProofread`) drops the proposal. Needs no confirmed framework.
+  "Beoordeel het hele dossier" in step 5 (`reviewAll`, `reviewDossier`) runs the same coach over
+  every chapter with text, in parallel, and keeps the reviews that worked.
   Framework extraction (P25.4, intent `extract` on the framework page): the teacher pastes the
   form or picks one or more PDF/DOCX files (`fileToText`, in the browser); `portfolio-framework@v1`
   returns JSON and `extract.ts` clips it to `LIMITS`, marks a criterion that is not verbatim in the

@@ -96,7 +96,7 @@ export interface Reference {
 export interface AiLogEntry {
   at: number;
   /** "rehearsal" (P29.3): written when the teacher keeps rehearsal feedback; no outcome. */
-  action: "review" | "draft" | "rehearsal";
+  action: "review" | "draft" | "rehearsal" | "proofread";
   outcomeId?: string;
   model: string;
 }
@@ -129,6 +129,33 @@ export interface StoredReview {
   review: CoachReview;
 }
 
+export const PROOFREAD_ISSUES = [
+  "spelling",
+  "grammar",
+  "style",
+  "person",
+  "repetition",
+  "apa",
+  "consistency",
+] as const;
+export type ProofreadIssue = (typeof PROOFREAD_ISSUES)[number];
+
+/** One proofreading proposal: a span copied from the chapter and a better version. */
+export interface ProofreadSuggestion {
+  /** The chapter's own text, exactly as it stands (checked and located in code). */
+  quote: string;
+  issue: ProofreadIssue;
+  explanation: string;
+  suggestion: string;
+}
+
+/** The latest proofreading of one chapter; taken-over or ignored proposals leave the list. */
+export interface StoredProofread {
+  at: number;
+  model: string;
+  suggestions: ProofreadSuggestion[];
+}
+
 export interface DossierData {
   tracks: Track[];
   framework: Framework;
@@ -142,6 +169,8 @@ export interface DossierData {
   aiLog: AiLogEntry[];
   /** outcomeId → the latest coach review of that outcome. */
   reviews?: Record<string, StoredReview>;
+  /** outcomeId → the latest proofreading of that outcome's chapter. */
+  proofreads?: Record<string, StoredProofread>;
   /** Self-checks of "Klaar om in te leveren?" (P29.1): code → when the teacher ticked it. */
   readiness?: { ticked: Partial<Record<string, number>> };
 }

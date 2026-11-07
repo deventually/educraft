@@ -24,6 +24,17 @@ describe("aiDisclosure", () => {
     expect(text).toContain("Anthropic. (2026). Claude Sonnet 5.5 [Large language model].");
   });
 
+  it("names proofreading apart from the coach's feedback on content", () => {
+    const d = {
+      ...sampleDossier(),
+      aiLog: [{ at: AT, action: "proofread" as const, outcomeId: LU, model: "claude-sonnet-5-5" }],
+    };
+    const nl = aiDisclosure(d, "nl") ?? "";
+    expect(nl).toContain("proeflezen");
+    expect(nl).not.toContain("als coach");
+    expect(aiDisclosure(d, "en")).toContain("proofread");
+  });
+
   it("names the outcomes where a paragraph was drafted", () => {
     const d = {
       ...sampleDossier(),

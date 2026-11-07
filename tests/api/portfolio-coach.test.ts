@@ -211,3 +211,225 @@ describe("outcome route — review intent", () => {
     });
   });
 });
+
+describe("proofreadOutcome", () => {
+  const proposal = (quote: string, suggestion: string) =>
+    JSON.stringify({
+      suggestions: [{ quote, issue: "style", explanation: "Korter.", suggestion }],
+    });
+
+  it("needs a chapter, not a confirmed framework, and respects the quota", async () => {
+    const empty = sampleDossier();
+    empty.chapters = [];
+    expect(await coach.proofreadOutcome(user, empty, LU, "nl")).toEqual({
+      ok: false,
+      error: "empty-chapter",
+    });
+    quota.ok = false;
+    expect(await coach.proofreadOutcome(user, sampleDossier(), LU, "nl")).toEqual({
+      ok: false,
+      error: "quota",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("stores only checked proposals and logs the AI use", async () => {
+    generate.mockResolvedValueOnce({
+      text: JSON.stringify({
+        suggestions: [
+          {
+            quote: "Mijn les begon met een vraag.",
+            issue: "style",
+            explanation: "Welke vraag?",
+            suggestion: "Mijn les begon met een vraag over hun stage.",
+          },
+          { quote: "Niet in het hoofdstuk.", issue: "style", explanation: "x", suggestion: "y" },
+        ],
+      }),
+    });
+    const r = await coach.proofreadOutcome(user, sampleDossier(), LU, "nl", 9);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.dropped).toBe(1);
+    expect(r.data.proofreads?.[LU]).toMatchObject({ at: 9, model: "claude-sonnet-5-5" });
+    expect(r.data.proofreads?.[LU].suggestions).toHaveLength(1);
+    expect(r.data.aiLog.at(-1)).toEqual({
+      at: 9,
+      action: "proofread",
+      outcomeId: LU,
+      model: "claude-sonnet-5-5",
+    });
+    // Proposals only: the chapter itself is untouched until the teacher takes one over.
+    expect(r.data.chapters).toEqual(sampleDossier().chapters);
+    const call = generate.mock.calls[0][0];
+    expect(call.system).toContain("Voice & Bounds");
+    expect(call.system).toContain("Proeflezer");
+    expect(call.messages[0].content).toContain("<chapter>\nMijn les begon met een vraag.");
+  });
+
+  it("retries once on an unusable answer, then gives up", async () => {
+    generate
+      .mockResolvedValueOnce({ text: "geen json" })
+      .mockResolvedValueOnce({ text: proposal("Mijn les", "De les") });
+    expect((await coach.proofreadOutcome(user, sampleDossier(), LU, "nl")).ok).toBe(true);
+    generate.mockReset();
+    generate.mockResolvedValue({ text: "geen json" });
+    expect(await coach.proofreadOutcome(user, sampleDossier(), LU, "nl")).toEqual({
+      ok: false,
+      error: "failed",
+    });
+  });
+});
+
+describe("reviewDossier", () => {
+  const LU2 = "00000000-0000-4000-8000-000000000002";
+  const C3 = "00000000-0000-4000-8000-0000000000c3";
+  function twoOutcomes(): DossierData {
+    const d = confirmed();
+    return {
+      ...d,
+      framework: {
+        ...d.framework,
+        outcomes: [
+          ...d.framework.outcomes,
+          {
+            id: LU2,
+            code: "LU2",
+            title: "Toetsen",
+            criteria: [{ id: C3, text: "Toets." }],
+            requiredEvidence: [],
+          },
+        ],
+      },
+    };
+  }
+  const oneCriterion = JSON.stringify({
+    criteria: [{ key: "K1", verdict: "partial", strengthen: [], evidenceNeeded: [] }],
+    overall: "Toetsen: begin gemaakt.",
+  });
+
+  it("refuses before the framework is confirmed, or when no chapter has text", async () => {
+    expect(await coach.reviewDossier(user, sampleDossier(), "nl")).toEqual({
+      ok: false,
+      error: "not-confirmed",
+    });
+    const empty = confirmed();
+    empty.chapters = [];
+    expect(await coach.reviewDossier(user, empty, "nl")).toEqual({
+      ok: false,
+      error: "empty-chapter",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("reviews every chapter with text, skips empty ones, and stores each review", async () => {
+    generate.mockResolvedValueOnce({ text: goodAnswer });
+    const r = await coach.reviewDossier(user, twoOutcomes(), "nl", 5);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.reviewed).toEqual([LU]);
+    expect(r.skipped).toEqual([LU2]);
+    expect(r.failed).toEqual([]);
+    expect(Object.keys(r.data.reviews ?? {})).toEqual([LU]);
+    expect(r.data.aiLog.filter((e) => e.action === "review")).toHaveLength(1);
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the reviews that worked when one chapter fails", async () => {
+    const d = twoOutcomes();
+    d.chapters = [
+      ...d.chapters,
+      { id: "ch2", outcomeId: LU2, text: "Ik maakte een toets.", aiDrafted: false },
+    ];
+    generate.mockImplementation(async ({ messages }) =>
+      messages[0].content.includes("Toetsen") ? { text: oneCriterion } : { text: "kapot" },
+    );
+    const r = await coach.reviewDossier(user, d, "nl", 5);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.reviewed).toEqual([LU2]);
+    expect(r.failed).toEqual([LU]);
+    expect(r.data.reviews?.[LU2]?.review.overall).toBe("Toetsen: begin gemaakt.");
+  });
+});
+
+describe("overview route — review the whole dossier", () => {
+  let overviewRoute: typeof import("~/routes/portfolio.$id");
+  beforeAll(async () => {
+    overviewRoute = await import("~/routes/portfolio.$id");
+  });
+  const post = (fields: Record<string, string>) =>
+    new Request("http://localhost/x", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(fields).toString(),
+    });
+
+  it("reviews all chapters and the page shows an overview per outcome", async () => {
+    const mine = await repo.createDossier("teacher-c", "C", confirmed());
+    generate.mockResolvedValueOnce({ text: goodAnswer });
+    const r = await overviewRoute.action({
+      request: post({ intent: "reviewAll" }),
+      params: { id: mine.id },
+    } as never);
+    expect(r).toEqual({ ok: true, intent: "reviewAll", reviewed: 1, failed: 0 });
+    const page = await overviewRoute.loader({
+      request: new Request("http://localhost/x"),
+      params: { id: mine.id },
+    } as never);
+    expect(page.dossierReview).toEqual([
+      expect.objectContaining({
+        outcomeId: LU,
+        shown: 1,
+        partial: 0,
+        missing: 1,
+        overall: "Helder begin.",
+        modelName: "Claude Sonnet 5.5",
+      }),
+    ]);
+  });
+});
+
+describe("outcome route — proofread intent", () => {
+  const post = (fields: Record<string, string>) =>
+    new Request("http://localhost/x", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(fields).toString(),
+    });
+
+  it("stores the proposals; the page shows only those still in the chapter", async () => {
+    const mine = await repo.createDossier("teacher-c", "C", sampleDossier());
+    generate.mockResolvedValueOnce({
+      text: JSON.stringify({
+        suggestions: [
+          {
+            quote: "Mijn les begon met een vraag.",
+            issue: "style",
+            explanation: "Welke vraag?",
+            suggestion: "Mijn les begon met een vraag over hun stage.",
+          },
+        ],
+      }),
+    });
+    const r = await outcomeRoute.action({
+      request: post({ intent: "proofread", outcomeId: LU }),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(r).toEqual({ ok: true, intent: "proofread", proposals: 1 });
+    const page = await outcomeRoute.loader({
+      request: new Request("http://localhost/x"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(page.proofread?.suggestions).toEqual([
+      expect.objectContaining({ index: 0, quote: "Mijn les begon met een vraag." }),
+    ]);
+
+    await outcomeRoute.action({
+      request: post({ intent: "writeChapter", outcomeId: LU, text: "Helemaal nieuw." }),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    const after = await outcomeRoute.loader({
+      request: new Request("http://localhost/x"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(after.proofread?.suggestions).toEqual([]);
+  });
+});
