@@ -1,8 +1,8 @@
 # Fase 31 — Verdedig je werk en de leercheck (bijlagen F en G van het boek)
 
-> **Status:** ⚪ brief, nog niet bouwen. **Wanneer:** na de pilot, want "tot de pilot geen nieuwe
-> AI-tools" (BESLUIT-2026-11-05-4), tenzij Bastiaan een uitzondering maakt (zie *Wat Bastiaan
-> beslist*). Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`,
+> **Status:** ⚪ brief. **31.1 en 31.3 mogen nu**, vóór de pilot: een uitzondering op "tot de
+> pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4, BESLUIT-2026-11-07-1). 31.2 wacht op een
+> "ja" van Bastiaan. Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`,
 > test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 
@@ -154,8 +154,8 @@ en het bord.
 
 | Stap | Wacht op | Tegelijk met |
 | --- | --- | --- |
-| 31.3 Leercheck | de pilot of een uitzondering | 31.1 |
-| 31.1 Verdedig je werk | de pilot of een uitzondering | 31.3 |
+| 31.3 Leercheck | — (BESLUIT-2026-11-07-1) | 31.1 |
+| 31.1 Verdedig je werk | — (BESLUIT-2026-11-07-1) | 31.3 |
 | 31.2 Nakijken | 31.1 en een "ja" van Bastiaan | — |
 
 31.3 eerst: klein, one-shot, met een controle in code en het meeste nut voor alle docenten.
@@ -180,8 +180,7 @@ en het bord.
 
 ## Wat Bastiaan beslist
 
-1. **Wanneer:** na de pilot (standaard), of een uitzondering op BESLUIT-2026-11-05-4 zodat 31.3 of
-   31.1 al vóór de pilot mag.
+1. ~~Wanneer~~: beslist, allebei nu (BESLUIT-2026-11-07-1).
 2. **31.2 nakijken van de verdediging:** wel of niet, gezien AVG en AI Act.
 
 ## Acceptatie
