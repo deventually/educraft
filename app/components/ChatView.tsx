@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Send, Square, RotateCcw, Pencil } from "lucide-react";
+import { Send, Square, RotateCcw, Pencil, Copy } from "lucide-react";
 import { Link } from "react-router";
 import type { Tool, ChatMessage } from "~/lib/registry/types";
 import { DynamicForm } from "./DynamicForm";
@@ -23,6 +23,8 @@ import { DictateButton } from "./DictateButton";
 import { ReadAloudButton } from "./ReadAloudButton";
 import { appendDictation } from "~/lib/speech/dictation";
 import { ResultActions, type ResultContext } from "./ResultActions";
+import { useToast } from "./Toast";
+import { fillStudentPrompt } from "~/lib/chat/studentPrompt";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
 function newSessionId(): string {
@@ -57,6 +59,11 @@ interface ChatViewProps {
   values?: FormValues;
   /** What the settings aside shows instead of the summary of `tool.inputs`. */
   settingsSummary?: { name: string; label: string; value: string }[];
+  /**
+   * The text a teacher copies for students, per language, with the form fields still as
+   * placeholders (P31.1, `studentPromptTemplates`). Shown only for `tool.copyableStudentPrompt`.
+   */
+  studentPrompt?: Record<"nl" | "en", string>;
   /** Extra fields for /api/stream, e.g. `{ dossierId }` (P29.3). */
   streamExtras?: Record<string, unknown>;
   /**
@@ -83,10 +90,12 @@ export function ChatView({
   resultContext,
   values: presetValues,
   settingsSummary,
+  studentPrompt,
   streamExtras,
   renderAssistant,
 }: ChatViewProps) {
   const t = useT();
+  const { showToast } = useToast();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
@@ -352,6 +361,33 @@ export function ChatView({
             <Pencil className="size-3.5" aria-hidden />
             {t.chat.edit}
           </button>
+        )}
+
+        {tool.copyableStudentPrompt && studentPrompt && (
+          <div className="mt-3">
+            <button
+              type="button"
+              aria-describedby="chat-copy-students-hint"
+              onClick={() => {
+                const text = fillStudentPrompt(
+                  studentPrompt[outputLanguage],
+                  tool.inputs,
+                  sandboxValues as Record<string, unknown>,
+                );
+                (navigator.clipboard?.writeText(text) ?? Promise.reject()).then(
+                  () => showToast({ variant: "success", message: t.chat.copiedForStudents }),
+                  () => showToast({ variant: "error", message: t.chat.copyFailed }),
+                );
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-800 transition-colors hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            >
+              <Copy className="size-3.5" aria-hidden />
+              {t.chat.copyForStudents}
+            </button>
+            <p id="chat-copy-students-hint" className="mt-1 text-xs text-slate-600">
+              {t.chat.copyForStudentsHint}
+            </p>
+          </div>
         )}
 
         {tool.usesContextProfile && !contextProfile && (

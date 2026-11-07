@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Nu
 
+- **P30.2 PDF en Markdown in het menu Exporteer (#146) gemerged op 2026-11-07:** het menu
+  *Exporteer* biedt Word, *Print of bewaar als PDF* en Markdown; de losse Markdown-knop is weg.
 - **P30.1 Exporteren naar Word (#144) gemerged op 2026-11-07:** onder elk resultaat een knop
   *Exporteer* met eerst een voorbeeld en dan *Download als Word*; meerdere stappen in één bestand.
 - **Brief P30 Exporteren (#143) gemerged op 2026-11-07:** Word en PDF nu (30.1, 30.2), de
@@ -265,19 +267,26 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
   Design, Socratische partner) bevatten kapotte woorden, een Cyrillische letter en Engelse
   resten ("guide de denkproces", "medical"). Hersteld op dezelfde plek, zonder `@v2`: de
   betekenis verandert niet. `tests/prompts.typos.test.ts` houdt ze weg.
-
+  Ook de Socratische partner (NL) vraagt nu, net als de Engelse, algemeen naar voorbeelden in
+  plaats van naar selectiedruk en generaties (biologie uit het boek).
+- **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
+  (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
+  deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
+  verdedigen: één vraag tegelijk, vage antwoorden worden doorgevraagd, nooit een cijfer. Met een
+  knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
+  Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
+  anonimiseren).
 - **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
   opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
   van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,
   50%) rekent LimeOnIt zelf uit en staat onder het resultaat, niet de AI. Volgende stap na een
   lesopzet, een heldere opdracht en differentiëren. Meting nog te draaien (`npm run eval -- --tool
   engagement-check`).
-- **P30.2 PDF en Markdown in het menu Exporteer (PR open):** *Print of bewaar als PDF* opent
-  het resultaat als nette pagina in een nieuw tabblad, met het printvenster van de browser
-  ("Opslaan als PDF"); geen bibliotheek. Markdown is een derde keuze in hetzelfde menu; de losse
-  knop "Exporteer (Markdown)" boven het resultaat is weg (keuze Bastiaan, 2026-11-07). Het menu
-  staat ook bij *Eerder gemaakt*. Bij printen vallen de kop en voet van de app weg, ook bij de
-  cijferrekenaar en de rubric.
+- **Code in Word en PDF (PR open):** een codeblok uit een resultaat (zoals ` ```python `) staat in
+  Word, in de PDF en in het voorbeeld als blok in een vaste-breedteletter op een lichtgrijze band,
+  met kleuren per taal (dezelfde kleuren als in de app, iets donkerder voor papier) en met de
+  inspringing zoals geschreven. Code in een zin (`zo`) krijgt ook die letter. Geen nieuwe
+  bibliotheek: dezelfde `rehype-highlight` als op het scherm.
 - **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
   *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
   microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar

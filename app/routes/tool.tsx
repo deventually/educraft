@@ -19,6 +19,7 @@ import {
 import { requireUser } from "~/server/auth.server";
 import type { InteractionMode } from "~/lib/registry/types";
 import { getVerbatimPrompt } from "~/lib/prompts";
+import { studentPromptTemplates } from "~/lib/template/studentPromptTemplate";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { localModelsEnabled } from "~/server/env.server";
 import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.server";
@@ -101,6 +102,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       ? wantedItem
       : "";
   const nextTools = await nextStepsFor(user, tool.next ?? []);
+  // P31.1: only a copyable tutor sends its student text, with the form fields still open.
+  const studentPrompt = tool.copyableStudentPrompt
+    ? studentPromptTemplates(tool, defaultProfile)
+    : null;
   // The BDB/BKE workplace switched off (P27): no dossiers, so no evidence choice.
   const ownDossiers = (await portfolioAccess(user)) ? await listDossiers(user.id) : [];
   const dossiers = ownDossiers.map((d) => ({
@@ -116,6 +121,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     profiles,
     defaultProfileId: defaultProfile?.id ?? "",
     verbatim,
+    studentPrompt,
     localModels,
     catalogModels,
     helpOverlay,
@@ -199,6 +205,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     profiles,
     defaultProfileId,
     verbatim,
+    studentPrompt,
     localModels,
     catalogModels,
     helpOverlay,
@@ -241,6 +248,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
             initialCourseId={initialCourseId}
             initialItemId={initialItemId}
             resultContext={resultContext}
+            studentPrompt={studentPrompt ?? undefined}
           />
         ) : multiStage ? (
           <StageStepper
