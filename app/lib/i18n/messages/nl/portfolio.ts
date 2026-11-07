@@ -69,9 +69,11 @@ export const portfolio = {
   exportBlockedLink: "Bekijk wat er nog open staat",
   exportBlockedMany:
     "Er staan nog {n} open plekken in je dossier, zoals [aanvullen: …], een leeg hoofdstuk of bewijs dat nog volgt. Een open plek komt nooit in je ingeleverde werk; los ze eerst op.",
-  exportDraft: "Download een conceptversie",
   exportDraftHelp:
     "Bijvoorbeeld voor je werkplekbegeleider: CONCEPT op elke pagina, open plekken geel.",
+  exportDraftPdf: "Conceptversie als PDF",
+  exportDraftWord: "Conceptversie als Word",
+  exportPdf: "Bewaar als PDF",
   exportTitle: "Exporteren",
   exportWord: "Download als Word-bestand",
   framework: {
@@ -210,6 +212,16 @@ export const portfolio = {
     unlinkedTitle: "Nog niet gekoppeld bewijs",
   },
   outcomesTitle: "Leeruitkomsten",
+  part: {
+    draft: "Concept: nog {n} open plekken.",
+    draftOne: "Concept: nog 1 open plek.",
+    final: "Apart inleveren:",
+    label: "{outcome} apart inleveren",
+    pdf: "PDF",
+    pdfDraft: "PDF (concept)",
+    word: "Word",
+    wordDraft: "Word (concept)",
+  },
   progressSummary: "{shown} van {total} criteria aangetoond",
   referenceAdd: "Bron toevoegen",
   referenceLabel: "Bron (APA)",

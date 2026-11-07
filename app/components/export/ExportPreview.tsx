@@ -18,13 +18,14 @@ function Runs({ runs }: { runs: Run[] }) {
     if (r.code) node = <code style={{ fontFamily: `${CODE_FONT}, monospace` }}>{node}</code>;
     if (r.italic) node = <em>{node}</em>;
     if (r.bold) node = <strong>{node}</strong>;
+    if (r.highlight) node = <mark className="bg-yellow-200 text-slate-900">{node}</mark>;
     // biome-ignore lint/suspicious/noArrayIndexKey: runs are static, in order
     return <span key={i}>{node}</span>;
   });
 }
 
 /** Blocks under a heading of level `parent`; the text's top heading becomes one deeper. */
-function Blocks({ blocks, parent }: { blocks: Block[]; parent: number }) {
+export function Blocks({ blocks, parent }: { blocks: Block[]; parent: number }) {
   const used = [...new Set(blocks.flatMap((b) => (b.type === "heading" ? [b.level] : [])))].sort();
   return blocks.map((b, i) => {
     const key = `${b.type}-${i}`;
