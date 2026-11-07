@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { AUTHENTIC_ASSESSMENT_PROMPT } from "~/lib/prompts/authentic-assessment.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const MODALITEIT = [
   { value: "in-person", label: { nl: "Contactonderwijs", en: "In-person" } },
@@ -51,7 +52,7 @@ export const authenticAssessment: Tool = {
   defaultOutputLanguage: "nl",
   next: ["rubric-builder", "test-items"],
   courseActions: ["outcome"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288, // nulmeting 2026-11-04: 6144 cut off the blueprint mid-sentence.
   defaultTemperature: 0.4,
   enabled: true,

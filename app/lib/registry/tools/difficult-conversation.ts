@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "~/lib/prompts/difficult-conversation@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONVERSATION = { nl: "Het gesprek", en: "The conversation" };
 
@@ -44,7 +45,7 @@ export const difficultConversation: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 3072,
   defaultTemperature: 0.7,
   enabled: true,

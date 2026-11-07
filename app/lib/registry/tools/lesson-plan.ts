@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { LESSON_PLAN_PROMPT } from "~/lib/prompts/lesson-plan@v1.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const LESSON = { nl: "De les", en: "The lesson" };
 const SETTING = { nl: "Groep en tijd", en: "Group and time" };
@@ -48,7 +49,7 @@ export const lessonPlan: Tool = {
   defaultOutputLanguage: "nl",
   next: ["differentiation", "clear-assignment", "engagement-check"],
   courseActions: ["activity"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288,
   defaultTemperature: 0.3,
   enabled: true,

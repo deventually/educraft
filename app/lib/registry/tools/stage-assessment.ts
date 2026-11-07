@@ -2,6 +2,7 @@ import type { Tool } from "../types";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "~/lib/prompts/stage-assessment@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import hboiNakijkmodel from "./presets/hbo-i-stage-nakijkmodel.md?raw";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const DOC = { nl: "Document", en: "Document" };
 const CONTEXT = { nl: "Context", en: "Context" };
@@ -68,7 +69,7 @@ export const stageAssessment: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   // Feedback on a whole portfolio can be long. 8192 is the Phase 0 cap; verify it
   // does not truncate on a LARGE-document case (§3.6) and raise to 12288 if it does
   // (note the added cost). Confirm the ceiling with an eval on a big submission.

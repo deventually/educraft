@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { MATH_GRADING_PROMPT } from "~/lib/prompts/math-grading.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -51,7 +52,7 @@ export const mathGrading: Tool = {
   usesContextProfile: true,
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 4096, // Scored feedback fits comfortably; verify no truncation via evals.
   // Grading tool: use the grading-mode default (0.3) for consistent, reproducible
   // scores — a grader at 0.7 introduces avoidable variance in the very numbers a

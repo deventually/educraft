@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { TEST_ITEMS_BLUEPRINT, TEST_ITEMS_ITEMS_V3 } from "~/lib/prompts/test-items.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTENT = { nl: "Leeruitkomsten en leerstof", en: "Learning outcomes and material" };
 const TEST = { nl: "Toets", en: "Test" };
@@ -47,7 +48,7 @@ export const testItems: Tool = {
   defaultOutputLanguage: "nl",
   next: ["rubric-builder", "test-analysis"],
   courseActions: ["assessment"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 8192,
   defaultTemperature: 0.3,
   enabled: true,

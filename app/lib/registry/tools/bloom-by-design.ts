@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { BLOOM_BY_DESIGN_PROMPT } from "~/lib/prompts/bloom-by-design.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -45,7 +46,7 @@ export const bloomByDesign: Tool = {
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   courseActions: ["outcome"],

@@ -2,6 +2,7 @@ import type { Tool } from "../types";
 import { PORTFOLIO_REHEARSAL_PROMPT_V2 } from "~/lib/prompts/portfolio-rehearsal@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { REHEARSAL_CLOSE, REHEARSAL_START } from "~/lib/portfolio/rehearsal";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 /**
  * Proefassessment — brief P29, 29.3. A played assessment committee that has read the
@@ -38,7 +39,7 @@ export const portfolioRehearsal: Tool = {
   hiddenFromCatalogue: true,
   storesConversation: false,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 3072,
   defaultTemperature: 0.7,
   enabled: true,

@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { PEER_TUTORING_PROMPT } from "~/lib/prompts/peer-tutoring.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const CONTEXT = { nl: "Context", en: "Context" };
 
@@ -48,7 +49,7 @@ export const peerTutoring: Tool = {
   // high-school/undergraduate/graduate input is retired onto that spine (P6.8).
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 2048,
   defaultTemperature: 0.7,
   enabled: true,

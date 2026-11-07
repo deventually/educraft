@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { GUIDED_REFLECTION_PROMPT_V2 } from "~/lib/prompts/guided-reflection@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const NIVEAU = [
   {
@@ -74,7 +75,7 @@ export const guidedReflection: Tool = {
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
   next: ["lesson-plan", "authentic-assessment"],
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 12288,
   defaultTemperature: 0.4,
   enabled: true,

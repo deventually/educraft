@@ -10,10 +10,16 @@
  */
 
 import type { Tool, ToolStage } from "~/lib/registry/types";
-import { isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
+import { DEFAULT_MODEL, isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import { defaultValuesFor, toTemplateValues } from "~/lib/forms/values";
+
+/**
+ * The judge is the app's default model (`default` in config/models.json), so raising the
+ * default there raises the judge too. Override per run with `--judge-model`.
+ */
+export const DEFAULT_JUDGE_MODEL = DEFAULT_MODEL;
 
 /** A judge model's parsed verdict for one output. Scores are clamped to 1–5. */
 export interface JudgeResult {

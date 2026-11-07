@@ -39,6 +39,7 @@ import {
   parseJudgeResult,
   rubricForJudge,
   runSpread,
+  DEFAULT_JUDGE_MODEL,
 } from "./eval-helpers";
 import {
   type RehearsalCase,
@@ -49,7 +50,6 @@ import {
 
 const TOOL = "portfolio-rehearsal";
 const EVALS_DIR = join(process.cwd(), "evals");
-const DEFAULT_JUDGE_MODEL = "claude-sonnet-4-6";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

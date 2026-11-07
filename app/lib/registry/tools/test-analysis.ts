@@ -1,6 +1,7 @@
 import type { Tool } from "../types";
 import { TEST_ANALYSIS_PROMPT } from "~/lib/prompts/test-analysis@v1.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
+import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const TEST = { nl: "Toets", en: "Test" };
 
@@ -43,7 +44,7 @@ export const testAnalysis: Tool = {
   }),
   usesContextProfile: false,
   defaultOutputLanguage: "nl",
-  defaultModel: "claude-sonnet-5-5",
+  defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 8192,
   defaultTemperature: 0.2,
   courseActions: ["assessment"],
