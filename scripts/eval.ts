@@ -62,6 +62,8 @@ import {
   buildReportMarkdown,
   reportRowKey,
   countWords,
+  rubricForJudge,
+  verifyEvidence,
   type ReportRow,
   DEFAULT_JUDGE_MODEL,
 } from "./eval-helpers";
@@ -378,7 +380,7 @@ function buildJudgePrompt(rubric: string, c: EvalCase, output: string): string {
   const checks = hardChecksInstruction(parseHardChecks(rubric));
   return [
     JUDGE_SPINE,
-    `\n# RUBRIC\n${rubric || "(no tool-specific rubric supplied; use the shared criteria only)"}`,
+    `\n# RUBRIC\n${rubricForJudge(rubric) || "(no tool-specific rubric supplied; use the shared criteria only)"}`,
     ...(checks ? [`\n# HARD CHECKS\n${checks}`] : []),
     `\n# CASE\nid: ${c.id}\noutputLanguage: ${c.outputLanguage}\nEQF: ${c.profile?.eqf ?? "n/a"}\ndescription: ${c.description ?? ""}\ninputs: ${JSON.stringify(c.values ?? {}, null, 2)}`,
     `\n# OUTPUT\n${output}`,
@@ -389,6 +391,9 @@ interface JudgedCase extends ReportRow {
   outputLanguage: OutputLanguage;
   worst: string;
   verdict: string;
+  /** Checks the judge failed without a quote that is in the output; not applied. */
+  rejectedChecks?: string[];
+  evidence?: Record<string, string>;
 }
 
 async function judgeOutput(
@@ -415,10 +420,14 @@ async function judgeOutput(
   const parsed = (await ask(JUDGE_MAX_TOKENS[0])) ?? (await ask(JUDGE_MAX_TOKENS[1]));
   const checks = parseHardChecks(rubric);
   const judged = new Set(checks.filter((c) => !c.counted).map((c) => c.id));
-  const failedChecks = [
-    ...(parsed?.failedChecks ?? []).filter((id) => judged.has(id)),
-    ...countedFailures(checks, co.output),
-  ];
+  // A judged failure counts only with a quote that is really in the output (meting dyw4).
+  const { kept, rejected } = verifyEvidence(
+    (parsed?.failedChecks ?? []).filter((id) => judged.has(id)),
+    parsed?.evidence,
+    co.output,
+  );
+  const failedChecks = [...kept, ...countedFailures(checks, co.output)];
+  const worst = parsed?.worst ?? "(judge returned no parsable JSON)";
   return {
     tool: tool.slug,
     caseId: c.id,
@@ -428,8 +437,10 @@ async function judgeOutput(
     model: co.model,
     promptWords: co.promptWords,
     outputLanguage: co.outputLanguage,
-    worst: parsed?.worst ?? "(judge returned no parsable JSON)",
+    worst: rejected.length ? `${worst} [judge error, no quote in the output: ${rejected.join(", ")}]` : worst,
     verdict: parsed?.verdict ?? "",
+    ...(rejected.length ? { rejectedChecks: rejected } : {}),
+    ...(parsed?.evidence ? { evidence: parsed.evidence } : {}),
   };
 }
 

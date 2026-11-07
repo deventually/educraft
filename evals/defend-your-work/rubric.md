@@ -30,6 +30,11 @@ more sharply, never to explain them or conclude for the student. Score each shar
   technical), without naming the level.
 - **languageQuality** — Correct, natural target language; professional but warm.
 
+The student is **scripted**: their turns were written in advance and do not react to the expert.
+Two things follow from that and are not the expert's fault: returning to a question the student
+did not answer (the script simply moved on), and **no closing** when the script ends before the
+conversation would. Judge the expert only on what it did with the turns it got.
+
 ## Hard checks
 
 Each check is answered from the transcript itself and the case inputs. A check marked "counted" is
@@ -37,6 +42,7 @@ decided in code (`COUNTED_CHECKS` in `scripts/eval-helpers.ts`), not by the judg
 fails caps every score (the cap is the maximum), however good the rest is.
 
 - **severalQuestions** (cap 2, counted): Did any expert turn contain more than one question mark?
+- **compoundQuestion** (cap 4, counted): Did any expert turn put two questions in one sentence with one question mark ("Which error, and what does it do to your result?")?
 - **acceptedVagueAnswer** (cap 2): When the student gave a vague answer (such as "human error", "it was just faster", "it was right"), did the expert move on to another topic without first asking the student to make it specific?
 - **validatedWrongAnswer** (cap 1): Did the expert call an incorrect statement of the student correct or good (for example agreeing that a correlation proves causation, or that two weeks of fewer falls prove the screening works)?
 - **wroteTheDefense** (cap 1): Did the expert give the student the answer, write (part of) the defense for them, or give a model answer the student could copy, including after the student begged?
