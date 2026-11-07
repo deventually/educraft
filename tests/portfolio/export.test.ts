@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
-import { buildDossierDocx, exportFileName } from "~/lib/portfolio/export";
+import { buildDossierDocx, exportFileName, OpenSpotsError } from "~/lib/portfolio/export";
 import { wordCount } from "~/lib/portfolio/progress";
 import type { DossierData } from "~/lib/portfolio/types";
 import { CH, LU, sampleDossier } from "./fixtures";
@@ -25,6 +25,7 @@ function richDossier(): DossierData {
       text: "## Aanpak\n\nIk **startte** met een vraag.\n\n- punt een\n\n| Kop A | Kop B |\n|---|---|\n| x | y |",
       aiDrafted: false,
     },
+    { id: "ch-2", outcomeId: LU2, text: "Mijn toets was valide.", aiDrafted: false },
   ];
   d.references = [
     { id: "r1", apa: "Wiley, D. (2025). The pedagogical promptbook." },
@@ -77,7 +78,7 @@ describe("buildDossierDocx", () => {
     expect(texts).toContain("Studiejaar 2025-2026");
     expect(texts).toContain("20 november 2026");
     // Only the chapters count; the evidence ("Goede opbouw.") is an appendix.
-    const words = wordCount(richDossier().chapters[0].text);
+    const words = richDossier().chapters.reduce((n, ch) => n + wordCount(ch.text), 0);
     expect(words).toBeGreaterThan(5);
     expect(texts).toContain(`Aantal woorden (zonder bijlagen): ${words}`);
   });
@@ -158,12 +159,82 @@ describe("buildDossierDocx", () => {
     expect(texts).not.toContain("Appendices");
   });
 
-  it("marks an outcome without a chapter so the gap is visible", async () => {
+  it("refuses to write the final version while an open spot is left", async () => {
     const d = richDossier();
-    const texts = paragraphs(
-      await documentXml(await buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW })),
-    ).map((p) => p.text);
-    expect(texts[texts.indexOf("LU2 Toetsen") + 1]).toBe("(Nog geen tekst.)");
+    d.chapters[1].text = "Mijn toets was valide. [aanvullen: de p-waarden]";
+    await expect(
+      buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW }),
+    ).rejects.toBeInstanceOf(OpenSpotsError);
+    d.chapters = d.chapters.slice(0, 1);
+    await expect(
+      buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW }),
+    ).rejects.toBeInstanceOf(OpenSpotsError);
+  });
+});
+
+describe("buildDossierDocx — draft version", () => {
+  async function draft(d: DossierData, locale: "nl" | "en" = "nl") {
+    const zip = await JSZip.loadAsync(
+      await buildDossierDocx({ name: "BDB", data: d, locale, now: NOW, draft: true }),
+    );
+    const doc = (await zip.file("word/document.xml")?.async("string")) ?? "";
+    const read = (re: RegExp) =>
+      Promise.all(
+        Object.keys(zip.files)
+          .filter((f) => re.test(f))
+          .map((f) => zip.file(f)?.async("string") ?? ""),
+      ).then((xs) => xs.join(""));
+    const core = (await zip.file("docProps/core.xml")?.async("string")) ?? "";
+    return {
+      doc,
+      header: await read(/^word\/header\d*\.xml$/),
+      footer: await read(/^word\/footer\d*\.xml$/),
+      core,
+    };
+  }
+
+  it("cannot be mistaken for the final version: top and bottom of every page, title page, title", async () => {
+    const nl = await draft(richDossier());
+    expect(nl.header).toContain("CONCEPT, NIET INLEVEREN");
+    expect(nl.footer).toContain("CONCEPT, NIET INLEVEREN");
+    expect(nl.core).toContain("CONCEPT, NIET INLEVEREN: BDB");
+    const first = paragraphs(nl.doc).slice(0, 3);
+    expect(first[0].text).toBe("CONCEPT, NIET INLEVEREN");
+    expect(first[1].text).toBe(
+      "Deze versie heeft nog open plekken, geel gemarkeerd. Lever hem niet in; los eerst alles op in LimeOnIt.",
+    );
+    expect(first[2]).toEqual({ style: "Title", text: "BDB" });
+    const en = await draft(richDossier(), "en");
+    expect(en.header).toContain("DRAFT, DO NOT SUBMIT");
+    expect(en.footer).toContain("DRAFT, DO NOT SUBMIT");
+  });
+
+  it("marks every open spot in yellow: markers, an empty chapter, evidence still to come", async () => {
+    const d = richDossier();
+    d.chapters = [{ ...d.chapters[0], text: "Ik begon. [aanvullen: het effect] Daarna." }];
+    d.evidence[0].text = "";
+    const { doc } = await draft(d);
+    const yellow = [
+      ...doc.matchAll(
+        /<w:r>(?:(?!<\/w:r>)[\s\S])*?<w:highlight w:val="yellow"\/>[\s\S]*?<w:t(?: [^>]*)?>([^<]*)<\/w:t>/g,
+      ),
+    ].map((m) => m[1]);
+    expect(yellow).toEqual(["[aanvullen: het effect]", "(Nog geen tekst.)", "(Volgt nog.)"]);
+    // The text around a marker stays as written.
+    expect(doc).toContain("Ik begon. ");
+    expect(doc).toContain(" Daarna.");
+  });
+
+  it("has no CONCEPT header in the final version", async () => {
+    const zip = await JSZip.loadAsync(
+      await buildDossierDocx({ name: "BDB", data: richDossier(), locale: "nl", now: NOW }),
+    );
+    const all = await Promise.all(
+      Object.keys(zip.files)
+        .filter((f) => f.endsWith(".xml"))
+        .map((f) => zip.file(f)?.async("string") ?? ""),
+    );
+    expect(all.join("")).not.toContain("CONCEPT");
   });
 });
 
@@ -172,6 +243,7 @@ describe("exportFileName", () => {
     expect(exportFileName("BDB 2026")).toBe("BDB 2026.docx");
     expect(exportFileName('a/b\\c:"d"\n')).toBe("a-b-c--d.docx");
     expect(exportFileName("   ")).toBe("dossier.docx");
+    expect(exportFileName("BDB 2026", { draft: "concept" })).toBe("BDB 2026 (concept).docx");
   });
 });
 

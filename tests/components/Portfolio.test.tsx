@@ -11,6 +11,8 @@ import { outcomeProgress, nextStep } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierStep } from "~/lib/portfolio/step";
 import { readinessCheck } from "~/lib/portfolio/readiness";
+import { openSpots } from "~/lib/portfolio/openSpots";
+import * as edit from "~/lib/portfolio/edit";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -50,6 +52,7 @@ function overviewData(d = sampleDossier()) {
     readiness: readinessCheck(d),
     dossierReview: [] as unknown[],
     canReviewAll: false,
+    openSpots: openSpots(d).length,
   };
 }
 
@@ -349,6 +352,28 @@ describe("Portfolio outcome page", () => {
       screen.getByText("3 woorden; het hele verslag mag 100 woorden hebben"),
     ).toBeInTheDocument();
   });
+
+  it("counts the open spots in the chapter as the teacher types", async () => {
+    const { container } = renderRoute(PortfolioOutcome, outcomeData());
+    const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");
+    expect(screen.queryByText(/open plek/)).toBeNull();
+    fireEvent.change(chapter, {
+      target: { value: "Ik begon. [aanvullen: het effect] Daarna [aanvullen: de groep]." },
+    });
+    const note = screen.getByText(
+      "2 open plekken in dit hoofdstuk, zoals [aanvullen: …]. Vul ze in voordat je inlevert.",
+    );
+    expect(chapter.getAttribute("aria-describedby")).toContain(note.id);
+    fireEvent.change(chapter, { target: { value: "Ik begon. [aanvullen: het effect]" } });
+    expect(
+      screen.getByText(
+        "1 open plek in dit hoofdstuk, zoals [aanvullen: …]. Vul hem in voordat je inlevert.",
+      ),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    fireEvent.change(chapter, { target: { value: "Klaar." } });
+    expect(screen.queryByText(/open plek/)).toBeNull();
+  });
 });
 
 describe("Portfolio overview — ready to hand in (P29.1)", () => {
@@ -360,9 +385,36 @@ describe("Portfolio overview — ready to hand in (P29.1)", () => {
       "href",
       "#readiness",
     );
-    // Advice, never a gate: the export button still works.
+    // Advice, not a gate: with no open spot left, the export button works.
     expect(within(exportForm).getByRole("button")).toBeEnabled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio overview — no open spot in the handed-in work", () => {
+  it("offers only a draft version while an open spot is left, and says why", async () => {
+    const d = edit.writeChapter(sampleDossier(), LU, "Mijn les. [aanvullen: het effect]");
+    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    const exportForm = screen.getByRole("form", { name: "Exporteren" });
+    expect(
+      within(exportForm).getByText(/Er staat nog 1 open plek in je dossier/),
+    ).toBeInTheDocument();
+    expect(
+      within(exportForm).queryByRole("button", { name: "Download als Word-bestand" }),
+    ).toBeNull();
+    const draft = within(exportForm).getByRole("button", { name: "Download een conceptversie" });
+    expect(draft).toHaveAttribute("name", "draft");
+    expect(draft).toHaveAttribute("value", "1");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers the final version once every open spot is gone", () => {
+    renderRoute(PortfolioOverview, overviewData());
+    const exportForm = screen.getByRole("form", { name: "Exporteren" });
+    expect(
+      within(exportForm).getByRole("button", { name: "Download als Word-bestand" }),
+    ).toBeInTheDocument();
+    expect(within(exportForm).queryByText(/open plek/)).toBeNull();
   });
 });
 

@@ -8,13 +8,18 @@
  * evidence as numbered appendices (a course snapshot keeps its tables). References come before appendices, as APA
  * asks. The document is accessible: real heading styles, the document language
  * set, tables with a repeating header row.
+ *
+ * An open spot (`openSpots.ts`) never reaches the final version: the builder
+ * refuses it (BESLUIT-2026-11-07-4). A draft version (`draft: true`) always
+ * works: "CONCEPT" at the top of every page and every open spot in yellow.
  */
 import { AlignmentType, HeadingLevel, PageBreak, Paragraph, type Table, TextRun } from "docx";
-import { blocksToDocx, LANGUAGE, listCounter, packDocx } from "~/lib/export/docx";
+import { blocksToDocx, LANGUAGE, listCounter, packDocx, runs } from "~/lib/export/docx";
 import { safeFileName } from "~/lib/export/filename";
 import { fmt } from "~/lib/i18n/format";
 import { getMessages, type Locale } from "~/lib/i18n";
-import { parseMarkdown } from "~/lib/export/markdown";
+import { type Block, parseMarkdown, type Run } from "~/lib/export/markdown";
+import { type OpenSpot, openSpots, splitOnMarkers } from "./openSpots";
 import { wordCount } from "./progress";
 import type { DossierData } from "./types";
 
@@ -29,15 +34,56 @@ export interface DossierExportInput {
    * when the teacher turns it on; absent = no disclosure section.
    */
   aiDisclosure?: string;
+  /** A draft version: allowed with open spots, marked as such. */
+  draft?: boolean;
 }
 
-/** Plain pasted text: one paragraph per non-empty line. */
+/** The final version was asked for while open spots are left. */
+export class OpenSpotsError extends Error {
+  constructor(readonly spots: OpenSpot[]) {
+    super(`${spots.length} open spot(s) left`);
+    this.name = "OpenSpotsError";
+  }
+}
+
+/** Runs with every marker cut out into its own highlighted run. */
+function markRuns(rs: Run[]): Run[] {
+  return rs.flatMap((r) =>
+    splitOnMarkers(r.text).map((p) => ({
+      ...r,
+      text: p.text,
+      ...(p.marker ? { highlight: true } : {}),
+    })),
+  );
+}
+
+function markBlocks(blocks: Block[]): Block[] {
+  return blocks.map((b) => {
+    switch (b.type) {
+      case "heading":
+      case "paragraph":
+        return { ...b, runs: markRuns(b.runs) };
+      case "list":
+        return { ...b, items: b.items.map(markRuns) };
+      case "table":
+        return { ...b, header: b.header.map(markRuns), rows: b.rows.map((r) => r.map(markRuns)) };
+      default:
+        return b;
+    }
+  });
+}
+
+/** Plain pasted text: one paragraph per non-empty line, open spots marked. */
 function plainParagraphs(text: string): Paragraph[] {
   return text
     .split(/\r?\n/)
     .filter((l) => l.trim())
-    .map((l) => new Paragraph({ children: [new TextRun(l)] }));
+    .map((l) => new Paragraph({ children: runs(markRuns([{ text: l }])) }));
 }
+
+/** A placeholder line for something missing: italic, in yellow (only a draft has them). */
+const missing = (text: string) =>
+  new Paragraph({ children: runs([{ text, italic: true, highlight: true }]) });
 
 function formatDate(now: number, locale: Locale): string {
   return new Intl.DateTimeFormat(LANGUAGE[locale], {
@@ -51,7 +97,11 @@ function formatDate(now: number, locale: Locale): string {
 export async function buildDossierDocx(
   input: DossierExportInput,
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const { name, data, locale, now, aiDisclosure } = input;
+  const { name, data, locale, now, aiDisclosure, draft = false } = input;
+  if (!draft) {
+    const spots = openSpots(data);
+    if (spots.length) throw new OpenSpotsError(spots);
+  }
   const t = getMessages(locale).portfolioExport;
   const { framework } = data;
   const nextList = listCounter();
@@ -60,7 +110,21 @@ export async function buildDossierDocx(
   const centered = (text: string) =>
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(text)] });
 
+  // A draft cannot be mistaken for the real thing: a banner above the title too.
+  const draftBanner: Paragraph[] = draft
+    ? [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: t.draftHeader, bold: true, color: "C00000", size: 48 })],
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: t.draftNote, color: "C00000" })],
+        }),
+      ]
+    : [];
   const titlePage: Paragraph[] = [
+    ...draftBanner,
     new Paragraph({
       heading: HeadingLevel.TITLE,
       alignment: AlignmentType.CENTER,
@@ -80,9 +144,8 @@ export async function buildDossierDocx(
     body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(heading)] }));
     const chapter = data.chapters.find((ch) => ch.outcomeId === o.id);
     const blocks = chapter ? parseMarkdown(chapter.text) : [];
-    if (blocks.length) body.push(...blocksToDocx(blocks, nextList, 1));
-    else
-      body.push(new Paragraph({ children: [new TextRun({ text: t.noChapter, italics: true })] }));
+    if (blocks.length) body.push(...blocksToDocx(markBlocks(blocks), nextList, 1));
+    else body.push(missing(t.noChapter));
   }
 
   if (aiDisclosure?.trim()) {
@@ -118,18 +181,25 @@ export async function buildDossierDocx(
       );
       // A course snapshot (P26.4) is our own Markdown, with tables; pasted
       // evidence is the teacher's text and stays as typed.
-      body.push(
-        ...(e.sourceCourse
-          ? blocksToDocx(parseMarkdown(e.text), nextList, 2)
-          : plainParagraphs(e.text)),
-      );
+      if (!e.text.trim()) body.push(missing(t.pending));
+      else
+        body.push(
+          ...(e.sourceCourse
+            ? blocksToDocx(markBlocks(parseMarkdown(e.text)), nextList, 2)
+            : plainParagraphs(e.text)),
+        );
     });
   }
 
-  return packDocx(name, locale, [...titlePage, ...body]);
+  return draft
+    ? packDocx(`${t.draftHeader}: ${name}`, locale, [...titlePage, ...body], {
+        banner: t.draftHeader,
+      })
+    : packDocx(name, locale, [...titlePage, ...body]);
 }
 
-/** A safe download name: no path or control characters, always `.docx`. */
-export function exportFileName(name: string): string {
-  return safeFileName(name, "docx", "dossier");
+/** A safe download name: no path or control characters, always `.docx`; a draft says so. */
+export function exportFileName(name: string, opts: { draft?: string } = {}): string {
+  const base = safeFileName(name, "docx", "dossier").replace(/\.docx$/, "");
+  return opts.draft ? `${base} (${opts.draft}).docx` : `${base}.docx`;
 }

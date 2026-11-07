@@ -1,3 +1,4 @@
+import { loc } from "~/lib/i18n/localized";
 import { describe, it, expect } from "vitest";
 import { getToolBySlug } from "~/lib/registry";
 import { getModel } from "~/lib/ai/models";
@@ -76,6 +77,23 @@ describe("tool: stage-assessment", () => {
     expect(figures).toBeDefined();
     expect(figures?.required).not.toBe(true);
     expect(figures?.accept).toContain("image/");
+  });
+
+  it("tells the teacher figures from the upload can be ticked, not that they are lost", async () => {
+    const { readFileSync } = await import("node:fs");
+    const tool = getToolBySlug("stage-assessment")!;
+    const doc = tool.inputs.find((f) => f.name === "document")!;
+    const figures = tool.inputs.find((f) => f.kind === "image")!;
+    const help = (lang: string) =>
+      readFileSync(`app/content/help/tools/stage-assessment.${lang}.md`, "utf8");
+    expect(loc(doc.help, "nl")).not.toMatch(/figuren gaan verloren/);
+    expect(loc(doc.help, "en")).not.toMatch(/figures are lost/);
+    expect(loc(figures.help, "nl")).toMatch(/aanvinken/);
+    expect(loc(figures.help, "en")).toMatch(/tick/);
+    expect(help("nl")).toMatch(/aanvinken/);
+    expect(help("en")).toMatch(/tick/);
+    expect(help("nl")).not.toMatch(/figuren gaan verloren/);
+    expect(help("en")).not.toMatch(/figures are lost/);
   });
 
   it("builds a prompt with no unresolved placeholders", () => {

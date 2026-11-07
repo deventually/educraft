@@ -266,6 +266,51 @@ describe("readinessCheck — one code at a time", () => {
     ]);
   });
 
+  it("open-spot: block per marker left in a chapter or in evidence, with a fix where it is", () => {
+    expect(levelOf(readinessCheck(tidy()), "open-spot")).toEqual(["ok"]);
+    const d = edit.writeChapter(tidy(), LU, "Mijn les. [aanvullen: het effect] TODO");
+    expect(of(readinessCheck(d), "open-spot")).toEqual([
+      {
+        code: "open-spot",
+        level: "block",
+        outcomeId: LU,
+        detail: "[aanvullen: het effect]",
+        fix: { to: "chapter", outcomeId: LU },
+      },
+      {
+        code: "open-spot",
+        level: "block",
+        outcomeId: LU,
+        detail: "TODO",
+        fix: { to: "chapter", outcomeId: LU },
+      },
+    ]);
+    const inEvidence = edit.updateEvidence(tidy(), EV, { text: "Datum: [invullen]" });
+    expect(of(readinessCheck(inEvidence), "open-spot")).toEqual([
+      {
+        code: "open-spot",
+        level: "block",
+        outcomeId: LU,
+        detail: "[invullen]",
+        fix: { to: "evidence", outcomeId: LU },
+      },
+    ]);
+  });
+
+  it("evidence-pending: block per evidence item without text, named by its title", () => {
+    expect(levelOf(readinessCheck(tidy()), "evidence-pending")).toEqual(["ok"]);
+    const d = edit.updateEvidence(tidy(), EV, { text: "" });
+    expect(of(readinessCheck(d), "evidence-pending")).toEqual([
+      {
+        code: "evidence-pending",
+        level: "block",
+        outcomeId: LU,
+        detail: "Feedback werkplekbegeleider",
+        fix: { to: "evidence", outcomeId: LU },
+      },
+    ]);
+  });
+
   it("ignores a tick for a code that is not a self-check", () => {
     const d = edit.updateEvidence(tidy(), EV, { criterionIds: [C1] });
     const ticked = { ...d, readiness: { ticked: { "criterion-without-evidence": NOW } } };

@@ -1,11 +1,13 @@
 /**
  * "Klaar om in te leveren?" (brief P29, 29.1): one advisory list that says
- * whether a dossier is ready to hand in. Pure, no LLM, and never a gate: the
- * export always works. Only what the confirmed framework asks for is checked;
+ * whether a dossier is ready to hand in. Pure, no LLM. Advice, with one gate:
+ * an open spot (`open-spot`, `evidence-pending`, an empty chapter) keeps the
+ * final export back; a draft version always works (BESLUIT-2026-11-07-4). Only what the confirmed framework asks for is checked;
  * there are no national rules in here, and BDB and BKE differ only by data.
  *
  * When in doubt, no finding: a missed point is better than a false alarm.
  */
+import { evidenceOutcome, openSpots } from "./openSpots";
 import { outcomeProgress, requirementFindings, wordCount } from "./progress";
 import type { DossierData } from "./types";
 
@@ -16,6 +18,8 @@ export const READINESS_CODES = [
   "criterion-without-evidence",
   "required-evidence-missing",
   "chapter-empty",
+  "open-spot",
+  "evidence-pending",
   "criterion-not-shown",
   "over-word-limit",
   "citation-not-in-references",
@@ -223,11 +227,12 @@ export function readinessCheck(d: DossierData): ReadinessItem[] {
   }
 
   const withCriteria = outcomes.filter((o) => o.criteria.length > 0);
-  if (withCriteria.length > 0) {
+  // Every outcome is a chapter in the export, so every one needs text (BESLUIT-2026-11-07-4).
+  if (outcomes.length > 0) {
     const words = new Map(d.chapters.map((ch) => [ch.outcomeId, wordCount(ch.text)]));
     check(
       "chapter-empty",
-      withCriteria
+      outcomes
         .filter((o) => !words.get(o.id))
         .map((o) => ({
           level: "block",
@@ -235,6 +240,23 @@ export function readinessCheck(d: DossierData): ReadinessItem[] {
           fix: { to: "chapter", outcomeId: o.id },
         })),
     );
+  }
+
+  // Open spots (BESLUIT-2026-11-07-4): what the final export refuses to carry.
+  const spots = openSpots(d);
+  const spotItems = (kind: "marker" | "empty", where?: "evidence") =>
+    spots
+      .filter((s) => s.kind === kind && (!where || s.where === where))
+      .map((s): Omit<ReadinessItem, "code"> => {
+        const outcomeId = s.where === "chapter" ? s.outcomeId : evidenceOutcome(d, s.evidenceId);
+        if (!outcomeId) return { level: "block", detail: s.text };
+        const to = s.where === "chapter" ? ("chapter" as const) : ("evidence" as const);
+        return { level: "block", outcomeId, detail: s.text, fix: { to, outcomeId } };
+      });
+  if (d.chapters.length > 0 || d.evidence.length > 0) check("open-spot", spotItems("marker"));
+  if (d.evidence.length > 0) check("evidence-pending", spotItems("empty", "evidence"));
+
+  if (withCriteria.length > 0) {
     check(
       "criterion-not-shown",
       criteria

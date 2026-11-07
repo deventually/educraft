@@ -24,8 +24,8 @@ beforeAll(async () => {
   repo = await import("~/server/repositories/portfolio.server");
 });
 
-function call(id: string, cookie = "") {
-  const request = new Request(`http://localhost/portfolio/${id}/export`, {
+function call(id: string, cookie = "", query = "") {
+  const request = new Request(`http://localhost/portfolio/${id}/export${query}`, {
     headers: cookie ? { Cookie: cookie } : {},
   });
   // biome-ignore lint/suspicious/noExplicitAny: minimal loader args for a resource route
@@ -56,6 +56,29 @@ describe("GET /portfolio/:id/export", () => {
     const xml = await zip.file("word/document.xml")?.async("string");
     expect(xml).toContain("BDB 2026");
     expect(xml).toContain("Word count (excluding appendices)");
+  });
+
+  it("sends the teacher back to the check while an open spot is left", async () => {
+    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    const data = sampleDossier();
+    data.chapters[0].text = "Mijn les. [aanvullen: het effect]";
+    const d = await repo.createDossier("export-owner", "BDB 2026", data);
+    const res = await call(d.id);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe(`/portfolio/${d.id}#readiness`);
+  });
+
+  it("always gives the draft version, marked as such in its file name", async () => {
+    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    const data = sampleDossier();
+    data.chapters[0].text = "Mijn les. [aanvullen: het effect]";
+    const d = await repo.createDossier("export-owner", "BDB 2026", data);
+    const res = await call(d.id, "", "?draft=1");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Disposition")).toContain('filename="BDB 2026 (concept).docx"');
+    const zip = await JSZip.loadAsync(new Uint8Array(await res.arrayBuffer()));
+    const header = await zip.file("word/header1.xml")?.async("string");
+    expect(header).toContain("CONCEPT, NIET INLEVEREN");
   });
 
   it("answers 404 for someone else's dossier", async () => {
