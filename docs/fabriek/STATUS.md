@@ -262,6 +262,13 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Bezig
 
+- **Typfouten in de prompts (PR open):** zeven oudere Nederlandse chatprompts (peer tutoring,
+  MentorAI v1, scaffolding feedback, think-pair-share, dialogische ontmoetingen v1, Bloom by
+  Design, Socratische partner) bevatten kapotte woorden, een Cyrillische letter en Engelse
+  resten ("guide de denkproces", "medical"). Hersteld op dezelfde plek, zonder `@v2`: de
+  betekenis verandert niet. `tests/prompts.typos.test.ts` houdt ze weg.
+  Ook de Socratische partner (NL) vraagt nu, net als de Engelse, algemeen naar voorbeelden in
+  plaats van naar selectiedruk en generaties (biologie uit het boek).
 - **P31.1 Verdedig je werk (PR open):** een chat-tutor *Je eigen werk mondeling verdedigen*
   (bijlage F.3, letterlijk overgenomen en algemeen gemaakt). Een kritische maar vriendelijke
   deskundige uit het werkveld laat de student een verslag, stage, project of beroepsproduct
