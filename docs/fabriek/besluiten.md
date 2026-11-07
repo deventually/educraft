@@ -265,3 +265,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-06-5:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
   en PDF voor elk resultaat, geen nieuwe bibliotheek) mogen vóór de pilot; Excel, PowerPoint,
   Brightspace en de huisstijl volgen na de pilotfeedback. Bastiaan, 2026-11-06 (keuzekaart).
+- **BESLUIT-2026-11-07-1:** **Bijlagen F en G uit het boek worden brief P31:** een tutor voor de
+  mondelinge verdediging van eigen werk (F) en de leercheck met de zes leerprincipes (G). Allebei
+  mogen nu, vóór de pilot: een uitzondering op "tot de pilot geen nieuwe AI-tools"
+  (BESLUIT-2026-11-05-4). Het nakijken van een verdediging (31.2): zie BESLUIT-2026-11-07-2.
+  Bastiaan, 2026-11-07 (keuzekaart). Uitwerking: brief P31.
+- **BESLUIT-2026-11-07-2:** **De AI mag de verdediging van een student nakijken (P31.2)**, als advies
+  (de docent beslist, AI Act) en alleen na anonimiseren in de browser: naam, studentnummer, bedrijf,
+  begeleiders en genoemde klanten of patiënten. Nooit gedeeld. Bastiaan, 2026-11-07.
