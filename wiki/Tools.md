@@ -49,6 +49,7 @@ All 14 tools from the book plus seven originals are shipped. *For* = who the too
 | 19 | — (original, P24.5) | Explain a test analysis (`test-analysis`; the numbers come from the item-analysis utility, the AI computes nothing) | one-shot | teacher |
 | 20 | — (original, P24.6) | Write a clear assignment (`clear-assignment`) | one-shot | teacher |
 | 21 | — (original, P24.7) | Differentiate a task (`differentiation`, three variants with the same learning goal) | one-shot | teacher |
+| 22 | Oracle to Socratic (Appendix G, P31.3) | How actively do your students learn? (`engagement-check`, the leercheck: a level 0–3 per principle of the book's rubric; the score out of 18 is computed in code, `output.computed`) | one-shot | teacher |
 
 The Cognitive Architect's four stages: **Instructional Analyst** → **Student Prompt
 Generator** → **Quality Validator** → **Analyst Prompt Generator**, with later

@@ -21,6 +21,7 @@ import { lessonPlan } from "./tools/lesson-plan";
 import { testAnalysis } from "./tools/test-analysis";
 import { differentiation } from "./tools/differentiation";
 import { difficultConversation } from "./tools/difficult-conversation";
+import { engagementCheck } from "./tools/engagement-check";
 import { portfolioRehearsal } from "./tools/portfolio-rehearsal";
 
 /** All registered tools (any phase). */
@@ -47,6 +48,7 @@ export const ALL_TOOLS: Tool[] = [
   testAnalysis,
   differentiation,
   difficultConversation,
+  engagementCheck,
 ];
 
 /**

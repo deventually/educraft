@@ -19,6 +19,10 @@ A *tool* is a declarative description, not a hand-written page. A `Tool`
   **`derive`** (`app/lib/template/derivations.ts`): the placeholder then gets something
   computed in code from that output, such as Toetsvragen's `question-plan` (one line per
   question with its row, level, type and points, from the blueprint table).
+  A stage's output can name a **`computed`** note (`app/lib/template/computations.ts`): a
+  line computed in code from the finished result and shown under it, labelled as not from
+  the AI, such as the leercheck's `engagement-index` (the score out of 18, P31.3). A number
+  never depends on the AI's arithmetic.
 
 Adding a tool is therefore *authoring data*, not writing a feature — see
 [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md). This is the property that lets
