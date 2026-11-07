@@ -60,6 +60,8 @@ export const authenticAssessment: Tool = {
   inputs: [
     {
       name: "discipline",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: ["programme", "domain"] },
       label: { nl: "Vakgebied / discipline", en: "Subject area / discipline" },
       kind: "text",
       required: true,

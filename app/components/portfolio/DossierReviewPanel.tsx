@@ -9,6 +9,8 @@ export interface DossierReviewRow {
   outcomeId: string;
   at: number;
   modelName: string;
+  /** Assessed on the national starting point (provisional framework). */
+  provisional?: true;
   shown: number;
   partial: number;
   missing: number;
@@ -65,6 +67,9 @@ export function DossierReviewPanel({
                 <p className="mt-1 text-sm text-slate-800">
                   {fmt(t.counts, { shown: r.shown, partial: r.partial, missing: r.missing })}
                 </p>
+                {r.provisional && (
+                  <p className="mt-2 text-sm text-amber-900">{tp.provisionalNotice}</p>
+                )}
                 {r.overall && <p className="mt-2 text-sm text-slate-800">{r.overall}</p>}
                 <p className="mt-2 text-xs text-slate-600">
                   {fmt(tp.coach.reviewedAt, {

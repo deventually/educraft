@@ -109,6 +109,18 @@ describe("reviewOutcome", () => {
     expect(call.temperature).toBe(0);
   });
 
+  it("marks a review made on a provisional framework (BDB/BKE plan, PR 3)", async () => {
+    generate.mockResolvedValue({ text: goodAnswer });
+    const d = confirmed();
+    d.framework = { ...d.framework, national: true, provisional: true };
+    const r = await coach.reviewOutcome(user, d, LU, "nl", 42);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.reviews?.[LU]?.provisional).toBe(true);
+    const own = await coach.reviewOutcome(user, confirmed(), LU, "nl", 42);
+    if (!own.ok) throw new Error(own.error);
+    expect(own.data.reviews?.[LU]?.provisional).toBeUndefined();
+  });
+
   it("retries once on an unusable answer, then gives up", async () => {
     generate
       .mockResolvedValueOnce({ text: "geen json" })
@@ -331,6 +343,17 @@ describe("reviewDossier", () => {
     expect(Object.keys(r.data.reviews ?? {})).toEqual([LU]);
     expect(r.data.aiLog.filter((e) => e.action === "review")).toHaveLength(1);
     expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("marks each review as provisional on a provisional framework", async () => {
+    const d = twoOutcomes();
+    d.framework.provisional = true;
+    generate.mockResolvedValueOnce({ text: goodAnswer });
+    const r = await coach.reviewDossier(user, d, "nl", 5);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.reviews?.[LU]?.provisional).toBe(true);
+    const { dossierReviewOverview } = await import("~/server/portfolio.server");
+    expect(dossierReviewOverview(r.data)[0].provisional).toBe(true);
   });
 
   it("keeps the reviews that worked when one chapter fails", async () => {

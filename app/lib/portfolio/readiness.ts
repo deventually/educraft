@@ -14,6 +14,7 @@ import type { DossierData } from "./types";
 /** Every check, in the order the list shows them. */
 export const READINESS_CODES = [
   "framework-unconfirmed",
+  "framework-provisional",
   "criterion-unverified",
   "criterion-without-evidence",
   "required-evidence-missing",
@@ -182,6 +183,9 @@ export function readinessCheck(d: DossierData): ReadinessItem[] {
     "framework-unconfirmed",
     d.framework.confirmedAt === undefined ? [{ level: "block", fix: { to: "framework" } }] : [],
   );
+  // Only shown while provisional: the institution's form is an open spot (BESLUIT-2026-11-07-5).
+  if (d.framework.provisional)
+    items.push({ code: "framework-provisional", level: "block", fix: { to: "framework" } });
 
   if (criteria.length > 0) {
     check(
@@ -247,6 +251,7 @@ export function readinessCheck(d: DossierData): ReadinessItem[] {
   const spotItems = (kind: "marker" | "empty", where?: "evidence") =>
     spots
       .filter((s) => s.kind === kind && (!where || s.where === where))
+      .flatMap((s) => (s.where === "framework" ? [] : [s]))
       .map((s): Omit<ReadinessItem, "code"> => {
         const outcomeId = s.where === "chapter" ? s.outcomeId : evidenceOutcome(d, s.evidenceId);
         if (!outcomeId) return { level: "block", detail: s.text };

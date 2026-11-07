@@ -52,7 +52,10 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
       }
       return {
         variant: "success",
-        message: r.intent === "confirm" ? t.portfolio.toastConfirmed : t.portfolio.toastSaved,
+        message:
+          r.intent === "confirm" || r.intent === "confirmProvisional"
+            ? t.portfolio.toastConfirmed
+            : t.portfolio.toastSaved,
       };
     },
   });
@@ -192,7 +195,12 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
         <h2 className="text-lg font-medium text-slate-900">{tf.confirmTitle}</h2>
         <p className="mt-1 text-sm text-slate-600">
           {framework.confirmedAt
-            ? fmt(t.portfolio.frameworkConfirmed, { date: fmtDate(framework.confirmedAt, locale) })
+            ? fmt(
+                framework.provisional
+                  ? t.portfolio.frameworkProvisional
+                  : t.portfolio.frameworkConfirmed,
+                { date: fmtDate(framework.confirmedAt, locale) },
+              )
             : tf.confirmBody}
         </p>
         {flagged > 0 && (
@@ -200,11 +208,20 @@ export default function PortfolioFramework({ loaderData }: Route.ComponentProps)
             {fmt(tf.checkThisCount, { n: String(flagged) })}
           </p>
         )}
-        {!framework.confirmedAt && (
+        {(!framework.confirmedAt || framework.provisional) && (
           <Form method="post" className="mt-3">
             <input type="hidden" name="intent" value="confirm" />
             <Button type="submit" disabled={!hasCriteria}>
               {tf.confirm}
+            </Button>
+          </Form>
+        )}
+        {framework.national && !framework.confirmedAt && hasCriteria && (
+          <Form method="post" className="mt-4 border-t border-slate-200 pt-4">
+            <input type="hidden" name="intent" value="confirmProvisional" />
+            <p className="text-sm text-slate-600">{tf.confirmProvisionalBody}</p>
+            <Button type="submit" variant="secondary" className="mt-3">
+              {tf.confirmProvisional}
             </Button>
           </Form>
         )}

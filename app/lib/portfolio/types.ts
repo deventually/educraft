@@ -42,6 +42,14 @@ export interface Framework {
   requirements: FormRequirements;
   /** Set when the teacher confirms the framework; any framework edit clears it. */
   confirmedAt?: number;
+  /** Built from the national starting point (`skeleton.ts`), not read from an institution's form. */
+  national?: true;
+  /**
+   * Confirmed as provisional: the national starting point stands in while the teacher waits for
+   * the institution's form. The AI works, every verdict says so, and the final export waits for
+   * a normal confirmation. Cleared with `confirmedAt`.
+   */
+  provisional?: true;
 }
 
 export const CRITERION_STATUSES = ["not-started", "in-progress", "shown"] as const;
@@ -126,6 +134,8 @@ export interface CoachReview {
 export interface StoredReview {
   at: number;
   model: string;
+  /** Made on a provisional framework: the verdicts are on the national starting point. */
+  provisional?: true;
   review: CoachReview;
 }
 

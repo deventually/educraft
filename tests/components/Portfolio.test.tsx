@@ -132,6 +132,13 @@ describe("Portfolio overview", () => {
     expect(screen.getByRole("radio", { name: /Alleen feedback/ })).toBeChecked();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
+
+  it("says when the framework is only provisional (BDB/BKE plan, PR 3)", () => {
+    const d = sampleDossier();
+    d.framework = { ...d.framework, national: true, provisional: true, confirmedAt: 1 };
+    renderRoute(PortfolioOverview, overviewData(d));
+    expect(screen.getByText(/Voorlopig kader, bevestigd op/)).toBeInTheDocument();
+  });
 });
 
 describe("Portfolio route in five steps", () => {
@@ -234,6 +241,46 @@ describe("Portfolio framework", () => {
     );
     expect(screen.getByRole("button", { name: "Kader bevestigen" })).toBeEnabled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers to confirm the national starting point as provisional (BDB/BKE plan, PR 3)", async () => {
+    const d = sampleDossier();
+    const { container } = renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: { ...d.framework, national: true },
+    });
+    expect(screen.getByRole("button", { name: "Bevestig als voorlopig kader" })).toBeEnabled();
+    expect(
+      screen.getByText(/Wacht je nog op het formulier van je hogeschool\?/),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no provisional confirmation for the institution's own form", () => {
+    renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: sampleDossier().framework,
+    });
+    expect(screen.queryByRole("button", { name: "Bevestig als voorlopig kader" })).toBeNull();
+  });
+
+  it("says a provisional framework still needs the institution's form, and can confirm it", () => {
+    const d = sampleDossier();
+    renderRoute(PortfolioFramework, {
+      id: ID,
+      name: "Mijn BDB",
+      framework: {
+        ...d.framework,
+        national: true,
+        provisional: true,
+        confirmedAt: Date.UTC(2026, 10, 7),
+      },
+    });
+    expect(screen.getByText(/Voorlopig kader, bevestigd op/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kader bevestigen" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Bevestig als voorlopig kader" })).toBeNull();
   });
 
   it("offers to read the form when nothing depends on the framework yet", async () => {
@@ -339,6 +386,23 @@ describe("Portfolio outcome page", () => {
         selector: "#new-evidence-text-file",
       }),
     ).toHaveAttribute("type", "file");
+  });
+
+  it("marks evidence without text as still to come (BDB/BKE plan, PR 3)", async () => {
+    const d = sampleDossier();
+    const evidence = [{ ...d.evidence[0], text: "" }];
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), evidence });
+    expect(screen.getByText("Volgt nog")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Nog geen tekst? Laat dit leeg; het bewijsstuk staat dan als Volgt nog.")
+        .length,
+    ).toBeGreaterThan(0);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no Volgt nog for evidence with text", () => {
+    renderRoute(PortfolioOutcome, outcomeData());
+    expect(screen.queryByText("Volgt nog")).toBeNull();
   });
 
   it("counts the chapter's words as the teacher types", () => {
@@ -484,6 +548,28 @@ describe("Portfolio outcome page — coach", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("labels the coach's verdicts on a provisional framework (BDB/BKE plan, PR 3)", async () => {
+    const { container } = renderRoute(PortfolioOutcome, {
+      ...outcomeData(),
+      provisional: true,
+      stored: { ...review, provisional: true },
+    });
+    expect(
+      screen.getByText(
+        "Voorlopig kader: de AI beoordeelt op het landelijke startpunt, niet op het formulier van je hogeschool.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Op het landelijke startpunt \(voorlopig kader\)\./),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no provisional label on the institution's own framework", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), stored: review });
+    expect(screen.queryByText(/landelijke startpunt/)).toBeNull();
+  });
+
   it("shows no draft buttons in coaching mode", () => {
     renderRoute(PortfolioOutcome, outcomeData());
     expect(screen.queryByRole("button", { name: /Stel een alinea op/ })).toBeNull();
@@ -606,10 +692,34 @@ describe("Portfolio overview — the whole dossier assessed", () => {
     );
     expect(within(region).getByText("1 aangetoond · 0 deels · 1 nog niet")).toBeInTheDocument();
     expect(within(region).getByText("Helder begin.")).toBeInTheDocument();
+    expect(within(region).queryByText(/Voorlopig kader/)).toBeNull();
     expect(
       within(region).getByRole("link", { name: "Bekijk de beoordeling van LU1 Doceren" }),
     ).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}#coach-title`);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio overview — whole dossier on a provisional framework", () => {
+  it("says a verdict was made on the national starting point", () => {
+    renderRoute(PortfolioOverview, {
+      ...overviewData(),
+      canReviewAll: true,
+      dossierReview: [
+        {
+          outcomeId: LU,
+          at: Date.UTC(2026, 10, 7),
+          modelName: "Claude Sonnet 5.5",
+          provisional: true,
+          shown: 0,
+          partial: 1,
+          missing: 1,
+          overall: "",
+        },
+      ],
+    });
+    const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
+    expect(within(region).getByText(/Voorlopig kader/)).toBeInTheDocument();
   });
 });
 

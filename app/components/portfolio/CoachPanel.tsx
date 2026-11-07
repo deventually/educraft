@@ -33,7 +33,13 @@ export function CoachPanel({
   status: Record<string, CriterionStatus>;
   confirmed: boolean;
   hasChapter: boolean;
-  stored?: { at: number; model: string; modelName: string; review: CoachReview };
+  stored?: {
+    at: number;
+    model: string;
+    modelName: string;
+    provisional?: true;
+    review: CoachReview;
+  };
   /** True once the chapter was proofread: the button then says "again". */
   proofread?: boolean;
 }) {
@@ -85,6 +91,12 @@ export function CoachPanel({
         <div className="mt-4 space-y-3">
           <p className="text-sm text-slate-600">
             {fmt(t.reviewedAt, { date: fmtDate(stored.at, locale), model: stored.modelName })}
+            {stored.provisional && (
+              <>
+                {" "}
+                <strong className="font-medium text-amber-900">{t.reviewedProvisional}</strong>
+              </>
+            )}
           </p>
           {stored.review.overall && (
             <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">

@@ -34,6 +34,11 @@ export const portfolioReadiness = {
       ok: "Elk bewijsstuk heeft tekst.",
       problem: "Dit bewijsstuk volgt nog, er staat geen tekst in: {detail}",
     },
+    "framework-provisional": {
+      ok: "Je kader is het formulier van je hogeschool.",
+      problem:
+        "Je werkt nog met een voorlopig kader: het landelijke startpunt. Neem het formulier van je hogeschool over en bevestig het kader.",
+    },
     "framework-unconfirmed": {
       ok: "Je kader is bevestigd.",
       problem: "Je kader is nog niet bevestigd.",

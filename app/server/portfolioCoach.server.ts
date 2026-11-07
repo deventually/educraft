@@ -67,7 +67,12 @@ export async function reviewOutcome(
           ...d,
           reviews: {
             ...d.reviews,
-            [outcomeId]: { at: now, model: answer.model, review: parsed.review },
+            [outcomeId]: {
+              at: now,
+              model: answer.model,
+              ...(d.framework.provisional ? { provisional: true as const } : {}),
+              review: parsed.review,
+            },
           },
         },
         { at: now, action: "review", outcomeId, model: answer.model },
@@ -206,11 +211,10 @@ export async function reviewDossier(
       return;
     }
     reviewed.push(id);
+    // Every result was built on the same `d`: take its stored review, with any provisional mark.
+    const stored = r.data.reviews?.[id] ?? { at: now, model: r.model, review: r.review };
     data = withLog(
-      {
-        ...data,
-        reviews: { ...data.reviews, [id]: { at: now, model: r.model, review: r.review } },
-      },
+      { ...data, reviews: { ...data.reviews, [id]: stored } },
       { at: now, action: "review", outcomeId: id, model: r.model },
     );
   });

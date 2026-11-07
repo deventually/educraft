@@ -1,10 +1,10 @@
 import type { Tool } from "../types";
 import {
-  COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
   COGNITIVE_ARCHITECT_ANALYST_GEN,
 } from "~/lib/prompts/cognitive-architect.prompt";
+import { COGNITIVE_ARCHITECT_ANALYST_V2 } from "~/lib/prompts/cognitive-architect@v2.prompt";
 import { attribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -67,6 +67,8 @@ export const cognitiveArchitect: Tool = {
   inputs: [
     {
       name: "gradeSubject",
+      // From the teaching context when one is selected; stays editable.
+      prefillFromProfile: { source: "courseName" },
       label: { nl: "Niveau & vak", en: "Level & subject" },
       kind: "text",
       required: true,
@@ -88,10 +90,10 @@ export const cognitiveArchitect: Tool = {
     },
     {
       name: "legacyActivity",
-      label: { nl: "Huidige activiteit (te vervangen)", en: "Current activity (to replace)" },
+      label: { nl: "Huidige activiteit (optioneel)", en: "Current activity (optional)" },
       kind: "textarea",
-      required: true,
       rows: 2,
+      help: { nl: "Laat leeg voor een nieuw ontwerp.", en: "Leave empty for a new design." },
       placeholder: {
         nl: "bijv. Lees hoofdstuk 4 en beantwoord de vragen",
         en: "e.g. Read chapter 4 and answer the questions",
@@ -149,7 +151,7 @@ export const cognitiveArchitect: Tool = {
         nl: "Verzamelt de coördinaten en levert het Instructional Coordinates Document met CER-diagnose.",
         en: "Collects the coordinates and delivers the Instructional Coordinates Document with a CER diagnosis.",
       },
-      systemPromptId: COGNITIVE_ARCHITECT_ANALYST.id,
+      systemPromptId: COGNITIVE_ARCHITECT_ANALYST_V2.id,
       output: {
         kind: "structured-sections",
         hint: {

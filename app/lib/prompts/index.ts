@@ -5,6 +5,7 @@ import { AUTHENTIC_ASSESSMENT_PROMPT } from "./authentic-assessment.prompt";
 import { ARCS_REACTOR_PROMPT } from "./arcs-reactor.prompt";
 import { FORUM_AUTOGRADER_PROMPT } from "./forum-autograder.prompt";
 import { CONTEXTUALIZATION_PROMPT } from "./contextualization.prompt";
+import { CONTEXTUALIZATION_PROMPT_V2 } from "./contextualization@v2.prompt";
 import { MENTORAI_PROMPT } from "./mentorai.prompt";
 import { MENTORAI_PROMPT_V2 } from "./mentorai@v2.prompt";
 import { MATH_GRADING_PROMPT } from "./math-grading.prompt";
@@ -49,6 +50,7 @@ import {
   COGNITIVE_ARCHITECT_VALIDATOR,
   COGNITIVE_ARCHITECT_ANALYST_GEN,
 } from "./cognitive-architect.prompt";
+import { COGNITIVE_ARCHITECT_ANALYST_V2 } from "./cognitive-architect@v2.prompt";
 
 const ALL: PromptDef[] = [
   AGENT_ASSESSMENT_PROMPT,
@@ -60,6 +62,7 @@ const ALL: PromptDef[] = [
   ARCS_REACTOR_PROMPT,
   FORUM_AUTOGRADER_PROMPT,
   CONTEXTUALIZATION_PROMPT,
+  CONTEXTUALIZATION_PROMPT_V2,
   MENTORAI_PROMPT,
   MENTORAI_PROMPT_V2,
   MATH_GRADING_PROMPT,
@@ -99,6 +102,7 @@ const ALL: PromptDef[] = [
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
   COGNITIVE_ARCHITECT_ANALYST_GEN,
+  COGNITIVE_ARCHITECT_ANALYST_V2,
 ];
 
 export const PROMPTS: Record<string, PromptDef> = Object.fromEntries(ALL.map((p) => [p.id, p]));

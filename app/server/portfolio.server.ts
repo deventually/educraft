@@ -85,6 +85,7 @@ export function dossierReviewOverview(d: DossierData) {
         outcomeId: o.id,
         at: stored.at,
         modelName: modelDisplayName(stored.model),
+        ...(stored.provisional ? { provisional: true as const } : {}),
         shown: count("shown"),
         partial: count("partial"),
         missing: count("missing"),

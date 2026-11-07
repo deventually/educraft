@@ -26,6 +26,8 @@ import { fmtDate } from "~/lib/portfolio/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
+import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
+import { evidencePending } from "~/lib/portfolio/evidence";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data ? outcomeLabel(data.outcome) : "BDB/BKE"} — LimeOnIt` }];
@@ -55,10 +57,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     maxWords: d.framework.requirements.maxWords,
     evidenceFull: d.evidence.length >= LIMITS.evidence,
     confirmed: d.framework.confirmedAt !== undefined,
+    provisional: d.framework.provisional === true,
     coachMode: d.coachMode,
     showDraftNotice: d.coachMode === "draft" && d.draftNoticeSeenAt === undefined,
     withEvidence: outcome.criteria
-      .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id)))
+      .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id) && !evidencePending(e)))
       .map((c) => c.id),
     stored: storedReview(d.reviews?.[outcome.id]),
     proofread: storedProofread(d, outcome.id),
@@ -150,6 +153,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     maxWords,
     evidenceFull,
     confirmed,
+    provisional = false,
     coachMode,
     showDraftNotice,
     withEvidence,
@@ -182,6 +186,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {outcomeLabel(outcome)}
       </h1>
+      {provisional && <ProvisionalNotice className="mt-3" />}
 
       <section className="mt-6" aria-labelledby="criteria-title">
         <h2 id="criteria-title" className="text-lg font-medium text-slate-900">
@@ -417,6 +422,14 @@ function EvidenceRow({
         <summary className="cursor-pointer px-4 py-3">
           <span className="font-medium text-slate-900">{item.title}</span>{" "}
           <span className="text-sm text-slate-600">· {t.kinds[item.kind]}</span>
+          {evidencePending(item) && (
+            <>
+              {" "}
+              <span className="ml-1 inline-block rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">
+                {t.outcome.evidencePending}
+              </span>
+            </>
+          )}
         </summary>
         <div className="border-t border-slate-100 p-4">
           {item.sourceCourse && (
