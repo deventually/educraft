@@ -71,6 +71,11 @@ describe("ResultActions (P27.1)", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  it("offers the export for saved work (P30.1)", () => {
+    show({ nextTools: [], linkTargets: [], dossiers: [] });
+    expect(screen.getByText("Exporteer")).toBeTruthy();
+  });
+
   it("renders nothing when there is nothing to offer", () => {
     const { container } = show({
       generationId: null,

@@ -11,6 +11,7 @@ import { courseTools } from "./courseTools";
 import { courses } from "./courses";
 import { documents } from "./documents";
 import { error } from "./error";
+import { exportResult } from "./exportResult";
 import { features } from "./features";
 import { feedback } from "./feedback";
 import { footer } from "./footer";
@@ -68,6 +69,7 @@ export const nl = {
   courseTools,
   documents,
   error,
+  exportResult,
   features,
   feedback,
   footer,

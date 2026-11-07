@@ -135,6 +135,7 @@ export const rubricBuilder: Tool = {
       systemPromptId: RUBRIC_BUILDER_PROMPT.id,
       output: {
         kind: "structured-sections",
+        exportAs: "rubric",
         hint: {
           nl: "Koppeling met de leeruitkomst, eventueel de controle van je rubric, de rubric als tabel, punten en cesuur, en een zelfcheck.",
           en: "Link to the learning outcome, the check of your rubric if given, the rubric as a table, points and pass mark, and a self-check.",

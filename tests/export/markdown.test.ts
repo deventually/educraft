@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMarkdown } from "~/lib/portfolio/markdown";
+import { parseMarkdown } from "~/lib/export/markdown";
 
 describe("parseMarkdown (chapter → Word blocks)", () => {
   it("reads headings, paragraphs and inline emphasis", () => {

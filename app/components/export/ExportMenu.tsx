@@ -1,0 +1,78 @@
+import { useId } from "react";
+import { useFetcher } from "react-router";
+import { Download } from "lucide-react";
+import type { ExportDoc } from "~/lib/export/doc";
+import type { ExportFormat } from "~/lib/export/formats";
+import { fmt } from "~/lib/i18n/format";
+import { useT } from "~/lib/i18n/useT";
+import { ExportPreview } from "./ExportPreview";
+
+export interface ExportMenuProps {
+  /** The saved result. */
+  generationId: string;
+  /** The other saved steps of the same tool, so a multi-step result is one file. */
+  with?: string[];
+}
+
+interface ExportData {
+  doc: ExportDoc;
+  downloads: { format: ExportFormat; href: string }[];
+}
+
+/**
+ * "Exporteer" under a result (brief P30.1). Opening it loads a preview of the file from the
+ * export route; the download links below it are made from the same model.
+ */
+export function ExportMenu({ generationId, with: withIds = [] }: ExportMenuProps) {
+  const m = useT().exportResult;
+  const fetcher = useFetcher<ExportData>();
+  const regionId = useId();
+  const query = withIds.map((id) => `with=${encodeURIComponent(id)}`).join("&");
+  const url = `/work/${encodeURIComponent(generationId)}/export${query ? `?${query}` : ""}`;
+  const data = fetcher.data;
+
+  function onToggle(e: React.SyntheticEvent<HTMLDetailsElement>) {
+    if (e.currentTarget.open && fetcher.state === "idle") void fetcher.load(url);
+  }
+
+  return (
+    <details onToggle={onToggle} className="rounded-xl border border-slate-200">
+      <summary className="flex cursor-pointer items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">
+        <Download className="size-4" aria-hidden />
+        {m.button}
+      </summary>
+      <div className="space-y-3 border-t border-slate-100 p-3">
+        <p role="status" className="text-xs text-slate-500">
+          {fetcher.state !== "idle" ? m.loading : data ? m.intro : ""}
+        </p>
+        {data && (
+          <>
+            <section
+              id={regionId}
+              aria-label={m.preview}
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard
+              tabIndex={0}
+              className="max-h-96 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 focus-visible:outline-2 focus-visible:outline-lime-700"
+            >
+              <ExportPreview doc={data.doc} />
+            </section>
+            <ul className="flex flex-wrap gap-2">
+              {data.downloads.map((d) => (
+                <li key={d.format}>
+                  <a
+                    href={d.href}
+                    download
+                    className="inline-flex items-center gap-1.5 rounded-full border border-lime-300 bg-lime-50 px-3 py-1.5 text-sm font-medium text-lime-900 hover:bg-lime-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700"
+                  >
+                    <Download className="size-4" aria-hidden />
+                    {fmt(m.download, { format: m.formats[d.format] })}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </details>
+  );
+}

@@ -254,6 +254,7 @@ export const stageAssessment: Tool = {
       systemPromptId: STAGE_ASSESSMENT_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
+        exportAs: "table",
         hint: {
           nl: "Samenvattend oordeel, per succescriterium (indicatie + citaten + verbeterpunten), concept-feedback, volledigheid bedrijfsevaluatie, aandachtspunten",
           en: "Summary verdict, per success criterion (indication + quotes + improvements), draft feedback, evaluation completeness, caveats",

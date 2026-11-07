@@ -9,23 +9,12 @@
  * asks. The document is accessible: real heading styles, the document language
  * set, tables with a repeating header row.
  */
-import {
-  AlignmentType,
-  Document,
-  HeadingLevel,
-  LevelFormat,
-  Packer,
-  PageBreak,
-  Paragraph,
-  Table,
-  TableCell,
-  TableRow,
-  TextRun,
-  WidthType,
-} from "docx";
+import { AlignmentType, HeadingLevel, PageBreak, Paragraph, type Table, TextRun } from "docx";
+import { blocksToDocx, LANGUAGE, listCounter, packDocx } from "~/lib/export/docx";
+import { safeFileName } from "~/lib/export/filename";
 import { fmt } from "~/lib/i18n/format";
 import { getMessages, type Locale } from "~/lib/i18n";
-import { type Block, parseMarkdown, type Run } from "./markdown";
+import { parseMarkdown } from "~/lib/export/markdown";
 import { wordCount } from "./progress";
 import type { DossierData } from "./types";
 
@@ -40,77 +29,6 @@ export interface DossierExportInput {
    * when the teacher turns it on; absent = no disclosure section.
    */
   aiDisclosure?: string;
-}
-
-const LANGUAGE: Record<Locale, string> = { nl: "nl-NL", en: "en-GB" };
-const ORDERED = "ordered-list";
-
-const HEADINGS = [
-  HeadingLevel.HEADING_1,
-  HeadingLevel.HEADING_2,
-  HeadingLevel.HEADING_3,
-  HeadingLevel.HEADING_4,
-  HeadingLevel.HEADING_5,
-  HeadingLevel.HEADING_6,
-] as const;
-
-function runs(rs: Run[]): TextRun[] {
-  return rs.map((r) => new TextRun({ text: r.text, bold: r.bold, italics: r.italic }));
-}
-
-function cell(rs: Run[], header: boolean): TableCell {
-  return new TableCell({
-    children: [
-      new Paragraph({ children: header ? runs(rs.map((r) => ({ ...r, bold: true }))) : runs(rs) }),
-    ],
-  });
-}
-
-/**
- * Markdown blocks under a heading of level `parent` (an outcome is Heading 1, an
- * appendix Heading 2). The text's top heading level (# or ##, whichever was used)
- * becomes one deeper and the rest follow, without skipping a level.
- */
-function markdownBlocks(
-  blocks: Block[],
-  nextList: () => number,
-  parent: 1 | 2,
-): (Paragraph | Table)[] {
-  const out: (Paragraph | Table)[] = [];
-  const used = [...new Set(blocks.flatMap((b) => (b.type === "heading" ? [b.level] : [])))].sort();
-  for (const b of blocks) {
-    if (b.type === "heading") {
-      const level = Math.min(used.indexOf(b.level) + parent, 5);
-      out.push(new Paragraph({ heading: HEADINGS[level], children: runs(b.runs) }));
-    } else if (b.type === "paragraph") {
-      out.push(new Paragraph({ children: runs(b.runs) }));
-    } else if (b.type === "list") {
-      const instance = nextList();
-      for (const item of b.items) {
-        out.push(
-          new Paragraph({
-            children: runs(item),
-            ...(b.ordered
-              ? { numbering: { reference: ORDERED, level: 0, instance } }
-              : { bullet: { level: 0 } }),
-          }),
-        );
-      }
-    } else {
-      const columns = Math.max(b.header.length, ...b.rows.map((r) => r.length));
-      const pad = (row: Run[][]) => [...row, ...Array(columns - row.length).fill([])] as Run[][];
-      out.push(
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: [
-            new TableRow({ tableHeader: true, children: pad(b.header).map((c) => cell(c, true)) }),
-            ...b.rows.map((r) => new TableRow({ children: pad(r).map((c) => cell(c, false)) })),
-          ],
-        }),
-      );
-    }
-  }
-  return out;
 }
 
 /** Plain pasted text: one paragraph per non-empty line. */
@@ -136,8 +54,7 @@ export async function buildDossierDocx(
   const { name, data, locale, now, aiDisclosure } = input;
   const t = getMessages(locale).portfolioExport;
   const { framework } = data;
-  let lists = 0;
-  const nextList = () => ++lists;
+  const nextList = listCounter();
 
   const words = data.chapters.reduce((n, ch) => n + wordCount(ch.text), 0);
   const centered = (text: string) =>
@@ -163,7 +80,7 @@ export async function buildDossierDocx(
     body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(heading)] }));
     const chapter = data.chapters.find((ch) => ch.outcomeId === o.id);
     const blocks = chapter ? parseMarkdown(chapter.text) : [];
-    if (blocks.length) body.push(...markdownBlocks(blocks, nextList, 1));
+    if (blocks.length) body.push(...blocksToDocx(blocks, nextList, 1));
     else
       body.push(new Paragraph({ children: [new TextRun({ text: t.noChapter, italics: true })] }));
   }
@@ -203,42 +120,16 @@ export async function buildDossierDocx(
       // evidence is the teacher's text and stays as typed.
       body.push(
         ...(e.sourceCourse
-          ? markdownBlocks(parseMarkdown(e.text), nextList, 2)
+          ? blocksToDocx(parseMarkdown(e.text), nextList, 2)
           : plainParagraphs(e.text)),
       );
     });
   }
 
-  const doc = new Document({
-    title: name,
-    styles: { default: { document: { run: { language: { value: LANGUAGE[locale] } } } } },
-    numbering: {
-      config: [
-        {
-          reference: ORDERED,
-          levels: [
-            {
-              level: 0,
-              format: LevelFormat.DECIMAL,
-              text: "%1.",
-              alignment: AlignmentType.START,
-              style: { paragraph: { indent: { left: 720, hanging: 360 } } },
-            },
-          ],
-        },
-      ],
-    },
-    sections: [{ children: [...titlePage, ...body] }],
-  });
-  return new Uint8Array(await Packer.toBuffer(doc));
+  return packDocx(name, locale, [...titlePage, ...body]);
 }
 
 /** A safe download name: no path or control characters, always `.docx`. */
 export function exportFileName(name: string): string {
-  const safe = name
-    .replace(/[\\/:*?"<>|\p{Cc}]/gu, "-")
-    .trim()
-    .replace(/-+$/, "")
-    .slice(0, 150);
-  return `${safe || "dossier"}.docx`;
+  return safeFileName(name, "docx", "dossier");
 }

@@ -10,6 +10,13 @@ import { StageStepper } from "~/components/StageStepper";
 // The client transport is mocked so no network/stream happens; the spy captures
 // the payload each stage POSTs (crucially the threaded `priorOutputs`).
 vi.mock("~/lib/streamClient", () => ({ streamPost: vi.fn() }));
+// The export menu is its own unit (tests/components/ExportMenu.test.tsx); here we only check
+// which saved steps the stepper hands it.
+vi.mock("~/components/export/ExportMenu", () => ({
+  ExportMenu: (p: { generationId: string; with?: string[] }) => (
+    <p data-testid="export">{[p.generationId, ...(p.with ?? [])].join(",")}</p>
+  ),
+}));
 
 const m = getMessages("nl"); // no root loader → components resolve to Dutch
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -91,6 +98,33 @@ describe("StageStepper (multi-stage)", () => {
     const genCall = spy.mock.calls.find((c) => c[1].stageId === "generator");
     expect(genCall).toBeTruthy();
     expect(genCall![1].priorOutputs.analyst).toBe("COORDS-DOC");
+  });
+
+  it("exports every saved step together (P30.1)", async () => {
+    const spy = await streamSpy();
+    spy.mockImplementation(async (_url, body, handlers) => {
+      handlers.onToken("out");
+      handlers.onDone?.({ generationId: `g-${body.stageId}` });
+    });
+    const user = userEvent.setup();
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <StageStepper
+            tool={tool}
+            profiles={[]}
+            defaultProfileId=""
+            resultContext={{ nextTools: [], linkTargets: [], dossiers: [] }}
+          />
+        ),
+      },
+    ]);
+    render(<Stub initialEntries={["/"]} />);
+    await fillRequired(user);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    expect(screen.getByTestId("export")).toHaveTextContent("g-generator,g-analyst");
   });
 
   it("leaves a re-runnable stage after aborting a stream mid-flight", async () => {
