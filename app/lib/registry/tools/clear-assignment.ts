@@ -48,6 +48,7 @@ export const clearAssignment: Tool = {
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288,
   defaultTemperature: 0.3,
+  next: ["engagement-check"],
   courseActions: ["activity"],
   enabled: true,
   phase: 1,

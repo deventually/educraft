@@ -14,6 +14,7 @@ const COURSE_FIELDS: [slug: string, field: string][] = [
   ["lesson-plan", "learningGoal"],
   ["differentiation", "learningGoal"],
   ["defend-your-work", "learningObjective"],
+  ["engagement-check", "learningObjective"],
 ];
 
 describe("prefillFromCourse (data hook, no control flow)", () => {

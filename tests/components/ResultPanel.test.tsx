@@ -11,6 +11,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       copy: "Copy",
       copied: "Copied!",
       generating: "Generating…",
+      computedByApp: "Computed by LimeOnIt, not by the AI",
     },
     speech: { readAloud: "Read aloud", stopReading: "Stop reading" },
   }),
@@ -97,5 +98,19 @@ describe("ResultPanel", () => {
     render(<ResultPanel markdown={MD} streaming />);
     expect(screen.queryByRole("button", { name: "Read aloud" })).toBeNull();
     speech.restore();
+  });
+
+  it("shows a note computed in code under a finished result, labelled as not from the AI (P31.3)", async () => {
+    const { container } = render(
+      <ResultPanel markdown={MD} computed="Engagement score: 9 of 18 points (50%)." />,
+    );
+    const note = screen.getByRole("note", { name: "Computed by LimeOnIt, not by the AI" });
+    expect(note).toHaveTextContent("Engagement score: 9 of 18 points (50%).");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no computed note while streaming", () => {
+    render(<ResultPanel markdown={MD} streaming computed="Score: 1." />);
+    expect(screen.queryByRole("note")).toBeNull();
   });
 });

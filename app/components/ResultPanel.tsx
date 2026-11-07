@@ -20,9 +20,11 @@ interface Props {
   fill?: boolean;
   /** Language of the result, for reading it aloud; defaults to the UI language. */
   lang?: SpeechLanguage;
+  /** A note computed in code from the finished result (P31.3), shown under it. */
+  computed?: string | null;
 }
 
-export function ResultPanel({ markdown, title, streaming, fill, lang }: Props) {
+export function ResultPanel({ markdown, title, streaming, fill, lang, computed }: Props) {
   const t = useT();
   const locale = useLocale();
   const [copied, setCopied] = useState(false);
@@ -63,6 +65,15 @@ export function ResultPanel({ markdown, title, streaming, fill, lang }: Props) {
         )}
         {streaming && markdown && <span className="ml-0.5 inline-block animate-pulse">▍</span>}
       </div>
+      {computed && !streaming && (
+        <p
+          role="note"
+          aria-label={t.tool.computedByApp}
+          className="border-t border-slate-100 bg-slate-50/70 px-5 py-2.5 text-sm font-medium text-slate-800"
+        >
+          {computed}
+        </p>
+      )}
     </div>
   );
 }

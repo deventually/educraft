@@ -46,7 +46,7 @@ export const lessonPlan: Tool = {
   }),
   usesContextProfile: true,
   defaultOutputLanguage: "nl",
-  next: ["differentiation", "clear-assignment"],
+  next: ["differentiation", "clear-assignment", "engagement-check"],
   courseActions: ["activity"],
   defaultModel: "claude-sonnet-5-5",
   defaultMaxTokens: 12288,

@@ -1,3 +1,4 @@
+import type { ComputationId } from "~/lib/template/computations";
 import type { ExportKind } from "~/lib/export/formats";
 import type { DerivationId } from "~/lib/template/derivations";
 import type { LocalizedText } from "~/lib/i18n/localized";
@@ -112,6 +113,11 @@ export interface OutputFormat {
    * formats for it (`app/lib/export/formats.ts`). Absent = "document".
    */
   exportAs?: ExportKind;
+  /**
+   * A note computed in code from the finished output and shown under it (P31.3), so a
+   * number never depends on the AI's arithmetic. Ids live in `app/lib/template/computations.ts`.
+   */
+  computed?: ComputationId;
 }
 
 /** Injects an earlier stage's output into this stage's prompt under a placeholder. */

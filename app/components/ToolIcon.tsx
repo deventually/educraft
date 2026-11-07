@@ -19,6 +19,7 @@ import {
   Calculator,
   Table2,
   ChartColumn,
+  Gauge,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -42,6 +43,7 @@ const ICONS: Record<string, LucideIcon> = {
   "calendar-clock": CalendarClock,
   "file-pen-line": FilePenLine,
   "chart-column": ChartColumn,
+  gauge: Gauge,
   route: Route,
 };
 

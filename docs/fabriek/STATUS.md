@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
+_Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
 
 ## Nu
 
@@ -266,7 +266,13 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
   verdedigen: één vraag tegelijk, vage antwoorden worden doorgevraagd, nooit een cijfer. Met een
   knop *Kopieer voor je studenten*: de tekst met jouw invoer, voor de eigen AI van de student.
   Meting klaar (vijf cases), nog niet gedraaid. Daarna 31.2 (nakijken, met verplicht
-  anonimiseren). De leercheck (31.3) loopt tegelijk in een eigen PR.
+  anonimiseren).
+- **P31.3 De leercheck (PR open):** de nieuwe tool "Hoe actief leren je studenten?" scoort een
+  opdracht of les op de zes leerprincipes uit bijlage G van het boek, met per principe een niveau
+  van Afwezig (0) tot Hoog (3), een reden en twee à drie verbeteringen. De score (bijv. 9 van 18,
+  50%) rekent LimeOnIt zelf uit en staat onder het resultaat, niet de AI. Volgende stap na een
+  lesopzet, een heldere opdracht en differentiëren. Meting nog te draaien (`npm run eval -- --tool
+  engagement-check`).
 - **P30.2 PDF en Markdown in het menu Exporteer (PR open):** *Print of bewaar als PDF* opent
   het resultaat als nette pagina in een nieuw tabblad, met het printvenster van de browser
   ("Opslaan als PDF"); geen bibliotheek. Markdown is een derde keuze in hetzelfde menu; de losse
