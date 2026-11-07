@@ -79,6 +79,7 @@ const SCHEMAS = {
   }),
   removeCriterion: z.object({ criterionId: Id }),
   confirm: z.object({}),
+  confirmProvisional: z.object({}),
   setStatus: z.object({ criterionId: Id, status: z.enum(CRITERION_STATUSES) }),
   addEvidence: z.object({
     outcomeId: Id,
@@ -139,7 +140,7 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
         const id = next.framework.outcomes[next.framework.outcomes.length - 1].id;
         for (const c of o.criteria) next = edit.addCriterion(next, id, { text: c.text });
       }
-      return next;
+      return { ...next, framework: { ...next.framework, national: true } };
     }
     case "meta": {
       const v = input as z.infer<(typeof SCHEMAS)["meta"]>;
@@ -197,6 +198,11 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
       if (!d.framework.outcomes.some((o) => o.criteria.length > 0))
         throw new RangeError("nothing to confirm");
       return edit.confirmFramework(d, ctx.now);
+    }
+    case "confirmProvisional": {
+      if (!d.framework.national || !d.framework.outcomes.some((o) => o.criteria.length > 0))
+        throw new RangeError("nothing to confirm provisionally");
+      return edit.confirmProvisional(d, ctx.now);
     }
     case "setStatus": {
       const v = input as z.infer<(typeof SCHEMAS)["setStatus"]>;

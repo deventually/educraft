@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { Link } from "react-router";
 import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
@@ -129,6 +130,7 @@ export default function PortfolioRehearsal({ loaderData }: Route.ComponentProps)
         {tr.title}
       </h1>
       <p className="mt-1 text-sm text-slate-600">{name}</p>
+      {framework.provisional && <ProvisionalNotice className="mt-3 max-w-2xl" />}
 
       {!started ? (
         <Card className="mt-4 max-w-2xl p-5">

@@ -74,6 +74,7 @@ const LABELS = {
     empty: "(Nog geen tekst.)",
     truncated: "[… ingekort]",
     linkedTo: "hoort bij",
+    provisional: "Voorlopig kader: het landelijke startpunt, niet het formulier van de hogeschool.",
     length: {
       short: "Kort: ongeveer 6 vragen, ongeveer 15 minuten.",
       full: "Volledig: ongeveer 12 vragen, zoals een eindgesprek van 30 minuten.",
@@ -87,6 +88,7 @@ const LABELS = {
     empty: "(No text yet.)",
     truncated: "[… shortened]",
     linkedTo: "belongs to",
+    provisional: "Provisional framework: the national starting point, not the institution's form.",
     length: {
       short: "Short: about 6 questions, about 15 minutes.",
       full: "Full: about 12 questions, like a 30-minute final interview.",
@@ -150,6 +152,7 @@ export function buildRehearsalContext(
   );
 
   const framework = [
+    ...(d.framework.provisional ? [l.provisional] : []),
     ...outcomes.map((o) =>
       [
         `## ${[o.code, o.title].filter(Boolean).join(" ")}`,
@@ -300,6 +303,7 @@ const KEEP = {
       "Feedback uit een oefengesprek met een gespeelde assessmentcommissie in LimeOnIt. Het is oefenen, geen oordeel.",
     heard: { convincing: "Overtuigend", partial: "Deels", "not-heard": "Nog niet gehoord" },
     heardLabel: "Gehoord",
+    provisional: "Op het landelijke startpunt (voorlopig kader).",
     quote: "Citaat",
     tip: "Tip",
     overall: "Samenvatting",
@@ -310,6 +314,7 @@ const KEEP = {
       "Feedback from a practice conversation with a simulated assessment committee in LimeOnIt. It is practice, not a judgement.",
     heard: { convincing: "Convincing", partial: "Partly", "not-heard": "Not yet heard" },
     heardLabel: "Heard",
+    provisional: "On the national starting point (provisional framework).",
     quote: "Quote",
     tip: "Tip",
     overall: "Summary",
@@ -350,7 +355,12 @@ export function addRehearsalFeedback(
         .join("\n"),
     ];
   });
-  const text = [t.intro, ...blocks, feedback.overall ? `${t.overall}: ${feedback.overall}` : null]
+  const text = [
+    t.intro,
+    d.framework.provisional ? t.provisional : null,
+    ...blocks,
+    feedback.overall ? `${t.overall}: ${feedback.overall}` : null,
+  ]
     .filter(Boolean)
     .join("\n\n");
   return {

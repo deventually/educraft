@@ -26,6 +26,7 @@ import { resolveModelInfo } from "~/lib/ai/models";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
+import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data ? outcomeLabel(data.outcome) : "BDB/BKE"} — LimeOnIt` }];
@@ -55,6 +56,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     maxWords: d.framework.requirements.maxWords,
     evidenceFull: d.evidence.length >= LIMITS.evidence,
     confirmed: d.framework.confirmedAt !== undefined,
+    provisional: d.framework.provisional === true,
     coachMode: d.coachMode,
     showDraftNotice: d.coachMode === "draft" && d.draftNoticeSeenAt === undefined,
     withEvidence: outcome.criteria
@@ -130,6 +132,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     maxWords,
     evidenceFull,
     confirmed,
+    provisional = false,
     coachMode,
     showDraftNotice,
     withEvidence,
@@ -161,6 +164,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {outcomeLabel(outcome)}
       </h1>
+      {provisional && <ProvisionalNotice className="mt-3" />}
 
       <section className="mt-6" aria-labelledby="criteria-title">
         <h2 id="criteria-title" className="text-lg font-medium text-slate-900">

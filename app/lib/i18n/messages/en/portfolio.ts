@@ -36,6 +36,7 @@ export const portfolio: Messages["portfolio"] = {
       'The coach quoted something that is not verbatim in your chapter. That quote was left out and the verdict is therefore "partly".',
     rerun: "Get feedback again",
     reviewedAt: "Assessed on {date} with {model}.",
+    reviewedProvisional: "On the national starting point (provisional framework).",
     run: "Get feedback",
     strengthen: "How to make it stronger",
     title: "Coach",
@@ -80,6 +81,9 @@ export const portfolio: Messages["portfolio"] = {
     confirm: "Confirm framework",
     confirmBody:
       "Confirm when the framework matches your form. If you change it later, you confirm again.",
+    confirmProvisional: "Confirm as provisional framework",
+    confirmProvisionalBody:
+      "Still waiting for your institution's form? Then confirm the national starting point as a provisional framework. You can write and get feedback; every verdict then says it is on the national starting point. The final Word file waits until you confirm your institution's framework.",
     confirmTitle: "Confirm framework",
     criteriaTitle: "Criteria",
     criterionStrong: "What makes it stronger (optional)",
@@ -133,6 +137,8 @@ export const portfolio: Messages["portfolio"] = {
   frameworkConfirmed: "Framework confirmed on {date}.",
   frameworkLink: "View or edit the framework",
   frameworkNotConfirmed: "The framework has not been confirmed yet.",
+  frameworkProvisional:
+    "Provisional framework, confirmed on {date}: the national starting point. Copy in your institution's form and confirm the framework for the final Word file.",
   goThere: "Go there",
   heading: "BDB/BKE",
   intro:
@@ -200,6 +206,8 @@ export const portfolio: Messages["portfolio"] = {
   },
   outcomesTitle: "Learning outcomes",
   progressSummary: "{shown} of {total} criteria shown",
+  provisionalNotice:
+    "Provisional framework: the AI assesses on the national starting point, not on your institution's form.",
   referenceAdd: "Add reference",
   referenceLabel: "Reference (APA)",
   referenceRemove: "Remove reference",

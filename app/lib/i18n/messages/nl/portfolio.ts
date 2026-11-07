@@ -33,6 +33,7 @@ export const portfolio = {
       'De coach citeerde iets wat niet letterlijk in je hoofdstuk staat. Dat citaat is weggelaten en het oordeel is daarom "deels".',
     rerun: "Opnieuw laten beoordelen",
     reviewedAt: "Beoordeeld op {date} met {model}.",
+    reviewedProvisional: "Op het landelijke startpunt (voorlopig kader).",
     run: "Laat beoordelen",
     strengthen: "Zo maak je het sterker",
     title: "Coach",
@@ -78,6 +79,9 @@ export const portfolio = {
     confirm: "Kader bevestigen",
     confirmBody:
       "Bevestig als het kader overeenkomt met je formulier. Pas je het later aan, dan bevestig je opnieuw.",
+    confirmProvisional: "Bevestig als voorlopig kader",
+    confirmProvisionalBody:
+      "Wacht je nog op het formulier van je hogeschool? Bevestig het landelijke startpunt dan als voorlopig kader. Je kunt schrijven en feedback krijgen; elk oordeel zegt dan dat het op het landelijke startpunt is. Het definitieve Word-bestand kan pas als je het kader van je hogeschool bevestigt.",
     confirmTitle: "Kader bevestigen",
     criteriaTitle: "Criteria",
     criterionStrong: "Wat het sterker maakt (optioneel)",
@@ -132,6 +136,8 @@ export const portfolio = {
   frameworkConfirmed: "Kader bevestigd op {date}.",
   frameworkLink: "Kader bekijken of aanpassen",
   frameworkNotConfirmed: "Het kader is nog niet bevestigd.",
+  frameworkProvisional:
+    "Voorlopig kader, bevestigd op {date}: het landelijke startpunt. Neem het formulier van je hogeschool over en bevestig het kader voor het definitieve Word-bestand.",
   goThere: "Ga erheen",
   heading: "BDB/BKE",
   intro:
@@ -199,6 +205,8 @@ export const portfolio = {
   },
   outcomesTitle: "Leeruitkomsten",
   progressSummary: "{shown} van {total} criteria aangetoond",
+  provisionalNotice:
+    "Voorlopig kader: de AI beoordeelt op het landelijke startpunt, niet op het formulier van je hogeschool.",
   referenceAdd: "Bron toevoegen",
   referenceLabel: "Bron (APA)",
   referenceRemove: "Bron verwijderen",

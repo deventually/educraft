@@ -47,6 +47,7 @@ const LABELS = {
     empty: "(Het hoofdstuk is nog leeg.)",
     truncated: "[… ingekort]",
     linkedTo: "hoort bij",
+    provisional: "Voorlopig kader: het landelijke startpunt, niet het formulier van de hogeschool.",
   },
   en: {
     institution: "Institution",
@@ -59,6 +60,7 @@ const LABELS = {
     empty: "(The chapter is still empty.)",
     truncated: "[… shortened]",
     linkedTo: "belongs to",
+    provisional: "Provisional framework: the national starting point, not the institution's form.",
   },
 } as const;
 
@@ -124,6 +126,7 @@ export function buildCoachMessage(d: DossierData, outcomeId: string, locale: Loc
     : l.none;
   return [
     `${l.institution}: ${d.framework.institution || l.none}`,
+    ...(d.framework.provisional ? [l.provisional] : []),
     `${l.outcome}: ${[o.code, o.title].filter(Boolean).join(" ")}`,
     `<criteria>\n${criteriaBlock(o, l)}\n</criteria>`,
     `<required-evidence>\n${l.required}:\n${required}\n</required-evidence>`,
