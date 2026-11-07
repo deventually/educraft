@@ -5,6 +5,7 @@ export const tool: Messages["tool"] = {
     "This prompt has been adapted (interview → one-shot generation, and translated). View the original prompt for the exact text from the book.",
   advanced: "Advanced",
   breadcrumb: "Breadcrumb",
+  computedByApp: "Computed by LimeOnIt, not by the AI",
   contextProfile: "Teaching context",
   copied: "Copied!",
   copy: "Copy",

@@ -10,6 +10,7 @@ import { ToolControls, type PickerModel } from "./ToolControls";
 import { CoursePicker } from "./CoursePicker";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
+import { computeResultNote } from "~/lib/template/computations";
 import { ResultActions, type ResultContext } from "./ResultActions";
 import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
@@ -285,6 +286,9 @@ export function GeneratorView({
               streaming={streaming}
               fill
               lang={outputLanguage}
+              computed={
+                streaming ? null : computeResultNote(stage.output.computed, shown, outputLanguage)
+              }
             />
           ) : docFiles ? null : (
             <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center text-sm text-slate-400">

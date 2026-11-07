@@ -36,9 +36,11 @@ describe("Tool.next — the first chains (P27.1)", () => {
     ["test-items", ["rubric-builder", "test-analysis"]],
     ["rubric-builder", ["stage-assessment"]],
     ["authentic-assessment", ["rubric-builder", "test-items"]],
-    ["lesson-plan", ["differentiation", "clear-assignment"]],
+    ["lesson-plan", ["differentiation", "clear-assignment", "engagement-check"]],
     ["guided-reflection", ["lesson-plan", "authentic-assessment"]],
-    ["differentiation", ["clear-assignment"]],
+    ["differentiation", ["clear-assignment", "engagement-check"]],
+    ["clear-assignment", ["engagement-check"]],
+    ["engagement-check", ["cognitive-architect", "differentiation"]],
   ])("%s → %j", (slug, expected) => {
     expect(next(slug)).toEqual(expected);
   });
