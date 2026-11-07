@@ -1,8 +1,8 @@
 # Fase 31 — Verdedig je werk en de leercheck (bijlagen F en G van het boek)
 
 > **Status:** ⚪ brief. **31.1 en 31.3 mogen nu**, vóór de pilot: een uitzondering op "tot de
-> pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4, BESLUIT-2026-11-07-1). 31.2 wacht op een
-> "ja" van Bastiaan. Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`,
+> pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4, BESLUIT-2026-11-07-1). 31.2 na 31.1, met
+> verplicht anonimiseren (BESLUIT-2026-11-07-2). Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`,
 > test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 
@@ -116,8 +116,16 @@ beginnend), waarnemingen bij de zes leerhoudingen (nieuwsgierigheid, nauwkeurigh
 doorzetten, eigenaarschap, kritisch), feedback voor de student en notities voor de docent.
 
 Dit is studentwerk: `handlesStudentWork: true`, `assistiveGrading: true` (AI Act, de docent beslist,
-BESLUIT-2026-07-03-4), anonimiseren vóór het versturen (`redact: true`), nooit gedeeld. **Alleen
-bouwen als Bastiaan het wil**; de privacy-officer kijkt later mee, net als bij 24.0b.
+BESLUIT-2026-07-03-4), nooit gedeeld. Bastiaan zei ja op 2026-11-07 (BESLUIT-2026-11-07-2).
+
+**Anonimiseren is verplicht** (`redact: true` op het transcriptveld, de bestaande browserstap uit
+24.0b): de naam en het studentnummer van de student, en in een verdediging van een stage of project
+ook het bedrijf, de begeleiders en klanten, patiënten of cliënten die de student noemt. Het
+`[AI]`/`[Student]`-label uit F.4 vervangt elke naam van de spreker. De docent controleert de codes
+vóór het versturen; de namen komen alleen in de browser terug in het resultaat. Eerlijke grens, zoals
+bij 24.0b: een herkenbare beschrijving kan erdoorheen glippen. De privacy-officer kijkt later mee.
+
+Na 31.1; volgende stap onder 31.1 voor de docent: "Een verdediging nakijken".
 
 ### 31.3 — De leercheck (one-shot, `engagement-check@v1`)
 
@@ -156,7 +164,7 @@ en het bord.
 | --- | --- | --- |
 | 31.3 Leercheck | — (BESLUIT-2026-11-07-1) | 31.1 |
 | 31.1 Verdedig je werk | — (BESLUIT-2026-11-07-1) | 31.3 |
-| 31.2 Nakijken | 31.1 en een "ja" van Bastiaan | — |
+| 31.2 Nakijken | 31.1 (BESLUIT-2026-11-07-2) | — |
 
 31.3 eerst: klein, one-shot, met een controle in code en het meeste nut voor alle docenten.
 
@@ -181,7 +189,7 @@ en het bord.
 ## Wat Bastiaan beslist
 
 1. ~~Wanneer~~: beslist, allebei nu (BESLUIT-2026-11-07-1).
-2. **31.2 nakijken van de verdediging:** wel of niet, gezien AVG en AI Act.
+2. ~~31.2~~: beslist, ja, met verplicht anonimiseren (BESLUIT-2026-11-07-2).
 
 ## Acceptatie
 
