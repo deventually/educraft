@@ -278,3 +278,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   om een paar cijfers of bevindingen uit het eigen werk, zonder namen, en vraagt daarop scherper
   door. Nooit het hele verslag: dan leest de AI de antwoorden mee en kan de student erop leunen,
   en een stageverslag staat vol namen. Bastiaan, 2026-11-07 ("Ja").
+- **BESLUIT-2026-11-07-4:** **Open plekken mogen in het BDB/BKE-dossier, nooit in het ingeleverde
+  werk** (plan BDB en BKE, PR 3). Het landelijke startpunt mag je bevestigen als *voorlopig kader*:
+  coach, alinea's en proefassessment werken, en elk oordeel zegt "op het landelijke startpunt". Een
+  bewijsstuk zonder tekst heet *Volgt nog* en telt niet als bewijs. Het definitieve Word-bestand
+  wacht tot het kader van je hogeschool bevestigd is; een conceptversie mag, maar dan heel duidelijk
+  als concept. Bastiaan, 2026-11-07 ("Akkoord op PR 3 en 4").

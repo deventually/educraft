@@ -275,6 +275,14 @@ _Laatst bijgewerkt: 2026-11-07 (eerlijker meten bij Verdedig je werk in een open
 
 ## Bezig
 
+- **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
+  startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
+  en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:
+  de coach weet dat het komt, het is geen bron voor een alinea. *AI-leeractiviteit ontwerpen* kan
+  zonder huidige activiteit (prompt `@v2`) en *Cursus op samenhang controleren* zonder pedagogische
+  benadering (prompt `@v2`); beide met een nieuwe eval-case, de meting moet nog. Vak, discipline en
+  onderwerp komen in negen tools uit je onderwijscontext. Nog te doen na PR 1: de
+  inleverklaar-check en de export (definitief Word pas na het eigen kader).
 - **Tabbladen boven de viewer niet meer afgesneden (PR open):** sinds de rechterkolom zelf scrolt
   (#162) viel de rand van *Origineel* en *Wat de AI krijgt* weg; de kolom houdt nu 4px ruimte
   binnen haar randen voor zulke randen en focusringen.
