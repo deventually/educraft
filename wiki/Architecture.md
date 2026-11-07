@@ -194,6 +194,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
   of advisory points from the confirmed framework only, each with a "Los op" target; four points
   are ticked by the teacher (`tickReadiness`). It blocks only one thing: while an open spot is left (`openSpots.ts`: `[aanvullen: …]`, TODO, an empty chapter, evidence without text) the export gives a draft version, marked CONCEPT on every page, never the final one (BESLUIT-2026-11-07-4; otherwise advice, BESLUIT-2026-11-05-9).
+  Export: `dossierDoc` (`export.ts`) is the one in-between model; the Word writer and the print
+  page (`/portfolio/:id/print`, PDF through the browser) both read it. `dossierExport`
+  (`portfolioExport.server.ts`) reads `?lu=` (one outcome via `dossierPart`, handed in on its
+  own), `?draft=1` and `?ai=1`, and applies the open-spot rule to what is exported.
   The rehearsal assessment (`/portfolio/:id/rehearsal`, `portfolio-rehearsal@v2`) is a chat with a
   played committee of two assessors. It is one registry entry in `WORKPLACE_TOOLS`, outside the
   catalogue (`hiddenFromCatalogue`), governed by the workplace feature instead of tool
