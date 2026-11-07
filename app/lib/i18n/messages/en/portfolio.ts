@@ -195,6 +195,10 @@ export const portfolio: Messages["portfolio"] = {
     fromCourse: "From course {course}, snapshot of {date}.",
     fromGoneCourse: "From a course that no longer exists, snapshot of {date}.",
     openCourse: "Open the course",
+    openSpots:
+      "{n} open spots in this chapter, such as [to add: …]. Fill them in before you hand in.",
+    openSpotsOne:
+      "1 open spot in this chapter, such as [to add: …]. Fill it in before you hand in.",
     refresh: "Fetch again",
     refreshed: "Fetched again from the course.",
     removeEvidence: "Remove evidence",

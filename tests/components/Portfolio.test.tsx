@@ -349,6 +349,28 @@ describe("Portfolio outcome page", () => {
       screen.getByText("3 woorden; het hele verslag mag 100 woorden hebben"),
     ).toBeInTheDocument();
   });
+
+  it("counts the open spots in the chapter as the teacher types", async () => {
+    const { container } = renderRoute(PortfolioOutcome, outcomeData());
+    const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");
+    expect(screen.queryByText(/open plek/)).toBeNull();
+    fireEvent.change(chapter, {
+      target: { value: "Ik begon. [aanvullen: het effect] Daarna [aanvullen: de groep]." },
+    });
+    const note = screen.getByText(
+      "2 open plekken in dit hoofdstuk, zoals [aanvullen: …]. Vul ze in voordat je inlevert.",
+    );
+    expect(chapter.getAttribute("aria-describedby")).toContain(note.id);
+    fireEvent.change(chapter, { target: { value: "Ik begon. [aanvullen: het effect]" } });
+    expect(
+      screen.getByText(
+        "1 open plek in dit hoofdstuk, zoals [aanvullen: …]. Vul hem in voordat je inlevert.",
+      ),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    fireEvent.change(chapter, { target: { value: "Klaar." } });
+    expect(screen.queryByText(/open plek/)).toBeNull();
+  });
 });
 
 describe("Portfolio overview — ready to hand in (P29.1)", () => {

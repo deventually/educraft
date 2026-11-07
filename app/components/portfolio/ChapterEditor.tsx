@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Form } from "react-router";
 import { wordCount } from "~/lib/portfolio/progress";
+import { markersIn } from "~/lib/portfolio/openSpots";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, HelpText, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
@@ -33,7 +34,9 @@ export function ChapterEditor({
   const t = useT().portfolio;
   const [text, setText] = useState(defaultValue);
   const n = wordCount(text);
+  const open = markersIn(text).length;
   const countId = `chapter-count-${outcomeId}`;
+  const openId = `chapter-open-${outcomeId}`;
   return (
     <Form method="post" className="grid gap-2">
       <input type="hidden" name="outcomeId" value={outcomeId} />
@@ -44,7 +47,7 @@ export function ChapterEditor({
         rows={16}
         value={text}
         maxLength={LIMITS.documentText}
-        aria-describedby={countId}
+        aria-describedby={open > 0 ? `${countId} ${openId}` : countId}
         onChange={(e) => setText(e.target.value)}
       />
       <p id={countId} className="text-sm text-slate-600">
@@ -52,6 +55,12 @@ export function ChapterEditor({
           ? fmt(t.outcome.chapterWordsLimit, { n, limit: maxWords })
           : fmt(t.outcome.chapterWords, { n })}
       </p>
+      {/* Open spots never reach the handed-in work (BESLUIT-2026-11-07-4). */}
+      {open > 0 && (
+        <p id={openId} className="text-sm font-medium text-amber-800">
+          {open === 1 ? t.outcome.openSpotsOne : fmt(t.outcome.openSpots, { n: open })}
+        </p>
+      )}
       <div>
         <Button type="submit" name="intent" value="writeChapter">
           {t.outcome.saveChapter}

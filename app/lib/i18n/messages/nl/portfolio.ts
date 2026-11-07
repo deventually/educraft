@@ -194,6 +194,10 @@ export const portfolio = {
     fromCourse: "Uit cursus {course}, momentopname van {date}.",
     fromGoneCourse: "Uit een cursus die niet meer bestaat, momentopname van {date}.",
     openCourse: "Open de cursus",
+    openSpots:
+      "{n} open plekken in dit hoofdstuk, zoals [aanvullen: …]. Vul ze in voordat je inlevert.",
+    openSpotsOne:
+      "1 open plek in dit hoofdstuk, zoals [aanvullen: …]. Vul hem in voordat je inlevert.",
     refresh: "Opnieuw ophalen",
     refreshed: "Opnieuw opgehaald uit de cursus.",
     removeEvidence: "Bewijs verwijderen",
