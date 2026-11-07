@@ -23,6 +23,7 @@ let courses: typeof import("~/server/repositories/courses.server");
 let shares: typeof import("~/server/repositories/shares.server");
 let preview: typeof import("~/routes/work.$generationId.export");
 let download: typeof import("~/routes/work.$generationId.export.$format");
+let printPage: typeof import("~/routes/work.$generationId.print");
 let team = "";
 
 beforeAll(async () => {
@@ -31,6 +32,7 @@ beforeAll(async () => {
   shares = await import("~/server/repositories/shares.server");
   preview = await import("~/routes/work.$generationId.export");
   download = await import("~/routes/work.$generationId.export.$format");
+  printPage = await import("~/routes/work.$generationId.print");
   const users = await import("~/server/repositories/users.server");
   const teams = await import("~/server/repositories/teams.server");
   for (const id of ["exp-a", "exp-b", "exp-c"])
@@ -89,6 +91,7 @@ describe("export routes (P30.1)", () => {
     expect(paths).toContain(
       "/work/:generationId/export/:format routes/work.$generationId.export.$format.tsx",
     );
+    expect(paths).toContain("/work/:generationId/print routes/work.$generationId.print.tsx");
   });
 
   it("gives the owner a preview with the formats to download", async () => {
@@ -96,7 +99,11 @@ describe("export routes (P30.1)", () => {
     const data = await loadPreview(g.id);
     expect(data.doc.title).toBe("Les voorbereiden");
     expect(data.doc.sections).toHaveLength(1);
-    expect(data.downloads).toEqual([{ format: "docx", href: `/work/${g.id}/export/docx` }]);
+    expect(data.downloads).toEqual([
+      { format: "docx", href: `/work/${g.id}/export/docx` },
+      { format: "pdf", href: `/work/${g.id}/print` },
+      { format: "md", href: `/work/${g.id}/export/md` },
+    ]);
   });
 
   it("puts all saved steps of a multi-step tool in one file, in stage order", async () => {
@@ -125,11 +132,37 @@ describe("export routes (P30.1)", () => {
     expect(await zip.file("word/document.xml")?.async("string")).toContain("starten");
   });
 
+  it("returns the result as Markdown, as written", async () => {
+    const g = await save("lesson-plan", "lesson", "## Verloop\n\nWe **starten** samen.");
+    const res = await loadFile(g.id, "md");
+    expect(res.headers.get("Content-Type")).toBe("text/markdown; charset=utf-8");
+    expect(res.headers.get("Content-Disposition")).toMatch(/filename="Les voorbereiden .*\.md"/);
+    expect(await res.text()).toBe("# Les voorbereiden\n\n## Verloop\n\nWe **starten** samen.\n");
+  });
+
+  it("makes the PDF through the print page, never as a download", async () => {
+    const g = await save("lesson-plan", "lesson", "Les");
+    expect(await status(loadFile(g.id, "pdf"))).toBe(404);
+    const data = (await printPage.loader({
+      request: get(`/work/${g.id}/print`),
+      params: { generationId: g.id },
+    } as never)) as { doc: { title: string } };
+    expect(data.doc.title).toBe("Les voorbereiden");
+  });
+
   it("is a 404 for someone else's work, also as an extra step", async () => {
     const g = await save("lesson-plan", "lesson", "Les");
     as("exp-c");
     expect(await status(loadPreview(g.id))).toBe(404);
     expect(await status(loadFile(g.id, "docx"))).toBe(404);
+    expect(
+      await status(
+        printPage.loader({
+          request: get(`/work/${g.id}/print`),
+          params: { generationId: g.id },
+        } as never),
+      ),
+    ).toBe(404);
     const own = await save("lesson-plan", "lesson", "Eigen", "exp-c");
     expect(await status(loadPreview(own.id, `?with=${g.id}`))).toBe(404);
   });

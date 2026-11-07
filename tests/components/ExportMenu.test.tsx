@@ -53,6 +53,8 @@ describe("ExportMenu (P30.1)", () => {
               format: "docx",
               href: `/work/${params.generationId}/export/docx${new URL(request.url).search}`,
             },
+            { format: "pdf", href: `/work/${params.generationId}/print` },
+            { format: "md", href: `/work/${params.generationId}/export/md` },
           ],
         }),
       },
@@ -73,6 +75,12 @@ describe("ExportMenu (P30.1)", () => {
     const link = screen.getByRole("link", { name: /Word/ });
     expect(link).toHaveAttribute("href", "/work/g2/export/docx?with=g1");
     expect(link).toHaveAttribute("download");
+    // P30.2: PDF goes through the print page in a new tab; Markdown is a plain download.
+    const pdf = screen.getByRole("link", { name: /Print of bewaar als PDF/ });
+    expect(pdf).toHaveAttribute("href", "/work/g2/print");
+    expect(pdf).toHaveAttribute("target", "_blank");
+    expect(pdf).not.toHaveAttribute("download");
+    expect(screen.getByRole("link", { name: /Markdown/ })).toHaveAttribute("download");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

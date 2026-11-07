@@ -43,6 +43,11 @@ describe("Projects page", () => {
     expect(screen.getByText("Alles wat je met de tools hebt gemaakt.")).toBeInTheDocument();
   });
 
+  it("offers the export menu for each generation (P30.2)", () => {
+    renderProjects([gen]);
+    expect(screen.getByText("Exporteer")).toBeInTheDocument();
+  });
+
   it("renders a delete control for each generation", () => {
     renderProjects([gen]);
     expect(screen.getByRole("button", { name: /verwijder|delete/i })).toBeInTheDocument();
