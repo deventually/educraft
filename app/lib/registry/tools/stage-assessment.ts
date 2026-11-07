@@ -64,7 +64,7 @@ export const stageAssessment: Tool = {
       nl: "Origineel LimeOnIt-instrument; standaardkader gebaseerd op het stage-nakijkmodel van de opleiding Informatica (HBO-i).",
       en: "Original LimeOnIt instrument; default framework based on the Informatica internship rubric (HBO-i).",
     },
-    evaluatedWith: { nl: "Claude Sonnet 4.6", en: "Claude Sonnet 4.6" },
+    evaluatedWith: { nl: "Claude Sonnet 5.5", en: "Claude Sonnet 5.5" },
   }),
   usesContextProfile: true,
   assistiveGrading: true,
