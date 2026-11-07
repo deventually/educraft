@@ -37,6 +37,7 @@ function overviewData(d = sampleDossier()) {
     progress: outcomeProgress(d),
     next: nextStep(d),
     references: d.references,
+    chapters: d.chapters.map(({ outcomeId, text }) => ({ outcomeId, text })),
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
@@ -681,5 +682,13 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
       "href",
       "/courses",
     );
+  });
+});
+
+describe("Portfolio overview — back from Word", () => {
+  it("offers to bring an edited Word export back", () => {
+    renderRoute(PortfolioOverview, overviewData());
+    expect(screen.getByRole("heading", { name: "Terughalen uit Word" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Word-bestand (.docx)")).toBeInTheDocument();
   });
 });

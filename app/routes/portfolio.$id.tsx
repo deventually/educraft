@@ -4,6 +4,7 @@ import type { Route } from "./+types/portfolio.$id";
 import { availableToolNames, loadDossier, saveIntent } from "~/server/portfolio.server";
 import { criterionHints } from "~/lib/portfolio/toolHints";
 import { ToolHints } from "~/components/portfolio/ToolHints";
+import { WordImport } from "~/components/portfolio/WordImport";
 import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
@@ -71,6 +72,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       }),
     ),
     references: d.references,
+    // Back from Word compares the file with these, in the browser.
+    chapters: d.chapters.map(({ outcomeId, text }) => ({ outcomeId, text })),
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
@@ -100,6 +103,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     progress,
     next,
     references,
+    chapters,
     coachMode,
     aiUsed,
     aiRequired,
@@ -336,6 +340,10 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             ))}
           </ul>
         </section>
+      )}
+
+      {framework.outcomes.length > 0 && (
+        <WordImport outcomes={framework.outcomes} chapters={chapters} references={references} />
       )}
 
       <section className="mt-8" aria-labelledby="references-title">

@@ -285,6 +285,11 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
   de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
   alleen een concept; zo kan LU1 al definitief terwijl LU3 nog concept is. Het hele dossier kan nu
   ook als PDF (printpagina, zoals P30.2), met CONCEPT boven en onder elke pagina bij een concept.
+- **Terughalen uit Word (PR open):** wie een export in Word verder bewerkt, kiest het bestand bij
+  *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
+  hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
+  de docent aanvinkt wordt overgenomen (`importChapters`), plus aangevinkte nieuwe bronnen.
+  Bijlagen blijven in LimeOnIt leidend.
 - **Open plekken toestaan in het BDB/BKE-dossier (PR open, plan BDB en BKE PR 3):** het landelijke
   startpunt kun je bevestigen als *voorlopig kader*; coach, alinea's en proefassessment werken dan,
   en elk oordeel zegt "op het landelijke startpunt". Een bewijsstuk zonder tekst heet *Volgt nog*:

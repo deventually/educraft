@@ -148,6 +148,26 @@ export const portfolio = {
   frameworkNotConfirmed: "Het kader is nog niet bevestigd.",
   frameworkProvisional:
     "Voorlopig kader, bevestigd op {date}: het landelijke startpunt. Neem het formulier van je hogeschool over en bevestig het kader voor het definitieve Word-bestand.",
+  fromWord: {
+    changed: "Anders dan in LimeOnIt: {now} woorden nu, {word} uit Word.",
+    chaptersLegend: "Hoofdstukken uit Word",
+    file: "Word-bestand (.docx)",
+    intro:
+      "Heb je een export in Word verder bewerkt? Kies het bestand. LimeOnIt leest het in je browser en laat per hoofdstuk zien wat er anders is. Niets wordt overschreven tot jij Overnemen aanvinkt. Open plekken blijven open plekken, en je bijlagen blijven zoals ze in LimeOnIt staan.",
+    noneFound:
+      'Geen hoofdstuk gevonden. LimeOnIt herkent een hoofdstuk aan de kop die de export zette, zoals "{example}". Staat die kop er nog, met de stijl Kop 1?',
+    preview: "Tekst uit Word bekijken",
+    reading: "Bezig met lezen…",
+    referencesLegend: "Nieuwe bronnen uit Word",
+    submit: "Neem het gekozen over",
+    take: "Overnemen: {outcome}",
+    title: "Terughalen uit Word",
+    unchanged: "{outcome}: gelijk aan LimeOnIt.",
+    unknown:
+      "Onder deze koppen is niets gelezen, omdat ze bij geen leeruitkomst horen: {headings}. Zet die tekst onder de kop van een leeruitkomst, of neem hem met de hand over.",
+    unreadable:
+      "Dit bestand kon niet gelezen worden. Kies een .docx die je uit LimeOnIt exporteerde.",
+  },
   goThere: "Ga erheen",
   heading: "BDB/BKE",
   intro:
