@@ -9,6 +9,7 @@ import { DossierRoute } from "~/components/portfolio/DossierRoute";
 import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
+import { dossierPart } from "~/lib/portfolio/dossierPart";
 import { nextStep, outcomeProgress } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
@@ -62,6 +63,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     practise,
     readiness: readinessCheck(d),
     openSpots: openSpots(d).length,
+    // Each outcome handed in on its own: its open spots decide final or draft.
+    partOpenSpots: Object.fromEntries(
+      d.framework.outcomes.map((o) => {
+        const part = dossierPart(d, o.id);
+        return [o.id, part ? openSpots(part).length : 0];
+      }),
+    ),
     references: d.references,
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
@@ -101,6 +109,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     practise,
     readiness,
     openSpots: open,
+    partOpenSpots,
   } = loaderData;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
@@ -233,16 +242,39 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
               size="sm"
               aria-describedby="export-draft-help"
             >
-              {t.portfolio.exportDraft}
+              {t.portfolio.exportDraftWord}
+            </Button>
+            <Button
+              type="submit"
+              name="draft"
+              value="1"
+              formAction={`/portfolio/${id}/print`}
+              formTarget="_blank"
+              variant="secondary"
+              size="sm"
+              aria-describedby="export-draft-help"
+            >
+              {t.portfolio.exportDraftPdf}
             </Button>
             <p id="export-draft-help" className="w-full text-sm text-slate-600">
               {t.portfolio.exportDraftHelp}
             </p>
           </>
         ) : (
-          <Button type="submit" variant="secondary" size="sm">
-            {t.portfolio.exportWord}
-          </Button>
+          <>
+            <Button type="submit" variant="secondary" size="sm">
+              {t.portfolio.exportWord}
+            </Button>
+            <Button
+              type="submit"
+              formAction={`/portfolio/${id}/print`}
+              formTarget="_blank"
+              variant="secondary"
+              size="sm"
+            >
+              {t.portfolio.exportPdf}
+            </Button>
+          </>
         )}
         {aiUsed && aiRequired && (
           <p className="w-full text-sm text-slate-600">{t.portfolio.exportAiRequired}</p>
@@ -293,6 +325,13 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
                     {fmt(t.portfolio.missingEvidence, { items: p.missingEvidence.join("; ") })}
                   </p>
                 )}
+                <PartExport
+                  dossierId={id}
+                  outcomeId={p.outcomeId}
+                  label={labelOf(p.outcomeId)}
+                  open={partOpenSpots[p.outcomeId] ?? 0}
+                  ai={aiUsed && aiRequired}
+                />
               </li>
             ))}
           </ul>
@@ -338,5 +377,47 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         </Form>
       </section>
     </div>
+  );
+}
+
+/**
+ * One learning outcome handed in on its own (Word or PDF). While it has an open spot
+ * the links give the draft version, and say so (BESLUIT-2026-11-07-4).
+ */
+function PartExport({
+  dossierId,
+  outcomeId,
+  label,
+  open,
+  ai,
+}: {
+  dossierId: string;
+  outcomeId: string;
+  label: string;
+  open: number;
+  /** The form asks for the AI disclosure and AI was used: always include it. */
+  ai: boolean;
+}) {
+  const t = useT().portfolio.part;
+  const query = `?lu=${encodeURIComponent(outcomeId)}${open > 0 ? "&draft=1" : ""}${ai ? "&ai=1" : ""}`;
+  const link = "font-medium text-violet-700 underline underline-offset-2";
+  return (
+    <fieldset className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <legend className="sr-only">{fmt(t.label, { outcome: label })}</legend>
+      <span className={open > 0 ? "font-medium text-amber-800" : "text-slate-700"}>
+        {open > 0 ? fmt(open === 1 ? t.draftOne : t.draft, { n: open }) : t.final}
+      </span>
+      <a href={`/portfolio/${dossierId}/export${query}`} className={link}>
+        {open > 0 ? t.wordDraft : t.word}
+      </a>
+      <a
+        href={`/portfolio/${dossierId}/print${query}`}
+        target="_blank"
+        rel="noopener"
+        className={link}
+      >
+        {open > 0 ? t.pdfDraft : t.pdf}
+      </a>
+    </fieldset>
   );
 }

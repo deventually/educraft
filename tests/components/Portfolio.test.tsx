@@ -12,6 +12,7 @@ import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierStep } from "~/lib/portfolio/step";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
+import { dossierPart } from "~/lib/portfolio/dossierPart";
 import * as edit from "~/lib/portfolio/edit";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
@@ -51,6 +52,12 @@ function overviewData(d = sampleDossier()) {
     practise: null as string | null,
     readiness: readinessCheck(d),
     openSpots: openSpots(d).length,
+    partOpenSpots: Object.fromEntries(
+      d.framework.outcomes.map((o) => {
+        const part = dossierPart(d, o.id);
+        return [o.id, part ? openSpots(part).length : 0];
+      }),
+    ),
   };
 }
 
@@ -447,7 +454,9 @@ describe("Portfolio overview — ready to hand in (P29.1)", () => {
       "#readiness",
     );
     // Advice, not a gate: with no open spot left, the export button works.
-    expect(within(exportForm).getByRole("button")).toBeEnabled();
+    expect(
+      within(exportForm).getByRole("button", { name: "Download als Word-bestand" }),
+    ).toBeEnabled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -463,9 +472,12 @@ describe("Portfolio overview — no open spot in the handed-in work", () => {
     expect(
       within(exportForm).queryByRole("button", { name: "Download als Word-bestand" }),
     ).toBeNull();
-    const draft = within(exportForm).getByRole("button", { name: "Download een conceptversie" });
-    expect(draft).toHaveAttribute("name", "draft");
-    expect(draft).toHaveAttribute("value", "1");
+    const word = within(exportForm).getByRole("button", { name: "Conceptversie als Word" });
+    expect(word).toHaveAttribute("name", "draft");
+    expect(word).toHaveAttribute("value", "1");
+    const pdf = within(exportForm).getByRole("button", { name: "Conceptversie als PDF" });
+    expect(pdf).toHaveAttribute("formaction", `/portfolio/${ID}/print`);
+    expect(pdf).toHaveAttribute("name", "draft");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -475,7 +487,45 @@ describe("Portfolio overview — no open spot in the handed-in work", () => {
     expect(
       within(exportForm).getByRole("button", { name: "Download als Word-bestand" }),
     ).toBeInTheDocument();
+    expect(within(exportForm).getByRole("button", { name: "Bewaar als PDF" })).toHaveAttribute(
+      "formaction",
+      `/portfolio/${ID}/print`,
+    );
     expect(within(exportForm).queryByText(/open plek/)).toBeNull();
+  });
+});
+
+describe("Portfolio overview — each learning outcome on its own", () => {
+  it("offers every outcome as its own Word and PDF, as a draft while it has an open spot", async () => {
+    const d = sampleDossier();
+    d.framework.outcomes.push({
+      id: "lu-2",
+      code: "LU2",
+      title: "Toetsen",
+      criteria: [],
+      requiredEvidence: [],
+    });
+    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    const lu1 = screen.getByRole("group", { name: "LU1 Doceren apart inleveren" });
+    expect(within(lu1).getByRole("link", { name: "Word" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/export?lu=${LU}`,
+    );
+    expect(within(lu1).getByRole("link", { name: "PDF" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/print?lu=${LU}`,
+    );
+    const lu2 = screen.getByRole("group", { name: "LU2 Toetsen apart inleveren" });
+    expect(within(lu2).getByText(/Concept: nog 1 open plek/)).toBeInTheDocument();
+    expect(within(lu2).getByRole("link", { name: "Word (concept)" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/export?lu=lu-2&draft=1`,
+    );
+    expect(within(lu2).getByRole("link", { name: "PDF (concept)" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/print?lu=lu-2&draft=1`,
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
 

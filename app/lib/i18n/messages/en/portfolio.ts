@@ -73,9 +73,11 @@ export const portfolio: Messages["portfolio"] = {
   exportBlockedLink: "See what is still open",
   exportBlockedMany:
     "There are still {n} open spots in your dossier, such as [to add: …], an empty chapter or evidence still to come. An open spot never ends up in the work you hand in; fix them first.",
-  exportDraft: "Download a draft version",
   exportDraftHelp:
     "For example for your workplace mentor: DRAFT on every page, open spots in yellow.",
+  exportDraftPdf: "Draft version as PDF",
+  exportDraftWord: "Draft version as Word",
+  exportPdf: "Save as PDF",
   exportTitle: "Export",
   exportWord: "Download as a Word file",
   framework: {
@@ -219,6 +221,16 @@ export const portfolio: Messages["portfolio"] = {
     unlinkedTitle: "Evidence not linked yet",
   },
   outcomesTitle: "Learning outcomes",
+  part: {
+    draft: "Draft: {n} open spots left.",
+    draftOne: "Draft: 1 open spot left.",
+    final: "Hand in on its own:",
+    label: "Hand in {outcome} on its own",
+    pdf: "PDF",
+    pdfDraft: "PDF (draft)",
+    word: "Word",
+    wordDraft: "Word (draft)",
+  },
   progressSummary: "{shown} of {total} criteria shown",
   provisionalNotice:
     "Provisional framework: the AI assesses on the national starting point, not on your institution's form.",

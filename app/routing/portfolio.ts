@@ -15,5 +15,9 @@ export const portfolio: RouteArea = {
     ]),
   ],
   // Resource route (no UI) — a dossier as a Word (.docx) download (P25.6).
-  standalone: [route("portfolio/:id/export", "routes/portfolio.$id.export.tsx")],
+  standalone: [
+    route("portfolio/:id/export", "routes/portfolio.$id.export.tsx"),
+    // PDF: the dossier as a print page, outside the app shell (like P30.2).
+    route("portfolio/:id/print", "routes/portfolio.$id.print.tsx"),
+  ],
 };

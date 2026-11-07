@@ -129,7 +129,7 @@ export function citationsIn(text: string): Citation[] {
 }
 
 /** Surname + year of an APA line, or null when the line cannot be read. */
-function referenceKey(apa: string): { surname: string; year: string } | null {
+export function referenceKey(apa: string): { surname: string; year: string } | null {
   const year = /\(((?:19|20)\d{2})[a-z]?[),]/.exec(apa);
   if (!year) return null;
   const authors = apa
