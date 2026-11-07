@@ -17,11 +17,11 @@ Ik zal mijn eerste reactie op het onderwerp of de vraag delen. In deze fase blij
 
 ## Fase 2: Pair (Dialogische Uitwisseling)
 
-Nu ga je met mij aan de slag als peer. Stel vragen die helpen mijn redenering, aannames of grenzen van mijn stelling te verduidelijken. Introduceer één alternatief perspectief, beperking of tegenposition relevant voor het onderwerp. Nodig mij uit mijn oorspronkelijke reactie aan te scherpen, te nuanceren of aan te vullen. Leg geen begrippen uit, geef geen antwoorden, vat mijn ideeën niet samen en oordeel niet over correctheid.
+Nu ga je met mij aan de slag als peer. Stel vragen die helpen mijn redenering, aannames of grenzen van mijn stelling te verduidelijken. Introduceer één alternatief perspectief, beperking of tegenpositie relevant voor het onderwerp. Nodig mij uit mijn oorspronkelijke reactie aan te scherpen, te nuanceren of aan te vullen. Leg geen begrippen uit, geef geen antwoorden, vat mijn ideeën niet samen en oordeel niet over correctheid.
 
 ## Fase 3: Share (Menselijk Gemedieerde Synthese)
 
-Stop met het genereren van dialoog. Maak geen samenvattingen of conclusies. Ik zal mijn eigen synthese voorbereiding om met anderen te delen.
+Stop met het genereren van dialoog. Maak geen samenvattingen of conclusies. Ik bereid mijn eigen synthese voor om met anderen te delen.
 
 ## Grenzen (Voice & Bounds)
 

@@ -10,27 +10,31 @@ export interface Run {
   text: string;
   bold?: boolean;
   italic?: boolean;
+  /** Inline code (`like this`): a monospace font. */
+  code?: boolean;
 }
 
 export type Block =
   | { type: "heading"; level: 1 | 2 | 3 | 4 | 5 | 6; runs: Run[] }
   | { type: "paragraph"; runs: Run[] }
   | { type: "list"; ordered: boolean; items: Run[][] }
-  | { type: "table"; header: Run[][]; rows: Run[][][] };
+  | { type: "table"; header: Run[][]; rows: Run[][][] }
+  /** A fenced code block, as written, with its language (```python) if any. */
+  | { type: "code"; lang: string | null; text: string };
 
 const HEADING = /^(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/;
 const BULLET = /^\s*[-*+]\s+(.*)$/;
 const NUMBERED = /^\s*\d+[.)]\s+(.*)$/;
 const TABLE_SEPARATOR = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 const RULE = /^\s*([-*_])(\s*\1){2,}\s*$/;
-const FENCE = /^\s*(```|~~~)/;
+const FENCE = /^\s*(```|~~~)\s*([\w#+.-]*)/;
 
 // Bold (** or __), italic (* or _ at a word edge), inline code, a link.
 // An opening marker must touch a non-space, so "2 * 3" stays text.
 const INLINE =
   /(\*\*|__)(?=\S)([\s\S]*?\S)\1|\*(?=[^\s*])([\s\S]*?[^\s*])\*|(?<![\p{L}\p{N}])_(?=[^\s_])([\s\S]*?[^\s_])_(?![\p{L}\p{N}])|`([^`]+)`|\[([^\]]+)\]\([^)]*\)/gu;
 
-type Marks = Pick<Run, "bold" | "italic">;
+type Marks = Pick<Run, "bold" | "italic" | "code">;
 
 function inline(text: string, marks: Marks = {}): Run[] {
   const runs: Run[] = [];
@@ -43,7 +47,7 @@ function inline(text: string, marks: Marks = {}): Run[] {
     if (m[2] !== undefined) runs.push(...inline(m[2], { ...marks, bold: true }));
     else if (m[3] !== undefined) runs.push(...inline(m[3], { ...marks, italic: true }));
     else if (m[4] !== undefined) runs.push(...inline(m[4], { ...marks, italic: true }));
-    else if (m[5] !== undefined) push(m[5], marks);
+    else if (m[5] !== undefined) push(m[5], { ...marks, code: true });
     else if (m[6] !== undefined) runs.push(...inline(m[6], marks));
     last = (m.index ?? 0) + m[0].length;
   }
@@ -56,7 +60,13 @@ function merge(runs: Run[]): Run[] {
   const out: Run[] = [];
   for (const r of runs) {
     const prev = out[out.length - 1];
-    if (prev && !!prev.bold === !!r.bold && !!prev.italic === !!r.italic) prev.text += r.text;
+    if (
+      prev &&
+      !!prev.bold === !!r.bold &&
+      !!prev.italic === !!r.italic &&
+      !!prev.code === !!r.code
+    )
+      prev.text += r.text;
     else out.push({ ...r });
   }
   return out;
@@ -98,12 +108,14 @@ export function parseMarkdown(markdown: string): Block[] {
       flush();
       continue;
     }
-    if (FENCE.test(line)) {
-      // Code: keep each line as plain text.
+    const fence = FENCE.exec(line);
+    if (fence) {
+      // Code: kept whole, as written, until the same fence closes it.
       flush();
-      for (i++; i < lines.length && !FENCE.test(lines[i]); i++) {
-        if (lines[i].trim()) blocks.push({ type: "paragraph", runs: [{ text: lines[i] }] });
-      }
+      const close = fence[1];
+      const code: string[] = [];
+      for (i++; i < lines.length && !lines[i].trim().startsWith(close); i++) code.push(lines[i]);
+      blocks.push({ type: "code", lang: fence[2] || null, text: code.join("\n") });
       continue;
     }
     const heading = HEADING.exec(line);

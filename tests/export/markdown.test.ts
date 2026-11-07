@@ -64,4 +64,25 @@ describe("parseMarkdown tables with an escaped pipe", () => {
       rows: [[[{ text: "x | y" }], [{ text: "z" }]]],
     });
   });
+
+  it("keeps a fenced code block whole, with its language and blank lines (code export)", () => {
+    const blocks = parseMarkdown(
+      "Voorbeeld:\n\n```python\ndef f():\n\n    return 1\n```\n\nKlaar.",
+    );
+    expect(blocks[1]).toEqual({ type: "code", lang: "python", text: "def f():\n\n    return 1" });
+    expect(blocks[2]).toEqual({ type: "paragraph", runs: [{ text: "Klaar." }] });
+  });
+
+  it("reads a fence without a language", () => {
+    expect(parseMarkdown("~~~\nx = 1\n~~~")).toEqual([{ type: "code", lang: null, text: "x = 1" }]);
+  });
+
+  it("marks inline code", () => {
+    expect(parseMarkdown("Gebruik `print()` hier.")).toEqual([
+      {
+        type: "paragraph",
+        runs: [{ text: "Gebruik " }, { text: "print()", code: true }, { text: " hier." }],
+      },
+    ]);
+  });
 });
