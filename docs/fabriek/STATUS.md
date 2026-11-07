@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
+_Laatst bijgewerkt: 2026-11-07 (terughalen uit Word, PR open)_
 
 ## Nu
 
+- **Elke leeruitkomst apart inleveren, als Word of PDF (#168) gemerged op 2026-11-07:** bij elke leeruitkomst in het
+  overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
+  de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
+  alleen een concept; zo kan LU1 al definitief terwijl LU3 nog concept is. Het hele dossier kan nu
+  ook als PDF (printpagina, zoals P30.2), met CONCEPT boven en onder elke pagina bij een concept.
 - **Geen open plek in het ingeleverde BDB/BKE-werk (#165) gemerged op 2026-11-07:**
   `[aanvullen: …]`, `[invullen]`, TODO, een leeg hoofdstuk of bewijs zonder tekst is een rood punt
   in *Klaar om in te leveren?*, en de schrijfpagina telt ze. Zolang er een staat, geeft de export
@@ -280,11 +285,6 @@ _Laatst bijgewerkt: 2026-11-07 (elke leeruitkomst apart inleveren, PR open)_
 
 ## Bezig
 
-- **Elke leeruitkomst apart inleveren, als Word of PDF (PR open):** bij elke leeruitkomst in het
-  overzicht *Word* en *PDF*: een eigen document met titelpagina (LU-code en titel), dat hoofdstuk,
-  de bronnen die het noemt en het bewijs bij de criteria van die LU. Een LU met een open plek geeft
-  alleen een concept; zo kan LU1 al definitief terwijl LU3 nog concept is. Het hele dossier kan nu
-  ook als PDF (printpagina, zoals P30.2), met CONCEPT boven en onder elke pagina bij een concept.
 - **Terughalen uit Word (PR open):** wie een export in Word verder bewerkt, kiest het bestand bij
   *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
   hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
