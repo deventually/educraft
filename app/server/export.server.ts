@@ -69,8 +69,12 @@ export async function loadExport(request: Request, generationId: string): Promis
   };
 }
 
-/** The download link for one format, carrying the extra steps along. */
+/**
+ * The link for one format, carrying the extra steps along. PDF goes through the print page
+ * (the browser saves it as PDF); every other format is a file download.
+ */
 export function downloadHref(request: Request, generationId: string, format: ExportFormat): string {
   const query = new URL(request.url).search;
-  return `/work/${encodeURIComponent(generationId)}/export/${format}${query}`;
+  const base = `/work/${encodeURIComponent(generationId)}`;
+  return format === "pdf" ? `${base}/print${query}` : `${base}/export/${format}${query}`;
 }

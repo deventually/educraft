@@ -10,7 +10,6 @@ vi.mock("~/lib/i18n/useT", () => ({
       result: "Result",
       copy: "Copy",
       copied: "Copied!",
-      exportMd: "Export (Markdown)",
       generating: "Generating…",
       computedByApp: "Computed by LimeOnIt, not by the AI",
     },
@@ -18,7 +17,6 @@ vi.mock("~/lib/i18n/useT", () => ({
   }),
 }));
 
-import * as utils from "~/lib/utils";
 import { ResultPanel } from "~/components/ResultPanel";
 import { stubSpeech } from "../helpers/speech";
 
@@ -41,22 +39,21 @@ beforeEach(() => {
 
 describe("ResultPanel", () => {
   it("shows the generating placeholder while streaming with nothing produced yet", () => {
-    render(<ResultPanel markdown="" filenameBase="Feedback report" streaming />);
+    render(<ResultPanel markdown="" streaming />);
     expect(screen.getByText("Generating…")).toBeInTheDocument();
-    // Nothing to copy or export yet → both actions are disabled.
+    // Nothing to copy yet → the action is disabled.
     expect(screen.getByRole("button", { name: /copy/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /export/i })).toBeDisabled();
   });
 
   it("renders streamed markdown as it arrives (a heading becomes a real heading)", () => {
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" streaming />);
+    render(<ResultPanel markdown={MD} streaming />);
     expect(screen.getByRole("heading", { name: "Heading one" })).toBeInTheDocument();
     // The placeholder is gone once content exists.
     expect(screen.queryByText("Generating…")).toBeNull();
   });
 
   it("renders the finished result with the copy action enabled", () => {
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" />);
+    render(<ResultPanel markdown={MD} />);
     expect(screen.getByRole("heading", { name: "Heading one" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /copy/i })).toBeEnabled();
   });
@@ -69,31 +66,27 @@ describe("ResultPanel", () => {
       configurable: true,
       writable: true,
     });
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" />);
+    render(<ResultPanel markdown={MD} />);
     await user.click(screen.getByRole("button", { name: /copy/i }));
     expect(writeText).toHaveBeenCalledWith(MD);
     // The label transitions to the "copied" confirmation.
     expect(await screen.findByRole("button", { name: /copied/i })).toBeInTheDocument();
   });
 
-  it("exports to a filename slugified from filenameBase", async () => {
-    const user = userEvent.setup();
-    const spy = vi.spyOn(utils, "downloadText").mockImplementation(() => {});
-    render(<ResultPanel markdown={MD} filenameBase="Feedback Report — Q1" />);
-    await user.click(screen.getByRole("button", { name: /export/i }));
-    expect(spy).toHaveBeenCalledWith("feedback-report-q1.md", MD);
-    spy.mockRestore();
+  it("leaves the download to the Exporteer menu (P30.2)", () => {
+    render(<ResultPanel markdown={MD} />);
+    expect(screen.queryByRole("button", { name: /export/i })).toBeNull();
   });
 
   it("has no a11y violations with a rendered result", async () => {
-    const { container } = render(<ResultPanel markdown={MD} filenameBase="Feedback" />);
+    const { container } = render(<ResultPanel markdown={MD} />);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("reads a finished result aloud in the result's language", async () => {
     const speech = stubSpeech();
     const user = userEvent.setup();
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" lang="nl" />);
+    render(<ResultPanel markdown={MD} lang="nl" />);
     await user.click(screen.getByRole("button", { name: "Read aloud" }));
     expect(speech.spoken.map((u) => u.text)).toEqual(["Heading one", "Some bold body text."]);
     expect(speech.spoken[0].lang).toBe("nl-NL");
@@ -102,18 +95,14 @@ describe("ResultPanel", () => {
 
   it("offers no read-aloud while the result is still streaming", () => {
     const speech = stubSpeech();
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" streaming />);
+    render(<ResultPanel markdown={MD} streaming />);
     expect(screen.queryByRole("button", { name: "Read aloud" })).toBeNull();
     speech.restore();
   });
 
   it("shows a note computed in code under a finished result, labelled as not from the AI (P31.3)", async () => {
     const { container } = render(
-      <ResultPanel
-        markdown={MD}
-        filenameBase="Feedback"
-        computed="Engagement score: 9 of 18 points (50%)."
-      />,
+      <ResultPanel markdown={MD} computed="Engagement score: 9 of 18 points (50%)." />,
     );
     const note = screen.getByRole("note", { name: "Computed by LimeOnIt, not by the AI" });
     expect(note).toHaveTextContent("Engagement score: 9 of 18 points (50%).");
@@ -121,7 +110,7 @@ describe("ResultPanel", () => {
   });
 
   it("shows no computed note while streaming", () => {
-    render(<ResultPanel markdown={MD} filenameBase="Feedback" streaming computed="Score: 1." />);
+    render(<ResultPanel markdown={MD} streaming computed="Score: 1." />);
     expect(screen.queryByRole("note")).toBeNull();
   });
 });

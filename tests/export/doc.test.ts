@@ -43,4 +43,13 @@ describe("toExportDoc (P30.1)", () => {
     });
     expect(doc.sections[0].kind).toBe("document");
   });
+
+  it("keeps each step's own markdown for the Markdown file", () => {
+    const doc = toExportDoc({
+      title: "X",
+      locale: "nl",
+      sections: [{ heading: null, markdown: " a\n" }],
+    });
+    expect(doc.sections[0].markdown).toBe("a");
+  });
 });

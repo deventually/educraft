@@ -94,7 +94,7 @@ export default function AppShell() {
       </a>
       <RouteAnnouncer />
 
-      <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
+      <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur print:hidden">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4">
           <NavLink
             to="/"
@@ -282,7 +282,7 @@ function SiteFooter({
   ];
 
   return (
-    <footer className="border-t border-black/10 bg-violet-700 text-violet-100">
+    <footer className="border-t border-black/10 bg-violet-700 text-violet-100 print:hidden">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">

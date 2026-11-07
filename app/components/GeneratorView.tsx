@@ -282,7 +282,6 @@ export function GeneratorView({
           ) : output || streaming ? (
             <ResultPanel
               markdown={shown}
-              filenameBase={`${tool.slug}-${String(values.onderwerp ?? values.discipline ?? "")}`}
               streaming={streaming}
               fill
               lang={outputLanguage}
