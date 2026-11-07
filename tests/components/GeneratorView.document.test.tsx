@@ -107,7 +107,17 @@ describe("GeneratorView with a document field", () => {
     const original = screen.getByRole("region", { name: "Original" });
     // Next to a result, a wide document still fits the page (no grid blow-out).
     expect(gridBlowoutRisks(original, document.body)).toEqual([]);
-    await user.click(screen.getByRole("button", { name: /show in document/i }));
+    // The quote in the result itself is the link; clicking it marks the place in the original.
+    const quote = await screen.findByRole("link", {
+      name: /ik heb de klant elke week gesproken.*show in document/i,
+    });
+    expect(original.contains(quote)).toBe(false);
+    await user.click(quote);
     expect(await screen.findByText(/Found on page 1/i)).toBeInTheDocument();
+    expect(document.querySelector('[data-located="true"]')).toHaveTextContent("Page 1 of 1");
+
+    // On a phone the viewer scrolls into view; one tap brings you back to the same quote.
+    await user.click(screen.getByRole("button", { name: "Back to the feedback" }));
+    expect(quote).toHaveFocus();
   });
 });

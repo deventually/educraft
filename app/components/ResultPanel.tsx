@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ComponentProps, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { remarkPlugins, rehypePlugins } from "./markdownPlugins";
 import { Check, Copy } from "lucide-react";
@@ -7,6 +7,8 @@ import { cn } from "~/lib/utils";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { ReadAloudButton } from "./ReadAloudButton";
 import type { SpeechLanguage } from "~/lib/speech/readAloud";
+import { quoteKey } from "~/lib/documents/locate";
+import { QuoteLink, rehypeQuoteLinks } from "./quoteLinks";
 
 interface Props {
   markdown: string;
@@ -22,12 +24,53 @@ interface Props {
   lang?: SpeechLanguage;
   /** A note computed in code from the finished result (P31.3), shown under it. */
   computed?: string | null;
+  /**
+   * Quotes from the student's work that the document viewer found in the
+   * original. Each becomes a button in the result that calls `onQuote`.
+   */
+  quotes?: string[];
+  onQuote?: (quote: string) => void;
 }
 
-export function ResultPanel({ markdown, title, streaming, fill, lang, computed }: Props) {
+export function ResultPanel({
+  markdown,
+  title,
+  streaming,
+  fill,
+  lang,
+  computed,
+  quotes,
+  onQuote,
+}: Props) {
   const t = useT();
   const locale = useLocale();
   const [copied, setCopied] = useState(false);
+  const linkQuotes = !streaming && onQuote && quotes && quotes.length > 0;
+  const keyList = linkQuotes ? quotes.map(quoteKey).join("\n") : "";
+  const plugins = useMemo(
+    () =>
+      keyList
+        ? ([
+            [rehypeQuoteLinks, { keys: new Set(keyList.split("\n")) }],
+            ...(rehypePlugins as unknown[]),
+          ] as never)
+        : rehypePlugins,
+    [keyList],
+  );
+
+  // Stable, so a re-render does not remount the quote links (and lose focus).
+  const label = t.documents?.locate;
+  const components = useMemo(
+    () =>
+      linkQuotes && onQuote
+        ? {
+            a: (props: ComponentProps<"a">) => (
+              <QuoteLink props={props} onQuote={onQuote} label={label} />
+            ),
+          }
+        : undefined,
+    [linkQuotes, onQuote, label],
+  );
 
   async function copy() {
     await navigator.clipboard.writeText(markdown);
@@ -57,7 +100,11 @@ export function ResultPanel({ markdown, title, streaming, fill, lang, computed }
       </div>
       <div className={cn("md overflow-y-auto px-5 py-4", fill ? "flex-1" : "max-h-[70vh]")}>
         {markdown ? (
-          <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>
+          <ReactMarkdown
+            remarkPlugins={remarkPlugins}
+            rehypePlugins={plugins}
+            components={components}
+          >
             {markdown}
           </ReactMarkdown>
         ) : (

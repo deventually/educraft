@@ -114,37 +114,38 @@ describe("DocumentViewer", () => {
     expect(screen.getByText("klant", { selector: "mark" })).toBeInTheDocument();
   });
 
-  it("jumps from a quote in the result to the right page", async () => {
-    const user = userEvent.setup();
-    render(
-      <DocumentViewer
-        files={[pdf]}
-        text="x"
-        quotes={["ik heb de klant elke week gesproken", "dit staat nergens in het verslag"]}
-      />,
-    );
+  it("jumps to a quote asked for from the result, and reports which quotes it can find", async () => {
+    const found = "ik heb de klant elke week gesproken";
+    const missing = "dit staat nergens in het verslag";
+    const onFoundQuotes = vi.fn();
+    const props = { files: [pdf], text: "x", quotes: [found, missing], onFoundQuotes };
+    const { rerender } = render(<DocumentViewer {...props} />);
     await screen.findByText("Page 1 of 2");
+    // Only a quote that is really in the original may become a button in the result.
+    await waitFor(() => expect(onFoundQuotes).toHaveBeenLastCalledWith([found]));
+    // The result holds the buttons now; the viewer no longer repeats them in a list.
+    expect(screen.queryByRole("button", { name: /show in document/i })).toBeNull();
 
-    const buttons = screen.getAllByRole("button", { name: /show in document/i });
-    await user.click(buttons[0]);
+    rerender(<DocumentViewer {...props} focus={{ quote: found, id: 1 }} />);
     expect(await screen.findByText(/Found on page 2/i)).toBeInTheDocument();
     expect(document.querySelector('[data-located="true"]')).toHaveTextContent("Page 2 of 2");
 
-    // A quote that is not verbatim in the original is said to be not found, never mis-marked.
-    await user.click(buttons[1]);
+    // Asking again for the same quote (a second click) works again.
+    rerender(<DocumentViewer {...props} focus={{ quote: missing, id: 2 }} />);
     expect(await screen.findByText(/not found exactly/i)).toBeInTheDocument();
-    expect(document.querySelector('[data-located="true"]')).toBeNull();
+    rerender(<DocumentViewer {...props} focus={{ quote: found, id: 3 }} />);
+    expect(await screen.findByText(/Found on page 2/i)).toBeInTheDocument();
   });
 
   it("renders a Word file as a Word view and marks the paragraph of a hit", async () => {
-    const user = userEvent.setup();
-    const { container } = render(
-      <DocumentViewer files={[docx]} text="x" quotes={["De opdrachtgever was tevreden"]} />,
+    const quote = "De opdrachtgever was tevreden";
+    const { container, rerender } = render(
+      <DocumentViewer files={[docx]} text="x" quotes={[quote]} />,
     );
     expect(await screen.findByRole("heading", { name: "Bijlage A" })).toBeInTheDocument();
     expect(screen.getByText(/colour and font are lost/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /show in document/i }));
+    rerender(<DocumentViewer files={[docx]} text="x" quotes={[quote]} focus={{ quote, id: 1 }} />);
     expect(await screen.findByText(/Found and marked/i)).toBeInTheDocument();
     expect(container.querySelector('p[data-located="true"]')).toHaveTextContent(
       "De opdrachtgever was tevreden",

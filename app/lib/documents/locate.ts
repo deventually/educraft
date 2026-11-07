@@ -177,3 +177,41 @@ export function extractQuotes(markdown: string): string[] {
   }
   return quotes;
 }
+
+/** The key two quotes share when they are the same passage (markup and layout aside). */
+export function quoteKey(quote: string): string {
+  return normalizeForMatch(quote.replace(/[*_`]/g, "").trim());
+}
+
+export interface QuoteSpan {
+  /** Offsets into the text, including the quotation marks. */
+  start: number;
+  end: number;
+  /** The passage between the marks, as `extractQuotes` returns it. */
+  quote: string;
+}
+
+/**
+ * The quoted passages in one piece of plain text (a text node of the rendered
+ * result), with their place, so the result can turn each into a button. Uses
+ * the same marks and minimum length as `extractQuotes`; overlapping matches keep
+ * the first.
+ */
+export function quoteSpans(text: string): QuoteSpan[] {
+  const spans: QuoteSpan[] = [];
+  for (const pattern of QUOTE_PATTERNS) {
+    for (const m of text.matchAll(pattern)) {
+      const quote = m[1].replace(/[*_`]/g, "").trim();
+      if (quote.length < MIN_EXTRACTED) continue;
+      const start = m.index ?? 0;
+      spans.push({ start, end: start + m[0].length, quote });
+    }
+  }
+  spans.sort((a, b) => a.start - b.start);
+  const kept: QuoteSpan[] = [];
+  for (const span of spans) {
+    const last = kept[kept.length - 1];
+    if (!last || span.start >= last.end) kept.push(span);
+  }
+  return kept;
+}

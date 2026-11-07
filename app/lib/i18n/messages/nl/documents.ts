@@ -2,6 +2,7 @@ export const documents = {
   aiEmpty: "Nog geen tekst. Upload een bestand of plak de tekst in het formulier.",
   aiHint: "Dit is precies de tekst die naar de AI gaat. Aanpassen doe je in het formulier.",
   aiTab: "Wat de AI krijgt",
+  backToResult: "Terug naar de feedback",
   cannotShow:
     "Dit bestand kan hier niet getoond worden. De uitgehaalde tekst gaat wel gewoon naar de AI.",
   chooseFile: "Kies bestand",
@@ -24,7 +25,6 @@ export const documents = {
   originalTab: "Origineel",
   page: "Pagina {n} van {total}",
   pageTextFallback: "Geen afbeelding van deze pagina; dit is de uitgehaalde tekst.",
-  quotes: "Citaten uit het resultaat ({n})",
   search: "Zoek in het origineel",
   searchButton: "Zoek",
   tabs: "Weergave",
