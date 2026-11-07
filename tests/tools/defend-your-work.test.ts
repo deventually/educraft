@@ -112,7 +112,9 @@ describe("tool: defend-your-work", () => {
         expect(p).toContain("leg de cijfers niet uit");
         // Meting dyw2: the expert still read the figures out for the student.
         expect(p).toContain("zeg dus nooit zelf wat een cijfer betekent");
-        expect(p).toContain("tel voor je antwoordt de vraagtekens");
+        // Meting dyw5: "count and delete" made the expert correct itself out loud.
+        expect(p).not.toContain("tel voor je antwoordt de vraagtekens");
+        expect(p).toContain("praat nooit over je eigen vragen");
         expect(p).toContain("niet blijven hangen");
         expect(p).toContain("als dit `false` is, sla dit deel over");
       } else {
@@ -121,7 +123,8 @@ describe("tool: defend-your-work", () => {
         expect(p).toContain("without names");
         expect(p).toContain("don't explain the figures");
         expect(p).toContain("so never say yourself what a figure means");
-        expect(p).toContain("count the question marks in your turn");
+        expect(p).not.toContain("count the question marks in your turn");
+        expect(p).toContain("never talk about your own questions");
         expect(p).toContain("don't get stuck");
         expect(p).toContain("if this is `false`, skip this part");
       }
@@ -132,7 +135,9 @@ describe("tool: defend-your-work", () => {
     it(`models one question per turn, never two in one line (meting dyw1, ${lang})`, () => {
       const p = runtime(lang);
       expect(p.toLowerCase()).toContain(
-        lang === "nl" ? "precies één vraagteken" : "exactly one question mark",
+        lang === "nl"
+          ? "één korte vraag over één ding, met één vraagteken"
+          : "one short question about one thing, with one question mark",
       );
       for (const line of p.split("\n")) {
         expect((line.match(/\?/g) ?? []).length, line).toBeLessThanOrEqual(1);
@@ -149,8 +154,8 @@ describe("tool: defend-your-work", () => {
       const low = p.toLowerCase();
       expect(low).toContain(
         lang === "nl"
-          ? 'geen tweede vraag na ", en" of ", of"'
-          : 'no second question after ", and" or ", or"',
+          ? 'ook een die met "en" of "of" aan de eerste vastzit'
+          : 'including one tied to the first with "and" or "or"',
       );
     });
   }
@@ -158,8 +163,10 @@ describe("tool: defend-your-work", () => {
   it("reminds the tutor every turn: one short reaction, one question, probe vague answers", () => {
     const nl = loc(tool().chat?.turnReminder, "nl");
     const en = loc(tool().chat?.turnReminder, "en");
-    expect(nl.toLowerCase()).toContain("precies één vraagteken");
-    expect(en.toLowerCase()).toContain("exactly one question mark");
+    expect(nl).toContain("één korte vraag over één ding");
+    expect(en).toContain("one short question about one thing");
+    expect(nl).toContain("bewaar je voor de volgende beurt");
+    expect(en).toContain("keep for your next turn");
     expect(nl).toContain("hooguit twee korte zinnen");
     expect(en).toContain("at most two short sentences");
     expect(nl).toContain("vaag");
@@ -167,9 +174,9 @@ describe("tool: defend-your-work", () => {
     // The reminder itself asks nothing, so it cannot model a second question.
     expect(nl).not.toContain("?");
     expect(en).not.toContain("?");
-    // Meting dyw4: 95 of 215 turns joined two questions with ", and".
-    expect(nl).toContain("geen tweede vraag na “, en”");
-    expect(en).toContain("no second question after “, and”");
+    // Meting dyw5: quoting the forbidden ", en" in the reminder leaked into a turn.
+    expect(nl).not.toContain("“, en”");
+    expect(en).not.toContain("“, and”");
   });
 
   for (const lang of ["nl", "en"] as const) {

@@ -183,8 +183,8 @@ export const defendYourWork: Tool = {
     allowRegenerate: true,
     // Meting dyw3: in a long chat the tutor drifted to two questions and praised vague answers.
     turnReminder: {
-      nl: "Herinnering voor deze beurt: hooguit twee korte zinnen reactie, dan één vraag. Precies één vraagteken in je beurt, aan het eind, en geen tweede vraag na “, en” of “, of”. Is het antwoord vaag, prijs het dan niet, maar vraag eerst om het concreet te maken. Leg niet uit wat de student zelf moet zeggen.",
-      en: "Reminder for this turn: at most two short sentences of reaction, then one question. Exactly one question mark in your turn, at the end, and no second question after “, and” or “, or”. If the answer is vague, don't praise it, but first ask to make it specific. Don't explain what the student should say themselves.",
+      nl: "Herinnering voor deze beurt: hooguit twee korte zinnen reactie, dan één korte vraag over één ding. Een tweede vraag bewaar je voor de volgende beurt. Is het antwoord vaag, prijs het dan niet, maar vraag eerst om het concreet te maken. Leg niet uit wat de student zelf moet zeggen.",
+      en: "Reminder for this turn: at most two short sentences of reaction, then one short question about one thing. A second question you keep for your next turn. If the answer is vague, don't praise it, but first ask to make it specific. Don't explain what the student should say themselves.",
     },
   },
 };
