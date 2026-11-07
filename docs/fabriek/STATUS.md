@@ -268,6 +268,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.2 een verdediging nakijken in een open PR)_
 
 ## Bezig
 
+- **"Wat de AI krijgt" toont de geanonimiseerde tekst (PR open):** na *Verstuur geanonimiseerd*
+  liet de documentviewer bij Stagebeoordeling nog de tekst met namen zien. De AI kreeg wel al
+  alleen codes (geen privacylek); nu toont het tabblad ook precies die tekst, tot de docent het
+  formulier weer aanpast.
+
 - **Het model op één plek (PR open):** `default` in `config/models.json` is de enige plek waar
   het standaardmodel staat. Alle tools en de beoordelaar van de meetscripts halen het daar
   vandaan; `tests/model-ids.test.ts` faalt als er ergens anders in `app/` of `scripts/` een

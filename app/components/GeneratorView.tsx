@@ -110,6 +110,11 @@ export function GeneratorView({
   const [reviewing, setReviewing] = useState(false);
   const [redactDraft, setRedactDraft] = useState<RedactDraft>(emptyRedactDraft);
   const [codes, setCodes] = useState<CodeTable | null>(null);
+  // What was last sent for each anonymised field, next to the form text it came from,
+  // so "What the AI receives" shows the codes until the teacher edits that text.
+  const [sentRedacted, setSentRedacted] = useState<Record<string, { from: string; to: string }>>(
+    {},
+  );
   const redactFields = tool.inputs.filter(
     (f) => f.redact && String(values[f.name] ?? "").trim() !== "",
   );
@@ -132,6 +137,13 @@ export function GeneratorView({
     el.focus();
   }, []);
 
+  /** The text that goes (or went) to the AI for a field: the codes once it was anonymised. */
+  function aiText(name: string): string {
+    const current = String(values[name] ?? "");
+    const sent = sentRedacted[name];
+    return sent && sent.from === current ? sent.to : current;
+  }
+
   function generate() {
     const missing = missingRequired(tool.inputs, values);
     if (missing.length) {
@@ -144,12 +156,21 @@ export function GeneratorView({
       return;
     }
     setCodes(null);
+    setSentRedacted({});
     void send({});
   }
 
   function sendRedacted(result: RedactResult) {
     setReviewing(false);
     setCodes(result.codes);
+    setSentRedacted(
+      Object.fromEntries(
+        Object.entries(result.values).map(([name, to]) => [
+          name,
+          { from: String(values[name] ?? ""), to },
+        ]),
+      ),
+    );
     void send(result.values);
   }
 
@@ -283,7 +304,7 @@ export function GeneratorView({
             >
               <DocumentViewer
                 files={docFiles}
-                text={String(values[docField.name] ?? "")}
+                text={aiText(docField.name)}
                 quotes={quotes}
                 onFoundQuotes={setFoundQuotes}
                 focus={focus}

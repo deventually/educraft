@@ -19,7 +19,7 @@ vi.mock("~/lib/streamClient", () => ({
 vi.mock("~/lib/documents/extract", async (orig) => ({
   ...(await orig<typeof import("~/lib/documents/extract")>()),
   filesToDocumentText: async () => ({
-    text: "Reflectie: ik heb de klant elke week gesproken.",
+    text: "Reflectie van Jan de Vries: ik heb de klant elke week gesproken.",
     emptyFiles: [],
     large: false,
   }),
@@ -28,7 +28,7 @@ vi.mock("~/lib/documents/extract", async (orig) => ({
 vi.mock("~/lib/documents/original", () => ({
   loadOriginal: async () => ({
     kind: "pdf",
-    pages: ["Reflectie: ik heb de klant elke week gesproken."],
+    pages: ["Reflectie van Jan de Vries: ik heb de klant elke week gesproken."],
     renderPage: () => Promise.reject(new Error("no canvas")),
   }),
 }));
@@ -119,5 +119,47 @@ describe("GeneratorView with a document field", () => {
     // On a phone the viewer scrolls into view; one tap brings you back to the same quote.
     await user.click(screen.getByRole("button", { name: "Back to the feedback" }));
     expect(quote).toHaveFocus();
+  });
+  it("shows the anonymised text under 'What the AI receives' once it is sent", async () => {
+    const user = userEvent.setup();
+    let sent = "";
+    streamPost.mockImplementation(async (...a: unknown[]) => {
+      const [, body, handlers] = a as [
+        string,
+        unknown,
+        { onToken: (s: string) => void; onDone: () => void },
+      ];
+      if (!body) return;
+      sent = JSON.stringify(body);
+      handlers.onToken("Goed werk.");
+      handlers.onDone();
+    });
+    const tool = getToolBySlug("stage-assessment")!;
+    render(
+      <GeneratorView tool={tool} profiles={[{ id: "p1", name: "Stage" }]} defaultProfileId="p1" />,
+    );
+    fireEvent.change(screen.getByLabelText("Upload PDF or Word") as HTMLInputElement, {
+      target: { files: [new File(["%PDF"], "verslag.pdf", { type: "application/pdf" })] },
+    });
+    await screen.findByText("Page 1 of 1");
+    const aiPanel = () =>
+      screen.getByRole("tabpanel", { name: "What the AI receives", hidden: true });
+    // Before anonymising, the panel shows the form's text.
+    expect(aiPanel()).toHaveTextContent("Reflectie van Jan de Vries");
+
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    await user.type(screen.getByLabelText("Student name"), "Jan de Vries");
+    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
+    await waitFor(() => expect(sent).not.toBe(""));
+
+    // The panel shows exactly what went to the AI: codes, not the name.
+    expect(sent).toContain("Reflectie van [STUDENT]");
+    expect(aiPanel()).toHaveTextContent("Reflectie van [STUDENT]: ik heb de klant");
+    expect(aiPanel()).not.toHaveTextContent("Jan de Vries");
+
+    // Editing the text afterwards shows the new form text again (not yet sent).
+    const box = screen.getByRole("textbox", { name: /Document to assess/i });
+    await user.type(box, " Extra.");
+    expect(aiPanel()).toHaveTextContent("Jan de Vries");
   });
 });
