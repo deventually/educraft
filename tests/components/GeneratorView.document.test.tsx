@@ -171,4 +171,55 @@ describe("GeneratorView with a document field", () => {
     await user.type(box, " Extra.");
     expect(aiPanel()).toHaveTextContent("Jan de Vries");
   });
+
+  it("folds the form away after a result, so the viewer and the result get the width", async () => {
+    const user = userEvent.setup();
+    streamPost.mockImplementation(async (...a: unknown[]) => {
+      const [, body, handlers] = a as [
+        string,
+        unknown,
+        { onToken: (s: string) => void; onDone: () => void },
+      ];
+      if (!body) return;
+      handlers.onToken("De student schrijft “ik heb de klant elke week gesproken” (p. 1).");
+      handlers.onDone();
+    });
+    const tool = getToolBySlug("stage-assessment")!;
+    const { container } = render(
+      <GeneratorView tool={tool} profiles={[{ id: "p1", name: "Stage" }]} defaultProfileId="p1" />,
+    );
+    // No toggle before there is a result: the form is what you work in.
+    expect(screen.queryByRole("button", { name: "Hide the form" })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Upload PDF or Word"), {
+      target: { files: [new File(["%PDF"], "verslag.pdf", { type: "application/pdf" })] },
+    });
+    await screen.findByText("Page 1 of 1");
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
+    await waitFor(() => expect(streamPost).toHaveBeenCalled());
+
+    const hide = await screen.findByRole("button", { name: "Hide the form" });
+    expect(hide).toHaveAttribute("aria-expanded", "true");
+    const form = document.getElementById(hide.getAttribute("aria-controls") ?? "");
+    expect(form).toContainElement(screen.getByLabelText("Upload PDF or Word"));
+
+    await user.click(hide);
+    const show = screen.getByRole("button", { name: "Show the form" });
+    expect(show).toHaveAttribute("aria-expanded", "false");
+    expect(form).toHaveAttribute("hidden");
+    // The form keeps its values while folded (it is hidden, not removed).
+    expect(form).toContainElement(screen.getByLabelText("Upload PDF or Word"));
+    // With the form folded, viewer and result stand side by side from laptop width.
+    const box = screen.getByRole("region", { name: "Original" }).closest("[data-viewer-box]");
+    expect(box?.parentElement?.className).toMatch(/(^|\s)lg:grid-cols-2(\s|$)/);
+    // Folded, the toggle sits on its own row: no side column eats the width.
+    const page = box?.parentElement?.parentElement?.parentElement;
+    expect(page?.className).not.toMatch(/lg:grid-cols-\[/);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+
+    await user.click(show);
+    expect(form).not.toHaveAttribute("hidden");
+    expect(screen.getByRole("button", { name: "Hide the form" })).toHaveFocus();
+  });
 });

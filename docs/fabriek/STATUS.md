@@ -275,6 +275,10 @@ _Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakij
 
 ## Bezig
 
+- **Formulier in- en uitklappen bij een resultaat (PR open):** zodra er een resultaat staat, klapt
+  de docent het formulier weg met *Formulier inklappen*; resultaat en documentviewer krijgen dan de
+  volle breedte (op een breed scherm naast elkaar). *Formulier uitklappen* haalt het terug, met alle
+  invoer nog ingevuld. Geldt voor elke formulier-tool, niet alleen Stagebeoordeling.
 - **"Wat de AI krijgt" toont de geanonimiseerde tekst (PR open):** na *Verstuur geanonimiseerd*
   liet de documentviewer bij Stagebeoordeling nog de tekst met namen zien. De AI kreeg wel al
   alleen codes (geen privacylek); nu toont het tabblad ook precies die tekst, tot de docent het

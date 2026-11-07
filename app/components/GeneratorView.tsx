@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Sparkles, Square, AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { AlertTriangle, PanelLeftClose, PanelLeftOpen, Sparkles, Square } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { ImageInput } from "~/lib/ai/types";
@@ -122,6 +122,8 @@ export function GeneratorView({
   const quotes = docFiles && shown && !streaming ? extractQuotes(shown) : [];
   // Quotes the viewer found in the original become buttons in the result (P24 follow-up);
   // clicking one asks the viewer to show it.
+  const [formOpen, setFormOpen] = useState(true);
+  const formId = useId();
   const [foundQuotes, setFoundQuotes] = useState<string[]>([]);
   const [focus, setFocus] = useState<{ quote: string; id: number } | undefined>();
   const quoteButtonRef = useRef<HTMLElement | null>(null);
@@ -234,53 +236,83 @@ export function GeneratorView({
     setStreaming(false);
   }
 
+  // After a result the form can fold away, so the viewer and the result get the width.
+  // It is hidden, not removed: its values and uploads stay.
+  const canFold = Boolean(output) && !streaming && !reviewing;
+  const folded = canFold && !formOpen;
+
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-      <div className="space-y-4">
-        {/* First, because choosing a course fills the learning outcomes below it. */}
-        <CoursePicker
-          courses={courses ?? []}
-          value={courseId}
-          onChange={selectCourse}
-          disabled={streaming}
-        />
-        <DynamicForm
-          fields={tool.inputs}
-          values={values}
-          onChange={setValue}
-          onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
-        />
-        <ToolControls
-          usesContextProfile={tool.usesContextProfile}
-          profiles={profiles}
-          contextProfileId={contextProfileId}
-          onProfile={selectProfile}
-          outputLanguage={outputLanguage}
-          onLanguage={setOutputLanguage}
-          model={model}
-          onModel={setModel}
-          localModels={localModels}
-          catalogModels={catalogModels}
-          disabled={streaming}
-          requiresImages={hasImageInputs}
-        />
-        <div className="flex items-center gap-3">
-          {streaming ? (
-            <Button variant="secondary" onClick={stop}>
-              <Square className="size-4" /> {t.tool.stop}
-            </Button>
-          ) : (
-            <Button onClick={generate} disabled={reviewing}>
-              <Sparkles className="size-4" /> {t.tool.generate}
-            </Button>
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-6",
+        // Folded, the toggle gets its own row so the results take the full width.
+        !folded && "lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]",
+      )}
+    >
+      <div className="min-w-0 space-y-4">
+        {canFold && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-expanded={!folded}
+            aria-controls={formId}
+            onClick={() => setFormOpen((open) => !open)}
+          >
+            {folded ? (
+              <PanelLeftOpen className="size-4" aria-hidden />
+            ) : (
+              <PanelLeftClose className="size-4" aria-hidden />
+            )}
+            {folded ? t.tool.formShow : t.tool.formHide}
+          </Button>
+        )}
+        <div id={formId} hidden={folded} className="space-y-4">
+          {/* First, because choosing a course fills the learning outcomes below it. */}
+          <CoursePicker
+            courses={courses ?? []}
+            value={courseId}
+            onChange={selectCourse}
+            disabled={streaming}
+          />
+          <DynamicForm
+            fields={tool.inputs}
+            values={values}
+            onChange={setValue}
+            onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
+          />
+          <ToolControls
+            usesContextProfile={tool.usesContextProfile}
+            profiles={profiles}
+            contextProfileId={contextProfileId}
+            onProfile={selectProfile}
+            outputLanguage={outputLanguage}
+            onLanguage={setOutputLanguage}
+            model={model}
+            onModel={setModel}
+            localModels={localModels}
+            catalogModels={catalogModels}
+            disabled={streaming}
+            requiresImages={hasImageInputs}
+          />
+          <div className="flex items-center gap-3">
+            {streaming ? (
+              <Button variant="secondary" onClick={stop}>
+                <Square className="size-4" /> {t.tool.stop}
+              </Button>
+            ) : (
+              <Button onClick={generate} disabled={reviewing}>
+                <Sparkles className="size-4" /> {t.tool.generate}
+              </Button>
+            )}
+          </div>
+          {error && (
+            <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              {error}
+            </p>
           )}
         </div>
-        {error && (
-          <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            {error}
-          </p>
-        )}
       </div>
 
       {/* Sticky in the shell's scroll region, which starts under the 4rem header (+1px
@@ -292,7 +324,9 @@ export function GeneratorView({
             docFiles &&
               (output || streaming) &&
               !reviewing &&
-              "grid grid-cols-1 gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1",
+              (folded
+                ? "grid grid-cols-1 gap-3 lg:grid-cols-2"
+                : "grid grid-cols-1 gap-3 lg:grid-rows-2 2xl:grid-cols-2 2xl:grid-rows-1"),
           )}
         >
           {docFiles && docField && !reviewing && (
@@ -301,7 +335,7 @@ export function GeneratorView({
               className={cn(
                 // A height of its own, so a long document scrolls inside the viewer.
                 "h-[80dvh] min-h-0 min-w-0 lg:h-full",
-                (output || streaming) && "2xl:order-2",
+                (output || streaming) && (folded ? "lg:order-2" : "2xl:order-2"),
               )}
             >
               <DocumentViewer
