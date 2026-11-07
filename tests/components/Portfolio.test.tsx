@@ -168,6 +168,15 @@ describe("Portfolio route in five steps", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("links the guide to the step you are at", () => {
+    const d = sampleDossier();
+    d.framework.confirmedAt = 1;
+    renderRoute(PortfolioOverview, overviewData(d));
+    expect(
+      screen.getByRole("link", { name: "Handleiding bij stap 3: Vul aan met een tool" }),
+    ).toHaveAttribute("href", "/help/bdb-bke#stap-3-vul-aan-met-een-tool");
+  });
+
   it("names the export and the interview practice at the last step", async () => {
     const d = sampleDossier();
     d.framework.confirmedAt = 1;

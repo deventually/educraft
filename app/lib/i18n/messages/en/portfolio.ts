@@ -305,6 +305,14 @@ export const portfolio: Messages["portfolio"] = {
   route: {
     finishHint:
       "Last step: mark each criterion as shown, choose whether to include the AI disclosure and download your dossier as a Word file.",
+    guide: "Guide to step {n}: {step}",
+    guideAnchors: {
+      collect: "step-2-collect-what-you-already-have",
+      fill: "step-3-fill-gaps-with-a-tool",
+      finish: "step-5-finish",
+      framework: "step-1-dossier-and-framework",
+      write: "step-4-write-your-chapters",
+    },
     label: "Your dossier's route",
     practise: "Practise your final interview with a rehearsal assessment",
     stepOf: "Step {n} of 5",

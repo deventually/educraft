@@ -70,7 +70,7 @@ export default function HelpPage({ loaderData }: Route.ComponentProps) {
         </>
       ) : (
         <article>
-          <Markdown>{loaderData.body}</Markdown>
+          <Markdown anchors>{loaderData.body}</Markdown>
         </article>
       )}
     </div>
