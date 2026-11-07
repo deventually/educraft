@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { DocumentViewer } from "~/components/documents/DocumentViewer";
+import { gridBlowoutRisks } from "../helpers/layout";
 
 vi.mock("~/lib/i18n/useT", async () => {
   const { messages } = await import("~/lib/i18n");
@@ -171,5 +172,68 @@ describe("DocumentViewer", () => {
     );
     await screen.findByText("Page 1 of 2");
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+  it("keeps a wide Word table and a long link inside the page", async () => {
+    const { container } = render(<DocumentViewer files={[docx]} text="x" />);
+    await screen.findByRole("heading", { name: "Bijlage A" });
+    const original = screen.getByRole("region", { name: "Original" });
+    // The columns never grow to the document's width…
+    expect(gridBlowoutRisks(original, container)).toEqual([]);
+    // …a table wider than the pane scrolls inside the pane, and a long word or link wraps.
+    const pane = original.querySelector("[tabindex='0']");
+    expect(pane?.className).toMatch(/\boverflow-auto\b/);
+    expect(pane?.className).toMatch(/\bmin-w-0\b/);
+    expect(container.querySelector(".md")?.className).toMatch(/\[overflow-wrap:break-word\]/);
+  });
+
+  it("keeps its hidden screen-reader text inside the viewer, so the page does not grow", async () => {
+    const { container } = render(<DocumentViewer files={[pdf]} text="x" />);
+    await screen.findByText("Page 1 of 2");
+    const root = container.firstElementChild as HTMLElement;
+    // An absolutely positioned (sr-only) element is placed against its nearest positioned
+    // ancestor; without one inside the viewer it lands far down the page and stretches it.
+    const hidden = Array.from(root.querySelectorAll(".sr-only"));
+    expect(hidden.length).toBeGreaterThan(0);
+    for (const el of hidden) {
+      let anchor: Element | null = el.parentElement;
+      while (anchor && !anchor.className.toString().split(/\s+/).includes("relative")) {
+        if (anchor === root) {
+          anchor = null;
+          break;
+        }
+        anchor = anchor.parentElement;
+      }
+      expect(anchor, el.outerHTML.slice(0, 80)).not.toBeNull();
+    }
+  });
+
+  it("zooms the pages of a PDF in and out, and back to 100%", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<DocumentViewer files={[pdf]} text="x" />);
+    await screen.findByText("Page 1 of 2");
+    const zoom = screen.getByRole("group", { name: "Zoom" });
+    const pages = () => container.querySelector<HTMLElement>("[data-zoom-target]");
+    expect(pages()?.style.width).toBe("100%");
+
+    await user.click(within(zoom).getByRole("button", { name: "Zoom in" }));
+    expect(pages()?.style.width).toBe("125%");
+    await user.click(within(zoom).getByRole("button", { name: /125%/ }));
+    expect(pages()?.style.width).toBe("100%");
+
+    const out = within(zoom).getByRole("button", { name: "Zoom out" });
+    await user.click(out);
+    await user.click(out);
+    expect(pages()?.style.width).toBe("50%");
+    expect(out).toBeDisabled();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("zooms a Word view so its text grows and still wraps", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<DocumentViewer files={[docx]} text="x" />);
+    await screen.findByRole("heading", { name: "Bijlage A" });
+    await user.click(screen.getByRole("button", { name: "Zoom in" }));
+    await user.click(screen.getByRole("button", { name: "Zoom in" }));
+    expect(container.querySelector<HTMLElement>("[data-zoom-target]")?.style.zoom).toBe("1.5");
   });
 });

@@ -32,4 +32,8 @@ export const documents = {
   tooShort: "Dit citaat is te kort om betrouwbaar terug te vinden.",
   wordNote:
     "Word-weergave: koppen, lijsten, tabellen en afbeeldingen blijven, kleur en lettertype vallen weg.",
+  zoom: "Zoomen",
+  zoomIn: "Inzoomen",
+  zoomOut: "Uitzoomen",
+  zoomReset: "{pct}%, terug naar 100%",
 };
