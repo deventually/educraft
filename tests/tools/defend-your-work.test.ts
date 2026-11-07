@@ -116,6 +116,18 @@ describe("tool: defend-your-work", () => {
     });
   }
 
+  for (const lang of ["nl", "en"] as const) {
+    it(`models one question per turn, never two in one line (meting dyw1, ${lang})`, () => {
+      const p = runtime(lang);
+      expect(p.toLowerCase()).toContain(
+        lang === "nl" ? "precies één vraagteken" : "exactly one question mark",
+      );
+      for (const line of p.split("\n")) {
+        expect((line.match(/\?/g) ?? []).length, line).toBeLessThanOrEqual(1);
+      }
+    });
+  }
+
   it("offers the text to copy for students", () => {
     expect(tool().copyableStudentPrompt).toBe(true);
   });

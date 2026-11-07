@@ -9,7 +9,11 @@ import { DEFEND_YOUR_WORK_PROMPT } from "./defend-your-work@v1.prompt";
  * What @v2 changes (BESLUIT-2026-11-07-3): an optional "key figures" step. When the teacher ticks
  * `askKeyFigures`, the expert asks after the opening for a few figures or findings from the
  * student's own work (never the report itself, never names) and uses them only to probe more
- * sharply. Off, the conversation is that of @v1.
+ * sharply.
+ *
+ * And one question per turn (meting dyw1, evals/reports/2026-11-07dyw1.md): every run of @v1
+ * failed `severalQuestions`, because its example lines paired two questions. @v2 lists them one
+ * per line as a menu and asks for exactly one question mark per turn.
  */
 export const DEFEND_YOUR_WORK_PROMPT_V2: PromptDef = {
   id: "defend-your-work@v2",
