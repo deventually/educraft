@@ -366,7 +366,7 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
               ref={bodyRef}
               // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable
               tabIndex={0}
-              className="relative min-h-0 min-w-0 flex-1 overflow-auto px-4 py-3"
+              className="relative min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain px-4 py-3"
             >
               {load.status === "loading" && (
                 <p className="flex items-center gap-2 text-sm text-slate-500">
@@ -425,8 +425,11 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
               </h3>
               <p className="text-xs text-slate-600">{t.aiHint}</p>
             </div>
-            {/* biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable */}
-            <div tabIndex={0} className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            <div
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable
+              tabIndex={0}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3"
+            >
               {text ? (
                 <p className="whitespace-pre-wrap text-sm text-slate-800">{text}</p>
               ) : (

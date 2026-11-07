@@ -164,6 +164,14 @@ describe("AppShell top navigation", () => {
     expect(cls).not.toMatch(/overflow-hidden/);
   });
 
+  it("anchors hidden screen-reader text in the scroll region, so a page never scrolls past its footer", async () => {
+    const { container } = renderShell();
+    const scrollRegion = container.querySelector("#top")?.parentElement;
+    // An sr-only element without a positioned ancestor is placed against the viewport
+    // and can make the whole document scroll beyond the footer.
+    expect(scrollRegion?.className.split(/\s+/)).toContain("relative");
+  });
+
   it("has no a11y violations with the menu closed", async () => {
     const { container } = renderShell();
     const results = await axe(container, axeOpts);

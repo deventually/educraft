@@ -19,3 +19,20 @@ export function gridBlowoutRisks(el: Element, stop: Element): string[] {
   }
   return risks;
 }
+
+/**
+ * Hidden screen-reader text (`sr-only`) is absolutely positioned. Without a positioned
+ * ancestor inside `root` it is placed against the page and stretches it (the page then
+ * scrolls far past the footer). Returns the ones that escape.
+ */
+export function escapingSrOnly(root: Element): Element[] {
+  const isPositioned = (el: Element) =>
+    el.className.toString().split(/\s+/).includes("relative") || el.hasAttribute("data-positioned");
+  return Array.from(root.querySelectorAll(".sr-only")).filter((el) => {
+    for (let node = el.parentElement; node; node = node.parentElement) {
+      if (isPositioned(node)) return false;
+      if (node === root) return true;
+    }
+    return true;
+  });
+}

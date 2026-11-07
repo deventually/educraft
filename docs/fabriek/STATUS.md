@@ -275,6 +275,11 @@ _Laatst bijgewerkt: 2026-11-07 (model op één plek; P31.2 een verdediging nakij
 
 ## Bezig
 
+- **Pagina met documentviewer scrolt niet meer voorbij de footer (PR open):** de verborgen
+  voorleestekst in de klikbare citaten (#155) rekte op een telefoon de pagina op tot ver na de
+  footer; de scrollzone van de app verankert zulke tekst nu voor alle pagina's. Daarnaast past de
+  meescrollende rechterkolom (viewer en resultaat) nu precies onder de kop, in plaats van 49px onder
+  het scherm, en sleept scrollen in de viewer of het resultaat de pagina niet meer mee.
 - **P31.2 Een verdediging nakijken (PR open):** de docent plakt het gesprek van een
   mondelinge verdediging en krijgt een concept (bijlage F.4, letterlijk overgenomen en algemeen
   gemaakt): het niveau van begrip (uitstekend, op niveau, in ontwikkeling, beginnend), opvallende
