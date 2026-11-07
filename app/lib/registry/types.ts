@@ -1,3 +1,4 @@
+import type { ExportKind } from "~/lib/export/formats";
 import type { DerivationId } from "~/lib/template/derivations";
 import type { LocalizedText } from "~/lib/i18n/localized";
 import type { ChatMessage as AIChatMessage } from "~/lib/ai/types";
@@ -106,6 +107,11 @@ export interface OutputFormat {
   hint?: LocalizedText;
   /** Expected headings; drives copy/export structure. */
   sections?: string[];
+  /**
+   * What this result *is* for an export (P30): the export module picks the file
+   * formats for it (`app/lib/export/formats.ts`). Absent = "document".
+   */
+  exportAs?: ExportKind;
 }
 
 /** Injects an earlier stage's output into this stage's prompt under a placeholder. */

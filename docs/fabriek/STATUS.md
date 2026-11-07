@@ -8,6 +8,8 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Nu
 
+- **Brief P30 Exporteren (#143) gemerged op 2026-11-07:** Word en PDF nu (30.1, 30.2), de
+  rest na de pilot (BESLUIT-2026-11-06-5). Twee vragen voor Bastiaan staan in de brief.
 - **AI-modellen beheren (#139) gemerged op 2026-11-06:** op "Tools en modellen" voegt een
   beheerder een model toe van elke gekoppelde aanbieder, upgradet een oud model naar een nieuwe
   versie (bijv. Haiku 4.5 → Haiku 5.5) en faseert het in twee stappen uit. De vaste lijst met
@@ -253,11 +255,11 @@ _Laatst bijgewerkt: 2026-11-05 (P28 af; rolagenten alleen per instelling open)_
 
 ## Bezig
 
-- **Brief P30 Exporteren (PR open):** Word en PDF voor elk resultaat, Excel voor tabellen en
-  rubrics, PowerPoint uit een lesopzet met een voorbeeld in de app, Brightspace (vragen en
-  cijfers), GradeWork eerst onderzoeken, en de huisstijl of een eigen sjabloon van de hogeschool.
-  Word en PDF (30.1, 30.2) mogen nu, de rest na de pilot (BESLUIT-2026-11-06-5). Twee vragen voor
-  Bastiaan staan in de brief.
+- **P30.1 Exporteren naar Word (PR open):** onder elk resultaat een knop *Exporteer*. Die toont
+  eerst een voorbeeld van het bestand en daarna *Download als Word*. Een tool met meerdere stappen
+  geeft alle bewaarde stappen in één bestand, met een kop per stap. Een teamlid kan werk exporteren
+  dat bij een gedeelde cursus hoort, maar nooit werk van een tool met studentwerk. Het dossier
+  gebruikt dezelfde Word-code. Geen nieuwe bibliotheek. PDF (30.2) volgt na deze PR.
 - **Spraak: voorlezen en dicteren (PR open):** onder elk toolresultaat en chatantwoord een knop
   *Voorlezen*, met een stem die op het apparaat zelf draait (nooit een online stem). En een
   microfoonknop in de chat en in elk tekstvak van een formulier: de opname gaat via LimeOnIt naar

@@ -1,10 +1,10 @@
 import type { Route } from "./+types/portfolio.$id.export";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { DOCX_TYPE } from "~/lib/export/docx";
+import { attachmentHeaders } from "~/lib/export/filename";
 import { buildDossierDocx, exportFileName } from "~/lib/portfolio/export";
 import { aiDisclosure } from "~/lib/portfolio/aiDisclosure";
 import { loadDossier } from "~/server/portfolio.server";
-
-const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 /**
  * Resource route (no UI): GET /portfolio/:id/export → the dossier as a .docx
@@ -26,15 +26,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     now: Date.now(),
     aiDisclosure: withAi ? (aiDisclosure(dossier.data, locale) ?? undefined) : undefined,
   });
-  const file = exportFileName(dossier.name);
-  // ASCII fallback for old clients, RFC 5987 for the real (UTF-8) name.
-  const ascii = file.replace(/[^\x20-\x7e]/g, "_").replace(/"/g, "_");
   return new Response(bytes, {
-    headers: {
-      "Content-Type": DOCX,
-      "Content-Disposition": `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(file)}`,
-      "Cache-Control": "private, no-store",
-      "X-Content-Type-Options": "nosniff",
-    },
+    headers: attachmentHeaders(exportFileName(dossier.name), DOCX_TYPE),
   });
 }

@@ -103,6 +103,7 @@ export const testAnalysis: Tool = {
       systemPromptId: TEST_ANALYSIS_PROMPT.id,
       output: {
         kind: "structured-sections",
+        exportAs: "table",
         hint: {
           nl: "In het kort, de betrouwbaarheid, de vragen om eerst te bekijken, wat goed werkt, vervolgstappen en wat de getallen niet zeggen.",
           en: "In short, reliability, the questions to look at first, what works well, next steps and what the numbers do not say.",

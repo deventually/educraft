@@ -5,6 +5,7 @@ import { PROMPTS } from "~/lib/prompts";
 import { MODELS } from "~/lib/ai/models";
 import { placeholdersIn } from "~/lib/template/interpolate";
 import { DERIVATION_IDS } from "~/lib/template/derivations";
+import { EXPORT_KINDS } from "~/lib/export/formats";
 
 /** Placeholders that buildSystemPrompt always injects (not from form fields). */
 const INJECTED = new Set(["contextProfile", "outputLanguage"]);
@@ -69,6 +70,7 @@ const toolStage = z.object({
     kind: z.enum(["markdown", "json", "structured-sections"]),
     hint: localizedText.optional(),
     sections: z.array(z.string()).optional(),
+    exportAs: z.enum(EXPORT_KINDS).optional(),
   }),
   model: z.string().optional(),
   temperature: z.number().optional(),

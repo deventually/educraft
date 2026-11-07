@@ -141,6 +141,7 @@ export const testItems: Tool = {
       courseExport: "assessment-items",
       output: {
         kind: "structured-sections",
+        exportAs: "table",
         hint: {
           nl: "Koppeling met de leeruitkomsten, de toetsmatrijs als tabel, verdeling en punten, en een zelfcheck.",
           en: "Link to the learning outcomes, the test blueprint as a table, distribution and points, and a self-check.",
@@ -165,6 +166,7 @@ export const testItems: Tool = {
       maxTokens: 32000,
       output: {
         kind: "structured-sections",
+        exportAs: "test-items",
         hint: {
           nl: "De vragen klaar voor studenten, het antwoordmodel, een controle tegen de matrijs en een zelfcheck.",
           en: "The questions ready for students, the answer model, a check against the blueprint and a self-check.",
