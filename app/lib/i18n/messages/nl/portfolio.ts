@@ -64,6 +64,14 @@ export const portfolio = {
   errorTracks: "Kies BDB, BKE of allebei.",
   exportAi: "Neem een verantwoording van het AI-gebruik op",
   exportAiRequired: "Je formulier vraagt om een verantwoording van AI-gebruik.",
+  exportBlocked:
+    "Er staat nog {n} open plek in je dossier, zoals [aanvullen: …], een leeg hoofdstuk of bewijs dat nog volgt. Een open plek komt nooit in je ingeleverde werk; los hem eerst op.",
+  exportBlockedLink: "Bekijk wat er nog open staat",
+  exportBlockedMany:
+    "Er staan nog {n} open plekken in je dossier, zoals [aanvullen: …], een leeg hoofdstuk of bewijs dat nog volgt. Een open plek komt nooit in je ingeleverde werk; los ze eerst op.",
+  exportDraft: "Download een conceptversie",
+  exportDraftHelp:
+    "Bijvoorbeeld voor je werkplekbegeleider: CONCEPT op elke pagina, open plekken geel.",
   exportTitle: "Exporteren",
   exportWord: "Download als Word-bestand",
   framework: {

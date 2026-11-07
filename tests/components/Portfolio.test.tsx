@@ -11,6 +11,8 @@ import { outcomeProgress, nextStep } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierStep } from "~/lib/portfolio/step";
 import { readinessCheck } from "~/lib/portfolio/readiness";
+import { openSpots } from "~/lib/portfolio/openSpots";
+import * as edit from "~/lib/portfolio/edit";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -48,6 +50,7 @@ function overviewData(d = sampleDossier()) {
     },
     practise: null as string | null,
     readiness: readinessCheck(d),
+    openSpots: openSpots(d).length,
   };
 }
 
@@ -357,9 +360,36 @@ describe("Portfolio overview — ready to hand in (P29.1)", () => {
       "href",
       "#readiness",
     );
-    // Advice, never a gate: the export button still works.
+    // Advice, not a gate: with no open spot left, the export button works.
     expect(within(exportForm).getByRole("button")).toBeEnabled();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Portfolio overview — no open spot in the handed-in work", () => {
+  it("offers only a draft version while an open spot is left, and says why", async () => {
+    const d = edit.writeChapter(sampleDossier(), LU, "Mijn les. [aanvullen: het effect]");
+    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    const exportForm = screen.getByRole("form", { name: "Exporteren" });
+    expect(
+      within(exportForm).getByText(/Er staat nog 1 open plek in je dossier/),
+    ).toBeInTheDocument();
+    expect(
+      within(exportForm).queryByRole("button", { name: "Download als Word-bestand" }),
+    ).toBeNull();
+    const draft = within(exportForm).getByRole("button", { name: "Download een conceptversie" });
+    expect(draft).toHaveAttribute("name", "draft");
+    expect(draft).toHaveAttribute("value", "1");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers the final version once every open spot is gone", () => {
+    renderRoute(PortfolioOverview, overviewData());
+    const exportForm = screen.getByRole("form", { name: "Exporteren" });
+    expect(
+      within(exportForm).getByRole("button", { name: "Download als Word-bestand" }),
+    ).toBeInTheDocument();
+    expect(within(exportForm).queryByText(/open plek/)).toBeNull();
   });
 });
 

@@ -67,6 +67,14 @@ export const portfolio: Messages["portfolio"] = {
   errorTracks: "Choose BDB, BKE or both.",
   exportAi: "Include an account of the AI use",
   exportAiRequired: "Your form asks for an account of AI use.",
+  exportBlocked:
+    "There is still {n} open spot in your dossier, such as [to add: …], an empty chapter or evidence still to come. An open spot never ends up in the work you hand in; fix it first.",
+  exportBlockedLink: "See what is still open",
+  exportBlockedMany:
+    "There are still {n} open spots in your dossier, such as [to add: …], an empty chapter or evidence still to come. An open spot never ends up in the work you hand in; fix them first.",
+  exportDraft: "Download a draft version",
+  exportDraftHelp:
+    "For example for your workplace mentor: DRAFT on every page, open spots in yellow.",
   exportTitle: "Export",
   exportWord: "Download as a Word file",
   framework: {
