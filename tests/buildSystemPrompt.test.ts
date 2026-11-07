@@ -185,6 +185,13 @@ describe("reinforceLanguage", () => {
     expect(reinforceLanguage(ending, "en")).toBe(ending);
   });
 
+  it("adds a tool's turn reminder after the directive, on the last user turn only", () => {
+    const out = reinforceLanguage(history, "nl", "Stel één vraag.");
+    expect(out[0]).toEqual(history[0]);
+    expect(out.at(-1)?.content).toContain("altijd volledig in het Nederlands");
+    expect(out.at(-1)?.content).toMatch(/Stel één vraag\.\]$/);
+  });
+
   it("returns an empty history unchanged", () => {
     const empty: ChatMessage[] = [];
     expect(reinforceLanguage(empty, "nl")).toBe(empty);

@@ -91,6 +91,8 @@ export function buildSystemPrompt(args: BuildSystemPromptArgs): string {
 export function reinforceLanguage(
   messages: ChatMessage[],
   outputLanguage: OutputLanguage,
+  /** A chat tool's own per-turn reminder (`ChatConfig.turnReminder`), added after the directive. */
+  turnReminder?: string,
 ): ChatMessage[] {
   if (messages.length === 0) return messages;
   const lastIndex = messages.length - 1;
@@ -98,7 +100,10 @@ export function reinforceLanguage(
   if (last.role !== "user") return messages;
   return messages.map((msg, i) =>
     i === lastIndex
-      ? { ...msg, content: `${msg.content}\n\n[${LANGUAGE_DIRECTIVE[outputLanguage]}]` }
+      ? {
+          ...msg,
+          content: `${msg.content}\n\n[${LANGUAGE_DIRECTIVE[outputLanguage]}${turnReminder ? ` ${turnReminder}` : ""}]`,
+        }
       : msg,
   );
 }

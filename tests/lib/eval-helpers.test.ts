@@ -70,6 +70,15 @@ describe("parseJudgeResult", () => {
     expect(parseJudgeResult('{"scores":{"taskFidelity":"high"}}')).toBeNull();
   });
 
+  it("salvages scores and checks when a quote in the prose breaks the JSON (meting dyw3)", () => {
+    const raw =
+      '{"scores": {"taskFidelity": 4, "levelFit": 3}, "checks": {"severalQuestions": false, "acceptedVagueAnswer": true}, "worst": "accepted "human error" too quickly", "verdict": "ok"}';
+    const r = parseJudgeResult(raw);
+    expect(r?.scores).toEqual({ taskFidelity: 4, levelFit: 3 });
+    expect(r?.failedChecks).toEqual(["acceptedVagueAnswer"]);
+    expect(r?.worst).toContain("human error");
+  });
+
   it("defaults worst/verdict to empty strings when absent", () => {
     const r = parseJudgeResult('{"scores":{"taskFidelity":3}}');
     expect(r?.worst).toBe("");

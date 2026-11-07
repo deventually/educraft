@@ -135,6 +135,37 @@ describe("tool: defend-your-work", () => {
     });
   }
 
+  it("reminds the tutor every turn: one short reaction, one question, probe vague answers", () => {
+    const nl = loc(tool().chat?.turnReminder, "nl");
+    const en = loc(tool().chat?.turnReminder, "en");
+    expect(nl.toLowerCase()).toContain("precies één vraagteken");
+    expect(en.toLowerCase()).toContain("exactly one question mark");
+    expect(nl).toContain("hooguit twee korte zinnen");
+    expect(en).toContain("at most two short sentences");
+    expect(nl).toContain("vaag");
+    expect(en).toContain("vague");
+    // The reminder itself asks nothing, so it cannot model a second question.
+    expect(nl).not.toContain("?");
+    expect(en).not.toContain("?");
+  });
+
+  for (const lang of ["nl", "en"] as const) {
+    it(`names the vague answers of meting dyw3 and forbids praising them first (${lang})`, () => {
+      const p = runtime(lang).toLowerCase();
+      if (lang === "nl") {
+        expect(p).toContain("iedereen gebruikt het");
+        expect(p).toContain("het ging beter");
+        expect(p).toContain("prijs of bedank een vaag antwoord niet");
+        expect(p).toContain("vaste vorm van je beurt");
+      } else {
+        expect(p).toContain("everyone uses it");
+        expect(p).toContain("it went better");
+        expect(p).toContain("don't praise or thank a vague answer");
+        expect(p).toContain("fixed shape of your turn");
+      }
+    });
+  }
+
   it("offers the text to copy for students", () => {
     expect(tool().copyableStudentPrompt).toBe(true);
   });

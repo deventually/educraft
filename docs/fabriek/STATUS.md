@@ -266,7 +266,11 @@ _Laatst bijgewerkt: 2026-11-07 (P31.3 de leercheck in een open PR)_
   kerncijfers* (BESLUIT-2026-11-07-3). De tutor vraagt dan na de opening om een paar cijfers of
   bevindingen, zonder namen, en vraagt daar scherper op door; nooit het verslag zelf. Prompt
   `@v2`, `@v1` blijft. Drie metingen (dyw1–3): het kerncijfer-gesprek ging van 2,8 naar 3,7; één
-  vraag per beurt is beter maar nog niet opgelost, en de judge kan het Engelse gesprek niet lezen. Daarna 31.2
+  vraag per beurt is beter maar nog niet opgelost, en de judge kan het Engelse gesprek niet lezen.
+  Daarom nu ook: een herinnering per beurt als tooldata (`ChatConfig.turnReminder`, naast de
+  taalherinnering op de laatste beurt, nooit in het transcript), een vaste vorm per beurt en een
+  lijst vage antwoorden in `@v2`, en de judge-uitslag wordt gered als een aanhalingsteken de JSON
+  breekt. Meting dyw4 volgt. Daarna 31.2
   (nakijken, met verplicht anonimiseren).
 - **Typfouten in de prompts (PR open):** zeven oudere Nederlandse chatprompts (peer tutoring,
   MentorAI v1, scaffolding feedback, think-pair-share, dialogische ontmoetingen v1, Bloom by

@@ -173,6 +173,12 @@ export interface ChatConfig {
    * words of the rehearsal ("Rond af", P29.3). Data, not a per-tool branch.
    */
   quickReplies?: LocalizedText[];
+  /**
+   * A short reminder added to the last user turn on every request, next to the language
+   * directive (`reinforceLanguage`), where it is read last. For rules a long chat drifts
+   * from, such as one question per turn (P31.1b, meting dyw3). Never saved in the transcript.
+   */
+  turnReminder?: LocalizedText;
 }
 
 export interface Attribution {
