@@ -38,7 +38,7 @@ export function ModelCheckboxes({
           />
           <label
             htmlFor={`${idPrefix}-${m.id}`}
-            className={cn("text-sm font-medium text-slate-800", disabled && "text-slate-400")}
+            className={cn("text-sm font-medium text-slate-800", disabled && "text-slate-500")}
           >
             {m.displayName}
           </label>

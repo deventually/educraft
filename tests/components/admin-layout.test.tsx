@@ -6,20 +6,25 @@ import AdminLayout from "~/routes/admin";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-function renderLayout() {
+async function renderLayout() {
   const Stub = createRoutesStub([
     {
       path: "/admin",
       Component: AdminLayout,
+      loader: () => ({
+        health: { backup: { state: "none" }, databaseBytes: null, freeDiskBytes: null },
+      }),
       children: [{ path: "users", Component: () => <p>child</p> }],
     },
   ]);
-  return render(<Stub initialEntries={["/admin/users"]} />);
+  const view = render(<Stub initialEntries={["/admin/users"]} />);
+  await screen.findByRole("navigation", { name: /beheersecties|admin sections/i });
+  return view;
 }
 
 describe("Admin layout", () => {
-  it("shows exactly six sections in order (Rolagenten after Tools)", () => {
-    renderLayout();
+  it("shows exactly six sections in order (Rolagenten after Tools)", async () => {
+    await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
     expect(links.map((a) => a.textContent)).toEqual([
@@ -40,8 +45,14 @@ describe("Admin layout", () => {
     ]);
   });
 
-  it("marks the current section", () => {
-    renderLayout();
+  it("shows the health overview above every admin page, with its backup warning", async () => {
+    await renderLayout();
+    expect(await screen.findByRole("heading", { name: "Gezondheid" })).toBeInTheDocument();
+    expect(screen.getByText(/ouder dan 36 uur/)).toBeInTheDocument();
+  });
+
+  it("marks the current section", async () => {
+    await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     expect(within(nav).getByRole("link", { name: "Gebruikers" })).toHaveAttribute(
       "aria-current",
@@ -50,7 +61,7 @@ describe("Admin layout", () => {
   });
 
   it("has no a11y violations", async () => {
-    const { container } = renderLayout();
+    const { container } = await renderLayout();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

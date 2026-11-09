@@ -113,7 +113,7 @@ export function ResultPanel({
             {markdown}
           </ReactMarkdown>
         ) : (
-          <p className="text-sm text-slate-400">{t.tool.generating}</p>
+          <p className="text-sm text-slate-500">{t.tool.generating}</p>
         )}
         {streaming && markdown && <span className="ml-0.5 inline-block animate-pulse">▍</span>}
       </div>

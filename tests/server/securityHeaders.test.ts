@@ -24,9 +24,11 @@ describe("security headers", () => {
     expect(SECURITY_HEADERS["Content-Security-Policy-Report-Only"]).toBeUndefined();
   });
 
-  it("allows the Google Fonts sources root.tsx depends on", () => {
-    expect(CSP).toContain("https://fonts.googleapis.com");
-    expect(CSP).toContain("https://fonts.gstatic.com");
+  it("allows only our own origin for styles and fonts (fonts are self-hosted)", () => {
+    expect(CSP).not.toContain("fonts.googleapis.com");
+    expect(CSP).not.toContain("fonts.gstatic.com");
+    expect(CSP).toContain("style-src 'self' 'unsafe-inline';");
+    expect(CSP).toContain("font-src 'self';");
     expect(CSP).toContain("default-src 'self'");
     // React Router injects inline hydration scripts.
     expect(CSP).toContain("script-src 'self' 'unsafe-inline'");
