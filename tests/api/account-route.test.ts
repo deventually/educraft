@@ -168,3 +168,41 @@ describe("account password change (P17)", () => {
     expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
   });
 });
+
+describe("log out everywhere (P1-4)", () => {
+  it("signs the account out on every device, this one included", async () => {
+    const auth = await import("~/server/auth.server");
+    const u = await users.createUser({
+      id: "acc-everywhere",
+      name: "Everywhere E",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0];
+    const asRequest = (cookie: string) =>
+      new Request("http://localhost/", { headers: { Cookie: cookie } });
+    const laptop = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
+    const phone = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
+
+    actAs(u.id, "teacher");
+    const res = (await route.action({
+      request: new Request("http://localhost/account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Cookie: laptop,
+        },
+        body: new URLSearchParams({ intent: "logoutEverywhere" }).toString(),
+      }),
+    } as Parameters<typeof route.action>[0])) as Response;
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("/login");
+    expect(await flashKeyOf(res)).toBe("signedOutEverywhere");
+    expect(await auth.getUser(asRequest(laptop))).toBeNull();
+    expect(await auth.getUser(asRequest(phone))).toBeNull();
+    // Logging in again afterwards works as usual.
+    const again = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
+    expect((await auth.getUser(asRequest(again)))?.id).toBe(u.id);
+  });
+});

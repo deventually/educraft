@@ -234,8 +234,9 @@ export async function updateUserEmail(id: string, email: string | null): Promise
  * minted before the change is logged out. Callers re-issue the acting device's cookie
  * afterwards. Every open reset / set-password link of the user is voided in the same
  * transaction: an older link must not overwrite the new password.
- * Together with `setUserDisabled` (deactivation) this is one of the THREE places
- * `sessionVersion` changes (the third is a real role change in `setUserRole`) — a plain login never does.
+ * Together with `setUserDisabled` (deactivation), a real role change in `setUserRole` and
+ * `logOutEverywhere` this is one of the FOUR places `sessionVersion` changes — a plain
+ * login never does.
  */
 export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
   getDb().transaction((tx) => {
@@ -245,6 +246,20 @@ export async function updateUserPassword(id: string, passwordHash: string): Prom
       .run();
     tx.delete(passwordResets).where(eq(passwordResets.userId, id)).run();
   });
+}
+
+/**
+ * "Log out everywhere" (P1-4, `/account`): bump `sessionVersion` and nothing else, so
+ * every cookie of the account — this device's included — is dead. The fourth and last
+ * place the counter changes (see `updateUserPassword`). The caller destroys the acting
+ * device's session; logging in again mints a cookie with the new version.
+ */
+export async function logOutEverywhere(id: string): Promise<void> {
+  getDb()
+    .update(users)
+    .set({ sessionVersion: sql`${users.sessionVersion} + 1` })
+    .where(eq(users.id, id))
+    .run();
 }
 
 /**

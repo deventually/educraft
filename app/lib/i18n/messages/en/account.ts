@@ -16,6 +16,9 @@ export const account: Messages["account"] = {
   heading: "Account",
   intro: "Your account details and data controls.",
   invalidEmail: "Not a valid email address.",
+  logoutEverywhereButton: "Log out everywhere",
+  logoutEverywhereIntro:
+    "After 8 hours without activity you are logged out automatically. Still logged in somewhere, for example on a computer at school? Then log out on all your devices at once, this one included.",
   mismatch: "Type the confirmation word exactly to delete.",
   name: "Name",
   newEmail: "New email address",
@@ -32,5 +35,6 @@ export const account: Messages["account"] = {
   roleTeacher: "Teacher",
   saveEmail: "Save email",
   savePassword: "Save password",
+  sessionsHeading: "Signed-in devices",
   wrongPassword: "Current password is incorrect.",
 };

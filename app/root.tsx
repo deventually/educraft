@@ -21,6 +21,7 @@ import { effectiveFeatures } from "~/server/availability.server";
 import { takeFlash } from "~/server/flash.server";
 import { dictationEnabled } from "~/server/speechToText.server";
 import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
+import { sessionRefreshMiddleware } from "~/server/session.server";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -37,8 +38,14 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-/** Security headers on every response, also `/api/*` and exports (not just pages). */
-export const middleware: Route.MiddlewareFunction[] = [securityHeadersMiddleware];
+/**
+ * Security headers on every response, also `/api/*` and exports (not just pages), and
+ * the sliding 8-hour session window: every request counts as activity (P1-4).
+ */
+export const middleware: Route.MiddlewareFunction[] = [
+  securityHeadersMiddleware,
+  sessionRefreshMiddleware,
+];
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);

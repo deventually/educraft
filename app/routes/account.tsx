@@ -7,6 +7,7 @@ import {
   deleteUserCascade,
   getUserById,
   getUserByEmail,
+  logOutEverywhere,
   updateUserEmail,
   updateUserPassword,
 } from "~/server/repositories/users.server";
@@ -42,6 +43,13 @@ export async function action({ request }: Route.ActionArgs) {
   const m = getMessages(getLocale(request));
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "delete");
+
+  // "Log out everywhere" (P1-4): bumps sessionVersion, so every cookie of this account
+  // is dead, this device's included. No password needed: it only takes access away.
+  if (intent === "logoutEverywhere") {
+    await logOutEverywhere(user.id);
+    return logout(request, "signedOutEverywhere");
+  }
 
   // The password hash never leaves the server boundary, so re-read the row here to
   // check the current password before any self-service change.
@@ -247,6 +255,18 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           </div>
           <Button type="submit" variant="secondary" disabled={busy}>
             {t.account.savePassword}
+          </Button>
+        </Form>
+      </Card>
+
+      {/* ── Log out everywhere (P1-4) ───────────────────────────────────────── */}
+      <Card className="mt-6 p-6">
+        <h2 className="font-semibold text-slate-900">{t.account.sessionsHeading}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t.account.logoutEverywhereIntro}</p>
+        <Form method="post" className="mt-4">
+          <input type="hidden" name="intent" value="logoutEverywhere" />
+          <Button type="submit" variant="secondary" disabled={busy}>
+            {t.account.logoutEverywhereButton}
           </Button>
         </Form>
       </Card>

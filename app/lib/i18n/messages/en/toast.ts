@@ -10,6 +10,7 @@ export const toast: Messages["toast"] = {
     rubricDuplicated: "Copy made. You are now editing the copy.",
     signedIn: "You are signed in.",
     signedOut: "You are signed out.",
+    signedOutEverywhere: "You are signed out on all your devices.",
     steppedDown: "You are no longer a team lead of this team.",
     teamDeleted: "Team deleted.",
     userDeleted: "User deleted.",
