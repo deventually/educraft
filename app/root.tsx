@@ -22,6 +22,7 @@ import { takeFlash } from "~/server/flash.server";
 import { dictationEnabled } from "~/server/speechToText.server";
 import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
 import { requestIdMiddleware } from "~/server/requestId.server";
+import { ErrorReportHint } from "~/components/ErrorReportHint";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -123,10 +124,13 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = m.error.title;
   let details = m.error.generic;
   let stack: string | undefined;
+  // A 404 is a wrong link, not a bug: nothing to report.
+  let reportable = true;
 
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? m.error.notFoundTitle : m.error.serverErrorTitle;
     details = error.status === 404 ? m.error.notFound : error.statusText || details;
+    reportable = error.status >= 500;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
@@ -136,6 +140,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     <main className="pt-16 p-4 container mx-auto">
       <h1>{message}</h1>
       <p>{details}</p>
+      {reportable && <ErrorReportHint />}
       {stack && (
         <pre className="w-full p-4 overflow-x-auto">
           <code>{stack}</code>

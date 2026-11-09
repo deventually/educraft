@@ -1,6 +1,7 @@
 import type { Route } from "./+types/admin.errors";
 import { isOwner, requireRole } from "~/server/auth.server";
 import { MAX_RECENT_ERRORS, recentErrors } from "~/server/errorLog.server";
+import { getTimeZone } from "~/server/repositories/settings.server";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 
@@ -11,18 +12,23 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
   if (!(await isOwner(admin))) throw new Response("Not found", { status: 404 });
-  return { errors: recentErrors(), max: MAX_RECENT_ERRORS };
+  // The school's zone, so a time matches the one on the teacher's error page.
+  return { errors: recentErrors(), max: MAX_RECENT_ERRORS, timeZone: await getTimeZone() };
 }
 
-function fmtTime(iso: string, locale: string): string {
+function fmtTime(iso: string, locale: string, timeZone: string): string {
   const intlLocale = locale === "en" ? "en-GB" : "nl-NL";
-  return new Date(iso).toLocaleString(intlLocale, { dateStyle: "medium", timeStyle: "medium" });
+  return new Date(iso).toLocaleString(intlLocale, {
+    dateStyle: "medium",
+    timeStyle: "medium",
+    timeZone,
+  });
 }
 
 export default function AdminErrors({ loaderData }: Route.ComponentProps) {
   const t = useT().adminErrors;
   const locale = useLocale();
-  const { errors, max } = loaderData;
+  const { errors, max, timeZone } = loaderData;
 
   return (
     <section aria-labelledby="admin-errors-heading">
@@ -49,7 +55,7 @@ export default function AdminErrors({ loaderData }: Route.ComponentProps) {
               </p>
               <dl className="mt-2 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
                 <dt className="text-slate-500">{t.colTime}</dt>
-                <dd className="text-slate-700">{fmtTime(e.at, locale)}</dd>
+                <dd className="text-slate-700">{fmtTime(e.at, locale, timeZone)}</dd>
                 <dt className="text-slate-500">{t.colPage}</dt>
                 <dd className="min-w-0">
                   <code className="break-all text-xs text-slate-700">{`${e.method} ${e.path}`}</code>

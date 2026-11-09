@@ -116,7 +116,9 @@ request are not errors.
 The owner (super admin) sees the newest 50 on **Beheer → Recente fouten** (`/admin/errors`);
 another admin gets a 404. That list lives in memory, so it starts empty after a restart; the
 server log keeps the full history. When a teacher reports a problem, search the log for the
-request id or the time.
+request id or the time. The error page a teacher sees (`ErrorReportHint` under the root
+`ErrorBoundary`, not on a 404) shows the exact time to the second and the page, to pass on;
+"Recente fouten" shows its times in the school's time zone, so the two match.
 
 ## Security headers
 

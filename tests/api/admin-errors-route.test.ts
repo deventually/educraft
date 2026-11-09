@@ -36,6 +36,8 @@ describe("admin errors loader", () => {
     const data = await load();
     expect(data.errors.map((e) => e.requestId)).toEqual(["b", "a"]);
     expect(data.max).toBe(log.MAX_RECENT_ERRORS);
+    // Times in the school's zone, so they match what the teacher's error page showed.
+    expect(data.timeZone).toBe("Europe/Amsterdam");
   });
 
   it("is a 404 for an admin who is not the owner", async () => {
