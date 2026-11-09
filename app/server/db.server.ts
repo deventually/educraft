@@ -48,3 +48,34 @@ export function getDb(): Db {
 export function pingDb(): void {
   getDb().get(sql`SELECT 1`);
 }
+
+/**
+ * Online backup (P0, ingebouwde back-up): SQLite's backup API copies the live database page by
+ * page while the app keeps reading and writing, so no downtime. The copy is then sealed as a
+ * single self-contained file (rollback journal, no -wal/-shm beside it) and checked.
+ */
+export async function backupDbTo(destination: string): Promise<void> {
+  await getDb().$client.backup(destination);
+  const copy = new Database(destination, { fileMustExist: true });
+  try {
+    copy.pragma("journal_mode = DELETE");
+    assertIntegrity(copy, destination);
+  } finally {
+    copy.close();
+  }
+}
+
+/** Throws unless `path` is a sound SQLite database. Opens it read-only, beside the live one. */
+export function assertSoundDatabaseFile(path: string): void {
+  const db = new Database(path, { readonly: true, fileMustExist: true });
+  try {
+    assertIntegrity(db, path);
+  } finally {
+    db.close();
+  }
+}
+
+function assertIntegrity(db: Database.Database, path: string): void {
+  const result = db.pragma("integrity_check", { simple: true });
+  if (result !== "ok") throw new Error(`${path} failed the integrity check: ${String(result)}`);
+}

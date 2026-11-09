@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { build } from "vite";
@@ -67,6 +67,33 @@ describe("ops bundle", () => {
     };
     db.close();
     expect(row.role).toBe("admin");
+  });
+
+  it("backup copies the database into backups/ and restore puts it back", () => {
+    const b = run("backup", []);
+    expect(b.stderr).toBe("");
+    expect(b.status).toBe(0);
+    const backups = readdirSync(join(dir, "backups"));
+    expect(backups).toHaveLength(1);
+    expect(backups[0]).toMatch(/^limeonit-.*Z\.db$/);
+
+    const restored = join(dir, "restored.db");
+    const r = run("restore", ["--from", join(dir, "backups", backups[0]), "--to", restored]);
+    expect(r.status).toBe(0);
+    const db = new Database(restored, { readonly: true });
+    const row = db
+      .prepare("SELECT COUNT(*) AS n FROM users WHERE email = ?")
+      .get("beheer@school.nl") as {
+      n: number;
+    };
+    db.close();
+    expect(row.n).toBe(1);
+  });
+
+  it("restore refuses without --from", () => {
+    const r = run("restore", []);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("--from");
   });
 
   it("invite prints a link", () => {

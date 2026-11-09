@@ -133,22 +133,33 @@ docker compose build      # of: docker load < limeonit.tar.gz
 docker compose up -d
 ```
 
-Maak **vóór** een update een back-up van de database (zie hieronder). Migraties lopen bij de start.
+Maak **vóór** een update een back-up van de database (zie hieronder, één commando). Migraties lopen bij de start.
 
 ## 6. Back-up en terugzetten
 
-Back-up van het volume naar `backup/limeonit-<datum>.tar.gz`:
+LimeOnIt maakt **zelf** elke dag een back-up van de database, terwijl de app gewoon doorloopt.
+De back-ups staan in `/data/backups` op het volume, als `limeonit-<datum>T<tijd>Z.db`. Er blijven
+er zeven van de laatste zeven dagen en één per week van de laatste vier weken; oudere gaan weg.
+
+- Nu meteen een back-up maken (bijvoorbeeld vóór een update):
+  `docker compose exec app node build/ops/backup.js`
+- Een andere map: zet `BACKUP_DIR` in `.env` (een map binnen de container, bijvoorbeeld op een
+  tweede volume). `BACKUP_DIR=off` zet de dagelijkse back-up uit.
+- **Kopieer de back-ups ook van de server af** (bijvoorbeeld met een nachtelijke `rsync` of de
+  back-up van je hostingpartij). Gaat de server of de schijf kapot, dan zijn back-ups op dezelfde
+  schijf ook weg.
+
+Terugzetten (de app moet stilstaan):
 
 ```sh
 docker compose stop
-docker run --rm -v educraft_limeonit-data:/data -v "$PWD/backup":/backup alpine \
-  tar czf /backup/limeonit-$(date +%F).tar.gz -C /data .
+docker compose run --rm app node build/ops/restore.js --from /data/backups/limeonit-2026-11-09T02-00-00Z.db
 docker compose start
 ```
 
-De naam van het volume begint met de mapnaam van je project (`docker volume ls` toont hem).
-Terugzetten: stop de app, pak het archief uit in hetzelfde volume en start weer. Gebruik je
-`LIMEONIT_DATA`, kopieer dan gewoon die map terwijl de app stilstaat.
+`restore.js` controleert eerst of de back-up een gezonde database is en doet anders niets. De
+database die hij vervangt, blijft bewaard als `limeonit.db.before-restore-<tijd>`; gooi die weg
+als alles goed is. `docker compose exec app ls /data/backups` toont welke back-ups er zijn.
 
 ## Problemen
 

@@ -299,6 +299,12 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Bezig
 
+- **Ingebouwde back-up zonder stilstand (PR open, P0-punt 2 uit de Doorlichting):** de app maakt
+  zelf elke dag een back-up van de database terwijl hij doorloopt (SQLite online backup), naar
+  `backups/` naast de database (`/data/backups` in Docker, of `BACKUP_DIR`), met rotatie (7 dagen,
+  4 weken). `npm run backup` / `node build/ops/backup.js` maakt er nu een; `restore` zet er een
+  terug na een controle en bewaart de oude database. Van de server af kopiëren blijft handwerk.
+  Geen migratie, geen nieuwe dependency.
 - **Inloggen beveiligen tegen wachtwoorden raden (doorlichting P0-1, PR open, BESLUIT-2026-11-09-1):** na 5 foute
   wachtwoorden voor één e-mailadres is dat adres 15 minuten op slot, ook met het goede wachtwoord en
   ook voor een adres dat niet bestaat (zo verraadt het slot niets). Elk volgend slot duurt twee
