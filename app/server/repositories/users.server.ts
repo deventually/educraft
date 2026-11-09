@@ -23,6 +23,8 @@ import {
   generations,
   instanceSettings,
   passwordResets,
+  recoveryCodes,
+  twoFactor,
   usage,
   users,
   type UserRow,
@@ -191,6 +193,8 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
     tx.delete(shares).where(eq(shares.ownerUserId, id)).run();
     tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();
+    tx.delete(twoFactor).where(eq(twoFactor.userId, id)).run();
+    tx.delete(recoveryCodes).where(eq(recoveryCodes.userId, id)).run();
     // The teacher's own model set lives in instance_settings.
     tx.delete(instanceSettings)
       .where(eq(instanceSettings.key, `assignedModels:${id}`))

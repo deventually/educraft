@@ -201,6 +201,35 @@ repository, `app/server/repositories/shares.server.ts`.
 - `SESSION_SECRET` (min 32 chars) signs the cookie. A dev default keeps local/test
   boots frictionless; **production refuses to boot** with the dev default.
 
+## Two-step verification (P2-12)
+
+BESLUIT-2026-11-09-3. An authenticator app (TOTP, RFC 6238: HMAC-SHA1, 6 digits, 30 s), no
+SMS or e-mail. The check is our own code on `node:crypto`
+([`totp.server.ts`](../app/server/totp.server.ts)); only the QR image comes from `uqr`.
+
+- **Storage:** `two_factor` (secret, `enabledAt`, `lastStep`) and `recovery_codes` (SHA-256
+  hash, `usedAt`), migration 0023, via
+  [`repositories/twoFactor.server.ts`](../app/server/repositories/twoFactor.server.ts). A row
+  with `enabledAt = null` is a setup waiting for its first code. `lastStep` makes a code work
+  once; one step either side is accepted for clock drift.
+- **Login:** a right password for an account with 2FA makes **no session**: a signed `__2fa`
+  cookie (5 minutes, path `/login`, carries the `sessionVersion`) sends the person to
+  `/login/2fa`. An app code or an unused recovery code then makes the session. Five wrong
+  codes lock the code step of that account, like wrong passwords
+  ([`twoFactorLogin.server.ts`](../app/server/twoFactorLogin.server.ts)).
+- **Required for admins:** `requireRole` on an admin-only page (roles without `"teacher"`)
+  redirects an admin without 2FA to `/account/2fa`. Pages for teachers and admins alike
+  stay open. An admin cannot turn it off; a teacher can, with a code.
+- **10 recovery codes**, shown once after setup and on "new recovery codes" (which voids the
+  old ones). Using one at login writes `twoFactorRecoveryUsed` in the audit log.
+- **Lost everything:** the owner turns it off on the person's page (`resetTwoFactor`,
+  owner-only, never on yourself). The owner's own: `node build/ops/reset-2fa.js --email …`
+  (`npm run reset-2fa` in dev), logged with `via: "server"`.
+- **No `sessionVersion` bump:** turning it on, off or resetting it gives no extra access, so
+  the four places above stay four.
+- The secret is stored as is (like most TOTP setups): encrypting it with `SESSION_SECRET`
+  would lock everyone out when that secret rotates.
+
 ## Account removal (P17)
 
 Every user (teacher or admin) deletes their own account on `/account`: type the

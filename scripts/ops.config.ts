@@ -14,6 +14,7 @@ export const OPS_SCRIPTS = [
   { name: "migrate", entry: "app/server/migrate.ts" },
   { name: "create-admin", entry: "scripts/create-admin.ts" },
   { name: "set-owner", entry: "scripts/set-owner.ts" },
+  { name: "reset-2fa", entry: "scripts/reset-2fa.ts" },
   { name: "invite", entry: "scripts/invite.ts" },
   { name: "backup", entry: "scripts/backup.ts" },
   { name: "restore", entry: "scripts/restore.ts" },

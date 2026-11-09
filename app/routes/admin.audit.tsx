@@ -75,6 +75,7 @@ function detailText(t: Messages, entry: Pick<AuditEntry, "action" | "detail">): 
   if (d.models === null) parts.push(t.auditLog.followsInstance);
   if (Array.isArray(d.models)) parts.push(d.models.join(", "));
   if (d.bulk) parts.push(t.auditLog.bulk);
+  if (d.via === "server") parts.push(t.auditLog.viaServer);
   return parts.join(" · ");
 }
 

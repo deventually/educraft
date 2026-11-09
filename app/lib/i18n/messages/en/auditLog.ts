@@ -14,6 +14,10 @@ export const auditLog: Messages["auditLog"] = {
     resetLinkCreated: "Reset link created",
     roleChanged: "Role changed",
     teacherModelsChanged: "Teacher's models changed",
+    twoFactorDisabled: "Two-step verification turned off",
+    twoFactorEnabled: "Two-step verification turned on",
+    twoFactorRecoveryUsed: "Logged in with a recovery code",
+    twoFactorReset: "Two-step verification turned off by an admin",
   },
   bulk: "via selection",
   cleaned: "{n} entries older than {days} days",
@@ -46,4 +50,5 @@ export const auditLog: Messages["auditLog"] = {
     "Who changed what in roles, passwords, accounts, invites and the model choice. The newest {n} actions are at the top.",
   invites: "{n} invites",
   role: "Role: {role}",
+  viaServer: "via the server",
 };

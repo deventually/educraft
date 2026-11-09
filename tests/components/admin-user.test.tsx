@@ -17,6 +17,7 @@ const teacher = {
   status: "active" as "active" | "disabled",
   lastActiveDay: null as string | null,
   ownerBadge: false,
+  twoFactor: false,
 };
 
 const base = [
@@ -393,5 +394,26 @@ describe("Admin person page — teams (P28.2)", () => {
     });
     expect(within(section(/^teams$/i)).queryByRole("checkbox")).toBeNull();
     expect(within(section(/^teams$/i)).getByText(/verpleegkunde/i)).toBeInTheDocument();
+  });
+
+  it("shows two-step verification and lets the owner turn it off (P2-12)", async () => {
+    const { container } = renderPage(undefined, { person: { twoFactor: true } });
+    expect(screen.getByText(/^tweestapsverificatie$|^two-step verification$/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /zet tweestapsverificatie uit|turn off two-step/i }),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no two-step reset when it is off, or to a regular admin", () => {
+    const { unmount } = renderPage();
+    expect(
+      screen.queryByRole("button", { name: /zet tweestapsverificatie uit|turn off two-step/i }),
+    ).toBeNull();
+    unmount();
+    renderPage(undefined, { isOwner: false, person: { twoFactor: true } });
+    expect(
+      screen.queryByRole("button", { name: /zet tweestapsverificatie uit|turn off two-step/i }),
+    ).toBeNull();
   });
 });

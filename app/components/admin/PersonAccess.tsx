@@ -1,5 +1,5 @@
 import { Form } from "react-router";
-import { KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
+import { KeyRound, ShieldOff, Trash2, UserCheck, UserX } from "lucide-react";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { Button } from "~/components/ui";
@@ -19,7 +19,7 @@ export function PersonAccess({
   viewerIsOwner,
   resetLink,
 }: {
-  person: { id: string; status: "active" | "disabled" };
+  person: { id: string; status: "active" | "disabled"; twoFactor: boolean };
   displayName: string;
   viewerIsOwner: boolean;
   resetLink?: string;
@@ -68,6 +68,18 @@ export function PersonAccess({
                     {disabled ? i.reactivate : i.deactivate}
                   </Button>
                 </Form>
+                {person.twoFactor && (
+                  <ConfirmDialog
+                    triggerLabel={t.twoFactor.adminReset}
+                    triggerIcon={<ShieldOff className="size-3.5" aria-hidden />}
+                    triggerVariant="secondary"
+                    title={t.twoFactor.adminResetTitle}
+                    description={fmt(t.twoFactor.adminResetConfirm, { name: displayName })}
+                    confirmLabel={t.twoFactor.adminReset}
+                    cancelLabel={t.confirm.cancel}
+                    fields={{ intent: "resetTwoFactor" }}
+                  />
+                )}
               </>
             )}
           </div>

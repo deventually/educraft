@@ -41,6 +41,7 @@ import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
+import { twoFactor } from "./twoFactor";
 import { utilities } from "./utilities";
 import { week } from "./week";
 
@@ -94,6 +95,7 @@ export const en: Messages = {
   teams,
   toast,
   tool,
+  twoFactor,
   utilities,
   week,
 };
