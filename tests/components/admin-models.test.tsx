@@ -4,7 +4,8 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
-import { ModelsTab, ProvidersTab } from "~/components/admin/models";
+import { ModelsTab } from "~/components/admin/models";
+import { ProvidersTab } from "~/components/admin/ProvidersTab";
 import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
