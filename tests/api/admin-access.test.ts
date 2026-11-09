@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { flatRoutes } from "../helpers/routes";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -9,9 +10,9 @@ type Users = typeof import("~/server/repositories/users.server");
 let auth: Auth;
 let users: Users;
 
-// Every admin route's guarded entry points. If a new admin route ships without
-// its own requireRole("admin"), it must be added here — and it will fail until
-// the guard exists (loaders run in parallel; each repeats the check).
+// Every admin route's guarded entry points, derived from the route table: a new admin
+// route is checked automatically and fails until it has its own requireRole("admin")
+// (loaders run in parallel; each repeats the check).
 interface Guarded {
   name: string;
   fn: (args: { request: Request; params: Record<string, string> }) => unknown;
@@ -19,6 +20,12 @@ interface Guarded {
 let guarded: Guarded[];
 
 let teacherCookie: string;
+
+/** The admin layout and every page under it, as files relative to `app/`. */
+const adminRouteFiles = (): string[] =>
+  flatRoutes()
+    .filter((r) => r.path === "/admin" || r.path.startsWith("/admin/"))
+    .map((r) => r.file);
 
 async function cookieFor(role: "teacher"): Promise<string> {
   const u = await users.createUser({
@@ -53,44 +60,28 @@ beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
   teacherCookie = await cookieFor("teacher");
 
-  const [layout, index, tools, usersRoute, context, usage, person, teamsRoute, team, agents, errs] =
-    await Promise.all([
-      import("~/routes/admin"),
-      import("~/routes/admin._index"),
-      import("~/routes/admin.tools"),
-      import("~/routes/admin.users"),
-      import("~/routes/admin.context"),
-      import("~/routes/admin.usage"),
-      import("~/routes/admin.users.$id"),
-      import("~/routes/admin.teams"),
-      import("~/routes/admin.teams.$id"),
-      import("~/routes/admin.agents"),
-      import("~/routes/admin.errors"),
-    ]);
-  const g = (name: string, fn: unknown) => ({ name, fn: fn as Guarded["fn"] });
-  guarded = [
-    g("admin layout loader", layout.loader),
-    g("admin index loader", index.loader),
-    g("admin.tools loader", tools.loader),
-    g("admin.tools action", tools.action),
-    g("admin.users loader", usersRoute.loader),
-    g("admin.users action", usersRoute.action),
-    g("admin.context loader", context.loader),
-    g("admin.context action", context.action),
-    g("admin.usage loader", usage.loader),
-    g("admin.users.$id loader", person.loader),
-    g("admin.users.$id action", person.action),
-    g("admin.teams loader", teamsRoute.loader),
-    g("admin.teams action", teamsRoute.action),
-    g("admin.teams.$id loader", team.loader),
-    g("admin.teams.$id action", team.action),
-    g("admin.agents loader", agents.loader),
-    g("admin.agents action", agents.action),
-    g("admin.errors loader", errs.loader),
-  ];
+  guarded = [];
+  for (const file of adminRouteFiles()) {
+    const mod = (await import(`~/${file}`)) as Partial<Record<"loader" | "action", Guarded["fn"]>>;
+    for (const kind of ["loader", "action"] as const) {
+      const fn = mod[kind];
+      if (fn) guarded.push({ name: `${file} ${kind}`, fn });
+    }
+  }
 });
 
 describe("admin routes — access control", () => {
+  it("covers every admin route, each with at least a loader", () => {
+    const files = adminRouteFiles();
+    expect(files).toContain("routes/admin.tsx");
+    expect(files.length).toBeGreaterThan(10);
+    for (const file of files)
+      expect(
+        guarded.map((g) => g.name),
+        file,
+      ).toContain(`${file} loader`);
+  });
+
   it("rejects a teacher with a 403 on every loader and action", async () => {
     for (const { name, fn } of guarded) {
       const thrown = await catchThrow(fn, req(teacherCookie));
