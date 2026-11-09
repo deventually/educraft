@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#177, #180, #183, #178 en #179 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#181 gemerged)_
 
 ## Nu
 
+- **Architectuurregels als test (P1-punt 6 uit de doorlichting, #181) gemerged op 2026-11-09:**
+  `tests/architecture.test.ts` bewaakt dat `app/components` niets uit een `*.server`-module
+  binnenhaalt, dat alleen `db.server.ts` `better-sqlite3` gebruikt en dat buiten `app/lib/ai/`
+  niets een AI-SDK importeert. AGENTS.md noemt de test.
 - **Ratchet-tests (P1-punt 7 uit de doorlichting, #179) gemerged op 2026-11-09:**
   `tests/ratchet.test.ts` legt de tellingen van vandaag vast: 31 onderdrukkingen (`as any`,
   `@ts-ignore`, `@ts-expect-error`, `biome-ignore`) en 20 bestanden in `app/` boven 400 regels

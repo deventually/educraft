@@ -122,8 +122,9 @@ Details: [Authentication](wiki/Authentication.md), model availability in
   a role.
 - Availability is enforced **server-side** (home loader, tool loader 404, stream refuse); the UI
   only hides.
-- `users.sessionVersion` is bumped in exactly three places: `updateUserPassword`,
-  `setUserDisabled(id, true)` and a real `setUserRole` change. Never anywhere else.
+- `users.sessionVersion` is bumped in exactly four places: `updateUserPassword`,
+  `setUserDisabled(id, true)`, a real `setUserRole` change and `logOutEverywhere` ("Overal
+  uitloggen" on `/account`, BESLUIT-2026-11-09-2). Never anywhere else.
 - Owner-only actions are checked in the action (`{ error: "ownerOnly" }`). Invites never make admins.
 - CLI and local models exist only outside production (`localModelsEnabled()`).
 - Student work stays in the browser where it can: document extraction, the document viewer and

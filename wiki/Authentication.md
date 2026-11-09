@@ -168,14 +168,24 @@ repository, `app/server/repositories/shares.server.ts`.
 
 - Cookie sessions via React Router's `createCookieSessionStorage`
   ([`session.server.ts`](../app/server/session.server.ts)). The cookie stores
-  `{ userId, sessionVersion }`; the **role is read fresh from the DB on every
+  `{ userId, sessionVersion, lastSeen }`; the **role is read fresh from the DB on every
   request**; a real role change additionally logs that user out everywhere (P18.9).
+- **8 hours without activity logs you out (P1-4, sliding).** `getUser` refuses a cookie
+  whose `lastSeen` is more than `SESSION_IDLE_MS` (8 h) ago, or that has no `lastSeen` at
+  all (cookies from before P1-4). `sessionRefreshMiddleware` (root middleware, so pages,
+  data requests and `/api/*` alike) re-stamps `lastSeen` on activity, at most once per
+  5 minutes, reads only the cookie (no DB), never revives an expired session and never
+  overrides a session cookie the route set itself. The cookie's Max-Age is 8 h too; the
+  server-side check is what counts.
 - **Several devices at once, one switch to sign them all out.** Logging in never
   invalidates other sessions (laptop and phone can both be signed in). Only a new
-  password (`updateUserPassword`), a deactivation (`setUserDisabled`) or a real role change
-  (`setUserRole`) bumps
+  password (`updateUserPassword`), a deactivation (`setUserDisabled`), a real role change
+  (`setUserRole`) or **"Overal uitloggen"** on `/account` (`logOutEverywhere`,
+  BESLUIT-2026-11-09-2) bumps
   `users.sessionVersion`; `getUser` rejects any cookie with an older version, and the
   device that changed its own password gets a fresh cookie so it stays signed in.
+  "Overal uitloggen" needs no password (it only takes access away) and also logs out the
+  device it was pressed on, with the `signedOutEverywhere` toast on `/login`.
 - Passwords hashed with Node's built-in `scrypt`
   ([`password.server.ts`](../app/server/password.server.ts)) — no native
   bcrypt/argon2 dependency. Stored self-describing as `scrypt:<saltHex>:<hashHex>`.

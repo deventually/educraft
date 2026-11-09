@@ -10,6 +10,7 @@ export const toast = {
     rubricDuplicated: "Kopie gemaakt. Je bewerkt nu de kopie.",
     signedIn: "Je bent ingelogd.",
     signedOut: "Je bent uitgelogd.",
+    signedOutEverywhere: "Je bent op al je apparaten uitgelogd.",
     steppedDown: "Je bent geen teamleider meer van dit team.",
     teamDeleted: "Team verwijderd.",
     userDeleted: "Gebruiker verwijderd.",

@@ -14,6 +14,9 @@ export const account = {
   heading: "Account",
   intro: "Je accountgegevens en gegevensbeheer.",
   invalidEmail: "Geen geldig e-mailadres.",
+  logoutEverywhereButton: "Overal uitloggen",
+  logoutEverywhereIntro:
+    "Na 8 uur zonder activiteit word je vanzelf uitgelogd. Ben je ergens ingelogd gebleven, bijvoorbeeld op een computer op school? Log dan op al je apparaten tegelijk uit, ook op dit apparaat.",
   mismatch: "Typ het bevestigingswoord exact over om te verwijderen.",
   name: "Naam",
   newEmail: "Nieuw e-mailadres",
@@ -30,5 +33,6 @@ export const account = {
   roleTeacher: "Docent",
   saveEmail: "E-mailadres opslaan",
   savePassword: "Wachtwoord opslaan",
+  sessionsHeading: "Ingelogde apparaten",
   wrongPassword: "Huidig wachtwoord klopt niet.",
 };

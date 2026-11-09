@@ -13,6 +13,7 @@ export const FLASH_KEYS = [
   "rubricDuplicated",
   "signedIn",
   "signedOut",
+  "signedOutEverywhere",
   "steppedDown",
   "teamDeleted",
   "userDeleted",

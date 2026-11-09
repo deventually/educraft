@@ -298,3 +298,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   dag zonder fouten zet het terug op 15 minuten. Automatisch deactiveren niet, want dan kan
   iedereen die een e-mailadres kent een collega buitensluiten tot de beheerder ingrijpt.
   Bastiaan, 2026-11-09 (keuze "Oplopend slot, max 24 uur").
+- **BESLUIT-2026-11-09-2:** **"Overal uitloggen" mag `sessionVersion` verhogen** (doorlichting
+  P1-4). Op `/account` kan een docent op alle eigen apparaten tegelijk uitloggen, ook op het apparaat
+  waarop de knop wordt ingedrukt. Dat is de vierde plek waar `sessionVersion` omhoog gaat, naast een
+  nieuw wachtwoord, deactiveren en een echte rolwijziging (AGENTS.md). Tegelijk verloopt een
+  sessie na 8 uur zonder activiteit (glijdend) in plaats van na 30 dagen; cookies van vóór deze
+  wijziging gelden als verlopen, dus iedereen logt na de uitrol één keer opnieuw in.
+  Bastiaan, 2026-11-09 ("Doe het maar").
