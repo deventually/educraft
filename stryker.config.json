@@ -6,6 +6,8 @@
   "mutate": [
     "app/lib/registry/**/*.ts",
     "!app/lib/registry/tools/**",
+    "!app/lib/registry/goals.ts",
+    "!app/lib/registry/keywords.ts",
     "app/server/auth.server.ts",
     "app/server/session.server.ts",
     "app/server/password.server.ts",

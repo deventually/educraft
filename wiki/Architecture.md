@@ -352,7 +352,7 @@ checks every path against the route table. Locally once: `npx playwright install
 CI runs it as its own job, next to the gate.
 
 **Mutation testing** (Stryker, `stryker.config.json`). Stryker makes small changes (mutants) to
-the core, the registry logic, auth, the repositories, the rate limiter and the login throttle, and
+the core, the registry logic (not its data: `tools/`, `goals.ts`, `keywords.ts`), auth, the repositories, the rate limiter and the login throttle, and
 checks that a test fails for each one. A surviving mutant points at a line no test really pins
 down. A full run takes far longer than the gate, so it is not part of it: the workflow
 `.github/workflows/mutation.yml` runs it nightly and by hand (*Run workflow*), and keeps the HTML
