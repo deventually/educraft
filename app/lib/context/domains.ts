@@ -98,9 +98,7 @@ const VO_DOMAINS_BY_TRACK: Record<string, DomainOption[]> = {
 };
 
 /** Sector-level domain options (track-independent). Absent sector = custom fields. */
-export const DOMAINS_BY_SECTOR: Partial<
-  Record<CountryCode, Partial<Record<Sector, DomainOption[]>>>
-> = {
+const DOMAINS_BY_SECTOR: Partial<Record<CountryCode, Partial<Record<Sector, DomainOption[]>>>> = {
   NL: {
     hbo: HBO_DOMAIN_OPTIONS,
     // vo is track-scoped (see VO_DOMAINS_BY_TRACK); mbo, wo: no catalogue yet.

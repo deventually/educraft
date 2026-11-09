@@ -502,7 +502,7 @@ function IconButton({
 }
 
 /** Read-only criteria × levels table, for the desktop overview and print. */
-export function RubricTable({ data, caption }: { data: RubricData; caption: string }) {
+function RubricTable({ data, caption }: { data: RubricData; caption: string }) {
   const t = useT();
   const locale = useLocale();
   const r = t.utilities.rubric;

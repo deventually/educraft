@@ -17,6 +17,3 @@ export function flatRoutes(): FlatRoute[] {
   walk(routes, "", false);
   return out;
 }
-
-/** The whole route table as one string, for "this route is gone" assertions. */
-export const routeTable = (): string => JSON.stringify(flatRoutes());

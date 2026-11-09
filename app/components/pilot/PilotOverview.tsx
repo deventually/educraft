@@ -23,7 +23,7 @@ export interface PilotOverviewProps {
 }
 
 /** "1 u 30 min" — total minutes saved, in the UI language. */
-export function useFormatMinutes() {
+function useFormatMinutes() {
   const m = useT().pilot.overview;
   return (total: number) => {
     const h = Math.floor(total / 60);

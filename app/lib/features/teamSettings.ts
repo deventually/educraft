@@ -17,7 +17,7 @@ export const TeamSettingsSchema = z
 
 export type TeamSettings = z.infer<typeof TeamSettingsSchema>;
 
-export const NO_TEAM_SETTINGS: TeamSettings = { features: {}, tools: {}, models: null };
+const NO_TEAM_SETTINGS: TeamSettings = { features: {}, tools: {}, models: null };
 
 export function parseTeamSettings(json: string | null | undefined): TeamSettings {
   try {

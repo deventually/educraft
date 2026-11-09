@@ -33,7 +33,7 @@ import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 
 /** Label + control wrapper with proper htmlFor/id association. */
-export function Field({
+function Field({
   id,
   label,
   required,

@@ -14,7 +14,7 @@ export const INSTANCE_STANDS: readonly InstanceStand[] = ["off", "on", "request"
 
 /** A team's choice or a teacher's exception; absent = no choice. */
 export type Choice = "on" | "off";
-export const CHOICES: readonly Choice[] = ["on", "off"];
+const CHOICES: readonly Choice[] = ["on", "off"];
 
 /**
  * Where an effective stand comes from (shown on the person page). `admin`: an admin

@@ -53,7 +53,7 @@ export interface CountedInput {
  * ('Waar wacht een klant het langst?') is not a question it asks. A single quote
  * opens only after a non-letter, so "zo'n" stays.
  */
-export function withoutQuotes(text: string): string {
+function withoutQuotes(text: string): string {
   return text
     .replace(/["“][^"”]*["”]/g, "")
     .replace(/(^|[^\p{L}])['‘][^'’]*['’](?!\p{L})/gu, "$1");

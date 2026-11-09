@@ -6,7 +6,7 @@ import { Button, Label, Textarea } from "~/components/ui";
 import { CopyButton } from "./LinkCard";
 
 /** The text for each reason the server can refuse a pasted line. */
-export function reasonText(p: Messages["people"], reason: PasteReason): string {
+function reasonText(p: Messages["people"], reason: PasteReason): string {
   const text: Record<PasteReason, string> = {
     invalidEmail: p.reasonInvalidEmail,
     nameRequired: p.reasonNameRequired,

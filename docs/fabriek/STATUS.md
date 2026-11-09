@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #193 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #194 gemerged)_
 
 ## Nu
 
+- **knip in de poort (#194) gemerged op 2026-11-09:** `npm run check` draait nu ook knip, dat
+  ongebruikte bestanden, exports en dependencies meldt. 68 exports die alleen hun eigen bestand
+  gebruikte zijn niet meer geëxporteerd, en vier ongebruikte waarden zijn weg.
 - **Golf 1 van het P2-plan (#188 t/m #193) gemerged op 2026-11-09:**
   - **Dependencies bijgewerkt (#189):** `ai`, `@ai-sdk/*` en de rest naar hun nieuwste versie
     binnen dezelfde major. Biome blijft op 2.4.16 (2.5 herformatteert ~200 bestanden, apart).

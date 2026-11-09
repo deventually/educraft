@@ -18,7 +18,7 @@ import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
 import type { CourseEvidencePart, DossierData, EvidenceItem } from "~/lib/portfolio/types";
 
 /** The form value of a part: "outcomes-and-matrix" or "assessment:<id>" of an existing assessment. */
-export function parsePart(value: string, data: CourseData): CourseEvidencePart | null {
+function parsePart(value: string, data: CourseData): CourseEvidencePart | null {
   if (value === "outcomes-and-matrix") return value;
   const id = value.startsWith("assessment:") ? value.slice("assessment:".length) : "";
   return data.assessments.some((a) => a.id === id) ? { assessmentId: id } : null;

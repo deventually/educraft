@@ -260,7 +260,7 @@ export function verifyEvidence(
  * Two questions in one sentence that ends in a single question mark (meting dyw4: 44% of the
  * tutor's turns): "…, en wat doet die met je resultaat?", "…, and how do you know?".
  */
-export const COMPOUND_QUESTION =
+const COMPOUND_QUESTION =
   /,\s*(?:en|of|and|or)\s+(?:wat|hoe|waarom|welke|welk|wie|waar|wanneer|hoeveel|in hoeverre|is|zijn|was|waren|kun|kan|zou|zouden|heb|had|maakt|doet|wordt|klopt|what|how|why|which|who|where|when|to what extent|are|were|do|does|did|can|could|would|has|have)\b[^.!?]*\?/i;
 
 /**
