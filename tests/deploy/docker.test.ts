@@ -43,15 +43,12 @@ describe("Dockerfile, final stage", () => {
 });
 
 describe(".dockerignore", () => {
-  it.each([
-    ".env",
-    ".git",
-    "data",
-    "node_modules",
-    "build",
-  ])("keeps %s out of the build context", (entry) => {
-    expect(dockerignore).toContain(entry);
-  });
+  it.each([".env", ".git", "data", "node_modules", "build"])(
+    "keeps %s out of the build context",
+    (entry) => {
+      expect(dockerignore).toContain(entry);
+    },
+  );
 
   it("still lets .env.example in", () => {
     expect(dockerignore).toContain("!.env.example");

@@ -2,14 +2,12 @@ import { describe, expect, it } from "vitest";
 import { safeRedirect } from "~/lib/safeRedirect";
 
 describe("safeRedirect", () => {
-  it.each([
-    "/",
-    "/tools/lesson-plan",
-    "/courses?tab=open&q=a%20b",
-    "/help#start",
-  ])("keeps the same-app path %s", (to) => {
-    expect(safeRedirect(to)).toBe(to);
-  });
+  it.each(["/", "/tools/lesson-plan", "/courses?tab=open&q=a%20b", "/help#start"])(
+    "keeps the same-app path %s",
+    (to) => {
+      expect(safeRedirect(to)).toBe(to);
+    },
+  );
 
   it.each([
     ["protocol-relative", "//evil.com"],

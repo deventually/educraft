@@ -293,14 +293,14 @@ describe("ChatView", () => {
     await user.type(screen.getByPlaceholderText("Your message…"), "hi");
     await user.keyboard("{Enter}");
     await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
-    expect((mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking).toBe(false);
+    expect((mockStreamPost.mock.calls.at(-1)![1] as { thinking?: boolean }).thinking).toBe(false);
 
     // Turn reasoning on → thinking:true is sent.
     await user.click(toggle);
     await user.type(screen.getByPlaceholderText("Your message…"), "again");
     await user.keyboard("{Enter}");
     await waitFor(() => expect(mockStreamPost.mock.calls.length).toBeGreaterThan(1));
-    expect((mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking).toBe(true);
+    expect((mockStreamPost.mock.calls.at(-1)![1] as { thinking?: boolean }).thinking).toBe(true);
   });
 
   it("keeps model and reasoning inside 'Advanced'; language stays visible", async () => {
@@ -427,7 +427,7 @@ describe("ChatView", () => {
     await user.keyboard("{Enter}");
     await waitFor(() => expect(mockStreamPost).toHaveBeenCalled());
     expect(
-      (mockStreamPost.mock.calls.at(-1)?.[1] as { thinking?: boolean }).thinking,
+      (mockStreamPost.mock.calls.at(-1)![1] as { thinking?: boolean }).thinking,
     ).toBeUndefined();
   });
 

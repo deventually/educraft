@@ -8,6 +8,9 @@ _Laatst bijgewerkt: 2026-11-10 (#187 t/m #209 gemerged)_
 
 ## Nu
 
+- **Vitest 5 (#208) gemerged op 2026-11-10:** de testomgeving gaat van vitest 4 naar 5, de eerste
+  van drie grote versiesprongen uit #189. `tests/jest-dom.d.ts` koppelt de jest-dom-controles aan
+  het nieuwe matcher-type van vitest 5. Geen gedragswijziging.
 - **Leerdoelen en trefwoorden uit de mutatiemeting (#209) gemerged op 2026-11-10:**
   `registry/goals.ts` en `registry/keywords.ts` zijn pure data, net als `tools/`, en tellen niet
   meer mee in Stryker. Dat scheelde 392 nepmeldingen: de eerste run op main ging van 63,8% naar

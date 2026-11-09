@@ -49,7 +49,7 @@ export async function loadExport(request: Request, generationId: string): Promis
   const locale: Locale = first.outputLanguage === "en" ? "en" : "nl";
   const stageIndex = (stageId: string | null) => {
     const i = tool.stages.findIndex((s) => s.id === stageId);
-    return i < 0 ? 0 : i;
+    return Math.max(i, 0);
   };
   const sorted = [...rows].sort((a, b) => stageIndex(a.stageId) - stageIndex(b.stageId));
   const many = sorted.length > 1;
