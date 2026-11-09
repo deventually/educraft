@@ -1,52 +1,29 @@
-import { Form, Link, useActionData } from "react-router";
-import { z } from "zod";
-import { ArrowLeft, KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
+import { Link, useActionData } from "react-router";
+import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/admin.users.$id";
 import { isOwner, requireRole } from "~/server/auth.server";
-import { hashPassword, passwordProblem } from "~/server/password.server";
-import {
-  createPasswordReset,
-  deleteUserCascade,
-  getUserAssignedModels,
-  getUserByEmail,
-  getUserById,
-  setUserAssignedModels,
-  setUserDisabled,
-  setUserRole,
-  updateUserEmail,
-  updateUserPassword,
-} from "~/server/repositories/users.server";
+import { getUserAssignedModels, getUserById } from "~/server/repositories/users.server";
 import { getLastActiveDay } from "~/server/repositories/usage.server";
-import { listTeams, listTeamsForUser, setUserTeams } from "~/server/repositories/teams.server";
+import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
 import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures, effectiveTools } from "~/server/availability.server";
-import {
-  featureKey,
-  getExceptions,
-  setException,
-  toolKey,
-} from "~/server/repositories/exceptions.server";
+import { featureKey, getExceptions, toolKey } from "~/server/repositories/exceptions.server";
 import { FEATURES } from "~/lib/features";
-import { isChoice } from "~/lib/features/rule";
 import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
+import { personAction } from "~/server/personActions.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
-import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
-import { Button, Input, Select } from "~/components/ui";
+import { Input, Select } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
-import { LinkCard } from "~/components/admin/LinkCard";
-import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
+import { TeamsForm } from "~/components/admin/TeamsForm";
+import { PersonAccess } from "~/components/admin/PersonAccess";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
-import { redirectWithFlash } from "~/server/flash.server";
-import { recordAdminAction } from "~/server/repositories/auditLog.server";
-import type { AuditAction, AuditDetail } from "~/lib/auditLog";
 
 /**
  * One person's page (P28.1): everything about one account in one place: Account
@@ -152,220 +129,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-/** The keys an exception may be set on: every feature and every tool. */
-const EXCEPTION_KEYS = new Set([
-  ...FEATURES.map((f) => featureKey(f.id)),
-  ...ALL_TOOLS.map((tool) => toolKey(tool.slug)),
-]);
-
-/** The target of a manage action: 404 when missing, `null` when out of reach. */
-async function manageTarget(actorIsOwner: boolean, userId: string) {
-  const target = await getUserById(userId);
-  if (!target) throw new Response("Not found", { status: 404 });
-  return mayManage(actorIsOwner, target) ? target : null;
-}
-
-/**
- * The target of an owner-only account action (P18.7): 404 when missing or of a retired
- * role (never acted on here, like `role`), `null` when it is the actor themself.
- */
-async function ownerTarget(actorId: string, userId: string) {
-  const target = await getUserById(userId);
-  if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
-  return target.id === actorId ? null : target;
-}
-
+/** Every change to this person (`personActions.server`); the user is the one in the URL. */
 export async function action({ request, params }: Route.ActionArgs) {
   const admin = await requireRole(request, "admin");
-  // Authority is decided here, on the server, for every intent below; the page only hides.
-  const actorIsOwner = await isOwner(admin);
-  const fd = await request.formData();
-  const intent = String(fd.get("intent") ?? "");
-  const userId = params.id;
-  // Every change below that touches someone's access goes in the audit log, after it succeeded.
-  const audit = (action: AuditAction, detail?: AuditDetail) =>
-    recordAdminAction({ actorUserId: admin.id, action, targetUserId: userId, detail });
-
-  // ── Models per teacher (P18): inherit the instance, or an own set ────────────
-  if (intent === "teacherModels") {
-    const target = await getUserById(userId);
-    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    if (fd.get("mode") === "own") {
-      // An own set replaces the instance, so it is checked against the catalogue,
-      // not the instance set. Exactly the chosen set is stored; empty is refused.
-      const catalogIds = new Set((await fullCatalog()).map((m) => m.id));
-      const chosen = [...new Set(fd.getAll("models").map(String))].filter((id) =>
-        catalogIds.has(id),
-      );
-      if (chosen.length === 0) return { error: "atLeastOne" as const };
-      await setUserAssignedModels(userId, chosen);
-      await audit("teacherModelsChanged", { models: chosen });
-    } else {
-      await setUserAssignedModels(userId, null);
-      await audit("teacherModelsChanged", { models: null });
-    }
-    return { saved: true as const };
-  }
-
-  // ── Teams (P28.2): exactly the checked teams, lead where checked ───────────
-  if (intent === "teams") {
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    await setUserTeams(userId, fd.getAll("teams").map(String), fd.getAll("leads").map(String));
-    return { saved: true as const };
-  }
-
-  // ── An exception per teacher (P28.3, admin only): on, off or none ──────────
-  // Above every team, below the instance. Switching off deletes nothing.
-  if (intent === "exception") {
-    const target = await getUserById(userId);
-    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
-    const key = String(fd.get("key") ?? "");
-    const choice = String(fd.get("choice") ?? "");
-    if (!EXCEPTION_KEYS.has(key) || (choice !== "" && !isChoice(choice))) {
-      return { error: "invalid" as const };
-    }
-    await setException(userId, key, isChoice(choice) ? choice : null);
-    return { saved: true as const };
-  }
-
-  if (intent === "role") {
-    const role = String(fd.get("role") ?? "");
-    // An admin can never change their OWN role — no self-lockout.
-    if (userId === admin.id) return { error: "selfDemote" as const };
-    // Only the super admin promotes, demotes or otherwise changes a role (P18.6).
-    if (!actorIsOwner) return { error: "ownerOnly" as const };
-    // A legacy row whose role is no longer valid (e.g. "student") is never
-    // promoted by a role change — treat it as not manageable here.
-    const target = await getUserById(userId);
-    if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
-    if (isRole(role) && role !== target.role) {
-      await setUserRole(userId, role);
-      await audit("roleChanged", { from: target.role, to: role });
-    }
-    return { roleChanged: true as const };
-  }
-
-  if (intent === "deleteUser") {
-    // An admin removes their own account via /account (type-to-confirm) — and
-    // since they can't remove themselves here, the instance always keeps an admin.
-    if (userId === admin.id) return { error: "selfDelete" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    await deleteUserCascade(userId);
-    await audit("accountDeleted");
-    // This page is gone with the account: back to the list.
-    return redirectWithFlash("/admin/users", "userDeleted");
-  }
-
-  if (intent === "resetPassword") {
-    if (userId === admin.id) return { error: "selfReset" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    // No email service: mint a single-use link the admin shares out-of-band; the
-    // user opens it and sets their own new password. The admin never sees it.
-    const reset = await createPasswordReset(userId);
-    await audit("resetLinkCreated");
-    return { resetLink: `${new URL(request.url).origin}/reset/${reset.token}` };
-  }
-
-  if (intent === "setEmail") {
-    // Own email changes go via /account, which asks for the current password.
-    if (userId === admin.id) return { error: "selfEmail" as const };
-    if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
-    const email = String(fd.get("email") ?? "").trim() || null;
-    if (email && !z.string().email().safeParse(email).success) {
-      return { error: "invalidEmail" as const };
-    }
-    // Reject a collision up front so the unique index never throws.
-    if (email) {
-      const existing = await getUserByEmail(email);
-      if (existing && existing.id !== userId) return { error: "emailTaken" as const };
-    }
-    await updateUserEmail(userId, email);
-    return { emailSet: true as const };
-  }
-
-  // ── Owner-only account actions (P18.7) ──────────────────────────────────────
-  // Authority first: a regular admin gets `ownerOnly` for all of these, whatever the
-  // target (even themself), before anything is read or written. No password is ever
-  // returned to the client.
-  if (intent === "setPassword" || intent === "deactivate" || intent === "reactivate") {
-    if (!actorIsOwner) return { error: "ownerOnly" as const };
-  }
-
-  if (intent === "setPassword") {
-    const target = await ownerTarget(admin.id, userId);
-    if (!target) return { error: "selfPassword" as const };
-    const password = String(fd.get("password") ?? "");
-    const confirm = String(fd.get("confirm") ?? "");
-    const problem = passwordProblem(password);
-    if (problem) return { error: problem };
-    if (password !== confirm) return { error: "passwordMismatch" as const };
-    // Bumps sessionVersion: the user is logged out on every device.
-    await updateUserPassword(target.id, await hashPassword(password));
-    await audit("passwordSet");
-    return { passwordSet: true as const };
-  }
-
-  if (intent === "deactivate" || intent === "reactivate") {
-    const target = await ownerTarget(admin.id, userId);
-    if (!target) return { error: "selfDeactivate" as const };
-    await setUserDisabled(target.id, intent === "deactivate");
-    await audit(intent === "deactivate" ? "deactivated" : "reactivated");
-    return { statusChanged: true as const };
-  }
-
-  return { error: "unknown" as const };
-}
-
-/** One row per team: member, and lead (only for a member). Saves itself. */
-function TeamsForm({
-  teams,
-  errorMessage,
-}: {
-  teams: { id: string; name: string; member: boolean; lead: boolean }[];
-  errorMessage: (code: string | true) => string | undefined;
-}) {
-  const t = useT();
-  const box =
-    "size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500";
-  return (
-    <AutoSaveForm intent="teams" errorMessage={errorMessage}>
-      <ul className="space-y-2.5">
-        {teams.map((team) => (
-          <li key={team.id} className="flex flex-wrap items-center gap-x-6 gap-y-1.5">
-            <span className="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                id={`team-member-${team.id}`}
-                name="teams"
-                value={team.id}
-                defaultChecked={team.member}
-                className={box}
-              />
-              <label
-                htmlFor={`team-member-${team.id}`}
-                className="text-sm font-medium text-slate-800"
-              >
-                {fmt(t.teams.memberOf, { name: team.name })}
-              </label>
-            </span>
-            <span className="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                id={`team-lead-${team.id}`}
-                name="leads"
-                value={team.id}
-                defaultChecked={team.lead}
-                className={box}
-              />
-              <label htmlFor={`team-lead-${team.id}`} className="text-sm text-slate-700">
-                {fmt(t.teams.leadOf, { name: team.name })}
-              </label>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </AutoSaveForm>
-  );
+  // Authority is decided on the server, for every intent; the page only hides.
+  return personAction(admin, await isOwner(admin), request, params.id);
 }
 
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
@@ -549,73 +317,17 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
       {/* ── Parts and tools: effective stand, source, exception (P28.3) ─────── */}
       {features && <PersonFeatures rows={features} errorMessage={autoSaveError} />}
 
-      {/* ── Access: reset link, password, (de)activation ───────────────────── */}
       {manage && (
-        <section>
-          <h2 className={h2}>{p.access}</h2>
-          {actionData && "resetLink" in actionData && actionData.resetLink && (
-            <LinkCard
-              heading={i.resetLinkHeading}
-              hint={i.resetLinkHint}
-              url={actionData.resetLink}
-              copyLabel={i.copy}
-            />
-          )}
-          <div className={`mt-3 ${card}`}>
-            <div className="flex flex-wrap items-center gap-2">
-              <Form method="post">
-                <input type="hidden" name="intent" value="resetPassword" />
-                <Button type="submit" variant="secondary" size="sm">
-                  <KeyRound className="size-3.5" aria-hidden />
-                  {i.resetPassword}
-                </Button>
-              </Form>
-              {viewerIsOwner && (
-                <>
-                  <SetPasswordDialog userId={person.id} name={displayName} />
-                  <Form method="post">
-                    <input
-                      type="hidden"
-                      name="intent"
-                      value={person.status === "disabled" ? "reactivate" : "deactivate"}
-                    />
-                    <Button type="submit" variant="secondary" size="sm">
-                      {person.status === "disabled" ? (
-                        <UserCheck className="size-3.5" aria-hidden />
-                      ) : (
-                        <UserX className="size-3.5" aria-hidden />
-                      )}
-                      {person.status === "disabled" ? i.reactivate : i.deactivate}
-                    </Button>
-                  </Form>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Delete, apart at the bottom ─────────────────────────────────────── */}
-      {manage && (
-        <section>
-          <h2 className={h2}>{p.danger}</h2>
-          <p className="mt-1 text-sm text-slate-600">{p.dangerIntro}</p>
-          <div className="mt-3">
-            <ConfirmDialog
-              triggerLabel={i.deleteUser}
-              triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
-              title={i.deleteUserTitle}
-              description={i.deleteUserConfirm}
-              confirmLabel={i.deleteUser}
-              cancelLabel={t.confirm.cancel}
-              fields={{ intent: "deleteUser" }}
-              typeToConfirm={{
-                word: displayName,
-                label: fmt(i.deleteUserType, { name: displayName }),
-              }}
-            />
-          </div>
-        </section>
+        <PersonAccess
+          person={person}
+          displayName={displayName}
+          viewerIsOwner={viewerIsOwner}
+          resetLink={
+            actionData && "resetLink" in actionData && actionData.resetLink
+              ? actionData.resetLink
+              : undefined
+          }
+        />
       )}
     </div>
   );
