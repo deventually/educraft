@@ -292,3 +292,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   tekst heet *Volgt nog* en telt niet als bewijs. Een voorlopig kader is een open plek in de zin
   van BESLUIT-2026-11-07-4: dan geeft de export alleen de conceptversie. Bastiaan, 2026-11-07
   ("Akkoord op PR 3 en 4").
+- **BESLUIT-2026-11-09-1:** **Inloggen: een oplopend slot, nooit automatisch deactiveren**
+  (doorlichting P0-1, #174). Na 5 foute wachtwoorden voor één e-mailadres gaat dat adres op slot:
+  15 minuten, en elk volgend slot twee keer zo lang, tot hooguit 24 uur. Een goede login of een
+  dag zonder fouten zet het terug op 15 minuten. Automatisch deactiveren niet, want dan kan
+  iedereen die een e-mailadres kent een collega buitensluiten tot de beheerder ingrijpt.
+  Bastiaan, 2026-11-09 (keuze "Oplopend slot, max 24 uur").

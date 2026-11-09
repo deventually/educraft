@@ -30,4 +30,8 @@ export const auth: Messages["auth"] = {
     "This reset link is invalid, already used, or expired. Ask your admin for a new one.",
   resetInvalidTitle: "Link invalid",
   resetSubmit: "Save password",
+  tooManyAttempts:
+    "Too many failed attempts. Try again in {minutes} minutes, or ask your administrator for a new password.",
+  tooManyAttemptsHours:
+    "Too many failed attempts. Try again in {hours} hours, or ask your administrator for a new password.",
 };

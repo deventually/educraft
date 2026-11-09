@@ -28,4 +28,8 @@ export const auth = {
     "Deze herstel-link is ongeldig, al gebruikt of verlopen. Vraag een nieuwe aan bij je beheerder.",
   resetInvalidTitle: "Link ongeldig",
   resetSubmit: "Wachtwoord opslaan",
+  tooManyAttempts:
+    "Te veel mislukte pogingen. Probeer het over {minutes} minuten opnieuw, of vraag de beheerder om een nieuw wachtwoord.",
+  tooManyAttemptsHours:
+    "Te veel mislukte pogingen. Probeer het over {hours} uur opnieuw, of vraag de beheerder om een nieuw wachtwoord.",
 };

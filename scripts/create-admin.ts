@@ -72,7 +72,7 @@ if (existing) {
 const user = await createUser({
   name,
   email,
-  passwordHash: hashPassword(password),
+  passwordHash: await hashPassword(password),
   role: "admin",
 });
 
