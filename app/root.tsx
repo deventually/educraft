@@ -12,6 +12,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import "~/lib/zodCsp";
 import { ToastProvider, useFlashToast } from "~/components/Toast";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";

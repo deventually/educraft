@@ -141,7 +141,22 @@ click-through of every app surface (login, home, one-shot/grader/chat tools,
 projects, account, admin) plus a live generation and feedback submit — all with
 zero CSP violations. `frame-ancestors 'none'`, `base-uri 'self'`,
 `form-action 'self'` and `object-src 'none'` are set explicitly because they
-do not fall back to `default-src`. If you later add an external resource (a new font host,
+do not fall back to `default-src`.
+
+**Scripts need a nonce (P2).** `script-src` is `'self'` plus `'nonce-…'`, without
+`'unsafe-inline'`. The root middleware picks a fresh 128-bit nonce per request and puts it
+in the router context (`cspNonceContext`); `entry.server.tsx` hands it to
+`<ServerRouter nonce>` and `renderToPipeableStream({ nonce })`, so React Router's hydration
+scripts, `<Scripts>`, `<ScrollRestoration>` and React's streaming scripts carry the same
+nonce the header names. An injected inline script has no nonce and is refused. Never write
+an inline `<script>` yourself; put code in a module. Responses without a page (API,
+exports, redirects) allow no inline script at all. Zod runs jitless (`app/lib/zodCsp.ts`),
+because its `new Function` probe would otherwise be reported as a violation (there is no
+`'unsafe-eval'`). Styles keep `'unsafe-inline'`: React renders `style` attributes, which a
+nonce cannot cover. `tests/server/cspNonceRender.test.ts` renders a page through the real
+entry.server and checks that every `<script>` carries the header's nonce.
+
+If you later add an external resource (a new font host,
 analytics, an image CDN, a cross-origin API), extend the relevant directive in
 `securityHeaders.server.ts` or it will be blocked.
 
@@ -158,4 +173,5 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
    localized "daily limit reached" error; an admin is exempt.
 7. Check container logs → one structured JSON line per generation
    (`{"event":"generation",...,"outcome":"ok"}`), **no prompt/response content**.
-8. Browser console shows **no CSP violations** → flip CSP to enforcing.
+8. Browser console shows **no CSP violations** (in particular no refused inline script:
+   then hydration failed and buttons do nothing).

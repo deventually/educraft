@@ -1,12 +1,20 @@
 import { describe, it, expect } from "vitest";
+import { RouterContextProvider } from "react-router";
 import {
   SECURITY_HEADERS,
   CSP,
   HSTS,
   applySecurityHeaders,
+  contentSecurityPolicy,
+  createCspNonce,
+  cspNonceOf,
   securityHeadersMiddleware,
   withSecurityHeaders,
 } from "~/server/securityHeaders.server";
+
+/** The `script-src` directive of a policy. */
+const scriptSrc = (policy: string) =>
+  policy.split("; ").find((directive) => directive.startsWith("script-src "));
 
 describe("security headers", () => {
   it("sets the standard hardening headers", () => {
@@ -30,10 +38,20 @@ describe("security headers", () => {
     expect(CSP).toContain("style-src 'self' 'unsafe-inline';");
     expect(CSP).toContain("font-src 'self';");
     expect(CSP).toContain("default-src 'self'");
-    // React Router injects inline hydration scripts.
-    expect(CSP).toContain("script-src 'self' 'unsafe-inline'");
     // Images may be data:/blob: (uploaded page previews).
     expect(CSP).toContain("img-src 'self' data: blob:");
+  });
+
+  it("allows no inline script without a nonce", () => {
+    expect(scriptSrc(CSP)).toBe("script-src 'self'");
+    expect(scriptSrc(CSP)).not.toContain("'unsafe-inline'");
+  });
+
+  it("allows exactly the inline scripts that carry this request's nonce", () => {
+    const policy = contentSecurityPolicy("abc123");
+    expect(scriptSrc(policy)).toBe("script-src 'self' 'nonce-abc123'");
+    // Everything else stays the same as the nonce-less policy.
+    expect(policy.replace(" 'nonce-abc123'", "")).toBe(CSP);
   });
 
   it("closes the CSP gaps default-src does not cover", () => {
@@ -65,6 +83,27 @@ describe("security headers", () => {
   });
 });
 
+describe("CSP nonce", () => {
+  it("is fresh, unguessable base64 for every request (128 bits)", () => {
+    const nonces = new Set(Array.from({ length: 50 }, () => createCspNonce()));
+    expect(nonces.size).toBe(50);
+    for (const nonce of nonces) {
+      expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/);
+    }
+  });
+
+  it("is null outside a request (no middleware ran)", () => {
+    expect(cspNonceOf(new RouterContextProvider())).toBeNull();
+    expect(cspNonceOf(undefined)).toBeNull();
+  });
+
+  it("puts the nonce into the policy when one is given", () => {
+    const headers = new Headers();
+    applySecurityHeaders(headers, { production: false, nonce: "n0nce" });
+    expect(headers.get("Content-Security-Policy")).toBe(contentSecurityPolicy("n0nce"));
+  });
+});
+
 describe("withSecurityHeaders", () => {
   it("keeps status, body and the route's own headers", async () => {
     const original = new Response("{}", {
@@ -90,22 +129,45 @@ describe("withSecurityHeaders", () => {
 });
 
 describe("securityHeadersMiddleware", () => {
-  const args = {
-    request: new Request("http://localhost/api/stream", { method: "POST" }),
-    params: {},
-    context: {},
-  } as unknown as Parameters<typeof securityHeadersMiddleware>[0];
+  const argsWith = (context: RouterContextProvider) =>
+    ({
+      request: new Request("http://localhost/api/stream", { method: "POST" }),
+      params: {},
+      context,
+    }) as unknown as Parameters<typeof securityHeadersMiddleware>[0];
 
   it("puts the headers on a resource route's response (API, exports)", async () => {
+    const context = new RouterContextProvider();
     const response = (await securityHeadersMiddleware(
-      args,
+      argsWith(context),
       async () =>
         new Response("data: hi\n\n", { headers: { "Content-Type": "text/event-stream" } }),
     )) as Response;
     expect(response.headers.get("Content-Type")).toBe("text/event-stream");
     for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+      if (key === "Content-Security-Policy") continue;
       expect(response.headers.get(key)).toBe(value);
     }
+    expect(response.headers.get("Content-Security-Policy")).toBe(
+      contentSecurityPolicy(cspNonceOf(context)),
+    );
+  });
+
+  it("gives the render the same nonce the CSP header names, fresh per request", async () => {
+    const seen: (string | null)[] = [];
+    const policies: (string | null)[] = [];
+    for (let i = 0; i < 2; i++) {
+      const context = new RouterContextProvider();
+      const response = (await securityHeadersMiddleware(argsWith(context), async () => {
+        // entry.server renders inside next(): the nonce is already there.
+        seen.push(cspNonceOf(context));
+        return new Response("<html></html>");
+      })) as Response;
+      policies.push(response.headers.get("Content-Security-Policy"));
+    }
+    expect(seen[0]).toBeTruthy();
+    expect(seen[0]).not.toBe(seen[1]);
+    expect(policies).toEqual(seen.map((nonce) => contentSecurityPolicy(nonce)));
   });
 
   it("is the root route's middleware, so every matched route runs it", async () => {
