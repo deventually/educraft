@@ -19,7 +19,8 @@ import { useActionToast } from "~/components/Toast";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { StandSelect } from "~/components/features/selects";
 import { isModelIntent, modelAdminAction, modelAdminData } from "~/server/modelAdmin.server";
-import { ModelsTab, ProvidersTab } from "~/components/admin/models";
+import { ModelsTab } from "~/components/admin/models";
+import { ProvidersTab } from "~/components/admin/ProvidersTab";
 import { cn } from "~/lib/utils";
 
 /** The page's tabs, in the URL (`?tab=`) so a tab can be linked and survives a reload. */
