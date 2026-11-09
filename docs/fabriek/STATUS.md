@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #202 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #203 gemerged)_
 
 ## Nu
 
+- **Rubric-editor en -invullen opgesplitst (#203) gemerged op 2026-11-09:** `RubricEditor.tsx`
+  (559 → 197 regels) en `RubricFill.tsx` (472 → 204) zijn verdeeld over kleinere onderdelen; het
+  resultaatlabel is nu één functie `resultLabel`. Beide bestanden zijn van de ratchet-lijst af.
+  Geen gedragswijziging.
 - **Portfoliopagina's opgesplitst (#202) gemerged op 2026-11-09:** `portfolio.$id.tsx` (458 → 349
   regels) en `portfolio.$id.outcome.$outcomeId.tsx` (507 → 327) delen nu de onderdelen
   `DossierExport` en `EvidenceRow`; beide routes zijn van de ratchet-lijst af. Geen
