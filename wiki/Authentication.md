@@ -236,6 +236,26 @@ approval first. Every link below is shown on the page for the admin to copy and 
   stays unspent (`reset.$token.tsx`) until the account is reactivated.
 - Nobody uses these on their own account; they use `/account`.
 
+## Audit log of admin actions (P1)
+
+Every admin action that changes someone's access writes one row to `admin_audit`
+(`recordAdminAction`, `app/server/repositories/auditLog.server.ts`), **after** the change
+succeeded; a refusal writes nothing. The actions (`AUDIT_ACTIONS`, `app/lib/auditLog.ts`): a role
+change (from → to), a password set by the owner, a reset link minted, (de)activation (per person or
+via the selection), an account created or deleted, invites created (with a count) or revoked, and
+the model choice of the instance or of one teacher.
+
+- **Facts, not secrets:** a row holds ids, the action and a small `detail` (`from`/`to`, `count`,
+  `role`, `models`, `bulk`). Never a password, a link, a token or an invite's note.
+- **No names stored:** the page joins the current names. A deleted account stays in the log as
+  "Deleted account"; the fact remains, the person does not.
+- **Kept a year:** nothing edits a row. Entries older than `AUDIT_RETENTION_DAYS` (365) are
+  removed on every new entry and whenever `/admin/audit` is opened. The page shows the newest 200.
+- **Cleaning up by hand (owner only):** "Logboek opruimen" removes entries older than 30, 90 or
+  180 days, or everything, behind a cannot-be-undone warning and type-to-confirm. Only the owner,
+  because wiping the log is the one way to hide what an admin did. The cleanup itself is then
+  recorded (`logCleaned`, with the age and count), so it is the first entry of what remains.
+
 ## What SSO will (and won't) replace
 
 Institutional SSO (SURFconext / SAML / OIDC) later replaces **only** the login /

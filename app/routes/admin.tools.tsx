@@ -80,12 +80,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  await requireRole(request, "admin");
+  const admin = await requireRole(request, "admin");
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
 
   // ── Models: allow-list, add, upgrade, phase out ──────────────────────────────
-  if (isModelIntent(intent)) return modelAdminAction(intent, fd);
+  if (isModelIntent(intent)) return modelAdminAction(intent, fd, admin.id);
 
   const stand = fd.get("stand");
   if (intent === "tool") {
