@@ -26,6 +26,9 @@ export const envSchema = z.object({
   // has a default that fits a long document; lower it on a machine with little memory.
   OLLAMA_NUM_CTX: z.coerce.number().int().min(2048).optional(),
   DATABASE_URL: z.string().default("file:./data/limeonit.db"),
+  // Where the daily backup goes (backup.server). Unset: `backups/` next to the database in
+  // production, off elsewhere. "off" turns it off. Read at call time by backupDir().
+  BACKUP_DIR: z.string().optional(),
   // Where the drizzle migrations live; overridable for the built/Docker image.
   MIGRATIONS_DIR: z.string().default("./drizzle"),
   // Signs the session cookie. Min 32 chars; a dev default keeps local/test boots

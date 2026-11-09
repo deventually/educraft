@@ -299,6 +299,12 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Bezig
 
+- **Ingebouwde back-up zonder stilstand (PR open, P0-punt 2 uit de Doorlichting):** de app maakt
+  zelf elke dag een back-up van de database terwijl hij doorloopt (SQLite online backup), naar
+  `backups/` naast de database (`/data/backups` in Docker, of `BACKUP_DIR`), met rotatie (7 dagen,
+  4 weken). `npm run backup` / `node build/ops/backup.js` maakt er nu een; `restore` zet er een
+  terug na een controle en bewaart de oude database. Van de server af kopiëren blijft handwerk.
+  Geen migratie, geen nieuwe dependency.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de
