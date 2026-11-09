@@ -31,9 +31,9 @@ import {
   ToolsField,
   PedagogyField,
   LearnerNounField,
-  DomainFields,
-  CustomFieldsEditor,
 } from "./ContextFields";
+import { DomainFields } from "./DomainFields";
+import { CustomFieldsEditor } from "./CustomFieldsEditor";
 
 export function ContextProfileEditor({
   onCancel,

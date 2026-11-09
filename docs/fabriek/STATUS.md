@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #199 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #200 gemerged)_
 
 ## Nu
 
+- **Contextvelden en vakgebiedpakketten opgesplitst (#200) gemerged op 2026-11-09:**
+  `ContextFields.tsx` (636 → 380 regels) is verdeeld over `DomainFields`, `CustomFieldsEditor` en
+  `Field`; `packs.ts` (538 → 110) over `packsCareSociety` en `packsTechBusiness`. Beide bestanden
+  zijn van de ratchet-lijst af. Geen gedragswijziging.
 - **ChatView opgesplitst (#199) gemerged op 2026-11-09:** `ChatView.tsx` (648 → 253 regels) is
   verdeeld over de hook `useChatSession` en de onderdelen `ChatSetupCard`, `ChatSettingsAside`,
   `ChatThread` en `ChatComposer`; het bestand is van de ratchet-lijst af. Geen gedragswijziging.
