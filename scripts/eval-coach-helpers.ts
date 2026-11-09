@@ -122,7 +122,7 @@ export function scoreCoachCase(c: CoachCase, result: ParseResult): CoachScore {
 }
 
 /** File names (recursively) under a directory; empty when it does not exist. */
-export function fileNames(dir: string): string[] {
+function fileNames(dir: string): string[] {
   if (!dir || !existsSync(dir)) return [];
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);

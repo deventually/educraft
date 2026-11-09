@@ -240,7 +240,7 @@ function run(
   }
 }
 
-export function isCourseIntent(value: unknown): value is CourseIntent {
+function isCourseIntent(value: unknown): value is CourseIntent {
   return (COURSE_INTENTS as readonly unknown[]).includes(value);
 }
 

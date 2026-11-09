@@ -21,7 +21,7 @@ import { isNlqfLevel, type NlqfLevel } from "./nlqf";
 import { isEqfLevel } from "./eqf";
 
 export const MAX_CUSTOM_FIELDS = 30;
-export const MAX_CUSTOM_LABEL = 120;
+const MAX_CUSTOM_LABEL = 120;
 export const MAX_CUSTOM_VALUE = 600;
 export const MAX_PEDAGOGY = 300;
 

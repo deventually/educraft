@@ -23,7 +23,7 @@ import type { EqfLevel } from "./types";
 export type NlqfLevel = "instroom" | "1" | "2" | "3" | "4" | "4+" | "5" | "6" | "7" | "8";
 
 /** Every NLQF level low → high, the order shown in the level picker. */
-export const NLQF_LEVEL_ORDER: readonly NlqfLevel[] = [
+const NLQF_LEVEL_ORDER: readonly NlqfLevel[] = [
   "instroom",
   "1",
   "2",

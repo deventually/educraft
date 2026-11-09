@@ -37,7 +37,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
    system (`useFormToast` / `useActionToast`); don't announce the same event inline as well.
 4. **Deep modules.** Narrow interfaces over powerful implementations. An
    `if (tool.mode === …)` or per-tool branch means: refactor toward a deeper component.
-5. **Simple and maintainable.** Remove what is redundant. Engine stays locale/level-neutral
+5. **Simple and maintainable.** Remove what is redundant: knip (`knip.json`, part of
+   `npm run check`) fails on unused files, exports and dependencies, so export only what another
+   file imports. Engine stays locale/level-neutral
    (specifics live in packs). Pinned toolchain (Volta, Node 24.14.1).
 6. **Ratchets only go down** (`tests/ratchet.test.ts`): suppressions (`as any`, `@ts-ignore`,
    `@ts-expect-error`, `biome-ignore`) and files in `app/` over 400 lines. Lowered a count? Lower
@@ -49,6 +51,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | --- | --- |
 | `npm test` · `npm run typecheck` · `npm run check` | **The gate.** All three green before done. |
 | `npm run test:watch` | Tests in watch mode. |
+| `npm run knip` | Unused files, exports and dependencies (also runs in `npm run check`). |
 | `npm run dev` · `npm run build` | Dev server (port 5173) · production build. |
 | `npm run db:generate` | Generate a Drizzle migration from the schema. |
 | `npm run db:migrate` | Apply migrations (also creates the local DB). |

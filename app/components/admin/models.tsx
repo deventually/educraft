@@ -90,7 +90,7 @@ function useModelToast(data: ModelActionResult | undefined) {
 
 const sectionHeading = "font-display text-lg font-medium tracking-tight text-slate-900";
 
-export function ProviderList({ providers }: { providers: ProviderView[] }) {
+function ProviderList({ providers }: { providers: ProviderView[] }) {
   const t = useT();
   const locale = useLocale();
   const a = t.modelAdmin;
@@ -168,7 +168,7 @@ function AddedProviderFooter({ provider }: { provider: ProviderView }) {
 }
 
 /** Add a provider: an API at an address. Its key setting is derived and stays in .env. */
-export function AddProviderForm() {
+function AddProviderForm() {
   const t = useT();
   const a = t.modelAdmin;
   const fetcher = useFetcher<ModelActionResult>();
@@ -304,7 +304,7 @@ function CheckField({
   );
 }
 
-export function AddModelForm({ providers }: { providers: ProviderView[] }) {
+function AddModelForm({ providers }: { providers: ProviderView[] }) {
   const t = useT();
   const locale = useLocale();
   const a = t.modelAdmin;
@@ -586,7 +586,7 @@ function ModelCard({ model, targets }: { model: ModelView; targets: ModelView[] 
   );
 }
 
-export function ModelList({ models }: { models: ModelView[] }) {
+function ModelList({ models }: { models: ModelView[] }) {
   const t = useT();
   const a = t.modelAdmin;
   const active = models.filter((m) => m.state === "active");
@@ -615,7 +615,7 @@ export interface LocalView {
 }
 
 /** CLI agents and local servers: always shown, usable only outside production. */
-export function LocalModels({ local }: { local: LocalView }) {
+function LocalModels({ local }: { local: LocalView }) {
   const t = useT();
   const a = t.modelAdmin;
   const found = (n: number) =>
@@ -666,7 +666,7 @@ export function LocalModels({ local }: { local: LocalView }) {
 }
 
 /** The instance allow-list (P14/P18): which models users may pick. Moved from Tools. */
-export function ModelAllowList({ choices }: { choices: ChoiceView[] }) {
+function ModelAllowList({ choices }: { choices: ChoiceView[] }) {
   const t = useT();
   const m = t.admin.models;
   return (

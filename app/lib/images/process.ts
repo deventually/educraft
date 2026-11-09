@@ -15,7 +15,7 @@ const DOWNSCALE_TARGET_SIZE = 2048;
  * - File size must not exceed MAX_IMAGE_SIZE
  * Returns error message if invalid, undefined if valid.
  */
-export function validateImageFile(file: File, acceptMimes: string): string | undefined {
+function validateImageFile(file: File, acceptMimes: string): string | undefined {
   const mimes = acceptMimes.split(",").map((m) => m.trim());
 
   if (!mimes.includes(file.type)) {
@@ -35,7 +35,7 @@ export function validateImageFile(file: File, acceptMimes: string): string | und
  * - Total count must not exceed MAX_IMAGES
  * Returns error message if invalid, undefined if valid.
  */
-export function validateImageBatch(files: File[], acceptMimes: string): string | undefined {
+function validateImageBatch(files: File[], acceptMimes: string): string | undefined {
   for (const file of files) {
     const error = validateImageFile(file, acceptMimes);
     if (error) return error;
@@ -156,4 +156,4 @@ export async function filesToImageInputs(
   return images;
 }
 
-export { MAX_IMAGE_SIZE, MAX_IMAGES, DOWNSCALE_TARGET_SIZE };
+export { MAX_IMAGES };

@@ -71,7 +71,7 @@ export const RubricScoreSchema = z.array(Pair).min(1).max(RUBRIC_LIMITS.criteria
 export type RubricScore = z.infer<typeof RubricScoreSchema>;
 
 /** The most fill-ins one batch may close at once. */
-export const MAX_BATCH = 200;
+const MAX_BATCH = 200;
 
 export const RubricScoresSchema = z.array(RubricScoreSchema).min(1).max(MAX_BATCH);
 

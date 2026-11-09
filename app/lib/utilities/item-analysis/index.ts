@@ -120,9 +120,9 @@ export function analyse(table: ScoreTable): TestStats {
 // Parsing a pasted score list
 // ---------------------------------------------------------------------------------------------
 
-export const MIN_CANDIDATES = 3;
-export const MAX_CANDIDATES = 5000;
-export const MAX_ITEMS = 200;
+const MIN_CANDIDATES = 3;
+const MAX_CANDIDATES = 5000;
+const MAX_ITEMS = 200;
 
 export type ParseError =
   | "empty"

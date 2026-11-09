@@ -15,7 +15,7 @@ import type { Sector } from "./sectors";
 import { DOMAIN_PACKS, type DomainPack } from "./packs";
 
 /** Verified packs per country → sector → domain slug. Additive; hbo-only today. */
-export const FRAMEWORK_REGISTRY: Partial<
+const FRAMEWORK_REGISTRY: Partial<
   Record<CountryCode, Partial<Record<Sector, Record<string, DomainPack>>>>
 > = {
   NL: {

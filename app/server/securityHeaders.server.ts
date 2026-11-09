@@ -47,7 +47,7 @@ export function createCspNonce(): string {
 }
 
 /** The current request's CSP nonce, set by the root middleware before anything renders. */
-export const cspNonceContext = createContext<string | null>(null);
+const cspNonceContext = createContext<string | null>(null);
 
 export function cspNonceOf(context: Pick<RouterContextProvider, "get"> | undefined): string | null {
   return context?.get(cspNonceContext) ?? null;

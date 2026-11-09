@@ -42,7 +42,7 @@ export const COACH_LIMITS = {
   overall: 600,
 } as const;
 
-export const CriterionReviewSchema = z.object({
+const CriterionReviewSchema = z.object({
   criterionId: Id,
   verdict: z.enum(VERDICTS),
   quote: z.string().max(COACH_LIMITS.quote).optional(),
@@ -52,7 +52,7 @@ export const CriterionReviewSchema = z.object({
   evidenceNeeded: z.array(z.string().max(COACH_LIMITS.item)).max(COACH_LIMITS.items),
 });
 
-export const CoachReviewSchema = z.object({
+const CoachReviewSchema = z.object({
   criteria: z.array(CriterionReviewSchema).max(LIMITS.criteriaPerOutcome),
   overall: z.string().max(COACH_LIMITS.overall),
 });
@@ -65,21 +65,21 @@ export const PROOFREAD_LIMITS = {
   suggestion: 800,
 } as const;
 
-export const ProofreadSuggestionSchema = z.object({
+const ProofreadSuggestionSchema = z.object({
   quote: z.string().min(1).max(PROOFREAD_LIMITS.quote),
   issue: z.enum(PROOFREAD_ISSUES),
   explanation: z.string().max(PROOFREAD_LIMITS.explanation),
   suggestion: z.string().max(PROOFREAD_LIMITS.suggestion),
 });
 
-export const CriterionSchema = z.object({
+const CriterionSchema = z.object({
   id: Id,
   text: z.string().min(1).max(LIMITS.criterionText),
   strongLevel: z.string().max(LIMITS.criterionText).optional(),
   unverified: z.boolean().optional(),
 });
 
-export const OutcomeSchema = z.object({
+const OutcomeSchema = z.object({
   id: Id,
   code: z.string().max(LIMITS.code),
   title: z.string().min(1).max(LIMITS.title),
@@ -89,7 +89,7 @@ export const OutcomeSchema = z.object({
     .max(LIMITS.requiredEvidence),
 });
 
-export const FrameworkSchema = z.object({
+const FrameworkSchema = z.object({
   institution: z.string().max(LIMITS.name),
   year: z.string().max(20).optional(),
   outcomes: z.array(OutcomeSchema).max(LIMITS.outcomes),
