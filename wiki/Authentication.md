@@ -189,6 +189,15 @@ repository, `app/server/repositories/shares.server.ts`.
 - Passwords hashed with Node's built-in `scrypt`
   ([`password.server.ts`](../app/server/password.server.ts)) — no native
   bcrypt/argon2 dependency. Stored self-describing as `scrypt:<saltHex>:<hashHex>`.
+- **One rule for every new password (P2):** `passwordProblem` in `password.server.ts`,
+  used by the invite, reset, `/account` and both admin forms. At least
+  `MIN_PASSWORD_LENGTH` (10) characters, not on the common-password list, not a common
+  word padded with digits or symbols ("Welkom2026!"), and not one short unit repeated
+  ("abcabcabcabc"). The list ([`data/commonPasswords.ts`](../app/server/data/commonPasswords.ts),
+  ~18k entries, lower case) is the top 10,000 plus every 10+-character entry of the UK
+  NCSC's "100k most used passwords" (via SecLists), plus Dutch and school favourites. It
+  is checked locally: no external service, no password leaves the server. Logging in is
+  never checked against it, so an existing weak password keeps working until it changes.
 - `SESSION_SECRET` (min 32 chars) signs the cookie. A dev default keeps local/test
   boots frictionless; **production refuses to boot** with the dev default.
 
@@ -223,7 +232,7 @@ approval first. Every link below is shown on the page for the admin to copy and 
 - **Create an account** (owner only, **Add** on `/admin/users`): name, e-mail (required, logging in
   uses it), role teacher or admin, and either a **link** (default: the account exists with
   `passwordHash = NO_PASSWORD`, which no typed password matches, plus a 7-day single-use
-  reset link) or an **initial password** (at least 10 characters, hashed by
+  reset link) or an **initial password** (the rule above, hashed by
   `hashPassword`, never shown again).
 - **Set a password** (owner only): `setPassword` writes a hash through
   `updateUserPassword`, so the user is signed out on every device. The password is never

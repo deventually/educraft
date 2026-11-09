@@ -11,7 +11,7 @@ import {
   updateUserEmail,
   updateUserPassword,
 } from "~/server/repositories/users.server";
-import { hashPassword, verifyPassword } from "~/server/password.server";
+import { hashPassword, passwordProblem, verifyPassword } from "~/server/password.server";
 import { listTeamsForUser } from "~/server/repositories/teams.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -78,7 +78,8 @@ export async function action({ request }: Route.ActionArgs) {
     }
     const password = String(fd.get("password") ?? "");
     const confirm = String(fd.get("confirm") ?? "");
-    if (password.length < 10) return { error: m.auth.passwordTooShort };
+    const problem = passwordProblem(password);
+    if (problem) return { error: m.auth[problem] };
     if (password !== confirm) return { error: m.auth.passwordMismatch };
     // Bumps sessionVersion (logs out every other device); re-issue this device's
     // cookie so the person who just changed the password stays signed in.

@@ -124,6 +124,33 @@ describe("account deletion — the owner (P18.6)", () => {
 });
 
 describe("account password change (P17)", () => {
+  it("refuses a commonly used password and keeps the old one", async () => {
+    const pw = await import("~/server/password.server");
+    const u = await users.createUser({
+      id: "acc-pwcommon",
+      name: "Pw Common",
+      email: "pwcommon@example.com",
+      passwordHash: await pw.hashPassword("old-password-x"),
+      role: "teacher",
+    });
+    actAs(u.id, "teacher");
+    const res = (await route.action({
+      request: new Request("http://localhost/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          intent: "changePassword",
+          currentPassword: "old-password-x",
+          password: "qwertyuiop",
+          confirm: "qwertyuiop",
+        }).toString(),
+      }),
+    } as Parameters<typeof route.action>[0])) as { error?: string };
+    expect(res.error).toMatch(/veelgebruikt|commonly used/);
+    const after = await users.getUserById(u.id);
+    expect(await pw.verifyPassword("old-password-x", after!.passwordHash)).toBe(true);
+  });
+
   it("logs out other devices but keeps the changing device signed in", async () => {
     const auth = await import("~/server/auth.server");
     const pw = await import("~/server/password.server");

@@ -975,7 +975,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(ok instanceof Response).toBe(true);
   });
 
-  it("refuses a taken email, a short password and an unknown role", async () => {
+  it("refuses a taken email, a short or common password and an unknown role", async () => {
     await actAsOwner();
     await mkUser("Taken", "teacher", "taken-p187@example.com");
     const before = (await users.listUsers()).length;
@@ -991,6 +991,16 @@ describe("admin.users action — owner accounts (P18.7)", () => {
         })
       ).error,
     ).toBe("passwordTooShort");
+    expect(
+      (
+        await create({
+          email: "common@example.com",
+          passwordMode: "password",
+          password: "Password123",
+          confirm: "Password123",
+        })
+      ).error,
+    ).toBe("passwordCommon");
     expect(
       (
         await create({
@@ -1075,7 +1085,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(await users.getPasswordReset(other.token)).toBeNull();
   });
 
-  it("setPassword refuses a short or mismatching password and changes nothing", async () => {
+  it("setPassword refuses a short, common or mismatching password and changes nothing", async () => {
     await actAsOwner();
     const pw = await password();
     const target = await users.createUser({
@@ -1089,6 +1099,16 @@ describe("admin.users action — owner accounts (P18.7)", () => {
       (await run({ intent: "setPassword", userId: target.id, password: "short", confirm: "short" }))
         .error,
     ).toBe("passwordTooShort");
+    expect(
+      (
+        await run({
+          intent: "setPassword",
+          userId: target.id,
+          password: "Welkom2026!",
+          confirm: "Welkom2026!",
+        })
+      ).error,
+    ).toBe("passwordCommon");
     expect(
       (
         await run({

@@ -19,6 +19,8 @@ export const auth = {
   name: "Naam",
   nameRequired: "Naam is verplicht.",
   password: "Wachtwoord",
+  passwordCommon:
+    "Dit wachtwoord is te makkelijk te raden: het lijkt op een veelgebruikt wachtwoord. Kies iets wat niemand anders zou kiezen, bijvoorbeeld een paar losse woorden achter elkaar.",
   passwordMismatch: "De wachtwoorden komen niet overeen.",
   passwordRepeat: "Herhaal wachtwoord",
   passwordTooShort: "Wachtwoord moet minstens 10 tekens bevatten.",

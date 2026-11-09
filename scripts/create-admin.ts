@@ -15,7 +15,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { createUser, getUserByEmail } from "../app/server/repositories/users.server";
-import { hashPassword } from "../app/server/password.server";
+import { hashPassword, passwordProblem } from "../app/server/password.server";
 import { env } from "../app/server/env.server";
 
 function parseArgs(argv: string[]): Record<string, string> {
@@ -55,8 +55,13 @@ if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
   console.error(`Invalid or missing --email "${args.email ?? ""}". An admin signs in with an email + password.`);
   process.exit(1);
 }
-if (password.length < 10) {
-  console.error("--password must be at least 10 characters.");
+const problem = passwordProblem(password);
+if (problem) {
+  console.error(
+    problem === "passwordTooShort"
+      ? "--password must be at least 10 characters."
+      : "--password is a commonly used password; choose one nobody else would.",
+  );
   process.exit(1);
 }
 

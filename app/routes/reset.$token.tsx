@@ -7,7 +7,7 @@ import {
   getUserById,
   updateUserPassword,
 } from "~/server/repositories/users.server";
-import { hashPassword } from "~/server/password.server";
+import { hashPassword, passwordProblem } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { Button, Card, Input, Label } from "~/components/ui";
@@ -42,7 +42,8 @@ export async function action({ params, request }: Route.ActionArgs) {
 
   const password = String(fd.get("password") ?? "");
   const confirm = String(fd.get("confirm") ?? "");
-  if (password.length < 10) return { error: m.auth.passwordTooShort };
+  const problem = passwordProblem(password);
+  if (problem) return { error: m.auth[problem] };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
   // Checked before the token is claimed, so a deactivated account's link is not spent.

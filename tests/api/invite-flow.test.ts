@@ -117,6 +117,22 @@ describe("invite flow (loader + action)", () => {
     expect(res instanceof Response && res.status === 302).toBe(false);
     expect(await users.getUserByEmail("shorty@example.com")).toBeNull();
   });
+
+  it("rejects a commonly used password", async () => {
+    const invite = await users.createInvite({ role: "teacher" });
+    const res = (await route.action({
+      params: { token: invite.token },
+      request: formRequest({
+        name: "Common",
+        email: "common-invite@example.com",
+        password: "Wachtwoord123",
+        confirm: "Wachtwoord123",
+      }),
+    } as ActionArgs)) as { error?: string };
+    expect(res.error).toMatch(/veelgebruikt|commonly used/);
+    expect(await users.getUserByEmail("common-invite@example.com")).toBeNull();
+    expect((await users.getInvite(invite.token))?.usedByUserId ?? null).toBeNull();
+  });
 });
 
 describe("invite flow — legacy invites (P17)", () => {
