@@ -67,7 +67,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     id: userId,
     name,
     email: emailRaw || null,
-    passwordHash: hashPassword(password),
+    passwordHash: await hashPassword(password),
     role: "teacher", // never taken from the invite row or the form
   });
   // A team invite (P28.2) makes the new teacher a member of that team.

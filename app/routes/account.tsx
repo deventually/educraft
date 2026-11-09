@@ -49,7 +49,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (!row) return logout(request);
 
   if (intent === "changeEmail") {
-    if (!verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash)) {
+    if (!(await verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash))) {
       return { error: m.account.wrongPassword };
     }
     const email = String(fd.get("email") ?? "").trim() || null;
@@ -65,7 +65,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "changePassword") {
-    if (!verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash)) {
+    if (!(await verifyPassword(String(fd.get("currentPassword") ?? ""), row.passwordHash))) {
       return { error: m.account.wrongPassword };
     }
     const password = String(fd.get("password") ?? "");
@@ -74,7 +74,7 @@ export async function action({ request }: Route.ActionArgs) {
     if (password !== confirm) return { error: m.auth.passwordMismatch };
     // Bumps sessionVersion (logs out every other device); re-issue this device's
     // cookie so the person who just changed the password stays signed in.
-    await updateUserPassword(user.id, hashPassword(password));
+    await updateUserPassword(user.id, await hashPassword(password));
     return data(
       { ok: "password" as const },
       { headers: { "Set-Cookie": await reissueSessionCookie(user.id) } },

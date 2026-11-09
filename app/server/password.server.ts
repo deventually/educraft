@@ -1,4 +1,11 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "node:crypto";
+
+/** scrypt on libuv's thread pool, so hashing never blocks other requests. */
+function scryptAsync(password: string, salt: Buffer, keylen: number, opts: ScryptOptions) {
+  return new Promise<Buffer>((resolve, reject) =>
+    scrypt(password, salt, keylen, opts, (err, key) => (err ? reject(err) : resolve(key))),
+  );
+}
 
 /**
  * Password hashing with Node's built-in scrypt — no native bcrypt/argon2
@@ -22,9 +29,9 @@ const SCRYPT_OPTS = {
 } as const;
 
 /** Hash a plaintext password into a `scrypt:<saltHex>:<hashHex>` record. */
-export function hashPassword(password: string): string {
+export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(SALT_BYTES);
-  const hash = scryptSync(password, salt, KEY_LENGTH, SCRYPT_OPTS);
+  const hash = await scryptAsync(password, salt, KEY_LENGTH, SCRYPT_OPTS);
   return `scrypt:${salt.toString("hex")}:${hash.toString("hex")}`;
 }
 
@@ -32,7 +39,7 @@ export function hashPassword(password: string): string {
  * Constant-time verification against a stored record. Returns false (never
  * throws) for a malformed or unrecognised record.
  */
-export function verifyPassword(password: string, stored: string): boolean {
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split(":");
   if (parts.length !== 3 || parts[0] !== "scrypt") return false;
   const [, saltHex, hashHex] = parts;
@@ -40,7 +47,7 @@ export function verifyPassword(password: string, stored: string): boolean {
     const salt = Buffer.from(saltHex, "hex");
     const expected = Buffer.from(hashHex, "hex");
     if (salt.length === 0 || expected.length === 0) return false;
-    const actual = scryptSync(password, salt, expected.length, SCRYPT_OPTS);
+    const actual = await scryptAsync(password, salt, expected.length, SCRYPT_OPTS);
     return actual.length === expected.length && timingSafeEqual(actual, expected);
   } catch {
     return false;

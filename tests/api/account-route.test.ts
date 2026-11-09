@@ -131,7 +131,7 @@ describe("account password change (P17)", () => {
       id: "acc-pwchange",
       name: "Pw Changer",
       email: "pwchanger@example.com",
-      passwordHash: pw.hashPassword("old-password-x"),
+      passwordHash: await pw.hashPassword("old-password-x"),
       role: "teacher",
     });
     const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0];

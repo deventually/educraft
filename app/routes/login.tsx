@@ -5,6 +5,9 @@ import { getUser, createUserSession } from "~/server/auth.server";
 import { getUserByEmail } from "~/server/repositories/users.server";
 import { isRole } from "~/lib/registry/access";
 import { verifyPassword } from "~/server/password.server";
+import { clientKeys, createAttemptLimiter } from "~/server/loginThrottle.server";
+import { clientIpHeader } from "~/server/env.server";
+import { fmt } from "~/lib/i18n/format";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { Button, Card, Input, Label } from "~/components/ui";
@@ -19,6 +22,26 @@ export function meta({ matches }: Route.MetaArgs) {
 const LoginSchema = z.object({
   email: z.string().trim().min(1).email(),
   password: z.string().min(1),
+});
+
+// Password guessing (P0 doorlichting): 5 wrong passwords for one address lock it for
+// 15 minutes; each next lockout doubles, up to 24 hours, until a successful login or
+// a day without failures. Never a deactivation: that would let anyone who knows an
+// address shut its owner out. One client IP (only with CLIENT_IP_HEADER) gets a higher cap, so a
+// whole school behind one address is not locked out by a few typos.
+const LOCKOUT_MS = 15 * 60_000;
+const DAY_MS = 24 * 60 * 60_000;
+const emailLimiter = createAttemptLimiter({
+  maxFailures: 5,
+  windowMs: LOCKOUT_MS,
+  lockoutMs: LOCKOUT_MS,
+  maxLockoutMs: DAY_MS,
+  forgetAfterMs: DAY_MS,
+});
+const ipLimiter = createAttemptLimiter({
+  maxFailures: 30,
+  windowMs: LOCKOUT_MS,
+  lockoutMs: LOCKOUT_MS,
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -37,10 +60,23 @@ export async function action({ request }: Route.ActionArgs) {
   // A single generic message for every failure mode → no user enumeration.
   if (!parsed.success) return { error: m.auth.loginFailed };
 
+  // Checked before the password, for known and unknown addresses alike, so a lock
+  // neither lets a right guess through nor reveals which accounts exist.
+  const [emailKey, ...ipKeys] = clientKeys(parsed.data.email, request, clientIpHeader());
+  const gate = [emailLimiter.check([emailKey]), ipLimiter.check(ipKeys)].find((g) => !g.ok);
+  if (gate && !gate.ok) {
+    const minutes = Math.ceil(gate.retryAfterMs / 60_000);
+    if (minutes <= 60) return { error: fmt(m.auth.tooManyAttempts, { minutes }) };
+    return { error: fmt(m.auth.tooManyAttemptsHours, { hours: Math.ceil(minutes / 60) }) };
+  }
+
   const row = await getUserByEmail(parsed.data.email);
-  if (!row || !verifyPassword(parsed.data.password, row.passwordHash)) {
+  if (!row || !(await verifyPassword(parsed.data.password, row.passwordHash))) {
+    emailLimiter.recordFailure([emailKey]);
+    ipLimiter.recordFailure(ipKeys);
     return { error: m.auth.loginFailed };
   }
+  emailLimiter.reset(emailKey);
   // A legacy row with a retired role (pre-P17 "student") may not enter; the same
   // generic message avoids listing which accounts exist.
   if (!isRole(row.role)) return { error: m.auth.loginFailed };
