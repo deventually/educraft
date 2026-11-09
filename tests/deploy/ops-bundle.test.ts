@@ -82,6 +82,13 @@ describe("ops bundle", () => {
     expect(row.role).toBe("admin");
   });
 
+  it("reset-2fa runs with plain node (P2-12)", () => {
+    const r = run("reset-2fa", ["--email", "beheer@school.nl"]);
+    expect(r.stderr).toBe("");
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("beheer@school.nl");
+  });
+
   it("backup copies the database into backups/ and restore puts it back", () => {
     const b = run("backup", []);
     expect(b.stderr).toBe("");

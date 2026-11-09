@@ -14,6 +14,7 @@ import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { personAction } from "~/server/personActions.server";
+import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
@@ -35,13 +36,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
   const target = await getUserById(params.id);
   if (!target) throw new Response("Not found", { status: 404 });
-  const [viewerIsOwner, storedOwnerId, lastActiveDay, allTeams, ownTeams] = await Promise.all([
-    isOwner(admin),
-    getOwnerUserId(),
-    getLastActiveDay(target.id),
-    listTeams(),
-    listTeamsForUser(target.id),
-  ]);
+  const [viewerIsOwner, storedOwnerId, lastActiveDay, allTeams, ownTeams, twoFactor] =
+    await Promise.all([
+      isOwner(admin),
+      getOwnerUserId(),
+      getLastActiveDay(target.id),
+      listTeams(),
+      listTeamsForUser(target.id),
+      isTwoFactorEnabled(target.id),
+    ]);
   // Every team, with this person's membership and lead stand (P28.2).
   const stand = new Map(ownTeams.map((team) => [team.id, team.isLead]));
   const teams = allTeams.map((team) => ({
@@ -122,6 +125,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       status: target.disabledAt ? ("disabled" as const) : ("active" as const),
       lastActiveDay,
       ownerBadge: target.id === storedOwnerId && target.role === "admin",
+      twoFactor,
     },
     models,
     features,
@@ -155,6 +159,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
     selfDeactivate: i.selfDeactivateError,
     selfDemote: i.selfDemoteError,
     selfEmail: i.selfEmailError,
+    selfTwoFactor: t.twoFactor.selfReset,
     ownerOnly: i.ownerOnlyError,
     invalidEmail: i.invalidEmailError,
     emailTaken: i.emailTakenError,
@@ -176,7 +181,12 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
           ? { variant: "error", message: errors[d.error] ?? t.error.generic }
           : {
               variant: "success",
-              message: "passwordSet" in d ? i.passwordSet : t.admin.console.saved,
+              message:
+                "passwordSet" in d
+                  ? i.passwordSet
+                  : "twoFactorReset" in d
+                    ? t.twoFactor.adminResetDone
+                    : t.admin.console.saved,
             },
   });
 
@@ -254,6 +264,10 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
           <dt className="font-medium text-slate-600">{p.status}</dt>
           <dd>
             <StatusBadge status={person.status} />
+          </dd>
+          <dt className="font-medium text-slate-600">{t.twoFactor.adminLabel}</dt>
+          <dd className="text-slate-800">
+            {person.twoFactor ? t.twoFactor.statusOn : t.twoFactor.statusOff}
           </dd>
           <dt className="font-medium text-slate-600">{p.lastActive}</dt>
           <dd className="text-slate-800">

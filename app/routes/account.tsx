@@ -13,6 +13,7 @@ import {
 } from "~/server/repositories/users.server";
 import { hashPassword, passwordProblem, verifyPassword } from "~/server/password.server";
 import { listTeamsForUser } from "~/server/repositories/teams.server";
+import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
@@ -35,6 +36,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     isOwner: await isOwner(user),
     // My teams (P28.2); a lead gets a link to the team page.
     teams: await listTeamsForUser(user.id),
+    // Two-step verification (P2-12) has its own page; here only the way there.
+    twoFactor: await isTwoFactorEnabled(user.id),
   };
 }
 
@@ -258,6 +261,18 @@ export default function Account({ loaderData }: Route.ComponentProps) {
             {t.account.savePassword}
           </Button>
         </Form>
+      </Card>
+
+      {/* ── Two-step verification (P2-12) ────────────────────────────────────── */}
+      <Card className="mt-6 p-6">
+        <h2 className="font-semibold text-slate-900">{t.twoFactor.heading}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t.twoFactor.accountCardIntro}</p>
+        <Link
+          to="/account/2fa"
+          className="mt-3 inline-block text-sm font-medium text-violet-700 underline hover:no-underline"
+        >
+          {loaderData.twoFactor ? t.twoFactor.accountCardManage : t.twoFactor.accountCardSetUp}
+        </Link>
       </Card>
 
       {/* ── Log out everywhere (P1-4) ───────────────────────────────────────── */}

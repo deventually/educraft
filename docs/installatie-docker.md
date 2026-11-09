@@ -126,6 +126,14 @@ docker compose exec app node build/ops/set-owner.js --email jij@school.nl
 docker compose exec app node build/ops/invite.js --note "Jan de Vries"
 ```
 
+Bij je eerste bezoek aan *Beheer* stel je tweestapsverificatie in: een code uit een
+authenticator-app op je telefoon. Dat is verplicht voor beheerders. Ben je als eigenaar je telefoon
+én je herstelcodes kwijt, zet het dan uit op de server en stel het daarna opnieuw in:
+
+```sh
+docker compose exec app node build/ops/reset-2fa.js --email jij@school.nl
+```
+
 ## 5. Bijwerken
 
 ```sh

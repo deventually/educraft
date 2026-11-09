@@ -40,6 +40,14 @@ describe("e2e setup", () => {
     expect(patterns.some((pattern) => matches(pattern, page.path))).toBe(true);
   });
 
+  it("signs in once per role, the admin with two-step verification (P2-12)", () => {
+    const config = read("playwright.config.ts");
+    expect(config).toContain("auth\\.setup\\.ts");
+    expect(config).toMatch(/dependencies: \["setup"\]/);
+    expect(read("e2e/auth.setup.ts")).toContain("/login/2fa");
+    expect(PAGES).toContainEqual({ path: "/account/2fa", as: "teacher" });
+  });
+
   it("each page is listed once", () => {
     const keys = PAGES.map((p) => `${p.as} ${p.path}`);
     expect(new Set(keys).size).toBe(keys.length);

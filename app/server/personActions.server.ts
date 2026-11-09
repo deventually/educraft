@@ -17,6 +17,7 @@ import { fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { redirectWithFlash } from "~/server/flash.server";
 import { recordAdminAction } from "~/server/repositories/auditLog.server";
+import { removeTwoFactor } from "~/server/repositories/twoFactor.server";
 import { FEATURES } from "~/lib/features";
 import { isChoice } from "~/lib/features/rule";
 import { ALL_TOOLS } from "~/lib/registry";
@@ -164,8 +165,22 @@ export async function personAction(
   // Authority first: a regular admin gets `ownerOnly` for all of these, whatever the
   // target (even themself), before anything is read or written. No password is ever
   // returned to the client.
-  if (intent === "setPassword" || intent === "deactivate" || intent === "reactivate") {
+  if (
+    intent === "setPassword" ||
+    intent === "deactivate" ||
+    intent === "reactivate" ||
+    intent === "resetTwoFactor"
+  ) {
     if (!actorIsOwner) return { error: "ownerOnly" as const };
+  }
+
+  // Two-step verification (P2-12): someone lost both phone and recovery codes. The owner's
+  // own goes via the server (`reset-2fa`), never here.
+  if (intent === "resetTwoFactor") {
+    const target = await ownerTarget(admin.id, userId);
+    if (!target) return { error: "selfTwoFactor" as const };
+    if (await removeTwoFactor(target.id)) await audit("twoFactorReset");
+    return { twoFactorReset: true as const };
   }
 
   if (intent === "setPassword") {

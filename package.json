@@ -22,6 +22,7 @@
     "restore": "tsx scripts/restore.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "set-owner": "tsx scripts/set-owner.ts",
+    "reset-2fa": "tsx scripts/reset-2fa.ts",
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",
     "eval:coach": "vite-node -c scripts/eval.config.ts scripts/eval-coach.ts",
     "eval:agents": "vite-node -c scripts/eval.config.ts scripts/eval-agents.ts",
@@ -52,6 +53,7 @@
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^3.7.0",
     "unpdf": "^1.9.1",
+    "uqr": "0.1.3",
     "zod": "^4.6.7"
   },
   "devDependencies": {

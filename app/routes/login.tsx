@@ -7,7 +7,8 @@ import { isRole } from "~/lib/registry/access";
 import { verifyPassword } from "~/server/password.server";
 import { clientKeys, createAttemptLimiter } from "~/server/loginThrottle.server";
 import { clientIpHeader } from "~/server/env.server";
-import { fmt } from "~/lib/i18n/format";
+import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
+import { lockoutMessage, startPendingLogin } from "~/server/twoFactorLogin.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { Button, Card, Input, Label } from "~/components/ui";
@@ -64,11 +65,7 @@ export async function action({ request }: Route.ActionArgs) {
   // neither lets a right guess through nor reveals which accounts exist.
   const [emailKey, ...ipKeys] = clientKeys(parsed.data.email, request, clientIpHeader());
   const gate = [emailLimiter.check([emailKey]), ipLimiter.check(ipKeys)].find((g) => !g.ok);
-  if (gate && !gate.ok) {
-    const minutes = Math.ceil(gate.retryAfterMs / 60_000);
-    if (minutes <= 60) return { error: fmt(m.auth.tooManyAttempts, { minutes }) };
-    return { error: fmt(m.auth.tooManyAttemptsHours, { hours: Math.ceil(minutes / 60) }) };
-  }
+  if (gate && !gate.ok) return { error: lockoutMessage(m, gate.retryAfterMs) };
 
   const row = await getUserByEmail(parsed.data.email);
   if (!row || !(await verifyPassword(parsed.data.password, row.passwordHash))) {
@@ -83,6 +80,12 @@ export async function action({ request }: Route.ActionArgs) {
   // A deactivated account (P18.7) is told so — but only after a correct password, so
   // this message never reveals which addresses exist.
   if (row.disabledAt) return { error: m.auth.accountDisabled };
+  // Two-step verification (P2-12): no session yet, first the code from the app.
+  if (await isTwoFactorEnabled(row.id)) {
+    return redirect("/login/2fa", {
+      headers: { "Set-Cookie": await startPendingLogin(row.id, row.sessionVersion ?? 0) },
+    });
+  }
   return createUserSession(row.id, "/", "signedIn");
 }
 
