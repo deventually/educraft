@@ -8,12 +8,15 @@ import { defineConfig } from "vite";
  *
  *   node build/ops/migrate.js
  *   node build/ops/create-admin.js --name "…" --email …
+ *   node build/ops/backup.js
  */
 export const OPS_SCRIPTS = [
   { name: "migrate", entry: "app/server/migrate.ts" },
   { name: "create-admin", entry: "scripts/create-admin.ts" },
   { name: "set-owner", entry: "scripts/set-owner.ts" },
   { name: "invite", entry: "scripts/invite.ts" },
+  { name: "backup", entry: "scripts/backup.ts" },
+  { name: "restore", entry: "scripts/restore.ts" },
 ] as const;
 
 const root = fileURLToPath(new URL("..", import.meta.url));

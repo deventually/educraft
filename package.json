@@ -17,6 +17,8 @@
     "db:migrate": "tsx app/server/migrate.ts",
     "db:push": "drizzle-kit push",
     "invite": "tsx scripts/invite.ts",
+    "backup": "tsx scripts/backup.ts",
+    "restore": "tsx scripts/restore.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "set-owner": "tsx scripts/set-owner.ts",
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",

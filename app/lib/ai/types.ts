@@ -31,6 +31,8 @@ export interface GenerateOptions {
    * providers ignore it.
    */
   thinking?: boolean;
+  /** Aborts the model call, e.g. when the teacher closes the tab mid-stream. */
+  signal?: AbortSignal;
 }
 
 export interface TokenUsage {

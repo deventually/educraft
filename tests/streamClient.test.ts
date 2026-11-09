@@ -107,3 +107,26 @@ describe("streamClient — localization-neutral errors", () => {
     expect(meta).toEqual({ generationId: "gen-9" });
   });
 });
+
+describe("streamClient — heartbeat", () => {
+  it("ignores the server's keep-alive comments", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseResponse([
+            ": keep-alive\n\n",
+            `data: {"t":"Hoi"}\n\n`,
+            ": keep-alive\n\n",
+            "event: done\ndata: {}\n\n",
+          ]),
+        ),
+    );
+    const tokens: string[] = [];
+    const onError = vi.fn();
+    await streamPost("/api/stream", {}, { onToken: (t) => tokens.push(t), onError });
+    expect(tokens).toEqual(["Hoi"]);
+    expect(onError).not.toHaveBeenCalled();
+  });
+});

@@ -96,11 +96,13 @@ describe("ops scripts in the image", () => {
     expect(existsSync(resolve(root, entry))).toBe(true);
   });
 
-  it("covers migrate, create-admin, set-owner and invite", () => {
+  it("covers migrate, create-admin, set-owner, invite, backup and restore", () => {
     expect(OPS_SCRIPTS.map((s) => s.name).sort()).toEqual([
+      "backup",
       "create-admin",
       "invite",
       "migrate",
+      "restore",
       "set-owner",
     ]);
   });

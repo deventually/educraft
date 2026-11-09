@@ -76,6 +76,7 @@ async function post(opts: GenerateOptions, stream: boolean): Promise<Response> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(buildBody(opts, stream)),
+      signal: opts.signal,
     });
   } catch {
     throw unreachable;

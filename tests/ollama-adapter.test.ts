@@ -49,6 +49,14 @@ describe("ollamaProvider — native /api/chat adapter", () => {
     expect(out.join("")).toBe("Hello");
   });
 
+  it("passes the abort signal to fetch, so a closed tab stops the model call", async () => {
+    fetchMock.mockResolvedValue(ndjsonResponse([`{"message":{"content":"x"},"done":true}`]));
+    const signal = new AbortController().signal;
+    for await (const _ of ollamaProvider.streamChat({ ...base, signal })) void _;
+    const init = fetchMock.mock.calls.at(-1)?.[1] as RequestInit;
+    expect(init.signal).toBe(signal);
+  });
+
   it("hits the native /api/chat endpoint (the /v1 suffix is stripped)", async () => {
     fetchMock.mockResolvedValue(ndjsonResponse([`{"message":{"content":"x"},"done":true}`]));
     for await (const _ of ollamaProvider.streamChat(base)) void _;

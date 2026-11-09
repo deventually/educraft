@@ -52,6 +52,12 @@ describe("aiSdkProvider", () => {
     expect(lastStreamOpts()?.maxOutputTokens).toBe(1234);
   });
 
+  it("hands the abort signal to the SDK, so a closed tab stops the model call", async () => {
+    const signal = new AbortController().signal;
+    for await (const _ of aiSdkProvider.streamChat({ ...base, signal })) void _;
+    expect(lastStreamOpts()?.abortSignal).toBe(signal);
+  });
+
   it("falls back to the 8192 default when maxTokens is absent", async () => {
     for await (const _ of aiSdkProvider.streamChat(base)) void _;
     expect(lastStreamOpts()?.maxOutputTokens).toBe(8192);

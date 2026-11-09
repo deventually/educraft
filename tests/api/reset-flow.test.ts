@@ -66,7 +66,7 @@ describe("reset route action", () => {
     const u = await users.createUser({
       name: "New Pw",
       email: "newpw@example.com",
-      passwordHash: password.hashPassword("old-password-x"),
+      passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
     const reset = await users.createPasswordReset(u.id);
@@ -81,7 +81,7 @@ describe("reset route action", () => {
     expect(await flashKeyOf(res)).toBe("passwordReset");
 
     const after = await users.getUserById(u.id);
-    expect(password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(true);
+    expect(await password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(true);
     // Token is single-use — spent by the reset.
     expect(await users.getPasswordReset(reset.token)).toBeNull();
   });
@@ -90,7 +90,7 @@ describe("reset route action", () => {
     const u = await users.createUser({
       name: "Short Pw",
       email: "shortpw@example.com",
-      passwordHash: password.hashPassword("keep-this-one"),
+      passwordHash: await password.hashPassword("keep-this-one"),
       role: "teacher",
     });
     const reset = await users.createPasswordReset(u.id);
@@ -100,7 +100,7 @@ describe("reset route action", () => {
     expect(res.error).toBeTruthy();
     // Unchanged and the token is still redeemable.
     const after = await users.getUserById(u.id);
-    expect(password.verifyPassword("keep-this-one", after!.passwordHash)).toBe(true);
+    expect(await password.verifyPassword("keep-this-one", after!.passwordHash)).toBe(true);
     expect(await users.getPasswordReset(reset.token)).not.toBeNull();
   });
 
@@ -109,7 +109,7 @@ describe("reset route action", () => {
     const u = await users.createUser({
       name: "Stale Cookie",
       email: "stale@example.com",
-      passwordHash: password.hashPassword("old-password-x"),
+      passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
     const cookieOf = async (res: Response) => (res.headers.get("Set-Cookie") ?? "").split(";")[0];
@@ -136,7 +136,7 @@ describe("reset link of a deactivated account (P18.7)", () => {
     const u = await users.createUser({
       name: "Dark Void",
       email: "darkvoid@example.com",
-      passwordHash: password.hashPassword("old-password-x"),
+      passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
     const reset = await users.createPasswordReset(u.id);
@@ -155,7 +155,7 @@ describe("reset link of a deactivated account (P18.7)", () => {
     const u = await users.createUser({
       name: "Dark Reset",
       email: "darkreset@example.com",
-      passwordHash: password.hashPassword("old-password-x"),
+      passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
     await users.setUserDisabled(u.id, true);
@@ -178,8 +178,8 @@ describe("reset link of a deactivated account (P18.7)", () => {
     expect(res instanceof Response).toBe(false);
     expect((res as { error?: string }).error).toBeTruthy();
     const after = await users.getUserById(u.id);
-    expect(password.verifyPassword("old-password-x", after!.passwordHash)).toBe(true);
-    expect(password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(false);
+    expect(await password.verifyPassword("old-password-x", after!.passwordHash)).toBe(true);
+    expect(await password.verifyPassword("brand-new-secret", after!.passwordHash)).toBe(false);
     expect(await users.getPasswordReset(reset.token)).not.toBeNull(); // not consumed
 
     // After reactivation that link works.
@@ -201,7 +201,7 @@ describe("a new password voids the other open links (P18.7 review)", () => {
     const u = await users.createUser({
       name: "Two Links",
       email: "twolinks@example.com",
-      passwordHash: password.hashPassword("old-password-x"),
+      passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
     const first = await users.createPasswordReset(u.id);
@@ -219,7 +219,7 @@ describe("a new password voids the other open links (P18.7 review)", () => {
     const b = await users.createUser({ name: "PwB", passwordHash: "scrypt:a:b", role: "teacher" });
     const la = await users.createPasswordReset(a.id);
     const lb = await users.createPasswordReset(b.id);
-    await users.updateUserPassword(a.id, password.hashPassword("another-secret"));
+    await users.updateUserPassword(a.id, await password.hashPassword("another-secret"));
     expect(await users.getPasswordReset(la.token)).toBeNull();
     expect(await users.getPasswordReset(lb.token)).not.toBeNull();
   });

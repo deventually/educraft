@@ -4,10 +4,32 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (poort faalt op waarschuwingen, PR open)_
+_Laatst bijgewerkt: 2026-11-09 (#175 gemerged)_
 
 ## Nu
 
+- **Lange AI-antwoorden blijven doorlopen (P0-punt 3 uit de doorlichting, #175) gemerged op 2026-11-09:**
+  de stream stuurt elke 15 seconden een keep-alive, zodat een proxy zoals Cloudflare (100 s
+  zonder verkeer) een lang antwoord niet afbreekt voor het eerste woord. Sluit de docent het
+  tabblad, dan stopt de modelaanroep ook (AI SDK, Ollama en CLI); een afgebroken stream bewaart
+  niets en logt `aborted`.
+- **Ingebouwde back-up zonder stilstand (P0-punt 2 uit de doorlichting, #176) gemerged op 2026-11-09:** de app maakt
+  zelf elke dag een back-up van de database terwijl hij doorloopt (SQLite online backup), naar
+  `backups/` naast de database (`/data/backups` in Docker, of `BACKUP_DIR`), met rotatie (7 dagen,
+  4 weken). `npm run backup` / `node build/ops/backup.js` maakt er nu een; `restore` zet er een
+  terug na een controle en bewaart de oude database. Van de server af kopiëren blijft handwerk.
+  Geen migratie, geen nieuwe dependency.
+- **Inloggen beveiligen tegen wachtwoorden raden (P0-punt 1 uit de doorlichting, #174, BESLUIT-2026-11-09-1) gemerged op 2026-11-09:** na 5 foute
+  wachtwoorden voor één e-mailadres is dat adres 15 minuten op slot, ook met het goede wachtwoord en
+  ook voor een adres dat niet bestaat (zo verraadt het slot niets). Elk volgend slot duurt twee
+  keer zo lang (15 min, 30 min, 1 uur … tot 24 uur); een goede login of een dag zonder fouten zet
+  het terug. Nooit automatisch deactiveren, want dan kan iedereen een collega buitensluiten. Met `CLIENT_IP_HEADER` (de header die de reverse proxy zet) geldt daarnaast 30 fouten per
+  IP-adres. In het geheugen van de app, geen externe dienst; een herstart wist de tellers.
+  Wachtwoorden hashen loopt nu async (scrypt blokkeert andere verzoeken niet meer). Geen migratie.
+- **Security-headers op elke response (P0-punt 4 uit de doorlichting, #173) gemerged op 2026-11-09:** ook `/api/*`,
+  exports, prints, `/healthz` en redirects krijgen nu CSP, `nosniff`, `X-Frame-Options` en
+  `Referrer-Policy`, via middleware op de root-route. De CSP kreeg er `frame-ancestors 'none'`,
+  `base-uri`, `form-action` en `object-src` bij; HSTS alleen in productie.
 - **Terughalen uit Word (#170) gemerged op 2026-11-07:** wie een export in Word verder bewerkt, kiest het bestand bij
   *Terughalen uit Word* in het overzicht. Het wordt in de browser gelezen; LimeOnIt herkent de
   hoofdstukken aan de LU-koppen van de export en toont per hoofdstuk of het anders is. Alleen wat
@@ -299,14 +321,6 @@ _Laatst bijgewerkt: 2026-11-09 (poort faalt op waarschuwingen, PR open)_
 
 ## Bezig
 
-- **De poort faalt ook op waarschuwingen (P0-punt 5 uit de doorlichting; PR open):**
-  `npm run check` en `npm run lint` draaien Biome met `--error-on-warnings`, ook in CI. De vier
-  waarschuwingen zijn echt opgelost: dode code (`criterionText` in het dossieroverzicht) is weg
-  en `parseEngagementLevels` gebruikt geen `!` meer. Geen onderdrukking.
-- **Security-headers op elke response (P0-punt 4 uit de doorlichting; PR open):** ook `/api/*`,
-  exports, prints, `/healthz` en redirects krijgen nu CSP, `nosniff`, `X-Frame-Options` en
-  `Referrer-Policy`, via middleware op de root-route. De CSP kreeg er `frame-ancestors 'none'`,
-  `base-uri`, `form-action` en `object-src` bij; HSTS alleen in productie.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de

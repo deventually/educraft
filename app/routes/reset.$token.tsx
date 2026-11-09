@@ -55,7 +55,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   const account = await getUserById(reset.userId);
   if (!account || account.disabledAt) return { error: m.auth.resetInvalid };
 
-  await updateUserPassword(reset.userId, hashPassword(password));
+  await updateUserPassword(reset.userId, await hashPassword(password));
   // `updateUserPassword` bumped sessionVersion, so every older cookie is logged out;
   // the fresh session below carries the new version.
   return createUserSession(reset.userId, "/", "passwordReset");

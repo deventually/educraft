@@ -26,6 +26,9 @@ export const envSchema = z.object({
   // has a default that fits a long document; lower it on a machine with little memory.
   OLLAMA_NUM_CTX: z.coerce.number().int().min(2048).optional(),
   DATABASE_URL: z.string().default("file:./data/limeonit.db"),
+  // Where the daily backup goes (backup.server). Unset: `backups/` next to the database in
+  // production, off elsewhere. "off" turns it off. Read at call time by backupDir().
+  BACKUP_DIR: z.string().optional(),
   // Where the drizzle migrations live; overridable for the built/Docker image.
   MIGRATIONS_DIR: z.string().default("./drizzle"),
   // Signs the session cookie. Min 32 chars; a dev default keeps local/test boots
@@ -68,6 +71,16 @@ export function localModelsEnabled(): boolean {
  * `baseURLEnv`). Only `*_API_KEY` and `*_BASE_URL` names are read, so the config can
  * never point at another secret (the session key, the database). Read at call time.
  */
+/**
+ * The request header that carries the real client IP (e.g. `x-real-ip`), set by the
+ * reverse proxy in front of the app. Unset: login throttling keys on the email only,
+ * because a header the proxy does not overwrite can be forged. Read at call time.
+ */
+export function clientIpHeader(): string | undefined {
+  const name = process.env.CLIENT_IP_HEADER?.trim();
+  return name ? name : undefined;
+}
+
 export function providerSetting(name: string): string | undefined {
   if (!/^[A-Z][A-Z0-9_]*_(API_KEY|BASE_URL)$/.test(name)) return undefined;
   const value = process.env[name];

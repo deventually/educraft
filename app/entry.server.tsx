@@ -13,6 +13,7 @@ import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 import { applySecurityHeaders } from "~/server/securityHeaders.server";
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
+import { startBackupSchedule } from "~/server/backup.server";
 
 export const streamTimeout = 5_000;
 
@@ -21,6 +22,10 @@ export const streamTimeout = 5_000;
 // and excludes the offending tool (via availability.server) so a single typo can
 // never take the instance down.
 ensureRegistryValidated();
+
+// The app's own daily database backup (production, or wherever BACKUP_DIR is set). Online, so
+// no downtime; a failure is logged and never takes the app down. See backup.server.
+startBackupSchedule();
 
 export default function handleRequest(
   request: Request,
