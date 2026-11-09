@@ -55,6 +55,12 @@ the body with `StreamBodySchema` (Zod), authenticates, and refuses via
 `isToolAvailable` (`app/server/availability.server.ts` — instance settings) before any provider call. The registry is
 validated at boot (`registry/boot.server.ts`): dev fails fast, prod excludes the bad tool.
 
+The stream (`app/lib/ai/sse.ts`) sends a `: keep-alive` comment every 15 s
+(`SSE_HEARTBEAT_MS`), so a proxy such as Cloudflare (100 s without data) never drops a
+long answer before its first token. When the teacher closes the tab, the route aborts
+the model call: `request.signal` and the stream's `cancel` both reach the provider as
+`GenerateOptions.signal`; nothing is saved and the log line says `aborted`.
+
 ---
 
 ## Providers (model-agnostic)

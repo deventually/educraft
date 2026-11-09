@@ -132,6 +132,7 @@ export const aiSdkProvider: LLMProvider = {
       system: opts.system,
       messages: toMessages(opts),
       ...settingsOptions(opts),
+      abortSignal: opts.signal,
     });
     for await (const delta of result.textStream) {
       yield delta;

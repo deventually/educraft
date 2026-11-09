@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
+_Laatst bijgewerkt: 2026-11-09 (hartslag en afbreken in de AI-stream, PR open)_
 
 ## Nu
 
@@ -299,6 +299,10 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Bezig
 
+- **Lange AI-antwoorden niet laten afbreken (P0-punt 3 uit de doorlichting, PR open):** de stream
+  stuurt elke 15 seconden een hartslag, zodat een proxy als Cloudflare (die na 100 seconden zonder
+  data ophangt) een lang antwoord niet meer afbreekt. Sluit de docent het tabblad, dan stopt de
+  AI-aanroep meteen: geen tokens meer op de rekening, niets opgeslagen.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de

@@ -290,6 +290,11 @@ export async function action({ request }: Route.ActionArgs) {
       return new Response(sseError(m.error.rateLimited), { headers: SSE_HEADERS });
     }
 
+    // The model call stops when the teacher closes the tab: the request aborts, or
+    // the response stream is cancelled (whichever the server notices first).
+    const cancelled = new AbortController();
+    const signal = AbortSignal.any([request.signal, cancelled.signal]);
+
     const startedAt = Date.now();
     const tokens = provider.streamChat({
       model,
@@ -301,6 +306,7 @@ export async function action({ request }: Route.ActionArgs) {
       // Reasoning switch — honored only by the native Ollama adapter; other
       // providers ignore it. `undefined` (absent from the body) = model default.
       thinking: body.thinking,
+      signal,
     });
 
     const stream = sseStream(tokens, {
@@ -314,6 +320,10 @@ export async function action({ request }: Route.ActionArgs) {
         return localizeError(err, locale, m.error.unknown);
       },
       onFinally: () => gate.release(),
+      onCancel: () => {
+        cancelled.abort();
+        log("generation", { ...logFields, outcome: "aborted", durationMs: Date.now() - startedAt });
+      },
       onComplete: async (full) => {
         // Record usage against the daily quota and emit the success log line.
         // TODO: surface inputTokens/outputTokens once the AI SDK adapter exposes
