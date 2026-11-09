@@ -50,18 +50,23 @@ export const invites = sqliteTable("invites", {
 });
 
 /** A one-shot generation result (one row per produced artifact / stage). */
-export const generations = sqliteTable("generations", {
-  id: text("id").primaryKey(),
-  userId: text("user_id"), // owner; scoped in every repository query
-  toolSlug: text("tool_slug").notNull(),
-  stageId: text("stage_id"),
-  model: text("model").notNull(),
-  inputJson: text("input_json").notNull(),
-  contextProfileId: text("context_profile_id"),
-  outputLanguage: text("output_language").notNull().default("nl"),
-  outputMarkdown: text("output_markdown").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const generations = sqliteTable(
+  "generations",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id"), // owner; scoped in every repository query
+    toolSlug: text("tool_slug").notNull(),
+    stageId: text("stage_id"),
+    model: text("model").notNull(),
+    inputJson: text("input_json").notNull(),
+    contextProfileId: text("context_profile_id"),
+    outputLanguage: text("output_language").notNull().default("nl"),
+    outputMarkdown: text("output_markdown").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  // Every query is owner-scoped and the history list orders by created_at.
+  (t) => [index("generations_user_idx").on(t.userId, t.createdAt)],
+);
 
 /**
  * Per-user daily usage counters backing the request/token quota. One row per

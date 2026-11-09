@@ -1,0 +1,1 @@
+CREATE INDEX `generations_user_idx` ON `generations` (`user_id`,`created_at`);
