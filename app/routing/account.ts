@@ -6,5 +6,7 @@ export const account: RouteArea = {
   shell: [
     route("context-profiles", "routes/context-profiles.tsx"),
     route("account", "routes/account.tsx"),
+    // Two-step verification (P2-12).
+    route("account/2fa", "routes/account.2fa.tsx"),
   ],
 };

@@ -15,6 +15,10 @@ export const AUDIT_ACTIONS = [
   "resetLinkCreated",
   "roleChanged",
   "teacherModelsChanged",
+  "twoFactorDisabled",
+  "twoFactorEnabled",
+  "twoFactorRecoveryUsed",
+  "twoFactorReset",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -25,7 +29,7 @@ export function isAuditAction(value: string): value is AuditAction {
 /**
  * Facts about one action: a role change (`from`, `to`), a bulk change (`bulk`), how many
  * invites or removed entries (`count`), a cleanup's `olderThanDays`, a new account's `role`, or the chosen `models` (`null` = follows the
- * instance). Never a password, link, token or note.
+ * instance), or `via: "server"` for a server command. Never a password, link, token or note.
  */
 export interface AuditDetail {
   bulk?: boolean;
@@ -36,6 +40,8 @@ export interface AuditDetail {
   models?: string[] | null;
   role?: string;
   to?: string;
+  /** Done on the server itself (`reset-2fa`), not in the app. */
+  via?: "server";
 }
 
 /** One line of the log, as the page shows it. */

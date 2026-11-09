@@ -12,6 +12,10 @@ export const auditLog = {
     resetLinkCreated: "Herstellink gemaakt",
     roleChanged: "Rol gewijzigd",
     teacherModelsChanged: "Modellen van docent gewijzigd",
+    twoFactorDisabled: "Tweestapsverificatie uitgezet",
+    twoFactorEnabled: "Tweestapsverificatie aangezet",
+    twoFactorRecoveryUsed: "Ingelogd met een herstelcode",
+    twoFactorReset: "Tweestapsverificatie uitgezet door beheer",
   },
   bulk: "via selectie",
   cleaned: "{n} regels ouder dan {days} dagen",
@@ -44,4 +48,5 @@ export const auditLog = {
     "Wie wat heeft veranderd aan rollen, wachtwoorden, accounts, uitnodigingen en modelkeuze. De nieuwste {n} acties staan bovenaan.",
   invites: "{n} uitnodigingen",
   role: "Rol: {role}",
+  viaServer: "via de server",
 };

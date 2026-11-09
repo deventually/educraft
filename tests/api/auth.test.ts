@@ -93,6 +93,7 @@ describe("auth helpers", () => {
   });
 
   it("requireRole passes through when the role matches", async () => {
+    // An admin-only page also needs two-step verification (two-factor-required.test.ts).
     const admin = await users.createUser({
       name: "Admin A",
       email: "admin@example.com",
@@ -100,7 +101,7 @@ describe("auth helpers", () => {
       role: "admin",
     });
     const cookie = await sessionCookieFor(admin.id);
-    const user = await auth.requireRole(requestWithCookie(cookie), "admin");
+    const user = await auth.requireRole(requestWithCookie(cookie), "teacher", "admin");
     expect(user.role).toBe("admin");
   });
 });

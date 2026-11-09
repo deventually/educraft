@@ -2,6 +2,7 @@ import { redirect } from "react-router";
 import { commitSession, destroySession, getSession, isSessionFresh } from "./session.server";
 import { getUserById } from "./repositories/users.server";
 import { getOwnerUserId } from "./repositories/settings.server";
+import { isTwoFactorEnabled } from "./repositories/twoFactor.server";
 import type { UserRow } from "./schema.server";
 import { isRole, type Role } from "~/lib/registry/access";
 import type { FlashKey } from "~/lib/flash";
@@ -57,10 +58,16 @@ export async function requireUser(request: Request): Promise<User> {
   return user;
 }
 
-/** Require one of `roles`; throw a 403 Response otherwise. */
+/**
+ * Require one of `roles`; throw a 403 Response otherwise. An admin-only page also needs
+ * two-step verification (P2-12): an admin without it is sent to set it up first.
+ */
 export async function requireRole(request: Request, ...roles: Role[]): Promise<User> {
   const user = await requireUser(request);
   if (!roles.includes(user.role)) throw new Response("Forbidden", { status: 403 });
+  if (!roles.includes("teacher") && !(await isTwoFactorEnabled(user.id))) {
+    throw redirect("/account/2fa");
+  }
   return user;
 }
 
