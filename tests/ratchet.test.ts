@@ -39,7 +39,6 @@ const lineCount = (src: string) => src.split("\n").length - (src.endsWith("\n") 
  * and a file that drops to 400 lines or fewer must leave the list.
  */
 const LONG_FILES_BASELINE = [
-  "app/components/AppShell.tsx",
   "app/lib/ai/models.ts",
   "app/lib/registry/goals.ts",
   "app/routes/start.tsx",
