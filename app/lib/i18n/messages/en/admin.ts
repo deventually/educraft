@@ -39,6 +39,20 @@ export const admin: Messages["admin"] = {
     tool: "Tool",
     user: "User",
   },
+  health: {
+    backup: "Latest backup",
+    backupNone: "No backup yet",
+    backupOff: "Built-in backup is off",
+    database: "Database",
+    daysAgo: "{n} days ago",
+    freeDisk: "Free disk space",
+    heading: "Health",
+    hoursAgo: "{n} hours ago",
+    justNow: "Less than an hour ago",
+    staleWarning:
+      "The latest backup is older than 36 hours, or no backup has been made yet. Check the log for backup.failed.",
+    unknown: "Unknown",
+  },
   invites: {
     accountCreated: "Account created.",
     copy: "Copy",

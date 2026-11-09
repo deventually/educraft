@@ -38,6 +38,20 @@ export const admin = {
     tool: "Tool",
     user: "Gebruiker",
   },
+  health: {
+    backup: "Laatste back-up",
+    backupNone: "Nog geen back-up",
+    backupOff: "Ingebouwde back-up staat uit",
+    database: "Database",
+    daysAgo: "{n} dagen geleden",
+    freeDisk: "Vrije schijfruimte",
+    heading: "Gezondheid",
+    hoursAgo: "{n} uur geleden",
+    justNow: "Minder dan een uur geleden",
+    staleWarning:
+      "De laatste back-up is ouder dan 36 uur, of er is nog geen back-up gemaakt. Kijk in het log naar backup.failed.",
+    unknown: "Onbekend",
+  },
   invites: {
     accountCreated: "Account aangemaakt.",
     copy: "Kopiëren",

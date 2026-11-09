@@ -14,7 +14,8 @@ import type { MiddlewareFunction } from "react-router";
  * verified in the browser during the P2 deploy click-through (all app surfaces
  * loaded + a live generation and feedback submit produced zero CSP violations)
  * and flipped to enforcing. Notes on the sources:
- *  - `root.tsx` loads Google Fonts → googleapis (styles) + gstatic (fonts).
+ *  - Fonts are self-hosted (`public/fonts/`, `@font-face` in `app.css`) →
+ *    `font-src 'self'`, and styles come only from our own origin.
  *  - React Router injects inline hydration scripts → `script-src 'unsafe-inline'`
  *    (tightening to nonces is a later hardening step).
  *  - Uploaded image previews are `data:`/`blob:` URLs.
@@ -25,8 +26,8 @@ import type { MiddlewareFunction } from "react-router";
 export const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   "connect-src 'self'",
   "object-src 'none'",

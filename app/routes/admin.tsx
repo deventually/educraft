@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import type { Route } from "./+types/admin";
 import { requireRole } from "~/server/auth.server";
+import { adminHealth } from "~/server/health.server";
+import { HealthPanel } from "~/components/admin/HealthPanel";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { cn } from "~/lib/utils";
@@ -22,11 +24,12 @@ export function meta({ matches }: Route.MetaArgs) {
 /**
  * Admin console layout (Phase 4). Gates the whole section on `requireRole("admin")`
  * — and every child loader/action repeats the check, because loaders run in
- * parallel and a nested loader must not trust the layout ran first.
+ * parallel and a nested loader must not trust the layout ran first. It also carries the
+ * health overview (P1), so a stale backup shows on whichever admin page is open.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireRole(request, "admin");
-  return null;
+  return { health: adminHealth() };
 }
 
 const SECTIONS = [
@@ -38,7 +41,7 @@ const SECTIONS = [
   { to: "/admin/usage", key: "usage", Icon: Activity },
 ] as const;
 
-export default function AdminLayout() {
+export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const nav = t.admin.console.nav;
 
@@ -77,6 +80,7 @@ export default function AdminLayout() {
         </nav>
 
         <div className="min-w-0">
+          <HealthPanel health={loaderData.health} />
           <Outlet />
         </div>
       </div>

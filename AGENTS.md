@@ -16,7 +16,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
   (`Tool.courseActions`) and "Los op met…" (`FINDING_TOOLS`) are registry data, validated at boot.
 - **Prompts are files.** `app/lib/prompts/<id>@vN.prompt.ts` + `app/lib/prompts/files/<id>.{nl,en}.md`
   with `{{placeholder}}` syntax, validated at build time.
-- **Providers are abstracted** behind `app/lib/ai/provider.ts`; tools never import an SDK.
+- **Providers are abstracted** behind `app/lib/ai/provider.ts`; nothing outside `app/lib/ai/` imports
+  an AI SDK, and nothing `app/components` imports reaches a `*.server` module
+  (`tests/architecture.test.ts`).
 - **Context:** the per-tool sandbox plus the user profile, injected as `{{context}}` /
   `{{contextProfile}}` ([Context Model](wiki/Context-Model.md)).
 
@@ -37,6 +39,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
    `if (tool.mode === …)` or per-tool branch means: refactor toward a deeper component.
 5. **Simple and maintainable.** Remove what is redundant. Engine stays locale/level-neutral
    (specifics live in packs). Pinned toolchain (Volta, Node 24.14.1).
+6. **Ratchets only go down** (`tests/ratchet.test.ts`): suppressions (`as any`, `@ts-ignore`,
+   `@ts-expect-error`, `biome-ignore`) and files in `app/` over 400 lines. Lowered a count? Lower
+   its baseline in the same PR. A `TODO`/`FIXME` names its issue: `// TODO(#123): …`.
 
 ## Commands
 
@@ -79,7 +84,8 @@ English slugs, never shown.
 
 ### Database
 - All DB access goes through `app/server/repositories/`: every exported function is `async` and
-  scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`.
+  scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`
+  (`tests/architecture.test.ts`).
 - Sharing (P28.4): **reading** is also allowed to a member of a team the owner shared the item
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared

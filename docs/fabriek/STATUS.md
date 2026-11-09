@@ -4,10 +4,27 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#175 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#177, #180, #183, #178 en #179 gemerged)_
 
 ## Nu
 
+- **Ratchet-tests (P1-punt 7 uit de doorlichting, #179) gemerged op 2026-11-09:**
+  `tests/ratchet.test.ts` legt de tellingen van vandaag vast: 31 onderdrukkingen (`as any`,
+  `@ts-ignore`, `@ts-expect-error`, `biome-ignore`) en 20 bestanden in `app/` boven 400 regels
+  mogen alleen dalen, en een TODO of FIXME mag alleen met een issuenummer.
+- **Beter contrast voor grijze tekst (P1-punt 3 uit de doorlichting, #178) gemerged op 2026-11-09:**
+  `slate-500` is donkerder (#676d5d, minstens 4,5:1) en alle niet-decoratieve `slate-400`
+  (tekst, placeholders, verwijderknoppen) is `slate-500` geworden. `tests/contrast.test.ts`
+  bewaakt dat `slate-400` alleen nog op `aria-hidden` staat.
+- **Gezondheid op de beheerpagina (P1-punt 5 uit de doorlichting, #183) gemerged op 2026-11-09:**
+  elke beheerpagina toont de leeftijd van de laatste back-up (waarschuwing na 36 uur of zonder
+  back-up), de grootte van de database en de vrije schijfruimte. Alleen lezen.
+- **Fonts zelf hosten (P1-punt 1 uit de doorlichting, #180) gemerged op 2026-11-09:** Inter en
+  Newsreader staan als woff2 in `public/fonts/` (met OFL-licentie); geen verzoeken meer naar
+  Google, en de CSP staat voor stijlen en fonts alleen nog `'self'` toe.
+- **safeRedirect dichtgezet (P1-punt 2 uit de doorlichting, #177) gemerged op 2026-11-09:**
+  `app/lib/safeRedirect.ts` weigert `/\evil.com`, backslashes, besturingstekens en alles wat naar
+  een andere origin leidt.
 - **Lange AI-antwoorden blijven doorlopen (P0-punt 3 uit de doorlichting, #175) gemerged op 2026-11-09:**
   de stream stuurt elke 15 seconden een keep-alive, zodat een proxy zoals Cloudflare (100 s
   zonder verkeer) een lang antwoord niet afbreekt voor het eerste woord. Sluit de docent het

@@ -114,7 +114,7 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                       {g.stageId && <Badge>{g.stageId}</Badge>}
                       <CourseLinkBadges links={g.courseLinks ?? []} />
                     </div>
-                    <p className="truncate text-xs text-slate-400">
+                    <p className="truncate text-xs text-slate-500">
                       {fmtDate(g.createdAt, locale)} · {g.model} · {g.outputLanguage.toUpperCase()}
                     </p>
                   </div>

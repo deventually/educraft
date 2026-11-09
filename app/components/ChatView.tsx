@@ -596,7 +596,7 @@ export function ChatView({
                 }}
                 placeholder={t.chat.inputPlaceholder}
                 disabled={isStreaming}
-                className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-400 focus:outline-none disabled:opacity-60"
+                className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-500 focus:outline-none disabled:opacity-60"
               />
 
               {isStreaming ? (
@@ -639,7 +639,7 @@ export function ChatView({
                 </>
               )}
             </div>
-            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-400">{t.chat.enterHint}</p>
+            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-500">{t.chat.enterHint}</p>
           </div>
         </div>
       </div>

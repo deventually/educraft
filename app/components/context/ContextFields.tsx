@@ -505,7 +505,7 @@ function PackFieldControl({
       type="button"
       onClick={onRemove}
       aria-label={`${t.settings.removeField}: ${label}`}
-      className="text-slate-400 transition-colors hover:text-red-600"
+      className="text-slate-500 transition-colors hover:text-red-600"
     >
       <X className="size-4" aria-hidden />
     </button>
@@ -618,7 +618,7 @@ export function CustomFieldsEditor({ initial = [] }: { initial?: CustomField[] }
             type="button"
             onClick={() => removeRow(row.id)}
             aria-label={t.settings.removeField}
-            className="mt-2 text-slate-400 transition-colors hover:text-red-600"
+            className="mt-2 text-slate-500 transition-colors hover:text-red-600"
           >
             <X className="size-4" aria-hidden />
           </button>

@@ -77,7 +77,7 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
 | `DATABASE_URL` | yes | `file:/data/limeonit.db` with a mounted volume (see above). |
 | `NODE_ENV` | yes | `production`. |
 | `MIGRATIONS_DIR` | no | Defaults to `./drizzle` (already in the image). |
-| `BACKUP_DIR` | no | Daily online backup (rotation 7 days, 4 weeks). Unset: `backups/` next to the database in production (`/data/backups`), off in development. `off` turns it off. `npm run backup` / `node build/ops/backup.js` makes one now; `restore` puts one back with the app stopped. See [installatie-docker.md](../docs/installatie-docker.md#6-back-up-en-terugzetten). |
+| `BACKUP_DIR` | no | Daily online backup (rotation 7 days, 4 weeks). Unset: `backups/` next to the database in production (`/data/backups`), off in development. `off` turns it off. `npm run backup` / `node build/ops/backup.js` makes one now; `restore` puts one back with the app stopped. The admin console shows the age of the newest backup (a warning after 36 hours), the database size and the free disk space. See [installatie-docker.md](../docs/installatie-docker.md#6-back-up-en-terugzetten). |
 | `RATE_LIMIT_PER_MINUTE` | no | Default 10 (per user). |
 | `RATE_LIMIT_CONCURRENT` | no | Default 3 (per user). |
 | `DAILY_REQUEST_LIMIT` | no | Default 50 (per user/day; admins exempt). |
