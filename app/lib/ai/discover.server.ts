@@ -1,4 +1,4 @@
-import { dynamicModelId, type ModelInfo, type ModelId } from "./models";
+import { dynamicModelId, type ModelInfo } from "./models";
 import { env } from "~/server/env.server";
 
 /** A discovered model carries the same shape as the catalog plus its runtime id. */
@@ -102,9 +102,4 @@ async function discoverServer(server: LocalServer, timeoutMs: number): Promise<D
 export async function discoverLocalModels(timeoutMs = 1500): Promise<DiscoveredModel[]> {
   const results = await Promise.all(LOCAL_SERVERS.map((s) => discoverServer(s, timeoutMs)));
   return results.flat();
-}
-
-/** True if `id` is a known static catalog id or matches a discovered local model. */
-export function isKnownModel(id: string, discovered: DiscoveredModel[]): id is ModelId | string {
-  return discovered.some((m) => m.id === id);
 }

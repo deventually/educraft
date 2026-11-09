@@ -47,7 +47,7 @@ export interface RubricData {
 
 const points = z.number().finite().min(0).max(RUBRIC_LIMITS.points);
 
-export const RubricLevelSchema = z
+const RubricLevelSchema = z
   .object({
     id: z.uuid(),
     label: z.string().max(RUBRIC_LIMITS.title),
@@ -56,7 +56,7 @@ export const RubricLevelSchema = z
   })
   .strict();
 
-export const RubricCriterionSchema = z
+const RubricCriterionSchema = z
   .object({
     id: z.uuid(),
     title: z.string().max(RUBRIC_LIMITS.title),
@@ -66,7 +66,7 @@ export const RubricCriterionSchema = z
   })
   .strict();
 
-export const RubricGradeSchema = z
+const RubricGradeSchema = z
   .object({
     passPercent: z.number().finite().gt(0).lt(100),
     passGrade: z.number().finite().min(0).max(100),

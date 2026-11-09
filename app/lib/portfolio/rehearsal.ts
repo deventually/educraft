@@ -42,7 +42,7 @@ export const HEARD = ["convincing", "partial", "not-heard"] as const;
 export type Heard = (typeof HEARD)[number];
 
 /** Output limits for the feedback. */
-export const REHEARSAL_LIMITS = { quote: 1_000, tip: 600, overall: 1_200 } as const;
+const REHEARSAL_LIMITS = { quote: 1_000, tip: 600, overall: 1_200 } as const;
 
 export interface RehearsalOptions {
   length: RehearsalLength;

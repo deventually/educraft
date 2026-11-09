@@ -9,7 +9,7 @@ export const AGENT_LIMITS = {
 } as const;
 
 /** One finding as the model writes it: `target` is a short key (L1, A2, T1). */
-export const RawAgentFindingSchema = z.object({
+const RawAgentFindingSchema = z.object({
   severity: z.enum(SEVERITIES),
   target: z.string().max(10).nullish(),
   message: z.string(),

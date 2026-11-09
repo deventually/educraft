@@ -10,10 +10,9 @@ import { engagementSummary } from "~/lib/utilities/engagement";
 export const COMPUTATION_IDS = ["engagement-index"] as const;
 export type ComputationId = (typeof COMPUTATION_IDS)[number];
 
-export const COMPUTATIONS: Record<ComputationId, (output: string, lang: OutputLanguage) => string> =
-  {
-    "engagement-index": engagementSummary,
-  };
+const COMPUTATIONS: Record<ComputationId, (output: string, lang: OutputLanguage) => string> = {
+  "engagement-index": engagementSummary,
+};
 
 /** The note for a finished output, or null when the stage names no computation. */
 export function computeResultNote(

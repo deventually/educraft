@@ -15,13 +15,13 @@ export const MAX_DOC_SIZE = 15 * 1024 * 1024;
  * Extracted text above this length gets a "very large — watch token cost"
  * warning. ~40k chars ≈ 10k tokens; assessments add framework + context on top.
  */
-export const LARGE_TEXT_THRESHOLD = 40_000;
+const LARGE_TEXT_THRESHOLD = 40_000;
 
 export const PDF_MIME = "application/pdf";
 export const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 /** MIME allow-list for the upload boundary. */
-export const ACCEPTED_DOC_MIMES = [PDF_MIME, DOCX_MIME] as const;
+const ACCEPTED_DOC_MIMES = [PDF_MIME, DOCX_MIME] as const;
 
 /** `accept` attribute for the file input (extensions + MIME for cross-browser). */
 export const DOC_ACCEPT_ATTR = `.pdf,.docx,${PDF_MIME},${DOCX_MIME}`;

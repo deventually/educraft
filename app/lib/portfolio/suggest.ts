@@ -8,7 +8,7 @@ import { criterionTools } from "./toolHints";
 import type { DossierData } from "./types";
 
 /** At most this many suggestions per criterion. */
-export const MAX_SUGGESTIONS = 5;
+const MAX_SUGGESTIONS = 5;
 
 export interface GenerationLike {
   id: string;

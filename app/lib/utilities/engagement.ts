@@ -34,7 +34,7 @@ export const ENGAGEMENT_PRINCIPLES: readonly EngagementPrinciple[] = [
   { id: "elaboration", book: "Elaboration", nl: "Uitleggen en verbinden" },
 ];
 
-export const ENGAGEMENT_MAX_LEVEL = 3;
+const ENGAGEMENT_MAX_LEVEL = 3;
 
 export type EngagementLevels = Record<EngagementPrincipleId, number>;
 

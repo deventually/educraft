@@ -85,7 +85,7 @@ function isConnected(id: string): boolean {
   return p !== undefined && missingSetting(p) === null;
 }
 
-export async function providerStatuses(): Promise<ProviderStatus[]> {
+async function providerStatuses(): Promise<ProviderStatus[]> {
   const added = new Set((await getModelRegistry()).providers.map((p) => p.id));
   return addableProviders().map((p) => ({
     id: p.id,
@@ -111,7 +111,7 @@ function tally(ids: Iterable<string>, into: Map<string, number>) {
   for (const id of new Set(ids)) into.set(id, (into.get(id) ?? 0) + 1);
 }
 
-export async function adminModelRows(): Promise<AdminModelRow[]> {
+async function adminModelRows(): Promise<AdminModelRow[]> {
   const registry = await getModelRegistry();
   const results = new Map(
     (await countGenerationsByModel(30)).map((r) => [r.model, Number(r.count)]),
@@ -149,7 +149,7 @@ export async function adminModelRows(): Promise<AdminModelRow[]> {
 export type AddResult = { added: string } | { error: string };
 
 /** Add a model on a connected provider. An existing allow-list gets it too (no surprise). */
-export async function addAdminModel(input: AddModelInput): Promise<AddResult> {
+async function addAdminModel(input: AddModelInput): Promise<AddResult> {
   if (!getAddableProvider(input.provider)) return { error: "invalid" };
   if (!isConnected(input.provider)) return { error: "notConnected" };
   const res = addModel(await getModelRegistry(), input);
@@ -175,7 +175,7 @@ const PROVIDER_ERROR = {
 } as const;
 
 /** Add a provider: its key setting is derived from its name and stays in `.env`. */
-export async function addAdminProvider(input: AddProviderInput): Promise<ProviderResult> {
+async function addAdminProvider(input: AddProviderInput): Promise<ProviderResult> {
   const res = addProvider(await getModelRegistry(), input);
   if (!res.ok) return { error: PROVIDER_ERROR[res.error] };
   await saveModelRegistry(res.registry);
@@ -184,7 +184,7 @@ export async function addAdminProvider(input: AddProviderInput): Promise<Provide
   return { providerAdded: input.noKey ? { name } : { name, setting: res.keyEnv } };
 }
 
-export async function removeAdminProvider(id: string): Promise<ProviderResult> {
+async function removeAdminProvider(id: string): Promise<ProviderResult> {
   const registry = await getModelRegistry();
   const name = registry.providers.find((p) => p.id === id)?.name ?? id;
   const res = removeProvider(registry, id);
@@ -202,7 +202,7 @@ export type UpgradeResult =
   | { cancelled: { name: string; restored: boolean } }
   | { error: string };
 
-export async function upgradeAdminModel(from: string, to: string): Promise<UpgradeResult> {
+async function upgradeAdminModel(from: string, to: string): Promise<UpgradeResult> {
   const registry = await getModelRegistry();
   const res = startUpgrade(registry, from, to, isApiModel);
   if (!res.ok) return { error: res.error };
@@ -210,7 +210,7 @@ export async function upgradeAdminModel(from: string, to: string): Promise<Upgra
   return { upgraded: { name: nameOf(from), successor: nameOf(to) } };
 }
 
-export async function finishAdminUpgrade(id: string): Promise<UpgradeResult> {
+async function finishAdminUpgrade(id: string): Promise<UpgradeResult> {
   const registry = await getModelRegistry();
   const res = finishUpgrade(registry, id);
   if (!res.ok) return { error: res.error };
@@ -220,7 +220,7 @@ export async function finishAdminUpgrade(id: string): Promise<UpgradeResult> {
   return { finished: { name: nameOf(id), successor: nameOf(successor) } };
 }
 
-export async function cancelAdminUpgrade(id: string): Promise<UpgradeResult> {
+async function cancelAdminUpgrade(id: string): Promise<UpgradeResult> {
   const registry = await getModelRegistry();
   const wasRetired = registry.lifecycle[id]?.state === "retired";
   const res = cancelUpgrade(registry, id);

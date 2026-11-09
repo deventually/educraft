@@ -26,7 +26,7 @@ const DEFAULT_TEMPERATURE = 0.4;
  */
 const REJECTS_SAMPLING = ["claude-opus-4-8", "claude-opus-4-7", "claude-fable-5", "claude-sonnet-5"];
 
-export function rejectsTemperature(apiId: string): boolean {
+function rejectsTemperature(apiId: string): boolean {
   return REJECTS_SAMPLING.some((prefix) => apiId.includes(prefix));
 }
 
@@ -80,7 +80,7 @@ function imageBlock(img: ImageInput): ContentBlock {
 }
 
 /** "max_tokens" is the API's word for what the AI SDK calls "length" (cut off). */
-export function toGenerateResult(outcome: Extract<BatchOutcome, { ok: true }>): GenerateResult {
+function toGenerateResult(outcome: Extract<BatchOutcome, { ok: true }>): GenerateResult {
   return {
     text: outcome.text,
     usage: outcome.usage,
