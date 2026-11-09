@@ -24,3 +24,7 @@ book/*.pdf
 /e2e/.data/
 /test-results/
 /playwright-report/
+
+# Mutation testing (npm run test:mutation): sandbox and HTML report.
+/.stryker-tmp/
+/reports/
