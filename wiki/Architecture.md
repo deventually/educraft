@@ -119,7 +119,7 @@ LimeOnIt is not tied to one model vendor.
   `instance_settings` JSON (`modelRegistry`), parsed by `app/lib/ai/modelRegistry.ts` and
   installed into the catalog by `modelRegistry.server.ts`, so every `resolveModelInfo` call
   sees it; `currentModelId` / `forwardRetired` in `models.ts` follow the upgrade chain and
-  `availability.server.ts#servedModelFor` decides the model of a stream request.
+  `modelAvailability.server.ts#servedModelFor` (via `availability.server`) decides the model of a stream request.
   An admin can also **add a provider** (name, API kind, address; `addProvider` in
   `modelRegistry.ts`). It sits in the same registry on top of the config's providers
   (`listProviders`/`getProvider` in `models.ts`). Its id and key setting are derived from the
@@ -135,7 +135,7 @@ LimeOnIt is not tied to one model vendor.
   follow the instance; teams can narrow the instance with their own sets (P28.3, see
   [Authentication](Authentication.md#parts-tools-and-models-per-team-p283)); an admin
   always gets the instance set. An own set that is
-  empty after filtering counts as not set. `availability.server.ts#isModelSelectableForUser`
+  empty after filtering counts as not set. `modelAvailability.server.ts#isModelSelectableForUser`
   is a membership walk, so it also gates a volatile `ollama::…` id without
   enumerating any local server. Opus-class + `compat::` stay server-only.
   **CLI agents and local (Ollama/LM Studio) models exist only outside production**
