@@ -1,7 +1,8 @@
 /**
  * Server entry. Mirrors the React Router default streaming SSR handler, adding
  * baseline security headers (see securityHeaders.server) to every rendered
- * response — bot and browser branches share the single ready callback below.
+ * response — bot and browser branches share the single ready callback below —
+ * and the request's CSP nonce to every inline script React and React Router write.
  */
 import { PassThrough } from "node:stream";
 
@@ -11,7 +12,7 @@ import { ServerRouter } from "react-router";
 import { isbot } from "isbot";
 import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
-import { applySecurityHeaders } from "~/server/securityHeaders.server";
+import { applySecurityHeaders, createCspNonce, cspNonceOf } from "~/server/securityHeaders.server";
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 import { startBackupSchedule } from "~/server/backup.server";
 import { handleServerError, recordError } from "~/server/errorLog.server";
@@ -42,6 +43,8 @@ export default function handleRequest(
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const userAgent = request.headers.get("user-agent");
+    // Set by the root middleware; a render without it (no route matched) gets its own.
+    const nonce = cspNonceOf(loadContext) ?? createCspNonce();
 
     // Wait for all content on bots/SPA (so meta/OG tags are present); stream the
     // shell as soon as it is ready for real users.
@@ -49,15 +52,16 @@ export default function handleRequest(
       (userAgent && isbot(userAgent)) || routerContext.isSpaMode ? "onAllReady" : "onShellReady";
 
     const { pipe, abort } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} />,
+      <ServerRouter context={routerContext} url={request.url} nonce={nonce} />,
       {
+        nonce,
         [readyOption]() {
           shellRendered = true;
           const body = new PassThrough();
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set("Content-Type", "text/html");
-          applySecurityHeaders(responseHeaders);
+          applySecurityHeaders(responseHeaders, { nonce });
 
           resolve(
             new Response(stream, {

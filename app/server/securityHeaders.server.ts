@@ -7,34 +7,51 @@
  * Static build assets (`/assets/*`) are served by react-router-serve's static
  * middleware before the app runs; they carry no user content.
  */
-import type { MiddlewareFunction } from "react-router";
+import { createContext, type MiddlewareFunction, type RouterContextProvider } from "react-router";
 
 /**
- * Content Security Policy — **enforcing**. Shipped report-only in Phase 0, then
- * verified in the browser during the P2 deploy click-through (all app surfaces
- * loaded + a live generation and feedback submit produced zero CSP violations)
- * and flipped to enforcing. Notes on the sources:
+ * Content Security Policy — **enforcing**, verified clean in the browser. Notes on the sources:
+ *  - Scripts: our own origin plus inline scripts that carry this request's nonce (P2). React
+ *    Router's hydration scripts and React's streaming scripts get the nonce through
+ *    entry.server (`<ServerRouter nonce>`, `renderToPipeableStream({ nonce })`); an injected
+ *    inline script has no nonce and is refused. No `'unsafe-inline'` for scripts any more.
  *  - Fonts are self-hosted (`public/fonts/`, `@font-face` in `app.css`) →
- *    `font-src 'self'`, and styles come only from our own origin.
- *  - React Router injects inline hydration scripts → `script-src 'unsafe-inline'`
- *    (tightening to nonces is a later hardening step).
+ *    `font-src 'self'`, and styles come only from our own origin. Styles keep
+ *    `'unsafe-inline'`: React renders `style` attributes, which a nonce cannot cover.
  *  - Uploaded image previews are `data:`/`blob:` URLs.
  *  - The SSE stream + feedback POST are same-origin fetches → `connect-src 'self'`.
  *  - `frame-ancestors`, `base-uri`, `form-action` and `object-src` do not fall
  *    back to `default-src`, so they are set explicitly.
  */
-export const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self'",
-  "img-src 'self' data: blob:",
-  "connect-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-].join("; ");
+export function contentSecurityPolicy(nonce: string | null = null): string {
+  return [
+    "default-src 'self'",
+    nonce ? `script-src 'self' 'nonce-${nonce}'` : "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
+    "img-src 'self' data: blob:",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
+}
+
+/** The policy without a nonce: no inline script at all (API, exports, redirects). */
+export const CSP = contentSecurityPolicy();
+
+/** 128 random bits, base64: a new one for every request, never reused. */
+export function createCspNonce(): string {
+  return Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString("base64");
+}
+
+/** The current request's CSP nonce, set by the root middleware before anything renders. */
+export const cspNonceContext = createContext<string | null>(null);
+
+export function cspNonceOf(context: Pick<RouterContextProvider, "get"> | undefined): string | null {
+  return context?.get(cspNonceContext) ?? null;
+}
 
 export const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -51,16 +68,17 @@ export const SECURITY_HEADERS: Record<string, string> = {
  */
 export const HSTS = "max-age=31536000";
 
-type Options = { production?: boolean };
+type Options = { production?: boolean; nonce?: string | null };
 
 const isProduction = () => process.env.NODE_ENV === "production";
 
 /** Set every baseline security header onto an outgoing response's Headers. */
 export function applySecurityHeaders(
   headers: Headers,
-  { production = isProduction() }: Options = {},
+  { production = isProduction(), nonce = null }: Options = {},
 ): void {
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) headers.set(key, value);
+  if (nonce) headers.set("Content-Security-Policy", contentSecurityPolicy(nonce));
   if (production) headers.set("Strict-Transport-Security", HSTS);
 }
 
@@ -79,6 +97,16 @@ export function withSecurityHeaders(response: Response, options: Options = {}): 
   }
 }
 
-/** Root-route middleware: every matched request (page, data, resource route). */
-export const securityHeadersMiddleware: MiddlewareFunction<Response> = async (_args, next) =>
-  withSecurityHeaders(await next());
+/**
+ * Root-route middleware: every matched request (page, data, resource route). It picks the
+ * request's CSP nonce first, so the page render inside `next()` (entry.server) stamps the same
+ * nonce on its scripts that the header allows.
+ */
+export const securityHeadersMiddleware: MiddlewareFunction<Response> = async (
+  { context },
+  next,
+) => {
+  const nonce = createCspNonce();
+  context.set(cspNonceContext, nonce);
+  return withSecurityHeaders(await next(), { nonce });
+};
