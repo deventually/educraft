@@ -101,6 +101,18 @@ DB probe, or `503 {"ok":false}` if the database is unreachable. Wire it to the
 orchestrator's healthcheck (Docker `HEALTHCHECK`, Fly `[[services.http_checks]]`,
 a load-balancer probe).
 
+## Security headers
+
+Every response the app produces carries the baseline headers from
+`app/server/securityHeaders.server.ts`: pages (via `entry.server.tsx`) and,
+through the root route's `middleware`, data requests and resource routes
+(`/api/*`, exports, prints, `/healthz`, redirects). That is CSP,
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+`Referrer-Policy`, `Permissions-Policy` and, in production only,
+`Strict-Transport-Security: max-age=31536000` (no `includeSubDomains`). Static
+build assets under `/assets/*` are served before the app runs and carry no
+user content; a reverse proxy may add headers there too.
+
 ## Content-Security-Policy
 
 CSP is **enforcing** (`Content-Security-Policy`, see
@@ -108,7 +120,9 @@ CSP is **enforcing** (`Content-Security-Policy`, see
 was flipped to enforcing during the P2 deploy after a clean browser
 click-through of every app surface (login, home, one-shot/grader/chat tools,
 projects, account, admin) plus a live generation and feedback submit — all with
-zero CSP violations. If you later add an external resource (a new font host,
+zero CSP violations. `frame-ancestors 'none'`, `base-uri 'self'`,
+`form-action 'self'` and `object-src 'none'` are set explicitly because they
+do not fall back to `default-src`. If you later add an external resource (a new font host,
 analytics, an image CDN, a cross-origin API), extend the relevant directive in
 `securityHeaders.server.ts` or it will be blocked.
 

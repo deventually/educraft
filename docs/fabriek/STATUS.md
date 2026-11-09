@@ -306,6 +306,10 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
   het terug. Nooit automatisch deactiveren, want dan kan iedereen een collega buitensluiten. Met `CLIENT_IP_HEADER` (de header die de reverse proxy zet) geldt daarnaast 30 fouten per
   IP-adres. In het geheugen van de app, geen externe dienst; een herstart wist de tellers.
   Wachtwoorden hashen loopt nu async (scrypt blokkeert andere verzoeken niet meer). Geen migratie.
+- **Security-headers op elke response (P0-punt 4 uit de doorlichting; PR open):** ook `/api/*`,
+  exports, prints, `/healthz` en redirects krijgen nu CSP, `nosniff`, `X-Frame-Options` en
+  `Referrer-Policy`, via middleware op de root-route. De CSP kreeg er `frame-ancestors 'none'`,
+  `base-uri`, `form-action` en `object-src` bij; HSTS alleen in productie.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de
