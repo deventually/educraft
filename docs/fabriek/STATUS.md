@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#181 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#182, #184 en #185 gemerged)_
 
 ## Nu
 
+- **Audit-log van beheeracties (P1 middelgroot uit de doorlichting, #185) gemerged op 2026-11-09:**
+  rol, wachtwoord, deactivering, uitnodiging en modelkeuze komen in een log op `/admin/audit`.
+  Regels ouder dan een jaar verdwijnen vanzelf; de eigenaar kan met een bevestiging eerder opruimen.
+- **Strengere TypeScript, fase 1 (P1 middelgroot, #184) gemerged op 2026-11-09:**
+  `noUnusedLocals` en `noFallthroughCasesInSwitch` staan aan en een test houdt ze aan. Fase 2
+  (`noUncheckedIndexedAccess`) volgt.
+- **Sessie verloopt na 8 uur inactiviteit, plus "Overal uitloggen" (P1-4, #182) gemerged op
+  2026-11-09:** elk verzoek telt als activiteit (root-middleware); op de accountpagina log je alle
+  andere apparaten uit.
 - **Architectuurregels als test (P1-punt 6 uit de doorlichting, #181) gemerged op 2026-11-09:**
   `tests/architecture.test.ts` bewaakt dat `app/components` niets uit een `*.server`-module
   binnenhaalt, dat alleen `db.server.ts` `better-sqlite3` gebruikt en dat buiten `app/lib/ai/`

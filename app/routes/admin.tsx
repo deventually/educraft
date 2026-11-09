@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router";
 import {
   Activity,
   BotMessageSquare,
+  Bug,
   GraduationCap,
   ScrollText,
   SlidersHorizontal,
@@ -9,7 +10,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import type { Route } from "./+types/admin";
-import { requireRole } from "~/server/auth.server";
+import { isOwner, requireRole } from "~/server/auth.server";
 import { adminHealth } from "~/server/health.server";
 import { HealthPanel } from "~/components/admin/HealthPanel";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
@@ -26,11 +27,12 @@ export function meta({ matches }: Route.MetaArgs) {
  * Admin console layout (Phase 4). Gates the whole section on `requireRole("admin")`
  * — and every child loader/action repeats the check, because loaders run in
  * parallel and a nested loader must not trust the layout ran first. It also carries the
- * health overview (P1), so a stale backup shows on whichever admin page is open.
+ * health overview (P1), so a stale backup shows on whichever admin page is open, and
+ * whether the viewer is the owner (only the owner sees "Recente fouten").
  */
 export async function loader({ request }: Route.LoaderArgs) {
-  await requireRole(request, "admin");
-  return { health: adminHealth() };
+  const admin = await requireRole(request, "admin");
+  return { health: adminHealth(), isOwner: await isOwner(admin) };
 }
 
 const SECTIONS = [
@@ -62,7 +64,12 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
           aria-label={t.admin.console.sectionNav}
           className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0"
         >
-          {SECTIONS.map(({ to, key, Icon }) => (
+          {[
+            ...SECTIONS.map((s) => ({ to: s.to, label: nav[s.key], Icon: s.Icon })),
+            ...(loaderData.isOwner
+              ? [{ to: "/admin/errors", label: t.adminErrors.nav, Icon: Bug }]
+              : []),
+          ].map(({ to, label, Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -76,7 +83,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
               }
             >
               <Icon className="size-4 shrink-0" aria-hidden />
-              {nav[key]}
+              {label}
             </NavLink>
           ))}
         </nav>

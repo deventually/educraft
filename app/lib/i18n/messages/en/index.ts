@@ -2,6 +2,7 @@ import type { Messages } from "../nl";
 import { about } from "./about";
 import { account } from "./account";
 import { admin } from "./admin";
+import { adminErrors } from "./adminErrors";
 import { agents } from "./agents";
 import { auditLog } from "./auditLog";
 import { aiNotice } from "./aiNotice";
@@ -52,6 +53,7 @@ export const en: Messages = {
   about,
   account,
   admin,
+  adminErrors,
   agents,
   aiNotice,
   appName: "LimeOnIt",

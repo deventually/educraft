@@ -6,13 +6,14 @@ import AdminLayout from "~/routes/admin";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-async function renderLayout() {
+async function renderLayout({ isOwner = false } = {}) {
   const Stub = createRoutesStub([
     {
       path: "/admin",
       Component: AdminLayout,
       loader: () => ({
         health: { backup: { state: "none" }, databaseBytes: null, freeDiskBytes: null },
+        isOwner,
       }),
       children: [{ path: "users", Component: () => <p>child</p> }],
     },
@@ -45,6 +46,15 @@ describe("Admin layout", () => {
       "/admin/usage",
       "/admin/audit",
     ]);
+  });
+
+  it("adds 'Recente fouten' last, for the owner only", async () => {
+    await renderLayout({ isOwner: true });
+    const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
+    const links = within(nav).getAllByRole("link");
+    expect(links).toHaveLength(8);
+    expect(links[7]).toHaveTextContent("Recente fouten");
+    expect(links[7]).toHaveAttribute("href", "/admin/errors");
   });
 
   it("shows the health overview above every admin page, with its backup warning", async () => {
