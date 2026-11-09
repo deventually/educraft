@@ -4,7 +4,7 @@
  * tagline, theory and `TOOL_KEYWORDS`, in both languages.
  */
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
-import { TOOL_KEYWORDS } from "./goals";
+import { TOOL_KEYWORDS } from "./keywords";
 import type { Tool } from "./types";
 
 /** Short words that say nothing about a task ("ik wil een les voor mijn groep"). */
