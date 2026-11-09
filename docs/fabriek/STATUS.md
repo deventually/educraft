@@ -4,10 +4,17 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#181 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#182 en #184 gemerged)_
 
 ## Nu
 
+- **Strengere TypeScript, fase 1 (#184) gemerged op 2026-11-09:** `noUnusedLocals` en
+  `noFallthroughCasesInSwitch` staan aan; de code voldeed al. `tests/tsconfig.test.ts` houdt ze
+  aan. Fase 2 (`noUncheckedIndexedAccess`) volgt als eigen PR.
+- **Sessie verloopt na 8 uur inactiviteit, plus *Overal uitloggen* (P1-punt 4 uit de
+  doorlichting, #182) gemerged op 2026-11-09:** een sessie verloopt na 8 uur zonder activiteit
+  (glijdend) in plaats van na 30 dagen. Op `/account` logt een docent met één knop op alle eigen
+  apparaten uit (BESLUIT-2026-11-09-2). Na de uitrol logt iedereen één keer opnieuw in.
 - **Architectuurregels als test (P1-punt 6 uit de doorlichting, #181) gemerged op 2026-11-09:**
   `tests/architecture.test.ts` bewaakt dat `app/components` niets uit een `*.server`-module
   binnenhaalt, dat alleen `db.server.ts` `better-sqlite3` gebruikt en dat buiten `app/lib/ai/`
