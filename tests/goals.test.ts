@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getEnabledTools } from "~/lib/registry";
-import { GOALS, GOAL_ORDER, TOOL_GOALS, TOOL_KEYWORDS } from "~/lib/registry/goals";
+import { GOALS, GOAL_ORDER, TOOL_GOALS } from "~/lib/registry/goals";
+import { TOOL_KEYWORDS } from "~/lib/registry/keywords";
 
 describe("teaching-goal taxonomy", () => {
   const enabled = getEnabledTools();

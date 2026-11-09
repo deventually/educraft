@@ -38,11 +38,7 @@ const lineCount = (src: string) => src.split("\n").length - (src.endsWith("\n") 
  * Files in app/ over 400 lines on 2026-11-09. The list may only shrink: a new long file fails,
  * and a file that drops to 400 lines or fewer must leave the list.
  */
-const LONG_FILES_BASELINE = [
-  "app/components/AppShell.tsx",
-  "app/components/DynamicForm.tsx",
-  "app/lib/registry/goals.ts",
-];
+const LONG_FILES_BASELINE: string[] = [];
 
 // --- TODO / FIXME --------------------------------------------------------------------------------
 
