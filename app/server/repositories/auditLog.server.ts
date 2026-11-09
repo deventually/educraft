@@ -1,14 +1,34 @@
 /**
  * The admin audit log: who changed whose access, when (P1). An instance-wide record, written by
- * the admin actions and read by admins only (the route checks the role). Append-only: nothing
- * here edits or deletes a row. Repository rule: every exported function is `async`.
+ * the admin actions and read by admins only (the route checks the role). Nothing edits a row;
+ * rows only go by age: automatically after `AUDIT_RETENTION_DAYS`, or by hand by the owner
+ * (`pruneAdminActions`). Repository rule: every exported function is `async`.
  */
 import { randomUUID } from "node:crypto";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, lt, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { getDb } from "../db.server";
 import { adminAudit, users } from "../schema.server";
-import { type AuditAction, type AuditDetail, type AuditEntry, isAuditAction } from "~/lib/auditLog";
+import {
+  AUDIT_RETENTION_DAYS,
+  type AuditAction,
+  type AuditDetail,
+  type AuditEntry,
+  isAuditAction,
+} from "~/lib/auditLog";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Remove the entries recorded before `before` (`null` = every entry). Returns how many went.
+ * Without an argument it applies the retention period: everything older than a year.
+ */
+export async function pruneAdminActions(
+  before: Date | null = new Date(Date.now() - AUDIT_RETENTION_DAYS * DAY_MS),
+): Promise<number> {
+  const query = getDb().delete(adminAudit);
+  return (before ? query.where(lt(adminAudit.at, before)) : query).run().changes;
+}
 
 export interface AuditInput {
   actorUserId: string;
@@ -19,6 +39,7 @@ export interface AuditInput {
 
 /** Record one admin action. Call it after the change succeeded, never for a refusal. */
 export async function recordAdminAction(input: AuditInput): Promise<void> {
+  await pruneAdminActions();
   getDb()
     .insert(adminAudit)
     .values({

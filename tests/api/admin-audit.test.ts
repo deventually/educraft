@@ -241,3 +241,78 @@ describe("the log page (/admin/audit)", () => {
     expect(await audit.listAdminActions(3)).toHaveLength(3);
   });
 });
+
+const DAY = 24 * 60 * 60 * 1000;
+
+/** Record one entry as if it happened `daysAgo` days ago. */
+async function recordAgo(daysAgo: number) {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(Date.now() - daysAgo * DAY));
+  try {
+    await audit.recordAdminAction({ actorUserId: owner.id, action: "inviteRevoked" });
+  } finally {
+    vi.useRealTimers();
+  }
+}
+const ages = async () =>
+  (await audit.listAdminActions(500)).map((e) => Math.round((Date.now() - +e.at) / DAY));
+const cleanup = (fields: Record<string, string>) =>
+  call(auditRoute.action, { request: post({ intent: "cleanup", ...fields }) });
+
+describe("cleaning up the log", () => {
+  it("keeps a year: older entries go when a new action is recorded", async () => {
+    await cleanup({ olderThan: "all" });
+    await recordAgo(400);
+    await recordAgo(300);
+    await audit.recordAdminAction({ actorUserId: owner.id, action: "inviteRevoked" });
+    const left = await ages();
+    expect(left.some((d) => d >= 365)).toBe(false);
+    expect(left).toContain(300);
+  });
+
+  it("keeps a year: opening the page also clears what is older", async () => {
+    await cleanup({ olderThan: "all" });
+    await recordAgo(400);
+    await call(auditRoute.loader, { request: new Request("http://localhost/admin/audit") });
+    expect((await ages()).some((d) => d >= 365)).toBe(false);
+  });
+
+  it("the owner removes entries older than a chosen age, and that is logged itself", async () => {
+    await cleanup({ olderThan: "all" });
+    await recordAgo(100);
+    await recordAgo(40);
+    await recordAgo(5);
+    expect(await cleanup({ olderThan: "30" })).toEqual({ cleaned: 2 });
+    const entries = await audit.listAdminActions();
+    expect(entries[0]).toMatchObject({
+      action: "logCleaned",
+      actorUserId: owner.id,
+      detail: { olderThanDays: 30, count: 2 },
+    });
+    expect((await ages()).filter((d) => d >= 30)).toEqual([]);
+  });
+
+  it("the owner can clear everything; only the cleanup itself remains", async () => {
+    await recordAgo(2);
+    await cleanup({ olderThan: "all" });
+    const entries = await audit.listAdminActions();
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({ action: "logCleaned", detail: { olderThanDays: null } });
+  });
+
+  it("refuses a regular admin and an unknown choice, deleting nothing", async () => {
+    await recordAgo(100);
+    const before = (await audit.listAdminActions(500)).length;
+    expect(await cleanup({ olderThan: "7" })).toEqual({ error: "invalid" });
+    await settings.setOwnerUserId(null);
+    expect(await cleanup({ olderThan: "all" })).toEqual({ error: "ownerOnly" });
+    expect((await audit.listAdminActions(500)).length).toBe(before);
+  });
+
+  it("tells the page whether the viewer may clean up", async () => {
+    const req = () => new Request("http://localhost/admin/audit");
+    expect((await call(auditRoute.loader, { request: req() })).canClean).toBe(true);
+    await settings.setOwnerUserId(null);
+    expect((await call(auditRoute.loader, { request: req() })).canClean).toBe(false);
+  });
+});

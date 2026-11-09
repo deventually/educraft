@@ -1,8 +1,16 @@
-import { Link } from "react-router";
+import { Link, useActionData } from "react-router";
+import { Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.audit";
-import { requireRole } from "~/server/auth.server";
-import { listAdminActions } from "~/server/repositories/auditLog.server";
-import type { AuditEntry } from "~/lib/auditLog";
+import { isOwner, requireRole } from "~/server/auth.server";
+import {
+  listAdminActions,
+  pruneAdminActions,
+  recordAdminAction,
+} from "~/server/repositories/auditLog.server";
+import { type AuditEntry, CLEANUP_CHOICES, isCleanupChoice } from "~/lib/auditLog";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { useFormToast } from "~/components/Toast";
+import { Label, Select } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
@@ -12,21 +20,54 @@ import { roleLabel } from "~/components/admin/people";
 const SHOWN = 200;
 
 /**
- * The audit log (P1): who changed whose access, when. Read-only, admins only; the actions
- * themselves write it (`recordAdminAction`).
+ * The audit log (P1): who changed whose access, when. Admins read it; the actions themselves
+ * write it (`recordAdminAction`). Entries go after a year by themselves (also when the page is
+ * opened, so a quiet instance forgets too). Only the owner cleans up earlier, and that
+ * cleanup is itself the first entry of what remains.
  */
 export async function loader({ request }: Route.LoaderArgs) {
-  await requireRole(request, "admin");
-  return { entries: await listAdminActions(SHOWN) };
+  const admin = await requireRole(request, "admin");
+  await pruneAdminActions();
+  const [entries, canClean] = await Promise.all([listAdminActions(SHOWN), isOwner(admin)]);
+  return { entries, canClean };
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export async function action({ request }: Route.ActionArgs) {
+  const admin = await requireRole(request, "admin");
+  const fd = await request.formData();
+  const choice = fd.get("olderThan");
+  if (fd.get("intent") !== "cleanup" || !isCleanupChoice(choice)) {
+    return { error: "invalid" as const };
+  }
+  // Wiping the log is the one way to hide what an admin did: only the owner may.
+  if (!(await isOwner(admin))) return { error: "ownerOnly" as const };
+  const days = choice === "all" ? null : Number(choice);
+  const cleaned = await pruneAdminActions(
+    days === null ? null : new Date(Date.now() - days * DAY_MS),
+  );
+  await recordAdminAction({
+    actorUserId: admin.id,
+    action: "logCleaned",
+    detail: { olderThanDays: days, count: cleaned },
+  });
+  return { cleaned };
 }
 
 const th = "px-4 py-2.5 font-semibold";
 const td = "px-4 py-2.5 align-top text-slate-600";
 
 /** The facts of one entry in words: a role change, a count, the chosen models. */
-function detailText(t: Messages, entry: Pick<AuditEntry, "detail">): string {
+function detailText(t: Messages, entry: Pick<AuditEntry, "action" | "detail">): string {
   const d = entry.detail;
   if (!d) return "";
+  if (entry.action === "logCleaned") {
+    const n = d.count ?? 0;
+    return d.olderThanDays
+      ? fmt(t.auditLog.cleaned, { n, days: d.olderThanDays })
+      : fmt(t.auditLog.cleanedAll, { n });
+  }
   const parts: string[] = [];
   if (d.from && d.to) parts.push(`${roleLabel(t, d.from)} → ${roleLabel(t, d.to)}`);
   if (d.role) parts.push(fmt(t.auditLog.role, { role: roleLabel(t, d.role) }));
@@ -48,7 +89,20 @@ function when(at: Date | string, locale: string): string {
 export default function AdminAudit({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { entries } = loaderData;
+  const { entries, canClean } = loaderData;
+  const actionData = useActionData<typeof action>();
+  useFormToast(actionData, {
+    result: (d) =>
+      !d
+        ? null
+        : "error" in d
+          ? {
+              variant: "error",
+              message:
+                d.error === "ownerOnly" ? t.admin.invites.ownerOnlyError : t.error.invalidRequest,
+            }
+          : { variant: "success", message: fmt(t.auditLog.cleanup.done, { n: d.cleaned }) },
+  });
 
   return (
     <section>
@@ -115,6 +169,45 @@ export default function AdminAudit({ loaderData }: Route.ComponentProps) {
           </table>
         </div>
       )}
+
+      <CleanupPanel canClean={canClean} />
     </section>
+  );
+}
+
+/** The retention note for every admin; the owner also gets the (guarded) cleanup. */
+function CleanupPanel({ canClean }: { canClean: boolean }) {
+  const t = useT();
+  const c = t.auditLog.cleanup;
+  return (
+    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-slate-900">{c.heading}</h3>
+      <p className="mt-1 text-sm text-slate-600">{c.intro}</p>
+      {canClean && (
+        <div className="mt-4">
+          <ConfirmDialog
+            triggerLabel={c.trigger}
+            triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
+            title={c.title}
+            description={c.description}
+            confirmLabel={c.confirm}
+            cancelLabel={t.confirm.cancel}
+            fields={{ intent: "cleanup" }}
+            typeToConfirm={{ word: c.word, label: fmt(c.typeLabel, { word: c.word }) }}
+          >
+            <div>
+              <Label htmlFor="audit-cleanup-choice">{c.choiceLabel}</Label>
+              <Select id="audit-cleanup-choice" name="olderThan" defaultValue="90" className="mt-1">
+                {CLEANUP_CHOICES.map((choice) => (
+                  <option key={choice} value={choice}>
+                    {choice === "all" ? c.all : fmt(c.olderThan, { n: Number(choice) })}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </ConfirmDialog>
+        </div>
+      )}
+    </div>
   );
 }

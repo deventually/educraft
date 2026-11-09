@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentProps } from "react";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AdminAudit from "~/routes/admin.audit";
@@ -40,7 +41,7 @@ const entries = [
   entry({ action: "instanceModelsChanged", detail: { models: ["claude-haiku-4-5", "gpt-5"] } }),
 ];
 
-function renderRoute(data: unknown = { entries }) {
+function renderRoute(data: unknown = { entries, canClean: false }) {
   const props = { loaderData: data } as unknown as ComponentProps<typeof AdminAudit>;
   const Stub = createRoutesStub([
     { path: "/admin/audit", Component: () => <AdminAudit {...props} /> },
@@ -83,13 +84,52 @@ describe("Admin audit log", () => {
   });
 
   it("says so when nothing has happened yet", () => {
-    renderRoute({ entries: [] });
+    renderRoute({ entries: [], canClean: false });
     expect(screen.getByText(/nog geen beheeracties/i)).toBeInTheDocument();
     expect(screen.queryByRole("table")).toBeNull();
   });
 
-  it("has no axe violations", async () => {
-    const { container } = renderRoute();
+  it("explains a cleanup entry", () => {
+    renderRoute({
+      entries: [entry({ action: "logCleaned", detail: { olderThanDays: 90, count: 4 } })],
+      canClean: false,
+    });
+    const row = within(screen.getByRole("table")).getAllByRole("row")[1]!;
+    expect(row).toHaveTextContent("Logboek opgeruimd");
+    expect(row).toHaveTextContent("4 regels ouder dan 90 dagen");
+  });
+
+  it("offers cleaning up only to the owner, with a choice of how old", async () => {
+    renderRoute();
+    expect(screen.queryByRole("button", { name: /logboek opruimen/i })).toBeNull();
+    renderRoute({ entries, canClean: true });
+    await userEvent.click(screen.getByRole("button", { name: /logboek opruimen/i }));
+    const dialog = screen.getByRole("dialog");
+    const select = within(dialog).getByRole("combobox", { name: /wat verwijderen/i });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((o) => (o as HTMLOptionElement).value),
+    ).toEqual(["30", "90", "180", "all"]);
+    // Everyone sees the automatic retention; only the owner gets the button.
+    expect(screen.getAllByText(/na een jaar/i).length).toBeGreaterThan(0);
+  });
+
+  it("warns loudly that a cleanup cannot be undone, and asks to type a word first", async () => {
+    renderRoute({ entries, canClean: true });
+    await userEvent.click(screen.getByRole("button", { name: /logboek opruimen/i }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/niet terug te draaien/i)).toBeInTheDocument();
+    const confirm = within(dialog).getByRole("button", { name: /definitief verwijderen/i });
+    expect(confirm).toBeDisabled();
+    await userEvent.type(within(dialog).getByRole("textbox"), "OPRUIMEN");
+    expect(confirm).toBeEnabled();
+  });
+
+  it("has no axe violations, also with the cleanup dialog open", async () => {
+    const { container } = renderRoute({ entries, canClean: true });
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await userEvent.click(screen.getByRole("button", { name: /logboek opruimen/i }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

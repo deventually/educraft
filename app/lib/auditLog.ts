@@ -9,6 +9,7 @@ export const AUDIT_ACTIONS = [
   "instanceModelsChanged",
   "inviteCreated",
   "inviteRevoked",
+  "logCleaned",
   "passwordSet",
   "reactivated",
   "resetLinkCreated",
@@ -23,13 +24,15 @@ export function isAuditAction(value: string): value is AuditAction {
 
 /**
  * Facts about one action: a role change (`from`, `to`), a bulk change (`bulk`), how many
- * invites (`count`), a new account's `role`, or the chosen `models` (`null` = follows the
+ * invites or removed entries (`count`), a cleanup's `olderThanDays`, a new account's `role`, or the chosen `models` (`null` = follows the
  * instance). Never a password, link, token or note.
  */
 export interface AuditDetail {
   bulk?: boolean;
   count?: number;
   from?: string;
+  /** A cleanup: entries older than this many days went; `null` = everything. */
+  olderThanDays?: number | null;
   models?: string[] | null;
   role?: string;
   to?: string;
@@ -45,4 +48,15 @@ export interface AuditEntry {
   targetUserId: string | null;
   targetName: string | null;
   detail: AuditDetail | null;
+}
+
+/** Days the log keeps an entry; older ones are removed automatically. */
+export const AUDIT_RETENTION_DAYS = 365;
+
+/** What the owner may clean up by hand: entries older than N days, or everything. */
+export const CLEANUP_CHOICES = ["30", "90", "180", "all"] as const;
+export type CleanupChoice = (typeof CLEANUP_CHOICES)[number];
+
+export function isCleanupChoice(value: unknown): value is CleanupChoice {
+  return (CLEANUP_CHOICES as readonly unknown[]).includes(value);
 }
