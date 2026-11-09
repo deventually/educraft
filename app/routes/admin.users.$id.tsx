@@ -284,7 +284,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (password.length < MIN_PASSWORD_LENGTH) return { error: "passwordTooShort" as const };
     if (password !== confirm) return { error: "passwordMismatch" as const };
     // Bumps sessionVersion: the user is logged out on every device.
-    await updateUserPassword(target.id, hashPassword(password));
+    await updateUserPassword(target.id, await hashPassword(password));
     return { passwordSet: true as const };
   }
 
