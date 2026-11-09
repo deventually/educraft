@@ -4,7 +4,6 @@ export const home = {
     clearSearch: "Zoekopdracht wissen",
     generator: "formulier",
     goalRegion: "Tools per onderwijsdoel",
-    open: "Open tool",
     resultsRegion: "Zoekresultaten",
     search: "Zoek tools",
   },

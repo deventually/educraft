@@ -4,10 +4,30 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#182, #184, #185 en #186 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #194 gemerged)_
 
 ## Nu
 
+- **knip in de poort (#194) gemerged op 2026-11-09:** `npm run check` draait nu ook knip, dat
+  ongebruikte bestanden, exports en dependencies meldt. 68 exports die alleen hun eigen bestand
+  gebruikte zijn niet meer geëxporteerd, en vier ongebruikte waarden zijn weg.
+- **Golf 1 van het P2-plan (#188 t/m #193) gemerged op 2026-11-09:**
+  - **Dependencies bijgewerkt (#189):** `ai`, `@ai-sdk/*` en de rest naar hun nieuwste versie
+    binnen dezelfde major. Biome blijft op 2.4.16 (2.5 herformatteert ~200 bestanden, apart).
+  - **Index op `generations` (#188):** migratie 0022 voegt een index op (gebruiker, aanmaakdatum)
+    toe; de geschiedenis hoeft niet meer de hele tabel door te lezen.
+  - **De `pXX-removed`-tests opgeruimd (#190):** hun twee blijvende regels zijn nu gedrag:
+    elke beheerpagina wordt vanzelf op toegang getest, en `invite` weigert `--role admin`.
+  - **Wachtwoordcheck tegen een lijst (#191):** een nieuw wachtwoord heeft minstens 10 tekens en
+    staat niet op een lijst van veelgebruikte wachtwoorden (NCSC plus Nederlandse favorieten).
+    Geldt voor uitnodiging, reset, `/account`, beheer en `create-admin`. Geen externe dienst.
+  - **CSP met nonces (#192):** scripts draaien alleen nog met een nonce per verzoek, zonder
+    `'unsafe-inline'`. Zod draait "jitless", zodat de browser geen CSP-fout meer meldt.
+  - **Snellere testsuite (#193):** de node-tests laden geen DOM-setup meer; de opstarttijd zakt
+    van ~48 s naar ~10 s.
+- **Strengere TypeScript, fase 2 (#187) gemerged op 2026-11-09:** `noUncheckedIndexedAccess`
+  staat aan; de ~950 meldingen zijn opgelost met guards en defaults, zonder iets weg te
+  asserten in `app/`.
 - **Fouten vastleggen in de app (P1 middelgroot uit de doorlichting, #186) gemerged op
   2026-11-09:** elk verzoek krijgt een request-id (header `X-Request-Id`); onverwachte fouten gaan
   als één JSON-regel met dat id naar de log, en de eigenaar ziet de laatste 50 op

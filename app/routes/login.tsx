@@ -94,7 +94,7 @@ export default function Login() {
   const error = actionData?.error;
 
   return (
-    <div className="mx-auto flex min-h-full max-w-md flex-col justify-center py-10">
+    <main className="mx-auto flex min-h-full max-w-md flex-col justify-center py-10">
       <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
         {t.auth.loginHeading}
       </h1>
@@ -140,6 +140,6 @@ export default function Login() {
           </Button>
         </Form>
       </Card>
-    </div>
+    </main>
   );
 }

@@ -9,6 +9,7 @@
     "typecheck": "react-router typegen && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "lint": "biome lint --error-on-warnings",
     "lint:fix": "biome lint --write",
     "format": "biome format --write",
@@ -54,7 +55,9 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.137.0",
+    "@axe-core/playwright": "4.14.0",
     "@biomejs/biome": "^2.4.16",
+    "@playwright/test": "1.63.0",
     "@react-router/dev": "8.5.1",
     "@tailwindcss/vite": "^4.3.5",
     "@testing-library/jest-dom": "^6.9.1",
@@ -82,6 +85,7 @@
   "overrides": {
     "@esbuild-kit/core-utils": {
       "esbuild": "^0.25.12"
-    }
+    },
+    "playwright-core": "1.63.0"
   }
 }
