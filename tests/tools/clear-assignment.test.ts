@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { loc } from "~/lib/i18n/localized";
 import { getPrompt } from "~/lib/prompts";
 import { getToolBySlug } from "~/lib/registry";
-import { TOOL_GOALS, TOOL_KEYWORDS } from "~/lib/registry/goals";
+import { TOOL_GOALS } from "~/lib/registry/goals";
+import { TOOL_KEYWORDS } from "~/lib/registry/keywords";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 
 /**
