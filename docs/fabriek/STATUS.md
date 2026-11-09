@@ -4,10 +4,26 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #194 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #198 gemerged)_
 
 ## Nu
 
+- **Beheerpagina Modellen opgesplitst (#198) gemerged op 2026-11-09:** `admin/models.tsx` (760 → 249
+  regels) is verdeeld over `AddModelForm`, `ProvidersTab` en `modelShared`; het bestand
+  is van de ratchet-lijst af. Geen gedragswijziging.
+- **Eén strategie per tool-modus (#196) gemerged op 2026-11-09:** wat verschilt tussen een chat,
+  een tool met stappen en een losse generatie staat nu op één plek (`modeOf(tool)` in
+  `app/lib/registry/modes.ts`) in plaats van in losse `tool.mode`-takken. `tool.tsx` (514 → 238)
+  en `api.stream.tsx` (412 → 400) zakken onder de 400 regels; een architectuurtest weigert een
+  nieuwe tak op `tool.mode`. Voor docenten verandert er niets.
+- **Browsertests met Playwright (#197) gemerged op 2026-11-09:** `npm run test:e2e` bouwt de app
+  en opent de belangrijkste pagina's als gast, docent en beheerder; elke pagina moet laden, zonder
+  axe-fouten (WCAG 2.2 AA) en zonder CSP-fout. Draait in CI als eigen job. Onderweg verbeterd: de
+  tegels op de toolpagina heten nu naar hun zichtbare tekst, de inlogpagina heeft een `main` en de
+  licentielink is onderstreept.
+- **Beheerpagina's voor gebruikers opgesplitst (#195) gemerged op 2026-11-09:**
+  `admin.users.tsx` (792) en `admin.users.$id.tsx` (622) zijn verdeeld over losse componenten en
+  twee servermodules; allebei onder de 400 regels. Geen gedragswijziging.
 - **knip in de poort (#194) gemerged op 2026-11-09:** `npm run check` draait nu ook knip, dat
   ongebruikte bestanden, exports en dependencies meldt. 68 exports die alleen hun eigen bestand
   gebruikte zijn niet meer geëxporteerd, en vier ongebruikte waarden zijn weg.

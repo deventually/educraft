@@ -1,38 +1,19 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Send, Square, RotateCcw, Pencil, Copy } from "lucide-react";
-import { Link } from "react-router";
-import type { Tool, ChatMessage } from "~/lib/registry/types";
-import { DynamicForm } from "./DynamicForm";
+import { useState } from "react";
+import type { Tool } from "~/lib/registry/types";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
-import { CoursePicker } from "./CoursePicker";
+import { useChatSession } from "~/lib/hooks/useChatSession";
 import { summarizeSandbox } from "~/lib/forms/summarize";
-import { streamPost } from "~/lib/streamClient";
-import { useLocale, useT } from "~/lib/i18n/useT";
-import { loc } from "~/lib/i18n/localized";
-import { AdvancedSettings } from "./AdvancedSettings";
-import { Button, Label, Select } from "./ui";
+import { useLocale } from "~/lib/i18n/useT";
+import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { initialPickerModel, pickableModels, type PickerModel } from "~/lib/ai/models";
-import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
 import type { FormValues } from "~/lib/forms/values";
-import { Markdown } from "./Markdown";
-import { ToolIcon } from "./ToolIcon";
-import { AiNotice } from "./AiNotice";
-import { DictateButton } from "./DictateButton";
-import { ReadAloudButton } from "./ReadAloudButton";
-import { appendDictation } from "~/lib/speech/dictation";
 import { ResultActions, type ResultContext } from "./ResultActions";
-import { useToast } from "./Toast";
-import { fillStudentPrompt } from "~/lib/chat/studentPrompt";
-
-/** Stable id grouping every turn of one chat into a single saved project. */
-function newSessionId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
+import { ChatSetupCard } from "./chat/ChatSetupCard";
+import { ChatSettingsAside } from "./chat/ChatSettingsAside";
+import { ChatThread, type RenderAssistant } from "./chat/ChatThread";
+import { ChatComposer } from "./chat/ChatComposer";
 
 interface ChatViewProps {
   tool: Tool;
@@ -70,10 +51,7 @@ interface ChatViewProps {
    * Renders an answer itself (e.g. the rehearsal feedback as a table); `undefined`
    * falls back to Markdown. Gets the user's own turns for checks on quotes.
    */
-  renderAssistant?: (
-    content: string,
-    ctx: { streaming: boolean; userTurns: string[]; model: string },
-  ) => ReactNode | undefined;
+  renderAssistant?: RenderAssistant;
 }
 
 export function ChatView({
@@ -94,8 +72,6 @@ export function ChatView({
   streamExtras,
   renderAssistant,
 }: ChatViewProps) {
-  const t = useT();
-  const { showToast } = useToast();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
@@ -108,9 +84,7 @@ export function ChatView({
   } = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
   const sandboxValues = presetValues ?? ownValues;
   const [sandboxSubmitted, setSandboxSubmitted] = useState(!!presetValues);
-  const [turns, setTurns] = useState<Turn[]>([]);
   const [messageInput, setMessageInput] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
   // Every screen offers the same models: API-key catalog + local CLI agents +
   // any Ollama / LM Studio models discovered at runtime.
   const modelOptions = pickableModels(localModels ?? [], false, catalogModels);
@@ -124,43 +98,37 @@ export function ChatView({
   // default: a direct answer is dramatically faster for chat than reasoning first.
   // Only sent to the server when the selected model actually supports it.
   const [thinking, setThinking] = useState(false);
-  const selectedPickerModel = modelOptions.find((m) => m.id === selectedModel);
-  const selectedModelSupportsThinking = selectedPickerModel?.supportsThinking ?? false;
-  const selectedModelName = selectedPickerModel?.displayName ?? selectedModel;
+  const selectedModelSupportsThinking =
+    modelOptions.find((m) => m.id === selectedModel)?.supportsThinking ?? false;
   // The conversation defaults to the interface language: a Dutch UI opens a
   // Dutch chat, an English UI an English one. An explicit prop still wins.
   const [outputLanguage, setOutputLanguage] = useState<"nl" | "en">(
     defaultOutputLanguage || locale,
   );
-  const endRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  // One id for the whole conversation, so each turn updates the same project.
-  const sessionIdRef = useRef<string | null>(null);
-  if (sessionIdRef.current === null) sessionIdRef.current = newSessionId();
-  // The saved conversation (its id is the session id), once a reply is stored (P27.1).
-  const [savedId, setSavedId] = useState<string | null>(null);
 
-  const greeting = tool.chat?.greeting;
-  const starters = tool.chat?.starters;
+  const chat = useChatSession({
+    body: {
+      slug: tool.slug,
+      stageId: tool.stages[0]?.id,
+      values: sandboxValues,
+      contextProfileId: contextProfile?.id || null,
+      outputLanguage,
+      model: selectedModel,
+      // Only govern reasoning for models that support it; otherwise leave it to
+      // the model default (omit the flag).
+      thinking: selectedModelSupportsThinking ? thinking : undefined,
+      courseId: courseId || undefined,
+      itemId: (courseId && itemId) || undefined,
+      ...streamExtras,
+    },
+    onGenerationStart,
+  });
 
-  // Keep the latest output in view whenever a turn is added or streamed into.
-  // Scrolling an end anchor into view follows whichever element actually
-  // scrolls — the thread on wide screens, the page on mobile.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every turns change to follow streaming
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
-  }, [turns]);
-
-  // Grow the composer textarea with its content (single line → up to ~8 lines),
-  // then scroll internally — the bottom-pinned input never pushes the page.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on every input change to resize
-  useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-  }, [messageInput]);
+  const sendMessage = (message: string = messageInput) => {
+    if (!message.trim() || chat.isStreaming) return;
+    setMessageInput("");
+    void chat.send(message);
+  };
 
   const handleSandboxSubmit = () => {
     setSandboxSubmitted(true);
@@ -175,130 +143,25 @@ export function ChatView({
     }
   };
 
-  const sendMessage = async (message: string = messageInput) => {
-    if (!message.trim() || isStreaming) return;
-
-    // Create user turn
-    const userTurnId = `user-${Date.now()}`;
-    const userTurn: Turn = {
-      role: "user",
-      content: message,
-      id: userTurnId,
-    };
-
-    // Create empty assistant turn
-    const assistantTurnId = `assistant-${Date.now()}`;
-    const assistantTurn: Turn = {
-      role: "assistant",
-      content: "",
-      id: assistantTurnId,
-    };
-
-    setTurns((prev) => [...prev, userTurn, assistantTurn]);
-    setMessageInput("");
-    setIsStreaming(true);
-
-    onGenerationStart?.();
-
-    try {
-      // Build message history for the API
-      const messageHistory: ChatMessage[] = turns
-        .filter((t) => t.content && !t.interrupted)
-        .map((t) => ({
-          role: t.role,
-          content: t.content,
-        }));
-
-      // Add the new user message
-      messageHistory.push({ role: "user", content: message });
-
-      abortControllerRef.current = new AbortController();
-
-      await streamPost(
-        "/api/stream",
-        {
-          slug: tool.slug,
-          stageId: tool.stages[0]?.id,
-          values: sandboxValues,
-          contextProfileId: contextProfile?.id || null,
-          outputLanguage,
-          model: selectedModel,
-          // Only govern reasoning for models that support it; otherwise leave it to
-          // the model default (omit the flag).
-          thinking: selectedModelSupportsThinking ? thinking : undefined,
-          messages: messageHistory,
-          sessionId: sessionIdRef.current,
-          courseId: courseId || undefined,
-          itemId: (courseId && itemId) || undefined,
-          ...streamExtras,
-        },
-        {
-          onToken: (token: string) => {
-            setTurns((prev) => appendTokenToLastTurn(prev, token));
-          },
-          onDone: (meta) => {
-            if (meta?.generationId) setSavedId(meta?.generationId);
-            setIsStreaming(false);
-          },
-          onError: (error) => {
-            // The thread marks the turn interrupted rather than rendering the
-            // message inline; log the server message or the machine code.
-            console.error("Stream error:", error.message ?? error.code);
-            setTurns((prev) => markLastTurnInterrupted(prev));
-            setIsStreaming(false);
-          },
-        },
-        abortControllerRef.current.signal,
-      );
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        console.error("Chat error:", err);
-        setTurns((prev) => markLastTurnInterrupted(prev));
-      }
-      setIsStreaming(false);
-    }
-  };
-
-  const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setTurns((prev) => markLastTurnInterrupted(prev));
-    setIsStreaming(false);
-  };
-
   const handleRegenerate = () => {
-    if (turns.length < 2) return;
-
-    // Remove last assistant turn
-    setTurns((prev) => prev.slice(0, -1));
-    setIsStreaming(false);
-
     // Re-send the last user message
-    const lastUserTurn = [...turns].reverse().find((t) => t.role === "user");
-    if (lastUserTurn) {
-      setTimeout(() => sendMessage(lastUserTurn.content), 100);
+    const lastUserMessage = chat.dropLastAnswer();
+    if (lastUserMessage !== undefined) {
+      setTimeout(() => sendMessage(lastUserMessage), 100);
     }
   };
 
-  // Sandbox gate: a focused card the user fills once before the chat opens.
   if (!sandboxSubmitted) {
     return (
-      <div className="mx-auto w-full max-w-2xl">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-4">
-            <h2 className="font-semibold text-slate-900">{t.chat.setupHeading}</h2>
-            <p className="mt-1 text-sm text-slate-600">{t.chat.sandboxHint}</p>
-          </div>
-          <div className="space-y-4">
-            <CoursePicker courses={courses ?? []} value={courseId} onChange={selectCourse} />
-            <DynamicForm fields={tool.inputs} values={sandboxValues} onChange={setSandboxValue} />
-          </div>
-          <Button onClick={handleSandboxSubmit} className="mt-4">
-            {t.chat.continue}
-          </Button>
-        </div>
-      </div>
+      <ChatSetupCard
+        tool={tool}
+        courses={courses ?? []}
+        courseId={courseId}
+        onSelectCourse={selectCourse}
+        values={sandboxValues}
+        onChange={setSandboxValue}
+        onSubmit={handleSandboxSubmit}
+      />
     );
   }
 
@@ -306,6 +169,7 @@ export function ChatView({
   // language (the aside's "Taal van uitvoer") — switching it re-renders them at
   // once and keeps them consistent with the language the model replies in. UI
   // chrome (labels, buttons) stays in the interface `locale`.
+  const greeting = tool.chat?.greeting;
   const greetingText = greeting
     ? interpolateGreeting(
         loc(greeting, outputLanguage),
@@ -314,12 +178,8 @@ export function ChatView({
         sandboxValues as unknown as TemplateValues,
       )
     : "";
-  const isEmpty = turns.length === 0;
-  // What the user entered in the one-time sandbox, shown so the chat makes clear
-  // which settings (e.g. which theorist) it's running with.
-  const sandboxSummary = settingsSummary ?? summarizeSandbox(tool.inputs, sandboxValues, locale);
-  const userTurns = turns.filter((x) => x.role === "user").map((x) => x.content);
-  const quickReplies = tool.chat?.quickReplies ?? [];
+  const inOutputLanguage = (texts: LocalizedText[] | undefined) =>
+    (texts ?? []).map((text) => loc(text, outputLanguage));
 
   return (
     // Two-pane chat. On a wide screen it's a fixed-height layout: the aside sits
@@ -328,320 +188,65 @@ export function ChatView({
     // top) that scrolls with the page — pinning there would trap the tall aside
     // and its model/language controls off-screen.
     <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
-      {/* Settings aside: what was entered before the chat, the output language, and
-          the technique (model, reasoning) behind "Advanced". */}
-      <aside
-        aria-labelledby="chat-settings-heading"
-        className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
-      >
-        <h2
-          id="chat-settings-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-        >
-          {t.chat.yourSettings}
-        </h2>
-
-        {sandboxSummary.length > 0 && (
-          <dl className="mt-3 space-y-2.5">
-            {sandboxSummary.map((item) => (
-              <div key={item.name}>
-                <dt className="text-[11px] text-slate-500">{item.label}</dt>
-                <dd className="text-sm font-medium text-slate-800">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
-        {tool.inputs.length > 0 && !presetValues && (
-          <button
-            type="button"
-            onClick={() => setSandboxSubmitted(false)}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-          >
-            <Pencil className="size-3.5" aria-hidden />
-            {t.chat.edit}
-          </button>
-        )}
-
-        {tool.copyableStudentPrompt && studentPrompt && (
-          <div className="mt-3">
-            <button
-              type="button"
-              aria-describedby="chat-copy-students-hint"
-              onClick={() => {
-                const text = fillStudentPrompt(
-                  studentPrompt[outputLanguage],
-                  tool.inputs,
-                  sandboxValues as Record<string, unknown>,
-                );
-                (navigator.clipboard?.writeText(text) ?? Promise.reject()).then(
-                  () => showToast({ variant: "success", message: t.chat.copiedForStudents }),
-                  () => showToast({ variant: "error", message: t.chat.copyFailed }),
-                );
-              }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-800 transition-colors hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-            >
-              <Copy className="size-3.5" aria-hidden />
-              {t.chat.copyForStudents}
-            </button>
-            <p id="chat-copy-students-hint" className="mt-1 text-xs text-slate-600">
-              {t.chat.copyForStudentsHint}
-            </p>
-          </div>
-        )}
-
-        {tool.usesContextProfile && !contextProfile && (
-          <p className="mt-3 text-xs text-slate-600">
-            {t.chat.noProfileHint}{" "}
-            <Link
-              to="/context-profiles"
-              className="font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-            >
-              {t.tool.noProfileAction}
-            </Link>
-          </p>
-        )}
-
-        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-          {/* Output language is not technique: it stays visible. */}
-          <div>
-            <Label htmlFor="chat-lang" className="mb-1 text-[11px] text-slate-500">
-              {t.tool.outputLanguage}
-            </Label>
-            <Select
-              id="chat-lang"
-              value={outputLanguage}
-              onChange={(e) => setOutputLanguage(e.target.value as "nl" | "en")}
-              className="h-9 w-full py-0 text-sm"
-            >
-              <option value="nl">{t.tool.dutch}</option>
-              <option value="en">{t.tool.english}</option>
-            </Select>
-          </div>
-          {/* Technique (model, reasoning) sits behind "Advanced". With one model and
-              no reasoning switch there is nothing to choose, so it drops out. */}
-          {(modelOptions.length > 1 || selectedModelSupportsThinking) && (
-            <AdvancedSettings current={selectedModelName}>
-              {modelOptions.length > 1 && (
-                <div>
-                  <Label htmlFor="chat-model" className="mb-1 text-[11px] text-slate-500">
-                    {t.tool.model}
-                  </Label>
-                  <Select
-                    id="chat-model"
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                    className="h-9 w-full py-0 text-sm"
-                  >
-                    {modelOptions.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.displayName}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              )}
-              {/* Reasoning switch: only for models that support it (Ollama Qwen3
-                  etc.). Off by default: a direct answer is far faster than
-                  reasoning first. */}
-              {selectedModelSupportsThinking && (
-                <div>
-                  <label
-                    htmlFor="chat-thinking"
-                    className="flex items-center gap-2 text-sm text-slate-700"
-                  >
-                    <input
-                      id="chat-thinking"
-                      type="checkbox"
-                      className="size-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
-                      checked={thinking}
-                      onChange={(e) => setThinking(e.target.checked)}
-                    />
-                    {t.tool.reasoning}
-                  </label>
-                  <p className="mt-1 text-[11px] text-slate-500">{t.tool.reasoningHint}</p>
-                </div>
-              )}
-            </AdvancedSettings>
-          )}
-        </div>
-      </aside>
+      <ChatSettingsAside
+        tool={tool}
+        summary={settingsSummary ?? summarizeSandbox(tool.inputs, sandboxValues, locale)}
+        onEdit={
+          tool.inputs.length > 0 && !presetValues ? () => setSandboxSubmitted(false) : undefined
+        }
+        values={sandboxValues}
+        studentPrompt={studentPrompt}
+        hasContextProfile={!!contextProfile}
+        outputLanguage={outputLanguage}
+        onOutputLanguage={setOutputLanguage}
+        model={{
+          options: modelOptions,
+          selected: selectedModel,
+          onSelect: setSelectedModel,
+          supportsThinking: selectedModelSupportsThinking,
+          thinking,
+          onThinking: setThinking,
+        }}
+      />
 
       {/* Chat column — on wide screens the thread fills the height and the
           composer pins; on mobile it flows in the page scroll. */}
       <div className="flex flex-col md:min-h-0 md:flex-1">
-        {/* Message thread — the scroll region that fills the available height (md+) */}
-        <div
-          className="md:min-h-0 md:flex-1 md:overflow-y-auto"
-          role="log"
-          aria-live="polite"
-          aria-label={t.chat.threadLabel}
-        >
-          {isEmpty ? (
-            // Centered welcome, like a fresh chat — greeting + starter prompts.
-            <div className="mx-auto flex min-h-[50vh] max-w-3xl flex-col items-center justify-center px-4 py-10 text-center md:h-full md:min-h-0">
-              <span className="mb-4 grid size-14 place-items-center rounded-2xl bg-violet-50 text-violet-600">
-                <ToolIcon name={tool.icon} className="size-7" />
-              </span>
-              {greetingText ? (
-                <p className="max-w-xl text-lg leading-relaxed text-slate-700">{greetingText}</p>
-              ) : (
-                <p className="text-sm text-slate-500">{t.chat.startConversation}</p>
-              )}
-              {starters && starters.length > 0 && (
-                <div className="mt-6 flex flex-wrap justify-center gap-2">
-                  {starters.map((starter) => (
-                    <button
-                      key={loc(starter, outputLanguage)}
-                      onClick={() => handleStarterClick(loc(starter, outputLanguage))}
-                      className="rounded-full border border-violet-300 bg-white px-4 py-2 text-sm text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                    >
-                      {loc(starter, outputLanguage)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
-              {turns.map((turn, i) =>
-                turn.role === "user" ? (
-                  <div key={turn.id} className="flex justify-end">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-violet-600 px-4 py-2.5 text-sm leading-relaxed text-white">
-                      {turn.content}
-                    </div>
-                  </div>
-                ) : (
-                  <div key={turn.id} className="flex gap-3">
-                    <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-violet-50 text-violet-600">
-                      <ToolIcon name={tool.icon} className="size-4" />
-                    </span>
-                    <div className="min-w-0 flex-1 text-sm text-slate-800">
-                      {turn.content ? (
-                        <>
-                          {renderAssistant?.(turn.content, {
-                            streaming: isStreaming && i === turns.length - 1,
-                            userTurns,
-                            model: selectedModel,
-                          }) ?? <Markdown>{turn.content}</Markdown>}
-                          {!(isStreaming && i === turns.length - 1) && (
-                            <div className="mt-1 -ml-3">
-                              <ReadAloudButton text={turn.content} lang={outputLanguage} />
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <span className="italic text-slate-500">
-                          {turn.interrupted ? (
-                            t.chat.interrupted
-                          ) : (
-                            <>
-                              <span className="inline-block animate-pulse">●</span>{" "}
-                              {t.tool.generating}
-                            </>
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ),
-              )}
-              {resultContext && savedId && !isStreaming && (
-                <ResultActions
-                  {...resultContext}
-                  generationId={savedId}
-                  courseId={courseId}
-                  itemId={itemId}
-                />
-              )}
-              {/* Anchor the auto-scroll: scrolls the thread (md+) or the page
-                  (mobile) so the latest turn stays in view while streaming. */}
-              <div ref={endRef} aria-hidden />
-            </div>
-          )}
-        </div>
-
-        {/* Composer — pinned to the bottom of the chat column */}
-        <div className="flex-none pt-3">
-          <div className="mx-auto w-full max-w-3xl">
-            {/* Persistent AI-transparency notice above the composer. */}
-            <AiNotice variant={tool.assistiveGrading ? "assistive" : "generic"} className="mb-2" />
-            {/* Fixed replies (P29.3), once the conversation runs: real buttons, so the
-                keyboard reaches them as well as the composer. */}
-            {!isEmpty && !isStreaming && quickReplies.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-2">
-                {quickReplies.map((reply) => (
-                  <button
-                    key={loc(reply, outputLanguage)}
-                    type="button"
-                    onClick={() => sendMessage(loc(reply, outputLanguage))}
-                    className="rounded-full border border-violet-300 bg-white px-4 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                  >
-                    {loc(reply, outputLanguage)}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-violet-500 focus-within:ring-1 focus-within:ring-violet-500">
-              <textarea
-                ref={inputRef}
-                rows={1}
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !isStreaming) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder={t.chat.inputPlaceholder}
-                disabled={isStreaming}
-                className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-500 focus:outline-none disabled:opacity-60"
+        <ChatThread
+          tool={tool}
+          turns={chat.turns}
+          isStreaming={chat.isStreaming}
+          greeting={greetingText}
+          starters={inOutputLanguage(tool.chat?.starters)}
+          onStarter={handleStarterClick}
+          outputLanguage={outputLanguage}
+          model={selectedModel}
+          renderAssistant={renderAssistant}
+          footer={
+            resultContext &&
+            chat.savedId &&
+            !chat.isStreaming && (
+              <ResultActions
+                {...resultContext}
+                generationId={chat.savedId}
+                courseId={courseId}
+                itemId={itemId}
               />
-
-              {isStreaming ? (
-                tool.chat?.allowStop && (
-                  <button
-                    onClick={handleStop}
-                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-red-500 text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                    title={t.tool.stop}
-                  >
-                    <Square className="size-4" />
-                  </button>
-                )
-              ) : (
-                <>
-                  <DictateButton
-                    lang={outputLanguage}
-                    className="size-9 rounded-xl"
-                    onText={(text) => {
-                      setMessageInput((cur) => appendDictation(cur, text));
-                      inputRef.current?.focus();
-                    }}
-                  />
-                  {tool.chat?.allowRegenerate && turns.length > 0 && (
-                    <button
-                      onClick={handleRegenerate}
-                      className="grid size-9 shrink-0 place-items-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                      title={t.tool.regenerate}
-                    >
-                      <RotateCcw className="size-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => sendMessage()}
-                    disabled={!messageInput.trim() || isStreaming}
-                    className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-600 text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:bg-slate-300"
-                    title={t.tool.generate}
-                  >
-                    <Send className="size-4" />
-                  </button>
-                </>
-              )}
-            </div>
-            <p className="mt-1.5 px-2 text-center text-[11px] text-slate-500">{t.chat.enterHint}</p>
-          </div>
-        </div>
+            )
+          }
+        />
+        <ChatComposer
+          tool={tool}
+          value={messageInput}
+          onChange={setMessageInput}
+          onSend={sendMessage}
+          onStop={chat.stop}
+          onRegenerate={handleRegenerate}
+          isStreaming={chat.isStreaming}
+          hasTurns={chat.turns.length > 0}
+          quickReplies={inOutputLanguage(tool.chat?.quickReplies)}
+          outputLanguage={outputLanguage}
+        />
       </div>
     </div>
   );
