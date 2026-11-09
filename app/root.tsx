@@ -21,6 +21,7 @@ import { effectiveFeatures } from "~/server/availability.server";
 import { takeFlash } from "~/server/flash.server";
 import { dictationEnabled } from "~/server/speechToText.server";
 import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
+import { requestIdMiddleware } from "~/server/requestId.server";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -35,8 +36,14 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-/** Security headers on every response, also `/api/*` and exports (not just pages). */
-export const middleware: Route.MiddlewareFunction[] = [securityHeadersMiddleware];
+/**
+ * Every response, also `/api/*` and exports (not just pages): first a request id (for the
+ * error log), then the security headers.
+ */
+export const middleware: Route.MiddlewareFunction[] = [
+  requestIdMiddleware,
+  securityHeadersMiddleware,
+];
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);

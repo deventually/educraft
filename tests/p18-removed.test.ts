@@ -55,7 +55,7 @@ describe("P18.2 — per-teacher tool/context access and the country axis removed
 });
 
 describe("P18.4 — the admin console has four pages", () => {
-  it("the route table registers exactly the four admin pages (plus the person page P28.1, teams P28.2, the team page and role agents)", () => {
+  it("the route table registers exactly the four admin pages (plus the person page P28.1, teams P28.2, the team page, role agents and the owner's recent errors)", () => {
     const files = flatRoutes()
       .filter((r) => r.path.startsWith("/admin") && r.file !== "routes/admin.tsx")
       .map((r) => `${r.path.replace(/^\/admin\/?/, "")}:${r.file.replace(/^routes\//, "")}`);
@@ -69,6 +69,7 @@ describe("P18.4 — the admin console has four pages", () => {
       "agents:admin.agents.tsx",
       "context:admin.context.tsx",
       "usage:admin.usage.tsx",
+      "errors:admin.errors.tsx",
     ]);
   });
 

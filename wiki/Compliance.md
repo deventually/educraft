@@ -37,7 +37,9 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
 - **Data minimisation in logs.** The structured logger (`app/server/log.server.ts`)
   emits **metadata only** — user id, tool, model, duration, outcome, output
   length — and **never** prompt or response content (student work). See the
-  per-generation log line in `app/routes/api.stream.tsx`.
+  per-generation log line in `app/routes/api.stream.tsx`. An unexpected error is logged with
+  its request id, method, path (without query string) and a capped message and stack, never
+  a request body (`app/server/errorLog.server.ts`).
 - **Right to erasure.** "Delete my account and data" (`/account`) runs
   `deleteUserCascade` (`app/server/repositories/users.server.ts`) — a single
   transaction removing the user's feedback, pilot check-ins, usage counters, generations, context
