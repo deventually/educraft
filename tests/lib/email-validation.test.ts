@@ -18,13 +18,10 @@ describe("e-mail validation (zod)", () => {
     expect(email.safeParse(value).success).toBe(true);
   });
 
-  it.each([
-    "",
-    "geen-apenstaartje",
-    "a@b",
-    "twee@@school.nl",
-    "spatie @school.nl",
-  ])("rejects %j", (value) => {
-    expect(email.safeParse(value).success).toBe(false);
-  });
+  it.each(["", "geen-apenstaartje", "a@b", "twee@@school.nl", "spatie @school.nl"])(
+    "rejects %j",
+    (value) => {
+      expect(email.safeParse(value).success).toBe(false);
+    },
+  );
 });

@@ -14,14 +14,12 @@ const pkg = (name: string) =>
   };
 
 describe("dev server config", () => {
-  it.each([
-    "react-router",
-    "@react-router/dev",
-    "@react-router/node",
-    "@react-router/serve",
-  ])("%s is on major version 8", (name) => {
-    expect(pkg(name).version.split(".")[0]).toBe("8");
-  });
+  it.each(["react-router", "@react-router/dev", "@react-router/node", "@react-router/serve"])(
+    "%s is on major version 8",
+    (name) => {
+      expect(pkg(name).version.split(".")[0]).toBe("8");
+    },
+  );
 
   it("sets no v8_ future flags (they are the default on v8)", () => {
     const flags = Object.keys((config as { future?: object }).future ?? {});

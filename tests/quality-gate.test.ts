@@ -18,6 +18,15 @@ describe("quality gate", () => {
     expect(scripts[name]).toMatch(/^biome \w+ .*--error-on-warnings/);
   });
 
+  // Biome 2.6 formats Markdown too. Prompt files hold the book's verbatim text and help pages are
+  // hand-written, so the formatter must not touch them.
+  it("keeps Markdown (prompts and help pages) out of Biome", () => {
+    const biome = JSON.parse(readFileSync(resolve(root, "biome.json"), "utf8")) as {
+      files: { includes: string[] };
+    };
+    expect(biome.files.includes).toContain("!**/*.md");
+  });
+
   it("CI runs the check script", () => {
     expect(readFileSync(resolve(root, ".github/workflows/ci.yml"), "utf8")).toContain(
       "npm run check",
