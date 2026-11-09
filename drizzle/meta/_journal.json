@@ -148,6 +148,13 @@
       "when": 1793973885926,
       "tag": "0020_unusual_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1794249844580,
+      "tag": "0021_mature_deathstrike",
+      "breakpoints": true
     }
   ]
 }

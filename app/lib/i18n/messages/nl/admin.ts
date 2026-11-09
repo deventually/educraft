@@ -2,6 +2,7 @@ export const admin = {
   console: {
     nav: {
       agents: "Rolagenten",
+      audit: "Logboek",
       context: "Onderwijscontext",
       teams: "Teams",
       tools: "Tools en modellen",

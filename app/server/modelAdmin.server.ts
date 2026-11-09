@@ -37,6 +37,7 @@ import { getEnabledModels, setEnabledModels } from "./repositories/settings.serv
 import { countGenerationsByModel } from "./repositories/generations.server";
 import { listAssignedModelSets } from "./repositories/users.server";
 import { listTeams } from "./repositories/teams.server";
+import { recordAdminAction } from "./repositories/auditLog.server";
 
 export interface ProviderStatus {
   id: string;
@@ -306,8 +307,11 @@ function addedSettings(fd: FormData): { settings?: ModelSettings } {
   return Object.keys(settings).length ? { settings } : {};
 }
 
-/** Run one models intent from the admin page's form data (the caller checked the role). */
-export async function modelAdminAction(intent: ModelIntent, fd: FormData) {
+/**
+ * Run one models intent from the admin page's form data (the caller checked the role). A change
+ * to the instance's model choice goes in the audit log under `actorUserId`.
+ */
+export async function modelAdminAction(intent: ModelIntent, fd: FormData, actorUserId: string) {
   switch (intent) {
     case "models": {
       const catalogIds = new Set((await fullCatalog()).map((m) => m.id));
@@ -317,6 +321,11 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData) {
       // Lockout guard at the boundary: an admin may not unselect everything.
       if (chosen.length === 0) return { error: true as const };
       await setEnabledModels(chosen);
+      await recordAdminAction({
+        actorUserId,
+        action: "instanceModelsChanged",
+        detail: { models: chosen },
+      });
       return { saved: true as const };
     }
     case "add": {

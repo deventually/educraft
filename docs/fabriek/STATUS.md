@@ -4,10 +4,23 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#177, #180, #183, #178 en #179 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#182, #184 en #185 gemerged)_
 
 ## Nu
 
+- **Audit-log van beheeracties (P1 middelgroot uit de doorlichting, #185) gemerged op 2026-11-09:**
+  rol, wachtwoord, deactivering, uitnodiging en modelkeuze komen in een log op `/admin/audit`.
+  Regels ouder dan een jaar verdwijnen vanzelf; de eigenaar kan met een bevestiging eerder opruimen.
+- **Strengere TypeScript, fase 1 (P1 middelgroot, #184) gemerged op 2026-11-09:**
+  `noUnusedLocals` en `noFallthroughCasesInSwitch` staan aan en een test houdt ze aan. Fase 2
+  (`noUncheckedIndexedAccess`) volgt.
+- **Sessie verloopt na 8 uur inactiviteit, plus "Overal uitloggen" (P1-4, #182) gemerged op
+  2026-11-09:** elk verzoek telt als activiteit (root-middleware); op de accountpagina log je alle
+  andere apparaten uit.
+- **Architectuurregels als test (P1-punt 6 uit de doorlichting, #181) gemerged op 2026-11-09:**
+  `tests/architecture.test.ts` bewaakt dat `app/components` niets uit een `*.server`-module
+  binnenhaalt, dat alleen `db.server.ts` `better-sqlite3` gebruikt en dat buiten `app/lib/ai/`
+  niets een AI-SDK importeert. AGENTS.md noemt de test.
 - **Ratchet-tests (P1-punt 7 uit de doorlichting, #179) gemerged op 2026-11-09:**
   `tests/ratchet.test.ts` legt de tellingen van vandaag vast: 31 onderdrukkingen (`as any`,
   `@ts-ignore`, `@ts-expect-error`, `biome-ignore`) en 20 bestanden in `app/` boven 400 regels

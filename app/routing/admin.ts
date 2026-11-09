@@ -17,6 +17,7 @@ export const admin: RouteArea = {
       route("agents", "routes/admin.agents.tsx"), // the role agents' switches
       route("context", "routes/admin.context.tsx"),
       route("usage", "routes/admin.usage.tsx"),
+      route("audit", "routes/admin.audit.tsx"), // the audit log of admin actions
       route("errors", "routes/admin.errors.tsx"), // recent errors, owner only (P1)
     ]),
   ],

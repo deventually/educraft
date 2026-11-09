@@ -45,6 +45,8 @@ import { SetPasswordDialog } from "~/components/admin/SetPasswordDialog";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
 import { redirectWithFlash } from "~/server/flash.server";
+import { recordAdminAction } from "~/server/repositories/auditLog.server";
+import type { AuditAction, AuditDetail } from "~/lib/auditLog";
 
 /**
  * One person's page (P28.1): everything about one account in one place: Account
@@ -177,6 +179,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   const fd = await request.formData();
   const intent = String(fd.get("intent") ?? "");
   const userId = params.id;
+  // Every change below that touches someone's access goes in the audit log, after it succeeded.
+  const audit = (action: AuditAction, detail?: AuditDetail) =>
+    recordAdminAction({ actorUserId: admin.id, action, targetUserId: userId, detail });
 
   // ── Models per teacher (P18): inherit the instance, or an own set ────────────
   if (intent === "teacherModels") {
@@ -191,8 +196,10 @@ export async function action({ request, params }: Route.ActionArgs) {
       );
       if (chosen.length === 0) return { error: "atLeastOne" as const };
       await setUserAssignedModels(userId, chosen);
+      await audit("teacherModelsChanged", { models: chosen });
     } else {
       await setUserAssignedModels(userId, null);
+      await audit("teacherModelsChanged", { models: null });
     }
     return { saved: true as const };
   }
@@ -228,7 +235,10 @@ export async function action({ request, params }: Route.ActionArgs) {
     // promoted by a role change — treat it as not manageable here.
     const target = await getUserById(userId);
     if (!target || !isRole(target.role)) throw new Response("Not found", { status: 404 });
-    if (isRole(role)) await setUserRole(userId, role);
+    if (isRole(role) && role !== target.role) {
+      await setUserRole(userId, role);
+      await audit("roleChanged", { from: target.role, to: role });
+    }
     return { roleChanged: true as const };
   }
 
@@ -238,6 +248,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (userId === admin.id) return { error: "selfDelete" as const };
     if (!(await manageTarget(actorIsOwner, userId))) return { error: "ownerOnly" as const };
     await deleteUserCascade(userId);
+    await audit("accountDeleted");
     // This page is gone with the account: back to the list.
     return redirectWithFlash("/admin/users", "userDeleted");
   }
@@ -248,6 +259,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     // No email service: mint a single-use link the admin shares out-of-band; the
     // user opens it and sets their own new password. The admin never sees it.
     const reset = await createPasswordReset(userId);
+    await audit("resetLinkCreated");
     return { resetLink: `${new URL(request.url).origin}/reset/${reset.token}` };
   }
 
@@ -285,6 +297,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (password !== confirm) return { error: "passwordMismatch" as const };
     // Bumps sessionVersion: the user is logged out on every device.
     await updateUserPassword(target.id, await hashPassword(password));
+    await audit("passwordSet");
     return { passwordSet: true as const };
   }
 
@@ -292,6 +305,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     const target = await ownerTarget(admin.id, userId);
     if (!target) return { error: "selfDeactivate" as const };
     await setUserDisabled(target.id, intent === "deactivate");
+    await audit(intent === "deactivate" ? "deactivated" : "reactivated");
     return { statusChanged: true as const };
   }
 

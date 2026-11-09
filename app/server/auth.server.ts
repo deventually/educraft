@@ -1,5 +1,5 @@
 import { redirect } from "react-router";
-import { commitSession, destroySession, getSession } from "./session.server";
+import { commitSession, destroySession, getSession, isSessionFresh } from "./session.server";
 import { getUserById } from "./repositories/users.server";
 import { getOwnerUserId } from "./repositories/settings.server";
 import type { UserRow } from "./schema.server";
@@ -35,6 +35,8 @@ export async function getUser(request: Request): Promise<User | null> {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") return null;
+  // Idle for more than 8 hours (P1-4), or minted before the stamp existed → logged out.
+  if (!isSessionFresh(session.get("lastSeen"))) return null;
   const row = await getUserById(userId);
   if (!row) return null;
   // A legacy row with a retired role (e.g. "student", pre-P17 data) counts as logged out.
@@ -42,7 +44,7 @@ export async function getUser(request: Request): Promise<User | null> {
   // A deactivated account (P18.7) has no session at all; its data stays.
   if (row.disabledAt) return null;
   // A cookie whose sessionVersion is behind the stored one predates a password
-  // change or a deactivation → treat as logged out on that device.
+  // change, a deactivation, a role change or "log out everywhere" → logged out.
   const cookieVersion = session.get("sessionVersion") ?? 0;
   if ((row.sessionVersion ?? 0) !== cookieVersion) return null;
   return toPublicUser(row);
@@ -78,6 +80,7 @@ async function sessionCookie(userId: string): Promise<string> {
   const session = await getSession();
   session.set("userId", userId);
   session.set("sessionVersion", row?.sessionVersion ?? 0);
+  session.set("lastSeen", Date.now());
   return commitSession(session);
 }
 

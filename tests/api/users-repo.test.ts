@@ -82,6 +82,20 @@ describe("users repository", () => {
     // A password change is the only thing that bumps the session version.
     expect(after?.sessionVersion).toBe(1);
   });
+
+  it("logOutEverywhere bumps the session version and changes nothing else", async () => {
+    const u = await repo.createUser({
+      name: "Everywhere",
+      passwordHash: "scrypt:keep:hash",
+      role: "teacher",
+    });
+    await repo.logOutEverywhere(u.id);
+    const after = await repo.getUserById(u.id);
+    expect(after?.sessionVersion).toBe(1);
+    expect(after?.passwordHash).toBe("scrypt:keep:hash");
+    expect(after?.role).toBe("teacher");
+    expect(after?.disabledAt ?? null).toBeNull();
+  });
 });
 
 describe("invites repository", () => {

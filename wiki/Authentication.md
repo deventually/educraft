@@ -168,14 +168,24 @@ repository, `app/server/repositories/shares.server.ts`.
 
 - Cookie sessions via React Router's `createCookieSessionStorage`
   ([`session.server.ts`](../app/server/session.server.ts)). The cookie stores
-  `{ userId, sessionVersion }`; the **role is read fresh from the DB on every
+  `{ userId, sessionVersion, lastSeen }`; the **role is read fresh from the DB on every
   request**; a real role change additionally logs that user out everywhere (P18.9).
+- **8 hours without activity logs you out (P1-4, sliding).** `getUser` refuses a cookie
+  whose `lastSeen` is more than `SESSION_IDLE_MS` (8 h) ago, or that has no `lastSeen` at
+  all (cookies from before P1-4). `sessionRefreshMiddleware` (root middleware, so pages,
+  data requests and `/api/*` alike) re-stamps `lastSeen` on activity, at most once per
+  5 minutes, reads only the cookie (no DB), never revives an expired session and never
+  overrides a session cookie the route set itself. The cookie's Max-Age is 8 h too; the
+  server-side check is what counts.
 - **Several devices at once, one switch to sign them all out.** Logging in never
   invalidates other sessions (laptop and phone can both be signed in). Only a new
-  password (`updateUserPassword`), a deactivation (`setUserDisabled`) or a real role change
-  (`setUserRole`) bumps
+  password (`updateUserPassword`), a deactivation (`setUserDisabled`), a real role change
+  (`setUserRole`) or **"Overal uitloggen"** on `/account` (`logOutEverywhere`,
+  BESLUIT-2026-11-09-2) bumps
   `users.sessionVersion`; `getUser` rejects any cookie with an older version, and the
   device that changed its own password gets a fresh cookie so it stays signed in.
+  "Overal uitloggen" needs no password (it only takes access away) and also logs out the
+  device it was pressed on, with the `signedOutEverywhere` toast on `/login`.
 - Passwords hashed with Node's built-in `scrypt`
   ([`password.server.ts`](../app/server/password.server.ts)) — no native
   bcrypt/argon2 dependency. Stored self-describing as `scrypt:<saltHex>:<hashHex>`.
@@ -225,6 +235,26 @@ approval first. Every link below is shown on the page for the admin to copy and 
   old cookies nor old links. A link minted while the account is deactivated is invalid and
   stays unspent (`reset.$token.tsx`) until the account is reactivated.
 - Nobody uses these on their own account; they use `/account`.
+
+## Audit log of admin actions (P1)
+
+Every admin action that changes someone's access writes one row to `admin_audit`
+(`recordAdminAction`, `app/server/repositories/auditLog.server.ts`), **after** the change
+succeeded; a refusal writes nothing. The actions (`AUDIT_ACTIONS`, `app/lib/auditLog.ts`): a role
+change (from → to), a password set by the owner, a reset link minted, (de)activation (per person or
+via the selection), an account created or deleted, invites created (with a count) or revoked, and
+the model choice of the instance or of one teacher.
+
+- **Facts, not secrets:** a row holds ids, the action and a small `detail` (`from`/`to`, `count`,
+  `role`, `models`, `bulk`). Never a password, a link, a token or an invite's note.
+- **No names stored:** the page joins the current names. A deleted account stays in the log as
+  "Deleted account"; the fact remains, the person does not.
+- **Kept a year:** nothing edits a row. Entries older than `AUDIT_RETENTION_DAYS` (365) are
+  removed on every new entry and whenever `/admin/audit` is opened. The page shows the newest 200.
+- **Cleaning up by hand (owner only):** "Logboek opruimen" removes entries older than 30, 90 or
+  180 days, or everything, behind a cannot-be-undone warning and type-to-confirm. Only the owner,
+  because wiping the log is the one way to hide what an admin did. The cleanup itself is then
+  recorded (`logCleaned`, with the age and count), so it is the first entry of what remains.
 
 ## What SSO will (and won't) replace
 

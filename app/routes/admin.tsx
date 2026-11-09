@@ -4,6 +4,7 @@ import {
   BotMessageSquare,
   Bug,
   GraduationCap,
+  ScrollText,
   SlidersHorizontal,
   Users,
   UsersRound,
@@ -41,6 +42,7 @@ const SECTIONS = [
   { to: "/admin/agents", key: "agents", Icon: BotMessageSquare },
   { to: "/admin/context", key: "context", Icon: GraduationCap },
   { to: "/admin/usage", key: "usage", Icon: Activity },
+  { to: "/admin/audit", key: "audit", Icon: ScrollText },
 ] as const;
 
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {

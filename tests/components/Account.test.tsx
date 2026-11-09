@@ -40,6 +40,15 @@ describe("Account page", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers 'log out everywhere' and says a session ends after 8 hours of inactivity", async () => {
+    const { container } = renderAccount();
+    expect(
+      screen.getByRole("button", { name: /overal uitloggen|log out everywhere/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/8 uur|8 hours/i)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("still offers a teacher the type-to-confirm account deletion", () => {
     renderAccount();
     expect(
