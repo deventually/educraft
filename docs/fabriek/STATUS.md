@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #207 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #209 gemerged)_
 
 ## Nu
 
+- **Leerdoelen en trefwoorden uit de mutatiemeting (#209) gemerged op 2026-11-10:**
+  `registry/goals.ts` en `registry/keywords.ts` zijn pure data, net als `tools/`, en tellen niet
+  meer mee in Stryker. Dat scheelde 392 nepmeldingen: de eerste run op main ging van 63,8% naar
+  75,9%. Geen gedragswijziging.
 - **Tweestapsverificatie met een authenticator-app (#207) gemerged op 2026-11-10:** beheerders en
   de eigenaar moeten een code uit een authenticator-app invoeren, anders gaan de beheerpagina's
   niet open; voor docenten is het optioneel (`/account/2fa`). Iedereen krijgt 10 herstelcodes. Alles
