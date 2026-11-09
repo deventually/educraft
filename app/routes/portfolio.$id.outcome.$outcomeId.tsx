@@ -1,19 +1,13 @@
 import { Form, Link, useActionData } from "react-router";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import {
-  CRITERION_STATUSES,
-  EVIDENCE_KINDS,
-  type Criterion,
-  type DossierData,
-  type EvidenceItem,
-} from "~/lib/portfolio/types";
-import { Button, Card, Input, Label, Select } from "~/components/ui";
+import { CRITERION_STATUSES, type DossierData } from "~/lib/portfolio/types";
+import { Button, Card, Label, Select } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
-import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
+import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ProofreadPanel } from "~/components/portfolio/ProofreadPanel";
@@ -22,10 +16,8 @@ import { availableToolNames, loadSuggestions, modelDisplayName } from "~/server/
 import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
 import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { snapshotCourses } from "~/server/courseEvidence.server";
-import { fmtDate } from "~/lib/portfolio/format";
-import { useLocale, useT } from "~/lib/i18n/useT";
+import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import type { Messages } from "~/lib/i18n";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { evidencePending } from "~/lib/portfolio/evidence";
 
@@ -103,8 +95,6 @@ function storedProofread(d: DossierData, outcomeId: string) {
 export async function action({ request, params }: Route.ActionArgs) {
   return saveIntent(request, params.id);
 }
-
-type PortfolioMessages = Messages["portfolio"];
 
 export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
   const t = useT();
@@ -256,7 +246,6 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 outcomeId={outcome.id}
                 criteria={outcome.criteria}
                 courses={snapshotCourses}
-                t={t.portfolio}
               />
             ))}
           </ul>
@@ -272,7 +261,6 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                   outcomeId={outcome.id}
                   criteria={outcome.criteria}
                   courses={snapshotCourses}
-                  t={t.portfolio}
                 />
               ))}
             </ul>
@@ -286,7 +274,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
             <Form key={evidence.length + unlinked.length} method="post" className="mt-3 grid gap-3">
               <input type="hidden" name="intent" value="addEvidence" />
               <input type="hidden" name="outcomeId" value={outcome.id} />
-              <EvidenceFields prefix="new-evidence" criteria={outcome.criteria} t={t.portfolio} />
+              <EvidenceFields prefix="new-evidence" criteria={outcome.criteria} />
               <div>
                 <Button type="submit">{to.addEvidence}</Button>
               </div>
@@ -334,174 +322,6 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
         proofread={!!proofread}
       />
       {proofread && <ProofreadPanel outcomeId={outcome.id} view={proofread} />}
-    </div>
-  );
-}
-
-function EvidenceFields({
-  prefix,
-  criteria,
-  item,
-  t,
-}: {
-  prefix: string;
-  criteria: Criterion[];
-  item?: EvidenceItem;
-  t: PortfolioMessages;
-}) {
-  const linked = new Set(item?.criterionIds ?? []);
-  return (
-    <>
-      <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
-        <div>
-          <Label htmlFor={`${prefix}-title`}>{t.outcome.evidenceTitleLabel}</Label>
-          <Input
-            id={`${prefix}-title`}
-            name="title"
-            required
-            maxLength={LIMITS.title}
-            defaultValue={item?.title ?? ""}
-          />
-        </div>
-        <div>
-          <Label htmlFor={`${prefix}-kind`}>{t.outcome.evidenceKind}</Label>
-          <Select id={`${prefix}-kind`} name="kind" defaultValue={item?.kind ?? "other"}>
-            {EVIDENCE_KINDS.map((k) => (
-              <option key={k} value={k}>
-                {t.kinds[k]}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </div>
-      <EvidenceTextField id={`${prefix}-text`} defaultValue={item?.text ?? ""} />
-      {criteria.length > 0 && (
-        <fieldset>
-          <legend className="text-sm font-medium text-slate-700">
-            {t.outcome.evidenceCriteria}
-          </legend>
-          <div className="mt-2 space-y-1">
-            {criteria.map((c, i) => (
-              <label key={c.id} className="flex items-start gap-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  name="criterionIds"
-                  value={c.id}
-                  defaultChecked={linked.has(c.id)}
-                  className="mt-1"
-                />
-                <span>
-                  {i + 1}. {c.text}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
-    </>
-  );
-}
-
-function EvidenceRow({
-  item,
-  outcomeId,
-  criteria,
-  courses,
-  t,
-}: {
-  item: EvidenceItem;
-  outcomeId: string;
-  criteria: Criterion[];
-  /** courseId → name, or null when the course is gone (P26.4). */
-  courses: Record<string, string | null>;
-  t: PortfolioMessages;
-}) {
-  return (
-    <li className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <details>
-        <summary className="cursor-pointer px-4 py-3">
-          <span className="font-medium text-slate-900">{item.title}</span>{" "}
-          <span className="text-sm text-slate-600">· {t.kinds[item.kind]}</span>
-          {evidencePending(item) && (
-            <>
-              {" "}
-              <span className="ml-1 inline-block rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">
-                {t.outcome.evidencePending}
-              </span>
-            </>
-          )}
-        </summary>
-        <div className="border-t border-slate-100 p-4">
-          {item.sourceCourse && (
-            <CourseSnapshot
-              evidenceId={item.id}
-              source={item.sourceCourse}
-              courseName={courses[item.sourceCourse.courseId] ?? null}
-              t={t}
-            />
-          )}
-          <Form method="post" className="grid gap-3">
-            <input type="hidden" name="intent" value="updateEvidence" />
-            <input type="hidden" name="outcomeId" value={outcomeId} />
-            <input type="hidden" name="evidenceId" value={item.id} />
-            <EvidenceFields prefix={`ev-${item.id}`} criteria={criteria} item={item} t={t} />
-            <div>
-              <Button type="submit" variant="secondary" size="sm">
-                {t.outcome.saveEvidence}
-              </Button>
-            </div>
-          </Form>
-          <Form method="post" className="mt-2">
-            <input type="hidden" name="intent" value="removeEvidence" />
-            <input type="hidden" name="evidenceId" value={item.id} />
-            <Button
-              type="submit"
-              variant="danger"
-              size="sm"
-              aria-label={`${t.outcome.removeEvidence}: ${item.title}`}
-            >
-              <Trash2 className="size-4" aria-hidden />
-              {t.outcome.removeEvidence}
-            </Button>
-          </Form>
-        </div>
-      </details>
-    </li>
-  );
-}
-
-/** Where a snapshot comes from, with a way to the course and "Opnieuw ophalen" (P26.4). */
-function CourseSnapshot({
-  evidenceId,
-  source,
-  courseName,
-  t,
-}: {
-  evidenceId: string;
-  source: NonNullable<EvidenceItem["sourceCourse"]>;
-  courseName: string | null;
-  t: PortfolioMessages;
-}) {
-  const locale = useLocale();
-  const date = fmtDate(source.at, locale);
-  if (courseName === null)
-    return <p className="mb-3 text-sm text-slate-600">{fmt(t.outcome.fromGoneCourse, { date })}</p>;
-  return (
-    <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-700">
-      <p>{fmt(t.outcome.fromCourse, { course: courseName, date })}</p>
-      <Link
-        to={`/courses/${source.courseId}`}
-        className="font-medium text-violet-700 underline underline-offset-2"
-      >
-        {t.outcome.openCourse}
-      </Link>
-      <Form method="post">
-        <input type="hidden" name="intent" value="refreshCourseEvidence" />
-        <input type="hidden" name="evidenceId" value={evidenceId} />
-        <Button type="submit" variant="secondary" size="sm">
-          {t.outcome.refresh}
-        </Button>
-      </Form>
     </div>
   );
 }
