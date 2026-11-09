@@ -6,7 +6,6 @@ export const home: Messages["home"] = {
     clearSearch: "Clear search",
     generator: "form",
     goalRegion: "Tools by teaching goal",
-    open: "Open tool",
     resultsRegion: "Search results",
     search: "Search tools",
   },

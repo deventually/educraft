@@ -33,6 +33,7 @@ const packageName = (spec: string) =>
 describe("declared dependencies", () => {
   it.each([
     "app",
+    "e2e",
     "scripts",
     "evals",
     "tests",

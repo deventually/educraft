@@ -332,7 +332,15 @@ npm test           # full node + DOM suite: registry, interpolation, buildSystem
 npm run typecheck  # react-router typegen + tsc
 npm run check      # Biome (lint + format); a warning fails it too (--error-on-warnings)
 npm run build      # production build
+npm run test:e2e   # browser tests: the production build in Chromium, axe (WCAG 2.2 AA) + CSP
 ```
+
+**Browser tests** (`e2e/`, Playwright). `npm run test:e2e` builds the app, seeds a throwaway
+database (`e2e/.data/`, one teacher and one admin from `e2e/users.ts`) and opens every page in
+`e2e/pages.ts` as the right user. Each page must load, have no axe violations at WCAG 2.2 AA and
+log no CSP violation. A new key page is one line in `e2e/pages.ts`; `tests/e2e-setup.test.ts`
+checks every path against the route table. Locally once: `npx playwright install chromium`.
+CI runs it as its own job, next to the gate.
 
 A Biome warning (dead code, a non-null assertion) fails the gate just like an error
 (`tests/quality-gate.test.ts`). Fix the cause; don't add a `biome-ignore`.

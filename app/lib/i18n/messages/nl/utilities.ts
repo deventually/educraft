@@ -92,7 +92,6 @@ export const utilities = {
     tableCaption: "Per vraag: p-waarde, Rit, Rir en alfa zonder deze vraag",
   },
   noAi: "Zonder AI",
-  open: "Open hulpmiddel",
   rubric: {
     addCriterion: "Criterium toevoegen",
     addLevel: "Niveau toevoegen",
