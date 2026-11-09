@@ -52,11 +52,9 @@ const LONG_FILES_BASELINE = [
   "app/lib/registry/goals.ts",
   "app/routes/admin.users.$id.tsx",
   "app/routes/admin.users.tsx",
-  "app/routes/api.stream.tsx",
   "app/routes/portfolio.$id.outcome.$outcomeId.tsx",
   "app/routes/portfolio.$id.tsx",
   "app/routes/start.tsx",
-  "app/routes/tool.tsx",
   "app/server/availability.server.ts",
   "app/server/repositories/users.server.ts",
 ];

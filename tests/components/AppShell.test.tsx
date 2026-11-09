@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import AppShell from "~/components/AppShell";
+import { getToolBySlugOrThrow } from "~/lib/registry";
 
 function renderShell(initialPath = "/") {
   // AppShell is a layout: it renders <Outlet/>, so stub a child route.
@@ -123,7 +124,7 @@ describe("AppShell top navigation", () => {
           { index: true, Component: () => <p>Tools home</p> },
           {
             path: "tools/:slug",
-            loader: () => ({ tool: { mode: "chat" } }),
+            loader: () => ({ tool: getToolBySlugOrThrow("mentorai") }),
             Component: () => <p>Chat tool</p>,
           },
         ],
@@ -136,6 +137,25 @@ describe("AppShell top navigation", () => {
     expect(screen.queryByRole("contentinfo")).toBeNull();
   });
 
+  it("keeps the footer on a tool that is not a chat", async () => {
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: AppShell,
+        children: [
+          {
+            path: "tools/:slug",
+            loader: () => ({ tool: getToolBySlugOrThrow("cognitive-architect") }),
+            Component: () => <p>Stages tool</p>,
+          },
+        ],
+      },
+    ]);
+    render(<Stub initialEntries={["/tools/cognitive-architect"]} />);
+    await screen.findByText("Stages tool");
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+  });
+
   it("keeps the chat page vertically scrollable so an expanded header is never clipped", async () => {
     const Stub = createRoutesStub([
       {
@@ -145,7 +165,7 @@ describe("AppShell top navigation", () => {
           { index: true, Component: () => <p>Tools home</p> },
           {
             path: "tools/:slug",
-            loader: () => ({ tool: { mode: "chat" } }),
+            loader: () => ({ tool: getToolBySlugOrThrow("mentorai") }),
             Component: () => <p>Chat tool</p>,
           },
         ],

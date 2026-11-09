@@ -248,7 +248,7 @@ function ToolGrid({ children }: { children: React.ReactNode }) {
 }
 
 function toolAria(tool: ToolCardData, locale: Locale, t: T) {
-  const kind = tool.mode === "chat" ? t.home.a11y.chatbot : t.home.a11y.generator;
+  const kind = { chat: t.home.a11y.chatbot, "one-shot": t.home.a11y.generator }[tool.mode];
   return `${t.home.a11y.open}: ${loc(tool.name, locale)}. ${kind}. ${loc(tool.tagline, locale)}`;
 }
 

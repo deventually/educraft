@@ -266,7 +266,7 @@ export interface Tool {
   /** Always at least one. length === 1 for simple generators & chat tools. */
   stages: [ToolStage, ...ToolStage[]];
 
-  /** Present iff mode === "chat". */
+  /** Present iff the tool is a chat (`mode: "chat"`). */
   chat?: ChatConfig;
 
   /** Catalog model id. */

@@ -24,6 +24,14 @@ A *tool* is a declarative description, not a hand-written page. A `Tool`
   the AI, such as the leercheck's `engagement-index` (the score out of 18, P31.3). A number
   never depends on the AI's arithmetic.
 
+- **`mode`** — `one-shot` or `chat`. How a tool runs is one **strategy** per kind
+  (`modeOf(tool)` in `app/lib/registry/modes.ts`): `chat`, `multiStage` (one-shot with more
+  than one stage) or `oneShot`. The strategy knows the turns the model answers (a chat's
+  history or one trigger), the language reminder on the last chat turn, the row a run is kept
+  in (a chat's session id), whether the workspace fills the page, and whether the work may be
+  shared. The tool page picks its workspace from `ToolWorkspace` by that kind. No route or
+  component branches on `tool.mode` itself (`tests/architecture.test.ts`).
+
 Adding a tool is therefore *authoring data*, not writing a feature — see
 [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md). This is the property that lets
 one app scale to many tools, sectors, and countries (see [Context Model](Context-Model.md)).

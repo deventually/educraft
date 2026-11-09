@@ -1,0 +1,252 @@
+import { useState } from "react";
+import { Link } from "react-router";
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  HelpCircle,
+  Info,
+  MessagesSquare,
+  Sparkles,
+} from "lucide-react";
+import { ToolIcon } from "~/components/ToolIcon";
+import { Markdown } from "~/components/Markdown";
+import { ToolSubtitle } from "~/components/ToolTitle";
+import { modeOf, type ToolKind } from "~/lib/registry/modes";
+import type { Tool } from "~/lib/registry/types";
+import { cn } from "~/lib/utils";
+import type { useT } from "~/lib/i18n/useT";
+import { fmt } from "~/lib/i18n/format";
+import { loc, type LocalizedText } from "~/lib/i18n/localized";
+import type { Locale } from "~/lib/i18n";
+
+type T = ReturnType<typeof useT>;
+/** The book's own prompt text, per stage. */
+type Verbatim = { name: LocalizedText; text: string }[];
+
+/**
+ * Compact "command bar" header (design: Direction A — Compacte commandobalk).
+ * Orient + start sit on two lines; the research provenance (theory, source,
+ * adapted notice, original prompt, how-to-use) collapses behind one disclosure
+ * so it never pushes the workspace down.
+ */
+export function ToolHeader({
+  tool,
+  verbatim,
+  helpOverlay,
+  locale,
+  t,
+}: {
+  tool: Tool;
+  verbatim: Verbatim;
+  helpOverlay: string | null;
+  locale: Locale;
+  t: T;
+}) {
+  const [open, setOpen] = useState(false);
+  const a = tool.attribution;
+  const kind = modeOf(tool).kind;
+
+  return (
+    <div className="mb-6">
+      <nav
+        aria-label={t.tool.breadcrumb}
+        className="mb-3 flex items-center gap-1.5 text-[13px] text-slate-500"
+      >
+        <Link to="/tools" className="transition-colors hover:text-violet-600">
+          {t.nav.tools}
+        </Link>
+        <ChevronRight className="size-3.5 text-slate-400" aria-hidden />
+        <span className="truncate font-medium text-slate-700">{loc(tool.name, locale)}</span>
+      </nav>
+
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-5">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span className="grid size-[52px] shrink-0 place-items-center rounded-[14px] bg-violet-50 text-violet-600">
+            <ToolIcon name={tool.icon} className="size-6" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+                {loc(tool.name, locale)}
+              </h1>
+              <KindPill kind={kind} stages={tool.stages.length} t={t} />
+            </div>
+            <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600 sm:line-clamp-1">
+              {loc(tool.tagline, locale)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex w-full shrink-0 flex-col-reverse items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-controls="tool-provenance"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[13px] font-medium transition-colors",
+              open
+                ? "border-violet-200 bg-violet-50 text-violet-700"
+                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+            )}
+          >
+            <BookOpen className="size-4" aria-hidden />
+            {t.tool.provenance}
+            <ChevronDown
+              className={cn("size-4 transition-transform", open && "rotate-180")}
+              aria-hidden
+            />
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div
+          id="tool-provenance"
+          className="mt-2.5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="grid gap-7 sm:grid-cols-[1.5fr_1fr]">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-brass-600">
+                {t.tool.theory}
+              </p>
+              <p className="mt-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <BookOpen className="size-4 shrink-0 text-violet-600" aria-hidden />
+                {loc(tool.theory.name, locale)}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                {loc(tool.theory.summary, locale)}
+              </p>
+              {tool.theory.keyCitations.length > 0 && (
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {tool.theory.keyCitations.map((c) => (
+                    <span
+                      key={c}
+                      className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-500"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-slate-100 sm:border-l sm:pl-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-brass-600">
+                {t.tool.source}
+              </p>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                {a.original ? (
+                  <>
+                    {t.tool.sourceOriginal}:{" "}
+                    <span className="italic text-slate-600">
+                      {a.source ? loc(a.source, locale) : "LimeOnIt"}
+                    </span>
+                    . {a.license}.
+                  </>
+                ) : (
+                  <>
+                    <span className="italic text-slate-600">{a.chapterTitle}</span> — {a.authors}.{" "}
+                    {a.bookTitle} ({a.editor}, {a.year}). {a.sourcePages}. {a.license}.
+                  </>
+                )}
+                {a.evaluatedWith
+                  ? ` ${fmt(t.tool.evaluatedWith, { model: loc(a.evaluatedWith, locale) })}`
+                  : ""}
+              </p>
+
+              {a.adapted && (
+                <p className="mt-2.5 flex items-start gap-1.5 text-xs text-amber-800">
+                  <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                  {a.adaptation ? loc(a.adaptation, locale) : t.tool.adaptedNotice}
+                </p>
+              )}
+              {a.improvedAfter && (
+                <p className="mt-2 text-xs text-emerald-800">
+                  {fmt(t.tool.improvedAfter, { date: a.improvedAfter.date })}{" "}
+                  {loc(a.improvedAfter.summary, locale)}
+                </p>
+              )}
+
+              <details className="mt-3 text-sm">
+                <summary className="cursor-pointer font-medium text-violet-600 hover:underline">
+                  {t.tool.viewOriginal}
+                </summary>
+                <div className="mt-2 space-y-3">
+                  {verbatim.map((v) => (
+                    <div key={loc(v.name, locale)}>
+                      {verbatim.length > 1 && (
+                        <div className="text-xs font-semibold text-slate-500">
+                          {loc(v.name, locale)}
+                        </div>
+                      )}
+                      <pre className="mt-1 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100">
+                        {v.text}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 pt-4">
+            <Link
+              to={`/help/${tool.id}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:underline"
+            >
+              <HelpCircle className="size-4" aria-hidden /> {t.help.fullHelp}
+            </Link>
+          </div>
+
+          {helpOverlay && (
+            <details className="mt-3 text-sm">
+              <summary className="cursor-pointer font-medium text-violet-600 hover:underline">
+                {t.help.howToUse}
+              </summary>
+              <div className="mt-2 rounded-xl border border-slate-200 bg-white p-4">
+                <Markdown>{helpOverlay}</Markdown>
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** What kind of tool this is, next to its name: a chat, a form, or a number of stages. */
+function KindPill({ kind, stages, t }: { kind: ToolKind; stages: number; t: T }) {
+  if (kind === "multiStage") return <StagePill count={stages} t={t} />;
+  const chat = kind === "chat";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full py-0.5 pl-1.5 pr-2 text-[11px] font-semibold",
+        chat ? "bg-slate-100 text-slate-600" : "bg-violet-50 text-violet-700",
+      )}
+    >
+      {chat ? (
+        <MessagesSquare className="size-3" aria-hidden />
+      ) : (
+        <Sparkles className="size-3" aria-hidden />
+      )}
+      {chat ? t.home.mode.chatbot : t.home.mode.generator}
+    </span>
+  );
+}
+
+function StagePill({ count, t }: { count: number; t: T }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#ecdcc0] bg-amber-50 py-0.5 pl-2 pr-2.5 text-xs font-semibold text-brass-600">
+      <span className="flex gap-0.5" aria-hidden>
+        {["d1", "d2", "d3", "d4"].slice(0, Math.min(count, 4)).map((d) => (
+          <span key={d} className="size-[5px] rounded-full bg-brass-500" />
+        ))}
+      </span>
+      {fmt(t.home.stages, { count })}
+    </span>
+  );
+}

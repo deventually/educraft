@@ -1,8 +1,8 @@
 import type { Route } from "./+types/api.stream";
 import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
-import { buildSystemPrompt, reinforceLanguage } from "~/lib/template/buildSystemPrompt";
-import { loc } from "~/lib/i18n/localized";
+import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { modeOf } from "~/lib/registry/modes";
 import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
 import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
@@ -12,7 +12,7 @@ import { saveGeneration, upsertChatGeneration } from "~/server/repositories/gene
 import { linkGeneration } from "~/server/repositories/courses.server";
 import { getUser } from "~/server/auth.server";
 import { buildChatTranscript } from "~/lib/chat/transcript";
-import type { OutputLanguage, ChatMessage, Tool } from "~/lib/registry/types";
+import type { OutputLanguage, Tool } from "~/lib/registry/types";
 import type { ImageInput } from "~/lib/ai/types";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -180,6 +180,7 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     const stage = tool.stages.find((s) => s.id === body.stageId) ?? tool.stages[0];
+    const mode = modeOf(tool);
     const outputLanguage: OutputLanguage = body.outputLanguage === "en" ? "en" : "nl";
 
     // Level register follows WHO reads the output: a student-facing tutor gets the
@@ -261,23 +262,11 @@ export async function action({ request }: Route.ActionArgs) {
       }
     }
 
-    // Chat mode: use the provided history. One-shot/multi-stage: single trigger.
-    let messages: ChatMessage[];
-    if (tool.mode === "chat" && body.messages) {
-      messages = body.messages;
-    } else {
-      const trigger =
-        outputLanguage === "en" ? "Carry out the task in full." : "Voer de opdracht volledig uit.";
-      messages = [{ role: "user", content: trigger }];
-    }
-
-    // Echo the language directive on the final user turn so a mid-chat language
-    // switch overrides the momentum of earlier turns. The saved transcript keeps
-    // the untouched `messages`.
-    const promptMessages =
-      tool.mode === "chat"
-        ? reinforceLanguage(messages, outputLanguage, loc(tool.chat?.turnReminder, outputLanguage))
-        : messages;
+    // The mode decides the turns: a chat's own history, or one trigger. A chat also repeats
+    // the language on its last turn, so a mid-chat switch wins over the earlier turns' momentum;
+    // the saved transcript keeps the untouched `messages`.
+    const messages = mode.turns(body.messages, outputLanguage);
+    const promptMessages = mode.promptTurns(messages, outputLanguage);
 
     // Reserve a rate + concurrency slot as late as possible: only a request that
     // will actually stream counts against the budget. The slot is freed in
@@ -342,10 +331,9 @@ export async function action({ request }: Route.ActionArgs) {
         // Not every conversation is kept (P29.3: only the feedback, on request).
         if (tool.storesConversation === false) return;
         try {
-          const sessionId =
-            tool.mode === "chat" && typeof body.sessionId === "string" ? body.sessionId.trim() : "";
+          const sessionId = mode.sessionId(body.sessionId);
           let generationId: string;
-          if (sessionId.length >= 8 && sessionId.length <= 100) {
+          if (sessionId) {
             generationId = sessionId;
             // Chat: collapse the whole conversation into one project row,
             // rewritten on every turn rather than one row per message.

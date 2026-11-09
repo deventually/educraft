@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import ToolPage from "~/routes/tool";
@@ -70,4 +70,21 @@ describe("Tool page", () => {
     const results = await axe(container, { rules: { "color-contrast": { enabled: false } } });
     expect(results.violations).toEqual([]);
   });
+});
+
+describe("Tool page: one workspace per kind of tool", () => {
+  const cases = [
+    { slug: "mentorai", pill: /^Gesprek$/, fills: true },
+    { slug: "cognitive-architect", pill: /^4 fasen$/, fills: false },
+    { slug: "authentic-assessment", pill: /^Formulier$/, fills: false },
+  ];
+  for (const { slug, pill, fills } of cases) {
+    it(`shows the kind next to the title and sizes the workspace (${slug})`, () => {
+      const { container } = renderTool(getToolBySlug(slug)!);
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(within(heading.parentElement!).getByText(pill)).toBeInTheDocument();
+      const workspace = container.querySelector("#tool-workspace")!;
+      expect(workspace.className.includes("flex-1")).toBe(fills);
+    });
+  }
 });
