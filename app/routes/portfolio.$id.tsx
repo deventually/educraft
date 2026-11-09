@@ -12,7 +12,8 @@ import { ToolHints } from "~/components/portfolio/ToolHints";
 import { WordImport } from "~/components/portfolio/WordImport";
 import { dossierStep } from "~/lib/portfolio/step";
 import { DossierRoute } from "~/components/portfolio/DossierRoute";
-import { ReadinessCheck, ReadinessSummaryLink } from "~/components/portfolio/ReadinessCheck";
+import { ReadinessCheck } from "~/components/portfolio/ReadinessCheck";
+import { DossierExport, PartExport } from "~/components/portfolio/DossierExport";
 import { DossierReviewPanel } from "~/components/portfolio/DossierReviewPanel";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
@@ -236,81 +237,13 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
 
       <ReadinessCheck dossierId={id} items={readiness} framework={framework} />
 
-      {/* Word export (25.6): a plain GET form, works without JS. */}
-      <form
-        id="export"
-        method="get"
-        action={`/portfolio/${id}/export`}
-        className="mt-4 flex flex-wrap items-center gap-3"
-        aria-label={t.portfolio.exportTitle}
-      >
-        <ReadinessSummaryLink items={readiness} />
-        {aiUsed && (
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="ai" value="1" defaultChecked={aiRequired} />
-            {t.portfolio.exportAi}
-          </label>
-        )}
-        {open > 0 ? (
-          <>
-            {/* An open spot never reaches the handed-in work (BESLUIT-2026-11-07-4). */}
-            <p className="w-full text-sm text-slate-800">
-              {fmt(open === 1 ? t.portfolio.exportBlocked : t.portfolio.exportBlockedMany, {
-                n: open,
-              })}{" "}
-              <a
-                href="#readiness"
-                className="font-medium text-violet-700 underline underline-offset-2"
-              >
-                {t.portfolio.exportBlockedLink}
-              </a>
-            </p>
-            <Button
-              type="submit"
-              name="draft"
-              value="1"
-              variant="secondary"
-              size="sm"
-              aria-describedby="export-draft-help"
-            >
-              {t.portfolio.exportDraftWord}
-            </Button>
-            <Button
-              type="submit"
-              name="draft"
-              value="1"
-              formAction={`/portfolio/${id}/print`}
-              formTarget="_blank"
-              variant="secondary"
-              size="sm"
-              aria-describedby="export-draft-help"
-            >
-              {t.portfolio.exportDraftPdf}
-            </Button>
-            <p id="export-draft-help" className="w-full text-sm text-slate-600">
-              {t.portfolio.exportDraftHelp}
-            </p>
-          </>
-        ) : (
-          <>
-            <Button type="submit" variant="secondary" size="sm">
-              {t.portfolio.exportWord}
-            </Button>
-            <Button
-              type="submit"
-              formAction={`/portfolio/${id}/print`}
-              formTarget="_blank"
-              variant="secondary"
-              size="sm"
-            >
-              {t.portfolio.exportPdf}
-            </Button>
-          </>
-        )}
-        {aiUsed && aiRequired && (
-          <p className="w-full text-sm text-slate-600">{t.portfolio.exportAiRequired}</p>
-        )}
-      </form>
+      <DossierExport
+        dossierId={id}
+        readiness={readiness}
+        open={open}
+        aiUsed={aiUsed}
+        aiRequired={aiRequired}
+      />
 
       <Form method="post" className="mt-6">
         <input type="hidden" name="intent" value="coachMode" />
@@ -412,47 +345,5 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         </Form>
       </section>
     </div>
-  );
-}
-
-/**
- * One learning outcome handed in on its own (Word or PDF). While it has an open spot
- * the links give the draft version, and say so (BESLUIT-2026-11-07-4).
- */
-function PartExport({
-  dossierId,
-  outcomeId,
-  label,
-  open,
-  ai,
-}: {
-  dossierId: string;
-  outcomeId: string;
-  label: string;
-  open: number;
-  /** The form asks for the AI disclosure and AI was used: always include it. */
-  ai: boolean;
-}) {
-  const t = useT().portfolio.part;
-  const query = `?lu=${encodeURIComponent(outcomeId)}${open > 0 ? "&draft=1" : ""}${ai ? "&ai=1" : ""}`;
-  const link = "font-medium text-violet-700 underline underline-offset-2";
-  return (
-    <fieldset className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-      <legend className="sr-only">{fmt(t.label, { outcome: label })}</legend>
-      <span className={open > 0 ? "font-medium text-amber-800" : "text-slate-700"}>
-        {open > 0 ? fmt(open === 1 ? t.draftOne : t.draft, { n: open }) : t.final}
-      </span>
-      <a href={`/portfolio/${dossierId}/export${query}`} className={link}>
-        {open > 0 ? t.wordDraft : t.word}
-      </a>
-      <a
-        href={`/portfolio/${dossierId}/print${query}`}
-        target="_blank"
-        rel="noopener"
-        className={link}
-      >
-        {open > 0 ? t.pdfDraft : t.pdf}
-      </a>
-    </fieldset>
   );
 }

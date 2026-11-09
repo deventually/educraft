@@ -48,8 +48,6 @@ const LONG_FILES_BASELINE = [
   "app/lib/ai/models.ts",
   "app/lib/context/packs.ts",
   "app/lib/registry/goals.ts",
-  "app/routes/portfolio.$id.outcome.$outcomeId.tsx",
-  "app/routes/portfolio.$id.tsx",
   "app/routes/start.tsx",
   "app/server/availability.server.ts",
   "app/server/repositories/users.server.ts",
