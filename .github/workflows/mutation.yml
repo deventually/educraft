@@ -1,0 +1,28 @@
+name: Mutation testing
+# Stryker on the core (registry, auth, repositories, rate limiter, login throttle). A full run
+# takes far longer than the gate, so it runs nightly and by hand, never on a pull request.
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mutation
+  cancel-in-progress: true
+jobs:
+  stryker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24.14.1", cache: npm }
+      - run: npm ci
+      - run: npm run test:mutation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 14

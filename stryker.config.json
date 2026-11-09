@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "vitest": { "configFile": "vitest.config.ts" },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "app/lib/registry/**/*.ts",
+    "!app/lib/registry/tools/**",
+    "app/server/auth.server.ts",
+    "app/server/session.server.ts",
+    "app/server/password.server.ts",
+    "app/server/repositories/**/*.ts",
+    "app/server/rateLimit.server.ts",
+    "app/server/loginThrottle.server.ts"
+  ],
+  "ignoreStatic": true,
+  "reporters": ["html", "clear-text", "progress"],
+  "htmlReporter": { "fileName": "reports/mutation/index.html" },
+  "thresholds": { "high": 80, "low": 60, "break": null },
+  "timeoutMS": 10000,
+  "tempDirName": ".stryker-tmp"
+}

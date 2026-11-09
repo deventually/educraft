@@ -341,6 +341,7 @@ npm run typecheck  # react-router typegen + tsc
 npm run check      # Biome (lint + format); a warning fails it too (--error-on-warnings)
 npm run build      # production build
 npm run test:e2e   # browser tests: the production build in Chromium, axe (WCAG 2.2 AA) + CSP
+npm run test:mutation  # Stryker mutation testing on the core (slow; nightly in CI)
 ```
 
 **Browser tests** (`e2e/`, Playwright). `npm run test:e2e` builds the app, seeds a throwaway
@@ -349,6 +350,16 @@ database (`e2e/.data/`, one teacher and one admin from `e2e/users.ts`) and opens
 log no CSP violation. A new key page is one line in `e2e/pages.ts`; `tests/e2e-setup.test.ts`
 checks every path against the route table. Locally once: `npx playwright install chromium`.
 CI runs it as its own job, next to the gate.
+
+**Mutation testing** (Stryker, `stryker.config.json`). Stryker makes small changes (mutants) to
+the core, the registry logic, auth, the repositories, the rate limiter and the login throttle, and
+checks that a test fails for each one. A surviving mutant points at a line no test really pins
+down. A full run takes far longer than the gate, so it is not part of it: the workflow
+`.github/workflows/mutation.yml` runs it nightly and by hand (*Run workflow*), and keeps the HTML
+report as the `mutation-report` artifact. The score is advisory (no `break` threshold yet). One
+file locally: `npx stryker run --mutate app/server/rateLimit.server.ts`.
+`tests/deploy/mutation-testing.test.ts` checks that every mutate pattern still matches a file, so a
+moved module cannot drop out silently.
 
 A Biome warning (dead code, a non-null assertion) fails the gate just like an error
 (`tests/quality-gate.test.ts`). Fix the cause; don't add a `biome-ignore`.
