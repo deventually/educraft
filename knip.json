@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/eval.config.ts", "tests/fixtures/generate.mjs"],
+  "entry": ["scripts/eval.config.ts", "tests/fixtures/generate.mjs", "e2e/auth.setup.ts"],
   "ignoreUnresolved": ["^\\./\\+types/"],
   "ignoreExportsUsedInFile": { "interface": true, "type": true }
 }

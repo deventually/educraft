@@ -19,8 +19,12 @@ export default defineConfig({
     trace: "off",
   },
   projects: [
+    // Signs in the teacher and the admin once (the admin with a code, P2-12) and saves the
+    // browser state; the page tests reuse it, so no two tests spend the same one-time code.
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "chromium",
+      dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         // A pre-installed browser (e.g. a sandbox without `playwright install`).
