@@ -21,6 +21,8 @@ export const auth: Messages["auth"] = {
   name: "Name",
   nameRequired: "Name is required.",
   password: "Password",
+  passwordCommon:
+    "This password is too easy to guess: it looks like a commonly used password. Choose something nobody else would, such as a few unrelated words in a row.",
   passwordMismatch: "The passwords do not match.",
   passwordRepeat: "Repeat password",
   passwordTooShort: "Password must be at least 10 characters.",

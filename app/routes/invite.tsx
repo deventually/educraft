@@ -5,7 +5,7 @@ import type { Route } from "./+types/invite";
 import { createUserSession } from "~/server/auth.server";
 import { consumeInvite, createUser, getInvite } from "~/server/repositories/users.server";
 import { joinTeamFromInvite } from "~/server/repositories/teams.server";
-import { hashPassword } from "~/server/password.server";
+import { hashPassword, passwordProblem } from "~/server/password.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { Button, Card, HelpText, Input, Label } from "~/components/ui";
@@ -51,7 +51,8 @@ export async function action({ params, request }: Route.ActionArgs) {
   if (emailRaw && !z.string().email().safeParse(emailRaw).success) {
     return { error: m.auth.loginFailed };
   }
-  if (password.length < 10) return { error: m.auth.passwordTooShort };
+  const problem = passwordProblem(password);
+  if (problem) return { error: m.auth[problem] };
   if (password !== confirm) return { error: m.auth.passwordMismatch };
 
   // Refuse a non-teacher (admin, retired role) invite before it can be claimed.

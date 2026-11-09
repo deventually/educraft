@@ -1,4 +1,5 @@
 import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "node:crypto";
+import { COMMON_PASSWORDS } from "./data/commonPasswords";
 
 /** scrypt on libuv's thread pool, so hashing never blocks other requests. */
 function scryptAsync(password: string, salt: Buffer, keylen: number, opts: ScryptOptions) {
@@ -61,3 +62,26 @@ export async function verifyPassword(password: string, stored: string): Promise<
  * typed password can ever log in to it.
  */
 export const NO_PASSWORD = "none";
+
+/** Shortest password the app accepts, on every form that sets one. */
+export const MIN_PASSWORD_LENGTH = 10;
+
+/** The common-password list as a set. Checked locally: no password ever leaves the server. */
+const COMMON = new Set(COMMON_PASSWORDS.split("\n"));
+
+/** Why a new password is refused, as an i18n key under `auth`; `null` when it is fine. */
+export type PasswordProblem = "passwordTooShort" | "passwordCommon";
+
+/**
+ * The one rule for a new password (sign-up, reset, `/account`, the admin forms): long
+ * enough, not on the common list, not a common word padded with digits or symbols
+ * ("Welkom2026!"), and not one short unit repeated ("abcabcabcabc").
+ */
+export function passwordProblem(password: string): PasswordProblem | null {
+  if (password.length < MIN_PASSWORD_LENGTH) return "passwordTooShort";
+  const lower = password.toLowerCase();
+  const core = lower.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
+  if (COMMON.has(lower) || (core.length >= 4 && COMMON.has(core))) return "passwordCommon";
+  if (/^(.{1,4})\1+$/su.test(password)) return "passwordCommon";
+  return null;
+}

@@ -104,6 +104,24 @@ describe("reset route action", () => {
     expect(await users.getPasswordReset(reset.token)).not.toBeNull();
   });
 
+  it("rejects a commonly used password and leaves the account unchanged", async () => {
+    const u = await users.createUser({
+      name: "Common Pw",
+      email: "commonpw@example.com",
+      passwordHash: await password.hashPassword("keep-this-one"),
+      role: "teacher",
+    });
+    const reset = await users.createPasswordReset(u.id);
+    const res = (await invoke(
+      reset.token,
+      post({ password: "Welkom2026!", confirm: "Welkom2026!" }),
+    )) as { error?: string };
+    expect(res.error).toMatch(/veelgebruikt|commonly used/);
+    const after = await users.getUserById(u.id);
+    expect(await password.verifyPassword("keep-this-one", after!.passwordHash)).toBe(true);
+    expect(await users.getPasswordReset(reset.token)).not.toBeNull();
+  });
+
   it("logs out an older session of the same user, and keeps the new one valid", async () => {
     const auth = await import("~/server/auth.server");
     const u = await users.createUser({

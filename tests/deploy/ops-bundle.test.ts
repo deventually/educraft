@@ -48,6 +48,19 @@ describe("ops bundle", () => {
     expect(existsSync(dbFile)).toBe(true);
   });
 
+  it("create-admin refuses a commonly used password", () => {
+    const r = run("create-admin", [
+      "--name",
+      "Zwak Wachtwoord",
+      "--email",
+      "zwak@school.nl",
+      "--password",
+      "Welkom2026!",
+    ]);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("commonly used");
+  });
+
   it("create-admin and set-owner make the first owner", () => {
     const admin = run("create-admin", [
       "--name",

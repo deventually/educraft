@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ArrowLeft, KeyRound, Trash2, UserCheck, UserX } from "lucide-react";
 import type { Route } from "./+types/admin.users.$id";
 import { isOwner, requireRole } from "~/server/auth.server";
-import { hashPassword } from "~/server/password.server";
+import { hashPassword, passwordProblem } from "~/server/password.server";
 import {
   createPasswordReset,
   deleteUserCascade,
@@ -31,7 +31,7 @@ import { FEATURES } from "~/lib/features";
 import { isChoice } from "~/lib/features/rule";
 import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
-import { MIN_PASSWORD_LENGTH, mayManage } from "~/server/userAdmin.server";
+import { mayManage } from "~/server/userAdmin.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -296,7 +296,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (!target) return { error: "selfPassword" as const };
     const password = String(fd.get("password") ?? "");
     const confirm = String(fd.get("confirm") ?? "");
-    if (password.length < MIN_PASSWORD_LENGTH) return { error: "passwordTooShort" as const };
+    const problem = passwordProblem(password);
+    if (problem) return { error: problem };
     if (password !== confirm) return { error: "passwordMismatch" as const };
     // Bumps sessionVersion: the user is logged out on every device.
     await updateUserPassword(target.id, await hashPassword(password));
@@ -389,6 +390,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
     ownerOnly: i.ownerOnlyError,
     invalidEmail: i.invalidEmailError,
     emailTaken: i.emailTakenError,
+    passwordCommon: t.auth.passwordCommon,
     passwordTooShort: t.auth.passwordTooShort,
     passwordMismatch: t.auth.passwordMismatch,
     atLeastOne: t.admin.models.atLeastOne,

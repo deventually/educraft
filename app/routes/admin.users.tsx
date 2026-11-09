@@ -4,7 +4,7 @@ import { z } from "zod";
 import { UserPlus } from "lucide-react";
 import type { Route } from "./+types/admin.users";
 import { isOwner, requireRole } from "~/server/auth.server";
-import { NO_PASSWORD, hashPassword } from "~/server/password.server";
+import { NO_PASSWORD, hashPassword, passwordProblem } from "~/server/password.server";
 import {
   createInvite,
   createPasswordReset,
@@ -24,7 +24,7 @@ import {
   listTeams,
   removeMember,
 } from "~/server/repositories/teams.server";
-import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS, mayManage } from "~/server/userAdmin.server";
+import { SET_PASSWORD_LINK_DAYS, mayManage } from "~/server/userAdmin.server";
 import { recordAdminAction } from "~/server/repositories/auditLog.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { type PasteOutcome, type PasteReason, parsePastedPeople } from "~/lib/people/pasteList";
@@ -210,7 +210,8 @@ export async function action({ request }: Route.ActionArgs) {
     if (mode === "password") {
       const password = String(fd.get("password") ?? "");
       const confirm = String(fd.get("confirm") ?? "");
-      if (password.length < MIN_PASSWORD_LENGTH) return fail("passwordTooShort");
+      const problem = passwordProblem(password);
+      if (problem) return fail(problem);
       if (password !== confirm) return fail("passwordMismatch");
       passwordHash = await hashPassword(password);
     }
@@ -533,6 +534,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     invalidEmail: i.invalidEmailError,
     emailTaken: i.emailTakenError,
     invalidRole: i.invalidRoleError,
+    passwordCommon: t.auth.passwordCommon,
     passwordTooShort: t.auth.passwordTooShort,
     passwordMismatch: t.auth.passwordMismatch,
     noneSelected: p.bulkNoneSelected,
