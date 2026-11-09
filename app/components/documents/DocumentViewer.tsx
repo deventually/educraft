@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Search, ZoomIn, ZoomOut } from "lucide-react";
-import { Button, Input, Select, Spinner } from "~/components/ui";
+import { ArrowUp } from "lucide-react";
+import { Button, Select, Spinner } from "~/components/ui";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loadOriginal, type OriginalDoc } from "~/lib/documents/original";
 import { locateAll, locateQuote, type Hit } from "~/lib/documents/locate";
-import { highlightRects, renderWidth, type PageLayout } from "~/lib/documents/pdfLayout";
+import { AiTextPanel } from "./AiTextPanel";
+import { highlightWords } from "./highlightWords";
+import { PdfPages } from "./PdfPages";
 import { BLOCK_SELECTOR, SafeNodes } from "./SafeNodes";
+import { ViewerControls, ViewerStatus, ZOOM_FIT, ZOOM_STEPS } from "./ViewerControls";
 import { VIEWER_ID } from "../quoteLinks";
 
 interface Props {
@@ -31,13 +34,6 @@ type LoadState =
   | { status: "error"; frameUrl?: string };
 
 type Tab = "original" | "ai";
-
-/** Context shown around a hit in the status line. */
-const CONTEXT_CHARS = 80;
-
-/** Zoom steps for the original; 1 is "fit the pane". */
-const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const;
-const ZOOM_FIT = ZOOM_STEPS.indexOf(1);
 
 /**
  * The original next to the text for the AI (brief P24, 24.0c).
@@ -288,59 +284,13 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
                 )}
               </div>
               {load.status === "ready" && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <search className="min-w-48 flex-1">
-                    <form onSubmit={runSearch} className="flex gap-2">
-                      <Input
-                        type="search"
-                        aria-label={t.search}
-                        placeholder={t.search}
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        className="h-8 text-sm"
-                      />
-                      <Button type="submit" size="sm" variant="secondary">
-                        <Search className="size-4" aria-hidden />
-                        {t.searchButton}
-                      </Button>
-                    </form>
-                  </search>
-                  <fieldset className="flex shrink-0 items-center gap-1">
-                    <legend className="sr-only">{t.zoom}</legend>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      aria-label={t.zoomOut}
-                      title={t.zoomOut}
-                      disabled={zoomStep === 0}
-                      onClick={() => setZoomStep((z) => Math.max(0, z - 1))}
-                    >
-                      <ZoomOut className="size-4" aria-hidden />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      aria-label={fmt(t.zoomReset, { pct: Math.round(zoom * 100) })}
-                      onClick={() => setZoomStep(ZOOM_FIT)}
-                      className="min-w-14 tabular-nums"
-                    >
-                      {Math.round(zoom * 100)}%
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      aria-label={t.zoomIn}
-                      title={t.zoomIn}
-                      disabled={zoomStep === ZOOM_STEPS.length - 1}
-                      onClick={() => setZoomStep((z) => Math.min(ZOOM_STEPS.length - 1, z + 1))}
-                    >
-                      <ZoomIn className="size-4" aria-hidden />
-                    </Button>
-                  </fieldset>
-                </div>
+                <ViewerControls
+                  query={query}
+                  onQuery={setQuery}
+                  onSearch={runSearch}
+                  zoomStep={zoomStep}
+                  onZoom={setZoomStep}
+                />
               )}
               {focus && onBack && (
                 <Button
@@ -354,20 +304,7 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
                   {t.backToResult}
                 </Button>
               )}
-              <div role="status" className="text-xs text-slate-700">
-                {message && <p>{message}</p>}
-                {located && snippet !== undefined && (
-                  <p className="mt-1 rounded bg-amber-50 px-2 py-1 text-slate-800">
-                    {located.start > CONTEXT_CHARS && "…"}
-                    {snippet.slice(Math.max(0, located.start - CONTEXT_CHARS), located.start)}
-                    <mark className="bg-amber-200">
-                      {snippet.slice(located.start, located.end)}
-                    </mark>
-                    {snippet.slice(located.end, located.end + CONTEXT_CHARS)}
-                    {located.end + CONTEXT_CHARS < snippet.length && "…"}
-                  </p>
-                )}
-              </div>
+              <ViewerStatus message={message} located={located} snippet={snippet} />
             </div>
 
             <div
@@ -420,243 +357,11 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
           aria-labelledby={tabId("ai")}
           className={cn("min-h-0 min-w-0", tab !== "ai" && "hidden @3xl:block")}
         >
-          <section
-            aria-labelledby={headingId("ai")}
-            className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-          >
-            <div className="border-b border-slate-100 bg-slate-50/70 px-4 py-2.5">
-              <h3
-                id={headingId("ai")}
-                className="sr-only text-sm font-medium text-slate-700 @3xl:not-sr-only"
-              >
-                {t.aiTab}
-              </h3>
-              <p className="text-xs text-slate-600">{t.aiHint}</p>
-            </div>
-            <div
-              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable
-              tabIndex={0}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3"
-            >
-              {text ? (
-                <p className="whitespace-pre-wrap text-sm text-slate-800">{text}</p>
-              ) : (
-                <p className="text-sm text-slate-500">{t.aiEmpty}</p>
-              )}
-            </div>
-          </section>
+          <AiTextPanel text={text} headingId={headingId("ai")} />
         </div>
       </div>
 
       <p className="text-xs text-slate-500">{t.notStored}</p>
     </div>
   );
-}
-
-interface PdfPagesProps {
-  doc: Extract<OriginalDoc, { kind: "pdf" }>;
-  /** 1 fits the pane; more makes the pages wider than the pane (it scrolls). */
-  zoom: number;
-  idPrefix: string;
-  located: Hit | null;
-  pageLabel: string;
-  fallbackLabel: string;
-}
-
-function PdfPages({ doc, zoom, idPrefix, located, pageLabel, fallbackLabel }: PdfPagesProps) {
-  return (
-    <div data-zoom-target className="mx-auto space-y-4" style={{ width: `${zoom * 100}%` }}>
-      {doc.pages.map((pageText, i) => (
-        <PdfPage
-          // biome-ignore lint/suspicious/noArrayIndexKey: pages are fixed and ordered
-          key={i}
-          index={i}
-          id={`${idPrefix}${i}`}
-          caption={fmt(pageLabel, { n: i + 1, total: doc.pages.length })}
-          text={pageText}
-          layout={doc.layouts[i]}
-          zoom={zoom}
-          renderPage={doc.renderPage}
-          hit={located?.segment === i ? located : undefined}
-          fallbackLabel={fallbackLabel}
-        />
-      ))}
-    </div>
-  );
-}
-
-/** Pages drawn up front; the rest are drawn when they scroll near the view. */
-const EAGER_PAGES = 2;
-
-interface PdfPageProps {
-  index: number;
-  id: string;
-  caption: string;
-  text: string;
-  layout?: PageLayout;
-  zoom: number;
-  renderPage: (pageNumber: number, width: number) => Promise<string>;
-  /** The hit on this page, marked on the drawing where its words are. */
-  hit?: Hit;
-  fallbackLabel: string;
-}
-
-/** A page's width in CSS pixels at zoom 1, until the page has been measured. */
-const ESTIMATED_PAGE_WIDTH = 640;
-
-function PdfPage({
-  index,
-  id,
-  caption,
-  text,
-  layout,
-  zoom,
-  renderPage,
-  hit,
-  fallbackLabel,
-}: PdfPageProps) {
-  const ref = useRef<HTMLElement>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const located = hit !== undefined;
-  const [near, setNear] = useState(index < EAGER_PAGES);
-  const [image, setImage] = useState<{ url: string; width: number } | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [cssWidth, setCssWidth] = useState(0);
-
-  // Measure the page as it shows (zoom and pane width), so it is drawn that sharp.
-  useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet) return;
-    const measure = () => setCssWidth(sheet.getBoundingClientRect().width);
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(measure);
-    ro.observe(sheet);
-    return () => ro.disconnect();
-  }, []);
-  const wanted = renderWidth(
-    cssWidth || ESTIMATED_PAGE_WIDTH * zoom,
-    typeof window === "undefined" ? 1 : window.devicePixelRatio,
-  );
-
-  useEffect(() => {
-    if (near || !ref.current) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setNear(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) setNear(true);
-      },
-      { rootMargin: "400px" },
-    );
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [near]);
-
-  // Draw when near; draw again only when shown larger than drawn (zooming out keeps it).
-  useEffect(() => {
-    if (!(near || located) || failed || (image && image.width >= wanted)) return;
-    let cancelled = false;
-    renderPage(index + 1, wanted).then(
-      (url) => !cancelled && setImage({ url, width: wanted }),
-      () => !cancelled && setFailed(true),
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [near, located, image, failed, renderPage, index, wanted]);
-
-  const rects = hit && layout ? highlightRects(layout, hit.start, hit.end) : [];
-  const pct = (n: number) => `${n * 100}%`;
-
-  return (
-    <figure
-      ref={ref}
-      id={id}
-      data-located={located ? "true" : undefined}
-      className="scroll-mt-2 rounded-lg border border-slate-200 p-2 data-[located=true]:ring-2 data-[located=true]:ring-amber-400"
-    >
-      <figcaption className="mb-1 text-xs text-slate-500">{caption}</figcaption>
-      {failed ? (
-        <>
-          <p className="text-xs text-slate-500">{fallbackLabel}</p>
-          <p className="whitespace-pre-wrap text-sm text-slate-800">
-            {hit ? (
-              <>
-                {text.slice(0, hit.start)}
-                <mark data-highlight className="bg-amber-200">
-                  {text.slice(hit.start, hit.end)}
-                </mark>
-                {text.slice(hit.end)}
-              </>
-            ) : (
-              text
-            )}
-          </p>
-        </>
-      ) : (
-        <div
-          ref={sheetRef}
-          className="relative w-full"
-          style={{ aspectRatio: layout ? String(layout.aspect) : "3 / 4" }}
-        >
-          {image ? (
-            <img src={image.url} alt="" className="absolute inset-0 size-full" />
-          ) : (
-            <div aria-hidden className="absolute inset-0 animate-pulse rounded bg-slate-100" />
-          )}
-          {rects.map((r, i) => (
-            <span
-              // biome-ignore lint/suspicious/noArrayIndexKey: rectangles are fixed for a hit
-              key={i}
-              aria-hidden
-              data-highlight
-              className="pointer-events-none absolute rounded-sm bg-amber-300/40 ring-2 ring-amber-500"
-              style={{
-                left: pct(r.left),
-                top: pct(r.top),
-                width: pct(r.width),
-                height: pct(r.height),
-              }}
-            />
-          ))}
-          <p className="sr-only">{text}</p>
-        </div>
-      )}
-    </figure>
-  );
-}
-
-/** The name of the CSS Custom Highlight that marks a hit's words in a Word view (app.css). */
-const HIT_HIGHLIGHT = "document-hit";
-
-/**
- * Marks the hit's words inside a Word paragraph without touching React's DOM,
- * through the CSS Custom Highlight API. Where a browser lacks it, the paragraph
- * mark alone shows the place.
- */
-function highlightWords(block: HTMLElement | undefined, hit: Hit | null) {
-  const registry = typeof CSS === "undefined" ? undefined : CSS.highlights;
-  if (!registry || typeof Highlight === "undefined") return;
-  registry.delete(HIT_HIGHLIGHT);
-  if (!block || !hit) return;
-  const range = document.createRange();
-  let offset = 0;
-  let started = false;
-  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    const length = node.textContent?.length ?? 0;
-    if (!started && hit.start <= offset + length) {
-      range.setStart(node, hit.start - offset);
-      started = true;
-    }
-    if (started && hit.end <= offset + length) {
-      range.setEnd(node, hit.end - offset);
-      registry.set(HIT_HIGHLIGHT, new Highlight(range));
-      return;
-    }
-    offset += length;
-  }
 }

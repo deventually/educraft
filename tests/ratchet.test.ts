@@ -42,7 +42,6 @@ const LONG_FILES_BASELINE = [
   "app/components/AppShell.tsx",
   "app/components/DynamicForm.tsx",
   "app/components/context/ContextFields.tsx",
-  "app/components/documents/DocumentViewer.tsx",
   "app/components/utilities/RubricEditor.tsx",
   "app/components/utilities/RubricFill.tsx",
   "app/lib/ai/models.ts",

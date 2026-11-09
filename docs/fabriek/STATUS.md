@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #198 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #199 gemerged)_
 
 ## Nu
 
+- **ChatView opgesplitst (#199) gemerged op 2026-11-09:** `ChatView.tsx` (648 → 253 regels) is
+  verdeeld over de hook `useChatSession` en de onderdelen `ChatSetupCard`, `ChatSettingsAside`,
+  `ChatThread` en `ChatComposer`; het bestand is van de ratchet-lijst af. Geen gedragswijziging.
 - **Beheerpagina Modellen opgesplitst (#198) gemerged op 2026-11-09:** `admin/models.tsx` (760 → 249
   regels) is verdeeld over `AddModelForm`, `ProvidersTab` en `modelShared`; het bestand
   is van de ratchet-lijst af. Geen gedragswijziging.
