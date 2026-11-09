@@ -30,4 +30,6 @@ export const auth = {
   resetSubmit: "Wachtwoord opslaan",
   tooManyAttempts:
     "Te veel mislukte pogingen. Probeer het over {minutes} minuten opnieuw, of vraag de beheerder om een nieuw wachtwoord.",
+  tooManyAttemptsHours:
+    "Te veel mislukte pogingen. Probeer het over {hours} uur opnieuw, of vraag de beheerder om een nieuw wachtwoord.",
 };

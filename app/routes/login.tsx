@@ -25,13 +25,18 @@ const LoginSchema = z.object({
 });
 
 // Password guessing (P0 doorlichting): 5 wrong passwords for one address lock it for
-// 15 minutes. One client IP (only with CLIENT_IP_HEADER) gets a higher cap, so a
+// 15 minutes; each next lockout doubles, up to 24 hours, until a successful login or
+// a day without failures. Never a deactivation: that would let anyone who knows an
+// address shut its owner out. One client IP (only with CLIENT_IP_HEADER) gets a higher cap, so a
 // whole school behind one address is not locked out by a few typos.
 const LOCKOUT_MS = 15 * 60_000;
+const DAY_MS = 24 * 60 * 60_000;
 const emailLimiter = createAttemptLimiter({
   maxFailures: 5,
   windowMs: LOCKOUT_MS,
   lockoutMs: LOCKOUT_MS,
+  maxLockoutMs: DAY_MS,
+  forgetAfterMs: DAY_MS,
 });
 const ipLimiter = createAttemptLimiter({
   maxFailures: 30,
@@ -61,7 +66,8 @@ export async function action({ request }: Route.ActionArgs) {
   const gate = [emailLimiter.check([emailKey]), ipLimiter.check(ipKeys)].find((g) => !g.ok);
   if (gate && !gate.ok) {
     const minutes = Math.ceil(gate.retryAfterMs / 60_000);
-    return { error: fmt(m.auth.tooManyAttempts, { minutes }) };
+    if (minutes <= 60) return { error: fmt(m.auth.tooManyAttempts, { minutes }) };
+    return { error: fmt(m.auth.tooManyAttemptsHours, { hours: Math.ceil(minutes / 60) }) };
   }
 
   const row = await getUserByEmail(parsed.data.email);

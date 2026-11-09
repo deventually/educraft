@@ -5,13 +5,19 @@
  * that lasts minutes.
  *
  * A key collects failed attempts inside a sliding window; at `maxFailures` it is
- * locked for `lockoutMs`. `check` refuses when any of the given keys is locked.
+ * locked for `lockoutMs`. With `maxLockoutMs`, each next lockout of the same key
+ * doubles (up to that cap) until `forgetAfterMs` pass without a failure or the key
+ * is reset. `check` refuses when any of the given keys is locked.
  * Memory is bounded: past `maxKeys` the least recently touched key is dropped.
  */
 export interface AttemptLimiterOptions {
   maxFailures: number;
   windowMs: number;
   lockoutMs: number;
+  /** Cap for escalating lockouts; unset means every lockout lasts `lockoutMs`. */
+  maxLockoutMs?: number;
+  /** How long a key remembers earlier lockouts after the last one ends. */
+  forgetAfterMs?: number;
   /** Clock seam for tests. */
   now?: () => number;
   maxKeys?: number;
@@ -29,11 +35,15 @@ export interface AttemptLimiter {
 interface Entry {
   failures: number[];
   lockedUntil: number;
+  /** Lockouts so far, for escalation. */
+  lockouts: number;
 }
 
 export function createAttemptLimiter(opts: AttemptLimiterOptions): AttemptLimiter {
   const now = opts.now ?? (() => Date.now());
   const maxKeys = opts.maxKeys ?? 10_000;
+  const maxLockoutMs = opts.maxLockoutMs ?? opts.lockoutMs;
+  const forgetAfterMs = opts.forgetAfterMs ?? 0;
   // A Map keeps insertion order; re-inserting on touch makes the first key the oldest.
   const entries = new Map<string, Entry>();
 
@@ -41,7 +51,7 @@ export function createAttemptLimiter(opts: AttemptLimiterOptions): AttemptLimite
     const entry = entries.get(key);
     if (!entry) return undefined;
     entry.failures = entry.failures.filter((t) => t > at - opts.windowMs);
-    if (entry.failures.length === 0 && entry.lockedUntil <= at) {
+    if (entry.failures.length === 0 && entry.lockedUntil + forgetAfterMs <= at) {
       entries.delete(key);
       return undefined;
     }
@@ -64,10 +74,12 @@ export function createAttemptLimiter(opts: AttemptLimiterOptions): AttemptLimite
     recordFailure(keys) {
       const at = now();
       for (const key of keys) {
-        const entry = live(key, at) ?? { failures: [], lockedUntil: 0 };
+        const entry = live(key, at) ?? { failures: [], lockedUntil: 0, lockouts: 0 };
         entry.failures.push(at);
         if (entry.failures.length >= opts.maxFailures) {
-          entry.lockedUntil = at + opts.lockoutMs;
+          const duration = Math.min(opts.lockoutMs * 2 ** entry.lockouts, maxLockoutMs);
+          entry.lockedUntil = at + duration;
+          entry.lockouts += 1;
           entry.failures = [];
         }
         entries.delete(key);

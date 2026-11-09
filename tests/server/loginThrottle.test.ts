@@ -76,6 +76,53 @@ describe("createAttemptLimiter", () => {
   });
 });
 
+describe("createAttemptLimiter, escalating lockout", () => {
+  const HOUR = 60 * MIN;
+  const escalating = () => limiter({ maxLockoutMs: 24 * HOUR, forgetAfterMs: 24 * HOUR });
+  const lockOut = (l: ReturnType<typeof limiter>["l"]) => {
+    for (let i = 0; i < 3; i++) l.recordFailure(["email:a@x.nl"]);
+    const gate = l.check(["email:a@x.nl"]);
+    return gate.ok ? 0 : gate.retryAfterMs;
+  };
+
+  it("doubles each next lockout: 15, 30, 60 minutes", () => {
+    const { l, advance } = escalating();
+    expect(lockOut(l)).toBe(15 * MIN);
+    advance(15 * MIN);
+    expect(lockOut(l)).toBe(30 * MIN);
+    advance(30 * MIN);
+    expect(lockOut(l)).toBe(60 * MIN);
+  });
+
+  it("never locks longer than maxLockoutMs", () => {
+    const { l, advance } = escalating();
+    for (let round = 0; round < 10; round++) advance(lockOut(l));
+    expect(lockOut(l)).toBe(24 * HOUR);
+  });
+
+  it("starts at the base lockout again after forgetAfterMs without failures", () => {
+    const { l, advance } = escalating();
+    advance(lockOut(l));
+    advance(lockOut(l));
+    advance(24 * HOUR);
+    expect(lockOut(l)).toBe(15 * MIN);
+  });
+
+  it("starts at the base lockout again after a reset (a successful login)", () => {
+    const { l, advance } = escalating();
+    advance(lockOut(l));
+    advance(lockOut(l));
+    l.reset("email:a@x.nl");
+    expect(lockOut(l)).toBe(15 * MIN);
+  });
+
+  it("without maxLockoutMs every lockout stays the same", () => {
+    const { l, advance } = limiter();
+    advance(lockOut(l));
+    expect(lockOut(l)).toBe(15 * MIN);
+  });
+});
+
 describe("clientKeys", () => {
   const req = (headers: Record<string, string> = {}) =>
     new Request("http://localhost/login", { method: "POST", headers });

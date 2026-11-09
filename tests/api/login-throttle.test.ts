@@ -106,4 +106,30 @@ describe("login throttling", () => {
       await attempt("school-nat@school.nl", PW, { "x-real-ip": "198.51.100.1" }),
     ).toBeInstanceOf(Response);
   });
+
+  it("locks for 30 minutes after a second round of 5 wrong passwords", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const m = i18n.getMessages("nl");
+    await makeUser("again@school.nl");
+    for (let i = 0; i < 5; i++) await attempt("again@school.nl", "wrong-password");
+    vi.setSystemTime(Date.now() + 15 * 60_000);
+    for (let i = 0; i < 5; i++) await attempt("again@school.nl", "wrong-password");
+    expect(errorOf(await attempt("again@school.nl", PW))).toBe(
+      m.auth.tooManyAttempts.replace("{minutes}", "30"),
+    );
+  });
+
+  it("says hours, not minutes, once the lockout is longer than an hour", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const m = i18n.getMessages("nl");
+    await makeUser("hours@school.nl");
+    for (const wait of [15, 30, 60]) {
+      for (let i = 0; i < 5; i++) await attempt("hours@school.nl", "wrong-password");
+      vi.setSystemTime(Date.now() + wait * 60_000);
+    }
+    for (let i = 0; i < 5; i++) await attempt("hours@school.nl", "wrong-password");
+    expect(errorOf(await attempt("hours@school.nl", PW))).toBe(
+      m.auth.tooManyAttemptsHours.replace("{hours}", "2"),
+    );
+  });
 });

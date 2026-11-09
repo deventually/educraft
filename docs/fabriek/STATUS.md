@@ -299,10 +299,11 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Bezig
 
-- **Inloggen beveiligen tegen wachtwoorden raden (doorlichting P0-1, PR open):** na 5 foute
+- **Inloggen beveiligen tegen wachtwoorden raden (doorlichting P0-1, PR open, BESLUIT-2026-11-09-1):** na 5 foute
   wachtwoorden voor één e-mailadres is dat adres 15 minuten op slot, ook met het goede wachtwoord en
-  ook voor een adres dat niet bestaat (zo verraadt het slot niets). Een goede login zet de teller
-  terug. Met `CLIENT_IP_HEADER` (de header die de reverse proxy zet) geldt daarnaast 30 fouten per
+  ook voor een adres dat niet bestaat (zo verraadt het slot niets). Elk volgend slot duurt twee
+  keer zo lang (15 min, 30 min, 1 uur … tot 24 uur); een goede login of een dag zonder fouten zet
+  het terug. Nooit automatisch deactiveren, want dan kan iedereen een collega buitensluiten. Met `CLIENT_IP_HEADER` (de header die de reverse proxy zet) geldt daarnaast 30 fouten per
   IP-adres. In het geheugen van de app, geen externe dienst; een herstart wist de tellers.
   Wachtwoorden hashen loopt nu async (scrypt blokkeert andere verzoeken niet meer). Geen migratie.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
