@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
-import ts from "typescript";
+import { parseSync } from "oxc-parser";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -22,36 +22,40 @@ const walk = (dir: string): string[] =>
   });
 
 /** Runtime import specifiers of one file: static, re-export, side-effect and dynamic imports. */
+type AstNode = { type?: string; [key: string]: unknown };
+const isNode = (v: unknown): v is AstNode => typeof v === "object" && v !== null;
+const literal = (v: unknown) =>
+  isNode(v) && v.type === "Literal" && typeof v.value === "string" ? v.value : null;
+
 function runtimeImports(source: string, fileName = "x.tsx"): string[] {
-  const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, false);
+  // TypeScript 7 has no JS API; oxc parses TS/TSX into an ESTree with importKind/exportKind.
+  const { program } = parseSync(fileName, source);
   const out: string[] = [];
-  const visit = (node: ts.Node) => {
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      const clause = node.importClause;
-      const typeOnly =
-        clause?.isTypeOnly ||
-        (clause && !clause.name && clause.namedBindings && ts.isNamedImports(clause.namedBindings)
-          ? clause.namedBindings.elements.length > 0 &&
-            clause.namedBindings.elements.every((e) => e.isTypeOnly)
-          : false);
-      if (!typeOnly) out.push(node.moduleSpecifier.text);
-    } else if (
-      ts.isExportDeclaration(node) &&
-      node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    ) {
-      if (!node.isTypeOnly) out.push(node.moduleSpecifier.text);
-    } else if (
-      ts.isCallExpression(node) &&
-      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments[0] &&
-      ts.isStringLiteral(node.arguments[0])
-    ) {
-      out.push(node.arguments[0].text);
+  const visit = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
     }
-    ts.forEachChild(node, visit);
+    if (!isNode(node)) return;
+    const spec = literal(node.source);
+    if (node.type === "ImportDeclaration" && spec !== null) {
+      const specifiers = node.specifiers as AstNode[];
+      const typeOnly =
+        node.importKind === "type" ||
+        (specifiers.length > 0 &&
+          specifiers.every((s) => s.type === "ImportSpecifier" && s.importKind === "type"));
+      if (!typeOnly) out.push(spec);
+    } else if (
+      (node.type === "ExportNamedDeclaration" || node.type === "ExportAllDeclaration") &&
+      spec !== null
+    ) {
+      if (node.exportKind !== "type") out.push(spec);
+    } else if (node.type === "ImportExpression" && spec !== null) {
+      out.push(spec);
+    }
+    for (const value of Object.values(node)) visit(value);
   };
-  visit(sf);
+  visit(program);
   return out;
 }
 
