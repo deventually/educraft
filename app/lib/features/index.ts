@@ -37,7 +37,7 @@ export const FEATURES: readonly Feature[] = [
   { id: "pilotCheckin", name: { nl: "Pilot-check-in", en: "Pilot check-in" }, defaultStand: "on" },
 ];
 
-export const FEATURE_IDS = FEATURES.map((f) => f.id);
+const FEATURE_IDS = FEATURES.map((f) => f.id);
 export const isFeatureId = (v: unknown): v is FeatureId =>
   typeof v === "string" && (FEATURE_IDS as string[]).includes(v);
 

@@ -30,7 +30,7 @@ export const DEFAULT_SCALE: Omit<GradeScale, "maxPoints"> = {
 };
 
 /** Highest maxPoints we tabulate (keeps the table finite and readable). */
-export const MAX_POINTS_LIMIT = 1000;
+const MAX_POINTS_LIMIT = 1000;
 
 export type GradeScaleError = "maxPoints" | "passPercent" | "gradeOrder" | "options" | "decimals";
 

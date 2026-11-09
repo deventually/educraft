@@ -192,7 +192,7 @@ function fromDataUrl(url: string): ImageInput {
 }
 
 /** Browser defaults: unpdf draws the page, a canvas shrinks a large photo. */
-export const browserFigureDeps: FigureDeps = {
+const browserFigureDeps: FigureDeps = {
   renderPdfPage: async (pdf, pageNumber) => {
     const { renderPageAsImage } = await import("unpdf");
     return renderPageAsImage(pdf, pageNumber, { width: PAGE_WIDTH, toDataURL: true });

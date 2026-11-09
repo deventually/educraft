@@ -308,7 +308,7 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
   }
 }
 
-export function isIntent(value: unknown): value is Intent {
+function isIntent(value: unknown): value is Intent {
   return typeof value === "string" && Object.hasOwn(SCHEMAS, value);
 }
 

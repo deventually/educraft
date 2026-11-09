@@ -15,7 +15,7 @@ import type { DossierData } from "./types";
  * `[aanvullen…]`, `[to add…]`, `[invullen…]`, `[fill in…]` in any case, and the
  * all-caps words TODO and XXX. Global: use with `matchAll` / `split`.
  */
-export const OPEN_SPOT =
+const OPEN_SPOT =
   /\[\s*(?:aanvullen|invullen|to add|fill in|todo)\b[^\][\n]{0,300}\]|\bTODO\b|\bXXX\b/giu;
 
 const isMarker = (m: string) => m.startsWith("[") || m === m.toUpperCase();

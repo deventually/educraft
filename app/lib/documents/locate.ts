@@ -9,7 +9,7 @@
  */
 
 /** Shorter needles than this (normalized) match too much to be trusted. */
-export const MIN_QUOTE_LENGTH = 12;
+const MIN_QUOTE_LENGTH = 12;
 
 export type LocateResult =
   | { status: "found"; segment: number; start: number; end: number; matches: number }
