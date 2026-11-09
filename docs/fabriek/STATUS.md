@@ -4,10 +4,24 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #198 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #202 gemerged)_
 
 ## Nu
 
+- **Portfoliopagina's opgesplitst (#202) gemerged op 2026-11-09:** `portfolio.$id.tsx` (458 → 349
+  regels) en `portfolio.$id.outcome.$outcomeId.tsx` (507 → 327) delen nu de onderdelen
+  `DossierExport` en `EvidenceRow`; beide routes zijn van de ratchet-lijst af. Geen
+  gedragswijziging.
+- **Documentviewer opgesplitst (#201) gemerged op 2026-11-09:** `DocumentViewer.tsx` (662 → 367
+  regels) is verdeeld over `PdfPages`, `ViewerControls`, `AiTextPanel` en `highlightWords`; het
+  bestand is van de ratchet-lijst af. Geen gedragswijziging.
+- **Contextvelden en vakgebiedpakketten opgesplitst (#200) gemerged op 2026-11-09:**
+  `ContextFields.tsx` (636 → 380 regels) is verdeeld over `DomainFields`, `CustomFieldsEditor` en
+  `Field`; `packs.ts` (538 → 110) over `packsCareSociety` en `packsTechBusiness`. Beide bestanden
+  zijn van de ratchet-lijst af. Geen gedragswijziging.
+- **ChatView opgesplitst (#199) gemerged op 2026-11-09:** `ChatView.tsx` (648 → 253 regels) is
+  verdeeld over de hook `useChatSession` en de onderdelen `ChatSetupCard`, `ChatSettingsAside`,
+  `ChatThread` en `ChatComposer`; het bestand is van de ratchet-lijst af. Geen gedragswijziging.
 - **Beheerpagina Modellen opgesplitst (#198) gemerged op 2026-11-09:** `admin/models.tsx` (760 → 249
   regels) is verdeeld over `AddModelForm`, `ProvidersTab` en `modelShared`; het bestand
   is van de ratchet-lijst af. Geen gedragswijziging.
