@@ -40,7 +40,6 @@ const lineCount = (src: string) => src.split("\n").length - (src.endsWith("\n") 
  */
 const LONG_FILES_BASELINE = [
   "app/components/AppShell.tsx",
-  "app/components/DynamicForm.tsx",
   "app/lib/ai/models.ts",
   "app/lib/registry/goals.ts",
   "app/routes/start.tsx",
