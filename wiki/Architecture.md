@@ -330,9 +330,12 @@ book/                The Pedagogical Promptbook (source material)
 ```bash
 npm test           # full node + DOM suite: registry, interpolation, buildSystemPrompt, i18n, the api.stream route, components (axe)
 npm run typecheck  # react-router typegen + tsc
-npm run check      # Biome (lint + format)
+npm run check      # Biome (lint + format); a warning fails it too (--error-on-warnings)
 npm run build      # production build
 ```
+
+A Biome warning (dead code, a non-null assertion) fails the gate just like an error
+(`tests/quality-gate.test.ts`). Fix the cause; don't add a `biome-ignore`.
 
 ## Related
 

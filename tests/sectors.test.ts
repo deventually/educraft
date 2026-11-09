@@ -62,8 +62,8 @@ describe("TRACKS_BY_SECTOR", () => {
     expect(vo["vmbo-kb"]).toBe("2");
     expect(vo["vmbo-gl"]).toBe("2");
     expect(vo["vmbo-tl"]).toBe("2");
-    expect(vo["havo"]).toBe("4");
-    expect(vo["vwo"]).toBe("4+");
+    expect(vo.havo).toBe("4");
+    expect(vo.vwo).toBe("4+");
   });
 
   it("anchors the mbo levels 1–4", () => {

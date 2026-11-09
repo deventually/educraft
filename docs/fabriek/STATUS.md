@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#173, #174 en #176 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#175 gemerged)_
 
 ## Nu
 
+- **Lange AI-antwoorden blijven doorlopen (P0-punt 3 uit de doorlichting, #175) gemerged op 2026-11-09:**
+  de stream stuurt elke 15 seconden een keep-alive, zodat een proxy zoals Cloudflare (100 s
+  zonder verkeer) een lang antwoord niet afbreekt voor het eerste woord. Sluit de docent het
+  tabblad, dan stopt de modelaanroep ook (AI SDK, Ollama en CLI); een afgebroken stream bewaart
+  niets en logt `aborted`.
 - **Ingebouwde back-up zonder stilstand (P0-punt 2 uit de doorlichting, #176) gemerged op 2026-11-09:** de app maakt
   zelf elke dag een back-up van de database terwijl hij doorloopt (SQLite online backup), naar
   `backups/` naast de database (`/data/backups` in Docker, of `BACKUP_DIR`), met rotatie (7 dagen,

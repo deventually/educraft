@@ -43,7 +43,8 @@ function principleIn(cell: string): EngagementPrincipleId | null {
   const hits = ENGAGEMENT_PRINCIPLES.filter(
     (p) => c.includes(p.book.toLowerCase()) || c.includes(p.nl.toLowerCase()),
   );
-  return hits.length === 1 ? hits[0]!.id : null;
+  const [only, ...more] = hits;
+  return only && more.length === 0 ? only.id : null;
 }
 
 /**
@@ -60,10 +61,11 @@ export function parseEngagementLevels(markdown: string): EngagementLevels | null
       .replace(/^\||\|$/g, "")
       .split("|")
       .map((c) => c.trim());
-    if (cells.length < 2) continue;
-    const id = principleIn(cells[0]!);
+    const [name, score] = cells;
+    if (name === undefined || score === undefined) continue;
+    const id = principleIn(name);
     if (!id) continue;
-    const m = cells[1]!.match(/\((\d+)\)/);
+    const m = score.match(/\((\d+)\)/);
     if (!m) return null;
     const level = Number(m[1]);
     if (level > ENGAGEMENT_MAX_LEVEL) return null;
