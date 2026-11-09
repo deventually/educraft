@@ -326,9 +326,8 @@ export async function action({ request }: Route.ActionArgs) {
       },
       onComplete: async (full) => {
         // Record usage against the daily quota and emit the success log line.
-        // TODO: surface inputTokens/outputTokens once the AI SDK adapter exposes
-        // the stream `usage` promise (see lib/ai/adapters/aisdk.ts) — until then
-        // we count chars only.
+        // Known limit: we count chars only. Tokens (inputTokens/outputTokens) need the AI SDK
+        // adapter to expose the stream `usage` promise (see lib/ai/adapters/aisdk.ts).
         try {
           await recordUsage(user.id, { chars: full.length });
         } catch (e) {
