@@ -49,6 +49,13 @@ describe("cliProvider", () => {
     );
   });
 
+  it("passes the abort signal to spawn, so a closed tab kills the agent", async () => {
+    spawnMock.mockReturnValue(fakeChild(["x"]));
+    const signal = new AbortController().signal;
+    for await (const _ of cliProvider.streamChat({ ...base, signal })) void _;
+    expect(spawnMock.mock.calls.at(-1)?.[2]).toMatchObject({ signal });
+  });
+
   it("generate() collects the full output", async () => {
     spawnMock.mockReturnValue(fakeChild(["one ", "two"]));
     const r = await cliProvider.generate(base);

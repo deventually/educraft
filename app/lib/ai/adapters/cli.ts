@@ -45,7 +45,11 @@ export function assemblePrompt(opts: GenerateOptions): string {
 }
 
 /** Spawn the agent, stream stdout, and surface spawn/exit failures clearly. */
-async function* runCli(catalogId: string, prompt: string): AsyncIterable<string> {
+async function* runCli(
+  catalogId: string,
+  prompt: string,
+  signal?: AbortSignal,
+): AsyncIterable<string> {
   if (process.env.NODE_ENV === "production") {
     throw new LocalizedError({
       nl: "CLI-agents draaien alleen lokaal en zijn uitgeschakeld in productie.",
@@ -54,7 +58,10 @@ async function* runCli(catalogId: string, prompt: string): AsyncIterable<string>
   }
   const spec = specFor(catalogId);
   // Prompt is the final positional argument (claude -p "…", codex exec "…", …).
-  const child = spawn(spec.command, [...spec.args, prompt], { stdio: ["ignore", "pipe", "pipe"] });
+  const child = spawn(spec.command, [...spec.args, prompt], {
+    stdio: ["ignore", "pipe", "pipe"],
+    signal,
+  });
 
   const spawnErrors: NodeJS.ErrnoException[] = [];
   child.on("error", (err) => {
@@ -108,6 +115,6 @@ export const cliProvider: LLMProvider = {
   },
 
   async *streamChat(opts) {
-    yield* runCli(opts.model, assemblePrompt(opts));
+    yield* runCli(opts.model, assemblePrompt(opts), opts.signal);
   },
 };

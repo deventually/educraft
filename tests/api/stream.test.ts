@@ -84,6 +84,7 @@ interface InvokeOpts {
   role?: string;
   cookie?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 function makeRequest(body: unknown, opts: InvokeOpts = {}): Request {
@@ -95,6 +96,7 @@ function makeRequest(body: unknown, opts: InvokeOpts = {}): Request {
     method: "POST",
     headers,
     body: typeof body === "string" ? body : JSON.stringify(body),
+    signal: opts.signal,
   });
 }
 
@@ -776,6 +778,40 @@ describe("api.stream — model allow-list & budget", () => {
 // ════════════════════════════════════════════════════════════════════════════
 // SSE mechanics
 // ════════════════════════════════════════════════════════════════════════════
+
+describe("api.stream — the teacher closes the tab", () => {
+  it("aborts the model call when the request is aborted", async () => {
+    const tab = new AbortController();
+    await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "abort-request", signal: tab.signal },
+    );
+    const signal = streamChatSpy.mock.calls.at(-1)?.[0].signal as AbortSignal;
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(signal.aborted).toBe(false);
+    tab.abort();
+    expect(signal.aborted).toBe(true);
+  });
+
+  it("aborts the model call when the response stream is cancelled", async () => {
+    streamChatSpy.mockImplementation(async function* (opts: { signal: AbortSignal }) {
+      yield "begin";
+      await new Promise((_, reject) =>
+        opts.signal.addEventListener("abort", () => reject(new Error("aborted"))),
+      );
+    });
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "abort-cancel" },
+    );
+    const reader = res.body!.getReader();
+    await reader.read();
+    await reader.cancel();
+    const signal = streamChatSpy.mock.calls.at(-1)?.[0].signal as AbortSignal;
+    expect(signal.aborted).toBe(true);
+    await vi.waitFor(() => expect(saveGenerationSpy).not.toHaveBeenCalled());
+  });
+});
 
 describe("api.stream — SSE mechanics", () => {
   it("emits token frames in order followed by a done frame", async () => {
