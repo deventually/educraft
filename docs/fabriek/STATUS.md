@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #203 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #204 gemerged)_
 
 ## Nu
 
+- **Gebruikers-, modellen-, beschikbaarheids- en Start-code opgesplitst (#204) gemerged op
+  2026-11-09:** `users.server.ts` (599 → 200 regels), `models.ts` (475 → 311),
+  `availability.server.ts` (405 → 198) en `start.tsx` (402 → 173) zijn verdeeld over kleinere
+  modules; de oude bestanden exporteren ze opnieuw. Alle vier zijn van de ratchet-lijst af. Geen
+  gedragswijziging.
 - **Rubric-editor en -invullen opgesplitst (#203) gemerged op 2026-11-09:** `RubricEditor.tsx` en
   `RubricFill.tsx` (nu 197 en 202 regels) zijn verdeeld over `RubricCriterionEditor`, `RubricControls`,
   `RubricGradeSettings`, `RubricTable`, `RubricStudentForm`, `RubricStudentTable` en
