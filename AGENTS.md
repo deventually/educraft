@@ -16,7 +16,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
   (`Tool.courseActions`) and "Los op met…" (`FINDING_TOOLS`) are registry data, validated at boot.
 - **Prompts are files.** `app/lib/prompts/<id>@vN.prompt.ts` + `app/lib/prompts/files/<id>.{nl,en}.md`
   with `{{placeholder}}` syntax, validated at build time.
-- **Providers are abstracted** behind `app/lib/ai/provider.ts`; tools never import an SDK.
+- **Providers are abstracted** behind `app/lib/ai/provider.ts`; nothing outside `app/lib/ai/` imports
+  an AI SDK, and nothing `app/components` imports reaches a `*.server` module
+  (`tests/architecture.test.ts`).
 - **Context:** the per-tool sandbox plus the user profile, injected as `{{context}}` /
   `{{contextProfile}}` ([Context Model](wiki/Context-Model.md)).
 
@@ -82,7 +84,8 @@ English slugs, never shown.
 
 ### Database
 - All DB access goes through `app/server/repositories/`: every exported function is `async` and
-  scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`.
+  scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`
+  (`tests/architecture.test.ts`).
 - Sharing (P28.4): **reading** is also allowed to a member of a team the owner shared the item
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared
