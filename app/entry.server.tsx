@@ -14,6 +14,8 @@ import { renderToPipeableStream } from "react-dom/server";
 import { applySecurityHeaders } from "~/server/securityHeaders.server";
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 import { startBackupSchedule } from "~/server/backup.server";
+import { handleServerError, recordError } from "~/server/errorLog.server";
+import { requestIdOf } from "~/server/requestId.server";
 
 export const streamTimeout = 5_000;
 
@@ -27,12 +29,15 @@ ensureRegistryValidated();
 // no downtime; a failure is logged and never takes the app down. See backup.server.
 startBackupSchedule();
 
+/** Unexpected loader/action/render errors: one JSON line with the request id (errorLog). */
+export const handleError = handleServerError;
+
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
-  _loadContext: RouterContextProvider,
+  loadContext: RouterContextProvider,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
@@ -68,9 +73,14 @@ export default function handleRequest(
         },
         onError(error: unknown) {
           responseStatusCode = 500;
-          // Log streaming errors only once the shell has rendered.
+          // Log streaming errors only once the shell has rendered (before that, the
+          // shell error rejects and React Router's handleError sees it).
           if (shellRendered) {
-            console.error(error);
+            recordError(error, {
+              requestId: requestIdOf(loadContext),
+              method: request.method,
+              path: new URL(request.url).pathname,
+            });
           }
         },
       },

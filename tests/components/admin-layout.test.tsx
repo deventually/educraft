@@ -6,13 +6,14 @@ import AdminLayout from "~/routes/admin";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-async function renderLayout() {
+async function renderLayout({ isOwner = false } = {}) {
   const Stub = createRoutesStub([
     {
       path: "/admin",
       Component: AdminLayout,
       loader: () => ({
         health: { backup: { state: "none" }, databaseBytes: null, freeDiskBytes: null },
+        isOwner,
       }),
       children: [{ path: "users", Component: () => <p>child</p> }],
     },
@@ -23,7 +24,7 @@ async function renderLayout() {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly six sections in order (Rolagenten after Tools)", async () => {
+  it("shows exactly seven sections in order (Rolagenten after Tools, Logboek last)", async () => {
     await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
@@ -34,6 +35,7 @@ describe("Admin layout", () => {
       "Rolagenten",
       "Onderwijscontext",
       "Gebruik en feedback",
+      "Logboek",
     ]);
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/admin/users",
@@ -42,7 +44,17 @@ describe("Admin layout", () => {
       "/admin/agents",
       "/admin/context",
       "/admin/usage",
+      "/admin/audit",
     ]);
+  });
+
+  it("adds 'Recente fouten' last, for the owner only", async () => {
+    await renderLayout({ isOwner: true });
+    const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
+    const links = within(nav).getAllByRole("link");
+    expect(links).toHaveLength(8);
+    expect(links[7]).toHaveTextContent("Recente fouten");
+    expect(links[7]).toHaveAttribute("href", "/admin/errors");
   });
 
   it("shows the health overview above every admin page, with its backup warning", async () => {

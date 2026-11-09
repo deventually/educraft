@@ -25,6 +25,7 @@ import {
   removeMember,
 } from "~/server/repositories/teams.server";
 import { MIN_PASSWORD_LENGTH, SET_PASSWORD_LINK_DAYS, mayManage } from "~/server/userAdmin.server";
+import { recordAdminAction } from "~/server/repositories/auditLog.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { type PasteOutcome, type PasteReason, parsePastedPeople } from "~/lib/people/pasteList";
 import { useT } from "~/lib/i18n/useT";
@@ -125,6 +126,12 @@ export async function action({ request }: Route.ActionArgs) {
       createdByUserId: admin.id,
       teamId: team?.id ?? null,
     });
+    // The log keeps the fact and the count, never the note (a name) or the link (a secret).
+    await recordAdminAction({
+      actorUserId: admin.id,
+      action: "inviteCreated",
+      detail: { count: 1 },
+    });
     return { link: `${new URL(request.url).origin}/invite/${invite.token}` };
   }
 
@@ -166,11 +173,21 @@ export async function action({ request }: Route.ActionArgs) {
         link: `${origin}/invite/${invite.token}`,
       });
     }
+    const count = pasted.filter((p) => "link" in p).length;
+    if (count > 0) {
+      await recordAdminAction({
+        actorUserId: admin.id,
+        action: "inviteCreated",
+        detail: { count },
+      });
+    }
     return { pasted };
   }
 
   if (intent === "revoke") {
-    await revokeInvite(String(fd.get("token") ?? ""));
+    if (await revokeInvite(String(fd.get("token") ?? ""))) {
+      await recordAdminAction({ actorUserId: admin.id, action: "inviteRevoked" });
+    }
     return { revoked: true as const };
   }
 
@@ -201,6 +218,12 @@ export async function action({ request }: Route.ActionArgs) {
     if (await getUserByEmail(email)) return fail("emailTaken");
     const created = await createUser({ name, email, passwordHash, role });
     if (team) await joinTeamFromInvite(team.id, created.id);
+    await recordAdminAction({
+      actorUserId: admin.id,
+      action: "accountCreated",
+      targetUserId: created.id,
+      detail: { role },
+    });
     if (mode === "password") return { accountCreated: true as const };
     const reset = await createPasswordReset(created.id, SET_PASSWORD_LINK_DAYS * 24);
     return { setPasswordLink: `${new URL(request.url).origin}/reset/${reset.token}` };
@@ -231,6 +254,12 @@ export async function action({ request }: Route.ActionArgs) {
       } else {
         if (target.id === admin.id) continue;
         await setUserDisabled(target.id, action === "deactivate");
+        await recordAdminAction({
+          actorUserId: admin.id,
+          action: action === "deactivate" ? "deactivated" : "reactivated",
+          targetUserId: target.id,
+          detail: { bulk: true },
+        });
       }
       done++;
     }

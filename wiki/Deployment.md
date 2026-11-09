@@ -102,6 +102,24 @@ DB probe, or `503 {"ok":false}` if the database is unreachable. Wire it to the
 orchestrator's healthcheck (Docker `HEALTHCHECK`, Fly `[[services.http_checks]]`,
 a load-balancer probe).
 
+## Errors and request ids
+
+Every request gets a fresh random id from the first root middleware
+(`app/server/requestId.server.ts`), returned as the `X-Request-Id` response header. An id the
+client sends is ignored. An unexpected error in a loader, an action or while rendering
+(React Router's `handleError` in `entry.server.tsx`) becomes one JSON line on stderr:
+`{"ts":…,"event":"unexpected_error","requestId":…,"method":…,"path":…,"name":…,"message":…,"stack":…}`
+(`app/server/errorLog.server.ts`). The path has no query string, message and stack are capped,
+and a request body is never logged. A thrown `Response` (404, 403, redirect) and an aborted
+request are not errors.
+
+The owner (super admin) sees the newest 50 on **Beheer → Recente fouten** (`/admin/errors`);
+another admin gets a 404. That list lives in memory, so it starts empty after a restart; the
+server log keeps the full history. When a teacher reports a problem, search the log for the
+request id or the time. The error page a teacher sees (`ErrorReportHint` under the root
+`ErrorBoundary`, not on a 404) shows the exact time to the second and the page, to pass on;
+"Recente fouten" shows its times in the school's time zone, so the two match.
+
 ## Security headers
 
 Every response the app produces carries the baseline headers from

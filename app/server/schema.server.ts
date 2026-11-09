@@ -335,6 +335,25 @@ export const shares = sqliteTable(
   ],
 );
 
+/**
+ * The admin audit log: one row per admin action that changes someone's access (a role, a
+ * password, (de)activation, an account, an invite, the model choice). Ids only, no names: a
+ * deleted account stays in the log as "deleted account". `detail` is a small JSON object of
+ * facts (never a password, link or token). Append-only; read by admins on /admin/audit.
+ */
+export const adminAudit = sqliteTable(
+  "admin_audit",
+  {
+    id: text("id").primaryKey(),
+    at: integer("at", { mode: "timestamp_ms" }).notNull(),
+    actorUserId: text("actor_user_id").notNull(),
+    action: text("action").notNull(),
+    targetUserId: text("target_user_id"),
+    detail: text("detail"),
+  },
+  (t) => [index("admin_audit_at_idx").on(t.at)],
+);
+
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
 export type TeamRow = typeof teams.$inferSelect;
