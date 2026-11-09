@@ -118,7 +118,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     course,
     results,
     teacherWeek: week,
-    startDateHint: own?.length && !hasDates ? { courseId: own[0].id } : null,
+    startDateHint: own?.[0] && !hasDates ? { courseId: own[0].id } : null,
     courses: own
       ? checked.map(({ course: c, findings: fs }) => ({
           id: c.id,

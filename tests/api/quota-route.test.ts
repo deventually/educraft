@@ -44,7 +44,7 @@ function sseErrorMessage(sseText: string): string | null {
   const match = /event: error\ndata: (.*)/.exec(sseText);
   if (!match) return null;
   try {
-    return JSON.parse(match[1]).message as string;
+    return JSON.parse(match[1]!).message as string;
   } catch {
     return null;
   }

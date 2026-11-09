@@ -30,7 +30,7 @@ beforeAll(async () => {
 async function sessionCookieFor(userId: string): Promise<string> {
   const res = await auth.createUserSession(userId, "/");
   const setCookie = res.headers.get("Set-Cookie") ?? "";
-  const cookie = setCookie.split(";")[0];
+  const cookie = setCookie.split(";")[0]!;
   expect(cookie).toContain("__session=");
   return cookie;
 }

@@ -78,7 +78,7 @@ describe("ops bundle", () => {
     expect(backups[0]).toMatch(/^limeonit-.*Z\.db$/);
 
     const restored = join(dir, "restored.db");
-    const r = run("restore", ["--from", join(dir, "backups", backups[0]), "--to", restored]);
+    const r = run("restore", ["--from", join(dir, "backups", backups[0]!), "--to", restored]);
     expect(r.status).toBe(0);
     const db = new Database(restored, { readonly: true });
     const row = db

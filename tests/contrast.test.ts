@@ -13,7 +13,7 @@ const css = readFileSync(resolve(root, "app/app.css"), "utf8");
 const token = (name: string): string => {
   const m = css.match(new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{6})`));
   if (!m) throw new Error(`token --color-${name} not found in app.css`);
-  return m[1];
+  return m[1]!;
 };
 
 const luminance = (hex: string): number => {
@@ -21,12 +21,12 @@ const luminance = (hex: string): number => {
     const v = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
     return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
 };
 
 const contrast = (a: string, b: string): number => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
+  return (hi! + 0.05) / (lo! + 0.05);
 };
 
 // The light surfaces muted text sits on: cards, the page body, subtle fills.

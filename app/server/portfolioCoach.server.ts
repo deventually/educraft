@@ -206,6 +206,7 @@ export async function reviewDossier(
   let data = d;
   results.forEach((r, i) => {
     const id = withText[i];
+    if (id === undefined) return;
     if (!r.ok) {
       failed.push(id);
       return;

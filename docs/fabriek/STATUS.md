@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#182, #184 en #185 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#182, #184, #185 en #186 gemerged)_
 
 ## Nu
 
+- **Fouten vastleggen in de app (P1 middelgroot uit de doorlichting, #186) gemerged op
+  2026-11-09:** elk verzoek krijgt een request-id (header `X-Request-Id`); onverwachte fouten gaan
+  als één JSON-regel met dat id naar de log, en de eigenaar ziet de laatste 50 op
+  `/admin/errors` (*Recente fouten*). Alleen metadata, nooit een body. De foutpagina noemt de
+  docent het precieze tijdstip en de pagina om te melden.
 - **Audit-log van beheeracties (P1 middelgroot uit de doorlichting, #185) gemerged op 2026-11-09:**
   rol, wachtwoord, deactivering, uitnodiging en modelkeuze komen in een log op `/admin/audit`.
   Regels ouder dan een jaar verdwijnen vanzelf; de eigenaar kan met een bevestiging eerder opruimen.

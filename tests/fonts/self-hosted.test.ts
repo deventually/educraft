@@ -10,11 +10,11 @@ const root = process.cwd();
 const css = readFileSync(join(root, "app/app.css"), "utf8");
 const faces = [...css.matchAll(/@font-face\s*{([^}]*)}/g)].map((m) => m[1]);
 const field = (face: string, name: string) =>
-  face.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim();
+  face.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1]?.trim();
 
 describe("self-hosted fonts", () => {
   it("declares Inter and Newsreader, upright and italic", () => {
-    const styles = faces.map((f) => `${field(f, "font-family")} ${field(f, "font-style")}`);
+    const styles = faces.map((f) => `${field(f!, "font-family")} ${field(f!, "font-style")}`);
     for (const family of ['"Inter"', '"Newsreader"']) {
       expect(styles).toContain(`${family} normal`);
       expect(styles).toContain(`${family} italic`);
@@ -24,10 +24,10 @@ describe("self-hosted fonts", () => {
   it("serves every face as a woff2 from public/fonts, with swap", () => {
     expect(faces.length).toBeGreaterThan(0);
     for (const face of faces) {
-      const url = field(face, "src")?.match(/url\("?([^")]+)"?\)/)?.[1] ?? "";
+      const url = field(face!, "src")?.match(/url\("?([^")]+)"?\)/)?.[1] ?? "";
       expect(url).toMatch(/^\/fonts\/[\w-]+\.woff2$/);
       expect(existsSync(join(root, "public", url))).toBe(true);
-      expect(field(face, "font-display")).toBe("swap");
+      expect(field(face!, "font-display")).toBe("swap");
     }
   });
 

@@ -160,7 +160,7 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
           title: o.title,
           requiredEvidence: o.requiredEvidence,
         });
-        const id = next.framework.outcomes[next.framework.outcomes.length - 1].id;
+        const id = next.framework.outcomes.at(-1)?.id ?? "";
         for (const c of o.criteria) next = edit.addCriterion(next, id, { text: c.text });
       }
       return { ...next, framework: { ...next.framework, national: true } };

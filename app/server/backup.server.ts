@@ -45,7 +45,8 @@ export function backupsToKeep(names: string[], now: Date): string[] {
     .filter((b): b is { name: string; t: number } => b.t !== null)
     .sort((a, b) => b.t - a.t);
   const keep = new Set(names.filter((n) => parseBackupTime(n) === null));
-  if (ours.length > 0) keep.add(ours[0].name);
+  const [newest] = ours;
+  if (newest) keep.add(newest.name);
   const days = new Set<number>();
   const weeks = new Set<number>();
   for (const { name, t } of ours) {

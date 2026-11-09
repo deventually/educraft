@@ -97,7 +97,7 @@ export function scoreCoachCase(c: CoachCase, result: ParseResult): CoachScore {
   const keys = Object.keys(c.expected);
   const good = keys.filter((n) => {
     const r = byN.get(Number(n));
-    return !!r && c.expected[n].includes(r.verdict);
+    return !!r && !!c.expected[n]?.includes(r.verdict);
   }).length;
   const verdicts = keys.length ? good / keys.length : 1;
   const unverifiedQuotes = result.review.criteria.filter((r) => r.quoteUnverified).length;

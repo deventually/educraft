@@ -133,7 +133,7 @@ describe("buildReportMarkdown", () => {
   ];
 
   it("keys a row stably by tool + case", () => {
-    expect(reportRowKey(rows[0])).toBe("forum-autograder/b-thread");
+    expect(reportRowKey(rows[0]!)).toBe("forum-autograder/b-thread");
   });
 
   it("produces deterministic markdown with avg, delta, model and prompt words", () => {
@@ -368,8 +368,8 @@ describe("hard checks in the committed rubrics", () => {
       if (!existsSync(path)) continue;
       const rubric = readFileSync(path, "utf8");
       if (!/^##\s+hard checks/im.test(rubric)) continue;
-      const section = rubric.split(/^##\s+hard checks.*$/im)[1].split(/^##\s/m)[0];
-      const bullets = section.split("\n").filter((l) => /^-\s+\*\*/.test(l.trim()));
+      const section = rubric.split(/^##\s+hard checks.*$/im)[1]!.split(/^##\s/m)[0];
+      const bullets = section!.split("\n").filter((l) => /^-\s+\*\*/.test(l.trim()));
       expect(parseHardChecks(rubric).length, tool).toBe(bullets.length);
       expect(bullets.length, tool).toBeGreaterThan(0);
     }
@@ -420,17 +420,17 @@ describe("counted checks (decided in code, not by the judge)", () => {
   });
 
   it("longTurn fails on a list, a heading or more than 150 words, not on the greeting", () => {
-    expect(COUNTED_CHECKS.longTurn(transcript)).toBe(true);
-    expect(COUNTED_CHECKS.longTurn("**Tutor:** Kort en goed. Wat denk je?")).toBe(false);
-    expect(COUNTED_CHECKS.longTurn(`**Tutor:** ${"woord ".repeat(151)}`)).toBe(true);
-    expect(COUNTED_CHECKS.longTurn(`**Tutor:** ${"woord ".repeat(140)}`)).toBe(false);
-    expect(COUNTED_CHECKS.longTurn("**Tutor:** **Jouw beurt:** wat denk je?")).toBe(true);
-    expect(COUNTED_CHECKS.longTurn("**Tutor:** ### Stap\nwat denk je?")).toBe(true);
+    expect(COUNTED_CHECKS.longTurn!(transcript)).toBe(true);
+    expect(COUNTED_CHECKS.longTurn!("**Tutor:** Kort en goed. Wat denk je?")).toBe(false);
+    expect(COUNTED_CHECKS.longTurn!(`**Tutor:** ${"woord ".repeat(151)}`)).toBe(true);
+    expect(COUNTED_CHECKS.longTurn!(`**Tutor:** ${"woord ".repeat(140)}`)).toBe(false);
+    expect(COUNTED_CHECKS.longTurn!("**Tutor:** **Jouw beurt:** wat denk je?")).toBe(true);
+    expect(COUNTED_CHECKS.longTurn!("**Tutor:** ### Stap\nwat denk je?")).toBe(true);
   });
 
   it("severalQuestions fails on more than one question mark in a tutor turn", () => {
-    expect(COUNTED_CHECKS.severalQuestions(transcript)).toBe(false);
-    expect(COUNTED_CHECKS.severalQuestions("**Tutor:** Wat is f? En wat is g?")).toBe(true);
+    expect(COUNTED_CHECKS.severalQuestions!(transcript)).toBe(false);
+    expect(COUNTED_CHECKS.severalQuestions!("**Tutor:** Wat is f? En wat is g?")).toBe(true);
   });
 
   it("compoundQuestion fails on two questions in one sentence with one question mark (meting dyw4)", () => {
@@ -444,7 +444,7 @@ describe("counted checks (decided in code, not by the judge)", () => {
       "Was it larger or smaller, and how do you know?",
     ];
     for (const q of fails)
-      expect(COUNTED_CHECKS.compoundQuestion(`**Tutor:** Goed. ${q}`), q).toBe(true);
+      expect(COUNTED_CHECKS.compoundQuestion!(`**Tutor:** Goed. ${q}`), q).toBe(true);
     const passes = [
       "Wat zou er nog meer veranderd kunnen zijn op je afdeling, los van de screening?",
       "Maakt die fout je uitkomst groter of kleiner?",
@@ -453,10 +453,10 @@ describe("counted checks (decided in code, not by the judge)", () => {
       "What did your data show, step by step?",
     ];
     for (const q of passes)
-      expect(COUNTED_CHECKS.compoundQuestion(`**Tutor:** ${q}`), q).toBe(false);
+      expect(COUNTED_CHECKS.compoundQuestion!(`**Tutor:** ${q}`), q).toBe(false);
     // The fixed greeting is not the model's.
     expect(
-      COUNTED_CHECKS.compoundQuestion(
+      COUNTED_CHECKS.compoundQuestion!(
         "**Tutor (greeting):** Wat deed je, en waarom?\n\n**Student:** x",
       ),
     ).toBe(false);
@@ -592,19 +592,19 @@ describe("--model: generate with another model, judge with the same one", () => 
   const stage = tool.stages[0];
 
   it("uses the stage's or tool's own model without an override", () => {
-    expect(generationModel(tool, stage)).toBe(stage.model ?? tool.defaultModel);
+    expect(generationModel(tool, stage!)).toBe(stage!.model ?? tool.defaultModel);
   });
 
   it("uses the override for every stage, also a pinned one", () => {
-    expect(generationModel(tool, { ...stage, model: "claude-haiku-5-5" }, "gpt-6.1-sol")).toBe(
+    expect(generationModel(tool, { ...stage!, model: "claude-haiku-5-5" }, "gpt-6.1-sol")).toBe(
       "gpt-6.1-sol",
     );
   });
 
   it("accepts catalog and local models, refuses an unknown id before anything is paid", () => {
-    expect(generationModel(tool, stage, "gemini-4-argon")).toBe("gemini-4-argon");
-    expect(generationModel(tool, stage, "ollama::qwen3:32b")).toBe("ollama::qwen3:32b");
-    expect(() => generationModel(tool, stage, "gpt-nonexistent")).toThrow(/gpt-nonexistent/);
+    expect(generationModel(tool, stage!, "gemini-4-argon")).toBe("gemini-4-argon");
+    expect(generationModel(tool, stage!, "ollama::qwen3:32b")).toBe("ollama::qwen3:32b");
+    expect(() => generationModel(tool, stage!, "gpt-nonexistent")).toThrow(/gpt-nonexistent/);
   });
 
   it("batches only Anthropic models (the Message Batches API is Anthropic's)", () => {

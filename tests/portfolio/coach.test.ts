@@ -80,7 +80,7 @@ describe("parseCoachReview", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.review.criteria.map((c) => c.criterionId)).toEqual([C1, C2]);
     expect(r.review.criteria[0]).toMatchObject({ verdict: "shown", quote: CHAPTER });
-    expect(r.review.criteria[1].evidenceNeeded).toEqual(["Opname van de les"]);
+    expect(r.review.criteria[1]!.evidenceNeeded).toEqual(["Opname van de les"]);
     expect(r.review.overall).toBe("Goed begin.");
   });
 
@@ -117,12 +117,12 @@ describe("parseCoachReview", () => {
     const r = parseCoachReview(reviewJson(made), d, LU);
     if (!r.ok) throw new Error(r.error);
     expect(r.review.criteria[0]).toMatchObject({ verdict: "partial", quoteUnverified: true });
-    expect(r.review.criteria[0].quote).toBeUndefined();
+    expect(r.review.criteria[0]!.quote).toBeUndefined();
   });
 
   it("treats whitespace and quote-style differences as the same quote", () => {
     let dd = sampleDossier();
-    dd.chapters[0].text = "Ik zei: “Wat weten jullie al?”\n\nDaarna  begon de kern.";
+    dd.chapters[0]!.text = "Ik zei: “Wat weten jullie al?”\n\nDaarna  begon de kern.";
     const r = parseCoachReview(
       reviewJson([
         { ...okCriteria[0], quote: 'Ik zei: "Wat weten jullie al?" Daarna begon de kern.' },
@@ -133,7 +133,7 @@ describe("parseCoachReview", () => {
     );
     if (!r.ok) throw new Error(r.error);
     expect(r.review.criteria[0]).toMatchObject({ verdict: "shown" });
-    expect(r.review.criteria[0].quoteUnverified).toBeUndefined();
+    expect(r.review.criteria[0]!.quoteUnverified).toBeUndefined();
     dd = sampleDossier();
   });
 
@@ -155,7 +155,7 @@ describe("parseCoachReview", () => {
     ];
     const r = parseCoachReview(reviewJson(advice), withRef, LU);
     if (!r.ok) throw new Error(r.error);
-    expect(r.review.criteria[1].strengthen).toEqual([
+    expect(r.review.criteria[1]!.strengthen).toEqual([
       "Onderbouw je keuze met Last (2017).",
       "Beschrijf wat de studenten al wisten.",
     ]);
@@ -168,8 +168,8 @@ describe("parseCoachReview", () => {
     ];
     const r = parseCoachReview(reviewJson(long, "x".repeat(900)), d, LU);
     if (!r.ok) throw new Error(r.error);
-    expect(r.review.criteria[1].strengthen).toHaveLength(3);
-    expect(r.review.criteria[1].evidenceNeeded).toHaveLength(3);
+    expect(r.review.criteria[1]!.strengthen).toHaveLength(3);
+    expect(r.review.criteria[1]!.evidenceNeeded).toHaveLength(3);
     expect(r.review.overall.length).toBeLessThanOrEqual(600);
   });
 

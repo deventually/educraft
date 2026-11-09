@@ -46,8 +46,9 @@ export function linkTargetValue(courseId: string, itemId?: string | null): strin
 
 export function parseLinkTarget(value: string): { courseId: string; itemId: string | null } | null {
   const parts = value.split(SEP);
-  if (parts.length > 2 || parts.some((p) => p === "")) return null;
-  return { courseId: parts[0], itemId: parts[1] ?? null };
+  const [courseId, itemId] = parts;
+  if (!courseId || parts.length > 2 || parts.some((p) => p === "")) return null;
+  return { courseId, itemId: itemId ?? null };
 }
 
 /** The links per generation id, named; links to a course not in the list are left out. */

@@ -29,7 +29,11 @@ function shuffle<T>(list: readonly T[]): T[] {
   const out = [...list];
   for (let i = out.length - 1; i > 0; i--) {
     const j = randomInt(i + 1);
-    [out[i], out[j]] = [out[j], out[i]];
+    const a = out[i];
+    const b = out[j];
+    if (a === undefined || b === undefined) continue;
+    out[i] = b;
+    out[j] = a;
   }
   return out;
 }

@@ -33,7 +33,7 @@ describe("highlightCode (code in Word and PDF)", () => {
 
   it("marks comments as italic", () => {
     const lines = highlightCode("# uitleg\nx = 1", "python");
-    expect(lines[0][0]).toMatchObject({
+    expect(lines[0]![0]).toMatchObject({
       text: "# uitleg",
       color: CODE_COLORS.comment,
       italic: true,

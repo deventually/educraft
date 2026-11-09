@@ -97,7 +97,7 @@ describe("DocumentInputControl", () => {
       expect(onChange).toHaveBeenCalledWith("## a.pdf\n\nAAA\n\n## b.docx\n\nBBB"),
     );
     // The control passes every selected file to the extractor.
-    expect(filesToDocumentText.mock.calls[0][0]).toHaveLength(2);
+    expect(filesToDocumentText.mock.calls[0]![0]).toHaveLength(2);
   });
 
   it("lists files that had no readable text alongside a successful merge", async () => {

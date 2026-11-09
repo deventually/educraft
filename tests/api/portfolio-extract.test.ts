@@ -62,9 +62,12 @@ describe("extractFramework", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.flagged).toBe(1);
     expect(r.data.framework.confirmedAt).toBeUndefined();
-    expect(r.data.framework.outcomes[0].criteria.map((c) => !!c.unverified)).toEqual([false, true]);
+    expect(r.data.framework.outcomes[0]!.criteria.map((c) => !!c.unverified)).toEqual([
+      false,
+      true,
+    ]);
     expect(recordUsage).toHaveBeenCalledOnce();
-    const call = generate.mock.calls[0][0];
+    const call = generate.mock.calls[0]![0];
     expect(call.model).toBe("claude-sonnet-5-5");
     expect(call.system).toContain("Voice & Bounds");
     expect(call.messages[0].content).toContain("<form>");
@@ -123,7 +126,7 @@ describe("the framework page, intent extract", () => {
     } as never);
     expect(r).toEqual({ ok: true, intent: "extract", flagged: 1, clipped: false });
     const saved = await repo.getDossier("teacher-e", mine.id);
-    expect(saved?.data.framework.outcomes[0].criteria).toHaveLength(2);
+    expect(saved?.data.framework.outcomes[0]?.criteria).toHaveLength(2);
   });
 
   it("gives a localized error and saves nothing when the framework is in use", async () => {

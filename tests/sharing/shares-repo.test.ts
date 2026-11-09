@@ -194,7 +194,7 @@ describe("shares repository (P28.4)", () => {
 
     const work = await shares.listSharedCourseWork(w.b, course.id);
     expect(work.map((x) => x.toolSlug)).toEqual(["lesson-plan"]);
-    expect(work[0].outputMarkdown).toBe("# Lesopzet");
+    expect(work[0]!.outputMarkdown).toBe("# Lesopzet");
     expect(await shares.listSharedCourseWork(w.c, course.id)).toEqual([]);
   });
 });

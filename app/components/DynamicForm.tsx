@@ -76,7 +76,7 @@ function FieldControl({
   sourceFiles,
 }: {
   field: InputField;
-  value: FormValues[string];
+  value: FormValues[string] | undefined;
   onChange: (v: FormValues[string]) => void;
   onFiles?: (files: File[]) => void;
   /** For an image field with `imagesFrom`: the files uploaded in that document field. */
@@ -118,7 +118,7 @@ function FieldControl({
 function renderControl(
   field: InputField,
   id: string,
-  value: FormValues[string],
+  value: FormValues[string] | undefined,
   onChange: (v: FormValues[string]) => void,
   locale: Locale,
   onFiles?: (files: File[]) => void,
@@ -476,7 +476,7 @@ function DocumentInputControl({
 }
 
 /** An image field's value; a fresh form seeds every field with "". */
-function asImages(value: FormValues[string]): ImageInput[] {
+function asImages(value: FormValues[string] | undefined): ImageInput[] {
   return Array.isArray(value) ? (value as unknown as ImageInput[]) : [];
 }
 

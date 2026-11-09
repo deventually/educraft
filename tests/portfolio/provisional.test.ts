@@ -59,7 +59,7 @@ describe("provisional framework", () => {
 
   it("an edit un-confirms a provisional framework too", () => {
     const d = ok(intent(national(), "confirmProvisional"));
-    const outcomeId = d.framework.outcomes[0].id;
+    const outcomeId = d.framework.outcomes[0]!.id;
     const next = edit.addCriterion(d, outcomeId, { text: "Extra criterium uit mijn formulier." });
     expect(next.framework.confirmedAt).toBeUndefined();
     expect(next.framework.provisional).toBeUndefined();

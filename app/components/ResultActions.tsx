@@ -92,12 +92,12 @@ export function ResultActions({
 
   function keepAtCourse(e: FormEvent<HTMLFormElement>) {
     const target = String(new FormData(e.currentTarget).get("target") ?? "");
-    setLinkedTo(target.split(SEP)[0]);
+    setLinkedTo(target.split(SEP)[0] ?? "");
   }
 
   function submitEvidence(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const [dossierId, criterionId = ""] = String(
+    const [dossierId = "", criterionId = ""] = String(
       new FormData(e.currentTarget).get("evidenceTarget") ?? "",
     ).split(SEP);
     void evidenceFetcher.submit(

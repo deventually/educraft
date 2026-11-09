@@ -9,7 +9,7 @@ describe("teaching-goal taxonomy", () => {
     for (const tool of enabled) {
       const goal = TOOL_GOALS[tool.slug];
       expect(goal, `${tool.slug} has no goal`).toBeDefined();
-      expect(GOALS[goal]).toBeDefined();
+      expect(GOALS[goal!]).toBeDefined();
     }
   });
 
@@ -39,7 +39,7 @@ describe("teaching-goal taxonomy", () => {
     for (const tool of enabled) {
       const keywords = TOOL_KEYWORDS[tool.slug];
       expect(keywords, `${tool.slug} has no keywords`).toBeDefined();
-      expect(keywords.length).toBeGreaterThan(0);
+      expect(keywords!.length).toBeGreaterThan(0);
     }
   });
 });

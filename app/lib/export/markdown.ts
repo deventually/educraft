@@ -104,8 +104,9 @@ export function parseMarkdown(markdown: string): Block[] {
     flushList();
   };
 
+  const lineAt = (k: number) => lines[k] ?? "";
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lineAt(i);
     if (!line.trim()) {
       flush();
       continue;
@@ -114,25 +115,25 @@ export function parseMarkdown(markdown: string): Block[] {
     if (fence) {
       // Code: kept whole, as written, until the same fence closes it.
       flush();
-      const close = fence[1];
+      const close = fence[1] ?? "";
       const code: string[] = [];
-      for (i++; i < lines.length && !lines[i].trim().startsWith(close); i++) code.push(lines[i]);
+      for (i++; i < lines.length && !lineAt(i).trim().startsWith(close); i++) code.push(lineAt(i));
       blocks.push({ type: "code", lang: fence[2] || null, text: code.join("\n") });
       continue;
     }
     const heading = HEADING.exec(line);
     if (heading) {
       flush();
-      const level = heading[1].length as 1 | 2 | 3 | 4 | 5 | 6;
-      blocks.push({ type: "heading", level, runs: inline(heading[2]) });
+      const level = (heading[1] ?? "").length as 1 | 2 | 3 | 4 | 5 | 6;
+      blocks.push({ type: "heading", level, runs: inline(heading[2] ?? "") });
       continue;
     }
-    if (line.includes("|") && i + 1 < lines.length && TABLE_SEPARATOR.test(lines[i + 1])) {
+    if (line.includes("|") && i + 1 < lines.length && TABLE_SEPARATOR.test(lineAt(i + 1))) {
       flush();
       const header = cells(line).map((c) => inline(c));
       const rows: Run[][][] = [];
-      for (i += 2; i < lines.length && lines[i].includes("|") && lines[i].trim(); i++) {
-        rows.push(cells(lines[i]).map((c) => inline(c)));
+      for (i += 2; i < lines.length && lineAt(i).includes("|") && lineAt(i).trim(); i++) {
+        rows.push(cells(lineAt(i)).map((c) => inline(c)));
       }
       i--;
       blocks.push({ type: "table", header, rows });
@@ -150,7 +151,7 @@ export function parseMarkdown(markdown: string): Block[] {
       const ordered = !!numbered;
       if (list && list.ordered !== ordered) flushList();
       if (!list) list = { ordered, items: [] };
-      list.items.push(item[1]);
+      list.items.push(item[1] ?? "");
       continue;
     }
     const text = line.trim().replace(/^>\s?/, "");

@@ -23,10 +23,10 @@ describe("rubrics repository", () => {
     expect(got?.data.criteria.map((c) => c.title)).toEqual(["Analyse", "Bronnen"]);
 
     const next = sampleRubric();
-    next.criteria[0].title = "Analyseren";
+    next.criteria[0]!.title = "Analyseren";
     const updated = await repo.updateRubric(A, created.id, { name: "Verslag v2", data: next });
     expect(updated?.name).toBe("Verslag v2");
-    expect((await repo.getRubric(A, created.id))?.data.criteria[0].title).toBe("Analyseren");
+    expect((await repo.getRubric(A, created.id))?.data.criteria[0]?.title).toBe("Analyseren");
     expect(updated!.updatedAt.getTime()).toBeGreaterThan(created.updatedAt.getTime());
 
     expect(await repo.deleteRubric(A, created.id)).toBe(true);
@@ -54,10 +54,10 @@ describe("rubrics repository", () => {
   it("refuses invalid data and writes nothing", async () => {
     const r = await repo.createRubric(A, "Geldig", sampleRubric());
     const bad = sampleRubric();
-    bad.criteria[0].levels = bad.criteria[0].levels.slice(0, 1);
+    bad.criteria[0]!.levels = bad.criteria[0]!.levels.slice(0, 1);
     await expect(repo.updateRubric(A, r.id, { data: bad })).rejects.toThrow();
     await expect(repo.createRubric(A, "Fout", bad)).rejects.toThrow();
-    expect((await repo.getRubric(A, r.id))?.data.criteria[0].levels).toHaveLength(3);
+    expect((await repo.getRubric(A, r.id))?.data.criteria[0]?.levels).toHaveLength(3);
     await expect(repo.createRubric(A, "  ", sampleRubric())).rejects.toThrow();
     await expect(repo.createRubric(A, "x".repeat(201), sampleRubric())).rejects.toThrow();
   });

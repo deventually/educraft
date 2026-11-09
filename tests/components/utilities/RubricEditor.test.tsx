@@ -44,7 +44,7 @@ describe("RubricEditor", () => {
     await user.click(await screen.findByRole("button", { name: "Criterium toevoegen" }));
     expect(screen.getByRole("group", { name: "Criterium 3" })).toBeInTheDocument();
     await waitFor(() => expect(posts).toHaveLength(1));
-    expect(posts[0].get("intent")).toBe("save");
+    expect(posts[0]!.get("intent")).toBe("save");
     expect(lastData(posts).criteria).toHaveLength(3);
   });
 
@@ -71,7 +71,7 @@ describe("RubricEditor", () => {
     await user.tab();
     await waitFor(() => expect(posts).toHaveLength(1));
     expect(lastData(posts).criteria[0].title).toBe("Analyseren");
-    expect(posts[0].get("name")).toBe("Verslag");
+    expect(posts[0]!.get("name")).toBe("Verslag");
   });
 
   it("updates the points and the maximum", async () => {
@@ -109,7 +109,7 @@ describe("RubricEditor", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     renderEditor();
     await user.click(await screen.findByRole("button", { name: "Kopieer als Markdown" }));
-    expect(String(writeText.mock.calls[0][0])).toMatch(/^\| Criterium \| Niveau 1 \|/);
+    expect(String(writeText.mock.calls[0]![0])).toMatch(/^\| Criterium \| Niveau 1 \|/);
   });
 
   it("keeps the grade settings on the rubric, starting from the calculator's defaults", async () => {

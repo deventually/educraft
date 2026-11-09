@@ -75,7 +75,7 @@ function fold(text: string): { text: string; at: number[] } {
   const at: number[] = [];
   let space = false;
   for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    const ch = text.charAt(i);
     if (/\s/.test(ch)) {
       if (!space) {
         out += " ";
@@ -102,7 +102,7 @@ export function locateQuote(quote: string, chapter: string): string | null {
   const hay = fold(chapter);
   const i = hay.text.indexOf(needle);
   if (i < 0) return null;
-  return chapter.slice(hay.at[i], hay.at[i + needle.length - 1] + 1);
+  return chapter.slice(hay.at[i] ?? 0, (hay.at[i + needle.length - 1] ?? 0) + 1);
 }
 
 // ── Checking the answer ─────────────────────────────────────────────────────

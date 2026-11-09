@@ -26,7 +26,7 @@ const base = {
 };
 const build = (lang: "nl" | "en", values: Record<string, unknown> = base) =>
   buildSystemPrompt({
-    promptId: tool().stages[0].systemPromptId,
+    promptId: tool().stages[0]!.systemPromptId,
     values: values as Record<string, string>,
     outputLanguage: lang,
   });
@@ -42,7 +42,7 @@ describe("tool: stage-assessment @v2 (any student work)", () => {
   });
 
   it("runs on stage-assessment@v2 and keeps @v1 registered", () => {
-    expect(tool().stages[0].systemPromptId).toBe("stage-assessment@v2");
+    expect(tool().stages[0]!.systemPromptId).toBe("stage-assessment@v2");
     expect(PROMPTS["stage-assessment@v1"]).toBeDefined();
     expect(PROMPTS["stage-assessment@v2"]).toBeDefined();
   });

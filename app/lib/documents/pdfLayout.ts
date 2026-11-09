@@ -43,7 +43,7 @@ const DESCENT = 0.25;
 
 /** `viewBox` is the page box `[x0, y0, x1, y1]` (pdf.js `viewport.viewBox`). */
 export function pageLayout(items: PdfTextItem[], viewBox: number[]): PageLayout {
-  const [x0, y0, x1, y1] = viewBox;
+  const [x0 = 0, y0 = 0, x1 = 0, y1 = 0] = viewBox;
   const pageW = x1 - x0 || 1;
   const pageH = y1 - y0 || 1;
   let text = "";

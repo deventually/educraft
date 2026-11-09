@@ -67,7 +67,7 @@ describe("RedactReview", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Send anonymised" }));
-    const { values, codes } = onConfirm.mock.calls[0][0];
+    const { values, codes } = onConfirm.mock.calls[0]![0];
     expect(values.document).toBe(
       "[STUDENT] liep stage bij SportShop BV. Mail: jan@example.org. Project [ANDER-1].",
     );

@@ -45,7 +45,7 @@ function normalizeWithMap(source: string): Normalized {
   };
 
   for (let i = 0; i < source.length; i++) {
-    let ch = source[i];
+    let ch = source.charAt(i);
     if (DROP.test(ch)) continue;
     if (SPACE.test(ch)) {
       if (out.length > 0 && out[out.length - 1] !== " ") push(" ", i);
@@ -61,8 +61,9 @@ function normalizeWithMap(source: string): Normalized {
     if (ch === "-") {
       const prev = out[out.length - 1];
       let j = i + 1;
-      while (j < source.length && (SPACE.test(source[j]) || DROP.test(source[j]))) j++;
-      if (prev && LETTER.test(prev) && j < source.length && LETTER.test(source[j])) {
+      while (j < source.length && (SPACE.test(source.charAt(j)) || DROP.test(source.charAt(j))))
+        j++;
+      if (prev && LETTER.test(prev) && j < source.length && LETTER.test(source.charAt(j))) {
         i = j - 1;
         continue;
       }
@@ -102,7 +103,7 @@ function findHits(segments: string[], needle: string): Hit[] {
 
   const segmentOf = (pos: number) => {
     let seg = 0;
-    while (seg + 1 < starts.length && starts[seg + 1] <= pos) seg++;
+    while (seg + 1 < starts.length && (starts[seg + 1] ?? pos + 1) <= pos) seg++;
     return seg;
   };
 
@@ -110,11 +111,12 @@ function findHits(segments: string[], needle: string): Hit[] {
   for (;;) {
     const at = hay.text.indexOf(needle, from);
     if (at < 0) break;
-    const srcStart = hay.map[at];
-    const srcEnd = hay.map[at + needle.length - 1] + 1;
+    // `at` and its last character are inside the text, so both are mapped.
+    const srcStart = hay.map[at] ?? 0;
+    const srcEnd = (hay.map[at + needle.length - 1] ?? 0) + 1;
     const segment = segmentOf(srcStart);
-    const segStart = starts[segment];
-    const segEnd = segStart + segments[segment].length;
+    const segStart = starts[segment] ?? 0;
+    const segEnd = segStart + (segments[segment]?.length ?? 0);
     hits.push({ segment, start: srcStart - segStart, end: Math.min(srcEnd, segEnd) - segStart });
     from = at + Math.max(needle.length, 1);
   }
@@ -143,8 +145,9 @@ export function locateQuote(segments: string[], quote: string): LocateResult {
   const needle = fragments.reduce((a, b) => (b.length > a.length ? b : a), "");
   if (needle.length < MIN_QUOTE_LENGTH) return { status: "tooShort" };
   const hits = findHits(segments, needle);
-  if (hits.length === 0) return { status: "notFound" };
-  return { status: "found", ...hits[0], matches: hits.length };
+  const [first] = hits;
+  if (!first) return { status: "notFound" };
+  return { status: "found", ...first, matches: hits.length };
 }
 
 /** Quotes in a result shorter than this are words, not evidence. */
@@ -159,10 +162,10 @@ const QUOTE_PATTERNS = [/“([^”\n]+)”/g, /„([^”“\n]+)[”“]/g, /"([
 export function extractQuotes(markdown: string): string[] {
   const found: Array<{ at: number; text: string }> = [];
   for (const pattern of QUOTE_PATTERNS) {
-    for (const m of markdown.matchAll(pattern)) found.push({ at: m.index ?? 0, text: m[1] });
+    for (const m of markdown.matchAll(pattern)) found.push({ at: m.index ?? 0, text: m[1] ?? "" });
   }
   for (const m of markdown.matchAll(/^\s*>\s?(.+)$/gm)) {
-    found.push({ at: m.index ?? 0, text: m[1] });
+    found.push({ at: m.index ?? 0, text: m[1] ?? "" });
   }
   found.sort((a, b) => a.at - b.at);
 
@@ -201,7 +204,7 @@ export function quoteSpans(text: string): QuoteSpan[] {
   const spans: QuoteSpan[] = [];
   for (const pattern of QUOTE_PATTERNS) {
     for (const m of text.matchAll(pattern)) {
-      const quote = m[1].replace(/[*_`]/g, "").trim();
+      const quote = (m[1] ?? "").replace(/[*_`]/g, "").trim();
       if (quote.length < MIN_EXTRACTED) continue;
       const start = m.index ?? 0;
       spans.push({ start, end: start + m[0].length, quote });

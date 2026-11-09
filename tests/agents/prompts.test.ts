@@ -7,7 +7,7 @@ describe("hat prompts (P21.2)", () => {
     describe(agent.id, () => {
       it("is registered with a book-free source note", () => {
         expect(PROMPTS[agent.promptId]).toBeDefined();
-        expect(PROMPTS[agent.promptId].verbatim.length).toBeGreaterThan(50);
+        expect(PROMPTS[agent.promptId]!.verbatim.length).toBeGreaterThan(50);
       });
 
       for (const locale of ["nl", "en"] as const) {

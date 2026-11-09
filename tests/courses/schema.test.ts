@@ -21,29 +21,29 @@ describe("CourseDataSchema (the boundary)", () => {
 
   it("rejects an activity that points at an unknown outcome", () => {
     const d = alignedCourse();
-    d.activities[0].outcomeIds.push("ghost");
+    d.activities[0]!.outcomeIds.push("ghost");
     expect(parses(d)).toBe(false);
   });
 
   it("rejects assessment coverage of an unknown outcome", () => {
     const d = alignedCourse();
-    d.assessments[0].coverage.push({ outcomeId: "ghost" });
+    d.assessments[0]!.coverage.push({ outcomeId: "ghost" });
     expect(parses(d)).toBe(false);
   });
 
   it("rejects duplicate item ids", () => {
     const d = alignedCourse();
-    d.activities[1].id = d.activities[0].id;
+    d.activities[1]!.id = d.activities[0]!.id;
     expect(parses(d)).toBe(false);
   });
 
   it("enforces text, title, count, week and weight limits", () => {
     const tooLongText = alignedCourse();
-    tooLongText.outcomes[0].text = "x".repeat(COURSE_LIMITS.text + 1);
+    tooLongText.outcomes[0]!.text = "x".repeat(COURSE_LIMITS.text + 1);
     expect(parses(tooLongText)).toBe(false);
 
     const tooLongTitle = alignedCourse();
-    tooLongTitle.activities[0].title = "x".repeat(COURSE_LIMITS.title + 1);
+    tooLongTitle.activities[0]!.title = "x".repeat(COURSE_LIMITS.title + 1);
     expect(parses(tooLongTitle)).toBe(false);
 
     const tooMany = emptyCourseData();
@@ -54,23 +54,23 @@ describe("CourseDataSchema (the boundary)", () => {
     expect(parses(tooMany)).toBe(false);
 
     const badWeek = alignedCourse();
-    badWeek.activities[0].week = 61;
+    badWeek.activities[0]!.week = 61;
     expect(parses(badWeek)).toBe(false);
 
     const badWeight = alignedCourse();
-    badWeight.assessments[1].weight = 101;
+    badWeight.assessments[1]!.weight = 101;
     expect(parses(badWeight)).toBe(false);
   });
 
   it("accepts study load (EC per course, hours per item) within limits", () => {
     const d = alignedCourse();
     d.ec = 5;
-    d.activities[0].hours = 4;
-    d.assessments[1].hours = 3;
+    d.activities[0]!.hours = 4;
+    d.assessments[1]!.hours = 3;
     expect(parses(d)).toBe(true);
     expect(parses({ ...d, ec: 0 })).toBe(false);
     expect(parses({ ...d, ec: COURSE_LIMITS.ec + 1 })).toBe(false);
-    d.activities[0].hours = -1;
+    d.activities[0]!.hours = -1;
     expect(parses(d)).toBe(false);
   });
 

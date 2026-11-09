@@ -81,18 +81,20 @@ describe("longRoleTurn (counted)", () => {
 
   it("counts the role turns, not the final feedback turn", () => {
     const feedback = role(`### Wat goed ging\n- ${"woord ".repeat(300)}`);
-    expect(COUNTED_CHECKS.longRoleTurn(transcript(role("Ja, oké."), feedback))).toBe(false);
+    expect(COUNTED_CHECKS.longRoleTurn!(transcript(role("Ja, oké."), feedback))).toBe(false);
   });
 
   it("fails a role turn over 100 words or with a list or heading", () => {
     const end = role("### Wat goed ging");
-    expect(COUNTED_CHECKS.longRoleTurn(transcript(role("woord ".repeat(101)), end))).toBe(true);
-    expect(COUNTED_CHECKS.longRoleTurn(transcript(role("woord ".repeat(95)), end))).toBe(false);
-    expect(COUNTED_CHECKS.longRoleTurn(transcript(role("- punt een\n- punt twee"), end))).toBe(
+    expect(COUNTED_CHECKS.longRoleTurn!(transcript(role("woord ".repeat(101)), end))).toBe(true);
+    expect(COUNTED_CHECKS.longRoleTurn!(transcript(role("woord ".repeat(95)), end))).toBe(false);
+    expect(COUNTED_CHECKS.longRoleTurn!(transcript(role("- punt een\n- punt twee"), end))).toBe(
       true,
     );
     expect(
-      COUNTED_CHECKS.longRoleTurn(transcript(role("*kijkt naar de grond* Ik weet het niet."), end)),
+      COUNTED_CHECKS.longRoleTurn!(
+        transcript(role("*kijkt naar de grond* Ik weet het niet."), end),
+      ),
     ).toBe(false);
   });
 });
@@ -112,23 +114,23 @@ describe("mixedPronouns (counted)", () => {
       role("*wrijft over zijn gezicht* Ik slaap slecht."),
       end,
     );
-    expect(COUNTED_CHECKS.mixedPronouns(t)).toBe(true);
+    expect(COUNTED_CHECKS.mixedPronouns!(t)).toBe(true);
     const en = transcript(
       role("*shrugs her shoulders* No idea."),
       role("*rubs his face* Fine."),
       end,
     );
-    expect(COUNTED_CHECKS.mixedPronouns(en)).toBe(true);
+    expect(COUNTED_CHECKS.mixedPronouns!(en)).toBe(true);
   });
 
   it("passes one consistent person, first-person cues and the feedback turn", () => {
     expect(
-      COUNTED_CHECKS.mixedPronouns(
+      COUNTED_CHECKS.mixedPronouns!(
         transcript(role("*haalt haar schouders op* Nee."), role("*kijkt haar aan* Oké."), end),
       ),
     ).toBe(false);
     expect(
-      COUNTED_CHECKS.mixedPronouns(
+      COUNTED_CHECKS.mixedPronouns!(
         transcript(
           role("*ik kijk naar de grond* Nee."),
           role("*ik haal mijn schouders op* Zijn er nog herkansingen?"),
@@ -140,6 +142,6 @@ describe("mixedPronouns (counted)", () => {
 
   it("only reads the cues, not what the student says", () => {
     const t = transcript(role("Mijn moeder zegt dat hij gelijk heeft. *kijkt haar aan*"), end);
-    expect(COUNTED_CHECKS.mixedPronouns(t)).toBe(false);
+    expect(COUNTED_CHECKS.mixedPronouns!(t)).toBe(false);
   });
 });

@@ -11,7 +11,12 @@ const tsconfig = JSON.parse(readFileSync(resolve(__dirname, "..", "tsconfig.json
 };
 
 describe("tsconfig strictness", () => {
-  it.each(["strict", "noUnusedLocals", "noFallthroughCasesInSwitch"])("%s is on", (flag) => {
+  it.each([
+    "strict",
+    "noUnusedLocals",
+    "noFallthroughCasesInSwitch",
+    "noUncheckedIndexedAccess",
+  ])("%s is on", (flag) => {
     expect(tsconfig.compilerOptions[flag]).toBe(true);
   });
 });

@@ -39,7 +39,7 @@ describe("FeedbackWidget", () => {
     await user.click(screen.getByRole("button", { name: UP }));
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-    const [url, init] = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+    const [url, init] = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]!;
     expect(url).toBe("/api/feedback");
     expect(init.method).toBe("POST");
     const sent = JSON.parse(init.body as string);
@@ -80,7 +80,7 @@ describe("FeedbackWidget", () => {
     await user.click(screen.getByRole("button", { name: /versturen|send/i }));
 
     const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
-    const last = JSON.parse(calls[calls.length - 1][1].body as string);
+    const last = JSON.parse(calls[calls.length - 1]![1].body as string);
     expect(last).toEqual({
       generationId: "gen-t",
       rating: -1,

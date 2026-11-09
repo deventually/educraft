@@ -19,8 +19,8 @@ beforeAll(async () => {
 
 const full = (d: RubricData, a: number, b: number) =>
   toScore(d, {
-    [d.criteria[0].id]: d.criteria[0].levels[a].id,
-    [d.criteria[1].id]: d.criteria[1].levels[b].id,
+    [d.criteria[0]!.id]: d.criteria[0]!.levels[a]!.id,
+    [d.criteria[1]!.id]: d.criteria[1]!.levels[b]!.id,
   })!;
 
 describe("rubric scores repository", () => {
@@ -58,7 +58,7 @@ describe("rubric scores repository", () => {
       [{ ...ok[0], code: 3 }, ok[1]],
       [{ ...ok[0], comment: "x" }, ok[1]],
       [ok[0]],
-      [ok[0], { criterionId: ok[1].criterionId, levelId: ok[0].levelId }],
+      [ok[0], { criterionId: ok[1]!.criterionId, levelId: ok[0]!.levelId }],
       [ok[0], ok[0]],
     ];
     for (const score of bad) {

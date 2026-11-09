@@ -112,12 +112,12 @@ describe("reset route action", () => {
       passwordHash: await password.hashPassword("old-password-x"),
       role: "teacher",
     });
-    const cookieOf = async (res: Response) => (res.headers.get("Set-Cookie") ?? "").split(";")[0];
+    const cookieOf = async (res: Response) => (res.headers.get("Set-Cookie") ?? "").split(";")[0]!;
     const asRequest = (cookie: string) =>
       new Request("http://localhost/", { headers: { Cookie: cookie } });
 
     const older = await cookieOf(await auth.createUserSession(u.id, "/"));
-    expect((await auth.getUser(asRequest(older)))?.id).toBe(u.id);
+    expect((await auth.getUser(asRequest(older!)))?.id).toBe(u.id);
 
     const reset = await users.createPasswordReset(u.id);
     const res = (await invoke(
@@ -126,8 +126,8 @@ describe("reset route action", () => {
     )) as Response;
     const fresh = await cookieOf(res);
 
-    expect(await auth.getUser(asRequest(older))).toBeNull();
-    expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
+    expect(await auth.getUser(asRequest(older!))).toBeNull();
+    expect((await auth.getUser(asRequest(fresh!)))?.id).toBe(u.id);
   });
 });
 
@@ -189,7 +189,7 @@ describe("reset link of a deactivated account (P18.7)", () => {
       post({ password: "brand-new-secret", confirm: "brand-new-secret" }),
     );
     expect(ok instanceof Response).toBe(true);
-    const cookie = ((ok as Response).headers.get("Set-Cookie") ?? "").split(";")[0];
+    const cookie = ((ok as Response).headers.get("Set-Cookie") ?? "").split(";")[0]!;
     expect(
       (await auth.getUser(new Request("http://localhost/", { headers: { Cookie: cookie } })))?.id,
     ).toBe(u.id);

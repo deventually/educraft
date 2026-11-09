@@ -97,7 +97,7 @@ export async function snapshotCourses(
   const names = await Promise.all(
     ids.map(async (id) => (await getCourse(userId, id))?.name ?? null),
   );
-  return Object.fromEntries(ids.map((id, i) => [id, names[i]]));
+  return Object.fromEntries(ids.map((id, i) => [id, names[i] ?? null]));
 }
 
 /**

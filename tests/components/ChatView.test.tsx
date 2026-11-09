@@ -556,7 +556,7 @@ describe("ChatView", () => {
     act(() => finish());
     await user.click(await within(log).findByRole("button", { name: "Read aloud" }));
     expect(speech.spoken.map((u) => u.text)).toEqual(["Hi there"]);
-    expect(speech.spoken[0].lang).toBe("en-GB");
+    expect(speech.spoken[0]!.lang).toBe("en-GB");
     expect((await axe(container)).violations).toEqual([]);
     speech.restore();
   });
@@ -675,7 +675,7 @@ describe("ChatView", () => {
 
     // It re-sends, with the prior user message as the last entry in the payload.
     await waitFor(() => expect(mockStreamPost).toHaveBeenCalledTimes(2));
-    const resentBody = mockStreamPost.mock.calls[1][1] as {
+    const resentBody = mockStreamPost.mock.calls[1]![1] as {
       messages: { role: string; content: string }[];
     };
     expect(resentBody.messages.at(-1)).toEqual({ role: "user", content: "What is OOP?" });

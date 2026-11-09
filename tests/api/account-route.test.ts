@@ -134,14 +134,14 @@ describe("account password change (P17)", () => {
       passwordHash: await pw.hashPassword("old-password-x"),
       role: "teacher",
     });
-    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0];
+    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0]!;
     const asRequest = (cookie: string) =>
       new Request("http://localhost/", { headers: { Cookie: cookie } });
 
     const otherDevice = cookieOf(
       (await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"),
     );
-    expect((await auth.getUser(asRequest(otherDevice)))?.id).toBe(u.id);
+    expect((await auth.getUser(asRequest(otherDevice!)))?.id).toBe(u.id);
 
     actAs(u.id, "teacher");
     const res = (await route.action({
@@ -161,11 +161,11 @@ describe("account password change (P17)", () => {
     };
 
     expect(res.data.ok).toBe("password");
-    expect(await auth.getUser(asRequest(otherDevice))).toBeNull();
+    expect(await auth.getUser(asRequest(otherDevice!))).toBeNull();
     const headers = new Headers(res.init?.headers);
     const fresh = cookieOf(headers.get("Set-Cookie"));
     expect(fresh).toContain("__session=");
-    expect((await auth.getUser(asRequest(fresh)))?.id).toBe(u.id);
+    expect((await auth.getUser(asRequest(fresh!)))?.id).toBe(u.id);
   });
 });
 
@@ -178,7 +178,7 @@ describe("log out everywhere (P1-4)", () => {
       passwordHash: "scrypt:x:y",
       role: "teacher",
     });
-    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0];
+    const cookieOf = (setCookie: string | null) => (setCookie ?? "").split(";")[0]!;
     const asRequest = (cookie: string) =>
       new Request("http://localhost/", { headers: { Cookie: cookie } });
     const laptop = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
@@ -199,10 +199,10 @@ describe("log out everywhere (P1-4)", () => {
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("/login");
     expect(await flashKeyOf(res)).toBe("signedOutEverywhere");
-    expect(await auth.getUser(asRequest(laptop))).toBeNull();
-    expect(await auth.getUser(asRequest(phone))).toBeNull();
+    expect(await auth.getUser(asRequest(laptop!))).toBeNull();
+    expect(await auth.getUser(asRequest(phone!))).toBeNull();
     // Logging in again afterwards works as usual.
     const again = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
-    expect((await auth.getUser(asRequest(again)))?.id).toBe(u.id);
+    expect((await auth.getUser(asRequest(again!)))?.id).toBe(u.id);
   });
 });

@@ -30,7 +30,11 @@ function move<T>(list: readonly T[], index: number, delta: -1 | 1): T[] | null {
   const to = index + delta;
   if (index < 0 || to < 0 || to >= list.length) return null;
   const next = [...list];
-  [next[index], next[to]] = [next[to], next[index]];
+  const a = next[index];
+  const b = next[to];
+  if (a === undefined || b === undefined) return null;
+  next[index] = b;
+  next[to] = a;
   return next;
 }
 

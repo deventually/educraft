@@ -111,8 +111,8 @@ export function clientKeys(
   email: string,
   request: Request,
   headerName: string | undefined,
-): string[] {
-  const keys = [`email:${email.trim().toLowerCase()}`];
+): [string, ...string[]] {
+  const keys: [string, ...string[]] = [`email:${email.trim().toLowerCase()}`];
   if (headerName) {
     const ip = request.headers.get(headerName)?.split(",")[0]?.trim();
     if (ip) keys.push(`ip:${ip}`);

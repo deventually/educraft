@@ -45,7 +45,7 @@ const get = () => new Request("http://localhost/x", { headers: { Cookie: "lang=n
 async function dossier(userId = "teacher-a") {
   const d = sampleDossier();
   d.framework.confirmedAt = 1;
-  d.framework.outcomes[0].criteria[0].text = "Je maakt een lesontwerp met een heldere opbouw.";
+  d.framework.outcomes[0]!.criteria[0]!.text = "Je maakt een lesontwerp met een heldere opbouw.";
   d.evidence = [];
   return repo.createDossier(userId, "Mijn BDB", d);
 }

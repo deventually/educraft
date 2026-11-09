@@ -18,7 +18,7 @@ describe("tool: forum-autograder", () => {
     };
 
     const prompt = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: inputs,
       outputLanguage: "nl",
     });

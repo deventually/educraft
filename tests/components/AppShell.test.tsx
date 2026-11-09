@@ -216,11 +216,11 @@ describe("AppShell menu of four (P27.3)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
     const [menu, account] = within(mobile).getAllByRole("list");
-    const links = within(menu).getAllByRole("link");
+    const links = within(menu!).getAllByRole("link");
     expect(links.map((l) => l.textContent)).toEqual(ITEMS);
     expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
     expect(
-      within(account)
+      within(account!)
         .getAllByRole("link")
         .map((l) => l.getAttribute("href")),
     ).toEqual(["/account", "/context-profiles"]);
@@ -403,7 +403,7 @@ describe("AppShell navigation a11y", () => {
 
     // RR meta sets document.title post-navigation; simulate that here.
     document.title = "Onderwijscontext — LimeOnIt";
-    await user.click(screen.getAllByRole("link", { name: "Onderwijscontext" })[0]);
+    await user.click(screen.getAllByRole("link", { name: "Onderwijscontext" })[0]!);
     await screen.findByText("Teaching context page");
 
     const main = document.querySelector("main#top");

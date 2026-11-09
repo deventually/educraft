@@ -70,7 +70,7 @@ describe("StageStepper (multi-stage)", () => {
     const user = userEvent.setup();
     renderStepper();
     // Run the entry stage without filling anything.
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
     expect(screen.getByText(m.tool.required, { exact: false })).toBeInTheDocument();
     expect(spy).not.toHaveBeenCalled();
   });
@@ -86,14 +86,14 @@ describe("StageStepper (multi-stage)", () => {
     await fillRequired(user);
 
     // Stage 1 posts with no prior outputs.
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
-    expect(spy.mock.calls[0][1].stageId).toBe("analyst");
-    expect(spy.mock.calls[0][1].priorOutputs).toEqual({});
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
+    expect(spy.mock.calls[0]![1].stageId).toBe("analyst");
+    expect(spy.mock.calls[0]![1].priorOutputs).toEqual({});
 
     // Stage 1 now shows a re-run control; the generator has unlocked.
     const nowRunnable = screen.getAllByRole("button", { name: m.tool.runStage });
     expect(nowRunnable[0]).toBeEnabled(); // generator
-    await user.click(nowRunnable[0]);
+    await user.click(nowRunnable[0]!);
 
     const genCall = spy.mock.calls.find((c) => c[1].stageId === "generator");
     expect(genCall).toBeTruthy();
@@ -110,7 +110,7 @@ describe("StageStepper (multi-stage)", () => {
     const { container } = renderStepper();
     expect(screen.queryByRole("button", { name: m.tool.formHide })).toBeNull();
     await fillRequired(user);
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
 
     await user.click(screen.getByRole("button", { name: m.tool.formHide }));
     const show = screen.getByRole("button", { name: m.tool.formShow });
@@ -148,8 +148,8 @@ describe("StageStepper (multi-stage)", () => {
     ]);
     render(<Stub initialEntries={["/"]} />);
     await fillRequired(user);
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
     expect(screen.getByTestId("export")).toHaveTextContent("g-generator,g-analyst");
   });
 
@@ -162,7 +162,7 @@ describe("StageStepper (multi-stage)", () => {
     const user = userEvent.setup();
     renderStepper();
     await fillRequired(user);
-    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
 
     // Streaming → a Stop control is offered for that stage.
     const stop = screen.getByRole("button", { name: m.tool.stop });

@@ -33,7 +33,8 @@ export function createRateLimiter(opts: RateLimiterOptions): RateLimiter {
 
   const prune = (entry: Entry, now: number) => {
     const cutoff = now - opts.windowMs;
-    if (entry.hits.length && entry.hits[0] <= cutoff) {
+    const oldest = entry.hits[0];
+    if (oldest !== undefined && oldest <= cutoff) {
       entry.hits = entry.hits.filter((t) => t > cutoff);
     }
   };
@@ -54,7 +55,7 @@ export function createRateLimiter(opts: RateLimiterOptions): RateLimiter {
 
       if (entry.hits.length >= opts.max) {
         // Retry once the oldest hit ages out of the window.
-        const retryAfterMs = Math.max(1, entry.hits[0] + opts.windowMs - now);
+        const retryAfterMs = Math.max(1, (entry.hits[0] ?? now) + opts.windowMs - now);
         return { ok: false, retryAfterMs };
       }
       if (entry.concurrent >= opts.maxConcurrent) {

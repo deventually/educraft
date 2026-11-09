@@ -15,7 +15,7 @@ function seed(code: string): Outcome {
 
 function first(code: string) {
   const o = seed(code);
-  return criterionHints(o, o.criteria[0], ALL);
+  return criterionHints(o, o.criteria[0]!, ALL);
 }
 
 describe("tool hints", () => {
@@ -44,7 +44,7 @@ describe("tool hints", () => {
     const hint = (code: string) => {
       const o = en.find((x) => x.code === code);
       if (!o) throw new Error(code);
-      return criterionHints(o, o.criteria[0], ALL);
+      return criterionHints(o, o.criteria[0]!, ALL);
     };
     expect(hint("BDB-1")).toContain("guided-reflection");
     expect(hint("BDB-2")).toContain("arcs-reactor");
@@ -55,10 +55,10 @@ describe("tool hints", () => {
   it("suggests at most two tools, and only tools the instance offers", () => {
     expect(first("BDB-1").length).toBeLessThanOrEqual(2);
     const o = seed("BDB-4");
-    expect(criterionHints(o, o.criteria[0], new Set(["stage-assessment"]))).toEqual([
+    expect(criterionHints(o, o.criteria[0]!, new Set(["stage-assessment"]))).toEqual([
       "stage-assessment",
     ]);
-    expect(criterionHints(o, o.criteria[0], new Set())).toEqual([]);
+    expect(criterionHints(o, o.criteria[0]!, new Set())).toEqual([]);
   });
 
   it("matches on the teacher's own criterion text before the outcome title", () => {
@@ -69,7 +69,7 @@ describe("tool hints", () => {
       criteria: [{ id: "c", text: "Je motiveert studenten tijdens de les." }],
       requiredEvidence: [],
     };
-    expect(criterionHints(o, o.criteria[0], ALL)[0]).toBe("arcs-reactor");
+    expect(criterionHints(o, o.criteria[0]!, ALL)[0]).toBe("arcs-reactor");
   });
 
   it("suggests thinking partners for the chapter when it asks for theory or literature", () => {
@@ -85,7 +85,7 @@ describe("tool hints", () => {
       criteria: [{ id: "c", text: "Je bent op tijd aanwezig." }],
       requiredEvidence: [],
     };
-    expect(criterionHints(o, o.criteria[0], ALL)).toEqual([]);
+    expect(criterionHints(o, o.criteria[0]!, ALL)).toEqual([]);
     expect(chapterHints(o, ALL)).toEqual([]);
   });
 });

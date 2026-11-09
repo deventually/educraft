@@ -287,7 +287,7 @@ describe("the person page and the list know teams (P28.2)", () => {
       request: post({ intent: "mint", teamId: team.id, note: "Team Invite" }),
     })) as { link: string };
     const token = minted.link.split("/invite/")[1];
-    expect((await users.getInvite(token))?.teamId).toBe(team.id);
+    expect((await users.getInvite(token!))?.teamId).toBe(team.id);
     const data = await call(list.loader, { request: get(`/admin/users?team=${team.id}`) });
     expect(data.people.map((p) => p.name).sort()).toEqual(["In Team", "Team Invite"]);
     expect(data.teams.map((t) => t.id)).toContain(team.id);
@@ -402,7 +402,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     as(lead);
     const res = (await act(team.id, { intent: "invite", note: "Collega" })) as { link: string };
     const token = res.link.split("/invite/")[1];
-    expect(await users.getInvite(token)).toMatchObject({ role: "teacher", teamId: team.id });
+    expect(await users.getInvite(token!)).toMatchObject({ role: "teacher", teamId: team.id });
   });
 
   it("steps down and goes back to the account page", async () => {

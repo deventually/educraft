@@ -229,7 +229,7 @@ describe("/courses/:id", () => {
       ok: true,
     });
     let data = (await repo.getCourse("teacher-a", c.id))!.data;
-    const lo = data.outcomes[0].id;
+    const lo = data.outcomes[0]!.id;
     await act(c.id, {
       intent: "update-outcome",
       id: lo,
@@ -244,7 +244,7 @@ describe("/courses/:id", () => {
       outcomeIds: lo,
     });
     data = (await repo.getCourse("teacher-a", c.id))!.data;
-    const act1 = data.activities[0].id;
+    const act1 = data.activities[0]!.id;
     await act(c.id, {
       intent: "update-activity",
       id: act1,
@@ -261,7 +261,7 @@ describe("/courses/:id", () => {
       [`bloom:${lo}`]: "analyze",
     });
     data = (await repo.getCourse("teacher-a", c.id))!.data;
-    const test = data.assessments[0].id;
+    const test = data.assessments[0]!.id;
     await act(c.id, {
       intent: "update-assessment",
       id: test,
@@ -333,9 +333,9 @@ describe("/courses/:id", () => {
         points: "4",
       }),
     ).toEqual({ ok: true });
-    let items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items!;
+    let items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1]!.items!;
     expect(items).toMatchObject([{ label: "1", outcomeId: LO1, points: 4 }]);
-    const id = items[0].id;
+    const id = items[0]!.id;
     expect(
       await act(c.id, {
         intent: "update-item",
@@ -346,7 +346,7 @@ describe("/courses/:id", () => {
         points: "",
       }),
     ).toEqual({ ok: true });
-    items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items!;
+    items = (await repo.getCourse("teacher-a", c.id))!.data.assessments[1]!.items!;
     expect(items).toEqual([{ id, label: "1a", outcomeId: LO2 }]);
 
     expect(
@@ -362,12 +362,12 @@ describe("/courses/:id", () => {
         points: "-3",
       }),
     ).toMatchObject({ ok: false });
-    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items).toEqual(items);
+    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1]!.items).toEqual(items);
 
     expect(await act(c.id, { intent: "remove-item", assessmentId: TEST1, id })).toEqual({
       ok: true,
     });
-    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1].items).toEqual([]);
+    expect((await repo.getCourse("teacher-a", c.id))!.data.assessments[1]!.items).toEqual([]);
   });
 
   describe("import-blueprint (P26.2)", () => {
@@ -508,7 +508,7 @@ describe("/courses/:id", () => {
       const { sampleDossier, C1, C2 } = await import("../portfolio/fixtures");
       await exceptions.setException("teacher-a", exceptions.featureKey("portfolio"), "on");
       const data = alignedCourse();
-      data.assessments[1].items = [
+      data.assessments[1]!.items = [
         { id: "q-1", label: "1", outcomeId: LO1, bloom: "create", points: 6 },
         { id: "q-2", label: "2", outcomeId: LO2, bloom: "analyze", points: 4 },
       ];
@@ -525,7 +525,7 @@ describe("/courses/:id", () => {
       } as never);
       const mine = data.dossiers.find((x) => x.id === d.id);
       expect(mine).toMatchObject({ name: "Mijn BKE" });
-      expect(mine?.outcomes[0].criteria.map((x) => x.id)).toContain(C1);
+      expect(mine?.outcomes[0]?.criteria.map((x) => x.id)).toContain(C1);
     });
 
     it("adds a snapshot of one test's blueprint as test material, linked to the criteria", async () => {
@@ -632,7 +632,7 @@ describe("pack tags on learning outcomes (P21.6)", () => {
         "tag:activiteiten": ["Ontwerpen", "Realiseren"],
       }),
     ).toEqual({ ok: true });
-    expect((await repo.getCourse("teacher-a", c.id))!.data.outcomes[0].packTags).toEqual({
+    expect((await repo.getCourse("teacher-a", c.id))!.data.outcomes[0]!.packTags).toEqual({
       beheersingsniveau: 2,
       activiteiten: ["Ontwerpen", "Realiseren"],
     });

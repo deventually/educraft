@@ -18,13 +18,13 @@ describe("DossierDataSchema", () => {
 
   it("accepts evidence from a course snapshot; old evidence without one stays valid (P26.4)", () => {
     const d = sampleDossier();
-    expect(d.evidence[0].sourceCourse).toBeUndefined();
-    d.evidence[0].sourceCourse = { courseId: "c1", part: "outcomes-and-matrix", at: 1 };
+    expect(d.evidence[0]!.sourceCourse).toBeUndefined();
+    d.evidence[0]!.sourceCourse = { courseId: "c1", part: "outcomes-and-matrix", at: 1 };
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
-    d.evidence[0].sourceCourse = { courseId: "c1", part: { assessmentId: "t1" }, at: 1 };
+    d.evidence[0]!.sourceCourse = { courseId: "c1", part: { assessmentId: "t1" }, at: 1 };
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
     // biome-ignore lint/suspicious/noExplicitAny: an invalid part on purpose
-    (d.evidence[0].sourceCourse as any).part = "everything";
+    (d.evidence[0]!.sourceCourse as any).part = "everything";
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 
@@ -33,7 +33,7 @@ describe("DossierDataSchema", () => {
     expect(d.readiness).toBeUndefined();
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
     d.readiness = { ticked: { "no-student-names": 1 } };
-    d.evidence[0].sourceCourse = {
+    d.evidence[0]!.sourceCourse = {
       courseId: "c1",
       part: { assessmentId: "t1" },
       at: 1,
@@ -46,7 +46,7 @@ describe("DossierDataSchema", () => {
 
   it("rejects an evidence link to an unknown criterion", () => {
     const d = sampleDossier();
-    d.evidence[0].criterionIds = ["00000000-0000-4000-8000-00000000dead"];
+    d.evidence[0]!.criterionIds = ["00000000-0000-4000-8000-00000000dead"];
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 
@@ -58,14 +58,14 @@ describe("DossierDataSchema", () => {
 
   it("rejects a chapter for an unknown outcome", () => {
     const d = sampleDossier();
-    d.chapters[0].outcomeId = "00000000-0000-4000-8000-00000000dead";
+    d.chapters[0]!.outcomeId = "00000000-0000-4000-8000-00000000dead";
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 
   it("rejects duplicate criterion ids across outcomes", () => {
     const d = sampleDossier();
     d.framework.outcomes.push({
-      ...d.framework.outcomes[0],
+      ...d.framework.outcomes[0]!,
       id: "00000000-0000-4000-8000-000000000002",
       criteria: [{ id: C1, text: "dubbel" }],
     });
@@ -74,18 +74,18 @@ describe("DossierDataSchema", () => {
 
   it("enforces text and count limits", () => {
     const long = sampleDossier();
-    long.framework.outcomes[0].criteria[0].text = "x".repeat(LIMITS.criterionText + 1);
+    long.framework.outcomes[0]!.criteria[0]!.text = "x".repeat(LIMITS.criterionText + 1);
     expect(DossierDataSchema.safeParse(long).success).toBe(false);
 
     const many = sampleDossier();
     many.evidence = Array.from({ length: LIMITS.evidence + 1 }, (_, i) => ({
-      ...many.evidence[0],
+      ...many.evidence[0]!,
       id: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
     }));
     expect(DossierDataSchema.safeParse(many).success).toBe(false);
 
     const doc = sampleDossier();
-    doc.chapters[0].text = "x".repeat(LIMITS.documentText + 1);
+    doc.chapters[0]!.text = "x".repeat(LIMITS.documentText + 1);
     expect(DossierDataSchema.safeParse(doc).success).toBe(false);
   });
 
@@ -98,8 +98,8 @@ describe("DossierDataSchema", () => {
   it("requires at least one track and keeps outcome ids unique", () => {
     expect(DossierDataSchema.safeParse({ ...sampleDossier(), tracks: [] }).success).toBe(false);
     const d = sampleDossier();
-    d.framework.outcomes.push({ ...d.framework.outcomes[0], criteria: [] });
-    expect(d.framework.outcomes[1].id).toBe(LU);
+    d.framework.outcomes.push({ ...d.framework.outcomes[0]!, criteria: [] });
+    expect(d.framework.outcomes[1]!.id).toBe(LU);
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 });

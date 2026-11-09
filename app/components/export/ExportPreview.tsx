@@ -8,7 +8,7 @@ const SIZE = ["text-2xl", "text-xl", "", "", "", ""] as const;
 
 function Heading({ level, children }: { level: number; children: ReactNode }) {
   const i = Math.min(Math.max(level, 1), 6) - 1;
-  const Tag = H[i];
+  const Tag = H[i] ?? "h6";
   return <Tag className={`font-semibold text-slate-900 ${SIZE[i]}`}>{children}</Tag>;
 }
 

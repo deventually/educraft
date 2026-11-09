@@ -27,7 +27,7 @@ describe("recordError: unexpected errors as one JSON line with the request id", 
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     recordError(new TypeError("x is undefined"), where);
     expect(spy).toHaveBeenCalledTimes(1);
-    const line = JSON.parse(spy.mock.calls[0][0] as string);
+    const line = JSON.parse(spy.mock.calls[0]![0] as string);
     expect(line).toMatchObject({
       event: "unexpected_error",
       requestId: "req-1",
@@ -43,7 +43,7 @@ describe("recordError: unexpected errors as one JSON line with the request id", 
   it("logs the path without the query string (it can carry search terms)", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     recordError(new Error("boom"), { ...where, path: "/admin/users?q=anna" });
-    expect(recentErrors()[0].path).toBe("/admin/users");
+    expect(recentErrors()[0]!.path).toBe("/admin/users");
   });
 
   it("keeps a thrown non-Error readable", () => {
@@ -57,8 +57,8 @@ describe("recordError: unexpected errors as one JSON line with the request id", 
     const err = new Error("a".repeat(5000));
     recordError(err, where);
     const [entry] = recentErrors();
-    expect(entry.message.length).toBeLessThanOrEqual(500);
-    expect(entry.stack.split("\n").length).toBeLessThanOrEqual(20);
+    expect(entry!.message.length).toBeLessThanOrEqual(500);
+    expect(entry!.stack.split("\n").length).toBeLessThanOrEqual(20);
   });
 
   it("keeps the newest errors first, and only the last few", () => {
@@ -68,7 +68,7 @@ describe("recordError: unexpected errors as one JSON line with the request id", 
     }
     const list = recentErrors();
     expect(list).toHaveLength(MAX_RECENT_ERRORS);
-    expect(list[0].requestId).toBe(`r${MAX_RECENT_ERRORS + 4}`);
+    expect(list[0]!.requestId).toBe(`r${MAX_RECENT_ERRORS + 4}`);
   });
 });
 
@@ -120,6 +120,6 @@ describe("handleServerError (React Router's handleError)", () => {
       params: {},
       context: new RouterContextProvider(),
     });
-    expect(recentErrors()[0].requestId).toBe("-");
+    expect(recentErrors()[0]!.requestId).toBe("-");
   });
 });

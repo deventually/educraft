@@ -57,7 +57,7 @@ function fileToBase64(fileOrBlob: File | Blob): Promise<string> {
     reader.onload = () => {
       const result = reader.result as string;
       // Remove "data:image/png;base64," prefix if present
-      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      const base64 = result.includes(",") ? (result.split(",")[1] ?? "") : result;
       resolve(base64);
     };
     reader.onerror = reject;

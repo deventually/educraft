@@ -102,9 +102,9 @@ describe("ReadAloudButton", () => {
     const user = userEvent.setup();
     render(<ReadAloudButton text={"Een.\nTwee."} lang="en" />);
     await user.click(screen.getByRole("button", { name: "Read aloud" }));
-    act(() => spoken[0].onend?.());
+    act(() => spoken[0]!.onend?.());
     expect(screen.getByRole("button", { name: "Stop reading" })).toBeInTheDocument();
-    act(() => spoken[1].onend?.());
+    act(() => spoken[1]!.onend?.());
     expect(screen.getByRole("button", { name: "Read aloud" })).toBeInTheDocument();
   });
 

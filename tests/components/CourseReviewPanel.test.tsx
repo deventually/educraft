@@ -25,7 +25,7 @@ const notYet: ReviewPanelAgent[] = [
 function reviewed(stale = false): ReviewPanelAgent[] {
   return [
     {
-      ...notYet[0],
+      ...notYet[0]!,
       review: {
         id: "rev-1",
         model: "Opus 5.5",
@@ -50,7 +50,7 @@ function reviewed(stale = false): ReviewPanelAgent[] {
         ],
       },
     },
-    { ...notYet[1], review: { id: "rev-2", model: "Opus 5.5", stale, findings: [] } },
+    { ...notYet[1]!, review: { id: "rev-2", model: "Opus 5.5", stale, findings: [] } },
   ];
 }
 
@@ -90,7 +90,7 @@ describe("CourseReviewPanel", () => {
   });
 
   it("names a single hat when only one is on", () => {
-    renderPanel([notYet[1]]);
+    renderPanel([notYet[1]!]);
     expect(screen.getByText(/kijken je cursus na: ontwerper\./i)).toBeVisible();
     expect(screen.queryByText(/toetsdeskundige/i)).toBeNull();
   });
@@ -160,7 +160,7 @@ describe("CourseReviewPanel", () => {
 
   it("offers Los op met… for an open finding about an item (P27.4)", async () => {
     const agents = reviewed();
-    const review = agents[0].review;
+    const review = agents[0]!.review;
     if (!review) throw new Error("fixture");
     review.findings.push({
       id: "f3",

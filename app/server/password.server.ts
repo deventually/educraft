@@ -42,7 +42,7 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split(":");
   if (parts.length !== 3 || parts[0] !== "scrypt") return false;
-  const [, saltHex, hashHex] = parts;
+  const [, saltHex = "", hashHex = ""] = parts;
   try {
     const salt = Buffer.from(saltHex, "hex");
     const expected = Buffer.from(hashHex, "hex");

@@ -287,7 +287,7 @@ export function parseRehearsalFeedback(
     const quote = trimTo(c.data.quote, REHEARSAL_LIMITS.quote);
     const verified = quote ? quoteInChapter(quote, said) : false;
     const out: RehearsalCriterionFeedback = {
-      criterionId: keys[c.data.key],
+      criterionId: keys[c.data.key] ?? "",
       heard: quote && !verified && c.data.heard === "convincing" ? "partial" : c.data.heard,
     };
     if (quote && verified) out.quote = quote;

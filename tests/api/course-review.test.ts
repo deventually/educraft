@@ -116,7 +116,7 @@ describe("review intent", () => {
     const c = await newCourse();
     generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
     await post(c.id, [["intent", "review"]]);
-    expect(generate.mock.calls[0][0].model).toBe("claude-sonnet-5-5");
+    expect(generate.mock.calls[0]![0].model).toBe("claude-sonnet-5-5");
   });
 
   it("keeps the other hat's advice when one hat answers junk, and names the failed hat", async () => {
@@ -182,7 +182,7 @@ describe("review intent", () => {
     generate.mockReset();
     generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
     await post(c.id, [["intent", "review"]]);
-    expect(generate.mock.calls[0][0].messages[0].content).toContain("Vage leeruitkomst.");
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Vage leeruitkomst.");
     // And the rejected finding does not come back, even though the hat repeated it.
     const latest = (await reviews.listReviewsForCourse("teacher-r", c.id)).find(
       (s) => s.agentId === "assessment-expert",
@@ -289,7 +289,7 @@ describe("course page loader (P21.5)", () => {
       reason: "Nee.",
     });
     const after = await load(c.id);
-    const shown = after.review?.agents[0].review as {
+    const shown = after.review?.agents[0]?.review as {
       id: string;
       stale: boolean;
       findings: { id: string; decision?: string; reason?: string | null }[];
@@ -299,7 +299,7 @@ describe("course page loader (P21.5)", () => {
     expect(shown.findings[0]).toMatchObject({ id: "f1", decision: "rejected", reason: "Nee." });
 
     await courses.updateCourse("teacher-r", c.id, { name: "Nieuwe naam" });
-    const stale = (await load(c.id)).review?.agents[0].review as { stale: boolean };
+    const stale = (await load(c.id)).review?.agents[0]?.review as { stale: boolean };
     expect(stale.stale).toBe(true);
   });
 
@@ -349,7 +349,7 @@ describe("linked work in the review (P21.7)", () => {
     expect(assessment).toContain('<work item="T2">');
     expect(assessment).not.toContain("authentieke opdracht");
     expect(design).not.toContain("normaalvormen");
-    expect(generate.mock.calls[0][0].system).toContain("<linkedWork>");
+    expect(generate.mock.calls[0]![0].system).toContain("<linkedWork>");
   });
 
   it("the loader counts the linked test questions, so the box only shows when useful", async () => {

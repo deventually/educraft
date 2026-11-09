@@ -209,7 +209,7 @@ describe("/portfolio/:id and its pages", () => {
   it("names the available tool that helps with the next criterion, on both pages", async () => {
     const d = sampleDossier();
     d.framework.confirmedAt = 1;
-    d.framework.outcomes[0].criteria[1].text = "Je motiveert studenten tijdens de les.";
+    d.framework.outcomes[0]!.criteria[1]!.text = "Je motiveert studenten tijdens de les.";
     const mine = await repo.createDossier("teacher-a", "A", d);
     const page = await overview.loader({ request: get("/x"), params: { id: mine.id } } as never);
     expect(page.next).toMatchObject({ step: "add-evidence", criterionId: C2 });
@@ -218,7 +218,7 @@ describe("/portfolio/:id and its pages", () => {
       request: get("/x"),
       params: { id: mine.id, outcomeId: LU },
     } as never);
-    expect(data.toolHints[C2][0].slug).toBe("arcs-reactor");
+    expect(data.toolHints[C2]![0]!.slug).toBe("arcs-reactor");
     // A criterion that already has evidence gets no suggestion.
     expect(Object.keys(data.toolHints)).toEqual([C2]);
   });
@@ -288,10 +288,10 @@ describe("/portfolio — a course snapshot as evidence (P26.4)", () => {
     const courses = await import("~/server/repositories/courses.server");
     const theirs = await courses.createCourse("teacher-b", { name: "Van B" });
     const d = sampleDossier();
-    d.evidence[0].sourceCourse = { courseId: theirs.id, part: "outcomes-and-matrix", at: 1 };
+    d.evidence[0]!.sourceCourse = { courseId: theirs.id, part: "outcomes-and-matrix", at: 1 };
     const mine = await repo.createDossier("teacher-a", "A", d);
-    expect(await refresh(mine.id, d.evidence[0].id)).toMatchObject({ ok: false });
-    expect((await repo.getDossier("teacher-a", mine.id))!.data.evidence[0].text).toBe(
+    expect(await refresh(mine.id, d.evidence[0]!.id)).toMatchObject({ ok: false });
+    expect((await repo.getDossier("teacher-a", mine.id))!.data.evidence[0]!.text).toBe(
       "Goede opbouw.",
     );
   });

@@ -58,7 +58,7 @@ export function recordError(error: unknown, where: ErrorWhere): ErrorEntry {
     requestId: where.requestId ?? "-",
     at: new Date().toISOString(),
     method: where.method,
-    path: where.path.split("?")[0],
+    path: where.path.split("?")[0] ?? "",
     ...summarize(error),
   };
   const { at, ...fields } = entry;

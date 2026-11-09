@@ -296,9 +296,11 @@ export function modelState(id: string): ModelState {
 export function currentModelId(id: string): string {
   let current = id;
   const seen = new Set<string>();
-  while (installed.lifecycle[current] && !seen.has(current)) {
+  let step = installed.lifecycle[current];
+  while (step && !seen.has(current)) {
     seen.add(current);
-    current = installed.lifecycle[current].successor;
+    current = step.successor;
+    step = installed.lifecycle[current];
   }
   return current;
 }

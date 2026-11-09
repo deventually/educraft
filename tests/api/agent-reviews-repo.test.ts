@@ -48,7 +48,7 @@ describe("agent reviews repository", () => {
     const saved = await review(A, c.id);
     expect(saved).not.toBeNull();
     expect(saved?.findings.map((f) => f.id)).toEqual(["f1", "f2"]);
-    expect(saved?.findings[0]).toMatchObject(FINDINGS[0]);
+    expect(saved?.findings[0]).toMatchObject(FINDINGS[0]!);
     expect(saved?.courseUpdatedAt.getTime()).toBe(c.updatedAt.getTime());
 
     const fetched = await repo.getReview(A, saved!.id);
@@ -66,7 +66,7 @@ describe("agent reviews repository", () => {
 
   it("refuses more findings than a hat may return", async () => {
     const c = await course(A);
-    const many = Array.from({ length: 16 }, () => FINDINGS[1]);
+    const many = Array.from({ length: 16 }, () => FINDINGS[1]!);
     await expect(review(A, c.id, many)).rejects.toThrow();
   });
 
@@ -88,7 +88,7 @@ describe("agent reviews repository", () => {
     expect(second).toMatchObject({ decision: "rejected", reason: "Bewuste keuze." });
     const decisions = await repo.listDecisions(A, r!.id);
     expect(decisions).toHaveLength(1);
-    expect(decisions[0].decision).toBe("rejected");
+    expect(decisions[0]!.decision).toBe("rejected");
   });
 
   it("refuses a decision on someone else's review or an unknown finding", async () => {
@@ -139,7 +139,7 @@ describe("agent reviews repository", () => {
     expect(two).toHaveLength(2);
     const all = await repo.listReviewsForCourse(A, c.id);
     expect(all).toHaveLength(4);
-    expect(all[0].createdAt.getTime()).toBeGreaterThanOrEqual(all[3].createdAt.getTime());
+    expect(all[0]!.createdAt.getTime()).toBeGreaterThanOrEqual(all[3]!.createdAt.getTime());
   });
 
   it("deleteCourse removes its reviews and decisions", async () => {

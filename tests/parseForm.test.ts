@@ -148,7 +148,7 @@ describe("parseContextForm", () => {
       ["Specialisatie", "Cybersecurity"],
       ["", "weeskind"], // no label → dropped
       ["Zonder waarde", ""], // no value → dropped
-    ]) {
+    ] as const) {
       f.append("customLabel", l);
       f.append("customValue", v);
     }

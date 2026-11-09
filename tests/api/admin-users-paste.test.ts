@@ -77,14 +77,16 @@ describe("/admin/users: paste a list (P28.5)", () => {
     expect(jan).toMatchObject({ line: 1, name: "Jan de Vries", email: "jan.paste@school.nl" });
     expect(anna).toMatchObject({ line: 2, name: "Anna Bos" });
     for (const row of [jan, anna]) {
-      expect("link" in row && row.link).toMatch(/^http:\/\/localhost\/invite\/[\w-]+$/);
-      const invite = await users.getInvite(tokenOf(row));
+      expect("link" in row! && row.link).toMatch(/^http:\/\/localhost\/invite\/[\w-]+$/);
+      const invite = await users.getInvite(tokenOf(row!)!);
       expect(invite?.role).toBe("teacher");
       expect(invite?.teamId).toBe(team.id);
       expect(invite?.createdByUserId).toBe(admin.id);
       expect(invite?.expiresAt?.getTime()).toBeGreaterThan(Date.now());
     }
-    expect((await users.getInvite(tokenOf(jan)))?.note).toBe("Jan de Vries <jan.paste@school.nl>");
+    expect((await users.getInvite(tokenOf(jan!)!))?.note).toBe(
+      "Jan de Vries <jan.paste@school.nl>",
+    );
   });
 
   it("refuses a line per person with a reason, and still invites the rest", async () => {
@@ -125,7 +127,7 @@ describe("/admin/users: paste a list (P28.5)", () => {
   it("never mints an admin, whatever the form says", async () => {
     const res = await paste("Stiekem, stiekem.paste@school.nl", { role: "admin" });
     const row = res.pasted?.[0] as Row;
-    expect((await users.getInvite(tokenOf(row)))?.role).toBe("teacher");
+    expect((await users.getInvite(tokenOf(row)!))?.role).toBe("teacher");
   });
 
   it("is for admins only", async () => {

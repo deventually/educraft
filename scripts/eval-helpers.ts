@@ -148,7 +148,7 @@ function salvageJudgeJson(raw: string): unknown {
     const m = new RegExp(`"${name}"\\s*:\\s*(\\{[^{}]*\\})`).exec(raw);
     if (!m) return undefined;
     try {
-      return JSON.parse(m[1]);
+      return JSON.parse(m[1] ?? "");
     } catch {
       return undefined;
     }
@@ -181,7 +181,7 @@ export function parseHardChecks(rubric: string): HardCheck[] {
     if (!inSection) continue;
     const m = /^-\s+\*\*([A-Za-z][\w-]*)\*\*\s*\(cap\s*([1-5])(,\s*counted)?\)\s*:\s*(.+)$/.exec(line.trim());
     if (m) {
-      const check: HardCheck = { id: m[1], cap: Number(m[2]), question: m[4].trim() };
+      const check: HardCheck = { id: m[1] ?? "", cap: Number(m[2]), question: (m[4] ?? "").trim() };
       if (m[3]) check.counted = true;
       checks.push(check);
     }

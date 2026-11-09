@@ -63,7 +63,7 @@ export function CoverageMatrix({ data, matrix }: { data: CourseData; matrix: Mat
                     {outcomeName(i)}
                   </th>
                   {row.cells.map((cell, j) => (
-                    <td key={matrix.columns[j].id} className="px-3 py-2 text-slate-700">
+                    <td key={matrix.columns[j]?.id ?? j} className="px-3 py-2 text-slate-700">
                       {cell.covered ? (
                         <>
                           <span aria-hidden>✓</span>

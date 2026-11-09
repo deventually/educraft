@@ -97,7 +97,7 @@ export function reinforceLanguage(
   if (messages.length === 0) return messages;
   const lastIndex = messages.length - 1;
   const last = messages[lastIndex];
-  if (last.role !== "user") return messages;
+  if (last?.role !== "user") return messages;
   return messages.map((msg, i) =>
     i === lastIndex
       ? {

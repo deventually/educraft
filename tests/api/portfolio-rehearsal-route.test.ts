@@ -110,7 +110,7 @@ describe("/portfolio/:id/rehearsal", () => {
     expect(ev.text).not.toContain("rubrics");
     expect(ev.text).toContain("Deels");
     expect(ev.text).toContain(
-      sampleDossier().framework.outcomes[0].criteria.find((c) => c.id === C1)!.text,
+      sampleDossier().framework.outcomes[0]!.criteria.find((c) => c.id === C1)!.text,
     );
   });
 

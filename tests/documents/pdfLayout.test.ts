@@ -24,27 +24,27 @@ describe("pageLayout", () => {
   it("places items as fractions of the page, from the top left", () => {
     expect(layout.aspect).toBe(0.5);
     const [first] = layout.items;
-    expect(first.left).toBeCloseTo(0.1);
-    expect(first.top).toBeCloseTo((200 - 180 - 10) / 200);
-    expect(first.width).toBeCloseTo(0.6);
+    expect(first!.left).toBeCloseTo(0.1);
+    expect(first!.top).toBeCloseTo((200 - 180 - 10) / 200);
+    expect(first!.width).toBeCloseTo(0.6);
     // Down past the baseline, so a "g" or "p" is covered too.
-    expect(first.height).toBeCloseTo(12.5 / 200);
+    expect(first!.height).toBeCloseTo(12.5 / 200);
   });
 
   it("respects a page box that does not start at the origin", () => {
-    const shifted = pageLayout([{ ...items[0], x: 60, y: 230 }], [50, 50, 150, 250]);
-    expect(shifted.items[0].left).toBeCloseTo(0.1);
-    expect(shifted.items[0].top).toBeCloseTo((250 - 230 - 10) / 200);
+    const shifted = pageLayout([{ ...items[0]!, x: 60, y: 230 }], [50, 50, 150, 250]);
+    expect(shifted.items[0]!.left).toBeCloseTo(0.1);
+    expect(shifted.items[0]!.top).toBeCloseTo((250 - 230 - 10) / 200);
   });
 
   it("skips an empty item but keeps its line break in the offsets", () => {
     const withBlank = pageLayout(
-      [{ ...items[0], hasEOL: false }, { ...items[0], str: "", hasEOL: true }, items[1]],
+      [{ ...items[0]!, hasEOL: false }, { ...items[0]!, str: "", hasEOL: true }, items[1]!],
       [0, 0, 100, 200],
     );
     expect(withBlank.text).toBe("Hallo wereld\nTweede regel");
     expect(withBlank.items).toHaveLength(2);
-    expect(withBlank.items[1].start).toBe(13);
+    expect(withBlank.items[1]!.start).toBe(13);
   });
 });
 
@@ -60,16 +60,16 @@ describe("highlightRects", () => {
   it("covers only the part of a line that is in the hit", () => {
     const rects = highlightRects(layout, 6, 12); // "wereld"
     expect(rects).toHaveLength(1);
-    expect(rects[0].left).toBeCloseTo(0.1 + 0.6 * (6 / 12));
-    expect(rects[0].width).toBeCloseTo(0.6 * (6 / 12));
+    expect(rects[0]!.left).toBeCloseTo(0.1 + 0.6 * (6 / 12));
+    expect(rects[0]!.width).toBeCloseTo(0.6 * (6 / 12));
   });
 
   it("gives one rectangle per line when a hit runs over a line break", () => {
     const rects = highlightRects(layout, 6, 19); // "wereld\nTweede"
     expect(rects).toHaveLength(2);
-    expect(rects[1].left).toBeCloseTo(0.1);
-    expect(rects[1].width).toBeCloseTo(0.5 * (6 / 12));
-    expect(rects[1].top).toBeGreaterThan(rects[0].top);
+    expect(rects[1]!.left).toBeCloseTo(0.1);
+    expect(rects[1]!.width).toBeCloseTo(0.5 * (6 / 12));
+    expect(rects[1]!.top).toBeGreaterThan(rects[0]!.top);
   });
 
   it("gives nothing for a range outside the text", () => {

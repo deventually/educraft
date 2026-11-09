@@ -16,7 +16,7 @@ function dossier(text = CHAPTER): DossierData {
   const d = sampleDossier();
   return {
     ...d,
-    chapters: [{ ...d.chapters[0], text }],
+    chapters: [{ ...d.chapters[0]!, text }],
     references: [{ id: "r1", apa: "Lemov, D. (2015). Teach like a champion 2.0. Jossey-Bass." }],
   };
 }
@@ -145,7 +145,7 @@ describe("parseProofread", () => {
     const r = parseProofread(answer(many), dossier(text), LU);
     if (!r.ok) throw new Error(r.error);
     expect(r.suggestions).toHaveLength(PROOFREAD_LIMITS.suggestions);
-    expect(r.suggestions[0].issue).toBe("style");
+    expect(r.suggestions[0]!.issue).toBe("style");
   });
 
   it("accepts an empty list (a clean chapter) and refuses an unparseable answer", () => {

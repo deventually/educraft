@@ -28,7 +28,7 @@ beforeAll(async () => {
 /** The `name=value` pair of the named cookie among a response's Set-Cookie headers. */
 function cookiePair(headers: Headers, name: string): string | null {
   const line = headers.getSetCookie().find((c) => c.startsWith(`${name}=`));
-  return line ? line.split(";")[0] : null;
+  return line ? line.split(";")[0]! : null;
 }
 
 const withCookie = (cookie?: string | null) =>
@@ -38,7 +38,7 @@ describe("flash cookie (P16)", () => {
   it("is read once: takeFlash returns it and a header that clears it", async () => {
     const setCookie = await flash.setFlash("rubricDeleted");
     const pair = setCookie.split(";")[0];
-    expect(pair.startsWith("__flash=")).toBe(true);
+    expect(pair!.startsWith("__flash=")).toBe(true);
     // HttpOnly and short-lived: it only has to survive one redirect.
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/Max-Age=60/i);

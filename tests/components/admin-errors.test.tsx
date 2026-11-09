@@ -45,10 +45,10 @@ describe("Recente fouten (owner only)", () => {
     await renderPage({ errors, max: 50, timeZone: "Europe/Amsterdam" });
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(2);
-    expect(within(rows[0]).getByText("5f0c2a9e-0000-4000-8000-000000000001")).toBeInTheDocument();
-    expect(within(rows[0]).getByText("POST /portfolio/7")).toBeInTheDocument();
-    expect(within(rows[0]).getByText(/reading .items./)).toBeInTheDocument();
-    expect(within(rows[1]).getByText("GET /courses/3")).toBeInTheDocument();
+    expect(within(rows[0]!).getByText("5f0c2a9e-0000-4000-8000-000000000001")).toBeInTheDocument();
+    expect(within(rows[0]!).getByText("POST /portfolio/7")).toBeInTheDocument();
+    expect(within(rows[0]!).getByText(/reading .items./)).toBeInTheDocument();
+    expect(within(rows[1]!).getByText("GET /courses/3")).toBeInTheDocument();
   });
 
   it("shows the time to the second in the school's time zone (UTC 10:15:00 = 11:15:00)", async () => {
@@ -60,7 +60,7 @@ describe("Recente fouten (owner only)", () => {
     await renderPage({ errors, max: 50, timeZone: "Europe/Amsterdam" });
     const [first] = screen.getAllByText("Technische details");
     expect(screen.queryByText(/at loader/)).not.toBeVisible();
-    await userEvent.click(first);
+    await userEvent.click(first!);
     expect(screen.getByText(/at loader/)).toBeVisible();
   });
 

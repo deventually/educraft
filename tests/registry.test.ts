@@ -55,7 +55,7 @@ describe("maxTokens validation", () => {
 
   it("rejects a non-positive stage maxTokens", () => {
     const tool = structuredClone(base);
-    tool.stages[0].maxTokens = -1;
+    tool.stages[0]!.maxTokens = -1;
     expect(validateTools([tool]).some((i) => /maxTokens/i.test(i.message))).toBe(true);
   });
 });
@@ -66,7 +66,7 @@ describe("stage dependency validation", () => {
 
   it("rejects an unknown derivation", () => {
     const tool = structuredClone(base);
-    const dep = tool.stages[1].consumes?.[0];
+    const dep = tool.stages[1]!.consumes?.[0];
     if (!dep) throw new Error("test-items consumes nothing");
     Object.assign(dep, { derive: "made-up" });
     expect(validateTools([tool]).some((i) => /derive/i.test(i.message))).toBe(true);

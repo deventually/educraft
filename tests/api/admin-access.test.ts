@@ -28,7 +28,7 @@ async function cookieFor(role: "teacher"): Promise<string> {
     role,
   });
   const res = await auth.createUserSession(u.id, "/");
-  return (res.headers.get("Set-Cookie") ?? "").split(";")[0];
+  return (res.headers.get("Set-Cookie") ?? "").split(";")[0]!;
 }
 
 function req(cookie?: string): Request {

@@ -65,7 +65,7 @@ describe("pilot check-in", () => {
     const rows = (await pilot.listCheckins()).filter((c) => c.userId === "ci-a");
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ userName: "User ci-a", helped: "Snel", missing: "Spraak" });
-    expect(rows[0].annoyed).toBeNull();
+    expect(rows[0]!.annoyed).toBeNull();
   });
 
   it("deleteCheckinsForUser removes everything of that user only", async () => {

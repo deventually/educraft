@@ -70,8 +70,8 @@ describe("config/models.json — what Bastiaan asked for (2026-11-06)", () => {
   });
 
   it("gives every model its settings (effort, temperature) where set", () => {
-    expect(MODELS["claude-sonnet-5-5"].settings).toMatchObject({ effort: "medium" });
+    expect(MODELS["claude-sonnet-5-5"]!.settings).toMatchObject({ effort: "medium" });
     // A reasoning model that refuses a temperature: null = never send one.
-    expect(MODELS["gpt-6.1-sol"].settings?.temperature).toBeNull();
+    expect(MODELS["gpt-6.1-sol"]!.settings?.temperature).toBeNull();
   });
 });

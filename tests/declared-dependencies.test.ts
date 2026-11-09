@@ -40,12 +40,12 @@ describe("declared dependencies", () => {
     const undeclared = new Set<string>();
     for (const file of sourceFiles(dir)) {
       for (const [, spec] of readFileSync(resolve(root, file), "utf8").matchAll(specifier)) {
-        if (spec.startsWith("node:") || spec.startsWith("virtual:") || spec.startsWith("+types"))
+        if (spec!.startsWith("node:") || spec!.startsWith("virtual:") || spec!.startsWith("+types"))
           continue;
         // Skip prose that happens to follow "from" (prompt text), keep real package names.
-        if (!/^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*(\/\S*)?$/.test(spec)) continue;
-        const name = packageName(spec);
-        if (!builtins.has(name) && !declared.has(name)) undeclared.add(`${name} (${file})`);
+        if (!/^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*(\/\S*)?$/.test(spec!)) continue;
+        const name = packageName(spec!);
+        if (!builtins.has(name!) && !declared.has(name!)) undeclared.add(`${name} (${file})`);
       }
     }
     expect([...undeclared]).toEqual([]);

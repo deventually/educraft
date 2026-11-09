@@ -54,7 +54,7 @@ describe("WordImport", () => {
     const outcome = sampleDossier().framework.outcomes[0];
     nodes.current = [
       el("p", "CONCEPT, NIET INLEVEREN"),
-      el("h1", `${outcome.code} ${outcome.title}`),
+      el("h1", `${outcome!.code} ${outcome!.title}`),
       el("p", "Nieuwe tekst uit Word."),
       el("h1", "Bronnenlijst"),
       el("p", "Biggs, J. (2011). Teaching."),
@@ -65,7 +65,7 @@ describe("WordImport", () => {
     pick();
 
     const take = await screen.findByRole("checkbox", {
-      name: new RegExp(`Overnemen.*${outcome.code}`),
+      name: new RegExp(`Overnemen.*${outcome!.code}`),
     });
     expect(take).not.toBeChecked();
     expect(screen.getByText(/Anders dan in LimeOnIt/)).toBeInTheDocument();
@@ -82,11 +82,11 @@ describe("WordImport", () => {
     fireEvent.click(take);
     fireEvent.click(submit);
     await waitFor(() => expect(posted).toHaveLength(1));
-    expect(posted[0].get("intent")).toBe("importChapters");
-    expect(JSON.parse(String(posted[0].get("chapters")))).toEqual([
+    expect(posted[0]!.get("intent")).toBe("importChapters");
+    expect(JSON.parse(String(posted[0]!.get("chapters")))).toEqual([
       { outcomeId: LU, text: "Nieuwe tekst uit Word." },
     ]);
-    expect(posted[0].getAll("reference")).toEqual([]);
+    expect(posted[0]!.getAll("reference")).toEqual([]);
   });
 
   it("says so when the file cannot be read, or holds no chapter", async () => {

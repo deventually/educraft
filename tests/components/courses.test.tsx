@@ -97,7 +97,7 @@ describe("Course editor (/courses/:id)", () => {
 
   it("renders a finding as text with the outcome and the item", async () => {
     const d = alignedCourse();
-    d.assessments[1].coverage[0].bloom = "understand";
+    d.assessments[1]!.coverage[0]!.bloom = "understand";
     const { container } = renderRoute(CoursePage, pageData(d));
     expect(
       screen.getByText("Eindopdracht toetst LU1 onder het niveau van de leeruitkomst.", {
@@ -231,7 +231,7 @@ describe("Course editor — question-level matrix (P26.1)", () => {
 
   it("names the question in a question-level finding", () => {
     const d = itemizedCourse();
-    d.assessments[1].items![1].bloom = "apply";
+    d.assessments[1]!.items![1]!.bloom = "apply";
     renderRoute(CoursePage, pageData(d));
     expect(
       screen.getByText(
@@ -397,7 +397,7 @@ describe("Course editor — pack tags on learning outcomes (P21.6)", () => {
   async function withPack() {
     const { getDomainPack } = await import("~/lib/context/packs");
     const data = alignedCourse();
-    data.outcomes[0].packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen"] };
+    data.outcomes[0]!.packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen"] };
     return { ...pageData(data), pack: getDomainPack("ICT") };
   }
 

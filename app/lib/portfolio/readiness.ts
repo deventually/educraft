@@ -99,7 +99,7 @@ const NOT_A_NAME = new Set(
 );
 
 function firstSurname(authors: string): string | null {
-  const first = authors.split(/\s*(?:&|\ben\b|\band\b|\be\.a\.|\bet al\.)/)[0].trim();
+  const first = authors.split(/\s*(?:&|\ben\b|\band\b|\be\.a\.|\bet al\.)/)[0]?.trim() ?? "";
   const words = first.split(/\s+/).filter((w) => SURNAME.test(w));
   const surname = words[words.length - 1];
   if (!surname || NOT_A_NAME.has(surname.toLowerCase())) return null;
@@ -119,12 +119,14 @@ export function citationsIn(text: string): Citation[] {
     found.push({ text: written, surname, year });
   };
   for (const m of text.matchAll(BRACKET)) {
-    for (const part of m[1].split(";")) {
+    for (const part of (m[1] ?? "").split(";")) {
       const p = BRACKET_PART.exec(part.trim());
-      if (p) add(p[1], p[2], `${p[1]}, ${p[2]}`);
+      if (p) add(p[1] ?? "", p[2] ?? "", `${p[1]}, ${p[2]}`);
     }
   }
-  for (const m of text.matchAll(NARRATIVE)) add(m[1], m[2], `${m[1]}, ${m[2]}`);
+  for (const [, authors = "", year = ""] of text.matchAll(NARRATIVE)) {
+    add(authors, year, `${authors}, ${year}`);
+  }
   return found;
 }
 
@@ -132,12 +134,9 @@ export function citationsIn(text: string): Citation[] {
 export function referenceKey(apa: string): { surname: string; year: string } | null {
   const year = /\(((?:19|20)\d{2})[a-z]?[),]/.exec(apa);
   if (!year) return null;
-  const authors = apa
-    .slice(0, year.index)
-    .split(",")[0]
-    .replace(/\.\s*$/, "");
+  const authors = (apa.slice(0, year.index).split(",")[0] ?? "").replace(/\.\s*$/, "");
   const surname = firstSurname(authors);
-  return surname ? { surname, year: year[1] } : null;
+  return surname ? { surname, year: year[1] ?? "" } : null;
 }
 
 const inReferences = (c: Citation, refs: string[]) =>

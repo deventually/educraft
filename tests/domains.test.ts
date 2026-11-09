@@ -67,8 +67,8 @@ describe("domainGroupsForSector — admin per-teacher grouping (P10.3)", () => {
   it("returns one track-less group for hbo (sector-level catalogue)", () => {
     const groups = domainGroupsForSector("NL", "hbo");
     expect(groups.length).toBe(1);
-    expect(groups[0].tracks).toEqual([]);
-    expect(groups[0].domains.map((d) => d.value)).toEqual([...HBO_DOMAINS]);
+    expect(groups[0]!.tracks).toEqual([]);
+    expect(groups[0]!.domains.map((d) => d.value)).toEqual([...HBO_DOMAINS]);
   });
 
   it("merges vo tracks that share an identical profiel set (havo+vwo, vmbo bb/kb/gl)", () => {

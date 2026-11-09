@@ -51,10 +51,10 @@ describe("local batch (names stay in the browser)", () => {
   it("is immutable", () => {
     const b = addStudent(newBatch(R), "A");
     const next = setLevel(b, 1, "crit", "level");
-    expect(b.students[0].levels).toEqual({});
-    expect(next.students[0].levels).toEqual({ crit: "level" });
+    expect(b.students[0]!.levels).toEqual({});
+    expect(next.students[0]!.levels).toEqual({ crit: "level" });
     const renamed = updateStudent(next, 1, { name: "Ab", comment: "netjes" });
-    expect(next.students[0].name).toBe("A");
+    expect(next.students[0]!.name).toBe("A");
     expect(renamed.students[0]).toMatchObject({ name: "Ab", comment: "netjes" });
   });
 
@@ -82,7 +82,7 @@ describe("local batch (names stay in the browser)", () => {
     saveBatch(addStudent(newBatch("keep"), "Kim"), storage);
     clearBatch(R, storage);
     expect(loadBatch(R, storage)).toBeNull();
-    expect(loadBatch("keep", storage)?.students[0].name).toBe("Kim");
+    expect(loadBatch("keep", storage)?.students[0]?.name).toBe("Kim");
     expect(JSON.stringify([...Array(storage.length)].map((_, i) => storage.key(i)))).not.toMatch(R);
   });
 

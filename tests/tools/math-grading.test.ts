@@ -59,7 +59,7 @@ describe("tool: math-grading", () => {
     };
 
     const prompt = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: inputs,
       outputLanguage: "nl",
     });
@@ -108,12 +108,12 @@ describe("tool: math-grading", () => {
 
     // Stage name and description must be bilingual
     const stage = tool.stages[0];
-    expect(typeof stage.name !== "string" && stage.name.nl).toBeDefined();
-    expect(typeof stage.name !== "string" && stage.name.en).toBeDefined();
+    expect(typeof stage!.name !== "string" && stage!.name.nl).toBeDefined();
+    expect(typeof stage!.name !== "string" && stage!.name.en).toBeDefined();
 
-    if (stage.description) {
-      expect(typeof stage.description !== "string" && stage.description.nl).toBeDefined();
-      expect(typeof stage.description !== "string" && stage.description.en).toBeDefined();
+    if (stage!.description) {
+      expect(typeof stage!.description !== "string" && stage!.description.nl).toBeDefined();
+      expect(typeof stage!.description !== "string" && stage!.description.en).toBeDefined();
     }
   });
 
@@ -136,13 +136,13 @@ describe("tool: math-grading", () => {
 
   it("has structured output format (sections or JSON)", () => {
     const tool = getToolBySlug("math-grading")!;
-    const output = tool.stages[0].output;
+    const output = tool.stages[0]!.output;
     expect(["markdown", "json", "structured-sections"]).toContain(output.kind);
   });
 
   it("provides proper NL/EN output hints", () => {
     const tool = getToolBySlug("math-grading")!;
-    const output = tool.stages[0].output;
+    const output = tool.stages[0]!.output;
     if (output.hint) {
       expect(typeof output.hint !== "string" && output.hint.nl).toBeDefined();
       expect(typeof output.hint !== "string" && output.hint.en).toBeDefined();

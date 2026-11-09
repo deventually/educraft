@@ -33,14 +33,14 @@ describe("dossierStep", () => {
 
   it("writes the chapters once every criterion has evidence", () => {
     const d = confirmed();
-    d.evidence[0].criterionIds = [C1, C2];
+    d.evidence[0]!.criterionIds = [C1, C2];
     d.chapters = [];
     expect(dossierStep(d)).toBe("write");
   });
 
   it("finishes once the chapters are written", () => {
     const d = confirmed();
-    d.evidence[0].criterionIds = [C1, C2];
+    d.evidence[0]!.criterionIds = [C1, C2];
     expect(dossierStep(d)).toBe("finish");
     d.status[C2] = "shown";
     expect(dossierStep(d)).toBe("finish");

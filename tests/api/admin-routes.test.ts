@@ -478,7 +478,7 @@ describe("admin.users action", () => {
     )) as { link?: string };
     expect(res.link).toMatch(/\/invite\//);
     const token = res.link!.split("/invite/")[1];
-    const invite = await users.getInvite(token);
+    const invite = await users.getInvite(token!);
     expect(invite?.role).toBe("teacher");
   });
 
@@ -575,7 +575,7 @@ describe("admin.users action", () => {
     )) as { resetLink?: string };
     expect(res.resetLink).toMatch(/\/reset\//);
     const token = res.resetLink!.split("/reset/")[1];
-    expect((await users.getPasswordReset(token))?.userId).toBe(teacher.id);
+    expect((await users.getPasswordReset(token!))?.userId).toBe(teacher.id);
   });
 
   it("sets a user's email (recovers an email-less account)", async () => {
@@ -665,13 +665,13 @@ describe("admin.users action — owner (P18.6)", () => {
       post({ intent: "resetPassword", userId: teacher.id }),
     )) as { resetLink?: string };
     const token = minted.resetLink!.split("/reset/")[1];
-    expect(await users.getPasswordReset(token)).not.toBeNull();
+    expect(await users.getPasswordReset(token!)).not.toBeNull();
 
     await actAsOwner();
     await invoke(personRoute.action, post({ intent: "role", userId: teacher.id, role: "admin" }));
     expect((await users.getUserById(teacher.id))?.role).toBe("admin");
-    expect(await users.getPasswordReset(token)).toBeNull();
-    expect(await users.consumePasswordReset(token)).toBeNull();
+    expect(await users.getPasswordReset(token!)).toBeNull();
+    expect(await users.consumePasswordReset(token!)).toBeNull();
   });
 
   it("the owner cannot change their own role (never an accidental self-demotion)", async () => {
@@ -840,7 +840,7 @@ describe("admin.users action — owner (P18.6)", () => {
     const res = (await invoke(usersRoute.action, post({ intent: "mint", role: "admin" }))) as {
       link?: string;
     };
-    const invite = await users.getInvite(res.link!.split("/invite/")[1]);
+    const invite = await users.getInvite(res.link!.split("/invite/")[1]!);
     expect(invite?.role).toBe("teacher");
   });
 
@@ -930,7 +930,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
 
     // The link is a 7-day single-use reset for exactly this account.
     const token = link.split("/reset/")[1];
-    const reset = await users.getPasswordReset(token);
+    const reset = await users.getPasswordReset(token!);
     expect(reset?.userId).toBe(row!.id);
     const days = (reset!.expiresAt.getTime() - Date.now()) / 86_400_000;
     expect(days).toBeGreaterThan(6.9);
@@ -1032,7 +1032,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     });
     const cookie = (
       (await auth.createUserSession(target.id, "/")).headers.get("Set-Cookie") ?? ""
-    ).split(";")[0];
+    ).split(";")[0]!;
     const asReq = () => new Request("http://localhost/", { headers: { Cookie: cookie } });
     expect((await auth.getUser(asReq()))?.id).toBe(target.id);
 
@@ -1071,7 +1071,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     });
     expect(res.passwordSet).toBe(true);
     // Whoever holds an older link can no longer overwrite the owner's password.
-    expect(await users.getPasswordReset(token)).toBeNull();
+    expect(await users.getPasswordReset(token!)).toBeNull();
     expect(await users.getPasswordReset(other.token)).toBeNull();
   });
 
@@ -1110,7 +1110,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const target = await mkUser("Toggle", "teacher", "toggle@example.com");
     const cookie = (
       (await auth.createUserSession(target.id, "/")).headers.get("Set-Cookie") ?? ""
-    ).split(";")[0];
+    ).split(";")[0]!;
     const asReq = () => new Request("http://localhost/", { headers: { Cookie: cookie } });
 
     const off = await run({ intent: "deactivate", userId: target.id });

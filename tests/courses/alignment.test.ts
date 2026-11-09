@@ -14,7 +14,7 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("outcome-not-taught: no activity names the outcome", () => {
     const d = alignedCourse();
-    d.activities[1].outcomeIds = [LO2];
+    d.activities[1]!.outcomeIds = [LO2];
     expect(checkAlignment(d)).toEqual([
       { code: "outcome-not-taught", severity: "warning", outcomeId: LO1 },
     ]);
@@ -22,7 +22,7 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("outcome-not-assessed: only a formative assessment covers the outcome", () => {
     const d = alignedCourse();
-    d.assessments[1].coverage = [{ outcomeId: LO1, bloom: "create" }];
+    d.assessments[1]!.coverage = [{ outcomeId: LO1, bloom: "create" }];
     expect(checkAlignment(d)).toEqual([
       { code: "outcome-not-assessed", severity: "warning", outcomeId: LO2 },
     ]);
@@ -30,7 +30,7 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("assessed-before-taught: a summative week before the earliest teaching week", () => {
     const d = alignedCourse();
-    d.activities[1].week = 6;
+    d.activities[1]!.week = 6;
     expect(checkAlignment(d)).toEqual([
       { code: "assessed-before-taught", severity: "warning", outcomeId: LO1, itemId: TEST1 },
     ]);
@@ -38,14 +38,14 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("assessed-before-taught needs both weeks", () => {
     const d = alignedCourse();
-    d.activities[1].week = undefined;
-    d.assessments[1].week = 1;
+    d.activities[1]!.week = undefined;
+    d.assessments[1]!.week = 1;
     expect(codes(d)).toEqual([]);
   });
 
   it("bloom-below-outcome: coverage ranks below the outcome's level", () => {
     const d = alignedCourse();
-    d.assessments[1].coverage[0].bloom = "understand";
+    d.assessments[1]!.coverage[0]!.bloom = "understand";
     expect(checkAlignment(d)).toEqual([
       { code: "bloom-below-outcome", severity: "warning", outcomeId: LO1, itemId: TEST1 },
     ]);
@@ -53,8 +53,8 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("bloom-below-outcome needs both levels", () => {
     const d = alignedCourse();
-    d.assessments[1].coverage[0].bloom = undefined;
-    d.outcomes[1].bloom = undefined;
+    d.assessments[1]!.coverage[0]!.bloom = undefined;
+    d.outcomes[1]!.bloom = undefined;
     expect(codes(d)).toEqual([]);
   });
 
@@ -68,29 +68,29 @@ describe("checkAlignment (pure, advisory)", () => {
 
   it("weights-not-100: summative weights are set and do not add up", () => {
     const d = alignedCourse();
-    d.assessments[1].weight = 60;
+    d.assessments[1]!.weight = 60;
     expect(checkAlignment(d)).toEqual([{ code: "weights-not-100", severity: "info" }]);
   });
 
   it("weights-not-100 stays quiet when no weight is set", () => {
     const d = alignedCourse();
-    d.assessments[1].weight = undefined;
+    d.assessments[1]!.weight = undefined;
     expect(codes(d)).toEqual([]);
   });
 
   it("study-load-exceeds-ec: planned hours exceed EC × 28 hours", () => {
     const d = alignedCourse();
     d.ec = 1; // 28 hours
-    d.activities[0].hours = 20;
-    d.assessments[1].hours = 10;
+    d.activities[0]!.hours = 20;
+    d.assessments[1]!.hours = 10;
     expect(checkAlignment(d)).toEqual([{ code: "study-load-exceeds-ec", severity: "info" }]);
-    d.assessments[1].hours = 8;
+    d.assessments[1]!.hours = 8;
     expect(codes(d)).toEqual([]);
   });
 
   it("study-load-exceeds-ec needs an EC value", () => {
     const d = alignedCourse();
-    d.activities[0].hours = 500;
+    d.activities[0]!.hours = 500;
     expect(codes(d)).toEqual([]);
   });
 
@@ -136,13 +136,13 @@ describe("coverageMatrix", () => {
       { id: TEST1, kind: "assessment" },
     ]);
     expect(m.rows.map((r) => r.outcomeId)).toEqual([LO1, LO2]);
-    expect(m.rows[0].cells).toEqual([
+    expect(m.rows[0]!.cells).toEqual([
       { covered: false },
       { covered: true },
       { covered: false },
       { covered: true, bloom: "create" },
     ]);
-    expect(m.rows[1].cells).toEqual([
+    expect(m.rows[1]!.cells).toEqual([
       { covered: true },
       { covered: false },
       { covered: true, bloom: "understand" },

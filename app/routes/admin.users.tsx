@@ -427,7 +427,7 @@ function BulkBar({
     deactivate: p.bulkDeactivate,
     reactivate: p.bulkReactivate,
   };
-  const [action, setAction] = useState<BulkAction>(actions[0]);
+  const [action, setAction] = useState<BulkAction>(actions[0] ?? "deactivate");
   const needsTeam = action === "addTeam" || action === "removeTeam";
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">

@@ -11,14 +11,14 @@ describe("weekPlan", () => {
       [2, [ACT2, QUIZ]],
       [4, [TEST1]],
     ]);
-    expect(plan.weeks[1].items.map((i) => i.kind)).toEqual(["activity", "assessment"]);
+    expect(plan.weeks[1]!.items.map((i) => i.kind)).toEqual(["activity", "assessment"]);
     expect(plan.unscheduled).toEqual([]);
   });
 
   it("puts items without a week at the bottom", () => {
     const d = alignedCourse();
-    d.activities[0].week = undefined;
-    d.assessments[1].week = undefined;
+    d.activities[0]!.week = undefined;
+    d.assessments[1]!.week = undefined;
     const plan = weekPlan(d);
     expect(plan.weeks.map((w) => w.week)).toEqual([2]);
     expect(plan.unscheduled.map((i) => i.id)).toEqual([ACT1, TEST1]);

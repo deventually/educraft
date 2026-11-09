@@ -92,7 +92,7 @@ const near = (a: number, b: number) => Math.abs(a - b) < 0.01;
 export function parseBlueprintTable(markdown: string): BlueprintParse {
   const lines = markdown.split(/\r?\n/);
   for (let h = 0; h < lines.length; h++) {
-    const header = cells(lines[h]);
+    const header = cells(lines[h] ?? "");
     if (!header) continue;
     const col = new Map<Column, number>();
     header.forEach((name, i) => {
@@ -104,7 +104,7 @@ export function parseBlueprintTable(markdown: string): BlueprintParse {
     const rows: BlueprintRow[] = [];
     let total: { count?: number; points?: number } | undefined;
     for (let i = h + 1; i < lines.length; i++) {
-      const c = cells(lines[i]);
+      const c = cells(lines[i] ?? "");
       if (!c) break;
       const at = (k: Column) => (col.has(k) ? c[col.get(k) as number] : undefined);
       const label = plain(at("row") ?? "");
@@ -187,14 +187,14 @@ export function proposeOutcomeMapping(
     const name = strip(normalizeForMatch(r.outcomeName));
     const exact = texts.filter((o) => strip(o.text) === name);
     if (exact.length === 1) {
-      proposal[r.row] = exact[0].id;
+      proposal[r.row] = exact[0]?.id ?? "";
       continue;
     }
     const prefix =
       name.split(" ").length >= MIN_PREFIX_WORDS
         ? texts.filter((o) => o.text.startsWith(name) || name.startsWith(strip(o.text)))
         : [];
-    proposal[r.row] = prefix.length === 1 ? prefix[0].id : "";
+    proposal[r.row] = prefix.length === 1 ? (prefix[0]?.id ?? "") : "";
   }
   return proposal;
 }

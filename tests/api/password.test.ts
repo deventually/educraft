@@ -20,7 +20,7 @@ describe("password hashing (scrypt)", () => {
     expect(parts).toHaveLength(3);
     // salt (16 bytes → 32 hex chars) and a non-empty key.
     expect(parts[1]).toMatch(/^[0-9a-f]{32}$/);
-    expect(parts[2].length).toBeGreaterThan(0);
+    expect(parts[2]!.length).toBeGreaterThan(0);
   });
 
   it("uses a distinct random salt for identical passwords", async () => {

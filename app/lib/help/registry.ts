@@ -68,7 +68,7 @@ export function topicLangs(slug: string): HelpLang[] {
 export function getTopicTitle(slug: string, lang: HelpLang): string {
   const body = getTopic(slug, lang) ?? "";
   const m = body.match(/^#\s+(.+)$/m);
-  return m ? m[1].trim() : slug;
+  return m?.[1]?.trim() ?? slug;
 }
 
 /** A heading's anchor: lower case, without accents, words joined by "-". */
@@ -84,5 +84,5 @@ export function headingSlug(text: string): string {
 /** The anchors of a topic's section headings (## and deeper), as the help page sets them. */
 export function topicAnchors(slug: string, lang: HelpLang): string[] {
   const body = getTopic(slug, lang) ?? "";
-  return [...body.matchAll(/^#{2,6}\s+(.+)$/gm)].map((m) => headingSlug(m[1]));
+  return [...body.matchAll(/^#{2,6}\s+(.+)$/gm)].map((m) => headingSlug(m[1] ?? ""));
 }

@@ -28,31 +28,31 @@ describe("RubricDataSchema", () => {
 
   it("limits text, titles, points and weight", () => {
     const d = sampleRubric();
-    d.criteria[0].levels[0].description = "x".repeat(1001);
+    d.criteria[0]!.levels[0]!.description = "x".repeat(1001);
     expect(RubricDataSchema.safeParse(d).success).toBe(false);
     const t = sampleRubric();
-    t.criteria[0].title = "x".repeat(201);
+    t.criteria[0]!.title = "x".repeat(201);
     expect(RubricDataSchema.safeParse(t).success).toBe(false);
     const p = sampleRubric();
-    p.criteria[0].levels[0].points = 101;
+    p.criteria[0]!.levels[0]!.points = 101;
     expect(RubricDataSchema.safeParse(p).success).toBe(false);
     const neg = sampleRubric();
-    neg.criteria[0].levels[0].points = -1;
+    neg.criteria[0]!.levels[0]!.points = -1;
     expect(RubricDataSchema.safeParse(neg).success).toBe(false);
     const w = sampleRubric();
-    w.criteria[0].weight = 101;
+    w.criteria[0]!.weight = 101;
     expect(RubricDataSchema.safeParse(w).success).toBe(false);
   });
 
   it("requires UUID ids, unique within the rubric", () => {
     const bad = sampleRubric();
-    bad.criteria[0].id = "not-a-uuid";
+    bad.criteria[0]!.id = "not-a-uuid";
     expect(RubricDataSchema.safeParse(bad).success).toBe(false);
     const dup = sampleRubric();
-    dup.criteria[1].id = dup.criteria[0].id;
+    dup.criteria[1]!.id = dup.criteria[0]!.id;
     expect(RubricDataSchema.safeParse(dup).success).toBe(false);
     const dupLevel = sampleRubric();
-    dupLevel.criteria[0].levels[1].id = dupLevel.criteria[0].levels[0].id;
+    dupLevel.criteria[0]!.levels[1]!.id = dupLevel.criteria[0]!.levels[0]!.id;
     expect(RubricDataSchema.safeParse(dupLevel).success).toBe(false);
   });
 
@@ -69,13 +69,13 @@ describe("maxPoints", () => {
 
   it("multiplies by a criterion's weight (default 1)", () => {
     const d = sampleRubric();
-    d.criteria[0].weight = 2;
+    d.criteria[0]!.weight = 2;
     expect(maxPoints(d)).toBe(9);
   });
 
   it("does not depend on level order", () => {
     const d = sampleRubric();
-    d.criteria[0].levels.reverse();
+    d.criteria[0]!.levels.reverse();
     expect(maxPoints(d)).toBe(5);
   });
 });

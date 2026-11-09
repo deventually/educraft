@@ -21,7 +21,7 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
   it("adds, updates and removes a learning outcome", () => {
     let d = ok(emptyCourseData(), { intent: "add-outcome", text: " Je test. ", bloom: "apply" });
     expect(d.outcomes[0]).toMatchObject({ text: "Je test.", bloom: "apply" });
-    const id = d.outcomes[0].id;
+    const id = d.outcomes[0]!.id;
     d = ok(d, { intent: "update-outcome", id, text: "Je test software.", bloom: "" });
     expect(d.outcomes[0]).toEqual({ id, text: "Je test software." });
     d = ok(d, { intent: "remove-outcome", id });
@@ -45,15 +45,15 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     });
     const added = d.activities[2];
     expect(added).toMatchObject({ title: "Werkcollege", kind: "assignment", week: 3, hours: 2.5 });
-    expect(added.outcomeIds).toEqual([LO1, LO2]);
-    d = ok(d, { intent: "update-activity", id: added.id, title: "Werkcollege 1", kind: "lesson" });
+    expect(added!.outcomeIds).toEqual([LO1, LO2]);
+    d = ok(d, { intent: "update-activity", id: added!.id, title: "Werkcollege 1", kind: "lesson" });
     expect(d.activities[2]).toEqual({
-      id: added.id,
+      id: added!.id,
       title: "Werkcollege 1",
       kind: "lesson",
       outcomeIds: [],
     });
-    d = ok(d, { intent: "remove-activity", id: added.id });
+    d = ok(d, { intent: "remove-activity", id: added!.id });
     expect(d.activities).toHaveLength(2);
   });
 
@@ -72,7 +72,7 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     const added = d.assessments[2];
     expect(added).toMatchObject({ title: "Tentamen", kind: "summative", week: 8, weight: 40 });
     // A Bloom level only counts for a checked outcome.
-    expect(added.coverage).toEqual([{ outcomeId: LO1, bloom: "analyze" }]);
+    expect(added!.coverage).toEqual([{ outcomeId: LO1, bloom: "analyze" }]);
     d = ok(d, {
       intent: "update-assessment",
       id: TEST1,
@@ -81,8 +81,8 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
       coverage: [LO1, LO2],
       [`bloom:${LO1}`]: "",
     });
-    expect(d.assessments[1].coverage).toEqual([{ outcomeId: LO1 }, { outcomeId: LO2 }]);
-    expect(d.assessments[1].weight).toBeUndefined();
+    expect(d.assessments[1]!.coverage).toEqual([{ outcomeId: LO1 }, { outcomeId: LO2 }]);
+    expect(d.assessments[1]!.weight).toBeUndefined();
   });
 
   it("sets and clears the course's EC", () => {
@@ -150,7 +150,7 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
       format: "open",
       points: "2,5",
     });
-    const item = d.assessments[1].items![0];
+    const item = d.assessments[1]!.items![0];
     expect(item).toMatchObject({
       label: "1a",
       outcomeId: LO1,
@@ -161,16 +161,16 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     d = ok(d, {
       intent: "update-item",
       assessmentId: TEST1,
-      id: item.id,
+      id: item!.id,
       label: "2",
       outcomeId: LO2,
       bloom: "",
       format: "",
       points: "",
     });
-    expect(d.assessments[1].items).toEqual([{ id: item.id, label: "2", outcomeId: LO2 }]);
-    d = ok(d, { intent: "remove-item", assessmentId: TEST1, id: item.id });
-    expect(d.assessments[1].items).toEqual([]);
+    expect(d.assessments[1]!.items).toEqual([{ id: item!.id, label: "2", outcomeId: LO2 }]);
+    d = ok(d, { intent: "remove-item", assessmentId: TEST1, id: item!.id });
+    expect(d.assessments[1]!.items).toEqual([]);
   });
 
   it("add-item numbers the question when the label is left empty", () => {
@@ -180,7 +180,7 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
       label: "",
       outcomeId: LO2,
     });
-    expect(d.assessments[1].items!.at(-1)).toMatchObject({ label: "5", outcomeId: LO2 });
+    expect(d.assessments[1]!.items!.at(-1)).toMatchObject({ label: "5", outcomeId: LO2 });
   });
 
   it("refuses an invalid question and reports unknown ones as not-found", () => {
@@ -207,7 +207,7 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
       title: "Eindtoets",
       kind: "summative",
     });
-    expect(d.assessments[1].coverage).toEqual(itemizedCourse().assessments[1].coverage);
-    expect(d.assessments[1].items).toHaveLength(4);
+    expect(d.assessments[1]!.coverage).toEqual(itemizedCourse().assessments[1]!.coverage);
+    expect(d.assessments[1]!.items).toHaveLength(4);
   });
 });

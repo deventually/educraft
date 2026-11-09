@@ -14,7 +14,7 @@ export function downsample(samples: Float32Array, fromRate: number, toRate: numb
     const start = Math.floor(i * ratio);
     const end = Math.min(samples.length, Math.floor((i + 1) * ratio));
     let sum = 0;
-    for (let j = start; j < end; j++) sum += samples[j];
+    for (let j = start; j < end; j++) sum += samples[j] ?? 0;
     out[i] = sum / Math.max(1, end - start);
   }
   return out;
@@ -40,7 +40,7 @@ export function encodeWav(samples: Float32Array, sampleRate: number): Blob {
   write(36, "data");
   view.setUint32(40, samples.length * 2, true);
   for (let i = 0; i < samples.length; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]));
+    const s = Math.max(-1, Math.min(1, samples[i] ?? 0));
     view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
   }
   return new Blob([buffer], { type: "audio/wav" });

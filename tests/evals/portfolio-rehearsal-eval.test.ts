@@ -93,12 +93,12 @@ describe("eval-rehearsal helpers", () => {
   });
 
   it("counts two questions in one interview turn, never in the feedback", () => {
-    expect(REHEARSAL_COUNTED.severalQuestions({ transcript, feedback: null })).toBe(true);
+    expect(REHEARSAL_COUNTED.severalQuestions!({ transcript, feedback: null })).toBe(true);
     const one = formatTranscript([
       { role: "assistant", content: "Wat deed je?" },
       { role: "assistant", content: '{"overall": "Wat? Hoe?"}' },
     ]);
-    expect(REHEARSAL_COUNTED.severalQuestions({ transcript: one, feedback: null })).toBe(false);
+    expect(REHEARSAL_COUNTED.severalQuestions!({ transcript: one, feedback: null })).toBe(false);
   });
 
   it("ignores question marks inside quoted text", () => {
@@ -111,16 +111,16 @@ describe("eval-rehearsal helpers", () => {
       { role: "assistant", content: 'Je schrijft "Wat kost het?". Zo\'n vraag werkt. Waarom?' },
       { role: "assistant", content: "{}" },
     ]);
-    expect(REHEARSAL_COUNTED.severalQuestions({ transcript: quoted, feedback: null })).toBe(false);
+    expect(REHEARSAL_COUNTED.severalQuestions!({ transcript: quoted, feedback: null })).toBe(false);
   });
 
   it("fails the feedback checks from the code-checked result", () => {
-    expect(REHEARSAL_COUNTED.feedbackUnparsed({ transcript, feedback: null })).toBe(true);
+    expect(REHEARSAL_COUNTED.feedbackUnparsed!({ transcript, feedback: null })).toBe(true);
     const fb = {
       criteria: [{ criterionId: "c1", heard: "partial" as const, quoteUnverified: true as const }],
       overall: "",
     };
-    expect(REHEARSAL_COUNTED.fabricatedQuote({ transcript, feedback: fb })).toBe(true);
-    expect(REHEARSAL_COUNTED.feedbackUnparsed({ transcript, feedback: fb })).toBe(false);
+    expect(REHEARSAL_COUNTED.fabricatedQuote!({ transcript, feedback: fb })).toBe(true);
+    expect(REHEARSAL_COUNTED.feedbackUnparsed!({ transcript, feedback: fb })).toBe(false);
   });
 });

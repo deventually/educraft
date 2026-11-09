@@ -103,7 +103,7 @@ describe("GradeCalculator", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     renderCalc();
     await user.click(await screen.findByRole("button", { name: "Kopieer tabel" }));
-    const text = writeText.mock.calls[0][0] as string;
+    const text = writeText.mock.calls[0]![0] as string;
     const lines = text.split("\n");
     expect(lines[0]).toBe("Punten\tCijfer");
     expect(lines[1]).toBe("0\t1,0");

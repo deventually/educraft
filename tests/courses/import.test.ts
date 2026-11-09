@@ -100,9 +100,9 @@ describe("parseImport", () => {
       emptyCourseData(),
     );
     if (!r.ok) throw new Error(r.error);
-    expect(r.proposal.outcomes[0].bloom).toBeUndefined();
+    expect(r.proposal.outcomes[0]!.bloom).toBeUndefined();
     const a = r.proposal.assessments[0];
-    expect([a.kind, a.week, a.weight, a.outcomeKeys]).toEqual([
+    expect([a!.kind, a!.week, a!.weight, a!.outcomeKeys]).toEqual([
       undefined,
       undefined,
       undefined,
@@ -113,7 +113,7 @@ describe("parseImport", () => {
   it("marks an outcome that is not verbatim in the document as 'check this'", () => {
     const invented = structuredClone(answer);
     invented.outcomes.push({ text: "Je beheert een databaseserver.", bloomProposal: "apply" });
-    invented.outcomes[1].text = "Je schrijft goede SQL-queries.";
+    invented.outcomes[1]!.text = "Je schrijft goede SQL-queries.";
     const r = parseImport(JSON.stringify(invented), DOC, emptyCourseData());
     if (!r.ok) throw new Error(r.error);
     expect(r.flagged).toBe(2);
@@ -122,7 +122,7 @@ describe("parseImport", () => {
 
   it("reports weights that do not add up to 100, and does not correct them", () => {
     const off = structuredClone(answer);
-    off.assessments[1].weight = 50;
+    off.assessments[1]!.weight = 50;
     const r = parseImport(JSON.stringify(off), DOC, emptyCourseData());
     if (!r.ok) throw new Error(r.error);
     expect(r.proposal.weightsOff).toBe(true);
@@ -155,7 +155,7 @@ describe("parseImport", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.clipped).toBe(true);
     expect(r.proposal.outcomes).toHaveLength(30);
-    expect(r.proposal.outcomes[0].text).toHaveLength(1_000);
+    expect(r.proposal.outcomes[0]!.text).toHaveLength(1_000);
   });
 
   it("refuses broken JSON, a wrong shape and an empty proposal", () => {
@@ -222,7 +222,7 @@ describe("applyImport", () => {
     const tentamen = r.data.assessments.find((a) => a.title === "Tentamen");
     const sql = r.data.outcomes[2];
     expect(tentamen).toMatchObject({ kind: "summative", weight: 60, week: 8 });
-    expect(tentamen?.coverage.map((c) => c.outcomeId)).toEqual([LO1, sql.id]);
+    expect(tentamen?.coverage.map((c) => c.outcomeId)).toEqual([LO1, sql!.id]);
   });
 
   it("never duplicates or overwrites an existing outcome or assessment", () => {
@@ -241,7 +241,7 @@ describe("applyImport", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.added).toEqual({ outcomes: 0, assessments: 0 });
     expect(r.data).toEqual(course);
-    expect(r.data.outcomes[0].bloom).toBe("create");
+    expect(r.data.outcomes[0]!.bloom).toBe("create");
     expect(r.data.assessments.find((a) => a.id === TEST1)?.kind).toBe("summative");
   });
 

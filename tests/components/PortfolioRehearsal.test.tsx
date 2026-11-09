@@ -94,7 +94,7 @@ describe("Oefen je eindgesprek (29.3)", () => {
     await user.click(screen.getByRole("button", { name: "Begin het gesprek" }));
     await user.click(screen.getByRole("button", { name: "Ik ben er klaar voor." }));
     expect(await screen.findByText("Welkom. Wat deed je in die les?")).toBeInTheDocument();
-    expect(mock.mock.calls[0][1]).toMatchObject({
+    expect(mock.mock.calls[0]![1]).toMatchObject({
       slug: "portfolio-rehearsal",
       dossierId: ID,
       values: { length: "short", outcomeIds: [] },

@@ -87,7 +87,7 @@ describe("import-extract", () => {
     expect(r.proposal.assessments[0]).toMatchObject({ title: "Tentamen", outcomeKeys: ["o1"] });
     expect((await repo.getCourse("teacher-i", course.id))?.data.outcomes).toEqual([]);
     expect(recordUsage).toHaveBeenCalledOnce();
-    const call = generate.mock.calls[0][0];
+    const call = generate.mock.calls[0]![0];
     expect(call.model).toBe("claude-sonnet-5-5");
     expect(call.system).toContain("Voice & Bounds");
     expect(call.messages[0].content).toContain("<document>");

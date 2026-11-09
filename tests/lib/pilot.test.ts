@@ -89,6 +89,6 @@ describe("summarizeByTool", () => {
       ["a", 1],
       ["b", 0],
     ]);
-    expect(rows[1].qualityAvg).toBeNull();
+    expect(rows[1]!.qualityAvg).toBeNull();
   });
 });

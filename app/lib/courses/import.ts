@@ -281,7 +281,7 @@ export function applyImport(d: CourseData, s: ImportSelection): ApplyImportResul
     }
     if (!o.pick) continue;
     next = edit.addOutcome(next, { text: o.text, ...(o.bloom ? { bloom: o.bloom } : {}) });
-    idByKey.set(o.key, next.outcomes[next.outcomes.length - 1].id);
+    idByKey.set(o.key, next.outcomes.at(-1)?.id ?? "");
     outcomes++;
   }
   for (const a of s.assessments) {

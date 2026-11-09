@@ -70,7 +70,7 @@ describe("tool loader — next steps (P27.1)", () => {
   it("offers the tool's next steps with their names", async () => {
     const data = await load("test-items");
     expect(data.nextTools.map((t) => t.slug)).toEqual(["rubric-builder", "test-analysis"]);
-    expect(data.nextTools[0].name.nl).toBeTruthy();
+    expect(data.nextTools[0]!.name.nl).toBeTruthy();
   });
 
   it("leaves out a next step the instance has switched off", async () => {
@@ -106,9 +106,9 @@ describe("tool loader — the course from the link (P27.1)", () => {
     const data = await load("mentorai");
     expect(data.linkTargets.map((t) => t.courseId)).toEqual([course.id]);
     expect(data.dossiers).toHaveLength(1);
-    expect(data.dossiers[0].id).toBe(dossier.id);
-    expect(data.dossiers[0].criteria.map((c) => c.id)).toContain(C1);
-    expect(data.dossiers[0].criteria[0].label).toMatch(/^LU1 · /);
+    expect(data.dossiers[0]!.id).toBe(dossier.id);
+    expect(data.dossiers[0]!.criteria.map((c) => c.id)).toContain(C1);
+    expect(data.dossiers[0]!.criteria[0]!.label).toMatch(/^LU1 · /);
   });
 });
 
@@ -153,7 +153,7 @@ describe("tool action — keep the result (P27.1)", () => {
     const saved = await portfolio.getDossier("res-a", dossier.id);
     const mine = saved?.data.evidence.filter((e) => e.sourceGenerationId === g.id) ?? [];
     expect(mine).toHaveLength(1);
-    expect(mine[0].criterionIds).toEqual([C1]);
+    expect(mine[0]!.criterionIds).toEqual([C1]);
   });
 
   it("refuses an unknown criterion and writes nothing", async () => {

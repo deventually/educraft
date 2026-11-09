@@ -309,7 +309,7 @@ async function importBlueprint(
         .trim()
         .slice(0, COURSE_LIMITS.title) || getMessages(locale).courses.blueprint.newTitleDefault;
     data = addAssessment(data, { title, kind: "summative", coverage: [] });
-    assessmentId = data.assessments[data.assessments.length - 1].id;
+    assessmentId = data.assessments.at(-1)?.id ?? "";
   } else {
     const target = data.assessments.find((a) => a.id === assessmentId);
     if (!target) return { ok: false, error: "not-found" };
