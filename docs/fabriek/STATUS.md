@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #206 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #207 gemerged)_
 
 ## Nu
 
+- **Tweestapsverificatie met een authenticator-app (#207) gemerged op 2026-11-10:** beheerders en
+  de eigenaar moeten een code uit een authenticator-app invoeren, anders gaan de beheerpagina's
+  niet open; voor docenten is het optioneel (`/account/2fa`). Iedereen krijgt 10 herstelcodes. Alles
+  kwijt: de eigenaar zet het uit op de pagina van die persoon, en zichzelf met `reset-2fa`. Met
+  migratie (`0023`); BESLUIT-2026-11-09-3.
 - **Mutatietesten met Stryker (#206) gemerged op 2026-11-09:** Stryker verandert expres kleine
   stukjes in de kern (registry, inloggen, repositories, de slotjes tegen raden) en kijkt of de tests
   dat merken. Draait 's nachts en met de hand (`npm run test:mutation`), nooit op een PR; het
