@@ -72,7 +72,10 @@ function replaceCodes(userId: string): string[] {
  * Finish a pending setup with the first code from the app. Returns the 10 recovery codes
  * (shown once), or `null` for a wrong code or no pending setup.
  */
-export async function confirmTwoFactorSetup(userId: string, code: string): Promise<string[] | null> {
+export async function confirmTwoFactorSetup(
+  userId: string,
+  code: string,
+): Promise<string[] | null> {
   const r = row(userId);
   if (!r || r.enabledAt) return null;
   const step = verifyTotp(r.secret, code, { lastStep: r.lastStep });

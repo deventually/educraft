@@ -29,7 +29,9 @@ const SETUP = {
 describe("two-step verification on /account/2fa (P2-12)", () => {
   it("off: a set-up button, no violations", async () => {
     const { container } = renderSetup({});
-    expect(screen.getByRole("heading", { level: 1, name: /tweestapsverificatie|two-step/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: /tweestapsverificatie|two-step/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /instellen|set up/i })).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -57,13 +59,17 @@ describe("two-step verification on /account/2fa (P2-12)", () => {
     await user.type(screen.getByLabelText(/code uit je app|code from your app/i), "123456");
     await user.click(screen.getByRole("button", { name: /bevestigen|confirm/i }));
     expect(await screen.findByText("aaaa9-bbbbb")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /herstelcodes|recovery codes/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /herstelcodes|recovery codes/i }),
+    ).toBeInTheDocument();
   });
 
   it("on for a teacher: new codes and turning off; for an admin no turning off", async () => {
     const { container, unmount } = renderSetup({ enabled: true, recoveryLeft: 7 });
     expect(screen.getByText(/7/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /nieuwe herstelcodes|new recovery codes/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /nieuwe herstelcodes|new recovery codes/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /zet uit|turn off/i })).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     unmount();
@@ -80,8 +86,12 @@ describe("the second login step (P2-12)", () => {
 
   it("asks for a code in a main landmark, with no violations", async () => {
     const { container } = renderStep();
-    expect(screen.getByRole("main")).toContainElement(screen.getByLabelText(/herstelcode|recovery code/i));
-    expect(screen.getByRole("link", { name: /terug naar inloggen|back to log in/i })).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("main")).toContainElement(
+      screen.getByLabelText(/herstelcode|recovery code/i),
+    );
+    expect(
+      screen.getByRole("link", { name: /terug naar inloggen|back to log in/i }),
+    ).toHaveAttribute("href", "/login");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -97,7 +107,12 @@ describe("the second login step (P2-12)", () => {
 describe("the account page links to two-step verification (P2-12)", () => {
   function renderAccount(twoFactor: boolean) {
     const props = {
-      loaderData: { user: { name: "T", email: null, role: "teacher" }, isOwner: false, teams: [], twoFactor },
+      loaderData: {
+        user: { name: "T", email: null, role: "teacher" },
+        isOwner: false,
+        teams: [],
+        twoFactor,
+      },
     } as unknown as ComponentProps<typeof Account>;
     const Stub = createRoutesStub([{ path: "/account", Component: () => <Account {...props} /> }]);
     return render(<Stub initialEntries={["/account"]} />);
@@ -105,9 +120,13 @@ describe("the account page links to two-step verification (P2-12)", () => {
 
   it("offers to set it up when off, to manage it when on", () => {
     const { unmount } = renderAccount(false);
-    expect(screen.getByRole("link", { name: /tweestapsverificatie instellen|set up two-step/i })).toHaveAttribute("href", "/account/2fa");
+    expect(
+      screen.getByRole("link", { name: /tweestapsverificatie instellen|set up two-step/i }),
+    ).toHaveAttribute("href", "/account/2fa");
     unmount();
     renderAccount(true);
-    expect(screen.getByRole("link", { name: /tweestapsverificatie beheren|manage two-step/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /tweestapsverificatie beheren|manage two-step/i }),
+    ).toBeInTheDocument();
   });
 });

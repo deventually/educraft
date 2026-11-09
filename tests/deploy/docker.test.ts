@@ -96,12 +96,13 @@ describe("ops scripts in the image", () => {
     expect(existsSync(resolve(root, entry))).toBe(true);
   });
 
-  it("covers migrate, create-admin, set-owner, invite, backup and restore", () => {
+  it("covers migrate, create-admin, set-owner, reset-2fa, invite, backup and restore", () => {
     expect(OPS_SCRIPTS.map((s) => s.name).sort()).toEqual([
       "backup",
       "create-admin",
       "invite",
       "migrate",
+      "reset-2fa",
       "restore",
       "set-owner",
     ]);
@@ -119,6 +120,7 @@ describe("Dutch install guide", () => {
     "DATABASE_URL",
     "node build/ops/create-admin.js",
     "node build/ops/set-owner.js",
+    "node build/ops/reset-2fa.js",
     "node build/ops/migrate.js",
     "/healthz",
   ])("mentions %s", (needle) => {

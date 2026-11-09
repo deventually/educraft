@@ -19,7 +19,12 @@ beforeAll(async () => {
 let n = 0;
 async function makeUser() {
   n++;
-  return users.createUser({ name: `U${n}`, email: `u${n}@school.nl`, passwordHash: "x", role: "teacher" });
+  return users.createUser({
+    name: `U${n}`,
+    email: `u${n}@school.nl`,
+    passwordHash: "x",
+    role: "teacher",
+  });
 }
 
 /** A code for the secret that is valid right now, `offset` steps away. */

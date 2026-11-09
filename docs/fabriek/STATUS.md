@@ -4,10 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #204 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #206 gemerged)_
 
 ## Nu
 
+- **Mutatietesten met Stryker (#206) gemerged op 2026-11-09:** Stryker verandert expres kleine
+  stukjes in de kern (registry, inloggen, repositories, de slotjes tegen raden) en kijkt of de tests
+  dat merken. Draait 's nachts en met de hand (`npm run test:mutation`), nooit op een PR; het
+  rapport blijft bewaard in CI. Geen gedragswijziging.
+- **DynamicForm, AppShell en leerdoelen-register opgesplitst (#205) gemerged op 2026-11-09:**
+  `DynamicForm.tsx`, `AppShell.tsx` en `registry/goals.ts` zijn verdeeld over kleinere onderdelen
+  (`form/`, `shell/`, `registry/keywords.ts`); de ratchet-lijst van lange bestanden is nu leeg. Geen
+  gedragswijziging.
 - **Gebruikers-, modellen-, beschikbaarheids- en Start-code opgesplitst (#204) gemerged op
   2026-11-09:** `users.server.ts` (599 → 200 regels), `models.ts` (475 → 311),
   `availability.server.ts` (405 → 198) en `start.tsx` (402 → 173) zijn verdeeld over kleinere

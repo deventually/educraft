@@ -86,7 +86,17 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 /** A labelled code field plus a button, for each step that asks for a code. */
-function CodeForm({ intent, label, button, id }: { intent: string; label: string; button: string; id: string }) {
+function CodeForm({
+  intent,
+  label,
+  button,
+  id,
+}: {
+  intent: string;
+  label: string;
+  button: string;
+  id: string;
+}) {
   const busy = useNavigation().state !== "idle";
   return (
     <Form method="post" className="mt-4 space-y-3">
@@ -158,7 +168,9 @@ export default function AccountTwoFactor({ loaderData }: Route.ComponentProps) {
           <span className="font-medium">{f.statusLabel}:</span>
           {enabled ? f.statusOn : f.statusOff}
         </p>
-        {enabled && <p className="mt-1 text-sm text-slate-600">{fmt(f.recoveryLeft, { n: recoveryLeft })}</p>}
+        {enabled && (
+          <p className="mt-1 text-sm text-slate-600">{fmt(f.recoveryLeft, { n: recoveryLeft })}</p>
+        )}
         {!enabled && !setup && (
           <Form method="post" className="mt-4">
             <input type="hidden" name="intent" value="start" />
@@ -170,11 +182,24 @@ export default function AccountTwoFactor({ loaderData }: Route.ComponentProps) {
         {!enabled && setup && (
           <div className="mt-4">
             <p className="text-sm text-slate-800">{f.step1}</p>
-            <img src={setup.qr} alt={f.qrAlt} width={200} height={200} className="mt-3 rounded-lg border border-slate-200" />
+            <img
+              src={setup.qr}
+              alt={f.qrAlt}
+              width={200}
+              height={200}
+              className="mt-3 rounded-lg border border-slate-200"
+            />
             <p className="mt-3 text-sm text-slate-600">{f.manualKey}</p>
-            <code className="mt-1 block break-all font-mono text-sm text-slate-900">{setup.secret}</code>
+            <code className="mt-1 block break-all font-mono text-sm text-slate-900">
+              {setup.secret}
+            </code>
             <p className="mt-4 text-sm text-slate-800">{f.step2}</p>
-            <CodeForm intent="confirm" id="setup-code" label={f.codeLabel} button={f.confirmButton} />
+            <CodeForm
+              intent="confirm"
+              id="setup-code"
+              label={f.codeLabel}
+              button={f.confirmButton}
+            />
           </div>
         )}
       </Card>
@@ -195,7 +220,12 @@ export default function AccountTwoFactor({ loaderData }: Route.ComponentProps) {
         <Card className="mt-6 p-6">
           <h2 className={h2}>{f.newCodesHeading}</h2>
           <p className="mt-1 text-sm text-slate-600">{f.newCodesIntro}</p>
-          <CodeForm intent="newCodes" id="new-codes-code" label={f.codeOrRecoveryLabel} button={f.newCodesButton} />
+          <CodeForm
+            intent="newCodes"
+            id="new-codes-code"
+            label={f.codeOrRecoveryLabel}
+            button={f.newCodesButton}
+          />
         </Card>
       )}
 
@@ -207,7 +237,12 @@ export default function AccountTwoFactor({ loaderData }: Route.ComponentProps) {
           ) : (
             <>
               <p className="mt-1 text-sm text-slate-600">{f.disableIntro}</p>
-              <CodeForm intent="disable" id="disable-code" label={f.codeOrRecoveryLabel} button={f.disableButton} />
+              <CodeForm
+                intent="disable"
+                id="disable-code"
+                label={f.codeOrRecoveryLabel}
+                button={f.disableButton}
+              />
             </>
           )}
         </Card>

@@ -55,7 +55,7 @@ export function totpCode(secret: string, step: number): string {
   const counter = Buffer.alloc(8);
   counter.writeBigUInt64BE(BigInt(step));
   const mac = createHmac("sha1", base32Decode(secret)).update(counter).digest();
-  const offset = mac[mac.length - 1]! & 0x0f;
+  const offset = mac.readUInt8(mac.length - 1) & 0x0f;
   const binary = mac.readUInt32BE(offset) & 0x7fffffff;
   return String(binary % 10 ** DIGITS).padStart(DIGITS, "0");
 }

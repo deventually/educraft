@@ -25,7 +25,10 @@ async function signedIn(role: "teacher" | "admin", withTwoFactor: boolean) {
   const user = await users.createUser({ name: `R${n}`, passwordHash: "x", role });
   if (withTwoFactor) {
     const secret = (await repo.startTwoFactorSetup(user.id))!;
-    await repo.confirmTwoFactorSetup(user.id, totp.totpCode(secret, Math.floor(Date.now() / 30_000)));
+    await repo.confirmTwoFactorSetup(
+      user.id,
+      totp.totpCode(secret, Math.floor(Date.now() / 30_000)),
+    );
   }
   const res = await auth.createUserSession(user.id, "/");
   const cookie = res.headers.get("Set-Cookie")!.split(";")[0]!;

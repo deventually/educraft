@@ -305,3 +305,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   sessie na 8 uur zonder activiteit (glijdend) in plaats van na 30 dagen; cookies van vóór deze
   wijziging gelden als verlopen, dus iedereen logt na de uitrol één keer opnieuw in.
   Bastiaan, 2026-11-09 ("Doe het maar").
+- **BESLUIT-2026-11-09-3:** **Tweestapsverificatie met een authenticator-app** (doorlichting
+  P2-12). TOTP (RFC 6238), geen sms of e-mail. Verplicht voor beheerders en de eigenaar: zonder
+  gaan de beheerpagina's niet open; optioneel voor docenten. Iedereen krijgt 10 herstelcodes, elk
+  één keer bruikbaar. Alles kwijt: de eigenaar zet het uit op de pagina van die persoon; de eigenaar
+  zelf via `node build/ops/reset-2fa.js --email …`. Aanzetten, uitzetten, resetten en inloggen met
+  een herstelcode komen in het logboek. Voor de QR-code mag het pakket `uqr` erbij. Uitzetten of
+  resetten verhoogt `sessionVersion` **niet**: het geeft geen toegang erbij, dus de regel van vier
+  plekken blijft. Bastiaan, 2026-11-09 (besluiten in de P2-planning; keuze "Ja, klein pakket (uqr)").

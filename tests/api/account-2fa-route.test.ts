@@ -34,7 +34,12 @@ beforeAll(async () => {
 let n = 0;
 async function actAs(role: "teacher" | "admin") {
   n++;
-  const row = await users.createUser({ name: `A${n}`, email: `a${n}@school.nl`, passwordHash: "x", role });
+  const row = await users.createUser({
+    name: `A${n}`,
+    email: `a${n}@school.nl`,
+    passwordHash: "x",
+    role,
+  });
   requireUserMock.mockResolvedValue({ ...row, role });
   return row;
 }
@@ -105,7 +110,9 @@ describe("/account/2fa (P2-12)", () => {
     );
     expect(await repo.isTwoFactorEnabled(me.id)).toBe(false);
     const log = await audit.listAdminActions();
-    expect(log.some((e) => e.action === "twoFactorDisabled" && e.targetUserId === me.id)).toBe(true);
+    expect(log.some((e) => e.action === "twoFactorDisabled" && e.targetUserId === me.id)).toBe(
+      true,
+    );
   });
 
   it("an admin cannot turn it off", async () => {

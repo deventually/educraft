@@ -106,8 +106,15 @@ describe("login with two-step verification (P2-12)", () => {
     expect(res.headers.get("Location")).toBe("/");
     const set = res.headers.getSetCookie();
     const session = set.find((c) => c.startsWith("__session="))!.split(";")[0]!;
-    expect(set.some((c) => c.startsWith("__2fa=;") || /^__2fa=[^;]*;.*(Max-Age=0|Expires=Thu, 01 Jan 1970)/.test(c))).toBe(true);
-    const signedIn = await auth.getUser(new Request("http://localhost/", { headers: { Cookie: session } }));
+    expect(
+      set.some(
+        (c) =>
+          c.startsWith("__2fa=;") || /^__2fa=[^;]*;.*(Max-Age=0|Expires=Thu, 01 Jan 1970)/.test(c),
+      ),
+    ).toBe(true);
+    const signedIn = await auth.getUser(
+      new Request("http://localhost/", { headers: { Cookie: session } }),
+    );
     expect(signedIn?.id).toBe(user.id);
   });
 
@@ -126,9 +133,9 @@ describe("login with two-step verification (P2-12)", () => {
     const again = cookiesOf(await passwordStep(email)).find((c) => c.startsWith("__2fa="))!;
     expect(errorOf(await codeStep(again, codes[0]!))).toBeDefined();
     const log = await audit.listAdminActions();
-    expect(
-      log.some((e) => e.action === "twoFactorRecoveryUsed" && e.actorUserId === user.id),
-    ).toBe(true);
+    expect(log.some((e) => e.action === "twoFactorRecoveryUsed" && e.actorUserId === user.id)).toBe(
+      true,
+    );
   });
 
   it("without a pending step the code step sends you back to /login", async () => {
@@ -147,7 +154,9 @@ describe("login with two-step verification (P2-12)", () => {
     const pending = cookiesOf(await passwordStep(email)).find((c) => c.startsWith("__2fa="))!;
     for (let i = 0; i < 5; i++) await codeStep(pending, "000000");
     const res = await codeStep(pending, nowCode(secret));
-    expect(errorOf(res)).toBe(i18n.getMessages("nl").auth.tooManyAttempts.replace("{minutes}", "15"));
+    expect(errorOf(res)).toBe(
+      i18n.getMessages("nl").auth.tooManyAttempts.replace("{minutes}", "15"),
+    );
   });
 
   it("a deactivated account does not get in at the code step", async () => {
