@@ -37,6 +37,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
    `if (tool.mode === …)` or per-tool branch means: refactor toward a deeper component.
 5. **Simple and maintainable.** Remove what is redundant. Engine stays locale/level-neutral
    (specifics live in packs). Pinned toolchain (Volta, Node 24.14.1).
+6. **Ratchets only go down** (`tests/ratchet.test.ts`): suppressions (`as any`, `@ts-ignore`,
+   `@ts-expect-error`, `biome-ignore`) and files in `app/` over 400 lines. Lowered a count? Lower
+   its baseline in the same PR. A `TODO`/`FIXME` names its issue: `// TODO(#123): …`.
 
 ## Commands
 
