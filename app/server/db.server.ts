@@ -1,5 +1,5 @@
 import { dirname, resolve } from "node:path";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, statSync } from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
@@ -47,6 +47,16 @@ export function getDb(): Db {
  */
 export function pingDb(): void {
   getDb().get(sql`SELECT 1`);
+}
+
+/**
+ * Bytes the database takes on disk: the file plus its write-ahead log. `null` for an in-memory or
+ * missing database. For the admin's health overview.
+ */
+export function databaseBytes(path: string = DB_PATH): number | null {
+  if (path.startsWith(":memory:") || !existsSync(path)) return null;
+  const wal = `${path}-wal`;
+  return statSync(path).size + (existsSync(wal) ? statSync(wal).size : 0);
 }
 
 /**

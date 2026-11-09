@@ -63,10 +63,16 @@ export function backupsToKeep(names: string[], now: Date): string[] {
   return names.filter((n) => keep.has(n));
 }
 
+/** When the newest backup among `names` was made, by its name; `null` without one. */
+export function latestBackupTime(names: string[]): Date | null {
+  const times = names.map(parseBackupTime).filter((t): t is number => t !== null);
+  return times.length > 0 ? new Date(Math.max(...times)) : null;
+}
+
 /** Due when no backup is younger than a day. */
 export function isBackupDue(names: string[], now: Date): boolean {
-  const newest = Math.max(-Infinity, ...names.map((n) => parseBackupTime(n) ?? -Infinity));
-  return now.getTime() - newest >= DAY;
+  const newest = latestBackupTime(names);
+  return newest === null || now.getTime() - newest.getTime() >= DAY;
 }
 
 /** Where the daily backup goes, or `null` when it is off. Pure: env and path are passed in. */
@@ -79,6 +85,9 @@ export function backupDir(env: Record<string, string | undefined>, dbPath: strin
 }
 
 const list = (dir: string) => (existsSync(dir) ? readdirSync(dir) : []);
+
+/** When the newest backup in `dir` was made (for the admin's health overview). */
+export const latestBackup = (dir: string): Date | null => latestBackupTime(list(dir));
 
 export interface BackupResult {
   file: string;
