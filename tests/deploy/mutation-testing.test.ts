@@ -48,8 +48,12 @@ describe("Stryker config", () => {
     expect(mutated).toContain(file);
   });
 
-  it("does not mutate tool data, only the registry's logic", () => {
-    expect([...mutated].filter((f) => f.startsWith("app/lib/registry/tools/"))).toEqual([]);
+  it.each([
+    "app/lib/registry/tools/",
+    "app/lib/registry/goals.ts",
+    "app/lib/registry/keywords.ts",
+  ])("does not mutate registry data (%s), only the registry's logic", (data) => {
+    expect([...mutated].filter((f) => f.startsWith(data))).toEqual([]);
   });
 
   it("every mutate pattern still matches a file (a moved module must not drop out silently)", () => {
