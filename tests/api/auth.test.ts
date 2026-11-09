@@ -122,7 +122,7 @@ describe("legacy student rows (P17)", () => {
     await users.createUser({
       name: "Legacy Login",
       email: "legacylogin@example.com",
-      passwordHash: password.hashPassword(pw),
+      passwordHash: await password.hashPassword(pw),
       role: "student" as never,
     });
     const req = new Request("http://localhost/login", {
@@ -220,7 +220,7 @@ describe("deactivated accounts (P18.7)", () => {
     const u = await users.createUser({
       name: "Disabled Login",
       email: "disabledlogin@example.com",
-      passwordHash: password.hashPassword(PW),
+      passwordHash: await password.hashPassword(PW),
       role: "teacher",
     });
     await users.setUserDisabled(u.id, true);
@@ -235,7 +235,7 @@ describe("deactivated accounts (P18.7)", () => {
     const u = await users.createUser({
       name: "Disabled Wrong",
       email: "disabledwrong@example.com",
-      passwordHash: password.hashPassword(PW),
+      passwordHash: await password.hashPassword(PW),
       role: "teacher",
     });
     await users.setUserDisabled(u.id, true);
@@ -266,7 +266,7 @@ describe("deactivated accounts (P18.7)", () => {
     const u = await users.createUser({
       name: "Back Again",
       email: "backagain@example.com",
-      passwordHash: password.hashPassword(PW),
+      passwordHash: await password.hashPassword(PW),
       role: "teacher",
     });
     const old = await sessionCookieFor(u.id);
@@ -343,7 +343,7 @@ describe("redirect toasts (P16)", () => {
     await users.createUser({
       name: "Flash Login",
       email: "flashlogin@example.com",
-      passwordHash: password.hashPassword(pw),
+      passwordHash: await password.hashPassword(pw),
       role: "teacher",
     });
     const req = new Request("http://localhost/login", {

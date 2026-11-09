@@ -16,3 +16,6 @@ book/*.pdf
 # Eval harness: raw model outputs are large + non-deterministic (don't commit);
 # scored reports under evals/reports/ ARE committed.
 /evals/output/
+
+# Local database backups (npm run backup).
+/data/backups/

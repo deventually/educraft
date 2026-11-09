@@ -58,8 +58,8 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
    `SELECT COUNT(*) FROM users WHERE allowed_tool_slugs IS NOT NULL;` en
    `SELECT key, value_json FROM instance_settings WHERE key LIKE 'contextCustomAccess:%' OR key LIKE 'assignedSectors:%' OR key LIKE 'assignedDomains:%';`.
    Staat er iets, zet dan eerst de instelling ruim genoeg op `/admin/context`.
-3. Kopieer `limeonit.db` **plus** `limeonit.db-wal` en `limeonit.db-shm` van het volume (of maak
-   een back-up met `sqlite3 limeonit.db ".backup limeonit-voor-p18.db"`).
+3. Maak een back-up: `node build/ops/backup.js` (of `npm run backup`); hij komt in `backups/`
+   naast de database.
 4. Bewaar de back-up buiten de repo. Hij bevat verwijderde data (studentdata vóór `0008`, oude
    chattranscripten vóór `0010`): verwijder hem na een korte, door de beheerder gekozen termijn.
 5. Deploy (of start de app weer). Tel daarna opnieuw: geen `student`, dezelfde aantallen docenten
@@ -77,10 +77,12 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
 | `DATABASE_URL` | yes | `file:/data/limeonit.db` with a mounted volume (see above). |
 | `NODE_ENV` | yes | `production`. |
 | `MIGRATIONS_DIR` | no | Defaults to `./drizzle` (already in the image). |
+| `BACKUP_DIR` | no | Daily online backup (rotation 7 days, 4 weeks). Unset: `backups/` next to the database in production (`/data/backups`), off in development. `off` turns it off. `npm run backup` / `node build/ops/backup.js` makes one now; `restore` puts one back with the app stopped. See [installatie-docker.md](../docs/installatie-docker.md#6-back-up-en-terugzetten). |
 | `RATE_LIMIT_PER_MINUTE` | no | Default 10 (per user). |
 | `RATE_LIMIT_CONCURRENT` | no | Default 3 (per user). |
 | `DAILY_REQUEST_LIMIT` | no | Default 50 (per user/day; admins exempt). |
 | `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 (enforced only once token data is surfaced). |
+| `CLIENT_IP_HEADER` | no | Header with the real client IP, set by your reverse proxy (e.g. `x-real-ip`). Login then also caps one IP at 30 failures per 15 minutes, on top of the always-on 5 per email address. Leave unset if the proxy does not overwrite the header. |
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
 | `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |
 | `OLLAMA_BASE_URL` / `LMSTUDIO_BASE_URL` | no | Local model endpoints. Used only in development (`NODE_ENV` not `production`); a production process (`npm start`, Docker) does not discover or offer local or CLI models. |

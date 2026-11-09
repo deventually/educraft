@@ -925,7 +925,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const pw = await password();
     expect(row?.passwordHash).toBe(pw.NO_PASSWORD);
     for (const typed of ["", "none", "anything-at-all"]) {
-      expect(pw.verifyPassword(typed, row!.passwordHash)).toBe(false);
+      expect(await pw.verifyPassword(typed, row!.passwordHash)).toBe(false);
     }
 
     // The link is a 7-day single-use reset for exactly this account.
@@ -961,8 +961,8 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(row?.passwordHash.startsWith("scrypt:")).toBe(true);
     expect(row?.passwordHash).not.toContain(secret);
     const pw = await password();
-    expect(pw.verifyPassword(secret, row!.passwordHash)).toBe(true);
-    expect(pw.verifyPassword("initial-secret-124", row!.passwordHash)).toBe(false);
+    expect(await pw.verifyPassword(secret, row!.passwordHash)).toBe(true);
+    expect(await pw.verifyPassword("initial-secret-124", row!.passwordHash)).toBe(false);
     // No reset link was minted in this mode.
     const loginAction = (await import("~/routes/login")).action;
     const ok = await loginAction({
@@ -1027,7 +1027,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const target = await users.createUser({
       name: "SetPw",
       email: "setpw@example.com",
-      passwordHash: pw.hashPassword("old-password-xx"),
+      passwordHash: await pw.hashPassword("old-password-xx"),
       role: "teacher",
     });
     const cookie = (
@@ -1045,8 +1045,8 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(res.passwordSet).toBe(true);
     expect(JSON.stringify(res)).not.toContain("brand-new-secret");
     const row = await users.getUserById(target.id);
-    expect(pw.verifyPassword("brand-new-secret", row!.passwordHash)).toBe(true);
-    expect(pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(false);
+    expect(await pw.verifyPassword("brand-new-secret", row!.passwordHash)).toBe(true);
+    expect(await pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(false);
     expect(await auth.getUser(asReq())).toBeNull(); // logged out everywhere
   });
 
@@ -1081,7 +1081,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const target = await users.createUser({
       name: "SetPwBad",
       email: "setpwbad@example.com",
-      passwordHash: pw.hashPassword("old-password-xx"),
+      passwordHash: await pw.hashPassword("old-password-xx"),
       role: "teacher",
     });
     const v0 = (await users.getUserById(target.id))!.sessionVersion;
@@ -1100,7 +1100,7 @@ describe("admin.users action — owner accounts (P18.7)", () => {
       ).error,
     ).toBe("passwordMismatch");
     const row = await users.getUserById(target.id);
-    expect(pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(true);
+    expect(await pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(true);
     expect(row!.sessionVersion).toBe(v0);
   });
 

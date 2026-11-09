@@ -195,7 +195,7 @@ export async function action({ request }: Route.ActionArgs) {
       const confirm = String(fd.get("confirm") ?? "");
       if (password.length < MIN_PASSWORD_LENGTH) return fail("passwordTooShort");
       if (password !== confirm) return fail("passwordMismatch");
-      passwordHash = hashPassword(password);
+      passwordHash = await hashPassword(password);
     }
     // Reject a collision up front so the unique index never throws.
     if (await getUserByEmail(email)) return fail("emailTaken");
