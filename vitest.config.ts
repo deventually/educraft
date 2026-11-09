@@ -12,7 +12,7 @@ export default defineConfig({
           globals: true,
           environment: "node",
           include: ["tests/**/*.test.ts"],
-          setupFiles: ["tests/setup.ts"],
+          // No DOM setup here: jest-dom and Testing Library are only for the happy-dom project.
         },
         resolve: {
           alias,
