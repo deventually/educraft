@@ -82,7 +82,7 @@ export default function AdminUsage({ loaderData }: Route.ComponentProps) {
           <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">
             {t.admin.usage.heading}
           </h2>
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
             {t.admin.usage.rangeNote}
           </span>
         </div>
@@ -289,7 +289,7 @@ function FeedbackSection({ rows }: { rows: Route.ComponentProps["loaderData"]["f
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-slate-600">{r.quality ?? "—"}</td>
                   <td className="max-w-xs px-4 py-2.5 text-slate-600">{r.comment ?? "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-400">
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
                     {fmtDate(r.createdAt, locale)}
                   </td>
                 </tr>
