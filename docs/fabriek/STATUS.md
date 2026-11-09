@@ -303,6 +303,10 @@ _Laatst bijgewerkt: 2026-11-09 (poort faalt op waarschuwingen, PR open)_
   `npm run check` en `npm run lint` draaien Biome met `--error-on-warnings`, ook in CI. De vier
   waarschuwingen zijn echt opgelost: dode code (`criterionText` in het dossieroverzicht) is weg
   en `parseEngagementLevels` gebruikt geen `!` meer. Geen onderdrukking.
+- **Security-headers op elke response (P0-punt 4 uit de doorlichting; PR open):** ook `/api/*`,
+  exports, prints, `/healthz` en redirects krijgen nu CSP, `nosniff`, `X-Frame-Options` en
+  `Referrer-Policy`, via middleware op de root-route. De CSP kreeg er `frame-ancestors 'none'`,
+  `base-uri`, `form-action` en `object-src` bij; HSTS alleen in productie.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de

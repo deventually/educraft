@@ -20,6 +20,7 @@ import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures } from "~/server/availability.server";
 import { takeFlash } from "~/server/flash.server";
 import { dictationEnabled } from "~/server/speechToText.server";
+import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -35,6 +36,9 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap",
   },
 ];
+
+/** Security headers on every response, also `/api/*` and exports (not just pages). */
+export const middleware: Route.MiddlewareFunction[] = [securityHeadersMiddleware];
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUser(request);
