@@ -23,6 +23,11 @@ describe("Login page", () => {
     expect(screen.getByRole("button", { name: /inloggen|log in/i })).toBeInTheDocument();
   });
 
+  it("puts the form in a main landmark", () => {
+    renderLogin();
+    expect(screen.getByRole("main")).toContainElement(screen.getByLabelText(/e-mail|email/i));
+  });
+
   it("uses a password input type for the password field", () => {
     renderLogin();
     expect(screen.getByLabelText(/wachtwoord|password/i)).toHaveAttribute("type", "password");

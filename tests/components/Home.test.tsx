@@ -122,8 +122,14 @@ describe("Home / tools page", () => {
 
   it("keeps the audience out of a card's accessible name", () => {
     renderHome();
+    expect(screen.getByRole("link", { name: /MentorAI/ })).not.toHaveAccessibleName(/Student/);
+  });
+
+  it("names a card by its visible text, then its kind (WCAG 2.5.3 label in name)", () => {
+    renderHome();
     const link = screen.getByRole("link", { name: /MentorAI/ });
-    expect(link.getAttribute("aria-label")).not.toMatch(/Student/);
+    expect(link).not.toHaveAttribute("aria-label");
+    expect(link).toHaveAccessibleName(/^MentorAI\b.* gesprek$/);
   });
 
   it("offers no type filter and no grid/list switch", () => {
@@ -151,6 +157,13 @@ describe("Home / tools page", () => {
     await user.type(screen.getByRole("searchbox"), "zzzznotathing");
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText("0 tools")).toBeInTheDocument();
+  });
+
+  it("names a utility card by its visible text (WCAG 2.5.3 label in name)", () => {
+    renderHome();
+    const link = screen.getByRole("link", { name: /Punten omrekenen naar een cijfer/ });
+    expect(link).not.toHaveAttribute("aria-label");
+    expect(link).toHaveAccessibleName(/^Punten omrekenen naar een cijfer Zonder AI /);
   });
 
   it("has no 'Hulpmiddelen' section when utilities are off for the user (P28.3)", () => {

@@ -93,7 +93,6 @@ export const utilities: Messages["utilities"] = {
     tableCaption: "Per question: p-value, Rit, Rir and alpha without this question",
   },
   noAi: "No AI",
-  open: "Open utility",
   rubric: {
     addCriterion: "Add criterion",
     addLevel: "Add level",

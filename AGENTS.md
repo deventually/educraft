@@ -52,6 +52,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | --- | --- |
 | `npm test` · `npm run typecheck` · `npm run check` | **The gate.** All three green before done. |
 | `npm run test:watch` | Tests in watch mode. |
+| `npm run test:e2e` | Browser tests (Playwright): key pages with axe (WCAG 2.2 AA) and CSP; own CI job. |
 | `npm run knip` | Unused files, exports and dependencies (also runs in `npm run check`). |
 | `npm run dev` · `npm run build` | Dev server (port 5173) · production build. |
 | `npm run db:generate` | Generate a Drizzle migration from the schema. |

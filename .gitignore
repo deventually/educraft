@@ -19,3 +19,8 @@ book/*.pdf
 
 # Local database backups (npm run backup).
 /data/backups/
+
+# Browser tests (Playwright): throwaway database and reports.
+/e2e/.data/
+/test-results/
+/playwright-report/

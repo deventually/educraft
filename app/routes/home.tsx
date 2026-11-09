@@ -247,16 +247,15 @@ function ToolGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-function toolAria(tool: ToolCardData, locale: Locale, t: T) {
-  const kind = { chat: t.home.a11y.chatbot, "one-shot": t.home.a11y.generator }[tool.mode];
-  return `${t.home.a11y.open}: ${loc(tool.name, locale)}. ${kind}. ${loc(tool.tagline, locale)}`;
+/** Read after the visible text, so the accessible name starts with what a user sees (WCAG 2.5.3). */
+function toolKind(tool: ToolCardData, t: T) {
+  return { chat: t.home.a11y.chatbot, "one-shot": t.home.a11y.generator }[tool.mode];
 }
 
 function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: T }) {
   return (
     <Link
       to={`/tools/${tool.slug}`}
-      aria-label={toolAria(tool, locale, t)}
       className="group row-span-3 grid grid-rows-subgrid items-start gap-y-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
     >
       <div className="flex items-start gap-3">
@@ -270,7 +269,10 @@ function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: 
           <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-slate-600">{loc(tool.tagline, locale)}</p>
+      <p className="text-sm leading-relaxed text-slate-600">
+        {loc(tool.tagline, locale)}
+        <span className="sr-only"> {toolKind(tool, t)}</span>
+      </p>
       <div className="flex items-center justify-end self-end">
         <ArrowRight className="size-4 shrink-0 text-violet-500 transition-transform group-hover:translate-x-0.5" />
       </div>

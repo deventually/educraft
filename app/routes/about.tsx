@@ -31,7 +31,7 @@ export default function About() {
             href={LICENSE_URL}
             target="_blank"
             rel="noreferrer"
-            className="text-violet-600 hover:underline"
+            className="text-violet-700 underline hover:no-underline"
           >
             {BOOK.license}
           </a>

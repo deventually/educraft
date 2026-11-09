@@ -26,6 +26,11 @@ describe("About / tools catalog", () => {
     expect(screen.queryByText("Binnenkort")).toBeNull();
   });
 
+  it("underlines the licence link in running text (not by colour alone)", () => {
+    renderAbout();
+    expect(screen.getByRole("link", { name: /CC BY/ })).toHaveClass("underline");
+  });
+
   it("has no a11y violations", async () => {
     const { container } = renderAbout();
     const results = await axe(container, {
