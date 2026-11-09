@@ -23,7 +23,7 @@ async function renderLayout() {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly six sections in order (Rolagenten after Tools)", async () => {
+  it("shows exactly seven sections in order (Rolagenten after Tools, Logboek last)", async () => {
     await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
@@ -34,6 +34,7 @@ describe("Admin layout", () => {
       "Rolagenten",
       "Onderwijscontext",
       "Gebruik en feedback",
+      "Logboek",
     ]);
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/admin/users",
@@ -42,6 +43,7 @@ describe("Admin layout", () => {
       "/admin/agents",
       "/admin/context",
       "/admin/usage",
+      "/admin/audit",
     ]);
   });
 

@@ -2,6 +2,7 @@ import { about } from "./about";
 import { account } from "./account";
 import { admin } from "./admin";
 import { agents } from "./agents";
+import { auditLog } from "./auditLog";
 import { aiNotice } from "./aiNotice";
 import { auth } from "./auth";
 import { calendar } from "./calendar";
@@ -61,6 +62,7 @@ export const nl = {
   agents,
   aiNotice,
   appName: "LimeOnIt",
+  auditLog,
   auth,
   calendar,
   chat,

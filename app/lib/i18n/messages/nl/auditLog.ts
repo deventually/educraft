@@ -1,0 +1,28 @@
+export const auditLog = {
+  actions: {
+    accountCreated: "Account aangemaakt",
+    accountDeleted: "Account verwijderd",
+    deactivated: "Gedeactiveerd",
+    instanceModelsChanged: "Modellen van de instantie gewijzigd",
+    inviteCreated: "Uitnodiging gemaakt",
+    inviteRevoked: "Uitnodiging ingetrokken",
+    passwordSet: "Wachtwoord ingesteld",
+    reactivated: "Weer geactiveerd",
+    resetLinkCreated: "Herstellink gemaakt",
+    roleChanged: "Rol gewijzigd",
+    teacherModelsChanged: "Modellen van docent gewijzigd",
+  },
+  bulk: "via selectie",
+  colAction: "Wat",
+  colActor: "Wie",
+  colTarget: "Bij wie",
+  colWhen: "Wanneer",
+  deletedAccount: "Verwijderd account",
+  empty: "Nog geen beheeracties vastgelegd.",
+  followsInstance: "Volgt de instantie",
+  heading: "Logboek",
+  intro:
+    "Wie wat heeft veranderd aan rollen, wachtwoorden, accounts, uitnodigingen en modelkeuze. De nieuwste {n} acties staan bovenaan.",
+  invites: "{n} uitnodigingen",
+  role: "Rol: {role}",
+};

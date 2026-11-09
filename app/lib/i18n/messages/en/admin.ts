@@ -4,6 +4,7 @@ export const admin: Messages["admin"] = {
   console: {
     nav: {
       agents: "Role agents",
+      audit: "Audit log",
       context: "Teaching context",
       teams: "Teams",
       tools: "Tools and models",
