@@ -152,3 +152,28 @@ describe("AI SDKs stay behind app/lib/ai/", () => {
     expect(outside).toEqual([]);
   });
 });
+
+describe("a tool's mode is a strategy, not a branch", () => {
+  // Principle 4 (deep modules): what differs between a chat, chained stages and a single
+  // generation lives in `app/lib/registry/modes.ts`. Validating the raw data may still look.
+  const allowed = new Set(["app/lib/registry/modes.ts", "app/lib/registry/validate.ts"]);
+  const BRANCH = /\bmode\s*[!=]==?\s*["'](?:chat|one-shot)["']|\bstages\.length\s*>\s*1\b/;
+
+  it("the detector sees a branch on the mode or on the stage count", () => {
+    expect(BRANCH.test('const isChat = tool.mode === "chat";')).toBe(true);
+    expect(BRANCH.test("tool.mode !== 'one-shot'")).toBe(true);
+    expect(BRANCH.test("const multiStage = tool.stages.length > 1;")).toBe(true);
+    expect(BRANCH.test('mode === "password"')).toBe(false);
+  });
+
+  it("no route or component outside modes.ts branches on tool.mode", () => {
+    const offenders = files
+      .filter((f) => !allowed.has(rel(f)))
+      .flatMap((f) =>
+        readFileSync(f, "utf8")
+          .split("\n")
+          .flatMap((line, i) => (BRANCH.test(line) ? [`${rel(f)}:${i + 1}`] : [])),
+      );
+    expect(offenders).toEqual([]);
+  });
+});

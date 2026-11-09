@@ -10,8 +10,9 @@ LimeOnIt turns *The Pedagogical Promptbook* (David Wiley, ed., CC BY 4.0) into a
 app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture.md).
 
 - **Tools are data.** Every tool is one `Tool` registry entry (`app/lib/registry/tools/<id>.ts`)
-  with modes `one-shot`, `chat` or `multi-stage`. Capability grows by adding data, never by a
-  per-tool branch.
+  with mode `one-shot` (one or more stages) or `chat`. What differs per mode is one strategy,
+  `modeOf(tool)` (`app/lib/registry/modes.ts`); nothing branches on `tool.mode`. Capability grows
+  by adding data, never by a per-tool branch.
 - **A result has a place and a next step.** Next steps (`Tool.next`), course buttons
   (`Tool.courseActions`) and "Los op met…" (`FINDING_TOOLS`) are registry data, validated at boot.
 - **Prompts are files.** `app/lib/prompts/<id>@vN.prompt.ts` + `app/lib/prompts/files/<id>.{nl,en}.md`

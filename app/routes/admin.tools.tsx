@@ -160,6 +160,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const tab = tabFrom(params.get("tab"));
   const f = t.features;
   const at = t.admin.tools;
+  const modeLabel = { chat: at.modeChat, "one-shot": at.modeOneShot };
   // Find and filter on the page: the registry is small, so no round trip.
   const [find, setFind] = useState("");
   const [standFilter, setStandFilter] = useState("");
@@ -307,9 +308,7 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
                         </Badge>
                       </span>
                     </th>
-                    <td className="px-4 py-2.5 text-slate-600">
-                      {r.mode === "chat" ? t.admin.tools.modeChat : t.admin.tools.modeOneShot}
-                    </td>
+                    <td className="px-4 py-2.5 text-slate-600">{modeLabel[r.mode]}</td>
                     <td className="px-4 py-2.5 text-slate-600">{r.phase}</td>
                     <td className="px-4 py-2.5">
                       <AutoSaveForm

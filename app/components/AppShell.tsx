@@ -15,6 +15,8 @@ import type { Messages } from "~/lib/i18n/messages/nl";
 import { LOCALES } from "~/lib/i18n";
 import { LICENSE_URL } from "~/lib/prompts/attribution";
 import { SITE } from "~/lib/site";
+import { modeOf } from "~/lib/registry/modes";
+import type { Tool } from "~/lib/registry/types";
 
 type NavItem = { to: string; label: string; end: boolean };
 
@@ -61,11 +63,12 @@ export default function AppShell() {
   // Scoped to the tool page itself — a help page (/help/:id) for the same tool
   // also carries the tool in its loader data, but must scroll like any article.
   const matches = useMatches();
-  const isChatRoute =
+  const fillsHeight =
     location.pathname.startsWith("/tools/") &&
-    matches.some(
-      (m) => (m.loaderData as { tool?: { mode?: string } } | undefined)?.tool?.mode === "chat",
-    );
+    matches.some((m) => {
+      const tool = (m.loaderData as { tool?: Tool } | undefined)?.tool;
+      return tool ? modeOf(tool).fillsHeight : false;
+    });
 
   // The menu of four (P27.3): Start · Cursussen · BDB/BKE · Tools, plus Beheer for an admin.
   // "Eerder gemaakt" lives on Start and Tools, Onderwijscontext in the account menu, Help is the
@@ -201,13 +204,13 @@ export default function AppShell() {
           tabIndex={-1}
           className={cn(
             "mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 focus:outline-none",
-            isChatRoute ? "min-h-0 py-6" : "py-8",
+            fillsHeight ? "min-h-0 py-6" : "py-8",
           )}
         >
           <Outlet />
         </main>
 
-        {!isChatRoute && <SiteFooter t={t} portfolio={portfolio} courses={courses} />}
+        {!fillsHeight && <SiteFooter t={t} portfolio={portfolio} courses={courses} />}
       </div>
     </div>
   );

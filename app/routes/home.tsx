@@ -249,7 +249,7 @@ function ToolGrid({ children }: { children: React.ReactNode }) {
 
 /** Read after the visible text, so the accessible name starts with what a user sees (WCAG 2.5.3). */
 function toolKind(tool: ToolCardData, t: T) {
-  return tool.mode === "chat" ? t.home.a11y.chatbot : t.home.a11y.generator;
+  return { chat: t.home.a11y.chatbot, "one-shot": t.home.a11y.generator }[tool.mode];
 }
 
 function ToolCard({ tool, locale, t }: { tool: ToolCardData; locale: Locale; t: T }) {
