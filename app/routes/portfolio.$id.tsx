@@ -141,8 +141,6 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     const o = outcomes.get(outcomeId);
     return o ? outcomeLabel(o) : "";
   };
-  const criterionText = (outcomeId: string, criterionId: string) =>
-    outcomes.get(outcomeId)?.criteria.find((c) => c.id === criterionId)?.text ?? "";
 
   const step = (() => {
     const ns = t.portfolio.nextStep;

@@ -4,7 +4,7 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
+_Laatst bijgewerkt: 2026-11-09 (poort faalt op waarschuwingen, PR open)_
 
 ## Nu
 
@@ -299,6 +299,10 @@ _Laatst bijgewerkt: 2026-11-07 (handleiding BDB en BKE in de app, PR open)_
 
 ## Bezig
 
+- **De poort faalt ook op waarschuwingen (P0-punt 5 uit de doorlichting; PR open):**
+  `npm run check` en `npm run lint` draaien Biome met `--error-on-warnings`, ook in CI. De vier
+  waarschuwingen zijn echt opgelost: dode code (`criterionText` in het dossieroverzicht) is weg
+  en `parseEngagementLevels` gebruikt geen `!` meer. Geen onderdrukking.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de
