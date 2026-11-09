@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-09 (#187 t/m #204 gemerged)_
+_Laatst bijgewerkt: 2026-11-09 (#187 t/m #205 gemerged)_
 
 ## Nu
 
+- **Invulformulier, app-kader en leerdoelen-register opgesplitst (#205) gemerged op 2026-11-09:**
+  `DynamicForm.tsx` (503 → 266 regels), `AppShell.tsx` (456 → 208) en `registry/goals.ts` (→ 99,
+  trefwoorden naar `keywords.ts`) zijn verdeeld over kleinere modules. Daarmee staat er geen
+  bestand in `app/` meer boven de 400 regels (golf 2 af). Geen gedragswijziging.
 - **Gebruikers-, modellen-, beschikbaarheids- en Start-code opgesplitst (#204) gemerged op
   2026-11-09:** `users.server.ts` (599 → 200 regels), `models.ts` (475 → 311),
   `availability.server.ts` (405 → 198) en `start.tsx` (402 → 173) zijn verdeeld over kleinere
