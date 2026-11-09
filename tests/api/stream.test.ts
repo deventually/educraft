@@ -109,7 +109,7 @@ function sseErrorMessage(text: string): string | null {
   const match = /event: error\ndata: (.*)/.exec(text);
   if (!match) return null;
   try {
-    return JSON.parse(match[1]).message as string;
+    return JSON.parse(match[1]!).message as string;
   } catch {
     return null;
   }
@@ -119,7 +119,7 @@ function sseErrorMessage(text: string): string | null {
 function sseTokens(text: string): string[] {
   const out: string[] = [];
   for (const match of text.matchAll(/data: (\{"t":.*?\})\n\n/g)) {
-    out.push(JSON.parse(match[1]).t);
+    out.push(JSON.parse(match[1]!).t);
   }
   return out;
 }
@@ -140,7 +140,7 @@ describe("api.stream — mode happy paths", () => {
       { userId: "one-shot-nl" },
     );
     expect(streamChatSpy).toHaveBeenCalledTimes(1);
-    const { system, messages } = streamChatSpy.mock.calls[0][0];
+    const { system, messages } = streamChatSpy.mock.calls[0]![0];
     expect(messages).toEqual([{ role: "user", content: "Voer de opdracht volledig uit." }]);
     // One-shot never applies the last-turn language reminder (that is chat-only).
     expect(messages[0].content).not.toContain("[Belangrijk");
@@ -156,7 +156,7 @@ describe("api.stream — mode happy paths", () => {
       },
       { userId: "one-shot-en" },
     );
-    const { system, messages } = streamChatSpy.mock.calls[0][0];
+    const { system, messages } = streamChatSpy.mock.calls[0]![0];
     expect(messages[0].content).toBe("Carry out the task in full.");
     expect(system).toContain("always respond entirely in English");
   });
@@ -176,7 +176,7 @@ describe("api.stream — mode happy paths", () => {
       },
       { userId: "chat-happy" },
     );
-    const { messages } = streamChatSpy.mock.calls[0][0];
+    const { messages } = streamChatSpy.mock.calls[0]![0];
     expect(messages).toHaveLength(3);
     expect(messages[0].content).toBe("eerste"); // untouched
     expect(messages[1].content).toBe("antwoord"); // untouched
@@ -194,7 +194,7 @@ describe("api.stream — mode happy paths", () => {
       { slug: "defend-your-work", values: fullValues("defend-your-work"), messages: history },
       { userId: "chat-turn-reminder" },
     );
-    const { messages } = streamChatSpy.mock.calls[0][0];
+    const { messages } = streamChatSpy.mock.calls[0]![0];
     expect(messages[0].content).toBe("eerste");
     expect(messages[2].content).toContain("laatste");
     expect(messages[2].content.toLowerCase()).toContain("precies één vraagteken");
@@ -211,7 +211,7 @@ describe("api.stream — mode happy paths", () => {
       { userId: "multi-stage" },
     );
     expect(streamChatSpy).toHaveBeenCalledTimes(1);
-    expect(streamChatSpy.mock.calls[0][0].system).toContain("THE-COORDINATES-DOC");
+    expect(streamChatSpy.mock.calls[0]![0].system).toContain("THE-COORDINATES-DOC");
   });
 });
 
@@ -227,7 +227,7 @@ describe("api.stream — persistence", () => {
     );
     await res.text(); // consume → onComplete
     expect(saveGenerationSpy).toHaveBeenCalledTimes(1);
-    expect(saveGenerationSpy.mock.calls[0][0].outputMarkdown).toBe("ok");
+    expect(saveGenerationSpy.mock.calls[0]![0].outputMarkdown).toBe("ok");
     expect(upsertChatSpy).not.toHaveBeenCalled();
   });
 
@@ -244,7 +244,7 @@ describe("api.stream — persistence", () => {
     );
     await res.text();
     expect(upsertChatSpy).toHaveBeenCalledTimes(1);
-    const arg = upsertChatSpy.mock.calls[0][0];
+    const arg = upsertChatSpy.mock.calls[0]![0];
     expect(arg.id).toBe(sessionId);
     expect(typeof arg.transcript).toBe("string");
     expect(arg.transcript).toContain("ok"); // the assistant's completed reply
@@ -598,7 +598,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-opus-4-8" },
       { userId: "allow-opus" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-5-5");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-sonnet-5-5");
   });
 
   it("honours a client-selectable model (Haiku)", async () => {
@@ -606,7 +606,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
       { userId: "allow-haiku" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-haiku-4-5");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-haiku-4-5");
   });
 
   it("falls back to the tool default when the requested model is not admin-enabled", async () => {
@@ -615,7 +615,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
       { userId: "avail-model" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-5-5");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-sonnet-5-5");
     await settings.setEnabledModels(null); // reset
   });
 
@@ -628,7 +628,7 @@ describe("api.stream — model allow-list & budget", () => {
       { userId: teacherId }, // default role teacher
     );
     // haiku ∉ the teacher's set → refused → tool default (sonnet), not the forced haiku.
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-sonnet-4-6");
     await users.setUserAssignedModels(teacherId, null); // reset
   });
 
@@ -640,7 +640,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" },
       { userId: teacherId },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-haiku-4-5");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-haiku-4-5");
     await users.setUserAssignedModels(teacherId, null); // reset
     await settings.setEnabledModels(null);
   });
@@ -656,7 +656,7 @@ describe("api.stream — model allow-list & budget", () => {
     } finally {
       vi.unstubAllEnvs();
     }
-    expect(streamChatSpy.mock.calls[0][0].model).toBe(
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe(
       getToolBySlug("socratic-partner")!.defaultModel,
     );
   });
@@ -667,7 +667,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-code" },
       { userId: "p14-uncurated-teacher" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-code");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-code");
   });
 
   it("[P14] a CLI model disabled instance-wide falls back to the tool default", async () => {
@@ -676,7 +676,7 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-code" },
       { userId: "p14-curated-teacher" },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-sonnet-4-6");
     await settings.setEnabledModels(null); // reset
   });
 
@@ -692,13 +692,13 @@ describe("api.stream — model allow-list & budget", () => {
       },
       { userId: teacherId },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-sonnet-4-6");
     await users.setUserAssignedModels(teacherId, null); // reset
   });
 
   it("streams with the tool's configured maxTokens budget", async () => {
     await invoke({ slug: "socratic-partner", values: { chapter: "x" } }, { userId: "budget" });
-    expect(streamChatSpy.mock.calls[0][0].maxTokens).toBe(2048); // chat tutor budget
+    expect(streamChatSpy.mock.calls[0]![0].maxTokens).toBe(2048); // chat tutor budget
   });
 
   it("[thinking] forwards the body's thinking flag to the provider", async () => {
@@ -706,12 +706,12 @@ describe("api.stream — model allow-list & budget", () => {
       { slug: "socratic-partner", values: { chapter: "x" }, thinking: false },
       { userId: "think-off" },
     );
-    expect(streamChatSpy.mock.calls[0][0].thinking).toBe(false);
+    expect(streamChatSpy.mock.calls[0]![0].thinking).toBe(false);
   });
 
   it("[thinking] leaves the flag undefined when the body omits it (model default)", async () => {
     await invoke({ slug: "socratic-partner", values: { chapter: "x" } }, { userId: "think-unset" });
-    expect(streamChatSpy.mock.calls[0][0].thinking).toBeUndefined();
+    expect(streamChatSpy.mock.calls[0]![0].thinking).toBeUndefined();
   });
 
   it("[models] a retired model hands over to its newest version; a retiring one may finish", async () => {
@@ -731,14 +731,14 @@ describe("api.stream — model allow-list & budget", () => {
     await store.saveModelRegistry(up.registry);
     const body = { slug: "socratic-partner", values: { chapter: "x" }, model: "claude-haiku-4-5" };
     await invoke(body, { userId: "retiring-chat" });
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("claude-haiku-4-5");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("claude-haiku-4-5");
 
     const done = reg.finishUpgrade(up.registry, "claude-haiku-4-5");
     if (!done.ok) throw new Error(done.error);
     await store.saveModelRegistry(done.registry);
     streamChatSpy.mockClear();
     await invoke(body, { userId: "retired-chat" });
-    expect(streamChatSpy.mock.calls[0][0].model).toBe(added.id);
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe(added.id);
     await store.saveModelRegistry(reg.EMPTY_REGISTRY); // reset
   });
 
@@ -756,7 +756,7 @@ describe("api.stream — model allow-list & budget", () => {
       },
       { userId: teacherId },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
 
     // The reported bug: a stale client sends the (disabled) tool default. The
     // server must NOT serve it — it substitutes the teacher's only allowed model.
@@ -769,8 +769,8 @@ describe("api.stream — model allow-list & budget", () => {
       },
       { userId: teacherId },
     );
-    expect(streamChatSpy.mock.calls[0][0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
-    expect(streamChatSpy.mock.calls[0][0].model).not.toBe("claude-sonnet-4-6");
+    expect(streamChatSpy.mock.calls[0]![0].model).toBe("ollama::qwen3.6:27b-coding-nvfp4");
+    expect(streamChatSpy.mock.calls[0]![0].model).not.toBe("claude-sonnet-4-6");
     await users.setUserAssignedModels(teacherId, null); // reset
   });
 });

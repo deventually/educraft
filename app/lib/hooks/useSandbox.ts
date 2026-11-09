@@ -108,7 +108,7 @@ export function useSandbox({
       const next = { ...prev };
       for (const f of inputs) {
         if (!f.prefillFromProfile) continue;
-        next[f.name] = f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name];
+        next[f.name] = (f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name]) ?? "";
       }
       return next;
     });
@@ -123,7 +123,7 @@ export function useSandbox({
       const next = { ...prev };
       for (const f of inputs) {
         if (!f.prefillFromCourse) continue;
-        next[f.name] = f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name];
+        next[f.name] = (f.name in prefill ? prefill[f.name] : defaultValuesFor([f])[f.name]) ?? "";
       }
       return next;
     });

@@ -38,7 +38,7 @@ describe("tool: cognitive-architect", () => {
       "transcript-analyst",
     ]);
     // The entry stage consumes nothing; the other three do.
-    expect(tool.stages[0].consumes ?? []).toEqual([]);
+    expect(tool.stages[0]!.consumes ?? []).toEqual([]);
   });
 
   it("only consumes outputs from EARLIER stages, and each placeholder is present in the consuming prompt", () => {
@@ -65,16 +65,16 @@ describe("tool: cognitive-architect", () => {
     const tool = getToolBySlug("cognitive-architect")!;
     const byId = Object.fromEntries(tool.stages.map((s) => [s.id, s]));
 
-    expect(byId.generator.consumes).toEqual([
+    expect(byId.generator!.consumes).toEqual([
       { placeholder: "coordinatesDocument", fromStageId: "analyst" },
     ]);
     for (const id of ["validator", "transcript-analyst"]) {
-      expect(byId[id].consumes).toEqual([
+      expect(byId[id]!.consumes).toEqual([
         { placeholder: "coordinatesDocument", fromStageId: "analyst" },
         { placeholder: "studentPrompt", fromStageId: "generator" },
       ]);
       // The two optional stages are marked optional.
-      expect(byId[id].optional).toBe(true);
+      expect(byId[id]!.optional).toBe(true);
     }
   });
 
@@ -151,7 +151,7 @@ describe("tool: cognitive-architect", () => {
 
   it("runs the analyst on @v2 and keeps @v1 registered", () => {
     const analyst = getToolBySlug("cognitive-architect")!.stages[0];
-    expect(analyst.systemPromptId).toBe("cognitive-architect-analyst@v2");
+    expect(analyst!.systemPromptId).toBe("cognitive-architect-analyst@v2");
     expect(getPrompt("cognitive-architect-analyst@v1").id).toBe("cognitive-architect-analyst@v1");
     expect(getPrompt("cognitive-architect-analyst@v2").verbatim).toBe(
       getPrompt("cognitive-architect-analyst@v1").verbatim,

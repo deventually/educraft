@@ -85,7 +85,7 @@ describe("applyIntent — framework", () => {
         d,
         fd({
           intent: "updateOutcome",
-          outcomeId: added.id,
+          outcomeId: added!.id,
           code: "LU2",
           title: "Studenten begeleiden",
           requiredEvidence: "Feedback van een student\n\n  Een verslag  \n",
@@ -93,12 +93,12 @@ describe("applyIntent — framework", () => {
         ctx,
       ),
     );
-    expect(d.framework.outcomes[1].title).toBe("Studenten begeleiden");
-    expect(d.framework.outcomes[1].requiredEvidence).toEqual([
+    expect(d.framework.outcomes[1]!.title).toBe("Studenten begeleiden");
+    expect(d.framework.outcomes[1]!.requiredEvidence).toEqual([
       "Feedback van een student",
       "Een verslag",
     ]);
-    d = ok(applyIntent(d, fd({ intent: "removeOutcome", outcomeId: added.id }), ctx));
+    d = ok(applyIntent(d, fd({ intent: "removeOutcome", outcomeId: added!.id }), ctx));
     expect(d.framework.outcomes).toHaveLength(1);
   });
 
@@ -119,22 +119,22 @@ describe("applyIntent — framework", () => {
         ctx,
       ),
     );
-    const c = d.framework.outcomes[0].criteria[2];
-    expect(c.text).toBe("Nieuw criterium");
+    const c = d.framework.outcomes[0]!.criteria[2];
+    expect(c!.text).toBe("Nieuw criterium");
     expect(c).not.toHaveProperty("strongLevel");
     d = ok(
       applyIntent(
         d,
-        fd({ intent: "updateCriterion", criterionId: c.id, text: "Beter", strongLevel: "Sterk" }),
+        fd({ intent: "updateCriterion", criterionId: c!.id, text: "Beter", strongLevel: "Sterk" }),
         ctx,
       ),
     );
-    expect(d.framework.outcomes[0].criteria[2]).toMatchObject({
+    expect(d.framework.outcomes[0]!.criteria[2]).toMatchObject({
       text: "Beter",
       strongLevel: "Sterk",
     });
-    d = ok(applyIntent(d, fd({ intent: "removeCriterion", criterionId: c.id }), ctx));
-    expect(d.framework.outcomes[0].criteria).toHaveLength(2);
+    d = ok(applyIntent(d, fd({ intent: "removeCriterion", criterionId: c!.id }), ctx));
+    expect(d.framework.outcomes[0]!.criteria).toHaveLength(2);
   });
 
   it("reports an unknown id as not-found", () => {
@@ -204,7 +204,7 @@ describe("applyIntent — outcome work", () => {
     let d = ok(
       applyIntent(sampleDossier(), fd({ intent: "addOutcome", code: "LU2", title: "B" }), ctx),
     );
-    const lu2 = d.framework.outcomes[1].id;
+    const lu2 = d.framework.outcomes[1]!.id;
     d = ok(applyIntent(d, fd({ intent: "addCriterion", outcomeId: lu2, text: "x" }), ctx));
     const r = applyIntent(
       d,
@@ -218,9 +218,9 @@ describe("applyIntent — outcome work", () => {
     let d = ok(
       applyIntent(sampleDossier(), fd({ intent: "addOutcome", code: "LU2", title: "B" }), ctx),
     );
-    const lu2 = d.framework.outcomes[1].id;
+    const lu2 = d.framework.outcomes[1]!.id;
     d = ok(applyIntent(d, fd({ intent: "addCriterion", outcomeId: lu2, text: "x" }), ctx));
-    const c3 = d.framework.outcomes[1].criteria[0].id;
+    const c3 = d.framework.outcomes[1]!.criteria[0]!.id;
     // Link the evidence to LU2's criterion from the LU2 page.
     d = ok(
       applyIntent(
@@ -237,7 +237,7 @@ describe("applyIntent — outcome work", () => {
         ctx,
       ),
     );
-    expect(d.evidence[0].criterionIds).toEqual([C1, c3]);
+    expect(d.evidence[0]!.criterionIds).toEqual([C1, c3]);
   });
 
   it("removes evidence", () => {
@@ -269,7 +269,9 @@ describe("applyIntent — outcome work", () => {
       ),
     );
     expect(d.references).toHaveLength(1);
-    d = ok(applyIntent(d, fd({ intent: "removeReference", referenceId: d.references[0].id }), ctx));
+    d = ok(
+      applyIntent(d, fd({ intent: "removeReference", referenceId: d.references[0]!.id }), ctx),
+    );
     expect(d.references).toEqual([]);
   });
 
@@ -300,7 +302,7 @@ describe("applyIntent — absent optional fields", () => {
     const d = ok(
       applyIntent(sampleDossier(), fd({ intent: "updateOutcome", outcomeId: LU, title: "T" }), ctx),
     );
-    expect(d.framework.outcomes[0].requiredEvidence).toEqual([]);
+    expect(d.framework.outcomes[0]!.requiredEvidence).toEqual([]);
   });
 });
 
@@ -385,7 +387,7 @@ describe("applyIntent — back from Word", () => {
 describe("applyIntent — proofreading proposals", () => {
   const proposals = (d = sampleDossier()) => ({
     ...d,
-    chapters: [{ ...d.chapters[0], text: "Mijn les begon met een vraag. Ik vroeg het de groep." }],
+    chapters: [{ ...d.chapters[0]!, text: "Mijn les begon met een vraag. Ik vroeg het de groep." }],
     proofreads: {
       [LU]: {
         at: 1,
@@ -410,36 +412,36 @@ describe("applyIntent — proofreading proposals", () => {
 
   it("takes a proposal over into the chapter and removes it from the list", () => {
     const d = ok(
-      applyIntent(proposals(), fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
+      applyIntent(proposals()!, fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
     );
-    expect(d.chapters[0].text).toBe(
+    expect(d.chapters[0]!.text).toBe(
       "Mijn les begon met een vraag. Ik stelde de vraag aan de hele groep.",
     );
-    expect(d.proofreads?.[LU].suggestions.map((s) => s.quote)).toEqual(["Mijn les begon"]);
-    expect(d.chapters[0].aiDrafted).toBe(false);
+    expect(d.proofreads?.[LU]?.suggestions.map((s) => s.quote)).toEqual(["Mijn les begon"]);
+    expect(d.chapters[0]!.aiDrafted).toBe(false);
   });
 
   it("ignores a proposal: the chapter stays, the proposal leaves the list", () => {
     const d = ok(
-      applyIntent(proposals(), fd({ intent: "skipProofread", outcomeId: LU, index: "1" }), ctx),
+      applyIntent(proposals()!, fd({ intent: "skipProofread", outcomeId: LU, index: "1" }), ctx),
     );
-    expect(d.chapters[0].text).toBe("Mijn les begon met een vraag. Ik vroeg het de groep.");
-    expect(d.proofreads?.[LU].suggestions).toHaveLength(1);
+    expect(d.chapters[0]!.text).toBe("Mijn les begon met een vraag. Ik vroeg het de groep.");
+    expect(d.proofreads?.[LU]?.suggestions).toHaveLength(1);
   });
 
   it("is not-found for a missing proposal or a sentence that is no longer there", () => {
     expect(
-      applyIntent(proposals(), fd({ intent: "takeProofread", outcomeId: LU, index: "5" }), ctx),
+      applyIntent(proposals()!, fd({ intent: "takeProofread", outcomeId: LU, index: "5" }), ctx),
     ).toEqual({ ok: false, error: "not-found" });
     const changed = proposals();
-    changed.chapters[0].text = "Alles herschreven.";
+    changed.chapters[0]!.text = "Alles herschreven.";
     expect(
-      applyIntent(changed, fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
+      applyIntent(changed!, fd({ intent: "takeProofread", outcomeId: LU, index: "0" }), ctx),
     ).toEqual({ ok: false, error: "not-found" });
   });
 
   it("forgets the proposals when the outcome is removed", () => {
-    const d = ok(applyIntent(proposals(), fd({ intent: "removeOutcome", outcomeId: LU }), ctx));
+    const d = ok(applyIntent(proposals()!, fd({ intent: "removeOutcome", outcomeId: LU }), ctx));
     expect(d.proofreads).toEqual({});
   });
 });

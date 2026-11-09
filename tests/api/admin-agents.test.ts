@@ -47,8 +47,8 @@ describe("admin.agents", () => {
       ["assessment-expert", "on"],
       ["designer", "on"],
     ]);
-    expect(data.agents[0].role.nl).toBe("Toetsdeskundige");
-    expect(data.agents[0].watches).toEqual(["course", "generation"]);
+    expect(data.agents[0]!.role.nl).toBe("Toetsdeskundige");
+    expect(data.agents[0]!.watches).toEqual(["course", "generation"]);
   });
 
   it("switches one hat off and on again", async () => {

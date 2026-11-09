@@ -19,15 +19,14 @@ export interface Turn {
 
 /** Return a new turns array with `token` appended to the last turn's content. */
 export function appendTokenToLastTurn(turns: Turn[], token: string): Turn[] {
-  if (turns.length === 0) return turns;
-  const last = turns[turns.length - 1];
+  const last = turns.at(-1);
+  if (!last) return turns;
   return [...turns.slice(0, -1), { ...last, content: last.content + token }];
 }
 
 /** Return a new turns array with the last turn flagged as interrupted. */
 export function markLastTurnInterrupted(turns: Turn[]): Turn[] {
-  if (turns.length === 0) return turns;
-  const last = turns[turns.length - 1];
-  if (last.interrupted) return turns;
+  const last = turns.at(-1);
+  if (!last || last.interrupted) return turns;
   return [...turns.slice(0, -1), { ...last, interrupted: true }];
 }

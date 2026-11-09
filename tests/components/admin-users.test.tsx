@@ -460,10 +460,10 @@ describe("Admin user list: change many people at once", () => {
     await user.selectOptions(within(bar).getByLabelText(/^welk team$/i), "team-2");
     await user.click(within(bar).getByRole("button", { name: /toepassen/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("bulk");
-    expect(bodies[0].get("action")).toBe("addTeam");
-    expect(bodies[0].get("teamId")).toBe("team-2");
-    expect(bodies[0].getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
+    expect(bodies[0]!.get("intent")).toBe("bulk");
+    expect(bodies[0]!.get("action")).toBe("addTeam");
+    expect(bodies[0]!.get("teamId")).toBe("team-2");
+    expect(bodies[0]!.getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/2 aangepast/i));
   });
 
@@ -498,9 +498,9 @@ describe("Admin user list: change many people at once", () => {
     );
     await user.click(within(dialog).getByRole("button", { name: /op non-actief zetten/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("bulk");
-    expect(bodies[0].get("action")).toBe("deactivate");
-    expect(bodies[0].getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
+    expect(bodies[0]!.get("intent")).toBe("bulk");
+    expect(bodies[0]!.get("action")).toBe("deactivate");
+    expect(bodies[0]!.getAll("userIds")).toEqual(["teacher-9", "teacher-off"]);
   });
 
   it("says how many were skipped", async () => {

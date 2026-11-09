@@ -39,7 +39,7 @@ async function newUser() {
 /** The `__session=…` pair from a response's Set-Cookie headers, or null. */
 function sessionPair(headers: Headers): string | null {
   const line = headers.getSetCookie().find((c) => c.startsWith("__session="));
-  return line ? line.split(";")[0] : null;
+  return line ? line.split(";")[0]! : null;
 }
 
 async function loginCookie(userId: string): Promise<string> {

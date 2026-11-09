@@ -77,7 +77,7 @@ describe("Context settings", () => {
     expect(buttons[0]).toHaveAccessibleName("Onderwijscontext instellen");
     // No second "New context profile" card underneath.
     expect(screen.queryByRole("button", { name: /nieuw contextprofiel/i })).toBeNull();
-    await user.click(buttons[0]);
+    await user.click(buttons[0]!);
     expect(screen.getByLabelText(/naam|name/i)).toBeInTheDocument();
   });
 

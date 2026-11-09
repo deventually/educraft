@@ -89,7 +89,7 @@ describe("ResultPanel", () => {
     render(<ResultPanel markdown={MD} lang="nl" />);
     await user.click(screen.getByRole("button", { name: "Read aloud" }));
     expect(speech.spoken.map((u) => u.text)).toEqual(["Heading one", "Some bold body text."]);
-    expect(speech.spoken[0].lang).toBe("nl-NL");
+    expect(speech.spoken[0]!.lang).toBe("nl-NL");
     speech.restore();
   });
 

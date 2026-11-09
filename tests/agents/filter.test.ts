@@ -34,7 +34,7 @@ describe("parseAgentReview (P21.1)", () => {
       course,
       [],
     );
-    expect(r.ok && r.findings[0].targetId).toBeUndefined();
+    expect(r.ok && r.findings[0]!.targetId).toBeUndefined();
   });
 
   it("drops a finding that points at an item that does not exist", () => {
@@ -73,7 +73,7 @@ describe("parseAgentReview (P21.1)", () => {
       [],
     );
     expect(r.ok && r.findings).toHaveLength(1);
-    expect(r.ok && r.findings[0].message.length).toBeLessThanOrEqual(AGENT_LIMITS.message);
+    expect(r.ok && r.findings[0]!.message.length).toBeLessThanOrEqual(AGENT_LIMITS.message);
   });
 
   it("keeps at most the finding limit", () => {

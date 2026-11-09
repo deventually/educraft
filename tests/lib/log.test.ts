@@ -7,7 +7,7 @@ describe("log.server", () => {
     log("generation", { userId: "u1", outcome: "ok", chars: 42 });
 
     expect(spy).toHaveBeenCalledTimes(1);
-    const line = spy.mock.calls[0][0] as string;
+    const line = spy.mock.calls[0]![0] as string;
     const parsed = JSON.parse(line);
     expect(parsed.event).toBe("generation");
     expect(typeof parsed.ts).toBe("string");
@@ -21,7 +21,7 @@ describe("log.server", () => {
   it("only serializes the fields it is given (no implicit content leakage)", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     log("generation", { userId: "u1", toolSlug: "math-grading" });
-    const parsed = JSON.parse(spy.mock.calls[0][0] as string);
+    const parsed = JSON.parse(spy.mock.calls[0]![0] as string);
     // Metadata only — the logger never invents prompt/response payload keys.
     expect(parsed).not.toHaveProperty("prompt");
     expect(parsed).not.toHaveProperty("output");

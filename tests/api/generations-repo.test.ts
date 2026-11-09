@@ -36,8 +36,8 @@ describe("upsertChatGeneration", () => {
 
     const mine = (await repo.listGenerations(USER_A, 50)).filter((g) => g.id === id);
     expect(mine).toHaveLength(1);
-    expect(mine[0].outputMarkdown).toContain("**Assistant:**");
-    expect(mine[0].toolSlug).toBe("mentorai");
+    expect(mine[0]!.outputMarkdown).toContain("**Assistant:**");
+    expect(mine[0]!.toolSlug).toBe("mentorai");
   });
 
   it("preserves the original createdAt across turns (stable ordering)", async () => {

@@ -19,19 +19,19 @@ describe("wordCount", () => {
 describe("outcomeProgress", () => {
   it("counts shown criteria and the required evidence that has no matching item", () => {
     const [p] = outcomeProgress(sampleDossier());
-    expect(p.outcomeId).toBe(LU);
-    expect(p.criteria).toBe(2);
-    expect(p.shown).toBe(1);
+    expect(p!.outcomeId).toBe(LU);
+    expect(p!.criteria).toBe(2);
+    expect(p!.shown).toBe(1);
     // "Feedback van de werkplekbegeleider" is covered by the feedback item; the recording is not.
-    expect(p.missingEvidence).toEqual(["Opname van de les"]);
-    expect(p.words).toBe(6);
+    expect(p!.missingEvidence).toEqual(["Opname van de les"]);
+    expect(p!.words).toBe(6);
   });
 });
 
 describe("requirementFindings", () => {
   it("is empty for a tidy dossier", () => {
     const d = edit.setStatus(sampleDossier(), C2, "shown");
-    const linked = edit.updateEvidence(d, d.evidence[0].id, { criterionIds: [C1, C2] });
+    const linked = edit.updateEvidence(d, d.evidence[0]!.id, { criterionIds: [C1, C2] });
     expect(requirementFindings(linked)).toEqual([]);
   });
 
@@ -65,7 +65,7 @@ describe("nextStep", () => {
     const confirmed = edit.confirmFramework(sampleDossier(), 1);
     expect(nextStep(confirmed)).toEqual({ step: "add-evidence", outcomeId: LU, criterionId: C2 });
 
-    const linked = edit.updateEvidence(confirmed, confirmed.evidence[0].id, {
+    const linked = edit.updateEvidence(confirmed, confirmed.evidence[0]!.id, {
       criterionIds: [C1, C2],
     });
     const noChapter = { ...linked, chapters: [] };

@@ -73,7 +73,7 @@ describe("parseBlueprintTable (P26.2)", () => {
 
   it("leaves an unknown cognitive level empty instead of guessing", () => {
     const md = fixture("blueprint-nl.md").replace("| Evalueren |", "| Beoordelen |");
-    expect(rowsOf(md)[3].bloom).toBeUndefined();
+    expect(rowsOf(md)[3]!.bloom).toBeUndefined();
   });
 
   it("reports a Total line that does not match the rows, and does not refuse", () => {
@@ -132,15 +132,15 @@ describe("proposeOutcomeMapping", () => {
 
   it("matches exact text first, ignoring layout and case", () => {
     const rows = rowsOf(fixture("blueprint-nl.md"));
-    rows[2].outcomeName = "de student INTERPRETEERT een betrouwbaarheidsinterval  in een casus.";
+    rows[2]!.outcomeName = "de student INTERPRETEERT een betrouwbaarheidsinterval  in een casus.";
     expect(proposeOutcomeMapping(rows, outcomes)).toMatchObject({ R1: "lo-1", R3: "lo-2" });
   });
 
   it("then a normalized start of the text, at least a few words long", () => {
     const rows = rowsOf(fixture("blueprint-nl.md"));
-    rows[0].outcomeName = "De student berekent een betrouwbaarheidsinterval";
+    rows[0]!.outcomeName = "De student berekent een betrouwbaarheidsinterval";
     expect(proposeOutcomeMapping(rows, outcomes).R1).toBe("lo-1");
-    rows[0].outcomeName = "De student";
+    rows[0]!.outcomeName = "De student";
     expect(proposeOutcomeMapping(rows, outcomes).R1).toBe("");
   });
 
@@ -149,12 +149,12 @@ describe("proposeOutcomeMapping", () => {
     // "Interpreteren van een interval" is a short name: no proposal.
     expect(proposeOutcomeMapping(rows, outcomes)).toMatchObject({ R3: "", R4: "" });
     // A start that fits two outcomes is ambiguous.
-    rows[0].outcomeName = "De student";
+    rows[0]!.outcomeName = "De student";
     const twins = [
       { id: "a", text: "De student berekent het gemiddelde van een steekproef." },
       { id: "b", text: "De student berekent het gemiddelde van een populatie." },
     ];
-    rows[0].outcomeName = "De student berekent het gemiddelde";
+    rows[0]!.outcomeName = "De student berekent het gemiddelde";
     expect(proposeOutcomeMapping(rows, twins).R1).toBe("");
   });
 });

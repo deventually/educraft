@@ -47,9 +47,9 @@ describe("/utilities/rubric", () => {
     } as never)) as Response;
     expect(res.status).toBe(302);
     const [created] = await repo.listRubrics("t-create");
-    expect(res.headers.get("Location")).toBe(`/utilities/rubric/${created.id}`);
-    expect(created.name).toBe("BKE eindopdracht");
-    expect(created.data.criteria[0].levels.map((l) => l.label)).toEqual([
+    expect(res.headers.get("Location")).toBe(`/utilities/rubric/${created!.id}`);
+    expect(created!.name).toBe("BKE eindopdracht");
+    expect(created!.data.criteria[0]!.levels.map((l) => l.label)).toEqual([
       "Insufficient",
       "Sufficient",
       "Good",
@@ -105,7 +105,7 @@ describe("/utilities/rubric/:id", () => {
     as("t-save");
     const r = await repo.createRubric("t-save", "Verslag", sampleRubric());
     const next = sampleRubric();
-    next.criteria[0].title = "Nieuw";
+    next.criteria[0]!.title = "Nieuw";
     const ok = await editor.action({
       request: post(`/utilities/rubric/${r.id}`, {
         intent: "save",
@@ -115,7 +115,7 @@ describe("/utilities/rubric/:id", () => {
       params: { id: r.id },
     } as never);
     expect(ok).toEqual({ ok: true });
-    expect((await repo.getRubric("t-save", r.id))?.data.criteria[0].title).toBe("Nieuw");
+    expect((await repo.getRubric("t-save", r.id))?.data.criteria[0]?.title).toBe("Nieuw");
 
     for (const dataJson of ["{not json", JSON.stringify({ criteria: [] })]) {
       const bad = await editor.action({

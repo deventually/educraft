@@ -61,9 +61,9 @@ describe("AutoSaveForm", () => {
     expect(screen.queryByRole("button")).toBeNull();
     await user.click(screen.getByLabelText("Aan"));
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
-    expect(calls[0].get("intent")).toBe("tool");
-    expect(calls[0].get("slug")).toBe("x");
-    expect(calls[0].get("enabled")).toBeNull(); // unchecked → not submitted
+    expect(calls[0]!.get("intent")).toBe("tool");
+    expect(calls[0]!.get("slug")).toBe("x");
+    expect(calls[0]!.get("enabled")).toBeNull(); // unchecked → not submitted
     await waitFor(() => expect(screen.getAllByRole("status")).toHaveLength(1));
     expect(screen.getByRole("status")).toHaveTextContent("Opgeslagen.");
   });
@@ -73,7 +73,7 @@ describe("AutoSaveForm", () => {
     const { action, calls } = renderForm();
     await user.selectOptions(screen.getByLabelText("Rol"), "admin");
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
-    expect(calls[0].get("role")).toBe("admin");
+    expect(calls[0]!.get("role")).toBe("admin");
   });
 
   it("keeps focus on the changed control", async () => {
@@ -95,7 +95,7 @@ describe("AutoSaveForm", () => {
     expect(action).not.toHaveBeenCalled(); // typing alone saves nothing
     await user.tab(); // blur
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
-    expect(calls[0].get("email")).toBe("b@x.nl");
+    expect(calls[0]!.get("email")).toBe("b@x.nl");
 
     await user.clear(email);
     await user.type(email, "c@x.nl");
@@ -103,7 +103,7 @@ describe("AutoSaveForm", () => {
     // emulates it for a form with a single <input>, ours also carries hidden ones).
     fireEvent.submit(screen.getByRole("form", { name: "Row form" }));
     await waitFor(() => expect(action).toHaveBeenCalledTimes(2));
-    expect(calls[1].get("email")).toBe("c@x.nl");
+    expect(calls[1]!.get("email")).toBe("c@x.nl");
     // Blurring after Enter does not save the same value twice.
     await user.tab();
     await new Promise((r) => setTimeout(r, 30));
@@ -126,7 +126,7 @@ describe("AutoSaveForm", () => {
     expect(box.checked).toBe(true);
     await user.click(box);
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
-    expect(calls[0].get("enabled")).toBeNull(); // the refused state was posted
+    expect(calls[0]!.get("enabled")).toBeNull(); // the refused state was posted
     await waitFor(() => expect(box.checked).toBe(true)); // sprong terug
     expect(screen.getByRole("alert")).toHaveTextContent("Kies er minstens één.");
     expect(screen.queryByRole("status")).toBeNull();

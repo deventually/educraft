@@ -6,7 +6,7 @@ describe("skeletonOutcomes", () => {
   it("gives the five national BDB core tasks", () => {
     const outcomes = skeletonOutcomes(["bdb"], "nl");
     expect(outcomes.map((o) => o.code)).toEqual(["BDB-1", "BDB-2", "BDB-3", "BDB-4", "BDB-5"]);
-    expect(outcomes[0].title).toBe("Doceren");
+    expect(outcomes[0]!.title).toBe("Doceren");
     for (const o of outcomes) expect(o.criteria.length).toBeGreaterThan(0);
   });
 
@@ -16,7 +16,7 @@ describe("skeletonOutcomes", () => {
     expect(both).toHaveLength(8);
     const ids = both.flatMap((o) => [o.id, ...o.criteria.map((c) => c.id)]);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(both[0].title).toBe("Teaching");
+    expect(both[0]!.title).toBe("Teaching");
   });
 
   it("produces a valid framework", () => {

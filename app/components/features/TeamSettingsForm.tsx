@@ -39,7 +39,11 @@ export function TeamSettingsForm({
   const f = t.features;
   const [mode, setMode] = useState<"inherit" | "own">(settings.models ? "own" : "inherit");
 
-  const row = (key: string, name: LocalizedText, choice: TeamSettings["tools"][string]) => {
+  const row = (
+    key: string,
+    name: LocalizedText,
+    choice: TeamSettings["tools"][string] | undefined,
+  ) => {
     const label = loc(name, locale);
     return (
       <li key={key} className="flex flex-wrap items-center justify-between gap-2 py-1.5">

@@ -7,7 +7,7 @@ const PLACEHOLDER_RE = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
 /** Return the set of placeholder names referenced in a template. */
 export function placeholdersIn(template: string): string[] {
   const names = new Set<string>();
-  for (const m of template.matchAll(PLACEHOLDER_RE)) names.add(m[1]);
+  for (const [, name = ""] of template.matchAll(PLACEHOLDER_RE)) names.add(name);
   return [...names];
 }
 

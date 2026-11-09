@@ -253,8 +253,8 @@ describe("Admin person page (P28.1)", () => {
     const [pw, confirm] = within(dialog).getAllByLabelText(/wachtwoord/i, {
       selector: "input[type=password]",
     });
-    await user.type(pw, "brand-new-secret");
-    await user.type(confirm, "brand-new-secret");
+    await user.type(pw!, "brand-new-secret");
+    await user.type(confirm!, "brand-new-secret");
     await user.click(within(dialog).getByRole("button", { name: /wachtwoord instellen/i }));
     await waitFor(() => expect(body).toBeDefined());
     expect(body?.get("intent")).toBe("setPassword");
@@ -273,12 +273,12 @@ describe("Admin person page (P28.1)", () => {
     expect(screen.queryByRole("button", { name: /weer activeren/i })).toBeNull();
     await user.click(screen.getByRole("button", { name: /op non-actief zetten/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("deactivate");
+    expect(bodies[0]!.get("intent")).toBe("deactivate");
     active.unmount();
     renderPage(action, { person: { status: "disabled" } });
     await user.click(screen.getByRole("button", { name: /weer activeren/i }));
     await waitFor(() => expect(bodies).toHaveLength(2));
-    expect(bodies[1].get("intent")).toBe("reactivate");
+    expect(bodies[1]!.get("intent")).toBe("reactivate");
   });
 
   it("hides the owner-only actions from a regular admin, and keeps reset and delete", () => {

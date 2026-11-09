@@ -214,9 +214,9 @@ export async function finishAdminUpgrade(id: string): Promise<UpgradeResult> {
   const res = finishUpgrade(registry, id);
   if (!res.ok) return { error: res.error };
   await saveModelRegistry(res.registry);
-  return {
-    finished: { name: nameOf(id), successor: nameOf(registry.lifecycle[id].successor) },
-  };
+  // finishUpgrade only succeeds for a model that has a lifecycle entry.
+  const successor = registry.lifecycle[id]?.successor ?? id;
+  return { finished: { name: nameOf(id), successor: nameOf(successor) } };
 }
 
 export async function cancelAdminUpgrade(id: string): Promise<UpgradeResult> {

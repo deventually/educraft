@@ -44,7 +44,7 @@ describe("buildReviewMessage", () => {
 
   it("includes the study load when set", () => {
     const course = { ...alignedCourse(), ec: 5 };
-    course.activities[0] = { ...course.activities[0], hours: 12 };
+    course.activities[0] = { ...course.activities[0]!, hours: 12 };
     const msg = buildReviewMessage({ course, alignment: [], rejected: [] }, "en");
     expect(msg).toContain("5 EC");
     expect(msg).toContain("12 h");

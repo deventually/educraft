@@ -103,7 +103,7 @@ describe("reviewOutcome", () => {
       model: "claude-sonnet-5-5",
     });
     expect(r.data.status).toEqual(sampleDossier().status);
-    const call = generate.mock.calls[0][0];
+    const call = generate.mock.calls[0]![0];
     expect(call.system).toContain("Voice & Bounds");
     expect(call.messages[0].content).toContain("<chapter>");
     expect(call.temperature).toBe(0);
@@ -181,8 +181,8 @@ describe("draftParagraph", () => {
       aiDrafted: true,
     });
     expect(r.data.aiLog.at(-1)).toMatchObject({ action: "draft", at: 7 });
-    expect(generate.mock.calls[0][0].messages[0].content).toContain("Niet opgeslagen tekst.");
-    expect(generate.mock.calls[0][0].system).toContain("aanvullen");
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Niet opgeslagen tekst.");
+    expect(generate.mock.calls[0]![0].system).toContain("aanvullen");
   });
 });
 
@@ -263,7 +263,7 @@ describe("proofreadOutcome", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.dropped).toBe(1);
     expect(r.data.proofreads?.[LU]).toMatchObject({ at: 9, model: "claude-sonnet-5-5" });
-    expect(r.data.proofreads?.[LU].suggestions).toHaveLength(1);
+    expect(r.data.proofreads?.[LU]?.suggestions).toHaveLength(1);
     expect(r.data.aiLog.at(-1)).toEqual({
       at: 9,
       action: "proofread",
@@ -272,7 +272,7 @@ describe("proofreadOutcome", () => {
     });
     // Proposals only: the chapter itself is untouched until the teacher takes one over.
     expect(r.data.chapters).toEqual(sampleDossier().chapters);
-    const call = generate.mock.calls[0][0];
+    const call = generate.mock.calls[0]![0];
     expect(call.system).toContain("Voice & Bounds");
     expect(call.system).toContain("Proeflezer");
     expect(call.messages[0].content).toContain("<chapter>\nMijn les begon met een vraag.");
@@ -353,7 +353,7 @@ describe("reviewDossier", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.data.reviews?.[LU]?.provisional).toBe(true);
     const { dossierReviewOverview } = await import("~/server/portfolio.server");
-    expect(dossierReviewOverview(r.data)[0].provisional).toBe(true);
+    expect(dossierReviewOverview(r.data)[0]!.provisional).toBe(true);
   });
 
   it("keeps the reviews that worked when one chapter fails", async () => {

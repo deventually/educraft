@@ -19,7 +19,7 @@ describe("chat turn reducers (StrictMode-safe)", () => {
   it("appendTokenToLastTurn does not mutate its input", () => {
     const prev = base();
     appendTokenToLastTurn(prev, "w");
-    expect(prev[1].content).toBe("Jou"); // unchanged
+    expect(prev[1]!.content).toBe("Jou"); // unchanged
   });
 
   it("appendTokenToLastTurn is idempotent across a double-invoked updater", () => {
@@ -29,8 +29,8 @@ describe("chat turn reducers (StrictMode-safe)", () => {
     const r2 = appendTokenToLastTurn(prev, "w");
     expect(r1).toEqual(r2);
     // Crucially, the token is appended exactly once — not "Jouww".
-    expect(r1[1].content).toBe("Jouw");
-    expect(r2[1].content).toBe("Jouw");
+    expect(r1[1]!.content).toBe("Jouw");
+    expect(r2[1]!.content).toBe("Jouw");
   });
 
   it("accumulates correctly across sequential tokens", () => {
@@ -38,7 +38,7 @@ describe("chat turn reducers (StrictMode-safe)", () => {
     for (const tok of ["w", " ", "naam"]) {
       turns = appendTokenToLastTurn(turns, tok);
     }
-    expect(turns[1].content).toBe("Jouw naam");
+    expect(turns[1]!.content).toBe("Jouw naam");
   });
 
   it("returns input unchanged when there are no turns", () => {
@@ -50,8 +50,8 @@ describe("chat turn reducers (StrictMode-safe)", () => {
     const prev = base();
     const r1 = markLastTurnInterrupted(prev);
     const r2 = markLastTurnInterrupted(prev);
-    expect(prev[1].interrupted).toBeUndefined(); // not mutated
-    expect(r1[1].interrupted).toBe(true);
+    expect(prev[1]!.interrupted).toBeUndefined(); // not mutated
+    expect(r1[1]!.interrupted).toBe(true);
     expect(r1).toEqual(r2);
   });
 });

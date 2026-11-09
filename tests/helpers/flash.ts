@@ -8,6 +8,6 @@ export async function flashKeyOf(res: unknown): Promise<string | null> {
   const line = res.headers.getSetCookie().find((c) => c.startsWith("__flash="));
   if (!line) return null;
   const { takeFlash } = await import("~/server/flash.server");
-  const request = new Request("http://localhost/", { headers: { Cookie: line.split(";")[0] } });
+  const request = new Request("http://localhost/", { headers: { Cookie: line.split(";")[0]! } });
   return (await takeFlash(request)).flash?.key ?? null;
 }

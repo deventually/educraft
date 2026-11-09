@@ -25,17 +25,17 @@ describe("course edits", () => {
   it("adds items with fresh UUIDs and keeps the course valid", () => {
     let d = edit.addOutcome(emptyCourseData(), { text: "Je test software.", bloom: "apply" });
     const lo = d.outcomes[0];
-    expect(lo.id).toMatch(/^[0-9a-f-]{36}$/);
-    d = edit.addActivity(d, { title: "Les testen", week: 1, kind: "lesson", outcomeIds: [lo.id] });
+    expect(lo!.id).toMatch(/^[0-9a-f-]{36}$/);
+    d = edit.addActivity(d, { title: "Les testen", week: 1, kind: "lesson", outcomeIds: [lo!.id] });
     d = edit.addAssessment(d, {
       title: "Toets",
       week: 5,
       kind: "summative",
       weight: 100,
-      coverage: [{ outcomeId: lo.id, bloom: "apply" }],
+      coverage: [{ outcomeId: lo!.id, bloom: "apply" }],
     });
-    expect(d.activities[0].outcomeIds).toEqual([lo.id]);
-    expect(d.assessments[0].coverage).toEqual([{ outcomeId: lo.id, bloom: "apply" }]);
+    expect(d.activities[0]!.outcomeIds).toEqual([lo!.id]);
+    expect(d.assessments[0]!.coverage).toEqual([{ outcomeId: lo!.id, bloom: "apply" }]);
     expect(valid(d)).toBe(true);
   });
 

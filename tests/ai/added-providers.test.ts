@@ -110,7 +110,7 @@ describe("added providers — an admin adds a provider from the screen", () => {
       keyEnv: "DEEPSEEK_API_KEY",
     });
     expect(listProviders().map((p) => p.id)).toContain("deepseek");
-    expect(listProviders()[0].id).toBe("anthropic");
+    expect(listProviders()[0]!.id).toBe("anthropic");
     expect(credentialKeyFor("deepseek")).toBe("DEEPSEEK_API_KEY");
   });
 

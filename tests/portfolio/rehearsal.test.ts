@@ -100,7 +100,7 @@ describe("buildRehearsalContext", () => {
   it("shortens long chapters", () => {
     const d = edit.writeChapter(twoOutcomes(), LU, "woord ".repeat(COACH_INPUT_LIMITS.chapter));
     const { values } = buildRehearsalContext(d, { length: "short", locale: "nl" });
-    expect(values.chapters.length).toBeLessThan(COACH_INPUT_LIMITS.chapter + 500);
+    expect(values.chapters!.length).toBeLessThan(COACH_INPUT_LIMITS.chapter + 500);
     expect(values.chapters).toContain("[… ingekort]");
   });
 
@@ -222,7 +222,7 @@ describe("parseRehearsalFeedback", () => {
       twoOutcomes(),
       turns,
     );
-    expect(r.ok && r.feedback.criteria[0].quote).toBeUndefined();
+    expect(r.ok && r.feedback.criteria[0]!.quote).toBeUndefined();
   });
 
   it("drops unknown and duplicate keys and unknown 'heard' values", () => {
@@ -279,7 +279,7 @@ describe("parseRehearsalFeedback", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(Object.keys(r.feedback).sort()).toEqual(["criteria", "overall"]);
-    expect(Object.keys(r.feedback.criteria[0]).sort()).toEqual(["criterionId", "heard", "tip"]);
+    expect(Object.keys(r.feedback.criteria[0]!).sort()).toEqual(["criterionId", "heard", "tip"]);
   });
 
   it("refuses output that is not the feedback JSON", () => {

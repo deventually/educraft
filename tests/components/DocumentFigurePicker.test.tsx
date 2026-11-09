@@ -68,12 +68,12 @@ describe("DocumentFigurePicker", () => {
       <DocumentFigurePicker files={files} value={[own]} onChange={onChange} />,
     );
     fireEvent.click(await screen.findByLabelText("Page 4 from report.pdf"));
-    expect(onChange).toHaveBeenLastCalledWith([own, FIGS.figures[1].image]);
+    expect(onChange).toHaveBeenLastCalledWith([own, FIGS.figures[1]!.image]);
 
     rerender(
       <DocumentFigurePicker
         files={files}
-        value={[own, FIGS.figures[1].image]}
+        value={[own, FIGS.figures[1]!.image]}
         onChange={onChange}
       />,
     );

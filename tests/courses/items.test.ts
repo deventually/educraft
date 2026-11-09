@@ -16,13 +16,13 @@ describe("assessment items: the schema (P26.1)", () => {
 
   it("rejects an item that points at an unknown outcome", () => {
     const d = itemizedCourse();
-    finalTest(d).items![0].outcomeId = "ghost";
+    finalTest(d).items![0]!.outcomeId = "ghost";
     expect(parses(d)).toBe(false);
   });
 
   it("rejects a duplicate item id", () => {
     const d = itemizedCourse();
-    finalTest(d).items![1].id = "q-1";
+    finalTest(d).items![1]!.id = "q-1";
     expect(parses(d)).toBe(false);
   });
 
@@ -37,13 +37,13 @@ describe("assessment items: the schema (P26.1)", () => {
     expect(parses(tooMany)).toBe(false);
 
     const longLabel = itemizedCourse();
-    finalTest(longLabel).items![0].label = "x".repeat(21);
+    finalTest(longLabel).items![0]!.label = "x".repeat(21);
     expect(parses(longLabel)).toBe(false);
 
     const points = itemizedCourse();
-    finalTest(points).items![0].points = 1_001;
+    finalTest(points).items![0]!.points = 1_001;
     expect(parses(points)).toBe(false);
-    finalTest(points).items![0].points = -1;
+    finalTest(points).items![0]!.points = -1;
     expect(parses(points)).toBe(false);
 
     const format = itemizedCourse();
@@ -56,8 +56,8 @@ describe("assessment items: the schema (P26.1)", () => {
 describe("effectiveCoverage: the items are the one source of truth", () => {
   it("without items, the P20 coverage holds unchanged", () => {
     const a = alignedCourse().assessments[1];
-    expect(effectiveCoverage(a)).toEqual(a.coverage);
-    expect(effectiveCoverage({ ...a, items: [] })).toEqual(a.coverage);
+    expect(effectiveCoverage(a!)).toEqual(a!.coverage);
+    expect(effectiveCoverage({ ...a!, items: [] })).toEqual(a!.coverage);
   });
 
   it("with items, coverage follows the items: per outcome the lowest Bloom level", () => {
@@ -78,10 +78,10 @@ describe("effectiveCoverage: the items are the one source of truth", () => {
   it("the matrix uses it and counts the questions per cell", () => {
     const m = coverageMatrix(itemizedCourse());
     const col = m.columns.findIndex((c) => c.id === TEST1);
-    expect(m.rows[0].cells[col]).toEqual({ covered: true, bloom: "create", items: 2 });
-    expect(m.rows[1].cells[col]).toEqual({ covered: true, bloom: "understand", items: 2 });
+    expect(m.rows[0]!.cells[col]).toEqual({ covered: true, bloom: "create", items: 2 });
+    expect(m.rows[1]!.cells[col]).toEqual({ covered: true, bloom: "understand", items: 2 });
     const quiz = m.columns.findIndex((c) => c.id === QUIZ);
-    expect(m.rows[1].cells[quiz]).toEqual({ covered: true, bloom: "understand" });
+    expect(m.rows[1]!.cells[quiz]).toEqual({ covered: true, bloom: "understand" });
   });
 
   it("checkAlignment uses it: coverage set by hand is ignored once there are items", () => {
@@ -106,13 +106,13 @@ describe("question-level findings (after the P20 findings)", () => {
 
   it("outcome-single-item stays quiet for a formative test", () => {
     const d = itemizedCourse();
-    d.assessments[0].items = [{ id: "f1", label: "1", outcomeId: LO2, bloom: "understand" }];
+    d.assessments[0]!.items = [{ id: "f1", label: "1", outcomeId: LO2, bloom: "understand" }];
     expect(checkAlignment(d)).toEqual([]);
   });
 
   it("item-bloom-below-outcome: a question ranks below its outcome, and replaces bloom-below-outcome", () => {
     const d = itemizedCourse();
-    finalTest(d).items![1].bloom = "apply";
+    finalTest(d).items![1]!.bloom = "apply";
     expect(checkAlignment(d)).toEqual([
       {
         code: "item-bloom-below-outcome",
@@ -126,15 +126,15 @@ describe("question-level findings (after the P20 findings)", () => {
 
   it("item-bloom-below-outcome needs both levels", () => {
     const d = itemizedCourse();
-    finalTest(d).items![1].bloom = undefined;
-    d.outcomes[1].bloom = undefined;
-    finalTest(d).items![3].bloom = "remember";
+    finalTest(d).items![1]!.bloom = undefined;
+    d.outcomes[1]!.bloom = undefined;
+    finalTest(d).items![3]!.bloom = "remember";
     expect(checkAlignment(d)).toEqual([]);
   });
 
   it("items-without-points: some questions have points and some do not", () => {
     const d = itemizedCourse();
-    finalTest(d).items![2].points = undefined;
+    finalTest(d).items![2]!.points = undefined;
     expect(checkAlignment(d)).toEqual([
       { code: "items-without-points", severity: "info", itemId: TEST1 },
     ]);
@@ -144,7 +144,7 @@ describe("question-level findings (after the P20 findings)", () => {
 
   it("comes after the P20 findings, in a fixed order", () => {
     const d = itemizedCourse();
-    d.assessments[1].weight = 60;
+    d.assessments[1]!.weight = 60;
     finalTest(d).items = [
       { id: "a", label: "1", outcomeId: LO1, bloom: "apply", points: 1 },
       { id: "b", label: "2", outcomeId: LO2, bloom: "analyze" },
@@ -166,15 +166,15 @@ describe("item edits", () => {
     let d = edit.addItem(start, TEST1, { label: "1", outcomeId: LO1, points: 4 });
     expect(JSON.stringify(start)).toBe(snapshot);
     const item = finalTest(d).items![0];
-    expect(item.id).toMatch(/^[0-9a-f-]{36}$/);
-    d = edit.updateItem(d, TEST1, item.id, { bloom: "create", points: undefined });
+    expect(item!.id).toMatch(/^[0-9a-f-]{36}$/);
+    d = edit.updateItem(d, TEST1, item!.id, { bloom: "create", points: undefined });
     expect(finalTest(d).items![0]).toEqual({
-      id: item.id,
+      id: item!.id,
       label: "1",
       outcomeId: LO1,
       bloom: "create",
     });
-    d = edit.removeItem(d, TEST1, item.id);
+    d = edit.removeItem(d, TEST1, item!.id);
     expect(finalTest(d).items).toEqual([]);
     expect(parses(d)).toBe(true);
   });
@@ -184,7 +184,7 @@ describe("item edits", () => {
       { label: "1", outcomeId: LO2, format: "open" },
     ]);
     expect(finalTest(d).items).toHaveLength(1);
-    expect(finalTest(d).items![0].id).not.toBe("q-1");
+    expect(finalTest(d).items![0]!.id).not.toBe("q-1");
     expect(parses(d)).toBe(true);
   });
 
@@ -231,7 +231,7 @@ describe("itemTotals (the total row of the matrix)", () => {
   });
 
   it("an assessment without items has empty totals", () => {
-    expect(itemTotals(alignedCourse().assessments[0])).toEqual({
+    expect(itemTotals(alignedCourse().assessments[0]!)).toEqual({
       count: 0,
       points: 0,
       byOutcome: [],

@@ -63,7 +63,7 @@ describe("teacherWeek (P22.2)", () => {
     });
     expect(week.monday).toBe("2026-11-02");
     expect(week.isoWeek).toBe(45);
-    const c = running(week.courses[0]);
+    const c = running(week.courses[0]!);
     expect(c).toMatchObject({ courseId: "c1", courseName: "Databases", week: 1 });
     expect(titles(c.thisWeek.rows)).toEqual(["Les 1", "Oefentoets"]);
     expect(c.thisWeek.rows[0]).toMatchObject({ itemId: "a1", kind: "activity", week: 1 });
@@ -72,11 +72,11 @@ describe("teacherWeek (P22.2)", () => {
 
   it("lists a lesson without linked work under prepare, and drops it once work is linked", () => {
     const input = { courses: [course()], breakWeeks: [], today: "2026-11-04" };
-    const before = running(teacherWeek({ ...input, links: [] }).courses[0]);
+    const before = running(teacherWeek({ ...input, links: [] }).courses[0]!);
     // This week and next week.
     expect(titles(before.prepare.rows)).toEqual(["Les 1", "Oefentoets", "Les 2"]);
     const after = running(
-      teacherWeek({ ...input, links: [{ courseId: "c1", itemId: "a2" }] }).courses[0],
+      teacherWeek({ ...input, links: [{ courseId: "c1", itemId: "a2" }] }).courses[0]!,
     );
     expect(titles(after.prepare.rows)).toEqual(["Les 1", "Oefentoets"]);
     // A link to the course as a whole, or to another course's item, prepares nothing.
@@ -87,7 +87,7 @@ describe("teacherWeek (P22.2)", () => {
           { courseId: "c1", itemId: null },
           { courseId: "c2", itemId: "a1" },
         ],
-      }).courses[0],
+      }).courses[0]!,
     );
     expect(titles(other.prepare.rows)).toEqual(["Les 1", "Oefentoets", "Les 2"]);
   });
@@ -96,13 +96,13 @@ describe("teacherWeek (P22.2)", () => {
     // Week 2: the quiz of week 1 needs grading.
     const w2 = running(
       teacherWeek({ courses: [course()], links: [], breakWeeks: [], today: "2026-11-09" })
-        .courses[0],
+        .courses[0]!,
     );
     expect(titles(w2.grade.rows)).toEqual(["Oefentoets"]);
     // Week 4 looks back to weeks 2 and 3 only.
     const w4 = running(
       teacherWeek({ courses: [course()], links: [], breakWeeks: [], today: "2026-11-23" })
-        .courses[0],
+        .courses[0]!,
     );
     expect(w4.grade.rows).toEqual([]);
     expect(GRADE_WEEKS).toBe(2);
@@ -112,7 +112,7 @@ describe("teacherWeek (P22.2)", () => {
     // The exam is in week 4 (23 Nov); weeks 5 and 6 still show it under grade.
     const w6 = running(
       teacherWeek({ courses: [course()], links: [], breakWeeks: [], today: "2026-12-07" })
-        .courses[0],
+        .courses[0]!,
     );
     expect(w6.week).toBe(6);
     expect(w6.thisWeek.rows).toEqual([]);
@@ -158,8 +158,8 @@ describe("teacherWeek (P22.2)", () => {
       today: "2026-11-04",
     });
     expect(week.courses.map((c) => c.courseName)).toEqual(["Algoritmen", "Webtechniek"]);
-    expect(titles(running(week.courses[0]).prepare.rows)).toContain("Les 1");
-    expect(titles(running(week.courses[1]).prepare.rows)).not.toContain("Les 1");
+    expect(titles(running(week.courses[0]!).prepare.rows)).toContain("Les 1");
+    expect(titles(running(week.courses[1]!).prepare.rows)).not.toContain("Les 1");
   });
 
   it("counts the open alignment findings, and the role-agent findings only when given", () => {
@@ -173,10 +173,10 @@ describe("teacherWeek (P22.2)", () => {
       },
     );
     const input = { courses: [misaligned], links: [], breakWeeks: [], today: "2026-11-04" };
-    const c = running(teacherWeek(input).courses[0]);
+    const c = running(teacherWeek(input).courses[0]!);
     expect(c.findings).toBeGreaterThan(0);
     expect(c).not.toHaveProperty("agentFindings");
-    const withAgents = running(teacherWeek({ ...input, agentFindings: { c1: 3 } }).courses[0]);
+    const withAgents = running(teacherWeek({ ...input, agentFindings: { c1: 3 } }).courses[0]!);
     expect(withAgents.agentFindings).toBe(3);
   });
 
@@ -194,7 +194,7 @@ describe("teacherWeek (P22.2)", () => {
         links: [],
         breakWeeks: [],
         today: "2026-11-02",
-      }).courses[0],
+      }).courses[0]!,
     );
     expect(c.thisWeek.rows).toHaveLength(MAX_ROWS);
     expect(c.thisWeek.more).toBe(4); // 13 lessons + the quiz, 10 shown
@@ -205,7 +205,7 @@ describe("nextWeek (P22.2)", () => {
   it("is the same week a week later", () => {
     const week = nextWeek({ courses: [course()], links: [], breakWeeks: [], today: "2026-11-06" });
     expect(week.monday).toBe("2026-11-09");
-    expect(titles(running(week.courses[0]).thisWeek.rows)).toEqual(["Les 2"]);
+    expect(titles(running(week.courses[0]!).thisWeek.rows)).toEqual(["Les 2"]);
   });
 
   it("looks across a break", () => {
@@ -216,10 +216,10 @@ describe("nextWeek (P22.2)", () => {
       breakWeeks: ["2026-11-09"],
       today: "2026-11-06",
     };
-    expect(nextWeek(input).courses[0].status).toBe("break");
+    expect(nextWeek(input).courses[0]!.status).toBe("break");
     // The week after the break is course week 2.
     const after = teacherWeek({ ...input, today: "2026-11-16" });
-    expect(running(after.courses[0]).week).toBe(2);
+    expect(running(after.courses[0]!).week).toBe(2);
   });
 });
 

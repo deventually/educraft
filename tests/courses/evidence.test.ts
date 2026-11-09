@@ -25,10 +25,10 @@ describe("courseAsEvidence: outcomes and matrix (P26.4)", () => {
 
   it("writes the findings as the course page does, in English too", () => {
     const d = itemizedCourse();
-    d.assessments[1].items = d.assessments[1].items!.filter((i) => i.id !== "q-2");
+    d.assessments[1]!.items = d.assessments[1]!.items!.filter((i) => i.id !== "q-2");
     const md = courseAsEvidence(course(d), "outcomes-and-matrix", "en");
     expect(md).toContain("### Learning outcomes");
-    expect(md).toContain(`- Attention: ${findingText(checkAlignment(d)[0], d, "en")}`);
+    expect(md).toContain(`- Attention: ${findingText(checkAlignment(d)[0]!, d, "en")}`);
     expect(md).toContain("Eindopdracht assesses LO1 with only one question.");
     expect(md).toMatchSnapshot();
   });
@@ -50,7 +50,7 @@ describe("courseAsEvidence: one assessment", () => {
     expect(md).toContain("| **Totaal** | 4 vragen |  |  | 25 |");
     expect(md).toContain("Aandeel per leeruitkomst: LU1 80% · LU2 20%.");
     const rows = md.split("\n").filter((l) => /^\| \d+ \|/.test(l));
-    const points = rows.map((l) => Number(l.split("|")[5].trim()));
+    const points = rows.map((l) => Number(l.split("|")[5]!.trim()));
     expect(points.reduce((s, p) => s + p, 0)).toBe(25);
     expect(md).toMatchSnapshot();
   });
@@ -81,8 +81,8 @@ describe("evidenceTitle", () => {
 describe("findingText", () => {
   it("names outcome, item and question like the course page", () => {
     const d = itemizedCourse();
-    d.assessments[1].items![1].bloom = "apply";
-    expect(findingText(checkAlignment(d)[0], d, "nl")).toBe(
+    d.assessments[1]!.items![1]!.bloom = "apply";
+    expect(findingText(checkAlignment(d)[0]!, d, "nl")).toBe(
       "Vraag 2 van Eindopdracht toetst LU1 onder het niveau van de leeruitkomst.",
     );
     expect(LO1).toBe("lo-1");

@@ -44,7 +44,7 @@ export function alignedCourse(): CourseData {
 /** The aligned course whose final test carries a question-level matrix (P26.1). Still aligned. */
 export function itemizedCourse(): CourseData {
   const d = alignedCourse();
-  d.assessments[1].items = [
+  d.assessments[1]!.items = [
     { id: "q-1", label: "1", outcomeId: LO1, bloom: "create", format: "open", points: 10 },
     { id: "q-2", label: "2", outcomeId: LO1, bloom: "create", format: "open", points: 10 },
     {

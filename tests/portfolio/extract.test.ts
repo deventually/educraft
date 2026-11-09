@@ -70,15 +70,15 @@ describe("parseExtraction", () => {
     expect(r.framework.requirements).toEqual({ maxWords: 6000 });
     expect(r.framework.confirmedAt).toBeUndefined();
     const [lu1, lu2] = r.framework.outcomes;
-    expect(lu1.code).toBe("LU1");
-    expect(lu1.criteria.map((c) => c.unverified)).toEqual([undefined, undefined]);
-    expect(lu1.criteria[0].strongLevel).toBe("de opbouw is afgestemd op de doelen van de les.");
-    expect(lu1.requiredEvidence).toEqual([
+    expect(lu1!.code).toBe("LU1");
+    expect(lu1!.criteria.map((c) => c.unverified)).toEqual([undefined, undefined]);
+    expect(lu1!.criteria[0]!.strongLevel).toBe("de opbouw is afgestemd op de doelen van de les.");
+    expect(lu1!.requiredEvidence).toEqual([
       "lesvoorbereiding",
       "feedback van de werkplekbegeleider",
     ]);
-    expect(lu2.criteria).toHaveLength(1);
-    const ids = [lu1.id, lu2.id, ...lu1.criteria.map((c) => c.id)];
+    expect(lu2!.criteria).toHaveLength(1);
+    const ids = [lu1!.id, lu2!.id, ...lu1!.criteria.map((c) => c.id)];
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -96,21 +96,21 @@ describe("parseExtraction", () => {
 
   it("flags a criterion that is not verbatim in the form", () => {
     const invented = structuredClone(good);
-    invented.outcomes[1].criteria.push({
+    invented.outcomes[1]!.criteria.push({
       text: "De docent reflecteert op de eigen toetspraktijk.",
     });
     const r = parseExtraction(JSON.stringify(invented), FORM);
     if (!r.ok) throw new Error(r.error);
     expect(r.flagged).toBe(1);
-    expect(r.framework.outcomes[1].criteria.map((c) => !!c.unverified)).toEqual([false, true]);
+    expect(r.framework.outcomes[1]!.criteria.map((c) => !!c.unverified)).toEqual([false, true]);
   });
 
   it("flags a paraphrase, not a near miss", () => {
     const para = structuredClone(good);
-    para.outcomes[0].criteria[1].text = "De docent sluit goed aan bij de beginsituatie.";
+    para.outcomes[0]!.criteria[1]!.text = "De docent sluit goed aan bij de beginsituatie.";
     const r = parseExtraction(JSON.stringify(para), FORM);
     if (!r.ok) throw new Error(r.error);
-    expect(r.framework.outcomes[0].criteria[1].unverified).toBe(true);
+    expect(r.framework.outcomes[0]!.criteria[1]!.unverified).toBe(true);
   });
 
   it("refuses broken JSON, an empty framework and a wrong shape", () => {
@@ -142,7 +142,7 @@ describe("parseExtraction", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.clipped).toBe(true);
     expect(r.framework.outcomes).toHaveLength(LIMITS.outcomes);
-    expect(r.framework.outcomes[0].criteria).toHaveLength(LIMITS.criteriaPerOutcome);
+    expect(r.framework.outcomes[0]!.criteria).toHaveLength(LIMITS.criteriaPerOutcome);
     expect(r.framework.requirements).toEqual({ aiDisclosureRequired: true });
     const d = applyExtraction(emptyDossier(["bdb"]), r.framework);
     if (!d.ok) throw new Error(d.error);
@@ -198,9 +198,9 @@ describe("applyExtraction", () => {
 describe("the check-this flag", () => {
   it("is cleared when the teacher saves that criterion", () => {
     const d = sampleDossier();
-    d.framework.outcomes[0].criteria[0].unverified = true;
+    d.framework.outcomes[0]!.criteria[0]!.unverified = true;
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
     const next = edit.updateCriterion(d, C1, { text: "Nagekeken tekst." });
-    expect(next.framework.outcomes[0].criteria[0].unverified).toBeUndefined();
+    expect(next.framework.outcomes[0]!.criteria[0]!.unverified).toBeUndefined();
   });
 });

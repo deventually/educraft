@@ -100,8 +100,10 @@ export function courseWeekOn(
   const weeks = courseWeekDates(startDate, breakWeeks, lastWeek);
   const index = weeks.indexOf(monday);
   if (index >= 0) return { kind: "week", week: index + 1 };
-  if (weeks.length === 0 || monday < weeks[0]) return { kind: "before" };
-  if (monday > weeks[weeks.length - 1]) return { kind: "after" };
+  const first = weeks[0];
+  const last = weeks[weeks.length - 1];
+  if (first === undefined || last === undefined || monday < first) return { kind: "before" };
+  if (monday > last) return { kind: "after" };
   return { kind: "break" };
 }
 

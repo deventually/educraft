@@ -95,7 +95,7 @@ function toLines(tokens: CodeToken[]): CodeToken[][] {
   for (const t of tokens) {
     t.text.split("\n").forEach((part, i) => {
       if (i > 0) lines.push([]);
-      if (part) lines[lines.length - 1].push({ ...t, text: part });
+      if (part) lines.at(-1)?.push({ ...t, text: part });
     });
   }
   return lines;

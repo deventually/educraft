@@ -61,7 +61,7 @@ describe("GET /portfolio/:id/export", () => {
   it("sends the teacher back to the check while an open spot is left", async () => {
     requireRoleMock.mockResolvedValue(teacher("export-owner"));
     const data = sampleDossier();
-    data.chapters[0].text = "Mijn les. [aanvullen: het effect]";
+    data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
     const res = await call(d.id);
     expect(res.status).toBe(302);
@@ -71,7 +71,7 @@ describe("GET /portfolio/:id/export", () => {
   it("always gives the draft version, marked as such in its file name", async () => {
     requireRoleMock.mockResolvedValue(teacher("export-owner"));
     const data = sampleDossier();
-    data.chapters[0].text = "Mijn les. [aanvullen: het effect]";
+    data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
     const res = await call(d.id, "", "?draft=1");
     expect(res.status).toBe(200);
@@ -85,7 +85,7 @@ describe("GET /portfolio/:id/export", () => {
     requireRoleMock.mockResolvedValue(teacher("export-owner"));
     const data = sampleDossier();
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
-    const lu = data.framework.outcomes[0].id;
+    const lu = data.framework.outcomes[0]!.id;
     const res = await call(d.id, "", `?lu=${lu}`);
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Disposition")).toContain('filename="BDB 2026 - LU1.docx"');
@@ -111,7 +111,7 @@ describe("GET /portfolio/:id/export", () => {
     });
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
     expect((await call(d.id)).status).toBe(302);
-    expect((await call(d.id, "", `?lu=${data.framework.outcomes[0].id}`)).status).toBe(200);
+    expect((await call(d.id, "", `?lu=${data.framework.outcomes[0]!.id}`)).status).toBe(200);
     const back = await call(d.id, "", `?lu=${lu2}`);
     expect(back.status).toBe(302);
     expect(back.headers.get("Location")).toBe(`/portfolio/${d.id}#readiness`);
@@ -152,7 +152,7 @@ describe("GET /portfolio/:id/print (PDF)", () => {
   it("follows the same rules as the Word export: draft always, final only without open spots", async () => {
     requireRoleMock.mockResolvedValue(teacher("print-owner"));
     const data = sampleDossier();
-    data.chapters[0].text = "Mijn les. [aanvullen: het effect]";
+    data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("print-owner", "BDB 2026", data);
     const back = await load(d.id);
     expect(back).toBeInstanceOf(Response);

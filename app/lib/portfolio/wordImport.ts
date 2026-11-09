@@ -75,7 +75,9 @@ function tableMarkdown(table: Element): string {
   if (!lines.length) return "";
   const width = Math.max(...lines.map((l) => l.length));
   const row = (l: string[]) => `| ${[...l, ...Array(width - l.length).fill("")].join(" | ")} |`;
-  return [row(lines[0]), row(Array(width).fill("---")), ...lines.slice(1).map(row)].join("\n");
+  return [row(lines[0] ?? []), row(Array(width).fill("---")), ...lines.slice(1).map(row)].join(
+    "\n",
+  );
 }
 
 function blockMarkdown(n: SafeNode): string {

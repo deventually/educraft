@@ -27,8 +27,8 @@ describe("prompt section contract", () => {
     for (const id of chatPromptIds) {
       const p = PROMPTS[id];
       expect(p, `chat prompt ${id} missing from PROMPTS`).toBeDefined();
-      expect(p.runtime.nl, `${id} nl`).toContain("Multi-turn");
-      expect(p.runtime.en, `${id} en`).toContain("Multi-turn");
+      expect(p!.runtime.nl, `${id} nl`).toContain("Multi-turn");
+      expect(p!.runtime.en, `${id} en`).toContain("Multi-turn");
     }
   });
 });

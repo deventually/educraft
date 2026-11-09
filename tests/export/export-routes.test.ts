@@ -115,7 +115,7 @@ describe("export routes (P30.1)", () => {
     );
     const data = await loadPreview(items.id, `?with=${blueprint.id}`);
     expect(data.doc.sections.map((s) => s.heading)).toEqual(["1. Toetsmatrijs", "2. Toetsvragen"]);
-    expect(data.downloads[0].href).toBe(`/work/${items.id}/export/docx?with=${blueprint.id}`);
+    expect(data.downloads[0]!.href).toBe(`/work/${items.id}/export/docx?with=${blueprint.id}`);
   });
 
   it("returns the owner's work as a Word download", async () => {

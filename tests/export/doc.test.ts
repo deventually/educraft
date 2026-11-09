@@ -18,9 +18,9 @@ describe("toExportDoc (P30.1)", () => {
     expect(doc.title).toBe("Toetsvragen");
     expect(doc.locale).toBe("nl");
     expect(doc.sections.map((s) => s.heading)).toEqual(["1. Toetsmatrijs", "2. Toetsvragen"]);
-    expect(doc.sections[0].kind).toBe("table");
-    expect(doc.sections[0].blocks[0]).toMatchObject({ type: "table" });
-    expect(doc.sections[1].blocks.map((b) => b.type)).toEqual(["heading", "list"]);
+    expect(doc.sections[0]!.kind).toBe("table");
+    expect(doc.sections[0]!.blocks[0]).toMatchObject({ type: "table" });
+    expect(doc.sections[1]!.blocks.map((b) => b.type)).toEqual(["heading", "list"]);
   });
 
   it("leaves out an empty step", () => {
@@ -41,7 +41,7 @@ describe("toExportDoc (P30.1)", () => {
       locale: "nl",
       sections: [{ heading: null, markdown: "a" }],
     });
-    expect(doc.sections[0].kind).toBe("document");
+    expect(doc.sections[0]!.kind).toBe("document");
   });
 
   it("keeps each step's own markdown for the Markdown file", () => {
@@ -50,6 +50,6 @@ describe("toExportDoc (P30.1)", () => {
       locale: "nl",
       sections: [{ heading: null, markdown: " a\n" }],
     });
-    expect(doc.sections[0].markdown).toBe("a");
+    expect(doc.sections[0]!.markdown).toBe("a");
   });
 });

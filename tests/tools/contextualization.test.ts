@@ -19,7 +19,7 @@ describe("tool: contextualization", () => {
     };
 
     const prompt = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: inputs,
       outputLanguage: "nl",
     });
@@ -45,7 +45,7 @@ describe("tool: contextualization", () => {
   });
 
   it("runs on @v2 and keeps @v1 registered", () => {
-    expect(getToolBySlug("contextualization")!.stages[0].systemPromptId).toBe(
+    expect(getToolBySlug("contextualization")!.stages[0]!.systemPromptId).toBe(
       "contextualization@v2",
     );
     expect(getPrompt("contextualization@v1").id).toBe("contextualization@v1");

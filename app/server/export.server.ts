@@ -41,10 +41,12 @@ export async function loadExport(request: Request, generationId: string): Promis
     if (!row) throw notFound();
     rows.push(row);
   }
-  const tool = getToolBySlug(rows[0].toolSlug);
+  const [first] = rows;
+  if (!first) throw notFound();
+  const tool = getToolBySlug(first.toolSlug);
   if (!tool || rows.some((r) => r.toolSlug !== tool.slug)) throw notFound();
 
-  const locale: Locale = rows[0].outputLanguage === "en" ? "en" : "nl";
+  const locale: Locale = first.outputLanguage === "en" ? "en" : "nl";
   const stageIndex = (stageId: string | null) => {
     const i = tool.stages.findIndex((s) => s.id === stageId);
     return i < 0 ? 0 : i;
@@ -53,6 +55,7 @@ export async function loadExport(request: Request, generationId: string): Promis
   const many = sorted.length > 1;
   const sections = sorted.map((r) => {
     const stage = tool.stages[stageIndex(r.stageId)];
+    if (!stage) throw notFound();
     return {
       heading: many ? loc(stage.name, locale) : null,
       kind: stage.output.exportAs,
@@ -61,7 +64,7 @@ export async function loadExport(request: Request, generationId: string): Promis
   });
   const title = loc(tool.name, locale);
   const doc = toExportDoc({ title, locale, sections });
-  const date = rows[0].createdAt.toISOString().slice(0, 10);
+  const date = first.createdAt.toISOString().slice(0, 10);
   return {
     doc,
     formats: formatsFor(doc.sections.map((s) => s.kind)),

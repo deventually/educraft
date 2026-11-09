@@ -121,7 +121,7 @@ describe("readBack", () => {
       [LU2, false],
     ]);
     // The open spot comes back as an open spot.
-    expect(r.chapters[1].text).toBe("Mijn toets. [aanvullen: de p-waarden]");
+    expect(r.chapters[1]!.text).toBe("Mijn toets. [aanvullen: de p-waarden]");
     expect(r.references).toEqual([]);
   });
 

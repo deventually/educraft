@@ -94,7 +94,7 @@ describe("CourseWeekView (P27.4)", () => {
 
   it("puts items without a week at the bottom", async () => {
     const d = alignedCourse();
-    d.assessments[1].week = undefined;
+    d.assessments[1]!.week = undefined;
     renderWeek(d);
     const region = await screen.findByRole("region", { name: "Per week" });
     const headings = within(region)

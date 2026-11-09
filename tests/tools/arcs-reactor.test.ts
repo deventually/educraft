@@ -27,7 +27,7 @@ describe("tool: arcs-reactor", () => {
       barriere: "students skip the automated-testing exercises",
     };
     const prompt = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: inputs,
       outputLanguage: "nl",
     });

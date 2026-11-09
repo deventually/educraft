@@ -11,7 +11,7 @@ import { C1, LU, sampleDossier } from "./fixtures";
  */
 function withPending(): DossierData {
   const d = sampleDossier();
-  d.evidence = [{ ...d.evidence[0], title: "Video van de les", text: "  " }];
+  d.evidence = [{ ...d.evidence[0]!, title: "Video van de les", text: "  " }];
   return d;
 }
 

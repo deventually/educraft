@@ -175,7 +175,7 @@ describe("DynamicForm — image input", () => {
 
     // Click remove button
     const removeButtons = screen.getAllByRole("button", { name: /Remove/i });
-    removeButtons[0].click();
+    removeButtons[0]!.click();
 
     // Verify onChange was called with array of 1 image (the second one)
     expect(onChange).toHaveBeenCalledWith("mathImages", [mockImages[1]]);

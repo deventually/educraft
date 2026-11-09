@@ -28,8 +28,8 @@ describe("loadOriginal", () => {
     if (doc.kind !== "pdf") throw new Error("expected a pdf");
     expect(doc.layouts.map((l) => l.text)).toEqual(doc.pages);
     const page = doc.layouts[0];
-    const at = page.text.indexOf("STAGEFIXTUREPAGEONE");
-    const rects = highlightRects(page, at, at + "STAGEFIXTUREPAGEONE".length);
+    const at = page!.text.indexOf("STAGEFIXTUREPAGEONE");
+    const rects = highlightRects(page!, at, at + "STAGEFIXTUREPAGEONE".length);
     expect(rects.length).toBeGreaterThan(0);
     for (const r of rects) {
       expect(r.left).toBeGreaterThanOrEqual(0);
@@ -37,7 +37,7 @@ describe("loadOriginal", () => {
       expect(r.left + r.width).toBeLessThanOrEqual(1);
       expect(r.top + r.height).toBeLessThanOrEqual(1);
     }
-    expect(page.aspect).toBeGreaterThan(0);
+    expect(page!.aspect).toBeGreaterThan(0);
   });
 
   it("turns a DOCX into the safe node tree of the Word view", async () => {

@@ -63,7 +63,7 @@ describe("readinessCheck — one code at a time", () => {
 
   it("criterion-unverified: warn per criterion the extraction flagged", () => {
     const d = tidy();
-    d.framework.outcomes[0].criteria[1].unverified = true;
+    d.framework.outcomes[0]!.criteria[1]!.unverified = true;
     expect(of(readinessCheck(d), "criterion-unverified")).toEqual([
       {
         code: "criterion-unverified",

@@ -161,7 +161,7 @@ describe("buildDossierDocx", () => {
 
   it("refuses to write the final version while an open spot is left", async () => {
     const d = richDossier();
-    d.chapters[1].text = "Mijn toets was valide. [aanvullen: de p-waarden]";
+    d.chapters[1]!.text = "Mijn toets was valide. [aanvullen: de p-waarden]";
     await expect(
       buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW }),
     ).rejects.toBeInstanceOf(OpenSpotsError);
@@ -199,8 +199,8 @@ describe("buildDossierDocx — draft version", () => {
     expect(nl.footer).toContain("CONCEPT, NIET INLEVEREN");
     expect(nl.core).toContain("CONCEPT, NIET INLEVEREN: BDB");
     const first = paragraphs(nl.doc).slice(0, 3);
-    expect(first[0].text).toBe("CONCEPT, NIET INLEVEREN");
-    expect(first[1].text).toBe(
+    expect(first[0]!.text).toBe("CONCEPT, NIET INLEVEREN");
+    expect(first[1]!.text).toBe(
       "Deze versie heeft nog open plekken, geel gemarkeerd. Lever hem niet in; los eerst alles op in LimeOnIt.",
     );
     expect(first[2]).toEqual({ style: "Title", text: "BDB" });
@@ -211,8 +211,8 @@ describe("buildDossierDocx — draft version", () => {
 
   it("marks every open spot in yellow: markers, an empty chapter, evidence still to come", async () => {
     const d = richDossier();
-    d.chapters = [{ ...d.chapters[0], text: "Ik begon. [aanvullen: het effect] Daarna." }];
-    d.evidence[0].text = "";
+    d.chapters = [{ ...d.chapters[0]!, text: "Ik begon. [aanvullen: het effect] Daarna." }];
+    d.evidence[0]!.text = "";
     const { doc } = await draft(d);
     const yellow = [
       ...doc.matchAll(
@@ -251,7 +251,7 @@ describe("chapter heading levels", () => {
   it("maps the chapter's top heading to Heading 2, without skipping a level", async () => {
     const d = sampleDossier();
     d.evidence = [];
-    d.chapters[0].text = "# Een\n\ntekst\n\n### Twee";
+    d.chapters[0]!.text = "# Een\n\ntekst\n\n### Twee";
     const styles = paragraphs(
       await documentXml(await buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW })),
     )
@@ -307,7 +307,7 @@ describe("course snapshots in the appendices (P26.4)", () => {
 
   it("keeps pasted evidence as plain text, markdown signs and all", async () => {
     const d = sampleDossier();
-    d.evidence[0].text = "| a | b |\n|---|---|\n* geen lijst";
+    d.evidence[0]!.text = "| a | b |\n|---|---|\n* geen lijst";
     const texts = paragraphs(
       await documentXml(await buildDossierDocx({ name: "BDB", data: d, locale: "nl", now: NOW })),
     ).map((p) => p.text);

@@ -7,7 +7,7 @@ const labels = { criterion: "Criterium", level: "Niveau", points: "pt", knockout
 describe("rubric export", () => {
   it("copies as a tab-separated table: criteria × levels", () => {
     const d = sampleRubric();
-    d.criteria[0].levels[0].description = "Geen\tanalyse,\nnee.";
+    d.criteria[0]!.levels[0]!.description = "Geen\tanalyse,\nnee.";
     const lines = rubricToTsv(d, labels).split("\n");
     expect(lines).toHaveLength(3);
     expect(lines[0]).toBe("Criterium\tNiveau 1\tNiveau 2\tNiveau 3");
@@ -21,7 +21,7 @@ describe("rubric export", () => {
 
   it("copies as a Markdown table, escaping pipes", () => {
     const d = sampleRubric();
-    d.criteria[0].title = "Analyse | diepgang";
+    d.criteria[0]!.title = "Analyse | diepgang";
     const md = rubricToMarkdown(d, labels);
     const lines = md.split("\n");
     expect(lines[0]).toBe("| Criterium | Niveau 1 | Niveau 2 | Niveau 3 |");

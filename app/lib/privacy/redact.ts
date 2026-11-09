@@ -165,11 +165,12 @@ export function findRedactions(
         const re = `${NOT_WORD_BEFORE}(${flexible(v)})${isPerson ? POSSESSIVE : ""}${NOT_WORD_AFTER}`;
         for (const m of text.matchAll(new RegExp(re, "giu"))) {
           const start = m.index ?? 0;
+          const original = m[1] ?? "";
           entryCands.push({
             start,
-            end: start + m[1].length,
+            end: start + original.length,
             code,
-            original: m[1],
+            original,
             source: "entry",
             value: entry.value.trim(),
             ...(entry.description?.trim() ? { description: entry.description.trim() } : {}),

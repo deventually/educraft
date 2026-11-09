@@ -10,8 +10,8 @@ const G3 = "00000000-0000-4000-8000-0000000000f3";
 /** C1 is about lesson structure, C2 about assessment. */
 function dossier(): DossierData {
   const d = sampleDossier();
-  d.framework.outcomes[0].criteria[0].text = "Je maakt een lesontwerp met heldere leerdoelen.";
-  d.framework.outcomes[0].criteria[1].text = "Je stelt een toets samen met een passende rubric.";
+  d.framework.outcomes[0]!.criteria[0]!.text = "Je maakt een lesontwerp met heldere leerdoelen.";
+  d.framework.outcomes[0]!.criteria[1]!.text = "Je stelt een toets samen met een passende rubric.";
   d.evidence = [];
   return d;
 }
@@ -29,8 +29,8 @@ describe("suggestEvidence", () => {
       gen(G2, "guided-reflection", 2000),
       gen(G3, "test-items", 3000),
     ]);
-    expect(s[C1].map((x) => x.generationId)).toEqual([G2, G1]);
-    expect(s[C2].map((x) => x.generationId)).toEqual([G3]);
+    expect(s[C1]!.map((x) => x.generationId)).toEqual([G2, G1]);
+    expect(s[C2]!.map((x) => x.generationId)).toEqual([G3]);
   });
 
   it("leaves out criteria without a fitting generation", () => {
@@ -65,6 +65,6 @@ describe("suggestEvidence", () => {
     const s = suggestEvidence(dossier(), [gen(G1, "lesson-plan", 1000)], {
       [G1]: [{ courseName: "Statistiek 1" }],
     });
-    expect(s[C1][0]).toMatchObject({ toolSlug: "lesson-plan", courses: ["Statistiek 1"] });
+    expect(s[C1]![0]).toMatchObject({ toolSlug: "lesson-plan", courses: ["Statistiek 1"] });
   });
 });

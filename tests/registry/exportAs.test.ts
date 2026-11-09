@@ -39,7 +39,7 @@ describe("OutputFormat.exportAs — the data (P30.1)", () => {
 
   it("leaves every other result a plain document (no kind set)", () => {
     expect(
-      kindOf("socratic-partner", getToolBySlugOrThrow("socratic-partner").stages[0].id),
+      kindOf("socratic-partner", getToolBySlugOrThrow("socratic-partner").stages[0]!.id),
     ).toBeUndefined();
   });
 });

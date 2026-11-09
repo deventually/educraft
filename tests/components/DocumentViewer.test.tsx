@@ -155,11 +155,11 @@ describe("DocumentViewer", () => {
     const page = document.querySelector<HTMLElement>('[data-located="true"]');
     const marks = page?.querySelectorAll<HTMLElement>("[data-highlight]") ?? [];
     expect(marks).toHaveLength(1);
-    const at = pageTexts[1].indexOf(found);
-    expect(Number.parseFloat(marks[0].style.left)).toBeCloseTo(
-      ((50 + 500 * (at / pageTexts[1].length)) / 600) * 100,
+    const at = pageTexts[1]!.indexOf(found);
+    expect(Number.parseFloat(marks[0]!.style.left)).toBeCloseTo(
+      ((50 + 500 * (at / pageTexts[1]!.length)) / 600) * 100,
     );
-    expect(Number.parseFloat(marks[0].style.top)).toBeCloseTo(((800 - 700 - 12) / 800) * 100);
+    expect(Number.parseFloat(marks[0]!.style.top)).toBeCloseTo(((800 - 700 - 12) / 800) * 100);
 
     // Asking again for the same quote (a second click) works again.
     rerender(<DocumentViewer {...props} focus={{ quote: missing, id: 2 }} />);

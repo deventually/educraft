@@ -22,7 +22,7 @@ describe("pack tags", () => {
     const old = alignedCourse();
     expect(CourseDataSchema.safeParse(old).success).toBe(true);
     const tagged = alignedCourse();
-    tagged.outcomes[0].packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen"] };
+    tagged.outcomes[0]!.packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen"] };
     expect(CourseDataSchema.safeParse(tagged).success).toBe(true);
     const bad = alignedCourse();
     (bad.outcomes[0] as { packTags?: unknown }).packTags = { beheersingsniveau: { x: 1 } };
@@ -58,13 +58,13 @@ describe("pack tags", () => {
       ["tag:beheersingsniveau", "3"],
     ]);
     const withPack = applyCourseIntent(alignedCourse(), fd, { pack: ICT });
-    expect(withPack.ok && withPack.data.outcomes[0].packTags).toEqual({ beheersingsniveau: 3 });
+    expect(withPack.ok && withPack.data.outcomes[0]!.packTags).toEqual({ beheersingsniveau: 3 });
 
     // Without a pack the tag fields are ignored and existing tags are kept.
     const tagged = alignedCourse();
-    tagged.outcomes[0].packTags = { beheersingsniveau: 1 };
+    tagged.outcomes[0]!.packTags = { beheersingsniveau: 1 };
     const noPack = applyCourseIntent(tagged, fd);
-    expect(noPack.ok && noPack.data.outcomes[0].packTags).toEqual({ beheersingsniveau: 1 });
+    expect(noPack.ok && noPack.data.outcomes[0]!.packTags).toEqual({ beheersingsniveau: 1 });
 
     const add = applyCourseIntent(
       alignedCourse(),
@@ -91,7 +91,7 @@ describe("pack tags", () => {
 
   it("clearing every tag removes them", () => {
     const tagged = alignedCourse();
-    tagged.outcomes[0].packTags = { beheersingsniveau: 1 };
+    tagged.outcomes[0]!.packTags = { beheersingsniveau: 1 };
     const r = applyCourseIntent(
       tagged,
       form([
@@ -102,12 +102,12 @@ describe("pack tags", () => {
       ]),
       { pack: ICT },
     );
-    expect(r.ok && "packTags" in r.data.outcomes[0]).toBe(false);
+    expect(r.ok && "packTags" in r.data.outcomes[0]!).toBe(false);
   });
 
   it("go into the hat's input, next to Bloom", () => {
     const c = alignedCourse();
-    c.outcomes[0].packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen", "Realiseren"] };
+    c.outcomes[0]!.packTags = { beheersingsniveau: 3, activiteiten: ["Ontwerpen", "Realiseren"] };
     const msg = buildReviewMessage({ course: c, alignment: [], rejected: [] }, "nl");
     expect(msg).toContain(
       "L1 (bloom: create, beheersingsniveau: 3, activiteiten: Ontwerpen + Realiseren): Je ontwerpt een datamodel.",
@@ -116,16 +116,16 @@ describe("pack tags", () => {
 
   it("an import leaves new outcomes untagged and keeps the tags of existing ones", () => {
     const c = alignedCourse();
-    c.outcomes[0].packTags = { beheersingsniveau: 3 };
+    c.outcomes[0]!.packTags = { beheersingsniveau: 3 };
     const r = applyImport(c, {
       outcomes: [
-        { key: "o1", pick: true, text: c.outcomes[0].text, bloom: "apply" },
+        { key: "o1", pick: true, text: c.outcomes[0]!.text, bloom: "apply" },
         { key: "o2", pick: true, text: "Je schrijft SQL-queries." },
       ],
       assessments: [],
     });
     if (!r.ok) throw new Error(r.error);
-    expect(r.data.outcomes[0].packTags).toEqual({ beheersingsniveau: 3 });
+    expect(r.data.outcomes[0]!.packTags).toEqual({ beheersingsniveau: 3 });
     expect(r.data.outcomes.at(-1)?.packTags).toBeUndefined();
   });
 });

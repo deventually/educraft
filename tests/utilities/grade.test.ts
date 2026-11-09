@@ -89,7 +89,7 @@ describe("grade calculator — rounding and bounds", () => {
     ]) {
       const rows = gradeTable(s);
       for (let i = 1; i < rows.length; i++) {
-        expect(rows[i].grade).toBeGreaterThanOrEqual(rows[i - 1].grade);
+        expect(rows[i]!.grade).toBeGreaterThanOrEqual(rows[i - 1]!.grade);
       }
       for (const r of rows) {
         expect(r.grade).toBeGreaterThanOrEqual(s.minGrade);

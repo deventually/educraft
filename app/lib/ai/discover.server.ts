@@ -78,8 +78,8 @@ async function discoverServer(server: LocalServer, timeoutMs: number): Promise<D
       provider: server.provider,
       apiId,
       displayName: `${server.label} · ${apiId}`,
-      supportsImages: capabilities[i].includes("vision"),
-      supportsThinking: capabilities[i].includes("thinking"),
+      supportsImages: capabilities[i]?.includes("vision") ?? false,
+      supportsThinking: capabilities[i]?.includes("thinking") ?? false,
       tier: 2,
       local: true,
       // Local inference is free to the owner, so discovered models stay selectable.

@@ -83,8 +83,8 @@ async function* runCli(
     child.on("close", (c) => resolve(c));
   });
 
-  if (spawnErrors.length > 0) {
-    const err = spawnErrors[0];
+  const [err] = spawnErrors;
+  if (err) {
     if (err.code === "ENOENT") {
       throw new LocalizedError({
         nl: `CLI "${spec.command}" kon niet worden gestart. Is deze geïnstalleerd en beschikbaar in je PATH?`,

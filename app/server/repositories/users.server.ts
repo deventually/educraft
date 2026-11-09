@@ -415,7 +415,7 @@ export async function findClaimedEmails(
   const wantedSet = new Set(wanted);
   for (const { note } of open) {
     const m = note?.match(/<([^<>\s]+)>\s*$/);
-    const email = m?.[1].toLowerCase();
+    const email = m?.[1]?.toLowerCase();
     if (email && wantedSet.has(email)) invited.add(email);
   }
   return { taken, invited };

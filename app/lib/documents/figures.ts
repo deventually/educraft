@@ -56,35 +56,38 @@ const isFigure = (w: number, h: number) => Math.min(w, h) >= MIN_SIDE && w * h >
 
 /** Pixel size from a PNG, GIF, JPEG or WebP header; undefined when unknown. */
 export function imageSize(b: Uint8Array): { width: number; height: number } | undefined {
-  const u16be = (i: number) => (b[i] << 8) | b[i + 1];
-  const u16le = (i: number) => b[i] | (b[i + 1] << 8);
-  const u32be = (i: number) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
-  if (b.length >= 24 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) {
+  /** Out of range reads as 0, as a bitwise op on a missing byte did before. */
+  const at = (i: number) => b[i] ?? 0;
+  const u16be = (i: number) => (at(i) << 8) | at(i + 1);
+  const u16le = (i: number) => at(i) | (at(i + 1) << 8);
+  const u32be = (i: number) =>
+    ((at(i) << 24) | (at(i + 1) << 16) | (at(i + 2) << 8) | at(i + 3)) >>> 0;
+  if (b.length >= 24 && at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47) {
     return { width: u32be(16), height: u32be(20) };
   }
-  if (b.length >= 10 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) {
+  if (b.length >= 10 && at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46) {
     return { width: u16le(6), height: u16le(8) };
   }
-  if (b.length >= 30 && b[0] === 0x52 && b[1] === 0x49 && b[8] === 0x57 && b[9] === 0x45) {
-    const kind = String.fromCharCode(b[12], b[13], b[14], b[15]);
+  if (b.length >= 30 && at(0) === 0x52 && at(1) === 0x49 && at(8) === 0x57 && at(9) === 0x45) {
+    const kind = String.fromCharCode(at(12), at(13), at(14), at(15));
     if (kind === "VP8 ") return { width: u16le(26) & 0x3fff, height: u16le(28) & 0x3fff };
     if (kind === "VP8L") {
-      const bits = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24);
+      const bits = at(21) | (at(22) << 8) | (at(23) << 16) | (at(24) << 24);
       return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
     }
     if (kind === "VP8X") {
       return {
-        width: 1 + (b[24] | (b[25] << 8) | (b[26] << 16)),
-        height: 1 + (b[27] | (b[28] << 8) | (b[29] << 16)),
+        width: 1 + (at(24) | (at(25) << 8) | (at(26) << 16)),
+        height: 1 + (at(27) | (at(28) << 8) | (at(29) << 16)),
       };
     }
     return undefined;
   }
-  if (b.length >= 4 && b[0] === 0xff && b[1] === 0xd8) {
+  if (b.length >= 4 && at(0) === 0xff && at(1) === 0xd8) {
     let i = 2;
     while (i + 8 < b.length) {
-      if (b[i] !== 0xff) return undefined;
-      const marker = b[i + 1];
+      if (at(i) !== 0xff) return undefined;
+      const marker = at(i + 1);
       // SOF0..SOF15, except DHT (C4), JPG (C8) and DAC (CC), carry the size.
       if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
         return { width: u16be(i + 7), height: u16be(i + 5) };
@@ -185,7 +188,7 @@ export async function pdfFigurePages(bytes: Uint8Array): Promise<number[]> {
 function fromDataUrl(url: string): ImageInput {
   const match = /^data:(image\/[a-z]+);base64,(.*)$/s.exec(url);
   if (!match) throw new Error("not an image data URL");
-  return { mediaType: match[1], dataBase64: match[2] };
+  return { mediaType: match[1] ?? "", dataBase64: match[2] ?? "" };
 }
 
 /** Browser defaults: unpdf draws the page, a canvas shrinks a large photo. */

@@ -60,8 +60,8 @@ describe("api.feedback", () => {
 
     const rows = (await feedback.listAllFeedback()).filter((f) => f.generationId === genId);
     expect(rows).toHaveLength(1);
-    expect(rows[0].rating).toBe(1);
-    expect(rows[0].userId).toBe(USER_A);
+    expect(rows[0]!.rating).toBe(1);
+    expect(rows[0]!.userId).toBe(USER_A);
   });
 
   it("updates (does not duplicate) on re-rating the same generation", async () => {
@@ -71,8 +71,8 @@ describe("api.feedback", () => {
 
     const rows = (await feedback.listAllFeedback()).filter((f) => f.generationId === genId);
     expect(rows).toHaveLength(1);
-    expect(rows[0].rating).toBe(-1);
-    expect(rows[0].comment).toBe("changed my mind");
+    expect(rows[0]!.rating).toBe(-1);
+    expect(rows[0]!.comment).toBe("changed my mind");
   });
 
   it("rejects feedback on another user's generation and stores nothing", async () => {

@@ -79,12 +79,12 @@ describe("tooManyOpenPoints (counted)", () => {
     ].join("\n");
 
   it("fails more than eight numbered open points (meting ca2 had 14)", () => {
-    expect(COUNTED_CHECKS.tooManyOpenPoints(output(14))).toBe(true);
-    expect(COUNTED_CHECKS.tooManyOpenPoints(output(9, "## Open points"))).toBe(true);
+    expect(COUNTED_CHECKS.tooManyOpenPoints!(output(14))).toBe(true);
+    expect(COUNTED_CHECKS.tooManyOpenPoints!(output(9, "## Open points"))).toBe(true);
   });
 
   it("passes eight or fewer, and does not count the steps of the assignment", () => {
-    expect(COUNTED_CHECKS.tooManyOpenPoints(output(8))).toBe(false);
-    expect(COUNTED_CHECKS.tooManyOpenPoints(output(3, "## Open points"))).toBe(false);
+    expect(COUNTED_CHECKS.tooManyOpenPoints!(output(8))).toBe(false);
+    expect(COUNTED_CHECKS.tooManyOpenPoints!(output(3, "## Open points"))).toBe(false);
   });
 });

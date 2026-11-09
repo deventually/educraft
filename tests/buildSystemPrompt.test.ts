@@ -25,7 +25,7 @@ const baseValues = {
 describe("buildSystemPrompt", () => {
   it("injects the output language label", () => {
     const sys = buildSystemPrompt({
-      promptId: guidedReflection.stages[0].systemPromptId,
+      promptId: guidedReflection.stages[0]!.systemPromptId,
       values: baseValues,
       outputLanguage: "nl",
     });
@@ -38,7 +38,7 @@ describe("buildSystemPrompt", () => {
     // central directive is what guarantees the model answers in the selected
     // language — even after a conversation that began in another language.
     const args = {
-      promptId: dialogicEncounters.stages[0].systemPromptId,
+      promptId: dialogicEncounters.stages[0]!.systemPromptId,
       values: { theorist: "Jean Piaget" },
     };
     const nl = buildSystemPrompt({ ...args, outputLanguage: "nl" });
@@ -51,7 +51,7 @@ describe("buildSystemPrompt", () => {
 
   it("collapses an empty context profile cleanly", () => {
     const sys = buildSystemPrompt({
-      promptId: guidedReflection.stages[0].systemPromptId,
+      promptId: guidedReflection.stages[0]!.systemPromptId,
       values: baseValues,
       profile: null,
       outputLanguage: "nl",
@@ -74,7 +74,7 @@ describe("buildSystemPrompt", () => {
       },
     };
     const sys = buildSystemPrompt({
-      promptId: guidedReflection.stages[0].systemPromptId,
+      promptId: guidedReflection.stages[0]!.systemPromptId,
       values: baseValues,
       profile,
       outputLanguage: "nl",
@@ -86,7 +86,7 @@ describe("buildSystemPrompt", () => {
   it("emits the direct-address level directive for a learner audience", () => {
     const profile: ContextProfile = { id: "p2", name: "SE jaar 1", eqf: 4 };
     const learner = buildSystemPrompt({
-      promptId: guidedReflection.stages[0].systemPromptId,
+      promptId: guidedReflection.stages[0]!.systemPromptId,
       values: baseValues,
       profile,
       outputLanguage: "en",
@@ -97,7 +97,7 @@ describe("buildSystemPrompt", () => {
 
     // The instructor default keeps the substance-first directive.
     const instructor = buildSystemPrompt({
-      promptId: guidedReflection.stages[0].systemPromptId,
+      promptId: guidedReflection.stages[0]!.systemPromptId,
       values: baseValues,
       profile,
       outputLanguage: "en",
@@ -165,8 +165,8 @@ describe("reinforceLanguage", () => {
     expect(out[0]).toEqual(history[0]);
     expect(out[1]).toEqual(history[1]);
     // …only the final user turn carries the recency reminder.
-    expect(out[2].content).toContain("Tell me more.");
-    expect(out[2].content).toContain("always respond entirely in English");
+    expect(out[2]!.content).toContain("Tell me more.");
+    expect(out[2]!.content).toContain("always respond entirely in English");
   });
 
   it("uses the target language for the reminder", () => {
@@ -175,9 +175,9 @@ describe("reinforceLanguage", () => {
   });
 
   it("does not mutate the original history (kept clean for the transcript)", () => {
-    const before = history[2].content;
+    const before = history[2]!.content;
     reinforceLanguage(history, "en");
-    expect(history[2].content).toBe(before);
+    expect(history[2]!.content).toBe(before);
   });
 
   it("leaves messages untouched when the last turn is not a user message", () => {

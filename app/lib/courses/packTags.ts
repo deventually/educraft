@@ -36,7 +36,7 @@ export function parsePackTags(fd: FormData, pack: DomainPack): PackTagsResult {
     if (values.some((v) => !allowed.has(v))) return { ok: false };
     if (field.type === "multiselect") tags[field.key] = [...new Set(values)];
     else if (values.length > 1) return { ok: false };
-    else tags[field.key] = values[0];
+    else tags[field.key] = values[0] ?? "";
   }
   return { ok: true, tags: Object.keys(tags).length ? tags : undefined };
 }

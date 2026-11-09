@@ -37,8 +37,8 @@ const post = (path: string, fields: Record<string, string>) =>
 
 const full = (d: RubricData, a: number, b: number) =>
   toScore(d, {
-    [d.criteria[0].id]: d.criteria[0].levels[a].id,
-    [d.criteria[1].id]: d.criteria[1].levels[b].id,
+    [d.criteria[0]!.id]: d.criteria[0]!.levels[a]!.id,
+    [d.criteria[1]!.id]: d.criteria[1]!.levels[b]!.id,
   })!;
 
 const close = (id: string, payload: unknown) =>

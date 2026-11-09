@@ -106,7 +106,7 @@ describe("listPeople (P28.1)", () => {
 describe("getLastActiveDay (P28.1)", () => {
   it("is the newest usage day of that user only", async () => {
     const ana = (await users.listPeople({ q: "ana@" }))[0];
-    expect(await usage.getLastActiveDay(ana.id)).toBe("2026-11-03");
+    expect(await usage.getLastActiveDay(ana!.id)).toBe("2026-11-03");
     expect(await usage.getLastActiveDay("nobody")).toBeNull();
   });
 });

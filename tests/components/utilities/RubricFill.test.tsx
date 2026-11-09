@@ -107,24 +107,24 @@ describe("RubricFill", () => {
       }),
     );
     await user.type(screen.getByLabelText(/^Opmerking/), COMMENT);
-    await waitFor(() => expect(loadBatch(rubric.id)?.students[0].comment).toBe(COMMENT));
-    expect(loadBatch(rubric.id)?.students[0].name).toBe(NAME);
+    await waitFor(() => expect(loadBatch(rubric.id)?.students[0]?.comment).toBe(COMMENT));
+    expect(loadBatch(rubric.id)?.students[0]?.name).toBe(NAME);
 
     await user.click(screen.getByRole("button", { name: "Batch afsluiten" }));
     const dialog = screen.getByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: "Batch afsluiten" }));
     await waitFor(() => expect(posts).toHaveLength(1));
 
-    const sent = JSON.stringify([...posts[0].entries()]);
+    const sent = JSON.stringify([...posts[0]!.entries()]);
     expect(sent).not.toContain("Sam");
     expect(sent).not.toContain("Mooie");
     expect(sent).not.toMatch(/Student 1|"code"/);
-    expect(posts[0].get("intent")).toBe("closeBatch");
-    const scores = JSON.parse(String(posts[0].get("scoresJson")));
+    expect(posts[0]!.get("intent")).toBe("closeBatch");
+    const scores = JSON.parse(String(posts[0]!.get("scoresJson")));
     expect(scores).toEqual([
       rubric.data.criteria.map((c, i) => ({
         criterionId: c.id,
-        levelId: c.levels[i === 0 ? 2 : 1].id,
+        levelId: c.levels[i === 0 ? 2 : 1]!.id,
       })),
     ]);
     for (const call of fetchSpy.mock.calls) expect(JSON.stringify(call)).not.toContain("Sam");
@@ -169,7 +169,7 @@ describe("RubricFill", () => {
       within(screen.getByRole("dialog")).getByRole("button", { name: "Batch afsluiten" }),
     );
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-    expect(loadBatch(rubric.id)?.students[0].name).toBe(NAME);
+    expect(loadBatch(rubric.id)?.students[0]?.name).toBe(NAME);
   });
 
   it("offers no close until one student is complete", async () => {
@@ -186,7 +186,7 @@ describe("RubricFill", () => {
     renderFill();
     await addStudent(user, NAME);
     await user.click(screen.getByRole("button", { name: "Kopieer overzicht" }));
-    const text = String(writeText.mock.calls[0][0]);
+    const text = String(writeText.mock.calls[0]![0]);
     expect(text.split("\n")[0]).toMatch(/^Student\tAnalyse\tBronnen\t/);
     expect(text).toContain(`Student 1 — ${NAME}`);
   });

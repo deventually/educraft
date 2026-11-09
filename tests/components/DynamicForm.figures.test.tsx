@@ -33,7 +33,7 @@ vi.mock("~/lib/documents/extract", () => ({
 const documentFigures = vi.fn(async (files: File[]) => ({
   figures: [
     {
-      source: files[0].name,
+      source: files[0]!.name,
       page: 2,
       index: 1,
       image: { mediaType: "image/png", dataBase64: "QUFB" },

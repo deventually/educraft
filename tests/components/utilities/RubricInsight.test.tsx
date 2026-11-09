@@ -14,8 +14,8 @@ function renderInsight(n: number, locale: "nl" | "en" = "nl") {
     { length: n },
     (_, i) =>
       toScore(d, {
-        [d.criteria[0].id]: d.criteria[0].levels[i % 3].id,
-        [d.criteria[1].id]: d.criteria[1].levels[i % 2].id,
+        [d.criteria[0]!.id]: d.criteria[0]!.levels[i % 3]!.id,
+        [d.criteria[1]!.id]: d.criteria[1]!.levels[i % 2]!.id,
       })!,
   );
   const insight = levelDistribution(d, scores);

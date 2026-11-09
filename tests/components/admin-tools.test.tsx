@@ -189,7 +189,7 @@ describe("Admin tools", () => {
     expect(screen.queryAllByRole("button", { name: /opslaan|save/i })).toHaveLength(0);
     const apply = screen.getAllByRole("button", { name: /toepassen|apply/i });
     expect(apply).toHaveLength(1);
-    expect(apply[0].closest("form")).toHaveAccessibleName(/getoonde tools/i);
+    expect(apply[0]!.closest("form")).toHaveAccessibleName(/getoonde tools/i);
   });
 
   it("autosaves a model toggle with the whole list and one toast (mutation)", async () => {
@@ -286,9 +286,9 @@ describe("Admin tools: find and change many at once", () => {
     await user.selectOptions(within(bar).getByLabelText(/zet alle getoonde tools op/i), "request");
     await user.click(within(bar).getByRole("button", { name: /toepassen/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("toolsBulk");
-    expect(bodies[0].get("stand")).toBe("request");
-    expect(bodies[0].getAll("slugs")).toEqual(["bloom-by-design"]);
+    expect(bodies[0]!.get("intent")).toBe("toolsBulk");
+    expect(bodies[0]!.get("stand")).toBe("request");
+    expect(bodies[0]!.getAll("slugs")).toEqual(["bloom-by-design"]);
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/1 tool aangepast/i));
   });
 

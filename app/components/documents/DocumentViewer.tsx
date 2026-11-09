@@ -60,7 +60,7 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState("");
   const [zoomStep, setZoomStep] = useState<number>(ZOOM_FIT);
-  const zoom = ZOOM_STEPS[zoomStep];
+  const zoom = ZOOM_STEPS[zoomStep] ?? 1;
   const searchRef = useRef<{ query: string; hits: Hit[]; index: number }>({
     query: "",
     hits: [],
@@ -194,6 +194,7 @@ export function DocumentViewer({ files, text, quotes = [], onFoundQuotes, focus,
     const index = (searchRef.current.index + 1) % hits.length;
     searchRef.current.index = index;
     const hit = hits[index];
+    if (!hit) return;
     const vars = { i: index + 1, n: hits.length, page: hit.segment + 1 };
     show(hit, fmt(isPdf ? t.matchPage : t.match, vars));
   }

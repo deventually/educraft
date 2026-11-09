@@ -263,8 +263,8 @@ export interface Tool {
   /** Tool-level inputs shared across all stages (the "Task Sandbox"). */
   inputs: InputField[];
 
-  /** Always present. length === 1 for simple generators & chat tools. */
-  stages: ToolStage[];
+  /** Always at least one. length === 1 for simple generators & chat tools. */
+  stages: [ToolStage, ...ToolStage[]];
 
   /** Present iff mode === "chat". */
   chat?: ChatConfig;

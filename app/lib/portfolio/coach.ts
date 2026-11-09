@@ -267,7 +267,7 @@ export function parseCoachReview(raw: string, d: DossierData, outcomeId: string)
       const quote = trimTo(c.quote, COACH_LIMITS.quote);
       const verified = quote ? quoteInChapter(quote, chapter) : false;
       const out: CriterionReview = {
-        criterionId: keys[c.key],
+        criterionId: keys[c.key] ?? "",
         verdict: quote && !verified && c.verdict === "shown" ? "partial" : c.verdict,
         strengthen: cleanList(c.strengthen, references),
         evidenceNeeded: cleanList(c.evidenceNeeded, references),

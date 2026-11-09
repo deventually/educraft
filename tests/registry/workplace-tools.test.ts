@@ -14,7 +14,7 @@ describe("workplace tools", () => {
       hiddenFromCatalogue: true,
       storesConversation: false,
     });
-    expect(rehearsal?.stages[0].systemPromptId).toBe(REHEARSAL_PROMPT_ID);
+    expect(rehearsal?.stages[0]?.systemPromptId).toBe(REHEARSAL_PROMPT_ID);
   });
 
   it("is not in the catalogue, so tool availability, admin lists and /tools never show it", () => {

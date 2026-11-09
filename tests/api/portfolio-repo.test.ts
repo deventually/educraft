@@ -43,10 +43,10 @@ describe("portfolio repository", () => {
   it("refuses invalid data and writes nothing", async () => {
     const d = await repo.createDossier(A, "Geldig", sampleDossier());
     const bad = sampleDossier();
-    bad.evidence[0].criterionIds = ["onbekend"];
+    bad.evidence[0]!.criterionIds = ["onbekend"];
     await expect(repo.updateDossier(A, d.id, { data: bad })).rejects.toThrow();
     await expect(repo.createDossier(A, "Fout", bad)).rejects.toThrow();
-    expect((await repo.getDossier(A, d.id))?.data.evidence[0].criterionIds).toHaveLength(1);
+    expect((await repo.getDossier(A, d.id))?.data.evidence[0]?.criterionIds).toHaveLength(1);
     await expect(repo.createDossier(A, "", sampleDossier())).rejects.toThrow();
     await expect(repo.createDossier(A, "x".repeat(201), sampleDossier())).rejects.toThrow();
   });

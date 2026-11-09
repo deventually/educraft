@@ -51,8 +51,8 @@ describe("i18n", () => {
     const nlFlat = flatten(messages.nl);
     const enFlat = flatten(messages.en);
     for (const key of Object.keys(nlFlat)) {
-      expect(placeholders(enFlat[key]), `placeholders differ for "${key}"`).toEqual(
-        placeholders(nlFlat[key]),
+      expect(placeholders(enFlat[key]!), `placeholders differ for "${key}"`).toEqual(
+        placeholders(nlFlat[key]!),
       );
     }
     void nlEntries;

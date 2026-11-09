@@ -73,7 +73,7 @@ function outcomeData(d = sampleDossier()) {
     status: { [C1]: "shown", [C2]: "not-started" },
     evidence: d.evidence,
     unlinked: [],
-    chapter: d.chapters[0].text,
+    chapter: d.chapters[0]!.text,
     maxWords: 100,
     evidenceFull: false,
     confirmed: true,
@@ -180,7 +180,7 @@ describe("Portfolio route in five steps", () => {
   it("names the export and the interview practice at the last step", async () => {
     const d = sampleDossier();
     d.framework.confirmedAt = 1;
-    d.evidence[0].criterionIds = [C1, C2];
+    d.evidence[0]!.criterionIds = [C1, C2];
     const data = {
       ...overviewData(d),
       practise: "/portfolio/d1/rehearsal",
@@ -327,7 +327,7 @@ describe("Portfolio framework", () => {
 
   it("marks a criterion that is not literally in the form", async () => {
     const d = sampleDossier();
-    d.framework.outcomes[0].criteria[1].unverified = true;
+    d.framework.outcomes[0]!.criteria[1]!.unverified = true;
     const { container } = renderRoute(PortfolioFramework, {
       id: ID,
       name: "Mijn BDB",
@@ -786,7 +786,7 @@ describe("Portfolio overview — whole dossier on a provisional framework", () =
 describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
   function withSnapshot(courseName: string | null) {
     const d = sampleDossier();
-    d.evidence[0].sourceCourse = {
+    d.evidence[0]!.sourceCourse = {
       courseId: "c1",
       part: "outcomes-and-matrix",
       at: Date.UTC(2026, 10, 5),

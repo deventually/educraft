@@ -73,7 +73,7 @@ describe("courses repository", () => {
   it("refuses invalid data and writes nothing", async () => {
     const c = await repo.createCourse(A, { name: "Geldig", data: alignedCourse() });
     const bad = alignedCourse();
-    bad.activities[0].outcomeIds = ["onbekend"];
+    bad.activities[0]!.outcomeIds = ["onbekend"];
     await expect(repo.updateCourse(A, c.id, { data: bad })).rejects.toThrow();
     await expect(repo.createCourse(A, { name: "Fout", data: bad })).rejects.toThrow();
     expect((await repo.getCourse(A, c.id))?.data).toEqual(alignedCourse());
@@ -132,8 +132,8 @@ describe("course links", () => {
     next.activities = next.activities.filter((a) => a.id !== ACT1);
     await repo.updateCourse(A, c.id, { data: next });
     const [link] = await repo.listLinksForCourse(A, c.id);
-    expect(link.generationId).toBe(g.id);
-    expect(link.itemId).toBeNull();
+    expect(link!.generationId).toBe(g.id);
+    expect(link!.itemId).toBeNull();
   });
 
   it("deleteCourse and deleteGeneration drop the links", async () => {

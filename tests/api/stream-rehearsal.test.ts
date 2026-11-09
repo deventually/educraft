@@ -32,7 +32,7 @@ beforeAll(async () => {
   await exceptions.setException("teacher-b", exceptions.featureKey("portfolio"), "on");
   ownId = (await repo.createDossier("teacher-a", "Mijn BDB", sampleDossier())).id;
   const other = sampleDossier();
-  other.chapters[0].text = "Het hoofdstuk van iemand anders.";
+  other.chapters[0]!.text = "Het hoofdstuk van iemand anders.";
   foreignId = (await repo.createDossier("teacher-b", "Andere BDB", other)).id;
 });
 

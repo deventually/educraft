@@ -57,7 +57,7 @@ describe("ShareWithTeam (P28.4)", () => {
     ).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Delen met Techniek" }));
     await waitFor(() => expect(posted).toHaveLength(1));
-    expect(Object.fromEntries(posted[0])).toEqual({ intent: "share", teamId: "t2" });
+    expect(Object.fromEntries(posted[0]!)).toEqual({ intent: "share", teamId: "t2" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -70,7 +70,7 @@ describe("ShareWithTeam (P28.4)", () => {
     await userEvent.click(screen.getByText("Delen met je team"));
     await userEvent.click(screen.getByRole("button", { name: "Delen met Verpleegkunde" }));
     await waitFor(() => expect(posted).toHaveLength(1));
-    expect(Object.fromEntries(posted[0])).toEqual({ id: "p1", intent: "share", teamId: "t1" });
+    expect(Object.fromEntries(posted[0]!)).toEqual({ id: "p1", intent: "share", teamId: "t1" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -91,7 +91,7 @@ describe("SharedWithMe (P28.4)", () => {
     expect(screen.getByText("Van Anna · Verpleegkunde")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Maak een kopie van Anatomie" }));
     await waitFor(() => expect(posted).toHaveLength(1));
-    expect(Object.fromEntries(posted[0])).toEqual({ intent: "copy-shared", id: "c1" });
+    expect(Object.fromEntries(posted[0]!)).toEqual({ intent: "copy-shared", id: "c1" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

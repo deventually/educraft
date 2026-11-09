@@ -82,7 +82,7 @@ describe("from a criterion to the tool and back (P27.2)", () => {
       outcomeId: LU,
       outcomeLabel: "LU1 Doceren",
       criterionId: C1,
-      criterionText: sampleDossier().framework.outcomes[0].criteria[0].text,
+      criterionText: sampleDossier().framework.outcomes[0]!.criteria[0]!.text,
     });
     expect((await load(`?dossier=${theirs.id}&criterion=${C1}`)).forCriterion).toBeNull();
     expect((await load(`?dossier=${mine.id}&criterion=nope`)).forCriterion).toBeNull();

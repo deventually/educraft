@@ -14,7 +14,7 @@ import { sampleRubric } from "./fixtures";
 
 /** Pick level `i` (by position) for every criterion: [0, 1] → first criterion level 0, second level 1. */
 function pick(data: RubricData, positions: number[]): Record<string, string> {
-  return Object.fromEntries(data.criteria.map((c, i) => [c.id, c.levels[positions[i]].id]));
+  return Object.fromEntries(data.criteria.map((c, i) => [c.id, c.levels[positions[i]!]!.id]));
 }
 
 describe("scoreRubric", () => {
@@ -29,7 +29,7 @@ describe("scoreRubric", () => {
 
   it("multiplies by the weight", () => {
     const d = sampleRubric();
-    d.criteria[0].weight = 2;
+    d.criteria[0]!.weight = 2;
     const s = scoreRubric(d, pick(d, [1, 1]));
     expect(s.total).toBe(5); // 2×2 + 1
     expect(s.max).toBe(9); // 4×2 + 1
@@ -37,7 +37,7 @@ describe("scoreRubric", () => {
 
   it("is incomplete until every criterion has a level, and has no grade or result then", () => {
     const d = sampleRubric();
-    const s = scoreRubric(d, { [d.criteria[0].id]: d.criteria[0].levels[2].id });
+    const s = scoreRubric(d, { [d.criteria[0]!.id]: d.criteria[0]!.levels[2]!.id });
     expect(s.complete).toBe(false);
     expect(s.total).toBe(4);
     expect(s.grade).toBeNull();
@@ -48,7 +48,7 @@ describe("scoreRubric", () => {
     const d = sampleRubric();
     const s = scoreRubric(d, { ...pick(d, [2, 1]), "not-a-criterion": "x" });
     expect(s.total).toBe(5);
-    const wrongLevel = { [d.criteria[0].id]: d.criteria[1].levels[1].id };
+    const wrongLevel = { [d.criteria[0]!.id]: d.criteria[1]!.levels[1]!.id };
     expect(scoreRubric(d, wrongLevel).total).toBe(0);
   });
 
@@ -84,7 +84,7 @@ describe("scoreRubric", () => {
   it("passes at or above the pass grade", () => {
     const d = sampleRubric();
     expect(scoreRubric(d, pick(d, [1, 1])).passed).toBe(true); // 3 ≥ 2.75
-    d.criteria[1].knockout = false;
+    d.criteria[1]!.knockout = false;
     expect(scoreRubric(d, pick(d, [1, 0])).passed).toBe(false); // 2 < 2.75
   });
 
@@ -138,7 +138,7 @@ describe("toScore (what the server may keep)", () => {
 
   it("is null when the fill-in is incomplete", () => {
     const d = sampleRubric();
-    expect(toScore(d, { [d.criteria[0].id]: d.criteria[0].levels[0].id })).toBeNull();
+    expect(toScore(d, { [d.criteria[0]!.id]: d.criteria[0]!.levels[0]!.id })).toBeNull();
   });
 
   it("the boundary refuses a name, a code, a comment or any other extra key", () => {
@@ -169,16 +169,16 @@ describe("levelDistribution", () => {
     const dist = levelDistribution(d, scores(d, 5));
     expect(dist).not.toBeNull();
     expect(dist!.total).toBe(5);
-    expect(dist!.criteria[0].levels.map((l) => l.count)).toEqual([2, 2, 1]);
-    expect(dist!.criteria[1].levels.map((l) => l.count)).toEqual([3, 2]);
-    expect(dist!.criteria[0].title).toBe("Analyse");
+    expect(dist!.criteria[0]!.levels.map((l) => l.count)).toEqual([2, 2, 1]);
+    expect(dist!.criteria[1]!.levels.map((l) => l.count)).toEqual([3, 2]);
+    expect(dist!.criteria[0]!.title).toBe("Analyse");
   });
 
   it("skips levels that no longer exist in the rubric", () => {
     const d = sampleRubric();
     const s = scores(d, 5);
-    s[0][0] = { criterionId: d.criteria[0].id, levelId: "00000000-0000-4000-8000-999999999999" };
+    s[0]![0] = { criterionId: d.criteria[0]!.id, levelId: "00000000-0000-4000-8000-999999999999" };
     const dist = levelDistribution(d, s)!;
-    expect(dist.criteria[0].levels.reduce((n, l) => n + l.count, 0)).toBe(4);
+    expect(dist.criteria[0]!.levels.reduce((n, l) => n + l.count, 0)).toBe(4);
   });
 });

@@ -110,7 +110,7 @@ describe("tool: stage-assessment", () => {
       submissionNotes: "",
     };
     const prompt = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: inputs,
       outputLanguage: "nl",
     });
@@ -120,7 +120,7 @@ describe("tool: stage-assessment", () => {
 
   it("encodes the core guardrails: advisory, no fabrication, examinator decides", () => {
     const tool = getToolBySlug("stage-assessment")!;
-    const nl = tool.stages[0].systemPromptId;
+    const nl = tool.stages[0]!.systemPromptId;
     const prompt = buildSystemPrompt({
       promptId: nl,
       values: {
@@ -158,12 +158,12 @@ describe("tool: stage-assessment", () => {
       submissionNotes: "",
     };
     const nl = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values,
       outputLanguage: "nl",
     });
     const en = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values,
       outputLanguage: "en",
     });
@@ -190,12 +190,12 @@ describe("tool: stage-assessment", () => {
       submissionNotes: "",
     };
     const nl = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: base,
       outputLanguage: "nl",
     });
     const en = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: base,
       outputLanguage: "en",
     });
@@ -230,12 +230,12 @@ describe("tool: stage-assessment", () => {
       submissionNotes: "",
     };
     const nl = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values,
       outputLanguage: "nl",
     });
     const en = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values,
       outputLanguage: "en",
     });
@@ -257,7 +257,7 @@ describe("tool: stage-assessment", () => {
     const note =
       "Alleen onderzoeksverslag en stageverslag nu; het beroepsproduct volgt en wordt apart via de eindpresentatie beoordeeld.";
     const nl = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: {
         document: "x",
         documentType: "stageverslag",
@@ -272,7 +272,7 @@ describe("tool: stage-assessment", () => {
       outputLanguage: "nl",
     });
     const en = buildSystemPrompt({
-      promptId: tool.stages[0].systemPromptId,
+      promptId: tool.stages[0]!.systemPromptId,
       values: {
         document: "x",
         documentType: "stageverslag",
@@ -338,7 +338,7 @@ describe("tool: stage-assessment", () => {
 
   it("has structured output and is enabled for phase 1", () => {
     const tool = getToolBySlug("stage-assessment")!;
-    expect(["markdown", "json", "structured-sections"]).toContain(tool.stages[0].output.kind);
+    expect(["markdown", "json", "structured-sections"]).toContain(tool.stages[0]!.output.kind);
     expect(tool.enabled).toBe(true);
     expect(tool.phase).toBe(1);
   });

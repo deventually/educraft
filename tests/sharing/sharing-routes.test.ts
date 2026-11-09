@@ -51,7 +51,7 @@ beforeAll(async () => {
     ["share-a", "Anna"],
     ["share-b", "Bram"],
     ["share-c", "Cas"],
-  ])
+  ] as const)
     await users.createUser({ id, name, passwordHash: "x", role: "teacher" });
   team = (await teams.createTeam("Verpleegkunde")).id;
   await teams.addMember(team, "share-a");

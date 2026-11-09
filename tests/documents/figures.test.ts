@@ -62,8 +62,8 @@ describe("docxFigures", () => {
   it("keeps a real figure, drops a tiny icon and counts a format the model cannot read", async () => {
     const { images, unsupported } = await docxFigures(bytesOf("sample-images.docx"));
     expect(images).toHaveLength(1);
-    expect(images[0].mediaType).toBe("image/png");
-    expect(images[0].dataBase64).toMatch(/^iVBORw0KGgo/);
+    expect(images[0]!.mediaType).toBe("image/png");
+    expect(images[0]!.dataBase64).toMatch(/^iVBORw0KGgo/);
     expect(unsupported).toBe(1);
   });
 
@@ -92,7 +92,7 @@ describe("documentFigures", () => {
       { source: "sample-images.docx", page: undefined, index: 1 },
       { source: "sample-images.pdf", page: 2, index: 2 },
     ]);
-    expect(figures[1].image).toEqual({ mediaType: "image/png", dataBase64: "UEFHRS2" });
+    expect(figures[1]!.image).toEqual({ mediaType: "image/png", dataBase64: "UEFHRS2" });
     expect(unsupported).toBe(1);
   });
 

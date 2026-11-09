@@ -39,7 +39,7 @@ describe("locateQuote", () => {
     if (hit.status !== "found") return;
     expect(hit.segment).toBe(1);
     // Offsets point into the original page text, so the viewer can mark it.
-    expect(pages[1].slice(hit.start, hit.end)).toBe(
+    expect(pages[1]!.slice(hit.start, hit.end)).toBe(
       "de feed-\nback van haar begeleider\nhet meest waardevol vond",
     );
   });

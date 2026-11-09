@@ -124,7 +124,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
           f.id === "portfolio" ? access : undefined,
         ),
       ),
-      ...ALL_TOOLS.map((tool) => row(toolKey(tool.slug), "tool", tool.name, toolStands[tool.slug])),
+      ...ALL_TOOLS.flatMap((tool) => {
+        const stand = toolStands[tool.slug];
+        return stand ? [row(toolKey(tool.slug), "tool", tool.name, stand)] : [];
+      }),
     ];
   }
 

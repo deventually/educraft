@@ -154,9 +154,9 @@ describe("/admin/teams/:id, the team page", () => {
     expect(screen.getByRole("checkbox", { name: /teamleider.*lea lead/i })).toBeChecked();
     await user.click(screen.getByRole("checkbox", { name: /teamleider.*mo member/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("setLead");
-    expect(bodies[0].get("userId")).toBe("u-mem");
-    expect(bodies[0].get("lead")).toBe("1");
+    expect(bodies[0]!.get("intent")).toBe("setLead");
+    expect(bodies[0]!.get("userId")).toBe("u-mem");
+    expect(bodies[0]!.get("lead")).toBe("1");
   });
 
   it("removes a member in one click", async () => {
@@ -165,8 +165,8 @@ describe("/admin/teams/:id, the team page", () => {
     page(action);
     await user.click(screen.getByRole("button", { name: /mo member uit het team halen/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("removeMember");
-    expect(bodies[0].get("userId")).toBe("u-mem");
+    expect(bodies[0]!.get("intent")).toBe("removeMember");
+    expect(bodies[0]!.get("userId")).toBe("u-mem");
   });
 
   it("adds several colleagues at once by ticking them", async () => {
@@ -178,8 +178,8 @@ describe("/admin/teams/:id, the team page", () => {
     await user.click(within(box).getByRole("checkbox", { name: /bram beuk/i }));
     await user.click(within(box).getByRole("button", { name: /aangevinkte toevoegen/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("addMembers");
-    expect(bodies[0].getAll("userIds")).toEqual(["u-a", "u-b"]);
+    expect(bodies[0]!.get("intent")).toBe("addMembers");
+    expect(bodies[0]!.getAll("userIds")).toEqual(["u-a", "u-b"]);
   });
 
   it("narrows the colleagues to tick with a search box", async () => {
@@ -205,8 +205,8 @@ describe("/admin/teams/:id, the team page", () => {
     await user.type(name, "VPK");
     await user.tab();
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("rename");
-    expect(bodies[0].get("name")).toBe("VPK");
+    expect(bodies[0]!.get("intent")).toBe("rename");
+    expect(bodies[0]!.get("name")).toBe("VPK");
   });
 
   it("shows the team's choices and autosaves one (P28.3)", async () => {
@@ -221,9 +221,9 @@ describe("/admin/teams/:id, the team page", () => {
       "off",
     );
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("settings");
-    expect(bodies[0].get("feature:utilities")).toBe("off");
-    expect(bodies[0].get("feature:portfolio")).toBe("on");
+    expect(bodies[0]!.get("intent")).toBe("settings");
+    expect(bodies[0]!.get("feature:utilities")).toBe("off");
+    expect(bodies[0]!.get("feature:portfolio")).toBe("on");
   });
 
   it("deletes the team only after a confirmation", async () => {
@@ -235,7 +235,7 @@ describe("/admin/teams/:id, the team page", () => {
     expect(within(dialog).getByText(/gedeelde stukken worden weer privé/i)).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: /opheffen/i }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("intent")).toBe("delete");
+    expect(bodies[0]!.get("intent")).toBe("delete");
   });
 
   it("has no a11y violations", async () => {
@@ -314,16 +314,16 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(tool).toHaveValue("");
     await user.selectOptions(tool, "on");
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0].get("tool:math-grading")).toBe("on");
+    expect(bodies[0]!.get("tool:math-grading")).toBe("on");
 
     const models = within(box).getByRole("group", { name: /modellen voor dit team/i });
     const haiku = within(models).getByLabelText("Claude Haiku 4.5") as HTMLInputElement;
     expect(haiku.disabled).toBe(true);
     await user.click(within(models).getByRole("radio", { name: /eigen keuze/i }));
     await waitFor(() => expect(bodies).toHaveLength(2));
-    expect(bodies[1].get("modelMode")).toBe("own");
-    expect(bodies[1].getAll("models")).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
-    expect(bodies[1].get("feature:portfolio")).toBeNull();
+    expect(bodies[1]!.get("modelMode")).toBe("own");
+    expect(bodies[1]!.getAll("models")).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+    expect(bodies[1]!.get("feature:portfolio")).toBeNull();
   });
 
   it("lets the lead step down after a confirmation", async () => {
