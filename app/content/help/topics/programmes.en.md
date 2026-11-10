@@ -29,6 +29,14 @@ You can also do this from the course. The course page has **Belongs to programme
 
 A course can belong to **several programmes**, with its own year and period in each. Think of a full-time and a part-time variant with the same courses, or a course that falls in year 1 of one programme and year 2 of another.
 
+## Learning lines
+
+A **learning line** is a series of courses within a programme, in order, for example *Programming* or *Research*. The team lead or an admin creates it on the programme's page: give it a name and tick the courses. On the learning line's page you put the courses in order with **Up** and **Down**, and add or remove one. Every team member can view the learning line.
+
+The learning line shows **what comes back**: a learning outcome that occurs in several courses, with the highest Bloom level in each course. An outcome comes back when a later course has the same text (capitals, spaces and a closing full stop don't count), or the same **subject tag**, such as the same professional task from your teaching context. If the Bloom level drops in a later course, it says: *The Bloom level drops*. Below that are the learning outcomes per course.
+
+Like the coverage matrix, this is **advice**. Nothing changes in the courses, and no AI is involved. To follow a thread, use the same wording or the same tag in each course.
+
 ## What goes where?
 
 - A **master's** is a programme of its own.

@@ -250,6 +250,23 @@ describe("ContextProfileEditor — level & framework (under Meer details)", () =
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
   });
 
+  it("groups the mbo picker per opleidingsdomein and reveals a kwalificatie's kerntaken", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+    await toMore(user, "mbo::mbo-3");
+    const zorg = container.querySelector('optgroup[label="Zorg en welzijn"]');
+    expect(zorg).not.toBeNull();
+    const inZorg = Array.from(zorg!.querySelectorAll("option")).map((o) => o.value);
+    expect(inZorg).toContain("mbo-kw-27144");
+    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "mbo-kw-27144");
+    expect(
+      screen.getByText(/Kwalificatiedossier Verzorging en verpleging \(crebo 23453\)/),
+    ).toBeInTheDocument();
+    expect(screen.getByText("B1-K1: Biedt zorg, ondersteuning en begeleiding")).toBeInTheDocument();
+    expect(screen.queryByText(/beheersingsniveau/i)).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("reveals the Dublin descriptors for any wo domain, without a level field", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor();

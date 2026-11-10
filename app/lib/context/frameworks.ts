@@ -3,8 +3,9 @@
  * country → sector → domain. This is the structure that lets verified national
  * frameworks grow as pure data: `NL.hbo` has a pack per domain (`DOMAIN_PACKS`),
  * and a sector can carry one pack that holds for all its domains (`NL.wo`: the
- * Dublin descriptors). vo/mbo are still absent, so those sectors fall back to the
- * honest custom-fields path — **never an invented framework**.
+ * Dublin descriptors). mbo has a pack per kwalificatie (`packsMbo.ts`); an mbo
+ * opleidingsdomein and every vo domain have none, so they fall back to the honest
+ * custom-fields path — **never an invented framework**.
  *
  * `getDomainPack`/`getPackField` (packs.ts) stay as the hbo-internal helpers; this
  * is the sector-aware entry point the engine + editor use.
@@ -12,6 +13,7 @@
 import type { CountryCode } from "./countries";
 import type { Sector } from "./sectors";
 import { DOMAIN_PACKS, type DomainPack } from "./packs";
+import { MBO_QUALIFICATIONS } from "./packsMbo";
 import { DUBLIN_PACK } from "./packsWo";
 
 /** Verified packs per country → sector → domain slug. Additive; hbo-only today. */
@@ -19,6 +21,7 @@ const FRAMEWORK_REGISTRY: Partial<
   Record<CountryCode, Partial<Record<Sector, Record<string, DomainPack>>>>
 > = {
   NL: {
+    mbo: Object.fromEntries(MBO_QUALIFICATIONS.map((q) => [q.value, q.pack])),
     hbo: DOMAIN_PACKS as Record<string, DomainPack>,
   },
 };

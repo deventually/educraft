@@ -103,9 +103,14 @@ pack of its own (`SECTOR_PACKS` in `app/lib/context/frameworks.ts`). Shipped: wo
 Dublin descriptors (`packsWo.ts`), with no level field because the track (bachelor,
 master, PhD) already is the cycle. The domain pickers for mbo (the 18
 opleidingsdomeinen) and wo (the ten CROHO-onderdelen) live in `domains.ts`; their slugs
-carry a sector prefix (`mbo-…`, `wo-…`) so no slug is shared between sectors. mbo
-packs per kwalificatie (SBB kwalificatiedossiers) are the next content step
-(BESLUIT-2026-11-10-4).
+carry a sector prefix (`mbo-…`, `wo-…`) so no slug is shared between sectors.
+
+For mbo the vakgebied is the **kwalificatie** (BESLUIT-2026-11-10-4): `packsMbo.ts` holds
+one pack per kwalificatie (slug `mbo-kw-<crebo>`) with the kerntaken and werkprocessen of
+the SBB kwalificatiedossier, codes included, and no level field. The picker lists each
+kwalificatie under its opleidingsdomein (`DomainOption.group`, rendered as an
+`optgroup`); a kwalificatie appears only once it has a pack. The `source` names dossier,
+crebo and "geldig vanaf", so a revised dossier is a new entry, not a silent change.
 
 - **Domain packs** — subject-specific structure, one verified registry entry per domain.
 - **Framework packs** — a country+sector+level's curriculum standards and
