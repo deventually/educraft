@@ -75,6 +75,7 @@ export default function AppShell() {
   const accountLinks: NavItem[] = [
     { to: "/account", label: t.auth.accountArea, end: true },
     { to: "/context-profiles", label: t.nav.settings, end: false },
+    { to: "/assessment-models", label: t.nav.assessmentModels, end: false },
   ];
 
   return (

@@ -7,7 +7,7 @@ import { useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
 import { DOC_ACCEPT_ATTR } from "~/lib/documents/extract";
-import { useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 import { DocumentFigurePicker } from "./documents/DocumentFigurePicker";
 import { DocumentInputControl } from "./form/DocumentInputControl";
 import { ImageInputControl, asImages } from "./form/ImageInputControl";
@@ -30,9 +30,11 @@ interface Props {
    * the browser; the field's value is still only the extracted text.
    */
   onDocumentFiles?: (name: string, files: File[]) => void;
+  /** Something to show right above a field, by field name (e.g. the assessment model picker). */
+  beforeField?: Partial<Record<string, ReactNode>>;
 }
 
-export function DynamicForm({ fields, values, onChange, onDocumentFiles }: Props) {
+export function DynamicForm({ fields, values, onChange, onDocumentFiles, beforeField }: Props) {
   const locale = useLocale();
   const groups = groupBy(fields, locale);
   // The files picked per document field, so an image field with `imagesFrom`
@@ -52,14 +54,16 @@ export function DynamicForm({ fields, values, onChange, onDocumentFiles }: Props
             </legend>
           )}
           {groupFields.map((field) => (
-            <FieldControl
-              key={field.name}
-              field={field}
-              value={values[field.name]}
-              onChange={(v) => onChange(field.name, v)}
-              onFiles={(files) => handleFiles(field.name, files)}
-              sourceFiles={field.imagesFrom ? docFiles[field.imagesFrom] : undefined}
-            />
+            <Fragment key={field.name}>
+              {beforeField?.[field.name]}
+              <FieldControl
+                field={field}
+                value={values[field.name]}
+                onChange={(v) => onChange(field.name, v)}
+                onFiles={(files) => handleFiles(field.name, files)}
+                sourceFiles={field.imagesFrom ? docFiles[field.imagesFrom] : undefined}
+              />
+            </Fragment>
           ))}
         </fieldset>
       ))}

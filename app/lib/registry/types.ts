@@ -68,6 +68,11 @@ export interface ProfilePrefill {
   map?: Record<string, string>;
 }
 
+/** Which part of an assessment model fills a field. Data, not control flow. */
+export interface AssessmentModelPrefill {
+  source: "framework" | "scale";
+}
+
 /** Which part of a course fills a field (P20, 20.4). Data, not control flow. */
 export interface CoursePrefill {
   source: "learningOutcomes";
@@ -101,6 +106,11 @@ export interface InputField {
   prefillFromProfile?: ProfilePrefill;
   /** Optional: fill this field from the selected course (P20): one learning outcome per line. */
   prefillFromCourse?: CoursePrefill;
+  /**
+   * Optional: fill this field from the assessment model the teacher picks (or their own model
+   * for the document type in `Tool.assessmentModels.byField`). Stays editable.
+   */
+  prefillFromAssessmentModel?: AssessmentModelPrefill;
   /**
    * Student work: before sending, the browser replaces names and other personal
    * details in this field by codes the teacher reviews (P24, 24.0b).
@@ -281,6 +291,13 @@ export interface Tool {
 
   /** Whether the HBO-i context profile is injected by default. */
   usesContextProfile: boolean;
+
+  /**
+   * Fields marked `prefillFromAssessmentModel` are filled from an assessment model: the
+   * teacher picks one, or their own model for the value of the select field `byField`
+   * (e.g. the document type) is filled in. Starters are only filled in when picked.
+   */
+  assessmentModels?: { byField: string };
 
   /**
    * Where the prompt's material comes from besides the inputs (P29.3). "dossier": the

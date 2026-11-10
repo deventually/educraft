@@ -190,8 +190,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
   field>"` offers the figures of the files uploaded there: Word images the model can read (icons
-  dropped, EMF/WMF counted as skipped) and PDF pages that draw a figure-sized image, rendered as a
-  picture of the page. Nothing is ticked by default: anonymisation covers text only.
+  dropped, EMF/WMF counted as skipped) and each figure-sized PDF image cut out of its rendered page
+  (tiles merge; an image on the same spot of 3+ pages or covering a text page is skipped). A
+  thumbnail enlarges in a dialog. Nothing is ticked by default: anonymisation covers text only.
+- **Assessment models** at `/assessment-models` (`app/lib/assessment-models/`,
+  `assessmentModels.server.ts`). A model is a framework (required) plus an optional scale for some
+  document types. A tool opts in with data: `Tool.assessmentModels.byField` (the select that
+  chooses) and `InputField.prefillFromAssessmentModel` on the fields it fills. The teacher's own
+  model for the chosen type fills in by itself (`useAssessmentModel`), a starter only when picked,
+  and text the teacher typed is never overwritten. An empty scale means feedback only
+  (`stage-assessment@v3`). Starters are files in `starters/`; a rubric can be taken over.
 - **BDB/BKE workplace (P25)** at `/portfolio`. Pure domain in `app/lib/portfolio/` (`schema` with
   `LIMITS`, immutable `edit`, `progress`, `intents.ts` → `applyIntent`, Zod per intent); routes stay
   thin via `app/server/portfolio.server.ts`; storage is one JSON graph per dossier in
@@ -329,6 +337,7 @@ app/
     i18n/            messages/{nl,en}/<ns>.ts · index · format · localized
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
+    assessment-models/ schema · starters · pick (frameworks per document type), all pure
     courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21), all pure
     agents/          types · registry · validate · schema · input · filter (P21 role agents), all pure
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)

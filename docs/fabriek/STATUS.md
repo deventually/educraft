@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #234 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #235 gemerged)_
 
 ## Nu
 
+- **Reviewer AI-bestendigheid (#235) gemerged op 2026-11-10:** het reviewteam heeft een derde
+  reviewer die kijkt of het cijfer laat zien wat de student zelf kan, nu AI een verslag of code
+  kan schrijven. Hij gebruikt *onder toezicht / zonder toezicht* uit #233, verbiedt AI niet en
+  raadt geen detectors aan. Voor docenten staat hij standaard uit. Geen migratie.
 - **Help-sectie opnieuw ingedeeld (#234) gemerged op 2026-11-10:** `/help` groepeert de
   onderwerpen naar wat een docent wil doen, toont tools per onderwijsdoel en heeft een zoekvak dat
   ook koppen vindt. Nieuwe onderwerpen (werken met een tool, eerder werk en export, hulpmiddelen,
