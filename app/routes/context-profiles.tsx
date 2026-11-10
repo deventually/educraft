@@ -33,6 +33,7 @@ import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { HelpLink } from "~/components/HelpLink";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
@@ -175,6 +176,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
         {t.settings.heading}
       </h1>
       <p className="mt-2 text-slate-600">{t.settings.intro}</p>
+      <HelpLink topic="context-profiles" />
 
       {profiles.length === 0 && !editor && (
         <EmptyState

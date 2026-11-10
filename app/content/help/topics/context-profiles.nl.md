@@ -1,6 +1,6 @@
 # Je onderwijscontext instellen
 
-Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke tool er rekening mee houdt. Het profiel wordt als achtergrond aan elke prompt meegegeven (`{{context}}`), zonder dat je het telkens opnieuw hoeft te typen.
+Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke tool er rekening mee houdt. Het profiel wordt als achtergrond aan elke prompt meegegeven, zonder dat je het telkens opnieuw hoeft te typen.
 
 ## Eén korte pagina
 
@@ -14,7 +14,7 @@ Ga naar **Onderwijscontext** en klik op **Onderwijscontext instellen** (of **Nie
 
 Je begint met het **onderwijstype**. Het onderwijstype (voortgezet onderwijs, mbo, hbo of wo — met bijbehorende leerweg of graad, zoals vmbo-kb, havo, mbo-4 of hbo-bachelor) bepaalt de rest: het stelt automatisch het passende **niveau** voor en bepaalt welke vakken/domeinen je kunt kiezen.
 
-Het niveau leg je vast als **NLQF-niveau** — het Nederlandse kwalificatieraamwerk is de bron van waarheid. De editor toont er het **afgeleide EU-niveau (EQF)** bij en een link naar de bron ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)). Belangrijk: in de prompt komt alléén dat EQF-getal plus een neutrale niveau-instructie terecht — nooit de term "NLQF" zelf. Zo blijft de engine landneutraal terwijl jij in vertrouwde Nederlandse termen kiest. De Instroomniveau-optie wordt als instapniveau (net onder EQF 1) meegegeven.
+Het niveau leg je vast als **NLQF-niveau** — het Nederlandse kwalificatieraamwerk is de bron van waarheid. De editor toont er het **afgeleide EU-niveau (EQF)** bij en een link naar de bron ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)).
 
 ## Kader per domein
 

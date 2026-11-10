@@ -20,6 +20,7 @@ import { LinkCard } from "~/components/admin/LinkCard";
 import { teamError } from "~/components/teams/teamError";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
 import { redirectWithFlash } from "~/server/flash.server";
+import { HelpLink } from "~/components/HelpLink";
 
 /** Days a lead's invite link stays valid (the admin's default). */
 const INVITE_DAYS = 14;
@@ -103,6 +104,7 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
           {team.name}
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-600">{tt.leadIntro}</p>
+        <HelpLink topic="teams" />
       </header>
 
       <section>

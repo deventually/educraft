@@ -21,6 +21,7 @@ import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Card, Input, Label } from "~/components/ui";
 import type { Role } from "~/lib/registry/access";
+import { HelpLink } from "~/components/HelpLink";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -141,6 +142,7 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         {t.account.heading}
       </h1>
       <p className="mt-2 text-slate-600">{t.account.intro}</p>
+      <HelpLink topic="account" />
 
       <Card className="mt-6 p-6">
         <dl className="grid gap-3 sm:grid-cols-[8rem_1fr]">

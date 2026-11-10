@@ -8,6 +8,7 @@ import {
   getTopicTitle,
   HELP_TOPIC_SLUGS,
 } from "~/lib/help/registry";
+import { topicIsAdminOnly } from "~/lib/help/sections";
 import { requireUser } from "~/server/auth.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { HelpContent } from "~/components/HelpContent";
@@ -17,13 +18,14 @@ import { loc } from "~/lib/i18n/localized";
 import { ToolSubtitle } from "~/components/ToolTitle";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  await requireUser(request);
+  const user = await requireUser(request);
   const lang = getLocale(request);
   const tool = getToolById(params.id);
   if (tool) {
     return { kind: "tool" as const, tool, overlay: getToolHelpOverlay(tool.id, lang) };
   }
-  if (HELP_TOPIC_SLUGS.includes(params.id)) {
+  const allowed = user.role === "admin" || !topicIsAdminOnly(params.id);
+  if (HELP_TOPIC_SLUGS.includes(params.id) && allowed) {
     return {
       kind: "topic" as const,
       title: getTopicTitle(params.id, lang),

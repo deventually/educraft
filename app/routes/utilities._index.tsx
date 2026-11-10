@@ -4,6 +4,7 @@ import { UTILITIES } from "~/lib/utilities";
 import { UtilityCard } from "~/components/utilities/UtilityCard";
 import { useT } from "~/lib/i18n/useT";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
+import { HelpLink } from "~/components/HelpLink";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireFeatureUser(request, "utilities");
@@ -25,6 +26,7 @@ export default function UtilitiesIndex() {
           {t.utilities.heading}
         </h1>
         <p className="mt-3 max-w-[60ch] text-pretty text-slate-600">{t.utilities.intro}</p>
+        <HelpLink topic="utilities" />
       </div>
       <ul className="grid list-none gap-5 p-0 [grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))]">
         {UTILITIES.map((u) => (

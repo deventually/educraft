@@ -77,3 +77,13 @@ describe("Admin layout", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("Admin layout help", () => {
+  it("links to the help for administrators", async () => {
+    await renderLayout();
+    expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/admin",
+    );
+  });
+});
