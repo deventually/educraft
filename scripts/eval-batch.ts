@@ -168,8 +168,8 @@ export function createBatchingProvider(submit: SubmitBatch, idleMs = 2000): LLMP
 }
 
 /** Submit through the Anthropic Message Batches API and wait for the results. */
-export function anthropicSubmit(apiKey: string, pollMs = 30_000): SubmitBatch {
-  const client = new Anthropic({ apiKey });
+export function anthropicSubmit(apiKey: string, pollMs = 30_000, fetch?: typeof globalThis.fetch): SubmitBatch {
+  const client = new Anthropic({ apiKey, fetch });
   return async (requests) => {
     const batch = await client.messages.batches.create({
       requests: requests as Anthropic.Messages.BatchCreateParams.Request[],
