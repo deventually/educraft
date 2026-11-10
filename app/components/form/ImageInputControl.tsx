@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import type { ImageInput } from "~/lib/ai/types";
 import type { FormValues } from "~/lib/forms/values";
 import { fmt } from "~/lib/i18n/format";
@@ -13,6 +13,11 @@ interface ImageInputControlProps {
   onChange: (v: ImageInput[]) => void;
   label: string;
   required?: boolean;
+  /**
+   * Images picked from elsewhere (the figures of an uploaded document), shown first;
+   * an own upload then becomes the fallback for what is missing there.
+   */
+  picked?: ReactNode;
 }
 
 export function ImageInputControl({
@@ -22,6 +27,7 @@ export function ImageInputControl({
   onChange,
   label,
   required,
+  picked,
 }: ImageInputControlProps) {
   const t = useT();
   const [error, setError] = useState<string | undefined>();
@@ -60,6 +66,8 @@ export function ImageInputControl({
         {label}
       </Label>
 
+      {picked}
+
       {/* File input (visually hidden, triggered by button) */}
       <input
         id={id}
@@ -82,7 +90,7 @@ export function ImageInputControl({
           }}
           className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
         >
-          {t.tool.imageUploadLabel}
+          {picked ? t.tool.figuresOwnUpload : t.tool.imageUploadLabel}
         </button>
       </label>
 

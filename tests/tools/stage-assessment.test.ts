@@ -96,6 +96,30 @@ describe("tool: stage-assessment", () => {
     expect(help("en")).not.toMatch(/figures are lost/);
   });
 
+  it("names the figures field for what it does: figures for the assessment, from the document first", async () => {
+    const { readFileSync } = await import("node:fs");
+    const tool = getToolBySlug("stage-assessment")!;
+    const doc = tool.inputs.find((f) => f.name === "document")!;
+    const figures = tool.inputs.find((f) => f.kind === "image")!;
+    const help = (lang: string) =>
+      readFileSync(`app/content/help/tools/stage-assessment.${lang}.md`, "utf8");
+    expect(figures.label).toEqual({
+      nl: "Figuren voor de beoordeling (optioneel)",
+      en: "Figures for the assessment (optional)",
+    });
+    for (const text of [loc(doc.help, "nl"), loc(figures.help, "nl"), help("nl")]) {
+      expect(text).not.toMatch(/Kernfiguren/);
+      expect(text).toMatch(/Figuren voor de beoordeling/);
+    }
+    for (const text of [loc(doc.help, "en"), loc(figures.help, "en"), help("en")]) {
+      expect(text).not.toMatch(/Key figures/);
+      expect(text).toMatch(/Figures for the assessment/);
+    }
+    // Images are never anonymised: the warning stays.
+    expect(loc(figures.help, "nl")).toMatch(/niet geanonimiseerd/);
+    expect(loc(figures.help, "en")).toMatch(/not anonymised/);
+  });
+
   it("builds a prompt with no unresolved placeholders", () => {
     const tool = getToolBySlug("stage-assessment")!;
     const inputs = {

@@ -7,7 +7,8 @@ import {
   docxFigures,
   imageSize,
   MAX_FIGURE_CANDIDATES,
-  pdfFigurePages,
+  pdfFigureBoxes,
+  type FigureBox,
   type FigureDeps,
 } from "~/lib/documents/figures";
 import { DOCX_MIME, PDF_MIME } from "~/lib/documents/extract";
@@ -18,9 +19,32 @@ const fileOf = (name: string, type: string) => new File([bytesOf(name)], name, {
 
 /** Browser-only steps stubbed: no canvas in tests. */
 const deps: FigureDeps = {
-  renderPdfPage: vi.fn(async (_pdf, page: number) => `data:image/png;base64,UEFHRS${page}`),
+  renderPdfFigure: vi.fn(async (_pdf, page: number) => `data:image/png;base64,UEFHRS${page}`),
   shrink: async (image) => image,
 };
+
+/** A box (fractions of the page, top-left origin) around a figure drawn in PDF points. */
+const PAGE = { width: 612, height: 792 };
+function expectAround(box: FigureBox | undefined, x: number, y: number, w: number, h: number) {
+  expect(box).toBeDefined();
+  const b = box as FigureBox;
+  const want = {
+    left: x / PAGE.width,
+    top: (PAGE.height - y - h) / PAGE.height,
+    right: (x + w) / PAGE.width,
+    bottom: (PAGE.height - y) / PAGE.height,
+  };
+  // The cut-out holds the whole figure plus a small margin, never much more.
+  const margin = 0.03;
+  expect(b.x).toBeLessThanOrEqual(want.left);
+  expect(b.x).toBeGreaterThanOrEqual(want.left - margin);
+  expect(b.y).toBeLessThanOrEqual(want.top);
+  expect(b.y).toBeGreaterThanOrEqual(want.top - margin);
+  expect(b.x + b.width).toBeGreaterThanOrEqual(want.right);
+  expect(b.x + b.width).toBeLessThanOrEqual(want.right + margin);
+  expect(b.y + b.height).toBeGreaterThanOrEqual(want.bottom);
+  expect(b.y + b.height).toBeLessThanOrEqual(want.bottom + margin);
+}
 
 describe("imageSize", () => {
   it("reads the pixel size from a PNG header", () => {
@@ -72,18 +96,30 @@ describe("docxFigures", () => {
   });
 });
 
-describe("pdfFigurePages", () => {
-  it("names the pages with a figure, not a page with only a small logo", async () => {
-    expect(await pdfFigurePages(bytesOf("sample-images.pdf"))).toEqual([2]);
+describe("pdfFigureBoxes", () => {
+  it("cuts out the figure, not a page with only a small logo", async () => {
+    const found = await pdfFigureBoxes(bytesOf("sample-images.pdf"));
+    expect(found.map((f) => f.page)).toEqual([2]);
+    expectAround(found[0]?.box, 72, 400, 300, 200);
   });
 
-  it("finds no figure pages in a text-only PDF", async () => {
-    expect(await pdfFigurePages(bytesOf("sample.pdf"))).toEqual([]);
+  it("finds no figures in a text-only PDF", async () => {
+    expect(await pdfFigureBoxes(bytesOf("sample.pdf"))).toEqual([]);
+  });
+
+  it("skips a banner on every page and a scanned page, and cuts out each real figure", async () => {
+    const found = await pdfFigureBoxes(bytesOf("sample-figure-noise.pdf"));
+    expect(found.map((f) => f.page)).toEqual([3, 4, 4]);
+    // Two stacked tiles make one figure.
+    expectAround(found[0]?.box, 72, 300, 300, 200);
+    // Top of the page first.
+    expectAround(found[1]?.box, 340, 450, 200, 150);
+    expectAround(found[2]?.box, 72, 100, 200, 150);
   });
 });
 
 describe("documentFigures", () => {
-  it("offers Word figures and PDF figure pages, each with its source", async () => {
+  it("offers Word figures and cut-out PDF figures, each with its source", async () => {
     const { figures, unsupported } = await documentFigures(
       [fileOf("sample-images.docx", DOCX_MIME), fileOf("sample-images.pdf", PDF_MIME)],
       deps,
@@ -94,6 +130,18 @@ describe("documentFigures", () => {
     ]);
     expect(figures[1]!.image).toEqual({ mediaType: "image/png", dataBase64: "UEFHRS2" });
     expect(unsupported).toBe(1);
+    const [, page, box] = vi.mocked(deps.renderPdfFigure).mock.lastCall ?? [];
+    expect(page).toBe(2);
+    expectAround(box, 72, 400, 300, 200);
+  });
+
+  it("offers every figure of a page apart, and no noise", async () => {
+    const { figures } = await documentFigures([fileOf("sample-figure-noise.pdf", PDF_MIME)], deps);
+    expect(figures.map((f) => ({ page: f.page, index: f.index }))).toEqual([
+      { page: 3, index: 1 },
+      { page: 4, index: 2 },
+      { page: 4, index: 3 },
+    ]);
   });
 
   it("offers nothing for a file without figures", async () => {
