@@ -4,7 +4,7 @@ A **course** records three things and shows whether they line up:
 
 - **Learning outcomes:** what the student can do at the end, with the Bloom level you expect.
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
-- **Assessments:** formative or summative, with the learning outcomes they test and at what level.
+- **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
 ## The checks
 

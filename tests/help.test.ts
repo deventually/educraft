@@ -42,6 +42,11 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("## Get a review");
   });
 
+  it("explains that an assessment can be marked as supervised", () => {
+    expect(getTopic("courses", "nl")).toContain("**onder toezicht**");
+    expect(getTopic("courses", "en")).toContain("**supervised**");
+  });
+
   it("describes every reviewer in its own section, so a new reviewer ships with its help", () => {
     expect(getTopicTitle("review-team", "nl")).toBe("Je reviewteam: wie er meekijkt");
     expect(getTopicTitle("review-team", "en")).toBe("Your review team: who reviews your course");
