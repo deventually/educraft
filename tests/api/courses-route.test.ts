@@ -1,16 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { alignedCourse, ACT1, LO1, LO2, QUIZ, TEST1 } from "../courses/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
 
 let repo: typeof import("~/server/repositories/courses.server");
 let profiles: typeof import("~/server/repositories/profiles.server");
@@ -24,22 +17,22 @@ beforeAll(async () => {
   detail = await import("~/routes/courses.$id");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
+beforeEach(async () => {
+  await signInAs({ id: "teacher-a", name: "A" });
 });
 
 function post(path: string, fields: Record<string, string | string[]>, locale = "nl"): Request {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(fields))
     for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
-  return new Request(`http://localhost${path}`, {
+  return signedRequest(`http://localhost${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: `lang=${locale}` },
     body: body.toString(),
   });
 }
 
-const get = (path: string) => new Request(`http://localhost${path}`);
+const get = (path: string) => signedRequest(`http://localhost${path}`);
 
 async function status(p: Promise<unknown>): Promise<number | undefined> {
   try {
@@ -175,6 +168,7 @@ describe("/courses/:id", () => {
   it("gives the current course week, or null without a start date (P27.4)", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-11-25T10:00:00Z")); // Wednesday of week 2
+    await signInAs({ id: "teacher-a" }); // a session from now, not from days ago
     try {
       const dated = await repo.createCourse("teacher-a", {
         name: "Met datum",

@@ -1,13 +1,8 @@
-import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return { ...actual, requireRole: requireRoleMock };
-});
 
 type ContextRoute = typeof import("~/routes/admin.context");
 type Settings = typeof import("~/server/repositories/settings.server");
@@ -20,13 +15,7 @@ beforeAll(async () => {
     import("~/routes/admin.context"),
     import("~/server/repositories/settings.server"),
   ]);
-  requireRoleMock.mockImplementation(async () => ({
-    id: "admin-1",
-    name: "Admin A",
-    email: "admin@example.com",
-    role: "admin" as const,
-    createdAt: new Date(0),
-  }));
+  await signInAs({ id: "admin-1", role: "admin", name: "Admin A", email: "admin@example.com" });
 });
 
 beforeEach(async () => {
@@ -34,7 +23,7 @@ beforeEach(async () => {
 });
 
 function post(fields: Record<string, string>): Request {
-  return new Request("http://localhost/admin/context", {
+  return signedRequest("http://localhost/admin/context", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(fields).toString(),
@@ -95,7 +84,7 @@ describe("admin.context action — intent calendar", () => {
 
   it("loader returns the saved break weeks", async () => {
     await settings.setBreakWeeks(["2026-10-19"]);
-    const data = await call(contextRoute.loader, new Request("http://localhost/admin/context"));
+    const data = await call(contextRoute.loader, signedRequest("http://localhost/admin/context"));
     expect(data.breakWeeks).toEqual(["2026-10-19"]);
   });
 });

@@ -1,25 +1,8 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Who is signed in; isOwner stays real (it reads the stored owner id).
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: null as unknown },
-}));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireUser: vi.fn(async () => currentUser.value),
-    requireRole: vi.fn(async (_req: Request, ...roles: string[]) => {
-      const u = currentUser.value as { role: string };
-      if (!roles.includes(u.role)) throw new Response("Forbidden", { status: 403 });
-      return u;
-    }),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let teams: typeof import("~/server/repositories/teams.server");
 let users: typeof import("~/server/repositories/users.server");
@@ -43,21 +26,19 @@ async function mk(name: string, role: "teacher" | "admin" = "teacher") {
     role,
   });
 }
-const as = (u: { id: string; role: string; name?: string }) => {
-  currentUser.value = { email: null, name: "x", ...u };
-};
+const as = (u: { id: string }) => signInAs({ id: u.id });
 
 let admin: Awaited<ReturnType<typeof mk>>;
 beforeEach(async () => {
   admin ??= await mk("Admin", "admin");
-  as(admin);
+  await as(admin);
 });
 
 function post(fields: Record<string, string | string[]>, path = "/x"): Request {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(fields))
     for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
-  return new Request(`http://localhost${path}`, {
+  return signedRequest(`http://localhost${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),

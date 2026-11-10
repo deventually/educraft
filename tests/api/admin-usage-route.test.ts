@@ -1,17 +1,13 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
-
-process.env.DATABASE_URL = "file::memory:";
-
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return { ...actual, requireRole: vi.fn(async () => ({ id: "admin", role: "admin" })) };
-});
+import { beforeAll, describe, expect, it } from "vitest";
+import { signIn, withCookie } from "../helpers/session";
 
 let route: typeof import("~/routes/admin.usage");
 let teamId = "";
+let cookie = "";
 
 beforeAll(async () => {
   route = await import("~/routes/admin.usage");
+  cookie = await signIn({ id: "usage-admin", role: "admin" });
   const users = await import("~/server/repositories/users.server");
   const teams = await import("~/server/repositories/teams.server");
   const generations = await import("~/server/repositories/generations.server");
@@ -32,7 +28,9 @@ beforeAll(async () => {
 });
 
 const load = (q = "") =>
-  route.loader({ request: new Request(`http://localhost/admin/usage${q}`) } as never);
+  route.loader({
+    request: withCookie(new Request(`http://localhost/admin/usage${q}`), cookie),
+  } as never);
 
 describe("admin usage loader: pilot per tool", () => {
   it("counts everyone without a team filter, and lists the teams", async () => {

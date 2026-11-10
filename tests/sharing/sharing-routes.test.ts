@@ -1,4 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { alignedCourse } from "../courses/fixtures";
 import { sampleRubric } from "../utilities/fixtures";
 import { flatRoutes } from "../helpers/routes";
@@ -6,17 +7,7 @@ import { flatRoutes } from "../helpers/routes";
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
 
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "share-a", name: "Anna", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
-
-const as = (id: string) => {
-  currentUser.value = { id, name: id, email: null, role: "teacher" } as never;
-};
+const as = (id: string) => signInAs({ id });
 
 let courses: typeof import("~/server/repositories/courses.server");
 let rubrics: typeof import("~/server/repositories/rubrics.server");
@@ -61,13 +52,13 @@ beforeAll(async () => {
 beforeEach(() => as("share-a"));
 
 function post(path: string, fields: Record<string, string>): Request {
-  return new Request(`http://localhost${path}`, {
+  return signedRequest(`http://localhost${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: new URLSearchParams(fields).toString(),
   });
 }
-const get = (path: string) => new Request(`http://localhost${path}`);
+const get = (path: string) => signedRequest(`http://localhost${path}`);
 
 async function status(p: Promise<unknown>): Promise<number | undefined> {
   try {
@@ -129,7 +120,7 @@ describe("a course, shared with the team", () => {
       params: { id: course.id },
     } as never);
     expect(r).toMatchObject({ ok: false, intent: "share" });
-    as("share-b");
+    await as("share-b");
     expect(
       await status(
         courseDetail.action({
@@ -158,7 +149,7 @@ describe("a course, shared with the team", () => {
     await courses.linkGeneration("share-a", course.id, (await save("math-grading")).id);
     await shares.shareItem("share-a", "course", course.id, team);
 
-    as("share-b");
+    await as("share-b");
     const list = (await courseList.loader({ request: get("/courses") } as never)) as {
       shared: { id: string; name: string; ownerName: string }[];
     };
@@ -184,7 +175,7 @@ describe("a course, shared with the team", () => {
     const copyId = ((copied as Response).headers.get("Location") ?? "").split("/").pop() ?? "";
     expect((await courses.getCourse("share-b", copyId))?.name).toBe("Farmacologie");
 
-    as("share-c");
+    await as("share-c");
     expect(
       await status(
         sharedCourse.loader({
@@ -206,7 +197,7 @@ describe("a rubric, shared with the team", () => {
       } as never),
     ).toMatchObject({ ok: true, intent: "share" });
 
-    as("share-b");
+    await as("share-b");
     const list = (await rubricList.loader({ request: get("/utilities/rubric") } as never)) as {
       shared: { id: string; ownerName: string }[];
     };
@@ -243,7 +234,7 @@ describe("a context profile, shared with the team", () => {
       } as never),
     ).toMatchObject({ ok: true, intent: "share" });
 
-    as("share-b");
+    await as("share-b");
     const page = (await contextPage.loader({ request: get("/context-profiles") } as never)) as {
       shared: { id: string; name: string; ownerName: string }[];
     };

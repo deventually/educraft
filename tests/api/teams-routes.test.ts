@@ -1,26 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Who is signed in; isOwner stays real (it reads the stored owner id).
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: null as unknown },
-}));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireUser: vi.fn(async () => currentUser.value),
-    requireRole: vi.fn(async (_req: Request, ...roles: string[]) => {
-      const u = currentUser.value as { role: string };
-      if (!roles.includes(u.role)) throw new Response("Forbidden", { status: 403 });
-      return u;
-    }),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let teams: typeof import("~/server/repositories/teams.server");
 let users: typeof import("~/server/repositories/users.server");
@@ -54,27 +37,25 @@ async function mk(name: string, role: "teacher" | "admin" = "teacher") {
     role,
   });
 }
-const as = (u: { id: string; role: string; name?: string }) => {
-  currentUser.value = { email: null, name: "x", ...u };
-};
+const as = (u: { id: string }) => signInAs({ id: u.id });
 
 let admin: Awaited<ReturnType<typeof mk>>;
 beforeEach(async () => {
   admin ??= await mk("Admin", "admin");
-  as(admin);
+  await as(admin);
 });
 
 function post(fields: Record<string, string | string[]>, path = "/x"): Request {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(fields))
     for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
-  return new Request(`http://localhost${path}`, {
+  return signedRequest(`http://localhost${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
   });
 }
-const get = (path = "/x") => new Request(`http://localhost${path}`);
+const get = (path = "/x") => signedRequest(`http://localhost${path}`);
 const call = <F extends (a: never) => unknown>(fn: F, args: object) =>
   fn({ params: {}, context: {}, ...args } as never) as Promise<Awaited<ReturnType<F>>>;
 async function status(p: Promise<unknown>): Promise<number | undefined> {
@@ -137,7 +118,7 @@ describe("/admin/teams, the list (P28.2, like the user list)", () => {
     const lead = await mk("Lead X");
     await teams.addMember(team.id, lead.id);
     await teams.setLead(team.id, lead.id, true);
-    as(lead);
+    await as(lead);
     expect(await status(call(adminTeams.loader, { request: get() }))).toBe(403);
     expect(
       await status(call(adminTeams.action, { request: post({ intent: "create", name: "Y" }) })),
@@ -346,7 +327,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
 
   it("shows the lead their team: members with name and e-mail", async () => {
     const { team, lead, member } = await setup();
-    as(lead);
+    await as(lead);
     const data = await call(leadPage.loader, { request: get(), params: { id: team.id } });
     expect(data.team.name).toBe(team.name);
     expect(data.team.members).toEqual(
@@ -361,7 +342,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     const { team, member } = await setup();
     const other = await setup();
     for (const who of [member, other.lead, admin]) {
-      as(who);
+      await as(who);
       expect(
         await status(call(leadPage.loader, { request: get(), params: { id: team.id } })),
         who.name,
@@ -377,7 +358,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
   it("adds by exact e-mail, makes a member lead, and removes a plain member", async () => {
     const { team, lead, member } = await setup();
     const colleague = await mk("Colleague");
-    as(lead);
+    await as(lead);
     expect(await act(team.id, { intent: "addMember", email: colleague.email! })).toEqual({
       saved: true,
     });
@@ -399,7 +380,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
 
   it("mints a teacher invite for this team", async () => {
     const { team, lead } = await setup();
-    as(lead);
+    await as(lead);
     const res = (await act(team.id, { intent: "invite", note: "Collega" })) as { link: string };
     const token = res.link.split("/invite/")[1];
     expect(await users.getInvite(token!)).toMatchObject({ role: "teacher", teamId: team.id });
@@ -407,7 +388,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
 
   it("steps down and goes back to the account page", async () => {
     const { team, lead } = await setup();
-    as(lead);
+    await as(lead);
     const res = (await act(team.id, { intent: "stepDown" })) as unknown as Response;
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("/account");
@@ -438,7 +419,7 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
     const { team, lead } = await leadOfNewTeam();
     await settings.setFeatureStand("courses", "off");
     await settings.setToolStand(TOOL, "off");
-    as(lead);
+    await as(lead);
     const data = await call(leadPage.loader, { request: get(), params: { id: team.id } });
     expect(data.offer.features.map((f) => f.id)).not.toContain("courses");
     expect(data.offer.features.map((f) => f.id)).toContain("portfolio");
@@ -456,7 +437,7 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
       models: null,
     });
     await settings.setFeatureStand("courses", "off");
-    as(lead);
+    await as(lead);
     const res = await call(leadPage.action, {
       request: post({
         intent: "settings",
@@ -479,7 +460,7 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
 
   it("an own model set may not be empty; follows the instance clears it", async () => {
     const { team, lead } = await leadOfNewTeam();
-    as(lead);
+    await as(lead);
     const act = (fields: Record<string, string | string[]>) =>
       call(leadPage.action, {
         request: post({ intent: "settings", ...fields }),
@@ -494,7 +475,7 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
 
   it("refuses an unknown choice", async () => {
     const { team, lead } = await leadOfNewTeam();
-    as(lead);
+    await as(lead);
     expect(
       await call(leadPage.action, {
         request: post({ intent: "settings", "feature:portfolio": "maybe" }),

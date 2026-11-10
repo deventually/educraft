@@ -1,18 +1,8 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Who is signed in; isOwner stays real (it reads the stored owner id).
-const { currentUser } = vi.hoisted(() => ({ currentUser: { value: null as unknown } }));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireRole: vi.fn(async () => currentUser.value),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let users: typeof import("~/server/repositories/users.server");
 let settings: typeof import("~/server/repositories/settings.server");
@@ -42,7 +32,7 @@ async function mk(role: "teacher" | "admin", withTwoFactor = true) {
 }
 
 function onPerson(id: string, intent: string) {
-  const request = new Request("http://localhost/x", {
+  const request = signedRequest("http://localhost/x", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ intent }).toString(),
@@ -53,7 +43,7 @@ function onPerson(id: string, intent: string) {
 }
 const load = (id: string) =>
   person.loader({
-    request: new Request("http://localhost/x"),
+    request: signedRequest("http://localhost/x"),
     params: { id },
     context: {},
   } as never);
@@ -62,7 +52,7 @@ let owner: Awaited<ReturnType<typeof mk>>;
 beforeEach(async () => {
   owner ??= await mk("admin");
   await settings.setOwnerUserId(owner.id);
-  currentUser.value = owner;
+  await signInAs({ id: owner.id });
 });
 
 describe("the owner turns off someone's two-step verification (P2-12)", () => {
@@ -90,7 +80,7 @@ describe("the owner turns off someone's two-step verification (P2-12)", () => {
   it("a regular admin may not, not even for a teacher", async () => {
     const admin = await mk("admin");
     const target = await mk("teacher");
-    currentUser.value = admin;
+    await signInAs({ id: admin.id });
     expect(await onPerson(target.id, "resetTwoFactor")).toEqual({ error: "ownerOnly" });
     expect(await repo.isTwoFactorEnabled(target.id)).toBe(true);
   });

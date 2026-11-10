@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// env.server needs a DATABASE_URL before import; OLLAMA_BASE_URL keeps its default
-// (http://localhost:11434/v1), which the adapter strips to hit the native API.
-process.env.DATABASE_URL = "file::memory:";
-
+// OLLAMA_BASE_URL ends in /v1 (default http://localhost:11434/v1), which the adapter strips to
+// hit the native API.
 import { OLLAMA_DEFAULT_NUM_CTX, ollamaProvider } from "~/lib/ai/adapters/ollama";
+import { env } from "~/server/env.server";
 import type { GenerateOptions } from "~/lib/ai/types";
 
 /** A stub Response whose body streams the given NDJSON lines. */
@@ -60,7 +59,8 @@ describe("ollamaProvider — native /api/chat adapter", () => {
   it("hits the native /api/chat endpoint (the /v1 suffix is stripped)", async () => {
     fetchMock.mockResolvedValue(ndjsonResponse([`{"message":{"content":"x"},"done":true}`]));
     for await (const _ of ollamaProvider.streamChat(base)) void _;
-    expect(lastUrl()).toBe("http://localhost:11434/api/chat");
+    expect(env.OLLAMA_BASE_URL).toMatch(/\/v1$/);
+    expect(lastUrl()).toBe(`${env.OLLAMA_BASE_URL.replace(/\/v1$/, "")}/api/chat`);
   });
 
   it("sends the raw apiId, a system message, and think:false when thinking is off", async () => {

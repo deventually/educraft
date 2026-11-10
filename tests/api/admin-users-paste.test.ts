@@ -1,25 +1,8 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Who is signed in; isOwner stays real (it reads the stored owner id).
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: null as unknown },
-}));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireUser: vi.fn(async () => currentUser.value),
-    requireRole: vi.fn(async (_req: Request, ...roles: string[]) => {
-      const u = currentUser.value as { role: string };
-      if (!roles.includes(u.role)) throw new Response("Forbidden", { status: 403 });
-      return u;
-    }),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let teams: typeof import("~/server/repositories/teams.server");
 let users: typeof import("~/server/repositories/users.server");
@@ -39,7 +22,7 @@ type Row =
 type Result = { pasted?: Row[]; error?: string };
 
 function post(fields: Record<string, string>): Request {
-  return new Request("http://localhost/admin/users", {
+  return signedRequest("http://localhost/admin/users", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(fields).toString(),
@@ -63,7 +46,7 @@ beforeEach(async () => {
   });
   // A regular admin, not the super admin: inviting teachers is every admin's job.
   await settings.setOwnerUserId(null);
-  currentUser.value = { ...admin };
+  await signInAs({ id: admin.id });
 });
 
 describe("/admin/users: paste a list (P28.5)", () => {
@@ -131,7 +114,7 @@ describe("/admin/users: paste a list (P28.5)", () => {
   });
 
   it("is for admins only", async () => {
-    currentUser.value = { ...admin, role: "teacher" };
+    await signInAs({ id: "paste-teacher" });
     await expect(paste("X, x.paste@school.nl")).rejects.toMatchObject({ status: 403 });
   });
 });

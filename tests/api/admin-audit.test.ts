@@ -1,26 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { flatRoutes } from "../helpers/routes";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Who is signed in; isOwner stays real (it reads the stored owner id).
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: null as unknown },
-}));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireUser: vi.fn(async () => currentUser.value),
-    requireRole: vi.fn(async (_req: Request, ...roles: string[]) => {
-      const u = currentUser.value as { role: string };
-      if (!roles.includes(u.role)) throw new Response("Forbidden", { status: 403 });
-      return u;
-    }),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let users: typeof import("~/server/repositories/users.server");
 let settings: typeof import("~/server/repositories/settings.server");
@@ -50,15 +33,13 @@ async function mk(name: string, role: "teacher" | "admin" = "teacher") {
     role,
   });
 }
-const as = (u: { id: string; role: string; name?: string }) => {
-  currentUser.value = { email: null, name: "x", ...u };
-};
+const as = (u: { id: string }) => signInAs({ id: u.id });
 
 function post(fields: Record<string, string | string[]>): Request {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(fields))
     for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
-  return new Request("http://localhost/x", {
+  return signedRequest("http://localhost/x", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
@@ -78,7 +59,7 @@ let owner: Awaited<ReturnType<typeof mk>>;
 beforeEach(async () => {
   owner ??= await mk("Eigenaar", "admin");
   await settings.setOwnerUserId(owner.id);
-  as(owner);
+  await as(owner);
 });
 
 describe("the audit log records every admin action that changes access", () => {
@@ -217,16 +198,16 @@ describe("the log page (/admin/audit)", () => {
     await onPerson(t.id, { intent: "deactivate" });
     await onPerson(t.id, { intent: "reactivate" });
     const data = await call(auditRoute.loader, {
-      request: new Request("http://localhost/admin/audit"),
+      request: signedRequest("http://localhost/admin/audit"),
     });
     expect(data.entries[0]).toMatchObject({ action: "reactivated", targetName: "Pagina Docent" });
     expect(data.entries[1]).toMatchObject({ action: "deactivated" });
   });
 
   it("is closed to a teacher", async () => {
-    as(await mk("Nieuwsgierig"));
+    await as(await mk("Nieuwsgierig"));
     await expect(
-      call(auditRoute.loader, { request: new Request("http://localhost/admin/audit") }),
+      call(auditRoute.loader, { request: signedRequest("http://localhost/admin/audit") }),
     ).rejects.toMatchObject({ status: 403 });
   });
 
@@ -273,7 +254,7 @@ describe("cleaning up the log", () => {
   it("keeps a year: opening the page also clears what is older", async () => {
     await cleanup({ olderThan: "all" });
     await recordAgo(400);
-    await call(auditRoute.loader, { request: new Request("http://localhost/admin/audit") });
+    await call(auditRoute.loader, { request: signedRequest("http://localhost/admin/audit") });
     expect((await ages()).some((d) => d >= 365)).toBe(false);
   });
 
@@ -310,7 +291,7 @@ describe("cleaning up the log", () => {
   });
 
   it("tells the page whether the viewer may clean up", async () => {
-    const req = () => new Request("http://localhost/admin/audit");
+    const req = () => signedRequest("http://localhost/admin/audit");
     expect((await call(auditRoute.loader, { request: req() })).canClean).toBe(true);
     await settings.setOwnerUserId(null);
     expect((await call(auditRoute.loader, { request: req() })).canClean).toBe(false);

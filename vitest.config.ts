@@ -28,8 +28,14 @@ function projects(
   const base = {
     globals: true,
     environment,
-    // Never the real database in data/, whatever a file imports first.
-    env: { DATABASE_URL: "file::memory:" },
+    env: {
+      // Never the real database in data/, whatever a file imports first.
+      DATABASE_URL: "file::memory:",
+      // Model discovery finds nothing: port 9 (discard) refuses at once, so a test never sees
+      // the models of an Ollama or LM Studio someone happens to run.
+      OLLAMA_BASE_URL: "http://127.0.0.1:9/ollama/v1",
+      LMSTUDIO_BASE_URL: "http://127.0.0.1:9/lmstudio/v1",
+    },
   };
   return [
     { resolve: { alias }, test: { ...base, name, include: isolated, setupFiles } },

@@ -1,22 +1,13 @@
 import JSZip from "jszip";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { alignedCourse } from "../courses/fixtures";
 import { flatRoutes } from "../helpers/routes";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
 
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "exp-a", name: "Anna", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
-
-const as = (id: string) => {
-  currentUser.value = { id, name: id, email: null, role: "teacher" } as never;
-};
+const as = (id: string) => signInAs({ id });
 
 let generations: typeof import("~/server/repositories/generations.server");
 let courses: typeof import("~/server/repositories/courses.server");
@@ -56,7 +47,7 @@ const save = (toolSlug: string, stageId: string, outputMarkdown: string, userId 
   });
 
 const get = (path: string) =>
-  new Request(`http://localhost${path}`, { headers: { Cookie: "lang=nl" } });
+  signedRequest(`http://localhost${path}`, { headers: { Cookie: "lang=nl" } });
 
 function loadPreview(id: string, query = "") {
   return preview.loader({
@@ -152,7 +143,7 @@ describe("export routes (P30.1)", () => {
 
   it("is a 404 for someone else's work, also as an extra step", async () => {
     const g = await save("lesson-plan", "lesson", "Les");
-    as("exp-c");
+    await as("exp-c");
     expect(await status(loadPreview(g.id))).toBe(404);
     expect(await status(loadFile(g.id, "docx"))).toBe(404);
     expect(
@@ -179,9 +170,9 @@ describe("export routes (P30.1)", () => {
     await shares.shareItem("exp-a", "course", course.id, team);
     const g = await save("lesson-plan", "lesson", "Gedeelde les");
     await courses.linkGeneration("exp-a", course.id, g.id);
-    as("exp-b");
+    await as("exp-b");
     expect((await loadFile(g.id, "docx")).status).toBe(200);
-    as("exp-c");
+    await as("exp-c");
     expect(await status(loadFile(g.id, "docx"))).toBe(404);
   });
 
@@ -190,9 +181,9 @@ describe("export routes (P30.1)", () => {
     await shares.shareItem("exp-a", "course", course.id, team);
     const g = await save("test-analysis", "explain", "Analyse");
     await courses.linkGeneration("exp-a", course.id, g.id);
-    as("exp-b");
+    await as("exp-b");
     expect(await status(loadFile(g.id, "docx"))).toBe(404);
-    as("exp-a");
+    await as("exp-a");
     expect((await loadFile(g.id, "docx")).status).toBe(200);
   });
 });

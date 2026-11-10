@@ -1,16 +1,11 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signIn, withCookie } from "../helpers/session";
 import { alignedCourse } from "../courses/fixtures";
 
-// Isolated in-memory SQLite before any server module loads.
-process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
+let cookie = "";
+const as = async (id: string) => {
+  cookie = await signIn({ id });
+};
 
 let repo: typeof import("~/server/repositories/courses.server");
 let route: typeof import("~/routes/courses.$id.calendar");
@@ -20,13 +15,11 @@ beforeAll(async () => {
   route = await import("~/routes/courses.$id.calendar");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
-});
+beforeEach(() => as("teacher-a"));
 
 const get = (id: string) =>
   route.loader({
-    request: new Request(`http://localhost/courses/${id}/calendar.ics`),
+    request: withCookie(new Request(`http://localhost/courses/${id}/calendar.ics`), cookie),
     params: { id },
     context: {},
   } as never) as Promise<Response>;
@@ -63,7 +56,7 @@ describe("/courses/:id/calendar.ics (P22.4)", () => {
       name: "Van A",
       data: { ...alignedCourse(), startDate: "2026-11-02" },
     });
-    currentUser.value = { id: "teacher-b", name: "B", email: null, role: "teacher" } as never;
+    await as("teacher-b");
     expect(await status(get(c.id))).toBe(404);
   });
 

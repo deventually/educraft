@@ -1,16 +1,9 @@
 // The role agents' admin page (/admin/agents): the main switch (the `roleAgents` feature)
 // and per hat On / Off on the instance. An untouched hat is on.
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 process.env.DATABASE_URL = "file::memory:";
-
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireRole: vi.fn(async () => ({ id: "admin-1", name: "A", email: null, role: "admin" })),
-  };
-});
 
 let route: typeof import("~/routes/admin.agents");
 let settings: typeof import("~/server/repositories/settings.server");
@@ -18,10 +11,11 @@ let settings: typeof import("~/server/repositories/settings.server");
 beforeAll(async () => {
   route = await import("~/routes/admin.agents");
   settings = await import("~/server/repositories/settings.server");
+  await signInAs({ id: "admin-1", role: "admin" });
 });
 
 function post(fields: Record<string, string>) {
-  const request = new Request("http://localhost/admin/agents", {
+  const request = signedRequest("http://localhost/admin/agents", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(fields).toString(),
@@ -31,7 +25,7 @@ function post(fields: Record<string, string>) {
 
 const load = () =>
   route.loader({
-    request: new Request("http://localhost/admin/agents"),
+    request: signedRequest("http://localhost/admin/agents"),
     params: {},
     context: {},
   } as never) as Promise<{

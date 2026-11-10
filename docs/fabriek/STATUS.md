@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #216 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #217 gemerged)_
 
 ## Nu
 
+- **better-sqlite3 13 (#217) gemerged op 2026-11-10:** de database-driver levert zijn voorgebouwde
+  bestanden nu zelf mee, ook voor het Alpine-image; er is nog steeds geen compiler nodig. Geen
+  gedragswijziging.
 - **Testsuite bijna twee keer zo snel (#216) gemerged op 2026-11-10:** de meeste testbestanden
   delen hun modules per worker (`isolate: false`, elk met een eigen in-memory database); een
   bestand dat `vi.mock` gebruikt of `process.env` zet, draait apart (`tests/helpers/isolation.ts`).

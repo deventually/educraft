@@ -1,20 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { sampleDossier } from "../portfolio/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({ currentUser: { value: null as unknown } }));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireUser: vi.fn(async () => currentUser.value),
-    requireRole: vi.fn(async () => currentUser.value),
-    getUser: vi.fn(async () => currentUser.value),
-  };
-});
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let av: typeof import("~/server/availability.server");
 let teams: typeof import("~/server/repositories/teams.server");
@@ -78,11 +67,11 @@ describe("tools follow the three layers (P28.3)", () => {
     expect(await av.isToolAvailable(inTeam, tool())).toBe(true);
     expect(await av.isToolAvailable(other, tool())).toBe(false);
     expect((await av.getAvailableTools(other)).map((t) => t.slug)).not.toContain(TOOL);
-    currentUser.value = other;
+    await signInAs({ id: other.id });
     expect(
       await status(
         toolRoute.loader({
-          request: new Request(`http://localhost/tools/${TOOL}`),
+          request: signedRequest(`http://localhost/tools/${TOOL}`),
           params: { slug: TOOL },
         } as never),
       ),
@@ -195,7 +184,7 @@ describe("models per team (P28.3)", () => {
 });
 
 describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () => {
-  const get = (path: string) => new Request(`http://localhost${path}`);
+  const get = (path: string) => signedRequest(`http://localhost${path}`);
   beforeEach(async () => {
     await settings.setFeatureStand("courses", "on");
     await settings.setFeatureStand("utilities", "on");
@@ -206,7 +195,7 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     const course = await import("~/routes/courses.$id");
     const root = await import("~/root");
     const t = await teacher();
-    currentUser.value = t;
+    await signInAs({ id: t.id });
     expect(await status(courses.loader({ request: get("/courses") } as never))).toBeUndefined();
     expect((await root.loader({ request: get("/") } as never)).data.user?.features.courses).toBe(
       true,
@@ -226,7 +215,7 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     const rubric = await import("~/routes/utilities.rubric._index");
     const home = await import("~/routes/home");
     const t = await teacher();
-    currentUser.value = t;
+    await signInAs({ id: t.id });
     expect((await home.loader({ request: get("/") } as never)).utilities).toBe(true);
     await settings.setFeatureStand("utilities", "off");
     expect(await status(utilities.loader({ request: get("/utilities") } as never))).toBe(404);
@@ -238,7 +227,7 @@ describe("a part that is off is a 404, and the menu leaves it out (P28.3)", () =
     const start = await import("~/routes/start");
     const generations = await import("~/server/repositories/generations.server");
     const t = await teacher();
-    currentUser.value = t;
+    await signInAs({ id: t.id });
     expect((await start.loader({ request: get("/start") } as never)).checkin).toBe(false);
     for (let i = 0; i < 3; i++) {
       await generations.saveGeneration({

@@ -1,11 +1,8 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
+import { signIn } from "../helpers/session";
 
 // Isolated in-memory DB before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// Stub auth: the route treats a request as the user named in `x-test-user`.
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
 
 type ActionMod = typeof import("~/routes/api.feedback");
 type GenRepo = typeof import("~/server/repositories/generations.server");
@@ -22,19 +19,12 @@ beforeAll(async () => {
   ({ action } = await import("~/routes/api.feedback"));
   generations = await import("~/server/repositories/generations.server");
   feedback = await import("~/server/repositories/feedback.server");
-  requireUserMock.mockImplementation(async (request: Request) => ({
-    id: request.headers.get("x-test-user") ?? "anon",
-    name: "Test",
-    email: null,
-    role: "teacher" as const,
-    createdAt: new Date(0),
-  }));
 });
 
-function post(body: unknown, userId: string): Promise<Response> {
+async function post(body: unknown, userId: string): Promise<Response> {
   const request = new Request("http://localhost/api/feedback", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-test-user": userId },
+    headers: { "Content-Type": "application/json", cookie: await signIn({ id: userId }) },
     body: JSON.stringify(body),
   });
   return action({ request, params: {}, context: {} } as Parameters<typeof action>[0]);
