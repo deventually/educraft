@@ -78,6 +78,18 @@ describe("student reviewer", () => {
   }
 });
 
+describe("inclusion reviewer", () => {
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: looks at variety in how students learn and show, and stays off the other reviewers' ground`, () => {
+      const p = getRuntimePrompt("agent-inclusion@v1", locale);
+      for (const word of locale === "nl"
+        ? ["meer dan één manier", "toetsvorm", "Toetsdeskundige", "Ontwerper"]
+        : ["more than one way", "assessment form", "Assessment expert", "Designer"])
+        expect(p, word).toContain(word);
+    });
+  }
+});
+
 describe("linked work (P21.7)", () => {
   it("every hat that watches generations names the linked-work tag; v1 stays registered", () => {
     for (const agent of AGENTS.filter((a) => a.watches.includes("generation")))

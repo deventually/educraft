@@ -60,6 +60,17 @@ export const AGENTS: Agent[] = [
     },
     teacherDefault: "off",
   },
+  {
+    id: "inclusion",
+    role: { nl: "Inclusie", en: "Inclusion" },
+    promptId: "agent-inclusion@v1",
+    watches: ["course"],
+    focus: {
+      nl: "Kijkt of studenten op meer dan één manier kunnen leren en laten zien wat ze kunnen.",
+      en: "Checks that students can learn, and show what they can do, in more than one way.",
+    },
+    teacherDefault: "off",
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {

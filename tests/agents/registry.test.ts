@@ -29,6 +29,7 @@ describe("agent registry (P21.1)", () => {
       "ai-resilience",
       "professional-practice",
       "student",
+      "inclusion",
     ]);
     expect(validateAgents(AGENTS)).toEqual([]);
   });
@@ -45,6 +46,7 @@ describe("agent registry (P21.1)", () => {
       "ai-resilience",
       "professional-practice",
       "student",
+      "inclusion",
     ]);
     expect(agentsWatching("generation").map((a) => a.id)).toEqual(["assessment-expert"]);
   });
@@ -58,17 +60,18 @@ describe("agent registry (P21.1)", () => {
       "ai-resilience",
       "professional-practice",
       "student",
+      "inclusion",
     ]);
-    expect(ids({ designer: "off", "professional-practice": "off", student: "off" })).toEqual([
-      "assessment-expert",
-      "ai-resilience",
-    ]);
+    expect(
+      ids({ designer: "off", "professional-practice": "off", student: "off", inclusion: "off" }),
+    ).toEqual(["assessment-expert", "ai-resilience"]);
     expect(
       ids({
         "ai-resilience": "off",
         "assessment-expert": "off",
         "professional-practice": "off",
         student: "off",
+        inclusion: "off",
       }),
     ).toEqual(["designer"]);
   });

@@ -78,6 +78,19 @@ This reviewer does not speak for real students; it only reads what is in your co
 
 This reviewer is off by default. Tick it if you want to see how your course works out for a student week by week.
 
+## Inclusion
+
+The Inclusion reviewer looks at your course from Universal Design for Learning (UDL). The question is: can students learn, and show what they can do, in more than one way?
+
+- **Variety in assessment form:** do all summative assessments have the student show what they can do in the same way, for example only written exams? Then it suggests a doable alternative, such as an oral explanation or a choice of form, for the same outcome.
+- **Variety in teaching methods:** does the student learn in more than one way, such as working together, practising and making something, and not only in lectures and self-study?
+- **Not everything at one moment:** does the whole grade hang on one assessment in one form?
+- **Room for a choice:** can the student choose somewhere, such as a topic or case?
+
+This reviewer only sees the titles and kinds of your lessons and assessments, not the material. Its advice is therefore more general than that of the other reviewers. It assumes nothing about students' disabilities or backgrounds and names no regulations. Whether an assessment form fits the outcome it leaves to the Assessment expert; the build-up to the Designer.
+
+This reviewer is off by default. Tick it if you want to see where your course could use more variety.
+
 ## What a reviewer sees
 
 A reviewer sees only this one course, as you filled it in:

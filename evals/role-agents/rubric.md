@@ -32,7 +32,8 @@ het hele cijfer aan een rapport of verslag zonder toezicht, zonder tussenproduct
 een adviesleeruitkomst die alleen in hoorcolleges en een kennistoets terugkomt, en een
 leeruitkomst op beheersingsniveau 3 met een stap-voor-stap-opdracht (Werkveld);
 drie summatieve toetsen in dezelfde week, en feedback die pas komt in de week van de toets
-(Student); en voor elke pet een goede cursus waarop hij niet mag vitten.
+(Student);
+alleen schriftelijke tentamens, en alleen hoorcolleges en zelfstudie (Inclusie); en voor elke pet een goede cursus waarop hij niet mag vitten.
 
 De woordlijsten zijn breed: ze meten of de pet de fout ziet, niet of hij precies die woorden kiest.
 Een gemiste fout lees je na in `evals/output/<datum>/role-agents/<case>.md`.

@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #237 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #238 gemerged)_
 
 ## Nu
 
+- **Reviewer Student (#238) gemerged op 2026-11-10:** een vijfde reviewer loopt de cursus week
+  voor week door zoals een student: deadlines die samenvallen, feedback die pas komt als het al
+  telt, lege weken met een eindsprint. Voor docenten standaard uit; eigen stuk op
+  `/help/review-team`. `npm run eval:agents -- --agent <id>` draait de cases van één reviewer.
+  Eval 9/9 (`evals/reports/2026-11-10b-role-agents.md`). PR 5 van het plan "Nieuwe rolagenten
+  en examencommissie".
 - **Reviewer Werkveld (#237) gemerged op 2026-11-10:** een vierde reviewer kijkt of studenten
   oefenen en getoetst worden zoals in het beroep, op het niveau van de beroepsactiviteiten en het
   beheersingsniveau uit het vakgebiedpakket. Voor docenten standaard uit; eigen stuk op

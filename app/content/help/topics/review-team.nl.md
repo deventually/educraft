@@ -78,6 +78,19 @@ Deze reviewer spreekt niet namens echte studenten; hij leest alleen wat in je cu
 
 Deze reviewer staat standaard uit. Vink hem aan als je wilt zien hoe je cursus week voor week voor een student uitpakt.
 
+## Inclusie
+
+De reviewer Inclusie kijkt vanuit Universal Design for Learning (UDL) naar je cursus. De vraag is: kunnen studenten op meer dan één manier leren en laten zien wat ze kunnen?
+
+- **Variatie in toetsvormen:** laten alle summatieve toetsen de student op dezelfde manier zien wat hij kan, bijvoorbeeld alleen schriftelijke tentamens? Dan stelt hij een haalbaar alternatief voor, zoals een mondelinge toelichting of een keuze in vorm, voor dezelfde leeruitkomst.
+- **Variatie in werkvormen:** leert de student op meer dan één manier, zoals samenwerken, oefenen en iets maken, en niet alleen in hoorcolleges en zelfstudie?
+- **Niet alles op één moment:** hangt het hele cijfer aan één toets in één vorm?
+- **Ruimte voor een keuze:** kan de student ergens kiezen, zoals een onderwerp of casus?
+
+Deze reviewer ziet alleen de titels en soorten van je lessen en toetsen, niet de lesstof. Zijn adviezen zijn daarom algemener dan die van de andere reviewers. Hij gaat niet uit van beperkingen of achtergronden van studenten en noemt geen regelingen. Of een toetsvorm bij de leeruitkomst past, laat hij aan de Toetsdeskundige; de opbouw aan de Ontwerper.
+
+Deze reviewer staat standaard uit. Vink hem aan als je wilt zien waar je cursus meer afwisseling kan gebruiken.
+
 ## Wat een reviewer ziet
 
 Een reviewer ziet alleen deze ene cursus, zoals jij hem invulde:
