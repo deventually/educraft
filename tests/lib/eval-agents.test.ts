@@ -5,6 +5,7 @@ import {
   type AgentCase,
   agentReportMarkdown,
   scoreAgentCase,
+  selectAgentCases,
   unknownTargets,
 } from "../../scripts/eval-agents-helpers";
 import { AGENTS, getAgent } from "~/lib/agents/registry";
@@ -132,5 +133,29 @@ describe("agentReportMarkdown", () => {
     });
     expect(md).toContain("| x | designer |");
     expect(md).toContain("Geslaagd: 1 van 1.");
+  });
+});
+
+describe("selecting role-agent eval cases", () => {
+  const cases = [
+    { id: "a1", agent: "student" },
+    { id: "a2", agent: "designer" },
+    { id: "a3", agent: "student" },
+  ] as AgentCase[];
+  const ids = (filter: { caseId?: string; agent?: string }) =>
+    selectAgentCases(cases, filter).map((c) => c.id);
+
+  it("runs every case without a filter, so a full run stays a regression test", () => {
+    expect(ids({})).toEqual(["a1", "a2", "a3"]);
+  });
+
+  it("runs only one reviewer's cases with --agent, or one case with --case", () => {
+    expect(ids({ agent: "student" })).toEqual(["a1", "a3"]);
+    expect(ids({ caseId: "a2" })).toEqual(["a2"]);
+    expect(ids({ agent: "student", caseId: "a2" })).toEqual([]);
+  });
+
+  it("refuses a reviewer that does not exist instead of running nothing", () => {
+    expect(() => selectAgentCases(cases, { agent: "nope" })).toThrow(/nope/);
   });
 });

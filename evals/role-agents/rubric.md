@@ -16,6 +16,10 @@ Per case:
 - **Onbekende items**: sleutels in het antwoord die de cursus niet heeft (de filter laat ze vallen).
   Moet 0 zijn.
 
+Met `--agent <id>` (bijvoorbeeld `--agent student`) draai je alleen de cases van één reviewer:
+genoeg voor een nieuwe of gewijzigde reviewer. Verandert er iets wat alle reviewers delen (de
+invoer, de filter of het model), draai dan alles.
+
 Een case slaagt als alles klopt. De eindmeting draait elke case drie keer (`--repeat 3`); de pet is
 klaar als elke run slaagt.
 
