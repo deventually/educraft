@@ -13,6 +13,16 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run check
+  audit:
+    # Known vulnerabilities in dependencies. Production must be clean from moderate up; the whole
+    # tree (dev tools too) blocks from high. npm audit reads the lockfile only, no install needed.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24.14.1" }
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: npm audit --audit-level=high
   e2e:
     # Browser tests: the production build in Chromium, with axe (WCAG 2.2 AA) and CSP checks.
     runs-on: ubuntu-latest

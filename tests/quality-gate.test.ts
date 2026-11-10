@@ -27,6 +27,18 @@ describe("quality gate", () => {
     expect(biome.files.includes).toContain("!**/*.md");
   });
 
+  // Two a11y rules were off. A button without a type submits its form by accident; a label
+  // without a control is read without the field it names. Both stay on.
+  it("keeps every Biome a11y rule on", () => {
+    const biome = JSON.parse(readFileSync(resolve(root, "biome.json"), "utf8")) as {
+      linter: { rules: { a11y?: Record<string, string | { level: string }> } };
+    };
+    const off = Object.entries(biome.linter.rules.a11y ?? {})
+      .filter(([, v]) => (typeof v === "string" ? v : v.level) === "off")
+      .map(([rule]) => rule);
+    expect(off).toEqual([]);
+  });
+
   it("CI runs the check script", () => {
     expect(readFileSync(resolve(root, ".github/workflows/ci.yml"), "utf8")).toContain(
       "npm run check",

@@ -78,6 +78,7 @@ export function ChatThread({
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {starters.map((starter) => (
                 <button
+                  type="button"
                   key={starter}
                   onClick={() => onStarter(starter)}
                   className="rounded-full border border-violet-300 bg-white px-4 py-2 text-sm text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"

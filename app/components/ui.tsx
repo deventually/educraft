@@ -66,12 +66,17 @@ export function Spinner({ className }: { className?: string }) {
 
 export function Label({
   className,
+  htmlFor,
   required,
   children,
   ...props
 }: React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean }) {
   return (
-    <label className={cn("block text-sm font-medium text-slate-800", className)} {...props}>
+    <label
+      htmlFor={htmlFor}
+      className={cn("block text-sm font-medium text-slate-800", className)}
+      {...props}
+    >
       {children}
       {required && <span className="ml-0.5 text-violet-600">*</span>}
     </label>

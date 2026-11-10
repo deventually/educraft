@@ -158,6 +158,16 @@ describe("ChatView", () => {
     expect(starters).toBeInTheDocument();
   });
 
+  it("gives every chat button an explicit type, so none submits a form by accident", async () => {
+    const user = userEvent.setup();
+    render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByPlaceholderText("Your message…"), "Hi");
+
+    const untyped = screen.getAllByRole("button").filter((b) => !b.hasAttribute("type"));
+    expect(untyped.map((b) => b.textContent || b.getAttribute("title"))).toEqual([]);
+  });
+
   it("renders one-time sandbox inputs from tool.inputs", async () => {
     const { container } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
 
