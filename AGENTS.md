@@ -116,8 +116,8 @@ Details: [Architecture](wiki/Architecture.md#feature-modules).
 - A course is one JSON graph per course (`CourseDataSchema`, `app/lib/courses/`): outcomes with an
   optional Bloom level, activities, assessments with coverage, optional EC. The schema is not
   `.strict()`, so later phases add optional fields without a migration.
-- `checkAlignment` and `coverageMatrix` are pure and advisory: they report, never change the
-  course, and use no AI.
+- `checkAlignment`, `coverageMatrix` and `learningLineOverview` (a learning line across courses,
+  `app/lib/programmes/`) are pure and advisory: they report, never change a course, and use no AI.
 - A tool reaches a course only through data: `InputField.prefillFromCourse`. No per-tool course code.
 - Links are owner-checked in the repository: `linkGeneration` returns `null` for anything that is
   not the caller's. The stream logs a refused link and still saves the generation.

@@ -29,6 +29,14 @@ Je kunt het ook vanaf de cursus doen. Op de cursuspagina staat **Hoort bij oplei
 
 Een cursus kan bij **meer opleidingen** horen, met in elke opleiding een eigen jaar en periode. Denk aan een voltijd- en een deeltijdvariant met dezelfde cursussen, of een cursus die in jaar 1 van de ene en in jaar 2 van de andere opleiding valt.
 
+## Leerlijnen
+
+Een **leerlijn** is een reeks cursussen binnen een opleiding, op volgorde, bijvoorbeeld *Programmeren* of *Onderzoeken*. De teamleider of een beheerder maakt hem aan op de pagina van de opleiding: geef een naam en vink de cursussen aan. Op de pagina van de leerlijn zet je de cursussen op volgorde met **Omhoog** en **Omlaag**, en voeg je er een toe of haal je er een uit. Elk teamlid kan de leerlijn bekijken.
+
+De leerlijn laat zien **wat terugkomt**: een leeruitkomst die in meer cursussen voorkomt, met per cursus het hoogste Bloom-niveau. Een leeruitkomst komt terug als hij in een latere cursus dezelfde tekst heeft (hoofdletters, spaties en een punt aan het eind tellen niet mee), of dezelfde **vakgebiedtag**, zoals dezelfde beroepstaak uit je onderwijscontext. Daalt het Bloom-niveau in een latere cursus, dan staat erbij: *Het Bloom-niveau daalt*. Daaronder staan de leeruitkomsten per cursus.
+
+Net als de dekkingsmatrix is dit een **advies**. Er verandert niets aan de cursussen, en er komt geen AI aan te pas. Wil je een draad volgen, gebruik dan in elke cursus dezelfde formulering of dezelfde tag.
+
 ## Wat hoort waar?
 
 - Een **master** is een eigen opleiding.
