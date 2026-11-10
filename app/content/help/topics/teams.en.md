@@ -12,7 +12,18 @@ You can share three things with your team:
 - a **rubric** from the utilities;
 - a **teaching context**.
 
-Choose **Share** on the course, rubric or teaching context, and then the team. Colleagues in the team can view it and choose **Make a copy** to make their own version. Only you edit the original. **Stop sharing** makes it private again; a copy a colleague already made stays theirs.
+Choose **Share** on the course, rubric or teaching context, and then the team. Colleagues in the team can view it and choose **Make a copy** to make their own version. Only you (and, for a course, your editors) edit the original. **Stop sharing** makes it private again; a copy a colleague already made stays theirs.
+
+## Working on a course together
+
+Sharing only lets colleagues read. To work on a course together, add a colleague as **editor**. You do that at the bottom of the course, under *Work on this course together*. You can choose colleagues you share a team with.
+
+- An editor sees the course under **Courses**, with your name on it, and changes outcomes, activities, assessments and settings as you do.
+- What an editor makes with a tool and links to the course stays theirs. So do the review team's reviews.
+- Only you as the owner delete the course, share it with a team, choose its educational context and choose editors.
+- An editor can **Stop editing** themselves; you can remove an editor.
+
+Changes are saved per part. If you work on different parts at the same time, everything is kept. If two people change the same part, the last save counts.
 
 ## What is never shared
 

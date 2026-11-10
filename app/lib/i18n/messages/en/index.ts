@@ -11,6 +11,7 @@ import { auth } from "./auth";
 import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { courseEditors } from "./courseEditors";
 import { courseTools } from "./courseTools";
 import { courses } from "./courses";
 import { documents } from "./documents";
@@ -65,6 +66,7 @@ export const en: Messages = {
   calendar,
   chat,
   confirm,
+  courseEditors,
   courses,
   courseTools,
   documents,

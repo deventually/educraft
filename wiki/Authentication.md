@@ -160,6 +160,11 @@ repository, `app/server/repositories/shares.server.ts`.
   with "Maak een kopie" (`copySharedItem`: own copy, no links, no shares, no context profile).
   A colleague's course or rubric opens read only on `/courses/shared/:id` and
   `/utilities/rubric/shared/:id`; not shared (any more) is a 404.
+- **Course editors (BESLUIT-2026-11-10-3):** sharing stays read only. To work on a course
+  together, the owner adds team-mates as editors (`course_members`, repository
+  `courseMembers.server.ts`, glue `courseEditors.server.ts`). `getCourse`, `listCourses` and
+  `updateCourse` accept owner or editor (`mayEdit`); `deleteCourse`, `shareItem`, the context
+  profile and the editors stay with the owner. Links and reviews stay with whoever made them.
 - **When a share lapses:** stopping, leaving the team (`removeMember`, `setUserTeams`: the
   leaver's shares for that team go), removing the team, deleting the item or the account. A copy
   stays with whoever made it.
