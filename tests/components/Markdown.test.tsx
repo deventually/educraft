@@ -25,6 +25,14 @@ describe("Markdown", () => {
     expect(container.querySelector("code")?.textContent).toBe("npm test");
   });
 
+  // LLM output is untrusted: raw HTML in it must never become DOM (AGENTS.md, security by design).
+  it("does not render raw HTML from the model", () => {
+    const { container } = render(
+      <Markdown>{'Hi <img src="x" onerror="alert(1)"> <script>alert(1)</script> there'}</Markdown>,
+    );
+    expect(container.querySelector("img, script")).toBeNull();
+  });
+
   it("has no a11y violations", async () => {
     const { container } = render(<Markdown>{"# Title\n\n```ts\ntype X = number;\n```"}</Markdown>);
     const results = await axe(container);
