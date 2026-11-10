@@ -27,7 +27,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 
 1. **TDD, always.** Red → Green → Refactor for every feature, fix, copy/layout/route/i18n change.
    Unit tests `tests/**/*.test.ts` (node), components `tests/**/*.test.tsx` (happy-dom). Use the
-   `/tdd` skill for templates.
+   `/tdd` skill for templates. Most files share their modules per worker (`isolate: false`, each
+   with a fresh in-memory DB); a file that `vi.mock`s or sets `process.env` runs isolated by
+   itself (`tests/helpers/isolation.ts`). Prefer a seam over a module mock.
 2. **Security by design.** Validate all external input with Zod at the boundary: `/api/stream`
    parses its body with `StreamBodySchema` (extend it, never `request.json()`). Secrets only via
    `app/server/env.server.ts`. LLM output through ReactMarkdown, never `dangerouslySetInnerHTML`.
