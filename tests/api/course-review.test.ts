@@ -2,6 +2,7 @@
 // the teacher picks, its answer is checked in code (21.1) and stored (21.3). One hat failing
 // never loses the other's advice. The teacher's decision is the `decide` intent.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { AGENTS } from "~/lib/agents/registry";
 import { alignedCourse, LO1 } from "../courses/fixtures";
 
 process.env.DATABASE_URL = "file::memory:";
@@ -370,8 +371,7 @@ describe("hats an admin switched off (/admin/agents)", () => {
     agentReview = await import("~/server/agentReview.server");
   });
   afterEach(async () => {
-    await settings.setAgentStand("assessment-expert", "on");
-    await settings.setAgentStand("designer", "on");
+    for (const { id } of AGENTS) await settings.setAgentStand(id, "on");
   });
 
   async function load(id: string) {
@@ -403,8 +403,7 @@ describe("hats an admin switched off (/admin/agents)", () => {
   });
 
   it("leaves the panel out and runs nothing when every hat is off", async () => {
-    await settings.setAgentStand("assessment-expert", "off");
-    await settings.setAgentStand("designer", "off");
+    for (const { id } of AGENTS) await settings.setAgentStand(id, "off");
     const c = await newCourse();
     expect((await load(c.id)).review).toBeNull();
     const r = await post(c.id, [["intent", "review"]]);
@@ -453,12 +452,15 @@ describe("the teacher's own choice of hats", () => {
     expect(await choices.getAgentChoices("teacher-r")).toEqual({
       "assessment-expert": "off",
       designer: "on",
+      "ai-resilience": "off",
     });
     const panel = (await load(c.id)).review;
     expect(panel?.agents.map((a) => a.agentId)).toEqual(["designer"]);
     expect(panel?.choices.map((a) => [a.agentId, a.chosen])).toEqual([
       ["assessment-expert", false],
       ["designer", true],
+      // A newer reviewer stays off until the teacher ticks it.
+      ["ai-resilience", false],
     ]);
   });
 
@@ -484,7 +486,7 @@ describe("the teacher's own choice of hats", () => {
     expect(generate).not.toHaveBeenCalled();
     const panel = (await load(c.id)).review;
     expect(panel?.agents).toEqual([]);
-    expect(panel?.choices.map((a) => a.chosen)).toEqual([false, false]);
+    expect(panel?.choices.map((a) => a.chosen)).toEqual([false, false, false]);
   });
 
   it("never runs or offers a hat the admin switched off, even when the teacher ticks it", async () => {
@@ -501,7 +503,10 @@ describe("the teacher's own choice of hats", () => {
     expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
       "assessment-expert",
     ]);
-    expect((await load(c.id)).review?.choices.map((a) => a.agentId)).toEqual(["assessment-expert"]);
+    expect((await load(c.id)).review?.choices.map((a) => a.agentId)).toEqual([
+      "assessment-expert",
+      "ai-resilience",
+    ]);
   });
 
   it("counts open advice only of the hats the teacher chose", async () => {

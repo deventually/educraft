@@ -40,6 +40,19 @@ The Designer reviewer looks at your course design like an experienced educationa
 
 This reviewer is on by default.
 
+## AI resilience
+
+The AI resilience reviewer looks at your summative assessments like an assessment expert who knows what AI can do. The question is: does the grade show what students can do themselves, now that a student can have AI write a text, code or report?
+
+- **Supervised or unsupervised:** for each assessment you can fill in whether it is *supervised* (exam, oral, practical in class) or *unsupervised* (work made at home). This reviewer looks mainly at unsupervised summative work.
+- **What the grade rests on:** does a large part of the grade hang on a submitted product alone, without a conversation or a supervised moment?
+- **The process in view:** are there drafts, feedback moments or a log, so you can see how the work came about?
+- **A short check:** sometimes a short conversation or oral explanation is enough to see that the work is the student's own.
+
+This reviewer does not ban AI and does not recommend AI detectors. It is fine with unsupervised formative work: that is where a student can practise, AI included. Whether the assessment form fits the outcome it leaves to the Assessment expert; the build-up of your lessons to the Designer.
+
+This reviewer is off by default. Tick it if your course has summative work made at home.
+
 ## What a reviewer sees
 
 A reviewer sees only this one course, as you filled it in:

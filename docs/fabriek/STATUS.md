@@ -4,15 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #234 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #235 gemerged)_
 
 ## Nu
 
-- **Help-sectie opnieuw ingedeeld (#234) gemerged op 2026-11-10:** `/help` is ingedeeld naar wat
-  een docent wil doen, met een zoekveld dat naar de juiste alinea springt en de tools per doel.
-  Nieuwe onderwerpen (tools gebruiken, eerder gemaakt, hulpmiddelen, teams, beheer); BDB/BKE ziet
-  een docent alleen als de werkplaats aanstaat. Zes schermen kregen een rustig linkje "Hoe werkt
-  dit?". Geen migratie.
+- **Reviewer AI-bestendigheid (#235) gemerged op 2026-11-10:** het reviewteam heeft een derde
+  reviewer die kijkt of het cijfer laat zien wat de student zelf kan, nu AI een verslag of code
+  kan schrijven. Hij gebruikt *onder toezicht / zonder toezicht* uit #233, verbiedt AI niet en
+  raadt geen detectors aan. Voor docenten staat hij standaard uit. Geen migratie.
+- **Help-sectie opnieuw ingedeeld (#234) gemerged op 2026-11-10:** `/help` groepeert de
+  onderwerpen naar wat een docent wil doen, toont tools per onderwijsdoel en heeft een zoekvak dat
+  ook koppen vindt. Nieuwe onderwerpen (werken met een tool, eerder werk en export, hulpmiddelen,
+  teams en delen, en een beheerdersonderwerp), en onder zes schermen een rustige *Hoe werkt
+  dit?*-link. De handleiding BDB/BKE ziet alleen wie de werkplek heeft.
 - **Een toets onder toezicht markeren (#233) gemerged op 2026-11-10:** bij een toets in de
   cursus kies je *onder toezicht*, *zonder toezicht* of niets. Het staat in de regel onder de
   toets en het reviewteam weegt het mee. Geen migratie.
