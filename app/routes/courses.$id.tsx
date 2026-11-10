@@ -29,6 +29,8 @@ import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { courseToolsFor } from "~/server/courseTools.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
+import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
+import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
 import { courseProgrammeAction } from "~/server/programmes.server";
 import { placeOptions, programmesOfCourse } from "~/server/repositories/programmes.server";
@@ -42,6 +44,7 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, course } = await loadCourse(request, params.id);
+  const members = await memberControls(user, course);
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   const items = [...course.data.activities, ...course.data.assessments];
   const linkedWork = await Promise.all(
@@ -70,16 +73,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     linkedWork,
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
-    pack: await coursePack(user.id, course),
+    pack: await coursePack(course),
     tools: await courseToolsFor(user),
     // The Monday of each course week (P22.1), or null without a start date.
     weekDates: course.data.startDate
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
     currentWeek: await currentCourseWeek(course.data.startDate),
-    sharing: await shareControls(user, "course", course.id),
+    // Sharing and choosing members are for the owner and co-owners (BESLUIT-2026-11-10-5).
+    sharing: managesCourse(members)
+      ? await shareControls(user, "course", course.id)
+      : { teams: [], sharedWith: [] },
+    members,
     programmes: {
-      placed: await programmesOfCourse(user.id, course.id),
+      placed: await programmesOfCourse(course.id),
       options: await placeOptions(user.id),
     },
   };
@@ -94,10 +101,12 @@ async function currentCourseWeek(startDate: string | undefined): Promise<number 
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  // "Delen met team" (P28.4): only the owner gets here, since loadCourse is owner-scoped.
+  // The owner and the course's members get here; the repositories refuse an editor's share
+  // or choice of members (BESLUIT-2026-11-10-5).
   const { user, course } = await loadCourse(request, params.id);
   return (
     (await shareAction(request, user, "course", course.id)) ??
+    (await memberAction(request, user, course)) ??
     (await courseProgrammeAction(request, user, course.id)) ??
     saveCourseIntent(request, params.id)
   );
@@ -132,6 +141,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (
         r.intent === "share" ||
         r.intent === "unshare" ||
+        r.intent === "set-member" ||
+        r.intent === "remove-member" ||
         r.intent === "programme-place" ||
         r.intent === "programme-remove"
       )
@@ -157,8 +168,10 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     tools = NO_COURSE_TOOLS,
     currentWeek = null,
     sharing = { teams: [], sharedWith: [] },
+    members = null,
     programmes = { placed: [], options: [] },
   } = loaderData;
+  const isOwner = (members?.myRole ?? "owner") === "owner";
   const { data } = course;
 
   return (
@@ -173,6 +186,14 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {course.name}
       </h1>
+      {members && members.myRole !== "owner" && (
+        <p className="mt-2 max-w-[65ch] text-sm text-slate-600">
+          {fmt(t.courseMembers.youAre, {
+            owner: members.ownerName,
+            role: t.courseMembers.roles[members.myRole].toLowerCase(),
+          })}
+        </p>
+      )}
       <p className="mt-2 text-sm">
         <Link
           to="/help/courses"
@@ -191,6 +212,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           startDate={data.startDate}
           hours={plannedHours(data)}
           profiles={profiles}
+          isOwner={isOwner}
         />
         <CourseProgrammes {...programmes} />
         <CourseImport
@@ -220,6 +242,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />
         <ShareWithTeam {...sharing} />
+        {members && <CourseMembers {...members} />}
       </div>
     </div>
   );
@@ -233,6 +256,7 @@ function CourseSettings({
   startDate,
   hours,
   profiles,
+  isOwner,
 }: {
   courseId: string;
   name: string;
@@ -241,6 +265,8 @@ function CourseSettings({
   startDate?: string;
   hours: number;
   profiles: { id: string; name: string }[];
+  /** Only the owner chooses the context profile; it is theirs. */
+  isOwner: boolean;
 }) {
   const t = useT();
   const c = t.courses;
@@ -265,22 +291,26 @@ function CourseSettings({
                 className="mt-1"
               />
             </div>
-            <div>
-              <Label htmlFor={`${id}-profile`}>{c.profile}</Label>
-              <Select
-                id={`${id}-profile`}
-                name="contextProfileId"
-                defaultValue={contextProfileId ?? ""}
-                className="mt-1"
-              >
-                <option value="">{c.profileNone}</option>
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            {isOwner ? (
+              <div>
+                <Label htmlFor={`${id}-profile`}>{c.profile}</Label>
+                <Select
+                  id={`${id}-profile`}
+                  name="contextProfileId"
+                  defaultValue={contextProfileId ?? ""}
+                  className="mt-1"
+                >
+                  <option value="">{c.profileNone}</option>
+                  {profiles.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            ) : (
+              <p className="self-end text-sm text-slate-600">{t.courseMembers.profileOwner}</p>
+            )}
             <NumberField
               id={`${id}-ec`}
               name="ec"

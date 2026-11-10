@@ -10,7 +10,7 @@ export const sharing = {
     "Wat collega's met je team delen. Je kunt het bekijken en een eigen kopie maken; alleen de eigenaar bewerkt het.",
   heading: "Delen met je team",
   intro:
-    "Collega's in het team kunnen dit bekijken en een eigen kopie maken. Alleen jij bewerkt het. Stoppen met delen kan altijd; een gemaakte kopie blijft van je collega.",
+    "Collega's in het team kunnen dit bekijken en een eigen kopie maken. Delen geeft geen bewerkrechten. Stoppen met delen kan altijd; een gemaakte kopie blijft van je collega.",
   owner: "Van {owner} · {teams}",
   readOnly: "Alleen lezen: dit is van {owner}. Met een kopie maak je je eigen versie.",
   share: "Delen",

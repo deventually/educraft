@@ -94,7 +94,8 @@ Provincial education systems coordinated through **CMEC**; the
    prefills the matching NLQF level (overridable).
 2. `derive.ts` resolves the stored NLQF level to an **EQF number**; the sector
    resolves a verified [framework pack](Context-Model.md#packs) via `resolveFramework`
-   — **hbo only today**. vo/mbo have no verified pack yet, so the editor shows an honest
+   — a pack per domain for hbo, and one sector pack (the Dublin descriptors) for every
+   wo domain. vo/mbo have no verified pack yet, so the editor shows an honest
    "no national framework" note and falls back to custom fields (nothing is invented).
 3. The engine scales the prompt — complexity, examples, vocabulary, pedagogical
    assumptions — to the injected EQF number + the neutral level directive, and uses the
@@ -103,4 +104,6 @@ Provincial education systems coordinated through **CMEC**; the
 > Mappings here are approximate and meant for engineering orientation, not
 > accreditation. Each framework pack should carry the authoritative descriptors for
 > its jurisdiction. Verified po/vo/mbo packs are a later content phase (SLO kerndoelen;
-> vmbo examenprogramma's/profielen; SBB kwalificatiedossiers) — never invented.
+> vmbo examenprogramma's/profielen; SBB kwalificatiedossiers) — never invented. For mbo
+> the plan is a pack per kwalificatie (crebo), with kerntaken and werkprocessen as
+> fields and no level field (the mbo level is the level); see BESLUIT-2026-11-10-4.

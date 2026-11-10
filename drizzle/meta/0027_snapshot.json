@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "fe3db152-e653-47c3-9dcd-cb49f30ee774",
+  "id": "d3e6a22e-bced-4eaa-916d-8ce14b1c6805",
   "prevId": "6de73773-7e3f-4260-a63f-10c9f19e4486",
   "tables": {
     "admin_audit": {
@@ -1484,44 +1484,30 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "learning_lines": {
-      "name": "learning_lines",
+    "course_members": {
+      "name": "course_members",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "programme_id": {
-          "name": "programme_id",
+        "course_id": {
+          "name": "course_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "course_ids_json": {
-          "name": "course_ids_json",
+        "role": {
+          "name": "role",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'[]'"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "default": "'editor'"
         },
         "created_at": {
           "name": "created_at",
@@ -1529,26 +1515,27 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         }
       },
       "indexes": {
-        "learning_lines_programme_idx": {
-          "name": "learning_lines_programme_idx",
+        "course_members_user_idx": {
+          "name": "course_members_user_idx",
           "columns": [
-            "programme_id"
+            "user_id"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "course_members_course_id_user_id_pk": {
+          "columns": [
+            "course_id",
+            "user_id"
+          ],
+          "name": "course_members_course_id_user_id_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },

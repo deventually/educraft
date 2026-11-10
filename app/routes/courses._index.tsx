@@ -28,12 +28,17 @@ export async function loader({ request }: Route.LoaderArgs) {
   const courses = (await listCourses(user.id)).map((c) => ({
     id: c.id,
     name: c.name,
+    // A course the viewer works on with a colleague (BESLUIT-2026-11-10-5); null = their own.
+    ownerName: c.ownerId === user.id ? null : c.ownerName,
+    role: c.role,
     outcomes: c.data.outcomes.length,
     findings: checkAlignment(c.data).length,
   }));
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   // "Van mijn team" (P28.4): colleagues' courses shared with the viewer's teams.
-  const shared = await sharedWithMe(user, "course");
+  // A course the viewer already edits is in their own list, not again here.
+  const mine = new Set(courses.map((c) => c.id));
+  const shared = (await sharedWithMe(user, "course")).filter((s) => !mine.has(s.id));
   return { courses, profiles, shared };
 }
 
@@ -162,17 +167,27 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
                   <p className="text-sm text-slate-600">
                     {fmt(c.summary, { outcomes: course.outcomes, findings: course.findings })}
                   </p>
+                  {course.ownerName && (
+                    <p className="text-sm text-slate-600">
+                      {fmt(t.courseMembers.ownerBadge, {
+                        owner: course.ownerName,
+                        role: t.courseMembers.roles[course.role ?? "editor"],
+                      })}
+                    </p>
+                  )}
                 </div>
-                <ConfirmDialog
-                  triggerLabel={`${c.delete}: ${course.name}`}
-                  triggerIcon={<Trash2 className="size-4" aria-hidden />}
-                  triggerIconOnly
-                  title={c.deleteTitle}
-                  description={c.deleteBody}
-                  confirmLabel={c.delete}
-                  cancelLabel={t.confirm.cancel}
-                  fields={{ intent: "delete", id: course.id }}
-                />
+                {!course.ownerName && (
+                  <ConfirmDialog
+                    triggerLabel={`${c.delete}: ${course.name}`}
+                    triggerIcon={<Trash2 className="size-4" aria-hidden />}
+                    triggerIconOnly
+                    title={c.deleteTitle}
+                    description={c.deleteBody}
+                    confirmLabel={c.delete}
+                    cancelLabel={t.confirm.cancel}
+                    fields={{ intent: "delete", id: course.id }}
+                  />
+                )}
               </li>
             ))}
           </ul>

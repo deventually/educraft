@@ -4,13 +4,14 @@
  * used outside `db.server.ts`.
  */
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   agentChoices,
   agentReviews,
   contextProfiles,
   courseLinks,
+  courseMembers,
   programmeCourses,
   courses,
   portfolioDossiers,
@@ -190,10 +191,27 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(rubricScores).where(eq(rubricScores.userId, id)).run();
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
     tx.delete(assessmentModels).where(eq(assessmentModels.userId, id)).run();
-    tx.delete(reviewDecisions).where(eq(reviewDecisions.userId, id)).run();
-    tx.delete(agentReviews).where(eq(agentReviews.userId, id)).run();
+    // Reviews by the account, and colleagues' reviews of the account's courses.
+    const ownCourses = tx.select({ id: courses.id }).from(courses).where(eq(courses.userId, id));
+    const gone = tx
+      .select({ id: agentReviews.id })
+      .from(agentReviews)
+      .where(or(eq(agentReviews.userId, id), inArray(agentReviews.courseId, ownCourses)));
+    tx.delete(reviewDecisions)
+      .where(or(eq(reviewDecisions.userId, id), inArray(reviewDecisions.reviewId, gone)))
+      .run();
+    tx.delete(agentReviews)
+      .where(or(eq(agentReviews.userId, id), inArray(agentReviews.courseId, ownCourses)))
+      .run();
     tx.delete(agentChoices).where(eq(agentChoices.userId, id)).run();
-    tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
+    // The account's courses go with everyone's links to them and their editors; the
+    // account's own editorships and links on colleagues' courses go too.
+    tx.delete(courseLinks)
+      .where(or(eq(courseLinks.userId, id), inArray(courseLinks.courseId, ownCourses)))
+      .run();
+    tx.delete(courseMembers)
+      .where(or(eq(courseMembers.userId, id), inArray(courseMembers.courseId, ownCourses)))
+      .run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(programmeCourses).where(eq(programmeCourses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();

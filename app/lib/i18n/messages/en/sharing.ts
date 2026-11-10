@@ -12,7 +12,7 @@ export const sharing: Messages["sharing"] = {
     "What colleagues share with your team. You can view it and make your own copy; only the owner edits it.",
   heading: "Share with your team",
   intro:
-    "Colleagues in the team can view this and make their own copy. Only you edit it. You can stop sharing at any time; a copy a colleague made stays theirs.",
+    "Colleagues in the team can view this and make their own copy. Sharing gives no right to edit. You can stop sharing at any time; a copy a colleague made stays theirs.",
   owner: "By {owner} · {teams}",
   readOnly: "Read only: this belongs to {owner}. Make a copy to get your own version.",
   share: "Share",
