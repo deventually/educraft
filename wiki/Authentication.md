@@ -168,6 +168,17 @@ repository, `app/server/repositories/shares.server.ts`.
   them as `owner_user_id` and counts while they are in the team and still co-owner; becoming
   editor or leaving drops their shares). `deleteCourse` and the context profile stay with the
   owner. Links and reviews stay with whoever made them.
+- **Handing a course over (BESLUIT-2026-11-10-5, no migration):** `courseTransfer.server.ts`
+  moves ownership in one transaction: `courses.user_id` to the receiver, the context profile to
+  null, the receiver's member row goes, the old owner's course shares and `programme_courses`
+  rows go along, and the old owner stays `editor` unless unticked. The owner hands over to a
+  team-mate or a member (`transferCourse`, intent `transfer-course` on the course page). An admin
+  hands one or all courses of a person to any active colleague and chooses members, also when
+  the teacher is disabled (`adminTransferCourse`, `adminTransferAll`, `adminSetCourseMember`,
+  `adminRemoveCourseMember`; glue `adminCourses.server.ts`, audit `coursesTransferred` and
+  `courseMemberChanged`). `deleteUserCascade` first hands each course with an active co-owner to
+  the earliest one (`handOverToCoOwners`); the delete screens warn about the rest
+  (`countCoursesWithoutSuccessor`).
 - **When a share lapses:** stopping, leaving the team (`removeMember`, `setUserTeams`: the
   leaver's shares for that team go), removing the team, deleting the item or the account. A copy
   stays with whoever made it.

@@ -2,6 +2,8 @@ export const auditLog = {
   actions: {
     accountCreated: "Account aangemaakt",
     accountDeleted: "Account verwijderd",
+    courseMemberChanged: "Meewerkers aan cursus gewijzigd",
+    coursesTransferred: "Cursussen overgedragen",
     deactivated: "Gedeactiveerd",
     instanceModelsChanged: "Modellen van de instantie gewijzigd",
     inviteCreated: "Uitnodiging gemaakt",

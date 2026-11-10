@@ -218,3 +218,22 @@ describe("log out everywhere (P1-4)", () => {
     expect((await auth.getUser(asRequest(again!)))?.id).toBe(u.id);
   });
 });
+
+describe("account deletion — courses (BESLUIT-2026-11-10-5)", () => {
+  it("the loader counts the courses that would go with the account", async () => {
+    const courses = await import("~/server/repositories/courses.server");
+    const { alignedCourse } = await import("../courses/fixtures");
+    const tch = await users.createUser({
+      id: "acc-courses",
+      name: "Teacher C",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    await courses.createCourse(tch.id, { name: "Eigen", data: alignedCourse() });
+    await actAs(tch.id, "teacher");
+    const loaded = (await route.loader({
+      request: signedRequest("http://localhost/account"),
+    } as Parameters<typeof route.loader>[0])) as { lostCourses: number };
+    expect(loaded.lostCourses).toBe(1);
+  });
+});

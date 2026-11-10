@@ -12,9 +12,10 @@ function renderAccount(
   role: "teacher" | "admin" = "teacher",
   isOwner = false,
   teams: { id: string; name: string; isLead: boolean }[] = [],
+  lostCourses = 0,
 ) {
   const props = {
-    loaderData: { user: { name: "Teacher T", email, role }, isOwner, teams },
+    loaderData: { user: { name: "Teacher T", email, role }, isOwner, teams, lostCourses },
   } as unknown as ComponentProps<typeof Account>;
   const Stub = createRoutesStub([
     { path: "/account", Component: () => <Account {...props} />, action: () => null },
@@ -47,6 +48,11 @@ describe("Account page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/8 uur|8 hours/i)).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("warns before deleting about courses without a co-owner (BESLUIT-2026-11-10-5)", () => {
+    renderAccount("teacher@example.com", "teacher", false, [], 2);
+    expect(screen.getByText(/Cursussen zonder mede-eigenaar: 2\./)).toBeInTheDocument();
   });
 
   it("still offers a teacher the type-to-confirm account deletion", () => {

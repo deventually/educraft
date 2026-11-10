@@ -3,8 +3,28 @@ export const courseMembers = {
   add: "Toevoegen",
   addLabel: "Collega",
   addNone: "Kies een collega",
+  admin: {
+    add: "Toevoegen",
+    addLabel: "Collega",
+    allLabel: "Alle cursussen naar",
+    allSubmit: "Alles overdragen",
+    heading: "Cursussen",
+    intro:
+      "De cursussen waar deze persoon eigenaar van is. Draag ze over aan een collega of kies wie meewerkt, ook als de docent niet meer actief is. De nieuwe eigenaar krijgt de cursus meteen.",
+    keep: "Blijft meewerken als bewerker",
+    lost: "Cursussen zonder mede-eigenaar: {n}. Die gaan verloren als je dit account verwijdert; draag ze eerst over bij Cursussen. Een cursus met een mede-eigenaar gaat vanzelf naar die mede-eigenaar.",
+    nobody: "Nog niemand werkt mee.",
+    none: "Geen eigen cursussen.",
+    refused: "Dat lukt niet. Kies een actieve collega.",
+    removeLabel: "{name} weghalen van {course}",
+    saved: "Opgeslagen.",
+    submitLabel: "{course} overdragen",
+    to: "Nieuwe eigenaar",
+    transferred: "Cursussen overgedragen: {n}.",
+  },
   empty: "Nog niemand werkt mee.",
   errorAdd: "Dat lukt niet. Deel je een team met deze collega?",
+  errorTransfer: "Overdragen lukt niet. Kies een collega uit je teams.",
   heading: "Samen aan deze cursus werken",
   intro:
     "Voeg collega's uit je teams toe. Een bewerker past de inhoud aan. Een mede-eigenaar mag daarnaast de cursus delen en mensen toevoegen of weghalen. Alleen de eigenaar verwijdert de cursus en kiest de onderwijscontext. Wat iemand met een tool maakt, blijft van die persoon.",
@@ -16,6 +36,8 @@ export const courseMembers = {
     "Je deelt nog geen team met een collega. Een beheerder of teamleider zet je in een team.",
   owner: "Eigenaar: {owner}",
   ownerBadge: "Van {owner} · {role}",
+  ownLost:
+    "Cursussen zonder mede-eigenaar: {n}. Die verdwijnen met je account; draag ze eerst over op de cursuspagina.",
   profileOwner: "De onderwijscontext kiest de eigenaar.",
   remove: "Weghalen",
   removeLabel: "{name} weghalen",
@@ -26,6 +48,13 @@ export const courseMembers = {
   saveLabel: "Rol van {name} opslaan",
   toastAdded: "Opgeslagen.",
   toastRemoved: "Weggehaald.",
+  toastTransferred: "Overgedragen. Je werkt nu mee als bewerker.",
+  transfer: "Cursus overdragen",
+  transferIntro:
+    "De collega wordt meteen eigenaar. Gedeelde teams, de plek in opleidingen en wie meewerkt gaan mee; de onderwijscontext gaat niet mee. Wat jij met een tool maakte, blijft van jou.",
+  transferKeep: "Ik blijf meewerken als bewerker",
+  transferSubmit: "Overdragen",
+  transferTo: "Nieuwe eigenaar",
   youAre:
     "Je werkt mee aan deze cursus van {owner}, als {role}. Verwijderen en de onderwijscontext kiezen doet de eigenaar.",
 };

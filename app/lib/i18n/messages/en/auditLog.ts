@@ -4,6 +4,8 @@ export const auditLog: Messages["auditLog"] = {
   actions: {
     accountCreated: "Account created",
     accountDeleted: "Account deleted",
+    courseMemberChanged: "Course members changed",
+    coursesTransferred: "Courses handed over",
     deactivated: "Deactivated",
     instanceModelsChanged: "Instance models changed",
     inviteCreated: "Invite created",

@@ -4,10 +4,22 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #243 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #246 gemerged)_
 
 ## Nu
 
+- **Mbo-vakgebiedpakketten per kwalificatie (#245) gemerged op 2026-11-10:** vier proefpakketten
+  met de kerntaken en werkprocessen uit het SBB-kwalificatiedossier: Helpende Zorg en Welzijn,
+  Verzorgende IG, Mbo-Verpleegkundige en Software developer. De mbo-keuzelijst groepeert nu per
+  opleidingsdomein. Bij SBB nog navragen of we codes en titels mogen overnemen.
+- **Installatiescripts en audit (#246) gemerged op 2026-11-10:** `allowScripts` in package.json
+  laat alleen better-sqlite3 en esbuild hun installatiescript draaien (npm 11); `npm audit` is
+  schoon.
+- **Leerlijnen (#244) gemerged op 2026-11-10:** een leerlijn is een benoemde, geordende reeks
+  cursussen binnen een opleiding. De teamleider of een beheerder maakt hem aan; elk teamlid leest
+  hem. Het overzicht laat per cursus zien welke leeruitkomsten terugkomen, met het hoogste
+  Bloom-niveau, en waar dat niveau zakt. Geen AI. Pagina `/programmes/:id/lines/:lineId`;
+  migratie 0028.
 - **Samen aan een cursus werken (#243) gemerged op 2026-11-10:** een cursus heeft één eigenaar en
   daarnaast mede-eigenaars en bewerkers, gekozen uit collega's met wie je een team deelt. Een
   bewerker wijzigt de inhoud en laat het reviewteam kijken; een mede-eigenaar mag de cursus ook

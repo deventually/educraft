@@ -6,6 +6,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
+import { handOverToCoOwners } from "./courseTransfer.server";
 import {
   agentChoices,
   agentReviews,
@@ -181,6 +182,8 @@ export async function deleteUser(id: string): Promise<void> {
  * rows are never touched.
  */
 export async function deleteUserCascade(id: string): Promise<void> {
+  // A course with a co-owner stays: it goes to the earliest co-owner first.
+  await handOverToCoOwners(id);
   getDb().transaction((tx) => {
     tx.delete(feedback).where(eq(feedback.userId, id)).run();
     tx.delete(pilotCheckins).where(eq(pilotCheckins.userId, id)).run();

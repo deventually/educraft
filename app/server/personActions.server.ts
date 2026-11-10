@@ -23,6 +23,7 @@ import { isChoice } from "~/lib/features/rule";
 import { ALL_TOOLS } from "~/lib/registry";
 import { isRole } from "~/lib/registry/access";
 import type { AuditAction, AuditDetail } from "~/lib/auditLog";
+import { COURSE_INTENTS, personCourseAction } from "~/server/adminCourses.server";
 
 /** The keys an exception may be set on: every feature and every tool. */
 const EXCEPTION_KEYS = new Set([
@@ -63,6 +64,13 @@ export async function personAction(
   // Every change below that touches someone's access goes in the audit log, after it succeeded.
   const audit = (action: AuditAction, detail?: AuditDetail) =>
     recordAdminAction({ actorUserId: admin.id, action, targetUserId: userId, detail });
+
+  // ── Courses (BESLUIT-2026-11-10-5): hand over, choose members; also for a disabled teacher
+  if (COURSE_INTENTS.has(intent)) {
+    if (userId === admin.id || !(await manageTarget(actorIsOwner, userId)))
+      return { error: "courseRefused" as const };
+    return personCourseAction(fd, userId, audit);
+  }
 
   // ── Models per teacher (P18): inherit the instance, or an own set ────────────
   if (intent === "teacherModels") {
