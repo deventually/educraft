@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #235 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #236 gemerged)_
 
 ## Nu
 
+- **Beoordelingsmodellen per documenttype (#236) gemerged op 2026-11-10:** op de nieuwe pagina
+  `/assessment-models` legt een docent eigen modellen vast: per documenttype een kader en een
+  optionele schaal, zelf geschreven of gekopieerd uit een startmodel (HBO-i-stage,
+  afstudeerscriptie, onderzoeks- of ander verslag, essay). Bij *Stagebeoordeling* vult het eigen
+  model zich vanzelf in; zonder schaal geeft de tool alleen feedback, zonder oordeel
+  (`stage-assessment@v3`). Migratie (`npm run db:migrate`).
 - **Reviewer AI-bestendigheid (#235) gemerged op 2026-11-10:** het reviewteam heeft een derde
   reviewer die kijkt of het cijfer laat zien wat de student zelf kan, nu AI een verslag of code
   kan schrijven. Hij gebruikt *onder toezicht / zonder toezicht* uit #233, verbiedt AI niet en

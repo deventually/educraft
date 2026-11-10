@@ -53,6 +53,18 @@ Deze reviewer verbiedt AI niet en raadt geen AI-detectors aan. Formatief werk zo
 
 Deze reviewer staat standaard uit. Vink hem aan als je cursus summatief werk heeft dat thuis ontstaat.
 
+## Werkveld
+
+De reviewer Werkveld kijkt als een docent met jaren ervaring in het beroep naar je cursus. De vraag is: oefenen en laten studenten zien wat een beginnend professional doet, op het niveau dat je vakgebiedpakket vraagt?
+
+- **Een beroepssituatie:** oefenen studenten een beroepsactiviteit uit een leeruitkomst (zoals analyseren, adviseren of ontwerpen) aan een casus, opdrachtgever of praktijkvraag, en niet alleen in een hoorcollege?
+- **Een toets die op het werk lijkt:** maakt de student voor het cijfer iets wat een professional ook maakt, zoals een advies, ontwerp of product?
+- **Het beheersingsniveau:** passen de zelfstandigheid en de complexiteit van opdracht en toets bij het niveau uit je pakket? Op niveau 3 hoort geen stap-voor-stap-opdracht; op niveau 1 is een begeleide opdracht juist goed.
+
+Deze reviewer leunt op de kenmerken uit je vakgebiedpakket bij elke leeruitkomst, zoals de beroepsactiviteiten en het beheersingsniveau. Heb je die niet ingevuld, dan zegt hij dat en kijkt hij alleen of oefenen en toetsen op het beroep lijken. Hoe je de toets formuleert, laat hij aan de Toetsdeskundige; de opbouw en de studielast aan de Ontwerper.
+
+Deze reviewer staat standaard uit. Vink hem aan als je cursus opleidt voor een beroep met een vakgebiedpakket.
+
 ## Wat een reviewer ziet
 
 Een reviewer ziet alleen deze ene cursus, zoals jij hem invulde:

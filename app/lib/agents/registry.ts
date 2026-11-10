@@ -38,6 +38,17 @@ export const AGENTS: Agent[] = [
     },
     teacherDefault: "off",
   },
+  {
+    id: "professional-practice",
+    role: { nl: "Werkveld", en: "Professional practice" },
+    promptId: "agent-professional-practice@v1",
+    watches: ["course"],
+    focus: {
+      nl: "Kijkt of studenten oefenen en getoetst worden zoals in het beroep, op het niveau uit je vakgebiedpakket.",
+      en: "Checks that students practise and are assessed as in the profession, at the level from your subject pack.",
+    },
+    teacherDefault: "off",
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {
