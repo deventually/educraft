@@ -119,3 +119,13 @@ describe("/utilities/rubric", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("/utilities help", () => {
+  it("links to the help on utilities", async () => {
+    renderAt(UtilitiesIndex);
+    expect(await screen.findByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/utilities",
+    );
+  });
+});

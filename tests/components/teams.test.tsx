@@ -345,3 +345,17 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("/teams/:id help", () => {
+  it("links the lead to the help on teams and sharing", () => {
+    renderWith(LeadTeam, "/teams/:id", {
+      selfId: "u-lead",
+      team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
+      offer,
+    });
+    expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/teams",
+    );
+  });
+});

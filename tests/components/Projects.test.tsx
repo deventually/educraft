@@ -123,3 +123,13 @@ describe("Projects page — course links (P20, 20.4)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("Projects page help", () => {
+  it("links to the help on saved work", () => {
+    renderProjects([gen]);
+    expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/saved-work",
+    );
+  });
+});

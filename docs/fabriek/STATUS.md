@@ -4,10 +4,21 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #221 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #233 gemerged)_
 
 ## Nu
 
+- **Een toets onder toezicht markeren (#233) gemerged op 2026-11-10:** bij een toets in de
+  cursus kies je *onder toezicht*, *zonder toezicht* of niets. Het staat in de regel onder de
+  toets en het reviewteam weegt het mee. Geen migratie.
+- **Figuren voor de beoordeling (#232) gemerged op 2026-11-10:** bij *Studentwerk beoordelen*
+  knipt LimeOnIt echte figuren uit de PDF (geen hele pagina's, geen logo's of scans), een klik
+  vergroot een plaatje, en de namen overlappen niet meer. Het veld *Kernfiguren* heet nu
+  *Figuren voor de beoordeling*; een eigen upload is de reserve.
+- **Onderhoud zonder gedragswijziging (#222 t/m #230) gemerged op 2026-11-10:** Node 26 (LTS)
+  via Volta overal (#229); Dependabot-updates voor de GitHub Actions checkout, setup-node,
+  upload-artifact en CodeQL (#222–#225), unpdf 2.1 (#228) en oxc-parser (#226); de test van de
+  mutatie-workflow accepteert elke versie van upload-artifact (#230).
 - **Reviewteam: de docent kiest zelf welke reviewers meekijken (#231) gemerged op 2026-11-10:**
   wat eerst "rolagenten" en "petten" heette, heet voor docenten nu het *Reviewteam* met
   *reviewers* (BESLUIT-2026-11-10-2). Boven *Laat reviewen* vinkt de docent aan wie er in het
