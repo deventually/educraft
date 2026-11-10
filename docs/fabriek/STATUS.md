@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #237 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #238 gemerged)_
 
 ## Nu
 
+- **Reviewer Student (#238) gemerged op 2026-11-10:** een vijfde reviewer loopt de cursus week
+  voor week door zoals een student: samenvallende deadlines, feedback die te laat komt, lege weken
+  met een eindsprint, onduidelijke toetsen. Hij spreekt niet namens echte studenten en staat voor
+  docenten standaard uit. Geen migratie.
 - **Reviewer Werkveld (#237) gemerged op 2026-11-10:** een vierde reviewer kijkt of studenten
   oefenen en getoetst worden zoals in het beroep, op het niveau van de beroepsactiviteiten en het
   beheersingsniveau uit het vakgebiedpakket. Voor docenten standaard uit; eigen stuk op
