@@ -65,6 +65,19 @@ This reviewer leans on the tags from your subject pack for each outcome, such as
 
 This reviewer is off by default. Tick it if your course prepares for a profession with a subject pack.
 
+## Student
+
+The Student reviewer goes through your course week by week, the way a student looks at their calendar. The question is: does a student know what to do each week, is it doable, and do they get feedback before it counts?
+
+- **Deadlines that coincide:** are several summative assessments or submissions in the same week?
+- **Feedback in time:** is there feedback on the same outcome at least a week before a summative assessment, so the student can still act on it?
+- **Empty weeks and a final sprint:** does nothing happen for weeks, with everything at the end?
+- **Clear what and when:** does every summative assessment have a week and a title that says what the student submits or does?
+
+This reviewer does not speak for real students; it only reads what is in your course. Whether the hours fit and the build-up is sound it leaves to the Designer; assessment form and weighting to the Assessment expert.
+
+This reviewer is off by default. Tick it if you want to see how your course works out for a student week by week.
+
 ## What a reviewer sees
 
 A reviewer sees only this one course, as you filled it in:

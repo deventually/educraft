@@ -5,10 +5,25 @@
 import { extractJson } from "../app/lib/ai/structuredAnswer";
 import type { AgentParseResult } from "../app/lib/agents/filter";
 import { courseKeys } from "../app/lib/agents/input";
+import { getAgent } from "../app/lib/agents/registry";
 import { RawAgentReviewSchema } from "../app/lib/agents/schema";
 import type { LinkedWorkInput } from "../app/lib/agents/input";
 import type { RejectedFinding } from "../app/lib/agents/types";
 import type { CourseData } from "../app/lib/courses/types";
+
+/**
+ * Which cases a run covers: all by default (a full run is also a regression test for the
+ * shared input and filter), or one reviewer's (`--agent`) or one case (`--case`).
+ */
+export function selectAgentCases(
+  cases: AgentCase[],
+  filter: { caseId?: string; agent?: string },
+): AgentCase[] {
+  if (filter.agent && !getAgent(filter.agent)) throw new Error(`Unknown agent: ${filter.agent}`);
+  return cases.filter(
+    (c) => (!filter.caseId || c.id === filter.caseId) && (!filter.agent || c.agent === filter.agent),
+  );
+}
 
 /** A finding that matches: about one of `targets` (any target when absent) and naming one of `anyOf`. */
 export interface FindingExpectation {

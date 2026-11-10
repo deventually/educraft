@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #236 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #237 gemerged)_
 
 ## Nu
 
+- **Reviewer Werkveld (#237) gemerged op 2026-11-10:** een vierde reviewer kijkt of studenten
+  oefenen en getoetst worden zoals in het beroep, op het niveau van de beroepsactiviteiten en het
+  beheersingsniveau uit het vakgebiedpakket. Voor docenten standaard uit; eigen stuk op
+  `/help/review-team`. Eval rolagenten 51/51 (`evals/reports/2026-11-10-role-agents.md`). PR 4
+  van het plan "Nieuwe rolagenten en examencommissie".
 - **Beoordelingsmodellen per documenttype (#236) gemerged op 2026-11-10:** op de nieuwe pagina
   `/assessment-models` legt een docent eigen modellen vast: per documenttype een kader en een
   optionele schaal, zelf geschreven of gekopieerd uit een startmodel (HBO-i-stage,

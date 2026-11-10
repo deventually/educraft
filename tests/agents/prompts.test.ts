@@ -66,6 +66,18 @@ describe("professional practice reviewer", () => {
   }
 });
 
+describe("student reviewer", () => {
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: reads the course week by week, and stays off the other reviewers' ground`, () => {
+      const p = getRuntimePrompt("agent-student@v1", locale);
+      for (const word of locale === "nl"
+        ? ["per week", "feedback", "deadline", "Toetsdeskundige", "Ontwerper"]
+        : ["week by week", "feedback", "deadline", "Assessment expert", "Designer"])
+        expect(p, word).toContain(word);
+    });
+  }
+});
+
 describe("linked work (P21.7)", () => {
   it("every hat that watches generations names the linked-work tag; v1 stays registered", () => {
     for (const agent of AGENTS.filter((a) => a.watches.includes("generation")))

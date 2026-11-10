@@ -5,6 +5,7 @@
  *
  *   ANTHROPIC_API_KEY=… npm run eval:agents                 # every case once
  *   ANTHROPIC_API_KEY=… npm run eval:agents -- --repeat 3   # final measurement
+ *   ANTHROPIC_API_KEY=… npm run eval:agents -- --agent student --repeat 3   # one reviewer
  *   npm run eval:agents -- --dry-run                        # build messages only
  *
  * Costs well under €1 per run (BESLUIT-2026-11-04-18). Never part of CI.
@@ -23,6 +24,7 @@ import {
   type AgentScore,
   agentReportMarkdown,
   scoreAgentCase,
+  selectAgentCases,
   unknownTargets,
 } from "./eval-agents-helpers";
 
@@ -38,11 +40,11 @@ async function main() {
   const repeat = Math.max(1, Number(arg("repeat") ?? 1));
   const model = arg("model") ?? DEFAULT_MODEL;
   const label = arg("label") ?? "";
-  const only = arg("case");
-  const cases = (
+  const cases = selectAgentCases(
     JSON.parse(readFileSync(join(EVALS_DIR, "role-agents", "cases.json"), "utf8"))
-      .cases as AgentCase[]
-  ).filter((c) => !only || c.id === only);
+      .cases as AgentCase[],
+    { caseId: arg("case"), agent: arg("agent") },
+  );
   const date = new Date().toISOString().slice(0, 10);
   const outDir = join(EVALS_DIR, "output", date, "role-agents");
   mkdirSync(outDir, { recursive: true });

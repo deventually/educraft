@@ -16,6 +16,10 @@ Per case:
 - **Onbekende items**: sleutels in het antwoord die de cursus niet heeft (de filter laat ze vallen).
   Moet 0 zijn.
 
+Met `--agent <id>` (bijvoorbeeld `--agent student`) draai je alleen de cases van één reviewer:
+genoeg voor een nieuwe of gewijzigde reviewer. Verandert er iets wat alle reviewers delen (de
+invoer, de filter of het model), draai dan alles.
+
 Een case slaagt als alles klopt. De eindmeting draait elke case drie keer (`--repeat 3`); de pet is
 klaar als elke run slaagt.
 
@@ -26,7 +30,9 @@ week (Ontwerper);
 het hele cijfer aan een rapport of verslag zonder toezicht, zonder tussenproduct of gesprek
 (AI-bestendigheid);
 een adviesleeruitkomst die alleen in hoorcolleges en een kennistoets terugkomt, en een
-leeruitkomst op beheersingsniveau 3 met een stap-voor-stap-opdracht (Werkveld); en voor elke pet een goede cursus waarop hij niet mag vitten.
+leeruitkomst op beheersingsniveau 3 met een stap-voor-stap-opdracht (Werkveld);
+drie summatieve toetsen in dezelfde week, en feedback die pas komt in de week van de toets
+(Student); en voor elke pet een goede cursus waarop hij niet mag vitten.
 
 De woordlijsten zijn breed: ze meten of de pet de fout ziet, niet of hij precies die woorden kiest.
 Een gemiste fout lees je na in `evals/output/<datum>/role-agents/<case>.md`.
