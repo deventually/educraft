@@ -4,10 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #218 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #221 gemerged)_
 
 ## Nu
 
+- **Overdrachtsdocument en noodplan (#221) gemerged op 2026-11-10:** `docs/overdracht.md` zegt
+  wat een vervanger moet weten (geheimen alleen bij naam, deployen, terugrollen, back-up, de
+  ops-scripts); `docs/noodplan.md` wat te doen bij storing, dataverlies, een datalek of een
+  kwijte server. Een test houdt beide bij de code. Open vragen voor Bastiaan staan erin als lijst.
+- **Twee a11y-lintregels weer aan en een beveiligingsscan in CI (#220) gemerged op 2026-11-10:**
+  knoppen hebben een `type`, labels wijzen naar hun veld. CI draait `npm audit` en CodeQL;
+  Dependabot stelt wekelijks updates voor. Geen gedragswijziging.
+- **Routetests loggen echt in (#219) gemerged op 2026-11-10:** `signInAs` / `signedRequest`
+  (`tests/helpers/session.ts`) vervangen de mock van `auth.server`, zodat de tests de echte
+  toegangscontrole raken. Geen gedragswijziging.
 - **Anthropic-SDK 1.x (#218) gemerged op 2026-11-10:** de SDK achter de prompt-evals gaat naar
   versie 1. Geen gedragswijziging in de app.
 - **better-sqlite3 13 (#217) gemerged op 2026-11-10:** de databasedriver levert de binaries voor

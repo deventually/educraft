@@ -30,7 +30,7 @@ export default defineConfig({
     ssr: true,
     outDir: "build/ops",
     emptyOutDir: true,
-    target: "node24",
+    target: "node26",
     minify: false,
     rollupOptions: {
       input: Object.fromEntries(OPS_SCRIPTS.map((s) => [s.name, s.entry])),

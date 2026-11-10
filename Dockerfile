@@ -1,20 +1,20 @@
 # LimeOnIt production image. Build:  docker build -t limeonit .
 # Run with docker-compose.yml and a .env file — see docs/installatie-docker.md.
-# Base image aligned with the Volta pin (package.json volta.node 24.x).
+# Base image aligned with the Volta pin (package.json volta.node 26.x).
 
 # better-sqlite3 ships prebuilt musl binaries (linux x64 and arm64) inside its npm package.
-FROM node:24-alpine AS development-dependencies-env
+FROM node:26-alpine AS development-dependencies-env
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-alpine AS production-dependencies-env
+FROM node:26-alpine AS production-dependencies-env
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # `npm run build` builds the app and the ops scripts (build/ops/*.js, scripts/ops.config.ts).
-FROM node:24-alpine AS build-env
+FROM node:26-alpine AS build-env
 WORKDIR /app
 COPY . .
 COPY --from=development-dependencies-env /app/node_modules ./node_modules
@@ -22,7 +22,7 @@ RUN npm run build
 
 # The final image holds only what runs: the build, production node_modules and the migrations.
 # No TypeScript source, no tests, no dev tooling.
-FROM node:24-alpine
+FROM node:26-alpine
 ENV NODE_ENV=production \
     PORT=3000 \
     DATABASE_URL=file:/data/limeonit.db \
