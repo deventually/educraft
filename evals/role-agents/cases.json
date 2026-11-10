@@ -2173,7 +2173,7 @@
       "id": "st-clean",
       "agent": "student",
       "locale": "nl",
-      "description": "Gespreide deadlines, feedback telkens een paar weken voor de toets, elke week iets te doen. Geen waarschuwingen verwacht.",
+      "description": "Tien weken met elke week iets te doen, gespreide deadlines en feedback telkens twee weken vóór de toets. Geen waarschuwingen verwacht.",
       "course": {
         "ec": 5,
         "outcomes": [
@@ -2207,12 +2207,22 @@
             "outcomeIds": [
               "lo1"
             ],
-            "hours": 30
+            "hours": 20
           },
           {
             "id": "a3",
-            "title": "Les marketingplan",
+            "title": "Werkcollege: begeleid werken aan je onderzoeksrapport",
             "week": 4,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Les marketingplan",
+            "week": 6,
             "kind": "lesson",
             "outcomeIds": [
               "lo2"
@@ -2220,20 +2230,40 @@
             "hours": 4
           },
           {
-            "id": "a4",
+            "id": "a5",
             "title": "Opdracht: marketingplan schrijven op basis van je onderzoek",
-            "week": 5,
+            "week": 6,
             "kind": "assignment",
             "outcomeIds": [
               "lo2"
             ],
-            "hours": 40
+            "hours": 24
+          },
+          {
+            "id": "a6",
+            "title": "Werkcollege: begeleid werken aan je marketingplan",
+            "week": 7,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a7",
+            "title": "Werkcollege: feedback op je concept verwerken",
+            "week": 9,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
           }
         ],
         "assessments": [
           {
             "id": "t1",
-            "title": "Peerfeedback op het concept-onderzoeksrapport",
+            "title": "Peerfeedback op je concept-onderzoeksrapport",
             "week": 3,
             "kind": "formative",
             "coverage": [
@@ -2247,7 +2277,7 @@
           {
             "id": "t2",
             "title": "Inleveren onderzoeksrapport marktonderzoek",
-            "week": 4,
+            "week": 5,
             "kind": "summative",
             "coverage": [
               {
@@ -2260,8 +2290,8 @@
           },
           {
             "id": "t3",
-            "title": "Feedbackronde concept-marketingplan",
-            "week": 6,
+            "title": "Feedbackronde op je volledige concept-marketingplan",
+            "week": 8,
             "kind": "formative",
             "coverage": [
               {
@@ -2274,7 +2304,7 @@
           {
             "id": "t4",
             "title": "Inleveren marketingplan",
-            "week": 8,
+            "week": 10,
             "kind": "summative",
             "coverage": [
               {
@@ -2284,6 +2314,372 @@
             ],
             "weight": 60,
             "hours": 20
+          }
+        ]
+      },
+      "maxWarnings": 0
+    },
+    {
+      "id": "in-all-written",
+      "agent": "inclusion",
+      "locale": "nl",
+      "description": "Alle summatieve toetsen zijn schriftelijke tentamens; studenten hebben maar één manier om te laten zien wat ze kunnen.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je legt de werking van het hart en de bloedsomloop uit.",
+            "bloom": "understand"
+          },
+          {
+            "id": "lo2",
+            "text": "Je past kennis van de bloedsomloop toe op een patiëntcasus.",
+            "bloom": "apply"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Hoorcollege hart en bloedsomloop",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Werkgroep: casussen bespreken in groepjes",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Practicum: bloeddruk meten bij elkaar",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Opdracht: casus uitwerken in tweetallen",
+            "week": 4,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 20
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefententamen",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Schriftelijk tentamen deel 1 (open vragen)",
+            "week": 5,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 40,
+            "hours": 20
+          },
+          {
+            "id": "t3",
+            "title": "Schriftelijk tentamen deel 2 (casusvragen)",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 60,
+            "hours": 30
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "t2",
+            "t3"
+          ],
+          "anyOf": [
+            "variatie",
+            "één manier",
+            "schriftelijk",
+            "mondeling",
+            "keuze",
+            "vorm",
+            "alternatief",
+            "afwissel",
+            "presentatie"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-one-way-of-learning",
+      "agent": "inclusion",
+      "locale": "nl",
+      "description": "De student leert alleen via hoorcolleges en zelfstudie; de toetsing is wel gevarieerd.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je legt de werking van het hart en de bloedsomloop uit.",
+            "bloom": "understand"
+          },
+          {
+            "id": "lo2",
+            "text": "Je past kennis van de bloedsomloop toe op een patiëntcasus.",
+            "bloom": "apply"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Hoorcollege hart",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a2",
+            "title": "Hoorcollege bloedsomloop",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a3",
+            "title": "Hoorcollege pathologie",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a4",
+            "title": "Zelfstudie: hoofdstukken 4 tot 9 lezen",
+            "week": 4,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 60
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefenvragen online",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Schriftelijke kennistoets",
+            "week": 5,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 40,
+            "hours": 20
+          },
+          {
+            "id": "t3",
+            "title": "Casuspresentatie met mondelinge toelichting",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 60,
+            "hours": 30
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "a1",
+            "a2",
+            "a3",
+            "a4"
+          ],
+          "anyOf": [
+            "hoorcollege",
+            "werkvorm",
+            "afwissel",
+            "variatie",
+            "samenwerk",
+            "bespre",
+            "oefen",
+            "één manier",
+            "zelfstudie"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-clean",
+      "agent": "inclusion",
+      "locale": "nl",
+      "description": "Afwisselende werkvormen, een schriftelijke toets én een presentatie met keuze in casus. Geen waarschuwingen verwacht.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je legt de werking van het hart en de bloedsomloop uit.",
+            "bloom": "understand"
+          },
+          {
+            "id": "lo2",
+            "text": "Je past kennis van de bloedsomloop toe op een patiëntcasus.",
+            "bloom": "apply"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Hoorcollege hart en bloedsomloop",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Werkgroep: casussen bespreken in groepjes",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Practicum: bloeddruk meten bij elkaar",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Opdracht: zelfgekozen casus uitwerken in tweetallen",
+            "week": 4,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 20
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefententamen met nabespreking",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Schriftelijk tentamen (open vragen)",
+            "week": 5,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 40,
+            "hours": 20
+          },
+          {
+            "id": "t3",
+            "title": "Presentatie van je zelfgekozen casus, met mondelinge toelichting",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 60,
+            "hours": 30
           }
         ]
       },

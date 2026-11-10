@@ -48,6 +48,8 @@ import { AGENT_ASSESSMENT_PROMPT_V2 } from "./agents@v2.prompt";
 import { AGENT_AI_RESILIENCE_PROMPT } from "./agent-ai-resilience@v1.prompt";
 import { AGENT_PROFESSIONAL_PRACTICE_PROMPT } from "./agent-professional-practice@v1.prompt";
 import { AGENT_STUDENT_PROMPT } from "./agent-student@v1.prompt";
+import { AGENT_STUDENT_V2_PROMPT } from "./agent-student@v2.prompt";
+import { AGENT_INCLUSION_PROMPT } from "./agent-inclusion@v1.prompt";
 import {
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
@@ -60,6 +62,8 @@ const ALL: PromptDef[] = [
   AGENT_AI_RESILIENCE_PROMPT,
   AGENT_PROFESSIONAL_PRACTICE_PROMPT,
   AGENT_STUDENT_PROMPT,
+  AGENT_STUDENT_V2_PROMPT,
+  AGENT_INCLUSION_PROMPT,
   AGENT_ASSESSMENT_PROMPT,
   AGENT_ASSESSMENT_PROMPT_V2,
   AGENT_DESIGN_PROMPT,

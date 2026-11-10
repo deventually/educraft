@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AGENTS } from "~/lib/agents/registry";
+import { AGENTS, getAgent } from "~/lib/agents/registry";
 import { PROMPTS, getRuntimePrompt } from "~/lib/prompts";
 
 describe("hat prompts (P21.2)", () => {
@@ -67,12 +67,37 @@ describe("professional practice reviewer", () => {
 });
 
 describe("student reviewer", () => {
+  it("runs v2; v1 stays registered for earlier reviews", () => {
+    expect(getAgent("student")?.promptId).toBe("agent-student@v2");
+    expect(PROMPTS["agent-student@v1"]).toBeDefined();
+  });
+
   for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: v2 warns only for a real clash, not for a lesson in a deadline week`, () => {
+      const p = getRuntimePrompt("agent-student@v2", locale);
+      for (const word of locale === "nl"
+        ? ["twee of meer summatieve", "Eén week ertussen is genoeg", "geen botsing"]
+        : ["two or more summative", "One week in between is enough", "not a clash"])
+        expect(p, word).toContain(word);
+    });
+
     it(`${locale}: reads the course week by week, and stays off the other reviewers' ground`, () => {
-      const p = getRuntimePrompt("agent-student@v1", locale);
+      const p = getRuntimePrompt("agent-student@v2", locale);
       for (const word of locale === "nl"
         ? ["per week", "feedback", "deadline", "Toetsdeskundige", "Ontwerper"]
         : ["week by week", "feedback", "deadline", "Assessment expert", "Designer"])
+        expect(p, word).toContain(word);
+    });
+  }
+});
+
+describe("inclusion reviewer", () => {
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: looks at variety in how students learn and show, and stays off the other reviewers' ground`, () => {
+      const p = getRuntimePrompt("agent-inclusion@v1", locale);
+      for (const word of locale === "nl"
+        ? ["meer dan één manier", "toetsvorm", "Toetsdeskundige", "Ontwerper"]
+        : ["more than one way", "assessment form", "Assessment expert", "Designer"])
         expect(p, word).toContain(word);
     });
   }

@@ -52,11 +52,22 @@ export const AGENTS: Agent[] = [
   {
     id: "student",
     role: { nl: "Student", en: "Student" },
-    promptId: "agent-student@v1",
+    promptId: "agent-student@v2",
     watches: ["course"],
     focus: {
       nl: "Loopt je cursus week voor week door zoals een student: is duidelijk wat er moet, vallen deadlines niet samen, komt feedback op tijd?",
       en: "Goes through your course week by week like a student: is it clear what to do, do deadlines not coincide, does feedback come in time?",
+    },
+    teacherDefault: "off",
+  },
+  {
+    id: "inclusion",
+    role: { nl: "Inclusie", en: "Inclusion" },
+    promptId: "agent-inclusion@v1",
+    watches: ["course"],
+    focus: {
+      nl: "Kijkt of studenten op meer dan één manier kunnen leren en laten zien wat ze kunnen.",
+      en: "Checks that students can learn, and show what they can do, in more than one way.",
     },
     teacherDefault: "off",
   },

@@ -4,14 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #238 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #240 gemerged)_
 
 ## Nu
 
+- **Figuren: grafieken en diagrammen uit een PDF (#240) gemerged op 2026-11-10:** bij
+  *Studentwerk beoordelen* vindt LimeOnIt in een PDF ook getekende grafieken, diagrammen en
+  stroomschema's als figuur, met hun labels; tabellen, kaders, lijnen en herhaalde logo's niet.
+  Bij Word worden grafieken en SmartArt geteld, met de tip het verslag als PDF te uploaden.
 - **Reviewer Student (#238) gemerged op 2026-11-10:** een vijfde reviewer loopt de cursus week
-  voor week door zoals een student: samenvallende deadlines, feedback die te laat komt, lege weken
-  met een eindsprint, onduidelijke toetsen. Hij spreekt niet namens echte studenten en staat voor
-  docenten standaard uit. Geen migratie.
+  voor week door zoals een student: deadlines die samenvallen, feedback die pas komt als het al
+  telt, lege weken met een eindsprint. Voor docenten standaard uit; eigen stuk op
+  `/help/review-team`. `npm run eval:agents -- --agent <id>` draait de cases van één reviewer.
+  Eval 9/9 (`evals/reports/2026-11-10b-role-agents.md`). PR 5 van het plan "Nieuwe rolagenten
+  en examencommissie".
 - **Reviewer Werkveld (#237) gemerged op 2026-11-10:** een vierde reviewer kijkt of studenten
   oefenen en getoetst worden zoals in het beroep, op het niveau van de beroepsactiviteiten en het
   beheersingsniveau uit het vakgebiedpakket. Voor docenten standaard uit; eigen stuk op
