@@ -90,7 +90,7 @@ describe("getAvailableSectors — the instance decides (P18.2)", () => {
 
   it("keeps the full mbo/wo catalogue when an older selection names none of their domains", async () => {
     enabledDomainsMock.mockResolvedValue(["nt"]);
-    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toHaveLength(18);
+    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toHaveLength(22);
     expect(await availability.getAvailableDomains(teacher, "wo", "master")).toHaveLength(10);
   });
 });

@@ -18,6 +18,7 @@ describe("resolveFramework — country → sector → domain → verified pack",
     expect(resolveFramework("NL", "vo", "ICT")).toBeUndefined();
     expect(resolveFramework("NL", "mbo", "ICT")).toBeUndefined();
     expect(resolveFramework("NL", "mbo", "mbo-ict")).toBeUndefined();
+    expect(resolveFramework("NL", "mbo", "mbo-zorg-welzijn")).toBeUndefined();
   });
 
   it("falls back to the wo sector pack (Dublin descriptors) for every wo domain", () => {

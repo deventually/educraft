@@ -114,11 +114,33 @@ describe("allDomainValues — the union of every valid domain slug (P10.3 filter
 describe("getDomainsForTrack — mbo opleidingsdomeinen (Regeling kwalificatiedossiers)", () => {
   it("offers the 18 mbo opleidingsdomeinen, whatever the mbo level", () => {
     const values = getDomainsForTrack("NL", "mbo", "mbo-4").map((d) => d.value);
-    expect(values.length).toBe(18);
+    expect(values.filter((v) => !v.startsWith("mbo-kw-")).length).toBe(18);
     expect(values).toContain("mbo-ict");
     expect(values).toContain("mbo-zorg-welzijn");
     expect(values).toContain("mbo-entree");
     expect(getDomainsForTrack("NL", "mbo", "mbo-2").map((d) => d.value)).toEqual(values);
+  });
+
+  it("offers the kwalificaties that have a pack, by crebo (BESLUIT-2026-11-10-4)", () => {
+    const values = getDomainsForTrack("NL", "mbo", "mbo-3").map((d) => d.value);
+    expect(values.filter((v) => v.startsWith("mbo-kw-")).sort()).toEqual([
+      "mbo-kw-25960",
+      "mbo-kw-25998",
+      "mbo-kw-27144",
+      "mbo-kw-27145",
+    ]);
+  });
+
+  it("groups every mbo option under its opleidingsdomein, the domain itself first", () => {
+    const opts = getDomainsForTrack("NL", "mbo", "mbo-4");
+    for (const o of opts) expect(o.group, o.value).toBeDefined();
+    const zorg = opts.filter((o) => loc(o.group!, "nl") === "Zorg en welzijn").map((o) => o.value);
+    expect(zorg).toEqual(["mbo-zorg-welzijn", "mbo-kw-25960", "mbo-kw-27144", "mbo-kw-27145"]);
+    const ict = opts.filter((o) => loc(o.group!, "nl") === "Informatie en communicatietechnologie");
+    expect(ict.map((o) => o.value)).toEqual(["mbo-ict", "mbo-kw-25998"]);
+    // A group's options sit together, so the picker can render one optgroup per domain.
+    const order = opts.map((o) => loc(o.group!, "nl"));
+    expect(new Set(order).size).toBe(order.filter((g, i) => g !== order[i - 1]).length);
   });
 
   it("uses the official Dutch names", () => {
