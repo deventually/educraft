@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #211 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #212 gemerged)_
 
 ## Nu
 
+- **Stryker draait weer onder TypeScript 7 (#212) gemerged op 2026-11-10:** Stryker wilde de
+  tsconfig herschrijven via de JS-API die TypeScript 7 niet meer heeft; `stryker.config.json` wijst
+  nu naar een tsconfig die niet bestaat, zodat die stap overgeslagen wordt. De 5 moderate
+  audit-meldingen zitten in Stryker zelf en wachten op een nieuwe Stryker-versie.
 - **TypeScript 7 (#211) gemerged op 2026-11-10:** de derde versiesprong uit #189; `npm run typecheck`
   duurt nu een paar seconden. TypeScript 7 heeft geen JS-API meer, dus de importscanner in
   `tests/architecture.test.ts` gebruikt `oxc-parser`. Geen gedragswijziging.
