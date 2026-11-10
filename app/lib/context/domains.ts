@@ -3,8 +3,8 @@
  * options the domain picker offers per country → sector → track. This is a
  * *picker*, not a framework: a domain here may or may not resolve a verified pack
  * (`frameworks.ts`). hbo reuses the existing `HBO_DOMAINS` at the sector level; vo
- * is scoped by track to the correct profielen; mbo/wo have no catalogue yet (→
- * custom fields). Nothing is invented as a framework here.
+ * is scoped by track to the correct profielen; mbo and wo have a sector-level
+ * catalogue. Nothing is invented as a framework here.
  *
  * Verified against the brief's sourced facts:
  *  - **havo & vwo** share the four profielen chosen in the tweede fase — Natuur &
@@ -14,8 +14,13 @@
  *    vmbo 22-04-2016; SLO `sectoren/vmbo/beroepsgericht/`).
  *  - **vmbo-tl / mavo** → the four sectoren (Techniek, Zorg & Welzijn, Economie,
  *    Landbouw/Groen).
+ *  - **mbo** → the 18 opleidingsdomeinen of the *Regeling vaststelling
+ *    kwalificatiedossiers en opleidingsdomeinen 2016* (as listed by CBS, 2021).
+ *    A kwalificatie-level pick (with its own pack) comes later.
+ *  - **wo** → the ten CROHO-onderdelen (DUO, *Handleiding CROHO op internet*).
  * The specific school subject belongs in the Course/"Vak" field, so kernvakken
- * are deliberately NOT part of this catalogue.
+ * are deliberately NOT part of this catalogue. Slugs are unique across sectors
+ * (mbo-…, wo-…), because the admin switches domains on by slug.
  */
 import type { LocalizedText } from "~/lib/i18n/localized";
 import type { CountryCode } from "./countries";
@@ -87,6 +92,87 @@ const VMBO_TL_SECTOREN: DomainOption[] = [
   { value: "groen", label: { nl: "Groen (landbouw)", en: "Green (agriculture)" } },
 ];
 
+/** The mbo opleidingsdomeinen (Regeling kwalificatiedossiers en opleidingsdomeinen 2016). */
+const MBO_OPLEIDINGSDOMEINEN: DomainOption[] = [
+  {
+    value: "mbo-afbouw-hout-onderhoud",
+    label: { nl: "Afbouw, hout en onderhoud", en: "Finishing, wood & maintenance" },
+  },
+  {
+    value: "mbo-ambacht-lab-gezondheidstechniek",
+    label: {
+      nl: "Ambacht, laboratorium en gezondheidstechniek",
+      en: "Crafts, laboratory & health technology",
+    },
+  },
+  { value: "mbo-bouw-infra", label: { nl: "Bouw en infra", en: "Construction & infrastructure" } },
+  { value: "mbo-cross-over", label: { nl: "Cross-over", en: "Cross-over (multiple domains)" } },
+  {
+    value: "mbo-economie-administratie",
+    label: { nl: "Economie en administratie", en: "Business & administration" },
+  },
+  { value: "mbo-entree", label: { nl: "Entree", en: "Entry level (Entree)" } },
+  {
+    value: "mbo-handel-ondernemerschap",
+    label: { nl: "Handel en ondernemerschap", en: "Trade & entrepreneurship" },
+  },
+  { value: "mbo-horeca-bakkerij", label: { nl: "Horeca en bakkerij", en: "Hospitality & bakery" } },
+  {
+    value: "mbo-ict",
+    label: {
+      nl: "Informatie en communicatietechnologie",
+      en: "Information & communication technology",
+    },
+  },
+  { value: "mbo-media-vormgeving", label: { nl: "Media en vormgeving", en: "Media & design" } },
+  {
+    value: "mbo-mobiliteit-voertuigen",
+    label: { nl: "Mobiliteit en voertuigen", en: "Mobility & vehicles" },
+  },
+  {
+    value: "mbo-techniek-procesindustrie",
+    label: { nl: "Techniek en procesindustrie", en: "Engineering & process industry" },
+  },
+  {
+    value: "mbo-toerisme-recreatie",
+    label: { nl: "Toerisme en recreatie", en: "Tourism & recreation" },
+  },
+  {
+    value: "mbo-transport-scheepvaart-logistiek",
+    label: { nl: "Transport, scheepvaart en logistiek", en: "Transport, shipping & logistics" },
+  },
+  {
+    value: "mbo-uiterlijke-verzorging",
+    label: { nl: "Uiterlijke verzorging", en: "Personal care & beauty" },
+  },
+  { value: "mbo-veiligheid-sport", label: { nl: "Veiligheid en sport", en: "Security & sport" } },
+  {
+    value: "mbo-voedsel-natuur-leefomgeving",
+    label: { nl: "Voedsel, natuur en leefomgeving", en: "Food, nature & living environment" },
+  },
+  { value: "mbo-zorg-welzijn", label: { nl: "Zorg en welzijn", en: "Care & welfare" } },
+];
+
+/** The ten CROHO-onderdelen (DUO) — every wo programme is registered under one. */
+const WO_CROHO_ONDERDELEN: DomainOption[] = [
+  { value: "wo-economie", label: { nl: "Economie", en: "Economics" } },
+  {
+    value: "wo-gedrag-maatschappij",
+    label: { nl: "Gedrag en maatschappij", en: "Behaviour & society" },
+  },
+  { value: "wo-gezondheidszorg", label: { nl: "Gezondheidszorg", en: "Healthcare" } },
+  {
+    value: "wo-landbouw-natuurlijke-omgeving",
+    label: { nl: "Landbouw en natuurlijke omgeving", en: "Agriculture & natural environment" },
+  },
+  { value: "wo-natuur", label: { nl: "Natuur", en: "Natural sciences" } },
+  { value: "wo-onderwijs", label: { nl: "Onderwijs", en: "Education" } },
+  { value: "wo-recht", label: { nl: "Recht", en: "Law" } },
+  { value: "wo-sectoroverstijgend", label: { nl: "Sectoroverstijgend", en: "Interdisciplinary" } },
+  { value: "wo-taal-cultuur", label: { nl: "Taal en cultuur", en: "Language & culture" } },
+  { value: "wo-techniek", label: { nl: "Techniek", en: "Engineering" } },
+];
+
 /** vo domain options per track — the leerweg/schooltype fixes which profielen apply. */
 const VO_DOMAINS_BY_TRACK: Record<string, DomainOption[]> = {
   havo: HAVO_VWO_PROFIELEN,
@@ -100,8 +186,10 @@ const VO_DOMAINS_BY_TRACK: Record<string, DomainOption[]> = {
 /** Sector-level domain options (track-independent). Absent sector = custom fields. */
 const DOMAINS_BY_SECTOR: Partial<Record<CountryCode, Partial<Record<Sector, DomainOption[]>>>> = {
   NL: {
+    mbo: MBO_OPLEIDINGSDOMEINEN,
     hbo: HBO_DOMAIN_OPTIONS,
-    // vo is track-scoped (see VO_DOMAINS_BY_TRACK); mbo, wo: no catalogue yet.
+    wo: WO_CROHO_ONDERDELEN,
+    // vo is track-scoped (see VO_DOMAINS_BY_TRACK).
   },
 };
 

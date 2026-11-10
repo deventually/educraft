@@ -83,9 +83,9 @@ describe("instance decides, on real storage (P18.2)", () => {
     await settings.setEnabledDomains(null);
   });
 
-  it("returns [] for a sector with no domain catalogue (mbo/wo)", async () => {
+  it("offers the mbo opleidingsdomeinen and the wo CROHO-onderdelen", async () => {
     const teacher = { id: "dom-mbo", role: "teacher" as const };
-    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toEqual([]);
-    expect(await availability.getAvailableDomains(teacher, "wo", "master")).toEqual([]);
+    expect(await availability.getAvailableDomains(teacher, "mbo", "mbo-4")).toContain("mbo-ict");
+    expect(await availability.getAvailableDomains(teacher, "wo", "master")).toContain("wo-recht");
   });
 });

@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #240 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #241 gemerged)_
 
 ## Nu
 
+- **Opleidingen van een team (#241) gemerged op 2026-11-10:** een opleiding bundelt de cursussen
+  van een team, met per cursus jaar en periode (BESLUIT-2026-11-10-3). De teamleider of een
+  beheerder maakt hem aan; elk teamlid leest hem. Een eigen cursus in een opleiding zetten deelt
+  hem met het team; een cursus kan in meer opleidingen staan. Pagina's `/programmes` en
+  `/programmes/:id`, "Hoort bij opleiding" op de cursuspagina, helponderwerp *programmes*;
+  migratie 0026.
 - **Reviewer Inclusie (#239) gemerged op 2026-11-10:** een zesde reviewer kijkt naar de cursus
   vanuit Universal Design for Learning: kunnen studenten op meer dan één manier leren en laten
   zien wat ze kunnen (afwisseling in toetsvormen en werkvormen, niet alles op één moment in één

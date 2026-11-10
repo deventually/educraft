@@ -84,7 +84,8 @@ export function levelForYear(year: number | undefined, levelMax: number): number
 }
 
 /**
- * Factual default answers for a domain's pack, used to PRE-FILL the create form:
+ * Factual default answers for a pack (resolve it with `resolveFramework`), used
+ * to PRE-FILL the create form:
  * - multiselect dimensions → left EMPTY. The framework lists the domain's whole
  *   competence set, but a course only touches a few of those dimensions. Pre-
  *   selecting every option injects the undifferentiated taxonomy into every
@@ -94,10 +95,9 @@ export function levelForYear(year: number | undefined, levelMax: number): number
  * - single-select → left unset (no factual default among the alternatives).
  */
 export function defaultPackValues(
-  domain: string | undefined,
+  pack: DomainPack | undefined,
   studyYear?: number,
 ): Record<string, PackFieldValue> {
-  const pack = getDomainPack(domain);
   if (!pack) return {};
   const out: Record<string, PackFieldValue> = {};
   for (const field of pack.fields) {

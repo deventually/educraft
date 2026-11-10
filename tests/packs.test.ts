@@ -119,23 +119,23 @@ describe("defaultPackValues", () => {
     // Pre-filling every option floods the prompt with the undifferentiated
     // taxonomy and drowns the discriminating free-text fields. The user picks
     // the few dimensions their course emphasises instead.
-    const v = defaultPackValues("ICT", 3);
+    const v = defaultPackValues(getDomainPack("ICT"), 3);
     expect(v.architectuurlagen).toBeUndefined();
     expect(v.activiteiten).toBeUndefined();
   });
 
   it("still derives the single-value level field from the study year (low-noise)", () => {
-    expect(defaultPackValues("ICT", 1).beheersingsniveau).toBe(1);
-    expect(defaultPackValues("ICT", 3).beheersingsniveau).toBe(2);
-    expect(defaultPackValues("ICT", 4).beheersingsniveau).toBe(3);
+    expect(defaultPackValues(getDomainPack("ICT"), 1).beheersingsniveau).toBe(1);
+    expect(defaultPackValues(getDomainPack("ICT"), 3).beheersingsniveau).toBe(2);
+    expect(defaultPackValues(getDomainPack("ICT"), 4).beheersingsniveau).toBe(3);
   });
 
   it("omits the level when no study year is chosen", () => {
-    expect(defaultPackValues("ICT").beheersingsniveau).toBeUndefined();
+    expect(defaultPackValues(getDomainPack("ICT")).beheersingsniveau).toBeUndefined();
   });
 
   it("returns nothing for domains without a pack", () => {
-    expect(defaultPackValues("Overig", 3)).toEqual({});
+    expect(defaultPackValues(undefined, 3)).toEqual({});
     expect(defaultPackValues(undefined)).toEqual({});
   });
 
