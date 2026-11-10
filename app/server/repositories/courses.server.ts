@@ -3,7 +3,7 @@
  * every query scoped to the caller in the WHERE clause, and every write re-parsed with
  * `CourseDataSchema` so the stored graph is always consistent.
  *
- * Who may do what (BESLUIT-2026-11-10-4): the owner (`courses.user_id`) and the course's
+ * Who may do what (BESLUIT-2026-11-10-5): the owner (`courses.user_id`) and the course's
  * editors (`course_members`) read and change its content (`mayEdit`); only the owner
  * deletes it or points it at a context profile (`ownCourse`). Links and reviews stay with
  * the person who made them.
@@ -31,7 +31,7 @@ export interface Course {
   /** The owner; anyone else who sees the course is one of its members. */
   ownerId: string;
   ownerName: string;
-  /** The caller's own role on the course (BESLUIT-2026-11-10-4). */
+  /** The caller's own role on the course (BESLUIT-2026-11-10-5). */
   role: "owner" | "editor" | "co-owner";
   name: string;
   contextProfileId: string | null;

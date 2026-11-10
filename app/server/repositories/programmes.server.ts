@@ -61,7 +61,7 @@ const cap = (limit?: number) => Math.min(limit ?? 50, 500);
 
 /**
  * The course is shared with the programme's team by someone who may share it (its owner or a
- * co-owner, BESLUIT-2026-11-10-4) and who is still in that team. Needs `courses` in the query.
+ * co-owner, BESLUIT-2026-11-10-5) and who is still in that team. Needs `courses` in the query.
  */
 const sharedWithTeam = (teamId: SQL | SQLiteColumn | string) =>
   sql`exists (select 1 from ${shares} s
@@ -333,7 +333,7 @@ export async function removeCourse(
 
 /**
  * Where a course sits: the programmes it is placed in while a share stands. Callers check
- * first that the viewer may open the course (owner or member, BESLUIT-2026-11-10-4).
+ * first that the viewer may open the course (owner or member, BESLUIT-2026-11-10-5).
  */
 export async function programmesOfCourse(courseId: string): Promise<
   {

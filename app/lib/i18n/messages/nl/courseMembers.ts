@@ -1,4 +1,4 @@
-/** Working on a course together: editors and co-owners (BESLUIT-2026-11-10-4). */
+/** Working on a course together: editors and co-owners (BESLUIT-2026-11-10-5). */
 export const courseMembers = {
   add: "Toevoegen",
   addLabel: "Collega",

@@ -1,5 +1,5 @@
 /**
- * Working on a course together (BESLUIT-2026-11-10-4). Repository rule, extended for
+ * Working on a course together (BESLUIT-2026-11-10-5). Repository rule, extended for
  * members: besides its owner (`courses.user_id`) a course has editors and co-owners
  * (`course_members.role`). Both read and change the course's content through
  * `courses.server.ts`. The owner and the co-owners *manage* the course: they share it and

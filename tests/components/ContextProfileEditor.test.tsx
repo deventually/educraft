@@ -242,6 +242,25 @@ describe("ContextProfileEditor — level & framework (under Meer details)", () =
     expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
   });
 
+  it("offers the mbo opleidingsdomeinen, with an honest note (no mbo pack yet)", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+    await toMore(user, "mbo::mbo-4");
+    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "mbo-ict");
+    expect(screen.getByText(/geen landelijk raamwerk|no national framework/i)).toBeInTheDocument();
+  });
+
+  it("reveals the Dublin descriptors for any wo domain, without a level field", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+    await toMore(user, "wo::master");
+    await user.selectOptions(screen.getByLabelText(/domein|domain/i), "wo-techniek");
+    expect(screen.getByText(/Dublin-descriptoren \(Joint Quality Initiative/)).toBeInTheDocument();
+    expect(screen.getByText("Toepassen van kennis en inzicht")).toBeInTheDocument();
+    expect(screen.queryByText(/beheersingsniveau/i)).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("filters the domain dropdown by the teacher's available domains (P10.3)", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor({ availableDomains: ["nt"] });

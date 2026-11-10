@@ -446,9 +446,14 @@ describe("admin.context action — instance lockout guard", () => {
     expect(data.sectors.every((s) => s.checked)).toBe(true);
     expect(data.sectors.map((s) => s.id)).toEqual(["vo", "mbo", "hbo", "wo"]);
     // The instance domain axis: unset = null (= all), and the shared catalogue
-    // carries the catalogued sectors (vo + hbo).
+    // carries the catalogued sectors (all four).
     expect(data.enabledDomains).toBeNull();
-    expect(data.domainCatalogueSectors.map((d) => d.sector).sort()).toEqual(["hbo", "vo"]);
+    expect(data.domainCatalogueSectors.map((d) => d.sector).sort()).toEqual([
+      "hbo",
+      "mbo",
+      "vo",
+      "wo",
+    ]);
   });
 });
 

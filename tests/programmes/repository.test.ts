@@ -226,7 +226,7 @@ describe("courses in a programme", () => {
   });
 });
 
-describe("programmes and course co-owners (BESLUIT-2026-11-10-4)", () => {
+describe("programmes and course co-owners (BESLUIT-2026-11-10-5)", () => {
   it("lets a co-owner place the owner's course in a programme of their own team", async () => {
     const { lead, member, outsider, team } = await world();
     const members = await import("~/server/repositories/courseMembers.server");

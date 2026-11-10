@@ -4,10 +4,21 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #240 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #242 gemerged)_
 
 ## Nu
 
+- **Vakgebiedlijsten voor mbo en wo (#242) gemerged op 2026-11-10:** bij mbo kies je een
+  opleidingsdomein uit de 18 domeinen, bij wo een van de tien CROHO-onderdelen. Wo krijgt een
+  sectorpakket met de Dublin-descriptoren, en de reviewer Werkveld (`@v2`) werkt nu voor elke
+  sector, ook zonder beheersingsniveau. De mbo-proefpakketten uit de kwalificatiedossiers volgen in
+  een tweede PR; bij SBB nog navragen of we codes en titels mogen overnemen. BESLUIT-2026-11-10-4.
+- **Opleidingen van een team (#241) gemerged op 2026-11-10:** een opleiding bundelt de cursussen
+  van een team, met per cursus jaar en periode (BESLUIT-2026-11-10-3). De teamleider of een
+  beheerder maakt hem aan; elk teamlid leest hem. Een eigen cursus in een opleiding zetten deelt
+  hem met het team; een cursus kan in meer opleidingen staan. Pagina's `/programmes` en
+  `/programmes/:id`, "Hoort bij opleiding" op de cursuspagina, helponderwerp *programmes*;
+  migratie 0026.
 - **Reviewer Inclusie (#239) gemerged op 2026-11-10:** een zesde reviewer kijkt naar de cursus
   vanuit Universal Design for Learning: kunnen studenten op meer dan één manier leren en laten
   zien wat ze kunnen (afwisseling in toetsvormen en werkvormen, niet alles op één moment in één

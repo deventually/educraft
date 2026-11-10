@@ -187,7 +187,7 @@ describe("/programmes/:id", () => {
     expect(await act(p!.id, { intent: "remove", courseId: c.id })).toMatchObject({ ok: true });
   });
 
-  it("offers a course I co-own, never one I only edit (BESLUIT-2026-11-10-4)", async () => {
+  it("offers a course I co-own, never one I only edit (BESLUIT-2026-11-10-5)", async () => {
     const members = await import("~/server/repositories/courseMembers.server");
     const p = await repo.createProgramme(me, teamId, hbo("Deeltijd"));
     const coOwned = await courses.createCourse(colleague.id, { name: "Samen van" });

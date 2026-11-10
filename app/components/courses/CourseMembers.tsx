@@ -26,7 +26,7 @@ export interface CourseMembersProps {
 const ROLES: MemberRole[] = ["editor", "co-owner"];
 
 /**
- * "Samen aan deze cursus werken" (BESLUIT-2026-11-10-4): the owner and co-owners add
+ * "Samen aan deze cursus werken" (BESLUIT-2026-11-10-5): the owner and co-owners add
  * team-mates as editor or co-owner, change a role and remove someone; an editor sees who
  * works on the course. Every member can stop.
  */

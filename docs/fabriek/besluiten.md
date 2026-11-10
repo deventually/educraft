@@ -340,7 +340,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   team mag alles zijn: faculteit, opleiding, richting, module. Overdragen en samen bewerken van een
   cursus is apart werk. Bastiaan, 2026-11-10 (keuzekaart "Van wie is een opleiding?", optie "Van
   een team").
-- **BESLUIT-2026-11-10-4:** **Een cursus heeft één eigenaar, en daarnaast mede-eigenaars en
+- **BESLUIT-2026-11-10-4:** **Vakgebiedpakketten voor mbo en wo.** Bij mbo is het vakgebied de
+  **kwalificatie** (crebo), gegroepeerd per opleidingsdomein; het pakket haalt kerntaken en
+  werkprocessen uit het kwalificatiedossier van SBB, zonder beheersingsniveau (het mbo-niveau is
+  het niveau). Bij wo geldt één sectorpakket met de Dublin-descriptoren voor elk domein; de
+  vakgebiedlijst is de tien CROHO-onderdelen. **Licentie:** kwalificatiedossiers worden door de
+  minister van OCW vastgesteld bij ministeriële regeling, dus naar onze lezing rust er geen
+  auteursrecht op (art. 11 Auteurswet) of mogen ze hergebruikt worden (art. 15b); dat is genoeg om
+  te bouwen. **Open punt:** later nog bij SBB verifiëren dat we codes en titels mogen overnemen.
+  De bouw gaat in twee PR's: eerst vakgebiedlijsten, een sectorbrede engine en het Dublin-pakket;
+  daarna de mbo-proefpakketten. Bastiaan, 2026-11-10 (advies "Vakgebiedpakketten mbo en wo").
+- **BESLUIT-2026-11-10-5:** **Een cursus heeft één eigenaar, en daarnaast mede-eigenaars en
   bewerkers; het eigenaarschap is over te dragen.** Vult BESLUIT-2026-11-05-5 aan ("alleen de
   eigenaar bewerkt"). Een *bewerker* leest en wijzigt de inhoud van de cursus, koppelt eigen werk en
   laat het reviewteam kijken. Een *mede-eigenaar* mag daarnaast de cursus delen met een eigen team en

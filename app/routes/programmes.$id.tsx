@@ -38,7 +38,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     kinds.unshift({ value: kind, label: programmeKindLabel({ ...programme, form: null }, locale) });
   const inProgramme = new Set(programme.courses.map((c) => c.courseId));
   // Only courses you own or co-own can go in; placing shares them with the team
-  // (BESLUIT-2026-11-10-4). An editor's courses are not theirs to place.
+  // (BESLUIT-2026-11-10-5). An editor's courses are not theirs to place.
   const managed = (await listCourses(user.id, 500)).filter((c) => c.role !== "editor");
   const mine = new Set(managed.map((c) => c.id));
   const available = managed

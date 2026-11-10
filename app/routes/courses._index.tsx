@@ -28,7 +28,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const courses = (await listCourses(user.id)).map((c) => ({
     id: c.id,
     name: c.name,
-    // A course the viewer works on with a colleague (BESLUIT-2026-11-10-4); null = their own.
+    // A course the viewer works on with a colleague (BESLUIT-2026-11-10-5); null = their own.
     ownerName: c.ownerId === user.id ? null : c.ownerName,
     role: c.role,
     outcomes: c.data.outcomes.length,

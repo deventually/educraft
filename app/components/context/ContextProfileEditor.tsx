@@ -14,6 +14,7 @@ import { Button } from "~/components/ui";
 import type { ContextProfile } from "~/lib/context/types";
 import { DEFAULT_COUNTRY } from "~/lib/context/countries";
 import { defaultPackValues } from "~/lib/context/packs";
+import { resolveFramework } from "~/lib/context/frameworks";
 import { courseLabel, showsDomain } from "~/lib/context/relevance";
 import { countFilledDetails } from "~/lib/context/details";
 import { useT } from "~/lib/i18n/useT";
@@ -67,10 +68,13 @@ export function ContextProfileEditor({
   const [learnerNoun, setLearnerNoun] = useState(profile?.learnerNounOverride ?? "");
 
   // When editing, keep the profile's stored answers; when creating, prefill the
-  // pack from the framework (hbo, refined by year).
+  // pack from the framework (refined by year where the pack has a level).
   const packValues = editing
     ? profile.packValues
-    : defaultPackValues(domain, studyYear ? Number(studyYear) : undefined);
+    : defaultPackValues(
+        resolveFramework(DEFAULT_COUNTRY, sector, domain),
+        studyYear ? Number(studyYear) : undefined,
+      );
 
   const onOnderwijstype = (nextSector: string, nextTrack: string, defaultLevel: string) => {
     setSector(nextSector);

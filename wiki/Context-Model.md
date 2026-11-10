@@ -98,6 +98,15 @@ Kunst & creatief (Beeldende kunst & design). Domains **without** a recognised na
 taxonomy (Agro/voeding & leefomgeving, Overig) are deliberately absent — the UI falls
 back to user-defined `customFields` rather than inventing a framework.
 
+A **sector pack** holds for every domain of a sector and is used when the domain has no
+pack of its own (`SECTOR_PACKS` in `app/lib/context/frameworks.ts`). Shipped: wo → the
+Dublin descriptors (`packsWo.ts`), with no level field because the track (bachelor,
+master, PhD) already is the cycle. The domain pickers for mbo (the 18
+opleidingsdomeinen) and wo (the ten CROHO-onderdelen) live in `domains.ts`; their slugs
+carry a sector prefix (`mbo-…`, `wo-…`) so no slug is shared between sectors. mbo
+packs per kwalificatie (SBB kwalificatiedossiers) are the next content step
+(BESLUIT-2026-11-10-4).
+
 - **Domain packs** — subject-specific structure, one verified registry entry per domain.
 - **Framework packs** — a country+sector+level's curriculum standards and
   qualification descriptors (see [Qualification Frameworks](Qualification-Frameworks.md)).
