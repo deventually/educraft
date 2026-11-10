@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #212 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #213 gemerged)_
 
 ## Nu
 
+- **@types/node 24 (#213) gemerged op 2026-11-10:** de Node-types passen nu bij de Node-versie die
+  we draaien (24); een test houdt die twee gelijk. Geen gedragswijziging.
 - **Stryker draait weer onder TypeScript 7 (#212) gemerged op 2026-11-10:** Stryker wilde de
   tsconfig herschrijven via de JS-API die TypeScript 7 niet meer heeft; `stryker.config.json` wijst
   nu naar een tsconfig die niet bestaat, zodat die stap overgeslagen wordt. De 5 moderate
