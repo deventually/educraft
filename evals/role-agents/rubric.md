@@ -24,7 +24,9 @@ ontwerpleeruitkomst, geen formatief moment, een verworpen advies, een opdracht i
 alleen hoorcolleges voor een bouwleeruitkomst, de opdracht vóór de instructie, alle studielast in één
 week (Ontwerper);
 het hele cijfer aan een rapport of verslag zonder toezicht, zonder tussenproduct of gesprek
-(AI-bestendigheid); en voor elke pet een goede cursus waarop hij niet mag vitten.
+(AI-bestendigheid);
+een adviesleeruitkomst die alleen in hoorcolleges en een kennistoets terugkomt, en een
+leeruitkomst op beheersingsniveau 3 met een stap-voor-stap-opdracht (Werkveld); en voor elke pet een goede cursus waarop hij niet mag vitten.
 
 De woordlijsten zijn breed: ze meten of de pet de fout ziet, niet of hij precies die woorden kiest.
 Een gemiste fout lees je na in `evals/output/<datum>/role-agents/<case>.md`.

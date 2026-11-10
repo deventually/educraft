@@ -1526,6 +1526,364 @@
         ]
       },
       "maxWarnings": 0
+    },
+    {
+      "id": "pp-advice-only-knowledge",
+      "agent": "professional-practice",
+      "locale": "nl",
+      "description": "L1 vraagt Adviseren op niveau 2, maar studenten krijgen alleen hoorcolleges en een kennistoets; nergens een opdrachtgever of casus.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je adviseert een mkb-organisatie over een passende cloudoplossing.",
+            "bloom": "evaluate",
+            "packTags": {
+              "activiteiten": [
+                "Adviseren"
+              ],
+              "architectuurlagen": [
+                "Infrastructuur"
+              ],
+              "beheersingsniveau": 2
+            }
+          },
+          {
+            "id": "lo2",
+            "text": "Je legt de verschillen tussen IaaS, PaaS en SaaS uit.",
+            "bloom": "understand",
+            "packTags": {
+              "activiteiten": [
+                "Analyseren"
+              ],
+              "beheersingsniveau": 1
+            }
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Hoorcollege cloudmodellen",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a2",
+            "title": "Hoorcollege kosten en risico's van cloud",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a3",
+            "title": "Hoorcollege cloudstrategie",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a4",
+            "title": "Zelfstudie literatuur cloud computing",
+            "week": 4,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefentoets cloudbegrippen",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "understand"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Kennistoets cloud computing (meerkeuze)",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 100,
+            "hours": 20
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "lo1",
+            "t2",
+            "a2",
+            "a3",
+            "a4"
+          ],
+          "anyOf": [
+            "opdrachtgever",
+            "casus",
+            "advies",
+            "adviseren",
+            "praktijk",
+            "beroep",
+            "organisatie",
+            "klant"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pp-level-too-low",
+      "agent": "professional-practice",
+      "locale": "nl",
+      "description": "L1 staat op beheersingsniveau 3 (zelfstandig, complex), maar opdracht en toets zijn een stap-voor-stap-handleiding met een kant-en-klare casus.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je ontwerpt en realiseert een webapplicatie voor een opdrachtgever.",
+            "bloom": "create",
+            "packTags": {
+              "activiteiten": [
+                "Ontwerpen",
+                "Realiseren"
+              ],
+              "architectuurlagen": [
+                "Software"
+              ],
+              "beheersingsniveau": 3
+            }
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Instructie webframework",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Tutorial: bouw de voorbeeld-todo-app stap voor stap volgens de handleiding",
+            "week": 2,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 30
+          },
+          {
+            "id": "a3",
+            "title": "Feedbackuur",
+            "week": 4,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Codereview tutorial",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Eindopdracht: breid de todo-app uit met de drie voorgeschreven functies uit de handleiding",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              }
+            ],
+            "weight": 100,
+            "hours": 40
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "lo1",
+            "a2",
+            "t2"
+          ],
+          "anyOf": [
+            "niveau 3",
+            "beheersingsniveau",
+            "zelfstandig",
+            "complex",
+            "open",
+            "stap voor stap",
+            "handleiding",
+            "voorgeschreven",
+            "opdrachtgever"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pp-clean",
+      "agent": "professional-practice",
+      "locale": "nl",
+      "description": "Studenten adviseren een echte opdrachtgever, op een niveau dat bij het pakket past. Geen waarschuwingen verwacht.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je adviseert een mkb-organisatie over een passende cloudoplossing.",
+            "bloom": "evaluate",
+            "packTags": {
+              "activiteiten": [
+                "Adviseren"
+              ],
+              "architectuurlagen": [
+                "Infrastructuur"
+              ],
+              "beheersingsniveau": 2
+            }
+          },
+          {
+            "id": "lo2",
+            "text": "Je analyseert de huidige IT-infrastructuur van een organisatie.",
+            "bloom": "analyze",
+            "packTags": {
+              "activiteiten": [
+                "Analyseren"
+              ],
+              "architectuurlagen": [
+                "Infrastructuur"
+              ],
+              "beheersingsniveau": 2
+            }
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Instructie cloudmodellen en kostenmodellen",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Kennismaking met de opdrachtgever en intake van de praktijkvraag",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Projectopdracht: analyse van de infrastructuur bij de opdrachtgever",
+            "week": 3,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 30
+          },
+          {
+            "id": "a4",
+            "title": "Projectopdracht: cloudadvies voor de opdrachtgever, met begeleiding",
+            "week": 5,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Tussenpresentatie analyse aan de opdrachtgever met feedback",
+            "week": 4,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "analyze"
+              }
+            ],
+            "hours": 4
+          },
+          {
+            "id": "t2",
+            "title": "Adviesrapport en adviesgesprek met de opdrachtgever",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "evaluate"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "analyze"
+              }
+            ],
+            "weight": 100,
+            "hours": 30
+          }
+        ]
+      },
+      "maxWarnings": 0
     }
   ]
 }

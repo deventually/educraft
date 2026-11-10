@@ -53,6 +53,18 @@ This reviewer does not ban AI and does not recommend AI detectors. It is fine wi
 
 This reviewer is off by default. Tick it if your course has summative work made at home.
 
+## Professional practice
+
+The Professional practice reviewer looks at your course like a teacher with years of experience in the profession. The question is: do students practise and show what a starting professional does, at the level your subject pack asks?
+
+- **A professional situation:** do students practise a professional activity from an outcome (such as analysing, advising or designing) on a case, client or practice question, and not just in a lecture?
+- **An assessment that resembles the work:** for the grade, does the student make something a professional also makes, such as advice, a design or a product?
+- **The proficiency level:** do the independence and complexity of assignment and assessment fit the level from your pack? A step-by-step assignment does not belong at level 3; at level 1 a guided assignment is right.
+
+This reviewer leans on the tags from your subject pack for each outcome, such as the professional activities and the proficiency level. If you did not fill them in, it says so and only checks whether practice and assessment resemble the profession. How you word the assessment it leaves to the Assessment expert; build-up and study load to the Designer.
+
+This reviewer is off by default. Tick it if your course prepares for a profession with a subject pack.
+
 ## What a reviewer sees
 
 A reviewer sees only this one course, as you filled it in:

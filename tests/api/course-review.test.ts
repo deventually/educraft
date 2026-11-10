@@ -449,19 +449,15 @@ describe("the teacher's own choice of hats", () => {
     expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
       "designer",
     ]);
-    expect(await choices.getAgentChoices("teacher-r")).toEqual({
-      "assessment-expert": "off",
-      designer: "on",
-      "ai-resilience": "off",
-    });
+    expect(await choices.getAgentChoices("teacher-r")).toEqual(
+      Object.fromEntries(AGENTS.map((a) => [a.id, a.id === "designer" ? "on" : "off"])),
+    );
     const panel = (await load(c.id)).review;
     expect(panel?.agents.map((a) => a.agentId)).toEqual(["designer"]);
-    expect(panel?.choices.map((a) => [a.agentId, a.chosen])).toEqual([
-      ["assessment-expert", false],
-      ["designer", true],
-      // A newer reviewer stays off until the teacher ticks it.
-      ["ai-resilience", false],
-    ]);
+    // Every other reviewer, the newer ones too, stays off until the teacher ticks it.
+    expect(panel?.choices.map((a) => [a.agentId, a.chosen])).toEqual(
+      AGENTS.map((a) => [a.id, a.id === "designer"]),
+    );
   });
 
   it("uses the remembered choice for a review without the choice boxes", async () => {
@@ -486,7 +482,7 @@ describe("the teacher's own choice of hats", () => {
     expect(generate).not.toHaveBeenCalled();
     const panel = (await load(c.id)).review;
     expect(panel?.agents).toEqual([]);
-    expect(panel?.choices.map((a) => a.chosen)).toEqual([false, false, false]);
+    expect(panel?.choices.map((a) => a.chosen)).toEqual(AGENTS.map(() => false));
   });
 
   it("never runs or offers a hat the admin switched off, even when the teacher ticks it", async () => {
@@ -503,10 +499,9 @@ describe("the teacher's own choice of hats", () => {
     expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
       "assessment-expert",
     ]);
-    expect((await load(c.id)).review?.choices.map((a) => a.agentId)).toEqual([
-      "assessment-expert",
-      "ai-resilience",
-    ]);
+    expect((await load(c.id)).review?.choices.map((a) => a.agentId)).toEqual(
+      AGENTS.filter((a) => a.id !== "designer").map((a) => a.id),
+    );
   });
 
   it("counts open advice only of the hats the teacher chose", async () => {

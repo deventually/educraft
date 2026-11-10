@@ -2,6 +2,7 @@
 // and per hat On / Off on the instance. An untouched hat is on.
 import { beforeAll, describe, expect, it } from "vitest";
 import { signInAs, signedRequest } from "../helpers/session";
+import { AGENTS } from "~/lib/agents/registry";
 
 process.env.DATABASE_URL = "file::memory:";
 
@@ -37,11 +38,7 @@ describe("admin.agents", () => {
   it("lists every hat as on and the main switch at its default", async () => {
     const data = await load();
     expect(data.main).toBe("on");
-    expect(data.agents.map((a) => [a.id, a.stand])).toEqual([
-      ["assessment-expert", "on"],
-      ["designer", "on"],
-      ["ai-resilience", "on"],
-    ]);
+    expect(data.agents.map((a) => [a.id, a.stand])).toEqual(AGENTS.map((a) => [a.id, "on"]));
     expect(data.agents[0]!.role.nl).toBe("Toetsdeskundige");
     expect(data.agents[0]!.watches).toEqual(["course", "generation"]);
   });

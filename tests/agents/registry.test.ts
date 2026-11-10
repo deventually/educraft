@@ -23,7 +23,12 @@ function valid(): Agent {
 
 describe("agent registry (P21.1)", () => {
   it("has the reviewers in order, each bilingual and valid", () => {
-    expect(AGENTS.map((a) => a.id)).toEqual(["assessment-expert", "designer", "ai-resilience"]);
+    expect(AGENTS.map((a) => a.id)).toEqual([
+      "assessment-expert",
+      "designer",
+      "ai-resilience",
+      "professional-practice",
+    ]);
     expect(validateAgents(AGENTS)).toEqual([]);
   });
 
@@ -37,6 +42,7 @@ describe("agent registry (P21.1)", () => {
       "assessment-expert",
       "designer",
       "ai-resilience",
+      "professional-practice",
     ]);
     expect(agentsWatching("generation").map((a) => a.id)).toEqual(["assessment-expert"]);
   });
@@ -44,9 +50,19 @@ describe("agent registry (P21.1)", () => {
   it("leaves out the hats an admin switched off; an untouched hat is on", () => {
     const ids = (stands: Record<string, "on" | "off">) =>
       activeAgents("course", stands).map((a) => a.id);
-    expect(ids({})).toEqual(["assessment-expert", "designer", "ai-resilience"]);
-    expect(ids({ designer: "off" })).toEqual(["assessment-expert", "ai-resilience"]);
-    expect(ids({ "ai-resilience": "off", "assessment-expert": "off" })).toEqual(["designer"]);
+    expect(ids({})).toEqual([
+      "assessment-expert",
+      "designer",
+      "ai-resilience",
+      "professional-practice",
+    ]);
+    expect(ids({ designer: "off", "professional-practice": "off" })).toEqual([
+      "assessment-expert",
+      "ai-resilience",
+    ]);
+    expect(
+      ids({ "ai-resilience": "off", "assessment-expert": "off", "professional-practice": "off" }),
+    ).toEqual(["designer"]);
   });
 });
 

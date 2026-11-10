@@ -54,6 +54,18 @@ describe("AI resilience reviewer", () => {
   }
 });
 
+describe("professional practice reviewer", () => {
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: reads the pack's professional activities and level, and stays off the other reviewers' ground`, () => {
+      const p = getRuntimePrompt("agent-professional-practice@v1", locale);
+      for (const word of locale === "nl"
+        ? ["beroepsactiviteiten", "beheersingsniveau", "Toetsdeskundige", "Ontwerper"]
+        : ["professional activities", "proficiency level", "Assessment expert", "Designer"])
+        expect(p, word).toContain(word);
+    });
+  }
+});
+
 describe("linked work (P21.7)", () => {
   it("every hat that watches generations names the linked-work tag; v1 stays registered", () => {
     for (const agent of AGENTS.filter((a) => a.watches.includes("generation")))
