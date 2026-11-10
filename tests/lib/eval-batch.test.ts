@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { THINKING_HEADROOM } from "~/lib/ai/models";
 import {
+  anthropicSubmit,
   type BatchOutcome,
   type BatchRequest,
   createBatchingProvider,
@@ -130,5 +131,47 @@ describe("eval batches", () => {
     const [bad, good] = await Promise.allSettled([call(), call()]);
     expect(bad.status).toBe("rejected");
     expect(good.status === "fulfilled" && good.value.text).toBe("ok");
+  });
+
+  // The SDK round trip with a fake fetch: create the batch, poll it, read the JSONL results.
+  // Guards the SDK's batch API across major versions without an API key.
+  it("submits through the Anthropic SDK and reads the batch results back", async () => {
+    const calls: string[] = [];
+    const batch = (status: string) => ({
+      id: "msgbatch_1",
+      type: "message_batch",
+      processing_status: status,
+      request_counts: { processing: 0, succeeded: 1, errored: 0, canceled: 0, expired: 0 },
+      results_url: "https://api.anthropic.com/v1/messages/batches/msgbatch_1/results",
+    });
+    const json = (body: unknown) =>
+      new Response(JSON.stringify(body), { headers: { "content-type": "application/json" } });
+    const fakeFetch = async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input instanceof Request ? input.url : input);
+      calls.push(`${init?.method ?? "GET"} ${new URL(url).pathname}`);
+      if (url.endsWith("/results")) {
+        const line = {
+          custom_id: "r1",
+          result: {
+            type: "succeeded",
+            message: {
+              content: [{ type: "text", text: "Hoi" }],
+              stop_reason: "end_turn",
+              usage: { input_tokens: 3, output_tokens: 1 },
+            },
+          },
+        };
+        return new Response(`${JSON.stringify(line)}\n`, {
+          headers: { "content-type": "application/binary" },
+        });
+      }
+      return json(batch(init?.method === "POST" ? "in_progress" : "ended"));
+    };
+    const submit = anthropicSubmit("test-key", 0, fakeFetch as typeof fetch);
+    const params = toBatchParams({ model: "claude-sonnet-5-5", system: "S", messages: [] });
+    const out = await submit([{ custom_id: "r1", params }]);
+    expect(calls[0]).toBe("POST /v1/messages/batches");
+    expect(calls).toContain("GET /v1/messages/batches/msgbatch_1");
+    expect(out.get("r1")).toMatchObject({ ok: true, text: "Hoi" });
   });
 });
