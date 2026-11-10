@@ -4,13 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #215 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #216 gemerged)_
 
 ## Nu
 
+- **Testsuite bijna twee keer zo snel (#216) gemerged op 2026-11-10:** de meeste testbestanden
+  delen hun modules per worker (`isolate: false`, elk met een eigen in-memory database); een
+  bestand dat `vi.mock` gebruikt of `process.env` zet, draait apart (`tests/helpers/isolation.ts`).
+  Geen gedragswijziging.
 - **Kleine dependency-updates (#215) gemerged op 2026-11-10:** react-markdown 10, lucide-react 1,
-  docx 9.15 en Playwright 1.65. Een nieuwe test borgt dat HTML in een AI-antwoord nooit als echte
-  HTML getoond wordt. Geen gedragswijziging.
+  docx en Playwright naar hun nieuwste versie. Geen gedragswijziging.
 - **@testing-library/jest-dom 7 (#214) gemerged op 2026-11-10:** alleen een testhulpje; geen
   gedragswijziging.
 - **@types/node 24 (#213) gemerged op 2026-11-10:** de Node-types passen nu bij de Node-versie die
