@@ -98,7 +98,7 @@ describe("nightly mutation workflow", () => {
   });
 
   it("keeps the HTML report as an artifact, also when the run fails", () => {
-    expect(workflow).toMatch(/uses: actions\/upload-artifact@v4\s*\n\s+if: always\(\)/);
+    expect(workflow).toMatch(/uses: actions\/upload-artifact@v\d+\s*\n\s+if: always\(\)/);
     expect(workflow).toContain("path: reports/mutation/");
   });
 });
