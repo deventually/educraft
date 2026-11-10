@@ -4,13 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #212 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #215 gemerged)_
 
 ## Nu
 
-- **Stryker onder TypeScript 7 (#212) gemerged op 2026-11-10:** Stryker krijgt geen tsconfig meer
-  om te herschrijven (TypeScript 7 heeft daar geen JS-API voor), zodat de nachtelijke
-  mutatiemeting weer draait. Geen gedragswijziging.
+- **Kleine dependency-updates (#215) gemerged op 2026-11-10:** react-markdown 10, lucide-react 1,
+  docx en Playwright naar hun nieuwste versie. Geen gedragswijziging.
+- **@testing-library/jest-dom 7 (#214) gemerged op 2026-11-10:** alleen een testhulpje; geen
+  gedragswijziging.
+- **@types/node 24 (#213) gemerged op 2026-11-10:** de Node-types passen nu bij de Node-versie die
+  we draaien (24); een test houdt die twee gelijk. Geen gedragswijziging.
+- **Stryker draait weer onder TypeScript 7 (#212) gemerged op 2026-11-10:** Stryker wilde de
+  tsconfig herschrijven via de JS-API die TypeScript 7 niet meer heeft; `stryker.config.json` wijst
+  nu naar een tsconfig die niet bestaat, zodat die stap overgeslagen wordt. De 5 moderate
+  audit-meldingen zitten in Stryker zelf en wachten op een nieuwe Stryker-versie.
 - **TypeScript 7 (#211) gemerged op 2026-11-10:** de derde versiesprong uit #189; `npm run typecheck`
   duurt nu een paar seconden. TypeScript 7 heeft geen JS-API meer, dus de importscanner in
   `tests/architecture.test.ts` gebruikt `oxc-parser`. Geen gedragswijziging.

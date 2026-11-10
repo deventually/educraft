@@ -21,6 +21,14 @@ describe("dev server config", () => {
     },
   );
 
+  it("@types/node matches the pinned Node major (Volta)", () => {
+    const own = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")) as {
+      volta: { node: string };
+    };
+    const nodeMajor = own.volta.node.split(".")[0];
+    expect(pkg("@types/node").version.split(".")[0]).toBe(nodeMajor);
+  });
+
   it("sets no v8_ future flags (they are the default on v8)", () => {
     const flags = Object.keys((config as { future?: object }).future ?? {});
     expect(flags.filter((f) => f.startsWith("v8_"))).toEqual([]);
