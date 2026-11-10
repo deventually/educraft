@@ -16,6 +16,7 @@ const config = JSON.parse(read("stryker.config.json")) as {
   mutate: string[];
   vitest?: { configFile?: string };
   reporters: string[];
+  tsconfigFile?: string;
 };
 const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
 const workflow = read(".github/workflows/mutation.yml");
@@ -27,6 +28,17 @@ const mutated = new Set(
 );
 
 describe("Stryker config", () => {
+  // Stryker rewrites `extends`/`references` in the tsconfig it is pointed at, through the
+  // TypeScript JS API, which TypeScript 7 no longer ships. Our tsconfig has neither, so Stryker is
+  // pointed at a file that does not exist and skips the rewrite.
+  it("does not hand Stryker a tsconfig to rewrite (TypeScript 7 has no JS API)", () => {
+    expect(config.tsconfigFile).toBeDefined();
+    expect(globSync(config.tsconfigFile ?? "tsconfig.json", { cwd: root })).toEqual([]);
+    const tsconfig = JSON.parse(read("tsconfig.json")) as Record<string, unknown>;
+    expect(tsconfig.extends).toBeUndefined();
+    expect(tsconfig.references).toBeUndefined();
+  });
+
   it("runs the vitest suite with per-test coverage, so each mutant only runs the tests that reach it", () => {
     expect(config.testRunner).toBe("vitest");
     expect(config.coverageAnalysis).toBe("perTest");

@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #210 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #211 gemerged)_
 
 ## Nu
 
+- **TypeScript 7 (#211) gemerged op 2026-11-10:** de derde versiesprong uit #189; `npm run typecheck`
+  duurt nu een paar seconden. TypeScript 7 heeft geen JS-API meer, dus de importscanner in
+  `tests/architecture.test.ts` gebruikt `oxc-parser`. Geen gedragswijziging.
 - **Biome 2.6 (#210) gemerged op 2026-11-10:** de tweede versiesprong uit #189. Markdown (de
   prompts met de tekst van het boek en de helppagina's) blijft buiten Biome; de nieuwe regel
   `noComponentHookFactories` staat alleen in `tests/` uit, voor route-stubs. Geen gedragswijziging.
