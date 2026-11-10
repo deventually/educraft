@@ -52,7 +52,7 @@ export const AGENTS: Agent[] = [
   {
     id: "student",
     role: { nl: "Student", en: "Student" },
-    promptId: "agent-student@v1",
+    promptId: "agent-student@v2",
     watches: ["course"],
     focus: {
       nl: "Loopt je cursus week voor week door zoals een student: is duidelijk wat er moet, vallen deadlines niet samen, komt feedback op tijd?",

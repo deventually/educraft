@@ -2173,7 +2173,7 @@
       "id": "st-clean",
       "agent": "student",
       "locale": "nl",
-      "description": "Gespreide deadlines, feedback telkens een paar weken voor de toets, elke week iets te doen. Geen waarschuwingen verwacht.",
+      "description": "Tien weken met elke week iets te doen, gespreide deadlines en feedback telkens twee weken vóór de toets. Geen waarschuwingen verwacht.",
       "course": {
         "ec": 5,
         "outcomes": [
@@ -2207,12 +2207,22 @@
             "outcomeIds": [
               "lo1"
             ],
-            "hours": 30
+            "hours": 20
           },
           {
             "id": "a3",
-            "title": "Les marketingplan",
+            "title": "Werkcollege: begeleid werken aan je onderzoeksrapport",
             "week": 4,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Les marketingplan",
+            "week": 6,
             "kind": "lesson",
             "outcomeIds": [
               "lo2"
@@ -2220,20 +2230,40 @@
             "hours": 4
           },
           {
-            "id": "a4",
+            "id": "a5",
             "title": "Opdracht: marketingplan schrijven op basis van je onderzoek",
-            "week": 5,
+            "week": 6,
             "kind": "assignment",
             "outcomeIds": [
               "lo2"
             ],
-            "hours": 40
+            "hours": 24
+          },
+          {
+            "id": "a6",
+            "title": "Werkcollege: begeleid werken aan je marketingplan",
+            "week": 7,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a7",
+            "title": "Werkcollege: feedback op je concept verwerken",
+            "week": 9,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
           }
         ],
         "assessments": [
           {
             "id": "t1",
-            "title": "Peerfeedback op het concept-onderzoeksrapport",
+            "title": "Peerfeedback op je concept-onderzoeksrapport",
             "week": 3,
             "kind": "formative",
             "coverage": [
@@ -2247,7 +2277,7 @@
           {
             "id": "t2",
             "title": "Inleveren onderzoeksrapport marktonderzoek",
-            "week": 4,
+            "week": 5,
             "kind": "summative",
             "coverage": [
               {
@@ -2260,8 +2290,8 @@
           },
           {
             "id": "t3",
-            "title": "Feedbackronde concept-marketingplan",
-            "week": 6,
+            "title": "Feedbackronde op je volledige concept-marketingplan",
+            "week": 8,
             "kind": "formative",
             "coverage": [
               {
@@ -2274,7 +2304,7 @@
           {
             "id": "t4",
             "title": "Inleveren marketingplan",
-            "week": 8,
+            "week": 10,
             "kind": "summative",
             "coverage": [
               {
