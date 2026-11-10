@@ -3,6 +3,7 @@ import type { Messages } from "../nl";
 export const nav: Messages["nav"] = {
   about: "About",
   admin: "Admin",
+  assessmentModels: "Assessment models",
   closeMenu: "Close menu",
   courses: "Courses",
   help: "Help",

@@ -162,6 +162,16 @@ export const rubrics = sqliteTable("rubrics", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+/** A teacher's assessment model (`AssessmentModelDataSchema` as JSON), scoped to its owner. */
+export const assessmentModels = sqliteTable("assessment_models", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  dataJson: text("data_json").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 /**
  * Closed rubric fill-ins (brief P23.3, BESLUIT-2026-11-04-8): only which level was chosen per
  * criterion (`levelsJson`, `RubricScoreSchema`) and the month of closing. On purpose there is no

@@ -6,6 +6,7 @@ import { adminErrors } from "./adminErrors";
 import { agents } from "./agents";
 import { auditLog } from "./auditLog";
 import { aiNotice } from "./aiNotice";
+import { assessmentModels } from "./assessmentModels";
 import { auth } from "./auth";
 import { calendar } from "./calendar";
 import { chat } from "./chat";
@@ -58,6 +59,7 @@ export const en: Messages = {
   agents,
   aiNotice,
   appName: "LimeOnIt",
+  assessmentModels,
   auditLog,
   auth,
   calendar,

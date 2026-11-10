@@ -9,8 +9,8 @@ import type { ContextProfile } from "~/lib/context/types";
 /**
  * Stage- & afstudeerbeoordeling: a docent-facing one-shot tool that drafts
  * feedback + a provisional verdict for internship/thesis documents against a
- * (replaceable) assessment framework. Engine-neutral: HBO-i nakijkmodel ships
- * as the default framework, but any study can paste its own.
+ * (replaceable) assessment framework. Engine-neutral: the framework comes from an
+ * assessment model (own or starter), and any study can paste its own.
  */
 describe("tool: stage-assessment", () => {
   it("registers and resolves by slug", () => {
@@ -57,15 +57,15 @@ describe("tool: stage-assessment", () => {
     expect(weeks?.required).not.toBe(true);
   });
 
-  it("is generic: the assessment framework + scale are editable inputs with HBO-i defaults", () => {
+  it("is generic: the assessment framework + scale are editable inputs, filled from a model", () => {
     const tool = getToolBySlug("stage-assessment")!;
     const framework = tool.inputs.find((f) => f.name === "assessmentFramework");
     const scale = tool.inputs.find((f) => f.name === "assessmentScale");
     expect(framework?.kind).toBe("textarea");
     expect(scale?.kind).toBe("textarea");
-    // HBO-i nakijkmodel ships as a replaceable default.
-    expect(String(framework?.defaultValue ?? "")).toMatch(/succescriteri|Analyseren|SC1/i);
-    expect(String(scale?.defaultValue ?? "")).toMatch(/onvoldoende/i);
+    // No programme's rubric by default: the HBO-i model is a starter the teacher picks.
+    expect(framework?.defaultValue).toBeUndefined();
+    expect(scale?.defaultValue).toBeUndefined();
   });
 
   it("accepts an optional company-mentor evaluation and optional figures", () => {

@@ -1,7 +1,6 @@
 import type { Tool } from "../types";
-import { STAGE_ASSESSMENT_PROMPT_V2 } from "~/lib/prompts/stage-assessment@v2.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V3 } from "~/lib/prompts/stage-assessment@v3.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
-import hboiNakijkmodel from "./presets/hbo-i-stage-nakijkmodel.md?raw";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
 const DOC = { nl: "Document", en: "Document" };
@@ -9,18 +8,14 @@ const CONTEXT = { nl: "Context", en: "Context" };
 const FRAMEWORK = { nl: "Beoordelingskader", en: "Assessment framework" };
 const INTERNSHIP = { nl: "Stage en afstuderen", en: "Internship and graduation" };
 
-const SCALE_DEFAULT = `Schaal: Onvoldoende (O) = 0 punten · Voldoende (V) = 6 punten · Goed (G) = 10 punten.
-Slaagregel: zodra één onderdeel/succescriterium Onvoldoende is, is het eindresultaat Onvoldoende (geen middeling).
-HBO-i stage: Analyseren wordt beoordeeld met O/V/G, Realiseren met een afgerond cijfer; beide wegen 50%. Voor een voldoende stage is het eindcijfer minimaal 6, is het stagedossier compleet en is geen enkel onderdeel Onvoldoende.
-Vervang deze schaal door die van je eigen opleiding indien je een andere studie beoordeelt.`;
-
 /**
  * Stage- & afstudeerbeoordeling — an original LimeOnIt instrument.
  *
  * Deep, locale-neutral engine; everything programme-specific lives in the
- * editable `assessmentFramework` + `assessmentScale` inputs (HBO-i nakijkmodel
- * ships as the default, replaceable for any study). No control-flow branching:
- * capability grows by swapping the framework data, not the engine.
+ * editable `assessmentFramework` + `assessmentScale` inputs, which start empty and are
+ * filled from an assessment model (the teacher's own per document type, or a starter such
+ * as the HBO-i internship model). No control-flow branching: capability grows by
+ * swapping the framework data, not the engine.
  */
 export const stageAssessment: Tool = {
   id: "stage-assessment",
@@ -61,12 +56,14 @@ export const stageAssessment: Tool = {
   },
   attribution: originalAttribution({
     source: {
-      nl: "Origineel LimeOnIt-instrument; standaardkader gebaseerd op het stage-nakijkmodel van de opleiding Informatica (HBO-i).",
-      en: "Original LimeOnIt instrument; default framework based on the Informatica internship rubric (HBO-i).",
+      nl: "Origineel LimeOnIt-instrument; startmodellen, waaronder het stage-nakijkmodel van de opleiding Informatica (HBO-i).",
+      en: "Original LimeOnIt instrument; starter models, including the Informatica internship rubric (HBO-i).",
     },
     evaluatedWith: { nl: "Claude Sonnet 5.5", en: "Claude Sonnet 5.5" },
   }),
   usesContextProfile: true,
+  // The framework and scale come from an assessment model, chosen by the document type.
+  assessmentModels: { byField: "documentType" },
   assistiveGrading: true,
   defaultOutputLanguage: "nl",
   defaultModel: DEFAULT_MODEL,
@@ -198,23 +195,34 @@ export const stageAssessment: Tool = {
       kind: "textarea",
       required: true,
       rows: 12,
-      defaultValue: hboiNakijkmodel,
+      prefillFromAssessmentModel: { source: "framework" },
+      placeholder: {
+        nl: "Kies hierboven een beoordelingsmodel, of plak hier je eigen rubric of succescriteria.",
+        en: "Pick an assessment model above, or paste your own rubric or success criteria here.",
+      },
       help: {
-        nl: "Standaard het HBO-i stage-nakijkmodel. Beoordeel je een essay, rapport of ander werk, vervang het dan door je eigen rubric of succescriteria — dit kader is leidend voor het oordeel.",
-        en: "Defaults to the HBO-i internship rubric. For an essay, report or other work, replace it with your own rubric or success criteria — this framework drives the judgement.",
+        nl: "Dit kader is leidend voor het oordeel. Een paar heldere succescriteria volstaan. Je eigen modellen per documenttype beheer je onder Beoordelingsmodellen.",
+        en: "This framework drives the judgement. A few clear success criteria are enough. Manage your own models per document type under Assessment models.",
       },
       group: FRAMEWORK,
     },
     {
       name: "assessmentScale",
-      label: { nl: "Beoordelingsschaal en slaagregels", en: "Grading scale and pass rules" },
+      label: {
+        nl: "Beoordelingsschaal en slaagregels (optioneel)",
+        en: "Grading scale and pass rules (optional)",
+      },
       kind: "textarea",
-      required: true,
+      required: false,
       rows: 5,
-      defaultValue: SCALE_DEFAULT,
+      prefillFromAssessmentModel: { source: "scale" },
+      placeholder: {
+        nl: "Bijv. Onvoldoende / Voldoende / Goed per criterium; één onvoldoende = geheel onvoldoende.",
+        en: "E.g. Insufficient / Sufficient / Good per criterion; one fail = overall fail.",
+      },
       help: {
-        nl: "Inclusief eventuele knock-outregel (bijv. 'één onvoldoende = geheel onvoldoende'). Pas aan voor je eigen opleiding.",
-        en: "Including any knock-out rule (e.g. 'one fail = overall fail'). Adjust for your own programme.",
+        nl: "Inclusief eventuele knock-outregel. Laat je dit leeg, dan geeft de tool alleen feedback en geen oordeel.",
+        en: "Including any knock-out rule. Leave it empty for feedback only, without a judgement.",
       },
       group: FRAMEWORK,
     },
@@ -256,7 +264,7 @@ export const stageAssessment: Tool = {
     {
       id: "assessment",
       name: { nl: "Concept-beoordeling", en: "Draft assessment" },
-      systemPromptId: STAGE_ASSESSMENT_PROMPT_V2.id,
+      systemPromptId: STAGE_ASSESSMENT_PROMPT_V3.id,
       output: {
         kind: "structured-sections",
         exportAs: "table",

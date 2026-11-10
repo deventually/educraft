@@ -27,6 +27,7 @@ export function SiteFooter({
         { to: "/tools", label: t.nav.tools },
         { to: "/projects", label: t.nav.projects },
         { to: "/context-profiles", label: t.nav.settings },
+        { to: "/assessment-models", label: t.nav.assessmentModels },
       ],
     },
     {

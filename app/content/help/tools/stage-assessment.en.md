@@ -9,7 +9,7 @@ Use it to draft a fast, consistent first assessment, to check your own judgement
 1. **Upload the document** (PDF or Word) you want to assess, or **paste the text**. When you upload, the tool extracts the text into the field so you can review and edit it before generating. You can then view (click to enlarge) and tick the figures from Word and PDF under **Figures for the assessment**; if one is missing, upload it yourself; nothing is sent by default, because images are not anonymised. Tables come along as text. Is it a scan (images only)? Then the tool finds no text and you paste it yourself.
 2. **Choose document type, track, study year and duration.** The track (UX/Software/Data) determines which variant of the success criteria applies.
 3. **Optionally add notes about this submission.** State what does or doesn't count, or what is assessed later or separately — for example: "only the research and internship reports are assessed now; the work product follows and is graded separately via the final presentation." The assistant follows these notes and leaves the stated parts out of the judgement.
-4. **Check the assessment framework.** The HBO-i internship rubric (level 2) is pre-filled by default. Assessing a different programme? Edit or fully replace the framework and scale — this framework drives the judgement.
+4. **Pick an assessment model.** If you have your own model for this document type under **Assessment models**, the framework is already filled in. Otherwise pick an own model or a starter model (for example HBO-i internship Informatica, graduation thesis or essay), or paste your own framework. The framework is required and drives the judgement. The scale is optional: leave it empty for feedback only, without a verdict.
 5. **Optionally add the company mentor's evaluation.** It's used as supporting evidence and checked for completeness.
 6. **Generate.** You get: a summary draft verdict (with the pass rule applied), evidence per success criterion with literal quotes, concrete improvement points, draft feedback for the student, and caveats.
 
@@ -25,4 +25,4 @@ Use it to draft a fast, consistent first assessment, to check your own judgement
 - **Always read the draft critically** before adopting anything. The tool is an aid, not an examiner.
 - **Privacy (GDPR):** student documents go to the AI model. Check that this fits your programme's agreements.
 
-> Original LimeOnIt instrument. Default framework based on the Informatica internship rubric (HBO-i, level 2). Rationale: criterion-referenced assessment (Single Point Rubric) and effective feedback (Hattie & Timperley, 2007; Sadler, 1989).
+> Original LimeOnIt instrument. Starter models, including one based on the Informatica internship rubric (HBO-i, level 2). Rationale: criterion-referenced assessment (Single Point Rubric) and effective feedback (Hattie & Timperley, 2007; Sadler, 1989).

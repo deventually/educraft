@@ -30,6 +30,7 @@ import { TEST_ANALYSIS_PROMPT } from "./test-analysis@v1.prompt";
 import { SCAFFOLDING_FEEDBACK_PROMPT } from "./scaffolding-feedback.prompt";
 import { STAGE_ASSESSMENT_PROMPT } from "./stage-assessment@v1.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V3 } from "./stage-assessment@v3.prompt";
 import {
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
@@ -90,6 +91,7 @@ const ALL: PromptDef[] = [
   SCAFFOLDING_FEEDBACK_PROMPT,
   STAGE_ASSESSMENT_PROMPT,
   STAGE_ASSESSMENT_PROMPT_V2,
+  STAGE_ASSESSMENT_PROMPT_V3,
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
   TEST_ITEMS_ITEMS_V2,

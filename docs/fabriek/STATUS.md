@@ -4,15 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #235 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #236 gemerged)_
 
 ## Nu
 
-- **Reviewer AI-bestendigheid (#235) gemerged op 2026-11-10:** een derde reviewer in het
-  reviewteam kijkt of summatieve toetsen laten zien wat de student zelf kan, nu AI werk kan
-  maken. Hij leunt op het veld *onder toezicht* (#233), verbiedt AI niet en noemt geen
-  detectors. Voor docenten standaard uit; eigen stuk op `/help/review-team`. PR 3 van het plan
-  "Nieuwe rolagenten en examencommissie".
+- **Beoordelingsmodellen per documenttype (#236) gemerged op 2026-11-10:** op de nieuwe pagina
+  `/assessment-models` legt een docent eigen modellen vast: per documenttype een kader en een
+  optionele schaal, zelf geschreven of gekopieerd uit een startmodel (HBO-i-stage,
+  afstudeerscriptie, onderzoeks- of ander verslag, essay). Bij *Stagebeoordeling* vult het eigen
+  model zich vanzelf in; zonder schaal geeft de tool alleen feedback, zonder oordeel
+  (`stage-assessment@v3`). Migratie (`npm run db:migrate`).
+- **Reviewer AI-bestendigheid (#235) gemerged op 2026-11-10:** het reviewteam heeft een derde
+  reviewer die kijkt of het cijfer laat zien wat de student zelf kan, nu AI een verslag of code
+  kan schrijven. Hij gebruikt *onder toezicht / zonder toezicht* uit #233, verbiedt AI niet en
+  raadt geen detectors aan. Voor docenten staat hij standaard uit. Geen migratie.
 - **Help-sectie opnieuw ingedeeld (#234) gemerged op 2026-11-10:** `/help` groepeert de
   onderwerpen naar wat een docent wil doen, toont tools per onderwijsdoel en heeft een zoekvak dat
   ook koppen vindt. Nieuwe onderwerpen (werken met een tool, eerder werk en export, hulpmiddelen,

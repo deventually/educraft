@@ -48,6 +48,8 @@ describe("GeneratorView with student work", () => {
       screen.getByRole("textbox", { name: /Document to assess/i }),
       "Jan de Vries liep stage bij SportShop BV. Bel 06-12345678.",
     );
+    // The framework starts empty now: an assessment model or the teacher fills it in.
+    await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
     await user.click(screen.getByRole("button", { name: /^generate$/i }));
 
     // Nothing is sent before the review.

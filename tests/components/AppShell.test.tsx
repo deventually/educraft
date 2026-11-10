@@ -243,7 +243,7 @@ describe("AppShell menu of four (P27.3)", () => {
       within(account!)
         .getAllByRole("link")
         .map((l) => l.getAttribute("href")),
-    ).toEqual(["/account", "/context-profiles"]);
+    ).toEqual(["/account", "/context-profiles", "/assessment-models"]);
   });
 
   it("moves 'Onderwijscontext' to the account menu", async () => {
@@ -257,6 +257,10 @@ describe("AppShell menu of four (P27.3)", () => {
       "/context-profiles",
     );
     expect(within(menu).getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
+    expect(within(menu).getByRole("link", { name: "Beoordelingsmodellen" })).toHaveAttribute(
+      "href",
+      "/assessment-models",
+    );
   });
 
   it("makes Help a question mark at the top right, and keeps it in the footer", async () => {
@@ -281,6 +285,10 @@ describe("AppShell menu of four (P27.3)", () => {
     expect(within(footer).getByRole("link", { name: "Onderwijscontext" })).toHaveAttribute(
       "href",
       "/context-profiles",
+    );
+    expect(within(footer).getByRole("link", { name: "Beoordelingsmodellen" })).toHaveAttribute(
+      "href",
+      "/assessment-models",
     );
   });
 
