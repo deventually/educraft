@@ -34,7 +34,7 @@ Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOn
 
 ## Laat beoordelen
 
-Onder **Beoordeling** op de cursuspagina laat je twee kritische collega's je cursus nakijken: een **Toetsdeskundige** (toetsmatrijs, Bloom-spreiding, formulering, weging) en een **Ontwerper** (constructive alignment, activerend onderwijs, studielast). Zij zijn AI en draaien op het model dat je kiest.
+Onder **Beoordeling** op de cursuspagina laat je twee kritische collega's je cursus nakijken: een **Toetsdeskundige** (toetsmatrijs, Bloom-spreiding, formulering, weging) en een **Ontwerper** (constructive alignment, activerend onderwijs, studielast). Zij zijn AI en draaien op het model dat je kiest. Je kiest zelf welke petten meekijken; wat elke pet doet, lees je bij [Rolagenten](/help/role-agents).
 
 - Elk advies wijst naar een leeruitkomst, activiteit of toets uit je eigen cursus, of naar de cursus als geheel.
 - Per advies kies je **Akkoord** of **Niet akkoord**, met een reden als je wilt. Akkoord legt alleen je besluit vast; er verandert niets aan je cursus.

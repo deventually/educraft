@@ -28,11 +28,16 @@ export const agents: Messages["agents"] = {
   panel: {
     about: "About: {item}",
     accept: "Agree",
+    chooseLegend: "Which hats review your course?",
+    chooseMore: "More about the hats",
+    chooseNone: "Pick at least one hat to get a review.",
     decided: "Handled ({n})",
     decision: { accepted: "Agree", rejected: "Disagree" },
     includeLinked: "Also review the linked test questions ({n})",
     intro:
       "Critical colleagues review your course: {roles}. They advise; you decide on each piece of advice. Nothing in your course changes.",
+    introNone:
+      "Critical colleagues review your course. They advise; you decide on each piece of advice. Nothing in your course changes.",
     model: "Model",
     none: "No advice from this reviewer.",
     notYet: "Not reviewed yet.",
@@ -51,6 +56,7 @@ export const agents: Messages["agents"] = {
     done: "The review is ready.",
     failed: "The review failed. Please try again later.",
     model: "This model is not available to you. Pick another model.",
+    none: "Pick at least one hat to have your course reviewed.",
     partial: "The review is ready, but {agents} gave no usable answer.",
     quota: "You have reached your daily limit. Please try again tomorrow.",
   },

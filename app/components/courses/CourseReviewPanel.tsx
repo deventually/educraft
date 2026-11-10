@@ -1,7 +1,12 @@
-import { useId } from "react";
-import { Form } from "react-router";
+import { useId, useState } from "react";
+import { Form, Link } from "react-router";
 import { AlertTriangle, Info } from "lucide-react";
-import { DECISION_REASON_MAX, type ReviewFinding, type ReviewPanelAgent } from "~/lib/agents/types";
+import {
+  DECISION_REASON_MAX,
+  type ReviewFinding,
+  type ReviewPanelAgent,
+  type ReviewPanelChoice,
+} from "~/lib/agents/types";
 import type { CourseData } from "~/lib/courses/types";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
@@ -10,7 +15,7 @@ import { Button, Input, Label, Select } from "~/components/ui";
 import { type CourseTools, findingItemId, itemKind } from "~/lib/registry/courseActions";
 import { SolveWith } from "./ItemTools";
 
-export type { ReviewPanelAgent };
+export type { ReviewPanelAgent, ReviewPanelChoice };
 
 type PanelFinding = NonNullable<ReviewPanelAgent["review"]>["findings"][number];
 
@@ -29,6 +34,7 @@ function itemLabel(data: CourseData, id: string): string | null {
 export function CourseReviewPanel({
   data,
   agents,
+  choices,
   models,
   defaultModel,
   linkedTests = 0,
@@ -36,7 +42,10 @@ export function CourseReviewPanel({
   tools,
 }: {
   data: CourseData;
+  /** The reviews of the hats the teacher chose. */
   agents: ReviewPanelAgent[];
+  /** Every hat the admin has on; the teacher ticks which ones look along. */
+  choices: ReviewPanelChoice[];
   models: { id: string; displayName: string }[];
   defaultModel: string;
   /** Linked test-question generations; the "also review" box shows only when there are any. */
@@ -48,19 +57,63 @@ export function CourseReviewPanel({
   const p = useT().agents.panel;
   const locale = useLocale();
   const id = useId();
+  const [ticked, setTicked] = useState(
+    () => new Set(choices.filter((c) => c.chosen).map((c) => c.agentId)),
+  );
+  const toggle = (agentId: string, on: boolean) =>
+    setTicked((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(agentId);
+      else next.delete(agentId);
+      return next;
+    });
   return (
     <section aria-labelledby={id}>
       <h2 id={id} className="text-lg font-medium text-slate-900">
         {p.title}
       </h2>
       <p className="mt-1 text-sm text-slate-600">
-        {fmt(p.intro, {
-          roles: new Intl.ListFormat(locale, { type: "conjunction" }).format(
-            agents.map((a) => loc(a.role, locale)),
-          ),
-        })}
+        {agents.length === 0
+          ? p.introNone
+          : fmt(p.intro, {
+              roles: new Intl.ListFormat(locale, { type: "conjunction" }).format(
+                agents.map((a) => loc(a.role, locale)),
+              ),
+            })}
       </p>
       <Form method="post" className="mt-3 flex flex-wrap items-end gap-3">
+        <input type="hidden" name="agentsChosen" value="1" />
+        <fieldset className="basis-full">
+          <legend className="text-sm font-medium text-slate-900">{p.chooseLegend}</legend>
+          <ul className="mt-2 space-y-2">
+            {choices.map((c) => (
+              <li key={c.agentId}>
+                <label className="flex items-start gap-2 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    name="agent"
+                    value={c.agentId}
+                    checked={ticked.has(c.agentId)}
+                    onChange={(e) => toggle(c.agentId, e.currentTarget.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    <span className="font-medium text-slate-900">{loc(c.role, locale)}</span>
+                    <span className="block text-slate-600">{loc(c.focus, locale)}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm">
+            <Link
+              to="/help/role-agents"
+              className="text-violet-700 underline focus-visible:outline-2 focus-visible:outline-violet-500"
+            >
+              {p.chooseMore}
+            </Link>
+          </p>
+        </fieldset>
         {models.length > 1 && (
           <div>
             <Label htmlFor={`${id}-model`}>{p.model}</Label>
@@ -79,9 +132,10 @@ export function CourseReviewPanel({
             {fmt(p.includeLinked, { n: linkedTests })}
           </label>
         )}
-        <Button type="submit" name="intent" value="review">
+        <Button type="submit" name="intent" value="review" disabled={ticked.size === 0}>
           {p.run}
         </Button>
+        {ticked.size === 0 && <p className="basis-full text-sm text-slate-700">{p.chooseNone}</p>}
       </Form>
       <div className="mt-4 space-y-6">
         {agents.map((agent) => (

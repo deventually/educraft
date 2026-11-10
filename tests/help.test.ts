@@ -13,6 +13,8 @@ import {
   topicLangs,
 } from "~/lib/help/registry";
 import { getEnabledTools } from "~/lib/registry";
+import { AGENTS } from "~/lib/agents/registry";
+import { loc } from "~/lib/i18n/localized";
 
 describe("help registry — tool resolution", () => {
   it("resolves a real tool by id and returns undefined for junk", () => {
@@ -38,6 +40,32 @@ describe("help registry — topics", () => {
   it("explains the role-agent review in the courses topic (P21.5)", () => {
     expect(getTopic("courses", "nl")).toContain("## Laat beoordelen");
     expect(getTopic("courses", "en")).toContain("## Get a review");
+  });
+
+  it("describes every role agent in its own section, so a new hat ships with its help", () => {
+    expect(getTopicTitle("role-agents", "nl")).toBe("Rolagenten: de petten die meekijken");
+    expect(getTopicTitle("role-agents", "en")).toBe(
+      "Role agents: the hats that review your course",
+    );
+    for (const lang of LOCALES) {
+      const topic = getTopic("role-agents", lang) ?? "";
+      for (const agent of AGENTS)
+        expect(topic, `${lang}: ${agent.id}`).toContain(`## ${loc(agent.role, lang)}`);
+    }
+    for (const heading of [
+      "## Kiezen welke petten meekijken",
+      "## Wat een pet ziet",
+      "## Wat een pet niet doet",
+    ])
+      expect(getTopic("role-agents", "nl")).toContain(heading);
+    for (const heading of [
+      "## Choosing which hats review",
+      "## What a hat sees",
+      "## What a hat does not do",
+    ])
+      expect(getTopic("role-agents", "en")).toContain(heading);
+    expect(getTopic("courses", "nl")).toContain("(/help/role-agents)");
+    expect(getTopic("courses", "en")).toContain("(/help/role-agents)");
   });
 
   it("guides a teacher through the BDB and BKE, from switching it on to handing in", () => {

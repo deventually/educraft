@@ -412,3 +412,104 @@ describe("hats an admin switched off (/admin/agents)", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 });
+
+describe("the teacher's own choice of hats", () => {
+  let settings: typeof import("~/server/repositories/settings.server");
+  let choices: typeof import("~/server/repositories/agentChoices.server");
+  let agentReview: typeof import("~/server/agentReview.server");
+  beforeAll(async () => {
+    settings = await import("~/server/repositories/settings.server");
+    choices = await import("~/server/repositories/agentChoices.server");
+    agentReview = await import("~/server/agentReview.server");
+  });
+  afterEach(async () => {
+    await settings.setAgentStand("designer", "on");
+    await choices.setAgentChoices("teacher-r", { "assessment-expert": "on", designer: "on" });
+  });
+
+  async function load(id: string) {
+    const request = new Request(`http://localhost/courses/${id}`);
+    return (await detail.loader({ request, params: { id } } as never)) as {
+      review: {
+        agents: { agentId: string }[];
+        choices: { agentId: string; chosen: boolean }[];
+      } | null;
+    };
+  }
+
+  it("runs only the hats the teacher ticks, and remembers that choice", async () => {
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(DESIGN);
+    const r = await post(c.id, [
+      ["intent", "review"],
+      ["agentsChosen", "1"],
+      ["agent", "designer"],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "review" });
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
+      "designer",
+    ]);
+    expect(await choices.getAgentChoices("teacher-r")).toEqual({
+      "assessment-expert": "off",
+      designer: "on",
+    });
+    const panel = (await load(c.id)).review;
+    expect(panel?.agents.map((a) => a.agentId)).toEqual(["designer"]);
+    expect(panel?.choices.map((a) => [a.agentId, a.chosen])).toEqual([
+      ["assessment-expert", false],
+      ["designer", true],
+    ]);
+  });
+
+  it("uses the remembered choice for a review without the choice boxes", async () => {
+    await choices.setAgentChoices("teacher-r", { designer: "off" });
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(GOOD);
+    await post(c.id, [["intent", "review"]]);
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
+      "assessment-expert",
+    ]);
+  });
+
+  it("runs nothing when the teacher ticks no hat, but keeps the panel to tick one again", async () => {
+    const c = await newCourse();
+    const r = await post(c.id, [
+      ["intent", "review"],
+      ["agentsChosen", "1"],
+    ]);
+    expect(r).toMatchObject({ ok: false, intent: "review" });
+    expect(String(r.error)).toMatch(/pet/i);
+    expect(generate).not.toHaveBeenCalled();
+    const panel = (await load(c.id)).review;
+    expect(panel?.agents).toEqual([]);
+    expect(panel?.choices.map((a) => a.chosen)).toEqual([false, false]);
+  });
+
+  it("never runs or offers a hat the admin switched off, even when the teacher ticks it", async () => {
+    await settings.setAgentStand("designer", "off");
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(GOOD);
+    await post(c.id, [
+      ["intent", "review"],
+      ["agentsChosen", "1"],
+      ["agent", "designer"],
+      ["agent", "assessment-expert"],
+    ]);
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect((await reviews.listReviewsForCourse("teacher-r", c.id)).map((s) => s.agentId)).toEqual([
+      "assessment-expert",
+    ]);
+    expect((await load(c.id)).review?.choices.map((a) => a.agentId)).toEqual(["assessment-expert"]);
+  });
+
+  it("counts open advice only of the hats the teacher chose", async () => {
+    const c = await newCourse();
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    await post(c.id, [["intent", "review"]]);
+    expect((await agentReview.openAgentFindings(currentUser.value, [c.id]))?.[c.id]).toBe(2);
+    await choices.setAgentChoices("teacher-r", { "assessment-expert": "off" });
+    expect((await agentReview.openAgentFindings(currentUser.value, [c.id]))?.[c.id]).toBe(1);
+  });
+});

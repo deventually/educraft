@@ -26,11 +26,16 @@ export const agents = {
   panel: {
     about: "Over: {item}",
     accept: "Akkoord",
+    chooseLegend: "Welke petten kijken mee?",
+    chooseMore: "Meer over de petten",
+    chooseNone: "Kies minstens één pet om te laten beoordelen.",
     decided: "Afgehandeld ({n})",
     decision: { accepted: "Akkoord", rejected: "Niet akkoord" },
     includeLinked: "Ook de gekoppelde toetsvragen nakijken ({n})",
     intro:
       "Kritische collega's kijken je cursus na: {roles}. Ze geven advies; jij beslist per advies. Er verandert niets aan je cursus.",
+    introNone:
+      "Kritische collega's kijken je cursus na. Ze geven advies; jij beslist per advies. Er verandert niets aan je cursus.",
     model: "Model",
     none: "Geen adviezen van deze pet.",
     notYet: "Nog niet beoordeeld.",
@@ -50,6 +55,7 @@ export const agents = {
     done: "De beoordeling is klaar.",
     failed: "De beoordeling is mislukt. Probeer het later opnieuw.",
     model: "Dit model is niet voor jou beschikbaar. Kies een ander model.",
+    none: "Kies minstens één pet om je cursus te laten beoordelen.",
     partial: "De beoordeling is klaar, maar {agents} gaf geen bruikbaar antwoord.",
     quota: "Je hebt je dagelijkse limiet bereikt. Probeer het morgen opnieuw.",
   },

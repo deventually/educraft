@@ -7,12 +7,13 @@
 import { z } from "zod";
 import { buildReviewMessage, LINKED_LIMITS, type LinkedWorkInput } from "~/lib/agents/input";
 import { parseAgentReview } from "~/lib/agents/filter";
-import { activeAgents } from "~/lib/agents/registry";
+import { activeAgents, chosenAgents } from "~/lib/agents/registry";
 import {
   type Agent,
   DECISION_REASON_MAX,
   DECISIONS,
   type ReviewPanelAgent,
+  type ReviewPanelChoice,
 } from "~/lib/agents/types";
 import {
   DEFAULT_MODEL,
@@ -43,13 +44,18 @@ import {
   saveReview,
 } from "./repositories/agentReviews.server";
 import { getAgentStands } from "./repositories/settings.server";
+import { getAgentChoices, setAgentChoices } from "./repositories/agentChoices.server";
 
 const EVENT = "agent-review";
 
 /** The course hats an admin has not switched off on /admin/agents. */
 const courseAgents = async (): Promise<Agent[]> => activeAgents("course", await getAgentStands());
 
-export type ReviewError = "model" | "quota" | "failed";
+/** Of the hats the admin has on, the ones this teacher chose. */
+const teacherAgents = async (user: User, active: Agent[]): Promise<Agent[]> =>
+  chosenAgents(active, await getAgentChoices(user.id));
+
+export type ReviewError = "model" | "quota" | "failed" | "none";
 
 export type ReviewResult =
   | { ok: true; reviewed: string[]; failed: Agent[] }
@@ -122,9 +128,18 @@ export async function reviewCourse(
   requestedModel: string | null,
   locale: Locale,
   includeLinked = false,
+  /** The hats the teacher ticked (remembered as their choice); absent = their earlier choice. */
+  ticked?: string[],
 ): Promise<ReviewResult> {
-  const agents = await courseAgents();
-  if (agents.length === 0) return { ok: false, error: "failed" };
+  const active = await courseAgents();
+  if (active.length === 0) return { ok: false, error: "failed" };
+  if (ticked)
+    await setAgentChoices(
+      user.id,
+      Object.fromEntries(active.map((a) => [a.id, ticked.includes(a.id) ? "on" : "off"])),
+    );
+  const agents = await teacherAgents(user, active);
+  if (agents.length === 0) return { ok: false, error: "none" };
   // A retired model hands over to its newest version (the page may be older than the upgrade).
   await syncModelRegistry();
   const model = requestedModel ? forwardRetired(requestedModel) : undefined;
@@ -180,7 +195,10 @@ export async function decideOnFinding(
 }
 
 export interface ReviewPanelData {
+  /** The reviews of the hats this teacher chose. */
   agents: ReviewPanelAgent[];
+  /** Every hat the admin has on, ticked when the teacher chose it. */
+  choices: ReviewPanelChoice[];
   /** How many test-question generations are linked to the course (the "also review" box). */
   linkedTests: number;
   models: { id: string; displayName: string }[];
@@ -192,9 +210,10 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
   if (!(await isFeatureOn(user, "roleAgents"))) return null;
   const active = await courseAgents();
   if (active.length === 0) return null;
+  const chosen = await teacherAgents(user, active);
   const all = await listReviewsForCourse(user.id, course.id);
   const agents = await Promise.all(
-    active.map(async (agent): Promise<ReviewPanelAgent> => {
+    chosen.map(async (agent): Promise<ReviewPanelAgent> => {
       const latest = all.find((r) => r.agentId === agent.id);
       if (!latest) return { agentId: agent.id, role: agent.role, review: null };
       const decisions = new Map(
@@ -224,6 +243,12 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
   }));
   return {
     agents,
+    choices: active.map((a) => ({
+      agentId: a.id,
+      role: a.role,
+      focus: a.focus,
+      chosen: chosen.includes(a),
+    })),
     models,
     defaultModel: await effectiveDefaultModel(user, DEFAULT_MODEL),
     linkedTests: (await linkedTestItems(user.id, course.id)).length,
@@ -239,7 +264,7 @@ export async function openAgentFindings(
   courseIds: string[],
 ): Promise<Record<string, number> | null> {
   if (!(await isFeatureOn(user, "roleAgents"))) return null;
-  const agents = await courseAgents();
+  const agents = await teacherAgents(user, await courseAgents());
   const out: Record<string, number> = {};
   for (const courseId of courseIds) {
     const all = await listReviewsForCourse(user.id, courseId);
