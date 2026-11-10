@@ -40,6 +40,19 @@ De reviewer Ontwerper kijkt als een ervaren onderwijskundige naar het ontwerp va
 
 Deze reviewer staat standaard aan.
 
+## AI-bestendigheid
+
+De reviewer AI-bestendigheid kijkt als een toetsdeskundige die weet wat AI kan naar je summatieve toetsen. De vraag is: laat het cijfer zien wat de student zelf kan, ook nu een student een tekst, code of verslag door AI kan laten maken?
+
+- **Onder of zonder toezicht:** bij elke toets kun je invullen of hij *onder toezicht* is (tentamen, mondeling, praktijktoets in de les) of *zonder toezicht* (werk dat thuis ontstaat). Deze reviewer kijkt vooral naar summatief werk zonder toezicht.
+- **Waar het cijfer op rust:** hangt een groot deel van het cijfer aan alleen een ingeleverd product, zonder gesprek of moment onder toezicht?
+- **Het proces in beeld:** zijn er tussenproducten, feedbackmomenten of een logboek, zodat je ziet hoe het werk ontstond?
+- **Een korte check:** soms is een kort gesprek of een mondelinge toelichting genoeg om te zien dat het werk van de student zelf is.
+
+Deze reviewer verbiedt AI niet en raadt geen AI-detectors aan. Formatief werk zonder toezicht vindt hij prima: daar mag een student oefenen, ook met AI. Of de toetsvorm past bij de leeruitkomst, laat hij aan de Toetsdeskundige; de opbouw van je lessen aan de Ontwerper.
+
+Deze reviewer staat standaard uit. Vink hem aan als je cursus summatief werk heeft dat thuis ontstaat.
+
 ## Wat een reviewer ziet
 
 Een reviewer ziet alleen deze ene cursus, zoals jij hem invulde:

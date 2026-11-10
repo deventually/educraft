@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #221 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #233 gemerged)_
 
 ## Nu
 
+- **Toetsen onder of zonder toezicht (#233) gemerged op 2026-11-10:** bij elke toets in een
+  cursus kan de docent invullen of hij *onder toezicht* is (tentamen, mondeling, praktijktoets) of
+  *zonder toezicht* (werk dat thuis ontstaat). De reviewers zien dat veld; de reviewer
+  AI-bestendigheid leunt erop. Geen migratie (het cursusschema is niet strict). PR 2 van het plan
+  "Nieuwe rolagenten en examencommissie".
+- **Figuren bij Studentwerk beoordelen (#232) gemerged op 2026-11-10:** uit een PDF wordt elke
+  figuur uitgesneden in plaats van de hele pagina; banners, logo's en scans vallen weg. Een klik
+  op een plaatje vergroot het. Het veld heet nu *Figuren voor de beoordeling*; zelf uploaden is
+  de terugvaloptie.
 - **Reviewteam: de docent kiest zelf welke reviewers meekijken (#231) gemerged op 2026-11-10:**
   wat eerst "rolagenten" en "petten" heette, heet voor docenten nu het *Reviewteam* met
   *reviewers* (BESLUIT-2026-11-10-2). Boven *Laat reviewen* vinkt de docent aan wie er in het

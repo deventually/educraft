@@ -1242,6 +1242,290 @@
         }
       ],
       "maxWarnings": 3
+    },
+    {
+      "id": "ai-unsupervised-report",
+      "agent": "ai-resilience",
+      "locale": "nl",
+      "description": "Het hele cijfer hangt aan een thuis geschreven rapport zonder toezicht, zonder tussenproduct of gesprek.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je schrijft een onderbouwd adviesrapport voor een opdrachtgever uit het werkveld.",
+            "bloom": "create"
+          },
+          {
+            "id": "lo2",
+            "text": "Je beoordeelt de betrouwbaarheid van bronnen voor je advies.",
+            "bloom": "evaluate"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les argumentatiestructuur",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Workshop bronnen beoordelen",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Schrijfopdracht: adviesrapport voor een opdrachtgever",
+            "week": 3,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Adviesrapport (thuis, inleveren via de ELO)",
+            "week": 8,
+            "kind": "summative",
+            "supervised": false,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "evaluate"
+              }
+            ],
+            "weight": 100,
+            "hours": 40
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "t1",
+            "lo1",
+            "lo2"
+          ],
+          "anyOf": [
+            "toezicht",
+            "mondeling",
+            "gesprek",
+            "tussenproduct",
+            "proces",
+            "AI",
+            "zelf",
+            "verdedig",
+            "logboek",
+            "versie"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai-unsupervised-reflection",
+      "agent": "ai-resilience",
+      "locale": "nl",
+      "description": "Een reflectieverslag zonder toezicht weegt 70%; de kennistoets onder toezicht maar 30%.",
+      "course": {
+        "ec": 3,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je reflecteert op je eigen handelen in een stagesituatie en formuleert verbeterpunten.",
+            "bloom": "evaluate"
+          },
+          {
+            "id": "lo2",
+            "text": "Je legt de fasen van de reflectiecyclus van Korthagen uit.",
+            "bloom": "understand"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les reflectiecyclus",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 2
+          },
+          {
+            "id": "a2",
+            "title": "Intervisie in kleine groepen",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Kennistoets reflectiemodellen",
+            "week": 4,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 30,
+            "hours": 6
+          },
+          {
+            "id": "t2",
+            "title": "Reflectieverslag stage (thuis geschreven)",
+            "week": 8,
+            "kind": "summative",
+            "supervised": false,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "evaluate"
+              }
+            ],
+            "weight": 70,
+            "hours": 20
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "t2",
+            "lo1"
+          ],
+          "anyOf": [
+            "toezicht",
+            "mondeling",
+            "gesprek",
+            "tussenproduct",
+            "proces",
+            "AI",
+            "zelf",
+            "intervisie",
+            "observ"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai-clean",
+      "agent": "ai-resilience",
+      "locale": "nl",
+      "description": "Het rapport is formatief; het cijfer komt uit een mondelinge verdediging onder toezicht. Geen waarschuwingen verwacht.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je schrijft een onderbouwd adviesrapport voor een opdrachtgever uit het werkveld.",
+            "bloom": "create"
+          },
+          {
+            "id": "lo2",
+            "text": "Je beoordeelt de betrouwbaarheid van bronnen voor je advies.",
+            "bloom": "evaluate"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les argumentatiestructuur",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Workshop bronnen beoordelen",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Schrijfopdracht: adviesrapport voor een opdrachtgever",
+            "week": 3,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Conceptrapport met feedback",
+            "week": 5,
+            "kind": "formative",
+            "supervised": false,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "evaluate"
+              }
+            ],
+            "hours": 10
+          },
+          {
+            "id": "t2",
+            "title": "Eindrapport met mondelinge verdediging",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "evaluate"
+              }
+            ],
+            "weight": 100,
+            "hours": 30
+          }
+        ]
+      },
+      "maxWarnings": 0
     }
   ]
 }
