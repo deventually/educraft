@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #233 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #234 gemerged)_
 
 ## Nu
 
+- **Help-sectie opnieuw ingedeeld (#234) gemerged op 2026-11-10:** `/help` is ingedeeld naar wat
+  een docent wil doen, met een zoekveld dat naar de juiste alinea springt en de tools per doel.
+  Nieuwe onderwerpen (tools gebruiken, eerder gemaakt, hulpmiddelen, teams, beheer); BDB/BKE ziet
+  een docent alleen als de werkplaats aanstaat. Zes schermen kregen een rustig linkje "Hoe werkt
+  dit?". Geen migratie.
 - **Een toets onder toezicht markeren (#233) gemerged op 2026-11-10:** bij een toets in de
   cursus kies je *onder toezicht*, *zonder toezicht* of niets. Het staat in de regel onder de
   toets en het reviewteam weegt het mee. Geen migratie.
