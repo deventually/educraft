@@ -15,6 +15,11 @@ export const courses: Messages["courses"] = {
     empty: "No assessments yet.",
     intro: "Formative and summative assessments, with the learning outcomes they test.",
     kinds: { formative: "Formative", summative: "Summative" },
+    supervised: "Supervised",
+    supervisedHint:
+      "For example an exam in a hall or an oral exam. It shows your review team how easily a student could leave the work to AI.",
+    supervisedMeta: { false: "Unsupervised", true: "Supervised" },
+    supervisedOptions: { no: "No, unsupervised", unset: "Not filled in", yes: "Yes, supervised" },
     title: "Assessments",
     weight: "Weight (%)",
     weightHint: "Summative assessments only.",

@@ -13,6 +13,15 @@ export const courses = {
     empty: "Nog geen toetsen.",
     intro: "Formatieve en summatieve toetsen, met de leeruitkomsten die ze toetsen.",
     kinds: { formative: "Formatief", summative: "Summatief" },
+    supervised: "Onder toezicht",
+    supervisedHint:
+      "Bijvoorbeeld een tentamen in een zaal of een mondeling. Zo ziet je reviewteam hoe makkelijk een student het werk aan AI kan overlaten.",
+    supervisedMeta: { false: "Zonder toezicht", true: "Onder toezicht" },
+    supervisedOptions: {
+      no: "Nee, zonder toezicht",
+      unset: "Niet ingevuld",
+      yes: "Ja, onder toezicht",
+    },
     title: "Toetsen",
     weight: "Weging (%)",
     weightHint: "Alleen voor summatieve toetsen.",

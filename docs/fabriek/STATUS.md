@@ -8,6 +8,13 @@ _Laatst bijgewerkt: 2026-11-10 (#187 t/m #221 gemerged)_
 
 ## Nu
 
+- **Reviewteam: de docent kiest zelf welke reviewers meekijken (#231) gemerged op 2026-11-10:**
+  wat eerst "rolagenten" en "petten" heette, heet voor docenten nu het *Reviewteam* met
+  *reviewers* (BESLUIT-2026-11-10-2). Boven *Laat reviewen* vinkt de docent aan wie er in het
+  team zit; de keuze geldt voor al zijn of haar cursussen, en wat de beheerder uitzet blijft uit.
+  Nieuwe reviewers staan voor een docent standaard uit (BESLUIT-2026-11-10-1). Helppagina
+  `/help/review-team` met een stuk per reviewer. Migratie 0024 (`npm run db:migrate`). PR 1 van
+  het plan "Nieuwe rolagenten en examencommissie"; de Examencommissie komt pas na de pilot of bij een tweede pilot.
 - **Overdrachtsdocument en noodplan (#221) gemerged op 2026-11-10:** `docs/overdracht.md` zegt
   wat een vervanger moet weten (geheimen alleen bij naam, deployen, terugrollen, back-up, de
   ops-scripts); `docs/noodplan.md` wat te doen bij storing, dataverlies, een datalek of een

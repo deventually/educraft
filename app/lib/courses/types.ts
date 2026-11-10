@@ -62,6 +62,11 @@ export interface Assessment {
   kind: AssessmentKind;
   /** % of the final grade; only summative weights count. */
   weight?: number;
+  /**
+   * Taken under supervision (an exam hall, an oral), or not (work done at home). Absent = the
+   * teacher did not say. Reviewers use it to judge how easily a student can hand the work to AI.
+   */
+  supervised?: boolean;
   coverage: AssessmentCoverage[];
   /** Planned study hours for this assessment. */
   hours?: number;

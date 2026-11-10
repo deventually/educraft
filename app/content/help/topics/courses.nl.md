@@ -4,7 +4,7 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 
 - **Leeruitkomsten:** wat de student aan het eind kan, met het Bloom-niveau dat je verwacht.
 - **Onderwijsactiviteiten:** de lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.
-- **Toetsen:** formatief of summatief, met de leeruitkomsten die ze toetsen en op welk niveau.
+- **Toetsen:** formatief of summatief, met de leeruitkomsten die ze toetsen en op welk niveau. Geef ook aan of een toets **onder toezicht** is, zoals een tentamen in een zaal of een mondeling. Dan ziet je reviewteam hoe makkelijk een student het werk aan AI kan overlaten.
 
 ## De controles
 
