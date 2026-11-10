@@ -1,6 +1,6 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ImageInput } from "~/lib/ai/types";
-import { documentFigures, type DocFigures } from "~/lib/documents/figures";
+import { documentFigures, type DocFigure, type DocFigures } from "~/lib/documents/figures";
 import { MAX_IMAGES } from "~/lib/images/process";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
@@ -16,15 +16,70 @@ interface Props {
 const same = (a: ImageInput, b: ImageInput) =>
   a.mediaType === b.mediaType && a.dataBase64 === b.dataBase64;
 
+const srcOf = (image: ImageInput) => `data:${image.mediaType};base64,${image.dataBase64}`;
+
+/** One figure at full width, in a modal dialog that closes on Escape or the button. */
+function FigureZoom({
+  figure,
+  label,
+  onClose,
+}: {
+  figure: DocFigure;
+  label: string;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+      className="m-auto max-h-[92vh] w-[min(64rem,94vw)] rounded-xl bg-white p-0 shadow-xl backdrop:bg-slate-900/60"
+    >
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-2">
+        <p className="min-w-0 truncate text-sm font-medium text-slate-800">
+          <span id={titleId}>{label}</span>
+          <span className="ml-2 font-normal text-slate-600">{figure.source}</span>
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="shrink-0 rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        >
+          {t.tool.figureClose}
+        </button>
+      </div>
+      <img
+        src={srcOf(figure.image)}
+        alt={label}
+        className="mx-auto max-h-[80vh] w-auto max-w-full object-contain p-4"
+      />
+    </dialog>
+  );
+}
+
 /**
  * The figures of an uploaded document, each to tick on or off (`InputField.imagesFrom`).
  * Nothing is ticked by default: anonymisation covers text only, so a figure goes
- * to the model only when the teacher chose it.
+ * to the model only when the teacher chose it. Clicking a thumbnail enlarges it.
  */
 export function DocumentFigurePicker({ files, value, onChange }: Props) {
   const t = useT();
   const uid = useId();
   const [found, setFound] = useState<DocFigures | null>(null);
+  const [zoomed, setZoomed] = useState<DocFigure | null>(null);
 
   useEffect(() => {
     if (files.length === 0) {
@@ -46,6 +101,10 @@ export function DocumentFigurePicker({ files, value, onChange }: Props) {
   const full = value.length >= MAX_IMAGES;
   const toggle = (image: ImageInput, on: boolean) =>
     onChange(on ? [...value, image] : value.filter((v) => !same(v, image)));
+  const labelOf = (fig: DocFigure) =>
+    fig.page === undefined
+      ? fmt(t.tool.figureFromFile, { index: fig.index })
+      : fmt(t.tool.figureFromPage, { index: fig.index, page: fig.page });
 
   return (
     <fieldset className="mt-3 space-y-2 rounded-lg border border-slate-200 p-3">
@@ -73,37 +132,50 @@ export function DocumentFigurePicker({ files, value, onChange }: Props) {
             {found.figures.map((fig) => {
               const id = `${uid}-figure-${fig.index}`;
               const checked = value.some((v) => same(v, fig.image));
-              const label =
-                fig.page === undefined
-                  ? fmt(t.tool.figureFromFile, { index: fig.index, source: fig.source })
-                  : fmt(t.tool.figureFromPage, { page: fig.page, source: fig.source });
+              const label = labelOf(fig);
               return (
-                <li key={id}>
-                  <label
-                    htmlFor={id}
-                    className="flex cursor-pointer flex-col gap-1 rounded-lg border border-slate-200 p-1.5 text-xs text-slate-700 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50"
+                <li
+                  key={id}
+                  className="flex min-w-0 flex-col gap-1 rounded-lg border border-slate-200 p-1.5 text-xs text-slate-700 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setZoomed(fig)}
+                    aria-label={fmt(t.tool.figureZoom, { label })}
+                    className="cursor-zoom-in rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                   >
                     <img
-                      src={`data:${fig.image.mediaType};base64,${fig.image.dataBase64}`}
+                      src={srcOf(fig.image)}
                       alt=""
                       className="aspect-square w-full rounded bg-slate-100 object-contain"
                     />
-                    <span className="flex items-start gap-1.5">
-                      <input
-                        id={id}
-                        type="checkbox"
-                        className="mt-0.5 focus-visible:ring-2 focus-visible:ring-violet-500"
-                        checked={checked}
-                        disabled={!checked && full}
-                        onChange={(e) => toggle(fig.image, e.target.checked)}
-                      />
-                      <span>{label}</span>
-                    </span>
+                  </button>
+                  <label htmlFor={id} className="flex min-w-0 cursor-pointer items-start gap-1.5">
+                    <input
+                      id={id}
+                      type="checkbox"
+                      className="mt-0.5 shrink-0 focus-visible:ring-2 focus-visible:ring-violet-500"
+                      checked={checked}
+                      disabled={!checked && full}
+                      aria-describedby={`${id}-source`}
+                      onChange={(e) => toggle(fig.image, e.target.checked)}
+                    />
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
                   </label>
+                  <span
+                    id={`${id}-source`}
+                    title={fig.source}
+                    className="block min-w-0 truncate pl-5 text-slate-600"
+                  >
+                    {fig.source}
+                  </span>
                 </li>
               );
             })}
           </ul>
+          {zoomed && (
+            <FigureZoom figure={zoomed} label={labelOf(zoomed)} onClose={() => setZoomed(null)} />
+          )}
         </>
       )}
     </fieldset>

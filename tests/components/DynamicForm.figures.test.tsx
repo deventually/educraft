@@ -19,8 +19,11 @@ vi.mock("~/lib/i18n/useT", () => ({
       figuresPrivacy: "Figures are not anonymised.",
       figuresUnsupported: "{count} skipped",
       figuresMax: "Max {max}",
-      figureFromFile: "Image {index} from {source}",
-      figureFromPage: "Page {page} from {source}",
+      figureClose: "Close",
+      figureFromFile: "Image {index}",
+      figureFromPage: "Figure {index}, page {page}",
+      figureZoom: "Enlarge {label}",
+      figuresOwnUpload: "Missing a figure? Upload it yourself",
     },
   }),
 }));
@@ -67,7 +70,7 @@ describe("DynamicForm — figures from the uploaded document (imagesFrom)", () =
       target: { files: [new File(["x"], "report.pdf", { type: "application/pdf" })] },
     });
 
-    fireEvent.click(await screen.findByLabelText("Page 2 from report.pdf"));
+    fireEvent.click(await screen.findByLabelText("Figure 1, page 2"));
     expect(onChange).toHaveBeenLastCalledWith("figures", [
       { mediaType: "image/png", dataBase64: "QUFB" },
     ]);
@@ -85,7 +88,19 @@ describe("DynamicForm — figures from the uploaded document (imagesFrom)", () =
     );
     const file = new File(["x"], "report.pdf", { type: "application/pdf" });
     fireEvent.change(screen.getByLabelText("Upload PDF or Word"), { target: { files: [file] } });
-    await screen.findByLabelText("Page 2 from report.pdf");
+    await screen.findByLabelText("Figure 1, page 2");
     expect(onDocumentFiles).toHaveBeenCalledWith("document", [file]);
+  });
+
+  it("offers the document's figures first, and own uploads as the fallback below", async () => {
+    render(<DynamicForm fields={fields} values={defaultValuesFor(fields)} onChange={vi.fn()} />);
+    expect(screen.getByText("Upload images", { selector: "button" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Upload PDF or Word"), {
+      target: { files: [new File(["x"], "report.pdf", { type: "application/pdf" })] },
+    });
+    const picker = await screen.findByRole("group", { name: "Figures from the document" });
+    const upload = screen.getByText("Missing a figure? Upload it yourself", { selector: "button" });
+    expect(picker.compareDocumentPosition(upload) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

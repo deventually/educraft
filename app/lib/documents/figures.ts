@@ -8,8 +8,10 @@
  *
  * - Word: the embedded images mammoth sees. Formats the model cannot read
  *   (EMF/WMF from Visio, TIFF, SVG) are counted, not offered. Icons are dropped.
- * - PDF: embedded images are often split, masked or vector, so a page that
- *   draws a figure-sized image is offered as a picture of the whole page.
+ * - PDF: each figure-sized image is cut out of the drawn page, so masks and
+ *   overlays show as the reader sees them. Tiles of one figure merge into one.
+ *   Not a figure: an image on the same spot of three or more pages (a banner,
+ *   logo or page background) and one that covers a page with text (a scan).
  */
 import type { ImageInput } from "~/lib/ai/types";
 import type { getDocumentProxy } from "unpdf";
@@ -23,8 +25,16 @@ export const MAX_FIGURE_CANDIDATES = 30;
 /** Smaller than this (pixels in Word, points in a PDF) is an icon or a logo. */
 const MIN_SIDE = 72;
 const MIN_AREA = 100 * 100;
-/** Long edge of a rendered PDF page; the model scales larger images down anyway. */
-const PAGE_WIDTH = 1200;
+/** Width a figure is cut out at; the model scales larger images down anyway. */
+const FIGURE_WIDTH = 1200;
+/** A rendered page is never wider than this, however small the figure. */
+const MAX_PAGE_WIDTH = 2400;
+/** Margin around a cut-out figure, as a fraction of the page. */
+const MARGIN = 0.015;
+/** An image on the same spot of this many pages is page furniture. */
+const REPEATS = 3;
+/** An image covering this much of a page with text is a scan or a background. */
+const COVERS_PAGE = 0.8;
 /** Image types the model reads (mirrors ImageInputSchema in /api/stream). */
 const MODEL_IMAGE = /^image\/(png|jpeg|gif|webp)$/;
 
@@ -44,10 +54,18 @@ export interface DocFigures {
   unsupported: number;
 }
 
+/** Part of a page, as fractions of its width and height, from the top left. */
+export interface FigureBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** The browser-only steps, injectable so tests need no canvas. */
 export interface FigureDeps {
-  /** Draws one PDF page as a `data:` URL. */
-  renderPdfPage: (pdf: PdfProxy, pageNumber: number) => Promise<string>;
+  /** Draws one part of a PDF page as a `data:` URL. */
+  renderPdfFigure: (pdf: PdfProxy, pageNumber: number, box: FigureBox) => Promise<string>;
   /** Scales a large photo down before it is offered. */
   shrink: (image: ImageInput) => Promise<ImageInput>;
 }
@@ -144,45 +162,131 @@ const multiply = (m: Matrix, n: Matrix): Matrix => [
   m[1] * n[4] + m[3] * n[5] + m[5],
 ];
 
-/** Pages that draw at least one figure-sized image, from a loaded PDF. */
-async function figurePagesOf(pdf: PdfProxy): Promise<number[]> {
-  const { getResolvedPDFJS } = await import("unpdf");
-  const { OPS } = await getResolvedPDFJS();
-  const pages: number[] = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const { fnArray, argsArray } = await page.getOperatorList();
-    let ctm: Matrix = [1, 0, 0, 1, 0, 0];
-    const stack: Matrix[] = [];
-    for (let i = 0; i < fnArray.length; i++) {
-      const fn = fnArray[i];
-      const args = argsArray[i];
-      if (fn === OPS.save) stack.push(ctm);
-      else if (fn === OPS.restore) ctm = stack.pop() ?? ctm;
-      else if (fn === OPS.transform) ctm = multiply(ctm, args as Matrix);
-      else if (fn === OPS.paintFormXObjectBegin) {
-        stack.push(ctm);
-        if (Array.isArray(args?.[0]) && args[0].length === 6)
-          ctm = multiply(ctm, args[0] as Matrix);
-      } else if (fn === OPS.paintFormXObjectEnd) ctm = stack.pop() ?? ctm;
-      else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
-        // An image fills the unit square, so the CTM's column lengths are its drawn size.
-        const w = Math.hypot(ctm[0], ctm[1]);
-        const h = Math.hypot(ctm[2], ctm[3]);
-        if (isFigure(w, h)) {
-          pages.push(p);
-          break;
-        }
+const overlaps = (a: FigureBox, b: FigureBox) =>
+  a.x <= b.x + b.width + MARGIN &&
+  b.x <= a.x + a.width + MARGIN &&
+  a.y <= b.y + b.height + MARGIN &&
+  b.y <= a.y + a.height + MARGIN;
+
+const union = (a: FigureBox, b: FigureBox): FigureBox => {
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  return {
+    x,
+    y,
+    width: Math.max(a.x + a.width, b.x + b.width) - x,
+    height: Math.max(a.y + a.height, b.y + b.height) - y,
+  };
+};
+
+/** Touching or overlapping boxes become one: the tiles of a split image. */
+function merge(boxes: FigureBox[]): FigureBox[] {
+  const out = [...boxes];
+  for (let i = 0; i < out.length; i++) {
+    for (let j = i + 1; j < out.length; j++) {
+      if (overlaps(out[i] as FigureBox, out[j] as FigureBox)) {
+        out[i] = union(out[i] as FigureBox, out[j] as FigureBox);
+        out.splice(j, 1);
+        j = i;
       }
     }
   }
-  return pages;
+  return out;
 }
 
-/** The pages of a PDF that draw a figure-sized image (1-based). */
-export async function pdfFigurePages(bytes: Uint8Array): Promise<number[]> {
+/** Same spot on the page, give or take a percent: how a repeated banner is recognised. */
+const spot = (b: FigureBox) =>
+  [b.x, b.y, b.width, b.height].map((n) => Math.round(n * 100)).join(",");
+
+interface PageImages {
+  page: number;
+  boxes: FigureBox[];
+  hasText: boolean;
+}
+
+/** Every figure-sized image a page draws, as a box on that page. */
+async function imagesOfPage(pdf: PdfProxy, p: number, OPS: Record<string, number>) {
+  const page = await pdf.getPage(p);
+  const viewport = page.getViewport({ scale: 1 });
+  const { fnArray, argsArray } = await page.getOperatorList();
+  const boxes: FigureBox[] = [];
+  let hasText = false;
+  let ctm: Matrix = [1, 0, 0, 1, 0, 0];
+  const stack: Matrix[] = [];
+  for (let i = 0; i < fnArray.length; i++) {
+    const fn = fnArray[i];
+    const args = argsArray[i];
+    if (fn === OPS.save) stack.push(ctm);
+    else if (fn === OPS.restore) ctm = stack.pop() ?? ctm;
+    else if (fn === OPS.transform) ctm = multiply(ctm, args as Matrix);
+    else if (fn === OPS.showText) hasText = true;
+    else if (fn === OPS.paintFormXObjectBegin) {
+      stack.push(ctm);
+      if (Array.isArray(args?.[0]) && args[0].length === 6) ctm = multiply(ctm, args[0] as Matrix);
+    } else if (fn === OPS.paintFormXObjectEnd) ctm = stack.pop() ?? ctm;
+    else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
+      // An image fills the unit square, so the CTM's column lengths are its drawn size.
+      if (!isFigure(Math.hypot(ctm[0], ctm[1]), Math.hypot(ctm[2], ctm[3]))) continue;
+      // The image's corners on the page as the reader sees it (rotation included).
+      const corners = [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ].map(([u = 0, v = 0]) => {
+        const [x = 0, y = 0] = viewport.convertToViewportPoint(
+          ctm[0] * u + ctm[2] * v + ctm[4],
+          ctm[1] * u + ctm[3] * v + ctm[5],
+        ) as number[];
+        return { x: x / viewport.width, y: y / viewport.height };
+      });
+      const left = Math.max(0, Math.min(...corners.map((c) => c.x)));
+      const top = Math.max(0, Math.min(...corners.map((c) => c.y)));
+      const right = Math.min(1, Math.max(...corners.map((c) => c.x)));
+      const bottom = Math.min(1, Math.max(...corners.map((c) => c.y)));
+      if (right > left && bottom > top)
+        boxes.push({ x: left, y: top, width: right - left, height: bottom - top });
+    }
+  }
+  return { page: p, boxes, hasText };
+}
+
+const pad = (b: FigureBox): FigureBox => {
+  const x = Math.max(0, b.x - MARGIN);
+  const y = Math.max(0, b.y - MARGIN);
+  return {
+    x,
+    y,
+    width: Math.min(1, b.x + b.width + MARGIN) - x,
+    height: Math.min(1, b.y + b.height + MARGIN) - y,
+  };
+};
+
+/** The figures of a loaded PDF: per page, top to bottom, without page furniture. */
+async function figureBoxesOf(pdf: PdfProxy): Promise<{ page: number; box: FigureBox }[]> {
+  const { getResolvedPDFJS } = await import("unpdf");
+  const { OPS } = await getResolvedPDFJS();
+  const pages: PageImages[] = [];
+  for (let p = 1; p <= pdf.numPages; p++) pages.push(await imagesOfPage(pdf, p, OPS));
+
+  const seen = new Map<string, Set<number>>();
+  for (const { page, boxes } of pages)
+    for (const box of boxes) seen.set(spot(box), (seen.get(spot(box)) ?? new Set()).add(page));
+  const furniture = (box: FigureBox) => (seen.get(spot(box))?.size ?? 0) >= REPEATS;
+  const scan = (box: FigureBox, hasText: boolean) =>
+    hasText && box.width * box.height >= COVERS_PAGE;
+
+  return pages.flatMap(({ page, boxes, hasText }) =>
+    merge(boxes.filter((b) => !furniture(b) && !scan(b, hasText)))
+      .sort((a, b) => a.y - b.y || a.x - b.x)
+      .map((box) => ({ page, box: pad(box) })),
+  );
+}
+
+/** The figures of a PDF: the page (1-based) and where on it each one sits. */
+export async function pdfFigureBoxes(bytes: Uint8Array) {
   const { getDocumentProxy } = await import("unpdf");
-  return figurePagesOf(await getDocumentProxy(bytes));
+  return figureBoxesOf(await getDocumentProxy(bytes));
 }
 
 function fromDataUrl(url: string): ImageInput {
@@ -193,9 +297,23 @@ function fromDataUrl(url: string): ImageInput {
 
 /** Browser defaults: unpdf draws the page, a canvas shrinks a large photo. */
 const browserFigureDeps: FigureDeps = {
-  renderPdfPage: async (pdf, pageNumber) => {
+  renderPdfFigure: async (pdf, pageNumber, box) => {
     const { renderPageAsImage } = await import("unpdf");
-    return renderPageAsImage(pdf, pageNumber, { width: PAGE_WIDTH, toDataURL: true });
+    const width = Math.min(MAX_PAGE_WIDTH, Math.round(FIGURE_WIDTH / box.width));
+    const page = await renderPageAsImage(pdf, pageNumber, { width, toDataURL: true });
+    // An <img>, not fetch(): the CSP allows data: images but no data: connections.
+    const img = new Image();
+    img.src = page;
+    await img.decode();
+    const sx = Math.round(box.x * img.naturalWidth);
+    const sy = Math.round(box.y * img.naturalHeight);
+    const sw = Math.max(1, Math.round(box.width * img.naturalWidth));
+    const sh = Math.max(1, Math.round(box.height * img.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = sw;
+    canvas.height = sh;
+    canvas.getContext("2d")?.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+    return canvas.toDataURL("image/png");
   },
   shrink: async (image) => {
     const { fileToImageInput } = await import("~/lib/images/process");
@@ -232,9 +350,10 @@ export async function documentFigures(
       } else if (file.type === PDF_MIME) {
         const { getDocumentProxy } = await import("unpdf");
         const pdf = await getDocumentProxy(bytes);
-        for (const page of await figurePagesOf(pdf)) {
+        for (const { page, box } of await figureBoxesOf(pdf)) {
           if (figures.length >= MAX_FIGURE_CANDIDATES) break;
-          add(file.name, fromDataUrl(await deps.renderPdfPage(pdf, page)), page);
+          const image = fromDataUrl(await deps.renderPdfFigure(pdf, page, box));
+          add(file.name, await deps.shrink(image), page);
         }
       }
     } catch {

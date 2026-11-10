@@ -1,0 +1,81 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 11 0 R >> /XObject << /Im1 12 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 111 >>
+stream
+q 612 0 0 792 0 0 cm /Im1 Do Q
+q 200 0 0 80 206 690 cm /Im1 Do Q
+BT /F1 12 Tf 72 650 Td (Gescande pagina) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 11 0 R >> /XObject << /Im1 12 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 77 >>
+stream
+q 200 0 0 80 206 690 cm /Im1 Do Q
+BT /F1 12 Tf 72 650 Td (Alleen tekst) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 11 0 R >> /XObject << /Im1 12 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 141 >>
+stream
+q 200 0 0 80 206 690 cm /Im1 Do Q
+BT /F1 12 Tf 72 650 Td (Figuur 1) Tj ET
+q 300 0 0 100 72 300 cm /Im1 Do Q
+q 300 0 0 100 72 400 cm /Im1 Do Q
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 11 0 R >> /XObject << /Im1 12 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 147 >>
+stream
+q 200 0 0 80 206 690 cm /Im1 Do Q
+BT /F1 12 Tf 72 650 Td (Figuur 2 en 3) Tj ET
+q 200 0 0 150 72 100 cm /Im1 Do Q
+q 200 0 0 150 340 450 cm /Im1 Do Q
+endstream
+endobj
+11 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+12 0 obj
+<< /Type /XObject /Subtype /Image /Width 4 /Height 4 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length 48 >>
+stream
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+endstream
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000133 00000 n 
+0000000287 00000 n 
+0000000449 00000 n 
+0000000603 00000 n 
+0000000730 00000 n 
+0000000884 00000 n 
+0000001076 00000 n 
+0000001231 00000 n 
+0000001430 00000 n 
+0000001501 00000 n 
+trailer
+<< /Size 13 /Root 1 0 R >>
+startxref
+1693
+%%EOF

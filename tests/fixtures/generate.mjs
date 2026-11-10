@@ -294,12 +294,36 @@ function buildDocxWithImages() {
  * only a small logo (40 × 20 pt). Only page 2 is worth offering as a figure.
  */
 function buildPdfWithImages() {
-  const pixels = Buffer.alloc(4 * 4 * 3, 0x80);
-  const pageContents = [
+  return buildPdfWithImagePages([
     "BT /F1 12 Tf 72 700 Td (Inleiding zonder figuur) Tj ET",
     "BT /F1 12 Tf 72 700 Td (Figuur 1 Architectuur) Tj ET\nq 300 0 0 200 72 400 cm /Im1 Do Q",
     "q 40 0 0 20 500 750 cm /Im1 Do Q\nBT /F1 12 Tf 72 700 Td (Alleen een logo) Tj ET",
-  ];
+  ]);
+}
+
+/**
+ * A four-page report full of images that are not figures, as a real thesis PDF has:
+ * - every page carries the same 200 × 80 pt header banner at the same spot;
+ * - page 1 is a scanned page: one image covering the whole page, with text over it;
+ * - page 2 is plain text;
+ * - page 3 has one figure (300 × 200 pt at 72, 300) drawn as two stacked tiles;
+ * - page 4 has two separate figures (200 × 150 pt at 72, 100 and at 340, 450).
+ * Only the figures on pages 3 and 4 are worth offering, each cut out on its own.
+ */
+function buildPdfWithFigureNoise() {
+  const banner = "q 200 0 0 80 206 690 cm /Im1 Do Q";
+  const text = (t) => `BT /F1 12 Tf 72 650 Td (${t}) Tj ET`;
+  return buildPdfWithImagePages([
+    `q 612 0 0 792 0 0 cm /Im1 Do Q\n${banner}\n${text("Gescande pagina")}`,
+    `${banner}\n${text("Alleen tekst")}`,
+    `${banner}\n${text("Figuur 1")}\nq 300 0 0 100 72 300 cm /Im1 Do Q\nq 300 0 0 100 72 400 cm /Im1 Do Q`,
+    `${banner}\n${text("Figuur 2 en 3")}\nq 200 0 0 150 72 100 cm /Im1 Do Q\nq 200 0 0 150 340 450 cm /Im1 Do Q`,
+  ]);
+}
+
+/** A PDF whose pages draw text (/F1) and one 4 × 4 grey image (/Im1) as their content says. */
+function buildPdfWithImagePages(pageContents) {
+  const pixels = Buffer.alloc(4 * 4 * 3, 0x80);
   const n = pageContents.length;
   const font = 3 + n * 2;
   const image = font + 1;
@@ -346,5 +370,6 @@ writeFileSync(join(here, "sample.docx"), buildDocx());
 writeFileSync(join(here, "sample-empty.pdf"), buildEmptyPdf());
 writeFileSync(join(here, "sample-images.docx"), buildDocxWithImages());
 writeFileSync(join(here, "sample-images.pdf"), buildPdfWithImages());
+writeFileSync(join(here, "sample-figure-noise.pdf"), buildPdfWithFigureNoise());
 console.log("Wrote sample.pdf, sample.docx, sample-empty.pdf and the sample-images fixtures");
 console.log({ PDF_TOKEN_ONE, PDF_TOKEN_TWO, DOCX_TOKEN });
