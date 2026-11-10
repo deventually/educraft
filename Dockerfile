@@ -2,7 +2,7 @@
 # Run with docker-compose.yml and a .env file — see docs/installatie-docker.md.
 # Base image aligned with the Volta pin (package.json volta.node 24.x).
 
-# better-sqlite3 downloads a prebuilt musl binary (linux x64 and arm64) during npm ci.
+# better-sqlite3 ships prebuilt musl binaries (linux x64 and arm64) inside its npm package.
 FROM node:24-alpine AS development-dependencies-env
 WORKDIR /app
 COPY package.json package-lock.json ./

@@ -19,6 +19,16 @@ const dockerignore = read(".dockerignore")
   .split("\n")
   .map((l) => l.trim());
 
+describe("native modules on Alpine", () => {
+  // The image is node:24-alpine (musl) and has no compiler, so better-sqlite3 must ship a musl
+  // binary for both architectures we build for. Since v13 the prebuilds live inside the package.
+  it.each(["linuxmusl-x64", "linuxmusl-arm64"])("better-sqlite3 ships a %s prebuild", (target) => {
+    expect(existsSync(resolve(root, `node_modules/better-sqlite3/prebuilds/${target}.node`))).toBe(
+      true,
+    );
+  });
+});
+
 describe("Dockerfile, final stage", () => {
   it("runs in production mode as a non-root user", () => {
     expect(finalStage).toMatch(/ENV NODE_ENV=production/);
