@@ -33,7 +33,9 @@ export const tool: Messages["tool"] = {
   figuresPrivacy:
     "Images are not anonymised. Only tick what affects the judgement and watch for names and faces.",
   figuresUnsupported:
-    "Skipped {count} image(s) in a format the AI cannot read (e.g. Visio or a Word chart).",
+    "Skipped {count} image(s) in a format the AI cannot read (e.g. a Visio drawing).",
+  figuresWordDrawings:
+    "LimeOnIt cannot cut out {count} chart(s) or diagram(s) drawn in Word. To include them, save the report as PDF in Word and upload that file.",
   figureZoom: "Enlarge {label}",
   fileComingSoon: "File/image input will become available in a later phase.",
   formHide: "Hide the form",

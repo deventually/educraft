@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #238 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #240 gemerged)_
 
 ## Nu
 
+- **Figuren: grafieken en diagrammen uit een PDF (#240) gemerged op 2026-11-10:** bij
+  *Studentwerk beoordelen* vindt LimeOnIt in een PDF ook getekende grafieken, diagrammen en
+  stroomschema's als figuur, met hun labels; tabellen, kaders, lijnen en herhaalde logo's niet.
+  Bij Word worden grafieken en SmartArt geteld, met de tip het verslag als PDF te uploaden.
 - **Reviewer Student (#238) gemerged op 2026-11-10:** een vijfde reviewer loopt de cursus week
   voor week door zoals een student: deadlines die samenvallen, feedback die pas komt als het al
   telt, lege weken met een eindsprint. Voor docenten standaard uit; eigen stuk op

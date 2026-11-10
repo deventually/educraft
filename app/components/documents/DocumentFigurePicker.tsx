@@ -90,7 +90,7 @@ export function DocumentFigurePicker({ files, value, onChange }: Props) {
     setFound(null);
     documentFigures(files)
       .then((result) => live && setFound(result))
-      .catch(() => live && setFound({ figures: [], unsupported: 0 }));
+      .catch(() => live && setFound({ figures: [], unsupported: 0, drawings: 0 }));
     return () => {
       live = false;
     };
@@ -117,6 +117,11 @@ export function DocumentFigurePicker({ files, value, onChange }: Props) {
         {found && found.unsupported > 0 && (
           <p className="text-slate-600">
             {fmt(t.tool.figuresUnsupported, { count: found.unsupported })}
+          </p>
+        )}
+        {found && found.drawings > 0 && (
+          <p className="text-slate-600">
+            {fmt(t.tool.figuresWordDrawings, { count: found.drawings })}
           </p>
         )}
         {found && found.figures.length > 0 && full && (
