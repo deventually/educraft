@@ -18,10 +18,6 @@ Kies **Exporteer** bij een resultaat. Je ziet eerst een voorbeeld van het bestan
 
 Je kunt werk koppelen aan een cursus: aan de hele cursus, of aan één les of toets daarin. Op de cursuspagina staat het dan onder **Gekoppeld werk**, en op **Start** verdwijnt die les uit *Voorbereiden*. Koppelen kan ook direct in de tool, als je daar je cursus kiest. Zie [Cursussen en de rode draad](/help/courses).
 
-## In je BDB- of BKE-dossier
-
-Werk je aan je BDB of BKE, dan kun je een resultaat met **Toevoegen aan dossier** als bewijs in je dossier zetten. Zie [Je BDB en BKE maken](/help/bdb-bke).
-
 ## Verwijderen
 
 Met **Verwijderen** gooi je een resultaat definitief weg. De koppeling met een cursus verdwijnt dan ook.

@@ -9,7 +9,7 @@ import {
   getToolById,
   TOOL_OVERLAY_IDS,
 } from "~/lib/help/registry";
-import { HELP_SECTIONS, helpSections, topicIsAdminOnly } from "~/lib/help/sections";
+import { HELP_SECTIONS, helpSections, topicVisible } from "~/lib/help/sections";
 import { searchHelp } from "~/lib/help/search";
 
 describe("help sections — the order of /help", () => {
@@ -23,25 +23,41 @@ describe("help sections — the order of /help", () => {
   });
 
   it("starts with getting started and keeps the admin topic for admins", () => {
-    const teacher = helpSections("nl", { isAdmin: false });
+    const teacher = helpSections("nl", { isAdmin: false, portfolio: true });
     expect(teacher[0]?.topics[0]?.slug).toBe("getting-started");
     expect(teacher.flatMap((s) => s.topics.map((t) => t.slug))).not.toContain("admin");
-    const admin = helpSections("nl", { isAdmin: true });
+    const admin = helpSections("nl", { isAdmin: true, portfolio: true });
     expect(admin.flatMap((s) => s.topics.map((t) => t.slug))).toContain("admin");
-    expect(topicIsAdminOnly("admin")).toBe(true);
-    expect(topicIsAdminOnly("account")).toBe(false);
+    expect(topicVisible("admin", { isAdmin: false, portfolio: true })).toBe(false);
+    expect(topicVisible("admin", { isAdmin: true, portfolio: true })).toBe(true);
+    expect(topicVisible("account", { isAdmin: false, portfolio: false })).toBe(true);
+  });
+
+  it("shows the BDB and BKE only to a teacher for whom the workplace is on", () => {
+    const slugs = (portfolio: boolean) =>
+      helpSections("nl", { isAdmin: false, portfolio }).flatMap((s) => s.topics.map((t) => t.slug));
+    expect(slugs(true)).toContain("bdb-bke");
+    expect(slugs(false)).not.toContain("bdb-bke");
+    expect(topicVisible("bdb-bke", { isAdmin: false, portfolio: false })).toBe(false);
+    expect(topicVisible("bdb-bke", { isAdmin: false, portfolio: true })).toBe(true);
+  });
+
+  it("points to the BDB and BKE only from its own topic, so nobody follows a link to a closed page", () => {
+    for (const lang of LOCALES)
+      for (const slug of HELP_TOPIC_SLUGS.filter((s) => s !== "bdb-bke"))
+        expect(getTopic(slug, lang), `${lang} ${slug}`).not.toContain("/help/bdb-bke");
   });
 
   it("leaves out a listed topic that has no file (yet), and an empty section", () => {
     for (const lang of LOCALES)
-      for (const section of helpSections(lang, { isAdmin: true })) {
+      for (const section of helpSections(lang, { isAdmin: true, portfolio: true })) {
         expect(section.topics.length).toBeGreaterThan(0);
         for (const t of section.topics) expect(HELP_TOPIC_SLUGS).toContain(t.slug);
       }
   });
 
   it("gives each listed topic its title and its section headings with their anchors", () => {
-    const account = helpSections("nl", { isAdmin: false })
+    const account = helpSections("nl", { isAdmin: false, portfolio: true })
       .flatMap((s) => s.topics)
       .find((t) => t.slug === "account");
     expect(account?.title).toBe("Je account");

@@ -10,8 +10,17 @@ interface HelpSection {
   id: string;
   title: LocalizedText;
   topics: readonly string[];
-  /** Only shown to admins; the topic page itself is refused to others. */
-  adminOnly?: boolean;
+  /**
+   * Only for whom this is true: an admin, or a teacher with the BDB/BKE workplace. Hidden from
+   * the others on /help, and the topic page itself is a 404 for them.
+   */
+  requires?: keyof HelpAccess;
+}
+
+/** What the viewer may see; the server decides (role, `portfolioAccess`). */
+export interface HelpAccess {
+  isAdmin: boolean;
+  portfolio: boolean;
 }
 
 export const HELP_SECTIONS: readonly HelpSection[] = [
@@ -27,18 +36,27 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
     topics: ["context-profiles", "courses", "week", "review-team"],
   },
   { id: "together", title: { nl: "Samenwerken", en: "Working together" }, topics: ["teams"] },
-  { id: "bdb-bke", title: { nl: "BDB en BKE", en: "BDB and BKE" }, topics: ["bdb-bke"] },
+  {
+    id: "bdb-bke",
+    title: { nl: "BDB en BKE", en: "BDB and BKE" },
+    topics: ["bdb-bke"],
+    requires: "portfolio",
+  },
   { id: "account", title: { nl: "Je account", en: "Your account" }, topics: ["account"] },
   {
     id: "admin",
     title: { nl: "Beheer", en: "Administration" },
     topics: ["admin"],
-    adminOnly: true,
+    requires: "isAdmin",
   },
 ];
 
-export function topicIsAdminOnly(slug: string): boolean {
-  return HELP_SECTIONS.some((s) => s.adminOnly && s.topics.includes(slug));
+const sectionVisible = (s: HelpSection, access: HelpAccess) =>
+  s.requires === undefined || access[s.requires];
+
+/** Whether this viewer may open the topic: not when its section requires what they lack. */
+export function topicVisible(slug: string, access: HelpAccess): boolean {
+  return !HELP_SECTIONS.some((s) => s.topics.includes(slug) && !sectionVisible(s, access));
 }
 
 /** Markdown reduced to lower-case words, for search. */
@@ -51,8 +69,8 @@ function plain(markdown: string): string {
 }
 
 /** The sections a user sees on /help, with each topic's title, headings and search text. */
-export function helpSections(lang: HelpLang, { isAdmin }: { isAdmin: boolean }) {
-  return HELP_SECTIONS.filter((s) => isAdmin || !s.adminOnly)
+export function helpSections(lang: HelpLang, access: HelpAccess) {
+  return HELP_SECTIONS.filter((s) => sectionVisible(s, access))
     .map((s) => ({
       id: s.id,
       title: loc(s.title, lang),

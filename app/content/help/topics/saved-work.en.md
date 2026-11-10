@@ -18,10 +18,6 @@ Choose **Export** on a result. You first see a preview of the file. Then you cho
 
 You can link work to a course: to the whole course, or to one lesson or test in it. The course page then lists it under **Linked work**, and on **Start** that lesson drops off *To prepare*. You can also link straight from the tool, by choosing your course there. See [Courses and the alignment spine](/help/courses).
 
-## In your BDB or BKE dossier
-
-If you are working on your BDB or BKE, **Add to dossier** puts a result in your dossier as evidence. See [Making your BDB and BKE](/help/bdb-bke).
-
 ## Deleting
 
 **Delete** removes a result for good. Its link to a course goes too.

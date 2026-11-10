@@ -15,7 +15,6 @@ LimeOnIt turns evidence-based teaching methods from *The Pedagogical Promptbook*
 - **Your week:** on **Start** you see what happens in your courses this week. See [Your week](/help/week).
 - **Utilities:** calculations without AI, such as turning points into a grade. See [Utilities](/help/utilities).
 - **Teams:** share a course, rubric or teaching context with colleagues. See [Teams and sharing](/help/teams).
-- **BDB and BKE:** work on your Dutch teaching qualification. See [Making your BDB and BKE](/help/bdb-bke).
 
 Not everything is on for everyone. If you don't see something, your administrator has not switched it on (yet).
 

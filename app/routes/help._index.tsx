@@ -8,6 +8,7 @@ import { GOAL_ORDER, GOALS, TOOL_GOALS } from "~/lib/registry/goals";
 import { toolSearchText } from "~/lib/registry/search";
 import { getAvailableTools } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -19,7 +20,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   // The same tools as the catalogue: only what this teacher can open.
   const tools = (await getAvailableTools(user)).filter((tool) => !tool.hiddenFromCatalogue);
   return {
-    sections: helpSections(lang, { isAdmin: user.role === "admin" }),
+    sections: helpSections(lang, {
+      isAdmin: user.role === "admin",
+      portfolio: await portfolioAccess(user),
+    }),
     toolGroups: GOAL_ORDER.map((goal) => ({
       goal,
       name: GOALS[goal].name,

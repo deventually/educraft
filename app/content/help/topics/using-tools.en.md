@@ -43,6 +43,6 @@ The real names stay in your browser and come back in the result. *Earlier work* 
 
 ## After the result
 
-- Under **Carry on with this result** you find a sensible **next step**, and you can keep the result with a course or put it in your BDB or BKE dossier as evidence.
+- Under **Carry on with this result** you find a sensible **next step**, and you can keep the result with a course.
 - **Was this helpful?** lets you say what you thought of it. That helps the administrator improve the tools.
 - Everything you make then shows up in [Earlier work](/help/saved-work).

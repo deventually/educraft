@@ -15,7 +15,6 @@ LimeOnIt zet onderbouwde onderwijsmethoden uit *The Pedagogical Promptbook* om i
 - **Je week:** op **Start** zie je wat er deze week in je cursussen gebeurt. Zie [Je week](/help/week).
 - **Hulpmiddelen:** rekenen zonder AI, zoals punten omrekenen naar een cijfer. Zie [Hulpmiddelen](/help/utilities).
 - **Teams:** deel een cursus, rubric of onderwijscontext met collega's. Zie [Teams en delen](/help/teams).
-- **BDB en BKE:** werk aan je basis- of seniorkwalificatie. Zie [Je BDB en BKE maken](/help/bdb-bke).
 
 Niet alles staat voor iedereen aan. Zie je iets niet, dan heeft je beheerder het (nog) niet aangezet.
 

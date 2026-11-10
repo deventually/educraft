@@ -43,6 +43,6 @@ De echte namen blijven in je browser en komen terug in het resultaat. In *Eerder
 
 ## Na het resultaat
 
-- Onder **Verder met dit resultaat** staat een logische **volgende stap**, en kun je het resultaat bij een cursus bewaren of als bewijs in je BDB- of BKE-dossier zetten.
+- Onder **Verder met dit resultaat** staat een logische **volgende stap**, en kun je het resultaat bij een cursus bewaren.
 - Met **Was dit nuttig?** laat je weten wat je ervan vond. Dat helpt de beheerder om de tools te verbeteren.
 - Alles wat je maakt, staat daarna in [Eerder gemaakt](/help/saved-work).

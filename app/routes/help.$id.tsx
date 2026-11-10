@@ -8,7 +8,8 @@ import {
   getTopicTitle,
   HELP_TOPIC_SLUGS,
 } from "~/lib/help/registry";
-import { topicIsAdminOnly } from "~/lib/help/sections";
+import { topicVisible } from "~/lib/help/sections";
+import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { requireUser } from "~/server/auth.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { HelpContent } from "~/components/HelpContent";
@@ -24,8 +25,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (tool) {
     return { kind: "tool" as const, tool, overlay: getToolHelpOverlay(tool.id, lang) };
   }
-  const allowed = user.role === "admin" || !topicIsAdminOnly(params.id);
-  if (HELP_TOPIC_SLUGS.includes(params.id) && allowed) {
+  const access = { isAdmin: user.role === "admin", portfolio: await portfolioAccess(user) };
+  if (HELP_TOPIC_SLUGS.includes(params.id) && topicVisible(params.id, access)) {
     return {
       kind: "topic" as const,
       title: getTopicTitle(params.id, lang),
