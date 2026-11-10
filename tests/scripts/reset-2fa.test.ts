@@ -36,7 +36,7 @@ beforeAll(async () => {
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 function run(args: string[]) {
-  return spawnSync("npx", ["tsx", "scripts/reset-2fa.ts", ...args], {
+  return spawnSync(process.execPath, ["--import", "tsx", "scripts/reset-2fa.ts", ...args], {
     cwd: root,
     env: { ...process.env, DATABASE_URL: `file:${dbFile}` },
     encoding: "utf8",
