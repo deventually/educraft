@@ -1,24 +1,16 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-
-process.env.DATABASE_URL = "file::memory:";
-
-const who = vi.hoisted(() => ({ owner: true }));
-
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return {
-    ...actual,
-    requireRole: vi.fn(async () => ({ id: "admin", role: "admin" })),
-    isOwner: vi.fn(async () => who.owner),
-  };
-});
+import { signIn, withCookie } from "../helpers/session";
 
 let route: typeof import("~/routes/admin.errors");
 let log: typeof import("~/server/errorLog.server");
+let settings: typeof import("~/server/repositories/settings.server");
+let cookie: string;
 
 beforeAll(async () => {
   route = await import("~/routes/admin.errors");
   log = await import("~/server/errorLog.server");
+  settings = await import("~/server/repositories/settings.server");
+  cookie = await signIn({ id: "errors-admin", role: "admin" });
 });
 
 beforeEach(() => {
@@ -26,11 +18,14 @@ beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
-const load = () => route.loader({ request: new Request("http://localhost/admin/errors") } as never);
+const load = () =>
+  route.loader({
+    request: withCookie(new Request("http://localhost/admin/errors"), cookie),
+  } as never);
 
 describe("admin errors loader", () => {
   it("gives the owner the recent errors, newest first", async () => {
-    who.owner = true;
+    await settings.setOwnerUserId("errors-admin");
     log.recordError(new Error("first"), { requestId: "a", method: "GET", path: "/x" });
     log.recordError(new Error("second"), { requestId: "b", method: "GET", path: "/y" });
     const data = await load();
@@ -41,7 +36,7 @@ describe("admin errors loader", () => {
   });
 
   it("is a 404 for an admin who is not the owner", async () => {
-    who.owner = false;
+    await settings.setOwnerUserId("someone-else");
     const thrown = await load().catch((e) => e);
     expect(thrown).toBeInstanceOf(Response);
     expect((thrown as Response).status).toBe(404);

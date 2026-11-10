@@ -1,17 +1,10 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { flatRoutes } from "../helpers/routes";
 import { C1, LU, sampleDossier } from "../portfolio/fixtures";
 
 // P29.3: the rehearsal page of a dossier, and "Bewaar in je dossier".
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
 
 let repo: typeof import("~/server/repositories/portfolio.server");
 let route: typeof import("~/routes/portfolio.$id.rehearsal");
@@ -27,19 +20,19 @@ beforeAll(async () => {
   foreignId = (await repo.createDossier("teacher-b", "Andere", sampleDossier())).id;
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
+beforeEach(async () => {
+  await signInAs({ id: "teacher-a", name: "A" });
 });
 
 const get = (id: string) =>
   route.loader({
-    request: new Request(`http://localhost/portfolio/${id}/rehearsal`),
+    request: signedRequest(`http://localhost/portfolio/${id}/rehearsal`),
     params: { id },
   } as never);
 
 function keep(id: string, fields: Record<string, string>) {
   const body = new URLSearchParams({ intent: "keepRehearsal", ...fields });
-  const request = new Request(`http://localhost/portfolio/${id}/rehearsal`, {
+  const request = signedRequest(`http://localhost/portfolio/${id}/rehearsal`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: body.toString(),
@@ -71,7 +64,7 @@ describe("/portfolio/:id/rehearsal", () => {
   it("is only for the owner; anyone else gets a 404", async () => {
     expect(await status(get(foreignId))).toBe(404);
     expect(await status(get("unknown"))).toBe(404);
-    currentUser.value = { id: "teacher-z", name: "Z", email: null, role: "teacher" } as never;
+    await signInAs({ id: "teacher-z", name: "Z" });
     expect(await status(get(ownId))).toBe(404);
   });
 

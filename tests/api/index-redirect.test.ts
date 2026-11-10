@@ -1,10 +1,5 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
-
-process.env.DATABASE_URL = "file::memory:";
-
-// Mock auth so we can drive the viewer's role.
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
+import { describe, it, expect, beforeAll } from "vitest";
+import { signIn, withCookie } from "../helpers/session";
 
 type IndexRoute = typeof import("~/routes/index");
 let route: IndexRoute;
@@ -13,16 +8,10 @@ beforeAll(async () => {
   route = await import("~/routes/index");
 });
 
-function loaderWith(role: "admin" | "teacher") {
-  requireUserMock.mockResolvedValueOnce({
-    id: "u",
-    name: "U",
-    email: null,
-    role,
-    createdAt: new Date(0),
-  });
+async function loaderWith(role: "admin" | "teacher") {
+  const cookie = await signIn({ id: `index-${role}`, role });
   return route.loader({
-    request: new Request("http://localhost/"),
+    request: withCookie(new Request("http://localhost/"), cookie),
     params: {},
     context: {},
   } as never);

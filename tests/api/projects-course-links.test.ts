@@ -1,16 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { alignedCourse, TEST1 } from "../courses/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "work-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
 
 let courses: typeof import("~/server/repositories/courses.server");
 let generations: typeof import("~/server/repositories/generations.server");
@@ -24,12 +17,10 @@ beforeAll(async () => {
   m = (await import("~/lib/i18n")).getMessages("nl");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "work-a", name: "A", email: null, role: "teacher" } as never;
-});
+beforeEach(() => signInAs({ id: "work-a", name: "A" }));
 
 function post(fields: Record<string, string>): Request {
-  return new Request("http://localhost/projects", {
+  return signedRequest("http://localhost/projects", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: new URLSearchParams(fields).toString(),
@@ -64,7 +55,7 @@ describe("/projects — link to a course (P20, 20.4)", () => {
     );
 
     const data = (await projects.loader({
-      request: new Request("http://localhost/projects"),
+      request: signedRequest("http://localhost/projects"),
     } as never)) as {
       generations: { id: string; courseLinks: unknown[] }[];
       courses: { courseId: string; courseName: string }[];

@@ -1,13 +1,8 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return { ...actual, requireUser: requireUserMock };
-});
 
 type Route = typeof import("~/routes/account.2fa");
 type Users = typeof import("~/server/repositories/users.server");
@@ -40,15 +35,15 @@ async function actAs(role: "teacher" | "admin") {
     passwordHash: "x",
     role,
   });
-  requireUserMock.mockResolvedValue({ ...row, role });
+  await signInAs({ id: row.id, twoFactor: false });
   return row;
 }
 
 const step = () => Math.floor(Date.now() / 30_000);
-const req = () => new Request("http://localhost/account/2fa");
+const req = () => signedRequest("http://localhost/account/2fa");
 
 function post(fields: Record<string, string>) {
-  const request = new Request("http://localhost/account/2fa", {
+  const request = signedRequest("http://localhost/account/2fa", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(fields).toString(),

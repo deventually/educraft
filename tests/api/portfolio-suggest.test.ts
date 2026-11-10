@@ -1,16 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { sampleDossier, C1, C2, LU } from "../portfolio/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
 
 let repo: typeof import("~/server/repositories/portfolio.server");
 let overview: typeof import("~/routes/portfolio.$id");
@@ -24,8 +17,8 @@ beforeAll(async () => {
   generations = await import("~/server/repositories/generations.server");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
+beforeEach(async () => {
+  await signInAs({ id: "teacher-a", name: "A" });
 });
 
 function post(fields: Record<string, string | string[]>): Request {
@@ -33,13 +26,13 @@ function post(fields: Record<string, string | string[]>): Request {
   for (const [k, v] of Object.entries(fields)) {
     for (const value of Array.isArray(v) ? v : [v]) body.append(k, value);
   }
-  return new Request("http://localhost/x", {
+  return signedRequest("http://localhost/x", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: body.toString(),
   });
 }
-const get = () => new Request("http://localhost/x", { headers: { Cookie: "lang=nl" } });
+const get = () => signedRequest("http://localhost/x", { headers: { Cookie: "lang=nl" } });
 
 /** A confirmed dossier whose first criterion is about lesson design; no evidence yet. */
 async function dossier(userId = "teacher-a") {

@@ -1,23 +1,15 @@
 import JSZip from "jszip";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { signInAs, signOut, signedRequest } from "../helpers/session";
 import { sampleDossier } from "../portfolio/fixtures";
 
 process.env.DATABASE_URL = "file::memory:";
-
-const { requireRoleMock } = vi.hoisted(() => ({ requireRoleMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireRole: requireRoleMock }));
 
 type Route = typeof import("~/routes/portfolio.$id.export");
 let route: Route;
 let repo: typeof import("~/server/repositories/portfolio.server");
 
-const teacher = (id: string) => ({
-  id,
-  name: "Docent",
-  email: null,
-  role: "teacher" as const,
-  createdAt: new Date(0),
-});
+const teacher = (id: string) => signInAs({ id, name: "Docent" });
 
 beforeAll(async () => {
   route = await import("~/routes/portfolio.$id.export");
@@ -25,7 +17,7 @@ beforeAll(async () => {
 });
 
 function call(id: string, cookie = "", query = "") {
-  const request = new Request(`http://localhost/portfolio/${id}/export${query}`, {
+  const request = signedRequest(`http://localhost/portfolio/${id}/export${query}`, {
     headers: cookie ? { Cookie: cookie } : {},
   });
   // biome-ignore lint/suspicious/noExplicitAny: minimal loader args for a resource route
@@ -33,15 +25,16 @@ function call(id: string, cookie = "", query = "") {
 }
 
 describe("GET /portfolio/:id/export", () => {
-  it("only lets teachers and admins in", async () => {
-    requireRoleMock.mockResolvedValueOnce(teacher("export-owner"));
+  it("only lets a signed-in teacher or admin in", async () => {
+    await teacher("export-owner");
     const d = await repo.createDossier("export-owner", "BDB 2026", sampleDossier());
-    await call(d.id);
-    expect(requireRoleMock).toHaveBeenCalledWith(expect.any(Request), "teacher", "admin");
+    signOut();
+    const thrown = (await call(d.id).catch((e: unknown) => e)) as Response;
+    expect(thrown.headers.get("Location")).toBe("/login");
   });
 
   it("returns the owner's dossier as a .docx download", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const d = await repo.createDossier("export-owner", "BDB 2026", sampleDossier());
     const res = await call(d.id, "lang=en");
     expect(res.status).toBe(200);
@@ -59,7 +52,7 @@ describe("GET /portfolio/:id/export", () => {
   });
 
   it("sends the teacher back to the check while an open spot is left", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const data = sampleDossier();
     data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
@@ -69,7 +62,7 @@ describe("GET /portfolio/:id/export", () => {
   });
 
   it("always gives the draft version, marked as such in its file name", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const data = sampleDossier();
     data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
@@ -82,7 +75,7 @@ describe("GET /portfolio/:id/export", () => {
   });
 
   it("gives one learning outcome as its own file, with the outcome in the file name", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const data = sampleDossier();
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
     const lu = data.framework.outcomes[0]!.id;
@@ -99,7 +92,7 @@ describe("GET /portfolio/:id/export", () => {
   });
 
   it("lets a finished outcome out while another one still has an open spot", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const data = sampleDossier();
     const lu2 = "00000000-0000-4000-8000-000000000002";
     data.framework.outcomes.push({
@@ -118,19 +111,19 @@ describe("GET /portfolio/:id/export", () => {
   });
 
   it("answers 404 for an outcome the dossier does not have", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     const d = await repo.createDossier("export-owner", "BDB 2026", sampleDossier());
     await expect(call(d.id, "", "?lu=nope")).rejects.toMatchObject({ status: 404 });
   });
 
   it("answers 404 for someone else's dossier", async () => {
     const d = await repo.createDossier("export-owner", "Van een ander", sampleDossier());
-    requireRoleMock.mockResolvedValue(teacher("export-stranger"));
+    await teacher("export-stranger");
     await expect(call(d.id)).rejects.toMatchObject({ status: 404 });
   });
 
   it("answers 404 for an unknown id", async () => {
-    requireRoleMock.mockResolvedValue(teacher("export-owner"));
+    await teacher("export-owner");
     await expect(call("does-not-exist")).rejects.toMatchObject({ status: 404 });
   });
 });
@@ -143,14 +136,14 @@ describe("GET /portfolio/:id/print (PDF)", () => {
   });
   const load = (id: string, query = "") =>
     print.loader({
-      request: new Request(`http://localhost/portfolio/${id}/print${query}`),
+      request: signedRequest(`http://localhost/portfolio/${id}/print${query}`),
       params: { id },
       context: {},
       // biome-ignore lint/suspicious/noExplicitAny: minimal loader args
     } as any);
 
   it("follows the same rules as the Word export: draft always, final only without open spots", async () => {
-    requireRoleMock.mockResolvedValue(teacher("print-owner"));
+    await teacher("print-owner");
     const data = sampleDossier();
     data.chapters[0]!.text = "Mijn les. [aanvullen: het effect]";
     const d = await repo.createDossier("print-owner", "BDB 2026", data);
@@ -163,7 +156,7 @@ describe("GET /portfolio/:id/print (PDF)", () => {
 
   it("answers 404 for someone else's dossier", async () => {
     const d = await repo.createDossier("print-owner", "Van een ander", sampleDossier());
-    requireRoleMock.mockResolvedValue(teacher("print-stranger"));
+    await teacher("print-stranger");
     await expect(load(d.id, "?draft=1")).rejects.toMatchObject({ status: 404 });
   });
 });

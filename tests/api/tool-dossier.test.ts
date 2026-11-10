@@ -1,17 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { C1, LU, sampleDossier } from "../portfolio/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "td-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 let toolRoute: typeof import("~/routes/tool");
 let projects: typeof import("~/routes/projects._index");
@@ -27,9 +19,7 @@ beforeAll(async () => {
   exceptions = await import("~/server/repositories/exceptions.server");
 });
 
-const as = (id: string) => {
-  currentUser.value = { id, name: id, email: null, role: "teacher" } as never;
-};
+const as = (id: string) => signInAs({ id });
 beforeEach(() => as("td-a"));
 
 interface ForCriterion {
@@ -47,13 +37,13 @@ interface Loaded {
 
 const load = (query = "", slug = "authentic-assessment") =>
   toolRoute.loader({
-    request: new Request(`http://localhost/tools/${slug}${query}`),
+    request: signedRequest(`http://localhost/tools/${slug}${query}`),
     params: { slug },
     context: {},
   } as never) as Promise<Loaded>;
 
 function act(fields: Record<string, string>, slug = "authentic-assessment") {
-  const request = new Request(`http://localhost/tools/${slug}`, {
+  const request = signedRequest(`http://localhost/tools/${slug}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: new URLSearchParams(fields).toString(),
@@ -102,7 +92,7 @@ describe("from a criterion to the tool and back (P27.2)", () => {
 
 describe("workplace switched off (P27)", () => {
   it("hides the bar and the evidence choice, and refuses the action on both pages", async () => {
-    as("td-off");
+    await as("td-off");
     const mine = await portfolio.createDossier("td-off", "Mijn BDB", sampleDossier());
     await exceptions.setException("td-off", exceptions.featureKey("portfolio"), "off");
     const g = await generation("td-off");
@@ -112,7 +102,7 @@ describe("workplace switched off (P27)", () => {
     const fields = { intent: "addToDossier", id: g.id, dossierId: mine.id, criterionId: C1 };
     expect(await act(fields)).toMatchObject({ ok: false });
     const viaProjects = await projects.action({
-      request: new Request("http://localhost/projects", {
+      request: signedRequest("http://localhost/projects", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
         body: new URLSearchParams(fields).toString(),
@@ -121,7 +111,7 @@ describe("workplace switched off (P27)", () => {
     expect(viaProjects).toMatchObject({ ok: false });
     expect((await portfolio.getDossier("td-off", mine.id))?.data.evidence).toHaveLength(1);
     const list = (await projects.loader({
-      request: new Request("http://localhost/projects"),
+      request: signedRequest("http://localhost/projects"),
     } as never)) as {
       dossiers: unknown[];
     };

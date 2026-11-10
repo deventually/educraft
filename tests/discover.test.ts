@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
+import { env } from "~/server/env.server";
+
+// Which server a URL is for (the test config points both at nothing, on their own path).
+const isOllama = (url: string) => url.startsWith(env.OLLAMA_BASE_URL.replace(/\/v1$/, ""));
+const isLmStudio = (url: string) => url.startsWith(env.LMSTUDIO_BASE_URL.replace(/\/v1$/, ""));
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -19,8 +24,8 @@ function mockFetch(handler: (url: string) => { ok: boolean; body?: unknown } | "
 describe("discoverLocalModels", () => {
   it("maps each server's /v1/models into prefixed local model ids", async () => {
     mockFetch((url) => {
-      if (url.includes("11434")) return { ok: true, body: { data: [{ id: "gemma4:31b" }] } };
-      if (url.includes("1234")) return { ok: true, body: { data: [{ id: "qwen-local" }] } };
+      if (isOllama(url)) return { ok: true, body: { data: [{ id: "gemma4:31b" }] } };
+      if (isLmStudio(url)) return { ok: true, body: { data: [{ id: "qwen-local" }] } };
       return { ok: false };
     });
     const models = await discoverLocalModels(50);
@@ -34,7 +39,7 @@ describe("discoverLocalModels", () => {
 
   it("fails soft when a server is down or errors (contributes nothing)", async () => {
     mockFetch((url) => {
-      if (url.includes("11434")) return { ok: true, body: { data: [{ id: "only-ollama" }] } };
+      if (isOllama(url)) return { ok: true, body: { data: [{ id: "only-ollama" }] } };
       return "throw"; // LM Studio down
     });
     const models = await discoverLocalModels(50);
@@ -51,7 +56,7 @@ describe("discoverLocalModels", () => {
     globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/models")) {
-        if (url.includes("11434"))
+        if (isOllama(url))
           return {
             ok: true,
             json: async () => ({ data: [{ id: "gemma4:31b" }, { id: "llama3" }] }),
@@ -78,7 +83,7 @@ describe("discoverLocalModels", () => {
     globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/models")) {
-        if (url.includes("11434"))
+        if (isOllama(url))
           return {
             ok: true,
             json: async () => ({ data: [{ id: "qwen3" }, { id: "llama3" }] }),
@@ -102,7 +107,7 @@ describe("discoverLocalModels", () => {
   it("defaults Ollama vision to false when /api/show fails (fail-soft)", async () => {
     globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.includes("/models") && url.includes("11434"))
+      if (url.includes("/models") && isOllama(url))
         return { ok: true, json: async () => ({ data: [{ id: "gemma4:31b" }] }) } as Response;
       if (url.includes("/api/show")) throw new Error("connection refused");
       return { ok: false, json: async () => ({}) } as Response;

@@ -1,16 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { alignedCourse } from "../courses/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "teacher-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
 
 let courses: typeof import("~/server/repositories/courses.server");
 let generations: typeof import("~/server/repositories/generations.server");
@@ -24,13 +17,13 @@ beforeAll(async () => {
   start = await import("~/routes/start");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "teacher-a", name: "A", email: null, role: "teacher" } as never;
+beforeEach(async () => {
+  await signInAs({ id: "teacher-a", name: "A" });
 });
 
 const load = (path = "/start", locale = "nl") =>
   start.loader({
-    request: new Request(`http://localhost${path}`, { headers: { Cookie: `lang=${locale}` } }),
+    request: signedRequest(`http://localhost${path}`, { headers: { Cookie: `lang=${locale}` } }),
     params: {},
     context: {},
   } as never);
@@ -54,7 +47,7 @@ const save = (userId: string, toolSlug: string) =>
 
 describe("/start (P27.3)", () => {
   it("is empty for a new teacher: no courses, no week, no results", async () => {
-    currentUser.value = { id: "new", name: "N", email: null, role: "teacher" } as never;
+    await signInAs({ id: "new", name: "N" });
     expect(await load()).toMatchObject({
       query: "",
       results: [],
@@ -89,7 +82,7 @@ describe("/start (P27.3)", () => {
   });
 
   it("shows at most five findings and the five newest own results", async () => {
-    currentUser.value = { id: "busy", name: "B", email: null, role: "teacher" } as never;
+    await signInAs({ id: "busy", name: "B" });
     for (const n of [1, 2, 3])
       await courses.createCourse("busy", { name: `C${n}`, data: gappyCourse() });
     for (let i = 0; i < 7; i++) await save("busy", "rubric-builder");
@@ -135,13 +128,15 @@ describe("/start (P27.3)", () => {
       ...alignedCourse(),
       startDate: "2026-11-16",
     });
-    const at = (iso: string) => {
+    // Signs in again at the new time: the session would be idle for days otherwise.
+    const at = async (iso: string) => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(new Date(iso));
+      await signInAs({ id: "dated", name: "D" });
     };
 
     it("is absent while no course has a start date, with a hint to the course", async () => {
-      currentUser.value = { id: "nodate", name: "N", email: null, role: "teacher" } as never;
+      await signInAs({ id: "nodate", name: "N" });
       const c = await courses.createCourse("nodate", { name: "Zonder", data: alignedCourse() });
       const data = await load();
       expect(data.teacherWeek).toBeNull();
@@ -149,10 +144,10 @@ describe("/start (P27.3)", () => {
     });
 
     it("computes this week from the own dated courses and links, never someone else's", async () => {
-      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await signInAs({ id: "dated", name: "D" });
       const mine = await courses.createCourse("dated", { name: "Datums", data: datedCourse() });
       await courses.createCourse("other", { name: "Van een ander", data: datedCourse() });
-      at("2026-11-18T10:00:00Z"); // Wednesday of week 1
+      await at("2026-11-18T10:00:00Z"); // Wednesday of week 1
       try {
         const data = await load();
         expect(data.startDateHint).toBeNull();
@@ -166,9 +161,9 @@ describe("/start (P27.3)", () => {
     });
 
     it("adds next week on Friday in the institution's time zone", async () => {
-      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await signInAs({ id: "dated", name: "D" });
       // 23:30 UTC on Thursday is already Friday in Amsterdam.
-      at("2026-11-19T23:30:00Z");
+      await at("2026-11-19T23:30:00Z");
       try {
         const data = await load();
         expect(data.teacherWeek?.next?.isoWeek).toBe(48);
@@ -178,7 +173,7 @@ describe("/start (P27.3)", () => {
     });
 
     it("gives the week the course tools the teacher may use (P27.4)", async () => {
-      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await signInAs({ id: "dated", name: "D" });
       await settings.setToolStand("rubric-builder", "off");
       try {
         const data = await load();
@@ -192,7 +187,7 @@ describe("/start (P27.3)", () => {
     });
 
     it("is absent when courses are switched off", async () => {
-      currentUser.value = { id: "dated", name: "D", email: null, role: "teacher" } as never;
+      await signInAs({ id: "dated", name: "D" });
       await settings.setFeatureStand("courses", "off");
       try {
         const data = await load();

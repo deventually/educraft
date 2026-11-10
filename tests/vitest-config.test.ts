@@ -65,6 +65,13 @@ describe("vitest config", () => {
   it("never lets a test reach the real database in data/", () => {
     for (const p of projects) expect(p.env?.DATABASE_URL).toBe("file::memory:");
   });
+
+  it("never lets a test find a local model server (Ollama, LM Studio) on this machine", () => {
+    for (const p of projects) {
+      expect(p.env?.OLLAMA_BASE_URL).toBe("http://127.0.0.1:9/ollama/v1");
+      expect(p.env?.LMSTUDIO_BASE_URL).toBe("http://127.0.0.1:9/lmstudio/v1");
+    }
+  });
 });
 
 describe("needsIsolation", () => {

@@ -1,19 +1,9 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { flashKeyOf } from "../helpers/flash";
 import { sampleRubric } from "../utilities/fixtures";
 
 process.env.DATABASE_URL = "file::memory:";
-
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
-
-const teacher = (id: string) => ({
-  id,
-  name: id,
-  email: null,
-  role: "teacher",
-  createdAt: new Date(0),
-});
 
 let list: typeof import("~/routes/utilities.rubric._index");
 let editor: typeof import("~/routes/utilities.rubric.$id");
@@ -26,18 +16,18 @@ beforeAll(async () => {
 });
 
 function post(path: string, fields: Record<string, string>, cookie = ""): Request {
-  return new Request(`http://localhost${path}`, {
+  return signedRequest(`http://localhost${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", cookie },
     body: new URLSearchParams(fields).toString(),
   });
 }
 
-const as = (id: string) => requireUserMock.mockResolvedValue(teacher(id));
+const as = (id: string) => signInAs({ id });
 
 describe("/utilities/rubric", () => {
   it("creates a rubric under the teacher's name, in their language, and opens it", async () => {
-    as("t-create");
+    await as("t-create");
     const res = (await list.action({
       request: post(
         "/utilities/rubric",
@@ -57,7 +47,7 @@ describe("/utilities/rubric", () => {
   });
 
   it("refuses a rubric without a name and creates nothing", async () => {
-    as("t-noname");
+    await as("t-noname");
     for (const name of [undefined, "", "   ", "x".repeat(201)]) {
       const fields: Record<string, string> = { intent: "create" };
       if (name !== undefined) fields.name = name;
@@ -70,9 +60,9 @@ describe("/utilities/rubric", () => {
   it("lists only the teacher's own rubrics, with their maximum", async () => {
     await repo.createRubric("t-list", "Mijn rubric", sampleRubric());
     await repo.createRubric("t-other", "Van een ander", sampleRubric());
-    as("t-list");
+    await as("t-list");
     const data = (await list.loader({
-      request: new Request("http://localhost/utilities/rubric"),
+      request: signedRequest("http://localhost/utilities/rubric"),
     } as never)) as { rubrics: { name: string; maxPoints: number; criteria: number }[] };
     expect(data.rubrics).toEqual([
       expect.objectContaining({ name: "Mijn rubric", maxPoints: 5, criteria: 2 }),
@@ -83,9 +73,9 @@ describe("/utilities/rubric", () => {
 describe("/utilities/rubric/:id", () => {
   it("404s on someone else's rubric", async () => {
     const theirs = await repo.createRubric("t-owner", "Privé", sampleRubric());
-    as("t-intruder");
+    await as("t-intruder");
     const args = {
-      request: new Request(`http://localhost/utilities/rubric/${theirs.id}`),
+      request: signedRequest(`http://localhost/utilities/rubric/${theirs.id}`),
       params: { id: theirs.id },
     } as never;
     await expect(editor.loader(args)).rejects.toMatchObject({ status: 404 });
@@ -102,7 +92,7 @@ describe("/utilities/rubric/:id", () => {
   });
 
   it("saves a valid rubric and refuses an invalid one without writing", async () => {
-    as("t-save");
+    await as("t-save");
     const r = await repo.createRubric("t-save", "Verslag", sampleRubric());
     const next = sampleRubric();
     next.criteria[0]!.title = "Nieuw";
@@ -137,7 +127,7 @@ describe("/utilities/rubric/:id", () => {
   });
 
   it("duplicates and deletes", async () => {
-    as("t-dup");
+    await as("t-dup");
     const r = await repo.createRubric("t-dup", "Toets", sampleRubric());
     const dup = (await editor.action({
       request: post(`/utilities/rubric/${r.id}`, { intent: "duplicate" }),

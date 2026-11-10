@@ -1,16 +1,9 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { flashKeyOf } from "../helpers/flash";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-// The route reads the acting user via requireUser; we stub it per-test. logout and
-// the rest of auth stay real (logout returns a redirect regardless of session).
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("~/server/auth.server")>();
-  return { ...actual, requireUser: requireUserMock };
-});
 
 type Route = typeof import("~/routes/account");
 type Users = typeof import("~/server/repositories/users.server");
@@ -31,24 +24,16 @@ beforeAll(async () => {
 
 /** A delete/request POST carrying the locale's confirmation word. */
 function deleteRequest(): Request {
-  const headersReq = new Request("http://localhost/account");
+  const headersReq = signedRequest("http://localhost/account");
   const m = i18n.getMessages(localeServer.getLocale(headersReq));
-  return new Request("http://localhost/account", {
+  return signedRequest("http://localhost/account", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ intent: "delete", confirm: m.account.confirmWord }).toString(),
   });
 }
 
-function actAs(id: string, role: "teacher" | "admin") {
-  requireUserMock.mockResolvedValue({
-    id,
-    name: `User ${id}`,
-    email: null,
-    role,
-    createdAt: new Date(0),
-  });
-}
+const actAs = (id: string, role: "teacher" | "admin") => signInAs({ id, role });
 
 describe("account deletion (P17)", () => {
   it("a teacher's deletion hard-deletes their account", async () => {
@@ -58,7 +43,7 @@ describe("account deletion (P17)", () => {
       passwordHash: "scrypt:x:y",
       role: "teacher",
     });
-    actAs(tch.id, "teacher");
+    await actAs(tch.id, "teacher");
     const res = await route.action({ request: deleteRequest() } as Parameters<
       typeof route.action
     >[0]);
@@ -78,11 +63,11 @@ describe("account deletion — the owner (P18.6)", () => {
       role: "admin",
     });
     await settings.setOwnerUserId(owner.id);
-    actAs(owner.id, "admin");
+    await actAs(owner.id, "admin");
     const res = (await route.action({ request: deleteRequest() } as Parameters<
       typeof route.action
     >[0])) as { error?: string };
-    const m = i18n.getMessages(localeServer.getLocale(new Request("http://localhost/account")));
+    const m = i18n.getMessages(localeServer.getLocale(signedRequest("http://localhost/account")));
     expect(res.error).toBe(m.account.ownerCannotDelete);
     expect(await users.getUserById(owner.id)).not.toBeNull();
     await settings.setOwnerUserId(null);
@@ -95,7 +80,7 @@ describe("account deletion — the owner (P18.6)", () => {
       passwordHash: "scrypt:x:y",
       role: "admin",
     });
-    actAs(adm.id, "admin");
+    await actAs(adm.id, "admin");
     await route.action({ request: deleteRequest() } as Parameters<typeof route.action>[0]);
     expect(await users.getUserById(adm.id)).toBeNull();
   });
@@ -109,14 +94,14 @@ describe("account deletion — the owner (P18.6)", () => {
       role: "admin",
     });
     await settings.setOwnerUserId(owner.id);
-    actAs(owner.id, "admin");
+    await actAs(owner.id, "admin");
     const asOwner = (await route.loader({
-      request: new Request("http://localhost/account"),
+      request: signedRequest("http://localhost/account"),
     } as Parameters<typeof route.loader>[0])) as { isOwner: boolean };
     expect(asOwner.isOwner).toBe(true);
-    actAs("someone-else", "admin");
+    await actAs("someone-else", "admin");
     const asOther = (await route.loader({
-      request: new Request("http://localhost/account"),
+      request: signedRequest("http://localhost/account"),
     } as Parameters<typeof route.loader>[0])) as { isOwner: boolean };
     expect(asOther.isOwner).toBe(false);
     await settings.setOwnerUserId(null);
@@ -133,9 +118,9 @@ describe("account password change (P17)", () => {
       passwordHash: await pw.hashPassword("old-password-x"),
       role: "teacher",
     });
-    actAs(u.id, "teacher");
+    await actAs(u.id, "teacher");
     const res = (await route.action({
-      request: new Request("http://localhost/account", {
+      request: signedRequest("http://localhost/account", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -170,9 +155,9 @@ describe("account password change (P17)", () => {
     );
     expect((await auth.getUser(asRequest(otherDevice!)))?.id).toBe(u.id);
 
-    actAs(u.id, "teacher");
+    await actAs(u.id, "teacher");
     const res = (await route.action({
-      request: new Request("http://localhost/account", {
+      request: signedRequest("http://localhost/account", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -211,7 +196,7 @@ describe("log out everywhere (P1-4)", () => {
     const laptop = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
     const phone = cookieOf((await auth.createUserSession(u.id, "/")).headers.get("Set-Cookie"));
 
-    actAs(u.id, "teacher");
+    await actAs(u.id, "teacher");
     const res = (await route.action({
       request: new Request("http://localhost/account", {
         method: "POST",

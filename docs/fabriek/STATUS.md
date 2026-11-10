@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #217 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #218 gemerged)_
 
 ## Nu
 
+- **Anthropic-SDK 1.x (#218) gemerged op 2026-11-10:** de SDK achter de prompt-evals gaat naar
+  versie 1. Geen gedragswijziging in de app.
 - **better-sqlite3 13 (#217) gemerged op 2026-11-10:** de databasedriver levert de binaries voor
   Alpine (musl, x64 en arm64) nu zelf mee in het npm-pakket; een test borgt dat de Docker-image
   geen compiler nodig heeft. Geen gedragswijziging.

@@ -1,17 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { signInAs, signedRequest } from "../helpers/session";
 import { C1, sampleDossier } from "../portfolio/fixtures";
 
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
-
-const { currentUser } = vi.hoisted(() => ({
-  currentUser: { value: { id: "res-a", name: "A", email: null, role: "teacher" } as never },
-}));
-vi.mock("~/server/auth.server", () => ({
-  requireUser: vi.fn(async () => currentUser.value),
-  requireRole: vi.fn(async () => currentUser.value),
-}));
-vi.mock("~/lib/ai/discover.server", () => ({ discoverLocalModels: vi.fn(async () => []) }));
 
 type ToolRoute = typeof import("~/routes/tool");
 let toolRoute: ToolRoute;
@@ -28,8 +20,8 @@ beforeAll(async () => {
   settings = await import("~/server/repositories/settings.server");
 });
 
-beforeEach(() => {
-  currentUser.value = { id: "res-a", name: "A", email: null, role: "teacher" } as never;
+beforeEach(async () => {
+  await signInAs({ id: "res-a", name: "A" });
 });
 
 interface Loaded {
@@ -41,14 +33,14 @@ interface Loaded {
 
 function load(slug: string, query = ""): Promise<Loaded> {
   return toolRoute.loader({
-    request: new Request(`http://localhost/tools/${slug}${query}`),
+    request: signedRequest(`http://localhost/tools/${slug}${query}`),
     params: { slug },
     context: {},
   } as never) as Promise<Loaded>;
 }
 
 function act(slug: string, fields: Record<string, string>) {
-  const request = new Request(`http://localhost/tools/${slug}`, {
+  const request = signedRequest(`http://localhost/tools/${slug}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
     body: new URLSearchParams(fields).toString(),
@@ -100,7 +92,7 @@ describe("tool loader — the course from the link (P27.1)", () => {
   });
 
   it("offers the own courses and dossiers (with criteria) as places for the result", async () => {
-    currentUser.value = { id: "res-c", name: "C", email: null, role: "teacher" } as never;
+    await signInAs({ id: "res-c", name: "C" });
     const course = await courses.createCourse("res-c", { name: "Biologie" });
     const dossier = await portfolio.createDossier("res-c", "Mijn BDB", sampleDossier());
     const data = await load("mentorai");

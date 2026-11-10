@@ -1,9 +1,5 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
-
-process.env.DATABASE_URL = "file::memory:";
-
-const { requireUserMock } = vi.hoisted(() => ({ requireUserMock: vi.fn() }));
-vi.mock("~/server/auth.server", () => ({ requireUser: requireUserMock }));
+import { beforeAll, describe, expect, it } from "vitest";
+import { signIn } from "../helpers/session";
 
 type ActionMod = typeof import("~/routes/api.checkin");
 type Pilot = typeof import("~/server/repositories/pilot.server");
@@ -14,19 +10,12 @@ let pilot: Pilot;
 beforeAll(async () => {
   ({ action } = await import("~/routes/api.checkin"));
   pilot = await import("~/server/repositories/pilot.server");
-  requireUserMock.mockImplementation(async (request: Request) => ({
-    id: request.headers.get("x-test-user") ?? "anon",
-    name: "Test",
-    email: null,
-    role: "teacher" as const,
-    createdAt: new Date(0),
-  }));
 });
 
-function post(body: unknown, userId: string): Promise<Response> {
+async function post(body: unknown, userId: string): Promise<Response> {
   const request = new Request("http://localhost/api/checkin", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-test-user": userId },
+    headers: { "Content-Type": "application/json", cookie: await signIn({ id: userId }) },
     body: JSON.stringify(body),
   });
   return action({ request, params: {}, context: {} } as Parameters<typeof action>[0]);
