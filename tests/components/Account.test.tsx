@@ -112,3 +112,13 @@ describe("Account page — my teams (P28.2)", () => {
     expect(screen.queryByRole("heading", { name: /mijn teams|my teams/i })).toBeNull();
   });
 });
+
+describe("Account page help", () => {
+  it("links to the help on your account", () => {
+    renderAccount();
+    expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/account",
+    );
+  });
+});
