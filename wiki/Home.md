@@ -23,6 +23,7 @@ For the full strategic picture, read the [Vision](../docs/VISION.md).
 | [Qualification Frameworks](Qualification-Frameworks.md) | EQF/ISCED + national frameworks per target country. |
 | [Internationalization](Internationalization.md) | The five localization layers; UI vs output language; compliance. |
 | [Deployment](Deployment.md) | Running the instance: env, migrations, security headers, health check. |
+| [Overdracht](../docs/overdracht.md) · [Noodplan](../docs/noodplan.md) | Taking over the instance (secrets, deploy, rollback, backups) and what to do when it breaks or leaks (Dutch). |
 | [Compliance](Compliance.md) | AI-transparency notice, GDPR/AI-Act shaping, data handling. |
 | [Roadmap](Roadmap.md) | Phased path from today's MVP to the global vision. |
 | [Adding a Tool or Pack](Adding-a-Tool-or-Pack.md) | How to extend LimeOnIt. |
