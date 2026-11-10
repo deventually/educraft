@@ -322,3 +322,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   helppagina *Rolagenten*. De Examencommissie (een toetsprogramma over meerdere cursussen) wordt
   een aparte flow, niet eerder dan na de pilot of bij een tweede pilot; Bastiaan beslist dat nog.
   Bastiaan, 2026-11-10 (plan "Nieuwe rolagenten en examencommissie", akkoord op alle aanbevelingen).
+- **BESLUIT-2026-11-10-2:** **Docenten lezen "Reviewteam", niet "rolagenten" of "petten".** Het
+  idee erachter is het vier-ogenprincipe. Het onderdeel en de helppagina heten *Reviewteam*
+  (Engels *Review team*), elke rol is een *reviewer* met een vaknaam (Toetsdeskundige, Ontwerper),
+  de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
+  staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
+  na "rolagenten is geen goede benaming").

@@ -270,7 +270,7 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `agentsChosen=1`, so "none ticked" differs from "no boxes"; the choice is saved at the review and
   holds for all the teacher's courses. A hat the teacher switched off is run, shown and counted like
   an admin-off hat (not at all). Every hat has a `focus` line and its own section in the help topic
-  `role-agents` (`tests/help.test.ts`). Linked work
+  `review-team` (`tests/help.test.ts`). Linked work
   (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
   clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
   profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.

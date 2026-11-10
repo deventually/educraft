@@ -121,7 +121,8 @@ Details: [Architecture](wiki/Architecture.md#feature-modules).
 - A hat is data (`app/lib/agents/registry.ts`: `{ id, role, promptId, watches, focus,
   teacherDefault }`); no per-hat branch. The admin switches a hat off for the instance; the teacher
   ticks which of the rest review (`agent_choices`, BESLUIT-2026-11-10-1). Every hat has its own
-  section in the help topic `role-agents`.
+  section in the help topic `review-team`. Teachers read "Reviewteam" and "reviewer", never
+  "rolagent" or "pet" (BESLUIT-2026-11-10-2).
 - Hats advise, never change a course. P20 checks are facts without buttons; only hat findings get
   Akkoord / Niet akkoord, stored in `review_decisions`; a rejected finding never comes back.
 - Anti-fabrication lives in code: `parseAgentReview` drops unknown keys, duplicates and rejected

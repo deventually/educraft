@@ -480,7 +480,7 @@ describe("the teacher's own choice of hats", () => {
       ["agentsChosen", "1"],
     ]);
     expect(r).toMatchObject({ ok: false, intent: "review" });
-    expect(String(r.error)).toMatch(/pet/i);
+    expect(String(r.error)).toMatch(/reviewer/i);
     expect(generate).not.toHaveBeenCalled();
     const panel = (await load(c.id)).review;
     expect(panel?.agents).toEqual([]);

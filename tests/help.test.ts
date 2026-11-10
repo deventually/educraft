@@ -38,34 +38,32 @@ describe("help registry — topics", () => {
   });
 
   it("explains the role-agent review in the courses topic (P21.5)", () => {
-    expect(getTopic("courses", "nl")).toContain("## Laat beoordelen");
+    expect(getTopic("courses", "nl")).toContain("## Laat reviewen");
     expect(getTopic("courses", "en")).toContain("## Get a review");
   });
 
-  it("describes every role agent in its own section, so a new hat ships with its help", () => {
-    expect(getTopicTitle("role-agents", "nl")).toBe("Rolagenten: de petten die meekijken");
-    expect(getTopicTitle("role-agents", "en")).toBe(
-      "Role agents: the hats that review your course",
-    );
+  it("describes every reviewer in its own section, so a new reviewer ships with its help", () => {
+    expect(getTopicTitle("review-team", "nl")).toBe("Je reviewteam: wie er meekijkt");
+    expect(getTopicTitle("review-team", "en")).toBe("Your review team: who reviews your course");
     for (const lang of LOCALES) {
-      const topic = getTopic("role-agents", lang) ?? "";
+      const topic = getTopic("review-team", lang) ?? "";
       for (const agent of AGENTS)
         expect(topic, `${lang}: ${agent.id}`).toContain(`## ${loc(agent.role, lang)}`);
     }
     for (const heading of [
-      "## Kiezen welke petten meekijken",
-      "## Wat een pet ziet",
-      "## Wat een pet niet doet",
+      "## Kiezen wie er in je reviewteam zit",
+      "## Wat een reviewer ziet",
+      "## Wat een reviewer niet doet",
     ])
-      expect(getTopic("role-agents", "nl")).toContain(heading);
+      expect(getTopic("review-team", "nl")).toContain(heading);
     for (const heading of [
-      "## Choosing which hats review",
-      "## What a hat sees",
-      "## What a hat does not do",
+      "## Choosing who is on your review team",
+      "## What a reviewer sees",
+      "## What a reviewer does not do",
     ])
-      expect(getTopic("role-agents", "en")).toContain(heading);
-    expect(getTopic("courses", "nl")).toContain("(/help/role-agents)");
-    expect(getTopic("courses", "en")).toContain("(/help/role-agents)");
+      expect(getTopic("review-team", "en")).toContain(heading);
+    expect(getTopic("courses", "nl")).toContain("(/help/review-team)");
+    expect(getTopic("courses", "en")).toContain("(/help/review-team)");
   });
 
   it("guides a teacher through the BDB and BKE, from switching it on to handing in", () => {

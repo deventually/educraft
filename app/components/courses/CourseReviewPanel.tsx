@@ -107,7 +107,7 @@ export function CourseReviewPanel({
           </ul>
           <p className="mt-2 text-sm">
             <Link
-              to="/help/role-agents"
+              to="/help/review-team"
               className="text-violet-700 underline focus-visible:outline-2 focus-visible:outline-violet-500"
             >
               {p.chooseMore}

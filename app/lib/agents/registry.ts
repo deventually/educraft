@@ -2,7 +2,7 @@ import type { Agent, AgentStand, AgentTarget } from "./types";
 
 /**
  * The hats (BESLUIT-2026-11-05-3, BESLUIT-2026-11-10-1). Every hat has its own section in the
- * help topic `role-agents` (tests/help.test.ts).
+ * help topic `review-team` (tests/help.test.ts).
  */
 export const AGENTS: Agent[] = [
   {
