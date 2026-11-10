@@ -88,6 +88,7 @@ export function ChatComposer({
           {isStreaming ? (
             tool.chat?.allowStop && (
               <button
+                type="button"
                 onClick={onStop}
                 className="grid size-9 shrink-0 place-items-center rounded-xl bg-red-500 text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 title={t.tool.stop}
@@ -107,6 +108,7 @@ export function ChatComposer({
               />
               {tool.chat?.allowRegenerate && hasTurns && (
                 <button
+                  type="button"
                   onClick={onRegenerate}
                   className="grid size-9 shrink-0 place-items-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                   title={t.tool.regenerate}
@@ -115,6 +117,7 @@ export function ChatComposer({
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => onSend()}
                 disabled={!value.trim() || isStreaming}
                 className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-600 text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:bg-slate-300"

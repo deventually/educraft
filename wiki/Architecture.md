@@ -362,7 +362,17 @@ file locally: `npx stryker run --mutate app/server/rateLimit.server.ts`.
 moved module cannot drop out silently.
 
 A Biome warning (dead code, a non-null assertion) fails the gate just like an error
-(`tests/quality-gate.test.ts`). Fix the cause; don't add a `biome-ignore`.
+(`tests/quality-gate.test.ts`). Fix the cause; don't add a `biome-ignore`. Every Biome a11y rule
+is on; a wrapper that renders a native control (`Select`, `StandSelect`) is listed in
+`noLabelWithoutControl.inputComponents`, so a `<label>` around it counts as labelled.
+
+**Security scanning** runs on GitHub itself (`tests/security-scan.test.ts`). The CI job `audit`
+runs `npm audit`: production dependencies must be clean from *moderate* up, the whole tree (dev
+tools such as Stryker too) blocks only from *high*, so a moderate finding deep in dev tooling
+doesn't need an `overrides` workaround. `.github/workflows/codeql.yml` runs CodeQL
+(`security-extended`) on every pull request, on `main` and weekly; findings appear under
+*Security › Code scanning*. `.github/dependabot.yml` opens weekly update PRs for npm and GitHub
+Actions: minor and patch bundled in one PR per ecosystem, each major version apart.
 
 ## Related
 
