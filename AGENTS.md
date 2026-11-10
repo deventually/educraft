@@ -94,7 +94,7 @@ English slugs, never shown.
 - All DB access goes through `app/server/repositories/`: every exported function is `async` and
   scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`
   (`tests/architecture.test.ts`).
-- Course members (BESLUIT-2026-11-10-3): a course's **content** may also be read and changed by
+- Course members (BESLUIT-2026-11-10-4): a course's **content** may also be read and changed by
   its editors and co-owners (`course_members`), in the WHERE clause of `courses.server.ts`.
   Sharing and choosing members is for owner and co-owners; deleting, the context profile and
   handing over stay owner-only.

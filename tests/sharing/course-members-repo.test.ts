@@ -60,7 +60,7 @@ const work = (userId: string) =>
     outputMarkdown: "x",
   });
 
-describe("course editors (BESLUIT-2026-11-10-3)", () => {
+describe("course editors (BESLUIT-2026-11-10-4)", () => {
   it("lets the owner add a team-mate as editor, never an outsider or themselves", async () => {
     const course = await newCourse(w.a);
     expect(await members.setCourseMember(w.a, course.id, w.c, "editor")).toBe(false);
@@ -192,7 +192,7 @@ describe("course editors (BESLUIT-2026-11-10-3)", () => {
   });
 });
 
-describe("course co-owners (BESLUIT-2026-11-10-3)", () => {
+describe("course co-owners (BESLUIT-2026-11-10-4)", () => {
   /** A co-owner D who is in team 2 with outsider E; the course owner A is not. */
   async function coOwnerWorld() {
     const mk = (who: string) =>

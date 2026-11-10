@@ -1,5 +1,5 @@
 /**
- * Route glue for working on a course together (BESLUIT-2026-11-10-3): what the course page
+ * Route glue for working on a course together (BESLUIT-2026-11-10-4): what the course page
  * shows about owner and members, and the `set-member`, `remove-member` and `leave-course`
  * intents. The form body is parsed with Zod at the boundary; the repository decides who may
  * do what. Leaving throws a redirect to the course list. Routes stay thin.

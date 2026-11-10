@@ -77,7 +77,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
     currentWeek: await currentCourseWeek(course.data.startDate),
-    // Sharing and choosing members are for the owner and co-owners (BESLUIT-2026-11-10-3).
+    // Sharing and choosing members are for the owner and co-owners (BESLUIT-2026-11-10-4).
     sharing: managesCourse(members)
       ? await shareControls(user, "course", course.id)
       : { teams: [], sharedWith: [] },
@@ -95,7 +95,7 @@ async function currentCourseWeek(startDate: string | undefined): Promise<number 
 
 export async function action({ request, params }: Route.ActionArgs) {
   // The owner and the course's members get here; the repositories refuse an editor's share
-  // or choice of members (BESLUIT-2026-11-10-3).
+  // or choice of members (BESLUIT-2026-11-10-4).
   const { user, course } = await loadCourse(request, params.id);
   return (
     (await shareAction(request, user, "course", course.id)) ??

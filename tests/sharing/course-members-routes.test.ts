@@ -62,7 +62,7 @@ const load = async (id: string) =>
     params: { id },
   } as never)) as Loaded;
 
-describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
+describe("working on a course together (BESLUIT-2026-11-10-4)", () => {
   it("lets the owner add and remove a team-mate as editor from the course page", async () => {
     const course = await courses.createCourse("ed-a", { name: "Databases", data: alignedCourse() });
     expect((await load(course.id)).members).toEqual({

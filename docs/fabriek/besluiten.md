@@ -328,7 +328,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
   staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
   na "rolagenten is geen goede benaming").
-- **BESLUIT-2026-11-10-3:** **Een cursus heeft één eigenaar, en daarnaast mede-eigenaars en
+- **BESLUIT-2026-11-10-4:** **Een cursus heeft één eigenaar, en daarnaast mede-eigenaars en
   bewerkers; het eigenaarschap is over te dragen.** Vult BESLUIT-2026-11-05-5 aan ("alleen de
   eigenaar bewerkt"). Een *bewerker* leest en wijzigt de inhoud van de cursus, koppelt eigen werk en
   laat het reviewteam kijken. Een *mede-eigenaar* mag daarnaast de cursus delen met een eigen team en

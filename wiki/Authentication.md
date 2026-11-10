@@ -160,7 +160,7 @@ repository, `app/server/repositories/shares.server.ts`.
   with "Maak een kopie" (`copySharedItem`: own copy, no links, no shares, no context profile).
   A colleague's course or rubric opens read only on `/courses/shared/:id` and
   `/utilities/rubric/shared/:id`; not shared (any more) is a 404.
-- **Course members (BESLUIT-2026-11-10-3, migration 0026):** sharing stays read only. To work on
+- **Course members (BESLUIT-2026-11-10-4, migration 0026):** sharing stays read only. To work on
   a course together, the owner adds team-mates as `editor` or `co-owner` (`course_members.role`,
   repository and glue both `courseMembers.server.ts`). `getCourse`, `listCourses` and
   `updateCourse` accept owner or member (`mayEdit`) and say the caller's `role`. Owner and

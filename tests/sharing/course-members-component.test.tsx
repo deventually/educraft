@@ -26,7 +26,7 @@ function renderAt(node: () => ReactNode, onPost?: (fd: FormData) => void) {
 const bram = { userId: "u-b", name: "Bram", role: "editor" as const };
 const cas = { userId: "u-c", name: "Cas" };
 
-describe("CourseMembers (BESLUIT-2026-11-10-3)", () => {
+describe("CourseMembers (BESLUIT-2026-11-10-4)", () => {
   it("lets a manager add a team-mate as co-owner, change a role and remove someone, accessibly", async () => {
     const posted: FormData[] = [];
     const { container } = renderAt(

@@ -7,7 +7,7 @@
  * A share only counts while its owner is still in the team, and leaving a team drops the
  * leaver's shares for it (`teams.server.ts`), so a share never outlives its team or owner.
  *
- * A course is also shared by its co-owners (BESLUIT-2026-11-10-3): `owner_user_id` is then
+ * A course is also shared by its co-owners (BESLUIT-2026-11-10-4): `owner_user_id` is then
  * the co-owner who shared it, and the share counts while that person is still in the team
  * and still co-owner. Any manager of the course (owner or co-owner) sees and stops its shares.
  */
