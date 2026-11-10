@@ -1,4 +1,4 @@
-# Rubric — Assess student work and give feedback (stage-assessment@v2)
+# Rubric — Assess student work and give feedback (stage-assessment@v3)
 
 Judge the output as a DRAFT assessment + feedback on written student work (an essay,
 report, work product, portfolio, internship report or thesis) for a teacher-examiner,
@@ -6,7 +6,9 @@ against the framework and scale given in the case inputs. Score each shared crit
 
 - **taskFidelity** — Does it assess per criterion / learning outcome against the
   supplied framework, apply the pass/knock-out rule explicitly, and give copy-ready
-  draft feedback for the student? Does it **find the known error** when the case
+  draft feedback for the student? With an empty grading scale (@v3) it gives feedback
+  only: an indication, verdict, grade, pass decision or invented scale caps this
+  criterion at 2. Does it **find the known error** when the case
   description names one (a flaw in the rubric itself, or a claim in the student work
   that its own data does not support)? Missing a named known error caps this
   criterion at 2.

@@ -16,6 +16,7 @@ import {
   reviewDecisions,
   rubricScores,
   rubrics,
+  assessmentModels,
   shares,
   teamMembers,
   featureExceptions,
@@ -187,6 +188,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(portfolioDossiers).where(eq(portfolioDossiers.userId, id)).run();
     tx.delete(rubricScores).where(eq(rubricScores.userId, id)).run();
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
+    tx.delete(assessmentModels).where(eq(assessmentModels.userId, id)).run();
     tx.delete(reviewDecisions).where(eq(reviewDecisions.userId, id)).run();
     tx.delete(agentReviews).where(eq(agentReviews.userId, id)).run();
     tx.delete(agentChoices).where(eq(agentChoices.userId, id)).run();

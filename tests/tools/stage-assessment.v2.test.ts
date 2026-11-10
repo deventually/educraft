@@ -41,8 +41,7 @@ describe("tool: stage-assessment @v2 (any student work)", () => {
     expect(loc(tool().subtitle, "en").toLowerCase()).toContain("internship");
   });
 
-  it("runs on stage-assessment@v2 and keeps @v1 registered", () => {
-    expect(tool().stages[0]!.systemPromptId).toBe("stage-assessment@v2");
+  it("keeps @v1 and @v2 registered (the tool runs on @v3 now)", () => {
     expect(PROMPTS["stage-assessment@v1"]).toBeDefined();
     expect(PROMPTS["stage-assessment@v2"]).toBeDefined();
   });

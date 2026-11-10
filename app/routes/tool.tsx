@@ -27,6 +27,8 @@ import { modeOf } from "~/lib/registry/modes";
 import { ToolHeader } from "~/components/tool/ToolHeader";
 import { ToolWorkspace } from "~/components/tool/ToolWorkspace";
 import { useT, useLocale } from "~/lib/i18n/useT";
+import { listAssessmentModels } from "~/server/repositories/assessmentModels.server";
+import { type ModelChoice, STARTER_MODELS } from "~/lib/assessment-models";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
@@ -86,6 +88,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       ? wantedItem
       : "";
   const nextTools = await nextStepsFor(user, tool.next ?? []);
+  const assessmentModels = tool.assessmentModels
+    ? await assessmentModelChoices(user.id, getLocale(request))
+    : [];
   // P31.1: only a copyable tutor sends its student text, with the form fields still open.
   const studentPrompt = tool.copyableStudentPrompt
     ? studentPromptTemplates(tool, defaultProfile)
@@ -115,7 +120,27 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     nextTools,
     linkTargets: linkTargets(ownCourses),
     dossiers,
+    assessmentModels,
   };
+}
+
+/** The teacher's own assessment models, then the starters, in the page's language. */
+async function assessmentModelChoices(userId: string, locale: Locale): Promise<ModelChoice[]> {
+  const own = (await listAssessmentModels(userId)).map((m) => ({
+    id: m.id,
+    name: m.name,
+    ...m.data,
+    starter: false,
+  }));
+  const starters = STARTER_MODELS.map((s) => ({
+    id: `starter:${s.id}`,
+    name: s.name[locale],
+    documentTypes: s.documentTypes,
+    framework: s.framework[locale],
+    scale: s.scale[locale],
+    starter: true,
+  }));
+  return [...own, ...starters];
 }
 
 /** The next steps the viewer may use, with their names (P27.1). */
@@ -200,6 +225,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     linkTargets,
     dossiers,
     forCriterion,
+    assessmentModels,
   } = loaderData;
   const resultContext = { nextTools, linkTargets, dossiers, forCriterion };
   const mode = modeOf(tool);
@@ -231,6 +257,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
           initialItemId={initialItemId}
           resultContext={resultContext}
           studentPrompt={studentPrompt ?? undefined}
+          assessmentModels={assessmentModels}
         />
       </section>
     </div>

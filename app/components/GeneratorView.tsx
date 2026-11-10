@@ -8,6 +8,8 @@ import { toTemplateValues } from "~/lib/forms/values";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { CoursePicker } from "./CoursePicker";
+import { useAssessmentModelPicker } from "./assessment-models/AssessmentModelPicker";
+import type { ModelChoice } from "~/lib/assessment-models";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { computeResultNote } from "~/lib/template/computations";
@@ -45,6 +47,8 @@ interface Props {
   initialItemId?: string;
   /** Next steps and places to keep the result (P27.1). */
   resultContext?: ResultContext;
+  /** Own and starter assessment models, for a tool with `assessmentModels`. */
+  assessmentModels?: ModelChoice[];
 }
 
 export function GeneratorView({
@@ -57,21 +61,23 @@ export function GeneratorView({
   initialCourseId,
   initialItemId,
   resultContext,
+  assessmentModels = [],
 }: Props) {
   const t = useT();
   const locale = useLocale();
   const stage = tool.stages[0];
   // Shared sandbox: seeds field defaults + the default profile's prefill, and
   // re-derives profile-backed fields on `selectProfile` (see useSandbox).
+  const sandbox = useSandbox({
+    inputs: tool.inputs,
+    profiles,
+    defaultProfileId,
+    courses,
+    initialCourseId,
+    initialItemId,
+  });
   const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
-    useSandbox({
-      inputs: tool.inputs,
-      profiles,
-      defaultProfileId,
-      courses,
-      initialCourseId,
-      initialItemId,
-    });
+    sandbox;
   // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
   // server render and hydration agree; only the tool's own text fields are filled.
   // biome-ignore lint/correctness/useExhaustiveDependencies: run once per tool
@@ -99,6 +105,7 @@ export function GeneratorView({
   const [output, setOutput] = useState("");
   const [generationId, setGenerationId] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
+  const beforeField = useAssessmentModelPicker(tool, assessmentModels, sandbox, streaming);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   // Originals of `kind: "document"` fields, by field name. Browser memory only:
@@ -255,6 +262,7 @@ export function GeneratorView({
             values={values}
             onChange={setValue}
             onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
+            beforeField={beforeField}
           />
           <ToolControls
             usesContextProfile={tool.usesContextProfile}

@@ -120,6 +120,8 @@ describe("GeneratorView with a document field", () => {
     });
     await screen.findByText("Page 1 of 1");
 
+    // The framework starts empty now: an assessment model or the teacher fills it in.
+    await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
     await user.click(screen.getByRole("button", { name: /generate/i }));
     // Student work goes through the anonymise step first (24.0b).
     await user.click(screen.getByRole("button", { name: "Send anonymised" }));
@@ -168,6 +170,8 @@ describe("GeneratorView with a document field", () => {
     // Before anonymising, the panel shows the form's text.
     expect(aiPanel()).toHaveTextContent("Reflectie van Jan de Vries");
 
+    // The framework starts empty now: an assessment model or the teacher fills it in.
+    await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
     await user.click(screen.getByRole("button", { name: /generate/i }));
     await user.type(screen.getByLabelText("Student name"), "Jan de Vries");
     await user.click(screen.getByRole("button", { name: "Send anonymised" }));
@@ -207,6 +211,8 @@ describe("GeneratorView with a document field", () => {
       target: { files: [new File(["%PDF"], "verslag.pdf", { type: "application/pdf" })] },
     });
     await screen.findByText("Page 1 of 1");
+    // The framework starts empty now: an assessment model or the teacher fills it in.
+    await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
     await user.click(screen.getByRole("button", { name: /generate/i }));
     await user.click(screen.getByRole("button", { name: "Send anonymised" }));
     await waitFor(() => expect(streamPost).toHaveBeenCalled());

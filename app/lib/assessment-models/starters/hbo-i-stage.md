@@ -1,4 +1,4 @@
-HBO-i stage (niveau 2) — nakijkmodel. Vervang dit kader door dat van je eigen opleiding indien je een andere studie beoordeelt. Beoordeel alleen de leeruitkomst die hoort bij het aangeleverde document (Analyseren voor het onderzoeksportfolio in deel 1; Realiseren voor het beroepsproduct in deel 2). Voor de richting (UX / Software / Data) gelden de tussen haakjes genoemde varianten.
+HBO-i stage (niveau 2) — nakijkmodel. Beoordeel alleen de leeruitkomst die hoort bij het aangeleverde document (Analyseren voor het onderzoeksportfolio in deel 1; Realiseren voor het beroepsproduct in deel 2). Voor de richting (UX / Software / Data) gelden de tussen haakjes genoemde varianten.
 
 LEERUITKOMST ANALYSEREN (niveau 2) — drie succescriteria, alle drie minimaal Voldoende vereist.
 

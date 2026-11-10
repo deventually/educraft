@@ -52,6 +52,7 @@ const inputField = z.object({
   group: localizedText.optional(),
   rows: z.number().optional(),
   imagesFrom: z.string().optional(),
+  prefillFromAssessmentModel: z.object({ source: z.enum(["framework", "scale"]) }).optional(),
 });
 
 const stageDependency = z.object({
@@ -122,6 +123,7 @@ const toolSchema = z.object({
   defaultTemperature: z.number().optional(),
   defaultMaxTokens: maxTokens.optional(),
   usesContextProfile: z.boolean(),
+  assessmentModels: z.object({ byField: z.string().min(1) }).optional(),
   contextFrom: z.literal("dossier").optional(),
   hiddenFromCatalogue: z.literal(true).optional(),
   storesConversation: z.literal(false).optional(),
@@ -185,6 +187,25 @@ export function validateTools(tools: Tool[]): ValidationIssue[] {
         issues.push({
           tool: tool.slug,
           message: `input "${f.name}": imagesFrom must name a document field, got ${f.imagesFrom}`,
+        });
+      }
+    }
+
+    const byField = tool.assessmentModels?.byField;
+    if (
+      byField !== undefined &&
+      !tool.inputs.some((f) => f.name === byField && f.kind === "select")
+    ) {
+      issues.push({
+        tool: tool.slug,
+        message: `assessmentModels.byField must name a select field, got ${byField}`,
+      });
+    }
+    for (const f of tool.inputs) {
+      if (f.prefillFromAssessmentModel && !tool.assessmentModels) {
+        issues.push({
+          tool: tool.slug,
+          message: `input "${f.name}": prefillFromAssessmentModel needs Tool.assessmentModels`,
         });
       }
     }

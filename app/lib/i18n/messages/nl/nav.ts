@@ -1,6 +1,7 @@
 export const nav = {
   about: "Over",
   admin: "Beheer",
+  assessmentModels: "Beoordelingsmodellen",
   closeMenu: "Menu sluiten",
   courses: "Cursussen",
   help: "Help",
