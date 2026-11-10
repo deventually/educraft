@@ -16,6 +16,7 @@ import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   invites,
+  learningLines,
   programmeCourses,
   programmes,
   shares,
@@ -109,6 +110,7 @@ export async function deleteTeam(id: string): Promise<void> {
     // The team's programmes and the courses placed in them go with it.
     const own = tx.select({ id: programmes.id }).from(programmes).where(eq(programmes.teamId, id));
     tx.delete(programmeCourses).where(inArray(programmeCourses.programmeId, own)).run();
+    tx.delete(learningLines).where(inArray(learningLines.programmeId, own)).run();
     tx.delete(programmes).where(eq(programmes.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.teamId, id)).run();

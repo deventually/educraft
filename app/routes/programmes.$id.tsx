@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form, Link, useActionData } from "react-router";
+import { Form, Link, redirect, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/programmes.$id";
 import {
@@ -14,6 +14,8 @@ import {
   updateProgramme,
 } from "~/server/repositories/programmes.server";
 import { listCourses } from "~/server/repositories/courses.server";
+import { createLine, listLines } from "~/server/repositories/learningLines.server";
+import { LearningLinesSection } from "~/components/programmes/LearningLinesSection";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
 import { Button, Card, Label, Select } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
@@ -55,6 +57,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     kinds,
     available,
+    lines: (await listLines(user, programme.id)).map((l) => ({
+      id: l.id,
+      name: l.name,
+      courses: l.courseIds.length,
+    })),
   };
 }
 
@@ -70,6 +77,16 @@ export async function action({ request, params }: Route.ActionArgs) {
     return (await updateProgramme(user, programme.id, parsed.data))
       ? { ok: true as const, message: m.toastSaved }
       : { ok: false as const, error: m.errorNotAllowed };
+  }
+  if (intent === "line-create") {
+    const l = getMessages(getLocale(request)).programmes.lines;
+    const name = String(fd.get("name") ?? "").trim();
+    const ids = fd.getAll("courseId").map(String);
+    if (!programme.canManage) return { ok: false as const, error: l.errorNotAllowed };
+    if (!name || name.length > 200) return { ok: false as const, error: l.errorName };
+    const line = ids.length ? await createLine(user, programme.id, name, ids) : null;
+    if (!line) return { ok: false as const, error: l.errorCourses };
+    return redirect(`/programmes/${programme.id}/lines/${line.id}`);
   }
   if (intent === "place") {
     const placement = placementFromForm(fd);
@@ -99,7 +116,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         : { variant: "error", message: d.error };
     },
   });
-  const { programme, kinds, available } = loaderData;
+  const { programme, kinds, available, lines = [] } = loaderData;
   const placementText = usePlacementText();
 
   return (
@@ -191,6 +208,13 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
             </ul>
           )}
         </section>
+
+        <LearningLinesSection
+          programmeId={programme.id}
+          lines={lines}
+          courses={programme.courses}
+          canManage={programme.canManage}
+        />
 
         <section aria-labelledby={`${id}-add`}>
           <h2 id={`${id}-add`} className="text-lg font-medium text-slate-900">

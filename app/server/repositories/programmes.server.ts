@@ -4,7 +4,8 @@
  * teams the actor is in (an admin: every team). Managing (create, rename, delete) is for the
  * team's lead or an admin. Placing a course is for its owner, in a team they are in, and
  * shares the course with that team; colleagues read it only through that share
- * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`).
+ * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`;
+ * the learning lines read their courses through it too).
  * Stopping the share, leaving the team or deleting the course takes it out of the programme:
  * every read joins the share, and the team's own clean-up removes the rows.
  */
@@ -20,6 +21,7 @@ import type { Sector } from "~/lib/context/sectors";
 import { getDb } from "../db.server";
 import {
   courses,
+  learningLines,
   programmeCourses,
   programmes,
   shares,
@@ -59,12 +61,16 @@ const cap = (limit?: number) => Math.min(limit ?? 50, 500);
 
 /**
  * The courses in a programme of `teamId`, by year, period and name (unplaced last): only those
- * whose owner shares them with that team and is still in it. Callers check first that the
- * viewer may read the programme.
+ * whose owner shares them with that team and is still in it, with the course JSON (for the
+ * learning line overview). Callers check first that the viewer may read the programme.
  */
-function listProgrammeCourses(programmeId: string, teamId: string): ProgrammeCourse[] {
+export function listProgrammeCourses(
+  programmeId: string,
+  teamId: string,
+): (ProgrammeCourse & { dataJson: string })[] {
   return getDb()
     .select({
+      dataJson: courses.dataJson,
       courseId: courses.id,
       name: courses.name,
       ownerId: courses.userId,
@@ -193,7 +199,7 @@ export async function getProgramme(
     ...rowToProgramme(hit.p),
     teamName: hit.teamName,
     canManage: canManageTeam(a, hit.p.teamId),
-    courses: listProgrammeCourses(hit.p.id, hit.p.teamId),
+    courses: listProgrammeCourses(hit.p.id, hit.p.teamId).map(({ dataJson: _, ...c }) => c),
   };
 }
 
@@ -252,6 +258,7 @@ export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
   if (!row) return false;
   getDb().transaction((tx) => {
     tx.delete(programmeCourses).where(eq(programmeCourses.programmeId, row.id)).run();
+    tx.delete(learningLines).where(eq(learningLines.programmeId, row.id)).run();
     tx.delete(programmes).where(eq(programmes.id, row.id)).run();
   });
   return true;
