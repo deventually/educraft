@@ -92,6 +92,17 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "^0.25.12"
     },
-    "playwright-core": "1.65.0"
+    "@stryker-mutator/core": {
+      "minimatch": "^11.0.6"
+    },
+    "playwright-core": "1.65.0",
+    "typed-rest-client": {
+      "qs": "^6.17.1"
+    }
+  },
+  "allowScripts": {
+    "better-sqlite3": true,
+    "esbuild": true,
+    "fsevents": false
   }
 }
