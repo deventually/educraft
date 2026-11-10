@@ -20,6 +20,7 @@ import {
   courseMembers,
   courses,
   generations,
+  programmeCourses,
   reviewDecisions,
   shares,
   users,
@@ -211,6 +212,9 @@ export async function deleteCourse(userId: string, id: string): Promise<boolean>
     tx.delete(courseMembers).where(eq(courseMembers.courseId, id)).run();
     tx.delete(shares)
       .where(and(eq(shares.kind, "course"), eq(shares.itemId, id)))
+      .run();
+    tx.delete(programmeCourses)
+      .where(and(eq(programmeCourses.courseId, id), eq(programmeCourses.userId, userId)))
       .run();
     // P21.3: the course's role-agent reviews and the decisions on them.
     const reviewIds = tx

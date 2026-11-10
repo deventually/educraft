@@ -102,6 +102,11 @@ English slugs, never shown.
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared
   ([Authentication](wiki/Authentication.md#sharing-with-your-team-p284)).
+- Programmes (BESLUIT-2026-11-10-3) are **team-owned**: queries are scoped to the actor's teams
+  in the WHERE clause (an admin: all); the lead or an admin manages. A member places only own or
+  co-owned courses (BESLUIT-2026-11-10-4), which shares them with the team; a colleague's course
+  is read only through that share (`listProgrammeCourses` in `programmes.server.ts` joins the
+  share row, the one exception).
 - `getDb()` is the seam; tests set `DATABASE_URL=file::memory:` before importing server modules.
   List queries are capped (`Math.min(limit ?? 50, 500)`).
 - A schema change ships with a migration (`npm run db:generate`), applied with `npm run db:migrate`.

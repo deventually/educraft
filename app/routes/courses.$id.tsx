@@ -31,6 +31,9 @@ import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
 import { CourseMembers } from "~/components/courses/CourseMembers";
+import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
+import { courseProgrammeAction } from "~/server/programmes.server";
+import { placeOptions, programmesOfCourse } from "~/server/repositories/programmes.server";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -82,6 +85,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       ? await shareControls(user, "course", course.id)
       : { teams: [], sharedWith: [] },
     members,
+    programmes: {
+      placed: await programmesOfCourse(course.id),
+      options: await placeOptions(user.id),
+    },
   };
 }
 
@@ -100,6 +107,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   return (
     (await shareAction(request, user, "course", course.id)) ??
     (await memberAction(request, user, course)) ??
+    (await courseProgrammeAction(request, user, course.id)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -134,7 +142,9 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         r.intent === "share" ||
         r.intent === "unshare" ||
         r.intent === "set-member" ||
-        r.intent === "remove-member"
+        r.intent === "remove-member" ||
+        r.intent === "programme-place" ||
+        r.intent === "programme-remove"
       )
         return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
@@ -159,6 +169,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     currentWeek = null,
     sharing = { teams: [], sharedWith: [] },
     members = null,
+    programmes = { placed: [], options: [] },
   } = loaderData;
   const isOwner = (members?.myRole ?? "owner") === "owner";
   const { data } = course;
@@ -203,6 +214,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           profiles={profiles}
           isOwner={isOwner}
         />
+        <CourseProgrammes {...programmes} />
         <CourseImport
           courseName={course.name}
           startOpen={data.outcomes.length === 0}

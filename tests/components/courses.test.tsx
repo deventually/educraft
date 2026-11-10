@@ -45,6 +45,10 @@ describe("Course list (/courses)", () => {
     expect(screen.getByLabelText("Naam")).toBeRequired();
     expect(screen.getByLabelText("Onderwijscontext")).toHaveDisplayValue("Geen");
     expect(screen.getByRole("heading", { level: 2, name: "Nog geen cursus" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Opleidingen" })).toHaveAttribute(
+      "href",
+      "/programmes",
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
