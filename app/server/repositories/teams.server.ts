@@ -14,7 +14,16 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { invites, shares, teamMembers, teams, users, type TeamRow } from "../schema.server";
+import {
+  invites,
+  programmeCourses,
+  programmes,
+  shares,
+  teamMembers,
+  teams,
+  users,
+  type TeamRow,
+} from "../schema.server";
 import { createInvite, getUserByEmail } from "./users.server";
 import {
   type TeamSettings,
@@ -97,6 +106,10 @@ export async function renameTeam(id: string, name: string): Promise<void> {
  */
 export async function deleteTeam(id: string): Promise<void> {
   getDb().transaction((tx) => {
+    // The team's programmes and the courses placed in them go with it.
+    const own = tx.select({ id: programmes.id }).from(programmes).where(eq(programmes.teamId, id));
+    tx.delete(programmeCourses).where(inArray(programmeCourses.programmeId, own)).run();
+    tx.delete(programmes).where(eq(programmes.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.teamId, id)).run();
     tx.update(invites).set({ teamId: null }).where(eq(invites.teamId, id)).run();
@@ -134,6 +147,18 @@ export async function removeMember(teamId: string, userId: string): Promise<void
   getDb().transaction((tx) => {
     tx.delete(shares)
       .where(and(eq(shares.teamId, teamId), eq(shares.ownerUserId, userId)))
+      .run();
+    // Their courses leave the team's programmes.
+    tx.delete(programmeCourses)
+      .where(
+        and(
+          eq(programmeCourses.userId, userId),
+          inArray(
+            programmeCourses.programmeId,
+            tx.select({ id: programmes.id }).from(programmes).where(eq(programmes.teamId, teamId)),
+          ),
+        ),
+      )
       .run();
     tx.delete(teamMembers)
       .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))

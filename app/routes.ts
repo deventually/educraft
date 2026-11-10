@@ -8,6 +8,7 @@ import { exporting } from "./routing/export";
 import { help } from "./routing/help";
 import { info } from "./routing/info";
 import { portfolio } from "./routing/portfolio";
+import { programmes } from "./routing/programmes";
 import { projects } from "./routing/projects";
 import { start } from "./routing/start";
 import { teams } from "./routing/teams";
@@ -30,6 +31,7 @@ const areas: RouteArea[] = [
   help,
   info,
   portfolio,
+  programmes,
   projects,
   start,
   teams,
