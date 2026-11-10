@@ -40,14 +40,14 @@
     "ai": "^7.0.166",
     "better-sqlite3": "^12.11.1",
     "clsx": "^2.1.1",
-    "docx": "9.11.0",
+    "docx": "9.15.3",
     "drizzle-orm": "^0.45.4",
     "isbot": "^5.2.3",
-    "lucide-react": "^0.469.0",
+    "lucide-react": "^1.70.0",
     "mammoth": "^1.13.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-markdown": "^9.0.1",
+    "react-markdown": "^10.1.0",
     "react-router": "8.5.1",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.0",
@@ -60,7 +60,7 @@
     "@anthropic-ai/sdk": "^0.137.0",
     "@axe-core/playwright": "4.14.0",
     "@biomejs/biome": "^2.6.6",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.0",
     "@react-router/dev": "8.5.1",
     "@stryker-mutator/core": "^10.1.1",
     "@stryker-mutator/vitest-runner": "^10.1.1",
@@ -92,6 +92,6 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "^0.25.12"
     },
-    "playwright-core": "1.63.0"
+    "playwright-core": "1.65.0"
   }
 }

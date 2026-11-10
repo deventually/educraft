@@ -4,10 +4,12 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #213 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #214 gemerged)_
 
 ## Nu
 
+- **@testing-library/jest-dom 7 (#214) gemerged op 2026-11-10:** alleen een testhulpje; geen
+  gedragswijziging.
 - **@types/node 24 (#213) gemerged op 2026-11-10:** de Node-types passen nu bij de Node-versie die
   we draaien (24); een test houdt die twee gelijk. Geen gedragswijziging.
 - **Stryker draait weer onder TypeScript 7 (#212) gemerged op 2026-11-10:** Stryker wilde de
