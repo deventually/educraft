@@ -32,6 +32,7 @@ import { portfolioExport } from "./portfolioExport";
 import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
 import { privacy } from "./privacy";
+import { programmes } from "./programmes";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
 import { settings } from "./settings";
@@ -94,6 +95,7 @@ export const nl = {
   portfolioReadiness,
   portfolioRehearsal,
   privacy,
+  programmes,
   projects,
   resultActions,
   settings,

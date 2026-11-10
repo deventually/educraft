@@ -106,4 +106,4 @@ Provincial education systems coordinated through **CMEC**; the
 > its jurisdiction. Verified po/vo/mbo packs are a later content phase (SLO kerndoelen;
 > vmbo examenprogramma's/profielen; SBB kwalificatiedossiers) — never invented. For mbo
 > the plan is a pack per kwalificatie (crebo), with kerntaken and werkprocessen as
-> fields and no level field (the mbo level is the level); see BESLUIT-2026-11-10-3.
+> fields and no level field (the mbo level is the level); see BESLUIT-2026-11-10-4.

@@ -105,7 +105,7 @@ master, PhD) already is the cycle. The domain pickers for mbo (the 18
 opleidingsdomeinen) and wo (the ten CROHO-onderdelen) live in `domains.ts`; their slugs
 carry a sector prefix (`mbo-…`, `wo-…`) so no slug is shared between sectors. mbo
 packs per kwalificatie (SBB kwalificatiedossiers) are the next content step
-(BESLUIT-2026-11-10-3).
+(BESLUIT-2026-11-10-4).
 
 - **Domain packs** — subject-specific structure, one verified registry entry per domain.
 - **Framework packs** — a country+sector+level's curriculum standards and

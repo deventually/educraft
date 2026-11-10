@@ -93,6 +93,10 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
         >
           {c.help}
         </Link>
+        <span aria-hidden> · </span>
+        <Link to="/programmes" className="font-medium text-violet-700 underline underline-offset-2">
+          {t.programmes.navLink}
+        </Link>
       </p>
 
       <Card className="mt-6 p-5">

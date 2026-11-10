@@ -14,6 +14,7 @@ import {
   courseLinks,
   courses,
   generations,
+  programmeCourses,
   reviewDecisions,
   shares,
 } from "../schema.server";
@@ -150,6 +151,9 @@ export async function deleteCourse(userId: string, id: string): Promise<boolean>
       .run();
     tx.delete(shares)
       .where(and(eq(shares.kind, "course"), eq(shares.itemId, id), eq(shares.ownerUserId, userId)))
+      .run();
+    tx.delete(programmeCourses)
+      .where(and(eq(programmeCourses.courseId, id), eq(programmeCourses.userId, userId)))
       .run();
     // P21.3: the course's role-agent reviews and the decisions on them.
     const reviewIds = tx

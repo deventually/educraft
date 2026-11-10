@@ -11,6 +11,7 @@ import {
   agentReviews,
   contextProfiles,
   courseLinks,
+  programmeCourses,
   courses,
   portfolioDossiers,
   reviewDecisions,
@@ -194,6 +195,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(agentChoices).where(eq(agentChoices.userId, id)).run();
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
+    tx.delete(programmeCourses).where(eq(programmeCourses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
     tx.delete(shares).where(eq(shares.ownerUserId, id)).run();
     tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();

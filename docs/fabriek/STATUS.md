@@ -4,10 +4,22 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #240 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #241 gemerged)_
 
 ## Nu
 
+- **Opleidingen van een team (#241) gemerged op 2026-11-10:** een opleiding bundelt de cursussen
+  van een team, met per cursus jaar en periode (BESLUIT-2026-11-10-3). De teamleider of een
+  beheerder maakt hem aan; elk teamlid leest hem. Een eigen cursus in een opleiding zetten deelt
+  hem met het team; een cursus kan in meer opleidingen staan. Pagina's `/programmes` en
+  `/programmes/:id`, "Hoort bij opleiding" op de cursuspagina, helponderwerp *programmes*;
+  migratie 0026.
+- **Reviewer Inclusie (#239) gemerged op 2026-11-10:** een zesde reviewer kijkt naar de cursus
+  vanuit Universal Design for Learning: kunnen studenten op meer dan één manier leren en laten
+  zien wat ze kunnen (afwisseling in toetsvormen en werkvormen, niet alles op één moment in één
+  vorm, een kleine keuze), steeds met een haalbaar alternatief. Voor docenten standaard uit; eigen
+  stuk op `/help/review-team`; drie eval-cases. De reviewer Student is naar `agent-student@v2`
+  gegaan: die waarschuwt alleen nog bij een echte botsing.
 - **Figuren: grafieken en diagrammen uit een PDF (#240) gemerged op 2026-11-10:** bij
   *Studentwerk beoordelen* vindt LimeOnIt in een PDF ook getekende grafieken, diagrammen en
   stroomschema's als figuur, met hun labels; tabellen, kaders, lijnen en herhaalde logo's niet.
@@ -645,6 +657,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 ## Later (bewust geparkeerd)
 
+- **Examencommissie** (aparte flow over meerdere cursussen), na de pilot, bouwt op opleidingen en
+  leerlijnen.
 - Add-on **praktijksimulaties** (Webshop Bob, fotorealistische avatars).
 - Spraak (dicteren, voorlezen).
 - De studentenlaag, opnieuw en beter.

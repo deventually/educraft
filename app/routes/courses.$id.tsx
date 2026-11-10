@@ -29,6 +29,9 @@ import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { courseToolsFor } from "~/server/courseTools.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
+import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
+import { courseProgrammeAction } from "~/server/programmes.server";
+import { placeOptions, programmesOfCourse } from "~/server/repositories/programmes.server";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -75,6 +78,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       : null,
     currentWeek: await currentCourseWeek(course.data.startDate),
     sharing: await shareControls(user, "course", course.id),
+    programmes: {
+      placed: await programmesOfCourse(user.id, course.id),
+      options: await placeOptions(user.id),
+    },
   };
 }
 
@@ -90,7 +97,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   // "Delen met team" (P28.4): only the owner gets here, since loadCourse is owner-scoped.
   const { user, course } = await loadCourse(request, params.id);
   return (
-    (await shareAction(request, user, "course", course.id)) ?? saveCourseIntent(request, params.id)
+    (await shareAction(request, user, "course", course.id)) ??
+    (await courseProgrammeAction(request, user, course.id)) ??
+    saveCourseIntent(request, params.id)
   );
 }
 
@@ -120,7 +129,12 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
       if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
-      if (r.intent === "share" || r.intent === "unshare")
+      if (
+        r.intent === "share" ||
+        r.intent === "unshare" ||
+        r.intent === "programme-place" ||
+        r.intent === "programme-remove"
+      )
         return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
         return { variant: r.partial ? "info" : "success", message: r.message };
@@ -143,6 +157,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     tools = NO_COURSE_TOOLS,
     currentWeek = null,
     sharing = { teams: [], sharedWith: [] },
+    programmes = { placed: [], options: [] },
   } = loaderData;
   const { data } = course;
 
@@ -177,6 +192,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           hours={plannedHours(data)}
           profiles={profiles}
         />
+        <CourseProgrammes {...programmes} />
         <CourseImport
           courseName={course.name}
           startOpen={data.outcomes.length === 0}

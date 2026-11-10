@@ -328,7 +328,19 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
   staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
   na "rolagenten is geen goede benaming").
-- **BESLUIT-2026-11-10-3:** **Vakgebiedpakketten voor mbo en wo.** Bij mbo is het vakgebied de
+- **BESLUIT-2026-11-10-3:** **Een opleiding is van een team; een cursus erin zetten deelt hem.**
+  Een opleiding (laag 1) bundelt cursussen, met per cursus jaar en periode; een leerlijn (laag 2)
+  is een geordende reeks cursussen binnen een opleiding. De teamleider of een beheerder maakt een
+  opleiding aan en past hem aan; elk teamlid leest hem. Een teamlid zet alleen **eigen** cursussen
+  erin, en deelt ze daarmee met dat team (het bestaande delen van P28.4). Een collega ziet een
+  cursus in de opleiding alleen zolang dat delen bestaat: stoppen met delen, het team verlaten of de
+  cursus verwijderen haalt hem eruit. Uithalen mag de eigenaar of de teamleider; het delen blijft
+  dan staan. Een cursus kan in meer opleidingen staan (voltijd, deeltijd), elk met een eigen jaar en
+  periode. Een master is een eigen opleiding; een minor hoort bij de opleiding die hem aanbiedt. Een
+  team mag alles zijn: faculteit, opleiding, richting, module. Overdragen en samen bewerken van een
+  cursus is apart werk. Bastiaan, 2026-11-10 (keuzekaart "Van wie is een opleiding?", optie "Van
+  een team").
+- **BESLUIT-2026-11-10-4:** **Vakgebiedpakketten voor mbo en wo.** Bij mbo is het vakgebied de
   **kwalificatie** (crebo), gegroepeerd per opleidingsdomein; het pakket haalt kerntaken en
   werkprocessen uit het kwalificatiedossier van SBB, zonder beheersingsniveau (het mbo-niveau is
   het niveau). Bij wo geldt één sectorpakket met de Dublin-descriptoren voor elk domein; de

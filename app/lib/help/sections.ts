@@ -33,7 +33,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
   {
     id: "teaching",
     title: { nl: "Je onderwijs", en: "Your teaching" },
-    topics: ["context-profiles", "courses", "week", "review-team"],
+    topics: ["context-profiles", "courses", "programmes", "week", "review-team"],
   },
   { id: "together", title: { nl: "Samenwerken", en: "Working together" }, topics: ["teams"] },
   {

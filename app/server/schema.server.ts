@@ -383,6 +383,8 @@ export const adminAudit = sqliteTable(
 
 // Two-step verification (P2-12) lives in its own file; one schema for drizzle and the app.
 export * from "./schemaAuth.server";
+// Programmes and learning lines live in their own file too.
+export * from "./schemaProgrammes.server";
 
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
