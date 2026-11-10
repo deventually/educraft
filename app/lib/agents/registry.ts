@@ -27,6 +27,17 @@ export const AGENTS: Agent[] = [
     },
     teacherDefault: "on",
   },
+  {
+    id: "ai-resilience",
+    role: { nl: "AI-bestendigheid", en: "AI resilience" },
+    promptId: "agent-ai-resilience@v1",
+    watches: ["course"],
+    focus: {
+      nl: "Kijkt of je summatieve toetsen laten zien wat de student zelf kan, ook nu er AI is.",
+      en: "Checks that your summative assessments show what students can do themselves, AI or not.",
+    },
+    teacherDefault: "off",
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {

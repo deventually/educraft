@@ -22,8 +22,8 @@ function valid(): Agent {
 }
 
 describe("agent registry (P21.1)", () => {
-  it("has exactly the two v1 hats, each bilingual and valid", () => {
-    expect(AGENTS.map((a) => a.id)).toEqual(["assessment-expert", "designer"]);
+  it("has the reviewers in order, each bilingual and valid", () => {
+    expect(AGENTS.map((a) => a.id)).toEqual(["assessment-expert", "designer", "ai-resilience"]);
     expect(validateAgents(AGENTS)).toEqual([]);
   });
 
@@ -33,23 +33,30 @@ describe("agent registry (P21.1)", () => {
   });
 
   it("lists the hats that watch a target", () => {
-    expect(agentsWatching("course").map((a) => a.id)).toEqual(["assessment-expert", "designer"]);
+    expect(agentsWatching("course").map((a) => a.id)).toEqual([
+      "assessment-expert",
+      "designer",
+      "ai-resilience",
+    ]);
     expect(agentsWatching("generation").map((a) => a.id)).toEqual(["assessment-expert"]);
   });
 
   it("leaves out the hats an admin switched off; an untouched hat is on", () => {
     const ids = (stands: Record<string, "on" | "off">) =>
       activeAgents("course", stands).map((a) => a.id);
-    expect(ids({})).toEqual(["assessment-expert", "designer"]);
-    expect(ids({ designer: "off" })).toEqual(["assessment-expert"]);
-    expect(ids({ designer: "on", "assessment-expert": "off" })).toEqual(["designer"]);
+    expect(ids({})).toEqual(["assessment-expert", "designer", "ai-resilience"]);
+    expect(ids({ designer: "off" })).toEqual(["assessment-expert", "ai-resilience"]);
+    expect(ids({ "ai-resilience": "off", "assessment-expert": "off" })).toEqual(["designer"]);
   });
 });
 
 describe("the teacher's own choice of hats", () => {
-  it("gives every v1 hat a one-line focus and keeps it on for a teacher by default", () => {
+  it("gives every reviewer a one-line focus; only the first two are on for a teacher by default", () => {
+    expect(AGENTS.filter((a) => a.teacherDefault === "on").map((a) => a.id)).toEqual([
+      "assessment-expert",
+      "designer",
+    ]);
     for (const a of AGENTS) {
-      expect(a.teacherDefault).toBe("on");
       expect(loc(a.focus, "nl").trim()).not.toBe("");
       expect(loc(a.focus, "en").trim()).not.toBe("");
     }

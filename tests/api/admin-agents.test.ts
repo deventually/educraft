@@ -40,6 +40,7 @@ describe("admin.agents", () => {
     expect(data.agents.map((a) => [a.id, a.stand])).toEqual([
       ["assessment-expert", "on"],
       ["designer", "on"],
+      ["ai-resilience", "on"],
     ]);
     expect(data.agents[0]!.role.nl).toBe("Toetsdeskundige");
     expect(data.agents[0]!.watches).toEqual(["course", "generation"]);

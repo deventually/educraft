@@ -42,6 +42,18 @@ describe("hat prompts (P21.2)", () => {
   });
 });
 
+describe("AI resilience reviewer", () => {
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: reads supervision, stays off the other reviewers' ground, and invents no AI tools`, () => {
+      const p = getRuntimePrompt("agent-ai-resilience@v1", locale);
+      for (const word of locale === "nl"
+        ? ["onder toezicht", "zonder toezicht", "Toetsdeskundige", "Ontwerper"]
+        : ["supervised", "unsupervised", "Assessment expert", "Designer"])
+        expect(p, word).toContain(word);
+    });
+  }
+});
+
 describe("linked work (P21.7)", () => {
   it("every hat that watches generations names the linked-work tag; v1 stays registered", () => {
     for (const agent of AGENTS.filter((a) => a.watches.includes("generation")))

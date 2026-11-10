@@ -22,7 +22,9 @@ klaar als elke run slaagt.
 De fouten die de cases dekken: een vage leeruitkomst, een meerkeuzetoets voor een
 ontwerpleeruitkomst, geen formatief moment, een verworpen advies, een opdracht in de invoer (Toetsdeskundige);
 alleen hoorcolleges voor een bouwleeruitkomst, de opdracht vóór de instructie, alle studielast in één
-week (Ontwerper); en voor elke pet een goede cursus waarop hij niet mag vitten.
+week (Ontwerper);
+het hele cijfer aan een rapport of verslag zonder toezicht, zonder tussenproduct of gesprek
+(AI-bestendigheid); en voor elke pet een goede cursus waarop hij niet mag vitten.
 
 De woordlijsten zijn breed: ze meten of de pet de fout ziet, niet of hij precies die woorden kiest.
 Een gemiste fout lees je na in `evals/output/<datum>/role-agents/<case>.md`.

@@ -7,7 +7,7 @@ import {
   scoreAgentCase,
   unknownTargets,
 } from "../../scripts/eval-agents-helpers";
-import { getAgent } from "~/lib/agents/registry";
+import { AGENTS, getAgent } from "~/lib/agents/registry";
 import { CourseDataSchema } from "~/lib/courses/schema";
 
 const cases = JSON.parse(
@@ -20,8 +20,8 @@ function itemIds(c: AgentCase): Set<string> {
 }
 
 describe("role-agent eval cases (P21.2)", () => {
-  it("covers both hats, a known fault for each, a clean course for each, and an injection", () => {
-    for (const agent of ["assessment-expert", "designer"]) {
+  it("covers every reviewer: two known faults and a clean course each, plus an injection", () => {
+    for (const { id: agent } of AGENTS) {
       const mine = cases.filter((c) => c.agent === agent);
       expect(mine.filter((c) => c.mustFind?.length).length).toBeGreaterThanOrEqual(2);
       expect(mine.some((c) => c.maxWarnings === 0)).toBe(true);
