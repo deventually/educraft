@@ -22,7 +22,7 @@ export const courseMembers = {
   role: "Rol",
   roleLabel: "Rol van {name}",
   roles: { "co-owner": "Mede-eigenaar", editor: "Bewerker", owner: "Eigenaar" },
-  save: "Rol opslaan",
+  save: "Opslaan",
   saveLabel: "Rol van {name} opslaan",
   toastAdded: "Opgeslagen.",
   toastRemoved: "Weggehaald.",

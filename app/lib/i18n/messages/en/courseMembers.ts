@@ -23,7 +23,7 @@ export const courseMembers: Messages["courseMembers"] = {
   role: "Role",
   roleLabel: "Role of {name}",
   roles: { "co-owner": "Co-owner", editor: "Editor", owner: "Owner" },
-  save: "Save role",
+  save: "Save",
   saveLabel: "Save the role of {name}",
   toastAdded: "Saved.",
   toastRemoved: "Removed.",
