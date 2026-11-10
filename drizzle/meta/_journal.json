@@ -183,6 +183,13 @@
       "when": 1794312040204,
       "tag": "0025_vengeful_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1794324104747,
+      "tag": "0026_flowery_mandarin",
+      "breakpoints": true
     }
   ]
 }
