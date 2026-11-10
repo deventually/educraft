@@ -27,9 +27,11 @@ import {
 
 export interface Course {
   id: string;
-  /** The owner; anyone else who sees the course is one of its editors. */
+  /** The owner; anyone else who sees the course is one of its members. */
   ownerId: string;
   ownerName: string;
+  /** The caller's own role on the course (BESLUIT-2026-11-10-3). */
+  role: "owner" | "editor" | "co-owner";
   name: string;
   contextProfileId: string | null;
   data: CourseData;
@@ -64,14 +66,17 @@ function assertOwnProfile(userId: string, profileId: string | null): void {
 function rowToCourse({
   row,
   ownerName,
+  memberRole,
 }: {
   row: typeof courses.$inferSelect;
   ownerName: string | null;
+  memberRole?: string | null;
 }): Course {
   return {
     id: row.id,
     ownerId: row.userId,
     ownerName: ownerName ?? "",
+    role: memberRole === "co-owner" ? "co-owner" : memberRole ? "editor" : "owner",
     name: row.name,
     contextProfileId: row.contextProfileId,
     data: parseData(JSON.parse(row.dataJson)),
@@ -91,15 +96,21 @@ const mayEdit = (userId: string) =>
       where m.course_id = ${courses.id} and m.user_id = ${userId})`,
   );
 
-const withOwner = () =>
+/** The course with its owner's name and the caller's member role (null for the owner). */
+const withOwner = (userId: string) =>
   getDb()
-    .select({ row: courses, ownerName: users.name })
+    .select({
+      row: courses,
+      ownerName: users.name,
+      memberRole: sql<string | null>`(select m.role from ${courseMembers} m
+        where m.course_id = ${courses.id} and m.user_id = ${userId})`,
+    })
     .from(courses)
     .leftJoin(users, eq(users.id, courses.userId));
 
 /** The caller's own courses and the ones they edit, most recently changed first. */
 export async function listCourses(userId: string, limit?: number): Promise<Course[]> {
-  return withOwner()
+  return withOwner(userId)
     .where(mayEdit(userId))
     .orderBy(desc(courses.updatedAt))
     .limit(cap(limit))
@@ -108,7 +119,7 @@ export async function listCourses(userId: string, limit?: number): Promise<Cours
 }
 
 export async function getCourse(userId: string, id: string): Promise<Course | null> {
-  const hit = withOwner()
+  const hit = withOwner(userId)
     .where(and(eq(courses.id, id), mayEdit(userId)))
     .get();
   return hit ? rowToCourse(hit) : null;
@@ -137,6 +148,7 @@ export async function createCourse(
     id: row.id,
     ownerId: userId,
     ownerName: owner?.name ?? "",
+    role: "owner",
     name: row.name,
     contextProfileId,
     data,
@@ -198,7 +210,7 @@ export async function deleteCourse(userId: string, id: string): Promise<boolean>
     tx.delete(courseLinks).where(eq(courseLinks.courseId, id)).run();
     tx.delete(courseMembers).where(eq(courseMembers.courseId, id)).run();
     tx.delete(shares)
-      .where(and(eq(shares.kind, "course"), eq(shares.itemId, id), eq(shares.ownerUserId, userId)))
+      .where(and(eq(shares.kind, "course"), eq(shares.itemId, id)))
       .run();
     // P21.3: the course's role-agent reviews and the decisions on them.
     const reviewIds = tx

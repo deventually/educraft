@@ -12,16 +12,17 @@ You can share three things with your team:
 - a **rubric** from the utilities;
 - a **teaching context**.
 
-Choose **Share** on the course, rubric or teaching context, and then the team. Colleagues in the team can view it and choose **Make a copy** to make their own version. Only you (and, for a course, your editors) edit the original. **Stop sharing** makes it private again; a copy a colleague already made stays theirs.
+Choose **Share** on the course, rubric or teaching context, and then the team. Colleagues in the team can view it and choose **Make a copy** to make their own version. Only you (and, for a course, whoever works on it) edit the original. **Stop sharing** makes it private again; a copy a colleague already made stays theirs.
 
 ## Working on a course together
 
-Sharing only lets colleagues read. To work on a course together, add a colleague as **editor**. You do that at the bottom of the course, under *Work on this course together*. You can choose colleagues you share a team with.
+Sharing only lets colleagues read. To work on a course together, add a colleague at the bottom of the course, under *Work on this course together*. You choose from colleagues you share a team with, and you choose a role:
 
-- An editor sees the course under **Courses**, with your name on it, and changes outcomes, activities, assessments and settings as you do.
-- What an editor makes with a tool and links to the course stays theirs. So do the review team's reviews.
-- Only you as the owner delete the course, share it with a team, choose its educational context and choose editors.
-- An editor can **Stop editing** themselves; you can remove an editor.
+- An **editor** sees the course under **Courses**, with the owner's name on it, and changes outcomes, activities, assessments and settings.
+- A **co-owner** can do that too, and can also share the course with their own team and add or remove co-owners and editors. That way a module team can run a course together.
+- Only the **owner** deletes the course and chooses its educational context.
+
+What someone makes with a tool and links to the course stays theirs. So do the review team's reviews. Anyone working on it can **Stop working on it** themselves.
 
 Changes are saved per part. If you work on different parts at the same time, everything is kept. If two people change the same part, the last save counts.
 

@@ -328,13 +328,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
   staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
   na "rolagenten is geen goede benaming").
-- **BESLUIT-2026-11-10-3:** **Een cursus heeft één eigenaar en kan bewerkers hebben; het
-  eigenaarschap is over te dragen.** Vult BESLUIT-2026-11-05-5 aan ("alleen de eigenaar bewerkt").
-  De eigenaar voegt collega's met wie hij of zij een team deelt toe als *bewerker*
-  (`course_members`). Een bewerker leest en wijzigt de inhoud van de cursus, koppelt eigen werk en
-  laat het reviewteam kijken. Alleen de eigenaar verwijdert de cursus, deelt hem met een team, kiest
-  de onderwijscontext, kiest bewerkers en draagt het eigenaarschap over aan een collega uit een
-  gedeeld team; de vorige eigenaar blijft dan standaard bewerker. Gekoppeld werk en reviews blijven
-  van wie ze maakte. Delen met een team blijft alleen lezen en kopiëren. Rubrics en
-  onderwijscontexten houden alleen de eigenaar. Bastiaan, 2026-11-10 (plan in de thread "Cursussen
-  overdragen en samen bewerken").
+- **BESLUIT-2026-11-10-3:** **Een cursus heeft één eigenaar, en daarnaast mede-eigenaars en
+  bewerkers; het eigenaarschap is over te dragen.** Vult BESLUIT-2026-11-05-5 aan ("alleen de
+  eigenaar bewerkt"). Een *bewerker* leest en wijzigt de inhoud van de cursus, koppelt eigen werk en
+  laat het reviewteam kijken. Een *mede-eigenaar* mag daarnaast de cursus delen met een eigen team en
+  mede-eigenaars en bewerkers kiezen, uit collega's met wie hij of zij een team deelt
+  (`course_members.role`). Alleen de eigenaar verwijdert de cursus, kiest de onderwijscontext en
+  draagt het eigenaarschap over; de ontvanger is meteen eigenaar, zonder accepteren, en de vorige
+  eigenaar blijft standaard bewerker. De beheerder kan dit ook, zodat een cursus niet verweest als
+  een docent wegvalt. Gekoppeld werk en reviews blijven van wie ze maakte. Delen met een team blijft
+  alleen lezen en kopiëren. Rubrics en onderwijscontexten houden alleen de eigenaar. Bastiaan,
+  2026-11-10 (keuzekaarten in de thread "Cursussen overdragen en samen bewerken").

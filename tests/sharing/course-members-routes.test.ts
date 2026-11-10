@@ -48,10 +48,10 @@ const act = (id: string, fields: Record<string, string>) =>
   courseDetail.action({ request: post(`/courses/${id}`, fields), params: { id } } as never);
 
 type Loaded = {
-  editors: {
-    isOwner: boolean;
+  members: {
+    myRole: string;
     ownerName: string;
-    editors: { userId: string; name: string }[];
+    members: { userId: string; name: string; role: string }[];
     candidates: { userId: string; name: string }[];
   };
   sharing: { teams: unknown[] };
@@ -65,30 +65,30 @@ const load = async (id: string) =>
 describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
   it("lets the owner add and remove a team-mate as editor from the course page", async () => {
     const course = await courses.createCourse("ed-a", { name: "Databases", data: alignedCourse() });
-    expect((await load(course.id)).editors).toEqual({
-      isOwner: true,
+    expect((await load(course.id)).members).toEqual({
+      myRole: "owner",
       ownerName: "Anna",
-      editors: [],
+      members: [],
       candidates: [{ userId: "ed-b", name: "Bram" }],
     });
 
-    expect(await act(course.id, { intent: "add-editor", userId: "ed-b" })).toMatchObject({
+    expect(await act(course.id, { intent: "set-member", userId: "ed-b" })).toMatchObject({
       ok: true,
-      intent: "add-editor",
+      intent: "set-member",
     });
-    expect(await members.listCourseEditors("ed-a", course.id)).toEqual([
-      { userId: "ed-b", name: "Bram" },
+    expect(await members.listCourseMembers("ed-a", course.id)).toEqual([
+      { userId: "ed-b", name: "Bram", role: "editor" },
     ]);
-    expect(await act(course.id, { intent: "add-editor", userId: "ed-c" })).toMatchObject({
+    expect(await act(course.id, { intent: "set-member", userId: "ed-c" })).toMatchObject({
       ok: false,
-      intent: "add-editor",
+      intent: "set-member",
     });
 
-    expect(await act(course.id, { intent: "remove-editor", userId: "ed-b" })).toMatchObject({
+    expect(await act(course.id, { intent: "remove-member", userId: "ed-b" })).toMatchObject({
       ok: true,
-      intent: "remove-editor",
+      intent: "remove-member",
     });
-    expect(await members.listCourseEditors("ed-a", course.id)).toEqual([]);
+    expect(await members.listCourseMembers("ed-a", course.id)).toEqual([]);
   });
 
   it("opens the course for an editor, who edits it but cannot share, choose editors or delete", async () => {
@@ -96,11 +96,11 @@ describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
       name: "Algoritmen",
       data: alignedCourse(),
     });
-    await members.addCourseEditor("ed-a", course.id, "ed-b");
+    await members.setCourseMember("ed-a", course.id, "ed-b", "editor");
     await as("ed-b");
 
     const loaded = await load(course.id);
-    expect(loaded.editors).toMatchObject({ isOwner: false, ownerName: "Anna", candidates: [] });
+    expect(loaded.members).toMatchObject({ myRole: "editor", ownerName: "Anna", candidates: [] });
     expect(loaded.sharing.teams).toEqual([]);
 
     expect(await act(course.id, { intent: "settings", name: "Algoritmen 2" })).toMatchObject({
@@ -109,7 +109,7 @@ describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
     expect((await courses.getCourse("ed-a", course.id))?.name).toBe("Algoritmen 2");
 
     expect(await act(course.id, { intent: "share", teamId: team })).toMatchObject({ ok: false });
-    expect(await act(course.id, { intent: "add-editor", userId: "ed-a" })).toMatchObject({
+    expect(await act(course.id, { intent: "set-member", userId: "ed-a" })).toMatchObject({
       ok: false,
     });
     const del = await courseList.action({
@@ -127,7 +127,7 @@ describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
       contextProfileId: profile.id,
       data: alignedCourse(),
     });
-    await members.addCourseEditor("ed-a", course.id, "ed-b");
+    await members.setCourseMember("ed-a", course.id, "ed-b", "editor");
     await as("ed-b");
     expect(
       await act(course.id, { intent: "settings", name: "Netwerken", contextProfileId: "" }),
@@ -137,7 +137,7 @@ describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
 
   it("lets an editor stop working on a course", async () => {
     const course = await courses.createCourse("ed-a", { name: "Security", data: alignedCourse() });
-    await members.addCourseEditor("ed-a", course.id, "ed-b");
+    await members.setCourseMember("ed-a", course.id, "ed-b", "editor");
     await as("ed-b");
     const r = await act(course.id, { intent: "leave-course" }).catch((e: unknown) => e);
     expect(r).toBeInstanceOf(Response);
@@ -147,15 +147,37 @@ describe("working on a course together (BESLUIT-2026-11-10-3)", () => {
 
   it("lists an editor's courses with the owner's name, not again under 'Van mijn team'", async () => {
     const course = await courses.createCourse("ed-a", { name: "Webdev", data: alignedCourse() });
-    await members.addCourseEditor("ed-a", course.id, "ed-b");
+    await members.setCourseMember("ed-a", course.id, "ed-b", "editor");
     const shares = await import("~/server/repositories/shares.server");
     await shares.shareItem("ed-a", "course", course.id, team);
     await as("ed-b");
     const loaded = (await courseList.loader({ request: get("/courses"), params: {} } as never)) as {
-      courses: { id: string; ownerName: string | null }[];
+      courses: { id: string; ownerName: string | null; role: string }[];
       shared: { id: string }[];
     };
-    expect(loaded.courses.find((c) => c.id === course.id)).toMatchObject({ ownerName: "Anna" });
+    expect(loaded.courses.find((c) => c.id === course.id)).toMatchObject({
+      ownerName: "Anna",
+      role: "editor",
+    });
     expect(loaded.shared.map((s) => s.id)).not.toContain(course.id);
+  });
+
+  it("gives a co-owner the share controls and the choice of members", async () => {
+    const course = await courses.createCourse("ed-a", { name: "AI", data: alignedCourse() });
+    await members.setCourseMember("ed-a", course.id, "ed-b", "co-owner");
+    await as("ed-b");
+    const loaded = await load(course.id);
+    expect(loaded.members.myRole).toBe("co-owner");
+    expect(loaded.sharing.teams).toEqual([{ id: team, name: "Informatica" }]);
+    expect(await act(course.id, { intent: "share", teamId: team })).toMatchObject({ ok: true });
+    // Not themselves, and never the owner.
+    expect(
+      await act(course.id, { intent: "set-member", userId: "ed-a", role: "editor" }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await act(course.id, { intent: "set-member", userId: "ed-b", role: "boss" }),
+    ).toMatchObject({
+      ok: false,
+    });
   });
 });

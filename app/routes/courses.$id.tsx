@@ -29,8 +29,8 @@ import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { courseToolsFor } from "~/server/courseTools.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
-import { editorAction, editorControls } from "~/server/courseEditors.server";
-import { CourseEditors } from "~/components/courses/CourseEditors";
+import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
+import { CourseMembers } from "~/components/courses/CourseMembers";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -41,6 +41,7 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, course } = await loadCourse(request, params.id);
+  const members = await memberControls(user, course);
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   const items = [...course.data.activities, ...course.data.assessments];
   const linkedWork = await Promise.all(
@@ -76,12 +77,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       ? courseWeekDates(course.data.startDate, await getBreakWeeks(), COURSE_LIMITS.week)
       : null,
     currentWeek: await currentCourseWeek(course.data.startDate),
-    // Sharing and choosing editors are the owner's (BESLUIT-2026-11-10-3).
-    sharing:
-      course.ownerId === user.id
-        ? await shareControls(user, "course", course.id)
-        : { teams: [], sharedWith: [] },
-    editors: await editorControls(user, course),
+    // Sharing and choosing members are for the owner and co-owners (BESLUIT-2026-11-10-3).
+    sharing: managesCourse(members)
+      ? await shareControls(user, "course", course.id)
+      : { teams: [], sharedWith: [] },
+    members,
   };
 }
 
@@ -94,12 +94,12 @@ async function currentCourseWeek(startDate: string | undefined): Promise<number 
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  // The owner and the course's editors get here; the repository refuses an editor's
-  // share or choice of editors (BESLUIT-2026-11-10-3).
+  // The owner and the course's members get here; the repositories refuse an editor's share
+  // or choice of members (BESLUIT-2026-11-10-3).
   const { user, course } = await loadCourse(request, params.id);
   return (
     (await shareAction(request, user, "course", course.id)) ??
-    (await editorAction(request, user, course)) ??
+    (await memberAction(request, user, course)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -133,8 +133,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (
         r.intent === "share" ||
         r.intent === "unshare" ||
-        r.intent === "add-editor" ||
-        r.intent === "remove-editor"
+        r.intent === "set-member" ||
+        r.intent === "remove-member"
       )
         return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
@@ -158,9 +158,9 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     tools = NO_COURSE_TOOLS,
     currentWeek = null,
     sharing = { teams: [], sharedWith: [] },
-    editors = null,
+    members = null,
   } = loaderData;
-  const isOwner = editors?.isOwner ?? true;
+  const isOwner = (members?.myRole ?? "owner") === "owner";
   const { data } = course;
 
   return (
@@ -175,9 +175,12 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {course.name}
       </h1>
-      {!isOwner && editors && (
+      {members && members.myRole !== "owner" && (
         <p className="mt-2 max-w-[65ch] text-sm text-slate-600">
-          {fmt(t.courseEditors.editorNote, { owner: editors.ownerName })}
+          {fmt(t.courseMembers.youAre, {
+            owner: members.ownerName,
+            role: t.courseMembers.roles[members.myRole].toLowerCase(),
+          })}
         </p>
       )}
       <p className="mt-2 text-sm">
@@ -227,7 +230,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />
         <ShareWithTeam {...sharing} />
-        {editors && <CourseEditors {...editors} />}
+        {members && <CourseMembers {...members} />}
       </div>
     </div>
   );
@@ -250,7 +253,7 @@ function CourseSettings({
   startDate?: string;
   hours: number;
   profiles: { id: string; name: string }[];
-  /** An editor sees no profile choice: the context profile is the owner's. */
+  /** Only the owner chooses the context profile; it is theirs. */
   isOwner: boolean;
 }) {
   const t = useT();
@@ -294,7 +297,7 @@ function CourseSettings({
                 </Select>
               </div>
             ) : (
-              <p className="self-end text-sm text-slate-600">{t.courseEditors.profileOwner}</p>
+              <p className="self-end text-sm text-slate-600">{t.courseMembers.profileOwner}</p>
             )}
             <NumberField
               id={`${id}-ec`}

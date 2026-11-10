@@ -94,9 +94,10 @@ English slugs, never shown.
 - All DB access goes through `app/server/repositories/`: every exported function is `async` and
   scoped to its owning `userId` in the WHERE clause. No better-sqlite3 API outside `db.server.ts`
   (`tests/architecture.test.ts`).
-- Course editors (BESLUIT-2026-11-10-3): a course's **content** may also be read and changed by
-  its editors (`course_members`), in the WHERE clause of `courses.server.ts`. Deleting, sharing,
-  the context profile, choosing editors and handing over stay owner-only.
+- Course members (BESLUIT-2026-11-10-3): a course's **content** may also be read and changed by
+  its editors and co-owners (`course_members`), in the WHERE clause of `courses.server.ts`.
+  Sharing and choosing members is for owner and co-owners; deleting, the context profile and
+  handing over stay owner-only.
 - Sharing (P28.4): **reading** is also allowed to a member of a team the owner shared the item
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared

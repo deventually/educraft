@@ -28,8 +28,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   const courses = (await listCourses(user.id)).map((c) => ({
     id: c.id,
     name: c.name,
-    // A course the viewer edits for a colleague (BESLUIT-2026-11-10-3); null = their own.
+    // A course the viewer works on with a colleague (BESLUIT-2026-11-10-3); null = their own.
     ownerName: c.ownerId === user.id ? null : c.ownerName,
+    role: c.role,
     outcomes: c.data.outcomes.length,
     findings: checkAlignment(c.data).length,
   }));
@@ -164,7 +165,10 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
                   </p>
                   {course.ownerName && (
                     <p className="text-sm text-slate-600">
-                      {fmt(t.courseEditors.ownerBadge, { owner: course.ownerName })}
+                      {fmt(t.courseMembers.ownerBadge, {
+                        owner: course.ownerName,
+                        role: t.courseMembers.roles[course.role ?? "editor"],
+                      })}
                     </p>
                   )}
                 </div>

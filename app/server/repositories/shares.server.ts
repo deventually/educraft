@@ -6,6 +6,10 @@
  *
  * A share only counts while its owner is still in the team, and leaving a team drops the
  * leaver's shares for it (`teams.server.ts`), so a share never outlives its team or owner.
+ *
+ * A course is also shared by its co-owners (BESLUIT-2026-11-10-3): `owner_user_id` is then
+ * the co-owner who shared it, and the share counts while that person is still in the team
+ * and still co-owner. Any manager of the course (owner or co-owner) sees and stops its shares.
  */
 import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, inArray, ne, type SQL, sql } from "drizzle-orm";
@@ -14,6 +18,7 @@ import { getDb } from "../db.server";
 import {
   contextProfiles,
   courseLinks,
+  courseMembers,
   courses,
   generations,
   rubrics,
@@ -49,9 +54,25 @@ const ITEMS = {
 const isKind = (kind: string): kind is ShareKind =>
   (SHARE_KINDS as readonly string[]).includes(kind);
 
+/** The sharer `sharer` may share the item: its owner, or for a course also a co-owner. */
+function mayShare(
+  kind: ShareKind,
+  sharer: SQL | string,
+  itemId: SQLiteColumn | string,
+  owner: SQLiteColumn,
+): SQL {
+  const coOwner =
+    kind === "course"
+      ? sql` or exists (select 1 from ${courseMembers} cm
+          where cm.course_id = ${itemId} and cm.user_id = ${sharer} and cm.role = 'co-owner')`
+      : sql``;
+  return sql`(${sharer} = ${owner}${coOwner})`;
+}
+
 /**
- * The read rule for a team-mate: the item is shared by its owner with a team that both the
- * viewer and the owner are in. A correlated condition for the item's own table.
+ * The read rule for a team-mate: the item is shared, by someone who may share it, with a
+ * team that both the viewer and that sharer are in. A correlated condition for the item's
+ * own table.
  */
 function sharedWith(
   viewerId: string,
@@ -62,7 +83,8 @@ function sharedWith(
   return sql`exists (select 1 from ${shares} s
     join ${teamMembers} viewer on viewer.team_id = s.team_id and viewer.user_id = ${viewerId}
     join ${teamMembers} owner on owner.team_id = s.team_id and owner.user_id = s.owner_user_id
-    where s.kind = ${kind} and s.item_id = ${itemId} and s.owner_user_id = ${ownerId})`;
+    where s.kind = ${kind} and s.item_id = ${itemId}
+      and ${mayShare(kind, sql`s.owner_user_id`, itemId, ownerId)})`;
 }
 
 function ownsItem(userId: string, kind: ShareKind, itemId: string): boolean {
@@ -70,7 +92,7 @@ function ownsItem(userId: string, kind: ShareKind, itemId: string): boolean {
   return !!getDb()
     .select({ id: t.id })
     .from(t.table)
-    .where(and(eq(t.id, itemId), eq(t.owner, userId)))
+    .where(and(eq(t.id, itemId), mayShare(kind, userId, t.id, t.owner)))
     .get();
 }
 
@@ -100,41 +122,47 @@ export async function shareItem(
   return true;
 }
 
-/** Stop sharing with one team. A copy a colleague made stays theirs. */
+/**
+ * Stop sharing with one team. A copy a colleague made stays theirs. A course's owner and
+ * co-owners stop any share of it; anything else only its owner.
+ */
 export async function stopSharing(
   ownerId: string,
   kind: ShareKind,
   itemId: string,
   teamId: string,
 ): Promise<boolean> {
+  if (!isKind(kind) || !ownsItem(ownerId, kind, itemId)) return false;
   const result = getDb()
     .delete(shares)
-    .where(
-      and(
-        eq(shares.ownerUserId, ownerId),
-        eq(shares.kind, kind),
-        eq(shares.itemId, itemId),
-        eq(shares.teamId, teamId),
-      ),
-    )
+    .where(and(eq(shares.kind, kind), eq(shares.itemId, itemId), eq(shares.teamId, teamId)))
     .run();
   return result.changes > 0;
 }
 
-/** The teams the owner shares this item with (ids). */
+/** The teams this item is shared with (ids), for whoever may share it. */
 export async function listItemShares(
   ownerId: string,
   kind: ShareKind,
   itemId: string,
 ): Promise<string[]> {
+  if (!isKind(kind) || !ownsItem(ownerId, kind, itemId)) return [];
+  const t = ITEMS[kind];
   return getDb()
-    .select({ teamId: shares.teamId })
+    .selectDistinct({ teamId: shares.teamId, createdAt: shares.createdAt })
     .from(shares)
     .innerJoin(
       teamMembers,
       and(eq(teamMembers.teamId, shares.teamId), eq(teamMembers.userId, shares.ownerUserId)),
     )
-    .where(and(eq(shares.ownerUserId, ownerId), eq(shares.kind, kind), eq(shares.itemId, itemId)))
+    .innerJoin(t.table, eq(t.id, shares.itemId))
+    .where(
+      and(
+        eq(shares.kind, kind),
+        eq(shares.itemId, itemId),
+        mayShare(kind, sql`${shares.ownerUserId}`, t.id, t.owner),
+      ),
+    )
     .orderBy(asc(shares.createdAt))
     .all()
     .map((r) => r.teamId);
