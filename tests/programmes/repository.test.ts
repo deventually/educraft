@@ -126,7 +126,7 @@ describe("courses in a programme", () => {
     await repo.placeCourse(member, vt!.id, c.id, { year: 1, period: 1 });
     await repo.placeCourse(member, dt!.id, c.id, { year: 2, period: 3 });
     await repo.placeCourse(member, vt!.id, c.id, { year: 1, period: 2 });
-    expect(await repo.programmesOfCourse(member.id, c.id)).toEqual([
+    expect(await repo.programmesOfCourse(c.id)).toEqual([
       { programmeId: dt!.id, name: "Deeltijd", teamName: team.name, year: 2, period: 3 },
       { programmeId: vt!.id, name: "Voltijd", teamName: team.name, year: 1, period: 2 },
     ]);
@@ -196,14 +196,14 @@ describe("courses in a programme", () => {
     );
     for (const x of [a!, b!, c!]) await repo.placeCourse(member, p!.id, x.id, {});
     await shares.stopSharing(member.id, "course", a!.id, team.id);
-    expect(await repo.programmesOfCourse(member.id, a!.id)).toEqual([]);
+    expect(await repo.programmesOfCourse(a!.id)).toEqual([]);
     await courses.deleteCourse(member.id, b!.id);
     expect((await repo.getProgramme(lead, p!.id))?.courses.map((x) => x.name)).toEqual([
       "Vertrokken",
     ]);
     await teams.removeMember(team.id, member.id);
     expect((await repo.getProgramme(lead, p!.id))?.courses).toEqual([]);
-    expect(await repo.programmesOfCourse(member.id, c!.id)).toEqual([]);
+    expect(await repo.programmesOfCourse(c!.id)).toEqual([]);
   });
 
   it("goes with its team", async () => {
@@ -213,7 +213,7 @@ describe("courses in a programme", () => {
     await repo.placeCourse(member, p!.id, c.id, {});
     await teams.deleteTeam(team.id);
     expect(await repo.getProgramme({ id: lead.id, role: "admin" }, p!.id)).toBeNull();
-    expect(await repo.programmesOfCourse(member.id, c.id)).toEqual([]);
+    expect(await repo.programmesOfCourse(c.id)).toEqual([]);
   });
 
   it("offers a member the programmes of all their teams on the course page", async () => {
@@ -223,5 +223,33 @@ describe("courses in a programme", () => {
       expect.objectContaining({ name: "Voltijd", teamName: team.name }),
     ]);
     expect(await repo.placeOptions(outsider.id)).toEqual([]);
+  });
+});
+
+describe("programmes and course co-owners (BESLUIT-2026-11-10-5)", () => {
+  it("lets a co-owner place the owner's course in a programme of their own team", async () => {
+    const { lead, member, outsider, team } = await world();
+    const members = await import("~/server/repositories/courseMembers.server");
+    // The owner shares another team with the co-owner, but is not in the programme's team.
+    const other = await teams.createTeam(`Module ${n}`);
+    await teams.addMember(other.id, outsider.id);
+    await teams.addMember(other.id, member.id);
+    const c = await courses.createCourse(outsider.id, { name: "Van de eigenaar" });
+    expect(await members.setCourseMember(outsider.id, c.id, member.id, "co-owner")).toBe(true);
+
+    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    expect(await repo.placeCourse(member, p!.id, c.id, { year: 1 })).toBe(true);
+    expect((await repo.getProgramme(lead, p!.id))?.courses.map((x) => x.name)).toEqual([
+      "Van de eigenaar",
+    ]);
+    expect((await repo.programmesOfCourse(c.id)).map((x) => x.name)).toEqual(["Opleiding"]);
+    // The owner can take it out too.
+    expect(await repo.removeCourse(outsider, p!.id, c.id)).toBe(true);
+
+    await repo.placeCourse(member, p!.id, c.id, {});
+    // No longer co-owner: their share goes, and the course leaves the programme.
+    await members.setCourseMember(outsider.id, c.id, member.id, "editor");
+    expect((await repo.getProgramme(lead, p!.id))?.courses).toEqual([]);
+    expect(await repo.placeCourse(member, p!.id, c.id, {})).toBe(false);
   });
 });

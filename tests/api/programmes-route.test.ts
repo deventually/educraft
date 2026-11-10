@@ -187,6 +187,21 @@ describe("/programmes/:id", () => {
     expect(await act(p!.id, { intent: "remove", courseId: c.id })).toMatchObject({ ok: true });
   });
 
+  it("offers a course I co-own, never one I only edit (BESLUIT-2026-11-10-5)", async () => {
+    const members = await import("~/server/repositories/courseMembers.server");
+    const p = await repo.createProgramme(me, teamId, hbo("Deeltijd"));
+    const coOwned = await courses.createCourse(colleague.id, { name: "Samen van" });
+    const edited = await courses.createCourse(colleague.id, { name: "Alleen bewerken" });
+    await members.setCourseMember(colleague.id, coOwned.id, me.id, "co-owner");
+    await members.setCourseMember(colleague.id, edited.id, me.id, "editor");
+    const loaded = (await load(p!.id)) as unknown as { available: { name: string }[] };
+    expect(loaded.available.map((c) => c.name)).toEqual(["Samen van"]);
+    await repo.placeCourse(me, p!.id, coOwned.id, {});
+    expect((await load(p!.id)).programme.courses).toEqual([
+      expect.objectContaining({ name: "Samen van", mine: true }),
+    ]);
+  });
+
   it("refuses a year out of range", async () => {
     const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
     const mine = await courses.createCourse(me.id, { name: "Mijn" });
@@ -235,7 +250,7 @@ describe("course page: belongs to programme…", () => {
       ok: true,
       intent: "programme-remove",
     });
-    expect(await repo.programmesOfCourse(me.id, c.id)).toEqual([]);
+    expect(await repo.programmesOfCourse(c.id)).toEqual([]);
   });
 
   it("refuses a programme of a team I'm not in", async () => {

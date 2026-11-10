@@ -9,7 +9,7 @@
  * every read joins the share, and the team's own clean-up removes the rows.
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, type SQL, sql } from "drizzle-orm";
+import { and, asc, eq, or, type SQL, sql } from "drizzle-orm";
 import {
   type Placement,
   PlacementSchema,
@@ -17,8 +17,10 @@ import {
   ProgrammeInputSchema,
 } from "~/lib/programmes/schema";
 import type { Sector } from "~/lib/context/sectors";
+import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { getDb } from "../db.server";
 import {
+  courseMembers,
   courses,
   programmeCourses,
   programmes,
@@ -58,9 +60,21 @@ export interface ProgrammeCourse {
 const cap = (limit?: number) => Math.min(limit ?? 50, 500);
 
 /**
+ * The course is shared with the programme's team by someone who may share it (its owner or a
+ * co-owner, BESLUIT-2026-11-10-5) and who is still in that team. Needs `courses` in the query.
+ */
+const sharedWithTeam = (teamId: SQL | SQLiteColumn | string) =>
+  sql`exists (select 1 from ${shares} s
+    join ${teamMembers} sharer on sharer.team_id = s.team_id and sharer.user_id = s.owner_user_id
+    where s.kind = 'course' and s.item_id = ${courses.id} and s.team_id = ${teamId}
+      and (s.owner_user_id = ${courses.userId} or exists (select 1 from ${courseMembers} cm
+        where cm.course_id = ${courses.id} and cm.user_id = s.owner_user_id
+          and cm.role = 'co-owner')))`;
+
+/**
  * The courses in a programme of `teamId`, by year, period and name (unplaced last): only those
- * whose owner shares them with that team and is still in it. Callers check first that the
- * viewer may read the programme.
+ * shared with that team by their owner or a co-owner who is still in it. Callers check first
+ * that the viewer may read the programme.
  */
 function listProgrammeCourses(programmeId: string, teamId: string): ProgrammeCourse[] {
   return getDb()
@@ -73,25 +87,9 @@ function listProgrammeCourses(programmeId: string, teamId: string): ProgrammeCou
       period: programmeCourses.period,
     })
     .from(programmeCourses)
-    .innerJoin(
-      courses,
-      and(eq(courses.id, programmeCourses.courseId), eq(courses.userId, programmeCourses.userId)),
-    )
+    .innerJoin(courses, eq(courses.id, programmeCourses.courseId))
     .innerJoin(users, eq(users.id, courses.userId))
-    .innerJoin(
-      shares,
-      and(
-        eq(shares.kind, "course"),
-        eq(shares.itemId, courses.id),
-        eq(shares.ownerUserId, courses.userId),
-        eq(shares.teamId, teamId),
-      ),
-    )
-    .innerJoin(
-      teamMembers,
-      and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, courses.userId)),
-    )
-    .where(eq(programmeCourses.programmeId, programmeId))
+    .where(and(eq(programmeCourses.programmeId, programmeId), sharedWithTeam(teamId)))
     .orderBy(
       sql`${programmeCourses.year} IS NULL`,
       asc(programmeCourses.year),
@@ -258,8 +256,8 @@ export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
 }
 
 /**
- * Puts the actor's own course in a programme of a team they are in, at this year and period
- * (or moves it there), and shares the course with that team. False otherwise.
+ * Puts a course the actor owns or co-owns in a programme of a team they are in, at this year
+ * and period (or moves it there), and shares the course with that team. False otherwise.
  */
 export async function placeCourse(
   a: Actor,
@@ -297,7 +295,10 @@ export async function placeCourse(
   return true;
 }
 
-/** Takes a course out: its owner, or whoever manages the programme. The share stays. */
+/**
+ * Takes a course out: whoever placed it, its owner or a co-owner, or whoever manages the
+ * programme. The share stays.
+ */
 export async function removeCourse(
   a: Actor,
   programmeId: string,
@@ -309,7 +310,14 @@ export async function removeCourse(
     .where(eq(programmes.id, programmeId))
     .get();
   if (!programme) return false;
-  const who = canManageTeam(a, programme.teamId) ? undefined : eq(programmeCourses.userId, a.id);
+  const who = canManageTeam(a, programme.teamId)
+    ? undefined
+    : or(
+        eq(programmeCourses.userId, a.id),
+        sql`exists (select 1 from ${courses} c where c.id = ${programmeCourses.courseId}
+          and (c.user_id = ${a.id} or exists (select 1 from ${courseMembers} cm
+            where cm.course_id = c.id and cm.user_id = ${a.id} and cm.role = 'co-owner')))`,
+      );
   const result = getDb()
     .delete(programmeCourses)
     .where(
@@ -323,11 +331,11 @@ export async function removeCourse(
   return result.changes > 0;
 }
 
-/** Where the owner's course sits: the programmes it is placed in while the share stands. */
-export async function programmesOfCourse(
-  userId: string,
-  courseId: string,
-): Promise<
+/**
+ * Where a course sits: the programmes it is placed in while a share stands. Callers check
+ * first that the viewer may open the course (owner or member, BESLUIT-2026-11-10-5).
+ */
+export async function programmesOfCourse(courseId: string): Promise<
   {
     programmeId: string;
     name: string;
@@ -347,21 +355,8 @@ export async function programmesOfCourse(
     .from(programmeCourses)
     .innerJoin(programmes, eq(programmes.id, programmeCourses.programmeId))
     .innerJoin(teams, eq(teams.id, programmes.teamId))
-    .innerJoin(
-      shares,
-      and(
-        eq(shares.kind, "course"),
-        eq(shares.itemId, programmeCourses.courseId),
-        eq(shares.ownerUserId, userId),
-        eq(shares.teamId, programmes.teamId),
-      ),
-    )
-    .innerJoin(
-      teamMembers,
-      and(eq(teamMembers.teamId, programmes.teamId), eq(teamMembers.userId, userId)),
-    )
-    .innerJoin(courses, and(eq(courses.id, programmeCourses.courseId), eq(courses.userId, userId)))
-    .where(and(eq(programmeCourses.courseId, courseId), eq(programmeCourses.userId, userId)))
+    .innerJoin(courses, eq(courses.id, programmeCourses.courseId))
+    .where(and(eq(programmeCourses.courseId, courseId), sharedWithTeam(programmes.teamId)))
     .orderBy(asc(programmes.name))
     .limit(cap(500))
     .all();

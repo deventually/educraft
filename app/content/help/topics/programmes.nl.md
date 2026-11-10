@@ -7,7 +7,7 @@ Een **opleiding** is een bundel cursussen van een team. Per cursus staat erbij i
 Een opleiding hoort bij een **team**, zoals je opleiding, je richting of een moduleteam. Je kunt in meer teams zitten; je ziet dan de opleidingen van al je teams. Bij elke opleiding staat het team erbij.
 
 - De **teamleider** of een **beheerder** maakt de opleiding aan en past naam, niveau en vorm aan.
-- **Elk teamlid** kan zijn eigen cursussen erin zetten en ziet de cursussen van collega's.
+- **Elk teamlid** kan zijn eigen cursussen erin zetten, en ook cursussen waarvan hij mede-eigenaar is, en ziet de cursussen van collega's.
 
 ## Een opleiding aanmaken
 
@@ -21,11 +21,11 @@ Ben je teamleider, ga dan naar **Opleidingen** (via de pagina **Cursussen**) en 
 
 ## Cursussen toevoegen
 
-Op de pagina van de opleiding kies je bij **Cursus toevoegen** een van je eigen cursussen, met het jaar en de periode. Het jaar loopt van 1 tot en met 8 en de periode van 1 tot en met 6. Allebei mogen leeg blijven; zo'n cursus staat dan onderaan.
+Op de pagina van de opleiding kies je bij **Cursus toevoegen** een van je eigen cursussen of een cursus waarvan je mede-eigenaar bent, met het jaar en de periode. Het jaar loopt van 1 tot en met 8 en de periode van 1 tot en met 6. Allebei mogen leeg blijven; zo'n cursus staat dan onderaan.
 
 Je kunt het ook vanaf de cursus doen. Op de cursuspagina staat **Hoort bij opleiding**. Daar kies je de opleiding, het jaar en de periode.
 
-**Zet je een cursus in een opleiding, dan deel je hem met het team van die opleiding.** Je collega's in dat team kunnen hem bekijken en kopiëren, net als bij [delen met je team](/help/teams). Alleen jij bewerkt hem. Jaar en periode van je eigen cursus pas je zelf aan.
+**Zet je een cursus in een opleiding, dan deel je hem met het team van die opleiding.** Je collega's in dat team kunnen hem bekijken en kopiëren, net als bij [delen met je team](/help/teams). Alleen jij en wie aan de cursus meewerkt, bewerken hem. Jaar en periode van je eigen cursus pas je zelf aan.
 
 Een cursus kan bij **meer opleidingen** horen, met in elke opleiding een eigen jaar en periode. Denk aan een voltijd- en een deeltijdvariant met dezelfde cursussen, of een cursus die in jaar 1 van de ene en in jaar 2 van de andere opleiding valt.
 

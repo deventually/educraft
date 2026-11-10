@@ -37,8 +37,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!kinds.some((k) => k.value === kind))
     kinds.unshift({ value: kind, label: programmeKindLabel({ ...programme, form: null }, locale) });
   const inProgramme = new Set(programme.courses.map((c) => c.courseId));
-  // Only your own courses can go in; placing shares them with the team.
-  const available = (await listCourses(user.id, 500))
+  // Only courses you own or co-own can go in; placing shares them with the team
+  // (BESLUIT-2026-11-10-5). An editor's courses are not theirs to place.
+  const managed = (await listCourses(user.id, 500)).filter((c) => c.role !== "editor");
+  const mine = new Set(managed.map((c) => c.id));
+  const available = managed
     .filter((c) => !inProgramme.has(c.id))
     .map((c) => ({ id: c.id, name: c.name }))
     .sort((a, b) => a.name.localeCompare(b.name, locale));
@@ -51,7 +54,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       kindLabel: programmeKindLabel(programme, locale),
       teamName: programme.teamName,
       canManage: programme.canManage,
-      courses: programme.courses.map(({ ownerId, ...c }) => ({ ...c, mine: ownerId === user.id })),
+      courses: programme.courses.map(({ ownerId: _owner, ...c }) => ({
+        ...c,
+        mine: mine.has(c.courseId),
+      })),
     },
     kinds,
     available,

@@ -69,10 +69,13 @@ export async function requireCourseUser(request: Request): Promise<User> {
   return user;
 }
 
-/** The pack of the course's own context profile (P21.6); undefined without profile or pack. */
-export async function coursePack(userId: string, course: Course): Promise<DomainPack | undefined> {
+/**
+ * The pack of the course's own context profile (P21.6); undefined without profile or pack.
+ * The profile is the owner's, also when an editor works on the course.
+ */
+export async function coursePack(course: Course): Promise<DomainPack | undefined> {
   if (!course.contextProfileId) return undefined;
-  const p = await getProfile(userId, course.contextProfileId);
+  const p = await getProfile(course.ownerId, course.contextProfileId);
   return p ? resolveFramework(p.country, p.sector, p.domain) : undefined;
 }
 
@@ -180,7 +183,11 @@ export async function saveCourseIntent(
   if (intent === "settings") {
     const name = String(fd.get("name") ?? "").trim();
     if (!name || name.length > COURSE_LIMITS.title) return { ok: false, error: m.errorName };
-    const contextProfileId = String(fd.get("contextProfileId") ?? "") || null;
+    // Only the owner chooses the context profile; an editor's form has no such field.
+    const contextProfileId =
+      course.ownerId === user.id
+        ? String(fd.get("contextProfileId") ?? "") || null
+        : course.contextProfileId;
     // The settings form also carries the EC and the start date (P22.1); each goes
     // through the same intent boundary as the rest of the editor.
     let data = course.data;
@@ -204,7 +211,7 @@ export async function saveCourseIntent(
     return saved ? { ok: true } : { ok: false, error: m.errorInvalid };
   }
 
-  const result = applyCourseIntent(course.data, fd, { pack: await coursePack(user.id, course) });
+  const result = applyCourseIntent(course.data, fd, { pack: await coursePack(course) });
   if (!result.ok)
     return { ok: false, error: result.error === "not-found" ? m.errorNotFound : m.errorInvalid };
   const saved = await updateCourse(user.id, course.id, { data: result.data }).catch(() => null);
