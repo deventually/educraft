@@ -2684,6 +2684,200 @@
         ]
       },
       "maxWarnings": 0
+    },
+    {
+      "id": "pp-wo-only-knowledge",
+      "agent": "professional-practice",
+      "locale": "nl",
+      "description": "wo, alleen Dublin-descriptoren: L1 vraagt toepassen op een echt vraagstuk, maar de cursus heeft alleen hoorcolleges en een kennistentamen.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je past epidemiologische methoden toe op een actueel volksgezondheidsvraagstuk.",
+            "bloom": "apply",
+            "packTags": {
+              "dublinDescriptoren": [
+                "Toepassen van kennis en inzicht"
+              ]
+            }
+          },
+          {
+            "id": "lo2",
+            "text": "Je legt de belangrijkste epidemiologische studieontwerpen uit.",
+            "bloom": "understand",
+            "packTags": {
+              "dublinDescriptoren": [
+                "Kennis en inzicht"
+              ]
+            }
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Hoorcollege studieontwerpen",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 12
+          },
+          {
+            "id": "a2",
+            "title": "Hoorcollege bias en confounding",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1",
+              "lo2"
+            ],
+            "hours": 12
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Schriftelijk tentamen met meerkeuzevragen",
+            "week": 8,
+            "kind": "summative",
+            "supervised": true,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "understand"
+              }
+            ],
+            "weight": 100,
+            "hours": 3
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "lo1",
+            "t1",
+            "a1",
+            "a2"
+          ],
+          "anyOf": [
+            "vraagstuk",
+            "toepassen",
+            "casus",
+            "praktijk",
+            "onderzoek",
+            "data",
+            "opdracht"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pp-wo-clean",
+      "agent": "professional-practice",
+      "locale": "nl",
+      "description": "wo, alleen Dublin-descriptoren en geen beheersingsniveau: studenten doen zelf een klein onderzoek naar een echt vraagstuk. Geen waarschuwingen verwacht.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je zet een klein empirisch onderzoek op naar een vraagstuk uit de onderwijspraktijk.",
+            "bloom": "create",
+            "packTags": {
+              "dublinDescriptoren": [
+                "Toepassen van kennis en inzicht",
+                "Oordeelsvorming"
+              ]
+            }
+          },
+          {
+            "id": "lo2",
+            "text": "Je rapporteert je onderzoek helder aan vakgenoten.",
+            "bloom": "create",
+            "packTags": {
+              "dublinDescriptoren": [
+                "Communicatie"
+              ]
+            }
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Werkcollege onderzoeksontwerp",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 6
+          },
+          {
+            "id": "a2",
+            "title": "Onderzoeksproject bij een school: dataverzameling en analyse",
+            "week": 3,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 60
+          },
+          {
+            "id": "a3",
+            "title": "Schrijfwerkgroep onderzoeksverslag",
+            "week": 6,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 6
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Feedback op het onderzoeksvoorstel",
+            "week": 2,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t2",
+            "title": "Onderzoeksverslag en presentatie op een minisymposium",
+            "week": 8,
+            "kind": "summative",
+            "supervised": false,
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "create"
+              },
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "weight": 100,
+            "hours": 20
+          }
+        ]
+      },
+      "maxWarnings": 0
     }
   ]
 }

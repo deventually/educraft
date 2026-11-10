@@ -328,3 +328,13 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
   staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
   na "rolagenten is geen goede benaming").
+- **BESLUIT-2026-11-10-3:** **Vakgebiedpakketten voor mbo en wo.** Bij mbo is het vakgebied de
+  **kwalificatie** (crebo), gegroepeerd per opleidingsdomein; het pakket haalt kerntaken en
+  werkprocessen uit het kwalificatiedossier van SBB, zonder beheersingsniveau (het mbo-niveau is
+  het niveau). Bij wo geldt één sectorpakket met de Dublin-descriptoren voor elk domein; de
+  vakgebiedlijst is de tien CROHO-onderdelen. **Licentie:** kwalificatiedossiers worden door de
+  minister van OCW vastgesteld bij ministeriële regeling, dus naar onze lezing rust er geen
+  auteursrecht op (art. 11 Auteurswet) of mogen ze hergebruikt worden (art. 15b); dat is genoeg om
+  te bouwen. **Open punt:** later nog bij SBB verifiëren dat we codes en titels mogen overnemen.
+  De bouw gaat in twee PR's: eerst vakgebiedlijsten, een sectorbrede engine en het Dublin-pakket;
+  daarna de mbo-proefpakketten. Bastiaan, 2026-11-10 (advies "Vakgebiedpakketten mbo en wo").

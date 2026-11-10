@@ -41,7 +41,7 @@ export const AGENTS: Agent[] = [
   {
     id: "professional-practice",
     role: { nl: "Werkveld", en: "Professional practice" },
-    promptId: "agent-professional-practice@v1",
+    promptId: "agent-professional-practice@v2",
     watches: ["course"],
     focus: {
       nl: "Kijkt of studenten oefenen en getoetst worden zoals in het beroep, op het niveau uit je vakgebiedpakket.",

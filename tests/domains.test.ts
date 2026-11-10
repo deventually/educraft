@@ -85,9 +85,12 @@ describe("domainGroupsForSector — admin per-teacher grouping (P10.3)", () => {
     expect(tl?.domains.length).toBe(4);
   });
 
-  it("returns [] for a sector with no catalogue (mbo/wo)", () => {
-    expect(domainGroupsForSector("NL", "mbo")).toEqual([]);
-    expect(domainGroupsForSector("NL", "wo")).toEqual([]);
+  it("returns one track-less group for mbo and for wo (sector-level catalogues)", () => {
+    for (const sector of ["mbo", "wo"]) {
+      const groups = domainGroupsForSector("NL", sector);
+      expect(groups.length, sector).toBe(1);
+      expect(groups[0]!.tracks, sector).toEqual([]);
+    }
   });
 });
 
@@ -108,12 +111,81 @@ describe("allDomainValues — the union of every valid domain slug (P10.3 filter
   });
 });
 
-describe("getDomainsForTrack — no catalogue / bad args", () => {
-  it("returns [] for mbo and wo (no verified catalogue)", () => {
-    expect(getDomainsForTrack("NL", "mbo", "mbo-4")).toEqual([]);
-    expect(getDomainsForTrack("NL", "wo", "master")).toEqual([]);
+describe("getDomainsForTrack — mbo opleidingsdomeinen (Regeling kwalificatiedossiers)", () => {
+  it("offers the 18 mbo opleidingsdomeinen, whatever the mbo level", () => {
+    const values = getDomainsForTrack("NL", "mbo", "mbo-4").map((d) => d.value);
+    expect(values.length).toBe(18);
+    expect(values).toContain("mbo-ict");
+    expect(values).toContain("mbo-zorg-welzijn");
+    expect(values).toContain("mbo-entree");
+    expect(getDomainsForTrack("NL", "mbo", "mbo-2").map((d) => d.value)).toEqual(values);
   });
 
+  it("uses the official Dutch names", () => {
+    const labels = getDomainsForTrack("NL", "mbo", "mbo-3").map((d) => loc(d.label, "nl"));
+    expect(labels).toContain("Informatie en communicatietechnologie");
+    expect(labels).toContain("Voedsel, natuur en leefomgeving");
+    expect(labels).toContain("Ambacht, laboratorium en gezondheidstechniek");
+  });
+});
+
+describe("getDomainsForTrack — wo CROHO-onderdelen (DUO)", () => {
+  it("offers the ten CROHO-onderdelen, whatever the wo track", () => {
+    const opts = getDomainsForTrack("NL", "wo", "master");
+    expect(opts.map((d) => loc(d.label, "nl"))).toEqual([
+      "Economie",
+      "Gedrag en maatschappij",
+      "Gezondheidszorg",
+      "Landbouw en natuurlijke omgeving",
+      "Natuur",
+      "Onderwijs",
+      "Recht",
+      "Sectoroverstijgend",
+      "Taal en cultuur",
+      "Techniek",
+    ]);
+    expect(getDomainsForTrack("NL", "wo", "bachelor")).toEqual(opts);
+  });
+});
+
+describe("domain catalogues — every sector", () => {
+  it("labels every mbo and wo domain bilingually", () => {
+    for (const [sector, track] of [
+      ["mbo", "mbo-4"],
+      ["wo", "bachelor"],
+    ] as const) {
+      for (const opt of getDomainsForTrack("NL", sector, track)) {
+        expect(loc(opt.label, "nl").length, `${opt.value} nl`).toBeGreaterThan(0);
+        expect(loc(opt.label, "en").length, `${opt.value} en`).toBeGreaterThan(0);
+        expect(loc(opt.label, "en"), opt.value).not.toBe(loc(opt.label, "nl"));
+      }
+    }
+  });
+
+  it("never reuses a slug across sectors (the admin switches domains on by slug)", () => {
+    const seen = new Map<string, string>();
+    const lists: [string, string | undefined][] = [
+      ["hbo", "bachelor"],
+      ["mbo", "mbo-4"],
+      ["wo", "master"],
+      ["vo", "havo"],
+      ["vo", "vmbo-bb"],
+      ["vo", "vmbo-tl"],
+    ];
+    for (const [sector, track] of lists) {
+      for (const d of getDomainsForTrack("NL", sector, track)) {
+        const other = seen.get(d.value);
+        if (other && other !== sector) throw new Error(`${d.value} in ${other} and ${sector}`);
+        seen.set(d.value, sector);
+      }
+    }
+    const all = allDomainValues("NL");
+    expect(all).toContain("mbo-ict");
+    expect(all).toContain("wo-techniek");
+  });
+});
+
+describe("getDomainsForTrack — bad args", () => {
   it("returns [] for an unknown country/sector or missing args", () => {
     expect(getDomainsForTrack("XX", "hbo", "bachelor")).toEqual([]);
     expect(getDomainsForTrack("NL", "banana", "x")).toEqual([]);

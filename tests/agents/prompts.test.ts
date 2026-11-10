@@ -66,6 +66,38 @@ describe("professional practice reviewer", () => {
   }
 });
 
+describe("professional practice reviewer v2 (every sector)", () => {
+  it("runs v2; v1 stays registered for earlier reviews", () => {
+    expect(getAgent("professional-practice")?.promptId).toBe("agent-professional-practice@v2");
+    expect(PROMPTS["agent-professional-practice@v1"]).toBeDefined();
+  });
+
+  for (const locale of ["nl", "en"] as const) {
+    it(`${locale}: speaks for mbo, hbo and wo, and reads werkprocessen and Dublin tags`, () => {
+      const p = getRuntimePrompt("agent-professional-practice@v2", locale);
+      for (const word of locale === "nl"
+        ? [
+            "mbo, hbo of wo",
+            "werkprocessen",
+            "Toepassen van kennis en inzicht",
+            "beheersingsniveau",
+            "Toetsdeskundige",
+            "Ontwerper",
+          ]
+        : [
+            "mbo, hbo or wo",
+            "werkprocessen",
+            "Toepassen van kennis en inzicht",
+            "proficiency level",
+            "Assessment expert",
+            "Designer",
+          ])
+        expect(p, word).toContain(word);
+      expect(p).not.toMatch(/hoger beroepsonderwijs|professional higher education/);
+    });
+  }
+});
+
 describe("student reviewer", () => {
   it("runs v2; v1 stays registered for earlier reviews", () => {
     expect(getAgent("student")?.promptId).toBe("agent-student@v2");
