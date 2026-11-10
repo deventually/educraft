@@ -31,7 +31,9 @@ export const tool = {
   figuresPrivacy:
     "Afbeeldingen worden niet geanonimiseerd. Vink alleen aan wat het oordeel raakt en let op namen en gezichten.",
   figuresUnsupported:
-    "{count} afbeelding(en) in een formaat dat de AI niet kan lezen (bijv. Visio of een Word-grafiek) overgeslagen.",
+    "{count} afbeelding(en) in een formaat dat de AI niet kan lezen (bijv. een Visio-tekening) overgeslagen.",
+  figuresWordDrawings:
+    "{count} grafiek(en) of diagram(men) uit Word kan LimeOnIt niet uitknippen. Wil je ze meenemen? Sla het verslag in Word op als PDF en upload dat bestand.",
   figureZoom: "{label} vergroten",
   fileComingSoon: "Bestand-/afbeeldinginvoer komt in een latere fase beschikbaar.",
   formHide: "Formulier inklappen",

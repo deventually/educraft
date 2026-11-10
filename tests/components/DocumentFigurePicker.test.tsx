@@ -14,6 +14,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       figuresNone: "No figures found in the document.",
       figuresPrivacy: "Figures are not anonymised.",
       figuresUnsupported: "{count} image(s) in a format the AI cannot read were skipped.",
+      figuresWordDrawings: "{count} Word chart(s) or diagram(s): upload the report as PDF.",
       figuresMax: "Maximum of {max} images reached.",
       figureClose: "Close",
       figureFromFile: "Image {index}",
@@ -35,6 +36,7 @@ const FIGS: DocFigures = {
     { source: "report.pdf", page: 4, index: 2, image: img("QkJC") },
   ],
   unsupported: 1,
+  drawings: 0,
 };
 const files = [new File(["x"], "report.docx")];
 
@@ -60,6 +62,14 @@ describe("DocumentFigurePicker", () => {
     expect(screen.getByText("Figures are not anonymised.")).toBeInTheDocument();
     expect(
       screen.getByText("1 image(s) in a format the AI cannot read were skipped."),
+    ).toBeInTheDocument();
+  });
+
+  it("tells the teacher to upload a PDF to bring along Word's own charts and diagrams", async () => {
+    documentFigures.mockResolvedValue({ ...FIGS, drawings: 2 });
+    render(<DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />);
+    expect(
+      await screen.findByText("2 Word chart(s) or diagram(s): upload the report as PDF."),
     ).toBeInTheDocument();
   });
 
@@ -109,7 +119,7 @@ describe("DocumentFigurePicker", () => {
   });
 
   it("says so when the document has no figures", async () => {
-    documentFigures.mockResolvedValue({ figures: [], unsupported: 0 });
+    documentFigures.mockResolvedValue({ figures: [], unsupported: 0, drawings: 0 });
     render(<DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />);
     expect(await screen.findByText("No figures found in the document.")).toBeInTheDocument();
   });

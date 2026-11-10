@@ -7,10 +7,9 @@ import {
   docxFigures,
   imageSize,
   MAX_FIGURE_CANDIDATES,
-  pdfFigureBoxes,
-  type FigureBox,
   type FigureDeps,
 } from "~/lib/documents/figures";
+import { type FigureBox, pdfFigureBoxes } from "~/lib/documents/pdfFigures";
 import { DOCX_MIME, PDF_MIME } from "~/lib/documents/extract";
 
 const bytesOf = (name: string) =>
@@ -91,8 +90,17 @@ describe("docxFigures", () => {
     expect(unsupported).toBe(1);
   });
 
+  it("counts the charts and SmartArt diagrams Word draws itself, which hold no image", async () => {
+    const { drawings } = await docxFigures(bytesOf("sample-images.docx"));
+    expect(drawings).toBe(2);
+  });
+
   it("finds nothing in a Word file without images", async () => {
-    expect(await docxFigures(bytesOf("sample.docx"))).toEqual({ images: [], unsupported: 0 });
+    expect(await docxFigures(bytesOf("sample.docx"))).toEqual({
+      images: [],
+      unsupported: 0,
+      drawings: 0,
+    });
   });
 });
 
@@ -115,6 +123,17 @@ describe("pdfFigureBoxes", () => {
     // Top of the page first.
     expectAround(found[1]?.box, 340, 450, 200, 150);
     expectAround(found[2]?.box, 72, 100, 200, 150);
+  });
+
+  it("cuts out charts and diagrams drawn as vectors, with their labels", async () => {
+    const found = await pdfFigureBoxes(bytesOf("sample-vector-figures.pdf"));
+    expect(found.map((f) => f.page)).toEqual([1, 2, 3]);
+    // Bar chart: axes, bars and the labels below the axis.
+    expectAround(found[0]?.box, 100, 462, 300, 188);
+    // Flowchart: three boxes joined by lines.
+    expectAround(found[1]?.box, 72, 300, 400, 50);
+    // Line chart with its axis label.
+    expectAround(found[2]?.box, 100, 185, 300, 215);
   });
 });
 

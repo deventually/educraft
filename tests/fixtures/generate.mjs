@@ -243,6 +243,16 @@ function buildDocxWithImages() {
         </a:graphic>
       </wp:inline>
     </w:drawing></w:r></w:p>`;
+  // A Word chart or SmartArt diagram: drawn by Word itself, no image inside.
+  const officeDrawing = (uri, content) => `<w:p><w:r><w:drawing>
+      <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+        <wp:extent cx="5486400" cy="3200400"/>
+        <wp:docPr id="2" name="Grafiek"/>
+        <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <a:graphicData uri="${uri}">${content}</a:graphicData>
+        </a:graphic>
+      </wp:inline>
+    </w:drawing></w:r></w:p>`;
   return zipParts([
     {
       name: "[Content_Types].xml",
@@ -280,6 +290,8 @@ function buildDocxWithImages() {
     ${drawing("rIdIcon", "Pictogram")}
     ${drawing("rIdFig", "Architectuurschets")}
     ${drawing("rIdEmf", "Visio-tekening")}
+    ${officeDrawing("http://schemas.openxmlformats.org/drawingml/2006/chart", '<c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" r:id="rIdChart"/>')}
+    ${officeDrawing("http://schemas.openxmlformats.org/drawingml/2006/diagram", '<dgm:relIds xmlns:dgm="http://schemas.openxmlformats.org/drawingml/2006/diagram" r:dm="rIdDm" r:lo="rIdLo" r:qs="rIdQs" r:cs="rIdCs"/>')}
   </w:body>
 </w:document>`,
     },
@@ -318,6 +330,65 @@ function buildPdfWithFigureNoise() {
     `${banner}\n${text("Alleen tekst")}`,
     `${banner}\n${text("Figuur 1")}\nq 300 0 0 100 72 300 cm /Im1 Do Q\nq 300 0 0 100 72 400 cm /Im1 Do Q`,
     `${banner}\n${text("Figuur 2 en 3")}\nq 200 0 0 150 72 100 cm /Im1 Do Q\nq 200 0 0 150 340 450 cm /Im1 Do Q`,
+  ]);
+}
+
+/**
+ * A three-page report whose figures are vector drawings, as Word, Excel, PowerPoint,
+ * draw.io and Visio export them: paths and text, no image.
+ * - every page: a header rule and a vector logo (90 × 70 pt) at the same spot;
+ * - page 1: a bar chart (axes, four bars, labels below the axis) at 100–400 × 462–650,
+ *   and a table drawn as grid lines with text in the cells;
+ * - page 2: a border around the whole page, a framed text box, and a flowchart of three
+ *   boxes joined by lines at 72–472 × 300–350;
+ * - page 3: a line chart (axes, one polyline, an axis label) at 100–400 × 185–400.
+ * Only the three charts and diagrams are worth offering.
+ */
+function buildPdfWithVectorFigures() {
+  const text = (x, y, t) => `BT /F1 10 Tf ${x} ${y} Td (${t}) Tj ET`;
+  const furniture = [
+    "0.5 w 72 760 m 540 760 l S",
+    text(72, 765, "Stageverslag"),
+    "q 0 0 1 rg 470 680 90 70 re f 1 1 1 rg 515 715 m 535 715 535 735 515 735 c 495 735 495 715 515 715 c f Q",
+  ].join("\n");
+  const barChart = [
+    "1 w 100 480 m 100 650 l S 100 480 m 400 480 l S",
+    "q 0 0 1 rg 120 480 40 100 re f 190 480 40 150 re f 260 480 40 60 re f 330 480 40 120 re f Q",
+    ...["Q1", "Q2", "Q3", "Q4"].map((q, i) => text(132 + i * 70, 464, q)),
+    text(200, 640, "Omzet"),
+  ];
+  const table = [
+    ...[300, 320, 340, 360].map((y) => `0.5 w 72 ${y} m 400 ${y} l S`),
+    ...[72, 200, 400].map((x) => `0.5 w ${x} 300 m ${x} 360 l S`),
+    text(80, 345, "Week"),
+    text(210, 345, "Taak"),
+    text(80, 325, "1"),
+    text(210, 325, "Programmeren"),
+    text(80, 305, "2"),
+    text(210, 305, "Testen"),
+  ];
+  const flowchart = [
+    ...[72, 222, 372].map((x) => `1 w ${x} 300 100 50 re S`),
+    "172 325 m 222 325 l S 322 325 m 372 325 l S",
+    text(100, 322, "Client"),
+    text(255, 322, "API"),
+    text(395, 322, "Database"),
+  ];
+  const lineChart = [
+    "1 w 100 200 m 100 400 l S 100 200 m 400 200 l S",
+    "1 0 0 RG 100 250 m 160 300 l 220 280 l 280 350 l 340 330 l 400 380 l S",
+    text(230, 187, "Tijd"),
+  ];
+  return buildPdfWithImagePages([
+    [furniture, text(72, 720, "Inleiding van het verslag"), ...barChart, ...table].join("\n"),
+    [
+      furniture,
+      "1 w 20 20 572 752 re S",
+      "1 w 72 600 300 80 re S",
+      text(80, 640, "Let op de deadline van week 6"),
+      ...flowchart,
+    ].join("\n"),
+    [furniture, ...lineChart, text(72, 150, "Conclusie")].join("\n"),
   ]);
 }
 
@@ -371,5 +442,6 @@ writeFileSync(join(here, "sample-empty.pdf"), buildEmptyPdf());
 writeFileSync(join(here, "sample-images.docx"), buildDocxWithImages());
 writeFileSync(join(here, "sample-images.pdf"), buildPdfWithImages());
 writeFileSync(join(here, "sample-figure-noise.pdf"), buildPdfWithFigureNoise());
+writeFileSync(join(here, "sample-vector-figures.pdf"), buildPdfWithVectorFigures());
 console.log("Wrote sample.pdf, sample.docx, sample-empty.pdf and the sample-images fixtures");
 console.log({ PDF_TOKEN_ONE, PDF_TOKEN_TWO, DOCX_TOKEN });
