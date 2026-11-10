@@ -44,7 +44,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 5. **Simple and maintainable.** Remove what is redundant: knip (`knip.json`, part of
    `npm run check`) fails on unused files, exports and dependencies, so export only what another
    file imports. Engine stays locale/level-neutral
-   (specifics live in packs). Pinned toolchain (Volta, Node 24.14.1).
+   (specifics live in packs). Pinned toolchain (Volta, Node 26.13.0).
 6. **Ratchets only go down** (`tests/ratchet.test.ts`): suppressions (`as any`, `@ts-ignore`,
    `@ts-expect-error`, `biome-ignore`) and files in `app/` over 400 lines. Lowered a count? Lower
    its baseline in the same PR. A `TODO`/`FIXME` names its issue: `// TODO(#123): …`.

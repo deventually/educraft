@@ -8,7 +8,7 @@ container with one persistent volume. No external SaaS is required.
 
 ## Container
 
-The [`Dockerfile`](../Dockerfile) is a multi-stage build on `node:24-alpine`
+The [`Dockerfile`](../Dockerfile) is a multi-stage build on `node:26-alpine`
 (aligned with the Volta pin), run with [`docker-compose.yml`](../docker-compose.yml)
 and a `.env` (from `.env.example`). The installer's guide, in Dutch, is
 [`docs/installatie-docker.md`](../docs/installatie-docker.md). The final image ships

@@ -18,7 +18,10 @@ const config = JSON.parse(read("stryker.config.json")) as {
   reporters: string[];
   tsconfigFile?: string;
 };
-const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+const pkg = JSON.parse(read("package.json")) as {
+  scripts: Record<string, string>;
+  volta: { node: string };
+};
 const workflow = read(".github/workflows/mutation.yml");
 
 const includes = config.mutate.filter((g) => !g.startsWith("!"));
@@ -90,7 +93,7 @@ describe("nightly mutation workflow", () => {
   });
 
   it("uses the pinned Node version and runs the mutation script", () => {
-    expect(workflow).toContain('node-version: "24.14.1"');
+    expect(workflow).toContain(`node-version: "${pkg.volta.node}"`);
     expect(workflow).toContain("run: npm run test:mutation");
   });
 
