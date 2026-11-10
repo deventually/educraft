@@ -16,7 +16,7 @@
  *    Landbouw/Groen).
  *  - **mbo** → the 18 opleidingsdomeinen of the *Regeling vaststelling
  *    kwalificatiedossiers en opleidingsdomeinen 2016* (as listed by CBS, 2021).
- *    A kwalificatie-level pick (with its own pack) comes later.
+ *    Each is followed by the kwalificaties (crebo) that have a pack.
  *  - **wo** → the ten CROHO-onderdelen (DUO, *Handleiding CROHO op internet*).
  * The specific school subject belongs in the Course/"Vak" field, so kernvakken
  * are deliberately NOT part of this catalogue. Slugs are unique across sectors
@@ -27,12 +27,15 @@ import type { CountryCode } from "./countries";
 import { isCountryCode } from "./countries";
 import type { Sector } from "./sectors";
 import { isSector, tracksForSector } from "./sectors";
+import { MBO_QUALIFICATIONS } from "./packsMbo";
 import { HBO_DOMAINS } from "./types";
 
 export interface DomainOption {
   /** Stored on the profile as `domain`; validated against this catalogue. */
   value: string;
   label: LocalizedText;
+  /** The picker groups options with the same group (an optgroup); mbo: the opleidingsdomein. */
+  group?: LocalizedText;
 }
 
 /** hbo keeps its established Dutch domain strings (packs.ts keys on them). */
@@ -153,6 +156,19 @@ const MBO_OPLEIDINGSDOMEINEN: DomainOption[] = [
   { value: "mbo-zorg-welzijn", label: { nl: "Zorg en welzijn", en: "Care & welfare" } },
 ];
 
+/**
+ * The mbo picker: each opleidingsdomein, followed by its kwalificaties that have a
+ * pack (`packsMbo.ts`), all grouped under the opleidingsdomein's name.
+ */
+const MBO_DOMAINS: DomainOption[] = MBO_OPLEIDINGSDOMEINEN.flatMap((d) => [
+  { ...d, group: d.label },
+  ...MBO_QUALIFICATIONS.filter((q) => q.opleidingsdomein === d.value).map((q) => ({
+    value: q.value,
+    label: q.label,
+    group: d.label,
+  })),
+]);
+
 /** The ten CROHO-onderdelen (DUO) — every wo programme is registered under one. */
 const WO_CROHO_ONDERDELEN: DomainOption[] = [
   { value: "wo-economie", label: { nl: "Economie", en: "Economics" } },
@@ -186,7 +202,7 @@ const VO_DOMAINS_BY_TRACK: Record<string, DomainOption[]> = {
 /** Sector-level domain options (track-independent). Absent sector = custom fields. */
 const DOMAINS_BY_SECTOR: Partial<Record<CountryCode, Partial<Record<Sector, DomainOption[]>>>> = {
   NL: {
-    mbo: MBO_OPLEIDINGSDOMEINEN,
+    mbo: MBO_DOMAINS,
     hbo: HBO_DOMAIN_OPTIONS,
     wo: WO_CROHO_ONDERDELEN,
     // vo is track-scoped (see VO_DOMAINS_BY_TRACK).
@@ -257,4 +273,17 @@ export function allDomainValues(country: string | undefined): string[] {
     }
   }
   return [...values];
+}
+
+/** Consecutive options with the same group, in order; ungrouped options form runs too. */
+export function groupOptions(
+  options: DomainOption[],
+): { group?: DomainOption["group"]; options: DomainOption[] }[] {
+  const runs: { group?: DomainOption["group"]; options: DomainOption[] }[] = [];
+  for (const o of options) {
+    const last = runs.at(-1);
+    if (last && last.group === o.group) last.options.push(o);
+    else runs.push({ group: o.group, options: [o] });
+  }
+  return runs;
 }

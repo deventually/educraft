@@ -7,7 +7,7 @@
  * domain-pack block lives in `DomainFields`, custom rows in `CustomFieldsEditor`.
  */
 import { ExternalLink } from "lucide-react";
-import { getDomainsForTrack, type DomainOption } from "~/lib/context/domains";
+import { getDomainsForTrack, groupOptions, type DomainOption } from "~/lib/context/domains";
 import {
   showsProgramme,
   showsProfessionalContext,
@@ -108,11 +108,20 @@ export function DomainSelect({
     <Field id="cf-domain" label={loc(domainFieldLabel(sector), locale)}>
       <Select id="cf-domain" name="domain" value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{t.settings.domainNone}</option>
-        {withLegacy.map((d) => (
-          <option key={d.value} value={d.value}>
-            {loc(d.label, locale)}
-          </option>
-        ))}
+        {groupOptions(withLegacy).map(({ group, options: opts }) => {
+          const items = opts.map((d) => (
+            <option key={d.value} value={d.value}>
+              {loc(d.label, locale)}
+            </option>
+          ));
+          if (!group) return items;
+          const label = loc(group, locale);
+          return (
+            <optgroup key={label} label={label}>
+              {items}
+            </optgroup>
+          );
+        })}
       </Select>
     </Field>
   );
