@@ -49,6 +49,17 @@ export const AGENTS: Agent[] = [
     },
     teacherDefault: "off",
   },
+  {
+    id: "student",
+    role: { nl: "Student", en: "Student" },
+    promptId: "agent-student@v1",
+    watches: ["course"],
+    focus: {
+      nl: "Loopt je cursus week voor week door zoals een student: is duidelijk wat er moet, vallen deadlines niet samen, komt feedback op tijd?",
+      en: "Goes through your course week by week like a student: is it clear what to do, do deadlines not coincide, does feedback come in time?",
+    },
+    teacherDefault: "off",
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {

@@ -65,6 +65,19 @@ Deze reviewer leunt op de kenmerken uit je vakgebiedpakket bij elke leeruitkomst
 
 Deze reviewer staat standaard uit. Vink hem aan als je cursus opleidt voor een beroep met een vakgebiedpakket.
 
+## Student
+
+De reviewer Student loopt je cursus week voor week door, zoals een student zijn agenda bekijkt. De vraag is: weet een student per week wat er moet, is dat te doen, en krijgt hij feedback voordat het telt?
+
+- **Deadlines die samenvallen:** liggen er meerdere summatieve toetsen of inleveringen in dezelfde week?
+- **Feedback op tijd:** komt er minstens een week vóór een summatieve toets feedback op dezelfde leeruitkomst, zodat de student er nog iets mee kan?
+- **Lege weken en een eindsprint:** gebeurt er weken niets en komt alles aan het eind?
+- **Duidelijk wat en wanneer:** heeft elke summatieve toets een week en een titel die zegt wat de student inlevert of doet?
+
+Deze reviewer spreekt niet namens echte studenten; hij leest alleen wat in je cursus staat. Of de uren kloppen en de opbouw goed is, laat hij aan de Ontwerper; toetsvorm en weging aan de Toetsdeskundige.
+
+Deze reviewer staat standaard uit. Vink hem aan als je wilt zien hoe je cursus week voor week voor een student uitpakt.
+
 ## Wat een reviewer ziet
 
 Een reviewer ziet alleen deze ene cursus, zoals jij hem invulde:

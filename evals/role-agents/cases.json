@@ -1884,6 +1884,410 @@
         ]
       },
       "maxWarnings": 0
+    },
+    {
+      "id": "st-deadline-cluster",
+      "agent": "student",
+      "locale": "nl",
+      "description": "Drie summatieve toetsen en een inlevering vallen allemaal in week 8; weken 4 tot 7 zijn leeg.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je voert een marktonderzoek uit voor een product.",
+            "bloom": "apply"
+          },
+          {
+            "id": "lo2",
+            "text": "Je schrijft een marketingplan op basis van je onderzoek.",
+            "bloom": "create"
+          },
+          {
+            "id": "lo3",
+            "text": "Je presenteert je plan overtuigend aan een publiek.",
+            "bloom": "apply"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les marktonderzoek",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Les marketingplan",
+            "week": 2,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a3",
+            "title": "Workshop presenteren",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo3"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Feedbackuur op het onderzoeksplan",
+            "week": 3,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 2
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Oefenpresentatie in de werkgroep",
+            "week": 3,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo3",
+                "bloom": "apply"
+              }
+            ],
+            "hours": 4
+          },
+          {
+            "id": "t2",
+            "title": "Inleveren onderzoeksrapport marktonderzoek",
+            "week": 8,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 30,
+            "hours": 40
+          },
+          {
+            "id": "t3",
+            "title": "Inleveren marketingplan",
+            "week": 8,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "weight": 40,
+            "hours": 50
+          },
+          {
+            "id": "t4",
+            "title": "Eindpresentatie marketingplan",
+            "week": 8,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo3",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 30,
+            "hours": 20
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "t2",
+            "t3",
+            "t4"
+          ],
+          "anyOf": [
+            "week 8",
+            "dezelfde week",
+            "zelfde week",
+            "tegelijk",
+            "samen",
+            "deadline",
+            "spreid",
+            "verdeel",
+            "piek",
+            "eindsprint"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "st-feedback-too-late",
+      "agent": "student",
+      "locale": "nl",
+      "description": "De enige feedback op het marketingplan komt in week 8, dezelfde week als de summatieve inlevering.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je voert een marktonderzoek uit voor een product.",
+            "bloom": "apply"
+          },
+          {
+            "id": "lo2",
+            "text": "Je schrijft een marketingplan op basis van je onderzoek.",
+            "bloom": "create"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les marktonderzoek",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Opdracht marktonderzoek",
+            "week": 2,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 30
+          },
+          {
+            "id": "a3",
+            "title": "Les marketingplan",
+            "week": 4,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Werken aan het marketingplan",
+            "week": 5,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Peerfeedback op het onderzoeksrapport",
+            "week": 3,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              }
+            ],
+            "hours": 3
+          },
+          {
+            "id": "t2",
+            "title": "Inleveren onderzoeksrapport",
+            "week": 5,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 40,
+            "hours": 10
+          },
+          {
+            "id": "t3",
+            "title": "Feedbackronde marketingplan",
+            "week": 8,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "hours": 2
+          },
+          {
+            "id": "t4",
+            "title": "Inleveren marketingplan",
+            "week": 8,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "weight": 60,
+            "hours": 20
+          }
+        ]
+      },
+      "mustFind": [
+        {
+          "targets": [
+            "t3",
+            "t4",
+            "lo2"
+          ],
+          "anyOf": [
+            "feedback",
+            "te laat",
+            "op tijd",
+            "eerder",
+            "voordat",
+            "vóór",
+            "dezelfde week",
+            "week 8"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "st-clean",
+      "agent": "student",
+      "locale": "nl",
+      "description": "Gespreide deadlines, feedback telkens een paar weken voor de toets, elke week iets te doen. Geen waarschuwingen verwacht.",
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          {
+            "id": "lo1",
+            "text": "Je voert een marktonderzoek uit voor een product.",
+            "bloom": "apply"
+          },
+          {
+            "id": "lo2",
+            "text": "Je schrijft een marketingplan op basis van je onderzoek.",
+            "bloom": "create"
+          }
+        ],
+        "activities": [
+          {
+            "id": "a1",
+            "title": "Les marktonderzoek",
+            "week": 1,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a2",
+            "title": "Opdracht: marktonderzoek uitvoeren voor je eigen product",
+            "week": 2,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo1"
+            ],
+            "hours": 30
+          },
+          {
+            "id": "a3",
+            "title": "Les marketingplan",
+            "week": 4,
+            "kind": "lesson",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 4
+          },
+          {
+            "id": "a4",
+            "title": "Opdracht: marketingplan schrijven op basis van je onderzoek",
+            "week": 5,
+            "kind": "assignment",
+            "outcomeIds": [
+              "lo2"
+            ],
+            "hours": 40
+          }
+        ],
+        "assessments": [
+          {
+            "id": "t1",
+            "title": "Peerfeedback op het concept-onderzoeksrapport",
+            "week": 3,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              }
+            ],
+            "hours": 3
+          },
+          {
+            "id": "t2",
+            "title": "Inleveren onderzoeksrapport marktonderzoek",
+            "week": 4,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo1",
+                "bloom": "apply"
+              }
+            ],
+            "weight": 40,
+            "hours": 10
+          },
+          {
+            "id": "t3",
+            "title": "Feedbackronde concept-marketingplan",
+            "week": 6,
+            "kind": "formative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "hours": 3
+          },
+          {
+            "id": "t4",
+            "title": "Inleveren marketingplan",
+            "week": 8,
+            "kind": "summative",
+            "coverage": [
+              {
+                "outcomeId": "lo2",
+                "bloom": "create"
+              }
+            ],
+            "weight": 60,
+            "hours": 20
+          }
+        ]
+      },
+      "maxWarnings": 0
     }
   ]
 }
