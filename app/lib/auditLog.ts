@@ -5,6 +5,8 @@
 export const AUDIT_ACTIONS = [
   "accountCreated",
   "accountDeleted",
+  "courseMemberChanged",
+  "coursesTransferred",
   "deactivated",
   "instanceModelsChanged",
   "inviteCreated",

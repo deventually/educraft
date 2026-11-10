@@ -14,15 +14,18 @@ import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { personAction } from "~/server/personActions.server";
+import { personCourses } from "~/server/adminCourses.server";
 import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { ROLES, isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
+import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
 import { Input, Select } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { TeamsForm } from "~/components/admin/TeamsForm";
 import { PersonAccess } from "~/components/admin/PersonAccess";
+import { PersonCourses } from "~/components/admin/PersonCourses";
 import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
 import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
 
@@ -130,6 +133,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     models,
     features,
     teams,
+    // A teacher's courses (BESLUIT-2026-11-10-5): the admin hands them over, also when gone.
+    courses:
+      mayManage(viewerIsOwner, target) && target.id !== admin.id
+        ? await personCourses(target.id)
+        : null,
   };
 }
 
@@ -148,7 +156,16 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
   const p = t.people;
   const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const { person, isOwner: viewerIsOwner, isSelf, canManage, models, features, teams } = loaderData;
+  const {
+    person,
+    isOwner: viewerIsOwner,
+    isSelf,
+    canManage,
+    models,
+    features,
+    teams,
+    courses,
+  } = loaderData;
   const manage = canManage && !isSelf;
   const displayName = person.name || person.email || person.id;
 
@@ -167,6 +184,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
     passwordTooShort: t.auth.passwordTooShort,
     passwordMismatch: t.auth.passwordMismatch,
     atLeastOne: t.admin.models.atLeastOne,
+    courseRefused: t.courseMembers.admin.refused,
   };
   const autoSaveError = (code: string | true) =>
     typeof code === "string" ? errors[code] : undefined;
@@ -186,7 +204,9 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
                   ? i.passwordSet
                   : "twoFactorReset" in d
                     ? t.twoFactor.adminResetDone
-                    : t.admin.console.saved,
+                    : "coursesTransferred" in d
+                      ? fmt(t.courseMembers.admin.transferred, { n: d.coursesTransferred ?? 0 })
+                      : t.admin.console.saved,
             },
   });
 
@@ -331,8 +351,11 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
       {/* ── Parts and tools: effective stand, source, exception (P28.3) ─────── */}
       {features && <PersonFeatures rows={features} errorMessage={autoSaveError} />}
 
+      {courses && <PersonCourses list={courses.list} colleagues={courses.colleagues} />}
+
       {manage && (
         <PersonAccess
+          lostCourses={courses?.lost ?? 0}
           person={person}
           displayName={displayName}
           viewerIsOwner={viewerIsOwner}

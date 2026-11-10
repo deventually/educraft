@@ -76,6 +76,11 @@ function teammates(userId: string): Colleague[] {
     .all();
 }
 
+/** Active colleagues who share at least one team with `userId`. */
+export async function listTeammates(userId: string): Promise<Colleague[]> {
+  return teammates(userId);
+}
+
 /**
  * A manager makes a team-mate an editor or co-owner, or changes their role. False (nothing
  * written) when the caller does not manage the course, the colleague shares no team with the

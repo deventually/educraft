@@ -20,11 +20,17 @@ Sharing only lets colleagues read. To work on a course together, add a colleague
 
 - An **editor** sees the course under **Courses**, with the owner's name on it, and changes outcomes, activities, assessments and settings.
 - A **co-owner** can do that too, and can also share the course with their own team and add or remove co-owners and editors. That way a module team can run a course together.
-- Only the **owner** deletes the course and chooses its educational context.
+- Only the **owner** deletes the course, chooses its educational context and hands it over.
 
 What someone makes with a tool and links to the course stays theirs. So do the review team's reviews. Anyone working on it can **Stop working on it** themselves.
 
 Changes are saved per part. If you work on different parts at the same time, everything is kept. If two people change the same part, the last save counts.
+
+### Handing a course over
+
+Leaving, or is a colleague taking the course on? Choose **Hand the course over** at the bottom of the course. You pick a colleague from your teams or someone who already works on it. That colleague is the owner at once. Shared teams, the place in programmes and who works on it go along; the educational context does not, the new owner chooses it. By default you keep working on it as editor. Untick that if you want to let go of the course completely.
+
+If a teacher drops out, the admin hands their courses over on that teacher's page, under **Courses**. That also works when the account is no longer active. When an account is deleted, a course with a co-owner goes by itself to the co-owner who has worked on it longest. A course without a co-owner goes with the account; the delete screen warns about it.
 
 ## What is never shared
 

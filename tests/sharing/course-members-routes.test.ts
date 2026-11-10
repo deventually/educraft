@@ -70,6 +70,7 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
       ownerName: "Anna",
       members: [],
       candidates: [{ userId: "ed-b", name: "Bram" }],
+      transferTo: [{ userId: "ed-b", name: "Bram" }],
     });
 
     expect(await act(course.id, { intent: "set-member", userId: "ed-b" })).toMatchObject({
@@ -100,7 +101,12 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
     await as("ed-b");
 
     const loaded = await load(course.id);
-    expect(loaded.members).toMatchObject({ myRole: "editor", ownerName: "Anna", candidates: [] });
+    expect(loaded.members).toMatchObject({
+      myRole: "editor",
+      ownerName: "Anna",
+      candidates: [],
+      transferTo: [],
+    });
     expect(loaded.sharing.teams).toEqual([]);
 
     expect(await act(course.id, { intent: "settings", name: "Algoritmen 2" })).toMatchObject({
@@ -179,5 +185,39 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
     ).toMatchObject({
       ok: false,
     });
+  });
+
+  it("lets the owner hand the course over and stay on as editor", async () => {
+    const course = await courses.createCourse("ed-a", {
+      name: "Overdracht",
+      data: alignedCourse(),
+    });
+    expect(
+      await act(course.id, { intent: "transfer-course", userId: "ed-c", keepAsEditor: "on" }),
+    ).toMatchObject({ ok: false, intent: "transfer-course" });
+    expect(
+      await act(course.id, { intent: "transfer-course", userId: "ed-b", keepAsEditor: "on" }),
+    ).toMatchObject({ ok: true, intent: "transfer-course" });
+    expect(await courses.getCourse("ed-b", course.id)).toMatchObject({ ownerId: "ed-b" });
+    expect((await courses.getCourse("ed-a", course.id))?.role).toBe("editor");
+  });
+
+  it("sends the old owner to the course list when they do not stay on", async () => {
+    const course = await courses.createCourse("ed-a", { name: "Weg", data: alignedCourse() });
+    const r = await act(course.id, { intent: "transfer-course", userId: "ed-b" }).catch(
+      (e: unknown) => e,
+    );
+    expect((r as Response).headers.get("Location")).toBe("/courses");
+    expect(await courses.getCourse("ed-a", course.id)).toBeNull();
+  });
+
+  it("does not let a co-owner hand the course over", async () => {
+    const course = await courses.createCourse("ed-a", { name: "Niet", data: alignedCourse() });
+    await members.setCourseMember("ed-a", course.id, "ed-b", "co-owner");
+    await as("ed-b");
+    expect(
+      await act(course.id, { intent: "transfer-course", userId: "ed-b", keepAsEditor: "on" }),
+    ).toMatchObject({ ok: false });
+    expect((await courses.getCourse("ed-a", course.id))?.ownerId).toBe("ed-a");
   });
 });

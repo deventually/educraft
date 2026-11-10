@@ -17,6 +17,7 @@ import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
+import { countCoursesWithoutSuccessor } from "~/server/repositories/courseTransfer.server";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Card, Input, Label } from "~/components/ui";
@@ -39,6 +40,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     teams: await listTeamsForUser(user.id),
     // Two-step verification (P2-12) has its own page; here only the way there.
     twoFactor: await isTwoFactorEnabled(user.id),
+    // Courses without a co-owner go with the account (BESLUIT-2026-11-10-5).
+    lostCourses: await countCoursesWithoutSuccessor(user.id),
   };
 }
 
@@ -306,6 +309,11 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         ) : (
           <>
             <p className="mt-2 text-sm text-red-700">{t.account.dangerIntro}</p>
+            {loaderData.lostCourses > 0 && (
+              <p className="mt-2 text-sm font-medium text-red-800">
+                {fmt(t.courseMembers.ownLost, { n: loaderData.lostCourses })}
+              </p>
+            )}
 
             <Form method="post" className="mt-4 space-y-3">
               <input type="hidden" name="intent" value="delete" />

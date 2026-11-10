@@ -18,11 +18,14 @@ export function PersonAccess({
   displayName,
   viewerIsOwner,
   resetLink,
+  lostCourses = 0,
 }: {
   person: { id: string; status: "active" | "disabled"; twoFactor: boolean };
   displayName: string;
   viewerIsOwner: boolean;
   resetLink?: string;
+  /** Courses without a co-owner that go with the account (BESLUIT-2026-11-10-5). */
+  lostCourses?: number;
 }) {
   const t = useT();
   const p = t.people;
@@ -90,6 +93,11 @@ export function PersonAccess({
       <section>
         <h2 className={h2}>{p.danger}</h2>
         <p className="mt-1 text-sm text-slate-600">{p.dangerIntro}</p>
+        {lostCourses > 0 && (
+          <p className="mt-2 max-w-[65ch] rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+            {fmt(t.courseMembers.admin.lost, { n: lostCourses })}
+          </p>
+        )}
         <div className="mt-3">
           <ConfirmDialog
             triggerLabel={i.deleteUser}

@@ -73,6 +73,11 @@ const loaderData = {
     { id: "team-1", name: "Verpleegkunde", member: true, lead: true },
     { id: "team-2", name: "Techniek", member: false, lead: false },
   ],
+  courses: null as {
+    list: { id: string; name: string; members: [] }[];
+    colleagues: { userId: string; name: string }[];
+    lost: number;
+  } | null,
 };
 
 type Data = typeof loaderData;
@@ -415,5 +420,28 @@ describe("Admin person page — teams (P28.2)", () => {
     expect(
       screen.queryByRole("button", { name: /zet tweestapsverificatie uit|turn off two-step/i }),
     ).toBeNull();
+  });
+
+  it("lists the teacher's courses to hand over, and warns before deleting what would be lost", async () => {
+    renderPage(() => ({ coursesTransferred: 2 }), {
+      courses: {
+        list: [
+          { id: "c-1", name: "Biologie", members: [] },
+          { id: "c-2", name: "Scheikunde", members: [] },
+        ],
+        colleagues: [{ userId: "u-b", name: "Bram" }],
+        lost: 2,
+      },
+    });
+    const h2 = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(h2).toContain("Cursussen");
+    expect(
+      within(section(/^verwijderen$/i)).getByText(/Cursussen zonder mede-eigenaar: 2\./),
+    ).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.selectOptions(screen.getByLabelText("Alle cursussen naar"), "u-b");
+    await user.click(screen.getByRole("button", { name: "Alles overdragen" }));
+    expect(await screen.findByText("Cursussen overgedragen: 2.")).toBeInTheDocument();
   });
 });

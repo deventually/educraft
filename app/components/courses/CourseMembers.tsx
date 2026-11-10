@@ -5,6 +5,7 @@ import { Button, Card, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { CourseTransfer } from "./CourseTransfer";
 
 type MemberRole = "editor" | "co-owner";
 
@@ -21,6 +22,8 @@ export interface CourseMembersProps {
   members: Member[];
   /** Team-mates a manager can still add. */
   candidates: { userId: string; name: string }[];
+  /** Colleagues the owner can hand the course to. */
+  transferTo: { userId: string; name: string }[];
 }
 
 const ROLES: MemberRole[] = ["editor", "co-owner"];
@@ -30,7 +33,13 @@ const ROLES: MemberRole[] = ["editor", "co-owner"];
  * team-mates as editor or co-owner, change a role and remove someone; an editor sees who
  * works on the course. Every member can stop.
  */
-export function CourseMembers({ myRole, ownerName, members, candidates }: CourseMembersProps) {
+export function CourseMembers({
+  myRole,
+  ownerName,
+  members,
+  candidates,
+  transferTo,
+}: CourseMembersProps) {
   const t = useT();
   const e = t.courseMembers;
   const id = useId();
@@ -140,6 +149,12 @@ export function CourseMembers({ myRole, ownerName, members, candidates }: Course
               </Button>
             </Form>
           ))}
+
+        {myRole === "owner" && transferTo.length > 0 && (
+          <div className="mt-4 border-t border-slate-100 pt-3">
+            <CourseTransfer to={transferTo} />
+          </div>
+        )}
 
         {myRole !== "owner" && (
           <div className="mt-3">

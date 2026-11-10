@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #242 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #243 gemerged)_
 
 ## Nu
 
+- **Samen aan een cursus werken (#243) gemerged op 2026-11-10:** de eigenaar voegt collega's uit
+  zijn teams toe als bewerker of mede-eigenaar (`course_members`, migratie 0027). Een bewerker
+  past de inhoud aan; een mede-eigenaar deelt de cursus ook en kiest wie meewerkt. Verwijderen en
+  de onderwijscontext blijven bij de eigenaar. BESLUIT-2026-11-10-5. Overdragen volgt in een
+  tweede PR.
 - **Vakgebiedlijsten voor mbo en wo (#242) gemerged op 2026-11-10:** bij mbo kies je een
   opleidingsdomein uit de 18 domeinen, bij wo een van de tien CROHO-onderdelen. Wo krijgt een
   sectorpakket met de Dublin-descriptoren, en de reviewer Werkveld (`@v2`) werkt nu voor elke

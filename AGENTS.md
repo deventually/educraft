@@ -97,7 +97,7 @@ English slugs, never shown.
 - Course members (BESLUIT-2026-11-10-5): a course's **content** may also be read and changed by
   its editors and co-owners (`course_members`), in the WHERE clause of `courses.server.ts`.
   Sharing and choosing members is for owner and co-owners; deleting, the context profile and
-  handing over stay owner-only.
+  handing over stay owner-only (and the admin's, on the person page: `courseTransfer.server.ts`).
 - Sharing (P28.4): **reading** is also allowed to a member of a team the owner shared the item
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared
