@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #209 gemerged)_
+_Laatst bijgewerkt: 2026-11-10 (#187 t/m #210 gemerged)_
 
 ## Nu
 
+- **Biome 2.6 (#210) gemerged op 2026-11-10:** de tweede versiesprong uit #189. Markdown (de
+  prompts met de tekst van het boek en de helppagina's) blijft buiten Biome; de nieuwe regel
+  `noComponentHookFactories` staat alleen in `tests/` uit, voor route-stubs. Geen gedragswijziging.
 - **Vitest 5 (#208) gemerged op 2026-11-10:** de testomgeving gaat van vitest 4 naar 5, de eerste
   van drie grote versiesprongen uit #189. `tests/jest-dom.d.ts` koppelt de jest-dom-controles aan
   het nieuwe matcher-type van vitest 5. Geen gedragswijziging.
