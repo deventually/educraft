@@ -203,3 +203,13 @@ describe("Context settings", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("Context settings help", () => {
+  it("links to the help on the teaching context", () => {
+    renderSettings();
+    expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
+      "href",
+      "/help/context-profiles",
+    );
+  });
+});

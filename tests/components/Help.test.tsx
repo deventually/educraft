@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import HelpIndex from "~/routes/help._index";
@@ -12,18 +13,47 @@ import HelpPage from "~/routes/help.$id";
 // in About.test.tsx and Projects.test.tsx.
 
 const indexData = {
-  topics: [
-    { slug: "getting-started", title: "Aan de slag" },
-    { slug: "context-profiles", title: "Onderwijscontext instellen" },
-  ],
-  tools: [
+  sections: [
     {
-      id: "bloom-by-design",
-      name: { nl: "Bloom by Design", en: "Bloom by Design" },
-      tagline: {
-        nl: "Kies technologie op basis van leerresultaten",
-        en: "Choose technology by learning outcome",
-      },
+      id: "start",
+      title: "Begin hier",
+      topics: [
+        {
+          slug: "getting-started",
+          title: "Aan de slag",
+          search: "aan de slag kies een tool",
+          headings: [],
+        },
+      ],
+    },
+    {
+      id: "account",
+      title: "Je account",
+      topics: [
+        {
+          slug: "account",
+          title: "Je account",
+          search: "je account tweestapsverificatie herstelcodes",
+          headings: [{ text: "Tweestapsverificatie", anchor: "tweestapsverificatie" }],
+        },
+      ],
+    },
+  ],
+  toolGroups: [
+    {
+      goal: "design",
+      name: { nl: "Plannen & ontwerpen", en: "Plan & design" },
+      tools: [
+        {
+          id: "bloom-by-design",
+          name: { nl: "Bloom by Design", en: "Bloom by Design" },
+          tagline: {
+            nl: "Kies technologie op basis van leerresultaten",
+            en: "Choose technology by learning outcome",
+          },
+          search: "bloom by design technologie",
+        },
+      ],
     },
   ],
 };
@@ -84,6 +114,44 @@ describe("Help index", () => {
     renderIndex();
     expect(screen.getByText("Aan de slag")).toBeInTheDocument();
     expect(screen.getByText("Bloom by Design")).toBeInTheDocument();
+  });
+
+  it("groups topics under section headings and tools under their goal", () => {
+    renderIndex();
+    expect(screen.getByRole("heading", { name: "Begin hier" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Plannen & ontwerpen" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Aan de slag/ })).toHaveAttribute(
+      "href",
+      "/help/getting-started",
+    );
+  });
+
+  it("searches topics and tools, and links straight to the matching heading", async () => {
+    renderIndex();
+    await userEvent.type(screen.getByRole("searchbox", { name: "Zoek in de help" }), "tweestap");
+    const results = screen.getByRole("region", { name: "Zoekresultaten" });
+    expect(within(results).getByRole("link", { name: "Je account" })).toHaveAttribute(
+      "href",
+      "/help/account",
+    );
+    expect(within(results).getByRole("link", { name: "Tweestapsverificatie" })).toHaveAttribute(
+      "href",
+      "/help/account#tweestapsverificatie",
+    );
+    expect(within(results).queryByText("Bloom by Design")).toBeNull();
+    expect(screen.getByText("1 resultaat")).toBeInTheDocument();
+  });
+
+  it("says so when the search finds nothing", async () => {
+    renderIndex();
+    await userEvent.type(screen.getByRole("searchbox", { name: "Zoek in de help" }), "xyzzy");
+    expect(screen.getByText(/Niets gevonden/)).toBeInTheDocument();
+  });
+
+  it("has no a11y violations while searching", async () => {
+    const { container } = renderIndex();
+    await userEvent.type(screen.getByRole("searchbox", { name: "Zoek in de help" }), "tweestap");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("has no a11y violations", async () => {

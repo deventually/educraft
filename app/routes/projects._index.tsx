@@ -19,6 +19,7 @@ import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { HelpLink } from "~/components/HelpLink";
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await requireUser(request);
@@ -91,6 +92,7 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
         {t.nav.projects}
       </h1>
       <p className="mt-2 text-slate-600">{t.projects.subtitle}</p>
+      <HelpLink topic="saved-work" />
 
       {generations.length === 0 ? (
         <EmptyState

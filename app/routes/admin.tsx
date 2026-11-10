@@ -16,6 +16,7 @@ import { HealthPanel } from "~/components/admin/HealthPanel";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { cn } from "~/lib/utils";
+import { HelpLink } from "~/components/HelpLink";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -56,6 +57,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
           {t.admin.console.title}
         </h1>
         <p className="mt-1 text-sm text-slate-600">{t.admin.console.subtitle}</p>
+        <HelpLink topic="admin" />
       </header>
 
       <div className="grid gap-6 md:grid-cols-[13rem_1fr]">

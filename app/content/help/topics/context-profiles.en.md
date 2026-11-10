@@ -1,6 +1,6 @@
 # Set up your teaching context
 
-A **context profile** describes your teaching situation once, so every tool takes it into account. The profile is passed to each prompt as background (`{{context}}`), so you don't retype it every time.
+A **context profile** describes your teaching situation once, so every tool takes it into account. The profile is passed to each prompt as background, so you don't retype it every time.
 
 ## One short page
 
@@ -14,7 +14,7 @@ Go to **Teaching context** and click **Set up teaching context** (or **New conte
 
 You start with the **type of education**. The type of education (secondary, senior vocational, higher professional or university — with its track or degree, such as vmbo-kb, havo, mbo-4 or hbo bachelor) drives the rest: it proposes the matching **level** automatically and determines which subjects/domains you can choose.
 
-Level is stored as an **NLQF level** — the Dutch national qualifications framework is the source of truth. The editor shows the **derived EU level (EQF)** next to it and a link to the source ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)). Important: only that EQF number plus a neutral level directive reaches the prompt — never the term "NLQF" itself. That keeps the engine country-neutral while you choose in familiar Dutch terms. The entry-level (Instroom) option is passed as an entry level, just below EQF 1.
+Level is stored as an **NLQF level** — the Dutch national qualifications framework is the source of truth. The editor shows the **derived EU level (EQF)** next to it and a link to the source ([nlqf.nl](https://nlqf.nl/impact-nlqf/nlqf-niveaus-waaier/)).
 
 ## Framework per domain
 
