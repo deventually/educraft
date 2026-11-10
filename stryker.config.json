@@ -20,5 +20,6 @@
   "htmlReporter": { "fileName": "reports/mutation/index.html" },
   "thresholds": { "high": 80, "low": 60, "break": null },
   "timeoutMS": 10000,
-  "tempDirName": ".stryker-tmp"
+  "tempDirName": ".stryker-tmp",
+  "tsconfigFile": "tsconfig.stryker-none.json"
 }
