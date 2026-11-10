@@ -13,7 +13,7 @@ Per cursus die nu loopt:
 - **In de les:** de lessen, opdrachten en toetsen van deze week.
 - **Voorbereiden:** wat er deze en volgende week is, maar waar nog geen werk aan hangt. Koppel je een lesopzet of toets aan dat onderdeel, dan verdwijnt het uit de lijst.
 - **Nakijken:** de toetsen van de twee weken hiervoor.
-- **Aandachtspunten:** hoeveel controles er openstaan, en de adviezen van de petten waar je nog geen besluit over nam.
+- **Aandachtspunten:** hoeveel controles er openstaan, en de adviezen van je reviewteam waar je nog geen besluit over nam.
 
 In een vakantieweek staat er alleen "Vakantie". Van **vrijdag tot en met zondag** staat er ook een blok **Volgende week**, zodat je het weekend in kunt met een overzicht.
 

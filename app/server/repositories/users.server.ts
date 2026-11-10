@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
+  agentChoices,
   agentReviews,
   contextProfiles,
   courseLinks,
@@ -188,6 +189,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
     tx.delete(reviewDecisions).where(eq(reviewDecisions.userId, id)).run();
     tx.delete(agentReviews).where(eq(agentReviews.userId, id)).run();
+    tx.delete(agentChoices).where(eq(agentChoices.userId, id)).run();
     tx.delete(courseLinks).where(eq(courseLinks.userId, id)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();

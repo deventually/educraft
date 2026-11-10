@@ -32,6 +32,8 @@ const LABELS = {
     none: "(geen)",
     week: "week",
     weight: "weging",
+    supervised: "onder toezicht",
+    unsupervised: "zonder toezicht",
     outcomes: "leeruitkomsten",
     checks: "Deze vaste controles ziet de docent al; herhaal ze niet",
     rejected: "Deze adviezen heeft de docent eerder verworpen; noem ze niet opnieuw",
@@ -41,6 +43,8 @@ const LABELS = {
     none: "(none)",
     week: "week",
     weight: "weight",
+    supervised: "supervised",
+    unsupervised: "unsupervised",
     outcomes: "learning outcomes",
     checks: "The teacher already sees these fixed checks; do not repeat them",
     rejected: "The teacher rejected these earlier; do not raise them again",
@@ -103,6 +107,7 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
       t.kind,
       t.week != null && `${l.week} ${t.week}`,
       t.weight != null && `${l.weight} ${t.weight}%`,
+      t.supervised != null && (t.supervised ? l.supervised : l.unsupervised),
       t.hours != null && `${t.hours} h`,
     ])}: ${t.title} → ${coverage}`;
   });

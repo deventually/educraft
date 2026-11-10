@@ -79,6 +79,11 @@ const assessment = z.object({
   week,
   hours,
   weight: optionalNumber(0, 100),
+  // An empty choice means "not said"; the stored value is a boolean.
+  supervised: z
+    .enum(["yes", "no", ""])
+    .optional()
+    .transform((v) => (v === "yes" ? true : v === "no" ? false : undefined)),
   coverage: ids,
 });
 
@@ -193,6 +198,7 @@ function run(
         week: v.week,
         hours: v.hours,
         weight: v.weight,
+        supervised: v.supervised,
         coverage,
       });
     }

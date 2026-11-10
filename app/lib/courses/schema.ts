@@ -75,6 +75,7 @@ const AssessmentSchema = z.object({
   week: Week.optional(),
   kind: z.enum(ASSESSMENT_KINDS),
   weight: z.number().min(0).max(100).optional(),
+  supervised: z.boolean().optional(),
   coverage: z
     .array(z.object({ outcomeId: Id, bloom: Bloom.optional() }))
     .max(COURSE_LIMITS.outcomes),

@@ -105,11 +105,8 @@ function FieldControl({
           </Label>
         )
       )}
-      {renderControl(field, id, value, onChange, locale, onFiles)}
+      {renderControl(field, id, value, onChange, locale, onFiles, sourceFiles)}
       {field.help && <HelpText>{loc(field.help, locale)}</HelpText>}
-      {field.kind === "image" && sourceFiles && (
-        <DocumentFigurePicker files={sourceFiles} value={asImages(value)} onChange={onChange} />
-      )}
     </div>
   );
 }
@@ -121,6 +118,7 @@ function renderControl(
   onChange: (v: FormValues[string]) => void,
   locale: Locale,
   onFiles?: (files: File[]) => void,
+  sourceFiles?: File[],
 ) {
   const placeholder = loc(field.placeholder, locale) || undefined;
   switch (field.kind) {
@@ -210,6 +208,15 @@ function renderControl(
           onChange={onChange}
           label={loc(field.label, locale)}
           required={field.required}
+          picked={
+            sourceFiles && sourceFiles.length > 0 ? (
+              <DocumentFigurePicker
+                files={sourceFiles}
+                value={asImages(value)}
+                onChange={onChange}
+              />
+            ) : undefined
+          }
         />
       );
     case "document":

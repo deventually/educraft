@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
-import { CourseReviewPanel, type ReviewPanelAgent } from "~/components/courses/CourseReviewPanel";
+import {
+  CourseReviewPanel,
+  type ReviewPanelAgent,
+  type ReviewPanelChoice,
+} from "~/components/courses/CourseReviewPanel";
 import { alignedCourse, LO1, TEST1 } from "../courses/fixtures";
 import type { CourseTools } from "~/lib/registry/courseActions";
 
@@ -21,6 +25,21 @@ const notYet: ReviewPanelAgent[] = [
   },
   { agentId: "designer", role: { nl: "Ontwerper", en: "Designer" }, review: null },
 ];
+
+const FOCUS = {
+  "assessment-expert": { nl: "Kijkt of je toetsen meten wat je leeruitkomsten beloven.", en: "a" },
+  designer: { nl: "Kijkt of je lessen studenten naar de leeruitkomsten brengen.", en: "b" },
+};
+
+/** The hats the admin has on, ticked when the panel shows them. */
+function choicesFor(agents: ReviewPanelAgent[], all = notYet): ReviewPanelChoice[] {
+  return all.map((a) => ({
+    agentId: a.agentId,
+    role: a.role,
+    focus: FOCUS[a.agentId as keyof typeof FOCUS],
+    chosen: agents.some((x) => x.agentId === a.agentId),
+  }));
+}
 
 function reviewed(stale = false): ReviewPanelAgent[] {
   return [
@@ -61,7 +80,12 @@ const tools: CourseTools = {
   findings: {},
 };
 
-function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0, withTools?: CourseTools) {
+function renderPanel(
+  agents: ReviewPanelAgent[],
+  linkedTests = 0,
+  withTools?: CourseTools,
+  choices = choicesFor(agents),
+) {
   const Stub = createRoutesStub([
     {
       path: "/",
@@ -69,6 +93,7 @@ function renderPanel(agents: ReviewPanelAgent[], linkedTests = 0, withTools?: Co
         <CourseReviewPanel
           data={alignedCourse()}
           agents={agents}
+          choices={choices}
           models={models}
           defaultModel="claude-sonnet-5-5"
           linkedTests={linkedTests}
@@ -85,24 +110,25 @@ describe("CourseReviewPanel", () => {
   it("names the hats that are on in its intro (an admin can switch one off)", () => {
     renderPanel(notYet);
     expect(
-      screen.getByText(/kritische collega's kijken je cursus na: toetsdeskundige en ontwerper\./i),
+      screen.getByText(/je reviewteam kijkt je cursus na: toetsdeskundige en ontwerper\./i),
     ).toBeVisible();
   });
 
   it("names a single hat when only one is on", () => {
-    renderPanel([notYet[1]!]);
-    expect(screen.getByText(/kijken je cursus na: ontwerper\./i)).toBeVisible();
+    // The admin switched the assessment expert off: it is neither run nor offered.
+    renderPanel([notYet[1]!], 0, undefined, choicesFor([notYet[1]!], [notYet[1]!]));
+    expect(screen.getByText(/kijkt je cursus na: ontwerper\./i)).toBeVisible();
     expect(screen.queryByText(/toetsdeskundige/i)).toBeNull();
   });
 
   it("offers the review with a model choice and says nothing was reviewed yet", async () => {
     const { container } = renderPanel(notYet);
-    expect(screen.getByRole("heading", { name: "Beoordeling" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Reviewteam" })).toBeVisible();
     expect(screen.getByLabelText("Model")).toHaveValue("claude-sonnet-5-5");
-    const run = screen.getByRole("button", { name: "Laat beoordelen" });
+    const run = screen.getByRole("button", { name: "Laat reviewen" });
     expect(run).toHaveAttribute("name", "intent");
     expect(run).toHaveAttribute("value", "review");
-    expect(screen.getAllByText("Nog niet beoordeeld.")).toHaveLength(2);
+    expect(screen.getAllByText("Nog niet gereviewd.")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Toetsdeskundige" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -124,7 +150,7 @@ describe("CourseReviewPanel", () => {
     expect(form.querySelector('input[name="intent"]')).toHaveValue("decide");
     expect(form.querySelector('input[name="reviewId"]')).toHaveValue("rev-1");
     expect(form.querySelector('input[name="findingId"]')).toHaveValue("f1");
-    expect(screen.getByText("Geen adviezen van deze pet.")).toBeVisible();
+    expect(screen.getByText("Geen adviezen van deze reviewer.")).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -141,7 +167,7 @@ describe("CourseReviewPanel", () => {
 
   it("says when the course changed after the review", async () => {
     const { container } = renderPanel(reviewed(true));
-    expect(screen.getAllByText(/gewijzigd na deze beoordeling/)).toHaveLength(2);
+    expect(screen.getAllByText(/gewijzigd na deze review/)).toHaveLength(2);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -155,7 +181,37 @@ describe("CourseReviewPanel", () => {
 
   it("hides the box without linked test questions", () => {
     renderPanel(notYet, 0);
-    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.queryByRole("checkbox", { name: /gekoppelde toetsvragen/ })).toBeNull();
+  });
+
+  it("lets the teacher tick which hats review, each with what it looks at", async () => {
+    const { container } = renderPanel([notYet[1]!]);
+    const group = screen.getByRole("group", { name: "Wie zit in je reviewteam?" });
+    const assessment = within(group).getByRole("checkbox", { name: /Toetsdeskundige/ });
+    expect(assessment).not.toBeChecked();
+    expect(assessment).toHaveAttribute("name", "agent");
+    expect(assessment).toHaveAttribute("value", "assessment-expert");
+    expect(within(group).getByRole("checkbox", { name: /Ontwerper/ })).toBeChecked();
+    expect(within(group).getByText(FOCUS.designer.nl)).toBeVisible();
+    const form = assessment.closest("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="agentsChosen"]')).toHaveValue("1");
+    expect(within(group).getByRole("link", { name: /Meer over het reviewteam/ })).toHaveAttribute(
+      "href",
+      "/help/review-team",
+    );
+    // Only the chosen hat has a review section.
+    expect(screen.queryByRole("heading", { name: "Toetsdeskundige" })).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("turns the review off and says why while no hat is ticked", async () => {
+    const { container } = renderPanel([]);
+    const run = screen.getByRole("button", { name: "Laat reviewen" });
+    expect(run).toBeDisabled();
+    expect(screen.getByText("Kies minstens één reviewer om te laten reviewen.")).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    fireEvent.click(screen.getByRole("checkbox", { name: /Ontwerper/ }));
+    expect(run).toBeEnabled();
   });
 
   it("offers Los op met… for an open finding about an item (P27.4)", async () => {

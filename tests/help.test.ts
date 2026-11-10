@@ -13,6 +13,8 @@ import {
   topicLangs,
 } from "~/lib/help/registry";
 import { getEnabledTools } from "~/lib/registry";
+import { AGENTS } from "~/lib/agents/registry";
+import { loc } from "~/lib/i18n/localized";
 
 describe("help registry — tool resolution", () => {
   it("resolves a real tool by id and returns undefined for junk", () => {
@@ -36,8 +38,37 @@ describe("help registry — topics", () => {
   });
 
   it("explains the role-agent review in the courses topic (P21.5)", () => {
-    expect(getTopic("courses", "nl")).toContain("## Laat beoordelen");
+    expect(getTopic("courses", "nl")).toContain("## Laat reviewen");
     expect(getTopic("courses", "en")).toContain("## Get a review");
+  });
+
+  it("explains that an assessment can be marked as supervised", () => {
+    expect(getTopic("courses", "nl")).toContain("**onder toezicht**");
+    expect(getTopic("courses", "en")).toContain("**supervised**");
+  });
+
+  it("describes every reviewer in its own section, so a new reviewer ships with its help", () => {
+    expect(getTopicTitle("review-team", "nl")).toBe("Je reviewteam: wie er meekijkt");
+    expect(getTopicTitle("review-team", "en")).toBe("Your review team: who reviews your course");
+    for (const lang of LOCALES) {
+      const topic = getTopic("review-team", lang) ?? "";
+      for (const agent of AGENTS)
+        expect(topic, `${lang}: ${agent.id}`).toContain(`## ${loc(agent.role, lang)}`);
+    }
+    for (const heading of [
+      "## Kiezen wie er in je reviewteam zit",
+      "## Wat een reviewer ziet",
+      "## Wat een reviewer niet doet",
+    ])
+      expect(getTopic("review-team", "nl")).toContain(heading);
+    for (const heading of [
+      "## Choosing who is on your review team",
+      "## What a reviewer sees",
+      "## What a reviewer does not do",
+    ])
+      expect(getTopic("review-team", "en")).toContain(heading);
+    expect(getTopic("courses", "nl")).toContain("(/help/review-team)");
+    expect(getTopic("courses", "en")).toContain("(/help/review-team)");
   });
 
   it("guides a teacher through the BDB and BKE, from switching it on to handing in", () => {

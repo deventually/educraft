@@ -253,6 +253,18 @@ export const reviewDecisions = sqliteTable(
   (t) => [uniqueIndex("review_decisions_review_finding").on(t.reviewId, t.findingId)],
 );
 
+/** A teacher's own choice of hats: `choice` "on" | "off" per agent. No row = the hat's default. */
+export const agentChoices = sqliteTable(
+  "agent_choices",
+  {
+    userId: text("user_id").notNull(),
+    agentId: text("agent_id").notNull(),
+    choice: text("choice").notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.agentId] })],
+);
+
 /**
  * Per-tool instance configuration (Phase 4). One row per tool an admin has
  * touched; an absent row means "registry default" (safe defaults: a fresh

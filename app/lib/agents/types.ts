@@ -15,9 +15,16 @@ export interface Agent {
   /** Versioned prompt id (`<id>@vN`); the prompt itself arrives in P21.2. */
   promptId: string;
   watches: AgentTarget[];
+  /** One line on what the hat looks at, shown where the teacher ticks it. */
+  focus: LocalizedText;
+  /** Whether the hat looks along for a teacher who never chose (the teacher's own switch). */
+  teacherDefault: AgentStand;
 }
 
-/** A hat's instance stand on /admin/agents: On or Off. An untouched hat is on. */
+/**
+ * A hat's stand: On or Off. Used for the instance switch on /admin/agents (an untouched hat
+ * is on) and for a teacher's own choice (an untouched hat follows `teacherDefault`).
+ */
 export const AGENT_STANDS = ["on", "off"] as const;
 export type AgentStand = (typeof AGENT_STANDS)[number];
 export const isAgentStand = (v: unknown): v is AgentStand =>
@@ -66,4 +73,13 @@ export interface ReviewPanelAgent {
     stale: boolean;
     findings: (ReviewFinding & { decision?: Decision; reason?: string | null })[];
   };
+}
+
+/** One hat the teacher can tick in the review panel: the admin has it on. */
+export interface ReviewPanelChoice {
+  agentId: string;
+  role: LocalizedText;
+  focus: LocalizedText;
+  /** The teacher chose it (or never chose and it is on by default). */
+  chosen: boolean;
 }

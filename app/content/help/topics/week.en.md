@@ -13,7 +13,7 @@ For every course that is running now:
 - **In class:** this week's lessons, assignments and assessments.
 - **To prepare:** what is on this week and next week but has no work linked to it yet. Link a lesson plan or a test to that item and it leaves the list.
 - **To grade:** the assessments of the two previous weeks.
-- **Points of attention:** how many checks are open, and the reviewers' advice you have not decided on yet.
+- **Points of attention:** how many checks are open, and your review team's advice you have not decided on yet.
 
 In a break week you only see "Break". From **Friday to Sunday** there is also a **Next week** block, so you can go into the weekend with an overview.
 

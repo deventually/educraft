@@ -1,7 +1,7 @@
 export const admin = {
   console: {
     nav: {
-      agents: "Rolagenten",
+      agents: "Reviewteam",
       audit: "Logboek",
       context: "Onderwijscontext",
       teams: "Teams",

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { activeAgents, AGENTS, agentsWatching, getAgent } from "~/lib/agents/registry";
+import {
+  activeAgents,
+  AGENTS,
+  agentsWatching,
+  chosenAgents,
+  getAgent,
+} from "~/lib/agents/registry";
 import { validateAgents } from "~/lib/agents/validate";
 import type { Agent } from "~/lib/agents/types";
+import { loc } from "~/lib/i18n/localized";
 
 function valid(): Agent {
   return {
@@ -9,6 +16,8 @@ function valid(): Agent {
     role: { nl: "Testpet", en: "Test hat" },
     promptId: "agent-design@v1",
     watches: ["course"],
+    focus: { nl: "Let op testen.", en: "Looks at tests." },
+    teacherDefault: "on",
   };
 }
 
@@ -34,6 +43,27 @@ describe("agent registry (P21.1)", () => {
     expect(ids({})).toEqual(["assessment-expert", "designer"]);
     expect(ids({ designer: "off" })).toEqual(["assessment-expert"]);
     expect(ids({ designer: "on", "assessment-expert": "off" })).toEqual(["designer"]);
+  });
+});
+
+describe("the teacher's own choice of hats", () => {
+  it("gives every v1 hat a one-line focus and keeps it on for a teacher by default", () => {
+    for (const a of AGENTS) {
+      expect(a.teacherDefault).toBe("on");
+      expect(loc(a.focus, "nl").trim()).not.toBe("");
+      expect(loc(a.focus, "en").trim()).not.toBe("");
+    }
+  });
+
+  it("follows the teacher's choice, and the hat's default when the teacher never chose", () => {
+    const off: Agent = { ...valid(), id: "quiet-hat", teacherDefault: "off" };
+    const hats = [valid(), off];
+    const ids = (choices: Record<string, "on" | "off">) =>
+      chosenAgents(hats, choices).map((a) => a.id);
+    expect(ids({})).toEqual(["test-hat"]);
+    expect(ids({ "test-hat": "off" })).toEqual([]);
+    expect(ids({ "quiet-hat": "on" })).toEqual(["test-hat", "quiet-hat"]);
+    expect(ids({ "quiet-hat": "on", "test-hat": "off" })).toEqual(["quiet-hat"]);
   });
 });
 
@@ -63,6 +93,12 @@ describe("validateAgents", () => {
   it("rejects a prompt id without a version", () => {
     const a = { ...valid(), promptId: "agent-test" };
     expect(validateAgents([a]).map((i) => i.agent)).toEqual(["test-hat"]);
+  });
+
+  it("rejects a hat without a bilingual focus or with an unknown teacher default", () => {
+    expect(validateAgents([{ ...valid(), focus: { nl: "Iets", en: "" } }])).toHaveLength(1);
+    const bad = { ...valid(), teacherDefault: "maybe" } as unknown as Agent;
+    expect(validateAgents([bad])).toHaveLength(1);
   });
 
   it("rejects an empty or unknown watch list", () => {

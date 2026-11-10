@@ -76,6 +76,26 @@ describe("Course editor (/courses/:id)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("asks per assessment whether it is supervised, and shows the answer", async () => {
+    const data = alignedCourse();
+    data.assessments[1] = { ...data.assessments[1]!, supervised: false };
+    const { container } = renderRoute(CoursePage, pageData(data));
+    const boxes = screen.getAllByRole("combobox", { name: "Onder toezicht" });
+    // One per existing assessment, plus the form for a new one.
+    expect(boxes).toHaveLength(3);
+    expect(boxes[1]).toHaveValue("no");
+    expect(boxes[2]).toHaveValue("");
+    expect(within(boxes[2]!).getByRole("option", { name: "Niet ingevuld" })).toBeInTheDocument();
+    expect(within(boxes[2]!).getByRole("option", { name: "Ja, onder toezicht" })).toHaveValue(
+      "yes",
+    );
+    expect(within(boxes[2]!).getByRole("option", { name: "Nee, zonder toezicht" })).toHaveValue(
+      "no",
+    );
+    expect(screen.getByText(/Zonder toezicht/)).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("shows the matrix as a real table with a caption, scoped headers and text cells", () => {
     renderRoute(CoursePage, pageData());
     const table = screen.getByRole("table", {

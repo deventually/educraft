@@ -42,6 +42,23 @@ describe("buildReviewMessage", () => {
     expect(msg).toMatch(/T2[^\n]*L1 \(create\), L2 \(understand\)/);
   });
 
+  it("says whether an assessment is supervised, and nothing when the teacher did not say", () => {
+    const course = alignedCourse();
+    course.assessments[0] = { ...course.assessments[0]!, supervised: true };
+    course.assessments[1] = { ...course.assessments[1]!, supervised: false };
+    const nl = buildReviewMessage({ course, alignment: [], rejected: [] }, "nl");
+    expect(nl).toMatch(/T1[^\n]*onder toezicht/);
+    expect(nl).toMatch(/T2[^\n]*zonder toezicht/);
+    const en = buildReviewMessage({ course, alignment: [], rejected: [] }, "en");
+    expect(en).toMatch(/T1[^\n]*\bsupervised/);
+    expect(en).toMatch(/T2[^\n]*unsupervised/);
+    const unset = buildReviewMessage(
+      { course: alignedCourse(), alignment: [], rejected: [] },
+      "nl",
+    );
+    expect(unset).not.toContain("toezicht");
+  });
+
   it("includes the study load when set", () => {
     const course = { ...alignedCourse(), ec: 5 };
     course.activities[0] = { ...course.activities[0]!, hours: 12 };

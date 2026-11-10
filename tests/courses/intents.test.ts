@@ -85,6 +85,31 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     expect(d.assessments[1]!.weight).toBeUndefined();
   });
 
+  it("sets and clears whether an assessment is supervised (an empty choice means not set)", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-assessment",
+      title: "Verslag",
+      kind: "summative",
+      supervised: "no",
+    });
+    expect(d.assessments[2]!.supervised).toBe(false);
+    d = ok(d, {
+      intent: "update-assessment",
+      id: TEST1,
+      title: "Eindopdracht",
+      kind: "summative",
+      supervised: "yes",
+    });
+    expect(d.assessments[1]!.supervised).toBe(true);
+    d = ok(d, { intent: "update-assessment", id: TEST1, title: "Eindopdracht", kind: "summative" });
+    expect("supervised" in d.assessments[1]!).toBe(false);
+    const r = applyCourseIntent(
+      alignedCourse(),
+      form({ intent: "add-assessment", title: "X", kind: "summative", supervised: "maybe" }),
+    );
+    expect(r).toEqual({ ok: false, error: "invalid" });
+  });
+
   it("sets and clears the course's EC", () => {
     let d = ok(alignedCourse(), { intent: "set-ec", ec: "7,5" });
     expect(d.ec).toBe(7.5);

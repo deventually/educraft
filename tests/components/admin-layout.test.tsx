@@ -24,7 +24,7 @@ async function renderLayout({ isOwner = false } = {}) {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly seven sections in order (Rolagenten after Tools, Logboek last)", async () => {
+  it("shows exactly seven sections in order (Reviewteam after Tools, Logboek last)", async () => {
     await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
@@ -32,7 +32,7 @@ describe("Admin layout", () => {
       "Gebruikers",
       "Teams",
       "Tools en modellen",
-      "Rolagenten",
+      "Reviewteam",
       "Onderwijscontext",
       "Gebruik en feedback",
       "Logboek",

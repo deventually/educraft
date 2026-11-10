@@ -4,7 +4,7 @@ A **course** records three things and shows whether they line up:
 
 - **Learning outcomes:** what the student can do at the end, with the Bloom level you expect.
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
-- **Assessments:** formative or summative, with the learning outcomes they test and at what level.
+- **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
 ## The checks
 
@@ -34,7 +34,7 @@ On a tool page with a learning-outcome field, pick your course under **Course**.
 
 ## Get a review
 
-Under **Review** on the course page, two critical colleagues look at your course: an **Assessment expert** (assessment blueprint, Bloom spread, wording, weighting) and a **Designer** (constructive alignment, active learning, study load). They are AI and run on the model you pick.
+Under **Review team** on the course page, critical colleagues look at your course, for example an **Assessment expert** (assessment blueprint, Bloom spread, wording, weighting) and a **Designer** (constructive alignment, active learning, study load). They are AI and run on the model you pick. You choose who is on your review team; what each reviewer does is in [Your review team](/help/review-team).
 
 - Each piece of advice points at a learning outcome, activity or assessment in your own course, or at the course as a whole.
 - For each piece of advice you choose **Agree** or **Disagree**, with a reason if you like. Agreeing only records your decision; nothing in your course changes.

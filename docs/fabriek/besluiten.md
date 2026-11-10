@@ -313,3 +313,18 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   een herstelcode komen in het logboek. Voor de QR-code mag het pakket `uqr` erbij. Uitzetten of
   resetten verhoogt `sessionVersion` **niet**: het geeft geen toegang erbij, dus de regel van vier
   plekken blijft. Bastiaan, 2026-11-09 (besluiten in de P2-planning; keuze "Ja, klein pakket (uqr)").
+- **BESLUIT-2026-11-10-1:** **Meer petten, en de docent kiest zelf welke meekijken.** Vervangt
+  "een derde pet pas als de pilot erom vraagt" uit BESLUIT-2026-11-05-3. Er komen vier petten bij,
+  elk in een eigen PR: AI-bestendigheid, Werkveld, Student en Inclusie. De docent vinkt in het
+  beoordelingspaneel aan welke petten meekijken; de keuze geldt voor al zijn of haar cursussen. De
+  schakelaar per pet van de beheerder blijft en gaat voor. Toetsdeskundige en Ontwerper staan voor
+  een docent standaard aan, nieuwe petten standaard uit. Elke pet krijgt een eigen stuk in de
+  helppagina *Rolagenten*. De Examencommissie (een toetsprogramma over meerdere cursussen) wordt
+  een aparte flow, niet eerder dan na de pilot of bij een tweede pilot; Bastiaan beslist dat nog.
+  Bastiaan, 2026-11-10 (plan "Nieuwe rolagenten en examencommissie", akkoord op alle aanbevelingen).
+- **BESLUIT-2026-11-10-2:** **Docenten lezen "Reviewteam", niet "rolagenten" of "petten".** Het
+  idee erachter is het vier-ogenprincipe. Het onderdeel en de helppagina heten *Reviewteam*
+  (Engels *Review team*), elke rol is een *reviewer* met een vaknaam (Toetsdeskundige, Ontwerper),
+  de vraag in het paneel is *Wie zit in je reviewteam?* en de knop *Laat reviewen*. De helppagina
+  staat op `/help/review-team`. In de code blijft het `agents`. Bastiaan, 2026-11-10 (keuzekaart,
+  na "rolagenten is geen goede benaming").

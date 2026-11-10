@@ -1,7 +1,7 @@
 /** The teacher's week on Start (P22.3). */
 export const week = {
-  agentFindings: "{count} adviezen van de petten",
-  agentFindingsOne: "1 advies van de petten",
+  agentFindings: "{count} adviezen van je reviewteam",
+  agentFindingsOne: "1 advies van je reviewteam",
   break: "Vakantie",
   courseWeek: "week {n}",
   findings: "{count} aandachtspunten",

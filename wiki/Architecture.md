@@ -264,7 +264,13 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   akkoord with a reason. Intents `review` and `decide` behind the `roleAgents` feature. An admin
   switches each hat On or Off for the instance on `/admin/agents` (`instance_settings`
   `agentStand:<id>`, absent = on; `activeAgents` in the registry). A hat that is off is not run,
-  not shown and not counted on Start; its stored reviews stay. No hat on = no panel. Linked work
+  not shown and not counted on Start; its stored reviews stay. No hat on = no panel. Below that, the
+  teacher ticks which hats review (BESLUIT-2026-11-10-1): `agent_choices` per (user, hat), absent =
+  the hat's `teacherDefault`; `chosenAgents` in the registry. The panel's boxes post with
+  `agentsChosen=1`, so "none ticked" differs from "no boxes"; the choice is saved at the review and
+  holds for all the teacher's courses. A hat the teacher switched off is run, shown and counted like
+  an admin-off hat (not at all). Every hat has a `focus` line and its own section in the help topic
+  `review-team` (`tests/help.test.ts`). Linked work
   (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
   clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
   profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.

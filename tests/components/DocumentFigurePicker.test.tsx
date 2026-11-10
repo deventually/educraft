@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { DocumentFigurePicker } from "~/components/documents/DocumentFigurePicker";
 import type { ImageInput } from "~/lib/ai/types";
@@ -15,8 +15,10 @@ vi.mock("~/lib/i18n/useT", () => ({
       figuresPrivacy: "Figures are not anonymised.",
       figuresUnsupported: "{count} image(s) in a format the AI cannot read were skipped.",
       figuresMax: "Maximum of {max} images reached.",
-      figureFromFile: "Image {index} from {source}",
-      figureFromPage: "Page {page} from {source}",
+      figureClose: "Close",
+      figureFromFile: "Image {index}",
+      figureFromPage: "Figure {index}, page {page}",
+      figureZoom: "Enlarge {label}",
     },
   }),
 }));
@@ -53,8 +55,8 @@ describe("DocumentFigurePicker", () => {
     const boxes = await screen.findAllByRole("checkbox");
     expect(boxes).toHaveLength(2);
     for (const box of boxes) expect(box).not.toBeChecked();
-    expect(screen.getByLabelText("Image 1 from report.docx")).toBeInTheDocument();
-    expect(screen.getByLabelText("Page 4 from report.pdf")).toBeInTheDocument();
+    expect(screen.getByLabelText("Image 1")).toHaveAccessibleDescription("report.docx");
+    expect(screen.getByLabelText("Figure 2, page 4")).toHaveAccessibleDescription("report.pdf");
     expect(screen.getByText("Figures are not anonymised.")).toBeInTheDocument();
     expect(
       screen.getByText("1 image(s) in a format the AI cannot read were skipped."),
@@ -67,7 +69,7 @@ describe("DocumentFigurePicker", () => {
     const { rerender } = render(
       <DocumentFigurePicker files={files} value={[own]} onChange={onChange} />,
     );
-    fireEvent.click(await screen.findByLabelText("Page 4 from report.pdf"));
+    fireEvent.click(await screen.findByLabelText("Figure 2, page 4"));
     expect(onChange).toHaveBeenLastCalledWith([own, FIGS.figures[1]!.image]);
 
     rerender(
@@ -77,10 +79,26 @@ describe("DocumentFigurePicker", () => {
         onChange={onChange}
       />,
     );
-    const box = screen.getByLabelText("Page 4 from report.pdf");
+    const box = screen.getByLabelText("Figure 2, page 4");
     expect(box).toBeChecked();
     fireEvent.click(box);
     expect(onChange).toHaveBeenLastCalledWith([own]);
+  });
+
+  it("enlarges a figure on click, without ticking it, and closes again", async () => {
+    const onChange = vi.fn();
+    render(<DocumentFigurePicker files={files} value={[]} onChange={onChange} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Enlarge Figure 2, page 4" }));
+    const dialog = screen.getByRole("dialog", { name: "Figure 2, page 4" });
+    expect(dialog).toHaveAttribute("open");
+    expect(within(dialog).getByRole("img", { name: "Figure 2, page 4" })).toHaveAttribute(
+      "src",
+      "data:image/png;base64,QkJC",
+    );
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("cannot tick more once the maximum is reached", async () => {
@@ -101,6 +119,15 @@ describe("DocumentFigurePicker", () => {
       <DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />,
     );
     await screen.findAllByRole("checkbox");
+    await waitFor(async () => expect((await axe(container)).violations).toEqual([]));
+  });
+
+  it("has no axe violations with a figure enlarged", async () => {
+    const { container } = render(
+      <DocumentFigurePicker files={files} value={[]} onChange={vi.fn()} />,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Enlarge Image 1" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     await waitFor(async () => expect((await axe(container)).violations).toEqual([]));
   });
 });

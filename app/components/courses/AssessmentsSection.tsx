@@ -113,6 +113,25 @@ function AssessmentForm({ data, assessment }: { data: CourseData; assessment?: A
           value={assessment?.hours}
         />
       </div>
+      <div className="sm:max-w-xs">
+        <Label htmlFor={`${id}-supervised`}>{a.supervised}</Label>
+        <Select
+          id={`${id}-supervised`}
+          name="supervised"
+          defaultValue={
+            assessment?.supervised === undefined ? "" : assessment.supervised ? "yes" : "no"
+          }
+          aria-describedby={`${id}-supervised-hint`}
+          className="mt-1"
+        >
+          <option value="">{a.supervisedOptions.unset}</option>
+          <option value="yes">{a.supervisedOptions.yes}</option>
+          <option value="no">{a.supervisedOptions.no}</option>
+        </Select>
+        <p id={`${id}-supervised-hint`} className="mt-1 text-xs text-slate-500">
+          {a.supervisedHint}
+        </p>
+      </div>
       {assessment?.items?.length ? (
         <p className="text-sm text-slate-600">{t.courses.items.coverageFromItems}</p>
       ) : (
@@ -165,6 +184,9 @@ export function AssessmentsSection({
                       <WeekLabel key="week" week={as.week} weekDates={weekDates} />
                     ) : null,
                     as.weight !== undefined ? `${as.weight}%` : null,
+                    as.supervised === undefined
+                      ? null
+                      : a.supervisedMeta[as.supervised ? "true" : "false"],
                     as.hours !== undefined ? `${as.hours} ${t.courses.hours.toLowerCase()}` : null,
                     effectiveCoverage(as)
                       .map(
