@@ -2,8 +2,8 @@ import type { Messages } from "../nl";
 
 /** The teacher's week on Start (P22.3). */
 export const week: Messages["week"] = {
-  agentFindings: "{count} pieces of advice from the reviewers",
-  agentFindingsOne: "1 piece of advice from the reviewers",
+  agentFindings: "{count} pieces of advice from your review team",
+  agentFindingsOne: "1 piece of advice from your review team",
   break: "Break",
   courseWeek: "week {n}",
   findings: "{count} points of attention",

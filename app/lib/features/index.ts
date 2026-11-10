@@ -28,7 +28,7 @@ export const FEATURES: readonly Feature[] = [
   { id: "courses", name: { nl: "Cursussen", en: "Courses" }, defaultStand: "on" },
   {
     id: "roleAgents",
-    name: { nl: "Rolagenten", en: "Role agents" },
+    name: { nl: "Reviewteam", en: "Review team" },
     defaultStand: "on",
     instanceOnly: true,
   },

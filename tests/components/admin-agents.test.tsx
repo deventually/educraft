@@ -44,12 +44,12 @@ function renderRoute(action?: (args: { request: Request }) => unknown) {
 }
 
 describe("Admin role agents", () => {
-  const table = () => screen.getByRole("table", { name: /petten/i });
+  const table = () => screen.getByRole("table", { name: /reviewers/i });
 
   it("shows the main switch with the three stands", () => {
     renderRoute();
-    expect(screen.getByRole("heading", { name: "Rolagenten" })).toBeVisible();
-    const main = screen.getByRole("combobox", { name: /rolagenten voor docenten/i });
+    expect(screen.getByRole("heading", { name: "Reviewteam" })).toBeVisible();
+    const main = screen.getByRole("combobox", { name: /reviewteam voor docenten/i });
     expect(main).toHaveValue("on");
     expect(
       within(main)
@@ -60,7 +60,7 @@ describe("Admin role agents", () => {
 
   it("says that teams cannot switch the role agents (BESLUIT-2026-11-05-11)", () => {
     renderRoute();
-    expect(screen.getByText(/een team kan rolagenten niet aan- of uitzetten/i)).toBeVisible();
+    expect(screen.getByText(/een team kan het reviewteam niet aan- of uitzetten/i)).toBeVisible();
   });
 
   it("lists every hat with what it looks at and an On / Off switch", () => {
@@ -100,7 +100,7 @@ describe("Admin role agents", () => {
       return { saved: true };
     });
     await user.selectOptions(
-      screen.getByRole("combobox", { name: /rolagenten voor docenten/i }),
+      screen.getByRole("combobox", { name: /reviewteam voor docenten/i }),
       "off",
     );
     await waitFor(() => expect(body?.get("intent")).toBe("main"));
@@ -111,7 +111,7 @@ describe("Admin role agents", () => {
     loaderData.main = "off";
     try {
       renderRoute();
-      expect(screen.getByText(/staan alle petten stil/i)).toBeVisible();
+      expect(screen.getByText(/kijkt geen enkele reviewer mee/i)).toBeVisible();
     } finally {
       loaderData.main = "on";
     }

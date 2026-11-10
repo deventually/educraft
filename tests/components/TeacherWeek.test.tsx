@@ -125,7 +125,7 @@ describe("TeacherWeekView (P22.3)", () => {
       "href",
       "/courses/c1",
     );
-    expect(within(region).getByText("1 advies van de petten")).toBeInTheDocument();
+    expect(within(region).getByText("1 advies van je reviewteam")).toBeInTheDocument();
   });
 
   it("gives a break one line and an empty course one line", async () => {

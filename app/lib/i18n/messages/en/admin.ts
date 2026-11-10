@@ -3,7 +3,7 @@ import type { Messages } from "../nl";
 export const admin: Messages["admin"] = {
   console: {
     nav: {
-      agents: "Role agents",
+      agents: "Review team",
       audit: "Audit log",
       context: "Teaching context",
       teams: "Teams",
