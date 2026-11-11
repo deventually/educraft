@@ -310,7 +310,6 @@ export const portfolio = {
   },
   toastAddedToDossier: "Toegevoegd aan het dossier. Koppel het daar aan een criterium.",
   toastConfirmed: "Kader bevestigd.",
-  toastCreated: "Dossier aangemaakt.",
   toastDeleted: "Dossier verwijderd.",
   toastSaved: "Opgeslagen.",
   tools: {

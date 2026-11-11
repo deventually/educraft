@@ -184,4 +184,84 @@ describe("coursePrefillValues", () => {
     const long = { ...course, disciplines: [{ id: "web", name: "Webtech", hoursPerWeek: 12 }] };
     expect(coursePrefillValues(duration, long, "w1")).toEqual({ duration: 240 });
   });
+
+  // Opened from a lesson in Les voorbereiden: its goal, its discipline and that discipline's lessons.
+  describe("from a lesson with a goal or a discipline", () => {
+    const lessonFields: InputField[] = [
+      {
+        name: "goal",
+        label: "Leerdoel",
+        kind: "textarea",
+        prefillFromCourse: { source: "lessonGoal" },
+      },
+      {
+        name: "content",
+        label: "Inhoud",
+        kind: "textarea",
+        prefillFromCourse: { source: "itemTitle" },
+      },
+      {
+        name: "prior",
+        label: "Voorkennis",
+        kind: "textarea",
+        prefillFromCourse: { source: "earlierLessons" },
+      },
+    ];
+    const lesson = (id: string, week: number, extra: object = {}) => ({
+      id,
+      title: id,
+      week,
+      kind: "activity" as const,
+      outcomeIds: ["a"],
+      ...extra,
+    });
+    const course = {
+      outcomes: [
+        { id: "a", text: "Je bouwt een webpagina." },
+        { id: "b", text: "Je presenteert je werk." },
+      ],
+      disciplines: [
+        { id: "web", name: "Webtech" },
+        { id: "pv", name: "Professionele vaardigheden" },
+      ],
+      items: [
+        lesson("HTML", 1, { disciplineId: "web" }),
+        lesson("Pitchen", 1, { disciplineId: "pv" }),
+        lesson("Flexbox", 2, { disciplineId: "web" }),
+        lesson("Zonder vak", 2),
+        lesson("CSS-grid", 3, {
+          disciplineId: "web",
+          goal: "De student zet een pagina op met CSS-grid.",
+        }),
+        lesson("Feedback", 3, { disciplineId: "pv" }),
+      ],
+    };
+
+    it("fills the lesson's goal, its discipline and only that discipline's earlier lessons", () => {
+      expect(coursePrefillValues(lessonFields, course, "CSS-grid")).toEqual({
+        goal: "De student zet een pagina op met CSS-grid.",
+        content: "Webtech: CSS-grid",
+        prior: "- Week 1: HTML\n- Week 2: Flexbox",
+      });
+    });
+
+    it("falls back to the lesson's outcomes without a goal, and to all lessons without a discipline", () => {
+      expect(coursePrefillValues(lessonFields, course, "Feedback")).toEqual({
+        goal: "- Je bouwt een webpagina.",
+        content: "Professionele vaardigheden: Feedback",
+        prior: "- Week 1: Pitchen",
+      });
+      expect(coursePrefillValues(lessonFields, course, "Zonder vak")).toEqual({
+        goal: "- Je bouwt een webpagina.",
+        content: "Zonder vak",
+        prior: "- Week 1: HTML\n- Week 1: Pitchen",
+      });
+    });
+
+    it("fills all outcomes as the goal without a lesson", () => {
+      expect(coursePrefillValues(lessonFields, course)).toEqual({
+        goal: "- Je bouwt een webpagina.\n- Je presenteert je werk.",
+      });
+    });
+  });
 });

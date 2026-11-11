@@ -38,7 +38,7 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 
 /** A lesson or test as the tool page needs it: no plan details, no questions. */
 function courseItem(
-  i: { id: string; title: string; week?: number; disciplineId?: string },
+  i: { id: string; title: string; week?: number; goal?: string; disciplineId?: string },
   kind: "activity" | "assessment",
   outcomeIds: string[],
 ) {
@@ -47,6 +47,7 @@ function courseItem(
     title: i.title,
     ...(i.week !== undefined && { week: i.week }),
     kind,
+    ...(i.goal && { goal: i.goal }),
     outcomeIds,
     ...(i.disciplineId && { disciplineId: i.disciplineId }),
   };
@@ -104,7 +105,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
         ],
         ...(c.data.schedule && { schedule: c.data.schedule }),
         ...(c.data.disciplines && {
-          disciplines: c.data.disciplines.map((x) => ({ id: x.id, hoursPerWeek: x.hoursPerWeek })),
+          disciplines: c.data.disciplines.map((x) => ({
+            id: x.id,
+            name: x.name,
+            hoursPerWeek: x.hoursPerWeek,
+          })),
         }),
       }))
     : [];

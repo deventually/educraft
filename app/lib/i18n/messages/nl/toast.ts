@@ -5,6 +5,7 @@ export const toast = {
   // Shown once after a redirect (P16); one per key in `~/lib/flash`.
   flash: {
     accountDeleted: "Je account is verwijderd.",
+    dossierCreated: "Dossier aangemaakt. Loop de vier stappen door, of sla er een over.",
     passwordReset: "Je wachtwoord is gewijzigd. Je bent ingelogd.",
     rubricDeleted: "Rubric verwijderd.",
     rubricDuplicated: "Kopie gemaakt. Je bewerkt nu de kopie.",

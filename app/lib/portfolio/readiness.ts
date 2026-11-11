@@ -47,6 +47,7 @@ export type ReadinessLevel = "ok" | "warn" | "block";
 export type ReadinessFix =
   | { to: "framework" }
   | { to: "evidence"; outcomeId: string }
+  | { to: "required"; outcomeId: string }
   | { to: "chapter"; outcomeId: string }
   | { to: "criterion"; outcomeId: string; criterionId: string }
   | { to: "references" }
@@ -223,7 +224,7 @@ export function readinessCheck(d: DossierData): ReadinessItem[] {
           level: "block" as const,
           outcomeId: p.outcomeId,
           detail: line,
-          fix: { to: "evidence" as const, outcomeId: p.outcomeId },
+          fix: { to: "required" as const, outcomeId: p.outcomeId },
         })),
       ),
     );

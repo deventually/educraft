@@ -92,6 +92,8 @@ export interface CoursePrefillItem {
   title: string;
   week?: number;
   kind: "activity" | "assessment";
+  /** A lesson's own goal (one sentence), when the teacher wrote one. */
+  goal?: string;
   outcomeIds: string[];
   disciplineId?: string;
 }
@@ -101,7 +103,7 @@ export interface CoursePrefillSource {
   outcomes: { id?: string; text: string }[];
   items?: CoursePrefillItem[];
   schedule?: CourseSchedule;
-  disciplines?: Pick<Discipline, "id" | "hoursPerWeek">[];
+  disciplines?: Pick<Discipline, "id" | "name" | "hoursPerWeek">[];
 }
 
 /** The lessons just before an item that `earlierLessons` names: recent ones matter most. */
@@ -117,16 +119,20 @@ function courseSourceValue(
 ): string | number {
   if (source === "sessionMinutes") return lessonMinutes(course, item) ?? "";
   if (source === "groupSize" || source === "deliveryMode") return course.schedule?.[source] ?? "";
-  if (source === "learningOutcomes") {
+  if (source === "lessonGoal" && item?.goal) return item.goal;
+  if (source === "learningOutcomes" || source === "lessonGoal") {
     const own = item ? course.outcomes.filter((o) => o.id && item.outcomeIds.includes(o.id)) : [];
     return lines((own.length > 0 ? own : course.outcomes).map((o) => o.text));
   }
   if (!item) return "";
-  if (source === "itemTitle") return item.title;
+  const discipline = course.disciplines?.find((d) => d.id === item.disciplineId);
+  if (source === "itemTitle") return discipline ? `${discipline.name}: ${item.title}` : item.title;
   const week = item.week;
   if (week === undefined) return "";
+  // With a discipline, prior knowledge is what that discipline taught before.
   const earlier = (course.items ?? [])
     .filter((i) => i.kind === "activity" && i.week !== undefined && i.week < week)
+    .filter((i) => !discipline || i.disciplineId === discipline.id)
     .sort((a, b) => (a.week ?? 0) - (b.week ?? 0))
     .slice(-EARLIER_LESSONS);
   return lines(earlier.map((i) => `Week ${i.week}: ${i.title}`));

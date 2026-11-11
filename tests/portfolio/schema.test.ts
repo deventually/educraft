@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DossierDataSchema, emptyDossier, LIMITS } from "~/lib/portfolio/schema";
-import { C1, LU, sampleDossier } from "./fixtures";
+import { C1, C2, LU, sampleDossier } from "./fixtures";
 
 describe("DossierDataSchema", () => {
   it("parses a valid dossier", () => {
@@ -100,6 +100,52 @@ describe("DossierDataSchema", () => {
     const d = sampleDossier();
     d.framework.outcomes.push({ ...d.framework.outcomes[0]!, criteria: [] });
     expect(d.framework.outcomes[1]!.id).toBe(LU);
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+});
+
+describe("chapter outline and literature (BDB step 5)", () => {
+  it("accepts an outline and literature; an old outcome without them stays valid", () => {
+    const d = sampleDossier();
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+    d.framework.outcomes[0]!.outline = [
+      { id: "s1", title: "Beginsituatie", description: "Wat de groep kan.", criterionIds: [C2] },
+      { id: "s2", title: "Reflectie", criterionIds: [], unverified: true },
+    ];
+    d.framework.outcomes[0]!.literature = ["Ebbens, S. (2016). Effectief leren."];
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+  });
+
+  it("rejects a section that covers a criterion of another outcome, or an unknown one", () => {
+    const d = sampleDossier();
+    d.framework.outcomes.push({
+      id: "lu2",
+      code: "LU2",
+      title: "Toetsen",
+      criteria: [{ id: "c-lu2", text: "Toets." }],
+      requiredEvidence: [],
+    });
+    d.framework.outcomes[0]!.outline = [{ id: "s1", title: "Toets", criterionIds: ["c-lu2"] }];
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+    d.framework.outcomes[0]!.outline = [{ id: "s1", title: "Toets", criterionIds: ["nope"] }];
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("rejects duplicate section ids and outlines over the limit", () => {
+    const d = sampleDossier();
+    d.framework.outcomes[0]!.outline = [
+      { id: "s1", title: "A", criterionIds: [] },
+      { id: "s1", title: "B", criterionIds: [] },
+    ];
+    expect(DossierDataSchema.safeParse(d).success).toBe(false);
+    d.framework.outcomes[0]!.outline = Array.from(
+      { length: LIMITS.outlineSections + 1 },
+      (_, i) => ({
+        id: `s${i}`,
+        title: "A",
+        criterionIds: [],
+      }),
+    );
     expect(DossierDataSchema.safeParse(d).success).toBe(false);
   });
 });

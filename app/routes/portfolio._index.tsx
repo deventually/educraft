@@ -15,6 +15,8 @@ import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
 import { fmtDate } from "~/lib/portfolio/format";
+import { startHref } from "~/lib/portfolio/start";
+import { redirectWithFlash } from "~/server/flash.server";
 
 export function meta() {
   return [{ title: "BDB/BKE — LimeOnIt" }];
@@ -53,8 +55,14 @@ export async function action({ request }: Route.ActionArgs) {
       return { ok: false as const, error: m.portfolio.errorName };
     const tracks = TRACKS.filter((t) => fd.getAll("tracks").includes(t));
     if (tracks.length === 0) return { ok: false as const, error: m.portfolio.errorTracks };
-    const dossier = await createDossier(user.id, name, emptyDossier(tracks));
-    return { ok: true as const, intent: "create", id: dossier.id };
+    const institution = String(fd.get("institution") ?? "")
+      .trim()
+      .slice(0, LIMITS.name);
+    const data = emptyDossier(tracks);
+    data.framework.institution = institution;
+    const dossier = await createDossier(user.id, name, data);
+    // Step 1 (track) is this form: the wizard goes on with the framework.
+    return redirectWithFlash(startHref(dossier.id, "framework"), "dossierCreated");
   }
   return { ok: false as const, error: m.portfolio.errorInvalid };
 }
@@ -68,10 +76,7 @@ export default function PortfolioList({ loaderData }: Route.ComponentProps) {
     result: (d) => {
       if (!d) return null;
       if (!d.ok) return { variant: "error", message: d.error };
-      return {
-        variant: "success",
-        message: d.intent === "delete" ? t.portfolio.toastDeleted : t.portfolio.toastCreated,
-      };
+      return { variant: "success", message: t.portfolio.toastDeleted };
     },
   });
   const trackLabel: Record<Track, string> = { bdb: "BDB", bke: "BKE" };
@@ -112,6 +117,10 @@ export default function PortfolioList({ loaderData }: Route.ComponentProps) {
               </label>
             </div>
           </fieldset>
+          <div>
+            <Label htmlFor="dossier-institution">{t.portfolioStart.track.institution}</Label>
+            <Input id="dossier-institution" name="institution" maxLength={LIMITS.name} />
+          </div>
           <Button type="submit">{t.portfolio.create}</Button>
         </Form>
       </Card>

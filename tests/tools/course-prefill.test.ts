@@ -11,7 +11,6 @@ const COURSE_FIELDS: [slug: string, field: string][] = [
   ["test-items", "learningOutcomes"],
   ["rubric-builder", "learningOutcome"],
   ["bloom-by-design", "learningOutcome"],
-  ["lesson-plan", "learningGoal"],
   ["differentiation", "learningGoal"],
   ["defend-your-work", "learningObjective"],
   ["defense-review", "learningObjective"],
@@ -27,6 +26,8 @@ describe("prefillFromCourse (data hook, no control flow)", () => {
   it("fills the lesson's title and the lessons before it in Les voorbereiden (P27.4)", () => {
     const field = (name: string) =>
       getToolBySlug("lesson-plan")?.inputs.find((f) => f.name === name)?.prefillFromCourse;
+    // The lesson's own goal when it has one, otherwise its learning outcomes.
+    expect(field("learningGoal")).toEqual({ source: "lessonGoal" });
     expect(field("content")).toEqual({ source: "itemTitle" });
     expect(field("priorKnowledge")).toEqual({ source: "earlierLessons" });
     expect(field("duration")).toEqual({ source: "sessionMinutes" });
