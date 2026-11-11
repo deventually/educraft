@@ -136,3 +136,12 @@ describe("mobile menu", () => {
     expect(links.at(-1)).toHaveFocus();
   });
 });
+
+describe("focus is visible on the menu links (WCAG 2.4.7)", () => {
+  it("gives every link in the account menu a focus ring", async () => {
+    const { menu } = await openAccountMenu();
+    for (const link of Array.from(menu.querySelectorAll("a"))) {
+      expect(link.className).toContain("focus-visible:ring-2");
+    }
+  });
+});
