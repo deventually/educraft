@@ -34,6 +34,17 @@ describe("course-design-outcomes@v1 prompt", () => {
     expect(p.runtime.en).toMatch(/observable/i);
   });
 
+  it("sets the number of outcomes from the study load, else the weeks, never the level", () => {
+    expect(p.runtime.nl).toContain(
+      "Tot en met 5 EC (of zonder studielast: tot en met 8 weken): 3 of 4",
+    );
+    expect(p.runtime.en).toContain(
+      "Up to and including 5 EC (or without a study load: up to and including 8 weeks): 3 or 4",
+    );
+    expect(p.runtime.nl).toMatch(/kies dan minder/);
+    expect(p.runtime.en).toMatch(/choose fewer/);
+  });
+
   it("covers the disciplines, and treats the description as material", () => {
     expect(p.runtime.nl).toMatch(/discipline/i);
     expect(p.runtime.en).toMatch(/discipline/i);
