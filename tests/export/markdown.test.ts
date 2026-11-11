@@ -86,3 +86,27 @@ describe("parseMarkdown tables with an escaped pipe", () => {
     ]);
   });
 });
+
+describe("parseMarkdown line breaks in a table cell", () => {
+  it("starts each line after a <br> on a new line in the same cell", () => {
+    const [table] = parseMarkdown("| A |\n|---|\n| **LU1**<br>LU2<br/>LU3 <br /> LU4 |");
+    expect(table).toEqual({
+      type: "table",
+      header: [[{ text: "A" }]],
+      rows: [
+        [
+          [
+            { text: "LU1", bold: true },
+            { text: "LU2", break: true },
+            { text: "LU3", break: true },
+            { text: "LU4", break: true },
+          ],
+        ],
+      ],
+    });
+  });
+
+  it("leaves <br> outside a table as text", () => {
+    expect(parseMarkdown("a<br>b")).toEqual([{ type: "paragraph", runs: [{ text: "a<br>b" }] }]);
+  });
+});

@@ -46,6 +46,7 @@ export function runs(rs: Run[]): TextRun[] {
         text: r.text,
         bold: r.bold,
         italics: r.italic,
+        ...(r.break ? { break: 1 } : {}),
         ...(r.code ? { font: CODE_FONT } : {}),
         ...(r.highlight ? { highlight: "yellow" } : {}),
       }),

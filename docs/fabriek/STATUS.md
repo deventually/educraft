@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #259 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
 
 ## Nu
 
+- **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** bij een toets
+  vul je toetsvorm, toetseigenaar, beoordeling, cesuur, voorwaarden, afname en herkansing in, en
+  de onderdelen met hun leeruitkomsten, weging, knock-out en criteria. Daaruit maakt LimeOnIt
+  zonder AI een toetsmatrijs en een nakijkmodel, als Word, PDF of Markdown. Leeruitkomsten krijgen
+  succescriteria, een cursus een modulecode en studiejaar.
 - **AI-aanroep stopt ook bij sluiten of wegnavigeren (#259) gemerged op 2026-11-11:** sluit een
   docent een tool of chat, of gaat die binnen de app naar een andere pagina terwijl de AI nog
   schrijft, dan breekt de aanroep af (`useStreamAborts`) en kost hij geen tokens meer. De pagina
@@ -609,6 +614,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #259 gemerged)_
 
 ## Bezig
 
+- **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (PR open):** het nakijkmodel heeft per
+  onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
+  leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de
+  toetsmatrijs staat de cesuur ook in de totaalregel onderaan, zodat elke matrijs in een document
+  zijn eigen cesuur draagt. Een tabelcel kan nu meer regels hebben (`<br>`) in Word, PDF en het
+  voorbeeld. Alles blijft links uitgelijnd.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

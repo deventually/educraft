@@ -493,7 +493,7 @@ describe("Course page — blueprint and marking model", () => {
     const summary = screen.getByText("Onderdelen (2)", { selector: "summary" });
     const details = summary.closest("details") as HTMLElement;
     expect(within(details).getByText("Datamodel")).toBeInTheDocument();
-    expect(within(details).getByText(/LU1 · weging 60% · knock-out/)).toBeInTheDocument();
+    expect(within(details).getByText(/LU1 · Weging: 60% · Knock-out: ja/)).toBeInTheDocument();
     const add = within(details).getByRole("button", { name: /Onderdeel toevoegen/ });
     const form = add.closest("form") as HTMLFormElement;
     expect(form.querySelector('input[name="intent"]')).toHaveValue("add-part");
