@@ -79,6 +79,10 @@ export function courseProgress(d: CourseData, findings: Finding[]): CourseProgre
   };
 }
 
+/** No outcomes, lessons or tests yet: the course wizard offers how to start. */
+export const isEmptyCourse = (d: CourseData): boolean =>
+  d.outcomes.length + d.activities.length + d.assessments.length === 0;
+
 const count = (done: number, total: number) => ({
   done,
   total,

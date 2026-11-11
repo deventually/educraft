@@ -10,11 +10,21 @@ A **course** records three things and shows whether they line up:
 
 The course page has five tabs, each for one task:
 
-- **Overview:** the progress, the course details, the schedule, the disciplines, importing from an existing document and your lessons and tests per week.
+- **Overview:** how to start an empty course, the progress, the course details, the schedule, the disciplines, importing from an existing document and your lessons and tests per week.
 - **Learning outcomes:** what the student can do at the end, with the success criteria.
 - **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
 - **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
 - **Documents and sharing:** the module guide and module handbook, evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
+## Starting a new course
+
+When your course is still empty, the Overview tab asks how you want to start:
+
+- **Design in broad outline:** you describe in a few sentences what the course is about and what students should be able to do at the end, and if you like you fill in the study load and the number of weeks. The AI proposes three to six learning outcomes, each with a Bloom level and success criteria. It also uses the course's teaching context and disciplines.
+- **Start from a document:** you take the learning outcomes and tests from a programme regulation, study guide or test blueprint (see *Starting from an existing module*).
+- **Start empty:** you write the learning outcomes yourself on the Learning outcomes tab.
+
+The **AI proposal** only goes into your course when you choose: you tick what you want to keep, edit the text and add it. What you fill in about the study load, weeks and the description goes straight into the course details and the schedule. An administrator can switch designing with AI off; then the document and the empty start remain.
 
 ## Progress
 

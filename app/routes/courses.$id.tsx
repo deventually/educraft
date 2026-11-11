@@ -20,17 +20,19 @@ import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
+import { CourseStart } from "~/components/courses/CourseStart";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { ModuleGuideSection } from "~/components/courses/ModuleGuideSection";
 import { courseToolsFor } from "~/server/courseTools.server";
+import { isFeatureOn } from "~/server/availability.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
 import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
 import { CourseProgress } from "~/components/courses/CourseProgress";
-import { courseProgress } from "~/lib/courses/progress";
+import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CourseTabs } from "~/components/courses/CourseTabs";
@@ -78,6 +80,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
     pack: await coursePack(course),
+    // The course wizard (switched off by the admin: only the document and an empty start).
+    courseDesign: await isFeatureOn(user, "courseDesign"),
     tools: await courseToolsFor(user),
     // The Monday of each course week (P22.1), or null without a start date.
     weekDates: course.data.startDate
@@ -129,6 +133,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     pending: (fd) => {
       const intent = fd?.get("intent");
       if (intent === "import-extract") return { variant: "pending", message: c.import.pending };
+      if (intent === "design-outcomes")
+        return { variant: "pending", message: t.courseDesign.pending };
       if (intent === "review") return { variant: "pending", message: t.agents.panel.pending };
       return { variant: "pending", message: t.toast.saving };
     },
@@ -137,6 +143,10 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (!r.ok) return { variant: "error", message: r.error };
       if (r.intent === "import-extract") {
         const ready = r.flagged ? fmt(c.import.readyCheck, { n: r.flagged }) : c.import.ready;
+        return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
+      }
+      if (r.intent === "design-outcomes") {
+        const ready = t.courseDesign.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
       }
       if (r.intent === "import-apply")
@@ -160,6 +170,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const proposal = useImportProposal(actionData);
+  const designed = proposal?.source === "design" ? proposal : null;
+  const aiNotes = (intent: string) =>
+    actionData && !actionData.ok && actionData.intent === intent && "notes" in actionData
+      ? actionData.notes
+      : undefined;
   const {
     course,
     profiles,
@@ -169,6 +184,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     dossiers = [],
     review = null,
     pack,
+    courseDesign = false,
     weekDates = null,
     tools = NO_COURSE_TOOLS,
     currentWeek = null,
@@ -217,6 +233,15 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       <div className="mt-6 space-y-10">
         {tab === "overview" && (
           <>
+            {isEmptyCourse(data) && (
+              <CourseStart
+                courseId={course.id}
+                data={data}
+                design={courseDesign}
+                proposal={designed}
+                notes={aiNotes("design-outcomes")}
+              />
+            )}
             <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />
             <CourseSettings
               courseId={course.id}
@@ -233,12 +258,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
             <CourseImport
               courseName={course.name}
               startOpen={data.outcomes.length === 0}
-              proposal={proposal}
-              notes={
-                actionData && !actionData.ok && actionData.intent === "import-extract"
-                  ? actionData.notes
-                  : undefined
-              }
+              proposal={designed ? null : proposal}
+              notes={aiNotes("import-extract")}
             />
             <CourseWeekView
               courseId={course.id}
