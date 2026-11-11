@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 
 // Isolated in-memory SQLite + small abuse budgets, set before any server module
-// loads. DAILY_REQUEST_LIMIT is low so the quota path is cheap to drain; the
+// loads. The daily token brake is low so the quota path is cheap to reach; the
 // rate-limit test uses an admin (quota-exempt) so the two never collide.
 process.env.DATABASE_URL = "file::memory:";
-process.env.DAILY_REQUEST_LIMIT = "2";
+process.env.DAILY_OUTPUT_TOKEN_LIMIT = "100";
 process.env.RATE_LIMIT_PER_MINUTE = "5";
 
 // Replace the real provider so no model call happens; the spy captures the
@@ -571,22 +571,16 @@ describe("api.stream — refusals (localized SSE, no provider call)", () => {
     expect(streamChatSpy).toHaveBeenCalledTimes(5); // 6th never reached the provider
   });
 
-  it("[10] over the daily quota (non-admin) → quotaExceeded", async () => {
+  it("[10] over the daily token brake (non-admin) → quotaExceeded", async () => {
     const teacher = "r-quota";
-    for (let i = 0; i < 2; i++) {
-      const res = await invoke(
-        { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
-        { userId: teacher },
-      );
-      await res.text(); // consume → recordUsage
-    }
-    expect(streamChatSpy).toHaveBeenCalledTimes(2);
+    const { recordUsage } = await import("~/server/repositories/usage.server");
+    await recordUsage(teacher, { chars: 1, tokens: 100 });
     const res = await invoke(
       { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
       { userId: teacher },
     );
     expect(sseErrorMessage(await res.text())).toBe(m.error.quotaExceeded);
-    expect(streamChatSpy).toHaveBeenCalledTimes(2);
+    expect(streamChatSpy).not.toHaveBeenCalled();
   });
 
   it("[11] a cookie from before a password change is treated as unauthenticated", async () => {

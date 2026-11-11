@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigation } from "react-router";
-import { Check, Info, Loader2, ShieldAlert, X } from "lucide-react";
+import { Check, Info, Loader2, ShieldAlert, TriangleAlert, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useT } from "~/lib/i18n/useT";
 import type { Flash } from "~/lib/flash";
 
-export type ToastVariant = "pending" | "success" | "error" | "info";
+export type ToastVariant = "pending" | "success" | "error" | "warning" | "info";
 
 export interface ToastInput {
   variant: ToastVariant;
@@ -32,7 +32,10 @@ interface ToastContextValue {
 
 const MAX_TOASTS = 3;
 
-/** No-auto-dismiss for pending (resolves on completion) and error (until dismissed). */
+/**
+ * No-auto-dismiss for pending (resolves on completion), error and warning (until dismissed:
+ * a warning is said once and must not slip by).
+ */
 function defaultDuration(variant: ToastVariant): number {
   switch (variant) {
     case "success":
@@ -253,6 +256,7 @@ const variantStyles: Record<ToastVariant, string> = {
   pending: "border-slate-200 bg-white text-slate-800",
   success: "border-emerald-200 bg-emerald-50 text-emerald-900",
   error: "border-red-200 bg-red-50 text-red-800",
+  warning: "border-amber-200 bg-amber-50 text-amber-900",
   info: "border-slate-200 bg-white text-slate-800",
 };
 
@@ -265,6 +269,8 @@ function VariantIcon({ variant }: { variant: ToastVariant }) {
       return <Check className={className} aria-hidden />;
     case "error":
       return <ShieldAlert className={className} aria-hidden />;
+    case "warning":
+      return <TriangleAlert className={className} aria-hidden />;
     default:
       return <Info className={className} aria-hidden />;
   }

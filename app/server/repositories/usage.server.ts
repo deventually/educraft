@@ -97,14 +97,13 @@ export async function recordUsage(
 }
 
 /**
- * Whether the user may run another generation on `day`. Blocks once the request
- * count reaches `DAILY_REQUEST_LIMIT`, or (only when token data exists) once
- * `outputTokens` reaches `DAILY_OUTPUT_TOKEN_LIMIT`. Admin exemption is applied
- * by the caller (the stream route), not here.
+ * Whether the user may run another generation on `day`: the quiet brake on a runaway day.
+ * Blocks once the day's `outputTokens` reach `DAILY_OUTPUT_TOKEN_LIMIT`; the number of calls
+ * alone never blocks (BESLUIT-2026-11-11-8, the monthly limit in euros is what a teacher
+ * sees). Admin exemption is applied by the caller (`aiGate`), not here.
  */
 export async function checkQuota(userId: string, day = utcDay()): Promise<{ ok: boolean }> {
   const u = await getTodayUsage(userId, day);
-  if (u.requests >= env.DAILY_REQUEST_LIMIT) return { ok: false };
   if (u.outputTokens !== null && u.outputTokens >= env.DAILY_OUTPUT_TOKEN_LIMIT) {
     return { ok: false };
   }

@@ -80,8 +80,7 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
 | `BACKUP_DIR` | no | Daily online backup (rotation 7 days, 4 weeks). Unset: `backups/` next to the database in production (`/data/backups`), off in development. `off` turns it off. `npm run backup` / `node build/ops/backup.js` makes one now; `restore` puts one back with the app stopped. The admin console shows the age of the newest backup (a warning after 36 hours), the database size and the free disk space. See [installatie-docker.md](../docs/installatie-docker.md#6-back-up-en-terugzetten). |
 | `RATE_LIMIT_PER_MINUTE` | no | Default 10 (per user). |
 | `RATE_LIMIT_CONCURRENT` | no | Default 3 (per user). |
-| `DAILY_REQUEST_LIMIT` | no | Default 50 (per user/day; admins exempt). |
-| `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 output tokens per user per day (the tool stream and the dossier calls report tokens; CLI agents do not). |
+| `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 output tokens per user per day, a quiet brake on a runaway day; admins exempt, the number of calls is not limited (the tool stream and the dossier calls report tokens; CLI agents do not). |
 | `CLIENT_IP_HEADER` | no | Header with the real client IP, set by your reverse proxy (e.g. `x-real-ip`). Login then also caps one IP at 30 failures per 15 minutes, on top of the always-on 5 per email address. Leave unset if the proxy does not overwrite the header. |
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
 | `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |
@@ -169,8 +168,8 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
 4. Open **My work** → the generation was saved.
 5. Rate a generation 👍/👎 with a comment → it lands on `/admin/usage`
    (as an admin).
-6. Set `DAILY_REQUEST_LIMIT=1`, restart, generate twice → the 2nd trips the
-   localized "daily limit reached" error; an admin is exempt.
+6. Set `DAILY_OUTPUT_TOKEN_LIMIT=1`, restart, generate twice → the 2nd trips the
+   localized "used a lot of AI today" error; an admin is exempt.
 7. Check container logs → one structured JSON line per generation
    (`{"event":"generation",...,"outcome":"ok"}`), **no prompt/response content**.
 8. Browser console shows **no CSP violations** (in particular no refused inline script:

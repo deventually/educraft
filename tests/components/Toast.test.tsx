@@ -27,6 +27,9 @@ function Harness() {
       <button type="button" onClick={() => showToast({ variant: "error", message: "Mislukt." })}>
         error
       </button>
+      <button type="button" onClick={() => showToast({ variant: "warning", message: "Bijna op." })}>
+        warning
+      </button>
       <button
         type="button"
         onClick={() => {
@@ -102,6 +105,20 @@ describe("Toast", () => {
       vi.advanceTimersByTime(30_000);
     });
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("shows a polite warning toast that stays until it is closed", () => {
+    renderHarness();
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: "warning" }));
+    const toast = screen.getByRole("status");
+    expect(toast).toHaveTextContent("Bijna op.");
+    expect(toast).toHaveAttribute("aria-live", "polite");
+    expect(toast.className).toMatch(/amber/);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("Bijna op.");
   });
 
   it("auto-dismisses a success toast after 4000ms", () => {

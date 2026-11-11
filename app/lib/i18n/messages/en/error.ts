@@ -7,12 +7,14 @@ export const error: Messages["error"] = {
   invalidImages: "Invalid image format. Images must be PNG, JPEG, GIF or WebP.",
   invalidMessages: "Invalid message format.",
   invalidRequest: "Invalid request.",
+  limitReached:
+    "The AI allowance for this month is used up. The Usage page shows which limit; your admin can raise it.",
   modelNoVision:
     "This model ({model}) does not support image analysis. Please select a vision-capable model.",
   notAllowed: "This tool is not available for your account.",
   notFound: "This page could not be found.",
   notFoundTitle: "404",
-  quotaExceeded: "Daily limit reached — available again tomorrow.",
+  quotaExceeded: "You have used a lot of AI today. It works again tomorrow.",
   rateLimited: "Too many requests. Please try again in a moment.",
   reportHint: "Report this to your admin, with the time and the page below.",
   reportPage: "Page",
