@@ -20,29 +20,25 @@ describe("course-design-outcomes@v1 prompt", () => {
         "<disciplines>",
         "<context>",
         "<description>",
+        "<outcomeCount>",
       ])
         expect(text).toContain(tag);
     }
   });
 
   it("asks for a handful of observable outcomes, each with success criteria", () => {
-    expect(p.runtime.nl).toMatch(/3 tot 6/);
-    expect(p.runtime.en).toMatch(/3 to 6/);
+    expect(p.runtime.nl).toMatch(/tussen 3 en 6/);
+    expect(p.runtime.en).toMatch(/between 3 and 6/);
     expect(p.runtime.nl).toMatch(/2 tot 4 succescriteria/);
     expect(p.runtime.en).toMatch(/2 to 4 success criteria/);
     expect(p.runtime.nl).toMatch(/waarneembaar/i);
     expect(p.runtime.en).toMatch(/observable/i);
   });
 
-  it("sets the number of outcomes from the study load, else the weeks, never the level", () => {
-    expect(p.runtime.nl).toContain(
-      "Tot en met 5 EC (of zonder studielast: tot en met 8 weken): 3 of 4",
-    );
-    expect(p.runtime.en).toContain(
-      "Up to and including 5 EC (or without a study load: up to and including 8 weeks): 3 or 4",
-    );
-    expect(p.runtime.nl).toMatch(/kies dan minder/);
-    expect(p.runtime.en).toMatch(/choose fewer/);
+  it("takes the number of outcomes from <outcomeCount>, set by the code", () => {
+    for (const lang of ["nl", "en"] as const) expect(p.runtime[lang]).toContain("<outcomeCount>");
+    expect(p.runtime.nl).toMatch(/houd je daaraan/);
+    expect(p.runtime.en).toMatch(/keep to it/);
   });
 
   it("covers the disciplines, and treats the description as material", () => {

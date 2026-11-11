@@ -36,3 +36,11 @@ Geslaagd: 15 van 18.
 
 Bastiaan las de antwoorden van deze run (2026-11-11): de leeruitkomsten zijn goed genoeg om mee
 te beginnen.
+
+## Tweede run (2026-11-11b), na de concrete regel in de prompt
+
+Geslaagd: 16 van 18. De mbo-case gaf nog twee van de drie keer 5 leeruitkomsten; alle andere
+cases slaagden, ook de wo-case (5) en de injectie (4) met hun strengere bereik. Een regel in de
+prompt was dus niet genoeg: het model neigt naar vijf. Daarom bepaalt de code nu het aantal
+(`outcomeRange` in `app/lib/courses/design.ts`) en stuurt het mee als `<outcomeCount>3-4</outcomeCount>`;
+de prompt houdt zich daaraan. Nog te draaien.

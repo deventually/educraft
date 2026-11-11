@@ -71,6 +71,17 @@ export function applyDesignBrief(d: CourseData, b: DesignBrief): CourseData {
 
 // ── What the model sees ─────────────────────────────────────────────────────
 
+/**
+ * How many outcomes the proposal has, decided here and not by the model (which leaned to five
+ * for every course): from the study load, else the weeks. Up to 5 EC (or 8 weeks) 3 to 4, larger
+ * 4 to 6, and 3 to 5 when neither is known.
+ */
+export function outcomeRange(b: DesignBrief): { min: number; max: number } {
+  const small = b.ec !== undefined ? b.ec <= 5 : b.weeks !== undefined ? b.weeks <= 8 : undefined;
+  if (small === undefined) return { min: 3, max: 5 };
+  return small ? { min: 3, max: 4 } : { min: 4, max: 6 };
+}
+
 export interface OutcomesDesignInput {
   name: string;
   brief: DesignBrief;
@@ -90,6 +101,8 @@ export function buildOutcomesDesignMessage(input: OutcomesDesignInput): string {
     parts.push(
       `<disciplines>\n${input.disciplines.map((n) => `- ${n}`).join("\n")}\n</disciplines>`,
     );
+  const range = outcomeRange(brief);
+  parts.push(`<outcomeCount>${range.min}-${range.max}</outcomeCount>`);
   if (input.context.trim()) parts.push(wrapAsData("context", input.context.trim()));
   parts.push(wrapAsData("description", brief.description, DESIGN_LIMITS.description));
   return parts.join("\n\n");

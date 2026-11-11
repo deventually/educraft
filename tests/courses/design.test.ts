@@ -3,6 +3,7 @@ import {
   applyDesignBrief,
   buildOutcomesDesignMessage,
   DESIGN_LIMITS,
+  outcomeRange,
   parseDesignBrief,
   parseOutcomesDesign,
 } from "~/lib/courses/design";
@@ -59,6 +60,22 @@ describe("parseDesignBrief", () => {
   });
 });
 
+describe("outcomeRange: how many outcomes, from the size of the course", () => {
+  it("is 3 to 4 up to 5 EC, or without EC up to 8 weeks", () => {
+    expect(outcomeRange({ description: "x", ec: 5 })).toEqual({ min: 3, max: 4 });
+    expect(outcomeRange({ description: "x", ec: 3, weeks: 20 })).toEqual({ min: 3, max: 4 });
+    expect(outcomeRange({ description: "x", weeks: 6 })).toEqual({ min: 3, max: 4 });
+    expect(outcomeRange({ description: "x", weeks: 8 })).toEqual({ min: 3, max: 4 });
+  });
+
+  it("is 4 to 6 for a larger course, and 3 to 5 when nothing is known", () => {
+    expect(outcomeRange({ description: "x", ec: 6 })).toEqual({ min: 4, max: 6 });
+    expect(outcomeRange({ description: "x", ec: 15, weeks: 4 })).toEqual({ min: 4, max: 6 });
+    expect(outcomeRange({ description: "x", weeks: 9 })).toEqual({ min: 4, max: 6 });
+    expect(outcomeRange({ description: "x" })).toEqual({ min: 3, max: 5 });
+  });
+});
+
 describe("buildOutcomesDesignMessage", () => {
   it("sends the description as data, with the name, study load, weeks, disciplines and context", () => {
     const m = buildOutcomesDesignMessage({
@@ -70,6 +87,7 @@ describe("buildOutcomesDesignMessage", () => {
     expect(m).toContain("<course>Databases</course>");
     expect(m).toContain("<studyLoad>5 EC</studyLoad>");
     expect(m).toContain("<weeks>8</weeks>");
+    expect(m).toContain("<outcomeCount>3-4</outcomeCount>");
     expect(m).toContain("<disciplines>\n- Wiskunde\n- Engels\n</disciplines>");
     expect(m).toContain("<context>\nSector: hbo\n</context>");
     expect(m).toContain(`<description>\n${DESCRIPTION}\n</description>`);
@@ -84,6 +102,7 @@ describe("buildOutcomesDesignMessage", () => {
     });
     for (const tag of ["<studyLoad>", "<weeks>", "<disciplines>", "<context>"])
       expect(m).not.toContain(tag);
+    expect(m).toContain("<outcomeCount>3-5</outcomeCount>");
     expect(m).toContain("<description>");
   });
 });
