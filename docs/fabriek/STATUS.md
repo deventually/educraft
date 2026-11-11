@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #278 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #279 gemerged)_
 
 ## Nu
 
+- **Lesdoel op een les (#279) gemerged op 2026-11-11:** een les of opdracht heeft een optioneel
+  *Lesdoel* van één zin: wat de student na deze les kan. Het staat in het formulier en onder de
+  titel in *Lessen en toetsen*. Wizard deel 3 en *Les voorbereiden* bouwen erop; geen migratie.
 - **BDB/BKE: tabbladen voor het dossier en per leeruitkomst (#278) gemerged op 2026-11-11:** het
   dossier heeft de tabbladen Overzicht en Afronden, elke leeruitkomst Overzicht, Bewijs, Hoofdstuk
   en Beoordelen (`?tab=` in de URL, zoals bij cursussen). Mijlpalen, *Los op*, de dossierreview en
