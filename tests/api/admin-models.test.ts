@@ -245,3 +245,69 @@ describe("admin.tools models — adding a provider (Aanbieder)", () => {
     });
   });
 });
+
+describe("admin.tools models — the price of a model (usage dashboard)", () => {
+  it("sets a price, shows it on the model, logs it, and removes it again", async () => {
+    const audit = await import("~/server/repositories/auditLog.server");
+    expect(
+      await act({
+        intent: "price",
+        id: "claude-sonnet-5-5",
+        input: "3",
+        cacheRead: "0,3",
+        cacheWrite: "",
+        output: "15",
+      }),
+    ).toEqual({ priced: { name: "Claude Sonnet 5.5" } });
+    const sonnet = (await load()).models.find((m) => m.id === "claude-sonnet-5-5")!;
+    expect(sonnet).toMatchObject({
+      price: { input: 3, cacheRead: 0.3, output: 15 },
+      priceFrom: "admin",
+    });
+    const [entry] = await audit.listAdminActions(1);
+    expect(entry).toMatchObject({
+      action: "modelPriceChanged",
+      detail: { models: ["claude-sonnet-5-5"], price: { input: 3, cacheRead: 0.3, output: 15 } },
+    });
+
+    expect(
+      await act({
+        intent: "price",
+        id: "claude-sonnet-5-5",
+        input: "",
+        cacheRead: "",
+        cacheWrite: "",
+        output: "",
+      }),
+    ).toEqual({ priced: { name: "Claude Sonnet 5.5", cleared: true } });
+    // Without an own price, the catalog's list price applies again.
+    expect((await load()).models.find((m) => m.id === "claude-sonnet-5-5")).toMatchObject({
+      priceFrom: "catalog",
+    });
+  });
+
+  it("refuses an unknown model and an invalid price", async () => {
+    expect(
+      await act({
+        intent: "price",
+        id: "nope",
+        input: "1",
+        cacheRead: "",
+        cacheWrite: "",
+        output: "2",
+      }),
+    ).toEqual({
+      error: "unknown",
+    });
+    expect(
+      await act({
+        intent: "price",
+        id: "claude-sonnet-5-5",
+        input: "-1",
+        cacheRead: "",
+        cacheWrite: "",
+        output: "2",
+      }),
+    ).toEqual({ error: "price" });
+  });
+});

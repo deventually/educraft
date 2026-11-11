@@ -50,6 +50,7 @@ Ingebouwd en dus niet in `providers`: de lokale servers `ollama` en `lmstudio` e
 | `local` | Draait op de eigen computer (alleen buiten productie). |
 | `clientSelectable` | Mogen docenten het zelf kiezen? `false` voor dure modellen. |
 | `settings` | Hoe het model antwoordt, zie hieronder. Mag weg. |
+| `price` | De lijstprijs per miljoen tokens, zie hieronder. Mag weg (dan telt het model als "zonder prijs"). |
 
 ### `settings`: hoe een model antwoordt
 
@@ -92,3 +93,25 @@ whisper-server --host 127.0.0.1 --port 8178 -m ggml-large-v3-turbo-q5_0.bin \
 
 Een eigen Whisper-server van de school: zet zijn adres in `WHISPER_BASE_URL` (een server op het
 schoolnetwerk mag `http://`), en eventueel een sleutel in `WHISPER_API_KEY`.
+
+### `price`: wat een model kost
+
+De lijstprijs zoals de aanbieder hem publiceert, per miljoen tokens. Het dashboard *Gebruik*
+rekent er de kosten mee uit. Een beheerder kan in **Tools en modellen** een eigen prijs zetten
+(bijvoorbeeld bij een schoolcontract); die gaat voor. Bijwerken doe je met de skill
+`/modelprijzen`, voor elke release.
+
+| Veld | Betekenis |
+| --- | --- |
+| `currency` | `USD` of `EUR`, zoals op de prijspagina. |
+| `input` | Invoer die niet uit de cache komt. |
+| `output` | Uitvoer, inclusief het nadenken van het model. |
+| `cacheRead` | Invoer die uit de cache komt. Weg = gelijk aan `input`. |
+| `cacheWrite` | Invoer die in de cache wordt gezet, als de aanbieder daar apart voor rekent. Weg = gelijk aan `input`. |
+| `checked` | De dag waarop de prijs is opgezocht (`2026-11-11`). |
+| `source` | De prijspagina van de aanbieder. |
+
+### `exchangeRate`: dollars naar euro's
+
+Nodig zodra een model een prijs in `USD` heeft: `usdToEur` (bijvoorbeeld `0,86` als `0.86`),
+met `checked` en `source` (de referentiekoers van de ECB).

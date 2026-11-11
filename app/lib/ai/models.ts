@@ -23,6 +23,8 @@ export {
   type ProviderId,
 } from "./modelsConfig";
 
+import { listPriceInEuro, type ModelPrice } from "./prices";
+
 const config = parseModelsConfig(modelsConfig);
 
 /**
@@ -33,6 +35,24 @@ const config = parseModelsConfig(modelsConfig);
 export const MODELS: Readonly<Record<string, ModelInfo>> = Object.fromEntries(
   config.models.map(({ id, ...info }) => [id, info]),
 );
+
+/**
+ * The price a call is counted at: the admin's own price, else the catalog's list price in
+ * euros (`config/models.json`, with the day it was looked up), else null (unpriced).
+ */
+export function effectivePrice(
+  id: string,
+  own: Readonly<Record<string, ModelPrice>>,
+):
+  | { price: ModelPrice; from: "admin" }
+  | { price: ModelPrice; from: "catalog"; checked: string }
+  | null {
+  const mine = own[id];
+  if (mine) return { price: mine, from: "admin" };
+  const list = config.models.find((m) => m.id === id)?.price;
+  const price = list && listPriceInEuro(list, config.exchangeRate?.usdToEur);
+  return list && price ? { price, from: "catalog", checked: list.checked } : null;
+}
 
 /** Dictation's provider and model (`speechToText` in `config/models.json`), or null. */
 export const SPEECH_TO_TEXT: Readonly<{ provider: string; model: string }> | null =

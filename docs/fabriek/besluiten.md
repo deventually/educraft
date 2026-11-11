@@ -375,3 +375,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   per team en per docent worden een maandlimiet in euro's, niet in tokens, omdat een token per model
   tot twintig keer anders kost. Het meten verhuist uit het werk aan prompt caching naar het
   dashboard. Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen").
+- **BESLUIT-2026-11-11-3:** **Prijzen per model: de prijslijst in de catalogus, een eigen prijs
+  op het scherm.** Elk model in `config/models.json` krijgt de lijstprijs van de aanbieder per
+  miljoen tokens, met de dag van opzoeken en de bronpagina, en een wisselkoers van de ECB voor
+  dollars. Beheer kan per model een eigen prijs zetten (een schoolcontract); die gaat voor. Een
+  aanroep krijgt de prijs van dat moment mee. De skill `/modelprijzen` houdt de lijstprijzen bij,
+  voor elke release; een vaste maandelijkse routine komt er pas als Bastiaan dat wil. Bastiaan,
+  2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Dit is teveel om bij te
+  houden anders").

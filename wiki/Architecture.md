@@ -156,6 +156,16 @@ LimeOnIt is not tied to one model vendor.
   token report counts as `unmeteredCalls`; a failed or aborted call as `failedCalls`. CLI agents
   report no tokens.
 
+- **Prices (usage dashboard, PR B).** Each catalog model has a list price per million tokens in
+  `config/models.json` (`price`: currency, input, output, cacheRead, cacheWrite, `checked`,
+  `source`), turned into euros with `exchangeRate`; `parseModelsConfig` refuses a price without a
+  date or source and a dollar price without a rate. An admin can set an own price per model on
+  the models tab (`modelPriceAdmin.server.ts`, `instance_settings` key `modelPrices`, logged as
+  `modelPriceChanged`); it wins (`effectivePrice` in `models.ts`). `meterCall` prices each call
+  when it is counted (`callCost`, `ai_usage.costMicros`, a snapshot); a local model costs 0, a
+  model without a price adds to `unpricedCalls`. The skill `/modelprijzen` keeps the list
+  prices and the rate current, from the providers' own pages.
+
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 

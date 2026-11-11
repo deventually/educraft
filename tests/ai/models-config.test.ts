@@ -1,7 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_MODEL, getProvider, MODELS, parseModelsConfig } from "~/lib/ai/models";
+import {
+  DEFAULT_MODEL,
+  effectivePrice,
+  getProvider,
+  MODELS,
+  parseModelsConfig,
+} from "~/lib/ai/models";
 
 const file = resolve(__dirname, "../../config/models.json");
 const raw = JSON.parse(readFileSync(file, "utf8"));
@@ -20,17 +26,17 @@ describe("config/models.json — the built-in model list lives in a config file"
   });
 
   it("refuses a broken file with a message that names the problem", () => {
-    const { providers } = raw;
+    const { providers, exchangeRate } = raw;
     expect(() => parseModelsConfig({ default: "x", providers, models: [] })).toThrow(
       /models\.json/,
     );
     const one = raw.models[0];
-    expect(() => parseModelsConfig({ default: one.id, providers, models: [one, one] })).toThrow(
-      /twice/,
-    );
-    expect(() => parseModelsConfig({ default: "nope", providers, models: [one] })).toThrow(
-      /default/,
-    );
+    expect(() =>
+      parseModelsConfig({ default: one.id, providers, exchangeRate, models: [one, one] }),
+    ).toThrow(/twice/);
+    expect(() =>
+      parseModelsConfig({ default: "nope", providers, exchangeRate, models: [one] }),
+    ).toThrow(/default/);
   });
 
   it("refuses a model with an unknown provider or bad settings", () => {
@@ -74,5 +80,77 @@ describe("config/models.json — what Bastiaan asked for (2026-11-06)", () => {
     expect(MODELS["claude-sonnet-5-5"]!.settings).toMatchObject({ effort: "medium" });
     // A reasoning model that refuses a temperature: null = never send one.
     expect(MODELS["gpt-6.1-sol"]!.settings?.temperature).toBeNull();
+  });
+});
+
+describe("config/models.json — a model's list price (usage dashboard)", () => {
+  const one = raw.models.find((m: { provider: string }) => m.provider === "anthropic");
+  const priced = {
+    ...one,
+    price: {
+      currency: "USD",
+      input: 3,
+      output: 15,
+      cacheRead: 0.3,
+      checked: "2026-11-11",
+      source: "https://example.com/pricing",
+    },
+  };
+  const rate = { usdToEur: 0.9, checked: "2026-11-11", source: "https://example.com/rate" };
+
+  it("accepts a dated, sourced price with an exchange rate for dollars", () => {
+    const parsed = parseModelsConfig({
+      ...raw,
+      default: one.id,
+      models: [priced],
+      exchangeRate: rate,
+    });
+    expect(parsed.models[0]?.price?.input).toBe(3);
+  });
+
+  it("refuses a dollar price without an exchange rate, or without a source", () => {
+    const { exchangeRate: _rate, ...withoutRate } = raw;
+    expect(() => parseModelsConfig({ ...withoutRate, default: one.id, models: [priced] })).toThrow(
+      /exchangeRate/,
+    );
+    const { source: _, ...unsourced } = priced.price;
+    expect(() =>
+      parseModelsConfig({
+        ...raw,
+        default: one.id,
+        models: [{ ...one, price: unsourced }],
+        exchangeRate: rate,
+      }),
+    ).toThrow(/models\.json/);
+  });
+});
+
+describe("effectivePrice — the price a call is counted at", () => {
+  it("is the catalog's list price in euros, dated, when the admin set none", () => {
+    const p = effectivePrice("claude-sonnet-5-5", {});
+    expect(p).toMatchObject({
+      from: "catalog",
+      checked: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    });
+    expect(p?.price.input).toBeGreaterThan(0);
+  });
+
+  it("is the admin's own price when there is one", () => {
+    const own = { input: 1, output: 2 };
+    expect(effectivePrice("claude-sonnet-5-5", { "claude-sonnet-5-5": own })).toEqual({
+      price: own,
+      from: "admin",
+    });
+  });
+
+  it("is null for a model without any price", () => {
+    expect(effectivePrice("openrouter-auto", {})).toBeNull();
+  });
+
+  it("every API model in the catalog has a price, except the router without a fixed one", () => {
+    const unpriced = raw.models
+      .filter((m: { local?: boolean; price?: unknown }) => !m.local && !m.price)
+      .map((m: { id: string }) => m.id);
+    expect(unpriced).toEqual(["openrouter-auto"]);
   });
 });

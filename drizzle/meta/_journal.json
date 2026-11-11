@@ -211,6 +211,13 @@
       "when": 1794386228331,
       "tag": "0029_illegal_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1794386830904,
+      "tag": "0030_narrow_la_nuit",
+      "breakpoints": true
     }
   ]
 }
