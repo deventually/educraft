@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #258 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #259 gemerged)_
 
 ## Nu
 
+- **AI-aanroep stopt ook bij sluiten of wegnavigeren (#259) gemerged op 2026-11-11:** sluit een
+  docent een tool of chat, of gaat die binnen de app naar een andere pagina terwijl de AI nog
+  schrijft, dan breekt de aanroep af (`useStreamAborts`) en kost hij geen tokens meer. De pagina
+  *Gebruik* telt zo'n aanroep één keer, als mislukt.
 - **Uitklapmenu's in de kop (#258) gemerged op 2026-11-11:** het accountmenu en het mobiele menu
   sluiten met Esc, met een klik ernaast of als Tab het menu verlaat; de pijltjestoetsen lopen
   rond, Home/End springen naar de uiteinden (`useDisclosure`). Menulinks tonen een focusring en

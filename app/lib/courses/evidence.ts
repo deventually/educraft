@@ -22,7 +22,7 @@ interface CourseSnapshotSource {
 /** A table cell: one line, no pipe that would break the row. */
 const cell = (s: string | number) => String(s).replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
 const row = (cells: (string | number)[]) => `| ${cells.map(cell).join(" | ")} |`;
-const table = (head: string[], rows: (string | number)[][]) =>
+export const table = (head: string[], rows: (string | number)[][]) =>
   [row(head), row(head.map(() => "---")), ...rows.map(row)].join("\n");
 
 const findAssessment = (data: CourseData, part: CoursePart): Assessment | undefined =>
@@ -51,7 +51,7 @@ export function courseAsEvidence(
     : assessmentMatrix(course, part.assessmentId, locale);
 }
 
-function outcomeLines(data: CourseData, locale: Locale, only?: Set<string>): string[] {
+export function outcomeLines(data: CourseData, locale: Locale, only?: Set<string>): string[] {
   return data.outcomes
     .filter((o) => !only || only.has(o.id))
     .map(
@@ -119,45 +119,29 @@ function assessmentMatrix(
   const a = data.assessments.find((x) => x.id === assessmentId);
   if (!a) return null;
   const m = getMessages(locale).courses;
+  const parts = [`## ${name}: ${a.title}`, ...assessmentParts(data, a, locale)];
+  const findings = checkAlignment(data).filter((f) => f.itemId === a.id);
+  if (findings.length)
+    parts.push(
+      `### ${m.findings.title}`,
+      findings
+        .map((f) => `- ${m.findings.severity[f.severity]}: ${findingText(f, data, locale)}`)
+        .join("\n"),
+    );
+  return parts.join("\n\n");
+}
+
+/**
+ * One test as Markdown blocks: the meta line, the question table with its shares (or the
+ * coverage when there are no questions) and the outcomes it assesses.
+ */
+function assessmentParts(data: CourseData, a: Assessment, locale: Locale): string[] {
+  const m = getMessages(locale).courses;
   const e = m.evidence;
   const short = (id: string) => outcomeShortName(data, id, locale);
-  const meta = [
-    m.assessments.kinds[a.kind],
-    a.week !== undefined ? `${m.week.toLowerCase()} ${a.week}` : null,
-    a.weight !== undefined ? fmt(e.weight, { n: a.weight }) : null,
-  ].filter(Boolean);
-  const parts = [`## ${name}: ${a.title}`, meta.join(" · ")];
-  const items = a.items ?? [];
-  if (items.length) {
-    const totals = itemTotals(a);
-    const questions =
-      totals.count === 1 ? m.items.countOne : fmt(m.items.count, { n: totals.count });
-    parts.push(`### ${m.items.title}`);
-    parts.push(
-      table(
-        [m.items.label, m.outcomes.text, m.items.bloom, m.items.format, m.items.points],
-        [
-          ...items.map((i) => [
-            i.label,
-            short(i.outcomeId),
-            i.bloom ? bloomLabel(i.bloom, locale) : "",
-            i.format ? m.items.formats[i.format] : "",
-            i.points ?? "",
-          ]),
-          [`**${m.items.total}**`, questions, "", "", totals.points],
-        ],
-      ),
-    );
-    const order = (id: string) => data.outcomes.findIndex((o) => o.id === id);
-    parts.push(
-      fmt(e.shares, {
-        shares: [...totals.byOutcome]
-          .sort((x, y) => order(x.outcomeId) - order(y.outcomeId))
-          .map((o) => `${short(o.outcomeId)} ${o.share}%`)
-          .join(" · "),
-      }),
-    );
-  } else {
+  const parts = [assessmentMeta(a, locale)];
+  if (a.items?.length) parts.push(`### ${m.items.title}`, ...questionTable(data, a, locale));
+  else {
     parts.push(e.noItems);
     const covers = effectiveCoverage(a)
       .map((c) => `${short(c.outcomeId)}${c.bloom ? ` (${bloomLabel(c.bloom, locale)})` : ""}`)
@@ -169,13 +153,47 @@ function assessmentMatrix(
     `### ${m.outcomes.title}`,
     outcomeLines(data, locale, used).join("\n") || m.outcomes.empty,
   );
-  const findings = checkAlignment(data).filter((f) => f.itemId === a.id);
-  if (findings.length)
-    parts.push(
-      `### ${m.findings.title}`,
-      findings
-        .map((f) => `- ${m.findings.severity[f.severity]}: ${findingText(f, data, locale)}`)
-        .join("\n"),
-    );
-  return parts.join("\n\n");
+  return parts;
+}
+
+/** "Summatief · week 4 · weging 100%". */
+export function assessmentMeta(a: Assessment, locale: Locale): string {
+  const m = getMessages(locale).courses;
+  return [
+    m.assessments.kinds[a.kind],
+    a.week !== undefined ? `${m.week.toLowerCase()} ${a.week}` : null,
+    a.weight !== undefined ? fmt(m.evidence.weight, { n: a.weight }) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** The question table of a test with its total row, and each outcome's share below it. */
+export function questionTable(data: CourseData, a: Assessment, locale: Locale): string[] {
+  const m = getMessages(locale).courses;
+  const short = (id: string) => outcomeShortName(data, id, locale);
+  const totals = itemTotals(a);
+  const questions = totals.count === 1 ? m.items.countOne : fmt(m.items.count, { n: totals.count });
+  const order = (id: string) => data.outcomes.findIndex((o) => o.id === id);
+  return [
+    table(
+      [m.items.label, m.outcomes.text, m.items.bloom, m.items.format, m.items.points],
+      [
+        ...(a.items ?? []).map((i) => [
+          i.label,
+          short(i.outcomeId),
+          i.bloom ? bloomLabel(i.bloom, locale) : "",
+          i.format ? m.items.formats[i.format] : "",
+          i.points ?? "",
+        ]),
+        [`**${m.items.total}**`, questions, "", "", totals.points],
+      ],
+    ),
+    fmt(m.evidence.shares, {
+      shares: [...totals.byOutcome]
+        .sort((x, y) => order(x.outcomeId) - order(y.outcomeId))
+        .map((o) => `${short(o.outcomeId)} ${o.share}%`)
+        .join(" · "),
+    }),
+  ];
 }

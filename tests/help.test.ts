@@ -42,6 +42,17 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("## Get a review");
   });
 
+  it("explains the blueprint and the marking model, with parts and success criteria", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("## Toetsmatrijs en nakijkmodel");
+    expect(nl).toContain("**Onderdelen**");
+    expect(nl).toContain("**Succescriteria**");
+    expect(en).toContain("## Test blueprint and marking model");
+    expect(en).toContain("**Parts**");
+    expect(en).toContain("**Success criteria**");
+  });
+
   it("explains that an assessment can be marked as supervised", () => {
     expect(getTopic("courses", "nl")).toContain("**onder toezicht**");
     expect(getTopic("courses", "en")).toContain("**supervised**");

@@ -23,15 +23,25 @@ interface ExportData {
 }
 
 /**
- * "Exporteer" under a result (brief P30.1). Opening it loads a preview of the file from the
- * export route; the download links below it are made from the same model.
+ * "Exporteer" under a result (brief P30.1): the panel below, fed by the result's export route.
  */
 export function ExportMenu({ generationId, with: withIds = [] }: ExportMenuProps) {
+  const query = withIds.map((id) => `with=${encodeURIComponent(id)}`).join("&");
+  return (
+    <ExportPanel
+      url={`/work/${encodeURIComponent(generationId)}/export${query ? `?${query}` : ""}`}
+    />
+  );
+}
+
+/**
+ * An export with a preview. Opening it loads the `ExportDoc` and the downloads from `url` (a
+ * resource route); the download links below the preview are made from the same model.
+ */
+export function ExportPanel({ url, label }: { url: string; label?: string }) {
   const m = useT().exportResult;
   const fetcher = useFetcher<ExportData>();
   const regionId = useId();
-  const query = withIds.map((id) => `with=${encodeURIComponent(id)}`).join("&");
-  const url = `/work/${encodeURIComponent(generationId)}/export${query ? `?${query}` : ""}`;
   const data = fetcher.data;
 
   function onToggle(e: React.SyntheticEvent<HTMLDetailsElement>) {
@@ -39,10 +49,14 @@ export function ExportMenu({ generationId, with: withIds = [] }: ExportMenuProps
   }
 
   return (
-    <details onToggle={onToggle} className="rounded-xl border border-slate-200">
+    <details
+      onToggle={onToggle}
+      data-export-url={url}
+      className="rounded-xl border border-slate-200"
+    >
       <summary className="flex cursor-pointer items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-700">
         <Download className="size-4" aria-hidden />
-        {m.button}
+        {label ?? m.button}
       </summary>
       <div className="space-y-3 border-t border-slate-100 p-3">
         <p role="status" className="text-xs text-slate-500">
