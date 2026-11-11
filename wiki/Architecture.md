@@ -394,6 +394,20 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   "Weging (voorstel van de AI)". Same server path as step 1 (`propose` in `courseDesign.server.ts`:
   feature, quota, one retry, nothing stored); `import-apply` adds what is ticked. Evals:
   `npm run eval:design-assessments`.
+- **Course wizard (step 3).** A course with outcomes and tests and no lessons (`canDesignLessons`)
+  shows "Volgende stap: de lessenreeks" on the overview (`CourseDesignLessons`), posting
+  `design-lessons` with the teacher's wishes and, while the schedule has none, the weeks and
+  sessions per week (kept in the schedule where it was empty). `designLessons.ts` decides the
+  lessons per week (`lessonsPerWeek`: the sessions, or per discipline its hours in sessions, capped
+  at 60 lessons) and sends `course-design-lessons@v1` the numbered outcomes, the tests with kind,
+  week and coverage, and the disciplines by name only. The answer becomes a `LessonsProposal` over
+  the course's own outcome and discipline ids: a week inside the course, the same title twice in a
+  week dropped, a goal cut to one sentence's length, sorted by week. `checkAlignment` on a preview
+  names outcomes no lesson teaches (`untaught`) or first taught after their summative test
+  (`late`); nothing is fixed. `LessonsProposalForm` groups the lessons by week, and
+  `design-lessons-apply` adds the ticked ones through `edit.addActivity` (which refuses ids that
+  are not the course's). All wizard intents live in `courseDesignIntent`
+  (`courseDesign.server.ts`). Evals: `npm run eval:design-lessons`.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings

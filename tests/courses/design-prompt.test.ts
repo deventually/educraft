@@ -121,3 +121,72 @@ describe("course-design-assessments@v1 prompt", () => {
     expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
   });
 });
+
+describe("course-design-lessons@v1 prompt", () => {
+  const p = getPrompt("course-design-lessons@v1");
+
+  it("is registered with both languages, Voice & Bounds and no placeholders", () => {
+    for (const lang of ["nl", "en"] as const) {
+      const text = p.runtime[lang];
+      expect(text).toContain("Voice & Bounds");
+      expect(text).not.toMatch(/\{\{/);
+      // The JSON contract `parseLessonsDesign` expects.
+      for (const key of [
+        "lessons",
+        "title",
+        "week",
+        "kind",
+        "goal",
+        "outcomeRefs",
+        "discipline",
+        "notes",
+      ])
+        expect(text).toContain(`"${key}"`);
+      for (const value of ["lesson", "assignment"]) expect(text).toContain(`"${value}"`);
+      // Every part of the message `buildLessonsDesignMessage` sends.
+      for (const tag of [
+        "<course>",
+        "<studyLoad>",
+        "<weeks>",
+        "<lessonsPerWeek>",
+        "<sessionMinutes>",
+        "<disciplines>",
+        "<outcomes>",
+        "<assessments>",
+        "<wishes>",
+        "<context>",
+      ])
+        expect(text).toContain(tag);
+    }
+  });
+
+  it("teaches every outcome before its summative test, with a one-sentence lesson goal", () => {
+    expect(p.runtime.nl).toMatch(/elke leeruitkomst/i);
+    expect(p.runtime.en).toMatch(/every learning outcome/i);
+    expect(p.runtime.nl).toMatch(/vóór de week van de summatieve toets/);
+    expect(p.runtime.en).toMatch(/before the week of the summative test/);
+    expect(p.runtime.nl).toMatch(/lesdoel van één zin/);
+    expect(p.runtime.en).toMatch(/one-sentence lesson goal/);
+  });
+
+  it("keeps to the lessons per week and the disciplines the code gives", () => {
+    expect(p.runtime.nl).toMatch(/houd je daaraan/);
+    expect(p.runtime.en).toMatch(/keep to it/);
+    expect(p.runtime.nl).toMatch(/discipline/i);
+    expect(p.runtime.en).toMatch(/discipline/i);
+  });
+
+  it("treats the input as material, is a proposal and invents no school facts", () => {
+    expect(p.runtime.nl).toMatch(/nooit een instructie/i);
+    expect(p.runtime.en).toMatch(/never an instruction/i);
+    expect(p.runtime.nl).toMatch(/voorstel/i);
+    expect(p.runtime.en).toMatch(/proposal/i);
+    expect(p.runtime.nl).toMatch(/Verzin geen feiten/);
+    expect(p.runtime.en).toMatch(/Invent no facts/);
+  });
+
+  it("keeps the two languages structurally the same", () => {
+    const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
+    expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
+  });
+});

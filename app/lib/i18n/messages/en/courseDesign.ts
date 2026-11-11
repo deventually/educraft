@@ -1,6 +1,6 @@
 import type { Messages } from "../nl";
 
-/** The course wizard: how a new course starts, step 1 (outcomes) and step 2 (the test programme). */
+/** The course wizard: how a new course starts, step 1 (outcomes), 2 (tests) and 3 (lessons). */
 export const courseDesign: Messages["courseDesign"] = {
   assessments: {
     errors: {
@@ -38,6 +38,39 @@ export const courseDesign: Messages["courseDesign"] = {
       "The AI needs more to propose learning outcomes. Read the note below and add to your description.",
     quota:
       "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
+  },
+  lessons: {
+    added:
+      "{n} lessons and assignments added. You find them under Lessons and tests; from each lesson, Prepare a lesson takes it further.",
+    apply: "Add lessons",
+    errors: {
+      failed: "Could not propose a lesson series. Try again, or add the lessons yourself.",
+      invalid: "Enter whole numbers and describe your wishes in 500 characters at most.",
+      nothing: "The AI needs more to propose a lesson series. Read the note below.",
+      notReady:
+        "A lesson series can be proposed when the course has learning outcomes and tests, and no lessons yet.",
+      quota:
+        "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
+    },
+    intro:
+      "The learning outcomes and tests are set. How do students get there? The AI proposes lessons and assignments per week, each with a lesson goal, that teach the learning outcomes before they are tested. You choose what goes in.",
+    late: "Learning outcome {n} is tested in week {week} ({test}), but only comes up in a lesson after that.",
+    lessonN: "Lesson {n}",
+    noWeek: "No week",
+    numbersHelp: "Optional. What you fill in here also goes into the timetable.",
+    pending: "The AI is proposing a lesson series…",
+    proposalIntro:
+      "The AI made this lesson series for your learning outcomes and tests. Tick what goes into the course and edit where needed; you work out each lesson later with Prepare a lesson.",
+    ready: "Lesson series ready. Choose what goes into the course.",
+    sessionsPerWeek: "Teaching sessions per week",
+    submit: "Propose a lesson series",
+    title: "Next step: the lesson series",
+    untaught: "These learning outcomes are in no lesson: {list}",
+    week: "Week {n}",
+    weeks: "Number of weeks",
+    wishes: "Wishes for the planning",
+    wishesHelp:
+      "Optional. For example: week 4 is a project week, or every week starts with a lecture.",
   },
   numbersHelp: "Optional. What you fill in here also goes into the course details and schedule.",
   pending: "The AI is proposing learning outcomes…",

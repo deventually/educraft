@@ -1,4 +1,4 @@
-/** The course wizard: how a new course starts, step 1 (outcomes) and step 2 (the test programme). */
+/** The course wizard: how a new course starts, step 1 (outcomes), 2 (tests) and 3 (lessons). */
 export const courseDesign = {
   assessments: {
     errors: {
@@ -39,6 +39,41 @@ export const courseDesign = {
       "De AI heeft meer nodig om leeruitkomsten voor te stellen. Lees de toelichting hieronder en vul je beschrijving aan.",
     quota:
       "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
+  },
+  lessons: {
+    added:
+      "{n} lessen en opdrachten toegevoegd. Je vindt ze bij Lessen en toetsen; vanuit elke les helpt Les voorbereiden verder.",
+    apply: "Lessen toevoegen",
+    errors: {
+      failed:
+        "Het lukte niet om een lessenreeks voor te stellen. Probeer het opnieuw, of voeg de lessen zelf toe.",
+      invalid: "Vul hele getallen in en beschrijf je wensen in hooguit 500 tekens.",
+      nothing:
+        "De AI heeft meer nodig om een lessenreeks voor te stellen. Lees de toelichting hieronder.",
+      notReady:
+        "Een lessenreeks laten voorstellen kan als de cursus leeruitkomsten en toetsen heeft en nog geen lessen.",
+      quota:
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
+    },
+    intro:
+      "De leeruitkomsten en toetsen staan. Hoe komen studenten daar? De AI stelt per week lessen en opdrachten voor, elk met een lesdoel, die de leeruitkomsten behandelen vóór ze getoetst worden. Jij kiest wat erin komt.",
+    late: "Leeruitkomst {n} wordt in week {week} getoetst ({test}), maar komt pas daarna voor het eerst in een les.",
+    lessonN: "Les {n}",
+    noWeek: "Zonder week",
+    numbersHelp: "Niet verplicht. Wat je hier invult, komt ook in het lesrooster.",
+    pending: "De AI stelt een lessenreeks voor…",
+    proposalIntro:
+      "De AI maakte deze lessenreeks bij je leeruitkomsten en toetsen. Vink aan wat in de cursus komt en pas aan waar nodig; de inhoud van elke les werk je later uit met Les voorbereiden.",
+    ready: "Lessenreeks klaar. Kies wat in de cursus komt.",
+    sessionsPerWeek: "Lesmomenten per week",
+    submit: "Lessenreeks voorstellen",
+    title: "Volgende stap: de lessenreeks",
+    untaught: "Deze leeruitkomsten komen in geen les: {list}",
+    week: "Week {n}",
+    weeks: "Aantal weken",
+    wishes: "Wensen voor de planning",
+    wishesHelp:
+      "Niet verplicht. Bijvoorbeeld: week 4 is projectweek, of elke week begint met een hoorcollege.",
   },
   numbersHelp:
     "Niet verplicht. Wat je hier invult, komt ook in de cursusgegevens en het lesrooster.",

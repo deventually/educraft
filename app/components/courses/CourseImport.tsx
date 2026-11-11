@@ -9,7 +9,7 @@ import { useT } from "~/lib/i18n/useT";
 import { AiCallField } from "~/components/AiLeaveGuard";
 import { AiNotes, ProposalForm } from "./ProposalForm";
 
-type ImportAction = { ok: boolean; intent?: string; proposal?: ImportProposal } | undefined;
+type ImportAction = { ok: boolean; intent?: string; proposal?: unknown } | undefined;
 const PROPOSING = ["import-extract", "design-outcomes", "design-assessments"];
 
 /**
@@ -22,7 +22,7 @@ export function useImportProposal(actionData: ImportAction): ImportProposal | nu
     if (!actionData?.ok) return;
     // A design proposal (`design-outcomes`, `design-assessments`) is reviewed the same way.
     if (PROPOSING.includes(actionData.intent ?? "") && actionData.proposal)
-      setProposal(actionData.proposal);
+      setProposal(actionData.proposal as ImportProposal);
     if (actionData.intent === "import-apply") setProposal(null);
   }, [actionData]);
   return proposal;
