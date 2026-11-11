@@ -382,6 +382,14 @@ describe("Portfolio — which tool helps now", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("shows the outline from the form above the chapter on the chapter tab", () => {
+    const d = sampleDossier();
+    d.framework.outcomes[0]!.outline = [{ id: "s1", title: "Beginsituatie", criterionIds: [C2] }];
+    renderRoute(PortfolioOutcome, outcomeData(d), "chapter");
+    expect(screen.getByRole("region", { name: "Opzet uit je formulier" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 4, name: "Beginsituatie" })).toBeInTheDocument();
+  });
+
   it("names a thinking aid for writing on the chapter tab", () => {
     renderRoute(
       PortfolioOutcome,
