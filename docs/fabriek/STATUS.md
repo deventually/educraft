@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266, #268 en #270 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266, #268, #270 en #272 gemerged)_
 
 ## Nu
 
+- **Modulehandleiding uit de cursus (#272) gemerged op 2026-11-11:** naast de modulewijzer
+  exporteert de cursus zonder AI een modulehandleiding: modulegegevens, inleiding, studielast en
+  duur, leeruitkomsten met succescriteria, de opbouw per week, per toets de gegevens, voorwaarden
+  en onderdelen, en de literatuur (nieuw modulegegeven, één per regel). Het blok heet nu
+  *Modulewijzer en modulehandleiding*; geen migratie.
 - **Terug en vooruit houden het resultaat van een tool vast (#270) gemerged op 2026-11-11:** wie
   vanuit een cursus een tool gebruikt en dan met de knoppen van de browser terug- of vooruitgaat,
   ziet het gegenereerde resultaat weer in plaats van een leeg formulier.
@@ -651,7 +656,7 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #266, #268 en #270 gemerged)_
 
 - **Cursuspagina in vijf tabbladen (#267, PR open):** de lange cursuspagina is opgedeeld in
   *Overzicht*, *Leeruitkomsten*, *Lessen en toetsen*, *Controle* (met het aantal bevindingen) en
-  *Documenten en delen* (met de modulewijzer). Het tabblad staat in de URL (`?tab=`), dus een
+  *Documenten en delen* (met de modulewijzer en modulehandleiding). Het tabblad staat in de URL (`?tab=`), dus een
   formulier blijft op zijn tabblad en links vanuit Start en Per week openen het juiste tabblad.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te

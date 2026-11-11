@@ -273,6 +273,7 @@ function run(
           leader: optionalText(COURSE_LIMITS.title),
           examiners: optionalText(COURSE_LIMITS.title),
           description: optionalText(COURSE_LIMITS.longText),
+          literature: optionalText(COURSE_LIMITS.longText),
         })
         .parse(raw);
       return edit.setModule(d, v);
