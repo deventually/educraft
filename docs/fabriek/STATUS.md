@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #270 en #272 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #272 gemerged)_
 
 ## Nu
 
+- **Lesrooster van de cursus (#271) gemerged op 2026-11-11:** een blok *Lesrooster* op het
+  tabblad Overzicht met weken, lesmomenten per week, duur van een lesmoment, groepsgrootte en
+  contactvorm, allemaal optioneel. *Les voorbereiden* neemt lesduur, groep en contactvorm daaruit
+  over; geen migratie.
 - **Vooraf invullen vanuit de les (#269) gemerged op 2026-11-11:** wie *Les voorbereiden* opent
   vanuit een les, krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis
   (de vijf lessen ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij
@@ -663,10 +667,11 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #270 en #272 gemerged)_
 
 ## Bezig
 
-- **Lesrooster van de cursus (#271, PR open):** een blok *Lesrooster* op het
-  tabblad Overzicht met weken, lesmomenten per week, duur van een lesmoment, groepsgrootte en
-  contactvorm, allemaal optioneel (`set-schedule`, `CourseData.schedule`). *Les voorbereiden*
-  neemt lesduur, groep en contactvorm daaruit over; geen migratie.
+- **Disciplines met uren per week (PR open):** een optioneel blok *Disciplines* op het tabblad
+  Overzicht (naam, docent, uren per week) en een discipline per les. *Les voorbereiden* rekent de
+  lesduur uit de uren van die discipline in die week, verdeeld over haar lessen in die week,
+  afgerond op 5 minuten en nooit langer dan een lesmoment. `CourseData.disciplines`,
+  `Activity.disciplineId`; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
