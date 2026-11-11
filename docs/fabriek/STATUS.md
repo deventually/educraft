@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #279 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #279 en #282 gemerged)_
 
 ## Nu
 
+- **Per week filteren op discipline (#282) gemerged op 2026-11-11:** heeft een cursus
+  disciplines, dan staat boven *Per week* een keuzelijst *Discipline*. Kies je er een, dan zie je
+  alleen de lessen van die discipline, met alle toetsen erbij; weken die leeg raken vallen weg.
+  Elke les toont ook zijn discipline.
 - **Lesdoel op een les (#279) gemerged op 2026-11-11:** een les of opdracht heeft een optioneel
   *Lesdoel* van één zin: wat de student na deze les kan. Het staat in het formulier en onder de
   titel in *Lessen en toetsen*. Wizard deel 3 en *Les voorbereiden* bouwen erop; geen migratie.
