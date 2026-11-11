@@ -440,7 +440,14 @@ database (`e2e/.data/`, one teacher and one admin from `e2e/users.ts`) and opens
 `e2e/pages.ts` as the right user. Each page must load, have no axe violations at WCAG 2.2 AA and
 log no CSP violation. A new key page is one line in `e2e/pages.ts`; `tests/e2e-setup.test.ts`
 checks every path against the route table. Locally once: `npx playwright install chromium`.
-CI runs it as its own job, next to the gate.
+CI runs it as its own job, next to the gate, but only when the repository variable
+`E2E_IN_CI` is `true`. For now it is off (BESLUIT-2026-11-11-9): the GitHub runner could not
+install Chromium. Until it is back on, a worker runs `npm run test:e2e` itself on every PR that
+touches `app/`, `e2e/`, `playwright.config.ts` or dependencies, and puts the result in the PR (the
+template asks for it; `AGENTS.md` says how in a sandbox with its own browser, via
+`PLAYWRIGHT_CHROMIUM_PATH`). A skipped job counts as passed for a required
+check. To switch it back on: *Settings → Secrets and variables → Actions → Variables*, add
+`E2E_IN_CI` = `true`; the next run of a PR or `main` runs the browser tests again.
 
 **Mutation testing** (Stryker, `stryker.config.json`). Stryker makes small changes (mutants) to
 the core, the registry logic (not its data: `tools/`, `goals.ts`, `keywords.ts`), auth, the
