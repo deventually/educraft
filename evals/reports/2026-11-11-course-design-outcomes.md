@@ -31,3 +31,8 @@ nog niet gemerged en heet dus nog steeds `@v1`. De cases voor de injectie (5 EC:
 | design-vague-nl#3 | ja | 0 | nee | nee | nee | 0 | nee | nee | 0 | ja |
 
 Geslaagd: 15 van 18.
+
+## Gelezen
+
+Bastiaan las de antwoorden van deze run (2026-11-11): de leeruitkomsten zijn goed genoeg om mee
+te beginnen.
