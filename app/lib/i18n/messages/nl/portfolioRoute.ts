@@ -56,5 +56,17 @@ export const portfolioRoute = {
   stepsLabel: "Stappen van je dossier",
   stepTodo: "Nog te doen",
   summary: "{done} van {total} stappen klaar",
+  tabs: {
+    chapter: "Hoofdstuk",
+    criteriaTitle: "Wat je moet aantonen",
+    dossierLabel: "Onderdelen van je dossier",
+    evidence: "Bewijs",
+    finish: "Afronden",
+    outcomeLabel: "Onderdelen van deze leeruitkomst",
+    overview: "Overzicht",
+    perCriterionTitle: "Bewijs per criterium",
+    review: "Beoordelen",
+    statusTitle: "Jouw oordeel per criterium",
+  },
   title: "Voortgang",
 };

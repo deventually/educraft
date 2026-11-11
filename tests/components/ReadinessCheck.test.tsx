@@ -57,7 +57,7 @@ describe("ReadinessCheck", () => {
     expect(noEvidence).toHaveTextContent("LU1 Doceren");
     expect(within(noEvidence).getByRole("link", { name: /Los op/ })).toHaveAttribute(
       "href",
-      `/portfolio/${ID}/outcome/${LU}#evidence-title`,
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence#evidence-title`,
     );
 
     const words = within(section)
@@ -66,7 +66,7 @@ describe("ReadinessCheck", () => {
     expect(words).toHaveTextContent("Nog doen");
     expect(within(words).getByRole("link", { name: /Los op/ })).toHaveAttribute(
       "href",
-      `/portfolio/${ID}/outcome/${LU}#chapter-${LU}`,
+      `/portfolio/${ID}/outcome/${LU}?tab=chapter#chapter-${LU}`,
     );
 
     // Green points say so in words too.

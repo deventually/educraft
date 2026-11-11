@@ -6,6 +6,7 @@ import { dossierPart } from "~/lib/portfolio/dossierPart";
 import { type DossierExportInput, exportFileName } from "~/lib/portfolio/export";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { openSpots } from "~/lib/portfolio/openSpots";
+import { dossierHref } from "~/lib/portfolio/tabs";
 import { loadDossier } from "./portfolio.server";
 
 /**
@@ -28,7 +29,8 @@ export async function dossierExport(
 
   const data = lu ? dossierPart(dossier.data, lu) : dossier.data;
   if (!data) throw new Response("Not Found", { status: 404 });
-  if (!draft && openSpots(data).length > 0) return redirect(`/portfolio/${dossier.id}#readiness`);
+  if (!draft && openSpots(data).length > 0)
+    return redirect(dossierHref(dossier.id, "finish", "readiness"));
 
   const outcome = lu ? data.framework.outcomes[0] : undefined;
   const label = outcome ? outcomeLabel(outcome) : undefined;

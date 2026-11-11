@@ -1,11 +1,11 @@
-import { Form, Link, useActionData } from "react-router";
+import { Form, Link, useActionData, useSearchParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import { CRITERION_STATUSES, type DossierData } from "~/lib/portfolio/types";
-import { Button, Card, Label, Select } from "~/components/ui";
+import type { DossierData } from "~/lib/portfolio/types";
+import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
@@ -17,11 +17,13 @@ import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions"
 import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { snapshotCourses } from "~/server/courseEvidence.server";
 import { useT } from "~/lib/i18n/useT";
-import { fmt } from "~/lib/i18n/format";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { evidencePending } from "~/lib/portfolio/evidence";
 import { outcomeRoute } from "~/lib/portfolio/route";
 import { OutcomeProgress } from "~/components/portfolio/DossierProgress";
+import { TabNav } from "~/components/TabNav";
+import { CriteriaOverview, StatusList } from "~/components/portfolio/CriteriaLists";
+import { OUTCOME_TABS, outcomeHref, outcomeTab } from "~/lib/portfolio/tabs";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data ? outcomeLabel(data.outcome) : "BDB/BKE"} — LimeOnIt` }];
@@ -160,6 +162,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     snapshotCourses = {},
     milestones = [],
   } = loaderData;
+  const [params] = useSearchParams();
   const drafts =
     coachMode === "draft" && confirmed
       ? outcome.criteria.map((c, i) => ({
@@ -168,6 +171,9 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
           hasEvidence: withEvidence.includes(c.id),
         }))
       : undefined;
+
+  const tab = outcomeTab(params.get("tab"));
+  const tr = t.portfolioRoute;
 
   return (
     <div className="w-full min-w-0">
@@ -182,152 +188,166 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
         {outcomeLabel(outcome)}
       </h1>
       {provisional && <ProvisionalNotice className="mt-3" />}
-      {milestones.length > 0 && <OutcomeProgress milestones={milestones} />}
 
-      <section className="mt-6" aria-labelledby="criteria-title">
-        <h2 id="criteria-title" className="text-lg font-medium text-slate-900">
-          {to.criteriaTitle}
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">{to.criteriaIntro}</p>
-        <ol className="mt-3 space-y-3">
-          {outcome.criteria.map((c, i) => (
-            <li key={c.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-slate-900">
-                <span className="font-medium">{i + 1}.</span> {c.text}
-              </p>
-              {c.strongLevel && (
-                <p className="mt-1 text-sm text-slate-600">
-                  {fmt(to.strongLevel, { text: c.strongLevel })}
-                </p>
-              )}
-              <EvidenceSuggestions
-                criterionId={c.id}
-                n={i + 1}
-                suggestions={suggestions[c.id] ?? []}
-                className="mt-3"
-              />
-              <ToolHints
-                hints={toolHints[c.id] ?? []}
-                step="evidence"
-                from={{ dossierId: id, criterionId: c.id }}
-                course={courseHints.includes(c.id)}
-                className="mt-3"
-              />
-              <Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
-                <input type="hidden" name="intent" value="setStatus" />
-                <input type="hidden" name="criterionId" value={c.id} />
-                <div>
-                  <Label htmlFor={`status-${c.id}`}>
-                    {to.statusLabel} {i + 1}
-                  </Label>
-                  <Select id={`status-${c.id}`} name="status" defaultValue={status[c.id]}>
-                    {CRITERION_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {t.portfolio.status[s]}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <Button type="submit" variant="secondary" size="sm">
-                  {to.saveStatus}
-                </Button>
-              </Form>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <div className="mt-6">
+        <TabNav
+          label={tr.tabs.outcomeLabel}
+          current={tab}
+          tabs={OUTCOME_TABS.map((x) => ({
+            id: x,
+            label: tr.tabs[x],
+            href: outcomeHref(id, outcome.id, x),
+          }))}
+        />
+      </div>
 
-      <section className="mt-8" aria-labelledby="evidence-title">
-        <h2 id="evidence-title" className="text-lg font-medium text-slate-900">
-          {to.evidenceTitle}
-        </h2>
-        {evidence.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600">{to.evidenceEmpty}</p>
-        ) : (
-          <ul className="mt-3 space-y-3">
-            {evidence.map((e) => (
-              <EvidenceRow
-                key={e.id}
-                item={e}
-                outcomeId={outcome.id}
-                criteria={outcome.criteria}
-                courses={snapshotCourses}
-              />
-            ))}
-          </ul>
-        )}
-        {unlinked.length > 0 && (
-          <>
-            <h3 className="mt-6 text-sm font-medium text-slate-900">{to.unlinkedTitle}</h3>
-            <ul className="mt-2 space-y-3">
-              {unlinked.map((e) => (
-                <EvidenceRow
-                  key={e.id}
-                  item={e}
-                  outcomeId={outcome.id}
-                  criteria={outcome.criteria}
-                  courses={snapshotCourses}
-                />
+      {tab === "overview" && (
+        <>
+          {milestones.length > 0 && (
+            <OutcomeProgress dossierId={id} outcomeId={outcome.id} milestones={milestones} />
+          )}
+          <CriteriaOverview criteria={outcome.criteria} />
+        </>
+      )}
+
+      {tab === "evidence" && (
+        <>
+          <section className="mt-6" aria-labelledby="per-criterion-title">
+            <h2 id="per-criterion-title" className="text-lg font-medium text-slate-900">
+              {tr.tabs.perCriterionTitle}
+            </h2>
+            <ol className="mt-3 space-y-3">
+              {outcome.criteria.map((c, i) => (
+                <li
+                  key={c.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <p className="text-slate-900">
+                    <span className="font-medium">{i + 1}.</span> {c.text}
+                  </p>
+                  <EvidenceSuggestions
+                    criterionId={c.id}
+                    n={i + 1}
+                    suggestions={suggestions[c.id] ?? []}
+                    className="mt-3"
+                  />
+                  <ToolHints
+                    hints={toolHints[c.id] ?? []}
+                    step="evidence"
+                    from={{ dossierId: id, criterionId: c.id }}
+                    course={courseHints.includes(c.id)}
+                    className="mt-3"
+                  />
+                </li>
               ))}
-            </ul>
-          </>
-        )}
+            </ol>
+          </section>
+          <section className="mt-8" aria-labelledby="evidence-title">
+            <h2 id="evidence-title" className="text-lg font-medium text-slate-900">
+              {to.evidenceTitle}
+            </h2>
+            {evidence.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-600">{to.evidenceEmpty}</p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {evidence.map((e) => (
+                  <EvidenceRow
+                    key={e.id}
+                    item={e}
+                    outcomeId={outcome.id}
+                    criteria={outcome.criteria}
+                    courses={snapshotCourses}
+                  />
+                ))}
+              </ul>
+            )}
+            {unlinked.length > 0 && (
+              <>
+                <h3 className="mt-6 text-sm font-medium text-slate-900">{to.unlinkedTitle}</h3>
+                <ul className="mt-2 space-y-3">
+                  {unlinked.map((e) => (
+                    <EvidenceRow
+                      key={e.id}
+                      item={e}
+                      outcomeId={outcome.id}
+                      criteria={outcome.criteria}
+                      courses={snapshotCourses}
+                    />
+                  ))}
+                </ul>
+              </>
+            )}
 
-        {!evidenceFull && (
-          <Card className="mt-6 p-5">
-            <h3 className="text-base font-medium text-slate-900">{to.addEvidenceTitle}</h3>
-            {/* Keyed on the evidence count: a saved item resets the form. */}
-            <Form key={evidence.length + unlinked.length} method="post" className="mt-3 grid gap-3">
-              <input type="hidden" name="intent" value="addEvidence" />
-              <input type="hidden" name="outcomeId" value={outcome.id} />
-              <EvidenceFields prefix="new-evidence" criteria={outcome.criteria} />
-              <div>
-                <Button type="submit">{to.addEvidence}</Button>
+            {!evidenceFull && (
+              <Card className="mt-6 p-5">
+                <h3 className="text-base font-medium text-slate-900">{to.addEvidenceTitle}</h3>
+                {/* Keyed on the evidence count: a saved item resets the form. */}
+                <Form
+                  key={evidence.length + unlinked.length}
+                  method="post"
+                  className="mt-3 grid gap-3"
+                >
+                  <input type="hidden" name="intent" value="addEvidence" />
+                  <input type="hidden" name="outcomeId" value={outcome.id} />
+                  <EvidenceFields prefix="new-evidence" criteria={outcome.criteria} />
+                  <div>
+                    <Button type="submit">{to.addEvidence}</Button>
+                  </div>
+                </Form>
+              </Card>
+            )}
+          </section>
+        </>
+      )}
+
+      {tab === "chapter" && (
+        <>
+          <section className="mt-8" aria-labelledby="chapter-title">
+            <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
+              {to.chapterTitle}
+            </h2>
+            {showDraftNotice && (
+              <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm text-slate-800">{t.portfolio.draft.notice}</p>
+                <Form method="post" className="mt-2">
+                  <input type="hidden" name="intent" value="dismissDraftNotice" />
+                  <Button type="submit" variant="secondary" size="sm">
+                    {t.portfolio.draft.noticeOk}
+                  </Button>
+                </Form>
               </div>
-            </Form>
-          </Card>
-        )}
-      </section>
+            )}
+            <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
+            <div className="mt-3">
+              {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}
+              <ChapterEditor
+                key={`${chapter.length}:${chapter.slice(-40)}`}
+                outcomeId={outcome.id}
+                defaultValue={chapter}
+                maxWords={maxWords}
+                drafts={drafts}
+              />
+            </div>
+          </section>
+        </>
+      )}
 
-      <section className="mt-8" aria-labelledby="chapter-title">
-        <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
-          {to.chapterTitle}
-        </h2>
-        {showDraftNotice && (
-          <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm text-slate-800">{t.portfolio.draft.notice}</p>
-            <Form method="post" className="mt-2">
-              <input type="hidden" name="intent" value="dismissDraftNotice" />
-              <Button type="submit" variant="secondary" size="sm">
-                {t.portfolio.draft.noticeOk}
-              </Button>
-            </Form>
-          </div>
-        )}
-        <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
-        <div className="mt-3">
-          {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}
-          <ChapterEditor
-            key={`${chapter.length}:${chapter.slice(-40)}`}
+      {tab === "review" && (
+        <>
+          <CoachPanel
+            dossierId={id}
             outcomeId={outcome.id}
-            defaultValue={chapter}
-            maxWords={maxWords}
-            drafts={drafts}
+            criteria={outcome.criteria}
+            status={status}
+            confirmed={confirmed}
+            hasChapter={chapter.trim().length > 0}
+            stored={stored}
+            proofread={!!proofread}
           />
-        </div>
-      </section>
-
-      <CoachPanel
-        dossierId={id}
-        outcomeId={outcome.id}
-        criteria={outcome.criteria}
-        status={status}
-        confirmed={confirmed}
-        hasChapter={chapter.trim().length > 0}
-        stored={stored}
-        proofread={!!proofread}
-      />
-      {proofread && <ProofreadPanel outcomeId={outcome.id} view={proofread} />}
+          {proofread && <ProofreadPanel outcomeId={outcome.id} view={proofread} />}
+          <StatusList criteria={outcome.criteria} status={status} />
+        </>
+      )}
     </div>
   );
 }

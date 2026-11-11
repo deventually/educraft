@@ -4,10 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #276 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #277 gemerged)_
 
 ## Nu
 
+- **Cursuswizard, deel 1: hoe je begint en de leeruitkomsten (#277) gemerged op 2026-11-11:** een lege cursus vraagt
+  op het tabblad Overzicht *Hoe wil je beginnen?*: in grote lijnen ontwerpen, met een document,
+  of leeg. Bij ontwerpen beschrijft de docent de cursus in een paar zinnen (plus EC en weken), en
+  de AI stelt 3 tot 6 leeruitkomsten met Bloom-niveau en succescriteria voor, met de
+  onderwijscontext en de disciplines erbij. De docent vinkt aan en past aan in hetzelfde
+  formulier als bij importeren. Nieuwe prompt `course-design-outcomes@v1` met evals
+  (`npm run eval:design`), schakelaar `courseDesign` voor de beheerder; geen migratie. Deel 2
+  (het toetsprogramma) en deel 3 (lessen met lesdoel) volgen.
 - **BDB/BKE: voortgang per leeruitkomst (#276) gemerged op 2026-11-11:** het overzicht van een
   dossier toont het gedeelde blok *Voortgang*: het kader, elke leeruitkomst apart en afronden,
   met één volgende stap. Op de pagina van een leeruitkomst staan vier mijlpalen (bewijs,
@@ -686,14 +694,6 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #276 gemerged)_
 
 ## Bezig
 
-- **Cursuswizard, deel 1: hoe je begint en de leeruitkomsten (PR open):** een lege cursus vraagt
-  op het tabblad Overzicht *Hoe wil je beginnen?*: in grote lijnen ontwerpen, met een document,
-  of leeg. Bij ontwerpen beschrijft de docent de cursus in een paar zinnen (plus EC en weken), en
-  de AI stelt 3 tot 6 leeruitkomsten met Bloom-niveau en succescriteria voor, met de
-  onderwijscontext en de disciplines erbij. De docent vinkt aan en past aan in hetzelfde
-  formulier als bij importeren. Nieuwe prompt `course-design-outcomes@v1` met evals
-  (`npm run eval:design`), schakelaar `courseDesign` voor de beheerder; geen migratie. Deel 2
-  (het toetsprogramma) en deel 3 (lessen met lesdoel) volgen.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

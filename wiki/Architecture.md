@@ -344,7 +344,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   has four milestones (`outcomeRoute`: evidence, chapter, review, shown); the review counts a
   coach verdict *shown* or the teacher's own mark, so the coach is never required, and only the
   teacher's mark completes an outcome. `DossierProgress` shows it on the overview, `OutcomeProgress`
-  on the outcome page, with each milestone a jump to its part of the page.
+  on the outcome page, with each milestone a jump to its tab and the part of it. Like a course,
+  the dossier and each outcome are split into tabs in the URL (`app/lib/portfolio/tabs.ts`,
+  the shared `TabNav`): the dossier has Overview and Finish, an outcome Overview, Evidence,
+  Chapter and Review. Links into a tab (`dossierHref`, `outcomeHref`) carry `?tab=` and an anchor.
 - **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
   design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
   `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,
