@@ -113,6 +113,8 @@ export function buildReviewMessage(input: ReviewInput, locale: Locale): string {
   });
   const checks = input.alignment.map((f) => {
     const target = [f.outcomeId, f.itemId].flatMap((id) => (id ? (key.get(id) ?? []) : []));
+    const discipline = c.disciplines?.find((x) => x.id === f.disciplineId)?.name;
+    if (discipline) target.push(discipline);
     return `- ${f.code}${target.length ? `: ${target.join(", ")}` : ""}`;
   });
   const rejected = input.rejected.map((r) => {

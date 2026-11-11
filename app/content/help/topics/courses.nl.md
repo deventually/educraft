@@ -58,6 +58,7 @@ LimeOnIt kijkt na elke wijziging of alles op elkaar aansluit. Je krijgt een aand
 - een summatieve toets een leeruitkomst toetst in een eerdere week dan de eerste les erover;
 - een toets een leeruitkomst onder het Bloom-niveau van die leeruitkomst toetst;
 - een les of opdracht bij geen enkele leeruitkomst hoort;
+- geen enkele les van een discipline bij een leeruitkomst hoort, zodat die discipline nergens aan bijdraagt;
 - de wegingen van de summatieve toetsen niet optellen tot 100%;
 - de geplande uren meer zijn dan de studielast (één EC is 28 uur studie).
 
