@@ -8,6 +8,7 @@ import { type CourseTools, NO_COURSE_TOOLS, weekRowTool } from "~/lib/registry/c
 import { RowTool } from "~/components/courses/ItemTools";
 import { AlertTriangle, BookOpen, ClipboardList, Palmtree } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { courseTabHref } from "~/lib/courses/tabs";
 
 /**
  * The teacher's week on Start (P22.3): this week, and from Friday next week too.
@@ -114,7 +115,7 @@ function CourseBlock({ course, tools }: { course: CourseWeek; tools: CourseTools
         <p className="flex flex-wrap items-center gap-2 text-xs">
           {findings > 0 && (
             <Link
-              to={`/courses/${course.courseId}`}
+              to={courseTabHref(course.courseId, "check")}
               className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
             >
               <AlertTriangle className="size-3.5" aria-hidden />
@@ -213,7 +214,7 @@ function Rows({
               </span>
               <div className="min-w-0 flex-1">
                 <Link
-                  to={`/courses/${courseId}#item-${r.itemId}`}
+                  to={courseTabHref(courseId, "plan", `item-${r.itemId}`)}
                   className="block rounded text-sm font-medium leading-snug text-slate-900 hover:text-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
                 >
                   {r.title}
