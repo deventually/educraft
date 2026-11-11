@@ -1,4 +1,5 @@
 import type { Route } from "./+types/tool";
+import { effectiveCoverage } from "~/lib/courses/alignment";
 import { aiLimitFor } from "~/server/aiLimits.server";
 import { LimitNotice } from "~/components/usage/LimitNotice";
 import { getToolBySlugOrThrow } from "~/lib/registry";
@@ -33,6 +34,21 @@ import { listAssessmentModels } from "~/server/repositories/assessmentModels.ser
 import { type ModelChoice, STARTER_MODELS } from "~/lib/assessment-models";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
+
+/** A lesson or test as the tool page needs it: no plan details, no questions. */
+function courseItem(
+  i: { id: string; title: string; week?: number },
+  kind: "activity" | "assessment",
+  outcomeIds: string[],
+) {
+  return {
+    id: i.id,
+    title: i.title,
+    ...(i.week !== undefined && { week: i.week }),
+    kind,
+    outcomeIds,
+  };
+}
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
@@ -72,7 +88,18 @@ export async function loader({ params, request }: Route.LoaderArgs) {
         id: c.id,
         name: c.name,
         contextProfileId: c.contextProfileId,
-        outcomes: c.data.outcomes.map((o) => ({ text: o.text })),
+        outcomes: c.data.outcomes.map((o) => ({ id: o.id, text: o.text })),
+        // The lessons and tests: a tool opened from one fills in what it knows (P27.4).
+        items: [
+          ...c.data.activities.map((a) => courseItem(a, "activity", a.outcomeIds)),
+          ...c.data.assessments.map((a) =>
+            courseItem(
+              a,
+              "assessment",
+              effectiveCoverage(a).map((cv) => cv.outcomeId),
+            ),
+          ),
+        ],
       }))
     : [];
   // P27.1: a next step opens with `?course=`; only an own course is taken over.

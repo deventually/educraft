@@ -83,7 +83,9 @@ describe("tool loader — courses (P20, 20.4)", () => {
       name: "Biologie 4 havo",
       data: {
         outcomes: [{ id: "lu1", text: "Legt fotosynthese uit", bloom: "understand" }],
-        activities: [],
+        activities: [
+          { id: "a1", title: "Les bladgroen", week: 2, kind: "lesson", outcomeIds: ["lu1"] },
+        ],
         assessments: [],
       },
     });
@@ -95,7 +97,11 @@ describe("tool loader — courses (P20, 20.4)", () => {
         id: mine.id,
         name: "Biologie 4 havo",
         contextProfileId: null,
-        outcomes: [{ text: "Legt fotosynthese uit" }],
+        outcomes: [{ id: "lu1", text: "Legt fotosynthese uit" }],
+        // The lessons and tests, so a tool opened from one fills in what it knows (P27.4).
+        items: [
+          { id: "a1", title: "Les bladgroen", week: 2, kind: "activity", outcomeIds: ["lu1"] },
+        ],
       },
     ]);
   });
