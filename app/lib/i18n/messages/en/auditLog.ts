@@ -11,6 +11,7 @@ export const auditLog: Messages["auditLog"] = {
     inviteCreated: "Invite created",
     inviteRevoked: "Invite revoked",
     logCleaned: "Audit log cleaned up",
+    modelPriceChanged: "Model price changed",
     passwordSet: "Password set",
     reactivated: "Reactivated",
     resetLinkCreated: "Reset link created",
@@ -51,6 +52,8 @@ export const auditLog: Messages["auditLog"] = {
   intro:
     "Who changed what in roles, passwords, accounts, invites and the model choice. The newest {n} actions are at the top.",
   invites: "{n} invites",
+  price: "{input} in, {output} out per million tokens",
+  priceRemoved: "price removed",
   role: "Role: {role}",
   viaServer: "via the server",
 };

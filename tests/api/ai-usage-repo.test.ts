@@ -39,6 +39,8 @@ describe("aiUsage repository", () => {
         cacheWriteTokens: 300,
         outputTokens: 60,
         reasoningTokens: 0,
+        costMicros: 0,
+        unpricedCalls: 2,
       },
     ]);
   });
@@ -80,5 +82,17 @@ describe("aiUsage repository", () => {
     await repo.recordAiUsage("ai-usage-other", call, "2026-11-02");
     const rows = await repo.listAiUsage("ai-usage-mine", "2026-11-01");
     expect(rows.map((r) => r.day)).toEqual(["2026-11-02"]);
+  });
+});
+
+describe("aiUsage repository — cost", () => {
+  it("adds up the cost of priced calls and counts the calls without a price", async () => {
+    const u = "ai-usage-cost";
+    const call = { source: "lesson-plan", model: "claude-sonnet-5-5", usage: tokens(1, 0, 0, 1) };
+    await repo.recordAiUsage(u, { ...call, costMicros: 1_500 }, "2026-11-11");
+    await repo.recordAiUsage(u, { ...call, costMicros: 500 }, "2026-11-11");
+    await repo.recordAiUsage(u, call, "2026-11-11");
+    const [row] = await repo.listAiUsage(u, "2026-11-11");
+    expect(row).toMatchObject({ calls: 3, costMicros: 2_000, unpricedCalls: 1 });
   });
 });

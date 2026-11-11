@@ -22,6 +22,8 @@ export interface AiCall {
   usage?: TokenUsage;
   /** The call failed or was aborted. */
   failed?: boolean;
+  /** What the call cost in millionths of a euro; absent = no price (or no tokens) known. */
+  costMicros?: number;
 }
 
 /** The model's provider, or "unknown" for an id the catalog no longer knows. */
@@ -41,6 +43,8 @@ export async function recordAiUsage(userId: string, call: AiCall, day = utcDay()
     cacheWriteTokens: t?.cacheWrite ?? 0,
     outputTokens: t?.output ?? 0,
     reasoningTokens: t?.reasoning ?? 0,
+    costMicros: call.costMicros ?? 0,
+    unpricedCalls: call.costMicros === undefined ? 1 : 0,
   };
   const inc = (col: (typeof aiUsage)[keyof typeof add], by: number) => sql`${col} + ${by}`;
   getDb()
@@ -65,6 +69,8 @@ export async function recordAiUsage(userId: string, call: AiCall, day = utcDay()
         cacheWriteTokens: inc(aiUsage.cacheWriteTokens, add.cacheWriteTokens),
         outputTokens: inc(aiUsage.outputTokens, add.outputTokens),
         reasoningTokens: inc(aiUsage.reasoningTokens, add.reasoningTokens),
+        costMicros: inc(aiUsage.costMicros, add.costMicros),
+        unpricedCalls: inc(aiUsage.unpricedCalls, add.unpricedCalls),
       },
     })
     .run();
@@ -86,6 +92,8 @@ export async function listAiUsage(userId: string, sinceDay: string) {
       cacheWriteTokens: aiUsage.cacheWriteTokens,
       outputTokens: aiUsage.outputTokens,
       reasoningTokens: aiUsage.reasoningTokens,
+      costMicros: aiUsage.costMicros,
+      unpricedCalls: aiUsage.unpricedCalls,
     })
     .from(aiUsage)
     .where(and(eq(aiUsage.userId, userId), gte(aiUsage.day, sinceDay)))

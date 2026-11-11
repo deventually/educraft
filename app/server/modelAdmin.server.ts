@@ -30,6 +30,7 @@ import {
   isAddableProvider,
 } from "~/lib/ai/providers";
 import type { LocalizedText } from "~/lib/i18n/localized";
+import type { ModelPrice } from "~/lib/ai/prices";
 import { localModelsEnabled, providerSetting } from "./env.server";
 import { getModelRegistry, saveModelRegistry } from "./modelRegistry.server";
 import { fullCatalog } from "./modelCatalog.server";
@@ -38,6 +39,8 @@ import { countGenerationsByModel } from "./repositories/generations.server";
 import { listAssignedModelSets } from "./repositories/users.server";
 import { listTeams } from "./repositories/teams.server";
 import { recordAdminAction } from "./repositories/auditLog.server";
+import { getModelPrices } from "./repositories/modelPrices.server";
+import { priceModel, priceView } from "./modelPriceAdmin.server";
 
 export interface ProviderStatus {
   id: string;
@@ -71,6 +74,11 @@ export interface AdminModelRow {
   state: ModelState;
   successor: { id: string; displayName: string } | null;
   usage: ModelUsage;
+  /** Euro per million tokens (the admin's, else the catalog's); null = no price yet. */
+  price: ModelPrice | null;
+  priceFrom: "admin" | "catalog" | null;
+  /** The day the catalog price was looked up. */
+  priceChecked?: string;
 }
 
 /** The setting a provider still needs: its address (own endpoint) first, then its key. */
@@ -125,6 +133,7 @@ async function adminModelRows(): Promise<AdminModelRow[]> {
     tally([tool.defaultModel, ...tool.stages.flatMap((s) => (s.model ? [s.model] : []))], tools);
   }
   const added = new Set(registry.added.map((m) => m.id));
+  const prices = await getModelPrices();
   return apiModels().map((m) => {
     const entry = registry.lifecycle[m.id];
     return {
@@ -142,6 +151,7 @@ async function adminModelRows(): Promise<AdminModelRow[]> {
         teams: teams.get(m.id) ?? 0,
         tools: tools.get(m.id) ?? 0,
       },
+      ...priceView(m.id, prices),
     };
   });
 }
@@ -280,6 +290,7 @@ export const MODEL_INTENTS = [
   "cancel",
   "addProvider",
   "removeProvider",
+  "price",
 ] as const;
 export type ModelIntent = (typeof MODEL_INTENTS)[number];
 
@@ -360,5 +371,7 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData, actorU
     }
     case "removeProvider":
       return removeAdminProvider(text(fd, "id"));
+    case "price":
+      return priceModel(apiModels(), text(fd, "id"), fd, actorUserId);
   }
 }

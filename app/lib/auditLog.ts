@@ -12,6 +12,7 @@ export const AUDIT_ACTIONS = [
   "inviteCreated",
   "inviteRevoked",
   "logCleaned",
+  "modelPriceChanged",
   "passwordSet",
   "reactivated",
   "resetLinkCreated",
@@ -40,6 +41,8 @@ export interface AuditDetail {
   /** A cleanup: entries older than this many days went; `null` = everything. */
   olderThanDays?: number | null;
   models?: string[] | null;
+  /** A model's new price (euro per million tokens); `null` = removed. */
+  price?: { input: number; output: number; cacheRead?: number; cacheWrite?: number } | null;
   role?: string;
   to?: string;
   /** Done on the server itself (`reset-2fa`), not in the app. */

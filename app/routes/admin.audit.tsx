@@ -12,6 +12,7 @@ import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { Label, Select } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
+import { formatEuro } from "~/lib/ai/prices";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n";
 import { roleLabel } from "~/components/admin/people";
@@ -59,7 +60,11 @@ const th = "px-4 py-2.5 font-semibold";
 const td = "px-4 py-2.5 align-top text-slate-600";
 
 /** The facts of one entry in words: a role change, a count, the chosen models. */
-function detailText(t: Messages, entry: Pick<AuditEntry, "action" | "detail">): string {
+function detailText(
+  t: Messages,
+  entry: Pick<AuditEntry, "action" | "detail">,
+  locale: "nl" | "en",
+): string {
   const d = entry.detail;
   if (!d) return "";
   if (entry.action === "logCleaned") {
@@ -74,6 +79,16 @@ function detailText(t: Messages, entry: Pick<AuditEntry, "action" | "detail">): 
   if (d.count !== undefined && d.count > 1) parts.push(fmt(t.auditLog.invites, { n: d.count }));
   if (d.models === null) parts.push(t.auditLog.followsInstance);
   if (Array.isArray(d.models)) parts.push(d.models.join(", "));
+  if (d.price === null) parts.push(t.auditLog.priceRemoved);
+  if (d.price) {
+    const { input, output } = d.price;
+    parts.push(
+      fmt(t.auditLog.price, {
+        input: formatEuro(input, locale),
+        output: formatEuro(output, locale),
+      }),
+    );
+  }
   if (d.bulk) parts.push(t.auditLog.bulk);
   if (d.via === "server") parts.push(t.auditLog.viaServer);
   return parts.join(" · ");
@@ -136,7 +151,7 @@ export default function AdminAudit({ loaderData }: Route.ComponentProps) {
             </thead>
             <tbody>
               {entries.map((e) => {
-                const detail = detailText(t, e);
+                const detail = detailText(t, e, locale);
                 return (
                   <tr key={e.id} className="border-b border-slate-50 last:border-0">
                     <td className={`${td} whitespace-nowrap text-slate-500`}>

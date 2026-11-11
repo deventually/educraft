@@ -7,6 +7,7 @@ import { useFetcher } from "react-router";
 import { Badge, Button, Label, Select } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { AddModelForm } from "~/components/admin/AddModelForm";
+import { ModelPriceForm } from "~/components/admin/ModelPriceForm";
 import {
   type ChoiceView,
   type ModelActionResult,
@@ -73,6 +74,8 @@ function ModelCard({ model, targets }: { model: ModelView; targets: ModelView[] 
           tools: String(model.usage.tools),
         })}
       </p>
+
+      {model.state !== "retired" && <ModelPriceForm model={model} idPrefix={headingId} />}
 
       {model.state === "active" && others.length > 0 && (
         <fetcher.Form method="post" className="mt-3 flex flex-wrap items-end gap-2">
