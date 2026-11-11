@@ -17,6 +17,11 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     locale: "nl-NL",
     trace: "off",
+    // A pre-installed browser (e.g. a sandbox without `playwright install`), for every project:
+    // the setup project signs in with a browser too.
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+      : {},
   },
   projects: [
     // Signs in the teacher and the admin once (the admin with a code, P2-12) and saves the
@@ -27,10 +32,6 @@ export default defineConfig({
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
-        // A pre-installed browser (e.g. a sandbox without `playwright install`).
-        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
-          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
-          : {},
       },
     },
   ],

@@ -426,3 +426,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   blijven de 200.000 uitvoertokens per dag en 10 aanroepen per minuut; die staan op geen pagina.
   Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Doe het maar",
   en op de kaart "Alleen tokens, onzichtbaar").
+- **BESLUIT-2026-11-11-9:** **Browsertests tijdelijk alleen lokaal.** De GitHub-runner kon
+  Chromium niet installeren (archive.ubuntu.com onbereikbaar), dus de e2e-job was rood. De job
+  draait nu alleen als de repositoryvariabele `E2E_IN_CI` op `true` staat; zonder die variabele
+  slaat GitHub hem over, en een overgeslagen job telt voor de ruleset als geslaagd. Zolang hij uit
+  staat draait de werker `npm run test:e2e` zelf, automatisch en zonder dat iemand erom vraagt, bij
+  elke PR die `app/`, `e2e/`, `playwright.config.ts` of de dependencies raakt, en zet de uitslag in
+  de PR (het sjabloon vraagt erom; `AGENTS.md` zegt hoe in een sandbox). Bastiaan kijkt op
+  2026-11-12 of het weer via GitHub kan. Weer aan: de variabele `E2E_IN_CI` = `true` zetten, zonder PR. Bastiaan, 2026-11-11
+  (thread "Playwright e2e tijdelijk alleen lokaal": "Kunnen we playwright e2e tijdelijk uitzetten op
+  github en het alleen lokaal draaien?" en "je moet het waar nodig automatisch lokaal draaien,
+  totdat het op github weer opgelost is").
