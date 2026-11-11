@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #259 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
 
 ## Nu
 
+- **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** een toets met
+  vragen exporteert zonder AI een toetsmatrijs (punten per leeruitkomst en niveau) als Word, PDF
+  of Markdown. Een cursus legt nu optioneel vast wat toetsdocumenten van een school nodig hebben
+  (modulecode, succescriteria, per toets vorm, cesuur, herkansing en onderdelen); daaruit komen
+  een toetsmatrijs per leeruitkomst en een nakijkmodel per onderdeel.
 - **AI-aanroep stopt ook bij sluiten of wegnavigeren (#259) gemerged op 2026-11-11:** sluit een
   docent een tool of chat, of gaat die binnen de app naar een andere pagina terwijl de AI nog
   schrijft, dan breekt de aanroep af (`useStreamAborts`) en kost hij geen tokens meer. De pagina
