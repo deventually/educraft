@@ -27,6 +27,7 @@ export function findingText(f: AlignmentFinding, data: CourseData, locale: Local
     outcome: f.outcomeId ? outcomeShortName(data, f.outcomeId, locale) : "",
     item: item?.title ?? "",
     question: question?.label ?? "",
+    discipline: data.disciplines?.find((x) => x.id === f.disciplineId)?.name ?? "",
     hours: plannedHours(data),
     budget: (data.ec ?? 0) * HOURS_PER_EC,
   });

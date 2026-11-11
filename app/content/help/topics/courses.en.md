@@ -57,7 +57,7 @@ After every change LimeOnIt checks whether everything lines up. You get a point 
 - a learning outcome is not tested in any **summative** assessment;
 - a summative assessment tests a learning outcome in an earlier week than the first lesson about it;
 - an assessment tests a learning outcome below that outcome's Bloom level;
-- a lesson or assignment serves no learning outcome;
+- no lesson of a discipline serves a learning outcome, so the discipline contributes to nothing;
 - the weights of the summative assessments do not add up to 100%;
 - the planned hours exceed the study load (one EC is 28 hours of study).
 

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import type { CourseTools } from "~/lib/registry/courseActions";
-import { alignedCourse, ACT1, QUIZ, TEST1 } from "../courses/fixtures";
+import { alignedCourse, ACT1, ACT2, QUIZ, TEST1 } from "../courses/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -142,6 +143,67 @@ describe("CourseWeekView (P27.4)", () => {
   it("has no a11y violations", async () => {
     const { container } = renderWeek();
     await screen.findByRole("region", { name: "Per week" });
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("CourseWeekView — per discipline (step D)", () => {
+  function withDisciplines() {
+    const d = alignedCourse();
+    d.disciplines = [
+      { id: "web", name: "Webtech" },
+      { id: "hw", name: "Hardware" },
+    ];
+    d.activities[0]!.disciplineId = "web";
+    d.activities[1]!.disciplineId = "hw";
+    return d;
+  }
+
+  it("offers no discipline filter when the course has no disciplines", async () => {
+    renderWeek();
+    await screen.findByRole("region", { name: "Per week" });
+    expect(screen.queryByRole("combobox", { name: "Discipline" })).toBeNull();
+  });
+
+  it("shows all disciplines first, and the discipline at each lesson", async () => {
+    renderWeek(withDisciplines());
+    const filter = await screen.findByRole("combobox", { name: "Discipline" });
+    expect(filter).toHaveValue("");
+    expect(
+      within(filter)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Alle disciplines", "Webtech", "Hardware"]);
+    const lesson = document.getElementById(`week-item-${ACT1}`) as HTMLElement;
+    expect(within(lesson).getByText(/Webtech/)).toBeInTheDocument();
+  });
+
+  it("shows only that discipline's lessons, with the tests, after choosing one", async () => {
+    renderWeek(withDisciplines());
+    const filter = await screen.findByRole("combobox", { name: "Discipline" });
+    await userEvent.selectOptions(filter, "Hardware");
+    const region = screen.getByRole("region", { name: "Per week" });
+    expect(document.getElementById(`week-item-${ACT1}`)).toBeNull();
+    expect(document.getElementById(`week-item-${ACT2}`)).not.toBeNull();
+    expect(document.getElementById(`week-item-${QUIZ}`)).not.toBeNull();
+    expect(
+      within(region)
+        .getAllByRole("heading", { level: 3 })
+        .map((h) => h.textContent),
+    ).toEqual(["Week 2", "Week 4"]);
+    await userEvent.selectOptions(filter, "Alle disciplines");
+    expect(document.getElementById(`week-item-${ACT1}`)).not.toBeNull();
+  });
+
+  it("speaks English", async () => {
+    renderWeek(withDisciplines(), "en");
+    const filter = await screen.findByRole("combobox", { name: "Discipline" });
+    expect(within(filter).getByRole("option", { name: "All disciplines" })).toBeInTheDocument();
+  });
+
+  it("has no a11y violations with the filter", async () => {
+    const { container } = renderWeek(withDisciplines());
+    await screen.findByRole("combobox", { name: "Discipline" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
