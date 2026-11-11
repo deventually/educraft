@@ -54,11 +54,20 @@ describe("Course list (/courses)", () => {
 
   it("lists courses with their outcomes and findings as text", async () => {
     const { container } = renderRoute(CourseList, {
-      courses: [{ id: "c1", name: "SE jaar 2", outcomes: 3, findings: 2 }],
+      courses: [
+        {
+          id: "c1",
+          name: "SE jaar 2",
+          outcomes: 3,
+          findings: 2,
+          progress: { complete: 2, total: 6, next: "assessments" },
+        },
+      ],
       profiles: [{ id: "p1", name: "SE" }],
     });
     expect(screen.getByRole("link", { name: "SE jaar 2" })).toHaveAttribute("href", "/courses/c1");
     expect(screen.getByText("3 leeruitkomsten · 2 aandachtspunten")).toBeVisible();
+    expect(screen.getByText("2 van 6 stappen klaar · Volgende stap: Toetsen")).toBeVisible();
     expect(screen.getByRole("button", { name: "Verwijderen: SE jaar 2" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -96,7 +105,7 @@ describe("Course page — tabs", () => {
 
   it("shows the settings, the schedule and the week on the overview, nothing else", () => {
     renderRoute(CoursePage, pageData());
-    expect(headings()).toEqual(["Cursusgegevens", "Lesrooster", "Per week"]);
+    expect(headings()).toEqual(["Voortgang", "Cursusgegevens", "Lesrooster", "Per week"]);
   });
 
   it("shows the learning outcomes on their own tab", async () => {
@@ -141,7 +150,7 @@ describe("Course page — tabs", () => {
 
   it("falls back to the overview for an unknown tab", () => {
     renderRoute(CoursePage, pageData(), "/?tab=nonsense");
-    expect(headings()).toEqual(["Cursusgegevens", "Lesrooster", "Per week"]);
+    expect(headings()).toEqual(["Voortgang", "Cursusgegevens", "Lesrooster", "Per week"]);
   });
 });
 

@@ -29,6 +29,8 @@ import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
 import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
+import { CourseProgress } from "~/components/courses/CourseProgress";
+import { courseProgress } from "~/lib/courses/progress";
 import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
@@ -214,6 +216,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       <div className="mt-6 space-y-10">
         {tab === "overview" && (
           <>
+            <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />
             <CourseSettings
               courseId={course.id}
               name={course.name}

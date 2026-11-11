@@ -227,6 +227,51 @@ export const courses: Messages["courses"] = {
   },
   profile: "Teaching context",
   profileNone: "None",
+  progress: {
+    allDone:
+      "Every step is done. Make the module guide under Documents and sharing, or let your review team look at it under Check.",
+    goTo: "Go to {place}",
+    intro:
+      "This is how you build the course, from what the student can do at the end back to the lessons. Follow the next step, or go to a tab yourself.",
+    next: "Next step: {step}",
+    stepDone: "Done",
+    steps: {
+      assessments: {
+        how: "Decide first how you assess. Add a summative test and choose which learning outcomes it assesses, until they are all assessed.",
+        status: "{done} of {total} learning outcomes assessed",
+        title: "Tests",
+      },
+      check: {
+        how: "Go through the points of attention. They are advice: you decide what to change.",
+        status: "{total} points of attention",
+        title: "Check",
+      },
+      details: {
+        how: "Fill in the study load in EC. With a start date the weeks get a date too.",
+        status: "Not filled in yet",
+        title: "Course details",
+      },
+      lessons: {
+        how: "Plan lessons and assignments that work towards the test, and choose for each which learning outcomes it teaches.",
+        status: "{done} of {total} learning outcomes in a lesson",
+        title: "Lessons and assignments",
+      },
+      outcomes: {
+        how: "Write down what the student can do at the end, starting with a verb, such as Designs or Explains. Three to six is often enough.",
+        status: "No learning outcomes yet",
+        title: "Learning outcomes",
+      },
+      weeks: {
+        how: "Put every lesson and test in a week. Then Overview shows the course week by week.",
+        status: "{done} of {total} in a week",
+        title: "Week planning",
+      },
+    },
+    stepsLabel: "Steps",
+    stepTodo: "To do",
+    summary: "{done} of {total} steps done",
+    title: "Progress",
+  },
   remove: "Remove",
   save: "Save",
   schedule: {

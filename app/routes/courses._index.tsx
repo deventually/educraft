@@ -9,6 +9,8 @@ import { copySharedItem } from "~/server/repositories/shares.server";
 import { sharedWithMe } from "~/server/sharing.server";
 import { SharedWithMe } from "~/components/sharing/SharedWithMe";
 import { checkAlignment } from "~/lib/courses/alignment";
+import { courseProgress } from "~/lib/courses/progress";
+import type { CourseData } from "~/lib/courses/types";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { EmptyState } from "~/components/EmptyState";
@@ -23,6 +25,13 @@ export function meta() {
   return [{ title: "Cursussen — LimeOnIt" }];
 }
 
+/** The findings and how far the course is, for one line in the list. */
+function progressSummary(data: CourseData) {
+  const findings = checkAlignment(data);
+  const { complete, total, next } = courseProgress(data, findings);
+  return { findings: findings.length, progress: { complete, total, next: next?.id ?? null } };
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireCourseUser(request);
   const courses = (await listCourses(user.id)).map((c) => ({
@@ -32,7 +41,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     ownerName: c.ownerId === user.id ? null : c.ownerName,
     role: c.role,
     outcomes: c.data.outcomes.length,
-    findings: checkAlignment(c.data).length,
+    ...progressSummary(c.data),
   }));
   const profiles = (await listProfiles(user.id)).map((p) => ({ id: p.id, name: p.name }));
   // "Van mijn team" (P28.4): colleagues' courses shared with the viewer's teams.
@@ -167,6 +176,22 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
                   <p className="text-sm text-slate-600">
                     {fmt(c.summary, { outcomes: course.outcomes, findings: course.findings })}
                   </p>
+                  {course.progress && (
+                    <p className="text-sm text-slate-600">
+                      {[
+                        fmt(c.progress.summary, {
+                          done: course.progress.complete,
+                          total: course.progress.total,
+                        }),
+                        course.progress.next &&
+                          fmt(c.progress.next, {
+                            step: c.progress.steps[course.progress.next].title,
+                          }),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
                   {course.ownerName && (
                     <p className="text-sm text-slate-600">
                       {fmt(t.courseMembers.ownerBadge, {

@@ -10,11 +10,24 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 
 De cursuspagina heeft vijf tabbladen, elk voor één taak:
 
-- **Overzicht:** de gegevens van de cursus, het lesrooster, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Overzicht:** de voortgang, de gegevens van de cursus, het lesrooster, importeren uit een bestaand document en je lessen en toetsen per week.
 - **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
 - **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
 - **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
 - **Documenten en delen:** de modulewijzer en modulehandleiding, bewijs voor je dossier, gemaakt werk, de opleiding, delen met je team en wie meewerkt.
+
+## Voortgang
+
+Bovenaan het tabblad Overzicht staat de **Voortgang**: hoeveel stappen van je cursus klaar zijn. De stappen volgen *backwards design*, dus je begint bij het einddoel en werkt terug naar de lessen:
+
+1. **Cursusgegevens:** de studielast in EC.
+2. **Leeruitkomsten:** wat de student aan het eind kan.
+3. **Toetsen:** een summatieve toets die elke leeruitkomst toetst.
+4. **Lessen en opdrachten:** elke leeruitkomst komt in een les terug.
+5. **Weekplanning:** elke les en toets staat in een week.
+6. **Controle:** geen aandachtspunten meer.
+
+Onder **Volgende stap** staat wat je nu het beste kunt doen, hoe je dat doet en een knop naar de plek waar het kan. Wil je zelf verder kijken, klik dan op een stap of ga naar een tabblad: je hoeft de volgorde niet te volgen. In je lijst met cursussen zie je per cursus hoeveel stappen klaar zijn en wat de volgende stap is.
 
 ## Lesrooster
 

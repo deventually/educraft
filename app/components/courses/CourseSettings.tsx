@@ -32,7 +32,7 @@ export function CourseSettings({
   const c = t.courses;
   const id = useId();
   return (
-    <section aria-labelledby={id}>
+    <section id="course-settings" aria-labelledby={id} className="scroll-mt-20">
       <h2 id={id} className="text-lg font-medium text-slate-900">
         {c.settings.title}
       </h2>

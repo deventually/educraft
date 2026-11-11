@@ -44,6 +44,13 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("**Schedule** on the Overview tab");
   });
 
+  it("explains the progress steps and the next step", () => {
+    expect(getTopic("courses", "nl")).toContain("## Voortgang");
+    expect(getTopic("courses", "nl")).toContain("**Volgende stap**");
+    expect(getTopic("courses", "en")).toContain("## Progress");
+    expect(getTopic("courses", "en")).toContain("**Next step**");
+  });
+
   it("explains the tabs of the course page in the courses topic", () => {
     const nl = getTopic("courses", "nl");
     const en = getTopic("courses", "en");

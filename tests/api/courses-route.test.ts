@@ -81,6 +81,8 @@ describe("/courses", () => {
     expect(data.courses.find((c) => c.name === "Met data")).toMatchObject({
       outcomes: 2,
       findings: 0,
+      // Without its study load, the details are the step still to do.
+      progress: { complete: 5, total: 6, next: "details" },
     });
   });
 
