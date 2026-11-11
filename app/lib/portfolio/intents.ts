@@ -55,8 +55,11 @@ const SCHEMAS = {
     tracks: z.array(z.enum(TRACKS)).min(1).max(TRACKS.length),
     institution: text(LIMITS.name).default(""),
   }),
-  /** Start wizard, step 4: the hand-in date; "" clears it. */
-  deadline: z.object({ deadline: z.union([z.literal(""), IsoDate]) }),
+  /** Start wizard, step 4: the hand-in date and hours a day; "" clears either. */
+  deadline: z.object({
+    deadline: z.union([z.literal(""), IsoDate]),
+    hoursPerDay: optionalInt(LIMITS.hoursPerDay).pipe(z.number().int().min(1).optional()),
+  }),
   meta: z.object({
     institution: text(LIMITS.name).default(""),
     year: text(20).default(""),
@@ -187,9 +190,13 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
       };
     }
     case "deadline": {
-      const { deadline: _old, ...rest } = d;
+      const { deadline: _old, hoursPerDay: _hours, ...rest } = d;
       const v = input as z.infer<(typeof SCHEMAS)["deadline"]>;
-      return v.deadline ? { ...rest, deadline: v.deadline } : rest;
+      return {
+        ...rest,
+        ...(v.deadline ? { deadline: v.deadline } : {}),
+        ...(v.hoursPerDay ? { hoursPerDay: v.hoursPerDay } : {}),
+      };
     }
     case "meta": {
       const v = input as z.infer<(typeof SCHEMAS)["meta"]>;

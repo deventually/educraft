@@ -7,7 +7,7 @@ test.use({ storageState: storageStateOf("admin") });
 
 /**
  * A new dossier opens the start wizard: the framework (the national starting point here), an
- * anchor per learning outcome and the hand-in date. Axe finds nothing on any step, the steps work
+ * anchor per learning outcome, the hand-in date and the day plan. Axe finds nothing on any step, the steps work
  * by keyboard, and nothing scrolls sideways at 320px.
  */
 test("a new dossier walks through the start wizard", async ({ page }) => {
@@ -35,8 +35,20 @@ test("a new dossier walks through the start wizard", async ({ page }) => {
   await page.getByRole("link", { name: "Volgende stap" }).click();
   await page.waitForURL(/step=planning$/);
   await page.getByLabel("Inleverdatum").fill("2099-01-01");
-  await page.getByRole("button", { name: "Datum opslaan" }).click();
+  await page.getByLabel("Uren per dag").fill("4");
+  await page.getByRole("button", { name: "Planning opslaan" }).click();
   await expect(page.getByText(/Inleveren op/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Dagplan" })).toBeVisible();
+  await expect(page.getByText(/werkdag(en)? van 4 uur/)).toBeVisible();
+  await expectNoAxeViolations(page);
+
+  // The overview carries the same plan; its rates open by keyboard.
+  await page.getByRole("link", { name: "Klaar, naar je dossier" }).click();
+  const plan = page.getByRole("region", { name: "Dagplan" });
+  await expect(plan).toBeVisible();
+  await plan.getByText("Hoe LimeOnIt rekent").focus();
+  await page.keyboard.press("Enter");
+  await expect(plan.getByText(/Vaste richtwaarden/)).toBeVisible();
   await expectNoAxeViolations(page);
 
   await page.setViewportSize({ width: 320, height: 800 });

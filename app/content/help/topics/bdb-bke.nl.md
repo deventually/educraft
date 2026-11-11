@@ -24,6 +24,8 @@ Zie je in het menu geen **BDB/BKE**? Dan staat de werkplaats nog uit voor jou. H
 
 Een nieuw dossier opent de **start** in vier korte stappen: je traject, je kader, je anker per leeruitkomst en je inleverdatum. Elke stap mag je overslaan; je vindt de start later terug onder het overzicht van je dossier (**Startwizard**). Het **anker** is waar een leeruitkomst over gaat: een les, je module (een hele cursus) of een toets uit je cursussen, of een korte beschrijving. Een tool die je bij die leeruitkomst opent, begint met die les, module of toets, en een module of toets komt meteen als bewijs in je dossier.
 
+Het **dagplan** op het overzicht zegt hoeveel uur werk er nog ongeveer is en verdeelt dat over je werkdagen, in de volgorde van je route. Vul bij de planning je inleverdatum en je uren per dag in, dan zegt het plan ook of je op schema ligt. Het rekent met vaste richtwaarden per open stap (onder **Hoe LimeOnIt rekent**), zonder AI, en het is advies: het houdt niets tegen. Bovenaan staat wat je **vandaag aanvraagt**: verplicht bewijs van anderen, zoals feedback of een opname, dat er nog niet is. Dat kost wachttijd, dus vraag het aan voordat je gaat schrijven.
+
 1. Ga naar **BDB/BKE** en maak een dossier aan. Geef het een naam en kies BDB, BKE of beide. Lever je elke leeruitkomst apart in, dan is één dossier genoeg: je kunt per leeruitkomst exporteren.
 2. Open **Kader**. Je hebt twee wegen:
    - **Kader uit je formulier halen (aanbevolen).** Plak de tekst van het beoordelingsformulier, of kies het PDF- of Word-bestand. Het bestand blijft op je computer; alleen de tekst gaat naar het AI-model. LimeOnIt zet leeruitkomsten en criteria klaar, en waar het formulier een "goed"-niveau noemt ook *Wat het sterker maakt*.
