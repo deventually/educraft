@@ -37,6 +37,29 @@ describe("help registry — topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
+  it("explains the tabs of the course page in the courses topic", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("## De cursuspagina");
+    for (const tab of [
+      "Overzicht",
+      "Leeruitkomsten",
+      "Lessen en toetsen",
+      "Controle",
+      "Documenten en delen",
+    ])
+      expect(nl).toContain(`**${tab}:**`);
+    expect(en).toContain("## The course page");
+    for (const tab of [
+      "Overview",
+      "Learning outcomes",
+      "Lessons and tests",
+      "Check",
+      "Documents and sharing",
+    ])
+      expect(en).toContain(`**${tab}:**`);
+  });
+
   it("explains the role-agent review in the courses topic (P21.5)", () => {
     expect(getTopic("courses", "nl")).toContain("## Laat reviewen");
     expect(getTopic("courses", "en")).toContain("## Get a review");

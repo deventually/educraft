@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { Form, Link } from "react-router";
 import { ArrowRight, GraduationCap, Search } from "lucide-react";
+import { courseTabHref } from "~/lib/courses/tabs";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { useLocale, type useT } from "~/lib/i18n/useT";
@@ -161,7 +162,7 @@ export function Week({
                 {week.findings.map((f) => (
                   <li key={`${f.courseId}-${f.text}`}>
                     <Link
-                      to={`/courses/${f.courseId}`}
+                      to={courseTabHref(f.courseId, "check")}
                       className="block rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:border-violet-200"
                     >
                       <span className="block text-slate-900">{f.text}</span>
