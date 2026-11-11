@@ -43,7 +43,7 @@ start via `app/server/env.server.ts` en `config/models.json`.
 | `OPENAI_API_KEY` | ChatGPT, alleen als die aanbieder aan staat. | Idem. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Gemini, idem. | Idem. |
 | `MISTRAL_API_KEY` | Mistral, idem. | Idem. |
-| `MINIMAX_API_KEY`, `OPENCODE_ZEN_API_KEY`, `OPENROUTER_API_KEY` | Extra aanbieders uit `config/models.json`, idem. | Idem. |
+| `MINIMAX_API_KEY`, `ZAI_API_KEY`, `XAI_API_KEY`, `QWEN_API_KEY` (met `QWEN_BASE_URL`), `TOGETHER_API_KEY`, `OPENCODE_ZEN_API_KEY`, `OPENROUTER_API_KEY` | Extra aanbieders uit `config/models.json`, idem. | Idem. |
 | `OPENAI_COMPAT_API_KEY` | Een eigen OpenAI-compatibele server (met `OPENAI_COMPAT_BASE_URL`). | Idem. |
 | `WHISPER_API_KEY` | Alleen als dicteren via een externe Whisper-dienst loopt. | Idem. |
 

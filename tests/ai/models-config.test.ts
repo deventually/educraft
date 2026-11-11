@@ -55,9 +55,10 @@ describe("config/models.json — what Bastiaan asked for (2026-11-06)", () => {
     }
   });
 
-  it("has a model for ChatGPT, Gemini, Zen, OpenRouter, Mistral and MiniMax", () => {
+  it("has a model for ChatGPT, Gemini, Zen, OpenRouter, Mistral, MiniMax, GLM, Grok, Qwen and Meta", () => {
     const providers = new Set(Object.values(MODELS).map((m) => m.provider));
-    for (const p of ["openai", "google", "opencode-zen", "openrouter", "mistral", "minimax"]) {
+    const wanted = ["openai", "google", "opencode-zen", "openrouter", "mistral", "minimax"];
+    for (const p of [...wanted, "zai", "xai", "qwen", "together"]) {
       expect(providers.has(p), p).toBe(true);
       expect(getProvider(p)?.keyEnv, p).toMatch(/_API_KEY$/);
     }
