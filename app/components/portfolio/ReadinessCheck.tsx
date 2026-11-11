@@ -49,6 +49,8 @@ function fixHref(dossierId: string, fix: ReadinessFix): string {
       return `${base}/framework`;
     case "evidence":
       return outcomeHref(dossierId, fix.outcomeId, "evidence", "evidence-title");
+    case "required":
+      return outcomeHref(dossierId, fix.outcomeId, "evidence", "required-title");
     case "chapter":
       return outcomeHref(dossierId, fix.outcomeId, "chapter", `chapter-${fix.outcomeId}`);
     case "criterion":

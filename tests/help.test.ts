@@ -210,6 +210,15 @@ describe("help registry — topics", () => {
     expect(en).toContain("Evidence, Chapter, Assessment and Shown");
   });
 
+  it("explains the checklist of required evidence", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("**Verplicht bewijs.**");
+    expect(nl).toContain("Ja, dit hoort erbij");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("**Required evidence.**");
+    expect(en).toContain("Yes, this belongs here");
+  });
+
   it("explains the tabs of the dossier and of each learning outcome", () => {
     const nl = getTopic("bdb-bke", "nl");
     expect(nl).toContain("**Tabbladen.**");

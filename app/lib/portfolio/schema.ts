@@ -128,6 +128,10 @@ const EvidenceSchema = z.object({
   text: z.string().max(LIMITS.documentText),
   criterionIds: z.array(Id).max(LIMITS.criteriaPerOutcome * LIMITS.outcomes),
   sourceGenerationId: Id.optional(),
+  requirements: z
+    .array(z.object({ outcomeId: Id, line: z.string().min(1).max(LIMITS.requiredEvidenceText) }))
+    .max(LIMITS.requiredEvidence * LIMITS.outcomes)
+    .optional(),
   sourceCourse: z
     .object({
       courseId: Id,

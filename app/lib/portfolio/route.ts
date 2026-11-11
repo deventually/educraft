@@ -6,6 +6,7 @@
  */
 import { wordCount } from "./progress";
 import { readinessCheck, readinessSummary } from "./readiness";
+import { requirementChecklist, requirementMet } from "./requirements";
 import type { DossierData } from "./types";
 
 const OUTCOME_MILESTONES = ["evidence", "chapter", "review", "shown"] as const;
@@ -14,7 +15,7 @@ export type OutcomeMilestone = (typeof OUTCOME_MILESTONES)[number];
 export interface Milestone {
   id: OutcomeMilestone;
   complete: boolean;
-  /** What is done of this milestone, out of `total` (criteria with evidence, …). */
+  /** What is done of this milestone, out of `total` (criteria and required lines with evidence, …). */
   done: number;
   total: number;
   /** The first criterion still open, where it makes sense (evidence). */
@@ -40,6 +41,7 @@ export function outcomeRoute(d: DossierData, outcomeId: string): OutcomeRoute | 
   const chapter = d.chapters.find((ch) => ch.outcomeId === o.id);
   const words = chapter ? wordCount(chapter.text) : 0;
   const total = o.criteria.length;
+  const required = requirementChecklist(d, o.id);
   const step = (id: OutcomeMilestone, done: number, of: number, criterionId?: string) => ({
     id,
     done,
@@ -48,10 +50,11 @@ export function outcomeRoute(d: DossierData, outcomeId: string): OutcomeRoute | 
     ...(criterionId ? { criterionId } : {}),
   });
   const milestones: Milestone[] = [
+    // Every criterion needs evidence, and so does every line of the form's required evidence.
     step(
       "evidence",
-      o.criteria.filter((c) => linked.has(c.id)).length,
-      total,
+      o.criteria.filter((c) => linked.has(c.id)).length + required.filter(requirementMet).length,
+      total + required.length,
       o.criteria.find((c) => !linked.has(c.id))?.id,
     ),
     step("chapter", words > 0 ? 1 : 0, 1),

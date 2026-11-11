@@ -11,6 +11,7 @@ import { outcomeProgress } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import { dossierRoute, outcomeRoute } from "~/lib/portfolio/route";
 import { readinessCheck } from "~/lib/portfolio/readiness";
+import { requirementChecklist } from "~/lib/portfolio/requirements";
 import { openSpots } from "~/lib/portfolio/openSpots";
 import { dossierPart } from "~/lib/portfolio/dossierPart";
 import * as edit from "~/lib/portfolio/edit";
@@ -79,6 +80,7 @@ function outcomeData(d = sampleDossier()) {
     chapterTools: [] as { slug: string; name: string }[],
     courseHints: [] as string[],
     milestones: outcomeRoute(d, LU)!.milestones,
+    required: requirementChecklist(d, LU),
     snapshotCourses: {} as Record<string, string | null>,
     suggestions: {} as Record<
       string,
@@ -164,7 +166,7 @@ describe("Portfolio progress (guided route)", () => {
       "href",
       `/portfolio/${ID}/framework`,
     );
-    expect(within(steps).getByText("1 van 2 criteria met bewijs")).toBeInTheDocument();
+    expect(within(steps).getByText("2 van 4 bewijspunten klaar")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Volgende stap: LU1 Doceren" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Naar LU1 Doceren" })).toHaveAttribute(
       "href",
@@ -183,6 +185,9 @@ describe("Portfolio progress (guided route)", () => {
   it("leads to finishing and the interview practice once every outcome is done", async () => {
     let d = confirmed();
     d.evidence[0]!.criterionIds = [C1, C2];
+    d.evidence[0]!.requirements = [{ outcomeId: LU, line: "Opname van de les" }];
+    // One point still blocks handing in: the chapter is over the word limit.
+    d.framework.requirements.maxWords = 3;
     d = edit.setStatus(d, C2, "shown");
     const { container } = renderRoute(PortfolioOverview, overviewData(d));
     expect(screen.getByRole("heading", { name: "Volgende stap: Afronden" })).toBeInTheDocument();
@@ -436,7 +441,11 @@ describe("Portfolio outcome page", () => {
 
   it("shows the evidence with its links and an add form", () => {
     renderRoute(PortfolioOutcome, outcomeData(), "evidence");
-    expect(screen.getByText("Feedback werkplekbegeleider")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "Bewijs" })).getByText(
+        "Feedback werkplekbegeleider",
+      ),
+    ).toBeInTheDocument();
     const link = document.querySelector(`#ev-${EV}-title`) as HTMLInputElement;
     expect(link.value).toBe("Feedback werkplekbegeleider");
     expect(screen.getByRole("button", { name: "Bewijs toevoegen" })).toBeInTheDocument();
@@ -866,7 +875,10 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
 
   it("names the course and the date, links to it and offers 'Opnieuw ophalen'", async () => {
     const { container } = renderRoute(PortfolioOutcome, withSnapshot("Databases"), "evidence");
-    const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
+    const summary = within(screen.getByRole("region", { name: "Bewijs" })).getByText(
+      "Feedback werkplekbegeleider",
+      { exact: false },
+    );
     (summary.closest("details") as HTMLDetailsElement).open = true;
     expect(screen.getByText(/Uit cursus Databases, momentopname van 5 nov\.? 2026/)).toBeVisible();
     expect(screen.getByRole("link", { name: "Open de cursus" })).toHaveAttribute(
@@ -881,7 +893,10 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
 
   it("keeps the snapshot of a deleted course, without the button", () => {
     renderRoute(PortfolioOutcome, withSnapshot(null), "evidence");
-    const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
+    const summary = within(screen.getByRole("region", { name: "Bewijs" })).getByText(
+      "Feedback werkplekbegeleider",
+      { exact: false },
+    );
     (summary.closest("details") as HTMLDetailsElement).open = true;
     expect(screen.getByText(/Uit een cursus die niet meer bestaat/)).toBeVisible();
     expect(screen.queryByRole("button", { name: /Opnieuw ophalen/ })).toBeNull();
@@ -906,6 +921,25 @@ describe("Portfolio overview — back from Word", () => {
 
 describe("Portfolio tabs", () => {
   const confirmed = () => edit.confirmFramework(sampleDossier(), 1);
+
+  it("opens the evidence tab with the form's required evidence as a checklist", async () => {
+    const { container } = renderRoute(PortfolioOutcome, outcomeData(confirmed()), "evidence");
+    const list = screen.getByRole("list", { name: "Verplicht bewijs" });
+    expect(
+      within(list)
+        .getAllByRole("listitem")
+        .map((li) => li.textContent),
+    ).toEqual([
+      expect.stringContaining("Controleren: Feedback van de werkplekbegeleider"),
+      expect.stringContaining("Ontbreekt: Opname van de les"),
+    ]);
+    // "Nieuw bewijs toevoegen" jumps to the form on the same tab.
+    expect(screen.getByRole("heading", { name: "Bewijs toevoegen" })).toHaveAttribute(
+      "id",
+      "add-evidence-title",
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
 
   it("splits a learning outcome into four tabs, each with its own address", async () => {
     const { container } = renderRoute(PortfolioOutcome, outcomeData(confirmed()));

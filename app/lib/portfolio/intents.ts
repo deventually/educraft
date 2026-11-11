@@ -97,6 +97,12 @@ const SCHEMAS = {
     criterionIds: z.array(Id).default([]),
   }),
   removeEvidence: z.object({ evidenceId: Id }),
+  linkRequirement: z.object({
+    outcomeId: Id,
+    evidenceId: Id,
+    line: z.string().min(1).max(LIMITS.requiredEvidenceText),
+    linked: z.enum(["on", "off"]),
+  }),
   writeChapter: z.object({ outcomeId: Id, text: z.string().max(LIMITS.documentText) }),
   coachMode: z.object({ mode: z.enum(["coach", "draft"]) }),
   dismissDraftNotice: z.object({}),
@@ -249,6 +255,11 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
         ...v,
         criterionIds: [...kept, ...v.criterionIds],
       });
+    }
+    case "linkRequirement": {
+      const v = input as z.infer<(typeof SCHEMAS)["linkRequirement"]>;
+      const { outcomeId, line } = v;
+      return edit.linkRequirement(d, v.evidenceId, { outcomeId, line }, v.linked === "on");
     }
     case "removeEvidence": {
       const v = input as z.infer<(typeof SCHEMAS)["removeEvidence"]>;
