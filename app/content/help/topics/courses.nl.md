@@ -6,9 +6,19 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 - **Onderwijsactiviteiten:** de lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.
 - **Toetsen:** formatief of summatief, met de leeruitkomsten die ze toetsen en op welk niveau. Geef ook aan of een toets **onder toezicht** is, zoals een tentamen in een zaal of een mondeling. Dan ziet je reviewteam hoe makkelijk een student het werk aan AI kan overlaten.
 
+## De cursuspagina
+
+De cursuspagina heeft vijf tabbladen, elk voor één taak:
+
+- **Overzicht:** de gegevens van de cursus, het lesrooster, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
+- **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
+- **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
+- **Documenten en delen:** de modulewijzer en modulehandleiding, bewijs voor je dossier, gemaakt werk, de opleiding, delen met je team en wie meewerkt.
+
 ## Lesrooster
 
-Onder **Lesrooster** leg je één keer vast hoe de cursus loopt: het aantal weken, de lesmomenten per week, de duur van een lesmoment, de groepsgrootte en de contactvorm. Alles is optioneel, want elke opleiding werkt anders. Open je vanuit een les **Les voorbereiden**, dan staan de lesduur, de groepsgrootte en de contactvorm al ingevuld, net als de leeruitkomsten van die les, de titel en de lessen van de weken ervoor. Je kunt alles nog aanpassen.
+Onder **Lesrooster** op het tabblad Overzicht leg je één keer vast hoe de cursus loopt: het aantal weken, de lesmomenten per week, de duur van een lesmoment, de groepsgrootte en de contactvorm. Alles is optioneel, want elke opleiding werkt anders. Open je vanuit een les **Les voorbereiden**, dan staan de lesduur, de groepsgrootte en de contactvorm al ingevuld, net als de leeruitkomsten van die les, de titel en de lessen van de weken ervoor. Je kunt alles nog aanpassen.
 
 ## De controles
 
@@ -42,7 +52,7 @@ Staat een leeruitkomst of toets al in je cursus, dan wordt die niet dubbel toege
 
 ## Modulewijzer en modulehandleiding
 
-Onder **Modulewijzer en modulehandleiding** op de cursuspagina vul je de gegevens van de module in: modulecode, studiejaar, studiefase, moduleleider, examinator(en), een inhoudelijke beschrijving en de literatuur (één per regel). Een lege regel in de beschrijving begint een nieuwe alinea. Met **Modulewijzer exporteren** zie je eerst een voorbeeld en kies je dan Word, PDF (via het printvenster) of Markdown.
+Onder **Modulewijzer en modulehandleiding** op het tabblad Documenten en delen vul je de gegevens van de module in: modulecode, studiejaar, studiefase, moduleleider, examinator(en), een inhoudelijke beschrijving en de literatuur (één per regel). Een lege regel in de beschrijving begint een nieuwe alinea. Met **Modulewijzer exporteren** zie je eerst een voorbeeld en kies je dan Word, PDF (via het printvenster) of Markdown.
 
 De modulewijzer zet alles op een rij: de modulegegevens met de studiepunten, elke leeruitkomst met haar succescriteria, de beschrijving, en onder **Beoordeling** een tabel met elke toets (toetsvorm, soort, week, weging, cesuur), de examinatoren en per toets de voorwaarden en de herkansing. Er komt geen AI aan te pas, en wat je leeg laat, staat er niet in.
 

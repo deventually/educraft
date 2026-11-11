@@ -6,9 +6,19 @@ A **course** records three things and shows whether they line up:
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
 - **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
+## The course page
+
+The course page has five tabs, each for one task:
+
+- **Overview:** the course details, the schedule, importing from an existing document and your lessons and tests per week.
+- **Learning outcomes:** what the student can do at the end, with the success criteria.
+- **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
+- **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
+- **Documents and sharing:** the module guide and module handbook, evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
 ## Schedule
 
-Under **Schedule** you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
+Under **Schedule** on the Overview tab you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
 
 ## The checks
 
@@ -42,7 +52,7 @@ If a learning outcome or assessment is already in your course, it is not added t
 
 ## Module guide and module handbook
 
-Under **Module guide and module handbook** on the course page you fill in the details of the module: module code, study year, study phase, module leader, examiner(s), a description of the content and the literature (one per line). An empty line in the description starts a new paragraph. With **Export module guide** you first see a preview and then choose Word, PDF (through the print window) or Markdown.
+Under **Module guide and module handbook** on the Documents and sharing tab you fill in the details of the module: module code, study year, study phase, module leader, examiner(s), a description of the content and the literature (one per line). An empty line in the description starts a new paragraph. With **Export module guide** you first see a preview and then choose Word, PDF (through the print window) or Markdown.
 
 The module guide puts it all together: the module details with the credits, every learning outcome with its success criteria, the description, and under **Assessment** a table with every test (form, kind, week, weight, pass mark), the examiners and per test the conditions and the resit. No AI is involved, and whatever you leave empty is left out.
 
