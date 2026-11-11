@@ -332,7 +332,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   feeds `sessionMinutes`, `groupSize` and `deliveryMode`; optional `disciplines` (name, teacher,
   `hoursPerWeek`) with `Activity.disciplineId` turn `sessionMinutes` into that discipline's hours
   in the lesson's week over its lessons that week (rounded to 5, capped at a session). An activity has an optional
-  `goal` (one sentence, `COURSE_LIMITS.goal`): what the student can do after that lesson. `/api/stream` takes an optional `courseId` and links the saved generation;
+  `goal` (one sentence, `COURSE_LIMITS.goal`): what the student can do after that lesson;
+  `lessonGoal` fills it in (without a goal: as `learningOutcomes`). With a discipline,
+  `itemTitle` reads "Webtech: <title>" and `earlierLessons` lists only that discipline's lessons.
+  `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
