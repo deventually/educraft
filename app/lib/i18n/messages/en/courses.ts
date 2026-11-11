@@ -6,6 +6,8 @@ export const courses: Messages["courses"] = {
     discipline: "Discipline",
     disciplineNone: "None",
     empty: "No teaching activities yet.",
+    goal: "Lesson goal",
+    goalHint: "Optional, in one sentence: what can the student do after this lesson?",
     intro: "Lessons and assignments, with the week and the learning outcomes they teach.",
     kinds: { assignment: "Assignment", lesson: "Lesson" },
     outcomesLegend: "Which learning outcomes does this activity teach?",
