@@ -3,6 +3,8 @@ import type { Messages } from "../nl";
 export const courses: Messages["courses"] = {
   activities: {
     add: "Add activity",
+    discipline: "Discipline",
+    disciplineNone: "None",
     empty: "No teaching activities yet.",
     intro: "Lessons and assignments, with the week and the learning outcomes they teach.",
     kinds: { assignment: "Assignment", lesson: "Lesson" },
@@ -61,6 +63,17 @@ export const courses: Messages["courses"] = {
   deleteBody:
     "The course and its links to your work are deleted for good. Your work itself is kept.",
   deleteTitle: "Delete course?",
+  disciplines: {
+    add: "Add discipline",
+    empty: "No disciplines yet.",
+    hoursPerWeek: "Hours per week",
+    hoursValue: "{n} hours per week",
+    intro:
+      "Optional. Is your module made of disciplines, each with its own teacher and hours per week, such as Webtech or Hardware? Add them here. Give a lesson a discipline and Prepare a lesson works out the lesson length from that discipline's hours in that week.",
+    name: "Name",
+    teacher: "Teacher",
+    title: "Disciplines",
+  },
   edit: "Edit",
   emptyBody:
     "A course records what students should learn, how you teach it and how you assess it. LimeOnIt then points out where these do not line up.",

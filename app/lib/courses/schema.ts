@@ -33,6 +33,8 @@ export const COURSE_LIMITS = {
   sessionsPerWeek: 20,
   sessionMinutes: { min: 15, max: 600 },
   groupSize: 1_000,
+  disciplines: 12,
+  hoursPerWeek: 60,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
@@ -78,6 +80,14 @@ const ActivitySchema = z.object({
   kind: z.enum(ACTIVITY_KINDS),
   outcomeIds: z.array(Id).max(COURSE_LIMITS.outcomes),
   hours: Hours.optional(),
+  disciplineId: Id.optional(),
+});
+
+const DisciplineSchema = z.object({
+  id: Id,
+  name: z.string().min(1).max(COURSE_LIMITS.title),
+  teacher: z.string().min(1).max(COURSE_LIMITS.title).optional(),
+  hoursPerWeek: z.number().positive().max(COURSE_LIMITS.hoursPerWeek).optional(),
 });
 
 const ItemSchema = z.object({
@@ -152,6 +162,7 @@ export const CourseDataSchema = z
     ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
     startDate: IsoDateSchema.optional(),
     schedule: ScheduleSchema.optional(),
+    disciplines: z.array(DisciplineSchema).max(COURSE_LIMITS.disciplines).optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
     activities: z.array(ActivitySchema).max(COURSE_LIMITS.activities),
     assessments: z.array(AssessmentSchema).max(COURSE_LIMITS.assessments),
@@ -175,6 +186,10 @@ export const CourseDataSchema = z
     for (const ref of refs)
       if (!outcomeIds.has(ref))
         ctx.addIssue({ code: "custom", message: `Unknown learning outcome: ${ref}` });
+    const disciplineIds = new Set((d.disciplines ?? []).map((x) => x.id));
+    for (const a of d.activities)
+      if (a.disciplineId !== undefined && !disciplineIds.has(a.disciplineId))
+        ctx.addIssue({ code: "custom", message: `Unknown discipline: ${a.disciplineId}` });
   }) satisfies z.ZodType<CourseData>;
 
 export function emptyCourseData(): CourseData {

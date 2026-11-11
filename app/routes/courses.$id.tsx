@@ -29,6 +29,7 @@ import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { managesCourse, memberAction, memberControls } from "~/server/courseMembers.server";
 import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
+import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
@@ -225,6 +226,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               isOwner={isOwner}
             />
             <CourseSchedule schedule={data.schedule} />
+            <DisciplinesSection data={data} />
             <CourseImport
               courseName={course.name}
               startOpen={data.outcomes.length === 0}
