@@ -1,11 +1,12 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { BookOpen, CircleCheck, ClipboardList } from "lucide-react";
-import { weekPlan, type PlanItem } from "~/lib/courses/weekPlan";
+import { forDiscipline, weekPlan, type PlanItem } from "~/lib/courses/weekPlan";
 import type { CourseData } from "~/lib/courses/types";
 import type { CourseTools } from "~/lib/registry/courseActions";
 import { type LocalizedText, loc } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { cn } from "~/lib/utils";
+import { Label, Select } from "~/components/ui";
 import { WeekLabel } from "./fields";
 import { ItemTools } from "./ItemTools";
 
@@ -42,7 +43,11 @@ export function CourseWeekView({
   const t = useT();
   const m = t.courseTools;
   const id = useId();
-  const plan = weekPlan(data);
+  const disciplines = data.disciplines ?? [];
+  const [disciplineId, setDisciplineId] = useState("");
+  const plan = forDiscipline(weekPlan(data), disciplineId || null);
+  const disciplineName = (item: PlanItem) =>
+    disciplines.find((d) => d.id === item.disciplineId)?.name ?? null;
   const groups = [
     ...plan.weeks.map((w) => ({
       key: `w${w.week}`,
@@ -69,6 +74,24 @@ export function CourseWeekView({
         {m.title}
       </h2>
       <p className="mt-1 text-sm text-slate-600">{m.intro}</p>
+      {disciplines.length > 0 && (
+        <div className="mt-3 max-w-xs">
+          <Label htmlFor={`${id}-discipline`}>{m.discipline}</Label>
+          <Select
+            id={`${id}-discipline`}
+            value={disciplineId}
+            onChange={(e) => setDisciplineId(e.target.value)}
+            className="mt-1"
+          >
+            <option value="">{m.allDisciplines}</option>
+            {disciplines.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+      )}
       {groups.length === 0 ? (
         <p className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white/60 px-4 py-6 text-center text-sm text-slate-600">
           {m.empty}
@@ -113,6 +136,7 @@ export function CourseWeekView({
                     key={item.id}
                     courseId={courseId}
                     item={item}
+                    discipline={disciplineName(item)}
                     tools={tools[item.kind]}
                     work={work.filter((w) => w.itemId === item.id)}
                     current={g.current}
@@ -130,12 +154,14 @@ export function CourseWeekView({
 function WeekItem({
   courseId,
   item,
+  discipline,
   tools,
   work,
   current,
 }: {
   courseId: string;
   item: PlanItem;
+  discipline: string | null;
   tools: CourseTools["activity"];
   work: WeekWork[];
   current: boolean;
@@ -167,6 +193,7 @@ function WeekItem({
           <p className="font-medium text-slate-900">{item.title}</p>
           <p className="text-xs text-slate-500">
             {isTest ? t.week.kindAssessment : t.week.kindActivity}
+            {discipline && ` · ${discipline}`}
           </p>
           {work.length > 0 && (
             <ul className="mt-2 flex list-none flex-wrap gap-1.5 p-0">
