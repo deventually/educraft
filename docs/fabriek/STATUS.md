@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 en #260 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #264 gemerged)_
 
 ## Nu
 
+- **Beginnen met een bestaande module (#264) gemerged op 2026-11-11:** de cursusimport
+  (`course-import@v2`) leest nu ook wat een toetsmatrijs en nakijkmodel nodig hebben: modulecode,
+  succescriteria, per toets vorm, cesuur, herkansing en onderdelen met weging, knock-out en
+  criteria. Het is een voorstel dat de docent bevestigt; alleen lege velden worden aangevuld.
 - **Maandlimieten in euro's (#260) gemerged op 2026-11-11:** de eigenaar zet een maandbudget voor
   de instelling, beheer een maandlimiet per team en per docent (een eigen limiet vervangt die van
   de teams). Vanaf 80% krijgt de docent één melding (een aandeel, nooit euro's), bij 100% weigert
