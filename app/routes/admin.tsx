@@ -3,6 +3,7 @@ import {
   Activity,
   BotMessageSquare,
   Bug,
+  Gauge,
   GraduationCap,
   ScrollText,
   SlidersHorizontal,
@@ -42,6 +43,7 @@ const SECTIONS = [
   { to: "/admin/tools", key: "tools", Icon: SlidersHorizontal },
   { to: "/admin/agents", key: "agents", Icon: BotMessageSquare },
   { to: "/admin/context", key: "context", Icon: GraduationCap },
+  { to: "/usage", key: "aiUsage", Icon: Gauge },
   { to: "/admin/usage", key: "usage", Icon: Activity },
   { to: "/admin/audit", key: "audit", Icon: ScrollText },
 ] as const;

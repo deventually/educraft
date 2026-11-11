@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #251 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #252 gemerged)_
 
 ## Nu
 
+- **Prijzen per model (#252) gemerged op 2026-11-11:** elk API-model in `config/models.json` heeft
+  de lijstprijs van de aanbieder (met datum en bronpagina) en een ECB-wisselkoers voor dollars.
+  Beheer zet op het tabblad Modellen een eigen prijs per model (een schoolcontract); die gaat
+  voor en komt in het logboek. Elke aanroep krijgt de prijs van dat moment mee (`ai_usage`,
+  migratie 0030); zonder prijs telt hij als "prijs onbekend". De skill `/model-prices` houdt de
+  prijzen bij. BESLUIT-2026-11-11-4.
 - **Prompt caching (#250) gemerged op 2026-11-11:** elke aanbieder in `config/models.json` heeft
   een cachestrategie (`cache`). Bij Anthropic markeert LimeOnIt zelf wat bewaard wordt (de
   systeemprompt en de beurt voor de laatste). Bij OpenAI, Mistral en OpenRouter gaat er per gesprek

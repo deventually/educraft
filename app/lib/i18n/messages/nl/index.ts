@@ -44,6 +44,7 @@ import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
 import { twoFactor } from "./twoFactor";
+import { usage } from "./usage";
 import { utilities } from "./utilities";
 import { week } from "./week";
 
@@ -109,6 +110,7 @@ export const nl = {
   toast,
   tool,
   twoFactor,
+  usage,
   utilities,
   week,
 };

@@ -16,4 +16,5 @@ export const nav: Messages["nav"] = {
   skipToContent: "Skip to main content",
   start: "Start",
   tools: "Tools",
+  usage: "Usage",
 };

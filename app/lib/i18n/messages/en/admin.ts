@@ -4,11 +4,12 @@ export const admin: Messages["admin"] = {
   console: {
     nav: {
       agents: "Review team",
+      aiUsage: "AI use and cost",
       audit: "Audit log",
       context: "Teaching context",
       teams: "Teams",
       tools: "Tools and models",
-      usage: "Usage and feedback",
+      usage: "Feedback and pilot",
       users: "Users",
     },
     saved: "Saved.",
@@ -153,18 +154,5 @@ export const admin: Messages["admin"] = {
     noMatch: "No tools found.",
     search: "Search for a tool",
     tabs: { label: "Parts of this page", models: "Models", providers: "Providers", tools: "Tools" },
-  },
-  usage: {
-    colChars: "Characters",
-    colCount: "Generations",
-    colDay: "Day",
-    colRequests: "Requests",
-    colTool: "Tool",
-    colUser: "User",
-    empty: "No usage recorded yet.",
-    heading: "Usage",
-    intro: "Daily usage per user over the last 14 days.",
-    perToolHeading: "Per tool",
-    rangeNote: "Last 14 days",
   },
 };

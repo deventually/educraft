@@ -28,9 +28,13 @@ Zet het reviewteam aan of uit, en elk lid apart. Het reviewteam geeft docenten a
 
 Kies welke onderwijssectoren (vo, mbo, hbo, wo) en domeinen docenten in hun onderwijscontext kunnen kiezen.
 
-## Gebruik en feedback
+## AI-gebruik en kosten
 
-Hier zie je het gebruik per docent en per tool over de laatste 14 dagen, en wat docenten bij *Was dit nuttig?* invulden.
+Deze link opent de pagina **Gebruik**. Als beheerder zie je daar het AI-gebruik van iedereen: per persoon, team, tool en model, met de kosten in euro's. Zie [Wat we meten](/help/usage).
+
+## Feedback en pilot
+
+Hier zie je wat docenten bij *Was dit nuttig?* invulden, en per tool hoe de pilot loopt.
 
 ## Logboek
 

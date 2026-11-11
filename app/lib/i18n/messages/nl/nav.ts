@@ -14,4 +14,5 @@ export const nav = {
   skipToContent: "Naar hoofdinhoud",
   start: "Start",
   tools: "Tools",
+  usage: "Gebruik",
 };
