@@ -95,6 +95,12 @@ describe("exporting the module guide from the course", () => {
     expect(data.doc.title).toBe("Databases: modulewijzer");
   });
 
+  it("also gives the module handbook", async () => {
+    const data = await loadPreview("module-handbook");
+    expect(data.doc.title).toBe("Databases: modulehandleiding");
+    expect(data.downloads.map((d) => d.href)).toContain(`${base("module-handbook")}/export/docx`);
+  });
+
   it("is a 404 for an unknown document and for a colleague without a part in the course", async () => {
     expect(await status(loadPreview("handbook-x"))).toBe(404);
     await signInAs({ id: "mg-b" });

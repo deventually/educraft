@@ -83,6 +83,13 @@ describe("module details of the course", () => {
     expect(d.phase).toBe("Propedeuse, semester 1");
     expect(refused(d, { ...fields, description: "x".repeat(5_001) }).ok).toBe(false);
   });
+
+  it("keeps the literature for the module handbook", () => {
+    const d = ok(alignedCourse(), { intent: "set-module", literature: "Boek A\nArtikel B" });
+    expect(d.literature).toBe("Boek A\nArtikel B");
+    expect(CourseDataSchema.safeParse(d).success).toBe(true);
+    expect(ok(d, { intent: "set-module", literature: "" }).literature).toBeUndefined();
+  });
 });
 
 describe("test details for the blueprint and the marking model", () => {

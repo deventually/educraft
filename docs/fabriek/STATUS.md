@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #265 en #268 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266 en #268 gemerged)_
 
 ## Nu
 
+- **Modulewijzer uit de cursus (#266) gemerged op 2026-11-11:** een eigen blok op de cursuspagina
+  met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en beschrijving. Daaruit
+  komt zonder AI een modulewijzer als Word, PDF of Markdown, met leeruitkomsten, succescriteria en
+  de beoordeling per toets.
 - **Browsertests voorlopig lokaal (#268) gemerged op 2026-11-11:** de GitHub-runner kon Chromium
   niet installeren (DNS). De `e2e`-job draait daarom alleen als de repositoryvariabele
   `E2E_IN_CI` op `true` staat; tot dan draait de werker `npm run test:e2e` zelf en zet de uitslag
@@ -641,12 +645,11 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #265 en #268 gemerged)_
 
 ## Bezig
 
-- **Modulewijzer uit de cursus (PR open):** een eigen blok *Modulewijzer* op de cursuspagina
-  met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en een inhoudelijke
-  beschrijving (`set-module`; de instellingen dragen ze niet meer). Daaruit komt zonder AI een
-  modulewijzer als Word, PDF of Markdown: modulegegevens met EC, leeruitkomsten met
-  succescriteria, de beschrijving en de beoordeling (per toets vorm, soort, week, weging, cesuur,
-  voorwaarden en herkansing). Nieuwe exportroutes `courses/:id/documents/:document`; geen migratie.
+- **Modulehandleiding uit de cursus (PR open):** naast de modulewijzer exporteert de cursus nu
+  zonder AI een modulehandleiding: modulegegevens, inleiding (de beschrijving), studielast en duur,
+  leeruitkomsten met succescriteria, de opbouw per week, per toets de gegevens, voorwaarden en
+  onderdelen, en de literatuur (nieuw modulegegeven, één per regel). Het blok heet nu
+  *Modulewijzer en modulehandleiding*; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

@@ -222,7 +222,7 @@ export function removePart(d: CourseData, assessmentId: string, partId: string):
 
 type ModuleDetails = Pick<
   CourseData,
-  "code" | "studyYear" | "phase" | "leader" | "examiners" | "description"
+  "code" | "studyYear" | "phase" | "leader" | "examiners" | "description" | "literature"
 >;
 
 /** Sets the module details that are given; `undefined` clears each. */

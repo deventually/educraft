@@ -1,7 +1,7 @@
 /**
- * The module guide (modulewijzer) on the course page: the module details in their own form
- * (`set-module`) and the export of the guide. The learning outcomes, success criteria and tests
- * in the guide come from the rest of the course.
+ * The module guide (modulewijzer) and handbook (modulehandleiding) on the course page: the module
+ * details in their own form (`set-module`) and the export of both. The learning outcomes, success
+ * criteria, activities and tests in them come from the rest of the course.
  */
 import { useId } from "react";
 import { Form } from "react-router";
@@ -69,11 +69,30 @@ export function ModuleGuideSection({ courseId, data }: { courseId: string; data:
               {m.descriptionHint}
             </p>
           </div>
+          <div>
+            <Label htmlFor={`${id}-literature`}>{m.literature}</Label>
+            <Textarea
+              id={`${id}-literature`}
+              name="literature"
+              rows={3}
+              maxLength={COURSE_LIMITS.longText}
+              defaultValue={data.literature ?? ""}
+              aria-describedby={`${id}-literature-hint`}
+              className="mt-1"
+            />
+            <p id={`${id}-literature-hint`} className="mt-1 text-xs text-slate-500">
+              {m.literatureHint}
+            </p>
+          </div>
           <Button type="submit" size="sm" variant="secondary">
             {t.courses.save}
           </Button>
         </Form>
         <ExportPanel url={`/courses/${courseId}/documents/module-guide/export`} label={g.export} />
+        <ExportPanel
+          url={`/courses/${courseId}/documents/module-handbook/export`}
+          label={t.courseDocuments.moduleHandbook.export}
+        />
       </Card>
     </section>
   );
