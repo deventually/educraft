@@ -1,5 +1,5 @@
 /**
- * The monthly AI limits in euros (PR D, BESLUIT-2026-11-11-7), checked before every AI call
+ * The monthly AI limits in euros (PR D, BESLUIT-2026-11-11-8), checked before every AI call
  * and shown on the tool page and the usage page. Admins are never limited. Which limit binds
  * is pure (`applicableLimit`); this module reads the limits, the teacher's teams and the
  * month's spend.

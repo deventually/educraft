@@ -188,17 +188,18 @@ export async function saveCourseIntent(
       course.ownerId === user.id
         ? String(fd.get("contextProfileId") ?? "") || null
         : course.contextProfileId;
-    // The settings form also carries the EC and the start date (P22.1); each goes
+    // The settings form also carries the EC, the start date (P22.1) and the module details; each goes
     // through the same intent boundary as the rest of the editor.
     let data = course.data;
-    for (const [field, intent] of [
-      ["ec", "set-ec"],
-      ["startDate", "set-start-date"],
+    for (const [fields, intent] of [
+      [["ec"], "set-ec"],
+      [["startDate"], "set-start-date"],
+      [["code", "studyYear"], "set-module"],
     ] as const) {
-      if (!fd.has(field)) continue;
+      if (!fields.some((f) => fd.has(f))) continue;
       const one = new FormData();
       one.set("intent", intent);
-      one.set(field, String(fd.get(field) ?? ""));
+      for (const field of fields) one.set(field, String(fd.get(field) ?? ""));
       const r = applyCourseIntent(data, one);
       if (!r.ok) return { ok: false, error: m.errorInvalid };
       data = r.data;

@@ -8,6 +8,7 @@ import type {
   Assessment,
   AssessmentCoverage,
   AssessmentItem,
+  AssessmentPart,
   CourseData,
   LearningOutcome,
 } from "./types";
@@ -80,6 +81,9 @@ export function removeOutcome(d: CourseData, id: string): CourseData {
       ...a,
       coverage: a.coverage.filter((c) => c.outcomeId !== id),
       ...(a.items && { items: a.items.filter((i) => i.outcomeId !== id) }),
+      ...(a.parts && {
+        parts: a.parts.map((p) => ({ ...p, outcomeIds: p.outcomeIds.filter((o) => o !== id) })),
+      }),
     })),
   };
 }
@@ -171,6 +175,57 @@ export function updateItem(
 
 export function removeItem(d: CourseData, assessmentId: string, itemId: string): CourseData {
   return withItems(d, assessmentId, (items) => without(items, itemId));
+}
+
+// Parts of an assessment (onderdelen, for the blueprint and the marking model)
+
+function withParts(
+  d: CourseData,
+  assessmentId: string,
+  change: (parts: AssessmentPart[]) => AssessmentPart[],
+): CourseData {
+  const next = structuredClone(d);
+  if (!next.assessments.some((a) => a.id === assessmentId))
+    throw new Error(`Unknown item: ${assessmentId}`);
+  return {
+    ...next,
+    assessments: next.assessments.map((a) =>
+      a.id === assessmentId ? { ...a, parts: change(a.parts ?? []) } : a,
+    ),
+  };
+}
+
+export function addPart(
+  d: CourseData,
+  assessmentId: string,
+  part: Omit<AssessmentPart, "id">,
+): CourseData {
+  assertOutcomes(d, part.outcomeIds);
+  return withParts(d, assessmentId, (parts) => [...parts, create<AssessmentPart>(part)]);
+}
+
+export function updatePart(
+  d: CourseData,
+  assessmentId: string,
+  partId: string,
+  patch: Patch<AssessmentPart>,
+): CourseData {
+  if (patch.outcomeIds) assertOutcomes(d, patch.outcomeIds);
+  return withParts(d, assessmentId, (parts) => replace(parts, partId, patch));
+}
+
+export function removePart(d: CourseData, assessmentId: string, partId: string): CourseData {
+  return withParts(d, assessmentId, (parts) => without(parts, partId));
+}
+
+// Module details
+
+/** Sets the module code and the study year; `undefined` clears each. */
+export function setModule(
+  d: CourseData,
+  module: { code: string | undefined; studyYear: string | undefined },
+): CourseData {
+  return compact({ ...d, ...module });
 }
 
 // Study load

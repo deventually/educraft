@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { FormResultLayout } from "~/components/FormResultLayout";
 import { Sparkles, Square, AlertTriangle, Lock, RotateCcw } from "lucide-react";
 import type { Tool, OutputLanguage, ToolStage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
+import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
 import { CoursePicker } from "./CoursePicker";
 import { ResultActions, type ResultContext } from "./ResultActions";
 import { ToolControls, type PickerModel } from "./ToolControls";
@@ -76,7 +77,7 @@ export function StageStepper({
   const [lastGenerationId, setLastGenerationId] = useState<string | null>(null);
   // P30.1: the saved result of each step, so the export holds all of them in one file.
   const [savedIds, setSavedIds] = useState<Record<string, string>>({});
-  const abortRefs = useRef<Record<string, AbortController>>({});
+  const streams = useStreamAborts();
 
   const outputs = (): Record<string, string> =>
     Object.fromEntries(
@@ -107,8 +108,7 @@ export function StageStepper({
       setFormError(null);
     }
     setStage(stage.id, { output: "", streaming: true, error: null });
-    const ctrl = new AbortController();
-    abortRefs.current[stage.id] = ctrl;
+    const signal = streams.start(stage.id);
     await streamPost(
       "/api/stream",
       {
@@ -146,12 +146,12 @@ export function StageStepper({
         onError: (err) =>
           setStage(stage.id, { streaming: false, error: err.message ?? t.error.unknown }),
       },
-      ctrl.signal,
+      signal,
     );
   }
 
   function stop(id: string) {
-    abortRefs.current[id]?.abort();
+    streams.abort(id);
     setStage(id, { streaming: false });
   }
 

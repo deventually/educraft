@@ -2,7 +2,7 @@
 name: release
 description: >-
   Prepare a LimeOnIt release: collect what was merged since the last tag, run the release
-  checklist (CI, audit, prompts and evals, model prices, migrations, settings, privacy), pick
+  checklist (CI, audit, security and accessibility reviews, prompts and evals, model prices, migrations, settings, privacy), pick
   the SemVer number, write the RELEASE.md entry in plain Dutch and open the "Release X.Y.Z"
   PR. Never sets the tag itself. Triggers: "release", "maak een release", "nieuwe versie",
   "uitrollen", "release notes".
@@ -49,6 +49,10 @@ did not check is not ticked.
 - [ ] `npm audit --omit=dev --audit-level=moderate` is clean.
 - [ ] The latest nightly **Mutation testing** run is green (Stryker breaks below 70%). Note its
       score.
+- [ ] `/security-review` over everything since the last tag (`git diff $RANGE`). Note what it
+      found; a real finding gets fixed before the release, not after.
+- [ ] `/accessibility-review` of every screen whose components or routes changed since the last
+      tag. Note what it found and what it could not check (no real screen reader).
 - [ ] No open Dependabot PR is half done. If there are many, say so and suggest
       `/maintenance` first.
 

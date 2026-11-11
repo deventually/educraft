@@ -178,3 +178,22 @@ describe("StageStepper (multi-stage)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("StageStepper — leaving stops the model call", () => {
+  it("aborts every running stage when the stepper closes", async () => {
+    const spy = await streamSpy();
+    const signals: AbortSignal[] = [];
+    spy.mockImplementation(async (_url, _body, _handlers, signal: AbortSignal) => {
+      signals.push(signal);
+      return new Promise<void>(() => {});
+    });
+    const user = userEvent.setup();
+    const { unmount } = renderStepper();
+    await fillRequired(user);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
+    expect(signals.map((s) => s.aborted)).toEqual([false]);
+
+    unmount();
+    expect(signals.map((s) => s.aborted)).toEqual([true]);
+  });
+});

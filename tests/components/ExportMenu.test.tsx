@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
-import { ExportMenu } from "~/components/export/ExportMenu";
+import { ExportMenu, ExportPanel } from "~/components/export/ExportMenu";
 import { ExportPreview } from "~/components/export/ExportPreview";
 import { toExportDoc } from "~/lib/export/doc";
 
@@ -100,5 +100,37 @@ describe("ExportMenu (P30.1)", () => {
     show();
     expect(screen.queryByRole("region", { name: /Voorbeeld/ })).toBeNull();
     expect(screen.queryByRole("link", { name: /Word/ })).toBeNull();
+  });
+});
+
+describe("ExportPanel: an export of anything with a preview route", () => {
+  it("loads the preview from its own url and carries its own label", async () => {
+    const Stub = createRoutesStub([
+      {
+        path: "/courses/c1",
+        Component: () => (
+          <ExportPanel url="/courses/c1/assessments/t1/export" label="Toetsmatrijs exporteren" />
+        ),
+      },
+      {
+        path: "/courses/c1/assessments/t1/export",
+        loader: () => ({
+          doc,
+          downloads: [{ format: "docx", href: "/courses/c1/assessments/t1/export/docx" }],
+        }),
+      },
+    ]);
+    const { container } = render(<Stub initialEntries={["/courses/c1"]} />);
+    const details = container.querySelector("details") as HTMLDetailsElement;
+    expect(screen.getByText("Toetsmatrijs exporteren")).toBeTruthy();
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: /Word/ })).toHaveAttribute(
+        "href",
+        "/courses/c1/assessments/t1/export/docx",
+      ),
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

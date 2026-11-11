@@ -68,6 +68,10 @@ The stream (`app/lib/ai/sse.ts`) sends a `: keep-alive` comment every 15 s
 long answer before its first token. When the teacher closes the tab, the route aborts
 the model call: `request.signal` and the stream's `cancel` both reach the provider as
 `GenerateOptions.signal`; nothing is saved and the log line says `aborted`.
+Leaving inside the app counts too: a view that streams (`GeneratorView`, `StageStepper`,
+`useChatSession`) takes its signals from `useStreamAborts`, which aborts every running call
+when the view closes, so navigating away or closing a part of the page stops the model call
+the same way. The call is still counted once, as failed (`failedCalls`, tokens unknown).
 
 ---
 
@@ -185,7 +189,7 @@ LimeOnIt is not tied to one model vendor.
   from `aiUsageReports.server.ts` (grouped in SQL, capped at 500 rows); the arithmetic
   (months, weeks, forecast, savings) is pure in `app/lib/usage/summary.ts`. Help topic `usage`
   ("Wat we meten"). Beheer → *Feedback en pilot* keeps feedback and the pilot only.
-- **Monthly AI limits (PR D, BESLUIT-2026-11-11-7).** The owner sets a monthly budget for the
+- **Monthly AI limits (PR D, BESLUIT-2026-11-11-8).** The owner sets a monthly budget for the
   institution, an admin a monthly limit in euros per team and per teacher, stored as one JSON
   value in `instance_settings` (`aiLimits.server.ts` repository; `parseAiLimits` drops a broken
   entry, never the set). `applicableLimit` (`app/lib/usage/limits.ts`, pure) picks the limit

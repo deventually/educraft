@@ -5,6 +5,7 @@ import {
   ACTIVITY_KINDS,
   ASSESSMENT_KINDS,
   ITEM_FORMATS,
+  GRADINGS,
   type CourseData,
   HOURS_PER_EC,
 } from "./types";
@@ -22,6 +23,12 @@ export const COURSE_LIMITS = {
   items: 200,
   itemLabel: 20,
   points: 1_000,
+  code: 40,
+  criteria: 20,
+  criterionCode: 20,
+  parts: 30,
+  conditions: 20,
+  longText: 3_000,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
@@ -49,6 +56,15 @@ const OutcomeSchema = z.object({
   text: z.string().min(1).max(COURSE_LIMITS.text),
   bloom: Bloom.optional(),
   packTags: PackTagsSchema.optional(),
+  criteria: z
+    .array(
+      z.object({
+        code: z.string().min(1).max(COURSE_LIMITS.criterionCode).optional(),
+        text: z.string().min(1).max(COURSE_LIMITS.text),
+      }),
+    )
+    .max(COURSE_LIMITS.criteria)
+    .optional(),
 });
 
 const ActivitySchema = z.object({
@@ -69,6 +85,19 @@ const ItemSchema = z.object({
   points: z.number().min(0).max(COURSE_LIMITS.points).optional(),
 });
 
+const PartSchema = z.object({
+  id: Id,
+  title: z.string().min(1).max(COURSE_LIMITS.title),
+  outcomeIds: z.array(Id).max(COURSE_LIMITS.outcomes),
+  weight: z.number().min(0).max(100).optional(),
+  knockOut: z.boolean().optional(),
+  pass: z.string().min(1).max(COURSE_LIMITS.longText).optional(),
+  fail: z.string().min(1).max(COURSE_LIMITS.longText).optional(),
+});
+
+const ShortText = z.string().min(1).max(COURSE_LIMITS.title);
+const LongText = z.string().min(1).max(COURSE_LIMITS.longText);
+
 const AssessmentSchema = z.object({
   id: Id,
   title: z.string().min(1).max(COURSE_LIMITS.title),
@@ -81,10 +110,23 @@ const AssessmentSchema = z.object({
     .max(COURSE_LIMITS.outcomes),
   hours: Hours.optional(),
   items: z.array(ItemSchema).max(COURSE_LIMITS.items).optional(),
+  form: ShortText.optional(),
+  owner: ShortText.optional(),
+  grading: z.enum(GRADINGS).optional(),
+  passMark: z.number().min(0).max(100).optional(),
+  conditions: z
+    .array(z.string().min(1).max(COURSE_LIMITS.text))
+    .max(COURSE_LIMITS.conditions)
+    .optional(),
+  resit: LongText.optional(),
+  conduct: LongText.optional(),
+  parts: z.array(PartSchema).max(COURSE_LIMITS.parts).optional(),
 });
 
 export const CourseDataSchema = z
   .object({
+    code: z.string().min(1).max(COURSE_LIMITS.code).optional(),
+    studyYear: z.string().min(1).max(COURSE_LIMITS.code).optional(),
     ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
     startDate: IsoDateSchema.optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
@@ -95,7 +137,8 @@ export const CourseDataSchema = z
     // The stored graph is always consistent: unique ids, no dangling references.
     const seen = new Set<string>();
     const questions = d.assessments.flatMap((a) => a.items ?? []);
-    for (const item of [...d.outcomes, ...d.activities, ...d.assessments, ...questions]) {
+    const parts = d.assessments.flatMap((a) => a.parts ?? []);
+    for (const item of [...d.outcomes, ...d.activities, ...d.assessments, ...questions, ...parts]) {
       if (seen.has(item.id)) ctx.addIssue({ code: "custom", message: `Duplicate id: ${item.id}` });
       seen.add(item.id);
     }
@@ -104,6 +147,7 @@ export const CourseDataSchema = z
       ...d.activities.flatMap((a) => a.outcomeIds),
       ...d.assessments.flatMap((a) => a.coverage.map((c) => c.outcomeId)),
       ...questions.map((q) => q.outcomeId),
+      ...parts.flatMap((p) => p.outcomeIds),
     ];
     for (const ref of refs)
       if (!outcomeIds.has(ref))

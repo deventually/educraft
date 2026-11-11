@@ -7,7 +7,7 @@ export function LanguageSwitcher({ current, redirectTo }: { current: string; red
     <Form
       method="post"
       action="/set-locale"
-      className="ml-1 flex items-center rounded-lg border border-slate-200 bg-white p-0.5"
+      className="flex items-center rounded-lg sm:ml-1 border border-slate-200 bg-white p-0.5"
     >
       <input type="hidden" name="redirectTo" value={redirectTo} />
       {LOCALES.map((loc) => (

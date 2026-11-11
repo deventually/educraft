@@ -107,6 +107,22 @@ function OutcomeForm({ outcome, pack }: { outcome?: LearningOutcome; pack?: Doma
           label={t.courses.bloomLabel}
         />
       </div>
+      <div>
+        <Label htmlFor={`${id}-criteria`}>{t.courseDocuments.criteria.label}</Label>
+        <Textarea
+          id={`${id}-criteria`}
+          name="criteria"
+          rows={3}
+          defaultValue={(outcome?.criteria ?? [])
+            .map((c) => (c.code ? `${c.code}: ${c.text}` : c.text))
+            .join("\n")}
+          aria-describedby={`${id}-criteria-hint`}
+          className="mt-1"
+        />
+        <p id={`${id}-criteria-hint`} className="mt-1 text-xs text-slate-500">
+          {t.courseDocuments.criteria.hint}
+        </p>
+      </div>
       {pack && <PackTagFields pack={pack} outcome={outcome} />}
       <Button type="submit" size="sm" variant={outcome ? "secondary" : "primary"}>
         {outcome ? t.courses.save : t.courses.outcomes.add}
@@ -151,6 +167,19 @@ export function OutcomesSection({
                   {t.courses.bloomLabel}: {bloomLabel(o.bloom, locale)}
                 </p>
               )}
+              {o.criteria?.length ? (
+                <ul
+                  aria-label={`${t.courseDocuments.criteria.label} ${outcomeName(i)}`}
+                  className="mt-1 list-disc pl-5 text-sm text-slate-600"
+                >
+                  {o.criteria.map((c) => (
+                    <li key={`${c.code ?? ""}${c.text}`}>
+                      {c.code && <strong className="font-medium">{c.code} </strong>}
+                      {c.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {packTagLines(o.packTags, pack, (text) => loc(text, locale)).map((line) => (
                 <p key={line} className="text-sm text-slate-600">
                   {line}

@@ -1,5 +1,5 @@
 /**
- * Monthly AI limits in euros (PR D, BESLUIT-2026-11-11-7): the owner's budget for the whole
+ * Monthly AI limits in euros (PR D, BESLUIT-2026-11-11-8): the owner's budget for the whole
  * institution, an admin's limit per team and per teacher. A teacher's own limit replaces the
  * team limits; the budget always counts. From 80% the teacher sees a warning, at 100% the AI
  * stops until the next month. Admins are never limited (the server checks that first). Pure:

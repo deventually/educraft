@@ -4,13 +4,31 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #256 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
 
 ## Nu
 
-- **Bewaartermijn AI-gebruik (#256) gemerged op 2026-11-11:** gebruik per persoon blijft 13
-  maanden; daarna rolt de server het op tot maandtotalen per tool en model, voor de instelling en
-  per team, zonder naam (BESLUIT-2026-11-11-6).
+- **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** een cursus legt
+  nu vast wat de toetsdocumenten van een school nodig hebben (alles optioneel, geen migratie).
+  Daaruit maakt elke toets, zonder AI, een toetsmatrijs per leeruitkomst en, met onderdelen, een
+  nakijkmodel, als Word, PDF of Markdown.
+- **AI-aanroep stopt ook bij sluiten of wegnavigeren (#259) gemerged op 2026-11-11:** sluit een
+  docent een tool of chat, of gaat die binnen de app naar een andere pagina terwijl de AI nog
+  schrijft, dan breekt de aanroep af (`useStreamAborts`) en kost hij geen tokens meer. De pagina
+  *Gebruik* telt zo'n aanroep één keer, als mislukt.
+- **Uitklapmenu's in de kop (#258) gemerged op 2026-11-11:** het accountmenu en het mobiele menu
+  sluiten met Esc, met een klik ernaast of als Tab het menu verlaat; de pijltjestoetsen lopen
+  rond, Home/End springen naar de uiteinden (`useDisclosure`). Menulinks tonen een focusring en
+  de kop past op 320px (`e2e/reflow.spec.ts`).
+- **Skill /accessibility-review (#257) gemerged op 2026-11-11:** loopt een scherm door zoals een
+  toetsenbord- of schermlezergebruiker, omdat axe maar een deel vindt. Verplicht bij een PR die
+  verandert wat een gebruiker ziet; `/security-review` bij een PR die repositories, auth, sessies
+  of `/api` raakt; allebei in `/release`. BESLUIT-2026-11-11-7.
+- **AI-gebruik 13 maanden per persoon bewaren (#256) gemerged op 2026-11-11:** regels in
+  `ai_usage` ouder dan de dertien maanden die de pagina *Gebruik* toont, worden maandtotalen per
+  tool en model zonder persoon (`ai_usage_rollup`, migratie 0031), voor de hele instelling en
+  per team; de regels per persoon gaan weg. Een timer doet dit elk uur; een fout wordt gelogd en
+  stopt de app niet. BESLUIT-2026-11-11-6.
 - **Pagina Gebruik (#255) gemerged op 2026-11-11:** één pagina `/usage` voor iedereen, met per
   rol een andere kring (BESLUIT-2026-11-11-1). De docent ziet het eigen gebruik en wat er vandaag
   nog over is; een teamleider de teamtotalen, zonder namen en geld, en alleen het totaal bij

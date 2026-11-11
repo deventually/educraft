@@ -113,6 +113,24 @@ describe("/courses/:id", () => {
     expect(data.linkedWork).toEqual([]);
   });
 
+  it("saves the module code and study year with the settings", async () => {
+    const c = await repo.createCourse("teacher-a", { name: "Module", data: alignedCourse() });
+    expect(
+      await act(c.id, {
+        intent: "settings",
+        name: "Module",
+        code: "HELWO",
+        studyYear: "2026-2027",
+      }),
+    ).toEqual({ ok: true });
+    expect((await repo.getCourse("teacher-a", c.id))!.data).toMatchObject({
+      code: "HELWO",
+      studyYear: "2026-2027",
+    });
+    await act(c.id, { intent: "settings", name: "Module", code: "", studyYear: "" });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.code).toBeUndefined();
+  });
+
   it("saves the start date with the settings and gives the week dates (P22.1)", async () => {
     const settings = await import("~/server/repositories/settings.server");
     await settings.setBreakWeeks(["2026-09-14"]);

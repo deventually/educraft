@@ -14,7 +14,7 @@ import { extractJson, verbatimIn, wrapAsData } from "~/lib/ai/structuredAnswer";
 import { normalizeForMatch } from "~/lib/documents/locate";
 import { BLOOM_LEVELS, type BloomLevel } from "./bloom";
 import * as edit from "./edit";
-import { optionalNumber } from "./intents";
+import { optionalNumber } from "./intentFields";
 import { COURSE_LIMITS, CourseDataSchema } from "./schema";
 import { ASSESSMENT_KINDS, type AssessmentKind, type CourseData } from "./types";
 
