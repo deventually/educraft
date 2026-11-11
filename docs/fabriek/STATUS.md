@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #277 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #278 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: tabbladen voor het dossier en per leeruitkomst (#278) gemerged op 2026-11-11:** het
+  dossier heeft de tabbladen Overzicht en Afronden, elke leeruitkomst Overzicht, Bewijs, Hoofdstuk
+  en Beoordelen (`?tab=` in de URL, zoals bij cursussen). Mijlpalen, *Los op*, de dossierreview en
+  de export wijzen naar het goede tabblad. Eén gedeelde `TabNav`, ook voor de cursustabs.
 - **Cursuswizard, deel 1: hoe je begint en de leeruitkomsten (#277) gemerged op 2026-11-11:** een lege cursus vraagt
   op het tabblad Overzicht *Hoe wil je beginnen?*: in grote lijnen ontwerpen, met een document,
   of leeg. Bij ontwerpen beschrijft de docent de cursus in een paar zinnen (plus EC en weken), en
@@ -694,6 +698,14 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #277 gemerged)_
 
 ## Bezig
 
+- **Cursuswizard, deel 2: het toetsprogramma (PR open):** heeft een cursus leeruitkomsten maar
+  nog geen toetsen, dan staat bovenaan het Overzicht *Volgende stap: het toetsprogramma*. De AI
+  stelt bij de leeruitkomsten summatieve toetsen en formatieve oefenmomenten ervoor voor, met
+  week, dekking, toetsvorm (desgewenst uit de toetsvormen van de school) en een weging die
+  zichtbaar een voorstel is. LimeOnIt past wegingen niet aan; tellen ze niet op tot 100% of zit
+  een leeruitkomst in geen summatieve toets, dan staat dat erbij. Aanvinken en toevoegen gaat
+  zoals bij importeren. Nieuwe prompt `course-design-assessments@v1` met evals
+  (`npm run eval:design-assessments`); geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
