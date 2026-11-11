@@ -327,7 +327,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   course's outcomes (`coursePrefillValues`, `useSandbox.selectCourse`), and `CoursePicker` sits at
   the top of the form. Opened from a lesson or test (`?item=`), `learningOutcomes` gives only that
   item's own outcomes, `itemTitle` its title and `earlierLessons` the (at most five) lessons in the
-  weeks before it; the tool loader sends each course's items for this. `/api/stream` takes an optional `courseId` and links the saved generation;
+  weeks before it; the tool loader sends each course's items for this. The optional
+  `CourseData.schedule` (weeks, sessions per week, `sessionMinutes`, group size, delivery mode)
+  feeds `sessionMinutes`, `groupSize` and `deliveryMode`; optional `disciplines` (name, teacher,
+  `hoursPerWeek`) with `Activity.disciplineId` turn `sessionMinutes` into that discipline's hours
+  in the lesson's week over its lessons that week (rounded to 5, capped at a session). `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest

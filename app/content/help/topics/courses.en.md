@@ -10,7 +10,7 @@ A **course** records three things and shows whether they line up:
 
 The course page has five tabs, each for one task:
 
-- **Overview:** the course details, the schedule, importing from an existing document and your lessons and tests per week.
+- **Overview:** the course details, the schedule, the disciplines, importing from an existing document and your lessons and tests per week.
 - **Learning outcomes:** what the student can do at the end, with the success criteria.
 - **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
 - **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
@@ -19,6 +19,12 @@ The course page has five tabs, each for one task:
 ## Schedule
 
 Under **Schedule** on the Overview tab you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
+
+## Disciplines
+
+Is your module made of disciplines, such as Professional skills, Hardware, Interaction Design and Webtech, each with its own teacher? Then add them under **Disciplines** on the Overview tab, with the teacher and the **Hours per week**. This is optional too: if your programme does not work this way, leave it empty.
+
+Then choose the discipline for each lesson. Open **Prepare a lesson** from such a lesson and the lesson length is already filled in: that discipline's hours in that week, divided over its lessons that week and rounded to five minutes, never longer than a session from the schedule. A lesson without a discipline gets the length of a session.
 
 ## The checks
 

@@ -50,6 +50,24 @@ function ActivityForm({ data, activity }: { data: CourseData; activity?: Activit
           value={activity?.hours}
         />
       </div>
+      {data.disciplines?.length ? (
+        <div className="max-w-xs">
+          <Label htmlFor={`${id}-discipline`}>{a.discipline}</Label>
+          <Select
+            id={`${id}-discipline`}
+            name="disciplineId"
+            defaultValue={activity?.disciplineId ?? ""}
+            className="mt-1"
+          >
+            <option value="">{a.disciplineNone}</option>
+            {data.disciplines.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : null}
       <OutcomeChecks
         legend={a.outcomesLegend}
         name="outcomeIds"
@@ -77,6 +95,8 @@ export function ActivitiesSection({
   const id = useId();
   const nameOf = (outcomeId: string) =>
     outcomeName(data.outcomes.findIndex((o) => o.id === outcomeId));
+  const disciplineOf = (disciplineId?: string) =>
+    data.disciplines?.find((d) => d.id === disciplineId)?.name ?? null;
   return (
     <section aria-labelledby={id}>
       <h2 id={id} className="text-lg font-medium text-slate-900">
@@ -98,6 +118,7 @@ export function ActivitiesSection({
                 <MetaLine
                   parts={[
                     a.kinds[act.kind],
+                    disciplineOf(act.disciplineId),
                     act.week !== undefined ? (
                       <WeekLabel key="week" week={act.week} weekDates={weekDates} />
                     ) : null,
