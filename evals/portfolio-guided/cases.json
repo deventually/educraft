@@ -267,7 +267,7 @@
       ],
       "expect": {
         "askAbout": [
-          "check|test|reach|assess|know|measure"
+          "check|test|reach|assess|know|measure|find out|whether|evaluat"
         ],
         "forbidden": [],
         "facts": [

@@ -124,6 +124,15 @@ describe("scoreDraft — open spots", () => {
     ];
     expect(scoreQuestions(c, q).topic).toBe(true);
   });
+
+  it("counts finding out whether students could do it as checking the objective (eval c)", () => {
+    const c = cases.find((x) => x.id === "en-objectives")!;
+    const q = [
+      "How did you arrive at this objective?",
+      "During or after the lesson, how did you find out whether each student could calculate a dose?",
+    ];
+    expect(scoreQuestions(c, q).topic).toBe(true);
+  });
 });
 
 describe("guidedReportMarkdown", () => {
