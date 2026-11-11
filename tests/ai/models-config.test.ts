@@ -48,6 +48,36 @@ describe("config/models.json — the built-in model list lives in a config file"
   });
 });
 
+describe("config/models.json — prompt caching per provider", () => {
+  it("says for every provider how it caches a prompt that comes back", () => {
+    for (const p of raw.providers) expect(p.cache, p.id).toBeDefined();
+  });
+
+  it("marks Claude's prompt, and keys OpenAI, Mistral and OpenRouter per conversation", () => {
+    expect(getProvider("anthropic")?.cache).toBe("markers");
+    expect(getProvider("openai")?.cache).toEqual({ key: "prompt_cache_key" });
+    expect(getProvider("mistral")?.cache).toEqual({ key: "prompt_cache_key" });
+    expect(getProvider("openrouter")?.cache).toEqual({ key: "session_id" });
+    for (const p of ["google", "minimax", "zai", "xai", "qwen", "together"]) {
+      expect(getProvider(p)?.cache, p).toBe("auto");
+    }
+  });
+
+  it("refuses a provider without a cache strategy, or markers outside Anthropic's API", () => {
+    const anthropic = raw.providers.find((p: { id: string }) => p.id === "anthropic");
+    const openai = raw.providers.find((p: { id: string }) => p.id === "openai");
+    const { cache: _, ...bare } = anthropic;
+    const base = { ...raw, models: raw.models.slice(0, 1), default: raw.models[0].id };
+    expect(() => parseModelsConfig({ ...base, providers: [bare] })).toThrow(/cache/);
+    expect(() =>
+      parseModelsConfig({ ...base, providers: [anthropic, { ...openai, cache: "markers" }] }),
+    ).toThrow(/cache/);
+    expect(() =>
+      parseModelsConfig({ ...base, providers: [anthropic, { ...openai, cache: { key: "x y" } }] }),
+    ).toThrow(/cache/);
+  });
+});
+
 describe("config/models.json — what Bastiaan asked for (2026-11-06)", () => {
   it("has the newest Opus, Sonnet and Haiku", () => {
     for (const id of ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]) {

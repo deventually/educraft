@@ -34,6 +34,12 @@ describe("modeOf: the kind of workspace", () => {
     expect(modeOf(oneShot).fillsHeight).toBe(false);
   });
 
+  it("lets only a chat ask the provider to cache its prompt (the next turn sends it again)", () => {
+    expect(modeOf(chat).cachesPrompt).toBe(true);
+    expect(modeOf(multiStage).cachesPrompt).toBe(false);
+    expect(modeOf(oneShot).cachesPrompt).toBe(false);
+  });
+
   it("never shares a conversation with a colleague (BESLUIT-2026-11-05-5)", () => {
     expect(modeOf(chat).sharesWork).toBe(false);
     expect(modeOf(multiStage).sharesWork).toBe(true);

@@ -31,6 +31,12 @@ export interface GenerateOptions {
    * providers ignore it.
    */
   thinking?: boolean;
+  /**
+   * Set when this prompt comes back (a chat's next turn): the adapter asks the provider to
+   * cache it, the way `cache` in `config/models.json` says. Groups calls that share a prefix
+   * (teacher and tool); it leaves the server only as a hash. Absent = no caching.
+   */
+  cacheKey?: string;
   /** Aborts the model call, e.g. when the teacher closes the tab mid-stream. */
   signal?: AbortSignal;
   /** Streaming only: told the call's tokens once the stream has finished (not on abort). */

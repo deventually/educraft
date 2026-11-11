@@ -97,6 +97,8 @@ export function installModelRegistry(registry: ModelRegistry): void {
       ...(p.keyOptional ? { keyOptional: true } : {}),
       ...(p.modelsUrl ? { modelsUrl: p.modelsUrl } : {}),
       example: "",
+      // Claude's API caches only what is marked; an own OpenAI-style server by itself.
+      cache: p.api === "anthropic" ? "markers" : "auto",
     }));
   addedById = new Map(
     registry.added
