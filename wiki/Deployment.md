@@ -162,7 +162,7 @@ analytics, an image CDN, a cross-origin API), extend the relevant directive in
 
 ## Smoke checklist (run after each deploy)
 
-1. `GET /healthz` → `200 {"ok":true}`.
+1. `GET /healthz` → `200 {"ok":true,"version":"X.Y.Z"}`, with the version you just rolled out.
 2. Log in with a seeded invite (`npm run invite` locally to mint one; see
    [`Authentication.md`](Authentication.md)).
 3. Generate with a cheap model (e.g. Haiku) → tokens stream into the result.

@@ -15,8 +15,8 @@ export function formatBytes(bytes: number, locale: Locale): string {
 }
 
 /**
- * The admin's health overview (P1): the age of the newest backup, the database size and the free
- * disk space, with a warning when the backup is older than 36 hours or missing. Rendered once per
+ * The admin's health overview (P1): the age of the newest backup, the database size, the free
+ * disk space and the running version, with a warning when the backup is older than 36 hours or missing. Rendered once per
  * page load, so the warning is plain text, not a live region.
  */
 export function HealthPanel({ health }: { health: AdminHealth }) {
@@ -45,6 +45,7 @@ export function HealthPanel({ health }: { health: AdminHealth }) {
     },
     { label: h.database, value: bytes(health.databaseBytes) },
     { label: h.freeDisk, value: bytes(health.freeDiskBytes) },
+    { label: h.version, value: health.version },
   ];
 
   return (
@@ -55,7 +56,7 @@ export function HealthPanel({ health }: { health: AdminHealth }) {
       <h2 id="admin-health-heading" className="text-sm font-semibold text-slate-900">
         {h.heading}
       </h2>
-      <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+      <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
         {items.map(({ label, value }) => (
           <div key={label}>
             <dt className="text-slate-600">{label}</dt>

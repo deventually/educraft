@@ -54,6 +54,7 @@ export const admin: Messages["admin"] = {
     staleWarning:
       "The latest backup is older than 36 hours, or no backup has been made yet. Check the log for backup.failed.",
     unknown: "Unknown",
+    version: "Version",
   },
   invites: {
     accountCreated: "Account created.",
