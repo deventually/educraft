@@ -10,13 +10,10 @@ import { getDossier, updateDossier, type Dossier } from "./repositories/portfoli
 import type { User } from "./auth.server";
 import { applyIntent } from "~/lib/portfolio/intents";
 import { LIMITS } from "~/lib/portfolio/schema";
-import {
-  draftParagraph,
-  proofreadOutcome,
-  reviewDossier,
-  reviewOutcome,
-} from "./portfolioCoach.server";
+import { proofreadOutcome, reviewDossier, reviewOutcome } from "./portfolioCoach.server";
 import { extractFramework } from "./portfolioExtract.server";
+import { answersFromForm, type GuidedIntent, runGuidedIntent } from "./portfolioGuided.server";
+import { withAnswers } from "~/lib/portfolio/guided";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getAvailableTools } from "./availability.server";
@@ -133,8 +130,9 @@ export type PortfolioActionResult =
   | { ok: false; error: string };
 
 /**
- * Applies the posted intent to the dossier and stores it. Five intents call a
- * model (`extract` on the framework page; `review`, `draft:<criterionId>` and
+ * Applies the posted intent to the dossier and stores it. Six intents call a
+ * model (`extract` on the framework page; `review`, `guideQuestions:<sectionId>`,
+ * `guideDraft:<sectionId>` and
  * `proofread` for one chapter; `reviewAll` for the whole dossier); every other
  * one is a pure edit.
  */
@@ -170,25 +168,44 @@ async function runIntent(
     return { ok: true, intent, flagged: result.flagged, clipped: result.clipped };
   }
 
-  if (intent === "review" || intent.startsWith("draft:")) {
+  if (intent === "review") {
     const outcomeId = String(fd.get("outcomeId") ?? "");
     const outcome = dossier.data.framework.outcomes.find((o) => o.id === outcomeId);
     if (!outcome) return { ok: false, error: m.portfolio.errorNotFound };
-    const result = await (intent === "review"
-      ? reviewOutcome(user, dossier.data, outcomeId, locale)
-      : draftParagraph(
-          user,
-          dossier.data,
-          outcomeId,
-          intent.slice("draft:".length),
-          String(fd.get("text") ?? "").slice(0, LIMITS.documentText),
-          locale,
-        )
-    ).catch(() => ({ ok: false as const, error: "failed" as const }));
+    const result = await reviewOutcome(user, dossier.data, outcomeId, locale).catch(() => ({
+      ok: false as const,
+      error: "failed" as const,
+    }));
     if (!result.ok) return { ok: false, error: m.portfolio.coach.errors[result.error] };
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
-    return { ok: true, intent: intent === "review" ? "review" : "draft" };
+    return { ok: true, intent };
+  }
+
+  const guided = /^(guideQuestions|guideDraft):(.+)$/.exec(intent);
+  if (guided) {
+    const step = guided[1] as GuidedIntent;
+    const outcomeId = String(fd.get("outcomeId") ?? "");
+    const result = await runGuidedIntent(
+      user,
+      dossier.data,
+      step,
+      outcomeId,
+      guided[2] ?? "",
+      fd,
+      locale,
+    ).catch(() => ({ ok: false as const, error: "failed" as const }));
+    if (!result.ok)
+      return {
+        ok: false,
+        error:
+          result.error === "not-found"
+            ? m.portfolio.errorNotFound
+            : m.portfolioGuided.errors[result.error],
+      };
+    const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
+    if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
+    return { ok: true, intent: step };
   }
 
   if (intent === "proofread") {
@@ -265,6 +282,11 @@ async function runIntent(
       error: result.error === "not-found" ? m.portfolio.errorNotFound : m.portfolio.errorInvalid,
     };
   }
-  await updateDossier(user.id, dossier.id, { data: result.data });
+  // Saving the chapter also keeps the answers typed beside it (guided writing).
+  const data =
+    intent === "writeChapter"
+      ? withAnswers(result.data, String(fd.get("outcomeId") ?? ""), answersFromForm(fd))
+      : result.data;
+  await updateDossier(user.id, dossier.id, { data });
   return { ok: true, intent };
 }

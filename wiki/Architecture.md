@@ -302,6 +302,17 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   dropped. The chapter tab shows both above the editor (`ChapterOutline`). Removing a criterion
   takes it out of the sections; the schema refuses a section that covers another outcome's
   criterion. Eval: `npm run eval:framework` (deterministic, `evals/portfolio-framework/`).
+  Guided writing per section (BDB/BKE plan, step 6; `guided.ts`, `portfolioGuided.server.ts`):
+  the chapter tab lists `writingSections(outcome)`, the form's outline or one section per
+  criterion, in `GuidedWriting` inside the chapter's own form, so every button also posts the
+  chapter text and the answers (`answer:<sectionId>`). `guideQuestions:<sectionId>` asks
+  `portfolio-questions@v1` for two to four questions (JSON; the code keeps 2–4 distinct ones and
+  drops one citing an unknown source); `DossierData.guided` keeps questions and answers per outcome
+  and section, and saving the chapter saves the answers too. In draft mode `guideDraft:<sectionId>`
+  sends the questions with the answers and the section's linked evidence to `portfolio-draft@v2`
+  and appends the text under the section's title (`appendSection`); the code refuses a paragraph
+  that cites an unknown source (one retry). It replaced the per-criterion paragraph of @v1. Eval:
+  `npm run eval:guided` (deterministic, `evals/portfolio-guided/`).
   Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
   of advisory points from the confirmed framework only, each with a "Los op" target; four points
   are ticked by the teacher (`tickReadiness`). It blocks only one thing: while an open spot is left (`openSpots.ts`: `[aanvullen: …]`, TODO, an empty chapter, evidence without text) the export gives a draft version, marked CONCEPT on every page, never the final one (BESLUIT-2026-11-07-4; otherwise advice, BESLUIT-2026-11-05-9).

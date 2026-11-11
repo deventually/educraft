@@ -185,6 +185,18 @@ export interface StoredProofread {
   suggestions: ProofreadSuggestion[];
 }
 
+/**
+ * Guided writing (BDB/BKE plan, step 6): the coach's questions for one section of a chapter and
+ * the teacher's own answers, one per question. The answers are the teacher's words; a drafted
+ * paragraph may use only them and the linked evidence.
+ */
+export interface GuidedSection {
+  questions: string[];
+  answers: string[];
+  at: number;
+  model: string;
+}
+
 export interface DossierData {
   tracks: Track[];
   framework: Framework;
@@ -196,6 +208,8 @@ export interface DossierData {
   coachMode: "coach" | "draft";
   draftNoticeSeenAt?: number;
   aiLog: AiLogEntry[];
+  /** outcomeId → section id (an outline section, or a criterion without one) → questions and answers. */
+  guided?: Record<string, Record<string, GuidedSection>>;
   /** outcomeId → the latest coach review of that outcome. */
   reviews?: Record<string, StoredReview>;
   /** outcomeId → the latest proofreading of that outcome's chapter. */

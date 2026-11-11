@@ -72,7 +72,7 @@ function outcomeData(d = sampleDossier()) {
     confirmed: true,
     coachMode: "coach",
     showDraftNotice: false,
-    withEvidence: [C1],
+
     stored: undefined as unknown,
     proofread: undefined as unknown,
     toolHints: {} as Record<string, { slug: string; name: string }[]>,
@@ -684,30 +684,60 @@ describe("Portfolio outcome page — coach", () => {
     expect(screen.queryByText(/landelijke startpunt/)).toBeNull();
   });
 
-  it("shows no draft buttons in coaching mode", () => {
-    renderRoute(PortfolioOutcome, outcomeData(), "chapter");
+  const guidedView = [
+    {
+      id: C1,
+      title: "De les heeft een heldere structuur met inleiding, kern en afsluiting.",
+      criterionIds: [C1],
+      fromOutline: false,
+      n: 1,
+      covers: [1],
+      questions: ["Hoe begon je de les?", "Hoe sloot je af?"],
+      answers: ["", ""],
+    },
+    {
+      id: C2,
+      title: "De les sluit aan bij de beginsituatie.",
+      criterionIds: [C2],
+      fromOutline: false,
+      n: 2,
+      covers: [2],
+      questions: [],
+      answers: [],
+    },
+  ];
+
+  it("shows the questions per section, inside the chapter form, without paragraph buttons in coaching mode", () => {
+    renderRoute(PortfolioOutcome, { ...outcomeData(), guided: guidedView }, "chapter");
+    const answer = screen.getByRole("textbox", { name: "Hoe begon je de les?" });
+    // One form: saving the chapter keeps the answers typed beside it.
+    expect(answer.closest("form")).toBe(
+      screen.getByRole("textbox", { name: "Je tekst bij deze leeruitkomst" }).closest("form"),
+    );
+    expect(screen.queryByRole("button", { name: /Maak er een alinea van/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /Stel een alinea op/ })).toBeNull();
   });
 
-  it("in draft mode shows one neutral notice and a draft button per criterion with evidence", async () => {
+  it("in draft mode shows one neutral notice and a paragraph button per section with questions", async () => {
     const { container } = renderRoute(
       PortfolioOutcome,
       {
         ...outcomeData(),
         coachMode: "draft",
         showDraftNotice: true,
+        guided: guidedView,
       },
       "chapter",
     );
     expect(screen.getByText(/eigen regels hebben voor AI-gebruik/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Begrepen" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Stel een alinea op voor criterium 1" }),
-    ).toHaveAttribute("value", `draft:${C1}`);
-    expect(
-      screen.queryByRole("button", { name: "Stel een alinea op voor criterium 2" }),
-    ).toBeNull();
-    expect(screen.getByText(/Criterium 2: koppel eerst bewijs/)).toBeInTheDocument();
+      screen.getByRole("button", { name: "Maak er een alinea van: Criterium 1" }),
+    ).toHaveAttribute("value", `guideDraft:${C1}`);
+    expect(screen.getByRole("button", { name: "Stel me vragen over Criterium 2" })).toHaveAttribute(
+      "value",
+      `guideQuestions:${C2}`,
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

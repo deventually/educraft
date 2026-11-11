@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  buildCoachMessage,
-  buildDraftMessage,
-  criterionKeys,
-  parseCoachReview,
-  parseDraft,
-} from "~/lib/portfolio/coach";
+import { buildCoachMessage, criterionKeys, parseCoachReview } from "~/lib/portfolio/coach";
 import { addEvidence, addReference } from "~/lib/portfolio/edit";
 import { C1, C2, LU, sampleDossier } from "./fixtures";
 
@@ -176,35 +170,5 @@ describe("parseCoachReview", () => {
   it("refuses an unknown verdict", () => {
     const bad = [{ ...okCriteria[0], verdict: "excellent" }, okCriteria[1]];
     expect(parseCoachReview(reviewJson(bad), d, LU)).toEqual({ ok: false, error: "unparseable" });
-  });
-});
-
-describe("draft", () => {
-  it("gives the model only the criterion and its own linked evidence", () => {
-    let d = addEvidence(sampleDossier(), {
-      title: "Lesplan",
-      kind: "lesson-plan",
-      text: "Doel: beginsituatie peilen.",
-      criterionIds: [C2],
-    });
-    d = addEvidence(d, {
-      title: "Ander",
-      kind: "other",
-      text: "Hoort bij K1.",
-      criterionIds: [C1],
-    });
-    const msg = buildDraftMessage(d, LU, C2, "nl");
-    expect(msg).toContain("De les sluit aan bij de beginsituatie.");
-    expect(msg).toContain("Doel: beginsituatie peilen.");
-    expect(msg).not.toContain("Hoort bij K1.");
-  });
-
-  it("returns null when the criterion has no evidence to write from", () => {
-    expect(buildDraftMessage(sampleDossier(), LU, C2, "nl")).toBeNull();
-  });
-
-  it("cleans the drafted paragraph", () => {
-    expect(parseDraft("```\nEen alinea.\n```")).toBe("Een alinea.");
-    expect(parseDraft("   ")).toBeNull();
   });
 });
