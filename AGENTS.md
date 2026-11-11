@@ -34,11 +34,15 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 2. **Security by design.** Validate all external input with Zod at the boundary: `/api/stream`
    parses its body with `StreamBodySchema` (extend it, never `request.json()`). Secrets only via
    `app/server/env.server.ts`. LLM output through ReactMarkdown, never `dangerouslySetInnerHTML`.
-   Registry validation (`registry/validate.ts`) runs at boot.
+   Registry validation (`registry/validate.ts`) runs at boot. A PR that touches
+   `app/server/repositories/`, auth, sessions or `/api` gets a `/security-review` of its diff
+   before it is called ready; say in the PR what it found.
 3. **Accessibility by design** (WCAG 2.2 AA). Semantic HTML, labels, `fieldset`/`legend`,
    focus-visible, `aria-live` for streaming. **Every interactive component ships a vitest-axe test:**
    `expect((await axe(container)).violations).toEqual([])`. Action feedback goes through the toast
    system (`useFormToast` / `useActionToast`); don't announce the same event inline as well.
+   axe finds only part of the problems: a PR that changes what a user sees also gets an
+   `/accessibility-review` (keyboard, focus, patterns, reflow) of the screens it touches.
 4. **Deep modules.** Narrow interfaces over powerful implementations. An
    `if (tool.mode === …)` or per-tool branch means: refactor toward a deeper component.
 5. **Simple and maintainable.** Remove what is redundant: knip (`knip.json`, part of
