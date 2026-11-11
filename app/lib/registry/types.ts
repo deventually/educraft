@@ -77,13 +77,17 @@ export interface AssessmentModelPrefill {
 export interface CoursePrefill {
   /**
    * `learningOutcomes`: one outcome per line; opened from a lesson or test, only its own.
-   * `itemTitle`: the title of the lesson or test the tool was opened for.
-   * `earlierLessons`: the (at most five) lessons in the weeks just before it, with the week.
+   * `lessonGoal`: the lesson's own goal; without one, as `learningOutcomes`.
+   * `itemTitle`: the title of the lesson or test the tool was opened for, after its
+   * discipline's name when it has one.
+   * `earlierLessons`: the (at most five) lessons in the weeks just before it, with the week;
+   * with a discipline, only that discipline's lessons.
    * `sessionMinutes`, `groupSize`, `deliveryMode`: from the course's schedule (a number field,
    * a select with the options `in-person`, `online`, `hybrid`).
    */
   source:
     | "learningOutcomes"
+    | "lessonGoal"
     | "itemTitle"
     | "earlierLessons"
     | "sessionMinutes"

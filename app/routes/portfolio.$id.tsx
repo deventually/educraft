@@ -27,6 +27,9 @@ import { Button, Input, Label } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { anchorToolQuery, daysUntil } from "~/lib/portfolio/anchors";
+import { startHref } from "~/lib/portfolio/start";
+import { DeadlineNote } from "~/components/portfolio/StartWizard";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.name ?? "BDB/BKE"} — LimeOnIt` }];
@@ -61,6 +64,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     route,
     nextTools,
     nextCriterion,
+    // The next outcome's anchor: its tools open on that lesson, module or test.
+    nextAnchor: anchorToolQuery(
+      route.next?.outcomeId ? d.anchors?.[route.next.outcomeId] : undefined,
+    ),
+    deadline: d.deadline,
+    daysLeft: d.deadline ? daysUntil(d.deadline, Date.now()) : undefined,
     practise,
     readiness: readinessCheck(d),
     dossierReview: dossierReviewOverview(d),
@@ -128,6 +137,9 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     canReviewAll,
     openSpots: open,
     partOpenSpots,
+    nextAnchor = {},
+    deadline,
+    daysLeft,
   } = loaderData;
   const [params] = useSearchParams();
   const tab = dossierTab(params.get("tab"));
@@ -174,6 +186,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
               hints={nextTools}
               step="evidence"
               from={{ dossierId: id, criterionId: nextCriterion }}
+              anchor={nextAnchor}
               className="mt-3"
             />
           )}
@@ -192,8 +205,18 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
               className="font-medium text-violet-700 underline underline-offset-2"
             >
               {t.portfolio.frameworkLink}
+            </Link>{" "}
+            ·{" "}
+            <Link
+              to={startHref(id, "track")}
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              {t.portfolioStart.open}
             </Link>
           </p>
+          {deadline && daysLeft !== undefined && (
+            <DeadlineNote deadline={deadline} daysLeft={daysLeft} className="mt-2" />
+          )}
 
           <Form method="post" className="mt-6">
             <input type="hidden" name="intent" value="coachMode" />

@@ -231,5 +231,7 @@ export function applyExtraction(
   // Empty chapters of the old outcomes would point at nothing.
   next.chapters = [];
   delete next.reviews;
+  // Anchors belong to the old outcomes; the wizard asks for them after the framework.
+  delete next.anchors;
   return { ok: true, data: next };
 }

@@ -49,6 +49,24 @@ function snapshotSource(
   return items ? { ...source, itemCount: items.length } : source;
 }
 
+/** A part of a course as a new evidence item; null when the assessment no longer exists. */
+export function courseSnapshot(
+  course: Course,
+  part: CourseEvidencePart,
+  criterionIds: string[],
+  locale: Locale,
+): Omit<EvidenceItem, "id"> | null {
+  const text = courseAsEvidence(course, part, locale);
+  if (text === null) return null;
+  return {
+    title: evidenceTitle(course, part, locale).slice(0, LIMITS.title),
+    kind: typeof part === "string" ? "other" : "test-material",
+    text: text.slice(0, LIMITS.documentText),
+    criterionIds,
+    sourceCourse: snapshotSource(course, part),
+  };
+}
+
 export type CourseEvidenceResult = { ok: true } | { ok: false; error: string };
 
 export async function addCourseToDossier(
@@ -71,15 +89,9 @@ export async function addCourseToDossier(
   if (criterionIds.some((id) => !known.has(id)))
     return { ok: false, error: m.courses.evidence.errorCriterion };
 
-  const text = courseAsEvidence(course, part, locale);
-  if (text === null) return { ok: false, error: m.courses.errorNotFound };
-  const next = addEvidence(dossier.data, {
-    title: evidenceTitle(course, part, locale).slice(0, LIMITS.title),
-    kind: typeof part === "string" ? "other" : "test-material",
-    text: text.slice(0, LIMITS.documentText),
-    criterionIds,
-    sourceCourse: snapshotSource(course, part),
-  });
+  const item = courseSnapshot(course, part, criterionIds, locale);
+  if (!item) return { ok: false, error: m.courses.errorNotFound };
+  const next = addEvidence(dossier.data, item);
   if (!DossierDataSchema.safeParse(next).success)
     return { ok: false, error: m.portfolio.errorInvalid };
   await updateDossier(user.id, dossier.id, { data: next });

@@ -8,6 +8,7 @@ import { z } from "zod";
  */
 export const FLASH_KEYS = [
   "accountDeleted",
+  "dossierCreated",
   "passwordReset",
   "rubricDeleted",
   "rubricDuplicated",

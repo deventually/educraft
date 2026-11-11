@@ -18,7 +18,7 @@ export const portfolioRoute = {
     },
     evidence: {
       how: "Voeg bewijs toe of koppel eerder werk, tot elk criterium minstens één bewijsstuk heeft. Mist er iets, dan noemt LimeOnIt bij het criterium een tool die helpt.",
-      status: "{done} van {total} criteria met bewijs",
+      status: "{done} van {total} bewijspunten klaar",
       title: "Bewijs",
     },
     review: {
@@ -40,6 +40,20 @@ export const portfolioRoute = {
   outcomeStepsLabel: "Mijlpalen van deze leeruitkomst",
   outcomeTitle: "Voortgang van deze leeruitkomst",
   practise: "Oefen je eindgesprek met een proefassessment",
+  required: {
+    add: "Nieuw bewijs toevoegen",
+    choose: "Kies een bewijsstuk",
+    confirm: "Ja, dit hoort erbij",
+    found: "Gevonden: {title}. Klopt dat?",
+    intro:
+      "Wat het formulier bij deze leeruitkomst als bewijs vraagt. Koppel bij elke regel het bewijsstuk dat erbij hoort; feedback die een tool maakte telt nooit als feedback van een ander.",
+    level: { done: "Klaar", guess: "Controleren", missing: "Ontbreekt" },
+    link: "Koppel",
+    linked: "Bewijs: {titles}",
+    title: "Verplicht bewijs",
+    unlink: "Ontkoppel",
+    unlinkLabel: "Ontkoppel {title}",
+  },
   stepDone: "Klaar",
   steps: {
     finish: {

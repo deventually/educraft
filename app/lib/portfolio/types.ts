@@ -84,6 +84,12 @@ export const EVIDENCE_KINDS = [
 ] as const;
 export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
+/** One required-evidence line of an outcome, by its text (the form's own words). */
+export interface RequirementRef {
+  outcomeId: string;
+  line: string;
+}
+
 export interface EvidenceItem {
   id: string;
   title: string;
@@ -92,6 +98,8 @@ export interface EvidenceItem {
   text: string;
   criterionIds: string[];
   sourceGenerationId?: string;
+  /** The required-evidence lines the teacher ticked this item for (`requirementChecklist`). */
+  requirements?: RequirementRef[];
   /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */
   sourceCourse?: {
     courseId: string;
@@ -197,6 +205,17 @@ export interface GuidedSection {
   model: string;
 }
 
+/**
+ * What one learning outcome is about (step 4 of the guided route): a module, lesson or test in one
+ * of the teacher's courses, or a short description in their own words, or both. Tools opened for
+ * this outcome start on the course and item; nothing else reads the course live.
+ */
+export interface Anchor {
+  /** No `itemId`: the whole course, as the module. */
+  course?: { courseId: string; itemId?: string };
+  description?: string;
+}
+
 export interface DossierData {
   tracks: Track[];
   framework: Framework;
@@ -216,4 +235,8 @@ export interface DossierData {
   proofreads?: Record<string, StoredProofread>;
   /** Self-checks of "Klaar om in te leveren?" (P29.1): code → when the teacher ticked it. */
   readiness?: { ticked: Partial<Record<string, number>> };
+  /** outcomeId → its anchor, set in the start wizard. */
+  anchors?: Record<string, Anchor>;
+  /** The hand-in date as an ISO date (`YYYY-MM-DD`). */
+  deadline?: string;
 }

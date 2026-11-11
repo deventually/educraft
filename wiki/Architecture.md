@@ -302,6 +302,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   dropped. The chapter tab shows both above the editor (`ChapterOutline`). Removing a criterion
   takes it out of the sections; the schema refuses a section that covers another outcome's
   criterion. Eval: `npm run eval:framework` (deterministic, `evals/portfolio-framework/`).
+  The start wizard (`/portfolio/:id/start?step=`, `start.ts`): a new dossier goes straight to it;
+  four steps (track, framework, anchors, planning), each skippable. An anchor (`anchors.ts`,
+  `DossierData.anchors`) says per learning outcome which module, lesson or test of the teacher's
+  own courses it is about, a short description, or both; `deadline` is the hand-in date. Saving
+  anchors (`dossierAnchors.server.ts`) checks each course with `getCourse` and takes a module or
+  test into the dossier once as a course snapshot, linked only to criteria that `courseHint`
+  matches. A tool opened for that outcome gets `?course=&item=` (`anchorToolQuery`), so the
+  existing `prefillFromCourse` sources fill it in; no tool knows about anchors.
   Guided writing per section (BDB/BKE plan, step 6; `guided.ts`, `portfolioGuided.server.ts`):
   the chapter tab lists `writingSections(outcome)`, the form's outline or one section per
   criterion, in `GuidedWriting` inside the chapter's own form, so every button also posts the
@@ -350,7 +358,10 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   feeds `sessionMinutes`, `groupSize` and `deliveryMode`; optional `disciplines` (name, teacher,
   `hoursPerWeek`) with `Activity.disciplineId` turn `sessionMinutes` into that discipline's hours
   in the lesson's week over its lessons that week (rounded to 5, capped at a session). An activity has an optional
-  `goal` (one sentence, `COURSE_LIMITS.goal`): what the student can do after that lesson. `/api/stream` takes an optional `courseId` and links the saved generation;
+  `goal` (one sentence, `COURSE_LIMITS.goal`): what the student can do after that lesson;
+  `lessonGoal` fills it in (without a goal: as `learningOutcomes`). With a discipline,
+  `itemTitle` reads "Webtech: <title>" and `earlierLessons` lists only that discipline's lessons.
+  `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
@@ -367,6 +378,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the dossier and each outcome are split into tabs in the URL (`app/lib/portfolio/tabs.ts`,
   the shared `TabNav`): the dossier has Overview and Finish, an outcome Overview, Evidence,
   Chapter and Review. Links into a tab (`dossierHref`, `outcomeHref`) carry `?tab=` and an anchor.
+  The form's required evidence is a checklist on the Evidence tab (`requirementChecklist`,
+  `app/lib/portfolio/requirements.ts`): an item counts for a line when the teacher ticked it
+  (`EvidenceItem.requirements`, intent `linkRequirement`), or else as a guess from its kind, which
+  the teacher confirms; tool-made feedback is never a guess. The evidence milestone and the
+  readiness check count the same lines. No migration (the dossier is JSON).
 - **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
   design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
   `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,

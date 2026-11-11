@@ -32,6 +32,7 @@ export const LIMITS = {
   references: 200,
   reference: 500,
   aiLog: 500,
+  anchorDescription: 1_000,
 } as const;
 
 const Id = z.string().min(1).max(LIMITS.id);
@@ -143,6 +144,10 @@ const EvidenceSchema = z.object({
   text: z.string().max(LIMITS.documentText),
   criterionIds: z.array(Id).max(LIMITS.criteriaPerOutcome * LIMITS.outcomes),
   sourceGenerationId: Id.optional(),
+  requirements: z
+    .array(z.object({ outcomeId: Id, line: z.string().min(1).max(LIMITS.requiredEvidenceText) }))
+    .max(LIMITS.requiredEvidence * LIMITS.outcomes)
+    .optional(),
   sourceCourse: z
     .object({
       courseId: Id,
@@ -152,6 +157,19 @@ const EvidenceSchema = z.object({
     })
     .optional(),
 });
+
+const AnchorSchema = z
+  .object({
+    course: z.object({ courseId: Id, itemId: Id.optional() }).optional(),
+    description: z.string().min(1).max(LIMITS.anchorDescription).optional(),
+  })
+  .refine((a) => a.course !== undefined || a.description !== undefined, "empty anchor");
+
+/** An ISO date, `YYYY-MM-DD`. */
+export const IsoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((v) => !Number.isNaN(Date.parse(v)), "not a date");
 
 const ChapterSchema = z.object({
   id: Id,
@@ -216,6 +234,8 @@ export const DossierDataSchema = z
     readiness: z
       .object({ ticked: z.partialRecord(z.enum(TICKABLE_CODES), z.number().int().nonnegative()) })
       .optional(),
+    anchors: z.record(Id, AnchorSchema).optional(),
+    deadline: IsoDate.optional(),
   })
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: no dangling or duplicate ids.
@@ -259,6 +279,10 @@ export const DossierDataSchema = z
       if (chapterOutcomes.has(ch.outcomeId))
         ctx.addIssue({ code: "custom", message: `two chapters for outcome ${ch.outcomeId}` });
       chapterOutcomes.add(ch.outcomeId);
+    }
+    for (const id of Object.keys(d.anchors ?? {})) {
+      if (!outcomeIds.has(id))
+        ctx.addIssue({ code: "custom", message: `anchor for unknown ${id}` });
     }
   });
 

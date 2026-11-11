@@ -6,6 +6,8 @@ This guide takes you step by step from an empty dossier to the documents you han
 
 **Tabs.** Your dossier has two tabs: Overview (your progress and your learning outcomes) and Finish (the check whether you can hand in, the export and your sources). Each learning outcome has four: Overview, Evidence, Chapter and Assessment. So you only see what you need now; the milestones and *Fix it* take you straight to the right tab.
 
+**Required evidence.** At the top of the Evidence tab is what the form asks for as evidence for this learning outcome, as a checklist. Link each line to the piece of evidence that belongs to it. When LimeOnIt already finds a piece of the right kind, it says *Check* and you confirm with *Yes, this belongs here*; otherwise you choose a piece yourself or add new evidence. Feedback a tool made never counts as feedback from your mentor or a fellow student. The Evidence milestone counts the list too.
+
 **Three agreements first**
 
 - **Your own institution's form is the standard.** Everything LimeOnIt says is measured against the criteria you take over and confirm.
@@ -19,6 +21,8 @@ No **BDB/BKE** in the menu? Then the workplace is still off for you. It is *On r
 **Done when:** you see **BDB/BKE** in the menu.
 
 ## Step 1: dossier and framework
+
+A new dossier opens **getting started** in four short steps: your track, your framework, your anchor per learning outcome and your hand-in date. You may skip any step; you find it again below your dossier's overview (**Start wizard**). The **anchor** is what a learning outcome is about: a lesson, your module (a whole course) or a test from your courses, or a short description. A tool you open for that outcome starts with that lesson, module or test, and a module or test goes into your dossier as evidence right away.
 
 1. Go to **BDB/BKE** and create a dossier. Give it a name and choose BDB, BKE or both. If you hand in each learning outcome on its own, one dossier is enough: you can export per learning outcome.
 2. Open **Framework**. There are two ways:

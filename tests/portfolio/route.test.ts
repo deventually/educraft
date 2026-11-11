@@ -6,20 +6,39 @@ import { C1, C2, LU, sampleDossier } from "./fixtures";
 
 /** The sample dossier with a confirmed framework: C1 has evidence and is shown, C2 has neither. */
 const confirmed = () => edit.confirmFramework(sampleDossier(), 1);
+/** Both criteria get evidence, and the recording the form asks for is there too. */
 const linkBoth = (d: DossierData) =>
-  edit.updateEvidence(d, d.evidence[0]!.id, { criterionIds: [C1, C2] });
+  edit.addEvidence(edit.updateEvidence(d, d.evidence[0]!.id, { criterionIds: [C1, C2] }), {
+    title: "Opname",
+    kind: "observation-notes",
+    text: "",
+    criterionIds: [C1],
+  });
 
 describe("outcomeRoute", () => {
   it("walks evidence → chapter → review → shown, one milestone at a time", () => {
     const r = outcomeRoute(confirmed(), LU)!;
     expect(r.milestones.map((m) => m.id)).toEqual(["evidence", "chapter", "review", "shown"]);
-    expect(r.milestones[0]).toMatchObject({ complete: false, done: 1, total: 2, criterionId: C2 });
+    // Two criteria and two required-evidence lines: C1 and the mentor's feedback are there.
+    expect(r.milestones[0]).toMatchObject({ complete: false, done: 2, total: 4, criterionId: C2 });
     expect(r.milestones[1]).toMatchObject({ complete: true, done: 1, total: 1 });
     expect(r.next?.id).toBe("evidence");
     expect(r.complete).toBe(false);
   });
 
-  it("asks for the chapter once every criterion has evidence", () => {
+  it("counts the required evidence of the form towards the evidence milestone", () => {
+    const d = edit.updateEvidence(confirmed(), sampleDossier().evidence[0]!.id, {
+      criterionIds: [C1, C2],
+    });
+    // Every criterion has evidence, but the recording the form asks for is missing.
+    expect(outcomeRoute(d, LU)!.milestones[0]).toMatchObject({
+      complete: false,
+      done: 3,
+      total: 4,
+    });
+  });
+
+  it("asks for the chapter once every criterion and required item has evidence", () => {
     const r = outcomeRoute({ ...linkBoth(confirmed()), chapters: [] }, LU)!;
     expect(r.milestones[0]!.complete).toBe(true);
     expect(r.next?.id).toBe("chapter");
