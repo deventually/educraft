@@ -20,6 +20,7 @@ import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseDesignAssessments } from "~/components/courses/CourseDesignAssessments";
+import { CourseDesignLessons, useLessonsProposal } from "~/components/courses/CourseDesignLessons";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseStart } from "~/components/courses/CourseStart";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
@@ -34,6 +35,7 @@ import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
 import { CourseProgress } from "~/components/courses/CourseProgress";
 import { canDesignAssessments } from "~/lib/courses/designAssessments";
+import { canDesignLessons } from "~/lib/courses/designLessons";
 import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
@@ -139,6 +141,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         return { variant: "pending", message: t.courseDesign.pending };
       if (intent === "design-assessments")
         return { variant: "pending", message: t.courseDesign.assessments.pending };
+      if (intent === "design-lessons")
+        return { variant: "pending", message: t.courseDesign.lessons.pending };
       if (intent === "review") return { variant: "pending", message: t.agents.panel.pending };
       return { variant: "pending", message: t.toast.saving };
     },
@@ -149,13 +153,24 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         const ready = r.flagged ? fmt(c.import.readyCheck, { n: r.flagged }) : c.import.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
       }
-      if (r.intent === "design-outcomes" || r.intent === "design-assessments") {
+      if (
+        r.intent === "design-outcomes" ||
+        r.intent === "design-assessments" ||
+        r.intent === "design-lessons"
+      ) {
         const d = t.courseDesign;
-        const ready = r.intent === "design-outcomes" ? d.ready : d.assessments.ready;
+        const ready =
+          r.intent === "design-outcomes"
+            ? d.ready
+            : r.intent === "design-assessments"
+              ? d.assessments.ready
+              : d.lessons.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
       }
       if (r.intent === "import-apply")
         return { variant: "success", message: fmt(c.import.done, r.added) };
+      if (r.intent === "design-lessons-apply")
+        return { variant: "success", message: fmt(t.courseDesign.lessons.added, { n: r.added }) };
       if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
       if (
         r.intent === "share" ||
@@ -175,6 +190,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const proposal = useImportProposal(actionData);
+  const lessons = useLessonsProposal(actionData);
   const designed = proposal?.source === "design" ? proposal : null;
   // Step 1 proposes outcomes, step 2 tests: each step shows its own proposal.
   const designedTests = designed?.assessments.length ? designed : null;
@@ -253,6 +269,13 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               <CourseDesignAssessments
                 proposal={designedTests}
                 notes={aiNotes("design-assessments")}
+              />
+            )}
+            {courseDesign && canDesignLessons(data) && (
+              <CourseDesignLessons
+                schedule={data.schedule}
+                proposal={lessons}
+                notes={aiNotes("design-lessons")}
               />
             )}
             <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />
