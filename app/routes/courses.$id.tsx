@@ -238,7 +238,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         />
         <OutcomesSection data={data} pack={pack} courseId={course.id} tools={tools.outcome} />
         <ActivitiesSection data={data} weekDates={weekDates} />
-        <AssessmentsSection data={data} weekDates={weekDates} />
+        <AssessmentsSection courseId={course.id} data={data} weekDates={weekDates} />
         <CoverageMatrix data={data} matrix={matrix} />
         <CourseEvidence data={data} dossiers={dossiers} />
         <LinkedWorkSection work={linkedWork} data={data} />

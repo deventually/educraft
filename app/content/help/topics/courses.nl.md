@@ -28,6 +28,10 @@ De niveaus volgen de herziene taxonomie van Bloom (Anderson & Krathwohl, 2001): 
 
 Op de cursuspagina staat een tabel met de leeruitkomsten in de rijen en de activiteiten en toetsen in de kolommen. Een ✓ betekent dat de activiteit of toets die leeruitkomst dekt, met het niveau erbij als je dat hebt ingevuld.
 
+## Een toetsmatrijs exporteren
+
+Heeft een toets vragen in zijn toetsmatrijs, dan staat daaronder **Toetsmatrijs exporteren**. Je krijgt eerst een voorbeeld en daarna een bestand in Word, als PDF (via het printvenster) of in Markdown. Het document heeft een tabel met de punten per leeruitkomst en denkniveau, de vragen met hun punten, en de leeruitkomsten die de toets toetst. Er komt geen AI aan te pas: het document komt rechtstreeks uit je cursus, dus het klopt altijd met wat je hebt ingevuld. Heeft geen vraag punten, dan telt de tabel het aantal vragen.
+
 ## Werk koppelen
 
 Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOnIt vult dan de leeruitkomsten van de cursus in, één per regel; haal weg wat niet past. Wat je genereert, wordt aan de cursus gekoppeld. Je kunt werk ook achteraf koppelen of ontkoppelen op **Eerder gemaakt**, aan de hele cursus of aan één activiteit of toets. Op de cursuspagina staat alles onder **Gekoppeld werk**.

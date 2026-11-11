@@ -42,6 +42,11 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("## Get a review");
   });
 
+  it("explains how to export a test blueprint as a document", () => {
+    expect(getTopic("courses", "nl")).toContain("## Een toetsmatrijs exporteren");
+    expect(getTopic("courses", "en")).toContain("## Exporting a test blueprint");
+  });
+
   it("explains that an assessment can be marked as supervised", () => {
     expect(getTopic("courses", "nl")).toContain("**onder toezicht**");
     expect(getTopic("courses", "en")).toContain("**supervised**");

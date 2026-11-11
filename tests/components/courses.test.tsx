@@ -231,6 +231,19 @@ describe("Course editor — question-level matrix (P26.1)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("offers the blueprint as a document to export, for each test with questions", async () => {
+    const { container } = renderRoute(CoursePage, pageData(itemizedCourse()));
+    openMatrix("Toetsmatrijs (4 vragen)");
+    const exportSummary = screen.getByText("Toetsmatrijs exporteren", { selector: "summary" });
+    expect(exportSummary.closest("details")).toHaveAttribute(
+      "data-export-url",
+      "/courses/c1/assessments/test-1/export",
+    );
+    // The formative quiz has no questions: nothing to export there.
+    expect(screen.getAllByText("Toetsmatrijs exporteren", { selector: "summary" })).toHaveLength(1);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("offers a question form that works without JavaScript", () => {
     renderRoute(CoursePage, pageData(itemizedCourse()));
     openMatrix("Toetsmatrijs (4 vragen)");

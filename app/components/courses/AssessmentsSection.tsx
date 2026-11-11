@@ -145,9 +145,11 @@ function AssessmentForm({ data, assessment }: { data: CourseData; assessment?: A
 }
 
 export function AssessmentsSection({
+  courseId,
   data,
   weekDates,
 }: {
+  courseId: string;
   data: CourseData;
   /** The Monday of each course week, or null without a start date (P22.1). */
   weekDates?: string[] | null;
@@ -201,7 +203,7 @@ export function AssessmentsSection({
               <ItemActions name={as.title} removeIntent="remove-assessment" id={as.id}>
                 <AssessmentForm data={data} assessment={as} />
               </ItemActions>
-              <ItemsMatrix data={data} assessment={as} />
+              <ItemsMatrix courseId={courseId} data={data} assessment={as} />
             </li>
           ))}
         </ul>

@@ -12,5 +12,13 @@ export const courses: RouteArea = {
     ]),
   ],
   // The calendar file (P22.4): a download, outside the app shell.
-  standalone: [route("courses/:id/calendar.ics", "routes/courses.$id.calendar.tsx")],
+  standalone: [
+    route("courses/:id/calendar.ics", "routes/courses.$id.calendar.tsx"),
+    // A test's blueprint as a document: preview, file download, and the print page for PDF.
+    ...prefix("courses/:id/assessments/:assessmentId", [
+      route("export", "routes/courses.$id.assessments.$assessmentId.export.tsx"),
+      route("export/:format", "routes/courses.$id.assessments.$assessmentId.export.$format.tsx"),
+      route("print", "routes/courses.$id.assessments.$assessmentId.print.tsx"),
+    ]),
+  ],
 };

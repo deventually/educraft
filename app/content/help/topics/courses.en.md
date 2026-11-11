@@ -28,6 +28,10 @@ The levels follow the revised Bloom taxonomy (Anderson & Krathwohl, 2001): remem
 
 On the course page is a table with the learning outcomes in the rows and the activities and assessments in the columns. A ✓ means the activity or assessment covers that learning outcome, with the level if you filled it in.
 
+## Exporting a test blueprint
+
+When a test has questions in its blueprint, **Export test blueprint** appears below it. You first see a preview, then get a file in Word, as a PDF (through the print window) or in Markdown. The document has a table with the points per learning outcome and cognitive level, the questions with their points, and the learning outcomes the test assesses. No AI is involved: the document comes straight from your course, so it always matches what you entered. If no question has points, the table counts the questions.
+
 ## Linking work
 
 On a tool page with a learning-outcome field, pick your course under **Course**. LimeOnIt then fills in the course's learning outcomes, one per line; remove what doesn't fit. What you generate is linked to the course. You can also link or unlink work afterwards on **Earlier work**, to the whole course or to one activity or assessment. The course page lists it all under **Linked work**.
