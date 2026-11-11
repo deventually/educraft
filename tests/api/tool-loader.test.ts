@@ -108,6 +108,46 @@ describe("tool loader — courses (P20, 20.4)", () => {
     ]);
   });
 
+  // A lesson's goal and its discipline's name reach Les voorbereiden (P27.4).
+  it("passes a lesson's goal and the names of the disciplines", async () => {
+    const repo = await import("~/server/repositories/courses.server");
+    const mine = await repo.createCourse("tool-loader-teacher", {
+      name: "Webmodule",
+      data: {
+        outcomes: [{ id: "lu1", text: "Bouwt een webpagina" }],
+        activities: [
+          {
+            id: "a1",
+            title: "CSS-grid",
+            week: 1,
+            kind: "lesson",
+            goal: "De student zet een pagina op met CSS-grid.",
+            outcomeIds: ["lu1"],
+            disciplineId: "web",
+          },
+        ],
+        assessments: [],
+        disciplines: [{ id: "web", name: "Webtech", teacher: "Sanne", hoursPerWeek: 6 }],
+      },
+    });
+    const data = (await loadSlug("lesson-plan")) as unknown as {
+      courses: { id: string; items: unknown[]; disciplines: unknown[] }[];
+    };
+    const course = data.courses.find((c) => c.id === mine.id);
+    expect(course?.items).toEqual([
+      {
+        id: "a1",
+        title: "CSS-grid",
+        week: 1,
+        kind: "activity",
+        goal: "De student zet een pagina op met CSS-grid.",
+        outcomeIds: ["lu1"],
+        disciplineId: "web",
+      },
+    ]);
+    expect(course?.disciplines).toEqual([{ id: "web", name: "Webtech", hoursPerWeek: 6 }]);
+  });
+
   it("offers no courses to a tool without course fields", async () => {
     const data = await loadSlug("mentorai");
     expect(data.courses).toEqual([]);
