@@ -13,6 +13,7 @@ export const admin: RouteArea = {
       route("users/:id", "routes/admin.users.$id.tsx"), // the person page (P28.1)
       route("teams", "routes/admin.teams.tsx"), // the team list (P28.2)
       route("teams/:id", "routes/admin.teams.$id.tsx"), // the team page
+      route("announcements", "routes/admin.announcements.tsx"), // banners for teachers
       route("tools", "routes/admin.tools.tsx"),
       route("agents", "routes/admin.agents.tsx"), // the role agents' switches
       route("context", "routes/admin.context.tsx"),

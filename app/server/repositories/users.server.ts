@@ -8,6 +8,8 @@ import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { handOverToCoOwners } from "./courseTransfer.server";
 import {
+  announcementDismissals,
+  announcements,
   aiUsage,
   agentChoices,
   agentReviews,
@@ -222,6 +224,22 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
     tx.delete(shares).where(eq(shares.ownerUserId, id)).run();
     tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();
+    // Announcements for the account and the account's closed announcements.
+    const told = tx
+      .select({ id: announcements.id })
+      .from(announcements)
+      .where(and(eq(announcements.audience, "user"), eq(announcements.targetId, id)));
+    tx.delete(announcementDismissals)
+      .where(
+        or(
+          eq(announcementDismissals.userId, id),
+          inArray(announcementDismissals.announcementId, told),
+        ),
+      )
+      .run();
+    tx.delete(announcements)
+      .where(and(eq(announcements.audience, "user"), eq(announcements.targetId, id)))
+      .run();
     tx.delete(twoFactor).where(eq(twoFactor.userId, id)).run();
     tx.delete(recoveryCodes).where(eq(recoveryCodes.userId, id)).run();
     // The teacher's own model set lives in instance_settings.

@@ -5,6 +5,8 @@ import { cn } from "~/lib/utils";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { modeOf } from "~/lib/registry/modes";
 import type { Tool } from "~/lib/registry/types";
+import type { ShownAnnouncement } from "~/lib/announcements";
+import { AnnouncementBanner } from "./shell/AnnouncementBanner";
 import { LanguageSwitcher } from "./shell/LanguageSwitcher";
 import { type NavItem, navLinkClass } from "./shell/nav";
 import { RouteAnnouncer } from "./shell/RouteAnnouncer";
@@ -26,6 +28,7 @@ export default function AppShell() {
           portfolio?: boolean;
           features?: Partial<Record<string, boolean>>;
         } | null;
+        announcements?: ShownAnnouncement[];
       }
     | undefined;
   const user = root?.user ?? null;
@@ -201,6 +204,7 @@ export default function AppShell() {
       {/* `relative`: hidden screen-reader text (sr-only, absolutely positioned) anchors
           here instead of against the viewport, so it never makes a page scroll past its footer. */}
       <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <AnnouncementBanner announcements={root?.announcements ?? []} t={t.announcements.banner} />
         <main
           id="top"
           ref={mainRef}

@@ -32,7 +32,7 @@ function toIso(d: Date): IsoDate {
   return d.toISOString().slice(0, 10);
 }
 
-function addDays(date: IsoDate, n: number): IsoDate {
+export function addDays(date: IsoDate, n: number): IsoDate {
   return toIso(new Date(toDate(date).getTime() + n * DAY_MS));
 }
 

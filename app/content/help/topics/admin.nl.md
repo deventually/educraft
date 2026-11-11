@@ -12,6 +12,10 @@ Nieuwe collega's nodig je uit met een **uitnodigingslink**. Plak je een lijst me
 
 Maak teams van collega's en wijs teamleiders aan. Per team kun je onderdelen, tools en modellen aanzetten die voor de rest *Op aanvraag* staan. Zie ook [Teams en delen](/help/teams).
 
+## Mededelingen
+
+Zet een mededeling als balk boven elke pagina, voor iedereen, één team of één persoon. Kies *Mededeling* of *Waarschuwing* (bijvoorbeeld bij een storing). Iedereen kan de balk voor zichzelf wegklikken. Wil je dat hij terugkomt, vul dan in na hoeveel dagen (1 tot 30). Met een laatste dag verdwijnt hij vanzelf; zonder blijft hij staan tot je hem weghaalt.
+
 ## Tools en modellen
 
 - **Tools:** zet elke tool op *Aan*, *Op aanvraag* of *Uit*. *Uit* is voor niemand; *Op aanvraag* alleen via een team of een uitzondering voor één docent.

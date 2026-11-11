@@ -5,6 +5,7 @@ export const admin: Messages["admin"] = {
     nav: {
       agents: "Review team",
       aiUsage: "AI use and cost",
+      announcements: "Announcements",
       audit: "Audit log",
       context: "Teaching context",
       teams: "Teams",

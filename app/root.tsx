@@ -22,6 +22,8 @@ import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures } from "~/server/availability.server";
 import { takeFlash } from "~/server/flash.server";
 import { dictationEnabled } from "~/server/speechToText.server";
+import { announcementsFor } from "~/server/repositories/announcements.server";
+import { DEFAULT_TIME_ZONE, todayIn } from "~/lib/calendar/weeks";
 import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
 import { requestIdMiddleware } from "~/server/requestId.server";
 import { ErrorReportHint } from "~/components/ErrorReportHint";
@@ -71,6 +73,10 @@ export async function loader({ request }: Route.LoaderArgs) {
           ) as Record<FeatureId, boolean>,
         }
       : null,
+    // The admin's banners for this user (closed ones stay away).
+    announcements: user
+      ? await announcementsFor(user.id, todayIn(DEFAULT_TIME_ZONE, new Date()))
+      : [],
     // Dictation needs a speech server (`speechToText` in config/models.json).
     dictation: user ? dictationEnabled() : false,
   };

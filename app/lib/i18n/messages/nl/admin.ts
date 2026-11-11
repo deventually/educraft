@@ -3,6 +3,7 @@ export const admin = {
     nav: {
       agents: "Reviewteam",
       aiUsage: "AI-gebruik en kosten",
+      announcements: "Mededelingen",
       audit: "Logboek",
       context: "Onderwijscontext",
       teams: "Teams",
