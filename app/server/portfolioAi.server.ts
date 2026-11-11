@@ -11,13 +11,15 @@ import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
 import { effectiveDefaultModel } from "./availability.server";
 import { meterCall } from "./aiMeter.server";
-import { checkQuota } from "./repositories/usage.server";
+import { aiGate } from "./aiLimits.server";
 import { log } from "./log.server";
 
-/** `"quota"` when a teacher is over the daily quota; admins are not limited. */
+/**
+ * `"quota"` when a teacher is over the daily quota or their monthly limit in euros (PR D);
+ * admins are not limited.
+ */
 export async function quotaGate(user: User): Promise<"quota" | null> {
-  if (user.role === "admin") return null;
-  return (await checkQuota(user.id)).ok ? null : "quota";
+  return (await aiGate(user)) ? "quota" : null;
 }
 
 export async function callPortfolioModel(

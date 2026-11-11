@@ -157,3 +157,14 @@ describe("tool loader — text for students (P31.1)", () => {
     expect(data.studentPrompt).toBeNull();
   });
 });
+
+describe("tool loader — monthly AI limit (PR D)", () => {
+  it("passes the teacher's limit along once it warns, as a share", async () => {
+    const { setAiLimit } = await import("~/server/repositories/aiLimits.server");
+    const { recordAiUsage } = await import("~/server/repositories/aiUsage.server");
+    await setAiLimit({ kind: "user", id: "tool-loader-teacher" }, 1);
+    await recordAiUsage("tool-loader-teacher", { source: "x", model: "m", costMicros: 900_000 });
+    const data = (await load()) as unknown as { aiLimit: unknown };
+    expect(data.aiLimit).toEqual({ scope: "user", share: 0.9, state: "warn" });
+  });
+});

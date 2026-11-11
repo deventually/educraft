@@ -2,9 +2,12 @@ import { Form } from "react-router";
 import type { Route } from "./+types/usage";
 import { requireUser } from "~/server/auth.server";
 import { loadUsageDashboard } from "~/server/usageDashboard.server";
+import { setLimitFromForm } from "~/server/aiLimitsAdmin.server";
 import { HelpLink } from "~/components/HelpLink";
 import { Button, Label, Select } from "~/components/ui";
 import { InstanceUsage } from "~/components/usage/InstanceUsage";
+import { LimitNotice, useLimitScope } from "~/components/usage/LimitNotice";
+import { LimitsAdmin } from "~/components/usage/LimitsAdmin";
 import {
   CallTables,
   Figure,
@@ -23,6 +26,14 @@ export function meta({ matches }: Route.MetaArgs) {
   return [{ title: `${m.usage.heading} — ${m.appName}` }];
 }
 
+/** Setting a limit (PR D): an admin per team and teacher, the owner the budget. */
+export async function action({ request }: Route.ActionArgs) {
+  const user = await requireUser(request);
+  const result = await setLimitFromForm(user, await request.formData());
+  if (!result) throw new Response("Bad Request", { status: 400 });
+  return result;
+}
+
 /** Everyone's page; `loadUsageDashboard` decides which circles the viewer sees. */
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
@@ -32,7 +43,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function Usage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const f = useUsageFormat();
-  const { own, teams, instance, money, month, months } = loaderData;
+  const { own, teams, instance, money, limits, month, months } = loaderData;
+  const scopeOf = useLimitScope();
 
   return (
     <div className="w-full min-w-0 space-y-10">
@@ -81,10 +93,18 @@ export default function Usage({ loaderData }: Route.ComponentProps) {
                 : t.usage.noLimit
             }
           />
+          {own.limit && (
+            <Figure
+              label={t.usage.limitUsed}
+              value={f.percent(own.limit.share)}
+              note={scopeOf(own.limit)}
+            />
+          )}
           {own.failedCalls > 0 && (
             <Figure label={t.usage.failed} value={f.number(own.failedCalls)} />
           )}
         </Figures>
+        <LimitNotice limit={own.limit} />
         <WeekBars weeks={own.weeks} />
         {own.calls === 0 ? (
           <p className="text-sm text-slate-500">{t.usage.none}</p>
@@ -118,6 +138,7 @@ export default function Usage({ loaderData }: Route.ComponentProps) {
       ))}
 
       {instance && <InstanceUsage data={instance} money={money} />}
+      {limits && <LimitsAdmin data={limits} />}
     </div>
   );
 }

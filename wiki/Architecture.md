@@ -185,6 +185,17 @@ LimeOnIt is not tied to one model vendor.
   from `aiUsageReports.server.ts` (grouped in SQL, capped at 500 rows); the arithmetic
   (months, weeks, forecast, savings) is pure in `app/lib/usage/summary.ts`. Help topic `usage`
   ("Wat we meten"). Beheer → *Feedback en pilot* keeps feedback and the pilot only.
+- **Monthly AI limits (PR D, BESLUIT-2026-11-11-7).** The owner sets a monthly budget for the
+  institution, an admin a monthly limit in euros per team and per teacher, stored as one JSON
+  value in `instance_settings` (`aiLimits.server.ts` repository; `parseAiLimits` drops a broken
+  entry, never the set). `applicableLimit` (`app/lib/usage/limits.ts`, pure) picks the limit
+  that binds: a teacher's own limit replaces their teams' limits, the budget always counts, the
+  highest share wins; from 80% `warn`, at 100% `stop`. `aiLimitFor` (`app/server/aiLimits.server.ts`)
+  feeds it this month's spend (`monthSpend`) and returns `null` for an admin. The stream and
+  `quotaGate` refuse at `stop`, after the daily quota (which stays as a safety net). A teacher
+  sees only a share, never euros: on *Gebruik* and above a tool's workspace (`LimitNotice`).
+  Changes go through the `/usage` action (`setLimitFromForm`: budget owner-only, never a limit
+  on an admin) and the audit log (`aiLimitChanged`).
 
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).

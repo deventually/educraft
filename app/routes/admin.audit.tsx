@@ -89,6 +89,14 @@ function detailText(
       }),
     );
   }
+  if (d.limit) {
+    const { kind, name, euros } = d.limit;
+    parts.push(
+      euros === null
+        ? t.auditLog.limit.removed
+        : fmt(t.auditLog.limit[kind], { name: name ?? "", euros: formatEuro(euros, locale) }),
+    );
+  }
   if (d.bulk) parts.push(t.auditLog.bulk);
   if (d.via === "server") parts.push(t.auditLog.viaServer);
   return parts.join(" · ");

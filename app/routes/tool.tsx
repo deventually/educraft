@@ -1,4 +1,6 @@
 import type { Route } from "./+types/tool";
+import { aiLimitFor } from "~/server/aiLimits.server";
+import { LimitNotice } from "~/components/usage/LimitNotice";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import {
   getSelectableModels,
@@ -105,6 +107,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     ),
   }));
   return {
+    // PR D: from 80% of the month's limit a notice above the tool (a share, no euros).
+    aiLimit: await aiLimitFor(user),
     forCriterion: forCriterion(ownDossiers, new URL(request.url).searchParams),
     tool,
     profiles,
@@ -226,6 +230,7 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     dossiers,
     forCriterion,
     assessmentModels,
+    aiLimit,
   } = loaderData;
   const resultContext = { nextTools, linkTargets, dossiers, forCriterion };
   const mode = modeOf(tool);
@@ -234,6 +239,11 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     <div className={cn(mode.fillsHeight && "flex min-h-0 flex-1 flex-col")}>
       {forCriterion && <DossierBar {...forCriterion} />}
       <ToolHeader tool={tool} verbatim={verbatim} helpOverlay={helpOverlay} locale={locale} t={t} />
+      {aiLimit && aiLimit.state !== "ok" && (
+        <div className="mb-4">
+          <LimitNotice limit={aiLimit} link />
+        </div>
+      )}
 
       <section
         id="tool-workspace"

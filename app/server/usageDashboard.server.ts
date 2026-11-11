@@ -17,6 +17,8 @@ import {
 } from "~/lib/usage/summary";
 import { isOwner, type User } from "./auth.server";
 import { env } from "./env.server";
+import { aiLimitFor } from "./aiLimits.server";
+import { limitsView } from "./aiLimitsAdmin.server";
 import {
   type UsageGroup,
   instanceAiUsage,
@@ -119,7 +121,10 @@ export async function loadUsageDashboard(user: User, askedMonth: string | null, 
       models: withName(callsOf(own.models)),
       // Admins have no daily limit.
       quota: user.role === "admin" ? null : { used, limit: env.DAILY_REQUEST_LIMIT },
+      // This month's limit (PR D) as a share, never in euros: a teacher sees no money.
+      limit: await aiLimitFor(user, today),
     },
+    limits: scope.instance ? await limitsView(scope.owner) : null,
     teams,
     instance,
     money,

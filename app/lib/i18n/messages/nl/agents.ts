@@ -57,6 +57,7 @@ export const agents = {
     model: "Dit model is niet voor jou beschikbaar. Kies een ander model.",
     none: "Kies minstens één reviewer om je cursus te laten reviewen.",
     partial: "De review is klaar, maar {agents} gaf geen bruikbaar antwoord.",
-    quota: "Je hebt je dagelijkse limiet bereikt. Probeer het morgen opnieuw.",
+    quota:
+      "AI-limiet bereikt: je daglimiet of de limiet voor deze maand. Op de pagina Gebruik zie je welke.",
   },
 };

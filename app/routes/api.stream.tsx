@@ -20,7 +20,7 @@ import { localizeError } from "~/lib/i18n/errors";
 import { createRateLimiter } from "~/server/rateLimit.server";
 import { env } from "~/server/env.server";
 import { log } from "~/server/log.server";
-import { checkQuota } from "~/server/repositories/usage.server";
+import { aiGate } from "~/server/aiLimits.server";
 import { meterCall } from "~/server/aiMeter.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { getDossier } from "~/server/repositories/portfolio.server";
@@ -253,14 +253,14 @@ export async function action({ request }: Route.ActionArgs) {
       outputLanguage,
     };
 
-    // Per-user daily quota (audit finding #8). Checked after auth, before the
-    // provider call. Admins are exempt. Over quota → localized SSE error.
-    if (user.role !== "admin") {
-      const { ok } = await checkQuota(user.id);
-      if (!ok) {
-        log("generation", { ...logFields, outcome: "quota_exceeded", durationMs: 0 });
-        return new Response(sseError(m.error.quotaExceeded), { headers: SSE_HEADERS });
-      }
+    // The daily quota (audit finding #8) and the monthly limit in euros (PR D), after auth and
+    // before the provider call. Admins are exempt. Refused → localized SSE error.
+    const refused = await aiGate(user);
+    if (refused) {
+      const outcome = refused === "quota" ? "quota_exceeded" : "limit_reached";
+      log("generation", { ...logFields, outcome, durationMs: 0 });
+      const text = refused === "quota" ? m.error.quotaExceeded : m.error.limitReached;
+      return new Response(sseError(text), { headers: SSE_HEADERS });
     }
 
     // The mode decides the turns: a chat's own history, or one trigger. A chat also repeats

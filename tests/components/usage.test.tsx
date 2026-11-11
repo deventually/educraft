@@ -185,4 +185,57 @@ describe("Usage page", () => {
     expect(within(owner).getByText("Bespaard door caching")).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
+
+  it("warns a teacher from 80% of the month's limit, as a share without euros", async () => {
+    const { container } = renderPage({
+      ...teacher,
+      own: {
+        ...teacher.own,
+        limit: { scope: "team", teamName: "Informatica", share: 0.85, state: "warn" },
+      },
+    });
+    expect(screen.getByText("AI-ruimte deze maand").closest("div")).toHaveTextContent("85%");
+    expect(
+      screen.getByText(
+        /Je hebt 85% van je AI-ruimte voor deze maand gebruikt \(de limiet van team Informatica\)/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/€/)).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says the AI stops when the limit is spent", () => {
+    renderPage({
+      ...teacher,
+      own: { ...teacher.own, limit: { scope: "budget", share: 1.2, state: "stop" } },
+    });
+    expect(
+      screen.getByText(/Je AI-ruimte voor deze maand is op \(het budget van de instelling\)/),
+    ).toBeInTheDocument();
+  });
+
+  it("lets an admin set limits per team and teacher, and the owner the budget", async () => {
+    const limits = {
+      budget: { euros: 250 },
+      teams: [{ id: "t1", name: "Informatica", euros: 40 }],
+      people: [{ id: "u1", name: "Anna de Vries", euros: null }],
+    };
+    const { container } = renderPage({ ...teacher, instance, limits });
+    const region = screen.getByRole("region", { name: "Limieten per maand" });
+    expect(within(region).getByLabelText("Budget van de instelling per maand (euro)")).toHaveValue(
+      "250",
+    );
+    expect(within(region).getByLabelText("Limiet per maand voor Informatica (euro)")).toHaveValue(
+      "40",
+    );
+    expect(within(region).getByLabelText("Limiet per maand voor Anna de Vries (euro)")).toHaveValue(
+      "",
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("hides the budget field from an admin who is not the owner", () => {
+    renderPage({ ...teacher, instance, limits: { budget: null, teams: [], people: [] } });
+    expect(screen.queryByLabelText(/Budget van de instelling/)).toBeNull();
+  });
 });

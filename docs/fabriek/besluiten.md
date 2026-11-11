@@ -407,3 +407,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   een schooljaar plus dezelfde maand vorig jaar, precies wat de pagina *Gebruik* laat kiezen.
   Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Bewaartermijn …
   JA").
+- **BESLUIT-2026-11-11-7:** **Limieten per maand in euro's.** De eigenaar zet een budget per
+  maand voor de hele instelling; beheer zet een limiet per maand per team en per docent. De eigen
+  limiet van een docent vervangt die van zijn teams; het budget telt altijd. Vanaf 80% ziet de
+  docent een waarschuwing, bij 100% stopt de AI tot de volgende maand. Een docent ziet een
+  percentage, nooit euro's. Beheerders hebben geen limiet. De vaste daglimiet blijft voorlopig
+  als vangnet. Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen":
+  "Doe het maar").

@@ -3,6 +3,7 @@ export const usage = {
   activeMembers: "Actieve leden deze maand",
   allHeading: "Hele instelling",
   allIntro: "Iedereen samen: per persoon, team, tool en model. Alleen beheer ziet dit.",
+  budgetLabel: "Budget van de instelling per maand (euro)",
   cacheShare: "Invoer uit de cache",
   callsMonth: "Aanroepen deze maand",
   colCacheRead: "Cache lezen",
@@ -17,6 +18,11 @@ export const usage = {
   colTeam: "Team",
   colTool: "Tool",
   cost: "Kosten deze maand",
+  errors: {
+    amount: "Vul een bedrag in euro's in, zoals 25 of 12,50. Leeg = geen limiet.",
+    ownerOnly: "Alleen de eigenaar zet het budget.",
+    unknown: "Dit team of deze persoon bestaat niet (meer).",
+  },
   estimate:
     "Een schatting uit onze eigen tellingen, met de prijs op het moment van elke aanroep. Het echte bedrag staat op de factuur van de aanbieder.",
   failed: "Mislukt of afgebroken",
@@ -24,6 +30,24 @@ export const usage = {
   heading: "Gebruik",
   intro:
     "Hoe vaak de tools AI voor je aanroepen. We tellen alleen aanroepen en tokens per dag, nooit wat je schrijft.",
+  limitAdmin: {
+    heading: "Limieten per maand",
+    intro:
+      "In euro's per maand. Een limiet voor een docent gaat voor die van zijn team. Vanaf 80% ziet de docent een melding, bij 100% stopt de AI tot de volgende maand. Beheerders hebben geen limiet. Leeg = geen limiet.",
+    people: "Per docent",
+    teams: "Per team",
+  },
+  limitFor: "Limiet per maand voor {name} (euro)",
+  limitNone: "geen limiet",
+  limitScope: {
+    budget: "het budget van de instelling",
+    team: "de limiet van team {name}",
+    user: "je eigen limiet",
+  },
+  limitStop:
+    "Je AI-ruimte voor deze maand is op ({scope}). Op de 1e van de maand kan het weer; je beheerder kan de limiet verhogen.",
+  limitUsed: "AI-ruimte deze maand",
+  limitWarn: "Je hebt {pct} van je AI-ruimte voor deze maand gebruikt ({scope}).",
   monthLabel: "Maand",
   monthShow: "Tonen",
   monthTotal: "Totaal van de maand",

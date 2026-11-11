@@ -5,6 +5,8 @@ export const error = {
   invalidImages: "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG, JPEG, GIF of WebP zijn.",
   invalidMessages: "Ongeldig berichtformaat.",
   invalidRequest: "Ongeldig verzoek.",
+  limitReached:
+    "De AI-ruimte voor deze maand is op. Op de pagina Gebruik zie je welke limiet; je beheerder kan hem verhogen.",
   modelNoVision:
     "Dit model ({model}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.",
   notAllowed: "Deze tool is niet beschikbaar voor jouw account.",

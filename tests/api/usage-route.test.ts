@@ -108,3 +108,44 @@ describe("/usage", () => {
     expect((await load("use-teacher", "?month=1999-01")).month).toBe(today.slice(0, 7));
   });
 });
+
+describe("/usage: monthly limits (PR D)", () => {
+  it("shows a teacher their limit as a share, never in euros", async () => {
+    const repo = await import("~/server/repositories/aiLimits.server");
+    await repo.setAiLimit({ kind: "user", id: "use-teacher" }, 0.0025);
+    const data = await load("use-teacher");
+    // 2,000 of 2,500 micro-euros.
+    expect(data.own.limit).toEqual({ scope: "user", share: 0.8, state: "warn" });
+    expect(data.limits).toBeNull();
+    await repo.setAiLimit({ kind: "user", id: "use-teacher" }, null);
+  });
+
+  it("gives an admin the team and teacher limits, the budget only to the owner", async () => {
+    const admin = await load("admin");
+    expect(admin.limits?.budget).toBeNull();
+    expect(admin.limits?.teams.map((t) => t.name)).toContain("Gebruik team");
+    expect(admin.limits?.people.map((p) => p.name)).toContain("Naam use-m1");
+    expect(admin.limits?.people.map((p) => p.name)).not.toContain("Beheer");
+    expect((await load("owner")).limits?.budget).toEqual({ euros: null });
+  });
+
+  it("saves a limit through the page's action, owner-only for the budget", async () => {
+    const act = (who: string, fields: Record<string, string>) =>
+      route.action({
+        request: withCookie(
+          new Request("http://localhost/usage", {
+            method: "POST",
+            body: new URLSearchParams(fields),
+          }),
+          cookies[who] ?? "",
+        ),
+      } as never);
+    expect(await act("admin", { intent: "budget", euros: "100" })).toEqual({ error: "ownerOnly" });
+    expect(await act("use-teacher", { intent: "teamLimit", id: teamId, euros: "5" })).toEqual({
+      error: "ownerOnly",
+    });
+    expect(await act("admin", { intent: "teamLimit", id: teamId, euros: "5" })).toMatchObject({
+      limitSaved: { name: "Gebruik team" },
+    });
+  });
+});

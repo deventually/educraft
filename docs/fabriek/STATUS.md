@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #255 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #256 gemerged)_
 
 ## Nu
 
+- **Bewaartermijn AI-gebruik (#256) gemerged op 2026-11-11:** gebruik per persoon blijft 13
+  maanden; daarna rolt de server het op tot maandtotalen per tool en model, voor de instelling en
+  per team, zonder naam (BESLUIT-2026-11-11-6).
 - **Pagina Gebruik (#255) gemerged op 2026-11-11:** één pagina `/usage` voor iedereen, met per
   rol een andere kring (BESLUIT-2026-11-11-1). De docent ziet het eigen gebruik en wat er vandaag
   nog over is; een teamleider de teamtotalen, zonder namen en geld, en alleen het totaal bij

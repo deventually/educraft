@@ -95,3 +95,28 @@ describe("api.stream — daily quota", () => {
     expect(streamChatSpy).toHaveBeenCalledTimes(4);
   });
 });
+
+describe("api.stream — monthly limit in euros (PR D)", () => {
+  it("refuses a teacher whose month is spent, before the provider, with its own message", async () => {
+    const { setAiLimit } = await import("~/server/repositories/aiLimits.server");
+    const { recordAiUsage } = await import("~/server/repositories/aiUsage.server");
+    const { getMessages } = await import("~/lib/i18n");
+    await setAiLimit({ kind: "user", id: "limit-teacher" }, 1);
+    await recordAiUsage("limit-teacher", { source: "x", model: "m", costMicros: 1_000_000 });
+
+    const res = await generate("limit-teacher");
+    expect(sseErrorMessage(await res.text())).toBe(getMessages("nl").error.limitReached);
+    expect(streamChatSpy).not.toHaveBeenCalled();
+  });
+
+  it("never limits an admin", async () => {
+    const { setAiLimit } = await import("~/server/repositories/aiLimits.server");
+    await setAiLimit({ kind: "budget" }, 0.01);
+    const { recordAiUsage } = await import("~/server/repositories/aiUsage.server");
+    await recordAiUsage("limit-admin", { source: "x", model: "m", costMicros: 5_000_000 });
+    const res = await generate("limit-admin", "admin");
+    expect(sseErrorMessage(await res.text())).toBeNull();
+    expect(streamChatSpy).toHaveBeenCalledTimes(1);
+    await setAiLimit({ kind: "budget" }, null);
+  });
+});

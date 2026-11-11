@@ -31,6 +31,16 @@ A token is a piece of text of a few letters. A provider charges per token. In a 
 
 There is a daily limit on the number of calls per person. A new day starts at midnight (UTC). Admins have no daily limit.
 
+## The monthly limit
+
+Admins can set a limit per month, in euros: for a team or for one teacher. A limit for you replaces your team's. The owner can also set a budget for the whole institution.
+
+- You see no amounts, only what share of your allowance you used this month, on **Usage**.
+- From 80% you see a notice above every tool.
+- At 100% the AI stops for you until the 1st of the next month. Your admin can raise the limit.
+
+When you share a limit with your team, the whole team's use counts.
+
 ## Costs are an estimate
 
 The costs come from our own counts, at each model's price at the time of the call. The real amount is on the provider's invoice. For a model without a known price we say how many calls were left out, rather than show costs that are too low.

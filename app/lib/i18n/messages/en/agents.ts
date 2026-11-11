@@ -58,6 +58,6 @@ export const agents: Messages["agents"] = {
     model: "This model is not available to you. Pick another model.",
     none: "Pick at least one reviewer to have your course reviewed.",
     partial: "The review is ready, but {agents} gave no usable answer.",
-    quota: "You have reached your daily limit. Please try again tomorrow.",
+    quota: "AI limit reached: your daily limit or this month's limit. The Usage page shows which.",
   },
 };

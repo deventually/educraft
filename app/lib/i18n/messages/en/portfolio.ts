@@ -20,7 +20,8 @@ export const portfolio: Messages["portfolio"] = {
         "Link evidence to this criterion first; it is the only source for the paragraph.",
       "not-confirmed": "Confirm the framework first; the coach assesses against your criteria.",
       "not-draft-mode": 'Turn on "draft paragraphs" for the dossier first.',
-      quota: "Daily limit reached; try again tomorrow.",
+      quota:
+        "AI limit reached: your daily limit or this month's limit. The Usage page shows which.",
     },
     evidenceNeeded: "Still needed as evidence",
     gap: "What is missing",
@@ -124,7 +125,8 @@ export const portfolio: Messages["portfolio"] = {
       failed: "Could not extract a framework from the form. Try again, or enter it by hand.",
       "in-use":
         "The framework is already in use: statuses, evidence or chapters depend on it. Change it by hand instead.",
-      quota: "Daily limit reached; try again tomorrow.",
+      quota:
+        "AI limit reached: your daily limit or this month's limit. The Usage page shows which.",
     },
     extractFile: "Or choose the form (PDF or Word, several files allowed)",
     extractFileFailed: "This file could not be read. Paste the text yourself instead.",

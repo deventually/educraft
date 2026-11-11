@@ -102,6 +102,27 @@ describe("Admin audit log", () => {
     expect(rows[1]).toHaveTextContent("gpt-5 · prijs weggehaald");
   });
 
+  it("explains a monthly AI limit: the budget, a team's, a teacher's, or removed", () => {
+    renderRoute({
+      entries: [
+        entry({ action: "aiLimitChanged", detail: { limit: { kind: "budget", euros: 250 } } }),
+        entry({
+          action: "aiLimitChanged",
+          detail: { limit: { kind: "team", name: "Informatica", euros: 40 } },
+        }),
+        entry({ action: "aiLimitChanged", detail: { limit: { kind: "user", euros: 12.5 } } }),
+        entry({ action: "aiLimitChanged", detail: { limit: { kind: "user", euros: null } } }),
+      ],
+      canClean: false,
+    });
+    const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
+    expect(rows[0]).toHaveTextContent("AI-limiet gewijzigd");
+    expect(rows[0]).toHaveTextContent("Budget van de instelling: € 250,00 per maand");
+    expect(rows[1]).toHaveTextContent("Team Informatica: € 40,00 per maand");
+    expect(rows[2]).toHaveTextContent("Limiet: € 12,50 per maand");
+    expect(rows[3]).toHaveTextContent("limiet weggehaald");
+  });
+
   it("says so when nothing has happened yet", () => {
     renderRoute({ entries: [], canClean: false });
     expect(screen.getByText(/nog geen beheeracties/i)).toBeInTheDocument();

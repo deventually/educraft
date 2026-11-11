@@ -2,6 +2,7 @@ export const auditLog = {
   actions: {
     accountCreated: "Account aangemaakt",
     accountDeleted: "Account verwijderd",
+    aiLimitChanged: "AI-limiet gewijzigd",
     courseMemberChanged: "Meewerkers aan cursus gewijzigd",
     coursesTransferred: "Cursussen overgedragen",
     deactivated: "Gedeactiveerd",
@@ -50,6 +51,12 @@ export const auditLog = {
   intro:
     "Wie wat heeft veranderd aan rollen, wachtwoorden, accounts, uitnodigingen en modelkeuze. De nieuwste {n} acties staan bovenaan.",
   invites: "{n} uitnodigingen",
+  limit: {
+    budget: "Budget van de instelling: {euros} per maand",
+    removed: "limiet weggehaald",
+    team: "Team {name}: {euros} per maand",
+    user: "Limiet: {euros} per maand",
+  },
   price: "{input} in, {output} uit per miljoen tokens",
   priceRemoved: "prijs weggehaald",
   role: "Rol: {role}",
