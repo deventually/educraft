@@ -6,6 +6,8 @@ This guide takes you step by step from an empty dossier to the documents you han
 
 **Tabs.** Your dossier has two tabs: Overview (your progress and your learning outcomes) and Finish (the check whether you can hand in, the export and your sources). Each learning outcome has four: Overview, Evidence, Chapter and Assessment. So you only see what you need now; the milestones and *Fix it* take you straight to the right tab.
 
+**Required evidence.** At the top of the Evidence tab is what the form asks for as evidence for this learning outcome, as a checklist. Link each line to the piece of evidence that belongs to it. When LimeOnIt already finds a piece of the right kind, it says *Check* and you confirm with *Yes, this belongs here*; otherwise you choose a piece yourself or add new evidence. Feedback a tool made never counts as feedback from your mentor or a fellow student. The Evidence milestone counts the list too.
+
 **Three agreements first**
 
 - **Your own institution's form is the standard.** Everything LimeOnIt says is measured against the criteria you take over and confirm.

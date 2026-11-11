@@ -98,7 +98,7 @@ describe("readinessCheck — one code at a time", () => {
         level: "block",
         outcomeId: LU,
         detail: "Opname van de les",
-        fix: { to: "evidence", outcomeId: LU },
+        fix: { to: "required", outcomeId: LU },
       },
     ]);
     // A framework that asks for no evidence lines gets no finding for it at all.

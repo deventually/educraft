@@ -65,6 +65,12 @@ export const EVIDENCE_KINDS = [
 ] as const;
 export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
+/** One required-evidence line of an outcome, by its text (the form's own words). */
+export interface RequirementRef {
+  outcomeId: string;
+  line: string;
+}
+
 export interface EvidenceItem {
   id: string;
   title: string;
@@ -73,6 +79,8 @@ export interface EvidenceItem {
   text: string;
   criterionIds: string[];
   sourceGenerationId?: string;
+  /** The required-evidence lines the teacher ticked this item for (`requirementChecklist`). */
+  requirements?: RequirementRef[];
   /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */
   sourceCourse?: {
     courseId: string;

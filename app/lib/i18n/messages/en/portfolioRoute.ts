@@ -19,7 +19,7 @@ export const portfolioRoute = {
     },
     evidence: {
       how: "Add evidence or link earlier work until every criterion has at least one piece. If something is missing, LimeOnIt names a tool that helps at the criterion.",
-      status: "{done} of {total} criteria with evidence",
+      status: "{done} of {total} evidence points done",
       title: "Evidence",
     },
     review: {
@@ -41,6 +41,20 @@ export const portfolioRoute = {
   outcomeStepsLabel: "Milestones of this learning outcome",
   outcomeTitle: "Progress of this learning outcome",
   practise: "Practise your final interview with a rehearsal assessment",
+  required: {
+    add: "Add new evidence",
+    choose: "Choose a piece of evidence",
+    confirm: "Yes, this belongs here",
+    found: "Found: {title}. Is that right?",
+    intro:
+      "What the form asks for as evidence for this learning outcome. Link each line to the piece of evidence that belongs to it; feedback a tool made never counts as feedback from someone else.",
+    level: { done: "Done", guess: "Check", missing: "Missing" },
+    link: "Link",
+    linked: "Evidence: {titles}",
+    title: "Required evidence",
+    unlink: "Unlink",
+    unlinkLabel: "Unlink {title}",
+  },
   stepDone: "Done",
   steps: {
     finish: {

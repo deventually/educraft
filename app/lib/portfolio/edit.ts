@@ -3,7 +3,14 @@
  * leaves its input untouched. A change to the framework (outcomes, criteria)
  * clears `confirmedAt`: the teacher must look at the framework again.
  */
-import type { CriterionStatus, DossierData, EvidenceItem, Framework, Outcome } from "./types";
+import type {
+  CriterionStatus,
+  DossierData,
+  EvidenceItem,
+  Framework,
+  Outcome,
+  RequirementRef,
+} from "./types";
 import { applySuggestion } from "./proofread";
 
 const newId = (): string => crypto.randomUUID();
@@ -194,6 +201,22 @@ export function updateEvidence(
   const next = clone(d);
   next.evidence = next.evidence.map((e) => (e.id === evidenceId ? { ...e, ...patch } : e));
   return next;
+}
+
+/** Ticks (or unticks) an evidence item for one required-evidence line of an outcome. */
+export function linkRequirement(
+  d: DossierData,
+  evidenceId: string,
+  ref: RequirementRef,
+  linked: boolean,
+): DossierData {
+  const outcome = d.framework.outcomes.find((o) => o.id === ref.outcomeId);
+  if (!outcome?.requiredEvidence.includes(ref.line)) throw new RangeError("unknown requirement");
+  const item = d.evidence.find((e) => e.id === evidenceId);
+  if (!item) throw new Error(`Unknown evidence: ${evidenceId}`);
+  const same = (r: RequirementRef) => r.outcomeId === ref.outcomeId && r.line === ref.line;
+  const rest = (item.requirements ?? []).filter((r) => !same(r));
+  return updateEvidence(d, evidenceId, { requirements: linked ? [...rest, { ...ref }] : rest });
 }
 
 export function removeEvidence(d: DossierData, evidenceId: string): DossierData {

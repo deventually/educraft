@@ -348,6 +348,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the dossier and each outcome are split into tabs in the URL (`app/lib/portfolio/tabs.ts`,
   the shared `TabNav`): the dossier has Overview and Finish, an outcome Overview, Evidence,
   Chapter and Review. Links into a tab (`dossierHref`, `outcomeHref`) carry `?tab=` and an anchor.
+  The form's required evidence is a checklist on the Evidence tab (`requirementChecklist`,
+  `app/lib/portfolio/requirements.ts`): an item counts for a line when the teacher ticked it
+  (`EvidenceItem.requirements`, intent `linkRequirement`), or else as a guess from its kind, which
+  the teacher confirms; tool-made feedback is never a guess. The evidence milestone and the
+  readiness check count the same lines. No migration (the dossier is JSON).
 - **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
   design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
   `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,
