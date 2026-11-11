@@ -204,3 +204,108 @@ describe("the check-this flag", () => {
     expect(next.framework.outcomes[0]!.criteria[0]!.unverified).toBeUndefined();
   });
 });
+
+// ── Chapter outline and literature (BDB step 5) ─────────────────────────────
+
+const FORM_WITH_OUTLINE = `${FORM}
+
+Uitwerking lesopzet (LU1)
+Beschrijf in je hoofdstuk:
+a. Beginsituatie: wat de groep al kan en weet.
+b. Lesdoel en subdoelen
+c. Procedure volgens Gagné
+d. Evaluatie van de les
+
+Literatuur bij LU1: Ebbens, S., & Ettekoven, S. (2016). Effectief leren. Noordhoff.`;
+
+const withOutline = () => {
+  const g = structuredClone(good) as Record<string, unknown> & typeof good;
+  (g.outcomes[0] as Record<string, unknown>).outline = [
+    { title: "Beginsituatie", description: "wat de groep al kan en weet.", criteria: [2] },
+    { title: "Lesdoel en subdoelen", description: null, criteria: [1] },
+    { title: "Procedure volgens Gagné", criteria: [1, 1, 9] },
+    { title: "Reflectie", criteria: [] },
+  ];
+  (g.outcomes[0] as Record<string, unknown>).literature = [
+    "Ebbens, S., & Ettekoven, S. (2016). Effectief leren. Noordhoff.",
+    "Hattie, J. (2009). Visible learning. Routledge.",
+  ];
+  return g;
+};
+
+describe("parseExtraction: chapter outline and literature", () => {
+  it("maps each section's criterion numbers to the outcome's criteria", () => {
+    const r = parseExtraction(JSON.stringify(withOutline()), FORM_WITH_OUTLINE);
+    if (!r.ok) throw new Error(r.error);
+    const lu1 = r.framework.outcomes[0]!;
+    const [c1, c2] = lu1.criteria.map((c) => c.id);
+    const outline = lu1.outline ?? [];
+    expect(outline.map((s) => s.title)).toEqual([
+      "Beginsituatie",
+      "Lesdoel en subdoelen",
+      "Procedure volgens Gagné",
+      "Reflectie",
+    ]);
+    expect(outline[0]!.criterionIds).toEqual([c2]);
+    expect(outline[0]!.description).toBe("wat de groep al kan en weet.");
+    expect(outline[1]!.description).toBeUndefined();
+    // Duplicates and numbers that point at no criterion are dropped.
+    expect(outline[2]!.criterionIds).toEqual([c1]);
+    expect(new Set(outline.map((s) => s.id)).size).toBe(4);
+  });
+
+  it("flags a section title that is not in the form, and keeps only literature the form names", () => {
+    const r = parseExtraction(JSON.stringify(withOutline()), FORM_WITH_OUTLINE);
+    if (!r.ok) throw new Error(r.error);
+    const lu1 = r.framework.outcomes[0]!;
+    expect(lu1.outline!.map((s) => !!s.unverified)).toEqual([false, false, false, true]);
+    // An invented source is worse than a missing one: it is dropped, not flagged.
+    expect(lu1.literature).toEqual([
+      "Ebbens, S., & Ettekoven, S. (2016). Effectief leren. Noordhoff.",
+    ]);
+    // Criteria flags keep their meaning: only criteria count.
+    expect(r.flagged).toBe(0);
+  });
+
+  it("maps numbers to the criteria as the model listed them, also when one is empty", () => {
+    const g = withOutline();
+    g.outcomes[0]!.criteria.unshift({ text: "  " });
+    (g.outcomes[0] as Record<string, unknown>).outline = [
+      { title: "Beginsituatie", criteria: [3] },
+    ];
+    const r = parseExtraction(JSON.stringify(g), FORM_WITH_OUTLINE);
+    if (!r.ok) throw new Error(r.error);
+    const lu1 = r.framework.outcomes[0]!;
+    expect(lu1.outline![0]!.criterionIds).toEqual([lu1.criteria[1]!.id]);
+  });
+
+  it("leaves outline and literature out when the form gives none", () => {
+    const r = parseExtraction(JSON.stringify(good), FORM);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.framework.outcomes[0]).not.toHaveProperty("outline");
+    expect(r.framework.outcomes[0]).not.toHaveProperty("literature");
+  });
+
+  it("clips outline and literature to the limits and stays a valid dossier", () => {
+    const g = withOutline();
+    (g.outcomes[0] as Record<string, unknown>).outline = Array.from(
+      { length: LIMITS.outlineSections + 3 },
+      (_, i) => ({ title: `Sectie ${i}`, description: "d".repeat(LIMITS.sectionDescription + 5) }),
+    );
+    (g.outcomes[0] as Record<string, unknown>).literature = Array.from(
+      { length: LIMITS.literature + 3 },
+      () => "Ebbens, S., & Ettekoven, S. (2016). Effectief leren. Noordhoff.",
+    );
+    const r = parseExtraction(JSON.stringify(g), FORM_WITH_OUTLINE);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.clipped).toBe(true);
+    const lu1 = r.framework.outcomes[0]!;
+    expect(lu1.outline).toHaveLength(LIMITS.outlineSections);
+    expect(lu1.outline![0]!.description).toHaveLength(LIMITS.sectionDescription);
+    // The same source twice is one suggestion.
+    expect(lu1.literature).toHaveLength(1);
+    const d = applyExtraction(emptyDossier(["bdb"]), r.framework);
+    if (!d.ok) throw new Error(d.error);
+    expect(DossierDataSchema.safeParse(d.data).success).toBe(true);
+  });
+});

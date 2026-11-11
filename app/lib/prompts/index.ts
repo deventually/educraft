@@ -39,6 +39,7 @@ import {
 } from "./test-items.prompt";
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
+import { PORTFOLIO_FRAMEWORK_PROMPT_V2 } from "./portfolio-framework@v2.prompt";
 import { PORTFOLIO_PROOFREAD_PROMPT } from "./portfolio-proofread@v1.prompt";
 import { PORTFOLIO_REHEARSAL_PROMPT } from "./portfolio-rehearsal@v1.prompt";
 import { PORTFOLIO_REHEARSAL_PROMPT_V2 } from "./portfolio-rehearsal@v2.prompt";
@@ -46,6 +47,7 @@ import { COURSE_IMPORT_PROMPT } from "./course-import@v1.prompt";
 import { COURSE_IMPORT_PROMPT_V2 } from "./course-import@v2.prompt";
 import { COURSE_IMPORT_PROMPT_V3 } from "./course-import@v3.prompt";
 import { COURSE_DESIGN_OUTCOMES_PROMPT } from "./course-design-outcomes@v1.prompt";
+import { COURSE_DESIGN_ASSESSMENTS_PROMPT } from "./course-design-assessments@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT, AGENT_DESIGN_PROMPT } from "./agents@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT_V2 } from "./agents@v2.prompt";
 import { AGENT_AI_RESILIENCE_PROMPT } from "./agent-ai-resilience@v1.prompt";
@@ -111,6 +113,7 @@ const ALL: PromptDef[] = [
   PORTFOLIO_COACH_PROMPT,
   PORTFOLIO_DRAFT_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT,
+  PORTFOLIO_FRAMEWORK_PROMPT_V2,
   PORTFOLIO_PROOFREAD_PROMPT,
   PORTFOLIO_REHEARSAL_PROMPT,
   PORTFOLIO_REHEARSAL_PROMPT_V2,
@@ -118,6 +121,7 @@ const ALL: PromptDef[] = [
   COURSE_IMPORT_PROMPT_V2,
   COURSE_IMPORT_PROMPT_V3,
   COURSE_DESIGN_OUTCOMES_PROMPT,
+  COURSE_DESIGN_ASSESSMENTS_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,

@@ -290,11 +290,18 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   "Beoordeel het hele dossier" in step 5 (`reviewAll`, `reviewDossier`) runs the same coach over
   every chapter with text, in parallel, and keeps the reviews that worked.
   Framework extraction (P25.4, intent `extract` on the framework page): the teacher pastes the
-  form or picks one or more PDF/DOCX files (`fileToText`, in the browser); `portfolio-framework@v1`
+  form or picks one or more PDF/DOCX files (`fileToText`, in the browser); `portfolio-framework@v2`
   returns JSON and `extract.ts` clips it to `LIMITS`, marks a criterion that is not verbatim in the
   form as `unverified` ("Controleer dit"; saving the criterion clears it) and refuses to replace a
   framework that work depends on (`frameworkInUse`). The proposal is stored unconfirmed. The model
   call is shared with the coach in `portfolioAi.server.ts`.
+  Per outcome @v2 also reads the chapter outline the form prescribes (`Outcome.outline`: sections
+  with what each asks and the criteria it covers, named by number in the model's list and mapped
+  to ids in code) and the sources the form names (`Outcome.literature`). No outline when the form
+  gives none; a section name not verbatim in the form is `unverified`, a source not in the form is
+  dropped. The chapter tab shows both above the editor (`ChapterOutline`). Removing a criterion
+  takes it out of the sections; the schema refuses a section that covers another outcome's
+  criterion. Eval: `npm run eval:framework` (deterministic, `evals/portfolio-framework/`).
   The start wizard (`/portfolio/:id/start?step=`, `start.ts`): a new dossier goes straight to it;
   four steps (track, framework, anchors, planning), each skippable. An anchor (`anchors.ts`,
   `DossierData.anchors`) says per learning outcome which module, lesson or test of the teacher's
@@ -339,7 +346,8 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `CourseData.schedule` (weeks, sessions per week, `sessionMinutes`, group size, delivery mode)
   feeds `sessionMinutes`, `groupSize` and `deliveryMode`; optional `disciplines` (name, teacher,
   `hoursPerWeek`) with `Activity.disciplineId` turn `sessionMinutes` into that discipline's hours
-  in the lesson's week over its lessons that week (rounded to 5, capped at a session). `/api/stream` takes an optional `courseId` and links the saved generation;
+  in the lesson's week over its lessons that week (rounded to 5, capped at a session). An activity has an optional
+  `goal` (one sentence, `COURSE_LIMITS.goal`): what the student can do after that lesson. `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
@@ -356,6 +364,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the dossier and each outcome are split into tabs in the URL (`app/lib/portfolio/tabs.ts`,
   the shared `TabNav`): the dossier has Overview and Finish, an outcome Overview, Evidence,
   Chapter and Review. Links into a tab (`dossierHref`, `outcomeHref`) carry `?tab=` and an anchor.
+  The form's required evidence is a checklist on the Evidence tab (`requirementChecklist`,
+  `app/lib/portfolio/requirements.ts`): an item counts for a line when the teacher ticked it
+  (`EvidenceItem.requirements`, intent `linkRequirement`), or else as a guess from its kind, which
+  the teacher confirms; tool-made feedback is never a guess. The evidence milestone and the
+  readiness check count the same lines. No migration (the dossier is JSON).
 - **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
   design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
   `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,
@@ -367,6 +380,17 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   model once more on a broken answer, and stores no outcome: the teacher reviews them in the same
   `ProposalForm` as an import and `import-apply` adds what is ticked. The feature `courseDesign`
   switches it off (the action is then a 404). Evals: `npm run eval:design`.
+- **Course wizard (step 2).** A course with outcomes and no tests (`canDesignAssessments`) shows
+  "Volgende stap: het toetsprogramma" on the overview (`CourseDesignAssessments`), posting
+  `design-assessments` with the school's assessment forms (optional). `designAssessments.ts` numbers
+  the course's own outcomes (with Bloom and criteria) for `course-design-assessments@v1` and checks
+  the answer into an `ImportProposal` over those outcomes (`existing: true`, sent as hidden fields):
+  coverage only to outcomes that exist, a week inside the course, no weight on a formative test, at
+  most eight tests, the form in `details.form`. Weights are never corrected: `weightsOff` and
+  `uncovered` (outcomes in no summative test) are shown above the tests, and the weight field reads
+  "Weging (voorstel van de AI)". Same server path as step 1 (`propose` in `courseDesign.server.ts`:
+  feature, quota, one retry, nothing stored); `import-apply` adds what is ticked. Evals:
+  `npm run eval:design-assessments`.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings

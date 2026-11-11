@@ -60,3 +60,64 @@ describe("course-design-outcomes@v1 prompt", () => {
     expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
   });
 });
+
+describe("course-design-assessments@v1 prompt", () => {
+  const p = getPrompt("course-design-assessments@v1");
+
+  it("is registered with both languages, Voice & Bounds and no placeholders", () => {
+    for (const lang of ["nl", "en"] as const) {
+      const text = p.runtime[lang];
+      expect(text).toContain("Voice & Bounds");
+      expect(text).not.toMatch(/\{\{/);
+      // The JSON contract `parseAssessmentsDesign` expects.
+      for (const key of [
+        "assessments",
+        "title",
+        "kind",
+        "week",
+        "weight",
+        "outcomeRefs",
+        "form",
+        "notes",
+      ])
+        expect(text).toContain(`"${key}"`);
+      for (const value of ["summative", "formative"]) expect(text).toContain(`"${value}"`);
+      // Every part of the message `buildAssessmentsDesignMessage` sends.
+      for (const tag of [
+        "<course>",
+        "<studyLoad>",
+        "<weeks>",
+        "<outcomes>",
+        "<assessmentForms>",
+        "<context>",
+      ])
+        expect(text).toContain(tag);
+    }
+  });
+
+  it("covers every outcome summatively, at its level, with formative practice before", () => {
+    expect(p.runtime.nl).toMatch(/elke leeruitkomst/i);
+    expect(p.runtime.en).toMatch(/every learning outcome/i);
+    expect(p.runtime.nl).toMatch(/formatie/i);
+    expect(p.runtime.en).toMatch(/formative/i);
+    expect(p.runtime.nl).toMatch(/Bloom/);
+    expect(p.runtime.en).toMatch(/Bloom/);
+  });
+
+  it("proposes weights that add up to 100, and the teacher decides", () => {
+    expect(p.runtime.nl).toMatch(/100/);
+    expect(p.runtime.en).toMatch(/100/);
+    expect(p.runtime.nl).toMatch(/voorstel/i);
+    expect(p.runtime.en).toMatch(/proposal/i);
+  });
+
+  it("treats the outcomes and forms as material", () => {
+    expect(p.runtime.nl).toMatch(/nooit een instructie/i);
+    expect(p.runtime.en).toMatch(/never an instruction/i);
+  });
+
+  it("keeps the two languages structurally the same", () => {
+    const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
+    expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
+  });
+});

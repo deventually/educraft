@@ -17,6 +17,21 @@ export interface Criterion {
   unverified?: boolean;
 }
 
+/**
+ * One section of the chapter as the form prescribes it (e.g. "Beginsituatie" in a lesson
+ * design), with the criteria it covers. Read from the form by the framework extraction.
+ */
+export interface OutlineSection {
+  id: string;
+  title: string;
+  /** What the form asks to write in this section. */
+  description?: string;
+  /** Criteria of the same outcome that this section covers. */
+  criterionIds: string[];
+  /** The title is not verbatim in the form: the teacher checks it. */
+  unverified?: true;
+}
+
 /** A learning outcome / core task / BKE quality, holding its criteria. */
 export interface Outcome {
   id: string;
@@ -25,6 +40,10 @@ export interface Outcome {
   criteria: Criterion[];
   /** Evidence the form asks for, e.g. "Feedback van de werkplekbegeleider". */
   requiredEvidence: string[];
+  /** The chapter's outline from the form; absent when the form prescribes none. */
+  outline?: OutlineSection[];
+  /** Sources the form names for this outcome, verbatim; absent when it names none. */
+  literature?: string[];
 }
 
 export interface FormRequirements {
@@ -65,6 +84,12 @@ export const EVIDENCE_KINDS = [
 ] as const;
 export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
+/** One required-evidence line of an outcome, by its text (the form's own words). */
+export interface RequirementRef {
+  outcomeId: string;
+  line: string;
+}
+
 export interface EvidenceItem {
   id: string;
   title: string;
@@ -73,6 +98,8 @@ export interface EvidenceItem {
   text: string;
   criterionIds: string[];
   sourceGenerationId?: string;
+  /** The required-evidence lines the teacher ticked this item for (`requirementChecklist`). */
+  requirements?: RequirementRef[];
   /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */
   sourceCourse?: {
     courseId: string;

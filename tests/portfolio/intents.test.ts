@@ -445,3 +445,42 @@ describe("applyIntent — proofreading proposals", () => {
     expect(d.proofreads).toEqual({});
   });
 });
+
+describe("applyIntent — required evidence", () => {
+  const line = "Opname van de les";
+  it("links an evidence item to a required-evidence line and unlinks it", () => {
+    const linked = ok(
+      applyIntent(
+        sampleDossier(),
+        fd({ intent: "linkRequirement", outcomeId: LU, evidenceId: EV, line, linked: "on" }),
+        ctx,
+      ),
+    );
+    expect(linked.evidence[0]!.requirements).toEqual([{ outcomeId: LU, line }]);
+    const unlinked = ok(
+      applyIntent(
+        linked,
+        fd({ intent: "linkRequirement", outcomeId: LU, evidenceId: EV, line, linked: "off" }),
+        ctx,
+      ),
+    );
+    expect(unlinked.evidence[0]!.requirements).toEqual([]);
+  });
+
+  it("refuses a line the form does not ask for and an unknown item", () => {
+    expect(
+      applyIntent(
+        sampleDossier(),
+        fd({ intent: "linkRequirement", outcomeId: LU, evidenceId: EV, line: "x", linked: "on" }),
+        ctx,
+      ),
+    ).toEqual({ ok: false, error: "invalid" });
+    expect(
+      applyIntent(
+        sampleDossier(),
+        fd({ intent: "linkRequirement", outcomeId: LU, evidenceId: C2, line, linked: "on" }),
+        ctx,
+      ),
+    ).toEqual({ ok: false, error: "not-found" });
+  });
+});

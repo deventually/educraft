@@ -6,6 +6,8 @@ export const courses: Messages["courses"] = {
     discipline: "Discipline",
     disciplineNone: "None",
     empty: "No teaching activities yet.",
+    goal: "Lesson goal",
+    goalHint: "Optional, in one sentence: what can the student do after this lesson?",
     intro: "Lessons and assignments, with the week and the learning outcomes they teach.",
     kinds: { assignment: "Assignment", lesson: "Lesson" },
     outcomesLegend: "Which learning outcomes does this activity teach?",
@@ -107,6 +109,8 @@ export const courses: Messages["courses"] = {
       "activity-without-outcome": "{item} serves no learning outcome.",
       "assessed-before-taught": "{item} assesses {outcome} before it is taught.",
       "bloom-below-outcome": "{item} assesses {outcome} below the level of the learning outcome.",
+      "discipline-without-outcome":
+        "The discipline {discipline} contributes to no learning outcome. Link at least one {discipline} lesson to a learning outcome.",
       "item-bloom-below-outcome":
         "Question {question} of {item} assesses {outcome} below the level of the learning outcome.",
       "items-without-points": "In {item}, not every question has points.",

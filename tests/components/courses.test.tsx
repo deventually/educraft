@@ -242,6 +242,23 @@ describe("Course editor (/courses/:id)", () => {
     expect(screen.queryByText("In grote lijnen ontwerpen")).toBeNull();
   });
 
+  it("offers step 2, the test programme, once the course has outcomes and no tests", async () => {
+    const withOutcomes = { ...emptyCourseData(), outcomes: alignedCourse().outcomes };
+    const { container } = renderRoute(CoursePage, {
+      ...pageData(withOutcomes),
+      courseDesign: true,
+    });
+    const first = () => screen.getAllByRole("heading", { level: 2 })[0]?.textContent;
+    expect(first()).toBe("Volgende stap: het toetsprogramma");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    cleanup();
+    renderRoute(CoursePage, pageData(withOutcomes));
+    expect(screen.queryByText("Volgende stap: het toetsprogramma")).toBeNull();
+    cleanup();
+    renderRoute(CoursePage, { ...pageData(alignedCourse()), courseDesign: true });
+    expect(screen.queryByText("Volgende stap: het toetsprogramma")).toBeNull();
+  });
+
   it("guides an empty course and asks for outcomes first", async () => {
     const outcomes = renderRoute(CoursePage, pageData(emptyCourseData()), "/?tab=outcomes");
     expect(screen.getByText("Nog geen leeruitkomsten.")).toBeVisible();

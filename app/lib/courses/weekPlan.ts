@@ -8,6 +8,8 @@ export interface PlanItem {
   id: string;
   title: string;
   kind: "activity" | "assessment";
+  /** The discipline that teaches a lesson, when the course has disciplines. */
+  disciplineId?: string;
 }
 
 export interface WeekPlan {
@@ -22,6 +24,7 @@ export function weekPlan(data: CourseData): WeekPlan {
       title: a.title,
       kind: "activity" as const,
       week: a.week,
+      ...(a.disciplineId !== undefined && { disciplineId: a.disciplineId }),
     })),
     ...data.assessments.map((a) => ({
       id: a.id,
@@ -40,4 +43,20 @@ export function weekPlan(data: CourseData): WeekPlan {
     .sort(([a], [b]) => a - b)
     .map(([week, items]) => ({ week, items }));
   return { weeks, unscheduled };
+}
+
+/**
+ * The plan for one discipline: its lessons and every test, since a test belongs to the
+ * whole course. Weeks left empty drop out. Without a discipline the plan stays as it is.
+ */
+export function forDiscipline(plan: WeekPlan, disciplineId: string | null): WeekPlan {
+  if (disciplineId === null) return plan;
+  const keep = (items: PlanItem[]) =>
+    items.filter((i) => i.kind === "assessment" || i.disciplineId === disciplineId);
+  return {
+    weeks: plan.weeks
+      .map((w) => ({ week: w.week, items: keep(w.items) }))
+      .filter((w) => w.items.length > 0),
+    unscheduled: keep(plan.unscheduled),
+  };
 }

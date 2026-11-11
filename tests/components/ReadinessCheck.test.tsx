@@ -76,6 +76,17 @@ describe("ReadinessCheck", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("sends a missing required item to the checklist on the evidence tab", () => {
+    let d = edit.updateOutcome(sampleDossier(), LU, { requiredEvidence: ["Opname van de les"] });
+    d = edit.confirmFramework(d, NOW);
+    renderCheck(d);
+    const missing = screen.getByText(/Opname van de les/).closest("li")!;
+    expect(within(missing).getByRole("link", { name: /Los op/ })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence#required-title`,
+    );
+  });
+
   it("says 'Alles klaar' when nothing is open, and the export link disappears", () => {
     let d = sampleDossier();
     d = edit.updateOutcome(d, LU, { requiredEvidence: [] });

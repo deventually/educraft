@@ -6,6 +6,8 @@ Deze handleiding neemt je stap voor stap mee, van een leeg dossier tot de docume
 
 **Tabbladen.** Je dossier heeft twee tabbladen: Overzicht (je voortgang en je leeruitkomsten) en Afronden (de check of je kunt inleveren, de export en je bronnen). Elke leeruitkomst heeft er vier: Overzicht, Bewijs, Hoofdstuk en Beoordelen. Zo zie je alleen wat je nu nodig hebt; de mijlpalen en *Los op* brengen je meteen naar het goede tabblad.
 
+**Verplicht bewijs.** Bovenaan het tabblad Bewijs staat wat het formulier bij deze leeruitkomst als bewijs vraagt, als afvinklijst. Koppel bij elke regel het bewijsstuk dat erbij hoort. Vindt LimeOnIt al een stuk van de goede soort, dan staat er *Controleren* en bevestig je met *Ja, dit hoort erbij*; anders kies je zelf een stuk of voeg je nieuw bewijs toe. Feedback die een tool maakte, telt nooit als feedback van je werkplekbegeleider of een medecursist. De mijlpaal Bewijs telt de lijst mee.
+
 **Drie afspraken vooraf**
 
 - **Het formulier van je eigen hogeschool is de maat.** Alles wat LimeOnIt zegt, meet het aan de criteria die jij overneemt en bevestigt.

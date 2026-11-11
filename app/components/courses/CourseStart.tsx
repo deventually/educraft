@@ -7,7 +7,7 @@ import type { ImportProposal } from "~/lib/courses/import";
 import { courseTabHref } from "~/lib/courses/tabs";
 import type { CourseData } from "~/lib/courses/types";
 import { useT } from "~/lib/i18n/useT";
-import { AiNotes, ProposalForm } from "./CourseImport";
+import { AiNotes, ProposalForm } from "./ProposalForm";
 import { NumberField } from "./fields";
 
 const choice = "rounded-md border border-slate-200 p-3";

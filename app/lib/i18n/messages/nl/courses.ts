@@ -4,6 +4,8 @@ export const courses = {
     discipline: "Discipline",
     disciplineNone: "Geen",
     empty: "Nog geen onderwijsactiviteiten.",
+    goal: "Lesdoel",
+    goalHint: "Optioneel, in één zin: wat kan de student na deze les?",
     intro: "Lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.",
     kinds: { assignment: "Opdracht", lesson: "Les" },
     outcomesLegend: "Welke leeruitkomsten onderwijst deze activiteit?",
@@ -109,6 +111,8 @@ export const courses = {
       "activity-without-outcome": "{item} hoort bij geen enkele leeruitkomst.",
       "assessed-before-taught": "{item} toetst {outcome} eerder dan die wordt onderwezen.",
       "bloom-below-outcome": "{item} toetst {outcome} onder het niveau van de leeruitkomst.",
+      "discipline-without-outcome":
+        "De discipline {discipline} draagt aan geen enkele leeruitkomst bij. Koppel minstens één les van {discipline} aan een leeruitkomst.",
       "item-bloom-below-outcome":
         "Vraag {question} van {item} toetst {outcome} onder het niveau van de leeruitkomst.",
       "items-without-points": "In {item} hebben niet alle vragen punten.",

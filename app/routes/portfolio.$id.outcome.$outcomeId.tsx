@@ -9,6 +9,7 @@ import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
+import { ChapterOutline } from "~/components/portfolio/ChapterOutline";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ProofreadPanel } from "~/components/portfolio/ProofreadPanel";
 import { ToolHints } from "~/components/portfolio/ToolHints";
@@ -23,6 +24,8 @@ import { useT } from "~/lib/i18n/useT";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { evidencePending } from "~/lib/portfolio/evidence";
 import { outcomeRoute } from "~/lib/portfolio/route";
+import { requirementChecklist } from "~/lib/portfolio/requirements";
+import { RequiredEvidence } from "~/components/portfolio/RequiredEvidence";
 import { OutcomeProgress } from "~/components/portfolio/DossierProgress";
 import { TabNav } from "~/components/TabNav";
 import { CriteriaOverview, StatusList } from "~/components/portfolio/CriteriaLists";
@@ -72,6 +75,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     chapterTools: view(chapterHints(outcome, available)),
     // The four milestones of this outcome, guiding the page (always found: the outcome is).
     milestones: outcomeRoute(d, outcome.id)?.milestones ?? [],
+    required: requirementChecklist(d, outcome.id),
     courseHints: outcome.criteria
       .filter((c) => !linked.has(c.id) && courseHint(c))
       .map((c) => c.id),
@@ -167,6 +171,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     snapshotCourses = {},
     milestones = [],
     anchor = null,
+    required = [],
   } = loaderData;
   const [params] = useSearchParams();
   const drafts =
@@ -219,6 +224,11 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
 
       {tab === "evidence" && (
         <>
+          <RequiredEvidence
+            outcomeId={outcome.id}
+            items={required}
+            evidence={[...evidence, ...unlinked].map(({ id, title }) => ({ id, title }))}
+          />
           <section className="mt-6" aria-labelledby="per-criterion-title">
             <h2 id="per-criterion-title" className="text-lg font-medium text-slate-900">
               {tr.tabs.perCriterionTitle}
@@ -288,7 +298,12 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
 
             {!evidenceFull && (
               <Card className="mt-6 p-5">
-                <h3 className="text-base font-medium text-slate-900">{to.addEvidenceTitle}</h3>
+                <h3
+                  id="add-evidence-title"
+                  className="scroll-mt-4 text-base font-medium text-slate-900"
+                >
+                  {to.addEvidenceTitle}
+                </h3>
                 {/* Keyed on the evidence count: a saved item resets the form. */}
                 <Form
                   key={evidence.length + unlinked.length}
@@ -325,6 +340,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 </Form>
               </div>
             )}
+            <ChapterOutline outcome={outcome} />
             <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
             <div className="mt-3">
               {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}

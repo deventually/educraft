@@ -16,6 +16,8 @@ export const COURSE_LIMITS = {
   id: 100,
   text: 1_000,
   title: 200,
+  /** A lesson goal: one sentence. */
+  goal: 300,
   outcomes: 30,
   activities: 100,
   assessments: 30,
@@ -78,6 +80,7 @@ const ActivitySchema = z.object({
   title: z.string().min(1).max(COURSE_LIMITS.title),
   week: Week.optional(),
   kind: z.enum(ACTIVITY_KINDS),
+  goal: z.string().min(1).max(COURSE_LIMITS.goal).optional(),
   outcomeIds: z.array(Id).max(COURSE_LIMITS.outcomes),
   hours: Hours.optional(),
   disciplineId: Id.optional(),

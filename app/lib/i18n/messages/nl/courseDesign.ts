@@ -1,5 +1,32 @@
-/** The course wizard: how a new course starts, and step 1 (learning outcomes from a description). */
+/** The course wizard: how a new course starts, step 1 (outcomes) and step 2 (the test programme). */
 export const courseDesign = {
+  assessments: {
+    errors: {
+      failed:
+        "Het lukte niet om een toetsprogramma voor te stellen. Probeer het opnieuw, of voeg de toetsen zelf toe.",
+      invalid: "Noem de toetsvormen in hooguit 500 tekens.",
+      nothing:
+        "De AI heeft meer nodig om een toetsprogramma voor te stellen. Lees de toelichting hieronder.",
+      notReady:
+        "Een toetsprogramma laten voorstellen kan als de cursus leeruitkomsten heeft en nog geen toetsen.",
+      quota:
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
+    },
+    forms: "Toetsvormen die jullie gebruiken",
+    formsHelp:
+      "Niet verplicht. Bijvoorbeeld: kennistoets, beroepsproduct, presentatie. Dan kiest de AI uit deze vormen.",
+    intro:
+      "De leeruitkomsten staan. Hoe weet je dat studenten ze beheersen? De AI stelt summatieve toetsen met een weging voor, en formatieve oefenmomenten ervoor. Jij kiest wat erin komt.",
+    pending: "De AI stelt een toetsprogramma voor…",
+    proposalIntro:
+      "De AI maakte dit toetsprogramma bij je leeruitkomsten. Vink aan wat in de cursus komt en pas aan waar nodig. De wegingen zijn een voorstel: jij beslist als examinator.",
+    ready: "Toetsprogramma klaar. Kies wat in de cursus komt.",
+    submit: "Toetsprogramma voorstellen",
+    title: "Volgende stap: het toetsprogramma",
+    uncovered: "Deze leeruitkomsten zitten in geen summatieve toets: {list}",
+    weight: "Weging (voorstel van de AI)",
+    weightsOff: "De voorgestelde wegingen tellen niet op tot 100%. Pas ze aan voordat je toevoegt.",
+  },
   description: "Waar gaat de cursus over?",
   descriptionHelp:
     "Twee tot vijf zinnen: waar gaat de cursus over, en wat moeten studenten aan het eind kunnen? De AI gebruikt ook de onderwijscontext en de disciplines van de cursus.",

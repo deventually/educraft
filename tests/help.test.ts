@@ -72,6 +72,17 @@ describe("help registry — topics", () => {
     expect(en).toContain("**AI proposal**");
   });
 
+  it("explains step 2 of the wizard: the test programme, with the weights as a proposal", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("**Volgende stap: het toetsprogramma**");
+    expect(nl).toContain("**Toetsvormen die jullie gebruiken**");
+    expect(nl).toContain("Weging (voorstel van de AI)");
+    expect(en).toContain("**Next step: the test programme**");
+    expect(en).toContain("**Assessment forms you use**");
+    expect(en).toContain("Weight (the AI's proposal)");
+  });
+
   it("explains the progress steps and the next step", () => {
     expect(getTopic("courses", "nl")).toContain("## Voortgang");
     expect(getTopic("courses", "nl")).toContain("**Volgende stap**");
@@ -197,6 +208,15 @@ describe("help registry — topics", () => {
     const en = getTopic("bdb-bke", "en");
     expect(en).toContain("**Progress.**");
     expect(en).toContain("Evidence, Chapter, Assessment and Shown");
+  });
+
+  it("explains the checklist of required evidence", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("**Verplicht bewijs.**");
+    expect(nl).toContain("Ja, dit hoort erbij");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("**Required evidence.**");
+    expect(en).toContain("Yes, this belongs here");
   });
 
   it("explains the tabs of the dossier and of each learning outcome", () => {

@@ -57,6 +57,30 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     expect(d.activities).toHaveLength(2);
   });
 
+  it("keeps an optional lesson goal of one sentence, and clears it when emptied", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-activity",
+      title: "Les 3",
+      kind: "lesson",
+      goal: " Je kunt een database normaliseren tot 3NF. ",
+    });
+    const added = d.activities[2]!;
+    expect(added.goal).toBe("Je kunt een database normaliseren tot 3NF.");
+    d = ok(d, {
+      intent: "update-activity",
+      id: added.id,
+      title: "Les 3",
+      kind: "lesson",
+      goal: "",
+    });
+    expect(d.activities[2]).not.toHaveProperty("goal");
+    const tooLong = applyCourseIntent(
+      alignedCourse(),
+      form({ intent: "add-activity", title: "a", kind: "lesson", goal: "x".repeat(301) }),
+    );
+    expect(tooLong).toEqual({ ok: false, error: "invalid" });
+  });
+
   it("adds and updates an assessment with coverage and a Bloom level per outcome", () => {
     let d = ok(alignedCourse(), {
       intent: "add-assessment",

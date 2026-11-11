@@ -66,6 +66,54 @@ describe("checkAlignment (pure, advisory)", () => {
     ]);
   });
 
+  it("discipline-without-outcome: none of a discipline's lessons serves an outcome", () => {
+    const d = alignedCourse();
+    d.disciplines = [
+      { id: "web", name: "Webtech" },
+      { id: "hw", name: "Hardware" },
+    ];
+    d.activities[0]!.disciplineId = "web";
+    d.activities.push({
+      id: "act-3",
+      title: "Solderen",
+      kind: "lesson",
+      outcomeIds: [],
+      disciplineId: "hw",
+    });
+    expect(checkAlignment(d)).toEqual([
+      { code: "activity-without-outcome", severity: "info", itemId: "act-3" },
+      { code: "discipline-without-outcome", severity: "warning", disciplineId: "hw" },
+    ]);
+  });
+
+  it("discipline-without-outcome: a discipline without lessons contributes nothing either", () => {
+    const d = alignedCourse();
+    d.disciplines = [{ id: "hw", name: "Hardware" }];
+    expect(checkAlignment(d)).toEqual([
+      { code: "discipline-without-outcome", severity: "warning", disciplineId: "hw" },
+    ]);
+  });
+
+  it("discipline-without-outcome: one lesson with an outcome is enough", () => {
+    const d = alignedCourse();
+    d.disciplines = [{ id: "hw", name: "Hardware" }];
+    d.activities[0]!.disciplineId = "hw";
+    d.activities.push({
+      id: "act-3",
+      title: "Solderen",
+      kind: "lesson",
+      outcomeIds: [],
+      disciplineId: "hw",
+    });
+    expect(codes(d)).toEqual(["activity-without-outcome"]);
+  });
+
+  it("discipline-without-outcome waits for the learning outcomes", () => {
+    const d = emptyCourseData();
+    d.disciplines = [{ id: "hw", name: "Hardware" }];
+    expect(codes(d)).toEqual([]);
+  });
+
   it("weights-not-100: summative weights are set and do not add up", () => {
     const d = alignedCourse();
     d.assessments[1]!.weight = 60;

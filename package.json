@@ -27,9 +27,11 @@
     "eval": "vite-node -c scripts/eval.config.ts scripts/eval.ts",
     "eval:coach": "vite-node -c scripts/eval.config.ts scripts/eval-coach.ts",
     "eval:agents": "vite-node -c scripts/eval.config.ts scripts/eval-agents.ts",
+    "eval:framework": "vite-node -c scripts/eval.config.ts scripts/eval-framework.ts",
     "eval:proofread": "vite-node -c scripts/eval.config.ts scripts/eval-proofread.ts",
     "eval:import": "vite-node -c scripts/eval.config.ts scripts/eval-import.ts",
     "eval:design": "vite-node -c scripts/eval.config.ts scripts/eval-design.ts",
+    "eval:design-assessments": "vite-node -c scripts/eval.config.ts scripts/eval-design-assessments.ts",
     "eval:rehearsal": "vite-node -c scripts/eval.config.ts scripts/eval-rehearsal.ts",
     "knip": "knip --no-progress",
     "test:mutation": "stryker run"
