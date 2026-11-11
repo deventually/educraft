@@ -1,22 +1,29 @@
 /**
- * What the import proposal shows beyond the editable rows: the module code and study year, and
+ * What the import proposal shows beyond the editable rows: the module details, and
  * per row what a test blueprint or marking model adds (success criteria, test details, parts).
  * The extras travel as JSON in `<key>.extra` and are checked again on the server
  * (`importExtras.ts`); the teacher edits them in the course afterwards.
  */
 import { useId } from "react";
-import { Input, Label } from "~/components/ui";
+import { Input, Label, Textarea } from "~/components/ui";
 import type { ImportAssessment, ImportOutcome, ImportProposal } from "~/lib/courses/import";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 
-/** The module code and study year, ticked to take over; empty fields in the course only. */
+/** The module details, ticked to take over; empty fields in the course only. */
 export function ModuleChoice({ module }: { module: NonNullable<ImportProposal["module"]> }) {
   const t = useT();
   const ti = t.courses.import;
   const m = t.courseDocuments.module;
   const id = useId();
+  const short: { name: "code" | "studyYear" | "phase" | "leader" | "examiners"; max: number }[] = [
+    { name: "code", max: COURSE_LIMITS.code },
+    { name: "studyYear", max: COURSE_LIMITS.code },
+    { name: "phase", max: COURSE_LIMITS.title },
+    { name: "leader", max: COURSE_LIMITS.title },
+    { name: "examiners", max: COURSE_LIMITS.title },
+  ];
   return (
     <fieldset className="rounded-md border border-slate-200 p-3">
       <legend className="px-1 text-sm font-medium text-slate-900">{ti.moduleTitle}</legend>
@@ -25,27 +32,32 @@ export function ModuleChoice({ module }: { module: NonNullable<ImportProposal["m
         {ti.moduleTake}
       </label>
       <div className="mt-2 grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor={`${id}-code`}>{m.code}</Label>
-          <Input
-            id={`${id}-code`}
-            name="module.code"
-            maxLength={COURSE_LIMITS.code}
-            defaultValue={module.code}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor={`${id}-year`}>{m.studyYear}</Label>
-          <Input
-            id={`${id}-year`}
-            name="module.studyYear"
-            maxLength={COURSE_LIMITS.code}
-            defaultValue={module.studyYear}
-            className="mt-1"
-          />
-        </div>
+        {short.map((f) => (
+          <div key={f.name}>
+            <Label htmlFor={`${id}-${f.name}`}>{m[f.name]}</Label>
+            <Input
+              id={`${id}-${f.name}`}
+              name={`module.${f.name}`}
+              maxLength={f.max}
+              defaultValue={module[f.name]}
+              className="mt-1"
+            />
+          </div>
+        ))}
       </div>
+      {(["description", "literature"] as const).map((name) => (
+        <div key={name} className="mt-3">
+          <Label htmlFor={`${id}-${name}`}>{m[name]}</Label>
+          <Textarea
+            id={`${id}-${name}`}
+            name={`module.${name}`}
+            rows={3}
+            maxLength={COURSE_LIMITS.longText}
+            defaultValue={module[name]}
+            className="mt-1"
+          />
+        </div>
+      ))}
     </fieldset>
   );
 }

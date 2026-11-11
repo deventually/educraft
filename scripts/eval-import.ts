@@ -24,7 +24,7 @@ import {
 } from "./eval-import-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
-const PROMPT_ID = "course-import@v2";
+const PROMPT_ID = "course-import@v3";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

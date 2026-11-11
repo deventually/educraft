@@ -294,9 +294,9 @@ describe("Course editor — real dates (P22.1)", () => {
 describe("Course editor — question-level matrix (P26.1)", () => {
   it("shows each test's matrix as a real table with a caption and a total row", async () => {
     const { container } = renderRoute(CoursePage, pageData(itemizedCourse()), "/?tab=plan");
-    expect(screen.getByText("Toetsmatrijs (4 vragen)", { exact: false })).toBeVisible();
-    openMatrix("Toetsmatrijs (4 vragen)");
-    const table = screen.getByRole("table", { name: "Toetsmatrijs: Eindopdracht" });
+    expect(screen.getByText("Vragen (4)", { exact: false })).toBeVisible();
+    openMatrix("Vragen (4)");
+    const table = screen.getByRole("table", { name: "Vragen: Eindopdracht" });
     for (const name of ["Vraag", "Leeruitkomst", "Denkniveau", "Vraagvorm", "Punten"])
       expect(within(table).getByRole("columnheader", { name })).toHaveAttribute("scope", "col");
     expect(within(table).getByRole("combobox", { name: "Leeruitkomst van vraag 3" })).toHaveValue(
@@ -316,7 +316,7 @@ describe("Course editor — question-level matrix (P26.1)", () => {
 
   it("offers a question form that works without JavaScript", () => {
     renderRoute(CoursePage, pageData(itemizedCourse()), "/?tab=plan");
-    openMatrix("Toetsmatrijs (4 vragen)");
+    openMatrix("Vragen (4)");
     const add = screen.getByRole("button", { name: /Vraag toevoegen\W+Eindopdracht/ });
     const form = add.closest("form") as HTMLFormElement;
     expect(form).toHaveAttribute("method", "post");

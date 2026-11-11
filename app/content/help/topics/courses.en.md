@@ -46,7 +46,7 @@ On the course page is a table with the learning outcomes in the rows and the act
 
 Redesigning a module? Start from what exists. On the course page, choose **Import from existing documents** and paste the text or choose the files: a course catalogue (OER), study guide, module guide, module handbook, test blueprint or marking model. You can choose several at once, for example a test blueprint and marking model at once. The files are read on your computer; only the text goes to the AI.
 
-The AI prepares a proposal: the module code and study year, learning outcomes with their success criteria, assessments with their form, pass mark, conditions and resit, and the parts with their criteria for a pass and a fail. Whatever is not verbatim in the document is marked. You tick what goes into the course.
+The AI prepares a proposal: the module details (code, study year, study phase, module leader, examiners, description and literature), learning outcomes with their success criteria, assessments with their form, pass mark, conditions and resit, and the parts with their criteria for a pass and a fail. Whatever is not verbatim in the document is marked. You tick what goes into the course.
 
 If a learning outcome or assessment is already in your course, it is not added twice. With **Fill in empty fields** you only complete what is still empty, such as the parts from a marking model for an assessment you took from the study guide earlier. What you had filled in stays as it is.
 

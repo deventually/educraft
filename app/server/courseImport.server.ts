@@ -17,7 +17,7 @@ export type CourseImportResult =
   /** `notes`: the model's own explanation when it found nothing to import. */
   | { ok: false; error: CourseImportError; notes?: string };
 
-const PROMPT_ID = "course-import@v2";
+const PROMPT_ID = "course-import@v3";
 const EVENT = "course-import";
 
 export async function extractCourseImport(
