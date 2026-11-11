@@ -4,17 +4,32 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266, #268 en #272 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #270 en #272 gemerged)_
 
 ## Nu
 
+- **Vooraf invullen vanuit de les (#269) gemerged op 2026-11-11:** wie *Les voorbereiden* opent
+  vanuit een les, krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis
+  (de vijf lessen ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij
+  `prefillFromCourse`; geen per-tool code, geen migratie.
+- **Cursuspagina in vijf tabbladen (#267) gemerged op 2026-11-11:** de lange cursuspagina is
+  opgedeeld in *Overzicht*, *Leeruitkomsten*, *Lessen en toetsen*, *Controle* (met het aantal
+  bevindingen) en *Documenten en delen* (met de modulewijzer en modulehandleiding). Het tabblad
+  staat in de URL (`?tab=`), dus een formulier blijft op zijn tabblad en links vanuit Start en Per
+  week openen het juiste tabblad.
 - **Modulehandleiding uit de cursus (#272) gemerged op 2026-11-11:** naast de modulewijzer
   exporteert de cursus zonder AI een modulehandleiding: modulegegevens, inleiding, studielast en
-  duur, leeruitkomsten, opbouw per week, toetsing per toets en literatuur (nieuw modulegegeven).
-- **Modulewijzer uit de cursus (#266) gemerged op 2026-11-11:** een eigen blok op de cursuspagina
-  met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en beschrijving. Daaruit
-  komt zonder AI een modulewijzer als Word, PDF of Markdown, met leeruitkomsten, succescriteria en
-  de beoordeling per toets.
+  duur, leeruitkomsten met succescriteria, de opbouw per week, per toets de gegevens, voorwaarden
+  en onderdelen, en de literatuur (nieuw modulegegeven, één per regel). Het blok heet nu
+  *Modulewijzer en modulehandleiding*; geen migratie.
+- **Terug en vooruit houden het resultaat van een tool vast (#270) gemerged op 2026-11-11:** wie
+  vanuit een cursus een tool gebruikt en dan met de knoppen van de browser terug- of vooruitgaat,
+  ziet het gegenereerde resultaat weer in plaats van een leeg formulier.
+- **Modulewijzer uit de cursus (#266) gemerged op 2026-11-11:** een eigen blok *Modulewijzer* op
+  de cursuspagina met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en een
+  inhoudelijke beschrijving (`set-module`; de instellingen dragen ze niet meer). Daaruit komt
+  zonder AI een modulewijzer als Word, PDF of Markdown. Exportroutes
+  `courses/:id/documents/:document`; geen migratie.
 - **Browsertests voorlopig lokaal (#268) gemerged op 2026-11-11:** de GitHub-runner kon Chromium
   niet installeren (DNS). De `e2e`-job draait daarom alleen als de repositoryvariabele
   `E2E_IN_CI` op `true` staat; tot dan draait de werker `npm run test:e2e` zelf en zet de uitslag

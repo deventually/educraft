@@ -118,7 +118,7 @@ export function useSandbox({
       inputs,
       profileList.find((p) => p.id === startProfileId),
     ),
-    ...coursePrefillValues(inputs, initialCourse),
+    ...coursePrefillValues(inputs, initialCourse, initialCourse ? initialItemId : undefined),
   }));
 
   function selectProfile(id: string) {

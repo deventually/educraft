@@ -1,5 +1,5 @@
 import type { ImageInput } from "~/lib/ai/types";
-import type { InputField } from "~/lib/registry/types";
+import type { CoursePrefill, InputField } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 
@@ -85,24 +85,65 @@ export function profilePrefillValues(
   return out;
 }
 
+/** A lesson or test of a course, as a tool opened from it sees it (P27.4). */
+export interface CoursePrefillItem {
+  id: string;
+  title: string;
+  week?: number;
+  kind: "activity" | "assessment";
+  outcomeIds: string[];
+}
+
 /** The part of a course that fills course-backed fields (P20, 20.4). */
 export interface CoursePrefillSource {
-  outcomes: { text: string }[];
+  outcomes: { id?: string; text: string }[];
+  items?: CoursePrefillItem[];
+}
+
+/** The lessons just before an item that `earlierLessons` names: recent ones matter most. */
+const EARLIER_LESSONS = 5;
+
+const lines = (rows: string[]) => rows.map((r) => `- ${r}`).join("\n");
+
+/** What each course source fills in; "" means it knows nothing for this item. */
+function courseSourceValue(
+  source: CoursePrefill["source"],
+  course: CoursePrefillSource,
+  item: CoursePrefillItem | undefined,
+): string {
+  if (source === "learningOutcomes") {
+    const own = item ? course.outcomes.filter((o) => o.id && item.outcomeIds.includes(o.id)) : [];
+    return lines((own.length > 0 ? own : course.outcomes).map((o) => o.text));
+  }
+  if (!item) return "";
+  if (source === "itemTitle") return item.title;
+  const week = item.week;
+  if (week === undefined) return "";
+  const earlier = (course.items ?? [])
+    .filter((i) => i.kind === "activity" && i.week !== undefined && i.week < week)
+    .sort((a, b) => (a.week ?? 0) - (b.week ?? 0))
+    .slice(-EARLIER_LESSONS);
+  return lines(earlier.map((i) => `Week ${i.week}: ${i.title}`));
 }
 
 /**
- * Initial values for fields that declare `prefillFromCourse`: the course's
- * learning outcomes, one per line (`- <text>`). Only fields that resolve to a
+ * Initial values for fields that declare `prefillFromCourse`. Without an item: the course's
+ * learning outcomes, one per line (`- <text>`). Opened from a lesson or test (`itemId`):
+ * its own outcomes, its title and the lessons before it. Only fields that resolve to a
  * non-empty value are returned; the prefilled fields stay editable.
  */
 export function coursePrefillValues(
   fields: InputField[],
   course: CoursePrefillSource | null | undefined,
+  itemId?: string,
 ): FormValues {
   const out: FormValues = {};
-  if (!course || course.outcomes.length === 0) return out;
-  const text = course.outcomes.map((o) => `- ${o.text}`).join("\n");
-  for (const f of fields)
-    if (f.prefillFromCourse?.source === "learningOutcomes") out[f.name] = text;
+  if (!course) return out;
+  const item = itemId ? course.items?.find((i) => i.id === itemId) : undefined;
+  for (const f of fields) {
+    if (!f.prefillFromCourse) continue;
+    const value = courseSourceValue(f.prefillFromCourse.source, course, item);
+    if (value) out[f.name] = value;
+  }
   return out;
 }
