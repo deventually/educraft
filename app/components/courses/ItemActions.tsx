@@ -8,11 +8,14 @@ export function ItemActions({
   name,
   id,
   removeIntent,
+  fields = {},
   children,
 }: {
   name: string;
   id: string;
   removeIntent: string;
+  /** Extra hidden fields for the remove form, e.g. the id of the parent. */
+  fields?: Record<string, string>;
   children: ReactNode;
 }) {
   const t = useT();
@@ -28,6 +31,9 @@ export function ItemActions({
       <Form method="post">
         <input type="hidden" name="intent" value={removeIntent} />
         <input type="hidden" name="id" value={id} />
+        {Object.entries(fields).map(([k, v]) => (
+          <input key={k} type="hidden" name={k} value={v} />
+        ))}
         <Button type="submit" size="sm" variant="ghost">
           {t.courses.remove}
           <span className="sr-only">: {name}</span>

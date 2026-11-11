@@ -9,6 +9,7 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 import { BloomSelect, MetaLine, NumberField, useOutcomeName, WeekLabel } from "./fields";
 import { ItemActions } from "./ItemActions";
 import { ItemsMatrix } from "./ItemsMatrix";
+import { TestDocuments } from "./TestDocuments";
 
 function CoverageFields({ data, assessment }: { data: CourseData; assessment?: Assessment }) {
   const t = useT();
@@ -145,9 +146,11 @@ function AssessmentForm({ data, assessment }: { data: CourseData; assessment?: A
 }
 
 export function AssessmentsSection({
+  courseId,
   data,
   weekDates,
 }: {
+  courseId: string;
   data: CourseData;
   /** The Monday of each course week, or null without a start date (P22.1). */
   weekDates?: string[] | null;
@@ -202,6 +205,7 @@ export function AssessmentsSection({
                 <AssessmentForm data={data} assessment={as} />
               </ItemActions>
               <ItemsMatrix data={data} assessment={as} />
+              <TestDocuments courseId={courseId} data={data} assessment={as} />
             </li>
           ))}
         </ul>

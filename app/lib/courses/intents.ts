@@ -12,6 +12,14 @@ import { IsoDateSchema } from "~/lib/calendar/weeks";
 import { BLOOM_LEVELS } from "./bloom";
 import * as edit from "./edit";
 import type { DomainPack } from "~/lib/context/packs";
+import {
+  assessmentDetails,
+  criterion,
+  lines,
+  optionalNumber,
+  optionalText,
+  part,
+} from "./intentFields";
 import { parsePackTags } from "./packTags";
 import { COURSE_LIMITS } from "./schema";
 import {
@@ -39,6 +47,11 @@ export const COURSE_INTENTS = [
   "remove-assessment",
   "set-ec",
   "set-start-date",
+  "set-module",
+  "update-assessment-details",
+  "add-part",
+  "update-part",
+  "remove-part",
   "add-item",
   "update-item",
   "remove-item",
@@ -51,16 +64,6 @@ const bloom = z
   .enum([...BLOOM_LEVELS, ""])
   .optional()
   .transform((v) => (v ? v : undefined));
-
-/** An optional number from a text field: absent or "" means not set. */
-export const optionalNumber = (min: number, max: number, int = false) =>
-  z
-    .string()
-    .trim()
-    .regex(/^(\d+([.,]\d+)?)?$/)
-    .optional()
-    .transform((v) => (v ? Number(v.replace(",", ".")) : undefined))
-    .refine((n) => n === undefined || (n >= min && n <= max && (!int || Number.isInteger(n))));
 
 const week = optionalNumber(1, COURSE_LIMITS.week, true);
 const hours = optionalNumber(0, COURSE_LIMITS.ec * HOURS_PER_EC);
@@ -148,15 +151,39 @@ function run(
 ): CourseData {
   switch (intent) {
     case "add-outcome": {
-      const v = z.object({ text: required(COURSE_LIMITS.text), bloom }).parse(raw);
-      return edit.addOutcome(d, { ...v, ...outcomeTags(fd, ctx) });
+      const { criteria, ...v } = z
+        .object({
+          text: required(COURSE_LIMITS.text),
+          bloom,
+          criteria: lines(COURSE_LIMITS.text, COURSE_LIMITS.criteria),
+        })
+        .parse(raw);
+      return edit.addOutcome(d, {
+        ...v,
+        criteria: criteria?.map(criterion),
+        ...outcomeTags(fd, ctx),
+      });
     }
     case "update-outcome": {
       const { id, ...v } = z
-        .object({ id: Id, text: required(COURSE_LIMITS.text), bloom })
+        .object({
+          id: Id,
+          text: required(COURSE_LIMITS.text),
+          bloom,
+          criteria: lines(COURSE_LIMITS.text, COURSE_LIMITS.criteria),
+        })
         .parse(raw);
       assertItem(d.outcomes, id);
-      return edit.updateOutcome(d, id, { text: v.text, bloom: v.bloom, ...outcomeTags(fd, ctx) });
+      // A form without the field leaves the criteria as they are.
+      const criteria = fd.has("criteria")
+        ? v.criteria?.map(criterion)
+        : d.outcomes.find((o) => o.id === id)?.criteria;
+      return edit.updateOutcome(d, id, {
+        text: v.text,
+        bloom: v.bloom,
+        criteria,
+        ...outcomeTags(fd, ctx),
+      });
     }
     case "remove-outcome": {
       const { id } = z.object({ id: Id }).parse(raw);
@@ -236,6 +263,52 @@ function run(
     case "set-ec": {
       const { ec } = z.object({ ec: optionalNumber(0, COURSE_LIMITS.ec) }).parse(raw);
       return edit.setStudyLoad(d, ec === 0 ? undefined : ec);
+    }
+    case "set-module": {
+      const v = z
+        .object({
+          code: optionalText(COURSE_LIMITS.code),
+          studyYear: optionalText(COURSE_LIMITS.code),
+        })
+        .parse(raw);
+      return edit.setModule(d, { code: v.code, studyYear: v.studyYear });
+    }
+    case "update-assessment-details": {
+      const { id, ...v } = assessmentDetails.parse(raw);
+      assertItem(d.assessments, id);
+      return edit.updateAssessment(d, id, {
+        form: v.form,
+        owner: v.owner,
+        grading: v.grading,
+        passMark: v.passMark,
+        conditions: v.conditions,
+        resit: v.resit,
+        conduct: v.conduct,
+      });
+    }
+    case "add-part": {
+      const { assessmentId, ...v } = part.parse(raw);
+      assertItem(d.assessments, assessmentId);
+      return edit.addPart(d, assessmentId, v);
+    }
+    case "update-part": {
+      const { assessmentId, id, ...v } = part.extend({ id: Id }).parse(raw);
+      assertItem(d.assessments, assessmentId);
+      assertItem(d.assessments.find((a) => a.id === assessmentId)?.parts ?? [], id);
+      return edit.updatePart(d, assessmentId, id, {
+        title: v.title,
+        outcomeIds: v.outcomeIds,
+        weight: v.weight,
+        knockOut: v.knockOut,
+        pass: v.pass,
+        fail: v.fail,
+      });
+    }
+    case "remove-part": {
+      const { assessmentId, id } = z.object({ assessmentId: Id, id: Id }).parse(raw);
+      assertItem(d.assessments, assessmentId);
+      assertItem(d.assessments.find((a) => a.id === assessmentId)?.parts ?? [], id);
+      return edit.removePart(d, assessmentId, id);
     }
     case "set-start-date": {
       const { startDate } = z

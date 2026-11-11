@@ -23,6 +23,13 @@ export interface LearningOutcome {
    * e.g. `{ beheersingsniveau: 3 }`. No pack → no tags. An import never sets them.
    */
   packTags?: Record<string, PackFieldValue>;
+  /** Success criteria (succescriteria), each with an optional code such as "S-An 1.1". */
+  criteria?: SuccessCriterion[];
+}
+
+export interface SuccessCriterion {
+  code?: string;
+  text: string;
 }
 
 export interface Activity {
@@ -55,6 +62,27 @@ export interface AssessmentItem {
   points?: number;
 }
 
+export const GRADINGS = ["grade", "pass-fail"] as const;
+export type Grading = (typeof GRADINGS)[number];
+
+/**
+ * One part of a test (onderdeel): what the student makes or does, the outcomes it shows, and
+ * the criteria for a pass and a fail. The rows of the blueprint and the marking model.
+ */
+export interface AssessmentPart {
+  id: string;
+  title: string;
+  outcomeIds: string[];
+  /** % of the test. */
+  weight?: number;
+  /** A knock-out: without a pass here the whole test fails. */
+  knockOut?: boolean;
+  /** What a pass looks like (voldoende); one criterion per line. */
+  pass?: string;
+  /** What a fail looks like (onvoldoende); empty means "does not meet the pass criteria". */
+  fail?: string;
+}
+
 export interface Assessment {
   id: string;
   title: string;
@@ -72,12 +100,30 @@ export interface Assessment {
   hours?: number;
   /** The question-level matrix. When present (non-empty) it is the source of coverage. */
   items?: AssessmentItem[];
+  /** The form of the test as the school names it, e.g. "Schriftelijk", "Andere wijze". */
+  form?: string;
+  /** Who owns the test (toetseigenaar). */
+  owner?: string;
+  grading?: Grading;
+  /** The pass mark (cesuur) in %. */
+  passMark?: number;
+  /** Conditions for a pass (voorwaarden), one per entry. */
+  conditions?: string[];
+  /** How and when a resit works (herkansing). */
+  resit?: string;
+  /** How the test is taken (afname): place, aids, AI. */
+  conduct?: string;
+  parts?: AssessmentPart[];
 }
 
 /** Hours of study per EC (WHW art. 7.4: one EC is 28 hours). */
 export const HOURS_PER_EC = 28;
 
 export interface CourseData {
+  /** The module code (modulecode), e.g. "HELWO". */
+  code?: string;
+  /** The study year, e.g. "2026-2027". */
+  studyYear?: string;
   /** Study load of the whole course in EC. */
   ec?: number;
   /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */

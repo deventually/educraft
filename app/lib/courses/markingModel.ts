@@ -1,0 +1,51 @@
+/**
+ * One test's marking model (toetsnakijkmodel) as a document to export: the details, the
+ * conditions and knock-outs, and per part its learning outcomes and the criteria for a fail
+ * and a pass. Built from the parts in the course, without AI. Pure and deterministic.
+ */
+import { type ExportDoc, toExportDoc } from "~/lib/export/doc";
+import { getMessages, type Locale } from "~/lib/i18n";
+import { fmt } from "~/lib/i18n/format";
+import { outcomeLines, table } from "./evidence";
+import { outcomeShortName } from "./findingText";
+import { type CourseSource, conditionsBlock, detailsTable, oneLine } from "./testDocument";
+
+/** The marking model of one test; null without parts or when the test is not in the course. */
+export function markingModelDoc(
+  course: CourseSource,
+  assessmentId: string,
+  locale: Locale,
+): ExportDoc | null {
+  const a = course.data.assessments.find((x) => x.id === assessmentId);
+  if (!a?.parts?.length) return null;
+  const m = getMessages(locale);
+  const d = m.courseDocuments.markingModel;
+  const short = (id: string) => outcomeShortName(course.data, id, locale);
+  const knockOuts = a.parts.filter((p) => p.knockOut).map((p) => p.title);
+  const blocks = [
+    detailsTable(course, a, locale, ["module", "studyYear", "test", "form", "author"]),
+    ...conditionsBlock(a, locale),
+    knockOuts.length ? fmt(d.knockOuts, { list: knockOuts.join(", ") }) : "",
+    ...a.parts.flatMap((p, i) => [
+      `### ${fmt(d.part, { n: i + 1, title: p.title })}`,
+      [
+        p.outcomeIds.length ? fmt(d.outcomes, { list: p.outcomeIds.map(short).join(", ") }) : "",
+        p.weight !== undefined ? fmt(d.weight, { n: p.weight }) : "",
+        p.knockOut ? d.knockOut : "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      table(
+        [d.fail, d.pass],
+        [[oneLine([p.fail]) || d.failDefault, oneLine([p.pass]) || d.passEmpty]],
+      ),
+    ]),
+    `### ${m.courses.outcomes.title}`,
+    outcomeLines(course.data, locale, new Set(a.parts.flatMap((p) => p.outcomeIds))).join("\n"),
+  ];
+  return toExportDoc({
+    title: fmt(d.title, { course: course.name, assessment: a.title }),
+    locale,
+    sections: [{ heading: null, kind: "rubric", markdown: blocks.filter(Boolean).join("\n\n") }],
+  });
+}

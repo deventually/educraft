@@ -59,3 +59,44 @@ export function itemizedCourse(): CourseData {
   ];
   return d;
 }
+
+/** The aligned course with what the blueprint and the marking model need: details and parts. */
+export function documentedCourse(): CourseData {
+  const d = alignedCourse();
+  d.code = "DB1";
+  d.studyYear = "2026-2027";
+  d.outcomes[0]!.criteria = [
+    { code: "S-An 1.1", text: "De student registreert requirements." },
+    { text: "Het model is genormaliseerd." },
+  ];
+  d.outcomes[0]!.packTags = { beheersingsniveau: 2 };
+  Object.assign(d.assessments[1]!, {
+    form: "Andere wijze",
+    owner: "Docent A",
+    grading: "pass-fail",
+    passMark: 75,
+    supervised: false,
+    conditions: ["Alle opdrachten ingeleverd.", "Deelgenomen aan het gesprek."],
+    resit: "In week 10, met een vervangende opdracht.",
+    conduct: "Thuis gemaakt, AI mag met bronvermelding.",
+    parts: [
+      {
+        id: "p-1",
+        title: "Datamodel",
+        outcomeIds: [LO1],
+        weight: 60,
+        knockOut: true,
+        pass: "Het model werkt.\nDe keuzes zijn onderbouwd.",
+      },
+      {
+        id: "p-2",
+        title: "Toelichting",
+        outcomeIds: [LO1, LO2],
+        weight: 40,
+        pass: "Legt normaliseren uit.",
+        fail: "Legt normaliseren niet of onjuist uit.",
+      },
+    ],
+  });
+  return d;
+}
