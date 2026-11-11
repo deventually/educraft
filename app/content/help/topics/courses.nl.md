@@ -26,6 +26,8 @@ Is je cursus nog leeg, dan vraagt het tabblad Overzicht hoe je wilt beginnen:
 
 Het **AI-voorstel** komt pas in je cursus als jij dat kiest: je vinkt aan wat je wilt houden, past de tekst aan en voegt het toe. Wat je invult over studielast, weken en de beschrijving, komt meteen in de cursusgegevens en het lesrooster. Een beheerder kan het ontwerpen met AI uitzetten; dan blijven het document en de lege start over.
 
+Heeft je cursus leeruitkomsten maar nog geen toetsen, dan staat bovenaan het Overzicht **Volgende stap: het toetsprogramma**. De AI stelt bij je leeruitkomsten summatieve toetsen voor, die meetellen, en formatieve oefenmomenten ervoor, met per toets de soort, de week, de leeruitkomsten die hij toetst en een toetsvorm. Vul bij **Toetsvormen die jullie gebruiken** in welke vormen jouw school kent, dan kiest de AI daaruit. Bij een summatieve toets staat een weging; het veld heet *Weging (voorstel van de AI)*, want jij beslist als examinator. LimeOnIt past de wegingen niet aan: tellen ze niet op tot 100%, of zit een leeruitkomst in geen enkele summatieve toets, dan staat dat boven de toetsen. Je vinkt aan welke toetsen erin komen, en het blok verdwijnt zodra je cursus toetsen heeft.
+
 ## Voortgang
 
 Bovenaan het tabblad Overzicht staat de **Voortgang**: hoeveel stappen van je cursus klaar zijn. De stappen volgen *backwards design*, dus je begint bij het einddoel en werkt terug naar de lessen:

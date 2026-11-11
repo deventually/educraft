@@ -39,3 +39,38 @@ test("a new course asks how to start, and the design form works by keyboard", as
   expect(overflow).toBeLessThanOrEqual(0);
   expect(csp).toEqual([]);
 });
+
+/**
+ * Step 2: once the course has a learning outcome and no tests, the overview offers the test
+ * programme; the form is reachable by keyboard, axe finds nothing and 320px does not scroll.
+ */
+test("a course with outcomes and no tests offers the test programme", async ({ page }) => {
+  const csp = watchCsp(page);
+  await page.goto("/courses");
+  await page.getByLabel("Naam", { exact: true }).fill("Toetsprogramma (e2e)");
+  await page.getByRole("button", { name: "Cursus aanmaken" }).click();
+  await page.waitForURL(/\/courses\/[^/?]+$/);
+  const url = page.url();
+
+  await page.goto(`${url}?tab=outcomes`);
+  await page.getByLabel("Leeruitkomst", { exact: true }).fill("De student ontwerpt een datamodel.");
+  await page.getByRole("button", { name: "Leeruitkomst toevoegen" }).click();
+  await expect(page.getByText("De student ontwerpt een datamodel.").first()).toBeVisible();
+
+  await page.goto(url);
+  const step = page.getByRole("region", { name: "Volgende stap: het toetsprogramma" });
+  await expect(step).toBeVisible();
+  const forms = step.getByLabel("Toetsvormen die jullie gebruiken");
+  await forms.focus();
+  await expect(forms).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(step.getByRole("button", { name: "Toetsprogramma voorstellen" })).toBeFocused();
+  await expectNoAxeViolations(page);
+
+  await page.setViewportSize({ width: 320, height: 800 });
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+  expect(csp).toEqual([]);
+});

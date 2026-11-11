@@ -360,6 +360,17 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   model once more on a broken answer, and stores no outcome: the teacher reviews them in the same
   `ProposalForm` as an import and `import-apply` adds what is ticked. The feature `courseDesign`
   switches it off (the action is then a 404). Evals: `npm run eval:design`.
+- **Course wizard (step 2).** A course with outcomes and no tests (`canDesignAssessments`) shows
+  "Volgende stap: het toetsprogramma" on the overview (`CourseDesignAssessments`), posting
+  `design-assessments` with the school's assessment forms (optional). `designAssessments.ts` numbers
+  the course's own outcomes (with Bloom and criteria) for `course-design-assessments@v1` and checks
+  the answer into an `ImportProposal` over those outcomes (`existing: true`, sent as hidden fields):
+  coverage only to outcomes that exist, a week inside the course, no weight on a formative test, at
+  most eight tests, the form in `details.form`. Weights are never corrected: `weightsOff` and
+  `uncovered` (outcomes in no summative test) are shown above the tests, and the weight field reads
+  "Weging (voorstel van de AI)". Same server path as step 1 (`propose` in `courseDesign.server.ts`:
+  feature, quota, one retry, nothing stored); `import-apply` adds what is ticked. Evals:
+  `npm run eval:design-assessments`.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings

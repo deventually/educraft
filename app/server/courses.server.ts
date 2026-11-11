@@ -34,7 +34,12 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { type CourseImportResult, extractCourseImport } from "./courseImport.server";
-import { type CourseDesignResult, designCourseOutcomes } from "./courseDesign.server";
+import {
+  type CourseDesignError,
+  type CourseDesignResult,
+  designCourseAssessments,
+  designCourseOutcomes,
+} from "./courseDesign.server";
 import { addCourseToDossier } from "./courseEvidence.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -58,7 +63,12 @@ export type CourseActionResult =
       flagged: number;
       clipped: boolean;
     }
-  | { ok: true; intent: "design-outcomes"; proposal: ImportProposal; clipped: boolean }
+  | {
+      ok: true;
+      intent: "design-outcomes" | "design-assessments";
+      proposal: ImportProposal;
+      clipped: boolean;
+    }
   | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
@@ -133,18 +143,23 @@ async function runCourseIntent(
     return { ...result, intent };
   }
 
-  if (intent === "design-outcomes") {
-    const result = await designCourseOutcomes(user, course, fd, locale).catch(
-      (e): CourseDesignResult => {
-        if (e instanceof Response) throw e;
-        return { ok: false, error: "failed" };
-      },
-    );
+  if (intent === "design-outcomes" || intent === "design-assessments") {
+    const design = intent === "design-outcomes" ? designCourseOutcomes : designCourseAssessments;
+    const result = await design(user, course, fd, locale).catch((e): CourseDesignResult => {
+      if (e instanceof Response) throw e;
+      return { ok: false, error: "failed" };
+    });
+    const d = getMessages(locale).courseDesign;
+    // Step 1 is never `notReady`: any course can get outcomes proposed.
+    const errors: Record<CourseDesignError, string> =
+      intent === "design-outcomes"
+        ? { ...d.errors, notReady: d.errors.invalid }
+        : d.assessments.errors;
     if (!result.ok)
       return {
         ok: false,
         intent,
-        error: getMessages(locale).courseDesign.errors[result.error],
+        error: errors[result.error],
         ...(result.notes ? { notes: result.notes } : {}),
       };
     return { ...result, intent };
