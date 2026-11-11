@@ -6,6 +6,10 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 - **Onderwijsactiviteiten:** de lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.
 - **Toetsen:** formatief of summatief, met de leeruitkomsten die ze toetsen en op welk niveau. Geef ook aan of een toets **onder toezicht** is, zoals een tentamen in een zaal of een mondeling. Dan ziet je reviewteam hoe makkelijk een student het werk aan AI kan overlaten.
 
+## Lesrooster
+
+Onder **Lesrooster** leg je één keer vast hoe de cursus loopt: het aantal weken, de lesmomenten per week, de duur van een lesmoment, de groepsgrootte en de contactvorm. Alles is optioneel, want elke opleiding werkt anders. Open je vanuit een les **Les voorbereiden**, dan staan de lesduur, de groepsgrootte en de contactvorm al ingevuld, net als de leeruitkomsten van die les, de titel en de lessen van de weken ervoor. Je kunt alles nog aanpassen.
+
 ## De controles
 
 LimeOnIt kijkt na elke wijziging of alles op elkaar aansluit. Je krijgt een aandachtspunt als:

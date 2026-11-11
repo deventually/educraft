@@ -282,6 +282,7 @@ describe("/courses/:id", () => {
       coverage: lo,
     });
     await act(c.id, { intent: "set-ec", ec: "5" });
+    await act(c.id, { intent: "set-schedule", sessionMinutes: "240", deliveryMode: "hybrid" });
     expect(
       await act(c.id, { intent: "settings", name: "Alles — nieuw", contextProfileId: "" }),
     ).toEqual({ ok: true });
@@ -289,6 +290,7 @@ describe("/courses/:id", () => {
     expect(saved.name).toBe("Alles — nieuw");
     expect(saved.data).toMatchObject({
       ec: 5,
+      schedule: { sessionMinutes: 240, deliveryMode: "hybrid" },
       outcomes: [{ id: lo, text: "Je test software.", bloom: "analyze" }],
       activities: [{ id: act1, title: "Les 1", outcomeIds: [lo] }],
       assessments: [{ id: test, title: "Eindtoets", coverage: [{ outcomeId: lo }] }],
@@ -298,6 +300,7 @@ describe("/courses/:id", () => {
     await act(c.id, { intent: "remove-outcome", id: lo });
     expect((await repo.getCourse("teacher-a", c.id))!.data).toEqual({
       ec: 5,
+      schedule: { sessionMinutes: 240, deliveryMode: "hybrid" },
       outcomes: [],
       activities: [],
       assessments: [],

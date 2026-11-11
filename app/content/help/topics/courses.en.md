@@ -6,6 +6,10 @@ A **course** records three things and shows whether they line up:
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
 - **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
+## Schedule
+
+Under **Schedule** you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
+
 ## The checks
 
 After every change LimeOnIt checks whether everything lines up. You get a point of attention when:

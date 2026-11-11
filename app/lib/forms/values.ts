@@ -1,5 +1,6 @@
 import type { ImageInput } from "~/lib/ai/types";
 import type { CoursePrefill, InputField } from "~/lib/registry/types";
+import type { CourseSchedule } from "~/lib/courses/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 
@@ -88,6 +89,7 @@ export interface CoursePrefillItem {
 export interface CoursePrefillSource {
   outcomes: { id?: string; text: string }[];
   items?: CoursePrefillItem[];
+  schedule?: CourseSchedule;
 }
 
 /** The lessons just before an item that `earlierLessons` names: recent ones matter most. */
@@ -100,7 +102,9 @@ function courseSourceValue(
   source: CoursePrefill["source"],
   course: CoursePrefillSource,
   item: CoursePrefillItem | undefined,
-): string {
+): string | number {
+  if (source === "sessionMinutes" || source === "groupSize" || source === "deliveryMode")
+    return course.schedule?.[source] ?? "";
   if (source === "learningOutcomes") {
     const own = item ? course.outcomes.filter((o) => o.id && item.outcomeIds.includes(o.id)) : [];
     return lines((own.length > 0 ? own : course.outcomes).map((o) => o.text));
@@ -133,7 +137,7 @@ export function coursePrefillValues(
   for (const f of fields) {
     if (!f.prefillFromCourse) continue;
     const value = courseSourceValue(f.prefillFromCourse.source, course, item);
-    if (value) out[f.name] = value;
+    if (value !== "") out[f.name] = value;
   }
   return out;
 }

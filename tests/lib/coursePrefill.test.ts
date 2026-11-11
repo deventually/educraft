@@ -106,4 +106,38 @@ describe("coursePrefillValues", () => {
       expect(coursePrefillValues(itemFields, course, "gone")).toEqual(all);
     });
   });
+
+  // The schedule fills the practical fields, with or without an item.
+  it("fills the lesson length, group size and delivery mode from the schedule", () => {
+    const practical: InputField[] = [
+      {
+        name: "duration",
+        label: "Lesduur",
+        kind: "number",
+        prefillFromCourse: { source: "sessionMinutes" },
+      },
+      {
+        name: "groupSize",
+        label: "Groep",
+        kind: "number",
+        prefillFromCourse: { source: "groupSize" },
+      },
+      {
+        name: "mode",
+        label: "Vorm",
+        kind: "select",
+        prefillFromCourse: { source: "deliveryMode" },
+      },
+    ];
+    const course = {
+      outcomes: [],
+      schedule: { sessionMinutes: 240, groupSize: 28, deliveryMode: "online" as const },
+    };
+    expect(coursePrefillValues(practical, course)).toEqual({
+      duration: 240,
+      groupSize: 28,
+      mode: "online",
+    });
+    expect(coursePrefillValues(practical, { outcomes: [] })).toEqual({});
+  });
 });

@@ -79,8 +79,16 @@ export interface CoursePrefill {
    * `learningOutcomes`: one outcome per line; opened from a lesson or test, only its own.
    * `itemTitle`: the title of the lesson or test the tool was opened for.
    * `earlierLessons`: the (at most five) lessons in the weeks just before it, with the week.
+   * `sessionMinutes`, `groupSize`, `deliveryMode`: from the course's schedule (a number field,
+   * a select with the options `in-person`, `online`, `hybrid`).
    */
-  source: "learningOutcomes" | "itemTitle" | "earlierLessons";
+  source:
+    | "learningOutcomes"
+    | "itemTitle"
+    | "earlierLessons"
+    | "sessionMinutes"
+    | "groupSize"
+    | "deliveryMode";
 }
 
 export interface InputField {

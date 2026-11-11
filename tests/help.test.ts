@@ -37,6 +37,11 @@ describe("help registry — topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
+  it("explains the schedule and what it fills in", () => {
+    expect(getTopic("courses", "nl")).toContain("## Lesrooster");
+    expect(getTopic("courses", "en")).toContain("## Schedule");
+  });
+
   it("explains the role-agent review in the courses topic (P21.5)", () => {
     expect(getTopic("courses", "nl")).toContain("## Laat reviewen");
     expect(getTopic("courses", "en")).toContain("## Get a review");

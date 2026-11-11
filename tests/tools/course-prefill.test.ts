@@ -29,6 +29,9 @@ describe("prefillFromCourse (data hook, no control flow)", () => {
       getToolBySlug("lesson-plan")?.inputs.find((f) => f.name === name)?.prefillFromCourse;
     expect(field("content")).toEqual({ source: "itemTitle" });
     expect(field("priorKnowledge")).toEqual({ source: "earlierLessons" });
+    expect(field("duration")).toEqual({ source: "sessionMinutes" });
+    expect(field("groupSize")).toEqual({ source: "groupSize" });
+    expect(field("deliveryMode")).toEqual({ source: "deliveryMode" });
   });
 
   it("is only declared on those fields, and only on text fields", () => {

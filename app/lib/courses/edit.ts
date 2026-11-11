@@ -10,6 +10,7 @@ import type {
   AssessmentItem,
   AssessmentPart,
   CourseData,
+  CourseSchedule,
   LearningOutcome,
 } from "./types";
 
@@ -233,6 +234,12 @@ export function setModule(
 /** Sets the course's start date (P22.1); `undefined` clears it. */
 export function setStartDate(d: CourseData, startDate: string | undefined): CourseData {
   return compact({ ...d, startDate });
+}
+
+/** Sets the course's schedule; an empty one clears it. */
+export function setSchedule(d: CourseData, schedule: CourseSchedule): CourseData {
+  const kept = compact(schedule);
+  return compact({ ...d, schedule: Object.keys(kept).length > 0 ? kept : undefined });
 }
 
 /** Sets the course's EC; `undefined` clears it. */

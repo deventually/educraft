@@ -229,6 +229,18 @@ export const courses: Messages["courses"] = {
   profileNone: "None",
   remove: "Remove",
   save: "Save",
+  schedule: {
+    deliveryMode: "Delivery mode",
+    deliveryModes: { hybrid: "Hybrid", "in-person": "In person", online: "Live online" },
+    groupSize: "Group size",
+    intro:
+      "How the course runs, filled in once. Everything is optional. Prepare a lesson takes the lesson length, group size and delivery mode from it.",
+    none: "Not filled in",
+    sessionMinutes: "Length of a session (minutes)",
+    sessionsPerWeek: "Sessions per week",
+    title: "Schedule",
+    weeks: "Number of weeks",
+  },
   settings: {
     calendar: "Add to your calendar",
     calendarHint:
