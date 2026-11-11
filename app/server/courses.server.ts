@@ -4,6 +4,7 @@
  * `<Form intent>`. Routes stay thin.
  */
 import { requireRole, type User } from "./auth.server";
+import { runAiCall } from "./aiCalls.server";
 import { requireFeature } from "./availability.server";
 import { decideOnFinding, reviewCourse } from "./agentReview.server";
 import {
@@ -96,6 +97,16 @@ export async function saveCourseIntent(
 ): Promise<CourseActionResult> {
   const { user, course } = await loadCourse(request, id);
   const fd = await request.formData();
+  // The page's call id: leaving the page with "Stop" stops this action's model calls.
+  return runAiCall(user.id, fd.get("aiCall"), () => runCourseIntent(request, user, course, fd));
+}
+
+async function runCourseIntent(
+  request: Request,
+  user: User,
+  course: Course,
+  fd: FormData,
+): Promise<CourseActionResult> {
   const locale = getLocale(request);
   const m = getMessages(locale).courses;
   const intent = fd.get("intent");

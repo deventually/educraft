@@ -10,6 +10,7 @@ import { getRuntimePrompt } from "~/lib/prompts";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
 import { effectiveDefaultModel } from "./availability.server";
+import { currentAiSignal } from "./aiCalls.server";
 import { meterCall } from "./aiMeter.server";
 import { checkQuota } from "./repositories/usage.server";
 import { log } from "./log.server";
@@ -31,6 +32,9 @@ export async function callPortfolioModel(
   chosenModel?: string,
 ): Promise<{ text: string; model: string } | null> {
   const model = chosenModel ?? (await effectiveDefaultModel(user, DEFAULT_MODEL));
+  // Set when the teacher left the page and chose to stop (aiCalls.server).
+  const signal = currentAiSignal();
+  if (signal?.aborted) return null;
   const started = Date.now();
   const meter = meterCall(user.id, event, model);
   try {
@@ -40,6 +44,7 @@ export async function callPortfolioModel(
       messages: [{ role: "user", content: message }],
       temperature: 0,
       maxTokens,
+      signal,
     });
     if (usage) meter.onUsage(usage);
     await meter.done(text.length);
@@ -50,7 +55,7 @@ export async function callPortfolioModel(
     log(event, {
       promptId,
       model,
-      outcome: "error",
+      outcome: signal?.aborted ? "aborted" : "error",
       error: e instanceof Error ? e.message : String(e),
       durationMs: Date.now() - started,
     });

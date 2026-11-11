@@ -8,6 +8,8 @@ export const api: RouteArea = {
     route("api/stream", "routes/api.stream.tsx"),
     // Records tester feedback on a generation.
     route("api/feedback", "routes/api.feedback.tsx"),
+    // Stops the teacher's own AI action when they leave the page and choose "Stop".
+    route("api/ai-cancel", "routes/api.ai-cancel.tsx"),
     // Dictation: one recording in, its text out (speech server from config/models.json).
     route("api/transcribe", "routes/api.transcribe.tsx"),
     // Stores or dismisses a teacher's periodic pilot check-in.

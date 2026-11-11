@@ -4,6 +4,7 @@
  * save path for every `<Form intent>`. Routes stay thin.
  */
 import { requireRole } from "./auth.server";
+import { runAiCall } from "./aiCalls.server";
 import { portfolioAccess } from "./portfolioAccess.server";
 import { getDossier, updateDossier, type Dossier } from "./repositories/portfolio.server";
 import type { User } from "./auth.server";
@@ -143,6 +144,16 @@ export async function saveIntent(
 ): Promise<PortfolioActionResult> {
   const { user, dossier } = await loadDossier(request, id);
   const fd = await request.formData();
+  // The page's call id: leaving the page with "Stop" stops this action's model calls.
+  return runAiCall(user.id, fd.get("aiCall"), () => runIntent(request, user, dossier, fd));
+}
+
+async function runIntent(
+  request: Request,
+  user: User,
+  dossier: Dossier,
+  fd: FormData,
+): Promise<PortfolioActionResult> {
   const locale = getLocale(request);
   const m = getMessages(locale);
   const intent = String(fd.get("intent") ?? "");

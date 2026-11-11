@@ -154,6 +154,7 @@ export const aiSdkProvider: LLMProvider = {
       model: resolveModel(opts.model),
       ...prompt(opts),
       ...settingsOptions(opts),
+      abortSignal: opts.signal,
     });
     return {
       text,
