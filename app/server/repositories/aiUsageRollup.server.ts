@@ -6,16 +6,16 @@
  * design: it is housekeeping over everyone, run by the server on a timer.
  */
 import { asc, eq, sql } from "drizzle-orm";
+import { monthOptions } from "~/lib/usage/summary";
 import { getDb } from "../db.server";
 import { aiUsageRollup } from "../schema.server";
 
-/** The thirteen months kept per person: this month and the twelve before. */
-const MONTHS_KEPT = 13;
-
-/** The first day kept per person, as a UTC "YYYY-MM-DD": the first of the oldest kept month. */
+/**
+ * The first day kept per person, as a UTC "YYYY-MM-DD": the first of the oldest month the
+ * usage page offers (this month and the twelve before), so the page never misses a row.
+ */
 export function retentionCutoff(today: string): string {
-  const [y, m] = today.split("-").map(Number) as [number, number];
-  return new Date(Date.UTC(y, m - 1 - (MONTHS_KEPT - 1), 1)).toISOString().slice(0, 10);
+  return `${monthOptions(today).at(-1)}-01`;
 }
 
 const COUNTERS = [
