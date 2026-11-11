@@ -6,6 +6,7 @@
  */
 import { type BloomLevel, bloomRank } from "../app/lib/courses/bloom";
 import type { ImportParseResult } from "../app/lib/courses/import";
+import type { ImportModule } from "../app/lib/courses/importExtras";
 import type { AssessmentKind, Grading } from "../app/lib/courses/types";
 import { normalizeForMatch } from "../app/lib/documents/locate";
 
@@ -27,9 +28,10 @@ export interface ImportCase {
   /** Each must match one assessment: title contains the word, and the given fields are equal. */
   expectAssessments?: { title: string; week?: number; weight?: number; kind?: AssessmentKind }[];
   expectWeightsOff?: boolean;
-  /** From a test blueprint or marking model (course-import@v2): what must come out. */
+  /** From a test blueprint, marking model (v2) or module guide (v3): what must come out. */
   expectDocument?: {
-    module?: { code?: string; studyYear?: string };
+    /** Equal, except the description and literature: those contain the given text. */
+    module?: ImportModule;
     /** Each must be a success criterion of some outcome (text contains it). */
     criteria?: string[];
     /** Some assessment has this pass mark and grading. */
@@ -47,7 +49,7 @@ export interface ImportScore {
   found: number;
   /** Outcomes that match no expected outcome (invented or from another course). */
   extra: number;
-  /** Outcomes, criteria and parts the code marked as not verbatim in the document. */
+  /** Outcomes, criteria, parts and module texts that are not verbatim in the document. */
   unverified: number;
   /** Outcomes or assessments that contain a forbidden word. */
   forbidden: number;
@@ -90,7 +92,8 @@ export function scoreImportCase(c: ImportCase, result: ImportParseResult): Impor
   const unverified =
     outcomes.filter((o) => !o.verbatim).length +
     outcomes.flatMap((o) => o.criteria).filter((k) => !k.verbatim).length +
-    assessments.flatMap((a) => a.parts).filter((p) => !p.verbatim).length;
+    assessments.flatMap((a) => a.parts).filter((p) => !p.verbatim).length +
+    moduleTextsOff(result.proposal.module, c.document);
   const forbidden =
     outcomes.filter((o) => (c.forbidOutcomes ?? []).some((w) => lower(o.text).includes(lower(w))))
       .length +
@@ -142,11 +145,27 @@ export function scoreImportCase(c: ImportCase, result: ImportParseResult): Impor
 
 type Proposal = Extract<ImportParseResult, { ok: true }>["proposal"];
 
+/** The module texts the model copies at length; each line must be in the document. */
+const LONG_MODULE_TEXTS: (keyof ImportModule)[] = ["description", "literature"];
+
+function moduleTextsOff(module: ImportModule | undefined, document: string): number {
+  const doc = normalizeForMatch(document);
+  return LONG_MODULE_TEXTS.filter((k) =>
+    (module?.[k] ?? "")
+      .split(/\n+/)
+      .map((l) => comparable(l))
+      .some((l) => l && !doc.includes(l)),
+  ).length;
+}
+
 function scoreDocument(e: ImportCase["expectDocument"], p: Proposal): boolean {
   if (!e) return true;
-  const moduleOk = Object.entries(e.module ?? {}).every(
-    ([k, v]) => p.module?.[k as "code" | "studyYear"] === v,
-  );
+  const moduleOk = Object.entries(e.module ?? {}).every(([k, v]) => {
+    const got = p.module?.[k as keyof ImportModule];
+    return LONG_MODULE_TEXTS.includes(k as keyof ImportModule)
+      ? !!got && comparable(got).includes(comparable(v))
+      : got === v;
+  });
   const criteria = p.outcomes.flatMap((o) => o.criteria.map((k) => comparable(k.text)));
   const criteriaOk = (e.criteria ?? []).every((t) =>
     criteria.some((k) => k.includes(comparable(t))),

@@ -168,6 +168,44 @@ describe("scoreImportCase", () => {
     expect(run(answer())).toMatchObject({ documentOk: false, pass: false });
   });
 
+  it("checks the module guide details, and that the description and literature are verbatim", () => {
+    const doc = `${c.document}\nModuleleider: Docent A. Studiefase: Propedeuse.\nIn deze module ontwerp je databases.\nLiteratuur: Boek over databases.`;
+    const withGuide: ImportCase = {
+      ...c,
+      document: doc,
+      expectDocument: {
+        module: {
+          leader: "Docent A",
+          phase: "Propedeuse",
+          description: "In deze module ontwerp je databases.",
+          literature: "Boek over databases.",
+        },
+      },
+    };
+    const run = (module: Record<string, string>) =>
+      scoreImportCase(withGuide, parseImport(answer({ module }), doc, emptyCourseData()));
+    const good = {
+      leader: "Docent A",
+      phase: "Propedeuse",
+      description: "In deze module ontwerp je databases.",
+      literature: "Boek over databases.",
+    };
+    expect(run(good)).toMatchObject({ documentOk: true, unverified: 0, pass: true });
+    expect(run({ ...good, leader: "Docent B" })).toMatchObject({ documentOk: false, pass: false });
+    expect(
+      run({ ...good, description: "In deze module ontwerp je databases. Het is een leuk vak." }),
+    ).toMatchObject({ unverified: 1, pass: false });
+  });
+
+  it("has a module guide case (course-import@v3)", () => {
+    const guide = cases.find((x) => x.id.includes("module-guide"));
+    expect(guide?.expectDocument?.module).toMatchObject({
+      leader: expect.any(String),
+      description: expect.any(String),
+      literature: expect.any(String),
+    });
+  });
+
   it("writes a Dutch report with one row per case", () => {
     const md = importReportMarkdown({
       date: "2026-11-05",

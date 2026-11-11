@@ -237,3 +237,63 @@ describe("applyImport: a whole module in one go, and only filling in what is emp
     expect(apply(first).assessments[0]?.parts).toHaveLength(1);
   });
 });
+
+describe("the module guide and handbook details (course-import@v3)", () => {
+  const guide = {
+    ...answer,
+    module: {
+      code: "DB1",
+      studyYear: "2026-2027",
+      phase: "Propedeuse, semester 1",
+      leader: "Docent A",
+      examiners: "Docenten Informatica",
+      description: "In deze module ontwerp je databases.",
+      literature: "Boek over databases.\nArtikel over normaliseren.",
+    },
+  };
+
+  it("proposes the study phase, module leader, examiners, description and literature", () => {
+    expect(proposal(guide).proposal.module).toEqual(guide.module);
+    const empty = { ...guide, module: { ...guide.module, leader: "  ", literature: null } };
+    expect(proposal(empty).proposal.module).not.toHaveProperty("leader");
+    expect(proposal(empty).proposal.module).not.toHaveProperty("literature");
+  });
+
+  const withGuide = () =>
+    form((fd) => {
+      fd.set("module.phase", "Propedeuse, semester 1");
+      fd.set("module.leader", "Docent A");
+      fd.set("module.examiners", "Docenten Informatica");
+      fd.set("module.description", "In deze module ontwerp je databases.");
+      fd.set("module.literature", "Boek over databases.");
+    });
+
+  it("reads them from the review form", () => {
+    expect(parseImportSelection(withGuide())?.module).toEqual({
+      code: "DB1",
+      studyYear: "2026-2027",
+      phase: "Propedeuse, semester 1",
+      leader: "Docent A",
+      examiners: "Docenten Informatica",
+      description: "In deze module ontwerp je databases.",
+      literature: "Boek over databases.",
+    });
+    expect(
+      parseImportSelection(form((fd) => fd.set("module.description", "x".repeat(3_001)))),
+    ).toBeNull();
+  });
+
+  it("fills them in only where the course has nothing yet", () => {
+    const course = { ...emptyCourseData(), leader: "Eigen leider" };
+    const r = applyImport(course, parseImportSelection(withGuide()) as ImportSelection);
+    if (!r.ok) throw new Error(r.error);
+    expect(CourseDataSchema.safeParse(r.data).success).toBe(true);
+    expect(r.data).toMatchObject({
+      leader: "Eigen leider",
+      phase: "Propedeuse, semester 1",
+      examiners: "Docenten Informatica",
+      description: "In deze module ontwerp je databases.",
+      literature: "Boek over databases.",
+    });
+  });
+});

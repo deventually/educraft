@@ -4,14 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #272 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #273 gemerged)_
 
 ## Nu
 
+- **Import leest ook de modulegegevens (#273) gemerged op 2026-11-11:** *Importeren uit bestaande
+  documenten* haalt uit een modulewijzer of modulehandleiding nu ook studiefase, moduleleider,
+  examinatoren, de inhoudelijke beschrijving en de literatuur; alleen lege velden worden
+  aangevuld. Nieuwe prompt `course-import@v3`. De vragenlijst onder een toets heet nu *Vragen (n)*.
 - **Lesrooster van de cursus (#271) gemerged op 2026-11-11:** een blok *Lesrooster* op het
   tabblad Overzicht met weken, lesmomenten per week, duur van een lesmoment, groepsgrootte en
-  contactvorm, allemaal optioneel. *Les voorbereiden* neemt lesduur, groep en contactvorm daaruit
-  over; geen migratie.
+  contactvorm, allemaal optioneel (`set-schedule`, `CourseData.schedule`). *Les voorbereiden*
+  neemt lesduur, groep en contactvorm daaruit over; geen migratie.
 - **Vooraf invullen vanuit de les (#269) gemerged op 2026-11-11:** wie *Les voorbereiden* opent
   vanuit een les, krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis
   (de vijf lessen ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij

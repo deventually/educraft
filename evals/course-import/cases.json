@@ -226,6 +226,37 @@
           }
         ]
       }
+    },
+    {
+      "id": "imp-module-guide-nl",
+      "locale": "nl",
+      "description": "Modulewijzer en modulehandleiding na elkaar: modulegegevens, beschrijving in twee alinea's, examinatoren en literatuur (course-import@v3).",
+      "courseName": "Netwerken",
+      "document": "## modulewijzer-netwerken.pdf\nHogeschool Fictief — Modulewijzer\nModulenaam Netwerken\nModulecode NET1\nStudiepunten 5\nStudiejaar 2026-2027\nModuleleider Docent C\nStudiefase Propedeuse, semester 2\n\nLeeruitkomsten\nLU1 De student configureert een klein bedrijfsnetwerk volgens een ontwerp.\nS-Re 1.1 De student stelt IP-adressering en subnetten in.\nS-Re 1.2 De student test de verbindingen en legt de resultaten vast.\nLU2 De student analyseert een netwerkstoring met behulp van meetgegevens.\nS-An 1.1 De student verzamelt meetgegevens met een netwerkanalyzer.\n\nInhoudelijke beschrijving\nIn deze module leer je hoe een bedrijfsnetwerk is opgebouwd. Je werkt in het lab met echte switches en routers.\n\nAan het eind van de module richt je zelfstandig een klein netwerk in en los je storingen op.\n\nBeoordeling\nToetsvorm: Andere wijze (praktijkopdracht netwerk). Voorwaarden: alle labopdrachten afgerond.\nExaminator(en) Docent C, Docent D\nTweede gelegenheid: in week 10, een nieuwe praktijkopdracht.\n\n## modulehandleiding-netwerken.docx\nModulehandleiding Netwerken (NET1)\nAuteurs: Docent C. Versie 1.0.\n1. Inleiding\nDeze handleiding beschrijft de weken, de labopdrachten en de toetsing.\n8. Aanbevolen literatuur\nNetwerken in de praktijk, 4e druk.\nHandboek subnetten voor beginners.\nLet op: lees ook de online documentatie van de lab-apparatuur.",
+      "expectOutcomes": [
+        "De student configureert een klein bedrijfsnetwerk volgens een ontwerp.",
+        "De student analyseert een netwerkstoring met behulp van meetgegevens."
+      ],
+      "expectAssessments": [
+        {
+          "title": "praktijkopdracht"
+        }
+      ],
+      "expectDocument": {
+        "module": {
+          "code": "NET1",
+          "studyYear": "2026-2027",
+          "phase": "Propedeuse, semester 2",
+          "leader": "Docent C",
+          "examiners": "Docent C, Docent D",
+          "description": "In deze module leer je hoe een bedrijfsnetwerk is opgebouwd.",
+          "literature": "Netwerken in de praktijk, 4e druk."
+        },
+        "criteria": [
+          "De student stelt IP-adressering en subnetten in.",
+          "De student verzamelt meetgegevens met een netwerkanalyzer."
+        ]
+      }
     }
   ]
 }

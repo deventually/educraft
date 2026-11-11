@@ -52,7 +52,7 @@ Op de cursuspagina staat een tabel met de leeruitkomsten in de rijen en de activ
 
 Herontwerp je een module, begin dan met wat er al is. Kies op de cursuspagina **Importeren uit bestaande documenten** en plak de tekst of kies de bestanden: een OER, studiehandleiding, modulewijzer, modulehandleiding, toetsmatrijs of nakijkmodel. Je kunt er meer tegelijk kiezen, bijvoorbeeld een toetsmatrijs en nakijkmodel tegelijk. De bestanden worden op je computer gelezen; alleen de tekst gaat naar de AI.
 
-De AI zet een voorstel klaar: modulecode en studiejaar, leeruitkomsten met hun succescriteria, toetsen met toetsvorm, cesuur, voorwaarden en herkansing, en de onderdelen met hun criteria voor voldoende en onvoldoende. Wat niet letterlijk in het document staat, wordt gemarkeerd. Jij vinkt aan wat in de cursus komt.
+De AI zet een voorstel klaar: de modulegegevens (modulecode, studiejaar, studiefase, moduleleider, examinatoren, beschrijving en literatuur), leeruitkomsten met hun succescriteria, toetsen met toetsvorm, cesuur, voorwaarden en herkansing, en de onderdelen met hun criteria voor voldoende en onvoldoende. Wat niet letterlijk in het document staat, wordt gemarkeerd. Jij vinkt aan wat in de cursus komt.
 
 Staat een leeruitkomst of toets al in je cursus, dan wordt die niet dubbel toegevoegd. Met **Lege velden aanvullen** vul je alleen aan wat nog leeg is, zoals de onderdelen uit een nakijkmodel bij een toets die je eerder uit de studiehandleiding haalde. Wat je al had ingevuld, blijft staan.
 
