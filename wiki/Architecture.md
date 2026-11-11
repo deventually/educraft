@@ -172,6 +172,17 @@ LimeOnIt is not tied to one model vendor.
   model without a price adds to `unpricedCalls`. The skill `/model-prices` keeps the list
   prices and the rate current, from the providers' own pages.
 
+- **Usage page (PR C).** `/usage` is one page for every role; `usageDashboard.server.ts`
+  decides the circles (BESLUIT-2026-11-11-1) and leaves out of the loader data what a viewer
+  may not see. Everyone: own calls per week, tool and model, and today's quota. A team lead:
+  each led team's totals (`teamAiUsage` returns `null` for anyone else), never per person or
+  money, and no split per tool or model below `MIN_TEAM_BREAKDOWN` (3) active members. An
+  admin: everyone, per person, team, provider, model and tool, with costs and the unpriced
+  calls. The owner: the month forecast and the cache savings at today's prices. The sums come
+  from `aiUsageReports.server.ts` (grouped in SQL, capped at 500 rows); the arithmetic
+  (months, weeks, forecast, savings) is pure in `app/lib/usage/summary.ts`. Help topic `usage`
+  ("Wat we meten"). Beheer → *Feedback en pilot* keeps feedback and the pilot only.
+
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 

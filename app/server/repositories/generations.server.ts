@@ -119,24 +119,6 @@ export async function getGeneration(
 }
 
 /**
- * Generation counts per tool over the last `days` days — the admin usage
- * "per tool" totals. Not user-scoped by design (an admin sees the whole
- * instance); cheap group-by, no analytics infrastructure.
- */
-export async function countGenerationsByTool(
-  days = 14,
-): Promise<{ toolSlug: string; count: number }[]> {
-  const cutoff = new Date(Date.now() - days * 86_400_000);
-  return getDb()
-    .select({ toolSlug: generations.toolSlug, count: sql<number>`count(*)` })
-    .from(generations)
-    .where(gte(generations.createdAt, cutoff))
-    .groupBy(generations.toolSlug)
-    .orderBy(desc(sql`count(*)`))
-    .all();
-}
-
-/**
  * Generation counts per model over the last `days` days — how much a model is still
  * used, on the admin's models page. Not user-scoped by design (instance totals).
  */

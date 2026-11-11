@@ -33,6 +33,15 @@ describe("help sections — the order of /help", () => {
     expect(topicVisible("account", { isAdmin: false, portfolio: false })).toBe(true);
   });
 
+  it("explains what we measure under 'Your account', for every teacher (the usage page's help)", () => {
+    const account = helpSections("nl", { isAdmin: false, portfolio: false }).find(
+      (s) => s.id === "account",
+    );
+    expect(account?.topics.map((t) => t.slug)).toEqual(["account", "usage"]);
+    expect(getTopicTitle("usage", "nl")).toBe("Wat we meten");
+    expect(getTopicTitle("usage", "en")).toBe("What we measure");
+  });
+
   it("shows the BDB and BKE only to a teacher for whom the workplace is on", () => {
     const slugs = (portfolio: boolean) =>
       helpSections("nl", { isAdmin: false, portfolio }).flatMap((s) => s.topics.map((t) => t.slug));

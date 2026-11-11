@@ -52,8 +52,9 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
 - **Abuse & cost bounds.** Per-user rate limits and a per-user daily quota
   (`app/server/repositories/usage.server.ts`) cap runaway use.
 - **AI-use measurement.** `ai_usage` keeps token counters per user, day, tool and model for the
-  usage dashboard: no prompt, no answer, no time of day. A team lead will see team totals only;
-  per person stays with the admin and the teacher (BESLUIT-2026-11-11-1).
+  usage page (`/usage`): no prompt, no answer, no time of day. A team lead sees team totals
+  only, and only the total when fewer than three members were active; per person stays with
+  the admin and the teacher (BESLUIT-2026-11-11-1). The help topic *Wat we meten* explains it.
 
 ## Retention
 

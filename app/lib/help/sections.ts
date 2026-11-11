@@ -42,7 +42,11 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
     topics: ["bdb-bke"],
     requires: "portfolio",
   },
-  { id: "account", title: { nl: "Je account", en: "Your account" }, topics: ["account"] },
+  {
+    id: "account",
+    title: { nl: "Je account", en: "Your account" },
+    topics: ["account", "usage"],
+  },
   {
     id: "admin",
     title: { nl: "Beheer", en: "Administration" },

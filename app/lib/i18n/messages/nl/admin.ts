@@ -2,11 +2,12 @@ export const admin = {
   console: {
     nav: {
       agents: "Reviewteam",
+      aiUsage: "AI-gebruik en kosten",
       audit: "Logboek",
       context: "Onderwijscontext",
       teams: "Teams",
       tools: "Tools en modellen",
-      usage: "Gebruik en feedback",
+      usage: "Feedback en pilot",
       users: "Gebruikers",
     },
     saved: "Opgeslagen.",
@@ -158,18 +159,5 @@ export const admin = {
       providers: "Aanbieders",
       tools: "Tools",
     },
-  },
-  usage: {
-    colChars: "Tekens",
-    colCount: "Generaties",
-    colDay: "Dag",
-    colRequests: "Verzoeken",
-    colTool: "Tool",
-    colUser: "Gebruiker",
-    empty: "Nog geen gebruik geregistreerd.",
-    heading: "Gebruik",
-    intro: "Dagelijks gebruik per gebruiker over de laatste 14 dagen.",
-    perToolHeading: "Per tool",
-    rangeNote: "Laatste 14 dagen",
   },
 };

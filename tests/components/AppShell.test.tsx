@@ -243,7 +243,7 @@ describe("AppShell menu of four (P27.3)", () => {
       within(account!)
         .getAllByRole("link")
         .map((l) => l.getAttribute("href")),
-    ).toEqual(["/account", "/context-profiles", "/assessment-models"]);
+    ).toEqual(["/account", "/context-profiles", "/assessment-models", "/usage"]);
   });
 
   it("moves 'Onderwijscontext' to the account menu", async () => {
@@ -261,6 +261,7 @@ describe("AppShell menu of four (P27.3)", () => {
       "href",
       "/assessment-models",
     );
+    expect(within(menu).getByRole("link", { name: "Gebruik" })).toHaveAttribute("href", "/usage");
   });
 
   it("makes Help a question mark at the top right, and keeps it in the footer", async () => {

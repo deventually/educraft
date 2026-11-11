@@ -43,11 +43,6 @@ const feedback = [
 
 const loaderData = {
   feedback,
-  rows: [
-    { userId: "u1", userName: "Jan", day: "2026-07-04", requests: 3, outputChars: 1200 },
-    { userId: "u2", userName: "Kim", day: "2026-07-04", requests: 1, outputChars: 400 },
-  ],
-  perTool: [{ slug: first.slug, name: first.name, count: 4 }],
   teams: [
     { id: "t-hsl", name: "HSL" },
     { id: "t-hhs", name: "HHS" },
@@ -80,8 +75,6 @@ const loaderData = {
 };
 
 const emptyData = {
-  rows: [],
-  perTool: [],
   feedback: [],
   teams: [],
   teamId: "",
@@ -98,22 +91,14 @@ function renderRoute(data: unknown = loaderData) {
 }
 
 describe("Admin usage", () => {
-  it("renders per-user rows and per-tool totals", () => {
-    renderRoute();
-    expect(screen.getByText("Jan")).toBeInTheDocument();
-    expect(screen.getByText("Kim")).toBeInTheDocument();
-    // The per-tool table; the feedback list below repeats the name, so assert >= 1.
-    expect(screen.getAllByText(firstName).length).toBeGreaterThan(0);
-  });
-
-  it("has three headings: usage, the pilot per tool and tester feedback", () => {
+  it("has two headings: the pilot per tool and tester feedback (AI use moved to /usage)", () => {
     renderRoute();
     const names = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
     expect(names).toEqual([
-      expect.stringMatching(/^gebruik|^usage/i),
       expect.stringMatching(/^pilot per tool/i),
       expect.stringMatching(/feedback van testers|tester feedback/i),
     ]);
+    expect(screen.queryByText("Jan")).toBeNull();
   });
 
   it("shows the pilot per tool: uses, thumbs, time saved, quality, comments", () => {
@@ -177,9 +162,8 @@ describe("Admin usage", () => {
     expect(screen.getByText("Piet")).toBeInTheDocument();
   });
 
-  it("shows an empty state with no usage and no feedback", () => {
+  it("shows an empty state with no feedback", () => {
     renderRoute(emptyData);
-    expect(screen.getByText(/nog geen gebruik|no usage/i)).toBeInTheDocument();
     expect(screen.getByText(/nog geen feedback|no feedback/i)).toBeInTheDocument();
   });
 

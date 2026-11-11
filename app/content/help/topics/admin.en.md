@@ -28,9 +28,13 @@ Switch the review team on or off, and each member separately. The review team ad
 
 Choose which sectors (secondary, vocational, higher education, university) and domains teachers can pick in their teaching context.
 
-## Usage and feedback
+## AI use and cost
 
-Here you see usage per teacher and per tool over the last 14 days, and what teachers filled in under *Was this helpful?*.
+This link opens the **Usage** page. As an admin you see everyone's AI use there: per person, team, tool and model, with the costs in euros. See [What we measure](/help/usage).
+
+## Feedback and pilot
+
+Here you see what teachers filled in under *Was this helpful?*, and per tool how the pilot is going.
 
 ## Audit log
 

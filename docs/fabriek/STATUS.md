@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #253 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #254 gemerged)_
 
 ## Nu
 
+- **Skills /release, /maintenance en /tdd (#254) gemerged op 2026-11-11:** `/release` maakt een
+  release klaar (checklist, versienummer, notes in `RELEASE.md`, een PR; de tag zet Bastiaan),
+  `/maintenance` doet de onderhoudsronde (Dependabot, `npm audit`, de toolchain), en `/tdd` is
+  bijgewerkt.
 - **Releases met een SemVer-tag (#253) gemerged op 2026-11-11:** een release is een tag `vX.Y.Z`
   op `main` die alleen Bastiaan zet. De tag bouwt de image op `ghcr.io/deventually/educraft:X.Y.Z`
   en een GitHub Release met de notes uit `RELEASE.md`. Op de VPS rolt `./deploy.sh X.Y.Z` uit
