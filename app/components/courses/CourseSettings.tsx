@@ -7,15 +7,13 @@ import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { NumberField } from "./fields";
 
-/** The course's own details (name, context, EC, module code, start date), on the overview tab. */
+/** The course's own details (name, context, EC, start date), on the overview tab. */
 export function CourseSettings({
   courseId,
   name,
   contextProfileId,
   ec,
   startDate,
-  code,
-  studyYear,
   hours,
   profiles,
   isOwner,
@@ -25,8 +23,6 @@ export function CourseSettings({
   contextProfileId: string | null;
   ec?: number;
   startDate?: string;
-  code?: string;
-  studyYear?: string;
   hours: number;
   profiles: { id: string; name: string }[];
   /** Only the owner chooses the context profile; it is theirs. */
@@ -82,32 +78,6 @@ export function CourseSettings({
               value={ec}
               hint={c.settings.ecHint}
             />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:max-w-xl">
-            <div>
-              <Label htmlFor={`${id}-code`}>{t.courseDocuments.module.code}</Label>
-              <Input
-                id={`${id}-code`}
-                name="code"
-                maxLength={COURSE_LIMITS.code}
-                defaultValue={code ?? ""}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor={`${id}-year`}>{t.courseDocuments.module.studyYear}</Label>
-              <Input
-                id={`${id}-year`}
-                name="studyYear"
-                maxLength={COURSE_LIMITS.code}
-                defaultValue={studyYear ?? ""}
-                aria-describedby={`${id}-year-hint`}
-                className="mt-1"
-              />
-              <p id={`${id}-year-hint`} className="mt-1 text-xs text-slate-500">
-                {t.courseDocuments.module.studyYearHint}
-              </p>
-            </div>
           </div>
           <div className="max-w-xs">
             <Label htmlFor={`${id}-start`}>{c.settings.startDate}</Label>

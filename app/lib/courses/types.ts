@@ -124,6 +124,14 @@ export interface CourseData {
   code?: string;
   /** The study year, e.g. "2026-2027". */
   studyYear?: string;
+  /** The study phase (studiefase), e.g. "Propedeuse, semester 1". */
+  phase?: string;
+  /** The module leader (moduleleider). */
+  leader?: string;
+  /** The examiners (examinator(en)) of the module. */
+  examiners?: string;
+  /** What the module is about (inhoudelijke beschrijving); paragraphs split by a blank line. */
+  description?: string;
   /** Study load of the whole course in EC. */
   ec?: number;
   /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */

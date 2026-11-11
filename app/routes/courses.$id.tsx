@@ -22,6 +22,7 @@ import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
+import { ModuleGuideSection } from "~/components/courses/ModuleGuideSection";
 import { courseToolsFor } from "~/server/courseTools.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
@@ -218,8 +219,6 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               contextProfileId={course.contextProfileId}
               ec={data.ec}
               startDate={data.startDate}
-              code={data.code}
-              studyYear={data.studyYear}
               hours={plannedHours(data)}
               profiles={profiles}
               isOwner={isOwner}
@@ -264,6 +263,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         )}
         {tab === "documents" && (
           <>
+            <ModuleGuideSection courseId={course.id} data={data} />
             <CourseEvidence data={data} dossiers={dossiers} />
             <LinkedWorkSection work={linkedWork} data={data} />
             <CourseProgrammes {...programmes} />

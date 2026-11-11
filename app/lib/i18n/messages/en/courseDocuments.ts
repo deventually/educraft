@@ -1,4 +1,4 @@
-/** Documents made from a course, without AI: the test blueprint and the marking model. */
+/** Documents made from a course, without AI: the module guide, the test blueprint and the marking model. */
 export const courseDocuments = {
   blueprint: {
     export: "Export test blueprint",
@@ -74,8 +74,30 @@ export const courseDocuments = {
   },
   module: {
     code: "Module code",
+    description: "Description of the content",
+    descriptionHint:
+      "What the module is about and what the student does. An empty line starts a new paragraph.",
+    examiners: "Examiner(s)",
+    leader: "Module leader",
+    phase: "Study phase",
+    phaseHint: "For example First year, semester 1.",
     studyYear: "Study year",
     studyYearHint: "For example 2026-2027.",
+  },
+  moduleGuide: {
+    assessment: "Assessment",
+    ec: "Credits",
+    ecValue: "{n} EC",
+    export: "Export module guide",
+    fileName: "{course} module guide",
+    heading: "Module guide",
+    intro:
+      "The details of the module for the module guide. The learning outcomes, success criteria and tests come from the course itself.",
+    name: "Module name",
+    outcomes: "Learning outcomes and success criteria",
+    resit: "Resit: {text}",
+    title: "{course}: module guide",
+    week: "Week",
   },
   parts: {
     add: "Add part",
