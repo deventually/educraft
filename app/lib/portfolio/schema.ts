@@ -21,6 +21,9 @@ export const LIMITS = {
   outcomes: 10,
   requiredEvidence: 20,
   requiredEvidenceText: 300,
+  outlineSections: 12,
+  sectionDescription: 1_000,
+  literature: 10,
   notes: 2_000,
   /** Same cap as a `kind: "document"` field in the stream. */
   documentText: 300_000,
@@ -87,6 +90,19 @@ const OutcomeSchema = z.object({
   requiredEvidence: z
     .array(z.string().min(1).max(LIMITS.requiredEvidenceText))
     .max(LIMITS.requiredEvidence),
+  outline: z
+    .array(
+      z.object({
+        id: Id,
+        title: z.string().min(1).max(LIMITS.title),
+        description: z.string().max(LIMITS.sectionDescription).optional(),
+        criterionIds: z.array(Id).max(LIMITS.criteriaPerOutcome),
+        unverified: z.literal(true).optional(),
+      }),
+    )
+    .max(LIMITS.outlineSections)
+    .optional(),
+  literature: z.array(z.string().min(1).max(LIMITS.reference)).max(LIMITS.literature).optional(),
 });
 
 const FrameworkSchema = z.object({
@@ -188,6 +204,17 @@ export const DossierDataSchema = z
         if (criterionIds.has(c.id))
           ctx.addIssue({ code: "custom", message: `duplicate criterion ${c.id}` });
         criterionIds.add(c.id);
+      }
+      // A section covers criteria of its own outcome only.
+      const own = new Set(o.criteria.map((c) => c.id));
+      const sectionIds = new Set<string>();
+      for (const s of o.outline ?? []) {
+        if (sectionIds.has(s.id))
+          ctx.addIssue({ code: "custom", message: `duplicate section ${s.id}` });
+        sectionIds.add(s.id);
+        for (const id of s.criterionIds)
+          if (!own.has(id))
+            ctx.addIssue({ code: "custom", message: `section ${s.id} covers foreign ${id}` });
       }
     }
     for (const id of Object.keys(d.status)) {

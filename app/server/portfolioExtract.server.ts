@@ -6,6 +6,7 @@
 import {
   applyExtraction,
   buildExtractMessage,
+  FRAMEWORK_PROMPT_ID,
   frameworkInUse,
   parseExtraction,
 } from "~/lib/portfolio/extract";
@@ -20,8 +21,6 @@ export type ExtractError = "empty-form" | "in-use" | "quota" | "failed";
 export type ExtractResult =
   | { ok: true; data: DossierData; flagged: number; clipped: boolean }
   | { ok: false; error: ExtractError };
-
-const PROMPT_ID = "portfolio-framework@v1";
 
 export async function extractFramework(
   user: User,
@@ -39,7 +38,7 @@ export async function extractFramework(
   for (let attempt = 0; attempt < 2; attempt++) {
     const answer = await callPortfolioModel(
       user,
-      PROMPT_ID,
+      FRAMEWORK_PROMPT_ID,
       message,
       locale,
       8_000,

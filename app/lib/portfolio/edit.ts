@@ -132,6 +132,12 @@ export function removeCriterion(d: DossierData, criterionId: string): DossierDat
     outcomes: next.framework.outcomes.map((o) => ({
       ...o,
       criteria: o.criteria.filter((c) => c.id !== criterionId),
+      ...(o.outline && {
+        outline: o.outline.map((s) => ({
+          ...s,
+          criterionIds: s.criterionIds.filter((id) => id !== criterionId),
+        })),
+      }),
     })),
   });
   return prune(next);

@@ -16,7 +16,10 @@ import {
 } from "~/lib/ai/structuredAnswer";
 import { normalizeForMatch } from "~/lib/documents/locate";
 import { LIMITS } from "./schema";
-import type { DossierData, FormRequirements, Framework, Outcome } from "./types";
+import type { DossierData, FormRequirements, Framework, Outcome, OutlineSection } from "./types";
+
+/** The prompt the extraction uses; @v1 stays registered (versioned prompts). */
+export const FRAMEWORK_PROMPT_ID = "portfolio-framework@v2";
 
 /** At most this much form text goes to the model (cost and context bound). */
 export const EXTRACT_INPUT_LIMIT = STRUCTURED_INPUT_LIMIT;
@@ -39,6 +42,16 @@ const RawFramework = z.object({
       title: str,
       criteria: z.array(z.object({ text: z.string(), strongLevel: str })).nullish(),
       requiredEvidence: z.array(z.string()).nullish(),
+      outline: z
+        .array(
+          z.object({
+            title: str,
+            description: str,
+            criteria: z.array(z.number()).nullish(),
+          }),
+        )
+        .nullish(),
+      literature: z.array(z.string()).nullish(),
     }),
   ),
   requirements: z
@@ -79,16 +92,21 @@ export function parseExtraction(raw: string, formText: string): ExtractParseResu
     LIMITS.outcomes,
   ).map((o) => {
     const code = cut(o.code, LIMITS.code);
+    // Sections name criteria by their 1-based number in the model's own list.
+    const byNumber = new Map<number, string>();
+    const raw = (o.criteria ?? []).map((c, i) => ({ c, n: i + 1 }));
     const criteria = take(
-      (o.criteria ?? []).filter((c) => c.text.trim()),
+      raw.filter(({ c }) => c.text.trim()),
       LIMITS.criteriaPerOutcome,
-    ).map((c) => {
+    ).map(({ c, n }) => {
       const text = cut(c.text, LIMITS.criterionText);
       const strongLevel = cut(c.strongLevel, LIMITS.criterionText);
       const unverified = !verbatimIn(text, form);
       if (unverified) flagged++;
+      const id = crypto.randomUUID();
+      byNumber.set(n, id);
       return {
-        id: crypto.randomUUID(),
+        id,
         text,
         ...(strongLevel ? { strongLevel } : {}),
         ...(unverified ? { unverified: true } : {}),
@@ -103,6 +121,7 @@ export function parseExtraction(raw: string, formText: string): ExtractParseResu
         (o.requiredEvidence ?? []).map((e) => cut(e, LIMITS.requiredEvidenceText)).filter(Boolean),
         LIMITS.requiredEvidence,
       ),
+      ...outlineOf(o, byNumber, form, cut, take),
     };
   });
   if (!outcomes.some((o) => o.criteria.length > 0)) return { ok: false, error: "empty" };
@@ -131,6 +150,51 @@ export function parseExtraction(raw: string, formText: string): ExtractParseResu
     },
     flagged,
     clipped,
+  };
+}
+
+type RawOutcome = z.infer<typeof RawFramework>["outcomes"][number];
+
+/**
+ * The chapter outline and literature of one outcome. A section whose title is
+ * not in the form is flagged for the teacher; a source that is not in the form
+ * is dropped, because an invented source is worse than a missing one.
+ */
+function outlineOf(
+  o: RawOutcome,
+  byNumber: Map<number, string>,
+  form: string,
+  cut: (s: string | null | undefined, max: number) => string,
+  take: <T>(items: T[], max: number) => T[],
+): Pick<Outcome, "outline" | "literature"> {
+  const outline: OutlineSection[] = take(
+    (o.outline ?? []).filter((s) => (s.title ?? "").trim()),
+    LIMITS.outlineSections,
+  ).map((s) => {
+    const title = cut(s.title, LIMITS.title);
+    const description = cut(s.description, LIMITS.sectionDescription);
+    const criterionIds = [...new Set((s.criteria ?? []).flatMap((n) => byNumber.get(n) ?? []))];
+    return {
+      id: crypto.randomUUID(),
+      title,
+      ...(description ? { description } : {}),
+      criterionIds,
+      ...(verbatimIn(title, form) ? {} : { unverified: true as const }),
+    };
+  });
+  const literature = take(
+    [
+      ...new Set(
+        (o.literature ?? [])
+          .map((l) => cut(l, LIMITS.reference))
+          .filter((l) => l && verbatimIn(l, form)),
+      ),
+    ],
+    LIMITS.literature,
+  );
+  return {
+    ...(outline.length ? { outline } : {}),
+    ...(literature.length ? { literature } : {}),
   };
 }
 

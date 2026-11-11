@@ -9,6 +9,7 @@ import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
+import { ChapterOutline } from "~/components/portfolio/ChapterOutline";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ProofreadPanel } from "~/components/portfolio/ProofreadPanel";
 import { ToolHints } from "~/components/portfolio/ToolHints";
@@ -317,6 +318,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 </Form>
               </div>
             )}
+            <ChapterOutline outcome={outcome} />
             <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
             <div className="mt-3">
               {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}

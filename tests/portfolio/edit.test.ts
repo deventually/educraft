@@ -114,3 +114,13 @@ describe("portfolio edits", () => {
     expect(edit.writeChapter(a, LU, "x").framework.confirmedAt).toBe(1000);
   });
 });
+
+describe("chapter outline (BDB step 5)", () => {
+  it("removing a criterion takes it out of the outline's sections too", () => {
+    const d0 = sampleDossier();
+    d0.framework.outcomes[0]!.outline = [{ id: "s1", title: "Opbouw", criterionIds: [C1, C2] }];
+    const d = edit.removeCriterion(d0, C1);
+    expect(d.framework.outcomes[0]!.outline![0]!.criterionIds).toEqual([C2]);
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+  });
+});
