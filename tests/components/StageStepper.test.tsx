@@ -197,3 +197,42 @@ describe("StageStepper — leaving stops the model call", () => {
     expect(signals.map((s) => s.aborted)).toEqual([true]);
   });
 });
+
+describe("StageStepper — leaving with the choice of the dialog", () => {
+  it("lets a running stage finish when the teacher keeps it running", async () => {
+    const { Link, Outlet } = await import("react-router");
+    const { AiLeaveGuard } = await import("~/components/AiLeaveGuard");
+    const spy = await streamSpy();
+    let signal: AbortSignal | undefined;
+    spy.mockImplementation(async (_url, _body, _handlers, s: AbortSignal) => {
+      signal = s;
+      return new Promise<void>(() => {});
+    });
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <AiLeaveGuard>
+            <Link to="/elsewhere">Weg</Link>
+            <Outlet />
+          </AiLeaveGuard>
+        ),
+        children: [
+          {
+            path: "tool",
+            Component: () => <StageStepper tool={tool} profiles={[]} defaultProfileId="" />,
+          },
+          { path: "elsewhere", Component: () => <h1>Ergens anders</h1> },
+        ],
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<Stub initialEntries={["/tool"]} />);
+    await fillRequired(user);
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
+    await user.click(screen.getByRole("link", { name: "Weg" }));
+    await user.click(screen.getByRole("button", { name: m.aiLeave.keep }));
+    await screen.findByRole("heading", { name: "Ergens anders" });
+    expect(signal?.aborted).toBe(false);
+  });
+});

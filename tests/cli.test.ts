@@ -53,7 +53,14 @@ describe("cliProvider", () => {
     spawnMock.mockReturnValue(fakeChild(["x"]));
     const signal = new AbortController().signal;
     for await (const _ of cliProvider.streamChat({ ...base, signal })) void _;
-    expect(spawnMock.mock.calls.at(-1)?.[2]).toMatchObject({ signal });
+    expect(spawnMock.mock.calls.at(-1)?.[2].signal).toBe(signal);
+  });
+
+  it("passes the abort signal to spawn for generate() too", async () => {
+    spawnMock.mockReturnValue(fakeChild(["x"]));
+    const signal = new AbortController().signal;
+    await cliProvider.generate({ ...base, signal });
+    expect(spawnMock.mock.calls.at(-1)?.[2].signal).toBe(signal);
   });
 
   it("generate() collects the full output", async () => {

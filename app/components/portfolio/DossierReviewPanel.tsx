@@ -4,6 +4,7 @@ import type { Outcome } from "~/lib/portfolio/types";
 import { Button } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 export interface DossierReviewRow {
   outcomeId: string;
@@ -48,6 +49,7 @@ export function DossierReviewPanel({
       <p className="mt-1 text-sm text-slate-600">{t.intro}</p>
       <Form method="post" className="mt-3">
         <input type="hidden" name="intent" value="reviewAll" />
+        <AiCallField />
         <Button type="submit" variant="secondary" disabled={!canRun}>
           {rows.length > 0 ? t.rerun : t.run}
         </Button>

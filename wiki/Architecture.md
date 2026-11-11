@@ -68,10 +68,19 @@ The stream (`app/lib/ai/sse.ts`) sends a `: keep-alive` comment every 15 s
 long answer before its first token. When the teacher closes the tab, the route aborts
 the model call: `request.signal` and the stream's `cancel` both reach the provider as
 `GenerateOptions.signal`; nothing is saved and the log line says `aborted`.
-Leaving inside the app counts too: a view that streams (`GeneratorView`, `StageStepper`,
-`useChatSession`) takes its signals from `useStreamAborts`, which aborts every running call
-when the view closes, so navigating away or closing a part of the page stops the model call
-the same way. The call is still counted once, as failed (`failedCalls`, tokens unknown).
+Leaving inside the app asks first. `AiLeaveGuard` (in `root.tsx`) blocks a navigation to
+another page while AI work runs and offers *Laten doorlopen*, *Afbreken* and *Op deze pagina
+blijven*. A view that streams (`GeneratorView`, `StageStepper`, `useChatSession`) takes its
+signals from `useStreamAborts(busy)`, which registers them with the guard: "keep" lets the
+stream finish (the route saves it as usual), "stop" aborts it. A view that closes any other
+way aborts its calls, like closing the tab. An aborted call is still counted once, as failed
+(`failedCalls`, tokens unknown).
+
+AI actions without streaming (Reviewteam, coach, proofread, framework and course import)
+carry a call id from their form (`AiCallField`). `saveIntent` and `saveCourseIntent` run
+under it (`runAiCall`, `app/server/aiCalls.server.ts`), and `callPortfolioModel` hands that
+signal to `generate`. Leaving alone never stops them, so "keep" saves the result; "stop" posts
+the id to `/api/ai-cancel`, which aborts only the caller's own call.
 
 ---
 

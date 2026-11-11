@@ -127,6 +127,7 @@ describe("routes: one file per area", () => {
         { path: "/api/stream", file: "routes/api.stream.tsx", inShell: false },
         { path: "/portfolio/:id/export", file: "routes/portfolio.$id.export.tsx", inShell: false },
         { path: "/api/feedback", file: "routes/api.feedback.tsx", inShell: false },
+        { path: "/api/ai-cancel", file: "routes/api.ai-cancel.tsx", inShell: false },
         { path: "/healthz", file: "routes/healthz.tsx", inShell: false },
         { path: "/set-locale", file: "routes/set-locale.tsx", inShell: false },
         {

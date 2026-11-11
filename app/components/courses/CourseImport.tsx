@@ -14,6 +14,7 @@ import { FileInput } from "~/components/FileInput";
 import { BloomSelect, NumberField } from "./fields";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 type ImportAction = { ok: boolean; intent?: string; proposal?: ImportProposal } | undefined;
 
@@ -81,6 +82,7 @@ export function CourseImport({
           <p className="mt-2 text-sm text-slate-600">{ti.body}</p>
           <Form method="post" className="mt-4 grid gap-3">
             <input type="hidden" name="intent" value="import-extract" />
+            <AiCallField />
             <div>
               <Label htmlFor={`${id}-text`}>{ti.text}</Label>
               <Textarea

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
+import { expectAiCallId } from "../helpers/aiCall";
 
 vi.mock("~/lib/documents/extract", () => ({
   DOC_ACCEPT_ATTR: ".pdf,.docx",
@@ -18,6 +19,11 @@ function renderCard() {
 }
 
 describe("FrameworkExtract", () => {
+  it("sends a call id with the extraction, so leaving can stop it", async () => {
+    renderCard();
+    await expectAiCallId(screen.getByRole("button", { name: "Kader uit formulier halen" }));
+  });
+
   it("reads several files at once, one per learning outcome, and keeps pasted text", async () => {
     const { container } = renderCard();
     const text = screen.getByLabelText("Tekst van het beoordelingsformulier");

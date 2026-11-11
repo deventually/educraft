@@ -5,6 +5,7 @@ import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
 import { FileInput } from "~/components/FileInput";
 import { useT } from "~/lib/i18n/useT";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 /**
  * "Extract the framework from your form" (brief P25, 25.4). The teacher pastes
@@ -47,6 +48,7 @@ export function FrameworkExtract({ replaces }: { replaces: boolean }) {
       <p className="mt-1 text-sm text-slate-600">{tf.extractBody}</p>
       <Form method="post" className="mt-4 grid gap-3">
         <input type="hidden" name="intent" value="extract" />
+        <AiCallField />
         <div>
           <Label htmlFor={`${id}-text`}>{tf.extractText}</Label>
           <Textarea

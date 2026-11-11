@@ -77,7 +77,7 @@ export function StageStepper({
   const [lastGenerationId, setLastGenerationId] = useState<string | null>(null);
   // P30.1: the saved result of each step, so the export holds all of them in one file.
   const [savedIds, setSavedIds] = useState<Record<string, string>>({});
-  const streams = useStreamAborts();
+  const streams = useStreamAborts(Object.values(stages).some((s) => s.streaming));
 
   const outputs = (): Record<string, string> =>
     Object.fromEntries(

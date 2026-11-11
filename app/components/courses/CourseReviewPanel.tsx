@@ -14,6 +14,7 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 import { Button, Input, Label, Select } from "~/components/ui";
 import { type CourseTools, findingItemId, itemKind } from "~/lib/registry/courseActions";
 import { SolveWith } from "./ItemTools";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 export type { ReviewPanelAgent, ReviewPanelChoice };
 
@@ -83,6 +84,7 @@ export function CourseReviewPanel({
       </p>
       <Form method="post" className="mt-3 flex flex-wrap items-end gap-3">
         <input type="hidden" name="agentsChosen" value="1" />
+        <AiCallField />
         <fieldset className="basis-full">
           <legend className="text-sm font-medium text-slate-900">{p.chooseLegend}</legend>
           <ul className="mt-2 space-y-2">
