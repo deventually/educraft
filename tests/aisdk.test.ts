@@ -25,7 +25,7 @@ vi.mock("@ai-sdk/anthropic", () => ({
   createAnthropic: () => () => ({ id: "mock-anthropic" }),
 }));
 
-import { streamText } from "ai";
+import { generateText, streamText } from "ai";
 import { aiSdkProvider } from "~/lib/ai/adapters/aisdk";
 
 const base = {
@@ -79,6 +79,12 @@ describe("aiSdkProvider", () => {
     const signal = new AbortController().signal;
     for await (const _ of aiSdkProvider.streamChat({ ...base, signal })) void _;
     expect(lastStreamOpts()?.abortSignal).toBe(signal);
+  });
+
+  it("hands the abort signal to the SDK for a call without streaming too", async () => {
+    const signal = new AbortController().signal;
+    await aiSdkProvider.generate({ ...base, signal });
+    expect(vi.mocked(generateText).mock.calls.at(-1)?.[0].abortSignal).toBe(signal);
   });
 
   it("falls back to the 8192 default when maxTokens is absent", async () => {

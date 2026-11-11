@@ -110,7 +110,7 @@ export const cliProvider: LLMProvider = {
 
   async generate(opts) {
     let text = "";
-    for await (const chunk of runCli(opts.model, assemblePrompt(opts))) text += chunk;
+    for await (const chunk of runCli(opts.model, assemblePrompt(opts), opts.signal)) text += chunk;
     return { text };
   },
 

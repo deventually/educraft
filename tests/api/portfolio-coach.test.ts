@@ -211,6 +211,19 @@ describe("outcome route — review intent", () => {
     expect(page.stored?.review.overall).toBe("Helder begin.");
   });
 
+  it("stops when the teacher left and chose to stop: no model call, nothing stored", async () => {
+    const mine = await repo.createDossier("teacher-c", "C", confirmed());
+    const { cancelAiCall } = await import("~/server/aiCalls.server");
+    cancelAiCall("teacher-c", "call-coach-stop");
+    const r = await outcomeRoute.action({
+      request: post({ intent: "review", outcomeId: LU, aiCall: "call-coach-stop" }),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(r).toMatchObject({ ok: false });
+    expect(generate).not.toHaveBeenCalled();
+    expect((await repo.getDossier("teacher-c", mine.id))?.data.reviews?.[LU]).toBeUndefined();
+  });
+
   it("returns a localized error when the coach cannot run", async () => {
     const mine = await repo.createDossier("teacher-c", "C", sampleDossier());
     const r = await outcomeRoute.action({

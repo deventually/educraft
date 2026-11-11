@@ -110,3 +110,50 @@ describe("callPortfolioModel prices its AI use", () => {
     expect(row).toMatchObject({ provider: "ollama", costMicros: 0, unpricedCalls: 0 });
   });
 });
+
+// Seam: the teacher leaves an AI action and picks "Stop" (aiCalls.server).
+describe("callPortfolioModel stops when the teacher stops the action", () => {
+  let calls: typeof import("~/server/aiCalls.server");
+  beforeAll(async () => {
+    calls = await import("~/server/aiCalls.server");
+  });
+  const call = (id: string) =>
+    ai.callPortfolioModel(
+      teacher(id),
+      "portfolio-coach@v1",
+      "msg",
+      "nl",
+      100,
+      "portfolio-coach",
+      "claude-sonnet-5-5",
+    );
+
+  it("hands the action's signal to the model call", async () => {
+    generate.mockResolvedValueOnce({ text: "ok", usage: tokens });
+    await calls.runAiCall("pai-signal", "call-signal-1", () => call("pai-signal"));
+    expect(generate.mock.calls.at(-1)?.[0].signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("counts a call stopped midway once, as failed, and gives no answer", async () => {
+    generate.mockImplementationOnce(
+      ({ signal }: { signal: AbortSignal }) =>
+        new Promise((_, reject) =>
+          signal.addEventListener("abort", () => reject(new Error("aborted"))),
+        ),
+    );
+    const run = calls.runAiCall("pai-stop", "call-stop-1", () => call("pai-stop"));
+    await vi.waitFor(() => expect(generate).toHaveBeenCalled());
+    calls.cancelAiCall("pai-stop", "call-stop-1");
+    expect(await run).toBeNull();
+    const [row] = await aiUsage.listAiUsage("pai-stop", usage.utcDay());
+    expect(row).toMatchObject({ calls: 1, failedCalls: 1 });
+  });
+
+  it("makes no model call at all once the action was stopped", async () => {
+    generate.mockClear();
+    calls.cancelAiCall("pai-early", "call-early-1");
+    expect(await calls.runAiCall("pai-early", "call-early-1", () => call("pai-early"))).toBeNull();
+    expect(generate).not.toHaveBeenCalled();
+    expect(await aiUsage.listAiUsage("pai-early", usage.utcDay())).toEqual([]);
+  });
+});

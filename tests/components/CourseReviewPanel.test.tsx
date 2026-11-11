@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
+import { expectAiCallId } from "../helpers/aiCall";
 import {
   CourseReviewPanel,
   type ReviewPanelAgent,
@@ -131,6 +132,11 @@ describe("CourseReviewPanel", () => {
     expect(screen.getAllByText("Nog niet gereviewd.")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Toetsdeskundige" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("sends a call id with the review, so leaving can stop it", async () => {
+    renderPanel(notYet);
+    await expectAiCallId(screen.getByRole("button", { name: "Laat reviewen" }));
   });
 
   it("shows open findings with the item they are about and Akkoord / Niet akkoord", async () => {

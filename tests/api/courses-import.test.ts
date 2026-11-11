@@ -95,6 +95,20 @@ describe("import-extract", () => {
     expect(call.temperature).toBe(0);
   });
 
+  it("stops when the teacher left and chose to stop, without a model call", async () => {
+    const course = await repo.createCourse("teacher-i", { name: "Stopped" });
+    const { cancelAiCall } = await import("~/server/aiCalls.server");
+    cancelAiCall("teacher-i", "call-import-stop");
+    const r = await post(course.id, [
+      ["intent", "import-extract"],
+      ["documentText", DOC],
+      ["courseName", "Stopped"],
+      ["aiCall", "call-import-stop"],
+    ]);
+    expect(r).toMatchObject({ ok: false, intent: "import-extract" });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
   it("retries once on broken JSON, then gives a localized failure", async () => {
     const course = await repo.createCourse("teacher-i", { name: "Retry" });
     generate.mockResolvedValueOnce({ text: "{ kapot" }).mockResolvedValueOnce({ text: answer });

@@ -4,15 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #262 gemerged)_
 
 ## Nu
 
-- **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** bij een toets
-  vul je toetsvorm, toetseigenaar, beoordeling, cesuur, voorwaarden, afname en herkansing in, en
-  de onderdelen met hun leeruitkomsten, weging, knock-out en criteria. Daaruit maakt LimeOnIt
-  zonder AI een toetsmatrijs en een nakijkmodel, als Word, PDF of Markdown. Leeruitkomsten krijgen
-  succescriteria, een cursus een modulecode en studiejaar.
+- **Weggaan terwijl de AI bezig is (#262) gemerged op 2026-11-11:** gaat een docent binnen de app
+  naar een andere pagina terwijl een tool, chat of AI-formulier nog bezig is, dan vraagt een
+  dialoog: laten doorlopen (het resultaat wordt bewaard), afbreken (de aanroep stopt, ook op de
+  server via `/api/ai-cancel`) of op de pagina blijven (`AiLeaveGuard`).
+- **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** een toets met
+  vragen exporteert zonder AI een toetsmatrijs (punten per leeruitkomst en niveau) als Word, PDF
+  of Markdown. Een cursus legt nu optioneel vast wat toetsdocumenten van een school nodig hebben
+  (modulecode, succescriteria, per toets vorm, cesuur, herkansing en onderdelen); daaruit komen
+  een toetsmatrijs per leeruitkomst en een nakijkmodel per onderdeel.
 - **AI-aanroep stopt ook bij sluiten of wegnavigeren (#259) gemerged op 2026-11-11:** sluit een
   docent een tool of chat, of gaat die binnen de app naar een andere pagina terwijl de AI nog
   schrijft, dan breekt de aanroep af (`useStreamAborts`) en kost hij geen tokens meer. De pagina

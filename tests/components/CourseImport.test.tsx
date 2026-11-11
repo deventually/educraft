@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
+import { expectAiCallId } from "../helpers/aiCall";
 import { CourseImport } from "~/components/courses/CourseImport";
 import type { ImportProposal } from "~/lib/courses/import";
 
@@ -62,6 +63,11 @@ describe("CourseImport", () => {
     expect(screen.getByText(/niet bewaard/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Voorstel maken" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("sends a call id with the proposal request, so leaving can stop it", async () => {
+    renderImport(null);
+    await expectAiCallId(screen.getByRole("button", { name: "Voorstel maken" }));
   });
 
   it("shows the proposal: verbatim items ticked, the rest marked and off", async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { GeneratorView } from "~/components/GeneratorView";
@@ -22,6 +22,13 @@ vi.mock("~/lib/i18n/localized", () => ({
 vi.mock("~/lib/i18n/useT", () => ({
   useLocale: () => "en",
   useT: () => ({
+    aiLeave: {
+      abort: "Stop",
+      body: "Keep it running or stop it.",
+      keep: "Keep running",
+      stay: "Stay on this page",
+      title: "The AI is still working",
+    },
     tool: {
       contextProfile: "Context",
       noProfile: "No profile",
@@ -241,5 +248,58 @@ describe("GeneratorView — leaving stops the model call", () => {
 
     unmount();
     expect(signal?.aborted).toBe(true);
+  });
+});
+
+describe("GeneratorView — leaving with the choice of the dialog", () => {
+  async function leaveWhileStreaming(choice: "keep" | "abort") {
+    const { createRoutesStub, Link, Outlet } = await import("react-router");
+    const { AiLeaveGuard } = await import("~/components/AiLeaveGuard");
+    const { streamPost } = await import("~/lib/streamClient");
+    const post = streamPost as unknown as ReturnType<typeof vi.fn>;
+    let signal: AbortSignal | undefined;
+    post.mockImplementationOnce(async (_url, _body, _cb, s: AbortSignal) => {
+      signal = s;
+      return new Promise<void>(() => {});
+    });
+    const base = getToolBySlug("authentic-assessment")!;
+    const tool = { ...base, inputs: base.inputs.map((f) => ({ ...f, required: false })) };
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <AiLeaveGuard>
+            <Link to="/elsewhere">Weg</Link>
+            <Outlet />
+          </AiLeaveGuard>
+        ),
+        children: [
+          {
+            path: "tool",
+            Component: () => (
+              <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" />
+            ),
+          },
+          { path: "elsewhere", Component: () => <h1>Ergens anders</h1> },
+        ],
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<Stub initialEntries={["/tool"]} />);
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    await user.click(screen.getByRole("link", { name: "Weg" }));
+    const dialog = screen.getByRole("dialog", { name: "The AI is still working" });
+    const label = choice === "keep" ? "Keep running" : "Stop";
+    await user.click(within(dialog).getByRole("button", { name: label }));
+    await screen.findByRole("heading", { name: "Ergens anders" });
+    return signal;
+  }
+
+  it("lets the stream run on when the teacher keeps it running", async () => {
+    expect((await leaveWhileStreaming("keep"))?.aborted).toBe(false);
+  });
+
+  it("stops the stream when the teacher stops it", async () => {
+    expect((await leaveWhileStreaming("abort"))?.aborted).toBe(true);
   });
 });
