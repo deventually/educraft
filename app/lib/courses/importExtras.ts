@@ -1,6 +1,7 @@
 /**
  * What the course import reads beyond outcomes and assessments: what a test blueprint
- * (toetsmatrijs) and a marking model (nakijkmodel) hold. The module code and study year,
+ * (toetsmatrijs), a marking model (nakijkmodel) and a module guide or handbook hold. The module
+ * details (code, study year, phase, leader, examiners, description, literature),
  * success criteria per outcome, the details of a test and its parts. Pure: the model's answer
  * is checked and clipped here, the teacher's choice is read here, and applying it only fills
  * in what the course does not have yet. Nothing that is filled in is ever changed.
@@ -23,7 +24,17 @@ import {
 const str = z.string().nullish();
 const num = z.number().nullish();
 
-export const RawModule = z.object({ code: str, studyYear: str }).nullish();
+export const RawModule = z
+  .object({
+    code: str,
+    studyYear: str,
+    phase: str,
+    leader: str,
+    examiners: str,
+    description: str,
+    literature: str,
+  })
+  .nullish();
 export const RawCriteria = z.array(z.object({ code: str, text: z.string() })).nullish();
 export const rawAssessmentExtras = {
   form: str,
@@ -58,7 +69,24 @@ export interface Clip {
 export interface ImportModule {
   code?: string;
   studyYear?: string;
+  phase?: string;
+  leader?: string;
+  examiners?: string;
+  description?: string;
+  literature?: string;
 }
+
+/** Each module field with its limit; the module guide and handbook fields came in v3. */
+const MODULE_FIELDS = {
+  code: COURSE_LIMITS.code,
+  studyYear: COURSE_LIMITS.code,
+  phase: COURSE_LIMITS.title,
+  leader: COURSE_LIMITS.title,
+  examiners: COURSE_LIMITS.title,
+  description: COURSE_LIMITS.longText,
+  literature: COURSE_LIMITS.longText,
+} as const satisfies Record<keyof ImportModule, number>;
+const moduleKeys = Object.keys(MODULE_FIELDS) as (keyof ImportModule)[];
 
 export interface ImportCriterion extends SuccessCriterion {
   /** The text is in the document (modulo layout); otherwise "check this". */
@@ -100,10 +128,11 @@ export function proposeModule(
   raw: z.infer<typeof RawModule>,
   clip: Clip,
 ): ImportModule | undefined {
-  const m = defined({
-    code: optional(clip, raw?.code, COURSE_LIMITS.code),
-    studyYear: optional(clip, raw?.studyYear, COURSE_LIMITS.code),
-  });
+  const m: ImportModule = defined(
+    Object.fromEntries(
+      moduleKeys.map((k) => [k, optional(clip, raw?.[k]?.trim(), MODULE_FIELDS[k])]),
+    ),
+  );
   return Object.keys(m).length ? m : undefined;
 }
 
@@ -232,17 +261,19 @@ export function assessmentExtra(value: string | undefined, known: Set<string>) {
   return e;
 }
 
-/** `module.code` and `module.studyYear`, only when `module.pick` is ticked. */
+/** The `module.<field>` fields, only when `module.pick` is ticked. Throws when one is off. */
 export function moduleChoice(one: (name: string) => string | undefined, ticked: boolean) {
   if (!ticked) return undefined;
-  const m = defined({
-    code: Text(COURSE_LIMITS.code)
-      .optional()
-      .parse(one("module.code") || undefined),
-    studyYear: Text(COURSE_LIMITS.code)
-      .optional()
-      .parse(one("module.studyYear") || undefined),
-  });
+  const m: ImportModule = defined(
+    Object.fromEntries(
+      moduleKeys.map((k) => [
+        k,
+        Text(MODULE_FIELDS[k])
+          .optional()
+          .parse(one(`module.${k}`)?.trim() || undefined),
+      ]),
+    ),
+  );
   return Object.keys(m).length ? m : undefined;
 }
 
@@ -250,7 +281,10 @@ export function moduleChoice(one: (name: string) => string | undefined, ticked: 
 
 export function fillModule(d: CourseData, m: ImportModule | undefined): CourseData {
   if (!m) return d;
-  return edit.setModule(d, { code: d.code ?? m.code, studyYear: d.studyYear ?? m.studyYear });
+  return edit.setModule(
+    d,
+    Object.fromEntries(moduleKeys.map((k) => [k, d[k] ?? m[k]])) as ImportModule,
+  );
 }
 
 export function fillCriteria(

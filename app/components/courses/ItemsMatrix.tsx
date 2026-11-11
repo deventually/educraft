@@ -41,7 +41,7 @@ export function ItemsMatrix({ data, assessment }: { data: CourseData; assessment
   return (
     <details className="mt-2 [&[open]>summary]:mb-3">
       <summary className="cursor-pointer text-sm font-medium text-violet-700 focus-visible:outline-2 focus-visible:outline-violet-500">
-        {fmt(m.summary, { n: count(items.length) })}
+        {fmt(m.summary, { n: items.length })}
         <span className="sr-only">: {assessment.title}</span>
       </summary>
       {items.length === 0 ? (
