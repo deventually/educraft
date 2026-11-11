@@ -21,7 +21,7 @@ export const portfolio: Messages["portfolio"] = {
       "not-confirmed": "Confirm the framework first; the coach assesses against your criteria.",
       "not-draft-mode": 'Turn on "draft paragraphs" for the dossier first.',
       quota:
-        "AI limit reached: your daily limit or this month's limit. The Usage page shows which.",
+        "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
     },
     evidenceNeeded: "Still needed as evidence",
     gap: "What is missing",
@@ -126,7 +126,7 @@ export const portfolio: Messages["portfolio"] = {
       "in-use":
         "The framework is already in use: statuses, evidence or chapters depend on it. Change it by hand instead.",
       quota:
-        "AI limit reached: your daily limit or this month's limit. The Usage page shows which.",
+        "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
     },
     extractFile: "Or choose the form (PDF or Word, several files allowed)",
     extractFileFailed: "This file could not be read. Paste the text yourself instead.",

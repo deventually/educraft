@@ -82,17 +82,6 @@ export default function Usage({ loaderData }: Route.ComponentProps) {
         </h2>
         <Figures>
           <Figure label={t.usage.callsMonth} value={f.number(own.calls)} />
-          <Figure
-            label={t.usage.quotaLeft}
-            value={
-              own.quota
-                ? fmt(t.usage.quotaOf, {
-                    left: Math.max(0, own.quota.limit - own.quota.used),
-                    limit: own.quota.limit,
-                  })
-                : t.usage.noLimit
-            }
-          />
           {own.limit && (
             <Figure
               label={t.usage.limitUsed}

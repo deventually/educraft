@@ -181,7 +181,7 @@ LimeOnIt is not tied to one model vendor.
 
 - **Usage page (PR C).** `/usage` is one page for every role; `usageDashboard.server.ts`
   decides the circles (BESLUIT-2026-11-11-1) and leaves out of the loader data what a viewer
-  may not see. Everyone: own calls per week, tool and model, and today's quota. A team lead:
+  may not see. Everyone: own calls per week, tool and model. A team lead:
   each led team's totals (`teamAiUsage` returns `null` for anyone else), never per person or
   money, and no split per tool or model below `MIN_TEAM_BREAKDOWN` (3) active members. An
   admin: everyone, per person, team, provider, model and tool, with costs and the unpriced
@@ -196,7 +196,8 @@ LimeOnIt is not tied to one model vendor.
   that binds: a teacher's own limit replaces their teams' limits, the budget always counts, the
   highest share wins; from 80% `warn`, at 100% `stop`. `aiLimitFor` (`app/server/aiLimits.server.ts`)
   feeds it this month's spend (`monthSpend`) and returns `null` for an admin. The stream and
-  `quotaGate` refuse at `stop`, after the daily quota (which stays as a safety net). A teacher
+  `quotaGate` refuse at `stop`, after the quiet daily brake on output tokens (`checkQuota`; the
+  number of calls is not limited, and nobody sees the brake on a page). A teacher
   sees only a share, never euros: on *Gebruik* and above a tool's workspace (`LimitNotice`).
   Changes go through the `/usage` action (`setLimitFromForm`: budget owner-only, never a limit
   on an admin) and the audit log (`aiLimitChanged`).

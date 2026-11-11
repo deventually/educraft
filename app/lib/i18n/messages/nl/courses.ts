@@ -136,7 +136,7 @@ export const courses = {
       nothing:
         "In dit document staan volgens de AI geen leeruitkomsten of toetsen voor dit vak. Lees de toelichting hieronder, of neem ze met de hand over.",
       quota:
-        "AI-limiet bereikt: je daglimiet of de limiet voor deze maand. Op de pagina Gebruik zie je welke.",
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
     existing: "Staat al in je cursus; wordt niet dubbel toegevoegd en niet gewijzigd.",
     extract: "Voorstel maken",

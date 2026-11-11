@@ -12,7 +12,7 @@ export const error = {
   notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
   notFound: "Deze pagina kon niet worden gevonden.",
   notFoundTitle: "404",
-  quotaExceeded: "Daglimiet bereikt — morgen weer beschikbaar.",
+  quotaExceeded: "Je hebt vandaag heel veel AI gebruikt. Morgen kan het weer.",
   rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",
   reportHint: "Meld dit aan je beheerder, met het tijdstip en de pagina hieronder.",
   reportPage: "Pagina",

@@ -53,7 +53,6 @@ export const usage: Messages["usage"] = {
   monthLabel: "Month",
   monthShow: "Show",
   monthTotal: "Total for the month",
-  noLimit: "No daily limit",
   none: "No usage this month yet.",
   ownerHeading: "Cost and forecast",
   ownHeading: "Your usage",
@@ -62,8 +61,6 @@ export const usage: Messages["usage"] = {
   perProvider: "Per provider",
   perTeam: "Per team",
   perTool: "Per tool",
-  quotaLeft: "Left today",
-  quotaOf: "{left} of {limit}",
   savings: "Saved by caching",
   savingsNote: "Estimated at today's prices.",
   smallTeam:

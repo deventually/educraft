@@ -14,7 +14,7 @@ export const error: Messages["error"] = {
   notAllowed: "This tool is not available for your account.",
   notFound: "This page could not be found.",
   notFoundTitle: "404",
-  quotaExceeded: "Daily limit reached — available again tomorrow.",
+  quotaExceeded: "You have used a lot of AI today. It works again tomorrow.",
   rateLimited: "Too many requests. Please try again in a moment.",
   reportHint: "Report this to your admin, with the time and the page below.",
   reportPage: "Page",

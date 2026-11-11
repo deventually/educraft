@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll } from "vitest";
 
-// Isolated in-memory DB + a small daily limit, both set before any server module
+// Isolated in-memory DB + a small daily token brake, both set before any server module
 // (and thus env.server) is imported.
 process.env.DATABASE_URL = "file::memory:";
-process.env.DAILY_REQUEST_LIMIT = "2";
+process.env.DAILY_OUTPUT_TOKEN_LIMIT = "300";
 
 type Repo = typeof import("~/server/repositories/usage.server");
 let repo: Repo;
@@ -30,21 +30,25 @@ describe("usage repository", () => {
     expect((await repo.getTodayUsage(u, "2026-07-02")).requests).toBe(0);
   });
 
-  it("checkQuota flips from ok to not-ok once requests reach the limit", async () => {
-    const u = "usage-user-limit";
+  it("never refuses for the number of calls alone (BESLUIT-2026-11-11-8)", async () => {
+    const u = "usage-user-many";
     const day = "2026-07-05";
+    for (let i = 0; i < 60; i++) await repo.recordUsage(u, { chars: 1 }, day);
     expect((await repo.checkQuota(u, day)).ok).toBe(true);
-    await repo.recordUsage(u, { chars: 1 }, day);
+  });
+
+  it("checkQuota refuses once the day's output tokens reach the brake", async () => {
+    const u = "usage-user-limit";
+    const day = "2026-07-06";
+    await repo.recordUsage(u, { chars: 1, tokens: 299 }, day);
     expect((await repo.checkQuota(u, day)).ok).toBe(true);
-    await repo.recordUsage(u, { chars: 1 }, day);
-    // Limit is 2 → the 3rd request is refused.
+    await repo.recordUsage(u, { chars: 1, tokens: 1 }, day);
     expect((await repo.checkQuota(u, day)).ok).toBe(false);
   });
 
-  it("resets the quota on day rollover", async () => {
+  it("resets the brake on day rollover", async () => {
     const u = "usage-user-rollover";
-    await repo.recordUsage(u, { chars: 1 }, "2026-07-10");
-    await repo.recordUsage(u, { chars: 1 }, "2026-07-10");
+    await repo.recordUsage(u, { chars: 1, tokens: 300 }, "2026-07-10");
     expect((await repo.checkQuota(u, "2026-07-10")).ok).toBe(false);
     expect((await repo.checkQuota(u, "2026-07-11")).ok).toBe(true);
   });

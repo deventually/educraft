@@ -58,6 +58,6 @@ export const agents = {
     none: "Kies minstens één reviewer om je cursus te laten reviewen.",
     partial: "De review is klaar, maar {agents} gaf geen bruikbaar antwoord.",
     quota:
-      "AI-limiet bereikt: je daglimiet of de limiet voor deze maand. Op de pagina Gebruik zie je welke.",
+      "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
   },
 };

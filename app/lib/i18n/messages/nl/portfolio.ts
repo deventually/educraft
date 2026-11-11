@@ -18,7 +18,7 @@ export const portfolio = {
       "not-confirmed": "Bevestig eerst het kader; de coach beoordeelt op jouw criteria.",
       "not-draft-mode": 'Zet bij het dossier eerst "alinea\'s laten opstellen" aan.',
       quota:
-        "AI-limiet bereikt: je daglimiet of de limiet voor deze maand. Op de pagina Gebruik zie je welke.",
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
     evidenceNeeded: "Nog nodig als bewijs",
     gap: "Wat ontbreekt",
@@ -126,7 +126,7 @@ export const portfolio = {
       "in-use":
         "Het kader is al in gebruik: er hangen statussen, bewijs of hoofdstukken aan. Pas het daarom met de hand aan.",
       quota:
-        "AI-limiet bereikt: je daglimiet of de limiet voor deze maand. Op de pagina Gebruik zie je welke.",
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
     extractFile: "Of kies het formulier (PDF of Word, ook meerdere bestanden)",
     extractFileFailed: "Dit bestand kon niet worden gelezen. Plak de tekst dan zelf.",

@@ -16,7 +16,6 @@ import {
   weeklyCalls,
 } from "~/lib/usage/summary";
 import { isOwner, type User } from "./auth.server";
-import { env } from "./env.server";
 import { aiLimitFor } from "./aiLimits.server";
 import { limitsView } from "./aiLimitsAdmin.server";
 import {
@@ -27,7 +26,7 @@ import {
 } from "./repositories/aiUsageReports.server";
 import { getModelPrices } from "./repositories/modelPrices.server";
 import { listTeamsForUser } from "./repositories/teams.server";
-import { getTodayUsage, utcDay } from "./repositories/usage.server";
+import { utcDay } from "./repositories/usage.server";
 
 interface UsageScope {
   /** The teams the viewer leads. */
@@ -72,7 +71,6 @@ export async function loadUsageDashboard(user: User, askedMonth: string | null, 
   const month = parseMonth(askedMonth, today);
   const ranges = usageRanges(month, today);
   const own = await ownAiUsage(user.id, ranges.month, ranges.trend);
-  const used = (await getTodayUsage(user.id, today)).requests;
 
   const teams = [];
   for (const team of scope.leadTeams) {
@@ -119,8 +117,6 @@ export async function loadUsageDashboard(user: User, askedMonth: string | null, 
       weeks: weeksOf(weeklyCalls(own.days, ranges.trend)),
       sources: callsOf(own.sources),
       models: withName(callsOf(own.models)),
-      // Admins have no daily limit.
-      quota: user.role === "admin" ? null : { used, limit: env.DAILY_REQUEST_LIMIT },
       // This month's limit (PR D) as a share, never in euros: a teacher sees no money.
       limit: await aiLimitFor(user, today),
     },

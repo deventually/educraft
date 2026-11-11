@@ -42,7 +42,6 @@ const teacher = {
       { key: "agent-review", calls: 1 },
     ],
     models: [{ key: "claude-sonnet-5-5", name: "Claude Sonnet 5.5", calls: 6 }],
-    quota: { used: 12, limit: 50 },
   },
   teams: [],
   instance: null,
@@ -84,10 +83,10 @@ function renderPage(data: unknown) {
 }
 
 describe("Usage page", () => {
-  it("shows a teacher their calls, what is left today and their tools, no money", async () => {
+  it("shows a teacher their calls and their tools, no daily limit and no money", async () => {
     const { container } = renderPage(teacher);
     expect(screen.getByRole("heading", { level: 1, name: "Gebruik" })).toBeInTheDocument();
-    expect(screen.getByText("38 van 50")).toBeInTheDocument();
+    expect(screen.queryByText("Vandaag nog over")).toBeNull();
     const tools = screen.getByRole("table", { name: "Per tool" });
     expect(within(tools).getByRole("rowheader", { name: toolName })).toBeInTheDocument();
     expect(within(tools).getByRole("rowheader", { name: "Reviewteam" })).toBeInTheDocument();
@@ -144,10 +143,8 @@ describe("Usage page", () => {
   it("shows an admin everyone with costs and the unpriced calls, no forecast", async () => {
     const { container } = renderPage({
       ...teacher,
-      own: { ...teacher.own, quota: null },
       instance,
     });
-    expect(screen.getByText("Geen daglimiet")).toBeInTheDocument();
     const all = screen.getByRole("region", { name: "Hele instelling" });
     const cost = within(all).getByText("Kosten deze maand").closest("div")!;
     expect(cost).toHaveTextContent("€ 1,23");

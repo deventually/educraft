@@ -421,6 +421,8 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   maand voor de hele instelling; beheer zet een limiet per maand per team en per docent. De eigen
   limiet van een docent vervangt die van zijn teams; het budget telt altijd. Vanaf 80% ziet de
   docent een waarschuwing, bij 100% stopt de AI tot de volgende maand. Een docent ziet een
-  percentage, nooit euro's. Beheerders hebben geen limiet. De vaste daglimiet blijft voorlopig
-  als vangnet. Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen":
-  "Doe het maar").
+  percentage, nooit euro's. Beheerders hebben geen limiet. De daglimiet van 50 aanroepen
+  vervalt: één limiet voor de docent is helderder. Als stille rem op een op hol geslagen dag
+  blijven de 200.000 uitvoertokens per dag en 10 aanroepen per minuut; die staan op geen pagina.
+  Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Doe het maar",
+  en op de kaart "Alleen tokens, onzichtbaar").

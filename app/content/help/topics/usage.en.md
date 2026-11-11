@@ -27,9 +27,9 @@ Chats count too, even when you stop an answer halfway. For admins we also work o
 
 A token is a piece of text of a few letters. A provider charges per token. In a chat the whole conversation goes to the model again on every turn. The provider keeps part of it in a cache for a while, and tokens from the cache are a lot cheaper.
 
-## The daily limit
+## A brake on an exceptional day
 
-There is a daily limit on the number of calls per person. A new day starts at midnight (UTC). Admins have no daily limit.
+There is no limit on the number of questions per day. The AI does stop when someone has it write an exceptional amount of text in one day (200,000 output tokens), for example a script that keeps running. A normal teacher never gets there. A new day starts at midnight (UTC). Admins have no such brake.
 
 ## The monthly limit
 

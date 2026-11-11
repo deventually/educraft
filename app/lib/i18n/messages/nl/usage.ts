@@ -51,7 +51,6 @@ export const usage = {
   monthLabel: "Maand",
   monthShow: "Tonen",
   monthTotal: "Totaal van de maand",
-  noLimit: "Geen daglimiet",
   none: "Deze maand nog geen gebruik.",
   ownerHeading: "Kosten en prognose",
   ownHeading: "Jouw gebruik",
@@ -60,8 +59,6 @@ export const usage = {
   perProvider: "Per aanbieder",
   perTeam: "Per team",
   perTool: "Per tool",
-  quotaLeft: "Vandaag nog over",
-  quotaOf: "{left} van {limit}",
   savings: "Bespaard door caching",
   savingsNote: "Geschat met de prijzen van nu.",
   smallTeam:

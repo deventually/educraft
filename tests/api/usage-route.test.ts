@@ -56,12 +56,12 @@ describe("/usage", () => {
     expect((res as Response).headers.get("Location")).toBe("/login");
   });
 
-  it("shows a teacher their own use and quota, no money and nobody else", async () => {
+  it("shows a teacher their own use, no daily limit, no money and nobody else", async () => {
     const data = await load("use-teacher");
     expect(data.month).toBe(today.slice(0, 7));
     expect(data.own.calls).toBe(1);
     expect(data.own.sources).toEqual([{ key: "lesson-plan", calls: 1 }]);
-    expect(data.own.quota?.limit).toBeGreaterThan(0);
+    expect(data.own).not.toHaveProperty("quota");
     expect(data.teams).toEqual([]);
     expect(data.instance).toBeNull();
     expect(data.money).toBeNull();
@@ -80,7 +80,6 @@ describe("/usage", () => {
 
   it("gives an admin everyone, per person and with costs, but no forecast", async () => {
     const data = await load("admin");
-    expect(data.own.quota).toBeNull(); // admins are exempt
     expect(data.instance?.total.calls).toBe(4);
     expect(data.instance?.total.costMicros).toBe(8_000);
     expect(data.instance?.cacheShare).toBe(0.9);
