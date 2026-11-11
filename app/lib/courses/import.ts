@@ -85,6 +85,8 @@ export interface ImportProposal {
   notes?: string;
   /** Some weights are given and they do not add up to 100. Reported, never corrected. */
   weightsOff: boolean;
+  /** A designed test programme: the outcome keys no summative test covers. Reported, never fixed. */
+  uncovered?: string[];
 }
 
 export type ImportParseResult =
@@ -141,7 +143,7 @@ const inRange = (n: number | null | undefined, min: number, max: number, int: bo
   typeof n === "number" && n >= min && n <= max && (!int || Number.isInteger(n)) ? n : undefined;
 
 /** Do the given weights miss 100? Only when at least one weight is given. */
-function weightsOff(assessments: ImportAssessment[]): boolean {
+export function weightsOff(assessments: ImportAssessment[]): boolean {
   const weights = assessments.filter((a) => a.kind !== "formative").map((a) => a.weight);
   const given = weights.filter((w): w is number => w !== undefined);
   if (given.length === 0) return false;

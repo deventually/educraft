@@ -19,6 +19,7 @@ import { CoverageMatrix } from "~/components/courses/CoverageMatrix";
 import { FindingsList, plannedHours } from "~/components/courses/FindingsList";
 import { LinkedWorkSection } from "~/components/courses/LinkedWorkSection";
 import { CourseEvidence } from "~/components/courses/CourseEvidence";
+import { CourseDesignAssessments } from "~/components/courses/CourseDesignAssessments";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseStart } from "~/components/courses/CourseStart";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
@@ -32,6 +33,7 @@ import { managesCourse, memberAction, memberControls } from "~/server/courseMemb
 import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
 import { CourseProgress } from "~/components/courses/CourseProgress";
+import { canDesignAssessments } from "~/lib/courses/designAssessments";
 import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
@@ -135,6 +137,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (intent === "import-extract") return { variant: "pending", message: c.import.pending };
       if (intent === "design-outcomes")
         return { variant: "pending", message: t.courseDesign.pending };
+      if (intent === "design-assessments")
+        return { variant: "pending", message: t.courseDesign.assessments.pending };
       if (intent === "review") return { variant: "pending", message: t.agents.panel.pending };
       return { variant: "pending", message: t.toast.saving };
     },
@@ -145,8 +149,9 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         const ready = r.flagged ? fmt(c.import.readyCheck, { n: r.flagged }) : c.import.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
       }
-      if (r.intent === "design-outcomes") {
-        const ready = t.courseDesign.ready;
+      if (r.intent === "design-outcomes" || r.intent === "design-assessments") {
+        const d = t.courseDesign;
+        const ready = r.intent === "design-outcomes" ? d.ready : d.assessments.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
       }
       if (r.intent === "import-apply")
@@ -171,6 +176,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
   });
   const proposal = useImportProposal(actionData);
   const designed = proposal?.source === "design" ? proposal : null;
+  // Step 1 proposes outcomes, step 2 tests: each step shows its own proposal.
+  const designedTests = designed?.assessments.length ? designed : null;
   const aiNotes = (intent: string) =>
     actionData && !actionData.ok && actionData.intent === intent && "notes" in actionData
       ? actionData.notes
@@ -238,8 +245,14 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
                 courseId={course.id}
                 data={data}
                 design={courseDesign}
-                proposal={designed}
+                proposal={designedTests ? null : designed}
                 notes={aiNotes("design-outcomes")}
+              />
+            )}
+            {courseDesign && canDesignAssessments(data) && (
+              <CourseDesignAssessments
+                proposal={designedTests}
+                notes={aiNotes("design-assessments")}
               />
             )}
             <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />

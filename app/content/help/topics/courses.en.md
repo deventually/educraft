@@ -26,6 +26,8 @@ When your course is still empty, the Overview tab asks how you want to start:
 
 The **AI proposal** only goes into your course when you choose: you tick what you want to keep, edit the text and add it. What you fill in about the study load, weeks and the description goes straight into the course details and the schedule. An administrator can switch designing with AI off; then the document and the empty start remain.
 
+When your course has learning outcomes but no tests yet, the top of the Overview shows **Next step: the test programme**. The AI proposes summative tests for your learning outcomes, which count, and formative practice moments before them, each with the kind, the week, the learning outcomes it assesses and an assessment form. Fill in **Assessment forms you use** with the forms your school has, and the AI chooses from them. A summative test has a weight; the field is called *Weight (the AI's proposal)*, because you decide as the examiner. LimeOnIt does not adjust the weights: when they do not add up to 100%, or a learning outcome is in no summative test, that is said above the tests. You tick which tests go in, and the block disappears once your course has tests.
+
 ## Progress
 
 At the top of the Overview tab is the **Progress**: how many steps of your course are done. The steps follow *backwards design*, so you start from the goal and work back to the lessons:
@@ -57,7 +59,7 @@ After every change LimeOnIt checks whether everything lines up. You get a point 
 - a learning outcome is not tested in any **summative** assessment;
 - a summative assessment tests a learning outcome in an earlier week than the first lesson about it;
 - an assessment tests a learning outcome below that outcome's Bloom level;
-- a lesson or assignment serves no learning outcome;
+- no lesson of a discipline serves a learning outcome, so the discipline contributes to nothing;
 - the weights of the summative assessments do not add up to 100%;
 - the planned hours exceed the study load (one EC is 28 hours of study).
 

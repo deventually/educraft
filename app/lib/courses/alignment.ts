@@ -11,6 +11,7 @@ export const FINDING_CODES = [
   "assessed-before-taught",
   "bloom-below-outcome",
   "activity-without-outcome",
+  "discipline-without-outcome",
   "weights-not-100",
   "study-load-exceeds-ec",
   "outcome-single-item",
@@ -26,6 +27,8 @@ export interface AlignmentFinding {
   itemId?: string;
   /** The question of an assessment (`itemId`) a question-level finding is about. */
   questionId?: string;
+  /** The discipline a discipline-level finding is about. */
+  disciplineId?: string;
 }
 
 export interface MatrixCell {
@@ -89,7 +92,7 @@ export function coverageMatrix(d: CourseData): CoverageMatrix {
 /**
  * Findings in a fixed order: per outcome (in outcome order: assessment-level
  * findings in assessment order, then not-taught, then not-assessed), then per
- * activity, then the course-wide weight and study-load checks, then the
+ * activity, then per discipline, then the course-wide weight and study-load checks, then the
  * question-level checks per assessment (P26.1).
  */
 export function checkAlignment(d: CourseData): AlignmentFinding[] {
@@ -134,6 +137,16 @@ export function checkAlignment(d: CourseData): AlignmentFinding[] {
   for (const a of d.activities)
     if (a.outcomeIds.length === 0)
       findings.push({ code: "activity-without-outcome", severity: "info", itemId: a.id });
+
+  // A discipline whose lessons together serve no outcome; waits until there are outcomes.
+  if (d.outcomes.length > 0)
+    for (const x of d.disciplines ?? [])
+      if (!d.activities.some((a) => a.disciplineId === x.id && a.outcomeIds.length > 0))
+        findings.push({
+          code: "discipline-without-outcome",
+          severity: "warning",
+          disciplineId: x.id,
+        });
 
   const weights = summative.flatMap((a) => (a.weight === undefined ? [] : [a.weight]));
   if (weights.length > 0 && Math.abs(weights.reduce((s, w) => s + w, 0) - 100) > 0.01)

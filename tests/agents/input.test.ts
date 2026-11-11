@@ -76,6 +76,14 @@ describe("buildReviewMessage", () => {
     expect(msg).toContain("outcome-not-assessed: L1");
   });
 
+  it("names the discipline of a discipline finding", () => {
+    const course = alignedCourse();
+    course.disciplines = [{ id: "hw", name: "Hardware" }];
+    const alignment = checkAlignment(course);
+    const msg = buildReviewMessage({ course, alignment, rejected: [] }, "en");
+    expect(msg).toContain("- discipline-without-outcome: Hardware");
+  });
+
   it("lists rejected findings so the hat does not raise them again", () => {
     const msg = buildReviewMessage(
       {
