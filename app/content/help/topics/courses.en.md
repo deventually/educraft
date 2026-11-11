@@ -28,6 +28,14 @@ The levels follow the revised Bloom taxonomy (Anderson & Krathwohl, 2001): remem
 
 On the course page is a table with the learning outcomes in the rows and the activities and assessments in the columns. A ✓ means the activity or assessment covers that learning outcome, with the level if you filled it in.
 
+## Starting from an existing module
+
+Redesigning a module? Start from what exists. On the course page, choose **Import from existing documents** and paste the text or choose the files: a course catalogue (OER), study guide, module guide, module handbook, test blueprint or marking model. You can choose several at once, for example a test blueprint and marking model at once. The files are read on your computer; only the text goes to the AI.
+
+The AI prepares a proposal: the module code and study year, learning outcomes with their success criteria, assessments with their form, pass mark, conditions and resit, and the parts with their criteria for a pass and a fail. Whatever is not verbatim in the document is marked. You tick what goes into the course.
+
+If a learning outcome or assessment is already in your course, it is not added twice. With **Fill in empty fields** you only complete what is still empty, such as the parts from a marking model for an assessment you took from the study guide earlier. What you had filled in stays as it is.
+
 ## Test blueprint and marking model
 
 Under each test you make a **test blueprint** with one click and, once the test has parts, a **marking model**. You first see a preview, then choose Word, PDF (through the print window) or Markdown. No AI is involved: the documents come straight from your course, so they always match what you entered. What you leave empty is left out.

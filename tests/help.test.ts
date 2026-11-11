@@ -53,6 +53,17 @@ describe("help registry — topics", () => {
     expect(en).toContain("**Success criteria**");
   });
 
+  it("explains starting from existing documents, completing and never overwriting", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("## Beginnen met een bestaande module");
+    expect(nl).toMatch(/toetsmatrijs en nakijkmodel tegelijk/);
+    expect(nl).toContain("**Lege velden aanvullen**");
+    expect(en).toContain("## Starting from an existing module");
+    expect(en).toMatch(/test blueprint and marking model at once/);
+    expect(en).toContain("**Fill in empty fields**");
+  });
+
   it("explains that an assessment can be marked as supervised", () => {
     expect(getTopic("courses", "nl")).toContain("**onder toezicht**");
     expect(getTopic("courses", "en")).toContain("**supervised**");

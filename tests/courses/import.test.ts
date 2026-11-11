@@ -297,6 +297,8 @@ describe("parseImportSelection", () => {
           kind: "summative",
           weight: 60,
           outcomeKeys: ["o1", "o2"],
+          details: {},
+          parts: [],
         },
       ],
     });
