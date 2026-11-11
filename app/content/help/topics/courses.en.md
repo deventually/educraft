@@ -36,12 +36,18 @@ The AI prepares a proposal: the module code and study year, learning outcomes wi
 
 If a learning outcome or assessment is already in your course, it is not added twice. With **Fill in empty fields** you only complete what is still empty, such as the parts from a marking model for an assessment you took from the study guide earlier. What you had filled in stays as it is.
 
+## Module guide
+
+Under **Module guide** on the course page you fill in the details of the module: module code, study year, study phase, module leader, examiner(s) and a description of the content. An empty line in the description starts a new paragraph. With **Export module guide** you first see a preview and then choose Word, PDF (through the print window) or Markdown.
+
+The module guide puts it all together: the module details with the credits, every learning outcome with its success criteria, the description, and under **Assessment** a table with every test (form, kind, week, weight, pass mark), the examiners and per test the conditions and the resit. No AI is involved, and whatever you leave empty is left out.
+
 ## Test blueprint and marking model
 
 Under each test you make a **test blueprint** with one click and, once the test has parts, a **marking model**. You first see a preview, then choose Word, PDF (through the print window) or Markdown. No AI is involved: the documents come straight from your course, so they always match what you entered. What you leave empty is left out.
 
 - **Success criteria** go with a learning outcome, one per line. If you use codes, start the line with the code and a colon, for example `S-An 1.1: The student …`.
-- **Details for the blueprint and the marking model** sit under the test: the form of the test, the test owner, the assessment (grade or pass/fail), the pass mark, the conditions for a pass, how the test is taken and the resit. The module code and the study year go in the course settings.
+- **Details for the blueprint and the marking model** sit under the test: the form of the test, the test owner, the assessment (grade or pass/fail), the pass mark, the conditions for a pass, how the test is taken and the resit. The module code and the study year go under **Module guide**.
 - **Parts** are what the student makes or does, with the learning outcomes it shows, a weight, whether it is a knock-out, and when it is a pass or a fail.
 
 The blueprint has a row per learning outcome with the success criteria, the level, the weight, the assessment criteria and the parts. The level is the mastery level from your subject pack if you filled it in, otherwise the Bloom level. A part with more than one learning outcome counts towards each of them. If the test has questions, the weight comes from the points per question, and the specification per question follows, with the points per learning outcome and cognitive level.

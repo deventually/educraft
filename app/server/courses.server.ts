@@ -199,13 +199,12 @@ async function runCourseIntent(
       course.ownerId === user.id
         ? String(fd.get("contextProfileId") ?? "") || null
         : course.contextProfileId;
-    // The settings form also carries the EC, the start date (P22.1) and the module details; each goes
-    // through the same intent boundary as the rest of the editor.
+    // The settings form also carries the EC and the start date (P22.1); each goes through the same
+    // intent boundary as the rest of the editor. The module details have their own form.
     let data = course.data;
     for (const [fields, intent] of [
       [["ec"], "set-ec"],
       [["startDate"], "set-start-date"],
-      [["code", "studyYear"], "set-module"],
     ] as const) {
       if (!fields.some((f) => fd.has(f))) continue;
       const one = new FormData();

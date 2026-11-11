@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #264 gemerged)_
 
 ## Nu
 
+- **Beginnen met een bestaande module (#264) gemerged op 2026-11-11:** *Importeren uit bestaande
+  documenten* leest ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer
+  bestanden tegelijk, met succescriteria, toetsgegevens en onderdelen. Wat de cursus al heeft,
+  wordt alleen aangevuld waar het leeg is. Prompt `course-import@v2`, eval 24/24.
 - **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (#263) gemerged op 2026-11-11:** het
   nakijkmodel heeft per onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
   leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de
@@ -624,12 +628,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 gemerged)_
 
 ## Bezig
 
-- **Beginnen met een bestaande module (PR open):** *Importeren uit bestaande documenten* leest nu
-  ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer bestanden tegelijk.
-  Het voorstel bevat modulecode en studiejaar, succescriteria, per toets vorm, eigenaar,
-  beoordeling, cesuur, voorwaarden, afname en herkansing, en de onderdelen met knock-out en
-  criteria. Een toets of leeruitkomst die de cursus al heeft, wordt alleen aangevuld waar hij leeg
-  is (*Lege velden aanvullen*). Nieuwe prompt `course-import@v2` met twee evalcases; geen migratie.
+- **Modulewijzer uit de cursus (PR open):** een eigen blok *Modulewijzer* op de cursuspagina
+  met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en een inhoudelijke
+  beschrijving (`set-module`; de instellingen dragen ze niet meer). Daaruit komt zonder AI een
+  modulewijzer als Word, PDF of Markdown: modulegegevens met EC, leeruitkomsten met
+  succescriteria, de beschrijving en de beoordeling (per toets vorm, soort, week, weging, cesuur,
+  voorwaarden en herkansing). Nieuwe exportroutes `courses/:id/documents/:document`; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
