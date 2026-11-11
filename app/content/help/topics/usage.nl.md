@@ -38,3 +38,7 @@ De kosten komen uit onze eigen tellingen, met de prijs per model op het moment v
 ## Je gegevens verwijderen
 
 Verwijder je je account, dan verdwijnen deze tellers mee.
+
+## Hoe lang we het bewaren
+
+De tellers per persoon blijven 13 maanden: deze maand en de twaalf ervoor, precies wat je bovenaan kunt kiezen. Daarna tellen we ze op tot maandtotalen per tool en model, voor de hele instelling en per team, en wissen we ze per persoon. In die totalen staat geen naam meer.

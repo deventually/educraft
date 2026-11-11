@@ -64,6 +64,13 @@ is **no silent server-side retention/expiry job** — deletion is user-initiated
 future deployment requires automatic retention limits, add a scheduled job; it is
 intentionally not built now to keep behaviour predictable and user-controlled.
 
+The one exception is the AI-use measurement (BESLUIT-2026-11-11-6): `ai_usage` keeps rows
+per person for **thirteen months** (this month and the twelve before, the months the usage
+page offers). Every hour the server rolls older rows up into `ai_usage_rollup`, month totals
+per tool and model for the whole institution and per team, **without a person**, and deletes
+the person rows (`aiUsageRetention.server.ts`). Deleting an account still removes its rows at
+once; the totals that were already rolled up know no person.
+
 ## What procurement will typically ask
 
 - **DPIA support** — a data-protection impact assessment for the specific

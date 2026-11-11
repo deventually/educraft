@@ -38,3 +38,7 @@ The costs come from our own counts, at each model's price at the time of the cal
 ## Deleting your data
 
 When you delete your account, these counters go with it.
+
+## How long we keep it
+
+The counters per person stay for 13 months: this month and the twelve before, exactly what you can pick at the top. After that we add them up into month totals per tool and model, for the whole institution and per team, and delete them per person. Those totals no longer hold a name.

@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #254 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #255 gemerged)_
 
 ## Nu
 
+- **Pagina Gebruik (#255) gemerged op 2026-11-11:** één pagina `/usage` voor iedereen, met per
+  rol een andere kring (BESLUIT-2026-11-11-1). De docent ziet het eigen gebruik en wat er vandaag
+  nog over is; een teamleider de teamtotalen, zonder namen en geld, en alleen het totaal bij
+  minder dan drie actieve leden; beheer iedereen met de kosten; de eigenaar ook de maandprognose
+  en wat caching bespaarde. Helponderwerp *Wat we meten*. Beheer → *Feedback en pilot* houdt
+  alleen feedback en pilot.
 - **Skills /release, /maintenance en /tdd (#254) gemerged op 2026-11-11:** `/release` maakt een
   release klaar (checklist, versienummer, notes in `RELEASE.md`, een PR; de tag zet Bastiaan),
   `/maintenance` doet de onderhoudsronde (Dependabot, `npm audit`, de toolchain), en `/tdd` is

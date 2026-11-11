@@ -160,7 +160,10 @@ LimeOnIt is not tied to one model vendor.
   `ai_usage`, one row per user, UTC day, source (tool slug or a fixed source such as
   `portfolio-coach`) and model. Counters only, never content or a time of day. A call without a
   token report counts as `unmeteredCalls`; a failed or aborted call as `failedCalls`. CLI agents
-  report no tokens.
+  report no tokens. Rows per person stay thirteen months; an hourly timer
+  (`aiUsageRetention.server.ts`, started in `entry.server.tsx`) rolls older ones up into
+  `ai_usage_rollup` (month totals for the institution and per team, no person) and deletes them
+  (BESLUIT-2026-11-11-6).
 
 - **Prices (usage dashboard, PR B).** Each catalog model has a list price per million tokens in
   `config/models.json` (`price`: currency, input, output, cacheRead, cacheWrite, `checked`,
