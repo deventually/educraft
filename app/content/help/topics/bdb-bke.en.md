@@ -24,6 +24,8 @@ No **BDB/BKE** in the menu? Then the workplace is still off for you. It is *On r
 
 A new dossier opens **getting started** in four short steps: your track, your framework, your anchor per learning outcome and your hand-in date. You may skip any step; you find it again below your dossier's overview (**Start wizard**). The **anchor** is what a learning outcome is about: a lesson, your module (a whole course) or a test from your courses, or a short description. A tool you open for that outcome starts with that lesson, module or test, and a module or test goes into your dossier as evidence right away.
 
+The **day plan** on the overview says about how many hours of work are left and spreads them over your working days, in the order of your route. Fill in your hand-in date and your hours a day in the planning, and the plan also says whether you are on track. It counts with fixed guide values per open step (under **How LimeOnIt counts**), without AI, and it is advice: it holds nothing back. At the top is what to **ask for today**: required evidence from others, such as feedback or a recording, that is not in yet. That takes waiting time, so ask for it before you start writing.
+
 1. Go to **BDB/BKE** and create a dossier. Give it a name and choose BDB, BKE or both. If you hand in each learning outcome on its own, one dossier is enough: you can export per learning outcome.
 2. Open **Framework**. There are two ways:
    - **Take the framework from your form (recommended).** Paste the text of the assessment form, or choose the PDF or Word file. The file stays on your computer; only the text goes to the AI model. LimeOnIt sets out learning outcomes and criteria, and where the form names a "good" level, also *What makes it stronger*.

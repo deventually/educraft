@@ -14,6 +14,7 @@ import { readinessCheck } from "~/lib/portfolio/readiness";
 import { requirementChecklist } from "~/lib/portfolio/requirements";
 import { openSpots } from "~/lib/portfolio/openSpots";
 import { dossierPart } from "~/lib/portfolio/dossierPart";
+import { dayPlan } from "~/lib/portfolio/plan";
 import * as edit from "~/lib/portfolio/edit";
 import { sampleDossier, LU, C1, C2, EV } from "../portfolio/fixtures";
 
@@ -55,6 +56,8 @@ function overviewData(d = sampleDossier()) {
         return [o.id, part ? openSpots(part).length : 0];
       }),
     ),
+    plan: dayPlan(d, "2026-11-12"),
+    today: "2026-11-12",
   };
 }
 
@@ -173,6 +176,14 @@ describe("Portfolio progress (guided route)", () => {
       `/portfolio/${ID}/outcome/${LU}?tab=evidence#evidence-title`,
     );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows the day plan and the hours left per outcome", () => {
+    renderRoute(PortfolioOverview, overviewData(confirmed()));
+    expect(screen.getByRole("region", { name: "Dagplan" })).toBeInTheDocument();
+    const list = screen.getByRole("region", { name: "Leeruitkomsten" });
+    // Evidence 2 × 15, coach 20 and the mark 5 minutes: about an hour.
+    expect(within(list).getByText(/Nog ongeveer 1 uur/)).toBeInTheDocument();
   });
 
   it("links the guide to the step you are at", () => {

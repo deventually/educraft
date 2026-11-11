@@ -30,6 +30,8 @@ import { fmt } from "~/lib/i18n/format";
 import { anchorToolQuery, daysUntil } from "~/lib/portfolio/anchors";
 import { startHref } from "~/lib/portfolio/start";
 import { DeadlineNote } from "~/components/portfolio/StartWizard";
+import { DayPlan, useHours } from "~/components/portfolio/DayPlan";
+import { dayPlan, isoDay } from "~/lib/portfolio/plan";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.name ?? "BDB/BKE"} — LimeOnIt` }];
@@ -56,6 +58,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
   // Finishing: practise the final interview with the rehearsal of this dossier (P29.3).
   const practise = `/portfolio/${dossier.id}/rehearsal`;
+  const today = isoDay(Date.now());
   return {
     id: dossier.id,
     name: dossier.name,
@@ -70,6 +73,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     ),
     deadline: d.deadline,
     daysLeft: d.deadline ? daysUntil(d.deadline, Date.now()) : undefined,
+    plan: dayPlan(d, today),
+    today,
     practise,
     readiness: readinessCheck(d),
     dossierReview: dossierReviewOverview(d),
@@ -100,6 +105,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
   const t = useT();
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
+  const hours = useHours();
   const tr = t.portfolio.dossierReview;
   useFormToast(actionData, {
     pending: (fd) =>
@@ -140,7 +146,10 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     nextAnchor = {},
     deadline,
     daysLeft,
+    plan,
+    today,
   } = loaderData;
+  const outcomeMinutes = new Map(plan.items.map((i) => [i.outcomeId, i.minutes]));
   const [params] = useSearchParams();
   const tab = dossierTab(params.get("tab"));
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
@@ -218,6 +227,8 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             <DeadlineNote deadline={deadline} daysLeft={daysLeft} className="mt-2" />
           )}
 
+          <DayPlan dossierId={id} plan={plan} outcomes={framework.outcomes} today={today} />
+
           <Form method="post" className="mt-6">
             <input type="hidden" name="intent" value="coachMode" />
             <fieldset>
@@ -263,6 +274,14 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
                     <p className="text-sm text-slate-700">
                       {fmt(t.portfolio.progressSummary, { shown: p.shown, total: p.criteria })} ·{" "}
                       {fmt(t.portfolio.words, { n: p.words })}
+                      {outcomeMinutes.has(p.outcomeId) && (
+                        <>
+                          {" · "}
+                          {fmt(t.portfolioPlan.outcomeLeft, {
+                            time: hours(outcomeMinutes.get(p.outcomeId) ?? 0),
+                          })}
+                        </>
+                      )}
                     </p>
                     {p.missingEvidence.length > 0 && (
                       <p className="text-sm text-slate-600">

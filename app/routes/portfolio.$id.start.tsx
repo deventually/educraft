@@ -4,10 +4,12 @@ import type { Route } from "./+types/portfolio.$id.start";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { anchorCourses } from "~/server/dossierAnchors.server";
 import { daysUntil } from "~/lib/portfolio/anchors";
+import { dayPlan, isoDay } from "~/lib/portfolio/plan";
 import { frameworkInUse } from "~/lib/portfolio/extract";
 import { START_STEPS, startStep } from "~/lib/portfolio/start";
 import { FrameworkExtract } from "~/components/portfolio/FrameworkExtract";
 import { AnchorForm } from "~/components/portfolio/AnchorForm";
+import { DayPlan } from "~/components/portfolio/DayPlan";
 import {
   FrameworkSummary,
   PlanningStep,
@@ -33,6 +35,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
   const step = startStep(new URL(request.url).searchParams.get("step"));
+  const today = isoDay(Date.now());
   return {
     id: dossier.id,
     name: dossier.name,
@@ -45,6 +48,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     courses: step === "anchors" ? await anchorCourses(user.id) : [],
     deadline: d.deadline,
     daysLeft: d.deadline ? daysUntil(d.deadline, Date.now()) : undefined,
+    hoursPerDay: d.hoursPerDay,
+    // The plan only where it is made.
+    plan: step === "planning" ? dayPlan(d, today) : null,
+    today,
   };
 }
 
@@ -80,8 +87,20 @@ export default function PortfolioStart({ loaderData }: Route.ComponentProps) {
       return { variant: "success", message: t.portfolio.toastSaved };
     },
   });
-  const { id, name, tracks, framework, canExtract, anchors, courses, deadline, daysLeft } =
-    loaderData;
+  const {
+    id,
+    name,
+    tracks,
+    framework,
+    canExtract,
+    anchors,
+    courses,
+    deadline,
+    daysLeft,
+    hoursPerDay,
+    plan,
+    today,
+  } = loaderData;
   // The step follows the URL, so the links between steps work without a reload.
   const [params] = useSearchParams();
   const step = startStep(params.get("step"));
@@ -137,7 +156,14 @@ export default function PortfolioStart({ loaderData }: Route.ComponentProps) {
         <AnchorForm outcomes={framework.outcomes} anchors={anchors} courses={courses} />
       )}
 
-      {step === "planning" && <PlanningStep deadline={deadline} daysLeft={daysLeft} />}
+      {step === "planning" && (
+        <>
+          <PlanningStep deadline={deadline} daysLeft={daysLeft} hoursPerDay={hoursPerDay} />
+          {plan && (
+            <DayPlan dossierId={id} plan={plan} outcomes={framework.outcomes} today={today} />
+          )}
+        </>
+      )}
 
       <StepFooter dossierId={id} step={step} />
     </div>

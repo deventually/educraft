@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #287 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #287 en #289 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: dagplan met het resterende werk in uren (#289) gemerged op 2026-11-11:** het
+  overzicht van een dossier en de planningstap tonen hoeveel uur werk er nog ongeveer is, verdeeld
+  over werkdagen in de volgorde van de route, en of dat past voor de inleverdatum. Bovenaan staat
+  verplicht bewijs van anderen dat nog ontbreekt, om vandaag aan te vragen. Puur rekenwerk met
+  vaste, zichtbare richtwaarden, zonder AI; uren per dag in te stellen (leeg is 8). Geen migratie.
 - **Cursuswizard, deel 3: de lessenreeks (#287) gemerged op 2026-11-11:** heeft een cursus
   leeruitkomsten en toetsen maar nog geen lessen, dan stelt de AI per week lessen en opdrachten
   voor, elk met een lesdoel van één zin, de leeruitkomsten en zo nodig een discipline. Het aantal

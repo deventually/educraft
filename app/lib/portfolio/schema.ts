@@ -33,6 +33,7 @@ export const LIMITS = {
   reference: 500,
   aiLog: 500,
   anchorDescription: 1_000,
+  hoursPerDay: 12,
 } as const;
 
 const Id = z.string().min(1).max(LIMITS.id);
@@ -236,6 +237,7 @@ export const DossierDataSchema = z
       .optional(),
     anchors: z.record(Id, AnchorSchema).optional(),
     deadline: IsoDate.optional(),
+    hoursPerDay: z.number().int().min(1).max(LIMITS.hoursPerDay).optional(),
   })
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: no dangling or duplicate ids.

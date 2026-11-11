@@ -51,8 +51,11 @@ export const portfolioStart: Messages["portfolioStart"] = {
     dateHelp: "The day you hand in your dossier. You may leave it empty.",
     daysLeft: "Hand in on {date}: {n} days left.",
     dueToday: "Hand in on {date}: today.",
+    hours: "Hours a day",
+    hoursHelp:
+      "How many hours a working day you spend on your dossier. Leave empty for a full day of {n} hours.",
     overdue: "The hand-in date {date} has passed.",
-    save: "Save date",
+    save: "Save planning",
     title: "Your planning",
   },
   previous: "Previous step",
