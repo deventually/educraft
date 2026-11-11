@@ -20,6 +20,8 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { evidencePending } from "~/lib/portfolio/evidence";
+import { outcomeRoute } from "~/lib/portfolio/route";
+import { OutcomeProgress } from "~/components/portfolio/DossierProgress";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data ? outcomeLabel(data.outcome) : "BDB/BKE"} — LimeOnIt` }];
@@ -63,6 +65,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         .map((c) => [c.id, view(criterionHints(outcome, c, available))]),
     ),
     chapterTools: view(chapterHints(outcome, available)),
+    // The four milestones of this outcome, guiding the page (always found: the outcome is).
+    milestones: outcomeRoute(d, outcome.id)?.milestones ?? [],
     courseHints: outcome.criteria
       .filter((c) => !linked.has(c.id) && courseHint(c))
       .map((c) => c.id),
@@ -154,6 +158,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     suggestions,
     courseHints = [],
     snapshotCourses = {},
+    milestones = [],
   } = loaderData;
   const drafts =
     coachMode === "draft" && confirmed
@@ -177,6 +182,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
         {outcomeLabel(outcome)}
       </h1>
       {provisional && <ProvisionalNotice className="mt-3" />}
+      {milestones.length > 0 && <OutcomeProgress milestones={milestones} />}
 
       <section className="mt-6" aria-labelledby="criteria-title">
         <h2 id="criteria-title" className="text-lg font-medium text-slate-900">

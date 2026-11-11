@@ -71,34 +71,3 @@ export function requirementFindings(d: DossierData): RequirementFinding[] {
   }
   return findings;
 }
-
-export type NextStep =
-  | { step: "build-framework" }
-  | { step: "confirm-framework" }
-  | { step: "add-evidence"; outcomeId: string; criterionId: string }
-  | { step: "write-chapter"; outcomeId: string }
-  | { step: "mark-shown"; outcomeId: string; criterionId: string }
-  | { step: "done" };
-
-/** One recommended next step: framework → evidence → chapter → mark shown. */
-export function nextStep(d: DossierData): NextStep {
-  const outcomes = d.framework.outcomes;
-  if (!outcomes.some((o) => o.criteria.length > 0)) return { step: "build-framework" };
-  if (d.framework.confirmedAt === undefined) return { step: "confirm-framework" };
-
-  const linked = new Set(d.evidence.flatMap((e) => e.criterionIds));
-  for (const o of outcomes) {
-    const c = o.criteria.find((x) => !linked.has(x.id));
-    if (c) return { step: "add-evidence", outcomeId: o.id, criterionId: c.id };
-  }
-  for (const o of outcomes) {
-    const chapter = d.chapters.find((ch) => ch.outcomeId === o.id);
-    if (o.criteria.length > 0 && (!chapter || wordCount(chapter.text) === 0))
-      return { step: "write-chapter", outcomeId: o.id };
-  }
-  for (const o of outcomes) {
-    const c = o.criteria.find((x) => d.status[x.id] !== "shown");
-    if (c) return { step: "mark-shown", outcomeId: o.id, criterionId: c.id };
-  }
-  return { step: "done" };
-}
