@@ -19,7 +19,14 @@ const declared = new Set([
 ]);
 
 describe("eval scripts", () => {
-  for (const name of ["eval", "eval:coach", "eval:agents", "eval:import", "eval:framework"]) {
+  for (const name of [
+    "eval",
+    "eval:coach",
+    "eval:agents",
+    "eval:import",
+    "eval:framework",
+    "eval:guided",
+  ]) {
     it(`${name} starts a command from a declared dependency`, () => {
       const bin = pkg.scripts[name]?.split(" ")[0];
       expect(bin).toBe("vite-node");

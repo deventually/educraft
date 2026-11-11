@@ -74,7 +74,8 @@ Per leeruitkomst schrijf je één hoofdstuk. De woordenteller loopt mee, met het
 
 - **Laat beoordelen.** De coach leest je hoofdstuk als een strenge assessor en zegt per criterium *aangetoond*, *deels* of *nog niet*, met een letterlijk citaat uit je tekst, wat ontbreekt en hoe het sterker wordt. Citaten die niet echt in je tekst staan en bronnen die niet in je lijst staan, filtert LimeOnIt eruit. Sla je hoofdstuk eerst op.
 - **Lees proef.** Voorstellen voor spelling, zinsbouw, ik-vorm, herhaling en APA, elk met de zin zoals hij nu is en een betere versie. *Overnemen* vervangt precies die zin, *Negeren* haalt het voorstel weg.
-- **Alinea's laten opstellen (keuze).** Kies bij *Hoe wil je de coach gebruiken?* voor feedback én alinea's. Per criterium kun je dan een alinea laten opstellen, met alleen je gekoppelde bewijs als bron. Waar bewijs ontbreekt, zet de AI `[aanvullen: …]`. Die plekken vul je zelf in.
+- **Schrijf per onderdeel.** Op het tabblad Hoofdstuk staan de onderdelen van je hoofdstuk: de opzet uit je formulier, of per criterium als je formulier geen opzet geeft. Klik bij een onderdeel op *Stel me vragen*. De coach stelt twee tot vier vragen over je eigen praktijk, over wat de criteria vragen en je bewijs nog niet laat zien. Beantwoord ze kort, in je eigen woorden; je antwoorden worden bewaard met je hoofdstuk. Nog niets ingevuld en wil je andere vragen? Klik op *Andere vragen*.
+- **Alinea's laten opstellen (keuze).** Kies bij *Hoe wil je de coach gebruiken?* voor feedback én alinea's. Dan staat bij elk onderdeel met vragen *Maak er een alinea van*: LimeOnIt schrijft dat onderdeel uit je antwoorden en je gekoppelde bewijs, en zet het onder de kop van het onderdeel in je hoofdstuk. Wat ontbreekt, staat er als `[aanvullen: …]`; die plekken vul je zelf in. Kies je alleen feedback, dan blijven je antwoorden naast je tekst staan en schrijf je zelf.
 - **Status zetten.** Alleen jij zet een criterium op *Mee bezig* of *Aangetoond*. De coach doet dat nooit.
 - **Literatuur.** Zet je bronnen in APA in de lijst. De check waarschuwt als je een bron citeert die niet in de lijst staat, of een bron in de lijst nergens gebruikt.
 
@@ -120,7 +121,7 @@ Open plekken blijven open plekken. Je bijlagen worden niet teruggelezen; die bli
 
 **De coach doet niets.** Bevestig eerst het kader en sla je hoofdstuk op.
 
-**"Koppel eerst bewijs aan dit criterium."** Een alinea opstellen kan alleen met je eigen bewijs als bron.
+**"Beantwoord eerst een vraag of koppel bewijs."** Een alinea opstellen kan alleen met je eigen antwoorden of je eigen bewijs als bron.
 
 **Kan ik het kader later nog aanpassen?** Ja. Na een wijziging bevestig je het opnieuw. Het automatisch uithalen kan alleen zolang er nog geen status, bewijs of hoofdstuk aan hangt; daarna pas je met de hand aan.
 

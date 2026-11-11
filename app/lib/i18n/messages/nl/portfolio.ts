@@ -14,9 +14,7 @@ export const portfolio = {
     errors: {
       "empty-chapter": "Het hoofdstuk is nog leeg. Sla eerst tekst op.",
       failed: "De coach gaf geen bruikbaar antwoord. Probeer het over een moment opnieuw.",
-      "no-evidence": "Koppel eerst bewijs aan dit criterium; dat is de enige bron voor de alinea.",
       "not-confirmed": "Bevestig eerst het kader; de coach beoordeelt op jouw criteria.",
-      "not-draft-mode": 'Zet bij het dossier eerst "alinea\'s laten opstellen" aan.',
       quota:
         "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
@@ -65,13 +63,9 @@ export const portfolio = {
     title: "Het hele dossier laten beoordelen",
   },
   draft: {
-    button: "Stel een alinea op voor criterium {n}",
-    done: "De alinea staat onderaan je hoofdstuk. Pas hem aan waar nodig.",
-    needsEvidence: "Criterium {n}: koppel eerst bewijs om een alinea te laten opstellen.",
     notice:
-      "Je kunt nu per criterium een eerste versie van een alinea laten opstellen, met je eigen bewijs als enige bron. Je hogeschool kan eigen regels hebben voor AI-gebruik in de BDB of BKE; wat je ermee doet, is aan jou.",
+      "Je kunt nu per onderdeel een eerste versie van een alinea laten opstellen, met je eigen antwoorden en bewijs als enige bron. Je hogeschool kan eigen regels hebben voor AI-gebruik in de BDB of BKE; wat je ermee doet, is aan jou.",
     noticeOk: "Begrepen",
-    pending: "De alinea wordt opgesteld…",
   },
   emptyBody: "Maak hierboven je eerste dossier aan. Daarna vul je het kader van je hogeschool in.",
   emptyTitle: "Nog geen dossier",

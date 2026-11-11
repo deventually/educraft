@@ -71,10 +71,10 @@ function clip(text: string, max: number, marker: string): string {
   return text.length <= max ? text : `${text.slice(0, max)}\n${marker}`;
 }
 
-function criteriaBlock(o: Outcome, l: (typeof LABELS)[Locale], only?: string): string {
+function criteriaBlock(o: Outcome, l: (typeof LABELS)[Locale], only?: readonly string[]): string {
   return o.criteria
     .map((c, i) => ({ c, key: `K${i + 1}` }))
-    .filter(({ c }) => !only || c.id === only)
+    .filter(({ c }) => !only || only.includes(c.id))
     .map(({ c, key }) => {
       const strong = c.strongLevel ? `\n   ${l.strong}: ${c.strongLevel}` : "";
       return `${key}: ${c.text}${strong}`;
@@ -86,11 +86,11 @@ function evidenceBlock(
   d: DossierData,
   o: Outcome,
   l: (typeof LABELS)[Locale],
-  only?: string,
+  only?: readonly string[],
 ): string {
   const keyOf = new Map(o.criteria.map((c, i) => [c.id, `K${i + 1}`]));
   const items = d.evidence.filter((e) =>
-    e.criterionIds.some((id) => (only ? id === only : keyOf.has(id))),
+    e.criterionIds.some((id) => (only ? only.includes(id) : keyOf.has(id))),
   );
   let budget = COACH_INPUT_LIMITS.evidenceTotal;
   const parts: string[] = [];
@@ -143,30 +143,30 @@ export function buildCoachMessage(d: DossierData, outcomeId: string, locale: Loc
 }
 
 /**
- * The user message for drafting one paragraph for one criterion, from the
- * teacher's own linked evidence only. `null` when there is no evidence: then
- * there is nothing honest to write from.
+ * The teacher's material for some criteria of one outcome, as tagged blocks (guided writing,
+ * `guided.ts`): the outcome line, those criteria, only their linked evidence, the chapter so far
+ * and the reference list. `hasEvidence` is false when none of it has text yet.
  */
-export function buildDraftMessage(
+export function criteriaMaterial(
   d: DossierData,
   outcomeId: string,
-  criterionId: string,
+  criterionIds: readonly string[],
+  chapter: string,
   locale: Locale,
-): string | null {
+) {
   const o = outcomeOf(d, outcomeId);
-  if (!o.criteria.some((c) => c.id === criterionId))
-    throw new Error(`Unknown criterion: ${criterionId}`);
-  if (!d.evidence.some((e) => e.criterionIds.includes(criterionId) && !evidencePending(e)))
-    return null;
   const l = LABELS[locale];
-  const chapter = d.chapters.find((ch) => ch.outcomeId === outcomeId)?.text.trim() ?? "";
-  return [
-    `${l.outcome}: ${[o.code, o.title].filter(Boolean).join(" ")}`,
-    `<criterion>\n${criteriaBlock(o, l, criterionId)}\n</criterion>`,
-    `<evidence>\n${evidenceBlock(d, o, l, criterionId)}\n</evidence>`,
-    `<chapter-so-far>\n${chapter ? clip(chapter, COACH_INPUT_LIMITS.chapter, l.truncated) : l.empty}\n</chapter-so-far>`,
-    `<references>\n${referencesBlock(d, l)}\n</references>`,
-  ].join("\n\n");
+  const text = chapter.trim();
+  return {
+    outcome: `${l.outcome}: ${[o.code, o.title].filter(Boolean).join(" ")}`,
+    criteria: `<criteria>\n${criteriaBlock(o, l, criterionIds)}\n</criteria>`,
+    evidence: `<evidence>\n${evidenceBlock(d, o, l, criterionIds)}\n</evidence>`,
+    chapter: `<chapter-so-far>\n${text ? clip(text, COACH_INPUT_LIMITS.chapter, l.truncated) : l.empty}\n</chapter-so-far>`,
+    references: `<references>\n${referencesBlock(d, l)}\n</references>`,
+    hasEvidence: d.evidence.some(
+      (e) => e.criterionIds.some((id) => criterionIds.includes(id)) && !evidencePending(e),
+    ),
+  };
 }
 
 // ── Checking the answer ─────────────────────────────────────────────────────
@@ -217,20 +217,26 @@ const YEAR = /\b(19|20)\d{2}[a-z]?\b/g;
 const CAPITALIZED = /\p{Lu}[\p{L}'’-]+/gu;
 
 /**
- * Does `text` cite an author + year that the reference list does not contain?
- * Simple on purpose: the surname is the last capitalized word before the year.
+ * The author + year citations in `text` that the reference list does not contain, as
+ * "Surname (year)". Simple on purpose: the surname is the last capitalized word before the year.
  */
-export function citesUnknownSource(text: string, references: string[]): boolean {
+export function unknownCitations(text: string, references: string[]): string[] {
   const refs = references.map((r) => r.toLowerCase());
+  const found = new Set<string>();
   for (const m of text.matchAll(YEAR)) {
     const before = text.slice(Math.max(0, (m.index ?? 0) - 60), m.index);
-    const names = before.match(CAPITALIZED);
-    const surname = names?.[names.length - 1]?.toLowerCase();
+    const surname = before.match(CAPITALIZED)?.at(-1);
     if (!surname) continue;
     const year = m[0].slice(0, 4);
-    if (!refs.some((r) => r.includes(surname) && r.includes(year))) return true;
+    const low = surname.toLowerCase();
+    if (!refs.some((r) => r.includes(low) && r.includes(year))) found.add(`${surname} (${year})`);
   }
-  return false;
+  return [...found];
+}
+
+/** Does `text` cite an author + year that the reference list does not contain? */
+export function citesUnknownSource(text: string, references: string[]): boolean {
+  return unknownCitations(text, references).length > 0;
 }
 
 function cleanList(items: string[] | null | undefined, references: string[]): string[] {
@@ -282,11 +288,4 @@ export function parseCoachReview(raw: string, d: DossierData, outcomeId: string)
     ok: true,
     review: { criteria, overall: trimTo(parsed.data.overall, COACH_LIMITS.overall) ?? "" },
   };
-}
-
-/** Cleans a drafted paragraph; `null` when nothing usable came back. */
-export function parseDraft(raw: string): string | null {
-  const fenced = /```[a-z]*\s*([\s\S]*?)```/i.exec(raw)?.[1];
-  const text = (fenced ?? raw).trim();
-  return text ? text.slice(0, 5_000) : null;
 }

@@ -16,10 +16,7 @@ export const portfolio: Messages["portfolio"] = {
     errors: {
       "empty-chapter": "The chapter is still empty. Save some text first.",
       failed: "The coach gave no usable answer. Try again in a moment.",
-      "no-evidence":
-        "Link evidence to this criterion first; it is the only source for the paragraph.",
       "not-confirmed": "Confirm the framework first; the coach assesses against your criteria.",
-      "not-draft-mode": 'Turn on "draft paragraphs" for the dossier first.',
       quota:
         "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
     },
@@ -67,13 +64,9 @@ export const portfolio: Messages["portfolio"] = {
     title: "Have the whole portfolio assessed",
   },
   draft: {
-    button: "Draft a paragraph for criterion {n}",
-    done: "The paragraph is at the end of your chapter. Edit it where needed.",
-    needsEvidence: "Criterion {n}: link evidence first to have a paragraph drafted.",
     notice:
-      "You can now have a first version of a paragraph drafted per criterion, with your own evidence as the only source. Your institution may have its own rules on AI use in the BDB or BKE; what you do with it is up to you.",
+      "You can now have a first version of a paragraph drafted per part, with your own answers and evidence as the only source. Your institution may have its own rules on AI use in the BDB or BKE; what you do with it is up to you.",
     noticeOk: "Got it",
-    pending: "Drafting the paragraph…",
   },
   emptyBody: "Create your first dossier above. Then fill in your institution's framework.",
   emptyTitle: "No dossier yet",

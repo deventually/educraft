@@ -5,7 +5,7 @@ import type { Outcome } from "~/lib/portfolio/types";
 const CARD = "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm";
 
 /** "1", "1 en 2", "1, 2 en 3". */
-function listOf(numbers: number[], and: string): string {
+export function listOf(numbers: number[], and: string): string {
   if (numbers.length < 2) return numbers.join("");
   return `${numbers.slice(0, -1).join(", ")} ${and} ${numbers.at(-1)}`;
 }
@@ -14,10 +14,17 @@ function listOf(numbers: number[], and: string): string {
  * On the chapter tab: the chapter's outline as the form prescribes it, with the
  * criteria each section covers, and the literature the form names. Read from the
  * form by the framework extraction; renders nothing when the form gave neither.
+ * `showOutline={false}` leaves the sections out: guided writing lists them instead.
  */
-export function ChapterOutline({ outcome }: { outcome: Outcome }) {
+export function ChapterOutline({
+  outcome,
+  showOutline = true,
+}: {
+  outcome: Outcome;
+  showOutline?: boolean;
+}) {
   const t = useT().portfolioOutline;
-  const outline = outcome.outline ?? [];
+  const outline = showOutline ? (outcome.outline ?? []) : [];
   const literature = outcome.literature ?? [];
   if (outline.length === 0 && literature.length === 0) return null;
   const number = new Map(outcome.criteria.map((c, i) => [c.id, i + 1]));

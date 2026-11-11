@@ -1,6 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { C1, C2, LU, sampleDossier } from "../portfolio/fixtures";
-import { addEvidence } from "~/lib/portfolio/edit";
 import type { DossierData } from "~/lib/portfolio/types";
 
 process.env.DATABASE_URL = "file::memory:";
@@ -141,48 +140,6 @@ describe("reviewOutcome", () => {
       ok: false,
       error: "failed",
     });
-  });
-});
-
-describe("draftParagraph", () => {
-  const withEvidence = () =>
-    confirmed(
-      addEvidence(sampleDossier(), {
-        title: "Lesplan",
-        kind: "lesson-plan",
-        text: "Beginsituatie: tweedejaars, weinig voorkennis.",
-        criterionIds: [C2],
-      }),
-    );
-
-  it("only works in draft mode, the teacher's choice", async () => {
-    expect(await coach.draftParagraph(user, withEvidence(), LU, C2, "", "nl")).toEqual({
-      ok: false,
-      error: "not-draft-mode",
-    });
-  });
-
-  it("needs linked evidence for the criterion", async () => {
-    const d = { ...confirmed(), coachMode: "draft" as const };
-    expect(await coach.draftParagraph(user, d, LU, C2, "", "nl")).toEqual({
-      ok: false,
-      error: "no-evidence",
-    });
-    expect(generate).not.toHaveBeenCalled();
-  });
-
-  it("appends the paragraph to the teacher's current text and logs it", async () => {
-    generate.mockResolvedValueOnce({ text: "Mijn groep bestond uit tweedejaars." });
-    const d = { ...withEvidence(), coachMode: "draft" as const };
-    const r = await coach.draftParagraph(user, d, LU, C2, "Niet opgeslagen tekst.", "nl", 7);
-    if (!r.ok) throw new Error(r.error);
-    expect(r.data.chapters[0]).toMatchObject({
-      text: "Niet opgeslagen tekst.\n\nMijn groep bestond uit tweedejaars.",
-      aiDrafted: true,
-    });
-    expect(r.data.aiLog.at(-1)).toMatchObject({ action: "draft", at: 7 });
-    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Niet opgeslagen tekst.");
-    expect(generate.mock.calls[0]![0].system).toContain("aanvullen");
   });
 });
 

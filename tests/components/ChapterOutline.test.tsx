@@ -74,4 +74,18 @@ describe("ChapterOutline", () => {
     const { container } = render(<ChapterOutline outcome={outcome()} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("leaves the sections out when guided writing lists them, but keeps the literature", () => {
+    render(
+      <ChapterOutline
+        outcome={outcome({
+          outline: [{ id: "s1", title: "Beginsituatie", criterionIds: [C2] }],
+          literature: ["Ebbens, S., & Ettekoven, S. (2016). Effectief leren."],
+        })}
+        showOutline={false}
+      />,
+    );
+    expect(screen.queryByRole("region", { name: "Opzet uit je formulier" })).toBeNull();
+    expect(screen.getByText(/Ebbens/)).toBeInTheDocument();
+  });
 });
