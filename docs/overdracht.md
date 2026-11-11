@@ -63,36 +63,64 @@ Er zijn nog drie plekken met iets geheims, buiten `.env`:
 
 ## 3. Deployen
 
-Er is (nog) geen automatische deploy: wie een nieuwe versie uitrolt, doet dat met de hand op de
-server. CI (`.github/workflows/ci.yml`) test alleen; `main` krijgt alleen code via een PR met
-groene CI, en alleen Bastiaan merget.
+Een release is een git-tag `vX.Y.Z` op `main` (BESLUIT-2026-11-11-4). Alleen Bastiaan zet die tag;
+Claude-sessies mogen het niet (`.claude/settings.json`). De versie staat ook in `package.json`, en
+[`RELEASE.md`](../RELEASE.md) zegt per versie de datum en wat er verandert.
 
-Een update, op de server in de map met `docker-compose.yml`:
+**Een release maken:**
 
-1. **Back-up maken:** `docker compose exec app node build/ops/backup.js`
-2. **De huidige image bewaren voor terugrollen:** `docker tag limeonit:latest limeonit:vorige`
-3. **Nieuwe versie ophalen en bouwen:** `git pull` en dan `docker compose build`
-   (of een kant-en-klare image laden: `docker load < limeonit.tar.gz`).
-4. **Starten:** `docker compose up -d`. Migraties lopen vanzelf bij de eerste databasetoegang.
-5. **Controleren:** `/healthz` geeft `{"ok":true}` en `docker compose ps` zegt `healthy`. Loop
-   daarna de [smoke-checklist](../wiki/Deployment.md#smoke-checklist-run-after-each-deploy) af.
+1. Een PR "Release X.Y.Z" zet de versie in `package.json` en voegt bovenaan `RELEASE.md` een kop
+   `## [X.Y.Z] - JJJJ-MM-DD` toe met de notes. Bastiaan merget hem.
+2. Bastiaan zet de tag op die merge: `git tag vX.Y.Z && git push origin vX.Y.Z` (of in GitHub bij
+   *Releases → Draft a new release*, met een nieuwe tag op `main`).
+3. De workflow `release.yml` controleert dat tag, `package.json` en `RELEASE.md` overeenkomen,
+   bouwt de image, zet hem op `ghcr.io/deventually/educraft:X.Y.Z` en maakt een GitHub Release met
+   de notes. Klopt er iets niet, dan wordt er niets gebouwd.
+
+Na de allereerste release: zet het pakket op GitHub op *public* (*Packages → educraft → Package
+settings → Change visibility*), zodat de VPS de image zonder inloggen kan ophalen. Wil je dat niet,
+log dan op de VPS één keer in met `docker login ghcr.io` en een token met alleen `read:packages`.
+
+**Uitrollen op de VPS (Caddy en Docker).** Eenmalig: maak op de server een map met
+[`deploy/docker-compose.yml`](../deploy/docker-compose.yml), [`deploy/deploy.sh`](../deploy/deploy.sh)
+en een `.env` (uit `.env.example`). Zet het blok uit
+[`deploy/Caddyfile.example`](../deploy/Caddyfile.example) in de Caddyfile, met je eigen domein, en
+`CLIENT_IP_HEADER=x-real-ip` in `.env`. LimeOnIt zit in het Docker-netwerk van Caddy (standaard
+`caddy`, anders `CADDY_NETWORK` in `.env`) en zet zelf geen poort open.
+
+Daarna is elke release één commando, in die map:
+
+```sh
+./deploy.sh 1.2.0
+```
+
+Het script haalt de image van die versie op, maakt een back-up van de draaiende database, start de
+nieuwe versie (migraties lopen vanzelf) en wacht tot `/healthz` die versie meldt. Het schrijft de
+versie in `.env` (`LIMEONIT_VERSION`), zodat een latere `docker compose up -d` dezelfde versie
+houdt. Aan het eind print het hoe je terugrolt. Loop daarna de
+[smoke-checklist](../wiki/Deployment.md#smoke-checklist-run-after-each-deploy) af; de versie staat
+ook op het beheerscherm onder *Gezondheid*.
 
 Een gewijzigde `.env` (bijvoorbeeld een nieuwe sleutel) werkt pas na `docker compose up -d`;
 `docker compose restart` leest `.env` **niet** opnieuw.
 
+Zonder VPS-map (de gewone `docker-compose.yml` in de repo) bouw je zelf: back-up maken met
+`docker compose exec app node build/ops/backup.js`, `git pull`, `docker compose build` en
+`docker compose up -d`.
+
 ## 4. Terugrollen
 
-Migraties gaan alleen vooruit: er bestaat geen "migratie ongedaan maken". Terugrollen is daarom
-altijd **image én database samen**:
+Migraties gaan alleen vooruit: er bestaat geen "migratie ongedaan maken". Had de release een
+migratie (dat staat in `RELEASE.md`), dan rol je **image én database samen** terug, met de back-up
+die `deploy.sh` net vóór de update maakte:
 
 ```sh
-docker compose stop
-docker compose run --rm app node build/ops/restore.js --from /data/backups/<back-up van vóór de update>.db
-LIMEONIT_IMAGE=limeonit:vorige docker compose up -d --no-build
+./deploy.sh 1.1.0 --restore /data/backups/<back-up van vóór de update>.db
 ```
 
-Alleen de image terugzetten zonder de database werkt zolang de update geen migratie had. Twijfel
-je, zet dan ook de database terug. Werk dat docenten ná de update maakten, gaat daarbij verloren.
+Had de release geen migratie, dan is `./deploy.sh 1.1.0` genoeg. Twijfel je, zet dan ook de
+database terug. Werk dat docenten ná de update maakten, gaat daarbij verloren. `deploy.sh` print
+na elke uitrol het precieze commando, met de naam van de back-up.
 
 ## 5. Back-up en terugzetten
 

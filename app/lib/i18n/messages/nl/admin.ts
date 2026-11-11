@@ -52,6 +52,7 @@ export const admin = {
     staleWarning:
       "De laatste back-up is ouder dan 36 uur, of er is nog geen back-up gemaakt. Kijk in het log naar backup.failed.",
     unknown: "Onbekend",
+    version: "Versie",
   },
   invites: {
     accountCreated: "Account aangemaakt.",
