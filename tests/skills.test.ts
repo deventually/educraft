@@ -27,7 +27,7 @@ function frontmatter(name: string): Record<string, string> {
 }
 
 describe("project skills", () => {
-  it.each(["tdd", "release", "maintenance"])("has the %s skill", (name) => {
+  it.each(["tdd", "release", "maintenance", "accessibility-review"])("has the %s skill", (name) => {
     expect(skills).toContain(name);
   });
 
@@ -44,5 +44,24 @@ describe("project skills", () => {
     it("says when to use it", () => {
       expect(frontmatter(name).description?.length ?? 0).toBeGreaterThan(40);
     });
+  });
+});
+
+describe("where the review skills are required", () => {
+  const read = (file: string) => readFileSync(resolve(__dirname, "..", file), "utf8");
+  const agents = read("AGENTS.md");
+  const release = read(".claude/skills/release/SKILL.md");
+
+  it("AGENTS.md asks for /security-review on a PR that touches data, auth or the API", () => {
+    expect(agents).toMatch(/repositories\/`, auth, sessions or `\/api` gets a `\/security-review`/);
+  });
+
+  it("AGENTS.md asks for /accessibility-review on a PR that changes what a user sees", () => {
+    expect(agents).toContain("/accessibility-review");
+  });
+
+  it("/release runs both reviews over everything since the last tag", () => {
+    expect(release).toContain("/security-review");
+    expect(release).toContain("/accessibility-review");
   });
 });
