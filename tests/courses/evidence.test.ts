@@ -79,6 +79,18 @@ describe("evidenceTitle", () => {
 });
 
 describe("findingText", () => {
+  it("names the discipline that serves no outcome (NL and EN)", () => {
+    const d = alignedCourse();
+    d.disciplines = [{ id: "hw", name: "Hardware" }];
+    const [finding] = checkAlignment(d);
+    expect(findingText(finding!, d, "nl")).toBe(
+      "De discipline Hardware draagt aan geen enkele leeruitkomst bij. Koppel minstens één les van Hardware aan een leeruitkomst.",
+    );
+    expect(findingText(finding!, d, "en")).toBe(
+      "The discipline Hardware contributes to no learning outcome. Link at least one Hardware lesson to a learning outcome.",
+    );
+  });
+
   it("names outcome, item and question like the course page", () => {
     const d = itemizedCourse();
     d.assessments[1]!.items![1]!.bloom = "apply";

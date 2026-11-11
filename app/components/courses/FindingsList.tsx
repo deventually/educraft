@@ -39,7 +39,7 @@ export function FindingsList({
         <ul className="mt-3 space-y-2">
           {findings.map((finding) => (
             <li
-              key={`${finding.code}-${finding.outcomeId ?? ""}-${finding.itemId ?? ""}-${finding.questionId ?? ""}`}
+              key={`${finding.code}-${finding.outcomeId ?? ""}-${finding.itemId ?? ""}-${finding.questionId ?? ""}-${finding.disciplineId ?? ""}`}
               className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-800"
             >
               {finding.severity === "warning" ? (
