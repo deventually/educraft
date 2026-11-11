@@ -453,10 +453,28 @@ describe("Course editor — pack tags on learning outcomes (P21.6)", () => {
 });
 
 describe("Course page — blueprint and marking model", () => {
-  it("asks for the module code and the study year with the settings", () => {
-    renderRoute(CoursePage, pageData(documentedCourse()));
-    expect(screen.getByLabelText("Modulecode")).toHaveValue("DB1");
-    expect(screen.getByLabelText("Studiejaar")).toHaveValue("2026-2027");
+  it("asks for the module details in the module guide, with its own form and export", async () => {
+    const data = { ...documentedCourse(), leader: "Docent A", description: "Over databases." };
+    const { container } = renderRoute(CoursePage, pageData(data));
+    const guide = screen.getByRole("region", { name: "Modulewijzer" });
+    expect(within(guide).getByLabelText("Modulecode")).toHaveValue("DB1");
+    expect(within(guide).getByLabelText("Studiejaar")).toHaveValue("2026-2027");
+    expect(within(guide).getByLabelText("Studiefase")).toHaveValue("");
+    expect(within(guide).getByLabelText("Moduleleider")).toHaveValue("Docent A");
+    expect(within(guide).getByLabelText("Examinator(en)")).toHaveValue("");
+    expect(within(guide).getByLabelText("Inhoudelijke beschrijving")).toHaveValue(
+      "Over databases.",
+    );
+    const form = within(guide).getByRole("button", { name: "Opslaan" }).closest("form");
+    expect(form?.querySelector('input[name="intent"]')).toHaveValue("set-module");
+    expect(
+      within(guide)
+        .getByText("Modulewijzer exporteren", { selector: "summary" })
+        .closest("details"),
+    ).toHaveAttribute("data-export-url", "/courses/c1/documents/module-guide/export");
+    const settings = screen.getByRole("region", { name: "Cursusgegevens" });
+    expect(within(settings).queryByLabelText("Modulecode")).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("asks for success criteria per learning outcome, one per line with a code", () => {

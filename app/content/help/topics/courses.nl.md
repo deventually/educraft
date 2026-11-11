@@ -36,12 +36,18 @@ De AI zet een voorstel klaar: modulecode en studiejaar, leeruitkomsten met hun s
 
 Staat een leeruitkomst of toets al in je cursus, dan wordt die niet dubbel toegevoegd. Met **Lege velden aanvullen** vul je alleen aan wat nog leeg is, zoals de onderdelen uit een nakijkmodel bij een toets die je eerder uit de studiehandleiding haalde. Wat je al had ingevuld, blijft staan.
 
+## Modulewijzer
+
+Onder **Modulewijzer** op de cursuspagina vul je de gegevens van de module in: modulecode, studiejaar, studiefase, moduleleider, examinator(en) en een inhoudelijke beschrijving. Een lege regel in de beschrijving begint een nieuwe alinea. Met **Modulewijzer exporteren** zie je eerst een voorbeeld en kies je dan Word, PDF (via het printvenster) of Markdown.
+
+De modulewijzer zet alles op een rij: de modulegegevens met de studiepunten, elke leeruitkomst met haar succescriteria, de beschrijving, en onder **Beoordeling** een tabel met elke toets (toetsvorm, soort, week, weging, cesuur), de examinatoren en per toets de voorwaarden en de herkansing. Er komt geen AI aan te pas, en wat je leeg laat, staat er niet in.
+
 ## Toetsmatrijs en nakijkmodel
 
 Onder elke toets maak je met één klik een **toetsmatrijs** en, zodra de toets onderdelen heeft, een **nakijkmodel**. Je ziet eerst een voorbeeld en kiest dan Word, PDF (via het printvenster) of Markdown. Er komt geen AI aan te pas: de documenten komen rechtstreeks uit je cursus, dus ze kloppen altijd met wat je hebt ingevuld. Wat je leeg laat, staat er niet in.
 
 - **Succescriteria** vul je in bij een leeruitkomst, één per regel. Gebruik je codes, begin de regel dan met de code en een dubbele punt, bijvoorbeeld `S-An 1.1: De student …`.
-- **Gegevens voor toetsmatrijs en nakijkmodel** staan onder de toets: toetsvorm, toetseigenaar, beoordeling (cijfer of voldoende/onvoldoende), cesuur, voorwaarden voor een voldoende, afname en herkansing. Modulecode en studiejaar vul je in bij de instellingen van de cursus.
+- **Gegevens voor toetsmatrijs en nakijkmodel** staan onder de toets: toetsvorm, toetseigenaar, beoordeling (cijfer of voldoende/onvoldoende), cesuur, voorwaarden voor een voldoende, afname en herkansing. Modulecode en studiejaar vul je in bij **Modulewijzer**.
 - **Onderdelen** zijn wat de student maakt of doet, met de leeruitkomsten die het laat zien, een weging, of het een knock-out is, en wanneer het voldoende of onvoldoende is.
 
 De toetsmatrijs heeft per leeruitkomst een rij met de succescriteria, het niveau, de weging, de beoordelingscriteria en de onderdelen. Het niveau is het beheersingsniveau uit je vakgebiedpakket als je dat hebt ingevuld, anders het Bloom-niveau. Een onderdeel bij meer leeruitkomsten telt bij elk daarvan mee. Heeft de toets vragen, dan komt de weging uit de punten per vraag en staat de specificatie per vraag eronder, met de punten per leeruitkomst en denkniveau.

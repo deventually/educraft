@@ -127,6 +127,10 @@ export const CourseDataSchema = z
   .object({
     code: z.string().min(1).max(COURSE_LIMITS.code).optional(),
     studyYear: z.string().min(1).max(COURSE_LIMITS.code).optional(),
+    phase: z.string().min(1).max(COURSE_LIMITS.title).optional(),
+    leader: z.string().min(1).max(COURSE_LIMITS.title).optional(),
+    examiners: z.string().min(1).max(COURSE_LIMITS.title).optional(),
+    description: LongText.optional(),
     ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
     startDate: IsoDateSchema.optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),

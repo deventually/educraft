@@ -1,4 +1,4 @@
-/** Documents made from a course, without AI: the test blueprint and the marking model. */
+/** Documents made from a course, without AI: the module guide, the test blueprint and the marking model. */
 export const courseDocuments = {
   blueprint: {
     export: "Toetsmatrijs exporteren",
@@ -74,8 +74,30 @@ export const courseDocuments = {
   },
   module: {
     code: "Modulecode",
+    description: "Inhoudelijke beschrijving",
+    descriptionHint:
+      "Waar de module over gaat en wat de student doet. Een lege regel begint een nieuwe alinea.",
+    examiners: "Examinator(en)",
+    leader: "Moduleleider",
+    phase: "Studiefase",
+    phaseHint: "Bijvoorbeeld Propedeuse, semester 1.",
     studyYear: "Studiejaar",
     studyYearHint: "Bijvoorbeeld 2026-2027.",
+  },
+  moduleGuide: {
+    assessment: "Beoordeling",
+    ec: "Studiepunten",
+    ecValue: "{n} EC",
+    export: "Modulewijzer exporteren",
+    fileName: "{course} modulewijzer",
+    heading: "Modulewijzer",
+    intro:
+      "De gegevens van de module voor de modulewijzer. De leeruitkomsten, succescriteria en toetsen komen uit de cursus zelf.",
+    name: "Modulenaam",
+    outcomes: "Leeruitkomsten en succescriteria",
+    resit: "Herkansing: {text}",
+    title: "{course}: modulewijzer",
+    week: "Week",
   },
   parts: {
     add: "Onderdeel toevoegen",

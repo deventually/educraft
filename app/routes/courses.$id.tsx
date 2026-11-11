@@ -26,6 +26,7 @@ import { CourseEvidence } from "~/components/courses/CourseEvidence";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
+import { ModuleGuideSection } from "~/components/courses/ModuleGuideSection";
 import { courseToolsFor } from "~/server/courseTools.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
@@ -211,12 +212,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           contextProfileId={course.contextProfileId}
           ec={data.ec}
           startDate={data.startDate}
-          code={data.code}
-          studyYear={data.studyYear}
           hours={plannedHours(data)}
           profiles={profiles}
           isOwner={isOwner}
         />
+        <ModuleGuideSection courseId={course.id} data={data} />
         <CourseProgrammes {...programmes} />
         <CourseImport
           courseName={course.name}
@@ -257,8 +257,6 @@ function CourseSettings({
   contextProfileId,
   ec,
   startDate,
-  code,
-  studyYear,
   hours,
   profiles,
   isOwner,
@@ -268,8 +266,6 @@ function CourseSettings({
   contextProfileId: string | null;
   ec?: number;
   startDate?: string;
-  code?: string;
-  studyYear?: string;
   hours: number;
   profiles: { id: string; name: string }[];
   /** Only the owner chooses the context profile; it is theirs. */
@@ -325,32 +321,6 @@ function CourseSettings({
               value={ec}
               hint={c.settings.ecHint}
             />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:max-w-xl">
-            <div>
-              <Label htmlFor={`${id}-code`}>{t.courseDocuments.module.code}</Label>
-              <Input
-                id={`${id}-code`}
-                name="code"
-                maxLength={COURSE_LIMITS.code}
-                defaultValue={code ?? ""}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor={`${id}-year`}>{t.courseDocuments.module.studyYear}</Label>
-              <Input
-                id={`${id}-year`}
-                name="studyYear"
-                maxLength={COURSE_LIMITS.code}
-                defaultValue={studyYear ?? ""}
-                aria-describedby={`${id}-year-hint`}
-                className="mt-1"
-              />
-              <p id={`${id}-year-hint`} className="mt-1 text-xs text-slate-500">
-                {t.courseDocuments.module.studyYearHint}
-              </p>
-            </div>
           </div>
           <div className="max-w-xs">
             <Label htmlFor={`${id}-start`}>{c.settings.startDate}</Label>
