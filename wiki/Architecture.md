@@ -243,6 +243,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (`app/server/flash.server.ts`; `createUserSession` and `logout` take an optional key). The key
   (`FLASH_KEYS` in `app/lib/flash.ts`, text in `toast.flash`) rides a signed one-minute `__flash`
   cookie; the root loader reads and clears it, and `useFlashToast` shows it once per flash id.
+- **Announcements** (`app/lib/announcements.ts`, `announcements.server.ts`). The admin posts a
+  banner on `/admin/announcements` for everyone, one team or one person, as `info` or `warning`,
+  with an optional last day (`endsOn`, Europe/Amsterdam, inclusive) and an optional
+  `remindAfterDays` (1-30) after which a closed banner comes back. The root loader brings the
+  user's banners (`announcementsFor`, scoped to the user in the WHERE clause, warnings first, at
+  most 5); `AnnouncementBanner` renders them in `AppShell` as a named region before `<main>`, not
+  a live region, with the level in words. Closing posts JSON to `/api/announcements/dismiss`
+  (Zod), which stores a dismissal only for an announcement the user can see; focus moves to
+  `<main>`. A deleted team or account takes its announcements along.
 - **Document upload** (`app/lib/documents/extract.ts`). `fileToText` lazily loads `unpdf` (PDF) and
   `mammoth` (DOCX) and extracts text in the browser into a `kind: "document"` field (300k chars,
   checked by `fieldCapError`). No server endpoint; fixtures in `tests/fixtures/generate.mjs`.

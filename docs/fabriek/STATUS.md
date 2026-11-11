@@ -4,14 +4,23 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #264 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #265 gemerged)_
 
 ## Nu
 
-- **Beginnen met een bestaande module (#264) gemerged op 2026-11-11:** *Importeren uit bestaande
-  documenten* leest ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer
-  bestanden tegelijk, met succescriteria, toetsgegevens en onderdelen. Wat de cursus al heeft,
-  wordt alleen aangevuld waar het leeg is. Prompt `course-import@v2`, eval 24/24.
+- **Mededelingen van beheer als banner (#265) gemerged op 2026-11-11:** beheer plaatst op
+  */admin/announcements* een mededeling of waarschuwing voor iedereen, een team of één persoon, met
+  een optionele laatste dag en eventueel terugkomen 1 tot 30 dagen na wegklikken. De banner staat
+  boven de inhoud van elke pagina; wegklikken gaat via `/api/announcements/dismiss`.
+- **Beginnen met een bestaande module (#264) gemerged op 2026-11-11:** de cursusimport
+  (`course-import@v2`) leest nu ook wat een toetsmatrijs en nakijkmodel nodig hebben: modulecode,
+  succescriteria, per toets vorm, cesuur, herkansing en onderdelen met weging, knock-out en
+  criteria. Het is een voorstel dat de docent bevestigt; alleen lege velden worden aangevuld.
+- **Maandlimieten in euro's (#260) gemerged op 2026-11-11:** de eigenaar zet een maandbudget voor
+  de instelling, beheer een maandlimiet per team en per docent (een eigen limiet vervangt die van
+  de teams). Vanaf 80% krijgt de docent één melding (een aandeel, nooit euro's), bij 100% weigert
+  de AI tot volgende maand; beheerders zijn uitgezonderd. Het aantal aanroepen per dag is niet
+  meer begrensd; een stille dagrem op output-tokens blijft (BESLUIT-2026-11-11-7 en -8).
 - **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (#263) gemerged op 2026-11-11:** het
   nakijkmodel heeft per onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
   leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de

@@ -29,13 +29,14 @@ async function renderLayout({ isOwner = false } = {}) {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly eight sections in order (AI use before the pilot, Logboek last)", async () => {
+  it("shows exactly nine sections in order (AI use before the pilot, Logboek last)", async () => {
     await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
     expect(links.map((a) => a.textContent)).toEqual([
       "Gebruikers",
       "Teams",
+      "Mededelingen",
       "Tools en modellen",
       "Reviewteam",
       "Onderwijscontext",
@@ -46,6 +47,7 @@ describe("Admin layout", () => {
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/admin/users",
       "/admin/teams",
+      "/admin/announcements",
       "/admin/tools",
       "/admin/agents",
       "/admin/context",
@@ -59,9 +61,9 @@ describe("Admin layout", () => {
     await renderLayout({ isOwner: true });
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
-    expect(links).toHaveLength(9);
-    expect(links[8]).toHaveTextContent("Recente fouten");
-    expect(links[8]).toHaveAttribute("href", "/admin/errors");
+    expect(links).toHaveLength(10);
+    expect(links[9]).toHaveTextContent("Recente fouten");
+    expect(links[9]).toHaveAttribute("href", "/admin/errors");
   });
 
   it("shows the health overview above every admin page, with its backup warning", async () => {
