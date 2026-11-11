@@ -43,4 +43,14 @@ Geslaagd: 16 van 18. De mbo-case gaf nog twee van de drie keer 5 leeruitkomsten;
 cases slaagden, ook de wo-case (5) en de injectie (4) met hun strengere bereik. Een regel in de
 prompt was dus niet genoeg: het model neigt naar vijf. Daarom bepaalt de code nu het aantal
 (`outcomeRange` in `app/lib/courses/design.ts`) en stuurt het mee als `<outcomeCount>3-4</outcomeCount>`;
-de prompt houdt zich daaraan. Nog te draaien.
+de prompt houdt zich daaraan.
+
+## Derde run (2026-11-11c), alleen mbo, met `<outcomeCount>`
+
+| Case | Geldig JSON | Aantal | Aantal ok | Criteria ok | Bloom ok | Vaag | De student | Disciplines ok | Verboden | Geslaagd |
+|---|---|---|---|---|---|---|---|---|---|---|
+| design-mbo-nl#1 | ja | 4 | ja | ja | ja | 0 | ja | ja | 0 | ja |
+| design-mbo-nl#2 | ja | 4 | ja | ja | ja | 0 | ja | ja | 0 | ja |
+| design-mbo-nl#3 | ja | 4 | ja | ja | ja | 0 | ja | ja | 0 | ja |
+
+Geslaagd: 3 van 3. Met de tweede run (alle andere cases geslaagd) slaagt nu elke case.
