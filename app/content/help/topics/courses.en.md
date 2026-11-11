@@ -6,9 +6,19 @@ A **course** records three things and shows whether they line up:
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
 - **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
+## The course page
+
+The course page has five tabs, each for one task:
+
+- **Overview:** the course details, the schedule, importing from an existing document and your lessons and tests per week.
+- **Learning outcomes:** what the student can do at the end, with the success criteria.
+- **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
+- **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
+- **Documents and sharing:** the module guide and module handbook, evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
 ## Schedule
 
-Under **Schedule** you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
+Under **Schedule** on the Overview tab you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
 
 ## The checks
 
@@ -40,12 +50,20 @@ The AI prepares a proposal: the module code and study year, learning outcomes wi
 
 If a learning outcome or assessment is already in your course, it is not added twice. With **Fill in empty fields** you only complete what is still empty, such as the parts from a marking model for an assessment you took from the study guide earlier. What you had filled in stays as it is.
 
+## Module guide and module handbook
+
+Under **Module guide and module handbook** on the Documents and sharing tab you fill in the details of the module: module code, study year, study phase, module leader, examiner(s), a description of the content and the literature (one per line). An empty line in the description starts a new paragraph. With **Export module guide** you first see a preview and then choose Word, PDF (through the print window) or Markdown.
+
+The module guide puts it all together: the module details with the credits, every learning outcome with its success criteria, the description, and under **Assessment** a table with every test (form, kind, week, weight, pass mark), the examiners and per test the conditions and the resit. No AI is involved, and whatever you leave empty is left out.
+
+The **module handbook** (*Export module handbook*) is the longer version for the student: the module details, an introduction (the description), study load and length, the learning outcomes with success criteria, the course week by week (every activity and test with its learning outcomes), per test its form, week, weight, grading, pass mark, resit, how it is taken, conditions and parts, and the literature. Running text such as themes or explanations of assignments you then add yourself in Word.
+
 ## Test blueprint and marking model
 
 Under each test you make a **test blueprint** with one click and, once the test has parts, a **marking model**. You first see a preview, then choose Word, PDF (through the print window) or Markdown. No AI is involved: the documents come straight from your course, so they always match what you entered. What you leave empty is left out.
 
 - **Success criteria** go with a learning outcome, one per line. If you use codes, start the line with the code and a colon, for example `S-An 1.1: The student …`.
-- **Details for the blueprint and the marking model** sit under the test: the form of the test, the test owner, the assessment (grade or pass/fail), the pass mark, the conditions for a pass, how the test is taken and the resit. The module code and the study year go in the course settings.
+- **Details for the blueprint and the marking model** sit under the test: the form of the test, the test owner, the assessment (grade or pass/fail), the pass mark, the conditions for a pass, how the test is taken and the resit. The module code and the study year go under **Module guide and module handbook**.
 - **Parts** are what the student makes or does, with the learning outcomes it shows, a weight, whether it is a knock-out, and when it is a pass or a fail.
 
 The blueprint has a row per learning outcome with the success criteria, the level, the weight, the assessment criteria and the parts. The level is the mastery level from your subject pack if you filled it in, otherwise the Bloom level. A part with more than one learning outcome counts towards each of them. If the test has questions, the weight comes from the points per question, and the specification per question follows, with the points per learning outcome and cognitive level.

@@ -25,6 +25,11 @@ jobs:
       - run: npm audit --audit-level=high
   e2e:
     # Browser tests: the production build in Chromium, with axe (WCAG 2.2 AA) and CSP checks.
+    # Temporarily off on GitHub (BESLUIT-2026-11-11-9): the runner could not install Chromium.
+    # Run `npm run test:e2e` locally and put the result in the PR. Switch it back on with the
+    # repository variable E2E_IN_CI=true (Settings > Secrets and variables > Actions > Variables).
+    # A skipped job counts as passed for a required check, so the ruleset can stay as it is.
+    if: vars.E2E_IN_CI == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

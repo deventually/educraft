@@ -7,6 +7,16 @@ import type { TemplateValues } from "~/lib/template/interpolate";
 /** The shape of a tool's input form: one entry per {@link InputField} name. */
 export type FormValues = Record<string, string | number | boolean | string[] | ImageInput[]>;
 
+/** The images of a tool's image fields: they travel to the API apart from the prompt. */
+export function imagesOf(inputs: InputField[], values: FormValues): ImageInput[] {
+  return inputs.flatMap((field) => {
+    const value = values[field.name];
+    return field.kind === "image" && Array.isArray(value)
+      ? value.filter((v): v is ImageInput => typeof v === "object")
+      : [];
+  });
+}
+
 /**
  * Narrow form values to the placeholder-substitutable subset accepted by
  * `buildSystemPrompt`. Image arrays are dropped: they travel to the API in a

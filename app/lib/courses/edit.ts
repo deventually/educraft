@@ -254,11 +254,13 @@ export function removePart(d: CourseData, assessmentId: string, partId: string):
 
 // Module details
 
-/** Sets the module code and the study year; `undefined` clears each. */
-export function setModule(
-  d: CourseData,
-  module: { code: string | undefined; studyYear: string | undefined },
-): CourseData {
+type ModuleDetails = Pick<
+  CourseData,
+  "code" | "studyYear" | "phase" | "leader" | "examiners" | "description" | "literature"
+>;
+
+/** Sets the module details that are given; `undefined` clears each. */
+export function setModule(d: CourseData, module: ModuleDetails): CourseData {
   return compact({ ...d, ...module });
 }
 

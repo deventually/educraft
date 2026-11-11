@@ -110,20 +110,20 @@ describe("TeacherWeekView (P22.3)", () => {
     for (const name of ["In de les", "Voorbereiden", "Nakijken"])
       expect(within(region).getAllByRole("heading", { level: 4, name })[0]).toBeInTheDocument();
     const lesson = within(region).getAllByRole("link", { name: /Les normaliseren/ })[0];
-    expect(lesson).toHaveAttribute("href", "/courses/c1#item-a3");
+    expect(lesson).toHaveAttribute("href", "/courses/c1?tab=plan#item-a3");
     expect(within(region).getByRole("link", { name: /Instaptoets/ })).toHaveAttribute(
       "href",
-      "/courses/c1#item-t0",
+      "/courses/c1?tab=plan#item-t0",
     );
     expect(within(region).getByText("en nog 2")).toBeInTheDocument();
   });
 
-  it("counts the open findings with a link to the course", async () => {
+  it("counts the open findings with a link to the course's Controle tab", async () => {
     renderWeek({ now, next: null });
     const region = await screen.findByRole("region", { name: "Deze week · week 47" });
     expect(within(region).getByRole("link", { name: "2 aandachtspunten" })).toHaveAttribute(
       "href",
-      "/courses/c1",
+      "/courses/c1?tab=check",
     );
     expect(within(region).getByText("1 advies van je reviewteam")).toBeInTheDocument();
   });

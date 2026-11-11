@@ -4,10 +4,36 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #264 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #268, #270 en #272 gemerged)_
 
 ## Nu
 
+- **Cursuspagina in vijf tabbladen (#267) gemerged op 2026-11-11:** de lange cursuspagina is
+  opgedeeld in *Overzicht*, *Leeruitkomsten*, *Lessen en toetsen*, *Controle* (met het aantal
+  bevindingen) en *Documenten en delen* (met de modulewijzer en modulehandleiding). Het tabblad
+  staat in de URL (`?tab=`), dus een formulier blijft op zijn tabblad en links vanuit Start en Per
+  week openen het juiste tabblad.
+- **Modulehandleiding uit de cursus (#272) gemerged op 2026-11-11:** naast de modulewijzer
+  exporteert de cursus zonder AI een modulehandleiding: modulegegevens, inleiding, studielast en
+  duur, leeruitkomsten met succescriteria, de opbouw per week, per toets de gegevens, voorwaarden
+  en onderdelen, en de literatuur (nieuw modulegegeven, één per regel). Het blok heet nu
+  *Modulewijzer en modulehandleiding*; geen migratie.
+- **Terug en vooruit houden het resultaat van een tool vast (#270) gemerged op 2026-11-11:** wie
+  vanuit een cursus een tool gebruikt en dan met de knoppen van de browser terug- of vooruitgaat,
+  ziet het gegenereerde resultaat weer in plaats van een leeg formulier.
+- **Modulewijzer uit de cursus (#266) gemerged op 2026-11-11:** een eigen blok *Modulewijzer* op
+  de cursuspagina met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en een
+  inhoudelijke beschrijving (`set-module`; de instellingen dragen ze niet meer). Daaruit komt
+  zonder AI een modulewijzer als Word, PDF of Markdown. Exportroutes
+  `courses/:id/documents/:document`; geen migratie.
+- **Browsertests voorlopig lokaal (#268) gemerged op 2026-11-11:** de GitHub-runner kon Chromium
+  niet installeren (DNS). De `e2e`-job draait daarom alleen als de repositoryvariabele
+  `E2E_IN_CI` op `true` staat; tot dan draait de werker `npm run test:e2e` zelf en zet de uitslag
+  in de PR (BESLUIT-2026-11-11-9).
+- **Mededelingen van beheer als banner (#265) gemerged op 2026-11-11:** beheer plaatst op
+  */admin/announcements* een mededeling of waarschuwing voor iedereen, een team of één persoon, met
+  een optionele laatste dag en eventueel terugkomen 1 tot 30 dagen na wegklikken. De banner staat
+  boven de inhoud van elke pagina; wegklikken gaat via `/api/announcements/dismiss`.
 - **Beginnen met een bestaande module (#264) gemerged op 2026-11-11:** de cursusimport
   (`course-import@v2`) leest nu ook wat een toetsmatrijs en nakijkmodel nodig hebben: modulecode,
   succescriteria, per toets vorm, cesuur, herkansing en onderdelen met weging, knock-out en
@@ -633,12 +659,14 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #264 gemerged)_
 
 ## Bezig
 
-- **Beginnen met een bestaande module (PR open):** *Importeren uit bestaande documenten* leest nu
-  ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer bestanden tegelijk.
-  Het voorstel bevat modulecode en studiejaar, succescriteria, per toets vorm, eigenaar,
-  beoordeling, cesuur, voorwaarden, afname en herkansing, en de onderdelen met knock-out en
-  criteria. Een toets of leeruitkomst die de cursus al heeft, wordt alleen aangevuld waar hij leeg
-  is (*Lege velden aanvullen*). Nieuwe prompt `course-import@v2` met twee evalcases; geen migratie.
+- **Vooraf invullen vanuit de les (#269, PR open):** wie *Les voorbereiden* opent vanuit een les,
+  krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis (de vijf lessen
+  ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij `prefillFromCourse`; geen
+  per-tool code, geen migratie.
+- **Lesrooster van de cursus (#271, PR open, bouwt op #269):** een blok *Lesrooster* op het
+  tabblad Overzicht met weken, lesmomenten per week, duur van een lesmoment, groepsgrootte en
+  contactvorm, allemaal optioneel (`set-schedule`, `CourseData.schedule`). *Les voorbereiden*
+  neemt lesduur, groep en contactvorm daaruit over; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

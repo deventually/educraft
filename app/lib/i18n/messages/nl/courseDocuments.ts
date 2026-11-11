@@ -1,4 +1,4 @@
-/** Documents made from a course, without AI: the test blueprint and the marking model. */
+/** Documents made from a course, without AI: the module guide, the test blueprint and the marking model. */
 export const courseDocuments = {
   blueprint: {
     export: "Toetsmatrijs exporteren",
@@ -74,8 +74,48 @@ export const courseDocuments = {
   },
   module: {
     code: "Modulecode",
+    description: "Inhoudelijke beschrijving",
+    descriptionHint:
+      "Waar de module over gaat en wat de student doet. Een lege regel begint een nieuwe alinea.",
+    examiners: "Examinator(en)",
+    leader: "Moduleleider",
+    literature: "Literatuur",
+    literatureHint: "Voor de modulehandleiding. Eén boek, artikel of link per regel.",
+    phase: "Studiefase",
+    phaseHint: "Bijvoorbeeld Propedeuse, semester 1.",
     studyYear: "Studiejaar",
     studyYearHint: "Bijvoorbeeld 2026-2027.",
+  },
+  moduleGuide: {
+    assessment: "Beoordeling",
+    ec: "Studiepunten",
+    ecValue: "{n} EC",
+    export: "Modulewijzer exporteren",
+    fileName: "{course} modulewijzer",
+    heading: "Modulewijzer en modulehandleiding",
+    intro:
+      "De gegevens van de module voor de modulewijzer en de modulehandleiding. De leeruitkomsten, succescriteria, activiteiten en toetsen komen uit de cursus zelf.",
+    name: "Modulenaam",
+    outcomes: "Leeruitkomsten en succescriteria",
+    resit: "Herkansing: {text}",
+    title: "{course}: modulewijzer",
+    week: "Week",
+  },
+  moduleHandbook: {
+    activity: "Onderdeel",
+    duration: "Duur: {n} weken",
+    export: "Modulehandleiding exporteren",
+    fileName: "{course} modulehandleiding",
+    general: "Algemene informatie",
+    intro: "Inleiding",
+    knockOut: "Knock-out",
+    knockOutNo: "nee",
+    knockOutYes: "ja",
+    markingModel: "De criteria per onderdeel staan in het nakijkmodel.",
+    studyLoad: "Studielast: {ec} EC ({hours} uur)",
+    testing: "Toetsing",
+    title: "{course}: modulehandleiding",
+    weeks: "Opbouw per week",
   },
   parts: {
     add: "Onderdeel toevoegen",

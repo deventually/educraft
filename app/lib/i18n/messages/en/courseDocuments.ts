@@ -1,4 +1,4 @@
-/** Documents made from a course, without AI: the test blueprint and the marking model. */
+/** Documents made from a course, without AI: the module guide, the test blueprint and the marking model. */
 export const courseDocuments = {
   blueprint: {
     export: "Export test blueprint",
@@ -74,8 +74,48 @@ export const courseDocuments = {
   },
   module: {
     code: "Module code",
+    description: "Description of the content",
+    descriptionHint:
+      "What the module is about and what the student does. An empty line starts a new paragraph.",
+    examiners: "Examiner(s)",
+    leader: "Module leader",
+    literature: "Literature",
+    literatureHint: "For the module handbook. One book, article or link per line.",
+    phase: "Study phase",
+    phaseHint: "For example First year, semester 1.",
     studyYear: "Study year",
     studyYearHint: "For example 2026-2027.",
+  },
+  moduleGuide: {
+    assessment: "Assessment",
+    ec: "Credits",
+    ecValue: "{n} EC",
+    export: "Export module guide",
+    fileName: "{course} module guide",
+    heading: "Module guide and module handbook",
+    intro:
+      "The details of the module for the module guide and the module handbook. The learning outcomes, success criteria, activities and tests come from the course itself.",
+    name: "Module name",
+    outcomes: "Learning outcomes and success criteria",
+    resit: "Resit: {text}",
+    title: "{course}: module guide",
+    week: "Week",
+  },
+  moduleHandbook: {
+    activity: "Part",
+    duration: "Duration: {n} weeks",
+    export: "Export module handbook",
+    fileName: "{course} module handbook",
+    general: "General information",
+    intro: "Introduction",
+    knockOut: "Knock-out",
+    knockOutNo: "no",
+    knockOutYes: "yes",
+    markingModel: "The criteria per part are in the marking model.",
+    studyLoad: "Study load: {ec} EC ({hours} hours)",
+    testing: "Assessment",
+    title: "{course}: module handbook",
+    weeks: "Week by week",
   },
   parts: {
     add: "Add part",

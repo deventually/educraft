@@ -6,6 +6,8 @@ import type { ContextProfile } from "~/lib/context/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
+import { useEntryMemory } from "~/lib/hooks/useEntryMemory";
+import { StagesMemorySchema } from "~/lib/tool/memory";
 import { CoursePicker } from "./CoursePicker";
 import { ResultActions, type ResultContext } from "./ResultActions";
 import { ToolControls, type PickerModel } from "./ToolControls";
@@ -32,6 +34,8 @@ interface Props {
   initialItemId?: string;
   /** Next steps and places to keep the result (P27.1). */
   resultContext?: ResultContext;
+  /** This history entry: Back and Forward bring its form and finished steps back. */
+  memoryKey?: string;
 }
 
 interface StageState {
@@ -50,21 +54,23 @@ export function StageStepper({
   initialCourseId,
   initialItemId,
   resultContext,
+  memoryKey,
 }: Props) {
   const t = useT();
   const locale = useLocale();
   // Shared sandbox (see useSandbox). Cognitive Architect has no profile-backed
   // fields, so `selectProfile` here is just the context selector; the hook keeps
   // the door open for prefill without special-casing the multi-stage surface.
+  const sandbox = useSandbox({
+    inputs: tool.inputs,
+    profiles,
+    defaultProfileId,
+    courses,
+    initialCourseId,
+    initialItemId,
+  });
   const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
-    useSandbox({
-      inputs: tool.inputs,
-      profiles,
-      defaultProfileId,
-      courses,
-      initialCourseId,
-      initialItemId,
-    });
+    sandbox;
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Pre-select an OFFERED model, not blindly the tool default: a teacher
   // whose set holds only a local model must not start on the frontier default.
@@ -78,6 +84,39 @@ export function StageStepper({
   // P30.1: the saved result of each step, so the export holds all of them in one file.
   const [savedIds, setSavedIds] = useState<Record<string, string>>({});
   const streams = useStreamAborts(Object.values(stages).some((s) => s.streaming));
+  // Only finished steps are kept: a step that was still streaming comes back empty.
+  const finished = Object.fromEntries(
+    Object.entries(stages).flatMap(([id, st]) =>
+      st.output && !st.streaming ? [[id, st.output]] : [],
+    ),
+  );
+  useEntryMemory(
+    memoryKey,
+    StagesMemorySchema,
+    {
+      sandbox: sandbox.memory,
+      outputs: finished,
+      lastGenerationId,
+      savedIds,
+      outputLanguage,
+      model,
+    },
+    (m) => {
+      sandbox.restore(m.sandbox);
+      setStages(
+        Object.fromEntries(
+          Object.entries(m.outputs).map(([id, output]) => [
+            id,
+            { output, streaming: false, error: null },
+          ]),
+        ),
+      );
+      setLastGenerationId(m.lastGenerationId);
+      setSavedIds(m.savedIds);
+      setOutputLanguage(m.outputLanguage);
+      setModel(m.model);
+    },
+  );
 
   const outputs = (): Record<string, string> =>
     Object.fromEntries(

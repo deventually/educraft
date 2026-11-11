@@ -113,22 +113,24 @@ describe("/courses/:id", () => {
     expect(data.linkedWork).toEqual([]);
   });
 
-  it("saves the module code and study year with the settings", async () => {
+  it("saves the module details with their own form", async () => {
     const c = await repo.createCourse("teacher-a", { name: "Module", data: alignedCourse() });
     expect(
       await act(c.id, {
-        intent: "settings",
-        name: "Module",
+        intent: "set-module",
         code: "HELWO",
         studyYear: "2026-2027",
+        leader: "Docent A",
       }),
-    ).toEqual({ ok: true });
+    ).toMatchObject({ ok: true });
     expect((await repo.getCourse("teacher-a", c.id))!.data).toMatchObject({
       code: "HELWO",
       studyYear: "2026-2027",
+      leader: "Docent A",
     });
-    await act(c.id, { intent: "settings", name: "Module", code: "", studyYear: "" });
-    expect((await repo.getCourse("teacher-a", c.id))!.data.code).toBeUndefined();
+    // The settings form no longer carries them, so saving it leaves them alone.
+    await act(c.id, { intent: "settings", name: "Module" });
+    expect((await repo.getCourse("teacher-a", c.id))!.data.code).toBe("HELWO");
   });
 
   it("saves the start date with the settings and gives the week dates (P22.1)", async () => {

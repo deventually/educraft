@@ -1,4 +1,5 @@
 import type { Route } from "./+types/tool";
+import { useLocation } from "react-router";
 import { effectiveCoverage } from "~/lib/courses/alignment";
 import { aiLimitFor } from "~/server/aiLimits.server";
 import { LimitNotice } from "~/components/usage/LimitNotice";
@@ -245,6 +246,9 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
 export default function ToolPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
+  // One workspace per history entry: opening the tool again starts empty, and Back or
+  // Forward brings back what that entry held (`useEntryMemory`).
+  const entry = useLocation().key;
   const {
     tool,
     profiles,
@@ -288,6 +292,8 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
         )}
       >
         <ToolWorkspace
+          key={entry}
+          memoryKey={`${entry}:${tool.slug}`}
           kind={mode.kind}
           tool={tool}
           profiles={profiles}
