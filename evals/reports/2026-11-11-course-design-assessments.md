@@ -29,3 +29,5 @@ Model: claude-sonnet-5-5. Herhalingen per case: 3. Deterministische score, geen 
 Geslaagd: 18 van 18, in de eerste run. Elke herhaling gaf hetzelfde aantal summatieve toetsen
 per case: 1 voor de kleine mbo-cursus en de cursus zonder weken, 2 voor hbo en 3 voor de wo-cursus
 van 10 EC.
+
+**Gelezen (Bastiaan, 2026-11-11):** goed genoeg om mee te beginnen.
