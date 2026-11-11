@@ -276,6 +276,53 @@ describe("design-assessments", () => {
     expect(data?.assessments[0]?.coverage.map((c) => c.outcomeId)).toEqual(["lo1", "lo2"]);
   });
 
+  it("asks again with the teacher's remark on the earlier proposal", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Opnieuw", data: withOutcomes });
+    generate.mockResolvedValueOnce({ text: programme, usage: { output: 80 } });
+    const previous = JSON.stringify([
+      { title: "Tentamen", kind: "summative", week: 8, weight: 100, outcomeRefs: [1, 2] },
+    ]);
+    const r = await post(
+      course.id,
+      assess([
+        ["remark", "Liever een beroepsproduct dan een tentamen."],
+        ["previous", previous],
+      ]),
+    );
+    expect(r).toMatchObject({ ok: true, intent: "design-assessments" });
+    const call = generate.mock.calls[0]![0];
+    expect(call.system).toContain("<remark>");
+    const message = call.messages[0].content as string;
+    expect(message).toContain(
+      "<previousProposal>\n1. Tentamen | summative | week 8 | weight 100 | outcomes 1, 2\n</previousProposal>",
+    );
+    expect(message).toContain("<remark>\nLiever een beroepsproduct dan een tentamen.\n</remark>");
+  });
+
+  it("keeps the Bloom level the teacher chose for each covered outcome", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Niveaus", data: withOutcomes });
+    await post(course.id, [
+      ["intent", "import-apply"],
+      ["outcomeKey", "o1"],
+      ["o1.text", "De student ontwerpt een datamodel."],
+      ["outcomeKey", "o2"],
+      ["o2.text", "De student schrijft SQL-queries."],
+      ["assessmentKey", "a1"],
+      ["a1.pick", "on"],
+      ["a1.title", "Ontwerp webwinkel"],
+      ["a1.kind", "summative"],
+      ["a1.outcomes", "o1"],
+      ["a1.outcomes", "o2"],
+      ["a1.bloom.o1", "create"],
+      ["a1.bloom.o2", "apply"],
+    ]);
+    const data = (await repo.getCourse("teacher-d", course.id))?.data;
+    expect(data?.assessments[0]?.coverage).toEqual([
+      { outcomeId: "lo1", bloom: "create" },
+      { outcomeId: "lo2", bloom: "apply" },
+    ]);
+  });
+
   it("is refused without a model call for a course without outcomes or with tests", async () => {
     const empty = await repo.createCourse("teacher-d", { name: "Leeg" });
     const r = await post(empty.id, assess());

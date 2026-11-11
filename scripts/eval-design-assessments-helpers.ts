@@ -6,6 +6,7 @@
  */
 import type { BloomLevel } from "../app/lib/courses/bloom";
 import type { DesignParseResult } from "../app/lib/courses/design";
+import type { AssessmentsBrief, PreviousTest } from "../app/lib/courses/designAssessments";
 import { emptyCourseData } from "../app/lib/courses/schema";
 import type { CourseData } from "../app/lib/courses/types";
 
@@ -24,6 +25,9 @@ export interface AssessmentsCase {
   context?: string;
   /** Words no test title or form may contain (an injected instruction). */
   forbid?: string[];
+  /** "Ask again": the teacher's remark on `previous`, the earlier proposal. */
+  remark?: string;
+  previous?: PreviousTest[];
   /** How many summative tests; default 1 to 2 up to 5 EC, else 1 to 4. */
   summative?: { min: number; max: number };
 }
@@ -58,6 +62,15 @@ export function caseCourse(c: AssessmentsCase): CourseData {
       ...(o.bloom ? { bloom: o.bloom } : {}),
       ...(o.criteria ? { criteria: o.criteria.map((text) => ({ text })) } : {}),
     })),
+  };
+}
+
+/** What the step 2 form sends for a case: the forms, and a remark with the earlier proposal. */
+export function caseBrief(c: AssessmentsCase): AssessmentsBrief {
+  const forms = c.formsText ?? c.forms?.join(", ");
+  return {
+    ...(forms ? { forms } : {}),
+    ...(c.remark ? { remark: c.remark, ...(c.previous ? { previous: c.previous } : {}) } : {}),
   };
 }
 

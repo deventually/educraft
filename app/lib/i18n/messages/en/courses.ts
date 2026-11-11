@@ -144,6 +144,7 @@ export const courses: Messages["courses"] = {
     courseName: "Name of the course in the document",
     courseNameHint:
       "Does the document describe several courses? Then the AI looks for this one only.",
+    coverBloom: "Bloom level in this assessment for learning outcome {n}",
     covers: "Which learning outcomes does this assessment assess?",
     done: "Added: {outcomes} learning outcome(s) and {assessments} assessment(s).",
     errors: {

@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #287 en #289 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #289 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: geleid schrijven per onderdeel van het hoofdstuk (#288) gemerged op 2026-11-11:**
+  op het tabblad *Hoofdstuk* stelt de coach per onderdeel (de opzet uit het formulier, of per
+  criterium) twee tot vier vragen over de eigen praktijk; de antwoorden blijven bij het hoofdstuk.
+  Daaruit en uit het gekoppelde bewijs schrijft de AI de tekst voor dat onderdeel, met
+  *[aanvullen: …]* waar iets ontbreekt. Nieuwe prompts `portfolio-questions@v1` en
+  `portfolio-draft@v2`, eval `npm run eval:guided`.
 - **BDB/BKE: dagplan met het resterende werk in uren (#289) gemerged op 2026-11-11:** het
   overzicht van een dossier en de planningstap tonen hoeveel uur werk er nog ongeveer is, verdeeld
   over werkdagen in de volgorde van de route, en of dat past voor de inleverdatum. Bovenaan staat

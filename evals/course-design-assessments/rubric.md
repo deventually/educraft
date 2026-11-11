@@ -1,7 +1,9 @@
 # Cursus ontwerpen (toetsprogramma) — zo scoort de eval
 
-Stap 2 van de cursuswizard (`course-design-assessments@v1`) stelt bij de leeruitkomsten een
-toetsprogramma voor. De runner (`npm run eval:design-assessments`) gebruikt de echte prompt, het
+Stap 2 van de cursuswizard (`course-design-assessments@v2`) stelt bij de leeruitkomsten een
+toetsprogramma voor. De cases `assess-again-*` vragen een nieuw voorstel met een opmerking van de
+docent over een eerder voorstel (`remark`, `previous`): minder toetsen, geen schriftelijke toets,
+een ingeplante opdracht in de opmerking, en in het Engels een tussentoets erbij. De runner (`npm run eval:design-assessments`) gebruikt de echte prompt, het
 echte bericht (`buildAssessmentsDesignMessage`) en de echte controle (`parseAssessmentsDesign`).
 Elke case is een **zelf geschreven, fictieve** cursus na stap 1 (de repo is publiek).
 
@@ -29,3 +31,7 @@ leeruitkomsten, of de wegingen kloppen met het werk, en of de toetsen samen pass
 beroepspraktijk. Lees daarvoor de opgeslagen antwoorden in
 `evals/output/<datum>/course-design-assessments/` en zet je oordeel in het rapport onder
 **Gelezen**.
+
+Bij de cases `assess-again-*` meet de score alleen de regels en het aantal summatieve toetsen.
+Of de AI de opmerking echt volgde en de rest gelijk hield, lees je in het antwoord: vergelijk het
+met `<previousProposal>` en lees de zin in `notes` over wat er veranderde.

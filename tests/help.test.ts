@@ -83,6 +83,17 @@ describe("help registry — topics", () => {
     expect(en).toContain("Weight (the AI's proposal)");
   });
 
+  it("explains asking again with a remark, and the Bloom level per covered outcome", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("**Wat moet er anders?**");
+    expect(nl).toContain("**Nieuw voorstel**");
+    expect(nl).toContain("Bloom-niveau in deze toets");
+    expect(en).toContain("**What should change?**");
+    expect(en).toContain("**New proposal**");
+    expect(en).toContain("Bloom level in this assessment");
+  });
+
   it("explains step 3 of the wizard: the lesson series, with goals and the check", () => {
     const nl = getTopic("courses", "nl");
     const en = getTopic("courses", "en");

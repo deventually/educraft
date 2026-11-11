@@ -5,12 +5,13 @@
 import { Fragment, useId } from "react";
 import { Form } from "react-router";
 import type { ImportAssessment, ImportOutcome, ImportProposal } from "~/lib/courses/import";
+import { BLOOM_LEVELS, type BloomLevel, bloomLabel } from "~/lib/courses/bloom";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { ASSESSMENT_KINDS } from "~/lib/courses/types";
 import { Button, Input, Label, Select, Textarea } from "~/components/ui";
 import { BloomSelect, NumberField } from "./fields";
 import { fmt } from "~/lib/i18n/format";
-import { useT } from "~/lib/i18n/useT";
+import { useLocale, useT } from "~/lib/i18n/useT";
 import {
   AssessmentExtrasPreview,
   assessmentHasExtras,
@@ -182,6 +183,30 @@ function OutcomeRow({
   );
 }
 
+/**
+ * The level a test assesses a covered outcome at, the outcome's own level first; it goes into
+ * the coverage (`applyImport`) and is ignored for an outcome the test does not cover.
+ */
+function CoverBloom({ name, value, n }: { name: string; value?: BloomLevel; n: number }) {
+  const t = useT();
+  const locale = useLocale();
+  return (
+    <Select
+      name={name}
+      defaultValue={value ?? ""}
+      aria-label={fmt(t.courses.import.coverBloom, { n })}
+      className="w-auto text-sm"
+    >
+      <option value="">{t.courses.bloomNone}</option>
+      {BLOOM_LEVELS.map((level) => (
+        <option key={level} value={level}>
+          {bloomLabel(level, locale)}
+        </option>
+      ))}
+    </Select>
+  );
+}
+
 function AssessmentRow({
   assessment: a,
   n,
@@ -253,18 +278,21 @@ function AssessmentRow({
             <legend className="text-sm text-slate-700">{ti.covers}</legend>
             <div className="mt-1 space-y-1">
               {outcomes.map((o, i) => (
-                <label key={o.key} className="flex items-start gap-2 text-sm text-slate-700">
-                  <input
-                    type="checkbox"
-                    name={`${a.key}.outcomes`}
-                    value={o.key}
-                    defaultChecked={covered.has(o.key)}
-                    className="mt-1"
-                  />
-                  <span>
-                    {fmt(ti.outcomeN, { n: i + 1 })}: {o.text}
-                  </span>
-                </label>
+                <div key={o.key} className="flex flex-wrap items-start gap-x-3 gap-y-1">
+                  <label className="flex flex-1 basis-64 items-start gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      name={`${a.key}.outcomes`}
+                      value={o.key}
+                      defaultChecked={covered.has(o.key)}
+                      className="mt-1"
+                    />
+                    <span>
+                      {fmt(ti.outcomeN, { n: i + 1 })}: {o.text}
+                    </span>
+                  </label>
+                  <CoverBloom name={`${a.key}.bloom.${o.key}`} value={o.bloom} n={i + 1} />
+                </div>
               ))}
             </div>
           </fieldset>

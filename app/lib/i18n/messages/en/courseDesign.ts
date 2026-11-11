@@ -3,9 +3,10 @@ import type { Messages } from "../nl";
 /** The course wizard: how a new course starts, step 1 (outcomes), 2 (tests) and 3 (lessons). */
 export const courseDesign: Messages["courseDesign"] = {
   assessments: {
+    again: "New proposal",
     errors: {
       failed: "Could not propose a test programme. Try again, or add the tests yourself.",
-      invalid: "Name the assessment forms in 500 characters at most.",
+      invalid: "Name the assessment forms and what should change in 500 characters each at most.",
       nothing: "The AI needs more to propose a test programme. Read the note below.",
       notReady:
         "A test programme can be proposed when the course has learning outcomes and no tests yet.",
@@ -21,6 +22,9 @@ export const courseDesign: Messages["courseDesign"] = {
     proposalIntro:
       "The AI made this test programme for your learning outcomes. Tick what goes into the course and edit where needed. The weights are a proposal: you decide as the examiner.",
     ready: "Test programme ready. Choose what goes into the course.",
+    remark: "What should change?",
+    remarkHelp:
+      "Optional. Say what you want to change in the proposal below, for example: one final assignment instead of two tests, or no presentations. The AI keeps the rest as it is where it can.",
     submit: "Propose a test programme",
     title: "Next step: the test programme",
     uncovered: "These learning outcomes are in no summative test: {list}",

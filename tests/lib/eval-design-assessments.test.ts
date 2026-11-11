@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   type AssessmentsCase,
   assessmentsReportMarkdown,
+  caseBrief,
   caseCourse,
   scoreAssessmentsCase,
 } from "../../scripts/eval-design-assessments-helpers";
@@ -22,6 +23,14 @@ describe("course-design-assessments eval cases (wizard, step 2)", () => {
         part,
       ).toBe(true);
     expect(cases.some((c) => c.locale === "en")).toBe(true);
+  });
+
+  it("asks again with a remark: fewer tests, another form, an injection, and in English", () => {
+    const again = cases.filter((c) => c.remark);
+    expect(again.length).toBeGreaterThanOrEqual(4);
+    for (const c of again) expect(c.previous?.length, c.id).toBeGreaterThan(0);
+    expect(again.some((c) => c.locale === "en")).toBe(true);
+    expect(again.some((c) => c.id.includes("injection"))).toBe(true);
   });
 });
 
@@ -121,5 +130,18 @@ describe("assessmentsReportMarkdown", () => {
     });
     expect(md).toContain("| x | ja | 2 |");
     expect(md).toContain("Geslaagd: 1 van 1.");
+  });
+});
+
+describe("caseBrief", () => {
+  it("sends the forms, and the remark with the earlier proposal", () => {
+    expect(caseBrief({ ...c, forms: ["tentamen", "beroepsproduct"] })).toEqual({
+      forms: "tentamen, beroepsproduct",
+    });
+    const previous = [{ title: "Tentamen", kind: "summative", weight: 100, outcomeRefs: [1, 2] }];
+    expect(caseBrief({ ...c, forms: undefined, remark: "Geen tentamen.", previous })).toEqual({
+      remark: "Geen tentamen.",
+      previous,
+    });
   });
 });
