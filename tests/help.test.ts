@@ -83,6 +83,17 @@ describe("help registry — topics", () => {
     expect(en).toContain("Weight (the AI's proposal)");
   });
 
+  it("explains step 3 of the wizard: the lesson series, with goals and the check", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("**Volgende stap: de lessenreeks**");
+    expect(nl).toContain("**Wensen voor de planning**");
+    expect(nl).toContain("lesdoel");
+    expect(en).toContain("**Next step: the lesson series**");
+    expect(en).toContain("**Wishes for the planning**");
+    expect(en).toContain("lesson goal");
+  });
+
   it("explains the progress steps and the next step", () => {
     expect(getTopic("courses", "nl")).toContain("## Voortgang");
     expect(getTopic("courses", "nl")).toContain("**Volgende stap**");

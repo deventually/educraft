@@ -74,3 +74,48 @@ test("a course with outcomes and no tests offers the test programme", async ({ p
   expect(overflow).toBeLessThanOrEqual(0);
   expect(csp).toEqual([]);
 });
+
+/**
+ * Step 3: once the course has outcomes and tests and no lessons, the overview offers the lesson
+ * series; it asks for the weeks and sessions while the timetable has none, the form is reachable
+ * by keyboard, axe finds nothing and 320px does not scroll.
+ */
+test("a course with outcomes and tests offers the lesson series", async ({ page }) => {
+  const csp = watchCsp(page);
+  await page.goto("/courses");
+  await page.getByLabel("Naam", { exact: true }).fill("Lessenreeks (e2e)");
+  await page.getByRole("button", { name: "Cursus aanmaken" }).click();
+  await page.waitForURL(/\/courses\/[^/?]+$/);
+  const url = page.url();
+
+  await page.goto(`${url}?tab=outcomes`);
+  await page.getByLabel("Leeruitkomst", { exact: true }).fill("De student ontwerpt een datamodel.");
+  await page.getByRole("button", { name: "Leeruitkomst toevoegen" }).click();
+  await expect(page.getByText("De student ontwerpt een datamodel.").first()).toBeVisible();
+
+  await page.goto(`${url}?tab=plan`);
+  const addTest = page.getByRole("button", { name: "Toets toevoegen" });
+  const testForm = page.locator("form", { has: addTest });
+  await testForm.getByLabel("Titel").fill("Beroepsproduct");
+  await addTest.click();
+  await expect(page.getByText("Beroepsproduct").first()).toBeVisible();
+
+  await page.goto(url);
+  const step = page.getByRole("region", { name: "Volgende stap: de lessenreeks" });
+  await expect(step).toBeVisible();
+  await expect(step.getByLabel("Aantal weken")).toBeVisible();
+  await expect(step.getByLabel("Lesmomenten per week")).toBeVisible();
+  const wishes = step.getByLabel("Wensen voor de planning");
+  await wishes.focus();
+  await expect(wishes).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(step.getByRole("button", { name: "Lessenreeks voorstellen" })).toBeFocused();
+  await expectNoAxeViolations(page);
+
+  await page.setViewportSize({ width: 320, height: 800 });
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+  expect(csp).toEqual([]);
+});

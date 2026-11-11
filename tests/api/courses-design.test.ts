@@ -328,3 +328,180 @@ describe("design-assessments", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 });
+
+const series = JSON.stringify({
+  lessons: [
+    {
+      title: "Kennismaken met SQL",
+      week: 1,
+      kind: "lesson",
+      goal: "De student schrijft een eerste SELECT-query.",
+      outcomeRefs: [2],
+      discipline: null,
+    },
+    {
+      title: "Opdracht datamodel",
+      week: 2,
+      kind: "assignment",
+      goal: "De student tekent een eerste datamodel.",
+      outcomeRefs: [1],
+      discipline: null,
+    },
+  ],
+  notes: "Week 8 is de toetsweek.",
+});
+const withTests = {
+  ...withOutcomes,
+  schedule: { weeks: 8, sessionsPerWeek: 2 },
+  assessments: [
+    {
+      id: "t1",
+      title: "Ontwerp webwinkel",
+      kind: "summative" as const,
+      week: 8,
+      weight: 100,
+      coverage: [{ outcomeId: "lo1" }, { outcomeId: "lo2" }],
+    },
+  ],
+};
+const lessons = (extra: [string, string][] = []): [string, string][] => [
+  ["intent", "design-lessons"],
+  ...extra,
+];
+
+describe("design-lessons", () => {
+  it("proposes lessons per week over the course's outcomes and tests, and stores nothing", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Lessen", data: withTests });
+    generate.mockResolvedValueOnce({ text: series, usage: { output: 80 } });
+    const r = await post(course.id, lessons([["wishes", "Week 4 is projectweek."]]));
+    if (!r.ok || r.intent !== "design-lessons") throw new Error(JSON.stringify(r));
+    expect(r.proposal.lessons.map((l) => [l.title, l.week, l.kind, l.outcomeIds])).toEqual([
+      ["Kennismaken met SQL", 1, "lesson", ["lo2"]],
+      ["Opdracht datamodel", 2, "assignment", ["lo1"]],
+    ]);
+    expect(r.proposal.untaught).toEqual([]);
+    expect(recordUsage).toHaveBeenCalledOnce();
+    const call = generate.mock.calls[0]![0];
+    expect(call.system).toContain("Voice & Bounds");
+    const message = call.messages[0].content as string;
+    expect(message).toContain("<lessonsPerWeek>2</lessonsPerWeek>");
+    expect(message).toContain("- Ontwerp webwinkel [summative, week 8]: 1, 2");
+    expect(message).toContain("Week 4 is projectweek.");
+    expect((await repo.getCourse("teacher-d", course.id))?.data.activities).toEqual([]);
+  });
+
+  it("keeps the weeks and sessions the teacher typed where the schedule was empty", async () => {
+    const course = await repo.createCourse("teacher-d", {
+      name: "Rooster",
+      data: { ...withTests, schedule: undefined },
+    });
+    generate.mockResolvedValueOnce({ text: series });
+    await post(
+      course.id,
+      lessons([
+        ["weeks", "10"],
+        ["sessionsPerWeek", "3"],
+      ]),
+    );
+    const message = generate.mock.calls[0]![0].messages[0].content as string;
+    expect(message).toContain("<weeks>10</weeks>");
+    expect(message).toContain("<lessonsPerWeek>3</lessonsPerWeek>");
+    expect((await repo.getCourse("teacher-d", course.id))?.data.schedule).toEqual({
+      weeks: 10,
+      sessionsPerWeek: 3,
+    });
+  });
+
+  it("adds the ticked lessons through design-lessons-apply", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Toepassen", data: withTests });
+    const r = await post(course.id, [
+      ["intent", "design-lessons-apply"],
+      ["lessonKey", "l1"],
+      ["l1.pick", "on"],
+      ["l1.title", "Kennismaken met SQL"],
+      ["l1.week", "1"],
+      ["l1.kind", "lesson"],
+      ["l1.goal", "De student schrijft een eerste SELECT-query."],
+      ["l1.outcomes", "lo2"],
+      ["lessonKey", "l2"],
+      ["l2.title", "Niet gekozen"],
+      ["l2.kind", "lesson"],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "design-lessons-apply", added: 1 });
+    const data = (await repo.getCourse("teacher-d", course.id))?.data;
+    expect(data?.activities).toHaveLength(1);
+    expect(data?.activities[0]).toMatchObject({
+      title: "Kennismaken met SQL",
+      week: 1,
+      goal: "De student schrijft een eerste SELECT-query.",
+      outcomeIds: ["lo2"],
+    });
+  });
+
+  it("refuses an apply with an outcome that is not the course's", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Vreemd", data: withTests });
+    const r = await post(course.id, [
+      ["intent", "design-lessons-apply"],
+      ["lessonKey", "l1"],
+      ["l1.pick", "on"],
+      ["l1.title", "Les"],
+      ["l1.kind", "lesson"],
+      ["l1.outcomes", "lo-van-een-ander"],
+    ]);
+    expect(r).toMatchObject({ ok: false, intent: "design-lessons-apply" });
+    expect((await repo.getCourse("teacher-d", course.id))?.data.activities).toEqual([]);
+  });
+
+  it("is refused without a model call for a course without tests, or with lessons", async () => {
+    const noTests = await repo.createCourse("teacher-d", {
+      name: "Geen toetsen",
+      data: withOutcomes,
+    });
+    const r = await post(noTests.id, lessons());
+    expect(r).toMatchObject({ ok: false, intent: "design-lessons" });
+    if (r.ok) return;
+    expect(r.error).toMatch(/toetsen/);
+    const taught = await repo.createCourse("teacher-d", {
+      name: "Al lessen",
+      data: {
+        ...withTests,
+        activities: [{ id: "x", title: "Les", kind: "lesson" as const, outcomeIds: [] }],
+      },
+    });
+    expect(await post(taught.id, lessons())).toMatchObject({ ok: false });
+    const course = await repo.createCourse("teacher-d", { name: "Te lang 3", data: withTests });
+    expect(await post(course.id, lessons([["wishes", "x".repeat(501)]]))).toMatchObject({
+      ok: false,
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("says what the AI needs when it proposes no lessons, and retries broken JSON once", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Niets 3", data: withTests });
+    generate.mockResolvedValueOnce({
+      text: JSON.stringify({ lessons: [], notes: "Hoeveel lesmomenten per week?" }),
+    });
+    expect(await post(course.id, lessons())).toMatchObject({
+      ok: false,
+      intent: "design-lessons",
+      notes: "Hoeveel lesmomenten per week?",
+    });
+    generate.mockReset();
+    generate.mockResolvedValue({ text: "{ kapot" });
+    const r = await post(course.id, lessons(), "en");
+    expect(generate).toHaveBeenCalledTimes(2);
+    if (r.ok) throw new Error("expected a failure");
+    expect(r.error).toMatch(/lesson series/i);
+  });
+
+  it("is a 404 when the admin switched the course wizard off", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Uit 3", data: withTests });
+    featureOff.add("courseDesign");
+    const status = await post(course.id, lessons()).then(
+      () => undefined,
+      (e) => (e instanceof Response ? e.status : -1),
+    );
+    expect(status).toBe(404);
+    expect(generate).not.toHaveBeenCalled();
+  });
+});
