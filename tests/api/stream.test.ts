@@ -930,4 +930,52 @@ describe("api.stream — measures AI use per tool and model (usage dashboard)", 
       expect(row).toMatchObject({ calls: 1, failedCalls: 1, unmeteredCalls: 1 });
     });
   });
+
+  /** A model that writes until it is aborted. */
+  function untilAborted() {
+    streamChatSpy.mockImplementation(async function* (opts: { signal: AbortSignal }) {
+      yield "begin";
+      await new Promise((_, reject) =>
+        opts.signal.addEventListener("abort", () => reject(new Error("aborted"))),
+      );
+    });
+  }
+
+  it("counts a call the teacher walked away from once, as failed", async () => {
+    untilAborted();
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "meter-cancel" },
+    );
+    const reader = res.body!.getReader();
+    await reader.read();
+    await reader.cancel();
+    await vi.waitFor(async () => {
+      const [row] = await aiUsage.listAiUsage("meter-cancel", usage.utcDay());
+      expect(row).toMatchObject({ calls: 1, failedCalls: 1, unmeteredCalls: 1 });
+    });
+    // Settled: no second count follows (the abort and the cancel are one walk-away).
+    await new Promise((r) => setTimeout(r, 20));
+    expect((await aiUsage.listAiUsage("meter-cancel", usage.utcDay()))[0]?.calls).toBe(1);
+  });
+
+  it("counts a call whose request was aborted once, as failed", async () => {
+    untilAborted();
+    const tab = new AbortController();
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "meter-abort", signal: tab.signal },
+    );
+    const reader = res.body!.getReader();
+    await reader.read();
+    tab.abort();
+    await reader.cancel().catch(() => {});
+    await vi.waitFor(async () => {
+      const [row] = await aiUsage.listAiUsage("meter-abort", usage.utcDay());
+      expect(row).toMatchObject({ calls: 1, failedCalls: 1, unmeteredCalls: 1 });
+    });
+    // Settled: no second count follows (the abort and the cancel are one walk-away).
+    await new Promise((r) => setTimeout(r, 20));
+    expect((await aiUsage.listAiUsage("meter-abort", usage.utcDay()))[0]?.calls).toBe(1);
+  });
 });

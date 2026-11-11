@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #257 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #258 gemerged)_
 
 ## Nu
 
+- **Uitklapmenu's in de kop (#258) gemerged op 2026-11-11:** het accountmenu en het mobiele menu
+  sluiten met Esc, met een klik ernaast of als Tab het menu verlaat; de pijltjestoetsen lopen
+  rond, Home/End springen naar de uiteinden (`useDisclosure`). Menulinks tonen een focusring en
+  de kop past op 320px (`e2e/reflow.spec.ts`).
 - **Skill /accessibility-review (#257) gemerged op 2026-11-11:** loopt een scherm door zoals een
   toetsenbord- of schermlezergebruiker, omdat axe maar een deel vindt. Verplicht bij een PR die
   verandert wat een gebruiker ziet; `/security-review` bij een PR die repositories, auth, sessies

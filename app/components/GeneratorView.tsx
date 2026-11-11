@@ -6,6 +6,7 @@ import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
 import { toTemplateValues } from "~/lib/forms/values";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
+import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { CoursePicker } from "./CoursePicker";
 import { useAssessmentModelPicker } from "./assessment-models/AssessmentModelPicker";
@@ -107,7 +108,7 @@ export function GeneratorView({
   const [streaming, setStreaming] = useState(false);
   const beforeField = useAssessmentModelPicker(tool, assessmentModels, sandbox, streaming);
   const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const streams = useStreamAborts();
   // Originals of `kind: "document"` fields, by field name. Browser memory only:
   // they are shown in the DocumentViewer and never sent or stored.
   const [originals, setOriginals] = useState<Record<string, File[]>>({});
@@ -186,8 +187,7 @@ export function GeneratorView({
     setOutput("");
     setGenerationId(null);
     setStreaming(true);
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
+    const signal = streams.start();
 
     // Extract images from form values if present
     const images: ImageInput[] = [];
@@ -233,12 +233,12 @@ export function GeneratorView({
           setStreaming(false);
         },
       },
-      ctrl.signal,
+      signal,
     );
   }
 
   function stop() {
-    abortRef.current?.abort();
+    streams.abort();
     setStreaming(false);
   }
 

@@ -219,3 +219,27 @@ describe("GeneratorView — a note computed in code (P31.3)", () => {
     expect(await screen.findByText("Leerscore: 9 van 18 punten (50%).")).toBeInTheDocument();
   });
 });
+
+describe("GeneratorView — leaving stops the model call", () => {
+  it("aborts the running stream when the view closes", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const post = streamPost as unknown as ReturnType<typeof vi.fn>;
+    let signal: AbortSignal | undefined;
+    // A stream that is still running when the teacher leaves.
+    post.mockImplementationOnce(async (_url, _body, _cb, s: AbortSignal) => {
+      signal = s;
+      return new Promise<void>(() => {});
+    });
+    const user = userEvent.setup();
+    const base = getToolBySlug("authentic-assessment")!;
+    const tool = { ...base, inputs: base.inputs.map((f) => ({ ...f, required: false })) };
+    const { unmount } = render(
+      <GeneratorView tool={tool} profiles={profiles} defaultProfileId="p2" />,
+    );
+    await user.click(screen.getByRole("button", { name: /generate/i }));
+    expect(signal?.aborted).toBe(false);
+
+    unmount();
+    expect(signal?.aborted).toBe(true);
+  });
+});

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { ChatMessage } from "~/lib/registry/types";
 import { streamPost } from "~/lib/streamClient";
+import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 
 /** Stable id grouping every turn of one chat into a single saved project. */
@@ -27,7 +28,7 @@ interface ChatSessionOptions {
 export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const streams = useStreamAborts();
   // One id for the whole conversation, so each turn updates the same project.
   const sessionIdRef = useRef<string | null>(null);
   if (sessionIdRef.current === null) sessionIdRef.current = newSessionId();
@@ -55,7 +56,7 @@ export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) 
       // Add the new user message
       messageHistory.push({ role: "user", content: message });
 
-      abortControllerRef.current = new AbortController();
+      const signal = streams.start();
 
       await streamPost(
         "/api/stream",
@@ -76,7 +77,7 @@ export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) 
             setIsStreaming(false);
           },
         },
-        abortControllerRef.current.signal,
+        signal,
       );
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
@@ -88,9 +89,7 @@ export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) 
   };
 
   const stop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    streams.abort();
     setTurns((prev) => markLastTurnInterrupted(prev));
     setIsStreaming(false);
   };

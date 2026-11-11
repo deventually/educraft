@@ -636,6 +636,27 @@ describe("ChatView", () => {
     expect(screen.getByText("Interrupted")).toBeInTheDocument();
   });
 
+  it("aborts the running reply when the chat closes", async () => {
+    const { streamPost } = await import("~/lib/streamClient");
+    const mockStreamPost = streamPost as ReturnType<typeof vi.fn>;
+    let abortSignal: AbortSignal | undefined;
+    mockStreamPost.mockImplementation(async (_url, _body, _handlers, signal) => {
+      abortSignal = signal;
+      return new Promise<void>(() => {});
+    });
+
+    const user = userEvent.setup();
+    const { unmount } = render(<ChatView tool={mockTool} onGenerationStart={() => {}} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByPlaceholderText("Your message…"), "Explain recursion");
+    await user.keyboard("{Enter}");
+    await screen.findByRole("button", { name: "Stop" });
+    expect(abortSignal?.aborted).toBe(false);
+
+    unmount();
+    expect(abortSignal?.aborted).toBe(true);
+  });
+
   it("offers the full model list (catalog + CLIs + discovered local) in the chat picker", async () => {
     const user = userEvent.setup();
     const local = [{ id: "ollama::gemma4:31b", displayName: "Ollama · gemma4:31b" }];
