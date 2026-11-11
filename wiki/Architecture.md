@@ -333,6 +333,12 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `hoursPerWeek`) with `Activity.disciplineId` turn `sessionMinutes` into that discipline's hours
   in the lesson's week over its lessons that week (rounded to 5, capped at a session). `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
+- **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
+  and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
+  lessons, weeks, check), each with its tab, what is done of it and the next open step. The
+  course page shows it on the Overview tab and the course list per course. The presentation is
+  the domain-neutral `ProgressPanel` (`app/components/progress/`): a bar, the next step with how
+  and a button, and every step as a link to go deeper; another domain passes its own steps.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings

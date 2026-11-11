@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #273 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #274 gemerged)_
 
 ## Nu
 
+- **Disciplines met uren per week (#274) gemerged op 2026-11-11:** een optioneel blok
+  *Disciplines* op het tabblad Overzicht (naam, docent, uren per week) en een discipline per les.
+  *Les voorbereiden* rekent de lesduur uit de uren van die discipline in die week, verdeeld over
+  haar lessen in die week, afgerond op 5 minuten en nooit langer dan een lesmoment.
 - **Import leest ook de modulegegevens (#273) gemerged op 2026-11-11:** *Importeren uit bestaande
   documenten* haalt uit een modulewijzer of modulehandleiding nu ook studiefase, moduleleider,
   examinatoren, de inhoudelijke beschrijving en de literatuur; alleen lege velden worden
@@ -671,11 +675,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #273 gemerged)_
 
 ## Bezig
 
-- **Disciplines met uren per week (PR open):** een optioneel blok *Disciplines* op het tabblad
-  Overzicht (naam, docent, uren per week) en een discipline per les. *Les voorbereiden* rekent de
-  lesduur uit de uren van die discipline in die week, verdeeld over haar lessen in die week,
-  afgerond op 5 minuten en nooit langer dan een lesmoment. `CourseData.disciplines`,
-  `Activity.disciplineId`; geen migratie.
+- **Voortgang van een cursus (PR open):** bovenaan het tabblad Overzicht een blok *Voortgang*
+  met zes stappen van backwards design (cursusgegevens, leeruitkomsten, toetsen, lessen,
+  weekplanning, controle), een balk, de *Volgende stap* met uitleg en een knop, en elke stap als
+  link naar zijn tabblad. De cursuslijst toont per cursus de stappen en de volgende stap.
+  `courseProgress` is puur; `ProgressPanel` (`app/components/progress/`) is gedeeld, ook voor de
+  BDB/BKE.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

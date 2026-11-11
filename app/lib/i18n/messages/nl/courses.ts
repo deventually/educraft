@@ -243,6 +243,51 @@ export const courses = {
   },
   profile: "Onderwijscontext",
   profileNone: "Geen",
+  progress: {
+    allDone:
+      "Alle stappen zijn klaar. Maak bij Documenten en delen de modulewijzer, of laat bij Controle je reviewteam meekijken.",
+    goTo: "Naar {place}",
+    intro:
+      "Zo bouw je de cursus op, van wat de student aan het eind kan terug naar de lessen. Volg de volgende stap, of ga zelf naar een tabblad.",
+    next: "Volgende stap: {step}",
+    stepDone: "Klaar",
+    steps: {
+      assessments: {
+        how: "Bepaal eerst hoe je toetst. Maak een summatieve toets en kies welke leeruitkomsten die toetst, tot ze allemaal getoetst worden.",
+        status: "{done} van {total} leeruitkomsten getoetst",
+        title: "Toetsen",
+      },
+      check: {
+        how: "Loop de aandachtspunten na. Het zijn adviezen: jij beslist wat je aanpast.",
+        status: "{total} aandachtspunten",
+        title: "Controle",
+      },
+      details: {
+        how: "Vul de studielast in EC in. Met een startdatum krijgen de weken ook een datum.",
+        status: "Nog niet ingevuld",
+        title: "Cursusgegevens",
+      },
+      lessons: {
+        how: "Plan lessen en opdrachten die werken naar de toets toe, en kies per les welke leeruitkomsten ze onderwijst.",
+        status: "{done} van {total} leeruitkomsten in een les",
+        title: "Lessen en opdrachten",
+      },
+      outcomes: {
+        how: "Schrijf op wat de student aan het eind kan, met een werkwoord vooraan, zoals Ontwerpt of Legt uit. Drie tot zes is vaak genoeg.",
+        status: "Nog geen leeruitkomsten",
+        title: "Leeruitkomsten",
+      },
+      weeks: {
+        how: "Zet elke les en toets in een week. Op Overzicht zie je de cursus dan per week.",
+        status: "{done} van {total} in een week",
+        title: "Weekplanning",
+      },
+    },
+    stepsLabel: "Stappen",
+    stepTodo: "Nog te doen",
+    summary: "{done} van {total} stappen klaar",
+    title: "Voortgang",
+  },
   remove: "Verwijderen",
   save: "Opslaan",
   schedule: {

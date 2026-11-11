@@ -10,11 +10,24 @@ A **course** records three things and shows whether they line up:
 
 The course page has five tabs, each for one task:
 
-- **Overview:** the course details, the schedule, the disciplines, importing from an existing document and your lessons and tests per week.
+- **Overview:** the progress, the course details, the schedule, the disciplines, importing from an existing document and your lessons and tests per week.
 - **Learning outcomes:** what the student can do at the end, with the success criteria.
 - **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
 - **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
 - **Documents and sharing:** the module guide and module handbook, evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
+## Progress
+
+At the top of the Overview tab is the **Progress**: how many steps of your course are done. The steps follow *backwards design*, so you start from the goal and work back to the lessons:
+
+1. **Course details:** the study load in EC.
+2. **Learning outcomes:** what the student can do at the end.
+3. **Tests:** a summative test that assesses every learning outcome.
+4. **Lessons and assignments:** every learning outcome comes back in a lesson.
+5. **Week planning:** every lesson and test is in a week.
+6. **Check:** no points of attention left.
+
+Under **Next step** you see what is best to do now, how to do it and a button to where you do it. Want to look further yourself? Click a step or go to a tab: you do not have to follow the order. Your list of courses shows for each course how many steps are done and what the next step is.
 
 ## Schedule
 
