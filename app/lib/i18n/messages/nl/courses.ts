@@ -1,6 +1,8 @@
 export const courses = {
   activities: {
     add: "Activiteit toevoegen",
+    discipline: "Discipline",
+    disciplineNone: "Geen",
     empty: "Nog geen onderwijsactiviteiten.",
     intro: "Lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.",
     kinds: { assignment: "Opdracht", lesson: "Les" },
@@ -63,6 +65,17 @@ export const courses = {
   deleteBody:
     "De cursus en de koppelingen met je werk worden definitief verwijderd. Je werk zelf blijft bewaard.",
   deleteTitle: "Cursus verwijderen?",
+  disciplines: {
+    add: "Discipline toevoegen",
+    empty: "Nog geen disciplines.",
+    hoursPerWeek: "Uren per week",
+    hoursValue: "{n} uur per week",
+    intro:
+      "Optioneel. Bestaat je module uit disciplines met elk een eigen docent en eigen uren per week, zoals Webtech of Hardware? Zet ze hier. Geef je een les een discipline, dan rekent Les voorbereiden de lesduur uit de uren van die discipline in die week.",
+    name: "Naam",
+    teacher: "Docent",
+    title: "Disciplines",
+  },
   edit: "Bewerken",
   emptyBody:
     "Een cursus legt vast wat studenten moeten leren, hoe je het onderwijst en hoe je het toetst. LimeOnIt wijst dan aan waar dat niet op elkaar aansluit.",

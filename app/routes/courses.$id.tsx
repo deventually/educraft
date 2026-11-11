@@ -31,6 +31,7 @@ import { CourseMembers } from "~/components/courses/CourseMembers";
 import { CourseSchedule } from "~/components/courses/CourseSchedule";
 import { CourseProgress } from "~/components/courses/CourseProgress";
 import { courseProgress } from "~/lib/courses/progress";
+import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
@@ -228,6 +229,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               isOwner={isOwner}
             />
             <CourseSchedule schedule={data.schedule} />
+            <DisciplinesSection data={data} />
             <CourseImport
               courseName={course.name}
               startOpen={data.outcomes.length === 0}

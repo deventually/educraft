@@ -153,6 +153,47 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     expect("schedule" in d).toBe(false);
   });
 
+  // Disciplines are optional: a module of several subjects, each with its own hours per week.
+  it("adds, updates and removes a discipline; removing it frees its lessons", () => {
+    let d = ok(alignedCourse(), {
+      intent: "add-discipline",
+      name: "Webtech",
+      teacher: "Sanne",
+      hoursPerWeek: "6",
+    });
+    const disc = d.disciplines![0]!;
+    expect(disc).toMatchObject({ name: "Webtech", teacher: "Sanne", hoursPerWeek: 6 });
+    d = ok(d, { intent: "update-discipline", id: disc.id, name: "Webtechnologie", teacher: "" });
+    expect(d.disciplines![0]).toEqual({ id: disc.id, name: "Webtechnologie" });
+    d = ok(d, {
+      intent: "update-activity",
+      id: ACT1,
+      title: "Les 1",
+      kind: "lesson",
+      disciplineId: disc.id,
+    });
+    expect(d.activities.find((a) => a.id === ACT1)?.disciplineId).toBe(disc.id);
+    d = ok(d, { intent: "remove-discipline", id: disc.id });
+    expect("disciplines" in d).toBe(false);
+    expect(d.activities.find((a) => a.id === ACT1)).not.toHaveProperty("disciplineId");
+  });
+
+  it("refuses a lesson with an unknown discipline, and a discipline without a name", () => {
+    const bad = (fields: Record<string, string>) =>
+      applyCourseIntent(alignedCourse(), form(fields));
+    expect(
+      bad({ intent: "add-activity", title: "a", kind: "lesson", disciplineId: "ghost" }),
+    ).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(bad({ intent: "add-discipline", name: "" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ intent: "remove-discipline", id: "ghost" })).toEqual({
+      ok: false,
+      error: "not-found",
+    });
+  });
+
   it("refuses a schedule out of range or with an unknown delivery mode", () => {
     const bad = (fields: Record<string, string>) =>
       applyCourseIntent(alignedCourse(), form({ intent: "set-schedule", ...fields }));

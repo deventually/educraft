@@ -10,7 +10,7 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 
 De cursuspagina heeft vijf tabbladen, elk voor één taak:
 
-- **Overzicht:** de voortgang, de gegevens van de cursus, het lesrooster, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Overzicht:** de voortgang, de gegevens van de cursus, het lesrooster, de disciplines, importeren uit een bestaand document en je lessen en toetsen per week.
 - **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
 - **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
 - **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
@@ -32,6 +32,12 @@ Onder **Volgende stap** staat wat je nu het beste kunt doen, hoe je dat doet en 
 ## Lesrooster
 
 Onder **Lesrooster** op het tabblad Overzicht leg je één keer vast hoe de cursus loopt: het aantal weken, de lesmomenten per week, de duur van een lesmoment, de groepsgrootte en de contactvorm. Alles is optioneel, want elke opleiding werkt anders. Open je vanuit een les **Les voorbereiden**, dan staan de lesduur, de groepsgrootte en de contactvorm al ingevuld, net als de leeruitkomsten van die les, de titel en de lessen van de weken ervoor. Je kunt alles nog aanpassen.
+
+## Disciplines
+
+Bestaat je module uit disciplines, zoals Professionele vaardigheden, Hardware, Interaction Design en Webtech, met elk een eigen docent? Zet ze dan onder **Disciplines** op het tabblad Overzicht, met de docent en de **Uren per week**. Ook dit is optioneel: werkt je opleiding niet zo, dan laat je het leeg.
+
+Daarna kies je bij elke les de discipline. Open je vanuit zo'n les **Les voorbereiden**, dan staat de lesduur al ingevuld: de uren van die discipline in die week, verdeeld over haar lessen in die week en afgerond op vijf minuten, en nooit langer dan een lesmoment uit het lesrooster. Heeft de les geen discipline, dan geldt de duur van een lesmoment.
 
 ## De controles
 

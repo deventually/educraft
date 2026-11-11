@@ -44,6 +44,13 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("**Schedule** on the Overview tab");
   });
 
+  it("explains the optional disciplines and how they set a lesson's length", () => {
+    expect(getTopic("courses", "nl")).toContain("## Disciplines");
+    expect(getTopic("courses", "nl")).toContain("**Uren per week**");
+    expect(getTopic("courses", "en")).toContain("## Disciplines");
+    expect(getTopic("courses", "en")).toContain("**Hours per week**");
+  });
+
   it("explains the progress steps and the next step", () => {
     expect(getTopic("courses", "nl")).toContain("## Voortgang");
     expect(getTopic("courses", "nl")).toContain("**Volgende stap**");

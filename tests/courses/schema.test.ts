@@ -24,6 +24,15 @@ describe("CourseDataSchema (the boundary)", () => {
     expect(parses({ ...alignedCourse(), schedule: { deliveryMode: "pigeon" } })).toBe(false);
   });
 
+  it("keeps disciplines, and refuses a lesson with an unknown discipline", () => {
+    const disciplines = [{ id: "webtech", name: "Webtech", teacher: "Sanne", hoursPerWeek: 6 }];
+    const withLesson = alignedCourse();
+    withLesson.activities[0] = { ...withLesson.activities[0]!, disciplineId: "webtech" };
+    expect(CourseDataSchema.parse({ ...withLesson, disciplines }).disciplines).toEqual(disciplines);
+    expect(parses(withLesson)).toBe(false);
+    expect(parses({ ...alignedCourse(), disciplines: [{ id: "x", name: "" }] })).toBe(false);
+  });
+
   it("accepts a real start date and refuses anything else (P22.1)", () => {
     expect(parses({ ...alignedCourse(), startDate: "2026-09-02" })).toBe(true);
     expect(parses({ ...alignedCourse(), startDate: "2026-02-30" })).toBe(false);
