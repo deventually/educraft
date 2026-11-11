@@ -77,6 +77,7 @@ const ids = z.array(Id).max(COURSE_LIMITS.outcomes).default([]);
 const activity = z.object({
   title: required(COURSE_LIMITS.title),
   kind: z.enum(ACTIVITY_KINDS),
+  goal: optionalText(COURSE_LIMITS.goal),
   week,
   hours,
   outcomeIds: ids,
@@ -210,6 +211,7 @@ function run(
       return edit.updateActivity(d, id, {
         title: v.title,
         kind: v.kind,
+        goal: v.goal,
         week: v.week,
         hours: v.hours,
         outcomeIds: v.outcomeIds,
