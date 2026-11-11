@@ -667,6 +667,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #272 gemerged)_
 
 ## Bezig
 
+- **Voortgang van een cursus (PR open):** bovenaan het tabblad Overzicht een blok *Voortgang*
+  met zes stappen van backwards design (cursusgegevens, leeruitkomsten, toetsen, lessen,
+  weekplanning, controle), een balk, de *Volgende stap* met uitleg en een knop, en elke stap als
+  link naar zijn tabblad. De cursuslijst toont per cursus de stappen en de volgende stap.
+  `courseProgress` is puur; `ProgressPanel` (`app/components/progress/`) is gedeeld, ook voor de
+  BDB/BKE.
 - **Import leest ook de modulegegevens (PR open):** *Importeren uit bestaande documenten* haalt
   uit een modulewijzer of modulehandleiding nu ook studiefase, moduleleider, examinatoren, de
   inhoudelijke beschrijving en de literatuur; alleen lege velden worden aangevuld. Nieuwe prompt
