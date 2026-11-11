@@ -36,6 +36,7 @@ import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
+import { portfolioRoute } from "./portfolioRoute";
 import { privacy } from "./privacy";
 import { programmes } from "./programmes";
 import { projects } from "./projects";
@@ -96,6 +97,7 @@ export const en: Messages = {
   portfolioExport,
   portfolioReadiness,
   portfolioRehearsal,
+  portfolioRoute,
   privacy,
   programmes,
   projects,

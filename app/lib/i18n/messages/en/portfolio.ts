@@ -184,7 +184,6 @@ export const portfolio: Messages["portfolio"] = {
       "Nothing was read under these headings, because they belong to no learning outcome: {headings}. Move that text under a learning outcome's heading, or copy it over by hand.",
     unreadable: "This file could not be read. Choose a .docx you exported from LimeOnIt.",
   },
-  goThere: "Go there",
   heading: "BDB/BKE",
   intro:
     "Your dossier for the BDB and the BKE. Your own institution's framework is the yardstick. You decide what goes in and when a criterion has been shown.",
@@ -206,15 +205,6 @@ export const portfolio: Messages["portfolio"] = {
   },
   nameLabel: "Name",
   namePlaceholder: "For example: My BDB 2026",
-  nextStep: {
-    addEvidence: "Add evidence for {outcome}.",
-    buildFramework: "Fill in your institution's framework.",
-    confirmFramework: "Check the framework and confirm it.",
-    done: "Every criterion has been shown. Read the whole thing once more.",
-    markShown: "Check for {outcome} whether you have shown the criteria.",
-    writeChapter: "Write the chapter for {outcome}.",
-  },
-  nextStepTitle: "Next step",
   open: "Open",
   outcome: {
     addEvidence: "Add evidence",
@@ -304,28 +294,6 @@ export const portfolio: Messages["portfolio"] = {
   referenceRemove: "Remove reference",
   referencesEmpty: "No references yet.",
   referencesTitle: "References",
-  route: {
-    finishHint:
-      "Last step: mark each criterion as shown, choose whether to include the AI disclosure and download your dossier as a Word file.",
-    guide: "Guide to step {n}: {step}",
-    guideAnchors: {
-      collect: "step-2-collect-what-you-already-have",
-      fill: "step-3-fill-gaps-with-a-tool",
-      finish: "step-5-finish",
-      framework: "step-1-dossier-and-framework",
-      write: "step-4-write-your-chapters",
-    },
-    label: "Your dossier's route",
-    practise: "Practise your final interview with a rehearsal assessment",
-    stepOf: "Step {n} of 5",
-    steps: {
-      collect: "Collect what you already have",
-      fill: "Fill the gaps with a tool",
-      finish: "Finish",
-      framework: "Framework",
-      write: "Write your chapters",
-    },
-  },
   status: {
     "in-progress": "In progress",
     "not-started": "Not started",

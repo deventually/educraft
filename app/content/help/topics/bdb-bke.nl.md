@@ -1,6 +1,8 @@
 # Je BDB en BKE maken
 
-Deze handleiding neemt je stap voor stap mee, van een leeg dossier tot de documenten die je inlevert. Reken op een paar werkdagen als je praktijkmateriaal (lessen, feedback, een afgenomen toets) al grotendeels klaarligt. De route bovenaan je dossier volgt dezelfde vijf stappen.
+Deze handleiding neemt je stap voor stap mee, van een leeg dossier tot de documenten die je inlevert. Reken op een paar werkdagen als je praktijkmateriaal (lessen, feedback, een afgenomen toets) al grotendeels klaarligt.
+
+**Voortgang.** Bovenaan je dossier zie je hoe ver je bent: eerst het kader, dan elke leeruitkomst apart, dan afronden. De knop *Volgende stap* brengt je naar wat nu aan de beurt is; elke stap in de lijst is ook een link, als je zelf de diepte in wilt. Bovenaan elke leeruitkomst staan vier mijlpalen: Bewijs, Hoofdstuk, Laten beoordelen en Aangetoond. Zo kan LU1 al klaar zijn terwijl LU4 nog op een afgenomen toets wacht. *Laten beoordelen* telt het oordeel van de coach mee, maar ook wat jij zelf al op *Aangetoond* zette: de coach is een hulp, geen verplichting.
 
 **Drie afspraken vooraf**
 

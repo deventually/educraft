@@ -117,10 +117,10 @@ describe("Dit heb je misschien al", () => {
   });
 });
 
-describe("the route in five steps", () => {
-  it("tells the overview which step the dossier is at", async () => {
+describe("the guided route", () => {
+  it("tells the overview which learning outcome and milestone come next", async () => {
     const mine = await dossier();
     const data = await overview.loader({ request: get(), params: { id: mine.id } } as never);
-    expect(data.step).toBe("collect");
+    expect(data.route.next).toMatchObject({ kind: "outcome", milestone: { id: "evidence" } });
   });
 });

@@ -185,7 +185,6 @@ export const portfolio = {
     unreadable:
       "Dit bestand kon niet gelezen worden. Kies een .docx die je uit LimeOnIt exporteerde.",
   },
-  goThere: "Ga erheen",
   heading: "BDB/BKE",
   intro:
     "Je dossier voor de BDB en de BKE. Het kader van je eigen hogeschool is de maat. Jij bepaalt wat erin staat en wanneer een criterium is aangetoond.",
@@ -207,15 +206,6 @@ export const portfolio = {
   },
   nameLabel: "Naam",
   namePlaceholder: "Bijvoorbeeld: Mijn BDB 2026",
-  nextStep: {
-    addEvidence: "Voeg bewijs toe bij {outcome}.",
-    buildFramework: "Vul het kader van je hogeschool in.",
-    confirmFramework: "Controleer het kader en bevestig het.",
-    done: "Alle criteria zijn aangetoond. Lees het geheel nog één keer na.",
-    markShown: "Kijk bij {outcome} of je de criteria hebt aangetoond.",
-    writeChapter: "Schrijf het hoofdstuk bij {outcome}.",
-  },
-  nextStepTitle: "Volgende stap",
   open: "Openen",
   outcome: {
     addEvidence: "Bewijs toevoegen",
@@ -305,28 +295,6 @@ export const portfolio = {
   referenceRemove: "Bron verwijderen",
   referencesEmpty: "Nog geen bronnen.",
   referencesTitle: "Literatuur",
-  route: {
-    finishHint:
-      "Laatste stap: zet elk criterium op aangetoond, kies of je de AI-verantwoording opneemt en download je dossier als Word-bestand.",
-    guide: "Handleiding bij stap {n}: {step}",
-    guideAnchors: {
-      collect: "stap-2-verzamel-wat-je-al-hebt",
-      fill: "stap-3-vul-aan-met-een-tool",
-      finish: "stap-5-rond-af",
-      framework: "stap-1-dossier-en-kader",
-      write: "stap-4-schrijf-je-hoofdstukken",
-    },
-    label: "Route van je dossier",
-    practise: "Oefen je eindgesprek met een proefassessment",
-    stepOf: "Stap {n} van 5",
-    steps: {
-      collect: "Verzamel wat je al hebt",
-      fill: "Vul aan met een tool",
-      finish: "Rond af",
-      framework: "Kader",
-      write: "Schrijf je hoofdstukken",
-    },
-  },
   status: {
     "in-progress": "Mee bezig",
     "not-started": "Nog niet begonnen",

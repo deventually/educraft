@@ -164,9 +164,18 @@ describe("help registry — topics", () => {
     expect(headingSlug("Één ÿ — café!")).toBe("een-y-cafe");
     for (const lang of LOCALES) {
       const anchors = topicAnchors("bdb-bke", lang);
-      for (const a of Object.values(getMessages(lang).portfolio.route.guideAnchors))
+      for (const a of Object.values(getMessages(lang).portfolioRoute.guideAnchors))
         expect(anchors, `${lang}: #${a}`).toContain(a);
     }
+  });
+
+  it("explains the progress block of the dossier and the milestones per learning outcome", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("**Voortgang.**");
+    expect(nl).toContain("Bewijs, Hoofdstuk, Laten beoordelen en Aangetoond");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("**Progress.**");
+    expect(en).toContain("Evidence, Chapter, Assessment and Shown");
   });
 
   it("explains the teacher's week and the calendar file (P22.5)", () => {
