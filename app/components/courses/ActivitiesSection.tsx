@@ -50,6 +50,20 @@ function ActivityForm({ data, activity }: { data: CourseData; activity?: Activit
           value={activity?.hours}
         />
       </div>
+      <div>
+        <Label htmlFor={`${id}-goal`}>{a.goal}</Label>
+        <Input
+          id={`${id}-goal`}
+          name="goal"
+          maxLength={COURSE_LIMITS.goal}
+          defaultValue={activity?.goal}
+          aria-describedby={`${id}-goal-hint`}
+          className="mt-1"
+        />
+        <p id={`${id}-goal-hint`} className="mt-1 text-xs text-slate-500">
+          {a.goalHint}
+        </p>
+      </div>
       {data.disciplines?.length ? (
         <div className="max-w-xs">
           <Label htmlFor={`${id}-discipline`}>{a.discipline}</Label>
@@ -114,6 +128,7 @@ export function ActivitiesSection({
               className="scroll-mt-20 rounded-xl border border-slate-200 bg-white p-3"
             >
               <p className="font-medium text-slate-900">{act.title}</p>
+              {act.goal && <p className="text-sm text-slate-700">{act.goal}</p>}
               <p className="text-sm text-slate-600">
                 <MetaLine
                   parts={[

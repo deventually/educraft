@@ -68,6 +68,10 @@ describe("CourseDataSchema (the boundary)", () => {
     tooLongTitle.activities[0]!.title = "x".repeat(COURSE_LIMITS.title + 1);
     expect(parses(tooLongTitle)).toBe(false);
 
+    const tooLongGoal = alignedCourse();
+    tooLongGoal.activities[0]!.goal = "x".repeat(COURSE_LIMITS.goal + 1);
+    expect(parses(tooLongGoal)).toBe(false);
+
     const tooMany = emptyCourseData();
     tooMany.outcomes = Array.from({ length: COURSE_LIMITS.outcomes + 1 }, (_, i) => ({
       id: `o${i}`,

@@ -38,6 +38,8 @@ export interface Activity {
   /** Relative week 1..n (no dates in P20). */
   week?: number;
   kind: ActivityKind;
+  /** What the student can do after this lesson, in one sentence. Optional. */
+  goal?: string;
   outcomeIds: string[];
   /** Planned study hours for this activity. */
   hours?: number;
