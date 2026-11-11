@@ -67,6 +67,15 @@ describe("account menu: closing", () => {
     await user.click(menu);
     expect(details).toHaveAttribute("open");
   });
+
+  it("closes when Tab moves the focus out of it (WCAG 2.4.11)", async () => {
+    const { user, details, menu } = await openAccountMenu();
+    const links = Array.from(menu.querySelectorAll("a"));
+    links.at(-1)?.focus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Uitloggen" })).toHaveFocus();
+    expect(details).not.toHaveAttribute("open");
+  });
 });
 
 describe("account menu: arrow keys", () => {
@@ -143,5 +152,22 @@ describe("focus is visible on the menu links (WCAG 2.4.7)", () => {
     for (const link of Array.from(menu.querySelectorAll("a"))) {
       expect(link.className).toContain("focus-visible:ring-2");
     }
+  });
+});
+
+describe("mobile menu: Tab out", () => {
+  it("closes when Tab leaves its last link", async () => {
+    const { user, panel } = await openMobileMenu();
+    Array.from(panel.querySelectorAll("a")).at(-1)?.focus();
+    await user.tab();
+    expect(screen.queryByRole("navigation", { name: "Mobiele navigatie" })).toBeNull();
+  });
+
+  it("stays open when Tab goes from its button into the panel", async () => {
+    const { user, panel } = await openMobileMenu();
+    screen.getByRole("button", { name: "Menu sluiten" }).focus();
+    await user.tab();
+    expect(panel.querySelector("a")).toHaveFocus();
+    expect(screen.getByRole("navigation", { name: "Mobiele navigatie" })).toBeInTheDocument();
   });
 });

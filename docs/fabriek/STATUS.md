@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #256 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #257 gemerged)_
 
 ## Nu
 
+- **Skill /accessibility-review (#257) gemerged op 2026-11-11:** loopt een scherm door zoals een
+  toetsenbord- of schermlezergebruiker, omdat axe maar een deel vindt. Verplicht bij een PR die
+  verandert wat een gebruiker ziet; `/security-review` bij een PR die repositories, auth, sessies
+  of `/api` raakt; allebei in `/release`. BESLUIT-2026-11-11-7.
 - **AI-gebruik 13 maanden per persoon bewaren (#256) gemerged op 2026-11-11:** regels in
   `ai_usage` ouder dan de dertien maanden die de pagina *Gebruik* toont, worden maandtotalen per
   tool en model zonder persoon (`ai_usage_rollup`, migratie 0031), voor de hele instelling en

@@ -6,8 +6,9 @@ import { type KeyboardEvent, type RefObject, useEffect } from "react";
  * stay plain links in a <nav> (no role="menu"), Tab works as everywhere else, and
  * on top of that
  * - Escape closes and returns focus to the button;
- * - a pointer press outside the button and the panel closes, and leaves focus
- *   where the user put it;
+ * - a pointer press outside the button and the panel closes, and so does Tab
+ *   moving the focus out (an open panel never covers the focused element);
+ *   either way focus stays where the user put it;
  * - ArrowDown/ArrowUp move through the panel's links round-robin (from the button
  *   too: down to the first, up to the last); Home/End jump to the first/last link.
  *
@@ -26,13 +27,17 @@ export function useDisclosure({
 }) {
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
+    const closeOutside = (e: Event) => {
       const target = e.target as Node;
       if (button.current?.contains(target) || panel.current?.contains(target)) return;
       close();
     };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("focusin", closeOutside);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("focusin", closeOutside);
+    };
   }, [open, close, button, panel]);
 
   const onKeyDown = (e: KeyboardEvent) => {

@@ -101,20 +101,16 @@ export default function AppShell() {
       <RouteAnnouncer />
 
       <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur print:hidden">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4">
           <NavLink
             to="/"
             onClick={() => setMenuOpen(false)}
             className="flex shrink-0 items-center"
             aria-label={t.appName}
           >
-            <img
-              src="/logo.svg"
-              alt={t.appName}
-              className="h-[clamp(2.3rem,3.5vw,3.25rem)] w-auto"
-            />
+            <img src="/logo.svg" alt={t.appName} className="h-[clamp(2rem,3.5vw,3.25rem)] w-auto" />
           </NavLink>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Inline nav — visible from md upward. */}
             <nav aria-label={t.nav.label} className="hidden items-center gap-1 md:flex">
               {nav.map((item) => (

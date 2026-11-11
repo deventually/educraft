@@ -33,7 +33,7 @@ export function UserArea({
   }, []);
   const { onKeyDown } = useDisclosure({ open, close, button: summary, panel });
   return (
-    <div className="ml-1 flex items-center gap-1.5">
+    <div className="flex items-center gap-1 sm:ml-1 sm:gap-1.5">
       <details
         ref={ref}
         onToggle={(e) => setOpen(e.currentTarget.open)}
