@@ -269,9 +269,14 @@ function run(
         .object({
           code: optionalText(COURSE_LIMITS.code),
           studyYear: optionalText(COURSE_LIMITS.code),
+          phase: optionalText(COURSE_LIMITS.title),
+          leader: optionalText(COURSE_LIMITS.title),
+          examiners: optionalText(COURSE_LIMITS.title),
+          description: optionalText(COURSE_LIMITS.longText),
+          literature: optionalText(COURSE_LIMITS.longText),
         })
         .parse(raw);
-      return edit.setModule(d, { code: v.code, studyYear: v.studyYear });
+      return edit.setModule(d, v);
     }
     case "update-assessment-details": {
       const { id, ...v } = assessmentDetails.parse(raw);
