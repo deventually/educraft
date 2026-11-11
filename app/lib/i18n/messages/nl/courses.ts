@@ -4,6 +4,8 @@ export const courses = {
     discipline: "Discipline",
     disciplineNone: "Geen",
     empty: "Nog geen onderwijsactiviteiten.",
+    goal: "Lesdoel",
+    goalHint: "Optioneel, in één zin: wat kan de student na deze les?",
     intro: "Lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.",
     kinds: { assignment: "Opdracht", lesson: "Les" },
     outcomesLegend: "Welke leeruitkomsten onderwijst deze activiteit?",
