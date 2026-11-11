@@ -20,7 +20,8 @@ import { localizeError } from "~/lib/i18n/errors";
 import { createRateLimiter } from "~/server/rateLimit.server";
 import { env } from "~/server/env.server";
 import { log } from "~/server/log.server";
-import { checkQuota, recordUsage } from "~/server/repositories/usage.server";
+import { checkQuota } from "~/server/repositories/usage.server";
+import { meterCall } from "~/server/aiMeter.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { getDossier } from "~/server/repositories/portfolio.server";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
@@ -285,6 +286,7 @@ export async function action({ request }: Route.ActionArgs) {
     const signal = AbortSignal.any([request.signal, cancelled.signal]);
 
     const startedAt = Date.now();
+    const meter = meterCall(user.id, tool.slug, model);
     const tokens = provider.streamChat({
       model,
       system,
@@ -296,6 +298,7 @@ export async function action({ request }: Route.ActionArgs) {
       // providers ignore it. `undefined` (absent from the body) = model default.
       thinking: body.thinking,
       signal,
+      onUsage: meter.onUsage,
     });
 
     const stream = sseStream(tokens, {
@@ -306,22 +309,18 @@ export async function action({ request }: Route.ActionArgs) {
           outcome: "error",
           durationMs: Date.now() - startedAt,
         });
+        void meter.failed();
         return localizeError(err, locale, m.error.unknown);
       },
       onFinally: () => gate.release(),
       onCancel: () => {
         cancelled.abort();
+        void meter.failed();
         log("generation", { ...logFields, outcome: "aborted", durationMs: Date.now() - startedAt });
       },
       onComplete: async (full) => {
-        // Record usage against the daily quota and emit the success log line.
-        // Known limit: we count chars only. Tokens (inputTokens/outputTokens) need the AI SDK
-        // adapter to expose the stream `usage` promise (see lib/ai/adapters/aisdk.ts).
-        try {
-          await recordUsage(user.id, { chars: full.length });
-        } catch (e) {
-          console.error("Failed to record usage:", e);
-        }
+        // Count the call (quota + dashboard) and emit the success log line.
+        await meter.done(full.length);
         log("generation", {
           ...logFields,
           outcome: "ok",

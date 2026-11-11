@@ -81,7 +81,7 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
 | `RATE_LIMIT_PER_MINUTE` | no | Default 10 (per user). |
 | `RATE_LIMIT_CONCURRENT` | no | Default 3 (per user). |
 | `DAILY_REQUEST_LIMIT` | no | Default 50 (per user/day; admins exempt). |
-| `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 (enforced only once token data is surfaced). |
+| `DAILY_OUTPUT_TOKEN_LIMIT` | no | Default 200000 output tokens per user per day (the tool stream and the dossier calls report tokens; CLI agents do not). |
 | `CLIENT_IP_HEADER` | no | Header with the real client IP, set by your reverse proxy (e.g. `x-real-ip`). Login then also caps one IP at 30 failures per 15 minutes, on top of the always-on 5 per email address. Leave unset if the proxy does not overwrite the header. |
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
 | `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |

@@ -144,6 +144,18 @@ LimeOnIt is not tied to one model vendor.
   `npm run dev`, so they work there; `npm start` and the Docker image do not have them.
   The gates only bound what an admin/teacher may *offer*.
 
+- **Measuring AI use (usage dashboard, PR A).** Every adapter reports a call's tokens in one
+  shape, `TokenUsage` (`input` uncached, `cacheRead`, `cacheWrite`, `output`, `reasoning`), via
+  `normalizeUsage` (`app/lib/ai/usage.ts`): Anthropic reports uncached input apart from cache
+  reads and writes, OpenAI-compatible providers a total with a cached share, Ollama no cache;
+  `input + cacheRead + cacheWrite` is always the whole prompt. `generate` returns it; a stream
+  hands it to `GenerateOptions.onUsage` once it ends. `meterCall` (`app/server/aiMeter.server.ts`)
+  is the one place a call is counted: the daily quota (`usage`, now with real output tokens) and
+  `ai_usage`, one row per user, UTC day, source (tool slug or a fixed source such as
+  `portfolio-coach`) and model. Counters only, never content or a time of day. A call without a
+  token report counts as `unmeteredCalls`; a failed or aborted call as `failedCalls`. CLI agents
+  report no tokens.
+
 This matters for the vision: institutions in different countries can run LimeOnIt on
 **their** chosen engine and infrastructure (local-first included).
 

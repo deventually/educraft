@@ -7,6 +7,11 @@ vi.mock("ai", () => ({
       yield "Hel";
       yield "lo";
     })(),
+    usage: Promise.resolve({
+      inputTokens: 10,
+      inputTokenDetails: { noCacheTokens: 4, cacheReadTokens: 6, cacheWriteTokens: undefined },
+      outputTokens: 2,
+    }),
   })),
   generateText: vi.fn(async () => ({
     text: "Hello",
@@ -44,7 +49,25 @@ describe("aiSdkProvider", () => {
   it("generates text and maps token usage to our shape", async () => {
     const result = await aiSdkProvider.generate(base);
     expect(result.text).toBe("Hello");
-    expect(result.usage).toEqual({ input: 3, output: 5 });
+    expect(result.usage).toEqual({
+      input: 3,
+      cacheRead: 0,
+      cacheWrite: 0,
+      output: 5,
+      reasoning: 0,
+    });
+  });
+
+  it("reports a streamed call's tokens, cache included, once the stream ends", async () => {
+    const onUsage = vi.fn();
+    for await (const _ of aiSdkProvider.streamChat({ ...base, onUsage })) void _;
+    expect(onUsage).toHaveBeenCalledWith({
+      input: 4,
+      cacheRead: 6,
+      cacheWrite: 0,
+      output: 2,
+      reasoning: 0,
+    });
   });
 
   it("passes an explicit maxTokens through to maxOutputTokens", async () => {

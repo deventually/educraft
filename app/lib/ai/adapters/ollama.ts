@@ -1,4 +1,5 @@
 import { resolveModelInfo } from "../models";
+import { normalizeUsage } from "../usage";
 import type { GenerateOptions, LLMProvider } from "../types";
 import { env } from "~/server/env.server";
 import { LocalizedError } from "~/lib/i18n/errors";
@@ -90,10 +91,15 @@ async function post(opts: GenerateOptions, stream: boolean): Promise<Response> {
   return res;
 }
 
-/** The `content` of one streamed NDJSON line, or "" for thinking/keepalive lines. */
-function contentOf(line: string): string {
-  const obj = JSON.parse(line) as { message?: { content?: string } };
-  return obj.message?.content ?? "";
+interface ChatLine {
+  message?: { content?: string };
+  prompt_eval_count?: number;
+  eval_count?: number;
+}
+
+/** Ollama's counts (no prompt cache) in our shape; on the final line of a stream only. */
+function usageOf(line: ChatLine) {
+  return normalizeUsage({ inputTokens: line.prompt_eval_count, outputTokens: line.eval_count });
 }
 
 export const ollamaProvider: LLMProvider = {
@@ -101,19 +107,17 @@ export const ollamaProvider: LLMProvider = {
 
   async generate(opts) {
     const res = await post(opts, false);
-    const data = (await res.json()) as {
-      message?: { content?: string };
-      prompt_eval_count?: number;
-      eval_count?: number;
-    };
-    return {
-      text: data.message?.content ?? "",
-      usage: { input: data.prompt_eval_count ?? 0, output: data.eval_count ?? 0 },
-    };
+    const data = (await res.json()) as ChatLine;
+    return { text: data.message?.content ?? "", usage: usageOf(data) };
   },
 
   async *streamChat(opts) {
     const res = await post(opts, true);
+    // Thinking and keepalive lines carry no content; the final line carries the counts.
+    const report = (line: ChatLine) => {
+      const usage = usageOf(line);
+      if (usage) opts.onUsage?.(usage);
+    };
     const reader = res.body?.getReader();
     if (!reader) return;
     const decoder = new TextDecoder();
@@ -125,14 +129,19 @@ export const ollamaProvider: LLMProvider = {
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? ""; // keep the trailing partial line for the next chunk
       for (const line of lines) {
-        const delta = line.trim() ? contentOf(line.trim()) : "";
+        if (!line.trim()) continue;
+        const parsed = JSON.parse(line) as ChatLine;
+        const delta = parsed.message?.content ?? "";
         if (delta) yield delta;
+        report(parsed);
       }
     }
     const tail = buffer.trim();
     if (tail) {
-      const delta = contentOf(tail);
+      const parsed = JSON.parse(tail) as ChatLine;
+      const delta = parsed.message?.content ?? "";
       if (delta) yield delta;
+      report(parsed);
     }
   },
 };

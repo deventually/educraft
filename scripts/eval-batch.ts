@@ -83,7 +83,7 @@ function imageBlock(img: ImageInput): ContentBlock {
 function toGenerateResult(outcome: Extract<BatchOutcome, { ok: true }>): GenerateResult {
   return {
     text: outcome.text,
-    usage: outcome.usage,
+    usage: outcome.usage && { ...outcome.usage, cacheRead: 0, cacheWrite: 0, reasoning: 0 },
     finishReason: outcome.stopReason === "max_tokens" ? "length" : (outcome.stopReason ?? undefined),
   };
 }

@@ -10,7 +10,8 @@ import { getRuntimePrompt } from "~/lib/prompts";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
 import { effectiveDefaultModel } from "./availability.server";
-import { checkQuota, recordUsage } from "./repositories/usage.server";
+import { meterCall } from "./aiMeter.server";
+import { checkQuota } from "./repositories/usage.server";
 import { log } from "./log.server";
 
 /** `"quota"` when a teacher is over the daily quota; admins are not limited. */
@@ -31,6 +32,7 @@ export async function callPortfolioModel(
 ): Promise<{ text: string; model: string } | null> {
   const model = chosenModel ?? (await effectiveDefaultModel(user, DEFAULT_MODEL));
   const started = Date.now();
+  const meter = meterCall(user.id, event, model);
   try {
     const { text, usage } = await providerForModel(model).generate({
       model,
@@ -39,10 +41,12 @@ export async function callPortfolioModel(
       temperature: 0,
       maxTokens,
     });
-    await recordUsage(user.id, { chars: text.length, tokens: usage?.output });
+    if (usage) meter.onUsage(usage);
+    await meter.done(text.length);
     log(event, { promptId, model, outcome: "ok", durationMs: Date.now() - started });
     return { text, model };
   } catch (e) {
+    await meter.failed();
     log(event, {
       promptId,
       model,
