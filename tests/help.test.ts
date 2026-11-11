@@ -250,6 +250,18 @@ describe("help registry — topics", () => {
     expect(en).toContain("Overview, Evidence, Chapter and Assessment");
   });
 
+  it("explains guided writing per part of the chapter (BDB step 6)", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("**Schrijf per onderdeel.**");
+    expect(nl).toContain("*Stel me vragen*");
+    expect(nl).toContain("*Maak er een alinea van*");
+    expect(nl).not.toContain("Per criterium kun je dan een alinea laten opstellen");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("**Write part by part.**");
+    expect(en).toContain("*Ask me questions*");
+    expect(en).toContain("*Make a paragraph of it*");
+  });
+
   it("explains the teacher's week and the calendar file (P22.5)", () => {
     expect(getTopicTitle("week", "nl")).toBe("Je week");
     expect(getTopicTitle("week", "en")).toBe("Your week");

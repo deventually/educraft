@@ -194,6 +194,18 @@ export interface StoredProofread {
 }
 
 /**
+ * Guided writing (BDB/BKE plan, step 6): the coach's questions for one section of a chapter and
+ * the teacher's own answers, one per question. The answers are the teacher's words; a drafted
+ * paragraph may use only them and the linked evidence.
+ */
+export interface GuidedSection {
+  questions: string[];
+  answers: string[];
+  at: number;
+  model: string;
+}
+
+/**
  * What one learning outcome is about (step 4 of the guided route): a module, lesson or test in one
  * of the teacher's courses, or a short description in their own words, or both. Tools opened for
  * this outcome start on the course and item; nothing else reads the course live.
@@ -215,6 +227,8 @@ export interface DossierData {
   coachMode: "coach" | "draft";
   draftNoticeSeenAt?: number;
   aiLog: AiLogEntry[];
+  /** outcomeId → section id (an outline section, or a criterion without one) → questions and answers. */
+  guided?: Record<string, Record<string, GuidedSection>>;
   /** outcomeId → the latest coach review of that outcome. */
   reviews?: Record<string, StoredReview>;
   /** outcomeId → the latest proofreading of that outcome's chapter. */
@@ -225,4 +239,6 @@ export interface DossierData {
   anchors?: Record<string, Anchor>;
   /** The hand-in date as an ISO date (`YYYY-MM-DD`). */
   deadline?: string;
+  /** Hours a day the teacher has for the dossier, for the day plan; absent = a full day. */
+  hoursPerDay?: number;
 }

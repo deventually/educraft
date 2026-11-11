@@ -41,4 +41,12 @@ await createAnnouncement({
   remindAfterDays: null,
   createdBy: (await getUserByEmail(USERS.admin.email))?.id ?? "",
 });
+// A dossier with guided writing for the admin (portfolio-guided.spec.ts).
+const { createDossier } = await import("../app/server/repositories/portfolio.server");
+const { E2E_DOSSIER, guidedDossier } = await import("./seedDossier");
+await createDossier(
+  (await getUserByEmail(USERS.admin.email))?.id ?? "",
+  E2E_DOSSIER,
+  guidedDossier(),
+);
 console.log(`✓ e2e database seeded: ${DB_PATH}`);

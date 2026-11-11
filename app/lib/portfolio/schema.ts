@@ -33,6 +33,7 @@ export const LIMITS = {
   reference: 500,
   aiLog: 500,
   anchorDescription: 1_000,
+  hoursPerDay: 12,
 } as const;
 
 const Id = z.string().min(1).max(LIMITS.id);
@@ -59,6 +60,21 @@ const CriterionReviewSchema = z.object({
 const CoachReviewSchema = z.object({
   criteria: z.array(CriterionReviewSchema).max(LIMITS.criteriaPerOutcome),
   overall: z.string().max(COACH_LIMITS.overall),
+});
+
+/** Guided writing limits (BDB/BKE plan, step 6). */
+export const GUIDED_LIMITS = {
+  minQuestions: 2,
+  questions: 4,
+  question: 300,
+  answer: 3_000,
+} as const;
+
+const GuidedSectionSchema = z.object({
+  questions: z.array(z.string().min(1).max(GUIDED_LIMITS.question)).max(GUIDED_LIMITS.questions),
+  answers: z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.questions),
+  at: z.number().int().nonnegative(),
+  model: z.string().max(200),
 });
 
 /** Proofreading output limits. */
@@ -185,6 +201,16 @@ export const DossierDataSchema = z
         }),
       )
       .max(LIMITS.aiLog),
+    guided: z
+      .record(
+        Id,
+        z
+          .record(Id, GuidedSectionSchema)
+          .refine(
+            (r) => Object.keys(r).length <= LIMITS.outlineSections + LIMITS.criteriaPerOutcome,
+          ),
+      )
+      .optional(),
     reviews: z
       .record(
         Id,
@@ -211,6 +237,7 @@ export const DossierDataSchema = z
       .optional(),
     anchors: z.record(Id, AnchorSchema).optional(),
     deadline: IsoDate.optional(),
+    hoursPerDay: z.number().int().min(1).max(LIMITS.hoursPerDay).optional(),
   })
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: no dangling or duplicate ids.

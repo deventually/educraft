@@ -1,36 +1,28 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Form } from "react-router";
 import { wordCount } from "~/lib/portfolio/progress";
 import { markersIn } from "~/lib/portfolio/openSpots";
 import { LIMITS } from "~/lib/portfolio/schema";
-import { Button, HelpText, Label, Textarea } from "~/components/ui";
+import { Button, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { AiCallField } from "~/components/AiLeaveGuard";
 
-export interface DraftTarget {
-  criterionId: string;
-  /** 1-based position of the criterion in the outcome. */
-  n: number;
-  hasEvidence: boolean;
-}
-
 /**
- * The chapter for one outcome, with a live word count. In draft mode each
- * criterion gets a "draft a paragraph" button; it posts the current text too,
- * so unsaved edits are kept and the paragraph is appended to them.
+ * The chapter for one outcome, with a live word count. `children` sit in the
+ * same form above the text (guided writing): their buttons post the current
+ * text too, so unsaved edits are kept and a paragraph is appended to them.
  */
 export function ChapterEditor({
   outcomeId,
   defaultValue,
   maxWords,
-  drafts,
+  children,
 }: {
   outcomeId: string;
   defaultValue: string;
   maxWords?: number;
-  /** Present only in draft mode with a confirmed framework. */
-  drafts?: DraftTarget[];
+  children?: ReactNode;
 }) {
   const t = useT().portfolio;
   const [text, setText] = useState(defaultValue);
@@ -40,9 +32,10 @@ export function ChapterEditor({
   const openId = `chapter-open-${outcomeId}`;
   return (
     <Form method="post" className="grid gap-2">
-      {/* The draft buttons ask the AI: leaving mid-draft asks first. */}
+      {/* The guided-writing buttons ask the AI: leaving mid-call asks first. */}
       <AiCallField />
       <input type="hidden" name="outcomeId" value={outcomeId} />
+      {children}
       <Label htmlFor={`chapter-${outcomeId}`}>{t.outcome.chapterLabel}</Label>
       <Textarea
         id={`chapter-${outcomeId}`}
@@ -69,26 +62,6 @@ export function ChapterEditor({
           {t.outcome.saveChapter}
         </Button>
       </div>
-      {drafts && drafts.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {drafts.map((d) =>
-            d.hasEvidence ? (
-              <Button
-                key={d.criterionId}
-                type="submit"
-                name="intent"
-                value={`draft:${d.criterionId}`}
-                variant="secondary"
-                size="sm"
-              >
-                {fmt(t.draft.button, { n: d.n })}
-              </Button>
-            ) : (
-              <HelpText key={d.criterionId}>{fmt(t.draft.needsEvidence, { n: d.n })}</HelpText>
-            ),
-          )}
-        </div>
-      )}
     </Form>
   );
 }

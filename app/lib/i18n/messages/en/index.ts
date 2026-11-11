@@ -35,7 +35,9 @@ import { people } from "./people";
 import { pilot } from "./pilot";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
+import { portfolioGuided } from "./portfolioGuided";
 import { portfolioOutline } from "./portfolioOutline";
+import { portfolioPlan } from "./portfolioPlan";
 import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
 import { portfolioRoute } from "./portfolioRoute";
@@ -99,7 +101,9 @@ export const en: Messages = {
   pilot,
   portfolio,
   portfolioExport,
+  portfolioGuided,
   portfolioOutline,
+  portfolioPlan,
   portfolioReadiness,
   portfolioRehearsal,
   portfolioRoute,

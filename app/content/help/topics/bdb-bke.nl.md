@@ -24,6 +24,8 @@ Zie je in het menu geen **BDB/BKE**? Dan staat de werkplaats nog uit voor jou. H
 
 Een nieuw dossier opent de **start** in vier korte stappen: je traject, je kader, je anker per leeruitkomst en je inleverdatum. Elke stap mag je overslaan; je vindt de start later terug onder het overzicht van je dossier (**Startwizard**). Het **anker** is waar een leeruitkomst over gaat: een les, je module (een hele cursus) of een toets uit je cursussen, of een korte beschrijving. Een tool die je bij die leeruitkomst opent, begint met die les, module of toets, en een module of toets komt meteen als bewijs in je dossier.
 
+Het **dagplan** op het overzicht zegt hoeveel uur werk er nog ongeveer is en verdeelt dat over je werkdagen, in de volgorde van je route. Vul bij de planning je inleverdatum en je uren per dag in, dan zegt het plan ook of je op schema ligt. Het rekent met vaste richtwaarden per open stap (onder **Hoe LimeOnIt rekent**), zonder AI, en het is advies: het houdt niets tegen. Bovenaan staat wat je **vandaag aanvraagt**: verplicht bewijs van anderen, zoals feedback of een opname, dat er nog niet is. Dat kost wachttijd, dus vraag het aan voordat je gaat schrijven.
+
 1. Ga naar **BDB/BKE** en maak een dossier aan. Geef het een naam en kies BDB, BKE of beide. Lever je elke leeruitkomst apart in, dan is één dossier genoeg: je kunt per leeruitkomst exporteren.
 2. Open **Kader**. Je hebt twee wegen:
    - **Kader uit je formulier halen (aanbevolen).** Plak de tekst van het beoordelingsformulier, of kies het PDF- of Word-bestand. Het bestand blijft op je computer; alleen de tekst gaat naar het AI-model. LimeOnIt zet leeruitkomsten en criteria klaar, en waar het formulier een "goed"-niveau noemt ook *Wat het sterker maakt*.
@@ -72,7 +74,8 @@ Per leeruitkomst schrijf je één hoofdstuk. De woordenteller loopt mee, met het
 
 - **Laat beoordelen.** De coach leest je hoofdstuk als een strenge assessor en zegt per criterium *aangetoond*, *deels* of *nog niet*, met een letterlijk citaat uit je tekst, wat ontbreekt en hoe het sterker wordt. Citaten die niet echt in je tekst staan en bronnen die niet in je lijst staan, filtert LimeOnIt eruit. Sla je hoofdstuk eerst op.
 - **Lees proef.** Voorstellen voor spelling, zinsbouw, ik-vorm, herhaling en APA, elk met de zin zoals hij nu is en een betere versie. *Overnemen* vervangt precies die zin, *Negeren* haalt het voorstel weg.
-- **Alinea's laten opstellen (keuze).** Kies bij *Hoe wil je de coach gebruiken?* voor feedback én alinea's. Per criterium kun je dan een alinea laten opstellen, met alleen je gekoppelde bewijs als bron. Waar bewijs ontbreekt, zet de AI `[aanvullen: …]`. Die plekken vul je zelf in.
+- **Schrijf per onderdeel.** Op het tabblad Hoofdstuk staan de onderdelen van je hoofdstuk: de opzet uit je formulier, of per criterium als je formulier geen opzet geeft. Klik bij een onderdeel op *Stel me vragen*. De coach stelt twee tot vier vragen over je eigen praktijk, over wat de criteria vragen en je bewijs nog niet laat zien. Beantwoord ze kort, in je eigen woorden; je antwoorden worden bewaard met je hoofdstuk. Nog niets ingevuld en wil je andere vragen? Klik op *Andere vragen*.
+- **Alinea's laten opstellen (keuze).** Kies bij *Hoe wil je de coach gebruiken?* voor feedback én alinea's. Dan staat bij elk onderdeel met vragen *Maak er een alinea van*: LimeOnIt schrijft dat onderdeel uit je antwoorden en je gekoppelde bewijs, en zet het onder de kop van het onderdeel in je hoofdstuk. Wat ontbreekt, staat er als `[aanvullen: …]`; die plekken vul je zelf in. Kies je alleen feedback, dan blijven je antwoorden naast je tekst staan en schrijf je zelf.
 - **Status zetten.** Alleen jij zet een criterium op *Mee bezig* of *Aangetoond*. De coach doet dat nooit.
 - **Literatuur.** Zet je bronnen in APA in de lijst. De check waarschuwt als je een bron citeert die niet in de lijst staat, of een bron in de lijst nergens gebruikt.
 
@@ -118,7 +121,7 @@ Open plekken blijven open plekken. Je bijlagen worden niet teruggelezen; die bli
 
 **De coach doet niets.** Bevestig eerst het kader en sla je hoofdstuk op.
 
-**"Koppel eerst bewijs aan dit criterium."** Een alinea opstellen kan alleen met je eigen bewijs als bron.
+**"Beantwoord eerst een vraag of koppel bewijs."** Een alinea opstellen kan alleen met je eigen antwoorden of je eigen bewijs als bron.
 
 **Kan ik het kader later nog aanpassen?** Ja. Na een wijziging bevestig je het opnieuw. Het automatisch uithalen kan alleen zolang er nog geen status, bewijs of hoofdstuk aan hangt; daarna pas je met de hand aan.
 

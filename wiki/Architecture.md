@@ -310,6 +310,22 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   test into the dossier once as a course snapshot, linked only to criteria that `courseHint`
   matches. A tool opened for that outcome gets `?course=&item=` (`anchorToolQuery`), so the
   existing `prefillFromCourse` sources fill it in; no tool knows about anchors.
+  Guided writing per section (BDB/BKE plan, step 6; `guided.ts`, `portfolioGuided.server.ts`):
+  the chapter tab lists `writingSections(outcome)`, the form's outline or one section per
+  criterion, in `GuidedWriting` inside the chapter's own form, so every button also posts the
+  chapter text and the answers (`answer:<sectionId>`). `guideQuestions:<sectionId>` asks
+  `portfolio-questions@v1` for two to four questions (JSON; the code keeps 2–4 distinct ones and
+  drops one citing an unknown source); `DossierData.guided` keeps questions and answers per outcome
+  and section, and saving the chapter saves the answers too. In draft mode `guideDraft:<sectionId>`
+  sends the questions with the answers and the section's linked evidence to `portfolio-draft@v2`
+  and appends the text under the section's title (`appendSection`); the code refuses a paragraph
+  that cites an unknown source (one retry). It replaced the per-criterion paragraph of @v1. Eval:
+  `npm run eval:guided` (deterministic, `evals/portfolio-guided/`).
+  The day plan (`plan.ts`, step 7): `remainingWork` turns the open milestones of `dossierRoute`
+  into minutes with fixed rates (`PLAN_MINUTES`, shown to the teacher), `dayPlan` lays them over
+  working days (Monday to Friday, `hoursPerDay` or 8) from today and compares that with the
+  working days before `deadline`. Missing required evidence from others is listed to ask for
+  today. Pure and advisory: no AI, no gate. Shown on the overview and the planning step (`DayPlan`).
   Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
   of advisory points from the confirmed framework only, each with a "Los op" target; four points
   are ticked by the teacher (`tickReadiness`). It blocks only one thing: while an open spot is left (`openSpots.ts`: `[aanvullen: …]`, TODO, an empty chapter, evidence without text) the export gives a draft version, marked CONCEPT on every page, never the final one (BESLUIT-2026-11-07-4; otherwise advice, BESLUIT-2026-11-05-9).

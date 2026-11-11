@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildCoachMessage, buildDraftMessage } from "~/lib/portfolio/coach";
+import { buildCoachMessage } from "~/lib/portfolio/coach";
+import { buildSectionDraftMessage } from "~/lib/portfolio/guided";
 import { evidencePending } from "~/lib/portfolio/evidence";
 import { buildRehearsalContext } from "~/lib/portfolio/rehearsal";
 import type { DossierData } from "~/lib/portfolio/types";
@@ -35,8 +36,9 @@ describe("evidence that is still to come", () => {
   }
 
   it("is no source for a drafted paragraph", () => {
-    expect(buildDraftMessage(withPending(), LU, C1, "nl")).toBeNull();
-    expect(buildDraftMessage(sampleDossier(), LU, C1, "nl")).not.toBeNull();
+    // No outline: the criterion is the section.
+    expect(buildSectionDraftMessage(withPending(), LU, C1, "", "nl")).toBeNull();
+    expect(buildSectionDraftMessage(sampleDossier(), LU, C1, "", "nl")).not.toBeNull();
   });
 
   it("is named as still to come in the rehearsal", () => {

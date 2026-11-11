@@ -4,6 +4,7 @@ import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmtDate } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
+import { DEFAULT_HOURS_PER_DAY } from "~/lib/portfolio/plan";
 import { START_STEPS, type StartStep, startHref } from "~/lib/portfolio/start";
 import { TRACKS, type Track } from "~/lib/portfolio/types";
 import { cn } from "~/lib/utils";
@@ -148,8 +149,16 @@ export function FrameworkSummary({
   );
 }
 
-/** Step 4: the hand-in date. */
-export function PlanningStep({ deadline, daysLeft }: { deadline?: string; daysLeft?: number }) {
+/** Step 4: the hand-in date and the hours a day, for the day plan. */
+export function PlanningStep({
+  deadline,
+  daysLeft,
+  hoursPerDay,
+}: {
+  deadline?: string;
+  daysLeft?: number;
+  hoursPerDay?: number;
+}) {
   const ts = useT().portfolioStart.planning;
   return (
     <Card className="mt-6 p-5">
@@ -166,6 +175,22 @@ export function PlanningStep({ deadline, daysLeft }: { deadline?: string; daysLe
             aria-describedby="start-deadline-help"
           />
           <HelpText id="start-deadline-help">{ts.dateHelp}</HelpText>
+        </div>
+        <div className="max-w-xs">
+          <Label htmlFor="start-hours">{ts.hours}</Label>
+          <Input
+            id="start-hours"
+            name="hoursPerDay"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={LIMITS.hoursPerDay}
+            defaultValue={hoursPerDay ?? ""}
+            aria-describedby="start-hours-help"
+          />
+          <HelpText id="start-hours-help">
+            {fmt(ts.hoursHelp, { n: DEFAULT_HOURS_PER_DAY })}
+          </HelpText>
         </div>
         <div>
           <Button type="submit" variant="secondary">

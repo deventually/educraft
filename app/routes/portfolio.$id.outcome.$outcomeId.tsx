@@ -4,7 +4,9 @@ import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import type { DossierData } from "~/lib/portfolio/types";
+import type { DossierData, Outcome } from "~/lib/portfolio/types";
+import { writingSections } from "~/lib/portfolio/guided";
+import { type GuidedSectionView, GuidedWriting } from "~/components/portfolio/GuidedWriting";
 import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
@@ -22,7 +24,6 @@ import { AnchorSummary } from "~/components/portfolio/AnchorForm";
 import { startHref } from "~/lib/portfolio/start";
 import { useT } from "~/lib/i18n/useT";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
-import { evidencePending } from "~/lib/portfolio/evidence";
 import { outcomeRoute } from "~/lib/portfolio/route";
 import { requirementChecklist } from "~/lib/portfolio/requirements";
 import { RequiredEvidence } from "~/components/portfolio/RequiredEvidence";
@@ -62,9 +63,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     provisional: d.framework.provisional === true,
     coachMode: d.coachMode,
     showDraftNotice: d.coachMode === "draft" && d.draftNoticeSeenAt === undefined,
-    withEvidence: outcome.criteria
-      .filter((c) => d.evidence.some((e) => e.criterionIds.includes(c.id) && !evidencePending(e)))
-      .map((c) => c.id),
+    // Guided writing per section (BDB step 6): only on a confirmed framework, like the coach.
+    guided: d.framework.confirmedAt === undefined ? [] : guidedView(d, outcome),
     stored: storedReview(d.reviews?.[outcome.id]),
     proofread: storedProofread(d, outcome.id),
     toolHints: Object.fromEntries(
@@ -86,6 +86,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
     ),
   };
+}
+
+function guidedView(d: DossierData, outcome: Outcome): GuidedSectionView[] {
+  const number = new Map(outcome.criteria.map((c, i) => [c.id, i + 1]));
+  return writingSections(outcome).map((s) => {
+    const saved = d.guided?.[outcome.id]?.[s.id];
+    return {
+      ...s,
+      covers: s.criterionIds.flatMap((id) => number.get(id) ?? []).sort((a, b) => a - b),
+      questions: saved?.questions ?? [],
+      answers: saved?.questions.map((_, i) => saved.answers[i] ?? "") ?? [],
+    };
+  });
 }
 
 function storedReview(r: NonNullable<DossierData["reviews"]>[string] | undefined) {
@@ -121,30 +134,30 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       if (intent === "review") return { variant: "pending", message: t.portfolio.coach.pending };
       if (intent === "proofread")
         return { variant: "pending", message: t.portfolio.proofread.pending };
-      if (intent.startsWith("draft:"))
-        return { variant: "pending", message: t.portfolio.draft.pending };
+      if (intent.startsWith("guideQuestions:"))
+        return { variant: "pending", message: t.portfolioGuided.pendingQuestions };
+      if (intent.startsWith("guideDraft:"))
+        return { variant: "pending", message: t.portfolioGuided.pendingDraft };
       return { variant: "pending", message: t.toast.saving };
     },
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
       const tr = t.portfolio.proofread;
+      const done: Record<string, string> = {
+        refreshCourseEvidence: t.portfolio.outcome.refreshed,
+        review: t.portfolio.coach.done,
+        guideQuestions: t.portfolioGuided.questions,
+        guideDraft: t.portfolioGuided.done,
+        takeProofread: tr.taken,
+        skipProofread: tr.skipped,
+      };
       const message =
-        r.intent === "refreshCourseEvidence"
-          ? t.portfolio.outcome.refreshed
-          : r.intent === "review"
-            ? t.portfolio.coach.done
-            : r.intent === "draft"
-              ? t.portfolio.draft.done
-              : r.intent === "proofread"
-                ? r.proposals
-                  ? tr.done
-                  : tr.doneNone
-                : r.intent === "takeProofread"
-                  ? tr.taken
-                  : r.intent === "skipProofread"
-                    ? tr.skipped
-                    : t.portfolio.toastSaved;
+        r.intent === "proofread"
+          ? r.proposals
+            ? tr.done
+            : tr.doneNone
+          : (done[r.intent] ?? t.portfolio.toastSaved);
       return { variant: "success", message };
     },
   });
@@ -161,7 +174,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     provisional = false,
     coachMode,
     showDraftNotice,
-    withEvidence,
+    guided = [],
     stored,
     proofread,
     toolHints,
@@ -174,15 +187,6 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     required = [],
   } = loaderData;
   const [params] = useSearchParams();
-  const drafts =
-    coachMode === "draft" && confirmed
-      ? outcome.criteria.map((c, i) => ({
-          criterionId: c.id,
-          n: i + 1,
-          hasEvidence: withEvidence.includes(c.id),
-        }))
-      : undefined;
-
   const tab = outcomeTab(params.get("tab"));
   const tr = t.portfolioRoute;
 
@@ -340,17 +344,18 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 </Form>
               </div>
             )}
-            <ChapterOutline outcome={outcome} />
+            <ChapterOutline outcome={outcome} showOutline={guided.length === 0} />
             <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
             <div className="mt-3">
-              {/* Keyed on the saved text: a drafted paragraph reloads the editor. */}
+              {/* Keyed on the saved text and questions: a drafted paragraph or new questions reload it. */}
               <ChapterEditor
-                key={`${chapter.length}:${chapter.slice(-40)}`}
+                key={`${chapter.length}:${chapter.slice(-40)}:${guided.map((g) => g.questions.length).join()}`}
                 outcomeId={outcome.id}
                 defaultValue={chapter}
                 maxWords={maxWords}
-                drafts={drafts}
-              />
+              >
+                <GuidedWriting sections={guided} draftMode={coachMode === "draft"} />
+              </ChapterEditor>
             </div>
           </section>
         </>

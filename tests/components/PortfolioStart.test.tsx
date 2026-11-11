@@ -8,6 +8,7 @@ import { AnchorSummary } from "~/components/portfolio/AnchorForm";
 import { anchorOptions } from "~/lib/portfolio/anchors";
 import { emptyDossier } from "~/lib/portfolio/schema";
 import type { StartStep } from "~/lib/portfolio/start";
+import { dayPlan } from "~/lib/portfolio/plan";
 import { LU, sampleDossier } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -45,6 +46,9 @@ function startData(step: StartStep, d = sampleDossier(), courses = [course]) {
     courses,
     deadline: d.deadline,
     daysLeft: d.deadline ? 9 : undefined,
+    hoursPerDay: d.hoursPerDay,
+    plan: dayPlan(d, "2026-11-12"),
+    today: "2026-11-12",
   };
 }
 
@@ -124,12 +128,24 @@ describe("the start wizard", () => {
     const { container } = renderStep("planning", d);
     expect(screen.getByLabelText("Inleverdatum")).toHaveValue("2026-11-20");
     expect(screen.getByText(/nog 9 dagen/)).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Dagplan" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Klaar, naar je dossier" })).toHaveAttribute(
       "href",
       `/portfolio/${ID}`,
     );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
+});
+
+it("asks how many hours a day you have for the plan", () => {
+  const d = sampleDossier();
+  d.hoursPerDay = 6;
+  renderStep("planning", d);
+  const hours = screen.getByLabelText("Uren per dag");
+  expect(hours).toHaveValue(6);
+  expect(hours).toHaveAttribute("min", "1");
+  expect(hours).toHaveAttribute("max", "12");
+  expect(hours.closest("form")).toBe(screen.getByLabelText("Inleverdatum").closest("form"));
 });
 
 describe("the anchor on an outcome", () => {

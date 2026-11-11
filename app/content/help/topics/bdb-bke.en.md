@@ -24,6 +24,8 @@ No **BDB/BKE** in the menu? Then the workplace is still off for you. It is *On r
 
 A new dossier opens **getting started** in four short steps: your track, your framework, your anchor per learning outcome and your hand-in date. You may skip any step; you find it again below your dossier's overview (**Start wizard**). The **anchor** is what a learning outcome is about: a lesson, your module (a whole course) or a test from your courses, or a short description. A tool you open for that outcome starts with that lesson, module or test, and a module or test goes into your dossier as evidence right away.
 
+The **day plan** on the overview says about how many hours of work are left and spreads them over your working days, in the order of your route. Fill in your hand-in date and your hours a day in the planning, and the plan also says whether you are on track. It counts with fixed guide values per open step (under **How LimeOnIt counts**), without AI, and it is advice: it holds nothing back. At the top is what to **ask for today**: required evidence from others, such as feedback or a recording, that is not in yet. That takes waiting time, so ask for it before you start writing.
+
 1. Go to **BDB/BKE** and create a dossier. Give it a name and choose BDB, BKE or both. If you hand in each learning outcome on its own, one dossier is enough: you can export per learning outcome.
 2. Open **Framework**. There are two ways:
    - **Take the framework from your form (recommended).** Paste the text of the assessment form, or choose the PDF or Word file. The file stays on your computer; only the text goes to the AI model. LimeOnIt sets out learning outcomes and criteria, and where the form names a "good" level, also *What makes it stronger*.
@@ -72,7 +74,8 @@ You write one chapter per learning outcome. The word counter runs along, with yo
 
 - **Get a review.** The coach reads your chapter as a strict assessor and says per criterion *shown*, *partly* or *not yet*, with a literal quote from your text, what is missing and how to make it stronger. Quotes that are not really in your text and sources not in your list are filtered out. Save your chapter first.
 - **Proofread.** Proposals for spelling, sentence structure, first person, repetition and APA, each with the sentence as it is now and a better version. *Take over* replaces exactly that sentence, *Ignore* removes the proposal.
-- **Have paragraphs drafted (a choice).** Under *How do you want to use the coach?*, choose feedback and paragraphs. Per criterion you can then have a paragraph drafted, with only your linked evidence as the source. Where evidence is missing, the AI writes `[to add: …]`. You fill in those spots yourself.
+- **Write part by part.** The Chapter tab lists the parts of your chapter: the outline from your form, or one per criterion when your form gives none. At a part, click *Ask me questions*. The coach asks two to four questions about your own practice, about what the criteria ask and your evidence does not show yet. Answer them briefly, in your own words; your answers are saved with your chapter. Nothing filled in yet and want other questions? Click *Other questions*.
+- **Have paragraphs drafted (a choice).** Under *How do you want to use the coach?*, choose feedback and paragraphs. Each part with questions then has *Make a paragraph of it*: LimeOnIt writes that part from your answers and your linked evidence and puts it under the part's heading in your chapter. What is missing shows as `[to add: …]`; you fill in those spots yourself. If you choose feedback only, your answers stay beside your text and you write yourself.
 - **Set the status.** Only you set a criterion to *In progress* or *Shown*. The coach never does.
 - **References.** Put your sources in APA in the list. The check warns when you cite a source that is not in the list, or list a source you never use.
 
@@ -118,7 +121,7 @@ Open spots stay open spots. Your appendices are not read back; they stay as they
 
 **The coach does nothing.** Confirm the framework first and save your chapter.
 
-**"Link evidence to this criterion first."** Drafting a paragraph only works with your own evidence as the source.
+**"Answer a question or link evidence first."** Drafting a paragraph only works with your own answers or your own evidence as the source.
 
 **Can I change the framework later?** Yes. After a change, confirm it again. Automatic extraction only works while no status, evidence or chapter depends on it; after that you adjust by hand.
 

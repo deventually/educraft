@@ -3,12 +3,7 @@
  * call, the checks from `coach.ts`, usage accounting and the `aiLog` line.
  * Returns the next dossier data; the caller stores it. Never sets a status.
  */
-import {
-  buildCoachMessage,
-  buildDraftMessage,
-  parseCoachReview,
-  parseDraft,
-} from "~/lib/portfolio/coach";
+import { buildCoachMessage, parseCoachReview } from "~/lib/portfolio/coach";
 import { buildProofreadMessage, parseProofread } from "~/lib/portfolio/proofread";
 import { LIMITS } from "~/lib/portfolio/schema";
 import type {
@@ -22,13 +17,7 @@ import type { User } from "./auth.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 
-export type CoachError =
-  | "not-confirmed"
-  | "empty-chapter"
-  | "no-evidence"
-  | "not-draft-mode"
-  | "quota"
-  | "failed";
+export type CoachError = "not-confirmed" | "empty-chapter" | "quota" | "failed";
 
 export type CoachResult<T> =
   | ({ ok: true; data: DossierData } & T)
@@ -82,51 +71,6 @@ export async function reviewOutcome(
     log("portfolio-coach", { outcome: "rejected", reason: parsed.error, attempt });
   }
   return { ok: false, error: "failed" };
-}
-
-/**
- * Drafts one paragraph for one criterion from the teacher's linked evidence and
- * appends it to the chapter (`currentText` = what the teacher had in the
- * textarea, so unsaved edits are kept).
- */
-export async function draftParagraph(
-  user: User,
-  d: DossierData,
-  outcomeId: string,
-  criterionId: string,
-  currentText: string,
-  locale: Locale,
-  now = Date.now(),
-): Promise<CoachResult<{ paragraph: string }>> {
-  if (d.coachMode !== "draft") return { ok: false, error: "not-draft-mode" };
-  if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
-  // The model sees what the teacher has in the textarea now, saved or not.
-  const withText: DossierData = {
-    ...d,
-    chapters: d.chapters.map((ch) =>
-      ch.outcomeId === outcomeId ? { ...ch, text: currentText } : ch,
-    ),
-  };
-  const message = buildDraftMessage(withText, outcomeId, criterionId, locale);
-  if (!message) return { ok: false, error: "no-evidence" };
-  const blocked = await quotaGate(user);
-  if (blocked) return { ok: false, error: blocked };
-
-  const answer = await callPortfolioModel(user, "portfolio-draft@v1", message, locale, 1_000);
-  const paragraph = answer ? parseDraft(answer.text) : null;
-  if (!answer || !paragraph) return { ok: false, error: "failed" };
-
-  const base = currentText.trimEnd();
-  const text = base ? `${base}\n\n${paragraph}` : paragraph;
-  const existing = d.chapters.find((ch) => ch.outcomeId === outcomeId);
-  const chapters = existing
-    ? d.chapters.map((ch) => (ch.outcomeId === outcomeId ? { ...ch, text, aiDrafted: true } : ch))
-    : [...d.chapters, { id: crypto.randomUUID(), outcomeId, text, aiDrafted: true }];
-  const data = withLog(
-    { ...d, chapters },
-    { at: now, action: "draft", outcomeId, model: answer.model },
-  );
-  return { ok: true, data, paragraph };
 }
 
 /**
