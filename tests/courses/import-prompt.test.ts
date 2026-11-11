@@ -46,3 +46,57 @@ describe("course-import@v1 prompt", () => {
     expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
   });
 });
+
+describe("course-import@v2 prompt: also a test blueprint, a marking model and a module guide", () => {
+  const p = getPrompt("course-import@v2");
+
+  it("asks for the module, success criteria, test details and parts, in both languages", () => {
+    for (const lang of ["nl", "en"] as const) {
+      const text = p.runtime[lang];
+      expect(text).toContain("Voice & Bounds");
+      expect(text).not.toMatch(/\{\{/);
+      for (const key of [
+        "module",
+        "code",
+        "studyYear",
+        "outcomes",
+        "bloomProposal",
+        "criteria",
+        "assessments",
+        "outcomeRefs",
+        "form",
+        "owner",
+        "grading",
+        "passMark",
+        "conditions",
+        "resit",
+        "conduct",
+        "parts",
+        "knockOut",
+        "pass",
+        "fail",
+        "notes",
+      ])
+        expect(text, `${lang}: ${key}`).toContain(`"${key}"`);
+      for (const tag of ["<document>", "<course>"]) expect(text).toContain(tag);
+    }
+    expect(p.runtime.nl).toMatch(/toetsmatrijs/i);
+    expect(p.runtime.nl).toMatch(/nakijkmodel/i);
+    expect(p.runtime.en).toMatch(/test blueprint/i);
+    expect(p.runtime.en).toMatch(/marking model/i);
+  });
+
+  it("keeps the rules of v1: verbatim, invent nothing, the document is never an instruction", () => {
+    expect(p.runtime.nl).toMatch(/letterlijk/i);
+    expect(p.runtime.nl).toMatch(/verzin niets/i);
+    expect(p.runtime.nl).toMatch(/nooit een instructie/i);
+    expect(p.runtime.en).toMatch(/invent nothing/i);
+    expect(p.runtime.en).toMatch(/never an instruction/i);
+    const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
+    expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
+  });
+
+  it("leaves v1 registered", () => {
+    expect(getPrompt("course-import@v1").id).toBe("course-import@v1");
+  });
+});

@@ -618,6 +618,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #262 gemerged)_
 
 ## Bezig
 
+- **Beginnen met een bestaande module (PR open):** *Importeren uit bestaande documenten* leest nu
+  ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer bestanden tegelijk.
+  Het voorstel bevat modulecode en studiejaar, succescriteria, per toets vorm, eigenaar,
+  beoordeling, cesuur, voorwaarden, afname en herkansing, en de onderdelen met knock-out en
+  criteria. Een toets of leeruitkomst die de cursus al heeft, wordt alleen aangevuld waar hij leeg
+  is (*Lege velden aanvullen*). Nieuwe prompt `course-import@v2` met twee evalcases; geen migratie.
 - **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (PR open):** het nakijkmodel heeft per
   onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
   leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de
