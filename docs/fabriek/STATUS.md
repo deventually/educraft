@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #255 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #256 gemerged)_
 
 ## Nu
 
+- **AI-gebruik 13 maanden per persoon bewaren (#256) gemerged op 2026-11-11:** regels in
+  `ai_usage` ouder dan de dertien maanden die de pagina *Gebruik* toont, worden maandtotalen per
+  tool en model zonder persoon (`ai_usage_rollup`, migratie 0031), voor de hele instelling en
+  per team; de regels per persoon gaan weg. Een timer doet dit elk uur; een fout wordt gelogd en
+  stopt de app niet. BESLUIT-2026-11-11-6.
 - **Pagina Gebruik (#255) gemerged op 2026-11-11:** één pagina `/usage` voor iedereen, met per
   rol een andere kring (BESLUIT-2026-11-11-1). De docent ziet het eigen gebruik en wat er vandaag
   nog over is; een teamleider de teamtotalen, zonder namen en geld, en alleen het totaal bij
