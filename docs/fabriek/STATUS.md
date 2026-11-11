@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 en #260 gemerged)_
 
 ## Nu
 
+- **Maandlimieten in euro's (#260) gemerged op 2026-11-11:** de eigenaar zet een maandbudget voor
+  de instelling, beheer een maandlimiet per team en per docent (een eigen limiet vervangt die van
+  de teams). Vanaf 80% krijgt de docent één melding (een aandeel, nooit euro's), bij 100% weigert
+  de AI tot volgende maand; beheerders zijn uitgezonderd. Het aantal aanroepen per dag is niet
+  meer begrensd; een stille dagrem op output-tokens blijft (BESLUIT-2026-11-11-7 en -8).
 - **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (#263) gemerged op 2026-11-11:** het
   nakijkmodel heeft per onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
   leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de
