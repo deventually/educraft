@@ -6,6 +6,16 @@ A **course** records three things and shows whether they line up:
 - **Teaching activities:** the lessons and assignments, with the week and the learning outcomes they teach.
 - **Assessments:** formative or summative, with the learning outcomes they test and at what level. Also say whether an assessment is **supervised**, such as an exam in a hall or an oral exam. Your review team then sees how easily a student could leave the work to AI.
 
+## The course page
+
+The course page has five tabs, each for one task:
+
+- **Overview:** the course details, importing from an existing document and your lessons and tests per week.
+- **Learning outcomes:** what the student can do at the end, with the success criteria.
+- **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
+- **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
+- **Documents and sharing:** evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
 ## The checks
 
 After every change LimeOnIt checks whether everything lines up. You get a point of attention when:

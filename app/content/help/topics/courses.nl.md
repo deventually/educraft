@@ -6,6 +6,16 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 - **Onderwijsactiviteiten:** de lessen en opdrachten, met de week en de leeruitkomsten die ze onderwijzen.
 - **Toetsen:** formatief of summatief, met de leeruitkomsten die ze toetsen en op welk niveau. Geef ook aan of een toets **onder toezicht** is, zoals een tentamen in een zaal of een mondeling. Dan ziet je reviewteam hoe makkelijk een student het werk aan AI kan overlaten.
 
+## De cursuspagina
+
+De cursuspagina heeft vijf tabbladen, elk voor één taak:
+
+- **Overzicht:** de gegevens van de cursus, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
+- **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
+- **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
+- **Documenten en delen:** bewijs voor je dossier, gemaakt werk, de opleiding, delen met je team en wie meewerkt.
+
 ## De controles
 
 LimeOnIt kijkt na elke wijziging of alles op elkaar aansluit. Je krijgt een aandachtspunt als:

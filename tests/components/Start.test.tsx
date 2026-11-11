@@ -124,7 +124,7 @@ describe("Start (P27.3)", () => {
     const week = await screen.findByRole("region", { name: "Deze week" });
     expect(
       within(week).getByRole("link", { name: /Leeruitkomst 1 wordt niet getoetst/ }),
-    ).toHaveAttribute("href", "/courses/c1");
+    ).toHaveAttribute("href", "/courses/c1?tab=check");
     expect(within(week).getByRole("link", { name: /Rubric maken/ })).toHaveAttribute(
       "href",
       "/projects",
