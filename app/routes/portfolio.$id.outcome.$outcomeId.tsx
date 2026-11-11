@@ -16,6 +16,9 @@ import { availableToolNames, loadSuggestions, modelDisplayName } from "~/server/
 import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
 import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { snapshotCourses } from "~/server/courseEvidence.server";
+import { anchorView } from "~/server/dossierAnchors.server";
+import { AnchorSummary } from "~/components/portfolio/AnchorForm";
+import { startHref } from "~/lib/portfolio/start";
 import { useT } from "~/lib/i18n/useT";
 import { ProvisionalNotice } from "~/components/portfolio/ProvisionalNotice";
 import { evidencePending } from "~/lib/portfolio/evidence";
@@ -73,6 +76,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       .filter((c) => !linked.has(c.id) && courseHint(c))
       .map((c) => c.id),
     snapshotCourses: await snapshotCourses(user.id, d),
+    // What this outcome is about; tools for its criteria open on the anchor's course and item.
+    anchor: await anchorView(user.id, d.anchors?.[outcome.id]),
     suggestions: Object.fromEntries(
       outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
     ),
@@ -161,6 +166,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     courseHints = [],
     snapshotCourses = {},
     milestones = [],
+    anchor = null,
   } = loaderData;
   const [params] = useSearchParams();
   const drafts =
@@ -206,6 +212,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
           {milestones.length > 0 && (
             <OutcomeProgress dossierId={id} outcomeId={outcome.id} milestones={milestones} />
           )}
+          <AnchorSummary view={anchor} changeHref={startHref(id, "anchors")} />
           <CriteriaOverview criteria={outcome.criteria} />
         </>
       )}
@@ -236,6 +243,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                     step="evidence"
                     from={{ dossierId: id, criterionId: c.id }}
                     course={courseHints.includes(c.id)}
+                    anchor={anchor?.query}
                     className="mt-3"
                   />
                 </li>

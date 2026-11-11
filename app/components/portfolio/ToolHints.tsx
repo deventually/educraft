@@ -17,6 +17,7 @@ export function ToolHints({
   step,
   from,
   course = false,
+  anchor = {},
   className = "",
 }: {
   hints: ToolHintView[];
@@ -25,15 +26,19 @@ export function ToolHints({
   from?: { dossierId: string; criterionId: string };
   /** P26.4: this criterion can take a course snapshot as evidence. */
   course?: boolean;
+  /** The outcome's anchor (`?course=&item=`): the tool starts on that lesson, module or test. */
+  anchor?: Record<string, string>;
   className?: string;
 }) {
   const t = useT();
   const tt = t.portfolio.tools;
   if (hints.length === 0 && !course) return null;
   const how = tt.how as Record<string, string>;
-  const query = from
-    ? `?${new URLSearchParams({ dossier: from.dossierId, criterion: from.criterionId })}`
-    : "";
+  const params = new URLSearchParams({
+    ...(from && { dossier: from.dossierId, criterion: from.criterionId }),
+    ...anchor,
+  }).toString();
+  const query = params ? `?${params}` : "";
   return (
     <div className={`rounded-xl bg-slate-50 p-3 text-sm ${className}`}>
       <p className="font-medium text-slate-900">

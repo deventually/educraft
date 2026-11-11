@@ -295,6 +295,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   form as `unverified` ("Controleer dit"; saving the criterion clears it) and refuses to replace a
   framework that work depends on (`frameworkInUse`). The proposal is stored unconfirmed. The model
   call is shared with the coach in `portfolioAi.server.ts`.
+  The start wizard (`/portfolio/:id/start?step=`, `start.ts`): a new dossier goes straight to it;
+  four steps (track, framework, anchors, planning), each skippable. An anchor (`anchors.ts`,
+  `DossierData.anchors`) says per learning outcome which module, lesson or test of the teacher's
+  own courses it is about, a short description, or both; `deadline` is the hand-in date. Saving
+  anchors (`dossierAnchors.server.ts`) checks each course with `getCourse` and takes a module or
+  test into the dossier once as a course snapshot, linked only to criteria that `courseHint`
+  matches. A tool opened for that outcome gets `?course=&item=` (`anchorToolQuery`), so the
+  existing `prefillFromCourse` sources fill it in; no tool knows about anchors.
   Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
   of advisory points from the confirmed framework only, each with a "Los op" target; four points
   are ticked by the teacher (`tickReadiness`). It blocks only one thing: while an open spot is left (`openSpots.ts`: `[aanvullen: …]`, TODO, an empty chapter, evidence without text) the export gives a draft version, marked CONCEPT on every page, never the final one (BESLUIT-2026-11-07-4; otherwise advice, BESLUIT-2026-11-05-9).

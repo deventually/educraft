@@ -26,6 +26,7 @@ import { suggestEvidence } from "~/lib/portfolio/suggest";
 import { listGenerations } from "./repositories/generations.server";
 import { addGenerationToDossier } from "./evidence.server";
 import { refreshCourseEvidence } from "./courseEvidence.server";
+import { saveAnchors } from "./dossierAnchors.server";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
 import { resolveModelInfo } from "~/lib/ai/models";
@@ -126,6 +127,8 @@ export type PortfolioActionResult =
       clipped?: boolean;
       /** proofread: how many proposals came back. */
       proposals?: number;
+      /** anchors: course parts taken into the dossier as evidence. */
+      added?: number;
       /** reviewAll: chapters reviewed, and chapters whose review failed. */
       reviewed?: number;
       failed?: number;
@@ -245,6 +248,9 @@ async function runIntent(
     }
     return { ok: true, intent };
   }
+
+  // Start wizard: the anchors check the courses, so they are not a pure edit.
+  if (intent === "anchors") return saveAnchors(user, dossier, fd, locale);
 
   if (intent === "refreshCourseEvidence") {
     const refreshed = await refreshCourseEvidence(

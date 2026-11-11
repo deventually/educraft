@@ -5,6 +5,7 @@ export const toast: Messages["toast"] = {
   // Shown once after a redirect (P16); one per key in `~/lib/flash`.
   flash: {
     accountDeleted: "Your account has been deleted.",
+    dossierCreated: "Dossier created. Go through the four steps, or skip one.",
     passwordReset: "Your password has been changed. You are signed in.",
     rubricDeleted: "Rubric deleted.",
     rubricDuplicated: "Copy made. You are now editing the copy.",

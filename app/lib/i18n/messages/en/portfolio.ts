@@ -308,7 +308,6 @@ export const portfolio: Messages["portfolio"] = {
   },
   toastAddedToDossier: "Added to the dossier. Link it to a criterion there.",
   toastConfirmed: "Framework confirmed.",
-  toastCreated: "Dossier created.",
   toastDeleted: "Dossier deleted.",
   toastSaved: "Saved.",
   tools: {
