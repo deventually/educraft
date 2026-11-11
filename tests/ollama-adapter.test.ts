@@ -129,7 +129,25 @@ describe("ollamaProvider — native /api/chat adapter", () => {
     );
     const res = await ollamaProvider.generate(base);
     expect(res.text).toBe("Hello");
-    expect(res.usage).toEqual({ input: 3, output: 5 });
+    expect(res.usage).toEqual({ input: 3, cacheRead: 0, cacheWrite: 0, output: 5, reasoning: 0 });
+  });
+
+  it("reports a streamed call's tokens from the final line", async () => {
+    fetchMock.mockResolvedValue(
+      ndjsonResponse([
+        `{"message":{"role":"assistant","content":"Hi"}}`,
+        `{"message":{"role":"assistant","content":""},"done":true,"prompt_eval_count":10,"eval_count":2}`,
+      ]),
+    );
+    const onUsage = vi.fn();
+    for await (const _ of ollamaProvider.streamChat({ ...base, onUsage })) void _;
+    expect(onUsage).toHaveBeenCalledWith({
+      input: 10,
+      cacheRead: 0,
+      cacheWrite: 0,
+      output: 2,
+      reasoning: 0,
+    });
   });
 
   it("throws a localized error when Ollama is unreachable", async () => {

@@ -42,7 +42,8 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
   a request body (`app/server/errorLog.server.ts`).
 - **Right to erasure.** "Delete my account and data" (`/account`) runs
   `deleteUserCascade` (`app/server/repositories/users.server.ts`) — a single
-  transaction removing the user's feedback, pilot check-ins, usage counters, generations, context
+  transaction removing the user's feedback, pilot check-ins, usage counters (`usage` and
+  `ai_usage`), generations, context
   profiles, and their chat history, then the user row — and
   ends the session. Scoped by user id, so no other account is touched.
 - **Access control & scoping.** Invite-only accounts, two roles
@@ -50,6 +51,9 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
   only ever sees their own data). See `wiki/Authentication.md`.
 - **Abuse & cost bounds.** Per-user rate limits and a per-user daily quota
   (`app/server/repositories/usage.server.ts`) cap runaway use.
+- **AI-use measurement.** `ai_usage` keeps token counters per user, day, tool and model for the
+  usage dashboard: no prompt, no answer, no time of day. A team lead will see team totals only;
+  per person stays with the admin and the teacher (BESLUIT-2026-11-11-1).
 
 ## Retention
 

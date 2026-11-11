@@ -8,6 +8,7 @@ import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { handOverToCoOwners } from "./courseTransfer.server";
 import {
+  aiUsage,
   agentChoices,
   agentReviews,
   contextProfiles,
@@ -188,6 +189,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(feedback).where(eq(feedback.userId, id)).run();
     tx.delete(pilotCheckins).where(eq(pilotCheckins.userId, id)).run();
     tx.delete(usage).where(eq(usage.userId, id)).run();
+    tx.delete(aiUsage).where(eq(aiUsage.userId, id)).run();
     tx.delete(generations).where(eq(generations.userId, id)).run();
     tx.delete(contextProfiles).where(eq(contextProfiles.userId, id)).run();
     tx.delete(portfolioDossiers).where(eq(portfolioDossiers.userId, id)).run();
