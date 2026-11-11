@@ -20,9 +20,10 @@ function renderStep(opts: { proposal?: ImportProposal | null; notes?: string } =
   return render(<Stub initialEntries={["/courses/c1"]} />);
 }
 
-const outcome = (n: number, text: string) => ({
+const outcome = (n: number, text: string, bloom?: "create" | "apply") => ({
   key: `o${n}`,
   text,
+  ...(bloom ? { bloom } : {}),
   verbatim: false,
   existing: true,
   criteria: [],
@@ -31,8 +32,8 @@ const outcome = (n: number, text: string) => ({
 const proposal: ImportProposal = {
   source: "design",
   outcomes: [
-    outcome(1, "De student ontwerpt een datamodel."),
-    outcome(2, "De student schrijft SQL-queries."),
+    outcome(1, "De student ontwerpt een datamodel.", "create"),
+    outcome(2, "De student schrijft SQL-queries.", "apply"),
   ],
   assessments: [
     {
@@ -71,6 +72,8 @@ describe("CourseDesignAssessments (wizard step 2)", () => {
     ) as HTMLTextAreaElement;
     expect(forms.required).toBe(false);
     expect(forms.maxLength).toBe(500);
+    // Nothing to remark on before there is a proposal.
+    expect(within(section).queryByLabelText("Wat moet er anders?")).toBeNull();
     const submit = within(section).getByRole("button", { name: "Toetsprogramma voorstellen" });
     const form = submit.closest("form")!;
     expect((form.querySelector('input[name="intent"]') as HTMLInputElement).value).toBe(
@@ -102,6 +105,41 @@ describe("CourseDesignAssessments (wizard step 2)", () => {
     expect((form.querySelector('input[name="intent"]') as HTMLInputElement).value).toBe(
       "import-apply",
     );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("asks for the Bloom level of each covered outcome, the outcome's own level first", () => {
+    renderStep({ proposal });
+    const form = screen.getByRole("form", { name: "AI-voorstel" });
+    const test2 = within(form).getByRole("group", { name: "Toets 2" });
+    const level = within(test2).getByLabelText(
+      "Bloom-niveau in deze toets voor leeruitkomst 1",
+    ) as HTMLSelectElement;
+    expect(level.name).toBe("a2.bloom.o1");
+    expect(level.value).toBe("create");
+    expect(
+      (
+        within(test2).getByLabelText(
+          "Bloom-niveau in deze toets voor leeruitkomst 2",
+        ) as HTMLSelectElement
+      ).value,
+    ).toBe("apply");
+  });
+
+  it("asks again with a remark, sending the earlier proposal along", async () => {
+    const { container } = renderStep({ proposal });
+    const section = screen.getByRole("region", { name: "Volgende stap: het toetsprogramma" });
+    const remark = within(section).getByLabelText("Wat moet er anders?") as HTMLTextAreaElement;
+    expect(remark.required).toBe(false);
+    expect(remark.maxLength).toBe(500);
+    const again = within(section).getByRole("button", { name: "Nieuw voorstel" });
+    const form = again.closest("form")!;
+    expect(remark.closest("form")).toBe(form);
+    const previous = form.querySelector('input[name="previous"]') as HTMLInputElement;
+    expect(JSON.parse(previous.value).map((t: { title: string }) => t.title)).toEqual([
+      "Proeftoets SQL",
+      "Ontwerp webwinkel",
+    ]);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

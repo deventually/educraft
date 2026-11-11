@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Form, useNavigation } from "react-router";
 import { AiCallField } from "~/components/AiLeaveGuard";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
-import { DESIGN_ASSESSMENTS_LIMITS } from "~/lib/courses/designAssessments";
+import { DESIGN_ASSESSMENTS_LIMITS, previousProposal } from "~/lib/courses/designAssessments";
 import type { ImportProposal } from "~/lib/courses/import";
 import { useT } from "~/lib/i18n/useT";
 import { AiNotes, ProposalForm } from "./ProposalForm";
@@ -10,7 +10,9 @@ import { AiNotes, ProposalForm } from "./ProposalForm";
 /**
  * The course wizard, step 2 (backwards design: how do you know they can do it?). Shown while
  * the course has outcomes and no tests: the AI proposes a test programme over those outcomes,
- * optionally from the school's own assessment forms, and the teacher ticks what goes in.
+ * optionally from the school's own assessment forms, and the teacher ticks what goes in. Once
+ * there is a proposal, the teacher can ask again with a remark: the earlier proposal goes along
+ * (`previous`, checked again on the server) so the AI changes only what the remark asks.
  */
 export function CourseDesignAssessments({
   proposal,
@@ -47,9 +49,28 @@ export function CourseDesignAssessments({
             />
             <HelpText id={`${id}-forms-help`}>{a.formsHelp}</HelpText>
           </div>
+          {proposal && (
+            <div>
+              <input
+                type="hidden"
+                name="previous"
+                value={JSON.stringify(previousProposal(proposal))}
+              />
+              <Label htmlFor={`${id}-remark`}>{a.remark}</Label>
+              <Textarea
+                id={`${id}-remark`}
+                name="remark"
+                rows={2}
+                maxLength={DESIGN_ASSESSMENTS_LIMITS.remark}
+                aria-describedby={`${id}-remark-help`}
+                className="mt-1"
+              />
+              <HelpText id={`${id}-remark-help`}>{a.remarkHelp}</HelpText>
+            </div>
+          )}
           <div>
             <Button type="submit" disabled={busy}>
-              {a.submit}
+              {proposal ? a.again : a.submit}
             </Button>
           </div>
         </Form>

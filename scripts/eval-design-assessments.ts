@@ -22,13 +22,14 @@ import {
   type AssessmentsCase,
   type AssessmentsScore,
   assessmentsReportMarkdown,
+  caseBrief,
   caseCourse,
   scoreAssessmentsCase,
 } from "./eval-design-assessments-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
 const STEP = "course-design-assessments";
-const PROMPT_ID = `${STEP}@v1`;
+const PROMPT_ID = `${STEP}@v2`;
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -51,11 +52,10 @@ async function main() {
 
   for (const c of cases) {
     const course = caseCourse(c);
-    const forms = c.formsText ?? c.forms?.join(", ");
     const message = buildAssessmentsDesignMessage({
       name: c.name,
       data: course,
-      brief: forms ? { forms } : {},
+      brief: caseBrief(c),
       context: c.context ?? "",
     });
     if (dryRun) {

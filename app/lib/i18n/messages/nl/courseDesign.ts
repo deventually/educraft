@@ -1,10 +1,11 @@
 /** The course wizard: how a new course starts, step 1 (outcomes), 2 (tests) and 3 (lessons). */
 export const courseDesign = {
   assessments: {
+    again: "Nieuw voorstel",
     errors: {
       failed:
         "Het lukte niet om een toetsprogramma voor te stellen. Probeer het opnieuw, of voeg de toetsen zelf toe.",
-      invalid: "Noem de toetsvormen in hooguit 500 tekens.",
+      invalid: "Noem de toetsvormen en wat er anders moet elk in hooguit 500 tekens.",
       nothing:
         "De AI heeft meer nodig om een toetsprogramma voor te stellen. Lees de toelichting hieronder.",
       notReady:
@@ -21,6 +22,9 @@ export const courseDesign = {
     proposalIntro:
       "De AI maakte dit toetsprogramma bij je leeruitkomsten. Vink aan wat in de cursus komt en pas aan waar nodig. De wegingen zijn een voorstel: jij beslist als examinator.",
     ready: "Toetsprogramma klaar. Kies wat in de cursus komt.",
+    remark: "Wat moet er anders?",
+    remarkHelp:
+      "Niet verplicht. Zeg wat je aan het voorstel hieronder wilt veranderen, bijvoorbeeld: één eindopdracht in plaats van twee toetsen, of geen presentaties. De AI houdt de rest zoveel mogelijk gelijk.",
     submit: "Toetsprogramma voorstellen",
     title: "Volgende stap: het toetsprogramma",
     uncovered: "Deze leeruitkomsten zitten in geen summatieve toets: {list}",

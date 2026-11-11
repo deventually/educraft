@@ -156,7 +156,7 @@ async function designCourseAssessments(
     brief,
     context: await courseContext(course, locale),
   });
-  return propose(user, "course-design-assessments@v1", message, locale, (raw) =>
+  return propose(user, "course-design-assessments@v2", message, locale, (raw) =>
     parseAssessmentsDesign(raw, data),
   );
 }

@@ -393,7 +393,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `uncovered` (outcomes in no summative test) are shown above the tests, and the weight field reads
   "Weging (voorstel van de AI)". Same server path as step 1 (`propose` in `courseDesign.server.ts`:
   feature, quota, one retry, nothing stored); `import-apply` adds what is ticked. Evals:
-  `npm run eval:design-assessments`.
+  `npm run eval:design-assessments`. **Ask again with a remark:** once there is a proposal, the
+  step 2 form also sends `remark` and `previous` (the proposal in the answer's shape,
+  `previousProposal`); `parseAssessmentsBrief` checks both again (500 characters, at most eight
+  tests, only with a remark) and `course-design-assessments@v2` gets them as `<previousProposal>`
+  and `<remark>` data: follow the remark within the rules, keep the rest. **Bloom per coverage:**
+  the review form (`ProposalForm`, also for an import) has a level per covered outcome
+  (`<test>.bloom.<outcome>`, the outcome's own level first); `parseImportSelection` reads it into
+  `outcomeBlooms` and `applyImport` writes it into `coverage[].bloom`, so `bloom-below-outcome`
+  can speak from the first save.
 - **Course wizard (step 3).** A course with outcomes and tests and no lessons (`canDesignLessons`)
   shows "Volgende stap: de lessenreeks" on the overview (`CourseDesignLessons`), posting
   `design-lessons` with the teacher's wishes and, while the schedule has none, the weeks and

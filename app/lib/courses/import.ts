@@ -18,6 +18,7 @@ import * as edit from "./edit";
 import {
   assessmentExtra,
   type Clip,
+  coverBlooms,
   fillAssessment,
   fillCriteria,
   fillModule,
@@ -254,6 +255,8 @@ export interface ImportSelection {
     weight?: number;
     week?: number;
     outcomeKeys: string[];
+    /** The Bloom level this test assesses a covered outcome at, by outcome key. */
+    outcomeBlooms?: Partial<Record<string, BloomLevel>>;
     details?: SelectedDetails;
     parts?: SelectedPart[];
   }[];
@@ -307,6 +310,7 @@ export function parseImportSelection(fd: FormData): ImportSelection | null {
       const refs = z.array(OutcomeKey).parse(keys(`${key}.outcomes`));
       if (refs.some((r) => !known.has(r))) throw new Error("unknown outcome key");
       const { details, parts } = assessmentExtra(one(`${key}.extra`), known);
+      const outcomeBlooms = coverBlooms(refs, (o) => bloomField.parse(one(`${key}.bloom.${o}`)));
       return {
         key,
         pick: fd.has(`${key}.pick`),
@@ -315,6 +319,7 @@ export function parseImportSelection(fd: FormData): ImportSelection | null {
         ...(weight !== undefined ? { weight } : {}),
         ...(week !== undefined ? { week } : {}),
         outcomeKeys: [...new Set(refs)],
+        ...(outcomeBlooms ? { outcomeBlooms } : {}),
         details,
         parts,
       };
@@ -369,7 +374,8 @@ export function applyImport(d: CourseData, s: ImportSelection): ApplyImportResul
     }
     const coverage = a.outcomeKeys.flatMap((k) => {
       const outcomeId = idByKey.get(k);
-      return outcomeId ? [{ outcomeId }] : [];
+      const bloom = a.outcomeBlooms?.[k];
+      return outcomeId ? [{ outcomeId, ...(bloom ? { bloom } : {}) }] : [];
     });
     next = edit.addAssessment(next, {
       title: a.title,

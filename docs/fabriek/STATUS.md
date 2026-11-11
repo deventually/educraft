@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #286 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #287 gemerged)_
 
 ## Nu
 
+- **Cursuswizard, deel 3: de lessenreeks (#287) gemerged op 2026-11-11:** heeft een cursus
+  leeruitkomsten en toetsen maar nog geen lessen, dan stelt de AI op het Overzicht per week lessen
+  en opdrachten voor, elk met een lesdoel, de leeruitkomsten en (bij disciplines) de discipline,
+  zo dat elke leeruitkomst vóór zijn toets aan bod komt. De docent vinkt aan; nieuwe prompt
+  `course-design-lessons@v1` met evals (`npm run eval:design-lessons`), geen migratie.
 - **BDB/BKE: startwizard met een anker per leeruitkomst (#286) gemerged op 2026-11-11:** een
   nieuw dossier opent een start in vier stappen (traject, kader, ankers, planning), elk over te
   slaan. Het anker zegt per leeruitkomst over welke module, les of toets uit je eigen cursussen

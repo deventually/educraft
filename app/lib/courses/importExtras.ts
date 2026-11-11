@@ -322,3 +322,18 @@ export function fillAssessment(
   }
   return next;
 }
+
+/**
+ * The Bloom level per covered outcome a test's review row sends (`<test>.bloom.<outcome>`), for
+ * the coverage `applyImport` writes; `undefined` when none is chosen.
+ */
+export function coverBlooms<L extends string>(
+  refs: string[],
+  level: (outcomeKey: string) => L | undefined,
+): Partial<Record<string, L>> | undefined {
+  const levels = [...new Set(refs)].flatMap((o) => {
+    const l = level(o);
+    return l ? [[o, l] as const] : [];
+  });
+  return levels.length ? Object.fromEntries(levels) : undefined;
+}

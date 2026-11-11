@@ -145,6 +145,7 @@ export const courses = {
     complete: "Lege velden aanvullen",
     courseName: "Naam van het vak in het document",
     courseNameHint: "Beschrijft het document meer vakken? Dan zoekt de AI alleen dit vak.",
+    coverBloom: "Bloom-niveau in deze toets voor leeruitkomst {n}",
     covers: "Welke leeruitkomsten toetst deze toets?",
     done: "Toegevoegd: {outcomes} leeruitkomst(en) en {assessments} toets(en).",
     errors: {
