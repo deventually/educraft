@@ -79,9 +79,16 @@ export function anchorPart(data: CourseItems, ref: AnchorRef): CourseEvidencePar
   return null;
 }
 
-/** The criteria a course snapshot is evidence for: only those about alignment or a blueprint. */
+/** A criterion about the programme a module sits in, which a course's outcomes and matrix show. */
+const PROGRAMME =
+  /opleidingsprofiel|leerlijn|samenhang|curricul|programme profile|learning line|coherence/i;
+
+/**
+ * The criteria a course snapshot is evidence for: only those about alignment, a blueprint or the
+ * programme. None fits: the snapshot stays unlinked, and the teacher links it.
+ */
 export const snapshotCriteria = (outcome: Outcome): string[] =>
-  outcome.criteria.filter((c) => courseHint(c)).map((c) => c.id);
+  outcome.criteria.filter((c) => courseHint(c) || PROGRAMME.test(c.text)).map((c) => c.id);
 
 /** A tool opened for this outcome starts on the anchor's course and item (`?course=&item=`). */
 export function anchorToolQuery(anchor: Anchor | undefined): Record<string, string> {

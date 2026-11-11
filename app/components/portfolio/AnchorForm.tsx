@@ -129,7 +129,10 @@ export function AnchorSummary({
       ? fmt(to[view.kind], { course: view.course, item: view.item ?? "" })
       : null;
   return (
-    <section className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm" aria-labelledby="anchor-title">
+    <section
+      className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm"
+      aria-labelledby="anchor-title"
+    >
       <h2 id="anchor-title" className="font-medium text-slate-900">
         {to.label}
       </h2>

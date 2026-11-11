@@ -1,5 +1,5 @@
 import { Form, Link } from "react-router";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmtDate } from "~/lib/portfolio/format";
@@ -11,10 +11,9 @@ import { Button, Card, HelpText, Input, Label } from "~/components/ui";
 
 const linkClass = "font-medium text-violet-700 underline underline-offset-2";
 
-/** The four steps as links: every step may be opened, in any order. */
+/** The four steps as links: every step may be opened, in any order, and none is required. */
 export function StartSteps({ dossierId, current }: { dossierId: string; current: StartStep }) {
   const ts = useT().portfolioStart;
-  const at = START_STEPS.indexOf(current);
   return (
     <nav aria-label={ts.stepsLabel} className="mt-6">
       <ol className="flex flex-wrap gap-2">
@@ -30,11 +29,7 @@ export function StartSteps({ dossierId, current }: { dossierId: string; current:
                   : "border-slate-200 text-slate-700 hover:border-slate-300",
               )}
             >
-              {i < at ? (
-                <Check className="size-4" aria-hidden />
-              ) : (
-                <span aria-hidden>{i + 1}.</span>
-              )}
+              <span aria-hidden>{i + 1}.</span>
               {ts.steps[step]}
             </Link>
           </li>

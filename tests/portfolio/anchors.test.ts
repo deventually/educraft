@@ -136,7 +136,7 @@ describe("anchor choices", () => {
     expect(anchorPart(course, { courseId: "c1", itemId: "les-1" })).toBeNull();
   });
 
-  it("links a snapshot only to criteria about alignment or a blueprint", () => {
+  it("links a snapshot only to criteria about alignment, a blueprint or the programme", () => {
     const outcome = sampleDossier().framework.outcomes[0]!;
     expect(snapshotCriteria(outcome)).toEqual([]);
     const aligned = {
@@ -147,6 +147,11 @@ describe("anchor choices", () => {
       ],
     };
     expect(snapshotCriteria(aligned)).toEqual(["c9"]);
+    const design = {
+      ...outcome,
+      criteria: [{ id: "c8", text: "Je ontwerpt onderwijs dat past bij het opleidingsprofiel." }],
+    };
+    expect(snapshotCriteria(design)).toEqual(["c8"]);
   });
 
   it("opens a tool on the anchor's course and item, and on nothing without a course", () => {
