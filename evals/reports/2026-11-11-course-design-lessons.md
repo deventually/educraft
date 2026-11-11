@@ -15,5 +15,5 @@ precies met wat de code per week uitrekent: 6 weken × 2 (mbo), 10 weken × 4 ov
 disciplines (hbo), 8 weken × 2 (wo). Zonder lesrooster koos de AI 13 lessen over 7 weken, en de
 ingebedde instructie werd niet gevolgd.
 
-**Gelezen:** nog niet; de opgeslagen antwoorden staan lokaal bij Bastiaan
-(`evals/output/2026-11-11/course-design-lessons/`).
+**Gelezen (Bastiaan, 2026-11-11):** de lessen bouwen logisch op naar de toetsen en de lesdoelen
+zijn klein genoeg.
