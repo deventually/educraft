@@ -4,7 +4,7 @@ Elke uitgebrachte versie van LimeOnIt, de nieuwste bovenaan, met de datum waarop
 Per versie een paar regels in gewone taal: wat er verandert voor een docent, en wat wie de server
 beheert moet doen (een migratie, een nieuwe instelling in `.env`).
 
-Versienummers volgen [SemVer](https://semver.org/lang/nl/) (BESLUIT-2026-11-11-4):
+Versienummers volgen [SemVer](https://semver.org/lang/nl/) (BESLUIT-2026-11-11-5):
 
 - **Major** (`2.0.0`): wie LimeOnIt zelf installeert, moet iets met de hand doen voordat de nieuwe
   versie werkt, bijvoorbeeld een nieuwe verplichte instelling.

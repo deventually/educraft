@@ -6,6 +6,7 @@ import { useActionToast } from "~/components/Toast";
 import { useT } from "~/lib/i18n/useT";
 import type { LocalizedText } from "~/lib/i18n/localized";
 import { fmt } from "~/lib/i18n/format";
+import type { ModelPrice } from "~/lib/ai/prices";
 
 export interface ProviderView {
   id: string;
@@ -27,6 +28,11 @@ export interface ModelView {
   state: "active" | "retiring" | "retired";
   successor: { id: string; displayName: string } | null;
   usage: { results: number; people: number; teams: number; tools: number };
+  /** Euro per million tokens; null = no price yet (its calls count as unpriced). */
+  price: ModelPrice | null;
+  /** Whose price: the admin's own, or the catalog's list price (looked up on `priceChecked`). */
+  priceFrom: "admin" | "catalog" | null;
+  priceChecked?: string;
 }
 
 export interface ChoiceView {
@@ -44,7 +50,8 @@ export type ModelActionResult =
   | { cancelled?: { name: string; restored: boolean } }
   | { saved?: true; error?: string | true }
   | { providerAdded?: { name: string; setting?: string } }
-  | { providerRemoved?: { name: string } };
+  | { providerRemoved?: { name: string } }
+  | { priced?: { name: string; cleared?: boolean } };
 
 /** Toast every models action the same way: the done text, or the error text. */
 export function useModelToast(data: ModelActionResult | undefined) {
@@ -70,6 +77,10 @@ export function useModelToast(data: ModelActionResult | undefined) {
           ? fmt(a.providerAddDone, { name, setting })
           : fmt(a.providerAddReady, { name }),
       };
+    }
+    if ("priced" in d && d.priced) {
+      const text = d.priced.cleared ? a.priceCleared : a.priceDone;
+      return { variant: "success", message: fmt(text, { name: d.priced.name }) };
     }
     if ("providerRemoved" in d && d.providerRemoved)
       return { variant: "success", message: fmt(a.providerRemoveDone, d.providerRemoved) };

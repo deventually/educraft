@@ -382,7 +382,15 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   kijken. **Voor later:** de online versie voor kleinere instellingen krijgt een goede disclaimer
   over waar de gegevens heen gaan, ook over hoe lang een aanbieder een prompt in zijn cache bewaart
   (OpenAI zonder zero data retention: tot 24 uur). Bastiaan, 2026-11-11 (thread "Jev als System 1").
-- **BESLUIT-2026-11-11-4:** **Releases met een SemVer-tag, uitrollen met één commando.** Een
+- **BESLUIT-2026-11-11-4:** **Prijzen per model: de prijslijst in de catalogus, een eigen prijs
+  op het scherm.** Elk model in `config/models.json` krijgt de lijstprijs van de aanbieder per
+  miljoen tokens, met de dag van opzoeken en de bronpagina, en een wisselkoers van de ECB voor
+  dollars. Beheer kan per model een eigen prijs zetten (een schoolcontract); die gaat voor. Een
+  aanroep krijgt de prijs van dat moment mee. De skill `/model-prices` houdt de lijstprijzen bij,
+  voor elke release; een vaste maandelijkse routine komt er pas als Bastiaan dat wil. Bastiaan,
+  2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Dit is teveel om bij te
+  houden anders").
+- **BESLUIT-2026-11-11-5:** **Releases met een SemVer-tag, uitrollen met één commando.** Een
   release is een tag `vX.Y.Z` op `main`, die alleen Bastiaan zet; Claude-sessies mogen geen tag
   of release maken. De versie staat in `package.json` en in `RELEASE.md`, met de datum en notes in
   gewone taal. Major: wie zelf installeert, moet iets met de hand doen; minor: iets nieuws (ook

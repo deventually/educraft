@@ -83,6 +83,25 @@ describe("Admin audit log", () => {
     expect(rows[5]).toHaveTextContent("claude-haiku-4-5, gpt-5");
   });
 
+  it("explains a model price change, and a removed price", () => {
+    renderRoute({
+      entries: [
+        entry({
+          action: "modelPriceChanged",
+          detail: { models: ["claude-sonnet-5-5"], price: { input: 3, output: 15 } },
+        }),
+        entry({ action: "modelPriceChanged", detail: { models: ["gpt-5"], price: null } }),
+      ],
+      canClean: false,
+    });
+    const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
+    expect(rows[0]).toHaveTextContent("Prijs van een model gewijzigd");
+    expect(rows[0]).toHaveTextContent(
+      "claude-sonnet-5-5 · € 3,00 in, € 15,00 uit per miljoen tokens",
+    );
+    expect(rows[1]).toHaveTextContent("gpt-5 · prijs weggehaald");
+  });
+
   it("says so when nothing has happened yet", () => {
     renderRoute({ entries: [], canClean: false });
     expect(screen.getByText(/nog geen beheeracties/i)).toBeInTheDocument();

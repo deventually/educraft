@@ -4,10 +4,21 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #249 en #251 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #252 gemerged)_
 
 ## Nu
 
+- **Prijzen per model (#252) gemerged op 2026-11-11:** elk model in `config/models.json` heeft
+  de lijstprijs van de aanbieder per miljoen tokens, met de dag van opzoeken en de bronpagina, en
+  een ECB-wisselkoers voor dollars. Beheer kan per model een eigen prijs zetten (een
+  schoolcontract); die gaat voor. Elke aanroep krijgt de prijs van dat moment mee (migratie
+  0030). De skill `/model-prices` houdt de lijstprijzen bij voor elke release.
+  BESLUIT-2026-11-11-4.
+- **Prompt caching (#250) gemerged op 2026-11-11:** elke aanbieder in `config/models.json` heeft
+  een cachestrategie (`cache`). Bij Anthropic markeert LimeOnIt zelf wat bewaard wordt (de
+  systeemprompt en de beurt voor de laatste). Bij OpenAI, Mistral en OpenRouter gaat er per gesprek
+  een vaste sleutel mee. De andere aanbieders cachen vanzelf. Alleen chats; een losse aanroep niet.
+  Herhaalde invoer wordt zo goedkoper; wat het scheelt, is te zien in `ai_usage` (cache lezen).
 - **AI-gebruik meten (#251) gemerged op 2026-11-11:** elke AI-aanroep telt nu mee per gebruiker,
   dag, tool en model, in de nieuwe tabel `ai_usage` (migratie 0029): invoer, cache lezen, cache
   schrijven, uitvoer en denken, voor elke aanbieder gelijk getrokken. Chats en mislukte aanroepen

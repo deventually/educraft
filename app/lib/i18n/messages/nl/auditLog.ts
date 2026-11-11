@@ -9,6 +9,7 @@ export const auditLog = {
     inviteCreated: "Uitnodiging gemaakt",
     inviteRevoked: "Uitnodiging ingetrokken",
     logCleaned: "Logboek opgeruimd",
+    modelPriceChanged: "Prijs van een model gewijzigd",
     passwordSet: "Wachtwoord ingesteld",
     reactivated: "Weer geactiveerd",
     resetLinkCreated: "Herstellink gemaakt",
@@ -49,6 +50,8 @@ export const auditLog = {
   intro:
     "Wie wat heeft veranderd aan rollen, wachtwoorden, accounts, uitnodigingen en modelkeuze. De nieuwste {n} acties staan bovenaan.",
   invites: "{n} uitnodigingen",
+  price: "{input} in, {output} uit per miljoen tokens",
+  priceRemoved: "prijs weggehaald",
   role: "Rol: {role}",
   viaServer: "via de server",
 };

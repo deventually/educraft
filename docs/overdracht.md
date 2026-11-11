@@ -63,7 +63,7 @@ Er zijn nog drie plekken met iets geheims, buiten `.env`:
 
 ## 3. Deployen
 
-Een release is een git-tag `vX.Y.Z` op `main` (BESLUIT-2026-11-11-4). Alleen Bastiaan zet die tag;
+Een release is een git-tag `vX.Y.Z` op `main` (BESLUIT-2026-11-11-5). Alleen Bastiaan zet die tag;
 Claude-sessies mogen het niet (`.claude/settings.json`). De versie staat ook in `package.json`, en
 [`RELEASE.md`](../RELEASE.md) zegt per versie de datum en wat er verandert.
 

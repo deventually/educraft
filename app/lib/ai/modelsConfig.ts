@@ -122,6 +122,31 @@ const SettingsSchema = z.object({
   maxTokens: z.int().min(256).max(200_000).optional(),
 });
 
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const listRate = z.number().finite().min(0).max(10_000);
+
+/**
+ * A model's list price per million tokens as the provider publishes it (usually dollars),
+ * with the day it was looked up and the page it came from. The admin can set an own
+ * price on screen; that one wins. Kept current with the `/model-prices` skill.
+ */
+const ListPriceSchema = z.object({
+  currency: z.enum(["USD", "EUR"]),
+  input: listRate,
+  output: listRate,
+  cacheRead: listRate.optional(),
+  cacheWrite: listRate.optional(),
+  checked: isoDate,
+  source: z.url(),
+});
+
+/** Dollars to euros for the list prices, dated and sourced like a price. */
+const ExchangeRateSchema = z.object({
+  usdToEur: z.number().positive().max(10),
+  checked: isoDate,
+  source: z.url(),
+});
+
 const ConfigModelSchema = z.object({
   id: z.string().min(1),
   provider: z.string().min(1),
@@ -134,6 +159,7 @@ const ConfigModelSchema = z.object({
   local: z.boolean().optional(),
   clientSelectable: z.boolean(),
   settings: SettingsSchema.optional(),
+  price: ListPriceSchema.optional(),
 });
 
 /**
@@ -151,6 +177,7 @@ const ModelsConfigSchema = z.object({
   providers: z.array(ConfigProviderSchema).default([]),
   models: z.array(ConfigModelSchema).min(1),
   speechToText: SpeechToTextSchema.optional(),
+  exchangeRate: ExchangeRateSchema.optional(),
 });
 
 export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
@@ -182,6 +209,11 @@ export function parseModelsConfig(raw: unknown): ModelsConfig {
       );
     }
     if (seen.has(m.id)) throw new Error(`config/models.json: model "${m.id}" is listed twice.`);
+    if (m.price?.currency === "USD" && !res.data.exchangeRate) {
+      throw new Error(
+        `config/models.json: model "${m.id}" has a dollar price, so "exchangeRate" is needed.`,
+      );
+    }
     seen.add(m.id);
   }
   if (!seen.has(res.data.default)) {

@@ -1,5 +1,5 @@
 /**
- * Pure helpers for releases (BESLUIT-2026-11-11-4): read RELEASE.md and check a tag against it.
+ * Pure helpers for releases (BESLUIT-2026-11-11-5): read RELEASE.md and check a tag against it.
  * Tested in tests/deploy/release.test.ts; `scripts/release-notes.ts` runs them in the release
  * workflow.
  */

@@ -49,6 +49,8 @@ const loaderData = {
       state: "active",
       successor: null,
       usage: { results: 12, people: 2, teams: 1, tools: 23 },
+      price: { input: 3, output: 15, cacheRead: 0.3 },
+      priceFrom: "admin",
     },
     {
       id: "claude-haiku-4-5",
@@ -58,6 +60,8 @@ const loaderData = {
       state: "retiring",
       successor: { id: "anthropic/claude-haiku-5-5", displayName: "Claude Haiku 5.5" },
       usage: { ...none, results: 3 },
+      price: null,
+      priceFrom: null,
     },
     {
       id: "claude-sonnet-4-6",
@@ -67,6 +71,8 @@ const loaderData = {
       state: "retired",
       successor: { id: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5" },
       usage: none,
+      price: null,
+      priceFrom: null,
     },
     {
       id: "anthropic/claude-haiku-5-5",
@@ -76,6 +82,8 @@ const loaderData = {
       state: "active",
       successor: null,
       usage: none,
+      price: null,
+      priceFrom: null,
     },
   ],
   local: {
@@ -95,8 +103,8 @@ const loaderData = {
   ],
 };
 
-function renderRoute(action?: (args: { request: Request }) => unknown) {
-  const props = loaderData as unknown as ComponentProps<typeof ModelsTab> &
+function renderRoute(action?: (args: { request: Request }) => unknown, data: object = loaderData) {
+  const props = data as unknown as ComponentProps<typeof ModelsTab> &
     ComponentProps<typeof ProvidersTab>;
   const Stub = createRoutesStub([
     {
@@ -279,6 +287,62 @@ describe("Admin — models part of Tools and models", () => {
 
   it("has no axe violations", async () => {
     const { container } = renderRoute();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("Admin — the price of a model (usage dashboard)", () => {
+  it("shows a model's price per million tokens, or that it has none", () => {
+    renderRoute();
+    expect(
+      within(card("Claude Sonnet 5.5")).getByText(/€ 3,00 in · € 15,00 uit/),
+    ).toBeInTheDocument();
+    expect(within(card("Claude Sonnet 5.5")).getByText("(eigen prijs)")).toBeInTheDocument();
+    expect(within(card("Claude Haiku 5.5")).getByText("Nog geen prijs")).toBeInTheDocument();
+  });
+
+  it("names the price list and its date when the catalog's price applies", () => {
+    const data = structuredClone(loaderData);
+    Object.assign(data.models[3]!, {
+      price: { input: 0.0892, output: 0.4459 },
+      priceFrom: "catalog",
+      priceChecked: "2026-11-11",
+    });
+    renderRoute(undefined, data);
+    const haiku = card("Claude Haiku 5.5");
+    expect(within(haiku).getByText(/€ 0,0892 in · € 0,4459 uit/)).toBeInTheDocument();
+    expect(within(haiku).getByText("(prijslijst van 11 nov 2026)")).toBeInTheDocument();
+    expect(within(haiku).getByText("Prijs instellen")).toBeInTheDocument();
+  });
+
+  it("saves a price with four rates, a comma as decimal sign allowed", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { priced: { name: "Claude Haiku 5.5" } };
+    });
+    const haiku = card("Claude Haiku 5.5");
+    await user.click(within(haiku).getByText("Prijs instellen"));
+    await user.type(within(haiku).getByLabelText("Invoer"), "0,8");
+    await user.type(within(haiku).getByLabelText("Uit de cache lezen"), "0,08");
+    await user.type(within(haiku).getByLabelText("Uitvoer"), "4");
+    await user.click(within(haiku).getByRole("button", { name: "Prijs bewaren" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("price"));
+    expect(body?.get("id")).toBe("anthropic/claude-haiku-5-5");
+    expect(body?.get("input")).toBe("0,8");
+    expect(body?.get("cacheRead")).toBe("0,08");
+    expect(body?.get("cacheWrite")).toBe("");
+    expect(body?.get("output")).toBe("4");
+    expect(
+      await screen.findByText("De prijs van Claude Haiku 5.5 is bewaard."),
+    ).toBeInTheDocument();
+  });
+
+  it("has no axe violations with the price form open", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute();
+    await user.click(within(card("Claude Sonnet 5.5")).getByText("Prijs aanpassen"));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { checkTag, parseReleases, releaseNotes } from "../../scripts/release-helpers";
 
 /**
- * Releases (BESLUIT-2026-11-11-4): a SemVer git tag `vX.Y.Z` on main, the same version in
+ * Releases (BESLUIT-2026-11-11-5): a SemVer git tag `vX.Y.Z` on main, the same version in
  * package.json, and an entry with its date in RELEASE.md. The tag builds the image on ghcr.io and
  * a GitHub Release with the notes from RELEASE.md.
  */
