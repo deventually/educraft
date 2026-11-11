@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266 en #268 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #266, #268 en #272 gemerged)_
 
 ## Nu
 
+- **Modulehandleiding uit de cursus (#272) gemerged op 2026-11-11:** naast de modulewijzer
+  exporteert de cursus zonder AI een modulehandleiding: modulegegevens, inleiding, studielast en
+  duur, leeruitkomsten, opbouw per week, toetsing per toets en literatuur (nieuw modulegegeven).
 - **Modulewijzer uit de cursus (#266) gemerged op 2026-11-11:** een eigen blok op de cursuspagina
   met modulecode, studiejaar, studiefase, moduleleider, examinator(en) en beschrijving. Daaruit
   komt zonder AI een modulewijzer als Word, PDF of Markdown, met leeruitkomsten, succescriteria en
@@ -645,11 +648,11 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #266 en #268 gemerged)_
 
 ## Bezig
 
-- **Modulehandleiding uit de cursus (PR open):** naast de modulewijzer exporteert de cursus nu
-  zonder AI een modulehandleiding: modulegegevens, inleiding (de beschrijving), studielast en duur,
-  leeruitkomsten met succescriteria, de opbouw per week, per toets de gegevens, voorwaarden en
-  onderdelen, en de literatuur (nieuw modulegegeven, één per regel). Het blok heet nu
-  *Modulewijzer en modulehandleiding*; geen migratie.
+- **Import leest ook de modulegegevens (PR open):** *Importeren uit bestaande documenten* haalt
+  uit een modulewijzer of modulehandleiding nu ook studiefase, moduleleider, examinatoren, de
+  inhoudelijke beschrijving en de literatuur; alleen lege velden worden aangevuld. Nieuwe prompt
+  `course-import@v3` met evalcase `imp-module-guide-nl`. Ook: de vragenlijst onder een toets heet
+  nu *Vragen (n)* in plaats van *Toetsmatrijs (n vragen)*.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

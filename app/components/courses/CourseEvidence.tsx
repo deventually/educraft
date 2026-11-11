@@ -48,7 +48,7 @@ export function CourseEvidence({
               <option value="outcomes-and-matrix">{e.partOutcomes}</option>
               {data.assessments.map((a) => (
                 <option key={a.id} value={`assessment:${a.id}`}>
-                  {fmt(t.courses.items.caption, { assessment: a.title })}
+                  {fmt(e.partAssessment, { assessment: a.title })}
                 </option>
               ))}
             </Select>

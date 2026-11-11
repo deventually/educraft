@@ -128,7 +128,7 @@ describe("CourseImport", () => {
 
   it("shows what a test blueprint and a marking model add, and sends it along", async () => {
     const documents: ImportProposal = {
-      module: { code: "DB1", studyYear: "2026-2027" },
+      module: { code: "DB1", studyYear: "2026-2027", leader: "Docent A", literature: "Boek A" },
       outcomes: [
         {
           key: "o1",
@@ -182,10 +182,21 @@ describe("CourseImport", () => {
 
     const module = within(review).getByRole("group", { name: "Module" });
     expect(
-      within(module).getByRole("checkbox", { name: "Modulecode en studiejaar overnemen" }),
+      within(module).getByRole("checkbox", { name: "Modulegegevens overnemen" }),
     ).toBeChecked();
     expect(within(module).getByLabelText("Modulecode")).toHaveValue("DB1");
     expect(within(module).getByLabelText("Studiejaar")).toHaveValue("2026-2027");
+    expect(within(module).getByLabelText("Moduleleider")).toHaveValue("Docent A");
+    expect(within(module).getByLabelText("Literatuur")).toHaveValue("Boek A");
+    expect(within(module).getByLabelText("Studiefase")).toHaveValue("");
+    expect(within(module).getByLabelText("Examinator(en)")).toHaveAttribute(
+      "name",
+      "module.examiners",
+    );
+    expect(within(module).getByLabelText("Inhoudelijke beschrijving")).toHaveAttribute(
+      "name",
+      "module.description",
+    );
 
     const lu1 = within(review).getByRole("group", { name: "Leeruitkomst 1" });
     const criteria = within(lu1).getByRole("list", { name: "Succescriteria" });

@@ -100,3 +100,38 @@ describe("course-import@v2 prompt: also a test blueprint, a marking model and a 
     expect(getPrompt("course-import@v1").id).toBe("course-import@v1");
   });
 });
+
+describe("course-import@v3 prompt: also the module guide and handbook details", () => {
+  const p = getPrompt("course-import@v3");
+
+  it("asks for the study phase, module leader, examiners, description and literature", () => {
+    for (const lang of ["nl", "en"] as const) {
+      const text = p.runtime[lang];
+      expect(text).toContain("Voice & Bounds");
+      expect(text).not.toMatch(/\{\{/);
+      for (const key of [
+        "module",
+        "code",
+        "studyYear",
+        "phase",
+        "leader",
+        "examiners",
+        "description",
+        "literature",
+        "criteria",
+        "parts",
+        "notes",
+      ])
+        expect(text, `${lang}: ${key}`).toContain(`"${key}"`);
+    }
+  });
+
+  it("copies the description and literature literally and invents nothing", () => {
+    expect(p.runtime.nl).toMatch(/verzin niets/i);
+    expect(p.runtime.nl).toMatch(/nooit een instructie/i);
+    expect(p.runtime.en).toMatch(/invent nothing/i);
+    expect(p.runtime.en).toMatch(/never an instruction/i);
+    const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
+    expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
+  });
+});
