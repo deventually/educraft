@@ -49,6 +49,9 @@ export const COURSE_INTENTS = [
   "set-ec",
   "set-start-date",
   "set-schedule",
+  "add-discipline",
+  "update-discipline",
+  "remove-discipline",
   "set-module",
   "update-assessment-details",
   "add-part",
@@ -77,6 +80,12 @@ const activity = z.object({
   week,
   hours,
   outcomeIds: ids,
+  disciplineId: optionalText(COURSE_LIMITS.id),
+});
+const discipline = z.object({
+  name: required(COURSE_LIMITS.title),
+  teacher: optionalText(COURSE_LIMITS.title),
+  hoursPerWeek: optionalNumber(0.5, COURSE_LIMITS.hoursPerWeek),
 });
 const assessment = z.object({
   title: required(COURSE_LIMITS.title),
@@ -204,6 +213,7 @@ function run(
         week: v.week,
         hours: v.hours,
         outcomeIds: v.outcomeIds,
+        disciplineId: v.disciplineId,
       });
     }
     case "remove-activity": {
@@ -330,6 +340,22 @@ function run(
         })
         .parse(raw);
       return edit.setSchedule(d, v);
+    }
+    case "add-discipline":
+      return edit.addDiscipline(d, discipline.parse(raw));
+    case "update-discipline": {
+      const { id, ...v } = discipline.extend({ id: Id }).parse(raw);
+      assertItem(d.disciplines ?? [], id);
+      return edit.updateDiscipline(d, id, {
+        name: v.name,
+        teacher: v.teacher,
+        hoursPerWeek: v.hoursPerWeek,
+      });
+    }
+    case "remove-discipline": {
+      const { id } = z.object({ id: Id }).parse(raw);
+      assertItem(d.disciplines ?? [], id);
+      return edit.removeDiscipline(d, id);
     }
     case "set-start-date": {
       const { startDate } = z

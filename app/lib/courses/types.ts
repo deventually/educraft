@@ -41,6 +41,19 @@ export interface Activity {
   outcomeIds: string[];
   /** Planned study hours for this activity. */
   hours?: number;
+  /** The discipline that teaches it, when the course has disciplines. */
+  disciplineId?: string;
+}
+
+/**
+ * A subject within a module (e.g. Webtech, Hardware), optional: not every programme works
+ * this way. Its hours per week split over its lessons in a week.
+ */
+export interface Discipline {
+  id: string;
+  name: string;
+  teacher?: string;
+  hoursPerWeek?: number;
 }
 
 export interface AssessmentCoverage {
@@ -146,6 +159,7 @@ export interface CourseData {
   /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */
   startDate?: string;
   schedule?: CourseSchedule;
+  disciplines?: Discipline[];
   outcomes: LearningOutcome[];
   activities: Activity[];
   assessments: Assessment[];

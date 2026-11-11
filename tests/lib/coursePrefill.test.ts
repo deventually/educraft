@@ -140,4 +140,48 @@ describe("coursePrefillValues", () => {
     });
     expect(coursePrefillValues(practical, { outcomes: [] })).toEqual({});
   });
+
+  // With disciplines, a lesson gets its discipline's share of the week.
+  it("fills a lesson's length from its discipline's hours, split over its lessons that week", () => {
+    const duration: InputField[] = [
+      {
+        name: "duration",
+        label: "Lesduur",
+        kind: "number",
+        prefillFromCourse: { source: "sessionMinutes" },
+      },
+    ];
+    const lesson = (id: string, week: number, disciplineId?: string) => ({
+      id,
+      title: id,
+      week,
+      kind: "activity" as const,
+      outcomeIds: [],
+      ...(disciplineId && { disciplineId }),
+    });
+    const course = {
+      outcomes: [],
+      schedule: { sessionMinutes: 240 },
+      disciplines: [
+        { id: "web", name: "Webtech", hoursPerWeek: 6 },
+        { id: "pv", name: "Professionele vaardigheden", hoursPerWeek: 2 },
+        { id: "hw", name: "Hardware" },
+      ],
+      items: [
+        lesson("w1", 3, "web"),
+        lesson("w2", 3, "web"),
+        lesson("p1", 3, "pv"),
+        lesson("h1", 3, "hw"),
+        lesson("x", 3),
+      ],
+    };
+    expect(coursePrefillValues(duration, course, "w1")).toEqual({ duration: 180 });
+    expect(coursePrefillValues(duration, course, "p1")).toEqual({ duration: 120 });
+    // No hours for the discipline, or no discipline: the session length.
+    expect(coursePrefillValues(duration, course, "h1")).toEqual({ duration: 240 });
+    expect(coursePrefillValues(duration, course, "x")).toEqual({ duration: 240 });
+    // Never longer than a session.
+    const long = { ...course, disciplines: [{ id: "web", name: "Webtech", hoursPerWeek: 12 }] };
+    expect(coursePrefillValues(duration, long, "w1")).toEqual({ duration: 240 });
+  });
 });

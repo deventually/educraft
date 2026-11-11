@@ -1,6 +1,6 @@
 import type { ImageInput } from "~/lib/ai/types";
 import type { CoursePrefill, InputField } from "~/lib/registry/types";
-import type { CourseSchedule } from "~/lib/courses/types";
+import type { CourseSchedule, Discipline } from "~/lib/courses/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
 
@@ -83,6 +83,7 @@ export interface CoursePrefillItem {
   week?: number;
   kind: "activity" | "assessment";
   outcomeIds: string[];
+  disciplineId?: string;
 }
 
 /** The part of a course that fills course-backed fields (P20, 20.4). */
@@ -90,6 +91,7 @@ export interface CoursePrefillSource {
   outcomes: { id?: string; text: string }[];
   items?: CoursePrefillItem[];
   schedule?: CourseSchedule;
+  disciplines?: Pick<Discipline, "id" | "hoursPerWeek">[];
 }
 
 /** The lessons just before an item that `earlierLessons` names: recent ones matter most. */
@@ -103,8 +105,8 @@ function courseSourceValue(
   course: CoursePrefillSource,
   item: CoursePrefillItem | undefined,
 ): string | number {
-  if (source === "sessionMinutes" || source === "groupSize" || source === "deliveryMode")
-    return course.schedule?.[source] ?? "";
+  if (source === "sessionMinutes") return lessonMinutes(course, item) ?? "";
+  if (source === "groupSize" || source === "deliveryMode") return course.schedule?.[source] ?? "";
   if (source === "learningOutcomes") {
     const own = item ? course.outcomes.filter((o) => o.id && item.outcomeIds.includes(o.id)) : [];
     return lines((own.length > 0 ? own : course.outcomes).map((o) => o.text));
@@ -118,6 +120,25 @@ function courseSourceValue(
     .sort((a, b) => (a.week ?? 0) - (b.week ?? 0))
     .slice(-EARLIER_LESSONS);
   return lines(earlier.map((i) => `Week ${i.week}: ${i.title}`));
+}
+
+/**
+ * A lesson's length: with a discipline that has hours per week, its share of that week
+ * (the hours over its lessons that week, rounded to 5 minutes, never longer than a session);
+ * otherwise the session length.
+ */
+function lessonMinutes(
+  course: CoursePrefillSource,
+  item: CoursePrefillItem | undefined,
+): number | undefined {
+  const session = course.schedule?.sessionMinutes;
+  const hours = course.disciplines?.find((x) => x.id === item?.disciplineId)?.hoursPerWeek;
+  if (!item || hours === undefined || item.week === undefined) return session;
+  const lessons = (course.items ?? []).filter(
+    (i) => i.disciplineId === item.disciplineId && i.week === item.week,
+  ).length;
+  const share = Math.round((hours * 60) / Math.max(lessons, 1) / 5) * 5;
+  return session === undefined ? share : Math.min(share, session);
 }
 
 /**

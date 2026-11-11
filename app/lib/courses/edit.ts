@@ -11,6 +11,7 @@ import type {
   AssessmentPart,
   CourseData,
   CourseSchedule,
+  Discipline,
   LearningOutcome,
 } from "./types";
 
@@ -91,14 +92,46 @@ export function removeOutcome(d: CourseData, id: string): CourseData {
 
 // Activities
 
+function assertDiscipline(d: CourseData, id: string | undefined): void {
+  if (id !== undefined && !(d.disciplines ?? []).some((x) => x.id === id))
+    throw new Error(`Unknown discipline: ${id}`);
+}
+
 export function addActivity(d: CourseData, activity: Omit<Activity, "id">): CourseData {
   assertOutcomes(d, activity.outcomeIds);
+  assertDiscipline(d, activity.disciplineId);
   return { ...structuredClone(d), activities: [...d.activities, create<Activity>(activity)] };
 }
 
 export function updateActivity(d: CourseData, id: string, patch: Patch<Activity>): CourseData {
   if (patch.outcomeIds) assertOutcomes(d, patch.outcomeIds);
+  assertDiscipline(d, patch.disciplineId);
   return { ...structuredClone(d), activities: replace(d.activities, id, patch) };
+}
+
+// Disciplines (optional)
+
+export function addDiscipline(d: CourseData, discipline: Omit<Discipline, "id">): CourseData {
+  return compact({
+    ...d,
+    disciplines: [...(d.disciplines ?? []), create<Discipline>(discipline)],
+  });
+}
+
+export function updateDiscipline(d: CourseData, id: string, patch: Patch<Discipline>): CourseData {
+  return compact({ ...d, disciplines: replace(d.disciplines ?? [], id, patch) });
+}
+
+/** Removes a discipline; its lessons stay, without a discipline. */
+export function removeDiscipline(d: CourseData, id: string): CourseData {
+  const left = without(d.disciplines ?? [], id);
+  return compact({
+    ...d,
+    disciplines: left.length > 0 ? left : undefined,
+    activities: d.activities.map((a) =>
+      a.disciplineId === id ? compact({ ...a, disciplineId: undefined }) : a,
+    ),
+  });
 }
 
 export function removeActivity(d: CourseData, id: string): CourseData {
