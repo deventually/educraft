@@ -27,7 +27,7 @@ const SUPPRESSION = /\bas any\b|@ts-ignore|@ts-expect-error|@ts-nocheck|biome-ig
 const countSuppressions = (src: string) => src.match(SUPPRESSION)?.length ?? 0;
 
 /** Baseline on 2026-11-09 (app/ and scripts/). May only go down. */
-const SUPPRESSIONS_BASELINE = 31;
+const SUPPRESSIONS_BASELINE = 30;
 
 // --- Long files ----------------------------------------------------------------------------------
 

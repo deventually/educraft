@@ -103,5 +103,19 @@ export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) 
     return [...turns].reverse().find((t) => t.role === "user")?.content;
   };
 
-  return { turns, isStreaming, savedId, send, stop, dropLastAnswer };
+  /** What Back and Forward bring back: the turns before a question still being answered. */
+  const memory = {
+    sessionId: sessionIdRef.current,
+    savedId,
+    turns: isStreaming ? turns.slice(0, -2) : turns,
+  };
+
+  /** Puts a kept conversation back; the next turn updates the same saved chat. */
+  const restore = (saved: typeof memory) => {
+    sessionIdRef.current = saved.sessionId;
+    setSavedId(saved.savedId);
+    setTurns(saved.turns);
+  };
+
+  return { turns, isStreaming, savedId, send, stop, dropLastAnswer, memory, restore };
 }
