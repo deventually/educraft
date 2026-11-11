@@ -34,9 +34,10 @@ describe("LimitToast", () => {
   it("tells a teacher once, as a toast, that 80% of the month is used", async () => {
     limit = { scope: "team", teamName: "Informatica", share: 0.85, state: "warn" };
     const { container, unmount } = renderToast();
-    expect(
-      await screen.findByText(/Je hebt 85% van je AI-ruimte voor deze maand gebruikt/),
-    ).toBeInTheDocument();
+    const warning = await screen.findByText(
+      /Je hebt 85% van je AI-ruimte voor deze maand gebruikt/,
+    );
+    expect(warning.closest("[role=status]")?.className).toMatch(/amber/);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     unmount();
 

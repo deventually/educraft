@@ -67,7 +67,7 @@ export function LimitToast() {
     });
     const stop = limit.state === "stop";
     showToast({
-      variant: stop ? "error" : "info",
+      variant: stop ? "error" : "warning",
       message: fmt(stop ? t.usage.limitStop : t.usage.limitWarn, { pct, scope: scopeOf(limit) }),
     });
   }, [limit, locale, scopeOf, showToast, t]);
