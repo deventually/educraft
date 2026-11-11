@@ -34,6 +34,7 @@ import { getLocale } from "~/lib/i18n/locale.server";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
 import { type CourseImportResult, extractCourseImport } from "./courseImport.server";
+import { type CourseDesignResult, designCourseOutcomes } from "./courseDesign.server";
 import { addCourseToDossier } from "./courseEvidence.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -57,6 +58,7 @@ export type CourseActionResult =
       flagged: number;
       clipped: boolean;
     }
+  | { ok: true; intent: "design-outcomes"; proposal: ImportProposal; clipped: boolean }
   | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
@@ -126,6 +128,23 @@ async function runCourseIntent(
         ok: false,
         intent,
         error: m.import.errors[result.error],
+        ...(result.notes ? { notes: result.notes } : {}),
+      };
+    return { ...result, intent };
+  }
+
+  if (intent === "design-outcomes") {
+    const result = await designCourseOutcomes(user, course, fd, locale).catch(
+      (e): CourseDesignResult => {
+        if (e instanceof Response) throw e;
+        return { ok: false, error: "failed" };
+      },
+    );
+    if (!result.ok)
+      return {
+        ok: false,
+        intent,
+        error: getMessages(locale).courseDesign.errors[result.error],
         ...(result.notes ? { notes: result.notes } : {}),
       };
     return { ...result, intent };

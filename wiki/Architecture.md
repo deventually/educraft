@@ -348,6 +348,17 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the dossier and each outcome are split into tabs in the URL (`app/lib/portfolio/tabs.ts`,
   the shared `TabNav`): the dossier has Overview and Finish, an outcome Overview, Evidence,
   Chapter and Review. Links into a tab (`dossierHref`, `outcomeHref`) carry `?tab=` and an anchor.
+- **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
+  design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
+  `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,
+  study load, weeks, disciplines, the owner's context profile via `formatProfile`, and the number of
+  outcomes `outcomeRange` sets from the EC or weeks, so the model does not decide that) and checks the
+  answer of `course-design-outcomes@v1` into an `ImportProposal` with `source: "design"` (at most
+  eight outcomes, four criteria each, no duplicates, unknown Bloom dropped).
+  `app/server/courseDesign.server.ts` keeps the brief in the course where it was empty, calls the
+  model once more on a broken answer, and stores no outcome: the teacher reviews them in the same
+  `ProposalForm` as an import and `import-apply` adds what is ticked. The feature `courseDesign`
+  switches it off (the action is then a 404). Evals: `npm run eval:design`.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings

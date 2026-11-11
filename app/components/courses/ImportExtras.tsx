@@ -96,8 +96,17 @@ function Lines({ label, lines }: { label?: string; lines: { text: string; check:
   );
 }
 
-/** The success criteria of an outcome, with the hidden field that carries them. */
-export function CriteriaPreview({ outcome: o }: { outcome: ImportOutcome }) {
+/**
+ * The success criteria of an outcome, with the hidden field that carries them. `designed`: the
+ * AI wrote them from a description, so "not in the document" says nothing.
+ */
+export function CriteriaPreview({
+  outcome: o,
+  designed = false,
+}: {
+  outcome: ImportOutcome;
+  designed?: boolean;
+}) {
   const t = useT();
   const criteria = o.criteria.map(({ code, text }) => (code ? { code, text } : { text }));
   return (
@@ -107,7 +116,7 @@ export function CriteriaPreview({ outcome: o }: { outcome: ImportOutcome }) {
         label={t.courseDocuments.criteria.label}
         lines={o.criteria.map((k) => ({
           text: k.code ? `${k.code} ${k.text}` : k.text,
-          check: !k.verbatim,
+          check: !k.verbatim && !designed,
         }))}
       />
     </>

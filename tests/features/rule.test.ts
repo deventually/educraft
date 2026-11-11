@@ -63,10 +63,11 @@ describe("the on/off rule (P28.3)", () => {
 });
 
 describe("the feature register (P28.3)", () => {
-  it("holds the five parts with their default stands", () => {
+  it("holds the six parts with their default stands", () => {
     expect(FEATURES.map((f) => [f.id, f.defaultStand])).toEqual([
       ["portfolio", "request"],
       ["courses", "on"],
+      ["courseDesign", "on"],
       ["roleAgents", "on"],
       ["utilities", "on"],
       ["pilotCheckin", "on"],

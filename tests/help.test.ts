@@ -51,6 +51,27 @@ describe("help registry — topics", () => {
     expect(getTopic("courses", "en")).toContain("**Hours per week**");
   });
 
+  it("explains how a new course starts, and the AI proposal of learning outcomes", () => {
+    const nl = getTopic("courses", "nl");
+    const en = getTopic("courses", "en");
+    expect(nl).toContain("## Een nieuwe cursus beginnen");
+    expect(en).toContain("## Starting a new course");
+    for (const choice of [
+      "**In grote lijnen ontwerpen:**",
+      "**Begin met een document:**",
+      "**Begin leeg:**",
+    ])
+      expect(nl).toContain(choice);
+    for (const choice of [
+      "**Design in broad outline:**",
+      "**Start from a document:**",
+      "**Start empty:**",
+    ])
+      expect(en).toContain(choice);
+    expect(nl).toContain("**AI-voorstel**");
+    expect(en).toContain("**AI proposal**");
+  });
+
   it("explains the progress steps and the next step", () => {
     expect(getTopic("courses", "nl")).toContain("## Voortgang");
     expect(getTopic("courses", "nl")).toContain("**Volgende stap**");

@@ -4,17 +4,23 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #276 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #277 gemerged)_
 
 ## Nu
 
-- **Voortgang van de BDB/BKE (#276) gemerged op 2026-11-11:** bovenaan het dossier een blok
-  *Voortgang*: het kader, elke leeruitkomst apart en afronden, met één *Volgende stap* en elke stap
-  als link. Elke leeruitkomst heeft vier mijlpalen (bewijs, hoofdstuk, laten beoordelen,
-  aangetoond); de coach telt mee bij beoordelen, alleen het eigen oordeel maakt een leeruitkomst
-  af. `dossierRoute`/`outcomeRoute` (`app/lib/portfolio/route.ts`) zijn puur en tonen via
-  `ProgressPanel`.
-
+- **Cursuswizard, deel 1: hoe je begint en de leeruitkomsten (#277) gemerged op 2026-11-11:** een lege cursus vraagt
+  op het tabblad Overzicht *Hoe wil je beginnen?*: in grote lijnen ontwerpen, met een document,
+  of leeg. Bij ontwerpen beschrijft de docent de cursus in een paar zinnen (plus EC en weken), en
+  de AI stelt 3 tot 6 leeruitkomsten met Bloom-niveau en succescriteria voor, met de
+  onderwijscontext en de disciplines erbij. De docent vinkt aan en past aan in hetzelfde
+  formulier als bij importeren. Nieuwe prompt `course-design-outcomes@v1` met evals
+  (`npm run eval:design`), schakelaar `courseDesign` voor de beheerder; geen migratie. Deel 2
+  (het toetsprogramma) en deel 3 (lessen met lesdoel) volgen.
+- **BDB/BKE: voortgang per leeruitkomst (#276) gemerged op 2026-11-11:** het overzicht van een
+  dossier toont het gedeelde blok *Voortgang*: het kader, elke leeruitkomst apart en afronden,
+  met één volgende stap. Op de pagina van een leeruitkomst staan vier mijlpalen (bewijs,
+  hoofdstuk, feedback, getoond), elk een sprong naar dat deel. De coach is nooit verplicht: het
+  eigen vinkje van de docent telt ook.
 - **Voortgang van een cursus (#275) gemerged op 2026-11-11:** bovenaan het tabblad Overzicht een
   blok *Voortgang* met zes stappen van backwards design (cursusgegevens, leeruitkomsten, toetsen,
   lessen, weekplanning, controle), een balk, de *Volgende stap* met uitleg en een knop, en elke

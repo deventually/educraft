@@ -10,11 +10,21 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 
 De cursuspagina heeft vijf tabbladen, elk voor één taak:
 
-- **Overzicht:** de voortgang, de gegevens van de cursus, het lesrooster, de disciplines, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Overzicht:** bij een lege cursus hoe je begint, de voortgang, de gegevens van de cursus, het lesrooster, de disciplines, importeren uit een bestaand document en je lessen en toetsen per week.
 - **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
 - **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
 - **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
 - **Documenten en delen:** de modulewijzer en modulehandleiding, bewijs voor je dossier, gemaakt werk, de opleiding, delen met je team en wie meewerkt.
+
+## Een nieuwe cursus beginnen
+
+Is je cursus nog leeg, dan vraagt het tabblad Overzicht hoe je wilt beginnen:
+
+- **In grote lijnen ontwerpen:** je beschrijft in een paar zinnen waar de cursus over gaat en wat studenten aan het eind moeten kunnen, en vult als je wilt de studielast en het aantal weken in. De AI stelt drie tot zes leeruitkomsten voor, elk met een Bloom-niveau en succescriteria. Hij gebruikt daarvoor ook de onderwijscontext en de disciplines van de cursus.
+- **Begin met een document:** je haalt de leeruitkomsten en toetsen uit een OER, studiehandleiding of toetsmatrijs (zie *Beginnen met een bestaande module*).
+- **Begin leeg:** je schrijft de leeruitkomsten zelf op het tabblad Leeruitkomsten.
+
+Het **AI-voorstel** komt pas in je cursus als jij dat kiest: je vinkt aan wat je wilt houden, past de tekst aan en voegt het toe. Wat je invult over studielast, weken en de beschrijving, komt meteen in de cursusgegevens en het lesrooster. Een beheerder kan het ontwerpen met AI uitzetten; dan blijven het document en de lege start over.
 
 ## Voortgang
 
