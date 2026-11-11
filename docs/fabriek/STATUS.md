@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #265 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #265 en #268 gemerged)_
 
 ## Nu
 
+- **Browsertests voorlopig lokaal (#268) gemerged op 2026-11-11:** de GitHub-runner kon Chromium
+  niet installeren (DNS). De `e2e`-job draait daarom alleen als de repositoryvariabele
+  `E2E_IN_CI` op `true` staat; tot dan draait de werker `npm run test:e2e` zelf en zet de uitslag
+  in de PR (BESLUIT-2026-11-11-9).
 - **Mededelingen van beheer als banner (#265) gemerged op 2026-11-11:** beheer plaatst op
   */admin/announcements* een mededeling of waarschuwing voor iedereen, een team of één persoon, met
   een optionele laatste dag en eventueel terugkomen 1 tot 30 dagen na wegklikken. De banner staat
