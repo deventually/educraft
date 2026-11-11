@@ -41,7 +41,6 @@ export const envSchema = z.object({
   RATE_LIMIT_CONCURRENT: z.coerce.number().default(3),
   // Per-user daily quotas (persisted, see repositories/usage.server). Admins are
   // exempt. The token limit is only enforced once the adapter surfaces usage.
-  DAILY_REQUEST_LIMIT: z.coerce.number().default(50),
   DAILY_OUTPUT_TOKEN_LIMIT: z.coerce.number().default(200_000),
 });
 

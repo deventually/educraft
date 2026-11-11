@@ -14,6 +14,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import "~/lib/zodCsp";
 import { ToastProvider, useFlashToast } from "~/components/Toast";
+import { LimitToast } from "~/components/usage/LimitToast";
 import { AiLeaveGuard } from "~/components/AiLeaveGuard";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -116,6 +117,7 @@ export default function App() {
   return (
     <ToastProvider>
       <FlashToast />
+      <TeacherLimitToast />
       <DictationProvider enabled={useLoaderData<typeof loader>().dictation}>
         {/* Leaving while the AI works asks: keep running, stop, or stay. */}
         <AiLeaveGuard>
@@ -124,6 +126,12 @@ export default function App() {
       </DictationProvider>
     </ToastProvider>
   );
+}
+
+/** The monthly AI limit as a toast, for a signed-in teacher (admins have no limit). */
+function TeacherLimitToast() {
+  const user = useLoaderData<typeof loader>().user;
+  return user && user.role !== "admin" ? <LimitToast /> : null;
 }
 
 /** Shows the root loader's flash (P16) inside the provider. */

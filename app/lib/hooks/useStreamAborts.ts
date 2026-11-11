@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useAiWork } from "~/components/AiLeaveGuard";
+import { AI_DONE_EVENT } from "~/lib/usage/limits";
 
 /**
  * The model calls a view has running, by key (a stage id; one call needs no key). Starting a
@@ -35,6 +36,13 @@ export function useStreamAborts(busy: boolean) {
     }),
     [],
   );
+
+  // When a call ends, the monthly limit may have moved: tell the page (`LimitToast`).
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    if (wasBusy.current && !busy) window.dispatchEvent(new Event(AI_DONE_EVENT));
+    wasBusy.current = busy;
+  }, [busy]);
 
   useAiWork(busy, {
     abort: () => {

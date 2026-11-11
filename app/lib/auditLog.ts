@@ -5,6 +5,7 @@
 export const AUDIT_ACTIONS = [
   "accountCreated",
   "accountDeleted",
+  "aiLimitChanged",
   "courseMemberChanged",
   "coursesTransferred",
   "deactivated",
@@ -37,6 +38,8 @@ export function isAuditAction(value: string): value is AuditAction {
 export interface AuditDetail {
   bulk?: boolean;
   count?: number;
+  /** A monthly AI limit in euros: the budget, a team's (with its name) or a teacher's. */
+  limit?: { kind: "budget" | "team" | "user"; name?: string; euros: number | null };
   from?: string;
   /** A cleanup: entries older than this many days went; `null` = everything. */
   olderThanDays?: number | null;

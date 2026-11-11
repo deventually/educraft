@@ -17,7 +17,8 @@ export const portfolio = {
       "no-evidence": "Koppel eerst bewijs aan dit criterium; dat is de enige bron voor de alinea.",
       "not-confirmed": "Bevestig eerst het kader; de coach beoordeelt op jouw criteria.",
       "not-draft-mode": 'Zet bij het dossier eerst "alinea\'s laten opstellen" aan.',
-      quota: "Daglimiet bereikt; morgen kan het weer.",
+      quota:
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
     evidenceNeeded: "Nog nodig als bewijs",
     gap: "Wat ontbreekt",
@@ -124,7 +125,8 @@ export const portfolio = {
         "Het lukte niet om een kader uit het formulier te halen. Probeer het opnieuw, of neem het met de hand over.",
       "in-use":
         "Het kader is al in gebruik: er hangen statussen, bewijs of hoofdstukken aan. Pas het daarom met de hand aan.",
-      quota: "Daglimiet bereikt; morgen kan het weer.",
+      quota:
+        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
     },
     extractFile: "Of kies het formulier (PDF of Word, ook meerdere bestanden)",
     extractFileFailed: "Dit bestand kon niet worden gelezen. Plak de tekst dan zelf.",

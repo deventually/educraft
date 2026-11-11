@@ -34,7 +34,7 @@ Kies welke onderwijssectoren (vo, mbo, hbo, wo) en domeinen docenten in hun onde
 
 ## AI-gebruik en kosten
 
-Deze link opent de pagina **Gebruik**. Als beheerder zie je daar het AI-gebruik van iedereen: per persoon, team, tool en model, met de kosten in euro's. Zie [Wat we meten](/help/usage).
+Deze link opent de pagina **Gebruik**. Als beheerder zie je daar het AI-gebruik van iedereen: per persoon, team, tool en model, met de kosten in euro's. Onderaan zet je de **limieten per maand**, in euro's: per team en per docent (die van de docent gaat voor). Vanaf 80% ziet de docent een melding, bij 100% stopt de AI tot de volgende maand. Beheerders hebben geen limiet. De eigenaar zet daar ook het budget van de hele instelling. Elke wijziging komt in het logboek. Zie [Wat we meten](/help/usage).
 
 ## Feedback en pilot
 

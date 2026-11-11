@@ -49,8 +49,9 @@ stronger "teacher decides" transparency notice — no per-tool UI branching.
 - **Access control & scoping.** Invite-only accounts, two roles
   (teacher/admin), and per-user scoping on every repository query (a user
   only ever sees their own data). See `wiki/Authentication.md`.
-- **Abuse & cost bounds.** Per-user rate limits and a per-user daily quota
-  (`app/server/repositories/usage.server.ts`) cap runaway use.
+- **Abuse & cost bounds.** Per-user rate limits, a quiet per-user daily brake on output tokens
+  (`app/server/repositories/usage.server.ts`) and the monthly limits in euros
+  (`app/server/aiLimits.server.ts`) cap runaway use.
 - **AI-use measurement.** `ai_usage` keeps token counters per user, day, tool and model for the
   usage page (`/usage`): no prompt, no answer, no time of day. A team lead sees team totals
   only, and only the total when fewer than three members were active; per person stays with

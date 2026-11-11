@@ -34,7 +34,7 @@ Choose which sectors (secondary, vocational, higher education, university) and d
 
 ## AI use and cost
 
-This link opens the **Usage** page. As an admin you see everyone's AI use there: per person, team, tool and model, with the costs in euros. See [What we measure](/help/usage).
+This link opens the **Usage** page. As an admin you see everyone's AI use there: per person, team, tool and model, with the costs in euros. At the bottom you set the **limits per month**, in euros: per team and per teacher (the teacher's own limit wins). From 80% the teacher sees a notice, at 100% the AI stops until next month. Admins have no limit. The owner also sets the whole institution's budget there. Every change goes into the audit log. See [What we measure](/help/usage).
 
 ## Feedback and pilot
 

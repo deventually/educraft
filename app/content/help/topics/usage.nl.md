@@ -27,9 +27,19 @@ Chats tellen mee, ook als je een antwoord halverwege afbreekt. Voor beheer reken
 
 Een token is een stukje tekst van een paar letters. Een aanbieder rekent per token. In een chat gaat bij elke beurt het hele gesprek opnieuw naar het model. Een deel daarvan bewaart de aanbieder even in een cache, en tokens uit de cache zijn een stuk goedkoper.
 
-## De daglimiet
+## Een rem op een uitzonderlijke dag
 
-Er geldt een daglimiet op het aantal aanroepen per persoon. Om middernacht (UTC) begint een nieuwe dag. Beheerders hebben geen daglimiet.
+Er is geen grens aan het aantal vragen per dag. Wel stopt de AI als iemand op één dag uitzonderlijk veel tekst laat schrijven (200.000 tokens uitvoer), bijvoorbeeld door een script dat blijft draaien. Een gewone docent haalt dat niet. Om middernacht (UTC) begint een nieuwe dag. Beheerders hebben deze rem niet.
+
+## De limiet per maand
+
+Beheer kan een limiet per maand zetten, in euro's: voor een team of voor één docent. Een limiet voor jou zelf gaat voor die van je team. De eigenaar kan daarnaast een budget voor de hele instelling zetten.
+
+- Je ziet geen bedragen, wel hoeveel procent van je ruimte je deze maand gebruikte, op **Gebruik**.
+- Vanaf 80% zie je boven elke tool een melding, en krijg je één keer een melding in beeld, waar je ook bent.
+- Bij 100% stopt de AI voor je tot de 1e van de volgende maand; ook dat zie je één keer in beeld. Je beheerder kan de limiet verhogen.
+
+Gebruik je samen met je team één limiet, dan telt het gebruik van het hele team mee.
 
 ## Kosten zijn een schatting
 

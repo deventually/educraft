@@ -10,6 +10,8 @@ export const api: RouteArea = {
     route("api/feedback", "routes/api.feedback.tsx"),
     // Stops the teacher's own AI action when they leave the page and choose "Stop".
     route("api/ai-cancel", "routes/api.ai-cancel.tsx"),
+    // The caller's monthly AI limit as a share, for the toast at 80% and 100%.
+    route("api/ai-limit", "routes/api.ai-limit.tsx"),
     // Dictation: one recording in, its text out (speech server from config/models.json).
     route("api/transcribe", "routes/api.transcribe.tsx"),
     // Closes an announcement banner for the signed-in user.
