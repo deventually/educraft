@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #262 gemerged)_
 
 ## Nu
 
+- **Weggaan terwijl de AI bezig is (#262) gemerged op 2026-11-11:** gaat een docent binnen de app
+  naar een andere pagina terwijl een tool, chat of AI-formulier nog bezig is, dan vraagt een
+  dialoog: laten doorlopen (het resultaat wordt bewaard), afbreken (de aanroep stopt, ook op de
+  server via `/api/ai-cancel`) of op de pagina blijven (`AiLeaveGuard`).
 - **Toetsmatrijs en nakijkmodel uit de cursus (#261) gemerged op 2026-11-11:** een toets met
   vragen exporteert zonder AI een toetsmatrijs (punten per leeruitkomst en niveau) als Word, PDF
   of Markdown. Een cursus legt nu optioneel vast wat toetsdocumenten van een school nodig hebben
@@ -614,6 +618,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #261 gemerged)_
 
 ## Bezig
 
+- **Toetsmatrijs en nakijkmodel volgens de HSL-sjablonen (PR open):** het nakijkmodel heeft per
+  onderdeel één tabel *Onderdeel | Onvoldoende | Voldoende*, met in de eerste kolom de naam, de
+  leeruitkomsten, de weging en knock-out ja/nee, en elk criterium op een eigen regel. In de
+  toetsmatrijs staat de cesuur ook in de totaalregel onderaan, zodat elke matrijs in een document
+  zijn eigen cesuur draagt. Een tabelcel kan nu meer regels hebben (`<br>`) in Word, PDF en het
+  voorbeeld. Alles blijft links uitgelijnd.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

@@ -22,25 +22,24 @@ describe("markingModelDoc: the marking model of a test with parts", () => {
     expect(m).toContain("Voorwaardelijk (knock-out): Datamodel.");
   });
 
-  it("gives every part its outcomes, weight and a fail and pass column", () => {
+  it("gives every part one table: the part, a fail and a pass column, a line per criterion", () => {
     const m = md();
     expect(m).toContain("### Onderdeel 1: Datamodel");
+    expect(m).toContain("| Onderdeel | Onvoldoende | Voldoende |");
     expect(m).toContain(
-      "Leeruitkomsten: LU1 · weging 60% · knock-out: zonder voldoende hier is de toets onvoldoende",
-    );
-    expect(m).toContain("| Onvoldoende | Voldoende |");
-    expect(m).toContain(
-      "| De student voldoet niet aan de criteria bij voldoende. | Het model werkt. · De keuzes zijn onderbouwd. |",
+      "| **Datamodel**<br>Leeruitkomsten: LU1<br>Weging: 60%<br>Knock-out: ja | De student voldoet niet aan de criteria bij voldoende. | De student voldoet aan de volgende criteria:<br>Het model werkt.<br>De keuzes zijn onderbouwd. |",
     );
     expect(m).toContain("### Onderdeel 2: Toelichting");
-    expect(m).toContain("Leeruitkomsten: LU1, LU2 · weging 40%");
-    expect(m).toContain("| Legt normaliseren niet of onjuist uit. | Legt normaliseren uit. |");
+    expect(m).toContain(
+      "| **Toelichting**<br>Leeruitkomsten: LU1, LU2<br>Weging: 40%<br>Knock-out: nee | Legt normaliseren niet of onjuist uit. | De student voldoet aan de volgende criteria:<br>Legt normaliseren uit. |",
+    );
     expect(m).toContain("- **LU2** Je legt normaliseren uit.");
   });
 
   it("speaks English", () => {
     expect(md("en")).toContain("### Part 1: Datamodel");
-    expect(md("en")).toContain("| Fail | Pass |");
+    expect(md("en")).toContain("| Part | Fail | Pass |");
+    expect(md("en")).toContain("Knock-out: yes");
   });
 
   it("is null without parts, or for a test that is not in the course", () => {

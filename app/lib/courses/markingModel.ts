@@ -8,7 +8,7 @@ import { getMessages, type Locale } from "~/lib/i18n";
 import { fmt } from "~/lib/i18n/format";
 import { outcomeLines, table } from "./evidence";
 import { outcomeShortName } from "./findingText";
-import { type CourseSource, conditionsBlock, detailsTable, oneLine } from "./testDocument";
+import { type CourseSource, cellLines, conditionsBlock, detailsTable } from "./testDocument";
 
 /** The marking model of one test; null without parts or when the test is not in the course. */
 export function markingModelDoc(
@@ -28,16 +28,22 @@ export function markingModelDoc(
     knockOuts.length ? fmt(d.knockOuts, { list: knockOuts.join(", ") }) : "",
     ...a.parts.flatMap((p, i) => [
       `### ${fmt(d.part, { n: i + 1, title: p.title })}`,
-      [
-        p.outcomeIds.length ? fmt(d.outcomes, { list: p.outcomeIds.map(short).join(", ") }) : "",
-        p.weight !== undefined ? fmt(d.weight, { n: p.weight }) : "",
-        p.knockOut ? d.knockOut : "",
-      ]
-        .filter(Boolean)
-        .join(" · "),
       table(
-        [d.fail, d.pass],
-        [[oneLine([p.fail]) || d.failDefault, oneLine([p.pass]) || d.passEmpty]],
+        [m.courseDocuments.columns.part, d.fail, d.pass],
+        [
+          [
+            cellLines([
+              `**${p.title}**`,
+              p.outcomeIds.length
+                ? fmt(d.outcomes, { list: p.outcomeIds.map(short).join(", ") })
+                : "",
+              p.weight !== undefined ? fmt(d.weight, { n: p.weight }) : "",
+              p.knockOut ? d.knockOutYes : d.knockOutNo,
+            ]),
+            cellLines([p.fail]) || d.failDefault,
+            cellLines([p.pass]) ? cellLines([d.passIntro, p.pass]) : d.passEmpty,
+          ],
+        ],
       ),
     ]),
     `### ${m.courses.outcomes.title}`,

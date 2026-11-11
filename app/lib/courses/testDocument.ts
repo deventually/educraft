@@ -65,10 +65,10 @@ export function outcomeLevel(o: LearningOutcome, a: Assessment, locale: Locale):
   return bloom ? bloomLabel(bloom, locale) : "";
 }
 
-/** Several lines as one table cell. */
-export const oneLine = (texts: (string | undefined)[]): string =>
+/** Several lines as one table cell, each on its own line. */
+export const cellLines = (texts: (string | undefined)[]): string =>
   texts
     .flatMap((t) => (t ?? "").split(/\r?\n/))
     .map((l) => l.trim())
     .filter(Boolean)
-    .join(" · ");
+    .join("<br>");

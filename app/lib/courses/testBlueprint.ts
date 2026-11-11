@@ -16,7 +16,7 @@ import {
   type CourseSource,
   conditionsBlock,
   detailsTable,
-  oneLine,
+  cellLines,
   outcomeLevel,
 } from "./testDocument";
 import type { Assessment, CourseData } from "./types";
@@ -72,13 +72,13 @@ function outcomeRows(data: CourseData, a: Assessment, locale: Locale): string[] 
           : "";
       return [
         `**${outcomeShortName(data, o.id, locale)}** ${o.text}`,
-        oneLine((o.criteria ?? []).map((k) => (k.code ? `${k.code} ${k.text}` : k.text))),
+        cellLines((o.criteria ?? []).map((k) => (k.code ? `${k.code} ${k.text}` : k.text))),
         outcomeLevel(o, a, locale),
         weight,
-        oneLine(own.map((p) => p.pass)),
-        own
-          .map((p) => (p.weight !== undefined ? `${p.title} (${pct(p.weight)})` : p.title))
-          .join(" · "),
+        cellLines(own.map((p) => p.pass)),
+        cellLines(
+          own.map((p) => (p.weight !== undefined ? `${p.title} (${pct(p.weight)})` : p.title)),
+        ),
       ];
     });
   const total = weighted
@@ -86,7 +86,11 @@ function outcomeRows(data: CourseData, a: Assessment, locale: Locale): string[] 
     : fromItems
       ? pct(100)
       : null;
-  if (total) rows.push([`**${c.total}**`, "", "", total, "", ""]);
+  // The pass mark sits in the total row as well, so every blueprint in a document carries its own.
+  const passMark = a.passMark === undefined ? null : fmt(d.header.passMarkLine, { n: a.passMark });
+  if (total)
+    rows.push([[`**${c.total}**`, passMark].filter(Boolean).join(" · "), "", "", total, "", ""]);
+  else if (passMark) rows.push([`**${passMark}**`, "", "", "", "", ""]);
   const out = [
     `### ${d.blueprint.outcomes}`,
     table([c.outcome, c.criteria, c.level, c.weight, c.assessmentCriteria, c.part], rows),
