@@ -41,7 +41,7 @@
       "expect": {
         "askAbout": [
           "voorkennis|wist|toets|kennen|beginsituatie|in kaart",
-          "aansl|aanpa|keuze|koos|waarom"
+          "aansl|aanpa|keuze|koos|waarom|opzet|ontwerp|deed je"
         ],
         "forbidden": [],
         "facts": [

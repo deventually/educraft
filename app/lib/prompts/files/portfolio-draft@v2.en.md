@@ -31,7 +31,7 @@ Only the text itself, as plain text: one or two paragraphs, 120 to 250 words tog
 
 - **Invent nothing.** Use only facts from `<answers>` and `<evidence>`: no situations, numbers, figures, student reactions, quotes or results that are not there. Take over a number only when it is there literally.
 - **Mark what is missing.** If a criterion asks for something the answers and the evidence do not give, or a question was left unanswered, put `[to add: …]` in that place, saying what the teacher must fill in. Better an open spot than a guess.
-- **Sources:** cite only literature from `<references>`, in APA style (author, year). If the teacher names a source that is not there, do not cite it but put `[to add: source in your reference list]`.
+- **Sources:** cite only literature from `<references>`, in APA style (author, year). Name no other author or source, even if the teacher mentions it in `<answers>`, and not without a year either. Put `[to add: source in your reference list]` in that place; the teacher then adds the source to the list.
 - **Stay with this part:** only the criteria of this part. No verdict on whether a criterion is now shown; the teacher decides that.
 
 ## When the input is missing or unsuitable

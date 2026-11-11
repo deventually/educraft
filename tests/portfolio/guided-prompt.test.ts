@@ -52,4 +52,10 @@ describe("portfolio-draft@v2 prompt (a paragraph per section from the answers)",
     expect(p.runtime.en).toMatch(/invent nothing/i);
     expect(p.runtime.en).toContain("[to add: …]");
   });
+
+  it("names no author outside the reference list at all, not even one the teacher mentions", () => {
+    // Eval 2026-11-11a: the paragraph cited a source the teacher named but did not list.
+    expect(p.runtime.nl).toMatch(/ook niet als de docent hem noemt/i);
+    expect(p.runtime.en).toMatch(/even if the teacher mentions it/i);
+  });
 });

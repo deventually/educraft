@@ -97,6 +97,26 @@ describe("scoreDraft", () => {
   });
 });
 
+describe("scoreDraft — open spots", () => {
+  it("does not count a number inside an open spot as invented: it asks the teacher", () => {
+    const c = cases.find((x) => x.id === "nl-beginsituatie")!;
+    const text = `${c.expect.goodParagraph} [aanvullen: wat je verder wist over de overige 15 studenten]`;
+    expect(scoreDraft(c, text)).toMatchObject({ noNewNumbers: true, pass: true });
+    expect(
+      scoreDraft(c, `${c.expect.goodParagraph} Daarna haalden 15 studenten een voldoende.`),
+    ).toMatchObject({ noNewNumbers: false });
+  });
+
+  it("counts a question about the lesson design as a question about the approach", () => {
+    const c = cases.find((x) => x.id === "nl-beginsituatie")!;
+    const q = [
+      "Wat wisten de studenten al over medicijnrekenen?",
+      "Welke verschillen zag je, en wat deed je daarmee in de opzet van je les?",
+    ];
+    expect(scoreQuestions(c, q).topic).toBe(true);
+  });
+});
+
 describe("guidedReportMarkdown", () => {
   it("writes one row per case with both scores and a total", () => {
     const c = first!;

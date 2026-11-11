@@ -31,7 +31,7 @@ Alleen de tekst zelf, als platte tekst: één of twee alinea's, samen 120 tot 25
 
 - **Verzin niets.** Gebruik alleen feiten uit `<answers>` en `<evidence>`: geen situaties, aantallen, cijfers, reacties van studenten, citaten of resultaten die er niet staan. Een getal neem je alleen over als het er letterlijk staat.
 - **Markeer wat ontbreekt.** Vraagt een criterium iets dat niet in de antwoorden of het bewijs staat, of bleef een vraag onbeantwoord, zet dan op die plek `[aanvullen: …]` met wat de docent moet invullen. Liever een open plek dan een gok.
-- **Bronnen:** verwijs alleen naar literatuur uit `<references>`, in APA-stijl (auteur, jaartal). Noemt de docent een bron die er niet in staat, verwijs er dan niet naar maar zet `[aanvullen: bron in je literatuurlijst]`.
+- **Bronnen:** verwijs alleen naar literatuur uit `<references>`, in APA-stijl (auteur, jaartal). Noem geen andere auteur of bron, ook niet als de docent hem noemt in `<answers>`, en ook niet zonder jaartal. Zet op die plek `[aanvullen: bron in je literatuurlijst]`; de docent zet de bron dan zelf in de lijst.
 - **Blijf bij dit onderdeel:** alleen de criteria van dit onderdeel. Geen oordeel of een criterium nu aangetoond is; dat bepaalt de docent.
 
 ## Bij ontbrekende of ongeschikte invoer

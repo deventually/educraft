@@ -2,7 +2,7 @@
  * Pure helpers for the guided-writing eval (`npm run eval:guided`): build a dossier from a
  * synthetic case, and score the questions and the paragraph deterministically (no judge model).
  */
-import { markersIn } from "../app/lib/portfolio/openSpots";
+import { markersIn, splitOnMarkers } from "../app/lib/portfolio/openSpots";
 import { emptyDossier } from "../app/lib/portfolio/schema";
 import { DRAFT_PROMPT_ID, QUESTIONS_PROMPT_ID } from "../app/lib/portfolio/guided";
 import type { DossierData, EvidenceKind } from "../app/lib/portfolio/types";
@@ -137,7 +137,7 @@ export interface DraftScore {
   words: number;
   /** 60 to 320 words. */
   length: boolean;
-  /** Every number in the paragraph is in the case's material. */
+  /** Every number in the paragraph (outside an open spot) is in the case's material. */
   noNewNumbers: boolean;
   /** Share of the expected facts kept, 0–1. */
   facts: number;
@@ -165,6 +165,13 @@ function material(c: GuidedCase): string {
     .join("\n");
 }
 
+function outsideMarkers(text: string): string {
+  return splitOnMarkers(text)
+    .filter((p) => !p.marker)
+    .map((p) => p.text)
+    .join(" ");
+}
+
 export function scoreDraft(c: GuidedCase, paragraph: string | null): DraftScore {
   const text = paragraph ?? "";
   const source = material(c);
@@ -176,7 +183,8 @@ export function scoreDraft(c: GuidedCase, paragraph: string | null): DraftScore 
     parse: paragraph !== null,
     words,
     length: words >= 60 && words <= 320,
-    noNewNumbers: (text.match(NUMBER) ?? []).every((n) => source.includes(n)),
+    // A number inside an open spot asks the teacher something; it states nothing.
+    noNewNumbers: (outsideMarkers(text).match(NUMBER) ?? []).every((n) => source.includes(n)),
     facts,
     gap: !c.expect.gap || markersIn(text).length > 0,
     clean: !c.expect.forbidden.some((f) => has(text, f)),
