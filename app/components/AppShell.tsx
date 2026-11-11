@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useMatches, useRouteLoaderData } from "react-router";
 import { CircleHelp, Menu, X } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -10,6 +10,7 @@ import { type NavItem, navLinkClass } from "./shell/nav";
 import { RouteAnnouncer } from "./shell/RouteAnnouncer";
 import { SiteFooter } from "./shell/SiteFooter";
 import { UserArea } from "./shell/UserArea";
+import { useDisclosure } from "./shell/useDisclosure";
 
 const MOBILE_NAV_ID = "mobile-nav";
 
@@ -34,6 +35,15 @@ export default function AppShell() {
   const courses = user?.features?.courses !== false;
   const redirectTo = location.pathname + location.search;
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const menuPanel = useRef<HTMLElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const mobileMenu = useDisclosure({
+    open: menuOpen,
+    close: closeMenu,
+    button: menuButton,
+    panel: menuPanel,
+  });
 
   // Focus-to-main on client navigation: keyboard/SR users restart at the top of
   // the new page. Skips the initial mount so we never yank focus on first paint.
@@ -91,20 +101,16 @@ export default function AppShell() {
       <RouteAnnouncer />
 
       <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur print:hidden">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4">
           <NavLink
             to="/"
             onClick={() => setMenuOpen(false)}
             className="flex shrink-0 items-center"
             aria-label={t.appName}
           >
-            <img
-              src="/logo.svg"
-              alt={t.appName}
-              className="h-[clamp(2.3rem,3.5vw,3.25rem)] w-auto"
-            />
+            <img src="/logo.svg" alt={t.appName} className="h-[clamp(2rem,3.5vw,3.25rem)] w-auto" />
           </NavLink>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Inline nav — visible from md upward. */}
             <nav aria-label={t.nav.label} className="hidden items-center gap-1 md:flex">
               {nav.map((item) => (
@@ -138,7 +144,9 @@ export default function AppShell() {
             )}
             {/* Hamburger — visible below md. */}
             <button
+              ref={menuButton}
               type="button"
+              onKeyDown={mobileMenu.onKeyDown}
               aria-expanded={menuOpen}
               aria-controls={MOBILE_NAV_ID}
               aria-label={menuOpen ? t.nav.closeMenu : t.nav.openMenu}
@@ -153,7 +161,9 @@ export default function AppShell() {
         {/* Collapsed nav panel — only mounted while open, below md. */}
         {menuOpen && (
           <nav
+            ref={menuPanel}
             id={MOBILE_NAV_ID}
+            onKeyDown={mobileMenu.onKeyDown}
             aria-label={t.nav.menuLabel}
             className="border-t border-slate-200 bg-white px-4 py-2 md:hidden"
           >
