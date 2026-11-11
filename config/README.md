@@ -100,7 +100,7 @@ schoolnetwerk mag `http://`), en eventueel een sleutel in `WHISPER_API_KEY`.
 De lijstprijs zoals de aanbieder hem publiceert, per miljoen tokens. Het dashboard *Gebruik*
 rekent er de kosten mee uit. Een beheerder kan in **Tools en modellen** een eigen prijs zetten
 (bijvoorbeeld bij een schoolcontract); die gaat voor. Bijwerken doe je met de skill
-`/modelprijzen`, voor elke release.
+`/model-prices`, voor elke release.
 
 | Veld | Betekenis |
 | --- | --- |

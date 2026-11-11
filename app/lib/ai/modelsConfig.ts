@@ -128,7 +128,7 @@ const listRate = z.number().finite().min(0).max(10_000);
 /**
  * A model's list price per million tokens as the provider publishes it (usually dollars),
  * with the day it was looked up and the page it came from. The admin can set an own
- * price on screen; that one wins. Kept current with the `/modelprijzen` skill.
+ * price on screen; that one wins. Kept current with the `/model-prices` skill.
  */
 const ListPriceSchema = z.object({
   currency: z.enum(["USD", "EUR"]),

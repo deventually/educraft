@@ -386,7 +386,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   op het scherm.** Elk model in `config/models.json` krijgt de lijstprijs van de aanbieder per
   miljoen tokens, met de dag van opzoeken en de bronpagina, en een wisselkoers van de ECB voor
   dollars. Beheer kan per model een eigen prijs zetten (een schoolcontract); die gaat voor. Een
-  aanroep krijgt de prijs van dat moment mee. De skill `/modelprijzen` houdt de lijstprijzen bij,
+  aanroep krijgt de prijs van dat moment mee. De skill `/model-prices` houdt de lijstprijzen bij,
   voor elke release; een vaste maandelijkse routine komt er pas als Bastiaan dat wil. Bastiaan,
   2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Dit is teveel om bij te
   houden anders").

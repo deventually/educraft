@@ -169,7 +169,7 @@ LimeOnIt is not tied to one model vendor.
   the models tab (`modelPriceAdmin.server.ts`, `instance_settings` key `modelPrices`, logged as
   `modelPriceChanged`); it wins (`effectivePrice` in `models.ts`). `meterCall` prices each call
   when it is counted (`callCost`, `ai_usage.costMicros`, a snapshot); a local model costs 0, a
-  model without a price adds to `unpricedCalls`. The skill `/modelprijzen` keeps the list
+  model without a price adds to `unpricedCalls`. The skill `/model-prices` keeps the list
   prices and the rate current, from the providers' own pages.
 
 This matters for the vision: institutions in different countries can run LimeOnIt on
