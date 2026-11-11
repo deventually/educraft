@@ -9,6 +9,8 @@ export const portfolio: RouteArea = {
       index("routes/portfolio._index.tsx"),
       route(":id", "routes/portfolio.$id.tsx"),
       route(":id/framework", "routes/portfolio.$id.framework.tsx"),
+      // Step 4 of the guided route: the start wizard (track, framework, anchors, planning).
+      route(":id/start", "routes/portfolio.$id.start.tsx"),
       route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
       // 29.3: the rehearsal assessment, from step 5 only.
       route(":id/rehearsal", "routes/portfolio.$id.rehearsal.tsx"),

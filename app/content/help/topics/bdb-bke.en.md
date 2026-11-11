@@ -22,6 +22,8 @@ No **BDB/BKE** in the menu? Then the workplace is still off for you. It is *On r
 
 ## Step 1: dossier and framework
 
+A new dossier opens **getting started** in four short steps: your track, your framework, your anchor per learning outcome and your hand-in date. You may skip any step; you find it again below your dossier's overview (**Start wizard**). The **anchor** is what a learning outcome is about: a lesson, your module (a whole course) or a test from your courses, or a short description. A tool you open for that outcome starts with that lesson, module or test, and a module or test goes into your dossier as evidence right away.
+
 1. Go to **BDB/BKE** and create a dossier. Give it a name and choose BDB, BKE or both. If you hand in each learning outcome on its own, one dossier is enough: you can export per learning outcome.
 2. Open **Framework**. There are two ways:
    - **Take the framework from your form (recommended).** Paste the text of the assessment form, or choose the PDF or Word file. The file stays on your computer; only the text goes to the AI model. LimeOnIt sets out learning outcomes and criteria, and where the form names a "good" level, also *What makes it stronger*.

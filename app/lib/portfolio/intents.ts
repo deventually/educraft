@@ -5,10 +5,10 @@
  */
 import { z } from "zod";
 import * as edit from "./edit";
-import { DossierDataSchema, LIMITS } from "./schema";
+import { DossierDataSchema, IsoDate, LIMITS } from "./schema";
 import { TICKABLE_CODES } from "./readiness";
 import { skeletonOutcomes } from "./skeleton";
-import { CRITERION_STATUSES, type DossierData, EVIDENCE_KINDS } from "./types";
+import { CRITERION_STATUSES, type DossierData, EVIDENCE_KINDS, TRACKS } from "./types";
 import type { Locale } from "~/lib/i18n";
 
 export type IntentError = "invalid" | "not-found";
@@ -50,6 +50,13 @@ const omitEmpty = (v: string | undefined) => (v ? v : undefined);
 /** Form fields per intent; `getAll` fields are listed in MULTI. */
 const SCHEMAS = {
   useSkeleton: z.object({}),
+  /** Start wizard, step 1: BDB, BKE or both, and the institution. */
+  track: z.object({
+    tracks: z.array(z.enum(TRACKS)).min(1).max(TRACKS.length),
+    institution: text(LIMITS.name).default(""),
+  }),
+  /** Start wizard, step 4: the hand-in date; "" clears it. */
+  deadline: z.object({ deadline: z.union([z.literal(""), IsoDate]) }),
   meta: z.object({
     institution: text(LIMITS.name).default(""),
     year: text(20).default(""),
@@ -135,7 +142,7 @@ const SCHEMAS = {
 } as const;
 
 export type Intent = keyof typeof SCHEMAS;
-const MULTI = new Set(["criterionIds", "reference"]);
+const MULTI = new Set(["criterionIds", "reference", "tracks"]);
 
 function fields(fd: FormData): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -170,6 +177,19 @@ function run(d: DossierData, intent: Intent, input: never, ctx: IntentContext): 
         for (const c of o.criteria) next = edit.addCriterion(next, id, { text: c.text });
       }
       return { ...next, framework: { ...next.framework, national: true } };
+    }
+    case "track": {
+      const v = input as z.infer<(typeof SCHEMAS)["track"]>;
+      return {
+        ...d,
+        tracks: TRACKS.filter((t) => v.tracks.includes(t)),
+        framework: { ...d.framework, institution: v.institution },
+      };
+    }
+    case "deadline": {
+      const { deadline: _old, ...rest } = d;
+      const v = input as z.infer<(typeof SCHEMAS)["deadline"]>;
+      return v.deadline ? { ...rest, deadline: v.deadline } : rest;
     }
     case "meta": {
       const v = input as z.infer<(typeof SCHEMAS)["meta"]>;

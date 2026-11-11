@@ -50,6 +50,21 @@ describe("ToolHints from a criterion (P27.2)", () => {
     );
   });
 
+  it("opens the tool on the outcome's anchor: its course and lesson", () => {
+    at(
+      <ToolHints
+        hints={[{ slug: "lesson-plan", name: "Les voorbereiden" }]}
+        step="evidence"
+        from={{ dossierId: "d1", criterionId: "k1" }}
+        anchor={{ course: "c1", item: "les-1" }}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Open Les voorbereiden" })).toHaveAttribute(
+      "href",
+      "/tools/lesson-plan?dossier=d1&criterion=k1&course=c1&item=les-1",
+    );
+  });
+
   it("opens the plain tool without a criterion", () => {
     at(
       <ToolHints

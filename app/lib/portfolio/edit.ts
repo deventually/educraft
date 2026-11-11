@@ -60,6 +60,8 @@ function prune(d: DossierData): DossierData {
     d.proofreads = Object.fromEntries(
       Object.entries(d.proofreads).filter(([id]) => outcomes.has(id)),
     );
+  if (d.anchors)
+    d.anchors = Object.fromEntries(Object.entries(d.anchors).filter(([id]) => outcomes.has(id)));
   return d;
 }
 

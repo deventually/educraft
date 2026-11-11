@@ -62,8 +62,10 @@ describe("/portfolio list", () => {
     const r = await list.action({
       request: post("/portfolio", { intent: "create", name: "Mijn BDB", tracks: ["bdb", "bke"] }),
     } as never);
-    expect(r).toMatchObject({ ok: true, intent: "create" });
-    const created = await repo.getDossier("teacher-a", (r as { id: string }).id);
+    // A new dossier opens the start wizard (step 2: the framework).
+    const location = (r as Response).headers.get("Location") ?? "";
+    const id = decodeURIComponent(location.match(/^\/portfolio\/([^/]+)\/start/)?.[1] ?? "");
+    const created = await repo.getDossier("teacher-a", id);
     expect(created?.data.tracks).toEqual(["bdb", "bke"]);
     expect(created?.data.framework.outcomes).toEqual([]);
   });
