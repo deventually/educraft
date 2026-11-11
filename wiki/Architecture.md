@@ -339,6 +339,12 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   course page shows it on the Overview tab and the course list per course. The presentation is
   the domain-neutral `ProgressPanel` (`app/components/progress/`): a bar, the next step with how
   and a button, and every step as a link to go deeper; another domain passes its own steps.
+  The BDB/BKE dossier does (`dossierRoute`, `app/lib/portfolio/route.ts`): the framework, each
+  learning outcome on its own, then finishing (no blocking point in `readinessCheck`). An outcome
+  has four milestones (`outcomeRoute`: evidence, chapter, review, shown); the review counts a
+  coach verdict *shown* or the teacher's own mark, so the coach is never required, and only the
+  teacher's mark completes an outcome. `DossierProgress` shows it on the overview, `OutcomeProgress`
+  on the outcome page, with each milestone a jump to its part of the page.
 - **Course wizard (step 1).** An empty course (`isEmptyCourse`) opens on "Hoe wil je beginnen?":
   design in broad outline, a document (the import) or empty. Designing posts `design-outcomes`:
   `app/lib/courses/design.ts` reads the brief (description, EC, weeks), builds the message (name,

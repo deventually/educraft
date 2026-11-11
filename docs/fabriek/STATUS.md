@@ -4,14 +4,21 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #275 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #276 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: voortgang per leeruitkomst (#276) gemerged op 2026-11-11:** het overzicht van een
+  dossier toont het gedeelde blok *Voortgang*: het kader, elke leeruitkomst apart en afronden,
+  met één volgende stap. Op de pagina van een leeruitkomst staan vier mijlpalen (bewijs,
+  hoofdstuk, feedback, getoond), elk een sprong naar dat deel. De coach is nooit verplicht: het
+  eigen vinkje van de docent telt ook.
 - **Voortgang van een cursus (#275) gemerged op 2026-11-11:** bovenaan het tabblad Overzicht een
-  blok *Voortgang* met zes stappen van backwards design, een balk, de *Volgende stap* met uitleg
-  en een knop, en elke stap als link naar zijn tabblad. De cursuslijst toont per cursus de
-  stappen en de volgende stap. `ProgressPanel` (`app/components/progress/`) is gedeeld.
+  blok *Voortgang* met zes stappen van backwards design (cursusgegevens, leeruitkomsten, toetsen,
+  lessen, weekplanning, controle), een balk, de *Volgende stap* met uitleg en een knop, en elke
+  stap als link naar zijn tabblad. De cursuslijst toont per cursus de stappen en de volgende stap.
+  `courseProgress` is puur; `ProgressPanel` (`app/components/progress/`) is gedeeld, ook voor de
+  BDB/BKE.
 - **Disciplines met uren per week (#274) gemerged op 2026-11-11:** een optioneel blok
   *Disciplines* op het tabblad Overzicht (naam, docent, uren per week) en een discipline per les.
   *Les voorbereiden* rekent de lesduur uit de uren van die discipline in die week, verdeeld over

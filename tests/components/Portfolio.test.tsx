@@ -7,9 +7,9 @@ import PortfolioList from "~/routes/portfolio._index";
 import PortfolioOverview from "~/routes/portfolio.$id";
 import PortfolioFramework from "~/routes/portfolio.$id.framework";
 import PortfolioOutcome from "~/routes/portfolio.$id.outcome.$outcomeId";
-import { outcomeProgress, nextStep } from "~/lib/portfolio/progress";
+import { outcomeProgress } from "~/lib/portfolio/progress";
 import { emptyDossier } from "~/lib/portfolio/schema";
-import { dossierStep } from "~/lib/portfolio/step";
+import { dossierRoute, outcomeRoute } from "~/lib/portfolio/route";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
 import { dossierPart } from "~/lib/portfolio/dossierPart";
@@ -35,22 +35,15 @@ function overviewData(d = sampleDossier()) {
     name: "Mijn BDB",
     framework: d.framework,
     progress: outcomeProgress(d),
-    next: nextStep(d),
+    route: dossierRoute(d),
     references: d.references,
     chapters: d.chapters.map(({ outcomeId, text }) => ({ outcomeId, text })),
     coachMode: d.coachMode,
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
     nextTools: [] as { slug: string; name: string }[],
-    step: dossierStep(d),
-    routeLinks: {
-      framework: `/portfolio/${ID}/framework`,
-      collect: `/portfolio/${ID}/outcome/${LU}`,
-      fill: `/portfolio/${ID}/outcome/${LU}`,
-      write: `/portfolio/${ID}/outcome/${LU}`,
-      finish: "#readiness",
-    },
-    practise: null as string | null,
+    nextCriterion: undefined as string | undefined,
+    practise: `/portfolio/${ID}/rehearsal`,
     readiness: readinessCheck(d),
     dossierReview: [] as unknown[],
     canReviewAll: false,
@@ -85,6 +78,7 @@ function outcomeData(d = sampleDossier()) {
     toolHints: {} as Record<string, { slug: string; name: string }[]>,
     chapterTools: [] as { slug: string; name: string }[],
     courseHints: [] as string[],
+    milestones: outcomeRoute(d, LU)!.milestones,
     snapshotCourses: {} as Record<string, string | null>,
     suggestions: {} as Record<
       string,
@@ -123,8 +117,9 @@ describe("Portfolio list", () => {
 describe("Portfolio overview", () => {
   it("shows one next step, progress per outcome and missing evidence", async () => {
     const { container } = renderRoute(PortfolioOverview, overviewData());
-    expect(screen.getByText("Controleer het kader en bevestig het.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "LU1 Doceren" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "Volgende stap: Kader" })).toBeInTheDocument();
+    const list = screen.getByRole("region", { name: "Leeruitkomsten" });
+    expect(within(list).getByRole("link", { name: "LU1 Doceren" })).toHaveAttribute(
       "href",
       `/portfolio/${ID}/outcome/${LU}`,
     );
@@ -149,48 +144,75 @@ describe("Portfolio overview", () => {
   });
 });
 
-describe("Portfolio route in five steps", () => {
-  it("marks the current step and links each step to where you do it", async () => {
-    const d = sampleDossier();
-    d.framework.confirmedAt = 1;
-    const { container } = renderRoute(PortfolioOverview, overviewData(d));
-    const nav = screen.getByRole("navigation", { name: "Route van je dossier" });
-    const steps = nav.querySelectorAll("ol > li");
-    expect(steps).toHaveLength(5);
-    const current = screen.getByRole("link", { current: "step" });
-    expect(current).toHaveTextContent("Stap 3 van 5: Vul aan met een tool");
-    expect(current).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}`);
-    expect(screen.getByRole("link", { name: /Stap 1 van 5: Kader/ })).toHaveAttribute(
+describe("Portfolio progress (guided route)", () => {
+  /** Confirmed: C1 has evidence and is shown, C2 has neither. */
+  const confirmed = () => edit.confirmFramework(sampleDossier(), 1);
+
+  it("shows the steps with a bar, and leads to the outcome at its next milestone", async () => {
+    const { container } = renderRoute(PortfolioOverview, overviewData(confirmed()));
+    const bar = screen.getByRole("progressbar");
+    expect(bar).toHaveAttribute("aria-valuenow", "1");
+    expect(bar).toHaveAttribute("aria-valuemax", "3");
+    expect(screen.getByText("1 van 3 stappen klaar")).toBeInTheDocument();
+    const steps = screen.getByRole("list", { name: "Stappen van je dossier" });
+    expect(within(steps).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(steps).getByRole("link", { name: "Kader" })).toHaveAttribute(
       "href",
       `/portfolio/${ID}/framework`,
     );
-    expect(screen.queryByText(/Laatste stap/)).toBeNull();
+    expect(within(steps).getByText("1 van 2 criteria met bewijs")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Volgende stap: LU1 Doceren" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Naar LU1 Doceren" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/outcome/${LU}#evidence-title`,
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("links the guide to the step you are at", () => {
-    const d = sampleDossier();
-    d.framework.confirmedAt = 1;
-    renderRoute(PortfolioOverview, overviewData(d));
+    renderRoute(PortfolioOverview, overviewData(confirmed()));
     expect(
-      screen.getByRole("link", { name: "Handleiding bij stap 3: Vul aan met een tool" }),
-    ).toHaveAttribute("href", "/help/bdb-bke#stap-3-vul-aan-met-een-tool");
+      screen.getByRole("link", { name: "Uitleg bij deze stap in de handleiding" }),
+    ).toHaveAttribute("href", "/help/bdb-bke#stap-2-verzamel-wat-je-al-hebt");
   });
 
-  it("names the export and the interview practice at the last step", async () => {
-    const d = sampleDossier();
-    d.framework.confirmedAt = 1;
+  it("leads to finishing and the interview practice once every outcome is done", async () => {
+    let d = confirmed();
     d.evidence[0]!.criterionIds = [C1, C2];
-    const data = {
-      ...overviewData(d),
-      practise: "/portfolio/d1/rehearsal",
-    };
-    const { container } = renderRoute(PortfolioOverview, data);
-    expect(screen.getByRole("link", { current: "step" })).toHaveTextContent("Rond af");
-    expect(screen.getByText(/Laatste stap/)).toBeInTheDocument();
+    d = edit.setStatus(d, C2, "shown");
+    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    expect(screen.getByRole("heading", { name: "Volgende stap: Afronden" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Naar Afronden" }).getAttribute("href")).toMatch(
+      /#readiness$/,
+    );
     expect(
       screen.getByRole("link", { name: "Oefen je eindgesprek met een proefassessment" }),
-    ).toHaveAttribute("href", "/portfolio/d1/rehearsal");
+    ).toHaveAttribute("href", `/portfolio/${ID}/rehearsal`);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows the four milestones of one outcome on its page, each a jump to its part", async () => {
+    const { container } = renderRoute(PortfolioOutcome, outcomeData(confirmed()));
+    const steps = screen.getByRole("list", { name: "Mijlpalen van deze leeruitkomst" });
+    expect(
+      within(steps)
+        .getAllByRole("link")
+        .map((a) => a.textContent),
+    ).toEqual(["Bewijs", "Hoofdstuk", "Laten beoordelen", "Aangetoond"]);
+    expect(screen.getByRole("heading", { name: "Volgende stap: Bewijs" })).toBeInTheDocument();
+    // A same-page jump is a plain link: the browser moves focus there, so Tab goes on from it.
+    expect(screen.getByRole("link", { name: "Naar Bewijs" })).toHaveAttribute(
+      "href",
+      "#evidence-title",
+    );
+    expect(within(steps).getByRole("link", { name: "Hoofdstuk" })).toHaveAttribute(
+      "href",
+      "#chapter-title",
+    );
+    expect(document.getElementById("evidence-title")).not.toBeNull();
+    expect(document.getElementById("chapter-title")).not.toBeNull();
+    expect(document.getElementById("coach-title")).not.toBeNull();
+    expect(document.getElementById("criteria-title")).not.toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -369,15 +391,15 @@ describe("Portfolio — which tool helps now", () => {
     expect(screen.queryByText("Denkhulp bij het schrijven")).toBeNull();
   });
 
-  it("puts the fitting tool in the next-step card of the overview", async () => {
+  it("puts the fitting tool under the next step of the overview", async () => {
     const { container } = renderRoute(PortfolioOverview, {
-      ...overviewData(),
+      ...overviewData(edit.confirmFramework(sampleDossier(), 1)),
       nextTools: [{ slug: "authentic-assessment", name: "Authentiek toetsen" }],
+      nextCriterion: C2,
     });
-    expect(screen.getByRole("link", { name: "Open Authentiek toetsen" })).toHaveAttribute(
-      "href",
-      "/tools/authentic-assessment",
-    );
+    expect(
+      screen.getByRole("link", { name: "Open Authentiek toetsen" }).getAttribute("href"),
+    ).toMatch(/^\/tools\/authentic-assessment\?.*criterion=/);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

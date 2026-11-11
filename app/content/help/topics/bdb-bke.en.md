@@ -1,6 +1,8 @@
 # Making your BDB and BKE
 
-This guide takes you step by step from an empty dossier to the documents you hand in. Allow a few working days if most of your practice material (lessons, feedback, a test you gave) is already there. The route at the top of your dossier follows the same five steps.
+This guide takes you step by step from an empty dossier to the documents you hand in. Allow a few working days if most of your practice material (lessons, feedback, a test you gave) is already there.
+
+**Progress.** At the top of your dossier you see how far you are: first the framework, then each learning outcome on its own, then finishing. The *Next step* button takes you to what is up now; every step in the list is a link too, if you want to go deeper yourself. At the top of each learning outcome are four milestones: Evidence, Chapter, Assessment and Shown. So LU1 can be done while LU4 still waits for a test you gave. *Assessment* counts the coach's verdict, but also what you already marked as *Shown* yourself: the coach is a help, not a requirement.
 
 **Three agreements first**
 

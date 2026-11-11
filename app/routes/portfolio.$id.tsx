@@ -10,18 +10,18 @@ import {
 import { criterionHints } from "~/lib/portfolio/toolHints";
 import { ToolHints } from "~/components/portfolio/ToolHints";
 import { WordImport } from "~/components/portfolio/WordImport";
-import { dossierStep } from "~/lib/portfolio/step";
-import { DossierRoute } from "~/components/portfolio/DossierRoute";
+import { dossierRoute } from "~/lib/portfolio/route";
+import { DossierProgress } from "~/components/portfolio/DossierProgress";
 import { ReadinessCheck } from "~/components/portfolio/ReadinessCheck";
 import { DossierExport, PartExport } from "~/components/portfolio/DossierExport";
 import { DossierReviewPanel } from "~/components/portfolio/DossierReviewPanel";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
 import { dossierPart } from "~/lib/portfolio/dossierPart";
-import { nextStep, outcomeProgress } from "~/lib/portfolio/progress";
+import { outcomeProgress } from "~/lib/portfolio/progress";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import { Button, Card, Input, Label } from "~/components/ui";
+import { Button, Input, Label } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -33,12 +33,15 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
-  const next = nextStep(d);
+  const route = dossierRoute(d);
+  // The next criterion without evidence, when that is the next step: the tools that help with it.
+  const nextCriterion =
+    route.next?.milestone?.id === "evidence" ? route.next.milestone.criterionId : undefined;
   const names = await availableToolNames(request, user);
   let nextTools: { slug: string; name: string }[] = [];
-  if (next.step === "add-evidence") {
-    const outcome = d.framework.outcomes.find((o) => o.id === next.outcomeId);
-    const criterion = outcome?.criteria.find((c) => c.id === next.criterionId);
+  if (nextCriterion) {
+    const outcome = d.framework.outcomes.find((o) => o.id === route.next?.outcomeId);
+    const criterion = outcome?.criteria.find((c) => c.id === nextCriterion);
     if (outcome && criterion) {
       nextTools = criterionHints(outcome, criterion, new Set(names.keys())).map((slug) => ({
         slug,
@@ -46,28 +49,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       }));
     }
   }
-  // The five-step route: each step links to where you do it.
-  const base = `/portfolio/${dossier.id}`;
-  const outcomeId = "outcomeId" in next ? next.outcomeId : d.framework.outcomes[0]?.id;
-  const work = outcomeId ? `${base}/outcome/${outcomeId}` : `${base}/framework`;
-  const routeLinks = {
-    framework: `${base}/framework`,
-    collect: work,
-    fill: work,
-    write: work,
-    finish: "#readiness",
-  };
-  // Step 5: practise the final interview with the rehearsal of this dossier (P29.3).
-  const practise = `${base}/rehearsal`;
+  // Finishing: practise the final interview with the rehearsal of this dossier (P29.3).
+  const practise = `/portfolio/${dossier.id}/rehearsal`;
   return {
     id: dossier.id,
     name: dossier.name,
     framework: d.framework,
     progress: outcomeProgress(d),
-    next,
+    route,
     nextTools,
-    step: dossierStep(d),
-    routeLinks,
+    nextCriterion,
     practise,
     readiness: readinessCheck(d),
     dossierReview: dossierReviewOverview(d),
@@ -121,15 +112,14 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     name,
     framework,
     progress,
-    next,
+    route,
     references,
     chapters,
     coachMode,
     aiUsed,
     aiRequired,
     nextTools,
-    step: routeStep,
-    routeLinks,
+    nextCriterion,
     practise,
     readiness,
     dossierReview,
@@ -142,34 +132,6 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     const o = outcomes.get(outcomeId);
     return o ? outcomeLabel(o) : "";
   };
-
-  const step = (() => {
-    const ns = t.portfolio.nextStep;
-    switch (next.step) {
-      case "build-framework":
-        return { text: ns.buildFramework, to: `/portfolio/${id}/framework` };
-      case "confirm-framework":
-        return { text: ns.confirmFramework, to: `/portfolio/${id}/framework` };
-      case "add-evidence":
-        return {
-          text: fmt(ns.addEvidence, { outcome: labelOf(next.outcomeId) }),
-          to: `/portfolio/${id}/outcome/${next.outcomeId}`,
-        };
-      case "write-chapter":
-        return {
-          text: fmt(ns.writeChapter, { outcome: labelOf(next.outcomeId) }),
-          to: `/portfolio/${id}/outcome/${next.outcomeId}`,
-        };
-      case "mark-shown":
-        return {
-          text: fmt(ns.markShown, { outcome: labelOf(next.outcomeId) }),
-          to: `/portfolio/${id}/outcome/${next.outcomeId}`,
-        };
-      default:
-        return { text: ns.done, to: null };
-    }
-  })();
-
   return (
     <div className="w-full min-w-0">
       <Link
@@ -183,32 +145,20 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         {name}
       </h1>
 
-      <DossierRoute current={routeStep} links={routeLinks} practise={practise} />
-
-      <Card className="mt-6 border-violet-200 bg-violet-50 p-5">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-violet-800">
-          {t.portfolio.nextStepTitle}
-        </h2>
-        <p className="mt-1 text-slate-900">{step.text}</p>
-        {step.to && (
-          <Link
-            to={step.to}
-            className="mt-2 inline-block text-sm font-medium text-violet-700 underline underline-offset-2"
-          >
-            {t.portfolio.goThere}
-          </Link>
-        )}
+      <DossierProgress
+        dossierId={id}
+        route={route}
+        outcomes={framework.outcomes}
+        practise={practise}
+      />
+      {nextCriterion && (
         <ToolHints
           hints={nextTools}
           step="evidence"
-          from={
-            next.step === "add-evidence"
-              ? { dossierId: id, criterionId: next.criterionId }
-              : undefined
-          }
-          className="mt-3 bg-white"
+          from={{ dossierId: id, criterionId: nextCriterion }}
+          className="mt-3"
         />
-      </Card>
+      )}
 
       <p className="mt-6 text-sm text-slate-600">
         {framework.confirmedAt

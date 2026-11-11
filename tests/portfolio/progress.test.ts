@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as edit from "~/lib/portfolio/edit";
-import {
-  nextStep,
-  outcomeProgress,
-  requirementFindings,
-  wordCount,
-} from "~/lib/portfolio/progress";
+import { outcomeProgress, requirementFindings, wordCount } from "~/lib/portfolio/progress";
 import { C1, C2, LU, sampleDossier } from "./fixtures";
 
 describe("wordCount", () => {
@@ -48,32 +43,5 @@ describe("requirementFindings", () => {
       words: 101,
       limit: 100,
     });
-  });
-
-  it("flags a framework that is not confirmed only once there are criteria", () => {
-    const d = sampleDossier();
-    expect(d.framework.confirmedAt).toBeUndefined();
-    expect(nextStep(d)).toEqual({ step: "confirm-framework" });
-  });
-});
-
-describe("nextStep", () => {
-  it("walks framework → evidence → chapter → review", () => {
-    const empty = edit.removeOutcome(sampleDossier(), LU);
-    expect(nextStep(empty)).toEqual({ step: "build-framework" });
-
-    const confirmed = edit.confirmFramework(sampleDossier(), 1);
-    expect(nextStep(confirmed)).toEqual({ step: "add-evidence", outcomeId: LU, criterionId: C2 });
-
-    const linked = edit.updateEvidence(confirmed, confirmed.evidence[0]!.id, {
-      criterionIds: [C1, C2],
-    });
-    const noChapter = { ...linked, chapters: [] };
-    expect(nextStep(noChapter)).toEqual({ step: "write-chapter", outcomeId: LU });
-
-    expect(nextStep(linked)).toEqual({ step: "mark-shown", outcomeId: LU, criterionId: C2 });
-
-    const done = edit.setStatus(linked, C2, "shown");
-    expect(nextStep(done)).toEqual({ step: "done" });
   });
 });

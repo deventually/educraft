@@ -1,7 +1,31 @@
-import { useId } from "react";
+import { type ReactNode, useId } from "react";
 import { Link } from "react-router";
 import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
+
+/**
+ * A link to where a step is done. A jump on the same page (`#…`) is a plain link, so the browser
+ * moves the focus there and Tab goes on from that part of the page (WCAG 2.4.3).
+ */
+function StepLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className: string;
+  children: ReactNode;
+}) {
+  return href.startsWith("#") ? (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ) : (
+    <Link to={href} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 /** One step of a guided route, already in the reader's language. */
 interface PanelStep {
@@ -75,12 +99,12 @@ export function ProgressPanel({
             {next.heading}
           </h3>
           <p className="mt-1 max-w-[65ch] text-sm text-slate-700">{next.how}</p>
-          <Link
-            to={next.href}
+          <StepLink
+            href={next.href}
             className="mt-3 inline-flex rounded-xl bg-violet-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
           >
             {next.cta}
-          </Link>
+          </StepLink>
         </section>
       ) : (
         <p className="mt-4 max-w-[65ch] rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -107,12 +131,12 @@ export function ProgressPanel({
               {s.complete ? <Check className="size-3.5" /> : i + 1}
             </span>
             <span className="min-w-0">
-              <Link
-                to={s.href}
+              <StepLink
+                href={s.href}
                 className="font-medium text-slate-900 underline underline-offset-2 hover:text-violet-700"
               >
                 {s.label}
-              </Link>
+              </StepLink>
               <span className="block text-slate-600">{s.status}</span>
             </span>
           </li>

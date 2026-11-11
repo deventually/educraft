@@ -136,14 +136,14 @@ describe("/portfolio/:id and its pages", () => {
     expect(data.progress[0]).toMatchObject({ outcomeId: LU, criteria: 2, shown: 1 });
     // The readiness check replaced the separate findings (Bastiaan, 2026-11-05).
     expect(data).not.toHaveProperty("findings");
-    expect(data.next).toEqual({ step: "confirm-framework" });
-    // P29.1: "Klaar om in te leveren?" and step 5 points at it.
+    expect(data.route.next).toMatchObject({ id: "framework", kind: "framework" });
+    // P29.1: "Klaar om in te leveren?", where finishing leads.
     expect(data.readiness).toContainEqual({
       code: "framework-unconfirmed",
       level: "block",
       fix: { to: "framework" },
     });
-    expect(data.routeLinks.finish).toBe("#readiness");
+    expect(data.route.steps.at(-1)).toMatchObject({ id: "finish", complete: false });
   });
 
   it("ticks a self-check only in the caller's own dossier (P29.1)", async () => {
@@ -205,7 +205,7 @@ describe("/portfolio/:id and its pages", () => {
     d.framework.outcomes[0]!.criteria[1]!.text = "Je motiveert studenten tijdens de les.";
     const mine = await repo.createDossier("teacher-a", "A", d);
     const page = await overview.loader({ request: get("/x"), params: { id: mine.id } } as never);
-    expect(page.next).toMatchObject({ step: "add-evidence", criterionId: C2 });
+    expect(page.nextCriterion).toBe(C2);
     expect(page.nextTools[0]).toEqual({ slug: "arcs-reactor", name: expect.any(String) });
     const data = await outcome.loader({
       request: get("/x"),
