@@ -361,3 +361,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   een docent wegvalt. Gekoppeld werk en reviews blijven van wie ze maakte. Delen met een team blijft
   alleen lezen en kopiëren. Rubrics en onderwijscontexten houden alleen de eigenaar. Bastiaan,
   2026-11-10 (keuzekaarten in de thread "Cursussen overdragen en samen bewerken").
+- **BESLUIT-2026-11-11-1:** **Meta loopt via Together AI; aanbieders buiten de EU houden de
+  bouw niet tegen.** Meta biedt zelf geen API meer aan (de Llama API stopte in juli 2026), dus
+  Muse Spark Open staat in de catalogus via Together AI (#249). Een school installeert LimeOnIt
+  zelf en kiest zelf haar aanbieder, dus de privacy-officer hoeft niet per aanbieder vooraf te
+  kijken. **Voor later:** de online versie voor kleinere instellingen krijgt een goede disclaimer
+  over waar de gegevens heen gaan, ook over hoe lang een aanbieder een prompt in zijn cache bewaart
+  (OpenAI zonder zero data retention: tot 24 uur). Bastiaan, 2026-11-11 (thread "Jev als System 1").

@@ -292,9 +292,9 @@ export async function action({ request }: Route.ActionArgs) {
       images,
       temperature: stage.temperature ?? tool.defaultTemperature,
       maxTokens: stage.maxTokens ?? tool.defaultMaxTokens,
-      // Reasoning switch — honored only by the native Ollama adapter; other
-      // providers ignore it. `undefined` (absent from the body) = model default.
+      // Reasoning switch, only for the native Ollama adapter; absent = model default.
       thinking: body.thinking,
+      cacheKey: mode.cachesPrompt ? `${user.id}:${tool.slug}` : undefined,
       signal,
     });
 

@@ -32,6 +32,7 @@ Het model dat tools gebruiken als niets anders gekozen is. Moet in `models` staa
 | `baseURLEnv` | Alleen voor een adres dat per server verschilt: de naam van de instelling in `.env`. |
 | `modelsUrl` | Link naar de lijst met modellen van de aanbieder (voor het beheerscherm). |
 | `example` | Een voorbeeld-model-id, als hulp in het formulier. |
+| `cache` | Hoe de aanbieder een prompt cachet die terugkomt (de volgende beurt van een chat): `"markers"` (wij markeren wat bewaard wordt; alleen de API van Anthropic), `"auto"` (de aanbieder doet het zelf) of `{ "key": "<veld>" }` (een vaste sleutel per docent en tool in dat veld, bijvoorbeeld `prompt_cache_key` of `session_id`). |
 
 Ingebouwd en dus niet in `providers`: de lokale servers `ollama` en `lmstudio` en de CLI-agents
 `claude-code`, `opencode`, `codex` en `gemini-cli`. Die werken alleen buiten productie.

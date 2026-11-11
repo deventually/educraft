@@ -8,7 +8,8 @@
       "baseURL": "https://api.anthropic.com/v1",
       "keyEnv": "ANTHROPIC_API_KEY",
       "modelsUrl": "https://docs.anthropic.com/en/docs/about-claude/models",
-      "example": "claude-haiku-5-5"
+      "example": "claude-haiku-5-5",
+      "cache": "markers"
     },
     {
       "id": "openai",
@@ -17,7 +18,8 @@
       "baseURL": "https://api.openai.com/v1",
       "keyEnv": "OPENAI_API_KEY",
       "modelsUrl": "https://developers.openai.com/api/docs/models",
-      "example": "gpt-6.1-sol"
+      "example": "gpt-6.1-sol",
+      "cache": { "key": "prompt_cache_key" }
     },
     {
       "id": "google",
@@ -26,7 +28,8 @@
       "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/",
       "keyEnv": "GOOGLE_GENERATIVE_AI_API_KEY",
       "modelsUrl": "https://ai.google.dev/gemini-api/docs/models",
-      "example": "gemini-4-argon"
+      "example": "gemini-4-argon",
+      "cache": "auto"
     },
     {
       "id": "mistral",
@@ -35,7 +38,8 @@
       "baseURL": "https://api.mistral.ai/v1",
       "keyEnv": "MISTRAL_API_KEY",
       "modelsUrl": "https://docs.mistral.ai/getting-started/models/",
-      "example": "mistral-large-4"
+      "example": "mistral-large-4",
+      "cache": { "key": "prompt_cache_key" }
     },
     {
       "id": "minimax",
@@ -44,7 +48,8 @@
       "baseURL": "https://api.minimax.io/v1",
       "keyEnv": "MINIMAX_API_KEY",
       "modelsUrl": "https://platform.minimax.io/docs/guides/text-chat",
-      "example": "MiniMax-M3"
+      "example": "MiniMax-M3",
+      "cache": "auto"
     },
     {
       "id": "zai",
@@ -53,7 +58,8 @@
       "baseURL": "https://api.z.ai/api/paas/v4",
       "keyEnv": "ZAI_API_KEY",
       "modelsUrl": "https://docs.z.ai/guides/overview/overview",
-      "example": "glm-5.3"
+      "example": "glm-5.3",
+      "cache": "auto"
     },
     {
       "id": "xai",
@@ -62,7 +68,8 @@
       "baseURL": "https://api.x.ai/v1",
       "keyEnv": "XAI_API_KEY",
       "modelsUrl": "https://docs.x.ai/developers/models",
-      "example": "grok-4.7"
+      "example": "grok-4.7",
+      "cache": "auto"
     },
     {
       "id": "qwen",
@@ -71,7 +78,8 @@
       "baseURLEnv": "QWEN_BASE_URL",
       "keyEnv": "QWEN_API_KEY",
       "modelsUrl": "https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope",
-      "example": "qwen3.8-max"
+      "example": "qwen3.8-max",
+      "cache": "auto"
     },
     {
       "id": "together",
@@ -80,7 +88,8 @@
       "baseURL": "https://api.together.xyz/v1",
       "keyEnv": "TOGETHER_API_KEY",
       "modelsUrl": "https://docs.together.ai/docs/serverless-models",
-      "example": "meta-models/Muse-Spark-Open-816B-A42B"
+      "example": "meta-models/Muse-Spark-Open-816B-A42B",
+      "cache": "auto"
     },
     {
       "id": "opencode-zen",
@@ -89,7 +98,8 @@
       "baseURL": "https://opencode.ai/inference/openai/v1",
       "keyEnv": "OPENCODE_ZEN_API_KEY",
       "modelsUrl": "https://opencode.ai/docs/zen/",
-      "example": "kimi-k3"
+      "example": "kimi-k3",
+      "cache": "auto"
     },
     {
       "id": "openrouter",
@@ -98,7 +108,8 @@
       "baseURL": "https://openrouter.ai/api/v1",
       "keyEnv": "OPENROUTER_API_KEY",
       "modelsUrl": "https://openrouter.ai/models",
-      "example": "openrouter/auto"
+      "example": "openrouter/auto",
+      "cache": { "key": "session_id" }
     },
     {
       "id": "openai-compat",
@@ -110,7 +121,8 @@
       "baseURLEnv": "OPENAI_COMPAT_BASE_URL",
       "keyEnv": "OPENAI_COMPAT_API_KEY",
       "keyOptional": true,
-      "example": "glm-4-plus"
+      "example": "glm-4-plus",
+      "cache": "auto"
     },
     {
       "id": "whisper",
@@ -122,7 +134,8 @@
       "baseURLEnv": "WHISPER_BASE_URL",
       "keyEnv": "WHISPER_API_KEY",
       "keyOptional": true,
-      "example": "whisper-1"
+      "example": "whisper-1",
+      "cache": "auto"
     }
   ],
   "models": [

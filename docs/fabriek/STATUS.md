@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-10 (#187 t/m #246 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #249 gemerged)_
 
 ## Nu
 
+- **Modelcatalogus: GLM, Grok, Qwen en Meta Muse (#249) gemerged op 2026-11-11:** een school kan
+  ook Z.AI (GLM), xAI (Grok), Alibaba (Qwen, adres via `QWEN_BASE_URL`) of Meta Muse Spark Open
+  via Together AI kiezen; alleen de sleutel in `.env` is nodig. BESLUIT-2026-11-11-1.
+- **Brief P32 (#248) gemerged op 2026-11-10:** plan voor meekijken op uitnodiging en een reviewer
+  Examencommissie, voor na de pilot.
+- **Een cursus overdragen (#247) gemerged op 2026-11-10:** de eigenaar draagt een cursus over aan
+  een teamgenoot of lid, de beheerder één of alle cursussen van een docent; bij het verwijderen
+  van een account gaat een cursus met een mede-eigenaar eerst naar de eerste mede-eigenaar.
+  BESLUIT-2026-11-10-5.
 - **Mbo-vakgebiedpakketten per kwalificatie (#245) gemerged op 2026-11-10:** vier proefpakketten
   met de kerntaken en werkprocessen uit het SBB-kwalificatiedossier: Helpende Zorg en Welzijn,
   Verzorgende IG, Mbo-Verpleegkundige en Software developer. De mbo-keuzelijst groepeert nu per
@@ -552,6 +561,11 @@ _Laatst bijgewerkt: 2026-11-10 (#187 t/m #246 gemerged)_
 
 ## Bezig
 
+- **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
+  dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
+  bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
+  krijgt markeringen, OpenAI, Mistral en OpenRouter een vaste sleutel per docent en tool (als
+  hash), de rest cachet zelf. Alleen bij chats; een losse generatie krijgt niets.
 - **De handleiding BDB en BKE in de app (PR open, plan BDB en BKE PR 2):** helponderwerp
   `bdb-bke` (NL/EN) van stap 0 (*Op aanvraag* aanzetten) tot inleveren, met open plekken, elke
   leeruitkomst apart en terughalen uit Word. Onder de route van het dossier staat een link naar de

@@ -127,3 +127,64 @@ describe("AI SDK adapter — a provider the admin added", () => {
     expect(compatCalls.at(-1)?.apiKey).toBeUndefined();
   });
 });
+
+describe("AI SDK adapter — prompt caching, as the provider wants it", () => {
+  const turns = [
+    { role: "user" as const, content: "eerste" },
+    { role: "assistant" as const, content: "antwoord" },
+    { role: "user" as const, content: "laatste" },
+  ];
+  const chat = (model: string, cacheKey?: string) =>
+    aiSdkProvider.generate({ model, system: "systeem", messages: turns, cacheKey });
+  interface Sent {
+    system: unknown;
+    messages: Array<{ content: unknown; providerOptions?: unknown }>;
+    providerOptions?: Record<string, Record<string, string>>;
+  }
+  const lastCall = async () => {
+    const { generateText } = await import("ai");
+    return vi.mocked(generateText).mock.calls.at(-1)?.[0] as unknown as Sent;
+  };
+  const EPHEMERAL = { anthropic: { cacheControl: { type: "ephemeral" } } };
+
+  it("marks Claude's system prompt and the turn before the last, never the changing last turn", async () => {
+    await chat("claude-sonnet-5-5", "user-1:socratic-partner");
+    const opts = await lastCall();
+    expect(opts.system).toEqual({ role: "system", content: "systeem", providerOptions: EPHEMERAL });
+    expect(opts.messages[1]).toMatchObject({ content: "antwoord", providerOptions: EPHEMERAL });
+    expect(opts.messages[0]?.providerOptions).toBeUndefined();
+    expect(opts.messages[2]?.providerOptions).toBeUndefined();
+    expect(opts.providerOptions).toEqual({ anthropic: { effort: "medium" } });
+  });
+
+  it("caches nothing when the call asks for no caching (a one-off generation)", async () => {
+    await chat("claude-sonnet-5-5");
+    const opts = await lastCall();
+    expect(opts.system).toBe("systeem");
+    expect(opts.messages.some((m) => m.providerOptions)).toBe(false);
+  });
+
+  it("sends a key provider an opaque key next to its effort, never the raw user id", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "sk-test");
+    await chat("gpt-6.1-sol", "user-1:socratic-partner");
+    const opts = await lastCall();
+    const sent = opts.providerOptions?.openai;
+    expect(sent?.reasoningEffort).toBe("medium");
+    expect(sent?.prompt_cache_key).toMatch(/^[0-9a-f]{32}$/);
+    expect(JSON.stringify(opts)).not.toContain("user-1");
+    await chat("gpt-6.1-sol", "user-1:socratic-partner");
+    expect((await lastCall()).providerOptions?.openai?.prompt_cache_key).toBe(
+      sent?.prompt_cache_key,
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it("sends a provider that caches by itself nothing extra", async () => {
+    vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "g-test");
+    await chat("gemini-4-argon", "user-1:socratic-partner");
+    const opts = await lastCall();
+    expect(opts.system).toBe("systeem");
+    expect(opts.providerOptions).toBeUndefined();
+    vi.unstubAllEnvs();
+  });
+});

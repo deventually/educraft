@@ -100,6 +100,12 @@ LimeOnIt is not tied to one model vendor.
   the boot with a message naming the problem. Keys stay in `.env`; `env.server#providerSetting`
   reads only `*_API_KEY` / `*_BASE_URL` names. The AI SDK adapter serves every config provider
   and maps `effort` to `providerOptions.anthropic.effort` or `providerOptions.<id>.reasoningEffort`.
+  **Prompt caching:** a chat sends the same system prompt and history every turn, so the stream
+  sets `GenerateOptions.cacheKey` (teacher and tool) when `modeOf(tool).cachesPrompt`. The adapter
+  then follows the provider's `cache`: `"markers"` puts Claude's `cacheControl` on the system
+  prompt and on the turn before the last (the last turn carries the language reminder, which is
+  gone next turn); `{ key }` sends a SHA-256 of the key in that body field; `"auto"` sends
+  nothing. A one-off generation is never cached (a cache write costs more than it saves there).
   Changes made on the admin screen go to the database on top of the file, never into it. `models.ts` holds the `compat::`/local id schemes;
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from

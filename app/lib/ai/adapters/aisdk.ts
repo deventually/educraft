@@ -1,4 +1,11 @@
-import { streamText, generateText, type LanguageModel, type ModelMessage } from "ai";
+import { createHash } from "node:crypto";
+import {
+  streamText,
+  generateText,
+  type Instructions,
+  type LanguageModel,
+  type ModelMessage,
+} from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { getProvider, outputTokenBudget, resolveModelInfo, type ConfigProvider } from "../models";
@@ -57,6 +64,22 @@ function resolveModel(catalogId: string): LanguageModel {
   }).chatModel(info.apiId);
 }
 
+/** The provider-specific options: the model's reasoning effort, and a cache key where wanted. */
+function providerOptionsFor(provider: ConfigProvider, opts: GenerateOptions, effort?: string) {
+  const own: Record<string, string> = {};
+  if (effort) own[provider.api === "anthropic" ? "effort" : "reasoningEffort"] = effort;
+  if (opts.cacheKey && typeof provider.cache === "object") {
+    own[provider.cache.key] = opaqueKey(opts.cacheKey);
+  }
+  if (Object.keys(own).length === 0) return undefined;
+  return { [provider.api === "anthropic" ? "anthropic" : provider.id]: own };
+}
+
+/** The key as the provider sees it: stable, but no user id leaves the server. */
+function opaqueKey(cacheKey: string): string {
+  return createHash("sha256").update(cacheKey).digest("hex").slice(0, 32);
+}
+
 /**
  * The model's settings as AI SDK call options: temperature (`null` = none sent, which
  * wins over the caller), and its reasoning effort in the form its API expects.
@@ -67,17 +90,30 @@ function settingsOptions(opts: GenerateOptions) {
   const temperature =
     s.temperature === null ? undefined : (opts.temperature ?? s.temperature ?? DEFAULT_TEMPERATURE);
   const provider = getProvider(info.provider);
-  const effort = s.effort;
-  const providerOptions =
-    effort && provider
-      ? provider.api === "anthropic"
-        ? { anthropic: { effort } }
-        : { [provider.id]: { reasoningEffort: effort } }
-      : undefined;
+  const providerOptions = provider ? providerOptionsFor(provider, opts, s.effort) : undefined;
   return {
     temperature,
     maxOutputTokens: outputTokenBudget(info, opts.maxTokens ?? s.maxTokens),
     ...(providerOptions ? { providerOptions } : {}),
+  };
+}
+
+/** Claude's marker: keep the prompt up to and including this part (for five minutes). */
+const KEEP = { anthropic: { cacheControl: { type: "ephemeral" as const } } };
+
+/**
+ * The prompt, marked for a provider that caches only what is marked (`cache: "markers"`)
+ * when it comes back (`cacheKey`): the system prompt, and the turn before the last. The
+ * last turn carries a reminder that is gone on the next turn, so a mark there is never read.
+ */
+function prompt(opts: GenerateOptions): { system: Instructions; messages: ModelMessage[] } {
+  const messages = toMessages(opts);
+  const provider = getProvider(resolveModelInfo(opts.model).provider);
+  if (!opts.cacheKey || provider?.cache !== "markers") return { system: opts.system, messages };
+  const before = messages.length - 2;
+  return {
+    system: { role: "system", content: opts.system, providerOptions: KEEP },
+    messages: messages.map((m, i) => (i === before ? { ...m, providerOptions: KEEP } : m)),
   };
 }
 
@@ -115,8 +151,7 @@ export const aiSdkProvider: LLMProvider = {
   async generate(opts) {
     const { text, usage, finishReason } = await generateText({
       model: resolveModel(opts.model),
-      system: opts.system,
-      messages: toMessages(opts),
+      ...prompt(opts),
       ...settingsOptions(opts),
     });
     return {
@@ -129,8 +164,7 @@ export const aiSdkProvider: LLMProvider = {
   async *streamChat(opts) {
     const result = streamText({
       model: resolveModel(opts.model),
-      system: opts.system,
-      messages: toMessages(opts),
+      ...prompt(opts),
       ...settingsOptions(opts),
       abortSignal: opts.signal,
     });

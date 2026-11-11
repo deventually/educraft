@@ -184,6 +184,31 @@ describe("api.stream — mode happy paths", () => {
     expect(messages[2].content).toContain("always respond entirely in English"); // reinforced
   });
 
+  it("chat: asks for prompt caching with one key per teacher and tool; one-shot never", async () => {
+    const chat = (userId: string) =>
+      invoke(
+        {
+          slug: "socratic-partner",
+          values: { chapter: "Evolutie" },
+          messages: [{ role: "user", content: "hoi" }],
+        },
+        { userId },
+      );
+    await chat("cache-a");
+    await chat("cache-a");
+    await chat("cache-b");
+    const keys = streamChatSpy.mock.calls.map((c) => c[0].cacheKey);
+    expect(keys[0]).toEqual(expect.any(String));
+    expect(keys[1]).toBe(keys[0]);
+    expect(keys[2]).not.toBe(keys[0]);
+    await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "cache-c" },
+    );
+    expect(streamChatSpy).toHaveBeenCalledTimes(4);
+    expect(streamChatSpy.mock.calls.at(-1)![0].cacheKey).toBeUndefined();
+  });
+
   it("chat: adds the tool's own turn reminder to the LAST turn only (P31.1b)", async () => {
     const history = [
       { role: "user", content: "eerste" },
