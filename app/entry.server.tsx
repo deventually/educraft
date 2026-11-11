@@ -14,6 +14,7 @@ import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 import { applySecurityHeaders, createCspNonce, cspNonceOf } from "~/server/securityHeaders.server";
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
+import { startAiUsageRetention } from "~/server/aiUsageRetention.server";
 import { startBackupSchedule } from "~/server/backup.server";
 import { handleServerError, recordError } from "~/server/errorLog.server";
 import { requestIdOf } from "~/server/requestId.server";
@@ -29,6 +30,10 @@ ensureRegistryValidated();
 // The app's own daily database backup (production, or wherever BACKUP_DIR is set). Online, so
 // no downtime; a failure is logged and never takes the app down. See backup.server.
 startBackupSchedule();
+
+// AI use per person is kept thirteen months, then rolled up into totals without a person
+// (BESLUIT-2026-11-11-6). Hourly, logged, never fatal. See aiUsageRetention.server.
+startAiUsageRetention();
 
 /** Unexpected loader/action/render errors: one JSON line with the request id (errorLog). */
 export const handleError = handleServerError;

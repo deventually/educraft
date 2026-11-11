@@ -401,3 +401,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   `/release` en `/maintenance` komen nu, `/model-prices` uit het werk aan het kostendashboard, en
   `/sources` (externe kaders nalopen, met een controledatum per pakket) na de pilot.
   Bastiaan, 2026-11-11 (thread "Releaseproces en onderhoudsskills adviseren").
+- **BESLUIT-2026-11-11-6:** **AI-gebruik per persoon blijft 13 maanden.** Daarna rolt de server
+  de rijen in `ai_usage` op tot maandtotalen per tool en model, voor de hele instelling en per
+  team, zonder persoon (`ai_usage_rollup`), en wist hij de rijen per persoon. Dertien maanden is
+  een schooljaar plus dezelfde maand vorig jaar, precies wat de pagina *Gebruik* laat kiezen.
+  Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Bewaartermijn …
+  JA").

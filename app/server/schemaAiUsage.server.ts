@@ -33,3 +33,32 @@ export const aiUsage = sqliteTable(
   },
   (t) => [uniqueIndex("ai_usage_key").on(t.userId, t.day, t.source, t.model)],
 );
+
+/**
+ * `ai_usage` rolled up after thirteen months (BESLUIT-2026-11-11-6): totals per UTC month,
+ * source and model, without a person. `team_id` "" is the whole institution; a team's row adds
+ * up its members at the time of rolling up, so a person in two teams counts in both (as on the
+ * live page). Counters as in `ai_usage`.
+ */
+export const aiUsageRollup = sqliteTable(
+  "ai_usage_rollup",
+  {
+    id: text("id").primaryKey(),
+    month: text("month").notNull(),
+    teamId: text("team_id").notNull(),
+    source: text("source").notNull(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    calls: integer("calls").notNull().default(0),
+    failedCalls: integer("failed_calls").notNull().default(0),
+    unmeteredCalls: integer("unmetered_calls").notNull().default(0),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+    cacheWriteTokens: integer("cache_write_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    reasoningTokens: integer("reasoning_tokens").notNull().default(0),
+    costMicros: integer("cost_micros").notNull().default(0),
+    unpricedCalls: integer("unpriced_calls").notNull().default(0),
+  },
+  (t) => [uniqueIndex("ai_usage_rollup_key").on(t.month, t.teamId, t.source, t.model)],
+);

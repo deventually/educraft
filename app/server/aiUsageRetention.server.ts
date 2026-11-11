@@ -1,0 +1,32 @@
+/**
+ * Keeps `ai_usage` per person for thirteen months (BESLUIT-2026-11-11-6): every hour the server
+ * rolls older rows up into month totals without a person (`rollUpAiUsage`). Usually there is
+ * nothing to do; on the first of a month one month goes. Never blocks a request and never takes
+ * the app down: a failure is logged.
+ */
+import { log } from "./log.server";
+import { retentionCutoff, rollUpAiUsage } from "./repositories/aiUsageRollup.server";
+
+const HOUR = 60 * 60 * 1000;
+
+/** Roll up what `now` no longer keeps per person; how many person rows went (0 on a failure). */
+export async function retainAiUsage(now = new Date()): Promise<number> {
+  try {
+    const moved = await rollUpAiUsage(retentionCutoff(now.toISOString().slice(0, 10)));
+    if (moved > 0) log("aiUsage.rolledUp", { rows: moved });
+    return moved;
+  } catch (error) {
+    log("aiUsage.rollUpFailed", { error: error instanceof Error ? error.message : String(error) });
+    return 0;
+  }
+}
+
+const globalForRetention = globalThis as unknown as { __limeonitAiUsageTimer?: NodeJS.Timeout };
+
+/** Starts the hourly roll-up, once per process. */
+export function startAiUsageRetention(): void {
+  if (globalForRetention.__limeonitAiUsageTimer) return;
+  globalForRetention.__limeonitAiUsageTimer = setInterval(() => void retainAiUsage(), HOUR);
+  globalForRetention.__limeonitAiUsageTimer.unref();
+  void retainAiUsage();
+}
