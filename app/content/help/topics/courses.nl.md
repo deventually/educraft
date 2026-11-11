@@ -28,9 +28,17 @@ De niveaus volgen de herziene taxonomie van Bloom (Anderson & Krathwohl, 2001): 
 
 Op de cursuspagina staat een tabel met de leeruitkomsten in de rijen en de activiteiten en toetsen in de kolommen. Een ✓ betekent dat de activiteit of toets die leeruitkomst dekt, met het niveau erbij als je dat hebt ingevuld.
 
-## Een toetsmatrijs exporteren
+## Toetsmatrijs en nakijkmodel
 
-Heeft een toets vragen in zijn toetsmatrijs, dan staat daaronder **Toetsmatrijs exporteren**. Je krijgt eerst een voorbeeld en daarna een bestand in Word, als PDF (via het printvenster) of in Markdown. Het document heeft een tabel met de punten per leeruitkomst en denkniveau, de vragen met hun punten, en de leeruitkomsten die de toets toetst. Er komt geen AI aan te pas: het document komt rechtstreeks uit je cursus, dus het klopt altijd met wat je hebt ingevuld. Heeft geen vraag punten, dan telt de tabel het aantal vragen.
+Onder elke toets maak je met één klik een **toetsmatrijs** en, zodra de toets onderdelen heeft, een **nakijkmodel**. Je ziet eerst een voorbeeld en kiest dan Word, PDF (via het printvenster) of Markdown. Er komt geen AI aan te pas: de documenten komen rechtstreeks uit je cursus, dus ze kloppen altijd met wat je hebt ingevuld. Wat je leeg laat, staat er niet in.
+
+- **Succescriteria** vul je in bij een leeruitkomst, één per regel. Gebruik je codes, begin de regel dan met de code en een dubbele punt, bijvoorbeeld `S-An 1.1: De student …`.
+- **Gegevens voor toetsmatrijs en nakijkmodel** staan onder de toets: toetsvorm, toetseigenaar, beoordeling (cijfer of voldoende/onvoldoende), cesuur, voorwaarden voor een voldoende, afname en herkansing. Modulecode en studiejaar vul je in bij de instellingen van de cursus.
+- **Onderdelen** zijn wat de student maakt of doet, met de leeruitkomsten die het laat zien, een weging, of het een knock-out is, en wanneer het voldoende of onvoldoende is.
+
+De toetsmatrijs heeft per leeruitkomst een rij met de succescriteria, het niveau, de weging, de beoordelingscriteria en de onderdelen. Het niveau is het beheersingsniveau uit je vakgebiedpakket als je dat hebt ingevuld, anders het Bloom-niveau. Een onderdeel bij meer leeruitkomsten telt bij elk daarvan mee. Heeft de toets vragen, dan komt de weging uit de punten per vraag en staat de specificatie per vraag eronder, met de punten per leeruitkomst en denkniveau.
+
+Het nakijkmodel heeft per onderdeel een tabel met wat onvoldoende en wat voldoende is, en zet de voorwaarden en knock-outs bovenaan.
 
 ## Werk koppelen
 

@@ -8,7 +8,7 @@ import CoursePage from "~/routes/courses.$id";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
 import { emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
-import { alignedCourse, itemizedCourse } from "../courses/fixtures";
+import { alignedCourse, documentedCourse, itemizedCourse } from "../courses/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -231,19 +231,6 @@ describe("Course editor — question-level matrix (P26.1)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("offers the blueprint as a document to export, for each test with questions", async () => {
-    const { container } = renderRoute(CoursePage, pageData(itemizedCourse()));
-    openMatrix("Toetsmatrijs (4 vragen)");
-    const exportSummary = screen.getByText("Toetsmatrijs exporteren", { selector: "summary" });
-    expect(exportSummary.closest("details")).toHaveAttribute(
-      "data-export-url",
-      "/courses/c1/assessments/test-1/export",
-    );
-    // The formative quiz has no questions: nothing to export there.
-    expect(screen.getAllByText("Toetsmatrijs exporteren", { selector: "summary" })).toHaveLength(1);
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
-
   it("offers a question form that works without JavaScript", () => {
     renderRoute(CoursePage, pageData(itemizedCourse()));
     openMatrix("Toetsmatrijs (4 vragen)");
@@ -462,5 +449,70 @@ describe("Course editor — pack tags on learning outcomes (P21.6)", () => {
   it("offers no tag fields without a pack", () => {
     renderRoute(CoursePage, pageData());
     expect(screen.queryByLabelText("Beheersingsniveau")).toBeNull();
+  });
+});
+
+describe("Course page — blueprint and marking model", () => {
+  it("asks for the module code and the study year with the settings", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()));
+    expect(screen.getByLabelText("Modulecode")).toHaveValue("DB1");
+    expect(screen.getByLabelText("Studiejaar")).toHaveValue("2026-2027");
+  });
+
+  it("asks for success criteria per learning outcome, one per line with a code", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()));
+    const fields = screen.getAllByLabelText("Succescriteria");
+    expect(fields[0]).toHaveValue(
+      "S-An 1.1: De student registreert requirements.\nHet model is genormaliseerd.",
+    );
+    expect(screen.getByRole("list", { name: "Succescriteria LU1" })).toHaveTextContent(
+      "S-An 1.1 De student registreert requirements.",
+    );
+  });
+
+  it("has a details form per test that works without JavaScript", async () => {
+    const { container } = renderRoute(CoursePage, pageData(documentedCourse()));
+    // One per test; the final test is the second.
+    const summary = screen.getAllByText("Gegevens voor toetsmatrijs en nakijkmodel", {
+      selector: "summary",
+    })[1]!;
+    const details = summary.closest("details") as HTMLElement;
+    const form = details.querySelector("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("update-assessment-details");
+    expect(within(details).getByLabelText("Toetsvorm")).toHaveValue("Andere wijze");
+    expect(within(details).getByLabelText("Beoordeling")).toHaveValue("pass-fail");
+    expect(within(details).getByLabelText("Cesuur (%)")).toHaveValue("75");
+    expect(within(details).getByLabelText("Voorwaarden voor een voldoende")).toHaveValue(
+      "Alle opdrachten ingeleverd.\nDeelgenomen aan het gesprek.",
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("lists the parts of a test, each editable, and a form to add one", async () => {
+    const { container } = renderRoute(CoursePage, pageData(documentedCourse()));
+    const summary = screen.getByText("Onderdelen (2)", { selector: "summary" });
+    const details = summary.closest("details") as HTMLElement;
+    expect(within(details).getByText("Datamodel")).toBeInTheDocument();
+    expect(within(details).getByText(/LU1 · weging 60% · knock-out/)).toBeInTheDocument();
+    const add = within(details).getByRole("button", { name: /Onderdeel toevoegen/ });
+    const form = add.closest("form") as HTMLFormElement;
+    expect(form.querySelector('input[name="intent"]')).toHaveValue("add-part");
+    expect(form.querySelector('input[name="assessmentId"]')).toHaveValue("test-1");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers the blueprint for every test, and the marking model where there are parts", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()));
+    const panels = (name: string) =>
+      screen
+        .getAllByText(name, { selector: "summary" })
+        .map((s) => s.closest("details")?.getAttribute("data-export-url"));
+    expect(panels("Toetsmatrijs exporteren")).toEqual([
+      "/courses/c1/assessments/quiz-1/blueprint/export",
+      "/courses/c1/assessments/test-1/blueprint/export",
+    ]);
+    expect(panels("Nakijkmodel exporteren")).toEqual([
+      "/courses/c1/assessments/test-1/marking-model/export",
+    ]);
   });
 });

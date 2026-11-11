@@ -28,9 +28,17 @@ The levels follow the revised Bloom taxonomy (Anderson & Krathwohl, 2001): remem
 
 On the course page is a table with the learning outcomes in the rows and the activities and assessments in the columns. A ✓ means the activity or assessment covers that learning outcome, with the level if you filled it in.
 
-## Exporting a test blueprint
+## Test blueprint and marking model
 
-When a test has questions in its blueprint, **Export test blueprint** appears below it. You first see a preview, then get a file in Word, as a PDF (through the print window) or in Markdown. The document has a table with the points per learning outcome and cognitive level, the questions with their points, and the learning outcomes the test assesses. No AI is involved: the document comes straight from your course, so it always matches what you entered. If no question has points, the table counts the questions.
+Under each test you make a **test blueprint** with one click and, once the test has parts, a **marking model**. You first see a preview, then choose Word, PDF (through the print window) or Markdown. No AI is involved: the documents come straight from your course, so they always match what you entered. What you leave empty is left out.
+
+- **Success criteria** go with a learning outcome, one per line. If you use codes, start the line with the code and a colon, for example `S-An 1.1: The student …`.
+- **Details for the blueprint and the marking model** sit under the test: the form of the test, the test owner, the assessment (grade or pass/fail), the pass mark, the conditions for a pass, how the test is taken and the resit. The module code and the study year go in the course settings.
+- **Parts** are what the student makes or does, with the learning outcomes it shows, a weight, whether it is a knock-out, and when it is a pass or a fail.
+
+The blueprint has a row per learning outcome with the success criteria, the level, the weight, the assessment criteria and the parts. The level is the mastery level from your subject pack if you filled it in, otherwise the Bloom level. A part with more than one learning outcome counts towards each of them. If the test has questions, the weight comes from the points per question, and the specification per question follows, with the points per learning outcome and cognitive level.
+
+The marking model has a table per part with what a fail and what a pass is, and puts the conditions and knock-outs at the top.
 
 ## Linking work
 

@@ -9,7 +9,6 @@ import {
   type CourseData,
   ITEM_FORMATS,
 } from "~/lib/courses/types";
-import { ExportPanel } from "~/components/export/ExportMenu";
 import { Button, Input, Label, Select } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -28,15 +27,7 @@ const cell = "px-2 py-1.5 align-top";
  * one row per question, each row its own `<Form>` through the `form` attribute,
  * so it works without JavaScript. The total row gives each outcome's share.
  */
-export function ItemsMatrix({
-  courseId,
-  data,
-  assessment,
-}: {
-  courseId: string;
-  data: CourseData;
-  assessment: Assessment;
-}) {
+export function ItemsMatrix({ data, assessment }: { data: CourseData; assessment: Assessment }) {
   const t = useT();
   const m = t.courses.items;
   const outcomeName = useOutcomeName();
@@ -99,14 +90,6 @@ export function ItemsMatrix({
             </tfoot>
           </table>
         </section>
-      )}
-      {items.length > 0 && (
-        <div className="mt-3">
-          <ExportPanel
-            url={`/courses/${encodeURIComponent(courseId)}/assessments/${encodeURIComponent(assessment.id)}/export`}
-            label={t.courseDocuments.blueprint.export}
-          />
-        </div>
       )}
       <AddItemForm data={data} assessment={assessment} />
     </details>

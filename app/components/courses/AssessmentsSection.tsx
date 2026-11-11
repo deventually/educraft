@@ -9,6 +9,7 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 import { BloomSelect, MetaLine, NumberField, useOutcomeName, WeekLabel } from "./fields";
 import { ItemActions } from "./ItemActions";
 import { ItemsMatrix } from "./ItemsMatrix";
+import { TestDocuments } from "./TestDocuments";
 
 function CoverageFields({ data, assessment }: { data: CourseData; assessment?: Assessment }) {
   const t = useT();
@@ -203,7 +204,8 @@ export function AssessmentsSection({
               <ItemActions name={as.title} removeIntent="remove-assessment" id={as.id}>
                 <AssessmentForm data={data} assessment={as} />
               </ItemActions>
-              <ItemsMatrix courseId={courseId} data={data} assessment={as} />
+              <ItemsMatrix data={data} assessment={as} />
+              <TestDocuments courseId={courseId} data={data} assessment={as} />
             </li>
           ))}
         </ul>
