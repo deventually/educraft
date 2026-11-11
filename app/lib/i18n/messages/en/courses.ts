@@ -136,7 +136,8 @@ export const courses: Messages["courses"] = {
         "That does not fit in one course (at most 30 learning outcomes and 30 assessments). Tick fewer.",
       nothing:
         "According to the AI, this document has no learning outcomes or assessments for this course. Read the explanation below, or enter them by hand.",
-      quota: "Daily limit reached; try again tomorrow.",
+      quota:
+        "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
     },
     existing: "Already in your course; it is not added twice and not changed.",
     existingFill:

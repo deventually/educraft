@@ -5,12 +5,14 @@ export const error = {
   invalidImages: "Ongeldig afbeeldingsformaat. Afbeeldingen moeten PNG, JPEG, GIF of WebP zijn.",
   invalidMessages: "Ongeldig berichtformaat.",
   invalidRequest: "Ongeldig verzoek.",
+  limitReached:
+    "De AI-ruimte voor deze maand is op. Op de pagina Gebruik zie je welke limiet; je beheerder kan hem verhogen.",
   modelNoVision:
     "Dit model ({model}) ondersteunt geen afbeeldingsanalyse. Selecteer een model met visiecapaciteit.",
   notAllowed: "Deze tool is niet beschikbaar voor jouw account.",
   notFound: "Deze pagina kon niet worden gevonden.",
   notFoundTitle: "404",
-  quotaExceeded: "Daglimiet bereikt — morgen weer beschikbaar.",
+  quotaExceeded: "Je hebt vandaag heel veel AI gebruikt. Morgen kan het weer.",
   rateLimited: "Te veel verzoeken. Probeer het over een moment opnieuw.",
   reportHint: "Meld dit aan je beheerder, met het tijdstip en de pagina hieronder.",
   reportPage: "Pagina",

@@ -5,6 +5,7 @@ export const usage: Messages["usage"] = {
   activeMembers: "Active members this month",
   allHeading: "Whole institution",
   allIntro: "Everyone together: per person, team, tool and model. Only admins see this.",
+  budgetLabel: "The institution's budget per month (euro)",
   cacheShare: "Input from the cache",
   callsMonth: "Calls this month",
   colCacheRead: "Cache read",
@@ -19,6 +20,11 @@ export const usage: Messages["usage"] = {
   colTeam: "Team",
   colTool: "Tool",
   cost: "Cost this month",
+  errors: {
+    amount: "Enter an amount in euros, such as 25 or 12.50. Empty = no limit.",
+    ownerOnly: "Only the owner sets the budget.",
+    unknown: "This team or person does not exist (any more).",
+  },
   estimate:
     "An estimate from our own counts, at the price at the time of each call. The real amount is on the provider's invoice.",
   failed: "Failed or aborted",
@@ -26,10 +32,27 @@ export const usage: Messages["usage"] = {
   heading: "Usage",
   intro:
     "How often the tools call AI for you. We only count calls and tokens per day, never what you write.",
+  limitAdmin: {
+    heading: "Limits per month",
+    intro:
+      "In euros per month. A teacher's own limit replaces their team's. From 80% the teacher sees a notice, at 100% the AI stops until next month. Admins have no limit. Empty = no limit.",
+    people: "Per teacher",
+    teams: "Per team",
+  },
+  limitFor: "Limit per month for {name} (euro)",
+  limitNone: "no limit",
+  limitScope: {
+    budget: "the institution's budget",
+    team: "the limit of team {name}",
+    user: "your own limit",
+  },
+  limitStop:
+    "Your AI allowance for this month is used up ({scope}). It is back on the 1st of the month; your admin can raise the limit.",
+  limitUsed: "AI allowance this month",
+  limitWarn: "You have used {pct} of your AI allowance for this month ({scope}).",
   monthLabel: "Month",
   monthShow: "Show",
   monthTotal: "Total for the month",
-  noLimit: "No daily limit",
   none: "No usage this month yet.",
   ownerHeading: "Cost and forecast",
   ownHeading: "Your usage",
@@ -38,8 +61,6 @@ export const usage: Messages["usage"] = {
   perProvider: "Per provider",
   perTeam: "Per team",
   perTool: "Per tool",
-  quotaLeft: "Left today",
-  quotaOf: "{left} of {limit}",
   savings: "Saved by caching",
   savingsNote: "Estimated at today's prices.",
   smallTeam:

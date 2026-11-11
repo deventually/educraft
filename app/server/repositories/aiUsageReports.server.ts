@@ -143,3 +143,25 @@ export async function instanceAiUsage(
     providers: grouped(inMonth, aiUsage.provider),
   };
 }
+
+/**
+ * What the month cost so far, for the limit check of one teacher: their own spend, each of
+ * their teams' (today's members) and everyone's. Not user-scoped by design: a team limit and
+ * the budget count colleagues' calls too; only totals leave this function.
+ */
+export async function monthSpend(
+  userId: string,
+  teamIds: readonly string[],
+  month: DayRange,
+): Promise<{ user: number; teams: Record<string, number>; instance: number }> {
+  const cost = (where: SQL | undefined) => total(and(where, within(month))).costMicros;
+  const teams: Record<string, number> = {};
+  for (const teamId of teamIds) {
+    const members = getDb()
+      .select({ id: teamMembers.userId })
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId));
+    teams[teamId] = cost(inArray(aiUsage.userId, members));
+  }
+  return { user: cost(eq(aiUsage.userId, userId)), teams, instance: cost(undefined) };
+}

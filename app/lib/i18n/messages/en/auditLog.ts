@@ -4,6 +4,7 @@ export const auditLog: Messages["auditLog"] = {
   actions: {
     accountCreated: "Account created",
     accountDeleted: "Account deleted",
+    aiLimitChanged: "AI limit changed",
     courseMemberChanged: "Course members changed",
     coursesTransferred: "Courses handed over",
     deactivated: "Deactivated",
@@ -52,6 +53,12 @@ export const auditLog: Messages["auditLog"] = {
   intro:
     "Who changed what in roles, passwords, accounts, invites and the model choice. The newest {n} actions are at the top.",
   invites: "{n} invites",
+  limit: {
+    budget: "The institution's budget: {euros} per month",
+    removed: "limit removed",
+    team: "Team {name}: {euros} per month",
+    user: "Limit: {euros} per month",
+  },
   price: "{input} in, {output} out per million tokens",
   priceRemoved: "price removed",
   role: "Role: {role}",
