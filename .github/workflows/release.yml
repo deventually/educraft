@@ -1,0 +1,47 @@
+name: Release
+# A tag vX.Y.Z on main (only Bastiaan sets one, BESLUIT-2026-11-11-4) builds the Docker image and
+# pushes it to ghcr.io under exactly that version, then makes a GitHub Release with the notes from
+# RELEASE.md. On the VPS, `./deploy.sh X.Y.Z` pulls that image.
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: "26.13.0", cache: npm }
+      - run: npm ci
+      # Stops here when the tag, package.json and RELEASE.md disagree: nothing is built.
+      - run: npx tsx scripts/release-notes.ts "${{ github.ref_name }}" > release-notes.md
+      - id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/deventually/educraft:${{ steps.v.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.v.outputs.version }}
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${{ github.ref_name }}" --verify-tag
+          --title "LimeOnIt ${{ github.ref_name }}"
+          --notes-file release-notes.md --generate-notes

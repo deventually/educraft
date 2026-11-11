@@ -1,4 +1,10 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, it, expect, beforeAll } from "vitest";
+
+const pkg = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf8")) as {
+  version: string;
+};
 
 // Point at an isolated in-memory DB before the route (and its DB probe) loads.
 process.env.DATABASE_URL = "file::memory:";
@@ -16,10 +22,11 @@ function invoke() {
 }
 
 describe("healthz", () => {
-  it("returns 200 and {ok:true} when the DB probe succeeds", async () => {
+  it("returns 200 with ok and the running version when the DB probe succeeds", async () => {
     const res = await invoke();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true });
+    // deploy.sh compares this version with the one it just started.
+    expect(await res.json()).toEqual({ ok: true, version: pkg.version });
   });
 
   it("does not require authentication (no redirect)", async () => {

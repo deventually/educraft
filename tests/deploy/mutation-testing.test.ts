@@ -17,6 +17,7 @@ const config = JSON.parse(read("stryker.config.json")) as {
   vitest?: { configFile?: string };
   reporters: string[];
   tsconfigFile?: string;
+  thresholds: { break: number | null };
 };
 const pkg = JSON.parse(read("package.json")) as {
   scripts: Record<string, string>;
@@ -40,6 +41,10 @@ describe("Stryker config", () => {
     const tsconfig = JSON.parse(read("tsconfig.json")) as Record<string, unknown>;
     expect(tsconfig.extends).toBeUndefined();
     expect(tsconfig.references).toBeUndefined();
+  });
+
+  it("fails the nightly run when the score drops below 70% (75.9% on main, 2026-11-10)", () => {
+    expect(config.thresholds.break).toBe(70);
   });
 
   it("runs the vitest suite with per-test coverage, so each mutant only runs the tests that reach it", () => {

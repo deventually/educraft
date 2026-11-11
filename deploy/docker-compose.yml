@@ -1,0 +1,29 @@
+# LimeOnIt on a VPS behind Caddy. This folder on the server holds this file, .env and deploy.sh.
+# Roll out a release with:  ./deploy.sh 1.2.0
+# The image comes from ghcr.io, built by the release workflow for that exact tag; the server
+# never builds. deploy.sh writes LIMEONIT_VERSION into .env, so a plain `docker compose up -d`
+# afterwards keeps running the same version. See docs/overdracht.md.
+services:
+  app:
+    image: ghcr.io/deventually/educraft:${LIMEONIT_VERSION:?run ./deploy.sh <version> first}
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/limeonit.db
+    # No ports: only Caddy reaches the app, as http://limeonit:3000 on the shared network.
+    networks:
+      caddy:
+        aliases: [limeonit]
+    volumes:
+      - ${LIMEONIT_DATA:-limeonit-data}:/data
+    restart: unless-stopped
+
+networks:
+  caddy:
+    # The network your Caddy container is on (docker network ls). Default: "caddy".
+    name: ${CADDY_NETWORK:-caddy}
+    external: true
+
+volumes:
+  limeonit-data:

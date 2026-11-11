@@ -1,6 +1,6 @@
 /**
- * The admin's health overview (P1): how old the newest backup is, how big the database is and how
- * much disk is left. Computed on the server (`health.server.ts`), shown by `HealthPanel`.
+ * The admin's health overview (P1): how old the newest backup is, how big the database is, how
+ * much disk is left and which version runs. Computed on the server (`health.server.ts`), shown by `HealthPanel`.
  */
 
 /** A backup older than this gets a warning on the admin page. */
@@ -17,4 +17,6 @@ export interface AdminHealth {
   databaseBytes: number | null;
   /** Free space for the database's folder; `null` when unknown. */
   freeDiskBytes: number | null;
+  /** The running version (`package.json`), e.g. `1.2.0`. */
+  version: string;
 }

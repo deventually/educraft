@@ -90,6 +90,11 @@ describe("adminHealth", () => {
 
   it("knows no size or free space for an in-memory database", () => {
     const h = health.adminHealth({ env: {}, dbPath: ":memory:", now });
-    expect(h).toEqual({ backup: { state: "off" }, databaseBytes: null, freeDiskBytes: null });
+    expect(h).toMatchObject({ backup: { state: "off" }, databaseBytes: null, freeDiskBytes: null });
+  });
+
+  it("names the running version, from package.json", () => {
+    const h = health.adminHealth({ env: {}, dbPath: ":memory:", now });
+    expect(h.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 });

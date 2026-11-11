@@ -390,3 +390,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   voor elke release; een vaste maandelijkse routine komt er pas als Bastiaan dat wil. Bastiaan,
   2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen": "Dit is teveel om bij te
   houden anders").
+- **BESLUIT-2026-11-11-5:** **Releases met een SemVer-tag, uitrollen met één commando.** Een
+  release is een tag `vX.Y.Z` op `main`, die alleen Bastiaan zet; Claude-sessies mogen geen tag
+  of release maken. De versie staat in `package.json` en in `RELEASE.md`, met de datum en notes in
+  gewone taal. Major: wie zelf installeert, moet iets met de hand doen; minor: iets nieuws (ook
+  met een migratie die vanzelf loopt); patch: alleen herstel. De tag bouwt de image op
+  `ghcr.io/deventually/educraft:X.Y.Z` en een GitHub Release. Op de VPS (Strato, Caddy, Docker)
+  rolt `./deploy.sh X.Y.Z` uit: back-up, starten, wachten tot `/healthz` die versie meldt.
+  Terugrollen gebeurt nooit vanzelf. Geen staging tot na de pilots. Skills krijgen een Engelse naam:
+  `/release` en `/maintenance` komen nu, `/model-prices` uit het werk aan het kostendashboard, en
+  `/sources` (externe kaders nalopen, met een controledatum per pakket) na de pilot.
+  Bastiaan, 2026-11-11 (thread "Releaseproces en onderhoudsskills adviseren").

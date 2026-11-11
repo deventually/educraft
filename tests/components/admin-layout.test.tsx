@@ -12,7 +12,12 @@ async function renderLayout({ isOwner = false } = {}) {
       path: "/admin",
       Component: AdminLayout,
       loader: () => ({
-        health: { backup: { state: "none" }, databaseBytes: null, freeDiskBytes: null },
+        health: {
+          backup: { state: "none" },
+          databaseBytes: null,
+          freeDiskBytes: null,
+          version: "1.2.3",
+        },
         isOwner,
       }),
       children: [{ path: "users", Component: () => <p>child</p> }],

@@ -31,6 +31,7 @@ describe("HealthPanel (admin only, P1)", () => {
       backup: { state: "ok", at: "2026-11-08T02:00:00.000Z", ageHours: 10 },
       databaseBytes: 12.3 * MB,
       freeDiskBytes: 2.5 * GB,
+      version: "1.2.3",
     });
     expect(screen.getByRole("heading", { name: "Gezondheid" })).toBeInTheDocument();
     expect(screen.getByText("10 uur geleden")).toBeInTheDocument();
@@ -39,11 +40,24 @@ describe("HealthPanel (admin only, P1)", () => {
     expect(screen.queryByText(/ouder dan 36 uur/)).not.toBeInTheDocument();
   });
 
+  it("names the running version, so a report from a teacher can be tied to a release", () => {
+    renderPanel({
+      backup: { state: "ok", at: "2026-11-08T02:00:00.000Z", ageHours: 10 },
+      databaseBytes: MB,
+      freeDiskBytes: GB,
+      version: "1.2.3",
+    });
+    const term = screen.getByText("Versie");
+    expect(term.tagName).toBe("DT");
+    expect(term.nextElementSibling).toHaveTextContent("1.2.3");
+  });
+
   it("says 'less than an hour' for a fresh backup, not '0 hours'", () => {
     renderPanel({
       backup: { state: "ok", at: "2026-11-09T11:30:00.000Z", ageHours: 0 },
       databaseBytes: MB,
       freeDiskBytes: GB,
+      version: "1.2.3",
     });
     expect(screen.getByText("Minder dan een uur geleden")).toBeInTheDocument();
   });
@@ -53,19 +67,30 @@ describe("HealthPanel (admin only, P1)", () => {
       backup: { state: "stale", at: "2026-11-06T02:00:00.000Z", ageHours: 80 },
       databaseBytes: MB,
       freeDiskBytes: GB,
+      version: "1.2.3",
     });
     expect(screen.getByText("3 dagen geleden")).toBeInTheDocument();
     expect(screen.getByText(/ouder dan 36 uur/)).toBeInTheDocument();
   });
 
   it("warns when there is no backup yet", () => {
-    renderPanel({ backup: { state: "none" }, databaseBytes: MB, freeDiskBytes: GB });
+    renderPanel({
+      backup: { state: "none" },
+      databaseBytes: MB,
+      freeDiskBytes: GB,
+      version: "1.2.3",
+    });
     expect(screen.getByText("Nog geen back-up")).toBeInTheDocument();
     expect(screen.getByText(/ouder dan 36 uur|nog geen back-up gemaakt/i)).toBeInTheDocument();
   });
 
   it("says plainly when the built-in backup is off, without a warning", () => {
-    renderPanel({ backup: { state: "off" }, databaseBytes: null, freeDiskBytes: null });
+    renderPanel({
+      backup: { state: "off" },
+      databaseBytes: null,
+      freeDiskBytes: null,
+      version: "1.2.3",
+    });
     expect(screen.getByText("Ingebouwde back-up staat uit")).toBeInTheDocument();
     expect(screen.getAllByText("Onbekend")).toHaveLength(2);
     expect(screen.queryByText(/ouder dan 36 uur/)).not.toBeInTheDocument();
@@ -76,10 +101,16 @@ describe("HealthPanel (admin only, P1)", () => {
       backup: { state: "ok", at: "2026-11-08T02:00:00.000Z", ageHours: 10 },
       databaseBytes: MB,
       freeDiskBytes: GB,
+      version: "1.2.3",
     });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     unmount();
-    const stale = renderPanel({ backup: { state: "none" }, databaseBytes: MB, freeDiskBytes: GB });
+    const stale = renderPanel({
+      backup: { state: "none" },
+      databaseBytes: MB,
+      freeDiskBytes: GB,
+      version: "1.2.3",
+    });
     expect((await axe(stale.container, axeOpts)).violations).toEqual([]);
   });
 });

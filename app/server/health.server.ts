@@ -4,6 +4,7 @@ import { BACKUP_STALE_HOURS, type AdminHealth, type BackupHealth } from "~/lib/h
 import { backupDir, latestBackup } from "./backup.server";
 import { databaseBytes } from "./db.server";
 import { DB_PATH } from "./env.server";
+import { APP_VERSION } from "./version.server";
 
 const HOUR = 60 * 60 * 1000;
 
@@ -41,5 +42,6 @@ export function adminHealth(
     backup: backupHealth(backupDir(env, dbPath), opts.now ?? new Date()),
     databaseBytes: databaseBytes(dbPath),
     freeDiskBytes: freeDiskBytes(dbPath),
+    version: APP_VERSION,
   };
 }

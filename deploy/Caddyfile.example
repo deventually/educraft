@@ -1,0 +1,8 @@
+# Add this block to the Caddyfile of your Caddy container, with your own domain. Caddy fetches
+# the HTTPS certificate itself. Then set CLIENT_IP_HEADER=x-real-ip in LimeOnIt's .env, so the
+# login throttle can also count failures per IP address.
+limeonit.example.nl {
+	reverse_proxy limeonit:3000 {
+		header_up X-Real-IP {remote_host}
+	}
+}
