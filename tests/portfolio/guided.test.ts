@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { C1, C2, LU, sampleDossier } from "./fixtures";
 import {
   appendSection,
+  checkSectionDraft,
   buildQuestionsMessage,
   buildSectionDraftMessage,
   parseQuestions,
   parseSectionDraft,
+  retryDraftMessage,
   withAnswers,
   writingSections,
 } from "~/lib/portfolio/guided";
@@ -201,6 +203,30 @@ describe("parseSectionDraft", () => {
 
   it("refuses an empty answer", () => {
     expect(parseSectionDraft("  ", [])).toBeNull();
+  });
+});
+
+describe("checkSectionDraft and the retry message", () => {
+  it("names the sources outside the reference list, so a second try can avoid them", () => {
+    const r = checkSectionDraft("Ik volgde Ebbens (2016) en Hattie (2009).", [
+      "Ebbens, S., & Ettekoven, S. (2016). Effectief leren.",
+    ]);
+    expect(r).toEqual({ ok: false, unknown: ["Hattie (2009)"] });
+    expect(checkSectionDraft("Ik volgde Ebbens (2016).", ["Ebbens (2016)."])).toEqual({
+      ok: true,
+      text: "Ik volgde Ebbens (2016).",
+    });
+  });
+
+  it("adds the refused sources to the message, as material, in the teacher's language", () => {
+    const nl = retryDraftMessage("BERICHT", ["Hattie (2009)"], "nl");
+    expect(nl.startsWith("BERICHT")).toBe(true);
+    expect(nl).toContain("<correction>");
+    expect(nl).toContain("Hattie (2009)");
+    expect(nl).toContain("[aanvullen: bron in je literatuurlijst]");
+    expect(retryDraftMessage("M", ["Hattie (2009)"], "en")).toContain(
+      "[to add: source in your reference list]",
+    );
   });
 });
 

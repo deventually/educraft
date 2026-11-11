@@ -193,6 +193,8 @@ describe("draftSection", () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.data.chapters[0]?.text).toContain("Dit werkte in mijn klas.");
     expect(r.data.chapters[0]?.text).not.toContain("Hattie");
+    // The second try is told which source to leave out.
+    expect(generate.mock.calls[1]![0].messages[0].content).toContain("Hattie (2009)");
   });
 });
 

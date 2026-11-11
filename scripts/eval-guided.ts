@@ -24,7 +24,8 @@ import {
   buildSectionDraftMessage,
   DRAFT_PROMPT_ID,
   parseQuestions,
-  parseSectionDraft,
+  checkSectionDraft,
+  retryDraftMessage,
   QUESTIONS_PROMPT_ID,
 } from "~/lib/portfolio/guided";
 import {
@@ -80,10 +81,16 @@ async function main() {
         await ask(model, QUESTIONS_PROMPT_ID, c.locale, questionsMessage),
         references,
       );
-      const paragraph = parseSectionDraft(
-        await ask(model, DRAFT_PROMPT_ID, c.locale, draftMessage),
-        references,
-      );
+      // As the app does: one more try, told which sources to leave out.
+      let message = draftMessage;
+      let paragraph: string | null = null;
+      let refused = "";
+      for (let attempt = 0; attempt < 2 && paragraph === null; attempt++) {
+        refused = await ask(model, DRAFT_PROMPT_ID, c.locale, message);
+        const checked = checkSectionDraft(refused, references);
+        if (checked.ok) paragraph = checked.text;
+        else message = retryDraftMessage(message, checked.unknown, c.locale);
+      }
       const row = {
         caseId: repeat > 1 ? `${c.id}#${i + 1}` : c.id,
         questions: scoreQuestions(c, questions),
@@ -93,7 +100,7 @@ async function main() {
       const mark = (b: boolean) => (b ? "✓" : "×");
       console.log(`${mark(row.questions.pass)}${mark(row.draft.pass)} ${row.caseId}`);
       if (!row.questions.pass) console.log(`   vragen: ${JSON.stringify(questions)}`);
-      if (!row.draft.pass) console.log(`   alinea: ${paragraph ?? "(geweigerd)"}`);
+      if (!row.draft.pass) console.log(`   alinea: ${paragraph ?? `(geweigerd) ${refused}`}`);
     }
   }
   if (dryRun) return;

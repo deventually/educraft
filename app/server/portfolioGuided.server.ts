@@ -10,7 +10,8 @@ import {
   buildSectionDraftMessage,
   DRAFT_PROMPT_ID,
   parseQuestions,
-  parseSectionDraft,
+  checkSectionDraft,
+  retryDraftMessage,
   QUESTIONS_PROMPT_ID,
   withAnswers,
   writingSections,
@@ -84,16 +85,18 @@ export async function draftSection(
 ): Promise<GuidedResult> {
   if (d.coachMode !== "draft") return { ok: false, error: "not-draft-mode" };
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
-  const message = buildSectionDraftMessage(d, outcomeId, sectionId, currentText, locale);
-  if (!message) return { ok: false, error: "no-material" };
+  const built = buildSectionDraftMessage(d, outcomeId, sectionId, currentText, locale);
+  if (!built) return { ok: false, error: "no-material" };
+  let message = built;
   const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
 
   for (let attempt = 0; attempt < 2; attempt++) {
     const answer = await callPortfolioModel(user, DRAFT_PROMPT_ID, message, locale, 1_500);
     if (!answer) break;
-    const paragraph = parseSectionDraft(answer.text, references(d));
-    if (paragraph) {
+    const checked = checkSectionDraft(answer.text, references(d));
+    if (checked.ok) {
+      const paragraph = checked.text;
       const outcome = d.framework.outcomes.find((o) => o.id === outcomeId);
       const section = outcome && writingSections(outcome).find((s) => s.id === sectionId);
       if (!section) break;
@@ -109,6 +112,7 @@ export async function draftSection(
       };
     }
     log("portfolio-guided", { outcome: "rejected", step: "draft", attempt });
+    message = retryDraftMessage(message, checked.unknown, locale);
   }
   return { ok: false, error: "failed" };
 }

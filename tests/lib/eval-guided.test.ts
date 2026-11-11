@@ -115,6 +115,15 @@ describe("scoreDraft — open spots", () => {
     ];
     expect(scoreQuestions(c, q).topic).toBe(true);
   });
+
+  it("counts asking how the teacher responded to differences (eval 2026-11-11b)", () => {
+    const c = cases.find((x) => x.id === "nl-beginsituatie")!;
+    const q = [
+      "Hoe heb je die voorkennis in kaart gebracht, en wat leverde dat op?",
+      "Welke verschillen tussen studenten zag je, en hoe speelde je daar in de les op in?",
+    ];
+    expect(scoreQuestions(c, q).topic).toBe(true);
+  });
 });
 
 describe("guidedReportMarkdown", () => {

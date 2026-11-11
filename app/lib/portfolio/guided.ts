@@ -12,7 +12,7 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { Locale } from "~/lib/i18n";
-import { citesUnknownSource, criteriaMaterial } from "./coach";
+import { citesUnknownSource, criteriaMaterial, unknownCitations } from "./coach";
 import { GUIDED_LIMITS } from "./schema";
 import type { DossierData, Outcome } from "./types";
 
@@ -159,7 +159,10 @@ export function buildSectionDraftMessage(
 }
 
 /** The paragraph without fences or a heading; `null` when empty or citing an unknown source. */
-export function parseSectionDraft(raw: string, references: string[]): string | null {
+export type SectionDraftCheck = { ok: true; text: string } | { ok: false; unknown: string[] };
+
+/** The paragraph, cleaned, or why it is refused: empty, or naming sources the teacher lacks. */
+export function checkSectionDraft(raw: string, references: string[]): SectionDraftCheck {
   const fenced = /```[a-z]*\s*([\s\S]*?)```/i.exec(raw)?.[1];
   const text = (fenced ?? raw)
     .split("\n")
@@ -167,8 +170,26 @@ export function parseSectionDraft(raw: string, references: string[]): string | n
     .join("\n")
     .trim()
     .slice(0, 5_000);
-  if (!text || citesUnknownSource(text, references)) return null;
-  return text;
+  if (!text) return { ok: false, unknown: [] };
+  const unknown = unknownCitations(text, references);
+  return unknown.length ? { ok: false, unknown } : { ok: true, text };
+}
+
+export function parseSectionDraft(raw: string, references: string[]): string | null {
+  const r = checkSectionDraft(raw, references);
+  return r.ok ? r.text : null;
+}
+
+const CORRECTION: Record<Locale, (list: string) => string> = {
+  nl: (list) =>
+    `<correction>\nJe vorige tekst noemde bronnen die niet in <references> staan: ${list}. Noem ze niet. Zet op die plek [aanvullen: bron in je literatuurlijst] en schrijf de alinea opnieuw.\n</correction>`,
+  en: (list) =>
+    `<correction>\nYour previous text named sources that are not in <references>: ${list}. Do not name them. Put [to add: source in your reference list] in their place and write the paragraph again.\n</correction>`,
+};
+
+/** The draft message for a second try, told which sources to leave out. */
+export function retryDraftMessage(message: string, unknown: string[], locale: Locale): string {
+  return unknown.length ? `${message}\n\n${CORRECTION[locale](unknown.join(", "))}` : message;
 }
 
 /** The chapter with the paragraph appended; an outline section's title goes above it, once. */

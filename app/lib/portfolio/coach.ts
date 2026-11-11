@@ -217,20 +217,26 @@ const YEAR = /\b(19|20)\d{2}[a-z]?\b/g;
 const CAPITALIZED = /\p{Lu}[\p{L}'’-]+/gu;
 
 /**
- * Does `text` cite an author + year that the reference list does not contain?
- * Simple on purpose: the surname is the last capitalized word before the year.
+ * The author + year citations in `text` that the reference list does not contain, as
+ * "Surname (year)". Simple on purpose: the surname is the last capitalized word before the year.
  */
-export function citesUnknownSource(text: string, references: string[]): boolean {
+export function unknownCitations(text: string, references: string[]): string[] {
   const refs = references.map((r) => r.toLowerCase());
+  const found = new Set<string>();
   for (const m of text.matchAll(YEAR)) {
     const before = text.slice(Math.max(0, (m.index ?? 0) - 60), m.index);
-    const names = before.match(CAPITALIZED);
-    const surname = names?.[names.length - 1]?.toLowerCase();
+    const surname = before.match(CAPITALIZED)?.at(-1);
     if (!surname) continue;
     const year = m[0].slice(0, 4);
-    if (!refs.some((r) => r.includes(surname) && r.includes(year))) return true;
+    const low = surname.toLowerCase();
+    if (!refs.some((r) => r.includes(low) && r.includes(year))) found.add(`${surname} (${year})`);
   }
-  return false;
+  return [...found];
+}
+
+/** Does `text` cite an author + year that the reference list does not contain? */
+export function citesUnknownSource(text: string, references: string[]): boolean {
+  return unknownCitations(text, references).length > 0;
 }
 
 function cleanList(items: string[] | null | undefined, references: string[]): string[] {
