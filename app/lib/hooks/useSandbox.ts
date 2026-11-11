@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import type { InputField } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import {
@@ -57,6 +58,28 @@ export interface UseSandbox {
   selectCourse: (id: string) => void;
   /** The course item the result is linked to ("" = the course as a whole). */
   itemId: string;
+  /** What Back and Forward bring back (`useEntryMemory`): everything but images. */
+  memory: SandboxMemory;
+  /** Put a saved sandbox back, as it was; nothing is re-derived. */
+  restore: (saved: SandboxMemory) => void;
+}
+
+/** A saved sandbox. Images are left out: they are large, and sent again only on purpose. */
+export const SandboxMemorySchema = z.object({
+  values: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])),
+  contextProfileId: z.string(),
+  courseId: z.string(),
+  itemId: z.string(),
+});
+type SandboxMemory = z.infer<typeof SandboxMemorySchema>;
+
+function withoutImages(values: FormValues): SandboxMemory["values"] {
+  const out: SandboxMemory["values"] = {};
+  for (const [name, value] of Object.entries(values)) {
+    if (Array.isArray(value) && value.some((v) => typeof v !== "string")) continue;
+    out[name] = value as SandboxMemory["values"][string];
+  }
+  return out;
 }
 
 /**
@@ -134,6 +157,13 @@ export function useSandbox({
   const setValue = (name: string, value: FormValues[string]) =>
     setValues((prev) => ({ ...prev, [name]: value }));
 
+  function restore(saved: SandboxMemory) {
+    setValues((prev) => ({ ...prev, ...saved.values }));
+    setContextProfileId(saved.contextProfileId);
+    setCourseId(saved.courseId);
+    setItemId(saved.itemId);
+  }
+
   return {
     values,
     setValue,
@@ -143,5 +173,7 @@ export function useSandbox({
     courseId,
     selectCourse,
     itemId,
+    memory: { values: withoutImages(values), contextProfileId, courseId, itemId },
+    restore,
   };
 }

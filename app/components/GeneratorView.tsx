@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AlertTriangle, Sparkles, Square } from "lucide-react";
 import type { Tool, OutputLanguage } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
-import type { ImageInput } from "~/lib/ai/types";
 import { DynamicForm, missingRequired } from "./DynamicForm";
-import { toTemplateValues } from "~/lib/forms/values";
+import { imagesOf, toTemplateValues } from "~/lib/forms/values";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
+import { useEntryMemory } from "~/lib/hooks/useEntryMemory";
+import { GeneratorMemorySchema } from "~/lib/tool/memory";
 import { ToolControls, type PickerModel } from "./ToolControls";
 import { CoursePicker } from "./CoursePicker";
 import { useAssessmentModelPicker } from "./assessment-models/AssessmentModelPicker";
@@ -19,7 +20,7 @@ import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
 import { cn } from "~/lib/utils";
 import { streamPost } from "~/lib/streamClient";
-import { takeHandoff } from "~/lib/forms/handoff";
+import { useHandoff } from "~/lib/hooks/useHandoff";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { loc } from "~/lib/i18n/localized";
@@ -50,6 +51,8 @@ interface Props {
   resultContext?: ResultContext;
   /** Own and starter assessment models, for a tool with `assessmentModels`. */
   assessmentModels?: ModelChoice[];
+  /** This history entry: Back and Forward bring its form and result back. */
+  memoryKey?: string;
 }
 
 export function GeneratorView({
@@ -63,6 +66,7 @@ export function GeneratorView({
   initialItemId,
   resultContext,
   assessmentModels = [],
+  memoryKey,
 }: Props) {
   const t = useT();
   const locale = useLocale();
@@ -79,19 +83,7 @@ export function GeneratorView({
   });
   const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
     sandbox;
-  // A utility may hand over values ("Laat uitleggen", P24.5). Taken once, after mount, so the
-  // server render and hydration agree; only the tool's own text fields are filled.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: run once per tool
-  useEffect(() => {
-    const handed = takeHandoff(tool.slug);
-    if (!handed) return;
-    for (const field of tool.inputs) {
-      const value = handed[field.name];
-      if (value !== undefined && (field.kind === "text" || field.kind === "textarea")) {
-        setValue(field.name, value);
-      }
-    }
-  }, [tool.slug]);
+  useHandoff(tool, setValue);
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Check if tool has image inputs (a vision tool narrows the offered models).
   const hasImageInputs = tool.inputs.some((f) => f.kind === "image");
@@ -126,6 +118,29 @@ export function GeneratorView({
   );
   const redactFields = tool.inputs.filter(
     (f) => f.redact && String(values[f.name] ?? "").trim() !== "",
+  );
+  // A result that is still streaming is not kept: coming back shows the form without it.
+  useEntryMemory(
+    memoryKey,
+    GeneratorMemorySchema,
+    {
+      sandbox: sandbox.memory,
+      output: streaming ? "" : output,
+      generationId: streaming ? null : generationId,
+      outputLanguage,
+      model,
+      codes,
+      sentRedacted,
+    },
+    (m) => {
+      sandbox.restore(m.sandbox);
+      setOutput(m.output);
+      setGenerationId(m.generationId);
+      setOutputLanguage(m.outputLanguage);
+      setModel(m.model);
+      setCodes(m.codes);
+      setSentRedacted(m.sentRedacted);
+    },
   );
   const shown = codes ? restoreNames(output, codes) : output;
   const quotes = docFiles && shown && !streaming ? extractQuotes(shown) : [];
@@ -189,21 +204,7 @@ export function GeneratorView({
     setStreaming(true);
     const signal = streams.start();
 
-    // Extract images from form values if present
-    const images: ImageInput[] = [];
-    for (const field of tool.inputs) {
-      if (field.kind === "image") {
-        const fieldImages = values[field.name];
-        if (
-          Array.isArray(fieldImages) &&
-          fieldImages.length > 0 &&
-          typeof fieldImages[0] === "object"
-        ) {
-          images.push(...(fieldImages as ImageInput[]));
-        }
-      }
-    }
-
+    const images = imagesOf(tool.inputs, values);
     // Image fields are sent separately (above); drop them from the prompt values.
     const valuesToSend = { ...toTemplateValues(values), ...overrides };
 
