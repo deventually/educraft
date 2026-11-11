@@ -152,4 +152,44 @@ describe("useSandbox — an item from the link (P27.4)", () => {
     const { result } = renderHook(() => useSandbox({ inputs, courses, initialCourseId: "c1" }));
     expect(result.current.itemId).toBe("");
   });
+
+  it("fills in the item it was opened for: its outcomes and title", () => {
+    const itemInputs: InputField[] = [
+      {
+        name: "goal",
+        label: { nl: "Leerdoel", en: "Goal" },
+        kind: "textarea",
+        prefillFromCourse: { source: "learningOutcomes" },
+      },
+      {
+        name: "content",
+        label: { nl: "Inhoud", en: "Content" },
+        kind: "textarea",
+        prefillFromCourse: { source: "itemTitle" },
+      },
+    ];
+    const withItems = [
+      {
+        id: "c1",
+        contextProfileId: null,
+        outcomes: [
+          { id: "o1", text: "Je test." },
+          { id: "o2", text: "Je ontwerpt." },
+        ],
+        items: [
+          { id: "a1", title: "Les ontwerpen", kind: "activity" as const, outcomeIds: ["o2"] },
+        ],
+      },
+    ];
+    const { result } = renderHook(() =>
+      useSandbox({
+        inputs: itemInputs,
+        courses: withItems,
+        initialCourseId: "c1",
+        initialItemId: "a1",
+      }),
+    );
+    expect(result.current.values.goal).toBe("- Je ontwerpt.");
+    expect(result.current.values.content).toBe("Les ontwerpen");
+  });
 });

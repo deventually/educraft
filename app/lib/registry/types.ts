@@ -75,7 +75,12 @@ export interface AssessmentModelPrefill {
 
 /** Which part of a course fills a field (P20, 20.4). Data, not control flow. */
 export interface CoursePrefill {
-  source: "learningOutcomes";
+  /**
+   * `learningOutcomes`: one outcome per line; opened from a lesson or test, only its own.
+   * `itemTitle`: the title of the lesson or test the tool was opened for.
+   * `earlierLessons`: the (at most five) lessons in the weeks just before it, with the week.
+   */
+  source: "learningOutcomes" | "itemTitle" | "earlierLessons";
 }
 
 export interface InputField {

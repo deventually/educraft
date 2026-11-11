@@ -24,9 +24,18 @@ describe("prefillFromCourse (data hook, no control flow)", () => {
     expect(input?.prefillFromCourse).toEqual({ source: "learningOutcomes" });
   });
 
+  it("fills the lesson's title and the lessons before it in Les voorbereiden (P27.4)", () => {
+    const field = (name: string) =>
+      getToolBySlug("lesson-plan")?.inputs.find((f) => f.name === name)?.prefillFromCourse;
+    expect(field("content")).toEqual({ source: "itemTitle" });
+    expect(field("priorKnowledge")).toEqual({ source: "earlierLessons" });
+  });
+
   it("is only declared on those fields, and only on text fields", () => {
     const declared = ALL_TOOLS.flatMap((t) =>
-      t.inputs.filter((f) => f.prefillFromCourse).map((f) => [t.slug, f.name, f.kind]),
+      t.inputs
+        .filter((f) => f.prefillFromCourse?.source === "learningOutcomes")
+        .map((f) => [t.slug, f.name, f.kind]),
     );
     expect(declared.map(([slug, name]) => [slug, name]).sort()).toEqual([...COURSE_FIELDS].sort());
     for (const [, , kind] of declared) expect(["text", "textarea"]).toContain(kind);

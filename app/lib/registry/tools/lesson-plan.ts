@@ -74,6 +74,7 @@ export const lessonPlan: Tool = {
     },
     {
       name: "content",
+      prefillFromCourse: { source: "itemTitle" },
       label: { nl: "Inhoud van de les", en: "Content of the lesson" },
       kind: "textarea",
       required: true,
@@ -86,6 +87,7 @@ export const lessonPlan: Tool = {
     },
     {
       name: "priorKnowledge",
+      prefillFromCourse: { source: "earlierLessons" },
       label: {
         nl: "Wat de studenten al weten (optioneel)",
         en: "What the students already know (optional)",
