@@ -58,6 +58,38 @@ describe("module details of the course", () => {
     expect(d.code).toBeUndefined();
     expect(d.studyYear).toBeUndefined();
   });
+
+  it("also keeps the study phase, module leader, examiners and the description", () => {
+    const fields = {
+      intent: "set-module",
+      code: "DB1",
+      studyYear: "2026-2027",
+      phase: "Propedeuse, semester 1",
+      leader: "Docent A",
+      examiners: "Docenten Informatica",
+      description: "In deze module ontwerp je databases.\n\nJe werkt in een team.",
+    };
+    let d = ok(alignedCourse(), fields);
+    expect(d).toMatchObject({
+      phase: "Propedeuse, semester 1",
+      leader: "Docent A",
+      examiners: "Docenten Informatica",
+      description: "In deze module ontwerp je databases.\n\nJe werkt in een team.",
+    });
+    expect(CourseDataSchema.safeParse(d).success).toBe(true);
+    d = ok(d, { ...fields, leader: "", description: "" });
+    expect(d.leader).toBeUndefined();
+    expect(d.description).toBeUndefined();
+    expect(d.phase).toBe("Propedeuse, semester 1");
+    expect(refused(d, { ...fields, description: "x".repeat(5_001) }).ok).toBe(false);
+  });
+
+  it("keeps the literature for the module handbook", () => {
+    const d = ok(alignedCourse(), { intent: "set-module", literature: "Boek A\nArtikel B" });
+    expect(d.literature).toBe("Boek A\nArtikel B");
+    expect(CourseDataSchema.safeParse(d).success).toBe(true);
+    expect(ok(d, { intent: "set-module", literature: "" }).literature).toBeUndefined();
+  });
 });
 
 describe("test details for the blueprint and the marking model", () => {

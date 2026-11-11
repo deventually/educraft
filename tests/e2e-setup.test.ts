@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import config from "../playwright.config";
 import { PAGES } from "../e2e/pages";
 import { flatRoutes } from "./helpers/routes";
 
@@ -26,8 +27,25 @@ describe("e2e setup", () => {
     expect(scripts["test:e2e"]).toMatch(/^playwright test/);
   });
 
-  it("CI runs the browser tests", () => {
+  it("CI keeps the browser test job", () => {
     expect(read(".github/workflows/ci.yml")).toContain("npm run test:e2e");
+  });
+
+  // Temporarily the e2e job runs only when the repository variable E2E_IN_CI is "true" (the
+  // runner could not install Chromium); the local run goes in the PR (BESLUIT-2026-11-11-9).
+  it("CI runs the browser tests only when the E2E_IN_CI variable switches them on", () => {
+    const job = read(".github/workflows/ci.yml").split(/^ {2}e2e:$/m)[1] ?? "";
+    expect(job).toMatch(/^ {4}if: vars\.E2E_IN_CI == 'true'$/m);
+  });
+
+  it("AGENTS.md has workers run the browser tests themselves while CI does not", () => {
+    const agents = read("AGENTS.md");
+    expect(agents).toContain("E2E_IN_CI");
+    expect(agents).toContain("PLAYWRIGHT_CHROMIUM_PATH");
+  });
+
+  it("the PR template asks for the local browser test result", () => {
+    expect(read(".github/pull_request_template.md")).toContain("npm run test:e2e");
   });
 
   it("covers the key pages for a guest, a teacher and an admin", () => {
@@ -46,6 +64,15 @@ describe("e2e setup", () => {
     expect(config).toMatch(/dependencies: \["setup"\]/);
     expect(read("e2e/auth.setup.ts")).toContain("/login/2fa");
     expect(PAGES).toContainEqual({ path: "/account/2fa", as: "teacher" });
+  });
+
+  // PLAYWRIGHT_CHROMIUM_PATH must reach the setup project too, or a sandbox with its own browser
+  // fails at sign-in before a single page runs.
+  it("a pre-installed browser applies to every project, the sign-in setup included", () => {
+    expect(config.use).toHaveProperty("launchOptions");
+    for (const project of config.projects ?? []) {
+      expect(project.use ?? {}).not.toHaveProperty("launchOptions");
+    }
   });
 
   it("each page is listed once", () => {

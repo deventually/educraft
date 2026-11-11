@@ -64,6 +64,13 @@ anonymous score list). A utility can name an explaining tool (`Utility.explainWi
 "Explain this" button hands only the per-question numbers to that tool's form through
 sessionStorage (`app/lib/forms/handoff.ts`).
 
+**Back and Forward keep the work.** The tool page mounts one workspace per browser history entry
+(`key={location.key}`). Each workspace (one-shot, stages, chat) keeps its form and its finished
+result for that entry with `useEntryMemory` (`app/lib/hooks/useEntryMemory.ts`), in this tab's
+sessionStorage only (`app/lib/history/entryMemory.ts`, the latest 30 entries). Back or Forward
+brings it back; opening the tool again by a link starts empty. Images, document originals and a
+result that was still streaming are not kept; a chat goes on in the same saved conversation.
+
 Next to the tools, the **BDB/BKE workplace** (`/portfolio`) helps a teacher build their
 teaching-qualification dossier (see [Architecture](Architecture.md#feature-modules)). Its last
 step has a check whether the dossier is ready to hand in and a rehearsal assessment: a played

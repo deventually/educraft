@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useEntryMemory } from "~/lib/hooks/useEntryMemory";
+import { ChatMemorySchema } from "~/lib/tool/memory";
 import type { Tool } from "~/lib/registry/types";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { useChatSession } from "~/lib/hooks/useChatSession";
@@ -52,6 +54,8 @@ interface ChatViewProps {
    * falls back to Markdown. Gets the user's own turns for checks on quotes.
    */
   renderAssistant?: RenderAssistant;
+  /** This history entry: Back and Forward bring its setup and conversation back. */
+  memoryKey?: string;
 }
 
 export function ChatView({
@@ -71,17 +75,13 @@ export function ChatView({
   studentPrompt,
   streamExtras,
   renderAssistant,
+  memoryKey,
 }: ChatViewProps) {
   const locale = useLocale();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
-  const {
-    values: ownValues,
-    setValue: setSandboxValue,
-    courseId,
-    selectCourse,
-    itemId,
-  } = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
+  const sandbox = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
+  const { values: ownValues, setValue: setSandboxValue, courseId, selectCourse, itemId } = sandbox;
   const sandboxValues = presetValues ?? ownValues;
   const [sandboxSubmitted, setSandboxSubmitted] = useState(!!presetValues);
   const [messageInput, setMessageInput] = useState("");
@@ -123,6 +123,25 @@ export function ChatView({
     },
     onGenerationStart,
   });
+
+  useEntryMemory(
+    memoryKey,
+    ChatMemorySchema,
+    {
+      sandbox: sandbox.memory,
+      submitted: sandboxSubmitted,
+      outputLanguage,
+      model: selectedModel,
+      chat: chat.memory,
+    },
+    (m) => {
+      sandbox.restore(m.sandbox);
+      setSandboxSubmitted(m.submitted);
+      setOutputLanguage(m.outputLanguage);
+      setSelectedModel(m.model);
+      chat.restore(m.chat);
+    },
+  );
 
   const sendMessage = (message: string = messageInput) => {
     if (!message.trim() || chat.isStreaming) return;
