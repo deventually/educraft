@@ -6,6 +6,7 @@ import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, HelpText, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 export interface DraftTarget {
   criterionId: string;
@@ -39,6 +40,8 @@ export function ChapterEditor({
   const openId = `chapter-open-${outcomeId}`;
   return (
     <Form method="post" className="grid gap-2">
+      {/* The draft buttons ask the AI: leaving mid-draft asks first. */}
+      <AiCallField />
       <input type="hidden" name="outcomeId" value={outcomeId} />
       <Label htmlFor={`chapter-${outcomeId}`}>{t.outcome.chapterLabel}</Label>
       <Textarea

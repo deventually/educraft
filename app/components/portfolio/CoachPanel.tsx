@@ -5,6 +5,7 @@ import { Button } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { cn } from "~/lib/utils";
+import { AiCallField } from "~/components/AiLeaveGuard";
 
 const VERDICT_STYLE: Record<Verdict, string> = {
   shown: "bg-emerald-50 text-emerald-800 border-emerald-200",
@@ -71,6 +72,7 @@ export function CoachPanel({
         {confirmed && (
           <Form method="post">
             <input type="hidden" name="intent" value="review" />
+            <AiCallField />
             <input type="hidden" name="outcomeId" value={outcomeId} />
             <Button type="submit" disabled={!hasChapter}>
               {stored ? t.rerun : t.run}
@@ -79,6 +81,7 @@ export function CoachPanel({
         )}
         <Form method="post">
           <input type="hidden" name="intent" value="proofread" />
+          <AiCallField />
           <input type="hidden" name="outcomeId" value={outcomeId} />
           <Button type="submit" variant="secondary" disabled={!hasChapter}>
             {proofread ? tp.proofread.rerun : tp.proofread.run}

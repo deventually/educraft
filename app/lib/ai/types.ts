@@ -37,7 +37,7 @@ export interface GenerateOptions {
    * (teacher and tool); it leaves the server only as a hash. Absent = no caching.
    */
   cacheKey?: string;
-  /** Aborts the model call, e.g. when the teacher closes the tab mid-stream. */
+  /** Aborts the model call: the teacher closed the tab, or chose to stop it on leaving. */
   signal?: AbortSignal;
   /** Streaming only: told the call's tokens once the stream has finished (not on abort). */
   onUsage?: (usage: TokenUsage) => void;
