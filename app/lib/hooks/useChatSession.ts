@@ -9,7 +9,9 @@ function newSessionId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  // `randomUUID` needs a secure context; `getRandomValues` works everywhere.
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return `sess-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
 }
 
 interface ChatSessionOptions {
