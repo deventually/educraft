@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #279 en #282 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #282 gemerged)_
 
 ## Nu
 
+- **Cursuswizard, deel 2: het toetsprogramma (#280) gemerged op 2026-11-11:** heeft een cursus
+  leeruitkomsten maar nog geen toetsen, dan staat bovenaan het Overzicht *Volgende stap: het
+  toetsprogramma*. De AI stelt summatieve toetsen en formatieve oefenmomenten ervoor voor, met
+  week, dekking, toetsvorm en een weging die zichtbaar een voorstel is. LimeOnIt past wegingen
+  niet aan; tellen ze niet op tot 100% of zit een leeruitkomst in geen summatieve toets, dan staat
+  dat erbij. Prompt `course-design-assessments@v1` met evals; geen migratie.
+- **Controle: discipline die aan geen leeruitkomst bijdraagt (#281) gemerged op 2026-11-11:** de
+  controle van een cursus meldt een discipline waarvan geen enkele les een leeruitkomst noemt,
+  met de naam van de discipline; ook het reviewteam ziet het.
 - **Per week filteren op discipline (#282) gemerged op 2026-11-11:** heeft een cursus
   disciplines, dan staat boven *Per week* een keuzelijst *Discipline*. Kies je er een, dan zie je
   alleen de lessen van die discipline, met alle toetsen erbij; weken die leeg raken vallen weg.
@@ -705,14 +714,6 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #279 en #282 gemerged)_
 
 ## Bezig
 
-- **Cursuswizard, deel 2: het toetsprogramma (PR open):** heeft een cursus leeruitkomsten maar
-  nog geen toetsen, dan staat bovenaan het Overzicht *Volgende stap: het toetsprogramma*. De AI
-  stelt bij de leeruitkomsten summatieve toetsen en formatieve oefenmomenten ervoor voor, met
-  week, dekking, toetsvorm (desgewenst uit de toetsvormen van de school) en een weging die
-  zichtbaar een voorstel is. LimeOnIt past wegingen niet aan; tellen ze niet op tot 100% of zit
-  een leeruitkomst in geen summatieve toets, dan staat dat erbij. Aanvinken en toevoegen gaat
-  zoals bij importeren. Nieuwe prompt `course-design-assessments@v1` met evals
-  (`npm run eval:design-assessments`); geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
