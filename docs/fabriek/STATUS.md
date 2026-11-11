@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #252 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #253 gemerged)_
 
 ## Nu
 
+- **Releases met een SemVer-tag (#253) gemerged op 2026-11-11:** een release is een tag `vX.Y.Z`
+  op `main` die alleen Bastiaan zet. De tag bouwt de image op `ghcr.io/deventually/educraft:X.Y.Z`
+  en een GitHub Release met de notes uit `RELEASE.md`. Op de VPS rolt `./deploy.sh X.Y.Z` uit
+  (back-up, starten, wachten tot `/healthz` die versie meldt, terugrolcommando). De versie staat op
+  *Gezondheid*. Nog geen release gedaan. BESLUIT-2026-11-11-5.
 - **Prijzen per model (#252) gemerged op 2026-11-11:** elk model in `config/models.json` heeft
   de lijstprijs van de aanbieder per miljoen tokens, met de dag van opzoeken en de bronpagina, en
   een ECB-wisselkoers voor dollars. Beheer kan per model een eigen prijs zetten (een
