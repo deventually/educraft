@@ -37,6 +37,13 @@ describe("help registry — topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
+  it("explains the schedule and what it fills in", () => {
+    expect(getTopic("courses", "nl")).toContain("## Lesrooster");
+    expect(getTopic("courses", "en")).toContain("## Schedule");
+    expect(getTopic("courses", "nl")).toContain("**Lesrooster** op het tabblad Overzicht");
+    expect(getTopic("courses", "en")).toContain("**Schedule** on the Overview tab");
+  });
+
   it("explains the tabs of the course page in the courses topic", () => {
     const nl = getTopic("courses", "nl");
     const en = getTopic("courses", "en");

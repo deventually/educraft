@@ -4,6 +4,7 @@ import { BLOOM_LEVELS } from "./bloom";
 import {
   ACTIVITY_KINDS,
   ASSESSMENT_KINDS,
+  DELIVERY_MODES,
   ITEM_FORMATS,
   GRADINGS,
   type CourseData,
@@ -29,6 +30,9 @@ export const COURSE_LIMITS = {
   parts: 30,
   conditions: 20,
   longText: 3_000,
+  sessionsPerWeek: 20,
+  sessionMinutes: { min: 15, max: 600 },
+  groupSize: 1_000,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
@@ -123,6 +127,19 @@ const AssessmentSchema = z.object({
   parts: z.array(PartSchema).max(COURSE_LIMITS.parts).optional(),
 });
 
+const ScheduleSchema = z.object({
+  weeks: z.number().int().min(1).max(COURSE_LIMITS.week).optional(),
+  sessionsPerWeek: z.number().int().min(1).max(COURSE_LIMITS.sessionsPerWeek).optional(),
+  sessionMinutes: z
+    .number()
+    .int()
+    .min(COURSE_LIMITS.sessionMinutes.min)
+    .max(COURSE_LIMITS.sessionMinutes.max)
+    .optional(),
+  groupSize: z.number().int().min(1).max(COURSE_LIMITS.groupSize).optional(),
+  deliveryMode: z.enum(DELIVERY_MODES).optional(),
+});
+
 export const CourseDataSchema = z
   .object({
     code: z.string().min(1).max(COURSE_LIMITS.code).optional(),
@@ -134,6 +151,7 @@ export const CourseDataSchema = z
     literature: LongText.optional(),
     ec: z.number().positive().max(COURSE_LIMITS.ec).optional(),
     startDate: IsoDateSchema.optional(),
+    schedule: ScheduleSchema.optional(),
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
     activities: z.array(ActivitySchema).max(COURSE_LIMITS.activities),
     assessments: z.array(AssessmentSchema).max(COURSE_LIMITS.assessments),

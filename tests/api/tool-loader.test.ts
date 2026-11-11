@@ -87,6 +87,7 @@ describe("tool loader — courses (P20, 20.4)", () => {
           { id: "a1", title: "Les bladgroen", week: 2, kind: "lesson", outcomeIds: ["lu1"] },
         ],
         assessments: [],
+        schedule: { sessionMinutes: 100, groupSize: 30 },
       },
     });
     await repo.createCourse("someone-else", { name: "Niet van mij" });
@@ -102,6 +103,7 @@ describe("tool loader — courses (P20, 20.4)", () => {
         items: [
           { id: "a1", title: "Les bladgroen", week: 2, kind: "activity", outcomeIds: ["lu1"] },
         ],
+        schedule: { sessionMinutes: 100, groupSize: 30 },
       },
     ]);
   });

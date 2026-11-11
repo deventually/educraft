@@ -130,6 +130,39 @@ describe("applyCourseIntent (the form boundary of the course editor)", () => {
     expect(r).toEqual({ ok: false, error: "invalid" });
   });
 
+  // The course's rhythm, filled in once: the wizard and Les voorbereiden read it. All optional.
+  it("sets and clears the course's schedule", () => {
+    let d = ok(alignedCourse(), {
+      intent: "set-schedule",
+      weeks: "10",
+      sessionsPerWeek: "3",
+      sessionMinutes: "240",
+      groupSize: "28",
+      deliveryMode: "hybrid",
+    });
+    expect(d.schedule).toEqual({
+      weeks: 10,
+      sessionsPerWeek: 3,
+      sessionMinutes: 240,
+      groupSize: 28,
+      deliveryMode: "hybrid",
+    });
+    d = ok(d, { intent: "set-schedule", weeks: "", sessionMinutes: "90", deliveryMode: "" });
+    expect(d.schedule).toEqual({ sessionMinutes: 90 });
+    d = ok(d, { intent: "set-schedule" });
+    expect("schedule" in d).toBe(false);
+  });
+
+  it("refuses a schedule out of range or with an unknown delivery mode", () => {
+    const bad = (fields: Record<string, string>) =>
+      applyCourseIntent(alignedCourse(), form({ intent: "set-schedule", ...fields }));
+    expect(bad({ weeks: "61" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ sessionsPerWeek: "2.5" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ sessionMinutes: "5" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ groupSize: "0" })).toEqual({ ok: false, error: "invalid" });
+    expect(bad({ deliveryMode: "carrier-pigeon" })).toEqual({ ok: false, error: "invalid" });
+  });
+
   it("refuses invalid input", () => {
     const bad = (fields: Record<string, string | string[]>) =>
       applyCourseIntent(alignedCourse(), form(fields));

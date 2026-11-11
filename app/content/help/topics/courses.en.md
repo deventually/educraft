@@ -10,11 +10,15 @@ A **course** records three things and shows whether they line up:
 
 The course page has five tabs, each for one task:
 
-- **Overview:** the course details, importing from an existing document and your lessons and tests per week.
+- **Overview:** the course details, the schedule, importing from an existing document and your lessons and tests per week.
 - **Learning outcomes:** what the student can do at the end, with the success criteria.
 - **Lessons and tests:** your lessons and assignments, and your tests with their blueprint, parts and documents.
 - **Check:** the coverage matrix, the findings and your review team. A number next to it is the number of findings.
 - **Documents and sharing:** the module guide and module handbook, evidence for your dossier, work you made, the programme, sharing with your team and who works along.
+
+## Schedule
+
+Under **Schedule** on the Overview tab you record once how the course runs: the number of weeks, the sessions per week, the length of a session, the group size and the delivery mode. Everything is optional, because every programme works differently. When you open **Prepare a lesson** from a lesson, the lesson length, group size and delivery mode are filled in, as are that lesson's learning outcomes, its title and the lessons of the weeks before it. You can still change everything.
 
 ## The checks
 

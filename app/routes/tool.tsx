@@ -101,6 +101,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
             ),
           ),
         ],
+        ...(c.data.schedule && { schedule: c.data.schedule }),
       }))
     : [];
   // P27.1: a next step opens with `?course=`; only an own course is taken over.

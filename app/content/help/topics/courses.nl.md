@@ -10,11 +10,15 @@ Een **cursus** legt drie dingen vast en laat zien of ze op elkaar aansluiten:
 
 De cursuspagina heeft vijf tabbladen, elk voor één taak:
 
-- **Overzicht:** de gegevens van de cursus, importeren uit een bestaand document en je lessen en toetsen per week.
+- **Overzicht:** de gegevens van de cursus, het lesrooster, importeren uit een bestaand document en je lessen en toetsen per week.
 - **Leeruitkomsten:** wat de student aan het eind kan, met de succescriteria.
 - **Lessen en toetsen:** je lessen en opdrachten, en je toetsen met hun toetsmatrijs, onderdelen en documenten.
 - **Controle:** de dekkingsmatrix, de aandachtspunten en je reviewteam. Staat er een getal bij, dan zijn er zoveel aandachtspunten.
 - **Documenten en delen:** de modulewijzer en modulehandleiding, bewijs voor je dossier, gemaakt werk, de opleiding, delen met je team en wie meewerkt.
+
+## Lesrooster
+
+Onder **Lesrooster** op het tabblad Overzicht leg je één keer vast hoe de cursus loopt: het aantal weken, de lesmomenten per week, de duur van een lesmoment, de groepsgrootte en de contactvorm. Alles is optioneel, want elke opleiding werkt anders. Open je vanuit een les **Les voorbereiden**, dan staan de lesduur, de groepsgrootte en de contactvorm al ingevuld, net als de leeruitkomsten van die les, de titel en de lessen van de weken ervoor. Je kunt alles nog aanpassen.
 
 ## De controles
 

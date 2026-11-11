@@ -102,6 +102,7 @@ export const lessonPlan: Tool = {
     },
     {
       name: "duration",
+      prefillFromCourse: { source: "sessionMinutes" },
       label: { nl: "Lesduur (minuten)", en: "Lesson length (minutes)" },
       kind: "number",
       required: true,
@@ -113,6 +114,7 @@ export const lessonPlan: Tool = {
     },
     {
       name: "groupSize",
+      prefillFromCourse: { source: "groupSize" },
       label: { nl: "Groepsgrootte", en: "Group size" },
       kind: "number",
       required: true,
@@ -123,6 +125,7 @@ export const lessonPlan: Tool = {
     },
     {
       name: "deliveryMode",
+      prefillFromCourse: { source: "deliveryMode" },
       label: { nl: "Contactvorm", en: "Delivery mode" },
       kind: "select",
       required: true,
