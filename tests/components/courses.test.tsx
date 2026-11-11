@@ -456,7 +456,7 @@ describe("Course page — blueprint and marking model", () => {
   it("asks for the module details in the module guide, with its own form and export", async () => {
     const data = { ...documentedCourse(), leader: "Docent A", description: "Over databases." };
     const { container } = renderRoute(CoursePage, pageData(data));
-    const guide = screen.getByRole("region", { name: "Modulewijzer" });
+    const guide = screen.getByRole("region", { name: "Modulewijzer en modulehandleiding" });
     expect(within(guide).getByLabelText("Modulecode")).toHaveValue("DB1");
     expect(within(guide).getByLabelText("Studiejaar")).toHaveValue("2026-2027");
     expect(within(guide).getByLabelText("Studiefase")).toHaveValue("");
@@ -472,6 +472,12 @@ describe("Course page — blueprint and marking model", () => {
         .getByText("Modulewijzer exporteren", { selector: "summary" })
         .closest("details"),
     ).toHaveAttribute("data-export-url", "/courses/c1/documents/module-guide/export");
+    expect(within(guide).getByLabelText("Literatuur")).toHaveValue("");
+    expect(
+      within(guide)
+        .getByText("Modulehandleiding exporteren", { selector: "summary" })
+        .closest("details"),
+    ).toHaveAttribute("data-export-url", "/courses/c1/documents/module-handbook/export");
     const settings = screen.getByRole("region", { name: "Cursusgegevens" });
     expect(within(settings).queryByLabelText("Modulecode")).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);

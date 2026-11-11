@@ -132,6 +132,8 @@ export interface CourseData {
   examiners?: string;
   /** What the module is about (inhoudelijke beschrijving); paragraphs split by a blank line. */
   description?: string;
+  /** The literature for the module handbook (modulehandleiding), one item per line. */
+  literature?: string;
   /** Study load of the whole course in EC. */
   ec?: number;
   /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */

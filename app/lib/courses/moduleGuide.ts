@@ -30,7 +30,8 @@ export function moduleGuideDoc(course: CourseSource, locale: Locale): ExportDoc 
   });
 }
 
-function detailsBlock({ name, data }: CourseSource, locale: Locale): string {
+/** The module details as a two-column table; only what is filled in. */
+export function detailsBlock({ name, data }: CourseSource, locale: Locale): string {
   const d = getMessages(locale).courseDocuments;
   const rows: [string, string | undefined][] = [
     [d.moduleGuide.name, name],
@@ -47,7 +48,8 @@ function detailsBlock({ name, data }: CourseSource, locale: Locale): string {
   return head ? table(head, rest) : "";
 }
 
-function outcomesBlock({ data }: CourseSource, locale: Locale): string[] {
+/** Every learning outcome with its success criteria, under one heading. */
+export function outcomesBlock({ data }: CourseSource, locale: Locale): string[] {
   if (!data.outcomes.length) return [];
   return [
     `### ${getMessages(locale).courseDocuments.moduleGuide.outcomes}`,

@@ -1,6 +1,6 @@
 /**
  * Loads a document made from a course for the export routes. Which documents exist is data:
- * per course the module guide (`COURSE_DOCUMENTS`), per test the blueprint and the marking model
+ * per course the module guide and the module handbook (`COURSE_DOCUMENTS`), per test the blueprint and the marking model
  * (`TEST_DOCUMENTS`). Reading follows
  * `loadCourse`: the owner and the course's members; anyone else, an unknown document, or a test
  * the document cannot be made for gets a 404.
@@ -10,6 +10,7 @@ import type { ExportDoc } from "~/lib/export/doc";
 import { type ExportFormat, formatsFor } from "~/lib/export/formats";
 import { markingModelDoc } from "~/lib/courses/markingModel";
 import { moduleGuideDoc } from "~/lib/courses/moduleGuide";
+import { moduleHandbookDoc } from "~/lib/courses/moduleHandbook";
 import { testBlueprintDoc } from "~/lib/courses/testBlueprint";
 import type { CourseSource } from "~/lib/courses/testDocument";
 import { getMessages, type Locale } from "~/lib/i18n";
@@ -42,6 +43,10 @@ const COURSE_DOCUMENTS: Record<
   "module-guide": {
     make: moduleGuideDoc,
     fileName: (l) => getMessages(l).courseDocuments.moduleGuide.fileName,
+  },
+  "module-handbook": {
+    make: moduleHandbookDoc,
+    fileName: (l) => getMessages(l).courseDocuments.moduleHandbook.fileName,
   },
 };
 
