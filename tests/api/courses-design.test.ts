@@ -188,3 +188,143 @@ describe("design-outcomes", () => {
     expect(status).toBe(404);
   });
 });
+
+const programme = JSON.stringify({
+  assessments: [
+    {
+      title: "Proeftoets SQL",
+      kind: "formative",
+      week: 3,
+      weight: null,
+      outcomeRefs: [2],
+      form: "Praktijktoets",
+    },
+    {
+      title: "Ontwerp webwinkel",
+      kind: "summative",
+      week: 8,
+      weight: 100,
+      outcomeRefs: [1, 2],
+      form: "Beroepsproduct met mondelinge toelichting",
+    },
+  ],
+  notes: "Weging is een voorstel.",
+});
+const withOutcomes = {
+  ec: 5,
+  schedule: { weeks: 8 },
+  outcomes: [
+    { id: "lo1", text: "De student ontwerpt een datamodel.", bloom: "create" as const },
+    {
+      id: "lo2",
+      text: "De student schrijft SQL-queries.",
+      bloom: "apply" as const,
+      criteria: [{ text: "De query klopt." }],
+    },
+  ],
+  activities: [],
+  assessments: [],
+};
+const assess = (extra: [string, string][] = []): [string, string][] => [
+  ["intent", "design-assessments"],
+  ...extra,
+];
+
+describe("design-assessments", () => {
+  it("proposes a test programme over the course's outcomes, and stores nothing", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Toetsen", data: withOutcomes });
+    generate.mockResolvedValueOnce({ text: programme, usage: { output: 80 } });
+    const r = await post(course.id, assess([["forms", "Kennistoets, Beroepsproduct"]]));
+    if (!r.ok || r.intent !== "design-assessments") throw new Error(JSON.stringify(r));
+    expect(r.proposal.source).toBe("design");
+    expect(r.proposal.assessments.map((a) => [a.title, a.kind, a.week, a.weight])).toEqual([
+      ["Proeftoets SQL", "formative", 3, undefined],
+      ["Ontwerp webwinkel", "summative", 8, 100],
+    ]);
+    expect(r.proposal.uncovered).toEqual([]);
+    expect(recordUsage).toHaveBeenCalledOnce();
+    const message = generate.mock.calls[0]![0].messages[0].content as string;
+    expect(message).toContain("1. De student ontwerpt een datamodel. [create]");
+    expect(message).toContain("   - De query klopt.");
+    expect(message).toContain("<weeks>8</weeks>");
+    expect(message).toContain("Kennistoets, Beroepsproduct");
+    expect((await repo.getCourse("teacher-d", course.id))?.data.assessments).toEqual([]);
+  });
+
+  it("adds the ticked tests with their coverage through import-apply", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Apply 2", data: withOutcomes });
+    const r = await post(course.id, [
+      ["intent", "import-apply"],
+      ["outcomeKey", "o1"],
+      ["o1.text", "De student ontwerpt een datamodel."],
+      ["outcomeKey", "o2"],
+      ["o2.text", "De student schrijft SQL-queries."],
+      ["assessmentKey", "a1"],
+      ["a1.pick", "on"],
+      ["a1.title", "Ontwerp webwinkel"],
+      ["a1.kind", "summative"],
+      ["a1.weight", "100"],
+      ["a1.week", "8"],
+      ["a1.outcomes", "o1"],
+      ["a1.outcomes", "o2"],
+      ["a1.extra", JSON.stringify({ details: { form: "Beroepsproduct" }, parts: [] })],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "import-apply", added: { outcomes: 0 } });
+    const data = (await repo.getCourse("teacher-d", course.id))?.data;
+    expect(data?.outcomes).toHaveLength(2);
+    expect(data?.assessments[0]).toMatchObject({ title: "Ontwerp webwinkel", weight: 100 });
+    expect(data?.assessments[0]?.coverage.map((c) => c.outcomeId)).toEqual(["lo1", "lo2"]);
+  });
+
+  it("is refused without a model call for a course without outcomes or with tests", async () => {
+    const empty = await repo.createCourse("teacher-d", { name: "Leeg" });
+    const r = await post(empty.id, assess());
+    expect(r).toMatchObject({ ok: false, intent: "design-assessments" });
+    if (r.ok) return;
+    expect(r.error).toMatch(/leeruitkomsten/);
+    const tested = await repo.createCourse("teacher-d", {
+      name: "Al getoetst",
+      data: {
+        ...withOutcomes,
+        assessments: [{ id: "t1", title: "Toets", kind: "summative" as const, coverage: [] }],
+      },
+    });
+    expect(await post(tested.id, assess())).toMatchObject({ ok: false });
+    expect(
+      await post(
+        (await repo.createCourse("teacher-d", { name: "Te lang", data: withOutcomes })).id,
+        assess([["forms", "x".repeat(501)]]),
+      ),
+    ).toMatchObject({ ok: false });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("says what the AI needs when it proposes no tests, and retries broken JSON once", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Niets", data: withOutcomes });
+    generate.mockResolvedValueOnce({
+      text: JSON.stringify({ assessments: [], notes: "Welke toetsvormen?" }),
+    });
+    expect(await post(course.id, assess())).toMatchObject({
+      ok: false,
+      intent: "design-assessments",
+      notes: "Welke toetsvormen?",
+    });
+    generate.mockReset();
+    generate.mockResolvedValue({ text: "{ kapot" });
+    const r = await post(course.id, assess(), "en");
+    expect(generate).toHaveBeenCalledTimes(2);
+    if (r.ok) throw new Error("expected a failure");
+    expect(r.error).toMatch(/test programme/i);
+  });
+
+  it("is a 404 when the admin switched the course wizard off", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Uit 2", data: withOutcomes });
+    featureOff.add("courseDesign");
+    const status = await post(course.id, assess()).then(
+      () => undefined,
+      (e) => (e instanceof Response ? e.status : -1),
+    );
+    expect(status).toBe(404);
+    expect(generate).not.toHaveBeenCalled();
+  });
+});
