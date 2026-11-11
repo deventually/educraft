@@ -10,6 +10,7 @@ import {
   type ReadinessLevel,
   readinessSummary,
 } from "~/lib/portfolio/readiness";
+import { outcomeHref } from "~/lib/portfolio/tabs";
 import type { Framework } from "~/lib/portfolio/types";
 
 /** "Nog 3 punten open, waarvan 2 blokkerend." or "Alles klaar om in te leveren." */
@@ -41,16 +42,17 @@ const ICON: Record<ReadinessLevel, { Icon: typeof CircleCheck; className: string
   block: { Icon: CircleX, className: "text-red-700" },
 };
 
-function fixHref(base: string, fix: ReadinessFix): string {
+function fixHref(dossierId: string, fix: ReadinessFix): string {
+  const base = `/portfolio/${dossierId}`;
   switch (fix.to) {
     case "framework":
       return `${base}/framework`;
     case "evidence":
-      return `${base}/outcome/${fix.outcomeId}#evidence-title`;
+      return outcomeHref(dossierId, fix.outcomeId, "evidence", "evidence-title");
     case "chapter":
-      return `${base}/outcome/${fix.outcomeId}#chapter-${fix.outcomeId}`;
+      return outcomeHref(dossierId, fix.outcomeId, "chapter", `chapter-${fix.outcomeId}`);
     case "criterion":
-      return `${base}/outcome/${fix.outcomeId}#status-${fix.criterionId}`;
+      return outcomeHref(dossierId, fix.outcomeId, "review", `status-${fix.criterionId}`);
     case "references":
       return "#references-title";
     case "export":
@@ -76,7 +78,6 @@ export function ReadinessCheck({
   const tr = t.portfolioReadiness;
   const locale = useLocale();
   const { text: summary } = useSummaryText(items);
-  const base = `/portfolio/${dossierId}`;
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const criterion = (id?: string) =>
     framework.outcomes.flatMap((o) => o.criteria).find((c) => c.id === id)?.text ?? "";
@@ -145,7 +146,7 @@ export function ReadinessCheck({
               </div>
               {item.fix && item.level !== "ok" && (
                 <Link
-                  to={fixHref(base, item.fix)}
+                  to={fixHref(dossierId, item.fix)}
                   aria-describedby={`readiness-${i}`}
                   className="shrink-0 font-medium text-violet-700 underline underline-offset-2"
                 >

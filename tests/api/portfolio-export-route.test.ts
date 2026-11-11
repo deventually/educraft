@@ -58,7 +58,7 @@ describe("GET /portfolio/:id/export", () => {
     const d = await repo.createDossier("export-owner", "BDB 2026", data);
     const res = await call(d.id);
     expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe(`/portfolio/${d.id}#readiness`);
+    expect(res.headers.get("Location")).toBe(`/portfolio/${d.id}?tab=finish#readiness`);
   });
 
   it("always gives the draft version, marked as such in its file name", async () => {
@@ -107,7 +107,7 @@ describe("GET /portfolio/:id/export", () => {
     expect((await call(d.id, "", `?lu=${data.framework.outcomes[0]!.id}`)).status).toBe(200);
     const back = await call(d.id, "", `?lu=${lu2}`);
     expect(back.status).toBe(302);
-    expect(back.headers.get("Location")).toBe(`/portfolio/${d.id}#readiness`);
+    expect(back.headers.get("Location")).toBe(`/portfolio/${d.id}?tab=finish#readiness`);
   });
 
   it("answers 404 for an outcome the dossier does not have", async () => {
@@ -149,7 +149,9 @@ describe("GET /portfolio/:id/print (PDF)", () => {
     const d = await repo.createDossier("print-owner", "BDB 2026", data);
     const back = await load(d.id);
     expect(back).toBeInstanceOf(Response);
-    expect((back as Response).headers.get("Location")).toBe(`/portfolio/${d.id}#readiness`);
+    expect((back as Response).headers.get("Location")).toBe(
+      `/portfolio/${d.id}?tab=finish#readiness`,
+    );
     const draft = await load(d.id, "?draft=1");
     expect(draft).toMatchObject({ doc: { banner: { text: "CONCEPT, NIET INLEVEREN" } } });
   });

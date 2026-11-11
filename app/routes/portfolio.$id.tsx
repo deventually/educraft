@@ -1,4 +1,4 @@
-import { Form, Link, useActionData } from "react-router";
+import { Form, Link, useActionData, useSearchParams } from "react-router";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id";
 import {
@@ -12,6 +12,8 @@ import { ToolHints } from "~/components/portfolio/ToolHints";
 import { WordImport } from "~/components/portfolio/WordImport";
 import { dossierRoute } from "~/lib/portfolio/route";
 import { DossierProgress } from "~/components/portfolio/DossierProgress";
+import { TabNav } from "~/components/TabNav";
+import { DOSSIER_TABS, dossierHref, dossierTab } from "~/lib/portfolio/tabs";
 import { ReadinessCheck } from "~/components/portfolio/ReadinessCheck";
 import { DossierExport, PartExport } from "~/components/portfolio/DossierExport";
 import { DossierReviewPanel } from "~/components/portfolio/DossierReviewPanel";
@@ -127,6 +129,8 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     openSpots: open,
     partOpenSpots,
   } = loaderData;
+  const [params] = useSearchParams();
+  const tab = dossierTab(params.get("tab"));
   const outcomes = new Map(framework.outcomes.map((o) => [o.id, o]));
   const labelOf = (outcomeId: string) => {
     const o = outcomes.get(outcomeId);
@@ -145,155 +149,182 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
         {name}
       </h1>
 
-      <DossierProgress
-        dossierId={id}
-        route={route}
-        outcomes={framework.outcomes}
-        practise={practise}
-      />
-      {nextCriterion && (
-        <ToolHints
-          hints={nextTools}
-          step="evidence"
-          from={{ dossierId: id, criterionId: nextCriterion }}
-          className="mt-3"
+      <div className="mt-6">
+        <TabNav
+          label={t.portfolioRoute.tabs.dossierLabel}
+          current={tab}
+          tabs={DOSSIER_TABS.map((x) => ({
+            id: x,
+            label: t.portfolioRoute.tabs[x],
+            href: dossierHref(id, x),
+          }))}
         />
-      )}
+      </div>
 
-      <p className="mt-6 text-sm text-slate-600">
-        {framework.confirmedAt
-          ? fmt(
-              framework.provisional
-                ? t.portfolio.frameworkProvisional
-                : t.portfolio.frameworkConfirmed,
-              { date: fmtDate(framework.confirmedAt, locale) },
-            )
-          : t.portfolio.frameworkNotConfirmed}{" "}
-        <Link
-          to={`/portfolio/${id}/framework`}
-          className="font-medium text-violet-700 underline underline-offset-2"
-        >
-          {t.portfolio.frameworkLink}
-        </Link>
-      </p>
+      {tab === "overview" && (
+        <>
+          <DossierProgress
+            dossierId={id}
+            route={route}
+            outcomes={framework.outcomes}
+            practise={practise}
+          />
+          {nextCriterion && (
+            <ToolHints
+              hints={nextTools}
+              step="evidence"
+              from={{ dossierId: id, criterionId: nextCriterion }}
+              className="mt-3"
+            />
+          )}
 
-      {/* Step 5: assess the whole dossier, check it, then export. */}
-      <DossierReviewPanel
-        dossierId={id}
-        outcomes={framework.outcomes}
-        rows={dossierReview}
-        canRun={canReviewAll}
-      />
+          <p className="mt-6 text-sm text-slate-600">
+            {framework.confirmedAt
+              ? fmt(
+                  framework.provisional
+                    ? t.portfolio.frameworkProvisional
+                    : t.portfolio.frameworkConfirmed,
+                  { date: fmtDate(framework.confirmedAt, locale) },
+                )
+              : t.portfolio.frameworkNotConfirmed}{" "}
+            <Link
+              to={`/portfolio/${id}/framework`}
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              {t.portfolio.frameworkLink}
+            </Link>
+          </p>
 
-      <ReadinessCheck dossierId={id} items={readiness} framework={framework} />
+          <Form method="post" className="mt-6">
+            <input type="hidden" name="intent" value="coachMode" />
+            <fieldset>
+              <legend className="text-sm font-medium text-slate-900">
+                {t.portfolio.mode.legend}
+              </legend>
+              <div className="mt-2 space-y-1">
+                {(["coach", "draft"] as const).map((mode) => (
+                  <label key={mode} className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="mode"
+                      value={mode}
+                      defaultChecked={coachMode === mode}
+                    />
+                    {t.portfolio.mode[mode]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <Button type="submit" variant="secondary" size="sm" className="mt-2">
+              {t.portfolio.mode.save}
+            </Button>
+          </Form>
 
-      <DossierExport
-        dossierId={id}
-        readiness={readiness}
-        open={open}
-        aiUsed={aiUsed}
-        aiRequired={aiRequired}
-      />
-
-      <Form method="post" className="mt-6">
-        <input type="hidden" name="intent" value="coachMode" />
-        <fieldset>
-          <legend className="text-sm font-medium text-slate-900">{t.portfolio.mode.legend}</legend>
-          <div className="mt-2 space-y-1">
-            {(["coach", "draft"] as const).map((mode) => (
-              <label key={mode} className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="radio" name="mode" value={mode} defaultChecked={coachMode === mode} />
-                {t.portfolio.mode[mode]}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <Button type="submit" variant="secondary" size="sm" className="mt-2">
-          {t.portfolio.mode.save}
-        </Button>
-      </Form>
-
-      {framework.outcomes.length > 0 && (
-        <section className="mt-8" aria-labelledby="outcomes-title">
-          <h2 id="outcomes-title" className="text-lg font-medium text-slate-900">
-            {t.portfolio.outcomesTitle}
-          </h2>
-          <ul className="mt-3 space-y-3">
-            {progress.map((p) => (
-              <li
-                key={p.outcomeId}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
-              >
-                <Link
-                  to={`/portfolio/${id}/outcome/${p.outcomeId}`}
-                  className="font-medium text-slate-900 underline-offset-2 hover:underline"
-                >
-                  {labelOf(p.outcomeId)}
-                </Link>
-                <p className="text-sm text-slate-700">
-                  {fmt(t.portfolio.progressSummary, { shown: p.shown, total: p.criteria })} ·{" "}
-                  {fmt(t.portfolio.words, { n: p.words })}
-                </p>
-                {p.missingEvidence.length > 0 && (
-                  <p className="text-sm text-slate-600">
-                    {fmt(t.portfolio.missingEvidence, { items: p.missingEvidence.join("; ") })}
-                  </p>
-                )}
-                <PartExport
-                  dossierId={id}
-                  outcomeId={p.outcomeId}
-                  label={labelOf(p.outcomeId)}
-                  open={partOpenSpots[p.outcomeId] ?? 0}
-                  ai={aiUsed && aiRequired}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {framework.outcomes.length > 0 && (
-        <WordImport outcomes={framework.outcomes} chapters={chapters} references={references} />
-      )}
-
-      <section className="mt-8" aria-labelledby="references-title">
-        <h2 id="references-title" className="text-lg font-medium text-slate-900">
-          {t.portfolio.referencesTitle}
-        </h2>
-        {references.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600">{t.portfolio.referencesEmpty}</p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {references.map((r) => (
-              <li key={r.id} className="flex items-start justify-between gap-3 text-sm">
-                <span className="text-slate-800">{r.apa}</span>
-                <Form method="post">
-                  <input type="hidden" name="intent" value="removeReference" />
-                  <input type="hidden" name="referenceId" value={r.id} />
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`${t.portfolio.referenceRemove}: ${r.apa}`}
+          {framework.outcomes.length > 0 && (
+            <section className="mt-8" aria-labelledby="outcomes-title">
+              <h2 id="outcomes-title" className="text-lg font-medium text-slate-900">
+                {t.portfolio.outcomesTitle}
+              </h2>
+              <ul className="mt-3 space-y-3">
+                {progress.map((p) => (
+                  <li
+                    key={p.outcomeId}
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
                   >
-                    <Trash2 className="size-4" aria-hidden />
-                  </Button>
-                </Form>
-              </li>
-            ))}
-          </ul>
-        )}
-        <Form method="post" className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <input type="hidden" name="intent" value="addReference" />
-          <div className="flex-1">
-            <Label htmlFor="reference-apa">{t.portfolio.referenceLabel}</Label>
-            <Input id="reference-apa" name="apa" required maxLength={LIMITS.reference} />
-          </div>
-          <Button type="submit" variant="secondary">
-            {t.portfolio.referenceAdd}
-          </Button>
-        </Form>
-      </section>
+                    <Link
+                      to={`/portfolio/${id}/outcome/${p.outcomeId}`}
+                      className="font-medium text-slate-900 underline-offset-2 hover:underline"
+                    >
+                      {labelOf(p.outcomeId)}
+                    </Link>
+                    <p className="text-sm text-slate-700">
+                      {fmt(t.portfolio.progressSummary, { shown: p.shown, total: p.criteria })} ·{" "}
+                      {fmt(t.portfolio.words, { n: p.words })}
+                    </p>
+                    {p.missingEvidence.length > 0 && (
+                      <p className="text-sm text-slate-600">
+                        {fmt(t.portfolio.missingEvidence, { items: p.missingEvidence.join("; ") })}
+                      </p>
+                    )}
+                    <PartExport
+                      dossierId={id}
+                      outcomeId={p.outcomeId}
+                      label={labelOf(p.outcomeId)}
+                      open={partOpenSpots[p.outcomeId] ?? 0}
+                      ai={aiUsed && aiRequired}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+
+      {tab === "finish" && (
+        <>
+          {/* Finishing: assess the whole dossier, check it, export, and the references. */}
+          <DossierReviewPanel
+            dossierId={id}
+            outcomes={framework.outcomes}
+            rows={dossierReview}
+            canRun={canReviewAll}
+          />
+
+          <ReadinessCheck dossierId={id} items={readiness} framework={framework} />
+
+          <DossierExport
+            dossierId={id}
+            readiness={readiness}
+            open={open}
+            aiUsed={aiUsed}
+            aiRequired={aiRequired}
+          />
+
+          {framework.outcomes.length > 0 && (
+            <WordImport outcomes={framework.outcomes} chapters={chapters} references={references} />
+          )}
+
+          <section className="mt-8" aria-labelledby="references-title">
+            <h2 id="references-title" className="text-lg font-medium text-slate-900">
+              {t.portfolio.referencesTitle}
+            </h2>
+            {references.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-600">{t.portfolio.referencesEmpty}</p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {references.map((r) => (
+                  <li key={r.id} className="flex items-start justify-between gap-3 text-sm">
+                    <span className="text-slate-800">{r.apa}</span>
+                    <Form method="post">
+                      <input type="hidden" name="intent" value="removeReference" />
+                      <input type="hidden" name="referenceId" value={r.id} />
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`${t.portfolio.referenceRemove}: ${r.apa}`}
+                      >
+                        <Trash2 className="size-4" aria-hidden />
+                      </Button>
+                    </Form>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Form method="post" className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+              <input type="hidden" name="intent" value="addReference" />
+              <div className="flex-1">
+                <Label htmlFor="reference-apa">{t.portfolio.referenceLabel}</Label>
+                <Input id="reference-apa" name="apa" required maxLength={LIMITS.reference} />
+              </div>
+              <Button type="submit" variant="secondary">
+                {t.portfolio.referenceAdd}
+              </Button>
+            </Form>
+          </section>
+        </>
+      )}
     </div>
   );
 }

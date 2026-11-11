@@ -57,5 +57,17 @@ export const portfolioRoute = {
   stepsLabel: "Steps of your dossier",
   stepTodo: "Still to do",
   summary: "{done} of {total} steps done",
+  tabs: {
+    chapter: "Chapter",
+    criteriaTitle: "What you need to show",
+    dossierLabel: "Parts of your dossier",
+    evidence: "Evidence",
+    finish: "Finish",
+    outcomeLabel: "Parts of this learning outcome",
+    overview: "Overview",
+    perCriterionTitle: "Evidence per criterion",
+    review: "Assessment",
+    statusTitle: "Your judgement per criterion",
+  },
   title: "Progress",
 };

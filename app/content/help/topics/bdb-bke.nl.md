@@ -4,6 +4,8 @@ Deze handleiding neemt je stap voor stap mee, van een leeg dossier tot de docume
 
 **Voortgang.** Bovenaan je dossier zie je hoe ver je bent: eerst het kader, dan elke leeruitkomst apart, dan afronden. De knop *Volgende stap* brengt je naar wat nu aan de beurt is; elke stap in de lijst is ook een link, als je zelf de diepte in wilt. Bovenaan elke leeruitkomst staan vier mijlpalen: Bewijs, Hoofdstuk, Laten beoordelen en Aangetoond. Zo kan LU1 al klaar zijn terwijl LU4 nog op een afgenomen toets wacht. *Laten beoordelen* telt het oordeel van de coach mee, maar ook wat jij zelf al op *Aangetoond* zette: de coach is een hulp, geen verplichting.
 
+**Tabbladen.** Je dossier heeft twee tabbladen: Overzicht (je voortgang en je leeruitkomsten) en Afronden (de check of je kunt inleveren, de export en je bronnen). Elke leeruitkomst heeft er vier: Overzicht, Bewijs, Hoofdstuk en Beoordelen. Zo zie je alleen wat je nu nodig hebt; de mijlpalen en *Los op* brengen je meteen naar het goede tabblad.
+
 **Drie afspraken vooraf**
 
 - **Het formulier van je eigen hogeschool is de maat.** Alles wat LimeOnIt zegt, meet het aan de criteria die jij overneemt en bevestigt.
