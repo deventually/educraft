@@ -31,6 +31,8 @@ the quality bar is where most TDD quietly fails.
 - **UI component** — new or changed interactive component or page (ships a `vitest-axe`
   zero-violations test).
 - Any **behaviour change** — copy, layout, routes, i18n all count.
+- A **route** loader or action, a **repository** query, or a **config/infra file** that has a
+  contract (a workflow, the Dockerfile, `deploy/`, a doc that must stay in step with the code).
 
 ## The loop
 
@@ -59,6 +61,30 @@ tracer bullet that responds to what the last one taught you.
 > the *right* assertions at the *right* seam is a separate **quality review** pass — use
 > `quality.md` and the `code-review` skill — don't interleave it with getting to green.
 
+## Seams by layer
+
+| You change | Test at | Reference |
+| --- | --- | --- |
+| A tool (data + prompt) | `getToolBySlug`, `buildSystemPrompt` | `tests/tools/*.test.ts`, `recipes.md` |
+| A component | render it, query by role/label, `vitest-axe` | `tests/components/admin-health.test.tsx` |
+| A route loader/action | call it with `signedRequest` after `signInAs` — the real auth guard | `tests/api/school-calendar.test.ts` |
+| A repository | its exported async functions on the in-memory DB, two users to prove the `userId` scope | `tests/server/*.test.ts` |
+| A config/infra file | read the file and assert its contract (order of steps, no floating tag) | `tests/deploy/*.test.ts` |
+
+**Never mock `~/server/auth.server`** — sign in for real with `tests/helpers/session.ts`
+(`signInAs`, `signedRequest`, `signOut`). Mocking it skips the access check the test should
+prove, and makes the file run isolated. Older files that still mock it are debt, not an
+example.
+
+## Keep the suite fast: shared or isolated
+
+Most test files share their modules per worker (`isolate: false`, each file with a fresh
+in-memory DB). A file runs **isolated** (slower, its own module graph) as soon as it calls
+`vi.mock`, `vi.stubEnv`, assigns a `process.env` value other than the in-memory
+`DATABASE_URL`, or points the DB at a file — `tests/helpers/isolation.ts` decides from the
+source. So prefer a seam (an injected argument, `signInAs`, an `opts.env` parameter like
+`adminHealth({ env })`) over a module mock or a `process.env` write.
+
 ## The gate — before done
 
 All three green. No exceptions (`AGENTS.md`).
@@ -66,8 +92,14 @@ All three green. No exceptions (`AGENTS.md`).
 ```bash
 npm test          # vitest run — node (*.test.ts) + happy-dom (*.test.tsx)
 npm run typecheck # react-router typegen && tsc
-npm run check     # biome (lint + format)
+npm run check     # biome (lint + format, sorted i18n keys) + knip (unused files/exports/deps)
 ```
+
+What usually turns the gate red after the tests pass: an export only a test uses is fine, but
+an export **nobody** imports fails knip — export only what another file imports; unsorted i18n
+keys (`npx biome check --write .` fixes them); a new `as any`/`biome-ignore`, or an `app/` file
+over 400 lines (`tests/ratchet.test.ts` — rewrite instead of suppressing); a string with `${…}`
+in a test (`noTemplateCurlyInString`: use a regex).
 
 ## Before-merge checklist
 
@@ -75,6 +107,9 @@ npm run check     # biome (lint + format)
 - [ ] Assertions read as behaviour ("resolves by slug", "no unresolved `{{…}}`"), not
       structure — cross-check against the anti-patterns in `quality.md`.
 - [ ] Interactive UI ships a `vitest-axe` test: `expect((await axe(container)).violations).toEqual([])`.
+- [ ] A visible UI change has screenshots NL/EN on desktop and mobile for the PR (template).
+- [ ] A new page is in `e2e/pages.ts`, so the browser tests run axe and CSP on it.
+- [ ] A new or changed prompt (`@vN`) has eval cases in `evals/<id>/` (`AGENTS.md`, Prompts).
 - [ ] Refactored toward data-not-control-flow / deeper modules.
 - [ ] `npm test` && `npm run typecheck` && `npm run check` all green.
 - [ ] No leftover `console.log` / debug code. Commit message says *what*, not *how*.

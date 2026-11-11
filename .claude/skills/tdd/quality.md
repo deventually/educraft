@@ -86,12 +86,15 @@ short, specific list, and `tests/components/ChatView.test.tsx` is the reference:
 
 - **Network / streaming** — `vi.mock("~/lib/streamClient")` and drive `streamPost` via
   its `onToken` / `onDone` handlers. Never hit a real endpoint.
-- **i18n surface** — `vi.mock("~/lib/i18n/useT")` (`useLocale`, `useT`) and
-  `~/lib/i18n/localized` (`loc`) so a component test asserts stable English strings.
+- **i18n surface** — usually *don't*: render with the real messages (Dutch is the default
+  locale) and assert the real copy, as `tests/components/admin-health.test.tsx` does — for a
+  copy change that is the behaviour. Mock `~/lib/i18n/useT` only when the real strings get in
+  the way, and know the file then runs isolated.
 - **Time / randomness** — inject or mock; never assert against a live clock.
 
 **Do not mock what you own** — the registry, `buildSystemPrompt`, interpolation, a tool's
-own data. Mocking your own modules is the implementation-coupled anti-pattern wearing a
+own data, and above all `~/server/auth.server` (sign in for real with
+`tests/helpers/session.ts`) and the repositories (use the in-memory DB). Mocking your own modules is the implementation-coupled anti-pattern wearing a
 disguise: the test then proves the mock behaves, not the code.
 
 **Design for mockability at the boundary:** dependency injection over internally

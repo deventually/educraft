@@ -27,7 +27,8 @@ already guarantee:
 **Not free — an extra registration you must do:** `tests/goals.test.ts` iterates
 `getEnabledTools()` and requires every *enabled* tool to be filed in
 `app/lib/registry/goals.ts` — a `TOOL_GOALS[slug]` entry (a goal whose `audience` matches
-the tool's `userType`) and a non-empty `TOOL_KEYWORDS[slug]` list. It's the one step that's
+the tool's `userType`) — and a non-empty `TOOL_KEYWORDS[slug]` list in
+`app/lib/registry/keywords.ts`. It's the one step that's
 easy to miss; skip it and the gate goes red (see step **f** below).
 
 Your per-tool test's real job: **it resolves by slug**, **its prompt fills with no
@@ -180,10 +181,14 @@ to the `ALL_TOOLS: Tool[]` array.
 
 **f. File it in the goal taxonomy** — in `app/lib/registry/goals.ts`, add the tool's slug
 to `TOOL_GOALS` (one of `design | assess | motivate | coach | discuss`; the goal's
-`audience` must equal the tool's `userType`) and a non-empty `TOOL_KEYWORDS[slug]` list of
-bilingual search synonyms. **Required for any `enabled` tool** — `tests/goals.test.ts`
+`audience` must equal the tool's `userType`), and in `app/lib/registry/keywords.ts` a
+non-empty `TOOL_KEYWORDS[slug]` list of bilingual search synonyms. **Required for any `enabled` tool** — `tests/goals.test.ts`
 fails without it. This is the registration the four-files list doesn't hint at, so it's the
 usual reason a fresh tool's gate is red.
+
+**g. Eval cases** — a new prompt follows `app/lib/prompts/TEMPLATE.md` (Voice & Bounds) and
+gets `evals/<slug>/cases.json` + `rubric.md` (copy the shape of `evals/clear-assignment/`).
+Running the eval costs API credit, so it is Bastiaan's call; the cases ship regardless.
 
 Run `npm test` → GREEN.
 
@@ -294,3 +299,62 @@ refactor toward a deeper module — one narrow prop surface hiding the complexit
 **i18n reminder:** any new displayed string is a behaviour change — add its `nl`/`en` keys
 to `app/lib/i18n/messages/{nl,en}/<namespace>.ts` (parity enforced by `tests/i18n.test.ts`), and wrap
 displayed strings in the localized helpers rather than hardcoding.
+
+---
+
+## Recipe: a route loader or action
+
+Sign in for real; never mock `auth.server`. The in-memory DB is set before any server module
+loads, and the route is imported after it.
+
+```ts
+import { beforeAll, describe, expect, it } from "vitest";
+import { signInAs, signedRequest, signOut } from "../helpers/session";
+
+process.env.DATABASE_URL = "file::memory:";
+
+type Route = typeof import("~/routes/<route>");
+let route: Route;
+
+beforeAll(async () => {
+  route = await import("~/routes/<route>");
+  await signInAs({ id: "t-1", role: "teacher" });
+});
+
+const args = (request: Request) =>
+  ({ request, params: {}, context: {} }) as Parameters<Route["loader"]>[0];
+
+describe("<route> loader", () => {
+  it("returns the teacher's own items", async () => {
+    const data = await route.loader(args(signedRequest("http://localhost/<path>")));
+    expect(data).toMatchObject({ /* behaviour, not internals */ });
+  });
+
+  it("sends a guest to the login page", async () => {
+    signOut();
+    // requireUser throws a redirect Response to /login.
+    await expect(route.loader(args(signedRequest("http://localhost/<path>")))).rejects.toHaveProperty(
+      "status",
+      302,
+    );
+  });
+});
+```
+
+For an owner-scoped query, sign in a second user and prove they **cannot** see or change the
+first user's row — that is the security behaviour (`AGENTS.md`, Database).
+
+## Recipe: a config or infra file
+
+A workflow, the Dockerfile, a deploy script or a doc that must stay in step has a contract
+too. Read the file and assert the contract, not its formatting — see `tests/deploy/*.test.ts`:
+
+```ts
+const script = readFileSync(resolve(root, "deploy/deploy.sh"), "utf8");
+
+it("makes a backup before it starts the new version", () => {
+  expect(script.indexOf("build/ops/backup.js")).toBeLessThan(script.indexOf("docker compose up -d"));
+});
+```
+
+Use a regex rather than a string with `${…}` in it (biome `noTemplateCurlyInString`).
