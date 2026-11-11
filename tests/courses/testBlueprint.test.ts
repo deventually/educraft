@@ -60,13 +60,26 @@ describe("testBlueprintDoc: the blueprint per learning outcome", () => {
       "| Leeruitkomst | Succescriteria | Niveau | Weging | Beoordelingscriteria | Onderdeel |",
     );
     expect(m).toContain(
-      "| **LU1** Je ontwerpt een datamodel. | S-An 1.1 De student registreert requirements. · Het model is genormaliseerd. | 2 | 100% | Het model werkt. · De keuzes zijn onderbouwd. · Legt normaliseren uit. | Datamodel (60%) · Toelichting (40%) |",
+      "| **LU1** Je ontwerpt een datamodel. | S-An 1.1 De student registreert requirements.<br>Het model is genormaliseerd. | 2 | 100% | Het model werkt.<br>De keuzes zijn onderbouwd.<br>Legt normaliseren uit. | Datamodel (60%)<br>Toelichting (40%) |",
     );
     expect(m).toContain(
       "| **LU2** Je legt normaliseren uit. |  | analyseren | 40% | Legt normaliseren uit. | Toelichting (40%) |",
     );
-    expect(m).toContain("| **Totaal** |  |  | 100% |  |  |");
+    expect(m).toContain("| **Totaal** · Cesuur: 75% |  |  | 100% |  |  |");
     expect(m).toContain("Een onderdeel bij meer leeruitkomsten telt bij elk daarvan mee.");
+  });
+
+  it("puts the pass mark in the total row too, so each blueprint carries its own", () => {
+    const data = documentedCourse();
+    const a = data.assessments.find((x) => x.id === TEST1)!;
+    a.parts = a.parts?.map(({ weight: _w, ...p }) => p);
+    delete a.items;
+    const m = testBlueprintDoc({ name: "Databases", data }, TEST1, "nl")!.sections[0]!.markdown;
+    expect(m).toContain("| **Cesuur: 75%** |  |  |  |  |  |");
+    delete a.passMark;
+    const without = testBlueprintDoc({ name: "Databases", data }, TEST1, "nl")!.sections[0]!
+      .markdown;
+    expect(without).not.toContain("Cesuur");
   });
 
   it("ends with the conditions, how the test is taken and the resit", () => {

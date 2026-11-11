@@ -19,8 +19,13 @@ function Runs({ runs }: { runs: Run[] }) {
     if (r.italic) node = <em>{node}</em>;
     if (r.bold) node = <strong>{node}</strong>;
     if (r.highlight) node = <mark className="bg-yellow-200 text-slate-900">{node}</mark>;
-    // biome-ignore lint/suspicious/noArrayIndexKey: runs are static, in order
-    return <span key={i}>{node}</span>;
+    return (
+      // biome-ignore lint/suspicious/noArrayIndexKey: runs are static, in order
+      <span key={i}>
+        {r.break && <br />}
+        {node}
+      </span>
+    );
   });
 }
 

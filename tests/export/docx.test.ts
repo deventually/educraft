@@ -71,3 +71,21 @@ describe("exportDocToDocx (P30.1)", () => {
     );
   });
 });
+
+describe("exportDocToDocx line breaks in a table cell", () => {
+  it("puts a <br> in a cell as a line break, not as text", async () => {
+    const doc = toExportDoc({
+      title: "Nakijkmodel",
+      locale: "nl",
+      sections: [{ heading: null, markdown: "| Voldoende |\n|---|\n| eerste<br>tweede |" }],
+    });
+    const xml = await documentXml(await exportDocToDocx(doc));
+    expect(xml).toMatch(/eerste<\/w:t>[\s\S]*?<w:br\/>[\s\S]*?tweede/);
+    expect(xml).not.toContain("&lt;br");
+  });
+
+  it("aligns nothing centred: every paragraph is left-aligned by default", async () => {
+    const xml = await documentXml(await exportDocToDocx(sample));
+    expect(xml).not.toMatch(/<w:jc w:val="(center|both)"\/>/);
+  });
+});

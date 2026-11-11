@@ -14,6 +14,8 @@ export interface Run {
   code?: boolean;
   /** Marked in yellow, e.g. an open spot in a draft dossier. */
   highlight?: boolean;
+  /** Starts on a new line (a `<br>` in a table cell). */
+  break?: boolean;
 }
 
 export type Block =
@@ -83,6 +85,21 @@ function cells(line: string): string[] {
   return trimmed.split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
 }
 
+const CELL_BREAK = /\s*<br\s*\/?>\s*/i;
+
+/** A cell's runs; each line after a `<br>` starts on a new line in the same cell. */
+function cellRuns(cell: string): Run[] {
+  return cell
+    .split(CELL_BREAK)
+    .filter(Boolean)
+    .flatMap((line, i) => {
+      const rs = inline(line);
+      const first = rs[0];
+      if (i > 0 && first) rs[0] = { ...first, break: true };
+      return rs;
+    });
+}
+
 /** Reads a chapter's markdown into blocks, in order. */
 export function parseMarkdown(markdown: string): Block[] {
   const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
@@ -130,10 +147,10 @@ export function parseMarkdown(markdown: string): Block[] {
     }
     if (line.includes("|") && i + 1 < lines.length && TABLE_SEPARATOR.test(lineAt(i + 1))) {
       flush();
-      const header = cells(line).map((c) => inline(c));
+      const header = cells(line).map(cellRuns);
       const rows: Run[][][] = [];
       for (i += 2; i < lines.length && lineAt(i).includes("|") && lineAt(i).trim(); i++) {
-        rows.push(cells(lineAt(i)).map((c) => inline(c)));
+        rows.push(cells(lineAt(i)).map(cellRuns));
       }
       i--;
       blocks.push({ type: "table", header, rows });

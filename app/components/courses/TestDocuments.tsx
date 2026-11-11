@@ -232,7 +232,7 @@ function PartsList({ data, assessment: a }: { data: CourseData; assessment: Asse
                 {[
                   part.outcomeIds.map(short).join(", "),
                   part.weight !== undefined ? fmt(m.weight, { n: part.weight }) : "",
-                  part.knockOut ? m.knockOut : "",
+                  part.knockOut ? m.knockOutYes : "",
                 ]
                   .filter(Boolean)
                   .join(" · ")}
