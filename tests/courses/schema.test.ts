@@ -11,6 +11,19 @@ describe("CourseDataSchema (the boundary)", () => {
     expect(parses(emptyCourseData())).toBe(true);
   });
 
+  it("keeps the schedule, and refuses one out of range", () => {
+    const schedule = {
+      weeks: 10,
+      sessionsPerWeek: 3,
+      sessionMinutes: 240,
+      groupSize: 28,
+      deliveryMode: "hybrid",
+    };
+    expect(CourseDataSchema.parse({ ...alignedCourse(), schedule }).schedule).toEqual(schedule);
+    expect(parses({ ...alignedCourse(), schedule: { weeks: 0 } })).toBe(false);
+    expect(parses({ ...alignedCourse(), schedule: { deliveryMode: "pigeon" } })).toBe(false);
+  });
+
   it("accepts a real start date and refuses anything else (P22.1)", () => {
     expect(parses({ ...alignedCourse(), startDate: "2026-09-02" })).toBe(true);
     expect(parses({ ...alignedCourse(), startDate: "2026-02-30" })).toBe(false);

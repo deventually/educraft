@@ -94,9 +94,9 @@ describe("Course page — tabs", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("shows the settings and the week on the overview, nothing else", () => {
+  it("shows the settings, the schedule and the week on the overview, nothing else", () => {
     renderRoute(CoursePage, pageData());
-    expect(headings()).toEqual(["Cursusgegevens", "Per week"]);
+    expect(headings()).toEqual(["Cursusgegevens", "Lesrooster", "Per week"]);
   });
 
   it("shows the learning outcomes on their own tab", async () => {
@@ -141,7 +141,7 @@ describe("Course page — tabs", () => {
 
   it("falls back to the overview for an unknown tab", () => {
     renderRoute(CoursePage, pageData(), "/?tab=nonsense");
-    expect(headings()).toEqual(["Cursusgegevens", "Per week"]);
+    expect(headings()).toEqual(["Cursusgegevens", "Lesrooster", "Per week"]);
   });
 });
 

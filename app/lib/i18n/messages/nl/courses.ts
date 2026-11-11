@@ -231,6 +231,18 @@ export const courses = {
   profileNone: "Geen",
   remove: "Verwijderen",
   save: "Opslaan",
+  schedule: {
+    deliveryMode: "Contactvorm",
+    deliveryModes: { hybrid: "Hybride", "in-person": "Op locatie", online: "Live online" },
+    groupSize: "Groepsgrootte",
+    intro:
+      "Hoe de cursus loopt, één keer ingevuld. Alles is optioneel. Les voorbereiden neemt hieruit de lesduur, de groepsgrootte en de contactvorm over.",
+    none: "Niet ingevuld",
+    sessionMinutes: "Duur van een lesmoment (minuten)",
+    sessionsPerWeek: "Lesmomenten per week",
+    title: "Lesrooster",
+    weeks: "Aantal weken",
+  },
   settings: {
     calendar: "Zet in je agenda",
     calendarHint:

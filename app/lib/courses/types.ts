@@ -116,6 +116,23 @@ export interface Assessment {
   parts?: AssessmentPart[];
 }
 
+/** How a course meets; option values are stable slugs, never shown. */
+export const DELIVERY_MODES = ["in-person", "online", "hybrid"] as const;
+export type DeliveryMode = (typeof DELIVERY_MODES)[number];
+
+/**
+ * The course's rhythm, filled in once (all optional): the course design wizard and the tools
+ * opened from a lesson read it. Generic on purpose: schools and programmes differ.
+ */
+export interface CourseSchedule {
+  weeks?: number;
+  sessionsPerWeek?: number;
+  /** Length of one teaching session in minutes. */
+  sessionMinutes?: number;
+  groupSize?: number;
+  deliveryMode?: DeliveryMode;
+}
+
 /** Hours of study per EC (WHW art. 7.4: one EC is 28 hours). */
 export const HOURS_PER_EC = 28;
 
@@ -138,6 +155,7 @@ export interface CourseData {
   ec?: number;
   /** ISO date (`YYYY-MM-DD`); week 1 is the week that holds it (P22.1). */
   startDate?: string;
+  schedule?: CourseSchedule;
   outcomes: LearningOutcome[];
   activities: Activity[];
   assessments: Assessment[];

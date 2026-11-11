@@ -26,6 +26,7 @@ import {
   ACTIVITY_KINDS,
   ASSESSMENT_KINDS,
   type CourseData,
+  DELIVERY_MODES,
   HOURS_PER_EC,
   ITEM_FORMATS,
 } from "./types";
@@ -47,6 +48,7 @@ export const COURSE_INTENTS = [
   "remove-assessment",
   "set-ec",
   "set-start-date",
+  "set-schedule",
   "set-module",
   "update-assessment-details",
   "add-part",
@@ -314,6 +316,25 @@ function run(
       assertItem(d.assessments, assessmentId);
       assertItem(d.assessments.find((a) => a.id === assessmentId)?.parts ?? [], id);
       return edit.removePart(d, assessmentId, id);
+    }
+    case "set-schedule": {
+      const v = z
+        .object({
+          weeks: optionalNumber(1, COURSE_LIMITS.week, true),
+          sessionsPerWeek: optionalNumber(1, COURSE_LIMITS.sessionsPerWeek, true),
+          sessionMinutes: optionalNumber(
+            COURSE_LIMITS.sessionMinutes.min,
+            COURSE_LIMITS.sessionMinutes.max,
+            true,
+          ),
+          groupSize: optionalNumber(1, COURSE_LIMITS.groupSize, true),
+          deliveryMode: z
+            .union([z.literal(""), z.enum(DELIVERY_MODES)])
+            .optional()
+            .transform((m) => m || undefined),
+        })
+        .parse(raw);
+      return edit.setSchedule(d, v);
     }
     case "set-start-date": {
       const { startDate } = z

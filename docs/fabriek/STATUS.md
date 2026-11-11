@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #268, #270 en #272 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #270 en #272 gemerged)_
 
 ## Nu
 
+- **Vooraf invullen vanuit de les (#269) gemerged op 2026-11-11:** wie *Les voorbereiden* opent
+  vanuit een les, krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis
+  (de vijf lessen ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij
+  `prefillFromCourse`; geen per-tool code, geen migratie.
 - **Cursuspagina in vijf tabbladen (#267) gemerged op 2026-11-11:** de lange cursuspagina is
   opgedeeld in *Overzicht*, *Leeruitkomsten*, *Lessen en toetsen*, *Controle* (met het aantal
   bevindingen) en *Documenten en delen* (met de modulewijzer en modulehandleiding). Het tabblad
@@ -659,10 +663,10 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #268, #270 en #272 gemerged)_
 
 ## Bezig
 
-- **Vooraf invullen vanuit de les (#269, PR open):** wie *Les voorbereiden* opent vanuit een les,
-  krijgt de leeruitkomsten van die les, de lesinhoud (de titel) en de voorkennis (de vijf lessen
-  ervoor) al ingevuld. Bronnen `itemTitle` en `earlierLessons` bij `prefillFromCourse`; geen
-  per-tool code, geen migratie.
+- **Lesrooster van de cursus (#271, PR open):** een blok *Lesrooster* op het
+  tabblad Overzicht met weken, lesmomenten per week, duur van een lesmoment, groepsgrootte en
+  contactvorm, allemaal optioneel (`set-schedule`, `CourseData.schedule`). *Les voorbereiden*
+  neemt lesduur, groep en contactvorm daaruit over; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
