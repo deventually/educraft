@@ -36,8 +36,8 @@ There is no limit on the number of questions per day. The AI does stop when some
 Admins can set a limit per month, in euros: for a team or for one teacher. A limit for you replaces your team's. The owner can also set a budget for the whole institution.
 
 - You see no amounts, only what share of your allowance you used this month, on **Usage**.
-- From 80% you see a notice above every tool.
-- At 100% the AI stops for you until the 1st of the next month. Your admin can raise the limit.
+- From 80% you see a notice above every tool, and once a pop-up notice, wherever you are.
+- At 100% the AI stops for you until the 1st of the next month; you also see that once as a pop-up. Your admin can raise the limit.
 
 When you share a limit with your team, the whole team's use counts.
 

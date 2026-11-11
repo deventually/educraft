@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applicableLimit, parseAiLimits, parseEuroAmount } from "~/lib/usage/limits";
+import { applicableLimit, limitAlertKey, parseAiLimits, parseEuroAmount } from "~/lib/usage/limits";
 
 describe("parseAiLimits", () => {
   it("keeps a budget and positive euro limits, drops what is broken", () => {
@@ -73,5 +73,17 @@ describe("applicableLimit", () => {
     const limits = { budget: 100, teams: {}, users: { u1: 50 } };
     const r = applicableLimit(limits, "u1", [], { ...spend, user: 1, instance: 100_000_000 });
     expect(r).toMatchObject({ scope: "budget", state: "stop" });
+  });
+});
+
+describe("limitAlertKey", () => {
+  it("names the month and the state from 80% on, so each crossing alerts once", () => {
+    expect(limitAlertKey({ state: "warn" }, "2026-11")).toBe("2026-11:warn");
+    expect(limitAlertKey({ state: "stop" }, "2026-11")).toBe("2026-11:stop");
+  });
+
+  it("is null below 80% or without a limit", () => {
+    expect(limitAlertKey({ state: "ok" }, "2026-11")).toBeNull();
+    expect(limitAlertKey(null, "2026-11")).toBeNull();
   });
 });

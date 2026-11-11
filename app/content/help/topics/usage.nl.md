@@ -36,8 +36,8 @@ Er is geen grens aan het aantal vragen per dag. Wel stopt de AI als iemand op é
 Beheer kan een limiet per maand zetten, in euro's: voor een team of voor één docent. Een limiet voor jou zelf gaat voor die van je team. De eigenaar kan daarnaast een budget voor de hele instelling zetten.
 
 - Je ziet geen bedragen, wel hoeveel procent van je ruimte je deze maand gebruikte, op **Gebruik**.
-- Vanaf 80% zie je boven elke tool een melding.
-- Bij 100% stopt de AI voor je tot de 1e van de volgende maand. Je beheerder kan de limiet verhogen.
+- Vanaf 80% zie je boven elke tool een melding, en krijg je één keer een melding in beeld, waar je ook bent.
+- Bij 100% stopt de AI voor je tot de 1e van de volgende maand; ook dat zie je één keer in beeld. Je beheerder kan de limiet verhogen.
 
 Gebruik je samen met je team één limiet, dan telt het gebruik van het hele team mee.
 

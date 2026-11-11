@@ -102,3 +102,14 @@ export function applicableLimit(
   if (checks.length === 0) return null;
   return checks.reduce((a, b) => (b.share > a.share ? b : a));
 }
+
+/** Fired on `window` when a streamed AI call ends, so the page checks the limit again. */
+export const AI_DONE_EVENT = "limeonit:ai-done";
+
+/**
+ * What a teacher was last told about the monthly limit: the month and the state, from 80%
+ * on; null below it. A new key (warn → stop, or a new month) means a new toast.
+ */
+export function limitAlertKey(limit: Pick<AppliedLimit, "state"> | null, month: string) {
+  return limit && limit.state !== "ok" ? `${month}:${limit.state}` : null;
+}
