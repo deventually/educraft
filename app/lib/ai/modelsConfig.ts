@@ -77,6 +77,18 @@ const LocalizedNameSchema = z.union([
 /** Only names of server settings may be given, never values (keys stay in `.env`). */
 const SETTING_NAME = /^[A-Z][A-Z0-9_]*_(API_KEY|BASE_URL)$/;
 
+/**
+ * How a provider caches a prompt that comes back (a chat's next turn):
+ * - "markers": we mark what to keep (Anthropic's `cache_control`);
+ * - "auto": the provider caches a repeated prefix by itself, nothing to send;
+ * - `{ key }`: it caches per key, sent in this body field (OpenAI, Mistral, OpenRouter).
+ */
+const CacheSchema = z.union([
+  z.literal("markers"),
+  z.literal("auto"),
+  z.object({ key: z.string().regex(/^[a-z][a-z_]*$/) }).strict(),
+]);
+
 const ConfigProviderSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
@@ -91,9 +103,15 @@ const ConfigProviderSchema = z
     keyOptional: z.boolean().optional(),
     modelsUrl: z.url().optional(),
     example: z.string().min(1),
+    cache: CacheSchema,
   })
   .refine((p) => p.api === "anthropic" || p.baseURL || p.baseURLEnv, {
     message: "an openai-compatible provider needs baseURL or baseURLEnv",
+  })
+  .refine((p) => p.cache !== "markers" || p.api === "anthropic", {
+    message:
+      "cache: markers is for Anthropic's API; an openai-compatible provider uses auto or a key",
+    path: ["cache"],
   });
 
 export type ConfigProvider = z.infer<typeof ConfigProviderSchema>;

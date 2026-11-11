@@ -17,6 +17,8 @@ export interface ModeStrategy {
   readonly fillsHeight: boolean;
   /** Its work may reach a colleague through a shared course; a conversation never does. */
   readonly sharesWork: boolean;
+  /** Its prompt comes back on the next turn (a chat), so the provider may cache it. */
+  readonly cachesPrompt: boolean;
   /** The turns the model answers: a chat's own history, otherwise one trigger. */
   turns(history: ChatMessage[] | undefined, lang: OutputLanguage): ChatMessage[];
   /** The turns as sent: a chat repeats the language (and its reminder) on the last turn. */
@@ -43,6 +45,7 @@ function generation(kind: "multiStage" | "oneShot"): ModeStrategy {
     kind,
     fillsHeight: false,
     sharesWork: true,
+    cachesPrompt: false,
     turns: (_history, lang) => trigger(lang),
     promptTurns: (turns) => turns,
     sessionId: () => null,
@@ -57,6 +60,7 @@ function conversation(tool: Pick<Tool, "chat">): ModeStrategy {
     kind: "chat",
     fillsHeight: true,
     sharesWork: false,
+    cachesPrompt: true,
     turns: (history, lang) => history ?? trigger(lang),
     promptTurns: (turns, lang) =>
       reinforceLanguage(turns, lang, loc(tool.chat?.turnReminder, lang)),

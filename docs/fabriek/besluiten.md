@@ -375,7 +375,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   per team en per docent worden een maandlimiet in euro's, niet in tokens, omdat een token per model
   tot twintig keer anders kost. Het meten verhuist uit het werk aan prompt caching naar het
   dashboard. Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen").
-- **BESLUIT-2026-11-11-3:** **Prijzen per model: de prijslijst in de catalogus, een eigen prijs
+- **BESLUIT-2026-11-11-3:** **Meta loopt via Together AI; aanbieders buiten de EU houden de
+  bouw niet tegen.** Meta biedt zelf geen API meer aan (de Llama API stopte in juli 2026), dus
+  Muse Spark Open staat in de catalogus via Together AI (#249). Een school installeert LimeOnIt
+  zelf en kiest zelf haar aanbieder, dus de privacy-officer hoeft niet per aanbieder vooraf te
+  kijken. **Voor later:** de online versie voor kleinere instellingen krijgt een goede disclaimer
+  over waar de gegevens heen gaan, ook over hoe lang een aanbieder een prompt in zijn cache bewaart
+  (OpenAI zonder zero data retention: tot 24 uur). Bastiaan, 2026-11-11 (thread "Jev als System 1").
+- **BESLUIT-2026-11-11-4:** **Prijzen per model: de prijslijst in de catalogus, een eigen prijs
   op het scherm.** Elk model in `config/models.json` krijgt de lijstprijs van de aanbieder per
   miljoen tokens, met de dag van opzoeken en de bronpagina, en een wisselkoers van de ECB voor
   dollars. Beheer kan per model een eigen prijs zetten (een schoolcontract); die gaat voor. Een
