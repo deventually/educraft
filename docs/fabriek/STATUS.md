@@ -4,13 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #249 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #249 en #251 gemerged)_
 
 ## Nu
 
+- **AI-gebruik meten (#251) gemerged op 2026-11-11:** elke AI-aanroep telt nu mee per gebruiker,
+  dag, tool en model, in de nieuwe tabel `ai_usage` (migratie 0029): invoer, cache lezen, cache
+  schrijven, uitvoer en denken, voor elke aanbieder gelijk getrokken. Chats en mislukte aanroepen
+  tellen mee; alleen tellers, geen inhoud. De basis voor de pagina *Gebruik*.
+  BESLUIT-2026-11-11-1 en -2.
 - **Modelcatalogus: GLM, Grok, Qwen en Meta Muse (#249) gemerged op 2026-11-11:** een school kan
   ook Z.AI (GLM), xAI (Grok), Alibaba (Qwen, adres via `QWEN_BASE_URL`) of Meta Muse Spark Open
-  via Together AI kiezen; alleen de sleutel in `.env` is nodig. BESLUIT-2026-11-11-1.
+  via Together AI kiezen; alleen de sleutel in `.env` is nodig. BESLUIT-2026-11-11-3.
 - **Brief P32 (#248) gemerged op 2026-11-10:** plan voor meekijken op uitnodiging en een reviewer
   Examencommissie, voor na de pilot.
 - **Een cursus overdragen (#247) gemerged op 2026-11-10:** de eigenaar draagt een cursus over aan

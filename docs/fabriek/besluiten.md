@@ -361,7 +361,21 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   een docent wegvalt. Gekoppeld werk en reviews blijven van wie ze maakte. Delen met een team blijft
   alleen lezen en kopiëren. Rubrics en onderwijscontexten houden alleen de eigenaar. Bastiaan,
   2026-11-10 (keuzekaarten in de thread "Cursussen overdragen en samen bewerken").
-- **BESLUIT-2026-11-11-1:** **Meta loopt via Together AI; aanbieders buiten de EU houden de
+- **BESLUIT-2026-11-11-1:** **Wie ziet welk AI-gebruik.** Er komt één pagina *Gebruik* waar
+  elke rol een andere kring ziet. De docent ziet zijn eigen gebruik. Een **teamleider ziet alleen
+  teamtotalen** per tool en model, nooit cijfers per docent (dat zou een volgsysteem voor personeel
+  zijn, met instemming van de OR). **Beheer** ziet het gebruik per docent en ook de **kosten**. De
+  eigenaar ziet daarbovenop het budget en de maandprognose. Bastiaan, 2026-11-11 (keuzekaart "Mag
+  een teamleider het AI-gebruik per docent zien?", optie "Nee, alleen teamtotalen"; en in de thread
+  "Dashboard voor AI-gebruik en kosten ontwerpen").
+- **BESLUIT-2026-11-11-2:** **AI-gebruik meten per gebruiker, dag, tool en model.** Tabel
+  `ai_usage` met invoer-, cache-lees-, cache-schrijf-, uitvoer- en denktokens, voor elke aanbieder
+  gelijk getrokken (`normalizeUsage`). Alleen tellers: geen inhoud en geen tijdstip. Chats tellen
+  mee. Prijzen komen per model (euro per miljoen tokens, als momentopname bij het opslaan). Limieten
+  per team en per docent worden een maandlimiet in euro's, niet in tokens, omdat een token per model
+  tot twintig keer anders kost. Het meten verhuist uit het werk aan prompt caching naar het
+  dashboard. Bastiaan, 2026-11-11 (thread "Dashboard voor AI-gebruik en kosten ontwerpen").
+- **BESLUIT-2026-11-11-3:** **Meta loopt via Together AI; aanbieders buiten de EU houden de
   bouw niet tegen.** Meta biedt zelf geen API meer aan (de Llama API stopte in juli 2026), dus
   Muse Spark Open staat in de catalogus via Together AI (#249). Een school installeert LimeOnIt
   zelf en kiest zelf haar aanbieder, dus de privacy-officer hoeft niet per aanbieder vooraf te

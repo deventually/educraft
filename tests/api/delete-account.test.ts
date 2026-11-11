@@ -8,6 +8,7 @@ type Generations = typeof import("~/server/repositories/generations.server");
 type Usage = typeof import("~/server/repositories/usage.server");
 type Feedback = typeof import("~/server/repositories/feedback.server");
 type Pilot = typeof import("~/server/repositories/pilot.server");
+type AiUsage = typeof import("~/server/repositories/aiUsage.server");
 
 let users: Users;
 let profiles: Profiles;
@@ -15,6 +16,7 @@ let generations: Generations;
 let usage: Usage;
 let feedback: Feedback;
 let pilot: Pilot;
+let aiUsage: AiUsage;
 
 beforeAll(async () => {
   users = await import("~/server/repositories/users.server");
@@ -23,6 +25,7 @@ beforeAll(async () => {
   usage = await import("~/server/repositories/usage.server");
   feedback = await import("~/server/repositories/feedback.server");
   pilot = await import("~/server/repositories/pilot.server");
+  aiUsage = await import("~/server/repositories/aiUsage.server");
 });
 
 async function seedUser(id: string) {
@@ -37,6 +40,7 @@ async function seedUser(id: string) {
   });
   await profiles.createProfile(id, { name: "Profile" });
   await usage.recordUsage(id, { chars: 10 }, "2026-07-01");
+  await aiUsage.recordAiUsage(id, { source: "s", model: "m" }, "2026-07-01");
   await feedback.upsertFeedback({ userId: id, generationId: gen.id, rating: 1 });
   await pilot.saveCheckin(id, { helped: "Alles" });
   return gen.id;
@@ -52,6 +56,7 @@ describe("deleteUserCascade", () => {
     expect(await generations.listGenerations("del-user-a")).toHaveLength(0);
     expect(await profiles.listProfiles("del-user-a")).toHaveLength(0);
     expect((await usage.getTodayUsage("del-user-a", "2026-07-01")).requests).toBe(0);
+    expect(await aiUsage.listAiUsage("del-user-a", "2026-07-01")).toHaveLength(0);
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === genId)).toBe(false);
     expect((await pilot.listCheckins()).some((c) => c.userId === "del-user-a")).toBe(false);
   });
@@ -80,6 +85,7 @@ describe("deleteUserCascade", () => {
     expect(await generations.listGenerations("del-user-keep")).toHaveLength(1);
     expect(await profiles.listProfiles("del-user-keep")).toHaveLength(1);
     expect((await usage.getTodayUsage("del-user-keep", "2026-07-01")).requests).toBe(1);
+    expect(await aiUsage.listAiUsage("del-user-keep", "2026-07-01")).toHaveLength(1);
     expect((await feedback.listAllFeedback()).some((f) => f.generationId === keepGenId)).toBe(true);
   });
 });

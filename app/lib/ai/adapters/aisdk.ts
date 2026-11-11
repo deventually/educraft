@@ -10,6 +10,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { getProvider, outputTokenBudget, resolveModelInfo, type ConfigProvider } from "../models";
 import type { GenerateOptions, LLMProvider } from "../types";
+import { normalizeUsage } from "../usage";
 import { env, providerSetting } from "~/server/env.server";
 import { LocalizedError } from "~/lib/i18n/errors";
 
@@ -156,7 +157,7 @@ export const aiSdkProvider: LLMProvider = {
     });
     return {
       text,
-      usage: { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 },
+      usage: normalizeUsage(usage),
       finishReason,
     };
   },
@@ -170,6 +171,10 @@ export const aiSdkProvider: LLMProvider = {
     });
     for await (const delta of result.textStream) {
       yield delta;
+    }
+    if (opts.onUsage) {
+      const usage = normalizeUsage(await result.usage);
+      if (usage) opts.onUsage(usage);
     }
   },
 };

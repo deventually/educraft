@@ -382,6 +382,7 @@ export const adminAudit = sqliteTable(
 );
 
 // Two-step verification, course members, programmes: own files; one schema for drizzle.
+export * from "./schemaAiUsage.server";
 export * from "./schemaAuth.server";
 export * from "./schemaCourseMembers.server";
 export * from "./schemaProgrammes.server";

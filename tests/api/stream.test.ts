@@ -865,3 +865,69 @@ describe("api.stream — SSE mechanics", () => {
     expect(text).not.toContain("event: done"); // a failed stream never "completes"
   });
 });
+
+describe("api.stream — measures AI use per tool and model (usage dashboard)", () => {
+  const tokens = { input: 40, cacheRead: 900, cacheWrite: 0, output: 25, reasoning: 0 };
+  let aiUsage: typeof import("~/server/repositories/aiUsage.server");
+  let usage: typeof import("~/server/repositories/usage.server");
+  beforeAll(async () => {
+    aiUsage = await import("~/server/repositories/aiUsage.server");
+    usage = await import("~/server/repositories/usage.server");
+  });
+
+  it("records a one-shot call's tokens, cache included, and feeds the quota real output tokens", async () => {
+    streamChatSpy.mockImplementation(async function* (opts: { onUsage?: (u: unknown) => void }) {
+      yield "ok";
+      opts.onUsage?.(tokens);
+    });
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "meter-oneshot" },
+    );
+    await res.text();
+    const [row] = await aiUsage.listAiUsage("meter-oneshot", usage.utcDay());
+    expect(row).toMatchObject({
+      source: "authentic-assessment",
+      calls: 1,
+      inputTokens: 40,
+      cacheReadTokens: 900,
+      outputTokens: 25,
+    });
+    expect((await usage.getTodayUsage("meter-oneshot")).outputTokens).toBe(25);
+  });
+
+  it("records a chat turn too", async () => {
+    streamChatSpy.mockImplementation(async function* (opts: { onUsage?: (u: unknown) => void }) {
+      yield "ok";
+      opts.onUsage?.(tokens);
+    });
+    const res = await invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "Evolutie" },
+        messages: [{ role: "user", content: "hoi" }],
+        sessionId: "session-meter-chat",
+      },
+      { userId: "meter-chat" },
+    );
+    await res.text();
+    const [row] = await aiUsage.listAiUsage("meter-chat", usage.utcDay());
+    expect(row).toMatchObject({ source: "socratic-partner", calls: 1, outputTokens: 25 });
+  });
+
+  it("counts a call that breaks off mid-stream as failed, with unknown tokens", async () => {
+    streamChatSpy.mockImplementation(async function* () {
+      yield "partial";
+      throw new Error("kaboom");
+    });
+    const res = await invoke(
+      { slug: "authentic-assessment", values: fullValues("authentic-assessment") },
+      { userId: "meter-fail" },
+    );
+    await res.text();
+    await vi.waitFor(async () => {
+      const [row] = await aiUsage.listAiUsage("meter-fail", usage.utcDay());
+      expect(row).toMatchObject({ calls: 1, failedCalls: 1, unmeteredCalls: 1 });
+    });
+  });
+});

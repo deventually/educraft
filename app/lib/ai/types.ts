@@ -39,11 +39,21 @@ export interface GenerateOptions {
   cacheKey?: string;
   /** Aborts the model call, e.g. when the teacher closes the tab mid-stream. */
   signal?: AbortSignal;
+  /** Streaming only: told the call's tokens once the stream has finished (not on abort). */
+  onUsage?: (usage: TokenUsage) => void;
 }
 
+/**
+ * Tokens of one model call, the same for every provider (`normalizeUsage`). `input` is the
+ * uncached part of the prompt; `input + cacheRead + cacheWrite` is the whole prompt.
+ * `reasoning` is the share of `output` spent thinking.
+ */
 export interface TokenUsage {
   input: number;
+  cacheRead: number;
+  cacheWrite: number;
   output: number;
+  reasoning: number;
 }
 
 export interface GenerateResult {
