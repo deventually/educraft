@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
-import { DOC_ACCEPT_ATTR, fileToText } from "~/lib/documents/extract";
+import { DOC_ACCEPT_ATTR, filesToDocumentText } from "~/lib/documents/extract";
 import {
   IMPORT_DOCUMENT_MAX,
   type ImportAssessment,
@@ -15,6 +15,14 @@ import { BloomSelect, NumberField } from "./fields";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { AiCallField } from "~/components/AiLeaveGuard";
+import {
+  AssessmentExtrasPreview,
+  assessmentHasExtras,
+  CompleteBox,
+  CriteriaPreview,
+  ModuleChoice,
+  outcomeHasExtras,
+} from "./ImportExtras";
 
 type ImportAction = { ok: boolean; intent?: string; proposal?: ImportProposal } | undefined;
 
@@ -60,10 +68,11 @@ export function CourseImport({
   const id = useId();
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = [...(e.target.files ?? [])];
+    if (!files.length) return;
     try {
-      setValue((await fileToText(file)).text.trim().slice(0, IMPORT_DOCUMENT_MAX));
+      // Several files (a test blueprint and a marking model) become one text, each under its name.
+      setValue((await filesToDocumentText(files)).text.trim().slice(0, IMPORT_DOCUMENT_MAX));
       setFailed(false);
     } catch {
       setFailed(true);
@@ -102,6 +111,7 @@ export function CourseImport({
                 ref={fileRef}
                 id={`${id}-file`}
                 accept={DOC_ACCEPT_ATTR}
+                multiple
                 aria-describedby={`${id}-file-help`}
                 onChange={onFile}
                 className="mt-1"
@@ -149,6 +159,7 @@ function ProposalForm({ proposal }: { proposal: ImportProposal }) {
       </h3>
       <p className="text-sm text-slate-600">{ti.proposalIntro}</p>
       {proposal.notes && <AiNotes notes={proposal.notes} />}
+      {proposal.module && <ModuleChoice module={proposal.module} />}
       {proposal.outcomes.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-medium text-slate-900">{ti.outcomesTitle}</h4>
@@ -209,7 +220,12 @@ function OutcomeRow({ outcome: o, n }: { outcome: ImportOutcome; n: number }) {
         <>
           <input type="hidden" name={`${o.key}.text`} value={o.text} />
           <p className="text-sm text-slate-900">{o.text}</p>
-          <p className="mt-1 text-sm text-slate-600">{ti.existing}</p>
+          {outcomeHasExtras(o) ? (
+            <CompleteBox name={`${o.key}.pick`} />
+          ) : (
+            <p className="mt-1 text-sm text-slate-600">{ti.existing}</p>
+          )}
+          <CriteriaPreview outcome={o} />
         </>
       ) : (
         <div className="space-y-2">
@@ -235,6 +251,7 @@ function OutcomeRow({ outcome: o, n }: { outcome: ImportOutcome; n: number }) {
               label={ti.bloom}
             />
           </div>
+          <CriteriaPreview outcome={o} />
         </div>
       )}
     </fieldset>
@@ -262,7 +279,9 @@ function AssessmentRow({
       </legend>
       <input type="hidden" name="assessmentKey" value={a.key} />
       <div className="space-y-2">
-        {a.existing ? (
+        {a.existing && assessmentHasExtras(a) ? (
+          <CompleteBox name={`${a.key}.pick`} />
+        ) : a.existing ? (
           <p className="text-sm text-slate-600">{ti.existing}</p>
         ) : (
           <PickBox name={`${a.key}.pick`} checked label={ti.addTo} />
@@ -323,6 +342,7 @@ function AssessmentRow({
             </div>
           </fieldset>
         )}
+        <AssessmentExtrasPreview assessment={a} />
       </div>
     </fieldset>
   );

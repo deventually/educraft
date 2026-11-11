@@ -629,6 +629,12 @@ _Laatst bijgewerkt: 2026-11-11 (#187 t/m #263 en #260 gemerged)_
 
 ## Bezig
 
+- **Beginnen met een bestaande module (PR open):** *Importeren uit bestaande documenten* leest nu
+  ook een toetsmatrijs, nakijkmodel, modulewijzer of modulehandleiding, ook meer bestanden tegelijk.
+  Het voorstel bevat modulecode en studiejaar, succescriteria, per toets vorm, eigenaar,
+  beoordeling, cesuur, voorwaarden, afname en herkansing, en de onderdelen met knock-out en
+  criteria. Een toets of leeruitkomst die de cursus al heeft, wordt alleen aangevuld waar hij leeg
+  is (*Lege velden aanvullen*). Nieuwe prompt `course-import@v2` met twee evalcases; geen migratie.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

@@ -26,6 +26,13 @@ describe("course-import eval cases (P26.3)", () => {
     expect(cases.some((c) => c.locale === "en")).toBe(true);
   });
 
+  it("has a test blueprint and a marking model case (course-import@v2)", () => {
+    const ids = cases.map((c) => c.id);
+    for (const kind of ["blueprint", "marking-model"])
+      expect(ids.some((id) => id.includes(kind), kind)).toBe(true);
+    expect(cases.filter((c) => c.expectDocument).length).toBeGreaterThanOrEqual(2);
+  });
+
   for (const c of cases) {
     it(`${c.id}: every expected outcome is verbatim in the document`, () => {
       const doc = normalizeForMatch(c.document);
@@ -111,6 +118,54 @@ describe("scoreImportCase", () => {
         parseImport(answer(), c.document, emptyCourseData()),
       ),
     ).toMatchObject({ weightsOk: false, pass: false });
+  });
+
+  it("checks what a test blueprint or marking model adds", () => {
+    const doc = `${c.document}\nModule DB1. Cesuur 75%.\nS-An 1.1 Registreert requirements.\nOnderdeel Datamodel (knock-out), 60%: Het model werkt.`;
+    const withDoc: ImportCase = {
+      ...c,
+      document: doc,
+      expectDocument: {
+        module: { code: "DB1" },
+        criteria: ["Registreert requirements."],
+        passMark: 75,
+        parts: [{ title: "datamodel", weight: 60, knockOut: true }],
+      },
+    };
+    const good = answer({
+      module: { code: "DB1", studyYear: null },
+      outcomes: [
+        { text: "Je kent SQL.", bloomProposal: null },
+        {
+          text: "Je ontwerpt een datamodel.",
+          criteria: [{ code: "S-An 1.1", text: "Registreert requirements." }],
+        },
+      ],
+      assessments: [
+        {
+          title: "Tentamen",
+          week: 8,
+          weight: 60,
+          outcomeRefs: [1],
+          passMark: 75,
+          parts: [
+            {
+              title: "Datamodel",
+              outcomeRefs: [2],
+              weight: 60,
+              knockOut: true,
+              pass: "Het model werkt.",
+            },
+          ],
+        },
+        { title: "Opdracht", weight: 40, outcomeRefs: [2] },
+      ],
+    });
+    const run = (raw: string) => scoreImportCase(withDoc, parseImport(raw, doc, emptyCourseData()));
+    expect(run(good)).toMatchObject({ documentOk: true, unverified: 0, pass: true });
+    const invented = good.replace("Het model werkt.", "Het model is prachtig.");
+    expect(run(invented)).toMatchObject({ unverified: 1, pass: false });
+    expect(run(answer())).toMatchObject({ documentOk: false, pass: false });
   });
 
   it("writes a Dutch report with one row per case", () => {
