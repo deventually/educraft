@@ -225,4 +225,6 @@ export interface DossierData {
   anchors?: Record<string, Anchor>;
   /** The hand-in date as an ISO date (`YYYY-MM-DD`). */
   deadline?: string;
+  /** Hours a day the teacher has for the dossier, for the day plan; absent = a full day. */
+  hoursPerDay?: number;
 }

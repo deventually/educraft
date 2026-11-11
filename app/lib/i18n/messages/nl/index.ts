@@ -35,6 +35,7 @@ import { pilot } from "./pilot";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioOutline } from "./portfolioOutline";
+import { portfolioPlan } from "./portfolioPlan";
 import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
 import { portfolioRoute } from "./portfolioRoute";
@@ -107,6 +108,7 @@ export const nl = {
   portfolio,
   portfolioExport,
   portfolioOutline,
+  portfolioPlan,
   portfolioReadiness,
   portfolioRehearsal,
   portfolioRoute,

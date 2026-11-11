@@ -51,8 +51,11 @@ export const portfolioStart = {
     dateHelp: "De dag waarop je je dossier inlevert. Leeg laten mag.",
     daysLeft: "Inleveren op {date}: nog {n} dagen.",
     dueToday: "Inleveren op {date}: vandaag.",
+    hours: "Uren per dag",
+    hoursHelp:
+      "Hoeveel uur per werkdag je aan je dossier werkt. Leeg laten is een hele dag van {n} uur.",
     overdue: "De inleverdatum {date} is voorbij.",
-    save: "Datum opslaan",
+    save: "Planning opslaan",
     title: "Je planning",
   },
   previous: "Vorige stap",

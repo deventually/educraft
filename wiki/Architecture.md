@@ -310,6 +310,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   test into the dossier once as a course snapshot, linked only to criteria that `courseHint`
   matches. A tool opened for that outcome gets `?course=&item=` (`anchorToolQuery`), so the
   existing `prefillFromCourse` sources fill it in; no tool knows about anchors.
+  The day plan (`plan.ts`, step 7): `remainingWork` turns the open milestones of `dossierRoute`
+  into minutes with fixed rates (`PLAN_MINUTES`, shown to the teacher), `dayPlan` lays them over
+  working days (Monday to Friday, `hoursPerDay` or 8) from today and compares that with the
+  working days before `deadline`. Missing required evidence from others is listed to ask for
+  today. Pure and advisory: no AI, no gate. Shown on the overview and the planning step (`DayPlan`).
   Finishing (P29). "Klaar om in te leveren?" in step 5 (`readiness.ts`, `readinessCheck`): one list
   of advisory points from the confirmed framework only, each with a "Los op" target; four points
   are ticked by the teacher (`tickReadiness`). It blocks only one thing: while an open spot is left (`openSpots.ts`: `[aanvullen: …]`, TODO, an empty chapter, evidence without text) the export gives a draft version, marked CONCEPT on every page, never the final one (BESLUIT-2026-11-07-4; otherwise advice, BESLUIT-2026-11-05-9).
