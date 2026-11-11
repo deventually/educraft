@@ -28,7 +28,7 @@ interface ChatSessionOptions {
 export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const streams = useStreamAborts();
+  const streams = useStreamAborts(isStreaming);
   // One id for the whole conversation, so each turn updates the same project.
   const sessionIdRef = useRef<string | null>(null);
   if (sessionIdRef.current === null) sessionIdRef.current = newSessionId();

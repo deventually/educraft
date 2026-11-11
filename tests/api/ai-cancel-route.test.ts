@@ -31,7 +31,13 @@ function hold(userId: string, callId: string) {
       release = r;
     });
   });
-  return { signal: () => signal, finish: () => (release(), done) };
+  return {
+    signal: () => signal,
+    finish: () => {
+      release();
+      return done;
+    },
+  };
 }
 
 // Seam: the page cancels its own AI action when the teacher leaves with "Stop".

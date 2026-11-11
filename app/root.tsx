@@ -14,6 +14,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import "~/lib/zodCsp";
 import { ToastProvider, useFlashToast } from "~/components/Toast";
+import { AiLeaveGuard } from "~/components/AiLeaveGuard";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getUser } from "~/server/auth.server";
@@ -110,7 +111,10 @@ export default function App() {
     <ToastProvider>
       <FlashToast />
       <DictationProvider enabled={useLoaderData<typeof loader>().dictation}>
-        <Outlet />
+        {/* Leaving while the AI works asks: keep running, stop, or stay. */}
+        <AiLeaveGuard>
+          <Outlet />
+        </AiLeaveGuard>
       </DictationProvider>
     </ToastProvider>
   );

@@ -108,7 +108,7 @@ export function GeneratorView({
   const [streaming, setStreaming] = useState(false);
   const beforeField = useAssessmentModelPicker(tool, assessmentModels, sandbox, streaming);
   const [error, setError] = useState<string | null>(null);
-  const streams = useStreamAborts();
+  const streams = useStreamAborts(streaming);
   // Originals of `kind: "document"` fields, by field name. Browser memory only:
   // they are shown in the DocumentViewer and never sent or stored.
   const [originals, setOriginals] = useState<Record<string, File[]>>({});
