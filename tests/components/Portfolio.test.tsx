@@ -20,11 +20,11 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 // createRoutesStub doesn't inject loaderData in library mode; pass it through a wrapper.
 // biome-ignore lint/suspicious/noExplicitAny: route components take framework-typed props
-function renderRoute(Component: ComponentType<any>, loaderData: unknown) {
+function renderRoute(Component: ComponentType<any>, loaderData: unknown, tab?: string) {
   const Stub = createRoutesStub([
     { path: "/", Component: () => <Component loaderData={loaderData} /> },
   ]);
-  return render(<Stub initialEntries={["/"]} />);
+  return render(<Stub initialEntries={[tab ? `/?tab=${tab}` : "/"]} />);
 }
 
 const ID = "dossier-1";
@@ -127,13 +127,17 @@ describe("Portfolio overview", () => {
     expect(screen.getByText(/Nog geen bewijs voor: Opname van de les/)).toBeInTheDocument();
     // The old "Aandachtspunten" block is gone: "Klaar om in te leveren?" names it (P29.1).
     expect(screen.queryByRole("heading", { name: "Aandachtspunten" })).toBeNull();
+    expect(screen.getByRole("radio", { name: /Alleen feedback/ })).toBeChecked();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("finishes on its own tab: references and the export", () => {
+    renderRoute(PortfolioOverview, overviewData(), "finish");
     expect(screen.getByLabelText("Bron (APA)")).toBeInTheDocument();
     const exportButton = screen.getByRole("button", { name: "Download als Word-bestand" });
     expect(exportButton.closest("form")).toHaveAttribute("action", `/portfolio/${ID}/export`);
     // No AI used yet: no disclosure checkbox.
     expect(screen.queryByRole("checkbox", { name: /verantwoording/ })).toBeNull();
-    expect(screen.getByRole("radio", { name: /Alleen feedback/ })).toBeChecked();
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("says when the framework is only provisional (BDB/BKE plan, PR 3)", () => {
@@ -164,7 +168,7 @@ describe("Portfolio progress (guided route)", () => {
     expect(screen.getByRole("heading", { name: "Volgende stap: LU1 Doceren" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Naar LU1 Doceren" })).toHaveAttribute(
       "href",
-      `/portfolio/${ID}/outcome/${LU}#evidence-title`,
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence#evidence-title`,
     );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -191,7 +195,7 @@ describe("Portfolio progress (guided route)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("shows the four milestones of one outcome on its page, each a jump to its part", async () => {
+  it("shows the four milestones of one outcome on its page, each a link to its tab", async () => {
     const { container } = renderRoute(PortfolioOutcome, outcomeData(confirmed()));
     const steps = screen.getByRole("list", { name: "Mijlpalen van deze leeruitkomst" });
     expect(
@@ -200,19 +204,14 @@ describe("Portfolio progress (guided route)", () => {
         .map((a) => a.textContent),
     ).toEqual(["Bewijs", "Hoofdstuk", "Laten beoordelen", "Aangetoond"]);
     expect(screen.getByRole("heading", { name: "Volgende stap: Bewijs" })).toBeInTheDocument();
-    // A same-page jump is a plain link: the browser moves focus there, so Tab goes on from it.
     expect(screen.getByRole("link", { name: "Naar Bewijs" })).toHaveAttribute(
       "href",
-      "#evidence-title",
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence#evidence-title`,
     );
     expect(within(steps).getByRole("link", { name: "Hoofdstuk" })).toHaveAttribute(
       "href",
-      "#chapter-title",
+      `/portfolio/${ID}/outcome/${LU}?tab=chapter#chapter-title`,
     );
-    expect(document.getElementById("evidence-title")).not.toBeNull();
-    expect(document.getElementById("chapter-title")).not.toBeNull();
-    expect(document.getElementById("coach-title")).not.toBeNull();
-    expect(document.getElementById("criteria-title")).not.toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -232,7 +231,7 @@ describe("Portfolio evidence suggestions", () => {
         ],
       },
     };
-    const { container } = renderRoute(PortfolioOutcome, data);
+    const { container } = renderRoute(PortfolioOutcome, data, "evidence");
     const group = screen.getByRole("group", { name: /Dit heb je misschien al/ });
     const box = screen.getByRole("checkbox", { name: /Les voorbereiden.*bij Statistiek 1/ });
     expect(box).not.toBeChecked();
@@ -243,7 +242,7 @@ describe("Portfolio evidence suggestions", () => {
   });
 
   it("shows nothing without suggestions", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "evidence");
     expect(screen.queryByText("Dit heb je misschien al")).toBeNull();
   });
 });
@@ -367,26 +366,40 @@ describe("Portfolio framework", () => {
 
 describe("Portfolio — which tool helps now", () => {
   it("names a tool and how to use it for a criterion that still needs evidence", async () => {
-    const { container } = renderRoute(PortfolioOutcome, {
-      ...outcomeData(),
-      toolHints: { [C2]: [{ slug: "guided-reflection", name: "Les of cursus ontwerpen" }] },
-      chapterTools: [{ slug: "dialogic-encounters", name: "Dialogic Encounters" }],
-    });
+    const { container } = renderRoute(
+      PortfolioOutcome,
+      {
+        ...outcomeData(),
+        toolHints: { [C2]: [{ slug: "guided-reflection", name: "Les of cursus ontwerpen" }] },
+      },
+      "evidence",
+    );
     const tool = screen.getByRole("link", { name: "Open Les of cursus ontwerpen" });
     // P27.2: the tool opens for this criterion, so its result can go straight back.
     expect(tool).toHaveAttribute("href", `/tools/guided-reflection?dossier=${ID}&criterion=${C2}`);
     expect(screen.getByText(/Backward Design/)).toBeInTheDocument();
     expect(screen.getAllByText(/Zet bij dit criterium/).length).toBe(1);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("names a thinking aid for writing on the chapter tab", () => {
+    renderRoute(
+      PortfolioOutcome,
+      {
+        ...outcomeData(),
+        chapterTools: [{ slug: "dialogic-encounters", name: "Dialogic Encounters" }],
+      },
+      "chapter",
+    );
     expect(screen.getByRole("link", { name: "Open Dialogic Encounters" })).toHaveAttribute(
       "href",
       "/tools/dialogic-encounters",
     );
     expect(screen.getByText(/geen bewijs en geen bron/)).toBeInTheDocument();
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("shows no tool help when nothing fits", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "evidence");
     expect(screen.queryByText("Hulp uit LimeOnIt")).toBeNull();
     expect(screen.queryByText("Denkhulp bij het schrijven")).toBeNull();
   });
@@ -406,16 +419,15 @@ describe("Portfolio — which tool helps now", () => {
 
 describe("Portfolio outcome page", () => {
   it("lets only the teacher set a status per criterion", async () => {
-    const { container } = renderRoute(PortfolioOutcome, outcomeData());
+    const { container } = renderRoute(PortfolioOutcome, outcomeData(), "review");
     expect(screen.getByRole("heading", { level: 1, name: "LU1 Doceren" })).toBeInTheDocument();
     expect(screen.getByLabelText("Status 1")).toHaveValue("shown");
     expect(screen.getByLabelText("Status 2")).toHaveValue("not-started");
-    expect(screen.getByText("Sterker: Ook per student.")).toBeInTheDocument();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("shows the evidence with its links and an add form", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "evidence");
     expect(screen.getByText("Feedback werkplekbegeleider")).toBeInTheDocument();
     const link = document.querySelector(`#ev-${EV}-title`) as HTMLInputElement;
     expect(link.value).toBe("Feedback werkplekbegeleider");
@@ -430,7 +442,7 @@ describe("Portfolio outcome page", () => {
   it("marks evidence without text as still to come (BDB/BKE plan, PR 3)", async () => {
     const d = sampleDossier();
     const evidence = [{ ...d.evidence[0], text: "" }];
-    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), evidence });
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), evidence }, "evidence");
     expect(screen.getByText("Volgt nog")).toBeInTheDocument();
     expect(
       screen.getAllByText("Nog geen tekst? Laat dit leeg; het bewijsstuk staat dan als Volgt nog.")
@@ -440,12 +452,12 @@ describe("Portfolio outcome page", () => {
   });
 
   it("shows no Volgt nog for evidence with text", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "evidence");
     expect(screen.queryByText("Volgt nog")).toBeNull();
   });
 
   it("counts the chapter's words as the teacher types", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "chapter");
     const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");
     expect(
       screen.getByText("6 woorden; het hele verslag mag 100 woorden hebben"),
@@ -457,7 +469,7 @@ describe("Portfolio outcome page", () => {
   });
 
   it("counts the open spots in the chapter as the teacher types", async () => {
-    const { container } = renderRoute(PortfolioOutcome, outcomeData());
+    const { container } = renderRoute(PortfolioOutcome, outcomeData(), "chapter");
     const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");
     expect(screen.queryByText(/open plek/)).toBeNull();
     fireEvent.change(chapter, {
@@ -481,7 +493,7 @@ describe("Portfolio outcome page", () => {
 
 describe("Portfolio overview — ready to hand in (P29.1)", () => {
   it("shows the check, and its summary above the export button as a link", async () => {
-    const { container } = renderRoute(PortfolioOverview, overviewData());
+    const { container } = renderRoute(PortfolioOverview, overviewData(), "finish");
     expect(screen.getByRole("region", { name: "Klaar om in te leveren?" })).toBeInTheDocument();
     const exportForm = screen.getByRole("form", { name: "Exporteren" });
     expect(within(exportForm).getByRole("link", { name: /punten open/ })).toHaveAttribute(
@@ -499,7 +511,7 @@ describe("Portfolio overview — ready to hand in (P29.1)", () => {
 describe("Portfolio overview — no open spot in the handed-in work", () => {
   it("offers only a draft version while an open spot is left, and says why", async () => {
     const d = edit.writeChapter(sampleDossier(), LU, "Mijn les. [aanvullen: het effect]");
-    const { container } = renderRoute(PortfolioOverview, overviewData(d));
+    const { container } = renderRoute(PortfolioOverview, overviewData(d), "finish");
     const exportForm = screen.getByRole("form", { name: "Exporteren" });
     expect(
       within(exportForm).getByText(/Er staat nog 1 open plek in je dossier/),
@@ -517,7 +529,7 @@ describe("Portfolio overview — no open spot in the handed-in work", () => {
   });
 
   it("offers the final version once every open spot is gone", () => {
-    renderRoute(PortfolioOverview, overviewData());
+    renderRoute(PortfolioOverview, overviewData(), "finish");
     const exportForm = screen.getByRole("form", { name: "Exporteren" });
     expect(
       within(exportForm).getByRole("button", { name: "Download als Word-bestand" }),
@@ -566,11 +578,15 @@ describe("Portfolio overview — each learning outcome on its own", () => {
 
 describe("Portfolio overview — AI disclosure in the export", () => {
   it("offers the disclosure once the coach was used, ticked when the form asks for it", async () => {
-    const { container } = renderRoute(PortfolioOverview, {
-      ...overviewData(),
-      aiUsed: true,
-      aiRequired: true,
-    });
+    const { container } = renderRoute(
+      PortfolioOverview,
+      {
+        ...overviewData(),
+        aiUsed: true,
+        aiRequired: true,
+      },
+      "finish",
+    );
     expect(
       screen.getByRole("checkbox", { name: /verantwoording van het AI-gebruik/ }),
     ).toBeChecked();
@@ -609,13 +625,17 @@ describe("Portfolio outcome page — coach", () => {
   };
 
   it("asks to confirm the framework before the coach can run", () => {
-    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false });
+    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false }, "review");
     expect(screen.queryByRole("button", { name: "Laat beoordelen" })).toBeNull();
     expect(screen.getByText(/Bevestig dat eerst/)).toBeInTheDocument();
   });
 
   it("runs on request and shows the advice per criterion, with the teacher's own mark", async () => {
-    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), stored: review });
+    const { container } = renderRoute(
+      PortfolioOutcome,
+      { ...outcomeData(), stored: review },
+      "review",
+    );
     expect(screen.getByRole("button", { name: "Opnieuw laten beoordelen" })).toBeEnabled();
     expect(screen.getByText(/Beoordeeld op .* met Claude Sonnet 5.5/)).toBeInTheDocument();
     expect(screen.getByText("Aangetoond volgens de coach")).toBeInTheDocument();
@@ -631,11 +651,15 @@ describe("Portfolio outcome page — coach", () => {
   });
 
   it("labels the coach's verdicts on a provisional framework (BDB/BKE plan, PR 3)", async () => {
-    const { container } = renderRoute(PortfolioOutcome, {
-      ...outcomeData(),
-      provisional: true,
-      stored: { ...review, provisional: true },
-    });
+    const { container } = renderRoute(
+      PortfolioOutcome,
+      {
+        ...outcomeData(),
+        provisional: true,
+        stored: { ...review, provisional: true },
+      },
+      "review",
+    );
     expect(
       screen.getByText(
         "Voorlopig kader: de AI beoordeelt op het landelijke startpunt, niet op het formulier van je hogeschool.",
@@ -648,21 +672,25 @@ describe("Portfolio outcome page — coach", () => {
   });
 
   it("shows no provisional label on the institution's own framework", () => {
-    renderRoute(PortfolioOutcome, { ...outcomeData(), stored: review });
+    renderRoute(PortfolioOutcome, { ...outcomeData(), stored: review }, "review");
     expect(screen.queryByText(/landelijke startpunt/)).toBeNull();
   });
 
   it("shows no draft buttons in coaching mode", () => {
-    renderRoute(PortfolioOutcome, outcomeData());
+    renderRoute(PortfolioOutcome, outcomeData(), "chapter");
     expect(screen.queryByRole("button", { name: /Stel een alinea op/ })).toBeNull();
   });
 
   it("in draft mode shows one neutral notice and a draft button per criterion with evidence", async () => {
-    const { container } = renderRoute(PortfolioOutcome, {
-      ...outcomeData(),
-      coachMode: "draft",
-      showDraftNotice: true,
-    });
+    const { container } = renderRoute(
+      PortfolioOutcome,
+      {
+        ...outcomeData(),
+        coachMode: "draft",
+        showDraftNotice: true,
+      },
+      "chapter",
+    );
     expect(screen.getByText(/eigen regels hebben voor AI-gebruik/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Begrepen" })).toBeInTheDocument();
     expect(
@@ -692,7 +720,7 @@ describe("Portfolio outcome page — proofreading", () => {
   };
 
   it("offers proofreading next to the coach, even before the framework is confirmed", () => {
-    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false });
+    renderRoute(PortfolioOutcome, { ...outcomeData(), confirmed: false }, "review");
     const button = screen.getByRole("button", { name: "Lees proef" });
     expect(button).toBeEnabled();
     expect(button.closest("form")?.querySelector("input[name=intent]")).toHaveAttribute(
@@ -702,13 +730,13 @@ describe("Portfolio outcome page — proofreading", () => {
   });
 
   it("sits beside Laat beoordelen and needs a saved chapter", () => {
-    renderRoute(PortfolioOutcome, { ...outcomeData(), chapter: "" });
+    renderRoute(PortfolioOutcome, { ...outcomeData(), chapter: "" }, "review");
     expect(screen.getByRole("button", { name: "Laat beoordelen" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Lees proef" })).toBeDisabled();
   });
 
   it("shows each proposal with the sentence now, the better one, and take over or ignore", async () => {
-    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), proofread });
+    const { container } = renderRoute(PortfolioOutcome, { ...outcomeData(), proofread }, "review");
     const region = screen.getByRole("region", { name: "Proeflezen" });
     expect(
       within(region).getByText(/Proefgelezen op .* met Claude Sonnet 5.5/),
@@ -730,17 +758,21 @@ describe("Portfolio outcome page — proofreading", () => {
   });
 
   it("says so when no proposals are open", () => {
-    renderRoute(PortfolioOutcome, {
-      ...outcomeData(),
-      proofread: { ...proofread, suggestions: [] },
-    });
+    renderRoute(
+      PortfolioOutcome,
+      {
+        ...outcomeData(),
+        proofread: { ...proofread, suggestions: [] },
+      },
+      "review",
+    );
     expect(screen.getByText("Geen open voorstellen.")).toBeInTheDocument();
   });
 });
 
 describe("Portfolio overview — the whole dossier assessed", () => {
   it("offers one button that needs a confirmed framework and a chapter", () => {
-    renderRoute(PortfolioOverview, overviewData());
+    renderRoute(PortfolioOverview, overviewData(), "finish");
     const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
     expect(
       within(region).getByRole("button", { name: "Beoordeel het hele dossier" }),
@@ -748,21 +780,25 @@ describe("Portfolio overview — the whole dossier assessed", () => {
   });
 
   it("lists the verdicts per outcome, with a link to each chapter's assessment", async () => {
-    const { container } = renderRoute(PortfolioOverview, {
-      ...overviewData(),
-      canReviewAll: true,
-      dossierReview: [
-        {
-          outcomeId: LU,
-          at: Date.UTC(2026, 10, 7),
-          modelName: "Claude Sonnet 5.5",
-          shown: 1,
-          partial: 0,
-          missing: 1,
-          overall: "Helder begin.",
-        },
-      ],
-    });
+    const { container } = renderRoute(
+      PortfolioOverview,
+      {
+        ...overviewData(),
+        canReviewAll: true,
+        dossierReview: [
+          {
+            outcomeId: LU,
+            at: Date.UTC(2026, 10, 7),
+            modelName: "Claude Sonnet 5.5",
+            shown: 1,
+            partial: 0,
+            missing: 1,
+            overall: "Helder begin.",
+          },
+        ],
+      },
+      "finish",
+    );
     const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
     const button = within(region).getByRole("button", {
       name: "Opnieuw het hele dossier beoordelen",
@@ -777,29 +813,33 @@ describe("Portfolio overview — the whole dossier assessed", () => {
     expect(within(region).queryByText(/Voorlopig kader/)).toBeNull();
     expect(
       within(region).getByRole("link", { name: "Bekijk de beoordeling van LU1 Doceren" }),
-    ).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}#coach-title`);
+    ).toHaveAttribute("href", `/portfolio/${ID}/outcome/${LU}?tab=review#coach-title`);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
 
 describe("Portfolio overview — whole dossier on a provisional framework", () => {
   it("says a verdict was made on the national starting point", () => {
-    renderRoute(PortfolioOverview, {
-      ...overviewData(),
-      canReviewAll: true,
-      dossierReview: [
-        {
-          outcomeId: LU,
-          at: Date.UTC(2026, 10, 7),
-          modelName: "Claude Sonnet 5.5",
-          provisional: true,
-          shown: 0,
-          partial: 1,
-          missing: 1,
-          overall: "",
-        },
-      ],
-    });
+    renderRoute(
+      PortfolioOverview,
+      {
+        ...overviewData(),
+        canReviewAll: true,
+        dossierReview: [
+          {
+            outcomeId: LU,
+            at: Date.UTC(2026, 10, 7),
+            modelName: "Claude Sonnet 5.5",
+            provisional: true,
+            shown: 0,
+            partial: 1,
+            missing: 1,
+            overall: "",
+          },
+        ],
+      },
+      "finish",
+    );
     const region = screen.getByRole("region", { name: "Het hele dossier laten beoordelen" });
     expect(within(region).getByText(/Voorlopig kader/)).toBeInTheDocument();
   });
@@ -817,7 +857,7 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
   }
 
   it("names the course and the date, links to it and offers 'Opnieuw ophalen'", async () => {
-    const { container } = renderRoute(PortfolioOutcome, withSnapshot("Databases"));
+    const { container } = renderRoute(PortfolioOutcome, withSnapshot("Databases"), "evidence");
     const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
     (summary.closest("details") as HTMLDetailsElement).open = true;
     expect(screen.getByText(/Uit cursus Databases, momentopname van 5 nov\.? 2026/)).toBeVisible();
@@ -832,7 +872,7 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
   });
 
   it("keeps the snapshot of a deleted course, without the button", () => {
-    renderRoute(PortfolioOutcome, withSnapshot(null));
+    renderRoute(PortfolioOutcome, withSnapshot(null), "evidence");
     const summary = screen.getByText("Feedback werkplekbegeleider", { exact: false });
     (summary.closest("details") as HTMLDetailsElement).open = true;
     expect(screen.getByText(/Uit een cursus die niet meer bestaat/)).toBeVisible();
@@ -840,7 +880,7 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
   });
 
   it("points a blueprint criterion at the courses", () => {
-    renderRoute(PortfolioOutcome, { ...outcomeData(), courseHints: [C2] });
+    renderRoute(PortfolioOutcome, { ...outcomeData(), courseHints: [C2] }, "evidence");
     expect(screen.getByRole("link", { name: "Gebruik je cursus" })).toHaveAttribute(
       "href",
       "/courses",
@@ -850,8 +890,102 @@ describe("Portfolio outcome — a course snapshot as evidence (P26.4)", () => {
 
 describe("Portfolio overview — back from Word", () => {
   it("offers to bring an edited Word export back", () => {
-    renderRoute(PortfolioOverview, overviewData());
+    renderRoute(PortfolioOverview, overviewData(), "finish");
     expect(screen.getByRole("heading", { name: "Terughalen uit Word" })).toBeInTheDocument();
     expect(screen.getByLabelText("Word-bestand (.docx)")).toBeInTheDocument();
+  });
+});
+
+describe("Portfolio tabs", () => {
+  const confirmed = () => edit.confirmFramework(sampleDossier(), 1);
+
+  it("splits a learning outcome into four tabs, each with its own address", async () => {
+    const { container } = renderRoute(PortfolioOutcome, outcomeData(confirmed()));
+    const nav = screen.getByRole("navigation", { name: "Onderdelen van deze leeruitkomst" });
+    const links = within(nav).getAllByRole("link");
+    expect(links.map((a) => a.textContent)).toEqual([
+      "Overzicht",
+      "Bewijs",
+      "Hoofdstuk",
+      "Beoordelen",
+    ]);
+    expect(within(nav).getByRole("link", { name: "Overzicht" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(nav).getByRole("link", { name: "Bewijs" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence`,
+    );
+    // The overview: the progress and what the criteria ask, nothing to fill in.
+    expect(
+      screen.getByRole("list", { name: "Mijlpalen van deze leeruitkomst" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Sterker: Ook per student.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bewijs toevoegen" })).toBeNull();
+    expect(screen.queryByLabelText("Je tekst bij deze leeruitkomst")).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("links each milestone to its tab", () => {
+    renderRoute(PortfolioOutcome, outcomeData(confirmed()));
+    const steps = screen.getByRole("list", { name: "Mijlpalen van deze leeruitkomst" });
+    expect(within(steps).getByRole("link", { name: "Bewijs" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/outcome/${LU}?tab=evidence#evidence-title`,
+    );
+    expect(within(steps).getByRole("link", { name: "Aangetoond" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}/outcome/${LU}?tab=review#status-title`,
+    );
+  });
+
+  it("holds the evidence, the chapter and the assessment each on their own tab", async () => {
+    const evidence = renderRoute(PortfolioOutcome, outcomeData(), "evidence");
+    expect(screen.getByRole("button", { name: "Bewijs toevoegen" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Je tekst bij deze leeruitkomst")).toBeNull();
+    expect((await axe(evidence.container, axeOpts)).violations).toEqual([]);
+    evidence.unmount();
+
+    const chapter = renderRoute(PortfolioOutcome, outcomeData(), "chapter");
+    expect(screen.getByLabelText("Je tekst bij deze leeruitkomst")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Status 1")).toBeNull();
+    expect((await axe(chapter.container, axeOpts)).violations).toEqual([]);
+    chapter.unmount();
+
+    const review = renderRoute(PortfolioOutcome, outcomeData(), "review");
+    expect(screen.getByRole("heading", { name: "Coach" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Jouw oordeel per criterium" })).toHaveAttribute(
+      "id",
+      "status-title",
+    );
+    expect(screen.getByLabelText("Status 1")).toHaveValue("shown");
+    expect(screen.queryByRole("button", { name: "Bewijs toevoegen" })).toBeNull();
+    expect((await axe(review.container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("splits the dossier into an overview and finishing", async () => {
+    const { container } = renderRoute(PortfolioOverview, overviewData(confirmed()));
+    const nav = screen.getByRole("navigation", { name: "Onderdelen van je dossier" });
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((a) => a.textContent),
+    ).toEqual(["Overzicht", "Afronden"]);
+    expect(within(nav).getByRole("link", { name: "Afronden" })).toHaveAttribute(
+      "href",
+      `/portfolio/${ID}?tab=finish`,
+    );
+    expect(screen.queryByRole("heading", { name: "Klaar om in te leveren?" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Leeruitkomsten" })).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("puts the check, the export and the references on Afronden", async () => {
+    const { container } = renderRoute(PortfolioOverview, overviewData(confirmed()), "finish");
+    expect(screen.getByRole("heading", { name: "Klaar om in te leveren?" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Bron (APA)")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Leeruitkomsten" })).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

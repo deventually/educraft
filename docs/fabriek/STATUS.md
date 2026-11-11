@@ -4,9 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #275 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #276 gemerged)_
 
 ## Nu
+
+- **Voortgang van de BDB/BKE (#276) gemerged op 2026-11-11:** bovenaan het dossier een blok
+  *Voortgang*: het kader, elke leeruitkomst apart en afronden, met één *Volgende stap* en elke stap
+  als link. Elke leeruitkomst heeft vier mijlpalen (bewijs, hoofdstuk, laten beoordelen,
+  aangetoond); de coach telt mee bij beoordelen, alleen het eigen oordeel maakt een leeruitkomst
+  af. `dossierRoute`/`outcomeRoute` (`app/lib/portfolio/route.ts`) zijn puur en tonen via
+  `ProgressPanel`.
 
 - **Voortgang van een cursus (#275) gemerged op 2026-11-11:** bovenaan het tabblad Overzicht een
   blok *Voortgang* met zes stappen van backwards design (cursusgegevens, leeruitkomsten, toetsen,

@@ -1,5 +1,6 @@
 import { Form, Link } from "react-router";
 import { fmtDate, outcomeLabel } from "~/lib/portfolio/format";
+import { outcomeHref } from "~/lib/portfolio/tabs";
 import type { Outcome } from "~/lib/portfolio/types";
 import { Button } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -80,7 +81,7 @@ export function DossierReviewPanel({
                   })}
                 </p>
                 <Link
-                  to={`/portfolio/${dossierId}/outcome/${r.outcomeId}#coach-title`}
+                  to={outcomeHref(dossierId, r.outcomeId, "review", "coach-title")}
                   className="mt-2 inline-block text-sm font-medium text-violet-700 underline underline-offset-2"
                 >
                   {fmt(t.open, { outcome: label })}

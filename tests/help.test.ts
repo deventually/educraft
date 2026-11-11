@@ -178,6 +178,15 @@ describe("help registry — topics", () => {
     expect(en).toContain("Evidence, Chapter, Assessment and Shown");
   });
 
+  it("explains the tabs of the dossier and of each learning outcome", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("**Tabbladen.**");
+    expect(nl).toContain("Overzicht, Bewijs, Hoofdstuk en Beoordelen");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("**Tabs.**");
+    expect(en).toContain("Overview, Evidence, Chapter and Assessment");
+  });
+
   it("explains the teacher's week and the calendar file (P22.5)", () => {
     expect(getTopicTitle("week", "nl")).toBe("Je week");
     expect(getTopicTitle("week", "en")).toBe("Your week");

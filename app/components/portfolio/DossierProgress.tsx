@@ -4,15 +4,19 @@ import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import type { Milestone, OutcomeMilestone, RouteStep, dossierRoute } from "~/lib/portfolio/route";
+import { type OutcomeTab, dossierHref, outcomeHref } from "~/lib/portfolio/tabs";
 import type { Outcome } from "~/lib/portfolio/types";
 
-/** Where each milestone is done on the outcome page. */
-const MILESTONE_ANCHOR: Record<OutcomeMilestone, string> = {
-  evidence: "evidence-title",
-  chapter: "chapter-title",
-  review: "coach-title",
-  shown: "criteria-title",
+/** Where each milestone is done: its tab of the outcome page, and the part of that tab. */
+const MILESTONE_PLACE: Record<OutcomeMilestone, [OutcomeTab, string]> = {
+  evidence: ["evidence", "evidence-title"],
+  chapter: ["chapter", "chapter-title"],
+  review: ["review", "coach-title"],
+  shown: ["review", "status-title"],
 };
+
+const milestoneHref = (dossierId: string, outcomeId: string, m: OutcomeMilestone) =>
+  outcomeHref(dossierId, outcomeId, ...MILESTONE_PLACE[m]);
 
 /** The section of the BDB/BKE guide that explains a step. */
 const GUIDE: Record<
@@ -61,9 +65,11 @@ export function DossierProgress({
   };
   const href = (s: RouteStep) => {
     if (s.kind === "framework") return `${base}/framework`;
-    if (s.kind === "finish") return "#readiness";
-    const anchor = s.milestone ? `#${MILESTONE_ANCHOR[s.milestone.id]}` : "";
-    return `${base}/outcome/${s.outcomeId}${anchor}`;
+    if (s.kind === "finish") return dossierHref(dossierId, "finish", "readiness");
+    const outcomeId = s.outcomeId ?? "";
+    return s.milestone
+      ? milestoneHref(dossierId, outcomeId, s.milestone.id)
+      : outcomeHref(dossierId, outcomeId, "overview");
   };
   const status = (s: RouteStep) => {
     if (s.complete) return tr.stepDone;
@@ -118,12 +124,20 @@ export function DossierProgress({
   );
 }
 
-/** One learning outcome's four milestones (`outcomeRoute`), each a jump to its part of the page. */
-export function OutcomeProgress({ milestones }: { milestones: Milestone[] }) {
+/** One learning outcome's four milestones (`outcomeRoute`), each a link to its tab. */
+export function OutcomeProgress({
+  dossierId,
+  outcomeId,
+  milestones,
+}: {
+  dossierId: string;
+  outcomeId: string;
+  milestones: Milestone[];
+}) {
   const tr = useT().portfolioRoute;
   const milestoneStatus = useMilestoneStatus();
   const next = milestones.find((m) => !m.complete) ?? null;
-  const href = (m: Milestone) => `#${MILESTONE_ANCHOR[m.id]}`;
+  const href = (m: Milestone) => milestoneHref(dossierId, outcomeId, m.id);
   return (
     <div className="mt-6">
       <ProgressPanel
