@@ -6,7 +6,13 @@
  */
 import { INSTANCE_STANDS, type InstanceStand } from "./rule";
 
-export type FeatureId = "portfolio" | "courses" | "roleAgents" | "utilities" | "pilotCheckin";
+export type FeatureId =
+  | "portfolio"
+  | "courses"
+  | "courseDesign"
+  | "roleAgents"
+  | "utilities"
+  | "pilotCheckin";
 
 export interface Feature {
   id: FeatureId;
@@ -26,6 +32,12 @@ export const FEATURES: readonly Feature[] = [
     defaultStand: "request",
   },
   { id: "courses", name: { nl: "Cursussen", en: "Courses" }, defaultStand: "on" },
+  // The course wizard: the AI proposes a course's outcomes from a short description.
+  {
+    id: "courseDesign",
+    name: { nl: "Cursus ontwerpen met AI", en: "Design a course with AI" },
+    defaultStand: "on",
+  },
   {
     id: "roleAgents",
     name: { nl: "Reviewteam", en: "Review team" },

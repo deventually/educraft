@@ -225,6 +225,23 @@ describe("Course editor (/courses/:id)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("asks how to start an empty course, first on the overview", async () => {
+    const first = () => screen.getAllByRole("heading", { level: 2 })[0]?.textContent;
+    const { container } = renderRoute(CoursePage, {
+      ...pageData(emptyCourseData()),
+      courseDesign: true,
+    });
+    expect(first()).toBe("Hoe wil je beginnen?");
+    expect(screen.getByText("In grote lijnen ontwerpen")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Naar importeren" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    cleanup();
+    renderRoute(CoursePage, pageData(emptyCourseData()));
+    // Without the wizard, a document or an empty start remain.
+    expect(first()).toBe("Hoe wil je beginnen?");
+    expect(screen.queryByText("In grote lijnen ontwerpen")).toBeNull();
+  });
+
   it("guides an empty course and asks for outcomes first", async () => {
     const outcomes = renderRoute(CoursePage, pageData(emptyCourseData()), "/?tab=outcomes");
     expect(screen.getByText("Nog geen leeruitkomsten.")).toBeVisible();

@@ -73,6 +73,11 @@ export interface ImportAssessment {
 }
 
 export interface ImportProposal {
+  /**
+   * "design": the AI proposed it from the teacher's description (`design.ts`), not from a
+   * document. There is nothing to check it against, so the whole proposal is the AI's.
+   */
+  source?: "design";
   /** The module code and study year, when the document names them. */
   module?: ImportModule;
   outcomes: ImportOutcome[];

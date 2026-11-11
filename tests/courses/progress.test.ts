@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkAlignment } from "~/lib/courses/alignment";
-import { courseProgress } from "~/lib/courses/progress";
+import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
 import { alignedCourse, LO1 } from "./fixtures";
@@ -68,5 +68,14 @@ describe("courseProgress: the steps of backwards design, from the course itself"
     const check = step(d, "check");
     expect(check.complete).toBe(false);
     expect(check.total).toBe(checkAlignment(d).length);
+  });
+});
+
+describe("isEmptyCourse: where the course wizard offers how to start", () => {
+  it("is empty without outcomes, lessons and tests, whatever the details say", () => {
+    expect(isEmptyCourse(emptyCourseData())).toBe(true);
+    expect(isEmptyCourse({ ...emptyCourseData(), ec: 5, schedule: { weeks: 8 } })).toBe(true);
+    expect(isEmptyCourse(alignedCourse())).toBe(false);
+    expect(isEmptyCourse({ ...alignedCourse(), outcomes: [], assessments: [] })).toBe(false);
   });
 });

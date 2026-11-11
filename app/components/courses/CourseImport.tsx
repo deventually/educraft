@@ -25,6 +25,7 @@ import {
 } from "./ImportExtras";
 
 type ImportAction = { ok: boolean; intent?: string; proposal?: ImportProposal } | undefined;
+const PROPOSING = ["import-extract", "design-outcomes"];
 
 /**
  * The proposal of the last `import-extract`, kept across a failed apply (the
@@ -34,7 +35,8 @@ export function useImportProposal(actionData: ImportAction): ImportProposal | nu
   const [proposal, setProposal] = useState<ImportProposal | null>(null);
   useEffect(() => {
     if (!actionData?.ok) return;
-    if (actionData.intent === "import-extract" && actionData.proposal)
+    // A design proposal (`design-outcomes`) is reviewed and applied the same way.
+    if (PROPOSING.includes(actionData.intent ?? "") && actionData.proposal)
       setProposal(actionData.proposal);
     if (actionData.intent === "import-apply") setProposal(null);
   }, [actionData]);
@@ -82,7 +84,7 @@ export function CourseImport({
   }
 
   return (
-    <section aria-labelledby={`${id}-title`}>
+    <section id="course-import" aria-labelledby={`${id}-title`}>
       <Card className="p-4">
         <details open={startOpen || !!proposal || !!notes}>
           <summary className="cursor-pointer text-lg font-medium text-slate-900">
@@ -144,8 +146,14 @@ export function CourseImport({
   );
 }
 
-function ProposalForm({ proposal }: { proposal: ImportProposal }) {
-  const ti = useT().courses.import;
+/**
+ * The review form of a proposal: the teacher ticks and edits, `import-apply` adds what is ticked.
+ * A design proposal (`source: "design"`) is the AI's own text: ticked, without "not in the document".
+ */
+export function ProposalForm({ proposal }: { proposal: ImportProposal }) {
+  const t = useT();
+  const ti = t.courses.import;
+  const designed = proposal.source === "design";
   const id = useId();
   return (
     <Form
@@ -155,16 +163,18 @@ function ProposalForm({ proposal }: { proposal: ImportProposal }) {
     >
       <input type="hidden" name="intent" value="import-apply" />
       <h3 id={`${id}-title`} className="text-base font-medium text-slate-900">
-        {ti.proposalTitle}
+        {designed ? t.courseDesign.proposalTitle : ti.proposalTitle}
       </h3>
-      <p className="text-sm text-slate-600">{ti.proposalIntro}</p>
+      <p className="text-sm text-slate-600">
+        {designed ? t.courseDesign.proposalIntro : ti.proposalIntro}
+      </p>
       {proposal.notes && <AiNotes notes={proposal.notes} />}
       {proposal.module && <ModuleChoice module={proposal.module} />}
       {proposal.outcomes.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-medium text-slate-900">{ti.outcomesTitle}</h4>
           {proposal.outcomes.map((o, i) => (
-            <OutcomeRow key={o.key} outcome={o} n={i + 1} />
+            <OutcomeRow key={o.key} outcome={o} n={i + 1} designed={designed} />
           ))}
         </div>
       )}
@@ -183,7 +193,7 @@ function ProposalForm({ proposal }: { proposal: ImportProposal }) {
 }
 
 /** The model's own remarks on the document, as a labelled region. */
-function AiNotes({ notes }: { notes: string }) {
+export function AiNotes({ notes }: { notes: string }) {
   const ti = useT().courses.import;
   const id = useId();
   return (
@@ -208,7 +218,15 @@ function PickBox({ name, checked, label }: { name: string; checked: boolean; lab
   );
 }
 
-function OutcomeRow({ outcome: o, n }: { outcome: ImportOutcome; n: number }) {
+function OutcomeRow({
+  outcome: o,
+  n,
+  designed,
+}: {
+  outcome: ImportOutcome;
+  n: number;
+  designed: boolean;
+}) {
   const t = useT();
   const ti = t.courses.import;
   const id = useId();
@@ -229,8 +247,8 @@ function OutcomeRow({ outcome: o, n }: { outcome: ImportOutcome; n: number }) {
         </>
       ) : (
         <div className="space-y-2">
-          <PickBox name={`${o.key}.pick`} checked={o.verbatim} label={ti.addTo} />
-          {!o.verbatim && <p className="text-sm text-amber-800">{ti.check}</p>}
+          <PickBox name={`${o.key}.pick`} checked={o.verbatim || designed} label={ti.addTo} />
+          {!o.verbatim && !designed && <p className="text-sm text-amber-800">{ti.check}</p>}
           <div className="grid gap-3 sm:grid-cols-[3fr_1fr]">
             <div>
               <Label htmlFor={`${id}-text`}>{t.courses.outcomes.text}</Label>
@@ -251,7 +269,7 @@ function OutcomeRow({ outcome: o, n }: { outcome: ImportOutcome; n: number }) {
               label={ti.bloom}
             />
           </div>
-          <CriteriaPreview outcome={o} />
+          <CriteriaPreview outcome={o} designed={designed} />
         </div>
       )}
     </fieldset>
