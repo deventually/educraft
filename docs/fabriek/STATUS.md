@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #285 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #286 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: startwizard met een anker per leeruitkomst (#286) gemerged op 2026-11-11:** een
+  nieuw dossier opent een start in vier stappen (traject, kader, ankers, planning), elk over te
+  slaan. Het anker zegt per leeruitkomst over welke module, les of toets uit je eigen cursussen
+  het gaat; tools die je bij die leeruitkomst opent, zijn daarmee vooraf ingevuld. Het overzicht
+  toont de inleverdatum met de dagen die nog over zijn; geen migratie.
 - **Les voorbereiden: lesdoel en discipline vooraf ingevuld (#285) gemerged op 2026-11-11:**
   open je *Les voorbereiden* vanuit een les, dan staat het lesdoel van die les al ingevuld
   (zonder lesdoel de leeruitkomsten van de les). Heeft de les een discipline, dan noemt de
