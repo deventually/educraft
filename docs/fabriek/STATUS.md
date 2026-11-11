@@ -4,14 +4,10 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #278 gemerged)_
+_Laatst bijgewerkt: 2026-11-11 (#187 t/m #277 gemerged)_
 
 ## Nu
 
-- **BDB/BKE: tabbladen (#278) gemerged op 2026-11-11:** het dossier heeft de tabbladen Overzicht
-  en Afronden, elke leeruitkomst Overzicht, Bewijs, Hoofdstuk en Beoordelen (`?tab=`, zoals bij
-  cursussen). Mijlpalen, *Los op* en de export wijzen naar het goede tabblad; de gedeelde
-  `TabNav` gebruiken ook de cursustabs.
 - **Cursuswizard, deel 1: hoe je begint en de leeruitkomsten (#277) gemerged op 2026-11-11:** een lege cursus vraagt
   op het tabblad Overzicht *Hoe wil je beginnen?*: in grote lijnen ontwerpen, met een document,
   of leeg. Bij ontwerpen beschrijft de docent de cursus in een paar zinnen (plus EC en weken), en
