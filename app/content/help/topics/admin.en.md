@@ -12,6 +12,10 @@ You invite new colleagues with an **invite link**. If you paste a list of names 
 
 Create teams of colleagues and appoint team leads. Per team you can switch on features, tools and models that are *On request* for everyone else. See also [Teams and sharing](/help/teams).
 
+## Announcements
+
+Put an announcement as a bar above every page, for everyone, one team or one person. Choose *Announcement* or *Warning* (for example during an outage). Everyone can close the bar for themselves. If you want it to come back, fill in after how many days (1 to 30). With a last day it disappears by itself; without one it stays until you remove it.
+
 ## Tools and models
 
 - **Tools:** set each tool to *On*, *On request* or *Off*. *Off* is for nobody; *On request* only through a team or an exception for one teacher.

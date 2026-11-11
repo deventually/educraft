@@ -14,6 +14,8 @@ export const api: RouteArea = {
     route("api/ai-limit", "routes/api.ai-limit.tsx"),
     // Dictation: one recording in, its text out (speech server from config/models.json).
     route("api/transcribe", "routes/api.transcribe.tsx"),
+    // Closes an announcement banner for the signed-in user.
+    route("api/announcements/dismiss", "routes/api.announcements.dismiss.tsx"),
     // Stores or dismisses a teacher's periodic pilot check-in.
     route("api/checkin", "routes/api.checkin.tsx"),
     // Public health probe for orchestrators (no auth, no chrome).

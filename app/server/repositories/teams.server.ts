@@ -15,6 +15,8 @@ import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
+  announcementDismissals,
+  announcements,
   invites,
   learningLines,
   programmeCourses,
@@ -113,6 +115,17 @@ export async function deleteTeam(id: string): Promise<void> {
     tx.delete(learningLines).where(inArray(learningLines.programmeId, own)).run();
     tx.delete(programmes).where(eq(programmes.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
+    // Announcements for the team go with it, with their dismissals.
+    const told = tx
+      .select({ id: announcements.id })
+      .from(announcements)
+      .where(and(eq(announcements.audience, "team"), eq(announcements.targetId, id)));
+    tx.delete(announcementDismissals)
+      .where(inArray(announcementDismissals.announcementId, told))
+      .run();
+    tx.delete(announcements)
+      .where(and(eq(announcements.audience, "team"), eq(announcements.targetId, id)))
+      .run();
     tx.delete(teamMembers).where(eq(teamMembers.teamId, id)).run();
     tx.update(invites).set({ teamId: null }).where(eq(invites.teamId, id)).run();
     tx.delete(teams).where(eq(teams.id, id)).run();

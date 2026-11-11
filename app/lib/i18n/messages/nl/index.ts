@@ -6,6 +6,7 @@ import { agents } from "./agents";
 import { auditLog } from "./auditLog";
 import { aiLeave } from "./aiLeave";
 import { aiNotice } from "./aiNotice";
+import { announcements } from "./announcements";
 import { assessmentModels } from "./assessmentModels";
 import { auth } from "./auth";
 import { calendar } from "./calendar";
@@ -71,6 +72,7 @@ export const nl = {
   agents,
   aiLeave,
   aiNotice,
+  announcements,
   appName: "LimeOnIt",
   assessmentModels,
   auditLog,

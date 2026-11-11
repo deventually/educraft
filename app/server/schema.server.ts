@@ -381,11 +381,8 @@ export const adminAudit = sqliteTable(
   (t) => [index("admin_audit_at_idx").on(t.at)],
 );
 
-// Two-step verification, course members, programmes: own files; one schema for drizzle.
-export * from "./schemaAiUsage.server";
-export * from "./schemaAuth.server";
-export * from "./schemaCourseMembers.server";
-export * from "./schemaProgrammes.server";
+// Two-step verification, course members, programmes, announcements: `schemaParts.server.ts`.
+export * from "./schemaParts.server";
 
 export type UserRow = typeof users.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;

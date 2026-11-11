@@ -12,7 +12,7 @@ import { ADMIN_TOTP_FILE, USERS } from "./users";
 if (!DB_PATH.includes("e2e")) throw new Error(`Refusing to seed a non-e2e database: ${DB_PATH}`);
 for (const suffix of ["", "-wal", "-shm"]) rmSync(`${DB_PATH}${suffix}`, { force: true });
 
-const { createUser } = await import("../app/server/repositories/users.server");
+const { createUser, getUserByEmail } = await import("../app/server/repositories/users.server");
 const twoFactor = await import("../app/server/repositories/twoFactor.server");
 const { totpCode } = await import("../app/server/totp.server");
 for (const [role, user] of Object.entries(USERS)) {
@@ -31,4 +31,14 @@ for (const [role, user] of Object.entries(USERS)) {
   );
   writeFileSync(ADMIN_TOTP_FILE, secret);
 }
+// One warning for everyone, so axe and the reflow check see the banner on every page.
+const { createAnnouncement } = await import("../app/server/repositories/announcements.server");
+await createAnnouncement({
+  message: "Vanavond tussen 20.00 en 22.00 uur is LimeOnIt niet bereikbaar door onderhoud.",
+  level: "warning",
+  audience: { kind: "all" },
+  endsOn: null,
+  remindAfterDays: null,
+  createdBy: (await getUserByEmail(USERS.admin.email))?.id ?? "",
+});
 console.log(`✓ e2e database seeded: ${DB_PATH}`);
