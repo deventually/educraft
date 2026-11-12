@@ -15,6 +15,7 @@ import { renderToPipeableStream } from "react-dom/server";
 import { applySecurityHeaders, createCspNonce, cspNonceOf } from "~/server/securityHeaders.server";
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 import { startAiUsageRetention } from "~/server/aiUsageRetention.server";
+import { startTrackRetention } from "~/server/trackRetention.server";
 import { startBackupSchedule } from "~/server/backup.server";
 import { migrateAllTenants, startDbSync } from "~/server/db.server";
 import { startArchivePurge } from "~/server/platformAdmin.server";
@@ -45,6 +46,10 @@ startBackupSchedule();
 // AI use per person is kept thirteen months, then rolled up into totals without a person
 // (BESLUIT-2026-11-11-6). Hourly, logged, never fatal. See aiUsageRetention.server.
 startAiUsageRetention();
+
+// A closed internship or thesis track is wiped after its retention term (P38). Daily, logged,
+// never fatal. See trackRetention.server.
+startTrackRetention();
 
 /** Unexpected loader/action/render errors: one JSON line with the request id (errorLog). */
 export const handleError = handleServerError;

@@ -1,9 +1,9 @@
 # Fase 38 — Het stage- en afstudeertraject naast OnStage
 
-> **Status:** ⚪ brief. Bouwen mag na P34.1; **aanzetten voor docenten pas na het akkoord van de
-> privacy-officer** op de bewaartermijn en de DPIA-aanvulling (BESLUIT-2026-11-12-10, -11). Tot dan
-> staat het onderdeel uit voor iedereen. Zo voer je deze brief uit: één deelstap per sessie, elke
-> deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
+> **Status:** 🟡 in uitvoering. Het onderdeel staat standaard **aan**; een beheerder kan het
+> tijdelijk uitzetten tot de privacy-officer akkoord geeft op de bewaartermijn en de
+> DPIA-aanvulling (BESLUIT-2026-11-12-15, vervangt het "uit tot akkoord" van -10 en -11). Zo voer
+> je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Elke PR die opslag, routes of `/api` raakt, krijgt
 > een `/security-review`. Merge nooit zelf; alleen Bastiaan merget. Volgorde en gedeelde bestanden:
 > `README.md`, *Docenthulpjes*.
@@ -57,9 +57,9 @@ afstudeerverslagen beoordelen, maar ik heb het idee dat een workflow dit sterker
    (`runWithTenant`, zoals `app/server/aiUsageRetention.server.ts`). De termijn is een instelling
    van de beheerder met een voorlopige standaard (90 dagen voor een bezwaar); **de privacy-officer
    bevestigt de termijn** (open punt op het bord).
-5. **Onderdeel uit tot het akkoord.** Een nieuw onderdeel `supervisionTracks` in `FEATURES`
-   (`app/lib/features/index.ts`) met `defaultStand: "off"`; het traject is onbereikbaar (404) als
-   het uit staat, server-side.
+5. **Een onderdeel dat de beheerder kan uitzetten.** Een nieuw onderdeel `supervisionTracks` in
+   `FEATURES` (`app/lib/features/index.ts`) met `defaultStand: "on"` (BESLUIT-2026-11-12-15); het
+   traject is onbereikbaar (404) als het uit staat, server-side.
 6. **Deep modules.** Het traject is één domein (`app/lib/tracks/`), zoals `app/lib/portfolio/`. De
    mijlpalen zijn data, de voortgang is puur afgeleid (zoals `app/lib/portfolio/progress.ts`), en het
    scherm hergebruikt `TabNav` en `ProgressPanel`. Geen tak per mijlpaal in de UI.
@@ -153,8 +153,8 @@ afstudeerverslagen beoordelen, maar ik heb het idee dat een workflow dit sterker
                     └────▶ 38.6
 ```
 
-Kleinste nuttige stap: 38.1 + 38.2 + 38.3 (trajecten met feedforward per ronde). Aanzetten pas na
-het akkoord van de privacy-officer.
+Kleinste nuttige stap: 38.1 + 38.2 + 38.3 (trajecten met feedforward per ronde). Het onderdeel
+staat aan; een beheerder zet het uit zolang de privacy-officer dat vraagt (BESLUIT-2026-11-12-15).
 
 ## Buiten deze fase
 
