@@ -12,6 +12,7 @@ import {
 import { requireUser } from "~/server/auth.server";
 import { listItemShares, copySharedItem } from "~/server/repositories/shares.server";
 import { listTeamsForUser } from "~/server/repositories/teams.server";
+import { listProgrammes } from "~/server/repositories/programmes.server";
 import { shareAction, sharedWithMe } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
 import { SharedWithMe } from "~/components/sharing/SharedWithMe";
@@ -47,10 +48,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   ]);
   // Sharing (P28.4): the owner's teams, per own profile the teams it is shared with, and
   // "Van mijn team".
-  const [teams, shared, sharedWith] = await Promise.all([
+  const [teams, shared, sharedWith, ownProgrammes] = await Promise.all([
     listTeamsForUser(user.id),
     sharedWithMe(user, "contextProfile"),
     Promise.all(profiles.map((p) => listItemShares(user.id, "contextProfile", p.id))),
+    // The programmes of the teacher's own teams, offered as a choice for "Opleiding".
+    listProgrammes({ id: user.id, role: "teacher" }, 500),
   ]);
   return {
     profiles,
@@ -60,6 +63,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     teams: teams.map((t) => ({ id: t.id, name: t.name })),
     sharedWith: Object.fromEntries(profiles.map((p, i) => [p.id, sharedWith[i]])),
     shared,
+    programmes: [...new Set(ownProgrammes.map((p) => p.name))].sort((a, b) => a.localeCompare(b)),
   };
 }
 
@@ -144,6 +148,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
     teams = [],
     sharedWith = {},
     shared = [],
+    programmes = [],
   } = loaderData;
   const actionData = useActionData<typeof action>();
   const nav = useNavigation();
@@ -273,6 +278,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
               isCurrentDefault={editing != null && editing.id === defaultId}
               availableSectors={availableSectors}
               availableDomains={availableDomains}
+              programmeOptions={programmes}
               onCancel={() => setEditor(null)}
             />
           ) : (

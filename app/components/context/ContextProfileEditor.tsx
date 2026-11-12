@@ -23,7 +23,6 @@ import {
   NameField,
   OnderwijstypeSelect,
   NationalLevelSelect,
-  ProgrammeField,
   PhaseField,
   DomainSelect,
   CourseField,
@@ -34,6 +33,7 @@ import {
   LearnerNounField,
 } from "./ContextFields";
 import { DomainFields } from "./DomainFields";
+import { ProgrammeField } from "./ProgrammeField";
 import { CustomFieldsEditor } from "./CustomFieldsEditor";
 
 export function ContextProfileEditor({
@@ -42,6 +42,7 @@ export function ContextProfileEditor({
   isCurrentDefault = false,
   availableSectors,
   availableDomains,
+  programmeOptions = [],
 }: {
   onCancel: () => void;
   /** When set, the editor edits this profile instead of creating a new one. */
@@ -50,6 +51,8 @@ export function ContextProfileEditor({
   availableSectors: string[];
   /** Per-teacher domain allow-list (Phase 10.3); null = unrestricted. */
   availableDomains: string[] | null;
+  /** The programmes of the teacher's teams, suggested for "Opleiding"; free text stays. */
+  programmeOptions?: string[];
 }) {
   const t = useT();
   const nav = useNavigation();
@@ -111,7 +114,11 @@ export function ContextProfileEditor({
           onChange={onOnderwijstype}
           sectors={availableSectors}
         />
-        <ProgrammeField sector={sector} defaultValue={profile?.programme} />
+        <ProgrammeField
+          sector={sector}
+          defaultValue={profile?.programme}
+          options={programmeOptions}
+        />
         <CourseField label={courseLabel(sector)} defaultValue={profile?.courseName} />
         <StudyYearField sector={sector} value={studyYear} onChange={setStudyYear} />
         <PhaseField sector={sector} value={phase} onChange={onPhase} />
