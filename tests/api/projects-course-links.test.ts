@@ -93,3 +93,21 @@ describe("/projects — link to a course (P20, 20.4)", () => {
     });
   });
 });
+
+describe("/projects — a label per result", () => {
+  it("labels a result by the teacher's own input", async () => {
+    await generations.saveGeneration({
+      userId: "work-a",
+      toolSlug: "lesson-plan",
+      input: { learningGoal: "Studenten leggen mitose uit" },
+      outputMarkdown: "# Les",
+      model: "test",
+      outputLanguage: "nl",
+    } as never);
+    const data = (await projects.loader({
+      request: signedRequest("http://localhost/projects"),
+    } as never)) as { generations: { toolSlug: string; label?: string }[] };
+    const lesson = data.generations.find((g) => g.toolSlug === "lesson-plan");
+    expect(lesson?.label).toContain("Studenten leggen mitose uit");
+  });
+});

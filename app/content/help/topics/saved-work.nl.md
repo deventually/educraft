@@ -4,7 +4,7 @@ Alles wat je met de tools maakt, wordt vanzelf bewaard onder **Eerder gemaakt**.
 
 ## Terugvinden
 
-Het nieuwste staat bovenaan, met de naam van de tool en de datum. Open een resultaat om het terug te lezen of te kopiëren.
+Het nieuwste staat bovenaan. Elk resultaat heeft als titel een stukje van wat je zelf invulde, zoals je vak of leerdoel, met daaronder de naam van de tool en de datum. Zo hou je drie resultaten van dezelfde tool uit elkaar. Vulde je niets in, dan staat er de eerste kop van het resultaat, of de naam van de tool. Open een resultaat om het terug te lezen of te kopiëren.
 
 ## Exporteren naar Word of PDF
 

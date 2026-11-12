@@ -17,6 +17,7 @@ const gen = {
 };
 
 type Gen = typeof gen & {
+  label?: string;
   courseLinks?: { courseId: string; courseName: string; itemTitle: string | null }[];
 };
 type Target = { courseId: string; courseName: string; items: { id: string; title: string }[] };
@@ -41,6 +42,24 @@ describe("Projects page", () => {
     renderProjects([gen]);
     expect(screen.getByRole("heading", { level: 1, name: "Eerder gemaakt" })).toBeInTheDocument();
     expect(screen.getByText("Alles wat je met de tools hebt gemaakt.")).toBeInTheDocument();
+  });
+
+  it("tells results of the same tool apart by their label and date", () => {
+    renderProjects([
+      { ...gen, id: "g1", label: "Biologie · Fotosynthese" },
+      { ...gen, id: "g2", label: "Biologie · Mitose" },
+    ]);
+    const items = screen.getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("Biologie · Fotosynthese");
+    expect(items[1]).toHaveTextContent("Biologie · Mitose");
+    // The tool name stays visible beside the label, with the date.
+    expect(items[0]).toHaveTextContent("Begeleide Reflectie");
+    expect(items[0]).toHaveTextContent("2026");
+  });
+
+  it("shows the tool name as the title when a result has no label", () => {
+    const { container } = renderProjects([gen]);
+    expect(container.querySelector("summary")).toHaveTextContent("Begeleide Reflectie");
   });
 
   it("offers the export menu for each generation (P30.2)", () => {

@@ -10,6 +10,7 @@ import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { courseLinkIntent, loadCourseLinks } from "~/server/courses.server";
 import { CourseLinkBadges, CourseLinkForm } from "~/components/courses/CourseLinks";
 import { getToolBySlug } from "~/lib/registry";
+import { workLabel } from "~/lib/tool/workLabel";
 import { ResultPanel } from "~/components/ResultPanel";
 import { ExportMenu } from "~/components/export/ExportMenu";
 import { FeedbackWidget } from "~/components/FeedbackWidget";
@@ -46,17 +47,21 @@ export async function action({ request }: Route.ActionArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const links = await loadCourseLinks(user.id);
-  const generations = (await listGenerations(user.id, 50)).map((g) => ({
-    id: g.id,
-    toolSlug: g.toolSlug,
-    toolName: getToolBySlug(g.toolSlug)?.name ?? g.toolSlug,
-    stageId: g.stageId,
-    model: g.model,
-    outputLanguage: g.outputLanguage,
-    outputMarkdown: g.outputMarkdown,
-    createdAt: g.createdAt,
-    courseLinks: links.byGeneration[g.id] ?? [],
-  }));
+  const generations = (await listGenerations(user.id, 50)).map((g) => {
+    const tool = getToolBySlug(g.toolSlug);
+    return {
+      id: g.id,
+      toolSlug: g.toolSlug,
+      toolName: tool?.name ?? g.toolSlug,
+      label: workLabel(tool?.inputs ?? [], parseInput(g.inputJson), g.outputMarkdown),
+      stageId: g.stageId,
+      model: g.model,
+      outputLanguage: g.outputLanguage,
+      outputMarkdown: g.outputMarkdown,
+      createdAt: g.createdAt,
+      courseLinks: links.byGeneration[g.id] ?? [],
+    };
+  });
   // The BDB/BKE workplace switched off (P27): no "Toevoegen aan dossier".
   const dossiers = (await portfolioAccess(user))
     ? (await listDossiers(user.id)).map((d) => ({ id: d.id, name: d.name }))
@@ -112,11 +117,14 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
                 <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pr-14">
                   <div className="min-w-0">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span className="font-medium text-slate-900">{loc(g.toolName, locale)}</span>
+                      <span className="min-w-0 break-words font-medium text-slate-900">
+                        {g.label ?? loc(g.toolName, locale)}
+                      </span>
                       {g.stageId && <Badge>{g.stageId}</Badge>}
                       <CourseLinkBadges links={g.courseLinks ?? []} />
                     </div>
                     <p className="truncate text-xs text-slate-500">
+                      {g.label && `${loc(g.toolName, locale)} · `}
                       {fmtDate(g.createdAt, locale)} · {g.model} · {g.outputLanguage.toUpperCase()}
                     </p>
                   </div>
@@ -178,4 +186,12 @@ function fmtDate(d: Date | string, locale: string): string {
   const date = d instanceof Date ? d : new Date(d);
   const intlLocale = locale === "en" ? "en-GB" : "nl-NL";
   return date.toLocaleString(intlLocale, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function parseInput(json: string): unknown {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return {};
+  }
 }
