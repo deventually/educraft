@@ -1,4 +1,4 @@
-# Rubric — Assess student work and give feedback (stage-assessment@v3)
+# Rubric — Assess student work and give feedback (stage-assessment@v4)
 
 Judge the output as a DRAFT assessment + feedback on written student work (an essay,
 report, work product, portfolio, internship report or thesis) for a teacher-examiner,
@@ -33,6 +33,14 @@ against the framework and scale given in the case inputs. Score each shared crit
   anglicisms beyond the established terms feed up / feed back / feed forward.
 
 Tool-specific expectations:
+
+- **Earlier feedback (@v4, P38.4).** When the case gives earlier feedback
+  (`feedbackHistory`), the output says per criterion whether the improvement asked for
+  earlier was taken up, partly taken up or not taken up, each with a verbatim quote from
+  the document or "niet aangetroffen" / "not found". A student's claim that feedback was
+  processed is never accepted without evidence in the text, and an earlier verdict is not
+  copied. Missing the follow-up, or accepting an unsupported claim, caps taskFidelity at
+  2. Without earlier feedback there is no follow-up and no mention of earlier feedback.
 
 - When the work is not an internship or graduation document, it does **not** assume
   an internship, a company or a company evaluation.

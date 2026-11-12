@@ -132,6 +132,7 @@ describe("tool: stage-assessment", () => {
       assessmentScale: "O=0, V=6, G=10; één O = onvoldoende",
       companyEvaluation: "",
       submissionNotes: "",
+      feedbackHistory: "",
     };
     const prompt = buildSystemPrompt({
       promptId: tool.stages[0]!.systemPromptId,
@@ -157,6 +158,7 @@ describe("tool: stage-assessment", () => {
         assessmentScale: "x",
         companyEvaluation: "",
         submissionNotes: "",
+        feedbackHistory: "",
       },
       outputLanguage: "nl",
     });
@@ -180,6 +182,7 @@ describe("tool: stage-assessment", () => {
       assessmentScale: "x",
       companyEvaluation: "",
       submissionNotes: "",
+      feedbackHistory: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0]!.systemPromptId,
@@ -212,6 +215,7 @@ describe("tool: stage-assessment", () => {
       assessmentScale: "x",
       companyEvaluation: "",
       submissionNotes: "",
+      feedbackHistory: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0]!.systemPromptId,
@@ -252,6 +256,7 @@ describe("tool: stage-assessment", () => {
       assessmentScale: "x",
       companyEvaluation: "",
       submissionNotes: "",
+      feedbackHistory: "",
     };
     const nl = buildSystemPrompt({
       promptId: tool.stages[0]!.systemPromptId,
@@ -292,6 +297,7 @@ describe("tool: stage-assessment", () => {
         assessmentScale: "x",
         companyEvaluation: "",
         submissionNotes: note,
+        feedbackHistory: "",
       },
       outputLanguage: "nl",
     });
@@ -307,6 +313,7 @@ describe("tool: stage-assessment", () => {
         assessmentScale: "x",
         companyEvaluation: "",
         submissionNotes: "Only the report is assessed now; the product is graded separately later.",
+        feedbackHistory: "",
       },
       outputLanguage: "en",
     });

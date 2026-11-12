@@ -68,6 +68,7 @@ export function StageStepper({
     courses,
     initialCourseId,
     initialItemId,
+    initialTrack: resultContext?.forTrack,
   });
   const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
     sandbox;

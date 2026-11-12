@@ -241,6 +241,75 @@
         "companyEvaluation": "",
         "document": "ESSAY — Moeten supermarkten stoppen met bonuskaarten?\n\nInleiding\nIn dit essay betoog ik dat supermarkten moeten stoppen met persoonlijke bonuskaarten, omdat ze klanten meer laten uitgeven dan ze van plan waren.\n\nArgument 1\nPersoonlijke aanbiedingen zijn gebaseerd op koopgedrag. Volgens de Consumentenbond (2023) kopen klanten met een persoonlijke aanbieding vaker producten die niet op hun lijstje stonden.\n\nArgument 2\nDaarnaast geven klanten hun gegevens weg zonder goed te weten wat ermee gebeurt. Veel mensen lezen de voorwaarden niet.\n\nTegenargument\nSommigen zeggen dat klanten juist geld besparen met de korting. Dat klopt soms, maar de besparing weegt niet op tegen de extra aankopen.\n\nConclusie\nSupermarkten zouden moeten stoppen met bonuskaarten.\n\nLiteratuur\nConsumentenbond. (2023). Persoonlijke aanbiedingen in de supermarkt."
       }
+    },
+    {
+      "id": "history-taken-up-eqf6",
+      "description": "P38.4: final internship report opened from a track, with the earlier feedback of two draft rounds. C1 (sources) was clearly taken up, C2 (figures for the peak) partly (one figure, not the comparison asked for), C3 (feasibility of the advice) not. Checks that the output says per criterion whether the improvement asked for earlier was taken up, partly or not, each with a verbatim quote or 'niet aangetroffen', and that it does not copy an earlier verdict.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Bedrijfskunde — stagefase",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "stageverslag",
+        "track": "",
+        "studyYear": "3",
+        "durationWeeks": "20",
+        "submissionNotes": "",
+        "assessmentFramework": "Stageverslag.\nC1 Onderbouwing: de analyse steunt op minstens drie relevante bronnen, in de tekst verwezen (APA).\nC2 Analyse: het probleem van de organisatie is met cijfers in kaart gebracht.\nC3 Advies: het advies volgt uit de analyse en is haalbaar (kosten, mensen, planning).",
+        "assessmentScale": "Schaal per criterium: Onvoldoende / Voldoende / Goed. Slaagregel: alle criteria minstens Voldoende.",
+        "companyEvaluation": "",
+        "feedbackHistory": "### Concepten, ronde 1\n- C1: Onderbouw de analyse met minstens drie bronnen en verwijs er in de tekst naar (APA).\n- C2: Laat met cijfers zien hoe groot de piek op maandag is, en vergelijk die met de andere dagen.\n- C3: Maak de haalbaarheid van het advies concreet: wat kost het, wie voert het uit, wanneer?\n\n### Concepten, ronde 2\n- C1: De bronnen staan er nu; verwijs ook in de analyse zelf naar het wachtrijmodel.\n- C3: De haalbaarheid ontbreekt nog.",
+        "document": "STAGEVERSLAG — Wachttijden bij de klantenservice\n\n1. Inleiding\nDe klantenservice van [BEDRIJF] krijgt op maandag veel meer vragen dan op andere dagen.\n\n2. Analyse\nVolgens het wachtrijmodel van Hopp en Spearman (2011) groeit de wachttijd sterk zodra de bezettingsgraad boven 85% komt. Uit de wachttijdcijfers van het eerste kwartaal blijkt dat bellers op maandag gemiddeld elf minuten wachten. Van der Aalst (2016) laat zien dat procesdata zulke pieken zichtbaar maakt. Ook Slack en Brandon-Jones (2019) noemen flexibele bezetting als middel tegen pieken.\n\n3. Advies\nIk adviseer om op maandag twee medewerkers extra in te roosteren en een terugbelknop aan te bieden. Dit lost het probleem op.\n\nBronnen\nHopp, W. J., & Spearman, M. L. (2011). Factory physics. Waveland Press.\nSlack, N., & Brandon-Jones, A. (2019). Operations management. Pearson.\nVan der Aalst, W. (2016). Process mining. Springer."
+      }
+    },
+    {
+      "id": "history-claimed-known-error-eqf6",
+      "description": "P38.4, known error: the final thesis claims in its preface that all earlier feedback was processed, but the ethics section the history asked for is still missing. The output must say the improvement asked for earlier on C3 was not taken up ('niet aangetroffen'), must not accept the student's claim, and must apply the knock-out rule to C3. Methode (C2) was taken up.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Social Work — afstudeerfase",
+        "programme": "Social Work",
+        "domain": "Zorg en welzijn",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "afstudeerscriptie",
+        "track": "",
+        "studyYear": "4",
+        "durationWeeks": "",
+        "submissionNotes": "",
+        "assessmentFramework": "Afstudeerscriptie.\nC1 Probleemstelling en vraag: helder, relevant voor de beroepspraktijk.\nC2 Methode: de methode past bij de vraag en de werkwijze is navolgbaar beschreven.\nC3 Ethiek: de student beschrijft hoe de deelnemers geïnformeerd zijn en hoe hun privacy is beschermd.",
+        "assessmentScale": "Schaal per criterium: Onvoldoende (O) / Voldoende (V) / Goed (G). Slaagregel: één O = geheel onvoldoende (knock-out), ongeacht de andere criteria.",
+        "companyEvaluation": "",
+        "feedbackHistory": "### Start, ronde 1\n- C1: De vraag is helder en relevant.\n\n### Concepten, ronde 1\n- C2: Beschrijf hoe je de respondenten koos en hoe je de interviews analyseerde.\n- C3: Beschrijf hoe de deelnemers geïnformeerd zijn (toestemming) en hoe je hun privacy beschermt.",
+        "document": "AFSTUDEERSCRIPTIE — Eenzaamheid bij jongvolwassenen in een middelgrote gemeente\n\nVoorwoord\nAlle feedback van mijn begeleider is in deze versie verwerkt.\n\n1. Probleemstelling\nHet wijkteam merkt dat steeds meer jongvolwassenen (18–25) zich eenzaam voelen, maar het aanbod is vooral op ouderen gericht. Hoofdvraag: welke vormen van ondersteuning zoeken eenzame jongvolwassenen zelf?\n\n2. Methode\nIk heb tien semigestructureerde interviews gehouden met jongvolwassenen die zich bij het wijkteam meldden; ik koos ze zo dat mannen en vrouwen en drie wijken vertegenwoordigd zijn. De interviews zijn opgenomen, uitgeschreven en thematisch gecodeerd met drie hoofdthema's. De topiclijst staat in bijlage 2.\n\n3. Resultaten\nDe jongeren zoeken vooral contact met leeftijdgenoten in een informele setting, niet een gesprek met een hulpverlener.\n\n4. Conclusie\nHet wijkteam kan het beste informele ontmoetingen voor jongvolwassenen faciliteren."
+      }
+    },
+    {
+      "id": "history-en-eqf6",
+      "description": "P38.4, English: final internship report with an earlier feedback round. Reflection (C1) taken up, evidence (C2) partly (one example where two were asked). Checks the per-criterion follow-up with quotes, in English.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "Communication — internship",
+        "programme": "Communication",
+        "domain": "Media and communication",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "stageverslag",
+        "track": "",
+        "studyYear": "3",
+        "durationWeeks": "10",
+        "submissionNotes": "",
+        "assessmentFramework": "Internship report.\nC1 Reflection: the student reflects on their own development during the internship.\nC2 Evidence: claims are supported by at least two concrete examples from the workplace.",
+        "assessmentScale": "",
+        "companyEvaluation": "",
+        "feedbackHistory": "### Drafts, round 1\n- C1: Describe what you did differently over time, not only what you liked about the internship.\n- C2: Give at least two concrete examples from the workplace to support your claims.",
+        "document": "INTERNSHIP REPORT\n\nIntroduction\nThis report describes my ten weeks at a small design agency.\n\nReflection\nAt the start I avoided asking questions because I did not want to look inexperienced. Halfway through I noticed this slowed me down, so I began a short daily check-in with my supervisor. I now ask earlier and I finish tasks faster.\n\nEvidence\nFor example, in week six I redesigned the agency's newsletter template after a check-in, and the client approved it in one round.\n\nConclusion\nI learned that asking for help early is part of working professionally."
+      }
     }
   ]
 }

@@ -53,6 +53,7 @@ const inputField = z.object({
   rows: z.number().optional(),
   imagesFrom: z.string().optional(),
   prefillFromAssessmentModel: z.object({ source: z.enum(["framework", "scale"]) }).optional(),
+  prefillFromTrack: z.object({ source: z.literal("feedbackHistory") }).optional(),
 });
 
 const stageDependency = z.object({

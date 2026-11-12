@@ -39,7 +39,15 @@ export const MILESTONES: readonly Milestone[] = [
   },
   { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
   { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, feedforward: true },
-  { id: "final", name: { nl: "Eindversie", en: "Final version" } },
+  {
+    id: "final",
+    name: { nl: "Eindversie", en: "Final version" },
+    // P38.4: opened from the track, the assessment gets the earlier feedback along.
+    tool: {
+      slug: "stage-assessment",
+      label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
+    },
+  },
   { id: "second-assessor", name: { nl: "Tweede beoordelaar", en: "Second assessor" } },
   { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
   { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
