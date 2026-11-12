@@ -180,23 +180,18 @@ describe("tracks repository (P38.1)", () => {
   });
 });
 
-describe("the supervisionTracks feature (off until the privacy officer agrees)", () => {
-  it("is off for a teacher and an admin on a fresh instance: the route gate gives a 404", async () => {
+describe("the supervisionTracks feature (on; the admin can switch it off)", () => {
+  it("is on for a teacher on a fresh instance, and a 404 once the admin switches it off", async () => {
     const teacher = await users.createUser({
       name: "Begeleider",
       passwordHash: "scrypt:a:b",
       role: "teacher",
     });
-    const admin = await users.createUser({
-      name: "Beheer",
-      passwordHash: "scrypt:a:b",
-      role: "admin",
-    });
-    for (const user of [teacher, admin]) {
-      expect(await av.isFeatureOn(user, "supervisionTracks")).toBe(false);
-      const refused = await av.requireFeature(user, "supervisionTracks").catch((e) => e);
-      expect(refused).toBeInstanceOf(Response);
-      expect((refused as Response).status).toBe(404);
-    }
+    expect(await av.isFeatureOn(teacher, "supervisionTracks")).toBe(true);
+    await settings.setFeatureStand("supervisionTracks", "off");
+    const refused = await av.requireFeature(teacher, "supervisionTracks").catch((e) => e);
+    expect(refused).toBeInstanceOf(Response);
+    expect((refused as Response).status).toBe(404);
+    await settings.setFeatureStand("supervisionTracks", "on");
   });
 });

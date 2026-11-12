@@ -48,12 +48,12 @@ export const FEATURES: readonly Feature[] = [
   { id: "utilities", name: { nl: "Hulpmiddelen", en: "Utilities" }, defaultStand: "on" },
   // The periodic pilot check-in on the home page; switch it off when the pilot ends.
   { id: "pilotCheckin", name: { nl: "Pilot-check-in", en: "Pilot check-in" }, defaultStand: "on" },
-  // P38: off for everyone until the privacy officer agrees to the retention term and the DPIA
-  // addition (BESLUIT-2026-11-12-10, -11).
+  // P38: on; an admin can switch it off for now, pending the privacy officer's word on the
+  // retention term and the DPIA addition (BESLUIT-2026-11-12-15).
   {
     id: "supervisionTracks",
     name: { nl: "Stage- en afstudeertrajecten", en: "Internship and thesis tracks" },
-    defaultStand: "off",
+    defaultStand: "on",
   },
 ];
 

@@ -71,8 +71,8 @@ describe("the feature register (P28.3)", () => {
       ["roleAgents", "on"],
       ["utilities", "on"],
       ["pilotCheckin", "on"],
-      // P38: off for everyone until the privacy officer agrees (BESLUIT-2026-11-12-10).
-      ["supervisionTracks", "off"],
+      // P38: on; an admin can switch it off for now (BESLUIT-2026-11-12-15).
+      ["supervisionTracks", "on"],
     ]);
     for (const f of FEATURES) {
       expect(f.name.nl.length).toBeGreaterThan(0);
