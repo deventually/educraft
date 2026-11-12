@@ -4,16 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #303 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #304 gemerged)_
 
 ## Nu
 
-- **Bewijs in één keer toevoegen in het BDB/BKE-dossier (#303) gemerged op 2026-11-12:** op
+- **Inspreken bij geleid schrijven en bij bewijs (#304) gemerged op 2026-11-12:** naast elk
+  antwoord van geleid schrijven en bij de tekst van nieuw bewijs staat een knop om in te spreken;
+  wat je zegt komt als tekst in het veld, en je past het daarna zelf aan. Geen migratie.
+- **Bewijs in één keer toevoegen (#303) gemerged op 2026-11-12:** op de nieuwe pagina
   *Bewijs in één keer toevoegen* kiest de docent veel bestanden of een hele map. LimeOnIt stelt per
-  bestand de leeruitkomst, de soort, de criteria en de regel van het verplicht bewijs voor; de
-  docent bevestigt alles in één lijst, en bij twijfel staat er *Controleren*. De bestanden blijven
-  op de computer; namen en contactgegevens worden vervangen voordat er tekst weggaat. Prompt
-  `portfolio-evidence-sort@v1`; geen migratie.
+  bestand de leeruitkomst, soort, criteria en regel van het verplicht bewijs voor; de docent vinkt
+  aan wat klopt, en bij twijfel staat *Controleren*. De bestanden blijven op de computer en namen
+  van studenten worden vervangen door codes. Prompt `portfolio-evidence-sort@v1`; geen migratie.
 - **BDB/BKE: feiten uit de cursus van het anker bij het hoofdstuk (#301) gemerged op
   2026-11-12:** hangt een leeruitkomst aan een les, module of toets uit je eigen cursus, dan staat
   op het tabblad *Hoofdstuk* het blok *Uit je cursus* (groepsgrootte, lesduur, lesdoel,
