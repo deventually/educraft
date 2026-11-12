@@ -494,7 +494,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   sits under at most one division (`programmes.division_id`). `organisation.server.ts` holds the
   admin-only writes; a division is deleted only while it is empty. Beheer → Organisatie
   (`/admin/organisation`) names the layer, manages the divisions and places the programmes; the
-  programmes themselves stay team-owned (BESLUIT-2026-11-10-3).
+  programmes themselves stay team-owned (BESLUIT-2026-11-10-3). A **learning line** keeps its own
+  programme and may also hold for others (`learning_line_programmes`): linking takes managing both;
+  a member of any linked programme reads it and sees only the courses shared with a team of a
+  programme they read; only its own programme's lead or an admin manages it. The course page shows
+  the course's place in each line it can read, with the course before and after (`linesOfCourse`).
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

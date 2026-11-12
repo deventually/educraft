@@ -23,6 +23,7 @@ import { getDb } from "../db.server";
 import {
   courseMembers,
   courses,
+  learningLineProgrammes,
   learningLines,
   programmeCourses,
   programmes,
@@ -260,6 +261,9 @@ export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
   if (!row) return false;
   getDb().transaction((tx) => {
     tx.delete(programmeCourses).where(eq(programmeCourses.programmeId, row.id)).run();
+    // Its own lines go with their links; a line of another programme only loses this link.
+    tx.run(sql`delete from ${learningLineProgrammes} where programme_id = ${row.id}
+      or line_id in (select id from ${learningLines} where programme_id = ${row.id})`);
     tx.delete(learningLines).where(eq(learningLines.programmeId, row.id)).run();
     tx.delete(programmes).where(eq(programmes.id, row.id)).run();
   });

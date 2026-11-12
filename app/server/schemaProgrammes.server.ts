@@ -1,4 +1,11 @@
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 /**
  * A programme (opleiding) of a team (BESLUIT-2026-11-10-3): a named bundle of the members'
@@ -69,4 +76,23 @@ export const learningLines = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
   (t) => [index("learning_lines_programme_idx").on(t.programmeId)],
+);
+
+/**
+ * A learning line that also holds for another programme than its own (BESLUIT-2026-11-12-2):
+ * voltijd and deeltijd, or a research line through a whole faculty. The line stays managed by
+ * its own programme (`learning_lines.programme_id`); a linked programme's members read it, and
+ * its courses may sit in any linked programme. Linking takes managing both programmes.
+ */
+export const learningLineProgrammes = sqliteTable(
+  "learning_line_programmes",
+  {
+    lineId: text("line_id").notNull(),
+    programmeId: text("programme_id").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.lineId, t.programmeId] }),
+    index("learning_line_programmes_programme_idx").on(t.programmeId),
+  ],
 );

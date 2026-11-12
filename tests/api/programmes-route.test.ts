@@ -245,6 +245,7 @@ describe("course page: belongs to programme…", () => {
     expect(data.programmes).toEqual({
       placed: [{ programmeId: p!.id, name: "Deeltijd", teamName, year: 2, period: 3 }],
       options: [{ id: p!.id, name: "Deeltijd", teamName }],
+      lines: [],
     });
     expect(await act(c.id, { intent: "programme-remove", programmeId: p!.id })).toMatchObject({
       ok: true,

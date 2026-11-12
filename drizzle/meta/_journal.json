@@ -239,6 +239,13 @@
       "when": 1794470212203,
       "tag": "0033_normal_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1794471710911,
+      "tag": "0034_nifty_catseye",
+      "breakpoints": true
     }
   ]
 }

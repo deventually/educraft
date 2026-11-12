@@ -176,6 +176,41 @@ describe("Course page: belongs to programme", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("shows where the course sits in its learning lines, with the course before and after", async () => {
+    const { container } = renderInRouter(
+      <CourseProgrammes
+        placed={[]}
+        options={[]}
+        lines={[
+          {
+            lineId: "l1",
+            name: "Onderzoek",
+            programmeId: "p1",
+            position: 2,
+            total: 3,
+            previous: { id: "c0", name: "Onderzoek 1" },
+            next: { id: "c2", name: "Onderzoek 3" },
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByRole("heading", { level: 3, name: "Leerlijnen" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Onderzoek" })).toHaveAttribute(
+      "href",
+      "/programmes/p1/lines/l1",
+    );
+    expect(screen.getByText("cursus 2 van 3")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Vorige: Onderzoek 1" })).toHaveAttribute(
+      "href",
+      "/courses/c0",
+    );
+    expect(screen.getByRole("link", { name: "Volgende: Onderzoek 3" })).toHaveAttribute(
+      "href",
+      "/courses/c2",
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("points to the programmes page when there are none yet", () => {
     renderInRouter(<CourseProgrammes placed={[]} options={[]} />);
     expect(screen.getByText("Deze cursus hoort nog bij geen opleiding.")).toBeVisible();

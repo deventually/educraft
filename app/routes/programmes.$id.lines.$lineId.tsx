@@ -9,8 +9,10 @@ import {
   moveCourse,
   renameLine,
   setLineCourses,
+  setLineProgrammes,
 } from "~/server/repositories/learningLines.server";
-import { getProgramme } from "~/server/repositories/programmes.server";
+import { getProgramme, listProgrammes } from "~/server/repositories/programmes.server";
+import { LineProgrammes } from "~/components/programmes/LineProgrammes";
 import { learningLineOverview } from "~/lib/programmes/learningLine";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
@@ -25,32 +27,44 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.line.name ?? "Leerlijn"} — LimeOnIt` }];
 }
 
-/** The line under its own programme's address, or a 404. */
+/** The line under the address of one of its programmes the user reads, or a 404. */
 async function loadLine(request: Request, params: { id?: string; lineId?: string }) {
   const user = await requireProgrammeUser(request);
   const line = params.lineId ? await getLine(user, params.lineId) : null;
-  if (!line || line.programmeId !== params.id) throw new Response("Not Found", { status: 404 });
+  if (!line?.programmes.some((p) => p.id === params.id))
+    throw new Response("Not Found", { status: 404 });
   return { user, line };
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, line } = await loadLine(request, params);
-  const programme = await getProgramme(user, line.programmeId);
+  const linked = (await Promise.all(line.programmes.map((p) => getProgramme(user, p.id)))).filter(
+    (p) => p !== null,
+  );
+  const here = linked.find((p) => p.id === params.id);
   const inLine = new Set(line.courseIds);
+  const addable = new Map<string, string>();
+  for (const p of linked)
+    for (const c of p.courses) if (!inLine.has(c.courseId)) addable.set(c.courseId, c.name);
+  const linkedIds = new Set(line.programmes.map((p) => p.id));
   return {
     line: {
       id: line.id,
       name: line.name,
-      programmeId: line.programmeId,
-      programmeName: line.programmeName,
-      teamName: line.teamName,
+      programmeId: here?.id ?? line.programmeId,
+      programmeName: here?.name ?? line.programmeName,
+      teamName: here?.teamName ?? line.teamName,
       canManage: line.canManage,
       courses: line.courses.map((c) => ({ id: c.id, name: c.name })),
     },
     overview: learningLineOverview(line.courses),
-    addable: (programme?.courses ?? [])
-      .filter((c) => !inLine.has(c.courseId))
-      .map((c) => ({ id: c.courseId, name: c.name })),
+    addable: [...addable].map(([id, name]) => ({ id, name })),
+    alsoFor: line.programmes.filter((p) => p.id !== params.id),
+    linkOptions: line.canManage
+      ? (await listProgrammes(user, 500))
+          .filter((p) => p.canManage && p.id !== line.programmeId)
+          .map((p) => ({ id: p.id, name: p.name, linked: linkedIds.has(p.id) }))
+      : [],
   };
 }
 
@@ -83,6 +97,14 @@ export async function action({ request, params }: Route.ActionArgs) {
       ),
     );
   if (intent === "add") return done(await setLineCourses(user, line.id, [...visible, courseId]));
+  if (intent === "programmes")
+    return done(
+      await setLineProgrammes(
+        user,
+        line.id,
+        fd.getAll("programmeId").map((v) => String(v)),
+      ),
+    );
   if (intent === "delete") {
     if (await deleteLine(user, line.id)) return redirect(`/programmes/${line.programmeId}`);
     return done(false);
@@ -104,7 +126,7 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
         : { variant: "error", message: d.error };
     },
   });
-  const { line, overview, addable } = loaderData;
+  const { line, overview, addable, alsoFor, linkOptions } = loaderData;
 
   return (
     <div className="w-full min-w-0">
@@ -121,6 +143,11 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
       <p className="mt-1 text-slate-600">
         {line.programmeName} · {t.programmes.team} {line.teamName}
       </p>
+      {alsoFor.length > 0 && (
+        <p className="mt-1 text-sm text-slate-600">
+          {fmt(l.alsoFor, { programmes: alsoFor.map((p) => p.name).join(", ") })}
+        </p>
+      )}
 
       <div className="mt-6 space-y-10">
         {line.courses.length === 0 ? (
@@ -201,6 +228,7 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
                 </Button>
               </Form>
             </Card>
+            {linkOptions.length > 0 && <LineProgrammes options={linkOptions} />}
             <div className="mt-3">
               <ConfirmDialog
                 triggerLabel={l.delete}
