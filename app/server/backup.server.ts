@@ -18,7 +18,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } 
 import { dirname, join } from "node:path";
 import { assertSoundDatabaseFile, backupDbTo } from "./db.server";
 import { log } from "./log.server";
-import { allTenants, runWithTenant, type Tenant } from "./tenants.server";
+import { servedTenants, runWithTenant, type Tenant } from "./tenants.server";
 
 const DAY = 24 * 60 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -143,7 +143,7 @@ export async function backupIfDue(dir: string, now = new Date()): Promise<Backup
  */
 export async function backupAllTenantsIfDue(
   env: Record<string, string | undefined> = process.env,
-  tenants: readonly Tenant[] = allTenants(),
+  tenants: readonly Tenant[] = servedTenants(),
   now = new Date(),
 ): Promise<(BackupResult & { tenant: string })[]> {
   const done: (BackupResult & { tenant: string })[] = [];
@@ -176,7 +176,7 @@ export function startBackupSchedule(
   tenants?: readonly Tenant[],
 ): boolean {
   // The platform's institutions change while the app runs: each tick reads the list anew.
-  const now = () => tenants ?? allTenants();
+  const now = () => tenants ?? servedTenants();
   if (!now().some((t) => tenantBackupDir(env, t)) && !env.PLATFORM_HOST) return false;
   if (globalForBackup.__limeonitBackupTimer) return true;
   const tick = () => void backupAllTenantsIfDue(env, now());

@@ -164,6 +164,15 @@ describe("the platform's list of institutions", () => {
     expect(readdirSync(join(dir, "archive"))).toEqual([]);
   });
 
+  it("picks up what another container changed in the shared folder, without a restart", () => {
+    const { dir, registry } = fresh();
+    const other = institutionRegistry({ dir, platformHost: "beheer.test" });
+    other.add({ id: "hhs", name: "HHS", host: "hhs.test" });
+    expect(registry.tenants().map((t) => t.id)).toEqual(["platform", "hhs"]);
+    other.setActive("hhs", false);
+    expect(registry.tenants().find((t) => t.id === "hhs")?.inactive).toBe(true);
+  });
+
   it("refuses a stored list it cannot trust, instead of serving the wrong databases", () => {
     const { dir } = fresh();
     writeFileSync(join(dir, "institutions.json"), "{broken");

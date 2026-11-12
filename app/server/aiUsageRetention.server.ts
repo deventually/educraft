@@ -6,7 +6,7 @@
  */
 import { log } from "./log.server";
 import { retentionCutoff, rollUpAiUsage } from "./repositories/aiUsageRollup.server";
-import { allTenants, runWithTenant, type Tenant } from "./tenants.server";
+import { servedTenants, runWithTenant, type Tenant } from "./tenants.server";
 
 const HOUR = 60 * 60 * 1000;
 
@@ -16,7 +16,7 @@ const HOUR = 60 * 60 * 1000;
  */
 export async function retainAiUsage(
   now = new Date(),
-  tenants: readonly Tenant[] = allTenants(),
+  tenants: readonly Tenant[] = servedTenants(),
 ): Promise<number> {
   let total = 0;
   for (const tenant of tenants) {

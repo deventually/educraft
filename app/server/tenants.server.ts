@@ -125,6 +125,26 @@ export function allTenants(): readonly Tenant[] {
   return platformRegistry()?.tenants() ?? configured;
 }
 
+const SERVES = ["all", "platform", "institutions"] as const;
+
+/**
+ * What this container serves (`LIMEONIT_SERVES`): everything (default), only the platform, or
+ * only the institutions. Two containers of one image on one data folder split the platform from
+ * the schools (BESLUIT-2026-11-12-5). Throws on any other value rather than serve everything.
+ */
+export function servedTenants(
+  serves: string | undefined = process.env.LIMEONIT_SERVES,
+  list: readonly Tenant[] = allTenants(),
+): readonly Tenant[] {
+  const value = serves?.trim() || "all";
+  if (!(SERVES as readonly string[]).includes(value)) {
+    throw new Error(`LIMEONIT_SERVES must be one of ${SERVES.join(", ")}, not "${value}".`);
+  }
+  if (value === "platform") return list.filter((t) => t.platform);
+  if (value === "institutions") return list.filter((t) => !t.platform);
+  return list;
+}
+
 /** The institution served on `host` (case and port ignored); `null` for any other address. */
 export function tenantForHost(host: string, list: readonly Tenant[] = allTenants()): Tenant | null {
   const name = host.trim().toLowerCase().replace(/:\d+$/, "");
@@ -208,7 +228,7 @@ export function tenantMiddleware(list?: readonly Tenant[]): MiddlewareFunction<R
     const url = new URL(request.url);
     // The container's health check calls itself on 127.0.0.1; the probe checks every database.
     if (url.pathname === HEALTH_PATH) return next();
-    const tenant = tenantForHost(url.host, list ?? allTenants());
+    const tenant = tenantForHost(url.host, list ?? servedTenants());
     if (!tenant) return text(404, UNKNOWN_HOST);
     if (tenant.inactive) return text(503, INACTIVE);
     const path = url.pathname.replace(/\.data$/, "").replace(/\/+$/, "") || "/";

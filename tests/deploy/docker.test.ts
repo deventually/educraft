@@ -78,6 +78,16 @@ describe("docker-compose.yml", () => {
     expect(envExample).toMatch(/WHISPER_BASE_URL=http:\/\/whisper:8178\/v1/);
   });
 
+  it("can run the platform in its own container of the same image, on the same data, on request", () => {
+    // BESLUIT-2026-11-12-5: `docker compose --profile platform up -d`.
+    const platform = compose.slice(compose.indexOf("  platform:"), compose.indexOf("  whisper:"));
+    expect(compose).toContain("  platform:");
+    expect(platform).toMatch(/profiles: \["platform"\]/);
+    expect(platform).toMatch(/image: \$\{LIMEONIT_IMAGE:-limeonit:latest\}/);
+    expect(platform).toMatch(/LIMEONIT_SERVES: platform/);
+    expect(platform).toMatch(/:-limeonit-data\}:\/data/);
+  });
+
   it("reads its configuration from .env", () => {
     expect(compose).toMatch(/env_file:[\s\S]*\.env/);
   });

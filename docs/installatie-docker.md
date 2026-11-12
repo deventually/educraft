@@ -84,6 +84,29 @@ TENANTS=[{"id":"hsl","hosts":["hsl.limeonit.nl"]},{"id":"hhs","hosts":["hhs.lime
   `docker compose exec -e LIMEONIT_TENANT=hhs app node build/ops/create-admin.js …`. Zonder die
   naam weigert het script.
 
+### Platformbeheer (optioneel)
+
+Wil je instellingen toevoegen, deactiveren en verwijderen in een scherm in plaats van in `.env`,
+zet dan ook `PLATFORM_HOST=platform.limeonit.net` (en laat dat adres naar de server wijzen). De
+lijst instellingen staat daarna in `/data/institutions.json`; `TENANTS` wordt bij de eerste start
+overgenomen en daarna niet meer gelezen. Maak eenmalig je platformaccount:
+
+```sh
+docker compose exec -e LIMEONIT_TENANT=platform app node build/ops/create-admin.js --name "…" --email …
+docker compose exec -e LIMEONIT_TENANT=platform app node build/ops/set-owner.js --email …
+```
+
+Tweestapsverificatie kwijt: `docker compose exec -e LIMEONIT_TENANT=platform app node build/ops/reset-2fa.js --email …`.
+Een verwijderde instelling staat 60 dagen in `/data/archive/` en kan zo lang worden teruggezet.
+
+**Het platform in een eigen container (aanbevolen).** Dezelfde image, een tweede container op
+dezelfde data. Zet in `.env` `LIMEONIT_SERVES=institutions` en start met
+`docker compose --profile platform up -d`. De container `app` bedient dan alleen de scholen
+(poort 3000), de container `platform` alleen het platformadres (poort `LIMEONIT_PLATFORM_PORT`,
+standaard 3001). Laat je reverse proxy het platformadres naar 3001 sturen; die poort kun je extra
+afschermen, bijvoorbeeld alleen vanaf jouw IP. Een nieuwe of gedeactiveerde instelling werkt in de
+schoolcontainer meteen, zonder herstart. Beide containers moeten op dezelfde server draaien.
+
 Andere poort dan 3000? Zet `LIMEONIT_PORT=8080` in `.env`.
 
 ### Dicteren (optioneel)

@@ -492,3 +492,20 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de pilot alvast twee databases", "de data is nu nog niet belangrijk en kan helemaal vers worden
   neergezet", en over de platformlaag "Ja, omdat ik ook nieuwe instellingen wil kunnen toevoegen en
   verwijderen via die UI").
+- **BESLUIT-2026-11-12-5:** **Platformlaag: het platform beheert de instellingen.** Met
+  `PLATFORM_HOST` (bijvoorbeeld platform.limeonit.net) heeft het platform een eigen adres en een
+  eigen database met het platformaccount van Bastiaan; geen beheerder van een instelling kan daarbij.
+  De lijst instellingen staat in de datamap (`institutions.json`), buiten elke instellingsdatabase,
+  wordt eenmalig overgenomen uit `TENANTS` en verandert zonder herstart. Toevoegen maakt de database,
+  een eerste beheerder die ook eigenaar is en een link om een wachtwoord te kiezen. Deactiveren maakt
+  de instelling direct onbereikbaar ("tijdelijk niet beschikbaar"), de data blijft. Verwijderen kan
+  alleen bij een gedeactiveerde instelling, met het id ter bevestiging; database en back-ups gaan 60
+  dagen naar het archief, waar ze terug te zetten zijn, en worden daarna gewist. Noodsleutel:
+  `LIMEONIT_TENANT=platform npm run reset-2fa`. Het platform draait in een eigen container van
+  dezelfde image (`LIMEONIT_SERVES=platform`), naast de schoolcontainer (`LIMEONIT_SERVES=institutions`),
+  op dezelfde datamap; de schoolcontainer pikt wijzigingen zonder herstart op. Het scherm
+  `/platform` is een eigen PR. Bastiaan,
+  2026-11-12 (thread "Platformbeheer voor instellingen bouwen": "ik wil ook nieuwe instellingen
+  kunnen toevoegen en verwijderen via die UI", "En (de)activeren.", over het archief "Misschien 60
+  dagen vasthouden", het platformadres "limeonit.net of platform.limeonit.net", en in de thread
+  "Platformscherm voor instellingen beheren" op de keuzekaart "Zelfde image, eigen container").
