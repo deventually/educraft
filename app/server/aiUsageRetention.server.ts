@@ -6,19 +6,33 @@
  */
 import { log } from "./log.server";
 import { retentionCutoff, rollUpAiUsage } from "./repositories/aiUsageRollup.server";
+import { allTenants, runWithTenant, type Tenant } from "./tenants.server";
 
 const HOUR = 60 * 60 * 1000;
 
-/** Roll up what `now` no longer keeps per person; how many person rows went (0 on a failure). */
-export async function retainAiUsage(now = new Date()): Promise<number> {
-  try {
-    const moved = await rollUpAiUsage(retentionCutoff(now.toISOString().slice(0, 10)));
-    if (moved > 0) log("aiUsage.rolledUp", { rows: moved });
-    return moved;
-  } catch (error) {
-    log("aiUsage.rollUpFailed", { error: error instanceof Error ? error.message : String(error) });
-    return 0;
+/**
+ * Roll up what `now` no longer keeps per person, in every institution's own database; how many
+ * person rows went (a failing institution counts 0 and is logged).
+ */
+export async function retainAiUsage(
+  now = new Date(),
+  tenants: readonly Tenant[] = allTenants(),
+): Promise<number> {
+  let total = 0;
+  for (const tenant of tenants) {
+    try {
+      const cutoff = retentionCutoff(now.toISOString().slice(0, 10));
+      const moved = await runWithTenant(tenant, () => rollUpAiUsage(cutoff));
+      if (moved > 0) log("aiUsage.rolledUp", { tenant: tenant.id, rows: moved });
+      total += moved;
+    } catch (error) {
+      log("aiUsage.rollUpFailed", {
+        tenant: tenant.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
+  return total;
 }
 
 const globalForRetention = globalThis as unknown as { __limeonitAiUsageTimer?: NodeJS.Timeout };

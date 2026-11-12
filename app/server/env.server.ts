@@ -26,6 +26,10 @@ export const envSchema = z.object({
   // has a default that fits a long document; lower it on a machine with little memory.
   OLLAMA_NUM_CTX: z.coerce.number().int().min(2048).optional(),
   DATABASE_URL: z.string().default("file:./data/limeonit.db"),
+  // Several institutions, each on its own database, chosen by address (tenants.server). JSON:
+  // [{"id":"hsl","hosts":["hsl.example.nl"],"database":"file:/data/hsl.db"}, …]. Unset: one
+  // instance on DATABASE_URL.
+  TENANTS: z.string().optional(),
   // Where the daily backup goes (backup.server). Unset: `backups/` next to the database in
   // production, off elsewhere. "off" turns it off. Read at call time by backupDir().
   BACKUP_DIR: z.string().optional(),

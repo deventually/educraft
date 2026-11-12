@@ -117,7 +117,10 @@ English slugs, never shown.
   co-owned courses (BESLUIT-2026-11-10-5), which shares them with the team; a colleague's course
   is read only through that share (`listProgrammeCourses` in `programmes.server.ts` joins the
   share row, the one exception).
-- `getDb()` is the seam; tests set `DATABASE_URL=file::memory:` before importing server modules.
+- `getDb()` is the seam: it opens the database of the institution the request runs for
+  (`TENANTS`, `app/server/tenants.server.ts`, BESLUIT-2026-11-12-4). Process-wide state that holds
+  data from a database (a cache, a timer's work) is kept per institution; work outside a request
+  runs inside `runWithTenant`. Tests set `DATABASE_URL=file::memory:` before importing server modules.
   List queries are capped (`Math.min(limit ?? 50, 500)`).
 - A schema change ships with a migration (`npm run db:generate`), applied with `npm run db:migrate`.
 

@@ -1,11 +1,9 @@
 /**
  * Manual/CI migration entry point (`npm run db:migrate`). Connecting via
  * `getDb()` applies all pending drizzle migrations from `./drizzle` (see
- * db.server.ts), so this is a thin, explicit trigger for that same migrator.
+ * db.server.ts); this opens every institution's database (`TENANTS`), or the one
+ * at `DATABASE_URL`.
  */
-import { getDb } from "./db.server";
-import { DB_PATH } from "./env.server";
+import { migrateAllTenants } from "./db.server";
 
-// Touch the db so the module initializes and migrations run.
-getDb();
-console.log(`✓ LimeOnIt database migrated: ${DB_PATH}`);
+for (const path of migrateAllTenants()) console.log(`✓ LimeOnIt database migrated: ${path}`);

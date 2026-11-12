@@ -4,11 +4,11 @@
  *   npm run restore -- --from data/backups/limeonit-2026-11-09T02-00-00Z.db
  *   node build/ops/restore.js --from /data/backups/limeonit-….db
  *
- * Checks the backup before touching anything, then replaces the database (DATABASE_URL, or
- * `--to <file>`). The database it replaces is kept aside as `<db>.before-restore-<time>`.
+ * Checks the backup before touching anything, then replaces the database (DATABASE_URL, the
+ * institution LIMEONIT_TENANT names when there are several, or `--to <file>`). The database it replaces is kept aside as `<db>.before-restore-<time>`.
  */
 import { restoreBackup } from "../app/server/backup.server";
-import { DB_PATH } from "../app/server/env.server";
+import { currentTenant } from "../app/server/tenants.server";
 
 function argument(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -21,7 +21,7 @@ if (!from) {
   console.error("Missing --from. Usage: npm run restore -- --from <backup file>  (stop the app first)");
   process.exit(1);
 }
-const dbPath = argument("to") ?? DB_PATH;
+const dbPath = argument("to") ?? currentTenant().dbPath;
 
 try {
   const { previous } = restoreBackup({ from, dbPath });

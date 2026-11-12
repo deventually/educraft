@@ -4,12 +4,14 @@
  *
  *   npm run invite -- --note "Jan de Vries" [--expires-days 14]
  *
- * Prints the absolute invite URL (using APP_ORIGIN). The admin UI mints the same
+ * Prints the absolute invite URL (using APP_ORIGIN, or the institution's own address). With
+ * several institutions (TENANTS), name one: `LIMEONIT_TENANT=hhs npm run invite -- …`. The admin UI mints the same
  * invites; the script stays for headless ops. Relative imports (not the `~`
  * alias) keep it runnable under plain tsx, matching db:migrate.
  */
 import { createInvite } from "../app/server/repositories/users.server";
 import { env } from "../app/server/env.server";
+import { currentTenant, tenantOrigin } from "../app/server/tenants.server";
 
 function parseArgs(argv: string[]): Record<string, string> {
   const args: Record<string, string> = {};
@@ -50,4 +52,4 @@ const invite = await createInvite({ role: "teacher", note, expiresAt });
 
 console.log(`✓ Invite minted (role: teacher${note ? `, note: ${note}` : ""}).`);
 if (expiresAt) console.log(`  Expires: ${expiresAt.toISOString()}`);
-console.log(`${env.APP_ORIGIN}/invite/${invite.token}`);
+console.log(`${tenantOrigin(currentTenant(), env.APP_ORIGIN)}/invite/${invite.token}`);

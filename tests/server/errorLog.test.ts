@@ -123,3 +123,15 @@ describe("handleServerError (React Router's handleError)", () => {
     expect(recentErrors()[0]!.requestId).toBe("-");
   });
 });
+
+describe("recent errors per institution", () => {
+  it("shows an institution's admin only the errors of requests on that institution", async () => {
+    const { runWithTenant } = await import("~/server/tenants.server");
+    const hsl = { id: "err-hsl", hosts: ["hsl.test"], dbPath: ":memory:" };
+    const hhs = { id: "err-hhs", hosts: ["hhs.test"], dbPath: ":memory:" };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    runWithTenant(hsl, () => recordError(new Error("geheim bij HSL"), where));
+    expect(runWithTenant(hhs, recentErrors)).toEqual([]);
+    expect(runWithTenant(hsl, recentErrors).map((e) => e.message)).toEqual(["geheim bij HSL"]);
+  });
+});

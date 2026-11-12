@@ -5,8 +5,10 @@
  *   npm run create-admin -- --name "Jane Roe" --email jane@school.nl --password "correct horse battery staple"
  *
  * If `--password` is omitted a strong one is generated and printed once. The
- * account can then sign in at APP_ORIGIN/login. Relative imports (not the `~`
- * alias) keep it runnable under plain tsx, matching db:migrate / invite.
+ * account can then sign in at APP_ORIGIN/login, or the institution's own address. With several
+ * institutions (TENANTS), `LIMEONIT_TENANT=hhs npm run create-admin -- …` makes an admin of
+ * HHS only. Relative imports (not the `~` alias) keep it runnable under plain tsx, matching
+ * db:migrate / invite.
  *
  * Multi-tenancy note: under the planned database-per-tenant model this same
  * primitive is what the control-plane super-user calls to seed a new tenant's
@@ -17,6 +19,7 @@ import { randomBytes } from "node:crypto";
 import { createUser, getUserByEmail } from "../app/server/repositories/users.server";
 import { hashPassword, passwordProblem } from "../app/server/password.server";
 import { env } from "../app/server/env.server";
+import { currentTenant, tenantOrigin } from "../app/server/tenants.server";
 
 function parseArgs(argv: string[]): Record<string, string> {
   const args: Record<string, string> = {};
@@ -85,4 +88,4 @@ console.log(`✓ Admin account created: ${name} <${email}> (id: ${user.id}).`);
 if (generated) {
   console.log(`  Generated password (store it now — it is not recoverable): ${password}`);
 }
-console.log(`  Sign in at: ${env.APP_ORIGIN}/login`);
+console.log(`  Sign in at: ${tenantOrigin(currentTenant(), env.APP_ORIGIN)}/login`);

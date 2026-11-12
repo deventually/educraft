@@ -68,6 +68,22 @@ De container bewaart de database altijd in `/data/limeonit.db` (`DATABASE_URL` w
 
 Een externe databaseserver (PostgreSQL, MySQL) wordt nog niet ondersteund.
 
+### Meerdere instellingen
+
+Eén container kan meerdere instellingen bedienen, elk met een eigen database op hetzelfde volume.
+De app kiest de database bij het adres. Zet in `.env`:
+
+```
+TENANTS=[{"id":"hsl","hosts":["hsl.limeonit.nl"]},{"id":"hhs","hosts":["hhs.limeonit.nl"]}]
+```
+
+- Laat beide adressen in de DNS naar deze server wijzen. Een ander adres krijgt een foutpagina.
+- De databases heten `/data/hsl.db` en `/data/hhs.db`; de back-ups staan in `/data/backups/hsl/` en
+  `/data/backups/hhs/`.
+- Elke instelling heeft haar eigen beheerders. Bij de beheerscripts zeg je welke instelling:
+  `docker compose exec -e LIMEONIT_TENANT=hhs app node build/ops/create-admin.js …`. Zonder die
+  naam weigert het script.
+
 Andere poort dan 3000? Zet `LIMEONIT_PORT=8080` in `.env`.
 
 ### Dicteren (optioneel)

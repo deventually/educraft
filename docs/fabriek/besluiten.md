@@ -478,3 +478,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   het platform meteen werkt zoals het moet. Bastiaan, 2026-11-12 (thread "School, faculteit,
   opleiding en leerlijn beheren": "Maak wel het plan dat de database maatwerk wordt voor grote
   instellingen" en "Doe dan ook voor de pilot alvast twee databases").
+- **BESLUIT-2026-11-12-4:** **Database per adres, binnen één app.** Eén container bedient alle
+  instellingen; `TENANTS` noemt per instelling een id, haar adressen en haar SQLite-bestand. Elk
+  verzoek draait op de instelling van zijn adres (een onbekend adres krijgt 404; alleen `/healthz`
+  antwoordt overal en controleert elke database). Migraties, de dagelijkse back-up (in
+  `backups/<id>/`), het opruimen van AI-gebruik, de modellenlijst van de beheerder en de lijst
+  recente fouten gaan per instelling. Beheerscripts noemen de instelling met `LIMEONIT_TENANT`;
+  bij meerdere instellingen zonder naam weigeren ze. Zonder `TENANTS` blijft alles één instelling op
+  `DATABASE_URL`. De pilot begint vers: geen splitsscript. Een gebruiker die bij twee instellingen
+  werkt, heeft voorlopig een account per instelling. De platformlaag (platformaccount, instellingen
+  toevoegen, verwijderen, activeren en deactiveren in een scherm) is de volgende stap en vervangt
+  `TENANTS`. Bastiaan, 2026-11-12 (thread "Pilot op twee databases (HSL en HHS)": "Doe dan ook voor
+  de pilot alvast twee databases", "de data is nu nog niet belangrijk en kan helemaal vers worden
+  neergezet", en over de platformlaag "Ja, omdat ik ook nieuwe instellingen wil kunnen toevoegen en
+  verwijderen via die UI").

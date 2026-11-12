@@ -8,6 +8,7 @@
  * Metadata only, like `log.server`: method, path without its query string, the
  * error's name, message and stack (both capped). Never a request body.
  */
+import { currentTenantOrNull } from "./tenants.server";
 import { isRouteErrorResponse, type HandleErrorFunction } from "react-router";
 import { requestIdOf } from "./requestId.server";
 
@@ -31,16 +32,18 @@ export interface ErrorWhere {
   path: string;
 }
 
-let recent: ErrorEntry[] = [];
+/** Per institution (tenants.server): an admin sees only the errors of their own institution. */
+const recentByTenant = new Map<string, ErrorEntry[]>();
+const scope = () => currentTenantOrNull()?.id ?? "";
 
-/** The newest errors first (a copy). */
+/** The newest errors first (a copy), of the institution this request is for. */
 export function recentErrors(): ErrorEntry[] {
-  return [...recent];
+  return [...(recentByTenant.get(scope()) ?? [])];
 }
 
 /** Tests only: start from an empty list. */
 export function clearRecentErrors(): void {
-  recent = [];
+  recentByTenant.clear();
 }
 
 function summarize(error: unknown): Pick<ErrorEntry, "name" | "message" | "stack"> {
@@ -63,7 +66,10 @@ export function recordError(error: unknown, where: ErrorWhere): ErrorEntry {
   };
   const { at, ...fields } = entry;
   console.error(JSON.stringify({ ts: at, event: "unexpected_error", ...fields }));
-  recent = [entry, ...recent].slice(0, MAX_RECENT_ERRORS);
+  recentByTenant.set(
+    scope(),
+    [entry, ...(recentByTenant.get(scope()) ?? [])].slice(0, MAX_RECENT_ERRORS),
+  );
   return entry;
 }
 
