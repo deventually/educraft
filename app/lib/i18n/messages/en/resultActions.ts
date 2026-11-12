@@ -11,6 +11,7 @@ export const resultActions: Messages["resultActions"] = {
   toastEvidence: "Added to your dossier.",
   toastSaved: "Kept with the course.",
   useAsEvidence: "Use as evidence",
+  viewInCourse: "View in the course",
   wholeCourse: "{course} (whole course)",
   wholeDossier: "{dossier} (no criterion yet)",
 };

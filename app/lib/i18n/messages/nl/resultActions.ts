@@ -10,6 +10,7 @@ export const resultActions = {
   toastEvidence: "Toegevoegd aan je dossier.",
   toastSaved: "Bewaard bij de cursus.",
   useAsEvidence: "Gebruik als bewijs",
+  viewInCourse: "Bekijk in de cursus",
   wholeCourse: "{course} (hele cursus)",
   wholeDossier: "{dossier} (nog geen criterium)",
 };

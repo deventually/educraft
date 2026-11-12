@@ -6,6 +6,7 @@ import { useActionToast } from "./Toast";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { ExportMenu } from "./export/ExportMenu";
 import { type LinkTarget, linkTargetValue } from "~/lib/courses/links";
+import { LINKED_WORK_ANCHOR, courseTabHref } from "~/lib/courses/tabs";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -142,6 +143,12 @@ export function ResultActions({
             <p className="flex items-center gap-1.5 text-sm text-slate-700">
               <BookmarkCheck className="size-4 text-lime-700" aria-hidden />
               {fmt(m.savedIn, { course: keptName })}
+              <Link
+                to={courseTabHref(keptAt, "documents", LINKED_WORK_ANCHOR)}
+                className="ml-1 font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700"
+              >
+                {m.viewInCourse}
+              </Link>
             </p>
           )}
 

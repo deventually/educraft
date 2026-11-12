@@ -56,6 +56,14 @@ describe("ResultActions (P27.1)", () => {
     expect(screen.queryByRole("button", { name: /Bewaar bij cursus/ })).toBeNull();
   });
 
+  it("links to the place in the course where the kept result shows", () => {
+    show({ courseId: "c1" });
+    expect(screen.getByRole("link", { name: "Bekijk in de cursus" })).toHaveAttribute(
+      "href",
+      "/courses/c1?tab=documents#linked-work",
+    );
+  });
+
   it("offers to keep the result at a course and to use it as evidence", () => {
     show();
     expect(screen.getByRole("combobox", { name: "Cursus" })).toBeTruthy();
