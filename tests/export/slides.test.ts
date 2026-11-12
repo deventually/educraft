@@ -92,6 +92,14 @@ describe("toSlideDeck (P30.4)", () => {
     expect(phase?.points.join(" ")).not.toContain("wisbordjes");
   });
 
+  it("puts the expected answers of lesson-plan@v2 in the notes, never on the slide", () => {
+    const phase = deckOf(
+      "## Lesverloop\n\n### Check op begrip (10 min)\n\n1. Wat is 4 × 6 m²?\n2. Welke eenheid?\n**Verwachte antwoorden:** 1. 24 m². 2. m².",
+    ).slides[0];
+    expect(phase?.points).toEqual(["Wat is 4 × 6 m²?", "Welke eenheid?"]);
+    expect(phase?.notes).toBe("Verwachte antwoorden: 1. 24 m². 2. m².");
+  });
+
   it("leaves a phase without steps with only its title, its text in the notes", () => {
     const phase = deckOf(lesson).slides[2];
     expect(phase?.points).toEqual([]);

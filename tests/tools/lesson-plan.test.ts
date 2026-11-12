@@ -24,7 +24,7 @@ const values = {
   constraints: "",
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "lesson-plan@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "lesson-plan@v2", values, outputLanguage: lang });
 
 describe("tool: lesson-plan", () => {
   it("registers as a one-shot, single-stage instructor tool that uses the context profile", () => {
@@ -35,7 +35,7 @@ describe("tool: lesson-plan", () => {
     expect(t.userType).toBe("instructor");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("lesson-plan@v1");
+    expect(t.stages[0]?.systemPromptId).toBe("lesson-plan@v2");
     expect(t.enabled).toBe(true);
   });
 
@@ -163,5 +163,48 @@ describe("tool: lesson-plan", () => {
 
   it("keeps an honest verbatim: the tool is not from the book", () => {
     expect(getPrompt("lesson-plan@v1").verbatim).toMatch(/LimeOnIt/);
+  });
+});
+
+/**
+ * @v2: an expected answer never shares a list item with its question. The list items of a phase
+ * become the points on a slide students see (P30.4); the answers go in their own paragraph,
+ * which the deck puts in the speaker notes.
+ */
+describe("lesson-plan@v2: expected answers off the slides", () => {
+  it("keeps @v1 registered for work that still uses it, with the same source text", () => {
+    expect(getPrompt("lesson-plan@v1").id).toBe("lesson-plan@v1");
+    expect(getPrompt("lesson-plan@v2").verbatim).toBe(getPrompt("lesson-plan@v1").verbatim);
+  });
+
+  it.each([
+    ["nl", "Verwachte antwoorden:", "nooit in hetzelfde lijstpunt"],
+    ["en", "Expected answers:", "never in the same list item"],
+  ] as const)(
+    "asks in %s for the answers in their own paragraph after the list",
+    (lang, label, rule) => {
+      const prompt = runtime(lang);
+      expect(prompt).toContain(label);
+      expect(prompt).toContain(rule);
+      expect(prompt).not.toMatch(/\{\{\w+\}\}/);
+    },
+  );
+
+  it.each([
+    ["nl", "Ook hier staat een verwacht antwoord nooit in hetzelfde lijstpunt"],
+    ["en", "Here too, an expected answer is never in the same list item"],
+  ] as const)("applies the same rule to coming back in later lessons (%s)", (lang, rule) => {
+    const prompt = runtime(lang);
+    const revisit = prompt.slice(
+      prompt.indexOf(
+        lang === "nl" ? "**Terugkomen in volgende lessen**" : "**Coming back in later lessons**",
+      ),
+    );
+    expect(revisit.slice(0, 600)).toContain(rule);
+  });
+
+  it("leaves @v1 as it was", () => {
+    const v1 = buildSystemPrompt({ promptId: "lesson-plan@v1", values, outputLanguage: "nl" });
+    expect(v1).not.toContain("Verwachte antwoorden:");
   });
 });

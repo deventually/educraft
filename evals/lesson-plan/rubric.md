@@ -1,4 +1,4 @@
-# Rubric — Prepare a lesson (lesson-plan@v1)
+# Rubric — Prepare a lesson (lesson-plan@v2)
 
 Judge the output as a DRAFT lesson plan for a teacher, built from the teacher's learning goal,
 content, lesson length, group size and delivery mode (brief P24, 24.4). The phases come from the
@@ -58,3 +58,4 @@ score (the cap is the maximum), however good the rest is.
 - **ignoresSetting** (cap 3): Does the plan contain an activity that does not work for the group size or the delivery mode: circulating among everyone's work in a lecture of 200 students, mini-whiteboards held up in an online lesson, or a hybrid activity that leaves out the online students?
 - **wrongContent** (cap 2): Is a worked example, formula, expected answer or subject fact in the plan wrong? Recompute every calculation step by step from the numbers given in the plan before answering true, and answer true only when you can name the line and the correct value.
 - **inventedSources** (cap 2): Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up, or attribute to Rosenshine something the article does not say?
+- **answerInQuestionItem** (cap 3): Does a list item under "Lesverloop"/"Lesson outline" or "Terugkomen in volgende lessen"/"Coming back in later lessons" that holds a question or problem for the students also contain its expected answer (after a colon, in brackets, or as "verwacht"/"expected"), instead of the answer standing in its own "Verwachte antwoorden:"/"Expected answers:" paragraph after the list? These list items become slides the students see.
