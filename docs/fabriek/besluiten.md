@@ -593,3 +593,11 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   dezelfde weg liepen. Bastiaan, 2026-11-12 (thread "Evals draaien via Codex of Claude Code": "Ja de
   keuze is aan mij"; "Geef ook bij volgende evals de keuze om het via claude code te doen of via de
   api").
+- **BESLUIT-2026-11-12-15:** **Het stage- en afstudeertraject zit gewoon in de app.** Het onderdeel
+  *Stage- en afstudeertrajecten* staat standaard **aan** en P38 wordt helemaal gebouwd (38.1 t/m
+  38.8). Een beheerder kan het onderdeel op basis van de privacy-officer tijdelijk uitzetten
+  (P28.3). Dit vervangt het deel van BESLUIT-2026-11-12-10 en -11 dat het onderdeel uit liet staan
+  tot het akkoord; de bewaartermijn en de DPIA-aanvulling blijven een open punt voor de
+  privacy-officer. Bastiaan, 2026-11-12 (thread "Bouw stagetrack naast OnStage": "Stage track wil
+  ik gewoon hebben in de app. Een beheerder kan die op basis van de privacy officer nog tijdelijk op
+  hidden zetten, maar ik wil de volledige feature in limeonit").

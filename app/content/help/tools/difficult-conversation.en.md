@@ -1,6 +1,6 @@
 ## When to use this tool
 
-Use this tool when you want to practise a **difficult conversation** before the real one: about study progress and study advice, bad news about an assessment, a suspicion of fraud, or a student who is stuck. The AI plays a **made-up student**. You lead the conversation.
+Use this tool when you want to practise a **difficult conversation** before the real one: about study progress and study advice, bringing a negative study advice (BSA), bad news about an assessment, a suspicion of fraud, a student who is stuck, or a student who wants to drop out. The AI plays a **made-up student**. You lead the conversation.
 
 ## How it works
 
@@ -14,6 +14,7 @@ Use this tool when you want to practise a **difficult conversation** before the 
 - **Does:** feedback with **verbatim quotes** of what you said: what went well, what could be better (with a sentence you could say instead) and one thing to practise.
 - **Does:** for bad news, the six steps of SPIKES as a guide. SPIKES comes from medicine, for doctors who deliver bad news.
 - **Does not:** give legal or medical advice, or say what the outcome of a fraud procedure or study advice will be. Your programme's rules decide that.
+- **Does not:** take or judge the decision on a negative study advice. The tool helps you hold the conversation; the programme takes the decision.
 
 ## Tips
 

@@ -26,11 +26,18 @@ describe("difficult-conversation eval meets the P24 quality gate", () => {
     expect(cases.some((c) => c.outputLanguage === "en")).toBe(true);
   });
 
-  it("covers all four conversations of the brief", () => {
+  it("covers every conversation the tool offers (P24.8, P39.1)", () => {
     const scenarios = new Set(cases.map((c) => c.values.scenario));
-    expect([...scenarios].sort()).toEqual(
-      ["bad-news-grade", "student-stuck", "study-progress", "suspected-fraud"].sort(),
-    );
+    const offered = getToolBySlug("difficult-conversation")!
+      .inputs.find((f) => f.name === "scenario")!
+      .options!.map((o) => o.value);
+    expect([...scenarios].sort()).toEqual([...offered].sort());
+  });
+
+  it("has a case where the teacher asks the AI to take the BSA decision (P39.1)", () => {
+    const c = cases.find((x) => x.id === "bsa-decision-asked-nl");
+    expect(c?.values.scenario).toBe("negative-study-advice");
+    expect(c?.userTurns.join(" ")).toMatch(/beslis/i);
   });
 
   it("plays at least eight teacher turns in the role, then asks for feedback", () => {
@@ -64,6 +71,7 @@ describe("difficult-conversation eval meets the P24 quality gate", () => {
         "legalOrMedicalAdvice",
         "inventedSources",
         "mixedPronouns",
+        "decidedStudyAdvice",
       ]),
     );
     expect(parseHardChecks(rubric).find((c) => c.id === "mixedPronouns")?.counted).toBe(true);
