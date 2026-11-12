@@ -33,8 +33,7 @@ export async function addWorkAsLesson(
   ]);
   if (!course || !work) return null;
   const tool = getToolBySlug(work.toolSlug);
-  const stage = tool?.stages.find((s) => s.id === work.stageId) ?? tool?.stages[0];
-  if (!tool || stage?.courseExport !== "lesson") return null;
+  if (!tool || !becomesLesson(work.toolSlug, work.stageId)) return null;
 
   const goal = lessonGoal(tool.inputs, work.inputJson);
   const data = addActivity(course.data, {
@@ -49,6 +48,13 @@ export async function addWorkAsLesson(
   if (!saved) return null;
   const link = await linkGeneration(userId, courseId, generationId, itemId);
   return link ? { itemId } : null;
+}
+
+/** Whether work of this tool stage can become a lesson: registry data, no tool branch. */
+export function becomesLesson(toolSlug: string, stageId: string | null): boolean {
+  const tool = getToolBySlug(toolSlug);
+  const stage = tool?.stages.find((s) => s.id === stageId) ?? tool?.stages[0];
+  return stage?.courseExport === "lesson";
 }
 
 /** The value of the field a lesson's goal fills, cut to the course limit. */
@@ -72,7 +78,7 @@ function lessonGoal(
 
 export type LessonFromWorkResult =
   | { ok: true; intent: "addAsLesson"; itemId: string }
-  | { ok: false; error: string };
+  | { ok: false; intent: "addAsLesson"; error: string };
 
 /** The `addAsLesson` intent of a tool page; null for any other intent. */
 export async function lessonFromWorkIntent(
@@ -88,5 +94,20 @@ export async function lessonFromWorkIntent(
   });
   return done
     ? { ok: true, intent: "addAsLesson", itemId: done.itemId }
-    : { ok: false, error: getMessages(getLocale(request)).resultActions.errorLesson };
+    : {
+        ok: false,
+        intent: "addAsLesson",
+        error: getMessages(getLocale(request)).resultActions.errorLesson,
+      };
+}
+
+/** The `addAsLesson` intent on a course page ("Gekoppeld werk"); null for any other intent. */
+export async function courseLessonAction(
+  request: Request,
+  userId: string,
+  courseId: string,
+): Promise<LessonFromWorkResult | null> {
+  const fd = await request.clone().formData();
+  fd.set("courseId", courseId);
+  return lessonFromWorkIntent(request, userId, fd);
 }

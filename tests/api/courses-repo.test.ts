@@ -176,6 +176,7 @@ describe("course links", () => {
       {
         generationId: g.id,
         toolSlug: "authentic-assessment",
+        stageId: null,
         itemId: TEST1,
         createdAt: g.createdAt,
       },
