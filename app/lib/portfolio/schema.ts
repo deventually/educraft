@@ -75,6 +75,8 @@ const GuidedSectionSchema = z.object({
   answers: z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.questions),
   at: z.number().int().nonnegative(),
   model: z.string().max(200),
+  /** When a paragraph was last drafted from these answers; new questions clear it. */
+  draftedAt: z.number().int().nonnegative().optional(),
 });
 
 /** Proofreading output limits. */

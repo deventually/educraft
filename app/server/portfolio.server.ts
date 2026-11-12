@@ -128,14 +128,16 @@ export type PortfolioActionResult =
       added?: number;
       /** reviewAll: chapters reviewed, and chapters whose review failed. */
       reviewed?: number;
+      /** guideDraftAll: sections written; with guideQuestionsAll, `failed` counts sections. */
+      drafted?: number;
       failed?: number;
     }
   | { ok: false; error: string };
 
 /**
- * Applies the posted intent to the dossier and stores it. Six intents call a
+ * Applies the posted intent to the dossier and stores it. Eight intents call a
  * model (`extract` on the framework page; `review`, `guideQuestions:<sectionId>`,
- * `guideDraft:<sectionId>` and
+ * `guideDraft:<sectionId>`, `guideQuestionsAll`, `guideDraftAll` and
  * `proofread` for one chapter; `reviewAll` for the whole dossier); every other
  * one is a pure edit.
  */
@@ -185,9 +187,10 @@ async function runIntent(
     return { ok: true, intent };
   }
 
-  const guided = /^(guideQuestions|guideDraft):(.+)$/.exec(intent);
+  // One section (`guideDraft:<sectionId>`) or the whole chapter (`guideDraftAll`).
+  const guided = /^(guideQuestions|guideDraft)(?:All$|:(.+)$)/.exec(intent);
   if (guided) {
-    const step = guided[1] as GuidedIntent;
+    const step = (guided[2] === undefined ? `${guided[1]}All` : guided[1]) as GuidedIntent;
     const outcomeId = String(fd.get("outcomeId") ?? "");
     const result = await runGuidedIntent(
       user,
@@ -208,7 +211,7 @@ async function runIntent(
       };
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
-    return { ok: true, intent: step };
+    return { ok: true, intent: step, drafted: result.drafted, failed: result.failed };
   }
 
   if (intent === "proofread") {

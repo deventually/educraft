@@ -6,7 +6,12 @@ import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
 import type { DossierData, Outcome } from "~/lib/portfolio/types";
 import { writingSections } from "~/lib/portfolio/guided";
-import { type GuidedSectionView, GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import {
+  type GuidedSectionView,
+  GuidedWriting,
+  guidedDone,
+  guidedPending,
+} from "~/components/portfolio/GuidedWriting";
 import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
@@ -101,6 +106,7 @@ function guidedView(d: DossierData, outcome: Outcome): GuidedSectionView[] {
       covers: s.criterionIds.flatMap((id) => number.get(id) ?? []).sort((a, b) => a - b),
       questions: saved?.questions ?? [],
       answers: saved?.questions.map((_, i) => saved.answers[i] ?? "") ?? [],
+      drafted: saved?.draftedAt !== undefined,
     };
   });
 }
@@ -138,21 +144,19 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       if (intent === "review") return { variant: "pending", message: t.portfolio.coach.pending };
       if (intent === "proofread")
         return { variant: "pending", message: t.portfolio.proofread.pending };
-      if (intent.startsWith("guideQuestions:"))
-        return { variant: "pending", message: t.portfolioGuided.pendingQuestions };
-      if (intent.startsWith("guideDraft:"))
-        return { variant: "pending", message: t.portfolioGuided.pendingDraft };
+      if (intent.startsWith("guide"))
+        return { variant: "pending", message: guidedPending(intent, t.portfolioGuided) };
       return { variant: "pending", message: t.toast.saving };
     },
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
+      if (r.intent.startsWith("guide"))
+        return { variant: "success", message: guidedDone(r, t.portfolioGuided) };
       const tr = t.portfolio.proofread;
       const done: Record<string, string> = {
         refreshCourseEvidence: t.portfolio.outcome.refreshed,
         review: t.portfolio.coach.done,
-        guideQuestions: t.portfolioGuided.questions,
-        guideDraft: t.portfolioGuided.done,
         takeProofread: tr.taken,
         skipProofread: tr.skipped,
       };

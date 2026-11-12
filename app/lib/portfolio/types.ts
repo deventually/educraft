@@ -203,6 +203,8 @@ export interface GuidedSection {
   answers: string[];
   at: number;
   model: string;
+  /** When a paragraph was last drafted from these answers; new questions clear it. */
+  draftedAt?: number;
 }
 
 /**
