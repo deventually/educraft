@@ -4,9 +4,17 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #294 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
 
 ## Nu
+
+- **Platformlaag, basis (#296) gemerged op 2026-11-12:** het platform heeft een eigen adres en
+  database (`PLATFORM_HOST`) en houdt de lijst van instellingen bij (`institutions.json`, eenmalig
+  overgenomen uit `TENANTS`), zonder herstart te wijzigen: toevoegen (met database, eerste
+  beheerder die ook eigenaar is, en een wachtwoordlink), activeren, deactiveren, verwijderen naar
+  een archief van 60 dagen en terugzetten. Een gedeactiveerde instelling antwoordt 503; het
+  platformadres laat alleen `/platform` en inloggen door. Eigen container met
+  `LIMEONIT_SERVES=platform|institutions` (compose-profiel `platform`). Het scherm volgt in #295.
 
 - **Leerlijn over meer opleidingen, en de leerlijn op de cursuspagina (#294) gemerged op
   2026-11-12:** een leerlijn houdt zijn eigen opleiding en kan ook gelden voor andere opleidingen
