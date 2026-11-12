@@ -113,6 +113,7 @@ describe("routes: one file per area", () => {
         { path: "/admin/users/:id", file: "routes/admin.users.$id.tsx", inShell: true },
         { path: "/admin/teams", file: "routes/admin.teams.tsx", inShell: true },
         { path: "/admin/teams/:id", file: "routes/admin.teams.$id.tsx", inShell: true },
+        { path: "/admin/organisation", file: "routes/admin.organisation.tsx", inShell: true },
         { path: "/teams/:id", file: "routes/teams.$id.tsx", inShell: true },
         { path: "/admin/tools", file: "routes/admin.tools.tsx", inShell: true },
         { path: "/admin/context", file: "routes/admin.context.tsx", inShell: true },

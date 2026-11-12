@@ -6,6 +6,7 @@ import {
   Gauge,
   GraduationCap,
   Megaphone,
+  Network,
   ScrollText,
   SlidersHorizontal,
   Users,
@@ -41,6 +42,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 const SECTIONS = [
   { to: "/admin/users", key: "users", Icon: Users },
   { to: "/admin/teams", key: "teams", Icon: UsersRound },
+  { to: "/admin/organisation", key: "organisation", Icon: Network },
   { to: "/admin/announcements", key: "announcements", Icon: Megaphone },
   { to: "/admin/tools", key: "tools", Icon: SlidersHorizontal },
   { to: "/admin/agents", key: "agents", Icon: BotMessageSquare },

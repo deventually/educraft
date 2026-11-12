@@ -232,6 +232,13 @@
       "when": 1794405623432,
       "tag": "0032_lean_mulholland_black",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1794470212203,
+      "tag": "0033_normal_harpoon",
+      "breakpoints": true
     }
   ]
 }

@@ -27,6 +27,7 @@ export const PAGES: E2EPage[] = [
   { path: "/admin/tools", as: "admin" },
   { path: "/admin/announcements", as: "admin" },
   { path: "/admin/audit", as: "admin" },
+  { path: "/admin/organisation", as: "admin" },
   // The dossier is off by default for a teacher; an admin always has it.
   { path: "/portfolio", as: "admin" },
 ];

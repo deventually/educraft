@@ -46,6 +46,8 @@ export interface Programme {
   sector: Sector;
   track: string | null;
   form: ProgrammeForm | null;
+  /** The division it sits under (faculty, location, …), or null. Set on Beheer → Organisatie. */
+  divisionId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -117,6 +119,7 @@ const rowToProgramme = (r: Row): Programme => ({
   sector: r.sector as Sector,
   track: r.track,
   form: r.form as ProgrammeForm | null,
+  divisionId: r.divisionId,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
 });
@@ -216,6 +219,7 @@ export async function createProgramme(
     teamId,
     createdBy: a.id,
     ...values,
+    divisionId: null,
     createdAt: now,
     updatedAt: now,
   };
