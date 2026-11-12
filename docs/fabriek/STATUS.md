@@ -4,10 +4,16 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313 en #314 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313, #314, #316 en #317 gemerged)_
 
 ## Nu
 
+- **Bastiaan kiest per eval de route (#317) gemerged op 2026-11-12:** een werker die een eval
+  nodig heeft, vraagt eerst: via Claude Code (de werker draait hem zelf en zet het rapport in zijn
+  PR) of via de API (Bastiaan draait hem met één kopieerblok) (BESLUIT-2026-11-12-14).
+- **Evals sneller (#316) gemerged op 2026-11-12:** `npm run eval -- --parallel N` laat N runs
+  tegelijk lopen, vooral voor `claude-code::…`, waar `--batch` niet bestaat. Met een ijkmeting van
+  lesson-plan via Claude Code.
 - **Cursusevaluatie verwerken: de motor (#313) gemerged op 2026-11-12:** LimeOnIt maakt van een
   geanonimiseerde studentenenquête thema's met aantallen en letterlijke citaten, problemen op hun
   plek in de cursus, en drie tot vijf verbeterpunten (een eigen punt per probleem). De code gooit
