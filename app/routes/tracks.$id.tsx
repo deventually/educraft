@@ -1,17 +1,26 @@
-import { useId } from "react";
+import { type ReactNode, useId } from "react";
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/tracks.$id";
 import { requireTracksUser } from "~/server/tracks.server";
 import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
+import { rubricChoices, trackSecondAssessorAction } from "~/server/trackSecondAssessor.server";
 import { getSelectableModels } from "~/server/availability.server";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
+import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 import { getTrack, listRounds, updateTrackData } from "~/server/repositories/tracks.server";
 import { getCourse } from "~/server/repositories/courses.server";
 import { getAssessmentModel } from "~/server/repositories/assessmentModels.server";
 import { IsoDateSchema } from "~/lib/calendar/weeks";
-import { MILESTONES, type MilestoneId, MilestoneIdSchema, nextStep, progress } from "~/lib/tracks";
+import {
+  MILESTONES,
+  type MilestoneId,
+  MilestoneIdSchema,
+  type MilestonePanel,
+  nextStep,
+  progress,
+} from "~/lib/tracks";
 import { TabNav } from "~/components/TabNav";
 import { ProgressPanel } from "~/components/progress/ProgressPanel";
 import { Markdown } from "~/components/Markdown";
@@ -38,14 +47,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireTracksUser(request);
   const track = await getTrack(user.id, params.id ?? "");
   if (!track) throw notFound();
-  const [rounds, course, model, selectable] = await Promise.all([
+  const tab = tabOf(new URL(request.url).searchParams.get("tab"));
+  const panel = tab === "overview" ? undefined : MILESTONES.find((x) => x.id === tab)?.panel;
+  const [rounds, course, model, selectable, rubrics] = await Promise.all([
     listRounds(user.id, track.id),
     track.courseId ? getCourse(user.id, track.courseId) : null,
     track.assessmentModelId ? getAssessmentModel(user.id, track.assessmentModelId) : null,
     getSelectableModels(user),
+    // The rubrics only on the tab that compares with them (P38.5).
+    panel === "second-assessor" ? rubricChoices(user) : [],
   ]);
   return {
-    tab: tabOf(new URL(request.url).searchParams.get("tab")),
+    tab,
+    rubrics,
     track: {
       id: track.id,
       code: track.code,
@@ -82,6 +96,8 @@ export async function action({ request, params }: Route.ActionArgs) {
   const locale = getLocale(request);
   const ff = await trackFeedforwardAction(request, user, track, locale);
   if (ff) return ff;
+  const sa = await trackSecondAssessorAction(request, user, track, locale);
+  if (sa) return sa;
   const fd = await request.formData();
   const m = getMessages(locale).tracks;
   if (fd.get("intent") !== "milestone")
@@ -116,7 +132,12 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
         ? d.ok
           ? {
               variant: "success",
-              message: d.intent === "feedforward" ? m.feedforward.done : m.toastSaved,
+              message:
+                d.intent === "feedforward"
+                  ? m.feedforward.done
+                  : d.intent === "second-assessor"
+                    ? m.secondAssessor.done
+                    : m.toastSaved,
             }
           : { variant: "error", message: d.error }
         : null,
@@ -209,6 +230,15 @@ function Overview({ data, href }: { data: Data; href: (id: string) => string }) 
   );
 }
 
+/** The working panel of a milestone, by its data (`Milestone.panel`). */
+function Panel({ kind, data }: { kind: MilestonePanel; data: Data }) {
+  const panels: Record<MilestonePanel, () => ReactNode> = {
+    feedforward: () => <FeedforwardPanel criteria={data.track.criteria} models={data.models} />,
+    "second-assessor": () => <SecondAssessorPanel rubrics={data.rubrics} />,
+  };
+  return panels[kind]();
+}
+
 function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId }) {
   const t = useT();
   const m = t.tracks;
@@ -241,9 +271,7 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
           </Link>
         </div>
       )}
-      {def?.feedforward && !data.track.closedAt && (
-        <FeedforwardPanel criteria={data.track.criteria} models={data.models} />
-      )}
+      {def?.panel && !data.track.closedAt && <Panel kind={def.panel} data={data} />}
       <Form method="post" key={milestone} className="space-y-4">
         <input type="hidden" name="intent" value="milestone" />
         <input type="hidden" name="milestone" value={milestone} />

@@ -19,13 +19,18 @@ const MILESTONE_IDS = [
 export type MilestoneId = (typeof MILESTONE_IDS)[number];
 export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
 
+export type MilestonePanel = "feedforward" | "second-assessor";
+
 interface Milestone {
   id: MilestoneId;
   name: { nl: string; en: string };
   /** The tool that does this milestone's work; its result can be kept as a round. */
   tool?: { slug: string; label: { nl: string; en: string } };
-  /** P38.3: each new version gets feedforward, following up the previous round. */
-  feedforward?: true;
+  /**
+   * The working panel the milestone tab shows: feedforward on each new version (P38.3), or the
+   * second assessor's comparison (P38.5).
+   */
+  panel?: MilestonePanel;
 }
 
 export const MILESTONES: readonly Milestone[] = [
@@ -38,7 +43,7 @@ export const MILESTONES: readonly Milestone[] = [
     },
   },
   { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
-  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, feedforward: true },
+  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, panel: "feedforward" },
   {
     id: "final",
     name: { nl: "Eindversie", en: "Final version" },
@@ -48,7 +53,11 @@ export const MILESTONES: readonly Milestone[] = [
       label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
     },
   },
-  { id: "second-assessor", name: { nl: "Tweede beoordelaar", en: "Second assessor" } },
+  {
+    id: "second-assessor",
+    name: { nl: "Tweede beoordelaar", en: "Second assessor" },
+    panel: "second-assessor",
+  },
   { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
   { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
 ];

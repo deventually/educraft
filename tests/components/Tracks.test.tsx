@@ -9,6 +9,7 @@ import { TrackBar } from "~/components/tracks/TrackBar";
 import { SupervisionBlock } from "~/components/tracks/SupervisionBlock";
 import { ResultActions } from "~/components/ResultActions";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
+import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -204,5 +205,42 @@ describe("feedforward on the drafts tab (P38.3)", () => {
     // The name check comes first: nothing can be sent before it.
     expect(screen.queryByRole("button", { name: "Geef feedforward" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("SecondAssessorPanel (P38.5)", () => {
+  const rubrics = [
+    {
+      id: "r1",
+      name: "Stage HBO",
+      criteria: [
+        {
+          id: "c1",
+          title: "Analyse",
+          levels: [
+            { id: "l1", label: "Onvoldoende" },
+            { id: "l2", label: "Goed" },
+          ],
+        },
+      ],
+    },
+  ];
+
+  it("asks both levels per criterion of the chosen rubric, and passes axe", async () => {
+    const { container } = renderWithRouter(<SecondAssessorPanel rubrics={rubrics} />);
+    const group = screen.getByRole("group", { name: "Analyse" });
+    expect(within(group).getByLabelText("Jouw niveau")).toBeTruthy();
+    expect(within(group).getByLabelText("Niveau van de tweede beoordelaar")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Vergelijk en bewaar" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("without a rubric, says where to make one", () => {
+    renderWithRouter(<SecondAssessorPanel rubrics={[]} />);
+    expect(screen.getByText(/nog geen rubric/i)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Naar je rubrics" }).getAttribute("href")).toBe(
+      "/utilities/rubric",
+    );
+    expect(screen.queryByRole("button", { name: "Vergelijk en bewaar" })).toBeNull();
   });
 });
