@@ -4,10 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318, #320 en #321 gemerged)_
 
 ## Nu
 
+- **Een gesprek voorbereiden (#321) gemerged op 2026-11-12:** een nieuwe tool voor de SLB'er:
+  kies de situatie (start, voortgang, dreigend negatief studieadvies, twijfel over stoppen,
+  minor of stage) en de fase, en krijg vragen om te openen, door te vragen en af te sluiten, wat
+  je niet vraagt en wanneer je doorverwijst. Nooit over een student, geen BSA-besluit, geen loket
+  bij naam (P39.2, `conversation-prep@v1`).
+- **Bewaarde les terugvinden (#320) gemerged op 2026-11-12:** *Bewaard bij cursus* onder een
+  resultaat linkt nu naar de plek in de cursus waar het werk staat. Een bewaarde lesopzet kan met
+  *Neem op als les* een les van de cursus worden, en bij elke les staat het werk dat eraan hangt.
 - **SLB-gesprekken in Lastig gesprek oefenen (#315) gemerged op 2026-11-12:** een docent oefent
   nu ook een negatief studieadvies (BSA) brengen en stoppen met de studie bespreken. De AI neemt
   nooit het BSA-besluit en beoordeelt het ook niet (P39.1, `difficult-conversation@v3`). Eval
