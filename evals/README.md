@@ -31,11 +31,14 @@ the model's effort and answer budget come from `config/models.json`
 
 ```bash
 npm run eval -- --tool lesson-plan --runs 3 \
-  --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 --label cc
+  --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 \
+  --parallel 6 --label cc
 ```
 
-- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). The calls run one
-  after another, so a `--runs 3` of one tool takes roughly half an hour to an hour.
+- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). Without `--batch`
+  the runs go one after another (a `--runs 3` of lesson-plan: about 75 minutes);
+  `--parallel 6` runs six at once (about 15 minutes). Lower it when the subscription hits its
+  limit.
 - A worker session in the cloud is signed in too, so it can run the eval itself and commit the
   report in its PR.
 - What still differs from the app: temperature cannot be set, and Claude Code adds a short
