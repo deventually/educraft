@@ -1,5 +1,5 @@
 import { Form, Link, redirect } from "react-router";
-import { ArrowLeft, CopyPlus } from "lucide-react";
+import { ArrowLeft, CopyPlus, Scale } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.shared.$id";
 import { requireFeatureUser } from "~/server/features.server";
 import { copySharedItem, getSharedRubric } from "~/server/repositories/shares.server";
@@ -52,13 +52,22 @@ export default function SharedRubricPage({ loaderData }: Route.ComponentProps) {
       <p className="mt-2 max-w-[65ch] text-slate-600">
         {fmt(s.readOnly, { owner: rubric.ownerName })}
       </p>
-      <Form method="post" className="mt-3">
-        <input type="hidden" name="intent" value="copy" />
-        <Button type="submit" size="sm">
-          <CopyPlus className="size-4" aria-hidden />
-          {s.copy}
-        </Button>
-      </Form>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Form method="post">
+          <input type="hidden" name="intent" value="copy" />
+          <Button type="submit" size="sm">
+            <CopyPlus className="size-4" aria-hidden />
+            {s.copy}
+          </Button>
+        </Form>
+        <Link
+          to={`/utilities/rubric/${rubric.id}/calibrate`}
+          className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          <Scale className="size-4" aria-hidden />
+          {t.rubricCalibrate.link}
+        </Link>
+      </div>
       <div className="mt-6 space-y-6">
         {rubric.data.criteria.map((criterion) => (
           <section

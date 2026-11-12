@@ -11,6 +11,8 @@ export const utilities: RouteArea = {
     // A colleague's rubric, shared with your team (P28.4): read only.
     route("utilities/rubric/shared/:id", "routes/utilities.rubric.shared.$id.tsx"),
     route("utilities/rubric/:id/fill", "routes/utilities.rubric.$id.fill.tsx"),
+    // Calibrating with a second rater (P34.2): own or shared rubric, nothing stored.
+    route("utilities/rubric/:id/calibrate", "routes/utilities.rubric.$id.calibrate.tsx"),
     route("utilities/:slug", "routes/utilities.$slug.tsx"),
   ],
 };

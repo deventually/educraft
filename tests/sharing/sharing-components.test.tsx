@@ -132,6 +132,10 @@ describe("the read-only pages (P28.4)", () => {
     ));
     expect(screen.getByRole("heading", { name: "Analyse" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Maak een kopie/ })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Kalibreren" })).toHaveAttribute(
+      "href",
+      "/utilities/rubric/r1/calibrate",
+    );
     expect(screen.queryByRole("textbox")).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });

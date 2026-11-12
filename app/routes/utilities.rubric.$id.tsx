@@ -1,5 +1,5 @@
 import { Form, Link, redirect, useActionData } from "react-router";
-import { ArrowLeft, ClipboardCheck, CopyPlus, Trash2 } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, CopyPlus, Scale, Trash2 } from "lucide-react";
 import type { Route } from "./+types/utilities.rubric.$id";
 import { requireFeatureUser } from "~/server/features.server";
 import {
@@ -116,6 +116,13 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
           >
             <ClipboardCheck className="size-4" aria-hidden />
             {r.fill.link}
+          </Link>
+          <Link
+            to={`/utilities/rubric/${rubric.id}/calibrate`}
+            className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            <Scale className="size-4" aria-hidden />
+            {t.rubricCalibrate.link}
           </Link>
           <Form method="post">
             <input type="hidden" name="intent" value="duplicate" />
