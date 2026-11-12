@@ -34,7 +34,7 @@ git diff $RANGE -- .env.example                          # new or changed settin
 git diff --name-only $RANGE -- app/lib/prompts/           # prompts, new @vN files
 ```
 
-No tag yet means this is the first release: summarise from `docs/fabriek/STATUS.md` (*Nu*)
+No tag yet means this is the first release: summarise from the board entries in `docs/fabriek/bord/`
 instead of listing every PR.
 
 ## 2. The checklist

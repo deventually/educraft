@@ -601,3 +601,13 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   privacy-officer. Bastiaan, 2026-11-12 (thread "Bouw stagetrack naast OnStage": "Stage track wil
   ik gewoon hebben in de app. Een beheerder kan die op basis van de privacy officer nog tijdelijk op
   hidden zetten, maar ik wil de volledige feature in limeonit").
+- **BESLUIT-2026-11-12-16:** **Het bord botst niet meer: één bestand per PR.** Een PR schrijft wat
+  hij verandert in een eigen nieuw bestand `docs/fabriek/bord/<datum>-<onderwerp>.md` en raakt
+  `STATUS.md` niet aan voor zijn eigen werk. Staat het bestand op `main`, dan is het gemerged; wat
+  loopt, zijn de open PR's op GitHub. `STATUS.md` houdt alleen de verzoeken, wat op Bastiaan
+  wacht, de volgorde, de open vragen en wat geparkeerd is. Dit vervangt de regel dat elke PR
+  *Nu* en *Bezig* bijwerkt, en de regel dat de volgende PR die `main` binnenhaalt de vorige op het
+  bord zet. Geen CI die naar `main` schrijft: `main` is beschermd en alleen Bastiaan merget.
+  `tests/hotspots.test.ts` bewaakt het. Bastiaan, 2026-11-12 (thread "Voorkom merge-conflicten in
+  het bord": "Kunnen we niets beters verzinnen voor het bord? Dit veroorzaakt ieder keer weer
+  conflicts").

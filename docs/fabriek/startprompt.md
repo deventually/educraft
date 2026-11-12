@@ -33,7 +33,7 @@ Wat ik nu van je wil:
    wat je niet doet.
 2. **Controleer je gereedschap.** Kun je de repo lezen, werkers starten, PR's openen en CI zien?
    Zeg eerlijk wat wel en niet lukt, en wat ik moet regelen, met alle instellingen erbij.
-3. **Controleer het bord.** Klopt `STATUS.md` met wat er echt in de repo en op GitHub staat? Zo
+3. **Controleer het bord.** Klopt `STATUS.md` (en de map `bord/`) met wat er echt in de repo en op GitHub staat? Zo
    niet, zeg wat er anders is.
 4. **Stel de eerste opdracht voor.** Volgens het bord is dat vereenvoudiging V1: de studentenlaag
    eruit, terwijl de tutors blijven. Geef in een paar zinnen het plan, hoeveel PR's het worden en welke

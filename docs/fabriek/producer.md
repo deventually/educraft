@@ -58,8 +58,8 @@ met de Producer praat?"
 ## Eerst kijken
 
 Voordat er werk start, controleert de Producer, of de werker, dat niemand het al doet:
-- de open PR's die over hetzelfde gaan of dezelfde bestanden raken;
-- *Bezig* op het bord.
+- de open PR's die over hetzelfde gaan of dezelfde bestanden raken (wat er loopt, staat alleen
+  daar; een werker die iets wil claimen, opent vroeg een concept-PR).
 
 Heeft iemand het al, dan start er geen kopie.
 
@@ -92,7 +92,8 @@ gesquasht is. Een branch die na een (squash-)merge doorloopt, geeft juist nieuwe
 Conflicten voorkomen gaat vóór oplossen. De bestanden waar bijna elke PR in schrijft, zijn daarom
 per onderdeel opgesplitst (BESLUIT-2026-11-04-19):
 - de schermteksten: één bestand per onderdeel in `app/lib/i18n/messages/nl/` en `en/`;
-- de routes: één bestand per onderdeel in `app/routing/`.
+- de routes: één bestand per onderdeel in `app/routing/`;
+- het bord: één bestand per PR in [`bord/`](bord/) (BESLUIT-2026-11-12-16).
 
 Een werker zet nieuwe teksten en routes in het bestand van zijn eigen onderdeel, of maakt een nieuw
 bestand. Hij voegt niets toe aan een ander onderdeel als dat niet hoeft.
@@ -103,9 +104,11 @@ onder valse belasting gemaakt is, controleer je opnieuw op een rustige machine.
 
 ## Afmaken wat je opent
 
-Wat af is, staat niet meer als *Bezig* op het bord. Wat op Bastiaan wacht, staat onder *Wacht op
-jou*. Een lege sectie blijft leeg: geen tekst als "niets op dit moment". Het bord bijwerken gebeurt
-in dezelfde PR als het werk zelf. Losse PR's alleen voor het bord bestaan niet.
+Elke PR zet in [`bord/`](bord/) zijn eigen nieuwe bestand neer met wat er verandert; staat het op
+`main`, dan is het gemerged. Een PR schrijft niet in `STATUS.md` voor zijn eigen werk, zodat
+parallelle PR's daar niet botsen (BESLUIT-2026-11-12-16). Wat op Bastiaan wacht, staat onder
+*Wacht op jou*. Een lege sectie blijft leeg: geen tekst als "niets op dit moment". Losse PR's alleen
+voor het bord bestaan niet.
 
 ## Praten met Bastiaan
 
