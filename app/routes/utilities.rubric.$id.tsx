@@ -11,7 +11,7 @@ import {
 import { listRubricScores } from "~/server/repositories/rubricScores.server";
 import { shareAction, shareControls } from "~/server/sharing.server";
 import { ShareWithTeam } from "~/components/sharing/ShareWithTeam";
-import { RubricInsight } from "~/components/utilities/RubricInsight";
+import { RubricGroup } from "~/components/utilities/RubricGroup";
 import { RubricEditor } from "~/components/utilities/RubricEditor";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { Button } from "~/components/ui";
@@ -19,7 +19,7 @@ import { useFormToast } from "~/components/Toast";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
-import { levelDistribution, RUBRIC_LIMITS } from "~/lib/utilities/rubric";
+import { groupSummary, RUBRIC_LIMITS, rubricRounds } from "~/lib/utilities/rubric";
 import { redirectWithFlash } from "~/server/flash.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -27,14 +27,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const rubric = await getRubric(user.id, params.id);
   if (!rubric) throw new Response("Not Found", { status: 404 });
   const scores = await listRubricScores(user.id, rubric.id);
+  // P36.1: one round (month) at a time, the newest unless ?round= names another.
+  const rounds = rubricRounds(scores);
+  const wanted = new URL(request.url).searchParams.get("round");
+  const selected = rounds.find((r) => r.month === wanted)?.month ?? rounds[0]?.month ?? "";
   return {
     rubric: { id: rubric.id, name: rubric.name, data: rubric.data },
     scoreCount: scores.length,
-    // Null under five closed fill-ins, so one student is not recognisable (P23.3).
-    insight: levelDistribution(
-      rubric.data,
-      scores.map((s) => s.levels),
-    ),
+    rounds,
+    selected,
+    // Null under five closed fill-ins in the round, so one student is not recognisable (P23.3).
+    group: groupSummary(rubric.data, scores, selected),
     sharing: await shareControls(user, "rubric", rubric.id),
   };
 }
@@ -86,7 +89,7 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export default function RubricPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const r = t.utilities.rubric;
-  const { rubric, insight, scoreCount, sharing = { teams: [], sharedWith: [] } } = loaderData;
+  const { rubric, group, rounds, selected, sharing = { teams: [], sharedWith: [] } } = loaderData;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
     result: (d) => {
@@ -144,7 +147,7 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
       </div>
       {/* Keyed on id: a duplicate opens with fresh editor state. */}
       <RubricEditor key={rubric.id} rubric={rubric} />
-      <RubricInsight insight={insight} count={scoreCount} />
+      <RubricGroup group={group} rounds={rounds} selected={selected} />
       <div className="mt-10">
         <ShareWithTeam {...sharing} />
       </div>

@@ -170,14 +170,6 @@ export const utilities = {
       studentsCaption: "Studenten in deze batch",
     },
     gradeSettings: "Van punten naar cijfer",
-    insight: {
-      caption: "{criterion}: hoe vaak elk niveau gekozen is",
-      count: "Aantal keer",
-      intro: "Op basis van {n} afgesloten invullingen, zonder namen.",
-      title: "Hoe vaak elk niveau gekozen is",
-      tooFew:
-        "Vanaf {min} afgesloten invullingen zie je hier hoe vaak elk niveau gekozen is, zodat geen student herkenbaar is. Nu: {n}.",
-    },
     invalid:
       "Niet opgeslagen: controleer de naam, de punten (0 tot en met 100) en de cijferinstellingen.",
     knockout: "Knock-out: het laagste niveau is altijd onvoldoende",
