@@ -446,6 +446,38 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   `npm run test:e2e` weer zelf. Bastiaan, 2026-11-12 (thread "Playwright e2e op GitHub weer laten
   draaien": "Ik wil kijken of de playwright e2e op github het weer doet, zodat we de PR's daar weer
   volledig kunnen draaien").
+- **BESLUIT-2026-11-12-2:** **Eén omgeving is één instelling; daarbinnen een tussenlaag met een
+  eigen naam.** LimeOnIt komt in drie soorten: geïnstalleerd bij een instelling, online met een
+  abonnement voor kleinere instellingen, en een demo voor sales. Bij alle drie is één omgeving (één
+  database) precies één instelling; een online abonnee krijgt dus een eigen database
+  (BESLUIT-2026-07-03-1 blijft). De beheerders van een omgeving beheren alleen die instelling; de
+  eigenaar is daar de hoogste beheerder. Boven de omgevingen komt later een platformbeheerder
+  (Bastiaan) die omgevingen aanmaakt en de eerste eigenaar aanwijst, buiten elke database van een
+  instelling. Een "school per gebruiker" is daarom niet nodig. Binnen een instelling zit tussen
+  instelling en opleiding een **optionele tussenlaag** (onderdeel) waarvan de instelling zelf kiest
+  hoe hij heet: faculteit, academie, instituut, college, vestiging of afdeling (een vo-bestuur kiest
+  vestigingen, een hogeschool faculteiten). Een opleiding valt onder hooguit één onderdeel; de
+  beheerder zet hem daar op Beheer → Organisatie. Opleidingen blijven van een team
+  (BESLUIT-2026-11-10-3); iemand aan een opleiding koppelen is hem in het team van die opleiding
+  zetten. Een leerlijn kan bij meer opleidingen horen (voltijd en deeltijd, een onderzoekslijn door
+  een faculteit) en komt terug op de cursuspagina; dat volgt in eigen PR's. Wie bij twee
+  instellingen werkt, heeft een account per instelling; eigen materiaal gaat mee via exporteren en
+  importeren, later via SSO per instelling. Een vestiging en een faculteit tegelijk (een ROC-college
+  op meer locaties) krijgt later een optionele lijst locaties per opleiding. Bastiaan, 2026-11-12
+  (thread "School, faculteit, opleiding en leerlijn beheren": "Mijn plan is om twee soorten
+  LimeOnIt aan te bieden" en "Als iedere instelling beheerder(s) krijgt, dan zijn de beheerders dus
+  alleen voor die instelling en 1 database").
+- **BESLUIT-2026-11-12-3:** **SQLite per instelling; een andere database is maatwerk.** Standaard
+  is één SQLite-bestand per instelling, ook online; er komt geen gedeelde database met alle scholen
+  erin (een vergeten schoolkolom in één query zou werk van school A aan school B laten zien). Een
+  grote instelling die een eigen databaseserver wil, krijgt die als maatwerk, in deze volgorde:
+  eerst Postgres (een tweede Drizzle-schema, migraties voor beide en de hele testsuite ook tegen
+  Postgres; een paar weken werk), daarna MySQL/MariaDB, en SQL Server of Oracle alleen met een
+  contract dat het betaalt (Drizzle ondersteunt die niet goed). Nu al: geen SQLite-specifieke SQL
+  in de repositories. De pilot draait op twee databases, één voor de HSL en één voor de HHS, zodat
+  het platform meteen werkt zoals het moet. Bastiaan, 2026-11-12 (thread "School, faculteit,
+  opleiding en leerlijn beheren": "Maak wel het plan dat de database maatwerk wordt voor grote
+  instellingen" en "Doe dan ook voor de pilot alvast twee databases").
 - **BESLUIT-2026-11-12-4:** **Database per adres, binnen één app.** Eén container bedient alle
   instellingen; `TENANTS` noemt per instelling een id, haar adressen en haar SQLite-bestand. Elk
   verzoek draait op de instelling van zijn adres (een onbekend adres krijgt 404; alleen `/healthz`

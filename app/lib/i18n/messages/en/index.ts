@@ -30,6 +30,7 @@ import { language } from "./language";
 import { meta } from "./meta";
 import { modelAdmin } from "./modelAdmin";
 import { nav } from "./nav";
+import { organisation } from "./organisation";
 import { pages } from "./pages";
 import { people } from "./people";
 import { pilot } from "./pilot";
@@ -96,6 +97,7 @@ export const en: Messages = {
   meta,
   modelAdmin,
   nav,
+  organisation,
   pages,
   people,
   pilot,

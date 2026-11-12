@@ -1,0 +1,27 @@
+export const organisation = {
+  add: "{kind} toevoegen",
+  addName: "Naam",
+  belongsTo: "{name} hoort bij",
+  create: "Toevoegen",
+  delete: "{name} verwijderen",
+  deleteShort: "Verwijderen",
+  emptyDivision: "Nog geen opleidingen.",
+  errorInvalid: "Dat lukte niet. Kijk het nog eens na.",
+  errorName: "Geef een naam van hooguit 200 tekens.",
+  errorNotEmpty: "Er staan nog opleidingen onder. Verplaats die eerst.",
+  heading: "Organisatie",
+  intro:
+    "Hoe je instelling is ingedeeld: de laag tussen de instelling en haar opleidingen, en welke opleiding waaronder valt. Een opleiding maakt een teamleider of beheerder aan bij Opleidingen; hier zet je hem op zijn plek.",
+  kindHint:
+    "Bijvoorbeeld faculteit bij een hogeschool, college bij een ROC of vestiging in het vo.",
+  kindLabel: "Hoe heet de laag tussen instelling en opleiding?",
+  kindNone: "Nog niet gekozen",
+  kindSave: "Opslaan",
+  move: "Verplaatsen",
+  none: "Zonder {kind}",
+  noneOption: "Geen",
+  noProgrammes: "Nog geen opleidingen. Een teamleider of beheerder maakt ze aan bij Opleidingen.",
+  rename: "Nieuwe naam voor {name}",
+  renameSave: "Naam opslaan",
+  team: "team {team}",
+};

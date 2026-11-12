@@ -8,6 +8,7 @@ export const admin: Messages["admin"] = {
       announcements: "Announcements",
       audit: "Audit log",
       context: "Teaching context",
+      organisation: "Organisation",
       teams: "Teams",
       tools: "Tools and models",
       usage: "Feedback and pilot",

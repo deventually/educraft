@@ -4,9 +4,22 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-11 (#187 t/m #289 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #292 gemerged)_
 
 ## Nu
+
+- **Organisatie: tussenlaag en opleidingen daaronder (#292) gemerged op 2026-11-12:** één
+  omgeving is één instelling (BESLUIT-2026-11-12-2). De beheerder kiest onder Beheer →
+  Organisatie hoe de tussenlaag heet (faculteit, vestiging, …), beheert de onderdelen en zet
+  opleidingen op hun plek; een opleiding valt onder hooguit één onderdeel. Migratie 0033. Ook
+  BESLUIT-2026-11-12-3: SQLite per instelling, een andere database als maatwerk.
+- **Browsertests weer op GitHub (#291) gemerged op 2026-11-12:** de e2e-job installeert Chromium
+  zonder `apt-get` en draait weer bij elke PR (BESLUIT-2026-11-12-1). Noodknop: de
+  repositoryvariabele `E2E_IN_CI` op `false`.
+- **Toetsprogramma: Bloom-niveau per leeruitkomst en nieuw voorstel met een opmerking (#290)
+  gemerged op 2026-11-12:** bij het overnemen van toetsen kiest de docent per gedekte leeruitkomst
+  een Bloom-niveau. In stap 2 van de cursuswizard vraagt *Wat moet er anders?* om een opmerking,
+  waarna *Nieuw voorstel* een nieuw toetsprogramma maakt (prompt `course-design-assessments@v2`).
 
 - **BDB/BKE: geleid schrijven per onderdeel van het hoofdstuk (#288) gemerged op 2026-11-11:**
   op het tabblad *Hoofdstuk* stelt de coach per onderdeel (de opzet uit het formulier, of per

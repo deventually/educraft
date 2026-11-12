@@ -4,6 +4,7 @@ import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqli
  * A programme (opleiding) of a team (BESLUIT-2026-11-10-3): a named bundle of the members'
  * courses. The team lead or an admin manages it; every member reads it. `sector` and `track`
  * come from the context catalogue (`~/lib/context/sectors`), `form` is fulltime/parttime/dual.
+ * `divisionId` is the division it sits under (faculty, location, …), set by an admin; null = none.
  * Re-exported by `schema.server.ts`.
  */
 export const programmes = sqliteTable(
@@ -16,10 +17,14 @@ export const programmes = sqliteTable(
     sector: text("sector").notNull(),
     track: text("track"),
     form: text("form"),
+    divisionId: text("division_id"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
-  (t) => [index("programmes_team_idx").on(t.teamId)],
+  (t) => [
+    index("programmes_team_idx").on(t.teamId),
+    index("programmes_division_idx").on(t.divisionId),
+  ],
 );
 
 /**

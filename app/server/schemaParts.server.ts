@@ -5,3 +5,4 @@ export * from "./schemaAnnouncements.server";
 export * from "./schemaAuth.server";
 export * from "./schemaCourseMembers.server";
 export * from "./schemaProgrammes.server";
+export * from "./schemaOrganisation.server";
