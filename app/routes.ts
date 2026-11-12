@@ -14,6 +14,7 @@ import { projects } from "./routing/projects";
 import { start } from "./routing/start";
 import { teams } from "./routing/teams";
 import { tools } from "./routing/tools";
+import { tracks } from "./routing/tracks";
 import { usage } from "./routing/usage";
 import { utilities } from "./routing/utilities";
 import type { RouteArea } from "./routing/types";
@@ -39,6 +40,7 @@ const areas: RouteArea[] = [
   start,
   teams,
   tools,
+  tracks,
   usage,
   utilities,
 ];

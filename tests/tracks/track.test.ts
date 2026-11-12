@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  fitsKind,
   MILESTONES,
   nextStep,
   progress,
@@ -99,5 +100,20 @@ describe("purgeDate", () => {
     expect(purgeDate(new Date("2027-01-01T10:00:00Z"), 0).toISOString()).toBe(
       "2027-01-01T10:00:00.000Z",
     );
+  });
+});
+
+describe("milestone tools and document types (P38.2)", () => {
+  it("the start milestone opens Studentwerk beoordelen; every milestone tool exists", async () => {
+    const { getToolBySlug } = await import("~/lib/registry");
+    expect(MILESTONES.find((m) => m.id === "start")?.tool?.slug).toBe("stage-assessment");
+    for (const m of MILESTONES) if (m.tool) expect(getToolBySlug(m.tool.slug)).toBeDefined();
+  });
+
+  it("a kind picks the assessment models for its documents", () => {
+    expect(fitsKind(["stageplan"], "internship")).toBe(true);
+    expect(fitsKind(["afstudeerscriptie"], "thesis")).toBe(true);
+    expect(fitsKind(["afstudeerscriptie"], "internship")).toBe(false);
+    expect(fitsKind(["essay"], "thesis")).toBe(false);
   });
 });
