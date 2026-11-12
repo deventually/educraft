@@ -137,6 +137,39 @@ describe("design-outcomes", () => {
     });
   });
 
+  it("runs on to the test programme after a wizard apply, not after a document import", async () => {
+    const fields: [string, string][] = [
+      ["intent", "import-apply"],
+      ["outcomeKey", "o1"],
+      ["o1.pick", "on"],
+      ["o1.text", "De student schrijft SQL-queries met joins."],
+    ];
+    const wizard = await repo.createCourse("teacher-d", { name: "Doorlopend" });
+    expect(await post(wizard.id, [...fields, ["wizard", "on"]])).toMatchObject({
+      ok: true,
+      intent: "import-apply",
+      next: "design-assessments",
+    });
+    const imported = await repo.createCourse("teacher-d", { name: "Uit een OER" });
+    const r = await post(imported.id, fields);
+    expect(r).toMatchObject({ ok: true, intent: "import-apply" });
+    expect(r).not.toHaveProperty("next");
+  });
+
+  it("does not run on when the admin switched the course wizard off", async () => {
+    featureOff.add("courseDesign");
+    const course = await repo.createCourse("teacher-d", { name: "Uit" });
+    const r = await post(course.id, [
+      ["intent", "import-apply"],
+      ["wizard", "on"],
+      ["outcomeKey", "o1"],
+      ["o1.pick", "on"],
+      ["o1.text", "De student schrijft SQL-queries met joins."],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "import-apply" });
+    expect(r).not.toHaveProperty("next");
+  });
+
   it("says what the AI still needs when the description says too little", async () => {
     const course = await repo.createCourse("teacher-d", { name: "Vaag" });
     const why = "Wat moeten studenten na de cursus kunnen?";
@@ -270,10 +303,27 @@ describe("design-assessments", () => {
       ["a1.extra", JSON.stringify({ details: { form: "Beroepsproduct" }, parts: [] })],
     ]);
     expect(r).toMatchObject({ ok: true, intent: "import-apply", added: { outcomes: 0 } });
+    expect(r).not.toHaveProperty("next");
     const data = (await repo.getCourse("teacher-d", course.id))?.data;
     expect(data?.outcomes).toHaveLength(2);
     expect(data?.assessments[0]).toMatchObject({ title: "Ontwerp webwinkel", weight: 100 });
     expect(data?.assessments[0]?.coverage.map((c) => c.outcomeId)).toEqual(["lo1", "lo2"]);
+  });
+
+  it("runs on to the lesson series after the tests are added in the wizard", async () => {
+    const course = await repo.createCourse("teacher-d", { name: "Verder", data: withOutcomes });
+    const r = await post(course.id, [
+      ["intent", "import-apply"],
+      ["wizard", "on"],
+      ["outcomeKey", "o1"],
+      ["o1.text", "De student ontwerpt een datamodel."],
+      ["assessmentKey", "a1"],
+      ["a1.pick", "on"],
+      ["a1.title", "Ontwerp webwinkel"],
+      ["a1.kind", "summative"],
+      ["a1.outcomes", "o1"],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "import-apply", next: "design-lessons" });
   });
 
   it("asks again with the teacher's remark on the earlier proposal", async () => {

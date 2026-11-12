@@ -5,7 +5,7 @@
  */
 import { requireRole, type User } from "./auth.server";
 import { runAiCall } from "./aiCalls.server";
-import { requireFeature } from "./availability.server";
+import { isFeatureOn, requireFeature } from "./availability.server";
 import { decideOnFinding, reviewCourse } from "./agentReview.server";
 import {
   type Course,
@@ -48,6 +48,7 @@ import {
 } from "~/lib/courses/blueprintImport";
 import { addAssessment, setAssessmentItems } from "~/lib/courses/edit";
 import type { CourseData } from "~/lib/courses/types";
+import { type DesignStep, nextDesignStep } from "~/lib/courses/wizard";
 
 export type CourseActionResult =
   | { ok: true; intent?: undefined }
@@ -59,7 +60,13 @@ export type CourseActionResult =
       clipped: boolean;
     }
   | CourseDesignActionResult
-  | { ok: true; intent: "import-apply"; added: { outcomes: number; assessments: number } }
+  | {
+      ok: true;
+      intent: "import-apply";
+      added: { outcomes: number; assessments: number };
+      /** Applied in the wizard: the step whose proposal the page asks for next. */
+      next?: DesignStep;
+    }
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
   | { ok: true; intent: "review" | "decide"; message: string; partial?: boolean }
@@ -147,9 +154,13 @@ async function runCourseIntent(
         error: applied?.error === "limit" ? m.import.errors.limit : m.errorInvalid,
       };
     const saved = await updateCourse(user.id, course.id, { data: applied.data }).catch(() => null);
-    return saved
-      ? { ok: true, intent, added: applied.added }
-      : { ok: false, error: m.errorInvalid };
+    if (!saved) return { ok: false, error: m.errorInvalid };
+    // From the wizard, the next step's proposal follows right away (the page asks for it).
+    const next =
+      fd.get("wizard") === "on" && (await isFeatureOn(user, "courseDesign"))
+        ? nextDesignStep(applied.data)
+        : null;
+    return { ok: true, intent, added: applied.added, ...(next ? { next } : {}) };
   }
 
   if (intent === "import-blueprint") {

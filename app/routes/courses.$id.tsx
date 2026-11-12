@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useActionData, useSearchParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
@@ -23,6 +24,7 @@ import { CourseDesignAssessments } from "~/components/courses/CourseDesignAssess
 import { CourseDesignLessons, useLessonsProposal } from "~/components/courses/CourseDesignLessons";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseStart } from "~/components/courses/CourseStart";
+import { useDesignChain } from "~/components/courses/useDesignChain";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { ModuleGuideSection } from "~/components/courses/ModuleGuideSection";
@@ -192,7 +194,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const proposal = useImportProposal(actionData);
-  const lessons = useLessonsProposal(actionData);
+  useDesignChain(actionData);
+  // "Later" in the wizard: the proposal left for now (the step itself stays on the overview).
+  const [later, setLater] = useState<object | null>(null);
+  const lessonsProposal = useLessonsProposal(actionData);
+  const lessons = lessonsProposal === later ? null : lessonsProposal;
   const designed = proposal?.source === "design" ? proposal : null;
   // Step 1 proposes outcomes, step 2 tests: each step shows its own proposal.
   const designedTests = designed?.assessments.length ? designed : null;
@@ -269,8 +275,9 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
             )}
             {courseDesign && canDesignAssessments(data) && (
               <CourseDesignAssessments
-                proposal={designedTests}
+                proposal={designedTests === later ? null : designedTests}
                 notes={aiNotes("design-assessments")}
+                onLater={() => setLater(designedTests)}
               />
             )}
             {courseDesign && canDesignLessons(data) && (
@@ -278,6 +285,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
                 schedule={data.schedule}
                 proposal={lessons}
                 notes={aiNotes("design-lessons")}
+                onLater={() => setLater(lessons)}
               />
             )}
             <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />

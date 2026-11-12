@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
 import { AiCallField } from "~/components/AiLeaveGuard";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
@@ -36,22 +36,31 @@ export function CourseDesignLessons({
   schedule,
   proposal,
   notes,
+  onLater,
 }: {
   schedule: CourseSchedule | undefined;
   /** The last lesson series proposed, until the teacher applies it. */
   proposal: LessonsProposal | null;
   /** What the AI still needs, when it proposed nothing. */
   notes?: string;
+  /** "Later": the page drops the proposal; the step stays here on the overview. */
+  onLater: () => void;
 }) {
   const l = useT().courseDesign.lessons;
   const id = useId();
+  const heading = useRef<HTMLHeadingElement>(null);
   const nav = useNavigation();
   const busy = nav.state === "submitting" && nav.formData?.get("intent") === "design-lessons";
   const askWeeks = schedule?.weeks === undefined;
   const askSessions = schedule?.sessionsPerWeek === undefined;
   return (
     <section aria-labelledby={`${id}-title`}>
-      <h2 id={`${id}-title`} className="text-lg font-medium text-slate-900">
+      <h2
+        id={`${id}-title`}
+        ref={heading}
+        tabIndex={-1}
+        className="text-lg font-medium text-slate-900"
+      >
         {l.title}
       </h2>
       <p className="mt-1 max-w-[65ch] text-sm text-slate-600">{l.intro}</p>
@@ -93,7 +102,16 @@ export function CourseDesignLessons({
           </div>
         </Form>
         {notes && !proposal && <AiNotes notes={notes} />}
-        {proposal && <LessonsProposalForm proposal={proposal} />}
+        {proposal && (
+          <LessonsProposalForm
+            proposal={proposal}
+            onLater={() => {
+              onLater();
+              // The form goes; keyboard focus lands on the step instead of the page top.
+              heading.current?.focus();
+            }}
+          />
+        )}
       </Card>
     </section>
   );

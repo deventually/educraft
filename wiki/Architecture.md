@@ -432,6 +432,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `design-lessons-apply` adds the ticked ones through `edit.addActivity` (which refuses ids that
   are not the course's). All wizard intents live in `courseDesignIntent`
   (`courseDesign.server.ts`). Evals: `npm run eval:design-lessons`.
+- **Course wizard, running on.** The steps follow each other without a stop on the overview. A
+  design proposal (`ProposalForm` with `source: "design"`) posts `wizard=on` with `import-apply`;
+  the server then answers with `next`, the intent of the next step (`nextDesignStep` in
+  `app/lib/courses/wizard.ts`: tests after outcomes, lessons after tests), unless the feature
+  `courseDesign` is off. `useDesignChain` posts that intent at once, with its own `aiCall` id, so
+  the pending toast shows and leaving can still stop the call. Steps 2 and 3 have **Later** next to
+  the apply button: the page drops the proposal (client state only) and focus goes to the step's
+  heading; the step stays on the overview as before. A document import never runs on.
 - **Courses, further (P26).** A test can carry questions (`Assessment.items`: label, outcome, Bloom,
   question type, points). With questions, `effectiveCoverage` derives coverage from them (lowest
   level per outcome) for the matrix, the findings and the role agents; three extra findings
