@@ -29,6 +29,7 @@ import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
 import { requestIdMiddleware } from "~/server/requestId.server";
 import { ErrorReportHint } from "~/components/ErrorReportHint";
 import { sessionRefreshMiddleware } from "~/server/session.server";
+import { tenantRouting } from "~/server/tenants.server";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -45,12 +46,13 @@ export const links: Route.LinksFunction = () => [
 
 /**
  * Every response, also `/api/*` and exports (not just pages): first a request id (for the
- * error log), then the security headers and the sliding 8-hour session window (every
- * request counts as activity, P1-4).
+ * error log), then the security headers, the institution of the address (its own database, or
+ * 404) and the sliding 8-hour session window (every request counts as activity, P1-4).
  */
 export const middleware: Route.MiddlewareFunction[] = [
   requestIdMiddleware,
   securityHeadersMiddleware,
+  tenantRouting,
   sessionRefreshMiddleware,
 ];
 

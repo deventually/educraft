@@ -10,13 +10,15 @@
  *   database it replaces aside.
  *
  * Where: `BACKUP_DIR`, else `backups/` next to the database in production; `BACKUP_DIR=off`
- * turns the daily backup off. Copying the folder off the server stays the host's job.
+ * turns the daily backup off. With several institutions (`TENANTS`) each gets its own folder
+ * inside it (`backups/<id>/`), so one folder still holds every backup and a restore touches one
+ * institution only. Copying the folder off the server stays the host's job.
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { assertSoundDatabaseFile, backupDbTo } from "./db.server";
-import { DB_PATH } from "./env.server";
 import { log } from "./log.server";
+import { allTenants, runWithTenant, type Tenant } from "./tenants.server";
 
 const DAY = 24 * 60 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -85,6 +87,19 @@ export function backupDir(env: Record<string, string | undefined>, dbPath: strin
   return env.NODE_ENV === "production" ? join(dirname(dbPath), "backups") : null;
 }
 
+/**
+ * Where `tenant`'s daily backup goes, or `null` when it is off: the one backup folder, with a
+ * folder per institution inside it when there are several.
+ */
+export function tenantBackupDir(
+  env: Record<string, string | undefined>,
+  tenant: Tenant,
+  tenants: readonly Tenant[] = allTenants(),
+): string | null {
+  const dir = backupDir(env, tenant.dbPath);
+  return dir && tenants.length > 1 ? join(dir, tenant.id) : dir;
+}
+
 const list = (dir: string) => (existsSync(dir) ? readdirSync(dir) : []);
 
 /** When the newest backup in `dir` was made (for the admin's health overview). */
@@ -122,6 +137,34 @@ export async function backupIfDue(dir: string, now = new Date()): Promise<Backup
   return runBackup({ dir, now });
 }
 
+/**
+ * The daily backup of every institution that is due, each on its own database into its own
+ * folder. One institution's failure is logged and never stops the next one.
+ */
+export async function backupAllTenantsIfDue(
+  env: Record<string, string | undefined> = process.env,
+  tenants: readonly Tenant[] = allTenants(),
+  now = new Date(),
+): Promise<(BackupResult & { tenant: string })[]> {
+  const done: (BackupResult & { tenant: string })[] = [];
+  for (const tenant of tenants) {
+    const dir = tenantBackupDir(env, tenant, tenants);
+    if (!dir) continue;
+    try {
+      const result = await runWithTenant(tenant, () => backupIfDue(dir, now));
+      if (!result) continue;
+      log("backup.done", { tenant: tenant.id, file: result.file, removed: result.removed.length });
+      done.push({ ...result, tenant: tenant.id });
+    } catch (error) {
+      log("backup.failed", {
+        tenant: tenant.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  return done;
+}
+
 const globalForBackup = globalThis as unknown as { __limeonitBackupTimer?: NodeJS.Timeout };
 
 /**
@@ -130,18 +173,11 @@ const globalForBackup = globalThis as unknown as { __limeonitBackupTimer?: NodeJ
  */
 export function startBackupSchedule(
   env: Record<string, string | undefined> = process.env,
-  dbPath: string = DB_PATH,
+  tenants: readonly Tenant[] = allTenants(),
 ): boolean {
-  const dir = backupDir(env, dbPath);
-  if (!dir) return false;
+  if (!tenants.some((t) => tenantBackupDir(env, t, tenants))) return false;
   if (globalForBackup.__limeonitBackupTimer) return true;
-  const tick = () => {
-    backupIfDue(dir)
-      .then((r) => r && log("backup.done", { file: r.file, removed: r.removed.length }))
-      .catch((error: unknown) =>
-        log("backup.failed", { error: error instanceof Error ? error.message : String(error) }),
-      );
-  };
+  const tick = () => void backupAllTenantsIfDue(env, tenants);
   globalForBackup.__limeonitBackupTimer = setInterval(tick, HOUR);
   globalForBackup.__limeonitBackupTimer.unref();
   tick();

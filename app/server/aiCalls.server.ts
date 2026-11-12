@@ -8,6 +8,7 @@
  * every action passing it along. One process serves the app (SQLite), so memory is enough.
  */
 import { AsyncLocalStorage } from "node:async_hooks";
+import { currentTenantOrNull } from "./tenants.server";
 
 const CALL_ID = /^[A-Za-z0-9-]{8,64}$/;
 /** How long a cancel that arrived before its call is remembered. */
@@ -18,7 +19,9 @@ const context = new AsyncLocalStorage<AbortSignal>();
 const running = new Map<string, AbortController>();
 const cancelledEarly = new Map<string, number>();
 
-const keyOf = (userId: string, callId: string) => `${userId}\u0000${callId}`;
+// The institution too: two institutions' databases could in theory hold the same user id.
+const keyOf = (userId: string, callId: string) =>
+  `${currentTenantOrNull()?.id ?? ""}\u0000${userId}\u0000${callId}`;
 
 /** A call id the page may send: anything else is ignored. */
 export function isAiCallId(value: unknown): value is string {

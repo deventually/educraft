@@ -42,6 +42,25 @@ starts empty.
 DATABASE_URL=file:/data/limeonit.db   # volume mounted at /data
 ```
 
+## Several institutions (one app, a database each)
+
+Set `TENANTS` (JSON) to serve several institutions from one container, each on its own SQLite
+file on the same volume, chosen by the address the request comes in on:
+
+```
+TENANTS=[{"id":"hsl","hosts":["hsl.limeonit.nl"]},{"id":"hhs","hosts":["hhs.limeonit.nl"]}]
+```
+
+- Without `database`, an institution's file is `<id>.db` next to `DATABASE_URL` (`/data/hsl.db`).
+- Every host name points at the same container (DNS + the reverse proxy, which must pass the
+  original `Host`). Any other address gets a 404; only `/healthz` answers everywhere.
+- Each database is migrated at boot and backed up daily into `backups/<id>/`.
+- Ops scripts need the institution: `LIMEONIT_TENANT=hhs node build/ops/create-admin.js …`.
+- Sessions are host-only cookies, so a login at one address is not one at the other.
+
+Adding an institution: a line in `TENANTS`, a DNS record, a restart; then its first admin with
+`create-admin`. Details: [Tenancy & Admin](../docs/Tenancy-and-Admin.md).
+
 ## Back-up vóór een destructieve migratie
 
 Migraties draaien automatisch bij de eerste database-toegang na een deploy. Migratie `0008`

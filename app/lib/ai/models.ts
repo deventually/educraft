@@ -63,12 +63,12 @@ export const PROVIDERS: readonly ConfigProvider[] = config.providers;
 
 /** A provider of the config or one the admin added (installed with the registry). */
 export function getProvider(id: string): ConfigProvider | undefined {
-  return PROVIDERS.find((p) => p.id === id) ?? addedProviders.find((p) => p.id === id);
+  return PROVIDERS.find((p) => p.id === id) ?? installedNow().providers.find((p) => p.id === id);
 }
 
 /** Every API provider: the config's first, then the ones the admin added. */
 export function listProviders(): ConfigProvider[] {
-  return [...PROVIDERS, ...addedProviders];
+  return [...PROVIDERS, ...installedNow().providers];
 }
 
 export type ModelId = string;
@@ -98,15 +98,31 @@ export const DEFAULT_MODEL: ModelId = config.default;
 // ── The admin's registry (added models, upgrades), installed by the server ─────────
 // `modelRegistry.server` reads it from the database and installs it here, so every
 // lookup below sees added and retiring models without a second code path.
-let installed: ModelRegistry = { added: [], lifecycle: {}, providers: [] };
-let addedById = new Map<string, ModelInfo>();
-let addedProviders: ConfigProvider[] = [];
+// Each institution has its own admin and so its own registry: the server names the scope
+// (`setModelRegistryScope`, the institution's id) and every lookup reads that scope's copy.
+interface Installed {
+  registry: ModelRegistry;
+  byId: Map<string, ModelInfo>;
+  providers: ConfigProvider[];
+}
+const NOTHING_INSTALLED: Installed = {
+  registry: { added: [], lifecycle: {}, providers: [] },
+  byId: new Map(),
+  providers: [],
+};
+const installedByScope = new Map<string, Installed>();
+let scopeOf: () => string = () => "";
+const installedNow = (): Installed => installedByScope.get(scopeOf()) ?? NOTHING_INSTALLED;
+
+/** Server only: which institution's registry a lookup reads (default: one for all). */
+export function setModelRegistryScope(scope: () => string): void {
+  scopeOf = scope;
+}
 
 /** Install the admin's registry (server only; tests reset it with the empty one). */
 export function installModelRegistry(registry: ModelRegistry): void {
-  installed = registry;
   // A config provider always wins: an added one can never shadow it.
-  addedProviders = registry.providers
+  const providers: ConfigProvider[] = registry.providers
     .filter((p) => !PROVIDERS.some((c) => c.id === p.id))
     .map((p) => ({
       id: p.id,
@@ -120,7 +136,7 @@ export function installModelRegistry(registry: ModelRegistry): void {
       // Claude's API caches only what is marked; an own OpenAI-style server by itself.
       cache: p.api === "anthropic" ? "markers" : "auto",
     }));
-  addedById = new Map(
+  const byId = new Map(
     registry.added
       // A catalog id always wins: an added model can never shadow a built-in one.
       .filter((m) => !(m.id in MODELS))
@@ -138,27 +154,28 @@ export function installModelRegistry(registry: ModelRegistry): void {
         },
       ]),
   );
+  installedByScope.set(scopeOf(), { registry, byId, providers });
 }
 
 /** The installed registry (read-only view for the admin screen). */
 export function installedModelRegistry(): ModelRegistry {
-  return installed;
+  return installedNow().registry;
 }
 
 /** Where a model is in its life: active, retiring (upgraded) or retired. */
 export function modelState(id: string): ModelState {
-  return installed.lifecycle[id]?.state ?? "active";
+  return installedNow().registry.lifecycle[id]?.state ?? "active";
 }
 
 /** Follow the upgrade chain from `id`, retiring or retired, to the model for new work. */
 export function currentModelId(id: string): string {
   let current = id;
   const seen = new Set<string>();
-  let step = installed.lifecycle[current];
+  let step = installedNow().registry.lifecycle[current];
   while (step && !seen.has(current)) {
     seen.add(current);
     current = step.successor;
-    step = installed.lifecycle[current];
+    step = installedNow().registry.lifecycle[current];
   }
   return current;
 }
@@ -172,7 +189,7 @@ export function forwardRetired(id: string): string {
 }
 
 function staticOrAdded(id: string): ModelInfo | undefined {
-  return (MODELS as Record<string, ModelInfo>)[id] ?? addedById.get(id);
+  return (MODELS as Record<string, ModelInfo>)[id] ?? installedNow().byId.get(id);
 }
 
 export function getModel(id: string): ModelInfo {
@@ -275,9 +292,10 @@ export function isClientSelectable(id: string): boolean {
 
 /** The catalog plus the admin's added models, in every state (filter on `modelState`). */
 export function listModels(): Array<{ id: string } & ModelInfo> {
-  return [...(Object.entries(MODELS) as Array<[string, ModelInfo]>), ...addedById.entries()].map(
-    ([id, info]) => ({ id, ...info }),
-  );
+  return [
+    ...(Object.entries(MODELS) as Array<[string, ModelInfo]>),
+    ...installedNow().byId.entries(),
+  ].map(([id, info]) => ({ id, ...info }));
 }
 
 /** Minimal shape needed to render a model <option> (static catalog or discovered local). */

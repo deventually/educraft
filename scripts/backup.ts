@@ -5,13 +5,18 @@
  *   node build/ops/backup.js       (production image)
  *
  * Goes to BACKUP_DIR, else `backups/` next to the database, and rotates (7 days, 4 weeks).
+ * With several institutions (TENANTS), name one: `LIMEONIT_TENANT=hhs npm run backup`; its
+ * backup goes to its own folder (`backups/hhs/`).
  * Relative imports (not the `~` alias) keep it runnable under plain tsx.
  */
 import { dirname, join } from "node:path";
-import { backupDir, runBackup } from "../app/server/backup.server";
-import { DB_PATH } from "../app/server/env.server";
+import { runBackup, tenantBackupDir } from "../app/server/backup.server";
+import { allTenants, currentTenant } from "../app/server/tenants.server";
 
-const dir = backupDir(process.env, DB_PATH) ?? join(dirname(DB_PATH), "backups");
+const tenant = currentTenant();
+const dir =
+  tenantBackupDir(process.env, tenant) ??
+  join(dirname(tenant.dbPath), "backups", ...(allTenants().length > 1 ? [tenant.id] : []));
 const { file, removed } = await runBackup({ dir });
 console.log(`✓ Backup made: ${file}`);
 if (removed.length > 0) console.log(`  Rotated away: ${removed.join(", ")}`);

@@ -16,6 +16,7 @@ import { applySecurityHeaders, createCspNonce, cspNonceOf } from "~/server/secur
 import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 import { startAiUsageRetention } from "~/server/aiUsageRetention.server";
 import { startBackupSchedule } from "~/server/backup.server";
+import { migrateAllTenants } from "~/server/db.server";
 import { handleServerError, recordError } from "~/server/errorLog.server";
 import { requestIdOf } from "~/server/requestId.server";
 
@@ -26,6 +27,10 @@ export const streamTimeout = 5_000;
 // and excludes the offending tool (via availability.server) so a single typo can
 // never take the instance down.
 ensureRegistryValidated();
+
+// Every institution's database (TENANTS, or the one at DATABASE_URL) is opened and migrated at
+// boot, so a bad migration or an unreachable volume fails here and not on a teacher's request.
+migrateAllTenants();
 
 // The app's own daily database backup (production, or wherever BACKUP_DIR is set). Online, so
 // no downtime; a failure is logged and never takes the app down. See backup.server.

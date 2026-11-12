@@ -186,6 +186,10 @@ describe("backupIfDue (the daily backup the app runs itself)", () => {
 
 describe("startBackupSchedule", () => {
   it("does not start when backups are off", () => {
-    expect(backup.startBackupSchedule({ NODE_ENV: "development" }, dbFile)).toBe(false);
+    expect(
+      backup.startBackupSchedule({ NODE_ENV: "development" }, [
+        { id: "default", hosts: [], dbPath: dbFile },
+      ]),
+    ).toBe(false);
   });
 });

@@ -63,24 +63,31 @@ tenant `admin` is therefore always "admin **of their own tenant**" — the DB
 they connect to — and has no visibility into any other tenant. The super user
 is the only cross-tenant identity.
 
-### What is (and isn't) prepared now
+### What is (and isn't) built now
 
-Prepared:
+Built (BESLUIT-2026-11-12-4, "pilot op twee databases"):
 
-- `getDb()` indirection — the single point a per-tenant resolver will hook into.
+- **Database per address.** `TENANTS` (`app/server/tenants.server.ts`) lists the
+  institutions: id, host names and SQLite file. The root middleware runs every request on the
+  institution of its address (unknown address: 404); `getDb()` opens that institution's
+  database, once per institution. Without `TENANTS`: one instance on `DATABASE_URL`, as before.
+- **Everything per database:** migrations at boot (`migrateAllTenants`), the daily backup into
+  `backups/<id>/`, the AI-usage roll-up, the admin's model registry and the recent-errors list.
+  `/healthz` answers on any address and checks every database.
+- **Ops scripts per institution:** `LIMEONIT_TENANT=<id>` names the institution; with several
+  and no name, a script refuses rather than guess (`currentTenant()` throws).
 - Admin creation is centralised behind `createUser` + `scripts/create-admin.ts`,
-  so the control-plane seeder reuses one code path (no second "make an admin"
-  implementation to keep in sync).
-- P4 instance settings (`tool_settings`, `instance_settings`) live in the tenant
-  DB, so per-tenant configuration comes for free with database-per-tenant — no
-  settings-sync layer to build.
+  so the control-plane seeder reuses one code path.
+- Instance settings (`tool_settings`, `instance_settings`) live in the tenant DB, so
+  per-tenant configuration comes for free.
 
-Deliberately **not** built yet (out of P4 scope, avoids speculative schema that
-could conflict with database-per-tenant):
+Not built yet (next step):
 
-- Control-plane tables (`super_user`, `tenant`) and a `super_user` role token.
-- A tenant-provisioning / DB-per-tenant resolver and its migrations runner.
-- Cross-tenant super-user UI.
+- The control plane: its own store with the platform owner's account and the institutions,
+  replacing the `TENANTS` setting (`allTenants()` is the one place that reads it), with a
+  screen to add, remove, activate and deactivate an institution.
+- A database other than SQLite for a large institution: see
+  [`implementation/maatwerk-database.md`](implementation/maatwerk-database.md).
 
 When the control plane is built, add it as a **separate** store/service; do not
 add a `tenantId` to the tenant-local schema (it contradicts the isolation model).
