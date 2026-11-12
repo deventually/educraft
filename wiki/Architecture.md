@@ -329,6 +329,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   them as `<course>` (`factsBlock`): the questions prompt (@v2) does not ask for them again, the
   draft prompt (@v3) uses them literally without an open spot. Facts alone are enough material
   for a paragraph.
+  Evidence in one go (`/portfolio/:id/evidence`; `batch.ts`, `portfolioBatch.server.ts`): the
+  teacher chooses many files or a folder (PDF, Word, text); the browser reads them and runs the
+  name check per file (`checkNames`: the student names the teacher lists plus the patterns of
+  `privacy/redact.ts`), so only text with codes leaves it. `proposeEvidence` sends each file with
+  the keyed framework (`U1`, `U1.C2`, `U1.R1`) to `portfolio-evidence-sort@v1`, four at a time, and
+  stores nothing; `parseSortAnswer` keeps only keys of the chosen outcome and sets `check`
+  ("Controleren") on doubt, a correction, no criteria or no text. The list (`BatchEvidenceList`)
+  starts with nothing ticked; `addEvidenceBatch` adds the ticked items with their criteria and
+  required-evidence line in one save, or refuses the whole batch. Sorting is not in `aiLog`: it
+  writes no text. Eval: `npm run eval:evidence` (deterministic, `evals/portfolio-evidence/`).
   The day plan (`plan.ts`, step 7): `remainingWork` turns the open milestones of `dossierRoute`
   into minutes with fixed rates (`PLAN_MINUTES`, shown to the teacher), `dayPlan` lays them over
   working days (Monday to Friday, `hoursPerDay` or 8) from today and compares that with the
