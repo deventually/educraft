@@ -2,18 +2,8 @@ import { Button, HelpText, Label, Textarea } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n/messages/nl";
 import { useT } from "~/lib/i18n/useT";
-import type { WritingSection } from "~/lib/portfolio/guided";
+import type { GuidedSectionView } from "~/lib/portfolio/guided";
 import { listOf } from "./ChapterOutline";
-
-/** One part of the chapter as the page shows it: the section, its questions and the answers. */
-export interface GuidedSectionView extends WritingSection {
-  /** 1-based numbers of the criteria it covers. */
-  covers: number[];
-  questions: string[];
-  answers: string[];
-  /** A paragraph from these answers is in the chapter. */
-  drafted: boolean;
-}
 
 type GuidedMessages = Messages["portfolioGuided"];
 

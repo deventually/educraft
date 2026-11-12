@@ -4,14 +4,9 @@ import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import type { DossierData, Outcome } from "~/lib/portfolio/types";
-import { writingSections } from "~/lib/portfolio/guided";
-import {
-  type GuidedSectionView,
-  GuidedWriting,
-  guidedDone,
-  guidedPending,
-} from "~/components/portfolio/GuidedWriting";
+import type { DossierData } from "~/lib/portfolio/types";
+import { guidedView } from "~/lib/portfolio/guided";
+import { GuidedWriting, guidedDone, guidedPending } from "~/components/portfolio/GuidedWriting";
 import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
@@ -95,20 +90,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
     ),
   };
-}
-
-function guidedView(d: DossierData, outcome: Outcome): GuidedSectionView[] {
-  const number = new Map(outcome.criteria.map((c, i) => [c.id, i + 1]));
-  return writingSections(outcome).map((s) => {
-    const saved = d.guided?.[outcome.id]?.[s.id];
-    return {
-      ...s,
-      covers: s.criterionIds.flatMap((id) => number.get(id) ?? []).sort((a, b) => a - b),
-      questions: saved?.questions ?? [],
-      answers: saved?.questions.map((_, i) => saved.answers[i] ?? "") ?? [],
-      drafted: saved?.draftedAt !== undefined,
-    };
-  });
 }
 
 function storedReview(r: NonNullable<DossierData["reviews"]>[string] | undefined) {

@@ -1,11 +1,11 @@
 export const portfolioGuided = {
   answerHint: "Kort mag. Schrijf in je eigen woorden; je kunt ook inspreken en uittypen.",
   ask: "Stel me vragen",
+  askAgain: "Andere vragen",
+  askAgainLabel: "Andere vragen over {title}",
   askAll: "Stel alle vragen",
   askAllHint:
     "De coach bedenkt de vragen voor alle onderdelen in één keer. Je beantwoordt ze hier, op één scherm.",
-  askAgain: "Andere vragen",
-  askAgainLabel: "Andere vragen over {title}",
   askLabel: "Stel me vragen over {title}",
   chapter: "Stel het hoofdstuk op",
   chapterDone: "{n} onderdelen staan in je hoofdstuk. Pas de tekst aan waar nodig.",
@@ -17,10 +17,10 @@ export const portfolioGuided = {
   criterion: "Criterium {n}",
   done: "De tekst staat onder de kop in je hoofdstuk. Pas hem aan waar nodig.",
   draft: "Maak er een alinea van",
+  drafted: "Staat in je hoofdstuk.",
   draftHint:
     "LimeOnIt schrijft alleen met jouw antwoorden en je gekoppelde bewijs. Wat ontbreekt, staat er als [aanvullen: …].",
   draftLabel: "Maak er een alinea van: {title}",
-  drafted: "Staat in je hoofdstuk.",
   errors: {
     "all-drafted":
       "Alle onderdelen met antwoorden staan al in je hoofdstuk. Wil je er één opnieuw, gebruik dan de knop bij dat onderdeel.",

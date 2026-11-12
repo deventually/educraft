@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { render as rtlRender, screen, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
-import { GuidedWriting, type GuidedSectionView } from "~/components/portfolio/GuidedWriting";
+import { GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import type { GuidedSectionView } from "~/lib/portfolio/guided";
 import { C1, C2 } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };

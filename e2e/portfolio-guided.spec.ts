@@ -32,6 +32,9 @@ test("the chapter tab guides writing part by part, by keyboard", async ({ page }
   await expect(
     guided.getByRole("button", { name: "Maak er een alinea van: Beginsituatie" }),
   ).toBeVisible();
+  // The whole chapter on one screen: every question at once, the whole chapter in one go.
+  await expect(guided.getByRole("button", { name: "Stel alle vragen" })).toBeVisible();
+  await expect(guided.getByRole("button", { name: "Stel het hoofdstuk op" })).toBeVisible();
 
   const first = page.getByRole("textbox", { name: "Welke groep had je, en wat konden ze al?" });
   await expect(first).toHaveValue("Een tweedejaars klas.");

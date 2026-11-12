@@ -204,7 +204,10 @@ describe("the whole chapter at once", () => {
     const both = { ...dossier(), guided: undefined };
     const r = await guided.askAllQuestions(user, asked(dossier()), LU, "nl", 5);
     if (!r.ok) throw new Error(r.error);
-    expect(r.data.guided?.[LU]?.s1?.questions).toEqual(["Welke groep had je?", "Wat konden ze al?"]);
+    expect(r.data.guided?.[LU]?.s1?.questions).toEqual([
+      "Welke groep had je?",
+      "Wat konden ze al?",
+    ]);
     expect(r.data.guided?.[LU]?.s1?.answers).toEqual(["Tweedejaars, 24 studenten.", ""]);
     expect(r.data.guided?.[LU]?.s2?.questions).toHaveLength(3);
     expect(generate).toHaveBeenCalledTimes(1);
@@ -273,7 +276,9 @@ describe("the whole chapter at once", () => {
       ok: false,
       error: "all-drafted",
     });
-    expect(await guided.draftChapter(user, dossier({ coachMode: "draft", evidence: [] }), LU, "", "nl")).toEqual({
+    expect(
+      await guided.draftChapter(user, dossier({ coachMode: "draft", evidence: [] }), LU, "", "nl"),
+    ).toEqual({
       ok: false,
       error: "no-material",
     });
@@ -299,7 +304,15 @@ describe("the whole chapter at once", () => {
 
   it("marks a section drafted on its own button too", async () => {
     generate.mockResolvedValueOnce({ text: "Ik had eerstejaars." });
-    const r = await guided.draftSection(user, asked(dossier({ coachMode: "draft" })), LU, "s1", "", "nl", 4);
+    const r = await guided.draftSection(
+      user,
+      asked(dossier({ coachMode: "draft" })),
+      LU,
+      "s1",
+      "",
+      "nl",
+      4,
+    );
     if (!r.ok) throw new Error(r.error);
     expect(r.data.guided?.[LU]?.s1?.draftedAt).toBe(4);
   });

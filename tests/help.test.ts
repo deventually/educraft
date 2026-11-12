@@ -262,6 +262,15 @@ describe("help registry — topics", () => {
     expect(en).toContain("*Make a paragraph of it*");
   });
 
+  it("explains asking all questions and drafting the whole chapter at once", () => {
+    const nl = getTopic("bdb-bke", "nl");
+    expect(nl).toContain("*Stel alle vragen*");
+    expect(nl).toContain("*Stel het hoofdstuk op*");
+    const en = getTopic("bdb-bke", "en");
+    expect(en).toContain("*Ask all questions*");
+    expect(en).toContain("*Draft the chapter*");
+  });
+
   it("explains the teacher's week and the calendar file (P22.5)", () => {
     expect(getTopicTitle("week", "nl")).toBe("Je week");
     expect(getTopicTitle("week", "en")).toBe("Your week");

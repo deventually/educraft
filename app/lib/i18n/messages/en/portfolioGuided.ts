@@ -1,11 +1,11 @@
 export const portfolioGuided = {
   answerHint: "Short is fine. Write in your own words; you can also dictate and type it out.",
   ask: "Ask me questions",
+  askAgain: "Other questions",
+  askAgainLabel: "Other questions about {title}",
   askAll: "Ask all questions",
   askAllHint:
     "The coach thinks of the questions for every part at once. You answer them here, on one screen.",
-  askAgain: "Other questions",
-  askAgainLabel: "Other questions about {title}",
   askLabel: "Ask me questions about {title}",
   chapter: "Draft the chapter",
   chapterDone: "{n} parts are in your chapter. Adjust the text where needed.",
@@ -17,10 +17,10 @@ export const portfolioGuided = {
   criterion: "Criterion {n}",
   done: "The text is under its heading in your chapter. Adjust it where needed.",
   draft: "Make a paragraph of it",
+  drafted: "In your chapter.",
   draftHint:
     "LimeOnIt writes only with your answers and your linked evidence. What is missing shows as [to add: …].",
   draftLabel: "Make a paragraph of it: {title}",
-  drafted: "In your chapter.",
   errors: {
     "all-drafted":
       "Every part with answers is already in your chapter. To redo one, use the button at that part.",

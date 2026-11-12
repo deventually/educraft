@@ -79,7 +79,10 @@ function withQuestions(
 ): DossierData {
   const section = { questions: asked.questions, answers: [], at: now, model: asked.model };
   return withLog(
-    { ...d, guided: { ...d.guided, [outcomeId]: { ...d.guided?.[outcomeId], [sectionId]: section } } },
+    {
+      ...d,
+      guided: { ...d.guided, [outcomeId]: { ...d.guided?.[outcomeId], [sectionId]: section } },
+    },
     // Questions are coaching, not text: the disclosure names them with the feedback.
     { at: now, action: "review", outcomeId, model: asked.model },
   );
