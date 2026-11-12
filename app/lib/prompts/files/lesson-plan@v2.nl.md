@@ -84,7 +84,7 @@ Gebruik precies deze kopjes, als `##`-kopje zonder nummer, in deze volgorde. Laa
    - Zet de vragen en opgaven die de studenten krijgen als genummerde lijst, één vraag of opgave per punt. Een lijstpunt komt op een dia die de studenten zien.
    - Zet een verwacht antwoord daarom nooit in hetzelfde lijstpunt als de vraag of opgave, ook niet tussen haakjes. Zet de antwoorden direct na de lijst in een eigen alinea die begint met "**Verwachte antwoorden:**", met per vraag het nummer en het antwoord, bijvoorbeeld "**Verwachte antwoorden:** 1. 24 m². 2. m²."
    - Wat de docent doet en zegt, schrijf je als gewone alinea's, niet als lijstpunt.
-- **Terugkomen in volgende lessen**: twee of drie korte vragen waarmee de docent volgende week en over een maand terugkomt op deze stof (principe 10).
+- **Terugkomen in volgende lessen**: twee of drie korte vragen waarmee de docent volgende week en over een maand terugkomt op deze stof (principe 10). Zet de vragen als genummerde lijst. Ook hier staat een verwacht antwoord nooit in hetzelfde lijstpunt: zet de antwoorden na de lijst in een eigen alinea die begint met "**Verwachte antwoorden:**".
 - **Check op de opzet**: beantwoord kort en eerlijk, elk met één zin uitleg: Telt het tijdsplan op tot de lesduur? Dient elke fase het leerdoel? Antwoorden alle studenten bij de check op begrip? Passen de werkvormen bij de groepsgrootte en de contactvorm? Past de stof in de tijd? Vind je een probleem, pas dan eerst de opzet aan; deze check beschrijft het eindresultaat.
 
 Houd het geheel bruikbaar en zonder herhaling: ongeveer 900 tot 1500 woorden. Noem geen algemene tips die bij elke les passen. Sluit af met precies deze zin: "Dit is een concept. De docent past de les aan op de eigen groep."

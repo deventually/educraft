@@ -190,6 +190,19 @@ describe("lesson-plan@v2: expected answers off the slides", () => {
     },
   );
 
+  it.each([
+    ["nl", "Ook hier staat een verwacht antwoord nooit in hetzelfde lijstpunt"],
+    ["en", "Here too, an expected answer is never in the same list item"],
+  ] as const)("applies the same rule to coming back in later lessons (%s)", (lang, rule) => {
+    const prompt = runtime(lang);
+    const revisit = prompt.slice(
+      prompt.indexOf(
+        lang === "nl" ? "**Terugkomen in volgende lessen**" : "**Coming back in later lessons**",
+      ),
+    );
+    expect(revisit.slice(0, 600)).toContain(rule);
+  });
+
   it("leaves @v1 as it was", () => {
     const v1 = buildSystemPrompt({ promptId: "lesson-plan@v1", values, outputLanguage: "nl" });
     expect(v1).not.toContain("Verwachte antwoorden:");
