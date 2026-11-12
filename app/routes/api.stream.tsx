@@ -2,6 +2,7 @@ import type { Route } from "./+types/api.stream";
 import { z } from "zod";
 import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
+import { guardOutput } from "~/lib/template/guards";
 import { modeOf } from "~/lib/registry/modes";
 import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
@@ -359,7 +360,7 @@ export async function action({ request }: Route.ActionArgs) {
               input: values,
               contextProfileId: body.contextProfileId ?? null,
               outputLanguage,
-              outputMarkdown: full,
+              outputMarkdown: guardOutput(stage.output.guard, full, values),
             });
             generationId = saved.id;
           }

@@ -22,7 +22,10 @@ A *tool* is a declarative description, not a hand-written page. A `Tool`
   A stage's output can name a **`computed`** note (`app/lib/template/computations.ts`): a
   line computed in code from the finished result and shown under it, labelled as not from
   the AI, such as the leercheck's `engagement-index` (the score out of 18, P31.3). A number
-  never depends on the AI's arithmetic.
+  never depends on the AI's arithmetic. It can also name a **`guard`**
+  (`app/lib/template/guards.ts`): the output cleaned in code, by the stream before it is saved
+  and by the result view before it is shown, such as Groepsfeedback's `input-numbers` (a number
+  in digits that is not in the input is dropped, P36.2).
 
 - **`mode`** — `one-shot` or `chat`. How a tool runs is one **strategy** per kind
   (`modeOf(tool)` in `app/lib/registry/modes.ts`): `chat`, `multiStage` (one-shot with more

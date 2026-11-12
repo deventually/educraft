@@ -1,8 +1,15 @@
 import { useId } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { Sparkles } from "lucide-react";
+import { Button } from "~/components/ui";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
-import { MIN_SCORES_FOR_INSIGHT, type GroupSummary } from "~/lib/utilities/rubric";
+import { writeHandoff } from "~/lib/forms/handoff";
+import {
+  groupSummaryText,
+  MIN_SCORES_FOR_INSIGHT,
+  type GroupSummary,
+} from "~/lib/utilities/rubric";
 
 /** "2026-11" → "november 2026" in the page's language. */
 function roundName(month: string, locale: string): string {
@@ -19,18 +26,23 @@ function roundName(month: string, locale: string): string {
  * How the group did in one round of closed, anonymous fill-ins (P36.1): per criterion the count
  * per level and how many works sat on the lowest level, worst first. Hidden under
  * MIN_SCORES_FOR_INSIGHT in the round, so one student's result cannot be read off it.
+ * "Groepsfeedback maken" (P36.2) hands only the counts as text to `feedbackWith`, passed only
+ * when that tool is available to this teacher.
  */
 export function RubricGroup({
   group,
   rounds,
   selected,
+  feedbackWith,
 }: {
   group: GroupSummary | null;
   rounds: { month: string; count: number }[];
   selected: string;
+  feedbackWith?: string;
 }) {
   const t = useT();
   const locale = useLocale();
+  const navigate = useNavigate();
   const s = t.rubricGroup;
   const id = useId();
   const inRound = rounds.find((r) => r.month === selected)?.count ?? 0;
@@ -65,6 +77,20 @@ export function RubricGroup({
           <p className="max-w-[70ch] text-sm text-slate-600">
             {fmt(s.intro, { n: group.total, round: roundName(group.month, locale) })}
           </p>
+          {feedbackWith && (
+            <div>
+              <Button
+                type="button"
+                onClick={() => {
+                  writeHandoff(feedbackWith, { groupSummary: groupSummaryText(group, locale) });
+                  void navigate(`/tools/${feedbackWith}`);
+                }}
+              >
+                <Sparkles className="size-4" aria-hidden />
+                {s.feedback}
+              </Button>
+            </div>
+          )}
           <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(18rem,100%),1fr))]">
             {group.criteria.map((c) => (
               <table
