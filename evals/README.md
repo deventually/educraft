@@ -21,6 +21,29 @@ npm run eval -- --cases-only     # regenerate raw outputs, skip the judge
 npm run eval -- --judge-only     # re-judge the latest raw outputs, skip generation
 ```
 
+### Without an API key: Claude Code on a subscription
+
+`claude-code::<model>` runs every call through Claude Code (`claude -p`) on the signed-in
+Claude subscription, pinned to that model. It sends the app's request, not Claude Code's own:
+our system prompt replaces Claude Code's, tools, `CLAUDE.md`, skills, hooks and MCP are off, and
+the model's effort and answer budget come from `config/models.json`
+(`app/lib/ai/adapters/cli.ts`). A cut-off answer is still seen (`stop_reason`).
+
+```bash
+npm run eval -- --tool lesson-plan --runs 3 \
+  --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 --label cc
+```
+
+- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). The calls run one
+  after another, so a `--runs 3` of one tool takes roughly half an hour to an hour.
+- A worker session in the cloud is signed in too, so it can run the eval itself and commit the
+  report in its PR.
+- What still differs from the app: temperature cannot be set, and Claude Code adds a short
+  prompt of its own (about 1,400 tokens). The report's model column says
+  `claude-code::…`, so compare it with an API report of the same prompt version once
+  (`--runs 3`); a difference smaller than the spread is noise.
+- Images (`imagePath` cases, math-grading) are not sent through the CLI.
+
 It runs on `vite-node` (not `tsx`): the prompt files use Vite's `?raw` imports,
 which plain tsx/Node cannot load — see `scripts/eval.config.ts`.
 

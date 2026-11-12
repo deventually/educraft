@@ -257,13 +257,42 @@ function parseCompatModel(id: string): ModelInfo | null {
   };
 }
 
+/** Prefix for Claude Code pinned to one model, e.g. "claude-code::claude-sonnet-5-5". */
+const CLAUDE_CODE_PREFIX = `claude-code${DYNAMIC_SEP}`;
+
+/**
+ * Resolve Claude Code pinned to a model ("claude-code::<apiId>"): the eval runs the app's
+ * prompts on the owner's own Claude subscription instead of an API key. It runs on the
+ * owner's subscription, so it is NOT client-selectable: a request body never picks it.
+ */
+function parseClaudeCodeModel(id: string): ModelInfo | null {
+  if (!id.startsWith(CLAUDE_CODE_PREFIX)) return null;
+  const apiId = id.slice(CLAUDE_CODE_PREFIX.length);
+  if (!apiId) return null;
+  return {
+    provider: "claude-code",
+    apiId,
+    displayName: `Claude Code · ${apiId}`,
+    supportsImages: false,
+    tier: 2,
+    local: true,
+    clientSelectable: false,
+  };
+}
+
+/** Every id form beyond the catalog: discovered local, compat endpoint, pinned Claude Code. */
+function parseSpecialModel(id: string): ModelInfo | null {
+  return parseDynamicModel(id) ?? parseCompatModel(id) ?? parseClaudeCodeModel(id);
+}
+
 /**
  * Resolve a model id to its ModelInfo: the static catalog first, then a
- * dynamically-discovered local id ("<provider>::<apiId>"), then a configured
- * OpenAI-compatible endpoint ("compat::<apiId>"). Throws if none.
+ * dynamically-discovered local id ("<provider>::<apiId>"), a configured
+ * OpenAI-compatible endpoint ("compat::<apiId>") or Claude Code pinned to a model
+ * ("claude-code::<apiId>"). Throws if none.
  */
 export function resolveModelInfo(id: string): ModelInfo {
-  return staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id) ?? throwUnknown(id);
+  return staticOrAdded(id) ?? parseSpecialModel(id) ?? throwUnknown(id);
 }
 
 function throwUnknown(id: string): never {
@@ -272,11 +301,7 @@ function throwUnknown(id: string): never {
 
 /** Whether an id resolves to a usable model (catalog, dynamic local, or configured compat). */
 export function isResolvableModel(id: string): boolean {
-  return (
-    staticOrAdded(id) !== undefined ||
-    parseDynamicModel(id) !== null ||
-    parseCompatModel(id) !== null
-  );
+  return staticOrAdded(id) !== undefined || parseSpecialModel(id) !== null;
 }
 
 /**
@@ -286,7 +311,7 @@ export function isResolvableModel(id: string): boolean {
  * Phase 4 swaps this body for an admin-configured allow-list.
  */
 export function isClientSelectable(id: string): boolean {
-  const info = staticOrAdded(id) ?? parseDynamicModel(id) ?? parseCompatModel(id);
+  const info = staticOrAdded(id) ?? parseSpecialModel(id);
   return info?.clientSelectable === true;
 }
 
