@@ -61,7 +61,12 @@ describe("TrackDataSchema", () => {
   });
 
   it("starts empty and drops unknown milestones, statuses and bad dates", () => {
-    expect(TrackDataSchema.parse({})).toEqual({ status: {}, deadlines: {}, visits: [] });
+    expect(TrackDataSchema.parse({})).toEqual({
+      status: {},
+      deadlines: {},
+      visits: [],
+      onstage: [],
+    });
     expect(TrackDataSchema.safeParse({ status: { start: "maybe" }, deadlines: {} }).success).toBe(
       false,
     );

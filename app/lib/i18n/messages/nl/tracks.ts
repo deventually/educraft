@@ -5,6 +5,20 @@ export const tracks = {
     back: "Terug naar het traject",
     label: "Traject",
   },
+  close: {
+    button: "Traject afronden",
+    closedOn: "Afgerond op {date}. Het traject wordt gewist op {purge}.",
+    confirmBody:
+      "Na afronden kun je niets meer toevoegen. Het traject wordt gewist op {purge}; tot dan kun je het nog lezen en downloaden.",
+    confirmTitle: "Traject afronden?",
+    done: "Traject afgerond.",
+    errorClosed: "Dit traject is al afgerond.",
+    heading: "Afronden",
+    intro:
+      "Rond het traject af als alles in OnStage staat. LimeOnIt bewaart het daarna nog {days} dagen voor een eventueel bezwaar en wist het dan vanzelf.",
+    keepNote:
+      "Wil je de hele feedbacklijn zelf bewaren? Download hem als Word. Waar je dat bestand bewaart, is jouw verantwoordelijkheid.",
+  },
   closed: "Afgerond",
   code: "Code van de student",
   codeHint:
@@ -91,6 +105,21 @@ export const tracks = {
   model: "Beoordelingsmodel (optioneel)",
   none: "Geen",
   notLinked: "geen",
+  onstage: {
+    confirm: "Bevestig de teksten",
+    confirmed: "Bevestigd",
+    copied: "Gekopieerd: {criterion}",
+    copy: "Kopieer",
+    copyFor: "Kopieer: {criterion}",
+    done: "Teksten bevestigd.",
+    draftNote: "Een eerste versie komt uit de laatste eindbeoordeling. Pas hem aan en bevestig.",
+    errorClosed: "Dit traject is afgerond; je kunt niets meer bevestigen.",
+    errorInvalid: "Dat ging niet. Laad de pagina opnieuw en probeer het nog eens.",
+    heading: "Teksten voor OnStage",
+    intro: "Plak dit in OnStage, controleer het en onderteken daar.",
+    noCriteria:
+      "Koppel een beoordelingsmodel aan dit traject. Dan zie je hier per criterium de tekst voor OnStage.",
+  },
   overview: "Overzicht",
   overviewIntro:
     "De zeven mijlpalen van het traject. Geldt een mijlpaal niet, kies daar dan Niet van toepassing.",

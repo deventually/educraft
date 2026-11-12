@@ -19,7 +19,7 @@ const MILESTONE_IDS = [
 export type MilestoneId = (typeof MILESTONE_IDS)[number];
 export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
 
-export type MilestonePanel = "feedforward" | "second-assessor" | "visits";
+export type MilestonePanel = "feedforward" | "onstage" | "second-assessor" | "visits";
 
 interface MilestoneTool {
   slug: string;
@@ -36,6 +36,8 @@ interface Milestone {
    * second assessor's comparison (P38.5).
    */
   panel?: MilestonePanel;
+  /** P38.7: the tab where the teacher closes the track (and sees when it is wiped). */
+  closes?: true;
 }
 
 export const MILESTONES: readonly Milestone[] = [
@@ -88,7 +90,13 @@ export const MILESTONES: readonly Milestone[] = [
       },
     ],
   },
-  { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
+  {
+    id: "onstage",
+    name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" },
+    // P38.7: per criterion the confirmed text to paste into OnStage; then close the track.
+    panel: "onstage",
+    closes: true,
+  },
 ];
 
 const TRACK_KINDS = ["internship", "thesis"] as const;
@@ -109,6 +117,8 @@ const TRACK_LIMITS = {
   /** A whole report, redacted in the browser (like a `document` field in `/api/stream`). */
   redactedText: 300_000,
   feedback: 60_000,
+  criterion: 300,
+  confirmed: 10_000,
 } as const;
 
 /** The teacher's choice when opening a track. The code is free text: the UI warns "no name". */
@@ -131,6 +141,11 @@ export type TrackInput = z.input<typeof TrackInputSchema>;
 /** `skipped`: a milestone that does not apply (a thesis without visits) also counts as resolved. */
 const MilestoneStatusSchema = z.enum(["open", "done", "skipped"]);
 
+export const ConfirmedTextSchema = z.object({
+  criterion: z.string().trim().min(1).max(TRACK_LIMITS.criterion),
+  text: z.string().max(TRACK_LIMITS.confirmed),
+});
+
 export const TrackDataSchema = z.object({
   status: z.partialRecord(MilestoneIdSchema, MilestoneStatusSchema).default({}),
   /** Hand-in dates per milestone. */
@@ -141,6 +156,8 @@ export const TrackDataSchema = z.object({
     .max(50)
     .default([])
     .transform((v) => [...new Set(v)].sort()),
+  /** P38.7: per criterion the text the teacher confirmed for OnStage, in the model's order. */
+  onstage: z.array(ConfirmedTextSchema).max(60).default([]),
 });
 export type TrackData = z.infer<typeof TrackDataSchema>;
 

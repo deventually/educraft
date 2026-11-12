@@ -6,6 +6,20 @@ export const tracks: Messages["tracks"] = {
     back: "Back to the track",
     label: "Track",
   },
+  close: {
+    button: "Close the track",
+    closedOn: "Closed on {date}. The track will be wiped on {purge}.",
+    confirmBody:
+      "After closing you cannot add anything. The track will be wiped on {purge}; until then you can still read and download it.",
+    confirmTitle: "Close the track?",
+    done: "Track closed.",
+    errorClosed: "This track is already closed.",
+    heading: "Close",
+    intro:
+      "Close the track once everything is in OnStage. LimeOnIt then keeps it for {days} more days for a possible appeal and wipes it by itself.",
+    keepNote:
+      "Want to keep the whole feedback line yourself? Download it as Word. Where you keep that file is your responsibility.",
+  },
   closed: "Closed",
   code: "Student code",
   codeHint:
@@ -91,6 +105,21 @@ export const tracks: Messages["tracks"] = {
   model: "Assessment model (optional)",
   none: "None",
   notLinked: "none",
+  onstage: {
+    confirm: "Confirm the texts",
+    confirmed: "Confirmed",
+    copied: "Copied: {criterion}",
+    copy: "Copy",
+    copyFor: "Copy: {criterion}",
+    done: "Texts confirmed.",
+    draftNote: "A first version comes from the last final assessment. Adjust it and confirm.",
+    errorClosed: "This track is closed; you can no longer confirm anything.",
+    errorInvalid: "That did not work. Reload the page and try again.",
+    heading: "Texts for OnStage",
+    intro: "Paste this into OnStage, check it and sign it there.",
+    noCriteria:
+      "Link an assessment model to this track. Then you see the text for OnStage here, per criterion.",
+  },
   overview: "Overview",
   overviewIntro:
     "The seven milestones of the track. If a milestone does not apply, choose Does not apply there.",

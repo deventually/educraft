@@ -24,7 +24,12 @@ export function weakPoints(rounds: readonly HistoryRound[]): string {
   return (last?.feedback.points ?? []).map((p) => `- ${p.criterion}: ${p.text}`).join("\n");
 }
 
-export function feedbackHistory(rounds: readonly HistoryRound[], locale: Locale): string {
+/** `limit`: the characters kept, newest first (the whole line for Word passes `Infinity`). */
+export function feedbackHistory(
+  rounds: readonly HistoryRound[],
+  locale: Locale,
+  limit = HISTORY_LIMIT,
+): string {
   const word = locale === "en" ? "round" : "ronde";
   const blocks = rounds
     .filter((r) => r.feedback.text.trim())
@@ -38,7 +43,7 @@ export function feedbackHistory(rounds: readonly HistoryRound[], locale: Locale)
   let size = 0;
   for (const b of [...blocks].reverse()) {
     const next = size + b.length + (kept.length ? 2 : 0);
-    if (next > HISTORY_LIMIT) break;
+    if (next > limit) break;
     kept.unshift(b);
     size = next;
   }

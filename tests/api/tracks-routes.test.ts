@@ -200,6 +200,7 @@ describe("/tracks/:id", () => {
       status: { start: "done" },
       deadlines: { start: "2027-02-01" },
       visits: [],
+      onstage: [],
     });
     const bad = (await detail.action({
       request: post(`/tracks/${t.id}`, { intent: "milestone", milestone: "start", status: "x" }),

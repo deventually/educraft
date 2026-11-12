@@ -11,6 +11,8 @@ import { ResultActions } from "~/components/ResultActions";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 import { VisitsPanel } from "~/components/tracks/VisitsPanel";
+import { OnStagePanel } from "~/components/tracks/OnStagePanel";
+import { CloseTrack } from "~/components/tracks/CloseTrack";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -81,6 +83,8 @@ describe("the track list", () => {
 
 const pageData = (tab = "overview") => ({
   tab,
+  rubrics: [],
+  retentionDays: 90,
   track: {
     id: "t1",
     code: "S-0423",
@@ -91,7 +95,12 @@ const pageData = (tab = "overview") => ({
     closedAt: null,
     purgeAfter: null,
   },
-  data: { status: { start: "done" }, deadlines: { visits: "2027-01-10" }, visits: [] as string[] },
+  data: {
+    status: { start: "done" },
+    deadlines: { visits: "2027-01-10" },
+    visits: [] as string[],
+    onstage: [] as { criterion: string; text: string }[],
+  },
   models: [] as { id: string; displayName: string }[],
   rounds: [
     {
@@ -260,5 +269,85 @@ describe("VisitsPanel (P38.6)", () => {
   it("says when there was no visit yet", () => {
     renderWithRouter(<VisitsPanel visits={[]} />);
     expect(screen.getByText("Nog geen bezoek vastgelegd.")).toBeTruthy();
+  });
+});
+
+describe("OnStagePanel (P38.7)", () => {
+  const rounds = [
+    {
+      milestone: "final",
+      round: 1,
+      feedback: {
+        text: "### C1 Probleemstelling\nSterk: de aanleiding.\n### C2 Aanpak\nVerbeter de deelvragen.",
+      },
+    },
+  ];
+
+  it("gives per criterion a draft from the final assessment, a copy button and the intro; axe", async () => {
+    const { container } = renderWithRouter(
+      <OnStagePanel criteria={"C1 Probleemstelling\nC2 Aanpak"} confirmed={[]} rounds={rounds} />,
+    );
+    expect(
+      screen.getByText("Plak dit in OnStage, controleer het en onderteken daar."),
+    ).toBeTruthy();
+    const c1 = screen.getByLabelText("C1 Probleemstelling") as HTMLTextAreaElement;
+    expect(c1.value).toBe("Sterk: de aanleiding.");
+    expect(screen.getByRole("button", { name: "Kopieer: C2 Aanpak" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Bevestig de teksten" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("a confirmed text wins over the draft and says so", () => {
+    renderWithRouter(
+      <OnStagePanel
+        criteria={"C1 Probleemstelling"}
+        confirmed={[{ criterion: "C1 Probleemstelling", text: "Definitief." }]}
+        rounds={rounds}
+      />,
+    );
+    expect((screen.getByLabelText("C1 Probleemstelling") as HTMLTextAreaElement).value).toBe(
+      "Definitief.",
+    );
+    expect(screen.getByText("Bevestigd")).toBeTruthy();
+  });
+
+  it("without a model, says to link one", () => {
+    renderWithRouter(<OnStagePanel criteria="" confirmed={[]} rounds={[]} />);
+    expect(screen.getByText(/Koppel een beoordelingsmodel/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Bevestig de teksten" })).toBeNull();
+  });
+});
+
+describe("CloseTrack (P38.7)", () => {
+  const base = { id: "t1", code: "S-0423", closedAt: null, purgeAfter: null };
+
+  it("an open track: the retention, the Word download with its note, and the close button; axe", async () => {
+    const { container } = renderWithRouter(
+      <CloseTrack track={base} retentionDays={90} rounds={[]} onstage={[]} />,
+    );
+    expect(screen.getByRole("heading", { name: "Afronden" })).toBeTruthy();
+    expect(screen.getByText(/nog 90 dagen/)).toBeTruthy();
+    expect(screen.getByText(/jouw verantwoordelijkheid/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Download als Word" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Traject afronden" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("a closed track says when it is wiped and has no close button", () => {
+    renderWithRouter(
+      <CloseTrack
+        track={{
+          ...base,
+          closedAt: new Date("2027-03-01T10:00:00Z"),
+          purgeAfter: new Date("2027-05-30T10:00:00Z"),
+        }}
+        retentionDays={90}
+        rounds={[]}
+        onstage={[]}
+      />,
+    );
+    expect(screen.getByText(/wordt gewist op 30 mei 2027/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Traject afronden" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Download als Word" })).toBeTruthy();
   });
 });

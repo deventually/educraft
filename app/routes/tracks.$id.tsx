@@ -6,10 +6,14 @@ import type { Route } from "./+types/tracks.$id";
 import { requireTracksUser, trackVisitAction } from "~/server/tracks.server";
 import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
 import { rubricChoices, trackSecondAssessorAction } from "~/server/trackSecondAssessor.server";
+import { trackCloseAction, trackOnStageAction } from "~/server/trackOnStage.server";
+import { getTrackRetentionDays } from "~/server/repositories/settings.server";
 import { getSelectableModels } from "~/server/availability.server";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 import { VisitsPanel } from "~/components/tracks/VisitsPanel";
+import { OnStagePanel } from "~/components/tracks/OnStagePanel";
+import { CloseTrack } from "~/components/tracks/CloseTrack";
 import { getTrack, listRounds, updateTrackData } from "~/server/repositories/tracks.server";
 import { getCourse } from "~/server/repositories/courses.server";
 import { getAssessmentModel } from "~/server/repositories/assessmentModels.server";
@@ -50,17 +54,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!track) throw notFound();
   const tab = tabOf(new URL(request.url).searchParams.get("tab"));
   const panel = tab === "overview" ? undefined : MILESTONES.find((x) => x.id === tab)?.panel;
-  const [rounds, course, model, selectable, rubrics] = await Promise.all([
+  const [rounds, course, model, selectable, rubrics, retentionDays] = await Promise.all([
     listRounds(user.id, track.id),
     track.courseId ? getCourse(user.id, track.courseId) : null,
     track.assessmentModelId ? getAssessmentModel(user.id, track.assessmentModelId) : null,
     getSelectableModels(user),
     // The rubrics only on the tab that compares with them (P38.5).
     panel === "second-assessor" ? rubricChoices(user) : [],
+    getTrackRetentionDays(),
   ]);
   return {
     tab,
     rubrics,
+    retentionDays,
     track: {
       id: track.id,
       code: track.code,
@@ -101,6 +107,10 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (sa) return sa;
   const visit = await trackVisitAction(request, user, track, locale);
   if (visit) return visit;
+  const onstage = await trackOnStageAction(request, user, track, locale);
+  if (onstage) return onstage;
+  const close = await trackCloseAction(request, user, track, locale);
+  if (close) return close;
   const fd = await request.formData();
   const m = getMessages(locale).tracks;
   if (fd.get("intent") !== "milestone")
@@ -130,21 +140,19 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
   const { tab, track } = loaderData;
+  const doneMessage = {
+    feedforward: m.feedforward.done,
+    "second-assessor": m.secondAssessor.done,
+    visit: m.visits.done,
+    onstage: m.onstage.done,
+    close: m.close.done,
+    milestone: m.toastSaved,
+  };
   useFormToast(actionData, {
     result: (d) =>
       d
         ? d.ok
-          ? {
-              variant: "success",
-              message:
-                d.intent === "feedforward"
-                  ? m.feedforward.done
-                  : d.intent === "second-assessor"
-                    ? m.secondAssessor.done
-                    : d.intent === "visit"
-                      ? m.visits.done
-                      : m.toastSaved,
-            }
+          ? { variant: "success", message: doneMessage[d.intent] }
           : { variant: "error", message: d.error }
         : null,
   });
@@ -242,6 +250,13 @@ function Panel({ kind, data }: { kind: MilestonePanel; data: Data }) {
     feedforward: () => <FeedforwardPanel criteria={data.track.criteria} models={data.models} />,
     "second-assessor": () => <SecondAssessorPanel rubrics={data.rubrics} />,
     visits: () => <VisitsPanel visits={data.data.visits} />,
+    onstage: () => (
+      <OnStagePanel
+        criteria={data.track.criteria}
+        confirmed={data.data.onstage}
+        rounds={data.rounds}
+      />
+    ),
   };
   return panels[kind]();
 }
@@ -284,6 +299,14 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
         </div>
       )}
       {def?.panel && !data.track.closedAt && <Panel kind={def.panel} data={data} />}
+      {def?.closes && (
+        <CloseTrack
+          track={data.track}
+          retentionDays={data.retentionDays}
+          rounds={data.rounds}
+          onstage={data.data.onstage}
+        />
+      )}
       <Form method="post" key={milestone} className="space-y-4">
         <input type="hidden" name="intent" value="milestone" />
         <input type="hidden" name="milestone" value={milestone} />
