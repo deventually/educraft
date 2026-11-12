@@ -69,13 +69,21 @@ const toolStage = z.object({
   inputs: z.array(inputField).optional(),
   consumes: z.array(stageDependency).optional(),
   optional: z.boolean().optional(),
-  output: z.object({
-    kind: z.enum(["markdown", "json", "structured-sections"]),
-    hint: localizedText.optional(),
-    sections: z.array(z.string()).optional(),
-    exportAs: z.enum(EXPORT_KINDS).optional(),
-    computed: z.enum(COMPUTATION_IDS).optional(),
-  }),
+  output: z
+    .object({
+      kind: z.enum(["markdown", "json", "structured-sections"]),
+      hint: localizedText.optional(),
+      sections: z.array(z.string()).optional(),
+      exportAs: z.enum(EXPORT_KINDS).optional(),
+      slides: z
+        .object({ opening: localizedText, phases: localizedText, closing: localizedText })
+        .optional(),
+      computed: z.enum(COMPUTATION_IDS).optional(),
+    })
+    .refine((o) => o.exportAs !== "slides" || o.slides, {
+      message: "a slides result names its slide headings (output.slides)",
+      path: ["slides"],
+    }),
   model: z.string().optional(),
   temperature: z.number().optional(),
   maxTokens: maxTokens.optional(),

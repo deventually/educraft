@@ -53,6 +53,7 @@
     "jszip": "^3.10.2",
     "lucide-react": "^1.70.0",
     "mammoth": "^1.13.0",
+    "pptxgenjs": "4.0.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
@@ -103,6 +104,9 @@
       "minimatch": "^11.0.6"
     },
     "playwright-core": "1.65.0",
+    "pptxgenjs": {
+      "image-size": "^2.0.3"
+    },
     "typed-rest-client": {
       "qs": "^6.17.1"
     }

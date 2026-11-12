@@ -6,6 +6,7 @@ import type { ExportDoc } from "./doc";
 import { DOCX_TYPE, exportDocToDocx } from "./docx";
 import { type ExportFormat, isExportFormat } from "./formats";
 import { exportDocToMarkdown, MARKDOWN_TYPE } from "./md";
+import { exportDocToPptx, PPTX_TYPE } from "./pptx";
 
 interface FileWriter {
   type: string;
@@ -14,6 +15,7 @@ interface FileWriter {
 
 const WRITERS: Partial<Record<ExportFormat, FileWriter>> = {
   docx: { type: DOCX_TYPE, write: exportDocToDocx },
+  pptx: { type: PPTX_TYPE, write: exportDocToPptx },
   md: { type: MARKDOWN_TYPE, write: exportDocToMarkdown },
 };
 
