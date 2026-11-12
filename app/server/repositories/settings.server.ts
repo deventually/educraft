@@ -25,6 +25,7 @@ import {
   MAX_BREAK_WEEKS,
   normalizeBreakWeeks,
 } from "~/lib/calendar/weeks";
+import { TRACK_RETENTION } from "~/lib/tracks/retention";
 
 /** Every tool stand an admin has set (P28.3); an untouched tool is absent (registry default). */
 export async function getToolStands(): Promise<Map<string, InstanceStand>> {
@@ -289,4 +290,38 @@ export async function getTimeZone(): Promise<string> {
   } catch {
     return DEFAULT_TIME_ZONE;
   }
+}
+
+const TRACK_RETENTION_KEY = "trackRetentionDays";
+
+const isRetentionDays = (v: unknown): v is number =>
+  Number.isInteger(v) && (v as number) >= 0 && (v as number) <= TRACK_RETENTION.maxDays;
+
+/**
+ * Days a closed internship or thesis track is kept before it is wiped (P38); unset = the
+ * provisional default until the privacy officer confirms the term.
+ */
+export async function getTrackRetentionDays(): Promise<number> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, TRACK_RETENTION_KEY))
+    .get();
+  if (!row) return TRACK_RETENTION.defaultDays;
+  try {
+    const parsed: unknown = JSON.parse(row.valueJson);
+    return isRetentionDays(parsed) ? parsed : TRACK_RETENTION.defaultDays;
+  } catch {
+    return TRACK_RETENTION.defaultDays;
+  }
+}
+
+export async function setTrackRetentionDays(days: number): Promise<void> {
+  if (!isRetentionDays(days)) throw new Error("Invalid retention days");
+  const valueJson = JSON.stringify(days);
+  getDb()
+    .insert(instanceSettings)
+    .values({ key: TRACK_RETENTION_KEY, valueJson, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: instanceSettings.key, set: { valueJson, updatedAt: new Date() } })
+    .run();
 }

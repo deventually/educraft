@@ -8,6 +8,11 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313, #314, #316 en #317 gemerged
 
 ## Nu
 
+- **Cursusevaluatie verwerken: het scherm (#318) gemerged op 2026-11-12:** op het tabblad
+  *Controle* plakt de docent de antwoorden of kiest een CSV, controleert de namen in de browser en
+  laat de enquête verwerken. Per verbeterpunt kiest de docent *Akkoord* (het komt bij de
+  verbeterpunten) of *Niet akkoord*. Punten uit de vorige uitvoering staan apart bovenaan.
+  Daarmee is P33 af.
 - **Bastiaan kiest per eval de route (#317) gemerged op 2026-11-12:** een werker die een eval
   nodig heeft, vraagt eerst: via Claude Code (de werker draait hem zelf en zet het rapport in zijn
   PR) of via de API (Bastiaan draait hem met één kopieerblok) (BESLUIT-2026-11-12-14).
@@ -861,10 +866,6 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313, #314, #316 en #317 gemerged
 
 ## Bezig
 
-- **Cursusevaluatie verwerken: het scherm (P33.3, PR open):** op het tabblad *Controle* plakt de
-  docent de antwoorden of kiest een CSV, controleert de namen in de browser en laat de enquête
-  verwerken. Per verbeterpunt kiest de docent *Akkoord* (het komt bij de verbeterpunten) of *Niet
-  akkoord*. Punten uit de vorige uitvoering staan apart bovenaan.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

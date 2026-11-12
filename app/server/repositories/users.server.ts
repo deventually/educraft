@@ -27,6 +27,8 @@ import {
   teamMembers,
   featureExceptions,
   slideTemplates,
+  supervisionTracks,
+  trackRounds,
   feedback,
   pilotCheckins,
   generations,
@@ -199,6 +201,13 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(rubricScores).where(eq(rubricScores.userId, id)).run();
     tx.delete(rubrics).where(eq(rubrics.userId, id)).run();
     tx.delete(assessmentModels).where(eq(assessmentModels.userId, id)).run();
+    // The account's internship and thesis tracks (P38), with their rounds.
+    const ownTracks = tx
+      .select({ id: supervisionTracks.id })
+      .from(supervisionTracks)
+      .where(eq(supervisionTracks.userId, id));
+    tx.delete(trackRounds).where(inArray(trackRounds.trackId, ownTracks)).run();
+    tx.delete(supervisionTracks).where(eq(supervisionTracks.userId, id)).run();
     // Reviews by the account, and colleagues' reviews of the account's courses.
     const ownCourses = tx.select({ id: courses.id }).from(courses).where(eq(courses.userId, id));
     const gone = tx
