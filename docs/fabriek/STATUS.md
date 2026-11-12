@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #309 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310 gemerged)_
 
 ## Nu
 
+- **Verbeterpunten in de cursus (#310) gemerged op 2026-11-12:** op het tabblad *Controle*
+  staan de open verbeterpunten van een cursus, met een plek (cursus, leeruitkomst, les of toets)
+  en een knop *Afgerond*; de docent of een bewerker voegt er een toe. Bij kopiëren voor een nieuwe
+  uitvoering gaan de open punten mee (P33.1). Geen migratie.
 - **Kalibreren: de berekening (#309) gemerged op 2026-11-12:** het rekenwerk voor kalibreren met
   een tweede beoordelaar (P34.1): per criterium hoe vaak twee docenten het eens zijn, één of meer
   niveaus verschil en de gewogen kappa (vanaf vijf werken), per werk het cijfer van beiden, en een
