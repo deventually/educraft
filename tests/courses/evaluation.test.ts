@@ -5,6 +5,7 @@ import {
   courseOutline,
   EVALUATION_LIMITS,
   parseEvaluation,
+  readSurveyCsv,
 } from "~/lib/courses/evaluation";
 
 const EVALUATION = [
@@ -214,6 +215,37 @@ describe("the course-evaluation@v1 prompt", () => {
     expect(keys(nl)).toEqual(keys(en));
     expect(tags(nl)).toEqual(
       expect.arrayContaining(["<evaluation>", "<outline>", "<respondents>", "<testAnalysis>"]),
+    );
+  });
+});
+
+describe("readSurveyCsv (read in the browser)", () => {
+  it("counts the answer rows and keeps the open answers, one respondent per line", () => {
+    const csv =
+      'Naam;Cijfer;Wat vond je?;Tip\r\n;8;"Fijne les; veel geleerd";\r\n;6;Te snel;"Meer ""oefenen"""\r\n\r\n';
+    expect(readSurveyCsv(csv)).toEqual({
+      respondents: 2,
+      answers: 'Fijne les; veel geleerd\nTe snel | Meer "oefenen"',
+    });
+  });
+
+  it("reads a comma-separated file and skips rows without an open answer from the text", () => {
+    expect(readSurveyCsv("cijfer,opmerking\n7,Goed\n9,\n")).toEqual({
+      respondents: 2,
+      answers: "Goed",
+    });
+  });
+});
+
+describe("the courses help topic (P33.3)", () => {
+  it("explains improvements and processing a course evaluation, in both languages", async () => {
+    const { getTopic } = await import("~/lib/help/registry");
+    expect(getTopic("courses", "nl")).toMatch(
+      /## Verbeterpunten en de cursusevaluatie\n\n.*Cursusevaluatie verwerken/,
+    );
+    expect(getTopic("courses", "nl")).toMatch(/namencheck/);
+    expect(getTopic("courses", "en")).toMatch(
+      /## Improvements and the course evaluation\n\n.*Process course evaluation/,
     );
   });
 });

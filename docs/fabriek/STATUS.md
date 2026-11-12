@@ -4,19 +4,28 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #316 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #314 en #316 t/m #318 gemerged)_
 
 ## Nu
 
-- **Evals sneller (#316) gemerged op 2026-11-12:** `--parallel N` laat een eval N runs tegelijk
-  draaien; met 6 of 7 tegelijk duurt een meting een kwartier in plaats van ruim een uur. Plus een
-  ijkmeting van *Les voorbereiden* via Claude Code.
-- **Evals op je Claude-abonnement (#314) gemerged op 2026-11-12:** met `claude-code::<model>`
-  draait een eval via Claude Code, zonder API-sleutel, met de echte vraag van de app.
-- **Cursusevaluatie verwerken: de prompt (#313) gemerged op 2026-11-12:** een geanonimiseerde
-  studentenevaluatie wordt thema's, problemen op hun plek in de cursus en drie tot vijf
-  verbeterpunten; citaten die niet letterlijk in de evaluatie staan vallen weg (P33.2,
-  `course-evaluation@v1`). Er wordt niets bewaard.
+- **Cursusevaluatie verwerken: het scherm (#318) gemerged op 2026-11-12:** op het tabblad
+  *Controle* plakt de docent de antwoorden van een studentenevaluatie of kiest een CSV; namen
+  worden eerst in de browser gecontroleerd. LimeOnIt toont wat studenten zeiden, waar het misging
+  en wat beter kan; met *Akkoord* wordt een voorstel een verbeterpunt (P33.3).
+- **Bastiaan kiest per eval de route (#317) gemerged op 2026-11-12:** een werker die een eval
+  nodig heeft, vraagt eerst: via Claude Code (de werker draait hem zelf en zet het rapport in zijn
+  PR) of via de API (Bastiaan draait hem met één kopieerblok) (BESLUIT-2026-11-12-14).
+- **Evals sneller (#316) gemerged op 2026-11-12:** `npm run eval -- --parallel N` laat N runs
+  tegelijk lopen, vooral voor `claude-code::…`, waar `--batch` niet bestaat. Met een ijkmeting van
+  lesson-plan via Claude Code.
+- **Cursusevaluatie verwerken: de motor (#313) gemerged op 2026-11-12:** LimeOnIt maakt van een
+  geanonimiseerde studentenenquête thema's met aantallen en letterlijke citaten, problemen op hun
+  plek in de cursus, en drie tot vijf verbeterpunten (een eigen punt per probleem). De code gooit
+  verzonnen citaten weg, en wat één student zei is geen thema. Er wordt niets opgeslagen (P33.2).
+  Eval zelf gedraaid via Claude Code: 15 van 15. Het scherm volgt in P33.3.
+- **Evals op het Claude-abonnement (#314) gemerged op 2026-11-12:** met
+  `--model claude-code::claude-sonnet-5-5` draait een eval via Claude Code, zonder API-sleutel,
+  met de systeemprompt van de app. Een werker-thread kan de eval dus zelf draaien.
 - **Kalibreren: het scherm (#312) gemerged op 2026-11-12:** op de rubricpagina (ook bij een
   gedeelde rubric) staat de knop *Kalibreren*. Twee beoordelaars plakken hun scores uit Excel of
   vullen ze per werk in; de pagina toont de overeenstemming per criterium, de cijfers per werk en

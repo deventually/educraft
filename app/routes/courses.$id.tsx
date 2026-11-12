@@ -46,6 +46,7 @@ import { copyRunAction } from "~/server/courseCopy.server";
 import { improvementAction } from "~/server/courseImprovements.server";
 import { courseEvaluationAction } from "~/server/courseEvaluation.server";
 import { CourseImprovements } from "~/components/courses/CourseImprovements";
+import { CourseEvaluationPanel } from "~/components/courses/CourseEvaluationPanel";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
@@ -344,6 +345,15 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
           <>
             {params.get("copied") === "1" && <CopiedNotice />}
             <CourseImprovements data={data} />
+            <CourseEvaluationPanel
+              data={data}
+              result={
+                actionData?.intent === "evaluate-course" && actionData.ok
+                  ? actionData.evaluation
+                  : null
+              }
+              models={review?.models}
+            />
             <CoverageMatrix data={data} matrix={matrix} />
             <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
             {review && (

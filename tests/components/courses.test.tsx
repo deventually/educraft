@@ -136,7 +136,12 @@ describe("Course page — tabs", () => {
 
   it("puts the improvements, the matrix and the findings together under Controle", async () => {
     const { container } = renderRoute(CoursePage, pageData(), "/?tab=check");
-    expect(headings()).toEqual(["Verbeterpunten", "Dekkingsmatrix", "Aandachtspunten"]);
+    expect(headings()).toEqual([
+      "Verbeterpunten",
+      "Cursusevaluatie verwerken",
+      "Dekkingsmatrix",
+      "Aandachtspunten",
+    ]);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -145,6 +150,7 @@ describe("Course page — tabs", () => {
     expect(headings()).toEqual([
       "Dit is je kopie voor de nieuwe uitvoering",
       "Verbeterpunten",
+      "Cursusevaluatie verwerken",
       "Dekkingsmatrix",
       "Aandachtspunten",
     ]);

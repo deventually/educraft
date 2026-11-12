@@ -8,6 +8,7 @@ import { COURSE_LIMITS } from "./schema";
 import {
   type CourseData,
   IMPROVEMENT_PLACE_KINDS,
+  IMPROVEMENT_SOURCES,
   IMPROVEMENT_STATUSES,
   type Improvement,
   type ImprovementPlace,
@@ -52,6 +53,8 @@ const PlaceField = z.string().transform((v, ctx): ImprovementPlace => {
 const AddSchema = z.object({
   text: z.string().trim().min(1).max(COURSE_LIMITS.text),
   place: PlaceField,
+  // A point the teacher accepted from the course evaluation (P33.3) keeps that source.
+  source: z.enum(IMPROVEMENT_SOURCES).default("teacher"),
 });
 const StatusSchema = z.object({ id: Id, status: z.enum(IMPROVEMENT_STATUSES) });
 const RemoveSchema = z.object({ id: Id });
@@ -74,7 +77,11 @@ export function applyImprovementIntent(
   const known = (id: string) => points.some((p) => p.id === id);
   switch (fd.get("intent")) {
     case "add-improvement": {
-      const v = AddSchema.safeParse({ text: field(fd, "text"), place: field(fd, "place") });
+      const v = AddSchema.safeParse({
+        text: field(fd, "text"),
+        place: field(fd, "place"),
+        source: fd.get("source")?.toString() || undefined,
+      });
       if (!v.success) return { ok: false, error: "invalid" };
       if (improvementPlace(d, v.data.place).kind !== v.data.place.kind)
         return { ok: false, error: "invalid" };
@@ -84,7 +91,7 @@ export function applyImprovementIntent(
         text: v.data.text,
         place: v.data.place,
         status: "open",
-        source: "teacher",
+        source: v.data.source,
         ...currentRun(d),
       };
       return { ok: true, data: { ...d, improvements: [...points, point] }, done: "added" };
