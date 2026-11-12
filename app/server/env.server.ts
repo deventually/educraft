@@ -30,6 +30,10 @@ export const envSchema = z.object({
   // [{"id":"hsl","hosts":["hsl.example.nl"],"database":"file:/data/hsl.db"}, …]. Unset: one
   // instance on DATABASE_URL.
   TENANTS: z.string().optional(),
+  // The platform's own address (platform layer): the platform owner manages the institutions
+  // there (/platform) and the list lives in the data folder (institutions.json). Unset: no
+  // platform, TENANTS decides.
+  PLATFORM_HOST: z.string().optional(),
   // Where the daily backup goes (backup.server). Unset: `backups/` next to the database in
   // production, off elsewhere. "off" turns it off. Read at call time by backupDir().
   BACKUP_DIR: z.string().optional(),

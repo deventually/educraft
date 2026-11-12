@@ -18,7 +18,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } 
 import { dirname, join } from "node:path";
 import { assertSoundDatabaseFile, backupDbTo } from "./db.server";
 import { log } from "./log.server";
-import { allTenants, runWithTenant, type Tenant } from "./tenants.server";
+import { servedTenants, runWithTenant, type Tenant } from "./tenants.server";
 
 const DAY = 24 * 60 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -89,15 +89,15 @@ export function backupDir(env: Record<string, string | undefined>, dbPath: strin
 
 /**
  * Where `tenant`'s daily backup goes, or `null` when it is off: the one backup folder, with a
- * folder per institution inside it when there are several.
+ * folder per institution inside it as soon as institutions have their own addresses (`TENANTS`
+ * or the platform).
  */
 export function tenantBackupDir(
   env: Record<string, string | undefined>,
   tenant: Tenant,
-  tenants: readonly Tenant[] = allTenants(),
 ): string | null {
   const dir = backupDir(env, tenant.dbPath);
-  return dir && tenants.length > 1 ? join(dir, tenant.id) : dir;
+  return dir && tenant.hosts.length > 0 ? join(dir, tenant.id) : dir;
 }
 
 const list = (dir: string) => (existsSync(dir) ? readdirSync(dir) : []);
@@ -143,12 +143,12 @@ export async function backupIfDue(dir: string, now = new Date()): Promise<Backup
  */
 export async function backupAllTenantsIfDue(
   env: Record<string, string | undefined> = process.env,
-  tenants: readonly Tenant[] = allTenants(),
+  tenants: readonly Tenant[] = servedTenants(),
   now = new Date(),
 ): Promise<(BackupResult & { tenant: string })[]> {
   const done: (BackupResult & { tenant: string })[] = [];
   for (const tenant of tenants) {
-    const dir = tenantBackupDir(env, tenant, tenants);
+    const dir = tenantBackupDir(env, tenant);
     if (!dir) continue;
     try {
       const result = await runWithTenant(tenant, () => backupIfDue(dir, now));
@@ -173,11 +173,13 @@ const globalForBackup = globalThis as unknown as { __limeonitBackupTimer?: NodeJ
  */
 export function startBackupSchedule(
   env: Record<string, string | undefined> = process.env,
-  tenants: readonly Tenant[] = allTenants(),
+  tenants?: readonly Tenant[],
 ): boolean {
-  if (!tenants.some((t) => tenantBackupDir(env, t, tenants))) return false;
+  // The platform's institutions change while the app runs: each tick reads the list anew.
+  const now = () => tenants ?? servedTenants();
+  if (!now().some((t) => tenantBackupDir(env, t)) && !env.PLATFORM_HOST) return false;
   if (globalForBackup.__limeonitBackupTimer) return true;
-  const tick = () => void backupAllTenantsIfDue(env, tenants);
+  const tick = () => void backupAllTenantsIfDue(env, now());
   globalForBackup.__limeonitBackupTimer = setInterval(tick, HOUR);
   globalForBackup.__limeonitBackupTimer.unref();
   tick();

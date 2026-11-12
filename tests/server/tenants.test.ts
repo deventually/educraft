@@ -5,6 +5,7 @@ import {
   currentTenant,
   parseTenants,
   runWithTenant,
+  servedTenants,
   tenantForHost,
   tenantMiddleware,
   type Tenant,
@@ -176,5 +177,109 @@ describe("the root route", () => {
     expect(order).toContain(tenantRouting);
     expect(order.indexOf(tenantRouting)).toBeGreaterThan(order.indexOf(securityHeadersMiddleware));
     expect(order.indexOf(tenantRouting)).toBeLessThan(order.indexOf(sessionRefreshMiddleware));
+  });
+});
+
+describe("the platform layer in the router", () => {
+  const platform: Tenant = {
+    id: "platform",
+    hosts: ["beheer.limeonit.test"],
+    dbPath: ":memory:",
+    platform: true,
+  };
+  const closed: Tenant = { ...hhs, inactive: true };
+  const middleware = tenantMiddleware([platform, hsl, closed]);
+  const call = async (url: string) => {
+    const seen: string[] = [];
+    const response = (await middleware(
+      { request: new Request(url) } as never,
+      (async () => {
+        seen.push(currentTenant().id);
+        return new Response("ok");
+      }) as never,
+    )) as Response;
+    return { response, seen };
+  };
+
+  it("tells a deactivated institution's visitors it is not available, in both languages", async () => {
+    const { response, seen } = await call("https://hhs.limeonit.test/courses");
+    expect(seen).toEqual([]);
+    expect(response.status).toBe(503);
+    const text = await response.text();
+    expect(text).toMatch(/niet beschikbaar/);
+    expect(text).toMatch(/not available/);
+  });
+
+  it("serves only the platform pages, login and two-step verification on the platform's address", async () => {
+    for (const path of [
+      "/platform",
+      "/platform/institutions",
+      "/platform.data",
+      "/login",
+      "/login/2fa",
+      "/logout",
+      "/account/2fa",
+      "/reset/abc",
+      "/set-locale",
+    ]) {
+      const { response, seen } = await call(`https://beheer.limeonit.test${path}`);
+      expect(response.status, path).toBe(200);
+      expect(seen, path).toEqual(["platform"]);
+    }
+  });
+
+  it("sends anything else on the platform's address to the platform page", async () => {
+    for (const path of ["/", "/courses", "/admin/users", "/tools/lesson-plan"]) {
+      const { response, seen } = await call(`https://beheer.limeonit.test${path}`);
+      expect(seen, path).toEqual([]);
+      expect(response.status, path).toBe(302);
+      expect(response.headers.get("Location"), path).toBe("/platform");
+    }
+  });
+
+  it("has no platform pages on an institution's address", async () => {
+    const { response, seen } = await call("https://hsl.limeonit.test/platform");
+    expect(seen).toEqual([]);
+    expect(response.status).toBe(404);
+  });
+});
+
+describe("servedTenants (one container for the platform, one for the institutions)", () => {
+  const platform: Tenant = {
+    id: "platform",
+    hosts: ["beheer.test"],
+    dbPath: ":memory:",
+    platform: true,
+  };
+  const list = [platform, hsl, hhs];
+
+  it("serves everything by default", () => {
+    expect(servedTenants(undefined, list)).toEqual(list);
+    expect(servedTenants("all", list)).toEqual(list);
+  });
+
+  it("serves only the platform in the platform container, only institutions in the other", () => {
+    expect(servedTenants("platform", list)).toEqual([platform]);
+    expect(servedTenants("institutions", list)).toEqual([hsl, hhs]);
+  });
+
+  it("refuses an unknown value instead of serving everything", () => {
+    expect(() => servedTenants("both", list)).toThrow(/LIMEONIT_SERVES/);
+  });
+});
+
+describe("closeStaleDbs (a deactivated or removed institution lets go of its file)", () => {
+  it("closes the database of an institution that is no longer active, and keeps the others", async () => {
+    const { closeStaleDbs } = await import("~/server/db.server");
+    const a: Tenant = { id: "stale-a", hosts: ["a.test"], dbPath: ":memory:" };
+    const b: Tenant = { id: "stale-b", hosts: ["b.test"], dbPath: ":memory:" };
+    await runWithTenant(a, () => addUser("a@a.test"));
+    await runWithTenant(b, () => addUser("b@b.test"));
+    const closed = closeStaleDbs([{ ...a, inactive: true }, b]);
+    expect(closed).toContain("stale-a");
+    expect(closed).not.toContain("stale-b");
+    // In memory, a closed database is gone; the open one still has its teacher.
+    expect(await runWithTenant(a, emails)).toEqual([]);
+    expect(await runWithTenant(b, emails)).toEqual(["b@b.test"]);
   });
 });
