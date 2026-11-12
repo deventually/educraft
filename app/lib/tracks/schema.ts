@@ -95,12 +95,16 @@ export const MILESTONES: readonly Milestone[] = [
   {
     id: "final-interview",
     name: { nl: "Eindgesprek", en: "Final interview" },
-    // P38.6: rehearse with the weak points of the last feedback, then review the defence.
+    // An assessment on location right after the student's presentation: questions per
+    // criterion beforehand, a report from the teacher's notes afterwards (never kept).
     tools: [
-      { slug: "defend-your-work", label: { nl: "Verdedig je werk", en: "Defend your work" } },
       {
-        slug: "defense-review",
-        label: { nl: "Een verdediging nakijken", en: "Review a defence" },
+        slug: "visit-prep",
+        label: { nl: "Vragen voor het eindgesprek", en: "Questions for the final interview" },
+      },
+      {
+        slug: "visit-report",
+        label: { nl: "Verslag uit steekwoorden", en: "Report from notes" },
       },
     ],
   },

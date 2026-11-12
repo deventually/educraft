@@ -140,7 +140,8 @@ describe("milestone tools and document types (P38.2)", () => {
     expect(slugs("final")).toEqual(["stage-assessment"]);
     // P38.6: a visit is prepared and written up; the final interview rehearsed and reviewed.
     expect(slugs("visits")).toEqual(["visit-prep", "visit-report"]);
-    expect(slugs("final-interview")).toEqual(["defend-your-work", "defense-review"]);
+    // The final interview is an assessment on location after the presentation: questions, then a report.
+    expect(slugs("final-interview")).toEqual(["visit-prep", "visit-report"]);
     for (const m of MILESTONES)
       for (const t of m.tools ?? []) expect(getToolBySlug(t.slug), t.slug).toBeDefined();
   });

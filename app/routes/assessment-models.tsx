@@ -104,13 +104,21 @@ export async function action({ request }: Route.ActionArgs) {
     const name = String(fd.get("name") ?? "").trim();
     const framework = String(fd.get("framework") ?? "");
     const scale = String(fd.get("scale") ?? "");
+    const interviewSetup = String(fd.get("interviewSetup") ?? "")
+      .trim()
+      .slice(0, ASSESSMENT_MODEL_LIMITS.interviewSetup);
     const types = fd.getAll("documentTypes").map(String);
     if (!name || name.length > ASSESSMENT_MODEL_LIMITS.name) return fail("name");
     if (!framework.trim() || framework.length > ASSESSMENT_MODEL_LIMITS.framework)
       return fail("framework");
     const known = new Set(documentTypes(locale).map((d) => d.value));
     if (types.some((t) => !known.has(t))) return fail("documentType");
-    const data = { documentTypes: [...new Set(types)], framework, scale };
+    const data = {
+      documentTypes: [...new Set(types)],
+      framework,
+      scale,
+      ...(interviewSetup ? { interviewSetup } : {}),
+    };
     if (intent === "create") {
       await createAssessmentModel(user.id, name, data);
       return ok("create");

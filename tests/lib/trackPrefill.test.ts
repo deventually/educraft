@@ -12,7 +12,27 @@ const fields = [
   },
 ] as InputField[];
 
+const track = { feedbackHistory: "", criteria: "", weakPoints: "" };
+const moment = {
+  name: "moment",
+  kind: "select",
+  label: { nl: "M", en: "M" },
+  options: [
+    { value: "midway", label: { nl: "H", en: "H" } },
+    { value: "final-interview", label: { nl: "E", en: "E" } },
+  ],
+  prefillFromTrack: { source: "milestone" },
+} as InputField;
+
 describe("trackPrefillValues (P38.4)", () => {
+  it("picks the option of the milestone the tool was opened from, and only an existing one", () => {
+    expect(trackPrefillValues([moment], { ...track, milestone: "final-interview" })).toEqual({
+      moment: "final-interview",
+    });
+    // From the visits tab there is no such option: the field keeps its default.
+    expect(trackPrefillValues([moment], { ...track, milestone: "visits" })).toEqual({});
+  });
+
   it("fills a field from the track the tool was opened from", () => {
     expect(
       trackPrefillValues(fields, {

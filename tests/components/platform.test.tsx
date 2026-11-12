@@ -202,9 +202,12 @@ describe("Platform: adding an institution", () => {
     expect(screen.getByText("https://ru.limeonit.nl/set-password/abc")).toBeVisible();
     expect(screen.getByText(/Stuur deze link aan Kim/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Kopieer link" })).toBeVisible();
-    // Done: the form closes and the focus moves to the link, so it is read out next.
-    expect(screen.queryByRole("form", { name: "Nieuwe instelling" })).toBeNull();
-    expect(screen.getByRole("region", { name: "Wachtwoordlink voor Radboud" })).toHaveFocus();
+    // Done: the form closes and the focus moves to the link, so it is read out next. That happens
+    // in an effect after the card renders, so wait for it (a bare check raced on slow runners).
+    await waitFor(() => {
+      expect(screen.queryByRole("form", { name: "Nieuwe instelling" })).toBeNull();
+      expect(screen.getByRole("region", { name: "Wachtwoordlink voor Radboud" })).toHaveFocus();
+    });
   });
 
   it("reports a refusal as an error toast and keeps what was typed", async () => {

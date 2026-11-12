@@ -14,7 +14,7 @@ const build = (lang: "nl" | "en") =>
 
 describe("tool: visit-report (P38.6)", () => {
   it("resolves, keeps nothing", () => {
-    expect(tool().stages[0]!.systemPromptId).toBe("visit-report@v1");
+    expect(tool().stages[0]!.systemPromptId).toBe("visit-report@v2");
     expect(tool().storesConversation).toBe(false);
     expect(tool().handlesStudentWork).toBe(true);
   });
@@ -26,6 +26,26 @@ describe("tool: visit-report (P38.6)", () => {
     expect(tool().inputs.find((f) => f.name === "criteria")?.prefillFromTrack).toEqual({
       source: "criteria",
     });
+  });
+
+  it("also writes up the final interview, chosen from the track's tab", () => {
+    const kind = tool().inputs.find((f) => f.name === "occasion");
+    expect(kind?.prefillFromTrack).toEqual({ source: "milestone" });
+    expect(kind?.options?.map((o) => o.value)).toEqual(["visits", "final-interview"]);
+    expect(kind?.defaultValue).toBe("visits");
+    const nl = build("nl");
+    expect(nl).toMatch(/`final-interview`: het eindgesprek/);
+    expect(nl).toMatch(/### Presentatie/);
+    expect(build("en")).toMatch(/### Presentation/);
+    expect(nl).toMatch(/Geen oordeel/);
+    // Eval eg: the teacher's own "C2 ruim voldoende" was copied; a place and order were invented.
+    expect(nl).toMatch(/laat dat dan weg zonder het te noemen/);
+    expect(build("en")).toMatch(/leave it out without mentioning it/);
+    expect(nl).toMatch(/Voeg geen plaats, aanwezigen of volgorde toe/);
+    // Eval eg2: attendance was still invented when the notes said nothing about it.
+    expect(nl).toContain('schrijf dan alleen: "Verslag van het eindgesprek."');
+    expect(build("en")).toContain('write only: "Report of the final interview."');
+    expect(build("en")).toMatch(/Add no place, people present or order/);
   });
 
   it("writes only what the notes say, and keeps codes", () => {

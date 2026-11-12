@@ -57,6 +57,17 @@ describe("/assessment-models", () => {
     });
   });
 
+  it("keeps how the final interview goes, once for the programme; empty keeps nothing", async () => {
+    await as("am-setup");
+    const fields = { intent: "create", name: "Stage", framework: "C1", scale: "" };
+    await act({ ...fields, interviewSetup: " Assessment na de presentatie. " });
+    await act({ ...fields, name: "Zonder", interviewSetup: "  " });
+    const all = await repo.listAssessmentModels("am-setup");
+    const by = (n: string) => all.find((m) => m.name === n)?.data;
+    expect(by("Stage")?.interviewSetup).toBe("Assessment na de presentatie.");
+    expect(by("Zonder")).not.toHaveProperty("interviewSetup");
+  });
+
   it("refuses a model without a name or framework, or with an unknown document type", async () => {
     await as("am-bad");
     expect(await act({ intent: "create", name: "", framework: "C1" })).toEqual({

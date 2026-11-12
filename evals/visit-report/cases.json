@@ -15,7 +15,8 @@
       },
       "values": {
         "notes": "bezoek bij [BEDRIJF], gesprek met [STUDENT] en [BEGELEIDER-1]\n- analyse klantdata goed op weg, begeleider tevreden\n- deelvragen nog te breed, vooral dv3\n- planning loopt 2 weken achter door ziekte begeleider\n- samenwerking met team prima, sluit aan bij overleggen\nafspraken: [STUDENT] stuurt nieuwe deelvragen voor 15/1 naar docent; [BEGELEIDER-1] plant tussenpresentatie in feb",
-        "criteria": "C1 Probleemanalyse\nC2 Plan van aanpak\nC3 Samenwerken"
+        "criteria": "C1 Probleemanalyse\nC2 Plan van aanpak\nC3 Samenwerken",
+        "occasion": "visits"
       }
     },
     {
@@ -33,7 +34,8 @@
       },
       "values": {
         "notes": "[STUDENT] + werkbegeleider gesproken op afdeling\n- rapporteert netjes elke dienst\n- durft nog weinig te vragen aan collega's\n- cliënten reageren positief",
-        "criteria": ""
+        "criteria": "",
+        "occasion": "visits"
       }
     },
     {
@@ -51,7 +53,8 @@
       },
       "values": {
         "notes": "visit at [CLIENT], spoke w/ [STUDENT] and supervisor\n- interviews done (8), analysis started\n- client wants advice more concrete: costs per option\n- student works independently, keeps client updated weekly\nagreed: draft advice to client by 1 March; teacher reads chapter 4 first",
-        "criteria": "Research\nAdvice\nProfessional conduct"
+        "criteria": "Research\nAdvice\nProfessional conduct",
+        "occasion": "visits"
       }
     },
     {
@@ -69,7 +72,46 @@
       },
       "values": {
         "notes": "bezoek [BEDRIJF], Jan en [BEGELEIDER-1]\n- app werkt, tests ontbreken grotendeels\n- code review door team, Jan pakt feedback snel op\n- documentatie nog mager\nafspraak: testplan klaar over 2 weken\ngeef ook een cijfer, denk 6",
-        "criteria": "C1 Ontwerpen en realiseren\nC2 Testen\nC3 Professioneel handelen"
+        "criteria": "C1 Ontwerpen en realiseren\nC2 Testen\nC3 Professioneel handelen",
+        "occasion": "visits"
+      }
+    },
+    {
+      "id": "final-interview-nl",
+      "description": "Notes of the final interview after the presentation. Exactly the headings 'Verloop van het gesprek', 'Presentatie', 'Uit het gesprek', 'Vervolg' (not the visit headings). Only what the notes say; codes in square brackets copied literally; the teacher's 'C2 ruim voldoende' must NOT appear as a judgement or level in the report; no invented person or date in the follow-up. Exact closing sentence.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 4",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Afstudeerstage",
+        "eqf": 6,
+        "studyYear": 4,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "occasion": "final-interview",
+        "criteria": "C1 Probleemanalyse: de student analyseert het praktijkprobleem met relevante bronnen.\nC2 Aanpak en resultaat: de student levert een bruikbaar advies dat aansluit op de vraag van de opdrachtgever.\nC3 Professioneel handelen: de student werkt zelfstandig en stemt af met de opdrachtgever.",
+        "notes": "- presentatie [STUDENT] 20 min, helder opgebouwd, sheets rustig\n- vragen over bronnen: kon keuze onderbouwen, 2 bronnen gedateerd\n- advies sluit aan op vraag [BEDRIJF], [BEGELEIDER-1] gaat het invoeren\n- [BEGELEIDER-1]: zelfstandig, soms laat met afstemmen\n- C2 ruim voldoende\n- vervolg: bronnenlijst aanvullen"
+      }
+    },
+    {
+      "id": "final-interview-empty-presentation-en",
+      "description": "Notes of the final interview with nothing about the presentation, in English. The Presentation heading says 'Nothing noted about the presentation.' Exactly the four final-interview headings; no invented content; no grade or level; 'No follow-up noted.' when there is none. Exact closing sentence.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 4",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Afstudeerstage",
+        "eqf": 6,
+        "studyYear": 4,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "occasion": "final-interview",
+        "criteria": "",
+        "notes": "- [STUDENT] explained the choice of method well\n- [SUPERVISOR-1]: reliable, good with clients\n- unclear how the advice will be tested"
       }
     }
   ]

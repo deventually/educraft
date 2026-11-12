@@ -254,6 +254,7 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
         feedbackHistory: string;
         criteria: string;
         weakPoints: string;
+        interviewSetup: string;
       } | null;
     }>;
   const act = (fields: Record<string, string>) =>
@@ -290,9 +291,27 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
     expect(final).toMatchObject({ milestone: "final" });
     expect(final?.feedbackHistory).toBe("### Concepten, ronde 1\nNoem bronnen.");
     // P38.6: the criteria of the linked model (none here) and the weak points go along too.
-    expect(final).toMatchObject({ criteria: "", weakPoints: "" });
+    expect(final).toMatchObject({ criteria: "", weakPoints: "", interviewSetup: "" });
     const theirs = await track(B);
     expect((await load(`?track=${theirs.id}&milestone=start`)).forTrack).toBeNull();
+  });
+
+  it("the final interview gets the model's setup of the final interview", async () => {
+    const model = await models.createAssessmentModel(A, "Stage HBO-i", {
+      documentTypes: ["stageverslag"],
+      framework: "C1 Realisatie",
+      scale: "",
+      interviewSetup: "Over de realisatie, na de presentatie.",
+    });
+    const t = await repo.createTrack(A, {
+      code: "S-EG",
+      kind: "internship",
+      assessmentModelId: model.id,
+    });
+    expect((await load(`?track=${t!.id}&milestone=final-interview`)).forTrack).toMatchObject({
+      criteria: "C1 Realisatie",
+      interviewSetup: "Over de realisatie, na de presentatie.",
+    });
   });
 
   it("keeps the feedback (not the report) as a round in the track", async () => {

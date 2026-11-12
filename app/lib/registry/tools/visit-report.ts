@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { VISIT_REPORT_PROMPT } from "~/lib/prompts/visit-report@v1.prompt";
+import { VISIT_REPORT_PROMPT_V2 } from "~/lib/prompts/visit-report@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -51,6 +51,26 @@ export const visitReport: Tool = {
   phase: 1,
   inputs: [
     {
+      name: "occasion",
+      label: { nl: "Verslag van", en: "Report of" },
+      kind: "select",
+      required: true,
+      defaultValue: "visits",
+      options: [
+        { value: "visits", label: { nl: "Een stagebezoek", en: "An internship visit" } },
+        {
+          value: "final-interview",
+          label: {
+            nl: "Het eindgesprek (assessment na de presentatie)",
+            en: "The final interview (assessment after the presentation)",
+          },
+        },
+      ],
+      // Opened from a track, the tab says which: Visits or Final interview.
+      prefillFromTrack: { source: "milestone" },
+      group: VISIT,
+    },
+    {
       name: "notes",
       redact: true,
       label: { nl: "Je steekwoorden", en: "Your notes" },
@@ -84,8 +104,8 @@ export const visitReport: Tool = {
   stages: [
     {
       id: "report",
-      name: { nl: "Bezoekverslag", en: "Visit report" },
-      systemPromptId: VISIT_REPORT_PROMPT.id,
+      name: { nl: "Verslag", en: "Report" },
+      systemPromptId: VISIT_REPORT_PROMPT_V2.id,
       output: {
         kind: "markdown",
         hint: {

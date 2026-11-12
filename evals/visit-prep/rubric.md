@@ -1,4 +1,4 @@
-# Rubric — Prepare a visit (visit-prep@v1)
+# Rubric — Prepare a visit (visit-prep@v2)
 
 Judge the output as the questions a supervising teacher takes into a visit to the internship or
 the client (brief P38, 38.6). The questions come only from the criteria in the input; the output
@@ -8,7 +8,9 @@ criterion is met. Score each shared criterion 1–5.
 - **taskFidelity** — Is there a `###` heading per criterion, in the order of the input, each with
   questions to the student and to the workplace supervisor, fitting the moment of the visit (start:
   plan and agreements; midway: progress and what is still needed; final: what was achieved and
-  what is missing)? Does it **find the known error** when the case description names one? Missing
+  what is missing; final-interview: an assessment right after the presentation, opening with
+  questions on the presentation and closing with "Voor je oordeel" / "For your judgement" instead
+  of agreements)? Does it **find the known error** when the case description names one? Missing
   a named known error caps this criterion at 2.
 - **pedagogicalSoundness** — Are the questions open, short and useful for seeing how the work on
   this criterion stands, without steering to an answer? Are the agreements concrete?

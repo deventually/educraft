@@ -55,7 +55,9 @@ const inputField = z.object({
   imagesFrom: z.string().optional(),
   prefillFromAssessmentModel: z.object({ source: z.enum(["framework", "scale"]) }).optional(),
   prefillFromTrack: z
-    .object({ source: z.enum(["feedbackHistory", "criteria", "weakPoints"]) })
+    .object({
+      source: z.enum(["feedbackHistory", "criteria", "weakPoints", "milestone", "interviewSetup"]),
+    })
     .optional(),
 });
 

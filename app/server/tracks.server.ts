@@ -32,6 +32,8 @@ export interface ForTrack {
   criteria: string;
   /** P38.6: the improvement points of the newest feedforward round, to rehearse. */
   weakPoints: string;
+  /** How the final interview goes, from the linked assessment model; "" without one. */
+  interviewSetup: string;
 }
 
 /** A tool opened from a track (`?track=&milestone=`): only an own track counts, else null. */
@@ -57,6 +59,7 @@ export async function forTrack(
     feedbackHistory: feedbackHistory(rounds, locale),
     criteria: model?.data.framework ?? "",
     weakPoints: weakPoints(rounds),
+    interviewSetup: model?.data.interviewSetup ?? "",
   };
 }
 

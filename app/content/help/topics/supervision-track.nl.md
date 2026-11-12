@@ -17,7 +17,7 @@ Een traject heeft zes vaste mijlpalen en een optionele: de tweede beoordelaar. B
 - **Concepten:** beoordeel een concept met *Studentwerk beoordelen*, net als de eindversie. De eerdere feedback van het traject gaat mee, en met *Bewaar de feedback in …* komt de beoordeling als ronde in het traject. Lever je meer concepten in, dan doe je dit per versie.
 - **Eindversie:** *Studentwerk beoordelen* krijgt de eerdere feedback van het traject mee en noemt per criterium of de gevraagde verbetering is opgepakt.
 - **Tweede beoordelaar (optioneel):** vooral bij een afstudeerstage. Telt niet mee in de voortgang. Heb je er een, vul dan per criterium jouw niveau en dat van je collega in, met een rubric uit Hulpmiddelen. LimeOnIt toont de verschillen en waar jullie eerst over moeten praten.
-- **Eindgesprek:** oefen met *Verdedig je werk* en kijk een verdediging na met *Een verdediging nakijken*. De criteria staan al ingevuld.
+- **Eindgesprek:** een assessment aan het einde van de stage, vaak na een presentatie van de student. Hoe het eindgesprek gaat verschilt per opleiding: leg dat één keer vast als *Opzet van het eindgesprek* bij je beoordelingsmodel. Bereid het gesprek voor met *Vragen voor het eindgesprek*: vragen per criterium, volgens die opzet en eventueel de presentatie van de student (als PDF, namen gaan er eerst uit), en wat je nog wilt zien voor je oordeel. Werk je aantekeningen daarna uit met *Verslag uit steekwoorden*; dat verslag wordt niet bewaard. De criteria staan al ingevuld.
 - **Klaar voor OnStage:** zie hieronder.
 
 ## Klaar voor OnStage

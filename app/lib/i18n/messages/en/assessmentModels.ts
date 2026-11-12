@@ -27,6 +27,11 @@ export const assessmentModels: Messages["assessmentModels"] = {
   fromRubricIntro: "Make a model from a rubric you built with the Rubric utility.",
   fromRubricLabel: "Rubric",
   heading: "Assessment models",
+  interviewSetup: "Setup of the final interview (optional)",
+  interviewSetupHelp:
+    "For an internship: how the final interview goes in your programme. From a track with this model it is filled in already under Questions for the final interview.",
+  interviewSetupPlaceholder:
+    "e.g. Assessment at the workplace after the presentation, about the realisation (the second half of the internship). The student hands in the presentation beforehand.",
   intro:
     "An assessment model is your framework with success criteria, with or without a scale, for certain document types. When you pick a document type in Assess student work and give feedback, the tool fills in your model for that type.",
   name: "Name",

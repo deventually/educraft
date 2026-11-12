@@ -593,7 +593,9 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `visit`, `onstage`, `close`), each in its own server file; the tab's working panel comes from
   `Milestone.panel`, closing from `Milestone.closes`, so nothing branches on a milestone id. A tool
   opened from a track (`?track=&milestone=`) gets its inputs through `InputField.prefillFromTrack`
-  (`feedbackHistory`, `criteria`, `weakPoints`) and keeps its result as a round with "Bewaar de
+  (`feedbackHistory`, `criteria`, `weakPoints`, and `milestone`: a select gets the tab's id only
+  when it is one of its options, so `visit-prep` and `visit-report` serve both Visits and the
+  Final interview, an assessment after the presentation) and keeps its result as a round with "Bewaar de
   feedback in …". A visit report (`visit-report`, `storesConversation: false`) is never stored and
   leaves through `WordDownload`, which builds the Word file in the browser.
 

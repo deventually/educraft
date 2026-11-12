@@ -36,6 +36,10 @@ describe("help topic supervision-track", () => {
     expect(en).not.toMatch(/feedforward/i);
     expect(nl).toContain("**Tweede beoordelaar (optioneel):**");
     expect(en).toContain("**Second assessor (optional):**");
+    expect(nl).toContain("**Eindgesprek:** een assessment aan het einde van de stage");
+    expect(en).toContain("**Final interview:** an assessment at the end of the internship");
+    expect(nl).toContain("*Opzet van het eindgesprek*");
+    expect(en).toContain("*Setup of the final interview*");
     expect(nl).toContain("zes vaste mijlpalen");
     expect(en).toContain("six fixed milestones");
   });

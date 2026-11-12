@@ -74,8 +74,9 @@ export interface AssessmentModelPrefill {
   source: "framework" | "scale";
 }
 
-/** The track's earlier feedback (P38.4), its model's framework or the newest weak points (P38.6). */
-export type TrackPrefillSource = "feedbackHistory" | "criteria" | "weakPoints";
+/** What of a track fills a field (P38.4, P38.6; `milestone` picks a select's option). */
+type TrackSource = "feedbackHistory" | "criteria" | "weakPoints" | "milestone";
+export type TrackPrefillSource = TrackSource | "interviewSetup";
 
 /** Which part of a track fills a field (P38.4): the track the tool was opened from. */
 export interface TrackPrefill {

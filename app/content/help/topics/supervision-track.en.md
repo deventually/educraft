@@ -17,7 +17,7 @@ A track has six fixed milestones and an optional one: the second assessor. For e
 - **Drafts:** assess a draft with *Assess student work*, just like the final version. The track's earlier feedback goes along, and with *Keep the feedback in …* the assessment becomes a round in the track. With several drafts, do this per version.
 - **Final version:** *Assess student work* gets the track's earlier feedback and says per criterion whether the requested improvement was taken up.
 - **Second assessor (optional):** mostly for a graduation internship. Not counted in the progress. If you have one, fill in your level and your colleague's per criterion, with a rubric from Utilities. LimeOnIt shows the differences and what to discuss first.
-- **Final interview:** rehearse with *Defend your work* and review a defence with *Review a defence*. The criteria are filled in already.
+- **Final interview:** an assessment at the end of the internship, often after a presentation by the student. How the final interview goes differs per programme: keep that once as *Setup of the final interview* with your assessment model. Prepare the interview with *Questions for the final interview*: questions per criterion, following that setup and, if you like, the student's presentation (as PDF, names out first), and what you still want to see before you judge. Write up your notes afterwards with *Report from notes*; that report is not kept. The criteria are filled in already.
 - **Ready for OnStage:** see below.
 
 ## Ready for OnStage
