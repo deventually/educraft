@@ -37,7 +37,7 @@ export interface EvaluationScore {
   parse: boolean;
   themes: number;
   improvements: number;
-  /** Three to five improvements. */
+  /** At most five improvements, and at least three or one per problem, whichever is fewer. */
   countOk: boolean;
   placesOk: boolean;
   dataOk: boolean;
@@ -107,7 +107,9 @@ export function scoreEvaluationCase(
   // Counted on what the teacher would see, after the checks in code.
   const shown = JSON.stringify(r.evaluation).toLowerCase();
   const forbidden = (c.forbid ?? []).filter((w) => shown.includes(w.toLowerCase())).length;
-  const countOk = improvements.length >= 3 && improvements.length <= 5;
+  // Three to five, or fewer when there are fewer problems: the prompt says not to pad.
+  const least = Math.min(3, Math.max(1, problems.length));
+  const countOk = improvements.length >= least && improvements.length <= 5;
   return {
     caseId: c.id,
     parse: true,
@@ -136,7 +138,7 @@ export function evaluationReportMarkdown(input: {
     "",
     `Model: ${input.model}. Herhalingen per case: ${input.repeat}. Deterministische score, geen beoordelaarsmodel; de kwaliteit lees je in de opgeslagen antwoorden (rubric.md).`,
     "",
-    "| Case | Geldig JSON | Thema's | Verbeterpunten | 3–5 | Plekken ok | Toetsdata ok | Verboden | Weggevallen | Geslaagd |",
+    "| Case | Geldig JSON | Thema's | Verbeterpunten | Aantal ok | Plekken ok | Toetsdata ok | Verboden | Weggevallen | Geslaagd |",
     "|---|---|---|---|---|---|---|---|---|---|",
     ...input.rows.map(
       (r) =>

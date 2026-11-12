@@ -78,11 +78,23 @@ describe("scoreEvaluationCase", () => {
   it("fails on a forbidden word anywhere in the answer, and on too few improvements", () => {
     const raw = answer({
       themes: [{ label: "Stem van Jansen", polarity: "negative", count: 2, quotes: [] }],
-      problems: [],
+      problems: three.map((p) => ({ ...p, basis: "students" })),
       improvements: three.slice(0, 2),
     });
     const s = scoreEvaluationCase(base, parseEvaluation(raw, ctx(base)));
     expect(s).toMatchObject({ forbidden: 1, countOk: false, pass: false });
+  });
+
+  it("accepts fewer than three improvements when there are fewer problems: no padding", () => {
+    const raw = answer({
+      themes: [],
+      problems: three.slice(0, 2).map((p) => ({ ...p, basis: "students" })),
+      improvements: three.slice(0, 2),
+    });
+    expect(scoreEvaluationCase(base, parseEvaluation(raw, ctx(base)))).toMatchObject({
+      countOk: true,
+      pass: true,
+    });
   });
 
   it("checks the problem from the test data at the test, and the dropped quotes", () => {

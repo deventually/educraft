@@ -10,7 +10,8 @@ De score is **deterministisch**, zonder beoordelaarsmodel, op wat de docent na d
 te zien krijgt:
 
 - **Geldig JSON**: het antwoord past in het schema.
-- **3–5**: drie tot vijf verbeterpunten.
+- **Aantal ok**: hooguit vijf verbeterpunten, en minstens drie, of minstens één per probleem als
+  er minder dan drie problemen zijn (de prompt zegt: niet aanvullen).
 - **Plekken ok**: er is een probleem of verbeterpunt op de les of toets waar de enquête duidelijk
   over gaat (`expectPlaces`).
 - **Toetsdata ok**: met een toetsanalyse staat er een probleem met basis `data` bij die toets
