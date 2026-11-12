@@ -37,6 +37,7 @@ import { pilot } from "./pilot";
 import { platform } from "./platform";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
+import { portfolioFacts } from "./portfolioFacts";
 import { portfolioGuided } from "./portfolioGuided";
 import { portfolioOutline } from "./portfolioOutline";
 import { portfolioPlan } from "./portfolioPlan";
@@ -114,6 +115,7 @@ export const nl = {
   platform,
   portfolio,
   portfolioExport,
+  portfolioFacts,
   portfolioGuided,
   portfolioOutline,
   portfolioPlan,

@@ -66,11 +66,18 @@ async function main() {
   const rows: GuidedRow[] = [];
 
   for (const c of cases) {
-    const { data, outcomeId, sectionId } = caseDossier(c);
+    const { data, outcomeId, sectionId, course } = caseDossier(c);
     const references = data.references.map((r) => r.apa);
-    const questionsMessage = buildQuestionsMessage(data, outcomeId, sectionId, c.locale);
+    const questionsMessage = buildQuestionsMessage(data, outcomeId, sectionId, c.locale, course);
     const chapter = c.chapter ?? "";
-    const draftMessage = buildSectionDraftMessage(data, outcomeId, sectionId, chapter, c.locale);
+    const draftMessage = buildSectionDraftMessage(
+      data,
+      outcomeId,
+      sectionId,
+      chapter,
+      c.locale,
+      course,
+    );
     if (!draftMessage) throw new Error(`${c.id}: no material for a paragraph`);
     if (dryRun) {
       console.log(`${c.id}: ${questionsMessage.length} + ${draftMessage.length} chars`);

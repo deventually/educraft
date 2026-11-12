@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #300 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #300 en #302 gemerged)_
 
 ## Nu
 
+- **Kopiëren ook voor een mede-eigenaar (#302) gemerged op 2026-11-12:** naast de eigenaar kan
+  ook een mede-eigenaar een cursus kopiëren voor een nieuwe uitvoering; de kopie is dan van die
+  mede-eigenaar, zonder de onderwijscontext van de eigenaar. Een bewerker en een beheerder kunnen niet
+  kopiëren.
 - **Cursus kopiëren voor een nieuwe uitvoering (#300) gemerged op 2026-11-12:** onderaan
   *Overzicht* maakt de eigenaar een kopie voor een volgend studiejaar, semester of periode, met
   een eigen naam en een nieuwe startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee;

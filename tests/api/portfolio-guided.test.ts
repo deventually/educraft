@@ -302,3 +302,85 @@ describe("outcome route — guided writing", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 });
+
+describe("the anchor's course in guided writing", () => {
+  async function anchoredDossier(owner: string, patch: Partial<DossierData> = {}) {
+    const courses = await import("~/server/repositories/courses.server");
+    const course = await courses.createCourse(owner, {
+      name: "Databases 1",
+      data: {
+        schedule: { groupSize: 24, sessionMinutes: 90 },
+        outcomes: [],
+        activities: [
+          {
+            id: "les-1",
+            title: "Normaliseren",
+            kind: "lesson",
+            goal: "De student normaliseert een tabel.",
+            outcomeIds: [],
+          },
+        ],
+        assessments: [],
+      },
+    });
+    const d = dossier({
+      anchors: { [LU]: { course: { courseId: course.id, itemId: "les-1" } } },
+      ...patch,
+    });
+    return { course, d };
+  }
+
+  it("asks with the course's facts, so the coach does not ask for them again", async () => {
+    const { d } = await anchoredDossier("teacher-g");
+    generate.mockResolvedValueOnce({ text: questions });
+    const r = await guided.runGuidedIntent(
+      user,
+      d,
+      "guideQuestions",
+      LU,
+      "s1",
+      new FormData(),
+      "nl",
+    );
+    expect(r.ok).toBe(true);
+    const sent = generate.mock.calls[0]![0].messages[0].content as string;
+    expect(sent).toContain("<course>");
+    expect(sent).toContain("Groepsgrootte: 24");
+    expect(sent).toContain("Lesdoel: De student normaliseert een tabel.");
+  });
+
+  it("drafts from the course's facts alone, without an answer or evidence", async () => {
+    const { d } = await anchoredDossier("teacher-g", { coachMode: "draft", evidence: [] });
+    generate.mockResolvedValueOnce({ text: "Mijn groep had 24 studenten." });
+    const r = await guided.runGuidedIntent(user, d, "guideDraft", LU, "s1", new FormData(), "nl");
+    expect(r.ok).toBe(true);
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain(
+      "Duur van een lesmoment: 90 minuten",
+    );
+  });
+
+  it("sends nothing of a course the teacher may not edit", async () => {
+    const { d } = await anchoredDossier("someone-else");
+    generate.mockResolvedValueOnce({ text: questions });
+    await guided.runGuidedIntent(user, d, "guideQuestions", LU, "s1", new FormData(), "nl");
+    expect(generate.mock.calls[0]![0].messages[0].content).not.toContain("<course>");
+  });
+
+  it("the Chapter tab shows the facts with the course they come from", async () => {
+    const { course, d } = await anchoredDossier("teacher-g");
+    const mine = await repo.createDossier("teacher-g", "G", d);
+    const page = await outcomeRoute.loader({
+      request: new Request("http://localhost/x?tab=chapter"),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(page.courseFacts).toMatchObject({ courseId: course.id, course: "Databases 1" });
+    expect(page.courseFacts?.facts).toContainEqual({ key: "groupSize", value: "24" });
+    const other = await anchoredDossier("someone-else");
+    const theirs = await repo.createDossier("teacher-g", "G2", other.d);
+    const none = await outcomeRoute.loader({
+      request: new Request("http://localhost/x?tab=chapter"),
+      params: { id: theirs.id, outcomeId: LU },
+    } as never);
+    expect(none.courseFacts).toBeNull();
+  });
+});

@@ -16,11 +16,13 @@ import {
   withAnswers,
   writingSections,
 } from "~/lib/portfolio/guided";
+import { factsBlock } from "~/lib/portfolio/courseFacts";
 import { writeChapter } from "~/lib/portfolio/edit";
 import { GUIDED_LIMITS, LIMITS } from "~/lib/portfolio/schema";
 import type { AiLogEntry, DossierData } from "~/lib/portfolio/types";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
+import { anchorCourseFacts } from "./dossierAnchors.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 
@@ -33,7 +35,10 @@ function withLog(d: DossierData, entry: AiLogEntry): DossierData {
 
 const references = (d: DossierData) => d.references.map((r) => r.apa);
 
-/** Asks two to four questions about one section and stores them, replacing earlier ones. */
+/**
+ * Asks two to four questions about one section and stores them, replacing earlier ones.
+ * `course` is what the anchor's course already says (`factsBlock`), "" without one.
+ */
 export async function askQuestions(
   user: User,
   d: DossierData,
@@ -41,9 +46,10 @@ export async function askQuestions(
   sectionId: string,
   locale: Locale,
   now = Date.now(),
+  course = "",
 ): Promise<GuidedResult> {
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
-  const message = buildQuestionsMessage(d, outcomeId, sectionId, locale);
+  const message = buildQuestionsMessage(d, outcomeId, sectionId, locale, course);
   const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
 
@@ -72,7 +78,7 @@ export async function askQuestions(
 /**
  * Drafts the text for one section from the teacher's answers and linked evidence, and appends
  * it to the chapter (`currentText` = what the teacher had in the textarea, so unsaved edits are
- * kept) under the section's title.
+ * kept) under the section's title. `course` as in `askQuestions`.
  */
 export async function draftSection(
   user: User,
@@ -82,10 +88,11 @@ export async function draftSection(
   currentText: string,
   locale: Locale,
   now = Date.now(),
+  course = "",
 ): Promise<GuidedResult> {
   if (d.coachMode !== "draft") return { ok: false, error: "not-draft-mode" };
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
-  const built = buildSectionDraftMessage(d, outcomeId, sectionId, currentText, locale);
+  const built = buildSectionDraftMessage(d, outcomeId, sectionId, currentText, locale, course);
   if (!built) return { ok: false, error: "no-material" };
   let message = built;
   const blocked = await quotaGate(user);
@@ -152,7 +159,12 @@ export async function runGuidedIntent(
     return { ok: false, error: "not-found" };
   const text = String(fd.get("text") ?? "").slice(0, LIMITS.documentText);
   const typed = withAnswers(d, outcomeId, answersFromForm(fd));
-  if (intent === "guideDraft") return draftSection(user, typed, outcomeId, sectionId, text, locale);
+  const facts = await anchorCourseFacts(user.id, d.anchors?.[outcomeId], locale);
+  const course = factsBlock(facts?.facts ?? [], locale);
+  const now = Date.now();
+  if (intent === "guideDraft")
+    return draftSection(user, typed, outcomeId, sectionId, text, locale, now, course);
   // Asking keeps what the teacher typed in the chapter, as saving would.
-  return askQuestions(user, writeChapter(typed, outcomeId, text), outcomeId, sectionId, locale);
+  const kept = writeChapter(typed, outcomeId, text);
+  return askQuestions(user, kept, outcomeId, sectionId, locale, now, course);
 }

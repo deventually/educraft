@@ -33,16 +33,28 @@ describe("portfolio-guided eval cases", () => {
 
   it("builds a valid dossier and both messages, exactly as the app does, for every case", () => {
     for (const c of cases) {
-      const { data, outcomeId, sectionId } = caseDossier(c);
+      const { data, outcomeId, sectionId, course } = caseDossier(c);
       expect(DossierDataSchema.safeParse(data).success, c.id).toBe(true);
-      expect(buildQuestionsMessage(data, outcomeId, sectionId, c.locale), c.id).toContain(
+      expect(buildQuestionsMessage(data, outcomeId, sectionId, c.locale, course), c.id).toContain(
         "<section>",
       );
       expect(
-        buildSectionDraftMessage(data, outcomeId, sectionId, "", c.locale),
+        buildSectionDraftMessage(data, outcomeId, sectionId, "", c.locale, course),
         c.id,
       ).not.toBeNull();
     }
+  });
+
+  it("has an anchored case in both languages, sent with the course's facts", () => {
+    const anchored = cases.filter((c) => c.course);
+    expect(new Set(anchored.map((c) => c.locale))).toEqual(new Set(["nl", "en"]));
+    for (const c of anchored) {
+      const { data, outcomeId, sectionId, course } = caseDossier(c);
+      expect(course, c.id).toContain("<course>");
+      expect(buildQuestionsMessage(data, outcomeId, sectionId, c.locale, course)).toContain(course);
+      expect(c.expect.notAskAbout?.length, c.id).toBeGreaterThan(0);
+    }
+    expect(caseDossier(first!).course).toBe("");
   });
 });
 
@@ -72,6 +84,23 @@ describe("scoreQuestions", () => {
     const c = cases.find((x) => x.expect.forbidden.length > 0)!;
     const q = [...c.expect.goodQuestions.slice(0, 2), `Schrijf ${c.expect.forbidden[0]}?`];
     expect(scoreQuestions(c, q)).toMatchObject({ clean: false, pass: false });
+  });
+});
+
+describe("scoreQuestions — what the course already says", () => {
+  it("fails a question about a fact the course already gives", () => {
+    const c = cases.find((x) => x.course && x.locale === "nl")!;
+    expect(scoreQuestions(c, c.expect.goodQuestions)).toMatchObject({ known: true, pass: true });
+    const asked = [
+      ...c.expect.goodQuestions.slice(0, 2),
+      "Hoeveel studenten zaten er in de groep?",
+    ];
+    expect(scoreQuestions(c, asked)).toMatchObject({ known: false, pass: false });
+  });
+
+  it("counts the course's facts as material: a number from the course is not invented", () => {
+    const c = cases.find((x) => x.course && x.locale === "nl")!;
+    expect(scoreDraft(c, c.expect.goodParagraph)).toMatchObject({ noNewNumbers: true, pass: true });
   });
 });
 
@@ -151,8 +180,8 @@ describe("guidedReportMarkdown", () => {
       ],
     });
     expect(md).toContain("# Eval geleid schrijven — 2026-11-11");
-    expect(md).toContain("portfolio-questions@v1");
-    expect(md).toContain("portfolio-draft@v2");
+    expect(md).toContain("portfolio-questions@v2");
+    expect(md).toContain("portfolio-draft@v3");
     expect(md).toContain(`| ${c.id} |`);
     expect(md).toContain("Geslaagd: 1 van 1.");
   });
