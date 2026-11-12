@@ -72,6 +72,24 @@ describe("CourseEvaluationPanel (P33.3)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("moves focus into each new step, so a keyboard user does not land on the page top", () => {
+    renderPanel();
+    const region = screen.getByRole("region", { name: "Cursusevaluatie verwerken" });
+    fireEvent.change(within(region).getByLabelText("Antwoorden van studenten"), {
+      target: { value: "Normaliseren ging te snel." },
+    });
+    fireEvent.change(within(region).getByLabelText("Aantal respondenten"), {
+      target: { value: "12" },
+    });
+    fireEvent.click(within(region).getByRole("button", { name: "Namen controleren" }));
+    expect(document.activeElement).not.toBe(document.body);
+    expect(region.contains(document.activeElement)).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: /Verstuur geanonimiseerd/ }));
+    expect(screen.getByRole("button", { name: "Verwerken" }).closest("form")).toContainElement(
+      document.activeElement as HTMLElement,
+    );
+  });
+
   it("fills the answers and the respondents from a CSV", async () => {
     renderPanel();
     const csv = 'Naam;Cijfer;Opmerking\n;8;"Fijne les"\n;6;Te snel\n';
@@ -111,6 +129,10 @@ describe("CourseEvaluationPanel (P33.3)", () => {
     expect(reject.closest("form")).toBeNull();
     fireEvent.click(reject);
     expect(within(better).getAllByRole("listitem")).toHaveLength(1);
+    // Focus stays in the list instead of falling to the page top.
+    expect(within(better).getByRole("button", { name: "Akkoord" })).toHaveFocus();
+    fireEvent.click(within(better).getByRole("button", { name: "Niet akkoord" }));
+    expect(within(better).getByRole("heading", { name: "Wat kan er beter" })).toHaveFocus();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

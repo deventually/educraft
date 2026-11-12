@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Form } from "react-router";
 import { ShieldCheck } from "lucide-react";
 import {
@@ -18,6 +18,8 @@ import { placeText } from "./CourseImprovements";
 type Messages = ReturnType<typeof useT>["courseEvaluation"];
 
 /** The input step: paste or a CSV, the respondents, then the name check. */
+const FOCUSABLE = 'textarea, select, button, input:not([type="hidden"]), [tabindex="0"]';
+
 function SurveyInput({
   text,
   respondents,
@@ -148,6 +150,17 @@ function EvaluationResult({ data, result }: { data: CourseData; result: CourseEv
   const places = t.courseImprovements.places;
   const id = useId();
   const [decided, setDecided] = useState<number[]>([]);
+  // A decided point leaves the list: focus the next one, or the heading when none is left.
+  const betterRef = useRef<HTMLElement>(null);
+  const seen = useRef(0);
+  useEffect(() => {
+    if (decided.length === seen.current) return;
+    seen.current = decided.length;
+    const next =
+      betterRef.current?.querySelector<HTMLElement>("li button") ??
+      betterRef.current?.querySelector<HTMLElement>("h3");
+    next?.focus();
+  }, [decided]);
   const open = result.improvements.flatMap((p, i) => (decided.includes(i) ? [] : [{ p, i }]));
   const themes = (polarity: "positive" | "negative") =>
     result.themes.filter((th) => th.polarity === polarity);
@@ -207,8 +220,8 @@ function EvaluationResult({ data, result }: { data: CourseData; result: CourseEv
           </ul>
         )}
       </section>
-      <section aria-labelledby={`${id}-better`}>
-        <h3 id={`${id}-better`} className="text-base font-medium text-slate-900">
+      <section ref={betterRef} aria-labelledby={`${id}-better`}>
+        <h3 id={`${id}-better`} tabIndex={-1} className="text-base font-medium text-slate-900">
           {m.better}
         </h3>
         <p className="mt-1 text-sm text-slate-600">{m.betterIntro}</p>
@@ -253,6 +266,14 @@ export function CourseEvaluationPanel({
   const [text, setText] = useState("");
   const [respondents, setRespondents] = useState("");
   const [step, setStep] = useState<"input" | "check" | "ready">("input");
+  // A step replaces the button that led to it: move focus to the new step's first control.
+  const stepRef = useRef<HTMLDivElement>(null);
+  const shownStep = useRef(step);
+  useEffect(() => {
+    if (shownStep.current === step) return;
+    shownStep.current = step;
+    stepRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+  }, [step]);
   const [draft, setDraft] = useState<RedactDraft>(emptyRedactDraft);
   const [redacted, setRedacted] = useState("");
   // The result stays while the teacher accepts points (each accept is a new action).
@@ -275,61 +296,68 @@ export function CourseEvaluationPanel({
       </h2>
       <Card className="mt-3 p-4">
         <p className="max-w-[65ch] text-sm text-slate-600">{m.intro}</p>
-        {step === "input" && (
-          <SurveyInput
-            text={text}
-            respondents={respondents}
-            onText={setText}
-            onRespondents={setRespondents}
-            onCheck={() => setStep("check")}
-            m={m}
-          />
-        )}
-        {step === "check" && (
-          <div className="mt-4">
-            <RedactReview
-              fields={[{ name: "evaluation", label: m.field, text }]}
-              draft={draft}
-              onDraft={setDraft}
-              onConfirm={(r) => {
-                setRedacted(r.values.evaluation ?? "");
-                setStep("ready");
-              }}
-              onCancel={() => setStep("input")}
+        <div ref={stepRef}>
+          {step === "input" && (
+            <SurveyInput
+              text={text}
+              respondents={respondents}
+              onText={setText}
+              onRespondents={setRespondents}
+              onCheck={() => setStep("check")}
+              m={m}
             />
-          </div>
-        )}
-        {step === "ready" && (
-          <Form method="post" className="mt-4 space-y-3">
-            <p className="flex items-center gap-2 text-sm text-slate-700">
-              <ShieldCheck className="size-4 text-violet-700" aria-hidden /> {m.checked}
-            </p>
-            <input type="hidden" name="intent" value="evaluate-course" />
-            <AiCallField />
-            <input type="hidden" name="evaluation" value={redacted} />
-            <input type="hidden" name="respondents" value={respondents} />
-            {models.length > 1 && (
-              <div className="max-w-xs">
-                <Label htmlFor={`${id}-model`}>{m.model}</Label>
-                <Select id={`${id}-model`} name="model" className="mt-1">
-                  {models.map((x) => (
-                    <option key={x.id} value={x.id}>
-                      {x.displayName}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Button type="submit" size="sm">
-                {m.process}
-              </Button>
-              <Button type="button" size="sm" variant="secondary" onClick={() => setStep("input")}>
-                {m.edit}
-              </Button>
+          )}
+          {step === "check" && (
+            <div className="mt-4">
+              <RedactReview
+                fields={[{ name: "evaluation", label: m.field, text }]}
+                draft={draft}
+                onDraft={setDraft}
+                onConfirm={(r) => {
+                  setRedacted(r.values.evaluation ?? "");
+                  setStep("ready");
+                }}
+                onCancel={() => setStep("input")}
+              />
             </div>
-          </Form>
-        )}
+          )}
+          {step === "ready" && (
+            <Form method="post" className="mt-4 space-y-3">
+              <p className="flex items-center gap-2 text-sm text-slate-700">
+                <ShieldCheck className="size-4 text-violet-700" aria-hidden /> {m.checked}
+              </p>
+              <input type="hidden" name="intent" value="evaluate-course" />
+              <AiCallField />
+              <input type="hidden" name="evaluation" value={redacted} />
+              <input type="hidden" name="respondents" value={respondents} />
+              {models.length > 1 && (
+                <div className="max-w-xs">
+                  <Label htmlFor={`${id}-model`}>{m.model}</Label>
+                  <Select id={`${id}-model`} name="model" className="mt-1">
+                    {models.map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {x.displayName}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" size="sm">
+                  {m.process}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setStep("input")}
+                >
+                  {m.edit}
+                </Button>
+              </div>
+            </Form>
+          )}
+        </div>
         {shown && <EvaluationResult key={round} data={data} result={shown} />}
       </Card>
     </section>
