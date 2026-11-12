@@ -44,6 +44,7 @@ import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CopiedNotice, CourseCopy } from "~/components/courses/CourseCopy";
 import { copyRunAction } from "~/server/courseCopy.server";
 import { improvementAction } from "~/server/courseImprovements.server";
+import { courseEvaluationAction } from "~/server/courseEvaluation.server";
 import { CourseImprovements } from "~/components/courses/CourseImprovements";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
@@ -130,6 +131,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     (await courseProgrammeAction(request, user, course.id)) ??
     (await copyRunAction(request, user, course)) ??
     (await improvementAction(request, user, course)) ??
+    (await courseEvaluationAction(request, user, course)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -154,6 +156,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (intent === "design-lessons")
         return { variant: "pending", message: t.courseDesign.lessons.pending };
       if (intent === "review") return { variant: "pending", message: t.agents.panel.pending };
+      if (intent === "evaluate-course")
+        return { variant: "pending", message: t.courseEvaluation.pending };
       return { variant: "pending", message: t.toast.saving };
     },
     result: (r) => {
@@ -181,6 +185,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         return { variant: "success", message: fmt(c.import.done, r.added) };
       if (r.intent === "design-lessons-apply")
         return { variant: "success", message: fmt(t.courseDesign.lessons.added, { n: r.added }) };
+      if (r.intent === "evaluate-course")
+        return { variant: "success", message: t.courseEvaluation.done };
       if (r.intent === "use-as-evidence") return { variant: "success", message: c.evidence.done };
       if (
         r.intent === "share" ||
