@@ -15,6 +15,7 @@
 import {
   existsSync,
   mkdirSync,
+  statSync,
   readdirSync,
   readFileSync,
   renameSync,
@@ -37,6 +38,8 @@ const InstitutionSchema = z.object({
   dbPath: z.string().min(1),
   active: z.boolean(),
   createdAt: z.string(),
+  /** When it was last deactivated: the other container needs a moment to let go of the file. */
+  deactivatedAt: z.string().optional(),
 });
 export type Institution = z.infer<typeof InstitutionSchema>;
 
@@ -104,9 +107,21 @@ export function institutionRegistry(opts: {
     writeFileSync(temp, `${JSON.stringify({ institutions: next }, null, 2)}\n`);
     renameSync(temp, file);
     institutions = next;
+    readAt = statSync(file).mtimeMs;
   }
 
   let institutions = read();
+  let readAt = existsSync(file) ? statSync(file).mtimeMs : 0;
+
+  /** Another container (the platform) may have changed the file: read it again if so. */
+  function fresh(): Institution[] {
+    const changedAt = existsSync(file) ? statSync(file).mtimeMs : 0;
+    if (changedAt !== readAt) {
+      institutions = read();
+      readAt = changedAt;
+    }
+    return institutions;
+  }
   if (!existsSync(file) && opts.seed?.length) {
     write(
       opts.seed
@@ -141,19 +156,19 @@ export function institutionRegistry(opts: {
       .sort((a, b) => a.about.removedAt.localeCompare(b.about.removedAt));
   }
 
-  const usedHosts = () => new Set([platformHost, ...institutions.flatMap((i) => i.hosts)]);
+  const usedHosts = () => new Set([platformHost, ...fresh().flatMap((i) => i.hosts)]);
 
   return {
     /** The institutions, in the order they were added. */
     list(): Institution[] {
-      return institutions.map((i) => ({ ...i, hosts: [...i.hosts] }));
+      return fresh().map((i) => ({ ...i, hosts: [...i.hosts] }));
     },
 
     /** The platform plus every institution, as the request router and the jobs see them. */
     tenants(): Tenant[] {
       return [
         platform,
-        ...institutions.map((i) => ({
+        ...fresh().map((i) => ({
           id: i.id,
           name: i.name,
           hosts: [...i.hosts],
@@ -175,7 +190,7 @@ export function institutionRegistry(opts: {
       if (!ID.test(id) || id === PLATFORM_ID) return { ok: false, error: "id" };
       if (!name || name.length > 100) return { ok: false, error: "name" };
       if (!HOST.test(host)) return { ok: false, error: "host" };
-      if (institutions.some((i) => i.id === id) || usedHosts().has(host)) {
+      if (fresh().some((i) => i.id === id) || usedHosts().has(host)) {
         return { ok: false, error: "taken" };
       }
       const dbPath = join(opts.dir, `${id}.db`);
@@ -188,14 +203,21 @@ export function institutionRegistry(opts: {
         active: true,
         createdAt: new Date().toISOString(),
       };
-      write([...institutions, institution]);
+      write([...fresh(), institution]);
       return { ok: true, institution };
     },
 
     /** Activate or deactivate; `false` for an unknown id. */
     setActive(id: string, active: boolean): boolean {
-      if (!institutions.some((i) => i.id === id)) return false;
-      write(institutions.map((i) => (i.id === id ? { ...i, active } : i)));
+      if (!fresh().some((i) => i.id === id)) return false;
+      const at = new Date().toISOString();
+      write(
+        fresh().map((i) => {
+          if (i.id !== id) return i;
+          const { deactivatedAt: _, ...rest } = i;
+          return active ? { ...rest, active } : { ...rest, active, deactivatedAt: at };
+        }),
+      );
       return true;
     },
 
@@ -210,7 +232,7 @@ export function institutionRegistry(opts: {
       now = new Date(),
       backupDir: string | null = null,
     ): { ok: true; archivedTo: string } | { ok: false; error: RemoveError } {
-      const institution = institutions.find((i) => i.id === id);
+      const institution = fresh().find((i) => i.id === id);
       if (!institution) return { ok: false, error: "unknown" };
       if (institution.active) return { ok: false, error: "active" };
       if (confirm.trim() !== id) return { ok: false, error: "confirm" };
@@ -223,7 +245,7 @@ export function institutionRegistry(opts: {
       if (backupDir) moveInto(backupDir, archivedTo, "backups");
       const about = { ...institution, removedAt: now.toISOString() };
       writeFileSync(join(archivedTo, ABOUT), `${JSON.stringify(about, null, 2)}\n`);
-      write(institutions.filter((i) => i.id !== id));
+      write(fresh().filter((i) => i.id !== id));
       return { ok: true, archivedTo };
     },
 
@@ -253,7 +275,7 @@ export function institutionRegistry(opts: {
       if (!entry) return { ok: false, error: "unknown" };
       const { about, path } = entry;
       if (
-        institutions.some((i) => i.id === about.id) ||
+        fresh().some((i) => i.id === about.id) ||
         about.hosts.some((h) => usedHosts().has(h)) ||
         existsSync(about.dbPath)
       ) {
@@ -271,7 +293,7 @@ export function institutionRegistry(opts: {
       }
       rmSync(path, { recursive: true, force: true });
       const { removedAt: _, ...institution } = about;
-      write([...institutions, { ...institution, active: false }]);
+      write([...fresh(), { ...institution, active: false }]);
       return { ok: true };
     },
 

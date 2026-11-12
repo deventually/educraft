@@ -61,6 +61,29 @@ TENANTS=[{"id":"hsl","hosts":["hsl.limeonit.nl"]},{"id":"hhs","hosts":["hhs.lime
 Adding an institution: a line in `TENANTS`, a DNS record, a restart; then its first admin with
 `create-admin`. Details: [Tenancy & Admin](../docs/Tenancy-and-Admin.md).
 
+### The platform address (`PLATFORM_HOST`)
+
+With `PLATFORM_HOST=platform.limeonit.net` the platform owner manages the institutions on
+`https://platform.limeonit.net/platform` instead of in `TENANTS`. The list lives in
+`/data/institutions.json` (taken over from `TENANTS` once), next to `/data/platform.db`. Adding,
+deactivating and removing take effect at once, without a restart; a removed institution sits in
+`/data/archive/` for 60 days. Make the platform owner once:
+
+```
+docker compose exec -e LIMEONIT_TENANT=platform app node build/ops/create-admin.js --name … --email …
+docker compose exec -e LIMEONIT_TENANT=platform app node build/ops/set-owner.js --email …
+```
+
+**Own container (BESLUIT-2026-11-12-5).** `LIMEONIT_SERVES` splits one image into two
+containers on the same `/data`: `platform` serves only the platform address (and backs up
+`platform.db`, and wipes the archive after 60 days), `institutions` serves only the schools (and
+backs up their databases). `docker compose --profile platform up -d` starts the `platform`
+service on `LIMEONIT_PLATFORM_PORT` (3001) with `LIMEONIT_SERVES=platform`; set
+`LIMEONIT_SERVES=institutions` in `.env` for `app`. The schools' container re-reads
+`institutions.json` when it changes and closes the database of a deactivated institution within
+ten seconds; the platform waits for that before it archives one. Both containers must share one
+host (SQLite on a local volume, not a network share).
+
 ## Back-up vóór een destructieve migratie
 
 Migraties draaien automatisch bij de eerste database-toegang na een deploy. Migratie `0008`

@@ -5,6 +5,7 @@ import {
   currentTenant,
   parseTenants,
   runWithTenant,
+  servedTenants,
   tenantForHost,
   tenantMiddleware,
   type Tenant,
@@ -240,5 +241,45 @@ describe("the platform layer in the router", () => {
     const { response, seen } = await call("https://hsl.limeonit.test/platform");
     expect(seen).toEqual([]);
     expect(response.status).toBe(404);
+  });
+});
+
+describe("servedTenants (one container for the platform, one for the institutions)", () => {
+  const platform: Tenant = {
+    id: "platform",
+    hosts: ["beheer.test"],
+    dbPath: ":memory:",
+    platform: true,
+  };
+  const list = [platform, hsl, hhs];
+
+  it("serves everything by default", () => {
+    expect(servedTenants(undefined, list)).toEqual(list);
+    expect(servedTenants("all", list)).toEqual(list);
+  });
+
+  it("serves only the platform in the platform container, only institutions in the other", () => {
+    expect(servedTenants("platform", list)).toEqual([platform]);
+    expect(servedTenants("institutions", list)).toEqual([hsl, hhs]);
+  });
+
+  it("refuses an unknown value instead of serving everything", () => {
+    expect(() => servedTenants("both", list)).toThrow(/LIMEONIT_SERVES/);
+  });
+});
+
+describe("closeStaleDbs (a deactivated or removed institution lets go of its file)", () => {
+  it("closes the database of an institution that is no longer active, and keeps the others", async () => {
+    const { closeStaleDbs } = await import("~/server/db.server");
+    const a: Tenant = { id: "stale-a", hosts: ["a.test"], dbPath: ":memory:" };
+    const b: Tenant = { id: "stale-b", hosts: ["b.test"], dbPath: ":memory:" };
+    await runWithTenant(a, () => addUser("a@a.test"));
+    await runWithTenant(b, () => addUser("b@b.test"));
+    const closed = closeStaleDbs([{ ...a, inactive: true }, b]);
+    expect(closed).toContain("stale-a");
+    expect(closed).not.toContain("stale-b");
+    // In memory, a closed database is gone; the open one still has its teacher.
+    expect(await runWithTenant(a, emails)).toEqual([]);
+    expect(await runWithTenant(b, emails)).toEqual(["b@b.test"]);
   });
 });

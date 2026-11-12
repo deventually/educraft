@@ -9,6 +9,7 @@ import {
   programmeFromForm,
 } from "~/server/programmes.server";
 import {
+  getProgramme,
   placeCourse,
   removeCourse,
   updateProgramme,
@@ -63,11 +64,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     kinds,
     available,
-    lines: (await listLines(user, programme.id)).map((l) => ({
-      id: l.id,
-      name: l.name,
-      courses: l.courseIds.length,
-    })),
+    lines: await Promise.all(
+      (await listLines(user, programme.id)).map(async (l) => {
+        // A line of another programme says where it comes from, when the user reads that one.
+        const from =
+          l.programmeId === programme.id
+            ? undefined
+            : (await getProgramme(user, l.programmeId))?.name;
+        return {
+          id: l.id,
+          name: l.name,
+          courses: l.courseIds.length,
+          ...(from ? { from } : {}),
+        };
+      }),
+    ),
   };
 }
 

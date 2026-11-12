@@ -91,8 +91,12 @@ describe("platform: deactivating, removing and putting back", () => {
   it("removes a deactivated institution into the archive, and puts it back with its data", async () => {
     expect(await removeInstitution("hhs", "hhs")).toEqual({ ok: false, error: "active" });
     await setInstitutionActive("hhs", false);
+    // The schools' container lets go of the database within 15 seconds; be past that.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.now() + 20_000);
     expect(await removeInstitution("hhs", "wrong")).toEqual({ ok: false, error: "confirm" });
     expect(await removeInstitution("hhs", "hhs")).toEqual({ ok: true });
+    vi.useRealTimers();
     expect(tenantForHost("hhs.test")).toBeNull();
     expect(existsSync(join(dir, "hhs.db"))).toBe(false);
 

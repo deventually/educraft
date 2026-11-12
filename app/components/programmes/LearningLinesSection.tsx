@@ -14,7 +14,8 @@ export function LearningLinesSection({
   canManage,
 }: {
   programmeId: string;
-  lines: { id: string; name: string; courses: number }[];
+  /** `from`: the name of the line's own programme, when it is another one. */
+  lines: { id: string; name: string; courses: number; from?: string }[];
   courses: { courseId: string; name: string }[];
   canManage: boolean;
 }) {
@@ -42,6 +43,11 @@ export function LearningLinesSection({
                 {line.name}
               </Link>
               <span className="text-sm text-slate-600">
+                {line.from && (
+                  <>
+                    <span>{fmt(l.from, { programme: line.from })}</span> ·{" "}
+                  </>
+                )}
                 {fmt(l.summary, { courses: line.courses })}
               </span>
             </li>

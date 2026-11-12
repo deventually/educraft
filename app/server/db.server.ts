@@ -6,7 +6,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema.server";
 import { env } from "./env.server";
-import { allTenants, currentTenant, runWithTenant, type Tenant } from "./tenants.server";
+import { servedTenants, currentTenant, runWithTenant, type Tenant } from "./tenants.server";
 
 /**
  * Local-first SQLite behind a `getDb()` seam.
@@ -57,8 +57,34 @@ export function closeTenantDb(tenant: Tenant): void {
   globalForDb.__limeonitDbs?.delete(keyOf(tenant));
 }
 
+/**
+ * Closes every open database that is not of an active institution in `tenants`: one another
+ * container deactivated or removed (it moves to the archive) lets go of its file. Returns the
+ * ids it closed.
+ */
+export function closeStaleDbs(tenants: readonly Tenant[] = servedTenants()): string[] {
+  const live = new Set(tenants.filter((t) => !t.inactive).map(keyOf));
+  const closed: string[] = [];
+  for (const [key, db] of globalForDb.__limeonitDbs ?? []) {
+    if (live.has(key)) continue;
+    db.$client.close();
+    globalForDb.__limeonitDbs?.delete(key);
+    closed.push(key.split("\u0000")[0] ?? key);
+  }
+  return closed;
+}
+
+const globalForSync = globalThis as unknown as { __limeonitDbSync?: NodeJS.Timeout };
+
+/** Every few seconds: let go of databases the platform deactivated or removed. Once. */
+export function startDbSync(everyMs = 10_000): void {
+  if (globalForSync.__limeonitDbSync) return;
+  globalForSync.__limeonitDbSync = setInterval(() => closeStaleDbs(), everyMs);
+  globalForSync.__limeonitDbSync.unref();
+}
+
 /** Opens (and so migrates) every institution's database: at boot and from `db:migrate`. */
-export function migrateAllTenants(tenants: readonly Tenant[] = allTenants()): string[] {
+export function migrateAllTenants(tenants: readonly Tenant[] = servedTenants()): string[] {
   return tenants.map((tenant) => {
     runWithTenant(tenant, getDb);
     return tenant.dbPath;
@@ -70,7 +96,7 @@ export function migrateAllTenants(tenants: readonly Tenant[] = allTenants()): st
  * if one is unreachable; returns nothing on success. Kept here so the raw-SQL access stays
  * behind the `db.server` seam.
  */
-export function pingDb(tenants: readonly Tenant[] = allTenants()): void {
+export function pingDb(tenants: readonly Tenant[] = servedTenants()): void {
   for (const tenant of tenants) runWithTenant(tenant, () => getDb().get(sql`SELECT 1`));
 }
 

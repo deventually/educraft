@@ -18,7 +18,13 @@ import { hashPassword } from "./password.server";
 import { createPasswordReset } from "./repositories/passwordResets.server";
 import { setOwnerUserId } from "./repositories/settings.server";
 import { createUser, getUserByEmail } from "./repositories/users.server";
-import { allTenants, platformRegistry, runWithTenant, type Tenant } from "./tenants.server";
+import {
+  allTenants,
+  platformRegistry,
+  runWithTenant,
+  servedTenants,
+  type Tenant,
+} from "./tenants.server";
 
 function platform(): InstitutionRegistry {
   const registry = platformRegistry();
@@ -86,6 +92,9 @@ export async function setInstitutionActive(id: string, active: boolean): Promise
   return done;
 }
 
+/** How long a container serving the institutions may take to close a deactivated database. */
+const RELEASE_MS = 15_000;
+
 /** Remove a deactivated institution, confirmed by its id: 60 days in the archive, then gone. */
 export async function removeInstitution(
   id: string,
@@ -93,6 +102,13 @@ export async function removeInstitution(
 ): Promise<{ ok: true } | { ok: false; error: "unknown" | "active" | "confirm" }> {
   const tenant = tenantOf(id);
   if (tenant && !tenant.inactive) return { ok: false, error: "active" };
+  // A container serving the institutions closes a deactivated database within seconds
+  // (`startDbSync`); just after deactivating, wait for it before the file moves.
+  const since = platform()
+    .list()
+    .find((i) => i.id === id)?.deactivatedAt;
+  const wait = since ? RELEASE_MS - (Date.now() - Date.parse(since)) : 0;
+  if (wait > 0 && confirm.trim() === id) await new Promise((r) => setTimeout(r, wait));
   if (tenant && confirm.trim() === id) closeTenantDb(tenant);
   const backups = tenant ? tenantBackupDir(process.env, tenant) : null;
   const result = platform().remove(id, confirm, new Date(), backups);
@@ -138,7 +154,8 @@ const DAY_TIMER = globalThis as unknown as { __limeonitArchiveTimer?: NodeJS.Tim
 
 /** Starts the hourly clean-up of the archive, once per process (only with a platform). */
 export function startArchivePurge(): void {
-  if (!platformRegistry() || DAY_TIMER.__limeonitArchiveTimer) return;
+  const servesPlatform = servedTenants().some((t) => t.platform);
+  if (!platformRegistry() || !servesPlatform || DAY_TIMER.__limeonitArchiveTimer) return;
   DAY_TIMER.__limeonitArchiveTimer = setInterval(() => purgeArchive(), 60 * 60 * 1000);
   DAY_TIMER.__limeonitArchiveTimer.unref();
   purgeArchive();

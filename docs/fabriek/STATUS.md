@@ -4,10 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #292 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #294 gemerged)_
 
 ## Nu
 
+- **Leerlijn over meer opleidingen, en de leerlijn op de cursuspagina (#294) gemerged op
+  2026-11-12:** een leerlijn houdt zijn eigen opleiding en kan ook gelden voor andere opleidingen
+  (voltijd en deeltijd, of een onderzoekslijn door een faculteit). Koppelen kan wie beide
+  opleidingen beheert. Op de cursuspagina staat per leerlijn de plek ("cursus 2 van 3") met de
+  vorige en volgende cursus. Migratie 0034.
+
+- **Pilot op twee databases (#293) gemerged op 2026-11-12:** één app bedient meer instellingen,
+  elk met een eigen SQLite-database, gekozen per adres (`TENANTS`, BESLUIT-2026-11-12-4).
+  Migraties, back-up, AI-gebruik, modellenlijst en recente fouten gaan per instelling;
+  beheerscripts noemen de instelling met `LIMEONIT_TENANT`. Zonder `TENANTS` verandert niets.
 - **Organisatie: tussenlaag en opleidingen daaronder (#292) gemerged op 2026-11-12:** één
   omgeving is één instelling (BESLUIT-2026-11-12-2). De beheerder kiest onder Beheer →
   Organisatie hoe de tussenlaag heet (faculteit, vestiging, …), beheert de onderdelen en zet

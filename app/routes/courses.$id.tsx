@@ -44,6 +44,7 @@ import { courseTab } from "~/lib/courses/tabs";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
 import { courseProgrammeAction } from "~/server/programmes.server";
 import { placeOptions, programmesOfCourse } from "~/server/repositories/programmes.server";
+import { linesOfCourse } from "~/server/repositories/learningLines.server";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -100,6 +101,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     programmes: {
       placed: await programmesOfCourse(course.id),
       options: await placeOptions(user.id),
+      lines: await linesOfCourse(user, course.id),
     },
   };
 }
