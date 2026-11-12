@@ -1,0 +1,40 @@
+/** Improvements for the next run of a course, on the Controle tab (P33.1). */
+export const courseImprovements = {
+  add: "Punt toevoegen",
+  addHeading: "Zelf een punt toevoegen",
+  done: {
+    added: "Verbeterpunt toegevoegd.",
+    finished: "Verbeterpunt afgerond.",
+    removed: "Verbeterpunt verwijderd.",
+    reopened: "Verbeterpunt staat weer open.",
+  },
+  doneList: "Afgeronde verbeterpunten",
+  doneSummary: "Afgerond ({n})",
+  errors: {
+    full: "Er staan al 30 verbeterpunten bij deze cursus. Verwijder eerst een afgerond punt.",
+    invalid: "Dit verbeterpunt kan zo niet. Schrijf een korte zin en kies een plek in de cursus.",
+    notFound: "Dit verbeterpunt bestaat niet meer.",
+  },
+  finish: "Afgerond",
+  fromEvaluation: "Uit de evaluatie",
+  heading: "Verbeterpunten",
+  intro:
+    "Wat wil je de volgende keer anders doen? Zet het hier, bij de les, de toets of de leeruitkomst waar het over gaat. Open punten gaan mee als je de cursus kopieert voor een nieuwe uitvoering; afgeronde niet.",
+  none: "Nog geen open verbeterpunten.",
+  openList: "Open verbeterpunten",
+  place: "Waar hoort het bij?",
+  places: {
+    activity: "Les of opdracht",
+    activityGroup: "Lessen en opdrachten",
+    assessment: "Toets",
+    assessmentGroup: "Toetsen",
+    course: "De hele cursus",
+    outcome: "Leeruitkomst",
+    outcomeGroup: "Leeruitkomsten",
+  },
+  remove: "Verwijderen",
+  reopen: "Weer openen",
+  run: "Uit {run}",
+  text: "Nieuw verbeterpunt",
+  textHint: "Eén punt, bijvoorbeeld: Geef de casus een week eerder uit.",
+};

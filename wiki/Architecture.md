@@ -392,6 +392,13 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `itemTitle` reads "Webtech: <title>" and `earlierLessons` lists only that discipline's lessons.
   `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
+- **Improvements for the next run (P33.1).** `CourseData.improvements` (optional, capped at 30):
+  a point with a text, a place (the whole course, or an outcome, lesson or test by id), `open` or
+  `done`, its source (`teacher`, or `evaluation` from P33.2) and the run it comes from. Advice
+  only: it never changes the course. The pure intents live in `app/lib/courses/improvements.ts`,
+  the action in `app/server/courseImprovements.server.ts` (an editor may: it is content). A place
+  whose item was removed reads as the whole course (`improvementPlace`); `forNewRun` takes the
+  open points along to a copy and leaves the finished ones.
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
   lessons, weeks, check), each with its tab, what is done of it and the next open step. The
@@ -578,7 +585,7 @@ app/
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
     assessment-models/ schema · starters · pick (frameworks per document type), all pure
-    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21), all pure
+    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21) · improvements (P33), all pure
     agents/          types · registry · validate · schema · input · filter (P21 role agents), all pure
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
 docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7
