@@ -1,0 +1,53 @@
+/** Evidence in one go (BDB/BKE): several files, a proposal per file, one list to confirm. */
+export const portfolioBatch = {
+  add: "Toevoegen",
+  added: "{n} stukken toegevoegd.",
+  addedOne: "1 stuk toegevoegd.",
+  addMany: "Voeg {n} stukken toe",
+  addOne: "Voeg 1 stuk toe",
+  back: "Terug naar je dossier",
+  check: "Controleren",
+  chosen: "Gekozen bestanden",
+  clean: "Geen namen of nummers gevonden",
+  criteria: "Criteria",
+  errors: {
+    "not-confirmed": "Bevestig eerst het kader; de voorstellen gaan over jouw leeruitkomsten.",
+    quota:
+      "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
+  },
+  filesHelp:
+    "PDF, Word of tekst, hoogstens {n} tegelijk. De bestanden blijven op je computer; alleen de tekst gaat mee, met codes in plaats van namen.",
+  filesLabel: "Kies bestanden",
+  folderLabel: "Of kies een map",
+  found: "Vervangen: {items}",
+  frameworkLink: "Naar je kader",
+  intro:
+    "Kies al je bewijs in één keer, bijvoorbeeld een map met een submap per leeruitkomst. LimeOnIt stelt per bestand de leeruitkomst, de soort, de criteria en de regel uit het verplicht bewijs voor. Jij bevestigt alles in één lijst.",
+  kind: "Soort",
+  line: "Verplicht bewijs",
+  listHelp:
+    "Niets wordt toegevoegd zonder je vinkje. Bij Controleren twijfelde LimeOnIt, of liet het iets weg dat niet bij je kader past.",
+  listTitle: "Controleer en voeg toe",
+  namesHelp:
+    "De namen blijven in je browser. In elk bestand worden ze vervangen door een code, net als e-mailadressen, telefoonnummers en studentnummers. Controleer het zelf: een verkeerd gespelde naam glipt erdoor.",
+  namesLabel: "Namen van studenten om te vervangen (één per regel)",
+  needsConfirm: "Bevestig eerst je kader; dan kan LimeOnIt voorstellen waar je bewijs hoort.",
+  noLine: "Geen regel",
+  noOutcome: "Nog geen leeruitkomst",
+  open: "Bewijs in één keer toevoegen",
+  openHint: "Heb je veel bestanden?",
+  outcome: "Leeruitkomst",
+  pending: "LimeOnIt bekijkt je bestanden…",
+  proposal: "Voorstel",
+  propose: "Stel voor waar ze horen",
+  proposed: "De voorstellen staan klaar. Vink aan wat klopt.",
+  remove: "{name} weghalen",
+  room: "Er passen nog {n} stukken in je dossier.",
+  roomOne: "Er past nog 1 stuk in je dossier.",
+  skipped: "Overgeslagen, geen PDF, Word of tekst: {names}",
+  tickSure: "Vink de voorstellen zonder twijfel aan",
+  title: "Bewijs in één keer toevoegen",
+  titleLabel: "Titel",
+  tooMany: "Je koos meer dan {n} bestanden; de eerste {n} staan in de lijst.",
+  unreadable: "Geen tekst gelezen; LimeOnIt gaat alleen uit van de naam.",
+};
