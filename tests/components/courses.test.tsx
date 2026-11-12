@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentType } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import CourseList from "~/routes/courses._index";
@@ -589,6 +589,44 @@ describe("Course page — use as evidence in BDB/BKE (P26.4)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("offers the test dossier of a summative test, and then ticks the criteria it fits", async () => {
+    const withHint = [
+      {
+        ...dossiers[0]!,
+        outcomes: [
+          {
+            code: "K2",
+            title: "Toetsconstructie",
+            criteria: [
+              { id: "k2a", text: "Je stelt een toetsmatrijs op.", testDossier: true },
+              { id: "k2b", text: "Je motiveert studenten.", testDossier: false },
+            ],
+          },
+        ],
+      },
+    ];
+    const { container } = renderRoute(
+      CoursePage,
+      { ...pageData(itemizedCourse()), dossiers: withHint },
+      "/?tab=documents",
+    );
+    const summary = screen.getByText("Gebruik als bewijs in BDB/BKE", { selector: "summary" });
+    (summary.closest("details") as HTMLDetailsElement).open = true;
+    const part = screen.getByRole("combobox", { name: "Wat wil je als bewijs gebruiken?" });
+    expect(within(part).getByRole("option", { name: "Toetsdossier: Eindopdracht" })).toHaveValue(
+      "dossier:test-1",
+    );
+    expect(within(part).queryByRole("option", { name: "Toetsdossier: Oefentoets" })).toBeNull();
+    const fits = screen.getByRole("checkbox", { name: /Je stelt een toetsmatrijs op/ });
+    const other = screen.getByRole("checkbox", { name: "Je motiveert studenten." });
+    expect(fits).not.toBeChecked();
+    fireEvent.change(part, { target: { value: "dossier:test-1" } });
+    expect(fits).toBeChecked();
+    expect(other).not.toBeChecked();
+    expect(screen.getByText("(Voorstel: past bij een toetsdossier)")).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("is absent without dossiers", () => {
     renderRoute(CoursePage, pageData(), "/?tab=documents");
     expect(screen.queryByText("Gebruik als bewijs in BDB/BKE")).toBeNull();
@@ -719,5 +757,14 @@ describe("Course page — blueprint and marking model", () => {
     expect(panels("Nakijkmodel exporteren")).toEqual([
       "/courses/c1/assessments/test-1/marking-model/export",
     ]);
+  });
+
+  it("offers the test dossier for every summative test", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()), "/?tab=plan");
+    expect(
+      screen
+        .getAllByText("Toetsdossier exporteren", { selector: "summary" })
+        .map((s) => s.closest("details")?.getAttribute("data-export-url")),
+    ).toEqual(["/courses/c1/assessments/test-1/dossier/export"]);
   });
 });

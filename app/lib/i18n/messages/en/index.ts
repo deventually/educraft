@@ -8,6 +8,7 @@ import { auditLog } from "./auditLog";
 import { aiLeave } from "./aiLeave";
 import { aiNotice } from "./aiNotice";
 import { announcements } from "./announcements";
+import { assessmentDossier } from "./assessmentDossier";
 import { assessmentModels } from "./assessmentModels";
 import { auth } from "./auth";
 import { calendar } from "./calendar";
@@ -83,6 +84,7 @@ export const en: Messages = {
   aiNotice,
   announcements,
   appName: "LimeOnIt",
+  assessmentDossier,
   assessmentModels,
   auditLog,
   auth,
