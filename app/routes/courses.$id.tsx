@@ -318,7 +318,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               weekDates={weekDates}
               currentWeek={currentWeek}
             />
-            {isOwner && <CourseCopy name={course.name} data={data} />}
+            {members?.myRole !== "editor" && <CourseCopy name={course.name} data={data} />}
           </>
         )}
         {tab === "outcomes" && (

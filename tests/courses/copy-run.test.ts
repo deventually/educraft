@@ -111,11 +111,24 @@ describe("copyCourse (a new run of an own course)", () => {
     expect(await courses.listLinksForCourse("run-a", course.id)).toHaveLength(1);
   });
 
-  it("is for the owner only: an editor or a stranger gets null", async () => {
-    const course = await courses.createCourse("run-a", { name: "Kansen", data: lastYear() });
-    await members.setCourseMember("run-a", course.id, "run-b", "co-owner");
+  it("is for the owner and a co-owner; an editor or a stranger gets null", async () => {
+    const profile = await profiles.createProfile("run-a", { name: "Vwo 5" });
+    const course = await courses.createCourse("run-a", {
+      name: "Kansen",
+      contextProfileId: profile.id,
+      data: lastYear(),
+    });
+    await members.setCourseMember("run-a", course.id, "run-b", "editor");
     expect(await courses.copyCourse("run-b", course.id, { name: "Kansen" })).toBeNull();
     expect(await courses.copyCourse("run-b", "nope", { name: "Kansen" })).toBeNull();
+    // A co-owner's copy is theirs, without the owner's context profile.
+    await members.setCourseMember("run-a", course.id, "run-b", "co-owner");
+    expect(await courses.copyCourse("run-b", course.id, { name: "Kansen" })).toMatchObject({
+      ownerId: "run-b",
+      role: "owner",
+      contextProfileId: null,
+      data: { outcomes: lastYear().outcomes },
+    });
   });
 
   it("refuses an invalid start date or name and writes nothing", async () => {
@@ -161,7 +174,7 @@ describe("the course page's copy-run intent", () => {
     });
   });
 
-  it("tells an editor that only the owner copies, and a bad date that it is wrong", async () => {
+  it("tells an editor that only the owner or a co-owner copies, and a bad date that it is wrong", async () => {
     const course = await courses.createCourse("run-a", { name: "Logica", data: lastYear() });
     expect(await post(course.id, { intent: "copy-run", name: "Logica", startDate: "x" })).toEqual({
       ok: false,
@@ -173,7 +186,7 @@ describe("the course page's copy-run intent", () => {
     expect(await post(course.id, { intent: "copy-run", name: "Logica" })).toEqual({
       ok: false,
       intent: "copy-run",
-      error: "Alleen de eigenaar kan deze cursus kopiëren.",
+      error: "Alleen de eigenaar of een mede-eigenaar kan deze cursus kopiëren.",
     });
   });
 });

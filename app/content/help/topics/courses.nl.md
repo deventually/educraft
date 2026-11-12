@@ -112,7 +112,7 @@ Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOn
 
 ## Een cursus opnieuw geven
 
-Geef je een cursus volgend studiejaar of in een ander semester opnieuw? Gebruik op het tabblad **Overzicht** **Kopiëren voor een nieuwe uitvoering**. Je kiest de naam van de kopie, het studiejaar, het semester of de periode en de startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee. Delen, collega's die meewerken, gekoppeld werk en reviews gaan niet mee. De oude cursus blijft zoals hij is. Alleen de eigenaar kan kopiëren.
+Geef je een cursus volgend studiejaar of in een ander semester opnieuw? Gebruik op het tabblad **Overzicht** **Kopiëren voor een nieuwe uitvoering**. Je kiest de naam van de kopie, het studiejaar, het semester of de periode en de startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee. Delen, collega's die meewerken, gekoppeld werk en reviews gaan niet mee. De oude cursus blijft zoals hij is. De eigenaar en een mede-eigenaar kunnen kopiëren; de kopie is dan van jou. Je onderwijscontext gaat alleen mee als de cursus van jou is.
 
 Na het kopiëren opent het tabblad **Controle** van de kopie. Daar bedenk je wat er na de evaluatie van vorige keer anders moet, want ook wat toen niet goed liep, is meegekomen.
 

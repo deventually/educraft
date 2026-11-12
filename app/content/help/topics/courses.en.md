@@ -111,7 +111,7 @@ On a tool page with a learning-outcome field, pick your course under **Course**.
 
 ## Teaching a course again
 
-Teaching a course again next study year or in another semester? On the **Overview** tab, use **Copy for a new run**. You choose the name of the copy, the study year, the semester or period and the start date. Learning outcomes, tests, lessons and schedule come along. Sharing, colleagues who work on it, linked work and reviews do not. The old course stays as it is. Only the owner can copy.
+Teaching a course again next study year or in another semester? On the **Overview** tab, use **Copy for a new run**. You choose the name of the copy, the study year, the semester or period and the start date. Learning outcomes, tests, lessons and schedule come along. Sharing, colleagues who work on it, linked work and reviews do not. The old course stays as it is. The owner and a co-owner can copy; the copy is then yours. Your teaching context comes along only if the course is yours.
 
 After copying, the **Check** tab of the copy opens. There you decide what has to change after last run's evaluation, because whatever did not go well then came along too.
 

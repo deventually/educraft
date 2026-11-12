@@ -11,7 +11,7 @@ export const courseCopy: Messages["courseCopy"] = {
     "Teaching this course again, next study year or in another semester? Make a copy. Learning outcomes, tests, lessons and schedule come along. Sharing, colleagues and linked work do not. This course stays as it is.",
   name: "Name of the copy",
   nameHint: "Add the study year, for example, so you can tell the two apart.",
-  ownerOnly: "Only the owner can copy this course.",
+  ownerOnly: "Only the owner or a co-owner can copy this course.",
   phase: "Semester or period",
   phaseHint: "For example Semester 1 or Period 3.",
   startDate: "New start date",

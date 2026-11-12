@@ -1,6 +1,6 @@
 /**
  * "Kopiëren voor een nieuwe uitvoering": the `copy-run` intent of the course page. The
- * owner copies their own course for its next run and lands on the Controle tab of the copy,
+ * owner or a co-owner copies the course for its next run and lands on the Controle tab of the copy,
  * which asks what has to change after the last run's evaluation.
  */
 import { redirect } from "react-router";
@@ -38,7 +38,7 @@ export async function copyRunAction(
   const fd = await request.clone().formData();
   if (fd.get("intent") !== "copy-run") return null;
   const m = getMessages(getLocale(request)).courseCopy;
-  if (course.ownerId !== user.id) return { ok: false, intent: "copy-run", error: m.ownerOnly };
+  if (course.role === "editor") return { ok: false, intent: "copy-run", error: m.ownerOnly };
   const field = (key: string) => fd.get(key)?.toString() ?? "";
   const parsed = CopyRunFormSchema.safeParse({
     name: field("name"),
