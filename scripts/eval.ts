@@ -16,6 +16,7 @@
  *    npm run eval -- --tool mentorai --runs 3 # mean + spread over 3 runs per case
  *    npm run eval -- --tool a,b --label d     # several tools, report <date>d.md
  *    npm run eval -- --tool x --batch         # half price via the Message Batches API
+ *    npm run eval -- --tool x --parallel 6    # 6 runs at once (without --batch)
  *    npm run eval -- --tool x --model gpt-6.1-sol --label gpt  # another model answers,
  *                                             # the same (Claude) judge scores
  *
@@ -56,6 +57,8 @@ import {
   caseValues,
   countedFailures,
   generationModel,
+  mapLimit,
+  parallelism,
   JUDGE_MAX_TOKENS,
   TRUNCATION_CAP,
   averageScore,
@@ -105,6 +108,8 @@ interface Cli {
   batch: boolean;
   /** Generate with this model instead of the tool's own (`--model`); the judge stays. */
   model?: string;
+  /** Runs at once without `--batch` (`--parallel N`, default 1: one after another). */
+  parallel: number;
 }
 
 const EVALS_DIR = join(process.cwd(), "evals");
@@ -120,6 +125,7 @@ function parseCli(argv: string[]): Cli {
     runs: 1,
     label: "",
     batch: false,
+    parallel: 1,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -131,6 +137,7 @@ function parseCli(argv: string[]): Cli {
     else if (a === "--model") cli.model = argv[++i];
     else if (a === "--judge-model") cli.judgeModel = argv[++i] ?? DEFAULT_JUDGE_MODEL;
     else if (a === "--label") cli.label = (argv[++i] ?? "").replace(/[^a-z0-9-]/gi, "");
+    else if (a === "--parallel") cli.parallel = parallelism(argv[++i]);
     else if (a === "--runs") cli.runs = Math.max(1, Math.min(10, Number(argv[++i]) || 1));
   }
   return cli;
@@ -643,7 +650,7 @@ async function main() {
     for (const c of cases) work.push({ tool, rubric, c });
   }
   const runNumbers = Array.from({ length: cli.runs }, (_, i) => i + 1);
-  // Sequential by default; with --batch every case and run at once, so they share batches.
+  // With --batch every case and run at once, so they share batches.
   const perCase: (JudgedCase | null)[][] = [];
   if (cli.batch) {
     perCase.push(
@@ -652,11 +659,12 @@ async function main() {
       )),
     );
   } else {
-    for (const w of work) {
-      const runs: (JudgedCase | null)[] = [];
-      for (const run of runNumbers) runs.push(await oneRun(w.tool, w.rubric, w.c, run));
-      perCase.push(runs);
-    }
+    // One after another, or `--parallel N` runs at once; the report keeps the case order.
+    const jobs = work.flatMap((w) => runNumbers.map((run) => ({ w, run })));
+    const done = await mapLimit(jobs, cli.parallel, ({ w, run }) => oneRun(w.tool, w.rubric, w.c, run));
+    work.forEach((_, i) => {
+      perCase.push(done.slice(i * runNumbers.length, (i + 1) * runNumbers.length));
+    });
   }
   for (const runs of perCase) {
     const combined = combineRuns(runs.filter((r): r is JudgedCase => r !== null));
