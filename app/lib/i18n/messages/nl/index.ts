@@ -15,6 +15,7 @@ import { confirm } from "./confirm";
 import { courseCopy } from "./courseCopy";
 import { courseDesign } from "./courseDesign";
 import { courseDocuments } from "./courseDocuments";
+import { courseImprovements } from "./courseImprovements";
 import { courseMembers } from "./courseMembers";
 import { courseTools } from "./courseTools";
 import { courses } from "./courses";
@@ -95,6 +96,7 @@ export const nl = {
   courseCopy,
   courseDesign,
   courseDocuments,
+  courseImprovements,
   courseMembers,
   courses,
   courseTools,
