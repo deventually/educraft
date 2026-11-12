@@ -1,0 +1,27 @@
+export const organisation = {
+  add: "Add {kind}",
+  addName: "Name",
+  belongsTo: "{name} belongs to",
+  create: "Add",
+  delete: "Delete {name}",
+  deleteShort: "Delete",
+  emptyDivision: "No programmes yet.",
+  errorInvalid: "That did not work. Please check it again.",
+  errorName: "Give a name of at most 200 characters.",
+  errorNotEmpty: "There are still programmes under it. Move them first.",
+  heading: "Organisation",
+  intro:
+    "How your institution is organised: the layer between the institution and its programmes, and which programme sits where. A team lead or admin creates a programme under Programmes; here you put it in its place.",
+  kindHint:
+    "For example faculty at a university of applied sciences, college at an mbo institution or location in secondary education.",
+  kindLabel: "What is the layer between institution and programme called?",
+  kindNone: "Not chosen yet",
+  kindSave: "Save",
+  move: "Move",
+  none: "Without {kind}",
+  noneOption: "None",
+  noProgrammes: "No programmes yet. A team lead or admin creates them under Programmes.",
+  rename: "New name for {name}",
+  renameSave: "Save name",
+  team: "team {team}",
+};

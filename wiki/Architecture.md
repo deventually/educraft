@@ -486,6 +486,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
 
 ---
 
+- **Organisation (BESLUIT-2026-11-12-2).** One environment (one database) is one institution;
+  inside it, an optional layer of **divisions** sits between the institution and its programmes.
+  The institution names that layer itself (faculty, academy, institute, college, location,
+  department: `DIVISION_KINDS` in `app/lib/organisation/kinds.ts`, stored as the instance setting
+  `divisionKind`); the app shows the chosen word, or "Onderdeel" until one is chosen. A programme
+  sits under at most one division (`programmes.division_id`). `organisation.server.ts` holds the
+  admin-only writes; a division is deleted only while it is empty. Beheer → Organisatie
+  (`/admin/organisation`) names the layer, manages the divisions and places the programmes; the
+  programmes themselves stay team-owned (BESLUIT-2026-11-10-3).
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

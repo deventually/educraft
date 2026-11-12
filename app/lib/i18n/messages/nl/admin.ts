@@ -6,6 +6,7 @@ export const admin = {
       announcements: "Mededelingen",
       audit: "Logboek",
       context: "Onderwijscontext",
+      organisation: "Organisatie",
       teams: "Teams",
       tools: "Tools en modellen",
       usage: "Feedback en pilot",
