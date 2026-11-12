@@ -150,7 +150,7 @@ describe("Course page — tabs", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("offers the copy for a new run to the owner only", () => {
+  it("offers the copy for a new run to a co-owner, never to an editor", () => {
     const members = {
       myRole: "editor",
       ownerName: "Anna",
@@ -158,8 +158,11 @@ describe("Course page — tabs", () => {
       candidates: [],
       transferTo: [],
     };
-    renderRoute(CoursePage, { ...pageData(), members });
+    const { unmount } = renderRoute(CoursePage, { ...pageData(), members });
     expect(headings()).not.toContain("Kopiëren voor een nieuwe uitvoering");
+    unmount();
+    renderRoute(CoursePage, { ...pageData(), members: { ...members, myRole: "co-owner" } });
+    expect(headings()).toContain("Kopiëren voor een nieuwe uitvoering");
   });
 
   it("puts made work and sharing under Documenten en delen", async () => {

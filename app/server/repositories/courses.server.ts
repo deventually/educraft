@@ -202,10 +202,11 @@ export async function updateCourse(
 }
 
 /**
- * A new run of the owner's own course: a new course with the same content and context
- * profile, and the run the teacher chose (`forNewRun`). Sharing, members, linked work and
- * reviews stay with the original. Null when the caller does not own the course; throws on
- * invalid input (nothing is written).
+ * A new run of a course, by its owner or a co-owner: a new course of the caller's own with the
+ * same content and the run the teacher chose (`forNewRun`). The context profile comes along
+ * only for the owner, whose it is. Sharing, members, linked work and reviews stay with the
+ * original. Null when the caller is neither owner nor co-owner; throws on invalid input
+ * (nothing is written).
  */
 export async function copyCourse(
   userId: string,
@@ -213,10 +214,10 @@ export async function copyCourse(
   input: { name: string } & CourseRun,
 ): Promise<Course | null> {
   const course = await getCourse(userId, id);
-  if (!course || course.ownerId !== userId) return null;
+  if (!course || course.role === "editor") return null;
   return createCourse(userId, {
     name: input.name,
-    contextProfileId: course.contextProfileId,
+    contextProfileId: course.role === "owner" ? course.contextProfileId : null,
     data: forNewRun(course.data, input),
   });
 }

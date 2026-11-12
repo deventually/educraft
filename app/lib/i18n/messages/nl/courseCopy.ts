@@ -9,7 +9,7 @@ export const courseCopy = {
     "Geef je deze cursus opnieuw, volgend studiejaar of in een ander semester? Maak een kopie. Leeruitkomsten, toetsen, lessen en rooster gaan mee. Delen, collega's en gekoppeld werk niet. Deze cursus blijft zoals hij is.",
   name: "Naam van de kopie",
   nameHint: "Zet er bijvoorbeeld het studiejaar bij, zodat je de twee uit elkaar houdt.",
-  ownerOnly: "Alleen de eigenaar kan deze cursus kopiëren.",
+  ownerOnly: "Alleen de eigenaar of een mede-eigenaar kan deze cursus kopiëren.",
   phase: "Semester of periode",
   phaseHint: "Bijvoorbeeld Semester 1 of Periode 3.",
   startDate: "Nieuwe startdatum",
