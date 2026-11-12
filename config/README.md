@@ -36,6 +36,9 @@ Het model dat tools gebruiken als niets anders gekozen is. Moet in `models` staa
 
 Ingebouwd en dus niet in `providers`: de lokale servers `ollama` en `lmstudio` en de CLI-agents
 `claude-code`, `opencode`, `codex` en `gemini-cli`. Die werken alleen buiten productie.
+`claude-code::<model>` (bijvoorbeeld `claude-code::claude-sonnet-5-5`) is Claude Code vastgezet op
+dat model, met onze systeemprompt in plaats van de zijne en zonder tools of `CLAUDE.md`. Het draait
+op het eigen Claude-abonnement; een verzoek van buiten kan het nooit kiezen. Bedoeld voor de evals.
 
 ### `models`: de modellen
 
