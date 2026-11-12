@@ -4,9 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #297 gemerged)_
 
 ## Nu
+
+- **Teams onder een faculteit, en per team zien waar het hoort (#297) gemerged op 2026-11-12:**
+  op de teampagina kiest de beheerder onder welk onderdeel een team valt, of geen. Beheer →
+  Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij welke
+  opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-6). Migratie 0035.
 
 - **Platformscherm voor instellingen (#295) gemerged op 2026-11-12:** op het platformadres heeft
   de platformeigenaar één pagina, *Platform*: alle instellingen met hun status, een nieuwe
@@ -789,10 +794,8 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
 
 ## Bezig
 
-- **Teams onder een faculteit, en per team zien waar het hoort (#297, PR open):** op de
-  teampagina kiest de beheerder onder welk onderdeel (faculteit, vestiging, …) een team valt, of
-  geen. Beheer → Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij
-  welke opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-6). Migratie 0035.
+- **Opleiding als keuze in het contextprofiel (PR open):** bij *Opleiding* in een contextprofiel
+  stelt LimeOnIt de opleidingen van je eigen teams voor; je kunt nog steeds zelf iets typen.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

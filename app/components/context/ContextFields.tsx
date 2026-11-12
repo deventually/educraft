@@ -9,7 +9,6 @@
 import { ExternalLink } from "lucide-react";
 import { getDomainsForTrack, groupOptions, type DomainOption } from "~/lib/context/domains";
 import {
-  showsProgramme,
   showsProfessionalContext,
   showsPhase,
   showsStudyYear,
@@ -55,27 +54,6 @@ export function NameField({
 }
 
 /** Opleiding / Programme — self-hides for the vo sector (no such concept there). */
-export function ProgrammeField({
-  sector,
-  defaultValue,
-}: {
-  sector?: string;
-  defaultValue?: string;
-}) {
-  const t = useT();
-  if (!showsProgramme(sector)) return null;
-  return (
-    <Field id="cf-programme" label={t.settings.programme}>
-      <Input
-        id="cf-programme"
-        name="programme"
-        defaultValue={defaultValue}
-        placeholder={t.settings.ph.programme}
-      />
-    </Field>
-  );
-}
-
 export function DomainSelect({
   value,
   onChange,
