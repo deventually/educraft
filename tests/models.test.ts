@@ -44,6 +44,19 @@ describe("model catalog", () => {
     expect(() => resolveModelInfo("does-not-exist")).toThrow();
   });
 
+  it("resolves claude-code::<model> to Claude Code pinned to that model, never forced by a client", () => {
+    const info = resolveModelInfo("claude-code::claude-sonnet-5-5");
+    expect(info.provider).toBe("claude-code");
+    expect(info.apiId).toBe("claude-sonnet-5-5");
+    expect(info.local).toBe(true);
+    // It runs on the owner's own subscription: a request body may not pick it.
+    expect(isClientSelectable("claude-code::claude-sonnet-5-5")).toBe(false);
+    expect(providerForModel("claude-code::claude-sonnet-5-5")).toBe(
+      providerForModel("claude-code"),
+    );
+    expect(() => resolveModelInfo("claude-code::")).toThrow();
+  });
+
   it("resolves a working provider implementation for every static model", () => {
     for (const { id } of listModels()) {
       const impl = providerForModel(id);
