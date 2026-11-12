@@ -1,8 +1,9 @@
-import { Button, HelpText, Label, Textarea } from "~/components/ui";
+import { Button, HelpText } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import type { WritingSection } from "~/lib/portfolio/guided";
 import { listOf } from "./ChapterOutline";
+import { DictatedAnswer } from "./DictatedAnswer";
 
 /** One part of the chapter as the page shows it: the section, its questions and the answers. */
 export interface GuidedSectionView extends WritingSection {
@@ -64,16 +65,14 @@ export function GuidedWriting({
                   {s.questions.map((q, i) => {
                     const id = `guided-${s.id}-${i}`;
                     return (
-                      <div key={id} className="grid gap-1">
-                        <Label htmlFor={id}>{q}</Label>
-                        <Textarea
-                          id={id}
-                          name={`answer:${s.id}`}
-                          rows={3}
-                          defaultValue={s.answers[i] ?? ""}
-                          aria-describedby={hintId}
-                        />
-                      </div>
+                      <DictatedAnswer
+                        key={id}
+                        id={id}
+                        question={q}
+                        name={`answer:${s.id}`}
+                        defaultValue={s.answers[i] ?? ""}
+                        describedBy={hintId}
+                      />
                     );
                   })}
                 </div>

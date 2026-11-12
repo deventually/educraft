@@ -3,11 +3,14 @@ import { DOC_ACCEPT_ATTR, fileToText } from "~/lib/documents/extract";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { HelpText, Label, Textarea } from "~/components/ui";
 import { FileInput } from "~/components/FileInput";
-import { useT } from "~/lib/i18n/useT";
+import { DictateButton } from "~/components/DictateButton";
+import { appendDictation } from "~/lib/speech/dictation";
+import { useLocale, useT } from "~/lib/i18n/useT";
 
 /**
  * The evidence text: paste it, or take it from a PDF/Word file. Extraction runs
- * in the browser (`fileToText`); the file itself is never sent or stored.
+ * in the browser (`fileToText`); the file itself is never sent or stored. Or dictate it:
+ * the text lands in the field for the teacher to read back before saving.
  */
 export function EvidenceTextField({
   id,
@@ -17,6 +20,7 @@ export function EvidenceTextField({
   defaultValue?: string;
 }) {
   const t = useT().portfolio.outcome;
+  const locale = useLocale();
   const [value, setValue] = useState(defaultValue);
   const [failed, setFailed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -40,7 +44,16 @@ export function EvidenceTextField({
   return (
     <div className="grid gap-2">
       <div>
-        <Label htmlFor={id}>{t.evidenceText}</Label>
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor={id}>{t.evidenceText}</Label>
+          <DictateButton
+            lang={locale}
+            field={t.evidenceText}
+            onText={(text) =>
+              setValue((v) => appendDictation(v, text).slice(0, LIMITS.documentText))
+            }
+          />
+        </div>
         <Textarea
           id={id}
           name="text"
