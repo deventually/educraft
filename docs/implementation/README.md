@@ -79,10 +79,58 @@ Ground rules for every phase:
 | [P31](P31-defend-your-work-and-engagement-check.md) | **Verdedig je werk en de leercheck** (bijlagen F en G van *From Oracle to Socratic Partner*): 31.1 chat-tutor `defend-your-work` (mondelinge verdediging van eigen werk, F.3) · 31.2 optioneel: een verdediging nakijken (F.4, studentwerk) · 31.3 one-shot `engagement-check` (zes leerprincipes, niveau 0–3 per principe, totaal in code) · 31.4 docs. BESLUIT-2026-11-07-1. | — | 🟡 31.1 ✓ (#148, #152), 31.3 ✓ (#147), 31.2 en 31.4 PR open |
 | [P32](P32-meekijken-en-examencommissie.md) | **Meekijken en de examencommissie** (na de pilot). Spoor A, een reviewer Examencommissie over de hele opleiding: 32.1 invoer met sleutels per cursus, leerlijnoverzicht als feiten, prompt en evals · 32.2 opslag per opleiding (`programme_reviews`, `programme_decisions`, migratie) · 32.3 paneel op de opleidingspagina en help. Spoor B, één meekijkmechanisme op uitnodiging, met verloopdatum en intrekken (`view_grants`, lezen alleen via `shares.server.ts`): 32.4 met een account, voor cursus, rubric en werk (migratie) · 32.5 leeslink zonder account · 32.6 commissies als data bij een opleiding (Examencommissie, Toetsingscommissie, CTL) · 32.7 adviezen van meekijkers met Akkoord / Niet akkoord (migratie) · 32.8 help en wiki. Tien keuzes voor Bastiaan staan in de brief. | #241, #243, #244, #247, P21, P28.4 | ⚪ plan, na de pilot |
 
+| [P33](P33-cursusevaluatie-verwerken.md) | **Cursusevaluatie verwerken**: 33.1 verbeterpunten in de cursusdata, mee bij kopiëren · 33.2 prompt `course-evaluation@v1`, citaten en plekken in code gecontroleerd · 33.3 blok op het tabblad *Controle*. Geen migratie. BESLUIT-2026-11-12-10. | #300 | ⚪ brief, mag nu |
+| [P34](P34-kalibreren-tweede-beoordelaar.md) | **Kalibreren met een tweede beoordelaar** (zonder AI): 34.1 overeenstemming per criterium en kappa · 34.2 knop *Kalibreren* op de rubric, alles in de browser · 34.3 als BKE-bewijs. Geen migratie. | P23.2 | ⚪ brief, mag nu |
+| [P35](P35-toetsdossier.md) | **Het toetsdossier**: 35.1 matrijs, beoordelingsmodel, cesuur en toetsanalyse in één document (`TEST_DOCUMENTS`) · 35.2 optioneel een AI-toelichting · 35.3 als BKE-bewijs. Geen migratie. | P26, P24.5 | ⚪ brief |
+| [P36](P36-groepsfeedback.md) | **Groepsfeedback na het nakijken**: 36.1 de groep in getallen uit `rubric_scores` · 36.2 one-shot `group-feedback@v1`, ook na de toetsanalyse. Geen migratie. | P34.1 | ⚪ brief |
+| [P37](P37-lesbezoek-kijkwijzer.md) | **Lesbezoek met kijkwijzer**: 37.1 kijkwijzer en verzoek (`lesson_observations`, migratie) · 37.2 scherm voor docent en collega · 37.3 als BDB-bewijs. | P32.4 | ⚪ brief, wacht op P32.4 |
+| [P38](P38-stage-en-afstudeertraject.md) | **Stage- en afstudeertraject naast OnStage**: 38.1 domein, opslag en automatisch wissen (migratie) · 38.2 lijst en traject · 38.3 feedforward per conceptronde · 38.4 eindbeoordeling met de feedbacklijn · 38.5 tweede beoordelaar · 38.6 bezoeken en eindgesprek · 38.7 *Klaar voor OnStage* · 38.8 help en regels. BESLUIT-2026-11-12-11. | P34.1 (voor 38.5) | ⚪ brief; aan pas na akkoord privacy-officer |
+| [P39](P39-slb-hulpjes.md) | **SLB-hulpjes**: 39.1 SLB-scenario's in *Lastig gesprek oefenen* · 39.2 vragenset per gesprekssituatie · 39.3 formatieve feedback op reflectie en POP · 39.4 wegwijzer naar het loket (zonder AI) · 39.5 SLB als cursus (help). Geen SLB-traject per student. BESLUIT-2026-11-12-12. | P38.3 (voor 39.3) | ⚪ brief, 39.1–39.2 mogen nu |
 \* P3 only needs P0 technically (eval harness + prompts are independent of auth), but
 runs after P2 so tester feedback can inform the prompt work.
 
 When a session is done, tick its box and note the merge commit.
+
+
+## Docenthulpjes (P33–P39)
+
+Uit het onderzoek "Docenttaken en hulpjes in LimeOnIt" (12 november 2026): LimeOnIt draagt het
+onderwijswerk van een docent (BESLUIT-2026-11-12-8), elk hulpje haalt de toets van drie vragen
+(-9), en deze zeven briefs zijn goedgekeurd (-10). PowerPoint-export voor dia's bij een les gaat
+naar vóór de pilot (-13), maar is P30.4 en heeft hier geen eigen brief.
+
+### Aanbevolen volgorde
+
+Hooguit twee werkers tegelijk (`voorkeuren.md`).
+
+| Ronde | Werker 1 | Werker 2 | Waarom zo |
+| --- | --- | --- | --- |
+| 1 | P34.1 → P34.2 (kalibreren) | P33.1 → P33.2 → P33.3 (cursusevaluatie) | De grootste gaten; P34 heeft geen AI, P33 bouwt op cursus kopiëren (#300). Ze delen geen bestanden. |
+| 2 | P39.1 → P39.2 (SLB-gesprekken) | P38.1 → P38.2 (traject, uit) | Klein en meteen bruikbaar; het traject kan gebouwd worden terwijl de privacy-officer kijkt. |
+| 3 | P36.1 → P36.2 (groepsfeedback) | P38.3 → P38.4 (feedforward, eindbeoordeling) | P36 na P34, want beide raken de rubricpagina. |
+| 4 | P35.1 → P35.3 (toetsdossier) | P38.5 → P38.6 → P38.7 → P38.8 | |
+| 5 | P39.4 (+ 39.5), P39.3, P34.3, P35.2 | | De rest, kleinste eerst. |
+| Later | P37 (lesbezoek) | | Wacht op meekijken (P32.4), dat na de pilot staat. |
+
+### Welke briefs bestanden delen
+
+Briefs die hier niet samen staan, kunnen direct na elkaar gemerged worden.
+
+| Bestand of plek | Gedeeld door | Wat te doen |
+| --- | --- | --- |
+| `app/lib/utilities/rubric/`, `app/routes/utilities.rubric.$id.tsx` | P34, P36 | Achter elkaar (P34 eerst). |
+| `app/lib/courses/schema.ts`, `types.ts` | P33.1, P37.1 (alleen als een observatie in de cursus komt) | P37 is later; haalt `main` binnen. |
+| `app/lib/courses/evidence.ts` | P35.3, P37.3 | Eigen functie per brief; kleine kans op een conflict. |
+| `app/server/evidence.server.ts` (bewijs naar het dossier) | P34.3, P35.3, P37.3 | Achter elkaar mergen. |
+| `app/lib/registry/tools/difficult-conversation.ts` | P39.1, P39.2 | Achter elkaar (39.1 eerst). |
+| `app/lib/registry/tools/stage-assessment.ts` en zijn prompt | P38.2, P38.4, P39.3 | Achter elkaar, in die volgorde. |
+| De feedforward-prompt (`feedforward@v1`) | P38.3, P39.3 | P39.3 na P38.3. |
+| `app/lib/utilities/rubric/calibrate.ts` | P34.1, P38.5 | P38.5 na P34.1. |
+| Migraties (`drizzle/`, de journal) | P37.1, P38.1 | Wie als tweede `main` binnenhaalt, genereert zijn migratie opnieuw. Schema's in eigen bestanden. |
+| `app/lib/features/index.ts` | P38.1 | Alleen P38. |
+| `app/lib/prompts/index.ts`, `app/lib/registry/index.ts` | P33.2, P35.2, P36.2, P37.3, P38.3, P38.4, P39.1, P39.2 | Eén regel per prompt of tool; een conflict is klein. |
+| `app/lib/i18n/messages/{nl,en}/index.ts` en de helpindex | bijna alle | Elk een eigen namespace en helponderwerp (BESLUIT-2026-11-04-19); alleen de compositieregel botst. |
+| `app/content/help/` (cursussen-onderwerp) | P33.3, P39.5 | Eigen sectie per brief. |
 
 ---
 

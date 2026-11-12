@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #304 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #305 gemerged)_
 
 ## Nu
 
+- **Het hele hoofdstuk in één keer (#305) gemerged op 2026-11-12:** op het tabblad *Hoofdstuk*
+  bedenkt *Stel alle vragen* de vragen voor elk onderdeel, die de docent op één scherm beantwoordt,
+  en *Stel het hoofdstuk op* schrijft alle onderdelen die nog niet in het hoofdstuk staan, één voor
+  één in volgorde. De knoppen per onderdeel blijven. Geen promptwijziging, geen migratie.
 - **Inspreken bij geleid schrijven en bij bewijs (#304) gemerged op 2026-11-12:** naast elk
   antwoord van geleid schrijven en bij de tekst van nieuw bewijs staat een knop om in te spreken;
   wat je zegt komt als tekst in het veld, en je past het daarna zelf aan. Geen migratie.
@@ -954,6 +958,9 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
 - De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
+- **Voor de privacy-officer:** de bewaartermijn en een aanvulling op de DPIA voor het stage- en
+  afstudeertraject (P38, BESLUIT-2026-11-12-11). Tot het akkoord staat het onderdeel uit voor
+  iedereen; bouwen mag wel.
 
 ## Later (bewust geparkeerd)
 

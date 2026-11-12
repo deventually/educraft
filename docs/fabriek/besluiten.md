@@ -265,6 +265,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
 - **BESLUIT-2026-11-06-5:** **Export: Word en PDF nu, de rest na de pilot.** P30.1 en P30.2 (Word
   en PDF voor elk resultaat, geen nieuwe bibliotheek) mogen vóór de pilot; Excel, PowerPoint,
   Brightspace en de huisstijl volgen na de pilotfeedback. Bastiaan, 2026-11-06 (keuzekaart).
+  **PowerPoint: vervangen door BESLUIT-2026-11-12-13.**
 - **BESLUIT-2026-11-07-1:** **Bijlagen F en G uit het boek worden brief P31:** een tutor voor de
   mondelinge verdediging van eigen werk (F) en de leercheck met de zes leerprincipes (G). Allebei
   mogen nu, vóór de pilot: een uitzondering op "tot de pilot geen nieuwe AI-tools"
@@ -530,3 +531,56 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   krijgt *Controleren*. Het voorstel schrijft geen tekst en komt daarom niet in de AI-verantwoording.
   Bastiaan, 2026-11-12 (thread "Waar kunnen we de cursussen en BDB/BKE nog beter maken", op het
   advies met punt 3: "Ik ga akkoord.").
+- **BESLUIT-2026-11-12-8:** **Het doel: LimeOnIt draagt het onderwijswerk van een docent.** Niet
+  "alle docenttaken overnemen", maar het werk rond ontwerpen, lesgeven, toetsen, nakijken,
+  begeleiden, evalueren en professionaliseren. LimeOnIt doet het werk voor, de docent beslist en
+  tekent; bij alles wat een student raakt (cijfer, oordeel, feedback) is het resultaat een concept
+  (AI-verordening: beoordelen is hoog risico, BESLUIT-2026-07-03-4). Bewust buiten LimeOnIt:
+  e-mail van studenten, vergaderverslagen, studenten met een functiebeperking en
+  toetsvoorzieningen, fraude en plagiaat, roosteren en Osiris koppelen. Bastiaan, 2026-11-12
+  (thread "Onderzoeken hulpjes voor docenttaken": "het onderwijswerk van een docent dragen - JA").
+- **BESLUIT-2026-11-12-9:** **De toets van drie vragen voor elk nieuw hulpje.** (1) Kent LimeOnIt
+  hier al iets van (een cursus, rubric, toets, dossier of opleiding)? (2) Wordt het onderwijs er
+  beter van, niet alleen sneller? (3) Krijgt het resultaat een vaste plek in de app, met een
+  volgende stap? Twee keer ja: het mag erin. Eén of geen keer ja: het blijft liggen. Een hulpje is
+  bij voorkeur een knop op een plek die al bestaat (cursus, toets, rubric, dossier, traject) en
+  geen nieuwe tool in het menu; Volgende stap laat het vinden. Bastiaan, 2026-11-12 (thread
+  "Onderzoeken hulpjes voor docenttaken", op de uitleg van de toets: "Akkoord").
+- **BESLUIT-2026-11-12-10:** **Zeven briefs voor de docenthulpjes (P33 t/m P39).** De hulpjes uit
+  het onderzoek komen er, elk met een eigen brief: P33 cursusevaluatie verwerken, P34 kalibreren met
+  een tweede beoordelaar, P35 het toetsdossier, P36 groepsfeedback na het nakijken, P37 lesbezoek
+  met kijkwijzer, P38 het stage- en afstudeertraject naast OnStage (met feedforward op concepten en
+  *Klaar voor OnStage*) en P39 de SLB-hulpjes. Volgorde en gedeelde bestanden staan in
+  `docs/implementation/README.md` (*Docenthulpjes*). Ze vallen onder dit besluit buiten "tot de
+  pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4), in de volgorde van de README; P37 wacht op
+  meekijken (P32.4) en P38 gaat pas aan voor docenten na het akkoord van BESLUIT-2026-11-12-11.
+  Bastiaan, 2026-11-12 (thread "Onderzoeken hulpjes voor docenttaken": "De hulpjes die jij
+  adviseert en powerpoint voor de pilot", en over de SLB-hulpjes: "Ja").
+- **BESLUIT-2026-11-12-11:** **Het stage- en afstudeertraject: OnStage blijft officieel, LimeOnIt is
+  de werkbank ernaast.** Per student een traject onder een code (geen naam), met mijlpalen van plan
+  van aanpak tot *Klaar voor OnStage*: per formulierveld de tekst met een kopieerknop, de docent
+  plakt en ondertekent in OnStage. Er is geen koppeling met OnStage (geen openbare API gevonden;
+  OnStage is van Xebic, nu Paragin); een echte koppeling pas als Paragin die biedt en de hogeschool
+  hem openzet. Nieuw is dat LimeOnIt studentwerk over weken bewaart: alleen de geanonimiseerde tekst
+  en de feedback, nooit het origineel of een naam; de docent houdt de koppeling code–student zelf;
+  nooit gedeeld, alleen een uitgenodigde tweede beoordelaar ziet het; bij afronden of na een korte
+  bewaartermijn wordt het traject automatisch gewist. **Open punt voor de privacy-officer:** de
+  bewaartermijn en een aanvulling op de DPIA. Tot dat akkoord staat het onderdeel *Stage- en
+  afstudeertraject* uit voor iedereen (P28.3); bouwen mag wel. Bastiaan, 2026-11-12 (thread
+  "Onderzoeken hulpjes voor docenttaken": "Ja dat is goed. We gebruiken OnStage, waar ik ook de
+  documenten van studenten die ik begeleid kan inzien en waar de beoordeling uiteindelijk ingezet
+  dient te worden").
+- **BESLUIT-2026-11-12-12:** **SLB in de groep, niet per student.** LimeOnIt helpt bij
+  studieloopbaanbegeleiding met SLB als cursus, formatieve feedback op reflecties en een POP (met
+  een SLB-beoordelingsmodel, nooit een cijfer), een vragenset per gesprekssituatie (start,
+  dreigend negatief BSA, uitval, keuze voor minor of stage; alleen de situatie, nooit de student),
+  SLB-scenario's in *Lastig gesprek oefenen* en een wegwijzer naar het juiste loket (zonder AI, de
+  beheerder vult de loketten in). Er komt **geen SLB-traject per student** met gespreksverslagen of
+  studievoortgang: dat zou een tweede leerlingvolgsysteem met bijzondere persoonsgegevens naast
+  Osiris worden. Bastiaan, 2026-11-12 (thread "Onderzoeken hulpjes voor docenttaken", op het
+  SLB-advies: "Ja").
+- **BESLUIT-2026-11-12-13:** **PowerPoint-export vóór de pilot.** P30.4 (een lesopzet als
+  PowerPoint, met `pptxgenjs` uit BESLUIT-2026-11-06-4) mag nu, voor dia's bij een les. Dit vervangt
+  het PowerPoint-deel van BESLUIT-2026-11-06-5; Excel, Brightspace en de huisstijl met eigen
+  sjablonen blijven na de pilot. Bastiaan, 2026-11-12 (thread "Onderzoeken hulpjes voor
+  docenttaken": "De hulpjes die jij adviseert en powerpoint voor de pilot").
