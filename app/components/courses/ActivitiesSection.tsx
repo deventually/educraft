@@ -1,9 +1,12 @@
 import { useId } from "react";
-import { Form } from "react-router";
+import { Form, Link } from "react-router";
 import { ACTIVITY_KINDS, type Activity, type CourseData } from "~/lib/courses/types";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
-import { useT } from "~/lib/i18n/useT";
+import type { Locale } from "~/lib/i18n";
+import { loc } from "~/lib/i18n/localized";
+import { useLocale, useT } from "~/lib/i18n/useT";
+import type { WeekWork } from "./CourseWeekView";
 import { MetaLine, NumberField, OutcomeChecks, useOutcomeName, WeekLabel } from "./fields";
 import { ItemActions } from "./ItemActions";
 
@@ -98,12 +101,16 @@ function ActivityForm({ data, activity }: { data: CourseData; activity?: Activit
 export function ActivitiesSection({
   data,
   weekDates,
+  work = [],
 }: {
   data: CourseData;
   /** The Monday of each course week, or null without a start date (P22.1). */
   weekDates?: string[] | null;
+  /** The work kept with this course; each lesson shows what was made for it. */
+  work?: WeekWork[];
 }) {
   const t = useT();
+  const locale = useLocale();
   const a = t.courses.activities;
   const outcomeName = useOutcomeName();
   const id = useId();
@@ -144,6 +151,7 @@ export function ActivitiesSection({
                   ]}
                 />
               </p>
+              <LessonWork work={work.filter((w) => w.itemId === act.id)} locale={locale} />
               <ItemActions name={act.title} removeIntent="remove-activity" id={act.id}>
                 <ActivityForm data={data} activity={act} />
               </ItemActions>
@@ -155,5 +163,31 @@ export function ActivitiesSection({
         <ActivityForm data={data} />
       </Card>
     </section>
+  );
+}
+
+/** What was made for one lesson with the tools (a lesson plan, a differentiation…). */
+function LessonWork({ work, locale }: { work: WeekWork[]; locale: Locale }) {
+  const m = useT().courses.links;
+  if (work.length === 0) return null;
+  const dateLocale = locale === "en" ? "en-GB" : "nl-NL";
+  return (
+    <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+      <p className="font-medium text-slate-800">{m.title}</p>
+      <ul className="mt-1 list-none space-y-0.5 p-0 text-slate-700">
+        {work.map((w) => (
+          <li key={w.generationId}>
+            {typeof w.toolName === "string" ? w.toolName : loc(w.toolName, locale)} ·{" "}
+            {new Date(w.createdAt).toLocaleDateString(dateLocale, { dateStyle: "medium" })}
+          </li>
+        ))}
+      </ul>
+      <Link
+        to="/projects"
+        className="mt-1 inline-block font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700"
+      >
+        {m.openInWork}
+      </Link>
+    </div>
   );
 }

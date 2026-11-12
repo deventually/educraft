@@ -337,7 +337,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         )}
         {tab === "plan" && (
           <>
-            <ActivitiesSection data={data} weekDates={weekDates} />
+            <ActivitiesSection data={data} weekDates={weekDates} work={linkedWork} />
             <AssessmentsSection courseId={course.id} data={data} weekDates={weekDates} />
           </>
         )}

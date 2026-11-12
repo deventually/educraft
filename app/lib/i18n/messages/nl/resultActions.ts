@@ -1,15 +1,22 @@
 /** Under a result: next steps and where to keep it (P27.1). */
 export const resultActions = {
+  addAsLesson: "Neem op als les",
   courseLabel: "Cursus",
+  errorLesson: "Opnemen als les lukte niet. Vernieuw de pagina en probeer het opnieuw.",
   evidenceLabel: "Dossier en criterium",
   heading: "Verder met dit resultaat",
+  lessonAdded: "Opgenomen als les bij {course}",
+  lessonTitle: "Titel van de les",
   next: "Volgende stap",
   putAtCriterion: "Zet bij dit criterium",
   savedIn: "Bewaard bij {course}",
   saveToCourse: "Bewaar bij cursus",
   toastEvidence: "Toegevoegd aan je dossier.",
+  toastLesson: "Opgenomen als les bij Lessen en toetsen.",
   toastSaved: "Bewaard bij de cursus.",
   useAsEvidence: "Gebruik als bewijs",
+  viewInCourse: "Bekijk in de cursus",
+  viewLesson: "Bekijk bij Lessen en toetsen",
   wholeCourse: "{course} (hele cursus)",
   wholeDossier: "{dossier} (nog geen criterium)",
 };
