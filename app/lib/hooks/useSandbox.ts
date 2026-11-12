@@ -33,7 +33,7 @@ export interface UseSandboxOptions {
    */
   initialCourseId?: string;
   /** P38.4: the track the tool was opened from; fills its `prefillFromTrack` fields. */
-  initialTrack?: Record<TrackPrefillSource, string> | null;
+  initialTrack?: Partial<Record<TrackPrefillSource, string>> | null;
   /**
    * The course item the tool was opened for (P27.4, `?item=`). It stays only while the
    * initial course stays selected; picking a course drops it.

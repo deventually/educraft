@@ -11,7 +11,7 @@ import { useT } from "~/lib/i18n/useT";
 export interface EditableModel {
   id: string;
   name: string;
-  data: { documentTypes: string[]; framework: string; scale: string };
+  data: { documentTypes: string[]; framework: string; scale: string; interviewSetup?: string };
 }
 
 export function AssessmentModelEditor({
@@ -81,6 +81,20 @@ export function AssessmentModelEditor({
           aria-describedby={`${id}-scale-help`}
         />
         <HelpText id={`${id}-scale-help`}>{t.scaleHelp}</HelpText>
+      </div>
+      <div>
+        <Label htmlFor={`${id}-interview`} className="mb-1.5">
+          {t.interviewSetup}
+        </Label>
+        <Textarea
+          id={`${id}-interview`}
+          name="interviewSetup"
+          rows={3}
+          defaultValue={model?.data.interviewSetup}
+          placeholder={t.interviewSetupPlaceholder}
+          aria-describedby={`${id}-interview-help`}
+        />
+        <HelpText id={`${id}-interview-help`}>{t.interviewSetupHelp}</HelpText>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy}>

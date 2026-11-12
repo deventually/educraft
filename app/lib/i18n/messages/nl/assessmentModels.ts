@@ -25,6 +25,11 @@ export const assessmentModels = {
   fromRubricIntro: "Maak een model van een rubric die je met het Rubric-hulpmiddel hebt gemaakt.",
   fromRubricLabel: "Rubric",
   heading: "Beoordelingsmodellen",
+  interviewSetup: "Opzet van het eindgesprek (optioneel)",
+  interviewSetupHelp:
+    "Voor een stage: hoe het eindgesprek bij je opleiding gaat. Vanuit een traject met dit model staat het al ingevuld bij Vragen voor het eindgesprek.",
+  interviewSetupPlaceholder:
+    "bijv. Assessment op de stageplek na de presentatie, over de realisatie (de tweede helft van de stage). De student levert de presentatie vooraf in.",
   intro:
     "Een beoordelingsmodel is je kader met succescriteria, met of zonder schaal, voor bepaalde typen document. Kies je bij Studentwerk beoordelen en feedback geven een type document, dan vult de tool je model voor dat type in.",
   name: "Naam",

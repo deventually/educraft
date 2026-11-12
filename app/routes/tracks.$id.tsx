@@ -1,15 +1,13 @@
 import { type ReactNode, useId } from "react";
+import { isFeatureOn } from "~/server/availability.server";
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/tracks.$id";
 import { requireTracksUser, trackVisitAction } from "~/server/tracks.server";
-import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
 import { rubricChoices, trackSecondAssessorAction } from "~/server/trackSecondAssessor.server";
 import { trackCloseAction, trackOnStageAction } from "~/server/trackOnStage.server";
 import { getTrackRetentionDays } from "~/server/repositories/settings.server";
-import { getSelectableModels } from "~/server/availability.server";
-import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 import { VisitsPanel } from "~/components/tracks/VisitsPanel";
 import { OnStagePanel } from "~/components/tracks/OnStagePanel";
@@ -54,18 +52,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!track) throw notFound();
   const tab = tabOf(new URL(request.url).searchParams.get("tab"));
   const panel = tab === "overview" ? undefined : MILESTONES.find((x) => x.id === tab)?.panel;
-  const [rounds, course, model, selectable, rubrics, retentionDays] = await Promise.all([
+  const [rounds, course, model, rubrics, rubricsOn, retentionDays] = await Promise.all([
     listRounds(user.id, track.id),
     track.courseId ? getCourse(user.id, track.courseId) : null,
     track.assessmentModelId ? getAssessmentModel(user.id, track.assessmentModelId) : null,
-    getSelectableModels(user),
     // The rubrics only on the tab that compares with them (P38.5).
     panel === "second-assessor" ? rubricChoices(user) : [],
+    // The rubrics live under Hulpmiddelen: without it the link would be a 404.
+    isFeatureOn(user, "utilities"),
     getTrackRetentionDays(),
   ]);
   return {
     tab,
     rubrics,
+    rubricsOn,
     retentionDays,
     track: {
       id: track.id,
@@ -73,13 +73,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       kind: track.kind,
       courseName: course?.name ?? null,
       modelName: model?.name ?? null,
-      // The criteria for feedforward (P38.3), from the linked assessment model.
+      // The criteria from the linked assessment model, for the OnStage texts (P38.7).
       criteria: model?.data.framework ?? "",
       closedAt: track.closedAt,
       purgeAfter: track.purgeAfter,
     },
     data: track.data,
-    models: selectable.map((m) => ({ id: m.id, displayName: m.displayName })),
     rounds: rounds.map((r) => ({
       id: r.id,
       milestone: r.milestone,
@@ -101,8 +100,6 @@ export async function action({ request, params }: Route.ActionArgs) {
   const track = await getTrack(user.id, params.id ?? "");
   if (!track) throw notFound();
   const locale = getLocale(request);
-  const ff = await trackFeedforwardAction(request, user, track, locale);
-  if (ff) return ff;
   const sa = await trackSecondAssessorAction(request, user, track, locale);
   if (sa) return sa;
   const visit = await trackVisitAction(request, user, track, locale);
@@ -141,7 +138,6 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
   const { tab, track } = loaderData;
   const doneMessage = {
-    feedforward: m.feedforward.done,
     "second-assessor": m.secondAssessor.done,
     visit: m.visits.done,
     onstage: m.onstage.done,
@@ -222,7 +218,9 @@ function Overview({ data, href }: { data: Data; href: (id: string) => string }) 
         const due = data.data.deadlines[x.id];
         return {
           id: x.id,
-          label: loc(x.name, locale),
+          label: x.optional
+            ? fmt(m.optional, { milestone: loc(x.name, locale) })
+            : loc(x.name, locale),
           status: due
             ? `${statusLabel[status]} · ${fmt(m.dueOn, { date: fmtDate(due, locale) })}`
             : statusLabel[status],
@@ -247,8 +245,9 @@ function Overview({ data, href }: { data: Data; href: (id: string) => string }) 
 /** The working panel of a milestone, by its data (`Milestone.panel`). */
 function Panel({ kind, data }: { kind: MilestonePanel; data: Data }) {
   const panels: Record<MilestonePanel, () => ReactNode> = {
-    feedforward: () => <FeedforwardPanel criteria={data.track.criteria} models={data.models} />,
-    "second-assessor": () => <SecondAssessorPanel rubrics={data.rubrics} />,
+    "second-assessor": () => (
+      <SecondAssessorPanel rubrics={data.rubrics} rubricsOn={data.rubricsOn} />
+    ),
     visits: () => <VisitsPanel visits={data.data.visits} />,
     onstage: () => (
       <OnStagePanel

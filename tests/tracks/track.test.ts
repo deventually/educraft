@@ -81,13 +81,13 @@ describe("TrackDataSchema", () => {
 
 describe("progress and nextStep (pure)", () => {
   it("a new track: nothing resolved, the next step is the start", () => {
-    expect(progress(track())).toEqual({ resolved: 0, total: 7 });
+    expect(progress(track())).toEqual({ resolved: 0, total: 6 });
     expect(nextStep(track())).toEqual({ milestone: "start", due: null });
   });
 
   it("done and skipped both resolve a milestone; the next step carries its deadline", () => {
     const t = track({ start: "done", visits: "skipped" }, { drafts: "2027-01-15" });
-    expect(progress(t)).toEqual({ resolved: 2, total: 7 });
+    expect(progress(t)).toEqual({ resolved: 2, total: 6 });
     expect(nextStep(t)).toEqual({ milestone: "drafts", due: "2027-01-15" });
   });
 
@@ -98,8 +98,20 @@ describe("progress and nextStep (pure)", () => {
   it("no next step when every milestone is resolved, or the track is closed", () => {
     const all = Object.fromEntries(MILESTONES.map((m) => [m.id, "done"]));
     expect(nextStep(track(all))).toBeNull();
-    expect(progress(track(all))).toEqual({ resolved: 7, total: 7 });
+    expect(progress(track(all))).toEqual({ resolved: 6, total: 6 });
     expect(nextStep(track({}, {}, new Date()))).toBeNull();
+  });
+
+  it("the second assessor is optional: never counted, never the next step", () => {
+    expect(MILESTONES.find((m) => m.id === "second-assessor")?.optional).toBe(true);
+    const required = Object.fromEntries(
+      MILESTONES.filter((m) => !m.optional).map((m) => [m.id, "done"]),
+    );
+    expect(nextStep(track(required))).toBeNull();
+    expect(progress(track(required))).toEqual({ resolved: 6, total: 6 });
+    expect(
+      nextStep(track({ start: "done", visits: "done", drafts: "done", final: "done" }))?.milestone,
+    ).toBe("final-interview");
   });
 });
 
@@ -121,11 +133,15 @@ describe("milestone tools and document types (P38.2)", () => {
     const slugs = (id: string) =>
       (MILESTONES.find((m) => m.id === id)?.tools ?? []).map((t) => t.slug);
     expect(slugs("start")).toEqual(["stage-assessment"]);
+    // A draft is assessed in full, like the final version, without a panel of its own.
+    expect(slugs("drafts")).toEqual(["stage-assessment"]);
+    expect(MILESTONES.find((m) => m.id === "drafts")?.panel).toBeUndefined();
     // P38.4: the final version is assessed with the feedback line.
     expect(slugs("final")).toEqual(["stage-assessment"]);
     // P38.6: a visit is prepared and written up; the final interview rehearsed and reviewed.
     expect(slugs("visits")).toEqual(["visit-prep", "visit-report"]);
-    expect(slugs("final-interview")).toEqual(["defend-your-work", "defense-review"]);
+    // The final interview is an assessment on location after the presentation: questions, then a report.
+    expect(slugs("final-interview")).toEqual(["visit-prep", "visit-report"]);
     for (const m of MILESTONES)
       for (const t of m.tools ?? []) expect(getToolBySlug(t.slug), t.slug).toBeDefined();
   });

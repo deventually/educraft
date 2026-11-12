@@ -40,43 +40,6 @@ export const tracks: Messages["tracks"] = {
   errorInput: "Enter a code (at most 40 characters) and choose internship or thesis.",
   errorInvalid: "That did not work. Reload the page and try again.",
   errorNotFound: "That track does not exist (any more).",
-  feedforward: {
-    check: "Check for names",
-    checked: "The names are out. Only this text goes to the AI and is kept with the track.",
-    criteria: "Criteria",
-    criteriaHint:
-      "From the linked assessment model. You can adjust them; they follow the OnStage form.",
-    done: "Feedforward ready; it is the round below.",
-    edit: "Edit the text",
-    empty: "The AI found nothing in this text to give feedforward on.",
-    errors: {
-      closed: "This track is closed.",
-      failed: "The AI gave no usable answer. Try again in a moment.",
-      invalid: "Paste the text of the new version and fill in the criteria.",
-      model: "You cannot choose that model.",
-      quota:
-        "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
-    },
-    heading: "Feedforward on a new version",
-    intro:
-      "Paste the text of the new version from OnStage. You get, per criterion, what is already strong and the next step, without a grade. From the second version on you see, per earlier point, what the student did with it, with a literal quote.",
-    labels: {
-      followUp: "What the student did with the previous feedback",
-      improve: "Next step",
-      status: {
-        addressed: "Addressed",
-        not: "Not yet",
-        partly: "Partly",
-        unseen: "Not visible",
-      },
-      strong: "Strong",
-    },
-    model: "Model",
-    submit: "Give feedforward",
-    version: "Text of the new version",
-    versionHint:
-      "Next, you check in your browser whether any names are left. The original never goes along.",
-  },
   heading: "My supervision",
   help: "How does a track work?",
   intro:
@@ -121,9 +84,10 @@ export const tracks: Messages["tracks"] = {
     noCriteria:
       "Link an assessment model to this track. Then you see the text for OnStage here, per criterion.",
   },
+  optional: "{milestone} (optional)",
   overview: "Overview",
   overviewIntro:
-    "The seven milestones of the track. If a milestone does not apply, choose Does not apply there.",
+    "The six fixed milestones and the optional second assessor. If a milestone does not apply, choose Does not apply there.",
   progress: "{resolved} of {total} milestones done",
   progressShort: "{resolved} of {total} milestones",
   secondAssessor: {
@@ -151,6 +115,8 @@ export const tracks: Messages["tracks"] = {
     pick: "Pick a level",
     rubric: "Rubric",
     rubricsLink: "To your rubrics",
+    rubricsOff:
+      "You compare with a rubric from Utilities, but Utilities is off for you. Ask your administrator to switch it on.",
     submit: "Compare and keep",
     theirs: "Second assessor's level",
   },

@@ -7,6 +7,7 @@ export const ASSESSMENT_MODEL_LIMITS = {
   documentType: 60,
   framework: 30_000,
   scale: 5_000,
+  interviewSetup: 5_000,
 } as const;
 
 /**
@@ -24,6 +25,8 @@ export const AssessmentModelDataSchema = z
       .max(ASSESSMENT_MODEL_LIMITS.framework)
       .refine((s) => s.trim() !== ""),
     scale: z.string().max(ASSESSMENT_MODEL_LIMITS.scale),
+    /** How the final interview of an internship goes in this programme (optional, P38). */
+    interviewSetup: z.string().max(ASSESSMENT_MODEL_LIMITS.interviewSetup).optional(),
   })
   .strict();
 

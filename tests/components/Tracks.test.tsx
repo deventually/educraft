@@ -8,7 +8,6 @@ import TrackPage from "~/routes/tracks.$id";
 import { TrackBar } from "~/components/tracks/TrackBar";
 import { SupervisionBlock } from "~/components/tracks/SupervisionBlock";
 import { ResultActions } from "~/components/ResultActions";
-import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
 import { VisitsPanel } from "~/components/tracks/VisitsPanel";
 import { OnStagePanel } from "~/components/tracks/OnStagePanel";
@@ -44,7 +43,7 @@ const row = {
   kind: "internship",
   next: { milestone: "drafts", due: "2027-01-15" },
   resolved: 2,
-  total: 7,
+  total: 6,
   closedAt: null,
 };
 
@@ -78,7 +77,7 @@ describe("the track list", () => {
     const { container } = renderRoute(TrackList, listData([row]));
     const link = screen.getByRole("link", { name: "S-0423" });
     expect(link.getAttribute("href")).toBe("/tracks/t1");
-    expect(screen.getByText(/Stage · 2 van 7 mijlpalen/)).toBeTruthy();
+    expect(screen.getByText(/Stage · 2 van 6 mijlpalen/)).toBeTruthy();
     expect(screen.getByText(/Volgende: Concepten/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Nu wissen: S-0423" })).toBeTruthy();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
@@ -88,6 +87,7 @@ describe("the track list", () => {
 const pageData = (tab = "overview") => ({
   tab,
   rubrics: [],
+  rubricsOn: true,
   retentionDays: 90,
   track: {
     id: "t1",
@@ -123,8 +123,11 @@ describe("a track", () => {
     expect(screen.getByRole("heading", { level: 1, name: /S-0423/ })).toBeTruthy();
     expect(screen.getByRole("navigation", { name: "Onderdelen van het traject" })).toBeTruthy();
     expect(screen.getByRole("progressbar")).toBeTruthy();
-    expect(screen.getByText("1 van 7 mijlpalen klaar")).toBeTruthy();
+    expect(screen.getByText("1 van 6 mijlpalen klaar")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Volgende: Bezoeken" })).toBeTruthy();
+    // The second assessor is optional (only some programmes use one).
+    expect(screen.getByText("Tweede beoordelaar (optioneel)")).toBeTruthy();
+    expect(screen.getByText(/zes vaste mijlpalen en de optionele tweede beoordelaar/)).toBeTruthy();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -200,26 +203,14 @@ describe("Mijn begeleiding on Start", () => {
   });
 });
 
-describe("feedforward on the drafts tab (P38.3)", () => {
-  it("the drafts tab offers feedforward; the start tab does not", () => {
-    const { unmount } = renderRoute(TrackPage, pageData("drafts"));
-    expect(screen.getByRole("heading", { name: "Feedforward op een nieuwe versie" })).toBeTruthy();
-    unmount();
-    renderRoute(TrackPage, pageData("start"));
-    expect(screen.queryByRole("heading", { name: "Feedforward op een nieuwe versie" })).toBeNull();
-  });
-
-  it("paste, check for names, then send with the model's criteria; each step passes axe", async () => {
-    const { container } = renderWithRouter(
-      <FeedforwardPanel criteria={"C1 Probleemstelling\nC2 Aanpak"} />,
-    );
-    expect((await axe(container, axeOpts)).violations).toEqual([]);
-    fireEvent.change(screen.getByLabelText("Tekst van de nieuwe versie"), {
-      target: { value: "Mijn plan van aanpak voor Jan de Vries." },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /Controleer op namen/ }));
-    // The name check comes first: nothing can be sent before it.
-    expect(screen.queryByRole("button", { name: "Geef feedforward" })).toBeNull();
+describe("the drafts tab", () => {
+  it("assesses a draft like the final version, with the button to Studentwerk beoordelen; axe", async () => {
+    const { container } = renderRoute(TrackPage, pageData("drafts"));
+    const tool = screen.getByRole("link", { name: /Concept beoordelen/ });
+    expect(tool.getAttribute("href")).toBe("/tools/stage-assessment?track=t1&milestone=drafts");
+    // No separate paste panel any more: the full assessment tool does the work.
+    expect(screen.queryByRole("heading", { name: /Feedforward/ })).toBeNull();
+    expect(screen.queryByRole("textbox", { name: /nieuwe versie/ })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
@@ -243,7 +234,7 @@ describe("SecondAssessorPanel (P38.5)", () => {
   ];
 
   it("asks both levels per criterion of the chosen rubric, and passes axe", async () => {
-    const { container } = renderWithRouter(<SecondAssessorPanel rubrics={rubrics} />);
+    const { container } = renderWithRouter(<SecondAssessorPanel rubrics={rubrics} rubricsOn />);
     const group = screen.getByRole("group", { name: "Analyse" });
     expect(within(group).getByLabelText("Jouw niveau")).toBeTruthy();
     expect(within(group).getByLabelText("Niveau van de tweede beoordelaar")).toBeTruthy();
@@ -251,8 +242,14 @@ describe("SecondAssessorPanel (P38.5)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("without Hulpmiddelen, says it is off instead of linking to a page that is not there", () => {
+    renderWithRouter(<SecondAssessorPanel rubrics={[]} rubricsOn={false} />);
+    expect(screen.getByText(/Hulpmiddelen staat voor jou uit/)).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Naar je rubrics" })).toBeNull();
+  });
+
   it("without a rubric, says where to make one", () => {
-    renderWithRouter(<SecondAssessorPanel rubrics={[]} />);
+    renderWithRouter(<SecondAssessorPanel rubrics={[]} rubricsOn />);
     expect(screen.getByText(/nog geen rubric/i)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Naar je rubrics" }).getAttribute("href")).toBe(
       "/utilities/rubric",

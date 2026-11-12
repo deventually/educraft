@@ -65,10 +65,18 @@ describe("Assessment models page", () => {
       {
         id: "m1",
         name: "Essay jaar 1",
-        data: { documentTypes: ["essay"], framework: "C1 Stelling", scale: "" },
+        data: {
+          documentTypes: ["essay"],
+          framework: "C1 Stelling",
+          scale: "",
+          interviewSetup: "Assessment na de presentatie.",
+        },
       },
     ]);
     await userEvent.click(await screen.findByRole("button", { name: "Bewerken" }));
+    expect(screen.getByLabelText(/^Opzet van het eindgesprek/)).toHaveValue(
+      "Assessment na de presentatie.",
+    );
     expect(screen.getByLabelText(/^Naam/)).toHaveValue("Essay jaar 1");
     expect(screen.getByRole("checkbox", { name: "Essay" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Stageverslag" })).not.toBeChecked();

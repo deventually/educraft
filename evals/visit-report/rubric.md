@@ -1,11 +1,13 @@
-# Rubric — Report from notes (visit-report@v1)
+# Rubric — Report from notes (visit-report@v2)
 
 Judge the output as a short visit report that a supervising teacher pastes into OnStage or an
 e-mail (brief P38, 38.6). It works out only what is in the teacher's anonymised notes, keeps codes
 in square brackets literally or uses the role, never uses a name, and gives no judgement. Score
 each shared criterion 1–5.
 
-- **taskFidelity** — Are the four headings there, each filled only from the notes (the course of
+- **taskFidelity** — Are the four headings of the kind of meeting there (a visit: course,
+  what goes well, points of attention, agreements; the final interview: course of the meeting,
+  presentation, from the conversation, follow-up), each filled only from the notes (the course of
   the visit, what goes well, points of attention, agreements with who and when, or "Geen
   afspraken genoteerd." / its English version when there are none)? Is a point linked to a
   criterion only where the notes clearly do? Does it **find the known error** when the case
