@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #312 gemerged)_
 
 ## Nu
 
+- **Kalibreren: het scherm (#312) gemerged op 2026-11-12:** op de rubricpagina (ook bij een
+  gedeelde rubric) staat de knop *Kalibreren*. Twee beoordelaars plakken hun scores uit Excel of
+  vullen ze per werk in; de pagina toont de overeenstemming per criterium, de cijfers per werk en
+  een agenda voor het gesprek, en kan worden afgedrukt. Alles in de browser, niets opgeslagen
+  (P34.2).
+- **PowerPoint-sjabloon van een docent of team (#311) gemerged op 2026-11-12:** een docent
+  uploadt op *Account* een eigen .pptx of .potx, een teamleider op de teampagina een voor het
+  team. In het exportpaneel kies je het standaardontwerp of een sjabloon; de dia's krijgen dan
+  het logo, de kleuren en de letters ervan (P30.7b). Geen nieuwe dependency.
 - **Verbeterpunten in de cursus (#310) gemerged op 2026-11-12:** op het tabblad *Controle*
   staan de open verbeterpunten van een cursus, met een plek (cursus, leeruitkomst, les of toets)
   en een knop *Afgerond*; de docent of een bewerker voegt er een toe. Bij kopiëren voor een nieuwe

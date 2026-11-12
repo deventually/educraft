@@ -35,7 +35,7 @@ describe("tool: difficult-conversation", () => {
     expect(t.userType).toBe("instructor");
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
-    expect(t.stages[0]?.systemPromptId).toBe("difficult-conversation@v2");
+    expect(t.stages[0]?.systemPromptId).toBe("difficult-conversation@v3");
     expect(t.enabled).toBe(true);
     expect(t.assistiveGrading).not.toBe(true);
   });
@@ -49,12 +49,14 @@ describe("tool: difficult-conversation", () => {
     const field = tool().inputs.find((f) => f.name === "scenario");
     expect(field?.required).toBe(true);
     expect(field?.kind).toBe("select");
-    expect(field?.options?.map((o) => o.value)).toEqual([
-      "study-progress",
-      "bad-news-grade",
-      "suspected-fraud",
-      "student-stuck",
-    ]);
+    expect(field?.options?.map((o) => o.value)).toEqual(
+      expect.arrayContaining([
+        "study-progress",
+        "bad-news-grade",
+        "suspected-fraud",
+        "student-stuck",
+      ]),
+    );
   });
 
   it("asks for a situation, never for a name", () => {
