@@ -12,6 +12,7 @@ let courses: typeof import("~/server/repositories/courses.server");
 let preview: typeof import("~/routes/courses.$id.assessments.$assessmentId.$document.export");
 let download: typeof import("~/routes/courses.$id.assessments.$assessmentId.$document.export.$format");
 let printPage: typeof import("~/routes/courses.$id.assessments.$assessmentId.$document.print");
+let generations: typeof import("~/server/repositories/generations.server");
 let courseId = "";
 let bareId = "";
 
@@ -23,7 +24,7 @@ beforeAll(async () => {
   );
   printPage = await import("~/routes/courses.$id.assessments.$assessmentId.$document.print");
   const users = await import("~/server/repositories/users.server");
-  for (const id of ["cex-a", "cex-b"])
+  for (const id of ["cex-a", "cex-b", "cex-c"])
     await users.createUser({ id, name: id, passwordHash: "x", role: "teacher" });
   courseId = (await courses.createCourse("cex-a", { name: "Databases", data: documentedCourse() }))
     .id;
@@ -159,5 +160,75 @@ describe("exporting a test blueprint from the course", () => {
     await as("cex-b");
     expect(await status(loadPreview())).toBe(404);
     expect(await status(loadFile("docx"))).toBe(404);
+  });
+});
+
+describe("exporting the test dossier", () => {
+  let dossierCourse = "";
+  const analysis = (userId: string, numbers: string, output: string) =>
+    generations.saveGeneration({
+      userId,
+      toolSlug: "test-analysis",
+      stageId: "explain",
+      model: "m",
+      input: { analysis: numbers },
+      outputLanguage: "nl",
+      outputMarkdown: output,
+    });
+
+  beforeAll(async () => {
+    generations = await import("~/server/repositories/generations.server");
+    const teams = await import("~/server/repositories/teams.server");
+    const members = await import("~/server/repositories/courseMembers.server");
+    dossierCourse = (
+      await courses.createCourse("cex-a", { name: "Dossier", data: documentedCourse() })
+    ).id;
+    const team = (await teams.createTeam("Informatica")).id;
+    await teams.addMember(team, "cex-a");
+    await teams.addMember(team, "cex-c");
+    await members.setCourseMember("cex-a", dossierCourse, "cex-c", "editor");
+    const own = await analysis("cex-a", "| V1 | 0,82 |", "Eigen uitleg.");
+    await courses.linkGeneration("cex-a", dossierCourse, own.id, TEST1);
+    const colleague = await analysis("cex-c", "| V1 | 0,11 |", "Uitleg van een collega.");
+    await courses.linkGeneration("cex-c", dossierCourse, colleague.id, TEST1);
+  });
+
+  const loadDossier = () =>
+    preview.loader({
+      request: get(`/courses/${dossierCourse}/assessments/${TEST1}/dossier/export`),
+      params: { id: dossierCourse, assessmentId: TEST1, document: "dossier" },
+    } as never) as Promise<{
+      doc: { title: string; sections: { markdown: string }[] };
+      downloads: { format: string; href: string }[];
+    }>;
+
+  it("puts the caller's own linked analysis in, never a colleague's", async () => {
+    const data = await loadDossier();
+    expect(data.doc.title).toBe("Dossier: toetsdossier Eindopdracht");
+    const md = data.doc.sections[0]!.markdown;
+    expect(md).toContain("| V1 | 0,82 |");
+    expect(md).toContain("Eigen uitleg.");
+    expect(md).not.toContain("0,11");
+    expect(md).not.toContain("Uitleg van een collega.");
+    expect(data.downloads.map((d) => d.format)).toEqual(["docx", "pdf", "md"]);
+  });
+
+  it("gives the editor their own analysis, and the Word file a dossier name", async () => {
+    await as("cex-c");
+    const md = (await loadDossier()).doc.sections[0]!.markdown;
+    expect(md).toContain("Uitleg van een collega.");
+    expect(md).not.toContain("Eigen uitleg.");
+    const res = (await download.loader({
+      request: get(`/courses/${dossierCourse}/assessments/${TEST1}/dossier/export/docx`),
+      params: { id: dossierCourse, assessmentId: TEST1, document: "dossier", format: "docx" },
+    } as never)) as Response;
+    expect(res.headers.get("Content-Disposition")).toMatch(
+      /filename="Dossier toetsdossier Eindopdracht\.docx"/,
+    );
+  });
+
+  it("is a 404 for a colleague who has no part in the course", async () => {
+    await as("cex-b");
+    expect(await status(loadDossier())).toBe(404);
   });
 });

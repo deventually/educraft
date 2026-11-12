@@ -49,7 +49,7 @@ function gridParts(data: CourseData, a: Assessment, locale: Locale): string[] {
 }
 
 /** One row per learning outcome the test assesses, through its coverage or its parts. */
-function outcomeRows(data: CourseData, a: Assessment, locale: Locale): string[] {
+export function outcomeRows(data: CourseData, a: Assessment, locale: Locale): string[] {
   const d = getMessages(locale).courseDocuments;
   const c = d.columns;
   const pct = (n: number) => fmt(d.header.percent, { n });
@@ -99,6 +99,16 @@ function outcomeRows(data: CourseData, a: Assessment, locale: Locale): string[] 
   return out;
 }
 
+/** For a written test, the specification per question: the grid and the question table. */
+export function specificationBlocks(data: CourseData, a: Assessment, locale: Locale): string[] {
+  if (!a.items?.length) return [];
+  return [
+    `### ${getMessages(locale).courseDocuments.blueprint.specification}`,
+    ...gridParts(data, a, locale),
+    ...questionTable(data, a, locale),
+  ];
+}
+
 /** The blueprint document of one test; null when the test is not in the course. */
 export function testBlueprintDoc(
   course: CourseSource,
@@ -114,13 +124,7 @@ export function testBlueprintDoc(
     ...conditionsBlock(a, locale),
     ...(a.conduct ? [`### ${d.header.conduct}`, a.conduct] : []),
     ...(a.resit ? [`### ${d.header.resit}`, a.resit] : []),
-    ...(a.items?.length
-      ? [
-          `### ${d.blueprint.specification}`,
-          ...gridParts(course.data, a, locale),
-          ...questionTable(course.data, a, locale),
-        ]
-      : []),
+    ...specificationBlocks(course.data, a, locale),
   ];
   return toExportDoc({
     title: evidenceTitle(course, { assessmentId }, locale),
