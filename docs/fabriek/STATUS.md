@@ -17,7 +17,7 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #292 gemerged)_
   zonder `apt-get` en draait weer bij elke PR (BESLUIT-2026-11-12-1). Noodknop: de
   repositoryvariabele `E2E_IN_CI` op `false`.
 - **Toetsprogramma: Bloom-niveau per leeruitkomst en nieuw voorstel met een opmerking (#290)
-  gemerged op 2026-11-12:** bij het overnemen van toetsen kiest de docent per gedekte leeruitkomst
+  gemerged op 2026-11-11:** bij het overnemen van toetsen kiest de docent per gedekte leeruitkomst
   een Bloom-niveau. In stap 2 van de cursuswizard vraagt *Wat moet er anders?* om een opmerking,
   waarna *Nieuw voorstel* een nieuw toetsprogramma maakt (prompt `course-design-assessments@v2`).
 
