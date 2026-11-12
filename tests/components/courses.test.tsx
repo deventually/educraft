@@ -720,4 +720,13 @@ describe("Course page — blueprint and marking model", () => {
       "/courses/c1/assessments/test-1/marking-model/export",
     ]);
   });
+
+  it("offers the test dossier for every summative test", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()), "/?tab=plan");
+    expect(
+      screen
+        .getAllByText("Toetsdossier exporteren", { selector: "summary" })
+        .map((s) => s.closest("details")?.getAttribute("data-export-url")),
+    ).toEqual(["/courses/c1/assessments/test-1/dossier/export"]);
+  });
 });

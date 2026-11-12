@@ -259,7 +259,8 @@ function PartsList({ data, assessment: a }: { data: CourseData; assessment: Asse
 
 /**
  * Under each test: its details and parts, and the documents made from them (the blueprint for
- * every test, the marking model once it has parts). The documents are built without AI.
+ * every test, the marking model once it has parts, the test dossier for a summative test). The
+ * documents are built without AI.
  */
 export function TestDocuments({
   courseId,
@@ -287,6 +288,9 @@ export function TestDocuments({
         <ExportPanel url={`${base}/blueprint/export`} label={d.blueprint.export} />
         {a.parts?.length ? (
           <ExportPanel url={`${base}/marking-model/export`} label={d.markingModel.export} />
+        ) : null}
+        {a.kind === "summative" ? (
+          <ExportPanel url={`${base}/dossier/export`} label={t.assessmentDossier.export} />
         ) : null}
       </div>
     </>
