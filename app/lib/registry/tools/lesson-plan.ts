@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { LESSON_PLAN_PROMPT } from "~/lib/prompts/lesson-plan@v1.prompt";
+import { LESSON_PLAN_PROMPT_V2 } from "~/lib/prompts/lesson-plan@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -156,7 +156,7 @@ export const lessonPlan: Tool = {
     {
       id: "lesson",
       name: { nl: "Lesopzet", en: "Lesson plan" },
-      systemPromptId: LESSON_PLAN_PROMPT.id,
+      systemPromptId: LESSON_PLAN_PROMPT_V2.id,
       output: {
         kind: "structured-sections",
         exportAs: "slides",

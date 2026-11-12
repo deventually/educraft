@@ -24,6 +24,7 @@ import { DIFFICULT_CONVERSATION_PROMPT } from "./difficult-conversation@v1.promp
 import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "./difficult-conversation@v2.prompt";
 import { ENGAGEMENT_CHECK_PROMPT } from "./engagement-check@v1.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
+import { LESSON_PLAN_PROMPT_V2 } from "./lesson-plan@v2.prompt";
 import { PEER_TUTORING_PROMPT } from "./peer-tutoring.prompt";
 import { RUBRIC_BUILDER_PROMPT } from "./rubric-builder@v1.prompt";
 import { TEST_ANALYSIS_PROMPT } from "./test-analysis@v1.prompt";
@@ -106,6 +107,7 @@ const ALL: PromptDef[] = [
   DIFFICULT_CONVERSATION_PROMPT_V2,
   ENGAGEMENT_CHECK_PROMPT,
   LESSON_PLAN_PROMPT,
+  LESSON_PLAN_PROMPT_V2,
   PEER_TUTORING_PROMPT,
   RUBRIC_BUILDER_PROMPT,
   SCAFFOLDING_FEEDBACK_PROMPT,
