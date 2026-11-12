@@ -4,6 +4,8 @@ import {
   caseValues,
   generationModel,
   evalGreeting,
+  mapLimit,
+  parallelism,
   scoresForNextRun,
   unjudgeableReason,
 } from "../../scripts/eval-helpers";
@@ -611,5 +613,44 @@ describe("--model: generate with another model, judge with the same one", () => 
     expect(batchableModel("claude-sonnet-5-5")).toBe(true);
     expect(batchableModel("gpt-6.1-sol")).toBe(false);
     expect(batchableModel("ollama::qwen3:32b")).toBe(false);
+  });
+});
+
+describe("mapLimit (--parallel: several runs at once, results in order)", () => {
+  it("never runs more than the limit at once, and keeps the order of the input", async () => {
+    let running = 0;
+    let peak = 0;
+    const out = await mapLimit([30, 5, 20, 1, 10], 2, async (ms, i) => {
+      running++;
+      peak = Math.max(peak, running);
+      await new Promise((r) => setTimeout(r, ms));
+      running--;
+      return `${i}:${ms}`;
+    });
+    expect(peak).toBe(2);
+    expect(out).toEqual(["0:30", "1:5", "2:20", "3:1", "4:10"]);
+  });
+
+  it("runs one at a time with limit 1", async () => {
+    const order: string[] = [];
+    await mapLimit(["a", "b"], 1, async (x) => {
+      order.push(`start ${x}`);
+      await new Promise((r) => setTimeout(r, 5));
+      order.push(`end ${x}`);
+    });
+    expect(order).toEqual(["start a", "end a", "start b", "end b"]);
+  });
+});
+
+describe("parallelism (--parallel N)", () => {
+  it("is 1 by default, so a run without the flag stays as before", () => {
+    expect(parallelism(undefined)).toBe(1);
+  });
+
+  it("takes a whole number, bounded to 1..16", () => {
+    expect(parallelism("6")).toBe(6);
+    expect(parallelism("0")).toBe(1);
+    expect(parallelism("99")).toBe(16);
+    expect(parallelism("abc")).toBe(1);
   });
 });

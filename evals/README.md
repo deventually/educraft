@@ -31,11 +31,14 @@ the model's effort and answer budget come from `config/models.json`
 
 ```bash
 npm run eval -- --tool lesson-plan --runs 3 \
-  --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 --label cc
+  --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 \
+  --parallel 6 --label cc
 ```
 
-- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). The calls run one
-  after another, so a `--runs 3` of one tool takes roughly half an hour to an hour.
+- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). Without `--batch`
+  the runs go one after another (a `--runs 3` of lesson-plan: about 75 minutes);
+  `--parallel 6` runs six at once (about 15 minutes). Lower it when the subscription hits its
+  limit.
 - A worker session in the cloud is signed in too, so it can run the eval itself and commit the
   report in its PR.
 - What still differs from the app: temperature cannot be set, and Claude Code adds a short
@@ -209,6 +212,19 @@ staat), feiten intact, en een goed hoofdstuk krijgt hooguit twee voorstellen. Zi
 ANTHROPIC_API_KEY=sk-… npm run eval:proofread                   # elke case één keer
 ANTHROPIC_API_KEY=sk-… npm run eval:proofread -- --repeat 3     # consistentie
 npm run eval:proofread -- --dry-run                             # alleen de berichten bouwen
+```
+
+## Cursusevaluatie (`npm run eval:evaluation`)
+
+De cursusevaluatie (`course-evaluation@v1`, brief P33.2) maakt van een geanonimiseerde enquête
+thema's, problemen op hun plek en drie tot vijf verbeterpunten. Vijf fictieve cases, waaronder de
+naam van een docent, een uitschieter van één student, tien respondenten met een toetsanalyse en
+een ingebedde opdracht. De score is deterministisch; zie `course-evaluation/rubric.md`.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:evaluation                  # elke case één keer
+ANTHROPIC_API_KEY=sk-… npm run eval:evaluation -- --repeat 3    # eindmeting
+npm run eval:evaluation -- --dry-run                            # alleen de berichten bouwen
 ```
 
 ## Proefassessment (`npm run eval:rehearsal`)

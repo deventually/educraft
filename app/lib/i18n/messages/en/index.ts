@@ -16,6 +16,7 @@ import { confirm } from "./confirm";
 import { courseCopy } from "./courseCopy";
 import { courseDesign } from "./courseDesign";
 import { courseDocuments } from "./courseDocuments";
+import { courseEvaluation } from "./courseEvaluation";
 import { courseImprovements } from "./courseImprovements";
 import { courseMembers } from "./courseMembers";
 import { courseTools } from "./courseTools";
@@ -89,6 +90,7 @@ export const en: Messages = {
   courseCopy,
   courseDesign,
   courseDocuments,
+  courseEvaluation,
   courseImprovements,
   courseMembers,
   courses,
