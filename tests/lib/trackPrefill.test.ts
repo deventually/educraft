@@ -15,7 +15,11 @@ const fields = [
 describe("trackPrefillValues (P38.4)", () => {
   it("fills a field from the track the tool was opened from", () => {
     expect(
-      trackPrefillValues(fields, { feedbackHistory: "### Concepten, ronde 1\nNoem bronnen." }),
+      trackPrefillValues(fields, {
+        feedbackHistory: "### Concepten, ronde 1\nNoem bronnen.",
+        criteria: "",
+        weakPoints: "",
+      }),
     ).toEqual({
       feedbackHistory: "### Concepten, ronde 1\nNoem bronnen.",
     });
@@ -23,6 +27,8 @@ describe("trackPrefillValues (P38.4)", () => {
 
   it("fills nothing without a track or without feedback", () => {
     expect(trackPrefillValues(fields, null)).toEqual({});
-    expect(trackPrefillValues(fields, { feedbackHistory: "" })).toEqual({});
+    expect(
+      trackPrefillValues(fields, { feedbackHistory: "", criteria: "", weakPoints: "" }),
+    ).toEqual({});
   });
 });

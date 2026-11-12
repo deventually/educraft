@@ -1,5 +1,5 @@
 import type { ImageInput } from "~/lib/ai/types";
-import type { CoursePrefill, InputField } from "~/lib/registry/types";
+import type { CoursePrefill, InputField, TrackPrefillSource } from "~/lib/registry/types";
 import type { CourseSchedule, Discipline } from "~/lib/courses/types";
 import type { ContextProfile } from "~/lib/context/types";
 import type { TemplateValues } from "~/lib/template/interpolate";
@@ -182,7 +182,7 @@ export function coursePrefillValues(
 /** Initial values for fields that declare `prefillFromTrack` (P38.4); only non-empty ones. */
 export function trackPrefillValues(
   fields: InputField[],
-  track: { feedbackHistory: string } | null | undefined,
+  track: Record<TrackPrefillSource, string> | null | undefined,
 ): FormValues {
   const out: FormValues = {};
   if (!track) return out;

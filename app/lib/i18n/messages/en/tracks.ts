@@ -130,4 +130,16 @@ export const tracks: Messages["tracks"] = {
   toastDeleted: "Track wiped.",
   toastKept: "Feedback kept in the track.",
   toastSaved: "Milestone saved.",
+  visits: {
+    add: "Record the visit",
+    date: "Date of the visit",
+    done: "Visit recorded.",
+    errorClosed: "This track is closed.",
+    errorDate: "Pick a valid date.",
+    heading: "Visits",
+    intro:
+      "The track keeps only that there was a visit and when. Your preparation and the report go to Word or the clipboard, not into LimeOnIt.",
+    none: "No visit recorded yet.",
+    on: "Visit on {date}",
+  },
 };

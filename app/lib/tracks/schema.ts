@@ -19,13 +19,18 @@ const MILESTONE_IDS = [
 export type MilestoneId = (typeof MILESTONE_IDS)[number];
 export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
 
-export type MilestonePanel = "feedforward" | "second-assessor";
+export type MilestonePanel = "feedforward" | "second-assessor" | "visits";
+
+interface MilestoneTool {
+  slug: string;
+  label: { nl: string; en: string };
+}
 
 interface Milestone {
   id: MilestoneId;
   name: { nl: string; en: string };
-  /** The tool that does this milestone's work; its result can be kept as a round. */
-  tool?: { slug: string; label: { nl: string; en: string } };
+  /** The tools that do this milestone's work; a result can be kept as a round. */
+  tools?: readonly MilestoneTool[];
   /**
    * The working panel the milestone tab shows: feedforward on each new version (P38.3), or the
    * second assessor's comparison (P38.5).
@@ -37,28 +42,52 @@ export const MILESTONES: readonly Milestone[] = [
   {
     id: "start",
     name: { nl: "Start", en: "Start" },
-    tool: {
-      slug: "stage-assessment",
-      label: { nl: "Plan van aanpak toetsen", en: "Check the plan of approach" },
-    },
+    tools: [
+      {
+        slug: "stage-assessment",
+        label: { nl: "Plan van aanpak toetsen", en: "Check the plan of approach" },
+      },
+    ],
   },
-  { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
+  {
+    id: "visits",
+    name: { nl: "Bezoeken", en: "Visits" },
+    // P38.6: questions from the criteria; a report from notes that is never kept.
+    tools: [
+      { slug: "visit-prep", label: { nl: "Bezoek voorbereiden", en: "Prepare a visit" } },
+      { slug: "visit-report", label: { nl: "Verslag uit steekwoorden", en: "Report from notes" } },
+    ],
+    panel: "visits",
+  },
   { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, panel: "feedforward" },
   {
     id: "final",
     name: { nl: "Eindversie", en: "Final version" },
     // P38.4: opened from the track, the assessment gets the earlier feedback along.
-    tool: {
-      slug: "stage-assessment",
-      label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
-    },
+    tools: [
+      {
+        slug: "stage-assessment",
+        label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
+      },
+    ],
   },
   {
     id: "second-assessor",
     name: { nl: "Tweede beoordelaar", en: "Second assessor" },
     panel: "second-assessor",
   },
-  { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
+  {
+    id: "final-interview",
+    name: { nl: "Eindgesprek", en: "Final interview" },
+    // P38.6: rehearse with the weak points of the last feedback, then review the defence.
+    tools: [
+      { slug: "defend-your-work", label: { nl: "Verdedig je werk", en: "Defend your work" } },
+      {
+        slug: "defense-review",
+        label: { nl: "Een verdediging nakijken", en: "Review a defence" },
+      },
+    ],
+  },
   { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
 ];
 
@@ -106,6 +135,12 @@ export const TrackDataSchema = z.object({
   status: z.partialRecord(MilestoneIdSchema, MilestoneStatusSchema).default({}),
   /** Hand-in dates per milestone. */
   deadlines: z.partialRecord(MilestoneIdSchema, IsoDateSchema).default({}),
+  /** P38.6: the dates of visits, sorted and once each; never what was said. */
+  visits: z
+    .array(IsoDateSchema)
+    .max(50)
+    .default([])
+    .transform((v) => [...new Set(v)].sort()),
 });
 export type TrackData = z.infer<typeof TrackDataSchema>;
 

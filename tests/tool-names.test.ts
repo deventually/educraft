@@ -67,6 +67,8 @@ describe("task-first tool names (P19.1)", () => {
         "test-analysis",
         "test-items",
         "think-pair-share",
+        "visit-prep",
+        "visit-report",
       ].sort(),
     );
   });

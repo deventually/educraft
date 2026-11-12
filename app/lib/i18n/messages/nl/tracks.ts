@@ -130,4 +130,16 @@ export const tracks = {
   toastDeleted: "Traject gewist.",
   toastKept: "Feedback bewaard in het traject.",
   toastSaved: "Mijlpaal bewaard.",
+  visits: {
+    add: "Bezoek vastleggen",
+    date: "Datum van het bezoek",
+    done: "Bezoek vastgelegd.",
+    errorClosed: "Dit traject is afgerond.",
+    errorDate: "Kies een geldige datum.",
+    heading: "Bezoeken",
+    intro:
+      "Het traject bewaart alleen dat er een bezoek was en wanneer. Je voorbereiding en het verslag gaan naar Word of het klembord, niet in LimeOnIt.",
+    none: "Nog geen bezoek vastgelegd.",
+    on: "Bezoek op {date}",
+  },
 };

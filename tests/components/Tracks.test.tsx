@@ -10,6 +10,7 @@ import { SupervisionBlock } from "~/components/tracks/SupervisionBlock";
 import { ResultActions } from "~/components/ResultActions";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
+import { VisitsPanel } from "~/components/tracks/VisitsPanel";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -90,7 +91,7 @@ const pageData = (tab = "overview") => ({
     closedAt: null,
     purgeAfter: null,
   },
-  data: { status: { start: "done" }, deadlines: { visits: "2027-01-10" } },
+  data: { status: { start: "done" }, deadlines: { visits: "2027-01-10" }, visits: [] as string[] },
   models: [] as { id: string; displayName: string }[],
   rounds: [
     {
@@ -127,7 +128,7 @@ describe("a track", () => {
   });
 
   it("a milestone without a tool has no tool button", () => {
-    renderRoute(TrackPage, pageData("visits"));
+    renderRoute(TrackPage, pageData("onstage"));
     expect(screen.queryByRole("link", { name: /Plan van aanpak toetsen/ })).toBeNull();
     expect(screen.getByText("Nog geen rondes bij deze mijlpaal.")).toBeTruthy();
   });
@@ -139,6 +140,8 @@ describe("TrackBar and keeping a result in a track", () => {
     code: "S-0423",
     milestone: "start" as const,
     feedbackHistory: "",
+    criteria: "",
+    weakPoints: "",
   };
 
   it("the bar says which track and milestone the work is for, and passes axe", async () => {
@@ -242,5 +245,20 @@ describe("SecondAssessorPanel (P38.5)", () => {
       "/utilities/rubric",
     );
     expect(screen.queryByRole("button", { name: "Vergelijk en bewaar" })).toBeNull();
+  });
+});
+
+describe("VisitsPanel (P38.6)", () => {
+  it("lists the visit dates and records a new one with a labelled date, and passes axe", async () => {
+    const { container } = renderWithRouter(<VisitsPanel visits={["2027-01-12"]} />);
+    expect(screen.getByText(/Bezoek op/)).toBeTruthy();
+    expect(screen.getByLabelText("Datum van het bezoek")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Bezoek vastleggen" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says when there was no visit yet", () => {
+    renderWithRouter(<VisitsPanel visits={[]} />);
+    expect(screen.getByText("Nog geen bezoek vastgelegd.")).toBeTruthy();
   });
 });

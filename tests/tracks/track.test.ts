@@ -53,8 +53,15 @@ describe("TrackInputSchema", () => {
 });
 
 describe("TrackDataSchema", () => {
+  it("keeps only the dates of visits, never what was said (P38.6)", () => {
+    const d = TrackDataSchema.parse({ visits: ["2027-03-02", "2027-01-12"] });
+    expect(d.visits).toEqual(["2027-01-12", "2027-03-02"]);
+    expect(TrackDataSchema.parse({}).visits).toEqual([]);
+    expect(TrackDataSchema.safeParse({ visits: ["nope"] }).success).toBe(false);
+  });
+
   it("starts empty and drops unknown milestones, statuses and bad dates", () => {
-    expect(TrackDataSchema.parse({})).toEqual({ status: {}, deadlines: {} });
+    expect(TrackDataSchema.parse({})).toEqual({ status: {}, deadlines: {}, visits: [] });
     expect(TrackDataSchema.safeParse({ status: { start: "maybe" }, deadlines: {} }).success).toBe(
       false,
     );
@@ -106,10 +113,16 @@ describe("purgeDate", () => {
 describe("milestone tools and document types (P38.2)", () => {
   it("the start milestone opens Studentwerk beoordelen; every milestone tool exists", async () => {
     const { getToolBySlug } = await import("~/lib/registry");
-    expect(MILESTONES.find((m) => m.id === "start")?.tool?.slug).toBe("stage-assessment");
+    const slugs = (id: string) =>
+      (MILESTONES.find((m) => m.id === id)?.tools ?? []).map((t) => t.slug);
+    expect(slugs("start")).toEqual(["stage-assessment"]);
     // P38.4: the final version is assessed with the feedback line.
-    expect(MILESTONES.find((m) => m.id === "final")?.tool?.slug).toBe("stage-assessment");
-    for (const m of MILESTONES) if (m.tool) expect(getToolBySlug(m.tool.slug)).toBeDefined();
+    expect(slugs("final")).toEqual(["stage-assessment"]);
+    // P38.6: a visit is prepared and written up; the final interview rehearsed and reviewed.
+    expect(slugs("visits")).toEqual(["visit-prep", "visit-report"]);
+    expect(slugs("final-interview")).toEqual(["defend-your-work", "defense-review"]);
+    for (const m of MILESTONES)
+      for (const t of m.tools ?? []) expect(getToolBySlug(t.slug), t.slug).toBeDefined();
   });
 
   it("a kind picks the assessment models for its documents", () => {

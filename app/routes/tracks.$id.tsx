@@ -3,12 +3,13 @@ import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/tracks.$id";
-import { requireTracksUser } from "~/server/tracks.server";
+import { requireTracksUser, trackVisitAction } from "~/server/tracks.server";
 import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
 import { rubricChoices, trackSecondAssessorAction } from "~/server/trackSecondAssessor.server";
 import { getSelectableModels } from "~/server/availability.server";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
+import { VisitsPanel } from "~/components/tracks/VisitsPanel";
 import { getTrack, listRounds, updateTrackData } from "~/server/repositories/tracks.server";
 import { getCourse } from "~/server/repositories/courses.server";
 import { getAssessmentModel } from "~/server/repositories/assessmentModels.server";
@@ -98,6 +99,8 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (ff) return ff;
   const sa = await trackSecondAssessorAction(request, user, track, locale);
   if (sa) return sa;
+  const visit = await trackVisitAction(request, user, track, locale);
+  if (visit) return visit;
   const fd = await request.formData();
   const m = getMessages(locale).tracks;
   if (fd.get("intent") !== "milestone")
@@ -112,6 +115,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   const { milestone, status, due } = form.data;
   const { [milestone]: _old, ...deadlines } = track.data.deadlines;
   await updateTrackData(user.id, track.id, {
+    ...track.data,
     status: { ...track.data.status, [milestone]: status },
     deadlines: due ? { ...deadlines, [milestone]: due } : deadlines,
   });
@@ -137,7 +141,9 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
                   ? m.feedforward.done
                   : d.intent === "second-assessor"
                     ? m.secondAssessor.done
-                    : m.toastSaved,
+                    : d.intent === "visit"
+                      ? m.visits.done
+                      : m.toastSaved,
             }
           : { variant: "error", message: d.error }
         : null,
@@ -235,6 +241,7 @@ function Panel({ kind, data }: { kind: MilestonePanel; data: Data }) {
   const panels: Record<MilestonePanel, () => ReactNode> = {
     feedforward: () => <FeedforwardPanel criteria={data.track.criteria} models={data.models} />,
     "second-assessor": () => <SecondAssessorPanel rubrics={data.rubrics} />,
+    visits: () => <VisitsPanel visits={data.data.visits} />,
   };
   return panels[kind]();
 }
@@ -246,7 +253,7 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
   const headingId = useId();
   const roundsId = useId();
   const def = MILESTONES.find((x) => x.id === milestone);
-  const tool = def?.tool;
+  const tools = def?.tools ?? [];
   const status = data.data.status[milestone] ?? "open";
   const rounds = data.rounds.filter((r) => r.milestone === milestone);
   const options = [
@@ -259,16 +266,21 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
       <h2 id={headingId} className="text-lg font-medium text-slate-900">
         {def ? loc(def.name, locale) : milestone}
       </h2>
-      {tool && !data.track.closedAt && (
+      {tools.length > 0 && !data.track.closedAt && (
         <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
           <p className="max-w-[65ch] text-sm text-slate-700">{m.milestone.toolHint}</p>
-          <Link
-            to={`/tools/${tool.slug}?track=${encodeURIComponent(data.track.id)}&milestone=${milestone}`}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-violet-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
-          >
-            {loc(tool.label, locale)}
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tools.map((tool) => (
+              <Link
+                key={tool.slug}
+                to={`/tools/${tool.slug}?track=${encodeURIComponent(data.track.id)}&milestone=${milestone}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-violet-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+              >
+                {loc(tool.label, locale)}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
       {def?.panel && !data.track.closedAt && <Panel kind={def.panel} data={data} />}

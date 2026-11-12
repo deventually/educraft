@@ -36,8 +36,10 @@ export interface ResultActionsProps {
     trackId: string;
     code: string;
     milestone: MilestoneId;
-    /** P38.4: the track's earlier feedback, filled into a `prefillFromTrack` field. */
+    /** P38.4/P38.6: what the track fills into `prefillFromTrack` fields. */
     feedbackHistory: string;
+    criteria: string;
+    weakPoints: string;
   } | null;
   /** P30.1: the other saved steps of a multi-step tool, exported along with this one. */
   exportWith?: string[];

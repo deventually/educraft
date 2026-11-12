@@ -113,6 +113,8 @@ export const defenseReview: Tool = {
         nl: "bijv. De student legt de ontwerpkeuzes uit, interpreteert de eigen gegevens en verdedigt de conclusie met bewijs.",
         en: "e.g. The student explains the design choices, interprets their own data and defends the conclusion with evidence.",
       },
+      // P38.6: opened from a track (final interview).
+      prefillFromTrack: { source: "criteria" },
       group: WORK,
     },
     {

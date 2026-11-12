@@ -17,6 +17,7 @@ describe("Tool.handlesStudentWork (P28.4)", () => {
       "math-grading",
       "stage-assessment",
       "test-analysis",
+      "visit-report",
     ]);
   });
 

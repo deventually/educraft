@@ -16,6 +16,7 @@ import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { computeResultNote } from "~/lib/template/computations";
 import { ResultActions, type ResultContext } from "./ResultActions";
+import { WordDownload } from "./export/WordDownload";
 import { AiNotice } from "./AiNotice";
 import { Button } from "./ui";
 import { cn } from "~/lib/utils";
@@ -370,8 +371,6 @@ export function GeneratorView({
               </div>
             )}
           </div>
-          {/* Persistent AI-transparency notice; stronger "teacher decides" variant
-            for grading tools, driven by registry data. */}
           {resultContext && output && !streaming && !reviewing && (
             <div className="shrink-0">
               <ResultActions
@@ -383,9 +382,13 @@ export function GeneratorView({
               />
             </div>
           )}
+          {output && !streaming && !reviewing && !generationId && (
+            <WordDownload markdown={shown} title={loc(tool.name, locale)} lang={outputLanguage} />
+          )}
           {codes && output && !reviewing && (
             <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
           )}
+          {/* AI-transparency notice; the "teacher decides" variant for grading tools. */}
           <AiNotice
             variant={tool.assistiveGrading ? "assistive" : "generic"}
             className="shrink-0"

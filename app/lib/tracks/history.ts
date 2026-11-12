@@ -12,7 +12,16 @@ export const HISTORY_LIMIT = 16_000;
 interface HistoryRound {
   milestone: string;
   round: number;
-  feedback: { text: string };
+  feedback: { text: string; points?: readonly { criterion: string; text: string }[] };
+}
+
+/**
+ * The weak points to rehearse (P38.6): the improvement points of the newest round that has
+ * them (a feedforward round), one per line, after their criterion. "" without any.
+ */
+export function weakPoints(rounds: readonly HistoryRound[]): string {
+  const last = [...rounds].reverse().find((r) => r.feedback.points?.length);
+  return (last?.feedback.points ?? []).map((p) => `- ${p.criterion}: ${p.text}`).join("\n");
 }
 
 export function feedbackHistory(rounds: readonly HistoryRound[], locale: Locale): string {
