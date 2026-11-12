@@ -11,8 +11,13 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const data = {
   kind: "faculty" as const,
   divisions: [
-    { id: "d-1", name: "Faculteit Gezondheid", programmeCount: 1 },
-    { id: "d-2", name: "Faculteit Techniek", programmeCount: 0 },
+    {
+      id: "d-1",
+      name: "Faculteit Gezondheid",
+      programmeCount: 1,
+      teams: [{ id: "t-9", name: "Onderwijscommissie" }],
+    },
+    { id: "d-2", name: "Faculteit Techniek", programmeCount: 0, teams: [] },
   ],
   programmes: [
     {
@@ -62,6 +67,15 @@ describe("/admin/organisation", () => {
     expect(within(none).getByText("Pabo")).toBeInTheDocument();
     const techniek = screen.getByRole("region", { name: "Faculteit Techniek" });
     expect(within(techniek).getByText(/nog geen opleidingen/i)).toBeInTheDocument();
+  });
+
+  it("names the teams under a division, linked to their page", async () => {
+    page();
+    const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
+    expect(within(zorg).getByRole("link", { name: "Onderwijscommissie" })).toHaveAttribute(
+      "href",
+      "/admin/teams/t-9",
+    );
   });
 
   it("offers delete only on an empty division", async () => {

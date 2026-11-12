@@ -8,7 +8,7 @@ export const organisation = {
   emptyDivision: "No programmes yet.",
   errorInvalid: "That did not work. Please check it again.",
   errorName: "Give a name of at most 200 characters.",
-  errorNotEmpty: "There are still programmes under it. Move them first.",
+  errorNotEmpty: "There are still programmes or teams under it. Move them first.",
   heading: "Organisation",
   intro:
     "How your institution is organised: the layer between the institution and its programmes, and which programme sits where. A team lead or admin creates a programme under Programmes; here you put it in its place.",
@@ -24,4 +24,5 @@ export const organisation = {
   rename: "New name for {name}",
   renameSave: "Save name",
   team: "team {team}",
+  teamsUnder: "Teams:",
 };

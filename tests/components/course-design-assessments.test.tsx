@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { expectAiCallId } from "../helpers/aiCall";
@@ -8,12 +8,18 @@ import type { ImportProposal } from "~/lib/courses/import";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-function renderStep(opts: { proposal?: ImportProposal | null; notes?: string } = {}) {
+function renderStep(
+  opts: { proposal?: ImportProposal | null; notes?: string; onLater?: () => void } = {},
+) {
   const Stub = createRoutesStub([
     {
       path: "/courses/:id",
       Component: () => (
-        <CourseDesignAssessments proposal={opts.proposal ?? null} notes={opts.notes} />
+        <CourseDesignAssessments
+          proposal={opts.proposal ?? null}
+          notes={opts.notes}
+          onLater={opts.onLater ?? (() => {})}
+        />
       ),
     },
   ]);
@@ -148,5 +154,27 @@ describe("CourseDesignAssessments (wizard step 2)", () => {
     const box = screen.getByRole("region", { name: "Opmerkingen van de AI" });
     expect(within(box).getByText("Welke toetsvormen gebruiken jullie?")).toBeTruthy();
     expect(screen.getByLabelText("Toetsvormen die jullie gebruiken")).toBeTruthy();
+  });
+  it("lets the teacher leave the proposal for later, back on the step's heading", async () => {
+    const onLater = vi.fn();
+    const { container } = renderStep({ proposal, onLater });
+    const form = screen.getByRole("form", { name: "AI-voorstel" });
+    const later = within(form).getByRole("button", { name: "Later" });
+    expect(later.getAttribute("type")).toBe("button");
+    expect(later.getAttribute("aria-describedby")).toBeTruthy();
+    expect(document.getElementById(later.getAttribute("aria-describedby")!)?.textContent).toMatch(
+      /blijft hier op Overzicht staan/,
+    );
+    fireEvent.click(later);
+    expect(onLater).toHaveBeenCalledOnce();
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Volgende stap: het toetsprogramma" }),
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("has no Later without a proposal", () => {
+    renderStep();
+    expect(screen.queryByRole("button", { name: "Later" })).toBeNull();
   });
 });

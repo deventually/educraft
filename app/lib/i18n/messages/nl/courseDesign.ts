@@ -44,6 +44,9 @@ export const courseDesign = {
     quota:
       "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
   },
+  later: "Later",
+  laterHelp:
+    "Dit voorstel laat je liggen. De stap blijft hier op Overzicht staan, en je kunt hem altijd opnieuw starten.",
   lessons: {
     added:
       "{n} lessen en opdrachten toegevoegd. Je vindt ze bij Lessen en toetsen; vanuit elke les helpt Les voorbereiden verder.",

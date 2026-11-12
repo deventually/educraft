@@ -109,6 +109,12 @@ The marking model has a table per part with what a fail and what a pass is, and 
 
 On a tool page with a learning-outcome field, pick your course under **Course**. LimeOnIt then fills in the course's learning outcomes, one per line; remove what doesn't fit. What you generate is linked to the course. You can also link or unlink work afterwards on **Earlier work**, to the whole course or to one activity or assessment. The course page lists it all under **Linked work**.
 
+## Teaching a course again
+
+Teaching a course again next study year or in another semester? On the **Overview** tab, use **Copy for a new run**. You choose the name of the copy, the study year, the semester or period and the start date. Learning outcomes, tests, lessons and schedule come along. Sharing, colleagues who work on it, linked work and reviews do not. The old course stays as it is. The owner and a co-owner can copy; the copy is then yours. Your teaching context comes along only if the course is yours.
+
+After copying, the **Check** tab of the copy opens. There you decide what has to change after last run's evaluation, because whatever did not go well then came along too.
+
 ## Get a review
 
 Under **Review team** on the course page, critical colleagues look at your course, for example an **Assessment expert** (assessment blueprint, Bloom spread, wording, weighting) and a **Designer** (constructive alignment, active learning, study load). They are AI and run on the model you pick. You choose who is on your review team; what each reviewer does is in [Your review team](/help/review-team).

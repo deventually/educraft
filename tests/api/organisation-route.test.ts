@@ -126,4 +126,14 @@ describe("/admin/organisation (Beheer → Organisatie)", () => {
     ).toEqual({ ok: "move" });
     expect((await programmes.getProgramme(admin, p!.id))?.divisionId).toBeNull();
   });
+
+  it("lists the teams under each division", async () => {
+    const d = await org.createDivision(admin, "Faculteit Teams");
+    const team = await teams.createTeam("Commissie");
+    await org.setTeamDivision(admin, team.id, d!.id);
+    const data = await call(page.loader, { request: get() });
+    expect(data.divisions.find((x) => x.id === d!.id)?.teams).toEqual([
+      { id: team.id, name: "Commissie" },
+    ]);
+  });
 });

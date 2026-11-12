@@ -43,6 +43,9 @@ export const courseDesign: Messages["courseDesign"] = {
     quota:
       "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
   },
+  later: "Later",
+  laterHelp:
+    "You leave this proposal for now. The step stays here on Overview, and you can start it again at any time.",
   lessons: {
     added:
       "{n} lessons and assignments added. You find them under Lessons and tests; from each lesson, Prepare a lesson takes it further.",

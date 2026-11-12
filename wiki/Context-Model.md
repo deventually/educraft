@@ -32,7 +32,9 @@ A profile stores only the chosen answers (`packValues`) plus any user-defined
 `customFields`; everything is formatted bilingually by `formatProfile(profile, lang)` in
 `app/lib/context/format.ts`. Profiles are created + edited in one short **single-page
 editor** (`ContextProfileEditor`: name, onderwijstype, programme, course and study year/phase up front, the rest under "Meer details"), and input is validated against the catalogues in
-`app/lib/context/parseForm.ts`. Which sectors and domains a teacher may pick is
+`app/lib/context/parseForm.ts`. "Opleiding" stays free text; the programmes of the teacher's own
+teams are offered as suggestions (a datalist), so the profile names the programme as the
+institution does. Which sectors and domains a teacher may pick is
 decided by the instance settings, via `availability.server.ts` — see
 [Availability](#availability-p18) below. The
 vision generalizes this further into a small set of **orthogonal dimensions**.

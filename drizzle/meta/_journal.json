@@ -246,6 +246,13 @@
       "when": 1794471710911,
       "tag": "0034_nifty_catseye",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1794473139134,
+      "tag": "0035_flashy_amphibian",
+      "breakpoints": true
     }
   ]
 }

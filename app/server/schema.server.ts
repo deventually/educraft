@@ -305,6 +305,9 @@ export const teams = sqliteTable("teams", {
   name: text("name").notNull(),
   // P28.3: the team's choices for features, tools and models (`TeamSettingsSchema`).
   settingsJson: text("settings_json").notNull().default("{}"),
+  // The division the team belongs to (BESLUIT-2026-11-12-2), set by an admin; null = none,
+  // a team for the whole institution (or one that belongs to a programme only).
+  divisionId: text("division_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 

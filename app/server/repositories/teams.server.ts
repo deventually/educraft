@@ -90,6 +90,7 @@ export async function createTeam(name: string): Promise<TeamRow> {
     name: cleanName(name),
     settingsJson: "{}",
     createdAt: new Date(),
+    divisionId: null,
   };
   getDb().insert(teams).values(row).run();
   return row;

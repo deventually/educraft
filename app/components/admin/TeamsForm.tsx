@@ -2,12 +2,30 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 
-/** One row per team: member, and lead (only for a member). Saves itself. */
+/** Where a team sits: its programmes and division (`teamPlaces`), or null. */
+type Place = { programmes: string[]; division: string | null } | null | undefined;
+
+/** "Opleiding VPK voltijd · Faculteit Gezondheid", or "" for a team that sits nowhere. */
+function placeText(t: ReturnType<typeof useT>, place: Place): string {
+  if (!place) return "";
+  const parts: string[] = [];
+  const n = place.programmes.length;
+  if (n > 0)
+    parts.push(
+      fmt(n === 1 ? t.teams.placeProgramme : t.teams.placeProgrammes, {
+        names: place.programmes.join(", "),
+      }),
+    );
+  if (place.division) parts.push(place.division);
+  return parts.join(" · ");
+}
+
+/** One row per team: member, and lead (only for a member), and where the team sits. Saves itself. */
 export function TeamsForm({
   teams,
   errorMessage,
 }: {
-  teams: { id: string; name: string; member: boolean; lead: boolean }[];
+  teams: { id: string; name: string; member: boolean; lead: boolean; place?: Place }[];
   errorMessage: (code: string | true) => string | undefined;
 }) {
   const t = useT();
@@ -47,6 +65,9 @@ export function TeamsForm({
                 {fmt(t.teams.leadOf, { name: team.name })}
               </label>
             </span>
+            {placeText(t, team.place) && (
+              <span className="basis-full text-xs text-slate-500">{placeText(t, team.place)}</span>
+            )}
           </li>
         ))}
       </ul>
