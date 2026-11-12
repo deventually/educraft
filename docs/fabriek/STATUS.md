@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #303 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #304 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: inspreken bij geleid schrijven en bij bewijs (#304) gemerged op 2026-11-12:** bij elke
+  vraag van *Schrijf per onderdeel* en bij de tekst van een bewijsstuk staat het microfoonknopje; de
+  ingesproken tekst komt achter wat er al staat en wordt pas bewaard als de docent zelf op een knop
+  drukt. Alleen zichtbaar met een spraakserver; geen migratie, geen prompts.
 - **Bewijs in één keer toevoegen (#303) gemerged op 2026-11-12:** op de nieuwe pagina
   *Bewijs in één keer toevoegen* kiest de docent veel bestanden of een hele map. LimeOnIt stelt per
   bestand de leeruitkomst, soort, criteria en regel van het verplicht bewijs voor; de docent vinkt
