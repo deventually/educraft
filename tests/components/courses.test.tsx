@@ -111,6 +111,7 @@ describe("Course page — tabs", () => {
       "Lesrooster",
       "Disciplines",
       "Per week",
+      "Kopiëren voor een nieuwe uitvoering",
     ]);
   });
 
@@ -139,6 +140,28 @@ describe("Course page — tabs", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("opens a fresh copy's Controle tab with the question what has to change", async () => {
+    const { container } = renderRoute(CoursePage, pageData(), "/?tab=check&copied=1");
+    expect(headings()).toEqual([
+      "Dit is je kopie voor de nieuwe uitvoering",
+      "Dekkingsmatrix",
+      "Aandachtspunten",
+    ]);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers the copy for a new run to the owner only", () => {
+    const members = {
+      myRole: "editor",
+      ownerName: "Anna",
+      members: [],
+      candidates: [],
+      transferTo: [],
+    };
+    renderRoute(CoursePage, { ...pageData(), members });
+    expect(headings()).not.toContain("Kopiëren voor een nieuwe uitvoering");
+  });
+
   it("puts made work and sharing under Documenten en delen", async () => {
     const { container } = renderRoute(CoursePage, pageData(), "/?tab=documents");
     expect(headings()).toContain("Gekoppeld werk");
@@ -162,6 +185,7 @@ describe("Course page — tabs", () => {
       "Lesrooster",
       "Disciplines",
       "Per week",
+      "Kopiëren voor een nieuwe uitvoering",
     ]);
   });
 });

@@ -39,6 +39,8 @@ import { canDesignLessons } from "~/lib/courses/designLessons";
 import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
+import { CopiedNotice, CourseCopy } from "~/components/courses/CourseCopy";
+import { copyRunAction } from "~/server/courseCopy.server";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
@@ -122,6 +124,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     (await shareAction(request, user, "course", course.id)) ??
     (await memberAction(request, user, course)) ??
     (await courseProgrammeAction(request, user, course.id)) ??
+    (await copyRunAction(request, user, course)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -307,6 +310,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               weekDates={weekDates}
               currentWeek={currentWeek}
             />
+            {isOwner && <CourseCopy name={course.name} data={data} />}
           </>
         )}
         {tab === "outcomes" && (
@@ -320,6 +324,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         )}
         {tab === "check" && (
           <>
+            {params.get("copied") === "1" && <CopiedNotice />}
             <CoverageMatrix data={data} matrix={matrix} />
             <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
             {review && (
