@@ -34,6 +34,7 @@ export const programmes = {
     add: "Toevoegen",
     addCourse: "Cursus toevoegen aan de leerlijn",
     addNone: "Alle cursussen van de opleiding zitten in deze leerlijn.",
+    alsoFor: "Geldt ook voor: {programmes}",
     back: "Terug naar {programme}",
     bloomDrops: "Het Bloom-niveau daalt",
     coursesHint:
@@ -50,8 +51,13 @@ export const programmes = {
     errorCourses: "Kies minstens één cursus van de opleiding.",
     errorName: "Geef de leerlijn een naam van hooguit 200 tekens.",
     errorNotAllowed: "Alleen de teamleider of een beheerder kan de leerlijn aanpassen.",
+    from: "uit {programme}",
     intro:
       "Een leerlijn is een reeks cursussen binnen de opleiding, op volgorde, zoals Programmeren of Onderzoeken.",
+    linkHint:
+      "Je ziet de opleidingen waarvan je teamleider bent. Cursussen uit een aangevinkte opleiding kun je daarna aan de leerlijn toevoegen.",
+    linkLegend: "Geldt ook voor andere opleidingen",
+    linkSave: "Opleidingen opslaan",
     name: "Naam",
     namePlaceholder: "Bijvoorbeeld Programmeren",
     noBloom: "zonder niveau",
@@ -81,8 +87,12 @@ export const programmes = {
   onCourse: {
     empty: "Deze cursus hoort nog bij geen opleiding.",
     intro: "Zet de cursus in een opleiding, met het jaar en de periode waarin hij daar valt.",
+    linePlace: "cursus {position} van {total}",
+    linesTitle: "Leerlijnen",
+    next: "Volgende: {name}",
     noProgrammes: "Je hebt nog geen opleidingen.",
     noProgrammesLink: "Maak een opleiding aan",
+    previous: "Vorige: {name}",
     programme: "Opleiding",
     sharesWith: "Je cursus wordt gedeeld met het team van de opleiding die je kiest.",
     title: "Hoort bij opleiding",

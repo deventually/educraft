@@ -144,6 +144,35 @@ describe("learning line routes", () => {
     expect(await status(linePage.loader({ request: get("/x"), params } as never))).toBe(404);
   });
 
+  it("links the line to another programme I lead, and opens it under that one's address too", async () => {
+    const team2 = await teams.createTeam(`Deeltijd lijn ${n}`);
+    await teams.addMember(team2.id, me.id);
+    await teams.setLead(team2.id, me.id, true);
+    const pid2 = (await programmes.createProgramme(me, team2.id, {
+      name: "HBO-ICT deeltijd",
+      sector: "hbo",
+    }))!.id;
+    const line = await lines.createLine(me, pid, "Programmeren", [c1]);
+    const params = { id: pid, lineId: line!.id };
+    const before = await linePage.loader({ request: get("/x"), params } as never);
+    expect(before.linkOptions).toEqual([{ id: pid2, name: "HBO-ICT deeltijd", linked: false }]);
+    expect(
+      await linePage.action({
+        request: post("/x", [
+          ["intent", "programmes"],
+          ["programmeId", pid2],
+        ]),
+        params,
+      } as never),
+    ).toMatchObject({ ok: true });
+    const there = await linePage.loader({
+      request: get("/x"),
+      params: { id: pid2, lineId: line!.id },
+    } as never);
+    expect(there.line.programmeName).toBe("HBO-ICT deeltijd");
+    expect(there.alsoFor).toEqual([{ id: pid, name: "HBO-ICT" }]);
+  });
+
   it("moves, removes and adds a course, renames, and deletes the line", async () => {
     const line = await lines.createLine(me, pid, "Lijn", [c1, c2]);
     const params = { id: pid, lineId: line!.id };
