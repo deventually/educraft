@@ -347,6 +347,7 @@ export async function listCourseLinksForUser(
 export interface LinkedWork {
   generationId: string;
   toolSlug: string;
+  stageId: string | null;
   itemId: string | null;
   createdAt: Date;
 }
@@ -361,6 +362,7 @@ export async function listLinkedWork(
     .select({
       generationId: generations.id,
       toolSlug: generations.toolSlug,
+      stageId: generations.stageId,
       itemId: courseLinks.itemId,
       createdAt: generations.createdAt,
     })

@@ -9,6 +9,7 @@ import { listProfiles } from "~/server/repositories/profiles.server";
 import { getBreakWeeks, getTimeZone } from "~/server/repositories/settings.server";
 import { courseWeekDates, courseWeekOn, todayIn } from "~/lib/calendar/weeks";
 import { listLinkedWork } from "~/server/repositories/courses.server";
+import { becomesLesson, courseLessonAction } from "~/server/lessonFromWork.server";
 import { getToolBySlug } from "~/lib/registry";
 import { checkAlignment, coverageMatrix } from "~/lib/courses/alignment";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
@@ -75,6 +76,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         itemId: w.itemId,
         itemTitle: items.find((i) => i.id === w.itemId)?.title ?? null,
         createdAt: w.createdAt,
+        // Work that can become a lesson and is at none yet offers "Neem op als les".
+        asLesson: w.itemId === null && becomesLesson(w.toolSlug, w.stageId),
         ...(blueprint && { blueprint }),
       };
     }),
@@ -133,6 +136,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     (await copyRunAction(request, user, course)) ??
     (await improvementAction(request, user, course)) ??
     (await courseEvaluationAction(request, user, course)) ??
+    (await courseLessonAction(request, user.id, course.id)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -202,6 +206,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
         return { variant: r.partial ? "info" : "success", message: r.message };
+      if (r.intent === "addAsLesson")
+        return { variant: "success", message: t.resultActions.toastLesson };
       if (r.intent === "import-blueprint")
         return { variant: "success", message: fmt(c.blueprint.done, { n: r.added }) };
       return { variant: "success", message: c.toastSaved };

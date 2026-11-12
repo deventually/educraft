@@ -183,6 +183,7 @@ describe("/courses/:id", () => {
         itemId: QUIZ,
         itemTitle: "Oefentoets",
         createdAt: g.createdAt,
+        asLesson: false,
       },
     ]);
   });
