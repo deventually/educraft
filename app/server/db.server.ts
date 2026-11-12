@@ -34,16 +34,27 @@ function createDb(path: string) {
 
 const globalForDb = globalThis as unknown as { __limeonitDbs?: Map<string, Db> };
 
+/** One open database per institution and file (an institution put back may have moved). */
+const keyOf = (tenant: Tenant) => `${tenant.id}\u0000${tenant.dbPath}`;
+
 /** The DB access point. All repositories call this at use time. */
 export function getDb(): Db {
   const tenant = currentTenant();
   globalForDb.__limeonitDbs ??= new Map();
-  let db = globalForDb.__limeonitDbs.get(tenant.id);
+  let db = globalForDb.__limeonitDbs.get(keyOf(tenant));
   if (!db) {
     db = createDb(tenant.dbPath);
-    globalForDb.__limeonitDbs.set(tenant.id, db);
+    globalForDb.__limeonitDbs.set(keyOf(tenant), db);
   }
   return db;
+}
+
+/** Closes `tenant`'s database if it is open (before its file moves to the archive). */
+export function closeTenantDb(tenant: Tenant): void {
+  const db = globalForDb.__limeonitDbs?.get(keyOf(tenant));
+  if (!db) return;
+  db.$client.close();
+  globalForDb.__limeonitDbs?.delete(keyOf(tenant));
 }
 
 /** Opens (and so migrates) every institution's database: at boot and from `db:migrate`. */

@@ -17,6 +17,7 @@ import { ensureRegistryValidated } from "~/lib/registry/boot.server";
 import { startAiUsageRetention } from "~/server/aiUsageRetention.server";
 import { startBackupSchedule } from "~/server/backup.server";
 import { migrateAllTenants } from "~/server/db.server";
+import { startArchivePurge } from "~/server/platformAdmin.server";
 import { handleServerError, recordError } from "~/server/errorLog.server";
 import { requestIdOf } from "~/server/requestId.server";
 
@@ -27,6 +28,9 @@ export const streamTimeout = 5_000;
 // and excludes the offending tool (via availability.server) so a single typo can
 // never take the instance down.
 ensureRegistryValidated();
+
+// With PLATFORM_HOST, a removed institution stays 60 days in the archive; this wipes it after.
+startArchivePurge();
 
 // Every institution's database (TENANTS, or the one at DATABASE_URL) is opened and migrated at
 // boot, so a bad migration or an unreachable volume fails here and not on a teacher's request.

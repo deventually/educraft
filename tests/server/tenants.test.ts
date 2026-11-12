@@ -178,3 +178,67 @@ describe("the root route", () => {
     expect(order.indexOf(tenantRouting)).toBeLessThan(order.indexOf(sessionRefreshMiddleware));
   });
 });
+
+describe("the platform layer in the router", () => {
+  const platform: Tenant = {
+    id: "platform",
+    hosts: ["beheer.limeonit.test"],
+    dbPath: ":memory:",
+    platform: true,
+  };
+  const closed: Tenant = { ...hhs, inactive: true };
+  const middleware = tenantMiddleware([platform, hsl, closed]);
+  const call = async (url: string) => {
+    const seen: string[] = [];
+    const response = (await middleware(
+      { request: new Request(url) } as never,
+      (async () => {
+        seen.push(currentTenant().id);
+        return new Response("ok");
+      }) as never,
+    )) as Response;
+    return { response, seen };
+  };
+
+  it("tells a deactivated institution's visitors it is not available, in both languages", async () => {
+    const { response, seen } = await call("https://hhs.limeonit.test/courses");
+    expect(seen).toEqual([]);
+    expect(response.status).toBe(503);
+    const text = await response.text();
+    expect(text).toMatch(/niet beschikbaar/);
+    expect(text).toMatch(/not available/);
+  });
+
+  it("serves only the platform pages, login and two-step verification on the platform's address", async () => {
+    for (const path of [
+      "/platform",
+      "/platform/institutions",
+      "/platform.data",
+      "/login",
+      "/login/2fa",
+      "/logout",
+      "/account/2fa",
+      "/reset/abc",
+      "/set-locale",
+    ]) {
+      const { response, seen } = await call(`https://beheer.limeonit.test${path}`);
+      expect(response.status, path).toBe(200);
+      expect(seen, path).toEqual(["platform"]);
+    }
+  });
+
+  it("sends anything else on the platform's address to the platform page", async () => {
+    for (const path of ["/", "/courses", "/admin/users", "/tools/lesson-plan"]) {
+      const { response, seen } = await call(`https://beheer.limeonit.test${path}`);
+      expect(seen, path).toEqual([]);
+      expect(response.status, path).toBe(302);
+      expect(response.headers.get("Location"), path).toBe("/platform");
+    }
+  });
+
+  it("has no platform pages on an institution's address", async () => {
+    const { response, seen } = await call("https://hsl.limeonit.test/platform");
+    expect(seen).toEqual([]);
+    expect(response.status).toBe(404);
+  });
+});
