@@ -27,7 +27,11 @@ describe("WordDownload", () => {
     URL.revokeObjectURL = vi.fn();
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const { container } = render(
-      <WordDownload markdown={"### Afspraken\n- [STUDENT] stuurt de planning."} title="Bezoekverslag" lang="nl" />,
+      <WordDownload
+        markdown={"### Afspraken\n- [STUDENT] stuurt de planning."}
+        title="Bezoekverslag"
+        lang="nl"
+      />,
     );
     expect((await axe(container)).violations).toEqual([]);
     await user.click(screen.getByRole("button", { name: "Download als Word" }));

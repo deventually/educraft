@@ -41,6 +41,13 @@ describe("tool: visit-prep (P38.6)", () => {
     for (const lang of ["nl", "en"] as const) expect(build(lang)).not.toMatch(/\{\{/);
   });
 
+  it("stays under 600 words and skips what is not a criterion without saying so (eval vp1)", () => {
+    expect(build("nl")).toMatch(/nooit meer dan 600/);
+    expect(build("en")).toMatch(/never more than 600/);
+    expect(build("nl")).toMatch(/sla die dan over zonder het te noemen/);
+    expect(build("en")).toMatch(/skip it without mentioning it/);
+  });
+
   it("is bilingual", () => {
     expect(loc(tool().name, "nl")).toMatch(/bezoek/i);
     expect(loc(tool().name, "en")).toMatch(/visit/i);

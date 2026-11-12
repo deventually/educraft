@@ -36,4 +36,19 @@ describe("tool: visit-report (P38.6)", () => {
     expect(build("en")).toMatch(/invent nothing/i);
     for (const lang of ["nl", "en"] as const) expect(build(lang)).not.toMatch(/\{\{/);
   });
+
+  it("never fills in who or when, and links a criterion only when the note does (eval vr1)", () => {
+    expect(build("nl")).toContain("Vul nooit zelf een persoon of datum in.");
+    expect(build("en")).toContain("Never fill in a person or date yourself.");
+    expect(build("nl")).toMatch(/twijfel je, zet er dan geen criterium bij/);
+    expect(build("en")).toMatch(/when in doubt, add no criterion/);
+  });
+
+  it("never copies a name the anonymisation missed (eval vr2)", () => {
+    expect(build("nl")).toMatch(/neem je nooit over, ook niet één keer/);
+    expect(build("en")).toMatch(/is never copied, not even once/);
+    // Eval vr3: "supervisor" became "workplace supervisor".
+    expect(build("nl")).toMatch(/met de woorden of codes uit de steekwoorden/);
+    expect(build("en")).toMatch(/in the words or codes of the notes/);
+  });
 });

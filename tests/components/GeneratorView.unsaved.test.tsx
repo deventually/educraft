@@ -32,7 +32,13 @@ describe("GeneratorView with an unsaved result", () => {
       handlers.onToken("### Agreements\n- Send the planning.");
       handlers.onDone(meta);
     });
-    render(<GeneratorView tool={getToolBySlug("arcs-reactor")!} profiles={profiles} defaultProfileId="p1" />);
+    render(
+      <GeneratorView
+        tool={getToolBySlug("arcs-reactor")!}
+        profiles={profiles}
+        defaultProfileId="p1"
+      />,
+    );
     for (const box of screen.getAllByRole("textbox")) await user.type(box, "x");
     await user.selectOptions(screen.getByLabelText(/course level/i), "foundation year (year 1)");
     await user.click(screen.getByRole("button", { name: /^generate$/i }));

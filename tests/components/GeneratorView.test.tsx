@@ -29,6 +29,7 @@ vi.mock("~/lib/i18n/useT", () => ({
       stay: "Stay on this page",
       title: "The AI is still working",
     },
+    exportResult: { download: "Download as {format}" },
     tool: {
       contextProfile: "Context",
       noProfile: "No profile",

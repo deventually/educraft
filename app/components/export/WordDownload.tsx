@@ -25,12 +25,9 @@ export function WordDownload({
     setBusy(true);
     try {
       // Loaded on demand: the Word writer is large and most results never need it here.
-      const [{ toExportDoc }, { DOCX_TYPE, exportDocToDocx }, { safeFileName }] =
-        await Promise.all([
-          import("~/lib/export/doc"),
-          import("~/lib/export/docx"),
-          import("~/lib/export/filename"),
-        ]);
+      const [{ toExportDoc }, { DOCX_TYPE, exportDocToDocx }, { safeFileName }] = await Promise.all(
+        [import("~/lib/export/doc"), import("~/lib/export/docx"), import("~/lib/export/filename")],
+      );
       const bytes = await exportDocToDocx(
         toExportDoc({ title, locale: lang, sections: [{ heading: null, markdown }] }),
       );

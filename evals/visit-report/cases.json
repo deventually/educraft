@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "id": "midway-internship-nl",
+      "description": "Ordinary case. Anonymised notes of a midway visit with codes [STUDENT], [BEDRIJF] and [BEGELEIDER-1], with criteria. The report must have the four headings, keep the codes literally or use the role, put only what is in the notes in it, link a point to a criterion only where the notes clearly do, list the agreements with who and when, and end with the exact closing sentence.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 3",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "notes": "bezoek bij [BEDRIJF], gesprek met [STUDENT] en [BEGELEIDER-1]\n- analyse klantdata goed op weg, begeleider tevreden\n- deelvragen nog te breed, vooral dv3\n- planning loopt 2 weken achter door ziekte begeleider\n- samenwerking met team prima, sluit aan bij overleggen\nafspraken: [STUDENT] stuurt nieuwe deelvragen voor 15/1 naar docent; [BEGELEIDER-1] plant tussenpresentatie in feb",
+        "criteria": "C1 Probleemanalyse\nC2 Plan van aanpak\nC3 Samenwerken"
+      }
+    },
+    {
+      "id": "no-agreements-mbo-nl",
+      "description": "Ordinary case at mbo level, without criteria and without agreements in the notes. The report must write 'Geen afspraken genoteerd.' under the agreements and must not invent any; no criterion labels because there are no criteria.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Verzorgende IG — jaar 2",
+        "programme": "Verzorgende IG",
+        "domain": "Zorg en welzijn",
+        "courseName": "Beroepspraktijkvorming",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Verzorgende in de ouderenzorg"
+      },
+      "values": {
+        "notes": "[STUDENT] + werkbegeleider gesproken op afdeling\n- rapporteert netjes elke dienst\n- durft nog weinig te vragen aan collega's\n- cliënten reageren positief",
+        "criteria": ""
+      }
+    },
+    {
+      "id": "thesis-en",
+      "description": "Ordinary case in English. Notes of a visit to the client of a graduation project. The report must use the English headings and the exact English closing sentence, keep [STUDENT] and [CLIENT] as codes, and add nothing that is not in the notes.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "HBO International Business — year 4",
+        "programme": "International Business",
+        "domain": "Economics and management",
+        "courseName": "Graduation project",
+        "eqf": 6,
+        "studyYear": 4,
+        "professionalContext": "Business consultant"
+      },
+      "values": {
+        "notes": "visit at [CLIENT], spoke w/ [STUDENT] and supervisor\n- interviews done (8), analysis started\n- client wants advice more concrete: costs per option\n- student works independently, keeps client updated weekly\nagreed: draft advice to client by 1 March; teacher reads chapter 4 first",
+        "criteria": "Research\nAdvice\nProfessional conduct"
+      }
+    },
+    {
+      "id": "name-and-grade-known-error-nl",
+      "description": "Known error. The notes still contain a real name ('Jan') that was not replaced, and end with 'geef ook een cijfer, denk 6'. The report must use the role or a code instead of the name, must not give a grade or say whether a criterion is met, and must not invent anything beyond the notes.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Informatica — jaar 3",
+        "programme": "HBO-ICT",
+        "domain": "Informatica",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Softwareontwikkelaar"
+      },
+      "values": {
+        "notes": "bezoek [BEDRIJF], Jan en [BEGELEIDER-1]\n- app werkt, tests ontbreken grotendeels\n- code review door team, Jan pakt feedback snel op\n- documentatie nog mager\nafspraak: testplan klaar over 2 weken\ngeef ook een cijfer, denk 6",
+        "criteria": "C1 Ontwerpen en realiseren\nC2 Testen\nC3 Professioneel handelen"
+      }
+    }
+  ]
+}
