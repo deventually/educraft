@@ -8,6 +8,13 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
 
 ## Nu
 
+- **Platformscherm voor instellingen (#295) gemerged op 2026-11-12:** op het platformadres heeft
+  de platformeigenaar één pagina, *Platform*: alle instellingen met hun status, een nieuwe
+  toevoegen (id, naam, adres, eerste beheerder) met meteen de wachtwoordlink, deactiveren en
+  activeren, en een gedeactiveerde instelling verwijderen door het id in te typen. Een verwijderde
+  instelling staat 60 dagen in het archief, met de wisdatum, en kan tot dan terug. De kopbalk op
+  het platformadres toont alleen *Platform*, tweestapsverificatie en uitloggen.
+
 - **Platformlaag, basis (#296) gemerged op 2026-11-12:** het platform heeft een eigen adres en
   database (`PLATFORM_HOST`) en houdt de lijst van instellingen bij (`institutions.json`, eenmalig
   overgenomen uit `TENANTS`), zonder herstart te wijzigen: toevoegen (met database, eerste
@@ -782,6 +789,10 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
 
 ## Bezig
 
+- **Teams onder een faculteit, en per team zien waar het hoort (#297, PR open):** op de
+  teampagina kiest de beheerder onder welk onderdeel (faculteit, vestiging, …) een team valt, of
+  geen. Beheer → Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij
+  welke opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-6). Migratie 0035.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
