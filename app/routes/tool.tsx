@@ -18,6 +18,7 @@ import { listProfiles, getDefaultProfile } from "~/server/repositories/profiles.
 import { listCourses } from "~/server/repositories/courses.server";
 import { listDossiers } from "~/server/repositories/portfolio.server";
 import { courseLinkIntent } from "~/server/courses.server";
+import { lessonFromWorkIntent } from "~/server/lessonFromWork.server";
 import { addGenerationToDossier } from "~/server/evidence.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { DossierBar } from "~/components/portfolio/DossierBar";
@@ -227,6 +228,8 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   const linked = await courseLinkIntent(request, user.id, fd);
   if (linked) return linked;
+  const lesson = await lessonFromWorkIntent(request, user.id, fd);
+  if (lesson) return lesson;
   if (fd.get("intent") === "addToDossier") {
     const added = await addGenerationToDossier(
       user,

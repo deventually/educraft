@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { Link, useFetcher } from "react-router";
-import { ArrowRight, BookmarkCheck, FolderCheck, GraduationCap } from "lucide-react";
-import { Button, Label, Select } from "./ui";
+import { ArrowRight, BookmarkCheck, CalendarPlus, FolderCheck, GraduationCap } from "lucide-react";
+import { Button, Input, Label, Select } from "./ui";
 import { useActionToast } from "./Toast";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { ExportMenu } from "./export/ExportMenu";
@@ -25,15 +25,18 @@ export interface ResultActionsProps {
   forCriterion?: { dossierId: string; criterionId: string } | null;
   /** P30.1: the other saved steps of a multi-step tool, exported along with this one. */
   exportWith?: string[];
+  /** The result can become a lesson of the course it is kept at (`Stage.courseExport`). */
+  asLesson?: boolean;
 }
 
 /** What the tool page passes down to every result surface (P27.1). */
 export type ResultContext = Omit<
   ResultActionsProps,
-  "generationId" | "courseId" | "itemId" | "exportWith"
+  "generationId" | "courseId" | "itemId" | "exportWith" | "asLesson"
 >;
 
 type ActionResult = { ok: true; intent?: string } | { ok: false; error?: string };
+type LessonResult = { ok: true; itemId: string } | { ok: false; error?: string };
 
 const SEP = "::";
 
@@ -52,6 +55,7 @@ export function ResultActions({
   dossiers,
   forCriterion = null,
   exportWith = [],
+  asLesson = false,
 }: ResultActionsProps) {
   const t = useT();
   const m = t.resultActions;
@@ -59,13 +63,23 @@ export function ResultActions({
   const headingId = useId();
   const courseSelectId = useId();
   const evidenceSelectId = useId();
+  const lessonTitleId = useId();
   const courseFetcher = useFetcher<ActionResult>();
   const evidenceFetcher = useFetcher<ActionResult>();
+  const lessonFetcher = useFetcher<LessonResult>();
   const [linkedTo, setLinkedTo] = useState(courseId);
+  const [linkedItem, setLinkedItem] = useState(itemId);
 
   useActionToast(courseFetcher.data, (d) =>
     d.ok
       ? { variant: "success", message: m.toastSaved }
+      : d.error
+        ? { variant: "error", message: d.error }
+        : null,
+  );
+  useActionToast(lessonFetcher.data, (d) =>
+    d.ok
+      ? { variant: "success", message: m.toastLesson }
       : d.error
         ? { variant: "error", message: d.error }
         : null,
@@ -80,7 +94,10 @@ export function ResultActions({
 
   const keptAt = courseId || (courseFetcher.data?.ok ? linkedTo : "");
   const keptName = linkTargets.find((c) => c.courseId === keptAt)?.courseName;
+  const keptItem = courseId ? itemId : courseFetcher.data?.ok ? linkedItem : "";
+  const lesson = lessonFetcher.data?.ok ? lessonFetcher.data.itemId : "";
   const canKeep = Boolean(generationId);
+  const canAddLesson = canKeep && asLesson && Boolean(keptName) && !keptItem && !lesson;
   const showCriterion = canKeep && forCriterion !== null;
   const showEvidence = canKeep && !showCriterion && dossiers.length > 0;
   // Saved work can always be exported (P30.1).
@@ -93,7 +110,9 @@ export function ResultActions({
 
   function keepAtCourse(e: FormEvent<HTMLFormElement>) {
     const target = String(new FormData(e.currentTarget).get("target") ?? "");
-    setLinkedTo(target.split(SEP)[0] ?? "");
+    const [course = "", item = ""] = target.split(SEP);
+    setLinkedTo(course);
+    setLinkedItem(item);
   }
 
   function submitEvidence(e: FormEvent<HTMLFormElement>) {
@@ -150,6 +169,35 @@ export function ResultActions({
                 {m.viewInCourse}
               </Link>
             </p>
+          )}
+
+          {lesson && keptName && (
+            <p className="flex items-center gap-1.5 text-sm text-slate-700">
+              <CalendarPlus className="size-4 text-lime-700" aria-hidden />
+              {fmt(m.lessonAdded, { course: keptName })}
+              <Link
+                to={courseTabHref(keptAt, "plan", `item-${lesson}`)}
+                className="ml-1 font-medium text-violet-700 underline underline-offset-2 hover:text-violet-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700"
+              >
+                {m.viewLesson}
+              </Link>
+            </p>
+          )}
+
+          {canAddLesson && (
+            <lessonFetcher.Form method="post" className="flex flex-wrap items-end gap-2">
+              <input type="hidden" name="intent" value="addAsLesson" />
+              <input type="hidden" name="id" value={generationId ?? ""} />
+              <input type="hidden" name="courseId" value={keptAt} />
+              <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+                <Label htmlFor={lessonTitleId}>{m.lessonTitle}</Label>
+                <Input id={lessonTitleId} name="title" required maxLength={200} />
+              </div>
+              <Button type="submit" variant="secondary" size="sm">
+                <CalendarPlus className="size-4" aria-hidden />
+                {m.addAsLesson}
+              </Button>
+            </lessonFetcher.Form>
           )}
 
           {canKeep && !keptName && linkTargets.length > 0 && (

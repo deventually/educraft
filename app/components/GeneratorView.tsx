@@ -378,6 +378,7 @@ export function GeneratorView({
                 generationId={generationId}
                 courseId={courseId}
                 itemId={itemId}
+                asLesson={stage.courseExport === "lesson"}
               />
             </div>
           )}

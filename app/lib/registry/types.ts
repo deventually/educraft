@@ -209,9 +209,10 @@ export interface ToolStage {
   maxTokens?: number;
   /**
    * What this stage's output can become in a linked course (P26.2):
-   * "assessment-items" = a blueprint table that becomes a test's questions.
+   * "assessment-items" = a blueprint table that becomes a test's questions;
+   * "lesson" = a lesson plan that can be added as a lesson of the course.
    */
-  courseExport?: "assessment-items";
+  courseExport?: "assessment-items" | "lesson";
 }
 
 export interface ChatConfig {

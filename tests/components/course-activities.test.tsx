@@ -42,3 +42,33 @@ describe("Lesson goal (optional, one sentence)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("Work kept at a lesson", () => {
+  it("shows the work made for a lesson at that lesson, with where to open it", async () => {
+    const d = alignedCourse();
+    const [first, second] = d.activities;
+    const work = [
+      {
+        generationId: "g1",
+        itemId: first!.id,
+        toolName: { nl: "Les voorbereiden", en: "Prepare a lesson" },
+        createdAt: "2026-11-12T10:00:00Z",
+      },
+      { generationId: "g2", itemId: null, toolName: "Rubric", createdAt: "2026-11-12T10:00:00Z" },
+    ];
+    const Stub = createRoutesStub([
+      { path: "/", Component: () => <ActivitiesSection data={d} work={work} /> },
+    ]);
+    const { container } = render(<Stub initialEntries={["/"]} />);
+    const lesson = container.querySelector(`#item-${first!.id}`) as HTMLElement;
+    expect(within(lesson).getByText(/Les voorbereiden/)).toBeVisible();
+    expect(within(lesson).getByRole("link", { name: "Bekijk in Eerder gemaakt" })).toHaveAttribute(
+      "href",
+      "/projects",
+    );
+    const other = container.querySelector(`#item-${second!.id}`) as HTMLElement;
+    expect(within(other).queryByText(/Les voorbereiden/)).toBeNull();
+    expect(screen.queryByText(/Rubric/)).toBeNull();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
