@@ -16,6 +16,7 @@ const base: Data = {
   teacherWeek: null,
   startDateHint: null,
   checkin: false,
+  supervision: null,
 };
 
 const full: Data = {
@@ -219,5 +220,16 @@ describe("Start (P27.3)", () => {
     expect(screen.getByText("Niets gepland deze week.")).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Deze week" })).toBeNull();
     expect(screen.getByRole("region", { name: "Je cursussen" })).toBeInTheDocument();
+  });
+});
+
+describe("Mijn begeleiding on Start (P38.2)", () => {
+  it("shows the block only when the part is on", async () => {
+    const { unmount } = renderStart(full);
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByRole("heading", { name: "Mijn begeleiding" })).toBeNull();
+    unmount();
+    renderStart({ ...full, supervision: { tracks: [] } });
+    expect(await screen.findByRole("heading", { name: "Mijn begeleiding" })).toBeTruthy();
   });
 });

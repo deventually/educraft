@@ -4,14 +4,17 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #322 gemerged)_
 
 ## Nu
 
-- **Stagetraject, de basis (#319) gemerged op 2026-11-12:** onder de motorkap kan LimeOnIt nu een
-  stage- of afstudeertraject per student bijhouden onder een code, met zeven mijlpalen, en wist
-  het een afgesloten traject automatisch na de bewaartermijn van de beheerder (standaard 90
-  dagen). Het onderdeel staat uit tot de privacy-officer akkoord geeft (P38.1). Migratie 0037.
+- **Eval van Een gesprek voorbereiden (#322) gemerged op 2026-11-12:** `conversation-prep@v1`
+  via Claude Code, vijf cases, drie runs: geen harde check faalt. De rubric zegt nu wat de prompt
+  vraagt, zodat de beoordelaar dat niet meer als afwijking telt.
+- **Stage- en afstudeertraject, de onderlaag (P38.1, #319) gemerged op 2026-11-12:** een traject
+  per student onder een code, met zeven mijlpalen en rondes feedback. Een afgerond traject wordt na
+  de bewaartermijn vanzelf gewist (standaard 90 dagen). Het onderdeel staat standaard aan; een
+  beheerder kan het uitzetten (BESLUIT-2026-11-12-15).
 - **Een gesprek voorbereiden (P39.2, #321) gemerged op 2026-11-12:** een nieuwe tool geeft een
   vragenset per soort SLB-gesprek (start, voortgang, dreigend negatief BSA, stoppen, minor of stage
   kiezen): openingsvragen, doorvragen, wat je niet vraagt, afspraken en wanneer je doorverwijst.
@@ -890,6 +893,9 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
 
 ## Bezig
 
+- **Mijn begeleiding: de lijst en het traject (P38.2, PR open):** onder *Mijn begeleiding* opent
+  een docent een traject per student, ziet de voortgang en de volgende mijlpaal, en bewaart de
+  feedback uit *Studentwerk beoordelen* als ronde. Op Start staat een blok met de open trajecten.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
@@ -1020,8 +1026,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
 - De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
 - **Voor de privacy-officer:** de bewaartermijn en een aanvulling op de DPIA voor het stage- en
-  afstudeertraject (P38, BESLUIT-2026-11-12-11). Tot het akkoord staat het onderdeel uit voor
-  iedereen; bouwen mag wel.
+  afstudeertraject (P38, BESLUIT-2026-11-12-11). Het onderdeel staat aan; een beheerder kan het
+  tot het akkoord uitzetten (BESLUIT-2026-11-12-15).
 
 ## Later (bewust geparkeerd)
 

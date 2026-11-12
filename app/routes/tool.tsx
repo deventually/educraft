@@ -36,6 +36,8 @@ import { listAssessmentModels } from "~/server/repositories/assessmentModels.ser
 import { type ModelChoice, STARTER_MODELS } from "~/lib/assessment-models";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
+import { addGenerationToTrack, forTrack } from "~/server/tracks.server";
+import { TrackBar } from "~/components/tracks/TrackBar";
 
 /** A lesson or test as the tool page needs it: no plan details, no questions. */
 function courseItem(
@@ -149,6 +151,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     // PR D: from 80% of the month's limit a notice above the tool (a share, no euros).
     aiLimit: await aiLimitFor(user),
     forCriterion: forCriterion(ownDossiers, new URL(request.url).searchParams),
+    // P38.2: opened from a track milestone (`?track=&milestone=`); only an own, open track.
+    forTrack: await forTrack(user, search),
     tool,
     profiles,
     defaultProfileId: defaultProfile?.id ?? "",
@@ -228,6 +232,14 @@ export async function action({ request }: Route.ActionArgs) {
   const fd = await request.formData();
   const linked = await courseLinkIntent(request, user.id, fd);
   if (linked) return linked;
+  if (fd.get("intent") === "addToTrack") {
+    const kept = await addGenerationToTrack(user, {
+      generationId: String(fd.get("id") ?? ""),
+      trackId: String(fd.get("trackId") ?? ""),
+      milestone: String(fd.get("milestone") ?? ""),
+    });
+    return kept ? { ok: true as const, intent: "addToTrack" as const } : { ok: false as const };
+  }
   const lesson = await lessonFromWorkIntent(request, user.id, fd);
   if (lesson) return lesson;
   if (fd.get("intent") === "addToDossier") {
@@ -273,15 +285,17 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     linkTargets,
     dossiers,
     forCriterion,
+    forTrack,
     assessmentModels,
     aiLimit,
   } = loaderData;
-  const resultContext = { nextTools, linkTargets, dossiers, forCriterion };
+  const resultContext = { nextTools, linkTargets, dossiers, forCriterion, forTrack };
   const mode = modeOf(tool);
 
   return (
     <div className={cn(mode.fillsHeight && "flex min-h-0 flex-1 flex-col")}>
       {forCriterion && <DossierBar {...forCriterion} />}
+      {forTrack && <TrackBar {...forTrack} />}
       <ToolHeader tool={tool} verbatim={verbatim} helpOverlay={helpOverlay} locale={locale} t={t} />
       {aiLimit && aiLimit.state !== "ok" && (
         <div className="mb-4">
