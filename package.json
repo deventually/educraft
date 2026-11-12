@@ -36,6 +36,7 @@
     "eval:design-assessments": "vite-node -c scripts/eval.config.ts scripts/eval-design-assessments.ts",
     "eval:design-lessons": "vite-node -c scripts/eval.config.ts scripts/eval-design-lessons.ts",
     "eval:evaluation": "vite-node -c scripts/eval.config.ts scripts/eval-evaluation.ts",
+    "eval:feedforward": "vite-node -c scripts/eval.config.ts scripts/eval-feedforward.ts",
     "eval:rehearsal": "vite-node -c scripts/eval.config.ts scripts/eval-rehearsal.ts",
     "knip": "knip --no-progress",
     "test:mutation": "stryker run"

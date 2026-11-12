@@ -8,6 +8,7 @@ import TrackPage from "~/routes/tracks.$id";
 import { TrackBar } from "~/components/tracks/TrackBar";
 import { SupervisionBlock } from "~/components/tracks/SupervisionBlock";
 import { ResultActions } from "~/components/ResultActions";
+import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
@@ -84,10 +85,12 @@ const pageData = (tab = "overview") => ({
     kind: "internship",
     courseName: "Stage jaar 3",
     modelName: "Stageplan HBO-i",
+    criteria: "C1 Probleemstelling\nC2 Aanpak",
     closedAt: null,
     purgeAfter: null,
   },
   data: { status: { start: "done" }, deadlines: { visits: "2027-01-10" } },
+  models: [] as { id: string; displayName: string }[],
   rounds: [
     {
       id: "r1",
@@ -171,6 +174,30 @@ describe("Mijn begeleiding on Start", () => {
     expect(screen.getByRole("link", { name: "Alle trajecten" }).getAttribute("href")).toBe(
       "/tracks",
     );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("feedforward on the drafts tab (P38.3)", () => {
+  it("the drafts tab offers feedforward; the start tab does not", () => {
+    const { unmount } = renderRoute(TrackPage, pageData("drafts"));
+    expect(screen.getByRole("heading", { name: "Feedforward op een nieuwe versie" })).toBeTruthy();
+    unmount();
+    renderRoute(TrackPage, pageData("start"));
+    expect(screen.queryByRole("heading", { name: "Feedforward op een nieuwe versie" })).toBeNull();
+  });
+
+  it("paste, check for names, then send with the model's criteria; each step passes axe", async () => {
+    const { container } = renderWithRouter(
+      <FeedforwardPanel criteria={"C1 Probleemstelling\nC2 Aanpak"} />,
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    fireEvent.change(screen.getByLabelText("Tekst van de nieuwe versie"), {
+      target: { value: "Mijn plan van aanpak voor Jan de Vries." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Controleer op namen/ }));
+    // The name check comes first: nothing can be sent before it.
+    expect(screen.queryByRole("button", { name: "Geef feedforward" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

@@ -60,6 +60,7 @@ import { COURSE_DESIGN_ASSESSMENTS_PROMPT } from "./course-design-assessments@v1
 import { COURSE_DESIGN_ASSESSMENTS_PROMPT_V2 } from "./course-design-assessments@v2.prompt";
 import { COURSE_DESIGN_LESSONS_PROMPT } from "./course-design-lessons@v1.prompt";
 import { COURSE_EVALUATION_PROMPT } from "./course-evaluation@v1.prompt";
+import { FEEDFORWARD_PROMPT } from "./feedforward@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT, AGENT_DESIGN_PROMPT } from "./agents@v1.prompt";
 import { AGENT_ASSESSMENT_PROMPT_V2 } from "./agents@v2.prompt";
 import { AGENT_AI_RESILIENCE_PROMPT } from "./agent-ai-resilience@v1.prompt";
@@ -146,6 +147,7 @@ const ALL: PromptDef[] = [
   COURSE_DESIGN_ASSESSMENTS_PROMPT_V2,
   COURSE_DESIGN_LESSONS_PROMPT,
   COURSE_EVALUATION_PROMPT,
+  FEEDFORWARD_PROMPT,
   COGNITIVE_ARCHITECT_ANALYST,
   COGNITIVE_ARCHITECT_GENERATOR,
   COGNITIVE_ARCHITECT_VALIDATOR,
