@@ -34,6 +34,7 @@ import { organisation } from "./organisation";
 import { pages } from "./pages";
 import { people } from "./people";
 import { pilot } from "./pilot";
+import { platform } from "./platform";
 import { portfolio } from "./portfolio";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioGuided } from "./portfolioGuided";
@@ -101,6 +102,7 @@ export const en: Messages = {
   pages,
   people,
   pilot,
+  platform,
   portfolio,
   portfolioExport,
   portfolioGuided,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -76,5 +76,16 @@ describe("ConfirmDialog", () => {
     });
     await user.click(screen.getByRole("button", { name: "Verwijderen" }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("wraps Tab from the last button back to the first focusable control, past hidden fields", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+    await user.click(screen.getByRole("button", { name: "Verwijderen" }));
+    const dialog = screen.getByRole("dialog");
+    const [cancel, confirm] = within(dialog).getAllByRole("button");
+    confirm!.focus();
+    await user.tab();
+    expect(cancel).toHaveFocus();
   });
 });
