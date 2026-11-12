@@ -84,6 +84,14 @@ describe("buildQuestionsMessage", () => {
   it("throws on an unknown section", () => {
     expect(() => buildQuestionsMessage(withOutline(), LU, "nope", "nl")).toThrow(/Unknown/);
   });
+
+  it("adds what the anchor's course already says, right after the outcome", () => {
+    const course = "<course>\nGroepsgrootte: 24\n</course>";
+    const m = buildQuestionsMessage(withOutline(), LU, "s1", "nl", course);
+    expect(m).toContain(course);
+    expect(m.indexOf(course)).toBeLessThan(m.indexOf("<section>"));
+    expect(buildQuestionsMessage(withOutline(), LU, "s1", "nl")).not.toContain("<course>");
+  });
 });
 
 describe("parseQuestions", () => {
@@ -184,6 +192,13 @@ describe("buildSectionDraftMessage", () => {
       criterionIds: [C2],
     });
     expect(buildSectionDraftMessage(withEv, LU, "s1", "", "nl")).toContain("Tweedejaars.");
+  });
+
+  it("writes from the course's facts too: they are the teacher's own material", () => {
+    const course = "<course>\nGroepsgrootte: 24\n</course>";
+    const m = buildSectionDraftMessage(withOutline(), LU, "s1", "", "nl", course);
+    expect(m).toContain(course);
+    expect(buildSectionDraftMessage(withOutline(), LU, "s1", "", "nl", "")).toBeNull();
   });
 });
 

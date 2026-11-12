@@ -17,6 +17,13 @@ test("the chapter tab guides writing part by part, by keyboard", async ({ page }
   await page.waitForURL(/\/portfolio\/[^/?]+$/);
   await page.goto(`${new URL(page.url()).pathname}/outcome/e2e-lu1?tab=chapter`);
 
+  // What the anchored lesson's course already says, read only, with the way to the course.
+  const facts = page.getByRole("region", { name: "Uit je cursus" });
+  await expect(facts.getByText("De student berekent een dosis met breuken.")).toBeVisible();
+  await expect(
+    facts.getByRole("link", { name: "Klopt iets niet meer? Pas het aan in Rekenen (e2e)" }),
+  ).toBeVisible();
+
   const guided = page.getByRole("region", { name: "Schrijf per onderdeel" });
   await expect(guided.getByRole("heading", { name: "Beginsituatie" })).toBeVisible();
   await expect(

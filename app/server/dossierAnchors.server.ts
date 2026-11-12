@@ -20,6 +20,7 @@ import {
   parseAnchorValue,
   snapshotCriteria,
 } from "~/lib/portfolio/anchors";
+import { anchorFacts, type CourseFactsView } from "~/lib/portfolio/courseFacts";
 import { addEvidence } from "~/lib/portfolio/edit";
 import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
 import type { Anchor, CourseEvidencePart, DossierData } from "~/lib/portfolio/types";
@@ -58,6 +59,22 @@ export async function anchorView(
     query: anchorToolQuery(anchor),
     ...description,
   };
+}
+
+/**
+ * The facts of one outcome's anchor; null without a course anchor, for a course the teacher may
+ * no longer edit (`getCourse` is owner or member only), or when its item is gone.
+ */
+export async function anchorCourseFacts(
+  userId: string,
+  anchor: Anchor | undefined,
+  locale: Locale,
+): Promise<CourseFactsView | null> {
+  const ref = anchor?.course;
+  if (!ref) return null;
+  const course = await getCourse(userId, ref.courseId);
+  const facts = course ? anchorFacts(course, ref, locale) : [];
+  return course && facts.length > 0 ? { courseId: course.id, course: course.name, facts } : null;
 }
 
 const samePart = (a: CourseEvidencePart, b: CourseEvidencePart) =>
