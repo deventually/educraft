@@ -8,6 +8,10 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
 
 ## Nu
 
+- **Stagetraject, de basis (#319) gemerged op 2026-11-12:** onder de motorkap kan LimeOnIt nu een
+  stage- of afstudeertraject per student bijhouden onder een code, met zeven mijlpalen, en wist
+  het een afgesloten traject automatisch na de bewaartermijn van de beheerder (standaard 90
+  dagen). Het onderdeel staat uit tot de privacy-officer akkoord geeft (P38.1). Migratie 0037.
 - **Een gesprek voorbereiden (P39.2, #321) gemerged op 2026-11-12:** een nieuwe tool geeft een
   vragenset per soort SLB-gesprek (start, voortgang, dreigend negatief BSA, stoppen, minor of stage
   kiezen): openingsvragen, doorvragen, wat je niet vraagt, afspraken en wanneer je doorverwijst.

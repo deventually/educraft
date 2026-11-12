@@ -20,6 +20,12 @@ conversation technique and names no conversation model. Score each shared criter
   exact closing sentence ("Dit is een vragenset voor een situatie, niet voor een bepaalde student.
   Jij kiest wat past." / "This is a set of questions for a situation, not for a particular student.
   You choose what fits."). Finished, not cut off.
+
+  Two things the prompt asks for and that are no deviation: for `negative-study-advice` the first
+  opening bullet is an instruction to the teacher (name the topic straight away) rather than a
+  quoted question; and the programme, course and profession named in the case's teaching context
+  come from that context, they are not invented. Check the fixed sentences against the exact
+  wording above before calling them altered.
 - **levelFit** — The questions suit a student of the programme and year in the case (plain spoken
   language for mbo, no jargon); the notes address the teacher as a professional.
 - **languageQuality** — Correct, natural target language; in Dutch no anglicisms where a Dutch
