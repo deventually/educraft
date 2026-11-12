@@ -122,6 +122,25 @@ describe("applyImprovementIntent", () => {
     });
   });
 
+  it("adds a point accepted from the evaluation as such, and refuses another source", () => {
+    const data = applied(
+      withPoints(),
+      form({
+        intent: "add-improvement",
+        text: "Meer oefentijd",
+        place: "course",
+        source: "evaluation",
+      }),
+    );
+    expect(data.improvements?.[0]?.source).toBe("evaluation");
+    expect(
+      applyImprovementIntent(
+        withPoints(),
+        form({ intent: "add-improvement", text: "Ok", place: "course", source: "ai" }),
+      )?.ok,
+    ).toBe(false);
+  });
+
   it("marks a point done and open again, and removes one", () => {
     const a = point();
     const b = point();

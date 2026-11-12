@@ -116,6 +116,12 @@ Geef je een cursus volgend studiejaar of in een ander semester opnieuw? Gebruik 
 
 Na het kopiëren opent het tabblad **Controle** van de kopie. Daar bedenk je wat er na de evaluatie van vorige keer anders moet, want ook wat toen niet goed liep, is meegekomen.
 
+## Verbeterpunten en de cursusevaluatie
+
+Op het tabblad **Controle** staat **Verbeterpunten**: wat je de volgende keer anders wilt doen, bij de les, de toets of de leeruitkomst waar het over gaat, of bij de hele cursus. Zet er zelf een punt bij, of laat ze voorstellen met **Cursusevaluatie verwerken**. Rond een punt af als het gedaan is. Open punten gaan mee als je de cursus kopieert voor een nieuwe uitvoering; op de kopie staan ze bovenaan, onder **Uit de vorige uitvoering**.
+
+Bij **Cursusevaluatie verwerken** plak je de open antwoorden van de studentenenquête, of kies je het CSV-bestand van de enquête. Het aantal respondenten haalt LimeOnIt uit de CSV; anders vul je het zelf in. Eerst doe je de namencheck: namen van studenten, collega's en jezelf worden in je browser vervangen door een code, voordat er tekst naar de AI gaat. Dan krijg je drie blokken: **wat zeiden studenten** (thema's met hoe vaak ze terugkomen en letterlijke citaten), **waar ging het mis** (op zijn plek in de cursus, met de toetsanalyse als je die aan een toets koppelde) en **wat kan er beter**. Per verbeterpunt zeg je **Akkoord** (het komt bij je verbeterpunten) of **Niet akkoord** (het verdwijnt). De enquête zelf wordt niet bewaard. Een citaat dat niet letterlijk in de enquête staat, laat LimeOnIt weg, en wat maar één student zei, is geen thema. Bij minder dan tien respondenten lees je de uitkomst voorzichtig. Opmerkingen over een docent of medestudent als persoon worden geen thema.
+
 ## Laat reviewen
 
 Onder **Reviewteam** op de cursuspagina laat je kritische collega's je cursus nakijken, bijvoorbeeld een **Toetsdeskundige** (toetsmatrijs, Bloom-spreiding, formulering, weging) en een **Ontwerper** (constructive alignment, activerend onderwijs, studielast). Zij zijn AI en draaien op het model dat je kiest. Je kiest zelf wie er in je reviewteam zit; wat elke reviewer doet, lees je bij [Je reviewteam](/help/review-team).

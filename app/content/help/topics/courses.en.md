@@ -115,6 +115,12 @@ Teaching a course again next study year or in another semester? On the **Overvie
 
 After copying, the **Check** tab of the copy opens. There you decide what has to change after last run's evaluation, because whatever did not go well then came along too.
 
+## Improvements and the course evaluation
+
+On the **Check** tab you find **Improvements**: what you want to do differently next time, with the lesson, test or learning outcome it is about, or with the whole course. Add a point yourself, or have them proposed with **Process course evaluation**. Finish a point when it is done. Open points come along when you copy the course for a new run; on the copy they are at the top, under **From the previous run**.
+
+With **Process course evaluation** you paste the open answers of the student survey, or choose the survey's CSV file. LimeOnIt takes the number of respondents from the CSV; otherwise you fill it in. First you do the name check: names of students, colleagues and yourself are replaced by a code in your browser, before any text goes to the AI. Then you get three blocks: **what students said** (themes with how often they come back and verbatim quotes), **where it went wrong** (in its place in the course, with the test analysis if you linked one to a test) and **what can be better**. For each improvement you say **Agree** (it joins your improvements) or **Disagree** (it goes). The survey itself is not kept. A quote that is not verbatim in the survey is left out, and what only one student said is not a theme. With fewer than ten respondents, read the result with care. Remarks about a teacher or fellow student as a person do not become a theme.
+
 ## Get a review
 
 Under **Review team** on the course page, critical colleagues look at your course, for example an **Assessment expert** (assessment blueprint, Bloom spread, wording, weighting) and a **Designer** (constructive alignment, active learning, study load). They are AI and run on the model you pick. You choose who is on your review team; what each reviewer does is in [Your review team](/help/review-team).
