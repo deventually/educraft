@@ -82,6 +82,20 @@ describe("SlideTemplateCard (P30.7b)", () => {
     await waitFor(() => expect(calls[0]?.get("intent")).toBe("delete"));
   });
 
+  it("keeps the keyboard where it was: on the upload button, and on the field after removing", async () => {
+    const user = userEvent.setup();
+    show({ name: "Hogeschool.pptx" }, { ok: "deleted" });
+    const upload = screen.getByRole("button", { name: "Sjabloon uploaden" });
+    expect(upload).not.toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Verwijder sjabloon Hogeschool.pptx" }));
+    await waitFor(() => expect(screen.getByText("Sjabloon verwijderd.")).toBeTruthy());
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByLabelText("Sjabloon (.pptx of .potx, max. 10 MB)"),
+      ),
+    );
+  });
+
   it("has no axe violations", async () => {
     const { container } = show({ name: "Hogeschool.pptx" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);

@@ -31,7 +31,7 @@ export function SlideTemplateCard({
   const fieldId = useId();
   const headingId = useId();
   const form = useRef<HTMLFormElement>(null);
-  const busy = fetcher.state !== "idle";
+  const field = useRef<HTMLInputElement>(null);
 
   useActionToast(fetcher.data, (d) => {
     if ("error" in d) return { variant: "error", message: m.errors[d.error] };
@@ -39,6 +39,8 @@ export function SlideTemplateCard({
       form.current?.reset();
       return { variant: "success", message: fmt(m.saved, { name: d.name }) };
     }
+    // The remove button is gone now; the keyboard goes on at the field.
+    field.current?.focus();
     return { variant: "success", message: m.deleted };
   });
 
@@ -58,7 +60,6 @@ export function SlideTemplateCard({
               <Button
                 type="submit"
                 variant="secondary"
-                disabled={busy}
                 aria-label={fmt(m.delete, { name: current.name })}
               >
                 <Trash2 className="size-4" aria-hidden />
@@ -78,9 +79,18 @@ export function SlideTemplateCard({
             <label htmlFor={fieldId} className="block text-sm font-medium text-slate-800">
               {m.field}
             </label>
-            <FileInput id={fieldId} name="file" accept=".pptx,.potx" required className="mt-1" />
+            <FileInput
+              ref={field}
+              id={fieldId}
+              name="file"
+              accept=".pptx,.potx"
+              required
+              className="mt-1"
+            />
           </div>
-          <Button type="submit" variant="secondary" disabled={busy}>
+          {/* Not disabled while sending: that would drop the keyboard focus. Another upload
+              only replaces the template. */}
+          <Button type="submit" variant="secondary">
             <Upload className="size-4" aria-hidden />
             {m.upload}
           </Button>

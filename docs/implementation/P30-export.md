@@ -249,7 +249,13 @@ als het past.
   gebruiken (de dia-indelingen van de hogeschool vullen) vraagt een **derde bibliotheek**, zoals
   `pptx-automizer` (MIT, bouwt op `pptxgenjs`). **Dat vraagt eerst Bastiaans akkoord**
   (voorkeuren.md). Zonder die bibliotheek blijft 30.7a de huisstijl voor PowerPoint.
-- **Upload aan de grens:** alleen een beheerder; Zod op het formulier; max 10 MB; het bestand moet
+- **Uitgevoerd voor PowerPoint (BESLUIT-2026-11-12-13, Bastiaan in de projectthread):** een
+  docent uploadt een eigen .pptx of .potx op Account, een teamleider een voor het team op de
+  teampagina; bij het exporteren kiest de docent "LimeOnIt (standaard)" of een van die sjablonen.
+  Toch **zonder derde bibliotheek**: LimeOnIt vult de indeling "Titel en inhoud" van het sjabloon
+  zelf met JSZip (al een dependency), dus `pptx-automizer` was niet nodig. Word-sjablonen volgen
+  apart.
+- **Upload aan de grens (oorspronkelijk plan):** alleen een beheerder; Zod op het formulier; max 10 MB; het bestand moet
   een zip zijn met het juiste `[Content_Types].xml`; uitpakken met een grens op het totaal (geen
   zipbom); geen macro's (`.dotm`/`.potm` geweigerd). Eén sjabloon per soort per instelling; een
   nieuw sjabloon vervangt het oude, met een voorbeeld vooraf.
@@ -275,7 +281,7 @@ data via `exportAs`), `docs/implementation/README.md` en het bord.
 | 30.5 Brightspace | 30.1; vragen ook `test-items-items@v4` met meting | 30.4 |
 | 30.6 GradeWork (CSV) | een voorbeeld-CSV van de GradeWork-beheerder of Xebic; na de pilot | alles |
 | 30.7a Huisstijl als instellingen | 30.4 | — |
-| 30.7b Eigen sjabloon | 30.7a; PowerPoint ook akkoord op een derde bibliotheek | — |
+| 30.7b Eigen sjabloon | PowerPoint: zonder 30.7a, zonder derde bibliotheek | — |
 
 ## Raakvlakken
 

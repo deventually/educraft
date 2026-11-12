@@ -545,6 +545,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   opening slide, a slide per phase with its list items as points, a closing slide, more than six
   points split over a next slide. The teacher's text goes in the speaker notes; the time plan and
   the check never go on a slide. `pptx.ts` (`pptxgenjs`) and `SlidePreview` both read the deck.
+  **A PowerPoint template (30.7b):** a teacher uploads one on `/account`, a team's lead one on the
+  team page (`slide_templates`, at most one per teacher and per team; `slideTemplates.server.ts`
+  reads only one's own or one's teams' templates in the WHERE clause). `checkPptxTemplate` checks
+  the bytes at the boundary (a real package, no macros, a cap on the unpacked size, a layout with a
+  title and a body placeholder). In the export panel the teacher picks one (`?template=<id>`, a 404
+  for anyone who may not use it); `fillPptxTemplate` (`pptxTemplate.ts`, JSZip, no extra library)
+  removes the template's own slides and writes each slide in its "Title and Content" layout, so the
+  master's logo, colours and fonts come along; the notes come from the `pptxgenjs` file.
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved
