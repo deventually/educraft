@@ -43,6 +43,8 @@ import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
 import { CopiedNotice, CourseCopy } from "~/components/courses/CourseCopy";
 import { copyRunAction } from "~/server/courseCopy.server";
+import { improvementAction } from "~/server/courseImprovements.server";
+import { CourseImprovements } from "~/components/courses/CourseImprovements";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
@@ -127,6 +129,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     (await memberAction(request, user, course)) ??
     (await courseProgrammeAction(request, user, course.id)) ??
     (await copyRunAction(request, user, course)) ??
+    (await improvementAction(request, user, course)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -186,7 +189,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         r.intent === "remove-member" ||
         r.intent === "transfer-course" ||
         r.intent === "programme-place" ||
-        r.intent === "programme-remove"
+        r.intent === "programme-remove" ||
+        r.intent === "improvement"
       )
         return { variant: "success", message: r.message };
       if (r.intent === "review" || r.intent === "decide")
@@ -333,6 +337,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         {tab === "check" && (
           <>
             {params.get("copied") === "1" && <CopiedNotice />}
+            <CourseImprovements data={data} />
             <CoverageMatrix data={data} matrix={matrix} />
             <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
             {review && (

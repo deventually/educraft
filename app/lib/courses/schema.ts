@@ -9,6 +9,9 @@ import {
   GRADINGS,
   type CourseData,
   HOURS_PER_EC,
+  IMPROVEMENT_PLACE_KINDS,
+  IMPROVEMENT_SOURCES,
+  IMPROVEMENT_STATUSES,
 } from "./types";
 
 /** Boundary limits for a course (brief P20, "Het model"). */
@@ -37,6 +40,7 @@ export const COURSE_LIMITS = {
   groupSize: 1_000,
   disciplines: 12,
   hoursPerWeek: 60,
+  improvements: 30,
 } as const;
 
 const Id = z.string().min(1).max(COURSE_LIMITS.id);
@@ -153,6 +157,23 @@ const ScheduleSchema = z.object({
   deliveryMode: z.enum(DELIVERY_MODES).optional(),
 });
 
+const ImprovementSchema = z.object({
+  id: Id,
+  text: z.string().min(1).max(COURSE_LIMITS.text),
+  place: z.union([
+    z.object({ kind: z.literal("course") }),
+    z.object({ kind: z.enum(IMPROVEMENT_PLACE_KINDS), id: Id }),
+  ]),
+  status: z.enum(IMPROVEMENT_STATUSES),
+  source: z.enum(IMPROVEMENT_SOURCES),
+  run: z
+    .object({
+      studyYear: z.string().min(1).max(COURSE_LIMITS.code).optional(),
+      phase: z.string().min(1).max(COURSE_LIMITS.title).optional(),
+    })
+    .optional(),
+});
+
 export const CourseDataSchema = z
   .object({
     code: z.string().min(1).max(COURSE_LIMITS.code).optional(),
@@ -169,6 +190,8 @@ export const CourseDataSchema = z
     outcomes: z.array(OutcomeSchema).max(COURSE_LIMITS.outcomes),
     activities: z.array(ActivitySchema).max(COURSE_LIMITS.activities),
     assessments: z.array(AssessmentSchema).max(COURSE_LIMITS.assessments),
+    // A place may point at a removed item: it then reads as the whole course (P33.1).
+    improvements: z.array(ImprovementSchema).max(COURSE_LIMITS.improvements).optional(),
   })
   .superRefine((d, ctx) => {
     // The stored graph is always consistent: unique ids, no dangling references.
