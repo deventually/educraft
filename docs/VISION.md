@@ -231,3 +231,48 @@ Direction, not commitment — sequence by real demand.
 - Not a content repository or course marketplace (initially).
 - Not a grading-of-record system.
 - Not a set of bespoke per-country codebases.
+
+---
+
+## 12. Het doel in de praktijk: het onderwijswerk van een docent dragen
+
+*Toegevoegd 2026-11-12 (BESLUIT-2026-11-12-8 en -9). Nieuwe delen van deze visie zijn
+Nederlands; de rest wordt vertaald wanneer we hem aanraken (BESLUIT-2026-11-03-1).*
+
+**LimeOnIt draagt het onderwijswerk van een docent.** Niet "alle docenttaken overnemen", maar het
+werk rond ontwerpen, lesgeven, toetsen, nakijken, begeleiden, evalueren en professionaliseren. Dat
+is de werkplek die sinds november gegroeid is: cursussen met samenhang, het toetsprogramma, de
+BDB/BKE-werkplaats en het reviewteam.
+
+- **De docent beslist.** LimeOnIt doet het werk voor, de docent tekent. Bij alles wat een student
+  raakt (cijfer, oordeel, feedback) is het resultaat een concept. Beoordelen van leerresultaten is
+  hoog risico onder de AI-verordening (BESLUIT-2026-07-03-4).
+- **Een plek, geen nieuw menu.** Een hulpje is bij voorkeur een knop op een plek die al bestaat
+  (cursus, toets, rubric, dossier, traject), en Volgende stap laat het vinden.
+- **Zonder AI als het kan.** Rekenwerk (kalibreren, cijfers, toetsanalyse) is puur en
+  controleerbaar.
+- **Studentgegevens zo weinig mogelijk.** Anonimiseren in de browser, namen nooit in de database,
+  studentwerk nooit gedeeld. Waar een systeem van de instelling het officiële dossier is (Osiris,
+  OnStage), is LimeOnIt de werkbank ernaast en niet een tweede dossier.
+
+### De toets van drie vragen
+
+Voordat er een nieuw hulpje bij komt:
+
+1. **Kent LimeOnIt hier al iets van?** Een cursus, rubric, toets, dossier of opleiding. Dan kan het
+   hulpje meer dan een losse chatbot, omdat het de eigen spullen van de docent kent.
+2. **Wordt het onderwijs er beter van, of alleen sneller?** Een betere toets of betere feedback
+   telt; sneller mailen niet.
+3. **Krijgt het resultaat een vaste plek in de app?** Het blijft ergens staan, met een volgende
+   stap, en niet als los lijstje in een nieuw menu.
+
+Twee keer ja: het mag erin. Eén of geen keer ja: het blijft liggen. Voorbeeld: verbeterpunten uit
+de cursusevaluatie is drie keer ja; een mail aan een student beantwoorden is drie keer nee.
+
+### Wat bewust buiten LimeOnIt blijft
+
+E-mail van studenten, vergaderverslagen, studenten met een functiebeperking en toetsvoorzieningen,
+fraude en plagiaat, roosteren en Osiris koppelen, en een SLB-dossier per student
+(BESLUIT-2026-11-12-12). Daar heeft LimeOnIt geen eigen gegevens voor, is de didactische winst
+klein, of zijn de gegevens te gevoelig. De hulpjes die er wel komen staan in de briefs P33 t/m P39
+(`docs/implementation/README.md`, *Docenthulpjes*).
