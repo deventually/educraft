@@ -4,14 +4,17 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #304 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #305 gemerged)_
 
 ## Nu
 
-- **BDB/BKE: inspreken bij geleid schrijven en bij bewijs (#304) gemerged op 2026-11-12:** bij elke
-  vraag van *Schrijf per onderdeel* en bij de tekst van een bewijsstuk staat het microfoonknopje; de
-  ingesproken tekst komt achter wat er al staat en wordt pas bewaard als de docent zelf op een knop
-  drukt. Alleen zichtbaar met een spraakserver; geen migratie, geen prompts.
+- **Het hele hoofdstuk in één keer (#305) gemerged op 2026-11-12:** op het tabblad *Hoofdstuk*
+  bedenkt *Stel alle vragen* de vragen voor elk onderdeel, die de docent op één scherm beantwoordt,
+  en *Stel het hoofdstuk op* schrijft alle onderdelen die nog niet in het hoofdstuk staan, één voor
+  één in volgorde. De knoppen per onderdeel blijven. Geen promptwijziging, geen migratie.
+- **Inspreken bij geleid schrijven en bij bewijs (#304) gemerged op 2026-11-12:** naast elk
+  antwoord van geleid schrijven en bij de tekst van nieuw bewijs staat een knop om in te spreken;
+  wat je zegt komt als tekst in het veld, en je past het daarna zelf aan. Geen migratie.
 - **Bewijs in één keer toevoegen (#303) gemerged op 2026-11-12:** op de nieuwe pagina
   *Bewijs in één keer toevoegen* kiest de docent veel bestanden of een hele map. LimeOnIt stelt per
   bestand de leeruitkomst, soort, criteria en regel van het verplicht bewijs voor; de docent vinkt

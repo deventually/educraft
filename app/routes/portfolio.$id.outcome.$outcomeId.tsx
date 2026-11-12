@@ -4,9 +4,9 @@ import type { Route } from "./+types/portfolio.$id.outcome.$outcomeId";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
 import { outcomeLabel } from "~/lib/portfolio/format";
 import { LIMITS } from "~/lib/portfolio/schema";
-import type { DossierData, Outcome } from "~/lib/portfolio/types";
-import { writingSections } from "~/lib/portfolio/guided";
-import { type GuidedSectionView, GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import type { DossierData } from "~/lib/portfolio/types";
+import { guidedView } from "~/lib/portfolio/guided";
+import { GuidedWriting, guidedDone, guidedPending } from "~/components/portfolio/GuidedWriting";
 import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
@@ -92,19 +92,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-function guidedView(d: DossierData, outcome: Outcome): GuidedSectionView[] {
-  const number = new Map(outcome.criteria.map((c, i) => [c.id, i + 1]));
-  return writingSections(outcome).map((s) => {
-    const saved = d.guided?.[outcome.id]?.[s.id];
-    return {
-      ...s,
-      covers: s.criterionIds.flatMap((id) => number.get(id) ?? []).sort((a, b) => a - b),
-      questions: saved?.questions ?? [],
-      answers: saved?.questions.map((_, i) => saved.answers[i] ?? "") ?? [],
-    };
-  });
-}
-
 function storedReview(r: NonNullable<DossierData["reviews"]>[string] | undefined) {
   if (!r) return undefined;
   return { ...r, modelName: modelDisplayName(r.model) };
@@ -138,21 +125,19 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       if (intent === "review") return { variant: "pending", message: t.portfolio.coach.pending };
       if (intent === "proofread")
         return { variant: "pending", message: t.portfolio.proofread.pending };
-      if (intent.startsWith("guideQuestions:"))
-        return { variant: "pending", message: t.portfolioGuided.pendingQuestions };
-      if (intent.startsWith("guideDraft:"))
-        return { variant: "pending", message: t.portfolioGuided.pendingDraft };
+      if (intent.startsWith("guide"))
+        return { variant: "pending", message: guidedPending(intent, t.portfolioGuided) };
       return { variant: "pending", message: t.toast.saving };
     },
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
+      if (r.intent.startsWith("guide"))
+        return { variant: "success", message: guidedDone(r, t.portfolioGuided) };
       const tr = t.portfolio.proofread;
       const done: Record<string, string> = {
         refreshCourseEvidence: t.portfolio.outcome.refreshed,
         review: t.portfolio.coach.done,
-        guideQuestions: t.portfolioGuided.questions,
-        guideDraft: t.portfolioGuided.done,
         takeProofread: tr.taken,
         skipProofread: tr.skipped,
       };

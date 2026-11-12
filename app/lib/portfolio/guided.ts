@@ -32,6 +32,31 @@ export interface WritingSection {
   unverified?: true;
 }
 
+/** One part of the chapter as the page shows it: the section, its questions and the answers. */
+export interface GuidedSectionView extends WritingSection {
+  /** 1-based numbers of the criteria it covers. */
+  covers: number[];
+  questions: string[];
+  answers: string[];
+  /** A paragraph from these answers is in the chapter. */
+  drafted: boolean;
+}
+
+/** Every section of the outcome's chapter with what the teacher was asked and answered. */
+export function guidedView(d: DossierData, outcome: Outcome): GuidedSectionView[] {
+  const number = new Map(outcome.criteria.map((c, i) => [c.id, i + 1]));
+  return writingSections(outcome).map((s) => {
+    const saved = d.guided?.[outcome.id]?.[s.id];
+    return {
+      ...s,
+      covers: s.criterionIds.flatMap((id) => number.get(id) ?? []).sort((a, b) => a - b),
+      questions: saved?.questions ?? [],
+      answers: saved?.questions.map((_, i) => saved.answers[i] ?? "") ?? [],
+      drafted: saved?.draftedAt !== undefined,
+    };
+  });
+}
+
 /** The form's outline, or one section per criterion when the form gives none. */
 export function writingSections(o: Outcome): WritingSection[] {
   if (o.outline?.length) {

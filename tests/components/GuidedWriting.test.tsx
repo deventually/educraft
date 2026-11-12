@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { render as rtlRender, screen, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
-import { GuidedWriting, type GuidedSectionView } from "~/components/portfolio/GuidedWriting";
+import { GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import type { GuidedSectionView } from "~/lib/portfolio/guided";
 import { C1, C2 } from "../portfolio/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -23,6 +24,7 @@ const sections: GuidedSectionView[] = [
     covers: [2],
     questions: ["Welke groep had je?", "Wat konden ze al?"],
     answers: ["Tweedejaars.", ""],
+    drafted: false,
   },
   {
     id: "s2",
@@ -33,6 +35,7 @@ const sections: GuidedSectionView[] = [
     covers: [1],
     questions: [],
     answers: [],
+    drafted: false,
   },
 ];
 
@@ -90,6 +93,7 @@ describe("GuidedWriting", () => {
             covers: [1],
             questions: [],
             answers: [],
+            drafted: false,
           },
         ]}
         draftMode={false}
@@ -98,5 +102,34 @@ describe("GuidedWriting", () => {
     expect(screen.getByRole("heading", { name: "Criterium 1" })).toBeInTheDocument();
     expect(screen.getByText("De les heeft een heldere structuur.")).toBeInTheDocument();
     expect(screen.queryByText("Dekt criterium 1")).toBeNull();
+  });
+
+  it("asks the questions of every section in one go, until all have them", () => {
+    const { unmount } = render(<GuidedWriting sections={sections} draftMode={false} />);
+    const all = screen.getByRole("button", { name: "Stel alle vragen" });
+    expect(all).toHaveAttribute("name", "intent");
+    expect(all).toHaveAttribute("value", "guideQuestionsAll");
+    unmount();
+    const asked = sections.map((s) => ({ ...s, questions: ["Wat deed je?", "Waarom?"] }));
+    render(<GuidedWriting sections={asked} draftMode={false} />);
+    expect(screen.queryByRole("button", { name: "Stel alle vragen" })).toBeNull();
+  });
+
+  it("in draft mode writes the whole chapter with one button, section by section", async () => {
+    const { container } = render(<GuidedWriting sections={sections} draftMode />);
+    const write = screen.getByRole("button", { name: "Stel het hoofdstuk op" });
+    expect(write).toHaveAttribute("value", "guideDraftAll");
+    expect(screen.getByText(/één voor één, in volgorde/)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no chapter button in coaching mode or when every section is written", () => {
+    const { unmount } = render(<GuidedWriting sections={sections} draftMode={false} />);
+    expect(screen.queryByRole("button", { name: "Stel het hoofdstuk op" })).toBeNull();
+    unmount();
+    const written = sections.map((s) => ({ ...s, drafted: true }));
+    render(<GuidedWriting sections={written} draftMode />);
+    expect(screen.queryByRole("button", { name: "Stel het hoofdstuk op" })).toBeNull();
+    expect(screen.getAllByText("Staat in je hoofdstuk.")).toHaveLength(2);
   });
 });
