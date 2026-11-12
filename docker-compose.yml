@@ -18,6 +18,24 @@ services:
       - ${LIMEONIT_DATA:-limeonit-data}:/data
     restart: unless-stopped
 
+  # Optional: the platform (PLATFORM_HOST) in its own container of the same image, on the same
+  # data (BESLUIT-2026-11-12-5). Start with:  docker compose --profile platform up -d
+  # and set LIMEONIT_SERVES=institutions in .env, so the app container serves only the schools.
+  platform:
+    image: ${LIMEONIT_IMAGE:-limeonit:latest}
+    profiles: ["platform"]
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/limeonit.db
+      LIMEONIT_SERVES: platform
+    ports:
+      - "${LIMEONIT_PLATFORM_PORT:-3001}:3000"
+    volumes:
+      - ${LIMEONIT_DATA:-limeonit-data}:/data
+    restart: unless-stopped
+
   # Optional: dictation (speech to text) with whisper.cpp on the internal network only.
   # Start with:  docker compose --profile speech up -d   and set WHISPER_BASE_URL in .env.
   # The first start downloads the model (WHISPER_MODEL, default ~550 MB) to its volume.

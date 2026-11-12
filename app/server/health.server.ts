@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { BACKUP_STALE_HOURS, type AdminHealth, type BackupHealth } from "~/lib/health";
 import { latestBackup, tenantBackupDir } from "./backup.server";
 import { databaseBytes } from "./db.server";
-import { currentTenant, type Tenant } from "./tenants.server";
+import { currentTenant } from "./tenants.server";
 import { APP_VERSION } from "./version.server";
 
 const HOUR = 60 * 60 * 1000;
@@ -34,21 +34,13 @@ function freeDiskBytes(dbPath: string): number | null {
 
 /** The admin's health overview, of the institution this request is for. Read-only: it looks at files, never changes anything. */
 export function adminHealth(
-  opts: {
-    env?: Record<string, string | undefined>;
-    dbPath?: string;
-    now?: Date;
-    tenants?: readonly Tenant[];
-  } = {},
+  opts: { env?: Record<string, string | undefined>; dbPath?: string; now?: Date } = {},
 ): AdminHealth {
   const env = opts.env ?? process.env;
   const tenant = currentTenant();
   const dbPath = opts.dbPath ?? tenant.dbPath;
   return {
-    backup: backupHealth(
-      tenantBackupDir(env, { ...tenant, dbPath }, opts.tenants),
-      opts.now ?? new Date(),
-    ),
+    backup: backupHealth(tenantBackupDir(env, { ...tenant, dbPath }), opts.now ?? new Date()),
     databaseBytes: databaseBytes(dbPath),
     freeDiskBytes: freeDiskBytes(dbPath),
     version: APP_VERSION,

@@ -29,16 +29,16 @@ describe("tenantBackupDir", () => {
 
   it("is the one backup folder when there is one institution", () => {
     const only: Tenant = { id: "default", hosts: [], dbPath: "/data/limeonit.db" };
-    expect(tenantBackupDir(env, only, [only])).toBe(backupDir(env, only.dbPath));
+    expect(tenantBackupDir(env, only)).toBe(backupDir(env, only.dbPath));
   });
 
   it("gives every institution its own folder inside it", () => {
-    expect(tenantBackupDir(env, hsl, both)).toBe("/srv/backups/bk-hsl");
-    expect(tenantBackupDir(env, hhs, both)).toBe("/srv/backups/bk-hhs");
+    expect(tenantBackupDir(env, hsl)).toBe("/srv/backups/bk-hsl");
+    expect(tenantBackupDir(env, hhs)).toBe("/srv/backups/bk-hhs");
   });
 
   it("is off when backups are off", () => {
-    expect(tenantBackupDir({ BACKUP_DIR: "off" }, hsl, both)).toBeNull();
+    expect(tenantBackupDir({ BACKUP_DIR: "off" }, hsl)).toBeNull();
   });
 });
 
@@ -81,9 +81,7 @@ describe("backupAllTenantsIfDue (the app's daily backup)", () => {
 describe("adminHealth", () => {
   it("looks at the database and backups of the institution it is asked on", () => {
     const env = { BACKUP_DIR: join(dir, "backups") };
-    const h = runWithTenant(hhs, () =>
-      adminHealth({ env, now: new Date("2026-11-12T10:00:00Z"), tenants: both }),
-    );
+    const h = runWithTenant(hhs, () => adminHealth({ env, now: new Date("2026-11-12T10:00:00Z") }));
     expect(h.backup.state).toBe("ok");
     expect(h.databaseBytes).toBeGreaterThan(0);
   });

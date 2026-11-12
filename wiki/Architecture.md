@@ -503,7 +503,7 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   without a programme, such as an exam board) or under nothing (the whole institution); a division
   with a team under it is not deleted. `teamPlaces` names, per team, its programmes and division
   for the admin's person page; Organisatie lists the teams per division. A module team is a
-  course's members (`course_members`), not a team (BESLUIT-2026-11-12-5).
+  course's members (`course_members`), not a team (BESLUIT-2026-11-12-6).
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

@@ -81,13 +81,34 @@ Built (BESLUIT-2026-11-12-4, "pilot op twee databases"):
 - Instance settings (`tool_settings`, `instance_settings`) live in the tenant DB, so
   per-tenant configuration comes for free.
 
-Not built yet (next step):
+Built (BESLUIT-2026-11-12-5, platform layer):
 
-- The control plane: its own store with the platform owner's account and the institutions,
-  replacing the `TENANTS` setting (`allTenants()` is the one place that reads it), with a
-  screen to add, remove, activate and deactivate an institution.
+- **`PLATFORM_HOST`** gives the platform its own address and its own database (tenant
+  `platform`, `platform.db`). The platform owner is an ordinary admin + owner *in that database*
+  (`LIMEONIT_TENANT=platform npm run create-admin` / `set-owner`; lost 2FA:
+  `LIMEONIT_TENANT=platform npm run reset-2fa`), so no institution's admin can reach it.
+- **The list of institutions** (`app/server/institutions.server.ts`) lives in the data folder as
+  `institutions.json`, outside every institution's database, and is taken over from `TENANTS`
+  on the first start. `allTenants()` reads it; it changes without a restart.
+- **Router:** the platform's address serves only `/platform`, signing in and two-step
+  verification (anything else redirects to `/platform`); an institution's address has no
+  `/platform`; a deactivated institution answers 503.
+- **Server API for /platform** (`app/server/platformAdmin.server.ts`): list, add (database +
+  first admin who is also owner + a 48-hour set-password link on the institution's address),
+  activate/deactivate, remove (deactivated only, confirmed by typing the id), archive and put
+  back. A removed institution's database and backups move to `archive/<id>-<time>/` and are
+  wiped after 60 days by an hourly job.
+- **Own container:** `LIMEONIT_SERVES=platform|institutions` (`servedTenants`) splits one image
+  into a platform container and a schools container on one data folder; routing, migrations,
+  backups and the jobs follow it. The schools' container re-reads `institutions.json` on change
+  and closes a deactivated institution's database (`startDbSync`).
+
+Not built yet:
+
+- The `/platform` screen itself (its own PR, on the API above).
 - A database other than SQLite for a large institution: see
   [`implementation/maatwerk-database.md`](implementation/maatwerk-database.md).
+- One login across institutions (a teacher at two institutions has an account at each).
 
 When the control plane is built, add it as a **separate** store/service; do not
 add a `tenantId` to the tenant-local schema (it contradicts the isolation model).
