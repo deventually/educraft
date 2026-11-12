@@ -110,6 +110,12 @@ Het nakijkmodel heeft per onderdeel een tabel met wat onvoldoende en wat voldoen
 
 Kies op een toolpagina met een leeruitkomstveld je cursus bij **Cursus**. LimeOnIt vult dan de leeruitkomsten van de cursus in, één per regel; haal weg wat niet past. Wat je genereert, wordt aan de cursus gekoppeld. Je kunt werk ook achteraf koppelen of ontkoppelen op **Eerder gemaakt**, aan de hele cursus of aan één activiteit of toets. Op de cursuspagina staat alles onder **Gekoppeld werk**.
 
+## Een cursus opnieuw geven
+
+Geef je een cursus volgend studiejaar of in een ander semester opnieuw? Gebruik op het tabblad **Overzicht** **Kopiëren voor een nieuwe uitvoering**. Je kiest de naam van de kopie, het studiejaar, het semester of de periode en de startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee. Delen, collega's die meewerken, gekoppeld werk en reviews gaan niet mee. De oude cursus blijft zoals hij is. Alleen de eigenaar kan kopiëren.
+
+Na het kopiëren opent het tabblad **Controle** van de kopie. Daar bedenk je wat er na de evaluatie van vorige keer anders moet, want ook wat toen niet goed liep, is meegekomen.
+
 ## Laat reviewen
 
 Onder **Reviewteam** op de cursuspagina laat je kritische collega's je cursus nakijken, bijvoorbeeld een **Toetsdeskundige** (toetsmatrijs, Bloom-spreiding, formulering, weging) en een **Ontwerper** (constructive alignment, activerend onderwijs, studielast). Zij zijn AI en draaien op het model dat je kiest. Je kiest zelf wie er in je reviewteam zit; wat elke reviewer doet, lees je bij [Je reviewteam](/help/review-team).
