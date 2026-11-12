@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import { validateTools } from "~/lib/registry/validate";
@@ -41,5 +42,31 @@ describe("OutputFormat.exportAs — the data (P30.1)", () => {
     expect(
       kindOf("socratic-partner", getToolBySlugOrThrow("socratic-partner").stages[0]!.id),
     ).toBeUndefined();
+  });
+});
+
+/** P30.4: a slides result says which of its headings become the deck, in both languages. */
+describe("OutputFormat.slides (P30.4)", () => {
+  const stage = base.stages[0]!;
+  const withOutput = (output: object): Tool =>
+    ({ ...base, next: undefined, stages: [{ ...stage, output }] }) as Tool;
+
+  it("is required for a slides result", () => {
+    const { slides: _, ...rest } = stage.output;
+    expect(validateTools([withOutput({ ...rest, exportAs: "slides" })]).length).toBeGreaterThan(0);
+  });
+
+  it("needs all three headings in both languages", () => {
+    const slides = { ...stage.output.slides, closing: { nl: "Terugkomen" } };
+    expect(validateTools([withOutput({ ...stage.output, slides })]).length).toBeGreaterThan(0);
+  });
+
+  it("names headings the lesson-plan prompt really writes, in each language", () => {
+    const outline = stage.output.slides;
+    expect(outline).toBeDefined();
+    for (const locale of ["nl", "en"] as const) {
+      const prompt = readFileSync(`app/lib/prompts/files/lesson-plan.${locale}.md`, "utf8");
+      for (const heading of Object.values(outline!)) expect(prompt).toContain(heading[locale]);
+    }
   });
 });

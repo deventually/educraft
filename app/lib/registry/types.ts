@@ -152,10 +152,25 @@ export interface OutputFormat {
    */
   exportAs?: ExportKind;
   /**
+   * For a `slides` result (P30.4): which of its headings the deck is made from, as the prompt
+   * writes them per language. Required when `exportAs` is `slides`.
+   */
+  slides?: SlideOutline;
+  /**
    * A note computed in code from the finished output and shown under it (P31.3), so a
    * number never depends on the AI's arithmetic. Ids live in `app/lib/template/computations.ts`.
    */
   computed?: ComputationId;
+}
+
+/** The headings of a lesson plan that become slides (P30.4), each as the prompt writes it. */
+export interface SlideOutline {
+  /** Its text is the opening slide (the learning goal and success criterion). */
+  opening: LocalizedText;
+  /** Each sub-heading under it is a phase: a slide of its own. */
+  phases: LocalizedText;
+  /** Its points are the closing slide (coming back in later lessons). */
+  closing: LocalizedText;
 }
 
 /** Injects an earlier stage's output into this stage's prompt under a placeholder. */

@@ -6,6 +6,7 @@
 import type { Locale } from "~/lib/i18n";
 import type { ExportKind } from "./formats";
 import { type Block, parseMarkdown } from "./markdown";
+import type { SlideHeadings } from "./slides";
 
 export interface ExportSection {
   /** The step's name in a multi-step result; null for a single result. */
@@ -14,6 +15,8 @@ export interface ExportSection {
   blocks: Block[];
   /** The step's markdown as written, for the Markdown file. */
   markdown: string;
+  /** For a `slides` step: the headings its deck is made from (P30.4). */
+  slides?: SlideHeadings;
 }
 
 export interface ExportDoc {
@@ -26,7 +29,12 @@ export interface ExportDoc {
 export interface ExportInput {
   title: string;
   locale: Locale;
-  sections: { heading: string | null; kind?: ExportKind; markdown: string }[];
+  sections: {
+    heading: string | null;
+    kind?: ExportKind;
+    slides?: SlideHeadings;
+    markdown: string;
+  }[];
 }
 
 /** Reads each step's markdown; an empty step is left out. */
@@ -40,6 +48,7 @@ export function toExportDoc({ title, locale, sections }: ExportInput): ExportDoc
         kind: s.kind ?? "document",
         blocks: parseMarkdown(s.markdown),
         markdown: s.markdown.trim(),
+        ...(s.slides ? { slides: s.slides } : {}),
       }))
       .filter((s) => s.blocks.length > 0),
   };

@@ -104,5 +104,6 @@ export async function loadCourseDocumentExport(
 const hrefs = (base: string): Record<ExportFormat, string> => ({
   docx: `${base}/export/docx`,
   pdf: `${base}/print`,
+  pptx: `${base}/export/pptx`,
   md: `${base}/export/md`,
 });
