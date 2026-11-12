@@ -31,21 +31,23 @@ describe("e2e setup", () => {
     expect(read(".github/workflows/ci.yml")).toContain("npm run test:e2e");
   });
 
-  // Temporarily the e2e job runs only when the repository variable E2E_IN_CI is "true" (the
-  // runner could not install Chromium); the local run goes in the PR (BESLUIT-2026-11-11-9).
-  it("CI runs the browser tests only when the E2E_IN_CI variable switches them on", () => {
+  // The e2e job runs on every PR again (BESLUIT-2026-11-12-1); the repository variable
+  // E2E_IN_CI = "false" is the emergency switch to turn it off.
+  it("CI runs the browser tests unless the E2E_IN_CI variable switches them off", () => {
     const job = read(".github/workflows/ci.yml").split(/^ {2}e2e:$/m)[1] ?? "";
-    expect(job).toMatch(/^ {4}if: vars\.E2E_IN_CI == 'true'$/m);
+    expect(job).toMatch(/^ {4}if: vars\.E2E_IN_CI != 'false'$/m);
   });
 
-  it("AGENTS.md has workers run the browser tests themselves while CI does not", () => {
-    const agents = read("AGENTS.md");
-    expect(agents).toContain("E2E_IN_CI");
-    expect(agents).toContain("PLAYWRIGHT_CHROMIUM_PATH");
+  // `--with-deps` runs apt-get on the runner; when the Ubuntu mirrors were unreachable the job
+  // failed before a single test ran. The runner image already has Chromium's libraries.
+  it("CI installs Chromium without apt (no --with-deps)", () => {
+    const job = read(".github/workflows/ci.yml").split(/^ {2}e2e:$/m)[1] ?? "";
+    expect(job).toContain("npx playwright install chromium");
+    expect(job).not.toContain("--with-deps");
   });
 
-  it("the PR template asks for the local browser test result", () => {
-    expect(read(".github/pull_request_template.md")).toContain("npm run test:e2e");
+  it("AGENTS.md says how to run the browser tests in a sandbox with its own browser", () => {
+    expect(read("AGENTS.md")).toContain("PLAYWRIGHT_CHROMIUM_PATH");
   });
 
   it("covers the key pages for a guest, a teacher and an admin", () => {
