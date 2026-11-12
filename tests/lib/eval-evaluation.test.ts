@@ -115,6 +115,7 @@ describe("evaluationReportMarkdown", () => {
       date: "2026-11-12",
       model: "m",
       repeat: 1,
+      retries: 1,
       rows: [
         {
           caseId: "a",
@@ -131,7 +132,9 @@ describe("evaluationReportMarkdown", () => {
       ],
     });
     expect(md).toContain("| a | ja | 2 | 4 | ja | ja | ja | 0 | 0 | ja |");
-    expect(md).toContain("Geslaagd: 1 van 1.");
+    expect(md).toContain(
+      "Geslaagd: 1 van 1. Herkansingen (onleesbaar JSON, zoals de app één keer opnieuw vraagt): 1.",
+    );
   });
 });
 

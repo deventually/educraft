@@ -21,6 +21,9 @@ te zien krijgt:
   thema van één student, kapotte items). Telt niet mee voor geslaagd, maar veel weggevallen
   citaten betekent dat de prompt citaten verzint.
 
+Is het eerste antwoord geen geldig JSON, dan vraagt de runner één keer opnieuw, net als de app
+(`courseEvaluation.server.ts`); het rapport telt die herkansingen.
+
 Een case slaagt als de eerste vier kloppen en Verboden 0 is. Tussenrondes draaien elke case één
 keer, de eindmeting drie keer (`--repeat 3`, BESLUIT-2026-11-04-25); de prompt is klaar als elke
 run slaagt (BESLUIT-2026-11-04-24).

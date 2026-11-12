@@ -127,6 +127,8 @@ export function evaluationReportMarkdown(input: {
   model: string;
   repeat: number;
   rows: EvaluationScore[];
+  /** Runs whose first answer was unreadable and got the app's one retry. */
+  retries?: number;
 }): string {
   const yesNo = (b: boolean) => (b ? "ja" : "nee");
   return [
@@ -141,7 +143,7 @@ export function evaluationReportMarkdown(input: {
         `| ${r.caseId} | ${yesNo(r.parse)} | ${r.themes} | ${r.improvements} | ${yesNo(r.countOk)} | ${yesNo(r.placesOk)} | ${yesNo(r.dataOk)} | ${r.forbidden} | ${r.dropped} | ${yesNo(r.pass)} |`,
     ),
     "",
-    `Geslaagd: ${input.rows.filter((r) => r.pass).length} van ${input.rows.length}.`,
+    `Geslaagd: ${input.rows.filter((r) => r.pass).length} van ${input.rows.length}. Herkansingen (onleesbaar JSON, zoals de app één keer opnieuw vraagt): ${input.retries ?? 0}.`,
     "",
   ].join("\n");
 }

@@ -47,6 +47,7 @@ async function main() {
   const outDir = join(EVALS_DIR, "output", date, STEP);
   mkdirSync(outDir, { recursive: true });
   const rows: EvaluationScore[] = [];
+  let retries = 0;
 
   for (const c of cases) {
     const data = caseCourse(c);
@@ -63,21 +64,32 @@ async function main() {
       continue;
     }
     for (let i = 0; i < repeat; i++) {
-      // The app's own budget and temperature (app/server/courseEvaluation.server.ts).
-      const { text } = await providerForModel(model).generate({
-        model,
-        system: getRuntimePrompt(PROMPT_ID, c.locale),
-        messages: [{ role: "user", content: message }],
-        temperature: 0,
-        maxTokens: 6_000,
-      });
+      // The app's own budget, temperature and single retry on unreadable JSON
+      // (app/server/courseEvaluation.server.ts).
+      const ask = async () =>
+        (
+          await providerForModel(model).generate({
+            model,
+            system: getRuntimePrompt(PROMPT_ID, c.locale),
+            messages: [{ role: "user", content: message }],
+            temperature: 0,
+            maxTokens: 6_000,
+          })
+        ).text;
+      const check = (text: string) =>
+        parseEvaluation(text, { data, evaluation: c.evaluation, respondents: c.respondents });
+      const texts = [await ask()];
+      let parsed = check(texts[0] ?? "");
+      if (!parsed.ok) {
+        retries++;
+        texts.push(await ask());
+        parsed = check(texts[1] ?? "");
+      }
       const suffix = repeat > 1 ? `.run${i + 1}` : "";
-      writeFileSync(join(outDir, `${c.id}${suffix}.md`), `${message}\n\n=== ANSWER ===\n\n${text}\n`);
-      const parsed = parseEvaluation(text, {
-        data,
-        evaluation: c.evaluation,
-        respondents: c.respondents,
-      });
+      writeFileSync(
+        join(outDir, `${c.id}${suffix}.md`),
+        `${message}\n\n${texts.map((t) => `=== ANSWER ===\n\n${t}\n`).join("\n")}`,
+      );
       const score = scoreEvaluationCase(c, parsed);
       rows.push({ ...score, caseId: repeat > 1 ? `${c.id}#${i + 1}` : c.id });
       console.log(`${score.pass ? "✓" : "×"} ${c.id}${repeat > 1 ? `#${i + 1}` : ""}`);
@@ -88,7 +100,7 @@ async function main() {
   const reports = join(EVALS_DIR, "reports");
   mkdirSync(reports, { recursive: true });
   const file = join(reports, `${date}${label}-${STEP}.md`);
-  writeFileSync(file, evaluationReportMarkdown({ date, model, repeat, rows }));
+  writeFileSync(file, evaluationReportMarkdown({ date, model, repeat, rows, retries }));
   console.log(`Report: ${file}`);
 }
 
