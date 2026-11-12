@@ -25,7 +25,10 @@ criterion 1–5.
   wat je bespreekt." / "The counts were made by LimeOnIt, not by the AI. You choose what to
   discuss."). Finished, not cut off.
 
-  No deviation: numbers that appear in the input (counts, percentages, p-values, question numbers
+  No deviation: the marker "*Zelfgemaakt voorbeeld:*" / "*Made-up example:*" sits inside the
+  "Zo ziet goed werk eruit" / "What good work looks like" bullet, as the prompt asks; leaving out
+  a criterion or question beyond the worst three to five is allowed; for a test analysis the
+  questions come lowest p-value first, not in the order of the table. No deviation: numbers that appear in the input (counts, percentages, p-values, question numbers
   such as V4, the round 2026-11, the alpha) may be repeated; the programme, course and profession
   named in the case's teaching context come from that context. Check the closing sentence against
   the exact wording above before calling it altered.
