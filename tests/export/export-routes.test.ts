@@ -93,8 +93,34 @@ describe("export routes (P30.1)", () => {
     expect(data.downloads).toEqual([
       { format: "docx", href: `/work/${g.id}/export/docx` },
       { format: "pdf", href: `/work/${g.id}/print` },
+      { format: "pptx", href: `/work/${g.id}/export/pptx` },
       { format: "md", href: `/work/${g.id}/export/md` },
     ]);
+  });
+
+  it("returns a lesson plan as PowerPoint, a slide per phase (P30.4)", async () => {
+    const g = await save(
+      "lesson-plan",
+      "lesson",
+      "## Leerdoel en succescriterium\n\nDe student rekent.\n\n## Lesverloop\n\n### Afsluiting (5 min)\n\n- Exitvraag",
+    );
+    const res = await loadFile(g.id, "pptx");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe(
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    );
+    expect(res.headers.get("Content-Disposition")).toMatch(
+      /^attachment; filename="Les voorbereiden .*\.pptx"/,
+    );
+    const zip = await JSZip.loadAsync(new Uint8Array(await res.arrayBuffer()));
+    expect(zip.file("ppt/slides/slide2.xml")).toBeTruthy();
+    expect(await zip.file("ppt/slides/slide2.xml")?.async("string")).toContain("Exitvraag");
+  });
+
+  it("offers no PowerPoint for a result that is not slides", async () => {
+    const g = await save("test-items", "items", "1. Vraag");
+    expect((await loadPreview(g.id)).downloads.map((d) => d.format)).not.toContain("pptx");
+    expect(await status(loadFile(g.id, "pptx"))).toBe(404);
   });
 
   it("puts all saved steps of a multi-step tool in one file, in stage order", async () => {

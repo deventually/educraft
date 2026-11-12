@@ -5,7 +5,9 @@ import type { ExportDoc } from "~/lib/export/doc";
 import type { ExportFormat } from "~/lib/export/formats";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
+import { toSlideDeck } from "~/lib/export/slides";
 import { ExportPreview } from "./ExportPreview";
+import { SlidePreview } from "./SlidePreview";
 
 export interface ExportMenuProps {
   /** The saved result. */
@@ -43,6 +45,7 @@ export function ExportPanel({ url, label }: { url: string; label?: string }) {
   const fetcher = useFetcher<ExportData>();
   const regionId = useId();
   const data = fetcher.data;
+  const deck = data ? toSlideDeck(data.doc) : null;
 
   function onToggle(e: React.SyntheticEvent<HTMLDetailsElement>) {
     if (e.currentTarget.open && fetcher.state === "idle") void fetcher.load(url);
@@ -73,6 +76,7 @@ export function ExportPanel({ url, label }: { url: string; label?: string }) {
             >
               <ExportPreview doc={data.doc} />
             </section>
+            {deck && deck.slides.length > 0 && <SlidePreview deck={deck} />}
             <ul className="flex flex-wrap gap-2">
               {data.downloads.map((d) => (
                 <li key={d.format}>

@@ -1,6 +1,7 @@
 # Fase 30 — Exporteren: Word, PDF, Excel, PowerPoint en Brightspace
 
-> **Status:** ⚪ brief. **30.1 en 30.2 (Word en PDF) mogen nu**; de rest volgt na de pilot en de
+> **Status:** ⚪ brief. **30.1 en 30.2 (Word en PDF) mogen nu**, en sinds 2026-11-12 ook **30.4
+> (PowerPoint)**: Bastiaan wil de dia's bij een les vóór de pilot. De rest volgt na de pilot en de
 > feedback daarop (BESLUIT-2026-11-06-5). Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.

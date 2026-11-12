@@ -9,6 +9,7 @@ import { getGeneration } from "./repositories/generations.server";
 import { getSharedWork } from "./repositories/shares.server";
 import { type ExportDoc, toExportDoc } from "~/lib/export/doc";
 import { type ExportFormat, formatsFor } from "~/lib/export/formats";
+import { slideHeadings } from "~/lib/export/slides";
 import { getToolBySlug } from "~/lib/registry";
 import { loc } from "~/lib/i18n/localized";
 import type { Locale } from "~/lib/i18n";
@@ -59,6 +60,7 @@ export async function loadExport(request: Request, generationId: string): Promis
     return {
       heading: many ? loc(stage.name, locale) : null,
       kind: stage.output.exportAs,
+      slides: slideHeadings(stage.output.slides, locale),
       markdown: r.outputMarkdown,
     };
   });

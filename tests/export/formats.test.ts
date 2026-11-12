@@ -7,7 +7,15 @@ describe("formatsFor (P30.1)", () => {
   });
 
   it("offers Word, PDF and Markdown for every kind, in that order", () => {
-    for (const kind of EXPORT_KINDS) expect(formatsFor([kind])).toEqual(["docx", "pdf", "md"]);
+    for (const kind of EXPORT_KINDS)
+      expect(formatsFor([kind])).toEqual(expect.arrayContaining(["docx", "pdf", "md"]));
+    expect(formatsFor(["document"])).toEqual(["docx", "pdf", "md"]);
+  });
+
+  it("adds PowerPoint for slides only, after PDF (P30.4)", () => {
+    expect(formatsFor(["slides"])).toEqual(["docx", "pdf", "pptx", "md"]);
+    for (const kind of EXPORT_KINDS.filter((k) => k !== "slides"))
+      expect(formatsFor([kind])).not.toContain("pptx");
   });
 
   it("offers each format once for a result with several kinds", () => {

@@ -530,6 +530,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   with a team under it is not deleted. `teamPlaces` names, per team, its programmes and division
   for the admin's person page; Organisatie lists the teams per division. A module team is a
   course's members (`course_members`), not a team (BESLUIT-2026-11-12-6).
+- **Exporting a result (P30)** (`app/lib/export/`). A stage says what its result is
+  (`OutputFormat.exportAs`); `formatsFor` picks the formats. Every result goes to one in-between
+  model (`ExportDoc`, `toExportDoc`); each writer (`docx.ts`, `pptx.ts`, `md.ts`, in `writers.ts`)
+  and the preview read only that model. PDF is the print page. **PowerPoint (30.4)** is offered
+  only for `slides`: `toSlideDeck` (pure) reads the deck from the headings the stage names in
+  `OutputFormat.slides` (opening, phases, closing; required for `slides`, validated at boot): an
+  opening slide, a slide per phase with its list items as points, a closing slide, more than six
+  points split over a next slide. The teacher's text goes in the speaker notes; the time plan and
+  the check never go on a slide. `pptx.ts` (`pptxgenjs`) and `SlidePreview` both read the deck.
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

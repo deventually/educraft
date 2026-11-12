@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
 import { ExportMenu, ExportPanel } from "~/components/export/ExportMenu";
@@ -100,6 +100,51 @@ describe("ExportMenu (P30.1)", () => {
     show();
     expect(screen.queryByRole("region", { name: /Voorbeeld/ })).toBeNull();
     expect(screen.queryByRole("link", { name: /Word/ })).toBeNull();
+  });
+});
+
+describe("ExportPanel: a lesson plan as slides (P30.4)", () => {
+  it("shows the slides as well and offers PowerPoint", async () => {
+    const lesson = toExportDoc({
+      title: "Les voorbereiden",
+      locale: "nl",
+      sections: [
+        {
+          heading: null,
+          kind: "slides",
+          slides: { opening: "Leerdoel", phases: "Lesverloop", closing: "Terugkomen" },
+          markdown: "## Lesverloop\n\n### Afsluiting (5 min)\n\n- Exitvraag",
+        },
+      ],
+    });
+    const Stub = createRoutesStub([
+      { path: "/tools/lesson-plan", Component: () => <ExportMenu generationId="g3" /> },
+      {
+        path: "/work/:generationId/export",
+        loader: () => ({
+          doc: lesson,
+          downloads: [{ format: "pptx", href: "/work/g3/export/pptx" }],
+        }),
+      },
+    ]);
+    const { container } = render(<Stub initialEntries={["/tools/lesson-plan"]} />);
+    const details = container.querySelector("details") as HTMLDetailsElement;
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: /PowerPoint \(\.pptx\)/ })).toHaveAttribute(
+        "href",
+        "/work/g3/export/pptx",
+      ),
+    );
+    const slides = screen.getByRole("region", { name: "Voorbeeld van de dia's" });
+    expect(within(slides).getByRole("heading", { name: "Afsluiting (5 min)" })).toBeTruthy();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows no slides for a result that is not slides", async () => {
+    const { container } = render(<ExportPreview doc={doc} />);
+    expect(container.textContent).not.toContain("Dia 1");
   });
 });
 
