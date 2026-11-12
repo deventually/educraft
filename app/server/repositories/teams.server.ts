@@ -22,6 +22,7 @@ import {
   programmeCourses,
   programmes,
   shares,
+  slideTemplates,
   teamMembers,
   teams,
   users,
@@ -126,6 +127,9 @@ export async function deleteTeam(id: string): Promise<void> {
       .run();
     tx.delete(announcements)
       .where(and(eq(announcements.audience, "team"), eq(announcements.targetId, id)))
+      .run();
+    tx.delete(slideTemplates)
+      .where(and(eq(slideTemplates.ownerKind, "team"), eq(slideTemplates.ownerId, id)))
       .run();
     tx.delete(teamMembers).where(eq(teamMembers.teamId, id)).run();
     tx.update(invites).set({ teamId: null }).where(eq(invites.teamId, id)).run();

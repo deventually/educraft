@@ -21,6 +21,8 @@ import { teamError } from "~/components/teams/teamError";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
 import { redirectWithFlash } from "~/server/flash.server";
 import { HelpLink } from "~/components/HelpLink";
+import { SlideTemplateCard } from "~/components/export/SlideTemplateCard";
+import { getTeamTemplate } from "~/server/repositories/slideTemplates.server";
 
 /** Days a lead's invite link stays valid (the admin's default). */
 const INVITE_DAYS = 14;
@@ -36,7 +38,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireUser(request);
   const team = await getTeamForLead(user.id, params.id);
   if (!team) throw new Response("Not found", { status: 404 });
-  return { selfId: user.id, team, offer: await getTeamSettingsOffer() };
+  return {
+    selfId: user.id,
+    team,
+    offer: await getTeamSettingsOffer(),
+    // The team's PowerPoint template (P30.7b), which every member can choose.
+    slideTemplate: await getTeamTemplate(user.id, params.id),
+  };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -85,7 +93,7 @@ const th = "px-4 py-2.5 font-semibold";
 export default function LeadTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
-  const { team, selfId, offer } = loaderData;
+  const { team, selfId, offer, slideTemplate } = loaderData;
   const actionData = useActionData<typeof action>();
 
   useFormToast(actionData, {
@@ -245,6 +253,12 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
           </Form>
         )}
       </section>
+
+      <SlideTemplateCard
+        action={`/teams/${team.id}/slide-template`}
+        current={slideTemplate}
+        scope="team"
+      />
 
       <section>
         <ConfirmDialog
