@@ -211,6 +211,19 @@ ANTHROPIC_API_KEY=sk-… npm run eval:proofread -- --repeat 3     # consistentie
 npm run eval:proofread -- --dry-run                             # alleen de berichten bouwen
 ```
 
+## Cursusevaluatie (`npm run eval:evaluation`)
+
+De cursusevaluatie (`course-evaluation@v1`, brief P33.2) maakt van een geanonimiseerde enquête
+thema's, problemen op hun plek en drie tot vijf verbeterpunten. Vijf fictieve cases, waaronder de
+naam van een docent, een uitschieter van één student, tien respondenten met een toetsanalyse en
+een ingebedde opdracht. De score is deterministisch; zie `course-evaluation/rubric.md`.
+
+```bash
+ANTHROPIC_API_KEY=sk-… npm run eval:evaluation                  # elke case één keer
+ANTHROPIC_API_KEY=sk-… npm run eval:evaluation -- --repeat 3    # eindmeting
+npm run eval:evaluation -- --dry-run                            # alleen de berichten bouwen
+```
+
 ## Proefassessment (`npm run eval:rehearsal`)
 
 Het proefassessment (brief P29, 29.2) is geen catalogustool en heeft een eigen runner,
