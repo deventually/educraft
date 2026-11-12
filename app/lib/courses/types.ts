@@ -148,6 +148,30 @@ export interface CourseSchedule {
   deliveryMode?: DeliveryMode;
 }
 
+export const IMPROVEMENT_STATUSES = ["open", "done"] as const;
+export const IMPROVEMENT_SOURCES = ["evaluation", "teacher"] as const;
+export const IMPROVEMENT_PLACE_KINDS = ["outcome", "activity", "assessment"] as const;
+
+/** Where in the course an improvement belongs: the whole course, or one item by its id. */
+export type ImprovementPlace =
+  | { kind: "course" }
+  | { kind: (typeof IMPROVEMENT_PLACE_KINDS)[number]; id: string };
+
+/**
+ * One improvement for the next run (brief P33.1): written by the teacher, or accepted from a
+ * course evaluation. Advice for the teacher, never a change to the course itself. The teacher
+ * writes it in one language, so it is plain text, not `LocalizedText`.
+ */
+export interface Improvement {
+  id: string;
+  text: string;
+  place: ImprovementPlace;
+  status: (typeof IMPROVEMENT_STATUSES)[number];
+  source: (typeof IMPROVEMENT_SOURCES)[number];
+  /** The run it comes from: the course's study year and semester or period at the time. */
+  run?: { studyYear?: string; phase?: string };
+}
+
 /** Hours of study per EC (WHW art. 7.4: one EC is 28 hours). */
 export const HOURS_PER_EC = 28;
 
@@ -175,4 +199,9 @@ export interface CourseData {
   outcomes: LearningOutcome[];
   activities: Activity[];
   assessments: Assessment[];
+  /**
+   * Improvements for the next run (P33.1). A place whose item was removed reads as the whole
+   * course (`improvementPlace`); a copy for a new run takes only the open ones.
+   */
+  improvements?: Improvement[];
 }
