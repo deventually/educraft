@@ -4,10 +4,20 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #300 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #302 gemerged)_
 
 ## Nu
 
+- **BDB/BKE: feiten uit de cursus van het anker bij het hoofdstuk (#301) gemerged op
+  2026-11-12:** hangt een leeruitkomst aan een les, module of toets uit je eigen cursus, dan staat
+  op het tabblad *Hoofdstuk* het blok *Uit je cursus* (groepsgrootte, lesduur, lesdoel,
+  discipline; bij een toets vorm, weging, cesuur en herkansing). De coach vraagt daar niet meer
+  naar en een opgestelde tekst neemt de feiten letterlijk over. Prompts `portfolio-questions@v2`
+  en `portfolio-draft@v3`; geen migratie.
+- **Kopiëren ook voor een mede-eigenaar (#302) gemerged op 2026-11-12:** naast de eigenaar kan
+  ook een mede-eigenaar een cursus kopiëren voor een nieuwe uitvoering; de kopie is dan van die
+  mede-eigenaar, zonder de onderwijscontext van de eigenaar. Een bewerker en een beheerder kunnen niet
+  kopiëren.
 - **Cursus kopiëren voor een nieuwe uitvoering (#300) gemerged op 2026-11-12:** onderaan
   *Overzicht* maakt de eigenaar een kopie voor een volgend studiejaar, semester of periode, met
   een eigen naam en een nieuwe startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee;

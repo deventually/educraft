@@ -314,13 +314,21 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the chapter tab lists `writingSections(outcome)`, the form's outline or one section per
   criterion, in `GuidedWriting` inside the chapter's own form, so every button also posts the
   chapter text and the answers (`answer:<sectionId>`). `guideQuestions:<sectionId>` asks
-  `portfolio-questions@v1` for two to four questions (JSON; the code keeps 2–4 distinct ones and
+  `portfolio-questions@v2` for two to four questions (JSON; the code keeps 2–4 distinct ones and
   drops one citing an unknown source); `DossierData.guided` keeps questions and answers per outcome
   and section, and saving the chapter saves the answers too. In draft mode `guideDraft:<sectionId>`
-  sends the questions with the answers and the section's linked evidence to `portfolio-draft@v2`
+  sends the questions with the answers and the section's linked evidence to `portfolio-draft@v3`
   and appends the text under the section's title (`appendSection`); the code refuses a paragraph
   that cites an unknown source (one retry). It replaced the per-criterion paragraph of @v1. Eval:
   `npm run eval:guided` (deterministic, `evals/portfolio-guided/`).
+  What the anchor's course already says (`courseFacts.ts`, pure, no AI): `anchorFacts` reads the
+  module's details and schedule and the anchored lesson (goal, discipline, outcomes) or test (form,
+  weight, pass mark, resit, parts). `anchorCourseFacts` looks the course up with `getCourse`, so a
+  course the teacher may no longer edit gives nothing. The chapter tab shows the facts
+  (`CourseFacts`, read only: a fact is changed in the course), and both guided-writing calls send
+  them as `<course>` (`factsBlock`): the questions prompt (@v2) does not ask for them again, the
+  draft prompt (@v3) uses them literally without an open spot. Facts alone are enough material
+  for a paragraph.
   Evidence in one go (`/portfolio/:id/evidence`; `batch.ts`, `portfolioBatch.server.ts`): the
   teacher chooses many files or a folder (PDF, Word, text); the browser reads them and runs the
   name check per file (`checkNames`: the student names the teacher lists plus the patterns of

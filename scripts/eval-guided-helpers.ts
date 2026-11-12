@@ -5,6 +5,8 @@
 import { markersIn, splitOnMarkers } from "../app/lib/portfolio/openSpots";
 import { emptyDossier } from "../app/lib/portfolio/schema";
 import { DRAFT_PROMPT_ID, QUESTIONS_PROMPT_ID } from "../app/lib/portfolio/guided";
+import { anchorFacts, factsBlock } from "../app/lib/portfolio/courseFacts";
+import type { CourseData } from "../app/lib/courses/types";
 import type { DossierData, EvidenceKind } from "../app/lib/portfolio/types";
 
 export interface GuidedCase {
@@ -20,9 +22,13 @@ export interface GuidedCase {
   references?: string[];
   /** The teacher's answers the paragraph is written from (the questions are fixed by the case). */
   answers: { question: string; answer: string }[];
+  /** The outcome's anchor: a course (missing lists are empty) and, for a lesson or test, its id. */
+  course?: { name: string; data: Partial<CourseData>; itemId?: string };
   expect: {
     /** Patterns (case-insensitive); each must match at least one question. */
     askAbout: string[];
+    /** Patterns (case-insensitive) no question may match: facts the course already gives. */
+    notAskAbout?: string[];
     /** Text that must appear in no question and not in the paragraph (e.g. an injected word). */
     forbidden: string[];
     /** Fragments from the answers or evidence the paragraph must keep. */
@@ -38,11 +44,23 @@ export interface GuidedCase {
 const OUTCOME = "eval-outcome";
 const SECTION = "eval-section";
 
-/** The dossier the app would hold for this case: confirmed, in draft mode, answers saved. */
+/** The `<course>` block the app would send for the case's anchor; "" without one. */
+function caseCourse(c: GuidedCase): string {
+  if (!c.course) return "";
+  const data: CourseData = { outcomes: [], activities: [], assessments: [], ...c.course.data };
+  const ref = { courseId: "eval-course", ...(c.course.itemId ? { itemId: c.course.itemId } : {}) };
+  return factsBlock(anchorFacts({ name: c.course.name, data }, ref, c.locale), c.locale);
+}
+
+/**
+ * The dossier the app would hold for this case: confirmed, in draft mode, answers saved; with
+ * the `<course>` block of its anchor ("" without one).
+ */
 export function caseDossier(c: GuidedCase): {
   data: DossierData;
   outcomeId: string;
   sectionId: string;
+  course: string;
 } {
   const criterionIds = c.criteria.map((_, i) => `eval-c${i + 1}`);
   const outlined = Boolean(c.section.title);
@@ -97,7 +115,7 @@ export function caseDossier(c: GuidedCase): {
         }
       : {}),
   };
-  return { data, outcomeId: OUTCOME, sectionId };
+  return { data, outcomeId: OUTCOME, sectionId, course: caseCourse(c) };
 }
 
 export interface QuestionsScore {
@@ -110,6 +128,8 @@ export interface QuestionsScore {
   clean: boolean;
   /** Every expected topic is asked about. */
   topic: boolean;
+  /** Nothing asked that the course already says. */
+  known: boolean;
   pass: boolean;
 }
 
@@ -128,6 +148,7 @@ export function scoreQuestions(c: GuidedCase, questions: string[] | null): Quest
     open: qs.every((q) => !YES_NO[c.locale].test(q.trim())),
     clean: qs.every((q) => !c.expect.forbidden.some((f) => has(q, f))),
     topic: c.expect.askAbout.every((p) => qs.some((q) => new RegExp(p, "i").test(q))),
+    known: (c.expect.notAskAbout ?? []).every((p) => !qs.some((q) => new RegExp(p, "i").test(q))),
   };
   return { ...score, pass: Object.values(score).every(Boolean) };
 }
@@ -160,6 +181,7 @@ function material(c: GuidedCase): string {
     c.chapter,
     ...(c.references ?? []),
     ...c.answers.flatMap((a) => [a.question, a.answer]),
+    caseCourse(c),
   ]
     .filter(Boolean)
     .join("\n");
@@ -225,11 +247,11 @@ export function guidedReportMarkdown(input: {
     "",
     "## Vragen",
     "",
-    "| Case | Geparsed | 2–4 vragen | Open vragen | Geen instructie gevolgd | Onderwerpen | Geslaagd |",
-    "|---|---|---|---|---|---|---|",
+    "| Case | Geparsed | 2–4 vragen | Open vragen | Geen instructie gevolgd | Onderwerpen | Niets gevraagd wat de cursus al zegt | Geslaagd |",
+    "|---|---|---|---|---|---|---|---|",
     ...input.rows.map(
       (r) =>
-        `| ${r.caseId} | ${yesNo(r.questions.parse)} | ${yesNo(r.questions.count)} | ${yesNo(r.questions.open)} | ${yesNo(r.questions.clean)} | ${yesNo(r.questions.topic)} | ${yesNo(r.questions.pass)} |`,
+        `| ${r.caseId} | ${yesNo(r.questions.parse)} | ${yesNo(r.questions.count)} | ${yesNo(r.questions.open)} | ${yesNo(r.questions.clean)} | ${yesNo(r.questions.topic)} | ${yesNo(r.questions.known)} | ${yesNo(r.questions.pass)} |`,
     ),
     "",
     "## Alinea",

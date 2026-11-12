@@ -282,6 +282,149 @@
         ],
         "goodParagraph": "My learning objective was that at the end of the lesson students can calculate a drug dose using the dosage formula. I deliberately used the verb 'calculate', because it describes something I can observe and check. To check it, I closed the lesson with an exit ticket of three sums. 18 of the 22 students got all three right, which showed me that most of the group reached the objective. This made the objective not only specific but also testable within the lesson itself."
       }
+    },
+    {
+      "id": "nl-anker-les",
+      "description": "Leeruitkomst verankerd aan een les: groepsgrootte en lesdoel staan in de cursus. De coach vraagt daar niet naar; de alinea neemt de feiten letterlijk over zonder open plek.",
+      "locale": "nl",
+      "section": {
+        "title": "Beginsituatie",
+        "description": "Beschrijf de groep en wat die al kan."
+      },
+      "criteria": [
+        {
+          "text": "De docent beschrijft de beginsituatie van de groep."
+        },
+        {
+          "text": "De docent onderbouwt hoe de les aansluit bij de beginsituatie."
+        }
+      ],
+      "evidence": [],
+      "answers": [
+        {
+          "question": "Hoe bracht je in kaart wat de studenten al konden?",
+          "answer": "Met een korte instaptoets in de les ervoor. Daaruit bleek dat 9 studenten breuken lastig vonden."
+        },
+        {
+          "question": "Wat deed je daarmee in de opzet van je les?",
+          "answer": "Ik begon met een herhaling van breuken en liet die 9 studenten eerst in tweetallen oefenen."
+        }
+      ],
+      "course": {
+        "name": "Medicijnrekenen",
+        "data": {
+          "studyYear": "2026-2027",
+          "schedule": {
+            "groupSize": 24,
+            "sessionMinutes": 90,
+            "deliveryMode": "in-person"
+          },
+          "activities": [
+            {
+              "id": "les-3",
+              "title": "Medicijnrekenen met breuken",
+              "kind": "lesson",
+              "week": 3,
+              "goal": "De student berekent een dosis met breuken zonder rekenmachine.",
+              "outcomeIds": []
+            }
+          ]
+        },
+        "itemId": "les-3"
+      },
+      "expect": {
+        "askAbout": [
+          "voorkennis|konden|kon|kenden|in kaart|verschil|aansl|opzet|aanpa"
+        ],
+        "notAskAbout": [
+          "hoeveel studenten|groepsgrootte|hoe groot (was|is) (de|je) groep|hoe lang (duurde|duurt)|lesduur|hoeveel minuten|wat (was|is) (het|je) lesdoel"
+        ],
+        "forbidden": [],
+        "facts": [
+          "24",
+          "9",
+          "breuk"
+        ],
+        "gap": false,
+        "goodQuestions": [
+          "Hoe bracht je in kaart wat de studenten al konden?",
+          "Welke verschillen zag je, en wat deed je daarmee in de opzet van je les?",
+          "Wat merkte je daarvan in de les?"
+        ],
+        "goodParagraph": "Mijn les Medicijnrekenen met breuken gaf ik aan een groep van 24 studenten. Het lesdoel was dat de student een dosis met breuken berekent zonder rekenmachine. Om te weten wat de groep al kon, nam ik in de les ervoor een korte instaptoets af. Daaruit bleek dat 9 studenten breuken lastig vonden. Omdat het lesdoel op breuken steunt, begon ik de les met een herhaling van breuken. Die 9 studenten liet ik eerst in tweetallen oefenen, zodat ze de basis op orde hadden voordat de hele groep aan de doseringen begon. Zo sloot de opbouw van mijn les aan bij wat de groep al kon."
+      }
+    },
+    {
+      "id": "en-anchor-test",
+      "description": "Outcome anchored to a test: form, weight and pass mark are in the course. The coach asks only for the why; the paragraph takes the facts over literally.",
+      "locale": "en",
+      "section": {
+        "title": "Choice of test form",
+        "description": "Explain the test form and the pass mark, and why they fit the learning outcome."
+      },
+      "criteria": [
+        {
+          "text": "The candidate justifies the choice of test form from the learning outcome."
+        }
+      ],
+      "evidence": [],
+      "answers": [
+        {
+          "question": "Why does this form fit the learning outcome?",
+          "answer": "The outcome asks students to design a database themselves, and a written exam with design tasks lets me see each student do that on their own."
+        },
+        {
+          "question": "How did you arrive at the pass mark?",
+          "answer": "The exam board uses the same pass mark for all written exams in the programme; I checked with a colleague that it suits the difficulty of the tasks."
+        }
+      ],
+      "course": {
+        "name": "Databases 1",
+        "data": {
+          "outcomes": [
+            {
+              "id": "o1",
+              "text": "The student designs a normalised data model."
+            }
+          ],
+          "assessments": [
+            {
+              "id": "t1",
+              "title": "Database exam",
+              "kind": "summative",
+              "form": "Written exam",
+              "weight": 60,
+              "passMark": 55,
+              "coverage": [
+                {
+                  "outcomeId": "o1"
+                }
+              ]
+            }
+          ]
+        },
+        "itemId": "t1"
+      },
+      "expect": {
+        "askAbout": [
+          "why|chose|choice|reason|fit|arrive"
+        ],
+        "notAskAbout": [
+          "what (is|was) (the|your) pass mark|which pass mark|what weight|what (is|was) the weight|how much does .* count|what (is|was) the (test )?form|what kind of test"
+        ],
+        "forbidden": [],
+        "facts": [
+          "55",
+          "written"
+        ],
+        "gap": false,
+        "goodQuestions": [
+          "Why does a written exam fit this learning outcome better than other forms?",
+          "How did you arrive at a pass mark of 55%?",
+          "What did you weigh up when you chose this form?"
+        ],
+        "goodParagraph": "For Databases 1 I use a written exam, a summative test that counts for 60% of the final grade. The learning outcome asks students to design a normalised data model themselves. A written exam with design tasks lets me see each student do that on their own, so the form measures what the outcome asks for. The pass mark is 55%. The exam board uses the same pass mark for all written exams in the programme, and I checked with a colleague that it suits the difficulty of the tasks. That way my choice of form and pass mark follows from the learning outcome and from the rules of my programme."
+      }
     }
   ]
 }

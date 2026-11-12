@@ -39,6 +39,7 @@ import { platform } from "./platform";
 import { portfolio } from "./portfolio";
 import { portfolioBatch } from "./portfolioBatch";
 import { portfolioExport } from "./portfolioExport";
+import { portfolioFacts } from "./portfolioFacts";
 import { portfolioGuided } from "./portfolioGuided";
 import { portfolioOutline } from "./portfolioOutline";
 import { portfolioPlan } from "./portfolioPlan";
@@ -109,6 +110,7 @@ export const en: Messages = {
   portfolio,
   portfolioBatch,
   portfolioExport,
+  portfolioFacts,
   portfolioGuided,
   portfolioOutline,
   portfolioPlan,

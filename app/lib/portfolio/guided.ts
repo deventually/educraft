@@ -16,8 +16,8 @@ import { citesUnknownSource, criteriaMaterial, unknownCitations } from "./coach"
 import { GUIDED_LIMITS } from "./schema";
 import type { DossierData, Outcome } from "./types";
 
-export const QUESTIONS_PROMPT_ID = "portfolio-questions@v1";
-export const DRAFT_PROMPT_ID = "portfolio-draft@v2";
+export const QUESTIONS_PROMPT_ID = "portfolio-questions@v2";
+export const DRAFT_PROMPT_ID = "portfolio-draft@v3";
 
 /** One part of a chapter to write. */
 export interface WritingSection {
@@ -89,17 +89,23 @@ function sectionBlock(s: WritingSection, locale: Locale): string {
   return `<section>\n${lines.join("\n")}\n</section>`;
 }
 
-/** The user message asking questions about one section. All teacher material is data. */
+/**
+ * The user message asking questions about one section. All teacher material is data; `course`
+ * is what the anchor's course already says (`factsBlock`), "" without an anchor.
+ */
 export function buildQuestionsMessage(
   d: DossierData,
   outcomeId: string,
   sectionId: string,
   locale: Locale,
+  course = "",
 ): string {
   const s = sectionOf(d, outcomeId, sectionId);
   const chapter = d.chapters.find((ch) => ch.outcomeId === outcomeId)?.text ?? "";
   const m = criteriaMaterial(d, outcomeId, s.criterionIds, chapter, locale);
-  return [m.outcome, sectionBlock(s, locale), m.criteria, m.evidence, m.chapter].join("\n\n");
+  return [m.outcome, course, sectionBlock(s, locale), m.criteria, m.evidence, m.chapter]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 const RawQuestions = z.object({ questions: z.array(z.unknown()) });
@@ -123,8 +129,8 @@ export function parseQuestions(raw: string, references: string[]): string[] | nu
 
 /**
  * The user message for one section's paragraph: the questions with the teacher's answers,
- * the section's evidence, the chapter so far and the references. `null` when there is
- * nothing honest to write from (no answer and no evidence with text).
+ * the course's facts, the section's evidence, the chapter so far and the references. `null`
+ * when there is nothing honest to write from (no answer, no evidence with text, no facts).
  */
 export function buildSectionDraftMessage(
   d: DossierData,
@@ -132,13 +138,14 @@ export function buildSectionDraftMessage(
   sectionId: string,
   chapter: string,
   locale: Locale,
+  course = "",
 ): string | null {
   const s = sectionOf(d, outcomeId, sectionId);
   const l = LABELS[locale];
   const m = criteriaMaterial(d, outcomeId, s.criterionIds, chapter, locale);
   const saved = d.guided?.[outcomeId]?.[sectionId];
   const pairs = (saved?.questions ?? []).map((q, i) => ({ q, a: saved?.answers[i]?.trim() ?? "" }));
-  if (!m.hasEvidence && !pairs.some((p) => p.a)) return null;
+  if (!m.hasEvidence && !course && !pairs.some((p) => p.a)) return null;
   const answers = pairs.length
     ? pairs
         .map(
@@ -149,13 +156,16 @@ export function buildSectionDraftMessage(
     : l.noAnswer;
   return [
     m.outcome,
+    course,
     sectionBlock(s, locale),
     m.criteria,
     `<answers>\n${answers}\n</answers>`,
     m.evidence,
     m.chapter,
     m.references,
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** The paragraph without fences or a heading; `null` when empty or citing an unknown source. */

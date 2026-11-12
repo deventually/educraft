@@ -19,7 +19,9 @@ import { availableToolNames, loadSuggestions, modelDisplayName } from "~/server/
 import { EvidenceSuggestions } from "~/components/portfolio/EvidenceSuggestions";
 import { chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
 import { snapshotCourses } from "~/server/courseEvidence.server";
-import { anchorView } from "~/server/dossierAnchors.server";
+import { anchorCourseFacts, anchorView } from "~/server/dossierAnchors.server";
+import { getLocale } from "~/lib/i18n/locale.server";
+import { CourseFacts } from "~/components/portfolio/CourseFacts";
 import { AnchorSummary } from "~/components/portfolio/AnchorForm";
 import { startHref } from "~/lib/portfolio/start";
 import { useT } from "~/lib/i18n/useT";
@@ -82,6 +84,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     snapshotCourses: await snapshotCourses(user.id, d),
     // What this outcome is about; tools for its criteria open on the anchor's course and item.
     anchor: await anchorView(user.id, d.anchors?.[outcome.id]),
+    // What that course already says: shown on the Chapter tab, sent along with guided writing.
+    courseFacts: await anchorCourseFacts(user.id, d.anchors?.[outcome.id], getLocale(request)),
     suggestions: Object.fromEntries(
       outcome.criteria.flatMap((c) => (allSuggestions[c.id] ? [[c.id, allSuggestions[c.id]]] : [])),
     ),
@@ -184,6 +188,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
     snapshotCourses = {},
     milestones = [],
     anchor = null,
+    courseFacts = null,
     required = [],
   } = loaderData;
   const [params] = useSearchParams();
@@ -355,6 +360,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
             )}
             <ChapterOutline outcome={outcome} showOutline={guided.length === 0} />
             <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
+            <CourseFacts view={courseFacts} />
             <div className="mt-3">
               {/* Keyed on the saved text and questions: a drafted paragraph or new questions reload it. */}
               <ChapterEditor
