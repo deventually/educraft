@@ -189,5 +189,12 @@ een vervanger kan openen, en zet hier alleen waar die map te vinden is, zonder d
    datalek meldt (zie het [noodplan](noodplan.md#4-datalek)).
 6. **Wie bel je?** Namen en nummers van: de functionaris gegevensbescherming (FG) van de school,
    de contactpersoon bij de pilot, de hostingpartij, en een technische vervanger.
-7. **Betaalt iemand anders de rekeningen** (hosting, API-verbruik, domein) als jij er niet bent, en
+7. **Wat staat er in het contract met een instelling over het einde?** Neem bij elk contract
+   (verwerkersovereenkomst) met een instelling op: wat er met haar data gebeurt als de
+   samenwerking stopt (teruggeven, wissen) en binnen hoeveel dagen. LimeOnIt bewaart een
+   verwijderde instelling 60 dagen in het archief, back-ups inbegrepen, en wist alles daarna
+   (BESLUIT-2026-11-12-5); de overeenkomst moet dat noemen, en een externe back-up van de server
+   (`rsync`, hostingpartij) moet binnen dezelfde termijn verlopen. Gangbaar is 30 tot 90 dagen;
+   langer alleen als de instelling erom vraagt. Laat de FG van de instelling meekijken.
+8. **Betaalt iemand anders de rekeningen** (hosting, API-verbruik, domein) als jij er niet bent, en
    wat gebeurt er als een betaling stopt?
