@@ -59,7 +59,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | --- | --- |
 | `npm test` · `npm run typecheck` · `npm run check` | **The gate.** All three green before done. |
 | `npm run test:watch` | Tests in watch mode. |
-| `npm run test:e2e` | Browser tests (Playwright): key pages with axe (WCAG 2.2 AA) and CSP; own CI job, now off (below). |
+| `npm run test:e2e` | Browser tests (Playwright): key pages with axe (WCAG 2.2 AA) and CSP; own CI job on every PR. |
 | `npm run knip` | Unused files, exports and dependencies (also runs in `npm run check`). |
 | `npm run dev` · `npm run build` | Dev server (port 5173) · production build. |
 | `npm run db:generate` | Generate a Drizzle migration from the schema. |
@@ -67,13 +67,11 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | `npm run eval` · `npm run eval:coach` · `npm run eval:rehearsal` | Prompt evals (need `ANTHROPIC_API_KEY`, see `evals/README.md`). |
 | `npm run invite` · `npm run set-owner -- --email …` | Mint an invite · set the owner. |
 
-**Browser tests run locally for now** (BESLUIT-2026-11-11-9). The `e2e` job on GitHub runs only
-when the repository variable `E2E_IN_CI` is `true`, and it is off while the runner cannot install
-Chromium. Until then a worker runs `npm run test:e2e` **itself, without being asked**, before
-calling a PR ready when it touches `app/`, `e2e/`, `playwright.config.ts` or dependencies, and puts
-the result (`N passed`) in the PR. In a sandbox with its own browser, point Playwright at it:
-`PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-<n>/chrome-linux64/chrome npm run test:e2e`.
-If it cannot run, say so in the PR; never call it green unrun.
+**Browser tests run on GitHub** as the `e2e` job on every PR (BESLUIT-2026-11-12-1). If the
+runner cannot run them, Bastiaan sets the repository variable `E2E_IN_CI` to `false`; then a
+worker runs `npm run test:e2e` itself on PRs that touch `app/`, `e2e/`, `playwright.config.ts` or
+dependencies and puts the result (`N passed`) in the PR. In a sandbox with its own browser, point
+Playwright at it: `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-<n>/chrome-linux64/chrome npm run test:e2e`.
 
 ## Conventions
 

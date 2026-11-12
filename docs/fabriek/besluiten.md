@@ -437,3 +437,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   (thread "Playwright e2e tijdelijk alleen lokaal": "Kunnen we playwright e2e tijdelijk uitzetten op
   github en het alleen lokaal draaien?" en "je moet het waar nodig automatisch lokaal draaien,
   totdat het op github weer opgelost is").
+- **BESLUIT-2026-11-12-1:** **Browsertests weer op GitHub, bij elke PR.** Vervangt
+  BESLUIT-2026-11-11-9. Oorzaak van het rood: `npx playwright install --with-deps chromium`
+  wilde via `apt-get` nog negen lettertypepakketten installeren, en de Ubuntu-mirrors waren vanaf de
+  runner onbereikbaar (DNS); alle andere bibliotheken die Chromium nodig heeft stonden er al. De job
+  installeert Chromium nu zonder `--with-deps`, dus zonder `apt-get`, en draait standaard. Noodknop:
+  de repositoryvariabele `E2E_IN_CI` op `false`; dan slaat GitHub de job over en draait de werker
+  `npm run test:e2e` weer zelf. Bastiaan, 2026-11-12 (thread "Playwright e2e op GitHub weer laten
+  draaien": "Ik wil kijken of de playwright e2e op github het weer doet, zodat we de PR's daar weer
+  volledig kunnen draaien").
