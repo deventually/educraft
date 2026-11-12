@@ -4,18 +4,22 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318, #320 en #321 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
 
 ## Nu
 
-- **Een gesprek voorbereiden (#321) gemerged op 2026-11-12:** een nieuwe tool voor de SLB'er:
-  kies de situatie (start, voortgang, dreigend negatief studieadvies, twijfel over stoppen,
-  minor of stage) en de fase, en krijg vragen om te openen, door te vragen en af te sluiten, wat
-  je niet vraagt en wanneer je doorverwijst. Nooit over een student, geen BSA-besluit, geen loket
-  bij naam (P39.2, `conversation-prep@v1`).
-- **Bewaarde les terugvinden (#320) gemerged op 2026-11-12:** *Bewaard bij cursus* onder een
-  resultaat linkt nu naar de plek in de cursus waar het werk staat. Een bewaarde lesopzet kan met
-  *Neem op als les* een les van de cursus worden, en bij elke les staat het werk dat eraan hangt.
+- **Stagetraject, de basis (#319) gemerged op 2026-11-12:** onder de motorkap kan LimeOnIt nu een
+  stage- of afstudeertraject per student bijhouden onder een code, met zeven mijlpalen, en wist
+  het een afgesloten traject automatisch na de bewaartermijn van de beheerder (standaard 90
+  dagen). Het onderdeel staat uit tot de privacy-officer akkoord geeft (P38.1). Migratie 0037.
+- **Een gesprek voorbereiden (P39.2, #321) gemerged op 2026-11-12:** een nieuwe tool geeft een
+  vragenset per soort SLB-gesprek (start, voortgang, dreigend negatief BSA, stoppen, minor of stage
+  kiezen): openingsvragen, doorvragen, wat je niet vraagt, afspraken en wanneer je doorverwijst.
+  Alleen de situatie, nooit de student; geen advies over het BSA-besluit
+  (`conversation-prep@v1`).
+- **Bewaarde les terugvinden en opnemen (#320) gemerged op 2026-11-12:** "Bewaard bij cursus"
+  linkt nu naar waar het werk in de cursus staat, en een bewaard lesplan kan met *Neem op als les*
+  een les worden op *Lessen en toetsen*. Bij elke les staat het werk dat ervoor gemaakt is.
 - **SLB-gesprekken in Lastig gesprek oefenen (#315) gemerged op 2026-11-12:** een docent oefent
   nu ook een negatief studieadvies (BSA) brengen en stoppen met de studie bespreken. De AI neemt
   nooit het BSA-besluit en beoordeelt het ook niet (P39.1, `difficult-conversation@v3`). Eval
