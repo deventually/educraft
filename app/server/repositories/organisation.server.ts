@@ -5,14 +5,14 @@
  * A division is deleted only while no programme sits under it.
  */
 import { randomUUID } from "node:crypto";
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, isNotNull } from "drizzle-orm";
 import {
   type DivisionKind,
   DivisionKindSchema,
   DivisionNameSchema,
 } from "~/lib/organisation/kinds";
 import { getDb } from "../db.server";
-import { divisions, instanceSettings, programmes } from "../schema.server";
+import { divisions, instanceSettings, programmes, teams } from "../schema.server";
 
 /** Who acts: the signed-in user's id and role. */
 interface Actor {
@@ -57,9 +57,12 @@ export async function setDivisionKind(a: Actor, kind: unknown): Promise<boolean>
   return true;
 }
 
-/** Every division by name, with how many programmes sit under it. */
-export async function listDivisions(): Promise<(Division & { programmeCount: number })[]> {
-  return getDb()
+/** Every division by name, with how many programmes and which teams sit under it. */
+export async function listDivisions(): Promise<
+  (Division & { programmeCount: number; teams: Division[] })[]
+> {
+  const db = getDb();
+  const rows = db
     .select({ id: divisions.id, name: divisions.name, programmeCount: count(programmes.id) })
     .from(divisions)
     .leftJoin(programmes, eq(programmes.divisionId, divisions.id))
@@ -67,6 +70,17 @@ export async function listDivisions(): Promise<(Division & { programmeCount: num
     .orderBy(asc(divisions.name))
     .limit(500)
     .all();
+  const placed = db
+    .select({ id: teams.id, name: teams.name, divisionId: teams.divisionId })
+    .from(teams)
+    .where(isNotNull(teams.divisionId))
+    .orderBy(asc(teams.name))
+    .limit(500)
+    .all();
+  return rows.map((d) => ({
+    ...d,
+    teams: placed.filter((t) => t.divisionId === d.id).map(({ id, name }) => ({ id, name })),
+  }));
 }
 
 /** Null for a teacher or an invalid name. */
@@ -91,7 +105,7 @@ export async function renameDivision(a: Actor, id: string, name: unknown): Promi
   return result.changes > 0;
 }
 
-/** Deletes an empty division; one with programmes under it stays ("notEmpty"). */
+/** Deletes an empty division; one with programmes or teams under it stays ("notEmpty"). */
 export async function deleteDivision(
   a: Actor,
   id: string,
@@ -103,10 +117,15 @@ export async function deleteDivision(
     .from(programmes)
     .where(eq(programmes.divisionId, id))
     .get();
-  if (used) return "notEmpty";
+  const team = db.select({ id: teams.id }).from(teams).where(eq(teams.divisionId, id)).get();
+  if (used || team) return "notEmpty";
   const result = db.delete(divisions).where(eq(divisions.id, id)).run();
   return result.changes > 0 ? "deleted" : "notFound";
 }
+
+const divisionExists = (id: string | null) =>
+  id === null ||
+  !!getDb().select({ id: divisions.id }).from(divisions).where(eq(divisions.id, id)).get();
 
 /** Puts a programme under a division, or under none (null). False for a teacher or unknown ids. */
 export async function setProgrammeDivision(
@@ -114,17 +133,76 @@ export async function setProgrammeDivision(
   programmeId: string,
   divisionId: string | null,
 ): Promise<boolean> {
-  if (!isAdmin(a)) return false;
-  const db = getDb();
-  if (
-    divisionId !== null &&
-    !db.select({ id: divisions.id }).from(divisions).where(eq(divisions.id, divisionId)).get()
-  )
-    return false;
-  const result = db
+  if (!isAdmin(a) || !divisionExists(divisionId)) return false;
+  const result = getDb()
     .update(programmes)
     .set({ divisionId, updatedAt: new Date() })
     .where(eq(programmes.id, programmeId))
     .run();
   return result.changes > 0;
+}
+
+/** Puts a team under a division, or under none (null). False for a teacher or unknown ids. */
+export async function setTeamDivision(
+  a: Actor,
+  teamId: string,
+  divisionId: string | null,
+): Promise<boolean> {
+  if (!isAdmin(a) || !divisionExists(divisionId)) return false;
+  const result = getDb().update(teams).set({ divisionId }).where(eq(teams.id, teamId)).run();
+  return result.changes > 0;
+}
+
+/** The division a team sits under (its own), or null. For admin callers only (not scoped). */
+export async function teamDivisionId(teamId: string): Promise<string | null> {
+  const row = getDb()
+    .select({ divisionId: teams.divisionId })
+    .from(teams)
+    .where(eq(teams.id, teamId))
+    .get();
+  return row?.divisionId ?? null;
+}
+
+/**
+ * Where each team sits, for the admin's lists: the names of its programmes, and its division
+ * (the team's own, else the first of its programmes'). A team with neither is left out.
+ * For admin callers only (not scoped); capped like every list.
+ */
+export async function teamPlaces(): Promise<
+  Map<string, { programmes: string[]; division: string | null }>
+> {
+  const db = getDb();
+  const names = new Map(
+    db
+      .select({ id: divisions.id, name: divisions.name })
+      .from(divisions)
+      .limit(500)
+      .all()
+      .map((d) => [d.id, d.name]),
+  );
+  const out = new Map<string, { programmes: string[]; division: string | null }>();
+  const entry = (teamId: string) => {
+    const hit = out.get(teamId) ?? { programmes: [], division: null };
+    out.set(teamId, hit);
+    return hit;
+  };
+  for (const t of db
+    .select({ id: teams.id, divisionId: teams.divisionId })
+    .from(teams)
+    .limit(500)
+    .all())
+    if (t.divisionId && names.has(t.divisionId))
+      entry(t.id).division = names.get(t.divisionId) ?? null;
+  const rows = db
+    .select({ teamId: programmes.teamId, name: programmes.name, divisionId: programmes.divisionId })
+    .from(programmes)
+    .orderBy(asc(programmes.name))
+    .limit(500)
+    .all();
+  for (const p of rows) {
+    const hit = entry(p.teamId);
+    hit.programmes.push(p.name);
+    if (!hit.division && p.divisionId) hit.division = names.get(p.divisionId) ?? null;
+  }
+  return out;
 }

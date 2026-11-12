@@ -499,6 +499,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   a member of any linked programme reads it and sees only the courses shared with a team of a
   programme they read; only its own programme's lead or an admin manages it. The course page shows
   the course's place in each line it can read, with the course before and after (`linesOfCourse`).
+  A **team** sits under a programme (it owns it), under a division (`teams.division_id`, for a team
+  without a programme, such as an exam board) or under nothing (the whole institution); a division
+  with a team under it is not deleted. `teamPlaces` names, per team, its programmes and division
+  for the admin's person page; Organisatie lists the teams per division. A module team is a
+  course's members (`course_members`), not a team (BESLUIT-2026-11-12-5).
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

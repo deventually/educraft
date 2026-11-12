@@ -70,9 +70,15 @@ const loaderData = {
     },
   ] as unknown[] | null,
   teams: [
-    { id: "team-1", name: "Verpleegkunde", member: true, lead: true },
-    { id: "team-2", name: "Techniek", member: false, lead: false },
-  ],
+    { id: "team-1", name: "Verpleegkunde", member: true, lead: true, place: null },
+    { id: "team-2", name: "Techniek", member: false, lead: false, place: null },
+  ] as {
+    id: string;
+    name: string;
+    member: boolean;
+    lead: boolean;
+    place: { programmes: string[]; division: string | null } | null;
+  }[],
   courses: null as {
     list: { id: string; name: string; members: [] }[];
     colleagues: { userId: string; name: string }[];
@@ -379,6 +385,23 @@ describe("Admin person page — teams (P28.2)", () => {
     await waitFor(() => expect(body?.get("intent")).toBe("teams"));
     expect(body?.getAll("teams").sort()).toEqual(["team-1", "team-2"]);
     expect(body?.getAll("leads")).toEqual(["team-1"]);
+  });
+
+  it("says which programmes and division a team stands for", () => {
+    renderPage(undefined, {
+      teams: [
+        {
+          id: "team-1",
+          name: "Verpleegkunde",
+          member: true,
+          lead: false,
+          place: { programmes: ["VPK voltijd"], division: "Faculteit Gezondheid" },
+        },
+      ],
+    });
+    expect(
+      within(section(/^teams$/i)).getByText("Opleiding VPK voltijd · Faculteit Gezondheid"),
+    ).toBeInTheDocument();
   });
 
   it("links to the teams page when there are no teams yet", () => {

@@ -8,7 +8,7 @@ export const organisation = {
   emptyDivision: "Nog geen opleidingen.",
   errorInvalid: "Dat lukte niet. Kijk het nog eens na.",
   errorName: "Geef een naam van hooguit 200 tekens.",
-  errorNotEmpty: "Er staan nog opleidingen onder. Verplaats die eerst.",
+  errorNotEmpty: "Er staan nog opleidingen of teams onder. Verplaats die eerst.",
   heading: "Organisatie",
   intro:
     "Hoe je instelling is ingedeeld: de laag tussen de instelling en haar opleidingen, en welke opleiding waaronder valt. Een opleiding maakt een teamleider of beheerder aan bij Opleidingen; hier zet je hem op zijn plek.",
@@ -24,4 +24,5 @@ export const organisation = {
   rename: "Nieuwe naam voor {name}",
   renameSave: "Naam opslaan",
   team: "team {team}",
+  teamsUnder: "Teams:",
 };

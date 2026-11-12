@@ -492,3 +492,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de pilot alvast twee databases", "de data is nu nog niet belangrijk en kan helemaal vers worden
   neergezet", en over de platformlaag "Ja, omdat ik ook nieuwe instellingen wil kunnen toevoegen en
   verwijderen via die UI").
+- **BESLUIT-2026-11-12-5:** **Een team hangt onder een opleiding, een onderdeel of niets.** Een
+  gebruiker hoort bij een opleiding of onderdeel via zijn teams; er komt geen aparte koppeling van
+  gebruiker aan opleiding. Een team van een opleiding hoort waar de opleiding hoort. Een team
+  zonder opleiding (een examencommissie, een onderwijscommissie van een faculteit) zet de beheerder
+  op de teampagina onder een onderdeel, of laat hem voor de hele instelling. Een onderdeel met een
+  team eronder wordt niet verwijderd. Op de persoonspagina staat per team bij welke opleidingen en
+  welk onderdeel het hoort. Een moduleteam is geen team maar de leden van een cursus
+  (`course_members`); "heel team aan een cursus toevoegen" komt er pas als docenten erom vragen.
+  Bastiaan, 2026-11-12 (thread "School, faculteit, opleiding en leerlijn beheren": "En het koppelen
+  van een team aan een opleiding, "faculteit", of instelling, of niets, toch?" en over heel team
+  toevoegen "Ja, maar alleen als dat het beheer vergemakkelijkt").

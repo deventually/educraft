@@ -502,3 +502,25 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
     expect((await stored(team.id)).features).toEqual({ courses: "off" });
   });
 });
+
+describe("/admin/teams/:id: where the team belongs", () => {
+  it("puts the team under a division, and offers the divisions", async () => {
+    const org = await import("~/server/repositories/organisation.server");
+    const d = await org.createDivision({ id: admin.id, role: "admin" }, "Faculteit Techniek");
+    const team = await teams.createTeam("Team Techniek");
+    const res = await call(adminTeam.action, {
+      request: post({ intent: "division", divisionId: d!.id }),
+      params: { id: team.id },
+    });
+    expect(res).toEqual({ saved: true });
+    const data = await call(adminTeam.loader, { request: get(), params: { id: team.id } });
+    expect(data.divisionId).toBe(d!.id);
+    expect(data.divisions).toContainEqual({ id: d!.id, name: "Faculteit Techniek" });
+    expect(
+      await call(adminTeam.action, {
+        request: post({ intent: "division", divisionId: "nope" }),
+        params: { id: team.id },
+      }),
+    ).toEqual({ error: "unknown" });
+  });
+});

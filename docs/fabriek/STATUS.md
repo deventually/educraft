@@ -4,10 +4,15 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #293 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #294 gemerged)_
 
 ## Nu
 
+- **Leerlijn over meer opleidingen, en op de cursuspagina (#294) gemerged op 2026-11-12:** een
+  leerlijn houdt haar eigen opleiding en kan ook voor andere gelden (voltijd en deeltijd); koppelen
+  mag wie beide beheert. Een lid van een gekoppelde opleiding leest de lijn en ziet alleen de
+  cursussen die met hem gedeeld zijn. Op de cursuspagina staat waar de cursus in elke leerlijn zit
+  ("cursus 2 van 4") met de vorige en volgende. Migratie 0034.
 - **Pilot op twee databases (#293) gemerged op 2026-11-12:** één app bedient meer instellingen,
   elk met een eigen SQLite-database, gekozen per adres (`TENANTS`, BESLUIT-2026-11-12-4).
   Migraties, back-up, AI-gebruik, modellenlijst en recente fouten gaan per instelling;
@@ -768,6 +773,10 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #293 gemerged)_
 
 ## Bezig
 
+- **Teams onder een faculteit, en per team zien waar het hoort (PR open):** op de teampagina
+  kiest de beheerder onder welk onderdeel (faculteit, vestiging, …) een team valt, of geen. Beheer
+  → Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij welke
+  opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-5). Migratie 0035.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
