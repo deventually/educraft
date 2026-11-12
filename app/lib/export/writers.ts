@@ -10,12 +10,13 @@ import { exportDocToPptx, PPTX_TYPE } from "./pptx";
 
 interface FileWriter {
   type: string;
-  write: (doc: ExportDoc) => Promise<BodyInit> | BodyInit;
+  /** `template`: a PowerPoint template the caller may use (P30.7b); the other formats ignore it. */
+  write: (doc: ExportDoc, options?: { template?: Uint8Array }) => Promise<BodyInit> | BodyInit;
 }
 
 const WRITERS: Partial<Record<ExportFormat, FileWriter>> = {
   docx: { type: DOCX_TYPE, write: exportDocToDocx },
-  pptx: { type: PPTX_TYPE, write: exportDocToPptx },
+  pptx: { type: PPTX_TYPE, write: (doc, options) => exportDocToPptx(doc, options?.template) },
   md: { type: MARKDOWN_TYPE, write: exportDocToMarkdown },
 };
 

@@ -142,6 +142,50 @@ describe("ExportPanel: a lesson plan as slides (P30.4)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("lets the teacher choose a PowerPoint template, the standard one first (P30.7b)", async () => {
+    const lesson = toExportDoc({
+      title: "Les voorbereiden",
+      locale: "nl",
+      sections: [
+        {
+          heading: null,
+          kind: "slides",
+          slides: { opening: "Leerdoel", phases: "Lesverloop", closing: "Terugkomen" },
+          markdown: "## Leerdoel\n\nDe student legt uit.",
+        },
+      ],
+    });
+    const Stub = createRoutesStub([
+      { path: "/tools/lesson-plan", Component: () => <ExportMenu generationId="g3" /> },
+      {
+        path: "/work/:generationId/export",
+        loader: () => ({
+          doc: lesson,
+          downloads: [{ format: "pptx", href: "/work/g3/export/pptx?with=g1" }],
+          templates: [
+            { id: "t-own", name: "Eigen.pptx", scope: "own" },
+            { id: "t-team", name: "Huisstijl.potx", scope: "team", teamName: "Biologie" },
+          ],
+        }),
+      },
+    ]);
+    const { container } = render(<Stub initialEntries={["/tools/lesson-plan"]} />);
+    const details = container.querySelector("details") as HTMLDetailsElement;
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    const select = await screen.findByRole("combobox", { name: "PowerPoint-sjabloon" });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["LimeOnIt (standaard)", "Mijn sjabloon: Eigen.pptx", "Biologie: Huisstijl.potx"]);
+    const link = () => screen.getByRole("link", { name: /PowerPoint \(\.pptx\)/ });
+    expect(link()).toHaveAttribute("href", "/work/g3/export/pptx?with=g1");
+    fireEvent.change(select, { target: { value: "t-team" } });
+    expect(link()).toHaveAttribute("href", "/work/g3/export/pptx?with=g1&template=t-team");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("shows no slides for a result that is not slides", async () => {
     const { container } = render(<ExportPreview doc={doc} />);
     expect(container.textContent).not.toContain("Dia 1");

@@ -2,7 +2,7 @@ import type { Route } from "./+types/work.$generationId.export.$format";
 import { attachmentHeaders, safeFileName } from "~/lib/export/filename";
 import type { ExportFormat } from "~/lib/export/formats";
 import { fileWriter } from "~/lib/export/writers";
-import { loadExport } from "~/server/export.server";
+import { chosenTemplate, loadExport } from "~/server/export.server";
 
 /**
  * Resource route (no UI): GET /work/:generationId/export/:format → the result as a file
@@ -14,7 +14,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!writer) throw new Response("Not Found", { status: 404 });
   const { doc, formats, fileBase } = await loadExport(request, params.generationId);
   if (!formats.includes(format as ExportFormat)) throw new Response("Not Found", { status: 404 });
-  const body = await writer.write(doc);
+  const body = await writer.write(doc, { template: await chosenTemplate(request) });
   return new Response(body, {
     headers: attachmentHeaders(safeFileName(fileBase, format, "export"), writer.type),
   });
