@@ -1,6 +1,6 @@
 ## Wanneer gebruik je deze tool?
 
-Gebruik deze tool als je een **lastig gesprek** wilt oefenen voordat het echte gesprek komt: over studievoortgang en studieadvies, slecht nieuws over een beoordeling, een vermoeden van fraude, of een student die vastloopt. De AI speelt een **verzonnen student**. Jij voert het gesprek.
+Gebruik deze tool als je een **lastig gesprek** wilt oefenen voordat het echte gesprek komt: over studievoortgang en studieadvies, een negatief studieadvies (BSA) brengen, slecht nieuws over een beoordeling, een vermoeden van fraude, een student die vastloopt, of een student die wil stoppen met de studie. De AI speelt een **verzonnen student**. Jij voert het gesprek.
 
 ## Hoe werkt het?
 
@@ -14,6 +14,7 @@ Gebruik deze tool als je een **lastig gesprek** wilt oefenen voordat het echte g
 - **Wel:** feedback met **letterlijke citaten** van wat je zei: wat goed ging, wat beter kan (met een zin die je in plaats daarvan kunt zeggen) en één ding om te oefenen.
 - **Wel:** bij slecht nieuws de zes stappen van SPIKES als leidraad. SPIKES komt uit de geneeskunde, voor artsen die slecht nieuws brengen.
 - **Niet:** juridisch of medisch advies, of zeggen wat de uitkomst van een fraudeprocedure of studieadvies wordt. Daarvoor gelden de regels van je opleiding.
+- **Niet:** het besluit over een negatief studieadvies nemen of beoordelen. De tool helpt je het gesprek voeren; het besluit neemt de opleiding.
 
 ## Tips
 

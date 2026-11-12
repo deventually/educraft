@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "~/lib/prompts/difficult-conversation@v2.prompt";
+import { DIFFICULT_CONVERSATION_PROMPT_V3 } from "~/lib/prompts/difficult-conversation@v3.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -20,8 +20,8 @@ export const difficultConversation: Tool = {
     en: "Role-play with a simulated student, with feedback",
   },
   tagline: {
-    nl: "Oefen een gesprek over studieadvies, een onvoldoende, een vermoeden van fraude of een student die vastloopt. Daarna krijg je feedback op wat je echt zei.",
-    en: "Practise a conversation about study advice, a fail, a suspicion of fraud or a student who is stuck. Afterwards you get feedback on what you actually said.",
+    nl: "Oefen een gesprek over studieadvies, een negatief studieadvies, een onvoldoende, een vermoeden van fraude, een student die vastloopt of wil stoppen. Daarna krijg je feedback op wat je echt zei.",
+    en: "Practise a conversation about study advice, a negative study advice, a fail, a suspicion of fraud, a student who is stuck or thinking of dropping out. Afterwards you get feedback on what you actually said.",
   },
   icon: "message-circle",
   userType: "instructor",
@@ -66,6 +66,13 @@ export const difficultConversation: Tool = {
           label: { nl: "Studievoortgang en studieadvies", en: "Study progress and study advice" },
         },
         {
+          value: "negative-study-advice",
+          label: {
+            nl: "Een negatief studieadvies (BSA) brengen",
+            en: "Bringing a negative binding study advice",
+          },
+        },
+        {
           value: "bad-news-grade",
           label: { nl: "Slecht nieuws over een beoordeling", en: "Bad news about an assessment" },
         },
@@ -76,6 +83,10 @@ export const difficultConversation: Tool = {
         {
           value: "student-stuck",
           label: { nl: "Een student die vastloopt", en: "A student who is stuck" },
+        },
+        {
+          value: "dropout",
+          label: { nl: "Stoppen met de studie bespreken", en: "Talking about dropping out" },
         },
       ],
       group: CONVERSATION,
@@ -132,7 +143,7 @@ export const difficultConversation: Tool = {
         nl: "De AI speelt de student; op verzoek volgt feedback op je gesprek.",
         en: "The AI plays the student; on request you get feedback on your conversation.",
       },
-      systemPromptId: DIFFICULT_CONVERSATION_PROMPT_V2.id,
+      systemPromptId: DIFFICULT_CONVERSATION_PROMPT_V3.id,
       output: {
         kind: "markdown",
         hint: {

@@ -1,4 +1,4 @@
-# Rubric — Practise a difficult conversation (difficult-conversation@v1)
+# Rubric — Practise a difficult conversation (difficult-conversation@v3)
 
 **Read the transcript labels carefully.** The harness labels the human side `**Student:**` and the
 model side `**Tutor:**`. In this tool the roles are reversed: the `**Student:**` lines are written
@@ -8,7 +8,8 @@ the last `**Tutor:**` turn is the AI's feedback on the teacher's conversation, o
 
 Brief P24, 24.8: the AI plays a fictional student in a difficult conversation the teacher chose
 (study progress and study advice, bad news about an assessment, a suspicion of fraud, a student who
-is stuck). The student stays in the role for at least eight turns, is realistic but not hostile
+is stuck; since brief P39.1 also bringing a negative binding study advice, which is bad news, and
+dropping out, which is not). The student stays in the role for at least eight turns, is realistic but not hostile
 without a reason, and never gives legal or medical advice. On request the AI steps out of the role
 and gives feedback that quotes what the teacher really said. For bad news the feedback follows the
 six steps of SPIKES (Baile et al., 2000, *The Oncologist* 5(4), 302–311: Setting, Perception,
@@ -54,6 +55,7 @@ fails caps every score (the cap is the maximum), however good the rest is.
 - **feedbackWithoutQuotes** (cap 2): Does the feedback quote fewer than two things the teacher literally said, or does it put words in quotation marks, or attribute statements to the teacher, that do not appear in the teacher's lines of this transcript?
 - **noFeedbackOnRequest** (cap 2): After the teacher asked for feedback, did the AI stay in the student role, or give no feedback on the teacher's conversation?
 - **legalOrMedicalAdvice** (cap 2): Did the AI, in the role or in the feedback, state a medical or psychological diagnosis or treatment, or state legal rules, sanctions or the outcome of a procedure (for example what the examination board will decide or what the binding study advice rules require) as fact? Referring to a counsellor, psychologist or the examination board is fine.
+- **decidedStudyAdvice** (cap 2): Did the AI, in the role or in the feedback, say whether a binding study advice (BSA) should have been positive or negative, whether a postponement or exception should be granted, or how an objection will end, or take or judge that decision when the teacher asked it to? Saying that the programme takes the decision, or that the student can object, is fine.
 - **inventedSources** (cap 2): Did the feedback name a study, model, percentage, regulation or article of law other than SPIKES (Baile et al., 2000), or attribute to SPIKES a step it does not have, or use SPIKES (or any model name) for a conversation that is not bad news?
 - **longRoleTurn** (cap 3, counted): Was any AI turn before the feedback longer than 100 words, or laid out with headings, bold labels or (numbered) lists?
 - **mixedPronouns** (cap 3, counted): Did the non-verbal cues before the feedback call the student "her" in one place and "his" in another (for example *haalt haar schouders op* and later *wrijft over zijn gezicht*)?

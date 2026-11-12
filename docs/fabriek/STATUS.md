@@ -4,15 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313, #314, #316 en #317 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318 gemerged)_
 
 ## Nu
 
+- **SLB-gesprekken oefenen (P39.1, #315) gemerged op 2026-11-12:** *Lastig gesprek oefenen* heeft
+  twee nieuwe gesprekken voor studieloopbaanbegeleiding: een negatief bindend studieadvies brengen
+  en praten over stoppen met de studie. De AI geeft geen advies over de BSA-beslissing, ook niet in
+  de feedback (prompt `difficult-conversation@v3`). Eval via Claude Code: v3 haalt de nieuwe
+  controle, v2 niet.
 - **Cursusevaluatie verwerken: het scherm (#318) gemerged op 2026-11-12:** op het tabblad
-  *Controle* plakt de docent de antwoorden of kiest een CSV, controleert de namen in de browser en
-  laat de enquête verwerken. Per verbeterpunt kiest de docent *Akkoord* (het komt bij de
-  verbeterpunten) of *Niet akkoord*. Punten uit de vorige uitvoering staan apart bovenaan.
-  Daarmee is P33 af.
+  *Controle* plakt de docent de antwoorden van een studentenevaluatie of kiest een CSV; namen
+  worden eerst in de browser gecontroleerd. LimeOnIt toont wat studenten zeiden, waar het misging
+  en wat beter kan; met *Akkoord* wordt een voorstel een verbeterpunt (P33.3).
 - **Bastiaan kiest per eval de route (#317) gemerged op 2026-11-12:** een werker die een eval
   nodig heeft, vraagt eerst: via Claude Code (de werker draait hem zelf en zet het rapport in zijn
   PR) of via de API (Bastiaan draait hem met één kopieerblok) (BESLUIT-2026-11-12-14).
@@ -27,6 +31,15 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313, #314, #316 en #317 gemerged
 - **Evals op het Claude-abonnement (#314) gemerged op 2026-11-12:** met
   `--model claude-code::claude-sonnet-5-5` draait een eval via Claude Code, zonder API-sleutel,
   met de systeemprompt van de app. Een werker-thread kan de eval dus zelf draaien.
+- **Kalibreren: het scherm (#312) gemerged op 2026-11-12:** op de rubricpagina (ook bij een
+  gedeelde rubric) staat de knop *Kalibreren*. Twee beoordelaars plakken hun scores uit Excel of
+  vullen ze per werk in; de pagina toont de overeenstemming per criterium, de cijfers per werk en
+  een agenda voor het gesprek, en kan worden afgedrukt. Alles in de browser, niets opgeslagen
+  (P34.2).
+- **PowerPoint-sjabloon van een docent of team (#311) gemerged op 2026-11-12:** een docent
+  uploadt op *Account* een eigen .pptx of .potx, een teamleider op de teampagina een voor het
+  team. In het exportpaneel kies je het standaardontwerp of een sjabloon; de dia's krijgen dan
+  het logo, de kleuren en de letters ervan (P30.7b). Geen nieuwe dependency.
 - **Verbeterpunten in de cursus (#310) gemerged op 2026-11-12:** op het tabblad *Controle*
   staan de open verbeterpunten van een cursus, met een plek (cursus, leeruitkomst, les of toets)
   en een knop *Afgerond*; de docent of een bewerker voegt er een toe. Bij kopiëren voor een nieuwe
