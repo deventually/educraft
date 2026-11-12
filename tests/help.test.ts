@@ -37,6 +37,11 @@ describe("help registry — topics", () => {
     expect(HELP_TOPIC_SLUGS).toContain("courses");
   });
 
+  it("explains how saved results of the same tool are told apart", () => {
+    expect(getTopic("saved-work", "nl")).toContain("wat je zelf invulde");
+    expect(getTopic("saved-work", "en")).toContain("what you filled in yourself");
+  });
+
   it("explains the schedule and what it fills in", () => {
     expect(getTopic("courses", "nl")).toContain("## Lesrooster");
     expect(getTopic("courses", "en")).toContain("## Schedule");

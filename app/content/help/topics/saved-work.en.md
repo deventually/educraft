@@ -4,7 +4,7 @@ Everything you make with the tools is saved automatically under **Earlier work**
 
 ## Finding it again
 
-The newest is at the top, with the tool's name and the date. Open a result to read it again or copy it.
+The newest is at the top. Each result is titled with a bit of what you filled in yourself, such as your subject or learning goal, with the tool's name and the date below it. That keeps three results of the same tool apart. If you filled nothing in, you see the result's first heading, or the tool's name. Open a result to read it again or copy it.
 
 ## Exporting to Word or PDF
 
