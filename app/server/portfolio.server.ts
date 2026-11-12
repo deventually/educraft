@@ -24,6 +24,8 @@ import { listGenerations } from "./repositories/generations.server";
 import { addGenerationToDossier } from "./evidence.server";
 import { refreshCourseEvidence } from "./courseEvidence.server";
 import { saveAnchors } from "./dossierAnchors.server";
+import { runBatchIntent } from "./portfolioBatch.server";
+import type { SortProposal } from "~/lib/portfolio/batch";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
 import { resolveModelInfo } from "~/lib/ai/models";
@@ -124,8 +126,10 @@ export type PortfolioActionResult =
       clipped?: boolean;
       /** proofread: how many proposals came back. */
       proposals?: number;
-      /** anchors: course parts taken into the dossier as evidence. */
+      /** anchors: course parts taken into the dossier as evidence; addEvidenceBatch: items added. */
       added?: number;
+      /** proposeEvidence: a proposal per file, for the teacher to confirm. */
+      sorted?: SortProposal[];
       /** reviewAll: chapters reviewed, and chapters whose review failed. */
       reviewed?: number;
       failed?: number;
@@ -133,11 +137,11 @@ export type PortfolioActionResult =
   | { ok: false; error: string };
 
 /**
- * Applies the posted intent to the dossier and stores it. Six intents call a
+ * Applies the posted intent to the dossier and stores it. Seven intents call a
  * model (`extract` on the framework page; `review`, `guideQuestions:<sectionId>`,
  * `guideDraft:<sectionId>` and
- * `proofread` for one chapter; `reviewAll` for the whole dossier); every other
- * one is a pure edit.
+ * `proofread` for one chapter; `reviewAll` for the whole dossier; `proposeEvidence`
+ * for evidence in one go, which stores nothing); every other one is a pure edit.
  */
 export async function saveIntent(
   request: Request,
@@ -265,6 +269,10 @@ async function runIntent(
     }
     return { ok: true, intent };
   }
+
+  // Evidence in one go: a proposal per file (model calls), then what the teacher ticked.
+  const batch = await runBatchIntent(user, dossier, intent, fd, locale);
+  if (batch) return batch;
 
   // Start wizard: the anchors check the courses, so they are not a pure edit.
   if (intent === "anchors") return saveAnchors(user, dossier, fd, locale);

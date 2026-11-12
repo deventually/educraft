@@ -26,6 +26,7 @@ describe("eval scripts", () => {
     "eval:import",
     "eval:framework",
     "eval:guided",
+    "eval:evidence",
   ]) {
     it(`${name} starts a command from a declared dependency`, () => {
       const bin = pkg.scripts[name]?.split(" ")[0];

@@ -39,6 +39,7 @@ import {
 } from "./test-items.prompt";
 import { PORTFOLIO_COACH_PROMPT, PORTFOLIO_DRAFT_PROMPT } from "./portfolio-coach@v1.prompt";
 import { PORTFOLIO_DRAFT_PROMPT_V2 } from "./portfolio-draft@v2.prompt";
+import { PORTFOLIO_EVIDENCE_SORT_PROMPT } from "./portfolio-evidence-sort@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT_V2 } from "./portfolio-framework@v2.prompt";
 import { PORTFOLIO_PROOFREAD_PROMPT } from "./portfolio-proofread@v1.prompt";
@@ -119,6 +120,7 @@ const ALL: PromptDef[] = [
   PORTFOLIO_DRAFT_PROMPT_V2,
   PORTFOLIO_FRAMEWORK_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT_V2,
+  PORTFOLIO_EVIDENCE_SORT_PROMPT,
   PORTFOLIO_PROOFREAD_PROMPT,
   PORTFOLIO_QUESTIONS_PROMPT,
   PORTFOLIO_REHEARSAL_PROMPT,
