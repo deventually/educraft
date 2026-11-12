@@ -123,6 +123,11 @@ npm test && npm run typecheck && npm run check
 Open the PR as **"Release X.Y.Z"**, following `.github/pull_request_template.md`, with the
 checklist from step 2 in the body. Do not touch `STATUS.md` (project rule).
 
+In the same PR, fold the board: move every entry file in `docs/fabriek/bord/` that is on `main`
+(not `README.md`, not an earlier `*-release-*.md`) into one new file
+`docs/fabriek/bord/<date>-release-X-Y-Z.md`, newest first, and delete the moved files. Open PRs only
+add new files there, so this never conflicts (BESLUIT-2026-11-12-16).
+
 ## 6. Hand over to Bastiaan
 
 When the PR is green, tell him in Dutch, in a few lines:

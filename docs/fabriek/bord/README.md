@@ -22,3 +22,7 @@ Een nieuw bestand botst nooit met een andere PR; zo geeft het bord geen merge-co
 
 [`2026-11-12-eerder.md`](2026-11-12-eerder.md) bevat alles wat tot en met #322 gemerged is, het
 nieuwste bovenaan. `tests/hotspots.test.ts` bewaakt de namen en de vorm.
+
+**Samenvoegen** gebeurt bij elke release: de release-PR zet alle losse bestanden in één bestand
+`<datum>-release-X-Y-Z.md` en haalt de losse weg. Dat botst niet, want open PR's voegen alleen
+nieuwe bestanden toe.
