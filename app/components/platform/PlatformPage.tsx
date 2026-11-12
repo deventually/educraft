@@ -57,9 +57,12 @@ export function PlatformPage({
     <div className="space-y-8">
       <section aria-labelledby="platform-heading" className="space-y-4">
         <div>
-          <h2 id="platform-heading" className={h2}>
+          <h1
+            id="platform-heading"
+            className="font-display text-2xl font-medium tracking-tight text-slate-900"
+          >
             {t.heading}
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-600">{t.intro}</p>
         </div>
         <AddInstitutionForm added={added} />

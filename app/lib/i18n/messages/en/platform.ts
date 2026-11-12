@@ -60,7 +60,7 @@ export const platform: Messages["platform"] = {
   removeConfirmLabel: "Type the id ({id}) to confirm",
   removeDescription:
     "The data of {name} goes to the archive for 60 days and is erased after that. You can restore the institution until that day.",
-  removeOnlyInactive: "Deactivate first",
+  removeOnlyInactive: "Remove after deactivating",
   removeTitle: "Remove {name}?",
   restore: "Restore",
   rowActions: "Actions for {name}",

@@ -59,7 +59,7 @@ export const platform = {
   removeConfirmLabel: "Typ het id ({id}) om te bevestigen",
   removeDescription:
     "De gegevens van {name} gaan 60 dagen naar het archief en worden daarna gewist. Tot die dag kun je de instelling terugzetten.",
-  removeOnlyInactive: "Eerst deactiveren",
+  removeOnlyInactive: "Verwijderen kan na deactiveren",
   removeTitle: "{name} verwijderen?",
   restore: "Terugzetten",
   rowActions: "Acties voor {name}",

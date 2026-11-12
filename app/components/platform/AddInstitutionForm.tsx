@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Form } from "react-router";
 import { Plus } from "lucide-react";
 import { LinkCard } from "~/components/admin/LinkCard";
@@ -29,13 +29,19 @@ const fields = [
 export function AddInstitutionForm({ added }: { added: AddedInstitution | null }) {
   const t = useT().platform;
   const [open, setOpen] = useState(false);
+  const linkRef = useRef<HTMLElement>(null);
+
+  // Added: close the form and move the focus to the link, the one thing left to do.
+  const link = added?.setPasswordLink;
+  useEffect(() => {
+    if (!link) return;
+    setOpen(false);
+    linkRef.current?.focus();
+  }, [link]);
 
   return (
-    <section aria-labelledby="platform-add-heading">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 id="platform-add-heading" className="sr-only">
-          {t.addHeading}
-        </h3>
+    <div className="space-y-4">
+      <div>
         <Button
           type="button"
           aria-expanded={open}
@@ -52,7 +58,7 @@ export function AddInstitutionForm({ added }: { added: AddedInstitution | null }
           id="platform-add"
           method="post"
           aria-label={t.addHeading}
-          className="mt-4 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2"
+          className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2"
         >
           <input type="hidden" name="intent" value="add" />
           {fields.map((f) => {
@@ -81,13 +87,20 @@ export function AddInstitutionForm({ added }: { added: AddedInstitution | null }
       )}
 
       {added && (
-        <LinkCard
-          heading={fmt(t.linkHeading, { name: added.name })}
-          hint={fmt(t.linkHint, { admin: added.adminName })}
-          url={added.setPasswordLink}
-          copyLabel={t.copyLink}
-        />
+        <section
+          ref={linkRef}
+          tabIndex={-1}
+          aria-label={fmt(t.linkHeading, { name: added.name })}
+          className="rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        >
+          <LinkCard
+            heading={fmt(t.linkHeading, { name: added.name })}
+            hint={fmt(t.linkHint, { admin: added.adminName })}
+            url={added.setPasswordLink}
+            copyLabel={t.copyLink}
+          />
+        </section>
       )}
-    </section>
+    </div>
   );
 }

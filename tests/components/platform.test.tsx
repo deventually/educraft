@@ -72,7 +72,7 @@ const rowOf = (name: string) => screen.getByRole("row", { name: new RegExp(name)
 describe("Platform: the institutions", () => {
   it("lists every institution with its id, address and status", async () => {
     renderPage();
-    expect(await screen.findByRole("heading", { level: 2, name: "Platform" })).toBeVisible();
+    expect(await screen.findByRole("heading", { level: 1, name: "Platform" })).toBeVisible();
     const table = screen.getByRole("table", { name: "Instellingen" });
     const hsl = within(table).getByRole("row", { name: /Hogeschool Leiden/ });
     expect(within(hsl).getByText("hsl")).toBeVisible();
@@ -114,7 +114,7 @@ describe("Platform: the institutions", () => {
     renderPage();
     const active = rowOf("Hogeschool Leiden");
     expect(within(active).queryByRole("button", { name: "Verwijderen" })).toBeNull();
-    expect(within(active).getByText("Eerst deactiveren")).toBeVisible();
+    expect(within(active).getByText("Verwijderen kan na deactiveren")).toBeVisible();
     expect(within(rowOf("De Haagse")).getByRole("button", { name: "Verwijderen" })).toBeVisible();
   });
 
@@ -202,6 +202,9 @@ describe("Platform: adding an institution", () => {
     expect(screen.getByText("https://ru.limeonit.nl/set-password/abc")).toBeVisible();
     expect(screen.getByText(/Stuur deze link aan Kim/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Kopieer link" })).toBeVisible();
+    // Done: the form closes and the focus moves to the link, so it is read out next.
+    expect(screen.queryByRole("form", { name: "Nieuwe instelling" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Wachtwoordlink voor Radboud" })).toHaveFocus();
   });
 
   it("reports a refusal as an error toast and keeps what was typed", async () => {
@@ -255,7 +258,7 @@ describe("Platform: accessibility", () => {
   it("has no axe violations, with the form open and a dialog open", async () => {
     const user = userEvent.setup();
     const { container } = renderPage();
-    await screen.findByRole("heading", { level: 2, name: "Platform" });
+    await screen.findByRole("heading", { level: 1, name: "Platform" });
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     await user.click(screen.getByRole("button", { name: "Nieuwe instelling" }));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
