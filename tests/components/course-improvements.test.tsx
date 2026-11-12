@@ -94,3 +94,24 @@ describe("CourseImprovements (the Controle tab, P33.1)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("CourseImprovements on a copy for a new run (P33.3)", () => {
+  it("puts the open points of an earlier run first, under their own heading", () => {
+    renderBlock({
+      ...alignedCourse(),
+      studyYear: "2026-2027",
+      phase: "Semester 1",
+      improvements: [
+        { ...points[1]!, run: { studyYear: "2026-2027", phase: "Semester 1" } },
+        points[0]!,
+      ],
+    });
+    const earlier = screen.getByRole("list", { name: "Uit de vorige uitvoering" });
+    expect(within(earlier).getByText("Geef de casus een week eerder uit.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Uit de vorige uitvoering" }),
+    ).toBeVisible();
+    const now = screen.getByRole("list", { name: "Open verbeterpunten" });
+    expect(within(now).getByText("Rooster eerder delen.")).toBeInTheDocument();
+  });
+});

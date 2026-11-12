@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Form } from "react-router";
 import { improvementPlace } from "~/lib/courses/improvements";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
-import type { CourseData, Improvement } from "~/lib/courses/types";
+import type { CourseData, Improvement, ImprovementPlace } from "~/lib/courses/types";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { Button, Card, HelpText, Label, Select, Textarea } from "~/components/ui";
@@ -12,9 +12,13 @@ type Messages = ReturnType<typeof useT>["courseImprovements"];
 /** An option label: long outcome texts are cut, the select stays usable. */
 const short = (text: string) => (text.length > 90 ? `${text.slice(0, 87)}…` : text);
 
-/** Where the point belongs, in words: "Toets: Eindopdracht", or the whole course. */
-function placeText(data: CourseData, point: Improvement, m: Messages): string {
-  const place = improvementPlace(data, point.place);
+/** Where a point belongs, in words: "Toets: Eindopdracht", or the whole course. */
+export function placeText(
+  data: CourseData,
+  at: ImprovementPlace,
+  m: Pick<Messages, "places">,
+): string {
+  const place = improvementPlace(data, at);
   if (place.kind === "course") return m.places.course;
   const name =
     place.kind === "outcome"
@@ -60,7 +64,7 @@ function PointItem({ data, point, m }: { data: CourseData; point: Improvement; m
   const textId = useId();
   const open = point.status === "open";
   const meta = [
-    placeText(data, point, m),
+    placeText(data, point.place, m),
     point.source === "evaluation" ? m.fromEvaluation : null,
     runText(point, m),
   ].filter(Boolean);
@@ -86,6 +90,12 @@ function PointItem({ data, point, m }: { data: CourseData; point: Improvement; m
       </div>
     </li>
   );
+}
+
+/** A point from a run before this one: both have a run, and they differ. */
+function isEarlierRun(point: Improvement, data: CourseData): boolean {
+  if (!point.run || !(data.studyYear || data.phase)) return false;
+  return point.run.studyYear !== data.studyYear || point.run.phase !== data.phase;
 }
 
 /** The select of places: the whole course, then each outcome, lesson and test by name. */
@@ -133,6 +143,9 @@ export function CourseImprovements({ data }: { data: CourseData }) {
   const id = useId();
   const points = data.improvements ?? [];
   const open = points.filter((p) => p.status === "open");
+  // On a copy for a new run, the open points of the run before come first (P33.3).
+  const earlier = open.filter((p) => isEarlierRun(p, data));
+  const current = open.filter((p) => !isEarlierRun(p, data));
   const done = points.filter((p) => p.status === "done");
   return (
     <section aria-labelledby={id}>
@@ -140,14 +153,28 @@ export function CourseImprovements({ data }: { data: CourseData }) {
         {m.heading}
       </h2>
       <p className="mt-1 max-w-[65ch] text-sm text-slate-600">{m.intro}</p>
+      {earlier.length > 0 && (
+        <>
+          <h3 id={`${id}-earlier`} className="mt-4 text-base font-medium text-slate-900">
+            {m.earlier}
+          </h3>
+          <ul aria-labelledby={`${id}-earlier`} className="mt-2 space-y-2">
+            {earlier.map((p) => (
+              <PointItem key={p.id} data={data} point={p} m={m} />
+            ))}
+          </ul>
+        </>
+      )}
       {open.length === 0 ? (
         <p className="mt-3 text-sm text-slate-700">{m.none}</p>
       ) : (
-        <ul aria-label={m.openList} className="mt-3 space-y-2">
-          {open.map((p) => (
-            <PointItem key={p.id} data={data} point={p} m={m} />
-          ))}
-        </ul>
+        current.length > 0 && (
+          <ul aria-label={m.openList} className="mt-3 space-y-2">
+            {current.map((p) => (
+              <PointItem key={p.id} data={data} point={p} m={m} />
+            ))}
+          </ul>
+        )
       )}
       {done.length > 0 && (
         <details className="mt-3">

@@ -12,6 +12,7 @@ export const courseImprovements: Messages["courseImprovements"] = {
   },
   doneList: "Finished improvements",
   doneSummary: "Finished ({n})",
+  earlier: "From the previous run",
   errors: {
     full: "This course already has 30 improvements. Remove a finished one first.",
     invalid:

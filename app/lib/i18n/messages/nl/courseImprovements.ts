@@ -10,6 +10,7 @@ export const courseImprovements = {
   },
   doneList: "Afgeronde verbeterpunten",
   doneSummary: "Afgerond ({n})",
+  earlier: "Uit de vorige uitvoering",
   errors: {
     full: "Er staan al 30 verbeterpunten bij deze cursus. Verwijder eerst een afgerond punt.",
     invalid: "Dit verbeterpunt kan zo niet. Schrijf een korte zin en kies een plek in de cursus.",

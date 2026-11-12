@@ -213,3 +213,53 @@ export function parseEvaluation(
     },
   };
 }
+
+// ── Reading a CSV export (in the browser) ───────────────────────────────────
+
+/** The cells of a CSV text: quoted fields with doubled quotes, `;` or `,` as found in the header. */
+function csvRows(text: string): string[][] {
+  const header = text.split(/\r?\n/, 1)[0] ?? "";
+  const sep = (header.match(/;/g)?.length ?? 0) >= (header.match(/,/g)?.length ?? 0) ? ";" : ",";
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charAt(i);
+    if (quoted) {
+      if (ch === '"' && text.charAt(i + 1) === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === sep) {
+      row.push(cell);
+      cell = "";
+    } else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text.charAt(i + 1) === "\n") i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else cell += ch;
+  }
+  if (cell || row.length) rows.push([...row, cell]);
+  return rows;
+}
+
+/**
+ * A survey export: one row per respondent after the header. The respondents are the rows with
+ * anything in them; the answers are the open answers (no numbers, which are scores), one
+ * respondent per line. The teacher can still change both.
+ */
+export function readSurveyCsv(text: string): { respondents: number; answers: string } {
+  const rows = csvRows(text)
+    .slice(1)
+    .map((r) => r.map((c) => c.trim()))
+    .filter((r) => r.some(Boolean));
+  const answers = rows
+    .map((r) => r.filter((c) => c && !/^-?\d+([.,]\d+)?$/.test(c)).join(" | "))
+    .filter(Boolean);
+  return { respondents: rows.length, answers: answers.join("\n") };
+}

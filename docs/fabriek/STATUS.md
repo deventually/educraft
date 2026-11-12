@@ -4,10 +4,18 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310, #313 en #314 gemerged)_
 
 ## Nu
 
+- **Cursusevaluatie verwerken: de motor (#313) gemerged op 2026-11-12:** LimeOnIt maakt van een
+  geanonimiseerde studentenenquête thema's met aantallen en letterlijke citaten, problemen op hun
+  plek in de cursus, en drie tot vijf verbeterpunten (een eigen punt per probleem). De code gooit
+  verzonnen citaten weg, en wat één student zei is geen thema. Er wordt niets opgeslagen (P33.2).
+  Eval zelf gedraaid via Claude Code: 15 van 15. Het scherm volgt in P33.3.
+- **Evals op het Claude-abonnement (#314) gemerged op 2026-11-12:** met
+  `--model claude-code::claude-sonnet-5-5` draait een eval via Claude Code, zonder API-sleutel,
+  met de systeemprompt van de app. Een werker-thread kan de eval dus zelf draaien.
 - **Verbeterpunten in de cursus (#310) gemerged op 2026-11-12:** op het tabblad *Controle*
   staan de open verbeterpunten van een cursus, met een plek (cursus, leeruitkomst, les of toets)
   en een knop *Afgerond*; de docent of een bewerker voegt er een toe. Bij kopiëren voor een nieuwe
@@ -847,6 +855,10 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #310 gemerged)_
 
 ## Bezig
 
+- **Cursusevaluatie verwerken: het scherm (P33.3, PR open):** op het tabblad *Controle* plakt de
+  docent de antwoorden of kiest een CSV, controleert de namen in de browser en laat de enquête
+  verwerken. Per verbeterpunt kiest de docent *Akkoord* (het komt bij de verbeterpunten) of *Niet
+  akkoord*. Punten uit de vorige uitvoering staan apart bovenaan.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude
