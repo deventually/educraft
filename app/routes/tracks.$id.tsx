@@ -1,17 +1,31 @@
-import { useId } from "react";
+import { type ReactNode, useId } from "react";
 import { Form, Link, useActionData } from "react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/tracks.$id";
-import { requireTracksUser } from "~/server/tracks.server";
+import { requireTracksUser, trackVisitAction } from "~/server/tracks.server";
 import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
+import { rubricChoices, trackSecondAssessorAction } from "~/server/trackSecondAssessor.server";
+import { trackCloseAction, trackOnStageAction } from "~/server/trackOnStage.server";
+import { getTrackRetentionDays } from "~/server/repositories/settings.server";
 import { getSelectableModels } from "~/server/availability.server";
 import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
+import { SecondAssessorPanel } from "~/components/tracks/SecondAssessorPanel";
+import { VisitsPanel } from "~/components/tracks/VisitsPanel";
+import { OnStagePanel } from "~/components/tracks/OnStagePanel";
+import { CloseTrack } from "~/components/tracks/CloseTrack";
 import { getTrack, listRounds, updateTrackData } from "~/server/repositories/tracks.server";
 import { getCourse } from "~/server/repositories/courses.server";
 import { getAssessmentModel } from "~/server/repositories/assessmentModels.server";
 import { IsoDateSchema } from "~/lib/calendar/weeks";
-import { MILESTONES, type MilestoneId, MilestoneIdSchema, nextStep, progress } from "~/lib/tracks";
+import {
+  MILESTONES,
+  type MilestoneId,
+  MilestoneIdSchema,
+  type MilestonePanel,
+  nextStep,
+  progress,
+} from "~/lib/tracks";
 import { TabNav } from "~/components/TabNav";
 import { ProgressPanel } from "~/components/progress/ProgressPanel";
 import { Markdown } from "~/components/Markdown";
@@ -38,14 +52,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireTracksUser(request);
   const track = await getTrack(user.id, params.id ?? "");
   if (!track) throw notFound();
-  const [rounds, course, model, selectable] = await Promise.all([
+  const tab = tabOf(new URL(request.url).searchParams.get("tab"));
+  const panel = tab === "overview" ? undefined : MILESTONES.find((x) => x.id === tab)?.panel;
+  const [rounds, course, model, selectable, rubrics, retentionDays] = await Promise.all([
     listRounds(user.id, track.id),
     track.courseId ? getCourse(user.id, track.courseId) : null,
     track.assessmentModelId ? getAssessmentModel(user.id, track.assessmentModelId) : null,
     getSelectableModels(user),
+    // The rubrics only on the tab that compares with them (P38.5).
+    panel === "second-assessor" ? rubricChoices(user) : [],
+    getTrackRetentionDays(),
   ]);
   return {
-    tab: tabOf(new URL(request.url).searchParams.get("tab")),
+    tab,
+    rubrics,
+    retentionDays,
     track: {
       id: track.id,
       code: track.code,
@@ -82,6 +103,14 @@ export async function action({ request, params }: Route.ActionArgs) {
   const locale = getLocale(request);
   const ff = await trackFeedforwardAction(request, user, track, locale);
   if (ff) return ff;
+  const sa = await trackSecondAssessorAction(request, user, track, locale);
+  if (sa) return sa;
+  const visit = await trackVisitAction(request, user, track, locale);
+  if (visit) return visit;
+  const onstage = await trackOnStageAction(request, user, track, locale);
+  if (onstage) return onstage;
+  const close = await trackCloseAction(request, user, track, locale);
+  if (close) return close;
   const fd = await request.formData();
   const m = getMessages(locale).tracks;
   if (fd.get("intent") !== "milestone")
@@ -96,6 +125,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   const { milestone, status, due } = form.data;
   const { [milestone]: _old, ...deadlines } = track.data.deadlines;
   await updateTrackData(user.id, track.id, {
+    ...track.data,
     status: { ...track.data.status, [milestone]: status },
     deadlines: due ? { ...deadlines, [milestone]: due } : deadlines,
   });
@@ -110,14 +140,19 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
   const { tab, track } = loaderData;
+  const doneMessage = {
+    feedforward: m.feedforward.done,
+    "second-assessor": m.secondAssessor.done,
+    visit: m.visits.done,
+    onstage: m.onstage.done,
+    close: m.close.done,
+    milestone: m.toastSaved,
+  };
   useFormToast(actionData, {
     result: (d) =>
       d
         ? d.ok
-          ? {
-              variant: "success",
-              message: d.intent === "feedforward" ? m.feedforward.done : m.toastSaved,
-            }
+          ? { variant: "success", message: doneMessage[d.intent] }
           : { variant: "error", message: d.error }
         : null,
   });
@@ -209,6 +244,23 @@ function Overview({ data, href }: { data: Data; href: (id: string) => string }) 
   );
 }
 
+/** The working panel of a milestone, by its data (`Milestone.panel`). */
+function Panel({ kind, data }: { kind: MilestonePanel; data: Data }) {
+  const panels: Record<MilestonePanel, () => ReactNode> = {
+    feedforward: () => <FeedforwardPanel criteria={data.track.criteria} models={data.models} />,
+    "second-assessor": () => <SecondAssessorPanel rubrics={data.rubrics} />,
+    visits: () => <VisitsPanel visits={data.data.visits} />,
+    onstage: () => (
+      <OnStagePanel
+        criteria={data.track.criteria}
+        confirmed={data.data.onstage}
+        rounds={data.rounds}
+      />
+    ),
+  };
+  return panels[kind]();
+}
+
 function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId }) {
   const t = useT();
   const m = t.tracks;
@@ -216,7 +268,7 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
   const headingId = useId();
   const roundsId = useId();
   const def = MILESTONES.find((x) => x.id === milestone);
-  const tool = def?.tool;
+  const tools = def?.tools ?? [];
   const status = data.data.status[milestone] ?? "open";
   const rounds = data.rounds.filter((r) => r.milestone === milestone);
   const options = [
@@ -229,20 +281,31 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
       <h2 id={headingId} className="text-lg font-medium text-slate-900">
         {def ? loc(def.name, locale) : milestone}
       </h2>
-      {tool && !data.track.closedAt && (
+      {tools.length > 0 && !data.track.closedAt && (
         <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
           <p className="max-w-[65ch] text-sm text-slate-700">{m.milestone.toolHint}</p>
-          <Link
-            to={`/tools/${tool.slug}?track=${encodeURIComponent(data.track.id)}&milestone=${milestone}`}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-violet-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
-          >
-            {loc(tool.label, locale)}
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tools.map((tool) => (
+              <Link
+                key={tool.slug}
+                to={`/tools/${tool.slug}?track=${encodeURIComponent(data.track.id)}&milestone=${milestone}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-violet-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+              >
+                {loc(tool.label, locale)}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
-      {def?.feedforward && !data.track.closedAt && (
-        <FeedforwardPanel criteria={data.track.criteria} models={data.models} />
+      {def?.panel && !data.track.closedAt && <Panel kind={def.panel} data={data} />}
+      {def?.closes && (
+        <CloseTrack
+          track={data.track}
+          retentionDays={data.retentionDays}
+          rounds={data.rounds}
+          onstage={data.data.onstage}
+        />
       )}
       <Form method="post" key={milestone} className="space-y-4">
         <input type="hidden" name="intent" value="milestone" />

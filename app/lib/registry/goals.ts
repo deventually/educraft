@@ -93,6 +93,8 @@ export const TOOL_GOALS: Record<string, TeachingGoal> = {
   "scaffolding-feedback": "coach",
   "difficult-conversation": "coach",
   "conversation-prep": "coach",
+  "visit-prep": "coach",
+  "visit-report": "coach",
   "socratic-partner": "discuss",
   "defend-your-work": "discuss",
   "think-pair-share": "discuss",

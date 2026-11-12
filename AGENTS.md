@@ -119,6 +119,9 @@ English slugs, never shown.
   with, in the WHERE clause, and only in `shares.server.ts`. **Writing, linking and deleting** stay
   owner-only. Work of a `Tool.handlesStudentWork` tool, chats and the dossier are never shared
   ([Authentication](wiki/Authentication.md#sharing-with-your-team-p284)).
+- Supervision tracks (P38) belong to one teacher: owner-scoped in `tracks.server.ts`, **never
+  shared** (not a share kind, no team rule), only a code and anonymised text, and wiped after
+  `purgeAfter` (`trackRetention.server.ts`, per institution).
 - Programmes (BESLUIT-2026-11-10-3) are **team-owned**: queries are scoped to the actor's teams
   in the WHERE clause (an admin: all); the lead or an admin manages. A member places only own or
   co-owned courses (BESLUIT-2026-11-10-5), which shares them with the team; a colleague's course

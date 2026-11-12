@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { feedbackHistory, HISTORY_LIMIT } from "~/lib/tracks/history";
+import { feedbackHistory, HISTORY_LIMIT, weakPoints } from "~/lib/tracks/history";
 
 const round = (milestone: string, n: number, text: string) => ({
   milestone,
@@ -50,5 +50,38 @@ describe("feedbackHistory (P38.4)", () => {
     expect(h).toContain("NIEUW");
     expect(h).toContain("MIDDEN");
     expect(h).not.toContain("OUD");
+  });
+});
+
+describe("weakPoints (P38.6)", () => {
+  it("are the improvement points of the newest round that has them", () => {
+    const rounds = [
+      {
+        milestone: "drafts",
+        round: 1,
+        feedback: { text: "x", points: [{ id: "p1", criterion: "C1", text: "Oud." }] },
+      },
+      {
+        milestone: "drafts",
+        round: 2,
+        feedback: {
+          text: "y",
+          points: [
+            { id: "p1", criterion: "C1 Bronnen", text: "Noem drie bronnen." },
+            { id: "p2", criterion: "C2 Methode", text: "Verantwoord de keuze voor interviews." },
+          ],
+        },
+      },
+      { milestone: "final", round: 1, feedback: { text: "Eindbeoordeling." } },
+    ];
+    expect(weakPoints(rounds)).toBe(
+      "- C1 Bronnen: Noem drie bronnen.\n- C2 Methode: Verantwoord de keuze voor interviews.",
+    );
+  });
+
+  it("is empty without points", () => {
+    expect(weakPoints([{ milestone: "start", round: 1, feedback: { text: "Goed plan." } }])).toBe(
+      "",
+    );
   });
 });

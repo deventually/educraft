@@ -186,7 +186,8 @@ export async function packDocx(
       },
     ],
   });
-  return new Uint8Array(await Packer.toBuffer(doc));
+  // An ArrayBuffer works in the server and in the browser (an unsaved result, P38.6).
+  return new Uint8Array(await Packer.toArrayBuffer(doc));
 }
 
 /** An `ExportDoc` as Word: the title, then each step under a Heading 1 (if named). */

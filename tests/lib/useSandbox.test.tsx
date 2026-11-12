@@ -63,7 +63,10 @@ describe("useSandbox", () => {
       },
     ];
     const { result } = renderHook(() =>
-      useSandbox({ inputs: withHistory, initialTrack: { feedbackHistory: "Noem bronnen." } }),
+      useSandbox({
+        inputs: withHistory,
+        initialTrack: { feedbackHistory: "Noem bronnen.", criteria: "", weakPoints: "" },
+      }),
     );
     expect(result.current.values.history).toBe("Noem bronnen.");
     const none = renderHook(() => useSandbox({ inputs: withHistory }));

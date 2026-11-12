@@ -199,6 +199,8 @@ describe("/tracks/:id", () => {
     expect((await repo.getTrack(A, t.id))?.data).toEqual({
       status: { start: "done" },
       deadlines: { start: "2027-02-01" },
+      visits: [],
+      onstage: [],
     });
     const bad = (await detail.action({
       request: post(`/tracks/${t.id}`, { intent: "milestone", milestone: "start", status: "x" }),
@@ -250,6 +252,8 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
         code: string;
         milestone: string;
         feedbackHistory: string;
+        criteria: string;
+        weakPoints: string;
       } | null;
     }>;
   const act = (fields: Record<string, string>) =>
@@ -285,6 +289,8 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
     const final = (await load(`?track=${t.id}&milestone=final`)).forTrack;
     expect(final).toMatchObject({ milestone: "final" });
     expect(final?.feedbackHistory).toBe("### Concepten, ronde 1\nNoem bronnen.");
+    // P38.6: the criteria of the linked model (none here) and the weak points go along too.
+    expect(final).toMatchObject({ criteria: "", weakPoints: "" });
     const theirs = await track(B);
     expect((await load(`?track=${theirs.id}&milestone=start`)).forTrack).toBeNull();
   });

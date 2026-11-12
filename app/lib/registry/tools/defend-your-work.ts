@@ -106,6 +106,8 @@ export const defendYourWork: Tool = {
         nl: "bijv. De student legt de ontwerpkeuzes uit, interpreteert de eigen gegevens en verdedigt de conclusie met bewijs.",
         en: "e.g. The student explains the design choices, interprets their own data and defends the conclusion with evidence.",
       },
+      // P38.6: opened from a track (final interview).
+      prefillFromTrack: { source: "criteria" },
       group: WORK,
     },
     {
@@ -120,6 +122,8 @@ export const defendYourWork: Tool = {
         nl: "bijv. De keuze voor interviews in plaats van een enquête.",
         en: "e.g. The choice for interviews instead of a survey.",
       },
+      // P38.6: opened from a track (final interview).
+      prefillFromTrack: { source: "weakPoints" },
       group: DEFENSE,
     },
     {

@@ -40,9 +40,14 @@ describe("tracks repository (P38.1)", () => {
       closedAt: null,
       purgeAfter: null,
     });
-    expect(t.data).toEqual({ status: {}, deadlines: {} });
+    expect(t.data).toEqual({ status: {}, deadlines: {}, visits: [], onstage: [] });
 
-    const data = { status: { start: "done" as const }, deadlines: { final: "2027-06-01" } };
+    const data = {
+      status: { start: "done" as const },
+      deadlines: { final: "2027-06-01" },
+      visits: [],
+      onstage: [],
+    };
     expect((await repo.updateTrackData(A, t.id, data))?.data).toEqual(data);
     expect((await repo.getTrack(A, t.id))?.data).toEqual(data);
     expect((await repo.listTracks(A)).map((x) => x.id)).toContain(t.id);
@@ -80,7 +85,9 @@ describe("tracks repository (P38.1)", () => {
     expect(r).not.toBeNull();
     expect(await repo.getTrack(B, t.id)).toBeNull();
     expect((await repo.listTracks(B)).map((x) => x.id)).not.toContain(t.id);
-    expect(await repo.updateTrackData(B, t.id, { status: {}, deadlines: {} })).toBeNull();
+    expect(
+      await repo.updateTrackData(B, t.id, { status: {}, deadlines: {}, visits: [], onstage: [] }),
+    ).toBeNull();
     expect(await repo.closeTrack(B, t.id)).toBeNull();
     expect(await repo.deleteTrack(B, t.id)).toBe(false);
     expect(await repo.listRounds(B, t.id)).toEqual([]);

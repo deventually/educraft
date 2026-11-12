@@ -580,6 +580,22 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   it is due: after 3 results, then at most once per 14 days; "Niet nu" counts too. `/admin/usage`
   has *Pilot per tool*: uses, thumbs, time, quality and comments since the start, plus the
   check-in answers, filtered per team with `?team=`.
+- **Internship and thesis track (P38)** at `/tracks` ("Mijn begeleiding", feature
+  `supervisionTracks`, on by default; BESLUIT-2026-11-12-11 and -15). Pure domain in
+  `app/lib/tracks/`: `schema` (the seven `MILESTONES` as data, each with optional `tools` and a
+  `panel`; `TrackDataSchema` with status, deadlines, visit dates and the confirmed OnStage texts,
+  not `.strict()`), `progress` (`progress`, `nextStep`), `retention` (`purgeDate`), `history`
+  (`feedbackHistory`, `weakPoints`), `feedforward` (`parseFeedforward`: no grade, a literal quote
+  for "addressed"), `secondAssessor` (`compareAssessors`) and `onstage` (`criteriaOf`, `draftFor`,
+  `trackLine`). Storage in `tracks.server.ts` (`supervision_tracks`, `track_rounds`, owner-scoped);
+  `trackRetention.server.ts` wipes what is past `purgeAfter`, per institution. The route
+  `tracks.$id.tsx` composes one action per intent (`milestone`, `feedforward`, `second-assessor`,
+  `visit`, `onstage`, `close`), each in its own server file; the tab's working panel comes from
+  `Milestone.panel`, closing from `Milestone.closes`, so nothing branches on a milestone id. A tool
+  opened from a track (`?track=&milestone=`) gets its inputs through `InputField.prefillFromTrack`
+  (`feedbackHistory`, `criteria`, `weakPoints`) and keeps its result as a round with "Bewaar de
+  feedback in …". A visit report (`visit-report`, `storesConversation: false`) is never stored and
+  leaves through `WordDownload`, which builds the Word file in the browser.
 
 ## Stack
 

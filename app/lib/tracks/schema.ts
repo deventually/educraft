@@ -19,38 +19,84 @@ const MILESTONE_IDS = [
 export type MilestoneId = (typeof MILESTONE_IDS)[number];
 export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
 
+export type MilestonePanel = "feedforward" | "onstage" | "second-assessor" | "visits";
+
+interface MilestoneTool {
+  slug: string;
+  label: { nl: string; en: string };
+}
+
 interface Milestone {
   id: MilestoneId;
   name: { nl: string; en: string };
-  /** The tool that does this milestone's work; its result can be kept as a round. */
-  tool?: { slug: string; label: { nl: string; en: string } };
-  /** P38.3: each new version gets feedforward, following up the previous round. */
-  feedforward?: true;
+  /** The tools that do this milestone's work; a result can be kept as a round. */
+  tools?: readonly MilestoneTool[];
+  /**
+   * The working panel the milestone tab shows: feedforward on each new version (P38.3), or the
+   * second assessor's comparison (P38.5).
+   */
+  panel?: MilestonePanel;
+  /** P38.7: the tab where the teacher closes the track (and sees when it is wiped). */
+  closes?: true;
 }
 
 export const MILESTONES: readonly Milestone[] = [
   {
     id: "start",
     name: { nl: "Start", en: "Start" },
-    tool: {
-      slug: "stage-assessment",
-      label: { nl: "Plan van aanpak toetsen", en: "Check the plan of approach" },
-    },
+    tools: [
+      {
+        slug: "stage-assessment",
+        label: { nl: "Plan van aanpak toetsen", en: "Check the plan of approach" },
+      },
+    ],
   },
-  { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
-  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, feedforward: true },
+  {
+    id: "visits",
+    name: { nl: "Bezoeken", en: "Visits" },
+    // P38.6: questions from the criteria; a report from notes that is never kept.
+    tools: [
+      { slug: "visit-prep", label: { nl: "Bezoek voorbereiden", en: "Prepare a visit" } },
+      { slug: "visit-report", label: { nl: "Verslag uit steekwoorden", en: "Report from notes" } },
+    ],
+    panel: "visits",
+  },
+  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, panel: "feedforward" },
   {
     id: "final",
     name: { nl: "Eindversie", en: "Final version" },
     // P38.4: opened from the track, the assessment gets the earlier feedback along.
-    tool: {
-      slug: "stage-assessment",
-      label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
-    },
+    tools: [
+      {
+        slug: "stage-assessment",
+        label: { nl: "Eindversie beoordelen", en: "Assess the final version" },
+      },
+    ],
   },
-  { id: "second-assessor", name: { nl: "Tweede beoordelaar", en: "Second assessor" } },
-  { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
-  { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
+  {
+    id: "second-assessor",
+    name: { nl: "Tweede beoordelaar", en: "Second assessor" },
+    panel: "second-assessor",
+  },
+  {
+    id: "final-interview",
+    name: { nl: "Eindgesprek", en: "Final interview" },
+    // P38.6: rehearse with the weak points of the last feedback, then review the defence.
+    tools: [
+      { slug: "defend-your-work", label: { nl: "Verdedig je werk", en: "Defend your work" } },
+      {
+        slug: "defense-review",
+        label: { nl: "Een verdediging nakijken", en: "Review a defence" },
+      },
+    ],
+  },
+  {
+    id: "onstage",
+    name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" },
+    // P38.7: per criterion the confirmed text to paste into OnStage; then close the track.
+    panel: "onstage",
+    closes: true,
+  },
 ];
 
 const TRACK_KINDS = ["internship", "thesis"] as const;
@@ -71,6 +117,8 @@ const TRACK_LIMITS = {
   /** A whole report, redacted in the browser (like a `document` field in `/api/stream`). */
   redactedText: 300_000,
   feedback: 60_000,
+  criterion: 300,
+  confirmed: 10_000,
 } as const;
 
 /** The teacher's choice when opening a track. The code is free text: the UI warns "no name". */
@@ -93,10 +141,23 @@ export type TrackInput = z.input<typeof TrackInputSchema>;
 /** `skipped`: a milestone that does not apply (a thesis without visits) also counts as resolved. */
 const MilestoneStatusSchema = z.enum(["open", "done", "skipped"]);
 
+export const ConfirmedTextSchema = z.object({
+  criterion: z.string().trim().min(1).max(TRACK_LIMITS.criterion),
+  text: z.string().max(TRACK_LIMITS.confirmed),
+});
+
 export const TrackDataSchema = z.object({
   status: z.partialRecord(MilestoneIdSchema, MilestoneStatusSchema).default({}),
   /** Hand-in dates per milestone. */
   deadlines: z.partialRecord(MilestoneIdSchema, IsoDateSchema).default({}),
+  /** P38.6: the dates of visits, sorted and once each; never what was said. */
+  visits: z
+    .array(IsoDateSchema)
+    .max(50)
+    .default([])
+    .transform((v) => [...new Set(v)].sort()),
+  /** P38.7: per criterion the text the teacher confirmed for OnStage, in the model's order. */
+  onstage: z.array(ConfirmedTextSchema).max(60).default([]),
 });
 export type TrackData = z.infer<typeof TrackDataSchema>;
 

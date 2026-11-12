@@ -154,6 +154,10 @@ repository, `app/server/repositories/shares.server.ts`.
   nakijken, Toetsanalyse, Forum nakijken; validated at boot) and `isShareableWork` (no student
   work, no chat, no dossier work) give `SHAREABLE_WORK_SLUGS`, which `listSharedCourseWork` puts
   in its WHERE. A shared course shows only that linked work.
+- **A supervision track is never shared (P38):** it is not a share kind and has no team rule.
+  Every query in `tracks.server.ts` is scoped to the owning teacher, a track holds only a code and
+  anonymised text with feedback, and it is wiped after `purgeAfter` (set when the teacher closes
+  it; the admin sets the days). Handing a track to a colleague is out of scope for now.
 - **Pages:** "Delen met je team" (`ShareWithTeam`, intents `share` / `unshare`, parsed with Zod in
   `app/server/sharing.server.ts`) on the course page, the rubric page and per context profile.
   "Van mijn team" (`SharedWithMe`) on `/courses`, `/utilities/rubric` and `/context-profiles`,

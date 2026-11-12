@@ -62,6 +62,8 @@ export const TOOL_KEYWORDS: Record<string, string[]> = {
     "direct instruction",
     "rosenshine",
   ],
+  "visit-prep": ["stagebezoek", "bezoek voorbereiden", "internship visit", "prepare a visit"],
+  "visit-report": ["bezoekverslag", "visit report", "steekwoorden", "stagebezoek", "onstage"],
   "conversation-prep": [
     "gesprek voorbereiden",
     "prepare a conversation",

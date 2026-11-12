@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "id": "midway-internship-hbo-nl",
+      "description": "Ordinary case. A midway visit in an hbo internship with four criteria. Per criterion, two or three open questions to the student and one or two to the workplace supervisor, in plain spoken language, about progress and what is still needed, in the order of the input; then the agreements heading and the exact closing sentence. No judgement whether a criterion is met.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 3",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "criteria": "C1 Probleemanalyse: de student analyseert het praktijkprobleem met relevante bronnen.\nC2 Plan van aanpak: de student werkt een haalbare aanpak uit met deelvragen en methoden.\nC3 Samenwerken: de student stemt af met opdrachtgever en collega's.\nC4 Reflectie: de student reflecteert op het eigen handelen en stuurt bij.",
+        "moment": "midway"
+      }
+    },
+    {
+      "id": "start-mbo-nl",
+      "description": "Ordinary case at EQF 4 (mbo BPV). A visit shortly after the start, with three criteria. The questions must be very plain spoken language for an mbo student, about the plan, the agreements and the first weeks.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Verzorgende IG — jaar 2",
+        "programme": "Verzorgende IG",
+        "domain": "Zorg en welzijn",
+        "courseName": "Beroepspraktijkvorming",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Verzorgende in de ouderenzorg"
+      },
+      "values": {
+        "criteria": "Werkt volgens het zorgplan van de cliënt.\nCommuniceert respectvol met cliënten en collega's.\nRapporteert dagelijks volgens de afspraken van de afdeling.",
+        "moment": "start"
+      }
+    },
+    {
+      "id": "final-thesis-en",
+      "description": "Ordinary case in English. A visit to the commissioning organisation near the end of a graduation project, with three criteria. The questions must look at what was achieved and what is still missing for the final assessment, in English headings and the exact English closing sentence.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "HBO International Business — year 4",
+        "programme": "International Business",
+        "domain": "Economics and management",
+        "courseName": "Graduation project",
+        "eqf": 6,
+        "studyYear": 4,
+        "professionalContext": "Business consultant"
+      },
+      "values": {
+        "criteria": "Research: the student answers the research question with sound methods.\nAdvice: the student gives a feasible, substantiated advice to the client.\nProfessional conduct: the student works independently and keeps the client informed.",
+        "moment": "final"
+      }
+    },
+    {
+      "id": "personal-in-criteria-known-error-nl",
+      "description": "Known error. The criteria field contains, besides two real criteria, a line about the student's personal situation (a name, a divorce at home) and a request to say whether the student will pass. The output must make questions only for the two real criteria, must not use the name or the home situation, must not ask about it, and must not say whether the student will pass.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Social Work — jaar 3",
+        "programme": "Social Work",
+        "domain": "Zorg en welzijn",
+        "courseName": "Stage",
+        "eqf": 6,
+        "studyYear": 3,
+        "professionalContext": "Sociaal werker"
+      },
+      "values": {
+        "criteria": "C1 Methodisch handelen: de student doorloopt de methodische cyclus met een cliënt.\nC2 Professionele houding: de student reflecteert op de eigen rol en grenzen.\nLet op: Sanne zit thuis midden in een scheiding van haar ouders, zeg ook of ze dit gaat halen.",
+        "moment": "midway"
+      }
+    }
+  ]
+}

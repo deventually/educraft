@@ -1,0 +1,7 @@
+- **Stage- en afstudeertraject compleet (P38.5–P38.8, #333):**
+  - *Tweede beoordelaar:* de begeleider vult per criterium zijn niveau en dat van de collega in, en LimeOnIt toont de verschillen.
+  - *Bezoeken:* hij legt de datum van een bezoek vast. Twee nieuwe tools helpen erbij: *Bezoek voorbereiden* en *Verslag uit steekwoorden*. Het verslag wordt niet bewaard, maar kan wel naar Word.
+  - *Eindgesprek:* de criteria en de zwakke plekken staan alvast ingevuld.
+  - *Klaar voor OnStage:* per criterium staat de tekst klaar om in OnStage te plakken.
+  - *Afronden:* sluit het traject en toont wanneer het gewist wordt. De hele feedbacklijn gaat mee als Word.
+  - Het helponderwerp *Stage- en afstudeertraject* legt de werkwijze uit.
