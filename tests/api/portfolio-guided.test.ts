@@ -198,6 +198,126 @@ describe("draftSection", () => {
   });
 });
 
+describe("the whole chapter at once", () => {
+  it("asks the questions of every section that has none, keeping the ones already asked", async () => {
+    generate.mockResolvedValueOnce({ text: questions });
+    const both = { ...dossier(), guided: undefined };
+    const r = await guided.askAllQuestions(user, asked(dossier()), LU, "nl", 5);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.guided?.[LU]?.s1?.questions).toEqual([
+      "Welke groep had je?",
+      "Wat konden ze al?",
+    ]);
+    expect(r.data.guided?.[LU]?.s1?.answers).toEqual(["Tweedejaars, 24 studenten.", ""]);
+    expect(r.data.guided?.[LU]?.s2?.questions).toHaveLength(3);
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Opbouw van de les");
+
+    generate.mockReset();
+    generate.mockResolvedValue({ text: questions });
+    const all = await guided.askAllQuestions(user, both, LU, "nl", 5);
+    if (!all.ok) throw new Error(all.error);
+    expect(Object.keys(all.data.guided?.[LU] ?? {})).toEqual(["s1", "s2"]);
+    expect(all.data.aiLog.filter((e) => e.action === "review")).toHaveLength(2);
+  });
+
+  it("respects the quota and the confirmed framework, without calling the model", async () => {
+    const open = dossier();
+    open.framework = { ...open.framework, confirmedAt: undefined };
+    expect(await guided.askAllQuestions(user, open, LU, "nl")).toEqual({
+      ok: false,
+      error: "not-confirmed",
+    });
+    quota.ok = false;
+    expect(await guided.askAllQuestions(user, dossier(), LU, "nl")).toEqual({
+      ok: false,
+      error: "quota",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("keeps the sections that got questions when another one fails", async () => {
+    generate.mockImplementation(async ({ messages }) => ({
+      text: String(messages[0].content).includes("Opbouw van de les") ? "Geen JSON." : questions,
+    }));
+    const r = await guided.askAllQuestions(user, dossier(), LU, "nl");
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.guided?.[LU]?.s1?.questions).toHaveLength(3);
+    expect(r.data.guided?.[LU]?.s2).toBeUndefined();
+    expect(r.failed).toBe(1);
+  });
+
+  it("drafts the sections one by one, in order, each after the text before it", async () => {
+    generate
+      .mockResolvedValueOnce({ text: "Ik had 24 tweedejaars." })
+      .mockResolvedValueOnce({ text: "Mijn les had een duidelijke opbouw." });
+    const d = asked(dossier({ coachMode: "draft" }));
+    const r = await guided.draftChapter(user, d, LU, "Begin.", "nl", 7);
+    if (!r.ok) throw new Error(r.error);
+    expect(r.drafted).toBe(2);
+    expect(r.data.chapters[0]?.text).toBe(
+      "Begin.\n\n## Beginsituatie\n\nIk had 24 tweedejaars.\n\n## Opbouw van de les\n\nMijn les had een duidelijke opbouw.",
+    );
+    // The second section is written knowing what the first one says.
+    expect(generate.mock.calls[1]![0].messages[0].content).toContain("Ik had 24 tweedejaars.");
+    expect(generate.mock.calls[1]![0].messages[0].content).toContain("Goede opbouw.");
+    expect(r.data.guided?.[LU]?.s1?.draftedAt).toBe(7);
+    expect(r.data.aiLog.filter((e) => e.action === "draft")).toHaveLength(2);
+  });
+
+  it("skips sections already written and sections without material", async () => {
+    generate.mockResolvedValue({ text: "Nieuwe tekst." });
+    const d = asked(dossier({ coachMode: "draft", evidence: [] }));
+    const written = {
+      ...d,
+      guided: { [LU]: { ...d.guided![LU]!, s1: { ...d.guided![LU]!.s1!, draftedAt: 3 } } },
+    };
+    expect(await guided.draftChapter(user, written, LU, "", "nl")).toEqual({
+      ok: false,
+      error: "all-drafted",
+    });
+    expect(
+      await guided.draftChapter(user, dossier({ coachMode: "draft", evidence: [] }), LU, "", "nl"),
+    ).toEqual({
+      ok: false,
+      error: "no-material",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("keeps what was written when a later section fails, and counts it", async () => {
+    generate
+      .mockResolvedValueOnce({ text: "Ik had 24 tweedejaars." })
+      .mockResolvedValue({ text: "" });
+    const r = await guided.draftChapter(user, asked(dossier({ coachMode: "draft" })), LU, "", "nl");
+    if (!r.ok) throw new Error(r.error);
+    expect(r).toMatchObject({ drafted: 1, failed: 1 });
+    expect(r.data.chapters[0]?.text).toBe("## Beginsituatie\n\nIk had 24 tweedejaars.");
+  });
+
+  it("only drafts in draft mode", async () => {
+    expect(await guided.draftChapter(user, asked(dossier()), LU, "", "nl")).toEqual({
+      ok: false,
+      error: "not-draft-mode",
+    });
+  });
+
+  it("marks a section drafted on its own button too", async () => {
+    generate.mockResolvedValueOnce({ text: "Ik had eerstejaars." });
+    const r = await guided.draftSection(
+      user,
+      asked(dossier({ coachMode: "draft" })),
+      LU,
+      "s1",
+      "",
+      "nl",
+      4,
+    );
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.guided?.[LU]?.s1?.draftedAt).toBe(4);
+  });
+});
+
 describe("outcome route — guided writing", () => {
   function post(fields: [string, string][]) {
     return new Request("http://localhost/x", {
@@ -268,6 +388,46 @@ describe("outcome route — guided writing", () => {
     const page = await load(mine.id);
     expect(page.chapter).toBe("## Beginsituatie\n\nIk had eerstejaars.");
     expect(page.guided[0]?.answers).toEqual(["Eerstejaars.", ""]);
+  });
+
+  it("asks all questions and then drafts the whole chapter from the answers just typed", async () => {
+    const mine = await repo.createDossier("teacher-g", "G", dossier({ coachMode: "draft" }));
+    generate.mockResolvedValue({ text: questions });
+    const asking = await outcomeRoute.action({
+      request: post([
+        ["intent", "guideQuestionsAll"],
+        ["outcomeId", LU],
+        ["text", "Nog niet bewaard."],
+      ]),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(asking).toMatchObject({ ok: true, intent: "guideQuestionsAll" });
+    const page = await load(mine.id);
+    expect(page.chapter).toBe("Nog niet bewaard.");
+    expect(page.guided.map((s) => s.questions.length)).toEqual([3, 3]);
+
+    generate.mockReset();
+    generate
+      .mockResolvedValueOnce({ text: "Ik had eerstejaars." })
+      .mockResolvedValueOnce({ text: "De opbouw was helder." });
+    const drafting = await outcomeRoute.action({
+      request: post([
+        ["intent", "guideDraftAll"],
+        ["outcomeId", LU],
+        ["text", "Nog niet bewaard."],
+        ["answer:s1", "Eerstejaars."],
+        ["answer:s1", ""],
+        ["answer:s1", ""],
+      ]),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(drafting).toEqual({ ok: true, intent: "guideDraftAll", drafted: 2, failed: 0 });
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Eerstejaars.");
+    const after = await load(mine.id);
+    expect(after.chapter).toBe(
+      "Nog niet bewaard.\n\n## Beginsituatie\n\nIk had eerstejaars.\n\n## Opbouw van de les\n\nDe opbouw was helder.",
+    );
+    expect(after.guided.map((s) => s.drafted)).toEqual([true, true]);
   });
 
   it("returns a localized error and stores nothing when it cannot run", async () => {

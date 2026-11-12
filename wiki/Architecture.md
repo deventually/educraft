@@ -321,6 +321,12 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   and appends the text under the section's title (`appendSection`); the code refuses a paragraph
   that cites an unknown source (one retry). It replaced the per-criterion paragraph of @v1. Eval:
   `npm run eval:guided` (deterministic, `evals/portfolio-guided/`).
+  The whole chapter on one screen: `guideQuestionsAll` asks the questions of every section that
+  has none (`askAllQuestions`, four at a time; one call per section, the same prompt), so the
+  teacher answers them all at once. `guideDraftAll` (`draftChapter`) drafts every section with
+  material not yet drafted, one call per section, in the outline's order, each with the chapter
+  so far, so the quality is that of drafting them one by one. `GuidedSection.draftedAt` marks a
+  drafted section (new questions clear it); a failed section is counted and keeps its own button.
   What the anchor's course already says (`courseFacts.ts`, pure, no AI): `anchorFacts` reads the
   module's details and schedule and the anchored lesson (goal, discipline, outcomes) or test (form,
   weight, pass mark, resit, parts). `anchorCourseFacts` looks the course up with `getCourse`, so a

@@ -3,7 +3,8 @@ import { render as rtlRender, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
-import { GuidedWriting, type GuidedSectionView } from "~/components/portfolio/GuidedWriting";
+import { GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import type { GuidedSectionView } from "~/lib/portfolio/guided";
 import { EvidenceTextField } from "~/components/portfolio/EvidenceTextField";
 
 // The button itself is tested in DictateButton.test.tsx; here only the wiring.
@@ -40,6 +41,7 @@ const sections: GuidedSectionView[] = [
     covers: [],
     questions: ["Welke groep had je?", "Wat konden ze al?"],
     answers: ["Tweedejaars.", ""],
+    drafted: false,
   },
 ];
 
