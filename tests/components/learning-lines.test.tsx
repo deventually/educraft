@@ -50,6 +50,8 @@ const data = (canManage: boolean) => ({
   },
   overview: learningLineOverview(courses),
   addable: [{ id: "c3", name: "Databases" }],
+  alsoFor: [] as { id: string; name: string }[],
+  linkOptions: [] as { id: string; name: string; linked: boolean }[],
 });
 
 describe("Learning line page", () => {
@@ -79,6 +81,32 @@ describe("Learning line page", () => {
       "Databases",
     );
     expect(screen.getByRole("button", { name: "Leerlijn verwijderen" })).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("tells a reader which other programmes the line also holds for", () => {
+    renderRoute(LearningLinePage, {
+      ...data(false),
+      alsoFor: [{ id: "p2", name: "HBO-ICT deeltijd" }],
+      linkOptions: [],
+    });
+    expect(screen.getByText("Geldt ook voor: HBO-ICT deeltijd")).toBeVisible();
+  });
+
+  it("lets the lead tick the other programmes the line holds for", async () => {
+    const { container } = renderRoute(LearningLinePage, {
+      ...data(true),
+      alsoFor: [],
+      linkOptions: [
+        { id: "p2", name: "HBO-ICT deeltijd", linked: true },
+        { id: "p3", name: "AD Software", linked: false },
+      ],
+    });
+    const group = screen.getByRole("group", { name: "Geldt ook voor andere opleidingen" });
+    expect(group).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "HBO-ICT deeltijd" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "AD Software" })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Opleidingen opslaan" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
@@ -112,6 +140,18 @@ describe("Learning lines on the programme page", () => {
     ).toBeVisible();
     expect(screen.getByRole("checkbox", { name: "Programmeren 2" })).not.toBeChecked();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("names the programme a line comes from when it is another one", () => {
+    renderInRouter(
+      <LearningLinesSection
+        programmeId="p2"
+        lines={[{ id: "l1", name: "Onderzoek", courses: 3, from: "Pabo voltijd" }]}
+        courses={[]}
+        canManage={false}
+      />,
+    );
+    expect(screen.getByText("uit Pabo voltijd")).toBeVisible();
   });
 
   it("shows a member the lines without the form", () => {

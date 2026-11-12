@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #292 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #293 gemerged)_
 
 ## Nu
 
+- **Pilot op twee databases (#293) gemerged op 2026-11-12:** één app bedient meer instellingen,
+  elk met een eigen SQLite-database, gekozen per adres (`TENANTS`, BESLUIT-2026-11-12-4).
+  Migraties, back-up, AI-gebruik, modellenlijst en recente fouten gaan per instelling;
+  beheerscripts noemen de instelling met `LIMEONIT_TENANT`. Zonder `TENANTS` verandert niets.
 - **Organisatie: tussenlaag en opleidingen daaronder (#292) gemerged op 2026-11-12:** één
   omgeving is één instelling (BESLUIT-2026-11-12-2). De beheerder kiest onder Beheer →
   Organisatie hoe de tussenlaag heet (faculteit, vestiging, …), beheert de onderdelen en zet
