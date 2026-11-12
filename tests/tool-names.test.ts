@@ -55,6 +55,7 @@ describe("task-first tool names (P19.1)", () => {
         "difficult-conversation",
         "engagement-check",
         "forum-autograder",
+        "group-feedback",
         "guided-reflection",
         "lesson-plan",
         "math-grading",

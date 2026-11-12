@@ -62,7 +62,9 @@ The **utilities** (`/utilities`, P23) compute without AI: the grade calculator, 
 item analysis (`item-analysis`, P24.5: p-value, Rit, Rir and Cronbach's alpha from a pasted,
 anonymous score list). A utility can name an explaining tool (`Utility.explainWith`): its
 "Explain this" button hands only the per-question numbers to that tool's form through
-sessionStorage (`app/lib/forms/handoff.ts`).
+sessionStorage (`app/lib/forms/handoff.ts`). The rubric does the same from *Hoe ging de groep*
+(P36): "Groepsfeedback maken" hands a round's counts as text to `group-feedback`, which turns
+them into one debrief for the group; its `input-numbers` guard drops any number not in the input.
 
 **Back and Forward keep the work.** The tool page mounts one workspace per browser history entry
 (`key={location.key}`). Each workspace (one-shot, stages, chat) keeps its form and its finished

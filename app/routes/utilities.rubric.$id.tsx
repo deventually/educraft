@@ -21,6 +21,9 @@ import { getMessages } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { groupSummary, RUBRIC_LIMITS, rubricRounds } from "~/lib/utilities/rubric";
 import { redirectWithFlash } from "~/server/flash.server";
+import { getUtilityBySlug } from "~/lib/utilities";
+import { getToolBySlug } from "~/lib/registry";
+import { isToolAvailable } from "~/server/availability.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireFeatureUser(request, "utilities");
@@ -31,6 +34,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const rounds = rubricRounds(scores);
   const wanted = new URL(request.url).searchParams.get("round");
   const selected = rounds.find((r) => r.month === wanted)?.month ?? rounds[0]?.month ?? "";
+  // P36.2: "Groepsfeedback maken" shows only when that tool is available to this teacher.
+  const slug = getUtilityBySlug("rubric")?.explainWith;
+  const tool = slug ? getToolBySlug(slug) : undefined;
+  const feedbackWith = tool && (await isToolAvailable(user, tool)) ? tool.slug : null;
   return {
     rubric: { id: rubric.id, name: rubric.name, data: rubric.data },
     scoreCount: scores.length,
@@ -38,6 +45,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     selected,
     // Null under five closed fill-ins in the round, so one student is not recognisable (P23.3).
     group: groupSummary(rubric.data, scores, selected),
+    feedbackWith,
     sharing: await shareControls(user, "rubric", rubric.id),
   };
 }
@@ -89,7 +97,8 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export default function RubricPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const r = t.utilities.rubric;
-  const { rubric, group, rounds, selected, sharing = { teams: [], sharedWith: [] } } = loaderData;
+  const { rubric, group, rounds, selected, feedbackWith } = loaderData;
+  const { sharing = { teams: [], sharedWith: [] } } = loaderData;
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
     result: (d) => {
@@ -147,7 +156,12 @@ export default function RubricPage({ loaderData }: Route.ComponentProps) {
       </div>
       {/* Keyed on id: a duplicate opens with fresh editor state. */}
       <RubricEditor key={rubric.id} rubric={rubric} />
-      <RubricGroup group={group} rounds={rounds} selected={selected} />
+      <RubricGroup
+        group={group}
+        rounds={rounds}
+        selected={selected}
+        feedbackWith={feedbackWith ?? undefined}
+      />
       <div className="mt-10">
         <ShareWithTeam {...sharing} />
       </div>

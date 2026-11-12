@@ -15,6 +15,7 @@ import type { ModelChoice } from "~/lib/assessment-models";
 import { initialPickerModel, pickableModels } from "~/lib/ai/models";
 import { ResultPanel } from "./ResultPanel";
 import { computeResultNote } from "~/lib/template/computations";
+import { guardOutput } from "~/lib/template/guards";
 import { ResultActions, type ResultContext } from "./ResultActions";
 import { WordDownload } from "./export/WordDownload";
 import { AiNotice } from "./AiNotice";
@@ -144,7 +145,9 @@ export function GeneratorView({
       setSentRedacted(m.sentRedacted);
     },
   );
-  const shown = codes ? restoreNames(output, codes) : output;
+  // A guard (P36.2) cleans the result as the server keeps it, after the names are back.
+  const restored = codes ? restoreNames(output, codes) : output;
+  const shown = guardOutput(stage.output.guard, restored, values);
   const quotes = docFiles && shown && !streaming ? extractQuotes(shown) : [];
   // Quotes the viewer found in the original become buttons in the result (P24 follow-up);
   // clicking one asks the viewer to show it.

@@ -6,6 +6,7 @@ import { PROMPTS } from "~/lib/prompts";
 import { MODELS } from "~/lib/ai/models";
 import { placeholdersIn } from "~/lib/template/interpolate";
 import { DERIVATION_IDS } from "~/lib/template/derivations";
+import { GUARD_IDS } from "~/lib/template/guards";
 import { EXPORT_KINDS } from "~/lib/export/formats";
 
 /** Placeholders that buildSystemPrompt always injects (not from form fields). */
@@ -82,6 +83,7 @@ const toolStage = z.object({
         .object({ opening: localizedText, phases: localizedText, closing: localizedText })
         .optional(),
       computed: z.enum(COMPUTATION_IDS).optional(),
+      guard: z.enum(GUARD_IDS).optional(),
     })
     .refine((o) => o.exportAs !== "slides" || o.slides, {
       message: "a slides result names its slide headings (output.slides)",

@@ -48,6 +48,7 @@ export const testAnalysis: Tool = {
   defaultMaxTokens: 8192,
   defaultTemperature: 0.2,
   courseActions: ["assessment"],
+  next: ["group-feedback"],
   enabled: true,
   phase: 1,
   inputs: [

@@ -1,6 +1,7 @@
 import type { ComputationId } from "~/lib/template/computations";
 import type { ExportKind } from "~/lib/export/formats";
 import type { DerivationId } from "~/lib/template/derivations";
+import type { GuardId } from "~/lib/template/guards";
 import type { LocalizedText } from "~/lib/i18n/localized";
 import type { ChatMessage as AIChatMessage } from "~/lib/ai/types";
 
@@ -175,6 +176,11 @@ export interface OutputFormat {
    * number never depends on the AI's arithmetic. Ids live in `app/lib/template/computations.ts`.
    */
   computed?: ComputationId;
+  /**
+   * Cleans the output in code before the teacher sees or keeps it (P36.2), e.g. drops a number
+   * that is not in the input. Ids live in `app/lib/template/guards.ts`.
+   */
+  guard?: GuardId;
 }
 
 /** The headings of a lesson plan that become slides (P30.4), each as the prompt writes it. */

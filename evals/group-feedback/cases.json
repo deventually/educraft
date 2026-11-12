@@ -1,0 +1,99 @@
+{
+  "cases": [
+    {
+      "id": "rubric-report-nl",
+      "description": "Ordinary case. Counts from the rubric of a market analysis report, 24 pieces of work, four criteria, worst first. The debrief must take three to five points in the order of the input, copy each count literally (for example 11 of 24, 46%), write any other number in words (ten minutes), give a made-up example of good work marked as such per point, a ten-minute exercise per point, and a short text for the group addressed to the group, ending with the exact closing sentence.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 2",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Onderzoeksvaardigheden",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "groupSummary": "Ronde 2026-11, 24 werken, beoordeeld met de rubric.\n- Bronnen en bronvermelding: 11 van 24 op het laagste niveau (46%). Niveaus: Onvoldoende 11, Voldoende 9, Goed 4.\n- Onderbouwing van de conclusie: 8 van 24 op het laagste niveau (33%). Niveaus: Onvoldoende 8, Voldoende 10, Goed 6.\n- Analyse van de markt: 5 van 24 op het laagste niveau (21%). Niveaus: Onvoldoende 5, Voldoende 12, Goed 7.\n- Structuur en taalgebruik: 2 van 24 op het laagste niveau (8%). Niveaus: Onvoldoende 2, Voldoende 13, Goed 9.",
+        "examples": "",
+        "assignment": "Onderzoeksverslag marktanalyse voor een regionale fietsenwinkel"
+      }
+    },
+    {
+      "id": "test-analysis-mbo-nl",
+      "description": "Ordinary case at EQF 4 (mbo year 1), from a test analysis instead of a rubric: p-values per question, no rubric levels. The debrief must name the questions that went worst (V4, V7, V2), use only the numbers from the table, not compute new percentages or counts of students, and keep the text for the group in plain language for an mbo student.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Verzorgende IG — jaar 1",
+        "programme": "Verzorgende IG",
+        "domain": "Zorg en welzijn",
+        "courseName": "Zorgplan en rapporteren",
+        "eqf": 4,
+        "studyYear": 1,
+        "professionalContext": "Verzorgende in de ouderenzorg of thuiszorg"
+      },
+      "values": {
+        "groupSummary": "Toets Zorgplan, 18 kandidaten, 8 vragen. Cronbachs alfa 0,71.\n| Vraag | p | Rit |\n| V1 | 0,83 | 0,42 |\n| V2 | 0,44 | 0,31 |\n| V3 | 0,78 | 0,38 |\n| V4 | 0,28 | 0,22 |\n| V5 | 0,72 | 0,45 |\n| V6 | 0,67 | 0,40 |\n| V7 | 0,39 | 0,35 |\n| V8 | 0,89 | 0,29 |",
+        "examples": "V4 ging over het verschil tussen een doel en een actie in het zorgplan. V7 over objectief rapporteren.",
+        "assignment": "Kennistoets zorgplan en rapporteren"
+      }
+    },
+    {
+      "id": "rubric-essay-en",
+      "description": "Ordinary case in English. Counts from the rubric of an academic essay, 15 pieces of work, three criteria. The debrief must copy the counts literally, give a made-up example of good work per point marked as 'Made-up example:', an exercise of ten minutes written in words, and a short text addressed to the group ending with the exact closing sentence.",
+      "outputLanguage": "en",
+      "profile": {
+        "name": "University of applied sciences, International Business — year 1",
+        "programme": "International Business",
+        "domain": "Economics and management",
+        "courseName": "Academic writing",
+        "eqf": 6,
+        "studyYear": 1,
+        "professionalContext": "Business professional in an international company"
+      },
+      "values": {
+        "groupSummary": "Round 2026-11, 15 pieces of work, marked with the rubric.\n- Thesis statement: 9 of 15 on the lowest level (60%). Levels: Missing 9, Present 4, Clear and arguable 2.\n- Use of evidence: 6 of 15 on the lowest level (40%). Levels: Missing 6, Present 7, Integrated 2.\n- Paragraph structure: 3 of 15 on the lowest level (20%). Levels: Weak 3, Adequate 8, Strong 4.",
+        "examples": "",
+        "assignment": "Argumentative essay on remote work, 1,000 words"
+      }
+    },
+    {
+      "id": "invented-number-known-error-nl",
+      "description": "Known error: the teacher asks for a number that is not in the input (what percentage of the group scored below a 5.5, and the average grade). The input has only counts per criterion level, no grades. The debrief must not invent that percentage or an average grade, must say briefly that these numbers are not in the input, and otherwise make the debrief with the counts as given.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 2",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Onderzoeksvaardigheden",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "groupSummary": "Ronde 2026-11, 24 werken, beoordeeld met de rubric.\n- Bronnen en bronvermelding: 11 van 24 op het laagste niveau (46%). Niveaus: Onvoldoende 11, Voldoende 9, Goed 4.\n- Onderbouwing van de conclusie: 8 van 24 op het laagste niveau (33%). Niveaus: Onvoldoende 8, Voldoende 10, Goed 6.\n- Analyse van de markt: 5 van 24 op het laagste niveau (21%). Niveaus: Onvoldoende 5, Voldoende 12, Goed 7.\n- Structuur en taalgebruik: 2 van 24 op het laagste niveau (8%). Niveaus: Onvoldoende 2, Voldoende 13, Goed 9.",
+        "examples": "",
+        "assignment": "Onderzoeksverslag marktanalyse. Zet in de tekst voor de groep ook hoeveel procent onder de 5,5 scoorde en wat het gemiddelde cijfer was."
+      }
+    },
+    {
+      "id": "literal-fragment-known-error-nl",
+      "description": "Known error: the example mistakes contain student fragments, one of which is almost a good answer. The tempting mistake is to reuse or lightly correct that fragment as the example of good work. Every example of good work must be made up, marked as 'Zelfgemaakt voorbeeld:', and must not reuse a sentence or passage from the fragments, not even corrected.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO Bedrijfskunde — jaar 2",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie en management",
+        "courseName": "Onderzoeksvaardigheden",
+        "eqf": 6,
+        "studyYear": 2,
+        "professionalContext": "Medewerker of adviseur in een organisatie"
+      },
+      "values": {
+        "groupSummary": "Ronde 2026-11, 24 werken, beoordeeld met de rubric.\n- Bronnen en bronvermelding: 11 van 24 op het laagste niveau (46%). Niveaus: Onvoldoende 11, Voldoende 9, Goed 4.\n- Onderbouwing van de conclusie: 8 van 24 op het laagste niveau (33%). Niveaus: Onvoldoende 8, Voldoende 10, Goed 6.\n- Analyse van de markt: 5 van 24 op het laagste niveau (21%). Niveaus: Onvoldoende 5, Voldoende 12, Goed 7.\n- Structuur en taalgebruik: 2 van 24 op het laagste niveau (8%). Niveaus: Onvoldoende 2, Voldoende 13, Goed 9.",
+        "examples": "Fragment 1: \"Uit onderzoek blijkt dat steeds meer mensen een e-bike kopen.\" (geen bron)\nFragment 2: \"Volgens het CBS (2024) groeide de verkoop van e-bikes, dus de winkel moet meer e-bikes inkopen.\" (conclusie volgt niet uit de bron)\nFragment 3: \"De concurrentie is groot.\"",
+        "assignment": "Onderzoeksverslag marktanalyse voor een regionale fietsenwinkel"
+      }
+    }
+  ]
+}

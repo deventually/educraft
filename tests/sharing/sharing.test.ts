@@ -14,6 +14,7 @@ describe("Tool.handlesStudentWork (P28.4)", () => {
     expect(marked).toEqual([
       "defense-review",
       "forum-autograder",
+      "group-feedback",
       "math-grading",
       "stage-assessment",
       "test-analysis",

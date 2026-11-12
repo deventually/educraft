@@ -18,8 +18,9 @@ export interface Utility {
   /** Extra search words for the /tools search box (both languages). */
   keywords: readonly string[];
   /**
-   * Slug of an AI tool that explains this utility's result ("Laat uitleggen", P24.5). The
-   * utility computes; the tool only explains the numbers it is handed.
+   * Slug of an AI tool that works from this utility's result ("Laat uitleggen", P24.5;
+   * "Groepsfeedback maken", P36.2). The utility computes; the tool only uses the numbers it is
+   * handed.
    */
   explainWith?: string;
 }
@@ -64,6 +65,8 @@ export const UTILITIES: readonly Utility[] = [
       "nakijken",
       "fill in",
     ],
+    // P36.2: "Groepsfeedback maken" hands a round's counts to the debrief tool.
+    explainWith: "group-feedback",
   },
   {
     id: "item-analysis",
