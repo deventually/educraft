@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { STAGE_ASSESSMENT_PROMPT_V3 } from "~/lib/prompts/stage-assessment@v3.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V4 } from "~/lib/prompts/stage-assessment@v4.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -259,12 +259,33 @@ export const stageAssessment: Tool = {
       },
       group: INTERNSHIP,
     },
+    {
+      name: "feedbackHistory",
+      label: {
+        nl: "Eerdere feedback aan de student (optioneel)",
+        en: "Earlier feedback to the student (optional)",
+      },
+      kind: "textarea",
+      required: false,
+      rows: 6,
+      // P38.4: opened from a track, its earlier feedback is filled in here.
+      prefillFromTrack: { source: "feedbackHistory" },
+      placeholder: {
+        nl: "Open je deze tool vanuit een traject, dan staat hier de eerdere feedback. Of plak zelf de feedback van een vorige ronde.",
+        en: "Opened from a track, the earlier feedback is filled in here. Or paste the feedback of a previous round yourself.",
+      },
+      help: {
+        nl: "De beoordeling zegt per criterium of de eerder gevraagde verbetering is opgepakt. Laat leeg bij een eerste beoordeling.",
+        en: "Per criterion, the assessment says whether the improvement asked for earlier was taken up. Leave empty for a first assessment.",
+      },
+      group: INTERNSHIP,
+    },
   ],
   stages: [
     {
       id: "assessment",
       name: { nl: "Concept-beoordeling", en: "Draft assessment" },
-      systemPromptId: STAGE_ASSESSMENT_PROMPT_V3.id,
+      systemPromptId: STAGE_ASSESSMENT_PROMPT_V4.id,
       output: {
         kind: "structured-sections",
         exportAs: "table",

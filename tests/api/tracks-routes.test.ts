@@ -245,7 +245,12 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
       params: { slug: SLUG },
       context: {},
     } as never) as Promise<{
-      forTrack: { trackId: string; code: string; milestone: string } | null;
+      forTrack: {
+        trackId: string;
+        code: string;
+        milestone: string;
+        feedbackHistory: string;
+      } | null;
     }>;
   const act = (fields: Record<string, string>) =>
     toolRoute.action({
@@ -271,6 +276,15 @@ describe("milestone 1 through Studentwerk beoordelen", () => {
       milestone: "start",
     });
     expect((await load(`?track=${t.id}&milestone=nope`)).forTrack).toBeNull();
+    // P38.4: the earlier feedback of the track goes along, for the final assessment.
+    await repo.addRound(A, t.id, {
+      milestone: "drafts",
+      redactedText: "",
+      feedback: { text: "Noem bronnen." },
+    });
+    const final = (await load(`?track=${t.id}&milestone=final`)).forTrack;
+    expect(final).toMatchObject({ milestone: "final" });
+    expect(final?.feedbackHistory).toBe("### Concepten, ronde 1\nNoem bronnen.");
     const theirs = await track(B);
     expect((await load(`?track=${theirs.id}&milestone=start`)).forTrack).toBeNull();
   });

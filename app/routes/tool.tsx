@@ -152,7 +152,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     aiLimit: await aiLimitFor(user),
     forCriterion: forCriterion(ownDossiers, new URL(request.url).searchParams),
     // P38.2: opened from a track milestone (`?track=&milestone=`); only an own, open track.
-    forTrack: await forTrack(user, search),
+    forTrack: await forTrack(user, search, getLocale(request)),
     tool,
     profiles,
     defaultProfileId: defaultProfile?.id ?? "",

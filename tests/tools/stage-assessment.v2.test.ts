@@ -23,6 +23,7 @@ const base = {
   assessmentScale: "x",
   companyEvaluation: "",
   submissionNotes: "",
+  feedbackHistory: "",
 };
 const build = (lang: "nl" | "en", values: Record<string, unknown> = base) =>
   buildSystemPrompt({
@@ -69,9 +70,9 @@ describe("tool: stage-assessment @v2 (any student work)", () => {
       expect(f.required, name).not.toBe(true);
       expect(f.group, name).toEqual({ nl: "Stage en afstuderen", en: "Internship and graduation" });
     }
-    // The optional group comes last, after the framework.
+    // The optional group comes last, after the framework (with the track's earlier feedback, P38.4).
     const names = tool().inputs.map((f) => f.name);
-    expect(names.slice(-2)).toEqual(["durationWeeks", "companyEvaluation"]);
+    expect(names.slice(-3)).toEqual(["durationWeeks", "companyEvaluation", "feedbackHistory"]);
     // An optional duration starts empty: an essay is never sent as "1 week".
     expect(defaultValuesFor(tool().inputs).durationWeeks).toBe("");
   });

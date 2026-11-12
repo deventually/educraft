@@ -52,6 +52,24 @@ describe("useSandbox", () => {
     expect(result.current.values.level).toBe("beginner"); // untouched
   });
 
+  it("fills a track field from the track the tool was opened from (P38.4)", () => {
+    const withHistory: InputField[] = [
+      ...inputs,
+      {
+        name: "history",
+        label: { nl: "Eerdere feedback", en: "Earlier feedback" },
+        kind: "textarea",
+        prefillFromTrack: { source: "feedbackHistory" },
+      },
+    ];
+    const { result } = renderHook(() =>
+      useSandbox({ inputs: withHistory, initialTrack: { feedbackHistory: "Noem bronnen." } }),
+    );
+    expect(result.current.values.history).toBe("Noem bronnen.");
+    const none = renderHook(() => useSandbox({ inputs: withHistory }));
+    expect(none.result.current.values.history).toBe("");
+  });
+
   describe("selectCourse (P20, 20.4)", () => {
     const courseInputs: InputField[] = [
       ...inputs,

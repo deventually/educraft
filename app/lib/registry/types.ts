@@ -73,6 +73,12 @@ export interface AssessmentModelPrefill {
   source: "framework" | "scale";
 }
 
+/** Which part of a track fills a field (P38.4): the track the tool was opened from. */
+export interface TrackPrefill {
+  /** The earlier feedback of the track's rounds, oldest first. */
+  source: "feedbackHistory";
+}
+
 /** Which part of a course fills a field (P20, 20.4). Data, not control flow. */
 export interface CoursePrefill {
   /**
@@ -128,6 +134,8 @@ export interface InputField {
    * for the document type in `Tool.assessmentModels.byField`). Stays editable.
    */
   prefillFromAssessmentModel?: AssessmentModelPrefill;
+  /** Optional: fill this field from the track the tool was opened from (P38.4). Stays editable. */
+  prefillFromTrack?: TrackPrefill;
   /**
    * Student work: before sending, the browser replaces names and other personal
    * details in this field by codes the teacher reviews (P24, 24.0b).

@@ -23,6 +23,7 @@ const base = {
   assessmentScale: "",
   companyEvaluation: "",
   submissionNotes: "",
+  feedbackHistory: "",
 };
 const build = (lang: "nl" | "en", values: Record<string, unknown> = base) =>
   buildSystemPrompt({
@@ -32,8 +33,7 @@ const build = (lang: "nl" | "en", values: Record<string, unknown> = base) =>
   });
 
 describe("tool: stage-assessment with assessment models", () => {
-  it("runs on stage-assessment@v3 and keeps @v1 and @v2 registered", () => {
-    expect(tool().stages[0]!.systemPromptId).toBe("stage-assessment@v3");
+  it("keeps @v1 to @v3 registered after @v4", () => {
     for (const v of ["@v1", "@v2", "@v3"]) expect(PROMPTS[`stage-assessment${v}`]).toBeDefined();
   });
 

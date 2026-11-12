@@ -178,3 +178,16 @@ export function coursePrefillValues(
   }
   return out;
 }
+
+/** Initial values for fields that declare `prefillFromTrack` (P38.4); only non-empty ones. */
+export function trackPrefillValues(
+  fields: InputField[],
+  track: { feedbackHistory: string } | null | undefined,
+): FormValues {
+  const out: FormValues = {};
+  if (!track) return out;
+  for (const f of fields)
+    if (f.prefillFromTrack && track[f.prefillFromTrack.source])
+      out[f.name] = track[f.prefillFromTrack.source];
+  return out;
+}

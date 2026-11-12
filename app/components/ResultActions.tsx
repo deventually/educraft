@@ -32,7 +32,13 @@ export interface ResultActionsProps {
   /** P27.2: the tool was opened from this dossier criterion; one button puts the result there. */
   forCriterion?: { dossierId: string; criterionId: string } | null;
   /** P38.2: the tool was opened from a track milestone; one button keeps the feedback there. */
-  forTrack?: { trackId: string; code: string; milestone: MilestoneId } | null;
+  forTrack?: {
+    trackId: string;
+    code: string;
+    milestone: MilestoneId;
+    /** P38.4: the track's earlier feedback, filled into a `prefillFromTrack` field. */
+    feedbackHistory: string;
+  } | null;
   /** P30.1: the other saved steps of a multi-step tool, exported along with this one. */
   exportWith?: string[];
   /** The result can become a lesson of the course it is kept at (`Stage.courseExport`). */

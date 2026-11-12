@@ -4,6 +4,7 @@ import type { InputField } from "~/lib/registry/types";
 import type { ContextProfile } from "~/lib/context/types";
 import {
   coursePrefillValues,
+  trackPrefillValues,
   type CoursePrefillSource,
   defaultValuesFor,
   profilePrefillValues,
@@ -31,6 +32,8 @@ export interface UseSandboxOptions {
    * only so the result is still linked to it.
    */
   initialCourseId?: string;
+  /** P38.4: the track the tool was opened from; fills its `prefillFromTrack` fields. */
+  initialTrack?: { feedbackHistory: string } | null;
   /**
    * The course item the tool was opened for (P27.4, `?item=`). It stays only while the
    * initial course stays selected; picking a course drops it.
@@ -101,6 +104,7 @@ export function useSandbox({
   courses,
   initialCourseId = "",
   initialItemId = "",
+  initialTrack = null,
 }: UseSandboxOptions): UseSandbox {
   const profileList = profiles ?? [];
   const initialCourse = (courses ?? []).find((c) => c.id === initialCourseId);
@@ -119,6 +123,7 @@ export function useSandbox({
       profileList.find((p) => p.id === startProfileId),
     ),
     ...coursePrefillValues(inputs, initialCourse, initialCourse ? initialItemId : undefined),
+    ...trackPrefillValues(inputs, initialTrack),
   }));
 
   function selectProfile(id: string) {

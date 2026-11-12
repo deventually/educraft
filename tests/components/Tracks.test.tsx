@@ -133,7 +133,12 @@ describe("a track", () => {
 });
 
 describe("TrackBar and keeping a result in a track", () => {
-  const forTrack = { trackId: "t1", code: "S-0423", milestone: "start" as const };
+  const forTrack = {
+    trackId: "t1",
+    code: "S-0423",
+    milestone: "start" as const,
+    feedbackHistory: "",
+  };
 
   it("the bar says which track and milestone the work is for, and passes axe", async () => {
     const { container } = renderWithRouter(<TrackBar {...forTrack} />);
