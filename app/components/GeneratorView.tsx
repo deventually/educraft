@@ -17,8 +17,7 @@ import { ResultPanel } from "./ResultPanel";
 import { computeResultNote } from "~/lib/template/computations";
 import { guardOutput } from "~/lib/template/guards";
 import { ResultActions, type ResultContext } from "./ResultActions";
-import { WordDownload } from "./export/WordDownload";
-import { AiNotice } from "./AiNotice";
+import { ResultFooter } from "./ResultFooter";
 import { Button } from "./ui";
 import { cn } from "~/lib/utils";
 import { streamPost } from "~/lib/streamClient";
@@ -385,16 +384,14 @@ export function GeneratorView({
               />
             </div>
           )}
-          {output && !streaming && !reviewing && !generationId && (
-            <WordDownload markdown={shown} title={loc(tool.name, locale)} lang={outputLanguage} />
-          )}
-          {codes && output && !reviewing && (
-            <p className="shrink-0 text-xs text-slate-600">{t.privacy.restoredNote}</p>
-          )}
-          {/* AI-transparency notice; the "teacher decides" variant for grading tools. */}
-          <AiNotice
-            variant={tool.assistiveGrading ? "assistive" : "generic"}
-            className="shrink-0"
+          <ResultFooter
+            markdown={shown}
+            done={Boolean(output) && !streaming && !reviewing}
+            saved={Boolean(generationId)}
+            restored={Boolean(codes && output && !reviewing)}
+            title={loc(tool.name, locale)}
+            lang={outputLanguage}
+            assistive={Boolean(tool.assistiveGrading)}
           />
         </div>
       )}
