@@ -15,7 +15,7 @@
       },
       "values": {
         "situation": "negative-study-advice",
-        "phase": "propaedeutic",
+        "phase": "first-year",
         "goal": "Samen kijken wat er nodig is om de laatste herkansingen te halen."
       }
     },
@@ -34,8 +34,27 @@
       },
       "values": {
         "situation": "start",
-        "phase": "propaedeutic",
+        "phase": "first-year",
         "goal": ""
+      }
+    },
+    {
+      "id": "direction-choice-mbo-nl",
+      "description": "Ordinary case at EQF 4 (mbo), later in the programme: choosing an elective (keuzedeel) or internship. The questions must use mbo words (keuzedeel, uitstroomrichting, stage, BPV) and never hbo-only words such as minor, propedeuse or hoofdfase, in plain spoken language for an mbo student.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "MBO Ondernemer handel — jaar 2",
+        "programme": "Ondernemer handel",
+        "domain": "Economie en handel",
+        "courseName": "Loopbaan en burgerschap",
+        "eqf": 4,
+        "studyYear": 2,
+        "professionalContext": "Ondernemer of medewerker in de detailhandel"
+      },
+      "values": {
+        "situation": "direction-or-internship-choice",
+        "phase": "later-years",
+        "goal": "Helpen kiezen tussen twee keuzedelen en een stageplek."
       }
     },
     {
@@ -52,8 +71,8 @@
         "professionalContext": "Business developer in an international company"
       },
       "values": {
-        "situation": "minor-or-internship-choice",
-        "phase": "main-phase",
+        "situation": "direction-or-internship-choice",
+        "phase": "later-years",
         "goal": "Help the student narrow three minors down to one."
       }
     },
@@ -72,7 +91,7 @@
       },
       "values": {
         "situation": "progress",
-        "phase": "main-phase",
+        "phase": "later-years",
         "goal": "Uitvragen hoe het thuis gaat, of de student gezond is en of er geldzorgen zijn."
       }
     },
@@ -91,7 +110,7 @@
       },
       "values": {
         "situation": "negative-study-advice",
-        "phase": "propaedeutic",
+        "phase": "first-year",
         "goal": "Bepalen of het negatieve BSA terecht is, gezien de persoonlijke omstandigheden."
       }
     }

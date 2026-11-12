@@ -1,10 +1,10 @@
 ## When to use this tool
 
-Use this tool as a study career coach to **prepare a conversation**: a starting conversation, a progress conversation, a threatening negative binding study advice (BSA), a student in doubt about quitting, or choosing a minor or internship.
+Use this tool as a study career coach to **prepare a conversation**: a starting conversation, a progress conversation, a threatening negative binding study advice (BSA), a student in doubt about quitting, or choosing a direction or internship. The tool fits mbo as well as higher education.
 
 ## How it works
 
-1. **Choose the kind of conversation** and the phase: foundation year or main phase.
+1. **Choose the kind of conversation** and the phase: the first year or later in the programme. In mbo the first year is year 1; in higher education it is the foundation year.
 2. **Optionally fill in what you want to achieve**, short and about the situation. **No names or personal details:** the set is about the situation, never about a particular student.
 3. You get opening questions, follow-up questions, what not to ask, how to close and make agreements, and when to refer on.
 
