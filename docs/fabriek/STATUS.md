@@ -4,10 +4,19 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #312 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #316 gemerged)_
 
 ## Nu
 
+- **Evals sneller (#316) gemerged op 2026-11-12:** `--parallel N` laat een eval N runs tegelijk
+  draaien; met 6 of 7 tegelijk duurt een meting een kwartier in plaats van ruim een uur. Plus een
+  ijkmeting van *Les voorbereiden* via Claude Code.
+- **Evals op je Claude-abonnement (#314) gemerged op 2026-11-12:** met `claude-code::<model>`
+  draait een eval via Claude Code, zonder API-sleutel, met de echte vraag van de app.
+- **Cursusevaluatie verwerken: de prompt (#313) gemerged op 2026-11-12:** een geanonimiseerde
+  studentenevaluatie wordt thema's, problemen op hun plek in de cursus en drie tot vijf
+  verbeterpunten; citaten die niet letterlijk in de evaluatie staan vallen weg (P33.2,
+  `course-evaluation@v1`). Er wordt niets bewaard.
 - **Kalibreren: het scherm (#312) gemerged op 2026-11-12:** op de rubricpagina (ook bij een
   gedeelde rubric) staat de knop *Kalibreren*. Twee beoordelaars plakken hun scores uit Excel of
   vullen ze per werk in; de pagina toont de overeenstemming per criterium, de cijfers per werk en
