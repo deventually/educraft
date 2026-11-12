@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form } from "react-router";
+import { Form, Link } from "react-router";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { Button, Input, Label, Select } from "~/components/ui";
@@ -14,7 +14,7 @@ interface ProgrammeRow {
 
 /**
  * One division on Beheer → Organisatie: its name (rename; delete while empty) and the
- * programmes under it, each with a choice where it belongs. Without `division` it is the group
+ * programmes under it, each with a choice where it belongs, and the teams under it (linked). Without `division` it is the group
  * of programmes under none.
  */
 export function DivisionSection({
@@ -23,7 +23,12 @@ export function DivisionSection({
   programmes,
   options,
 }: {
-  division?: { id: string; name: string; programmeCount: number };
+  division?: {
+    id: string;
+    name: string;
+    programmeCount: number;
+    teams: { id: string; name: string }[];
+  };
   heading?: string;
   programmes: ProgrammeRow[];
   options: { id: string; name: string }[];
@@ -60,7 +65,7 @@ export function DivisionSection({
               {o.renameSave}
             </Button>
           </Form>
-          {division.programmeCount === 0 && (
+          {division.programmeCount === 0 && division.teams.length === 0 && (
             <Form method="post">
               <input type="hidden" name="intent" value="delete" />
               <input type="hidden" name="id" value={division.id} />
@@ -74,6 +79,23 @@ export function DivisionSection({
             </Form>
           )}
         </div>
+      )}
+
+      {division && division.teams.length > 0 && (
+        <p className="mt-3 text-sm text-slate-600">
+          {o.teamsUnder}{" "}
+          {division.teams.map((team, i) => (
+            <span key={team.id}>
+              {i > 0 && ", "}
+              <Link
+                to={`/admin/teams/${team.id}`}
+                className="rounded font-medium text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              >
+                {team.name}
+              </Link>
+            </span>
+          ))}
+        </p>
       )}
 
       {programmes.length === 0 ? (

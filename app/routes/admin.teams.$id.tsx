@@ -13,6 +13,15 @@ import {
   setTeamSettings,
 } from "~/server/repositories/teams.server";
 import { getUserById, listPeople } from "~/server/repositories/users.server";
+import {
+  getDivisionKind,
+  listDivisions,
+  setTeamDivision,
+  teamDivisionId,
+} from "~/server/repositories/organisation.server";
+import { divisionWord } from "~/lib/organisation/kinds";
+import { getLocale } from "~/lib/i18n/locale.server";
+import { loc } from "~/lib/i18n/localized";
 import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -22,6 +31,7 @@ import { Button, Input, Label } from "~/components/ui";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
+import { TeamDivisionForm } from "~/components/teams/TeamDivisionForm";
 import { redirectWithFlash } from "~/server/flash.server";
 
 /** The most people one "add" may carry; the candidate list is capped the same. */
@@ -29,27 +39,37 @@ const MAX_PEOPLE = 500;
 
 /**
  * One team's page (admin): name, members and leads, add several colleagues at once by
- * ticking them, remove one, the team's choices (P28.3) and delete. The team is the one
+ * ticking them, remove one, the division it belongs under, the team's choices (P28.3) and delete. The team is the one
  * in the URL; a `teamId` in a form is ignored.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   await requireRole(request, "admin");
   const team = await getTeamWithMembers(params.id);
   if (!team) throw new Response("Not found", { status: 404 });
-  const [people, offer] = await Promise.all([
+  const [people, offer, divisions, divisionId, kind] = await Promise.all([
     listPeople({ status: "active", limit: MAX_PEOPLE }),
     getTeamSettingsOffer(),
+    listDivisions(),
+    teamDivisionId(team.id),
+    getDivisionKind(),
   ]);
   const inTeam = new Set(team.members.map((m) => m.userId));
   const candidates = people
     .filter((p) => p.kind === "user" && !inTeam.has(p.id))
     .map((p) => ({ id: p.id, name: p.name ?? p.email ?? p.id, email: p.email }))
     .sort((a, b) => a.name.localeCompare(b.name));
-  return { team, candidates, offer };
+  return {
+    team,
+    candidates,
+    offer,
+    divisions: divisions.map(({ id, name }) => ({ id, name })),
+    divisionId,
+    divisionWord: loc(divisionWord(kind), getLocale(request)),
+  };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  await requireRole(request, "admin");
+  const admin = await requireRole(request, "admin");
   const team = await getTeamWithMembers(params.id);
   if (!team) throw new Response("Not found", { status: 404 });
   const fd = await request.formData();
@@ -78,6 +98,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "setLead") {
     await setLead(team.id, userId, fd.get("lead") === "1");
     return { saved: true as const };
+  }
+  if (intent === "division") {
+    const divisionId = String(fd.get("divisionId") ?? "") || null;
+    return (await setTeamDivision(admin, team.id, divisionId))
+      ? { saved: true as const }
+      : { error: "unknown" as const };
   }
   if (intent === "settings") {
     const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
@@ -158,7 +184,7 @@ function AddMembers({
 export default function AdminTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
-  const { team, candidates, offer } = loaderData;
+  const { team, candidates, offer, divisions, divisionId, divisionWord } = loaderData;
   const actionData = useActionData<typeof action>();
   const errorOf = (code: string | true) =>
     typeof code === "string" ? teamError(t, code) : undefined;
@@ -207,6 +233,14 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
             className="mt-1"
           />
         </AutoSaveForm>
+        <div className="mt-4">
+          <TeamDivisionForm
+            divisions={divisions}
+            divisionId={divisionId}
+            divisionWord={divisionWord}
+            errorMessage={errorOf}
+          />
+        </div>
       </section>
 
       <section className={`${card} space-y-5`} aria-labelledby="team-members">

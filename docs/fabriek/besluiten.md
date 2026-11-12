@@ -509,3 +509,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   kunnen toevoegen en verwijderen via die UI", "En (de)activeren.", over het archief "Misschien 60
   dagen vasthouden", het platformadres "limeonit.net of platform.limeonit.net", en in de thread
   "Platformscherm voor instellingen beheren" op de keuzekaart "Zelfde image, eigen container").
+- **BESLUIT-2026-11-12-6:** **Een team hangt onder een opleiding, een onderdeel of niets.** Een
+  gebruiker hoort bij een opleiding of onderdeel via zijn teams; er komt geen aparte koppeling van
+  gebruiker aan opleiding. Een team van een opleiding hoort waar de opleiding hoort. Een team
+  zonder opleiding (een examencommissie, een onderwijscommissie van een faculteit) zet de beheerder
+  op de teampagina onder een onderdeel, of laat hem voor de hele instelling. Een onderdeel met een
+  team eronder wordt niet verwijderd. Op de persoonspagina staat per team bij welke opleidingen en
+  welk onderdeel het hoort. Een moduleteam is geen team maar de leden van een cursus
+  (`course_members`); "heel team aan een cursus toevoegen" komt er pas als docenten erom vragen.
+  Bastiaan, 2026-11-12 (thread "School, faculteit, opleiding en leerlijn beheren": "En het koppelen
+  van een team aan een opleiding, "faculteit", of instelling, of niets, toch?" en over heel team
+  toevoegen "Ja, maar alleen als dat het beheer vergemakkelijkt").

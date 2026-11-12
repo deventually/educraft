@@ -126,6 +126,9 @@ describe("/admin/teams/:id, the team page", () => {
       { id: "u-b", name: "Bram Beuk", email: "bram@school.nl" },
     ],
     offer,
+    divisions: [{ id: "d-1", name: "Faculteit Gezondheid" }],
+    divisionId: null as string | null,
+    divisionWord: "Faculteit",
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
     renderWith(AdminTeam, "/admin/teams/:id", d, action);
@@ -137,6 +140,16 @@ describe("/admin/teams/:id, the team page", () => {
     };
     return { bodies, action };
   };
+
+  it("lets the admin put the team under a division, with autosave", async () => {
+    const { bodies, action } = recorder();
+    page(action);
+    const select = screen.getByLabelText("Hoort bij faculteit");
+    expect(select).toHaveValue("");
+    await userEvent.selectOptions(select, "d-1");
+    await waitFor(() => expect(bodies.at(-1)?.get("intent")).toBe("division"));
+    expect(bodies.at(-1)?.get("divisionId")).toBe("d-1");
+  });
 
   it("shows the team with a way back to the list", () => {
     page();

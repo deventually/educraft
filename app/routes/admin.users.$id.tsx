@@ -5,6 +5,7 @@ import { isOwner, requireRole } from "~/server/auth.server";
 import { getUserAssignedModels, getUserById } from "~/server/repositories/users.server";
 import { getLastActiveDay } from "~/server/repositories/usage.server";
 import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
+import { teamPlaces } from "~/server/repositories/organisation.server";
 import { getEnabledModels, getOwnerUserId } from "~/server/repositories/settings.server";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { effectiveFeatures, effectiveTools } from "~/server/availability.server";
@@ -39,7 +40,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
   const target = await getUserById(params.id);
   if (!target) throw new Response("Not found", { status: 404 });
-  const [viewerIsOwner, storedOwnerId, lastActiveDay, allTeams, ownTeams, twoFactor] =
+  const [viewerIsOwner, storedOwnerId, lastActiveDay, allTeams, ownTeams, twoFactor, places] =
     await Promise.all([
       isOwner(admin),
       getOwnerUserId(),
@@ -47,14 +48,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       listTeams(),
       listTeamsForUser(target.id),
       isTwoFactorEnabled(target.id),
+      teamPlaces(),
     ]);
-  // Every team, with this person's membership and lead stand (P28.2).
+  // Every team, with this person's membership and lead stand (P28.2), and where it sits.
   const stand = new Map(ownTeams.map((team) => [team.id, team.isLead]));
   const teams = allTeams.map((team) => ({
     id: team.id,
     name: team.name,
     member: stand.has(team.id),
     lead: stand.get(team.id) ?? false,
+    place: places.get(team.id) ?? null,
   }));
 
   // Models, parts and tools are per teacher (P18, P28.3).
