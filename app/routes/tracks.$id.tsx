@@ -4,6 +4,9 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import type { Route } from "./+types/tracks.$id";
 import { requireTracksUser } from "~/server/tracks.server";
+import { trackFeedforwardAction } from "~/server/trackFeedforward.server";
+import { getSelectableModels } from "~/server/availability.server";
+import { FeedforwardPanel } from "~/components/tracks/FeedforwardPanel";
 import { getTrack, listRounds, updateTrackData } from "~/server/repositories/tracks.server";
 import { getCourse } from "~/server/repositories/courses.server";
 import { getAssessmentModel } from "~/server/repositories/assessmentModels.server";
@@ -35,10 +38,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireTracksUser(request);
   const track = await getTrack(user.id, params.id ?? "");
   if (!track) throw notFound();
-  const [rounds, course, model] = await Promise.all([
+  const [rounds, course, model, selectable] = await Promise.all([
     listRounds(user.id, track.id),
     track.courseId ? getCourse(user.id, track.courseId) : null,
     track.assessmentModelId ? getAssessmentModel(user.id, track.assessmentModelId) : null,
+    getSelectableModels(user),
   ]);
   return {
     tab: tabOf(new URL(request.url).searchParams.get("tab")),
@@ -48,10 +52,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       kind: track.kind,
       courseName: course?.name ?? null,
       modelName: model?.name ?? null,
+      // The criteria for feedforward (P38.3), from the linked assessment model.
+      criteria: model?.data.framework ?? "",
       closedAt: track.closedAt,
       purgeAfter: track.purgeAfter,
     },
     data: track.data,
+    models: selectable.map((m) => ({ id: m.id, displayName: m.displayName })),
     rounds: rounds.map((r) => ({
       id: r.id,
       milestone: r.milestone,
@@ -72,22 +79,27 @@ export async function action({ request, params }: Route.ActionArgs) {
   const user = await requireTracksUser(request);
   const track = await getTrack(user.id, params.id ?? "");
   if (!track) throw notFound();
+  const locale = getLocale(request);
+  const ff = await trackFeedforwardAction(request, user, track, locale);
+  if (ff) return ff;
   const fd = await request.formData();
-  const m = getMessages(getLocale(request)).tracks;
-  if (fd.get("intent") !== "milestone") return { ok: false as const, error: m.errorInvalid };
+  const m = getMessages(locale).tracks;
+  if (fd.get("intent") !== "milestone")
+    return { ok: false as const, intent: "milestone" as const, error: m.errorInvalid };
   const form = MilestoneFormSchema.safeParse({
     milestone: fd.get("milestone"),
     status: fd.get("status"),
     due: fd.get("due") ?? "",
   });
-  if (!form.success) return { ok: false as const, error: m.errorInvalid };
+  if (!form.success)
+    return { ok: false as const, intent: "milestone" as const, error: m.errorInvalid };
   const { milestone, status, due } = form.data;
   const { [milestone]: _old, ...deadlines } = track.data.deadlines;
   await updateTrackData(user.id, track.id, {
     status: { ...track.data.status, [milestone]: status },
     deadlines: due ? { ...deadlines, [milestone]: due } : deadlines,
   });
-  return { ok: true as const };
+  return { ok: true as const, intent: "milestone" as const };
 }
 
 type Data = Route.ComponentProps["loaderData"];
@@ -102,7 +114,10 @@ export default function TrackPage({ loaderData }: Route.ComponentProps) {
     result: (d) =>
       d
         ? d.ok
-          ? { variant: "success", message: m.toastSaved }
+          ? {
+              variant: "success",
+              message: d.intent === "feedforward" ? m.feedforward.done : m.toastSaved,
+            }
           : { variant: "error", message: d.error }
         : null,
   });
@@ -225,6 +240,9 @@ function MilestoneTab({ data, milestone }: { data: Data; milestone: MilestoneId 
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
+      )}
+      {def?.feedforward && !data.track.closedAt && (
+        <FeedforwardPanel criteria={data.track.criteria} models={data.models} />
       )}
       <Form method="post" key={milestone} className="space-y-4">
         <input type="hidden" name="intent" value="milestone" />
