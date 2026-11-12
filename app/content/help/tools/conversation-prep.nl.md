@@ -1,10 +1,10 @@
 ## Wanneer gebruik je deze tool?
 
-Gebruik deze tool als studieloopbaanbegeleider (SLB'er) om een **gesprek voor te bereiden**: een startgesprek, een voortgangsgesprek, een dreigend negatief studieadvies (BSA), een student die twijfelt over stoppen, of de keuze voor een minor of stage.
+Gebruik deze tool als studieloopbaanbegeleider (SLB'er) om een **gesprek voor te bereiden**: een startgesprek, een voortgangsgesprek, een dreigend negatief studieadvies (BSA), een student die twijfelt over stoppen, of de keuze voor een richting of stage. De tool past bij het mbo en het hbo.
 
 ## Hoe werkt het?
 
-1. **Kies het soort gesprek** en de fase: propedeuse of hoofdfase.
+1. **Kies het soort gesprek** en de fase: het eerste jaar of later in de opleiding. Dat werkt voor het mbo en het hbo: in het mbo is het eerste jaar leerjaar 1, in het hbo de propedeuse.
 2. **Vul eventueel in wat je wilt bereiken**, kort en over de situatie. **Geen namen of persoonlijke gegevens:** de vragenset gaat over de situatie, nooit over een bepaalde student.
 3. Je krijgt openingsvragen, doorvragen, wat je niet vraagt, hoe je afsluit en afspraken maakt, en wanneer je doorverwijst.
 

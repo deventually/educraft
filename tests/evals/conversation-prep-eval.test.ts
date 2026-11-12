@@ -56,6 +56,7 @@ describe("conversation-prep eval meets the P39.2 quality gate", () => {
         "namedCounter",
         "aboutAStudent",
         "inventedSources",
+        "wrongSectorWords",
       ]),
     );
   });

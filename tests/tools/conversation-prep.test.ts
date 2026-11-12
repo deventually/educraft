@@ -16,11 +16,11 @@ import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 const tool = () => getToolBySlug("conversation-prep")!;
 const values = {
   situation: "negative-study-advice",
-  phase: "propaedeutic",
+  phase: "first-year",
   goal: "Samen kijken wat er nodig is om de laatste herkansingen te halen.",
 };
 const runtime = (lang: "nl" | "en") =>
-  buildSystemPrompt({ promptId: "conversation-prep@v1", values, outputLanguage: lang });
+  buildSystemPrompt({ promptId: "conversation-prep@v2", values, outputLanguage: lang });
 
 describe("tool: conversation-prep", () => {
   it("registers as a one-shot tool for teachers that uses the context profile", () => {
@@ -29,7 +29,7 @@ describe("tool: conversation-prep", () => {
     expect(t.mode).toBe("one-shot");
     expect(t.userType).toBe("instructor");
     expect(t.usesContextProfile).toBe(true);
-    expect(t.stages.map((s) => s.systemPromptId)).toEqual(["conversation-prep@v1"]);
+    expect(t.stages.map((s) => s.systemPromptId)).toEqual(["conversation-prep@v2"]);
     expect(t.enabled).toBe(true);
     expect(t.handlesStudentWork).not.toBe(true);
   });
@@ -39,7 +39,7 @@ describe("tool: conversation-prep", () => {
     expect(loc(tool().name, "en")).toBe("Prepare a conversation");
   });
 
-  it("offers the brief's five situations and two phases as stable English slugs", () => {
+  it("offers five situations and two phases that fit mbo as well as hbo and wo", () => {
     const situation = tool().inputs.find((f) => f.name === "situation");
     expect(situation?.kind).toBe("select");
     expect(situation?.required).toBe(true);
@@ -48,11 +48,33 @@ describe("tool: conversation-prep", () => {
       "progress",
       "negative-study-advice",
       "dropout",
-      "minor-or-internship-choice",
+      "direction-or-internship-choice",
     ]);
     const phase = tool().inputs.find((f) => f.name === "phase");
     expect(phase?.required).toBe(true);
-    expect(phase?.options?.map((o) => o.value)).toEqual(["propaedeutic", "main-phase"]);
+    expect(phase?.options?.map((o) => o.value)).toEqual(["first-year", "later-years"]);
+    // Neutral labels: no hbo-only words such as propedeuse, hoofdfase or minor.
+    const labels = [...(situation?.options ?? []), ...(phase?.options ?? [])]
+      .map((o) => loc(o.label, "nl").toLowerCase())
+      .join(" ");
+    for (const word of ["propedeuse", "hoofdfase", "minor"]) expect(labels).not.toContain(word);
+    expect(phase?.options?.map((o) => loc(o.label, "nl"))).toEqual([
+      "Eerste jaar",
+      "Later in de opleiding",
+    ]);
+  });
+
+  it("gives an example for mbo and hbo under the phase and the situation", () => {
+    const phase = tool().inputs.find((f) => f.name === "phase");
+    expect(loc(phase?.help, "nl")).toMatch(/mbo.*leerjaar 1.*hbo.*propedeuse/i);
+    expect(loc(phase?.help, "en")).toMatch(/mbo.*year 1.*foundation year/i);
+    const situation = tool().inputs.find((f) => f.name === "situation");
+    expect(loc(situation?.help, "nl")).toMatch(/keuzedeel.*minor/i);
+    expect(loc(situation?.help, "en")).toMatch(/elective.*minor/i);
+  });
+
+  it("keeps @v1 registered for earlier results", () => {
+    expect(getPrompt("conversation-prep@v1")).toBeDefined();
   });
 
   it("asks for the situation, never for the student", () => {
@@ -71,7 +93,7 @@ describe("tool: conversation-prep", () => {
 
   it("is an original LimeOnIt tool, findable under coaching", () => {
     expect(tool().attribution.original).toBe(true);
-    expect(getPrompt("conversation-prep@v1").verbatim).toMatch(/LimeOnIt/);
+    expect(getPrompt("conversation-prep@v2").verbatim).toMatch(/LimeOnIt/);
     expect(TOOL_GOALS["conversation-prep"]).toBe("coach");
     expect(TOOL_KEYWORDS["conversation-prep"]).toEqual(
       expect.arrayContaining(["slb", "gesprek voorbereiden", "bsa", "vragen"]),
@@ -89,6 +111,10 @@ describe("tool: conversation-prep", () => {
       expect(p).not.toMatch(/\{\{\w+\}\}/);
       expect(p).toContain(values.goal);
       expect(p).toContain("`negative-study-advice`");
+      // @v2 explains the neutral phases and the choice for mbo as well as hbo and wo.
+      for (const slug of ["`first-year`", "`later-years`", "`direction-or-internship-choice`"])
+        expect(p).toContain(slug);
+      expect(p).toMatch(lang === "nl" ? /leerjaar 1.*propedeuse/ : /year 1.*foundation year/);
     });
   }
 

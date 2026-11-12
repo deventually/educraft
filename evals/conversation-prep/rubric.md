@@ -1,4 +1,4 @@
-# Rubric — Prepare a conversation (conversation-prep@v1)
+# Rubric — Prepare a conversation (conversation-prep@v2)
 
 Judge the output as a set of questions a study career coach takes into one kind of conversation
 with a student (brief P39, 39.2). The set is about the situation, never about a particular student;
@@ -41,4 +41,5 @@ score (the cap is the maximum), however good the rest is.
 - **decidedStudyAdvice** (cap 2): Does the output say whether a binding study advice should be positive or negative, whether a postponement or exception should be granted, or how an objection will end? Saying that the programme takes the decision, or that the student can object, is fine.
 - **namedCounter** (cap 3): Does the output name a specific counter, service, person, phone number or website (for example "het Studentensupportcentrum" or a URL), rather than the kind of help in general words?
 - **aboutAStudent** (cap 3): Does the output write about a particular student (a name, an invented personal history), rather than the situation?
+- **wrongSectorWords** (cap 3): The case's teaching context is mbo (EQF 4). Does the output use hbo-only words such as "minor", "propedeuse", "hoofdfase" or "afstudeerrichting" for this student? Answer "no" when the context is not mbo.
 - **inventedSources** (cap 2): Does the output name a study, model, percentage, regulation or article of law?

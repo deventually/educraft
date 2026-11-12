@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { CONVERSATION_PREP_PROMPT } from "~/lib/prompts/conversation-prep@v1.prompt";
+import { CONVERSATION_PREP_PROMPT_V2 } from "~/lib/prompts/conversation-prep@v2.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -20,8 +20,8 @@ export const conversationPrep: Tool = {
     en: "Questions for a study career conversation, per situation",
   },
   tagline: {
-    nl: "Krijg vragen voor een startgesprek, een voortgangsgesprek, een dreigend negatief studieadvies, twijfel over stoppen of de keuze voor een minor of stage: hoe je opent, doorvraagt, afsluit en doorverwijst.",
-    en: "Get questions for a starting conversation, a progress conversation, a threatening negative study advice, doubts about quitting or choosing a minor or internship: how to open, follow up, close and refer on.",
+    nl: "Krijg vragen voor een startgesprek, een voortgangsgesprek, een dreigend negatief studieadvies, twijfel over stoppen of de keuze voor een richting of stage: hoe je opent, doorvraagt, afsluit en doorverwijst.",
+    en: "Get questions for a starting conversation, a progress conversation, a threatening negative study advice, doubts about quitting or choosing a direction or internship: how to open, follow up, close and refer on.",
   },
   icon: "messages-square",
   userType: "instructor",
@@ -73,10 +73,17 @@ export const conversationPrep: Tool = {
           },
         },
         {
-          value: "minor-or-internship-choice",
-          label: { nl: "Keuze voor een minor of stage", en: "Choosing a minor or internship" },
+          value: "direction-or-internship-choice",
+          label: {
+            nl: "Keuze voor een richting of stage",
+            en: "Choosing a direction or internship",
+          },
         },
       ],
+      help: {
+        nl: "Bij een richting: bijvoorbeeld een uitstroomrichting of keuzedeel in het mbo, of een minor of afstudeerrichting in het hbo.",
+        en: "For a direction: for example a specialisation or elective in mbo, or a minor or graduation track in higher education.",
+      },
       group: CONVERSATION,
     },
     {
@@ -84,11 +91,18 @@ export const conversationPrep: Tool = {
       label: { nl: "Fase van de studie", en: "Phase of the programme" },
       kind: "select",
       required: true,
-      defaultValue: "propaedeutic",
+      defaultValue: "first-year",
       options: [
-        { value: "propaedeutic", label: { nl: "Propedeuse", en: "Foundation year" } },
-        { value: "main-phase", label: { nl: "Hoofdfase", en: "Main phase" } },
+        { value: "first-year", label: { nl: "Eerste jaar", en: "First year" } },
+        {
+          value: "later-years",
+          label: { nl: "Later in de opleiding", en: "Later in the programme" },
+        },
       ],
+      help: {
+        nl: "Bijvoorbeeld: in het mbo is het eerste jaar leerjaar 1, in het hbo de propedeuse. Later in de opleiding is in het mbo leerjaar 2 en verder, in het hbo de hoofdfase.",
+        en: "For example, in mbo the first year is year 1; in higher education it is the foundation year. Later in the programme means year 2 and beyond in mbo, and the main phase in higher education.",
+      },
       group: CONVERSATION,
     },
     {
@@ -118,7 +132,7 @@ export const conversationPrep: Tool = {
         nl: "Vragen om te openen, door te vragen en af te sluiten, wat je niet vraagt en wanneer je doorverwijst.",
         en: "Questions to open, follow up and close, what not to ask and when to refer on.",
       },
-      systemPromptId: CONVERSATION_PREP_PROMPT.id,
+      systemPromptId: CONVERSATION_PREP_PROMPT_V2.id,
       output: {
         kind: "markdown",
         hint: {
