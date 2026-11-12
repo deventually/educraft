@@ -27,7 +27,14 @@ import {
  * hidden fields for the coverage, the weights are marked as the AI's, and an outcome no summative
  * test covers is named above the tests.
  */
-export function ProposalForm({ proposal }: { proposal: ImportProposal }) {
+export function ProposalForm({
+  proposal,
+  onLater,
+}: {
+  proposal: ImportProposal;
+  /** The wizard's way out: leave this proposal for now (steps 2 and 3). */
+  onLater?: () => void;
+}) {
   const t = useT();
   const ti = t.courses.import;
   const d = t.courseDesign;
@@ -45,6 +52,8 @@ export function ProposalForm({ proposal }: { proposal: ImportProposal }) {
       className="mt-6 space-y-4 border-t border-slate-200 pt-4"
     >
       <input type="hidden" name="intent" value="import-apply" />
+      {/* Applied in the wizard: the next step's proposal follows (`nextDesignStep`). */}
+      {designed && <input type="hidden" name="wizard" value="on" />}
       <h3 id={`${id}-title`} className="text-base font-medium text-slate-900">
         {designed ? d.proposalTitle : ti.proposalTitle}
       </h3>
@@ -94,7 +103,7 @@ export function ProposalForm({ proposal }: { proposal: ImportProposal }) {
           ))}
         </div>
       )}
-      <Button type="submit">{ti.apply}</Button>
+      <ProposalButtons label={ti.apply} onLater={onLater} />
     </Form>
   );
 }
@@ -300,5 +309,33 @@ function AssessmentRow({
         <AssessmentExtrasPreview assessment={a} />
       </div>
     </fieldset>
+  );
+}
+
+/** Apply, and in the wizard also "Later": leave the proposal; the step stays on the overview. */
+export function ProposalButtons({ label, onLater }: { label: string; onLater?: () => void }) {
+  const d = useT().courseDesign;
+  const id = useId();
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit">{label}</Button>
+        {onLater && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onLater}
+            aria-describedby={`${id}-later`}
+          >
+            {d.later}
+          </Button>
+        )}
+      </div>
+      {onLater && (
+        <p id={`${id}-later`} className="text-sm text-slate-600">
+          {d.laterHelp}
+        </p>
+      )}
+    </div>
   );
 }

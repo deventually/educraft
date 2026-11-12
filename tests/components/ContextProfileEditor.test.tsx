@@ -423,3 +423,33 @@ describe("ContextProfileEditor — a11y", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
+
+describe("ContextProfileEditor — programme as a choice", () => {
+  it("suggests the programmes of your teams, and still takes free text", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor({ programmeOptions: ["Pabo", "Verpleegkunde"] });
+    await user.selectOptions(
+      screen.getByLabelText(/onderwijstype|type of education/i),
+      "hbo::bachelor",
+    );
+    const field = screen.getByLabelText(/^opleiding$/i) as HTMLInputElement;
+    const list = container.querySelector(`datalist#${field.getAttribute("list")}`);
+    expect(Array.from(list?.querySelectorAll("option") ?? []).map((o) => o.value)).toEqual([
+      "Pabo",
+      "Verpleegkunde",
+    ]);
+    await user.type(field, "Eigen opleiding");
+    expect(field).toHaveValue("Eigen opleiding");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("offers no list without programmes", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+    await user.selectOptions(
+      screen.getByLabelText(/onderwijstype|type of education/i),
+      "hbo::bachelor",
+    );
+    expect(screen.getByLabelText(/^opleiding$/i)).not.toHaveAttribute("list");
+  });
+});

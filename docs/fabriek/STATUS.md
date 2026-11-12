@@ -4,9 +4,27 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #300 gemerged)_
 
 ## Nu
+
+- **Cursus kopiëren voor een nieuwe uitvoering (#300) gemerged op 2026-11-12:** onderaan
+  *Overzicht* maakt de eigenaar een kopie voor een volgend studiejaar, semester of periode, met
+  een eigen naam en een nieuwe startdatum. Leeruitkomsten, toetsen, lessen en rooster gaan mee;
+  delen, collega's, gekoppeld werk en reviews niet. Daarna opent *Controle* met de vraag wat er
+  na de evaluatie anders moet. Geen migratie.
+
+- **Cursuswizard loopt door (#299) gemerged op 2026-11-12:** na *Overnemen* van de leeruitkomsten
+  of de toetsen vraagt de pagina meteen het voorstel voor de volgende stap. Stap 2 en 3 hebben een
+  knop *Later*; de stap blijft dan op het overzicht staan.
+
+- **Opleiding als keuze in het contextprofiel (#298) gemerged op 2026-11-12:** bij *Opleiding*
+  stelt LimeOnIt de opleidingen van je eigen teams voor; je kunt nog steeds zelf iets typen.
+
+- **Teams onder een faculteit, en per team zien waar het hoort (#297) gemerged op 2026-11-12:**
+  op de teampagina kiest de beheerder onder welk onderdeel een team valt, of geen. Beheer →
+  Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij welke
+  opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-6). Migratie 0035.
 
 - **Platformscherm voor instellingen (#295) gemerged op 2026-11-12:** op het platformadres heeft
   de platformeigenaar één pagina, *Platform*: alle instellingen met hun status, een nieuwe
@@ -789,10 +807,6 @@ _Laatst bijgewerkt: 2026-11-12 (#187 t/m #296 gemerged)_
 
 ## Bezig
 
-- **Teams onder een faculteit, en per team zien waar het hoort (#297, PR open):** op de
-  teampagina kiest de beheerder onder welk onderdeel (faculteit, vestiging, …) een team valt, of
-  geen. Beheer → Organisatie toont per onderdeel zijn teams; de persoonspagina zegt per team bij
-  welke opleidingen en welk onderdeel het hoort (BESLUIT-2026-11-12-6). Migratie 0035.
 - **Prompt caching voor elke aanbieder (PR open):** in een chat stuurt LimeOnIt bij elke beurt
   dezelfde lange systeemprompt en het hele gesprek opnieuw. Nu vraagt het de aanbieder dat te
   bewaren, zoals die aanbieder het wil (`cache` per aanbieder in `config/models.json`): Claude

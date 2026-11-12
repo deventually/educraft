@@ -12,6 +12,7 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { CourseDataSchema, COURSE_LIMITS, emptyCourseData } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
+import { type CourseRun, forNewRun } from "~/lib/courses/newRun";
 import { getDb } from "../db.server";
 import {
   agentReviews,
@@ -198,6 +199,27 @@ export async function updateCourse(
       tx.update(courseLinks).set({ itemId: null }).where(inArray(courseLinks.id, stale)).run();
   });
   return { ...existing, name, contextProfileId, data, updatedAt };
+}
+
+/**
+ * A new run of a course, by its owner or a co-owner: a new course of the caller's own with the
+ * same content and the run the teacher chose (`forNewRun`). The context profile comes along
+ * only for the owner, whose it is. Sharing, members, linked work and reviews stay with the
+ * original. Null when the caller is neither owner nor co-owner; throws on invalid input
+ * (nothing is written).
+ */
+export async function copyCourse(
+  userId: string,
+  id: string,
+  input: { name: string } & CourseRun,
+): Promise<Course | null> {
+  const course = await getCourse(userId, id);
+  if (!course || course.role === "editor") return null;
+  return createCourse(userId, {
+    name: input.name,
+    contextProfileId: course.role === "owner" ? course.contextProfileId : null,
+    data: forNewRun(course.data, input),
+  });
 }
 
 /**

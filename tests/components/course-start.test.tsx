@@ -104,6 +104,8 @@ describe("CourseStart", () => {
     expect((form.querySelector('input[name="intent"]') as HTMLInputElement).value).toBe(
       "import-apply",
     );
+    // Applied from the wizard: the next step's proposal comes right after.
+    expect((form.querySelector('input[name="wizard"]') as HTMLInputElement).value).toBe("on");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

@@ -13,6 +13,7 @@ import { auth } from "./auth";
 import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
+import { courseCopy } from "./courseCopy";
 import { courseDesign } from "./courseDesign";
 import { courseDocuments } from "./courseDocuments";
 import { courseMembers } from "./courseMembers";
@@ -82,6 +83,7 @@ export const en: Messages = {
   calendar,
   chat,
   confirm,
+  courseCopy,
   courseDesign,
   courseDocuments,
   courseMembers,

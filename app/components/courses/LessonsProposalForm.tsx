@@ -9,13 +9,20 @@ import { Form } from "react-router";
 import type { LessonsProposal, ProposedLesson } from "~/lib/courses/designLessons";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import { ACTIVITY_KINDS } from "~/lib/courses/types";
-import { Button, Input, Label, Select, Textarea } from "~/components/ui";
+import { Input, Label, Select, Textarea } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { NumberField } from "./fields";
-import { AiNotes } from "./ProposalForm";
+import { AiNotes, ProposalButtons } from "./ProposalForm";
 
-export function LessonsProposalForm({ proposal }: { proposal: LessonsProposal }) {
+export function LessonsProposalForm({
+  proposal,
+  onLater,
+}: {
+  proposal: LessonsProposal;
+  /** The wizard's way out: leave this proposal for now. */
+  onLater?: () => void;
+}) {
   const t = useT();
   const l = t.courseDesign.lessons;
   const id = useId();
@@ -57,7 +64,7 @@ export function LessonsProposalForm({ proposal }: { proposal: LessonsProposal })
           )}
         </div>
       ))}
-      <Button type="submit">{l.apply}</Button>
+      <ProposalButtons label={l.apply} onLater={onLater} />
     </Form>
   );
 }

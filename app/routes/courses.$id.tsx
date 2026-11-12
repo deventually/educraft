@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useActionData, useSearchParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/courses.$id";
@@ -23,6 +24,7 @@ import { CourseDesignAssessments } from "~/components/courses/CourseDesignAssess
 import { CourseDesignLessons, useLessonsProposal } from "~/components/courses/CourseDesignLessons";
 import { CourseImport, useImportProposal } from "~/components/courses/CourseImport";
 import { CourseStart } from "~/components/courses/CourseStart";
+import { useDesignChain } from "~/components/courses/useDesignChain";
 import { CourseReviewPanel } from "~/components/courses/CourseReviewPanel";
 import { CourseWeekView } from "~/components/courses/CourseWeekView";
 import { ModuleGuideSection } from "~/components/courses/ModuleGuideSection";
@@ -39,6 +41,8 @@ import { canDesignLessons } from "~/lib/courses/designLessons";
 import { courseProgress, isEmptyCourse } from "~/lib/courses/progress";
 import { DisciplinesSection } from "~/components/courses/DisciplinesSection";
 import { CourseSettings } from "~/components/courses/CourseSettings";
+import { CopiedNotice, CourseCopy } from "~/components/courses/CourseCopy";
+import { copyRunAction } from "~/server/courseCopy.server";
 import { CourseTabs } from "~/components/courses/CourseTabs";
 import { courseTab } from "~/lib/courses/tabs";
 import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
@@ -122,6 +126,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     (await shareAction(request, user, "course", course.id)) ??
     (await memberAction(request, user, course)) ??
     (await courseProgrammeAction(request, user, course.id)) ??
+    (await copyRunAction(request, user, course)) ??
     saveCourseIntent(request, params.id)
   );
 }
@@ -192,7 +197,11 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const proposal = useImportProposal(actionData);
-  const lessons = useLessonsProposal(actionData);
+  useDesignChain(actionData);
+  // "Later" in the wizard: the proposal left for now (the step itself stays on the overview).
+  const [later, setLater] = useState<object | null>(null);
+  const lessonsProposal = useLessonsProposal(actionData);
+  const lessons = lessonsProposal === later ? null : lessonsProposal;
   const designed = proposal?.source === "design" ? proposal : null;
   // Step 1 proposes outcomes, step 2 tests: each step shows its own proposal.
   const designedTests = designed?.assessments.length ? designed : null;
@@ -269,8 +278,9 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
             )}
             {courseDesign && canDesignAssessments(data) && (
               <CourseDesignAssessments
-                proposal={designedTests}
+                proposal={designedTests === later ? null : designedTests}
                 notes={aiNotes("design-assessments")}
+                onLater={() => setLater(designedTests)}
               />
             )}
             {courseDesign && canDesignLessons(data) && (
@@ -278,6 +288,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
                 schedule={data.schedule}
                 proposal={lessons}
                 notes={aiNotes("design-lessons")}
+                onLater={() => setLater(lessons)}
               />
             )}
             <CourseProgress courseId={course.id} progress={courseProgress(data, findings)} />
@@ -307,6 +318,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               weekDates={weekDates}
               currentWeek={currentWeek}
             />
+            {members?.myRole !== "editor" && <CourseCopy name={course.name} data={data} />}
           </>
         )}
         {tab === "outcomes" && (
@@ -320,6 +332,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         )}
         {tab === "check" && (
           <>
+            {params.get("copied") === "1" && <CopiedNotice />}
             <CoverageMatrix data={data} matrix={matrix} />
             <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
             {review && (
