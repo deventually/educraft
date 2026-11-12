@@ -52,6 +52,7 @@ import { privacy } from "./privacy";
 import { programmes } from "./programmes";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
+import { rubricCalibrate } from "./rubricCalibrate";
 import { settings } from "./settings";
 import { sharing } from "./sharing";
 import { speech } from "./speech";
@@ -124,6 +125,7 @@ export const en: Messages = {
   programmes,
   projects,
   resultActions,
+  rubricCalibrate,
   settings,
   sharing,
   speech,
