@@ -29,7 +29,7 @@ import { securityHeadersMiddleware } from "~/server/securityHeaders.server";
 import { requestIdMiddleware } from "~/server/requestId.server";
 import { ErrorReportHint } from "~/components/ErrorReportHint";
 import { sessionRefreshMiddleware } from "~/server/session.server";
-import { tenantRouting } from "~/server/tenants.server";
+import { currentTenantOrNull, tenantRouting } from "~/server/tenants.server";
 import { DictationProvider } from "~/lib/speech/dictation";
 import type { FeatureId } from "~/lib/features";
 
@@ -82,6 +82,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       : [],
     // Dictation needs a speech server (`speechToText` in config/models.json).
     dictation: user ? dictationEnabled() : false,
+    // On the platform address the shell shows only the platform's own pages.
+    platform: currentTenantOrNull()?.platform === true,
   };
   return data(body, clearCookie ? { headers: { "Set-Cookie": clearCookie } } : undefined);
 }

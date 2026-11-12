@@ -29,9 +29,12 @@ export default function AppShell() {
           features?: Partial<Record<string, boolean>>;
         } | null;
         announcements?: ShownAnnouncement[];
+        platform?: boolean;
       }
     | undefined;
   const user = root?.user ?? null;
+  // The platform address (platform layer) serves only /platform and the sign-in pages.
+  const platform = root?.platform === true;
   // BDB/BKE shows only when an admin switched the workplace on for this user (P27).
   const portfolio = user?.portfolio === true;
   // Courses can be switched off per team (P28.3); unknown (signed out) = shown.
@@ -77,20 +80,26 @@ export default function AppShell() {
   // The menu of four (P27.3): Start · Cursussen · BDB/BKE · Tools, plus Beheer for an admin.
   // "Eerder gemaakt" lives on Start and Tools, Onderwijscontext in the account menu, Help is the
   // question mark at the top right; all of them stay in the footer.
-  const nav: NavItem[] = [
-    // Admin console — first for an admin, so they land on their console entry immediately.
-    ...(user && user.role === "admin" ? [{ to: "/admin", label: t.nav.admin, end: false }] : []),
-    { to: "/start", label: t.nav.start, end: true },
-    ...(courses ? [{ to: "/courses", label: t.nav.courses, end: false }] : []),
-    ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
-    { to: "/tools", label: t.nav.tools, end: false },
-  ];
-  const accountLinks: NavItem[] = [
-    { to: "/account", label: t.auth.accountArea, end: true },
-    { to: "/context-profiles", label: t.nav.settings, end: false },
-    { to: "/assessment-models", label: t.nav.assessmentModels, end: false },
-    { to: "/usage", label: t.nav.usage, end: true },
-  ];
+  const nav: NavItem[] = platform
+    ? [{ to: "/platform", label: t.platform.heading, end: false }]
+    : [
+        // Admin console — first for an admin, so they land on their console entry immediately.
+        ...(user && user.role === "admin"
+          ? [{ to: "/admin", label: t.nav.admin, end: false }]
+          : []),
+        { to: "/start", label: t.nav.start, end: true },
+        ...(courses ? [{ to: "/courses", label: t.nav.courses, end: false }] : []),
+        ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
+        { to: "/tools", label: t.nav.tools, end: false },
+      ];
+  const accountLinks: NavItem[] = platform
+    ? [{ to: "/account/2fa", label: t.twoFactor.heading, end: true }]
+    : [
+        { to: "/account", label: t.auth.accountArea, end: true },
+        { to: "/context-profiles", label: t.nav.settings, end: false },
+        { to: "/assessment-models", label: t.nav.assessmentModels, end: false },
+        { to: "/usage", label: t.nav.usage, end: true },
+      ];
 
   return (
     <div className="flex h-dvh flex-col bg-slate-50 text-slate-900">
@@ -106,7 +115,7 @@ export default function AppShell() {
       <header className="z-10 border-b border-slate-200 bg-white/80 backdrop-blur print:hidden">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4">
           <NavLink
-            to="/"
+            to={platform ? "/platform" : "/"}
             onClick={() => setMenuOpen(false)}
             className="flex shrink-0 items-center"
             aria-label={t.appName}
@@ -128,14 +137,16 @@ export default function AppShell() {
               ))}
             </nav>
             <LanguageSwitcher current={locale} redirectTo={redirectTo} />
-            <Link
-              to="/help"
-              aria-label={t.nav.help}
-              title={t.nav.help}
-              className="grid size-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-            >
-              <CircleHelp className="size-5" aria-hidden />
-            </Link>
+            {!platform && (
+              <Link
+                to="/help"
+                aria-label={t.nav.help}
+                title={t.nav.help}
+                className="grid size-9 shrink-0 place-items-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              >
+                <CircleHelp className="size-5" aria-hidden />
+              </Link>
+            )}
             {user && (
               <UserArea
                 name={user.name}
@@ -217,7 +228,7 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        {!fillsHeight && <SiteFooter t={t} portfolio={portfolio} courses={courses} />}
+        {!fillsHeight && !platform && <SiteFooter t={t} portfolio={portfolio} courses={courses} />}
       </div>
     </div>
   );
