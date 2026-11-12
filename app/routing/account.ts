@@ -11,4 +11,6 @@ export const account: RouteArea = {
     // Two-step verification (P2-12).
     route("account/2fa", "routes/account.2fa.tsx"),
   ],
+  // Upload or remove the teacher's own PowerPoint template (P30.7b); no UI of its own.
+  standalone: [route("account/slide-template", "routes/account.slide-template.tsx")],
 };

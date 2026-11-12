@@ -13,6 +13,7 @@ import {
 } from "~/server/repositories/users.server";
 import { hashPassword, passwordProblem, verifyPassword } from "~/server/password.server";
 import { listTeamsForUser } from "~/server/repositories/teams.server";
+import { listTemplatesForUser } from "~/server/repositories/slideTemplates.server";
 import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -23,6 +24,7 @@ import { useFormToast } from "~/components/Toast";
 import { Button, Card, Input, Label } from "~/components/ui";
 import type { Role } from "~/lib/registry/access";
 import { HelpLink } from "~/components/HelpLink";
+import { SlideTemplateCard } from "~/components/export/SlideTemplateCard";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -42,6 +44,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     twoFactor: await isTwoFactorEnabled(user.id),
     // Courses without a co-owner go with the account (BESLUIT-2026-11-10-5).
     lostCourses: await countCoursesWithoutSuccessor(user.id),
+    // My own PowerPoint template (P30.7b); a team's is on the team page.
+    slideTemplate: (await listTemplatesForUser(user.id)).find((t) => t.scope === "own") ?? null,
   };
 }
 
@@ -186,6 +190,12 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           </ul>
         </Card>
       )}
+
+      <SlideTemplateCard
+        action="/account/slide-template"
+        current={loaderData.slideTemplate}
+        scope="own"
+      />
 
       {/* ── Change email ──────────────────────────────────────────────────── */}
       <Card className="mt-6 p-6">

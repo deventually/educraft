@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import JSZip from "jszip";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { signInAs, signedRequest } from "../helpers/session";
@@ -121,6 +122,44 @@ describe("export routes (P30.1)", () => {
     const g = await save("test-items", "items", "1. Vraag");
     expect((await loadPreview(g.id)).downloads.map((d) => d.format)).not.toContain("pptx");
     expect(await status(loadFile(g.id, "pptx"))).toBe(404);
+  });
+
+  it("offers the caller's PowerPoint templates with a slides result, never another's (P30.7b)", async () => {
+    const templates = await import("~/server/repositories/slideTemplates.server");
+    const bytes = new Uint8Array(readFileSync("tests/fixtures/template-school.pptx"));
+    await templates.saveOwnTemplate("exp-a", "Hogeschool.pptx", bytes);
+    await templates.saveOwnTemplate("exp-c", "Ander.pptx", bytes);
+    const lesson = await save(
+      "lesson-plan",
+      "lesson",
+      "## Lesverloop\n\n### Afsluiting (5 min)\n\n- Exitvraag",
+    );
+    const data = (await loadPreview(lesson.id)) as unknown as {
+      templates: { id: string; name: string; scope: string }[];
+    };
+    expect(data.templates.map((t) => [t.name, t.scope])).toEqual([["Hogeschool.pptx", "own"]]);
+    const items = await save("test-items", "items", "1. Vraag");
+    expect(
+      ((await loadPreview(items.id)) as unknown as { templates: unknown[] }).templates,
+    ).toEqual([]);
+
+    // The download with the template: the slides sit in the template's own layout and master.
+    const own = data.templates[0]!.id;
+    const res = await loadFile(lesson.id, "pptx", `?template=${own}`);
+    const zip = await JSZip.loadAsync(new Uint8Array(await res.arrayBuffer()));
+    expect(await zip.file("ppt/slides/_rels/slide1.xml.rels")?.async("string")).toContain(
+      "slideLayout2.xml",
+    );
+    expect(await zip.file("ppt/slideMasters/slideMaster1.xml")?.async("string")).toContain(
+      "Schoollogo",
+    );
+
+    // Someone else's template, or one that does not exist: a 404, never the file.
+    const [theirs] = await templates.listTemplatesForUser("exp-c");
+    expect(await status(loadFile(lesson.id, "pptx", `?template=${theirs!.id}`))).toBe(404);
+    expect(await status(loadFile(lesson.id, "pptx", "?template=nope"))).toBe(404);
+    await templates.deleteOwnTemplate("exp-a");
+    await templates.deleteOwnTemplate("exp-c");
   });
 
   it("puts all saved steps of a multi-step tool in one file, in stage order", async () => {

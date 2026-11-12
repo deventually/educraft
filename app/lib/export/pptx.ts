@@ -9,6 +9,7 @@ import JSZip from "jszip";
 import PptxGenJS from "pptxgenjs";
 import type { ExportDoc } from "./doc";
 import { LANGUAGE } from "./docx";
+import { fillPptxTemplate } from "./pptxTemplate";
 import { toSlideDeck } from "./slides";
 
 export const PPTX_TYPE =
@@ -97,7 +98,14 @@ async function notesPerLine(bytes: ArrayBuffer, lang: string): Promise<Uint8Arra
   >;
 }
 
-export async function exportDocToPptx(doc: ExportDoc): Promise<Uint8Array<ArrayBuffer>> {
+/**
+ * The deck as PowerPoint: in LimeOnIt's own master, or, with `template` (an upload that passed
+ * `checkPptxTemplate`), in the template's own layout (P30.7b).
+ */
+export async function exportDocToPptx(
+  doc: ExportDoc,
+  template?: Uint8Array,
+): Promise<Uint8Array<ArrayBuffer>> {
   const deck = toSlideDeck(doc);
   const lang = LANGUAGE[deck.locale];
   const pptx = new PptxGenJS();
@@ -119,5 +127,10 @@ export async function exportDocToPptx(doc: ExportDoc): Promise<Uint8Array<ArrayB
       );
     if (s.notes) slide.addNotes(s.notes);
   }
-  return notesPerLine((await pptx.write({ outputType: "arraybuffer" })) as ArrayBuffer, lang);
+  const own = await notesPerLine(
+    (await pptx.write({ outputType: "arraybuffer" })) as ArrayBuffer,
+    lang,
+  );
+  if (!template) return own;
+  return fillPptxTemplate(template, { title: deck.title, lang, slides, notesSource: own });
 }

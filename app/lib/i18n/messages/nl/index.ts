@@ -15,6 +15,7 @@ import { confirm } from "./confirm";
 import { courseCopy } from "./courseCopy";
 import { courseDesign } from "./courseDesign";
 import { courseDocuments } from "./courseDocuments";
+import { courseImprovements } from "./courseImprovements";
 import { courseMembers } from "./courseMembers";
 import { courseTools } from "./courseTools";
 import { courses } from "./courses";
@@ -50,6 +51,7 @@ import { privacy } from "./privacy";
 import { programmes } from "./programmes";
 import { projects } from "./projects";
 import { resultActions } from "./resultActions";
+import { rubricCalibrate } from "./rubricCalibrate";
 import { settings } from "./settings";
 import { sharing } from "./sharing";
 import { speech } from "./speech";
@@ -94,6 +96,7 @@ export const nl = {
   courseCopy,
   courseDesign,
   courseDocuments,
+  courseImprovements,
   courseMembers,
   courses,
   courseTools,
@@ -129,6 +132,7 @@ export const nl = {
   programmes,
   projects,
   resultActions,
+  rubricCalibrate,
   settings,
   sharing,
   speech,

@@ -392,6 +392,13 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `itemTitle` reads "Webtech: <title>" and `earlierLessons` lists only that discipline's lessons.
   `/api/stream` takes an optional `courseId` and links the saved generation;
   "Mijn werk" links and unlinks afterwards; the course page lists "Gekoppeld werk".
+- **Improvements for the next run (P33.1).** `CourseData.improvements` (optional, capped at 30):
+  a point with a text, a place (the whole course, or an outcome, lesson or test by id), `open` or
+  `done`, its source (`teacher`, or `evaluation` from P33.2) and the run it comes from. Advice
+  only: it never changes the course. The pure intents live in `app/lib/courses/improvements.ts`,
+  the action in `app/server/courseImprovements.server.ts` (an editor may: it is content). A place
+  whose item was removed reads as the whole course (`improvementPlace`); `forNewRun` takes the
+  open points along to a copy and leaves the finished ones.
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
   lessons, weeks, check), each with its tab, what is done of it and the next open step. The
@@ -545,6 +552,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   opening slide, a slide per phase with its list items as points, a closing slide, more than six
   points split over a next slide. The teacher's text goes in the speaker notes; the time plan and
   the check never go on a slide. `pptx.ts` (`pptxgenjs`) and `SlidePreview` both read the deck.
+  **A PowerPoint template (30.7b):** a teacher uploads one on `/account`, a team's lead one on the
+  team page (`slide_templates`, at most one per teacher and per team; `slideTemplates.server.ts`
+  reads only one's own or one's teams' templates in the WHERE clause). `checkPptxTemplate` checks
+  the bytes at the boundary (a real package, no macros, a cap on the unpacked size, a layout with a
+  title and a body placeholder). In the export panel the teacher picks one (`?template=<id>`, a 404
+  for anyone who may not use it); `fillPptxTemplate` (`pptxTemplate.ts`, JSZip, no extra library)
+  removes the template's own slides and writes each slide in its "Title and Content" layout, so the
+  master's logo, colours and fonts come along; the notes come from the `pptxgenjs` file.
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved
@@ -578,7 +593,7 @@ app/
     registry/        … · access.ts (roles + canUseTool) · boot.server.ts (boot validation)
     hooks/           useSandbox (shared values/profile/course/locked-mode across the tool surfaces)
     assessment-models/ schema · starters · pick (frameworks per document type), all pure
-    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21), all pure
+    courses/         types · bloom · schema · edit · alignment · intents · links (P20) · items · blueprintImport · import · evidence · findingText (P26) · packTags (P21) · improvements (P33), all pure
     agents/          types · registry · validate · schema · input · filter (P21 role agents), all pure
   server/            env · db (getDb seam) · schema · migrate · auth · availability.server · repositories/* (async, userId-scoped)
 docs/                VISION.md · Audit-2026-07.md · Improvement-Plan.md · implementation/P0…P7

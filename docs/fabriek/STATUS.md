@@ -4,10 +4,28 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #305 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #310 gemerged)_
 
 ## Nu
 
+- **Verbeterpunten in de cursus (#310) gemerged op 2026-11-12:** op het tabblad *Controle*
+  staan de open verbeterpunten van een cursus, met een plek (cursus, leeruitkomst, les of toets)
+  en een knop *Afgerond*; de docent of een bewerker voegt er een toe. Bij kopiëren voor een nieuwe
+  uitvoering gaan de open punten mee (P33.1). Geen migratie.
+- **Kalibreren: de berekening (#309) gemerged op 2026-11-12:** het rekenwerk voor kalibreren met
+  een tweede beoordelaar (P34.1): per criterium hoe vaak twee docenten het eens zijn, één of meer
+  niveaus verschil en de gewogen kappa (vanaf vijf werken), per werk het cijfer van beiden, en een
+  agenda voor het gesprek. Geen AI, niets opgeslagen. Het scherm volgt in P34.2.
+- **Les voorbereiden @v2 (#308) gemerged op 2026-11-12:** de verwachte antwoorden staan niet
+  meer in het lijstpunt van de vraag, dus niet op de dia die studenten zien, maar in de
+  sprekersnotities. `@v1` blijft geregistreerd.
+- **Docenthulpjes: besluiten en briefs P33 t/m P39 (#307) gemerged op 2026-11-12:** LimeOnIt
+  draagt het onderwijswerk van een docent (BESLUIT-2026-11-12-8); nieuwe hulpjes halen de toets
+  van drie vragen (-9); zeven briefs staan klaar in `docs/implementation/` (-10), met de volgorde
+  en welke briefs bestanden delen in de README.
+- **PowerPoint-export voor een lesopzet (#306) gemerged op 2026-11-12:** de lesopzet van *Les
+  voorbereiden* kan als .pptx, met een dia per fase en wat voor de docent bedoeld is in de
+  sprekersnotities. Het exportpaneel toont een voorbeeld van de dia's.
 - **Het hele hoofdstuk in één keer (#305) gemerged op 2026-11-12:** op het tabblad *Hoofdstuk*
   bedenkt *Stel alle vragen* de vragen voor elk onderdeel, die de docent op één scherm beantwoordt,
   en *Stel het hoofdstuk op* schrijft alle onderdelen die nog niet in het hoofdstuk staan, één voor
