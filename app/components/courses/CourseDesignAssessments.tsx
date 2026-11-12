@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { Form, useNavigation } from "react-router";
 import { AiCallField } from "~/components/AiLeaveGuard";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
@@ -17,19 +17,28 @@ import { AiNotes, ProposalForm } from "./ProposalForm";
 export function CourseDesignAssessments({
   proposal,
   notes,
+  onLater,
 }: {
   /** The last test programme proposed, until the teacher applies it. */
   proposal: ImportProposal | null;
   /** What the AI still needs, when it proposed nothing. */
   notes?: string;
+  /** "Later": the page drops the proposal; the step stays here on the overview. */
+  onLater: () => void;
 }) {
   const a = useT().courseDesign.assessments;
   const id = useId();
+  const heading = useRef<HTMLHeadingElement>(null);
   const nav = useNavigation();
   const busy = nav.state === "submitting" && nav.formData?.get("intent") === "design-assessments";
   return (
     <section aria-labelledby={`${id}-title`}>
-      <h2 id={`${id}-title`} className="text-lg font-medium text-slate-900">
+      <h2
+        id={`${id}-title`}
+        ref={heading}
+        tabIndex={-1}
+        className="text-lg font-medium text-slate-900"
+      >
         {a.title}
       </h2>
       <p className="mt-1 max-w-[65ch] text-sm text-slate-600">{a.intro}</p>
@@ -75,7 +84,16 @@ export function CourseDesignAssessments({
           </div>
         </Form>
         {notes && !proposal && <AiNotes notes={notes} />}
-        {proposal && <ProposalForm proposal={proposal} />}
+        {proposal && (
+          <ProposalForm
+            proposal={proposal}
+            onLater={() => {
+              onLater();
+              // The form goes; keyboard focus lands on the step instead of the page top.
+              heading.current?.focus();
+            }}
+          />
+        )}
       </Card>
     </section>
   );
