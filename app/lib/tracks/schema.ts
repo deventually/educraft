@@ -7,20 +7,54 @@
 import { z } from "zod";
 import { IsoDateSchema } from "~/lib/calendar/weeks";
 
-export const MILESTONES = [
-  { id: "start", name: { nl: "Start", en: "Start" } },
+const MILESTONE_IDS = [
+  "start",
+  "visits",
+  "drafts",
+  "final",
+  "second-assessor",
+  "final-interview",
+  "onstage",
+] as const;
+export type MilestoneId = (typeof MILESTONE_IDS)[number];
+export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
+
+interface Milestone {
+  id: MilestoneId;
+  name: { nl: string; en: string };
+  /** The tool that does this milestone's work; its result can be kept as a round. */
+  tool?: { slug: string; label: { nl: string; en: string } };
+}
+
+export const MILESTONES: readonly Milestone[] = [
+  {
+    id: "start",
+    name: { nl: "Start", en: "Start" },
+    tool: {
+      slug: "stage-assessment",
+      label: { nl: "Plan van aanpak toetsen", en: "Check the plan of approach" },
+    },
+  },
   { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
   { id: "drafts", name: { nl: "Concepten", en: "Drafts" } },
   { id: "final", name: { nl: "Eindversie", en: "Final version" } },
   { id: "second-assessor", name: { nl: "Tweede beoordelaar", en: "Second assessor" } },
   { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
   { id: "onstage", name: { nl: "Klaar voor OnStage", en: "Ready for OnStage" } },
-] as const;
-
-export type MilestoneId = (typeof MILESTONES)[number]["id"];
-const MilestoneIdSchema = z.enum(MILESTONES.map((m) => m.id) as [MilestoneId, ...MilestoneId[]]);
+];
 
 const TRACK_KINDS = ["internship", "thesis"] as const;
+export type TrackKind = (typeof TRACK_KINDS)[number];
+
+/** The `documentType` values of *Studentwerk beoordelen* that belong to each kind. */
+const KIND_DOCUMENTS: Record<TrackKind, readonly string[]> = {
+  internship: ["stageplan", "stageverslag", "portfolio"],
+  thesis: ["afstudeerscriptie", "onderzoeksverslag"],
+};
+
+/** Whether an assessment model (by its document types) fits a kind of track. */
+export const fitsKind = (documentTypes: readonly string[], kind: TrackKind): boolean =>
+  documentTypes.some((d) => KIND_DOCUMENTS[kind].includes(d));
 
 const TRACK_LIMITS = {
   code: 40,

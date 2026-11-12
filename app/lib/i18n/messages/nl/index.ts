@@ -60,6 +60,7 @@ import { start } from "./start";
 import { teams } from "./teams";
 import { toast } from "./toast";
 import { tool } from "./tool";
+import { tracks } from "./tracks";
 import { twoFactor } from "./twoFactor";
 import { usage } from "./usage";
 import { utilities } from "./utilities";
@@ -143,6 +144,7 @@ export const nl = {
   teams,
   toast,
   tool,
+  tracks,
   twoFactor,
   usage,
   utilities,

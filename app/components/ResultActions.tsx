@@ -1,10 +1,18 @@
 import { useId, useState, type FormEvent } from "react";
 import { Link, useFetcher } from "react-router";
-import { ArrowRight, BookmarkCheck, CalendarPlus, FolderCheck, GraduationCap } from "lucide-react";
+import {
+  ArrowRight,
+  BookmarkCheck,
+  CalendarPlus,
+  FolderCheck,
+  GraduationCap,
+  Route,
+} from "lucide-react";
 import { Button, Input, Label, Select } from "./ui";
 import { useActionToast } from "./Toast";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { ExportMenu } from "./export/ExportMenu";
+import type { MilestoneId } from "~/lib/tracks";
 import { type LinkTarget, linkTargetValue } from "~/lib/courses/links";
 import { LINKED_WORK_ANCHOR, courseTabHref } from "~/lib/courses/tabs";
 import { fmt } from "~/lib/i18n/format";
@@ -23,6 +31,8 @@ export interface ResultActionsProps {
   dossiers: { id: string; name: string; criteria: { id: string; label: string }[] }[];
   /** P27.2: the tool was opened from this dossier criterion; one button puts the result there. */
   forCriterion?: { dossierId: string; criterionId: string } | null;
+  /** P38.2: the tool was opened from a track milestone; one button keeps the feedback there. */
+  forTrack?: { trackId: string; code: string; milestone: MilestoneId } | null;
   /** P30.1: the other saved steps of a multi-step tool, exported along with this one. */
   exportWith?: string[];
   /** The result can become a lesson of the course it is kept at (`Stage.courseExport`). */
@@ -54,6 +64,7 @@ export function ResultActions({
   linkTargets,
   dossiers,
   forCriterion = null,
+  forTrack = null,
   exportWith = [],
   asLesson = false,
 }: ResultActionsProps) {
@@ -66,6 +77,7 @@ export function ResultActions({
   const lessonTitleId = useId();
   const courseFetcher = useFetcher<ActionResult>();
   const evidenceFetcher = useFetcher<ActionResult>();
+  const trackFetcher = useFetcher<ActionResult>();
   const lessonFetcher = useFetcher<LessonResult>();
   const [linkedTo, setLinkedTo] = useState(courseId);
   const [linkedItem, setLinkedItem] = useState(itemId);
@@ -90,6 +102,12 @@ export function ResultActions({
       : d.error
         ? { variant: "error", message: d.error }
         : null,
+  );
+
+  useActionToast(trackFetcher.data, (d) =>
+    d.ok
+      ? { variant: "success", message: t.tracks.toastKept }
+      : { variant: "error", message: t.tracks.errorInvalid },
   );
 
   const keptAt = courseId || (courseFetcher.data?.ok ? linkedTo : "");
@@ -243,6 +261,19 @@ export function ResultActions({
                 {m.putAtCriterion}
               </Button>
             </evidenceFetcher.Form>
+          )}
+
+          {canKeep && forTrack && (
+            <trackFetcher.Form method="post">
+              <input type="hidden" name="intent" value="addToTrack" />
+              <input type="hidden" name="id" value={generationId ?? ""} />
+              <input type="hidden" name="trackId" value={forTrack.trackId} />
+              <input type="hidden" name="milestone" value={forTrack.milestone} />
+              <Button type="submit" size="sm">
+                <Route className="size-4" aria-hidden />
+                {fmt(t.tracks.keep, { code: forTrack.code })}
+              </Button>
+            </trackFetcher.Form>
           )}
 
           {showEvidence && (

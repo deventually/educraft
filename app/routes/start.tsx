@@ -20,6 +20,9 @@ import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { useT } from "~/lib/i18n/useT";
 import { Courses, MAX_QUERY, QuestionBox, Week } from "~/components/start/StartSections";
+import { SupervisionBlock } from "~/components/tracks/SupervisionBlock";
+import { listTracks } from "~/server/repositories/tracks.server";
+import { nextStep } from "~/lib/tracks";
 
 /** Results of the question box, findings and recent work on Start: small on purpose. */
 const MAX_RESULTS = 3;
@@ -106,8 +109,19 @@ export async function loader({ request }: Route.LoaderArgs) {
   // The pilot check-in shows when it is on for this teacher and due (`checkinDue`).
   const checkin = (await isFeatureOn(user, "pilotCheckin")) && (await isCheckinDue(user.id));
 
+  // P38.2: *Mijn begeleiding*, the open tracks, when the part is on for this teacher.
+  const supervision = (await isFeatureOn(user, "supervisionTracks"))
+    ? {
+        tracks: (await listTracks(user.id))
+          .filter((t) => !t.closedAt)
+          .slice(0, MAX_WEEK)
+          .map((t) => ({ id: t.id, code: t.code, next: nextStep(t) })),
+      }
+    : null;
+
   return {
     checkin,
+    supervision,
     query,
     course,
     results,
@@ -136,6 +150,7 @@ export default function Start({ loaderData }: Route.ComponentProps) {
     teacherWeek = null,
     startDateHint = null,
     checkin = false,
+    supervision = null,
   } = loaderData;
   const hasCourses = (courses?.length ?? 0) > 0;
 
@@ -168,6 +183,7 @@ export default function Start({ loaderData }: Route.ComponentProps) {
       )}
       {hasCourses && !teacherWeek && <Week t={t} week={week} hint={startDateHint} />}
       {hasCourses && courses && <Courses t={t} courses={courses} />}
+      {supervision && <SupervisionBlock tracks={supervision.tracks} />}
     </div>
   );
 }

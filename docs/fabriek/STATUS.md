@@ -77,8 +77,8 @@ Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
 - De privacy-officer kijkt later mee naar het anonimiseren (24.0b, BESLUIT-2026-11-04-20).
 - De privacy-officer kijkt later mee naar het rubric-invullen in batches (P23.3, BESLUIT-2026-11-04-8).
 - **Voor de privacy-officer:** de bewaartermijn en een aanvulling op de DPIA voor het stage- en
-  afstudeertraject (P38, BESLUIT-2026-11-12-11). Tot het akkoord staat het onderdeel uit voor
-  iedereen; bouwen mag wel.
+  afstudeertraject (P38, BESLUIT-2026-11-12-11). Het onderdeel staat aan; een beheerder kan het
+  tot het akkoord uitzetten (BESLUIT-2026-11-12-15).
 
 ## Later (bewust geparkeerd)
 

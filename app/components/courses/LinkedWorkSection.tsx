@@ -1,6 +1,8 @@
 import { useId } from "react";
-import { Link } from "react-router";
-import { Card } from "~/components/ui";
+import { Form, Link } from "react-router";
+import { CalendarPlus } from "lucide-react";
+import { Button, Card, Input, Label } from "~/components/ui";
+import { COURSE_LIMITS } from "~/lib/courses/schema";
 import type { BlueprintOffer } from "~/lib/courses/blueprintImport";
 import type { CourseData } from "~/lib/courses/types";
 import { type LocalizedText, loc } from "~/lib/i18n/localized";
@@ -15,6 +17,8 @@ export interface LinkedWorkItem {
   createdAt: Date | string;
   /** A blueprint that can become a test's questions (P26.2). */
   blueprint?: BlueprintOffer;
+  /** A lesson plan at no lesson yet: it can become a lesson of this course. */
+  asLesson?: boolean;
 }
 
 /** "Gekoppeld werk" (P20.4): what the teacher made with the tools for this course. */
@@ -55,6 +59,7 @@ export function LinkedWorkSection({ work, data }: { work: LinkedWorkItem[]; data
                 >
                   {m.openInWork}
                 </Link>
+                {w.asLesson && <AddAsLesson generationId={w.generationId} />}
                 {w.blueprint && (
                   <BlueprintImport data={data} generationId={w.generationId} offer={w.blueprint} />
                 )}
@@ -64,5 +69,25 @@ export function LinkedWorkSection({ work, data }: { work: LinkedWorkItem[]; data
         </Card>
       )}
     </section>
+  );
+}
+
+/** "Neem op als les": the work becomes a lesson on "Lessen en toetsen", kept at it. */
+function AddAsLesson({ generationId }: { generationId: string }) {
+  const m = useT().resultActions;
+  const titleId = useId();
+  return (
+    <Form method="post" className="flex w-full flex-wrap items-end gap-2">
+      <input type="hidden" name="intent" value="addAsLesson" />
+      <input type="hidden" name="id" value={generationId} />
+      <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+        <Label htmlFor={titleId}>{m.lessonTitle}</Label>
+        <Input id={titleId} name="title" required maxLength={COURSE_LIMITS.title} />
+      </div>
+      <Button type="submit" variant="secondary" size="sm">
+        <CalendarPlus className="size-4" aria-hidden />
+        {m.addAsLesson}
+      </Button>
+    </Form>
   );
 }
