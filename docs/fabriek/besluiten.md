@@ -520,3 +520,13 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   Bastiaan, 2026-11-12 (thread "School, faculteit, opleiding en leerlijn beheren": "En het koppelen
   van een team aan een opleiding, "faculteit", of instelling, of niets, toch?" en over heel team
   toevoegen "Ja, maar alleen als dat het beheer vergemakkelijkt").
+- **BESLUIT-2026-11-12-7:** **Bewijs in één keer: de AI stelt voor, de docent vinkt aan.** Op
+  *Bewijs in één keer toevoegen* kiest de docent veel bestanden of een map. De bestanden worden in
+  de browser gelezen en blijven daar; de namencheck draait per bestand voordat er tekst weggaat
+  (de namen die de docent opgeeft, plus e-mailadressen, telefoonnummers en studentnummers). De AI
+  stelt per bestand de leeruitkomst, de soort, de criteria en de regel uit het verplicht bewijs
+  voor, en slaat niets op. De docent bevestigt alles in één lijst: niets wordt gekoppeld zonder
+  vinkje, en twijfel (of een antwoord dat de code moest corrigeren, of een bestand zonder tekst)
+  krijgt *Controleren*. Het voorstel schrijft geen tekst en komt daarom niet in de AI-verantwoording.
+  Bastiaan, 2026-11-12 (thread "Waar kunnen we de cursussen en BDB/BKE nog beter maken", op het
+  advies met punt 3: "Ik ga akkoord.").

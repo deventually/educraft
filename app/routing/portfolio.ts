@@ -12,6 +12,8 @@ export const portfolio: RouteArea = {
       // Step 4 of the guided route: the start wizard (track, framework, anchors, planning).
       route(":id/start", "routes/portfolio.$id.start.tsx"),
       route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
+      // Evidence in one go: many files, a proposal per file, one list to confirm.
+      route(":id/evidence", "routes/portfolio.$id.evidence.tsx"),
       // 29.3: the rehearsal assessment, from step 5 only.
       route(":id/rehearsal", "routes/portfolio.$id.rehearsal.tsx"),
     ]),

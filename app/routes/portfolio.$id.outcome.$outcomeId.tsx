@@ -305,8 +305,17 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
               </>
             )}
 
+            <p className="mt-6 text-sm text-slate-700">
+              {t.portfolioBatch.openHint}{" "}
+              <Link
+                to={`/portfolio/${id}/evidence`}
+                className="font-medium text-violet-700 underline underline-offset-2"
+              >
+                {t.portfolioBatch.open}
+              </Link>
+            </p>
             {!evidenceFull && (
-              <Card className="mt-6 p-5">
+              <Card className="mt-4 p-5">
                 <h3
                   id="add-evidence-title"
                   className="scroll-mt-4 text-base font-medium text-slate-900"
