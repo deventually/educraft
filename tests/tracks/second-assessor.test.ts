@@ -53,4 +53,13 @@ describe("compareAssessors (P38.5, on P34.1 calibrate)", () => {
     expect(md).toMatch(/Cijfer volgens de rubric: jij \d/);
     expect(md).toContain("Bespreek eerst: Analyse.");
   });
+
+  it("escapes a backslash and a pipe in a title, so the table keeps its columns", () => {
+    const r = {
+      criteria: [{ id: "c", title: "A\\|B", mine: "x", theirs: "x", distance: 0 }],
+      gradeA: null,
+      gradeB: null,
+    };
+    expect(secondAssessorMarkdown(r, LABELS, "nl")).toContain("| A\\\\\\|B | x | x | gelijk |");
+  });
 });

@@ -61,7 +61,9 @@ export interface SecondAssessorLabels {
   talk: string;
 }
 
-const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
+/** A table cell: backslashes first, then pipes, so a title never breaks the columns. */
+const cell = (s: string) =>
+  s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
 
 export function secondAssessorMarkdown(
   r: AssessorComparison,
