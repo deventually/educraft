@@ -56,6 +56,10 @@ describe("the track list", () => {
     expect(code.getAttribute("aria-describedby")).toBeTruthy();
     expect(screen.getByText(/gebruik geen naam/i)).toBeTruthy();
     expect(screen.getByRole("group", { name: "Soort traject" })).toBeTruthy();
+    // P38.8: the way of working is in the help.
+    expect(screen.getByRole("link", { name: "Hoe werkt een traject?" }).getAttribute("href")).toBe(
+      "/help/supervision-track",
+    );
     expect(screen.getByLabelText("Cursus (optioneel)")).toBeTruthy();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });

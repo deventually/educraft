@@ -109,6 +109,14 @@ export default function TrackList({ loaderData }: Route.ComponentProps) {
         {m.heading}
       </h1>
       <p className="mt-2 max-w-[70ch] text-slate-600">{m.intro}</p>
+      <p className="mt-2 text-sm">
+        <Link
+          to="/help/supervision-track"
+          className="font-medium text-violet-700 underline underline-offset-2"
+        >
+          {m.help}
+        </Link>
+      </p>
 
       <Card className="mt-6 p-5">
         <h2 className="text-lg font-medium text-slate-900">{m.createTitle}</h2>

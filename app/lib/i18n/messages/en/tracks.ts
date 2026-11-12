@@ -78,6 +78,7 @@ export const tracks: Messages["tracks"] = {
       "Next, you check in your browser whether any names are left. The original never goes along.",
   },
   heading: "My supervision",
+  help: "How does a track work?",
   intro:
     "One track per student alongside OnStage: from the plan of approach to the final interview, with your earlier feedback at hand. Only anonymised text and feedback; closed tracks are wiped after the retention term.",
   keep: "Keep the feedback in {code}",

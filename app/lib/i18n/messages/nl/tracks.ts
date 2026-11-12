@@ -78,6 +78,7 @@ export const tracks = {
       "Je controleert hierna in je browser of er nog namen in staan. Het origineel gaat nooit mee.",
   },
   heading: "Mijn begeleiding",
+  help: "Hoe werkt een traject?",
   intro:
     "Per student één traject naast OnStage: van plan van aanpak tot eindgesprek, met jouw eerdere feedback erbij. Alleen geanonimiseerde tekst en feedback; afgeronde trajecten worden na de bewaartermijn gewist.",
   keep: "Bewaar de feedback in {code}",
