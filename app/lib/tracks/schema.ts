@@ -24,6 +24,8 @@ interface Milestone {
   name: { nl: string; en: string };
   /** The tool that does this milestone's work; its result can be kept as a round. */
   tool?: { slug: string; label: { nl: string; en: string } };
+  /** P38.3: each new version gets feedforward, following up the previous round. */
+  feedforward?: true;
 }
 
 export const MILESTONES: readonly Milestone[] = [
@@ -36,7 +38,7 @@ export const MILESTONES: readonly Milestone[] = [
     },
   },
   { id: "visits", name: { nl: "Bezoeken", en: "Visits" } },
-  { id: "drafts", name: { nl: "Concepten", en: "Drafts" } },
+  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, feedforward: true },
   { id: "final", name: { nl: "Eindversie", en: "Final version" } },
   { id: "second-assessor", name: { nl: "Tweede beoordelaar", en: "Second assessor" } },
   { id: "final-interview", name: { nl: "Eindgesprek", en: "Final interview" } },
@@ -93,6 +95,17 @@ export type TrackData = z.infer<typeof TrackDataSchema>;
 /** What a round keeps besides the redacted text: the feedback, never the report itself. */
 export const RoundFeedbackSchema = z.object({
   text: z.string().trim().min(1).max(TRACK_LIMITS.feedback),
+  /** P38.3: the improvement points of a feedforward round, numbered for the next round. */
+  points: z
+    .array(
+      z.object({
+        id: z.string().max(10),
+        criterion: z.string().max(200),
+        text: z.string().max(1_000),
+      }),
+    )
+    .max(40)
+    .optional(),
 });
 export type RoundFeedback = z.infer<typeof RoundFeedbackSchema>;
 

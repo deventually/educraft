@@ -227,6 +227,20 @@ ANTHROPIC_API_KEY=sk-… npm run eval:evaluation -- --repeat 3    # eindmeting
 npm run eval:evaluation -- --dry-run                            # alleen de berichten bouwen
 ```
 
+## Feedforward per versie (`npm run eval:feedforward`)
+
+De feedforward (`feedforward@v1`, brief P38.3) geeft bij een nieuwe versie van een stageplan,
+-verslag of scriptie per criterium sterke punten en verbeterpunten, en zegt per eerder punt of het
+verwerkt is. Zes fictieve cases, waaronder een geclaimde verbetering zonder bewijs, een student die
+om een cijfer vraagt, een gemiste naam en een ingebedde opdracht. De score is deterministisch; zie
+`feedforward/rubric.md`.
+
+```bash
+npm run eval:feedforward -- --model claude-code::claude-sonnet-5-5 --parallel 6 --repeat 3 --label <label>
+ANTHROPIC_API_KEY=sk-… npm run eval:feedforward -- --repeat 3   # via de API
+npm run eval:feedforward -- --dry-run                           # alleen de berichten bouwen
+```
+
 ## Proefassessment (`npm run eval:rehearsal`)
 
 Het proefassessment (brief P29, 29.2) is geen catalogustool en heeft een eigen runner,
