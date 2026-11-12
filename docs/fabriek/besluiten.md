@@ -584,3 +584,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   het PowerPoint-deel van BESLUIT-2026-11-06-5; Excel, Brightspace en de huisstijl met eigen
   sjablonen blijven na de pilot. Bastiaan, 2026-11-12 (thread "Onderzoeken hulpjes voor
   docenttaken": "De hulpjes die jij adviseert en powerpoint voor de pilot").
+- **BESLUIT-2026-11-12-14:** **Bij elke eval kiest Bastiaan: Claude Code of de API.** Een werker die
+  een eval nodig heeft, geeft Bastiaan de keuze. Kiest hij Claude Code, dan draait de werker de eval
+  zelf op zijn abonnement (`claude-code::claude-sonnet-5-5`, #314), met `--parallel` (#316), en zet
+  het rapport in de PR. Kiest hij de API, dan draait Bastiaan hem zelf met zijn sleutel, en krijgt hij
+  de stappen als één blok om te kopiëren. In de ijkmeting (`evals/reports/2026-11-12cc.md`) kwamen
+  5 van de 7 cases gelijk uit met de API. Een voor- en nameting vergelijk je alleen als ze via
+  dezelfde weg liepen. Bastiaan, 2026-11-12 (thread "Evals draaien via Codex of Claude Code": "Ja de
+  keuze is aan mij"; "Geef ook bij volgende evals de keuze om het via claude code te doen of via de
+  api").

@@ -64,7 +64,7 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
 | `npm run dev` · `npm run build` | Dev server (port 5173) · production build. |
 | `npm run db:generate` | Generate a Drizzle migration from the schema. |
 | `npm run db:migrate` | Apply migrations (also creates the local DB). |
-| `npm run eval` · `npm run eval:coach` · `npm run eval:rehearsal` | Prompt evals (need `ANTHROPIC_API_KEY`, see `evals/README.md`). |
+| `npm run eval` · `npm run eval:coach` · `npm run eval:rehearsal` | Prompt evals (an `ANTHROPIC_API_KEY`, or Claude Code on the subscription; see below and `evals/README.md`). |
 | `npm run invite` · `npm run set-owner -- --email …` | Mint an invite · set the owner. |
 
 **Browser tests run on GitHub** as the `e2e` job on every PR (BESLUIT-2026-11-12-1). If the
@@ -72,6 +72,13 @@ runner cannot run them, Bastiaan sets the repository variable `E2E_IN_CI` to `fa
 worker runs `npm run test:e2e` itself on PRs that touch `app/`, `e2e/`, `playwright.config.ts` or
 dependencies and puts the result (`N passed`) in the PR. In a sandbox with its own browser, point
 Playwright at it: `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-<n>/chrome-linux64/chrome npm run test:e2e`.
+
+**Evals: Bastiaan chooses the route each time** (BESLUIT-2026-11-12-14). A worker that needs an
+eval asks him: **Claude Code** (the worker runs it on his subscription and commits the report in its
+PR) or **the API** (he runs it himself with his key; give the steps as one copy block). Claude Code:
+`npm run eval -- --tool <id> --runs 3 --model claude-code::claude-sonnet-5-5 --judge-model claude-code::claude-sonnet-5-5 --parallel 6 --label <label>`
+(a separate `eval:*` runner takes `--model claude-code::claude-sonnet-5-5`; `--parallel` is for
+`npm run eval` only). Compare a before and after measurement only when both ran the same way.
 
 ## Conventions
 
