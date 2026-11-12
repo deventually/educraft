@@ -4,10 +4,13 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #322 gemerged)_
 
 ## Nu
 
+- **Eval van Een gesprek voorbereiden (#322) gemerged op 2026-11-12:** `conversation-prep@v1`
+  via Claude Code, vijf cases, drie runs: geen harde check faalt. De rubric zegt nu wat de prompt
+  vraagt, zodat de beoordelaar dat niet meer als afwijking telt.
 - **Stage- en afstudeertraject, de onderlaag (P38.1, #319) gemerged op 2026-11-12:** een traject
   per student onder een code, met zeven mijlpalen en rondes feedback. Een afgerond traject wordt na
   de bewaartermijn vanzelf gewist (standaard 90 dagen). Het onderdeel staat standaard aan; een
