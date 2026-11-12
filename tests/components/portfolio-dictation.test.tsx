@@ -41,6 +41,7 @@ const sections: GuidedSectionView[] = [
     covers: [],
     questions: ["Welke groep had je?", "Wat konden ze al?"],
     answers: ["Tweedejaars.", ""],
+    drafted: false,
   },
 ];
 
