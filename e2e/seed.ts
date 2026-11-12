@@ -48,10 +48,4 @@ const { E2E_DOSSIER, anchoredCourse, guidedDossier } = await import("./seedDossi
 const adminId = (await getUserByEmail(USERS.admin.email))?.id ?? "";
 const anchored = await createCourse(adminId, { name: "Rekenen (e2e)", data: anchoredCourse() });
 await createDossier(adminId, E2E_DOSSIER, guidedDossier(anchored.id));
-// The internship and thesis tracks (P38) are off for everyone; on request, and on for the teacher.
-const settings = await import("../app/server/repositories/settings.server");
-const exceptions = await import("../app/server/repositories/exceptions.server");
-await settings.setFeatureStand("supervisionTracks", "request");
-const teacherId = (await getUserByEmail(USERS.teacher.email))?.id ?? "";
-await exceptions.setException(teacherId, exceptions.featureKey("supervisionTracks"), "on");
 console.log(`✓ e2e database seeded: ${DB_PATH}`);
