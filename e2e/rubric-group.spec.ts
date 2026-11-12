@@ -9,6 +9,7 @@ test.use({ storageState: storageStateOf("teacher") });
 /**
  * How the group did (P36.1): two rounds of closed fill-ins, picked by keyboard. The chosen round
  * keeps focus and stays in view, the tables pass axe, and nothing scrolls sideways at 320px.
+ * "Groepsfeedback maken" (P36.2) opens the tool with that round's counts filled in.
  * The fill-ins are written straight into the e2e database: closing a batch is P23.3's own test.
  */
 test("pick a round in How the group did", async ({ page }) => {
@@ -67,5 +68,13 @@ test("pick a round in How the group did", async ({ page }) => {
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   expect(overflow).toBeLessThanOrEqual(0);
+
+  // P36.2: the button hands only this round's counts to Groepsfeedback maken, by keyboard.
+  await section.getByRole("button", { name: "Groepsfeedback maken" }).focus();
+  await page.keyboard.press("Enter");
+  await page.waitForURL(/\/tools\/group-feedback$/);
+  const summary = page.getByRole("textbox", { name: /^Hoe ging de groep/ });
+  await expect(summary).toHaveValue(/^Ronde 2026-09, 5 werken/);
+  await expectNoAxeViolations(page);
   expect(csp).toEqual([]);
 });

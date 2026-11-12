@@ -2,6 +2,7 @@
 export const rubricGroup = {
   caption: "{criterion}: {lowest} van {scored} op het laagste niveau ({percent}%)",
   count: "Aantal",
+  feedback: "Groepsfeedback maken",
   intro:
     "{n} afgesloten invullingen in {round}, zonder namen. Het criterium waar de meeste werken op het laagste niveau zaten, staat bovenaan.",
   level: "Niveau",

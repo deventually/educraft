@@ -90,6 +90,7 @@ describe("/utilities/rubric/:id group (P36.1)", () => {
     rounds: { month: string; count: number }[];
     selected: string;
     scoreCount: number;
+    feedbackWith: string | null;
   };
   const load = async (id: string, query = "") =>
     (await page.loader({
@@ -124,5 +125,11 @@ describe("/utilities/rubric/:id group (P36.1)", () => {
     expect((await load(r.id, "?round=2026-09")).group?.month).toBe("2026-09");
     // An unknown round falls back to the newest.
     expect((await load(r.id, "?round=1999-01")).selected).toBe("2026-11");
+  });
+
+  it("names the group-feedback tool when it is available to the teacher (P36.2)", async () => {
+    await as("f-feedback");
+    const r = await rubrics.createRubric("f-feedback", "Toets", sampleRubric());
+    expect((await load(r.id)).feedbackWith).toBe("group-feedback");
   });
 });

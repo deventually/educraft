@@ -4,6 +4,7 @@ import type { Messages } from "../nl";
 export const rubricGroup: Messages["rubricGroup"] = {
   caption: "{criterion}: {lowest} of {scored} on the lowest level ({percent}%)",
   count: "Count",
+  feedback: "Make group feedback",
   intro:
     "{n} closed fill-ins in {round}, without names. The criterion with the most work on the lowest level comes first.",
   level: "Level",

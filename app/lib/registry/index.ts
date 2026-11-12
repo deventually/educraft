@@ -24,6 +24,7 @@ import { testAnalysis } from "./tools/test-analysis";
 import { differentiation } from "./tools/differentiation";
 import { difficultConversation } from "./tools/difficult-conversation";
 import { conversationPrep } from "./tools/conversation-prep";
+import { groupFeedback } from "./tools/group-feedback";
 import { engagementCheck } from "./tools/engagement-check";
 import { portfolioRehearsal } from "./tools/portfolio-rehearsal";
 
@@ -52,6 +53,7 @@ export const ALL_TOOLS: Tool[] = [
   differentiation,
   difficultConversation,
   conversationPrep,
+  groupFeedback,
   defendYourWork,
   defenseReview,
   engagementCheck,

@@ -256,6 +256,27 @@ describe("api.stream — persistence", () => {
     expect(upsertChatSpy).not.toHaveBeenCalled();
   });
 
+  it("a stage's guard cleans the output before it is kept (P36.2: numbers only from the input)", async () => {
+    streamChatSpy.mockImplementation(async function* () {
+      yield "Bij Bronnen ging het mis: 7 van 12, en bij 9 werken ook.";
+    });
+    const res = await invoke(
+      {
+        slug: "group-feedback",
+        values: {
+          groupSummary: "Ronde 2026-11, 12 werken.\n- Bronnen: 7 van 12 (58%).",
+          examples: "",
+          assignment: "",
+        },
+      },
+      { userId: "persist-guard" },
+    );
+    await res.text();
+    expect(saveGenerationSpy.mock.calls[0]![0].outputMarkdown).toBe(
+      "Bij Bronnen ging het mis: 7 van 12, en bij … werken ook.",
+    );
+  });
+
   it("chat completion with a valid sessionId upserts one row with the rebuilt transcript", async () => {
     const sessionId = "session-abcdefgh"; // 8–100 chars
     const res = await invoke(

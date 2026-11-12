@@ -24,6 +24,7 @@ import { DIFFICULT_CONVERSATION_PROMPT } from "./difficult-conversation@v1.promp
 import { DIFFICULT_CONVERSATION_PROMPT_V2 } from "./difficult-conversation@v2.prompt";
 import { DIFFICULT_CONVERSATION_PROMPT_V3 } from "./difficult-conversation@v3.prompt";
 import { CONVERSATION_PREP_PROMPT } from "./conversation-prep@v1.prompt";
+import { GROUP_FEEDBACK_PROMPT } from "./group-feedback@v1.prompt";
 import { ENGAGEMENT_CHECK_PROMPT } from "./engagement-check@v1.prompt";
 import { LESSON_PLAN_PROMPT } from "./lesson-plan@v1.prompt";
 import { LESSON_PLAN_PROMPT_V2 } from "./lesson-plan@v2.prompt";
@@ -112,6 +113,7 @@ const ALL: PromptDef[] = [
   DIFFICULT_CONVERSATION_PROMPT_V2,
   DIFFICULT_CONVERSATION_PROMPT_V3,
   CONVERSATION_PREP_PROMPT,
+  GROUP_FEEDBACK_PROMPT,
   ENGAGEMENT_CHECK_PROMPT,
   LESSON_PLAN_PROMPT,
   LESSON_PLAN_PROMPT_V2,

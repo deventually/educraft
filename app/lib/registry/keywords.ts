@@ -193,6 +193,17 @@ export const TOOL_KEYWORDS: Record<string, string[]> = {
     "brookhart",
     "bloom",
   ],
+  "group-feedback": [
+    "groepsfeedback",
+    "nabespreking",
+    "feedforward",
+    "klassikale feedback",
+    "nakijken",
+    "veelgemaakte fouten",
+    "group feedback",
+    "debrief",
+    "common mistakes",
+  ],
   "test-analysis": [
     "toetsanalyse",
     "itemanalyse",

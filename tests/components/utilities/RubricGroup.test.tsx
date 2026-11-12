@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
+import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
+import { takeHandoff } from "~/lib/forms/handoff";
 import { RubricGroup } from "~/components/utilities/RubricGroup";
 import { groupSummary, rubricRounds, toScore } from "~/lib/utilities/rubric";
 import { sampleRubric } from "../../utilities/fixtures";
@@ -9,7 +11,12 @@ import { sampleRubric } from "../../utilities/fixtures";
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 /** P36.1 — Hoe ging de groep: counts per round, worst criterion first, no AI. */
-function renderGroup(n: number, locale: "nl" | "en" = "nl", extraRound = false) {
+function renderGroup(
+  n: number,
+  locale: "nl" | "en" = "nl",
+  extraRound = false,
+  feedbackWith?: string,
+) {
   const d = sampleRubric();
   const scores = Array.from({ length: n }, (_, i) => ({
     month: "2026-11",
@@ -26,8 +33,11 @@ function renderGroup(n: number, locale: "nl" | "en" = "nl", extraRound = false) 
       id: "root",
       path: "/",
       loader: () => ({ locale }),
-      Component: () => <RubricGroup group={group} rounds={rounds} selected="2026-11" />,
+      Component: () => (
+        <RubricGroup group={group} rounds={rounds} selected="2026-11" feedbackWith={feedbackWith} />
+      ),
     },
+    { path: "/tools/group-feedback", Component: () => <p>Tool page</p> },
   ]);
   return render(<Stub initialEntries={["/"]} />);
 }
@@ -61,8 +71,28 @@ describe("RubricGroup", () => {
     );
   });
 
+  it("hands only the counts to group feedback and opens it (P36.2)", async () => {
+    const user = userEvent.setup();
+    renderGroup(5, "nl", false, "group-feedback");
+    await user.click(await screen.findByRole("button", { name: "Groepsfeedback maken" }));
+    expect(await screen.findByText("Tool page")).toBeInTheDocument();
+    const handed = takeHandoff("group-feedback");
+    expect(Object.keys(handed ?? {})).toEqual(["groupSummary"]);
+    expect(handed?.groupSummary).toContain("Ronde 2026-11, 5 werken");
+    expect(handed?.groupSummary).toContain("- Bronnen: 5 van 5 op het laagste niveau (100%)");
+  });
+
+  it("offers group feedback only with counts and when the tool is available", async () => {
+    renderGroup(5);
+    await screen.findAllByRole("table");
+    expect(screen.queryByRole("button", { name: "Groepsfeedback maken" })).toBeNull();
+    renderGroup(4, "nl", false, "group-feedback");
+    await screen.findByText(/Vanaf 5 afgesloten invullingen/);
+    expect(screen.queryByRole("button", { name: "Groepsfeedback maken" })).toBeNull();
+  });
+
   it("has no a11y violations (NL and EN)", async () => {
-    const { container, unmount } = renderGroup(5, "nl", true);
+    const { container, unmount } = renderGroup(5, "nl", true, "group-feedback");
     await screen.findAllByRole("table");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     unmount();
