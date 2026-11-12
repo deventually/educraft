@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
 import { ResultActions, type ResultActionsProps } from "~/components/ResultActions";
@@ -56,6 +56,14 @@ describe("ResultActions (P27.1)", () => {
     expect(screen.queryByRole("button", { name: /Bewaar bij cursus/ })).toBeNull();
   });
 
+  it("links to the place in the course where the kept result shows", () => {
+    show({ courseId: "c1" });
+    expect(screen.getByRole("link", { name: "Bekijk in de cursus" })).toHaveAttribute(
+      "href",
+      "/courses/c1?tab=documents#linked-work",
+    );
+  });
+
   it("offers to keep the result at a course and to use it as evidence", () => {
     show();
     expect(screen.getByRole("combobox", { name: "Cursus" })).toBeTruthy();
@@ -100,6 +108,30 @@ describe("ResultActions (P27.1)", () => {
   it("has no axe violations", async () => {
     const { container } = show();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("ResultActions: keep a lesson plan as a lesson of the course", () => {
+  it("offers to add the kept work as a lesson, with a title", async () => {
+    const { container } = show({ courseId: "c1", asLesson: true });
+    const button = screen.getByRole("button", { name: "Neem op als les" });
+    const form = button.closest("form");
+    expect(form?.querySelector('input[name="intent"]')).toHaveValue("addAsLesson");
+    expect(form?.querySelector('input[name="id"]')).toHaveValue("gen-1");
+    expect(form?.querySelector('input[name="courseId"]')).toHaveValue("c1");
+    expect(screen.getByRole("textbox", { name: "Titel van de les" })).toBeRequired();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("does not offer it for work that is no lesson, before it is kept, or when it is at a lesson already", () => {
+    show({ courseId: "c1" });
+    expect(screen.queryByRole("button", { name: "Neem op als les" })).toBeNull();
+    cleanup();
+    show({ asLesson: true });
+    expect(screen.queryByRole("button", { name: "Neem op als les" })).toBeNull();
+    cleanup();
+    show({ courseId: "c1", itemId: "t1", asLesson: true });
+    expect(screen.queryByRole("button", { name: "Neem op als les" })).toBeNull();
   });
 });
 

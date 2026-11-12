@@ -4,15 +4,22 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #321 gemerged)_
 
 ## Nu
 
-- **SLB-gesprekken oefenen (P39.1, #315) gemerged op 2026-11-12:** *Lastig gesprek oefenen* heeft
-  twee nieuwe gesprekken voor studieloopbaanbegeleiding: een negatief bindend studieadvies brengen
-  en praten over stoppen met de studie. De AI geeft geen advies over de BSA-beslissing, ook niet in
-  de feedback (prompt `difficult-conversation@v3`). Eval via Claude Code: v3 haalt de nieuwe
-  controle, v2 niet.
+- **Een gesprek voorbereiden (P39.2, #321) gemerged op 2026-11-12:** een nieuwe tool geeft een
+  vragenset per soort SLB-gesprek (start, voortgang, dreigend negatief BSA, stoppen, minor of stage
+  kiezen): openingsvragen, doorvragen, wat je niet vraagt, afspraken en wanneer je doorverwijst.
+  Alleen de situatie, nooit de student; geen advies over het BSA-besluit
+  (`conversation-prep@v1`).
+- **Bewaarde les terugvinden en opnemen (#320) gemerged op 2026-11-12:** "Bewaard bij cursus"
+  linkt nu naar waar het werk in de cursus staat, en een bewaard lesplan kan met *Neem op als les*
+  een les worden op *Lessen en toetsen*. Bij elke les staat het werk dat ervoor gemaakt is.
+- **SLB-gesprekken in Lastig gesprek oefenen (#315) gemerged op 2026-11-12:** een docent oefent
+  nu ook een negatief studieadvies (BSA) brengen en stoppen met de studie bespreken. De AI neemt
+  nooit het BSA-besluit en beoordeelt het ook niet (P39.1, `difficult-conversation@v3`). Eval
+  via Claude Code: de oude gesprekken scoren gelijk, de BSA-case gaat van 2,00 naar 4,20.
 - **Cursusevaluatie verwerken: het scherm (#318) gemerged op 2026-11-12:** op het tabblad
   *Controle* plakt de docent de antwoorden van een studentenevaluatie of kiest een CSV; namen
   worden eerst in de browser gecontroleerd. LimeOnIt toont wat studenten zeiden, waar het misging

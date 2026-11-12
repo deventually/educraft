@@ -6,6 +6,7 @@ import type { CourseData } from "~/lib/courses/types";
 import { type LocalizedText, loc } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { BlueprintImport } from "./BlueprintImport";
+import { LINKED_WORK_ANCHOR } from "~/lib/courses/tabs";
 
 export interface LinkedWorkItem {
   generationId: string;
@@ -21,11 +22,11 @@ export function LinkedWorkSection({ work, data }: { work: LinkedWorkItem[]; data
   const t = useT();
   const locale = useLocale();
   const m = t.courses.links;
-  const id = useId();
+  const headingId = useId();
   const dateLocale = locale === "en" ? "en-GB" : "nl-NL";
   return (
-    <section aria-labelledby={id}>
-      <h2 id={id} className="text-lg font-medium text-slate-900">
+    <section id={LINKED_WORK_ANCHOR} aria-labelledby={headingId}>
+      <h2 id={headingId} className="text-lg font-medium text-slate-900">
         {m.title}
       </h2>
       <p className="mt-1 text-sm text-slate-600">{m.intro}</p>

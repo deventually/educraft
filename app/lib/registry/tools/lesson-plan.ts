@@ -156,6 +156,7 @@ export const lessonPlan: Tool = {
     {
       id: "lesson",
       name: { nl: "Lesopzet", en: "Lesson plan" },
+      courseExport: "lesson",
       systemPromptId: LESSON_PLAN_PROMPT_V2.id,
       output: {
         kind: "structured-sections",

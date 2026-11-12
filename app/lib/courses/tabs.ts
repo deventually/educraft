@@ -18,3 +18,6 @@ export function courseTabHref(courseId: string, tab: CourseTab, anchor?: string)
   const query = tab === "overview" ? "" : `?tab=${tab}`;
   return `${base}${query}${anchor ? `#${anchor}` : ""}`;
 }
+
+/** Where work kept with a course shows: "Gekoppeld werk" on the documents tab. */
+export const LINKED_WORK_ANCHOR = "linked-work";

@@ -36,6 +36,8 @@ describe("tool: lesson-plan", () => {
     expect(t.usesContextProfile).toBe(true);
     expect(t.stages).toHaveLength(1);
     expect(t.stages[0]?.systemPromptId).toBe("lesson-plan@v2");
+    // The lesson plan can become a lesson of the linked course.
+    expect(t.stages[0]?.courseExport).toBe("lesson");
     expect(t.enabled).toBe(true);
   });
 
