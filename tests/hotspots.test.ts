@@ -145,3 +145,29 @@ describe("routes: one file per area", () => {
       expect(existsSync(resolve(root, "app", r.file)), r.file).toBe(true);
   });
 });
+
+describe("the factory board: one file per PR", () => {
+  // Every PR used to edit docs/fabriek/STATUS.md (Nu, Bezig, "Laatst bijgewerkt") and parallel
+  // PRs collided there. Now a PR adds its own new file in docs/fabriek/bord/ and leaves
+  // STATUS.md alone; what is open is the list of open PRs on GitHub (BESLUIT-2026-11-12-16).
+  const dir = "docs/fabriek/bord";
+  const entries = () => readdirSync(resolve(root, dir)).filter((f) => f !== "README.md");
+
+  it("STATUS.md has no sections every PR would edit", () => {
+    const status = read("docs/fabriek/STATUS.md");
+    expect(status).not.toMatch(/^## (Nu|Bezig)\s*$/m);
+    expect(status).not.toMatch(/Laatst bijgewerkt/);
+  });
+
+  it("the board folder explains itself and holds entries", () => {
+    expect(existsSync(resolve(root, dir, "README.md"))).toBe(true);
+    expect(entries().length).toBeGreaterThan(0);
+  });
+
+  it("every entry is named <date>-<slug>.md and starts with a bold bullet", () => {
+    for (const f of entries()) {
+      expect(f).toMatch(/^\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*\.md$/);
+      expect(read(`${dir}/${f}`), f).toMatch(/^- \*\*\S/);
+    }
+  });
+});

@@ -21,7 +21,8 @@ LimeOnIt wordt gebouwd door een kleine softwarefabriek, het lichte broertje van 
 | --- | --- |
 | [`voorkeuren.md`](voorkeuren.md) | **Jouw bedieningspaneel:** taal, toon, autonomie, modellen, wat eerst gevraagd wordt. Wint van alles |
 | [`producer.md`](producer.md) | De rol van de Producer |
-| [`STATUS.md`](STATUS.md) | Het bord: verzoeken, wat loopt, wat op jou wacht, wat volgt |
+| [`STATUS.md`](STATUS.md) | Het bord: verzoeken, wat op jou wacht, wat volgt, open vragen |
+| [`bord/`](bord/) | Wat er gemerged is: één bestand per PR, zodat PR's niet botsen |
 | [`besluiten.md`](besluiten.md) | Het besluitenlog: één regel per besluit, het nieuwste wint |
 | [`lessen.md`](lessen.md) | Correcties en de lessen eruit |
 | [`geschiedenis.md`](geschiedenis.md) | Tijdlijn mei–november 2026 en productlessen; achtergrond |

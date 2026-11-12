@@ -198,13 +198,16 @@ als iemand vraagt om "de Producer te zijn". Lees eerst
 Als werker:
 
 1. **Zeg in één regel dat je een werker bent**, als iemand je als Producer aanspreekt.
-2. **Kijk eerst rond:** de open PR's en *Bezig* in `STATUS.md`. Heeft iemand het al, start dan
+2. **Kijk eerst rond:** de open PR's (die zijn wat er loopt). Heeft iemand het al, start dan
    geen kopie.
 3. **Eén stuk werk, één branch vanaf `main`, één PR.** Test-first, poort groen.
 4. **De PR-beschrijving volgt het sjabloon** (`.github/pull_request_template.md`), met bovenaan
    **"In gewone taal"**: wat er verandert voor een docent of voor Bastiaan.
-5. **Werk het bord bij in dezelfde PR:** *Bezig* zolang de PR openstaat, *Nu* bij de laatste
-   wijziging. Nieuwe besluiten gaan in `besluiten.md`.
+5. **Zet je eigen bordbestand neer in dezelfde PR:** één nieuw bestand
+   `docs/fabriek/bord/<datum>-<onderwerp>.md` met wat er verandert, in gewone taal
+   ([`bord/README.md`](docs/fabriek/bord/README.md)). Raak `STATUS.md` niet aan voor je eigen werk
+   en pas geen bordbestand van een andere PR aan (BESLUIT-2026-11-12-16). Nieuwe besluiten gaan in
+   `besluiten.md`.
 6. **Merge nooit, push nooit naar `main`, force-push nooit.** Alleen Bastiaan merget, en hij
    merget PR's in nummervolgorde.
 7. **Na elke merge haalt elke open PR `main` binnen**, met een gewone merge (geen rebase), en lost

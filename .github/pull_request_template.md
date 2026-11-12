@@ -17,7 +17,7 @@ Bastiaan), en waarom. -->
 - [ ] De `e2e`-job (browsertests) is groen; staat hij uit (`E2E_IN_CI` = `false`), dan `npm run test:e2e` lokaal met de uitslag, bv. `25 passed`
 - [ ] Nieuwe of gewijzigde behaviour heeft eerst een falende test gehad (TDD)
 - [ ] UI-wijziging: axe-test, plus screenshots in NL/EN op desktop en mobiel (anders: n.v.t.)
-- [ ] `docs/fabriek/STATUS.md` is bijgewerkt
+- [ ] Eigen bordbestand in `docs/fabriek/bord/` (`STATUS.md` niet aangeraakt voor dit werk)
 
 ## Wat Bastiaan moet beslissen
 
