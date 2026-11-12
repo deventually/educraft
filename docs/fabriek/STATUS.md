@@ -4,10 +4,14 @@
 > blijft leeg. Kort houden: dit is een bord, geen archief. Geschiedenis staat in `geschiedenis.md`,
 > `docs/implementation/README.md` en git.
 
-_Laatst bijgewerkt: 2026-11-12 (#187 t/m #314 en #316 t/m #318 gemerged)_
+_Laatst bijgewerkt: 2026-11-12 (#187 t/m #318 gemerged)_
 
 ## Nu
 
+- **SLB-gesprekken in Lastig gesprek oefenen (#315) gemerged op 2026-11-12:** een docent oefent
+  nu ook een negatief studieadvies (BSA) brengen en stoppen met de studie bespreken. De AI neemt
+  nooit het BSA-besluit en beoordeelt het ook niet (P39.1, `difficult-conversation@v3`). Eval
+  via Claude Code: de oude gesprekken scoren gelijk, de BSA-case gaat van 2,00 naar 4,20.
 - **Cursusevaluatie verwerken: het scherm (#318) gemerged op 2026-11-12:** op het tabblad
   *Controle* plakt de docent de antwoorden van een studentenevaluatie of kiest een CSV; namen
   worden eerst in de browser gecontroleerd. LimeOnIt toont wat studenten zeiden, waar het misging

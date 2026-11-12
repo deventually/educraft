@@ -47,6 +47,7 @@ describe("task-first tool names (P19.1)", () => {
         "clear-assignment",
         "cognitive-architect",
         "contextualization",
+        "conversation-prep",
         "defend-your-work",
         "defense-review",
         "dialogic-encounters",

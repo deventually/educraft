@@ -48,6 +48,7 @@ export const difficultConversation: Tool = {
   defaultModel: DEFAULT_MODEL,
   defaultMaxTokens: 3072,
   defaultTemperature: 0.7,
+  next: ["conversation-prep"],
   enabled: true,
   phase: 1,
   inputs: [

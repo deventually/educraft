@@ -91,6 +91,7 @@ export const TOOL_GOALS: Record<string, TeachingGoal> = {
   mentorai: "coach",
   "scaffolding-feedback": "coach",
   "difficult-conversation": "coach",
+  "conversation-prep": "coach",
   "socratic-partner": "discuss",
   "defend-your-work": "discuss",
   "think-pair-share": "discuss",
