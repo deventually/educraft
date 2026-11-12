@@ -399,6 +399,15 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   the action in `app/server/courseImprovements.server.ts` (an editor may: it is content). A place
   whose item was removed reads as the whole course (`improvementPlace`); `forNewRun` takes the
   open points along to a copy and leaves the finished ones.
+- **Course evaluation (P33.2).** `course-evaluation@v1` turns an anonymised student survey into
+  themes, problems on their place and three to five improvements. The survey, the respondents
+  (counted in code), the course outline with ids and any `test-analysis` work linked to one of the
+  course's tests travel in the user message as tagged data (`buildEvaluationMessage`,
+  `app/lib/courses/evaluation.ts`); the system prompt has no placeholders. `parseEvaluation` drops
+  quotes that are not literally in the survey, themes from one student and malformed items, caps
+  counts at the respondents and puts unknown places on the whole course. The `evaluate-course`
+  intent (`app/server/courseEvaluation.server.ts`) calls the teacher's chosen model with the quota
+  gate and one retry, and saves nothing. Eval: `npm run eval:evaluation`.
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
   lessons, weeks, check), each with its tab, what is done of it and the next open step. The
