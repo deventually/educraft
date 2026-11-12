@@ -78,7 +78,9 @@ export async function anchorCourseFacts(
 }
 
 const samePart = (a: CourseEvidencePart, b: CourseEvidencePart) =>
-  typeof a === "string" || typeof b === "string" ? a === b : a.assessmentId === b.assessmentId;
+  typeof a === "string" || typeof b === "string"
+    ? a === b
+    : a.assessmentId === b.assessmentId && !!a.dossier === !!b.dossier;
 
 const hasSnapshot = (d: DossierData, courseId: string, part: CourseEvidencePart) =>
   d.evidence.some(

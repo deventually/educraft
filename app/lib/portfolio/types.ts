@@ -110,8 +110,11 @@ export interface EvidenceItem {
   };
 }
 
-/** Which part of a course a snapshot shows: outcomes with the coverage matrix, or one assessment. */
-export type CourseEvidencePart = "outcomes-and-matrix" | { assessmentId: string };
+/**
+ * Which part of a course a snapshot shows: outcomes with the coverage matrix, one assessment's
+ * blueprint, or one assessment's test dossier (`dossier: true`, P35.3).
+ */
+export type CourseEvidencePart = "outcomes-and-matrix" | { assessmentId: string; dossier?: true };
 
 export interface Chapter {
   id: string;

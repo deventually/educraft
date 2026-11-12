@@ -3,26 +3,46 @@
  * a snapshot, never a live link: "Opnieuw ophalen" in the dossier replaces the
  * text with the course as it is now. Both the course and the dossier must be the
  * caller's (same rule as linkGeneration); a foreign one is a 404 and nothing is
- * written. The workplace must be switched on for the caller (P27).
+ * written. The workplace must be switched on for the caller (P27). A test dossier (P35.3) goes in
+ * only from an own or co-owned course, with the caller's own linked test analysis.
  */
 import type { User } from "./auth.server";
+import { linkedTestAnalysis } from "./courseExport.server";
 import { portfolioAccess } from "./portfolioAccess.server";
 import type { Course } from "./repositories/courses.server";
 import { getCourse } from "./repositories/courses.server";
 import { getDossier, listDossiers, updateDossier } from "./repositories/portfolio.server";
+import type { DossierAnalysis } from "~/lib/courses/assessmentDossier";
 import { courseAsEvidence, evidenceTitle } from "~/lib/courses/evidence";
 import type { CourseData } from "~/lib/courses/types";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { addEvidence, updateEvidence } from "~/lib/portfolio/edit";
 import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
+import { testDossierHint } from "~/lib/portfolio/toolHints";
 import type { CourseEvidencePart, DossierData, EvidenceItem } from "~/lib/portfolio/types";
 
-/** The form value of a part: "outcomes-and-matrix" or "assessment:<id>" of an existing assessment. */
+/**
+ * The form value of a part: "outcomes-and-matrix", or "assessment:<id>" (the blueprint) or
+ * "dossier:<id>" (the test dossier, P35.3) of an existing assessment.
+ */
 function parsePart(value: string, data: CourseData): CourseEvidencePart | null {
   if (value === "outcomes-and-matrix") return value;
-  const id = value.startsWith("assessment:") ? value.slice("assessment:".length) : "";
-  return data.assessments.some((a) => a.id === id) ? { assessmentId: id } : null;
+  const [kind, id] = [value.slice(0, value.indexOf(":")), value.slice(value.indexOf(":") + 1)];
+  if (!data.assessments.some((a) => a.id === id)) return null;
+  if (kind === "assessment") return { assessmentId: id };
+  return kind === "dossier" ? { assessmentId: id, dossier: true } : null;
 }
+
+const isDossier = (part: CourseEvidencePart) => typeof part !== "string" && part.dossier === true;
+
+/** A test dossier as evidence is for the owner and co-owners only, not for an editor (P35.3). */
+const mayUseDossier = (course: Course) => course.role !== "editor";
+
+/** What a snapshot needs beyond the course: for a test dossier, the caller's own analysis. */
+const snapshotAnalysis = (userId: string, course: Course, part: CourseEvidencePart) =>
+  typeof part !== "string" && part.dossier
+    ? linkedTestAnalysis(userId, course.id, part.assessmentId)
+    : Promise.resolve(undefined);
 
 /** The caller's dossiers with their criteria, for the form on the course page. */
 export async function dossierTargets(user: User) {
@@ -33,7 +53,11 @@ export async function dossierTargets(user: User) {
     outcomes: d.data.framework.outcomes.map((o) => ({
       code: o.code,
       title: o.title,
-      criteria: o.criteria.map((c) => ({ id: c.id, text: c.text })),
+      criteria: o.criteria.map((c) => ({
+        id: c.id,
+        text: c.text,
+        testDossier: testDossierHint(c),
+      })),
     })),
   }));
 }
@@ -44,7 +68,8 @@ function snapshotSource(
   part: CourseEvidencePart,
 ): NonNullable<EvidenceItem["sourceCourse"]> {
   const source = { courseId: course.id, part, at: Date.now() };
-  if (typeof part === "string") return source;
+  // A dossier's questions are already counted through the test's blueprint (P29.1).
+  if (typeof part === "string" || part.dossier) return source;
   const items = course.data.assessments.find((a) => a.id === part.assessmentId)?.items;
   return items ? { ...source, itemCount: items.length } : source;
 }
@@ -55,8 +80,9 @@ export function courseSnapshot(
   part: CourseEvidencePart,
   criterionIds: string[],
   locale: Locale,
+  analysis?: DossierAnalysis,
 ): Omit<EvidenceItem, "id"> | null {
-  const text = courseAsEvidence(course, part, locale);
+  const text = courseAsEvidence(course, part, locale, analysis);
   if (text === null) return null;
   return {
     title: evidenceTitle(course, part, locale).slice(0, LIMITS.title),
@@ -82,6 +108,8 @@ export async function addCourseToDossier(
 
   const part = parsePart(String(fd.get("part") ?? ""), course.data);
   if (!part) return { ok: false, error: m.courses.errorNotFound };
+  if (isDossier(part) && !mayUseDossier(course))
+    return { ok: false, error: m.courses.evidence.errorDossierRole };
   const known = new Set(
     dossier.data.framework.outcomes.flatMap((o) => o.criteria.map((c) => c.id)),
   );
@@ -89,7 +117,8 @@ export async function addCourseToDossier(
   if (criterionIds.some((id) => !known.has(id)))
     return { ok: false, error: m.courses.evidence.errorCriterion };
 
-  const item = courseSnapshot(course, part, criterionIds, locale);
+  const analysis = await snapshotAnalysis(user.id, course, part);
+  const item = courseSnapshot(course, part, criterionIds, locale, analysis);
   if (!item) return { ok: false, error: m.courses.errorNotFound };
   const next = addEvidence(dossier.data, item);
   if (!DossierDataSchema.safeParse(next).success)
@@ -126,8 +155,11 @@ export async function refreshCourseEvidence(
   const item = d.evidence.find((e) => e.id === evidenceId);
   if (!item?.sourceCourse) return { ok: false, error: m.errorNotFound };
   const { courseId, part } = item.sourceCourse;
-  const course = await getCourse(userId, courseId);
-  const text = course ? courseAsEvidence(course, part, locale) : null;
+  const found = await getCourse(userId, courseId);
+  // A test dossier of a course the caller is now only an editor of is not fetched again.
+  const course = found && (!isDossier(part) || mayUseDossier(found)) ? found : null;
+  const analysis = course ? await snapshotAnalysis(userId, course, part) : undefined;
+  const text = course ? courseAsEvidence(course, part, locale, analysis) : null;
   if (!course || text === null) return { ok: false, error: m.outcome.courseGone };
   return {
     ok: true,

@@ -154,3 +154,20 @@ const COURSE_HINT =
 export function courseHint(c: Pick<Criterion, "text">): boolean {
   return COURSE_HINT.test(c.text);
 }
+
+/** The tools whose criteria a test dossier fits: making, marking and analysing a test. */
+const TEST_DOSSIER_TOOLS = [
+  "authentic-assessment",
+  "test-items",
+  "rubric-builder",
+  "test-analysis",
+];
+
+/**
+ * P35.3: a criterion a test dossier can be evidence for, through the same hints that suggest
+ * earlier work (P27.2). Only on the criterion's own words; no match, no proposal.
+ */
+export function testDossierHint(c: Criterion): boolean {
+  const tools = criterionTools(c);
+  return TEST_DOSSIER_TOOLS.some((t) => tools.has(t));
+}

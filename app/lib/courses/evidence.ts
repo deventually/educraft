@@ -7,12 +7,13 @@
 import { getMessages, type Locale } from "~/lib/i18n";
 import { fmt } from "~/lib/i18n/format";
 import { checkAlignment, coverageMatrix, effectiveCoverage } from "./alignment";
+import { assessmentDossierDoc, type DossierAnalysis } from "./assessmentDossier";
 import { bloomLabel } from "./bloom";
 import { findingText, outcomeShortName } from "./findingText";
 import { itemTotals } from "./items";
 import type { Assessment, CourseData } from "./types";
 
-export type CoursePart = "outcomes-and-matrix" | { assessmentId: string };
+export type CoursePart = "outcomes-and-matrix" | { assessmentId: string; dossier?: true };
 
 interface CourseSnapshotSource {
   name: string;
@@ -33,22 +34,29 @@ export function evidenceTitle(
   part: CoursePart,
   locale: Locale,
 ): string {
-  const e = getMessages(locale).courses.evidence;
+  const m = getMessages(locale);
+  const e = m.courses.evidence;
   const a = findAssessment(course.data, part);
-  return a
-    ? fmt(e.titleAssessment, { course: course.name, assessment: a.title })
-    : fmt(e.titleOutcomes, { course: course.name });
+  if (!a) return fmt(e.titleOutcomes, { course: course.name });
+  const title =
+    typeof part !== "string" && part.dossier ? m.assessmentDossier.title : e.titleAssessment;
+  return fmt(title, { course: course.name, assessment: a.title });
 }
 
-/** The snapshot as Markdown; null when the assessment no longer exists. */
+/**
+ * The snapshot as Markdown; null when the assessment no longer exists. A test dossier carries
+ * the caller's own linked analysis, which the server passes in.
+ */
 export function courseAsEvidence(
   course: CourseSnapshotSource,
   part: CoursePart,
   locale: Locale,
+  analysis?: DossierAnalysis,
 ): string | null {
-  return part === "outcomes-and-matrix"
-    ? outcomesAndMatrix(course, locale)
-    : assessmentMatrix(course, part.assessmentId, locale);
+  if (part === "outcomes-and-matrix") return outcomesAndMatrix(course, locale);
+  if (!part.dossier) return assessmentMatrix(course, part.assessmentId, locale);
+  const doc = assessmentDossierDoc(course, part.assessmentId, locale, analysis);
+  return doc ? (doc.sections[0]?.markdown ?? "") : null;
 }
 
 export function outcomeLines(data: CourseData, locale: Locale, only?: Set<string>): string[] {

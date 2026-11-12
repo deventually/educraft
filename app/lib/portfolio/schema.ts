@@ -154,7 +154,10 @@ const EvidenceSchema = z.object({
   sourceCourse: z
     .object({
       courseId: Id,
-      part: z.union([z.literal("outcomes-and-matrix"), z.object({ assessmentId: Id })]),
+      part: z.union([
+        z.literal("outcomes-and-matrix"),
+        z.object({ assessmentId: Id, dossier: z.literal(true).optional() }),
+      ]),
       at: z.number().int().nonnegative(),
       itemCount: z.number().int().nonnegative().max(1_000).optional(),
     })

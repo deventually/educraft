@@ -42,25 +42,24 @@ interface TestDocument {
 
 /**
  * The newest test analysis the caller linked to this test, or nothing. Only the caller's own
- * work: a colleague's analysis of the same test never shows (BESLUIT-2026-11-10-5).
+ * work: a colleague's analysis of the same test never shows (BESLUIT-2026-11-10-5). The test
+ * dossier uses it, as a document and as evidence (P35).
  */
-async function linkedAnalysis(
-  user: User,
-  course: Course,
+export async function linkedTestAnalysis(
+  userId: string,
+  courseId: string,
   assessmentId: string,
-): Promise<DocumentExtras> {
-  const work = (await listLinkedWork(user.id, course.id)).find(
+): Promise<DossierAnalysis | undefined> {
+  const work = (await listLinkedWork(userId, courseId)).find(
     (w) => w.toolSlug === GRADE_TOOL && w.itemId === assessmentId,
   );
-  const g = work ? await getGeneration(user.id, work.generationId) : null;
-  if (!g) return {};
+  const g = work ? await getGeneration(userId, work.generationId) : null;
+  if (!g) return undefined;
   const numbers = (JSON.parse(g.inputJson) as { analysis?: unknown }).analysis;
   return {
-    analysis: {
-      numbers: typeof numbers === "string" ? numbers : "",
-      explanation: g.outputMarkdown,
-      createdAt: g.createdAt,
-    },
+    numbers: typeof numbers === "string" ? numbers : "",
+    explanation: g.outputMarkdown,
+    createdAt: g.createdAt,
   };
 }
 
@@ -77,7 +76,9 @@ const TEST_DOCUMENTS: Record<string, TestDocument> = {
   dossier: {
     make: (course, id, locale, { analysis }) => assessmentDossierDoc(course, id, locale, analysis),
     fileName: (l) => getMessages(l).assessmentDossier.fileName,
-    extras: linkedAnalysis,
+    extras: async (user, course, id) => ({
+      analysis: await linkedTestAnalysis(user.id, course.id, id),
+    }),
   },
 };
 
