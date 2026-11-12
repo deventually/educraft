@@ -141,11 +141,18 @@ describe("/platform: the owner manages the institutions", () => {
       ok: false,
       error: "confirm",
     });
-    expect(await onPlatform(() => post({ intent: "remove", id: "ru", confirm: "ru" }))).toEqual({
-      intent: "remove",
-      ok: true,
-      name: "Radboud",
-    });
+    // The base waits until a school container can have closed the database (15 s).
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.now() + 20_000);
+    try {
+      expect(await onPlatform(() => post({ intent: "remove", id: "ru", confirm: "ru" }))).toEqual({
+        intent: "remove",
+        ok: true,
+        name: "Radboud",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
     const data = await onPlatform(load);
     expect(data.institutions).toEqual([]);
     expect(data.archived).toMatchObject([{ id: "ru", name: "Radboud" }]);
@@ -167,6 +174,18 @@ describe("/platform: the owner manages the institutions", () => {
       ok: true,
     });
     expect((await onPlatform(load)).institutions).toMatchObject([{ id: "ru", active: true }]);
+  });
+
+  it("tells the shell it runs on the platform address, and a school's address that it does not", async () => {
+    const root = await import("~/root");
+    const rootLoad = () =>
+      root.loader(args(signedRequest("http://localhost/"))) as unknown as Promise<{
+        data: { platform: boolean };
+      }>;
+    expect((await onPlatform(rootLoad)).data.platform).toBe(true);
+    const school = tenantForHost("ru.test");
+    if (!school) throw new Error("no school");
+    expect((await runWithTenant(school, rootLoad)).data.platform).toBe(false);
   });
 
   it("says an unknown institution is unknown", async () => {
