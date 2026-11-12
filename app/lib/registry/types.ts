@@ -74,15 +74,11 @@ export interface AssessmentModelPrefill {
   source: "framework" | "scale";
 }
 
+/** The track's earlier feedback (P38.4), its model's framework or the newest weak points (P38.6). */
 export type TrackPrefillSource = "feedbackHistory" | "criteria" | "weakPoints";
 
 /** Which part of a track fills a field (P38.4): the track the tool was opened from. */
 export interface TrackPrefill {
-  /**
-   * `feedbackHistory`: the earlier feedback of the track's rounds, oldest first (P38.4).
-   * `criteria`: the framework of the track's assessment model (P38.6).
-   * `weakPoints`: the improvement points of the newest feedforward round (P38.6).
-   */
   source: TrackPrefillSource;
 }
 
