@@ -26,4 +26,17 @@ describe("help topic supervision-track", () => {
     for (const s of ["Bezoeken", "Concepten", "Eindversie", "Tweede beoordelaar", "Eindgesprek"])
       expect(nl, s).toContain(s);
   });
+
+  it("drafts are assessed like the final version; the second assessor is optional", () => {
+    const nl = getTopic("supervision-track", "nl") ?? "";
+    const en = getTopic("supervision-track", "en") ?? "";
+    expect(nl).toContain("**Concepten:** beoordeel een concept met *Studentwerk beoordelen*");
+    expect(en).toContain("**Drafts:** assess a draft with *Assess student work*");
+    expect(nl).not.toMatch(/feedforward/i);
+    expect(en).not.toMatch(/feedforward/i);
+    expect(nl).toContain("**Tweede beoordelaar (optioneel):**");
+    expect(en).toContain("**Second assessor (optional):**");
+    expect(nl).toContain("zes vaste mijlpalen");
+    expect(en).toContain("six fixed milestones");
+  });
 });

@@ -582,14 +582,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   check-in answers, filtered per team with `?team=`.
 - **Internship and thesis track (P38)** at `/tracks` ("Mijn begeleiding", feature
   `supervisionTracks`, on by default; BESLUIT-2026-11-12-11 and -15). Pure domain in
-  `app/lib/tracks/`: `schema` (the seven `MILESTONES` as data, each with optional `tools` and a
-  `panel`; `TrackDataSchema` with status, deadlines, visit dates and the confirmed OnStage texts,
+  `app/lib/tracks/`: `schema` (the seven `MILESTONES` as data, each with optional `tools`, a
+  `panel` and `optional` (the second assessor: never counted, never the next step); `TrackDataSchema` with status, deadlines, visit dates and the confirmed OnStage texts,
   not `.strict()`), `progress` (`progress`, `nextStep`), `retention` (`purgeDate`), `history`
-  (`feedbackHistory`, `weakPoints`), `feedforward` (`parseFeedforward`: no grade, a literal quote
-  for "addressed"), `secondAssessor` (`compareAssessors`) and `onstage` (`criteriaOf`, `draftFor`,
+  (`feedbackHistory`, `weakPoints`), `feedforward` (`parseFeedforward`; only the `feedforward@v1` prompt
+  and its eval use it since the drafts tab assesses with `stage-assessment`, kept for P39.3), `secondAssessor` (`compareAssessors`) and `onstage` (`criteriaOf`, `draftFor`,
   `trackLine`). Storage in `tracks.server.ts` (`supervision_tracks`, `track_rounds`, owner-scoped);
   `trackRetention.server.ts` wipes what is past `purgeAfter`, per institution. The route
-  `tracks.$id.tsx` composes one action per intent (`milestone`, `feedforward`, `second-assessor`,
+  `tracks.$id.tsx` composes one action per intent (`milestone`, `second-assessor`,
   `visit`, `onstage`, `close`), each in its own server file; the tab's working panel comes from
   `Milestone.panel`, closing from `Milestone.closes`, so nothing branches on a milestone id. A tool
   opened from a track (`?track=&milestone=`) gets its inputs through `InputField.prefillFromTrack`

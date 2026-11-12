@@ -31,7 +31,7 @@ test("open a track, set a milestone and wipe it", async ({ page }) => {
   await expect(page.getByText("Mijlpaal bewaard.")).toBeVisible();
 
   await tabs.getByRole("link", { name: "Overzicht" }).click();
-  await expect(page.getByText("1 van 7 mijlpalen klaar")).toBeVisible();
+  await expect(page.getByText("1 van 6 mijlpalen klaar")).toBeVisible();
   await page.setViewportSize({ width: 320, height: 800 });
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,

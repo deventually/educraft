@@ -10,14 +10,14 @@ Onder **Mijn begeleiding** houd je per student die je bij stage of afstuderen be
 
 ## De mijlpalen
 
-Een traject heeft zeven mijlpalen. Bij elke mijlpaal zet je de stand (open, klaar of overgeslagen) en eventueel een inleverdatum. Het overzicht zegt welke mijlpaal nu aan de beurt is.
+Een traject heeft zes vaste mijlpalen en een optionele: de tweede beoordelaar. Bij elke mijlpaal zet je de stand (open, klaar of overgeslagen) en eventueel een inleverdatum. Het overzicht zegt welke vaste mijlpaal nu aan de beurt is.
 
 - **Start:** toets het plan van aanpak met *Studentwerk beoordelen*. Met *Bewaar de feedback in …* komt de feedback als ronde in het traject.
 - **Bezoeken:** bereid een bezoek voor met *Bezoek voorbereiden* (vragen uit de criteria) en maak een verslag met *Verslag uit steekwoorden*. Het verslag gaat naar Word of het klembord en wordt niet bewaard. Het traject onthoudt alleen de datum van het bezoek.
-- **Concepten:** plak een nieuwe versie. Na de namencontrole geeft LimeOnIt feedforward per criterium, zonder cijfer, en zegt per eerder verbeterpunt of de student het oppakte, met een letterlijk citaat.
+- **Concepten:** beoordeel een concept met *Studentwerk beoordelen*, net als de eindversie. De eerdere feedback van het traject gaat mee, en met *Bewaar de feedback in …* komt de beoordeling als ronde in het traject. Lever je meer concepten in, dan doe je dit per versie.
 - **Eindversie:** *Studentwerk beoordelen* krijgt de eerdere feedback van het traject mee en noemt per criterium of de gevraagde verbetering is opgepakt.
-- **Tweede beoordelaar:** vul per criterium jouw niveau en dat van je collega in. LimeOnIt toont de verschillen en waar jullie eerst over moeten praten.
-- **Eindgesprek:** oefen met *Verdedig je werk* en kijk een verdediging na met *Een verdediging nakijken*. De criteria en de zwakke plekken uit de laatste feedback staan al ingevuld.
+- **Tweede beoordelaar (optioneel):** vooral bij een afstudeerstage. Telt niet mee in de voortgang. Heb je er een, vul dan per criterium jouw niveau en dat van je collega in, met een rubric uit Hulpmiddelen. LimeOnIt toont de verschillen en waar jullie eerst over moeten praten.
+- **Eindgesprek:** oefen met *Verdedig je werk* en kijk een verdediging na met *Een verdediging nakijken*. De criteria staan al ingevuld.
 - **Klaar voor OnStage:** zie hieronder.
 
 ## Klaar voor OnStage

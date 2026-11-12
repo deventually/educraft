@@ -14,7 +14,14 @@ interface RubricChoice {
  * and the colleague's. The server compares them (P34.1) and keeps only the outcome as a round;
  * the page's toast announces it.
  */
-export function SecondAssessorPanel({ rubrics }: { rubrics: RubricChoice[] }) {
+export function SecondAssessorPanel({
+  rubrics,
+  rubricsOn,
+}: {
+  rubrics: RubricChoice[];
+  /** Whether Hulpmiddelen (where the rubrics live) is on for this teacher. */
+  rubricsOn: boolean;
+}) {
   const m = useT().tracks.secondAssessor;
   const id = useId();
   const [rubricId, setRubricId] = useState(rubrics[0]?.id ?? "");
@@ -26,7 +33,9 @@ export function SecondAssessorPanel({ rubrics }: { rubrics: RubricChoice[] }) {
       </h3>
       <Card className="mt-2 p-4">
         <p className="max-w-[65ch] text-sm text-slate-600">{m.intro}</p>
-        {!rubric ? (
+        {!rubric && !rubricsOn ? (
+          <p className="mt-3 text-sm text-slate-700">{m.rubricsOff}</p>
+        ) : !rubric ? (
           <p className="mt-3 text-sm text-slate-700">
             {m.noRubrics}{" "}
             <Link to="/utilities/rubric" className="font-medium text-violet-700 underline">

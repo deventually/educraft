@@ -39,44 +39,6 @@ export const tracks = {
   errorInput: "Vul een code in (hooguit 40 tekens) en kies stage of afstuderen.",
   errorInvalid: "Dat ging niet. Laad de pagina opnieuw en probeer het nog eens.",
   errorNotFound: "Dat traject bestaat niet (meer).",
-  feedforward: {
-    check: "Controleer op namen",
-    checked:
-      "De namen zijn eruit. Alleen deze tekst gaat naar de AI en wordt bij het traject bewaard.",
-    criteria: "Criteria",
-    criteriaHint:
-      "Uit het gekoppelde beoordelingsmodel. Je kunt ze aanpassen; ze volgen het OnStage-formulier.",
-    done: "Feedforward klaar; hij staat als ronde hieronder.",
-    edit: "Tekst aanpassen",
-    empty: "De AI vond in deze tekst niets om feedforward op te geven.",
-    errors: {
-      closed: "Dit traject is afgerond.",
-      failed: "De AI gaf geen bruikbaar antwoord. Probeer het over een moment opnieuw.",
-      invalid: "Plak de tekst van de nieuwe versie en vul de criteria in.",
-      model: "Dat model kun je niet kiezen.",
-      quota:
-        "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
-    },
-    heading: "Feedforward op een nieuwe versie",
-    intro:
-      "Plak de tekst van de nieuwe versie uit OnStage. Je krijgt per criterium wat al sterk is en de volgende stap, zonder cijfer. Vanaf de tweede versie zie je per eerder punt wat de student ermee deed, met een letterlijk citaat.",
-    labels: {
-      followUp: "Wat deed de student met de vorige feedback",
-      improve: "Volgende stap",
-      status: {
-        addressed: "Opgepakt",
-        not: "Nog niet",
-        partly: "Deels",
-        unseen: "Niet te zien",
-      },
-      strong: "Sterk",
-    },
-    model: "Model",
-    submit: "Geef feedforward",
-    version: "Tekst van de nieuwe versie",
-    versionHint:
-      "Je controleert hierna in je browser of er nog namen in staan. Het origineel gaat nooit mee.",
-  },
   heading: "Mijn begeleiding",
   help: "Hoe werkt een traject?",
   intro:
@@ -121,9 +83,10 @@ export const tracks = {
     noCriteria:
       "Koppel een beoordelingsmodel aan dit traject. Dan zie je hier per criterium de tekst voor OnStage.",
   },
+  optional: "{milestone} (optioneel)",
   overview: "Overzicht",
   overviewIntro:
-    "De zeven mijlpalen van het traject. Geldt een mijlpaal niet, kies daar dan Niet van toepassing.",
+    "De zes vaste mijlpalen en de optionele tweede beoordelaar. Geldt een mijlpaal niet, kies daar dan Niet van toepassing.",
   progress: "{resolved} van {total} mijlpalen klaar",
   progressShort: "{resolved} van {total} mijlpalen",
   secondAssessor: {
@@ -151,6 +114,8 @@ export const tracks = {
     pick: "Kies een niveau",
     rubric: "Rubric",
     rubricsLink: "Naar je rubrics",
+    rubricsOff:
+      "Je vergelijkt met een rubric uit Hulpmiddelen, maar Hulpmiddelen staat voor jou uit. Vraag je beheerder om het aan te zetten.",
     submit: "Vergelijk en bewaar",
     theirs: "Niveau van de tweede beoordelaar",
   },

@@ -19,7 +19,7 @@ const MILESTONE_IDS = [
 export type MilestoneId = (typeof MILESTONE_IDS)[number];
 export const MilestoneIdSchema = z.enum(MILESTONE_IDS);
 
-export type MilestonePanel = "feedforward" | "onstage" | "second-assessor" | "visits";
+export type MilestonePanel = "onstage" | "second-assessor" | "visits";
 
 interface MilestoneTool {
   slug: string;
@@ -32,10 +32,12 @@ interface Milestone {
   /** The tools that do this milestone's work; a result can be kept as a round. */
   tools?: readonly MilestoneTool[];
   /**
-   * The working panel the milestone tab shows: feedforward on each new version (P38.3), or the
-   * second assessor's comparison (P38.5).
+   * The working panel the milestone tab shows: the visits (P38.6), the second assessor's
+   * comparison (P38.5) or the OnStage texts (P38.7).
    */
   panel?: MilestonePanel;
+  /** Not every programme has it: never counted in the progress, never the next step. */
+  optional?: true;
   /** P38.7: the tab where the teacher closes the track (and sees when it is wiped). */
   closes?: true;
 }
@@ -61,7 +63,17 @@ export const MILESTONES: readonly Milestone[] = [
     ],
     panel: "visits",
   },
-  { id: "drafts", name: { nl: "Concepten", en: "Drafts" }, panel: "feedforward" },
+  {
+    id: "drafts",
+    name: { nl: "Concepten", en: "Drafts" },
+    // A draft is assessed in full, with the track's earlier feedback along (like the final).
+    tools: [
+      {
+        slug: "stage-assessment",
+        label: { nl: "Concept beoordelen", en: "Assess the draft" },
+      },
+    ],
+  },
   {
     id: "final",
     name: { nl: "Eindversie", en: "Final version" },
@@ -76,6 +88,8 @@ export const MILESTONES: readonly Milestone[] = [
   {
     id: "second-assessor",
     name: { nl: "Tweede beoordelaar", en: "Second assessor" },
+    // Mostly for a graduation internship; a teacher who has one uses the tab, else it waits.
+    optional: true,
     panel: "second-assessor",
   },
   {
