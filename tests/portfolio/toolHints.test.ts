@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { TOOL_HINTS, chapterHints, courseHint, criterionHints } from "~/lib/portfolio/toolHints";
+import {
+  TOOL_HINTS,
+  chapterHints,
+  courseHint,
+  criterionHints,
+  testDossierHint,
+} from "~/lib/portfolio/toolHints";
 import { skeletonOutcomes } from "~/lib/portfolio/skeleton";
 import { getToolBySlug } from "~/lib/registry";
 import { getMessages } from "~/lib/i18n";
@@ -103,5 +109,20 @@ describe("course hint (P26.4)", () => {
     );
     expect(courseHint(c("De les sluit aan bij de beginsituatie."))).toBe(false);
     expect(courseHint(c("Je motiveert studenten."))).toBe(false);
+  });
+});
+
+describe("testDossierHint (P35.3): which criteria a test dossier fits", () => {
+  const c = (text: string) => ({ id: "c", text });
+  it("proposes a criterion about a test, its marking or its analysis", () => {
+    expect(testDossierHint(c("Je analyseert de toetskwaliteit met een itemanalyse."))).toBe(true);
+    expect(testDossierHint(c("Je ontwikkelt een beoordelingsmodel."))).toBe(true);
+    expect(testDossierHint(c("Je construeert een summatieve toets."))).toBe(true);
+    expect(testDossierHint(c("You analyse the test results."))).toBe(true);
+  });
+
+  it("never a criterion about something else", () => {
+    expect(testDossierHint(c("De les sluit aan bij de beginsituatie."))).toBe(false);
+    expect(testDossierHint(c("Je motiveert studenten."))).toBe(false);
   });
 });

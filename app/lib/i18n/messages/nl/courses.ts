@@ -92,13 +92,17 @@ export const courses = {
     done: "Toegevoegd aan je dossier als bewijs.",
     dossier: "Dossier",
     errorCriterion: "Dat criterium staat niet in dit dossier.",
+    errorDossierRole:
+      "Alleen de eigenaar of een mede-eigenaar kan het toetsdossier als bewijs gebruiken.",
     intro:
       "Er komt een momentopname in je dossier. Een latere wijziging aan de cursus verandert die niet; in het dossier kun je hem opnieuw ophalen.",
     noItems: "Deze toets heeft nog geen toetsmatrijs per vraag.",
     open: "Gebruik als bewijs in BDB/BKE",
     part: "Wat wil je als bewijs gebruiken?",
     partAssessment: "Toetsmatrijs: {assessment}",
+    partDossier: "Toetsdossier: {assessment}",
     partOutcomes: "Leeruitkomsten en dekkingsmatrix",
+    proposal: "Voorstel: past bij een toetsdossier",
     shares: "Aandeel per leeruitkomst: {shares}.",
     studyLoad: "Studielast: {ec} EC.",
     submit: "Toevoegen aan dossier",
