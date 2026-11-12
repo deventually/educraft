@@ -84,23 +84,45 @@ describe("/utilities/rubric/:id/fill", () => {
   });
 });
 
-describe("/utilities/rubric/:id insight", () => {
-  const load = async (id: string) =>
+describe("/utilities/rubric/:id group (P36.1)", () => {
+  type Loaded = {
+    group: { month: string; total: number } | null;
+    rounds: { month: string; count: number }[];
+    selected: string;
+    scoreCount: number;
+  };
+  const load = async (id: string, query = "") =>
     (await page.loader({
-      request: signedRequest(`http://localhost/utilities/rubric/${id}`),
+      request: signedRequest(`http://localhost/utilities/rubric/${id}${query}`),
       params: { id },
-    } as never)) as { insight: { total: number } | null; scoreCount: number };
+    } as never)) as Loaded;
 
-  it("shows nothing under five closed fill-ins, then a count per level", async () => {
+  it("shows nothing under five closed fill-ins in a round, then the counts", async () => {
     await as("f-insight");
     const r = await rubrics.createRubric("f-insight", "Toets", sampleRubric());
+    const nov = new Date("2026-11-12T10:00:00Z");
     await scores.addRubricScores(
       "f-insight",
       r.id,
       Array.from({ length: 4 }, () => full(r.data, 0, 0)),
+      nov,
     );
-    expect(await load(r.id)).toMatchObject({ insight: null, scoreCount: 4 });
-    await scores.addRubricScores("f-insight", r.id, [full(r.data, 2, 1)]);
-    expect((await load(r.id)).insight?.total).toBe(5);
+    expect(await load(r.id)).toMatchObject({ group: null, scoreCount: 4, selected: "2026-11" });
+    await scores.addRubricScores("f-insight", r.id, [full(r.data, 2, 1)], nov);
+    expect((await load(r.id)).group?.total).toBe(5);
+  });
+
+  it("opens the newest round, and another one with ?round=", async () => {
+    await as("f-rounds");
+    const r = await rubrics.createRubric("f-rounds", "Toets", sampleRubric());
+    const five = Array.from({ length: 5 }, () => full(r.data, 1, 1));
+    await scores.addRubricScores("f-rounds", r.id, five, new Date("2026-09-20T10:00:00Z"));
+    await scores.addRubricScores("f-rounds", r.id, five, new Date("2026-11-02T10:00:00Z"));
+    const latest = await load(r.id);
+    expect(latest.rounds.map((x) => x.month)).toEqual(["2026-11", "2026-09"]);
+    expect(latest.group?.month).toBe("2026-11");
+    expect((await load(r.id, "?round=2026-09")).group?.month).toBe("2026-09");
+    // An unknown round falls back to the newest.
+    expect((await load(r.id, "?round=1999-01")).selected).toBe("2026-11");
   });
 });

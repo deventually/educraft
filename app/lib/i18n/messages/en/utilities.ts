@@ -169,14 +169,6 @@ export const utilities: Messages["utilities"] = {
       studentsCaption: "Students in this batch",
     },
     gradeSettings: "From points to a grade",
-    insight: {
-      caption: "{criterion}: how often each level was chosen",
-      count: "Times",
-      intro: "Based on {n} closed fill-ins, without names.",
-      title: "How often each level was chosen",
-      tooFew:
-        "From {min} closed fill-ins on you see here how often each level was chosen, so no student is recognisable. Now: {n}.",
-    },
     invalid: "Not saved: check the name, the points (0 to 100) and the grade settings.",
     knockout: "Knock-out: the lowest level always means fail",
     level: "Level {n}",

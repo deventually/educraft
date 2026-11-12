@@ -142,7 +142,7 @@ describe("the rubric page", () => {
         loader: () => ({ locale: "nl" }),
         Component: () => (
           <ToastProvider>
-            <Page loaderData={{ rubric, insight: null, scoreCount: 0 }} />
+            <Page loaderData={{ rubric, group: null, rounds: [], selected: "", scoreCount: 0 }} />
           </ToastProvider>
         ),
       },

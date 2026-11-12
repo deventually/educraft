@@ -100,38 +100,3 @@ export function matchesRubric(data: RubricData, score: RubricScore): boolean {
 
 /** Below this many closed fill-ins the overview stays hidden, so one student is not recognisable. */
 export const MIN_SCORES_FOR_INSIGHT = 5;
-
-export interface LevelDistribution {
-  total: number;
-  criteria: {
-    id: string;
-    title: string;
-    levels: { id: string; label: string; count: number }[];
-  }[];
-}
-
-/** How often each level was chosen, per criterion; null under MIN_SCORES_FOR_INSIGHT fill-ins. */
-export function levelDistribution(
-  data: RubricData,
-  scores: readonly RubricScore[],
-): LevelDistribution | null {
-  if (scores.length < MIN_SCORES_FOR_INSIGHT) return null;
-  const counts = new Map<string, number>();
-  for (const score of scores)
-    for (const { criterionId, levelId } of score) {
-      const key = `${criterionId}:${levelId}`;
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-  return {
-    total: scores.length,
-    criteria: data.criteria.map((c) => ({
-      id: c.id,
-      title: c.title,
-      levels: c.levels.map((l) => ({
-        id: l.id,
-        label: l.label,
-        count: counts.get(`${c.id}:${l.id}`) ?? 0,
-      })),
-    })),
-  };
-}

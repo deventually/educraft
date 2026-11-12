@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   DEFAULT_RUBRIC_GRADE,
-  levelDistribution,
-  MIN_SCORES_FOR_INSIGHT,
   RubricDataSchema,
   RubricScoreSchema,
   rubricGrade,
@@ -150,35 +148,5 @@ describe("toScore (what the server may keep)", () => {
       expect(RubricScoreSchema.safeParse(bad).success).toBe(false);
     }
     expect(RubricScoreSchema.safeParse({ levels: ok, name: "Sam" }).success).toBe(false);
-  });
-});
-
-describe("levelDistribution", () => {
-  const scores = (d: RubricData, n: number) =>
-    Array.from({ length: n }, (_, i) => toScore(d, pick(d, [i % 3, i % 2]))!);
-
-  it(`shows nothing under ${MIN_SCORES_FOR_INSIGHT} closed fill-ins`, () => {
-    expect(MIN_SCORES_FOR_INSIGHT).toBe(5);
-    const d = sampleRubric();
-    expect(levelDistribution(d, scores(d, 4))).toBeNull();
-    expect(levelDistribution(d, [])).toBeNull();
-  });
-
-  it("counts how often each level was chosen, per criterion", () => {
-    const d = sampleRubric();
-    const dist = levelDistribution(d, scores(d, 5));
-    expect(dist).not.toBeNull();
-    expect(dist!.total).toBe(5);
-    expect(dist!.criteria[0]!.levels.map((l) => l.count)).toEqual([2, 2, 1]);
-    expect(dist!.criteria[1]!.levels.map((l) => l.count)).toEqual([3, 2]);
-    expect(dist!.criteria[0]!.title).toBe("Analyse");
-  });
-
-  it("skips levels that no longer exist in the rubric", () => {
-    const d = sampleRubric();
-    const s = scores(d, 5);
-    s[0]![0] = { criterionId: d.criteria[0]!.id, levelId: "00000000-0000-4000-8000-999999999999" };
-    const dist = levelDistribution(d, s)!;
-    expect(dist.criteria[0]!.levels.reduce((n, l) => n + l.count, 0)).toBe(4);
   });
 });
