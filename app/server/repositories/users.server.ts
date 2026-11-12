@@ -26,6 +26,7 @@ import {
   shares,
   teamMembers,
   featureExceptions,
+  slideTemplates,
   feedback,
   pilotCheckins,
   generations,
@@ -224,6 +225,9 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();
     tx.delete(shares).where(eq(shares.ownerUserId, id)).run();
     tx.delete(featureExceptions).where(eq(featureExceptions.userId, id)).run();
+    tx.delete(slideTemplates)
+      .where(and(eq(slideTemplates.ownerKind, "user"), eq(slideTemplates.ownerId, id)))
+      .run();
     // Announcements for the account and the account's closed announcements.
     const told = tx
       .select({ id: announcements.id })

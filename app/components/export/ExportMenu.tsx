@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { useFetcher } from "react-router";
 import { Download, Printer } from "lucide-react";
 import type { ExportDoc } from "~/lib/export/doc";
@@ -22,6 +22,14 @@ const LINK =
 interface ExportData {
   doc: ExportDoc;
   downloads: { format: ExportFormat; href: string }[];
+  /** PowerPoint templates the teacher may choose (P30.7b); absent or empty: only the standard. */
+  templates?: { id: string; name: string; scope: "own" | "team"; teamName?: string }[];
+}
+
+/** The download link, with the chosen template for a PowerPoint. */
+function withTemplate(href: string, template: string): string {
+  if (!template) return href;
+  return `${href}${href.includes("?") ? "&" : "?"}template=${encodeURIComponent(template)}`;
 }
 
 /**
@@ -44,6 +52,8 @@ export function ExportPanel({ url, label }: { url: string; label?: string }) {
   const m = useT().exportResult;
   const fetcher = useFetcher<ExportData>();
   const regionId = useId();
+  const templateId = useId();
+  const [template, setTemplate] = useState("");
   const data = fetcher.data;
   const deck = data ? toSlideDeck(data.doc) : null;
 
@@ -77,6 +87,28 @@ export function ExportPanel({ url, label }: { url: string; label?: string }) {
               <ExportPreview doc={data.doc} />
             </section>
             {deck && deck.slides.length > 0 && <SlidePreview deck={deck} />}
+            {!!data.templates?.length && (
+              <div>
+                <label htmlFor={templateId} className="block text-sm font-medium text-slate-800">
+                  {m.templates.choose}
+                </label>
+                <select
+                  id={templateId}
+                  value={template}
+                  onChange={(e) => setTemplate(e.target.value)}
+                  className="mt-1 block w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus-visible:outline-2 focus-visible:outline-lime-700"
+                >
+                  <option value="">{m.templates.standard}</option>
+                  {data.templates.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.scope === "own"
+                        ? fmt(m.templates.own, { name: t.name })
+                        : fmt(m.templates.team, { name: t.name, team: t.teamName ?? "" })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <ul className="flex flex-wrap gap-2">
               {data.downloads.map((d) => (
                 <li key={d.format}>
@@ -88,7 +120,11 @@ export function ExportPanel({ url, label }: { url: string; label?: string }) {
                       <span className="sr-only"> {m.newTab}</span>
                     </a>
                   ) : (
-                    <a href={d.href} download className={LINK}>
+                    <a
+                      href={d.format === "pptx" ? withTemplate(d.href, template) : d.href}
+                      download
+                      className={LINK}
+                    >
                       <Download className="size-4" aria-hidden />
                       {fmt(m.download, { format: m.formats[d.format] })}
                     </a>

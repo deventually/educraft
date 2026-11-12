@@ -1,5 +1,5 @@
 import type { Route } from "./+types/work.$generationId.export";
-import { downloadHref, loadExport } from "~/server/export.server";
+import { downloadHref, loadExport, templatesFor } from "~/server/export.server";
 
 /**
  * Resource route (no UI): GET /work/:generationId/export → the result as an `ExportDoc` plus
@@ -13,6 +13,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     downloads: formats.map((format) => ({
       format,
       href: downloadHref(request, params.generationId, format),
+    })),
+    // Without the file: only what the export panel shows to choose one (P30.7b).
+    templates: (await templatesFor(request, formats)).map(({ id, name, scope, teamName }) => ({
+      id,
+      name,
+      scope,
+      ...(teamName ? { teamName } : {}),
     })),
   };
 }

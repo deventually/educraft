@@ -7,6 +7,11 @@
 import { requireRole } from "./auth.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getSharedWork } from "./repositories/shares.server";
+import {
+  getTemplateFile,
+  listTemplatesForUser,
+  type SlideTemplateInfo,
+} from "./repositories/slideTemplates.server";
 import { type ExportDoc, toExportDoc } from "~/lib/export/doc";
 import { type ExportFormat, formatsFor } from "~/lib/export/formats";
 import { slideHeadings } from "~/lib/export/slides";
@@ -82,4 +87,27 @@ export function downloadHref(request: Request, generationId: string, format: Exp
   const query = new URL(request.url).search;
   const base = `/work/${encodeURIComponent(generationId)}`;
   return format === "pdf" ? `${base}/print${query}` : `${base}/export/${format}${query}`;
+}
+
+/** The PowerPoint templates the caller may use, for a result that becomes slides (P30.7b). */
+export async function templatesFor(
+  request: Request,
+  formats: ExportFormat[],
+): Promise<SlideTemplateInfo[]> {
+  if (!formats.includes("pptx")) return [];
+  const user = await requireRole(request, "teacher", "admin");
+  return listTemplatesForUser(user.id);
+}
+
+/**
+ * The template the download asks for (`?template=<id>`), if any. One the caller may not use,
+ * or that does not exist, is a 404: the id never confirms someone else's template.
+ */
+export async function chosenTemplate(request: Request): Promise<Uint8Array | undefined> {
+  const id = new URL(request.url).searchParams.get("template");
+  if (!id) return undefined;
+  const user = await requireRole(request, "teacher", "admin");
+  const file = await getTemplateFile(user.id, id.slice(0, 100));
+  if (!file) throw notFound();
+  return file;
 }
