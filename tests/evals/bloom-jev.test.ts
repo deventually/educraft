@@ -155,5 +155,19 @@ describe("scoring against Bastiaan's labels", () => {
     expect(md).toMatch(/Jev: gemiddeld 200 ms/);
     expect(md).toMatch(/LLM: gemiddeld 4000 ms/);
     expect(md).toContain("Nog geen label: 1");
+    expect(md).toContain("$0.020000 (API-lijstprijs, de hele import)");
+    expect(md).not.toMatch(/via Claude Code/);
+    expect(
+      bloomReport({
+        date: "x",
+        jevModel: "j",
+        llmModel: "claude-code::claude-sonnet-5-5",
+        repeat: 1,
+        rows: [],
+        labels: {},
+        jevMs: [],
+        llmMs: [1],
+      }),
+    ).toMatch(/via Claude Code.*opstarten/);
   });
 });

@@ -6,6 +6,7 @@ import { ALL_TOOLS } from "~/lib/registry";
 import { type EvalCase, parseHardChecks } from "../../scripts/eval-helpers";
 import {
   buildJudgeJevRequest,
+  catalogPrice,
   judgeJevReport,
   JUDGE_JEV_THRESHOLDS,
   listPriceUsd,
@@ -238,7 +239,19 @@ describe("the comparison with the LLM judge", () => {
     expect(md).toMatch(/Jev: gemiddeld 300 ms/);
     expect(md).toMatch(/Sonnet-judge: gemiddeld 6000 ms/);
     expect(md).toContain("$0.000200");
-    expect(md).toContain("$0.050000");
+    expect(md).toContain("$0.050000 (API-lijstprijs)");
+    const viaCode = judgeJevReport({
+      date: "2026-11-13",
+      jevModel: "typesafe/jev-1.14",
+      judgeModel: "claude-code::claude-sonnet-5-5",
+      rows,
+      jevMs: [200],
+      judgeMs: [5000],
+      jevCostUsd: 0.0002,
+      judgeCostUsd: 0.05,
+    });
+    expect(viaCode).toMatch(/via Claude Code.*opstarten/);
+    expect(md).not.toMatch(/via Claude Code/);
     expect(md).toMatch(/\| visit-prep \| a#1 \| invented \| fail \| pass \|/);
   });
 
@@ -260,5 +273,12 @@ describe("the judge's cost", () => {
     expect(listPriceUsd(usage, { currency: "USD", input: 2, output: 10 })).toBeCloseTo(0.025);
     expect(listPriceUsd(usage, { currency: "EUR", input: 2, output: 10 })).toBeUndefined();
     expect(listPriceUsd(usage, undefined)).toBeUndefined();
+  });
+
+  it("through Claude Code is the pinned model's list price, so a subscription run is priced too", () => {
+    const api = catalogPrice("claude-sonnet-5-5");
+    expect(api).toMatchObject({ currency: "USD" });
+    expect(catalogPrice("claude-code::claude-sonnet-5-5")).toEqual(api);
+    expect(catalogPrice("claude-code::no-such-model")).toBeUndefined();
   });
 });

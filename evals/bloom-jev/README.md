@@ -59,5 +59,8 @@ methode goed is, en hoe vaak een voorgesteld niveau klopt.
 - **Holdout-teksten zijn citaten van een webpagina**, en een paar zijn midden in de zin afgebroken.
   Het werkwoord staat vooraan, dus voor het niveau maakt dat zelden uit, maar het staat hier.
 - De afstemset is deels door ons geschreven; daarom telt vooral de holdout.
+- **Via Claude Code** (`--llm-model claude-code::claude-sonnet-5-5`) kost de meting alleen Jev. De
+  kosten van de LLM zijn dan zijn tokens tegen de API-lijstprijs; zijn snelheid is trager dan via
+  de API, omdat elke call de CLI opstart. Het rapport zegt dat erbij.
 
 Nooit onderdeel van CI.

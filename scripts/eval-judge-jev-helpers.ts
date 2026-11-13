@@ -289,11 +289,19 @@ export function judgeJevReport(input: {
     "",
     [
       input.jevCostUsd !== undefined ? `Kosten Jev: ${usd(input.jevCostUsd)}` : "",
-      input.judgeCostUsd !== undefined ? `Kosten judge: ${usd(input.judgeCostUsd)}` : "",
+      input.judgeCostUsd !== undefined
+        ? `Kosten judge: ${usd(input.judgeCostUsd)} (API-lijstprijs)`
+        : "",
     ]
       .filter(Boolean)
       .join(" · "),
     "",
+    ...(input.judgeModel.startsWith("claude-code::")
+      ? [
+          "Snelheid van de LLM via Claude Code, inclusief het opstarten van de CLI per call: trager dan via de API. Kosten tegen de API-lijstprijs van hetzelfde model.",
+          "",
+        ]
+      : []),
     ...(scored
       ? [
           `Beoordeeld door Bastiaan: ${scored.labelled} verschillen · Jev had gelijk: ${scored.jevRight} · judge had gelijk: ${scored.judgeRight}`,
@@ -321,12 +329,17 @@ type ListPrice = {
   cacheWrite?: number;
 };
 
-/** A model's list price from the catalog (`config/models.json`), if it has one. */
+/**
+ * A model's list price from the catalog (`config/models.json`), if it has one. A run through
+ * Claude Code ("claude-code::<model>") sends the app's own prompt to that model, so its tokens
+ * are priced at that model's list price: what the same call would cost through the API.
+ */
 export function catalogPrice(model: string): ListPrice | undefined {
   const config = JSON.parse(readFileSync(join(process.cwd(), "config/models.json"), "utf8")) as {
     models: { id: string; price?: ListPrice }[];
   };
-  return config.models.find((m) => m.id === model)?.price;
+  const id = model.replace(/^claude-code::/, "");
+  return config.models.find((m) => m.id === id)?.price;
 }
 
 export function listPriceUsd(

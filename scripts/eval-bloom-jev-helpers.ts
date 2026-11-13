@@ -299,11 +299,19 @@ export function bloomReport(input: {
     "",
     [
       input.jevCostUsd !== undefined ? `Kosten Jev: ${usd(input.jevCostUsd)}` : "",
-      input.llmCostUsd !== undefined ? `Kosten LLM: ${usd(input.llmCostUsd)} (de hele import)` : "",
+      input.llmCostUsd !== undefined
+        ? `Kosten LLM: ${usd(input.llmCostUsd)} (API-lijstprijs, de hele import)`
+        : "",
     ]
       .filter(Boolean)
       .join(" · "),
     "",
+    ...(input.llmModel.startsWith("claude-code::")
+      ? [
+          "Snelheid van de LLM via Claude Code, inclusief het opstarten van de CLI per call: trager dan via de API. Kosten tegen de API-lijstprijs van hetzelfde model.",
+          "",
+        ]
+      : []),
     ...(unlabelled ? [`Nog geen label: ${unlabelled}`, ""] : []),
   ].join("\n");
 }
