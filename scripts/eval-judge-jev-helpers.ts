@@ -26,6 +26,8 @@ import type { EvalCase } from "./eval-helpers";
 export const JUDGE_JEV_THRESHOLDS = { yes: 0.7, no: 0.3 } as const;
 
 const When = z.union([
+  /** Version 2: the case has a known error (`isKnownErrorCase`). */
+  z.object({ knownError: z.literal(true) }),
   z.object({ field: z.string(), empty: z.literal(true) }),
   z.object({ field: z.string(), equals: z.union([z.boolean(), z.string()]) }),
   z.object({ eqf: z.number() }),
@@ -47,6 +49,8 @@ const CheckSpec = z.union([
 type CheckSpec = z.infer<typeof CheckSpec>;
 
 const JudgeSpecs = z.object({
+  /** 1: the first set (`checks.json`); 2: with the fixed rules of README "Versie 2". */
+  version: z.number().int().default(1),
   about: z.string(),
   holdout: z.array(z.string()),
   /** `<tool slug>/<check id>` → how Jev asks it. */
@@ -54,10 +58,53 @@ const JudgeSpecs = z.object({
 });
 type JudgeSpecs = z.infer<typeof JudgeSpecs>;
 
-export function loadJudgeSpecs(): JudgeSpecs {
-  const file = join(__dirname, "../evals/judge-jev/checks.json");
-  return JudgeSpecs.parse(JSON.parse(readFileSync(file, "utf8")));
+export const LATEST_CHECKS = 2;
+
+/** The checks of one version; version 1 stays as it was, so its reports can be rescored. */
+export function loadJudgeSpecs(version = LATEST_CHECKS): JudgeSpecs {
+  const name = version === 1 ? "checks.json" : `checks.v${version}.json`;
+  const specs = JudgeSpecs.parse(
+    JSON.parse(readFileSync(join(__dirname, "../evals/judge-jev", name), "utf8")),
+  );
+  if (specs.version !== version) throw new Error(`${name} is version ${specs.version}`);
+  return specs;
 }
+
+/**
+ * Bastiaan's labels for one report (`<date><label>`): row keys repeat across runs, so a label
+ * holds only for the outputs it was given on.
+ */
+export const labelsPath = (report: string) =>
+  join(__dirname, "../evals/judge-jev/labels", `${report}.json`);
+
+/** Version 2, rule 1: a known-error case says so at the start of its description. */
+export function isKnownErrorCase(c: Pick<EvalCase, "description">): boolean {
+  return /^(known error|bekende fout)\b/i.test(c.description ?? "");
+}
+
+/**
+ * Version 2, rule 3: an output in stages (`### Stage: <id>` lines, as the eval writes them)
+ * as one field per stage, so a check can name the stage it is about. A single text stays a text.
+ */
+export function outputByStage(output: string): string | Record<string, string> {
+  const marker = /^### Stage: (\S+)[ \t]*$/gm;
+  if (!/^\s*### Stage: /.test(output)) return output;
+  const marks = [...output.matchAll(marker)];
+  return Object.fromEntries(
+    marks.map((m, i) => [
+      m[1] as string,
+      output.slice((m.index ?? 0) + m[0].length, marks[i + 1]?.index ?? output.length).trim(),
+    ]),
+  );
+}
+
+/**
+ * Version 2, rule 4: the same two sentences on every part that fails on yes, after Bastiaan's
+ * rule for his labels: a check fails only when the failure demonstrably happens in the output.
+ */
+export const EVIDENCE_FAILS =
+  " Only when the text of `output` itself shows this; a refusal of it or a warning against it is not this.";
+export const EVIDENCE_PASSES = " Also when `output` does not clearly show it.";
 
 /** The checks of one tool, in rubric order: `[check id, spec]`. */
 function checksOf(specs: JudgeSpecs, slug: string): [string, CheckSpec][] {
@@ -68,6 +115,7 @@ function checksOf(specs: JudgeSpecs, slug: string): [string, CheckSpec][] {
 
 function holds(when: When | undefined, c: EvalCase): boolean {
   if (!when) return true;
+  if ("knownError" in when) return isKnownErrorCase(c);
   if ("eqf" in when) return c.profile?.eqf === when.eqf;
   const v = c.values?.[when.field];
   if ("empty" in when) return v === undefined || String(v).trim() === "";
@@ -89,8 +137,10 @@ export interface JudgeJevRequest {
       output_language: string;
       eqf: number | null;
       inputs: Record<string, unknown>;
+      /** Version 2: the description of a known-error case, else null. */
+      known_error?: string | null;
     };
-    output: string;
+    output: string | Record<string, string>;
     about_output: string;
   };
   questions: Record<string, NoulQuestion>;
@@ -98,6 +148,7 @@ export interface JudgeJevRequest {
 
 const ABOUT_OUTPUT =
   "`output` is what the tool produced for `case`. In a chat transcript, a turn marked \"(greeting)\" is fixed app text the model did not write; it never counts for a check.";
+const ABOUT_OUTPUT_V2 = `${ABOUT_OUTPUT} A tool that works in stages has its \`output\` by stage: \`output.<stage>\` is that stage's text. \`case.known_error\` is the known error the case was built around, or null for an ordinary case.`;
 
 /** One request per output: every asked part of every check of its tool. */
 export function buildJudgeJevRequest(
@@ -106,6 +157,7 @@ export function buildJudgeJevRequest(
   opts: { model?: string } = {},
 ): { request: JudgeJevRequest; asked: string[] } {
   const { tool, c, output } = input;
+  const v2 = specs.version >= 2;
   const questions: Record<string, NoulQuestion> = {};
   const asked: string[] = [];
   for (const [id, spec] of checksOf(specs, tool.slug)) {
@@ -115,7 +167,10 @@ export function buildJudgeJevRequest(
       questions[`${id}_${k + 1}`] = {
         type: "noul",
         instructions: part.ask,
-        criteria: { true: part.yes, false: part.no },
+        criteria:
+          v2 && part.fails === "yes"
+            ? { true: part.yes + EVIDENCE_FAILS, false: part.no + EVIDENCE_PASSES }
+            : { true: part.yes, false: part.no },
       };
     });
   }
@@ -129,9 +184,10 @@ export function buildJudgeJevRequest(
           output_language: c.outputLanguage,
           eqf: c.profile?.eqf ?? null,
           inputs: c.values ?? {},
+          ...(v2 ? { known_error: isKnownErrorCase(c) ? (c.description ?? "") : null } : {}),
         },
-        output,
-        about_output: ABOUT_OUTPUT,
+        output: v2 ? outputByStage(output) : output,
+        about_output: v2 ? ABOUT_OUTPUT_V2 : ABOUT_OUTPUT,
       },
       questions,
     },
@@ -265,6 +321,46 @@ function hybridLine(name: string, set: JudgeRow[], labels: Record<string, boolea
   return `| ${name} | ${outputs.size} | ${clear}/${outputs.size} | ${s.labelled} | ${of(s.jevRight)} | ${of(s.judgeRight)} | ${of(s.hybridRight)} |`;
 }
 
+/**
+ * A row as it would have come out at stricter thresholds. Only stricter: a fail needs a higher
+ * p, a pass a lower one. A looser threshold would settle rows nobody labelled.
+ */
+function atThresholds(r: JudgeRow, t: { yes: number; no: number }): JudgeRow {
+  if (r.jev === "llm" || r.jev === "unsettled") return r;
+  if (r.jevP === undefined) return r; // decided in code
+  const jev = r.jevP >= t.yes ? "fail" : r.jev === "pass" && r.jevP <= t.no ? "pass" : "unsettled";
+  return { ...r, jev };
+}
+
+const SWEEP = [
+  { yes: 0.7, no: 0.3 },
+  { yes: 0.8, no: 0.3 },
+  { yes: 0.9, no: 0.3 },
+  { yes: 0.95, no: 0.3 },
+  { yes: 0.7, no: 0.2 },
+  { yes: 0.7, no: 0.1 },
+  { yes: 0.7, no: 0.05 },
+];
+
+/** Per threshold, on the tuning rows: what Jev decides, its labelled false alarms and misses. */
+function sweepLines(rows: JudgeRow[], labels: Record<string, boolean>): string[] {
+  return SWEEP.map((t) => {
+    const set = rows.map((r) => atThresholds(r, t));
+    const decided = set.filter(settled).length;
+    const truth = (r: JudgeRow) => labels[rowKey(r)];
+    const falseAlarms = set.filter((r) => r.jev === "fail" && truth(r) === false).length;
+    const misses = set.filter((r) => r.jev === "pass" && truth(r) === true).length;
+    const outputs = new Map<string, boolean>();
+    for (const r of set) {
+      const k = `${r.tool}/${r.caseId}#${r.run}`;
+      outputs.set(k, (outputs.get(k) ?? true) && r.jev === "pass");
+    }
+    const clear = [...outputs.values()].filter(Boolean).length;
+    const fails = set.filter((r) => r.jev === "fail").length;
+    return `| ${t.yes.toFixed(2)} | ${t.no.toFixed(2)} | ${decided} | ${fails} | ${falseAlarms} | ${misses} | ${clear}/${outputs.size} |`;
+  });
+}
+
 const mean = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
 const usd = (n: number) => `$${n.toFixed(6)}`;
 
@@ -273,6 +369,8 @@ type Speed = number[] | { mean: number; max: number };
 export function judgeJevReport(input: {
   date: string;
   jevModel: string;
+  /** The version of `checks.json` the questions came from. */
+  checksVersion?: number;
   judgeModel: string;
   rows: JudgeRow[];
   /** Each call's time, or only the mean and maximum (a report rebuilt from an old raw file). */
@@ -298,7 +396,7 @@ export function judgeJevReport(input: {
   return [
     "# Eval — harde checks: Jev naast de LLM-judge",
     "",
-    `Datum: ${input.date} · Jev: ${input.jevModel} · judge: ${input.judgeModel}`,
+    `Datum: ${input.date} · Jev: ${input.jevModel}${input.checksVersion ? ` · checks: v${input.checksVersion}` : ""} · judge: ${input.judgeModel}`,
     "",
     "| Set | Beslist door Jev | Eens met de judge | Onbeslist (naar de judge) | Bij de judge (rekenen, tellen) |",
     "| --- | --- | --- | --- | --- |",
@@ -344,6 +442,17 @@ export function judgeJevReport(input: {
           hybridLine(
             "Holdout",
             rows.filter((r) => r.holdout),
+            input.labels,
+          ),
+          "",
+          "## Drempels, op alleen de afstemset",
+          "",
+          "Wat Jev zou beslissen bij een strengere drempel: \"faalt\" pas vanaf een hogere kans, \"slaagt\" pas onder een lagere. Vals alarm en gemist tellen alleen de rijen die Bastiaan beoordeelde (de verschillen bij 0,7 en 0,3); waar Jev en de judge het eens waren, is niets beoordeeld. De holdout telt hier niet mee: daarop wordt geen drempel gekozen.",
+          "",
+          "| Faalt vanaf | Slaagt tot | Beslist door Jev | Jev zegt faalt | Vals alarm | Gemist | Uitvoer zonder LLM |",
+          "| --- | --- | --- | --- | --- | --- | --- |",
+          ...sweepLines(
+            rows.filter((r) => !r.holdout),
             input.labels,
           ),
           "",

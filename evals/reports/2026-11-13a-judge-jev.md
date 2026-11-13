@@ -1,6 +1,6 @@
 # Eval — harde checks: Jev naast de LLM-judge
 
-Datum: 2026-11-13 · Jev: typesafe/jev-1.14 · judge: claude-code::claude-sonnet-5-5
+Datum: 2026-11-13 · Jev: typesafe/jev-1.14 · checks: v1 · judge: claude-code::claude-sonnet-5-5
 
 | Set | Beslist door Jev | Eens met de judge | Onbeslist (naar de judge) | Bij de judge (rekenen, tellen) |
 | --- | --- | --- | --- | --- |
@@ -21,6 +21,20 @@ Hybride: zegt Jev bij elke check van een uitvoer "slaagt", dan is die uitvoer kl
 | --- | --- | --- | --- | --- | --- | --- |
 | Afstemmen | 216 | 60/216 | 46 | 2/46 | 44/46 | 46/46 |
 | Holdout | 96 | 15/96 | 36 | 1/36 | 35/36 | 35/36 |
+
+## Drempels, op alleen de afstemset
+
+Wat Jev zou beslissen bij een strengere drempel: "faalt" pas vanaf een hogere kans, "slaagt" pas onder een lagere. Vals alarm en gemist tellen alleen de rijen die Bastiaan beoordeelde (de verschillen bij 0,7 en 0,3); waar Jev en de judge het eens waren, is niets beoordeeld. De holdout telt hier niet mee: daarop wordt geen drempel gekozen.
+
+| Faalt vanaf | Slaagt tot | Beslist door Jev | Jev zegt faalt | Vals alarm | Gemist | Uitvoer zonder LLM |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0.70 | 0.30 | 961 | 51 | 44 | 0 | 60/216 |
+| 0.80 | 0.30 | 936 | 26 | 25 | 0 | 60/216 |
+| 0.90 | 0.30 | 917 | 7 | 7 | 0 | 60/216 |
+| 0.95 | 0.30 | 914 | 4 | 4 | 0 | 60/216 |
+| 0.70 | 0.20 | 863 | 51 | 44 | 0 | 32/216 |
+| 0.70 | 0.10 | 667 | 51 | 44 | 0 | 11/216 |
+| 0.70 | 0.05 | 487 | 51 | 44 | 0 | 5/216 |
 
 ## Waar Jev en de judge verschillen
 

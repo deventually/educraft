@@ -18,7 +18,7 @@ import {
 } from "../../scripts/eval-judge-jev-helpers";
 
 const EVALS = join(__dirname, "../../evals");
-const specs = loadJudgeSpecs();
+const specs = loadJudgeSpecs(1);
 
 /** The tools `npm run eval` judges that have judged hard checks, with those checks. */
 const judged = ALL_TOOLS.flatMap((t) => {
