@@ -108,15 +108,23 @@ describe("Jev on the evidence sort: the answer becomes the app's proposal", () =
     expect(proposal.check).toBe(false);
   });
 
-  it("an unsettled yes/no (between 'no' and 'yes') on the chosen outcome is a check", () => {
+  it("by default an unsettled yes/no is simply not a yes: BDB criteria are compound, so Jev often lands mid-way (meting jev3)", () => {
+    expect(JEV_THRESHOLDS.unsettled).toBe(false);
     const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
     raw.answers.c_U1_2 = noul((JEV_THRESHOLDS.no + JEV_THRESHOLDS.yes) / 2);
     const { proposal } = parseJevAnswer(raw, d, file);
     expect(proposal.criterionIds).not.toContain("eval-u1-c2");
-    expect(proposal.check).toBe(true);
+    expect(proposal.check).toBe(false);
+  });
+
+  it("with `unsettled` on, an unsettled yes/no on the chosen outcome is a check", () => {
+    const strict = { ...JEV_THRESHOLDS, unsettled: true };
+    const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
+    raw.answers.c_U1_2 = noul((JEV_THRESHOLDS.no + JEV_THRESHOLDS.yes) / 2);
+    expect(parseJevAnswer(raw, d, file, strict).proposal.check).toBe(true);
     const other = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
     other.answers.c_U2_1 = noul(0.5); // another outcome's doubt does not matter
-    expect(parseJevAnswer(other, d, file).proposal.check).toBe(false);
+    expect(parseJevAnswer(other, d, file, strict).proposal.check).toBe(false);
   });
 
   it("marks 'Controleren' when Jev is unsure of the outcome or the kind", () => {
@@ -128,12 +136,28 @@ describe("Jev on the evidence sort: the answer becomes the app's proposal", () =
     expect(parseJevAnswer(kind, d, file).proposal.check).toBe(true);
   });
 
+  it("takes other thresholds, to tune them offline on saved answers", () => {
+    const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
+    raw.answers.outcome = choice("U1", 0.75);
+    raw.answers.c_U1_2 = noul(0.5);
+    expect(
+      parseJevAnswer(raw, d, file, { ...JEV_THRESHOLDS, unsettled: true }).proposal.check,
+    ).toBe(true);
+    const lenient = { ...JEV_THRESHOLDS, outcomeSure: 0.7, unsettled: false };
+    expect(parseJevAnswer(raw, d, file, lenient).proposal.check).toBe(false);
+    expect(parseJevAnswer(raw, d, file, lenient).why).toEqual([]);
+  });
+
   it("says why it set 'Controleren', so the thresholds can be tuned", () => {
     expect(parseJevAnswer(goodLessonPlanAnswer(), d, file).why).toEqual([]);
     const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
     raw.answers.outcome = choice("U1", JEV_THRESHOLDS.outcomeSure - 0.01);
     raw.answers.c_U1_2 = noul(0.5);
-    expect(parseJevAnswer(raw, d, file).why).toEqual(["outcome", "unsettled:c_U1_2"]);
+    expect(parseJevAnswer(raw, d, file).why).toEqual(["outcome"]);
+    expect(parseJevAnswer(raw, d, file, { ...JEV_THRESHOLDS, unsettled: true }).why).toEqual([
+      "outcome",
+      "unsettled:c_U1_2",
+    ]);
     expect(parseJevAnswer(goodLessonPlanAnswer(), d, { ...file, text: "" }).why).toEqual([
       "no-text",
     ]);

@@ -22,9 +22,29 @@ const JEV_URL = "https://openrouter.ai/api/alpha/decisions";
 
 /**
  * Starting points from TypeSafe's own skill (yes ≥ 0.7, no ≤ 0.3, in between is unsettled);
- * the outcome and kind must be clearer before a row goes without "Controleren".
+ * the outcome and kind must be clearer before a row goes without "Controleren". Tuned on the
+ * saved answers of meting jev3 (`evals/portfolio-evidence/rubric.md`).
  */
-export const JEV_THRESHOLDS = { outcomeSure: 0.8, kindSure: 0.7, yes: 0.7, no: 0.3 } as const;
+export const JEV_THRESHOLDS: JevThresholds = {
+  outcomeSure: 0.8,
+  kindSure: 0.7,
+  yes: 0.7,
+  no: 0.3,
+  // Off since meting jev3 (2026-11-13): BDB criteria are compound ("asks for feedback and uses
+  // it"), so Jev often lands mid-way on one; flagging that put 55 of 69 rows on "Controleren".
+  unsettled: false,
+};
+
+export interface JevThresholds {
+  outcomeSure: number;
+  kindSure: number;
+  /** A yes/no counts as yes from here, … */
+  yes: number;
+  /** … as no up to here; in between it is unsettled. */
+  no: number;
+  /** Does an unsettled yes/no of the chosen outcome set "Controleren"? */
+  unsettled: boolean;
+}
 
 type Locale = "nl" | "en";
 
@@ -174,6 +194,7 @@ export function parseJevAnswer(
   body: unknown,
   d: DossierData,
   file: { key: string; name: string; text?: string },
+  t: JevThresholds = JEV_THRESHOLDS,
 ): JevParsed {
   const fallback: SortProposal = {
     key: file.key,
@@ -195,16 +216,16 @@ export function parseJevAnswer(
 
   const unsettled: string[] = [];
   const isUnsettled = (p: number | undefined) =>
-    p === undefined || (p > JEV_THRESHOLDS.no && p < JEV_THRESHOLDS.yes);
+    p === undefined || (p > t.no && p < t.yes);
   const criterionIds: string[] = [];
   let line: string | undefined;
   if (outcome) {
     outcome.criteria.forEach((c, j) => {
       const p = yesOf(answers[criterionKey(index, j)]);
       if (isUnsettled(p)) unsettled.push(criterionKey(index, j));
-      if (p !== undefined && p >= JEV_THRESHOLDS.yes) criterionIds.push(c.id);
+      if (p !== undefined && p >= t.yes) criterionIds.push(c.id);
     });
-    let best: number = JEV_THRESHOLDS.yes;
+    let best: number = t.yes;
     outcome.requiredEvidence.forEach((r, j) => {
       const p = yesOf(answers[requiredKey(index, j)]);
       if (isUnsettled(p)) unsettled.push(requiredKey(index, j));
@@ -216,11 +237,11 @@ export function parseJevAnswer(
   }
 
   const why = [
-    ...(!outcome ? ["none"] : (outcomeAnswer?.p ?? 0) < JEV_THRESHOLDS.outcomeSure ? ["outcome"] : []),
-    ...(!kindAnswer || !isKind(kindAnswer.choice) || kindAnswer.p < JEV_THRESHOLDS.kindSure
+    ...(!outcome ? ["none"] : (outcomeAnswer?.p ?? 0) < t.outcomeSure ? ["outcome"] : []),
+    ...(!kindAnswer || !isKind(kindAnswer.choice) || kindAnswer.p < t.kindSure
       ? ["kind"]
       : []),
-    ...unsettled.map((k) => `unsettled:${k}`),
+    ...(t.unsettled ? unsettled.map((k) => `unsettled:${k}`) : []),
     ...(outcome && criterionIds.length === 0 ? ["no-criteria"] : []),
     ...(file.text !== undefined && file.text.trim() === "" ? ["no-text"] : []),
   ];

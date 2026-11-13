@@ -58,3 +58,16 @@ het ontwikkelplan) eist **doubt** juist *geen* Controleren.
 Het rapport telt daarnaast hoe vaak een rij *Controleren* kreeg (**Controleren gezet**, ook per rij).
 Dat is geen check, maar laat zien of een model te vaak twijfelt: alles op Controleren haalt de checks,
 maar helpt de docent niet. Gebruik het om de drempels van Jev af te stellen.
+
+## Drempels van Jev afgesteld (2026-11-13)
+
+Meting `jev2`/`jev3`: Jev haalde 60/69, maar zette bij 55 van de 69 rijen *Controleren*. Bijna altijd
+door één ja/nee van de gekozen leeruitkomst tussen 0,3 en 0,7. De criteria van een BDB-kader zijn
+vaak samengesteld ("vraagt feedback **en** gebruikt die"); Jev geeft dan eerlijk een kans in het
+midden. Op de opgeslagen antwoorden (`2026-11-13jev3-portfolio-evidence-raw.json`) zijn de
+drempels opnieuw doorgerekend, zonder nieuwe aanroepen: zo'n ja/nee telt nu als *geen ja* en zet
+geen *Controleren* meer (`unsettled: false`). Uitslag `jev3b`: 63/69, *Controleren* 24/69 (Sonnet
+5.5: 69/69, 31/69). De drempels voor leeruitkomst en soort maakten tussen 0,6 en 0,8 geen verschil.
+
+Let op: afgesteld op dezelfde 23 cases als waarop gemeten is. Een volgende ronde nieuwe cases moet
+laten zien of het standhoudt.
