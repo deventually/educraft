@@ -65,4 +65,26 @@ methode goed is, en hoe vaak een voorgesteld niveau klopt.
   model-call zelf, zoals Claude Code die meet (`duration_api_ms`), zonder het opstarten van de CLI.
   Het rapport zegt dat erbij.
 
+## Ronde 2 (2026-11-13, na de eerste meting)
+
+De eerste meting (rapport `2026-11-13b-bloom-jev.md`, holdout van 71) liet zien dat alle drie
+vooral te voorzichtig waren: weinig verkeerde niveaus, veel "geen niveau" waar Bastiaan er wel een
+gaf, vooral bij twee werkwoorden ("benoemt en verklaart"). Bastiaan besloot: **bij werkwoorden van
+verschillende niveaus het hoogste**. Daarna:
+
+- **De oude holdout is afstemmateriaal geworden**, omdat de regel en de aanvullingen na het zien
+  ervan zijn gekozen. Er is een **nieuwe holdout** ([`holdout2.json`](holdout2.json)): 80 echte
+  leeruitkomsten van Inholland, HAN, Cibap (mbo), Wageningen, Antwerpen en de AHK, met bron-URL.
+  Ik heb die teksten gezien bij het verzamelen, maar niets eraan aangepast of erop afgesteld.
+- **De werkwoordenlijst** neemt het hoogste niveau en kent nu ook de infinitief na "kan"
+  ("toepassen", "beoordelen") en de werkwoorden die de oude holdout miste (beschrijft, reflecteert,
+  doorloopt, organiseert, onderzoekt, …). Een zwakte blijft: een zelfstandig naamwoord dat op een
+  werkwoord lijkt ("een ontwerp") telt mee.
+- **Jev** krijgt per niveau één ja/nee: "staat er een werkwoord van dit niveau in?". Code neemt het
+  hoogste niveau boven de drempel (TypeSafe: één oordeel per vraag, code beslist). De drempel wordt
+  **afgesteld op de afstemsets** (`calibrate`, 0,50 tot 0,95), nooit op de nieuwe holdout.
+- **De LLM** krijgt dezelfde regel, alleen in deze eval: `withHighestRule` voegt één zin toe aan
+  `course-import@v3`. De app zelf blijft op v3 tot de meting zegt waar het voorstel vandaan moet komen.
+- **De hybride**: eerst de lijst, dan Jev, dan de LLM. Het rapport zegt per set wie er besliste.
+
 Nooit onderdeel van CI.

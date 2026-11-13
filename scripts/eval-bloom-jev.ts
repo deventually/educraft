@@ -1,10 +1,11 @@
 /**
- * The Bloom proposal three ways (experiment, 2026-11-13): the LLM inside the real course import
- * (`course-import@v3`, one call per course document), TypeSafe's Jev (one call per outcome) and
- * the verb list in code, on the same outcomes: the tuning set and the holdout of public ones.
+ * The Bloom proposal three ways and their hybrid (experiment, 2026-11-13, round 2): the LLM inside
+ * the real course import (`course-import@v3` plus Bastiaan's rule for several verbs, one call per
+ * course document), TypeSafe's Jev (one call per outcome, one yes/no per level) and the verb list
+ * in code, on the same outcomes: two tuning sets and a fresh holdout of public ones.
  *
  *   ANTHROPIC_API_KEY=… OPENROUTER_API_KEY=… npm run eval:bloom-jev -- --repeat 3 --label a
- *   … -- --set holdout              # one set only (default: both)
+ *   … -- --set holdout2             # one set only (default: all three)
  *   npm run eval:bloom-jev -- --dry-run   # build the requests only, no API
  *   npm run eval:bloom-jev -- --rescore evals/reports/<date><label>-bloom-jev-raw.json
  *                                    # the report again with the labels as they are now, no API
@@ -25,11 +26,13 @@ import {
   type BloomRow,
   bloomFromVerb,
   bloomReport,
+  type BloomSet,
   buildBloomJevRequest,
   loadBloomSuite,
   outcomeDocument,
   parseBloomJevAnswer,
   sameOutcome,
+  withHighestRule,
 } from "./eval-bloom-jev-helpers";
 import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import { EVALS_DIR, REPORTS_DIR } from "./eval-files";
@@ -74,7 +77,9 @@ async function main() {
   const apiKey = process.env.OPENROUTER_API_KEY ?? "";
   if (!dryRun && !apiKey) throw new Error("needs OPENROUTER_API_KEY");
   const only = arg("set");
-  const sets = (["cases", "holdout"] as const).filter((s) => !only || s === only);
+  const sets = (["cases", "holdout", "holdout2"] as const satisfies readonly BloomSet[]).filter(
+    (s) => !only || s === only,
+  );
   const price = catalogPrice(llmModel);
   const limit = parallelism(arg("parallel") ?? "4");
 
@@ -97,11 +102,12 @@ async function main() {
         continue;
       }
       for (let run = 1; run <= repeat; run++) {
-        // The LLM: the real import, as the app asks it (app/server/courseImport.server.ts).
+        // The LLM: the real import, as the app asks it (app/server/courseImport.server.ts), with
+        // Bastiaan's rule for several verbs added for this eval.
         const start = performance.now();
         const r = await providerForModel(llmModel).generate({
           model: llmModel,
-          system: getRuntimePrompt(PROMPT_ID, course.locale),
+          system: withHighestRule(getRuntimePrompt(PROMPT_ID, course.locale), course.locale),
           messages: [{ role: "user", content: message }],
           temperature: 0,
           maxTokens: 8_000,
@@ -117,25 +123,22 @@ async function main() {
           imported.find((x) => sameOutcome(x.text, o))?.bloom ?? null;
         raw.push({ set, course: course.id, run, import: r.text });
 
-        // Jev, one request per outcome, the option order rotated per repeat.
+        // Jev, one request per outcome: one yes/no per level; code takes the highest.
         const jev = await mapLimit(course.outcomes, limit, async (outcome) => {
-          const request = buildBloomJevRequest(outcome, course.locale, {
-            model: jevModel,
-            rotate: run - 1,
-          });
+          const request = buildBloomJevRequest(outcome, course.locale, { model: jevModel });
           const answer = await askJev(request, { apiKey });
           jevMs.push(answer.ms);
           const v = parseBloomJevAnswer(answer.body);
           if (v.costUsd !== undefined) jevCostUsd += v.costUsd;
           raw.push({ set, course: course.id, run, outcome, request, body: answer.body });
-          return v.level;
+          return v.p;
         });
 
         course.outcomes.forEach((outcome, i) => {
           rows.push({
             set,
             outcome,
-            jev: jev[i] ?? null,
+            jevP: jev[i] ?? {},
             llm: llmLevel(outcome),
             verb: bloomFromVerb(outcome, course.locale),
           });
