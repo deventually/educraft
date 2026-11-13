@@ -51,7 +51,7 @@ bijgesteld. Het rapport toont de holdout apart.
 ## Wie heeft gelijk
 
 Waar de twee het eens zijn, telt dat als overeenstemming, niet als bewijs dat ze gelijk hebben.
-Waar ze het oneens zijn, labelt Bastiaan de rij in `labels.json` (`{"labels": {"<tool>/<case>#<run>/<check>": true}}`,
+Waar ze het oneens zijn, labelt Bastiaan de rij in `labels/<datum><label>.json` (`{"labels": {"<tool>/<case>#<run>/<check>": true}}`,
 `true` = de check faalt echt). Het rapport scoort dan beide judges op die rijen. Geen model
 beoordeelt de modellen. Na het labelen maakt
 `npm run eval:judge-jev -- --rescore evals/reports/<datum><label>-judge-jev-raw.json` het rapport
@@ -111,6 +111,74 @@ slagen, hoeft geen judge, en dat is 28% (afstemmen) en 16% (holdout) van de uitv
 onderscheid tussen een case met en zonder bekende fout. Dat onderscheid is een feit over de case
 en hoort volgens TypeSafe's eigen regel in code (`when`), niet in de vraag. Dat is nu niet
 aangepast: het zou na het zien van de labels zijn, en moet dan op nieuwe uitvoer gemeten worden.
+
+## Drempels op de bewaarde antwoorden van versie 1
+
+Kan een strengere drempel het vals alarm weghalen? Het rapport probeert het nu op de afstemset
+(het rapport van 2026-11-13 opnieuw gemaakt met `--rescore`, zonder API; de holdout telt niet
+mee):
+
+| "Faalt" vanaf | Jev zegt faalt | Daarvan vals alarm | Gemist | Uitvoer zonder LLM |
+| --- | --- | --- | --- | --- |
+| 0,7 | 51 | 44 | 0 | 60 van 216 |
+| 0,8 | 26 | 25 | 0 | 60 van 216 |
+| 0,9 | 7 | 7 | 0 | 60 van 216 |
+| 0,95 | 4 | 4 | 0 | 60 van 216 |
+
+**Nee.** Een hogere drempel haalt het vals alarm wel weg, maar de terechte "faalt" verdwijnen
+sneller: bij 0,9 is elke "faalt" die overblijft vals alarm. Jev is juist zeker bij zijn vals
+alarm. Een strengere "slaagt" (onder 0,2 of 0,1) vangt geen enkele gemiste fout extra en laat
+veel minder uitvoer zonder LLM. De drempels blijven dus 0,7 en 0,3. Wat wel kan helpen, zijn
+betere vragen: versie 2.
+
+## Versie 2
+
+[`checks.v2.json`](checks.v2.json) is versie 1 met vier vaste regels. Ze zijn hier opgeschreven
+vóór enige meting van versie 2. Versie 1 ([`checks.json`](checks.json)) blijft zoals hij was;
+een oud rapport wordt met de vragen van zijn eigen versie opnieuw gemaakt.
+
+1. **Of een case een bekende fout heeft, beslist code.** `missedKnownError` wordt alleen gevraagd
+   bij een case waarvan de beschrijving begint met "Known error" of "Bekende fout"
+   (`isKnownErrorCase`, `when: {"knownError": true}`). Bij een gewone case slaagt de check zonder
+   vraag. Dat is TypeSafe's regel "wat code kan, doet code", die versie 1 al had, maar hier miste
+   omdat het feit in de beschrijving staat en niet in een veld.
+2. **De bekende fout is een eigen veld in de toestand:** `case.known_error` (de beschrijving bij
+   een case met een bekende fout, anders null). De vragen van `missedKnownError` noemen dat veld in
+   plaats van `case.description`.
+3. **Uitvoer in stages wordt per stage gesplitst:** `output.<stage>` is de tekst van die stage.
+   Een check waarvan de rubric het document van één stage noemt, vraagt naar die stage. Dat is
+   alleen `cognitive-architect/inventedActivity`: het Coordinates Document, stage `analyst` (de
+   validator mag later wel een CEI geven).
+4. **Een fout moet in de uitvoer zelf te zien zijn.** Elk deel dat op "ja" faalt, krijgt in code
+   dezelfde twee zinnen bij de criteria (`EVIDENCE_FAILS`, `EVIDENCE_PASSES`): "ja" alleen als de
+   tekst van `output` het zelf laat zien, en een weigering of waarschuwing ertegen telt niet; "nee"
+   ook als `output` het niet duidelijk laat zien. Dat volgt Bastiaans beoordelingsregel
+   ("aantoonbaar optreedt").
+
+Verder verandert er niets: dezelfde checks, delen, drempels (0,7 en 0,3) en holdout.
+
+**Eerlijk over de holdout.** Regels 1 en 3 komen uit Bastiaans opmerkingen bij de labels van
+versie 1, en die gingen ook over holdout-tools. De holdout-tools zijn voor versie 2 dus niet
+blind. Daarom telt alleen een meting op **nieuwe uitvoer**, en vergelijken we versie 1 en 2 op
+**dezelfde** uitvoer. De regels zijn algemeen (geen regel voor één tool, behalve regel 3, die de
+rubric zelf zo zegt), en er wordt na de meting niets aan bijgesteld.
+
+### Meetplan voor versie 2 (vooraf vastgelegd)
+
+1. **Nieuwe uitvoer**: `npm run eval -- --cases-only --runs 3`, op dezelfde route als versie 1
+   (Claude Code, `claude-code::claude-sonnet-5-5`), zodat de meting vergelijkbaar is.
+2. **Beide versies op die uitvoer**: `npm run eval:judge-jev -- --runs 3 --checks 1 --label b1`
+   en `… --checks 2 --label b2`, met `JEV_API_KEY` en dezelfde judge.
+3. **Bastiaan labelt** de verschillen met de judge, met dezelfde beoordelingsregel, in
+   `labels/<datum>b1.json` en `labels/<datum>b2.json`. Daarna `--rescore` op beide.
+4. **Wat telt als beter**, beslist vóór de meting:
+   - Jev alleen: minder vals alarm met versie 2 dan met versie 1, op de holdout van dezelfde
+     uitvoer;
+   - de hybride (Jevs "slaagt" blijft staan, de rest gaat naar de judge): niet minder vaak gelijk
+     dan de judge op de beoordeelde rijen, op de holdout;
+   - het rapport geeft ook hoeveel uitvoer zonder LLM klaar is; dat is de besparing.
+5. **Drempels**: 0,7 en 0,3, niet bijgesteld. Het drempelblok in het rapport is alleen informatie
+   over de afstemset.
 
 ## Eerlijk over de vergelijking
 
