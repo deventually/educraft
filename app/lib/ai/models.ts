@@ -2,6 +2,7 @@ import modelsConfig from "../../../config/models.json";
 import {
   type ConfigProvider,
   type ModelInfo,
+  type ModelsConfig,
   type ProviderId,
   parseModelsConfig,
 } from "./modelsConfig";
@@ -57,6 +58,16 @@ export function effectivePrice(
 /** Dictation's provider and model (`speechToText` in `config/models.json`), or null. */
 export const SPEECH_TO_TEXT: Readonly<{ provider: string; model: string }> | null =
   config.speechToText ?? null;
+
+/** The decision model (`decisions` in `config/models.json`: TypeSafe's Jev), or null. */
+export const DECISIONS: Readonly<NonNullable<ModelsConfig["decisions"]>> | null =
+  config.decisions ?? null;
+
+/** A price in dollars as millionths of a euro, at the config's exchange rate; else undefined. */
+export function usdInEuroMicros(usd: number): number | undefined {
+  const rate = config.exchangeRate?.usdToEur;
+  return rate === undefined ? undefined : Math.round(usd * rate * 1_000_000);
+}
 
 /** The API providers of `config/models.json`, in file order. */
 export const PROVIDERS: readonly ConfigProvider[] = config.providers;

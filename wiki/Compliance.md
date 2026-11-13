@@ -82,7 +82,9 @@ once; the totals that were already rolled up know no person.
   production process). EU hosting: Fly.io `ams` or Hetzner both fit.
 - **Retention & deletion** — documented above; deletion is implemented.
 - **Sub-processors** — the model provider(s) in use (Anthropic, OpenAI, or a
-  local Ollama/LM Studio endpoint with no third party).
+  local Ollama/LM Studio endpoint with no third party). With the feature `bloomJev` on (default
+  Off), the learning outcomes of an imported course document also go to OpenRouter and TypeSafe
+  (Jev, the Bloom proposal); the rest of the document does not.
 
 ## Deferred to first sale / real deployment
 

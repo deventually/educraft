@@ -172,11 +172,27 @@ const SpeechToTextSchema = z.object({
   model: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}$/),
 });
 
+/**
+ * A decision model (TypeSafe's Jev): a part of LimeOnIt for bounded judgments, never a model
+ * anyone picks. It speaks the provider's Decisions API (typed questions in, probabilities out),
+ * not the chat API, so it is not in `models`. It uses its provider's key unless `keyEnv` names
+ * another setting (a key of its own, with its own spending limit). The model is pinned: a new
+ * version comes with a measurement (`evals/bloom-jev`).
+ */
+const DecisionsSchema = z.object({
+  name: z.string().min(1),
+  provider: z.string().min(1),
+  url: z.url({ protocol: /^https$/ }),
+  model: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}$/),
+  keyEnv: z.string().regex(SETTING_NAME).optional(),
+});
+
 const ModelsConfigSchema = z.object({
   default: z.string().min(1),
   providers: z.array(ConfigProviderSchema).default([]),
   models: z.array(ConfigModelSchema).min(1),
   speechToText: SpeechToTextSchema.optional(),
+  decisions: DecisionsSchema.optional(),
   exchangeRate: ExchangeRateSchema.optional(),
 });
 
@@ -218,6 +234,16 @@ export function parseModelsConfig(raw: unknown): ModelsConfig {
   }
   if (!seen.has(res.data.default)) {
     throw new Error(`config/models.json: the default "${res.data.default}" is not in the list.`);
+  }
+  const decisions = res.data.decisions;
+  if (
+    decisions &&
+    (!providerIds.has(decisions.provider) ||
+      (LOCAL_PROVIDERS as readonly string[]).includes(decisions.provider))
+  ) {
+    throw new Error(
+      `config/models.json: decisions names provider "${decisions.provider}", which is not an API provider in "providers".`,
+    );
   }
   // A provider added on screen is only known at run time; a listed one must speak OpenAI.
   const stt = res.data.speechToText;

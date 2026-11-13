@@ -27,13 +27,12 @@ import {
   bloomFromVerb,
   bloomReport,
   type BloomSet,
-  buildBloomJevRequest,
   loadBloomSuite,
   outcomeDocument,
-  parseBloomJevAnswer,
   sameOutcome,
   withHighestRule,
 } from "./eval-bloom-jev-helpers";
+import { buildBloomJevRequest, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
 import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import { EVALS_DIR, REPORTS_DIR } from "./eval-files";
 import { mapLimit, parallelism } from "./eval-helpers";
@@ -98,7 +97,7 @@ async function main() {
       const document = outcomeDocument(course);
       const message = buildImportMessage(document, course.courseName);
       if (dryRun) {
-        const req = buildBloomJevRequest(course.outcomes[0] ?? "", course.locale);
+        const req = buildBloomJevRequest(course.outcomes[0] ?? "", course.locale, jevModel);
         console.log(`  · ${set}/${course.id}: ${course.outcomes.length} outcomes, ${message.length} chars`);
         console.log(JSON.stringify(req, null, 2));
         continue;
@@ -127,7 +126,7 @@ async function main() {
 
         // Jev, one request per outcome: one yes/no per level; code takes the highest.
         const jev = await mapLimit(course.outcomes, limit, async (outcome) => {
-          const request = buildBloomJevRequest(outcome, course.locale, { model: jevModel });
+          const request = buildBloomJevRequest(outcome, course.locale, jevModel);
           const answer = await askJev(request, { apiKey });
           jevMs.push(answer.ms);
           const v = parseBloomJevAnswer(answer.body);

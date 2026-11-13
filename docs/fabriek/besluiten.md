@@ -611,3 +611,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   `tests/hotspots.test.ts` bewaakt het. Bastiaan, 2026-11-12 (thread "Voorkom merge-conflicten in
   het bord": "Kunnen we niets beters verzinnen voor het bord? Dit veroorzaakt ieder keer weer
   conflicts").
+- **BESLUIT-2026-11-13-1:** **Jev stelt het Bloom-niveau voor bij de import, achter een instelling.**
+  Na drie metingen (`evals/bloom-jev/README.md`) vraagt de import TypeSafe Jev per leeruitkomst om
+  het Bloom-niveau, in plaats van het taalmodel. Het onderdeel *Bloom-voorstel bij de import door
+  TypeSafe Jev* staat standaard **uit** (alleen de instantie, P28.3), omdat de leeruitkomsten dan
+  ook naar OpenRouter gaan. De docent bevestigt het niveau zoals altijd; de eval blijft de
+  controle. Bastiaan, 2026-11-13 (keuzekaart "Zetten we Jev in voor het Bloom-voorstel bij de
+  import?": "Ja, achter een instelling").
+- **BESLUIT-2026-11-13-2:** **Jev is een onderdeel van LimeOnIt, geen model dat iemand kiest.** Jev
+  staat in `config/models.json` als eigen entry (`decisions`), los van de modellijst: het praat met
+  de Decisions API, niet met de chat-API. De versie staat vast en verandert alleen met een meting
+  erbij. Jev gebruikt de sleutel van OpenRouter, of een eigen sleutelinstelling (`keyEnv`). De
+  gewone OpenRouter-modellen blijven als taalmodel te kiezen. Bastiaan, 2026-11-13 (thread
+  "Jev"-experiment: "ik denk niet dat Jev ooit gekozen moet worden. Het is een onderdeel van
+  LimeOnIt").

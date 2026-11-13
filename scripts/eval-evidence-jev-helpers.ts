@@ -23,6 +23,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { type DecisionsPayload, postDecisions } from "../app/lib/ai/decisions";
 import { BATCH_LIMITS, baseName, type SortProposal } from "../app/lib/portfolio/batch";
 import { type DossierData, EVIDENCE_KINDS, type EvidenceKind } from "../app/lib/portfolio/types";
 
@@ -411,25 +412,12 @@ export function parseJevAnswer(
 
 // ── The call ────────────────────────────────────────────────────────────────
 
-/** Any Decisions API request: a model, the state, and named questions. */
-interface JevPayload {
-  model: string;
-  state: unknown;
-  questions: Record<string, unknown>;
-}
-
-/** One POST to OpenRouter's Decisions API (alpha). Throws on an error status. */
+/** One POST to OpenRouter's Decisions API (alpha), the app's own client. Throws on an error status. */
 export async function askJev(
-  req: JevPayload,
+  req: DecisionsPayload,
   opts: { apiKey: string; fetch?: typeof fetch },
 ): Promise<{ body: unknown; ms: number }> {
   const start = performance.now();
-  const res = await (opts.fetch ?? fetch)(JEV_URL, {
-    method: "POST",
-    headers: { authorization: `Bearer ${opts.apiKey}`, "content-type": "application/json" },
-    body: JSON.stringify(req),
-  });
-  const ms = Math.round(performance.now() - start);
-  if (!res.ok) throw new Error(`Jev via OpenRouter: ${res.status} ${(await res.text()).slice(0, 300)}`);
-  return { body: (await res.json()) as unknown, ms };
+  const body = await postDecisions(JEV_URL, req, opts);
+  return { body, ms: Math.round(performance.now() - start) };
 }
