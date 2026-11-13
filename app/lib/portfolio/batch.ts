@@ -100,7 +100,7 @@ const RawAnswer = z.object({
 });
 
 /** "Mijn bewijs/LU1/lesplan.docx" → "lesplan". */
-function baseName(name: string): string {
+export function baseName(name: string): string {
   const last = name.split(/[\\/]/).pop() ?? name;
   return (last.replace(/\.[a-z0-9]{1,5}$/i, "").trim() || last).slice(0, LIMITS.title);
 }

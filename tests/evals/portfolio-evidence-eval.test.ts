@@ -1,12 +1,16 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildSortMessage, parseSortAnswer } from "~/lib/portfolio/batch";
 import { DossierDataSchema } from "~/lib/portfolio/schema";
 import {
+  answerUsable,
   caseDossier,
   type EvidenceEvalFile,
   evidenceReportMarkdown,
+  HOLDOUT_FILE,
+  loadSuite,
+  rawReportName,
   scoreSort,
 } from "../../scripts/eval-evidence-helpers";
 
@@ -18,7 +22,7 @@ const score = (id: string, raw: string | null) => {
   const c = suite.cases.find((x) => x.id === id);
   if (!c) throw new Error(id);
   const d = caseDossier(suite, c);
-  return scoreSort(suite, c, raw, parseSortAnswer(raw, d, { key: c.id, ...c.file }));
+  return scoreSort(suite, c, answerUsable(raw), parseSortAnswer(raw, d, { key: c.id, ...c.file }));
 };
 
 describe("portfolio-evidence eval cases", () => {
@@ -85,4 +89,89 @@ describe("portfolio-evidence eval cases", () => {
     expect(md).toContain("portfolio-evidence-sort@v1");
     expect(md).toContain("1/1");
   });
+
+  it("the report gives speed and cost when the runner measured them", () => {
+    const s = score("nl-lesson-plan", JSON.stringify(suite.cases[0]?.good));
+    const rows = [
+      { caseId: "a", ...s, ms: 100 },
+      { caseId: "b", ...s, ms: 300 },
+    ];
+    const md = evidenceReportMarkdown({ date: "d", model: "m", repeat: 1, rows, costUsd: 0.00012 });
+    expect(md).toMatch(/gemiddeld 200 ms/);
+    expect(md).toMatch(/hoogst 300 ms/);
+    expect(md).toContain("$0.000120");
+    expect(
+      evidenceReportMarkdown({ date: "d", model: "m", repeat: 1, rows: [{ caseId: "a", ...s }] }),
+    ).not.toMatch(/ms/);
+  });
+
+  it("counts how often 'Controleren' was set, so over-flagging shows even when every check passes", () => {
+    const sure = score("nl-lesson-plan", JSON.stringify({ ...suite.cases[0]?.good, sure: true }));
+    const unsure = score(
+      "nl-lesson-plan",
+      JSON.stringify({ ...suite.cases[0]?.good, sure: false }),
+    );
+    expect(sure.flagged).toBe(false);
+    expect(unsure.flagged).toBe(true);
+    const md = evidenceReportMarkdown({
+      date: "d",
+      model: "m",
+      repeat: 1,
+      rows: [
+        { caseId: "a", ...sure },
+        { caseId: "b", ...unsure },
+      ],
+    });
+    expect(md).toContain("Controleren gezet: 1/2");
+    expect(md).toMatch(/\| b \|.*\| ja \|/);
+    const why = evidenceReportMarkdown({
+      date: "d",
+      model: "m",
+      repeat: 1,
+      rows: [{ caseId: "b", ...unsure, why: ["outcome", "unsettled:c_U1_2"] }],
+    });
+    expect(why).toMatch(/\| b \|.*\| ja: outcome, unsettled:c_U1_2 \|/);
+  });
 });
+
+describe("the holdout stays out of the public repo", () => {
+  it("ignores the holdout file and its raw answers, which hold its text", () => {
+    const ignore = readFileSync(join(__dirname, "../../.gitignore"), "utf8");
+    expect(ignore).toContain("/evals/portfolio-evidence/holdout.json");
+    expect(ignore).toContain("/evals/reports/*-holdout-raw.json");
+    expect(rawReportName("2026-11-13", "jev4h", "holdout")).toBe(
+      "2026-11-13jev4h-portfolio-evidence-holdout-raw.json",
+    );
+    expect(rawReportName("2026-11-13", "jev4", "cases")).toBe(
+      "2026-11-13jev4-portfolio-evidence-raw.json",
+    );
+  });
+});
+
+describe.skipIf(!existsSync(HOLDOUT_FILE))(
+  "portfolio-evidence holdout (real, anonymised files on Bastiaan's machine only; never used to tune)",
+  () => {
+    const holdout = existsSync(HOLDOUT_FILE) ? loadSuite("holdout") : { ...suite, cases: [] };
+
+    it("uses the main frameworks and has its own case ids", () => {
+      expect(holdout.frameworks).toEqual(suite.frameworks);
+      const ids = new Set(suite.cases.map((c) => c.id));
+      expect(holdout.cases.length).toBeGreaterThanOrEqual(10);
+      for (const c of holdout.cases) expect(ids.has(c.id), c.id).toBe(false);
+    });
+
+    it("every holdout case's known-good answer passes every check", () => {
+      for (const c of holdout.cases) {
+        const d = caseDossier(holdout, c);
+        const raw = JSON.stringify(c.good);
+        const s = scoreSort(
+          holdout,
+          c,
+          answerUsable(raw),
+          parseSortAnswer(raw, d, { key: c.id, ...c.file }),
+        );
+        expect(s.pass, `${c.id}: ${JSON.stringify(s.checks)}`).toBe(true);
+      }
+    });
+  },
+);

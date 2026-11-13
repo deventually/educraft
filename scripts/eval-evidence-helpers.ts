@@ -2,6 +2,8 @@
  * Pure helpers for the evidence-sorting eval (`npm run eval:evidence`): build the dossier a
  * case's framework gives, and score the proposal for one file deterministically (no judge).
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { extractJson } from "../app/lib/ai/structuredAnswer";
 import { SORT_PROMPT_ID, type SortProposal } from "../app/lib/portfolio/batch";
 import { emptyDossier } from "../app/lib/portfolio/schema";
@@ -43,6 +45,33 @@ export interface EvidenceEvalFile {
   cases: EvidenceCase[];
 }
 
+const SUITE_DIR = join(__dirname, "..", "evals", "portfolio-evidence");
+
+/**
+ * A case set: `cases` (the main set, also used to tune) or `holdout` (real, anonymised files,
+ * never used to tune). Every set uses the frameworks of `cases.json`.
+ */
+/**
+ * Real, anonymised files from Bastiaan's own dossier: kept on his machine, never in the public
+ * repo (gitignored), and never used to tune.
+ */
+export const HOLDOUT_FILE = join(SUITE_DIR, "holdout.json");
+
+/** The raw answers hold the files' text, so a holdout run's raw file is gitignored too. */
+export function rawReportName(date: string, label: string, set: "cases" | "holdout"): string {
+  return `${date}${label}-portfolio-evidence${set === "holdout" ? "-holdout" : ""}-raw.json`;
+}
+
+export function loadSuite(set: "cases" | "holdout"): EvidenceEvalFile {
+  const main = JSON.parse(readFileSync(join(SUITE_DIR, "cases.json"), "utf8")) as EvidenceEvalFile;
+  if (set === "cases") return main;
+  const extra = JSON.parse(readFileSync(HOLDOUT_FILE, "utf8")) as Pick<
+    EvidenceEvalFile,
+    "cases"
+  >;
+  return { frameworks: main.frameworks, cases: extra.cases };
+}
+
 const outcomeId = (i: number) => `eval-u${i + 1}`;
 
 /** The dossier the app would hold: the case's framework, confirmed, without evidence. */
@@ -76,18 +105,28 @@ export interface SortScore {
     doubt: boolean;
     clean: boolean;
   };
+  /** The row said "Controleren": not a check, but counted, so over-flagging shows. */
+  flagged: boolean;
 }
 
-/** Scores the code-checked proposal; `raw` only for whether the answer was usable at all. */
+/** Was the model's text answer usable at all: JSON with an `outcome`? */
+export function answerUsable(raw: string | null): boolean {
+  const json = raw === null ? undefined : extractJson(raw);
+  return typeof json === "object" && json !== null && "outcome" in json;
+}
+
+/**
+ * Scores the code-checked proposal. `usable`: whether the answer could be read at all
+ * (`answerUsable` for a text answer; the Jev runner says so for its typed answer).
+ */
 export function scoreSort(
   suite: EvidenceEvalFile,
   c: EvidenceCase,
-  raw: string | null,
+  usable: boolean,
   p: SortProposal,
 ): SortScore {
   const outcomes = suite.frameworks[c.locale];
-  const json = raw === null ? undefined : extractJson(raw);
-  const parse = typeof json === "object" && json !== null && "outcome" in json;
+  const parse = usable;
   const index = Number(/^eval-u(\d+)$/.exec(p.outcomeId ?? "")?.[1] ?? 0) - 1;
   const code = index >= 0 ? (outcomes[index]?.code ?? null) : null;
   const outcome = c.expect.outcome.includes(code);
@@ -114,11 +153,33 @@ export function scoreSort(
     doubt,
     clean,
   };
-  return { pass: Object.values(checks).every(Boolean), checks };
+  return { pass: Object.values(checks).every(Boolean), checks, flagged: p.check };
 }
 
 export interface EvidenceRow extends SortScore {
   caseId: string;
+  /** How long the call took, when the runner measured it. */
+  ms?: number;
+  /** Why the row says "Controleren", when the runner knows (Jev). */
+  why?: string[];
+}
+
+function speedLine(rows: EvidenceRow[], costUsd?: number): string[] {
+  const ms = rows.flatMap((x) => (x.ms === undefined ? [] : [x.ms]));
+  const parts = [
+    ...(ms.length > 0
+      ? [
+          `Snelheid: gemiddeld ${Math.round(ms.reduce((a, b) => a + b, 0) / ms.length)} ms, hoogst ${Math.max(...ms)} ms per bestand`,
+        ]
+      : []),
+    ...(costUsd !== undefined ? [`kosten: $${costUsd.toFixed(6)} in totaal`] : []),
+  ];
+  return parts.length > 0 ? [parts.join(" · "), ""] : [];
+}
+
+function flagCell(x: EvidenceRow): string {
+  if (!x.flagged) return "nee";
+  return x.why && x.why.length > 0 ? `ja: ${x.why.join(", ")}` : "ja";
 }
 
 export function evidenceReportMarkdown(r: {
@@ -126,6 +187,8 @@ export function evidenceReportMarkdown(r: {
   model: string;
   repeat: number;
   rows: EvidenceRow[];
+  /** The total the provider reported, when it did. */
+  costUsd?: number;
 }): string {
   const passed = r.rows.filter((x) => x.pass).length;
   const names = Object.keys(r.rows[0]?.checks ?? {}) as (keyof SortScore["checks"])[];
@@ -137,9 +200,15 @@ export function evidenceReportMarkdown(r: {
     "",
     `**Geslaagd: ${passed}/${r.rows.length}**`,
     "",
-    `| Case | ${names.join(" | ")} |`,
-    `| --- | ${names.map(() => "---").join(" | ")} |`,
-    ...r.rows.map((x) => `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} |`),
+    `Controleren gezet: ${r.rows.filter((x) => x.flagged).length}/${r.rows.length}`,
+    "",
+    ...speedLine(r.rows, r.costUsd),
+    `| Case | ${names.join(" | ")} | Controleren |`,
+    `| --- | ${names.map(() => "---").join(" | ")} | --- |`,
+    ...r.rows.map(
+      (x) =>
+        `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} | ${flagCell(x)} |`,
+    ),
     "",
     ...names.map(
       (n) => `- **${n}**: ${r.rows.filter((x) => x.checks[n]).length}/${r.rows.length}`,

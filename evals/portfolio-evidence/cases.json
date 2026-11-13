@@ -568,6 +568,363 @@
         "sure": false,
         "reason": "Feedback from students on your lessons; it may also fit your development."
       }
+    },
+    {
+      "id": "nl-hard-two-outcomes",
+      "description": "Intervisieverslag: feedback van collega's op een begeleidingsgesprek. Past bij LU2 en LU5.",
+      "locale": "nl",
+      "file": {
+        "name": "intervisie-verslag-oktober.docx",
+        "text": "Verslag intervisie 14 oktober\nIk bracht een studievoortgangsgesprek in dat vastliep: de student wilde stoppen en ik ging te snel naar oplossingen. Mijn collega's gaven feedback: stel eerst meer open vragen en vat samen voordat je advies geeft. Ik neem mee dat ik in mijn volgende gesprek bewust eerst luister. Dit punt zet ik ook in mijn ontwikkelplan."
+      },
+      "expect": {
+        "outcome": [
+          "LU2",
+          "LU5"
+        ],
+        "kinds": [
+          "feedback",
+          "analysis",
+          "other"
+        ],
+        "mustCriteria": [],
+        "notCriteria": [],
+        "required": "any",
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U5",
+        "kind": "feedback",
+        "criteria": [
+          "U5.C2"
+        ],
+        "required": null,
+        "title": "Intervisie over een begeleidingsgesprek",
+        "sure": false,
+        "reason": "Feedback van collega's; past ook bij begeleiden."
+      }
+    },
+    {
+      "id": "nl-hard-ocr",
+      "description": "Een gescand lesplan met OCR-ruis: toch duidelijk een lesvoorbereiding.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/scan lesplan.pdf",
+        "text": "LESV00RBEREIDlNG  — Wondzorg  kl@s 2A\nLeerd0el: de student k@n een wond beoordelen m.b.v. de TIME-methode\nBeginsituatie: grpe heeft anatomie huid gehad (per. 1)\nOpbouw: 10 min ophalen voorkennis / 20 min uitleg + demo / 30 min oefenen in tweetallen (casus) / 10 min nabespreken\nWerkv0rmen: think-pair-share, oefenen op m0del\nAfsluiting: exit ticket 3 vragen"
+      },
+      "expect": {
+        "outcome": [
+          "LU1"
+        ],
+        "kinds": [
+          "lesson-plan"
+        ],
+        "mustCriteria": [
+          1
+        ],
+        "notCriteria": [],
+        "required": 1,
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U1",
+        "kind": "lesson-plan",
+        "criteria": [
+          "U1.C1",
+          "U1.C2",
+          "U1.C3"
+        ],
+        "required": "U1.R1",
+        "title": "Lesvoorbereiding wondzorg",
+        "sure": true,
+        "reason": "Een lesplan met doel, beginsituatie en opbouw."
+      }
+    },
+    {
+      "id": "nl-hard-long",
+      "description": "Een lang document: eerst algemene informatie, pas daarna een toetsanalyse. Duidelijk bewijs, dus geen Controleren.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/LU4/verslag-periode-2.pdf",
+        "text": "Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. Algemene informatie opleiding Verpleegkunde. De opleiding werkt met vier periodes van tien weken. Roosters staan in het studentportaal. Vragen over de organisatie gaan naar het onderwijsbureau. \nToetsanalyse tentamen Anatomie periode 2\n142 studenten, slagingspercentage 61%. Vraag 7 en 12 hadden een p-waarde onder 0,30 en een negatieve Rit; beide vragen zijn dubbelzinnig geformuleerd. Cronbachs alfa 0,74. Conclusie: vraag 7 en 12 herschrijven, de toetsmatrijs laat te weinig vragen op toepassingsniveau zien. Verbeterpunten voor volgend jaar: twee toepassingsvragen extra, vraag 7 en 12 vervangen."
+      },
+      "expect": {
+        "outcome": [
+          "LU4"
+        ],
+        "kinds": [
+          "analysis"
+        ],
+        "mustCriteria": [
+          3
+        ],
+        "notCriteria": [],
+        "required": 2,
+        "check": false,
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U4",
+        "kind": "analysis",
+        "criteria": [
+          "U4.C3"
+        ],
+        "required": "U4.R2",
+        "title": "Toetsanalyse anatomie periode 2",
+        "sure": true,
+        "reason": "Een toetsanalyse met conclusies en verbeterpunten."
+      }
+    },
+    {
+      "id": "nl-hard-english-feedback",
+      "description": "Engelstalige feedback van de werkplekbegeleider in een Nederlands dossier.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/LU1/feedback-mentor.pdf",
+        "text": "Lesson observation — feedback from your workplace supervisor\nStrong start: you activated prior knowledge with a quick quiz. The group work was well organised and you gave students specific feedback while walking around. Next step: check understanding before moving to the case, two students were lost. Overall a well-structured lesson."
+      },
+      "expect": {
+        "outcome": [
+          "LU1"
+        ],
+        "kinds": [
+          "feedback"
+        ],
+        "mustCriteria": [
+          3
+        ],
+        "notCriteria": [],
+        "required": 2,
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U1",
+        "kind": "feedback",
+        "criteria": [
+          "U1.C3"
+        ],
+        "required": "U1.R2",
+        "title": "Feedback werkplekbegeleider op een les",
+        "sure": true,
+        "reason": "Feedback van je werkplekbegeleider op een les."
+      }
+    },
+    {
+      "id": "nl-hard-filename-only",
+      "description": "Alleen een nietszeggende bestandsnaam, geen tekst: altijd Controleren.",
+      "locale": "nl",
+      "file": {
+        "name": "Scan_20261002_0001.pdf",
+        "text": ""
+      },
+      "expect": {
+        "outcome": [
+          null,
+          "LU1",
+          "LU2",
+          "LU3",
+          "LU4",
+          "LU5"
+        ],
+        "kinds": [
+          "lesson-plan",
+          "observation-notes",
+          "feedback",
+          "test-material",
+          "analysis",
+          "other"
+        ],
+        "mustCriteria": [],
+        "notCriteria": [],
+        "required": "any",
+        "check": true,
+        "forbidden": []
+      },
+      "good": {
+        "outcome": null,
+        "kind": "other",
+        "criteria": [],
+        "required": null,
+        "title": "Scan",
+        "sure": false,
+        "reason": "Alleen een bestandsnaam, geen inhoud."
+      }
+    },
+    {
+      "id": "nl-hard-transcript",
+      "description": "Een transcript van een lesopname: een verslag van een les, geen lesplan.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/LU1/transcript-les-3-oktober.txt",
+        "text": "[00:00] Docent: Goedemorgen, we beginnen met drie vragen over vorige week.\n[03:10] Student A: Is het de rechterkamer?\n[03:15] Docent: Bijna, kijk nog eens naar de pijl. Wie helpt?\n[12:40] Docent: Nu in tweetallen de casus. Na tien minuten bespreken we het.\n[25:05] Docent: Groep 3, goed dat jullie de vitale functies erbij pakten. Wat zou je nog meer meten?"
+      },
+      "expect": {
+        "outcome": [
+          "LU1"
+        ],
+        "kinds": [
+          "observation-notes"
+        ],
+        "mustCriteria": [
+          3
+        ],
+        "notCriteria": [],
+        "required": "any",
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U1",
+        "kind": "observation-notes",
+        "criteria": [
+          "U1.C3"
+        ],
+        "required": "U1.R3",
+        "title": "Transcript van een les",
+        "sure": true,
+        "reason": "Een uitgeschreven lesopname met werkvormen en feedback."
+      }
+    },
+    {
+      "id": "nl-hard-development-plan",
+      "description": "Een ontwikkelplan: duidelijk LU5, dus geen Controleren.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/ontwikkelplan-2026.docx",
+        "text": "Persoonlijk ontwikkelplan 2026\nWaar sta ik: ik kan lessen goed voorbereiden, maar mijn klassenmanagement bij grote groepen is wisselend.\nDoel 1: in periode 3 gebruik ik bij elke les een vaste start en ik vraag twee keer per periode feedback van mijn werkplekbegeleider.\nDoel 2: ik volg de training gespreksvoering.\nReflectie: de feedback van vorig jaar liet zien dat ik te snel ga; daar werk ik nu aan."
+      },
+      "expect": {
+        "outcome": [
+          "LU5"
+        ],
+        "kinds": [
+          "other",
+          "analysis"
+        ],
+        "mustCriteria": [
+          1
+        ],
+        "notCriteria": [],
+        "required": 1,
+        "check": false,
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U5",
+        "kind": "other",
+        "criteria": [
+          "U5.C1",
+          "U5.C2"
+        ],
+        "required": "U5.R1",
+        "title": "Ontwikkelplan 2026",
+        "sure": true,
+        "reason": "Je ontwikkelplan met doelen en reflectie."
+      }
+    },
+    {
+      "id": "nl-hard-not-evidence",
+      "description": "Notulen van een sectievergadering: geen bewijs voor het dossier.",
+      "locale": "nl",
+      "file": {
+        "name": "notulen-sectie-november.docx",
+        "text": "Notulen sectievergadering 6 november\n1. Rooster periode 3: wijzigingen voor dinsdag\n2. Kerstborrel 18 december, opgave bij Mark\n3. Nieuwe printer op de tweede verdieping\n4. Rondvraag: geen"
+      },
+      "expect": {
+        "outcome": [
+          null
+        ],
+        "kinds": [
+          "other"
+        ],
+        "mustCriteria": [],
+        "notCriteria": [],
+        "required": "any",
+        "check": true,
+        "forbidden": []
+      },
+      "good": {
+        "outcome": null,
+        "kind": "other",
+        "criteria": [],
+        "required": null,
+        "title": "Notulen sectievergadering",
+        "sure": false,
+        "reason": "Notulen, geen bewijs voor een leeruitkomst."
+      }
+    },
+    {
+      "id": "nl-hard-feedback-on-plan",
+      "description": "Feedback van een collega op het ontwikkelplan: feedback, bij LU5.",
+      "locale": "nl",
+      "file": {
+        "name": "Mijn bewijs/LU5/reactie-collega-ontwikkelplan.pdf",
+        "text": "Hoi, ik heb je ontwikkelplan gelezen. Je doelen zijn concreet, sterk dat je een vaste lesstart kiest. Tip: maak doel 2 meetbaar, wanneer is de training gespreksvoering geslaagd? En plan een moment om met je werkplekbegeleider terug te kijken. Groet, je collega uit de sectie"
+      },
+      "expect": {
+        "outcome": [
+          "LU5"
+        ],
+        "kinds": [
+          "feedback"
+        ],
+        "mustCriteria": [
+          2
+        ],
+        "notCriteria": [],
+        "required": null,
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U5",
+        "kind": "feedback",
+        "criteria": [
+          "U5.C2"
+        ],
+        "required": null,
+        "title": "Feedback van een collega op het ontwikkelplan",
+        "sure": true,
+        "reason": "Feedback van een collega op je ontwikkelplan."
+      }
+    },
+    {
+      "id": "en-hard-dutch-text",
+      "description": "Engels dossier, Nederlandse tekst: een toetsanalyse, bij LO4.",
+      "locale": "en",
+      "file": {
+        "name": "Evidence/LO4/toetsanalyse-blok-1.pdf",
+        "text": "Toetsanalyse blok 1 Biologie\n96 studenten, gemiddeld cijfer 6,4. Vraag 4 had een p-waarde van 0,92: te makkelijk. Vraag 9 discrimineerde negatief en is geschrapt. Conclusie: meer vragen op analyseniveau; de matrijs aanpassen voor blok 2."
+      },
+      "expect": {
+        "outcome": [
+          "LO4"
+        ],
+        "kinds": [
+          "analysis"
+        ],
+        "mustCriteria": [
+          3
+        ],
+        "notCriteria": [],
+        "required": 2,
+        "check": "any",
+        "forbidden": []
+      },
+      "good": {
+        "outcome": "U2",
+        "kind": "analysis",
+        "criteria": [
+          "U2.C3"
+        ],
+        "required": "U2.R2",
+        "title": "Test analysis block 1 biology",
+        "sure": true,
+        "reason": "A test analysis with conclusions and improvements."
+      }
     }
   ]
 }
