@@ -87,4 +87,26 @@ verschillende niveaus het hoogste**. Daarna:
   `course-import@v3`. De app zelf blijft op v3 tot de meting zegt waar het voorstel vandaan moet komen.
 - **De hybride**: eerst de lijst, dan Jev, dan de LLM. Het rapport zegt per set wie er besliste.
 
+### Uitslag ronde 2
+
+Rapport: [`2026-11-13c-bloom-jev.md`](../reports/2026-11-13c-bloom-jev.md). Elke leeruitkomst 3
+keer; LLM `claude-code::claude-sonnet-5-5`. De drempel voor Jev kwam op de afstemsets uit op 0,7.
+
+| Nieuwe holdout (80 × 3) | Goed | Stabiel over 3 runs | Snelheid | Kosten (hele meting, alle sets) |
+| --- | --- | --- | --- | --- |
+| Jev | 171/240 (71%) | 78/80 | 314 ms per leeruitkomst | $0,024 |
+| LLM (de import) | 158/240 (66%) | 73/80 | 5,8 s per document | $0,74 (API-lijstprijs) |
+| Werkwoordenlijst | 144/240 (60%) | 80/80 | 0 | $0 |
+| Hybride (lijst, Jev, LLM) | 169/240 (70%) | | | |
+
+- **Jev wint vooral waar Bastiaan wel een niveau gaf**: 86 van de 141 goed, de LLM 62, de lijst
+  57. De LLM zegt het vaakst "geen niveau" bij toepassen, evalueren en creëren. Bij "geen niveau"
+  doen ze het alle drie goed (Jev 85, LLM 96, lijst 87 van de 99).
+- **De hybride voegt niets toe**: op de nieuwe holdout iets onder Jev alleen. Op de oude holdout
+  was hij de beste, maar daar zijn de regel en de lijst ook op gekozen.
+- **Klein.** Het verschil tussen Jev en de LLM is 13 rijen, ongeveer 4 leeruitkomsten op 80. Een
+  duidelijke richting, geen hard bewijs.
+- De volgorde van de hybride ligt vast sinds vóór de meting; andere volgordes zijn op de holdout
+  niet uitgeprobeerd om er een te kiezen.
+
 Nooit onderdeel van CI.

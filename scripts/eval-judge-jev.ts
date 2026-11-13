@@ -7,6 +7,8 @@
  *   … -- --date 2026-11-13          # the outputs of that day (default: the latest)
  *   … -- --tool mentorai,lesson-plan
  *   npm run eval:judge-jev -- --dry-run   # build the requests only, no API
+ *   npm run eval:judge-jev -- --rescore evals/reports/<date><label>-judge-jev-raw.json
+ *                                    # the report again with the labels as they are now, no API
  *
  * Writes `evals/reports/<date><label>-judge-jev.md` and `…-judge-jev-raw.json` (each exact Jev
  * request with its answer, and the judge's reply). Labels for the rows where the two disagree
@@ -17,6 +19,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { providerForModel } from "~/lib/ai/provider";
 import { ALL_TOOLS } from "~/lib/registry";
+import type { Tool } from "~/lib/registry/types";
 import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import {
   EVALS_DIR,
@@ -29,6 +32,7 @@ import {
 import {
   buildJudgePrompt,
   DEFAULT_JUDGE_MODEL,
+  type EvalCase,
   JUDGE_MAX_TOKENS,
   mapLimit,
   parallelism,
@@ -52,7 +56,104 @@ function arg(name: string): string | undefined {
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
 
+const specs = loadJudgeSpecs();
+
+/** One row per judged check of one output: Jev's verdict next to the LLM judge's. */
+function rowsOf(
+  job: { tool: Tool; c: EvalCase; run: number; rubric: string },
+  output: string,
+  body: unknown,
+  judgeText: string,
+) {
+  const { tool, c, run, rubric } = job;
+  const judgedIds = parseHardChecks(rubric)
+    .filter((h) => !h.counted)
+    .map((h) => h.id);
+  const parsed = parseJudgeResult(judgeText);
+  const { kept } = verifyEvidence(
+    (parsed?.failedChecks ?? []).filter((id) => judgedIds.includes(id)),
+    parsed?.evidence,
+    output,
+  );
+  const jev = parseJudgeJevAnswer(body, tool, c, specs);
+  const rows: JudgeRow[] = judgedIds.map((check) => {
+    const v = jev.verdicts[check];
+    return {
+      tool: tool.slug,
+      caseId: c.id,
+      run,
+      check,
+      holdout: specs.holdout.includes(tool.slug),
+      jev: v?.verdict ?? "unsettled",
+      ...(v?.p !== undefined ? { jevP: v.p } : {}),
+      sonnet: kept.includes(check),
+    };
+  });
+  return { rows, costUsd: jev.costUsd };
+}
+
+function loadLabels(): Record<string, boolean> | undefined {
+  const file = join(EVALS_DIR, "judge-jev", "labels.json");
+  return existsSync(file)
+    ? (JSON.parse(readFileSync(file, "utf8")) as { labels: Record<string, boolean> }).labels
+    : undefined;
+}
+
+const order = (r: JudgeRow) => `${r.tool}/${r.caseId}/${r.run}/${r.check}`;
+
+type Meta = Omit<Parameters<typeof judgeJevReport>[0], "rows" | "labels">;
+
+interface RawEntry {
+  key: string;
+  request: { state: { output: string } };
+  body: unknown;
+  judge: string;
+}
+
+/** Date, models, speed and cost as the first report printed them (its raw file has no meta). */
+function metaFromReport(md: string): Meta {
+  const text = readFileSync(md, "utf8");
+  const pick = (re: RegExp) => re.exec(text)?.[1] ?? "";
+  const num = (re: RegExp) => Number(pick(re));
+  return {
+    date: pick(/Datum: (\S+)/),
+    jevModel: pick(/Jev: (\S+) ·/),
+    judgeModel: pick(/judge: (\S+)\n/),
+    jevMs: { mean: num(/Jev: gemiddeld (\d+) ms/), max: num(/Jev: gemiddeld \d+ ms, hoogst (\d+)/) },
+    judgeMs: {
+      mean: num(/Sonnet-judge: gemiddeld (\d+) ms/),
+      max: num(/Sonnet-judge: gemiddeld \d+ ms, hoogst (\d+)/),
+    },
+    jevCostUsd: num(/Kosten Jev: \$([\d.]+)/),
+    judgeCostUsd: num(/Kosten judge: \$([\d.]+)/),
+  };
+}
+
+/** The report again from a raw file, with the labels as they are now: no API. */
+function rescore(rawFile: string) {
+  const file = rawFile.replace(/-raw\.json$/, ".md");
+  const parsed = JSON.parse(readFileSync(rawFile, "utf8")) as
+    | { meta: Meta; raw: RawEntry[] }
+    | RawEntry[];
+  const entries = Array.isArray(parsed) ? parsed : parsed.raw;
+  const meta = Array.isArray(parsed) ? metaFromReport(file) : parsed.meta;
+  const rows = entries.flatMap((e) => {
+    const m = /^(.+?)\/(.+)#(\d+)$/.exec(e.key);
+    const tool = ALL_TOOLS.find((t) => t.slug === m?.[1]);
+    const c = tool && loadCases(tool).find((x) => x.id === m?.[2]);
+    if (!m || !tool || !c) throw new Error(`unknown output in the raw file: ${e.key}`);
+    const job = { tool, c, run: Number(m[3]), rubric: loadRubric(tool) };
+    return rowsOf(job, e.request.state.output, e.body, e.judge).rows;
+  });
+  rows.sort((a, b) => order(a).localeCompare(order(b)));
+  const labels = loadLabels();
+  writeFileSync(file, judgeJevReport({ ...meta, rows, ...(labels ? { labels } : {}) }));
+  console.log(`Report: ${file}`);
+}
+
 async function main() {
+  const again = arg("rescore");
+  if (again) return rescore(again);
   const dryRun = process.argv.includes("--dry-run");
   const runs = Math.max(1, Number(arg("runs") ?? 1));
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
@@ -63,7 +164,6 @@ async function main() {
   const date = arg("date") ?? latestOutputDate();
   if (!date) throw new Error("No outputs yet: run `npm run eval -- --cases-only` first.");
   const only = arg("tool")?.split(",");
-  const specs = loadJudgeSpecs();
   const price = catalogPrice(judgeModel);
 
   const tools = ALL_TOOLS.filter(
@@ -124,14 +224,6 @@ async function main() {
       if (parsed) break;
     }
     judgeMs.push(judgeApiMs ?? Math.round(performance.now() - judgeStart));
-    const judgedIds = parseHardChecks(rubric)
-      .filter((h) => !h.counted)
-      .map((h) => h.id);
-    const { kept } = verifyEvidence(
-      (parsed?.failedChecks ?? []).filter((id) => judgedIds.includes(id)),
-      parsed?.evidence,
-      out.output,
-    );
 
     // Jev on the same output.
     // Nothing to ask (every check decided in code or left to the judge): no call.
@@ -139,50 +231,32 @@ async function main() {
       ? await askJev(request, { apiKey })
       : { body: { answers: {} }, ms: undefined };
     if (answer.ms !== undefined) jevMs.push(answer.ms);
-    const jev = parseJudgeJevAnswer(answer.body, tool, c, specs);
-    if (jev.costUsd !== undefined) jevCostUsd += jev.costUsd;
-
-    for (const check of judgedIds) {
-      const v = jev.verdicts[check];
-      rows.push({
-        tool: tool.slug,
-        caseId: c.id,
-        run,
-        check,
-        holdout: specs.holdout.includes(tool.slug),
-        jev: v?.verdict ?? "unsettled",
-        ...(v?.p !== undefined ? { jevP: v.p } : {}),
-        sonnet: kept.includes(check),
-      });
-    }
+    const judged = rowsOf({ tool, c, run, rubric }, out.output, answer.body, judgeText);
+    if (judged.costUsd !== undefined) jevCostUsd += judged.costUsd;
+    rows.push(...judged.rows);
     raw.push({ key: tag, request, body: answer.body, judge: judgeText });
     console.log(`  ✓ ${tag}`);
   });
   if (dryRun) return;
 
-  const labelsFile = join(EVALS_DIR, "judge-jev", "labels.json");
-  const labels = existsSync(labelsFile)
-    ? (JSON.parse(readFileSync(labelsFile, "utf8")) as { labels: Record<string, boolean> }).labels
-    : undefined;
-  const order = (r: JudgeRow) => `${r.tool}/${r.caseId}/${r.run}/${r.check}`;
+  const labels = loadLabels();
   rows.sort((a, b) => order(a).localeCompare(order(b)));
   mkdirSync(REPORTS_DIR, { recursive: true });
   const file = join(REPORTS_DIR, `${date}${label}-judge-jev.md`);
+  const meta: Meta = {
+    date,
+    jevModel,
+    judgeModel,
+    jevMs,
+    judgeMs,
+    jevCostUsd,
+    ...(judgePriced ? { judgeCostUsd } : {}),
+  };
+  writeFileSync(file, judgeJevReport({ ...meta, rows, ...(labels ? { labels } : {}) }));
   writeFileSync(
-    file,
-    judgeJevReport({
-      date,
-      jevModel,
-      judgeModel,
-      rows,
-      jevMs,
-      judgeMs,
-      jevCostUsd,
-      ...(judgePriced ? { judgeCostUsd } : {}),
-      ...(labels ? { labels } : {}),
-    }),
+    join(REPORTS_DIR, `${date}${label}-judge-jev-raw.json`),
+    `${JSON.stringify({ meta, raw }, null, 2)}\n`,
   );
-  writeFileSync(join(REPORTS_DIR, `${date}${label}-judge-jev-raw.json`), `${JSON.stringify(raw, null, 2)}\n`);
   console.log(`Report: ${file}`);
 }
 

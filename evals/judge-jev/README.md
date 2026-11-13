@@ -53,7 +53,64 @@ bijgesteld. Het rapport toont de holdout apart.
 Waar de twee het eens zijn, telt dat als overeenstemming, niet als bewijs dat ze gelijk hebben.
 Waar ze het oneens zijn, labelt Bastiaan de rij in `labels.json` (`{"labels": {"<tool>/<case>#<run>/<check>": true}}`,
 `true` = de check faalt echt). Het rapport scoort dan beide judges op die rijen. Geen model
-beoordeelt de modellen.
+beoordeelt de modellen. Na het labelen maakt
+`npm run eval:judge-jev -- --rescore evals/reports/<datum><label>-judge-jev-raw.json` het rapport
+opnieuw, zonder API.
+
+## Uitslag (2026-11-13)
+
+Rapport: [`2026-11-13a-judge-jev.md`](../reports/2026-11-13a-judge-jev.md). Uitvoer van 19 tools,
+3 runs; judge `claude-code::claude-sonnet-5-5`.
+
+| | Afstemmen | Holdout |
+| --- | --- | --- |
+| Beslist door Jev | 961 | 387 |
+| Eens met de judge | 900 (94%) | 350 (90%) |
+| Verschillen beoordeeld door Bastiaan | 46 | 36 |
+| Daarvan had Jev gelijk | 2 | 1 |
+| Daarvan had de judge gelijk | 44 | 35 |
+
+**Bastiaans beoordelingsregel**, in zijn woorden:
+
+> Faalt echt wanneer de specifiek genoemde fout in de relevante uitvoer aantoonbaar optreedt;
+> Slaagt wanneer dit niet gebeurt; Weet ik niet bij onvoldoende bewijs. De oordelen van Jev en
+> Sonnet zijn niet als bewijs gebruikt. Een positief oordeel op één check is geen algemeen
+> kwaliteitsoordeel over de volledige uitvoer.
+
+Wat hij er verder over zegt:
+
+- Een groot deel van de checks van het type `missedKnownError` betreft een gewone case, zonder
+  vooraf benoemde fout van de gevraagde soort. Dat er dan geen foutmelding komt, is op zichzelf
+  geen overtreding.
+- `inventedActivity` geldt voor het Coordinates Document van de analist, niet voor de validator,
+  die later wel een CEI mag berekenen.
+- Bij `visit-prep/final-interview-nl#1/inventedCriteria` faalt de check echt: de uitvoer verwijst
+  naar wat van een startende adviseur wordt verwacht, terwijl die maatstaf niet als criterium was
+  meegegeven.
+- De 15 keer "weet ik niet" zijn vooral interpretatieve grensgevallen: mogelijke aanwijzingen in
+  meerkeuzevragen (`clueInStem`) en het verschil tussen een didactische techniek beschrijven en
+  benoemen (`namedMoves`). Die tellen niet mee.
+- **Methodische beperking:** de beoordelingen volgen de tekst van de checks en zijn geen
+  volledige vakinhoudelijke audit van de uitvoer. Eén verschil (`difficult-conversation/
+  suspected-fraud-accusation-known-error-nl#2/legalOrMedicalAdvice`) is niet beoordeeld.
+
+**Wat dat betekent.** Waar de twee verschillen, heeft de judge bijna altijd gelijk (79 van 82).
+Jevs fouten zijn bijna allemaal vals alarm: Jev zegt "faalt" waar de check slaagt, vooral bij
+`missedKnownError` (42 rijen) en `gaveGrade` (12). Neem je aan dat overeenstemming klopt, dan
+heeft Jev ongeveer 95% (afstemmen) en 91% (holdout) van zijn eigen beslissingen goed, de judge
+bijna 100%. Die aanname is niet getoetst.
+
+**De hybride die de labels aanwijzen**: Jevs "slaagt" blijft staan, al het andere gaat naar de
+judge. Die regel volgt al uit de afstemset alleen (daar had Jevs "slaagt" 2 van de 2 keer gelijk
+en zijn "faalt" 0 van de 44 keer). Op de holdout heeft de hybride 35 van de 36 verschillen goed,
+net als de judge. Maar hij scheelt weinig: alleen een uitvoer waarvan Jev **elke** check laat
+slagen, hoeft geen judge, en dat is 28% (afstemmen) en 16% (holdout) van de uitvoer. En in
+`npm run eval` scoort dezelfde judge-call ook de rubricdimensies, dus daar valt de call niet weg.
+
+**Waarschijnlijke oorzaak, voor een volgende ronde:** Jev ziet in `missedKnownError` geen
+onderscheid tussen een case met en zonder bekende fout. Dat onderscheid is een feit over de case
+en hoort volgens TypeSafe's eigen regel in code (`when`), niet in de vraag. Dat is nu niet
+aangepast: het zou na het zien van de labels zijn, en moet dan op nieuwe uitvoer gemeten worden.
 
 ## Eerlijk over de vergelijking
 

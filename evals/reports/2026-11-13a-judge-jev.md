@@ -13,6 +13,15 @@ Kosten Jev: $0.037769 · Kosten judge: $8.202184 (API-lijstprijs)
 
 Snelheid van de LLM via Claude Code: de model-call zelf, zoals Claude Code hem meet, zonder het opstarten van de CLI. Kosten tegen de API-lijstprijs van hetzelfde model.
 
+## Bastiaans oordeel op de verschillen, en de hybride
+
+Hybride: zegt Jev bij elke check van een uitvoer "slaagt", dan is die uitvoer klaar zonder LLM; anders beoordeelt de LLM-judge hem. Twijfel telt niet mee.
+
+| Set | Uitvoer | Zonder LLM | Beoordeeld | Jev gelijk | Judge gelijk | Hybride gelijk |
+| --- | --- | --- | --- | --- | --- | --- |
+| Afstemmen | 216 | 60/216 | 46 | 2/46 | 44/46 | 46/46 |
+| Holdout | 96 | 15/96 | 36 | 1/36 | 35/36 | 35/36 |
+
 ## Waar Jev en de judge verschillen
 
 | Tool | Case | Check | Jev | Judge | p(faalt) | Set |

@@ -263,7 +263,48 @@ describe("the comparison with the LLM judge", () => {
     ];
     const labels = { [rowKey(rows[0] as JudgeRow)]: true, [rowKey(rows[1] as JudgeRow)]: true };
     expect(rowKey(rows[0] as JudgeRow)).toBe("visit-prep/a#1/invented");
-    expect(scoreLabels(rows, labels)).toEqual({ labelled: 2, jevRight: 1, judgeRight: 1 });
+    expect(scoreLabels(rows, labels)).toEqual({
+      labelled: 2,
+      jevRight: 1,
+      judgeRight: 1,
+      hybridRight: 0,
+    });
+  });
+
+  it("measures the hybrid the labels point to: Jev's pass stands, anything else goes to the LLM", () => {
+    const rows = [
+      // output a#1: all clear by Jev, so no LLM call
+      row({ check: "p", jev: "pass" }),
+      row({ check: "q", jev: "pass", sonnet: true }),
+      // output b#1: one fail, so the LLM judges this output
+      row({ caseId: "b", check: "p", jev: "fail", sonnet: false }),
+      row({ caseId: "b", check: "q", jev: "pass" }),
+      // output c#1: a check left to the LLM
+      row({ caseId: "c", check: "p", jev: "llm", sonnet: true }),
+      // holdout
+      row({ tool: "mentorai", holdout: true, check: "p", jev: "unsettled" }),
+    ];
+    const md = judgeJevReport({
+      date: "2026-11-13",
+      jevModel: "j",
+      judgeModel: "claude-sonnet-5-5",
+      rows,
+      jevMs: [1],
+      judgeMs: [1],
+      labels: { [rowKey(rows[1] as JudgeRow)]: false, [rowKey(rows[2] as JudgeRow)]: false },
+    });
+    expect(md).toContain("| Afstemmen | 3 | 1/3 | 2 | 1/2 | 1/2 | 2/2 |");
+    expect(md).toContain("| Holdout | 1 | 0/1 | 0 | - | - | - |");
+    // A report rebuilt from an old raw file knows only the mean and the maximum.
+    const again = judgeJevReport({
+      date: "x",
+      jevModel: "j",
+      judgeModel: "s",
+      rows: [],
+      jevMs: { mean: 358, max: 3159 },
+      judgeMs: [1],
+    });
+    expect(again).toMatch(/Jev: gemiddeld 358 ms, hoogst 3159 ms per uitvoer/);
   });
 });
 

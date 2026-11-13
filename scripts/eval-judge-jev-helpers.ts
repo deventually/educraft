@@ -225,34 +225,59 @@ export const rowKey = (r: Pick<JudgeRow, "tool" | "caseId" | "run" | "check">) =
 const settled = (r: JudgeRow) => r.jev === "fail" || r.jev === "pass";
 const agrees = (r: JudgeRow) => (r.jev === "fail") === r.sonnet;
 
+/**
+ * The hybrid Bastiaan's labels point to (2026-11-13): where the two disagreed, Jev's "fail" was
+ * mostly a false alarm and its "pass" held. So Jev's pass stands, and everything else (fail,
+ * unsettled, left to the LLM) is the LLM judge's.
+ */
+const hybridFails = (r: JudgeRow) => (r.jev === "pass" ? false : r.sonnet);
+
 /** Bastiaan's labels (row key → the check failed) on the rows where the two judges disagree. */
 export function scoreLabels(
   rows: JudgeRow[],
   labels: Record<string, boolean>,
-): { labelled: number; jevRight: number; judgeRight: number } {
+): { labelled: number; jevRight: number; judgeRight: number; hybridRight: number } {
   let labelled = 0;
   let jevRight = 0;
   let judgeRight = 0;
+  let hybridRight = 0;
   for (const r of rows) {
     const truth = labels[rowKey(r)];
     if (truth === undefined || !settled(r)) continue;
     labelled++;
     if ((r.jev === "fail") === truth) jevRight++;
     if (r.sonnet === truth) judgeRight++;
+    if (hybridFails(r) === truth) hybridRight++;
   }
-  return { labelled, jevRight, judgeRight };
+  return { labelled, jevRight, judgeRight, hybridRight };
+}
+
+/** Per set: the outputs, how many need no LLM call in the hybrid, and the labelled scores. */
+function hybridLine(name: string, set: JudgeRow[], labels: Record<string, boolean>): string {
+  const outputs = new Map<string, boolean>();
+  for (const r of set) {
+    const k = `${r.tool}/${r.caseId}#${r.run}`;
+    outputs.set(k, (outputs.get(k) ?? true) && r.jev === "pass");
+  }
+  const clear = [...outputs.values()].filter(Boolean).length;
+  const s = scoreLabels(set, labels);
+  const of = (n: number) => (s.labelled ? `${n}/${s.labelled}` : "-");
+  return `| ${name} | ${outputs.size} | ${clear}/${outputs.size} | ${s.labelled} | ${of(s.jevRight)} | ${of(s.judgeRight)} | ${of(s.hybridRight)} |`;
 }
 
 const mean = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
 const usd = (n: number) => `$${n.toFixed(6)}`;
+
+type Speed = number[] | { mean: number; max: number };
 
 export function judgeJevReport(input: {
   date: string;
   jevModel: string;
   judgeModel: string;
   rows: JudgeRow[];
-  jevMs: number[];
-  judgeMs: number[];
+  /** Each call's time, or only the mean and maximum (a report rebuilt from an old raw file). */
+  jevMs: Speed;
+  judgeMs: Speed;
   jevCostUsd?: number;
   judgeCostUsd?: number;
   labels?: Record<string, boolean>;
@@ -265,10 +290,11 @@ export function judgeJevReport(input: {
     const llm = set.filter((r) => r.jev === "llm").length;
     return `| ${name} | ${s.length} | ${agree}/${s.length} | ${unsettled} | ${llm} |`;
   };
-  const speed = (name: string, ms: number[]) =>
-    ms.length ? `${name}: gemiddeld ${mean(ms)} ms, hoogst ${Math.max(...ms)} ms per uitvoer` : "";
+  const speed = (name: string, ms: Speed) => {
+    const s = Array.isArray(ms) ? (ms.length ? { mean: mean(ms), max: Math.max(...ms) } : null) : ms;
+    return s ? `${name}: gemiddeld ${s.mean} ms, hoogst ${s.max} ms per uitvoer` : "";
+  };
   const disagree = rows.filter((r) => settled(r) && !agrees(r));
-  const scored = input.labels ? scoreLabels(rows, input.labels) : undefined;
   return [
     "# Eval — harde checks: Jev naast de LLM-judge",
     "",
@@ -302,9 +328,24 @@ export function judgeJevReport(input: {
           "",
         ]
       : []),
-    ...(scored
+    ...(input.labels
       ? [
-          `Beoordeeld door Bastiaan: ${scored.labelled} verschillen · Jev had gelijk: ${scored.jevRight} · judge had gelijk: ${scored.judgeRight}`,
+          "## Bastiaans oordeel op de verschillen, en de hybride",
+          "",
+          "Hybride: zegt Jev bij elke check van een uitvoer \"slaagt\", dan is die uitvoer klaar zonder LLM; anders beoordeelt de LLM-judge hem. Twijfel telt niet mee.",
+          "",
+          "| Set | Uitvoer | Zonder LLM | Beoordeeld | Jev gelijk | Judge gelijk | Hybride gelijk |",
+          "| --- | --- | --- | --- | --- | --- | --- |",
+          hybridLine(
+            "Afstemmen",
+            rows.filter((r) => !r.holdout),
+            input.labels,
+          ),
+          hybridLine(
+            "Holdout",
+            rows.filter((r) => r.holdout),
+            input.labels,
+          ),
           "",
         ]
       : []),
