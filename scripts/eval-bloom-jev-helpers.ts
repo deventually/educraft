@@ -20,8 +20,8 @@ import { BLOOM_LEVELS, type BloomLevel } from "../app/lib/courses/bloom";
 import { JEV_MODEL } from "./eval-evidence-jev-helpers";
 
 type Locale = "nl" | "en";
-export type BloomSet = "cases" | "holdout" | "holdout2";
-/** The sets the threshold may be set on. `holdout2` is never tuned on. */
+export type BloomSet = "cases" | "holdout" | "holdout2" | "holdout3";
+/** The sets the threshold may be set on. `holdout2` and `holdout3` are never tuned on. */
 const TUNING_SETS: readonly BloomSet[] = ["cases", "holdout"];
 
 export interface BloomCourse {
@@ -354,6 +354,7 @@ const SET_NAMES: Record<BloomSet, string> = {
   cases: "Afstemmen",
   holdout: "Afstemmen (oude holdout)",
   holdout2: "Nieuwe holdout",
+  holdout3: "Derde holdout",
 };
 
 export function bloomReport(input: {
@@ -385,7 +386,11 @@ export function bloomReport(input: {
     "",
     `Datum: ${input.date} · Jev: ${input.jevModel} · LLM: ${input.llmModel} (course-import@v3 met de regel "het hoogste niveau") · herhalingen: ${input.repeat}`,
     "",
-    `Drempel voor Jev: ${String(t).replace(".", ",")} (afgesteld op de afstemsets)`,
+    `Drempel voor Jev: ${String(t).replace(".", ",")} (${
+      input.rows.some((r) => TUNING_SETS.includes(r.set))
+        ? "afgesteld op de afstemsets"
+        : "vast: geen afstemsets in deze run"
+    })`,
     "",
     'Goed = hetzelfde als Bastiaans label, ook "geen niveau". Hybride = eerst de lijst, dan Jev, dan de LLM.',
     "",

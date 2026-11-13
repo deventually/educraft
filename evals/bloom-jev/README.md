@@ -104,9 +104,64 @@ keer; LLM `claude-code::claude-sonnet-5-5`. De drempel voor Jev kwam op de afste
   doen ze het alle drie goed (Jev 85, LLM 96, lijst 87 van de 99).
 - **De hybride voegt niets toe**: op de nieuwe holdout iets onder Jev alleen. Op de oude holdout
   was hij de beste, maar daar zijn de regel en de lijst ook op gekozen.
-- **Klein.** Het verschil tussen Jev en de LLM is 13 rijen, ongeveer 4 leeruitkomsten op 80. Een
-  duidelijke richting, geen hard bewijs.
+- **Klein.** Per leeruitkomst vergeleken (de 3 runs samen) was Jev op 11 beter en de LLM op 7; de
+  rest gelijk. Een tekentoets geeft p ≈ 0,48: dat verschil kan toeval zijn. Jev tegen de lijst is
+  12 tegen 2 (p ≈ 0,01): dat is wel echt.
+- **In de app is Jev een extra call.** De import vraagt het niveau al in dezelfde LLM-call als de
+  rest van de cursus; Jev komt daar per leeruitkomst bij (ongeveer $0,0001 en 0,3 s, parallel).
+  Jev in de import loont dus alleen als Jev aantoonbaar beter is, en dat is het nog niet.
 - De volgorde van de hybride ligt vast sinds vóór de meting; andere volgordes zijn op de holdout
   niet uitgeprobeerd om er een te kiezen.
 
 Nooit onderdeel van CI.
+
+## Ronde 3: de derde holdout (vooraf vastgelegd, 2026-11-13)
+
+Ronde 2 liet Jev winnen van de LLM, maar per leeruitkomst was het 11 tegen 7: dat kan toeval zijn.
+De derde holdout ([`holdout3.json`](holdout3.json), 78 leeruitkomsten: 40 nl, 38 en; mbo, hbo en wo)
+moet laten zien of het standhoudt. Vastgelegd vóór de meting:
+
+- **Niets verandert** aan Jev, de LLM-prompt (course-import@v3 met de regel "het hoogste
+  niveau"), de werkwoordenlijst of de hybride. De drempel voor Jev blijft **0,7**, de uitkomst van
+  ronde 2: de run draait alleen `--set holdout3`, en zonder afstemsets in de run houdt `calibrate`
+  0,7 aan (het rapport zegt "vast").
+- **Verzameld** van instellingen die nog niet in een eerdere set zaten (Leiden twee keer, Fontys,
+  TU/e, Hanze, UvA, Open Universiteit, Curio, HvA), per cursus de hele lijst in volgorde, letterlijk
+  uit de bron. Weggelaten: lijsten met een eigen Bloom-label in de tekst (IVA: "Kennis:", "Begrip:"),
+  cursussen met één zin (Saxion), en bij de HvA twee regels die afbreken op een komma en één
+  bijna-kopie. Bij Curio zijn de codes (B1-K1-W1 …) weggelaten.
+- **Wat telt:** per leeruitkomst (de 3 runs samen) Jev tegen de LLM en tegen de lijst, met een
+  tekentoets, naast het percentage goed. Houdt Jevs voorsprong op de LLM hier stand, dan is er
+  reden om Jev in de import te zetten; zo niet, dan blijft de import zoals hij is.
+
+### Uitslag ronde 3
+
+Rapport: [`2026-11-13d-bloom-jev.md`](../reports/2026-11-13d-bloom-jev.md). Elke leeruitkomst 3 keer,
+drempel vast op 0,7, verder niets veranderd. Bastiaan labelde de 78 na de run, zonder antwoorden
+van een methode te zien.
+
+| Derde holdout (78 × 3) | Goed | Stabiel over 3 runs | Snelheid | Kosten (hele meting) |
+| --- | --- | --- | --- | --- |
+| Jev | 143/234 (61%) | 76/78 | 374 ms per leeruitkomst | $0,009 |
+| LLM (de import) | 128/234 (55%) | 70/78 | 7,7 s per document | $0,40 (API-lijstprijs) |
+| Werkwoordenlijst | 123/234 (53%) | 78/78 | 0 | $0 |
+| Hybride (lijst, Jev, LLM) | 132/234 (56%) | | | |
+
+Per leeruitkomst (de 3 runs samen), met een tekentoets:
+
+| | Derde holdout | Nieuwe en derde holdout samen (158) |
+| --- | --- | --- |
+| Jev tegen de LLM | 17 tegen 10 (p ≈ 0,25) | 28 tegen 17 (p ≈ 0,14) |
+| Jev tegen de lijst | 17 tegen 10 (p ≈ 0,25) | 29 tegen 12 (p ≈ 0,01) |
+| De LLM tegen de lijst | 15 tegen 13 (p ≈ 0,85) | 25 tegen 18 (p ≈ 0,36) |
+
+- **De richting houdt stand:** op twee verse holdouts is Jev de beste van de drie, en nergens
+  slechter dan de LLM. Jev is ook het stabielst (154 van de 158 uitkomsten elke run hetzelfde,
+  de LLM 143).
+- **Beter dan de LLM is niet bewezen:** samen 28 tegen 17, p ≈ 0,14. Dat is een duidelijke
+  richting, maar geen bewijs op de gewone grens van 0,05. Beter dan de lijst is wel bewezen.
+- **De derde holdout was moeilijker** (alle drie lager) en had minder "geen niveau" (15 van de 78).
+  Jev had 109 van de 189 rijen met een niveau goed, de LLM 95, de lijst 93.
+- **De hybride voegt opnieuw niets toe.**
+- Samen genomen is een analyse achteraf; vooraf vastgelegd was de vergelijking per holdout.
+

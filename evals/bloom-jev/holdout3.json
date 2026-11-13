@@ -1,0 +1,163 @@
+{
+  "about": "A third holdout of real, public learning outcomes (collected 2026-11-13, after round 2 was measured, to test whether its result holds). Rules fixed before collecting: institutions not used in earlier sets (Fontys appears for the first time; Leiden twice), each course's list taken in full and in order, quoted from the source, nothing about Jev, the LLM, the verb list or the threshold changed afterwards. Left out: lists whose outcomes carry their own Bloom label (IVA: 'Kennis:', 'Begrip:'), single-sentence course outcomes (Saxion), and at HvA two lines that break off at a comma and one near-copy of another line. Curio's codes (B1-K1-W1 …) are dropped; the text is the werkproces.",
+  "courses": [
+    {
+      "id": "hold3-leiden-designing-research",
+      "locale": "en",
+      "courseName": "Designing research for science and society (Leiden University, 2025-2026)",
+      "source": "https://studiegids-archief.leidenuniv.nl/courses/136303/designing-research-for-science-and-society",
+      "outcomes": [
+        "Formulate your own research questions in a team.",
+        "Describe the relevance of the research to the practice of Education and Child studies; that is, argue its impact on science and society.",
+        "Choose, describe and defend research methods appropriate to the research question.",
+        "Make ethical considerations about the research methods, and implement these considerations into the design.",
+        "Draw up a simple version of a budget and management plan, including valorization plans",
+        "Work respectfully and constructively together with other researchers; that is, take your own role in the group, show your ability to argue your own points as well as to compromise.",
+        "Take responsibility for the group products, by being actively involved in every stage of the design process.",
+        "Defend the research design in public."
+      ]
+    },
+    {
+      "id": "hold3-leiden-research-methods",
+      "locale": "en",
+      "courseName": "Research Methods (Leiden University, 2016-2017)",
+      "source": "https://studiegids-archief.leidenuniv.nl/courses/66677/research-methods",
+      "outcomes": [
+        "Distinguish different concepts of scientific research",
+        "Understand and know the basic structure of an academic text and use that structure to support your efficient reading of such texts",
+        "Write a basic research proposal",
+        "Introduce the societal, applied, and/ or academic relevance of a certain research field based on a literature review",
+        "Formulate/ craft a research question and/ or hypotheses that are suited to be subjected to empirical research",
+        "Establish the most suited technique (method) to generate the needed empirical data to answer the research question and/ or test the hypotheses",
+        "Indicate realistic time lines for the different activities in the research project",
+        "Conduct a research project more or less independently",
+        "Expand the literature review (from the proposal) to a level that it (a) shows sufficient mastery of the research subject at hand and (b) is a full argumentation of the relevance of the study's research question/ hypotheses",
+        "Apply the suited research techniques (methods) in a proper way in order to generate the data needed to further the research questions/ hypotheses",
+        "Analyse and interpret the research findings, presenting results",
+        "Write a text, paper, or thesis (either academic or business-oriented) about your research, the results, and their interpretation"
+      ]
+    },
+    {
+      "id": "hold3-tue-healthy-environments",
+      "locale": "en",
+      "courseName": "Healthy and Sustainable Living Environments, 7UB1B10 (TU Eindhoven, Built Environment)",
+      "source": "https://assets.w3.tue.nl/w/fileadmin/Education_Guide/Content/Programs/Bachelor%20College/Major%20Architecture%2C%20Urbanism%20and%20Building%20Sciences/Curriculum/Built%20Environment%20Bachelor%20College%20CourseGuide.pdf",
+      "outcomes": [
+        "Describe the global challenges and health threats and their relationship to the built environment on different scale levels: indoor space, Buildings, Neighborhood and City.",
+        "Describe the relevant concepts and its indicators related to the user’s needs for a healthy and comfortable indoor /outdoor space (physical, physiology, psychology/behavior).",
+        "Evaluate general design solutions with regard to their consequences for a healthy built environment (based on provided concepts/methods) by discussing advantages and disadvantages of each. Evaluate (design) solutions for defined cases, considering the value propositions and requirements for the user and society (design guidelines/rules of thumb etc.) by discussing advantages and disadvantages of each.",
+        "Approach a design challenge from an integral and multi-disciplinary perspective by being able to describe and discuss each design decision from various interlocking points of view."
+      ]
+    },
+    {
+      "id": "hold3-fontys-ib-pm1",
+      "locale": "en",
+      "courseName": "International Business, PM1 Investigate your Market (Fontys, Fall 2023)",
+      "source": "https://fontys.nl/en/Download-4/Course-manual-IB-Fall-2023-1.htm",
+      "outcomes": [
+        "Student can identify, explain and interpret business models and methods.",
+        "Student can demonstrate the process of the project investigations in a thoughtful manner.",
+        "Student can formulate innovative and creative ideas.",
+        "Student can describe the chosen industry, subindustry and company.",
+        "Student can present the chosen industry, subindustry and company.",
+        "Student knows how to collaborate in a diverse team.",
+        "Student can use and justify management tools to collaborate in a team.",
+        "Student can demonstrate, understand and select appropriate sources.",
+        "Student can select the appropriate sources for the presentation and can present relevant data.",
+        "Student shows awareness of the importance of ethics in business.",
+        "In a team, students demonstrate a comprehensive understanding of strategic and operational marketing and its importance for company performance.",
+        "In a team, students understand the coherence of the different components of digital marketing, including digital marketing channels, user experience and website performance.",
+        "In a team, students demonstrate an understanding of change (a general notion or approach to change, helpful in developing specific ideas for changes that lead to improvement) in organizations.",
+        "In a team, students demonstrate a comprehensive understanding of the different steps of the research cycle."
+      ]
+    },
+    {
+      "id": "hold3-hanze-onderwijsontwerp",
+      "locale": "nl",
+      "courseName": "Onderwijsontwerp, PBDB23VOO (Hanzehogeschool, Leraar Basisonderwijs, 2025)",
+      "source": "https://catalogue.hanze.nl/nl/Course/print/2025/PBDB23VOO",
+      "outcomes": [
+        "De student laat zien hoe hij de les met inzet van uitnodigend materiaal verrijkt.",
+        "De student (her)ontwerpt een samenhangend lesaanbod vanuit vakinhouden volgens gegeven ontwerpcriteria.",
+        "De student verantwoordt zijn ontwerpacties aan de hand van ontwerpcriteria en vakinhouden.",
+        "De student reflecteert op zijn handelen in het ontwerpproces in relatie tot beschreven leerkrachtgedrag bij de vakinhoudelijke kennisbases."
+      ]
+    },
+    {
+      "id": "hold3-hanze-onderzoeken-ontwerpen",
+      "locale": "nl",
+      "courseName": "Onderzoeken en ontwerpen, PBDB23VOND (Hanzehogeschool, Leraar Basisonderwijs, 2025)",
+      "source": "https://catalogue.hanze.nl/nl/Course/print/2025/PBDB23VOND",
+      "outcomes": [
+        "De student combineert inhoudelijke kennis van een van de aangeboden thema's met actuele ontwikkelingen, input van de betrokkenen en (wetenschappelijke) bronnen",
+        "De student onderzoekt op systematische en methodische wijze een probleem uit de context van de school",
+        "De student formuleert heldere en concrete ontwerpcriteria voor het ontwerp bij het probleem",
+        "De student kiest een passende methode om data te verzamelen en test hiermee het eigen ontwerp in de eigen schoolpraktijk",
+        "De student analyseert en geeft de resultaten weer op een systematische manier en in samenhang met de onderzoeksvraag",
+        "De student beschouwt het product en onderzoeksproces kritisch",
+        "De student stelt aanbevelingen op voor de verbetering van het ontwerp op basis van de kritische beschouwing"
+      ]
+    },
+    {
+      "id": "hold3-uva-burgerschap",
+      "locale": "nl",
+      "courseName": "Democratie, actualiteit en controverse in de klas (UvA, lerarenopleiding, najaar 2025)",
+      "source": "https://iloinfo.socsci.uva.nl/wp-content/uploads/2025/09/Studiehandleiding-Democratie-actualiteit-en-controverse-in-de-klas-najaar-2025.pdf",
+      "outcomes": [
+        "De student analyseert de rol van burgerschap in het onderwijs vanuit pedagogisch-vakdidactisch perspectief.",
+        "De student vormt een eigen visie op de rol van burgerschap in het onderwijs."
+      ]
+    },
+    {
+      "id": "hold3-ou-design-patterns",
+      "locale": "nl",
+      "courseName": "Design patterns, IM0102 (Open Universiteit)",
+      "source": "https://www.ou.nl/documents/40554/349790/IM0102_in.pdf",
+      "outcomes": [
+        "een probleemanalyse kunt opstellen aan de hand van een probleembeschrijving",
+        "aan de hand van een probleemanalyse kunt aangeven en beargumenteren welke van de behandelde design patterns kunnen bijdragen aan een goede oplossing van het probleem",
+        "zelfstandig design patterns kunt bestuderen die niet worden behandeld in het tekstboek, en deze kunt toepassen",
+        "op basis van een probleemanalyse een ontwerp kunt maken, gebruikmakend van design patterns uit verschillende bronnen",
+        "een (eigen of gegeven) ontwerp waarbij design patterns zijn toegepast, kunt implementeren",
+        "in een gegeven ontwerp of implementatie kunt aangeven waar design patterns zijn gebruikt, en de voordelen van die patterns op die plaats kunt uitleggen",
+        "het verband kunt uitleggen tussen een bepaald pattern en de flexibiliteit die daardoor in het ontwerp wordt gebracht",
+        "zich realiseert dat er variaties op design patterns bestaan en dat ze op meerdere manieren geïmplementeerd kunnen worden",
+        "in staat bent een ontwerp op te stellen dat flexibel is met het oog op toekomstige veranderingen",
+        "de achterliggende principes van design patterns kent en ze kunt toepassen."
+      ]
+    },
+    {
+      "id": "hold3-curio-ict-system-engineer",
+      "locale": "nl",
+      "courseName": "ICT system engineer, werkprocessen (Curio, mbo 4, OER 2025)",
+      "source": "https://www.curio.nl/sites/default/files/oer_documents/27016_oer_00_2025_tt_bol-bbl_ict-system-engineer.pdf",
+      "outcomes": [
+        "Handelt meldingen af",
+        "Instrueert gebruikers",
+        "Installeert, configureert en beheert gebruikersdevices",
+        "Installeert en configureert netwerk- en infrastructuuronderdelen",
+        "Beheert en monitort netwerk- en infrastructuuronderdelen",
+        "Adviseert over en configureert applicaties",
+        "Onderhoudt applicaties",
+        "Ontwerpt en beheert een informatievoorziening",
+        "Automatiseert processen",
+        "Beheert databases",
+        "Geeft security-advies en verbetert de security",
+        "Reageert op security-incidenten"
+      ]
+    },
+    {
+      "id": "hold3-hva-studiecoaching",
+      "locale": "nl",
+      "courseName": "Verpleegkunde duaal, propedeuse: Studiecoaching & Praktijkleren (HvA, 2025)",
+      "source": "https://cms.web.hva.nl/sites/default/files/imported/2025-10/studiehandleiding-propedeuse-studiecoaching-en-praktijkleren.pdf",
+      "outcomes": [
+        "een realistisch beeld schetsen van het verpleegkundig beroep en van wat nodig is om dit beroep uit te oefenen.",
+        "een realistisch beeld schetsen van de eigen mogelijkheden om zich in de studie te bekwamen voor het verpleegkundig beroep.",
+        "voornemens formuleren voor het eigen leren, concretiseert deze in studieplannen en realiseert deze plannen.",
+        "op het eigen leerproces reflecteren en op basis hiervan sturing geven aan een persoonlijk leerpad.",
+        "Een professionele houding aannemen binnen onderwijs- en leerwerk omgeving"
+      ]
+    }
+  ]
+}

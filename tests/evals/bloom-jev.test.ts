@@ -34,6 +34,18 @@ describe("the Bloom suites", () => {
     for (const t of texts(old)) expect(new Set(texts(tune)).has(t), t).toBe(false);
     expect(new Set(fresh.courses.map((c) => c.locale))).toEqual(new Set(["nl", "en"]));
   });
+
+  it("has a third holdout, collected after round 2, that shares no outcome with any earlier set", () => {
+    const third = loadBloomSuite("holdout3");
+    expect(texts(third).length).toBeGreaterThanOrEqual(75);
+    for (const c of third.courses) expect(c.source, c.id).toMatch(/^https:\/\//);
+    const earlier = new Set(
+      (["cases", "holdout", "holdout2"] as const).flatMap((s) => texts(loadBloomSuite(s))),
+    );
+    for (const t of texts(third)) expect(earlier.has(t), t).toBe(false);
+    expect(new Set(texts(third)).size).toBe(texts(third).length);
+    expect(new Set(third.courses.map((c) => c.locale))).toEqual(new Set(["nl", "en"]));
+  });
 });
 
 describe("Bloom from the verb, in code (the baseline TypeSafe asks for first)", () => {
@@ -189,6 +201,18 @@ describe("scoring against Bastiaan's labels", () => {
     expect(md).toContain("Nog geen label: 1");
     expect(md).toContain("$0.020000 (API-lijstprijs, de hele import)");
     expect(md).not.toMatch(/via Claude Code/);
+    const thirdOnly = bloomReport({
+      date: "x",
+      jevModel: "j",
+      llmModel: "l",
+      repeat: 1,
+      rows: [{ set: "holdout3", outcome: "d", jevP: { analyze: 0.75 }, llm: null, verb: null }],
+      labels,
+      jevMs: [1],
+      llmMs: [1],
+    });
+    expect(thirdOnly).toContain("Drempel voor Jev: 0,7 (vast: geen afstemsets in deze run)");
+    expect(thirdOnly).toContain("| Derde holdout | 1 | 1/1 | 0/1 | 0/1 | 1/1 |");
     expect(
       bloomReport({
         date: "x",
