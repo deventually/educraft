@@ -118,7 +118,7 @@ Wat er eerlijk gezegd nog afwijkt of open is:
 
 Op de holdout zijn Jev en Sonnet even goed. Van Jev's 25 keer *Controleren* gaan er 18 over
 bestanden die geen bewijs zijn (formats, intro, werkblad, formulier, Q&A); Sonnet zet daar ook een
-check. Jev gaf bij de gedraaide optievolgorde in 9 van de 10 holdout-cases drie keer hetzelfde
-antwoord, Sonnet in 7 van de 10. Op de cases mist Jev bij `nl-names` en `nl-hard-feedback-on-plan`
+check. Jev zette, ook met de gedraaide optievolgorde, in 9 van de 10 holdout-cases drie keer hetzelfde
+oordeel over *Controleren*, Sonnet in 7 van de 10. Op de cases mist Jev bij `nl-names` en `nl-hard-feedback-on-plan`
 elke keer een criterium; daar is bewust niet meer op afgesteld. Jev schrijft geen titel of reden.
 De ruwe antwoorden van de holdout staan alleen op de Mac van Bastiaan.
