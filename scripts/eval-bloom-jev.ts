@@ -4,7 +4,7 @@
  * course document), TypeSafe's Jev (one call per outcome, one yes/no per level) and the verb list
  * in code, on the same outcomes: two tuning sets and a fresh holdout of public ones.
  *
- *   ANTHROPIC_API_KEY=… OPENROUTER_API_KEY=… npm run eval:bloom-jev -- --repeat 3 --label a
+ *   ANTHROPIC_API_KEY=… JEV_API_KEY=… npm run eval:bloom-jev -- --repeat 3 --label a
  *   … -- --set holdout3             # one set only (default: all four)
  *   npm run eval:bloom-jev -- --dry-run   # build the requests only, no API
  *   npm run eval:bloom-jev -- --rescore evals/reports/<date><label>-bloom-jev-raw.json
@@ -33,7 +33,7 @@ import {
   withHighestRule,
 } from "./eval-bloom-jev-helpers";
 import { buildBloomJevRequest, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
-import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
+import { askJev, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import { EVALS_DIR, REPORTS_DIR } from "./eval-files";
 import { mapLimit, parallelism } from "./eval-helpers";
 import { catalogPrice, listPriceUsd } from "./eval-judge-jev-helpers";
@@ -73,8 +73,8 @@ async function main() {
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const jevModel = arg("model") ?? JEV_MODEL;
   const llmModel = arg("llm-model") ?? DEFAULT_MODEL;
-  const apiKey = process.env.OPENROUTER_API_KEY ?? "";
-  if (!dryRun && !apiKey) throw new Error("needs OPENROUTER_API_KEY");
+  const apiKey = process.env[JEV_KEY_ENV] ?? "";
+  if (!dryRun && !apiKey) throw new Error(`needs ${JEV_KEY_ENV}`);
   const only = arg("set");
   const sets = (
     ["cases", "holdout", "holdout2", "holdout3"] as const satisfies readonly BloomSet[]

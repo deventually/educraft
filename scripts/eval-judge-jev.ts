@@ -3,7 +3,7 @@
  * wrote (`npm run eval -- --cases-only`), and has both the LLM judge (the eval's own prompt) and
  * TypeSafe's Jev judge the same outputs, timing and pricing each.
  *
- *   ANTHROPIC_API_KEY=… OPENROUTER_API_KEY=… npm run eval:judge-jev -- --runs 3 --label a
+ *   ANTHROPIC_API_KEY=… JEV_API_KEY=… npm run eval:judge-jev -- --runs 3 --label a
  *   … -- --date 2026-11-13          # the outputs of that day (default: the latest)
  *   … -- --tool mentorai,lesson-plan
  *   npm run eval:judge-jev -- --dry-run   # build the requests only, no API
@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { providerForModel } from "~/lib/ai/provider";
 import { ALL_TOOLS } from "~/lib/registry";
 import type { Tool } from "~/lib/registry/types";
-import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
+import { askJev, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import {
   EVALS_DIR,
   latestOutputDate,
@@ -159,8 +159,8 @@ async function main() {
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const jevModel = arg("model") ?? JEV_MODEL;
   const judgeModel = arg("judge-model") ?? DEFAULT_JUDGE_MODEL;
-  const apiKey = process.env.OPENROUTER_API_KEY ?? "";
-  if (!dryRun && !apiKey) throw new Error("needs OPENROUTER_API_KEY");
+  const apiKey = process.env[JEV_KEY_ENV] ?? "";
+  if (!dryRun && !apiKey) throw new Error(`needs ${JEV_KEY_ENV}`);
   const date = arg("date") ?? latestOutputDate();
   if (!date) throw new Error("No outputs yet: run `npm run eval -- --cases-only` first.");
   const only = arg("tool")?.split(",");

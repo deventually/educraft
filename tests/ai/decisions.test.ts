@@ -2,19 +2,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, getProvider, MODELS, parseModelsConfig } from "~/lib/ai/models";
-import { JEV_MODEL } from "../../scripts/eval-evidence-jev-helpers";
+import { DECISIONS, MODELS, parseModelsConfig } from "~/lib/ai/models";
+import { JEV_KEY_ENV, JEV_MODEL } from "../../scripts/eval-evidence-jev-helpers";
 
 const raw = JSON.parse(readFileSync(resolve(__dirname, "../../config/models.json"), "utf8"));
 
 describe("config/models.json — Jev is its own entry, next to the models, not one of them", () => {
-  it("names OpenRouter's Decisions API, the pinned Jev the evals measured, and OpenRouter's key", () => {
+  it("names OpenRouter's Decisions API, the pinned Jev the evals measured, and a key of its own", () => {
     expect(DECISIONS).toMatchObject({
       provider: "openrouter",
       url: "https://openrouter.ai/api/alpha/decisions",
       model: JEV_MODEL,
     });
-    expect(DECISIONS?.keyEnv ?? getProvider("openrouter")?.keyEnv).toBe("OPENROUTER_API_KEY");
+    // Bastiaan, 2026-11-13: "Jev moet een eigen API key hebben" (own spending limit, own bill).
+    expect(DECISIONS?.keyEnv).toBe("JEV_API_KEY");
+    expect(JEV_KEY_ENV).toBe(DECISIONS?.keyEnv);
   });
 
   it("is no chat model: it can never be picked as the LLM, and OpenRouter's models stay", () => {
@@ -22,7 +24,7 @@ describe("config/models.json — Jev is its own entry, next to the models, not o
     expect(Object.values(MODELS).some((m) => m.provider === "openrouter")).toBe(true);
   });
 
-  it("may be left out, and refuses an unknown provider, a non-https address or a key value", () => {
+  it("may be left out, and refuses an unknown provider, a non-https address, a key value or no own key", () => {
     const { decisions, ...rest } = raw;
     expect(parseModelsConfig(rest).decisions).toBeUndefined();
     expect(() =>
@@ -37,10 +39,11 @@ describe("config/models.json — Jev is its own entry, next to the models, not o
     expect(() =>
       parseModelsConfig({ ...rest, decisions: { ...decisions, keyEnv: "sk-or-v1-abc" } }),
     ).toThrow(/decisions/);
-    expect(
-      parseModelsConfig({ ...rest, decisions: { ...decisions, keyEnv: "JEV_API_KEY" } }).decisions
-        ?.keyEnv,
-    ).toBe("JEV_API_KEY");
+    const { keyEnv: _key, ...keyless } = decisions;
+    expect(() => parseModelsConfig({ ...rest, decisions: keyless })).toThrow(/decisions/);
+    expect(() =>
+      parseModelsConfig({ ...rest, decisions: { ...decisions, keyEnv: "OPENROUTER_API_KEY" } }),
+    ).toThrow(/own key/);
   });
 });
 

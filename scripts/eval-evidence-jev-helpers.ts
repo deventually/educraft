@@ -32,6 +32,9 @@ export const JEV_MODEL = "typesafe/jev-1.14";
 
 const JEV_URL = "https://openrouter.ai/api/alpha/decisions";
 
+/** Jev's own key (an OpenRouter key for Jev only), the same setting the app reads. */
+export const JEV_KEY_ENV = "JEV_API_KEY";
+
 export interface JevThresholds {
   /** The chosen outcome's probability from which it needs no check. */
   outcomeSure: number;

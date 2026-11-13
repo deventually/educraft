@@ -128,8 +128,8 @@ LimeOnIt is not tied to one model vendor.
   `.env` through `env.server` — never hardcoded or read ad hoc.
 - **A decision model, not a chat model** (BESLUIT-2026-11-13-2). `decisions` in
   `config/models.json` names TypeSafe's Jev: a provider (`openrouter`), the Decisions API's
-  address, the pinned model and, optionally, a key setting of its own (`keyEnv`; else the
-  provider's). It is not in the model list, so nobody picks it as the LLM; the code asks it for
+  address, the pinned model and its own key setting (`keyEnv`: `JEV_API_KEY`, never the
+  provider's chat key; the config refuses that). It is not in the model list, so nobody picks it as the LLM; the code asks it for
   bounded judgments (typed yes/no questions in, probabilities out) and decides in code.
   `app/lib/ai/decisions.ts` is the one POST. Its only use: the Bloom level in the course import
   (`app/lib/courses/bloomJev.ts`, `withJevBloom` in `courseImport.server.ts`), behind the

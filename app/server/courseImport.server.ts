@@ -4,7 +4,7 @@
  * stores nothing; the teacher picks, and `import-apply` adds what was picked.
  */
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, getProvider, usdInEuroMicros } from "~/lib/ai/models";
+import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
 import { buildBloomJevRequest, jevLevel, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
 import { buildImportMessage, type ImportProposal, parseImport } from "~/lib/courses/import";
 import type { CourseData } from "~/lib/courses/types";
@@ -65,7 +65,7 @@ const JEV_PARALLEL = 6;
 /**
  * Jev's Bloom level instead of the LLM's (setting `bloomJev`, off by default): one request per
  * outcome, the level from code (`jevLevel`), none when no level is clear. An outcome Jev does
- * not answer keeps the LLM's level, and nothing goes to Jev without the setting and a key. Each
+ * not answer keeps the LLM's level, and nothing goes to Jev without the setting and Jev's own key. Each
  * call is metered at the cost Jev reports. The teacher confirms every level, as before.
  */
 async function withJevBloom(
@@ -73,8 +73,7 @@ async function withJevBloom(
   proposal: ImportProposal,
   locale: Locale,
 ): Promise<ImportProposal> {
-  const keyEnv = DECISIONS && (DECISIONS.keyEnv ?? getProvider(DECISIONS.provider)?.keyEnv);
-  const apiKey = keyEnv ? providerSetting(keyEnv) : undefined;
+  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
   if (!DECISIONS || !apiKey || !(await isFeatureOn(user, "bloomJev"))) return proposal;
   const { url, model, provider } = DECISIONS;
   const signal = currentAiSignal();

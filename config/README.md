@@ -76,13 +76,13 @@ chat-API.
 | Veld | Betekenis |
 | --- | --- |
 | `name` | De naam, voor mensen. |
-| `provider` | De aanbieder uit `providers` wiens sleutel Jev gebruikt (`openrouter`). |
+| `provider` | De aanbieder uit `providers` waar Jev draait (`openrouter`); de kosten staan in het gebruiksoverzicht onder die aanbieder. |
 | `url` | Het adres van de Decisions API (alleen `https://`). |
 | `model` | De vaste versie (`typesafe/jev-1.14`). Een nieuwe versie komt alleen met een meting erbij (`evals/bloom-jev`). |
-| `keyEnv` | Optioneel: een eigen sleutelinstelling, zoals `JEV_API_KEY`, bijvoorbeeld een tweede OpenRouter-sleutel met een eigen bestedingslimiet. Weg = de sleutel van de aanbieder (`OPENROUTER_API_KEY`). |
+| `keyEnv` | Jevs eigen sleutelinstelling: `JEV_API_KEY`, een OpenRouter-sleutel alleen voor Jev, met een eigen bestedingslimiet. Nooit de sleutel van de chatmodellen (`OPENROUTER_API_KEY`); de config weigert dat. |
 
 Jev doet alleen iets als het onderdeel *Bloom-voorstel bij de import door TypeSafe Jev* aan staat
-(Beheer → Tools en modellen, standaard uit) en de sleutel er is.
+(Beheer → Tools en modellen, standaard uit) en `JEV_API_KEY` gezet is.
 
 ### `speechToText`: dicteren
 

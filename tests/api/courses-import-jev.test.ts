@@ -66,12 +66,12 @@ beforeEach(() => {
   fetchMock.mockReset();
   fetchMock.mockImplementation(jev);
   vi.stubGlobal("fetch", fetchMock);
-  process.env.OPENROUTER_API_KEY = "test-key";
+  process.env.JEV_API_KEY = "test-key";
 });
 
 afterEach(async () => {
   vi.unstubAllGlobals();
-  delete process.env.OPENROUTER_API_KEY;
+  delete process.env.JEV_API_KEY;
   await settings.setFeatureStand("bloomJev", "off");
 });
 
@@ -122,11 +122,15 @@ describe("import-extract with Jev's Bloom proposal", () => {
 
   it("keeps the LLM's level without a key, and for an outcome Jev did not answer", async () => {
     await settings.setFeatureStand("bloomJev", "on");
-    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.JEV_API_KEY;
     expect(await extract("No key")).toEqual(["apply", "remember"]);
+    // OpenRouter's own key is for its chat models, never for Jev.
+    process.env.OPENROUTER_API_KEY = "chat-key";
+    expect(await extract("Only the chat key")).toEqual(["apply", "remember"]);
+    delete process.env.OPENROUTER_API_KEY;
     expect(fetchMock).not.toHaveBeenCalled();
 
-    process.env.OPENROUTER_API_KEY = "test-key";
+    process.env.JEV_API_KEY = "test-key";
     fetchMock.mockImplementation(async (_url: string, init: RequestInit) => {
       const outcome = JSON.parse(String(init.body)).state.outcome as string;
       if (outcome.includes("ontwerpt")) return new Response("busy", { status: 503 });
