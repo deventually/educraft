@@ -104,8 +104,12 @@ keer; LLM `claude-code::claude-sonnet-5-5`. De drempel voor Jev kwam op de afste
   doen ze het alle drie goed (Jev 85, LLM 96, lijst 87 van de 99).
 - **De hybride voegt niets toe**: op de nieuwe holdout iets onder Jev alleen. Op de oude holdout
   was hij de beste, maar daar zijn de regel en de lijst ook op gekozen.
-- **Klein.** Het verschil tussen Jev en de LLM is 13 rijen, ongeveer 4 leeruitkomsten op 80. Een
-  duidelijke richting, geen hard bewijs.
+- **Klein.** Per leeruitkomst vergeleken (de 3 runs samen) was Jev op 11 beter en de LLM op 7; de
+  rest gelijk. Een tekentoets geeft p ≈ 0,48: dat verschil kan toeval zijn. Jev tegen de lijst is
+  12 tegen 2 (p ≈ 0,01): dat is wel echt.
+- **In de app is Jev een extra call.** De import vraagt het niveau al in dezelfde LLM-call als de
+  rest van de cursus; Jev komt daar per leeruitkomst bij (ongeveer $0,0001 en 0,3 s, parallel).
+  Jev in de import loont dus alleen als Jev aantoonbaar beter is, en dat is het nog niet.
 - De volgorde van de hybride ligt vast sinds vóór de meting; andere volgordes zijn op de holdout
   niet uitgeprobeerd om er een te kiezen.
 
