@@ -101,4 +101,25 @@ describe("portfolio-evidence eval cases", () => {
       evidenceReportMarkdown({ date: "d", model: "m", repeat: 1, rows: [{ caseId: "a", ...s }] }),
     ).not.toMatch(/ms/);
   });
+
+  it("counts how often 'Controleren' was set, so over-flagging shows even when every check passes", () => {
+    const sure = score("nl-lesson-plan", JSON.stringify({ ...suite.cases[0]?.good, sure: true }));
+    const unsure = score(
+      "nl-lesson-plan",
+      JSON.stringify({ ...suite.cases[0]?.good, sure: false }),
+    );
+    expect(sure.flagged).toBe(false);
+    expect(unsure.flagged).toBe(true);
+    const md = evidenceReportMarkdown({
+      date: "d",
+      model: "m",
+      repeat: 1,
+      rows: [
+        { caseId: "a", ...sure },
+        { caseId: "b", ...unsure },
+      ],
+    });
+    expect(md).toContain("Controleren gezet: 1/2");
+    expect(md).toMatch(/\| b \|.*\| ja \|/);
+  });
 });

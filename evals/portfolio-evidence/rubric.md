@@ -46,3 +46,15 @@ Het antwoord wordt het voorstel van de app (`SortProposal`) en gaat door dezelfd
 uitslag is te vergelijken met het taalmodel. Het rapport geeft daarnaast de snelheid per bestand en,
 bij Jev, de kosten die OpenRouter meldt. Vergelijk alleen metingen met dezelfde cases en
 herhalingen. Niets in de app roept Jev aan.
+
+## Lastige cases en *Controleren gezet* (2026-11-13)
+
+De cases `*-hard-*` zijn moeilijker dan de eerste dertien: een bestand dat bij twee leeruitkomsten
+past, een scan met OCR-ruis, een lang document met het bewijs pas achteraan, Engelse feedback in een
+Nederlands dossier, alleen een nietszeggende bestandsnaam, een lestranscript, notulen die geen bewijs
+zijn, en Nederlandse tekst in een Engels dossier. Bij twee duidelijke gevallen (het lange document en
+het ontwikkelplan) eist **doubt** juist *geen* Controleren.
+
+Het rapport telt daarnaast hoe vaak een rij *Controleren* kreeg (**Controleren gezet**, ook per rij).
+Dat is geen check, maar laat zien of een model te vaak twijfelt: alles op Controleren haalt de checks,
+maar helpt de docent niet. Gebruik het om de drempels van Jev af te stellen.

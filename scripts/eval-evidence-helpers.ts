@@ -76,6 +76,8 @@ export interface SortScore {
     doubt: boolean;
     clean: boolean;
   };
+  /** The row said "Controleren": not a check, but counted, so over-flagging shows. */
+  flagged: boolean;
 }
 
 /** Was the model's text answer usable at all: JSON with an `outcome`? */
@@ -122,7 +124,7 @@ export function scoreSort(
     doubt,
     clean,
   };
-  return { pass: Object.values(checks).every(Boolean), checks };
+  return { pass: Object.values(checks).every(Boolean), checks, flagged: p.check };
 }
 
 export interface EvidenceRow extends SortScore {
@@ -162,10 +164,15 @@ export function evidenceReportMarkdown(r: {
     "",
     `**Geslaagd: ${passed}/${r.rows.length}**`,
     "",
+    `Controleren gezet: ${r.rows.filter((x) => x.flagged).length}/${r.rows.length}`,
+    "",
     ...speedLine(r.rows, r.costUsd),
-    `| Case | ${names.join(" | ")} |`,
-    `| --- | ${names.map(() => "---").join(" | ")} |`,
-    ...r.rows.map((x) => `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} |`),
+    `| Case | ${names.join(" | ")} | Controleren |`,
+    `| --- | ${names.map(() => "---").join(" | ")} | --- |`,
+    ...r.rows.map(
+      (x) =>
+        `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} | ${x.flagged ? "ja" : "nee"} |`,
+    ),
     "",
     ...names.map(
       (n) => `- **${n}**: ${r.rows.filter((x) => x.checks[n]).length}/${r.rows.length}`,
