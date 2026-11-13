@@ -61,6 +61,11 @@ export interface GenerateResult {
   usage?: TokenUsage;
   /** Why the model stopped, when the provider says ("stop", "length", …). "length" = cut off by maxTokens. */
   finishReason?: string;
+  /**
+   * How long the model call itself took, in ms, when the provider measures it apart from its own
+   * overhead (Claude Code: without starting the CLI). Evals use it to time a model fairly.
+   */
+  apiMs?: number;
 }
 
 export interface LLMProvider {

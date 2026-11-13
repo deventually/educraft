@@ -106,7 +106,8 @@ async function main() {
           temperature: 0,
           maxTokens: 8_000,
         });
-        llmMs.push(Math.round(performance.now() - start));
+        // The model's own time when the provider measures it (Claude Code: without the CLI starting).
+        llmMs.push(r.apiMs ?? Math.round(performance.now() - start));
         const cost = r.usage ? listPriceUsd(r.usage, price) : undefined;
         if (cost === undefined) llmPriced = false;
         else llmCostUsd += cost;

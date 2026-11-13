@@ -103,6 +103,8 @@ async function main() {
     // The LLM judge, exactly as `npm run eval` asks it.
     const provider = providerForModel(judgeModel);
     const judgeStart = performance.now();
+    // The model's own time when the provider measures it (Claude Code: without the CLI starting).
+    let judgeApiMs: number | undefined = 0;
     let judgeText = "";
     let parsed = null;
     for (const maxTokens of JUDGE_MAX_TOKENS) {
@@ -116,11 +118,12 @@ async function main() {
       const cost = r.usage ? listPriceUsd(r.usage, price) : undefined;
       if (cost === undefined) judgePriced = false;
       else judgeCostUsd += cost;
+      judgeApiMs = judgeApiMs !== undefined && r.apiMs !== undefined ? judgeApiMs + r.apiMs : undefined;
       judgeText = r.text;
       parsed = parseJudgeResult(r.text);
       if (parsed) break;
     }
-    judgeMs.push(Math.round(performance.now() - judgeStart));
+    judgeMs.push(judgeApiMs ?? Math.round(performance.now() - judgeStart));
     const judgedIds = parseHardChecks(rubric)
       .filter((h) => !h.counted)
       .map((h) => h.id);

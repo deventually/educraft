@@ -250,7 +250,7 @@ describe("the comparison with the LLM judge", () => {
       jevCostUsd: 0.0002,
       judgeCostUsd: 0.05,
     });
-    expect(viaCode).toMatch(/via Claude Code.*opstarten/);
+    expect(viaCode).toMatch(/via Claude Code.*zonder het opstarten/);
     expect(md).not.toMatch(/via Claude Code/);
     expect(md).toMatch(/\| visit-prep \| a#1 \| invented \| fail \| pass \|/);
   });

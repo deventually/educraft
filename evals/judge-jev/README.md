@@ -68,7 +68,8 @@ beoordeelt de modellen.
   genereren van de uitvoer mag wel in batch.
 - **Via Claude Code** (`--judge-model claude-code::claude-sonnet-5-5`) kost de meting alleen Jev.
   De kosten van de judge zijn dan zijn tokens tegen de API-lijstprijs van hetzelfde model (de
-  prompt is die van de app, zonder Claude Code's eigen prompt). Zijn snelheid is dan trager dan via
-  de API, omdat elke call de CLI opstart; het rapport zegt dat erbij.
+  prompt is die van de app, zonder Claude Code's eigen prompt). Zijn snelheid is de tijd van de
+  model-call zelf, zoals Claude Code die meet (`duration_api_ms`), zonder het opstarten van de CLI.
+  Het rapport zegt dat erbij.
 
 Nooit onderdeel van CI.

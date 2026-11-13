@@ -168,6 +168,6 @@ describe("scoring against Bastiaan's labels", () => {
         jevMs: [],
         llmMs: [1],
       }),
-    ).toMatch(/via Claude Code.*opstarten/);
+    ).toMatch(/via Claude Code.*zonder het opstarten/);
   });
 });

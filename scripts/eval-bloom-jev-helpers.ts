@@ -308,7 +308,7 @@ export function bloomReport(input: {
     "",
     ...(input.llmModel.startsWith("claude-code::")
       ? [
-          "Snelheid van de LLM via Claude Code, inclusief het opstarten van de CLI per call: trager dan via de API. Kosten tegen de API-lijstprijs van hetzelfde model.",
+          "Snelheid van de LLM via Claude Code: de model-call zelf, zoals Claude Code hem meet, zonder het opstarten van de CLI. Kosten tegen de API-lijstprijs van hetzelfde model.",
           "",
         ]
       : []),
