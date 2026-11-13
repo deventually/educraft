@@ -106,3 +106,19 @@ Wat er eerlijk gezegd nog afwijkt of open is:
 - **De pagina met zwakke plekken** van TypeSafe beschrijft jev-1.13; we meten jev-1.14. Niet-Engelse
   tekst staat er niet op, dus de Nederlandse cases zijn ook daarop een test.
 
+
+## Uitslag v3 (2026-11-13)
+
+| Meting | Set | Geslaagd | Controleren | Snelheid per bestand | Kosten per bestand |
+| --- | --- | --- | --- | --- | --- |
+| `jev4` | 23 cases × 3 | 63/69 | 27/69 | 271 ms (hoogst 508) | $0,00015 (gemeten) |
+| `llm2` (Sonnet 5.5) | 23 cases × 3 | 69/69 | 31/69 | | |
+| `jev4h` | holdout 10 × 3 | 30/30 | 25/30 | 328 ms (hoogst 498) | $0,00017 (gemeten) |
+| `llm4h` (Sonnet 5.5, Claude Code) | holdout 10 × 3 | 30/30 | 22/30 | 4616 ms (hoogst 10144) | ± $0,004 (schatting) |
+
+Op de holdout zijn Jev en Sonnet even goed. Van Jev's 25 keer *Controleren* gaan er 18 over
+bestanden die geen bewijs zijn (formats, intro, werkblad, formulier, Q&A); Sonnet zet daar ook een
+check. Jev gaf bij de gedraaide optievolgorde in 9 van de 10 holdout-cases drie keer hetzelfde
+antwoord, Sonnet in 7 van de 10. Op de cases mist Jev bij `nl-names` en `nl-hard-feedback-on-plan`
+elke keer een criterium; daar is bewust niet meer op afgesteld. Jev schrijft geen titel of reden.
+De ruwe antwoorden van de holdout staan alleen op de Mac van Bastiaan.
