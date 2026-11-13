@@ -42,6 +42,8 @@ function claudeJson(result: string, stopReason = "end_turn", isError = false) {
     is_error: isError,
     result,
     stop_reason: stopReason,
+    duration_ms: 4200,
+    duration_api_ms: 3100,
     usage: {
       input_tokens: 10,
       cache_read_input_tokens: 2,
@@ -181,6 +183,11 @@ describe("Claude Code: the request the app would send, not Claude Code's own set
     expect(r.text).toBe("Een lesplan");
     expect(r.finishReason).toBe("length");
     expect(r.usage).toEqual({ input: 10, cacheRead: 2, cacheWrite: 3, output: 40, reasoning: 5 });
+  });
+
+  it("generate() reports the time of the model call itself, without the CLI starting up", async () => {
+    spawnMock.mockReturnValue(fakeChild([claudeJson("Klaar")]));
+    expect((await cliProvider.generate(cc)).apiMs).toBe(3100);
   });
 
   it("generate() reports a normal end as stop", async () => {

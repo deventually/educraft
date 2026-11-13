@@ -113,6 +113,7 @@ interface ClaudeCodeResult {
   is_error?: boolean;
   result?: string;
   stop_reason?: string;
+  duration_api_ms?: number;
   usage?: {
     input_tokens?: number;
     cache_read_input_tokens?: number;
@@ -145,6 +146,7 @@ function parseClaudeCodeResult(stdout: string): GenerateResult {
     text: r.result ?? "",
     usage: usageOf(r.usage),
     finishReason: r.stop_reason === "max_tokens" ? "length" : "stop",
+    ...(typeof r.duration_api_ms === "number" ? { apiMs: r.duration_api_ms } : {}),
   };
 }
 

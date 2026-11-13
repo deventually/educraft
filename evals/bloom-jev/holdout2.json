@@ -1,0 +1,149 @@
+{
+  "about": "A second holdout of real, public learning outcomes (collected 2026-11-13, after the first holdout was used to choose the rule for several verbs: the highest level). Quoted from the source pages; never tuned on.",
+  "courses": [
+    {
+      "id": "hold2-inholland-verpleegkunde",
+      "locale": "nl",
+      "courseName": "Verpleegkunde deeltijd, eenheden van leeruitkomsten 2025-2026",
+      "source": "https://www.inholland.nl/media/xkmbpi2u/leeruitkomsten-met-jaarprogramma-25-26.pdf",
+      "outcomes": [
+        "De student respecteert de wensen van de zorgvrager.",
+        "De student werkt volgens standaarden, richtlijnen en protocollen.",
+        "De student ondersteunt de zorgvrager bij persoonlijke verzorging en neemt deze volgens instructie over.",
+        "De student draagt het beroep van verpleegkundige met trots uit.",
+        "De student signaleert en meldt (bijna-)incidenten.",
+        "De student neemt beslissingen over de uitvoering van de zorg volgens de principes van informed consent.",
+        "De student monitort en rapporteert de geïndiceerde zorg.",
+        "De student brengt haar visie op kwaliteit van zorg in begrijpelijke woorden naar voren.",
+        "De student overlegt over de zorg die zij biedt en legt verslag van de door haar geboden zorg.",
+        "De student coördineert de zorg die disciplines aan de zorgvrager verlenen, en waarborgt de continuïteit van zorg proactief.",
+        "De student zoekt relevante informatie op internet.",
+        "De student voert samen met de zorgvrager een proces- en productevaluatie uit, gericht op de beoogde gedragsverandering.",
+        "De student evalueert, in samenspraak met de doelgroep, het proces en effect van de toegepaste interventies.",
+        "De student analyseert methodisch het gedrag dat ten grondslag ligt aan de risicovolle leefstijl van de zorgvrager.",
+        "De student verzamelt gegevens gericht op signalering van leefstijlrisico’s.",
+        "De student herkent eenvoudige verpleegproblemen en doet voorstellen voor interventies en beoogde zorgresultaten.",
+        "De student maakt gebruik van verschillende vormen van communicatie en sociale media.",
+        "De student reageert de-escalerend op emoties van zorgvragers, zodat de zorgsituatie veilig blijft of weer veilig wordt.",
+        "De student begeleidt de zorgvrager en diens naasten in het nemen van beslissingen over de te verlenen zorg.",
+        "De student sluit aan bij het begripsniveau van de zorgvrager en reageert passend op emoties en gedrag."
+      ]
+    },
+    {
+      "id": "hold2-han-ldo",
+      "locale": "nl",
+      "courseName": "Learning and Development in Organisations deeltijd, eindkwalificaties 2025-2026",
+      "source": "https://www.han.nl/opleidingen/hbo/learning-development-organisations/deeltijd/praktische-info/opleidingsstatuut-en-onderwijs-en-examenregeling-bacheloropleiding-learning-and-development-in-organisations-deeltijd-25-26.pdf",
+      "outcomes": [
+        "Ik laat actieve inzet zien en neem verantwoordelijkheid voor mijn eigen optreden en handelen.",
+        "Ik treed proactief op en ben gemotiveerd om te werken en te leren.",
+        "In verschillende rollen en situaties toon ik gepast gedrag.",
+        "In lastige situaties maak ik zaken bespreekbaar.",
+        "Ik ga integer en respectvol om met mensen en informatie.",
+        "Ik kan helder en duidelijk communiceren, zowel mondeling als schriftelijk, zodanig dat anderen het begrijpen.",
+        "Ik kan argumenteren.",
+        "Ik geef aandacht en ruimte aan gesprekspartners en ga in op inbreng van anderen.",
+        "Ik kan relaties opbouwen en verdiepen.",
+        "Ik verzamel informatie en weeg dit tot elkaar af, in het licht van relevante criteria.",
+        "Op basis van criteria kom ik tot realistische oordelen.",
+        "Ik houd actuele ontwikkelingen bij op het vakgebied.",
+        "Ik kan kritisch reflecteren op mijn manier van kijken en handelen.",
+        "Ik stel - wanneer nodig - mijn eigen denken en doen ter discussie.",
+        "Ik herken in de praktijk mijn eigen leer- en ontwikkelbehoeften en realiseer effectiever gedrag.",
+        "Het adviseren over hoe leren een (strategische) bijdrage levert aan de ontwikkeling van organisatie, team en individu."
+      ]
+    },
+    {
+      "id": "hold2-cibap-schilder",
+      "locale": "nl",
+      "courseName": "Decoratie- en restauratieschilder (mbo), werkprocessen 2025-2026",
+      "source": "https://studiegidsen.cibap.nl/wp-content/uploads/2026/06/Decoratie-en-restauratieschilder_2025-2026.pdf",
+      "outcomes": [
+        "Voert vooronderzoek uit",
+        "Inspecteert en analyseert te behandelen gebouwen/objecten",
+        "Stelt projectplan op",
+        "Bespreekt advies uit projectplan",
+        "Bereidt specialistische schilderwerkzaamheden voor",
+        "Bereidt ondergronden voor",
+        "Voert schilderwerk uit",
+        "Brengt wandbekledingsmaterialen aan",
+        "Past specialistische schildertechnieken toe",
+        "Stelt calculaties ten behoeve van de offerte op",
+        "Koopt materialen en middelen in",
+        "Stuurt medewerkers aan",
+        "Bewaakt kwaliteit en voortgang van het project",
+        "Oriënteert zich op het starten als zelfstandig ondernemer"
+      ]
+    },
+    {
+      "id": "hold2-uantwerpen-biology",
+      "locale": "en",
+      "courseName": "Bachelor of Biology, learning outcomes",
+      "source": "https://www.uantwerpen.be/en/study/programmes/all-programmes/biology-programmes/bachelor/learning-outcomes/",
+      "outcomes": [
+        "The Bachelor is able to describe, critically analyze, evaluate and solve a question or problem.",
+        "To do this the Bachelor is capable of formal thinking, logical deductive reasoning and making hypotheses.",
+        "The Bachelor has a critical mind, is creative and has developed problem solving skills.",
+        "The Bachelor has been taught the attitudes of lifelong learning and reflection.",
+        "The Bachelor is able to explain or defend an argument.",
+        "The Bachelor can answer society’s general questions about living matter and the relation between man and the biosphere.",
+        "The Bachelor is aware of the international context in which scientific research is situated."
+      ]
+    },
+    {
+      "id": "hold2-wur-software-engineering",
+      "locale": "en",
+      "courseName": "INF-32306 Software Engineering",
+      "source": "https://ssc.wur.nl/History/Handbook/2016/Course/INF-32306.html",
+      "outcomes": [
+        "find occurrences of object-oriented (OO) software concepts in a given computer program (source code) or UML model",
+        "write a software specification using UML",
+        "assess adherence to specified software development practices",
+        "design a software system using object-oriented (OO) techniques",
+        "construct a working computer program according to defined specifications",
+        "formulate and execute functional tests for a software system",
+        "operate a software version management system for sharing software components and documentation"
+      ]
+    },
+    {
+      "id": "hold2-wur-data-analysis",
+      "locale": "en",
+      "courseName": "FTE-26306 Data Analysis Biosystems Engineering",
+      "source": "https://ssc.wur.nl/Historie/Studiegids/2014/Vak/FTE-26306.html",
+      "outcomes": [
+        "translate a research question into a statistical hypothesis",
+        "design the appropriate experiment given the hypothesis",
+        "choose an appropriate model and check the underlying assumptions",
+        "analyse the data with an appropriate programme",
+        "interpret the results of the analysis and draw conclusions with respect to the stated problem"
+      ]
+    },
+    {
+      "id": "hold2-wur-research-methods",
+      "locale": "en",
+      "courseName": "FTE-25806 Research Methods Biosystems Engineering",
+      "source": "https://ssc.wur.nl/Historie/Studiegids/2014/Vak/FTE-25806.html",
+      "outcomes": [
+        "analyse a problem, define the problem, formulate the objectives of the research, and derive the relevant research questions",
+        "write a project proposal",
+        "execute a small research project in the domain according to the project plan and in a proper way",
+        "deliver an oral argumentation in the right context and for the right purpose",
+        "present the results in a proper way, both orally and in writing",
+        "reflect on group work and their own functioning in a group."
+      ]
+    },
+    {
+      "id": "hold2-ahk-urbanism",
+      "locale": "en",
+      "courseName": "Master in Urbanism, learning outcomes 2025-2026",
+      "source": "https://www.bouwkunst.ahk.nl/media/avb/docs/docenteninfo/2025-2026/Learning_outcomes_Master_in_Urbanism_Studiegids_25-26.pdf",
+      "outcomes": [
+        "Insight into the profession of urbanist in society in the Netherlands and abroad.",
+        "Appropriate knowledge of and insight into procedures and processes of decision-making.",
+        "Skills and methods to make a plan and design clear to others visually, in writing and orally.",
+        "Appropriate knowledge of the social sciences, economics, social and historical geography and the ecology.",
+        "Appropriate knowledge of urban physics in an (inter)national context and of spatial planning law in the Netherlands."
+      ]
+    }
+  ]
+}

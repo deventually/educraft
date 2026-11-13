@@ -41,6 +41,17 @@ import type { LLMProvider } from "~/lib/ai/types";
 import { env } from "~/server/env.server";
 import { anthropicSubmit, createBatchingProvider } from "./eval-batch";
 import {
+  type CaseOutput,
+  EVALS_DIR,
+  latestOutputDate,
+  loadCases,
+  loadRubric,
+  OUTPUT_DIR,
+  outputFileName,
+  REPORTS_DIR,
+  readExistingOutput,
+} from "./eval-files";
+import {
   parseJudgeResult,
   evalGreeting,
   scoresForNextRun,
@@ -48,7 +59,6 @@ import {
   judgeFileName,
   judgeRecord,
   applyHardChecks,
-  hardChecksInstruction,
   meanScores,
   parseHardChecks,
   runSpread,
@@ -65,33 +75,18 @@ import {
   buildReportMarkdown,
   reportRowKey,
   countWords,
-  rubricForJudge,
   verifyEvidence,
   type ReportRow,
   DEFAULT_JUDGE_MODEL,
+  buildJudgePrompt,
+  type EvalCase,
 } from "./eval-helpers";
 
 // ---------------------------------------------------------------------------
 // Case + CLI shapes
 // ---------------------------------------------------------------------------
 
-interface EvalCase {
-  id: string;
-  description?: string;
-  outputLanguage: OutputLanguage;
-  /** Form values keyed by input field name. */
-  values?: Record<string, string | number | boolean | string[]>;
-  /** Inline teaching-context fixture (no id needed; matches ContextProfile). */
-  profile?: Omit<ContextProfile, "id">;
-  /** Chat tools only: the scripted student turns the harness plays. */
-  userTurns?: string[];
-  /** Vision tools (e.g. math-grading): image file, relative to evals/<slug>/. */
-  imagePath?: string;
-}
 
-interface CasesFile {
-  cases: EvalCase[];
-}
 
 interface Cli {
   tool?: string;
@@ -112,9 +107,6 @@ interface Cli {
   parallel: number;
 }
 
-const EVALS_DIR = join(process.cwd(), "evals");
-const OUTPUT_DIR = join(EVALS_DIR, "output");
-const REPORTS_DIR = join(EVALS_DIR, "reports");
 
 function parseCli(argv: string[]): Cli {
   const cli: Cli = {
@@ -165,17 +157,7 @@ function toolsWithCases(only?: string): Tool[] {
   return wanted.filter((t) => existsSync(join(EVALS_DIR, t.slug, "cases.json")));
 }
 
-function loadCases(tool: Tool): EvalCase[] {
-  const raw = readFileSync(join(EVALS_DIR, tool.slug, "cases.json"), "utf8");
-  const parsed = JSON.parse(raw) as CasesFile;
-  if (!Array.isArray(parsed.cases)) throw new Error(`${tool.slug}/cases.json: missing "cases" array`);
-  return parsed.cases;
-}
 
-function loadRubric(tool: Tool): string {
-  const path = join(EVALS_DIR, tool.slug, "rubric.md");
-  return existsSync(path) ? readFileSync(path, "utf8") : "";
-}
 
 // ---------------------------------------------------------------------------
 // Case phase — build the real prompt and call the provider
@@ -221,16 +203,6 @@ function loadImage(toolSlug: string, imagePath: string): ImageInput {
   return { mediaType, dataBase64: readFileSync(abs).toString("base64") };
 }
 
-interface CaseOutput {
-  tool: string;
-  caseId: string;
-  model: string;
-  outputLanguage: OutputLanguage;
-  promptWords: number;
-  output: string;
-  /** A model answer hit maxTokens (finishReason "length"): the output is cut off. */
-  truncated?: boolean;
-}
 
 /**
  * Build every stage prompt for a case WITHOUT calling any API. Exercises the real
@@ -363,10 +335,6 @@ async function runChat(
   return { text: transcript.join("\n\n"), truncated };
 }
 
-/** Run 1 keeps the old name, so a single-run measurement looks as before. */
-function outputFileName(caseId: string, run: number): string {
-  return run === 1 ? `${caseId}.md` : `${caseId}.run${run}.md`;
-}
 
 function writeOutput(date: string, o: CaseOutput, run = 1) {
   const dir = join(OUTPUT_DIR, date, o.tool);
@@ -379,20 +347,7 @@ function writeOutput(date: string, o: CaseOutput, run = 1) {
 // Judge phase — a second model scores the output against the tool's rubric
 // ---------------------------------------------------------------------------
 
-const JUDGE_SPINE = `You are a strict but fair evaluator of AI-generated teaching material. Score the OUTPUT against the RUBRIC. Reply with ONLY a JSON object, no prose, in this exact shape:
-{"scores": {"taskFidelity": 1-5, "pedagogicalSoundness": 1-5, "formatAdherence": 1-5, "levelFit": 1-5, "languageQuality": 1-5}, "checks": {"<hard check id>": true|false}, "worst": "<the single weakest aspect, one phrase>", "verdict": "<one sentence>"}
-Shared criteria (the rubric may add tool-specific ones): taskFidelity = does it do what the tool promises; pedagogicalSoundness = fidelity to the tool's pedagogical theory; formatAdherence = follows the required output structure; levelFit = register matches the case's EQF level; languageQuality = correct target language, no anglicisms in Dutch. Be harsh on fabricated facts. Integer scores 1 (poor) to 5 (excellent). A 5 means you found nothing to improve after looking for problems; reserve it for that. Leave "checks" empty ({}) when the rubric has no hard checks.`;
 
-function buildJudgePrompt(rubric: string, c: EvalCase, output: string): string {
-  const checks = hardChecksInstruction(parseHardChecks(rubric));
-  return [
-    JUDGE_SPINE,
-    `\n# RUBRIC\n${rubricForJudge(rubric) || "(no tool-specific rubric supplied; use the shared criteria only)"}`,
-    ...(checks ? [`\n# HARD CHECKS\n${checks}`] : []),
-    `\n# CASE\nid: ${c.id}\noutputLanguage: ${c.outputLanguage}\nEQF: ${c.profile?.eqf ?? "n/a"}\ndescription: ${c.description ?? ""}\ninputs: ${JSON.stringify(c.values ?? {}, null, 2)}`,
-    `\n# OUTPUT\n${output}`,
-  ].join("\n");
-}
 
 interface JudgedCase extends ReportRow {
   outputLanguage: OutputLanguage;
@@ -533,28 +488,7 @@ function writeReport(date: string, judged: JudgedCase[]) {
 // Orchestration
 // ---------------------------------------------------------------------------
 
-function readExistingOutput(date: string, toolId: string, caseId: string, run = 1): CaseOutput | null {
-  const path = join(OUTPUT_DIR, date, toolId, outputFileName(caseId, run));
-  if (!existsSync(path)) return null;
-  const raw = readFileSync(path, "utf8");
-  const meta = /<!-- tool=(\S+) case=(\S+) model=(\S+) lang=(\S+) promptWords=(\d+) -->/.exec(raw);
-  const body = raw.replace(/^<!--.*?-->\n\n/, "");
-  return {
-    tool: toolId,
-    caseId,
-    model: meta?.[3] ?? "unknown",
-    outputLanguage: (meta?.[4] as OutputLanguage) ?? "nl",
-    promptWords: meta ? Number(meta[5]) : 0,
-    output: body,
-    truncated: / truncated=1 -->/.test(raw),
-  };
-}
 
-function latestOutputDate(): string | null {
-  if (!existsSync(OUTPUT_DIR)) return null;
-  const dates = readdirSync(OUTPUT_DIR).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
-  return dates.at(-1) ?? null;
-}
 
 async function main() {
   const cli = parseCli(process.argv.slice(2));
