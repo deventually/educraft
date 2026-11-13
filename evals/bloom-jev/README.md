@@ -133,3 +133,35 @@ moet laten zien of het standhoudt. Vastgelegd vóór de meting:
 - **Wat telt:** per leeruitkomst (de 3 runs samen) Jev tegen de LLM en tegen de lijst, met een
   tekentoets, naast het percentage goed. Houdt Jevs voorsprong op de LLM hier stand, dan is er
   reden om Jev in de import te zetten; zo niet, dan blijft de import zoals hij is.
+
+### Uitslag ronde 3
+
+Rapport: [`2026-11-13d-bloom-jev.md`](../reports/2026-11-13d-bloom-jev.md). Elke leeruitkomst 3 keer,
+drempel vast op 0,7, verder niets veranderd. Bastiaan labelde de 78 na de run, zonder antwoorden
+van een methode te zien.
+
+| Derde holdout (78 × 3) | Goed | Stabiel over 3 runs | Snelheid | Kosten (hele meting) |
+| --- | --- | --- | --- | --- |
+| Jev | 143/234 (61%) | 76/78 | 374 ms per leeruitkomst | $0,009 |
+| LLM (de import) | 128/234 (55%) | 70/78 | 7,7 s per document | $0,40 (API-lijstprijs) |
+| Werkwoordenlijst | 123/234 (53%) | 78/78 | 0 | $0 |
+| Hybride (lijst, Jev, LLM) | 132/234 (56%) | | | |
+
+Per leeruitkomst (de 3 runs samen), met een tekentoets:
+
+| | Derde holdout | Nieuwe en derde holdout samen (158) |
+| --- | --- | --- |
+| Jev tegen de LLM | 17 tegen 10 (p ≈ 0,25) | 28 tegen 17 (p ≈ 0,14) |
+| Jev tegen de lijst | 17 tegen 10 (p ≈ 0,25) | 29 tegen 12 (p ≈ 0,01) |
+| De LLM tegen de lijst | 15 tegen 13 (p ≈ 0,85) | 25 tegen 18 (p ≈ 0,36) |
+
+- **De richting houdt stand:** op twee verse holdouts is Jev de beste van de drie, en nergens
+  slechter dan de LLM. Jev is ook het stabielst (154 van de 158 uitkomsten elke run hetzelfde,
+  de LLM 143).
+- **Beter dan de LLM is niet bewezen:** samen 28 tegen 17, p ≈ 0,14. Dat is een duidelijke
+  richting, maar geen bewijs op de gewone grens van 0,05. Beter dan de lijst is wel bewezen.
+- **De derde holdout was moeilijker** (alle drie lager) en had minder "geen niveau" (15 van de 78).
+  Jev had 109 van de 189 rijen met een niveau goed, de LLM 95, de lijst 93.
+- **De hybride voegt opnieuw niets toe.**
+- Samen genomen is een analyse achteraf; vooraf vastgelegd was de vergelijking per holdout.
+
