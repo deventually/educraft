@@ -411,9 +411,16 @@ export function parseJevAnswer(
 
 // ── The call ────────────────────────────────────────────────────────────────
 
+/** Any Decisions API request: a model, the state, and named questions. */
+interface JevPayload {
+  model: string;
+  state: unknown;
+  questions: Record<string, unknown>;
+}
+
 /** One POST to OpenRouter's Decisions API (alpha). Throws on an error status. */
 export async function askJev(
-  req: JevRequest,
+  req: JevPayload,
   opts: { apiKey: string; fetch?: typeof fetch },
 ): Promise<{ body: unknown; ms: number }> {
   const start = performance.now();

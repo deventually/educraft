@@ -1,0 +1,116 @@
+{
+  "about": "Real learning outcomes from public study guides and course catalogues (sources per course), copied as quoted by a web reader: some end mid-sentence, as outcomes pasted from a document can. Public text, no personal data. Never used to tune; labelled by Bastiaan.",
+  "courses": [
+    {
+      "id": "hold-han-leraar-nederlands",
+      "locale": "nl",
+      "courseName": "Leraar Nederlands (deeltijd)",
+      "source": "https://www.han.nl/opleidingen/hbo/leraar-nederlands/deeltijd/praktische-info/Studiegids-Nederlands-Deeltijd-2025-2026.pdf",
+      "outcomes": [
+        "De student bereidt, met behulp van een spreekschema, een debat (polyloog) voor.",
+        "De student schrijft een doel- en publieksgericht betoog in correct Nederlands",
+        "De student kent theorieën over moedertaalverwerving, tweedetaalverwerving en meertaligheid.",
+        "Hij kan voorbeelden uit de praktijk duiden in het kader van deze theorieën.",
+        "De student doorloopt de onderzoekscyclus.",
+        "Zij kunnen minimaal drie geschikte bronnen zoeken die passen bij het vraagstuk.",
+        "Zij kunnen kritisch reflecteren op hun eigen handelen.",
+        "De student benoemt en verklaart het taalsysteem in de domeinen syntaxis, semantiek, morfologie, fonologie en fonetiek.",
+        "De student kan de woordsoorten benoemen van willekeurige woorden in complexe teksten van diverse genres.",
+        "De student is in staat om zelf zinnen te maken (synthetiseren) met specifieke woordsoorten.",
+        "De student heeft kennis van het directe instructiemodel en kan deze kennis toepassen in praktijksituaties.",
+        "De student heeft kennis en inzicht in het Nederlandse onderwijssysteem.",
+        "De student is zich bewust van zijn eigen attitude m.b.t. deze thema’s",
+        "De student maakt contact met leerlingen/studenten.",
+        "De student lost verscheidene onderwijssituaties op een creatieve manier op",
+        "Hij onderzoekt op systematische wijze situaties in de praktijk met behulp van eenvoudige onderzoeksmethode(n).",
+        "De student kan literaire recensies schrijven en beargumenteerd reageren op recensies van anderen.",
+        "De student kan een onderbouwde analyse geven van een gedicht.",
+        "De student kan een beargumenteerd waardeoordeel geven over een poëtische tekst",
+        "De student kan de betekenis van een groot aantal theoretische begrippen uitleggen,"
+      ]
+    },
+    {
+      "id": "hold-hr-verpleegkunde",
+      "locale": "nl",
+      "courseName": "Verpleegkunde, leeruitkomsten 2025-2026",
+      "source": "https://www.hogeschoolrotterdam.nl/contentassets/22d35100892242ebb168fb0fc24716e8/curriculumschema--uitwerking-alle-leeruitkomsten-2025---2026.pdf",
+      "outcomes": [
+        "De student beschrijft in het position paper kort en bondig de eigen kwaliteiten",
+        "De student toont aan ethisch verantwoorde zorg te verlenen volgens een passend verpleegplan",
+        "Past de basisprincipes van het gebruik van wetenschappelijk onderzoek over verpleegkundige interventies toe",
+        "De student participeert in de zorgketen van een individuele patiënt",
+        "De student kan een gesprek in een gecompliceerde situatie voeren",
+        "De student organiseert de zorg voor een kwetsbare zorgvrager op basis van gezamenlijke besluitvorming.",
+        "De student biedt ondersteuning aan mensen met lichamelijke en/of verstandelijke beperkingen",
+        "De student vertaalt een praktijkprobleem naar een onderzoekbare vraag en ontwerpt hiervoor een adequate methode",
+        "De student ontwikkelt een gezondheidsbevorderende interventie voor een specifieke risicogroep",
+        "De student voert gezondheidsbevorderende interventies uit, waaronder motiverende gespreksvoering",
+        "De student kan in een betoog een ethisch dilemma op het gebied van gezondheidsbevordering beschrijven",
+        "De student adviseert het multidisciplinaire team over de implementatie en evaluatie van een kwaliteitsverbetering",
+        "De student stimuleert en coacht collega’s in hun groei en ontwikkeling",
+        "De student ontwikkelt een topiclijst voor een kwalitatief interview",
+        "De student formuleert zelf de leeruitkomst"
+      ]
+    },
+    {
+      "id": "hold-hhs-voeding-dietetiek",
+      "locale": "nl",
+      "courseName": "Voeding en Diëtetiek (deeltijd) 2024-2025",
+      "source": "https://dehaagsehogeschool.nl/media/olp-voeding-en-dietetiek-deeltijd-2024-2025",
+      "outcomes": [
+        "De professional legt de werking uit van alle macro- en micronutriënten.",
+        "De professional toetst een bestaande, planmatige gezondheidsbevorderende interventie op theoretische onderbouwing.",
+        "De professional kan op basis hiervan een passende evidence based dieetbehandeling formuleren.",
+        "De professional legt de stappen uit van het proces van productontwikkeling",
+        "De professional maakt onderbouwde keuzes voor functional foods, de toevoeging van additieven",
+        "De professional leidt (groeps)gesprekken met klanten/cliënten/collega-professionals in een hulpverlenerssetting",
+        "De professional zet op methodische wijze een kwantitatief praktijkonderzoek op",
+        "De professional past gesprekstechnieken toe, aangepast aan de doelgroep en situatie.",
+        "De professional begeleidt de cliënt zelfstandig bij het behalen van de in het behandelplan gestelde doelen.",
+        "De professional reflecteert stelselmatig kritisch op haar handelen",
+        "De professional voert marktonderzoek uit om te komen tot een nieuw voedingsconcept.",
+        "De professional ontwerpt een prototype van het voedingsconcept",
+        "De professional meet het effect van het product, de dienst of werkwijze in voeding en/of diëtetiek",
+        "De professional analyseert hoe het gewenste voedingsgedrag bij een specifieke doelgroep kan worden bevorderd.",
+        "De professional beoordeelt aan de hand van literatuur welke interventies te gebruiken zijn"
+      ]
+    },
+    {
+      "id": "hold-windesheim-hme",
+      "locale": "en",
+      "courseName": "Human Movement Education, exchange courses 2020-2021",
+      "source": "https://www.windesheim.com/getmedia/545b38d2-64ed-4c86-b313-e780f874a99e/Course-Catalogue-Human-Movement-Education-2020-2021.pdf",
+      "outcomes": [
+        "You have obtained a broad perspective on education in general and on education in Dutch schools",
+        "You have experienced differences in educational approach between schools in the Netherlands and schools in your home country",
+        "Students know how to approach students in a pedagogical way",
+        "Students know various didactical methods",
+        "Students learn about handling group dinamics",
+        "Understanding intermediate basic vocabulary: words (Dutch - English)",
+        "Use of vocabulary and grammar in simple conversations",
+        "You can give a broad outline of the Dutch educational system",
+        "You can indicate the main differences between the educational system in your home country and the Dutch educational system",
+        "You can explain how special educational needs of children are met in the Netherlands",
+        "You have a broad idea about different innovative schools"
+      ]
+    },
+    {
+      "id": "hold-ucm-catalogue",
+      "locale": "en",
+      "courseName": "University College Maastricht, course catalogue 2024-2025",
+      "source": "https://www.maastrichtuniversity.nl/sites/default/files/2026-10/UCM%20-%20Course%20Catalogue%202024-2025.pdf",
+      "outcomes": [
+        "To familiarize students with the philosophical foundations of the scientific method.",
+        "Students will be trained in normative political argumentation.",
+        "Students are encouraged to recognise and illustrate the interdisciplinary nature of successful scientific endeavour",
+        "Students are trained to apply the scientific inquiry method.",
+        "To give students a better understanding of basic legal notions such as property, contract and delict.",
+        "Are able to define, apply and critically reflect on the notion of mimesis.",
+        "Are able to critically reflect on the role of style in representation.",
+        "You are able to apply this theory to both poems as song texts.",
+        "You know how stories work and how to analyse them academically",
+        "To discuss the development of “the state” as well as the diversity in state- and nation-building since the Middle Ages."
+      ]
+    }
+  ]
+}

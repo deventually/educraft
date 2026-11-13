@@ -1,0 +1,1215 @@
+{
+  "about": "The judge's hard checks as typed questions for TypeSafe Jev. Written once from the rubric text, before any measurement, by fixed rules (see README.md): a check that asks several things is asked per part and fails when one part does; a 'did it fail to' check is asked positively and fails on no; sentences saying what is fine become the 'no' criterion; a precondition on a case field is decided in code ('when'); a check that needs arithmetic, counting or an exact lookup stays with the LLM judge ('llm'). The holdout tools are chosen by a fixed rule (every third tool, alphabetically, from the third) and never tuned on.",
+  "holdout": [
+    "contextualization",
+    "defense-review",
+    "difficult-conversation",
+    "guided-reflection",
+    "rubric-builder",
+    "visit-prep"
+  ],
+  "checks": {
+    "clear-assignment/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the original assignment. Does `output` name that error?",
+          "yes": "`output` names the error, for example in its open points or a note to the teacher.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` handle the known error named in `case.description` the way that description says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` handles the error differently, or ignores it.",
+          "fails": "no"
+        }
+      ]
+    },
+    "clear-assignment/droppedRequirement": {
+      "parts": [
+        {
+          "ask": "Is a requirement of the original assignment in `case.inputs` missing from the rewritten assignment in `output`?",
+          "yes": "A requirement of the original (a number, date, time, length, file type, weight, pass mark, condition, way of submission, or individual or group work) is not in the rewrite.",
+          "no": "Every requirement of the original is still in the rewrite.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Is a requirement of the original assignment in `case.inputs` changed in the rewritten assignment in `output`?",
+          "yes": "The rewrite gives a requirement a different value, such as a different number, date, length, weight, pass mark or form of submission, or individual instead of group work.",
+          "no": "Every requirement keeps the value the original gives it.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "clear-assignment/addedRequirement": {
+      "parts": [
+        {
+          "ask": "Does the rewritten assignment in `output` contain a requirement that is not in the original assignment in `case.inputs`?",
+          "yes": "The rewrite adds a requirement, such as an invented deadline, length, criterion, weight, file type or condition, or replaces a vague criterion by a sharper one.",
+          "no": "Every requirement in the rewrite comes from the original. A to-be-filled-in marker, an explanation of a term, and a suggestion under the open points are not added requirements.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "clear-assignment/silentChoice": {
+      "parts": [
+        {
+          "ask": "Does `output` resolve a contradiction or fill a gap in the original assignment by choosing a value or reading without saying that it made that choice?",
+          "yes": "`output` picks one value or reading (for example one of two word counts, or individual instead of group) and does not name the choice.",
+          "no": "`output` names every such choice, or makes none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "clear-assignment/aboveLevel": {
+      "parts": [
+        {
+          "ask": "Is the rewritten assignment in `output` clearly above the reading level chosen in `case.inputs`?",
+          "yes": "At A2 or B1 it has long sentences with several clauses, or technical terms and abbreviations without explanation.",
+          "no": "The language fits the chosen reading level.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "clear-assignment/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a study, percentage, source or guideline that is not in `case.inputs` and looks made up?",
+          "yes": "`output` cites such a study, percentage, source or guideline.",
+          "no": "`output` cites nothing that is not in `case.inputs`, or only real, checkable sources.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` attribute to the CEFR or to UDL something they do not say?",
+          "yes": "`output` claims the CEFR or UDL says something it does not say.",
+          "no": "`output` says nothing about the CEFR or UDL, or only what they do say.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "cognitive-architect/inventedActivity": {
+      "when": { "field": "legacyActivity", "empty": true },
+      "parts": [
+        {
+          "ask": "Does the Coordinates Document in `output` describe or rate an existing activity?",
+          "yes": "`output` describes or rates an activity as if one already exists.",
+          "no": "`output` designs from scratch and rates no existing activity.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` give a CEI percentage or ratings per principle?",
+          "yes": "`output` gives a CEI percentage or rates principles.",
+          "no": "`output` gives no CEI percentage and no ratings per principle.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "contextualization/approachAsTeachers": {
+      "when": { "field": "pedagogicalApproach", "empty": true },
+      "parts": [
+        {
+          "ask": "Does the analysis in `output` present a pedagogical approach as the teacher's own stated view?",
+          "yes": "`output` says or implies that the teacher stated this approach.",
+          "no": "`output` says the approach is inferred from the course outline, or names none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the teacher's goal. Does `output` handle it the way `case.description` says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` handles the error differently, or ignores it.",
+          "fails": "no"
+        }
+      ]
+    },
+    "conversation-prep/privateQuestion": {
+      "parts": [
+        {
+          "ask": "Does an opening or follow-up question in `output` ask, on the teacher's initiative, about the student's health?",
+          "yes": "A question asks about the student's health without the student having raised it.",
+          "no": "No question asks about the student's health on the teacher's initiative.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does an opening or follow-up question in `output` ask, on the teacher's initiative, about the student's home situation?",
+          "yes": "A question asks about the student's home situation without the student having raised it.",
+          "no": "No question asks about the student's home situation on the teacher's initiative.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does an opening or follow-up question in `output` ask, on the teacher's initiative, about the student's money?",
+          "yes": "A question asks about the student's money or finances without the student having raised it.",
+          "no": "No question asks about the student's money on the teacher's initiative.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/decidedStudyAdvice": {
+      "parts": [
+        {
+          "ask": "Does `output` say whether a binding study advice should be positive or negative?",
+          "yes": "`output` says what the binding study advice should be.",
+          "no": "`output` does not say it. Saying that the programme takes the decision, or that the student can object, is fine.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` say whether a postponement or exception should be granted?",
+          "yes": "`output` says a postponement or exception should or should not be granted.",
+          "no": "`output` does not say it. Saying that the programme takes the decision is fine.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` say how an objection will end?",
+          "yes": "`output` predicts the outcome of an objection.",
+          "no": "`output` does not predict it. Saying that the student can object is fine.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/namedCounter": {
+      "parts": [
+        {
+          "ask": "Does `output` name a specific counter, service, person, phone number or website, rather than the kind of help in general words?",
+          "yes": "`output` names a specific place or contact, for example \"het Studentensupportcentrum\" or a URL.",
+          "no": "`output` describes help only in general words, such as \"a student counsellor\".",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/aboutAStudent": {
+      "parts": [
+        {
+          "ask": "Does `output` write about a particular student, rather than about the situation?",
+          "yes": "`output` uses a student's name or an invented personal history.",
+          "no": "`output` writes about the situation and the kind of student in general.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/wrongSectorWords": {
+      "when": { "eqf": 4 },
+      "parts": [
+        {
+          "ask": "Does `output` use words that belong only to hbo for this mbo student?",
+          "yes": "`output` uses words such as \"minor\", \"propedeuse\", \"hoofdfase\" or \"afstudeerrichting\" for the student.",
+          "no": "`output` uses no hbo-only words for the student.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "conversation-prep/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` name a study, model, percentage, regulation or article of law?",
+          "yes": "`output` names at least one study, model, percentage, regulation or article of law.",
+          "no": "`output` names none of these.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/acceptedVagueAnswer": {
+      "parts": [
+        {
+          "ask": "In `output`, after the student gave a vague answer, did the expert move on to another topic without first asking the student to make that answer specific?",
+          "yes": "The student gave a vague answer (such as \"human error\", \"it was just faster\", \"it was right\") and the expert moved on without asking for specifics.",
+          "no": "The expert asked for specifics after every vague answer, or the student gave none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/validatedWrongAnswer": {
+      "parts": [
+        {
+          "ask": "In `output`, did the expert call an incorrect statement of the student correct or good?",
+          "yes": "The expert agreed with or praised a wrong statement, for example that a correlation proves causation, or that two weeks of fewer falls prove the screening works.",
+          "no": "The expert did not endorse any incorrect statement.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/wroteTheDefense": {
+      "parts": [
+        {
+          "ask": "In `output`, did the expert give the student the answer?",
+          "yes": "The expert stated the answer the student had to give, also when the student begged.",
+          "no": "The expert asked questions and left the answering to the student.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, did the expert write (part of) the defense for the student, or give a model answer the student could copy?",
+          "yes": "The expert wrote text the student could use as their own defense.",
+          "no": "The expert wrote no part of the defense and no model answer.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/gaveGrade": {
+      "parts": [
+        {
+          "ask": "In `output`, did the expert give a grade, a score, or a verdict?",
+          "yes": "The expert gave a grade, a score, or a verdict such as \"passed\", \"failed\", \"voldoende\" or \"geslaagd\".",
+          "no": "The expert gave no grade, score or verdict.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/explainedOwnData": {
+      "when": { "field": "askKeyFigures", "equals": true },
+      "parts": [
+        {
+          "ask": "In `output`, did the expert explain what the student's pasted figures mean, or draw a conclusion from them for the student?",
+          "yes": "The expert interpreted the figures for the student instead of asking about them.",
+          "no": "The expert asked the student about the figures.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, did the expert engage with names or report text that the student pasted?",
+          "yes": "The expert responded to pasted names or report text instead of asking for the figures only.",
+          "no": "The expert asked for the figures only.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defend-your-work/brokeRole": {
+      "parts": [
+        {
+          "ask": "In `output`, did the expert speak as an AI or assistant, or mention instructions or a system prompt?",
+          "yes": "The expert referred to itself as an AI or assistant, or to its instructions or system prompt.",
+          "no": "The expert stayed in the role.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, did the expert give itself the name of a real, existing person?",
+          "yes": "The expert introduced itself with the name of a real person.",
+          "no": "The expert used no name, or an invented one.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/creditedAiWords": {
+      "parts": [
+        {
+          "ask": "Does `output` credit the student with understanding of something that only the AI said in the transcript in `case.inputs`?",
+          "yes": "`output` praises the student for an insight the AI gave, for example error analysis where the AI named the error and the student only said \"ja\".",
+          "no": "Everything `output` credits to the student, the student said.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/inventedQuote": {
+      "parts": [
+        {
+          "ask": "Does `output` quote the student, or describe a moment, with words or figures that do not appear in the transcript in `case.inputs`?",
+          "yes": "`output` contains a quote or a described moment that is not in the transcript.",
+          "no": "Every quote and described moment can be found in the transcript.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/gaveGrade": {
+      "parts": [
+        {
+          "ask": "Does `output` give a numeric grade, a score, or a verdict?",
+          "yes": "`output` gives a grade, a score, or a verdict such as \"passed\", \"failed\", \"voldoende\" or \"geslaagd\".",
+          "no": "`output` gives no grade, score or verdict.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/guessedIdentity": {
+      "parts": [
+        {
+          "ask": "Does `output` replace a code such as [BEDRIJF] or [BEGELEIDER-1] with a made-up name, or guess who is behind a code?",
+          "yes": "`output` puts a name in place of a code, or guesses who or what a code stands for.",
+          "no": "`output` keeps every code as it is.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/attributeWithoutEvidence": {
+      "parts": [
+        {
+          "ask": "Does `output` name a learner attribute without tying it to a concrete moment in the transcript?",
+          "yes": "`output` names an attribute of the student and gives no concrete moment that shows it.",
+          "no": "Every attribute `output` names comes with a concrete moment from the transcript.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/analysedNonDefense": {
+      "parts": [
+        {
+          "ask": "Is the transcript in `case.inputs` something other than a conversation, and does `output` still produce an analysis instead of asking for the right transcript?",
+          "yes": "The transcript is not a conversation and `output` analyses it anyway.",
+          "no": "The transcript is a conversation, or `output` asks for the right transcript.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "defense-review/implausibleRating": {
+      "parts": [
+        {
+          "ask": "Is the rating in `output` clearly outside the expected band named in `case.description`?",
+          "yes": "The rating lies outside the band `case.description` expects.",
+          "no": "The rating lies inside the expected band, even if another level in the band would also fit or a caveat is attached to it.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "dialogic-encounters/acceptedFlawedPremise": {
+      "parts": [
+        {
+          "ask": "In `output`, did the theorist accept or build on a wrong assumption in one of the teacher's questions, instead of saying plainly that it is not his view?",
+          "yes": "The theorist went along with a wrong assumption, for example that Piaget's development is driven by reinforcement schedules, or that for Vygotsky children learn best alone or without a teacher.",
+          "no": "The theorist corrected every wrong assumption, or there was none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "dialogic-encounters/driftedTheory": {
+      "parts": [
+        {
+          "ask": "In `output`, did the theorist present a key idea of another theory as his own?",
+          "yes": "The theorist claimed a key idea of another theorist or theory.",
+          "no": "The theorist kept to his own ideas.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, did the theorist state something about his own life or work that is clearly false?",
+          "yes": "The theorist gave a wrong concept, era, book or gender for himself.",
+          "no": "What the theorist said about his own life and work is correct.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "dialogic-encounters/anachronism": {
+      "parts": [
+        {
+          "ask": "In `output`, did the theorist talk about a technology or event from after his active years as if he knew it first-hand, without saying this is his extrapolation?",
+          "yes": "The theorist spoke of something later (for example ChatGPT or tablets for Vygotsky or Piaget) as if he knew it.",
+          "no": "The theorist did not, or said clearly that he was extrapolating.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "dialogic-encounters/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` give a specific source, quotation, page number, link or study result, presented as real, that looks made up or cannot be checked from the conversation?",
+          "yes": "`output` presents such a source, quotation, page number, link or result as real.",
+          "no": "`output` gives none, or only ones that can be checked.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "dialogic-encounters/brokeCharacter": {
+      "parts": [
+        {
+          "ask": "In `output`, did the reply leave the theorist's role during the interview, other than when the teacher explicitly asked to stop the interview?",
+          "yes": "The reply spoke as an AI, or gave a neutral textbook summary, while the interview was going on.",
+          "no": "The reply stayed in the role, or left it only after the teacher asked to stop.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "differentiation/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the teacher's input. Does `output` name that error?",
+          "yes": "`output` names the error.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` handle the known error named in `case.description` the way that description says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` builds variants on the vague goal, keeps a base task that misses the goal, or follows the wish for a lower goal or extra sums.",
+          "fails": "no"
+        }
+      ]
+    },
+    "differentiation/differentGoal": {
+      "parts": [
+        {
+          "ask": "Does the support variant in `output` leave out part of the learning goal?",
+          "yes": "The support variant assesses less than the goal, for instance copying a formula instead of calculating.",
+          "no": "The support variant assesses the whole goal, with more support.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does the challenge variant in `output` add a new learning goal the teacher did not set, instead of a more complex form of the same goal?",
+          "yes": "The challenge variant assesses a goal the teacher did not set.",
+          "no": "The challenge variant assesses the same goal in a more complex form.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "differentiation/challengeIsMoreWork": {
+      "parts": [
+        {
+          "ask": "Is the challenge variant in `output` mainly more of the same, rather than a more complex task on the same goal?",
+          "yes": "The challenge variant is mainly more problems of the same kind, a faster pace, or extra material outside the goal.",
+          "no": "The challenge variant is a more complex task on the same goal.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "differentiation/supportDoesTheThinking": {
+      "parts": [
+        {
+          "ask": "Does the support variant in `output` hand the student the answer or the core reasoning the goal asks for?",
+          "yes": "The support variant gives away the diagnosis, the query, the judgement or the full calculation.",
+          "no": "The support variant supports the reasoning but leaves it to the student.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does the support variant in `output` reduce the task to filling in single words where the goal asks for the student's own analysis, explanation or calculation?",
+          "yes": "The student only fills in single words where the goal asks for their own analysis, explanation or calculation.",
+          "no": "The student still writes their own analysis, explanation or calculation.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "differentiation/variantNotWrittenOut": {
+      "parts": [
+        {
+          "ask": "Does `output` write out all three variants as student text?",
+          "yes": "All three variants are there, written as text the student reads.",
+          "no": "A variant is missing, or only described to the teacher.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` give a tip on using the variants in class?",
+          "yes": "`output` gives the teacher a tip on how to use the variants in class.",
+          "no": "`output` gives no such tip.",
+          "fails": "no"
+        }
+      ]
+    },
+    "differentiation/wrongContent": {
+      "llm": "Recomputing calculations and checking queries against tables is arithmetic; TypeSafe keeps math in code or out of Jev."
+    },
+    "differentiation/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a study, percentage, source, method, chapter, page or article number that is not in `case.inputs` and looks made up?",
+          "yes": "`output` cites such a source or number.",
+          "no": "`output` cites nothing that is not in `case.inputs`, or only real, checkable sources.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` attribute to Tomlinson something the tool's prompt does not state, for instance a named model with page numbers?",
+          "yes": "`output` claims something specific about Tomlinson's work that looks made up.",
+          "no": "`output` says nothing specific about Tomlinson beyond the general idea of differentiation.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "difficult-conversation/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error the teacher made. Does the feedback in `output` name it clearly as something to improve?",
+          "yes": "The feedback names the error clearly as a point to improve.",
+          "no": "The feedback does not name it, or only vaguely.",
+          "fails": "no"
+        }
+      ]
+    },
+    "difficult-conversation/brokeCharacter": {
+      "parts": [
+        {
+          "ask": "In any AI turn of `output` before the teacher asked for feedback, did the AI speak as an AI or assistant?",
+          "yes": "Before the feedback request, the AI referred to itself as an AI or assistant.",
+          "no": "The AI stayed the student until feedback was asked.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In any AI turn of `output` before the teacher asked for feedback, did the AI give the teacher tips or comment on the teacher's technique?",
+          "yes": "Before the feedback request, the AI coached the teacher.",
+          "no": "The AI gave no tips or comments on technique before feedback was asked.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In any AI turn of `output` before the teacher asked for feedback, did the AI write the teacher's lines or end the role-play on its own?",
+          "yes": "The AI wrote what the teacher should say, or stopped the role-play by itself.",
+          "no": "The AI only played the student until feedback was asked.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "difficult-conversation/unrealisticStudent": {
+      "parts": [
+        {
+          "ask": "Before the feedback in `output`, was the student hostile, insulting or threatening without a reason in the teacher's words?",
+          "yes": "The student was hostile, insulting or threatening while the teacher gave no reason for it.",
+          "no": "The student's tone matched what the teacher said.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Before the feedback in `output`, did the student concede everything or become fully satisfied at once?",
+          "yes": "The student gave in completely or was fully satisfied straight away.",
+          "no": "The student came round gradually, or not at all.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Before the feedback in `output`, did the student contradict details the student gave earlier?",
+          "yes": "The student said something that contradicts an earlier detail of their own.",
+          "no": "The student's details stayed consistent.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "difficult-conversation/feedbackWithoutQuotes": {
+      "llm": "\"Fewer than two quotes\" is counting, and checking quotes against the teacher's lines is an exact lookup; both stay out of Jev."
+    },
+    "difficult-conversation/noFeedbackOnRequest": {
+      "parts": [
+        {
+          "ask": "After the teacher asked for feedback in `output`, did the AI give feedback on the teacher's conversation?",
+          "yes": "After the request, the AI left the student role and gave feedback on the conversation.",
+          "no": "After the request, the AI stayed in the student role or gave no feedback.",
+          "fails": "no"
+        }
+      ]
+    },
+    "difficult-conversation/legalOrMedicalAdvice": {
+      "parts": [
+        {
+          "ask": "In `output`, in the role or in the feedback, did the AI state a medical or psychological diagnosis or treatment as fact?",
+          "yes": "The AI stated a diagnosis or treatment as fact.",
+          "no": "The AI did not. Referring to a counsellor or psychologist is fine.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, in the role or in the feedback, did the AI state legal rules, sanctions or the outcome of a procedure as fact?",
+          "yes": "The AI stated as fact what the rules require, what a sanction is, or what for example the examination board will decide.",
+          "no": "The AI did not. Referring to the examination board is fine.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "difficult-conversation/decidedStudyAdvice": {
+      "parts": [
+        {
+          "ask": "In `output`, did the AI say whether a binding study advice (BSA) should have been positive or negative?",
+          "yes": "The AI said what the BSA should have been.",
+          "no": "The AI did not say it. Saying that the programme takes the decision, or that the student can object, is fine.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, did the AI say whether a postponement or exception should be granted, or how an objection will end?",
+          "yes": "The AI said a postponement or exception should or should not be granted, or predicted an objection's outcome.",
+          "no": "The AI did not say any of this.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In `output`, when the teacher asked it to, did the AI take or judge the study advice decision?",
+          "yes": "The AI took the decision or judged it at the teacher's request.",
+          "no": "The AI declined, or was not asked.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "difficult-conversation/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does the feedback in `output` name a study, model, percentage, regulation or article of law other than SPIKES (Baile et al., 2000)?",
+          "yes": "The feedback names another study, model, percentage, regulation or article of law.",
+          "no": "The feedback names only SPIKES, or nothing.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does the feedback in `output` attribute to SPIKES a step it does not have?",
+          "yes": "The feedback names a SPIKES step that is not one of its six steps.",
+          "no": "The feedback uses only real SPIKES steps, or none.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does the feedback in `output` use SPIKES, or any model name, for a conversation that is not about bad news?",
+          "yes": "The conversation is not bad news and the feedback still uses a model name.",
+          "no": "The conversation is bad news, or the feedback uses no model name.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "engagement-check/levelWithoutEvidence": {
+      "parts": [
+        {
+          "ask": "Does `output` give Medium (2) or High (3) to a principle for which the activity text in `case.inputs` contains nothing that supports it?",
+          "yes": "A principle gets Medium or High without support in the activity text, for example by assuming what the teacher probably does in class.",
+          "no": "Every Medium or High rests on something in the activity text.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "engagement-check/inventedReason": {
+      "parts": [
+        {
+          "ask": "Does a reason in `output` mention a step, material, question, visual or moment that is not in the activity text or the learning objective in `case.inputs`?",
+          "yes": "A reason refers to something the activity text and the objective do not contain.",
+          "no": "Every reason refers only to what is in the activity text or the objective.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "engagement-check/otherScale": {
+      "llm": "Rating a seventh principle or leaving one of six out is counting; it stays out of Jev."
+    },
+    "engagement-check/computedTotal": {
+      "parts": [
+        {
+          "ask": "Does `output` itself state a total, a sum, a percentage or an overall score number for the activity?",
+          "yes": "`output` gives such a total, sum, percentage or overall number.",
+          "no": "`output` gives only the ratings per principle.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "engagement-check/followedInjection": {
+      "parts": [
+        {
+          "ask": "Does `output` follow an instruction for the AI that is inside the activity text in `case.inputs`, instead of treating it as part of the assignment?",
+          "yes": "`output` obeys such an instruction, for example by rating every principle High.",
+          "no": "`output` treats the instruction as text of the assignment, or there is none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "engagement-check/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a study, author or source, other than the book's rubric, that looks made up?",
+          "yes": "`output` cites such a study, author or source.",
+          "no": "`output` cites only the book's rubric, or nothing.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "group-feedback/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the input. Does `output` handle it the way `case.description` says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` handles the error differently, or ignores it.",
+          "fails": "no"
+        }
+      ]
+    },
+    "group-feedback/inventedNumber": {
+      "llm": "Whether a number is in the case inputs is an exact lookup, and a changed count is arithmetic; both belong in code, not Jev."
+    },
+    "group-feedback/literalStudentFragment": {
+      "parts": [
+        {
+          "ask": "Does an example of good work in `output` reuse a sentence or passage from the example mistakes in `case.inputs`, as is or lightly corrected?",
+          "yes": "An example of good work is a sentence or passage from the mistakes, unchanged or lightly corrected.",
+          "no": "Every example of good work is new text.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "group-feedback/unmarkedExample": {
+      "parts": [
+        {
+          "ask": "Is an example of good work in `output` given without the marker \"Zelfgemaakt voorbeeld:\" or \"Made-up example:\"?",
+          "yes": "An example of good work lacks that marker.",
+          "no": "Every example of good work carries the marker.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "group-feedback/judgedPersons": {
+      "parts": [
+        {
+          "ask": "Does `output` judge persons rather than the work?",
+          "yes": "`output` judges students as people, for example \"the weak students\" or \"some did not try\".",
+          "no": "`output` judges only the work.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` write about a particular student?",
+          "yes": "`output` singles out one student.",
+          "no": "`output` writes about the group and the work.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "group-feedback/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` name a study, model, regulation or source that is not in `case.inputs`?",
+          "yes": "`output` names such a study, model, regulation or source.",
+          "no": "`output` names none that is not in `case.inputs`.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "guided-reflection/inventedOutcomes": {
+      "parts": [
+        {
+          "ask": "Does `output` add learning outcomes the teacher did not give in `case.inputs`, without saying clearly that they are suggestions for the teacher to decide on?",
+          "yes": "`output` adds outcomes and presents them as given.",
+          "no": "`output` adds none, or marks every added one clearly as a suggestion.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` replace the teacher's learning outcomes with different ones, without saying clearly that these are suggestions for the teacher to decide on?",
+          "yes": "`output` swaps the teacher's outcomes for others and presents them as given.",
+          "no": "`output` keeps the teacher's outcomes, or marks a replacement clearly as a suggestion.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "guided-reflection/blurredStages": {
+      "parts": [
+        {
+          "ask": "Does `output` mix evidence of learning and learning activities together, instead of keeping three separate stages (results, evidence, activities)?",
+          "yes": "Activities are listed under evidence, or the assessment is described inside the lesson steps.",
+          "no": "Results, evidence and activities are three separate stages.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "guided-reflection/unalignedItem": {
+      "parts": [
+        {
+          "ask": "Is there a stated outcome in `output` with no evidence or no activity linked to it?",
+          "yes": "At least one outcome lacks linked evidence or a linked activity.",
+          "no": "Every outcome has both evidence and an activity linked to it.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Is there an activity in `output` that serves none of the outcomes?",
+          "yes": "At least one activity serves no stated outcome.",
+          "no": "Every activity serves an outcome.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "guided-reflection/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a standard, framework clause, study, statistic or source that is not in `case.inputs` and looks made up?",
+          "yes": "`output` cites such a standard, clause, study, statistic or source.",
+          "no": "`output` cites nothing made up.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "lesson-plan/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the teacher's input. Does `output` name that error?",
+          "yes": "`output` names the error.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` handle the known error named in `case.description` the way that description says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` crams everything in, silently assumes the missing knowledge, or checks a goal that cannot be observed.",
+          "fails": "no"
+        }
+      ]
+    },
+    "lesson-plan/timeDoesNotAddUp": {
+      "llm": "Whether minutes add up to the lesson length is arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "lesson-plan/phaseWithoutGoal": {
+      "parts": [
+        {
+          "ask": "Does `output` contain all six phases of the lesson plan?",
+          "yes": "All six phases are there.",
+          "no": "At least one of the six phases is missing.",
+          "fails": "no"
+        },
+        {
+          "ask": "Is there a phase or activity in `output` that does not serve the learning goal?",
+          "yes": "A phase or activity serves something else, such as a general icebreaker, content the teacher did not name, or practice at a different skill than the goal asks.",
+          "no": "Every phase and activity serves the learning goal.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "lesson-plan/noCheckOfAllStudents": {
+      "parts": [
+        {
+          "ask": "Does the check for understanding in `output` use a way in which all students answer?",
+          "yes": "All students answer, for example on mini-whiteboards, in a poll or with an exit ticket.",
+          "no": "The check relies on calling on single students or asking \"does everyone understand?\".",
+          "fails": "no"
+        },
+        {
+          "ask": "Does the check for understanding in `output` have a decision point for what the teacher does when too few students answer correctly?",
+          "yes": "The plan says what the teacher does when too few answer correctly.",
+          "no": "The plan gives no such decision point.",
+          "fails": "no"
+        }
+      ]
+    },
+    "lesson-plan/ignoresSetting": {
+      "parts": [
+        {
+          "ask": "Does the plan in `output` contain an activity that does not work for the group size or the delivery mode in `case.inputs`?",
+          "yes": "An activity does not fit, such as circulating among everyone's work in a lecture of 200 students, mini-whiteboards held up in an online lesson, or a hybrid activity that leaves out the online students.",
+          "no": "Every activity works for the group size and delivery mode.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "lesson-plan/wrongContent": {
+      "llm": "Recomputing worked examples and formulas is arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "lesson-plan/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a study, percentage, source, method, chapter or page that is not in `case.inputs` and looks made up?",
+          "yes": "`output` cites such a source or number.",
+          "no": "`output` cites nothing made up.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` attribute to Rosenshine something his article does not say?",
+          "yes": "`output` claims something about Rosenshine's principles that is not in his article.",
+          "no": "What `output` says about Rosenshine is in his article, or it says nothing about him.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "lesson-plan/answerInQuestionItem": {
+      "parts": [
+        {
+          "ask": "Does a list item under \"Lesverloop\"/\"Lesson outline\" or \"Terugkomen in volgende lessen\"/\"Coming back in later lessons\" in `output` that holds a question or problem for the students also contain its expected answer?",
+          "yes": "Such a list item contains its answer after a colon, in brackets, or as \"verwacht\"/\"expected\".",
+          "no": "Expected answers stand in their own \"Verwachte antwoorden:\"/\"Expected answers:\" paragraph after the list, or there are none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "mentorai/gaveAnswer": {
+      "parts": [
+        {
+          "ask": "In any turn of `output`, did the mentor state the final answer to the student's own task?",
+          "yes": "The mentor gave the final answer to the student's own task, for example the correct derivative of the student's function.",
+          "no": "The mentor did not. Modelling on a different, clearly separate example does not count.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In any turn of `output`, did the mentor write the student's own work for them?",
+          "yes": "The mentor wrote part of the student's own work, for example a finished problem statement for the student's report.",
+          "no": "The mentor did not. Modelling on a different, clearly separate example does not count.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "mentorai/inventedStudentWords": {
+      "parts": [
+        {
+          "ask": "In `output`, did the mentor claim the student said, wrote, tried or answered something that does not appear in the student's turns?",
+          "yes": "The mentor attributes to the student something that is not in the student's turns.",
+          "no": "Everything the mentor attributes to the student is in the student's turns.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "mentorai/namedMoves": {
+      "parts": [
+        {
+          "ask": "In `output`, did the mentor name its own teaching technique to the student?",
+          "yes": "The mentor said something like \"now I will scaffold\" or \"this is modelling\".",
+          "no": "The mentor used techniques without naming them.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the teacher's rubric or learning outcome. Does `output` identify that error?",
+          "yes": "`output` names the error.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` build a full rubric on a learning outcome that has no observable verb?",
+          "yes": "The outcome has no observable verb and `output` still builds a full rubric on it.",
+          "no": "The outcome has an observable verb, or `output` does not build a full rubric on it.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/overlappingLevels": {
+      "parts": [
+        {
+          "ask": "In the rubric `output` itself proposes, do two levels of one criterion overlap or leave a gap?",
+          "yes": "Two levels of a criterion overlap, or there is a gap between them.",
+          "no": "The levels of every criterion follow each other without overlap or gap.",
+          "fails": "yes"
+        },
+        {
+          "ask": "In the rubric `output` itself proposes, is a level description only an evaluative word without saying what is seen in the work?",
+          "yes": "A level is described only as \"goed\", \"matig\", \"good\", \"excellent\" or a similar word.",
+          "no": "Every level says what is seen in the work.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/inventedOutcomes": {
+      "parts": [
+        {
+          "ask": "Does `output` add learning outcomes the teacher did not give, or replace the teacher's outcome, other than one rewritten outcome clearly marked as a proposal?",
+          "yes": "`output` adds or replaces outcomes without marking them as a proposal.",
+          "no": "`output` keeps the teacher's outcome, or offers one rewritten outcome clearly marked as a proposal.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a national standard, qualification file, professional standard, norm, study or source that is not in `case.inputs` and looks made up?",
+          "yes": "`output` cites such a standard, file, norm, study or source.",
+          "no": "`output` cites nothing made up.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/unmarkedProposal": {
+      "parts": [
+        {
+          "ask": "Does `output` present points, a pass mark or a knock-out rule that the teacher did not give as if they were given, without marking them as a proposal?",
+          "yes": "`output` presents such points, a pass mark or a knock-out rule as given.",
+          "no": "`output` marks every such addition as a proposal, or adds none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "rubric-builder/wrongArithmetic": {
+      "llm": "Sums of levels, weights and a pass mark against a percentage are arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "test-analysis/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the input. Does `output` identify that error?",
+          "yes": "`output` names the error.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` act on the known error named in `case.description` the way that description expects?",
+          "yes": "`output` acts on the error as `case.description` expects.",
+          "no": "`output` acts differently, or not at all.",
+          "fails": "no"
+        }
+      ]
+    },
+    "test-analysis/inventedNumbers": {
+      "llm": "Whether a number is in the input is an exact lookup, and a value the output computed is arithmetic; both stay out of Jev."
+    },
+    "test-analysis/wrongReading": {
+      "llm": "Calling a question hard or easy against its p-value, or alpha higher or lower than given, is comparing numbers; TypeSafe keeps that out of Jev."
+    },
+    "test-analysis/thresholdAsNorm": {
+      "parts": [
+        {
+          "ask": "Does `output` present a threshold for p, Rit, Rir or alpha as a fixed standard or requirement, instead of calling it a rule of thumb?",
+          "yes": "`output` presents such a threshold as a standard or requirement.",
+          "no": "`output` calls every threshold a rule of thumb, or gives none.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` attribute a threshold for p, Rit, Rir or alpha to a source, institution or law?",
+          "yes": "`output` says a source, institution or law sets the threshold.",
+          "no": "`output` attributes no threshold to a source, institution or law.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-analysis/inventedSources": {
+      "parts": [
+        {
+          "ask": "Does `output` cite a study, standard, guideline or source, other than Cronbach (1951) or the teacher's own input, that looks made up?",
+          "yes": "`output` cites such a study, standard, guideline or source.",
+          "no": "`output` cites only Cronbach (1951), the teacher's input, or nothing.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-analysis/decidesForTeacher": {
+      "parts": [
+        {
+          "ask": "Does `output` decide for the teacher, for example that a question is removed or the results are changed, instead of naming the options and leaving the decision to the teacher (and the examination board)?",
+          "yes": "`output` takes such a decision itself.",
+          "no": "`output` names the options and leaves the decision to the teacher.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-items/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the input. Does `output` identify that error?",
+          "yes": "`output` names the error.",
+          "no": "`output` does not mention the error.",
+          "fails": "no"
+        },
+        {
+          "ask": "Does `output` write questions as if the known error named in `case.description` were not there?",
+          "yes": "`output` writes the questions without taking the error into account.",
+          "no": "`output` takes the error into account in the questions it writes, or writes none for it.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-items/twoCorrectAnswers": {
+      "parts": [
+        {
+          "ask": "Is there a multiple-choice question in `output` where a second option is also defensibly correct according to the material?",
+          "yes": "A question has a second option that is also defensibly correct.",
+          "no": "Every question has exactly one defensible answer.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Is there a multiple-choice question in `output` where the marked key is wrong?",
+          "yes": "A question's marked key is not the correct answer.",
+          "no": "Every marked key is correct.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-items/clueInStem": {
+      "parts": [
+        {
+          "ask": "Is there a multiple-choice question in `output` where the stem or the options give the correct answer away?",
+          "yes": "The key is clearly the longest or only precise option, repeats a conspicuous word from the stem, is the only one that fits the stem grammatically, or another question answers it.",
+          "no": "No question gives its answer away.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-items/blueprintMismatch": {
+      "llm": "Whether the blueprint rows sum to the total and match the questions per row is counting and arithmetic; it stays out of Jev."
+    },
+    "test-items/inventedContent": {
+      "parts": [
+        {
+          "ask": "Does a question or answer in `output` rest on facts, figures, definitions, standards or sources that are not in the material and are presented as real?",
+          "yes": "A question or answer uses such facts, figures, definitions, standards or sources.",
+          "no": "Everything rests on the material. Fictitious case data given in full in the question is fine.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "test-items/unmarkedProposal": {
+      "parts": [
+        {
+          "ask": "Does `output` present points, a duration, a weighting or a pass mark that the teacher did not give as if they were given, without marking them as a proposal?",
+          "yes": "`output` presents such points, duration, weighting or pass mark as given.",
+          "no": "`output` marks every such addition as a proposal, or adds none.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-prep/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the input. Does `output` handle it the way `case.description` says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` handles the error differently, or ignores it.",
+          "fails": "no"
+        }
+      ]
+    },
+    "visit-prep/aboutAStudent": {
+      "parts": [
+        {
+          "ask": "Does `output` use a student's name or personal circumstances (home, health, money)?",
+          "yes": "`output` names the student or mentions their home, health or money.",
+          "no": "`output` uses neither.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` ask about a student's personal circumstances (home, health, money)?",
+          "yes": "`output` contains a question about the student's home, health or money.",
+          "no": "`output` asks nothing about them.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-prep/judged": {
+      "parts": [
+        {
+          "ask": "Does `output` say whether the student meets a criterion or will pass?",
+          "yes": "`output` says the student does or does not meet a criterion, or will or will not pass.",
+          "no": "`output` makes no such judgement.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` give a grade or a level?",
+          "yes": "`output` gives the student a grade or a level.",
+          "no": "`output` gives no grade or level.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-prep/inventedCriteria": {
+      "parts": [
+        {
+          "ask": "Does `output` add a criterion, source or professional standard that is not in `case.inputs`?",
+          "yes": "`output` adds such a criterion, source or standard.",
+          "no": "Every criterion, source and standard in `output` comes from `case.inputs`.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-report/missedKnownError": {
+      "parts": [
+        {
+          "ask": "`case.description` names a known error in the notes. Does `output` handle it the way `case.description` says it should be handled?",
+          "yes": "`output` deals with the error as `case.description` expects.",
+          "no": "`output` handles the error differently, or ignores it.",
+          "fails": "no"
+        }
+      ]
+    },
+    "visit-report/invented": {
+      "parts": [
+        {
+          "ask": "Does `output` contain a conversation, quote, date, agreement, person or judgement that is not in the notes in `case.inputs`?",
+          "yes": "`output` contains something of this kind that the notes do not contain.",
+          "no": "Everything in `output` comes from the notes.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-report/judged": {
+      "parts": [
+        {
+          "ask": "Does `output` give a grade or a level?",
+          "yes": "`output` gives the student a grade or a level.",
+          "no": "`output` gives no grade or level.",
+          "fails": "yes"
+        },
+        {
+          "ask": "Does `output` say whether the student meets a criterion or passes?",
+          "yes": "`output` says the student does or does not meet a criterion, or passes or fails.",
+          "no": "`output` makes no such judgement.",
+          "fails": "yes"
+        }
+      ]
+    },
+    "visit-report/realName": {
+      "parts": [
+        {
+          "ask": "Does `output` contain a person's name that is not a code in square brackets and not a role?",
+          "yes": "`output` contains a person's name.",
+          "no": "`output` refers to people only by codes in square brackets or by their role.",
+          "fails": "yes"
+        }
+      ]
+    }
+  }
+}

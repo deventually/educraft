@@ -9,7 +9,8 @@
  * pure template helpers, which are network-free too.)
  */
 
-import type { Tool, ToolStage } from "~/lib/registry/types";
+import type { ContextProfile } from "~/lib/context/types";
+import type { OutputLanguage, Tool, ToolStage } from "~/lib/registry/types";
 import { DEFAULT_MODEL, isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
 import { interpolateGreeting } from "~/lib/chat/greeting";
 import type { TemplateValues } from "~/lib/template/interpolate";
@@ -593,4 +594,35 @@ export async function mapLimit<T, R>(
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
+}
+
+/** One eval case of `evals/<tool>/cases.json`. */
+export interface EvalCase {
+  id: string;
+  description?: string;
+  outputLanguage: OutputLanguage;
+  /** Form values keyed by input field name. */
+  values?: Record<string, string | number | boolean | string[]>;
+  /** Inline teaching-context fixture (no id needed; matches ContextProfile). */
+  profile?: Omit<ContextProfile, "id">;
+  /** Chat tools only: the scripted student turns the harness plays. */
+  userTurns?: string[];
+  /** Vision tools (e.g. math-grading): image file, relative to evals/<slug>/. */
+  imagePath?: string;
+}
+
+const JUDGE_SPINE = `You are a strict but fair evaluator of AI-generated teaching material. Score the OUTPUT against the RUBRIC. Reply with ONLY a JSON object, no prose, in this exact shape:
+{"scores": {"taskFidelity": 1-5, "pedagogicalSoundness": 1-5, "formatAdherence": 1-5, "levelFit": 1-5, "languageQuality": 1-5}, "checks": {"<hard check id>": true|false}, "worst": "<the single weakest aspect, one phrase>", "verdict": "<one sentence>"}
+Shared criteria (the rubric may add tool-specific ones): taskFidelity = does it do what the tool promises; pedagogicalSoundness = fidelity to the tool's pedagogical theory; formatAdherence = follows the required output structure; levelFit = register matches the case's EQF level; languageQuality = correct target language, no anglicisms in Dutch. Be harsh on fabricated facts. Integer scores 1 (poor) to 5 (excellent). A 5 means you found nothing to improve after looking for problems; reserve it for that. Leave "checks" empty ({}) when the rubric has no hard checks.`;
+
+/** The judge's prompt for one output: the spine, the rubric, its hard checks, the case and the output. */
+export function buildJudgePrompt(rubric: string, c: EvalCase, output: string): string {
+  const checks = hardChecksInstruction(parseHardChecks(rubric));
+  return [
+    JUDGE_SPINE,
+    `\n# RUBRIC\n${rubricForJudge(rubric) || "(no tool-specific rubric supplied; use the shared criteria only)"}`,
+    ...(checks ? [`\n# HARD CHECKS\n${checks}`] : []),
+    `\n# CASE\nid: ${c.id}\noutputLanguage: ${c.outputLanguage}\nEQF: ${c.profile?.eqf ?? "n/a"}\ndescription: ${c.description ?? ""}\ninputs: ${JSON.stringify(c.values ?? {}, null, 2)}`,
+    `\n# OUTPUT\n${output}`,
+  ].join("\n");
 }

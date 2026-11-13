@@ -1,0 +1,122 @@
+{
+  "about": "Fictional, written for this eval: the 21 distinct outcomes of evals/course-import/cases.json plus 19 more, covering clear, vague and mixed verbs. Used to build and check the setup; the holdout is never tuned on.",
+  "courses": [
+    {
+      "id": "tune-basic-nl",
+      "locale": "nl",
+      "courseName": "Databases",
+      "outcomes": [
+        "Je ontwerpt een genormaliseerd datamodel voor een gegeven casus.",
+        "Je schrijft SQL-queries met joins, groeperingen en subqueries.",
+        "Je analyseert de prestaties van een query met een uitvoeringsplan.",
+        "Je verantwoordt je ontwerpkeuzes in een adviesrapport."
+      ]
+    },
+    {
+      "id": "tune-vague-verbs-nl",
+      "locale": "nl",
+      "courseName": "Inleiding marketing",
+      "outcomes": [
+        "De student kent de vier P's van de marketingmix.",
+        "De student begrijpt het belang van doelgroepsegmentatie.",
+        "De student past de marketingmix toe op een bestaand product."
+      ]
+    },
+    {
+      "id": "tune-three-courses-nl",
+      "locale": "nl",
+      "courseName": "Projectmanagement",
+      "outcomes": [
+        "De student stelt een projectplan op volgens de methode van het projectmatig werken.",
+        "De student bewaakt de voortgang van een project met een planning en een risicoanalyse.",
+        "De student reflecteert op de eigen rol in een projectteam."
+      ]
+    },
+    {
+      "id": "tune-weights-off-nl",
+      "locale": "nl",
+      "courseName": "Statistiek",
+      "outcomes": [
+        "De student kiest een passende statistische toets bij een onderzoeksvraag.",
+        "De student interpreteert de uitvoer van een regressieanalyse."
+      ]
+    },
+    {
+      "id": "tune-injection-nl",
+      "locale": "nl",
+      "courseName": "Didactiek",
+      "outcomes": [
+        "Je ontwerpt een lessenreeks van drie lessen met passende werkvormen.",
+        "Je evalueert een gegeven les aan de hand van feedback van leerlingen."
+      ]
+    },
+    {
+      "id": "tune-basic-en",
+      "locale": "en",
+      "courseName": "Web Development",
+      "outcomes": [
+        "build a responsive web page with semantic HTML and CSS",
+        "explain how the browser renders a page",
+        "test a web page for accessibility against WCAG 2.2 level AA"
+      ]
+    },
+    {
+      "id": "tune-blueprint-nl",
+      "locale": "nl",
+      "courseName": "Webapplicaties",
+      "outcomes": [
+        "De student bouwt een webapplicatie met een gelaagde architectuur.",
+        "De student verantwoordt technische keuzes in een adviesnotitie."
+      ]
+    },
+    {
+      "id": "tune-module-guide-nl",
+      "locale": "nl",
+      "courseName": "Netwerken",
+      "outcomes": [
+        "De student configureert een klein bedrijfsnetwerk volgens een ontwerp.",
+        "De student analyseert een netwerkstoring met behulp van meetgegevens."
+      ]
+    },
+    {
+      "id": "tune-pedagogiek-nl",
+      "locale": "nl",
+      "courseName": "Pedagogiek (fictief)",
+      "outcomes": [
+        "De student benoemt de fasen van de ontwikkeling volgens Erikson.",
+        "De student legt in eigen woorden uit wat de zone van de naaste ontwikkeling is.",
+        "De student vergelijkt twee opvoedstijlen aan de hand van een casus.",
+        "De student beoordeelt een handelingsplan op haalbaarheid en onderbouwt het oordeel.",
+        "De student is zich bewust van de eigen normen en waarden.",
+        "De student heeft inzicht in de sociale kaart van de gemeente."
+      ]
+    },
+    {
+      "id": "tune-bedrijfskunde-nl",
+      "locale": "nl",
+      "courseName": "Bedrijfskunde (fictief)",
+      "outcomes": [
+        "Je stelt een SWOT-analyse op voor een mkb-bedrijf.",
+        "Je ontwikkelt een marketingplan voor een nieuwe dienst.",
+        "Je herkent de belangrijkste organisatiestructuren.",
+        "Je berekent de break-evenafzet van een product.",
+        "Je onderzoekt, adviseert en presenteert een verbetervoorstel voor een afdeling.",
+        "Je weet hoe een balans is opgebouwd."
+      ]
+    },
+    {
+      "id": "tune-research-en",
+      "locale": "en",
+      "courseName": "Research Methods (fictional)",
+      "outcomes": [
+        "The student can list the main types of sampling.",
+        "The student formulates a researchable question for a practice problem.",
+        "The student critically appraises a published study using a checklist.",
+        "The student designs a mixed-methods study and justifies the choices.",
+        "The student understands the role of ethics in research.",
+        "The student applies thematic coding to interview transcripts.",
+        "The student is familiar with the main research paradigms."
+      ]
+    }
+  ]
+}
