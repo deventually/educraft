@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildSortMessage, parseSortAnswer } from "~/lib/portfolio/batch";
@@ -8,6 +8,9 @@ import {
   caseDossier,
   type EvidenceEvalFile,
   evidenceReportMarkdown,
+  HOLDOUT_FILE,
+  loadSuite,
+  rawReportName,
   scoreSort,
 } from "../../scripts/eval-evidence-helpers";
 
@@ -130,3 +133,45 @@ describe("portfolio-evidence eval cases", () => {
     expect(why).toMatch(/\| b \|.*\| ja: outcome, unsettled:c_U1_2 \|/);
   });
 });
+
+describe("the holdout stays out of the public repo", () => {
+  it("ignores the holdout file and its raw answers, which hold its text", () => {
+    const ignore = readFileSync(join(__dirname, "../../.gitignore"), "utf8");
+    expect(ignore).toContain("/evals/portfolio-evidence/holdout.json");
+    expect(ignore).toContain("/evals/reports/*-holdout-raw.json");
+    expect(rawReportName("2026-11-13", "jev4h", "holdout")).toBe(
+      "2026-11-13jev4h-portfolio-evidence-holdout-raw.json",
+    );
+    expect(rawReportName("2026-11-13", "jev4", "cases")).toBe(
+      "2026-11-13jev4-portfolio-evidence-raw.json",
+    );
+  });
+});
+
+describe.skipIf(!existsSync(HOLDOUT_FILE))(
+  "portfolio-evidence holdout (real, anonymised files on Bastiaan's machine only; never used to tune)",
+  () => {
+    const holdout = existsSync(HOLDOUT_FILE) ? loadSuite("holdout") : { ...suite, cases: [] };
+
+    it("uses the main frameworks and has its own case ids", () => {
+      expect(holdout.frameworks).toEqual(suite.frameworks);
+      const ids = new Set(suite.cases.map((c) => c.id));
+      expect(holdout.cases.length).toBeGreaterThanOrEqual(10);
+      for (const c of holdout.cases) expect(ids.has(c.id), c.id).toBe(false);
+    });
+
+    it("every holdout case's known-good answer passes every check", () => {
+      for (const c of holdout.cases) {
+        const d = caseDossier(holdout, c);
+        const raw = JSON.stringify(c.good);
+        const s = scoreSort(
+          holdout,
+          c,
+          answerUsable(raw),
+          parseSortAnswer(raw, d, { key: c.id, ...c.file }),
+        );
+        expect(s.pass, `${c.id}: ${JSON.stringify(s.checks)}`).toBe(true);
+      }
+    });
+  },
+);

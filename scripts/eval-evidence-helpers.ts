@@ -2,6 +2,8 @@
  * Pure helpers for the evidence-sorting eval (`npm run eval:evidence`): build the dossier a
  * case's framework gives, and score the proposal for one file deterministically (no judge).
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { extractJson } from "../app/lib/ai/structuredAnswer";
 import { SORT_PROMPT_ID, type SortProposal } from "../app/lib/portfolio/batch";
 import { emptyDossier } from "../app/lib/portfolio/schema";
@@ -41,6 +43,33 @@ export interface EvidenceCase {
 export interface EvidenceEvalFile {
   frameworks: Record<"nl" | "en", EvalOutcome[]>;
   cases: EvidenceCase[];
+}
+
+const SUITE_DIR = join(__dirname, "..", "evals", "portfolio-evidence");
+
+/**
+ * A case set: `cases` (the main set, also used to tune) or `holdout` (real, anonymised files,
+ * never used to tune). Every set uses the frameworks of `cases.json`.
+ */
+/**
+ * Real, anonymised files from Bastiaan's own dossier: kept on his machine, never in the public
+ * repo (gitignored), and never used to tune.
+ */
+export const HOLDOUT_FILE = join(SUITE_DIR, "holdout.json");
+
+/** The raw answers hold the files' text, so a holdout run's raw file is gitignored too. */
+export function rawReportName(date: string, label: string, set: "cases" | "holdout"): string {
+  return `${date}${label}-portfolio-evidence${set === "holdout" ? "-holdout" : ""}-raw.json`;
+}
+
+export function loadSuite(set: "cases" | "holdout"): EvidenceEvalFile {
+  const main = JSON.parse(readFileSync(join(SUITE_DIR, "cases.json"), "utf8")) as EvidenceEvalFile;
+  if (set === "cases") return main;
+  const extra = JSON.parse(readFileSync(HOLDOUT_FILE, "utf8")) as Pick<
+    EvidenceEvalFile,
+    "cases"
+  >;
+  return { frameworks: main.frameworks, cases: extra.cases };
 }
 
 const outcomeId = (i: number) => `eval-u${i + 1}`;

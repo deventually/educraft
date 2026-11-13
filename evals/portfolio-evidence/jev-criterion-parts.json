@@ -1,0 +1,45 @@
+{
+  "_about": "TypeSafe: one judgment per question. A criterion that asks two things is asked as its parts; code proposes the criterion when the file shows one of them. Split once, before any measurement on the holdout, from the criterion text alone. A criterion not listed here is asked whole.",
+  "parts": {
+    "De docent ontwerpt een les met een heldere opbouw en passende leerdoelen.": [
+      "De docent ontwerpt een les met een heldere opbouw.",
+      "De docent kiest passende leerdoelen voor een les."
+    ],
+    "De docent zet activerende werkvormen in en geeft studenten feedback.": [
+      "De docent zet activerende werkvormen in.",
+      "De docent geeft studenten feedback."
+    ],
+    "De docent begeleidt studenten individueel en in groepen.": [
+      "De docent begeleidt studenten individueel.",
+      "De docent begeleidt studenten in groepen."
+    ],
+    "De docent voert gesprekken over studievoortgang en loopbaan.": [
+      "De docent voert gesprekken met studenten over hun studievoortgang.",
+      "De docent voert gesprekken met studenten over hun loopbaan."
+    ],
+    "De docent analyseert de toetsresultaten en trekt conclusies.": [
+      "De docent analyseert toetsresultaten.",
+      "De docent trekt conclusies uit toetsresultaten."
+    ],
+    "De docent vraagt feedback en gebruikt die.": [
+      "De docent vraagt anderen om feedback op het eigen werk.",
+      "De docent gebruikt ontvangen feedback om het eigen werk te verbeteren."
+    ],
+    "The teacher designs a lesson with a clear structure and fitting learning goals.": [
+      "The teacher designs a lesson with a clear structure.",
+      "The teacher chooses fitting learning goals for a lesson."
+    ],
+    "The teacher uses activating methods and gives students feedback.": [
+      "The teacher uses activating methods.",
+      "The teacher gives students feedback."
+    ],
+    "The teacher analyses the test results and draws conclusions.": [
+      "The teacher analyses test results.",
+      "The teacher draws conclusions from test results."
+    ],
+    "The teacher asks for feedback and uses it.": [
+      "The teacher asks others for feedback on their own work.",
+      "The teacher uses feedback received to improve their own work."
+    ]
+  }
+}

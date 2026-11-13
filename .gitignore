@@ -16,6 +16,9 @@ book/*.pdf
 # Eval harness: raw model outputs are large + non-deterministic (don't commit);
 # scored reports under evals/reports/ ARE committed.
 /evals/output/
+# The holdout is real (anonymised) dossier work: it stays on Bastiaan's machine.
+/evals/portfolio-evidence/holdout.json
+/evals/reports/*-holdout-raw.json
 
 # Local database backups (npm run backup).
 /data/backups/

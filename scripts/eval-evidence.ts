@@ -9,6 +9,7 @@
  *   ANTHROPIC_API_KEY=… npm run eval:evidence -- --repeat 3      # consistency
  *   ANTHROPIC_API_KEY=… npm run eval:evidence -- --label b       # <date>b-portfolio-evidence.md
  *   npm run eval:evidence -- --dry-run                           # build messages only, no API
+ *   … -- --set holdout                                           # the real, anonymised files
  *   OPENROUTER_API_KEY=… npm run eval:evidence -- --jev --label jev   # TypeSafe Jev instead
  *
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
@@ -17,7 +18,7 @@
  * answers go next to the report (`…-raw.json`), to tune the thresholds offline. Costs well
  * under €1 per run. Never part of CI.
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { providerForModel } from "~/lib/ai/provider";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
@@ -28,15 +29,25 @@ import {
   SORT_PROMPT_ID,
   type SortProposal,
 } from "~/lib/portfolio/batch";
+import type { DossierData } from "~/lib/portfolio/types";
 import {
   answerUsable,
   caseDossier,
-  type EvidenceEvalFile,
+  loadSuite,
+  rawReportName,
+  type EvidenceCase,
   type EvidenceRow,
   evidenceReportMarkdown,
   scoreSort,
 } from "./eval-evidence-helpers";
-import { askJev, buildJevRequest, JEV_MODEL, parseJevAnswer } from "./eval-evidence-jev-helpers";
+import {
+  askJev,
+  buildJevRequest,
+  JEV_MODEL,
+  type JevRequest,
+  loadCriterionParts,
+  parseJevAnswer,
+} from "./eval-evidence-jev-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
 const REPORTS_DIR = join(EVALS_DIR, "reports");
@@ -55,21 +66,23 @@ async function main() {
   if (jev && !dryRun && !apiKey) throw new Error("--jev needs OPENROUTER_API_KEY");
   let costUsd: number | undefined;
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
-  const suite = JSON.parse(
-    readFileSync(join(EVALS_DIR, "portfolio-evidence", "cases.json"), "utf8"),
-  ) as EvidenceEvalFile;
+  const set = arg("set") === "holdout" ? "holdout" : "cases";
+  const suite = loadSuite(set);
   const rows: EvidenceRow[] = [];
-  /** Jev's answers as they came, so thresholds can be tuned offline without new calls. */
-  const raw: { caseId: string; body: unknown }[] = [];
+  /** Each exact request with Jev's answer as it came, to rerun it or tune thresholds offline. */
+  const raw: { caseId: string; request: JevRequest; body: unknown }[] = [];
+  const parts = loadCriterionParts();
+  /** The option order turns per repeat (TypeSafe: Jev leans toward the first option). */
+  const jevRequest = (d: DossierData, c: EvidenceCase, i: number) =>
+    buildJevRequest(d, c.file, c.locale, { model, parts, rotate: i });
 
   for (const c of suite.cases) {
     const d = caseDossier(suite, c);
     const message = buildSortMessage(d, c.file, c.locale);
-    const request = buildJevRequest(d, c.file, c.locale, model);
     if (dryRun) {
       console.log(
         jev
-          ? `${c.id}: ${Object.keys(request.questions).length} questions`
+          ? `${c.id}: ${Object.keys(jevRequest(d, c, 0).questions).length} questions`
           : `${c.id}: ${message.length} chars`,
       );
       continue;
@@ -83,10 +96,11 @@ async function main() {
       let ms: number;
       let why: string[] | undefined;
       if (jev) {
+        const request = jevRequest(d, c, i);
         const answer = await askJev(request, { apiKey });
         const parsed = parseJevAnswer(answer.body, d, { key: c.id, ...c.file });
         ({ usable, proposal, why } = parsed);
-        raw.push({ caseId, body: answer.body });
+        raw.push({ caseId, request, body: answer.body });
         if (parsed.costUsd !== undefined) costUsd = (costUsd ?? 0) + parsed.costUsd;
         text = `p(outcome)=${parsed.outcomeProbability?.toFixed(2) ?? "-"} ${JSON.stringify(proposal)}`;
         ms = answer.ms;
@@ -119,7 +133,7 @@ async function main() {
   writeFileSync(file, evidenceReportMarkdown({ date, model, repeat, rows, costUsd }));
   console.log(`Report: ${file}`);
   if (jev) {
-    const rawFile = join(REPORTS_DIR, `${date}${label}-portfolio-evidence-raw.json`);
+    const rawFile = join(REPORTS_DIR, rawReportName(date, label, set));
     writeFileSync(rawFile, `${JSON.stringify(raw, null, 2)}\n`);
     console.log(`Raw Jev answers: ${rawFile}`);
   }
