@@ -4,7 +4,7 @@
  * course document), TypeSafe's Jev (one call per outcome, one yes/no per level) and the verb list
  * in code, on the same outcomes: two tuning sets and a fresh holdout of public ones.
  *
- *   ANTHROPIC_API_KEY=… OPENROUTER_API_KEY=… npm run eval:bloom-jev -- --repeat 3 --label a
+ *   ANTHROPIC_API_KEY=… JEV_API_KEY=… npm run eval:bloom-jev -- --repeat 3 --label a
  *   … -- --set holdout3             # one set only (default: all four)
  *   npm run eval:bloom-jev -- --dry-run   # build the requests only, no API
  *   npm run eval:bloom-jev -- --rescore evals/reports/<date><label>-bloom-jev-raw.json
@@ -27,14 +27,13 @@ import {
   bloomFromVerb,
   bloomReport,
   type BloomSet,
-  buildBloomJevRequest,
   loadBloomSuite,
   outcomeDocument,
-  parseBloomJevAnswer,
   sameOutcome,
   withHighestRule,
 } from "./eval-bloom-jev-helpers";
-import { askJev, JEV_MODEL } from "./eval-evidence-jev-helpers";
+import { buildBloomJevRequest, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
+import { askJev, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import { EVALS_DIR, REPORTS_DIR } from "./eval-files";
 import { mapLimit, parallelism } from "./eval-helpers";
 import { catalogPrice, listPriceUsd } from "./eval-judge-jev-helpers";
@@ -74,8 +73,8 @@ async function main() {
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const jevModel = arg("model") ?? JEV_MODEL;
   const llmModel = arg("llm-model") ?? DEFAULT_MODEL;
-  const apiKey = process.env.OPENROUTER_API_KEY ?? "";
-  if (!dryRun && !apiKey) throw new Error("needs OPENROUTER_API_KEY");
+  const apiKey = process.env[JEV_KEY_ENV] ?? "";
+  if (!dryRun && !apiKey) throw new Error(`needs ${JEV_KEY_ENV}`);
   const only = arg("set");
   const sets = (
     ["cases", "holdout", "holdout2", "holdout3"] as const satisfies readonly BloomSet[]
@@ -98,7 +97,7 @@ async function main() {
       const document = outcomeDocument(course);
       const message = buildImportMessage(document, course.courseName);
       if (dryRun) {
-        const req = buildBloomJevRequest(course.outcomes[0] ?? "", course.locale);
+        const req = buildBloomJevRequest(course.outcomes[0] ?? "", course.locale, jevModel);
         console.log(`  · ${set}/${course.id}: ${course.outcomes.length} outcomes, ${message.length} chars`);
         console.log(JSON.stringify(req, null, 2));
         continue;
@@ -127,7 +126,7 @@ async function main() {
 
         // Jev, one request per outcome: one yes/no per level; code takes the highest.
         const jev = await mapLimit(course.outcomes, limit, async (outcome) => {
-          const request = buildBloomJevRequest(outcome, course.locale, { model: jevModel });
+          const request = buildBloomJevRequest(outcome, course.locale, jevModel);
           const answer = await askJev(request, { apiKey });
           jevMs.push(answer.ms);
           const v = parseBloomJevAnswer(answer.body);

@@ -126,6 +126,15 @@ LimeOnIt is not tied to one model vendor.
   `provider.ts` routes a model id to an adapter; `credentials.ts` maps a provider
   to the `.env` var it needs (or none, for local/CLI). All keys come from
   `.env` through `env.server` — never hardcoded or read ad hoc.
+- **A decision model, not a chat model** (BESLUIT-2026-11-13-2). `decisions` in
+  `config/models.json` names TypeSafe's Jev: a provider (`openrouter`), the Decisions API's
+  address, the pinned model and its own key setting (`keyEnv`: `JEV_API_KEY`, never the
+  provider's chat key; the config refuses that). It is not in the model list, so nobody picks it as the LLM; the code asks it for
+  bounded judgments (typed yes/no questions in, probabilities out) and decides in code.
+  `app/lib/ai/decisions.ts` is the one POST. Its only use: the Bloom level in the course import
+  (`app/lib/courses/bloomJev.ts`, `withJevBloom` in `courseImport.server.ts`), behind the
+  instance-only feature `bloomJev` (default Off, BESLUIT-2026-11-13-1). A call is metered in
+  `ai_usage` under its provider at the cost Jev reports.
 - Default model: `default` in `config/models.json`, read as `DEFAULT_MODEL` (`models.ts`). It is the
   only place a model is chosen: every tool's `defaultModel` and the eval judge point at it, and
   `tests/model-ids.test.ts` fails on a model id written anywhere else in `app/` or `scripts/`.

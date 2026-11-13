@@ -18,6 +18,8 @@ export interface AiCall {
   source: string;
   /** The served model id; its provider is looked up in the catalog. */
   model: string;
+  /** The provider, for a model outside the catalog (the decision model, `DECISIONS`). */
+  provider?: string;
   /** The call's tokens; absent when the provider reported none (or the call broke off). */
   usage?: TokenUsage;
   /** The call failed or was aborted. */
@@ -54,7 +56,7 @@ export async function recordAiUsage(userId: string, call: AiCall, day = utcDay()
       userId,
       day,
       source: call.source,
-      provider: providerOf(call.model),
+      provider: call.provider ?? providerOf(call.model),
       model: call.model,
       ...add,
     })

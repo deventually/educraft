@@ -521,6 +521,13 @@
     "provider": "whisper",
     "model": "whisper-1"
   },
+  "decisions": {
+    "name": "TypeSafe Jev",
+    "provider": "openrouter",
+    "url": "https://openrouter.ai/api/alpha/decisions",
+    "model": "typesafe/jev-1.14",
+    "keyEnv": "JEV_API_KEY"
+  },
   "exchangeRate": {
     "usdToEur": 0.8917,
     "checked": "2026-11-11",

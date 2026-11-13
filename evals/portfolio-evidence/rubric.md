@@ -33,7 +33,7 @@ sjabloon als bewijs zien, namen overnemen, en de Engelse prompt.
 
 `npm run eval:evidence -- --jev` stuurt dezelfde cases naar TypeSafe Jev, een beslismodel dat
 geen tekst schrijft maar getypte antwoorden met kansen geeft, via de Decisions API van OpenRouter
-(`OPENROUTER_API_KEY`). De vertaling staat in `scripts/eval-evidence-jev-helpers.ts`:
+(`JEV_API_KEY`, Jevs eigen OpenRouter-sleutel). De vertaling staat in `scripts/eval-evidence-jev-helpers.ts`:
 
 - eerst een ja/nee *is dit bewijs?*, dan één keuze voor de leeruitkomst en één voor de soort;
 - elk criterium (of elk deel ervan, zie *Vraagopzet v3*) en elke regel van het verplicht bewijs is

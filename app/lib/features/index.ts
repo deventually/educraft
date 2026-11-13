@@ -13,7 +13,8 @@ export type FeatureId =
   | "roleAgents"
   | "utilities"
   | "pilotCheckin"
-  | "supervisionTracks";
+  | "supervisionTracks"
+  | "bloomJev";
 
 export interface Feature {
   id: FeatureId;
@@ -54,6 +55,17 @@ export const FEATURES: readonly Feature[] = [
     id: "supervisionTracks",
     name: { nl: "Stage- en afstudeertrajecten", en: "Internship and thesis tracks" },
     defaultStand: "on",
+  },
+  // TypeSafe's Jev proposes the Bloom level in the course import (evals/bloom-jev). Off by
+  // default: the outcomes then go to OpenRouter as well, a processor the institution has to accept.
+  {
+    id: "bloomJev",
+    name: {
+      nl: "Bloom-voorstel bij de import door TypeSafe Jev (via OpenRouter)",
+      en: "Bloom proposal on import by TypeSafe Jev (via OpenRouter)",
+    },
+    defaultStand: "off",
+    instanceOnly: true,
   },
 ];
 

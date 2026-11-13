@@ -10,7 +10,7 @@
  *   ANTHROPIC_API_KEY=… npm run eval:evidence -- --label b       # <date>b-portfolio-evidence.md
  *   npm run eval:evidence -- --dry-run                           # build messages only, no API
  *   … -- --set holdout                                           # the real, anonymised files
- *   OPENROUTER_API_KEY=… npm run eval:evidence -- --jev --label jev   # TypeSafe Jev instead
+ *   JEV_API_KEY=… npm run eval:evidence -- --jev --label jev       # TypeSafe Jev instead
  *
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
  * `--jev` the same cases go to Jev as typed decisions (`eval-evidence-jev-helpers.ts`), through
@@ -43,6 +43,7 @@ import {
 import {
   askJev,
   buildJevRequest,
+  JEV_KEY_ENV,
   JEV_MODEL,
   type JevRequest,
   loadCriterionParts,
@@ -62,8 +63,8 @@ async function main() {
   const repeat = Math.max(1, Number(arg("repeat") ?? 1));
   const jev = process.argv.includes("--jev");
   const model = arg("model") ?? (jev ? JEV_MODEL : DEFAULT_MODEL);
-  const apiKey = process.env.OPENROUTER_API_KEY ?? "";
-  if (jev && !dryRun && !apiKey) throw new Error("--jev needs OPENROUTER_API_KEY");
+  const apiKey = process.env[JEV_KEY_ENV] ?? "";
+  if (jev && !dryRun && !apiKey) throw new Error(`--jev needs ${JEV_KEY_ENV}`);
   let costUsd: number | undefined;
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const set = arg("set") === "holdout" ? "holdout" : "cases";

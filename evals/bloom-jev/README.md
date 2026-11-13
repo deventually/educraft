@@ -165,3 +165,23 @@ Per leeruitkomst (de 3 runs samen), met een tekentoets:
 - **De hybride voegt opnieuw niets toe.**
 - Samen genomen is een analyse achteraf; vooraf vastgelegd was de vergelijking per holdout.
 
+
+## In de app (na ronde 3)
+
+Bastiaan koos op 2026-11-13: Jev stelt het Bloom-niveau voor bij de import, achter een instelling
+(zie `docs/fabriek/besluiten.md`). Wat er in de app zit, is precies wat hier gemeten is:
+
+- **Dezelfde code.** De vragen, het lezen van het antwoord en de drempel (0,7) staan in
+  `app/lib/courses/bloomJev.ts`; deze eval bouwt zijn verzoeken met die module, en het
+  Jev-model staat één keer vast in `config/models.json` (`decisions`). Een test bewaakt dat de
+  app en de eval hetzelfde model gebruiken.
+- **Na de import.** De LLM leest het document nog steeds (leeruitkomsten, toetsen, criteria).
+  Staat de instelling aan, dan vraagt de server Jev per leeruitkomst om het niveau, en dat vervangt
+  het voorstel van de LLM, ook als Jev geen duidelijk niveau ziet. Antwoordt Jev niet voor een
+  leeruitkomst, dan blijft het voorstel van de LLM staan. De docent bevestigt elk niveau, zoals
+  altijd.
+- **Eén verschil met de meting.** De LLM in de meting kreeg de regel "het hoogste niveau" erbij
+  (`withHighestRule`); de import in de app (`course-import@v3`) heeft die regel niet. Met Jev
+  aan volgt de app de regel wel, want die zit in de code (`jevLevel`).
+- **Kosten** komen per aanroep in het gebruiksoverzicht, onder OpenRouter en `typesafe/jev-1.14`,
+  tegen de prijs die Jev zelf meldt.
