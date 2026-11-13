@@ -33,6 +33,7 @@ function goodLessonPlanAnswer(): Record<string, unknown> {
   const req = buildJevRequest(caseDossier(suite, c), c.file, c.locale);
   const answers: Record<string, unknown> = {};
   for (const key of Object.keys(req.questions)) answers[key] = noul(0.05);
+  answers.evidence = noul(0.95);
   answers.outcome = choice("U1", 0.93);
   answers.kind = choice("lesson-plan", 0.9);
   const good = c.good as { criteria: string[]; required: string };
@@ -46,11 +47,14 @@ describe("Jev on the evidence sort: the request", () => {
   const d = caseDossier(suite, c);
   const req = buildJevRequest(d, c.file, c.locale);
 
-  it("asks one choice for the outcome, with every outcome and 'none' as options", () => {
+  it("asks one choice for the outcome over the outcomes only, and 'is this evidence?' on its own", () => {
     expect(req.model).toBe(JEV_MODEL);
     expect(req.questions.outcome?.type).toBe("choice");
     const options = Object.keys(req.questions.outcome?.criteria ?? {});
-    expect(options).toEqual([...d.framework.outcomes.map((_, i) => `U${i + 1}`), "none"]);
+    expect(options).toEqual(d.framework.outcomes.map((_, i) => `U${i + 1}`));
+    expect(req.questions.evidence?.type).toBe("noul");
+    expect(Object.keys(req.questions.evidence?.criteria ?? {})).toEqual(["true", "false"]);
+    expect(req.questions.evidence?.criteria?.false).toMatch(/sjabloon/i);
     expect(req.questions.outcome?.criteria?.U1).toContain(d.framework.outcomes[0]?.title);
   });
 
@@ -64,14 +68,18 @@ describe("Jev on the evidence sort: the request", () => {
     const o = d.framework.outcomes[0];
     expect(req.questions.c_U1_1?.type).toBe("noul");
     expect(req.questions.c_U1_1?.instructions).toContain(o?.criteria[0]?.text);
+    // A compound criterion counts when the file shows part of it (TypeSafe: one judgment).
+    expect(req.questions.c_U1_1?.criteria?.true).toMatch(/deel/i);
     expect(req.questions.r_U1_1?.instructions).toContain(o?.requiredEvidence[0]);
     const criteria = d.framework.outcomes.reduce((n, x) => n + x.criteria.length, 0);
     const lines = d.framework.outcomes.reduce((n, x) => n + x.requiredEvidence.length, 0);
-    expect(Object.keys(req.questions)).toHaveLength(2 + criteria + lines);
+    expect(Object.keys(req.questions)).toHaveLength(3 + criteria + lines);
   });
 
-  it("puts the file as data in the state, and says so when no text was read", () => {
-    expect(req.state.file).toBe(c.file.name);
+  it("puts the file as named data in the state, and says so when no text was read", () => {
+    expect(req.state.folder).toBe("Mijn bewijs/LU1");
+    expect(req.state.file).toBe("lesvoorbereiding-medicijnrekenen.docx");
+    expect(buildJevRequest(d, { name: "los.docx", text: "x" }, "nl").state.folder).toBe("");
     expect(req.state.text).toContain(c.file.text.slice(0, 40));
     const empty = buildJevRequest(d, { name: "scan.pdf", text: "  " }, "nl");
     expect(empty.state.text).toMatch(/geen tekst/i);
@@ -164,13 +172,22 @@ describe("Jev on the evidence sort: the answer becomes the app's proposal", () =
     expect(parseJevAnswer(null, d, file).why).toEqual(["unusable"]);
   });
 
-  it("'none' is no outcome, no criteria and a check", () => {
+  it("not evidence: no outcome, no criteria and a check", () => {
     const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
-    raw.answers.outcome = choice("none", 0.95);
-    const { proposal } = parseJevAnswer(raw, d, file);
-    expect(proposal.outcomeId).toBeUndefined();
-    expect(proposal.criterionIds).toEqual([]);
-    expect(proposal.check).toBe(true);
+    raw.answers.evidence = noul(JEV_THRESHOLDS.no);
+    const r = parseJevAnswer(raw, d, file);
+    expect(r.proposal.outcomeId).toBeUndefined();
+    expect(r.proposal.criterionIds).toEqual([]);
+    expect(r.proposal.check).toBe(true);
+    expect(r.why).toEqual(["not-evidence"]);
+  });
+
+  it("unsure whether it is evidence: the outcome stays, with a check", () => {
+    const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
+    raw.answers.evidence = noul(0.5);
+    const r = parseJevAnswer(raw, d, file);
+    expect(r.proposal.outcomeId).toBe("eval-u1");
+    expect(r.why).toEqual(["evidence"]);
   });
 
   it("an unknown option, a refusal or a broken body is a check, never a crash", () => {

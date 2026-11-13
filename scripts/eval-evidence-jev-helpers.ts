@@ -3,8 +3,10 @@
  * TypeSafe's Jev, through OpenRouter's Decisions API, next to the LLM that does it now. Jev
  * answers choices and yes/no questions with calibrated probabilities and writes no text, so:
  *
- * - the outcome and the kind are a `choice` (with "none" for the outcome);
- * - every criterion and every line of the required evidence is a `noul` (yes/no);
+ * - "is this evidence at all?" is its own `noul`, as TypeSafe advises next to a choice;
+ * - the outcome (over the outcomes only) and the kind are a `choice`;
+ * - every criterion and every line of the required evidence is a `noul` (yes/no), where part of a
+ *   compound criterion counts ("asks for feedback and uses it");
  * - "Controleren" comes from the probabilities, not from a `sure` the model gives itself;
  * - the title is the file's own name, and there is no reason line.
  *
@@ -56,47 +58,71 @@ interface JevQuestion {
 
 export interface JevRequest {
   model: string;
-  state: { file: string; text: string };
+  /** Named fields, as TypeSafe advises: the folder the teacher chose, the file, its text. */
+  state: { folder: string; file: string; text: string };
   questions: Record<string, JevQuestion>;
 }
 
 const TEXT = {
   nl: {
     noText: "(Er is geen tekst gelezen uit dit bestand; ga alleen uit van de naam.)",
+    evidence:
+      "Is dit bestand bewijs van het werk van de docent zelf, voor een BDB/BKE-dossier?",
+    evidenceYes:
+      "Ja: het laat werk van de docent zien, zoals een lesplan, toets, verslag van een eigen les of gesprek, feedback op de docent, een analyse, reflectie of ontwikkelplan.",
+    evidenceNo:
+      "Nee: een leeg sjabloon of format, algemene informatie, notulen of organisatie, of iets zonder verband met het werk van de docent.",
     outcome:
-      "Bij welke leeruitkomst van het BDB/BKE-dossier van de docent hoort dit bestand als bewijs? Een mapnaam zoals LU1 is een aanwijzing, maar de inhoud weegt zwaarder.",
-    none: "Het bestand hoort duidelijk bij geen enkele leeruitkomst, of het is geen bewijs (zoals een leeg sjabloon).",
+      "Bij welke leeruitkomst van het BDB/BKE-dossier van de docent past dit bestand het best? De map is een aanwijzing, maar de inhoud weegt zwaarder.",
     criteria: "Criteria",
     kind: "Wat voor soort bewijs is dit bestand?",
-    criterion: (c: string) => `Laat dit bestand zichtbaar zien dat de docent dit criterium uitvoert: "${c}"?`,
-    required: (r: string) => `Vult dit bestand deze regel van het verplicht bewijs in: "${r}"?`,
+    criterion: (c: string) => `Laat dit bestand zien dat de docent dit doet: "${c}"?`,
+    criterionYes:
+      "Ja: het bestand laat zien dat de docent dit doet of deed, ook als het maar een deel van het criterium is.",
+    criterionNo: "Nee: het bestand gaat er niet over, of noemt het alleen zonder het te laten zien.",
+    required: (r: string) => `Is dit bestand dit stuk verplicht bewijs: "${r}"?`,
+    requiredYes: "Ja: het bestand is dit stuk, of een versie ervan.",
+    requiredNo: "Nee: het is een ander soort stuk.",
     kinds: {
-      "lesson-plan": "Een lesvoorbereiding of lesplan.",
-      "observation-notes": "Een opname, observatie of verslag van een les of gesprek.",
+      "lesson-plan": "Een lesvoorbereiding of lesplan van de docent.",
+      "observation-notes":
+        "Een opname, transcript, observatie of verslag van een eigen les of begeleidingsgesprek. Geen notulen van een vergadering.",
       feedback:
-        "Feedback van een ander: een werkplekbegeleider, collega, leidinggevende of studenten. Een eigen reflectie of de uitvoer van een AI-tool is nooit feedback.",
+        "Feedback van een ander op de docent: een werkplekbegeleider, collega, leidinggevende of studenten. Een eigen reflectie of de uitvoer van een AI-tool is nooit feedback.",
       "test-material": "Een toets, toetsmatrijs, antwoordmodel of rubric.",
-      analysis: "Een analyse, zoals een toetsanalyse of een evaluatie.",
-      other: "Iets anders, zoals een eigen reflectie.",
+      analysis: "Een analyse, zoals een toetsanalyse of een evaluatie met conclusies.",
+      other:
+        "Iets anders: een eigen reflectie, een ontwikkelplan, uitvoer van een AI-tool, notulen of een leeg sjabloon.",
     },
   },
   en: {
     noText: "(No text could be read from this file; go by its name only.)",
+    evidence: "Is this file evidence of the teacher's own work, for a teaching-qualification dossier?",
+    evidenceYes:
+      "Yes: it shows the teacher's work, such as a lesson plan, test, report of their own lesson or conversation, feedback on the teacher, an analysis, reflection or development plan.",
+    evidenceNo:
+      "No: an empty template or format, general information, meeting minutes or logistics, or something unrelated to the teacher's work.",
     outcome:
-      "Which learning outcome of the teacher's teaching-qualification dossier does this file belong to as evidence? A folder name such as LO1 is a hint, but the content weighs more.",
-    none: "The file clearly belongs to no learning outcome, or it is not evidence (such as an empty template).",
+      "Which learning outcome of the teacher's teaching-qualification dossier does this file fit best? The folder is a hint, but the content weighs more.",
     criteria: "Criteria",
     kind: "What kind of evidence is this file?",
-    criterion: (c: string) => `Does this file visibly show the teacher meeting this criterion: "${c}"?`,
-    required: (r: string) => `Does this file fill this line of the required evidence: "${r}"?`,
+    criterion: (c: string) => `Does this file show the teacher doing this: "${c}"?`,
+    criterionYes:
+      "Yes: the file shows the teacher doing or having done this, even if only part of the criterion.",
+    criterionNo: "No: the file is not about it, or only mentions it without showing it.",
+    required: (r: string) => `Is this file this piece of required evidence: "${r}"?`,
+    requiredYes: "Yes: the file is this piece, or a version of it.",
+    requiredNo: "No: it is another kind of document.",
     kinds: {
-      "lesson-plan": "A lesson preparation or lesson plan.",
-      "observation-notes": "A recording, observation or report of a lesson or conversation.",
+      "lesson-plan": "A lesson preparation or lesson plan by the teacher.",
+      "observation-notes":
+        "A recording, transcript, observation or report of the teacher's own lesson or coaching conversation. Not minutes of a meeting.",
       feedback:
-        "Feedback from someone else: a workplace supervisor, colleague, manager or students. The teacher's own reflection or the output of an AI tool is never feedback.",
+        "Feedback from someone else on the teacher: a workplace supervisor, colleague, manager or students. The teacher's own reflection or the output of an AI tool is never feedback.",
       "test-material": "A test, test blueprint, answer key or rubric.",
-      analysis: "An analysis, such as a test analysis or an evaluation.",
-      other: "Something else, such as the teacher's own reflection.",
+      analysis: "An analysis, such as a test analysis or an evaluation with conclusions.",
+      other:
+        "Something else: the teacher's own reflection, a development plan, AI tool output, meeting minutes or an empty template.",
     },
   },
 } satisfies Record<Locale, { kinds: Record<EvidenceKind, string> } & Record<string, unknown>>;
@@ -104,6 +130,12 @@ const TEXT = {
 const outcomeKey = (i: number) => `U${i + 1}`;
 const criterionKey = (i: number, j: number) => `c_${outcomeKey(i)}_${j + 1}`;
 const requiredKey = (i: number, j: number) => `r_${outcomeKey(i)}_${j + 1}`;
+
+/** "Mijn bewijs/LU1/lesplan.docx" → "Mijn bewijs/LU1"; no folder → "". */
+function folderOf(name: string): string {
+  const parts = name.split(/[\\/]/);
+  return parts.slice(0, -1).join("/").slice(0, BATCH_LIMITS.name);
+}
 
 /** One request for one file: every question about it shares the file as state. */
 export function buildJevRequest(
@@ -116,33 +148,44 @@ export function buildJevRequest(
   const outcomes = d.framework.outcomes;
   const text = file.text.trim();
   const questions: Record<string, JevQuestion> = {
+    evidence: {
+      type: "noul",
+      instructions: t.evidence,
+      criteria: { true: t.evidenceYes, false: t.evidenceNo },
+    },
     outcome: {
       type: "choice",
       instructions: t.outcome,
-      criteria: {
-        ...Object.fromEntries(
-          outcomes.map((o, i) => [
-            outcomeKey(i),
-            [[o.code, o.title].filter(Boolean).join(" "), `${t.criteria}: ${o.criteria.map((c) => c.text).join("; ")}`].join(". "),
-          ]),
-        ),
-        none: t.none,
-      },
+      criteria: Object.fromEntries(
+        outcomes.map((o, i) => [
+          outcomeKey(i),
+          [[o.code, o.title].filter(Boolean).join(" "), `${t.criteria}: ${o.criteria.map((c) => c.text).join("; ")}`].join(". "),
+        ]),
+      ),
     },
     kind: { type: "choice", instructions: t.kind, criteria: { ...t.kinds } },
   };
   outcomes.forEach((o, i) => {
     o.criteria.forEach((c, j) => {
-      questions[criterionKey(i, j)] = { type: "noul", instructions: t.criterion(c.text) };
+      questions[criterionKey(i, j)] = {
+        type: "noul",
+        instructions: t.criterion(c.text),
+        criteria: { true: t.criterionYes, false: t.criterionNo },
+      };
     });
     o.requiredEvidence.forEach((r, j) => {
-      questions[requiredKey(i, j)] = { type: "noul", instructions: t.required(r) };
+      questions[requiredKey(i, j)] = {
+        type: "noul",
+        instructions: t.required(r),
+        criteria: { true: t.requiredYes, false: t.requiredNo },
+      };
     });
   });
   return {
     model,
     state: {
-      file: file.name.slice(0, BATCH_LIMITS.name),
+      folder: folderOf(file.name),
+      file: file.name.split(/[\\/]/).pop()?.slice(0, BATCH_LIMITS.name) ?? "",
       text: text ? text.slice(0, BATCH_LIMITS.excerpt) : t.noText,
     },
     questions,
@@ -169,7 +212,8 @@ export interface JevParsed {
   outcomeProbability?: number;
   costUsd?: number;
   /**
-   * Why the row says "Controleren": `unusable`, `none` (no outcome), `outcome` or `kind` (below
+   * Why the row says "Controleren": `unusable`, `not-evidence` or `evidence` (unsure whether it
+   * is evidence), `none` (no outcome), `outcome` or `kind` (below
    * its threshold or unknown), `unsettled:<question>`, `no-criteria`, `no-text`. Empty = sure.
    */
   why: string[];
@@ -208,8 +252,12 @@ export function parseJevAnswer(
   const { answers, usage } = parsed.data;
   const costUsd = usage?.cost;
 
+  const evidenceP = yesOf(answers.evidence);
+  const notEvidence = evidenceP !== undefined && evidenceP <= t.no;
   const outcomeAnswer = picked(answers.outcome);
-  const index = d.framework.outcomes.findIndex((_, i) => outcomeKey(i) === outcomeAnswer?.choice);
+  const index = notEvidence
+    ? -1
+    : d.framework.outcomes.findIndex((_, i) => outcomeKey(i) === outcomeAnswer?.choice);
   const outcome = d.framework.outcomes[index];
   const kindAnswer = picked(answers.kind);
   const kind = kindAnswer && isKind(kindAnswer.choice) ? kindAnswer.choice : "other";
@@ -237,8 +285,9 @@ export function parseJevAnswer(
   }
 
   const why = [
-    ...(!outcome ? ["none"] : (outcomeAnswer?.p ?? 0) < t.outcomeSure ? ["outcome"] : []),
-    ...(!kindAnswer || !isKind(kindAnswer.choice) || kindAnswer.p < t.kindSure
+    ...(notEvidence ? ["not-evidence"] : evidenceP === undefined || evidenceP < t.yes ? ["evidence"] : []),
+    ...(notEvidence ? [] : !outcome ? ["none"] : (outcomeAnswer?.p ?? 0) < t.outcomeSure ? ["outcome"] : []),
+    ...(!notEvidence && (!kindAnswer || !isKind(kindAnswer.choice) || kindAnswer.p < t.kindSure)
       ? ["kind"]
       : []),
     ...(t.unsettled ? unsettled.map((k) => `unsettled:${k}`) : []),
