@@ -114,3 +114,22 @@ keer; LLM `claude-code::claude-sonnet-5-5`. De drempel voor Jev kwam op de afste
   niet uitgeprobeerd om er een te kiezen.
 
 Nooit onderdeel van CI.
+
+## Ronde 3: de derde holdout (vooraf vastgelegd, 2026-11-13)
+
+Ronde 2 liet Jev winnen van de LLM, maar per leeruitkomst was het 11 tegen 7: dat kan toeval zijn.
+De derde holdout ([`holdout3.json`](holdout3.json), 78 leeruitkomsten: 40 nl, 38 en; mbo, hbo en wo)
+moet laten zien of het standhoudt. Vastgelegd vóór de meting:
+
+- **Niets verandert** aan Jev, de LLM-prompt (course-import@v3 met de regel "het hoogste
+  niveau"), de werkwoordenlijst of de hybride. De drempel voor Jev blijft **0,7**, de uitkomst van
+  ronde 2: de run draait alleen `--set holdout3`, en zonder afstemsets in de run houdt `calibrate`
+  0,7 aan (het rapport zegt "vast").
+- **Verzameld** van instellingen die nog niet in een eerdere set zaten (Leiden twee keer, Fontys,
+  TU/e, Hanze, UvA, Open Universiteit, Curio, HvA), per cursus de hele lijst in volgorde, letterlijk
+  uit de bron. Weggelaten: lijsten met een eigen Bloom-label in de tekst (IVA: "Kennis:", "Begrip:"),
+  cursussen met één zin (Saxion), en bij de HvA twee regels die afbreken op een komma en één
+  bijna-kopie. Bij Curio zijn de codes (B1-K1-W1 …) weggelaten.
+- **Wat telt:** per leeruitkomst (de 3 runs samen) Jev tegen de LLM en tegen de lijst, met een
+  tekentoets, naast het percentage goed. Houdt Jevs voorsprong op de LLM hier stand, dan is er
+  reden om Jev in de import te zetten; zo niet, dan blijft de import zoals hij is.
