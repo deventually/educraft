@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildSortMessage, parseSortAnswer } from "~/lib/portfolio/batch";
 import { DossierDataSchema } from "~/lib/portfolio/schema";
 import {
+  answerUsable,
   caseDossier,
   type EvidenceEvalFile,
   evidenceReportMarkdown,
@@ -18,7 +19,7 @@ const score = (id: string, raw: string | null) => {
   const c = suite.cases.find((x) => x.id === id);
   if (!c) throw new Error(id);
   const d = caseDossier(suite, c);
-  return scoreSort(suite, c, raw, parseSortAnswer(raw, d, { key: c.id, ...c.file }));
+  return scoreSort(suite, c, answerUsable(raw), parseSortAnswer(raw, d, { key: c.id, ...c.file }));
 };
 
 describe("portfolio-evidence eval cases", () => {
@@ -84,5 +85,20 @@ describe("portfolio-evidence eval cases", () => {
     });
     expect(md).toContain("portfolio-evidence-sort@v1");
     expect(md).toContain("1/1");
+  });
+
+  it("the report gives speed and cost when the runner measured them", () => {
+    const s = score("nl-lesson-plan", JSON.stringify(suite.cases[0]?.good));
+    const rows = [
+      { caseId: "a", ...s, ms: 100 },
+      { caseId: "b", ...s, ms: 300 },
+    ];
+    const md = evidenceReportMarkdown({ date: "d", model: "m", repeat: 1, rows, costUsd: 0.00012 });
+    expect(md).toMatch(/gemiddeld 200 ms/);
+    expect(md).toMatch(/hoogst 300 ms/);
+    expect(md).toContain("$0.000120");
+    expect(
+      evidenceReportMarkdown({ date: "d", model: "m", repeat: 1, rows: [{ caseId: "a", ...s }] }),
+    ).not.toMatch(/ms/);
   });
 });

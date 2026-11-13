@@ -28,3 +28,21 @@ Een case slaagt als alle checks slagen:
 De faalwijzen die de cases afdekken: de eigen reflectie of AI-uitvoer als feedback zien, een map
 laten winnen van de inhoud, een verborgen opdracht volgen, zeker zijn zonder tekst, een leeg
 sjabloon als bewijs zien, namen overnemen, en de Engelse prompt.
+
+## Jev (experiment, 2026-11-13)
+
+`npm run eval:evidence -- --jev` stuurt dezelfde cases naar TypeSafe Jev, een beslismodel dat
+geen tekst schrijft maar getypte antwoorden met kansen geeft, via de Decisions API van OpenRouter
+(`OPENROUTER_API_KEY`). De vertaling staat in `scripts/eval-evidence-jev-helpers.ts`:
+
+- de leeruitkomst (met de optie *geen*) en de soort zijn elk één keuze;
+- elk criterium en elke regel van het verplicht bewijs is een ja/nee-vraag; alleen die van de
+  gekozen leeruitkomst tellen, met ja vanaf 0,7;
+- *Controleren* komt uit de kansen: leeruitkomst onder 0,8, soort onder 0,7, een ja/nee van de
+  gekozen leeruitkomst tussen 0,3 en 0,7, geen criteria of geen tekst;
+- de titel is de naam van het bestand; Jev geeft geen reden.
+
+Het antwoord wordt het voorstel van de app (`SortProposal`) en gaat door dezelfde checks, dus de
+uitslag is te vergelijken met het taalmodel. Het rapport geeft daarnaast de snelheid per bestand en,
+bij Jev, de kosten die OpenRouter meldt. Vergelijk alleen metingen met dezelfde cases en
+herhalingen. Niets in de app roept Jev aan.

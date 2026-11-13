@@ -78,16 +78,24 @@ export interface SortScore {
   };
 }
 
-/** Scores the code-checked proposal; `raw` only for whether the answer was usable at all. */
+/** Was the model's text answer usable at all: JSON with an `outcome`? */
+export function answerUsable(raw: string | null): boolean {
+  const json = raw === null ? undefined : extractJson(raw);
+  return typeof json === "object" && json !== null && "outcome" in json;
+}
+
+/**
+ * Scores the code-checked proposal. `usable`: whether the answer could be read at all
+ * (`answerUsable` for a text answer; the Jev runner says so for its typed answer).
+ */
 export function scoreSort(
   suite: EvidenceEvalFile,
   c: EvidenceCase,
-  raw: string | null,
+  usable: boolean,
   p: SortProposal,
 ): SortScore {
   const outcomes = suite.frameworks[c.locale];
-  const json = raw === null ? undefined : extractJson(raw);
-  const parse = typeof json === "object" && json !== null && "outcome" in json;
+  const parse = usable;
   const index = Number(/^eval-u(\d+)$/.exec(p.outcomeId ?? "")?.[1] ?? 0) - 1;
   const code = index >= 0 ? (outcomes[index]?.code ?? null) : null;
   const outcome = c.expect.outcome.includes(code);
@@ -119,6 +127,21 @@ export function scoreSort(
 
 export interface EvidenceRow extends SortScore {
   caseId: string;
+  /** How long the call took, when the runner measured it. */
+  ms?: number;
+}
+
+function speedLine(rows: EvidenceRow[], costUsd?: number): string[] {
+  const ms = rows.flatMap((x) => (x.ms === undefined ? [] : [x.ms]));
+  const parts = [
+    ...(ms.length > 0
+      ? [
+          `Snelheid: gemiddeld ${Math.round(ms.reduce((a, b) => a + b, 0) / ms.length)} ms, hoogst ${Math.max(...ms)} ms per bestand`,
+        ]
+      : []),
+    ...(costUsd !== undefined ? [`kosten: $${costUsd.toFixed(6)} in totaal`] : []),
+  ];
+  return parts.length > 0 ? [parts.join(" · "), ""] : [];
 }
 
 export function evidenceReportMarkdown(r: {
@@ -126,6 +149,8 @@ export function evidenceReportMarkdown(r: {
   model: string;
   repeat: number;
   rows: EvidenceRow[];
+  /** The total the provider reported, when it did. */
+  costUsd?: number;
 }): string {
   const passed = r.rows.filter((x) => x.pass).length;
   const names = Object.keys(r.rows[0]?.checks ?? {}) as (keyof SortScore["checks"])[];
@@ -137,6 +162,7 @@ export function evidenceReportMarkdown(r: {
     "",
     `**Geslaagd: ${passed}/${r.rows.length}**`,
     "",
+    ...speedLine(r.rows, r.costUsd),
     `| Case | ${names.join(" | ")} |`,
     `| --- | ${names.map(() => "---").join(" | ")} |`,
     ...r.rows.map((x) => `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} |`),
