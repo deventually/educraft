@@ -13,7 +13,8 @@
  *
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
  * `--jev` the same cases go to Jev as typed decisions (`eval-evidence-jev-helpers.ts`), through
- * OpenRouter, and are scored by the same code; `--model` then names the Jev version. Costs well
+ * OpenRouter, and are scored by the same code; `--model` then names the Jev version. Jev's raw
+ * answers go next to the report (`…-raw.json`), to tune the thresholds offline. Costs well
  * under €1 per run. Never part of CI.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -58,6 +59,8 @@ async function main() {
     readFileSync(join(EVALS_DIR, "portfolio-evidence", "cases.json"), "utf8"),
   ) as EvidenceEvalFile;
   const rows: EvidenceRow[] = [];
+  /** Jev's answers as they came, so thresholds can be tuned offline without new calls. */
+  const raw: { caseId: string; body: unknown }[] = [];
 
   for (const c of suite.cases) {
     const d = caseDossier(suite, c);
@@ -78,10 +81,12 @@ async function main() {
       let usable: boolean;
       let proposal: SortProposal;
       let ms: number;
+      let why: string[] | undefined;
       if (jev) {
         const answer = await askJev(request, { apiKey });
         const parsed = parseJevAnswer(answer.body, d, { key: c.id, ...c.file });
-        ({ usable, proposal } = parsed);
+        ({ usable, proposal, why } = parsed);
+        raw.push({ caseId, body: answer.body });
         if (parsed.costUsd !== undefined) costUsd = (costUsd ?? 0) + parsed.costUsd;
         text = `p(outcome)=${parsed.outcomeProbability?.toFixed(2) ?? "-"} ${JSON.stringify(proposal)}`;
         ms = answer.ms;
@@ -97,7 +102,7 @@ async function main() {
         proposal = parseSortAnswer(text, d, { key: c.id, ...c.file });
         ms = Math.round(performance.now() - start);
       }
-      const row = { caseId, ms, ...scoreSort(suite, c, usable, proposal) };
+      const row = { caseId, ms, ...(why ? { why } : {}), ...scoreSort(suite, c, usable, proposal) };
       rows.push(row);
       console.log(`${row.pass ? "✓" : "×"} ${row.caseId}`);
       if (!row.pass) {
@@ -113,6 +118,11 @@ async function main() {
   const file = join(REPORTS_DIR, `${date}${label}-portfolio-evidence.md`);
   writeFileSync(file, evidenceReportMarkdown({ date, model, repeat, rows, costUsd }));
   console.log(`Report: ${file}`);
+  if (jev) {
+    const rawFile = join(REPORTS_DIR, `${date}${label}-portfolio-evidence-raw.json`);
+    writeFileSync(rawFile, `${JSON.stringify(raw, null, 2)}\n`);
+    console.log(`Raw Jev answers: ${rawFile}`);
+  }
 }
 
 main().catch((e) => {

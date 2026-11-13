@@ -128,6 +128,18 @@ describe("Jev on the evidence sort: the answer becomes the app's proposal", () =
     expect(parseJevAnswer(kind, d, file).proposal.check).toBe(true);
   });
 
+  it("says why it set 'Controleren', so the thresholds can be tuned", () => {
+    expect(parseJevAnswer(goodLessonPlanAnswer(), d, file).why).toEqual([]);
+    const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
+    raw.answers.outcome = choice("U1", JEV_THRESHOLDS.outcomeSure - 0.01);
+    raw.answers.c_U1_2 = noul(0.5);
+    expect(parseJevAnswer(raw, d, file).why).toEqual(["outcome", "unsettled:c_U1_2"]);
+    expect(parseJevAnswer(goodLessonPlanAnswer(), d, { ...file, text: "" }).why).toEqual([
+      "no-text",
+    ]);
+    expect(parseJevAnswer(null, d, file).why).toEqual(["unusable"]);
+  });
+
   it("'none' is no outcome, no criteria and a check", () => {
     const raw = goodLessonPlanAnswer() as { answers: Record<string, unknown> };
     raw.answers.outcome = choice("none", 0.95);

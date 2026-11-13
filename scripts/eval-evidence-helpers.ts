@@ -131,6 +131,8 @@ export interface EvidenceRow extends SortScore {
   caseId: string;
   /** How long the call took, when the runner measured it. */
   ms?: number;
+  /** Why the row says "Controleren", when the runner knows (Jev). */
+  why?: string[];
 }
 
 function speedLine(rows: EvidenceRow[], costUsd?: number): string[] {
@@ -144,6 +146,11 @@ function speedLine(rows: EvidenceRow[], costUsd?: number): string[] {
     ...(costUsd !== undefined ? [`kosten: $${costUsd.toFixed(6)} in totaal`] : []),
   ];
   return parts.length > 0 ? [parts.join(" · "), ""] : [];
+}
+
+function flagCell(x: EvidenceRow): string {
+  if (!x.flagged) return "nee";
+  return x.why && x.why.length > 0 ? `ja: ${x.why.join(", ")}` : "ja";
 }
 
 export function evidenceReportMarkdown(r: {
@@ -171,7 +178,7 @@ export function evidenceReportMarkdown(r: {
     `| --- | ${names.map(() => "---").join(" | ")} | --- |`,
     ...r.rows.map(
       (x) =>
-        `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} | ${x.flagged ? "ja" : "nee"} |`,
+        `| ${x.caseId} | ${names.map((n) => mark(x.checks[n])).join(" | ")} | ${flagCell(x)} |`,
     ),
     "",
     ...names.map(

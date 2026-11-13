@@ -148,6 +148,11 @@ export interface JevParsed {
   usable: boolean;
   outcomeProbability?: number;
   costUsd?: number;
+  /**
+   * Why the row says "Controleren": `unusable`, `none` (no outcome), `outcome` or `kind` (below
+   * its threshold or unknown), `unsettled:<question>`, `no-criteria`, `no-text`. Empty = sure.
+   */
+  why: string[];
 }
 
 /** The probability of the option Jev chose, or `undefined` when it chose none or refused. */
@@ -178,7 +183,7 @@ export function parseJevAnswer(
     check: true,
   };
   const parsed = Response.safeParse(body);
-  if (!parsed.success) return { proposal: fallback, usable: false };
+  if (!parsed.success) return { proposal: fallback, usable: false, why: ["unusable"] };
   const { answers, usage } = parsed.data;
   const costUsd = usage?.cost;
 
@@ -188,19 +193,21 @@ export function parseJevAnswer(
   const kindAnswer = picked(answers.kind);
   const kind = kindAnswer && isKind(kindAnswer.choice) ? kindAnswer.choice : "other";
 
-  let unsettled = false;
+  const unsettled: string[] = [];
+  const isUnsettled = (p: number | undefined) =>
+    p === undefined || (p > JEV_THRESHOLDS.no && p < JEV_THRESHOLDS.yes);
   const criterionIds: string[] = [];
   let line: string | undefined;
   if (outcome) {
     outcome.criteria.forEach((c, j) => {
       const p = yesOf(answers[criterionKey(index, j)]);
-      if (p === undefined || (p > JEV_THRESHOLDS.no && p < JEV_THRESHOLDS.yes)) unsettled = true;
+      if (isUnsettled(p)) unsettled.push(criterionKey(index, j));
       if (p !== undefined && p >= JEV_THRESHOLDS.yes) criterionIds.push(c.id);
     });
     let best: number = JEV_THRESHOLDS.yes;
     outcome.requiredEvidence.forEach((r, j) => {
       const p = yesOf(answers[requiredKey(index, j)]);
-      if (p === undefined || (p > JEV_THRESHOLDS.no && p < JEV_THRESHOLDS.yes)) unsettled = true;
+      if (isUnsettled(p)) unsettled.push(requiredKey(index, j));
       if (p !== undefined && p >= best) {
         best = p;
         line = r;
@@ -208,15 +215,16 @@ export function parseJevAnswer(
     });
   }
 
-  const check =
-    !outcome ||
-    (outcomeAnswer?.p ?? 0) < JEV_THRESHOLDS.outcomeSure ||
-    !kindAnswer ||
-    !isKind(kindAnswer.choice) ||
-    kindAnswer.p < JEV_THRESHOLDS.kindSure ||
-    unsettled ||
-    criterionIds.length === 0 ||
-    (file.text !== undefined && file.text.trim() === "");
+  const why = [
+    ...(!outcome ? ["none"] : (outcomeAnswer?.p ?? 0) < JEV_THRESHOLDS.outcomeSure ? ["outcome"] : []),
+    ...(!kindAnswer || !isKind(kindAnswer.choice) || kindAnswer.p < JEV_THRESHOLDS.kindSure
+      ? ["kind"]
+      : []),
+    ...unsettled.map((k) => `unsettled:${k}`),
+    ...(outcome && criterionIds.length === 0 ? ["no-criteria"] : []),
+    ...(file.text !== undefined && file.text.trim() === "" ? ["no-text"] : []),
+  ];
+  const check = why.length > 0;
 
   return {
     proposal: {
@@ -229,6 +237,7 @@ export function parseJevAnswer(
       check,
     },
     usable: true,
+    why,
     ...(outcomeAnswer ? { outcomeProbability: outcomeAnswer.p } : {}),
     ...(costUsd !== undefined ? { costUsd } : {}),
   };

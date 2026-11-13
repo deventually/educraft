@@ -121,5 +121,12 @@ describe("portfolio-evidence eval cases", () => {
     });
     expect(md).toContain("Controleren gezet: 1/2");
     expect(md).toMatch(/\| b \|.*\| ja \|/);
+    const why = evidenceReportMarkdown({
+      date: "d",
+      model: "m",
+      repeat: 1,
+      rows: [{ caseId: "b", ...unsure, why: ["outcome", "unsettled:c_U1_2"] }],
+    });
+    expect(why).toMatch(/\| b \|.*\| ja: outcome, unsettled:c_U1_2 \|/);
   });
 });
