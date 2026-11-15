@@ -203,36 +203,51 @@ Daarvan zijn 38 rijen `missedKnownError` bij een gewone case (28 afstemmen, 10 h
 zei "faalt"; volgens de rubric geldt de check alleen bij een bekende fout, dus dat is vals alarm.
 Versie 2 laat hem daar door de code slagen (regel 1).
 
-**Met labels.** Bastiaan labelde de 25 holdout-rijen waar een versie van de judge verschilde,
-zelf en zonder te zien wat Jev of de judge zei ([`labels/2026-11-14b1.json`](labels/2026-11-14b1.json),
-`…b2.json` is dezelfde): 2 faalt echt, 21 slaagt, 2 weet ik niet. De afstemset is niet door hem
-gelabeld. Eerder had ChatGPT alle 59 verschillen gelabeld; die labels tellen niet als bewijs en
-staan alleen ter vergelijking in [`labels/2026-11-14b-chatgpt.json`](labels/2026-11-14b-chatgpt.json)
-(op de holdout 22 van de 25 gelijk aan Bastiaan).
+**Met labels.** Bastiaan labelde alle 59 rijen waar een versie van Jev van de judge verschilde
+(buiten de 38 hierboven) zelf, zonder te zien wat Jev of de judge zei:
+[`labels/2026-11-14b1.json`](labels/2026-11-14b1.json) (`…b2.json` is dezelfde). Holdout: 2 faalt
+echt, 21 slaagt, 2 weet ik niet. Afstemmen: 13 faalt echt, 16 slaagt, 5 weet ik niet. Eerder had
+ChatGPT dezelfde 59 gelabeld; die labels tellen niet als bewijs en staan alleen ter vergelijking
+in [`labels/2026-11-14b-chatgpt.json`](labels/2026-11-14b-chatgpt.json). Ze kwamen in 43 van de 59
+gevallen overeen met Bastiaan (holdout 22 van 25, afstemmen 21 van 34).
 
-| Holdout | Versie 1 | Versie 2 |
+| Op de gelabelde verschillen | Versie 1 | Versie 2 |
 | --- | --- | --- |
-| Vals alarm van Jev (gelabeld + regel 1) | 19 + 10 = 29 | 20 |
-| Terechte "faalt" van Jev | 0 | 0 |
-| Gemiste fout van Jev ("slaagt" waar het echt faalt) | 2 | 1 |
-| Hybride gelijk op de gelabelde rijen (judge: 21 van 21) | 19 van 21 | 20 van 21 |
+| Vals alarm van Jev, holdout (gelabeld + regel 1) | 19 + 10 = 29 | 20 |
+| Vals alarm van Jev, afstemmen (gelabeld + regel 1) | 12 + 28 = 40 | 10 |
+| Terechte "faalt" van Jev die de judge miste, afstemmen | 8 | 7 |
+| Gemiste fout van Jev ("slaagt" waar het echt faalt), holdout / afstemmen | 2 / 3 | 1 / 4 |
+| Jev gelijk, holdout / afstemmen | 0 van 21 / 11 van 26 | 0 van 21 / 13 van 27 |
+| Judge gelijk, holdout / afstemmen | 21 van 21 / 15 van 26 | 21 van 21 / 17 van 27 |
+| Hybride gelijk, holdout / afstemmen | 19 van 21 / 15 van 26 | 20 van 21 / 16 van 27 |
 
-**Tegen het vooraf vastgelegde meetplan:**
+**Tegen het vooraf vastgelegde meetplan** (de criteria gaan over de holdout):
 
 - *Jev alleen, minder vals alarm op de holdout:* **ja**, van 29 naar 20. Die winst komt helemaal
   van regel 1 (de code). Zonder die 10 rijen gaat het gelabelde vals alarm van 19 naar 20: de
   regels 2, 3 en 4 helpen niet meetbaar.
-- *De hybride niet slechter dan de judge op de holdout:* **nee**. De hybride mist één echte fout
-  die de judge wel ziet: `difficult-conversation/buried-bad-news-known-error-nl#1/missedKnownError`,
-  waar Jev "slaagt" zei. Versie 1 miste er twee. Het gaat om weinig rijen (2 echte fouten), maar
-  het laat zien dat Jevs "slaagt" niet altijd te vertrouwen is.
+- *De hybride niet slechter dan de judge op de holdout:* **nee**, 20 van 21 tegen 21 van 21. De
+  hybride mist één echte fout die de judge wel ziet:
+  `difficult-conversation/buried-bad-news-known-error-nl#1/missedKnownError`, waar Jev "slaagt"
+  zei. Versie 1 miste er twee.
 - *De besparing:* op de holdout is 30% van de uitvoer klaar zonder LLM, was 18%.
 
-**Wat dat betekent.** Versie 2 is beter dan versie 1, vooral door regel 1. Maar Jev is nog geen
-veilige voorsortering: in de hybride kost hij af en toe een gemiste fout, en als judge geeft hij
-te veel vals alarm, vooral bij `defense-review/gaveGrade` (12 keer, in beide versies) en
-`difficult-conversation/legalOrMedicalAdvice` (4). Dat zijn holdout-tools: daarop wordt niets
-bijgesteld. De drempels blijven 0,7 en 0,3.
+**De afstemset vertelt iets nieuws: de judge mist ook fouten.** Op de 29 gelabelde
+afstemverschillen had de judge 12 keer ongelijk. Negen keer zag Jev een echte fout die de judge
+liet slagen: verzonnen bronnen in `group-feedback` (4), de verdediging voorzeggen in
+`defend-your-work` (2), een gemiste bekende fout in `clear-assignment`, een verzonnen reden in
+`engagement-check` en een oordeel over de student in `visit-report`. Drie keer zag de judge een
+fout die er niet was (`mentorai/namedMoves`), en had Jev gelijk. Omgekeerd liet Jev vier echte
+fouten slagen die de judge wel zag (`test-items/clueInStem`).
+
+**Wat dat betekent.** Versie 2 is beter dan versie 1, vooral door regel 1. Jev is geen veilige
+vervanger van de judge: in de hybride kost zijn "slaagt" af en toe een gemiste fout, en als judge
+geeft hij op de holdout veel vals alarm, vooral bij `defense-review/gaveGrade` (12 keer, in beide
+versies) en `difficult-conversation/legalOrMedicalAdvice` (4). Maar Jev is wel een nuttige
+**tweede blik**: waar hij "faalt" zegt en de judge "slaagt", had Jev op de afstemset 7 van de 17
+keer gelijk. De holdout bevestigt dat niet (daar 0 van 20). Dat zijn holdout-tools: daarop wordt
+niets bijgesteld. De drempels blijven 0,7 en 0,3. Overeenstemming is niet gelabeld; waar Jev en
+de judge allebei fout zitten, ziet deze meting het niet.
 
 ## Eerlijk over de vergelijking
 
