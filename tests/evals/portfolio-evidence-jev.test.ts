@@ -9,18 +9,12 @@ import {
   loadSuite,
   scoreSort,
 } from "../../scripts/eval-evidence-helpers";
-import {
-  askJev,
-  buildJevRequest,
-  JEV_MODEL,
-  JEV_THRESHOLDS,
-  loadCriterionParts,
-  parseJevAnswer,
-} from "../../scripts/eval-evidence-jev-helpers";
+import { buildJevRequest, JEV_THRESHOLDS, parseJevAnswer } from "~/lib/portfolio/sortJev";
+import { askJev, criterionPartsFor, JEV_MODEL } from "../../scripts/eval-evidence-jev-helpers";
 
 const dir = join(__dirname, "../../evals/portfolio-evidence");
 const suite = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8")) as EvidenceEvalFile;
-const parts = loadCriterionParts();
+const parts = criterionPartsFor(["--parts"]);
 const caseOf = (id: string) => {
   const c = suite.cases.find((x) => x.id === id);
   if (!c) throw new Error(id);
@@ -41,7 +35,7 @@ const SLUG_LU2 = "lu2_begeleiden";
 /** Jev's answer for nl-lesson-plan as the case expects it: LU1, a lesson plan, its criteria, R1. */
 function goodLessonPlanAnswer(): { answers: Record<string, unknown>; usage: { cost: number } } {
   const c = caseOf("nl-lesson-plan");
-  const req = buildJevRequest(caseDossier(suite, c), c.file, c.locale, { parts });
+  const req = buildJevRequest(caseDossier(suite, c), c.file, c.locale, { model: JEV_MODEL, parts });
   const answers: Record<string, unknown> = {};
   for (const key of Object.keys(req.questions)) answers[key] = noul(0.05);
   answers.evidence = noul(0.95);
@@ -60,7 +54,7 @@ function goodLessonPlanAnswer(): { answers: Record<string, unknown>; usage: { co
 describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", () => {
   const c = caseOf("nl-lesson-plan");
   const d = caseDossier(suite, c);
-  const req = buildJevRequest(d, c.file, c.locale, { parts });
+  const req = buildJevRequest(d, c.file, c.locale, { model: JEV_MODEL, parts });
 
   it("names outcome options by what they are, described as objects with their criteria", () => {
     expect(req.model).toBe(JEV_MODEL);
@@ -77,7 +71,7 @@ describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", ()
       criteria: d.framework.outcomes[0]?.criteria.map((x) => x.text),
     });
     const en = caseOf("en-lesson-plan");
-    const enReq = buildJevRequest(caseDossier(suite, en), en.file, en.locale);
+    const enReq = buildJevRequest(caseDossier(suite, en), en.file, en.locale, { model: JEV_MODEL });
     expect(enReq.questions.outcome?.criteria?.lo1_teaching).toMatchObject({
       learning_outcome: "LO1 Teaching",
     });
@@ -100,7 +94,7 @@ describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", ()
   });
 
   it("rotates the option order per repeat, against Jev's lean toward the first option", () => {
-    const r1 = buildJevRequest(d, c.file, c.locale, { parts, rotate: 1 });
+    const r1 = buildJevRequest(d, c.file, c.locale, { model: JEV_MODEL, parts, rotate: 1 });
     expect(Object.keys(r1.questions.outcome?.criteria ?? {})[0]).toBe("lu2_begeleiden");
     expect(Object.keys(r1.questions.kind?.criteria ?? {})[0]).toBe(EVIDENCE_KINDS[1]);
     expect(new Set(Object.keys(r1.questions.outcome?.criteria ?? {}))).toEqual(
@@ -116,7 +110,7 @@ describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", ()
     expect(req.questions[`c_${SLUG_LU1}_2_2`]).toBeUndefined();
     expect(req.questions[`r_${SLUG_LU1}_1`]?.instructions).toContain(o?.requiredEvidence[0]);
     // Without parts every criterion is one question.
-    const whole = buildJevRequest(d, c.file, c.locale);
+    const whole = buildJevRequest(d, c.file, c.locale, { model: JEV_MODEL });
     expect(whole.questions[`c_${SLUG_LU1}_1_1`]?.instructions).toContain(o?.criteria[0]?.text);
     expect(whole.questions[`c_${SLUG_LU1}_1_2`]).toBeUndefined();
   });
@@ -131,11 +125,11 @@ describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", ()
     expect(req.state.file.name).toBe("lesvoorbereiding-medicijnrekenen.docx");
     expect(req.state.file.text).toContain(c.file.text.slice(0, 40));
     expect(req.state.dossier).toMatch(/dossier/i);
-    expect(buildJevRequest(d, { name: "los.docx", text: "x" }, "nl").state.file.folder).toBe("");
-    expect(buildJevRequest(d, { name: "scan.pdf", text: "  " }, "nl").state.about_text).toMatch(
+    expect(buildJevRequest(d, { name: "los.docx", text: "x" }, "nl", { model: JEV_MODEL }).state.file.folder).toBe("");
+    expect(buildJevRequest(d, { name: "scan.pdf", text: "  " }, "nl", { model: JEV_MODEL }).state.about_text).toMatch(
       /geen tekst/i,
     );
-    expect(buildJevRequest(d, { name: "scan.pdf", text: "" }, "en").state.about_text).toMatch(
+    expect(buildJevRequest(d, { name: "scan.pdf", text: "" }, "en", { model: JEV_MODEL }).state.about_text).toMatch(
       /no text/i,
     );
   });
@@ -259,9 +253,16 @@ describe("Jev on the evidence sort: the truth table", () => {
   });
 });
 
+describe("the eval asks what the app asks", () => {
+  it("asks each criterion whole by default, as the app does; the hand split only with --parts", () => {
+    expect(criterionPartsFor(["--jev", "--set", "holdout"])).toBeUndefined();
+    expect(criterionPartsFor(["--jev", "--parts"])).toEqual(parts);
+  });
+});
+
 describe("askJev", () => {
   const c = caseOf("nl-lesson-plan");
-  const req = buildJevRequest(caseDossier(suite, c), c.file, c.locale, { parts });
+  const req = buildJevRequest(caseDossier(suite, c), c.file, c.locale, { model: JEV_MODEL, parts });
 
   it("posts the request to OpenRouter's decisions endpoint with the key", async () => {
     const calls: { url: string; init: RequestInit }[] = [];
