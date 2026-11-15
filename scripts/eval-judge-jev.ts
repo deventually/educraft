@@ -36,14 +36,13 @@ import {
   JUDGE_MAX_TOKENS,
   mapLimit,
   parallelism,
-  parseHardChecks,
   parseJudgeResult,
   unjudgeableReason,
-  verifyEvidence,
 } from "./eval-helpers";
 import {
   buildJudgeJevRequest,
   catalogPrice,
+  judgeFailed,
   type JudgeRow,
   judgeJevReport,
   LATEST_CHECKS,
@@ -67,15 +66,7 @@ function rowsOf(
   specs: ReturnType<typeof loadJudgeSpecs>,
 ) {
   const { tool, c, run, rubric } = job;
-  const judgedIds = parseHardChecks(rubric)
-    .filter((h) => !h.counted)
-    .map((h) => h.id);
-  const parsed = parseJudgeResult(judgeText);
-  const { kept } = verifyEvidence(
-    (parsed?.failedChecks ?? []).filter((id) => judgedIds.includes(id)),
-    parsed?.evidence,
-    output,
-  );
+  const { judged: judgedIds, failed: kept } = judgeFailed(rubric, judgeText, output);
   const jev = parseJudgeJevAnswer(body, tool, c, specs);
   const rows: JudgeRow[] = judgedIds.map((check) => {
     const v = jev.verdicts[check];

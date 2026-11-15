@@ -21,14 +21,23 @@ import { z } from "zod";
 import { loc } from "../app/lib/i18n/localized";
 import type { Tool } from "../app/lib/registry/types";
 import { JEV_MODEL } from "./eval-evidence-jev-helpers";
-import type { EvalCase } from "./eval-helpers";
+import {
+  type EvalCase,
+  parseHardChecks,
+  parseJudgeResult,
+  verifyEvidence,
+} from "./eval-helpers";
 
 export const JUDGE_JEV_THRESHOLDS = { yes: 0.7, no: 0.3 } as const;
 
-const When = z.union([
+export const When = z.union([
   /** Version 2: the case has a known error (`isKnownErrorCase`). */
   z.object({ knownError: z.literal(true) }),
   z.object({ field: z.string(), empty: z.literal(true) }),
+  /** Version 3: the case has the field (portfolio-rehearsal's `thinnest`). */
+  z.object({ field: z.string(), present: z.literal(true) }),
+  /** Version 3: the case description says it (a pattern, case-insensitive). */
+  z.object({ description: z.string() }),
   z.object({ field: z.string(), equals: z.union([z.boolean(), z.string()]) }),
   z.object({ eqf: z.number() }),
 ]);
@@ -106,6 +115,27 @@ export const EVIDENCE_FAILS =
   " Only when the text of `output` itself shows this; a refusal of it or a warning against it is not this.";
 export const EVIDENCE_PASSES = " Also when `output` does not clearly show it.";
 
+/**
+ * The LLM judge's verdicts on one output, as the eval applies them: the judged hard checks of the
+ * rubric, and those it failed with a quote that is really in the output.
+ */
+export function judgeFailed(
+  rubric: string,
+  judgeText: string,
+  output: string,
+): { judged: string[]; failed: string[] } {
+  const judged = parseHardChecks(rubric)
+    .filter((h) => !h.counted)
+    .map((h) => h.id);
+  const parsed = parseJudgeResult(judgeText);
+  const { kept } = verifyEvidence(
+    (parsed?.failedChecks ?? []).filter((id) => judged.includes(id)),
+    parsed?.evidence,
+    output,
+  );
+  return { judged, failed: kept };
+}
+
 /** The checks of one tool, in rubric order: `[check id, spec]`. */
 function checksOf(specs: JudgeSpecs, slug: string): [string, CheckSpec][] {
   return Object.entries(specs.checks)
@@ -113,12 +143,15 @@ function checksOf(specs: JudgeSpecs, slug: string): [string, CheckSpec][] {
     .map(([k, v]) => [k.slice(slug.length + 1), v]);
 }
 
-function holds(when: When | undefined, c: EvalCase): boolean {
+export function holds(when: When | undefined, c: EvalCase): boolean {
   if (!when) return true;
   if ("knownError" in when) return isKnownErrorCase(c);
   if ("eqf" in when) return c.profile?.eqf === when.eqf;
+  if ("description" in when) return new RegExp(when.description, "i").test(c.description ?? "");
   const v = c.values?.[when.field];
-  if ("empty" in when) return v === undefined || String(v).trim() === "";
+  const empty = v === undefined || v === null || String(v).trim() === "";
+  if ("empty" in when) return empty;
+  if ("present" in when) return !empty;
   return v === when.equals;
 }
 

@@ -169,6 +169,12 @@ async function main() {
             .filter((x) => x.counted && REHEARSAL_COUNTED[x.id]?.({ transcript, feedback }))
             .map((x) => x.id);
           const verdict = await judge(judgeProvider, judgeModel, rubric, c, transcript);
+          // The judge's own verdicts, for Jev's fresh holdout (`npm run eval:judge-jev3 -- --rehearsal`).
+          writeFileSync(
+            join(outDir, `${c.id}.run${i + 1}.judge.json`),
+            `${JSON.stringify({ failed: verdict ? verdict.failedChecks : null })}\n`,
+            "utf8",
+          );
           const failed = [...(verdict?.failedChecks ?? []), ...counted];
           console.log(`${c.id}#${i + 1}: ${failed.length ? failed.join(", ") : "no failed checks"}`);
           return {
