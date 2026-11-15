@@ -75,7 +75,8 @@ function jobsFrom(file: string): { jobs: Job[]; meta: V3Meta } {
     const tool = ALL_TOOLS.find((t) => t.slug === m?.[1]);
     const c = tool && loadCases(tool).find((x) => x.id === m?.[2]);
     if (!m || !tool || !c || typeof e.judge !== "string") throw new Error(`not a 19-tool output: ${e.key}`);
-    return { key: e.key, tool, c, run: Number(m[3]), output: e.output, judge: e.judge };
+    const sentences = rubricSentences(loadRubric(tool));
+    return { key: e.key, tool, c, run: Number(m[3]), output: e.output, judge: e.judge, sentences };
   });
   return { jobs, meta: parsed.meta };
 }

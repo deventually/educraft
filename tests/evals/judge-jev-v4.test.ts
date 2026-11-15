@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_TOOLS } from "~/lib/registry";
-import type { EvalCase } from "../../scripts/eval-helpers";
+import { buildJudgePrompt, type EvalCase } from "../../scripts/eval-helpers";
 import {
   codeValue,
   DIMENSIONS,
@@ -13,6 +13,7 @@ import {
   planRequestsV4,
   type V4Part,
 } from "../../scripts/eval-judge-jev-v4";
+import { rubricSentences } from "../../scripts/eval-judge-jev-v4-report";
 
 const rubricOf = (slug: string) =>
   readFileSync(join(process.cwd(), "evals", slug, "rubric.md"), "utf8");
@@ -173,6 +174,31 @@ describe("version 4: the questions file", () => {
       for (const d of DIMENSIONS) {
         const ids = (dims.tools[slug]?.[d] ?? []).map((p) => p.id);
         expect(new Set(ids).size, `${slug}/${d}`).toBe(ids.length);
+      }
+  });
+
+  it("takes the last look from the judge's own rule for a 5, for every dimension of every rubric", () => {
+    const look = dims.lastLook;
+    expect(look).toBeDefined();
+    expect(squash(buildJudgePrompt("", { id: "x", outputLanguage: "nl" }, ""))).toContain(
+      squash(look?.source ?? "-"),
+    );
+    expect(look?.ask).toContain("{{sentence}}");
+    expect(Object.keys(look?.needs ?? {}).sort()).toEqual([...DIMENSIONS].sort());
+    for (const slug of slugs) {
+      const s = rubricSentences(rubricOf(slug));
+      for (const d of DIMENSIONS) expect(s[d], `${slug}/${d}`).toBeTruthy();
+      for (const d of DIMENSIONS)
+        expect(dims.tools[slug]?.[d]?.some((p) => p.id === "lastLook")).toBe(false);
+    }
+  });
+
+  it("counts a known error as found when the output names it or handles it as the case describes, as the rubric's hard check does", () => {
+    for (const slug of slugs)
+      for (const p of dims.tools[slug]?.taskFidelity ?? []) {
+        if (p.id !== "knownError" || p.type !== "noul") continue;
+        expect(p.ask, slug).toMatch(/\bname/);
+        expect(p.ask, slug).toMatch(/\bhandle/);
       }
   });
 
@@ -401,6 +427,58 @@ describe("version 4: which parts apply", () => {
     expect((lf?.request.state as { output: string } | undefined)?.output).toBe(
       "## Feedback op je gesprek\n\nGoed gedaan.\n\n### Tip\n\nVraag door.",
     );
+  });
+});
+
+describe("version 4: the last look", () => {
+  const looked: DimensionsV4 = {
+    ...spec,
+    lastLook: {
+      source: "A 5 means you found nothing to improve after looking for problems",
+      ask: "On this point: {{sentence}} Is there still something to improve?",
+      yes: "Something to improve.",
+      no: "Nothing to improve.",
+      needs: {
+        taskFidelity: ["description", "inputs"],
+        pedagogicalSoundness: ["inputs"],
+        formatAdherence: ["output_language"],
+        levelFit: ["eqf"],
+        languageQuality: ["output_language"],
+      },
+    },
+  };
+  const sentences = { levelFit: "Fits the level of the case." };
+  const top = { score: 2, probabilities: { "0": 0, "1": 0, "2": 1 } };
+
+  it("asks it per dimension, with that dimension's rubric sentence, only where the rubric has one", () => {
+    const reqs = planRequestsV4({ tool, c: lessonCase, output, sentences }, looked, { model: "m" });
+    const q = reqs.find((r) => r.parts.includes("levelFit.lastLook"));
+    expect(q?.request.questions["levelFit.lastLook"]).toEqual({
+      type: "noul",
+      instructions:
+        "On this point: Fits the level of the case. Is there still something to improve?",
+      criteria: { true: "Something to improve.", false: "Nothing to improve." },
+    });
+    expect(Object.keys((q?.request.state as { case: object } | undefined)?.case ?? {})).toEqual([
+      "eqf",
+    ]);
+    const asked = reqs.flatMap((r) => r.parts);
+    expect(asked.filter((p) => p.endsWith(".lastLook"))).toEqual(["levelFit.lastLook"]);
+  });
+
+  it("caps at 4 when something is still to improve, and is not averaged with the parts", () => {
+    const decide = (lastLook: { noul: number }, eqf = top) =>
+      decideDimensions({ tool, c: lessonCase, output, sentences }, looked, {
+        "levelFit.eqf": eqf,
+        "levelFit.lastLook": lastLook,
+      }).levelFit;
+    expect(decide({ noul: 0.9 })).toMatchObject({ score: 4, x: 4, capped: true });
+    expect(decide({ noul: 0.1 })?.score).toBe(5);
+    expect(decide({ noul: 0.5 })?.score).toBe(5);
+    // not averaged in: a part at 3/4 stays 4 whatever the last look says
+    const mid = { score: 1.5, probabilities: { "0": 0, "1": 0.5, "2": 0.5 } };
+    expect(decide({ noul: 0.1 }, mid)?.x).toBeCloseTo(4);
+    expect(decide({ noul: 0.1 })?.parts.lastLook).toBe(1);
   });
 });
 

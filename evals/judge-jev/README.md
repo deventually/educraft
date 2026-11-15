@@ -524,6 +524,28 @@ de meting.
   zijn antwoord, ook zonder die caps. Zo krijgen alle drie hetzelfde.
 - **Portfolio-rehearsal doet niet mee:** de repo heeft daar geen Sonnet-scores per run.
 
+### Afstemming na de eerste afstemrun (t4)
+
+Twee wijzigingen, allebei uit de tekst van de judge of de rubric zelf, niet uit een drempel die op
+Bastiaans 8 cijfers is gepast:
+
+- **De laatste blik** (`lastLook`). De judge-instructie zegt: "A 5 means you found nothing to
+  improve after looking for problems; reserve it for that." In t4 gaf Jev op elke dimensie vooral
+  5 (bij formatAdherence 213 van 216), omdat "aan alle delen voldaan" in de formule 5 werd. Nu
+  vraagt code per dimensie één Noul met de zin van die dimensie uit de rubric: "is er na zoeken
+  nog iets te verbeteren?" Bij ja wordt de dimensie hoogstens 4. Het is een regel voor het
+  hoogste cijfer, dus het telt niet mee in het gemiddelde van de delen. Sonnet krijgt dezelfde
+  regel in zijn instructie.
+- **Een bekende fout gevonden** (`knownError`, 11 tools). De vraag luidde "wijst de uitvoer het
+  probleem aan?". De harde check in de rubric zegt "name it, or handle it as the case description
+  says". Bij visit-report liet de uitvoer de echte naam weg en gaf geen cijfer, zoals de casus
+  vraagt, en kreeg toch een cap van 2. De vraag volgt nu de rubric: benoemen óf afhandelen zoals
+  beschreven.
+
+Nagekeken en ongewijzigd: test-analysis `levelFit.termsOnce` (Jev zegt bijna altijd "nee"). De
+rubric vraagt "every term explained once", en in de gelezen uitvoer worden alfa en Rir uitgelegd
+maar p-waarde en Rit niet. Jev volgt de rubric letterlijk; dat laten we zo.
+
 ### Sets, labels en toetsen
 
 | Set | Uitvoer | Bron | Gelabeld door Bastiaan |
@@ -562,8 +584,9 @@ npm run eval:judge-jev4 -- --rescore evals/reports/<datum><label>-judge-jev4-raw
 
 Labels staan in `evals/judge-jev/labels/<naam>-v4.json`: per uitvoer de vijf cijfers, `null` voor
 "weet ik niet", en bij de toetsset `retest` met de herhalingen. Het script roept alleen Jev aan,
-nooit Claude. Een droge run telt de requests: 1.149 voor de afstemset en 447 voor de toetsset,
-samen ruim 2,5 miljoen tokens invoer, ongeveer $0,11 tegen de invoerprijs.
+nooit Claude. Een droge run telt de requests: met de laatste blik 1.797 voor de afstemset (was 1.149),
+en 735 voor de toetsset (was 447); samen ongeveer 4,5 miljoen tokens invoer, $0,19 tegen de
+invoerprijs.
 
 ## Eerlijk over de vergelijking
 

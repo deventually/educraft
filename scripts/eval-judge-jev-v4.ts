@@ -80,6 +80,7 @@ type CodeCheck = z.infer<typeof CodeCheck>;
 
 const NEEDS = ["inputs", "description", "known_error", "eqf", "output_language", "user_turns"] as const;
 type Need = (typeof NEEDS)[number];
+const NeedList = z.array(z.enum(NEEDS));
 
 /**
  * What part of the output a question reads: the whole, one section by its heading, everything from
@@ -109,7 +110,7 @@ const Common = {
 
 const Asked = {
   about: About.optional(),
-  needs: z.array(z.enum(NEEDS)),
+  needs: NeedList,
   ask: z.string().min(1),
 };
 
@@ -132,10 +133,28 @@ export type V4Part = z.infer<typeof Part>;
 
 const ToolDims = z.object(Object.fromEntries(DIMENSIONS.map((d) => [d, z.array(Part).min(1)])) as Record<Dimension, z.ZodArray<typeof Part>>).strict();
 
+/**
+ * The judge's rule for a 5 ("nothing to improve after looking for problems"), asked once per
+ * dimension with that dimension's rubric sentence in place of `{{sentence}}`. A yes caps the
+ * dimension at 4; it is a rule for the top score, so it is not averaged with the parts.
+ */
+const LastLook = z
+  .object({
+    source: z.string().min(1),
+    ask: z.string().includes("{{sentence}}"),
+    yes: z.string().min(1),
+    no: z.string().min(1),
+    needs: z.object(Object.fromEntries(DIMENSIONS.map((d) => [d, NeedList])) as Record<Dimension, typeof NeedList>).strict(),
+  })
+  .strict();
+
+const LAST_LOOK = { id: "lastLook", capAt: 4 } as const;
+
 const DimensionsV4Schema = z
   .object({
     version: z.literal(4),
     about: z.string(),
+    lastLook: LastLook.optional(),
     /** How code reads a Score: its position (the expectation) or its most likely level. */
     read: z.enum(["position", "top"]),
     holdout: z.array(z.string()),
@@ -240,6 +259,8 @@ export interface OutputInput {
   tool: JudgedTool;
   c: EvalCase;
   output: string;
+  /** The rubric's sentence per dimension, for the last look. */
+  sentences?: Partial<Record<Dimension, string>>;
 }
 
 function caseField(c: EvalCase, need: Need): unknown {
@@ -304,14 +325,36 @@ export interface V4Request {
 const applies = (p: V4Part, c: EvalCase) =>
   holds(p.when, c) && !(p.unless && holds(p.unless, c)) && (!p.lang || p.lang === (c.outputLanguage === "en" ? "en" : "nl"));
 
-const asked = (d: DimensionsV4, slug: string) =>
-  DIMENSIONS.flatMap((dim) => (d.tools[slug]?.[dim] ?? []).map((p) => [`${dim}.${p.id}`, p] as const));
+/** The last look of one dimension as a Noul part, when the file has one and the rubric a sentence. */
+function lastLookPart(d: DimensionsV4, dim: Dimension, input: OutputInput): V4Part | undefined {
+  const look = d.lastLook;
+  const sentence = input.sentences?.[dim];
+  if (!look || !sentence) return undefined;
+  return {
+    ...LAST_LOOK,
+    type: "noul",
+    source: look.source,
+    needs: look.needs[dim],
+    ask: look.ask.replace("{{sentence}}", sentence),
+    yes: look.yes,
+    no: look.no,
+    good: "no",
+  };
+}
+
+const asked = (d: DimensionsV4, input: OutputInput) =>
+  DIMENSIONS.flatMap((dim) => {
+    const look = lastLookPart(d, dim, input);
+    return [...(d.tools[input.tool.slug]?.[dim] ?? []), ...(look ? [look] : [])].map(
+      (p) => [`${dim}.${p.id}`, p] as const,
+    );
+  });
 
 /** The requests for one output: questions that share a state (the same section, the same fields) together. */
 export function planRequestsV4(input: OutputInput, d: DimensionsV4, opts: { model?: string } = {}): V4Request[] {
   const { tool, c, output } = input;
   const groups = new Map<string, V4Request>();
-  for (const [qid, p] of asked(d, tool.slug)) {
+  for (const [qid, p] of asked(d, input)) {
     if (p.type === "code" || !applies(p, c)) continue;
     const text = textFor(p.about, output, c.outputLanguage);
     if (text === undefined) continue;
@@ -428,6 +471,12 @@ export function decideDimensions(
     }
     const values = [...units.values()].map(mean);
     if (!values.length) continue;
+    const look = lastLookPart(d, dim, input);
+    const v = look && partValue(look, `${dim}.${look.id}`, input, answers, d.read);
+    if (v !== undefined) {
+      parts[LAST_LOOK.id] = v;
+      if (v === 0) cap = Math.min(cap, LAST_LOOK.capAt);
+    }
     const raw = 1 + 4 * mean(values);
     const x = Math.min(raw, cap);
     out[dim] = { score: Math.floor(x + 0.5), x, parts, ...(x < raw ? { capped: true } : {}) };

@@ -1,6 +1,33 @@
 {
   "version": 4,
   "about": "Version 4 of Jev as judge: the five dimension scores of the eval judge, each from small questions about the tool's rubric (a Score with levels described as situations, a Noul, or a check in code). Code averages the parts per dimension on 0 to 1 and maps that to 1 to 5. Written before any Jev answer on these outputs was seen; tuned only on the tuning set, against Bastiaan's own labels. See evals/judge-jev/README.md, 'Versie 4'.",
+  "lastLook": {
+    "source": "A 5 means you found nothing to improve after looking for problems; reserve it for that.",
+    "ask": "Look for problems in `output` on this point of the rubric: \"{{sentence}}\" After looking, is there still something in `output` to improve on this point?",
+    "yes": "There is at least one concrete thing on this point that a careful teacher would want changed.",
+    "no": "After looking for problems, there is nothing on this point to improve.",
+    "needs": {
+      "taskFidelity": [
+        "description",
+        "inputs"
+      ],
+      "pedagogicalSoundness": [
+        "description",
+        "inputs"
+      ],
+      "formatAdherence": [
+        "description",
+        "output_language"
+      ],
+      "levelFit": [
+        "description",
+        "eqf"
+      ],
+      "languageQuality": [
+        "output_language"
+      ]
+    }
+  },
   "read": "position",
   "holdout": [
     "guided-reflection",
@@ -84,9 +111,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -722,9 +749,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -1417,9 +1444,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -1661,9 +1688,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -2106,9 +2133,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -2605,9 +2632,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -2997,9 +3024,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -3304,9 +3331,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -3557,9 +3584,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -3823,9 +3850,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
@@ -4050,9 +4077,9 @@
           "needs": [
             "known_error"
           ],
-          "ask": "Does `output` point out the problem described in `case.known_error`?",
-          "yes": "`output` names this problem: as a warning, a question to the teacher, or a proposal.",
-          "no": "`output` goes ahead as if the input had no such problem.",
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
           "good": "yes"
         }
       ],
