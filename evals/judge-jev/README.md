@@ -249,6 +249,244 @@ keer gelijk. De holdout bevestigt dat niet (daar 0 van 20). Dat zijn holdout-too
 niets bijgesteld. De drempels blijven 0,7 en 0,3. Overeenstemming is niet gelabeld; waar Jev en
 de judge allebei fout zitten, ziet deze meting het niet.
 
+## Versie 3
+
+Versie 2 liet zien dat Jev lange uitvoer niet betrouwbaar in één vraag beoordeelt: hij zoekt en
+oordeelt tegelijk, wijst niet aan waar het staat, en is zeker van zijn zaak ook als hij verkeerd
+leest (een rubriekniveau als cijfer). Versie 3 volgt daarom de recepten en richtlijnen van
+TypeSafe zelf, zonder eigen draai. Het plan is vastgelegd vóór enige meting; wat na de
+afstemronde verandert, is een afwijking en komt zo in de uitslag.
+
+**Bijgesteld op 15 november, vóór de afstemronde.** Bij nalezen volgde de eerste versie van dit
+plan TypeSafe op drie punten niet, en lagen de toetsen te veel langs Sonnet in plaats van langs
+Bastiaans labels. Wat er veranderde: de bekende fout via semantic_find, beweringen tegen de bron
+via citation_check, checks over het geheel naar de judge, Jev en Sonnet met dezelfde regels tegen
+de labels, strengere vertrouwensregels, kosten erbij, en een toets voor de tweede blik.
+
+### Het ontwerp
+
+[`checks.v3.json`](checks.v3.json), [`eval-judge-jev-v3.ts`](../../scripts/eval-judge-jev-v3.ts).
+Drie soorten vragen, elk volgens TypeSafe:
+
+1. **Een bekende fout: het recept semantic_find** (11 checks, `findRequests`, `decideFind`). De
+   uitvoer gaat als genummerde regels (`L000| …`) als platte tekst naar Jev, met een keuzevraag
+   "welke regel" (de regelnummers als opties, zonder omschrijving) en een Noul "bestaat het".
+   Vanaf 0,7 noemt de uitvoer de fout (de check slaagt, met die regel als bewijs); onder 0,35 niet
+   (de check faalt); daartussen beslist de judge. Boven 255 regels (het maximum van een
+   keuzevraag) de twee stappen van het recept: eerst een venster, dan de regel daarin. De vaste
+   begroeting van de app telt niet mee.
+2. **Een bewering tegen de bron: het recept citation_check** (12 checks waar de check precies die
+   vraag is: staat wat het stuk zegt in de invoer, het transcript of de beurten). Per stuk een
+   keuzevraag met de drie relaties van het recept, `supports`, `contradicts` en `says_nothing`;
+   de hoogste telt vanaf 0,8, anders beslist de judge (het recept stuurt dat naar een mens). Een
+   Noul vooraf (TypeSafe: "screen with a Noul first") zegt of het stuk zo'n bewering doet; wat de
+   rubric toestaat (een gemarkeerd voorstel, fictieve casusgegevens) staat daar aan de "nee"-kant,
+   met de zin uit de rubric. Stap 1 van het recept (letterlijk zoeken naar het citaat) slaat
+   over: de stukken hebben geen citaatveld, en dan zegt het recept zelf die stap over te slaan.
+3. **Elke andere check** (verboden handeling, per onderdeel, gespreksbeurten, overige
+   verzinsels): code knipt de uitvoer in stukken (`splitUnits`: blok, onderdeel, beurt,
+   beurtpaar, eerste beurt). Per stuk een Noul of het stuk over het onderwerp gaat, en een
+   keuzevraag met benoemde categorieën: eerst de toegestane (met de zin uit de rubric), daarna de
+   fout. Een optie "geen van deze" is er niet: TypeSafe raadt voor Jev 1.14 de losse Noul aan.
+   Code beslist bij 0,7 en 0,3, het startpunt van TypeSafe.
+
+Steeds alleen de velden die een vraag noemt (`needs`). Code beslist; het falende stuk is het
+bewijs. **Tien checks gaan over het geheel van de uitvoer** (zoals een ontbrekende variant, of
+gescheiden stappen): dat is geen kleine vraag, en TypeSafe noemt kleine vragen het
+belangrijkste. Die blijven bij de judge, net als rekenen, tellen en exact opzoeken. Een schaal
+(Score) gebruikt versie 3 niet: TypeSafe raadt hem alleen aan als er echt tussenliggende niveaus
+zijn.
+
+**Drempels.** TypeSafe raadt aan drempels te kiezen door kans tegen juistheid uit te zetten op
+eigen gelabelde data. Voor de afstemset zijn alleen de verschillen van 14 november gelabeld, dus
+dat kan niet eerlijk; de drempels zijn die van de recepten, en het rapport toont de kalibratie
+(kans tegen juistheid) op de nieuwe labels, als bevinding.
+
+### Vaste regels
+
+- Elke toegestane categorie en elk toegestaan geval noemt de zin uit de rubric waar het uit komt
+  (`source`); een test eist dat die zin in de rubric staat.
+- Namen van categorieën zeggen wat ze zijn, nooit hun plaats; een recept houdt zijn eigen namen.
+  Geen zinnen per casus.
+- Of een check geldt, beslist code, zoals in versie 2.
+- Drempels uit de recepten (0,7 / 0,3; semantic_find 0,7 / 0,35; citation_check 0,8); geen
+  zoektocht naar een betere drempel.
+- **Eén afstemronde**, op de uitvoer van 14 november en alleen op de afstemtools, met
+  Bastiaans labels van toen (`--labels 2026-11-14b2`). Een categorie mag daarna alleen
+  aangescherpt worden met een zin uit de rubric. Daarna gaat het bestand op slot, in een commit
+  vóór de meting.
+
+### De afstemronde (15 november) en wat er daarna veranderde
+
+[Rapport](../reports/2026-11-14b3t-judge-jev3.md). Op de afstemtools beslist Jev 772 rijen (versie
+2: 1005) en is hij het in 634 daarvan eens met Sonnet (82%; versie 2: 97%). Hij laat 224 rijen
+onbeslist (versie 2: 108). Met de opties omgekeerd blijft de hoogste categorie in 95% gelijk
+(4667 van 4938). De ronde kostte $0,50 zonder de omgekeerde volgorde.
+
+Versie 3 zegt dus vaker "faalt" waar Sonnet "slaagt". De labels van 14 november laten beide
+kanten zien. Bij group-feedback/inventedSources had Jev 4 van de 4 gelabelde keren gelijk, en bij
+mentorai/namedMoves had Jev gelijk waar Sonnet faalde. Bij cognitive-architect/inventedActivity en
+één rij van differentiation/inventedSources was het een vals alarm. De meeste verschillen zijn
+niet gelabeld; die zijn per cluster gelezen.
+
+**Aangescherpt**, alleen op afstemtools en steeds met de zin uit de rubric als bron (`source`):
+
+| Check | Wat er veranderde | Zin uit de rubric |
+| --- | --- | --- |
+| test-items/inventedContent | Het onderwerp is alleen een vraag of antwoord. Daarnaast tellen niet mee: een matrijs, de controle tegen de matrijs of een telling van antwoordposities; een antwoord dat uit de casusgegevens van de vraag zelf volgt; punten, tijd, weging en cesuur (een andere check). | "Does a question or answer rest on facts, figures, definitions, standards or sources"; "fictitious case data given in full in the question is fine"; "present points, a duration, a weighting or a pass mark the teacher did not give" |
+| test-items/unmarkedProposal | Getallen in de casus van een vraag zijn casusgegevens. | "fictitious case data given in full in the question is fine" |
+| lesson-plan/inventedSources, differentiation/inventedSources | Een verzonnen casus, naam of getal in een oefening voor de studenten citeert niets. | "Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up" (differentiation: met "article number") |
+| cognitive-architect/inventedActivity | Het kiezen van principes voor een nieuw ontwerp mag zeggen waarom een principe kwetsbaar is, zolang er geen score, niveau of percentage bij staat. | "picks the Priority Principles without rating anything" |
+| clear-assignment/aboveLevel | Een term is pas een fout als een lezer op dat niveau hem niet kent. | "Is the rewritten assignment clearly above the chosen reading level" |
+
+**Eén afwijking van het ontwerp.** test-analysis/decidesForTeacher kijkt per onderdeel in plaats
+van per blok. Per blok zag Jev één optie uit een lijst van opties als een besluit; de rubric
+vraagt of de uitvoer de opties noemt en de beslissing laat, en dat is alleen in het hele
+onderdeel te zien. Dit is geen aanscherping met een zin, maar een andere knip, en telt daarom als
+afwijking.
+
+**Bewust niet veranderd**, omdat de rubric geen zin geeft die Jev ongelijk geeft, of omdat Jev
+mogelijk gelijk heeft: test-analysis/inventedSources (een vuistregel als bron), lesson-plan/
+noCheckOfAllStudents (een exitvraag zonder beslismoment), visit-report/judged,
+visit-report/missedKnownError en group-feedback.
+
+**Eerlijk over het risico.** De clusters zijn gevonden waar Jev en Sonnet het oneens waren. Dat
+kan Jev naar Sonnet toe trekken. Daar staan drie dingen tegenover: alleen zinnen uit de rubric,
+geen enkele holdouttool aangeraakt, en clusters waar Jev gelijk kan hebben blijven zoals ze zijn.
+Het plan kent één afstemronde, dus het effect van deze aanscherpingen is vóór het slot niet
+gemeten. De meting draait alleen de holdouts (zie het meetplan), dus dat effect blijft ongemeten.
+
+### Twee holdouts
+
+De zes holdouttools zijn niet meer blind: de fouten van versie 2 daar zijn bekeken. Ze blijven
+holdout (nieuwe uitvoer), maar half blind. Daarom is er een **verse holdout**:
+**portfolio-rehearsal**, die in geen enkele eerdere Jev-meting zat. De 6 checks die de judge daar
+beantwoordt, zijn uit de rubric geschreven zonder uitvoer van die tool met Jev te bekijken. Alleen
+de 4 openbare casussen doen mee, elk 5 runs; privécasussen nooit. Die holdout is klein, en zal
+vaak "te weinig" zeggen. Dat is dan ook de uitkomst.
+
+### Meetplan en toetsen (vooraf vastgelegd)
+
+Nieuwe uitvoer van de zes holdouttools (3 runs) via Claude Code met dezelfde judge; versie 2 en
+de judge via `npm run eval:judge-jev -- --checks 2`, en versie 3 op precies die uitvoer met
+`npm run eval:judge-jev3 -- --from <die raw> --rehearsal <datum>`.
+
+**Bijgesteld op 15 november, vóór de meting: alleen de holdouts.** Het plan was nieuwe uitvoer
+van alle 19 tools (312 uitvoeren). Alle toetsen en de regels voor "met vertrouwen" kijken alleen
+naar de holdouts; de uitvoer van de afstemtools telt nergens als bewijs, want daarop is
+afgestemd. Om de kosten van Sonnet te beperken (ongeveer 70% minder) draait de meting daarom
+alleen de zes holdouttools (96 uitvoeren) en portfolio-rehearsal. Wat dat kost: de meting laat
+niet zien of de aanscherpingen op nieuwe uitvoer van de afstemtools werken. Bastiaan koos dit
+vóór de meting; aan de toetsen verandert niets. Jev beantwoordt elke
+keuzevraag ook met de opties in omgekeerde volgorde (toets 5); die requests tellen niet mee in
+de kosten.
+
+**Neutraal tussen Jev en Sonnet.** De waarheid is Bastiaans oordeel, niet Sonnet. Hij labelt
+blind, zonder AI: elke rij waar Jev (versie 2 of 3) **of Sonnet** zegt dat de check faalt, en
+een vaste steekproef van 40 van de rest (`labelRows`). Wat de steekproef mist, wordt opgeschaald
+naar de hele rest. Daarna, niet blind: bij elke echte fout die Jev zag, staat de fout in het stuk
+dat hij aanwees? Labels per rapport in `labels/<rapport>.json`, met `evidence` voor die tweede
+vraag. Het rapport zet Jev v3, Jev v2, Sonnet en de hybride (Jev waar hij beslist, anders
+Sonnet) naast elkaar: beslist, vals alarm, gemist, geschat juist, en de **kosten per 1.000
+uitvoer** tegen de API-lijstprijs (Sonnet is de hele judge-call, met de dimensies erbij).
+
+| | Toets | Oude holdout | Verse holdout |
+| --- | --- | --- | --- |
+| 1 | Valse alarmen | versie 3 hooguit half zoveel als versie 2 | 80% van de fails van versie 3 echt fout |
+| 2 | Gemist | de hybride mist niet meer echte fouten dan Sonnet alleen | idem |
+| 3 | Zonder LLM | alleen gerapporteerd (de checks over het geheel gaan nu naar de judge; de kostentabel weegt dat) | idem |
+| 4 | Bewijs | bij 80% van de echte fouten staat de fout in het aangewezen stuk | idem |
+| 5 | Volgorde | bij 95% van de stukken op het onderwerp blijft de hoogste categorie gelijk | idem |
+| 6 | Tweede blik | waar Jev faalt en Sonnet niet: minstens 5 echt fout, ondergrens (95%) minstens 50% | idem |
+
+Onder 5 echte fouten (of beoordeelde bewijsstukken) zegt een toets "te weinig".
+
+**Met vertrouwen, per soort check**, voor Jev **en** Sonnet met dezelfde regels (verboden
+handeling, verzonnen of anders dan de invoer, bekende fout, per onderdeel, gespreksbeurten). Een
+casus is een case met een check; de runs ervan tellen één keer, want ze zijn niet los van elkaar.
+
+- **Laten slagen** (de LLM overslaan): minstens 30 casussen waar de beoordelaar slaagt, en geen
+  gelabelde echte fout daarbij. Met 0 van n is de kans op een gemiste fout nog tot 3/n, dus
+  hooguit 10%; het rapport noemt die grens.
+- **Fout melden** (een tweede blik): minstens 10 casussen onder de gelabelde fails, en de
+  ondergrens (95%, Wilson) van het aandeel echt fout minstens 60%; voor Jev ook het bewijs in het
+  aangewezen stuk.
+- **Te weinig gegevens** onder die aantallen: dan zeggen we niets. De bekende fout, de checks per
+  onderdeel en de gespreksbeurten hebben op een holdout minder dan 30 casussen; daar komt dus
+  "te weinig" uit, hoeveel runs er ook zijn.
+- Een soort moet het op de oude holdout halen, en mag op de verse holdout niet "nee" krijgen.
+
+Haalt versie 3 toets 1 of 2 op een holdout niet, dan is de conclusie dat Jev geen rechter is voor
+lange tekst die een model schreef, ook niet in stukken. Een soort check die de regels wel haalt,
+noemen we, ook als het geheel niet slaagt. Een versie 4 zou een nieuwe holdout nodig hebben.
+
+**Wat dit voor de app betekent.** In de app draait geen judge; daar zit de besparing in
+LLM-calls die eigenlijk een keuze of een controle zijn. De conclusie zet de soorten checks die
+het halen naast die calls, met de prijs per 1.000 beslissingen voor Jev en Sonnet.
+
+### Uitslag versie 3 (2026-11-15)
+
+[Rapport](../reports/2026-11-15c3-judge-jev3.md), labels in
+[`labels/2026-11-15c3.json`](labels/2026-11-15c3.json). Nieuwe uitvoer van de zes holdouttools
+(3 runs, 96 uitvoeren) en portfolio-rehearsal (4 openbare casussen × 5 runs), Sonnet als judge via
+Claude Code, Jev op precies die uitvoer: 8.820 requests, $0,36 ($0,18 zonder de omgekeerde volgorde).
+Bastiaan labelde blind en zonder AI 94 rijen (78 oude holdout, 16 verse holdout): 80 slaagt, 12
+faalt echt, 2 weet ik niet. Daarna, niet blind, het bewijs bij de 5 echte fouten die Jev aanwees:
+4 keer stond de fout in het aangewezen stuk. Bij de vijfde merkte hij op dat de overlap niet in
+het aangewezen criterium (Juistheid van de bevindingen) zit, maar in Uitvoering van het testplan.
+
+| Oude holdout | Beslist | Vals alarm | Gemist | Geschat juist | Kosten per 1.000 uitvoer |
+| --- | --- | --- | --- | --- | --- |
+| Jev v3 | 297 | 22 | 0 | 93% | $1,56 |
+| Jev v2 | 368 | 17 | 3 | 95% | - |
+| Sonnet | 438 | 2 | 5 + 35 geschat | 90% | $24,08 |
+| Hybride (Jev, anders Sonnet) | 438 | 23 | 0 + 35 geschat | 87% | $23,38 |
+
+De geschatte gemiste fouten komen uit de steekproef: 3 echte fouten in 38 rijen waar niemand
+"faalt" zei, opgeschaald naar de hele rest. Dat is een ruwe schatting op weinig rijen.
+
+| Toets | Oude holdout | Verse holdout |
+| --- | --- | --- |
+| 1. Valse alarmen | v2 17, v3 22: **niet geslaagd** | te weinig |
+| 2. Gemist: hybride niet meer dan Sonnet | hybride 3, Sonnet 8: **geslaagd** | te weinig |
+| 3. Uitvoer zonder LLM (alleen gerapporteerd) | v2 29/96, v3 9/96 | 0/20 |
+| 4. Bewijs in het aangewezen stuk | 4 van 5 (80%): **geslaagd**, precies op het minimum van 5 | - (geen bewijs te beoordelen) |
+| 5. Volgorde van de opties | 950/1001 (94,9%): **net niet geslaagd** | 94%: niet geslaagd |
+| 6. Tweede blik: Jev faalt, Sonnet niet | 5 van 27 echt fout: **niet geslaagd** | te weinig |
+
+**Met vertrouwen, per soort check** (oude holdout; de verse holdout zegt overal "te weinig" en
+nergens "nee"):
+
+- **Laten slagen haalt Jev bij twee soorten:** verboden handeling (`act`) en verzonnen of anders
+  dan de invoer (`invented`), elk 30 casussen zonder één gemiste fout, dus hooguit 10% gemist.
+  Sonnet haalt dat bij `act` ook (44 casussen), maar níet bij `invented` en `per onderdeel`: daar
+  miste Sonnet er telkens 4.
+- **Fout melden met vertrouwen haalt niemand.** Er zijn te weinig echte fouten (12 in totaal).
+- De bekende fout, de checks per onderdeel en de gespreksbeurten hebben te weinig casussen.
+
+**Kalibratie.** Elke gelabelde rij waar Jev een kans op "faalt" onder 0,7 gaf, was echt in orde
+(37 van 37). Boven 0,7 was 12 van de 55 echt fout (22%). Jevs "slaagt" is betrouwbaar, zijn
+"faalt" niet.
+
+**Waar het vals alarm vandaan komt.** Vooral rubric-builder/unmarkedProposal: Jev ziet het
+narekenen van punten en cesuur (die de docent gaf) als een verzonnen voorstel. Verder ziet hij
+bij difficult-conversation wat de gespeelde student zegt als een bron of als een besluit. Dit zijn
+holdouttools; aanscherpen kan pas met een nieuwe holdout (een versie 4).
+
+**Conclusie, volgens de regel die vooraf vastlag.** Versie 3 haalt toets 1 niet, dus: Jev is geen
+rechter voor lange tekst die een model schreef, ook niet in stukken. Wel haalt Jev bij twee soorten
+de regel om een check te laten slagen: verboden handelingen en verzinsels. Daar mist Jev op deze
+meting niets, waar Sonnet bij verzinsels 4 fouten miste. Jev is dus bruikbaar als filter dat zegt
+"dit is in orde", niet als alarm. In de eval scheelt dat weinig ($23,38 tegen $24,08 per 1.000
+uitvoer), want de judge-call blijft nodig voor de dimensies van de rubric. De besparing zit in de
+app, bij LLM-calls die alleen een ja/nee-controle van dit soort zijn: daar kost Jev ongeveer een
+vijftiende.
+
+**Wat de uitslag niet zegt.** De aantallen zijn klein: 12 echte fouten, 5 bewijsstukken, en de
+verse holdout heeft er te weinig voor elke toets. De oude holdout is half blind (zie "Twee
+holdouts"). De meting liep alleen op de holdouts (bijgesteld vóór de meting). Toets 4 haalt het
+minimum van 5 precies.
+
 ## Eerlijk over de vergelijking
 
 - **De LLM-judge doet meer dan de harde checks.** Hij scoort in dezelfde call ook de dimensies van

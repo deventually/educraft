@@ -1,0 +1,2318 @@
+{
+  "version": 3,
+  "about": "Version 3 (README \"Versie 3\"), following TypeSafe's own recipes and guidance. A known error: semantic_find (the output as numbered lines, a Choice over the lines and an exists Noul; 0.7 / 0.35). A claim against its source: citation_check (a Choice supports / contradicts / says_nothing; the top relation counts from 0.8), screened by a Noul on the topic. Every other check: per piece a topic Noul and a Choice of named kinds written from the rubric, each allowed kind with the rubric sentence it comes from; code decides at 0.7 / 0.3. A check about the whole output stays with the judge.",
+  "holdout": [
+    "contextualization",
+    "defense-review",
+    "difficult-conversation",
+    "guided-reflection",
+    "rubric-builder",
+    "visit-prep"
+  ],
+  "freshHoldout": [
+    "portfolio-rehearsal"
+  ],
+  "checks": {
+    "clear-assignment/aboveLevel": {
+      "family": "part",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` part of the rewritten assignment that the students read?",
+        "yes": "`piece.text` is text of the assignment itself, written for the students.",
+        "no": "`piece.text` is a note for the teacher, such as what was changed or the open points."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` read for a student at the reading level `case.inputs.readingLevel`?",
+        "options": {
+          "plain_for_level": {
+            "says": "`piece.text` uses short sentences and words a reader at that level knows.",
+            "means": "other",
+            "source": "The rewritten assignment is written for students at the chosen CEFR reading level"
+          },
+          "terms_explained": {
+            "says": "`piece.text` uses technical terms or abbreviations and explains them.",
+            "means": "other",
+            "source": "vocabulary clarified (2.1)"
+          },
+          "long_multi_clause_sentences": {
+            "says": "At A2 or B1, `piece.text` has long sentences with several clauses.",
+            "means": "fails"
+          },
+          "unexplained_terms": {
+            "says": "`piece.text` uses technical terms or abbreviations a reader at that level would not know, without explaining them.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "clear-assignment/addedRequirement": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state a requirement for the students: something they must do or hand in, or by which the work is assessed?",
+        "yes": "`piece.text` states such a requirement (a product, length, form, file type, deadline, way of submission, criterion, weight, pass mark or condition).",
+        "no": "`piece.text` states no requirement, for example it explains the purpose, a term, or what the tool changed.",
+        "besides": [
+          {
+            "says": "A to-be-filled-in marker, an explanation of a term, or a suggestion under the open points is not an added requirement.",
+            "source": "A to-be-filled-in marker, an explanation of a term, and a suggestion under the open points are not added requirements."
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What does the original assignment in `case.inputs` say about the requirement in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "The original assignment in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The original assignment in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The original assignment in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "clear-assignment/droppedRequirement": {
+      "llm": "Whether a requirement is missing is about the whole rewrite against the whole original: no single piece shows an absence. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "clear-assignment/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "names_cefr_or_udl": {
+            "says": "`piece.text` names the CEFR or UDL for what they do say.",
+            "means": "other",
+            "source": "structured after the UDL Guidelines 3.0 (CAST, 2024)"
+          },
+          "source_from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "Compare the output with the original text in the case inputs, line by line."
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites a study, percentage, source or guideline that is not in `case.inputs` and looks made up, or attributes to a named source something it does not say.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "clear-assignment/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "clear-assignment/silentChoice": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state a value or reading for something the original assignment in `case.inputs` leaves open or states in two conflicting ways?",
+        "yes": "`piece.text` fills such a gap or settles such a contradiction, for example one of two word counts, or individual instead of group.",
+        "no": "`piece.text` is about something the original states once and clearly, or about nothing the original leaves open."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` deal with the gap or contradiction?",
+        "options": {
+          "names_it_open": {
+            "says": "`piece.text` names the gap or contradiction, for example as an open point or a to-be-filled-in marker.",
+            "means": "other",
+            "source": "and a list of open points (\"you name no deadline\")"
+          },
+          "says_it_chose": {
+            "says": "`piece.text` says that a choice was made and which one.",
+            "means": "other",
+            "source": "the tool says what it changed"
+          },
+          "chooses_silently": {
+            "says": "`piece.text` picks a value or reading without saying that the original was open or contradictory.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "cognitive-architect/inventedActivity": {
+      "family": "act",
+      "unit": "block",
+      "stage": "analyst",
+      "when": {
+        "field": "legacyActivity",
+        "empty": true
+      },
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about an existing learning activity or about ratings of the six principles?",
+        "yes": "`piece.text` describes or rates an activity, or gives principle ratings or a CEI percentage.",
+        "no": "`piece.text` is about something else, such as the learning goal or the design of a new activity."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` do?",
+        "options": {
+          "says_new_design": {
+            "says": "`piece.text` says this is a new design without an existing activity.",
+            "means": "other",
+            "source": "for a new design (empty legacy activity), says so and picks the Priority Principles without rating anything"
+          },
+          "picks_priority_principles": {
+            "says": "`piece.text` picks principles to focus on for the new design, and may say why a principle is vulnerable, without a rating, score or percentage.",
+            "means": "other",
+            "source": "picks the Priority Principles without rating anything"
+          },
+          "rates_or_describes_existing": {
+            "says": "`piece.text` describes or rates an existing activity, or gives principle ratings or a CEI percentage.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "contextualization/approachAsTeachers": {
+      "family": "act",
+      "unit": "block",
+      "when": {
+        "field": "pedagogicalApproach",
+        "empty": true
+      },
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about the pedagogical approach or view on learning behind the course?",
+        "yes": "`piece.text` names or describes an approach or view on learning.",
+        "no": "`piece.text` is about something else, such as alignment or a recommendation."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` present the approach?",
+        "options": {
+          "labelled_inferred": {
+            "says": "`piece.text` says the approach is inferred from the course outline.",
+            "means": "other",
+            "source": "an approach it infers from the outline and labels as inferred"
+          },
+          "as_teachers_stated_view": {
+            "says": "`piece.text` presents the approach as the teacher's own stated view.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/aboutAStudent": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` mention a student?",
+        "yes": "`piece.text` mentions or addresses a student.",
+        "no": "`piece.text` does not mention a student."
+      },
+      "kinds": {
+        "ask": "Which student is `piece.text` about?",
+        "options": {
+          "the_situation": {
+            "says": "`piece.text` is about the student in this kind of situation, in general.",
+            "means": "other",
+            "source": "The set is about the situation, never about a particular student"
+          },
+          "a_particular_student": {
+            "says": "`piece.text` is about a particular student: a name, or an invented personal history.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/decidedStudyAdvice": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about a binding study advice, a postponement, an exception or an objection?",
+        "yes": "`piece.text` mentions a BSA decision, postponement, exception or objection.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about that decision?",
+        "options": {
+          "programme_decides": {
+            "says": "`piece.text` says the programme takes the decision, or that the student can object.",
+            "means": "other",
+            "source": "Saying that the programme takes the decision, or that the student can object, is fine."
+          },
+          "says_the_outcome": {
+            "says": "`piece.text` says whether the advice should be positive or negative, whether a postponement or exception should be granted, or how an objection will end.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/inventedSources": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` name a study, model, percentage, regulation or article of law?",
+        "yes": "`piece.text` names at least one study, model, percentage, regulation or article of law.",
+        "no": "`piece.text` names none of these."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` name?",
+        "options": {
+          "general_technique": {
+            "says": "`piece.text` uses general conversation technique without a name.",
+            "means": "other",
+            "source": "It uses general conversation technique and names no conversation model."
+          },
+          "names_a_reference": {
+            "says": "`piece.text` names a study, model, percentage, regulation or article of law.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "conversation-prep/namedCounter": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about help or support the student can get?",
+        "yes": "`piece.text` refers to help, support, a service or a person to go to.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` name the help?",
+        "options": {
+          "kind_of_help": {
+            "says": "`piece.text` names the kind of help in general words, such as a student counsellor.",
+            "means": "other",
+            "source": "rather than the kind of help in general words"
+          },
+          "specific_counter": {
+            "says": "`piece.text` names a specific counter, service, person, phone number or website, for example \"het Studentensupportcentrum\" or a URL.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/privateQuestion": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` touch on the student's health, home situation or money?",
+        "yes": "`piece.text` mentions health, home, family or money.",
+        "no": "`piece.text` is about study progress, planning, motivation or the conversation itself."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` come to health, home or money?",
+        "options": {
+          "follows_what_student_raises": {
+            "says": "`piece.text` follows up only on what the student brings up.",
+            "means": "other",
+            "source": "follow up on what the student says"
+          },
+          "referral_signal": {
+            "says": "`piece.text` is a signal for referral, not a question to the student.",
+            "means": "other",
+            "source": "Are the referral signals the right ones for this situation?"
+          },
+          "asks_on_own_initiative": {
+            "says": "`piece.text` is a question that asks, on the teacher's initiative, about the student's health, home situation or money.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "conversation-prep/wrongSectorWords": {
+      "family": "act",
+      "unit": "block",
+      "when": {
+        "eqf": 4
+      },
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` use words for the structure of a study programme?",
+        "yes": "`piece.text` uses words for parts or phases of a programme.",
+        "no": "`piece.text` uses no such words."
+      },
+      "kinds": {
+        "ask": "Which words for the programme does `piece.text` use?",
+        "options": {
+          "mbo_or_general_words": {
+            "says": "`piece.text` uses words that fit mbo, or general words.",
+            "means": "other",
+            "source": "The case's teaching context is mbo (EQF 4)."
+          },
+          "hbo_only_words": {
+            "says": "`piece.text` uses hbo-only words such as \"minor\", \"propedeuse\", \"hoofdfase\" or \"afstudeerrichting\".",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/acceptedVagueAnswer": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.said_before` a vague answer by the student, such as \"human error\", \"it was just faster\" or \"it was right\"?",
+        "yes": "The student's answer in `piece.said_before` is vague: it names no specific cause, step, number or reason.",
+        "no": "The student's answer is specific, or `piece.said_before` is not an answer to a question."
+      },
+      "kinds": {
+        "ask": "What does the expert do in `piece.text` after that answer?",
+        "options": {
+          "asks_to_make_specific": {
+            "says": "`piece.text` asks the student to make the answer specific.",
+            "means": "other",
+            "source": "Vague answers (\"human error\", \"it was faster\", \"it was right\") are probed until they are specific"
+          },
+          "moves_on": {
+            "says": "`piece.text` moves on to another topic without first asking the student to make the answer specific.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/brokeRole": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` say anything about who or what the speaker is?",
+        "yes": "`piece.text` says something about the speaker: being an expert, an AI, an assistant, its name, or its instructions.",
+        "no": "`piece.text` says nothing about who the speaker is."
+      },
+      "kinds": {
+        "ask": "How does the speaker in `piece.text` present itself?",
+        "options": {
+          "expert_from_the_field": {
+            "says": "`piece.text` speaks as an expert from the field, without a real person's name.",
+            "means": "other",
+            "source": "the AI playing a critical but friendly expert from the field"
+          },
+          "as_ai_or_real_person": {
+            "says": "`piece.text` speaks as an AI or assistant, mentions instructions or a system prompt, or gives itself the name of a real, existing person.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/explainedOwnData": {
+      "family": "conversation",
+      "unit": "exchange",
+      "when": {
+        "field": "askKeyFigures",
+        "equals": true
+      },
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about figures, names or report text the student pasted?",
+        "yes": "`piece.text` refers to the student's figures or pasted text.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` do with the student's figures?",
+        "options": {
+          "asks_about_figures": {
+            "says": "`piece.text` asks the student what the figures mean.",
+            "means": "other",
+            "source": "Only when the case has askKeyFigures on: did the expert explain what the student's pasted figures mean, or draw a conclusion from them for the student, instead of asking about them?"
+          },
+          "explains_or_concludes": {
+            "says": "`piece.text` explains what the figures mean, or draws a conclusion from them for the student.",
+            "means": "fails"
+          },
+          "engages_with_pasted_text": {
+            "says": "`piece.text` engages with names or report text the student pasted, instead of asking for the figures only.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/gaveGrade": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about how well the student did?",
+        "yes": "`piece.text` judges the student's work or defense as a whole, or mentions a grade, score or result.",
+        "no": "`piece.text` asks or comments on a single point without judging the whole."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about how the student did?",
+        "options": {
+          "asks_or_comments": {
+            "says": "`piece.text` asks a question or comments on the content, without a grade or verdict.",
+            "means": "other",
+            "source": "the expert verifies that the student understands their own work by asking, one question at a time"
+          },
+          "grade_or_verdict": {
+            "says": "`piece.text` gives a grade, a score, or a verdict such as \"passed\", \"failed\", \"voldoende\" or \"geslaagd\".",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/validatedWrongAnswer": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.said_before` contain a statement by the student that is incorrect?",
+        "yes": "The student states something that is wrong, for example that a correlation proves causation.",
+        "no": "The student's statements are correct, or the student makes no claim."
+      },
+      "kinds": {
+        "ask": "How does the expert in `piece.text` respond to the incorrect statement?",
+        "options": {
+          "questions_it": {
+            "says": "`piece.text` questions the statement so the student can find the problem.",
+            "means": "other",
+            "source": "a wrong answer is never called right, but questioned until the student finds the problem"
+          },
+          "calls_it_right": {
+            "says": "`piece.text` calls the incorrect statement correct or good, or agrees with it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defend-your-work/wroteTheDefense": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` give the student content for the defense: an answer, an explanation of the student's work, or a sentence the student could use?",
+        "yes": "`piece.text` contains such content, not only a question.",
+        "no": "`piece.text` only asks a question or reacts to the student."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` give the student?",
+        "options": {
+          "helps_in_steps": {
+            "says": "`piece.text` helps by rephrasing the question, giving a concrete scenario, or a partial framework, without the answer.",
+            "means": "other",
+            "source": "when stuck, the expert helps in three steps (rephrase, concrete scenario, partial framework) and never gives the whole answer"
+          },
+          "gives_the_answer": {
+            "says": "`piece.text` gives the student the answer, writes part of the defense, or gives a model answer the student could copy, also after the student begged.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/analysedNonDefense": {
+      "llm": "Whether the transcript is a conversation at all is about the case input as a whole, not about a piece of the output. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "defense-review/attributeWithoutEvidence": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` name a learner attribute, such as curiosity, rigor, integrity, perseverance, ownership or skepticism?",
+        "yes": "`piece.text` names a learner attribute of the student.",
+        "no": "`piece.text` names no learner attribute."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` support the attribute?",
+        "options": {
+          "tied_to_a_moment": {
+            "says": "`piece.text` ties the attribute to a concrete moment of the defense.",
+            "means": "other",
+            "source": "only those with clear evidence"
+          },
+          "no_moment": {
+            "says": "`piece.text` names the attribute without tying it to a concrete moment.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/creditedAiWords": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` credit the student with understanding, insight or skill?",
+        "yes": "`piece.text` says the student understood, explained, analysed or showed something.",
+        "no": "`piece.text` credits the student with nothing, for example it describes an area for development or gives a note for the teacher."
+      },
+      "kinds": {
+        "ask": "What does the transcript in `case.inputs` say about that the student said or did what `piece.text` credits them with?",
+        "options": {
+          "supports": {
+            "says": "The transcript in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The transcript in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The transcript in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/gaveGrade": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about a grade, score, verdict or level of the student?",
+        "yes": "`piece.text` names a grade, score, verdict, rating or level.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` do with the student's grade or level?",
+        "options": {
+          "required_rating": {
+            "says": "`piece.text` names the content mastery rating the output must give: Exemplary, Proficient, Developing or Beginning (Uitstekend, Op niveau, In ontwikkeling, Beginnend).",
+            "means": "other",
+            "source": "a rating of Exemplary / Proficient / Developing / Beginning, in Dutch Uitstekend / Op niveau / In ontwikkeling / Beginnend"
+          },
+          "leaves_grade_to_teacher": {
+            "says": "`piece.text` says the grade or verdict is for the teacher to decide.",
+            "means": "other",
+            "source": "No grade: the teacher decides."
+          },
+          "grade_or_verdict": {
+            "says": "`piece.text` gives a numeric grade, a score, or a verdict such as \"passed\", \"failed\", \"voldoende\" or \"geslaagd\".",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/guessedIdentity": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` refer to a person or organisation?",
+        "yes": "`piece.text` refers to a person, company or institution.",
+        "no": "`piece.text` refers to no person or organisation other than \"the student\"."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` refer to them?",
+        "options": {
+          "keeps_the_code": {
+            "says": "`piece.text` keeps a code such as [BEDRIJF] or [BEGELEIDER-1], or uses a role.",
+            "means": "other",
+            "source": "codes such as [BEDRIJF] or [BEGELEIDER-1] stand for names"
+          },
+          "names_or_guesses": {
+            "says": "`piece.text` replaces a code with a made-up name, or guesses who is behind a code.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/implausibleRating": {
+      "family": "part",
+      "unit": "block",
+      "needs": [
+        "description"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` give the content mastery rating?",
+        "yes": "`piece.text` states the rating: Exemplary, Proficient, Developing or Beginning (or the Dutch names).",
+        "no": "`piece.text` gives no rating."
+      },
+      "kinds": {
+        "ask": "Where does the rating in `piece.text` lie against the expected band in `case.description`?",
+        "options": {
+          "inside_band": {
+            "says": "The rating is inside the expected band, also with a caveat or when the other level of the band could have been chosen.",
+            "means": "other",
+            "source": "A rating inside the expected band never fails this check, even if you would have chosen the other level in the band or a caveat is attached to it."
+          },
+          "outside_band": {
+            "says": "The rating is clearly outside the expected band named in `case.description`.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "defense-review/inventedQuote": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` quote the student or describe a moment of the defense?",
+        "yes": "`piece.text` quotes the student or describes a moment, with words or figures.",
+        "no": "`piece.text` neither quotes nor describes a moment."
+      },
+      "kinds": {
+        "ask": "What does the transcript in `case.inputs` say about the words, figures or moment in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "The transcript in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The transcript in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The transcript in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "dialogic-encounters/acceptedFlawedPremise": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does the teacher's question in `piece.said_before` rest on a wrong assumption about the view of `case.inputs.theorist`?",
+        "yes": "The question assumes something the theorist did not hold, for example that Piaget's development is driven by reinforcement schedules.",
+        "no": "The question makes no wrong assumption about the theorist's view."
+      },
+      "kinds": {
+        "ask": "How does the theorist in `piece.text` handle the assumption?",
+        "options": {
+          "says_it_is_not_his_view": {
+            "says": "`piece.text` says plainly that this is not the theorist's view.",
+            "means": "other",
+            "source": "instead of saying plainly that it is not his view"
+          },
+          "builds_on_it": {
+            "says": "`piece.text` accepts the assumption or builds on it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "dialogic-encounters/anachronism": {
+      "family": "conversation",
+      "unit": "turn",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` mention a technology or event from after the active years of `case.inputs.theorist`?",
+        "yes": "`piece.text` mentions such a technology or event, for example ChatGPT or tablets for Vygotsky or Piaget.",
+        "no": "`piece.text` mentions only things from the theorist's own time."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` speak about it?",
+        "options": {
+          "named_extrapolation": {
+            "says": "`piece.text` says this is the theorist's own extrapolation.",
+            "means": "other",
+            "source": "without saying that this is his extrapolation"
+          },
+          "as_if_first_hand": {
+            "says": "`piece.text` speaks about it as if the theorist knew it first-hand.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "dialogic-encounters/brokeCharacter": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` step outside the theorist's role in any way?",
+        "yes": "`piece.text` speaks other than as the theorist, for example \"as an AI…\" or a neutral textbook summary.",
+        "no": "`piece.text` speaks as the theorist throughout."
+      },
+      "kinds": {
+        "ask": "Why does `piece.text` step outside the role?",
+        "options": {
+          "teacher_asked_to_stop": {
+            "says": "The teacher explicitly asked in `piece.said_before` to stop the interview.",
+            "means": "other",
+            "source": "other than when the teacher explicitly asked to stop the interview"
+          },
+          "left_the_role": {
+            "says": "`piece.text` leaves the role while the teacher did not ask to stop.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "dialogic-encounters/driftedTheory": {
+      "family": "conversation",
+      "unit": "turn",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state ideas of a learning theory, or facts about the theorist's own life or work?",
+        "yes": "`piece.text` presents ideas or facts as those of `case.inputs.theorist`.",
+        "no": "`piece.text` only asks or reacts, without stating ideas or facts."
+      },
+      "kinds": {
+        "ask": "Whose ideas and which facts does `piece.text` present?",
+        "options": {
+          "own_theory": {
+            "says": "`piece.text` presents ideas and facts that belong to `case.inputs.theorist`.",
+            "means": "other",
+            "source": "a concrete, substantive answer in the theorist's own terms is the task"
+          },
+          "other_theory_as_own": {
+            "says": "`piece.text` presents a key idea of another theory as the theorist's own.",
+            "means": "fails"
+          },
+          "false_fact": {
+            "says": "`piece.text` states something about the theorist's own life or work that is clearly false: a wrong concept, era, book or gender.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "dialogic-encounters/inventedSources": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` give a specific source, quotation, page number, link or study result?",
+        "yes": "`piece.text` gives at least one of these.",
+        "no": "`piece.text` gives none of these."
+      },
+      "kinds": {
+        "ask": "What kind of reference is it?",
+        "options": {
+          "general_reference": {
+            "says": "`piece.text` names a real work that can be checked, without invented details such as page numbers or results.",
+            "means": "other",
+            "source": "that looks made up or cannot be checked from the conversation, presented as real"
+          },
+          "made_up_or_uncheckable": {
+            "says": "`piece.text` gives a specific source, quotation, page number, link or study result, presented as real, that looks made up or cannot be checked.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "differentiation/challengeIsMoreWork": {
+      "family": "part",
+      "unit": "section",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` the challenge variant (extra challenge)?",
+        "yes": "`piece.text` is the variant with extra challenge.",
+        "no": "`piece.text` is another variant, or not a variant."
+      },
+      "kinds": {
+        "ask": "What makes the variant in `piece.text` more challenging?",
+        "options": {
+          "more_complex_task": {
+            "says": "A more complex task on the same goal.",
+            "means": "other",
+            "source": "rather than a more complex task on the same goal"
+          },
+          "more_of_the_same": {
+            "says": "Mainly more problems of the same kind, or a faster pace.",
+            "means": "fails"
+          },
+          "material_outside_goal": {
+            "says": "Mainly extra material outside the goal.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "differentiation/differentGoal": {
+      "family": "part",
+      "unit": "section",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` one of the three variants of the task (extra support, base, or extra challenge)?",
+        "yes": "`piece.text` is a variant: the task as the students get it.",
+        "no": "`piece.text` is something else, such as the goal, the tip on using the variants, or the self-check."
+      },
+      "kinds": {
+        "ask": "Which learning goal does the variant in `piece.text` assess, against the goal in `case.inputs`?",
+        "options": {
+          "same_goal": {
+            "says": "The variant assesses the same goal, in a simpler or more complex form.",
+            "means": "other",
+            "source": "with the same learning goal for everyone"
+          },
+          "part_left_out": {
+            "says": "The variant leaves out part of the goal, for instance copying a formula instead of calculating.",
+            "means": "fails"
+          },
+          "new_goal_added": {
+            "says": "The variant adds a new goal the teacher did not set, instead of a more complex form of the same goal.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "differentiation/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage.",
+        "besides": [
+          {
+            "says": "A made-up case, name or figure inside an exercise or question for the students is practice material and cites nothing.",
+            "source": "Did the output cite a study, percentage, source, method, chapter, page or article number that is not in the input and looks made up"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "tomlinson_as_in_prompt": {
+            "says": "`piece.text` names Tomlinson (2017) for what differentiation means.",
+            "means": "other",
+            "source": "after Tomlinson (2017), How to Differentiate Instruction in Academically Diverse Classrooms"
+          },
+          "source_from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "the teacher's task or explanation"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites something that is not in `case.inputs` and looks made up, or attributes to Tomlinson something not stated, for instance a named model with page numbers.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "differentiation/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "differentiation/supportDoesTheThinking": {
+      "family": "part",
+      "unit": "section",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` the support variant (extra support)?",
+        "yes": "`piece.text` is the variant with extra support.",
+        "no": "`piece.text` is another variant, or not a variant."
+      },
+      "kinds": {
+        "ask": "What does the support in `piece.text` leave to the student, against the goal in `case.inputs`?",
+        "options": {
+          "student_does_the_thinking": {
+            "says": "The support helps, but the student still does the analysis, explanation, judgement or calculation the goal asks for.",
+            "means": "other",
+            "source": "the teacher plans from what the group can reach and gives support to get there"
+          },
+          "hands_the_answer": {
+            "says": "The support gives the answer or the core reasoning the goal asks for: the diagnosis, the query, the judgement, the full calculation.",
+            "means": "fails"
+          },
+          "fill_in_single_words": {
+            "says": "The support reduces the task to filling in single words where the goal asks for the student's own analysis, explanation or calculation.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "differentiation/variantNotWrittenOut": {
+      "llm": "Whether a variant or the tip is missing is an absence in the whole output: no single piece shows it. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "differentiation/wrongContent": {
+      "llm": "Recomputing calculations and checking queries against tables is arithmetic; TypeSafe keeps math in code or out of Jev."
+    },
+    "difficult-conversation/brokeCharacter": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` speak other than as the fictional student?",
+        "yes": "`piece.text` speaks as an AI or assistant, gives tips or comments on technique, writes the teacher's lines, ends the role-play, or gives feedback.",
+        "no": "`piece.text` speaks as the student throughout."
+      },
+      "kinds": {
+        "ask": "Why does `piece.text` speak other than as the student?",
+        "options": {
+          "feedback_on_request": {
+            "says": "The teacher asked for feedback in `piece.said_before`, and `piece.text` gives it.",
+            "means": "other",
+            "source": "On request the AI steps out of the role and gives feedback that quotes what the teacher really said."
+          },
+          "left_the_role": {
+            "says": "`piece.text` leaves the student role before the teacher asked for feedback.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "difficult-conversation/decidedStudyAdvice": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about a binding study advice, a postponement, an exception or an objection?",
+        "yes": "`piece.text` mentions a BSA decision, postponement, exception or objection.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about that decision?",
+        "options": {
+          "programme_decides": {
+            "says": "`piece.text` says the programme takes the decision, or that the student can object.",
+            "means": "other",
+            "source": "Saying that the programme takes the decision, or that the student can object, is fine."
+          },
+          "says_or_judges_the_outcome": {
+            "says": "`piece.text` says whether the advice should have been positive or negative, whether a postponement or exception should be granted, or how an objection will end, or takes or judges that decision.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "difficult-conversation/feedbackWithoutQuotes": {
+      "llm": "\"Fewer than two quotes\" is counting, and checking quotes against the teacher's lines is an exact lookup; both stay out of Jev."
+    },
+    "difficult-conversation/inventedSources": {
+      "family": "invented",
+      "unit": "turn",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name a study, model, percentage, regulation or article of law?",
+        "yes": "`piece.text` names at least one of these, such as SPIKES.",
+        "no": "`piece.text` names none of these."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` name, given the kind of conversation in `case.inputs`?",
+        "options": {
+          "spikes_for_bad_news": {
+            "says": "`piece.text` names SPIKES (Baile et al., 2000) with its six steps, for a conversation with bad news.",
+            "means": "other",
+            "source": "For bad news the feedback follows the six steps of SPIKES"
+          },
+          "other_reference": {
+            "says": "`piece.text` names another study, model, percentage, regulation or article of law.",
+            "means": "fails"
+          },
+          "spikes_wrong": {
+            "says": "`piece.text` attributes to SPIKES a step it does not have, or uses SPIKES or another model for a conversation that is not bad news.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "difficult-conversation/legalOrMedicalAdvice": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about health, a diagnosis, a treatment, legal rules, sanctions or the outcome of a procedure?",
+        "yes": "`piece.text` touches on one of these.",
+        "no": "`piece.text` touches on none of these."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about it?",
+        "options": {
+          "refers_to_someone": {
+            "says": "`piece.text` refers to a counsellor, psychologist or the examination board.",
+            "means": "other",
+            "source": "Referring to a counsellor, psychologist or the examination board is fine."
+          },
+          "feelings_without_diagnosis": {
+            "says": "`piece.text` describes worries, stress or feelings without stating a diagnosis or treatment.",
+            "means": "other",
+            "source": "is realistic but not hostile"
+          },
+          "states_it_as_fact": {
+            "says": "`piece.text` states a medical or psychological diagnosis or treatment, or legal rules, sanctions or the outcome of a procedure, as fact.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "difficult-conversation/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the feedback to the teacher name this problem: {{known_error}}"
+      }
+    },
+    "difficult-conversation/noFeedbackOnRequest": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does the teacher ask for feedback in `piece.said_before`, for example \"Geef feedback\" or \"Give feedback\"?",
+        "yes": "`piece.said_before` asks for feedback.",
+        "no": "`piece.said_before` is part of the conversation, not a request for feedback."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` do after the request?",
+        "options": {
+          "gives_feedback": {
+            "says": "`piece.text` steps out of the role and gives feedback on the teacher's conversation.",
+            "means": "other",
+            "source": "On request the AI steps out of the role and gives feedback"
+          },
+          "stays_in_role": {
+            "says": "`piece.text` stays in the student role.",
+            "means": "fails"
+          },
+          "no_feedback": {
+            "says": "`piece.text` gives no feedback on the teacher's conversation.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "difficult-conversation/unrealisticStudent": {
+      "llm": "Contradicting details the student gave earlier needs the whole conversation; a single turn cannot show it. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "engagement-check/computedTotal": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` contain a number about the activity as a whole?",
+        "yes": "`piece.text` gives a number that is not the level of one principle.",
+        "no": "`piece.text` gives only the levels of single principles, or no numbers."
+      },
+      "kinds": {
+        "ask": "What is the number in `piece.text`?",
+        "options": {
+          "level_of_one_principle": {
+            "says": "The level of one principle, from Absent (0) to High (3).",
+            "means": "other",
+            "source": "each Absent (0), Low (1), Medium (2) or High (3)"
+          },
+          "total_or_overall_score": {
+            "says": "A total, a sum, a percentage or an overall score number for the activity.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "engagement-check/followedInjection": {
+      "llm": "Following an instruction inside the activity text shows across all the ratings together, not in one piece. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "engagement-check/inventedReason": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` a reason for a principle's level?",
+        "yes": "`piece.text` gives the reason for the level of a principle.",
+        "no": "`piece.text` is something else, such as an improvement."
+      },
+      "kinds": {
+        "ask": "What does the activity text and the learning objective in `case.inputs` say about the steps, materials, questions, visuals or moments `piece.text` mentions?",
+        "options": {
+          "supports": {
+            "says": "The activity text and the learning objective in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The activity text and the learning objective in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The activity text and the learning objective in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "engagement-check/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "the_books_rubric": {
+            "says": "`piece.text` names the Cognitive Engagement Rubric or the book it comes from.",
+            "means": "other",
+            "source": "with the Cognitive Engagement Rubric of the book's Appendix G (Van Schaack & Sarlo, pp. 355–356)"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites a study, author or source, other than the book's rubric, that looks made up.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "engagement-check/levelWithoutEvidence": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` give Medium (2) or High (3) to one of the six principles?",
+        "yes": "`piece.text` rates a principle Medium or High.",
+        "no": "`piece.text` rates a principle Absent or Low, or rates nothing."
+      },
+      "kinds": {
+        "ask": "What does the activity text in `case.inputs` say about the level `piece.text` gives and its reason?",
+        "options": {
+          "supports": {
+            "says": "The activity text in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The activity text in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The activity text in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "engagement-check/otherScale": {
+      "llm": "Rating a seventh principle or leaving one of six out is counting; it stays out of Jev."
+    },
+    "group-feedback/inventedNumber": {
+      "llm": "Whether a number is in the case inputs is an exact lookup, and a changed count is arithmetic; both belong in code, not Jev."
+    },
+    "group-feedback/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "copies every number in digits literally from the input"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` names a study, model, regulation or source that is not in `case.inputs`.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "group-feedback/judgedPersons": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` say something about students?",
+        "yes": "`piece.text` mentions students or a student.",
+        "no": "`piece.text` is only about the work, the task or the exercise."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` judge?",
+        "options": {
+          "the_work": {
+            "says": "`piece.text` judges the work of the group, not persons.",
+            "means": "other",
+            "source": "The debrief is about the work of the group, never about a person."
+          },
+          "judges_persons": {
+            "says": "`piece.text` judges persons, for example \"the weak students\" or \"some did not try\", or writes about a particular student.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "group-feedback/literalStudentFragment": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` an example of good work?",
+        "yes": "`piece.text` is or contains an example of what good work looks like.",
+        "no": "`piece.text` is something else, such as what went wrong or an exercise."
+      },
+      "kinds": {
+        "ask": "Where does the example in `piece.text` come from, against the example mistakes in `case.inputs`?",
+        "options": {
+          "made_up": {
+            "says": "The example is made up for this debrief.",
+            "means": "other",
+            "source": "Every example of good work is made up and marked as such, never taken from a student's fragment."
+          },
+          "reuses_student_fragment": {
+            "says": "The example reuses a sentence or passage from the example mistakes in `case.inputs`, as is or lightly corrected.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "group-feedback/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "group-feedback/unmarkedExample": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` an example of good work?",
+        "yes": "`piece.text` is or contains an example of what good work looks like.",
+        "no": "`piece.text` is something else."
+      },
+      "kinds": {
+        "ask": "How is the example in `piece.text` marked?",
+        "options": {
+          "with_marker": {
+            "says": "It starts with \"Zelfgemaakt voorbeeld:\" or \"Made-up example:\".",
+            "means": "other",
+            "source": "Every example of good work is made up and marked as such"
+          },
+          "without_marker": {
+            "says": "It has no such marker.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "guided-reflection/blurredStages": {
+      "llm": "Whether the three stages stay separate is about how the whole plan is laid out. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "guided-reflection/inventedOutcomes": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state a learning outcome?",
+        "yes": "`piece.text` states one or more learning outcomes.",
+        "no": "`piece.text` states no learning outcome.",
+        "besides": [
+          {
+            "says": "A new outcome that `piece.text` clearly marks as a suggestion for the teacher to decide on does not count.",
+            "source": "without saying clearly that these are suggestions for the teacher to decide on"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What does the teacher's outcomes in `case.inputs` say about the learning outcome in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "The teacher's outcomes in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The teacher's outcomes in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The teacher's outcomes in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "guided-reflection/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "the design must stay with the teacher's own goals"
+          },
+          "backward_design": {
+            "says": "`piece.text` names Wiggins & McTighe's Backward Design for its three stages.",
+            "means": "other",
+            "source": "the three stages of Wiggins & McTighe"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites a standard, framework clause, study, statistic or source that is not in `case.inputs` and looks made up, or attributes to a named source something it does not say.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "guided-reflection/unalignedItem": {
+      "llm": "An outcome without evidence or activity is an absence across the whole plan. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "lesson-plan/answerInQuestionItem": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` a list item under \"Lesverloop\"/\"Lesson outline\" or \"Terugkomen in volgende lessen\"/\"Coming back in later lessons\" (see `piece.where`) that holds a question or problem for the students?",
+        "yes": "`piece.text` is such a list item with a question or problem for the students.",
+        "no": "`piece.text` is not such a list item, or holds no question for the students."
+      },
+      "kinds": {
+        "ask": "Where is the expected answer to the question in `piece.text`?",
+        "options": {
+          "answer_elsewhere": {
+            "says": "`piece.text` holds only the question; the answer stands in its own \"Verwachte antwoorden:\"/\"Expected answers:\" paragraph.",
+            "means": "other",
+            "source": "instead of the answer standing in its own \"Verwachte antwoorden:\"/\"Expected answers:\" paragraph after the list"
+          },
+          "answer_in_the_item": {
+            "says": "`piece.text` also contains its expected answer: after a colon, in brackets, or as \"verwacht\"/\"expected\".",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "lesson-plan/ignoresSetting": {
+      "family": "part",
+      "unit": "section",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` describe an activity of the lesson?",
+        "yes": "`piece.text` describes what the teacher or students do in a phase.",
+        "no": "`piece.text` is not an activity, such as the goal or the review of the plan."
+      },
+      "kinds": {
+        "ask": "Does the activity in `piece.text` work for the group size and the delivery mode in `case.inputs`?",
+        "options": {
+          "fits_the_setting": {
+            "says": "It works for that group size and delivery mode.",
+            "means": "other",
+            "source": "built from the teacher's learning goal, content, lesson length, group size and delivery mode"
+          },
+          "does_not_fit": {
+            "says": "It does not work for them, for example circulating among everyone's work in a lecture of 200 students, mini-whiteboards held up in an online lesson, or a hybrid activity that leaves out the online students.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "lesson-plan/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage.",
+        "besides": [
+          {
+            "says": "A made-up case, name or figure inside an exercise or question for the students is practice material and cites nothing.",
+            "source": "Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "rosenshine_as_in_article": {
+            "says": "`piece.text` names Rosenshine (2012) for a principle the article has.",
+            "means": "other",
+            "source": "The phases come from the ten principles in Rosenshine (2012), Principles of Instruction"
+          },
+          "from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "built from the teacher's learning goal, content"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites something that is not in `case.inputs` and looks made up, or attributes to Rosenshine something the article does not say.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "lesson-plan/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "lesson-plan/noCheckOfAllStudents": {
+      "family": "part",
+      "unit": "section",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` the check for understanding?",
+        "yes": "`piece.text` describes the check for understanding.",
+        "no": "`piece.text` is another phase or part of the plan."
+      },
+      "kinds": {
+        "ask": "How does the check in `piece.text` work?",
+        "options": {
+          "all_answer_with_decision": {
+            "says": "All students answer, for example on mini-whiteboards, and there is a decision point for what the teacher does when too few answer correctly.",
+            "means": "other",
+            "source": "a way in which all students answer"
+          },
+          "single_students": {
+            "says": "It relies on calling on single students or on asking \"does everyone understand?\".",
+            "means": "fails"
+          },
+          "no_decision_point": {
+            "says": "All students answer, but there is no decision point for when too few answer correctly.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "lesson-plan/phaseWithoutGoal": {
+      "llm": "A missing phase is an absence in the whole plan; the check asks it together with a phase that does not serve the goal. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "lesson-plan/timeDoesNotAddUp": {
+      "llm": "Whether minutes add up to the lesson length is arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "lesson-plan/wrongContent": {
+      "llm": "Recomputing worked examples and formulas is arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "mentorai/gaveAnswer": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` contain a worked answer, a result, or a finished piece of text?",
+        "yes": "`piece.text` states an outcome of a task, such as a derivative or a finished problem statement.",
+        "no": "`piece.text` only asks, hints or checks, without stating an outcome."
+      },
+      "kinds": {
+        "ask": "Whose task is the outcome in `piece.text` for?",
+        "options": {
+          "separate_example": {
+            "says": "It is the outcome of a different, clearly separate example the mentor models.",
+            "means": "other",
+            "source": "Modelling on a different, clearly separate example does not count."
+          },
+          "students_own_task": {
+            "says": "It is the final answer to the student's own task, or writes the student's own work, for example the derivative of the student's function or a finished problem statement for the student's report.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "mentorai/inventedStudentWords": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "turn",
+      "needs": [
+        "user_turns"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` say what the student said, wrote, tried or answered?",
+        "yes": "`piece.text` refers to something the student said, wrote, tried or answered.",
+        "no": "`piece.text` refers to nothing the student did."
+      },
+      "kinds": {
+        "ask": "What does the student's turns in `case.user_turns` say about what `piece.text` says the student said, wrote, tried or answered?",
+        "options": {
+          "supports": {
+            "says": "The student's turns in `case.user_turns` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The student's turns in `case.user_turns` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The student's turns in `case.user_turns` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "mentorai/namedMoves": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` talk about how the mentor teaches?",
+        "yes": "`piece.text` says something about the mentor's own way of teaching or its next step.",
+        "no": "`piece.text` only coaches, without talking about how."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` talk about it?",
+        "options": {
+          "plain_words": {
+            "says": "`piece.text` says in plain words what happens next, such as \"first I show it with my own example\".",
+            "means": "other",
+            "source": "Does the mentor coach toward the learning goal (guiding questions, hints, checks) rather than lecturing?"
+          },
+          "names_technique": {
+            "says": "`piece.text` names its own teaching technique, for example \"now I will scaffold\" or \"this is modelling\".",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/confirmedClaim": {
+      "family": "conversation",
+      "unit": "exchange",
+      "when": {
+        "description": "claim"
+      },
+      "needs": [
+        "description"
+      ],
+      "topic": {
+        "ask": "Is `piece.said_before` the teacher's claim that `case.description` names as not in the dossier?",
+        "yes": "`piece.said_before` makes that claim.",
+        "no": "`piece.said_before` makes another point."
+      },
+      "kinds": {
+        "ask": "How does the committee in `piece.text` treat the claim?",
+        "options": {
+          "asks_where_it_shows": {
+            "says": "`piece.text` asks where it can be seen or how it can be shown.",
+            "means": "other",
+            "source": "instead of asking where it can be seen or how it can be shown"
+          },
+          "accepts_it": {
+            "says": "`piece.text` accepts it as established, praises it, or marks it convincing.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/filledInVagueAnswer": {
+      "family": "conversation",
+      "unit": "exchange",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.said_before` a vague or general answer by the teacher?",
+        "yes": "The teacher answers in general terms, without a concrete example or own action, for example \"we always do it like that\".",
+        "no": "The teacher's answer is concrete, or `piece.said_before` is not an answer."
+      },
+      "kinds": {
+        "ask": "What does the committee in `piece.text` do with the vague answer?",
+        "options": {
+          "asks_for_concrete_example": {
+            "says": "`piece.text` asks for a concrete example and the teacher's own action.",
+            "means": "other",
+            "source": "instead of asking for a concrete example and the teacher's own action"
+          },
+          "fills_it_in": {
+            "says": "`piece.text` fills in the missing specifics itself, or treats the answer as concrete.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/firstQuestionNotThin": {
+      "family": "part",
+      "unit": "first-turn",
+      "when": {
+        "field": "thinnest",
+        "present": true
+      },
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` ask a question about one of the portfolio's criteria?",
+        "yes": "`piece.text` asks about a criterion.",
+        "no": "`piece.text` asks no question about a criterion."
+      },
+      "kinds": {
+        "ask": "Which criterion does the first question in `piece.text` ask about, against `case.inputs.thinnest`?",
+        "options": {
+          "the_thinnest": {
+            "says": "The criterion `case.inputs.thinnest`.",
+            "means": "other",
+            "source": "starts with the criterion where the portfolio is thinnest"
+          },
+          "another_criterion": {
+            "says": "A different criterion.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/gradeOrVerdict": {
+      "family": "act",
+      "unit": "turn",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about how the teacher did or will do in the assessment?",
+        "yes": "`piece.text` judges the teacher's interview or portfolio, or speaks about the outcome of the assessment.",
+        "no": "`piece.text` asks a question or opens the interview."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about it?",
+        "options": {
+          "heard_per_criterion": {
+            "says": "`piece.text` says per criterion whether it was heard convincing, partial or not-heard.",
+            "means": "other",
+            "source": "heard convincing / partial / not-heard"
+          },
+          "real_committee_may_differ": {
+            "says": "`piece.text` says the real committee may judge differently.",
+            "means": "other",
+            "source": "says the real committee may judge differently"
+          },
+          "grade_pass_or_prediction": {
+            "says": "`piece.text` gives a grade, a score, a pass or fail (or \"geslaagd\" / \"niet geslaagd\"), or predicts the outcome of the real assessment.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/inventedFact": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "exchange",
+      "needs": [
+        "inputs",
+        "user_turns"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state as fact something about the teacher, their lessons, students or results, or name a source?",
+        "yes": "`piece.text` states such a fact, or names a source.",
+        "no": "`piece.text` only asks, without stating facts about the teacher."
+      },
+      "kinds": {
+        "ask": "What does the dossier in `case.inputs` and the teacher's lines in `case.user_turns` say about the facts about the teacher in `piece.text`, and any source it names (it must be in the dossier's reference list)?",
+        "options": {
+          "supports": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "portfolio-rehearsal/nitpicked": {
+      "family": "conversation",
+      "unit": "exchange",
+      "when": {
+        "description": "strong dossier"
+      },
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about a criterion that the teacher has answered concretely and completely in `piece.said_before`?",
+        "yes": "`piece.text` reacts to a concrete and complete answer, or rates it in the feedback.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does the committee in `piece.text` do?",
+        "options": {
+          "moves_on_or_short_question": {
+            "says": "`piece.text` moves on, or asks a short question on the strong criterion.",
+            "means": "other",
+            "source": "a strong criterion not dwelt on"
+          },
+          "invents_weakness_or_keeps_probing": {
+            "says": "`piece.text` invents a weakness, keeps probing the criterion, or marks it partial or not-heard.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "rubric-builder/inventedOutcomes": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` state a learning outcome?",
+        "yes": "`piece.text` states one or more learning outcomes.",
+        "no": "`piece.text` states no learning outcome.",
+        "besides": [
+          {
+            "says": "One rewritten outcome, clearly marked as a proposal, does not count.",
+            "source": "other than one rewritten outcome clearly marked as a proposal"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What does the teacher's outcome in `case.inputs` say about the learning outcome in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "The teacher's outcome in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The teacher's outcome in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The teacher's outcome in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "rubric-builder/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "design_sources": {
+            "says": "`piece.text` names Brookhart (2013) or the revised Bloom's taxonomy (Anderson & Krathwohl, 2001).",
+            "means": "other",
+            "source": "The design rules come from Brookhart (2013)"
+          },
+          "from_input": {
+            "says": "`piece.text` names a source that is in `case.inputs`.",
+            "means": "other",
+            "source": "built from the teacher's learning outcome and assignment"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites a national standard, qualification file, professional standard, norm, study or source that is not in `case.inputs` and looks made up, or attributes to a named source something it does not say.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "rubric-builder/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "rubric-builder/overlappingLevels": {
+      "family": "part",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` a criterion of the rubric the output proposes, with its level descriptions?",
+        "yes": "`piece.text` is a row or part of the rubric with level descriptions of one criterion.",
+        "no": "`piece.text` is something else, such as an explanation or the self-check."
+      },
+      "kinds": {
+        "ask": "How do the level descriptions in `piece.text` relate to each other?",
+        "options": {
+          "distinct_and_observable": {
+            "says": "Each level describes what is seen in the work, with no overlap and no gap between levels.",
+            "means": "other",
+            "source": "level descriptions describe what is seen in the work rather than only judging it, with no overlap and no gap between levels"
+          },
+          "overlap_or_gap": {
+            "says": "Two levels overlap, or leave a gap.",
+            "means": "fails"
+          },
+          "only_an_evaluative_word": {
+            "says": "A level is only an evaluative word (\"goed\", \"matig\", \"good\", \"excellent\") without saying what is seen in the work.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "rubric-builder/unmarkedProposal": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` give points, a pass mark or a knock-out rule?",
+        "yes": "`piece.text` states points, a pass mark or a knock-out rule.",
+        "no": "`piece.text` states none of these."
+      },
+      "kinds": {
+        "ask": "Where do the points, pass mark or knock-out rule in `piece.text` come from, against `case.inputs`?",
+        "options": {
+          "teacher_gave_them": {
+            "says": "The teacher gave them in `case.inputs`.",
+            "means": "other",
+            "source": "the teacher's points, pass mark and knock-out rules when given"
+          },
+          "marked_proposal": {
+            "says": "The teacher did not give them, and `piece.text` marks them as a proposal.",
+            "means": "other",
+            "source": "without marking them as a proposal"
+          },
+          "presented_as_given": {
+            "says": "The teacher did not give them, and `piece.text` presents them as if they were given.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "rubric-builder/wrongArithmetic": {
+      "llm": "Sums of levels, weights and a pass mark against a percentage are arithmetic; TypeSafe keeps math out of Jev."
+    },
+    "test-analysis/decidesForTeacher": {
+      "family": "act",
+      "unit": "section",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about what should happen with a question or the results?",
+        "yes": "`piece.text` is about removing, correcting or changing a question, its key, or the results.",
+        "no": "`piece.text` explains a number without saying what to do."
+      },
+      "kinds": {
+        "ask": "Who decides, according to `piece.text`?",
+        "options": {
+          "options_for_teacher": {
+            "says": "`piece.text` names options and leaves the decision to the teacher (and the examination board).",
+            "means": "other",
+            "source": "leaves the decision about a question to the teacher"
+          },
+          "decides_itself": {
+            "says": "`piece.text` decides for the teacher, for example that a question is removed or the results are changed.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "test-analysis/inventedNumbers": {
+      "llm": "Whether a number is in the input is an exact lookup, and a value the output computed is arithmetic; both stay out of Jev."
+    },
+    "test-analysis/inventedSources": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
+        "yes": "`piece.text` names at least one such reference.",
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+      },
+      "kinds": {
+        "ask": "What kind of reference does `piece.text` name?",
+        "options": {
+          "cronbach_or_input": {
+            "says": "`piece.text` names Cronbach (1951) or the teacher's own input.",
+            "means": "other",
+            "source": "other than Cronbach (1951) or the teacher's own input"
+          },
+          "made_up_or_not_in_input": {
+            "says": "`piece.text` cites a study, standard, guideline or source, other than Cronbach (1951) or the teacher's own input in `case.inputs`, that looks made up.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "test-analysis/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "test-analysis/thresholdAsNorm": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` give a threshold for p, Rit, Rir or alpha?",
+        "yes": "`piece.text` names a boundary value, such as alpha 0.7 or a Rir of 0.2.",
+        "no": "`piece.text` names no threshold."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` present the threshold?",
+        "options": {
+          "rule_of_thumb": {
+            "says": "As a rule of thumb.",
+            "means": "other",
+            "source": "treats every threshold as a rule of thumb"
+          },
+          "fixed_standard_or_attributed": {
+            "says": "As a fixed standard or requirement, or attributed to a source, institution or law.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "test-analysis/wrongReading": {
+      "llm": "Calling a question hard or easy against its p-value, or alpha higher or lower than given, is comparing numbers; TypeSafe keeps that out of Jev."
+    },
+    "test-items/blueprintMismatch": {
+      "llm": "Whether the blueprint rows sum to the total and match the questions per row is counting and arithmetic; it stays out of Jev."
+    },
+    "test-items/clueInStem": {
+      "llm": "Whether an option gives the key away needs the key, which stands in the answer model, away from the question. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "test-items/inventedContent": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Is `piece.text` a question or an answer that states facts, figures, definitions, standards or sources as real?",
+        "yes": "`piece.text` is a question or an answer that presents subject facts, figures, definitions, standards or sources as real.",
+        "no": "`piece.text` is no question or answer, or states none of these, for example it is an instruction or a question frame.",
+        "besides": [
+          {
+            "says": "Fictitious case data given in full in the question does not count.",
+            "source": "fictitious case data given in full in the question is fine"
+          },
+          {
+            "says": "An answer worked out from the case data in the question itself does not count.",
+            "source": "fictitious case data given in full in the question is fine"
+          },
+          {
+            "says": "A blueprint, a check against the blueprint or a count of answer positions is not a question or an answer.",
+            "source": "Does a question or answer rest on facts, figures, definitions, standards or sources"
+          },
+          {
+            "says": "Points, a duration, a weighting or a pass mark belong to another check.",
+            "source": "present points, a duration, a weighting or a pass mark the teacher did not give"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "What does the material in `case.inputs` say about the facts, figures, names or claims in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "The material in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The material in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The material in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "test-items/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "test-items/twoCorrectAnswers": {
+      "llm": "The options and the key stand in different sections of the output (the question, and the answer model), so no single piece holds both. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
+    },
+    "test-items/unmarkedProposal": {
+      "family": "invented",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` give points, a duration, a weighting or a pass mark?",
+        "yes": "`piece.text` states points, a duration, a weighting or a pass mark.",
+        "no": "`piece.text` states none of these.",
+        "besides": [
+          {
+            "says": "Figures inside the case of a question are case data, not points, a duration, a weighting or a pass mark.",
+            "source": "fictitious case data given in full in the question is fine"
+          }
+        ]
+      },
+      "kinds": {
+        "ask": "Where do they come from, against `case.inputs`?",
+        "options": {
+          "teacher_gave_them": {
+            "says": "The teacher gave them in `case.inputs`.",
+            "means": "other",
+            "source": "the teacher's learning outcomes and material"
+          },
+          "marked_proposal": {
+            "says": "The teacher did not give them, and `piece.text` marks them as a proposal.",
+            "means": "other",
+            "source": "without marking them as a proposal"
+          },
+          "presented_as_given": {
+            "says": "The teacher did not give them, and `piece.text` presents them as if they were given.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-prep/aboutAStudent": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` mention a student's name or personal circumstances (home, health, money)?",
+        "yes": "`piece.text` names a student or mentions home, health or money.",
+        "no": "`piece.text` mentions neither."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` do with them?",
+        "options": {
+          "about_the_criteria": {
+            "says": "`piece.text` is about the criteria, addressing the student only as \"the student\" or \"you\".",
+            "means": "other",
+            "source": "the output is about the criteria, never about a particular student"
+          },
+          "names_or_asks_personal": {
+            "says": "`piece.text` uses a student's name or personal circumstances, or asks about them.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-prep/inventedCriteria": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` name a criterion, source or professional standard?",
+        "yes": "`piece.text` names a criterion, source or professional standard.",
+        "no": "`piece.text` names none of these."
+      },
+      "kinds": {
+        "ask": "What does `case.inputs` say about the criteria, competences or facts in `piece.text`?",
+        "options": {
+          "supports": {
+            "says": "`case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "`case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "`case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-prep/judged": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about whether the student meets a criterion, a grade or a level?",
+        "yes": "`piece.text` touches on meeting a criterion, passing, a grade or a level.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about it?",
+        "options": {
+          "asks_only": {
+            "says": "`piece.text` only asks questions about the criterion, or leaves the judgement to the teacher.",
+            "means": "other",
+            "source": "gives no judgement whether a criterion is met"
+          },
+          "gives_a_judgement": {
+            "says": "`piece.text` says whether the student meets a criterion, will pass, or gives a grade or level.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-prep/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "visit-report/invented": {
+      "family": "invented",
+      "recipe": "citation_check",
+      "unit": "block",
+      "needs": [
+        "inputs"
+      ],
+      "topic": {
+        "ask": "Does `piece.text` report a conversation, quote, date, agreement, person or judgement?",
+        "yes": "`piece.text` reports at least one of these.",
+        "no": "`piece.text` reports none of these, for example it is a heading or \"Geen afspraken genoteerd.\"."
+      },
+      "kinds": {
+        "ask": "What does the notes in `case.inputs` say about what `piece.text` reports?",
+        "options": {
+          "supports": {
+            "says": "The notes in `case.inputs` states or directly supports it.",
+            "means": "other"
+          },
+          "contradicts": {
+            "says": "The notes in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The notes in `case.inputs` does not state it.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-report/judged": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Is `piece.text` about a grade, a level, meeting a criterion or passing?",
+        "yes": "`piece.text` touches on a grade, a level, meeting a criterion or passing.",
+        "no": "`piece.text` is about something else."
+      },
+      "kinds": {
+        "ask": "What does `piece.text` say about it?",
+        "options": {
+          "reports_without_judgement": {
+            "says": "`piece.text` reports what was said or agreed, without a judgement.",
+            "means": "other",
+            "source": "and gives no judgement"
+          },
+          "gives_a_judgement": {
+            "says": "`piece.text` gives a grade or level, or says whether the student meets a criterion or passes.",
+            "means": "fails"
+          }
+        }
+      }
+    },
+    "visit-report/missedKnownError": {
+      "family": "known",
+      "recipe": "semantic_find",
+      "when": {
+        "knownError": true
+      },
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
+      }
+    },
+    "visit-report/realName": {
+      "family": "act",
+      "unit": "block",
+      "needs": [],
+      "topic": {
+        "ask": "Does `piece.text` refer to a person?",
+        "yes": "`piece.text` refers to a person.",
+        "no": "`piece.text` refers to no person."
+      },
+      "kinds": {
+        "ask": "How does `piece.text` refer to the person?",
+        "options": {
+          "code_or_role": {
+            "says": "With a code in square brackets, such as [STUDENT], or with a role.",
+            "means": "other",
+            "source": "keeps codes in square brackets literally or uses the role"
+          },
+          "a_name": {
+            "says": "With a person's name.",
+            "means": "fails"
+          }
+        }
+      }
+    }
+  }
+}
