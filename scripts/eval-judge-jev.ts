@@ -6,23 +6,23 @@
  *   ANTHROPIC_API_KEY=… JEV_API_KEY=… npm run eval:judge-jev -- --runs 3 --label a
  *   … -- --date 2026-11-13          # the outputs of that day (default: the latest)
  *   … -- --tool mentorai,lesson-plan
+ *   … -- --checks 1                  # the questions of version 1 (default: the latest)
  *   npm run eval:judge-jev -- --dry-run   # build the requests only, no API
  *   npm run eval:judge-jev -- --rescore evals/reports/<date><label>-judge-jev-raw.json
  *                                    # the report again with the labels as they are now, no API
  *
  * Writes `evals/reports/<date><label>-judge-jev.md` and `…-judge-jev-raw.json` (each exact Jev
  * request with its answer, and the judge's reply). Labels for the rows where the two disagree
- * go in `evals/judge-jev/labels.json` (row key → the check failed); the report scores both
+ * go in `evals/judge-jev/labels/<date><label>.json` (row key → the check failed); the report scores both
  * judges on them. Never part of CI.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { providerForModel } from "~/lib/ai/provider";
 import { ALL_TOOLS } from "~/lib/registry";
 import type { Tool } from "~/lib/registry/types";
 import { askJev, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
 import {
-  EVALS_DIR,
   latestOutputDate,
   loadCases,
   loadRubric,
@@ -46,6 +46,8 @@ import {
   catalogPrice,
   type JudgeRow,
   judgeJevReport,
+  LATEST_CHECKS,
+  labelsPath,
   listPriceUsd,
   loadJudgeSpecs,
   parseJudgeJevAnswer,
@@ -56,14 +58,13 @@ function arg(name: string): string | undefined {
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
 
-const specs = loadJudgeSpecs();
-
 /** One row per judged check of one output: Jev's verdict next to the LLM judge's. */
 function rowsOf(
   job: { tool: Tool; c: EvalCase; run: number; rubric: string },
   output: string,
   body: unknown,
   judgeText: string,
+  specs: ReturnType<typeof loadJudgeSpecs>,
 ) {
   const { tool, c, run, rubric } = job;
   const judgedIds = parseHardChecks(rubric)
@@ -92,8 +93,8 @@ function rowsOf(
   return { rows, costUsd: jev.costUsd };
 }
 
-function loadLabels(): Record<string, boolean> | undefined {
-  const file = join(EVALS_DIR, "judge-jev", "labels.json");
+function loadLabels(report: string): Record<string, boolean> | undefined {
+  const file = labelsPath(report);
   return existsSync(file)
     ? (JSON.parse(readFileSync(file, "utf8")) as { labels: Record<string, boolean> }).labels
     : undefined;
@@ -105,6 +106,8 @@ type Meta = Omit<Parameters<typeof judgeJevReport>[0], "rows" | "labels">;
 
 interface RawEntry {
   key: string;
+  /** The output as the eval wrote it (version 2: the request holds it by stage). */
+  output?: string;
   request: { state: { output: string } };
   body: unknown;
   judge: string;
@@ -118,6 +121,7 @@ function metaFromReport(md: string): Meta {
   return {
     date: pick(/Datum: (\S+)/),
     jevModel: pick(/Jev: (\S+) ·/),
+    checksVersion: num(/checks: v(\d+)/) || 1,
     judgeModel: pick(/judge: (\S+)\n/),
     jevMs: { mean: num(/Jev: gemiddeld (\d+) ms/), max: num(/Jev: gemiddeld \d+ ms, hoogst (\d+)/) },
     judgeMs: {
@@ -137,16 +141,17 @@ function rescore(rawFile: string) {
     | RawEntry[];
   const entries = Array.isArray(parsed) ? parsed : parsed.raw;
   const meta = Array.isArray(parsed) ? metaFromReport(file) : parsed.meta;
+  const specs = loadJudgeSpecs(meta.checksVersion ?? 1);
   const rows = entries.flatMap((e) => {
     const m = /^(.+?)\/(.+)#(\d+)$/.exec(e.key);
     const tool = ALL_TOOLS.find((t) => t.slug === m?.[1]);
     const c = tool && loadCases(tool).find((x) => x.id === m?.[2]);
     if (!m || !tool || !c) throw new Error(`unknown output in the raw file: ${e.key}`);
     const job = { tool, c, run: Number(m[3]), rubric: loadRubric(tool) };
-    return rowsOf(job, e.request.state.output, e.body, e.judge).rows;
+    return rowsOf(job, e.output ?? e.request.state.output, e.body, e.judge, specs).rows;
   });
   rows.sort((a, b) => order(a).localeCompare(order(b)));
-  const labels = loadLabels();
+  const labels = loadLabels(basename(rawFile).replace(/-judge-jev-raw\.json$/, ""));
   writeFileSync(file, judgeJevReport({ ...meta, rows, ...(labels ? { labels } : {}) }));
   console.log(`Report: ${file}`);
 }
@@ -159,6 +164,8 @@ async function main() {
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const jevModel = arg("model") ?? JEV_MODEL;
   const judgeModel = arg("judge-model") ?? DEFAULT_JUDGE_MODEL;
+  const checksVersion = Number(arg("checks") ?? LATEST_CHECKS);
+  const specs = loadJudgeSpecs(checksVersion);
   const apiKey = process.env[JEV_KEY_ENV] ?? "";
   if (!dryRun && !apiKey) throw new Error(`needs ${JEV_KEY_ENV}`);
   const date = arg("date") ?? latestOutputDate();
@@ -231,21 +238,22 @@ async function main() {
       ? await askJev(request, { apiKey })
       : { body: { answers: {} }, ms: undefined };
     if (answer.ms !== undefined) jevMs.push(answer.ms);
-    const judged = rowsOf({ tool, c, run, rubric }, out.output, answer.body, judgeText);
+    const judged = rowsOf({ tool, c, run, rubric }, out.output, answer.body, judgeText, specs);
     if (judged.costUsd !== undefined) jevCostUsd += judged.costUsd;
     rows.push(...judged.rows);
-    raw.push({ key: tag, request, body: answer.body, judge: judgeText });
+    raw.push({ key: tag, output: out.output, request, body: answer.body, judge: judgeText });
     console.log(`  ✓ ${tag}`);
   });
   if (dryRun) return;
 
-  const labels = loadLabels();
+  const labels = loadLabels(`${date}${label}`);
   rows.sort((a, b) => order(a).localeCompare(order(b)));
   mkdirSync(REPORTS_DIR, { recursive: true });
   const file = join(REPORTS_DIR, `${date}${label}-judge-jev.md`);
   const meta: Meta = {
     date,
     jevModel,
+    checksVersion,
     judgeModel,
     jevMs,
     judgeMs,
