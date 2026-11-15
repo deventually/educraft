@@ -180,6 +180,56 @@ rubric zelf zo zegt), en er wordt na de meting niets aan bijgesteld.
 5. **Drempels**: 0,7 en 0,3, niet bijgesteld. Het drempelblok in het rapport is alleen informatie
    over de afstemset.
 
+### Uitslag versie 2 (2026-11-14)
+
+Rapporten: [`2026-11-14b1-judge-jev.md`](../reports/2026-11-14b1-judge-jev.md) (versie 1) en
+[`2026-11-14b2-judge-jev.md`](../reports/2026-11-14b2-judge-jev.md) (versie 2), op dezelfde
+nieuwe uitvoer van 19 tools, 3 runs, judge `claude-code::claude-sonnet-5-5`.
+
+**Zonder labels** (feiten uit de rapporten):
+
+| | Versie 1 | Versie 2 |
+| --- | --- | --- |
+| Jev "faalt" waar de judge "slaagt" (afstemmen / holdout) | 51 / 30 | 21 / 21 |
+| Eens met de judge, holdout | 351 van 384 (91%) | 390 van 413 (94%) |
+| Uitvoer zonder LLM klaar, holdout | 17 van 96 (18%) | 29 van 96 (30%) |
+| Uitvoer zonder LLM klaar, afstemmen | 58 van 216 (27%) | 70 van 216 (32%) |
+
+Daarvan zijn 38 rijen `missedKnownError` bij een gewone case (28 afstemmen, 10 holdout). Versie 1
+zei "faalt"; volgens de rubric geldt de check alleen bij een bekende fout, dus dat is vals alarm.
+Versie 2 laat hem daar door de code slagen (regel 1).
+
+**Met labels.** Bastiaan labelde de 25 holdout-rijen waar een versie van de judge verschilde,
+zelf en zonder te zien wat Jev of de judge zei ([`labels/2026-11-14b1.json`](labels/2026-11-14b1.json),
+`…b2.json` is dezelfde): 2 faalt echt, 21 slaagt, 2 weet ik niet. De afstemset is niet door hem
+gelabeld. Eerder had ChatGPT alle 59 verschillen gelabeld; die labels tellen niet als bewijs en
+staan alleen ter vergelijking in [`labels/2026-11-14b-chatgpt.json`](labels/2026-11-14b-chatgpt.json)
+(op de holdout 22 van de 25 gelijk aan Bastiaan).
+
+| Holdout | Versie 1 | Versie 2 |
+| --- | --- | --- |
+| Vals alarm van Jev (gelabeld + regel 1) | 19 + 10 = 29 | 20 |
+| Terechte "faalt" van Jev | 0 | 0 |
+| Gemiste fout van Jev ("slaagt" waar het echt faalt) | 2 | 1 |
+| Hybride gelijk op de gelabelde rijen (judge: 21 van 21) | 19 van 21 | 20 van 21 |
+
+**Tegen het vooraf vastgelegde meetplan:**
+
+- *Jev alleen, minder vals alarm op de holdout:* **ja**, van 29 naar 20. Die winst komt helemaal
+  van regel 1 (de code). Zonder die 10 rijen gaat het gelabelde vals alarm van 19 naar 20: de
+  regels 2, 3 en 4 helpen niet meetbaar.
+- *De hybride niet slechter dan de judge op de holdout:* **nee**. De hybride mist één echte fout
+  die de judge wel ziet: `difficult-conversation/buried-bad-news-known-error-nl#1/missedKnownError`,
+  waar Jev "slaagt" zei. Versie 1 miste er twee. Het gaat om weinig rijen (2 echte fouten), maar
+  het laat zien dat Jevs "slaagt" niet altijd te vertrouwen is.
+- *De besparing:* op de holdout is 30% van de uitvoer klaar zonder LLM, was 18%.
+
+**Wat dat betekent.** Versie 2 is beter dan versie 1, vooral door regel 1. Maar Jev is nog geen
+veilige voorsortering: in de hybride kost hij af en toe een gemiste fout, en als judge geeft hij
+te veel vals alarm, vooral bij `defense-review/gaveGrade` (12 keer, in beide versies) en
+`difficult-conversation/legalOrMedicalAdvice` (4). Dat zijn holdout-tools: daarop wordt niets
+bijgesteld. De drempels blijven 0,7 en 0,3.
+
 ## Eerlijk over de vergelijking
 
 - **De LLM-judge doet meer dan de harde checks.** Hij scoort in dezelfde call ook de dimensies van

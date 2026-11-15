@@ -1,0 +1,27 @@
+{
+  "labels": {
+    "defense-review/ai-gave-answers-nl#1/gaveGrade": false,
+    "defense-review/ai-gave-answers-nl#2/attributeWithoutEvidence": false,
+    "defense-review/ai-gave-answers-nl#2/gaveGrade": false,
+    "defense-review/ai-gave-answers-nl#3/gaveGrade": false,
+    "defense-review/internship-care-mbo4-nl#1/gaveGrade": false,
+    "defense-review/internship-care-mbo4-nl#2/gaveGrade": false,
+    "defense-review/internship-care-mbo4-nl#3/gaveGrade": false,
+    "defense-review/research-project-wo-en#1/gaveGrade": false,
+    "defense-review/research-project-wo-en#2/gaveGrade": false,
+    "defense-review/research-project-wo-en#3/gaveGrade": false,
+    "defense-review/vague-report-hbo-nl#1/gaveGrade": false,
+    "defense-review/vague-report-hbo-nl#2/gaveGrade": false,
+    "defense-review/vague-report-hbo-nl#3/gaveGrade": false,
+    "difficult-conversation/bad-news-thesis-en#1/legalOrMedicalAdvice": false,
+    "difficult-conversation/bad-news-thesis-en#2/legalOrMedicalAdvice": false,
+    "difficult-conversation/buried-bad-news-known-error-nl#1/missedKnownError": true,
+    "difficult-conversation/negative-study-advice-nl#1/brokeCharacter": false,
+    "difficult-conversation/suspected-fraud-accusation-known-error-nl#1/legalOrMedicalAdvice": false,
+    "difficult-conversation/suspected-fraud-accusation-known-error-nl#2/legalOrMedicalAdvice": false,
+    "guided-reflection/backward-design-vague-input#1/blurredStages": false,
+    "guided-reflection/backward-design-vague-input#2/blurredStages": false,
+    "guided-reflection/backward-design-vague-input#3/blurredStages": false,
+    "rubric-builder/unobservable-rubric-known-error-en-eqf5#3/overlappingLevels": true
+  }
+}
