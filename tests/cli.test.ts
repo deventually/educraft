@@ -169,6 +169,47 @@ describe("Claude Code: the request the app would send, not Claude Code's own set
     expect(child.written).toBe("trigger");
   });
 
+  describe("runs on the subscription, never on an API key from .env or the shell", () => {
+    // `npm run eval` loads .env into process.env (vite-node), and `claude -p` bills the API
+    // instead of the subscription whenever it finds ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN.
+    const keys = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"] as const;
+    afterEach(() => {
+      for (const k of keys) delete process.env[k];
+    });
+
+    it.each([
+      ["streamChat", { ...cc }],
+      ["streamChat with a token budget", { ...cc, maxTokens: 4000 }],
+    ])("keeps the keys out of Claude Code's environment (%s)", async (_label, opts) => {
+      process.env.ANTHROPIC_API_KEY = "sk-ant-from-dotenv";
+      process.env.ANTHROPIC_AUTH_TOKEN = "token-from-dotenv";
+      spawnMock.mockReturnValue(fakeChild(["x"]));
+      for await (const _ of cliProvider.streamChat(opts)) void _;
+      const env = options().env as NodeJS.ProcessEnv;
+      expect(env).toBeDefined();
+      expect(env).not.toHaveProperty("ANTHROPIC_API_KEY");
+      expect(env).not.toHaveProperty("ANTHROPIC_AUTH_TOKEN");
+      // The rest of the environment stays, so it still finds its login and binaries.
+      expect(env.PATH).toBe(process.env.PATH);
+      expect(env.HOME).toBe(process.env.HOME);
+    });
+
+    it("keeps the key out for generate() too", async () => {
+      process.env.ANTHROPIC_API_KEY = "sk-ant-from-dotenv";
+      spawnMock.mockReturnValue(fakeChild([claudeJson("Klaar")]));
+      await cliProvider.generate(cc);
+      expect(options().env).toBeDefined();
+      expect(options().env).not.toHaveProperty("ANTHROPIC_API_KEY");
+    });
+
+    it("leaves the parent process's own key alone, for the judge or an API model", async () => {
+      process.env.ANTHROPIC_API_KEY = "sk-ant-from-dotenv";
+      spawnMock.mockReturnValue(fakeChild(["x"]));
+      for await (const _ of cliProvider.streamChat(cc)) void _;
+      expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-from-dotenv");
+    });
+  });
+
   it("caps the answer at the tool's budget plus thinking room, as the API call does", async () => {
     spawnMock.mockReturnValue(fakeChild(["x"]));
     for await (const _ of cliProvider.streamChat({ ...cc, maxTokens: 4000 })) void _;

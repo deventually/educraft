@@ -22,11 +22,13 @@ import { LocalizedError } from "~/lib/i18n/errors";
  *   opencode run "<prompt>"     (opencode one-shot run)
  */
 
-/** One run of an agent: its arguments, what goes on stdin, extra environment. */
+/** One run of an agent: its arguments, what goes on stdin, extra and removed environment. */
 interface Invocation {
   args: string[];
   stdin?: string;
   env?: Record<string, string>;
+  /** Variables of this process the agent must not see. */
+  unsetEnv?: readonly string[];
 }
 
 interface CliSpec {
@@ -68,6 +70,9 @@ export function assemblePrompt(opts: GenerateOptions): string {
 // no tools, no CLAUDE.md, skills, hooks or MCP from the folder it runs in. With
 // "claude-code::<model>" it is pinned to that model, with that model's effort and answer
 // budget from the catalog, so the eval measures the app's prompts on the app's model.
+// It runs on the signed-in subscription: `claude -p` bills the API instead whenever it finds
+// one of these, and `npm run eval` loads them from .env into this process.
+const API_CREDENTIALS = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"] as const;
 
 /** The catalog model "claude-code::<model>" pins, when the catalog knows it. */
 function pinnedModel(info: ModelInfo): ModelInfo | null {
@@ -106,7 +111,7 @@ function claudeCodeInvocation(opts: GenerateOptions, info: ModelInfo, json: bool
   const env = maxTokens
     ? { CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(outputTokenBudget(pinned ?? info, maxTokens)) }
     : undefined;
-  return { args, stdin: conversation(opts), env };
+  return { args, stdin: conversation(opts), env, unsetEnv: API_CREDENTIALS };
 }
 
 interface ClaudeCodeResult {
@@ -152,6 +157,13 @@ function parseClaudeCodeResult(stdout: string): GenerateResult {
 
 // ── Running an agent ──────────────────────────────────────────────────────────────
 
+/** This process's environment with the run's additions, minus what it must not see. */
+function childEnv(run: Invocation): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, ...run.env };
+  for (const name of run.unsetEnv ?? []) delete env[name];
+  return env;
+}
+
 /** Spawn the agent, stream stdout, and surface spawn/exit failures clearly. */
 async function* runCli(
   spec: CliSpec,
@@ -167,7 +179,7 @@ async function* runCli(
   const child = spawn(spec.command, run.args, {
     stdio: [run.stdin === undefined ? "ignore" : "pipe", "pipe", "pipe"],
     signal,
-    ...(run.env ? { env: { ...process.env, ...run.env } } : {}),
+    ...(run.env || run.unsetEnv ? { env: childEnv(run) } : {}),
   });
   if (run.stdin !== undefined) {
     child.stdin?.write(run.stdin);

@@ -35,7 +35,12 @@ npm run eval -- --tool lesson-plan --runs 3 \
   --parallel 6 --label cc
 ```
 
-- No `ANTHROPIC_API_KEY`, and no `--batch` (that is the API's half price). Without `--batch`
+- Claude Code never sees `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN`: `claude -p` bills the
+  API instead of the subscription whenever it finds one, and `npm run eval` loads `.env` into its
+  own environment. The adapter removes both from Claude Code's environment, so a key in `.env` or
+  the shell is used only by `anthropic::` models (an API judge, for instance), never by
+  `claude-code::` ones.
+- No `ANTHROPIC_API_KEY` needed, and no `--batch` (that is the API's half price). Without `--batch`
   the runs go one after another (a `--runs 3` of lesson-plan: about 75 minutes);
   `--parallel 6` runs six at once (about 15 minutes). Lower it when the subscription hits its
   limit.
