@@ -92,5 +92,12 @@
     "visit-prep/personal-in-criteria-known-error-nl#1/missedKnownError": false,
     "visit-prep/personal-in-criteria-known-error-nl#3/missedKnownError": false,
     "visit-prep/start-mbo-nl#3/judged": false
+  },
+  "evidence": {
+    "rubric-builder/critical-review-en-eqf7#1/unmarkedProposal": true,
+    "rubric-builder/critical-review-en-eqf7#2/unmarkedProposal": true,
+    "rubric-builder/critical-review-en-eqf7#3/unmarkedProposal": true,
+    "rubric-builder/overlapping-rubric-known-error-eqf6#1/overlappingLevels": true,
+    "rubric-builder/test-report-mbo4-eqf4#1/overlappingLevels": false
   }
 }
