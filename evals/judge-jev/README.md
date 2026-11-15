@@ -546,6 +546,12 @@ Nagekeken en ongewijzigd: test-analysis `levelFit.termsOnce` (Jev zegt bijna alt
 rubric vraagt "every term explained once", en in de gelezen uitvoer worden alfa en Rir uitgelegd
 maar p-waarde en Rit niet. Jev volgt de rubric letterlijk; dat laten we zo.
 
+Afstemrun t5 (`2026-11-15t5-judge-jev4.md`): op alle vijf dimensies dichter bij Bastiaans 8
+cijfers dan t4. **Op slot na t5:** de vragen (`dimensions.v4.json`) en `read: "position"` veranderen
+niet meer vóór de toetsset. Verder afstemmen op 8 cijfers zou passen op die 8. `position` blijft:
+het gebruikt Jevs hele antwoord, en de meest waarschijnlijke trede had gemiddeld een kans van
+ongeveer 0,6 tot 0,9, dus alleen de top lezen gooit veel weg.
+
 ### Sets, labels en toetsen
 
 | Set | Uitvoer | Bron | Gelabeld door Bastiaan |
