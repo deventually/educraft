@@ -594,6 +594,34 @@ nooit Claude. Een droge run telt de requests: met de laatste blik 1.797 voor de 
 en 735 voor de toetsset (was 447); samen ongeveer 4,5 miljoen tokens invoer, $0,19 tegen de
 invoerprijs.
 
+### De uitslag (toetsset, 15 november)
+
+Rapport: `evals/reports/2026-11-15h4-judge-jev4.md`. Bastiaan scoorde 30 uitvoeren van de zes
+toetstools blind (labels `2026-11-15h4`), vóór Jev ze beantwoordde, met de vragen op slot.
+
+| Dimensie | MAE Jev | MAE Sonnet | Altijd 4 | Jev − Sonnet (95%) | Rangorde Jev / Sonnet | Besluit |
+| --- | --- | --- | --- | --- | --- | --- |
+| taskFidelity | 0,43 | 0,43 | 0,40 | 0,00 (−0,23 tot 0,23) | 55% / 62% | nee |
+| pedagogicalSoundness | 0,48 | 0,41 | 0,33 | 0,07 (−0,07 tot 0,22) | 50% / 54% | nee |
+| formatAdherence | 0,47 | 0,50 | 0,60 | −0,03 (−0,27 tot 0,23) | 46% / 75% | nee |
+| levelFit | 0,41 | 0,59 | 0,62 | −0,17 (−0,41 tot 0,07) | 63% / 65% | **ja, met vertrouwen** |
+| languageQuality | 0,63 | 0,50 | 0,40 | 0,13 (−0,07 tot 0,33) | 65% / 69% | nee |
+
+- **Besluit volgens het meetplan:** Jev kan levelFit overnemen. De judge-call naar Sonnet blijft,
+  want die kan pas weg als alle vijf slagen. Er is dus nog geen besparing.
+- **Toets 1** (binnen 0,25 van Sonnet) haalt Jev op alle vijf, en op vier met de bovengrens van
+  het interval binnen de marge. Wat ontbreekt is toets 2 of 3.
+- **Toets 2** haalt ook Sonnet niet bij taskFidelity, pedagogicalSoundness en languageQuality:
+  Bastiaan gaf daar meestal een 4, en een judge die altijd 4 zegt zit er dichter bij dan allebei.
+- **Waar Jev achterblijft:** te mild bij languageQuality (contextualization 4,2 tegen Bastiaans
+  3,0; vooral `anglicisms`) en bij pedagogicalSoundness van defense-review (5,0 tegen 3,5); bij
+  formatAdherence zet hij uitvoeren van dezelfde tool slecht op volgorde (46% tegen 75%).
+- **Bastiaans eigen herhaling:** 0 tot 0,4 punt verschil op vijf uitvoeren per dimensie.
+- **Kosten:** Jev $0,60, Sonnet (de hele judge-call) $24,08 per 1.000 uitvoer.
+
+Een verbetering hierop wordt een nieuwe versie, met een eigen vooraf vastgelegd meetplan en
+getoetst op nieuwe uitvoer: op deze toetsset is nu gekeken.
+
 ## Eerlijk over de vergelijking
 
 - **De LLM-judge doet meer dan de harde checks.** Hij scoort in dezelfde call ook de dimensies van
