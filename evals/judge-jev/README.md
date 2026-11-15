@@ -316,6 +316,46 @@ dat kan niet eerlijk; de drempels zijn die van de recepten, en het rapport toont
   aangescherpt worden met een zin uit de rubric. Daarna gaat het bestand op slot, in een commit
   vóór de meting.
 
+### De afstemronde (15 november) en wat er daarna veranderde
+
+[Rapport](../reports/2026-11-14b3t-judge-jev3.md). Op de afstemtools beslist Jev 772 rijen (versie
+2: 1005) en is hij het in 634 daarvan eens met Sonnet (82%; versie 2: 97%). Hij laat 224 rijen
+onbeslist (versie 2: 108). Met de opties omgekeerd blijft de hoogste categorie in 95% gelijk
+(4667 van 4938). De ronde kostte $0,50 zonder de omgekeerde volgorde.
+
+Versie 3 zegt dus vaker "faalt" waar Sonnet "slaagt". De labels van 14 november laten beide
+kanten zien. Bij group-feedback/inventedSources had Jev 4 van de 4 gelabelde keren gelijk, en bij
+mentorai/namedMoves had Jev gelijk waar Sonnet faalde. Bij cognitive-architect/inventedActivity en
+één rij van differentiation/inventedSources was het een vals alarm. De meeste verschillen zijn
+niet gelabeld; die zijn per cluster gelezen.
+
+**Aangescherpt**, alleen op afstemtools en steeds met de zin uit de rubric als bron (`source`):
+
+| Check | Wat er veranderde | Zin uit de rubric |
+| --- | --- | --- |
+| test-items/inventedContent | Het onderwerp is alleen een vraag of antwoord. Daarnaast tellen niet mee: een matrijs, de controle tegen de matrijs of een telling van antwoordposities; een antwoord dat uit de casusgegevens van de vraag zelf volgt; punten, tijd, weging en cesuur (een andere check). | "Does a question or answer rest on facts, figures, definitions, standards or sources"; "fictitious case data given in full in the question is fine"; "present points, a duration, a weighting or a pass mark the teacher did not give" |
+| test-items/unmarkedProposal | Getallen in de casus van een vraag zijn casusgegevens. | "fictitious case data given in full in the question is fine" |
+| lesson-plan/inventedSources, differentiation/inventedSources | Een verzonnen casus, naam of getal in een oefening voor de studenten citeert niets. | "Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up" (differentiation: met "article number") |
+| cognitive-architect/inventedActivity | Het kiezen van principes voor een nieuw ontwerp mag zeggen waarom een principe kwetsbaar is, zolang er geen score, niveau of percentage bij staat. | "picks the Priority Principles without rating anything" |
+| clear-assignment/aboveLevel | Een term is pas een fout als een lezer op dat niveau hem niet kent. | "Is the rewritten assignment clearly above the chosen reading level" |
+
+**Eén afwijking van het ontwerp.** test-analysis/decidesForTeacher kijkt per onderdeel in plaats
+van per blok. Per blok zag Jev één optie uit een lijst van opties als een besluit; de rubric
+vraagt of de uitvoer de opties noemt en de beslissing laat, en dat is alleen in het hele
+onderdeel te zien. Dit is geen aanscherping met een zin, maar een andere knip, en telt daarom als
+afwijking.
+
+**Bewust niet veranderd**, omdat de rubric geen zin geeft die Jev ongelijk geeft, of omdat Jev
+mogelijk gelijk heeft: test-analysis/inventedSources (een vuistregel als bron), lesson-plan/
+noCheckOfAllStudents (een exitvraag zonder beslismoment), visit-report/judged,
+visit-report/missedKnownError en group-feedback.
+
+**Eerlijk over het risico.** De clusters zijn gevonden waar Jev en Sonnet het oneens waren. Dat
+kan Jev naar Sonnet toe trekken. Daar staan drie dingen tegenover: alleen zinnen uit de rubric,
+geen enkele holdouttool aangeraakt, en clusters waar Jev gelijk kan hebben blijven zoals ze zijn.
+Het plan kent één afstemronde, dus het effect van deze aanscherpingen is vóór het slot niet
+gemeten. De meting laat het zien, op de afstemtools apart van de holdouts.
+
 ### Twee holdouts
 
 De zes holdouttools zijn niet meer blind: de fouten van versie 2 daar zijn bekeken. Ze blijven

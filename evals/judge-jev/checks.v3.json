@@ -42,7 +42,7 @@
             "means": "fails"
           },
           "unexplained_terms": {
-            "says": "`piece.text` uses technical terms or abbreviations without explaining them.",
+            "says": "`piece.text` uses technical terms or abbreviations a reader at that level would not know, without explaining them.",
             "means": "fails"
           }
         }
@@ -182,7 +182,7 @@
             "source": "for a new design (empty legacy activity), says so and picks the Priority Principles without rating anything"
           },
           "picks_priority_principles": {
-            "says": "`piece.text` picks principles to focus on without rating them.",
+            "says": "`piece.text` picks principles to focus on for the new design, and may say why a principle is vulnerable, without a rating, score or percentage.",
             "means": "other",
             "source": "picks the Priority Principles without rating anything"
           },
@@ -898,7 +898,13 @@
       "topic": {
         "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
         "yes": "`piece.text` names at least one such reference.",
-        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage.",
+        "besides": [
+          {
+            "says": "A made-up case, name or figure inside an exercise or question for the students is practice material and cites nothing.",
+            "source": "Did the output cite a study, percentage, source, method, chapter, page or article number that is not in the input and looks made up"
+          }
+        ]
       },
       "kinds": {
         "ask": "What kind of reference does `piece.text` name?",
@@ -1476,7 +1482,13 @@
       "topic": {
         "ask": "Does `piece.text` name or cite a source, study, model, standard, guideline, percentage or similar reference?",
         "yes": "`piece.text` names at least one such reference.",
-        "no": "`piece.text` names no study, source, model, standard, guideline or percentage."
+        "no": "`piece.text` names no study, source, model, standard, guideline or percentage.",
+        "besides": [
+          {
+            "says": "A made-up case, name or figure inside an exercise or question for the students is practice material and cites nothing.",
+            "source": "Did the output cite a study, percentage, source, method, chapter or page that is not in the input and looks made up"
+          }
+        ]
       },
       "kinds": {
         "ask": "What kind of reference does `piece.text` name?",
@@ -1934,7 +1946,7 @@
     },
     "test-analysis/decidesForTeacher": {
       "family": "act",
-      "unit": "block",
+      "unit": "section",
       "needs": [],
       "topic": {
         "ask": "Is `piece.text` about what should happen with a question or the results?",
@@ -2036,13 +2048,25 @@
         "inputs"
       ],
       "topic": {
-        "ask": "Does `piece.text` state facts, figures, definitions, standards or sources as real?",
-        "yes": "`piece.text` presents subject facts, figures, definitions, standards or sources as real.",
-        "no": "`piece.text` states none, for example it is an instruction or a question frame.",
+        "ask": "Is `piece.text` a question or an answer that states facts, figures, definitions, standards or sources as real?",
+        "yes": "`piece.text` is a question or an answer that presents subject facts, figures, definitions, standards or sources as real.",
+        "no": "`piece.text` is no question or answer, or states none of these, for example it is an instruction or a question frame.",
         "besides": [
           {
             "says": "Fictitious case data given in full in the question does not count.",
             "source": "fictitious case data given in full in the question is fine"
+          },
+          {
+            "says": "An answer worked out from the case data in the question itself does not count.",
+            "source": "fictitious case data given in full in the question is fine"
+          },
+          {
+            "says": "A blueprint, a check against the blueprint or a count of answer positions is not a question or an answer.",
+            "source": "Does a question or answer rest on facts, figures, definitions, standards or sources"
+          },
+          {
+            "says": "Points, a duration, a weighting or a pass mark belong to another check.",
+            "source": "present points, a duration, a weighting or a pass mark the teacher did not give"
           }
         ]
       },
@@ -2086,7 +2110,13 @@
       "topic": {
         "ask": "Does `piece.text` give points, a duration, a weighting or a pass mark?",
         "yes": "`piece.text` states points, a duration, a weighting or a pass mark.",
-        "no": "`piece.text` states none of these."
+        "no": "`piece.text` states none of these.",
+        "besides": [
+          {
+            "says": "Figures inside the case of a question are case data, not points, a duration, a weighting or a pass mark.",
+            "source": "fictitious case data given in full in the question is fine"
+          }
+        ]
       },
       "kinds": {
         "ask": "Where do they come from, against `case.inputs`?",
