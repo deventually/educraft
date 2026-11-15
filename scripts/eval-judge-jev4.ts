@@ -236,7 +236,8 @@ async function main() {
       return; // these parts stay unanswered; the report counts outputs without a score
     }
     jevMs.push(r.ms);
-    jevCostUsd += (r.body as { usage?: { cost?: number } })?.usage?.cost ?? 0;
+    const cost = (r.body as { usage?: { cost?: unknown } } | null)?.usage?.cost;
+    if (typeof cost === "number" && Number.isFinite(cost) && cost >= 0) jevCostUsd += cost;
     Object.assign(stored.get(t.job) as object, keepScoreAnswers(r.body, t.request.questions as AskedV4));
     if (++done % 200 === 0) console.log(`  ${done}/${tasks.length}`);
   });
