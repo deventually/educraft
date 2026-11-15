@@ -10,6 +10,7 @@ import {
   decideCheck,
   decideOutputV3,
   decidePiece,
+  keepAnswers,
   loadChecksV3,
   orderAgreement,
   planOutputV3,
@@ -528,5 +529,39 @@ describe("version 3: the order check", () => {
       same: 1,
       total: 1,
     });
+  });
+});
+
+describe("version 3: what is kept of Jev's answer", () => {
+  it("keeps only the questions and options that were asked, as numbers", () => {
+    const questions = {
+      "x.topic": { type: "noul" as const },
+      "x.kind": { type: "choice" as const, criteria: { allowed: "a", fails: "b" } },
+    };
+    const body = {
+      answers: {
+        "x.topic": { type: "noul", noul: 0.91234 },
+        "x.kind": {
+          type: "choice",
+          probabilities: { allowed: 0.123456, fails: 0.8, "../evil": 1 },
+        },
+        "y.other": { type: "noul", noul: 1 },
+      },
+      usage: { cost: 1 },
+    };
+    expect(keepAnswers(body, questions)).toEqual({
+      "x.topic": { noul: 0.9123 },
+      "x.kind": { probabilities: { allowed: 0.1235, fails: 0.8 } },
+    });
+  });
+
+  it("drops an answer that is not a probability", () => {
+    const questions = {
+      "x.topic": { type: "noul" as const },
+      "y.topic": { type: "noul" as const },
+    };
+    const body = { answers: { "x.topic": { noul: "0.9" }, "y.topic": { noul: 7 } } };
+    expect(keepAnswers(body, questions)).toEqual({});
+    expect(keepAnswers("not json", questions)).toEqual({});
   });
 });

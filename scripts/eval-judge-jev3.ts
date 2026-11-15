@@ -29,8 +29,10 @@ import {
   parseJudgeJevAnswer,
 } from "./eval-judge-jev-helpers";
 import {
+  type AskedQuestions,
   type CaseView,
   decideOutputV3,
+  keepAnswers,
   loadChecksV3,
   orderAgreement,
   planOutputV3,
@@ -151,19 +153,6 @@ function rehearsalJudged(j: { failed: string[] }): { judged: string[]; failed: s
     .filter((h) => !h.counted)
     .map((h) => h.id);
   return { judged, failed: j.failed.filter((id) => judged.includes(id)) };
-}
-
-/** The answer without what the decision does not read, so the raw file stays small. */
-function slim(body: unknown): Record<string, unknown> {
-  const answers = (body as { answers?: Record<string, { noul?: number; probabilities?: Record<string, number> }> })?.answers ?? {};
-  return Object.fromEntries(
-    Object.entries(answers).map(([q, a]) => [
-      q,
-      a.probabilities
-        ? { probabilities: Object.fromEntries(Object.entries(a.probabilities).map(([k, p]) => [k, Math.round(p * 1e4) / 1e4])) }
-        : { noul: a.noul },
-    ]),
-  );
 }
 
 /** One request, tried up to four times with a growing pause; undefined when it keeps failing. */
@@ -318,8 +307,9 @@ async function main() {
     jevMs.push(r.ms);
     jevCostUsd += (r.body as { usage?: { cost?: number } })?.usage?.cost ?? 0;
     const s = stored.get(t.job) as Stored;
-    if (t.into === "kept") s.kept = { answers: slim(r.body) };
-    else s[t.into][t.unit] = { ...s[t.into][t.unit], ...slim(r.body) };
+    const kept = keepAnswers(r.body, (t.request as { questions: AskedQuestions }).questions);
+    if (t.into === "kept") s.kept = { answers: kept };
+    else s[t.into][t.unit] = { ...s[t.into][t.unit], ...kept };
     if (++done % 500 === 0) console.log(`  ${done}/${tasks.length}`);
   });
   if (failures) console.log(`  ${failures} requests failed after retries: their pieces stay unsettled`);

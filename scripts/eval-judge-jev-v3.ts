@@ -510,6 +510,38 @@ export type V3Verdict = Omit<CheckDecision, "verdict" | "pieces" | "failed"> &
     by?: "code" | "v2";
   };
 
+/** The questions of a request, as far as `keepAnswers` reads them. */
+export type AskedQuestions = Record<string, { type: "noul" | "choice"; criteria?: Record<string, string> }>;
+
+const isProbability = (p: unknown): p is number => typeof p === "number" && p >= 0 && p <= 1;
+const round4 = (p: number) => Math.round(p * 1e4) / 1e4;
+
+/**
+ * What the raw file keeps of Jev's answer: only the questions that were asked and, for a Choice,
+ * only its own options, each a probability rounded to four decimals. Everything else in the
+ * response (other keys, text, usage) is dropped, so the file holds nothing the API made up.
+ */
+export function keepAnswers(body: unknown, questions: AskedQuestions): Record<string, unknown> {
+  const answers = (body as { answers?: Record<string, { noul?: unknown; probabilities?: Record<string, unknown> }> } | null)
+    ?.answers;
+  const kept: Record<string, unknown> = {};
+  if (!answers || typeof answers !== "object") return kept;
+  for (const [id, q] of Object.entries(questions)) {
+    const a = answers[id];
+    if (q.type === "noul") {
+      if (isProbability(a?.noul)) kept[id] = { noul: round4(a.noul) };
+      continue;
+    }
+    const probabilities: Record<string, number> = {};
+    for (const option of Object.keys(q.criteria ?? {})) {
+      const p = a?.probabilities?.[option];
+      if (isProbability(p)) probabilities[option] = round4(p);
+    }
+    if (Object.keys(probabilities).length) kept[id] = { probabilities };
+  }
+  return kept;
+}
+
 /** Every check of the output, decided from the stored answers (per piece id) without the API. */
 export function decideOutputV3(
   input: OutputInput,

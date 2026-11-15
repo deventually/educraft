@@ -107,6 +107,14 @@ describe("the version 3 report", () => {
       "| act | Holdout | 19 | 0 | 16% | te weinig |",
     );
   });
+
+  it("quotes the evidence so a backslash or a pipe cannot break the table", () => {
+    const md = judgeJevV3Report({
+      ...base,
+      rows: [row({ v3: "fail", evidence: { id: "B01", where: "K1", text: "a \\| b" } })],
+    });
+    expect(md).toContain("| B01: a \\\\\\| b |");
+  });
 });
 
 describe("the rows Bastiaan labels", () => {

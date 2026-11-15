@@ -118,7 +118,7 @@ export interface OrderCount {
   total: number;
 }
 
-const short = (s: string) => (s.length > 120 ? `${s.slice(0, 117)}…` : s).replace(/\s+/g, " ").replace(/\|/g, "\\|");
+const short = (s: string) => (s.length > 120 ? `${s.slice(0, 117)}…` : s).replace(/\s+/g, " ").replace(/[\\|]/g, "\\$&");
 
 export function judgeJevV3Report(input: {
   date: string;
