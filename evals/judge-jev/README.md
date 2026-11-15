@@ -487,6 +487,84 @@ verse holdout heeft er te weinig voor elke toets. De oude holdout is half blind 
 holdouts"). De meting liep alleen op de holdouts (bijgesteld vóór de meting). Toets 4 haalt het
 minimum van 5 precies.
 
+## Versie 4: de dimensies
+
+Versie 3 liet de scores van de rubric bij Sonnet. De call naar Sonnet bleef daardoor nodig, en de
+eval werd maar $0,70 per 1.000 uitvoer goedkoper. Versie 4 meet of Jev ook de vijf scores kan
+geven (taskFidelity, pedagogicalSoundness, formatAdherence, levelFit, languageQuality, 1 tot 5),
+gemeten tegen Bastiaans eigen blinde scores, naast Sonnet en met dezelfde regels. Het meetplan
+staat in het document "Jev versie 4: dimensies scoren, meetplan" (15 november) en ligt vast vóór
+de meting.
+
+### Het ontwerp (TypeSafe, commit 302eea6, zonder eigen draai)
+
+- **Jev oordeelt, code beslist.** Elke dimensie is geknipt in de delen die de zin in de rubric
+  noemt (`evals/judge-jev/dimensions.v4.json`). Een deel is een Score (niveaus als situaties), een
+  Noul (ja of nee) of een check in code. Code zet elk deel op 0 tot 1 (Noul: ≥ 0,7 is 1, ≤ 0,3 is
+  0, ertussen 0,5; Score: positie gedeeld door het hoogste niveau), neemt het gemiddelde met
+  gelijke gewichten en maakt daar 1 + 4 × gemiddelde van, afgerond. Delen van één groep (de zes
+  fasen van lesson-plan) tellen samen als één deel. Een regel uit de rubric als "missing a named
+  known error caps this criterion at 2" past code toe (`capAt`).
+- **Elk deel noemt zijn zin uit de rubric** (`source`); een test eist dat die zin in de rubric
+  staat. Geen deel zonder zin in de rubric: daarom hebben cognitive-architect en defense-review
+  geen "afgebroken"-check.
+- **Code waar code kan:** kopjes en hun volgorde (elk niveau), vaste tekst (een tabelkop), de
+  slotzin, lengte (woorden met een letter of cijfer, 10% marge op "about N words"), het aantal
+  rijen en de vorm van een cel in een tabel, genummerde punten, een vast patroon (de beoordeling
+  van defense-review) en de regels per beurt van een gesprek.
+- **De state:** benoemde velden, alleen de velden van de casus die een vraag noemt (`needs`), en
+  alleen het stuk van de uitvoer waar de vraag over gaat (een kopje met zijn subkopjes, alles
+  vanaf een kopje, of een stage). Vragen met dezelfde state gaan samen in één request.
+- **Weggelaten: rekenen.** Een zin als "Are the worked examples and expected answers correct?"
+  wordt geen vraag aan Jev: TypeSafe zegt dat rekenwerk in code hoort, en hier is er geen code
+  voor. Dat deel van de rubric telt bij Jev dus niet mee; het rapport moet dat lezen als een
+  bekende blinde vlek.
+- **De harde checks tellen niet mee.** Bastiaan scoort zoals de rubric het vraagt, zonder de caps
+  van de harde checks (die past code apart toe, met versie 3 of Sonnet). Sonnets scores komen uit
+  zijn antwoord, ook zonder die caps. Zo krijgen alle drie hetzelfde.
+- **Portfolio-rehearsal doet niet mee:** de repo heeft daar geen Sonnet-scores per run.
+
+### Sets, labels en toetsen
+
+| Set | Uitvoer | Bron | Gelabeld door Bastiaan |
+| --- | --- | --- | --- |
+| Afstemset (13 tools) | 216 | `2026-11-14b3t-judge-jev3-raw.json` | 8, één per tool, door code gekozen |
+| Toetsset (6 holdouttools) | 96 | `2026-11-15c3-judge-jev3-raw.json` | 30 (vijf per tool, verschillende casussen) en 5 herhalingen |
+
+De keuze gebeurt door code (`labelSample`, seed 20261115). Afstemmen gebeurt alleen op de
+afstemset, op Bastiaans labels en het lezen van Jevs antwoorden, nooit op Sonnets scores. Daarna
+gaan de vragen in een commit op slot, en draait de toetsset één keer.
+
+Per dimensie, op de toetsset, met Bastiaans scores als waarheid (`eval-judge-jev-v4-report.ts`):
+
+1. **Afwijking:** Jevs gemiddelde absolute afwijking is hooguit 0,25 groter dan die van Sonnet.
+2. **Beter dan altijd 4:** Jev zit dichter bij Bastiaan dan een judge die altijd 4 zegt (4 is wat
+   Sonnet het vaakst gaf, 66% van 312 uitvoer).
+3. **Rangorde:** bij paren van dezelfde tool die Bastiaan verschillend scoort, zet Jev ze minstens
+   zo vaak goed als Sonnet min 5 procentpunt, en vaker dan de helft. Gelijk telt half. Onder 10
+   paren staat er "te weinig", en dan is de dimensie onbeslist.
+4. tot 7. **Alleen gerapporteerd:** het gemiddelde per tool, het aandeel van het meest gegeven
+   cijfer, de kosten per 1.000 uitvoer, en "net ernaast": waar Jevs cijfer vóór afronden binnen
+   0,75 van Bastiaans cijfer lag maar anders afrondde, plus welke delen Jev omlaag trokken.
+
+**Besluit per dimensie:** Jev kan het overnemen als 1, 2 en 3 slagen; **met vertrouwen** als ook de
+bovengrens van het 95%-interval van toets 1 (gepaarde bootstrap, 10.000 trekkingen, seed
+20261115) binnen 0,25 blijft. De hele judge-call kan pas weg als alle vijf slagen. Een verbetering
+uit toets 7 wordt een nieuwe versie, getoetst op nieuwe uitvoer.
+
+### Draaien
+
+```bash
+npm run eval:judge-jev4 -- --from evals/reports/2026-11-14b3t-judge-jev3-raw.json --dry-run
+JEV_API_KEY=… npm run eval:judge-jev4 -- --from evals/reports/2026-11-14b3t-judge-jev3-raw.json --label t4 --labels <naam>
+npm run eval:judge-jev4 -- --rescore evals/reports/<datum><label>-judge-jev4-raw.json --labels <naam>
+```
+
+Labels staan in `evals/judge-jev/labels/<naam>-v4.json`: per uitvoer de vijf cijfers, `null` voor
+"weet ik niet", en bij de toetsset `retest` met de herhalingen. Het script roept alleen Jev aan,
+nooit Claude. Een droge run telt de requests: 1.149 voor de afstemset en 447 voor de toetsset,
+samen ruim 2,5 miljoen tokens invoer, ongeveer $0,11 tegen de invoerprijs.
+
 ## Eerlijk over de vergelijking
 
 - **De LLM-judge doet meer dan de harde checks.** Hij scoort in dezelfde call ook de dimensies van
