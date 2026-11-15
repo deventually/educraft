@@ -70,6 +70,10 @@ Rapport: [`2026-11-13a-judge-jev.md`](../reports/2026-11-13a-judge-jev.md). Uitv
 | Daarvan had Jev gelijk | 2 | 1 |
 | Daarvan had de judge gelijk | 44 | 35 |
 
+**Let op:** deze labels zijn met hulp van ChatGPT gekozen, niet door Bastiaan alleen. Ze zijn
+dus het oordeel van een derde model en tellen niet als bewijs. De geldende meting is die van
+14 november (versie 2, hieronder), op nieuwe uitvoer en met Bastiaans eigen labels.
+
 **Bastiaans beoordelingsregel**, in zijn woorden:
 
 > Faalt echt wanneer de specifiek genoemde fout in de relevante uitvoer aantoonbaar optreedt;
