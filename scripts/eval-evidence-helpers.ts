@@ -4,6 +4,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { outputTokenBudget } from "../app/lib/ai/models";
 import { extractJson } from "../app/lib/ai/structuredAnswer";
 import { SORT_PROMPT_ID, type SortProposal } from "../app/lib/portfolio/batch";
 import { emptyDossier } from "../app/lib/portfolio/schema";
@@ -55,6 +56,17 @@ const SUITE_DIR = join(__dirname, "..", "evals", "portfolio-evidence");
  * Real, anonymised files from Bastiaan's own dossier: kept on his machine, never in the public
  * repo (gitignored), and never used to tune.
  */
+/** The app's answer budget for one sort (`portfolioBatch.server.ts`). */
+const SORT_MAX_TOKENS = 600;
+
+/**
+ * The answer budget: the app's, plus with `--think` the room the app gives a model that thinks
+ * first (`alwaysThinks`), for a model the catalog does not know (`compat::…`).
+ */
+export function sortTokenBudget(argv: readonly string[]): number {
+  return outputTokenBudget({ alwaysThinks: argv.includes("--think") }, SORT_MAX_TOKENS);
+}
+
 export const HOLDOUT_FILE = join(SUITE_DIR, "holdout.json");
 
 /** The raw answers hold the files' text, so a holdout run's raw file is gitignored too. */

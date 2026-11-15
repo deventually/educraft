@@ -12,6 +12,7 @@
  *   … -- --set holdout                                           # the real, anonymised files
  *   JEV_API_KEY=… npm run eval:evidence -- --jev --label jev       # TypeSafe Jev instead
  *   … -- --jev --parts                                           # with the hand split (13 Nov)
+ *   … -- --model compat::<id> --think                            # a model that thinks first
  *
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
  * `--jev` the same cases go to Jev as typed decisions, built by the app's own module
@@ -41,6 +42,7 @@ import {
   type EvidenceRow,
   evidenceReportMarkdown,
   scoreSort,
+  sortTokenBudget,
 } from "./eval-evidence-helpers";
 import { buildJevRequest, type JevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
 import { askJev, criterionPartsFor, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
@@ -106,7 +108,7 @@ async function main() {
           system: getRuntimePrompt(SORT_PROMPT_ID, c.locale),
           messages: [{ role: "user", content: message }],
           temperature: 0,
-          maxTokens: 600,
+          maxTokens: sortTokenBudget(process.argv),
         }));
         usable = answerUsable(text);
         proposal = parseSortAnswer(text, d, { key: c.id, ...c.file });
