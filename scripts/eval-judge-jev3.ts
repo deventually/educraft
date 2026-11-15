@@ -66,7 +66,6 @@ interface Job {
 interface Stored {
   answers: Record<string, Record<string, unknown>>;
   reversed: Record<string, Record<string, unknown>>;
-  kept?: unknown;
 }
 
 type Raw = { meta: Meta; raw: (Omit<Job, "tool" | "c" | "view" | "run"> & { v3: Stored })[] };
@@ -78,14 +77,25 @@ interface Meta {
   calls: number;
   jevMs: number[];
   jevCostUsd: number;
+  /** Jev's cost without the reversed requests (those are for test 5 only): what use would cost. */
+  jevUseCostUsd?: number;
+  /** The judge's cost (API list price) and the outputs it judged, from the version 2 run. */
+  judgeCostUsd?: number;
+  judgeOutputs?: number;
 }
 
 const setOf = (slug: string): JudgeSet =>
   specs.freshHoldout.includes(slug) ? "fresh" : specs.holdout.includes(slug) ? "holdout" : "tuning";
 
-function jobsFromV2(file: string): { jobs: Job[]; date: string; judgeModel: string } {
+function jobsFromV2(file: string): {
+  jobs: Job[];
+  date: string;
+  judgeModel: string;
+  judgeCostUsd?: number;
+  judgeOutputs?: number;
+} {
   const parsed = JSON.parse(readFileSync(file, "utf8")) as {
-    meta: { date: string; judgeModel: string; checksVersion?: number };
+    meta: { date: string; judgeModel: string; checksVersion?: number; judgeCostUsd?: number };
     raw: { key: string; output: string; body: unknown; judge: string }[];
   };
   if (parsed.meta.checksVersion !== 2) throw new Error(`${file} is not a version 2 run`);
@@ -96,7 +106,12 @@ function jobsFromV2(file: string): { jobs: Job[]; date: string; judgeModel: stri
     if (!m || !tool || !c) throw new Error(`unknown output: ${e.key}`);
     return { key: e.key, tool, c, run: Number(m[3]), output: e.output, judge: e.judge, v2: e.body };
   });
-  return { jobs, date: parsed.meta.date, judgeModel: parsed.meta.judgeModel };
+  return {
+    jobs,
+    date: parsed.meta.date,
+    judgeModel: parsed.meta.judgeModel,
+    ...(parsed.meta.judgeCostUsd !== undefined ? { judgeCostUsd: parsed.meta.judgeCostUsd, judgeOutputs: jobs.length } : {}),
+  };
 }
 
 /**
@@ -186,7 +201,7 @@ function rowsOf(job: Job, stored: Stored): V3Row[] {
       run: job.run,
       check,
       set: setOf(tool.slug),
-      family: !spec ? "llm" : "family" in spec ? spec.family : "keep" in spec ? "v2" : "llm",
+      family: spec && "family" in spec ? spec.family : "llm",
       judge: failed.includes(check),
       ...(v2 ? { v2: v2[check]?.verdict ?? "unsettled" } : {}),
       v3: d?.verdict ?? "unsettled",
@@ -287,7 +302,6 @@ async function main() {
     return [
       ...plan.calls.map((c) => ({ job: job.key, into: "answers" as const, unit: c.unit, request: c.request as object })),
       ...reversed.calls.map((c) => ({ job: job.key, into: "reversed" as const, unit: c.unit, request: c.request as object })),
-      ...(plan.kept ? [{ job: job.key, into: "kept" as const, unit: "", request: plan.kept.request as object }] : []),
     ];
   });
   if (dryRun) {
@@ -296,6 +310,7 @@ async function main() {
   }
   const jevMs: number[] = [];
   let jevCostUsd = 0;
+  let jevUseCostUsd = 0;
   let done = 0;
   let failures = 0;
   await mapLimit(tasks, parallelism(arg("parallel") ?? "16"), async (t) => {
@@ -305,17 +320,28 @@ async function main() {
       return; // the pieces of this request stay unsettled, for the judge
     }
     jevMs.push(r.ms);
-    jevCostUsd += (r.body as { usage?: { cost?: number } })?.usage?.cost ?? 0;
+    const cost = (r.body as { usage?: { cost?: number } })?.usage?.cost ?? 0;
+    jevCostUsd += cost;
+    if (t.into === "answers") jevUseCostUsd += cost;
     const s = stored.get(t.job) as Stored;
     const kept = keepAnswers(r.body, (t.request as { questions: AskedQuestions }).questions);
-    if (t.into === "kept") s.kept = { answers: kept };
-    else s[t.into][t.unit] = { ...s[t.into][t.unit], ...kept };
+    s[t.into][t.unit] = { ...s[t.into][t.unit], ...kept };
     if (++done % 500 === 0) console.log(`  ${done}/${tasks.length}`);
   });
   if (failures) console.log(`  ${failures} requests failed after retries: their pieces stay unsettled`);
   const calls = tasks.length;
   const date = v2.date;
-  const meta: Meta = { date, jevModel: model, judgeModel: v2.judgeModel, source, calls, jevMs, jevCostUsd };
+  const meta: Meta = {
+    date,
+    jevModel: model,
+    judgeModel: v2.judgeModel,
+    source,
+    calls,
+    jevMs,
+    jevCostUsd,
+    jevUseCostUsd,
+    ...(v2.judgeCostUsd !== undefined ? { judgeCostUsd: v2.judgeCostUsd, judgeOutputs: v2.judgeOutputs } : {}),
+  };
   mkdirSync(REPORTS_DIR, { recursive: true });
   const raw: Raw = {
     meta,

@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "about": "Version 3 (README \"Versie 3\"): code cuts the output into pieces; per piece Jev answers a Noul (is the piece on the check's topic) and a Choice of named kinds written from the rubric, each allowed kind with the rubric sentence it comes from. Code decides at 0.7 / 0.3. `keep: v2` asks the check as in version 2, because it is about the whole output.",
+  "about": "Version 3 (README \"Versie 3\"), following TypeSafe's own recipes and guidance. A known error: semantic_find (the output as numbered lines, a Choice over the lines and an exists Noul; 0.7 / 0.35). A claim against its source: citation_check (a Choice supports / contradicts / says_nothing; the top relation counts from 0.8), screened by a Noul on the topic. Every other check: per piece a topic Noul and a Choice of named kinds written from the rubric, each allowed kind with the rubric sentence it comes from; code decides at 0.7 / 0.3. A check about the whole output stays with the judge.",
   "holdout": [
     "contextualization",
     "defense-review",
@@ -50,6 +50,7 @@
     },
     "clear-assignment/addedRequirement": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -57,31 +58,34 @@
       "topic": {
         "ask": "Does `piece.text` state a requirement for the students: something they must do or hand in, or by which the work is assessed?",
         "yes": "`piece.text` states such a requirement (a product, length, form, file type, deadline, way of submission, criterion, weight, pass mark or condition).",
-        "no": "`piece.text` states no requirement, for example it explains the purpose, a term, or what the tool changed."
+        "no": "`piece.text` states no requirement, for example it explains the purpose, a term, or what the tool changed.",
+        "besides": [
+          {
+            "says": "A to-be-filled-in marker, an explanation of a term, or a suggestion under the open points is not an added requirement.",
+            "source": "A to-be-filled-in marker, an explanation of a term, and a suggestion under the open points are not added requirements."
+          }
+        ]
       },
       "kinds": {
-        "ask": "Where does the requirement in `piece.text` come from?",
+        "ask": "What does the original assignment in `case.inputs` say about the requirement in `piece.text`?",
         "options": {
-          "from_original": {
-            "says": "The requirement is in the original assignment in `case.inputs`, in the same or other words.",
-            "means": "other",
-            "source": "content and requirements stay the same"
+          "supports": {
+            "says": "The original assignment in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "marker_explanation_or_suggestion": {
-            "says": "`piece.text` is a to-be-filled-in marker, an explanation of a term, or a suggestion under the open points.",
-            "means": "other",
-            "source": "A to-be-filled-in marker, an explanation of a term, and a suggestion under the open points are not added requirements."
+          "contradicts": {
+            "says": "The original assignment in `case.inputs` states otherwise.",
+            "means": "fails"
           },
-          "not_in_original": {
-            "says": "`piece.text` states a requirement that is not in the original in `case.inputs`: an invented deadline, length, criterion, weight, file type or condition, or a vague criterion replaced by a sharper one.",
+          "says_nothing": {
+            "says": "The original assignment in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
       }
     },
     "clear-assignment/droppedRequirement": {
-      "keep": "v2",
-      "why": "Whether a requirement is missing is about the whole rewrite against the whole original: no single piece shows an absence."
+      "llm": "Whether a requirement is missing is about the whole rewrite against the whole original: no single piece shows an absence. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "clear-assignment/inventedSources": {
       "family": "invented",
@@ -116,31 +120,12 @@
     },
     "clear-assignment/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (missing information, requirements that contradict each other, or criteria that are not observable)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` names the error that `case.known_error` describes, or handles it the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "clear-assignment/silentChoice": {
@@ -310,31 +295,12 @@
     },
     "conversation-prep/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error in the teacher's goal"
-          },
-          "the_known_error": {
-            "says": "`piece.text` handles the error in `case.known_error` the way `case.known_error` says, for example by not asking about it or by not judging the decision.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "conversation-prep/namedCounter": {
@@ -570,8 +536,7 @@
       }
     },
     "defense-review/analysedNonDefense": {
-      "keep": "v2",
-      "why": "Whether the transcript is a conversation at all is about the case input as a whole, not about a piece of the output."
+      "llm": "Whether the transcript is a conversation at all is about the case input as a whole, not about a piece of the output. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "defense-review/attributeWithoutEvidence": {
       "family": "act",
@@ -599,6 +564,7 @@
     },
     "defense-review/creditedAiWords": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -609,15 +575,18 @@
         "no": "`piece.text` credits the student with nothing, for example it describes an area for development or gives a note for the teacher."
       },
       "kinds": {
-        "ask": "Whose words in the transcript in `case.inputs` back what `piece.text` credits the student with?",
+        "ask": "What does the transcript in `case.inputs` say about that the student said or did what `piece.text` credits them with?",
         "options": {
-          "student_said_it": {
-            "says": "The student said it in the transcript in `case.inputs`.",
-            "means": "other",
-            "source": "Only what the student said counts"
+          "supports": {
+            "says": "The transcript in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "only_ai_said_it": {
-            "says": "Only the AI said it in the transcript; the student only agreed or said little, for example \"ja\".",
+          "contradicts": {
+            "says": "The transcript in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The transcript in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -704,6 +673,7 @@
     },
     "defense-review/inventedQuote": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -714,15 +684,18 @@
         "no": "`piece.text` neither quotes nor describes a moment."
       },
       "kinds": {
-        "ask": "Are the words and figures of `piece.text` in the transcript in `case.inputs`?",
+        "ask": "What does the transcript in `case.inputs` say about the words, figures or moment in `piece.text`?",
         "options": {
-          "in_transcript": {
-            "says": "The quoted words and figures, or the moment, appear in the transcript in `case.inputs`.",
-            "means": "other",
-            "source": "tied to moments"
+          "supports": {
+            "says": "The transcript in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "not_in_transcript": {
-            "says": "`piece.text` uses words or figures that do not appear in the transcript, or describes a moment that did not happen.",
+          "contradicts": {
+            "says": "The transcript in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The transcript in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -949,31 +922,12 @@
     },
     "differentiation/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (a goal that is not observable, a task that does not assess the goal, or a teacher's wish that lowers the goal or makes challenge more work)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` names the error that `case.known_error` describes, or handles it the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "differentiation/supportDoesTheThinking": {
@@ -1007,8 +961,7 @@
       }
     },
     "differentiation/variantNotWrittenOut": {
-      "keep": "v2",
-      "why": "Whether a variant or the tip is missing is an absence in the whole output: no single piece shows it."
+      "llm": "Whether a variant or the tip is missing is an absence in the whole output: no single piece shows it. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "differentiation/wrongContent": {
       "llm": "Recomputing calculations and checking queries against tables is arithmetic; TypeSafe keeps math in code or out of Jev."
@@ -1125,31 +1078,12 @@
     },
     "difficult-conversation/missedKnownError": {
       "family": "known",
-      "unit": "exchange",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` the feedback on the teacher's conversation, after the teacher asked for it in `piece.said_before`?",
-        "yes": "`piece.text` is feedback on the conversation, out of the student role.",
-        "no": "`piece.text` is a turn of the role-play."
-      },
-      "kinds": {
-        "ask": "Which point to improve does the feedback in `piece.text` name?",
-        "options": {
-          "other_points": {
-            "says": "`piece.text` names other points, but not the error in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error the teacher made"
-          },
-          "the_known_error": {
-            "says": "`piece.text` names the error in `case.known_error` clearly as something to improve.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the feedback to the teacher name this problem: {{known_error}}"
       }
     },
     "difficult-conversation/noFeedbackOnRequest": {
@@ -1181,8 +1115,7 @@
       }
     },
     "difficult-conversation/unrealisticStudent": {
-      "keep": "v2",
-      "why": "Contradicting details the student gave earlier needs the whole conversation; a single turn cannot show it."
+      "llm": "Contradicting details the student gave earlier needs the whole conversation; a single turn cannot show it. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "engagement-check/computedTotal": {
       "family": "act",
@@ -1209,11 +1142,11 @@
       }
     },
     "engagement-check/followedInjection": {
-      "keep": "v2",
-      "why": "Following an instruction inside the activity text shows across all the ratings together, not in one piece."
+      "llm": "Following an instruction inside the activity text shows across all the ratings together, not in one piece. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "engagement-check/inventedReason": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -1224,15 +1157,18 @@
         "no": "`piece.text` is something else, such as an improvement."
       },
       "kinds": {
-        "ask": "Is what the reason in `piece.text` mentions in the activity text or the learning objective in `case.inputs`?",
+        "ask": "What does the activity text and the learning objective in `case.inputs` say about the steps, materials, questions, visuals or moments `piece.text` mentions?",
         "options": {
-          "in_activity_text": {
-            "says": "Every step, material, question, visual or moment it mentions is in the activity text or the learning objective.",
-            "means": "other",
-            "source": "with a one-sentence reason that points to the activity"
+          "supports": {
+            "says": "The activity text and the learning objective in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "not_in_activity_text": {
-            "says": "It mentions a step, material, question, visual or moment that is not in the activity text or the learning objective.",
+          "contradicts": {
+            "says": "The activity text and the learning objective in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The activity text and the learning objective in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -1264,6 +1200,7 @@
     },
     "engagement-check/levelWithoutEvidence": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -1274,15 +1211,18 @@
         "no": "`piece.text` rates a principle Absent or Low, or rates nothing."
       },
       "kinds": {
-        "ask": "What in the activity text in `case.inputs` backs the Medium or High in `piece.text`?",
+        "ask": "What does the activity text in `case.inputs` say about the level `piece.text` gives and its reason?",
         "options": {
-          "backed_by_activity_text": {
-            "says": "The activity text contains something that supports this level.",
-            "means": "other",
-            "source": "with a one-sentence reason that points to the activity"
+          "supports": {
+            "says": "The activity text in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "nothing_supports_it": {
-            "says": "The activity text contains nothing that supports it, for example the reason assumes what the teacher probably does in class.",
+          "contradicts": {
+            "says": "The activity text in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The activity text in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -1372,31 +1312,12 @@
     },
     "group-feedback/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (a request for a number that is not in the input, or a student fragment that tempts reuse as the good example)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` handles the error in `case.known_error` the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "group-feedback/unmarkedExample": {
@@ -1424,11 +1345,11 @@
       }
     },
     "guided-reflection/blurredStages": {
-      "keep": "v2",
-      "why": "Whether the three stages stay separate is about how the whole plan is laid out."
+      "llm": "Whether the three stages stay separate is about how the whole plan is laid out. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "guided-reflection/inventedOutcomes": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -1436,23 +1357,27 @@
       "topic": {
         "ask": "Does `piece.text` state a learning outcome?",
         "yes": "`piece.text` states one or more learning outcomes.",
-        "no": "`piece.text` states no learning outcome."
+        "no": "`piece.text` states no learning outcome.",
+        "besides": [
+          {
+            "says": "A new outcome that `piece.text` clearly marks as a suggestion for the teacher to decide on does not count.",
+            "source": "without saying clearly that these are suggestions for the teacher to decide on"
+          }
+        ]
       },
       "kinds": {
-        "ask": "Where does the outcome in `piece.text` come from, against `case.inputs`?",
+        "ask": "What does the teacher's outcomes in `case.inputs` say about the learning outcome in `piece.text`?",
         "options": {
-          "teachers_outcome": {
-            "says": "It is one of the teacher's outcomes in `case.inputs`.",
-            "means": "other",
-            "source": "the design must stay with the teacher's own goals"
+          "supports": {
+            "says": "The teacher's outcomes in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "marked_suggestion": {
-            "says": "It is new, but `piece.text` says clearly that it is a suggestion for the teacher to decide on.",
-            "means": "other",
-            "source": "without saying clearly that these are suggestions for the teacher to decide on"
+          "contradicts": {
+            "says": "The teacher's outcomes in `case.inputs` states otherwise.",
+            "means": "fails"
           },
-          "added_or_replaced": {
-            "says": "It is an outcome the teacher did not give, or replaces the teacher's outcome, without being marked as a suggestion.",
+          "says_nothing": {
+            "says": "The teacher's outcomes in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -1490,8 +1415,7 @@
       }
     },
     "guided-reflection/unalignedItem": {
-      "keep": "v2",
-      "why": "An outcome without evidence or activity is an absence across the whole plan."
+      "llm": "An outcome without evidence or activity is an absence across the whole plan. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "lesson-plan/answerInQuestionItem": {
       "family": "act",
@@ -1576,31 +1500,12 @@
     },
     "lesson-plan/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (too much content for the time, missing prior knowledge, or a goal without an observable verb)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` names the error that `case.known_error` describes, or handles it the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "lesson-plan/noCheckOfAllStudents": {
@@ -1632,8 +1537,7 @@
       }
     },
     "lesson-plan/phaseWithoutGoal": {
-      "keep": "v2",
-      "why": "A missing phase is an absence in the whole plan; the check asks it together with a phase that does not serve the goal."
+      "llm": "A missing phase is an absence in the whole plan; the check asks it together with a phase that does not serve the goal. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "lesson-plan/timeDoesNotAddUp": {
       "llm": "Whether minutes add up to the lesson length is arithmetic; TypeSafe keeps math out of Jev."
@@ -1667,6 +1571,7 @@
     },
     "mentorai/inventedStudentWords": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "turn",
       "needs": [
         "user_turns"
@@ -1677,15 +1582,18 @@
         "no": "`piece.text` refers to nothing the student did."
       },
       "kinds": {
-        "ask": "Is what `piece.text` attributes to the student in the student's turns in `case.user_turns`?",
+        "ask": "What does the student's turns in `case.user_turns` say about what `piece.text` says the student said, wrote, tried or answered?",
         "options": {
-          "in_student_turns": {
-            "says": "Yes, the student said, wrote, tried or answered it in `case.user_turns`.",
-            "means": "other",
-            "source": "builds on what the student knows"
+          "supports": {
+            "says": "The student's turns in `case.user_turns` states or directly supports it.",
+            "means": "other"
           },
-          "not_in_student_turns": {
-            "says": "No, it does not appear in the student's turns.",
+          "contradicts": {
+            "says": "The student's turns in `case.user_turns` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The student's turns in `case.user_turns` does not state it.",
             "means": "fails"
           }
         }
@@ -1829,6 +1737,7 @@
     },
     "portfolio-rehearsal/inventedFact": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "exchange",
       "needs": [
         "inputs",
@@ -1840,15 +1749,18 @@
         "no": "`piece.text` only asks, without stating facts about the teacher."
       },
       "kinds": {
-        "ask": "Where is that fact or source, against the dossier in `case.inputs` and the teacher's lines in `case.user_turns`?",
+        "ask": "What does the dossier in `case.inputs` and the teacher's lines in `case.user_turns` say about the facts about the teacher in `piece.text`, and any source it names (it must be in the dossier's reference list)?",
         "options": {
-          "in_dossier_or_teachers_lines": {
-            "says": "It is in the dossier or in the teacher's lines.",
-            "means": "other",
-            "source": "refers to what the portfolio says"
+          "supports": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` states or directly supports it.",
+            "means": "other"
           },
-          "in_neither": {
-            "says": "It is in neither, or the source is not in the dossier's reference list.",
+          "contradicts": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The dossier in `case.inputs` and the teacher's lines in `case.user_turns` does not state it.",
             "means": "fails"
           }
         }
@@ -1883,6 +1795,7 @@
     },
     "rubric-builder/inventedOutcomes": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -1890,23 +1803,27 @@
       "topic": {
         "ask": "Does `piece.text` state a learning outcome?",
         "yes": "`piece.text` states one or more learning outcomes.",
-        "no": "`piece.text` states no learning outcome."
+        "no": "`piece.text` states no learning outcome.",
+        "besides": [
+          {
+            "says": "One rewritten outcome, clearly marked as a proposal, does not count.",
+            "source": "other than one rewritten outcome clearly marked as a proposal"
+          }
+        ]
       },
       "kinds": {
-        "ask": "Where does the outcome in `piece.text` come from, against `case.inputs`?",
+        "ask": "What does the teacher's outcome in `case.inputs` say about the learning outcome in `piece.text`?",
         "options": {
-          "teachers_outcome": {
-            "says": "It is the teacher's outcome in `case.inputs`.",
-            "means": "other",
-            "source": "built from the teacher's learning outcome and assignment"
+          "supports": {
+            "says": "The teacher's outcome in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "marked_rewrite": {
-            "says": "It is one rewritten outcome, clearly marked as a proposal.",
-            "means": "other",
-            "source": "other than one rewritten outcome clearly marked as a proposal"
+          "contradicts": {
+            "says": "The teacher's outcome in `case.inputs` states otherwise.",
+            "means": "fails"
           },
-          "added_or_replaced": {
-            "says": "It adds an outcome the teacher did not give, or replaces the teacher's outcome.",
+          "says_nothing": {
+            "says": "The teacher's outcome in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -1945,31 +1862,12 @@
     },
     "rubric-builder/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (in the teacher's existing rubric or in the learning outcome)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` identifies the error that `case.known_error` describes, or does not build a full rubric on an outcome without an observable verb.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "rubric-builder/overlappingLevels": {
@@ -2089,31 +1987,12 @@
     },
     "test-analysis/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (a wrong answer key, too few candidates, raw scores instead of numbers per question, or a request for numbers that are not in the input)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` identifies the error that `case.known_error` describes, or acts on it as `case.known_error` expects.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "test-analysis/thresholdAsNorm": {
@@ -2147,11 +2026,11 @@
       "llm": "Whether the blueprint rows sum to the total and match the questions per row is counting and arithmetic; it stays out of Jev."
     },
     "test-items/clueInStem": {
-      "keep": "v2",
-      "why": "Whether an option gives the key away needs the key, which stands in the answer model, away from the question."
+      "llm": "Whether an option gives the key away needs the key, which stands in the answer model, away from the question. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "test-items/inventedContent": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -2159,23 +2038,27 @@
       "topic": {
         "ask": "Does `piece.text` state facts, figures, definitions, standards or sources as real?",
         "yes": "`piece.text` presents subject facts, figures, definitions, standards or sources as real.",
-        "no": "`piece.text` states none, for example it is an instruction or a question frame."
+        "no": "`piece.text` states none, for example it is an instruction or a question frame.",
+        "besides": [
+          {
+            "says": "Fictitious case data given in full in the question does not count.",
+            "source": "fictitious case data given in full in the question is fine"
+          }
+        ]
       },
       "kinds": {
-        "ask": "Where do the facts in `piece.text` come from, against the material in `case.inputs`?",
+        "ask": "What does the material in `case.inputs` say about the facts, figures, names or claims in `piece.text`?",
         "options": {
-          "from_material": {
-            "says": "They are in the material in `case.inputs`.",
-            "means": "other",
-            "source": "built from the teacher's learning outcomes and material"
+          "supports": {
+            "says": "The material in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "fictitious_case_data": {
-            "says": "They are fictitious case data given in full in the question.",
-            "means": "other",
-            "source": "fictitious case data given in full in the question is fine"
+          "contradicts": {
+            "says": "The material in `case.inputs` states otherwise.",
+            "means": "fails"
           },
-          "not_in_material": {
-            "says": "They are not in the material and are presented as real.",
+          "says_nothing": {
+            "says": "The material in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -2183,36 +2066,16 @@
     },
     "test-items/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error (an outcome without an observable verb, an outcome multiple choice cannot measure, or teacher figures that do not add up)."
-          },
-          "the_known_error": {
-            "says": "`piece.text` identifies the error that `case.known_error` describes, or does not write questions as if it were not there.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "test-items/twoCorrectAnswers": {
-      "keep": "v2",
-      "why": "The options and the key stand in different sections of the output (the question, and the answer model), so no single piece holds both."
+      "llm": "The options and the key stand in different sections of the output (the question, and the answer model), so no single piece holds both. TypeSafe asks for small questions; a question about the whole output is not one, so the judge keeps it."
     },
     "test-items/unmarkedProposal": {
       "family": "invented",
@@ -2271,6 +2134,7 @@
     },
     "visit-prep/inventedCriteria": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -2281,15 +2145,18 @@
         "no": "`piece.text` names none of these."
       },
       "kinds": {
-        "ask": "Where does it come from, against `case.inputs`?",
+        "ask": "What does `case.inputs` say about the criteria, competences or facts in `piece.text`?",
         "options": {
-          "from_input": {
-            "says": "It is in `case.inputs`.",
-            "means": "other",
-            "source": "The questions come only from the criteria in the input"
+          "supports": {
+            "says": "`case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "not_in_input": {
-            "says": "It is not in `case.inputs`.",
+          "contradicts": {
+            "says": "`case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "`case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -2321,35 +2188,17 @@
     },
     "visit-prep/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error in the input."
-          },
-          "the_known_error": {
-            "says": "`piece.text` handles the error in `case.known_error` the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "visit-report/invented": {
       "family": "invented",
+      "recipe": "citation_check",
       "unit": "block",
       "needs": [
         "inputs"
@@ -2360,15 +2209,18 @@
         "no": "`piece.text` reports none of these, for example it is a heading or \"Geen afspraken genoteerd.\"."
       },
       "kinds": {
-        "ask": "Is what `piece.text` reports in the teacher's notes in `case.inputs`?",
+        "ask": "What does the notes in `case.inputs` say about what `piece.text` reports?",
         "options": {
-          "in_the_notes": {
-            "says": "Yes, it is in the notes.",
-            "means": "other",
-            "source": "It works out only what is in the teacher's anonymised notes"
+          "supports": {
+            "says": "The notes in `case.inputs` states or directly supports it.",
+            "means": "other"
           },
-          "not_in_the_notes": {
-            "says": "No, it is not in the notes.",
+          "contradicts": {
+            "says": "The notes in `case.inputs` states otherwise.",
+            "means": "fails"
+          },
+          "says_nothing": {
+            "says": "The notes in `case.inputs` does not state it.",
             "means": "fails"
           }
         }
@@ -2400,31 +2252,12 @@
     },
     "visit-report/missedKnownError": {
       "family": "known",
-      "unit": "block",
+      "recipe": "semantic_find",
       "when": {
         "knownError": true
       },
-      "needs": [
-        "known_error"
-      ],
-      "topic": {
-        "ask": "Is `piece.text` about a problem, error or gap in what the teacher gave?",
-        "yes": "`piece.text` points out or deals with a problem, error or gap in the teacher's input or goal.",
-        "no": "`piece.text` only does the task, without pointing out any problem in the teacher's input."
-      },
-      "kinds": {
-        "ask": "Which problem does `piece.text` deal with?",
-        "options": {
-          "another_problem": {
-            "says": "`piece.text` deals with a problem other than the one in `case.known_error`.",
-            "means": "other",
-            "source": "The case description names a known error in the notes."
-          },
-          "the_known_error": {
-            "says": "`piece.text` handles the error in `case.known_error` the way `case.known_error` says.",
-            "means": "found"
-          }
-        }
+      "find": {
+        "query": "Where does the output point out or deal with this problem in what the teacher gave: {{known_error}}"
       }
     },
     "visit-report/realName": {

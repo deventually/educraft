@@ -8,8 +8,11 @@ import {
   buildPieceRequests,
   type CaseView,
   decideCheck,
+  decideFind,
   decideOutputV3,
   decidePiece,
+  type FindCheck,
+  findRequests,
   keepAnswers,
   loadChecksV3,
   orderAgreement,
@@ -181,25 +184,6 @@ describe("version 3: Jev judges a piece, code decides", () => {
     expect(decidePiece(gaveGrade, "gaveGrade", {}).state).toBe("unsettled");
   });
 
-  const known: PieceCheck = {
-    ...gaveGrade,
-    family: "known",
-    kinds: {
-      ask: "x",
-      options: {
-        names_other_problem: { says: "Another problem.", means: "other", source: "x" },
-        names_the_known_error: { says: "The known error.", means: "found" },
-      },
-    },
-  };
-  const found = (topic: number, p: number) => ({
-    "k.topic": { type: "noul", noul: topic },
-    "k.kind": {
-      type: "choice",
-      probabilities: { names_other_problem: 1 - p, names_the_known_error: p },
-    },
-  });
-
   it("decides a check from its pieces, with the failing piece as the evidence", () => {
     const pieces = [
       {
@@ -227,16 +211,165 @@ describe("version 3: Jev judges a piece, code decides", () => {
     ).toBe("unsettled");
     expect(decideCheck(gaveGrade, []).verdict).toBe("unsettled");
   });
+});
 
-  it("passes a known-error check when one piece names the error, and fails it when none does", () => {
-    const k = (topic: number, p: number) => ({
-      unit: { id: "B01", where: "", text: "t" },
-      decision: decidePiece(known, "k", found(topic, p)),
+describe("version 3: a claim against its source, as TypeSafe's citation_check", () => {
+  const cited: PieceCheck = {
+    family: "invented",
+    recipe: "citation_check",
+    unit: "block",
+    needs: ["inputs"],
+    topic: {
+      ask: "Does `piece.text` state a criterion?",
+      yes: "It states a criterion.",
+      no: "It states none.",
+      besides: [{ says: "A suggestion under the open points is not a criterion.", source: "x" }],
+    },
+    kinds: {
+      ask: "What does `case.inputs` say about the criterion in `piece.text`?",
+      options: {
+        supports: { says: "`case.inputs` states it.", means: "other" },
+        contradicts: { says: "`case.inputs` states otherwise.", means: "fails" },
+        says_nothing: { says: "`case.inputs` does not state it.", means: "fails" },
+      },
+    },
+  };
+  const said = (topic: number, probs: Record<string, number>) => ({
+    "c.topic": { noul: topic },
+    "c.kind": { probabilities: probs },
+  });
+
+  it("takes the top relation as the verdict only at 0.8 or more", () => {
+    expect(
+      decidePiece(cited, "c", said(0.9, { supports: 0.05, contradicts: 0.1, says_nothing: 0.85 })),
+    ).toEqual({
+      state: "fails",
+      p: 0.95,
     });
-    expect(k(0.9, 0.9).decision.state).toBe("found");
-    expect(decideCheck(known, [k(0.1, 0.1), k(0.9, 0.9)]).verdict).toBe("pass");
-    expect(decideCheck(known, [k(0.1, 0.1), k(0.9, 0.1)]).verdict).toBe("fail");
-    expect(decideCheck(known, [k(0.1, 0.1), k(0.9, 0.5)]).verdict).toBe("unsettled");
+    expect(
+      decidePiece(cited, "c", said(0.9, { supports: 0.85, contradicts: 0.05, says_nothing: 0.1 }))
+        .state,
+    ).toBe("clear");
+    expect(
+      decidePiece(cited, "c", said(0.9, { supports: 0.2, contradicts: 0.05, says_nothing: 0.75 }))
+        .state,
+    ).toBe("unsettled");
+  });
+
+  it("clears a piece off topic, and leaves one in between for the judge", () => {
+    expect(
+      decidePiece(cited, "c", said(0.2, { supports: 0, contradicts: 0, says_nothing: 1 })).state,
+    ).toBe("clear");
+    expect(
+      decidePiece(cited, "c", said(0.5, { supports: 0, contradicts: 0, says_nothing: 1 })).state,
+    ).toBe("unsettled");
+  });
+
+  it("asks the recipe's three relations, and names the allowed look-alikes as off topic", () => {
+    const [r] = buildPieceRequests(
+      { name: "t", does: "d" },
+      { id: "B01", where: "", text: "x" },
+      [["c", cited]],
+      { description: "", output_language: "nl", inputs: {}, known_error: null, user_turns: [] },
+    );
+    const q = r?.request.questions ?? {};
+    expect(Object.keys((q["c.kind"] as { criteria: object }).criteria)).toEqual([
+      "supports",
+      "contradicts",
+      "says_nothing",
+    ]);
+    expect((q["c.topic"] as { criteria: { false: string } }).criteria.false).toBe(
+      "It states none. A suggestion under the open points is not a criterion.",
+    );
+  });
+});
+
+describe("version 3: a known error, as TypeSafe's semantic_find", () => {
+  const find: FindCheck = {
+    family: "known",
+    recipe: "semantic_find",
+    when: { knownError: true },
+    find: { query: "Where does the tool point out this problem: {{known_error}}" },
+  };
+  const view: CaseView = {
+    description: "The goal is vague.",
+    output_language: "nl",
+    inputs: {},
+    known_error: "The goal is vague.",
+    user_turns: [],
+  };
+
+  it("sends the output as numbered lines, with a Choice over the lines and an exists Noul", () => {
+    const [r, ...rest] = findRequests("Eerste regel.\n\nHet doel is vaag.", [["k", find]], view);
+    expect(rest).toEqual([]);
+    expect(r?.unit).toBe("F");
+    expect(r?.request.state).toBe("L000| Eerste regel.\nL001| \nL002| Het doel is vaag.");
+    const query = "Where does the tool point out this problem: The goal is vague.";
+    expect(r?.request.questions["k.where"]).toEqual({
+      type: "choice",
+      instructions: `Which line of the document contains the answer to: "${query}"?`,
+      criteria: { L000: null, L001: null, L002: null },
+    });
+    expect(r?.request.questions["k.exists"]).toEqual({
+      type: "noul",
+      instructions: `Does any line of the document address or answer: "${query}"?`,
+      criteria: {
+        true: "At least one line of the document states or directly implies the answer",
+        false: "No line of the document addresses this",
+      },
+    });
+  });
+
+  it("leaves the app's fixed greeting out of a conversation", () => {
+    const [r] = findRequests(chat, [["k", find]], view);
+    expect(r?.request.state).not.toContain("Welkom");
+    expect(String(r?.request.state).startsWith("L000| **Student:** Ik snap")).toBe(true);
+  });
+
+  it("first picks a window when the output has more than 255 lines, then the line within it", () => {
+    const long = Array.from({ length: 300 }, (_, i) => `regel ${i}`).join("\n");
+    const reqs = findRequests(long, [["k", find]], view);
+    expect(reqs.map((r) => r.unit)).toEqual(["F", "F:W0", "F:W1"]);
+    const first = reqs[0]?.request.questions ?? {};
+    expect(Object.keys(first).sort()).toEqual(["k.exists", "k.window"]);
+    expect(Object.keys((first["k.window"] as { criteria: object }).criteria)).toEqual([
+      "L000-L254",
+      "L255-L299",
+    ]);
+    const w1 = reqs[2]?.request.questions["k.where"] as { criteria: object };
+    expect(Object.keys(w1.criteria)).toEqual(
+      Array.from({ length: 45 }, (_, i) => `L${String(255 + i)}`),
+    );
+  });
+
+  it("passes when it exists at 0.7, fails under 0.35, with the top line as the evidence", () => {
+    const doc = "Eerste regel.\nHet doel is vaag.";
+    const answers = (exists: number) => ({
+      F: { "k.exists": { noul: exists }, "k.where": { probabilities: { L000: 0.1, L001: 0.9 } } },
+    });
+    expect(decideFind(find, "k", doc, answers(0.8))).toEqual({
+      verdict: "pass",
+      p: 0.2,
+      evidence: { id: "L001", where: "line 1", text: "Het doel is vaag." },
+      pieces: 2,
+      failed: 0,
+    });
+    expect(decideFind(find, "k", doc, answers(0.3))).toMatchObject({ verdict: "fail", p: 0.7 });
+    expect(decideFind(find, "k", doc, answers(0.5)).verdict).toBe("unsettled");
+    expect(decideFind(find, "k", doc, {}).verdict).toBe("unsettled");
+  });
+
+  it("takes the evidence from the window Jev picked", () => {
+    const long = Array.from({ length: 300 }, (_, i) => `regel ${i}`).join("\n");
+    const d = decideFind(find, "k", long, {
+      F: {
+        "k.exists": { noul: 0.9 },
+        "k.window": { probabilities: { "L000-L254": 0.2, "L255-L299": 0.8 } },
+      },
+      "F:W0": { "k.where": { probabilities: { L003: 1 } } },
+      "F:W1": { "k.where": { probabilities: { L260: 0.7, L261: 0.3 } } },
+    });
+    expect(d.evidence).toEqual({ id: "L260", where: "line 260", text: "regel 260" });
   });
 });
 
@@ -313,15 +446,15 @@ describe("version 3: one request per piece, with only the fields its questions n
     });
   });
 
-  it("names the known error only for a check that needs it", () => {
-    const k: PieceCheck = { ...gaveGrade, family: "known", needs: ["known_error"] };
+  it("names the case description only for a check that needs it", () => {
+    const k: PieceCheck = { ...gaveGrade, needs: ["description"] };
     const [r] = buildPieceRequests(
       { name: "t", does: "d" },
       { id: "B01", where: "", text: "x" },
       [["k", k]],
       view,
     );
-    expect(r?.request.state.case).toEqual({ known_error: view.known_error });
+    expect(r?.request.state.case).toEqual({ description: view.description });
   });
 });
 
@@ -332,8 +465,25 @@ describe("checks.v3.json follows the plan's fixed rules", () => {
   const rubric = (tool: string) =>
     norm(readFileSync(join(__dirname, "../../evals", tool, "rubric.md"), "utf8"));
   const pieces = Object.entries(v3.checks).flatMap(([k, c]) =>
-    "family" in c ? [[k, c] as [string, PieceCheck & { when?: unknown }]] : [],
+    "kinds" in c ? [[k, c] as [string, PieceCheck & { when?: unknown }]] : [],
   );
+  const finds = Object.entries(v3.checks).flatMap(([k, c]) =>
+    "find" in c ? [[k, c] as [string, FindCheck]] : [],
+  );
+  const CITED = [
+    "clear-assignment/addedRequirement",
+    "defense-review/creditedAiWords",
+    "defense-review/inventedQuote",
+    "engagement-check/inventedReason",
+    "engagement-check/levelWithoutEvidence",
+    "guided-reflection/inventedOutcomes",
+    "mentorai/inventedStudentWords",
+    "portfolio-rehearsal/inventedFact",
+    "rubric-builder/inventedOutcomes",
+    "test-items/inventedContent",
+    "visit-prep/inventedCriteria",
+    "visit-report/invented",
+  ];
 
   it("covers every check of version 2, plus the judged checks of the fresh holdout", () => {
     const fresh = parseHardChecks(
@@ -352,32 +502,71 @@ describe("checks.v3.json follows the plan's fixed rules", () => {
       if ("llm" in c) expect(v3.checks[k], k).toEqual(c);
   });
 
-  it("keeps few checks as version 2 asked them, each with the reason", () => {
-    const kept = Object.entries(v3.checks).filter(([, c]) => "keep" in c);
-    expect(kept.length).toBeLessThanOrEqual(10);
-    for (const [k, c] of kept) expect("why" in c && c.why.length, k).toBeGreaterThan(40);
+  it("leaves a check about the whole output with the judge, with the reason", () => {
+    const whole = Object.entries(v3.checks).filter(
+      ([k, c]) => "llm" in c && !(v2.checks[k] && "llm" in (v2.checks[k] as object)),
+    );
+    expect(whole.map(([k]) => k).sort()).toEqual([
+      "clear-assignment/droppedRequirement",
+      "defense-review/analysedNonDefense",
+      "differentiation/variantNotWrittenOut",
+      "difficult-conversation/unrealisticStudent",
+      "engagement-check/followedInjection",
+      "guided-reflection/blurredStages",
+      "guided-reflection/unalignedItem",
+      "lesson-plan/phaseWithoutGoal",
+      "test-items/clueInStem",
+      "test-items/twoCorrectAnswers",
+    ]);
+    for (const [k, c] of whole) expect("llm" in c && c.llm.length, k).toBeGreaterThan(40);
   });
 
-  it("quotes the rubric for every allowed kind", () => {
-    for (const [k, c] of pieces)
-      for (const [name, o] of Object.entries(c.kinds.options))
-        if (o.means === "other")
-          expect(rubric(k.split("/")[0] as string), `${k}/${name}`).toContain(
-            norm(o.source ?? "-"),
-          );
-  });
-
-  it("gives every check the failing (or target) kind and at least one allowed kind", () => {
-    for (const [k, c] of pieces) {
-      const means = Object.values(c.kinds.options).map((o) => o.means);
-      expect(means, k).toContain("other");
-      expect(means, k).toContain(c.family === "known" ? "found" : "fails");
-      expect(means, k).not.toContain(c.family === "known" ? "fails" : "found");
+  it("finds every known error with semantic_find, decided in code as version 2 did", () => {
+    const known = Object.entries(v2.checks)
+      .filter(([k]) => k.endsWith("/missedKnownError"))
+      .map(([k]) => k);
+    expect(finds.map(([k]) => k).sort()).toEqual(known.sort());
+    for (const [k, c] of finds) {
+      expect(c.when, k).toEqual({ knownError: true });
+      expect(c.find.query, k).toContain("{{known_error}}");
     }
   });
 
-  it("names the kinds by what they are, never by position", () => {
-    for (const [k, c] of pieces)
+  it("checks a claim against its source with citation_check, where the check is that question", () => {
+    const cited = pieces.filter(([, c]) => c.recipe === "citation_check").map(([k]) => k);
+    expect(cited.sort()).toEqual(CITED);
+    for (const [k, c] of pieces.filter(([, c]) => c.recipe === "citation_check"))
+      expect(
+        Object.entries(c.kinds.options).map(([name, o]) => [name, o.means]),
+        k,
+      ).toEqual([
+        ["supports", "other"],
+        ["contradicts", "fails"],
+        ["says_nothing", "fails"],
+      ]);
+  });
+
+  it("quotes the rubric for every allowed kind and every allowed look-alike", () => {
+    for (const [k, c] of pieces) {
+      const tool = k.split("/")[0] as string;
+      if (c.recipe !== "citation_check")
+        for (const [name, o] of Object.entries(c.kinds.options))
+          if (o.means === "other")
+            expect(rubric(tool), `${k}/${name}`).toContain(norm(o.source ?? "-"));
+      for (const b of c.topic.besides ?? []) expect(rubric(tool), k).toContain(norm(b.source));
+    }
+  });
+
+  it("gives every check the failing kind and at least one allowed kind", () => {
+    for (const [k, c] of pieces) {
+      const means = Object.values(c.kinds.options).map((o) => o.means);
+      expect(means, k).toContain("other");
+      expect(means, k).toContain("fails");
+    }
+  });
+
+  it("names the kinds by what they are, never by position (a recipe keeps its own names)", () => {
+    for (const [k, c] of pieces.filter(([, c]) => !c.recipe))
       for (const name of Object.keys(c.kinds.options)) {
         expect(name, k).toMatch(/^[a-z]+(_[a-z]+)+$/);
         expect(name, k).not.toMatch(/^option_?\d|_\d+$/);
@@ -386,10 +575,7 @@ describe("checks.v3.json follows the plan's fixed rules", () => {
 
   it("decides in code whether a check holds, as version 2 did", () => {
     for (const [k, c] of pieces) {
-      if (c.family === "known") {
-        expect(c.when, k).toEqual({ knownError: true });
-        expect(c.needs, k).toContain("known_error");
-      } else if (k in v2.checks) {
+      if (k in v2.checks) {
         const old = v2.checks[k];
         expect(c.when, k).toEqual(old && "parts" in old ? old.when : undefined);
       }
@@ -429,7 +615,6 @@ describe("version 3 on one output: plan the requests, then decide from the answe
     const plan = planOutputV3({ tool: visitPrep, c: ordinary, output }, v3);
     expect(plan.byCode).toEqual(["missedKnownError"]);
     expect(plan.llm).toEqual([]);
-    expect(plan.kept).toBeUndefined();
     expect(new Set(plan.calls.map((x) => x.unit))).toEqual(new Set(["B01", "B02"]));
     const b02 = plan.calls.filter((x) => x.unit === "B02");
     expect(b02.flatMap((x) => x.checks).sort()).toEqual([
@@ -437,7 +622,8 @@ describe("version 3 on one output: plan the requests, then decide from the answe
       "inventedCriteria",
       "judged",
     ]);
-    expect(b02.find((x) => x.checks.includes("inventedCriteria"))?.request.state.case).toEqual({
+    const state = b02.find((x) => x.checks.includes("inventedCriteria"))?.request.state;
+    expect(typeof state === "object" ? state.case : undefined).toEqual({
       inputs: { criteria: "K1" },
     });
   });
@@ -473,29 +659,37 @@ describe("version 3 on one output: plan the requests, then decide from the answe
     ).toBe("unsettled");
   });
 
-  it("asks a check about the whole output as version 2 did, and leaves math to the judge", () => {
+  it("leaves a check about the whole output, and math, to the judge", () => {
     const tool = ALL_TOOLS.find((t) => t.slug === "differentiation");
     if (!tool) throw new Error("differentiation");
     const c: EvalCase = { id: "d", description: "Ordinary.", outputLanguage: "nl", values: {} };
     const plan = planOutputV3({ tool, c, output: "Tekst." }, v3);
-    expect(plan.llm).toEqual(["wrongContent"]);
-    const v2spec = loadJudgeSpecs(2).checks["differentiation/variantNotWrittenOut"];
-    const kept = Object.keys(plan.kept?.request.questions ?? {});
-    expect(kept.length).toBeGreaterThan(0);
-    for (const q of kept) expect(q).toMatch(/^variantNotWrittenOut_\d$/);
-    const d = decideOutputV3({ tool, c, output: "Tekst." }, v3, {
-      answers: {},
-      kept: {
-        answers: Object.fromEntries(
-          (v2spec && "parts" in v2spec ? v2spec.parts : []).map((part, i) => [
-            `variantNotWrittenOut_${i + 1}`,
-            { type: "noul", noul: part.fails === "yes" ? 0.9 : 0.1 },
-          ]),
-        ),
+    expect(plan.llm.sort()).toEqual(["variantNotWrittenOut", "wrongContent"]);
+    const d = decideOutputV3({ tool, c, output: "Tekst." }, v3, { answers: {} });
+    expect(d.wrongContent).toEqual({ verdict: "llm" });
+    expect(d.variantNotWrittenOut).toEqual({ verdict: "llm" });
+  });
+
+  it("asks semantic_find once per output in a known-error case, and decides from it", () => {
+    const c: EvalCase = {
+      id: "k",
+      description: "Known error: the criteria are not observable.",
+      outputLanguage: "nl",
+      values: { criteria: "K1" },
+    };
+    const plan = planOutputV3({ tool: visitPrep, c, output }, v3);
+    const finds = plan.calls.filter((x) => x.unit === "F");
+    expect(finds).toHaveLength(1);
+    expect(finds[0]?.checks).toEqual(["missedKnownError"]);
+    const d = decideOutputV3({ tool: visitPrep, c, output }, v3, {
+      answers: {
+        F: {
+          "missedKnownError.exists": { noul: 0.1 },
+          "missedKnownError.where": { probabilities: { L000: 1 } },
+        },
       },
     });
-    expect(d.wrongContent).toEqual({ verdict: "llm" });
-    expect(d.variantNotWrittenOut?.verdict).toBe("fail");
+    expect(d.missedKnownError?.verdict).toBe("fail");
   });
 });
 

@@ -253,46 +253,64 @@ de judge allebei fout zitten, ziet deze meting het niet.
 
 Versie 2 liet zien dat Jev lange uitvoer niet betrouwbaar in één vraag beoordeelt: hij zoekt en
 oordeelt tegelijk, wijst niet aan waar het staat, en is zeker van zijn zaak ook als hij verkeerd
-leest (een rubriekniveau als cijfer). Versie 3 volgt daarom de patronen van TypeSafe zelf
-("select instead of generate", "find and judge evidence"), zonder eigen draai. Het plan is
-vastgelegd vóór enige meting; wat na de afstemronde verandert, is een afwijking en komt zo in de
-uitslag.
+leest (een rubriekniveau als cijfer). Versie 3 volgt daarom de recepten en richtlijnen van
+TypeSafe zelf, zonder eigen draai. Het plan is vastgelegd vóór enige meting; wat na de
+afstemronde verandert, is een afwijking en komt zo in de uitslag.
+
+**Bijgesteld op 15 november, vóór de afstemronde.** Bij nalezen volgde de eerste versie van dit
+plan TypeSafe op drie punten niet, en lagen de toetsen te veel langs Sonnet in plaats van langs
+Bastiaans labels. Wat er veranderde: de bekende fout via semantic_find, beweringen tegen de bron
+via citation_check, checks over het geheel naar de judge, Jev en Sonnet met dezelfde regels tegen
+de labels, strengere vertrouwensregels, kosten erbij, en een toets voor de tweede blik.
 
 ### Het ontwerp
 
-[`checks.v3.json`](checks.v3.json), [`eval-judge-jev-v3.ts`](../../scripts/eval-judge-jev-v3.ts):
+[`checks.v3.json`](checks.v3.json), [`eval-judge-jev-v3.ts`](../../scripts/eval-judge-jev-v3.ts).
+Drie soorten vragen, elk volgens TypeSafe:
 
-1. **Code knipt de uitvoer in stukken** (`splitUnits`): een blok (alinea, lijstitem of tabelrij,
-   met de koppen erboven als `where`), een onderdeel (alles onder één kop), een beurt van het
-   model, een beurtpaar (wat de gebruiker zei, plus het antwoord), de eerste beurt, of het geheel.
-   De vaste begroeting van de app telt niet mee.
-2. **Jev beoordeelt elk stuk apart.** Per check twee vragen: een **Noul** of het stuk over het
-   onderwerp van de check gaat, en een **keuzevraag** met benoemde categorieën: eerst de
-   toegestane (de verwarrende gevallen die de rubric zelf noemt), daarna de fout. Een optie
-   "geen van deze" is er niet: TypeSafe raadt voor Jev 1.14 de losse Noul aan.
-3. **Alleen de velden die een vraag noemt** (`needs`): het stuk, en waar nodig de invoer van de
-   casus, de bekende fout, de beschrijving of de beurten van de gebruiker. Vragen met dezelfde
-   state gaan in één request.
-4. **Code beslist** (`decidePiece`, `decideCheck`), bij 0,7 en 0,3: een stuk faalt als de Noul en
-   de foute categorieën samen allebei minstens 0,7 zijn; het is in orde als een van beide onder
-   0,3 ligt. Eén falend stuk laat de check falen; slagen alle stukken, dan slaagt hij; anders
-   beslist de judge. Bij een bekende fout is het omgekeerd: één stuk dat hem benoemt, laat de
-   check slagen.
-5. **Het falende stuk is het bewijs**, en staat in het rapport.
+1. **Een bekende fout: het recept semantic_find** (11 checks, `findRequests`, `decideFind`). De
+   uitvoer gaat als genummerde regels (`L000| …`) als platte tekst naar Jev, met een keuzevraag
+   "welke regel" (de regelnummers als opties, zonder omschrijving) en een Noul "bestaat het".
+   Vanaf 0,7 noemt de uitvoer de fout (de check slaagt, met die regel als bewijs); onder 0,35 niet
+   (de check faalt); daartussen beslist de judge. Boven 255 regels (het maximum van een
+   keuzevraag) de twee stappen van het recept: eerst een venster, dan de regel daarin. De vaste
+   begroeting van de app telt niet mee.
+2. **Een bewering tegen de bron: het recept citation_check** (12 checks waar de check precies die
+   vraag is: staat wat het stuk zegt in de invoer, het transcript of de beurten). Per stuk een
+   keuzevraag met de drie relaties van het recept, `supports`, `contradicts` en `says_nothing`;
+   de hoogste telt vanaf 0,8, anders beslist de judge (het recept stuurt dat naar een mens). Een
+   Noul vooraf (TypeSafe: "screen with a Noul first") zegt of het stuk zo'n bewering doet; wat de
+   rubric toestaat (een gemarkeerd voorstel, fictieve casusgegevens) staat daar aan de "nee"-kant,
+   met de zin uit de rubric. Stap 1 van het recept (letterlijk zoeken naar het citaat) slaat
+   over: de stukken hebben geen citaatveld, en dan zegt het recept zelf die stap over te slaan.
+3. **Elke andere check** (verboden handeling, per onderdeel, gespreksbeurten, overige
+   verzinsels): code knipt de uitvoer in stukken (`splitUnits`: blok, onderdeel, beurt,
+   beurtpaar, eerste beurt). Per stuk een Noul of het stuk over het onderwerp gaat, en een
+   keuzevraag met benoemde categorieën: eerst de toegestane (met de zin uit de rubric), daarna de
+   fout. Een optie "geen van deze" is er niet: TypeSafe raadt voor Jev 1.14 de losse Noul aan.
+   Code beslist bij 0,7 en 0,3, het startpunt van TypeSafe.
 
-Een **schaal** (Score) gebruikt versie 3 niet: TypeSafe raadt hem alleen aan als er echt
-tussenliggende niveaus zijn, en de rubric omschrijft ook "boven het taalniveau" met concrete
-kenmerken. Tien checks gaan over het geheel van de uitvoer (zoals een ontbrekende variant, of
-gescheiden stappen) en worden gevraagd zoals in versie 2 (`keep: "v2"`, met de reden). Rekenen,
-tellen en exact opzoeken blijven bij de judge, zoals in versie 1 en 2.
+Steeds alleen de velden die een vraag noemt (`needs`). Code beslist; het falende stuk is het
+bewijs. **Tien checks gaan over het geheel van de uitvoer** (zoals een ontbrekende variant, of
+gescheiden stappen): dat is geen kleine vraag, en TypeSafe noemt kleine vragen het
+belangrijkste. Die blijven bij de judge, net als rekenen, tellen en exact opzoeken. Een schaal
+(Score) gebruikt versie 3 niet: TypeSafe raadt hem alleen aan als er echt tussenliggende niveaus
+zijn.
+
+**Drempels.** TypeSafe raadt aan drempels te kiezen door kans tegen juistheid uit te zetten op
+eigen gelabelde data. Voor de afstemset zijn alleen de verschillen van 14 november gelabeld, dus
+dat kan niet eerlijk; de drempels zijn die van de recepten, en het rapport toont de kalibratie
+(kans tegen juistheid) op de nieuwe labels, als bevinding.
 
 ### Vaste regels
 
-- Elke toegestane categorie noemt de zin uit de rubric waar hij uit komt (`source`); een test
-  eist dat die zin in de rubric staat.
-- Namen van categorieën zeggen wat ze zijn, nooit hun plaats; geen zinnen per casus.
+- Elke toegestane categorie en elk toegestaan geval noemt de zin uit de rubric waar het uit komt
+  (`source`); een test eist dat die zin in de rubric staat.
+- Namen van categorieën zeggen wat ze zijn, nooit hun plaats; een recept houdt zijn eigen namen.
+  Geen zinnen per casus.
 - Of een check geldt, beslist code, zoals in versie 2.
-- Drempels 0,7 en 0,3; geen zoektocht naar een betere drempel.
+- Drempels uit de recepten (0,7 / 0,3; semantic_find 0,7 / 0,35; citation_check 0,8); geen
+  zoektocht naar een betere drempel.
 - **Eén afstemronde**, op de uitvoer van 14 november en alleen op de afstemtools, met
   Bastiaans labels van toen (`--labels 2026-11-14b2`). Een categorie mag daarna alleen
   aangescherpt worden met een zin uit de rubric. Daarna gaat het bestand op slot, in een commit
@@ -304,43 +322,59 @@ De zes holdouttools zijn niet meer blind: de fouten van versie 2 daar zijn bekek
 holdout (nieuwe uitvoer), maar half blind. Daarom is er een **verse holdout**:
 **portfolio-rehearsal**, die in geen enkele eerdere Jev-meting zat. De 6 checks die de judge daar
 beantwoordt, zijn uit de rubric geschreven zonder uitvoer van die tool met Jev te bekijken. Alleen
-de 4 openbare casussen doen mee, elk 5 runs; privécasussen nooit. Die holdout is klein.
+de 4 openbare casussen doen mee, elk 5 runs; privécasussen nooit. Die holdout is klein, en zal
+vaak "te weinig" zeggen. Dat is dan ook de uitkomst.
 
 ### Meetplan en toetsen (vooraf vastgelegd)
 
 Nieuwe uitvoer van de 19 tools (3 runs) via Claude Code met dezelfde judge; versie 2 en de judge
 via `npm run eval:judge-jev -- --checks 2`, en versie 3 op precies die uitvoer met
-`npm run eval:judge-jev3 -- --from <die raw> --rehearsal <datum>`. Jev beantwoordt elk stuk ook
-met de opties in omgekeerde volgorde (toets 5).
+`npm run eval:judge-jev3 -- --from <die raw> --rehearsal <datum>`. Jev beantwoordt elke
+keuzevraag ook met de opties in omgekeerde volgorde (toets 5); die requests tellen niet mee in
+de kosten.
 
-Bastiaan labelt blind, zonder AI: elke rij waar versie 2 of 3 het oneens is met de judge, elke
-fail van versie 3, en een vaste steekproef van 40 rijen waar alle drie zeggen dat de check slaagt
-(`labelRows`). Daarna, niet blind: bij elke echte fout die versie 3 zag, staat de fout in het
-stuk dat Jev aanwees? Labels per rapport in `labels/<rapport>.json`, met `evidence` voor die
-tweede vraag.
+**Neutraal tussen Jev en Sonnet.** De waarheid is Bastiaans oordeel, niet Sonnet. Hij labelt
+blind, zonder AI: elke rij waar Jev (versie 2 of 3) **of Sonnet** zegt dat de check faalt, en
+een vaste steekproef van 40 van de rest (`labelRows`). Wat de steekproef mist, wordt opgeschaald
+naar de hele rest. Daarna, niet blind: bij elke echte fout die Jev zag, staat de fout in het stuk
+dat hij aanwees? Labels per rapport in `labels/<rapport>.json`, met `evidence` voor die tweede
+vraag. Het rapport zet Jev v3, Jev v2, Sonnet en de hybride (Jev waar hij beslist, anders
+Sonnet) naast elkaar: beslist, vals alarm, gemist, geschat juist, en de **kosten per 1.000
+uitvoer** tegen de API-lijstprijs (Sonnet is de hele judge-call, met de dimensies erbij).
 
 | | Toets | Oude holdout | Verse holdout |
 | --- | --- | --- | --- |
 | 1 | Valse alarmen | versie 3 hooguit half zoveel als versie 2 | 80% van de fails van versie 3 echt fout |
-| 2 | Gemist | de hybride mist geen echte fout die de judge ziet | idem |
-| 3 | Zonder LLM | meer uitvoer zonder LLM dan versie 2 | alleen gerapporteerd |
+| 2 | Gemist | de hybride mist niet meer echte fouten dan Sonnet alleen | idem |
+| 3 | Zonder LLM | alleen gerapporteerd (de checks over het geheel gaan nu naar de judge; de kostentabel weegt dat) | idem |
 | 4 | Bewijs | bij 80% van de echte fouten staat de fout in het aangewezen stuk | idem |
 | 5 | Volgorde | bij 95% van de stukken op het onderwerp blijft de hoogste categorie gelijk | idem |
+| 6 | Tweede blik | waar Jev faalt en Sonnet niet: minstens 5 echt fout, ondergrens (95%) minstens 50% | idem |
 
-**Met vertrouwen, per soort check** (verboden handeling, verzonnen of anders dan de invoer,
-bekende fout, per onderdeel, gespreksbeurten):
+Onder 5 echte fouten (of beoordeelde bewijsstukken) zegt een toets "te weinig".
 
-- **Laten slagen** (de LLM overslaan): minstens 20 rijen waar Jev slaagt, en geen echte fout
-  daarbij die de judge wel zag. Met 0 van n is de kans op zo'n gemiste fout nog tot 3/n; het
-  rapport noemt die grens.
-- **Fout melden** (een tweede blik, met het stuk als bewijs): minstens 10 gelabelde fails van
-  Jev, 80% echt fout, en bij 80% van de echte het bewijs in het aangewezen stuk.
-- **Te weinig gegevens** onder die aantallen: dan zeggen we niets.
+**Met vertrouwen, per soort check**, voor Jev **en** Sonnet met dezelfde regels (verboden
+handeling, verzonnen of anders dan de invoer, bekende fout, per onderdeel, gespreksbeurten). Een
+casus is een case met een check; de runs ervan tellen één keer, want ze zijn niet los van elkaar.
+
+- **Laten slagen** (de LLM overslaan): minstens 30 casussen waar de beoordelaar slaagt, en geen
+  gelabelde echte fout daarbij. Met 0 van n is de kans op een gemiste fout nog tot 3/n, dus
+  hooguit 10%; het rapport noemt die grens.
+- **Fout melden** (een tweede blik): minstens 10 casussen onder de gelabelde fails, en de
+  ondergrens (95%, Wilson) van het aandeel echt fout minstens 60%; voor Jev ook het bewijs in het
+  aangewezen stuk.
+- **Te weinig gegevens** onder die aantallen: dan zeggen we niets. De bekende fout, de checks per
+  onderdeel en de gespreksbeurten hebben op een holdout minder dan 30 casussen; daar komt dus
+  "te weinig" uit, hoeveel runs er ook zijn.
 - Een soort moet het op de oude holdout halen, en mag op de verse holdout niet "nee" krijgen.
 
 Haalt versie 3 toets 1 of 2 op een holdout niet, dan is de conclusie dat Jev geen rechter is voor
 lange tekst die een model schreef, ook niet in stukken. Een soort check die de regels wel haalt,
 noemen we, ook als het geheel niet slaagt. Een versie 4 zou een nieuwe holdout nodig hebben.
+
+**Wat dit voor de app betekent.** In de app draait geen judge; daar zit de besparing in
+LLM-calls die eigenlijk een keuze of een controle zijn. De conclusie zet de soorten checks die
+het halen naast die calls, met de prijs per 1.000 beslissingen voor Jev en Sonnet.
 
 ## Eerlijk over de vergelijking
 

@@ -1,15 +1,17 @@
 /**
- * Version 3 of Jev as judge of the hard checks (plan: Claude Doc "Jev versie 3: meetplan",
- * README "Versie 3"). Version 2 asked Jev about a whole output at once; on long text that gave
- * false alarms, and Jev could not point to its evidence. Version 3 follows TypeSafe's own
- * patterns instead of asking more of one question:
- * - code cuts the output into pieces (`splitUnits`): blocks, sections, turns or exchanges;
- * - per piece Jev classifies with a Choice of named kinds, written from the rubric, the allowed
- *   look-alikes first, plus a companion Noul on whether the piece is on topic at all (better
- *   than a "none of these" option, as of Jev 1.14);
- * - only the state fields a question names (`needs`), so one request per piece and state;
- * - code decides per piece and per check (`decidePiece`, `decideCheck`) at 0.7 / 0.3, and the
- *   piece that fails is the evidence.
+ * Version 3 of Jev as judge of the hard checks (README "Versie 3"). Version 2 asked Jev about a
+ * whole output at once; on long text that gave false alarms, and Jev could not point to its
+ * evidence. Version 3 follows TypeSafe's own recipes and guidance, without a twist of ours:
+ * - a known error: the recipe semantic_find (`findRequests`, `decideFind`): the output as
+ *   numbered lines, a Choice over the lines and an exists Noul, at 0.7 / 0.35;
+ * - a claim against its source: the recipe citation_check: a Choice supports / contradicts /
+ *   says_nothing whose top relation counts from 0.8, per piece, screened by a topic Noul;
+ * - every other check: code cuts the output into pieces (`splitUnits`), and per piece Jev
+ *   classifies with a Choice of named kinds written from the rubric, plus a companion Noul on
+ *   whether the piece is on topic at all (better than a "none of these" option, as of Jev 1.14);
+ * - only the state fields a question names (`needs`); code decides at 0.7 / 0.3 (`decidePiece`,
+ *   `decideCheck`), and the piece that fails is the evidence;
+ * - a check about the whole output stays with the LLM judge: it is not a small question.
  *
  * Eval only. Versions 1 and 2 stay in `eval-judge-jev-helpers.ts`, for rescoring.
  */
@@ -20,18 +22,16 @@ import { loc } from "../app/lib/i18n/localized";
 import type { Tool } from "../app/lib/registry/types";
 import { JEV_MODEL } from "./eval-evidence-jev-helpers";
 import type { EvalCase } from "./eval-helpers";
-import {
-  buildJudgeJevRequest,
-  holds,
-  isKnownErrorCase,
-  type JevVerdict,
-  loadJudgeSpecs,
-  outputByStage,
-  parseJudgeJevAnswer,
-  When,
-} from "./eval-judge-jev-helpers";
+import { holds, isKnownErrorCase, type JevVerdict, outputByStage, When } from "./eval-judge-jev-helpers";
 
+/** TypeSafe's starting point for a Noul. */
 const T = { yes: 0.7, no: 0.3 } as const;
+/** semantic_find: answered in the document from 0.7, not in it under 0.35. */
+const FIND = { found: 0.7, absent: 0.35 } as const;
+/** citation_check: a relation is taken without review from 0.8. */
+const CITE = { accept: 0.8 } as const;
+/** A Choice takes at most 255 options. */
+const MAX_OPTIONS = 255;
 
 const UNIT_KINDS = ["block", "section", "turn", "first-turn", "exchange", "whole"] as const;
 export type UnitKind = (typeof UNIT_KINDS)[number];
@@ -43,6 +43,8 @@ export interface Unit {
   text: string;
   user?: string;
 }
+
+const round4 = (p: number) => Math.round(p * 1e4) / 1e4;
 
 // ── Cutting ─────────────────────────────────────────────────────────────────
 
@@ -199,20 +201,32 @@ export function splitUnits(output: string, kind: UnitKind, stage?: string): Unit
 const Option = z
   .object({
     says: z.string().min(1),
-    /** The failure, the known error found, or another (allowed) kind. */
-    means: z.enum(["fails", "found", "other"]),
+    /** The failure, or another (allowed) kind. */
+    means: z.enum(["fails", "other"]),
     /** The rubric sentence an allowed kind comes from. */
     source: z.string().min(1).optional(),
   })
   .strict();
 type Means = z.infer<typeof Option>["means"];
 
-const Asked = z.object({ ask: z.string().min(1), yes: z.string().min(1), no: z.string().min(1) }).strict();
+const Asked = z
+  .object({
+    ask: z.string().min(1),
+    yes: z.string().min(1),
+    no: z.string().min(1),
+    /** Look-alikes the rubric allows, added to the "no" side, each with its rubric sentence. */
+    besides: z
+      .array(z.object({ says: z.string().min(1), source: z.string().min(1) }).strict())
+      .optional(),
+  })
+  .strict();
 
 const PieceCheckSchema = z
   .object({
     /** For the report: which sort of check this is. */
-    family: z.enum(["act", "invented", "known", "part", "conversation"]),
+    family: z.enum(["act", "invented", "part", "conversation"]),
+    /** citation_check: the kinds are the recipe's three relations, the top one counts from 0.8. */
+    recipe: z.literal("citation_check").optional(),
     unit: z.enum(UNIT_KINDS),
     /** Only this stage of an output in stages. */
     stage: z.string().optional(),
@@ -227,6 +241,18 @@ const PieceCheckSchema = z
   .strict();
 export type PieceCheck = z.infer<typeof PieceCheckSchema>;
 
+/** A known error, found with TypeSafe's recipe semantic_find. */
+const FindCheckSchema = z
+  .object({
+    family: z.literal("known"),
+    recipe: z.literal("semantic_find"),
+    when: When,
+    /** The plain-language query; `{{known_error}}` is the case's known error. */
+    find: z.object({ query: z.string().min(1) }).strict(),
+  })
+  .strict();
+export type FindCheck = z.infer<typeof FindCheckSchema>;
+
 const ChecksV3 = z.object({
   version: z.literal(3),
   about: z.string(),
@@ -236,9 +262,9 @@ const ChecksV3 = z.object({
   checks: z.record(
     z.string(),
     z.union([
+      /** Math, counting, a lookup, or the whole output: the LLM judge, with the reason. */
       z.object({ llm: z.string().min(1) }).strict(),
-      /** About the whole output: asked as in version 2. */
-      z.object({ keep: z.literal("v2"), why: z.string().min(1) }).strict(),
+      FindCheckSchema,
       PieceCheckSchema,
     ]),
   ),
@@ -267,7 +293,8 @@ const ABOUT_PIECE =
 
 type Question =
   | { type: "noul"; instructions: string; criteria: { true: string; false: string } }
-  | { type: "choice"; instructions: string; criteria: Record<string, string> };
+  /** A null description: the option is read by its name alone (semantic_find's line ids). */
+  | { type: "choice"; instructions: string; criteria: Record<string, string | null> };
 
 export interface PieceRequest {
   model: string;
@@ -280,10 +307,10 @@ export interface PieceRequest {
   questions: Record<string, Question>;
 }
 
-/** The kinds in a fixed order: the allowed ones first, the failure (or the target) last. */
+/** The kinds in a fixed order: the allowed ones first, the failure last. */
 function orderedKinds(check: PieceCheck, reversed: boolean): [string, string][] {
   const all = Object.entries(check.kinds.options);
-  const last = (m: Means) => m !== "other";
+  const last = (m: Means) => m === "fails";
   const ordered = [...all.filter(([, o]) => !last(o.means)), ...all.filter(([, o]) => last(o.means))];
   return (reversed ? ordered.reverse() : ordered).map(([name, o]) => [name, o.says]);
 }
@@ -311,7 +338,10 @@ export function buildPieceRequests(
       questions[`${id}.topic`] = {
         type: "noul",
         instructions: check.topic.ask,
-        criteria: { true: check.topic.yes, false: check.topic.no },
+        criteria: {
+          true: check.topic.yes,
+          false: [check.topic.no, ...(check.topic.besides ?? []).map((b) => b.says)].join(" "),
+        },
       };
       questions[`${id}.kind`] = {
         type: "choice",
@@ -345,34 +375,47 @@ export function buildPieceRequests(
 // ── The decision ────────────────────────────────────────────────────────────
 
 export interface PieceDecision {
-  /** fails: the failure is in this piece; found: the known error is named here; clear: neither. */
-  state: "fails" | "found" | "clear" | "unsettled";
-  /** The summed probability of the failing (or target) kinds. */
+  /** fails: the failure is in this piece; clear: it is not. */
+  state: "fails" | "clear" | "unsettled";
+  /** The summed probability of the failing kinds. */
   p?: number;
 }
 
-const targetOf = (check: PieceCheck): Exclude<Means, "other"> => (check.family === "known" ? "found" : "fails");
+const topEntry = (probs: Record<string, number>) =>
+  Object.entries(probs).sort((x, y) => y[1] - x[1])[0] as [string, number] | undefined;
 
 /**
  * The truth table per piece, at TypeSafe's 0.7 / 0.3:
  *
- * | topic Noul | failing (or target) kinds | → |
+ * | topic Noul | failing kinds | → |
  * | --- | --- | --- |
- * | ≥ 0.7 | ≥ 0.7 | fails (found) |
+ * | ≥ 0.7 | ≥ 0.7 | fails |
  * | ≤ 0.3 | any | clear |
  * | any | ≤ 0.3 | clear |
  * | otherwise, or an answer missing | | unsettled |
+ *
+ * A citation_check piece takes the top relation as the verdict, from 0.8 only: supports clears
+ * it, contradicts or says_nothing fails it when the piece is on topic (≥ 0.7). Off topic (≤ 0.3)
+ * is clear; anything else goes to the judge, as the recipe sends it to a person.
  */
 export function decidePiece(check: PieceCheck, id: string, answers: unknown): PieceDecision {
   const a = (answers ?? {}) as Record<string, { noul?: number; probabilities?: Record<string, number> }>;
   const topic = a[`${id}.topic`]?.noul;
   const probs = a[`${id}.kind`]?.probabilities;
   if (topic === undefined || !probs) return { state: "unsettled" };
-  const target = targetOf(check);
-  const p = Object.entries(check.kinds.options)
-    .filter(([, o]) => o.means === target)
-    .reduce((sum, [name]) => sum + (probs[name] ?? 0), 0);
-  if (topic >= T.yes && p >= T.yes) return { state: target, p };
+  const p = round4(
+    Object.entries(check.kinds.options)
+      .filter(([, o]) => o.means === "fails")
+      .reduce((sum, [name]) => sum + (probs[name] ?? 0), 0),
+  );
+  if (check.recipe === "citation_check") {
+    const top = topEntry(probs);
+    if (topic <= T.no) return { state: "clear", p };
+    if (!top || top[1] < CITE.accept) return { state: "unsettled", p };
+    if (check.kinds.options[top[0]]?.means === "other") return { state: "clear", p };
+    return { state: topic >= T.yes ? "fails" : "unsettled", p };
+  }
+  if (topic >= T.yes && p >= T.yes) return { state: "fails", p };
   if (topic <= T.no || p <= T.no) return { state: "clear", p };
   return { state: "unsettled", p };
 }
@@ -381,7 +424,7 @@ export interface CheckDecision {
   verdict: "fail" | "pass" | "unsettled";
   /** The probability that the check fails, as far as the pieces show it. */
   p?: number;
-  /** The piece that shows the failure (or names the known error). */
+  /** The piece that shows the failure (or, for a known error, the line that names it). */
   evidence?: Unit;
   pieces: number;
   failed: number;
@@ -395,33 +438,164 @@ const evidenceOf = (u: Unit): Unit => ({
 });
 
 /**
- * Per check: one failing piece fails it, and it passes when every piece is clear. A known error
- * turns this around: one piece that names it passes the check, and it fails when no piece does.
- * No pieces, or a piece unsettled without a decisive one: unsettled, for the LLM judge.
+ * Per check: one failing piece fails it, and it passes when every piece is clear. No pieces, or
+ * a piece unsettled without a failing one: unsettled, for the LLM judge.
  */
 export function decideCheck(
-  check: PieceCheck,
+  _check: PieceCheck,
   pieces: { unit: Unit; decision: PieceDecision }[],
 ): CheckDecision {
-  const target = targetOf(check);
-  const hits = pieces.filter((x) => x.decision.state === target);
+  const hits = pieces.filter((x) => x.decision.state === "fails");
   const best = hits.reduce<(typeof hits)[number] | undefined>(
     (b, x) => (!b || (x.decision.p ?? 0) > (b.decision.p ?? 0) ? x : b),
     undefined,
   );
   const ps = pieces.map((x) => x.decision.p).filter((p): p is number => p !== undefined);
   const allClear = pieces.length > 0 && pieces.every((x) => x.decision.state === "clear");
-  const failed = target === "fails" ? hits.length : 0;
-  const base = { pieces: pieces.length, failed };
-  if (target === "fails") {
-    if (best) return { verdict: "fail", p: best.decision.p, evidence: evidenceOf(best.unit), ...base };
-    if (allClear) return { verdict: "pass", ...(ps.length ? { p: Math.max(...ps) } : {}), ...base };
-    return { verdict: "unsettled", ...(ps.length ? { p: Math.max(...ps) } : {}), ...base };
+  const base = { pieces: pieces.length, failed: hits.length };
+  const maxP = ps.length ? { p: Math.max(...ps) } : {};
+  if (best) return { verdict: "fail", p: best.decision.p, evidence: evidenceOf(best.unit), ...base };
+  if (allClear) return { verdict: "pass", ...maxP, ...base };
+  return { verdict: "unsettled", ...maxP, ...base };
+}
+
+// ── A known error: semantic_find ────────────────────────────────────────────
+
+/** The output as one document: the stages in order, a conversation without the app's greeting. */
+function documentOf(output: string): string {
+  const byStage = outputByStage(output);
+  const text =
+    typeof byStage === "string"
+      ? byStage
+      : Object.entries(byStage)
+          .map(([stage, t]) => `# ${stage}\n\n${t}`)
+          .join("\n\n");
+  return text
+    .split(/\n\n(?=\*\*(?:Tutor|Committee|Student|Teacher)[^*]*:\*\*)/)
+    .filter((block) => !SPEAKER.exec(block)?.[2])
+    .join("\n\n");
+}
+
+/** Python's `splitlines()`, as the recipe splits the document. */
+const linesOf = (output: string) => documentOf(output).replace(/\n$/, "").split("\n");
+const lineId = (i: number) => `L${String(i).padStart(3, "0")}`;
+
+/** The windows of at most 255 lines, named by their first and last line. */
+function windowsOf(n: number): { name: string; from: number; to: number }[] {
+  const out: { name: string; from: number; to: number }[] = [];
+  for (let from = 0; from < n; from += MAX_OPTIONS) {
+    const to = Math.min(n, from + MAX_OPTIONS) - 1;
+    out.push({ name: `${lineId(from)}-${lineId(to)}`, from, to });
   }
-  const notFound = ps.length ? 1 - Math.max(...ps) : undefined;
-  if (best) return { verdict: "pass", p: 1 - (best.decision.p ?? 0), evidence: evidenceOf(best.unit), ...base };
-  if (allClear) return { verdict: "fail", ...(notFound !== undefined ? { p: notFound } : {}), ...base };
-  return { verdict: "unsettled", ...(notFound !== undefined ? { p: notFound } : {}), ...base };
+  return out;
+}
+
+const queryOf = (check: FindCheck, view: CaseView) =>
+  check.find.query.replace("{{known_error}}", view.known_error ?? "");
+
+export interface FindRequest {
+  model: string;
+  /** The recipe sends the document as a plain string. */
+  state: string;
+  questions: Record<string, Question>;
+}
+
+const lineChoice = (query: string, ids: string[]): Question => ({
+  type: "choice",
+  instructions: `Which line of the document contains the answer to: "${query}"?`,
+  criteria: Object.fromEntries(ids.map((id) => [id, null])),
+});
+
+/**
+ * The recipe semantic_find for the known-error checks of one output: one request with the
+ * numbered lines, a Choice "where" over the lines and a Noul "exists". Over 255 lines (the most
+ * a Choice takes), the recipe's two passes: the first request asks "exists" and picks a window;
+ * one more request per window ranks the lines in it, and the decision reads the one picked.
+ */
+export function findRequests(
+  output: string,
+  checks: [string, FindCheck][],
+  view: CaseView,
+  opts: { model?: string } = {},
+): { unit: string; checks: string[]; request: FindRequest }[] {
+  const lines = linesOf(output);
+  const state = lines.map((line, i) => `${lineId(i)}| ${line}`).join("\n");
+  const ids = lines.map((_, i) => lineId(i));
+  const model = opts.model ?? JEV_MODEL;
+  const names = checks.map(([id]) => id);
+  const exists = (query: string): Question => ({
+    type: "noul",
+    instructions: `Does any line of the document address or answer: "${query}"?`,
+    criteria: {
+      true: "At least one line of the document states or directly implies the answer",
+      false: "No line of the document addresses this",
+    },
+  });
+  if (lines.length <= MAX_OPTIONS) {
+    const questions: Record<string, Question> = {};
+    for (const [id, check] of checks) {
+      const query = queryOf(check, view);
+      questions[`${id}.where`] = lineChoice(query, ids);
+      questions[`${id}.exists`] = exists(query);
+    }
+    return [{ unit: "F", checks: names, request: { model, state, questions } }];
+  }
+  const windows = windowsOf(lines.length);
+  const first: Record<string, Question> = {};
+  for (const [id, check] of checks) {
+    const query = queryOf(check, view);
+    first[`${id}.window`] = {
+      type: "choice",
+      instructions: `Which part of the document contains the answer to: "${query}"?`,
+      criteria: Object.fromEntries(windows.map((w) => [w.name, `lines ${w.name}`])),
+    };
+    first[`${id}.exists`] = exists(query);
+  }
+  return [
+    { unit: "F", checks: names, request: { model, state, questions: first } },
+    ...windows.map((w, i) => ({
+      unit: `F:W${i}`,
+      checks: names,
+      request: {
+        model,
+        state,
+        questions: Object.fromEntries(
+          checks.map(([id, check]) => [`${id}.where`, lineChoice(queryOf(check, view), ids.slice(w.from, w.to + 1))]),
+        ),
+      },
+    })),
+  ];
+}
+
+/**
+ * semantic_find's decision: "exists" from 0.7 means the output names the known error (the check
+ * passes, with the top line as the evidence); under 0.35 it does not (the check fails); in
+ * between, the judge decides.
+ */
+export function decideFind(
+  _check: FindCheck,
+  id: string,
+  output: string,
+  answers: Record<string, unknown>,
+): CheckDecision {
+  type A = Record<string, { noul?: number; probabilities?: Record<string, number> }>;
+  const lines = linesOf(output);
+  const first = answers.F as A | undefined;
+  const exists = first?.[`${id}.exists`]?.noul;
+  const base = { pieces: lines.length, failed: 0 };
+  if (exists === undefined) return { verdict: "unsettled", ...base };
+  const p = round4(1 - exists);
+  if (exists < FIND.absent) return { verdict: "fail", p, ...base };
+  if (exists < FIND.found) return { verdict: "unsettled", p, ...base };
+  const windows = lines.length > MAX_OPTIONS ? windowsOf(lines.length) : undefined;
+  const window = windows
+    ? windows.findIndex((w) => w.name === topEntry(first?.[`${id}.window`]?.probabilities ?? {})?.[0])
+    : -1;
+  const where = (windows ? (answers[`F:W${window}`] as A | undefined) : first)?.[`${id}.where`]?.probabilities;
+  const top = topEntry(where ?? {})?.[0];
+  const n = top ? Number(top.slice(1)) : Number.NaN;
+  const evidence = Number.isInteger(n) && lines[n] !== undefined ? { id: top as string, where: `line ${n}`, text: lines[n] as string } : undefined;
+  return { verdict: "pass", p, ...(evidence ? { evidence } : {}), ...base };
 }
 
 // ── One output ──────────────────────────────────────────────────────────────
@@ -458,19 +632,6 @@ const ofTool = (specs: ChecksV3, slug: string) =>
     .filter(([k]) => k.startsWith(`${slug}/`))
     .map(([k, v]) => [k.slice(slug.length + 1), v] as const);
 
-/** The checks about the whole output, as version 2 asks them. */
-function keptSpecs(specs: ChecksV3, slug: string) {
-  const v2 = loadJudgeSpecs(2);
-  const kept = ofTool(specs, slug).filter(([, v]) => "keep" in v);
-  return {
-    ...v2,
-    checks: Object.fromEntries(kept.flatMap(([id]) => {
-      const spec = v2.checks[`${slug}/${id}`];
-      return spec ? [[`${slug}/${id}`, spec]] : [];
-    })),
-  };
-}
-
 /** What to ask about one output: requests per piece, and what code or the judge decides. */
 export function planOutputV3(
   input: OutputInput,
@@ -482,10 +643,11 @@ export function planOutputV3(
   const byCode: string[] = [];
   const llm: string[] = [];
   const perUnit = new Map<string, { unit: Unit; checks: [string, PieceCheck][] }>();
+  const finds: [string, FindCheck][] = [];
   for (const [id, spec] of ofTool(specs, tool.slug)) {
     if ("llm" in spec) llm.push(id);
-    else if ("keep" in spec) continue;
     else if (!holds(spec.when, c)) byCode.push(id);
+    else if ("find" in spec) finds.push([id, spec]);
     else
       for (const unit of splitUnits(output, spec.unit, spec.stage)) {
         const at = perUnit.get(unit.id) ?? { unit, checks: [] };
@@ -493,28 +655,27 @@ export function planOutputV3(
         perUnit.set(unit.id, at);
       }
   }
-  const calls = [...perUnit.values()].flatMap(({ unit, checks }) =>
-    buildPieceRequests(toolInfo(tool), unit, checks, view, opts).map((r) => ({ unit: unit.id, ...r })),
-  );
-  const kept =
-    "tagline" in tool && ofTool(specs, tool.slug).some(([, v]) => "keep" in v)
-      ? buildJudgeJevRequest({ tool, c, output }, keptSpecs(specs, tool.slug), opts)
-      : undefined;
-  return { calls, byCode, llm, ...(kept ? { kept } : {}) };
+  const calls: { unit: string; checks: string[]; request: PieceRequest | FindRequest }[] = [
+    ...[...perUnit.values()].flatMap(({ unit, checks }) =>
+      buildPieceRequests(toolInfo(tool), unit, checks, view, opts).map((r) => ({ unit: unit.id, ...r })),
+    ),
+    // semantic_find has no options to reverse: it is asked once
+    ...(finds.length && !opts.reversed ? findRequests(output, finds, view, opts) : []),
+  ];
+  return { calls, byCode, llm };
 }
 
 export type V3Verdict = Omit<CheckDecision, "verdict" | "pieces" | "failed"> &
   Partial<Pick<CheckDecision, "pieces" | "failed">> & {
     verdict: JevVerdict;
-    /** code: the check does not hold for this case; v2: asked as in version 2. */
-    by?: "code" | "v2";
+    /** code: the check does not hold for this case. */
+    by?: "code";
   };
 
 /** The questions of a request, as far as `keepAnswers` reads them. */
-export type AskedQuestions = Record<string, { type: "noul" | "choice"; criteria?: Record<string, string> }>;
+export type AskedQuestions = Record<string, { type: "noul" | "choice"; criteria?: Record<string, unknown> }>;
 
 const isProbability = (p: unknown): p is number => typeof p === "number" && p >= 0 && p <= 1;
-const round4 = (p: number) => Math.round(p * 1e4) / 1e4;
 
 /**
  * What the raw file keeps of Jev's answer: only the questions that were asked and, for a Choice,
@@ -546,20 +707,14 @@ export function keepAnswers(body: unknown, questions: AskedQuestions): Record<st
 export function decideOutputV3(
   input: OutputInput,
   specs: ChecksV3,
-  stored: { answers: Record<string, unknown>; kept?: unknown },
+  stored: { answers: Record<string, unknown> },
 ): Record<string, V3Verdict> {
   const { tool, c, output } = input;
   const out: Record<string, V3Verdict> = {};
-  const keptVerdicts =
-    "tagline" in tool && stored.kept !== undefined
-      ? parseJudgeJevAnswer(stored.kept, tool, c, keptSpecs(specs, tool.slug)).verdicts
-      : {};
   for (const [id, spec] of ofTool(specs, tool.slug)) {
     if ("llm" in spec) out[id] = { verdict: "llm" };
-    else if ("keep" in spec) {
-      const v = keptVerdicts[id];
-      out[id] = { verdict: v?.verdict ?? "unsettled", ...(v?.p !== undefined ? { p: v.p } : {}), by: "v2" };
-    } else if (!holds(spec.when, c)) out[id] = { verdict: "pass", by: "code" };
+    else if (!holds(spec.when, c)) out[id] = { verdict: "pass", by: "code" };
+    else if ("find" in spec) out[id] = decideFind(spec, id, output, stored.answers);
     else {
       const pieces = splitUnits(output, spec.unit, spec.stage).map((unit) => ({
         unit,
@@ -573,8 +728,7 @@ export function decideOutputV3(
 
 const topOf = (a: unknown): string | undefined => {
   const probs = (a as { probabilities?: Record<string, number> } | undefined)?.probabilities;
-  if (!probs) return undefined;
-  return Object.entries(probs).sort((x, y) => y[1] - x[1])[0]?.[0];
+  return probs ? topEntry(probs)?.[0] : undefined;
 };
 
 /**
@@ -589,7 +743,7 @@ export function orderAgreement(
   let same = 0;
   let total = 0;
   for (const [id, spec] of ofTool(specs, input.tool.slug)) {
-    if (!("family" in spec) || !holds(spec.when, input.c)) continue;
+    if (!("kinds" in spec) || !holds(spec.when, input.c)) continue;
     for (const unit of splitUnits(input.output, spec.unit, spec.stage)) {
       const a = stored.answers[unit.id] as Record<string, { noul?: number }> | undefined;
       const r = stored.reversed[unit.id] as Record<string, unknown> | undefined;

@@ -28,6 +28,9 @@ const base = {
   calls: 10,
   jevMs: [100],
   jevCostUsd: 0.5,
+  jevUseCostUsd: 0.25,
+  judgeCostUsd: 8,
+  judgeOutputs: 100,
 };
 
 describe("the version 3 report", () => {
@@ -55,7 +58,7 @@ describe("the version 3 report", () => {
     expect(md).toContain("| Holdout | 96/100 | 96% |");
   });
 
-  it("applies the five fixed tests to the labelled holdout rows", () => {
+  it("applies the six fixed tests to the labelled holdout rows, and says when there is too little", () => {
     const rows = [
       row({ caseId: "a", v2: "fail", v3: "pass" }), // v2 false alarm, fixed in v3
       row({
@@ -87,25 +90,114 @@ describe("the version 3 report", () => {
     });
     const tests = md.slice(md.indexOf("## De toetsen"));
     expect(tests).toContain(
-      "| 1. Valse alarmen | v2 1, v3 0: geslaagd | 1/1 echt fout: geslaagd |",
+      "| 1. Valse alarmen | v2 1, v3 0: geslaagd | 1/1 echt fout: te weinig |",
     );
-    expect(tests).toContain("| 2. Gemist wat de judge ziet | 1: niet geslaagd | 0: geslaagd |");
     expect(tests).toContain(
-      "| 3. Uitvoer zonder LLM | v2 2/4, v3 3/4: geslaagd | 0/1 (geen versie 2) |",
+      "| 2. Gemist: de hybride niet meer dan Sonnet alleen | 2 echt fout gelabeld: te weinig | 1 echt fout gelabeld: te weinig |",
     );
-    expect(tests).toContain("| 4. Bewijs in het aangewezen stuk | 1/1: geslaagd | 1/1: geslaagd |");
+    expect(tests).toContain(
+      "| 3. Uitvoer zonder LLM (alleen gerapporteerd) | v2 2/4, v3 3/4 | 0/1 (geen versie 2) |",
+    );
+    expect(tests).toContain(
+      "| 4. Bewijs in het aangewezen stuk | 1/1: te weinig | 1/1: te weinig |",
+    );
     expect(tests).toContain("| 5. Volgorde van de opties | 96%: geslaagd | 95%: geslaagd |");
+    expect(tests).toContain("| 6. Tweede blik: Jev faalt, Sonnet niet | - | - |");
   });
 
-  it("says per sort of check whether Jev may pass or report, and too little data below the minimum", () => {
-    const passes = Array.from({ length: 20 }, (_, i) => row({ caseId: `p${i}`, family: "act" }));
+  it("judges Jev and Sonnet by the same rules per sort of check, counting cases, not runs", () => {
+    const passes = Array.from({ length: 30 }, (_, i) => row({ caseId: `p${i}`, family: "act" }));
     const md = judgeJevV3Report({ ...base, rows: passes, labels: {} });
     const table = md.slice(md.indexOf("## Met vertrouwen"));
-    expect(table).toContain("| act | Holdout | 20 | 0 | 15% | ja | 0 | - | - | te weinig |");
-    const few = judgeJevV3Report({ ...base, rows: passes.slice(0, 19), labels: {} });
-    expect(few.slice(few.indexOf("## Met vertrouwen"))).toContain(
-      "| act | Holdout | 19 | 0 | 16% | te weinig |",
+    expect(table).toContain(
+      "| act | Holdout | Jev | 30 | 0 | 10% | ja | 0 | - | - | - | te weinig |",
     );
+    expect(table).toContain(
+      "| act | Holdout | Sonnet | 30 | 0 | 10% | ja | 0 | - | - | - | te weinig |",
+    );
+    const few = judgeJevV3Report({ ...base, rows: passes.slice(0, 29), labels: {} });
+    expect(few.slice(few.indexOf("## Met vertrouwen"))).toContain(
+      "| act | Holdout | Jev | 29 | 0 | 10% | te weinig |",
+    );
+    const runs = Array.from({ length: 60 }, (_, i) =>
+      row({ caseId: `c${i % 20}`, run: 1 + Math.floor(i / 20) }),
+    );
+    const clustered = judgeJevV3Report({ ...base, rows: runs, labels: {} });
+    expect(clustered.slice(clustered.indexOf("## Met vertrouwen"))).toContain(
+      "| act | Holdout | Jev | 20 | 0 | 15% | te weinig |",
+    );
+  });
+
+  it("lets Jev report a failure only when the lower bound of the real share is 60%", () => {
+    const fails = (real: number, n: number) =>
+      Array.from({ length: n }, (_, i) =>
+        row({
+          caseId: `f${i}`,
+          v3: "fail",
+          judge: true,
+          evidence: { id: "B01", where: "", text: "x" },
+        }),
+      ).map((r, i) => [r, i < real] as const);
+    const report = (real: number, n: number) => {
+      const rows = fails(real, n);
+      const labels = Object.fromEntries(rows.map(([r, t]) => [rowKey(r), t]));
+      const evidence = Object.fromEntries(
+        rows.filter(([, t]) => t).map(([r]) => [rowKey(r), true]),
+      );
+      const md = judgeJevV3Report({ ...base, rows: rows.map(([r]) => r), labels, evidence });
+      return md.slice(md.indexOf("## Met vertrouwen"));
+    };
+    expect(report(10, 10)).toContain(
+      "| act | Holdout | Jev | 0 | 0 | - | te weinig | 10 | 100% | 72% | 100% | ja |",
+    );
+    expect(report(0, 5)).toContain("| 5 | 0% | 0% | - | te weinig |");
+    expect(report(9, 10)).toContain(
+      "| act | Holdout | Jev | 0 | 0 | - | te weinig | 10 | 90% | 59% | 100% | nee |",
+    );
+    expect(report(9, 10)).toContain(
+      "| act | Holdout | Sonnet | 0 | 0 | - | te weinig | 10 | 90% | 59% | - | nee |",
+    );
+  });
+
+  it("sets Jev, Sonnet and the hybrid side by side on the labels, with the cost per 1,000 outputs", () => {
+    const rows = [
+      row({ caseId: "a", v2: "fail", v3: "pass", judge: false }), // v2 false alarm
+      row({ caseId: "b", v2: "pass", v3: "fail", judge: false }), // Jev sees what Sonnet missed
+      row({ caseId: "c", v2: "pass", v3: "unsettled", judge: true }), // Sonnet false alarm
+      ...Array.from({ length: 10 }, (_, i) => row({ caseId: `q${i}` })),
+    ];
+    const key = (id: string) => rowKey(rows.find((r) => r.caseId === id) as V3Row);
+    const md = judgeJevV3Report({
+      ...base,
+      rows,
+      labels: {
+        [key("a")]: false,
+        [key("b")]: true,
+        [key("c")]: false,
+        [key("q0")]: true,
+        [key("q1")]: false,
+      },
+    });
+    const side = md.slice(md.indexOf("## Jev en Sonnet naast de labels"));
+    expect(side).toContain("| Holdout | Jev v3 | 12 | 0 | 0 + 5 geschat | 58% | $19.23 |");
+    expect(side).toContain("| Holdout | Jev v2 | 13 | 1 | 1 + 5 geschat | 46% | - |");
+    expect(side).toContain("| Holdout | Sonnet | 13 | 1 | 1 + 5 geschat | 46% | $80.00 |");
+    expect(side).toContain(
+      "| Holdout | Hybride (Jev, anders Sonnet) | 13 | 1 | 0 + 5 geschat | 54% | $25.38 |",
+    );
+  });
+
+  it("shows how often a failure is real per probability band, as TypeSafe asks", () => {
+    const rows = [
+      row({ caseId: "a", v3: "fail", v3P: 0.95, judge: true }),
+      row({ caseId: "b", v3: "fail", v3P: 0.92, judge: false }),
+      row({ caseId: "c", v3: "pass", v3P: 0.05, judge: true }),
+    ];
+    const labels = Object.fromEntries(rows.map((r, i) => [rowKey(r), i === 0 || i === 2]));
+    const md = judgeJevV3Report({ ...base, rows, labels });
+    const cal = md.slice(md.indexOf("## Kalibratie"));
+    expect(cal).toContain("| 0,9–1 | 2 | 1 | 50% |");
+    expect(cal).toContain("| 0–0,1 | 1 | 1 | 100% |");
   });
 
   it("quotes the evidence so a backslash or a pipe cannot break the table", () => {
@@ -118,11 +210,12 @@ describe("the version 3 report", () => {
 });
 
 describe("the rows Bastiaan labels", () => {
-  it("are every disagreement, every fail of version 3, and a fixed sample of agreeing passes", () => {
+  it("are every fail of Jev (v2 or v3) or Sonnet, and a fixed sample of the rest", () => {
     const rows = [
       row({ caseId: "a", v2: "fail", v3: "pass" }),
       row({ caseId: "b", v3: "fail", judge: true }),
       row({ caseId: "c", v2: "unsettled", v3: "unsettled", judge: true }),
+      row({ caseId: "u", v2: "pass", v3: "unsettled", judge: false }),
       ...Array.from({ length: 60 }, (_, i) => row({ caseId: `q${i}` })),
       row({ caseId: "code", v3: "pass", by: "code" }),
       row({ caseId: "t", set: "tuning", v2: "fail", v3: "pass" }),
@@ -131,10 +224,10 @@ describe("the rows Bastiaan labels", () => {
     const ids = picked.map((r) => r.caseId);
     expect(ids).toContain("a");
     expect(ids).toContain("b");
-    expect(ids).not.toContain("c");
+    expect(ids).toContain("c");
     expect(ids).not.toContain("code");
     expect(ids).not.toContain("t");
-    expect(picked.filter((r) => r.caseId.startsWith("q"))).toHaveLength(40);
+    expect(picked.filter((r) => r.caseId.startsWith("q") || r.caseId === "u")).toHaveLength(40);
     expect(labelRows(rows, { sample: 40, seed: 1 })).toEqual(picked);
     expect(labelRows(rows, { sample: 40, seed: 1, tuning: true }).map((r) => r.caseId)).toContain(
       "t",
