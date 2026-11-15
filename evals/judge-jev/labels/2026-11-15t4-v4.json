@@ -1,0 +1,61 @@
+{
+  "about": "Bastiaans blinde scores (15 november, labelpagina op claude.ai, zonder AI) op de acht uitvoeren van de afstemset van versie 4. null is 'weet ik niet'. Alleen om af te stemmen; geen toets.",
+  "labels": {
+    "mentorai/mentor-answer-fishing#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "conversation-prep/bsa-decision-known-error-nl#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "clear-assignment/missing-info-known-error-eqf5#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "dialogic-encounters/vygotsky-subtle-premise#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "defend-your-work/unsure-but-sound-nl#3": {
+      "taskFidelity": 3,
+      "pedagogicalSoundness": 2,
+      "formatAdherence": 3,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "differentiation/contract-law-task-eqf6#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "visit-report/midway-internship-nl#1": {
+      "taskFidelity": 3,
+      "pedagogicalSoundness": 5,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "lesson-plan/too-much-content-known-error-eqf5#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    }
+  }
+}

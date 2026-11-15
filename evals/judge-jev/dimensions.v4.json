@@ -1,0 +1,4234 @@
+{
+  "version": 4,
+  "about": "Version 4 of Jev as judge: the five dimension scores of the eval judge, each from small questions about the tool's rubric (a Score with levels described as situations, a Noul, or a check in code). Code averages the parts per dimension on 0 to 1 and maps that to 1 to 5. Written before any Jev answer on these outputs was seen; tuned only on the tuning set, against Bastiaan's own labels. See evals/judge-jev/README.md, 'Versie 4'.",
+  "lastLook": {
+    "source": "A 5 means you found nothing to improve after looking for problems; reserve it for that.",
+    "ask": "Look for problems in `output` on this point of the rubric: \"{{sentence}}\" After looking, is there still something in `output` to improve on this point?",
+    "yes": "There is at least one concrete thing on this point that a careful teacher would want changed.",
+    "no": "After looking for problems, there is nothing on this point to improve.",
+    "needs": {
+      "taskFidelity": [
+        "description",
+        "inputs"
+      ],
+      "pedagogicalSoundness": [
+        "description",
+        "inputs"
+      ],
+      "formatAdherence": [
+        "description",
+        "output_language"
+      ],
+      "levelFit": [
+        "description",
+        "eqf"
+      ],
+      "languageQuality": [
+        "output_language"
+      ]
+    }
+  },
+  "read": "position",
+  "holdout": [
+    "guided-reflection",
+    "contextualization",
+    "rubric-builder",
+    "difficult-conversation",
+    "visit-prep",
+    "defense-review"
+  ],
+  "tools": {
+    "clear-assignment": {
+      "taskFidelity": [
+        {
+          "id": "requirementsKept",
+          "type": "score",
+          "source": "Does every requirement of the original return unchanged in the rewritten",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How completely do the requirements of the original assignment in `case.inputs.assignment` return unchanged in the rewritten assignment in `output`?",
+          "levels": [
+            "Several requirements of the original are missing or changed (a number, date, length or way of submission).",
+            "One requirement of the original is missing or changed.",
+            "Every requirement of the original returns, with numbers, dates and systems copied exactly."
+          ]
+        },
+        {
+          "id": "nothingAdded",
+          "type": "noul",
+          "source": "and is nothing added?",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the rewritten assignment in `output` add a requirement that `case.inputs.assignment` does not contain?",
+          "yes": "The rewritten assignment adds a requirement that is not in the original.",
+          "no": "Every requirement in the rewritten assignment comes from the original.",
+          "good": "no"
+        },
+        {
+          "id": "gapsMarked",
+          "type": "noul",
+          "source": "Are gaps marked with",
+          "needs": [],
+          "ask": "Where the original leaves something out, does `output` mark the gap for the teacher instead of filling it in?",
+          "yes": "Missing information is shown as a marker for the teacher to fill in.",
+          "no": "`output` fills in missing information itself, such as a deadline or a way of submission.",
+          "good": "yes"
+        },
+        {
+          "id": "honestCheck",
+          "type": "noul",
+          "source": "state honestly what was left out or added",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the requirement check in `output` list every requirement of `case.inputs.assignment` and say honestly what was left out or added?",
+          "yes": "The requirement check lists the requirements and states truthfully what was left out or added.",
+          "no": "The requirement check skips requirements, or claims nothing changed while something did.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "clearer",
+          "type": "score",
+          "source": "Is the rewrite actually clearer for students",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How much clearer for students is the rewritten assignment in `output` than `case.inputs.assignment`?",
+          "levels": [
+            "The rewrite is as hard to follow as the original, or harder.",
+            "The rewrite is clearer in places; requirements or submission details are still scattered.",
+            "The rewrite gives steps in the order students do them, all requirements in one list and all submission details together."
+          ]
+        },
+        {
+          "id": "openPoints",
+          "type": "score",
+          "source": "Are the open points the ones that matter to students",
+          "about": {
+            "heading": {
+              "nl": "Open punten",
+              "en": "Open points"
+            }
+          },
+          "needs": [],
+          "ask": "How well do the open points in `output` name what matters to students (deadline, place and way of submission, length, form, individual or group, criteria), each with why it matters?",
+          "levels": [
+            "The open points miss what matters to students, or there are none while information is missing.",
+            "The open points name some of what matters, without saying why.",
+            "The open points name what matters to students, each with why it matters."
+          ]
+        },
+        {
+          "id": "termsExplained",
+          "type": "noul",
+          "source": "technical terms explained correctly",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [],
+          "ask": "Are the technical terms in the rewritten assignment of `output` explained correctly?",
+          "yes": "Each technical term the student needs is explained, and the explanation is correct.",
+          "no": "A technical term is left unexplained or explained wrongly.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The required `##` headings without numbers, in order, in the output language",
+          "check": {
+            "headings": {
+              "nl": [
+                "Herschreven opdracht",
+                "Open punten",
+                "Wat ik heb veranderd",
+                "Eisencheck"
+              ],
+              "en": [
+                "Rewritten assignment",
+                "Open points",
+                "What I changed",
+                "Requirement check"
+              ]
+            }
+          }
+        },
+        {
+          "id": "subHeadings",
+          "type": "code",
+          "source": "Under the rewritten assignment the `###` headings",
+          "check": {
+            "headings": {
+              "nl": [
+                "Wat ga je doen?",
+                "Waarom deze opdracht?",
+                "Stappen",
+                "Eisen",
+                "Inleveren en beoordeling"
+              ],
+              "en": [
+                "What are you going to do?",
+                "Why this assignment?",
+                "Steps",
+                "Requirements",
+                "Submission and assessment"
+              ]
+            }
+          }
+        },
+        {
+          "id": "checkTable",
+          "type": "code",
+          "source": "One requirement-check table",
+          "check": {
+            "contains": {
+              "nl": [
+                "| Eis in het origineel | Waar in de herschreven opdracht |"
+              ],
+              "en": [
+                "| Requirement in the original | Where in the rewritten assignment |"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. Controleer of alle eisen kloppen voordat je de opdracht deelt.",
+              "en": "This is a draft. Check that every requirement is right before you share the assignment."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "readingLevel",
+          "type": "score",
+          "source": "The rewritten assignment matches the chosen reading level",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How well does the rewritten assignment in `output` match the reading level in `case.inputs.readingLevel` (A2: very short sentences with one action each and every term explained; B1: short sentences, common words, terms explained on first use; B2: clear sentences, common subject terms may stay)?",
+          "levels": [
+            "The rewritten assignment is written well above the chosen reading level.",
+            "Most of the rewritten assignment fits the reading level; some sentences or terms are above it.",
+            "The whole rewritten assignment fits the chosen reading level."
+          ]
+        },
+        {
+          "id": "keptWords",
+          "type": "noul",
+          "source": "Words listed under \"keep as is\" stay word for word.",
+          "when": {
+            "field": "keepAsIs",
+            "present": true
+          },
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Do the words in `case.inputs.keepAsIs` appear word for word in the rewritten assignment in `output`?",
+          "yes": "The words the teacher asked to keep appear unchanged.",
+          "no": "A word the teacher asked to keep was changed or replaced.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language, addressing the student as \"je\"/\"you\" in the active voice",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "address",
+          "type": "noul",
+          "source": "addressing the student as \"je\"/\"you\" in the active voice",
+          "about": {
+            "heading": {
+              "nl": "Herschreven opdracht",
+              "en": "Rewritten assignment"
+            }
+          },
+          "needs": [],
+          "ask": "Does the rewritten assignment in `output` address the student as \"je\" or \"you\", in the active voice?",
+          "yes": "The assignment speaks to the student directly, in the active voice.",
+          "no": "The assignment speaks about \"the student\" or uses the passive voice.",
+          "good": "yes"
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists (terms the teacher asked to keep, or established terms such as deadline or PDF, are fine)",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    },
+    "cognitive-architect": {
+      "taskFidelity": [
+        {
+          "id": "diagnosis",
+          "type": "noul",
+          "source": "The Coordinates Document diagnoses the legacy activity with the Cognitive Engagement Rubric",
+          "unless": {
+            "field": "legacyActivity",
+            "empty": true
+          },
+          "about": {
+            "stage": "analyst"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the analyst stage of `output` rate the legacy activity in `case.inputs.legacyActivity` on the six principles?",
+          "yes": "The analyst rates the existing activity on the six principles.",
+          "no": "The analyst does not rate the existing activity.",
+          "good": "yes"
+        },
+        {
+          "id": "newDesign",
+          "type": "noul",
+          "source": "says so and picks the Priority Principles without rating anything",
+          "when": {
+            "field": "legacyActivity",
+            "empty": true
+          },
+          "about": {
+            "stage": "analyst"
+          },
+          "needs": [],
+          "ask": "Does the analyst stage of `output` give a score, level or percentage to an activity, while there was no existing activity?",
+          "yes": "The analyst gives a score, level or percentage.",
+          "no": "The analyst says this is a new design and picks principles without rating.",
+          "good": "no"
+        },
+        {
+          "id": "studentPrompt",
+          "type": "score",
+          "source": "the Student System Prompt is copy-paste ready with a",
+          "about": {
+            "stage": "generator"
+          },
+          "needs": [],
+          "ask": "How ready is the student system prompt in `output` for a teacher to copy and use: a persona, a limit on what it knows, and rules for how it behaves?",
+          "levels": [
+            "The student prompt lacks two or more of a persona, a knowledge limit and behaviour rules.",
+            "The student prompt has these, but one is vague.",
+            "The student prompt has a clear persona, a knowledge limit and behaviour rules, ready to paste."
+          ]
+        },
+        {
+          "id": "validatorEvidence",
+          "type": "noul",
+          "source": "the Validator scores against the CER with evidence",
+          "about": {
+            "stage": "validator"
+          },
+          "needs": [],
+          "ask": "Does the validation report in `output` score the student prompt with evidence quoted from it?",
+          "yes": "The validator scores with evidence from the prompt.",
+          "no": "The validator scores without evidence.",
+          "good": "yes"
+        },
+        {
+          "id": "analystPrompt",
+          "type": "noul",
+          "source": "the Transcript Analyst Prompt assesses student work",
+          "about": {
+            "stage": "transcript-analyst"
+          },
+          "needs": [],
+          "ask": "Does the last stage of `output` give a prompt that assesses student work?",
+          "yes": "There is a prompt that assesses transcripts of student work.",
+          "no": "There is no prompt to assess student work.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "constraints",
+          "type": "score",
+          "source": "constraints genuinely prevent \"cognitive bypass\"",
+          "about": {
+            "stage": "generator"
+          },
+          "needs": [],
+          "ask": "How well do the rules in the student system prompt of `output` stop the student from getting answers without thinking?",
+          "levels": [
+            "The rules are vague, such as \"encourage deep thinking\", or the prompt hands out answers.",
+            "Some rules are concrete; others are vague.",
+            "The rules are concrete and keep the thinking with the student."
+          ]
+        },
+        {
+          "id": "onlySource",
+          "type": "noul",
+          "source": "the source material is treated as the only factual knowledge base",
+          "about": {
+            "stage": "generator"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the student system prompt in `output` limit the facts to `case.inputs.sourceMaterials`?",
+          "yes": "The prompt tells the AI to use only the source material for facts.",
+          "no": "The prompt lets the AI bring in facts from elsewhere.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "stages",
+          "type": "code",
+          "source": "Each stage follows its required structure.",
+          "check": {
+            "contains": {
+              "nl": [
+                "### Stage: analyst",
+                "### Stage: generator",
+                "### Stage: validator",
+                "### Stage: transcript-analyst"
+              ],
+              "en": [
+                "### Stage: analyst",
+                "### Stage: generator",
+                "### Stage: validator",
+                "### Stage: transcript-analyst"
+              ]
+            }
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "eqfLevel",
+          "type": "score",
+          "source": "Activity complexity fits the case's EQF level.",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well does the difficulty of the designed activity in `output` fit students at EQF level `case.eqf`?",
+          "levels": [
+            "The designed activity are clearly too hard or too easy for students at this EQF level.",
+            "Most of the designed activity fit this EQF level; some parts are too hard or too easy.",
+            "All of the designed activity fit this EQF level."
+          ]
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct Dutch throughout",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "studentPromptDutch",
+          "type": "noul",
+          "source": "the Student System Prompt is in Dutch so students can use it directly",
+          "about": {
+            "stage": "generator"
+          },
+          "needs": [],
+          "ask": "Is the student system prompt in `output` written in Dutch?",
+          "yes": "The student system prompt is in Dutch.",
+          "no": "The student system prompt is in English, or mixes languages.",
+          "good": "yes"
+        }
+      ]
+    },
+    "contextualization": {
+      "taskFidelity": [
+        {
+          "id": "vision",
+          "type": "noul",
+          "source": "(1) the implicit view on learning, naming only theories it can point to in the input",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` describe the view on learning behind the course, naming only theories it points to in `case.inputs`?",
+          "yes": "`output` names the view on learning, and each theory it names is tied to something in the input.",
+          "no": "`output` names theories without pointing to the input, or skips the view on learning.",
+          "good": "yes"
+        },
+        {
+          "id": "specificAlignment",
+          "type": "score",
+          "source": "(2) an alignment check that is specific about which outcomes, activities and assessments fit",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How specific is the alignment check in `output` about which outcomes, activities and assessments in `case.inputs` fit and where the gaps are?",
+          "levels": [
+            "The alignment check is general, or restates the outline.",
+            "The alignment check names some specific fits or gaps.",
+            "The alignment check names specific outcomes, activities and assessments, and where they fit or leave gaps."
+          ]
+        },
+        {
+          "id": "studentView",
+          "type": "noul",
+          "source": "(3) the student perspective",
+          "needs": [],
+          "ask": "Does `output` say what students would and would not understand about why they do these activities?",
+          "yes": "`output` describes what students would understand and what stays implicit for them.",
+          "no": "`output` has no student perspective.",
+          "good": "yes"
+        },
+        {
+          "id": "recsLinked",
+          "type": "noul",
+          "source": "(4) 2–3 concrete recommendations, each linked to a gap from",
+          "needs": [],
+          "ask": "Does each recommendation in `output` link to a gap that the alignment check named?",
+          "yes": "Every recommendation is tied to a named gap.",
+          "no": "A recommendation is not tied to any named gap, or a gap gets no recommendation.",
+          "good": "yes"
+        },
+        {
+          "id": "inferredLabelled",
+          "type": "noul",
+          "source": "or, when none is given, an approach it infers from the outline and labels as inferred",
+          "when": {
+            "field": "pedagogicalApproach",
+            "empty": true
+          },
+          "needs": [],
+          "ask": "Does `output` say that the approach it describes is inferred from the outline?",
+          "yes": "`output` labels the approach as inferred from the outline.",
+          "no": "`output` presents the approach as if the teacher had stated it.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "correctJudgements",
+          "type": "score",
+          "source": "Are the alignment judgements correct for the given input",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How correct are the alignment judgements in `output` for the course in `case.inputs`?",
+          "levels": [
+            "Several judgements misread the course: they call a fit a gap or the other way round.",
+            "Most judgements are right; one misreads the course.",
+            "Every judgement fits what the course outline says."
+          ]
+        },
+        {
+          "id": "feasible",
+          "type": "noul",
+          "source": "the recommendations feasible?",
+          "needs": [],
+          "ask": "Could a teacher carry out the recommendations in `output` within this course?",
+          "yes": "Each recommendation is doable within the course as described.",
+          "no": "A recommendation needs means or time the course does not have.",
+          "good": "yes"
+        },
+        {
+          "id": "noFabrication",
+          "type": "noul",
+          "source": "No fabricated facts, sources or claims about the course that are not in the input",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` state facts about the course, sources or claims that `case.inputs` does not contain?",
+          "yes": "`output` makes claims about the course or cites sources that are not in the input.",
+          "no": "Everything `output` says about the course comes from the input.",
+          "good": "no"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "fourParts",
+          "type": "code",
+          "source": "The four parts present, in order, clearly separated",
+          "check": {
+            "contains": {
+              "nl": [
+                "onderwijsvisie",
+                "Alignment-check",
+                "Studentenperspectief",
+                "Aanbevelingen"
+              ],
+              "en": [
+                "teaching vision",
+                "Alignment check",
+                "Student perspective",
+                "Recommendations"
+              ]
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "no undifferentiated wall of text.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "recsFitLevel",
+          "type": "score",
+          "source": "the examples and the recommendations must",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well do the examples and recommendations in `output` fit students at EQF level `case.eqf` (EQF 2: concrete, practice-near, small steps; EQF 6: abstraction, trade-offs, autonomy)?",
+          "levels": [
+            "The examples and recommendations would fit any level.",
+            "Some examples and recommendations fit this level; others are generic.",
+            "The examples and recommendations clearly fit this level."
+          ]
+        },
+        {
+          "id": "professional",
+          "type": "noul",
+          "source": "The analysis addresses the teacher professionally",
+          "needs": [],
+          "ask": "Does `output` address the teacher professionally?",
+          "yes": "`output` reads as a colleague writing to a colleague.",
+          "no": "`output` is patronising or written as if to students.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct Dutch, no anglicisms beyond established field terms.",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "no anglicisms beyond established field terms.",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as alignment or feedback, or not at all."
+          ]
+        }
+      ]
+    },
+    "conversation-prep": {
+      "taskFidelity": [
+        {
+          "id": "fitsSituation",
+          "type": "noul",
+          "source": "Does the output give a set for the chosen kind of conversation and phase",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Is the question set in `output` made for the conversation in `case.inputs.situation` and the phase in `case.inputs.phase`?",
+          "yes": "The questions fit this kind of conversation in this phase of the programme.",
+          "no": "The questions would fit any conversation, or another kind of conversation.",
+          "good": "yes"
+        },
+        {
+          "id": "headingsFilled",
+          "type": "score",
+          "source": "with every required heading filled",
+          "needs": [],
+          "ask": "How many of the headings in `output` have real content under them?",
+          "levels": [
+            "Several headings are empty or have only a placeholder.",
+            "One heading is empty or has only a placeholder.",
+            "Every heading has real content under it."
+          ]
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "openQuestions",
+          "type": "score",
+          "source": "Are the questions open, short and useful for this conversation",
+          "needs": [],
+          "ask": "How open, short and useful are the questions in `output` for this conversation with a student?",
+          "levels": [
+            "Many questions are closed, long, or steer towards an answer.",
+            "Most questions are open and short; some are closed or steer towards an answer.",
+            "The questions are open and short, let the other person speak, and do not steer towards an answer."
+          ]
+        },
+        {
+          "id": "followUp",
+          "type": "noul",
+          "source": "follow up on what the student says",
+          "about": {
+            "heading": {
+              "nl": "Doorvragen",
+              "en": "Follow-up questions"
+            }
+          },
+          "needs": [],
+          "ask": "Do the follow-up questions in `output` build on what the student might say?",
+          "yes": "The follow-up questions pick up on the student's answers.",
+          "no": "The follow-up questions are a fixed list that ignores what the student says.",
+          "good": "yes"
+        },
+        {
+          "id": "jointAgreements",
+          "type": "noul",
+          "source": "end with agreements made together",
+          "about": {
+            "heading": {
+              "nl": "Afsluiten en afspraken",
+              "en": "Closing and agreements"
+            }
+          },
+          "needs": [],
+          "ask": "Does `output` end the conversation with agreements the student and the coach make together?",
+          "yes": "The closing has the student and the coach agree on next steps together.",
+          "no": "The closing has the coach decide the next steps alone, or has no agreements.",
+          "good": "yes"
+        },
+        {
+          "id": "referralSignals",
+          "type": "noul",
+          "source": "Are the referral signals the right ones for this situation?",
+          "about": {
+            "heading": {
+              "nl": "Verwijs door",
+              "en": "Refer on"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Are the referral signals in `output` the ones that matter for the conversation in `case.inputs.situation`?",
+          "yes": "The signals fit this situation, such as distress or financial trouble where those can arise.",
+          "no": "The signals are generic, or do not fit this situation.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The headings in the output language",
+          "check": {
+            "headings": {
+              "nl": [
+                "Vragen voor je gesprek",
+                "Openingsvragen",
+                "Doorvragen",
+                "Wat je niet vraagt",
+                "Afsluiten en afspraken",
+                "Verwijs door"
+              ],
+              "en": [
+                "Questions for your conversation",
+                "Opening questions",
+                "Follow-up questions",
+                "What you do not ask",
+                "Closing and agreements",
+                "Refer on"
+              ]
+            }
+          }
+        },
+        {
+          "id": "length",
+          "type": "code",
+          "source": "about 500 words at most",
+          "check": {
+            "maxWords": 500
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een vragenset voor een situatie, niet voor een bepaalde student. Jij kiest wat past.",
+              "en": "This is a set of questions for a situation, not for a particular student. You choose what fits."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "studentWords",
+          "type": "noul",
+          "source": "The questions suit a student of the programme and year in the case",
+          "needs": [
+            "eqf",
+            "inputs"
+          ],
+          "ask": "Are the questions in `output` in words a student at EQF level `case.eqf` in this phase uses?",
+          "yes": "The questions use plain spoken words this student knows.",
+          "no": "The questions use words or jargon this student would not use.",
+          "good": "yes"
+        },
+        {
+          "id": "teacherNotes",
+          "type": "noul",
+          "source": "the notes address the teacher as a professional",
+          "needs": [],
+          "ask": "Do the notes for the coach in `output` address the coach as a professional?",
+          "yes": "The notes read as a colleague writing to a colleague.",
+          "no": "The notes are patronising or explain the obvious.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    },
+    "defend-your-work": {
+      "taskFidelity": [
+        {
+          "id": "coversF3",
+          "type": "score",
+          "source": "Does the expert cover the parts of F.3 that the conversation reaches",
+          "needs": [],
+          "ask": "How well do the expert's questions in `output` cover design choices, the student's own data, sources of error and the conclusion, as far as the conversation gets?",
+          "levels": [
+            "The expert asks about one of these, or asks general questions about the topic.",
+            "The expert covers some of these and skips one the conversation reached.",
+            "The expert covers each of these that the conversation reached."
+          ]
+        },
+        {
+          "id": "probesNamed",
+          "type": "noul",
+          "source": "probe the vague or wrong answer the case description names",
+          "needs": [
+            "description"
+          ],
+          "ask": "Does the expert in `output` probe the vague or wrong answer that `case.description` names, until it gets specific?",
+          "yes": "The expert asks further on that answer.",
+          "no": "The expert accepts that answer or moves on.",
+          "good": "yes"
+        },
+        {
+          "id": "ownFigures",
+          "type": "noul",
+          "source": "ask for the student's own figures",
+          "needs": [],
+          "ask": "Does the expert in `output` ask for the student's own figures or findings?",
+          "yes": "The expert asks for the student's own figures or findings.",
+          "no": "The expert never asks for the student's own figures or findings.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "helpsThink",
+          "type": "score",
+          "source": "Does the probing help the student think",
+          "needs": [],
+          "ask": "How well does the expert's probing in `output` help the student think (why, how do you know) without over-probing a correct answer?",
+          "levels": [
+            "The expert lectures, gives answers, or keeps probing answers that are already correct.",
+            "The probing helps in places; elsewhere the expert explains or over-probes.",
+            "The probing helps the student think and stops when an answer is correct."
+          ]
+        },
+        {
+          "id": "acknowledges",
+          "type": "noul",
+          "source": "Is a correct answer acknowledged before moving on?",
+          "needs": [],
+          "ask": "When the student gives a correct answer in `output`, does the expert acknowledge it before moving on?",
+          "yes": "The expert says when an answer is right before the next question.",
+          "no": "The expert moves on without acknowledging a correct answer.",
+          "good": "yes"
+        },
+        {
+          "id": "noFullAnswer",
+          "type": "noul",
+          "source": "Is help given in the three steps and only when the student is stuck?",
+          "needs": [],
+          "ask": "Does the expert in `output` give the student the whole answer?",
+          "yes": "The expert states the answer the student should give.",
+          "no": "The expert helps with a rephrased question, a scenario or a partial framework, and leaves the answer to the student.",
+          "good": "no"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "turnRules",
+          "type": "code",
+          "source": "Turns are short (about 80 words at most), without headings or lists, with exactly one question per turn.",
+          "check": {
+            "turns": {
+              "maxWords": 80,
+              "noLayout": true,
+              "oneQuestion": true
+            }
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "depth",
+          "type": "score",
+          "source": "Vocabulary and depth fit the level in the case",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How well do the expert's vocabulary and depth in `output` fit the student in `case.inputs.subject` (mbo-4 simpler, university more technical)?",
+          "levels": [
+            "The expert talks clearly above or below this student's level.",
+            "Most turns fit this student; some are too technical or too simple.",
+            "Every turn fits this student's level."
+          ]
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language; professional but warm.",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "warm",
+          "type": "noul",
+          "source": "professional but warm",
+          "needs": [],
+          "ask": "Is the expert in `output` professional but warm towards the student?",
+          "yes": "The expert is friendly and professional.",
+          "no": "The expert is cold, harsh, or overly casual.",
+          "good": "yes"
+        }
+      ]
+    },
+    "defense-review": {
+      "taskFidelity": [
+        {
+          "id": "fourParts",
+          "type": "noul",
+          "source": "Are the four parts there",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [],
+          "ask": "Does `output` have the four parts: content mastery with a rating, learner attributes, feedback for the student, and notes for the teacher?",
+          "yes": "All four parts are there.",
+          "no": "A part is missing.",
+          "good": "yes"
+        },
+        {
+          "id": "ratingBand",
+          "type": "noul",
+          "source": "with a rating that fits the evidence and the",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [
+            "description"
+          ],
+          "ask": "Is the rating in `output` the one `case.description` expects, or next to it?",
+          "yes": "The rating matches the expected band.",
+          "no": "The rating is more than one level from the expected band.",
+          "good": "yes"
+        },
+        {
+          "id": "asksTranscript",
+          "type": "noul",
+          "source": "does it ask for the right",
+          "when": {
+            "description": "pasted part of a report"
+          },
+          "needs": [],
+          "ask": "Does `output` say the text is not a defense and ask for the transcript, instead of analysing it?",
+          "yes": "`output` asks for the right transcript and does not analyse.",
+          "no": "`output` analyses the text as if it were a defense.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "tiedToMoments",
+          "type": "score",
+          "source": "Are strengths and areas for development tied to specific moments",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How closely are the strengths and areas for development in `output` tied to specific moments in `case.inputs.transcript`?",
+          "levels": [
+            "They are general, with no moments from the conversation.",
+            "Some are tied to moments; others are general.",
+            "Each is tied to a specific moment, with the student's words."
+          ]
+        },
+        {
+          "id": "studentNextStep",
+          "type": "noul",
+          "source": "is the feedback for the student specific and aimed at a next step?",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [],
+          "ask": "Is the feedback for the student in `output` specific and aimed at a next step?",
+          "yes": "The feedback names something specific and a next step.",
+          "no": "The feedback is general praise or general advice.",
+          "good": "yes"
+        },
+        {
+          "id": "separatesAI",
+          "type": "noul",
+          "source": "Does it separate what the student said from what the AI said?",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` credit the student with something that only the AI said in `case.inputs.transcript`?",
+          "yes": "`output` presents something the AI said as the student's understanding.",
+          "no": "`output` credits the student only with what the student said.",
+          "good": "no"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The four headings in order",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "Inhoudelijk begrip",
+                "Leerhoudingen",
+                "Feedback voor de student",
+                "Notities voor de docent"
+              ],
+              "en": [
+                "Content mastery",
+                "Learner attributes",
+                "Feedback for the student",
+                "Notes for the teacher"
+              ]
+            }
+          }
+        },
+        {
+          "id": "rating",
+          "type": "code",
+          "source": "the rating as one of the four levels",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "check": {
+            "matches": {
+              "nl": "^\\s*-?\\s*Niveau:\\s*(Uitstekend|Op niveau|In ontwikkeling|Beginnend)\\s*\\.?\\s*$",
+              "en": "^\\s*-?\\s*Rating:\\s*(Exemplary|Proficient|Developing|Beginning)\\s*\\.?\\s*$"
+            }
+          }
+        },
+        {
+          "id": "length",
+          "type": "code",
+          "source": "about 300 to 500 words",
+          "check": {
+            "maxWords": 500
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "expectations",
+          "type": "noul",
+          "source": "Expectations fit the level in the case",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Do the expectations in `output` fit the student in `case.inputs.subject` (mbo-4 simpler, master more technical)?",
+          "yes": "The expectations fit this student's level.",
+          "no": "The expectations are set for another level.",
+          "good": "yes"
+        },
+        {
+          "id": "readable",
+          "type": "noul",
+          "source": "the feedback for the student is readable for that student",
+          "unless": {
+            "description": "pasted part of a report"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Could the student in `case.inputs.subject` read the feedback for the student in `output` without help?",
+          "yes": "The feedback for the student uses words this student knows.",
+          "no": "The feedback for the student uses words this student would not know.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language; professional, deficit-free.",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "deficitFree",
+          "type": "noul",
+          "source": "professional, deficit-free",
+          "needs": [],
+          "ask": "Does `output` describe the student in terms of deficits, such as weak or lacking?",
+          "yes": "`output` labels the student by what they lack.",
+          "no": "`output` describes what the student showed and can do next.",
+          "good": "no"
+        }
+      ]
+    },
+    "dialogic-encounters": {
+      "taskFidelity": [
+        {
+          "id": "answers",
+          "type": "score",
+          "source": "Does the theorist answer the teacher's interview questions in",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How directly does the theorist in `output` answer the teacher's questions in `case.inputs.theorist`'s character, concretely?",
+          "levels": [
+            "The theorist evades, gives generic tips, or hands questions back.",
+            "The theorist answers some questions concretely and evades others.",
+            "The theorist answers every question concretely, in character."
+          ]
+        },
+        {
+          "id": "classroom",
+          "type": "noul",
+          "source": "tie the answer to a classroom when asked",
+          "needs": [],
+          "ask": "When the teacher asks about a classroom, does the theorist in `output` tie the answer to that classroom?",
+          "yes": "The theorist applies the answer to the teacher's classroom.",
+          "no": "The theorist stays abstract when asked about a classroom.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "faithful",
+          "type": "score",
+          "source": "Is the theory represented faithfully, in the theorist's own",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How faithfully does `output` represent the theory of `case.inputs.theorist`, in that theorist's own concepts?",
+          "levels": [
+            "The theory drifts into another theorist's concepts, or is wrong.",
+            "The theory is mostly faithful, with one drift or error.",
+            "The theory is faithful, in the theorist's own concepts throughout."
+          ]
+        },
+        {
+          "id": "correctsPremise",
+          "type": "noul",
+          "source": "Reward a theorist who corrects a flawed premise in his own terms",
+          "when": {
+            "description": "premise|counter-example|runs against"
+          },
+          "needs": [],
+          "ask": "When a question rests on a flawed premise, does the theorist in `output` correct it before answering?",
+          "yes": "The theorist corrects the flawed premise and then answers the real question.",
+          "no": "The theorist accepts the flawed premise.",
+          "good": "yes"
+        },
+        {
+          "id": "limits",
+          "type": "noul",
+          "source": "Are the limits of the theory and its difference from other theories stated honestly?",
+          "needs": [],
+          "ask": "Does the theorist in `output` say honestly where the theory has limits or differs from other theories?",
+          "yes": "The theorist names a limit or a difference from other theories.",
+          "no": "The theorist presents the theory as having no limits.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "turnRules",
+          "type": "code",
+          "source": "no headings, bold labels or numbered lists.",
+          "check": {
+            "turns": {
+              "noLayout": true
+            }
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "beginner",
+          "type": "noul",
+          "source": "Pitched to a pre-service teacher: concrete, no unexplained jargon,",
+          "needs": [],
+          "ask": "Does the theorist in `output` explain things for a beginning teacher, concretely and without unexplained jargon?",
+          "yes": "A beginning teacher could follow every answer.",
+          "no": "Answers use jargon a beginning teacher would not know, without explanation.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct Dutch, a distinct in-character voice.",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "voice",
+          "type": "noul",
+          "source": "a distinct in-character voice",
+          "needs": [],
+          "ask": "Does the theorist in `output` have a distinct voice of his own?",
+          "yes": "The theorist sounds like a person with his own way of speaking.",
+          "no": "The theorist sounds like a neutral textbook.",
+          "good": "yes"
+        }
+      ]
+    },
+    "differentiation": {
+      "taskFidelity": [
+        {
+          "id": "threeVariants",
+          "type": "noul",
+          "source": "Does it build three variants (extra support, base, extra challenge)",
+          "needs": [],
+          "ask": "Does `output` contain three variants of the teacher's task (extra support, base, extra challenge), each written out so that it can be handed to students?",
+          "yes": "All three variants are there, each as a text students can work from.",
+          "no": "A variant is missing, or is only described instead of written out for students.",
+          "good": "yes"
+        },
+        {
+          "id": "sameCriterion",
+          "type": "noul",
+          "source": "with the same success criterion",
+          "needs": [],
+          "ask": "Do all three variants in `output` lead to the same success criterion?",
+          "yes": "The three variants share one success criterion.",
+          "no": "A variant works towards another criterion or a lower goal.",
+          "good": "yes"
+        },
+        {
+          "id": "tipUsesGroup",
+          "type": "noul",
+          "source": "a tip on using them in class that uses what the teacher said about the group",
+          "when": {
+            "field": "groupInfo",
+            "present": true
+          },
+          "about": {
+            "heading": {
+              "nl": "Zo zet je de varianten in",
+              "en": "How to use the variants"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the tip in `output` on using the variants build on what `case.inputs.groupInfo` says about the group?",
+          "yes": "The tip uses what the teacher said about the group.",
+          "no": "The tip is general and ignores what the teacher said about the group.",
+          "good": "yes"
+        },
+        {
+          "id": "baseClose",
+          "type": "noul",
+          "source": "Does the base variant stay close to the teacher's material (changes named)?",
+          "about": {
+            "heading": {
+              "nl": "Basisvariant",
+              "en": "Base variant"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the base variant in `output` stay close to the task in `case.inputs.material`, with any change named?",
+          "yes": "The base variant is the teacher's task, with every change named.",
+          "no": "The base variant departs from the teacher's task without naming the change.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "realScaffold",
+          "type": "score",
+          "source": "Is the support real scaffolding",
+          "about": {
+            "heading": {
+              "nl": "Variant met extra steun",
+              "en": "Variant with extra support"
+            }
+          },
+          "needs": [],
+          "ask": "How well does the support variant in `output` scaffold the thinking while leaving it to the student?",
+          "levels": [
+            "The support variant does the thinking for the student, or gives no real support.",
+            "The support variant gives some support (a step plan or an example), but it takes over part of the thinking the goal asks for.",
+            "The support variant gives real scaffolding, such as a worked example of a similar problem, a step plan or sentence starters, and leaves the thinking to the student."
+          ]
+        },
+        {
+          "id": "realChallenge",
+          "type": "score",
+          "source": "Is the challenge more complex",
+          "about": {
+            "heading": {
+              "nl": "Variant met extra uitdaging",
+              "en": "Variant with extra challenge"
+            }
+          },
+          "needs": [],
+          "ask": "How does the challenge variant in `output` differ from the base variant?",
+          "levels": [
+            "The challenge variant is more of the same work.",
+            "The challenge variant is somewhat harder, mostly by asking for more.",
+            "The challenge variant is more complex: less structure, more factors, a trade-off or transfer."
+          ]
+        },
+        {
+          "id": "respectful",
+          "type": "noul",
+          "source": "Are the variants equally respectful and doable in about the same time",
+          "needs": [],
+          "ask": "Are the three variants in `output` equally respectful, and doable in about the same time?",
+          "yes": "The variants are equally respectful and take about the same time.",
+          "no": "A variant is belittling, or takes much more or less time than the others.",
+          "good": "yes"
+        },
+        {
+          "id": "flexibleTip",
+          "type": "noul",
+          "source": "Does the tip assign variants by a quick check, let students switch, and keep groups flexible?",
+          "about": {
+            "heading": {
+              "nl": "Zo zet je de varianten in",
+              "en": "How to use the variants"
+            }
+          },
+          "needs": [],
+          "ask": "Does the tip in `output` assign the variants by a quick check rather than by fixed labels?",
+          "yes": "Students are assigned by a quick check and can switch.",
+          "no": "Students are assigned by fixed labels, with no way to switch.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The required `##` headings without numbers, in order, in the output language",
+          "check": {
+            "headings": {
+              "nl": [
+                "Leerdoel en succescriterium",
+                "Variant met extra steun",
+                "Basisvariant",
+                "Variant met extra uitdaging",
+                "Zo zet je de varianten in",
+                "Check op de varianten"
+              ],
+              "en": [
+                "Learning goal and success criterion",
+                "Variant with extra support",
+                "Base variant",
+                "Variant with extra challenge",
+                "How to use the variants",
+                "Check of the variants"
+              ]
+            }
+          }
+        },
+        {
+          "id": "routes",
+          "type": "code",
+          "source": "under a `###` heading with a neutral name (Route A/B/C)",
+          "check": {
+            "contains": {
+              "nl": [
+                "### Route A",
+                "### Route B",
+                "### Route C"
+              ],
+              "en": [
+                "### Route A",
+                "### Route B",
+                "### Route C"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "The exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent kent de groep en past de varianten aan.",
+              "en": "This is a draft. The teacher knows the group and adapts the variants."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "eqfLevel",
+          "type": "score",
+          "source": "The variants fit the case's EQF level and study year",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well does the difficulty of the three variants in `output` fit students at EQF level `case.eqf`?",
+          "levels": [
+            "The three variants are clearly too hard or too easy for students at this EQF level.",
+            "Most of the three variants fit this EQF level; some parts are too hard or too easy.",
+            "All of the three variants fit this EQF level."
+          ]
+        },
+        {
+          "id": "supportAtLevel",
+          "type": "noul",
+          "source": "the support variant is still at that level",
+          "about": {
+            "heading": {
+              "nl": "Variant met extra steun",
+              "en": "Variant with extra support"
+            }
+          },
+          "needs": [
+            "eqf"
+          ],
+          "ask": "Is the support variant in `output` still at the level of students at EQF level `case.eqf`?",
+          "yes": "The support variant asks for the same level of thinking, with more help.",
+          "no": "The support variant drops below the level these students should reach.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists. No deficit labels",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        },
+        {
+          "id": "deficitLabels",
+          "type": "noul",
+          "source": "No deficit labels (\"zwak\", \"sterk\", \"plus\", \"weak\", \"bright\") for students.",
+          "needs": [],
+          "ask": "Does `output` label students with words such as \"zwak\", \"sterk\", \"plus\", \"weak\" or \"bright\"?",
+          "yes": "`output` labels students as weak, strong, plus or bright.",
+          "no": "`output` describes what students need, without labels for students.",
+          "good": "no"
+        }
+      ]
+    },
+    "difficult-conversation": {
+      "taskFidelity": [
+        {
+          "id": "staysInRole",
+          "type": "noul",
+          "source": "Does the AI play the student in the chosen situation and reaction for every",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the AI in `output` play the student in the situation of `case.inputs.situation` in every turn before the teacher asks for feedback?",
+          "yes": "Every turn before the request is the student, in this situation.",
+          "no": "In some turn before the request the AI drops the role or plays another situation.",
+          "good": "yes"
+        },
+        {
+          "id": "feedbackGiven",
+          "type": "noul",
+          "source": "and then give feedback in the required form?",
+          "needs": [],
+          "ask": "Does `output` end with feedback on the teacher's conversation, out of the role?",
+          "yes": "The last turn steps out of the role and gives feedback.",
+          "no": "There is no feedback, or the feedback stays in the role.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "believable",
+          "type": "score",
+          "source": "Is the student believable",
+          "needs": [],
+          "ask": "How believable is the student the AI plays in `output`: reactions that follow from what the teacher does, consistent details, nothing conceded at once?",
+          "levels": [
+            "The student reacts the same whatever the teacher does, or concedes at once.",
+            "The student reacts to the teacher in some turns; elsewhere the reactions do not follow.",
+            "The student's reactions follow from what the teacher does, with consistent details, and nothing is conceded at once."
+          ]
+        },
+        {
+          "id": "usefulFeedback",
+          "type": "score",
+          "source": "Is the feedback useful to a teacher",
+          "about": {
+            "from": {
+              "nl": "Feedback op je gesprek",
+              "en": "Feedback on your conversation"
+            }
+          },
+          "needs": [],
+          "ask": "How useful is the feedback in `output` to the teacher: the points that matter most, each with the effect on the student and a concrete alternative sentence?",
+          "levels": [
+            "The feedback is general praise or general tips.",
+            "The feedback names some points, without effect or alternative sentence.",
+            "The feedback names the points that matter most, each with its effect and a concrete alternative sentence."
+          ]
+        },
+        {
+          "id": "quotesTeacher",
+          "type": "noul",
+          "source": "On request the AI steps out of the role and gives feedback that quotes what the teacher really said",
+          "about": {
+            "from": {
+              "nl": "Feedback op je gesprek",
+              "en": "Feedback on your conversation"
+            }
+          },
+          "needs": [
+            "user_turns"
+          ],
+          "ask": "Does the feedback in `output` quote what the teacher actually said in `case.user_turns`?",
+          "yes": "The feedback quotes the teacher's own words.",
+          "no": "The feedback quotes words the teacher never said, or quotes nothing.",
+          "good": "yes"
+        },
+        {
+          "id": "spikes",
+          "type": "noul",
+          "source": "SPIKES applied correctly for bad news",
+          "when": {
+            "field": "scenario",
+            "equals": "bad-news-grade"
+          },
+          "about": {
+            "from": {
+              "nl": "Feedback op je gesprek",
+              "en": "Feedback on your conversation"
+            }
+          },
+          "needs": [],
+          "ask": "Does the feedback in `output` go through the six steps of SPIKES, each judged with evidence from the conversation?",
+          "yes": "The feedback takes the SPIKES steps one by one, each with evidence.",
+          "no": "The feedback skips SPIKES or judges steps without evidence.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "roleTurns",
+          "type": "code",
+          "source": "Role turns: one to four sentences, about sixty words at most, no headings,",
+          "check": {
+            "turns": {
+              "maxWords": 60,
+              "noLayout": true,
+              "exceptLast": true
+            }
+          }
+        },
+        {
+          "id": "feedbackHeadings",
+          "type": "code",
+          "source": "then the headings in the output language",
+          "check": {
+            "headings": {
+              "nl": [
+                "Feedback op je gesprek",
+                "Wat goed ging",
+                "Wat beter kan",
+                "Eén ding om te oefenen"
+              ],
+              "en": [
+                "Feedback on your conversation",
+                "What went well",
+                "What could be better",
+                "One thing to practise"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is feedback op een oefengesprek met een gespeelde student. Jij beslist wat je ermee doet.",
+              "en": "This is feedback on a practice conversation with a role-played student. You decide what to do with it."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "studentTalk",
+          "type": "noul",
+          "source": "The student talks like a student of the programme and year in the case",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the student the AI plays in `output` talk like a student of the programme and year in `case.inputs.situation`?",
+          "yes": "The student sounds like such a student.",
+          "no": "The student sounds like an adult professional or a child.",
+          "good": "yes"
+        },
+        {
+          "id": "feedbackTone",
+          "type": "noul",
+          "source": "the feedback addresses the teacher as a professional, neither patronising nor jargon-heavy",
+          "about": {
+            "from": {
+              "nl": "Feedback op je gesprek",
+              "en": "Feedback on your conversation"
+            }
+          },
+          "needs": [],
+          "ask": "Does the feedback in `output` address the teacher as a professional, without talking down and without heavy jargon?",
+          "yes": "The feedback reads as one professional to another.",
+          "no": "The feedback is patronising or full of jargon.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language; the student sounds like spoken language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "spoken",
+          "type": "noul",
+          "source": "the student sounds like spoken language,",
+          "needs": [],
+          "ask": "Do the student's turns in `output` sound like spoken language?",
+          "yes": "The student talks the way people speak.",
+          "no": "The student talks like a textbook.",
+          "good": "yes"
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists.",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    },
+    "engagement-check": {
+      "taskFidelity": [
+        {
+          "id": "allSix",
+          "type": "noul",
+          "source": "Are all six principles rated, each with one level and a reason",
+          "needs": [],
+          "ask": "Does `output` rate all six principles, each with one level and a reason?",
+          "yes": "All six principles have one level and a reason.",
+          "no": "A principle is missing, has no level, or has no reason.",
+          "good": "yes"
+        },
+        {
+          "id": "expectedLevels",
+          "type": "score",
+          "source": "Are the levels close to the expected ones in the case description",
+          "capAt": 2,
+          "needs": [
+            "description"
+          ],
+          "ask": "How close are the levels in `output` to the levels that `case.description` expects (one step off is fine)?",
+          "levels": [
+            "Two or more principles are two or more steps off the expected level.",
+            "One principle is two or more steps off the expected level.",
+            "Every principle is at most one step off the expected level."
+          ]
+        },
+        {
+          "id": "aimedAtLowest",
+          "type": "noul",
+          "source": "are the improvements aimed at the lowest principles",
+          "needs": [],
+          "ask": "Are the improvements in `output` aimed at the principles that got the lowest levels?",
+          "yes": "The improvements work on the lowest-rated principles.",
+          "no": "The improvements work on principles that were already rated high.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "followsDefinitions",
+          "type": "score",
+          "source": "Does each level follow the rubric's own definition",
+          "needs": [],
+          "ask": "How well does each level in `output` follow the definitions of the Cognitive Engagement Rubric (for example, open-book work is not High retrieval; a single session is not High spacing)?",
+          "levels": [
+            "Several levels contradict the definitions.",
+            "One level contradicts the definitions.",
+            "Every level follows the definitions."
+          ]
+        },
+        {
+          "id": "concreteImprovements",
+          "type": "score",
+          "source": "Are the improvements concrete for this activity",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How concrete are the improvements in `output` for the activity in `case.inputs.activity`?",
+          "levels": [
+            "The improvements are general advice that would fit any activity.",
+            "Some improvements are concrete; others are general.",
+            "Every improvement names a step, a question or a moment in this activity."
+          ]
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "boldHeadings",
+          "type": "code",
+          "source": "The two bold headings in order",
+          "check": {
+            "contains": {
+              "nl": [
+                "Score per principe",
+                "Zo maak je het actiever"
+              ],
+              "en": [
+                "Score per principle",
+                "How to make it more active"
+              ]
+            }
+          }
+        },
+        {
+          "id": "sixRows",
+          "type": "code",
+          "source": "exactly six rows in the rubric's order",
+          "check": {
+            "tableRows": 6
+          }
+        },
+        {
+          "id": "levelWords",
+          "type": "code",
+          "source": "the levels written as \"Afwezig (0)\" … \"Hoog (3)\"",
+          "check": {
+            "cells": {
+              "column": 2,
+              "pattern": {
+                "nl": "^(Afwezig|Laag|Middel|Hoog) \\([0-3]\\)$",
+                "en": "^(Absent|Low|Medium|High) \\([0-3]\\)$"
+              }
+            }
+          }
+        },
+        {
+          "id": "improvements",
+          "type": "code",
+          "source": "two or three numbered improvements",
+          "check": {
+            "numbered": {
+              "min": 2,
+              "max": 3
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent kent de opdracht en de groep.",
+              "en": "This is a draft. The teacher knows the assignment and the group."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "noLecture",
+          "type": "noul",
+          "source": "Written for a teacher: professional, brief, no lecture on learning science",
+          "needs": [],
+          "ask": "Does `output` lecture on learning science beyond what the ratings need?",
+          "yes": "`output` explains learning science at length.",
+          "no": "`output` stays brief and professional, about this activity.",
+          "good": "no"
+        },
+        {
+          "id": "studentsLevel",
+          "type": "noul",
+          "source": "improvements fit the students' level in the profile",
+          "when": {
+            "eqf": 6
+          },
+          "needs": [
+            "eqf"
+          ],
+          "ask": "Do the improvements in `output` fit students at EQF level `case.eqf`?",
+          "yes": "The improvements are doable for these students.",
+          "no": "The improvements are too hard or too easy for these students.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "principleNames",
+          "type": "noul",
+          "source": "in Dutch the Dutch principle names with the book's name in brackets.",
+          "lang": "nl",
+          "needs": [],
+          "ask": "Does the Dutch text of `output` give each principle a Dutch name with the English name of the book in brackets?",
+          "yes": "Each principle has a Dutch name with the English name in brackets.",
+          "no": "Principles appear with English names only, or with Dutch names only.",
+          "good": "yes"
+        }
+      ]
+    },
+    "group-feedback": {
+      "taskFidelity": [
+        {
+          "id": "pointsComplete",
+          "type": "score",
+          "source": "each with the count from the input, what went wrong, a made-up example of good work and a ten-minute exercise",
+          "needs": [],
+          "ask": "How complete are the points in `output`: does each have the count from the input, what went wrong, a made-up example of good work and a ten-minute exercise?",
+          "levels": [
+            "Several points lack one of these four elements.",
+            "One point lacks one of these four elements.",
+            "Every point has the count, what went wrong, a made-up example and a ten-minute exercise."
+          ]
+        },
+        {
+          "id": "worstFirst",
+          "type": "noul",
+          "source": "the worst first as in the input",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` take the points in the order of `case.inputs.groupSummary`, the worst first?",
+          "yes": "The points follow the input's order, the worst first.",
+          "no": "The points are in another order than the input gives.",
+          "good": "yes"
+        },
+        {
+          "id": "groupText",
+          "type": "noul",
+          "source": "plus a text for the group",
+          "about": {
+            "heading": {
+              "nl": "Tekst voor de groep",
+              "en": "Text for the group"
+            }
+          },
+          "needs": [],
+          "ask": "Does `output` end with a text addressed to the group?",
+          "yes": "There is a text that speaks to the group.",
+          "no": "There is no text for the group.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "feedforward",
+          "type": "score",
+          "source": "Is it feedforward",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How well does each point in `output` show the way forward: what went wrong concretely, an example of good work for this assignment, and an exercise that practises exactly that point?",
+          "levels": [
+            "The points stay general, or the examples and exercises do not fit the point.",
+            "Most points are concrete; some example or exercise does not fit its point.",
+            "Every point is concrete, with an example and an exercise that fit that point and this assignment."
+          ]
+        },
+        {
+          "id": "encouraging",
+          "type": "noul",
+          "source": "the text for the group is encouraging and concrete",
+          "about": {
+            "heading": {
+              "nl": "Tekst voor de groep",
+              "en": "Text for the group"
+            }
+          },
+          "needs": [],
+          "ask": "Is the text for the group in `output` encouraging and concrete?",
+          "yes": "The text encourages the group and names concrete next steps.",
+          "no": "The text is discouraging or vague.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The headings in the output language (Dutch \"Nabespreking\", \"Tekst voor de",
+          "check": {
+            "headings": {
+              "nl": [
+                "Nabespreking",
+                "Tekst voor de groep"
+              ],
+              "en": [
+                "Debrief",
+                "Text for the group"
+              ]
+            }
+          }
+        },
+        {
+          "id": "bullets",
+          "type": "code",
+          "source": "the bullets \"Hoeveel\" / \"How many\"",
+          "check": {
+            "contains": {
+              "nl": [
+                "Hoeveel",
+                "Wat er misging",
+                "Zo ziet goed werk eruit",
+                "Zelfgemaakt voorbeeld:",
+                "Oefening van tien minuten"
+              ],
+              "en": [
+                "How many",
+                "What went wrong",
+                "What good work looks like",
+                "Made-up example:",
+                "Exercise of ten minutes"
+              ]
+            }
+          }
+        },
+        {
+          "id": "length",
+          "type": "code",
+          "source": "about 600 words at most",
+          "check": {
+            "maxWords": 600
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "the exact closing sentence (\"De aantallen zijn geteld door LimeOnIt",
+          "check": {
+            "closing": {
+              "nl": "De aantallen zijn geteld door LimeOnIt, niet door de AI. Jij kiest wat je bespreekt.",
+              "en": "The counts were made by LimeOnIt, not by the AI. You choose what to discuss."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "groupLanguage",
+          "type": "noul",
+          "source": "The text for the group suits students of the programme and year in the case",
+          "about": {
+            "heading": {
+              "nl": "Tekst voor de groep",
+              "en": "Text for the group"
+            }
+          },
+          "needs": [
+            "eqf"
+          ],
+          "ask": "Is the text for the group in `output` in words students at EQF level `case.eqf` use?",
+          "yes": "The text for the group is in plain words these students know.",
+          "no": "The text for the group uses words these students would not know.",
+          "good": "yes"
+        },
+        {
+          "id": "teacherTone",
+          "type": "noul",
+          "source": "the points address the teacher as a professional",
+          "needs": [],
+          "ask": "Do the points in `output` address the teacher as a professional?",
+          "yes": "The points read as a colleague writing to a colleague.",
+          "no": "The points are patronising or chatty.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    },
+    "guided-reflection": {
+      "taskFidelity": [
+        {
+          "id": "threeStages",
+          "type": "noul",
+          "source": "Does it work backward through the three stages, in order and as three separate parts",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [],
+          "ask": "Does `output` work through the three stages of Backward Design (desired results, evidence, learning activities) as three separate parts, in that order?",
+          "yes": "The three stages each have their own part, in this order.",
+          "no": "A stage is missing, the stages are mixed together, or they are out of order.",
+          "good": "yes"
+        },
+        {
+          "id": "teachersOwn",
+          "type": "score",
+          "source": "using the teacher's own big idea, essential question, outcomes and evidence",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How closely does `output` use the big idea, essential question, outcomes and evidence in `case.inputs`?",
+          "levels": [
+            "`output` replaces the teacher's big idea, outcomes or evidence with its own.",
+            "`output` keeps most of the teacher's input but changes or drops part of it.",
+            "`output` builds on the teacher's own big idea, essential question, outcomes and evidence."
+          ]
+        },
+        {
+          "id": "deliverables",
+          "type": "noul",
+          "source": "Does it produce the deliverables the teacher asked for",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` produce the materials that `case.inputs.artefacten` asks for, and only those?",
+          "yes": "`output` makes the materials the teacher asked for.",
+          "no": "`output` leaves out a requested material, or makes materials nobody asked for.",
+          "good": "yes"
+        },
+        {
+          "id": "pastExperience",
+          "type": "noul",
+          "source": "build on what the teacher says worked or did",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "when": {
+            "field": "eerdereErvaring",
+            "present": true
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` build on what `case.inputs.eerdereErvaring` says worked or did not work before?",
+          "yes": "`output` uses the teacher's earlier experience in the design.",
+          "no": "`output` ignores the teacher's earlier experience.",
+          "good": "yes"
+        },
+        {
+          "id": "stopsWhenVague",
+          "type": "noul",
+          "source": "the right output stops after naming what to sharpen",
+          "when": {
+            "description": "Vague teacher input"
+          },
+          "needs": [],
+          "ask": "Does `output` stop after naming what the teacher should sharpen, without producing the design?",
+          "yes": "`output` names what to sharpen, with marked suggestions, and asks the teacher to adjust the form.",
+          "no": "`output` goes on to produce the design on the vague input.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "alignment",
+          "type": "score",
+          "source": "Is every outcome assessed by evidence that fits its verb",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [],
+          "ask": "How well is each outcome in `output` assessed by evidence that fits its verb and level, and supported by at least one activity?",
+          "levels": [
+            "Several outcomes lack fitting evidence or an activity.",
+            "Most outcomes have fitting evidence and an activity; one does not.",
+            "Every outcome has evidence that fits its verb and level, and at least one activity."
+          ]
+        },
+        {
+          "id": "activitiesServe",
+          "type": "noul",
+          "source": "and does every activity serve an outcome (constructive alignment)?",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [],
+          "ask": "Does every activity in `output` serve one of the outcomes?",
+          "yes": "Each activity is tied to an outcome.",
+          "no": "An activity serves no outcome.",
+          "good": "yes"
+        },
+        {
+          "id": "evidenceApart",
+          "type": "noul",
+          "source": "Is the evidence about how students show the outcome",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "needs": [],
+          "ask": "Does `output` keep the evidence (how students show they master an outcome) apart from the activities (what they do to learn it)?",
+          "yes": "Evidence and activities are described separately.",
+          "no": "Evidence and activities are mixed together.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "parts",
+          "type": "code",
+          "source": "A table that links outcomes → evidence → activities, then the",
+          "unless": {
+            "description": "Vague teacher input"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "Samenhangtabel",
+                "Fase 1",
+                "Fase 2",
+                "Fase 3",
+                "Zo kan de sessie verlopen"
+              ],
+              "en": [
+                "Alignment table",
+                "Stage 1",
+                "Stage 2",
+                "Stage 3",
+                "How the session could run"
+              ]
+            }
+          }
+        },
+        {
+          "id": "sharpen",
+          "type": "code",
+          "source": "the right output stops after naming what to sharpen",
+          "when": {
+            "description": "Vague teacher input"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "Om aan te scherpen"
+              ],
+              "en": [
+                "To sharpen"
+              ]
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "eqfLevel",
+          "type": "score",
+          "source": "Register and cognitive demand fit the case's EQF level",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well does the difficulty of the evidence and activities in `output` fit students at EQF level `case.eqf`?",
+          "levels": [
+            "The evidence and activities are clearly too hard or too easy for students at this EQF level.",
+            "Most of the evidence and activities fit this EQF level; some parts are too hard or too easy.",
+            "All of the evidence and activities fit this EQF level."
+          ]
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional Dutch",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "no anglicisms such as \"Alignment Summary\" where a Dutch term exists.",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as samenhangtabel or leeruitkomst, or not at all."
+          ]
+        }
+      ]
+    },
+    "lesson-plan": {
+      "taskFidelity": [
+        {
+          "id": "ownGoal",
+          "type": "score",
+          "source": "Does it build the plan for the teacher's own goal and content",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How closely does the lesson plan in `output` build on the learning goal and content in `case.inputs`?",
+          "levels": [
+            "The plan teaches another goal or other content than `case.inputs` gives.",
+            "The plan works on the goal in `case.inputs`, but some phases cover content the teacher did not name.",
+            "Every phase works on the goal and content in `case.inputs`."
+          ]
+        },
+        {
+          "id": "prior",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students activate the prior knowledge this lesson builds on?",
+          "yes": "A phase of the lesson has students activate the prior knowledge this lesson builds on.",
+          "no": "No phase of the lesson has students activate the prior knowledge this lesson builds on.",
+          "good": "yes"
+        },
+        {
+          "id": "explain",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students get the new material explained in small steps?",
+          "yes": "A phase of the lesson has students get the new material explained in small steps.",
+          "no": "No phase of the lesson has students get the new material explained in small steps.",
+          "good": "yes"
+        },
+        {
+          "id": "guided",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students practise with the teacher's guidance?",
+          "yes": "A phase of the lesson has students practise with the teacher's guidance.",
+          "no": "No phase of the lesson has students practise with the teacher's guidance.",
+          "good": "yes"
+        },
+        {
+          "id": "check",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students show whether they understood, so that the teacher can check?",
+          "yes": "A phase of the lesson has students show whether they understood, so that the teacher can check.",
+          "no": "No phase of the lesson has students show whether they understood, so that the teacher can check.",
+          "good": "yes"
+        },
+        {
+          "id": "independent",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students practise on their own?",
+          "yes": "A phase of the lesson has students practise on their own.",
+          "no": "No phase of the lesson has students practise on their own.",
+          "good": "yes"
+        },
+        {
+          "id": "closing",
+          "type": "noul",
+          "source": "with the six phases (activating prior knowledge, explanation in small steps, guided practice, check for understanding, independent practice, closing)",
+          "group": "sixPhases",
+          "needs": [],
+          "ask": "Does the lesson in `output` have a phase in which students close the lesson by showing what they learned?",
+          "yes": "A phase of the lesson has students close the lesson by showing what they learned.",
+          "no": "No phase of the lesson has students close the lesson by showing what they learned.",
+          "good": "yes"
+        },
+        {
+          "id": "fixedParts",
+          "type": "noul",
+          "source": "the teacher's fixed parts included",
+          "when": {
+            "field": "constraints",
+            "present": true
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the time plan in `output` include the fixed part that `case.inputs.constraints` names?",
+          "yes": "The time plan has a row for the fixed part the teacher named.",
+          "no": "The fixed part the teacher named is missing from the time plan.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "review",
+          "type": "score",
+          "source": "a short review of prior learning",
+          "needs": [],
+          "ask": "How closely is the review of prior learning in `output` limited to what this lesson needs?",
+          "levels": [
+            "The review covers topics this lesson does not use, or there is no review.",
+            "The review is partly about what this lesson needs.",
+            "The review covers only what this lesson needs."
+          ]
+        },
+        {
+          "id": "smallSteps",
+          "type": "score",
+          "source": "steps that are actually small and ordered",
+          "needs": [],
+          "ask": "How small and ordered are the steps of the explanation in `output`?",
+          "levels": [
+            "The explanation is one long block, or it jumps between topics.",
+            "Some steps are small; others bring several new things at once.",
+            "Every step adds one new thing, in a logical order."
+          ]
+        },
+        {
+          "id": "workedExample",
+          "type": "noul",
+          "source": "a worked example per step",
+          "needs": [],
+          "ask": "Does every step of the explanation in `output` come with a worked example?",
+          "yes": "Each step of the explanation has its own worked example.",
+          "no": "At least one step of the explanation has no worked example.",
+          "good": "yes"
+        },
+        {
+          "id": "fading",
+          "type": "score",
+          "source": "guided practice with support that is withdrawn",
+          "needs": [],
+          "ask": "How does the support in the guided practice of `output` change during the practice?",
+          "levels": [
+            "There is no guided practice, or the teacher does the work for the students.",
+            "Students practise with support, and the support stays the same throughout.",
+            "Students practise with support that the teacher withdraws step by step."
+          ]
+        },
+        {
+          "id": "decisionPoint",
+          "type": "noul",
+          "source": "a check that measures the goal itself with a decision point",
+          "needs": [],
+          "ask": "Does the check for understanding in `output` say what the teacher does when too few students answer correctly?",
+          "yes": "The check names what the teacher does when too few students answer correctly.",
+          "no": "The check gives no next step for when too few students answer correctly.",
+          "good": "yes"
+        },
+        {
+          "id": "laterReview",
+          "type": "noul",
+          "source": "review questions for later lessons",
+          "needs": [],
+          "ask": "Does `output` give questions to come back to this material in later lessons?",
+          "yes": "`output` lists questions or tasks to review this material in a later lesson.",
+          "no": "`output` has nothing to come back to this material later.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The required `##` headings without numbers, in order, in the output language",
+          "check": {
+            "headings": {
+              "nl": [
+                "Leerdoel en succescriterium",
+                "Tijdsplan",
+                "Lesverloop",
+                "Terugkomen in volgende lessen",
+                "Check op de opzet"
+              ],
+              "en": [
+                "Learning goal and success criterion",
+                "Time plan",
+                "Lesson outline",
+                "Coming back in later lessons",
+                "Check of the plan"
+              ]
+            }
+          }
+        },
+        {
+          "id": "timeTable",
+          "type": "code",
+          "source": "one time-plan table in the required layout",
+          "check": {
+            "contains": {
+              "nl": [
+                "| Fase | Minuten | Werkvorm | Hoe dit het leerdoel dient |"
+              ],
+              "en": [
+                "| Phase | Minutes | Activity | How this serves the learning goal |"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent past de les aan op de eigen groep.",
+              "en": "This is a draft. The teacher adapts the lesson to their own group."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "eqfLevel",
+          "type": "score",
+          "source": "The difficulty of the explanation, examples and tasks fits the case's EQF level and study year",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well does the difficulty of the explanations, examples and tasks in `output` fit students at EQF level `case.eqf`?",
+          "levels": [
+            "The explanations, examples and tasks are clearly too hard or too easy for students at this EQF level.",
+            "Most of the explanations, examples and tasks fit this EQF level; some parts are too hard or too easy.",
+            "All of the explanations, examples and tasks fit this EQF level."
+          ]
+        },
+        {
+          "id": "studentRegister",
+          "type": "noul",
+          "source": "Questions students read are in their register",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "Are the questions that students read in `output` written in words these students at EQF level `case.eqf` use?",
+          "yes": "The questions for students use words and sentences these students know.",
+          "no": "The questions for students use words or sentences these students would not know.",
+          "good": "yes"
+        },
+        {
+          "id": "teacherRegister",
+          "type": "noul",
+          "source": "prose for the teacher stays professional",
+          "needs": [],
+          "ask": "Is the text that `output` addresses to the teacher written in a professional tone?",
+          "yes": "The text for the teacher reads as a colleague writing to a colleague.",
+          "no": "The text for the teacher is chatty, patronising or written as if to a student.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists (established terms such as exitvraag or quiz are fine)",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as exitvraag or quiz, or not at all."
+          ]
+        }
+      ]
+    },
+    "mentorai": {
+      "taskFidelity": [
+        {
+          "id": "coaches",
+          "type": "score",
+          "source": "Does the mentor coach toward the learning goal",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How much does the mentor in `output` coach toward the goal in `case.inputs.learningGoal` with questions, hints and checks, rather than lecture?",
+          "levels": [
+            "The mentor mostly explains or gives answers.",
+            "The mentor coaches in some turns and lectures in others.",
+            "The mentor coaches with questions, hints and checks in every turn."
+          ]
+        },
+        {
+          "id": "holdsAnswer",
+          "type": "noul",
+          "source": "simply hands over the final answer when the student pushes for it",
+          "needs": [],
+          "ask": "Does the mentor in `output` hand over the final answer when the student pushes for it?",
+          "yes": "The mentor gives the final answer.",
+          "no": "The mentor declines in character and turns the student back to the thinking.",
+          "good": "no"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "buildsOn",
+          "type": "score",
+          "source": "builds on what the student knows, scaffolds, encourages",
+          "needs": [],
+          "ask": "How well does the mentor in `output` build on what the student says and knows, giving the next small step?",
+          "levels": [
+            "The mentor ignores what the student says, or takes over the task.",
+            "The mentor builds on the student in some turns.",
+            "The mentor builds on what the student says in every turn, with a next small step."
+          ]
+        },
+        {
+          "id": "consistent",
+          "type": "noul",
+          "source": "gives inconsistent or contradictory guidance across turns",
+          "needs": [],
+          "ask": "Does the mentor in `output` contradict its own earlier guidance?",
+          "yes": "The mentor's guidance contradicts an earlier turn.",
+          "no": "The mentor's guidance stays consistent across turns.",
+          "good": "no"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "turnRules",
+          "type": "code",
+          "source": "Turns are conversational and reasonably concise",
+          "check": {
+            "turns": {
+              "maxWords": 120
+            }
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "register",
+          "type": "noul",
+          "source": "Register fits a first-year hbo student; supportive, not condescending.",
+          "needs": [],
+          "ask": "Does the mentor in `output` talk like a supportive mentor to a first-year hbo student, without talking down?",
+          "yes": "The mentor is supportive and talks at the student's level.",
+          "no": "The mentor talks down to the student, or above the student's head.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct Dutch, warm and clear.",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        }
+      ]
+    },
+    "rubric-builder": {
+      "taskFidelity": [
+        {
+          "id": "ownOutcome",
+          "type": "score",
+          "source": "Does it build the rubric for the teacher's own outcome and assignment",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How closely is the rubric in `output` built on the learning outcome and assignment in `case.inputs`?",
+          "levels": [
+            "The rubric assesses another outcome or another assignment.",
+            "The rubric fits the outcome in part; some criteria belong to another outcome.",
+            "Every criterion comes from the teacher's outcome and assignment."
+          ]
+        },
+        {
+          "id": "levelCount",
+          "type": "noul",
+          "source": "with the number of levels asked for",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the rubric in `output` have the number of levels in `case.inputs.levelCount`?",
+          "yes": "The rubric has exactly that number of levels.",
+          "no": "The rubric has more or fewer levels.",
+          "good": "yes"
+        },
+        {
+          "id": "teachersRules",
+          "type": "noul",
+          "source": "the teacher's points, pass mark and knock-out rules",
+          "when": {
+            "field": "scale",
+            "present": true
+          },
+          "unless": {
+            "description": "no observable verb"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` use the points, pass mark and knock-out rules that `case.inputs.scale` gives?",
+          "yes": "`output` keeps the teacher's points, pass mark and knock-out rules.",
+          "no": "`output` changes or drops the teacher's points, pass mark or knock-out rules.",
+          "good": "yes"
+        },
+        {
+          "id": "checksExisting",
+          "type": "noul",
+          "source": "With an existing rubric, does it check that rubric first",
+          "when": {
+            "field": "existingRubric",
+            "present": true
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` check the teacher's existing rubric in `case.inputs.existingRubric` before improving it?",
+          "yes": "`output` first checks the existing rubric, then improves it.",
+          "no": "`output` builds a new rubric without checking the existing one.",
+          "good": "yes"
+        },
+        {
+          "id": "stopsForVerb",
+          "type": "noul",
+          "source": "the right output stops",
+          "when": {
+            "description": "no observable verb"
+          },
+          "needs": [],
+          "ask": "Does `output` stop to sharpen the learning outcome instead of building a rubric on it?",
+          "yes": "`output` names what is not observable, proposes a sharper outcome and builds no rubric.",
+          "no": "`output` builds a rubric on the outcome as it is.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "criteria",
+          "type": "score",
+          "source": "Are the criteria appropriate, observable, distinct and complete",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [],
+          "ask": "How appropriate, observable and distinct are the criteria of the rubric in `output`?",
+          "levels": [
+            "Several criteria cannot be seen in the work, overlap, or miss part of the outcome.",
+            "Most criteria are observable and distinct; one overlaps or cannot be seen in the work.",
+            "Every criterion can be seen in the work, none overlap, and together they cover the outcome."
+          ]
+        },
+        {
+          "id": "levels",
+          "type": "score",
+          "source": "are the level descriptions descriptive, free of overlap and gaps, and",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [],
+          "ask": "How well do the level descriptions in `output` describe what is seen in the work, without overlap or gaps between levels?",
+          "levels": [
+            "The levels only judge (\"good\", \"weak\") or overlap.",
+            "Most levels describe the work; some overlap, leave a gap or only judge.",
+            "Every level describes what is seen in the work, with no overlap and no gap."
+          ]
+        },
+        {
+          "id": "passLevel",
+          "type": "noul",
+          "source": "Does the pass level ask for the outcome's cognitive process",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does the pass level in `output` ask for the thinking the outcome's verb in `case.inputs.learningOutcome` names?",
+          "yes": "Passing needs the thinking of the outcome's verb.",
+          "no": "Passing can be reached with a lower kind of thinking, such as describing where the outcome asks to analyse.",
+          "good": "yes"
+        },
+        {
+          "id": "noTaskDirections",
+          "type": "noul",
+          "source": "Are task directions (length, layout, deadlines) kept out of",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [],
+          "ask": "Does the rubric in `output` include task directions such as length, layout or deadlines as quality criteria?",
+          "yes": "A criterion is about length, layout or a deadline.",
+          "no": "The criteria are about the quality of the work only.",
+          "good": "no"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The required `##` headings without numbers, in order",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "Koppeling met de leeruitkomst",
+                "Beoordelingsmodel",
+                "Punten, cesuur en slaagregels",
+                "Zelfcheck"
+              ],
+              "en": [
+                "Link to the learning outcome",
+                "Rubric",
+                "Points, pass mark and pass rules",
+                "Self-check"
+              ]
+            }
+          }
+        },
+        {
+          "id": "table",
+          "type": "code",
+          "source": "one Markdown table in the editor's layout",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "| Criterium | Niveau 1 |"
+              ],
+              "en": [
+                "| Criterion | Level 1 |"
+              ]
+            }
+          }
+        },
+        {
+          "id": "stopHeading",
+          "type": "code",
+          "source": "the required form is one heading",
+          "when": {
+            "description": "no observable verb"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "Leeruitkomst eerst aanscherpen"
+              ],
+              "en": [
+                "Sharpen the learning outcome first"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent stelt het beoordelingsmodel vast.",
+              "en": "This is a draft. The teacher decides on the rubric."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "reachable",
+          "type": "score",
+          "source": "The demands in the descriptions fit the case's EQF level and study year",
+          "unless": {
+            "description": "no observable verb"
+          },
+          "about": {
+            "heading": {
+              "nl": "Beoordelingsmodel",
+              "en": "Rubric"
+            }
+          },
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well do the demands in the level descriptions of `output` fit students at EQF level `case.eqf`, with the top level within reach?",
+          "levels": [
+            "The top level is out of reach for these students, or the demands are far below their level.",
+            "Most demands fit this level; some are too high or too low.",
+            "The demands fit this level, and the top level is within reach."
+          ]
+        },
+        {
+          "id": "professional",
+          "type": "noul",
+          "source": "Prose for the teacher stays professional.",
+          "needs": [],
+          "ask": "Is the text that `output` addresses to the teacher written in a professional tone?",
+          "yes": "The text for the teacher reads as a colleague writing to a colleague.",
+          "no": "The text for the teacher is chatty or patronising.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists (established terms such as rubric and knock-out are fine)",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as rubric or knock-out, or not at all."
+          ]
+        }
+      ]
+    },
+    "test-analysis": {
+      "taskFidelity": [
+        {
+          "id": "reliability",
+          "type": "noul",
+          "source": "Does it explain the reliability",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` explain what the reliability (Cronbach's alpha) in `case.inputs.analysis` means for this test?",
+          "yes": "`output` explains what this alpha means for this test.",
+          "no": "`output` gives no explanation of the reliability.",
+          "good": "yes"
+        },
+        {
+          "id": "firstQuestions",
+          "type": "score",
+          "source": "name the questions to look at first, most urgent first, with the reason from the numbers, as the case description expects",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [
+            "description"
+          ],
+          "ask": "How well do the questions that `output` names to look at first match what `case.description` expects, most urgent first, each with its reason from the numbers?",
+          "levels": [
+            "`output` names other questions than the case description expects, or gives no reasons.",
+            "`output` names some of the expected questions, or puts them in another order, or gives reasons for only some.",
+            "`output` names the expected questions, most urgent first, each with a reason from the numbers."
+          ]
+        },
+        {
+          "id": "optionsNoChoice",
+          "type": "noul",
+          "source": "without choosing",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [],
+          "ask": "Does `output` list what the teacher can do with a faulty question and leave the choice to the teacher?",
+          "yes": "`output` lists the options (correct the key, accept a second answer, give everyone the point, leave it out) and lets the teacher choose.",
+          "no": "`output` decides for the teacher what to do with a question, or names no options.",
+          "good": "yes"
+        },
+        {
+          "id": "stopsForRaw",
+          "type": "noul",
+          "source": "When the tool rightly stops because it got raw scores",
+          "when": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [],
+          "ask": "Does `output` stop and ask for the numbers per question instead of analysing the raw scores?",
+          "yes": "`output` says it needs the numbers per question and does not analyse the raw scores.",
+          "no": "`output` analyses or computes from the raw scores.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "rirOverRit",
+          "type": "noul",
+          "source": "Rir preferred over Rit",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [],
+          "ask": "Does `output` base its judgement of how well a question discriminates on the Rir rather than the Rit?",
+          "yes": "`output` uses the Rir to judge discrimination, or explains why the Rir is the better number.",
+          "no": "`output` judges discrimination on the Rit alone.",
+          "good": "yes"
+        },
+        {
+          "id": "combinations",
+          "type": "noul",
+          "source": "combinations rather than single thresholds",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [],
+          "ask": "Does `output` read combinations of numbers, such as a negative Rir together with a p below guessing level, rather than one threshold at a time?",
+          "yes": "`output` combines signals before calling a question faulty.",
+          "no": "`output` calls a question faulty on a single threshold.",
+          "good": "yes"
+        },
+        {
+          "id": "easyQuestion",
+          "type": "noul",
+          "source": "no condemning of an easy question for its low Rit",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "needs": [],
+          "ask": "Does `output` call a very easy question faulty only because its Rit is low?",
+          "yes": "`output` calls a very easy question faulty because of its low Rit.",
+          "no": "`output` treats a low Rit on a very easy question as no fault in itself, or no such question occurs.",
+          "good": "no"
+        },
+        {
+          "id": "smallSample",
+          "type": "noul",
+          "source": "caution with few candidates",
+          "when": {
+            "description": "only \\d+ candidates"
+          },
+          "needs": [],
+          "ask": "Does `output` say that its statements are provisional because there are few candidates?",
+          "yes": "`output` warns that with this few candidates every statement is provisional.",
+          "no": "`output` draws firm conclusions despite the few candidates.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The required `##` headings without numbers, in order",
+          "unless": {
+            "description": "raw scores per candidate"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "In het kort",
+                "Betrouwbaarheid",
+                "Vragen om eerst te bekijken",
+                "Vragen die goed werken",
+                "Vervolgstappen",
+                "Wat deze getallen niet zeggen"
+              ],
+              "en": [
+                "In short",
+                "Reliability",
+                "Questions to look at first",
+                "Questions that work well",
+                "Next steps",
+                "What these numbers do not say"
+              ]
+            }
+          }
+        },
+        {
+          "id": "headingsStop",
+          "type": "code",
+          "source": "When the tool rightly stops because it got raw scores, the required form is one heading",
+          "when": {
+            "description": "raw scores per candidate"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "Eerst de getallen per vraag"
+              ],
+              "en": [
+                "First the numbers per question"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit is een advies. De docent besluit over de toets en de uitslag.",
+              "en": "This is advice. The teacher decides on the test and the results."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "termsOnce",
+          "type": "noul",
+          "source": "every term explained once, briefly",
+          "needs": [],
+          "ask": "Does `output` explain each psychometric term (such as p-value, Rit, Rir, alpha) once and briefly?",
+          "yes": "Each term is explained once, in a short phrase.",
+          "no": "Terms are used without explanation, or explained at length.",
+          "good": "yes"
+        },
+        {
+          "id": "noLecture",
+          "type": "noul",
+          "source": "no lecture on test theory",
+          "needs": [],
+          "ask": "Does `output` contain a lecture on test theory that the teacher did not need?",
+          "yes": "`output` spends paragraphs on test theory beyond what these numbers need.",
+          "no": "`output` stays with what these numbers mean for this test.",
+          "good": "no"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists (established terms such as p-waarde, Rit, Rir and alfa are fine)",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as p-waarde, Rit, Rir or alfa, or not at all."
+          ]
+        }
+      ]
+    },
+    "test-items": {
+      "taskFidelity": [
+        {
+          "id": "ownOutcomes",
+          "type": "score",
+          "source": "Does the blueprint cover the teacher's own outcomes",
+          "about": {
+            "stage": "blueprint"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How fully does the blueprint in `output` cover the learning outcomes in `case.inputs.learningOutcomes`?",
+          "levels": [
+            "The blueprint leaves out several outcomes without a reason, or tests other outcomes.",
+            "The blueprint covers most outcomes; one is missing without a reason.",
+            "The blueprint covers every outcome, or names a reason for leaving one out."
+          ]
+        },
+        {
+          "id": "followsBlueprint",
+          "type": "noul",
+          "source": "do the questions follow the blueprint row by row",
+          "needs": [],
+          "ask": "Do the questions in `output` follow the rows of the blueprint, with the number of questions each row gives?",
+          "yes": "Every row of the blueprint gets the questions it promises.",
+          "no": "Some row gets more, fewer or other questions than the blueprint promises.",
+          "good": "yes"
+        },
+        {
+          "id": "distractorReasons",
+          "type": "noul",
+          "source": "Does every MC item give the reason each distractor is wrong",
+          "unless": {
+            "field": "questionTypes",
+            "equals": "open"
+          },
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "Does the answer model in `output` give, for every multiple-choice question, why each wrong option is wrong?",
+          "yes": "Every multiple-choice question has a reason for each wrong option.",
+          "no": "Some multiple-choice question lacks a reason for a wrong option.",
+          "good": "yes"
+        },
+        {
+          "id": "openModel",
+          "type": "noul",
+          "source": "every open item an answer model with points",
+          "unless": {
+            "field": "questionTypes",
+            "equals": "multiple-choice"
+          },
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "Does the answer model in `output` give, for every open question, what earns the points?",
+          "yes": "Every open question has an answer model with points.",
+          "no": "Some open question lacks an answer model or its points.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "verbLevel",
+          "type": "score",
+          "source": "Does each outcome get tested at the level of its verb",
+          "about": {
+            "stage": "items"
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How well do the questions in `output` test each outcome at the thinking level of its verb, as in `case.inputs.learningOutcomes`?",
+          "levels": [
+            "Most questions ask for recall, also where the outcome asks to apply, analyse or evaluate.",
+            "Some questions match the outcome's verb; others ask for a lower level.",
+            "Each question asks for the thinking level of its outcome's verb, with apply-or-higher questions in a new situation."
+          ]
+        },
+        {
+          "id": "mcSound",
+          "type": "score",
+          "source": "Are the MC items sound by Haladyna et al.",
+          "unless": {
+            "field": "questionTypes",
+            "equals": "open"
+          },
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "How sound are the multiple-choice questions in `output`: one correct answer, plausible wrong options, no clue to the answer?",
+          "levels": [
+            "Several questions have two defensible answers, implausible options, or a clue such as the longest option.",
+            "Most questions are sound; one or two have a weak option or a clue.",
+            "Every question has exactly one correct answer, plausible wrong options from real student errors, and no clue."
+          ]
+        },
+        {
+          "id": "openClear",
+          "type": "score",
+          "source": "Are open questions clear about what to do",
+          "unless": {
+            "field": "questionTypes",
+            "equals": "multiple-choice"
+          },
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "How clear are the open questions in `output` about what the student must do, with an answer model a colleague could mark with?",
+          "levels": [
+            "Several open questions leave unclear what to do, or their answer model could not be used to mark.",
+            "Most open questions are clear; one or two are vague or lack a usable answer model.",
+            "Every open question says what to do, and its answer model would let a colleague mark it."
+          ]
+        },
+        {
+          "id": "independent",
+          "type": "noul",
+          "source": "Are questions independent of each other?",
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "Can each question in `output` be answered without the answer to another question?",
+          "yes": "No question gives away or depends on the answer to another question.",
+          "no": "Some question gives away or depends on the answer to another question.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "blueprintTable",
+          "type": "code",
+          "source": "one table `| Rij | Leeruitkomst | Denkniveau | Vraagvorm |",
+          "about": {
+            "stage": "blueprint"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "| Rij | Leeruitkomst | Denkniveau | Vraagvorm | Aantal vragen | Punten per vraag | Punten |"
+              ],
+              "en": [
+                "| Row | Learning outcome | Cognitive level | Question type | Number of questions | Points per question | Points |"
+              ]
+            }
+          }
+        },
+        {
+          "id": "itemSections",
+          "type": "code",
+          "source": "The items stage: \"Vragen/Questions\" without answers, \"Antwoordmodel/Answer model\"",
+          "about": {
+            "stage": "items"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "## Vragen",
+                "## Antwoordmodel",
+                "## Controle tegen de matrijs"
+              ],
+              "en": [
+                "## Questions",
+                "## Answer model",
+                "## Check against the blueprint"
+              ]
+            }
+          }
+        },
+        {
+          "id": "closingBlueprint",
+          "type": "code",
+          "source": "Both stages end with the exact closing sentence",
+          "about": {
+            "stage": "blueprint"
+          },
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent stelt de toets vast.",
+              "en": "This is a draft. The teacher decides on the test."
+            }
+          }
+        },
+        {
+          "id": "closingItems",
+          "type": "code",
+          "source": "Both stages end with the exact closing sentence",
+          "about": {
+            "stage": "items"
+          },
+          "check": {
+            "closing": {
+              "nl": "Dit is een concept. De docent stelt de toets vast.",
+              "en": "This is a draft. The teacher decides on the test."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "eqfLevel",
+          "type": "score",
+          "source": "The questions fit the case's EQF level and study year",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "How well does the difficulty of the questions and their situations in `output` fit students at EQF level `case.eqf`?",
+          "levels": [
+            "The questions and their situations are clearly too hard or too easy for students at this EQF level.",
+            "Most of the questions and their situations fit this EQF level; some parts are too hard or too easy.",
+            "All of the questions and their situations fit this EQF level."
+          ]
+        },
+        {
+          "id": "teacherRegister",
+          "type": "noul",
+          "source": "the answer model stays professional for the teacher",
+          "about": {
+            "stage": "items"
+          },
+          "needs": [],
+          "ask": "Is the answer model in `output` written in a professional tone for the teacher?",
+          "yes": "The answer model reads as a colleague writing to a colleague.",
+          "no": "The answer model is chatty, or written as if to a student.",
+          "good": "yes"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, professional target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch term exists (established terms such as multiple choice and t-toets are fine)",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as multiple choice or t-toets, or not at all."
+          ]
+        }
+      ]
+    },
+    "visit-prep": {
+      "taskFidelity": [
+        {
+          "id": "perCriterion",
+          "type": "score",
+          "source": "Is there a `###` heading per criterion, in the order of the input",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How well does `output` give each criterion in `case.inputs.criteria` its own heading, in the order of the input, with questions to the student and to the workplace supervisor?",
+          "levels": [
+            "Several criteria are missing, merged, or lack questions to one of the two.",
+            "One criterion is missing, out of order, or lacks questions to one of the two.",
+            "Every criterion has its own heading in the input's order, with questions to the student and to the supervisor."
+          ]
+        },
+        {
+          "id": "fitsMoment",
+          "type": "noul",
+          "source": "fitting the moment of the visit",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Do the questions in `output` fit the moment in `case.inputs.moment` (start: plan and agreements; midway: progress and what is still needed; final: what was achieved and what is missing; final-interview: an assessment after the presentation)?",
+          "yes": "The questions fit this moment.",
+          "no": "The questions belong to another moment.",
+          "good": "yes"
+        },
+        {
+          "id": "presentationFirst",
+          "type": "noul",
+          "source": "opening with questions on the presentation",
+          "when": {
+            "field": "moment",
+            "equals": "final-interview"
+          },
+          "needs": [],
+          "ask": "Does `output` open with questions about the presentation?",
+          "yes": "The first heading has questions about the presentation.",
+          "no": "`output` does not open with the presentation.",
+          "good": "yes"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "openQuestions",
+          "type": "score",
+          "source": "Are the questions open, short and useful for seeing how the work on",
+          "needs": [],
+          "ask": "How open, short and useful are the questions in `output` for seeing how the work on each criterion stands?",
+          "levels": [
+            "Many questions are closed, long, or steer towards an answer.",
+            "Most questions are open and short; some are closed or steer towards an answer.",
+            "The questions are open and short, let the other person speak, and do not steer towards an answer."
+          ]
+        },
+        {
+          "id": "concreteAgreements",
+          "type": "noul",
+          "source": "Are the agreements concrete?",
+          "unless": {
+            "field": "moment",
+            "equals": "final-interview"
+          },
+          "needs": [],
+          "ask": "Are the agreements at the end of `output` concrete: what is agreed and who does what?",
+          "yes": "The agreements name what is agreed and who does it.",
+          "no": "The agreements are vague.",
+          "good": "yes"
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "roles",
+          "type": "code",
+          "source": "per criterion \"Aan de student\"",
+          "check": {
+            "contains": {
+              "nl": [
+                "Aan de student",
+                "Aan de praktijkbegeleider"
+              ],
+              "en": [
+                "To the student",
+                "To the workplace supervisor"
+              ]
+            }
+          }
+        },
+        {
+          "id": "agreements",
+          "type": "code",
+          "source": "a closing agreements heading",
+          "unless": {
+            "field": "moment",
+            "equals": "final-interview"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "### Afspraken"
+              ],
+              "en": [
+                "### Agreements"
+              ]
+            }
+          }
+        },
+        {
+          "id": "judgement",
+          "type": "code",
+          "source": "closing with \"Voor je oordeel\"",
+          "when": {
+            "field": "moment",
+            "equals": "final-interview"
+          },
+          "check": {
+            "contains": {
+              "nl": [
+                "### Voor je oordeel"
+              ],
+              "en": [
+                "### For your judgement"
+              ]
+            }
+          }
+        },
+        {
+          "id": "length",
+          "type": "code",
+          "source": "about 600 words at most",
+          "check": {
+            "maxWords": 600
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing",
+          "check": {
+            "closing": {
+              "nl": "Deze vragen komen alleen uit de criteria. Jij kiest wat je stelt.",
+              "en": "These questions come only from the criteria. You choose what to ask."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "studentLanguage",
+          "type": "noul",
+          "source": "The questions suit a student of the programme and year",
+          "needs": [
+            "eqf"
+          ],
+          "ask": "Are the questions to the student in `output` in words a student at EQF level `case.eqf` uses?",
+          "yes": "The questions use plain words this student knows.",
+          "no": "The questions use words this student would not know.",
+          "good": "yes"
+        },
+        {
+          "id": "noLevelNamed",
+          "type": "noul",
+          "source": "no level is named.",
+          "needs": [],
+          "ask": "Does `output` name the student's level, such as mbo, hbo or EQF?",
+          "yes": "`output` names the student's level.",
+          "no": "`output` names no level.",
+          "good": "no"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    },
+    "visit-report": {
+      "taskFidelity": [
+        {
+          "id": "onlyNotes",
+          "type": "score",
+          "source": "each filled only from the notes",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "How strictly does the report in `output` stay with what `case.inputs.notes` says?",
+          "levels": [
+            "The report adds several things the notes do not say.",
+            "The report adds one detail the notes do not say.",
+            "Everything in the report comes from the notes."
+          ]
+        },
+        {
+          "id": "noAgreementsLine",
+          "type": "noul",
+          "source": "\"Geen afspraken genoteerd.\"",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "When `case.inputs.notes` records no agreements, does `output` say so instead of making some up?",
+          "yes": "The report says that no agreements were noted, or the notes do record agreements that the report gives.",
+          "no": "The report makes up agreements the notes do not record.",
+          "good": "yes"
+        },
+        {
+          "id": "criterionLinks",
+          "type": "noul",
+          "source": "Is a point linked to a criterion only where the notes clearly do?",
+          "when": {
+            "field": "criteria",
+            "present": true
+          },
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` link a point to a criterion in `case.inputs.criteria` where the notes do not clearly do so?",
+          "yes": "The report links a point to a criterion that the notes do not connect to it.",
+          "no": "Every link to a criterion is one the notes make clearly.",
+          "good": "no"
+        },
+        {
+          "id": "knownError",
+          "type": "noul",
+          "source": "Missing a named known error caps this criterion at 2.",
+          "when": {
+            "knownError": true
+          },
+          "capAt": 2,
+          "needs": [
+            "known_error"
+          ],
+          "ask": "Does `output` name the problem described in `case.known_error`, or handle it the way that description asks?",
+          "yes": "`output` names this problem (as a warning, a question to the teacher, or a proposal), or does what the description asks for it, such as leaving out what must not appear.",
+          "no": "`output` neither names this problem nor handles it as the description asks: it goes ahead as if the input had no such problem.",
+          "good": "yes"
+        }
+      ],
+      "pedagogicalSoundness": [
+        {
+          "id": "actionable",
+          "type": "score",
+          "source": "Does the report describe what happens and what can improve, without deficit language",
+          "needs": [],
+          "ask": "How well does `output` describe what happens and what can improve, so that the student and the teacher can act on it?",
+          "levels": [
+            "The report judges the student, or stays too vague to act on.",
+            "The report describes some points concretely; others are vague or judging.",
+            "The report describes what happens and what can improve, concretely and without judging the person."
+          ]
+        }
+      ],
+      "formatAdherence": [
+        {
+          "id": "headings",
+          "type": "code",
+          "source": "The headings of the prompt in the output language",
+          "unless": {
+            "field": "occasion",
+            "equals": "final-interview"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "Verloop van het bezoek",
+                "Wat er goed gaat",
+                "Aandachtspunten",
+                "Afspraken"
+              ],
+              "en": [
+                "Course of the visit",
+                "What goes well",
+                "Points of attention",
+                "Agreements"
+              ]
+            }
+          }
+        },
+        {
+          "id": "headingsFinal",
+          "type": "code",
+          "source": "The headings of the prompt in the output language",
+          "when": {
+            "field": "occasion",
+            "equals": "final-interview"
+          },
+          "check": {
+            "headings": {
+              "nl": [
+                "Verloop van het gesprek",
+                "Presentatie",
+                "Uit het gesprek",
+                "Vervolg"
+              ],
+              "en": [
+                "Course of the meeting",
+                "Presentation",
+                "From the conversation",
+                "Follow-up"
+              ]
+            }
+          }
+        },
+        {
+          "id": "length",
+          "type": "code",
+          "source": "about 400 words at most",
+          "check": {
+            "maxWords": 400
+          }
+        },
+        {
+          "id": "closing",
+          "type": "code",
+          "source": "and the exact closing sentence",
+          "check": {
+            "closing": {
+              "nl": "Dit verslag is gemaakt uit jouw steekwoorden. Controleer het voordat je het deelt; LimeOnIt bewaart het niet.",
+              "en": "This report was made from your notes. Check it before you share it; LimeOnIt does not keep it."
+            }
+          }
+        },
+        {
+          "id": "notCutOff",
+          "type": "code",
+          "source": "Finished, not cut off.",
+          "check": {
+            "notCutOff": true
+          }
+        }
+      ],
+      "levelFit": [
+        {
+          "id": "professional",
+          "type": "noul",
+          "source": "Professional, full sentences for the teacher and the file",
+          "needs": [],
+          "ask": "Is `output` written in professional, full sentences fit for a student's file?",
+          "yes": "The report reads as a professional note in full sentences.",
+          "no": "The report is in loose keywords, or chatty.",
+          "good": "yes"
+        },
+        {
+          "id": "noJargon",
+          "type": "noul",
+          "source": "no jargon that is not in the notes or the criteria",
+          "needs": [
+            "inputs"
+          ],
+          "ask": "Does `output` use jargon that is not in `case.inputs.notes` or `case.inputs.criteria`?",
+          "yes": "The report adds jargon of its own.",
+          "no": "The report uses only words from the notes, the criteria or plain language.",
+          "good": "no"
+        }
+      ],
+      "languageQuality": [
+        {
+          "id": "correct",
+          "type": "score",
+          "source": "Correct, natural target language",
+          "needs": [
+            "output_language"
+          ],
+          "ask": "How correct is the language of `output`, written for `case.output_language` (nl is Dutch, en is English)?",
+          "levels": [
+            "Much of `output` is in another language than `case.output_language`, or most paragraphs have grammar or spelling mistakes.",
+            "`output` is in the right language, with a few grammar or spelling mistakes.",
+            "`output` is in the right language, without grammar or spelling mistakes."
+          ]
+        },
+        {
+          "id": "anglicisms",
+          "type": "score",
+          "source": "in Dutch no anglicisms where a Dutch",
+          "lang": "nl",
+          "needs": [],
+          "ask": "How often does the Dutch text in `output` use an English word where a common Dutch word exists?",
+          "levels": [
+            "Often: several English words or phrases where a common Dutch word exists.",
+            "Once or twice: an English word where a common Dutch word exists.",
+            "Never: English words appear only as established terms in Dutch education, such as deadline, quiz or PDF, or not at all."
+          ]
+        }
+      ]
+    }
+  }
+}

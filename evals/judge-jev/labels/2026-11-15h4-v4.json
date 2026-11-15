@@ -1,0 +1,252 @@
+{
+  "about": "Bastiaans blinde scores (15 november, labelpagina op claude.ai, zonder AI) op de toetsset van versie 4: 30 uitvoeren van de zes toetstools, en in `retest` vijf daarvan nog een keer, later in dezelfde ronde. null is 'weet ik niet'. Gescoord vóórdat Jev de toetsset beantwoordde, met de vragen op slot (15a205a).",
+  "labels": {
+    "guided-reflection/backward-design-eqf3#1": {
+      "taskFidelity": 3,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "rubric-builder/advisory-report-eqf6#2": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "defense-review/internship-care-mbo4-nl#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "difficult-conversation/suspected-fraud-accusation-known-error-nl#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 3,
+      "levelFit": 5,
+      "languageQuality": 3
+    },
+    "contextualization/no-approach-eqf6#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 3
+    },
+    "visit-prep/final-thesis-en#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "guided-reflection/backward-design-eqf6#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 3
+    },
+    "difficult-conversation/dropout-en#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 3,
+      "levelFit": 5,
+      "languageQuality": 5
+    },
+    "contextualization/no-approach-eqf6#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 3
+    },
+    "visit-prep/midway-internship-hbo-nl#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 5
+    },
+    "difficult-conversation/bsa-decision-asked-nl#1": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "rubric-builder/unobservable-rubric-known-error-en-eqf5#3": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "contextualization/security-eqf2#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 3
+    },
+    "visit-prep/final-interview-nl#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "rubric-builder/test-report-mbo4-eqf4#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "visit-prep/personal-in-criteria-known-error-nl#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "contextualization/security-eqf2#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 3
+    },
+    "contextualization/security-eqf6#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 3
+    },
+    "defense-review/not-a-defense-nl#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": null,
+      "formatAdherence": 5,
+      "levelFit": null,
+      "languageQuality": 5
+    },
+    "difficult-conversation/bad-news-thesis-en#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 3,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "guided-reflection/backward-design-vague-input#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "rubric-builder/vague-outcome-known-error-eqf6#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "difficult-conversation/student-stuck-internship-nl#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "guided-reflection/backward-design-eqf6#2": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 3
+    },
+    "guided-reflection/backward-design-eqf3#2": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "defense-review/ai-gave-answers-nl#1": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "defense-review/research-project-wo-en#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "rubric-builder/critical-review-en-eqf7#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "defense-review/vague-report-hbo-nl#2": {
+      "taskFidelity": 5,
+      "pedagogicalSoundness": 3,
+      "formatAdherence": 5,
+      "levelFit": 4,
+      "languageQuality": 3
+    },
+    "visit-prep/start-mbo-nl#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    }
+  },
+  "retest": {
+    "contextualization/security-eqf2#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 4,
+      "languageQuality": 4
+    },
+    "defense-review/internship-care-mbo4-nl#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 3,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "guided-reflection/backward-design-eqf6#3": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "rubric-builder/test-report-mbo4-eqf4#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 2,
+      "formatAdherence": 5,
+      "levelFit": 5,
+      "languageQuality": 4
+    },
+    "visit-prep/final-thesis-en#1": {
+      "taskFidelity": 4,
+      "pedagogicalSoundness": 4,
+      "formatAdherence": 4,
+      "levelFit": 5,
+      "languageQuality": 4
+    }
+  }
+}
