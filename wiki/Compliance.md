@@ -84,7 +84,10 @@ once; the totals that were already rolled up know no person.
 - **Sub-processors** — the model provider(s) in use (Anthropic, OpenAI, or a
   local Ollama/LM Studio endpoint with no third party). With the feature `bloomJev` on (default
   Off), the learning outcomes of an imported course document also go to OpenRouter and TypeSafe
-  (Jev, the Bloom proposal); the rest of the document does not.
+  (Jev, the Bloom proposal); the rest of the document does not. With the feature `evidenceJev` on
+  (default Off), the name and the start of each file in "Bewijs in één keer" go to OpenRouter and
+  TypeSafe instead of the LLM provider (the same excerpt, student names already replaced by codes
+  in the browser).
 
 ## Deferred to first sale / real deployment
 

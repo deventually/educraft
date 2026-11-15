@@ -16,8 +16,9 @@
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
  * `--jev` the same cases go to Jev as typed decisions, built by the app's own module
  * (`app/lib/portfolio/sortJev.ts`, each criterion whole unless `--parts`), through OpenRouter,
- * and are scored by the same code; `--model` then names the Jev version. Jev's raw answers go next to the report (`…-raw.json`), to tune the thresholds offline. Costs well
- * under €1 per run. Never part of CI.
+ * and are scored by the same code; `--model` then names the Jev version. Jev's raw answers go
+ * next to the report (`…-raw.json`), to tune the thresholds offline. Costs well under €1 per
+ * run. Never part of CI.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

@@ -14,7 +14,11 @@ import { askJev, criterionPartsFor, JEV_MODEL } from "../../scripts/eval-evidenc
 
 const dir = join(__dirname, "../../evals/portfolio-evidence");
 const suite = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8")) as EvidenceEvalFile;
-const parts = criterionPartsFor(["--parts"]);
+const parts = (() => {
+  const p = criterionPartsFor(["--parts"]);
+  if (!p) throw new Error("no criterion parts");
+  return p;
+})();
 const caseOf = (id: string) => {
   const c = suite.cases.find((x) => x.id === id);
   if (!c) throw new Error(id);
@@ -125,13 +129,18 @@ describe("Jev on the evidence sort: the request (TypeSafe's skill, in full)", ()
     expect(req.state.file.name).toBe("lesvoorbereiding-medicijnrekenen.docx");
     expect(req.state.file.text).toContain(c.file.text.slice(0, 40));
     expect(req.state.dossier).toMatch(/dossier/i);
-    expect(buildJevRequest(d, { name: "los.docx", text: "x" }, "nl", { model: JEV_MODEL }).state.file.folder).toBe("");
-    expect(buildJevRequest(d, { name: "scan.pdf", text: "  " }, "nl", { model: JEV_MODEL }).state.about_text).toMatch(
-      /geen tekst/i,
-    );
-    expect(buildJevRequest(d, { name: "scan.pdf", text: "" }, "en", { model: JEV_MODEL }).state.about_text).toMatch(
-      /no text/i,
-    );
+    expect(
+      buildJevRequest(d, { name: "los.docx", text: "x" }, "nl", { model: JEV_MODEL }).state.file
+        .folder,
+    ).toBe("");
+    expect(
+      buildJevRequest(d, { name: "scan.pdf", text: "  " }, "nl", { model: JEV_MODEL }).state
+        .about_text,
+    ).toMatch(/geen tekst/i);
+    expect(
+      buildJevRequest(d, { name: "scan.pdf", text: "" }, "en", { model: JEV_MODEL }).state
+        .about_text,
+    ).toMatch(/no text/i);
   });
 });
 

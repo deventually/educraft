@@ -1,8 +1,11 @@
 /**
  * Evidence in one go, the server half: one model call per file for a proposal (stored
  * nowhere; the page shows it for the teacher to confirm), and adding what the teacher ticked
- * in one save. Pure checks live in `~/lib/portfolio/batch`.
+ * in one save. Pure checks live in `~/lib/portfolio/batch`; with the setting `evidenceJev`,
+ * TypeSafe's Jev sorts a file first (`~/lib/portfolio/sortJev`).
  */
+import { postDecisions } from "~/lib/ai/decisions";
+import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
 import {
   addEvidenceBatch,
   type BatchFile,
@@ -15,13 +18,52 @@ import {
 } from "~/lib/portfolio/batch";
 import { DossierDataSchema } from "~/lib/portfolio/schema";
 import type { DossierData } from "~/lib/portfolio/types";
+import { buildJevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
 import { getMessages, type Locale } from "~/lib/i18n";
+import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
+import { isFeatureOn } from "./availability.server";
+import { providerSetting } from "./env.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
+import { recordAiUsage } from "./repositories/aiUsage.server";
 import { updateDossier, type Dossier } from "./repositories/portfolio.server";
 
 /** Files sorted at the same time: quick for 25 files, gentle on the provider. */
 const PARALLEL = 4;
+
+const EVENT = "portfolio-sort";
+
+type Sorter = (f: BatchFile) => Promise<SortProposal | null>;
+
+/**
+ * Jev's sort of one file (setting `evidenceJev`, off by default), each criterion asked whole:
+ * `null` when Jev did not answer, so the LLM sorts that file. Nothing goes to Jev without the
+ * setting and Jev's own key; each call is metered at the cost Jev reports.
+ */
+async function jevSorter(user: User, d: DossierData, locale: Locale): Promise<Sorter | null> {
+  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
+  if (!DECISIONS || !apiKey || !(await isFeatureOn(user, "evidenceJev"))) return null;
+  const { url, model, provider } = DECISIONS;
+  const signal = currentAiSignal();
+  return async (f) => {
+    const answer = await postDecisions(url, buildJevRequest(d, f, locale, { model }), {
+      apiKey,
+      ...(signal ? { signal } : {}),
+    }).then(
+      (body) => parseJevAnswer(body, d, f),
+      () => null,
+    );
+    const costMicros = answer?.costUsd === undefined ? undefined : usdInEuroMicros(answer.costUsd);
+    await recordAiUsage(user.id, {
+      source: EVENT,
+      model,
+      provider,
+      failed: !answer?.usable,
+      ...(costMicros === undefined ? {} : { costMicros }),
+    }).catch((e: unknown) => console.error("Failed to record usage:", e));
+    return answer?.usable ? answer.proposal : null;
+  };
+}
 
 type ProposeResult =
   | { ok: true; proposals: SortProposal[] }
@@ -37,24 +79,22 @@ async function proposeEvidence(
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
   const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
-  const proposals: SortProposal[] = [];
-  for (let i = 0; i < files.length; i += PARALLEL) {
-    const chunk = files.slice(i, i + PARALLEL);
-    const answers = await Promise.all(
-      chunk.map((f) =>
-        callPortfolioModel(
-          user,
-          SORT_PROMPT_ID,
-          buildSortMessage(d, f, locale),
-          locale,
-          600,
-          "portfolio-sort",
-        ),
-      ),
+  const jev = await jevSorter(user, d, locale);
+  const llm = async (f: BatchFile): Promise<SortProposal> => {
+    const answer = await callPortfolioModel(
+      user,
+      SORT_PROMPT_ID,
+      buildSortMessage(d, f, locale),
+      locale,
+      600,
+      EVENT,
     );
-    for (const [j, f] of chunk.entries())
-      proposals.push(parseSortAnswer(answers[j]?.text ?? null, d, f));
-  }
+    return parseSortAnswer(answer?.text ?? null, d, f);
+  };
+  const sort = async (f: BatchFile) => (await jev?.(f)) ?? (await llm(f));
+  const proposals: SortProposal[] = [];
+  for (let i = 0; i < files.length; i += PARALLEL)
+    proposals.push(...(await Promise.all(files.slice(i, i + PARALLEL).map(sort))));
   return { ok: true, proposals };
 }
 
