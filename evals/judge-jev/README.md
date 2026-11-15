@@ -424,6 +424,69 @@ noemen we, ook als het geheel niet slaagt. Een versie 4 zou een nieuwe holdout n
 LLM-calls die eigenlijk een keuze of een controle zijn. De conclusie zet de soorten checks die
 het halen naast die calls, met de prijs per 1.000 beslissingen voor Jev en Sonnet.
 
+### Uitslag versie 3 (2026-11-15)
+
+[Rapport](../reports/2026-11-15c3-judge-jev3.md), labels in
+[`labels/2026-11-15c3.json`](labels/2026-11-15c3.json). Nieuwe uitvoer van de zes holdouttools
+(3 runs, 96 uitvoeren) en portfolio-rehearsal (4 openbare casussen × 5 runs), Sonnet als judge via
+Claude Code, Jev op precies die uitvoer: 8.820 requests, $0,36 ($0,18 zonder de omgekeerde volgorde).
+Bastiaan labelde blind en zonder AI 94 rijen (78 oude holdout, 16 verse holdout): 80 slaagt, 12
+faalt echt, 2 weet ik niet. Daarna, niet blind, het bewijs bij de 5 echte fouten die Jev aanwees:
+4 keer stond de fout in het aangewezen stuk. Bij de vijfde merkte hij op dat de overlap niet in
+het aangewezen criterium (Juistheid van de bevindingen) zit, maar in Uitvoering van het testplan.
+
+| Oude holdout | Beslist | Vals alarm | Gemist | Geschat juist | Kosten per 1.000 uitvoer |
+| --- | --- | --- | --- | --- | --- |
+| Jev v3 | 297 | 22 | 0 | 93% | $1,56 |
+| Jev v2 | 368 | 17 | 3 | 95% | - |
+| Sonnet | 438 | 2 | 5 + 35 geschat | 90% | $24,08 |
+| Hybride (Jev, anders Sonnet) | 438 | 23 | 0 + 35 geschat | 87% | $23,38 |
+
+De geschatte gemiste fouten komen uit de steekproef: 3 echte fouten in 38 rijen waar niemand
+"faalt" zei, opgeschaald naar de hele rest. Dat is een ruwe schatting op weinig rijen.
+
+| Toets | Oude holdout | Verse holdout |
+| --- | --- | --- |
+| 1. Valse alarmen | v2 17, v3 22: **niet geslaagd** | te weinig |
+| 2. Gemist: hybride niet meer dan Sonnet | hybride 3, Sonnet 8: **geslaagd** | te weinig |
+| 3. Uitvoer zonder LLM (alleen gerapporteerd) | v2 29/96, v3 9/96 | 0/20 |
+| 4. Bewijs in het aangewezen stuk | 4 van 5 (80%): **geslaagd**, precies op het minimum van 5 | - (geen bewijs te beoordelen) |
+| 5. Volgorde van de opties | 950/1001 (94,9%): **net niet geslaagd** | 94%: niet geslaagd |
+| 6. Tweede blik: Jev faalt, Sonnet niet | 5 van 27 echt fout: **niet geslaagd** | te weinig |
+
+**Met vertrouwen, per soort check** (oude holdout; de verse holdout zegt overal "te weinig" en
+nergens "nee"):
+
+- **Laten slagen haalt Jev bij twee soorten:** verboden handeling (`act`) en verzonnen of anders
+  dan de invoer (`invented`), elk 30 casussen zonder één gemiste fout, dus hooguit 10% gemist.
+  Sonnet haalt dat bij `act` ook (44 casussen), maar níet bij `invented` en `per onderdeel`: daar
+  miste Sonnet er telkens 4.
+- **Fout melden met vertrouwen haalt niemand.** Er zijn te weinig echte fouten (12 in totaal).
+- De bekende fout, de checks per onderdeel en de gespreksbeurten hebben te weinig casussen.
+
+**Kalibratie.** Elke gelabelde rij waar Jev een kans op "faalt" onder 0,7 gaf, was echt in orde
+(37 van 37). Boven 0,7 was 12 van de 55 echt fout (22%). Jevs "slaagt" is betrouwbaar, zijn
+"faalt" niet.
+
+**Waar het vals alarm vandaan komt.** Vooral rubric-builder/unmarkedProposal: Jev ziet het
+narekenen van punten en cesuur (die de docent gaf) als een verzonnen voorstel. Verder ziet hij
+bij difficult-conversation wat de gespeelde student zegt als een bron of als een besluit. Dit zijn
+holdouttools; aanscherpen kan pas met een nieuwe holdout (een versie 4).
+
+**Conclusie, volgens de regel die vooraf vastlag.** Versie 3 haalt toets 1 niet, dus: Jev is geen
+rechter voor lange tekst die een model schreef, ook niet in stukken. Wel haalt Jev bij twee soorten
+de regel om een check te laten slagen: verboden handelingen en verzinsels. Daar mist Jev op deze
+meting niets, waar Sonnet bij verzinsels 4 fouten miste. Jev is dus bruikbaar als filter dat zegt
+"dit is in orde", niet als alarm. In de eval scheelt dat weinig ($23,38 tegen $24,08 per 1.000
+uitvoer), want de judge-call blijft nodig voor de dimensies van de rubric. De besparing zit in de
+app, bij LLM-calls die alleen een ja/nee-controle van dit soort zijn: daar kost Jev ongeveer een
+vijftiende.
+
+**Wat de uitslag niet zegt.** De aantallen zijn klein: 12 echte fouten, 5 bewijsstukken, en de
+verse holdout heeft er te weinig voor elke toets. De oude holdout is half blind (zie "Twee
+holdouts"). De meting liep alleen op de holdouts (bijgesteld vóór de meting). Toets 4 haalt het
+minimum van 5 precies.
+
 ## Eerlijk over de vergelijking
 
 - **De LLM-judge doet meer dan de harde checks.** Hij scoort in dezelfde call ook de dimensies van
