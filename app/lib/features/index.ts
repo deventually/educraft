@@ -14,7 +14,8 @@ export type FeatureId =
   | "utilities"
   | "pilotCheckin"
   | "supervisionTracks"
-  | "bloomJev";
+  | "bloomJev"
+  | "evidenceJev";
 
 export interface Feature {
   id: FeatureId;
@@ -63,6 +64,17 @@ export const FEATURES: readonly Feature[] = [
     name: {
       nl: "Bloom-voorstel bij de import door TypeSafe Jev (via OpenRouter)",
       en: "Bloom proposal on import by TypeSafe Jev (via OpenRouter)",
+    },
+    defaultStand: "off",
+    instanceOnly: true,
+  },
+  // TypeSafe's Jev sorts the files of "Bewijs in één keer" (evals/portfolio-evidence). Off by
+  // default for the same reason: the files' text then goes to OpenRouter.
+  {
+    id: "evidenceJev",
+    name: {
+      nl: "Bewijs in één keer sorteren door TypeSafe Jev (via OpenRouter)",
+      en: "Evidence in one go sorted by TypeSafe Jev (via OpenRouter)",
     },
     defaultStand: "off",
     instanceOnly: true,

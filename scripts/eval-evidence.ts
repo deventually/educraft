@@ -11,12 +11,15 @@
  *   npm run eval:evidence -- --dry-run                           # build messages only, no API
  *   … -- --set holdout                                           # the real, anonymised files
  *   JEV_API_KEY=… npm run eval:evidence -- --jev --label jev       # TypeSafe Jev instead
+ *   … -- --jev --parts                                           # with the hand split (13 Nov)
+ *   … -- --model compat::<id> --think                            # a model that thinks first
  *
  * The model is the app default (config/models.json) unless `--model` says otherwise. With
- * `--jev` the same cases go to Jev as typed decisions (`eval-evidence-jev-helpers.ts`), through
- * OpenRouter, and are scored by the same code; `--model` then names the Jev version. Jev's raw
- * answers go next to the report (`…-raw.json`), to tune the thresholds offline. Costs well
- * under €1 per run. Never part of CI.
+ * `--jev` the same cases go to Jev as typed decisions, built by the app's own module
+ * (`app/lib/portfolio/sortJev.ts`, each criterion whole unless `--parts`), through OpenRouter,
+ * and are scored by the same code; `--model` then names the Jev version. Jev's raw answers go
+ * next to the report (`…-raw.json`), to tune the thresholds offline. Costs well under €1 per
+ * run. Never part of CI.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -39,16 +42,10 @@ import {
   type EvidenceRow,
   evidenceReportMarkdown,
   scoreSort,
+  sortTokenBudget,
 } from "./eval-evidence-helpers";
-import {
-  askJev,
-  buildJevRequest,
-  JEV_KEY_ENV,
-  JEV_MODEL,
-  type JevRequest,
-  loadCriterionParts,
-  parseJevAnswer,
-} from "./eval-evidence-jev-helpers";
+import { buildJevRequest, type JevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
+import { askJev, criterionPartsFor, JEV_KEY_ENV, JEV_MODEL } from "./eval-evidence-jev-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
 const REPORTS_DIR = join(EVALS_DIR, "reports");
@@ -72,7 +69,7 @@ async function main() {
   const rows: EvidenceRow[] = [];
   /** Each exact request with Jev's answer as it came, to rerun it or tune thresholds offline. */
   const raw: { caseId: string; request: JevRequest; body: unknown }[] = [];
-  const parts = loadCriterionParts();
+  const parts = criterionPartsFor(process.argv);
   /** The option order turns per repeat (TypeSafe: Jev leans toward the first option). */
   const jevRequest = (d: DossierData, c: EvidenceCase, i: number) =>
     buildJevRequest(d, c.file, c.locale, { model, parts, rotate: i });
@@ -111,7 +108,7 @@ async function main() {
           system: getRuntimePrompt(SORT_PROMPT_ID, c.locale),
           messages: [{ role: "user", content: message }],
           temperature: 0,
-          maxTokens: 600,
+          maxTokens: sortTokenBudget(process.argv),
         }));
         usable = answerUsable(text);
         proposal = parseSortAnswer(text, d, { key: c.id, ...c.file });

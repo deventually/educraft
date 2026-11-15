@@ -127,7 +127,7 @@ open beheerdersuitnodigingen. Doe daarom vooraf:
 | `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `MISTRAL_API_KEY` | no | Only if those providers are offered. |
 | `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` | no | A configured OpenAI-compatible endpoint (ChatGPT, Gemini, Mistral, GLM, DeepSeek, OpenRouter, vLLM, …), referenced by a `compat::<model>` id. Key optional for a keyless self-hosted endpoint. |
 | `OPENROUTER_API_KEY` | no | OpenRouter's chat models (`config/models.json`). Never used for Jev. |
-| `JEV_API_KEY` | no | TypeSafe's Jev (`decisions` in `config/models.json`): an OpenRouter key for Jev only, with its own spending limit. Used only when the feature *Bloom-voorstel bij de import door TypeSafe Jev* is on; also by the Jev evals. |
+| `JEV_API_KEY` | no | TypeSafe's Jev (`decisions` in `config/models.json`): an OpenRouter key for Jev only, with its own spending limit. Used only when the feature *Bloom-voorstel bij de import door TypeSafe Jev* or *Bewijs in één keer sorteren door TypeSafe Jev* is on; also by the Jev evals. |
 | `OLLAMA_BASE_URL` / `LMSTUDIO_BASE_URL` | no | Local model endpoints. Used only in development (`NODE_ENV` not `production`); a production process (`npm start`, Docker) does not discover or offer local or CLI models. |
 
 ### EU hosting / data residency

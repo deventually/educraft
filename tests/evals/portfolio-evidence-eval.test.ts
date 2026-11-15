@@ -12,7 +12,9 @@ import {
   loadSuite,
   rawReportName,
   scoreSort,
+  sortTokenBudget,
 } from "../../scripts/eval-evidence-helpers";
+import { THINKING_HEADROOM } from "~/lib/ai/models";
 
 const dir = join(__dirname, "../../evals/portfolio-evidence");
 const suite = JSON.parse(readFileSync(join(dir, "cases.json"), "utf8")) as EvidenceEvalFile;
@@ -175,3 +177,10 @@ describe.skipIf(!existsSync(HOLDOUT_FILE))(
     });
   },
 );
+
+describe("the answer budget", () => {
+  it("is the app's 600 tokens; --think adds the room the app gives a model that thinks first", () => {
+    expect(sortTokenBudget(["--set", "holdout"])).toBe(600);
+    expect(sortTokenBudget(["--think"])).toBe(600 + THINKING_HEADROOM);
+  });
+});
