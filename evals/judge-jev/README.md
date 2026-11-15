@@ -354,7 +354,7 @@ visit-report/missedKnownError en group-feedback.
 kan Jev naar Sonnet toe trekken. Daar staan drie dingen tegenover: alleen zinnen uit de rubric,
 geen enkele holdouttool aangeraakt, en clusters waar Jev gelijk kan hebben blijven zoals ze zijn.
 Het plan kent één afstemronde, dus het effect van deze aanscherpingen is vóór het slot niet
-gemeten. De meting laat het zien, op de afstemtools apart van de holdouts.
+gemeten. De meting draait alleen de holdouts (zie het meetplan), dus dat effect blijft ongemeten.
 
 ### Twee holdouts
 
@@ -367,9 +367,17 @@ vaak "te weinig" zeggen. Dat is dan ook de uitkomst.
 
 ### Meetplan en toetsen (vooraf vastgelegd)
 
-Nieuwe uitvoer van de 19 tools (3 runs) via Claude Code met dezelfde judge; versie 2 en de judge
-via `npm run eval:judge-jev -- --checks 2`, en versie 3 op precies die uitvoer met
-`npm run eval:judge-jev3 -- --from <die raw> --rehearsal <datum>`. Jev beantwoordt elke
+Nieuwe uitvoer van de zes holdouttools (3 runs) via Claude Code met dezelfde judge; versie 2 en
+de judge via `npm run eval:judge-jev -- --checks 2`, en versie 3 op precies die uitvoer met
+`npm run eval:judge-jev3 -- --from <die raw> --rehearsal <datum>`.
+
+**Bijgesteld op 15 november, vóór de meting: alleen de holdouts.** Het plan was nieuwe uitvoer
+van alle 19 tools (312 uitvoeren). Alle toetsen en de regels voor "met vertrouwen" kijken alleen
+naar de holdouts; de uitvoer van de afstemtools telt nergens als bewijs, want daarop is
+afgestemd. Om de kosten van Sonnet te beperken (ongeveer 70% minder) draait de meting daarom
+alleen de zes holdouttools (96 uitvoeren) en portfolio-rehearsal. Wat dat kost: de meting laat
+niet zien of de aanscherpingen op nieuwe uitvoer van de afstemtools werken. Bastiaan koos dit
+vóór de meting; aan de toetsen verandert niets. Jev beantwoordt elke
 keuzevraag ook met de opties in omgekeerde volgorde (toets 5); die requests tellen niet mee in
 de kosten.
 
