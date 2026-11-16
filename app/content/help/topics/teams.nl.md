@@ -47,7 +47,7 @@ Wat collega's met je team delen, staat onder **Van mijn team**: op de pagina's C
 
 Ben je teamleider, dan open je je team vanaf **Account**. Daar kun je:
 
-- collega's toevoegen met **Leden toevoegen**: zoek op naam of e-mailadres, vink aan wie erbij moet en kies **Toevoegen**. Je ziet iedereen met een actief account die nog niet in je team zit;
+- collega's toevoegen met **Leden toevoegen**: zoek op naam of e-mailadres, vink aan wie erbij moet en kies **Toevoegen**. Je ziet elke docent met een actief account die nog niet in je team zit; beheerders staan er niet tussen;
 - een **uitnodigingslink** maken voor een nieuwe collega, die daarmee docent en lid van je team wordt;
 - een collega uit het team halen met **Weghalen** (dat vraagt eerst of je het zeker weet), of ook teamleider maken;
 - je team aan opleidingen koppelen met **Opleiding toevoegen**, of het eraf halen met **Weghalen**;

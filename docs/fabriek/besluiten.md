@@ -694,9 +694,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   gebeurt?").
 - **BESLUIT-2026-11-16-6:** **Een teamleider kiest zelf wie er in het team komt.** Op de teampagina van
   de teamleider staat **Leden toevoegen**, net als bij de beheerder: zoeken op naam of e-mailadres
-  en aanvinken. De teamleider ziet daarvoor de naam en het e-mailadres van iedere collega met een
-  actief account die nog niet in het team zit (`leadCandidates`; uitgeschakelde accounts niet, hoogstens
-  500). Dit vervangt de regel uit P28.2 dat een teamleider alleen op exact e-mailadres toevoegt en
+  en aanvinken. De teamleider ziet daarvoor de naam en het e-mailadres van iedere docent met een
+  actief account die nog niet in het team zit (`leadCandidates`; uitgeschakelde accounts niet,
+  hoogstens 500). Beheerders staan niet in die lijst en kan een teamleider niet toevoegen
+  (Bastiaan: "Liever de beheerder verbergen"). Dit vervangt de regel uit P28.2 dat een teamleider alleen op exact e-mailadres toevoegt en
   niet door accounts bladert. Weghalen blijft zoals het was: alleen een gewoon lid, na een
   bevestiging; een andere teamleider haalt een beheerder weg. Bastiaan, 2026-11-16 ("Als
   teamleider moet ik kunnen kiezen wie ik aan mijn team kan toevoegen en weghalen").

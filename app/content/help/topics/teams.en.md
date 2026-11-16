@@ -47,7 +47,7 @@ What colleagues share with your team is listed under **From my team**: on the Co
 
 If you are a team lead, you open your team from **Account**. There you can:
 
-- add colleagues with **Add members**: search by name or email address, tick who should join and choose **Add**. You see everyone with an active account who is not in your team yet;
+- add colleagues with **Add members**: search by name or email address, tick who should join and choose **Add**. You see every teacher with an active account who is not in your team yet; admins are not listed;
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
 - remove a colleague from the team with **Remove** (it asks first), or make them team lead too;
 - link your team to programmes with **Add programme**, or take it off with **Remove**;

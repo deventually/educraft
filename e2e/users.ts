@@ -9,6 +9,9 @@ export const USERS: Record<
   admin: { name: "E2E Beheerder", email: "beheer@e2e.test", password: "e2e-beheer-wachtwoord-1" },
 };
 
+/** A teacher who never signs in: someone a team lead can add (lead-team.spec.ts). */
+export const COLLEAGUE = { name: "E2E Collega", email: "collega@e2e.test" };
+
 /** Where `seed.ts` leaves the admin's two-step verification secret (git-ignored). */
 export const ADMIN_TOTP_FILE = "e2e/.data/admin-totp";
 

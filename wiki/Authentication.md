@@ -97,7 +97,7 @@ lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` st
 - A lead works on `/teams/:id` (teacher side). Every lead function goes through
   `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team, so the
   route answers a 404 to everyone else, admins included. A lead ticks colleagues to add from
-  everyone active and not yet in the team (`leadCandidates`, `leadAddMembers`,
+  active teachers not yet in the team, never admins (`leadCandidates`, `leadAddMembers`,
   BESLUIT-2026-11-16-6), removes a plain member, makes a member lead, steps down, and mints a
   team invite.
   A lead never removes another lead or takes the stand away; an admin does.

@@ -1,5 +1,6 @@
 /**
- * Fresh database for the browser tests: migrate and create one teacher and one admin. The admin
+ * Fresh database for the browser tests: migrate and create one teacher and one admin (plus a
+ * colleague who never signs in, for a team lead to add). The admin
  * has two-step verification on (required, P2-12); its secret goes to `e2e/.data/admin-totp`,
  * where `auth.setup.ts` reads it to sign in.
  * Run by the Playwright web server before the app starts (DATABASE_URL points at e2e/.data).
@@ -7,7 +8,7 @@
 import { rmSync, writeFileSync } from "node:fs";
 import { hashPassword } from "../app/server/password.server";
 import { DB_PATH } from "../app/server/env.server";
-import { ADMIN_TOTP_FILE, USERS } from "./users";
+import { ADMIN_TOTP_FILE, COLLEAGUE, USERS } from "./users";
 
 if (!DB_PATH.includes("e2e")) throw new Error(`Refusing to seed a non-e2e database: ${DB_PATH}`);
 for (const suffix of ["", "-wal", "-shm"]) rmSync(`${DB_PATH}${suffix}`, { force: true });
@@ -31,6 +32,11 @@ for (const [role, user] of Object.entries(USERS)) {
   );
   writeFileSync(ADMIN_TOTP_FILE, secret);
 }
+await createUser({
+  ...COLLEAGUE,
+  passwordHash: await hashPassword("e2e-collega-wachtwoord-1"),
+  role: "teacher",
+});
 // One warning for everyone, so axe and the reflow check see the banner on every page.
 const { createAnnouncement } = await import("../app/server/repositories/announcements.server");
 await createAnnouncement({

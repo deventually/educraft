@@ -296,7 +296,7 @@ export async function getTeamForLead(
   return getTeamWithMembers(teamId);
 }
 
-/** Active accounts not yet in the team: the lead's picker (BESLUIT-2026-11-16-6). */
+/** Active teachers not yet in the team: the lead's picker; admins stay out (BESLUIT-2026-11-16-6). */
 async function activeOutsiders(teamId: string, ids?: string[]) {
   const inTeam = getDb()
     .select({ userId: teamMembers.userId })
@@ -306,31 +306,32 @@ async function activeOutsiders(teamId: string, ids?: string[]) {
     .select({ id: users.id, name: users.name, email: users.email })
     .from(users)
     .where(
-      and(isNull(users.disabledAt), notInArray(users.id, inTeam), ids && inArray(users.id, ids)),
+      and(
+        eq(users.role, "teacher"),
+        isNull(users.disabledAt),
+        notInArray(users.id, inTeam),
+        ids && inArray(users.id, ids),
+      ),
     )
     .orderBy(asc(users.name), asc(users.email))
     .limit(500)
     .all();
 }
 
-/** Colleagues the lead may add: everyone active and not yet in the team; `null` for a non-lead. */
+/** Colleagues the lead may add: active teachers not yet in the team; `null` for a non-lead. */
 export async function leadCandidates(callerId: string, teamId: string) {
   if (!(await getTeamForLead(callerId, teamId))) return null;
   return activeOutsiders(teamId);
 }
 
-/** Add the chosen colleagues; unknown, disabled or present accounts are skipped. */
-export async function leadAddMembers(
-  callerId: string,
-  teamId: string,
-  userIds: string[],
-): Promise<{ ok: true; added: number } | { error: "notLead" | "noSuchUser" }> {
-  if (!(await getTeamForLead(callerId, teamId))) return { error: "notLead" };
+/** Add the chosen colleagues; unknown, disabled, admin or present accounts are skipped. */
+export async function leadAddMembers(callerId: string, teamId: string, userIds: string[]) {
+  if (!(await getTeamForLead(callerId, teamId))) return { error: "notLead" as const };
   const wanted = [...new Set(userIds)].slice(0, 500);
   const found = wanted.length ? await activeOutsiders(teamId, wanted) : [];
-  if (!found.length) return { error: "noSuchUser" };
+  if (!found.length) return { error: "noSuchUser" as const };
   for (const u of found) await addMember(teamId, u.id);
-  return { ok: true, added: found.length };
+  return { ok: true as const, added: found.length };
 }
 
 /** Remove a plain member; another lead is the admin's to remove. */

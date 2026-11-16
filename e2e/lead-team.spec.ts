@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers";
-import { USERS, storageStateOf } from "./users";
+import { COLLEAGUE, USERS, storageStateOf } from "./users";
 
 // Bastiaan, 2026-11-16 (BESLUIT-2026-11-16-6): a team lead chooses who joins the team, with
 // search and ticks, and takes a plain member out after a confirmation.
@@ -26,22 +26,23 @@ test("a team lead ticks a colleague to add and takes them out again", async ({ b
   await expect(a.getByRole("status").filter({ hasText: "Opgeslagen" })).toBeVisible();
   await admin.close();
 
-  // The lead adds the admin as a colleague, then takes them out again.
+  // The lead adds a colleague, then takes them out again. Admins are not in the list.
   const lead = await browser.newContext({ storageState: storageStateOf("teacher") });
   const page = await lead.newPage();
   await page.goto(teamUrl);
   await expect(page.getByRole("heading", { level: 1, name: team })).toBeVisible();
   await page.getByRole("button", { name: "Leden toevoegen" }).click();
   const add = page.getByRole("dialog", { name: `Leden toevoegen aan ${team}` });
-  await add.getByRole("searchbox", { name: "Zoeken" }).fill("beheer");
-  await add.getByRole("checkbox", { name: new RegExp(USERS.admin.name) }).check();
+  await add.getByRole("searchbox", { name: "Zoeken" }).fill("e2e");
+  await expect(add.getByRole("checkbox", { name: new RegExp(USERS.admin.name) })).toHaveCount(0);
+  await add.getByRole("checkbox", { name: new RegExp(COLLEAGUE.name) }).check();
   await expectNoAxeViolations(page);
   await add.getByRole("button", { name: "Toevoegen (1)" }).click();
-  const row = page.getByRole("row", { name: new RegExp(USERS.admin.name) });
+  const row = page.getByRole("row", { name: new RegExp(COLLEAGUE.name) });
   await expect(row).toBeVisible();
 
-  await row.getByRole("button", { name: `Weghalen: ${USERS.admin.name}` }).click();
-  const confirm = page.getByRole("dialog", { name: new RegExp(`${USERS.admin.name} weghalen`) });
+  await row.getByRole("button", { name: `Weghalen: ${COLLEAGUE.name}` }).click();
+  const confirm = page.getByRole("dialog", { name: new RegExp(`${COLLEAGUE.name} weghalen`) });
   await confirm.getByRole("button", { name: "Weghalen" }).click();
   await expect(row).toBeHidden();
   await lead.close();
