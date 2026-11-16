@@ -54,10 +54,10 @@ describe("/admin (Beheer → Overzicht en inrichten)", () => {
     expect(data.steps.map((s) => s.id)).toEqual([
       "kind",
       "divisions",
+      "programmes",
       "people",
       "teams",
-      "programmes",
-      "placement",
+      "link",
     ]);
   });
 
@@ -68,5 +68,17 @@ describe("/admin (Beheer → Overzicht en inrichten)", () => {
     expect((await done()).teams).toBe(false);
     await teams.addMember(team.id, admin.id);
     expect((await done()).teams).toBe(true);
+  });
+
+  it("counts linking done once every programme has a team", async () => {
+    const programmes = await import("~/server/repositories/programmes.server");
+    const links = await import("~/server/repositories/programmeTeams.server");
+    const actor = { id: admin.id, role: "admin" };
+    const team = await teams.createTeam("Team Link");
+    await teams.addMember(team.id, admin.id);
+    const p = (await programmes.createProgramme(actor, null, { name: "Los", sector: "hbo" }))!;
+    expect((await done()).link).toBe(false);
+    await links.linkProgrammeTeam(actor, p.id, team.id);
+    expect((await done()).link).toBe(true);
   });
 });

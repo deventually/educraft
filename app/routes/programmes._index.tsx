@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form, Link, redirect, useActionData, useSearchParams } from "react-router";
+import { Link, redirect, useActionData, useSearchParams } from "react-router";
 import { Layers, Trash2 } from "lucide-react";
 import type { Route } from "./+types/programmes._index";
 import { kindOptions, programmeFromForm, requireProgrammeUser } from "~/server/programmes.server";
@@ -7,14 +7,16 @@ import {
   createProgramme,
   deleteProgramme,
   listProgrammes,
-  manageableTeams,
 } from "~/server/repositories/programmes.server";
+import { manageableTeams } from "~/server/repositories/programmeTeams.server";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
-import { Button, Card, Label, Select } from "~/components/ui";
 import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
-import { ProgrammeFields } from "~/components/programmes/ProgrammeFields";
+import { NewProgramme } from "~/components/programmes/NewProgramme";
+import { getDivisionKind, listDivisions } from "~/server/repositories/organisation.server";
+import { divisionWord } from "~/lib/organisation/kinds";
+import { loc } from "~/lib/i18n/localized";
 import { useT } from "~/lib/i18n/useT";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -33,13 +35,19 @@ export async function loader({ request }: Route.LoaderArgs) {
     kind: programmeKindLabel(p, locale),
     teamName: p.teamName,
     courses: p.courseCount,
-    canManage: p.canManage,
+    canDelete: user.role === "admin",
   }));
+  // Only an admin creates, manages and deletes a programme; a lead links their own team on the
+  // team's page (BESLUIT-2026-11-16-4).
+  const isAdmin = user.role === "admin";
   return {
     programmes,
     kinds: await kindOptions(user, locale),
-    // The teams this person may create a programme for: where they lead (an admin: all).
-    teams: await manageableTeams(user),
+    // The teams an admin may create a programme for, or none; also without a team, under a faculty.
+    teams: isAdmin ? await manageableTeams(user) : [],
+    isAdmin,
+    divisions: isAdmin ? (await listDivisions()).map(({ id, name }) => ({ id, name })) : [],
+    divisionWord: loc(divisionWord(await getDivisionKind()), locale),
   };
 }
 
@@ -49,6 +57,7 @@ export async function action({ request }: Route.ActionArgs) {
   const m = getMessages(getLocale(request)).programmes;
   const intent = fd.get("intent");
   if (intent === "delete") {
+    if (user.role !== "admin") return { ok: false as const, error: m.errorDeleteAdminOnly };
     return (await deleteProgramme(user, String(fd.get("id") ?? "")))
       ? { ok: true as const }
       : { ok: false as const, error: m.errorNotFound };
@@ -61,7 +70,12 @@ export async function action({ request }: Route.ActionArgs) {
         ok: false as const,
         error: parsed.error.issues.some((i) => i.path[0] === "name") ? m.errorName : m.errorInvalid,
       };
-    const programme = await createProgramme(user, String(fd.get("teamId") ?? ""), parsed.data);
+    const programme = await createProgramme(
+      user,
+      String(fd.get("teamId") ?? "") || null,
+      parsed.data,
+      String(fd.get("divisionId") ?? "") || null,
+    );
     if (!programme) return { ok: false as const, error: m.errorNotAllowed };
     return redirect(`/programmes/${programme.id}`);
   }
@@ -82,7 +96,10 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
     },
   });
   const { programmes, kinds, teams } = loaderData;
-  const defaultKind = kinds.some((k) => k.value === "hbo:bachelor") ? "hbo:bachelor" : "";
+  const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
+  const divisions = "divisions" in loaderData ? loaderData.divisions : [];
+  const divisionWord = "divisionWord" in loaderData ? loaderData.divisionWord : undefined;
+  const canCreate = isAdmin;
   // "New programme for this team" on an admin's team page links here with ?team=<id>.
   const [search] = useSearchParams();
   const askedTeam = search.get("team");
@@ -103,40 +120,23 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
         </Link>
       </p>
 
-      {teams.length === 0 ? (
+      {canCreate ? (
+        <div className="mt-6">
+          <NewProgramme
+            kinds={kinds}
+            teams={teams}
+            isAdmin={isAdmin}
+            divisions={divisions}
+            divisionWord={divisionWord}
+            defaultTeam={defaultTeam ?? undefined}
+            startOpen={!!defaultTeam}
+            triggerId={`${id}-new`}
+          />
+        </div>
+      ) : (
         <p className="mt-6 max-w-[65ch] rounded-2xl border border-slate-200 bg-white p-4 text-slate-600">
           {p.noTeams}
         </p>
-      ) : (
-        <Card className="mt-6 p-5">
-          <h2 className="text-lg font-medium text-slate-900">{p.createTitle}</h2>
-          <Form method="post" className="mt-4 grid gap-4 sm:grid-cols-2">
-            <input type="hidden" name="intent" value="create" />
-            <div>
-              <Label htmlFor={`${id}-team`}>{p.team}</Label>
-              <Select
-                id={`${id}-team`}
-                name="teamId"
-                defaultValue={defaultTeam ?? undefined}
-                className="mt-1"
-              >
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <ProgrammeFields
-              id={id}
-              kinds={kinds}
-              defaults={{ name: "", kind: defaultKind, form: "" }}
-            />
-            <div className="sm:col-span-2">
-              <Button type="submit">{p.create}</Button>
-            </div>
-          </Form>
-        </Card>
       )}
 
       {programmes.length === 0 ? (
@@ -145,10 +145,10 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
           title={p.emptyTitle}
           body={p.emptyBody}
           action={
-            teams.length > 0
+            canCreate
               ? {
                   label: p.createTitle,
-                  onClick: () => document.getElementById(`${id}-name`)?.focus(),
+                  onClick: () => document.getElementById(`${id}-new`)?.click(),
                 }
               : { label: p.help, to: "/help/programmes" }
           }
@@ -179,7 +179,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
                     })}
                   </p>
                 </div>
-                {programme.canManage && (
+                {programme.canDelete && (
                   <ConfirmDialog
                     triggerLabel={`${p.delete}: ${programme.name}`}
                     triggerIcon={<Trash2 className="size-4" aria-hidden />}

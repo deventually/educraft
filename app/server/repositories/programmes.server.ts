@@ -1,8 +1,9 @@
 /**
  * Programmes (opleidingen) of one or more teams (BESLUIT-2026-11-10-3, BESLUIT-2026-11-16-1) and
  * the courses in them. Repository rule for team-owned rows: every query is scoped in its WHERE
- * clause to the teams the actor is in (an admin: every team). Managing (create, rename, delete)
- * is for a lead of one of its teams or an admin; linking teams is in `programmeTeams.server.ts`.
+ * clause to the teams the actor is in (an admin: every team). Only an admin creates, manages and
+ * deletes one (BESLUIT-2026-11-16-4); linking teams, also by a lead for their own team, is in
+ * `programmeTeams.server.ts`.
  * Placing a course is for its owner, in a programme of a team they are in, and shares the course
  * with the programme's teams they are in; colleagues read it only through that share
  * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`;
@@ -23,6 +24,7 @@ import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { getDb } from "../db.server";
 import {
   courses,
+  divisions,
   learningLineProgrammes,
   learningLines,
   programmeCourses,
@@ -30,11 +32,10 @@ import {
   programmes,
   shares,
   teamMembers,
-  teams,
   users,
 } from "../schema.server";
 import { courseRoles } from "./courseRoles.server";
-import { myTeams, namesOf, teamsOf } from "./programmeTeams.server";
+import { manageableTeams, myTeams, namesOf, teamsOf } from "./programmeTeams.server";
 import { shareItem } from "./shares.server";
 
 /** Who acts: the signed-in user's id and role. */
@@ -129,10 +130,6 @@ const rowToProgramme = (r: Row, teamIds: string[]): Programme => ({
   updatedAt: r.updatedAt,
 });
 
-/** An admin, or a lead of one of the programme's teams. */
-const canManage = (a: Actor, programmeId: string) =>
-  isAdmin(a) || myTeams(a.id, programmeId).some((m) => m.isLead);
-
 /** Programmes the actor may read: of a team they are in, or any for an admin. */
 const readable = (a: Actor): SQL | undefined =>
   isAdmin(a)
@@ -147,7 +144,8 @@ function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) 
     ...rowToProgramme(p, ids),
     teams: list,
     teamName: namesOf(list),
-    canManage: canManage(a, p.id),
+    // Only an admin manages a programme; a lead only links their own team (BESLUIT-2026-11-16-4).
+    canManage: isAdmin(a),
     // In one of its teams: only they place a course in it (an admin may not be).
     isMember: myTeams(a.id, p.id).length > 0,
   };
@@ -156,20 +154,6 @@ function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) 
 function parseInput(input: unknown) {
   const p = ProgrammeInputSchema.parse(input);
   return { name: p.name, sector: p.sector, track: p.track ?? null, form: p.form ?? null };
-}
-
-/** The teams the actor may create a programme for: where they lead; every team for an admin. */
-export async function manageableTeams(a: Actor): Promise<{ id: string; name: string }[]> {
-  const db = getDb();
-  if (isAdmin(a))
-    return db.select({ id: teams.id, name: teams.name }).from(teams).orderBy(asc(teams.name)).all();
-  return db
-    .select({ id: teams.id, name: teams.name })
-    .from(teamMembers)
-    .innerJoin(teams, eq(teams.id, teamMembers.teamId))
-    .where(and(eq(teamMembers.userId, a.id), eq(teamMembers.isLead, true)))
-    .orderBy(asc(teams.name))
-    .all();
 }
 
 export async function listProgrammes(
@@ -210,25 +194,35 @@ export async function getProgramme(
 /** Null when the actor may not manage the team; throws on invalid input (nothing written). */
 export async function createProgramme(
   a: Actor,
-  teamId: string,
+  teamId: string | null,
   input: unknown,
+  divisionId: string | null = null,
 ): Promise<Programme | null> {
   const values = parseInput(input);
-  if (!(await manageableTeams(a)).some((t) => t.id === teamId)) return null;
+  // Only an admin makes one, with or without a team, under a faculty (BESLUIT-2026-11-16-4).
+  if (!isAdmin(a)) return null;
+  if (teamId && !(await manageableTeams(a)).some((t) => t.id === teamId)) return null;
+  const division = divisionId;
+  if (
+    division &&
+    !getDb().select({ id: divisions.id }).from(divisions).where(eq(divisions.id, division)).get()
+  )
+    return null;
   const now = new Date();
   const row: Row = {
     id: randomUUID(),
     createdBy: a.id,
     ...values,
-    divisionId: null,
+    divisionId: division,
     createdAt: now,
     updatedAt: now,
   };
   getDb().transaction((tx) => {
     tx.insert(programmes).values(row).run();
-    tx.insert(programmeTeams).values({ programmeId: row.id, teamId, createdAt: now }).run();
+    if (teamId)
+      tx.insert(programmeTeams).values({ programmeId: row.id, teamId, createdAt: now }).run();
   });
-  return rowToProgramme(row, [teamId]);
+  return rowToProgramme(row, teamId ? [teamId] : []);
 }
 
 function managedRow(a: Actor, id: string): Row | undefined {
@@ -237,7 +231,7 @@ function managedRow(a: Actor, id: string): Row | undefined {
     .from(programmes)
     .where(and(eq(programmes.id, id), readable(a)))
     .get();
-  return row && canManage(a, row.id) ? row : undefined;
+  return row && isAdmin(a) ? row : undefined;
 }
 
 /** Null when the actor may not manage it; throws on invalid input. */
@@ -259,8 +253,12 @@ export async function updateProgramme(
   return updated ? rowToProgramme(updated, ids) : null;
 }
 
-/** Removes the programme and its placements; the courses and their shares stay. */
+/**
+ * Removes the programme and its placements; the courses and their shares stay. Only an admin
+ * (BESLUIT-2026-11-16-3): a lead manages the programme but does not delete it.
+ */
 export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
+  if (!isAdmin(a)) return false;
   const row = managedRow(a, id);
   if (!row) return false;
   getDb().transaction((tx) => {
@@ -328,7 +326,7 @@ export async function removeCourse(
     .where(eq(programmes.id, programmeId))
     .get();
   if (!programme) return false;
-  const who = canManage(a, programme.id)
+  const who = isAdmin(a)
     ? undefined
     : or(
         eq(programmeCourses.userId, a.id),

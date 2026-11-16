@@ -130,12 +130,15 @@ describe("/admin/teams/:id, the team page", () => {
     divisionId: null as string | null,
     divisionWord: "Faculteit",
     programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
-    otherProgrammes: [{ id: "p-2", name: "Pabo", teamName: "Team Pabo" }],
+    otherProgrammes: [
+      { id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" },
+      { id: "p-4", name: "Pabo deeltijd", divisionName: null },
+    ],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
     renderWith(AdminTeam, "/admin/teams/:id", d, action);
 
-  it("shows the team's programmes and links another team's programme to this team", async () => {
+  it("shows the team's programmes and adds programmes of other teams in a dialog", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();
     page(action);
@@ -147,23 +150,26 @@ describe("/admin/teams/:id, the team page", () => {
     expect(
       within(section).getByRole("link", { name: /nieuwe opleiding voor dit team/i }),
     ).toHaveAttribute("href", "/programmes?team=team-1");
-    await user.selectOptions(
-      within(section).getByLabelText("Opleiding koppelen aan dit team"),
-      "p-2",
-    );
-    await user.click(within(section).getByRole("button", { name: "Koppelen" }));
+    await user.click(within(section).getByRole("button", { name: "Opleiding toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Opleidingen toevoegen aan Verpleegkunde" });
+    await user.click(within(dialog).getByRole("checkbox", { name: /^Pabo Faculteit Onderwijs/ }));
+    await user.click(within(dialog).getByRole("checkbox", { name: /Pabo deeltijd/ }));
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen (2)" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]!.get("intent")).toBe("linkProgramme");
-    expect(bodies[0]!.get("programmeId")).toBe("p-2");
+    expect(bodies[0]!.getAll("programmeId")).toEqual(["p-2", "p-4"]);
   });
 
-  it("unlinks one of the team's programmes in one click", async () => {
+  it("asks before taking a programme off the team, and says the programme stays", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();
     page(action);
-    await user.click(
-      screen.getByRole("button", { name: "Verpleegkunde voltijd loskoppelen van dit team" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Weghalen: Verpleegkunde voltijd" }));
+    const dialog = screen.getByRole("dialog", {
+      name: "Verpleegkunde weghalen uit Verpleegkunde voltijd?",
+    });
+    expect(within(dialog).getByText(/De opleiding blijft bestaan/)).toBeVisible();
+    await user.click(within(dialog).getByRole("button", { name: "Weghalen" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]!.get("intent")).toBe("unlinkProgramme");
     expect(bodies[0]!.get("programmeId")).toBe("p-1");
@@ -173,7 +179,7 @@ describe("/admin/teams/:id, the team page", () => {
     page(undefined, { ...data, programmes: [], otherProgrammes: [] });
     const section = screen.getByRole("region", { name: "Opleidingen" });
     expect(within(section).getByText(/nog geen opleiding/i)).toBeInTheDocument();
-    expect(within(section).queryByRole("button", { name: "Koppelen" })).toBeNull();
+    expect(within(section).queryByRole("button", { name: "Opleiding toevoegen" })).toBeNull();
   });
 
   it("points to Organisatie when there are no divisions to choose", () => {
@@ -223,40 +229,40 @@ describe("/admin/teams/:id, the team page", () => {
     expect(bodies[0]!.get("lead")).toBe("1");
   });
 
-  it("removes a member in one click", async () => {
+  it("asks before taking a member out of the team", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();
     page(action);
-    await user.click(screen.getByRole("button", { name: /mo member uit het team halen/i }));
+    await user.click(screen.getByRole("button", { name: "Weghalen: Mo Member" }));
+    const dialog = screen.getByRole("dialog", { name: "Mo Member weghalen uit Verpleegkunde?" });
+    expect(within(dialog).getByText(/Het account blijft bestaan/)).toBeVisible();
+    await user.click(within(dialog).getByRole("button", { name: "Weghalen" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]!.get("intent")).toBe("removeMember");
     expect(bodies[0]!.get("userId")).toBe("u-mem");
   });
 
-  it("adds several colleagues at once by ticking them", async () => {
+  it("adds several colleagues at once in the Leden toevoegen dialog", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();
     page(action);
-    const box = screen.getByRole("group", { name: /leden toevoegen/i });
-    await user.click(within(box).getByRole("checkbox", { name: /anna aal/i }));
-    await user.click(within(box).getByRole("checkbox", { name: /bram beuk/i }));
-    await user.click(within(box).getByRole("button", { name: /aangevinkte toevoegen/i }));
+    await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Leden toevoegen aan Verpleegkunde" });
+    await user.keyboard("bram");
+    expect(
+      within(dialog).getByRole("checkbox", { name: /anna aal/i, hidden: true }),
+    ).not.toBeVisible();
+    await user.click(within(dialog).getByRole("checkbox", { name: /bram beuk/i }));
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen (1)" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]!.get("intent")).toBe("addMembers");
-    expect(bodies[0]!.getAll("userIds")).toEqual(["u-a", "u-b"]);
+    expect(bodies[0]!.getAll("userIds")).toEqual(["u-b"]);
   });
 
-  it("narrows the colleagues to tick with a search box", async () => {
+  it("says so when everyone is already in the team", async () => {
     const user = userEvent.setup();
-    page();
-    const box = screen.getByRole("group", { name: /leden toevoegen/i });
-    await user.type(within(box).getByLabelText(/zoek een collega/i), "bram");
-    expect(within(box).queryByRole("checkbox", { name: /anna aal/i })).toBeNull();
-    expect(within(box).getByRole("checkbox", { name: /bram beuk/i })).toBeInTheDocument();
-  });
-
-  it("says so when everyone is already in the team", () => {
     page(undefined, { ...data, candidates: [] });
+    await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
     expect(screen.getByText(/iedereen zit al in dit team/i)).toBeInTheDocument();
   });
 
@@ -313,6 +319,8 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     selfId: "u-lead",
     team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
     offer,
+    programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
+    programmeChoices: [{ id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" }],
   };
   const page = (action?: (args: { request: Request }) => unknown) =>
     renderWith(LeadTeam, "/teams/:id", data, action);
@@ -330,33 +338,77 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     page();
     const mo = screen.getByRole("row", { name: /mo member/i });
     expect(within(mo).getByRole("button", { name: /teamleider maken/i })).toBeInTheDocument();
-    expect(within(mo).getByRole("button", { name: /uit het team halen/i })).toBeInTheDocument();
+    expect(within(mo).getByRole("button", { name: "Weghalen: Mo Member" })).toBeInTheDocument();
     const lea = screen.getByRole("row", { name: /lea lead/i });
     expect(within(lea).queryByRole("button")).toBeNull();
   });
 
-  it("adds a colleague by exact e-mail", async () => {
+  it("adds a colleague by exact e-mail in the Lid toevoegen dialog", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
     page(async ({ request }) => {
       body = await request.formData();
       return { saved: true };
     });
-    expect(screen.getByText(/precies het e-mailadres/i)).toBeInTheDocument();
-    await user.type(screen.getByLabelText(/e-mailadres van je collega/i), "c@school.nl");
-    await user.click(screen.getByRole("button", { name: /^toevoegen$/i }));
+    await user.click(screen.getByRole("button", { name: "Lid toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Lid toevoegen aan Verpleegkunde" });
+    expect(within(dialog).getByText(/precies het e-mailadres/i)).toBeInTheDocument();
+    expect(within(dialog).getByLabelText(/e-mailadres van je collega/i)).toHaveFocus();
+    await user.keyboard("c@school.nl");
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen" }));
     await waitFor(() => expect(body?.get("intent")).toBe("addMember"));
     expect(body?.get("email")).toBe("c@school.nl");
+  });
+
+  it("asks before taking a member out", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    page(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    await user.click(screen.getByRole("button", { name: "Weghalen: Mo Member" }));
+    const dialog = screen.getByRole("dialog", { name: "Mo Member weghalen uit Verpleegkunde?" });
+    await user.click(within(dialog).getByRole("button", { name: "Weghalen" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("removeMember"));
   });
 
   it("shows a refusal as an error toast", async () => {
     const user = userEvent.setup();
     page(() => ({ error: "noSuchUser" }));
-    await user.type(screen.getByLabelText(/e-mailadres van je collega/i), "x@school.nl");
-    await user.click(screen.getByRole("button", { name: /^toevoegen$/i }));
+    await user.click(screen.getByRole("button", { name: "Lid toevoegen" }));
+    await user.keyboard("x@school.nl");
+    await user.click(screen.getByRole("button", { name: "Toevoegen" }));
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(/geen account met dit e-mailadres/i),
     );
+  });
+
+  it("lets the lead add the team to programmes, and take it off after a confirm", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    page(async ({ request }) => {
+      bodies.push(await request.formData());
+      return { saved: true };
+    });
+    const section = screen.getByRole("region", { name: "Opleidingen" });
+    // Only an admin creates a programme (BESLUIT-2026-11-16-4).
+    expect(within(section).queryByRole("link", { name: /nieuwe opleiding/i })).toBeNull();
+    expect(within(section).getByRole("link", { name: "Verpleegkunde voltijd" })).toHaveAttribute(
+      "href",
+      "/programmes/p-1",
+    );
+    await user.click(within(section).getByRole("button", { name: "Opleiding toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Opleidingen toevoegen aan Verpleegkunde" });
+    await user.click(within(dialog).getByRole("checkbox", { name: /Pabo/ }));
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen (1)" }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("linkProgramme");
+    expect(bodies[0]!.getAll("programmeId")).toEqual(["p-2"]);
+    await user.click(screen.getByRole("button", { name: "Weghalen: Verpleegkunde voltijd" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Weghalen" }));
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1]!.get("intent")).toBe("unlinkProgramme");
   });
 
   it("mints an invite link for the team and shows it", async () => {

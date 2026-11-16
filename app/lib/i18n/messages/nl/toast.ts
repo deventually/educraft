@@ -7,6 +7,7 @@ export const toast = {
     accountDeleted: "Je account is verwijderd.",
     dossierCreated: "Dossier aangemaakt. Loop de vier stappen door, of sla er een over.",
     passwordReset: "Je wachtwoord is gewijzigd. Je bent ingelogd.",
+    programmeDeleted: "Opleiding verwijderd.",
     rubricDeleted: "Rubric verwijderd.",
     rubricDuplicated: "Kopie gemaakt. Je bewerkt nu de kopie.",
     signedIn: "Je bent ingelogd.",

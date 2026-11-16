@@ -11,13 +11,14 @@ import { setupSteps } from "~/lib/admin/setup";
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 const steps = setupSteps({
-  kindChosen: true,
+  kindChosen: false,
   divisions: 2,
   users: 5,
   teams: 1,
   teamsWithoutMembers: 1,
   programmes: 0,
   programmesWithoutDivision: 0,
+  programmesWithoutTeam: 0,
 });
 
 const counts = { users: 5, teams: 1, programmes: 0, divisions: 2 };
@@ -45,8 +46,10 @@ describe("Beheer overview", () => {
     const items = within(list).getAllByRole("listitem");
     expect(items).toHaveLength(6);
     expect(items[0]).toHaveTextContent("Kies het woord");
-    expect(items[4]).toHaveTextContent("Maak de opleidingen aan");
-    expect(within(items[4]!).getByRole("link")).toHaveAttribute("href", "/programmes");
+    expect(items[2]).toHaveTextContent("Maak de opleidingen aan");
+    // With faculties, a programme is made in its faculty.
+    expect(within(items[2]!).getByRole("link")).toHaveAttribute("href", "/admin/organisation");
+    expect(items[5]).toHaveTextContent("Koppel elk team aan zijn opleidingen");
   });
 
   it("gives every step a heading, so a screen reader can jump from step to step", () => {
@@ -58,15 +61,15 @@ describe("Beheer overview", () => {
   it("says per step whether it is done, still to do, or optional", () => {
     page();
     const items = within(screen.getByRole("list", { name: "Inrichten" })).getAllByRole("listitem");
-    expect(items[0]).toHaveTextContent("Klaar");
-    expect(items[2]).toHaveTextContent("Klaar");
-    expect(items[3]).toHaveTextContent("Nog te doen");
-    expect(items[5]).toHaveTextContent("Optioneel");
+    expect(items[0]).toHaveTextContent("Optioneel");
+    expect(items[1]).toHaveTextContent("Klaar");
+    expect(items[3]).toHaveTextContent("Klaar");
+    expect(items[4]).toHaveTextContent("Nog te doen");
   });
 
   it("counts the required steps that are done", () => {
     page();
-    expect(screen.getByText("1 van 3 vaste stappen klaar")).toBeInTheDocument();
+    expect(screen.getByText("1 van 4 vaste stappen klaar")).toBeInTheDocument();
   });
 
   it("shows every admin page with a line on what it is for", () => {

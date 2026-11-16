@@ -29,19 +29,19 @@ export const adminSetup = {
       body: "Bijvoorbeeld faculteit, college of vestiging: de laag tussen de instelling en haar opleidingen.",
       title: "Kies het woord voor de laag onder de instelling",
     },
+    link: {
+      action: "Naar Teams",
+      body: "Open een team en klik op Opleiding toevoegen. Een teamleider kan dat ook zelf voor zijn eigen team.",
+      title: "Koppel elk team aan zijn opleidingen",
+    },
     people: {
       action: "Naar Gebruikers",
       body: "Maak accounts of uitnodigingslinks voor de docenten.",
       title: "Nodig collega's uit",
     },
-    placement: {
-      action: "Naar Faculteiten en opleidingen",
-      body: "Dan vindt iedereen de opleidingen per faculteit terug.",
-      title: "Zet elke opleiding onder een faculteit",
-    },
     programmes: {
-      action: "Naar Opleidingen",
-      body: "Voltijd, deeltijd en duaal elk apart. Een opleiding hoort bij een of meer teams.",
+      action: "Naar Faculteiten en opleidingen",
+      body: "Klik bij een faculteit op Nieuwe opleiding. Voltijd, deeltijd en duaal elk apart. Een team koppel je later.",
       title: "Maak de opleidingen aan",
     },
     teams: {

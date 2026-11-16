@@ -43,6 +43,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       teamsWithoutMembers: teams.filter((team) => team.members.length === 0).length,
       programmes: programmes.length,
       programmesWithoutDivision: programmes.filter((p) => !p.divisionId).length,
+      programmesWithoutTeam: programmes.filter((p) => p.teamIds.length === 0).length,
     }),
   };
 }

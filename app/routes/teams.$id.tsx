@@ -1,5 +1,4 @@
 import { Form, useActionData } from "react-router";
-import { UserPlus } from "lucide-react";
 import type { Route } from "./+types/teams.$id";
 import { requireUser } from "~/server/auth.server";
 import {
@@ -12,10 +11,19 @@ import {
   leadStepDown,
 } from "~/server/repositories/teams.server";
 import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
+import { listProgrammes } from "~/server/repositories/programmes.server";
+import {
+  linkProgrammeTeam,
+  programmeChoices,
+  unlinkProgrammeTeam,
+} from "~/server/repositories/programmeTeams.server";
+import { TeamProgrammes } from "~/components/teams/TeamProgrammes";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { AddDialog } from "~/components/connections/AddDialog";
+import { fmt } from "~/lib/i18n/format";
 import { LinkCard } from "~/components/admin/LinkCard";
 import { teamError } from "~/components/teams/teamError";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
@@ -29,7 +37,7 @@ const INVITE_DAYS = 14;
 
 /**
  * The team lead's page (P28.2, teacher side): the members (name, e-mail), add a colleague
- * by exact e-mail, remove a plain member, make a member lead, step down, the team's
+ * by exact e-mail (in the Lid toevoegen dialog), remove a plain member after a confirm, make a member lead, step down, the team's
  * choices for parts, tools and models within the instance (P28.3), and an invite link
  * that makes a new teacher a member. Anyone who is not lead of this team, an admin
  * included, gets a 404: the admin works on /admin/teams.
@@ -42,6 +50,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     selfId: user.id,
     team,
     offer: await getTeamSettingsOffer(),
+    // The programmes the team works on, and the ones the lead can put it in
+    // (BESLUIT-2026-11-16-4: a lead only their own team, in any programme).
+    programmes: (await listProgrammes(user, 500))
+      .filter((p) => p.teamIds.includes(team.id))
+      .map(({ id, name }) => ({ id, name })),
+    programmeChoices: await programmeChoices(user, team.id),
     // The team's PowerPoint template (P30.7b), which every member can choose.
     slideTemplate: await getTeamTemplate(user.id, params.id),
   };
@@ -62,6 +76,18 @@ export async function action({ request, params }: Route.ActionArgs) {
     return done(await leadAddMember(user.id, params.id, String(fd.get("email") ?? "")));
   }
   if (intent === "removeMember") return done(await leadRemoveMember(user.id, params.id, userId));
+  const programmeId = String(fd.get("programmeId") ?? "");
+  if (intent === "linkProgramme") {
+    const ids = [...new Set(fd.getAll("programmeId").map(String))].slice(0, 100);
+    let linked = 0;
+    for (const id of ids) if (await linkProgrammeTeam(user, id, team.id)) linked++;
+    return linked ? { saved: true as const } : { error: "unknown" };
+  }
+  if (intent === "unlinkProgramme") {
+    return (await unlinkProgrammeTeam(user, programmeId, team.id)) === "unlinked"
+      ? { saved: true as const }
+      : { error: "unknown" };
+  }
   if (intent === "makeLead") return done(await leadMakeLead(user.id, params.id, userId));
   if (intent === "settings") {
     // Within the instance's limits: only what is not Off is offered and changed.
@@ -94,6 +120,8 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
   const { team, selfId, offer, slideTemplate } = loaderData;
+  const programmes = "programmes" in loaderData ? loaderData.programmes : [];
+  const choices = "programmeChoices" in loaderData ? loaderData.programmeChoices : [];
   const actionData = useActionData<typeof action>();
 
   useFormToast(actionData, {
@@ -116,7 +144,28 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
       </header>
 
       <section>
-        <h2 className={h2}>{tt.members}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className={h2}>{tt.members}</h2>
+          <AddDialog
+            triggerLabel={tt.addMember}
+            title={fmt(tt.addMemberTitle, { team: team.name })}
+            description={tt.addHint}
+            intent="addMember"
+          >
+            <div>
+              <Label htmlFor="team-add-email">{tt.addEmailLabel}</Label>
+              <Input
+                id="team-add-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="off"
+                className="mt-1"
+                data-autofocus
+              />
+            </div>
+          </AddDialog>
+        </div>
         <div className="relative mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{tt.members}</caption>
@@ -166,13 +215,17 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
                             {tt.makeLead}
                           </Button>
                         </Form>
-                        <Form method="post">
-                          <input type="hidden" name="intent" value="removeMember" />
-                          <input type="hidden" name="userId" value={m.userId} />
-                          <Button type="submit" variant="secondary" size="sm">
-                            {tt.remove}
-                          </Button>
-                        </Form>
+                        <ConfirmDialog
+                          triggerLabel={t.connections.remove}
+                          triggerContext={m.name}
+                          triggerVariant="ghost"
+                          title={fmt(tt.memberRemoveTitle, { name: m.name, team: team.name })}
+                          description={tt.memberRemoveBody}
+                          confirmLabel={t.connections.remove}
+                          confirmVariant="primary"
+                          cancelLabel={t.confirm.cancel}
+                          fields={{ intent: "removeMember", userId: m.userId }}
+                        />
                       </div>
                     )}
                   </td>
@@ -183,31 +236,7 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      <section>
-        <h2 className={h2}>{tt.addHeading}</h2>
-        <p id="team-add-hint" className="mt-1 text-sm text-slate-600">
-          {tt.addHint}
-        </p>
-        <Form method="post" className="mt-3 flex max-w-xl flex-wrap items-end gap-3">
-          <input type="hidden" name="intent" value="addMember" />
-          <div className="min-w-48 flex-1">
-            <Label htmlFor="team-add-email">{tt.addEmailLabel}</Label>
-            <Input
-              id="team-add-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="off"
-              aria-describedby="team-add-hint"
-              className="mt-1"
-            />
-          </div>
-          <Button type="submit">
-            <UserPlus className="size-4" aria-hidden />
-            {tt.add}
-          </Button>
-        </Form>
-      </section>
+      <TeamProgrammes team={team} programmes={programmes} choices={choices} headingLevel={2} />
 
       <section aria-labelledby="team-features">
         <h2 id="team-features" className={h2}>

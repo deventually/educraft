@@ -3,6 +3,7 @@ import { Form, Link } from "react-router";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 import { Button, Input, Label, Select } from "~/components/ui";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 interface ProgrammeRow {
   id: string;
@@ -13,7 +14,7 @@ interface ProgrammeRow {
 }
 
 /**
- * One division on Beheer → Organisatie: its name (rename; delete while empty) and the
+ * One division on Beheer → Organisatie: its name (rename; delete while empty, after a confirm, and otherwise a line that says what to move first) and the
  * programmes under it, each with a choice where it belongs, and the teams under it (linked). Without `division` it is the group
  * of programmes under none.
  */
@@ -22,6 +23,7 @@ export function DivisionSection({
   heading,
   programmes,
   options,
+  newProgramme,
 }: {
   division?: {
     id: string;
@@ -32,8 +34,11 @@ export function DivisionSection({
   heading?: string;
   programmes: ProgrammeRow[];
   options: { id: string; name: string }[];
+  /** "Nieuwe opleiding" in this division, next to its heading. */
+  newProgramme?: React.ReactNode;
 }) {
-  const o = useT().organisation;
+  const t = useT();
+  const o = t.organisation;
   const headingId = useId();
   const title = division?.name ?? heading ?? "";
   return (
@@ -41,9 +46,12 @@ export function DivisionSection({
       aria-labelledby={headingId}
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     >
-      <h3 id={headingId} className="font-display text-base font-medium text-slate-900">
-        {title}
-      </h3>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 id={headingId} className="font-display text-base font-medium text-slate-900">
+          {title}
+        </h3>
+        {newProgramme}
+      </div>
 
       {division && (
         <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -66,19 +74,22 @@ export function DivisionSection({
             </Button>
           </Form>
           {division.programmeCount === 0 && division.teams.length === 0 && (
-            <Form method="post">
-              <input type="hidden" name="intent" value="delete" />
-              <input type="hidden" name="id" value={division.id} />
-              <Button
-                type="submit"
-                variant="secondary"
-                aria-label={fmt(o.delete, { name: division.name })}
-              >
-                {o.deleteShort}
-              </Button>
-            </Form>
+            <ConfirmDialog
+              triggerLabel={o.deleteShort}
+              triggerContext={division.name}
+              triggerVariant="secondary"
+              triggerSize="md"
+              title={fmt(o.deleteTitle, { name: division.name })}
+              description={o.deleteBody}
+              confirmLabel={o.deleteShort}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "delete", id: division.id }}
+            />
           )}
         </div>
+      )}
+      {division && (division.programmeCount > 0 || division.teams.length > 0) && (
+        <p className="mt-2 text-sm text-slate-600">{fmt(o.deleteFirst, { name: division.name })}</p>
       )}
 
       {division && division.teams.length > 0 && (

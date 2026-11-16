@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { Form, Link, useActionData } from "react-router";
-import { ArrowLeft, Trash2, UserMinus, UserPlus } from "lucide-react";
+import { Link, useActionData } from "react-router";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import type { Route } from "./+types/admin.teams.$id";
 import { requireRole } from "~/server/auth.server";
 import {
@@ -22,6 +21,7 @@ import {
 import { listProgrammes } from "~/server/repositories/programmes.server";
 import {
   linkProgrammeTeam,
+  programmeChoices,
   unlinkProgrammeTeam,
 } from "~/server/repositories/programmeTeams.server";
 import { divisionWord } from "~/lib/organisation/kinds";
@@ -32,7 +32,8 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { teamError } from "~/components/teams/teamError";
 import { useFormToast } from "~/components/Toast";
-import { Button, Input, Label } from "~/components/ui";
+import { Input, Label } from "~/components/ui";
+import { AddDialog } from "~/components/connections/AddDialog";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
@@ -45,7 +46,7 @@ const MAX_PEOPLE = 500;
 
 /**
  * One team's page (admin): name, members and leads, add several colleagues at once by
- * ticking them, remove one, the division it belongs under, its programmes, the team's choices (P28.3) and delete. The team is the one
+ * ticking them in a dialog, remove one after a confirm, the division it belongs under, its programmes, the team's choices (P28.3) and delete. The team is the one
  * in the URL; a `teamId` in a form is ignored.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -76,9 +77,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     programmes: programmes
       .filter((p) => p.teamIds.includes(team.id))
       .map(({ id, name }) => ({ id, name })),
-    otherProgrammes: programmes
-      .filter((p) => !p.teamIds.includes(team.id))
-      .map(({ id, name, teamName }) => ({ id, name, teamName })),
+    otherProgrammes: await programmeChoices(admin, team.id),
   };
 }
 
@@ -121,14 +120,16 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
   const programmeId = String(fd.get("programmeId") ?? "");
   if (intent === "linkProgramme") {
-    return (await linkProgrammeTeam(admin, programmeId, team.id))
-      ? { saved: true as const }
-      : { error: "unknown" as const };
+    const ids = [...new Set(fd.getAll("programmeId").map(String))].slice(0, 100);
+    if (ids.length === 0) return { error: "noneSelected" as const };
+    let linked = 0;
+    for (const id of ids) if (await linkProgrammeTeam(admin, id, team.id)) linked++;
+    return linked ? { saved: true as const } : { error: "unknown" as const };
   }
   if (intent === "unlinkProgramme") {
-    const result = await unlinkProgrammeTeam(admin, programmeId, team.id);
-    if (result === "unlinked") return { saved: true as const };
-    return { error: result === "lastTeam" ? ("lastTeam" as const) : ("unknown" as const) };
+    return (await unlinkProgrammeTeam(admin, programmeId, team.id)) === "unlinked"
+      ? { saved: true as const }
+      : { error: "unknown" as const };
   }
   if (intent === "settings") {
     const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
@@ -147,64 +148,6 @@ const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const h3 = "text-sm font-semibold text-slate-800";
 const card = "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm";
 const th = "px-4 py-2.5 font-semibold";
-
-/** Tick colleagues and add them in one go; the search box only narrows what is shown. */
-function AddMembers({
-  candidates,
-}: {
-  candidates: { id: string; name: string; email: string | null }[];
-}) {
-  const t = useT();
-  const tt = t.teams;
-  const [find, setFind] = useState("");
-  if (candidates.length === 0) return <p className="text-sm text-slate-500">{tt.noCandidates}</p>;
-  const needle = find.trim().toLowerCase();
-  const shows = (c: { name: string; email: string | null }) =>
-    !needle || `${c.name} ${c.email ?? ""}`.toLowerCase().includes(needle);
-
-  return (
-    <Form method="post">
-      <input type="hidden" name="intent" value="addMembers" />
-      <fieldset className="space-y-3">
-        <legend className={h3}>{tt.addMembersHeading}</legend>
-        <p className="text-xs text-slate-500">{tt.addMembersHint}</p>
-        <div className="max-w-sm">
-          <Label htmlFor="candidate-find">{tt.findCandidate}</Label>
-          <Input
-            id="candidate-find"
-            type="search"
-            value={find}
-            onChange={(e) => setFind(e.target.value)}
-            // Enter narrows the list; it never submits the form.
-            onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
-            className="mt-1"
-          />
-        </div>
-        <ul className="max-h-72 space-y-1 overflow-y-auto rounded-xl border border-slate-100 p-2">
-          {candidates.map((c) => (
-            // `hidden`, not removed: a ticked colleague stays ticked while you search on.
-            <li key={c.id} hidden={!shows(c)}>
-              <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-slate-50">
-                <input
-                  type="checkbox"
-                  name="userIds"
-                  value={c.id}
-                  className="size-4 rounded border-slate-300 text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500"
-                />
-                <span className="font-medium text-slate-800">{c.name}</span>
-                {c.email && <span className="text-slate-500">{c.email}</span>}
-              </label>
-            </li>
-          ))}
-        </ul>
-        <Button type="submit" variant="secondary">
-          <UserPlus className="size-4" aria-hidden />
-          {tt.addSelected}
-        </Button>
-      </fieldset>
-    </Form>
-  );
-}
 
 export default function AdminTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
@@ -269,12 +212,31 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      <TeamProgrammes teamId={team.id} programmes={programmes} others={otherProgrammes} />
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <TeamProgrammes team={team} programmes={programmes} choices={otherProgrammes} canCreate />
+      </section>
 
       <section className={`${card} space-y-5`} aria-labelledby="team-members">
-        <h3 id="team-members" className={h3}>
-          {tt.members}
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 id="team-members" className={h3}>
+            {tt.members}
+          </h3>
+          <AddDialog
+            triggerLabel={tt.addMembersHeading}
+            title={fmt(tt.addMembersTitle, { team: team.name })}
+            description={tt.addMembersHint}
+            intent="addMembers"
+            pick={{
+              name: "userIds",
+              options: candidates.map((c) => ({
+                id: c.id,
+                label: c.name,
+                hint: c.email ?? undefined,
+              })),
+              empty: tt.noCandidates,
+            }}
+          />
+        </div>
         {team.members.length === 0 ? (
           <p className="text-sm text-slate-500">{tt.noMembers}</p>
         ) : (
@@ -293,7 +255,7 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
                     {tt.colLead}
                   </th>
                   <th scope="col" className={th}>
-                    <span className="sr-only">{tt.remove}</span>
+                    <span className="sr-only">{t.connections.remove}</span>
                   </th>
                 </tr>
               </thead>
@@ -326,18 +288,17 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
                       </AutoSaveForm>
                     </td>
                     <td className="px-4 py-2 text-right">
-                      <Form method="post">
-                        <input type="hidden" name="intent" value="removeMember" />
-                        <input type="hidden" name="userId" value={m.userId} />
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="sm"
-                          aria-label={fmt(tt.removeLabel, { name: m.name })}
-                        >
-                          <UserMinus className="size-3.5" aria-hidden />
-                        </Button>
-                      </Form>
+                      <ConfirmDialog
+                        triggerLabel={t.connections.remove}
+                        triggerContext={m.name}
+                        triggerVariant="ghost"
+                        title={fmt(tt.memberRemoveTitle, { name: m.name, team: team.name })}
+                        description={tt.memberRemoveBody}
+                        confirmLabel={t.connections.remove}
+                        confirmVariant="primary"
+                        cancelLabel={t.confirm.cancel}
+                        fields={{ intent: "removeMember", userId: m.userId }}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -345,7 +306,6 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
             </table>
           </div>
         )}
-        <AddMembers candidates={candidates} />
       </section>
 
       <section className={card} aria-labelledby="team-features">

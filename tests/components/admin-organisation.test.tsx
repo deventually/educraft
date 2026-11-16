@@ -10,6 +10,8 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 const data = {
   kind: "faculty" as const,
+  kinds: [{ value: "hbo:bachelor", label: "hbo-bachelor" }],
+  teams: [{ id: "t-1", name: "Team VPK" }],
   divisions: [
     {
       id: "d-1",
@@ -78,12 +80,50 @@ describe("/admin/organisation", () => {
     );
   });
 
-  it("offers delete only on an empty division", async () => {
+  it("says on a division that is not empty what to move before it can go", async () => {
     page();
     const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
     expect(within(zorg).queryByRole("button", { name: /verwijderen/i })).toBeNull();
-    const techniek = screen.getByRole("region", { name: "Faculteit Techniek" });
-    expect(within(techniek).getByRole("button", { name: /verwijderen/i })).toBeInTheDocument();
+    expect(
+      within(zorg).getByText(
+        "Om Faculteit Gezondheid te verwijderen, zet je eerst de opleidingen en teams eronder op Geen of onder iets anders.",
+      ),
+    ).toBeVisible();
+  });
+
+  it("asks before deleting an empty division, and says what stays", async () => {
+    const user = userEvent.setup();
+    page();
+    const techniek = await screen.findByRole("region", { name: "Faculteit Techniek" });
+    await user.click(
+      within(techniek).getByRole("button", { name: "Verwijderen: Faculteit Techniek" }),
+    );
+    const dialog = screen.getByRole("dialog", { name: "Faculteit Techniek verwijderen?" });
+    expect(within(dialog).getByText(/Er staan geen opleidingen of teams meer onder/)).toBeVisible();
+    expect(within(dialog).getByRole("button", { name: "Verwijderen" })).toBeVisible();
+  });
+
+  it("says programmes are made here, in their faculty", async () => {
+    page({ ...data, programmes: [] });
+    expect(
+      await screen.findByText(/Een opleiding maak je hier met Nieuwe opleiding/),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/Nog geen opleidingen. Klik bij een faculteit op Nieuwe opleiding/),
+    ).toBeVisible();
+  });
+
+  it("starts a new programme right in a faculty (BESLUIT-2026-11-16-4)", async () => {
+    const user = userEvent.setup();
+    page();
+    const techniek = await screen.findByRole("region", { name: "Faculteit Techniek" });
+    await user.click(within(techniek).getByRole("button", { name: "Nieuwe opleiding" }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe opleiding in Faculteit Techniek" });
+    expect(within(dialog).getByLabelText("Team")).toHaveDisplayValue("Nog geen team");
+    expect(within(dialog).queryByLabelText("Faculteit")).toBeNull();
+    const form = within(dialog).getByRole("button", { name: "Opleiding aanmaken" }).closest("form");
+    expect(form).toHaveAttribute("action", "/programmes");
+    expect(form?.querySelector('input[name="divisionId"]')).toHaveValue("d-2");
   });
 
   it("moves a programme with a choice of division per programme", async () => {

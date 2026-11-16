@@ -102,7 +102,7 @@ describe("handing a course over (BESLUIT-2026-11-10-5)", () => {
     const course = await newCourse(w.a);
     const lead = { id: w.a, role: "teacher" as const };
     await teams.setLead(w.team, w.a, true);
-    const programme = await programmes.createProgramme(lead, w.team, {
+    const programme = await programmes.createProgramme({ id: "admin", role: "admin" }, w.team, {
       name: "Bachelor",
       sector: "hbo",
       track: "bachelor",

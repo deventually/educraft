@@ -664,6 +664,25 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie": keuzes 1 tot en met 6, "Ook
   ontkoppelen moet bevestigd worden met een confirm" en "Is het ook een idee om het beheer met
   een dashboardpagina te starten?").
+- **BESLUIT-2026-11-16-4:** **De beheerder maakt de opleidingen, een teamleider koppelt zijn eigen
+  team; alleen een beheerder beheert en verwijdert een opleiding.** Een beheerder maakt een opleiding aan,
+  ook zonder team en meteen onder een faculteit (*Nieuwe opleiding* bij elke faculteit). Een
+  opleiding zonder team ziet alleen een beheerder. Een beheerder koppelt elk team aan een of meer
+  opleidingen en haalt het eraf; een teamleider doet dat alleen voor zijn eigen team, en kiest
+  daarvoor uit alle opleidingen van de instelling. Het laatste team mag eraf: de opleiding blijft
+  dan bestaan, voor de beheerder, net als wanneer haar laatste team wordt opgeheven. Alleen een
+  beheerder maakt een opleiding aan en beheert haar: naam, niveau, vorm, leerlijnen, de cursus van
+  een collega eruit halen, en verwijderen. Een teamleider koppelt alleen zijn eigen team aan een
+  opleiding of haalt het eraf; een lid zet er eigen cursussen in en haalt ze eruit. Dit vervangt in BESLUIT-2026-11-16-1 "een beheerder koppelt", "een opleiding houdt
+  altijd minstens één team" en "een opleiding van alleen dat team verdwijnt mee", en in
+  BESLUIT-2026-11-16-3 "een teamleider van de opleiding koppelt zelf teams". Bastiaan, 2026-11-16
+  (thread "Plan voor eenvoudiger beheer en navigatie": "Alleen de beheerder", "Ik wil eerst de
+  opleidingen aanmaken als beheerder. Deze opleiding valt onder een faculteit. Een team (of
+  beheerder) kan het team aan een opleiding koppelen. Een team alleen zichzelf, een beheerder alle
+  teams", "Een beheerder kan ook een team koppelen aan een of meerdere opleidingen", keuzekaart:
+  "Alle opleidingen van de instelling", en "Alleen een beheerder kan een opleiding beheren. De
+  teamleider kan er wel voor kiezen om zijn team van de desbetreffende opleiding te ontkoppelen,
+  of aan een andere opleiding te koppelen").
 - **BESLUIT-2026-11-16-5:** **Buiten productie mag een beheerder elk wachtwoord geven.** Bij
   "account aanmaken" met een beginwachtwoord en bij "wachtwoord instellen" op de pagina van een
   persoon geldt de wachtwoordregel (minstens 10 tekens, geen veelgebruikt wachtwoord) alleen op

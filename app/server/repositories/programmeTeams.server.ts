@@ -1,13 +1,14 @@
 /**
  * The teams of a programme (BESLUIT-2026-11-16-1): a programme has one or more teams, such as
  * the programme team and its module teams. Every member of one of them reads the programme, a
- * lead of one of them manages it (`programmes.server.ts`). Linking and unlinking is for an admin;
- * a programme always keeps at least one team. The read helpers are for the programme
+ * lead of one of them manages it (`programmes.server.ts`). An admin links and unlinks any team;
+ * a team lead only their own team, to and from any programme (BESLUIT-2026-11-16-4). A
+ * programme may have no team: an admin makes it so, and then only an admin sees it. The read helpers are for the programme
  * repository, which scopes its queries itself.
  */
-import { and, asc, count, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import { getDb } from "../db.server";
-import { programmeTeams, programmes, teamMembers, teams } from "../schema.server";
+import { divisions, programmeTeams, programmes, teamMembers, teams } from "../schema.server";
 
 /** Who acts: the signed-in user's id and role. */
 interface Actor {
@@ -16,6 +17,35 @@ interface Actor {
 }
 
 const isAdmin = (a: Actor) => a.role === "admin";
+
+/** An admin, or the lead of this team: the ones who choose where the team works. */
+const speaksFor = (a: Actor, teamId: string) =>
+  isAdmin(a) ||
+  !!getDb()
+    .select({ id: teamMembers.teamId })
+    .from(teamMembers)
+    .where(
+      and(
+        eq(teamMembers.teamId, teamId),
+        eq(teamMembers.userId, a.id),
+        eq(teamMembers.isLead, true),
+      ),
+    )
+    .get();
+
+/** The teams the actor may create a programme for: where they lead; every team for an admin. */
+export async function manageableTeams(a: Actor): Promise<{ id: string; name: string }[]> {
+  const db = getDb();
+  if (isAdmin(a))
+    return db.select({ id: teams.id, name: teams.name }).from(teams).orderBy(asc(teams.name)).all();
+  return db
+    .select({ id: teams.id, name: teams.name })
+    .from(teamMembers)
+    .innerJoin(teams, eq(teams.id, teamMembers.teamId))
+    .where(and(eq(teamMembers.userId, a.id), eq(teamMembers.isLead, true)))
+    .orderBy(asc(teams.name))
+    .all();
+}
 
 /** The teams of these programmes, by name, per programme id. Not scoped: callers scope. */
 export function teamsOf(programmeIds: string[]): Map<string, { id: string; name: string }[]> {
@@ -49,13 +79,17 @@ export const namesOf = (list: { name: string }[] = []) => list.map((t) => t.name
 const exists = (table: typeof programmes | typeof teams, id: string) =>
   !!getDb().select({ id: table.id }).from(table).where(eq(table.id, id)).get();
 
-/** Links a team to a programme (admin only; linking twice changes nothing). False otherwise. */
+/**
+ * Links a team to a programme (an admin, or the lead of that team; linking twice changes
+ * nothing). False otherwise.
+ */
 export async function linkProgrammeTeam(
   a: Actor,
   programmeId: string,
   teamId: string,
 ): Promise<boolean> {
-  if (!isAdmin(a) || !exists(programmes, programmeId) || !exists(teams, teamId)) return false;
+  if (!exists(programmes, programmeId) || !exists(teams, teamId) || !speaksFor(a, teamId))
+    return false;
   getDb()
     .insert(programmeTeams)
     .values({ programmeId, teamId, createdAt: new Date() })
@@ -65,29 +99,46 @@ export async function linkProgrammeTeam(
 }
 
 /**
- * Unlinks a team from a programme (admin only). Its members no longer read the programme, and
- * a course shows in it only while it is shared with one of the remaining teams. Never the last
- * team: a programme without a team would be no one's.
+ * Unlinks a team from a programme (an admin, or the lead of that team). Its members no longer
+ * read the programme, and a course shows in it only while it is shared with one of the
+ * remaining teams. The last team may go: the programme stays, for an admin.
  */
 export async function unlinkProgrammeTeam(
   a: Actor,
   programmeId: string,
   teamId: string,
-): Promise<"unlinked" | "lastTeam" | "refused"> {
-  if (!isAdmin(a)) return "refused";
-  const db = getDb();
+): Promise<"unlinked" | "refused"> {
+  if (!speaksFor(a, teamId)) return "refused";
   const linked = and(
     eq(programmeTeams.programmeId, programmeId),
     eq(programmeTeams.teamId, teamId),
   );
-  if (!db.select({ id: programmeTeams.teamId }).from(programmeTeams).where(linked).get())
-    return "refused";
-  const [{ n }] = db
-    .select({ n: count() })
+  const result = getDb().delete(programmeTeams).where(linked).run();
+  return result.changes > 0 ? "unlinked" : "refused";
+}
+
+/**
+ * The programmes this team can still be linked to, for an admin or the team's lead (else
+ * none): every programme of the institution it is not in, with its faculty. Only names: a
+ * lead reads a programme itself once their team is in it.
+ */
+export async function programmeChoices(
+  a: Actor,
+  teamId: string,
+): Promise<{ id: string; name: string; divisionName: string | null }[]> {
+  if (!exists(teams, teamId) || !speaksFor(a, teamId)) return [];
+  const inIt = getDb()
+    .select({ id: programmeTeams.programmeId })
     .from(programmeTeams)
-    .where(eq(programmeTeams.programmeId, programmeId))
-    .all() as [{ n: number }];
-  if (n <= 1) return "lastTeam";
-  db.delete(programmeTeams).where(linked).run();
-  return "unlinked";
+    .where(eq(programmeTeams.teamId, teamId))
+    .all()
+    .map((r) => r.id);
+  return getDb()
+    .select({ id: programmes.id, name: programmes.name, divisionName: divisions.name })
+    .from(programmes)
+    .leftJoin(divisions, eq(divisions.id, programmes.divisionId))
+    .where(inIt.length ? notInArray(programmes.id, inIt) : undefined)
+    .orderBy(asc(programmes.name))
+    .limit(500)
+    .all();
 }

@@ -7,6 +7,7 @@ export const toast: Messages["toast"] = {
     accountDeleted: "Your account has been deleted.",
     dossierCreated: "Dossier created. Go through the four steps, or skip one.",
     passwordReset: "Your password has been changed. You are signed in.",
+    programmeDeleted: "Programme deleted.",
     rubricDeleted: "Rubric deleted.",
     rubricDuplicated: "Copy made. You are now editing the copy.",
     signedIn: "You are signed in.",

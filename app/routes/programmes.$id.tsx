@@ -9,23 +9,32 @@ import {
   programmeFromForm,
 } from "~/server/programmes.server";
 import {
+  deleteProgramme,
   getProgramme,
   placeCourse,
   removeCourse,
   updateProgramme,
 } from "~/server/repositories/programmes.server";
 import { listCourses } from "~/server/repositories/courses.server";
+import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
+import {
+  linkProgrammeTeam,
+  unlinkProgrammeTeam,
+} from "~/server/repositories/programmeTeams.server";
 import { createLine, listLines } from "~/server/repositories/learningLines.server";
 import { LearningLinesSection } from "~/components/programmes/LearningLinesSection";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
-import { Button, Card, Label, Select } from "~/components/ui";
+import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { ProgrammeFields } from "~/components/programmes/ProgrammeFields";
-import { PlacementFields, usePlacementText } from "~/components/programmes/PlacementFields";
+import { ProgrammeCourses } from "~/components/programmes/ProgrammeCourses";
+import { ProgrammeTeams } from "~/components/programmes/ProgrammeTeams";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { redirectWithFlash } from "~/server/flash.server";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.programme.name ?? "Opleiding"} — LimeOnIt` }];
@@ -34,6 +43,8 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, programme } = await loadProgramme(request, params.id);
   const locale = getLocale(request);
+  const m = getMessages(locale).programmes;
+  const leads = new Set((await listTeamsForUser(user.id)).filter((t) => t.isLead).map((t) => t.id));
   const kind = `${programme.sector}:${programme.track ?? ""}`;
   const kinds = await kindOptions(user, locale);
   // A programme keeps its level even when the admin later switches that sector off.
@@ -57,6 +68,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       kindLabel: programmeKindLabel(programme, locale),
       teamName: programme.teamName,
       teamCount: programme.teams.length,
+      teams: programme.teams,
       canManage: programme.canManage,
       courses: programme.courses.map(({ ownerId: _owner, ...c }) => ({
         ...c,
@@ -65,7 +77,25 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     kinds,
     available,
+    // The teams that can still be added: for an admin or a lead of the programme only
+    // (BESLUIT-2026-11-16-4). Names and sizes, never who is in them.
+    // The teams this person may add (BESLUIT-2026-11-16-4): an admin any team, a lead only
+    // the teams they lead. Names and sizes, never who is in them.
+    teamOptions: (await listTeams())
+      .filter((t) => !programme.teamIds.includes(t.id))
+      .filter((t) => user.role === "admin" || leads.has(t.id))
+      .map((t) => ({
+        id: t.id,
+        label: t.name,
+        hint:
+          t.members.length === 1 ? m.memberOne : fmt(m.memberCount, { count: t.members.length }),
+      })),
+    // The teams whose Weghalen this person may use: an admin all, a lead their own.
+    myTeamIds: user.role === "admin" ? programme.teamIds : [...leads],
     canPlace: programme.isMember,
+    // Only an admin deletes a programme (BESLUIT-2026-11-16-4).
+    canDelete: user.role === "admin",
+    isAdmin: user.role === "admin",
     lines: await Promise.all(
       (await listLines(user, programme.id)).map(async (l) => {
         // A line of another programme says where it comes from, when the user reads that one.
@@ -114,6 +144,42 @@ export async function action({ request, params }: Route.ActionArgs) {
       ? { ok: true as const, message: m.toastPlaced }
       : { ok: false as const, error: m.errorNotFound };
   }
+  const ids = (name: string) => [...new Set(fd.getAll(name).map(String))].slice(0, 100);
+  const added = (n: number, one: string, many: string) => ({
+    ok: true as const,
+    message: n === 1 ? one : fmt(many, { count: n }),
+  });
+  if (intent === "add-courses") {
+    const placement = placementFromForm(fd);
+    if (!placement) return { ok: false as const, error: m.errorPlacement };
+    const chosen = ids("courseId");
+    if (chosen.length === 0) return { ok: false as const, error: m.errorNoChoice };
+    let n = 0;
+    for (const id of chosen) if (await placeCourse(user, programme.id, id, placement)) n++;
+    return n
+      ? added(n, m.courseAdded, m.coursesAdded)
+      : { ok: false as const, error: m.errorNotFound };
+  }
+  if (intent === "link-teams" || intent === "unlink-team") {
+    // The repository decides: an admin any team, a lead only their own (BESLUIT-2026-11-16-4).
+    if (intent === "unlink-team") {
+      const result = await unlinkProgrammeTeam(user, programme.id, String(fd.get("teamId") ?? ""));
+      return result === "unlinked"
+        ? { ok: true as const, message: m.teamRemoved }
+        : { ok: false as const, error: m.errorOwnTeam };
+    }
+    const chosen = ids("teamId");
+    if (chosen.length === 0) return { ok: false as const, error: m.errorNoChoice };
+    let n = 0;
+    for (const id of chosen) if (await linkProgrammeTeam(user, programme.id, id)) n++;
+    return n ? added(n, m.teamAdded, m.teamsAdded) : { ok: false as const, error: m.errorOwnTeam };
+  }
+  if (intent === "delete") {
+    if (user.role !== "admin") return { ok: false as const, error: m.errorDeleteAdminOnly };
+    if (!(await deleteProgramme(user, programme.id)))
+      return { ok: false as const, error: m.errorNotFound };
+    return redirectWithFlash("/programmes", "programmeDeleted");
+  }
   if (intent === "remove") {
     return (await removeCourse(user, programme.id, courseId))
       ? { ok: true as const, message: m.toastRemoved }
@@ -124,7 +190,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 /** One programme: its details, its courses by year and period, and adding a course. */
 export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
-  const p = useT().programmes;
+  const t = useT();
+  const p = t.programmes;
   const id = useId();
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
@@ -135,8 +202,10 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         : { variant: "error", message: d.error };
     },
   });
-  const { programme, kinds, available, canPlace, lines = [] } = loaderData;
-  const placementText = usePlacementText();
+  const { programme, kinds, available, canPlace, teamOptions = [], lines = [] } = loaderData;
+  const myTeamIds = "myTeamIds" in loaderData ? loaderData.myTeamIds : [];
+  const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
+  const canDelete = "canDelete" in loaderData && loaderData.canDelete;
 
   return (
     <div className="w-full min-w-0">
@@ -151,82 +220,21 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         {programme.name}
       </h1>
       <p className="mt-1 text-slate-600">
-        {programme.kindLabel} · {programme.teamCount > 1 ? p.teams : p.team} {programme.teamName}
+        {programme.kindLabel} ·{" "}
+        {programme.teamCount === 0
+          ? p.noTeamYet
+          : `${programme.teamCount > 1 ? p.teams : p.team} ${programme.teamName}`}
       </p>
 
       <div className="mt-6 space-y-10">
-        <section aria-labelledby={`${id}-courses`}>
-          <h2 id={`${id}-courses`} className="text-lg font-medium text-slate-900">
-            {p.courses.title}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">{p.courses.intro}</p>
-          {programme.courses.length === 0 ? (
-            <p className="mt-3 text-slate-600">{p.courses.empty}</p>
-          ) : (
-            <ul className="mt-3 space-y-3">
-              {programme.courses.map((c) => (
-                <li
-                  key={c.courseId}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span>
-                      {c.mine ? (
-                        <Link
-                          to={`/courses/${c.courseId}`}
-                          className="font-medium text-slate-900 underline-offset-2 hover:underline"
-                        >
-                          {c.name}
-                        </Link>
-                      ) : (
-                        <Link
-                          to={`/courses/shared/${c.courseId}`}
-                          className="font-medium text-slate-900 underline-offset-2 hover:underline"
-                        >
-                          {c.name}
-                        </Link>
-                      )}
-                      {!c.mine && (
-                        <span className="ml-2 text-sm text-slate-600">
-                          {fmt(p.owner, { name: c.ownerName })}
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-sm text-slate-600">{placementText(c)}</span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-end gap-3">
-                    {c.mine && (
-                      <Form method="post" className="flex flex-wrap items-end gap-3">
-                        <input type="hidden" name="intent" value="place" />
-                        <input type="hidden" name="courseId" value={c.courseId} />
-                        <PlacementFields
-                          id={`${id}-${c.courseId}`}
-                          year={c.year}
-                          period={c.period}
-                          label={c.name}
-                        />
-                        <Button type="submit" size="sm" variant="secondary">
-                          {p.save}
-                          <span className="sr-only"> ({c.name})</span>
-                        </Button>
-                      </Form>
-                    )}
-                    {(c.mine || programme.canManage) && (
-                      <Form method="post">
-                        <input type="hidden" name="intent" value="remove" />
-                        <input type="hidden" name="courseId" value={c.courseId} />
-                        <Button type="submit" size="sm" variant="ghost">
-                          {p.remove}
-                          <span className="sr-only"> ({c.name})</span>
-                        </Button>
-                      </Form>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <ProgrammeCourses id={id} programme={programme} available={available} canPlace={canPlace} />
+
+        <ProgrammeTeams
+          programme={programme}
+          teamOptions={teamOptions}
+          myTeamIds={myTeamIds}
+          isAdmin={isAdmin}
+        />
 
         <LearningLinesSection
           programmeId={programme.id}
@@ -234,41 +242,6 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
           courses={programme.courses}
           canManage={programme.canManage}
         />
-
-        <section aria-labelledby={`${id}-add`}>
-          <h2 id={`${id}-add`} className="text-lg font-medium text-slate-900">
-            {p.addTitle}
-          </h2>
-          {!canPlace ? (
-            <p className="mt-2 max-w-[65ch] text-slate-600">{p.addNotMember}</p>
-          ) : available.length === 0 ? (
-            <p className="mt-2 text-slate-600">{p.addNone}</p>
-          ) : (
-            <Card className="mt-3 p-4">
-              <Form method="post" className="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="intent" value="place" />
-                <div className="w-full sm:w-auto sm:min-w-48 sm:flex-1">
-                  <Label htmlFor={`${id}-course`}>{p.course}</Label>
-                  <Select id={`${id}-course`} name="courseId" className="mt-1">
-                    {available.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <PlacementFields id={`${id}-new`} />
-                <Button type="submit" size="sm">
-                  {p.add}
-                </Button>
-              </Form>
-              <p className="mt-2 text-xs text-slate-500">{p.yearPeriodHint}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {fmt(p.sharesWith, { team: programme.teamName })}
-              </p>
-            </Card>
-          )}
-        </section>
 
         {programme.canManage && (
           <section aria-labelledby={`${id}-settings`}>
@@ -290,6 +263,19 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
                 </div>
               </Form>
             </Card>
+          </section>
+        )}
+
+        {canDelete && (
+          <section className="border-t border-slate-200 pt-6">
+            <ConfirmDialog
+              triggerLabel={p.deleteProgramme}
+              title={p.deleteTitle}
+              description={p.deleteBody}
+              confirmLabel={p.delete}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "delete" }}
+            />
           </section>
         )}
       </div>

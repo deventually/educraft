@@ -30,19 +30,19 @@ export const adminSetup: Messages["adminSetup"] = {
       body: "For example faculty, college or location: the layer between the institution and its programmes.",
       title: "Choose the word for the layer under the institution",
     },
+    link: {
+      action: "To Teams",
+      body: "Open a team and click Add programme. A team lead can also do this for their own team.",
+      title: "Link each team to its programmes",
+    },
     people: {
       action: "To Users",
       body: "Create accounts or invitation links for the teachers.",
       title: "Invite colleagues",
     },
-    placement: {
-      action: "To Faculties and programmes",
-      body: "Then everyone finds the programmes per faculty.",
-      title: "Put every programme under a faculty",
-    },
     programmes: {
-      action: "To Programmes",
-      body: "Full-time, part-time and dual each on their own. A programme belongs to one or more teams.",
+      action: "To Faculties and programmes",
+      body: "Click New programme in a faculty. Full-time, part-time and dual each separately. You link a team later.",
       title: "Create the programmes",
     },
     teams: {

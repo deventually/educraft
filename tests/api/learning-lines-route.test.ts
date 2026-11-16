@@ -29,16 +29,19 @@ const outcome = (text: string, bloom: "apply" | "create"): CourseData => ({
 });
 
 let n = 0;
-let me = { id: "", role: "teacher" as const };
+let me = { id: "", role: "admin" as const };
 let pid = "";
 let c1 = "";
 let c2 = "";
 
-/** I lead a team with a programme holding two of my courses. */
+/**
+ * I am an admin in a team with a programme holding two of my courses: only an admin manages a
+ * programme and its learning lines (BESLUIT-2026-11-16-4).
+ */
 beforeEach(async () => {
   n += 1;
-  me = { id: `line-route-${n}`, role: "teacher" };
-  await signInAs({ id: me.id, name: "Docent" });
+  me = { id: `line-route-${n}`, role: "admin" };
+  await signInAs({ id: me.id, name: "Docent", role: "admin" });
   const team = await teams.createTeam(`Informatica lijn ${n}`);
   await teams.addMember(team.id, me.id);
   await teams.setLead(team.id, me.id, true);
@@ -144,7 +147,7 @@ describe("learning line routes", () => {
     expect(await status(linePage.loader({ request: get("/x"), params } as never))).toBe(404);
   });
 
-  it("links the line to another programme I lead, and opens it under that one's address too", async () => {
+  it("links the line to another programme I manage, and opens it under that one's address too", async () => {
     const team2 = await teams.createTeam(`Deeltijd lijn ${n}`);
     await teams.addMember(team2.id, me.id);
     await teams.setLead(team2.id, me.id, true);
@@ -155,7 +158,12 @@ describe("learning line routes", () => {
     const line = await lines.createLine(me, pid, "Programmeren", [c1]);
     const params = { id: pid, lineId: line!.id };
     const before = await linePage.loader({ request: get("/x"), params } as never);
-    expect(before.linkOptions).toEqual([{ id: pid2, name: "HBO-ICT deeltijd", linked: false }]);
+    // An admin may link it to any programme; the new one is among them.
+    expect(before.linkOptions).toContainEqual({
+      id: pid2,
+      name: "HBO-ICT deeltijd",
+      linked: false,
+    });
     expect(
       await linePage.action({
         request: post("/x", [

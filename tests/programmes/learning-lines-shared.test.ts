@@ -49,11 +49,11 @@ async function world() {
   await teams.setLead(teamA.id, both.id, true);
   await teams.setLead(teamA.id, leadA.id, true);
   await teams.setLead(teamB.id, both.id, true);
-  const a = (await programmes.createProgramme(both, teamA.id, {
+  const a = (await programmes.createProgramme(admin, teamA.id, {
     name: "Pabo voltijd",
     sector: "hbo",
   }))!;
-  const b = (await programmes.createProgramme(both, teamB.id, {
+  const b = (await programmes.createProgramme(admin, teamB.id, {
     name: "Pabo deeltijd",
     sector: "hbo",
   }))!;
@@ -65,29 +65,31 @@ async function world() {
 }
 
 describe("a learning line across programmes", () => {
-  it("is linked to another programme by someone who manages both, and shows up there", async () => {
-    const { both, memberB, a, b, cA } = await world();
-    const line = (await lines.createLine(both, a.id, "Onderzoek", [cA.id]))!;
-    expect(await lines.setLineProgrammes(both, line.id, [b.id])).toBe(true);
+  it("is linked to another programme by an admin, and shows up there", async () => {
+    const { admin, both, memberB, a, b, cA } = await world();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
+    expect(await lines.setLineProgrammes(admin, line.id, [b.id])).toBe(true);
     const inB = await lines.listLines(memberB, b.id);
     expect(inB).toEqual([expect.objectContaining({ id: line.id, programmeId: a.id })]);
     expect((await lines.getLine(both, line.id))?.programmes.map((p) => p.id)).toEqual([a.id, b.id]);
   });
 
-  it("refuses a lead who does not manage the other programme; an admin may", async () => {
-    const { leadA, admin, a, b, cA } = await world();
-    const line = (await lines.createLine(leadA, a.id, "Onderzoek", [cA.id]))!;
-    expect(await lines.setLineProgrammes(leadA, line.id, [b.id])).toBe(false);
+  it("refuses a lead, also of both teams; an admin may (BESLUIT-2026-11-16-4)", async () => {
+    const { both, leadA, admin, a, b, cA } = await world();
+    expect(await lines.createLine(both, a.id, "Onderzoek", [cA.id])).toBeNull();
+    expect(await lines.createLine(leadA, a.id, "Onderzoek", [cA.id])).toBeNull();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
+    expect(await lines.setLineProgrammes(both, line.id, [b.id])).toBe(false);
     expect(await lines.setLineProgrammes(admin, line.id, [b.id])).toBe(true);
   });
 
   it("takes courses from every linked programme, and each reader sees only what is shared with them", async () => {
-    const { both, memberA, memberB, a, b, cA, cB } = await world();
-    const line = (await lines.createLine(both, a.id, "Onderzoek", [cA.id]))!;
+    const { admin, both, memberA, memberB, a, b, cA, cB } = await world();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
     // Not linked yet: a course of B is not allowed.
-    expect(await lines.setLineCourses(both, line.id, [cA.id, cB.id])).toBe(false);
-    await lines.setLineProgrammes(both, line.id, [b.id]);
-    expect(await lines.setLineCourses(both, line.id, [cA.id, cB.id])).toBe(true);
+    expect(await lines.setLineCourses(admin, line.id, [cA.id, cB.id])).toBe(false);
+    await lines.setLineProgrammes(admin, line.id, [b.id]);
+    expect(await lines.setLineCourses(admin, line.id, [cA.id, cB.id])).toBe(true);
     expect((await lines.getLine(both, line.id))?.courses.map((c) => c.name)).toEqual([
       "Onderzoek 1",
       "Onderzoek 2 (dt)",
@@ -103,35 +105,35 @@ describe("a learning line across programmes", () => {
   });
 
   it("disappears from a programme that is unlinked or deleted", async () => {
-    const { both, memberB, a, b, cA } = await world();
-    const line = (await lines.createLine(both, a.id, "Onderzoek", [cA.id]))!;
-    await lines.setLineProgrammes(both, line.id, [b.id]);
-    expect(await lines.setLineProgrammes(both, line.id, [])).toBe(true);
+    const { admin, both, memberB, a, b, cA } = await world();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
+    await lines.setLineProgrammes(admin, line.id, [b.id]);
+    expect(await lines.setLineProgrammes(admin, line.id, [])).toBe(true);
     expect(await lines.listLines(memberB, b.id)).toEqual([]);
     expect(await lines.getLine(memberB, line.id)).toBeNull();
-    await lines.setLineProgrammes(both, line.id, [b.id]);
-    await programmes.deleteProgramme(both, b.id);
+    await lines.setLineProgrammes(admin, line.id, [b.id]);
+    await programmes.deleteProgramme({ id: "admin", role: "admin" }, b.id);
     expect(await lines.getLine(memberB, line.id)).toBeNull();
     expect((await lines.getLine(both, line.id))?.programmes.map((p) => p.id)).toEqual([a.id]);
   });
 
   it("ignores the home programme and duplicates in the list, and refuses an unknown one", async () => {
-    const { both, a, b, cA } = await world();
-    const line = (await lines.createLine(both, a.id, "Onderzoek", [cA.id]))!;
-    expect(await lines.setLineProgrammes(both, line.id, [a.id, b.id, b.id])).toBe(true);
+    const { admin, both, a, b, cA } = await world();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
+    expect(await lines.setLineProgrammes(admin, line.id, [a.id, b.id, b.id])).toBe(true);
     expect((await lines.getLine(both, line.id))?.programmes.map((p) => p.id)).toEqual([a.id, b.id]);
-    expect(await lines.setLineProgrammes(both, line.id, ["nope"])).toBe(false);
+    expect(await lines.setLineProgrammes(admin, line.id, ["nope"])).toBe(false);
   });
 });
 
 describe("where a course sits in its learning lines (the course page)", () => {
   it("gives the place, the total and the courses before and after", async () => {
-    const { both, memberA, a, cA } = await world();
+    const { admin, memberA, a, cA } = await world();
     const c2 = await courses.createCourse(memberA.id, { name: "Onderzoek 3" });
     await programmes.placeCourse(memberA, a.id, c2.id, { year: 3 });
     const c0 = await courses.createCourse(memberA.id, { name: "Onderzoek 0" });
     await programmes.placeCourse(memberA, a.id, c0.id, { year: 1 });
-    const line = (await lines.createLine(both, a.id, "Onderzoek", [c0.id, cA.id, c2.id]))!;
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [c0.id, cA.id, c2.id]))!;
     expect(await lines.linesOfCourse(memberA, cA.id)).toEqual([
       {
         lineId: line.id,
@@ -146,8 +148,8 @@ describe("where a course sits in its learning lines (the course page)", () => {
   });
 
   it("shows nothing to someone who cannot read any of the line's programmes", async () => {
-    const { both, memberB, a, cA } = await world();
-    await lines.createLine(both, a.id, "Onderzoek", [cA.id]);
+    const { admin, memberB, a, cA } = await world();
+    await lines.createLine(admin, a.id, "Onderzoek", [cA.id]);
     expect(await lines.linesOfCourse(memberB, cA.id)).toEqual([]);
   });
 });
