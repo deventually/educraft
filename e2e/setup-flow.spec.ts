@@ -34,8 +34,8 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await page.goto("/admin/teams");
   await page.getByRole("button", { name: "Nieuw team" }).click();
   await page.getByLabel("Naam van het nieuwe team").fill(team);
+  // Creating a team opens its page.
   await page.getByRole("button", { name: "Team aanmaken" }).click();
-  await page.getByRole("link", { name: team }).click();
   await expect(page.getByRole("heading", { level: 2, name: team })).toBeVisible();
 
   const programmes = page.getByRole("region", { name: "Opleidingen" });
