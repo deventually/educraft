@@ -16,11 +16,13 @@ Kies **Delen** op de cursus, de rubric of de onderwijscontext, en dan het team. 
 
 ## Samen aan een cursus werken
 
-Delen geeft collega's alleen leesrecht. Wil je met iemand samen aan een cursus werken, voeg die collega dan toe onderaan de cursus, bij *Samen aan deze cursus werken*. Je kiest uit collega's met wie je een team deelt, en je kiest een rol:
+Delen geeft collega's alleen leesrecht. Wil je met iemand samen aan een cursus werken, klik dan op de cursus, bij *Samen aan deze cursus werken*, op **Collega toevoegen**. Je vinkt een of meer collega's aan met wie je een team deelt, en je kiest een rol:
 
 - Een **bewerker** ziet de cursus bij **Cursussen**, met de naam van de eigenaar erbij, en past leeruitkomsten, activiteiten, toetsen en instellingen aan.
 - Een **mede-eigenaar** kan dat ook, en mag de cursus daarnaast delen met een eigen team en mede-eigenaars en bewerkers toevoegen of weghalen. Zo kan een moduleteam een cursus samen beheren.
 - Alleen de **eigenaar** verwijdert de cursus, kiest de onderwijscontext en draagt de cursus over.
+
+Werkt een heel team mee, zoals een moduleteam, klik dan op **Team toevoegen** en vink het team aan. Iedereen in dat team werkt mee met de rol die je kiest, ook wie later bij het team komt. De rol pas je aan in de rij, en **Weghalen** vraagt altijd eerst of je het zeker weet.
 
 Wat iemand met een tool maakt en aan de cursus koppelt, blijft van die persoon. Hetzelfde geldt voor de reviews van het reviewteam. Wie meewerkt, kan zelf **Stoppen met meewerken**.
 

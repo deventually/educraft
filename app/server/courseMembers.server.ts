@@ -46,6 +46,8 @@ export interface MemberControls {
 }
 
 type MemberIntent =
+  | "add-members"
+  | "link-teams"
   | "set-member"
   | "remove-member"
   | "link-team"
@@ -64,6 +66,12 @@ const MemberFormSchema = z.object({
 const TeamFormSchema = z.object({
   intent: z.enum(["link-team", "unlink-team"]),
   teamId: z.string().min(1).max(100),
+  role: z.enum(COURSE_ROLES).default("editor"),
+});
+
+/** "Collega toevoegen" / "Team toevoegen" (plan step 6): several ids at one role. */
+const AddManySchema = z.object({
+  ids: z.array(z.string().min(1).max(100)).min(1).max(100),
   role: z.enum(COURSE_ROLES).default("editor"),
 });
 
@@ -123,6 +131,26 @@ export async function memberAction(
     if (!done) return { ok: false, intent, error: m.errorTransfer };
     if (!parsed.data.keepAsEditor) throw redirect("/courses");
     return { ok: true, intent, message: m.toastTransferred };
+  }
+  if (intent === "add-members" || intent === "link-teams") {
+    const members = intent === "add-members";
+    const parsed = AddManySchema.safeParse({
+      ids: [...new Set(fd.getAll(members ? "userId" : "teamId").map(String))],
+      role: fd.get("role") ?? undefined,
+    });
+    const error = members ? m.errorAdd : m.errorTeam;
+    if (!parsed.success) return { ok: false, intent, error };
+    // Each one checked by the repository; one that is refused makes the whole answer an error.
+    let all = true;
+    for (const id of parsed.data.ids) {
+      const done = members
+        ? await setCourseMember(user.id, course.id, id, parsed.data.role)
+        : await linkCourseTeam(user.id, course.id, id, parsed.data.role);
+      all &&= done;
+    }
+    return all
+      ? { ok: true, intent, message: members ? m.toastAdded : m.toastLinked }
+      : { ok: false, intent, error };
   }
   if (intent === "link-team" || intent === "unlink-team") {
     const parsed = TeamFormSchema.safeParse({

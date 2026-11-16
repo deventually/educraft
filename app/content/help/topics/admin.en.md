@@ -20,7 +20,7 @@ Create teams of colleagues and appoint team leads. Per team you can switch on fe
 
 ## Faculties and programmes
 
-Choose what your institution calls the layer between institution and programme, create those parts (for example faculties), and put every programme in its place. You create a programme under **Programmes**, in the **Education** menu. See also [Programmes](/help/programmes).
+Choose what your institution calls the layer between institution and programme and create those parts, for example with **New faculty**. You delete an empty faculty after a confirmation. Where a programme belongs is chosen in the programme's **Details**; click its name on Organisation to get there. You create a programme under **Programmes**, in the **Education** menu. See also [Programmes](/help/programmes).
 
 ## Announcements
 

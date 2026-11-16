@@ -139,7 +139,10 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-2xl text-sm text-slate-600">{o.moveHint}</p>
+        {/* Said only once there is a programme to place. */}
+        <p className="max-w-2xl text-sm text-slate-600">
+          {programmes.length > 0 ? o.moveHint : null}
+        </p>
         <NewDialog
           triggerLabel={loc(newDivisionLabel(kind), locale)}
           title={loc(newDivisionLabel(kind), locale)}

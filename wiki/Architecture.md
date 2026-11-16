@@ -258,6 +258,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (`app/server/flash.server.ts`; `createUserSession` and `logout` take an optional key). The key
   (`FLASH_KEYS` in `app/lib/flash.ts`, text in `toast.flash`) rides a signed one-minute `__flash`
   cookie; the root loader reads and clears it, and `useFlashToast` shows it once per flash id.
+- **Lists and links: one fixed pattern** (plan "eenvoudiger beheer en navigatie", steps 3 and 6;
+  `app/components/connections/`). *Nieuwe …* is `NewDialog`: a button above the list that opens
+  a dialog with only the name and what else is needed (course, programme, team, faculty).
+  *… toevoegen* is `AddDialog`: search and ticks, several at once, with own fields under the
+  list (a role, a year and period). `ConnectionList` is the list: heading with the add button,
+  rows with their own controls and *Weghalen*, which always asks first (`ConfirmDialog`) and
+  says the thing itself stays; `ordered` makes it an `ol` (a learning line). *Verwijderen*
+  sits at the bottom of the page in a red `ConfirmDialog`. Screens on it: the programme
+  (courses, teams), the team (members, programmes), the learning line, Organisatie and the
+  course's colleagues and teams.
 - **Announcements** (`app/lib/announcements.ts`, `announcements.server.ts`). The admin posts a
   banner on `/admin/announcements` for everyone, one team or one person, as `info` or `warning`,
   with an optional last day (`endsOn`, Europe/Amsterdam, inclusive) and an optional
@@ -556,7 +566,9 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `divisionKind`); the app shows the chosen word, or "Onderdeel" until one is chosen. A programme
   sits under at most one division (`programmes.division_id`). `organisation.server.ts` holds the
   admin-only writes; a division is deleted only while it is empty. Beheer → Organisatie
-  (`/admin/organisation`) names the layer, manages the divisions and places the programmes; the
+  (`/admin/organisation`) names the layer and manages the divisions (*Nieuwe faculteit*, delete
+  after a confirm); a programme is placed in its own Gegevens tab, which Organisatie links to
+  (plan step 6); the
   programmes themselves stay team-owned (BESLUIT-2026-11-10-3), by **one or more teams**
   (`programme_teams`, BESLUIT-2026-11-16-1): a member of any of them reads the programme, a lead
   of any of them manages it, and a course is in it while it is shared with one of its teams by

@@ -224,6 +224,46 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
     expect((await courses.getCourse("ed-a", course.id))?.ownerId).toBe("ed-a");
   });
 
+  it("adds colleagues and teams several at once (plan step 6)", async () => {
+    const course = await courses.createCourse("ed-a", { name: "Samen", data: alignedCourse() });
+    const fd = new URLSearchParams([
+      ["intent", "add-members"],
+      ["userId", "ed-b"],
+      ["role", "co-owner"],
+    ]);
+    const req = (body: URLSearchParams) =>
+      signedRequest(`http://localhost/courses/${course.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
+        body: body.toString(),
+      });
+    const run = (body: URLSearchParams) =>
+      courseDetail.action({ request: req(body), params: { id: course.id } } as never);
+    expect(await run(fd)).toMatchObject({ ok: true, intent: "add-members" });
+    expect(await members.listCourseMembers("ed-a", course.id)).toEqual([
+      { userId: "ed-b", name: "Bram", role: "co-owner" },
+    ]);
+    // Someone outside my teams is refused.
+    expect(
+      await run(
+        new URLSearchParams([
+          ["intent", "add-members"],
+          ["userId", "ed-c"],
+        ]),
+      ),
+    ).toMatchObject({ ok: false, intent: "add-members" });
+    expect(
+      await run(
+        new URLSearchParams([
+          ["intent", "link-teams"],
+          ["teamId", team],
+          ["role", "editor"],
+        ]),
+      ),
+    ).toMatchObject({ ok: true, intent: "link-teams" });
+    expect((await load(course.id)).members.teams).toMatchObject([{ id: team, role: "editor" }]);
+  });
+
   it("links a whole team from the course page and unlinks it", async () => {
     const course = await courses.createCourse("ed-a", {
       name: "Moduleteam",

@@ -178,13 +178,15 @@ repository, `app/server/repositories/shares.server.ts`.
   a course together, the owner adds team-mates as `editor` or `co-owner` (`course_members.role`,
   repository and glue both `courseMembers.server.ts`). `getCourse`, `listCourses` and
   `updateCourse` accept owner or member (`mayEdit`) and say the caller's `role`. Owner and
-  co-owners manage: `setCourseMember`, `removeCourseMember`, and sharing (a co-owner's share has
+  co-owners manage: `setCourseMember` (intent `add-members` adds several at one role,
+  `set-member` changes one role), `removeCourseMember`, and sharing (a co-owner's share has
   them as `owner_user_id` and counts while they are in the team and still co-owner; becoming
   editor or leaving drops their shares). `deleteCourse` and the context profile stay with the
   owner. Links and reviews stay with whoever made them.
 - **A module team on a course (BESLUIT-2026-11-16-2, migration 0039):** an owner or co-owner
   links one of their own teams as `editor` or `co-owner` (`course_teams`, repository
-  `courseTeams.server.ts`, intents `link-team` and `unlink-team`). Every member of the team has
+  `courseTeams.server.ts`, intents `link-teams` to add several, `link-team` to change a role and
+  `unlink-team`). Every member of the team has
   that role for as long as they are in it: the WHERE clauses read `courseRoles`
   (`courseRoles.server.ts`), `course_members` plus `course_teams` × `team_members`, never the
   owner, so joining or leaving the team takes effect at once. Someone in both gets the stronger

@@ -16,11 +16,13 @@ Choose **Share** on the course, rubric or teaching context, and then the team. C
 
 ## Working on a course together
 
-Sharing only lets colleagues read. To work on a course together, add a colleague at the bottom of the course, under *Work on this course together*. You choose from colleagues you share a team with, and you choose a role:
+Sharing only lets colleagues read. To work on a course together, click **Add a colleague** on the course, under *Work on this course together*. You tick one or more colleagues you share a team with, and you choose a role:
 
 - An **editor** sees the course under **Courses**, with the owner's name on it, and changes outcomes, activities, assessments and settings.
 - A **co-owner** can do that too, and can also share the course with their own team and add or remove co-owners and editors. That way a module team can run a course together.
 - Only the **owner** deletes the course, chooses its educational context and hands it over.
+
+If a whole team works on it, such as a module team, click **Add team** and tick the team. Everyone in that team works on it with the role you choose, also whoever joins the team later. You change the role in the row, and **Remove** always asks first.
 
 What someone makes with a tool and links to the course stays theirs. So do the review team's reviews. Anyone working on it can **Stop working on it** themselves.
 

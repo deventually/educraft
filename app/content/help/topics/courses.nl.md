@@ -18,6 +18,8 @@ De cursuspagina heeft vijf tabbladen, elk voor één taak:
 
 ## Een nieuwe cursus beginnen
 
+Klik bij **Cursussen** op **Nieuwe cursus**. In het venster geef je de cursus een naam en kies je als je wilt een onderwijscontext; daarna kom je meteen op de cursuspagina.
+
 Is je cursus nog leeg, dan vraagt het tabblad Overzicht hoe je wilt beginnen:
 
 - **In grote lijnen ontwerpen:** je beschrijft in een paar zinnen waar de cursus over gaat en wat studenten aan het eind moeten kunnen, en vult als je wilt de studielast en het aantal weken in. De AI stelt drie tot zes leeruitkomsten voor, elk met een Bloom-niveau en succescriteria. Hij gebruikt daarvoor ook de onderwijscontext en de disciplines van de cursus.

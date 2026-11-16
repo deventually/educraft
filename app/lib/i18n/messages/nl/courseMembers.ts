@@ -1,8 +1,9 @@
 /** Working on a course together: editors and co-owners (BESLUIT-2026-11-10-5). */
 export const courseMembers = {
-  add: "Toevoegen",
-  addLabel: "Collega",
+  addMember: "Collega toevoegen",
+  addMembersTitle: "Collega's toevoegen",
   addNone: "Kies een collega",
+  addTeamsTitle: "Teams toevoegen",
   admin: {
     add: "Toevoegen",
     addLabel: "Collega",
@@ -32,7 +33,8 @@ export const courseMembers = {
   leave: "Stoppen met meewerken",
   leaveConfirm:
     "Stoppen met meewerken? De cursus verdwijnt uit je lijst; je gekoppelde werk blijft van jou.",
-  listLabel: "Werken mee",
+  membersHeading: "Collega's die meewerken",
+  noCandidates: "Alle collega's uit je teams werken al mee.",
   noTeammates:
     "Je deelt nog geen team met een collega. Een beheerder of teamleider zet je in een team.",
   owner: "Eigenaar: {owner}",
@@ -41,23 +43,24 @@ export const courseMembers = {
     "Cursussen zonder mede-eigenaar: {n}. Die verdwijnen met je account; draag ze eerst over op de cursuspagina.",
   profileOwner: "De onderwijscontext kiest de eigenaar.",
   remove: "Weghalen",
-  removeLabel: "{name} weghalen",
+  removeBody:
+    "{name} werkt daarna niet meer aan deze cursus mee. De cursus blijft zoals hij is, en wat er met een tool gemaakt is, blijft van wie het maakte.",
+  removeTitle: "{name} weghalen uit deze cursus?",
   role: "Rol",
   roleLabel: "Rol van {name}",
   roles: { "co-owner": "Mede-eigenaar", editor: "Bewerker", owner: "Eigenaar" },
   save: "Opslaan",
   saveLabel: "Rol van {name} opslaan",
-  teamLabel: "Team",
   teamLink: "Team toevoegen",
   teamNobody: "Nog niemand anders in dit team.",
-  teamNone: "Kies een team",
+  teamNoCandidates: "Al je teams werken al mee.",
+  teamRemoveBody:
+    "Wie alleen via dit team meewerkt, werkt daarna niet meer mee. Het team en de cursus blijven bestaan.",
   teamRole: "Rol voor het team",
   teamsEmpty: "Nog geen team toegevoegd.",
   teamsHeading: "Teams die meewerken",
   teamsIntro:
     "Voeg een heel team toe, zoals een moduleteam. Iedereen in het team werkt mee met de rol die je kiest, ook wie later bij het team komt. Wie het team verlaat, werkt niet meer mee. De cursus blijft van de eigenaar.",
-  teamUnlink: "Weghalen",
-  teamUnlinkLabel: "{team} weghalen",
   toastAdded: "Opgeslagen.",
   toastLinked: "Team toegevoegd.",
   toastRemoved: "Weggehaald.",
