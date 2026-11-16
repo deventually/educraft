@@ -57,7 +57,16 @@ describe("/admin/organisation", () => {
     const choice = screen.getByLabelText(/hoe heet de laag/i);
     expect(choice).toHaveValue("faculty");
     expect(within(choice).getByRole("option", { name: "Vestiging" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /faculteit toevoegen/i })).toBeInTheDocument();
+  });
+
+  it("makes a faculty through Nieuwe faculteit, a dialog with only the name (plan step 6)", async () => {
+    const user = userEvent.setup();
+    page();
+    expect(screen.queryByLabelText("Naam")).toBeNull();
+    await user.click(await screen.findByRole("button", { name: "Nieuwe faculteit" }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe faculteit" });
+    expect(within(dialog).getByLabelText("Naam")).toHaveFocus();
+    expect(within(dialog).getByRole("button", { name: "Aanmaken" })).toBeVisible();
   });
 
   it("shows each division with its programmes, and the programmes without one", async () => {
@@ -126,12 +135,16 @@ describe("/admin/organisation", () => {
     expect(form?.querySelector('input[name="divisionId"]')).toHaveValue("d-2");
   });
 
-  it("moves a programme with a choice of division per programme", async () => {
+  it("links each programme to its Gegevens, where its faculty is chosen (plan step 6)", async () => {
     page();
-    const select = await screen.findByLabelText(/Pabo \(hbo\) hoort bij/i);
-    expect(within(select).getByRole("option", { name: "Faculteit Techniek" })).toBeInTheDocument();
-    await userEvent.selectOptions(select, "d-2");
-    expect(select).toHaveValue("d-2");
+    const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
+    expect(within(zorg).getByRole("link", { name: "Verpleegkunde" })).toHaveAttribute(
+      "href",
+      "/programmes/p-1?tab=details",
+    );
+    // No move form on this page any more: one place to choose, the programme's Gegevens.
+    expect(screen.queryByRole("button", { name: "Verplaatsen" })).toBeNull();
+    expect(screen.getByText(/kies je bij Gegevens van de opleiding/)).toBeVisible();
   });
 
   it("tells two programmes of the same name apart by their kind", async () => {
@@ -142,17 +155,14 @@ describe("/admin/organisation", () => {
         { ...data.programmes[0], id: "p-3", kindLabel: "hbo-bachelor · deeltijd" },
       ],
     });
-    expect(
-      await screen.findByLabelText("Verpleegkunde (hbo-bachelor · voltijd) hoort bij"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Verpleegkunde (hbo-bachelor · deeltijd) hoort bij"),
-    ).toBeInTheDocument();
+    const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
+    expect(within(zorg).getByText(/hbo-bachelor · voltijd/)).toBeVisible();
+    expect(within(zorg).getByText(/hbo-bachelor · deeltijd/)).toBeVisible();
   });
 
   it("uses a neutral word before a kind is chosen", async () => {
     page({ ...data, kind: null });
-    expect(await screen.findByRole("button", { name: /onderdeel toevoegen/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Nieuw onderdeel" })).toBeInTheDocument();
   });
 
   it("has no a11y violations", async () => {

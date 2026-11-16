@@ -35,7 +35,7 @@ A course can belong to **several programmes**, with its own year and period in e
 
 ## Learning lines
 
-A **learning line** is a series of courses within a programme, in order, for example *Programming* or *Research*. The admin creates it on the programme's page: give it a name and tick the courses. On the learning line's page you put the courses in order with **Up** and **Down**, and add or remove one. Every team member can view the learning line. All learning lines of your programmes are under **Education → Learning lines**.
+A **learning line** is a series of courses within a programme, in order, for example *Programming* or *Research*. The admin creates it on the programme's page: give it a name and tick the courses. On the learning line's page you put the courses in order with **Up** and **Down**. With **Add a course** you tick one or more; they go at the end. **Remove** asks first; the course itself stays. You change the name under **Details**. Every team member can view the learning line. All learning lines of your programmes are under **Education → Learning lines**.
 
 The learning line shows **what comes back**: a learning outcome that occurs in several courses, with the highest Bloom level in each course. An outcome comes back when a later course has the same text (capitals, spaces and a closing full stop don't count), or the same **subject tag**, such as the same professional task from your teaching context. If the Bloom level drops in a later course, it says: *The Bloom level drops*. Below that are the learning outcomes per course.
 

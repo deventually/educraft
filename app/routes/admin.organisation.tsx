@@ -1,5 +1,4 @@
 import { Form, useActionData } from "react-router";
-import { z } from "zod";
 import type { Route } from "./+types/admin.organisation";
 import { requireRole } from "~/server/auth.server";
 import {
@@ -9,7 +8,6 @@ import {
   listDivisions,
   renameDivision,
   setDivisionKind,
-  setProgrammeDivision,
 } from "~/server/repositories/organisation.server";
 import { listProgrammes } from "~/server/repositories/programmes.server";
 import { manageableTeams } from "~/server/repositories/programmeTeams.server";
@@ -17,7 +15,8 @@ import { kindOptions } from "~/server/programmes.server";
 import { NewProgramme } from "~/components/programmes/NewProgramme";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { programmeKindLabel } from "~/lib/programmes/schema";
-import { DIVISION_KINDS, divisionWord } from "~/lib/organisation/kinds";
+import { DIVISION_KINDS, divisionWord, newDivisionLabel } from "~/lib/organisation/kinds";
+import { NewDialog } from "~/components/connections/NewDialog";
 import { loc } from "~/lib/i18n/localized";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -50,8 +49,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-const Id = z.string().trim().min(1).max(100);
-
 export async function action({ request }: Route.ActionArgs) {
   const admin = await requireRole(request, "admin");
   const fd = await request.formData();
@@ -74,14 +71,6 @@ export async function action({ request }: Route.ActionArgs) {
       if (result === "deleted") return { ok: "delete" as const };
       return { error: result === "notEmpty" ? ("notEmpty" as const) : ("invalid" as const) };
     }
-    case "move": {
-      const programmeId = Id.safeParse(field("programmeId"));
-      const divisionId = field("divisionId").trim() || null;
-      if (!programmeId.success) return { error: "invalid" as const };
-      return (await setProgrammeDivision(admin, programmeId.data, divisionId))
-        ? { ok: "move" as const }
-        : { error: "invalid" as const };
-    }
     default:
       return { error: "invalid" as const };
   }
@@ -98,7 +87,6 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
   const kinds = "kinds" in loaderData ? loaderData.kinds : [];
   const teams = "teams" in loaderData ? loaderData.teams : [];
   const word = loc(divisionWord(kind), locale);
-  const options = divisions.map((d) => ({ id: d.id, name: d.name }));
   const errors = { invalid: o.errorInvalid, name: o.errorName, notEmpty: o.errorNotEmpty };
 
   useFormToast(actionData, {
@@ -150,17 +138,30 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
         <HelpText id="division-kind-hint">{o.kindHint}</HelpText>
       </section>
 
-      <Form
-        method="post"
-        className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-      >
-        <input type="hidden" name="intent" value="create" />
-        <div className="min-w-48 flex-1 sm:max-w-sm">
-          <Label htmlFor="division-new">{o.addName}</Label>
-          <Input id="division-new" name="name" required maxLength={200} className="mt-1" />
-        </div>
-        <Button type="submit">{fmt(o.add, { kind: word })}</Button>
-      </Form>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Said only once there is a programme to place. */}
+        <p className="max-w-2xl text-sm text-slate-600">
+          {programmes.length > 0 ? o.moveHint : null}
+        </p>
+        <NewDialog
+          triggerLabel={loc(newDivisionLabel(kind), locale)}
+          title={loc(newDivisionLabel(kind), locale)}
+          intent="create"
+          submitLabel={o.create}
+        >
+          <div>
+            <Label htmlFor="division-new">{o.addName}</Label>
+            <Input
+              id="division-new"
+              name="name"
+              required
+              maxLength={200}
+              className="mt-1"
+              data-autofocus
+            />
+          </div>
+        </NewDialog>
+      </div>
 
       {programmes.length === 0 && <p className="text-sm text-slate-500">{o.noProgrammes}</p>}
 
@@ -169,7 +170,6 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
           key={d.id}
           division={d}
           programmes={programmes.filter((p) => p.divisionId === d.id)}
-          options={options}
           newProgramme={
             <NewProgramme
               kinds={kinds}
@@ -186,7 +186,6 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
         <DivisionSection
           heading={fmt(o.none, { kind: word.toLowerCase() })}
           programmes={unplaced}
-          options={options}
         />
       )}
     </div>

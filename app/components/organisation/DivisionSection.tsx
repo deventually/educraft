@@ -2,8 +2,11 @@ import { useId } from "react";
 import { Form, Link } from "react-router";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
-import { Button, Input, Label, Select } from "~/components/ui";
+import { Button, Input, Label } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+
+const link =
+  "rounded font-medium text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500";
 
 interface ProgrammeRow {
   id: string;
@@ -15,14 +18,13 @@ interface ProgrammeRow {
 
 /**
  * One division on Beheer → Organisatie: its name (rename; delete while empty, after a confirm, and otherwise a line that says what to move first) and the
- * programmes under it, each with a choice where it belongs, and the teams under it (linked). Without `division` it is the group
+ * programmes under it, each linked to its Gegevens where its faculty is chosen, and the teams under it (linked). Without `division` it is the group
  * of programmes under none.
  */
 export function DivisionSection({
   division,
   heading,
   programmes,
-  options,
   newProgramme,
 }: {
   division?: {
@@ -33,7 +35,6 @@ export function DivisionSection({
   };
   heading?: string;
   programmes: ProgrammeRow[];
-  options: { id: string; name: string }[];
   /** "Nieuwe opleiding" in this division, next to its heading. */
   newProgramme?: React.ReactNode;
 }) {
@@ -98,10 +99,7 @@ export function DivisionSection({
           {division.teams.map((team, i) => (
             <span key={team.id}>
               {i > 0 && ", "}
-              <Link
-                to={`/teams/${team.id}`}
-                className="rounded font-medium text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-              >
+              <Link to={`/teams/${team.id}`} className={link}>
                 {team.name}
               </Link>
             </span>
@@ -114,38 +112,14 @@ export function DivisionSection({
       ) : (
         <ul className="mt-4 divide-y divide-slate-100">
           {programmes.map((p) => (
-            <li key={p.id} className="flex flex-wrap items-end justify-between gap-3 py-3">
-              <div>
-                <p className="font-medium text-slate-900">{p.name}</p>
-                <p className="text-sm text-slate-600">
-                  {p.kindLabel} · {fmt(o.team, { team: p.teamName })}
-                </p>
-              </div>
-              <Form method="post" className="flex flex-wrap items-end gap-2">
-                <input type="hidden" name="intent" value="move" />
-                <input type="hidden" name="programmeId" value={p.id} />
-                <div>
-                  <Label htmlFor={`move-${p.id}`}>
-                    {fmt(o.belongsTo, { name: `${p.name} (${p.kindLabel})` })}
-                  </Label>
-                  <Select
-                    id={`move-${p.id}`}
-                    name="divisionId"
-                    defaultValue={p.divisionId ?? ""}
-                    className="mt-1"
-                  >
-                    <option value="">{o.noneOption}</option>
-                    {options.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <Button type="submit" variant="secondary">
-                  {o.move}
-                </Button>
-              </Form>
+            <li key={p.id} className="py-3">
+              {/* Where it belongs is chosen in the programme's Gegevens (plan step 6). */}
+              <Link to={`/programmes/${p.id}?tab=details`} className={link}>
+                {p.name}
+              </Link>
+              <p className="text-sm text-slate-600">
+                {p.kindLabel} · {fmt(o.team, { team: p.teamName })}
+              </p>
             </li>
           ))}
         </ul>

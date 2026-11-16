@@ -28,6 +28,7 @@ export function ConnectionList({
   add,
   items,
   headingLevel = 2,
+  ordered = false,
 }: {
   title: string;
   intro?: string;
@@ -35,10 +36,13 @@ export function ConnectionList({
   add?: React.ReactNode;
   items: ConnectionItem[];
   headingLevel?: 2 | 3;
+  /** The rows have an order of their own (a learning line): an `ol` instead of a `ul`. */
+  ordered?: boolean;
 }) {
   const t = useT();
   const id = useId();
   const Heading = headingLevel === 2 ? "h2" : "h3";
+  const List = ordered ? "ol" : "ul";
   return (
     <section aria-labelledby={id}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -58,7 +62,7 @@ export function ConnectionList({
       {items.length === 0 ? (
         <p className="mt-3 text-sm text-slate-600">{empty}</p>
       ) : (
-        <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <List className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-sm">
           {items.map((item) => (
             <li
               key={item.id}
@@ -97,7 +101,7 @@ export function ConnectionList({
               )}
             </li>
           ))}
-        </ul>
+        </List>
       )}
     </section>
   );

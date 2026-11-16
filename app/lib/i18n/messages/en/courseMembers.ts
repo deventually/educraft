@@ -2,9 +2,10 @@ import type { Messages } from "../nl";
 
 /** Working on a course together: editors and co-owners (BESLUIT-2026-11-10-5). */
 export const courseMembers: Messages["courseMembers"] = {
-  add: "Add",
-  addLabel: "Colleague",
+  addMember: "Add a colleague",
+  addMembersTitle: "Add colleagues",
   addNone: "Choose a colleague",
+  addTeamsTitle: "Add teams",
   admin: {
     add: "Add",
     addLabel: "Colleague",
@@ -33,7 +34,8 @@ export const courseMembers: Messages["courseMembers"] = {
     "Add colleagues from your teams. An editor changes the content. A co-owner can also share the course and add or remove people. Only the owner deletes the course and chooses the educational context. What someone makes with a tool stays theirs.",
   leave: "Stop working on it",
   leaveConfirm: "Stop working on this course? It leaves your list; your linked work stays yours.",
-  listLabel: "Working on it",
+  membersHeading: "Colleagues working on it",
+  noCandidates: "All colleagues from your teams already work on it.",
   noTeammates:
     "You do not share a team with a colleague yet. An admin or team lead puts you in a team.",
   owner: "Owner: {owner}",
@@ -42,23 +44,24 @@ export const courseMembers: Messages["courseMembers"] = {
     "Courses without a co-owner: {n}. They go with your account; hand them over on the course page first.",
   profileOwner: "The owner chooses the educational context.",
   remove: "Remove",
-  removeLabel: "Remove {name}",
+  removeBody:
+    "{name} no longer works on this course. The course stays as it is, and what was made with a tool stays with whoever made it.",
+  removeTitle: "Remove {name} from this course?",
   role: "Role",
   roleLabel: "Role of {name}",
   roles: { "co-owner": "Co-owner", editor: "Editor", owner: "Owner" },
   save: "Save",
   saveLabel: "Save the role of {name}",
-  teamLabel: "Team",
   teamLink: "Add team",
   teamNobody: "Nobody else is in this team yet.",
-  teamNone: "Choose a team",
+  teamNoCandidates: "All your teams already work on it.",
+  teamRemoveBody:
+    "Whoever works on it only through this team no longer does. The team and the course stay.",
   teamRole: "Role for the team",
   teamsEmpty: "No team added yet.",
   teamsHeading: "Teams working on it",
   teamsIntro:
     "Add a whole team, such as a module team. Everyone in the team works on the course in the role you choose, including whoever joins the team later. Whoever leaves the team stops working on it. The course stays the owner's.",
-  teamUnlink: "Remove",
-  teamUnlinkLabel: "Remove {team}",
   toastAdded: "Saved.",
   toastLinked: "Team added.",
   toastRemoved: "Removed.",

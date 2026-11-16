@@ -47,8 +47,10 @@ export const programmes = {
     "Een opleiding is een bundel cursussen van een team, met per cursus het jaar en de periode. Een cursus kan bij meer opleidingen horen, zoals voltijd en deeltijd.",
   kind: "Onderwijstype en niveau",
   lines: {
-    add: "Toevoegen",
-    addCourse: "Cursus toevoegen aan de leerlijn",
+    addCourse: "Cursus toevoegen",
+    addCourseTitle: "Cursussen toevoegen aan {line}",
+    addHint:
+      "Je ziet de cursussen van de opleidingen waar de leerlijn voor geldt. Ze komen achteraan; met Omhoog en Omlaag zet je ze op hun plek.",
     addNone: "Alle cursussen van de opleiding zitten in deze leerlijn.",
     allCourseOne: "1 cursus · {programmes}",
     allCourses: "{courses} cursussen · {programmes}",
@@ -63,11 +65,13 @@ export const programmes = {
     coursesHint:
       "De volgorde is eerst die van jaar en periode. Op de pagina van de leerlijn pas je hem aan.",
     coursesLegend: "Welke cursussen horen bij de leerlijn?",
+    coursesTitle: "Cursussen, op volgorde",
     create: "Leerlijn aanmaken",
     createTitle: "Nieuwe leerlijn",
     delete: "Leerlijn verwijderen",
     deleteBody: "De leerlijn verdwijnt. De cursussen en de opleiding blijven bestaan.",
     deleteTitle: "Leerlijn verwijderen?",
+    details: "Gegevens",
     down: "Omlaag",
     empty: "Nog geen leerlijnen in deze opleiding.",
     emptyLine: "Er staan geen cursussen (meer) in deze leerlijn.",
@@ -86,13 +90,14 @@ export const programmes = {
     noBloom: "zonder niveau",
     noThreads:
       "Geen leeruitkomst komt in een latere cursus terug. Gebruik in elke cursus dezelfde formulering, of dezelfde vakgebiedtag, om een draad te volgen.",
-    order: "Volgorde",
     outcomesTitle: "Leeruitkomsten per cursus",
     overviewIntro:
       "Een rij is een leeruitkomst die in meer cursussen terugkomt: met dezelfde tekst of dezelfde vakgebiedtag. Per cursus staat het hoogste Bloom-niveau. Dit is een advies; er verandert niets aan de cursussen, en er komt geen AI aan te pas.",
     overviewTitle: "Wat komt terug",
-    remove: "Uit de leerlijn",
-    rename: "Naam opslaan",
+    removeBody:
+      "De cursus blijft bestaan, ook in de opleiding. Alleen zijn plek in deze leerlijn verdwijnt.",
+    removeTitle: "{course} weghalen uit de leerlijn {line}?",
+    save: "Opslaan",
     summary: "{courses} cursussen",
     tag: "vakgebiedtag {field}",
     thread: "Leeruitkomst",

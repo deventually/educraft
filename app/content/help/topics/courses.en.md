@@ -18,6 +18,8 @@ The course page has five tabs, each for one task:
 
 ## Starting a new course
 
+Under **Courses**, click **New course**. In the window you give the course a name and, if you like, choose a teaching context; then you go straight to the course page.
+
 When your course is still empty, the Overview tab asks how you want to start:
 
 - **Design in broad outline:** you describe in a few sentences what the course is about and what students should be able to do at the end, and if you like you fill in the study load and the number of weeks. The AI proposes three to six learning outcomes, each with a Bloom level and success criteria. It also uses the course's teaching context and disciplines.

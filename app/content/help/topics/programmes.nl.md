@@ -35,7 +35,7 @@ Een cursus kan bij **meer opleidingen** horen, met in elke opleiding een eigen j
 
 ## Leerlijnen
 
-Een **leerlijn** is een reeks cursussen binnen een opleiding, op volgorde, bijvoorbeeld *Programmeren* of *Onderzoeken*. De beheerder maakt hem aan op de pagina van de opleiding: geef een naam en vink de cursussen aan. Op de pagina van de leerlijn zet je de cursussen op volgorde met **Omhoog** en **Omlaag**, en voeg je er een toe of haal je er een uit. Elk teamlid kan de leerlijn bekijken. Alle leerlijnen van je opleidingen vind je bij **Onderwijs → Leerlijnen**.
+Een **leerlijn** is een reeks cursussen binnen een opleiding, op volgorde, bijvoorbeeld *Programmeren* of *Onderzoeken*. De beheerder maakt hem aan op de pagina van de opleiding: geef een naam en vink de cursussen aan. Op de pagina van de leerlijn zet je de cursussen op volgorde met **Omhoog** en **Omlaag**. Met **Cursus toevoegen** vink je er een of meer aan; ze komen achteraan. **Weghalen** vraagt eerst of je het zeker weet; de cursus zelf blijft bestaan. De naam pas je aan bij **Gegevens**. Elk teamlid kan de leerlijn bekijken. Alle leerlijnen van je opleidingen vind je bij **Onderwijs → Leerlijnen**.
 
 De leerlijn laat zien **wat terugkomt**: een leeruitkomst die in meer cursussen voorkomt, met per cursus het hoogste Bloom-niveau. Een leeruitkomst komt terug als hij in een latere cursus dezelfde tekst heeft (hoofdletters, spaties en een punt aan het eind tellen niet mee), of dezelfde **vakgebiedtag**, zoals dezelfde beroepstaak uit je onderwijscontext. Daalt het Bloom-niveau in een latere cursus, dan staat erbij: *Het Bloom-niveau daalt*. Daaronder staan de leeruitkomsten per cursus.
 

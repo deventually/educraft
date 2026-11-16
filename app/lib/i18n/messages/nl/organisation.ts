@@ -1,8 +1,6 @@
 export const organisation = {
-  add: "{kind} toevoegen",
   addName: "Naam",
-  belongsTo: "{name} hoort bij",
-  create: "Toevoegen",
+  create: "Aanmaken",
   delete: "{name} verwijderen",
   deleteBody: "Er staan geen opleidingen of teams meer onder. Alleen de naam verdwijnt.",
   deleteFirst:
@@ -21,7 +19,7 @@ export const organisation = {
   kindLabel: "Hoe heet de laag tussen instelling en opleiding?",
   kindNone: "Nog niet gekozen",
   kindSave: "Opslaan",
-  move: "Verplaatsen",
+  moveHint: "Waar een opleiding bij hoort, kies je bij Gegevens van de opleiding: klik op de naam.",
   none: "Zonder {kind}",
   noneOption: "Geen",
   noProgrammes:

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -27,8 +27,9 @@ const bram = { userId: "u-b", name: "Bram", role: "editor" as const };
 const cas = { userId: "u-c", name: "Cas" };
 
 describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
-  it("lets a manager add a team-mate as co-owner, change a role and remove someone, accessibly", async () => {
+  it("adds colleagues through Collega toevoegen, and asks before Weghalen (plan step 6)", async () => {
     const posted: FormData[] = [];
+    const user = userEvent.setup();
     const { container } = renderAt(
       () => (
         <CourseMembers
@@ -42,19 +43,27 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
       (fd) => posted.push(fd),
     );
     expect(screen.getByRole("heading", { name: "Samen aan deze cursus werken" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Bram weghalen" })).toBeTruthy();
-    expect(screen.getByRole("combobox", { name: "Rol van Bram" })).toHaveValue("editor");
-
-    await userEvent.selectOptions(screen.getByLabelText("Collega"), "u-c");
-    await userEvent.selectOptions(screen.getByLabelText("Rol"), "co-owner");
-    await userEvent.click(screen.getByRole("button", { name: "Toevoegen" }));
-    await waitFor(() => expect(posted).toHaveLength(1));
-    expect(Object.fromEntries(posted[0]!)).toEqual({
-      intent: "set-member",
-      userId: "u-c",
-      role: "co-owner",
-    });
+    const list = screen.getByRole("region", { name: "Collega's die meewerken" });
+    expect(within(list).getByRole("combobox", { name: "Rol van Bram" })).toHaveValue("editor");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+
+    await user.click(within(list).getByRole("button", { name: "Collega toevoegen" }));
+    const add = screen.getByRole("dialog", { name: "Collega's toevoegen" });
+    await user.click(within(add).getByRole("checkbox", { name: "Cas" }));
+    await user.selectOptions(within(add).getByLabelText("Rol"), "co-owner");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.click(within(add).getByRole("button", { name: "Toevoegen (1)" }));
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(posted[0]!.get("intent")).toBe("add-members");
+    expect(posted[0]!.getAll("userId")).toEqual(["u-c"]);
+    expect(posted[0]!.get("role")).toBe("co-owner");
+
+    await user.click(within(list).getByRole("button", { name: "Weghalen: Bram" }));
+    const ask = screen.getByRole("dialog", { name: "Bram weghalen uit deze cursus?" });
+    expect(within(ask).getByText(/De cursus blijft zoals hij is/)).toBeTruthy();
+    await user.click(within(ask).getByRole("button", { name: "Weghalen" }));
+    await waitFor(() => expect(posted).toHaveLength(2));
+    expect(Object.fromEntries(posted[1]!)).toEqual({ intent: "remove-member", userId: "u-b" });
   });
 
   it("tells an owner without team-mates how to get them", () => {
@@ -62,7 +71,7 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
       <CourseMembers myRole="owner" ownerName="Anna" members={[]} candidates={[]} transferTo={[]} />
     ));
     expect(screen.getByText(/deelt nog geen team/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Toevoegen" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Collega toevoegen" })).toBeNull();
   });
 
   it("shows an editor the owner and the members, and only a way to stop", async () => {
@@ -77,8 +86,8 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
     ));
     expect(screen.getByText("Eigenaar: Anna")).toBeTruthy();
     expect(screen.getByText(/Bram/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /weghalen/ })).toBeNull();
-    expect(screen.queryByLabelText("Collega")).toBeNull();
+    expect(screen.queryByRole("button", { name: /weghalen/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Collega toevoegen" })).toBeNull();
     expect(screen.getByRole("button", { name: "Stoppen met meewerken" })).toBeTruthy();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -125,8 +134,9 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
     expect(screen.queryByRole("button", { name: "Cursus overdragen" })).toBeNull();
   });
 
-  it("lets a manager link a whole team, change its role and unlink it, accessibly", async () => {
+  it("adds teams through Team toevoegen, changes a role, and asks before Weghalen", async () => {
     const posted: FormData[] = [];
+    const user = userEvent.setup();
     const { container } = renderAt(
       () => (
         <CourseMembers
@@ -141,20 +151,25 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
       ),
       (fd) => posted.push(fd),
     );
-    expect(screen.getByRole("heading", { name: "Teams die meewerken" })).toBeTruthy();
-    expect(screen.getByText("Bram, Cas")).toBeTruthy();
-    expect(screen.getByRole("combobox", { name: "Rol van Moduleteam Web" })).toHaveValue("editor");
-    await userEvent.selectOptions(screen.getByLabelText("Team"), "t-1");
-    await userEvent.selectOptions(screen.getByLabelText("Rol voor het team"), "co-owner");
+    const list = screen.getByRole("region", { name: "Teams die meewerken" });
+    expect(within(list).getByText("Bram, Cas")).toBeTruthy();
+    expect(within(list).getByRole("combobox", { name: "Rol van Moduleteam Web" })).toHaveValue(
+      "editor",
+    );
+    await user.click(within(list).getByRole("button", { name: "Team toevoegen" }));
+    const add = screen.getByRole("dialog", { name: "Teams toevoegen" });
+    await user.click(within(add).getByRole("checkbox", { name: "Moduleteam Databases" }));
+    await user.selectOptions(within(add).getByLabelText("Rol voor het team"), "co-owner");
     expect((await axe(container, axeOpts)).violations).toEqual([]);
-    await userEvent.click(screen.getByRole("button", { name: "Team toevoegen" }));
+    await user.click(within(add).getByRole("button", { name: "Toevoegen (1)" }));
     await waitFor(() => expect(posted).toHaveLength(1));
-    expect(Object.fromEntries(posted[0]!)).toEqual({
-      intent: "link-team",
-      teamId: "t-1",
-      role: "co-owner",
-    });
-    await userEvent.click(screen.getByRole("button", { name: "Moduleteam Web weghalen" }));
+    expect(posted[0]!.get("intent")).toBe("link-teams");
+    expect(posted[0]!.getAll("teamId")).toEqual(["t-1"]);
+    expect(posted[0]!.get("role")).toBe("co-owner");
+
+    await user.click(within(list).getByRole("button", { name: "Weghalen: Moduleteam Web" }));
+    const ask = screen.getByRole("dialog", { name: "Moduleteam Web weghalen uit deze cursus?" });
+    await user.click(within(ask).getByRole("button", { name: "Weghalen" }));
     await waitFor(() => expect(posted).toHaveLength(2));
     expect(Object.fromEntries(posted[1]!)).toEqual({ intent: "unlink-team", teamId: "t-2" });
   });
@@ -173,6 +188,6 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
     ));
     expect(screen.getByText(/Moduleteam/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Team toevoegen" })).toBeNull();
-    expect(screen.queryByRole("button", { name: /weghalen/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /weghalen/i })).toBeNull();
   });
 });

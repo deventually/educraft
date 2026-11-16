@@ -11,6 +11,7 @@ test.use({ storageState: storageStateOf("teacher") });
 test("a new course asks how to start, and the design form works by keyboard", async ({ page }) => {
   const csp = watchCsp(page);
   await page.goto("/courses");
+  await page.getByRole("button", { name: "Nieuwe cursus" }).first().click();
   await page.getByLabel("Naam", { exact: true }).fill("Databases (e2e)");
   await page.getByRole("button", { name: "Cursus aanmaken" }).click();
   await page.waitForURL(/\/courses\/[^/?]+$/);
@@ -47,6 +48,7 @@ test("a new course asks how to start, and the design form works by keyboard", as
 test("a course with outcomes and no tests offers the test programme", async ({ page }) => {
   const csp = watchCsp(page);
   await page.goto("/courses");
+  await page.getByRole("button", { name: "Nieuwe cursus" }).first().click();
   await page.getByLabel("Naam", { exact: true }).fill("Toetsprogramma (e2e)");
   await page.getByRole("button", { name: "Cursus aanmaken" }).click();
   await page.waitForURL(/\/courses\/[^/?]+$/);
@@ -83,6 +85,7 @@ test("a course with outcomes and no tests offers the test programme", async ({ p
 test("a course with outcomes and tests offers the lesson series", async ({ page }) => {
   const csp = watchCsp(page);
   await page.goto("/courses");
+  await page.getByRole("button", { name: "Nieuwe cursus" }).first().click();
   await page.getByLabel("Naam", { exact: true }).fill("Lessenreeks (e2e)");
   await page.getByRole("button", { name: "Cursus aanmaken" }).click();
   await page.waitForURL(/\/courses\/[^/?]+$/);

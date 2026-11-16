@@ -196,6 +196,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
       if (
         r.intent === "share" ||
         r.intent === "unshare" ||
+        r.intent === "add-members" ||
+        r.intent === "link-teams" ||
         r.intent === "set-member" ||
         r.intent === "remove-member" ||
         r.intent === "link-team" ||

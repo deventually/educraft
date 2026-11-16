@@ -327,38 +327,36 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
       )}
 
       {tab === "chapter" && (
-        <>
-          <section className="mt-8" aria-labelledby="chapter-title">
-            <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
-              {to.chapterTitle}
-            </h2>
-            {showDraftNotice && (
-              <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm text-slate-800">{t.portfolio.draft.notice}</p>
-                <Form method="post" className="mt-2">
-                  <input type="hidden" name="intent" value="dismissDraftNotice" />
-                  <Button type="submit" variant="secondary" size="sm">
-                    {t.portfolio.draft.noticeOk}
-                  </Button>
-                </Form>
-              </div>
-            )}
-            <ChapterOutline outcome={outcome} showOutline={guided.length === 0} />
-            <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
-            <CourseFacts view={courseFacts} />
-            <div className="mt-3">
-              {/* Keyed on the saved text and questions: a drafted paragraph or new questions reload it. */}
-              <ChapterEditor
-                key={`${chapter.length}:${chapter.slice(-40)}:${guided.map((g) => g.questions.length).join()}`}
-                outcomeId={outcome.id}
-                defaultValue={chapter}
-                maxWords={maxWords}
-              >
-                <GuidedWriting sections={guided} draftMode={coachMode === "draft"} />
-              </ChapterEditor>
+        <section className="mt-8" aria-labelledby="chapter-title">
+          <h2 id="chapter-title" className="text-lg font-medium text-slate-900">
+            {to.chapterTitle}
+          </h2>
+          {showDraftNotice && (
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm text-slate-800">{t.portfolio.draft.notice}</p>
+              <Form method="post" className="mt-2">
+                <input type="hidden" name="intent" value="dismissDraftNotice" />
+                <Button type="submit" variant="secondary" size="sm">
+                  {t.portfolio.draft.noticeOk}
+                </Button>
+              </Form>
             </div>
-          </section>
-        </>
+          )}
+          <ChapterOutline outcome={outcome} showOutline={guided.length === 0} />
+          <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
+          <CourseFacts view={courseFacts} />
+          <div className="mt-3">
+            {/* Keyed on the saved text and questions: a drafted paragraph or new questions reload it. */}
+            <ChapterEditor
+              key={`${chapter.length}:${chapter.slice(-40)}:${guided.map((g) => g.questions.length).join()}`}
+              outcomeId={outcome.id}
+              defaultValue={chapter}
+              maxWords={maxWords}
+            >
+              <GuidedWriting sections={guided} draftMode={coachMode === "draft"} />
+            </ChapterEditor>
+          </div>
+        </section>
       )}
 
       {tab === "review" && (

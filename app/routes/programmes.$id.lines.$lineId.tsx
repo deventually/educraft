@@ -14,7 +14,9 @@ import {
 import { getProgramme, listProgrammes } from "~/server/repositories/programmes.server";
 import { LineProgrammes } from "~/components/programmes/LineProgrammes";
 import { learningLineOverview } from "~/lib/programmes/learningLine";
-import { Button, Card, Input, Label, Select } from "~/components/ui";
+import { Button, Card, Input, Label } from "~/components/ui";
+import { AddDialog } from "~/components/connections/AddDialog";
+import { ConnectionList } from "~/components/connections/ConnectionList";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { Breadcrumb } from "~/components/Breadcrumb";
@@ -97,7 +99,14 @@ export async function action({ request, params }: Route.ActionArgs) {
         line.courseIds.filter((c) => c !== courseId),
       ),
     );
-  if (intent === "add") return done(await setLineCourses(user, line.id, [...visible, courseId]));
+  if (intent === "add") {
+    // Several at once (plan step 6), after the ones already in it; one already in stays put.
+    const added = fd
+      .getAll("courseId")
+      .map(String)
+      .filter((c) => !visible.includes(c));
+    return done(await setLineCourses(user, line.id, [...new Set([...visible, ...added])]));
+  }
   if (intent === "programmes")
     return done(
       await setLineProgrammes(
@@ -160,79 +169,68 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
         )}
 
         {line.canManage && (
-          <section aria-labelledby={`${id}-order`}>
-            <h2 id={`${id}-order`} className="text-lg font-medium text-slate-900">
-              {l.order}
-            </h2>
-            <ol className="mt-3 space-y-2">
-              {line.courses.map((c, i) => (
-                <li
-                  key={c.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm"
-                >
-                  <span className="text-slate-900">
-                    {i + 1}. {c.name}
-                  </span>
+          <>
+            <ConnectionList
+              title={l.coursesTitle}
+              ordered
+              empty={l.emptyLine}
+              add={
+                <AddDialog
+                  triggerLabel={l.addCourse}
+                  title={fmt(l.addCourseTitle, { line: line.name })}
+                  description={l.addHint}
+                  intent="add"
+                  pick={{
+                    name: "courseId",
+                    options: addable.map((c) => ({ id: c.id, label: c.name })),
+                    empty: l.addNone,
+                  }}
+                />
+              }
+              items={line.courses.map((c, i) => ({
+                id: c.id,
+                name: c.name,
+                actions: (
                   <span className="flex flex-wrap gap-1">
                     {i > 0 && <MoveButton courseId={c.id} name={c.name} direction="up" />}
                     {i < line.courses.length - 1 && (
                       <MoveButton courseId={c.id} name={c.name} direction="down" />
                     )}
-                    <Form method="post">
-                      <input type="hidden" name="intent" value="remove" />
-                      <input type="hidden" name="courseId" value={c.id} />
-                      <Button type="submit" size="sm" variant="ghost">
-                        {l.remove}
-                        <span className="sr-only"> ({c.name})</span>
-                      </Button>
-                    </Form>
                   </span>
-                </li>
-              ))}
-            </ol>
-            <Card className="mt-3 p-4">
-              {addable.length === 0 ? (
-                <p className="text-sm text-slate-600">{l.addNone}</p>
-              ) : (
+                ),
+                remove: {
+                  fields: { intent: "remove", courseId: c.id },
+                  title: fmt(l.removeTitle, { course: c.name, line: line.name }),
+                  description: l.removeBody,
+                },
+              }))}
+            />
+            <section aria-labelledby={`${id}-details`}>
+              <h2 id={`${id}-details`} className="text-lg font-medium text-slate-900">
+                {l.details}
+              </h2>
+              <Card className="mt-3 p-4">
                 <Form method="post" className="flex flex-wrap items-end gap-3">
-                  <input type="hidden" name="intent" value="add" />
+                  <input type="hidden" name="intent" value="rename" />
                   <div className="w-full sm:w-auto sm:min-w-48 sm:flex-1">
-                    <Label htmlFor={`${id}-add`}>{l.addCourse}</Label>
-                    <Select id={`${id}-add`} name="courseId" className="mt-1">
-                      {addable.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </Select>
+                    <Label htmlFor={`${id}-name`}>{l.name}</Label>
+                    <Input
+                      id={`${id}-name`}
+                      name="name"
+                      required
+                      maxLength={200}
+                      defaultValue={line.name}
+                      className="mt-1"
+                    />
                   </div>
                   <Button type="submit" size="sm">
-                    {l.add}
+                    {l.save}
                   </Button>
                 </Form>
-              )}
-            </Card>
-            <Card className="mt-3 p-4">
-              <Form method="post" className="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="intent" value="rename" />
-                <div className="w-full sm:w-auto sm:min-w-48 sm:flex-1">
-                  <Label htmlFor={`${id}-name`}>{l.name}</Label>
-                  <Input
-                    id={`${id}-name`}
-                    name="name"
-                    required
-                    maxLength={200}
-                    defaultValue={line.name}
-                    className="mt-1"
-                  />
-                </div>
-                <Button type="submit" size="sm" variant="secondary">
-                  {l.rename}
-                </Button>
-              </Form>
-            </Card>
-            {linkOptions.length > 0 && <LineProgrammes options={linkOptions} />}
-            <div className="mt-3">
+              </Card>
+              {linkOptions.length > 0 && <LineProgrammes options={linkOptions} />}
+            </section>
+            <div>
               <ConfirmDialog
                 triggerLabel={l.delete}
                 title={l.deleteTitle}
@@ -242,7 +240,7 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
                 fields={{ intent: "delete" }}
               />
             </div>
-          </section>
+          </>
         )}
       </div>
     </div>

@@ -1,8 +1,6 @@
-import { useId, useState } from "react";
-import { Form } from "react-router";
-import { Plus } from "lucide-react";
-import { Modal } from "~/components/Modal";
-import { Button, Label, Select } from "~/components/ui";
+import { useId } from "react";
+import { NewDialog } from "~/components/connections/NewDialog";
+import { Label, Select } from "~/components/ui";
 import { type KindOption, ProgrammeFields } from "~/components/programmes/ProgrammeFields";
 import { useT } from "~/lib/i18n/useT";
 
@@ -39,67 +37,49 @@ export function NewProgramme({
   const t = useT();
   const p = t.programmes;
   const id = useId();
-  const [open, setOpen] = useState(startOpen);
-  const close = () => setOpen(false);
   const defaultKind = kinds.some((k) => k.value === "hbo:bachelor") ? "hbo:bachelor" : "";
   return (
-    <>
-      <Button id={triggerId} type="button" size="sm" onClick={() => setOpen(true)}>
-        <Plus className="size-4" aria-hidden />
-        {p.createTitle}
-      </Button>
-      {open && (
-        <Modal titleId={`${id}-title`} onClose={close} className="max-w-lg">
-          <h2 id={`${id}-title`} className="text-lg font-semibold text-slate-900">
-            {title ?? p.createTitle}
-          </h2>
-          <Form method="post" action="/programmes" onSubmit={close} className="mt-4 grid gap-4">
-            <input type="hidden" name="intent" value="create" />
-            {division && <input type="hidden" name="divisionId" value={division.id} />}
-            <div>
-              <Label htmlFor={`${id}-team`}>{p.team}</Label>
-              <Select
-                id={`${id}-team`}
-                name="teamId"
-                defaultValue={defaultTeam ?? (isAdmin ? "" : teams[0]?.id)}
-                className="mt-1"
-                data-autofocus
-              >
-                {isAdmin && <option value="">{p.noTeamOption}</option>}
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {isAdmin && !division && (
-              <div>
-                <Label htmlFor={`${id}-division`}>{divisionWord ?? p.division}</Label>
-                <Select id={`${id}-division`} name="divisionId" defaultValue="" className="mt-1">
-                  <option value="">{t.organisation.noneOption}</option>
-                  {divisions.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-            <ProgrammeFields
-              id={id}
-              kinds={kinds}
-              defaults={{ name: "", kind: defaultKind, form: "" }}
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="secondary" onClick={close}>
-                {t.confirm.cancel}
-              </Button>
-              <Button type="submit">{p.create}</Button>
-            </div>
-          </Form>
-        </Modal>
+    <NewDialog
+      triggerLabel={p.createTitle}
+      triggerId={triggerId}
+      title={title ?? p.createTitle}
+      intent="create"
+      action="/programmes"
+      hidden={division ? { divisionId: division.id } : {}}
+      submitLabel={p.create}
+      startOpen={startOpen}
+    >
+      <div>
+        <Label htmlFor={`${id}-team`}>{p.team}</Label>
+        <Select
+          id={`${id}-team`}
+          name="teamId"
+          defaultValue={defaultTeam ?? (isAdmin ? "" : teams[0]?.id)}
+          className="mt-1"
+          data-autofocus
+        >
+          {isAdmin && <option value="">{p.noTeamOption}</option>}
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+      {isAdmin && !division && (
+        <div>
+          <Label htmlFor={`${id}-division`}>{divisionWord ?? p.division}</Label>
+          <Select id={`${id}-division`} name="divisionId" defaultValue="" className="mt-1">
+            <option value="">{t.organisation.noneOption}</option>
+            {divisions.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </Select>
+        </div>
       )}
-    </>
+      <ProgrammeFields id={id} kinds={kinds} defaults={{ name: "", kind: defaultKind, form: "" }} />
+    </NewDialog>
   );
 }

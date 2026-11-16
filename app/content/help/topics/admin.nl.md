@@ -20,7 +20,7 @@ Maak teams van collega's en wijs teamleiders aan. Per team kun je onderdelen, to
 
 ## Faculteiten en opleidingen
 
-Kies hoe je instelling de laag tussen instelling en opleiding noemt, maak die onderdelen aan (bijvoorbeeld faculteiten), en zet elke opleiding op zijn plek. Een opleiding maak je aan bij **Opleidingen**, in het menu **Onderwijs**. Zie ook [Opleidingen](/help/programmes).
+Kies hoe je instelling de laag tussen instelling en opleiding noemt en maak die onderdelen aan, bijvoorbeeld met **Nieuwe faculteit**. Een lege faculteit verwijder je na een bevestiging. Waar een opleiding bij hoort, kies je bij **Gegevens** van de opleiding; klik op Organisatie op haar naam om daar te komen. Een opleiding maak je aan bij **Opleidingen**, in het menu **Onderwijs**. Zie ook [Opleidingen](/help/programmes).
 
 ## Mededelingen
 

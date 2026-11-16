@@ -1,8 +1,6 @@
 export const organisation = {
-  add: "Add {kind}",
   addName: "Name",
-  belongsTo: "{name} belongs to",
-  create: "Add",
+  create: "Create",
   delete: "Delete {name}",
   deleteBody: "There are no programmes or teams under it any more. Only the name goes.",
   deleteFirst:
@@ -21,7 +19,7 @@ export const organisation = {
   kindLabel: "What is the layer between institution and programme called?",
   kindNone: "Not chosen yet",
   kindSave: "Save",
-  move: "Move",
+  moveHint: "Where a programme belongs is chosen in the programme's Details: click its name.",
   none: "Without {kind}",
   noneOption: "None",
   noProgrammes:
