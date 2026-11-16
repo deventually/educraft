@@ -8,6 +8,7 @@ import { getUserById, listPeople } from "~/server/repositories/users.server";
 import { getOwnerUserId } from "~/server/repositories/settings.server";
 import { listTeams } from "~/server/repositories/teams.server";
 import { peopleListAction } from "~/server/peopleList.server";
+import { strictAdminPasswords } from "~/server/password.server";
 import { ROLES } from "~/lib/registry/access";
 import { BULK_ACTIONS, OWNER_ONLY_BULK } from "~/lib/people/bulk";
 import type { PasteOutcome } from "~/lib/people/pasteList";
@@ -62,6 +63,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     selfId: admin.id,
     isOwner: viewerIsOwner,
     ownerId: owner?.role === "admin" ? owner.id : null,
+    // Outside production the create form accepts any initial password.
+    strictPasswords: strictAdminPasswords(),
     filter,
     teams: allTeams.map((t) => ({ id: t.id, name: t.name })),
     people: rows.map((r) => ({
@@ -90,7 +93,15 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const p = t.people;
   const i = t.admin.invites;
   const actionData = useActionData<typeof action>();
-  const { selfId, people, filter, teams, isOwner: viewerIsOwner, ownerId } = loaderData;
+  const {
+    selfId,
+    people,
+    filter,
+    teams,
+    isOwner: viewerIsOwner,
+    ownerId,
+    strictPasswords,
+  } = loaderData;
   const [adding, setAdding] = useState(false);
   // The ticked accounts for "With selected"; cleared after a bulk change.
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -196,6 +207,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
             actionData={actionData}
             createError={createError}
             teams={teams}
+            strictPasswords={strictPasswords}
           />
         )}
       </section>

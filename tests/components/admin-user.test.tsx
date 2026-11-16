@@ -31,6 +31,8 @@ const loaderData = {
   isOwner: true,
   isSelf: false,
   canManage: true,
+  // Production: the full password rule applies to the admin's forms.
+  strictPasswords: true,
   person: teacher,
   models: { base, mode: "own", models: ["claude-haiku-4-5"] } as {
     base: typeof base;
@@ -272,6 +274,33 @@ describe("Admin person page (P28.1)", () => {
     expect(body?.get("intent")).toBe("setPassword");
     expect(body?.get("password")).toBe("brand-new-secret");
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/ingesteld/i));
+  });
+
+  it("asks for at least 10 characters in the set-password dialog in production", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole("button", { name: /wachtwoord instellen/i }));
+    const dialog = screen.getByRole("dialog");
+    for (const field of within(dialog).getAllByLabelText(/wachtwoord/i, {
+      selector: "input[type=password]",
+    })) {
+      expect(field).toHaveAttribute("minlength", "10");
+    }
+    expect(within(dialog).queryByText(/buiten productie/i)).toBeNull();
+  });
+
+  it("accepts any password in the set-password dialog outside production, and says so", async () => {
+    const user = userEvent.setup();
+    const { container } = renderPage(undefined, { strictPasswords: false });
+    await user.click(screen.getByRole("button", { name: /wachtwoord instellen/i }));
+    const dialog = screen.getByRole("dialog");
+    for (const field of within(dialog).getAllByLabelText(/wachtwoord/i, {
+      selector: "input[type=password]",
+    })) {
+      expect(field).not.toHaveAttribute("minlength");
+    }
+    expect(within(dialog).getByText(/buiten productie mag elk wachtwoord/i)).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("posts deactivate on an active user and reactivate on a deactivated one (owner)", async () => {

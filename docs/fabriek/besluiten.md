@@ -664,3 +664,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie": keuzes 1 tot en met 6, "Ook
   ontkoppelen moet bevestigd worden met een confirm" en "Is het ook een idee om het beheer met
   een dashboardpagina te starten?").
+- **BESLUIT-2026-11-16-5:** **Buiten productie mag een beheerder elk wachtwoord geven.** Bij
+  "account aanmaken" met een beginwachtwoord en bij "wachtwoord instellen" op de pagina van een
+  persoon geldt de wachtwoordregel (minstens 10 tekens, geen veelgebruikt wachtwoord) alleen op
+  productie (`NODE_ENV=production`). Daarbuiten mag elk wachtwoord dat niet leeg is, ook een
+  makkelijk te raden. Een wachtwoord dat iemand zelf kiest (uitnodiging, resetlink, accountpagina)
+  houdt overal de volle regel. Dat de gebruiker daarna verplicht een nieuw wachtwoord kiest, komt
+  later. Bastiaan, 2026-11-16 ("Een beheerder mag een makkelijk te raden wachtwoord kiezen voor een
+  nieuwe gebruiker als hij dat wil. [...] Misschien kunnen we inbouwen dat dit alleen op productie
+  gebeurt?").

@@ -87,8 +87,11 @@ export function AddPersonForm({
   actionData,
   createError,
   teams,
+  strictPasswords,
 }: {
   viewerIsOwner: boolean;
+  /** Whether the full password rule applies (production only). */
+  strictPasswords: boolean;
   actionData: unknown;
   createError?: string;
   teams: TeamOption[];
@@ -139,6 +142,7 @@ export function AddPersonForm({
         <CreateAccountForm
           result={actionData as CreateAccountResult}
           errorMessage={createError}
+          strictPasswords={strictPasswords}
           extraFields={<TeamSelect teams={teams} id="create-team" />}
         />
       ) : (
