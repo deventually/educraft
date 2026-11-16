@@ -5,7 +5,7 @@ export function teamError(t: Messages, code: string): string {
   const map: Record<string, string> = {
     nameRequired: t.teams.nameRequired,
     noSuchUser: t.teams.noSuchUser,
-    isLead: t.teams.isLeadError,
+    self: t.teams.selfError,
     notMember: t.teams.notMember,
     noneSelected: t.teams.noneSelected,
     chooseDivision: t.teams.chooseDivision,

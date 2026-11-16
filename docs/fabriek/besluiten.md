@@ -718,3 +718,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   tot de opleidingen zijn weggehaald (bij *Opleidingen* op dezelfde pagina). Er wordt nooit iets
   vanzelf ontkoppeld; de server weigert de wissel ook (`hasProgrammes`). Bastiaan, 2026-11-16
   (plan "eenvoudiger beheer en navigatie", stap 5; keuze "Eerst opleidingen weghalen").
+- **BESLUIT-2026-11-16-9:** **Een teamleider haalt iedereen uit zijn team weg, behalve zichzelf.** Op
+  de teampagina staat Weghalen bij elk lid, ook bij een andere teamleider; het vraagt eerst. Jezelf
+  weghalen kan niet (fout `self`); daarvoor is *Stoppen als teamleider*. Een teamleider maakt nog
+  steeds niemand géén teamleider meer; dat doet de beheerder. Dit vervangt de regel uit P28 en
+  BESLUIT-2026-11-16-6 dat een teamleider alleen een gewoon lid weghaalt. Bastiaan, 2026-11-16
+  ("Ik kan als teamleider/team eigenaar geen leden weghalen uit mijn team", "Maar wil dat wel
+  kunnen").

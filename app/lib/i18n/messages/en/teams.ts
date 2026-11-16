@@ -41,7 +41,6 @@ export const teams: Messages["teams"] = {
   inviteIntro:
     "Make a link for a new colleague. Whoever uses it becomes a teacher and a member of this team.",
   inviteSubmit: "Create invite link",
-  isLeadError: "You cannot remove another team lead; an admin does that.",
   leadBadge: "Team lead",
   leadIntro:
     "You lead this team. You add and remove colleagues and can make a colleague team lead too. Removing another team lead or taking the stand away is an admin's job.",
@@ -88,6 +87,7 @@ export const teams: Messages["teams"] = {
   search: "Search by team or person",
   searchMine: "Search by team or team lead",
   searchRegion: "Search teams",
+  selfError: "You cannot remove yourself. To stop being team lead, choose Stop being team lead.",
   stepDown: "Stop being team lead",
   stepDownBody:
     "You stay a member of the team. Becoming team lead again goes through an admin or another team lead.",

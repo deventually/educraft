@@ -5,7 +5,9 @@ import { COLLEAGUE, USERS, storageStateOf } from "./users";
 // Bastiaan, 2026-11-16 (BESLUIT-2026-11-16-6): a team lead chooses who joins the team, with
 // search and ticks, and takes a plain member out after a confirmation.
 
-test("a team lead ticks a colleague to add and takes them out again", async ({ browser }) => {
+test("a team lead ticks a colleague to add, makes them lead and takes them out again", async ({
+  browser,
+}) => {
   const team = `Leidersteam ${Date.now()}`;
 
   // The admin makes the team and the e2e teacher its lead.
@@ -44,6 +46,9 @@ test("a team lead ticks a colleague to add and takes them out again", async ({ b
   await add.getByRole("button", { name: "Toevoegen (1)" }).click();
   const row = page.getByRole("row", { name: new RegExp(COLLEAGUE.name) });
   await expect(row).toBeVisible();
+  // Also another lead goes (Bastiaan, 16-11): make them lead first.
+  await row.getByRole("button", { name: "Teamleider maken" }).click();
+  await expect(row.getByText("Teamleider")).toBeVisible();
 
   await row.getByRole("button", { name: `Weghalen: ${COLLEAGUE.name}` }).click();
   const confirm = page.getByRole("dialog", { name: new RegExp(`${COLLEAGUE.name} weghalen`) });

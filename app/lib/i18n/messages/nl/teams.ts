@@ -41,7 +41,6 @@ export const teams = {
   inviteIntro:
     "Maak een link voor een nieuwe collega. Wie hem gebruikt, wordt docent en lid van dit team.",
   inviteSubmit: "Uitnodigingslink maken",
-  isLeadError: "Een andere teamleider haal je niet weg; dat doet een beheerder.",
   leadBadge: "Teamleider",
   leadIntro:
     "Jij bent teamleider van dit team. Je voegt collega's toe, haalt ze weg en kunt een collega ook teamleider maken. Een andere teamleider weghalen of de stand afnemen doet een beheerder.",
@@ -89,6 +88,8 @@ export const teams = {
   search: "Zoek op team of persoon",
   searchMine: "Zoek op team of teamleider",
   searchRegion: "Teams zoeken",
+  selfError:
+    "Jezelf haal je niet weg. Wil je geen teamleider meer zijn, kies dan Stoppen als teamleider.",
   stepDown: "Stoppen als teamleider",
   stepDownBody:
     "Je blijft lid van het team. Weer teamleider worden kan via een beheerder of een andere teamleider.",
