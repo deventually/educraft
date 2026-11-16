@@ -1,4 +1,4 @@
-# Rubric — Assess student work and give feedback (stage-assessment@v5)
+# Rubric — Assess student work and give feedback (stage-assessment@v6)
 
 Judge the output as a DRAFT assessment + feedback on written student work (an essay,
 report, work product, portfolio, internship report or thesis) for a teacher-examiner,
@@ -27,7 +27,7 @@ against the framework and scale given in the case inputs. Score each shared crit
   the caveats become 5), caveats; and ends with the exact closing sentence ("Dit is een
   concept ter ondersteuning. De docent is examinator en stelt de beoordeling vast." /
   "This is a draft for support. The teacher is the examiner and determines the
-  assessment."). In the summary for OnStage a draft indication in the general feedback and
+  assessment."). In the summary for OnStage a draft verdict in the general feedback and an indication
   at the start of each criterion remark is **required** when a scale is given (OnStage asks
   for a score per criterion); it is not a new finding.
 - **levelFit** — Expectations fit the case's EQF level and study year; the student
@@ -51,12 +51,14 @@ Tool-specific expectations:
   feedback. Evidence from one report used for the other caps pedagogicalSoundness at 2. With
   one report, everything (also the summary) is only about that report; using the other
   report in the input as evidence caps taskFidelity at 2.
-- **Summary for OnStage (@v5).** Every output has the heading "Samenvatting voor OnStage" /
-  "Summary for OnStage" in the layout of OnStage: per assessed report a `###` heading with a
-  `#### Algemene feedback` / `#### General feedback` (at most 100 words) and a `####` remark per
-  criterion that belongs to that report (indication first, at most 80 words), and with two
-  reports a `###` for both; addressed to the student, without quotes, locations or new findings. A missing summary, a missing report in it, or a summary that adds findings
-  not in the assessment caps formatAdherence at 2.
+- **Summary for OnStage (@v6).** Every output has the heading "Samenvatting voor OnStage" /
+  "Summary for OnStage" in the layout of OnStage's assessment form: first one `### Algemene
+  feedback` / `### General feedback` (at most 150 words; with two reports it combines both,
+  with a verdict per report), then per assessed report a `###` heading (with two reports first a short
+  `#### Algemene feedback` about that report only) and a `####` remark per criterion that belongs to that report (indication first, at most 80 words); addressed
+  to the student, without quotes, locations or new findings. A missing summary, a missing
+  report in it, or a summary that adds findings not in the assessment caps formatAdherence
+  at 2.
 - When the work is not an internship or graduation document, it does **not** assume
   an internship, a company or a company evaluation.
 - Anonymisation codes such as [STUDENT], [BEDRIJF] or [BEGELEIDER-1] are copied

@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { STAGE_ASSESSMENT_PROMPT_V5 } from "~/lib/prompts/stage-assessment@v5.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V6 } from "~/lib/prompts/stage-assessment@v6.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -123,7 +123,7 @@ export const stageAssessment: Tool = {
         { value: "stageverslag", label: { nl: "Stageverslag", en: "Internship report" } },
         { value: "onderzoeksverslag", label: { nl: "Onderzoeksverslag", en: "Research report" } },
         {
-          // Two reports together: feedback per report plus general feedback (prompt @v5).
+          // Two reports together: feedback per report plus general feedback (prompt @v5, @v6).
           value: "stageverslag+onderzoeksverslag",
           label: {
             nl: "Stageverslag + onderzoeksverslag (samen)",
@@ -293,7 +293,7 @@ export const stageAssessment: Tool = {
     {
       id: "assessment",
       name: { nl: "Concept-beoordeling", en: "Draft assessment" },
-      systemPromptId: STAGE_ASSESSMENT_PROMPT_V5.id,
+      systemPromptId: STAGE_ASSESSMENT_PROMPT_V6.id,
       output: {
         kind: "structured-sections",
         exportAs: "table",

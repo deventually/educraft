@@ -42,6 +42,7 @@ import { STAGE_ASSESSMENT_PROMPT_V2 } from "./stage-assessment@v2.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V3 } from "./stage-assessment@v3.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V4 } from "./stage-assessment@v4.prompt";
 import { STAGE_ASSESSMENT_PROMPT_V5 } from "./stage-assessment@v5.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V6 } from "./stage-assessment@v6.prompt";
 import {
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
@@ -136,6 +137,7 @@ const ALL: PromptDef[] = [
   STAGE_ASSESSMENT_PROMPT_V3,
   STAGE_ASSESSMENT_PROMPT_V4,
   STAGE_ASSESSMENT_PROMPT_V5,
+  STAGE_ASSESSMENT_PROMPT_V6,
   TEST_ITEMS_BLUEPRINT,
   TEST_ITEMS_ITEMS,
   TEST_ITEMS_ITEMS_V2,
