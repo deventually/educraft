@@ -11,7 +11,8 @@ import {
   setDivisionKind,
   setProgrammeDivision,
 } from "~/server/repositories/organisation.server";
-import { listProgrammes, manageableTeams } from "~/server/repositories/programmes.server";
+import { listProgrammes } from "~/server/repositories/programmes.server";
+import { manageableTeams } from "~/server/repositories/programmeTeams.server";
 import { kindOptions } from "~/server/programmes.server";
 import { NewProgramme } from "~/components/programmes/NewProgramme";
 import { getLocale } from "~/lib/i18n/locale.server";

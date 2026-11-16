@@ -28,8 +28,10 @@ describe("help on who makes and links programmes (BESLUIT-2026-11-16-4)", () => 
     expect(topic("en")).toContain("**New programme**");
     expect(topic("nl")).toContain("alleen zijn eigen team");
     expect(topic("en")).toContain("only their own team");
-    for (const gone of ["minstens één team", "verdwijnt mee"]) expect(topic("nl")).not.toContain(gone);
-    for (const gone of ["at least one team", "goes with it"]) expect(topic("en")).not.toContain(gone);
+    for (const gone of ["minstens één team", "verdwijnt mee"])
+      expect(topic("nl")).not.toContain(gone);
+    for (const gone of ["at least one team", "goes with it"])
+      expect(topic("en")).not.toContain(gone);
   });
 });
 

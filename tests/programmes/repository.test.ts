@@ -83,9 +83,10 @@ describe("programmes of a team: who manages", () => {
 
   it("names the teams a person may create a programme for", async () => {
     const { lead, member, admin, team } = await world();
-    expect(await repo.manageableTeams(lead)).toEqual([{ id: team.id, name: team.name }]);
-    expect(await repo.manageableTeams(member)).toEqual([]);
-    expect((await repo.manageableTeams(admin)).map((t) => t.id)).toContain(team.id);
+    const { manageableTeams } = await import("~/server/repositories/programmeTeams.server");
+    expect(await manageableTeams(lead)).toEqual([{ id: team.id, name: team.name }]);
+    expect(await manageableTeams(member)).toEqual([]);
+    expect((await manageableTeams(admin)).map((t) => t.id)).toContain(team.id);
   });
 });
 

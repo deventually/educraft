@@ -1,8 +1,9 @@
 /**
  * Programmes (opleidingen) of one or more teams (BESLUIT-2026-11-10-3, BESLUIT-2026-11-16-1) and
  * the courses in them. Repository rule for team-owned rows: every query is scoped in its WHERE
- * clause to the teams the actor is in (an admin: every team). Managing (create, rename, delete)
- * is for a lead of one of its teams or an admin; linking teams is in `programmeTeams.server.ts`.
+ * clause to the teams the actor is in (an admin: every team). Managing is for a lead of one of
+ * its teams or an admin; only an admin creates one without a team, and deletes one
+ * (BESLUIT-2026-11-16-4); linking teams is in `programmeTeams.server.ts`.
  * Placing a course is for its owner, in a programme of a team they are in, and shares the course
  * with the programme's teams they are in; colleagues read it only through that share
  * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`;
@@ -31,11 +32,10 @@ import {
   programmes,
   shares,
   teamMembers,
-  teams,
   users,
 } from "../schema.server";
 import { courseRoles } from "./courseRoles.server";
-import { myTeams, namesOf, teamsOf } from "./programmeTeams.server";
+import { manageableTeams, myTeams, namesOf, teamsOf } from "./programmeTeams.server";
 import { shareItem } from "./shares.server";
 
 /** Who acts: the signed-in user's id and role. */
@@ -157,20 +157,6 @@ function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) 
 function parseInput(input: unknown) {
   const p = ProgrammeInputSchema.parse(input);
   return { name: p.name, sector: p.sector, track: p.track ?? null, form: p.form ?? null };
-}
-
-/** The teams the actor may create a programme for: where they lead; every team for an admin. */
-export async function manageableTeams(a: Actor): Promise<{ id: string; name: string }[]> {
-  const db = getDb();
-  if (isAdmin(a))
-    return db.select({ id: teams.id, name: teams.name }).from(teams).orderBy(asc(teams.name)).all();
-  return db
-    .select({ id: teams.id, name: teams.name })
-    .from(teamMembers)
-    .innerJoin(teams, eq(teams.id, teamMembers.teamId))
-    .where(and(eq(teamMembers.userId, a.id), eq(teamMembers.isLead, true)))
-    .orderBy(asc(teams.name))
-    .all();
 }
 
 export async function listProgrammes(

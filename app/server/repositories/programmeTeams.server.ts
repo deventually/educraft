@@ -33,6 +33,20 @@ const speaksFor = (a: Actor, teamId: string) =>
     )
     .get();
 
+/** The teams the actor may create a programme for: where they lead; every team for an admin. */
+export async function manageableTeams(a: Actor): Promise<{ id: string; name: string }[]> {
+  const db = getDb();
+  if (isAdmin(a))
+    return db.select({ id: teams.id, name: teams.name }).from(teams).orderBy(asc(teams.name)).all();
+  return db
+    .select({ id: teams.id, name: teams.name })
+    .from(teamMembers)
+    .innerJoin(teams, eq(teams.id, teamMembers.teamId))
+    .where(and(eq(teamMembers.userId, a.id), eq(teamMembers.isLead, true)))
+    .orderBy(asc(teams.name))
+    .all();
+}
+
 /** The teams of these programmes, by name, per programme id. Not scoped: callers scope. */
 export function teamsOf(programmeIds: string[]): Map<string, { id: string; name: string }[]> {
   const out = new Map<string, { id: string; name: string }[]>();

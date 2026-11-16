@@ -7,8 +7,8 @@ import {
   createProgramme,
   deleteProgramme,
   listProgrammes,
-  manageableTeams,
 } from "~/server/repositories/programmes.server";
+import { manageableTeams } from "~/server/repositories/programmeTeams.server";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
 import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
