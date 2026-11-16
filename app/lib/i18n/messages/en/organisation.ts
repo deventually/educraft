@@ -15,7 +15,7 @@ export const organisation = {
   errorNotEmpty: "There are still programmes or teams under it. Move them first.",
   heading: "Organisation",
   intro:
-    "How your institution is organised: the layer between the institution and its programmes, and which programme sits where. A team lead or admin creates a programme under Programmes; here you put it in its place.",
+    "How your institution is organised: the layer between the institution and its programmes, and which programme sits where. You create a programme here with New programme in its faculty; then you link teams to it.",
   kindHint:
     "For example faculty at a university of applied sciences, college at an mbo institution or location in secondary education.",
   kindLabel: "What is the layer between institution and programme called?",
@@ -24,7 +24,8 @@ export const organisation = {
   move: "Move",
   none: "Without {kind}",
   noneOption: "None",
-  noProgrammes: "No programmes yet. A team lead or admin creates them under Programmes.",
+  noProgrammes:
+    "No programmes yet. Click New programme in a faculty, or create one under Programmes.",
   rename: "New name for {name}",
   renameSave: "Save name",
   team: "team {team}",

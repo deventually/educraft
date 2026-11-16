@@ -12,10 +12,13 @@ export function ProgrammeTeams({
   programme,
   teamOptions,
   myTeamIds,
+  isAdmin = false,
 }: {
   programme: { name: string; teams: { id: string; name: string }[] };
   teamOptions: AddOption[];
   myTeamIds: string[];
+  /** An admin always sees Team toevoegen, so the way to link is never hidden. */
+  isAdmin?: boolean;
 }) {
   const p = useT().programmes;
   return (
@@ -24,7 +27,7 @@ export function ProgrammeTeams({
       intro={p.teamsIntro}
       empty={p.teamsEmpty}
       add={
-        teamOptions.length > 0 && (
+        (isAdmin || teamOptions.length > 0) && (
           <AddDialog
             triggerLabel={p.addTeam}
             title={fmt(p.addTeamTitle, { programme: programme.name })}

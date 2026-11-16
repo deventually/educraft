@@ -15,7 +15,7 @@ export const organisation = {
   errorNotEmpty: "Er staan nog opleidingen of teams onder. Verplaats die eerst.",
   heading: "Organisatie",
   intro:
-    "Hoe je instelling is ingedeeld: de laag tussen de instelling en haar opleidingen, en welke opleiding waaronder valt. Een opleiding maakt een teamleider of beheerder aan bij Opleidingen; hier zet je hem op zijn plek.",
+    "Hoe je instelling is ingedeeld: de laag tussen de instelling en haar opleidingen, en welke opleiding waaronder valt. Een opleiding maak je hier met Nieuwe opleiding bij de faculteit; daarna koppel je er teams aan.",
   kindHint:
     "Bijvoorbeeld faculteit bij een hogeschool, college bij een ROC of vestiging in het vo.",
   kindLabel: "Hoe heet de laag tussen instelling en opleiding?",
@@ -24,7 +24,8 @@ export const organisation = {
   move: "Verplaatsen",
   none: "Zonder {kind}",
   noneOption: "Geen",
-  noProgrammes: "Nog geen opleidingen. Een teamleider of beheerder maakt ze aan bij Opleidingen.",
+  noProgrammes:
+    "Nog geen opleidingen. Klik bij een faculteit op Nieuwe opleiding, of maak er een bij Opleidingen.",
   rename: "Nieuwe naam voor {name}",
   renameSave: "Naam opslaan",
   team: "team {team}",

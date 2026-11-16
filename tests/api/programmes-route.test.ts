@@ -369,6 +369,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
     const web = await teams.createTeam(`Moduleteam Web ${n}`);
     const data = await teams.createTeam(`Moduleteam Data ${n}`);
     await signInAs({ id: `route-admin-teams-${n}`, name: "Beheer", role: "admin" });
+    expect((await load(p!.id)).isAdmin).toBe(true);
     expect((await load(p!.id)).teamOptions.map((t) => t.id)).toEqual(
       expect.arrayContaining([web.id, data.id]),
     );

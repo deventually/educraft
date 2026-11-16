@@ -103,6 +103,16 @@ describe("/admin/organisation", () => {
     expect(within(dialog).getByRole("button", { name: "Verwijderen" })).toBeVisible();
   });
 
+  it("says programmes are made here, in their faculty", async () => {
+    page({ ...data, programmes: [] });
+    expect(
+      await screen.findByText(/Een opleiding maak je hier met Nieuwe opleiding/),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/Nog geen opleidingen. Klik bij een faculteit op Nieuwe opleiding/),
+    ).toBeVisible();
+  });
+
   it("starts a new programme right in a faculty (BESLUIT-2026-11-16-4)", async () => {
     const user = userEvent.setup();
     page();

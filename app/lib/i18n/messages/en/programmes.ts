@@ -8,7 +8,7 @@ export const programmes = {
   addTeam: "Add team",
   addTeamHint:
     "The members of an added team see the programme and put their courses in it. Their team lead manages it too.",
-  addTeamNone: "Every team already belongs to this programme.",
+  addTeamNone: "There is no team left to add. You create a new team under Admin → Teams.",
   addTeamTitle: "Add teams to {programme}",
   addTitle: "Add a course",
   back: "All programmes",

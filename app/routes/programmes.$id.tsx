@@ -95,6 +95,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     canPlace: programme.isMember,
     // Only an admin deletes a programme (BESLUIT-2026-11-16-4).
     canDelete: user.role === "admin",
+    isAdmin: user.role === "admin",
     lines: await Promise.all(
       (await listLines(user, programme.id)).map(async (l) => {
         // A line of another programme says where it comes from, when the user reads that one.
@@ -203,6 +204,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
   });
   const { programme, kinds, available, canPlace, teamOptions = [], lines = [] } = loaderData;
   const myTeamIds = "myTeamIds" in loaderData ? loaderData.myTeamIds : [];
+  const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
   const canDelete = "canDelete" in loaderData && loaderData.canDelete;
 
   return (
@@ -227,7 +229,12 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
       <div className="mt-6 space-y-10">
         <ProgrammeCourses id={id} programme={programme} available={available} canPlace={canPlace} />
 
-        <ProgrammeTeams programme={programme} teamOptions={teamOptions} myTeamIds={myTeamIds} />
+        <ProgrammeTeams
+          programme={programme}
+          teamOptions={teamOptions}
+          myTeamIds={myTeamIds}
+          isAdmin={isAdmin}
+        />
 
         <LearningLinesSection
           programmeId={programme.id}

@@ -8,7 +8,7 @@ export const programmes = {
   addTeam: "Team toevoegen",
   addTeamHint:
     "De leden van een toegevoegd team zien de opleiding en zetten er hun cursussen in. Hun teamleider beheert haar mee.",
-  addTeamNone: "Alle teams horen al bij deze opleiding.",
+  addTeamNone: "Er is geen team meer om toe te voegen. Een nieuw team maak je bij Beheer → Teams.",
   addTeamTitle: "Teams toevoegen aan {programme}",
   addTitle: "Cursus toevoegen",
   back: "Alle opleidingen",

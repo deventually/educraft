@@ -227,6 +227,13 @@ describe("Programme page (/programmes/:id)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("always offers an admin Team toevoegen, and says where to make a team when there is none", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammePage, { ...data, isAdmin: true, teamOptions: [] });
+    await user.click(screen.getByRole("button", { name: "Team toevoegen" }));
+    expect(screen.getByText(/Een nieuw team maak je bij Beheer → Teams/)).toBeVisible();
+  });
+
   it("says so when the programme has no team yet", () => {
     renderRoute(ProgrammePage, {
       ...data,
