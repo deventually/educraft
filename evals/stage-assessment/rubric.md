@@ -21,12 +21,15 @@ against the framework and scale given in the case inputs. Score each shared crit
   an example from the document) and Feed forward (at most three prioritised, concrete
   next steps linked to criteria), aimed at task, process and self-regulation — not
   praise or criticism of the person.
-- **formatAdherence** — Follows the required structure (summary verdict, per
-  criterion, draft feedback with the three headings, company evaluation only when
-  one was supplied, caveats) and ends with the exact closing sentence ("Dit is een
+- **formatAdherence** — Follows the required structure (@v5): 1 summary verdict, 2 per
+  criterion, 3 draft feedback with the three headings, 4 "Samenvatting voor OnStage" /
+  "Summary for OnStage" (once), 5 company evaluation only when one was supplied (otherwise
+  the caveats become 5), caveats; and ends with the exact closing sentence ("Dit is een
   concept ter ondersteuning. De docent is examinator en stelt de beoordeling vast." /
   "This is a draft for support. The teacher is the examiner and determines the
-  assessment.").
+  assessment."). In the summary for OnStage a draft indication in the general feedback and
+  at the start of each criterion remark is **required** when a scale is given (OnStage asks
+  for a score per criterion); it is not a new finding.
 - **levelFit** — Expectations fit the case's EQF level and study year; the student
   feedback's wording suits that student; prose for the teacher stays professional.
 - **languageQuality** — Correct, professional target language; in Dutch no

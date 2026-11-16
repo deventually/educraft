@@ -71,8 +71,8 @@ describe("tool: stage-assessment, feedback per report and a summary for OnStage"
   it("asks for a short summary per report under the heading the Copy buttons read", () => {
     const heading = stage().output.copyBlocks;
     expect(heading).toEqual({ nl: "Samenvatting voor OnStage", en: "Summary for OnStage" });
-    expect(build("nl")).toContain(`## Samenvatting voor OnStage`);
-    expect(build("en")).toContain(`## Summary for OnStage`);
+    expect(build("nl")).toContain("## 4. Samenvatting voor OnStage");
+    expect(build("en")).toContain("## 4. Summary for OnStage");
     // As OnStage asks it: per report a general feedback field and a remark per criterion.
     expect(build("nl")).toContain("#### Algemene feedback");
     expect(build("nl")).toMatch(/per succescriterium.*#### SC1/i);
