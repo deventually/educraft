@@ -147,17 +147,15 @@ describe("teams — a lead's functions are scoped to their own team (P28.2)", ()
     });
   });
 
-  it("a lead removes a plain member, but never another lead", async () => {
+  it("a lead removes anyone, also another lead, but never themselves (BESLUIT-2026-11-16-9)", async () => {
     const { team, lead, member } = await teamWithLead("Remove");
     const other = await person("Other Lead");
     await teams.addMember(team.id, other.id);
     await teams.setLead(team.id, other.id, true);
-    expect(await teams.leadRemoveMember(lead.id, team.id, other.id)).toEqual({
-      error: "isLead",
-    });
-    expect(await memberIds(team.id)).toContain(other.id);
+    expect(await teams.leadRemoveMember(lead.id, team.id, lead.id)).toEqual({ error: "self" });
+    expect(await teams.leadRemoveMember(lead.id, team.id, other.id)).toEqual({ ok: true });
     expect(await teams.leadRemoveMember(lead.id, team.id, member.id)).toEqual({ ok: true });
-    expect(await memberIds(team.id)).not.toContain(member.id);
+    expect(await memberIds(team.id)).toEqual([lead.id]);
   });
 
   it("a lead makes a member lead; only an admin takes it away", async () => {

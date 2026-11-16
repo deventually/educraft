@@ -54,9 +54,7 @@ const withSettings = ({ settingsJson, ...team }: TeamRow) => ({
 });
 
 /** What a lead's write returns: done, or why not. */
-export type LeadResult =
-  | { ok: true }
-  | { error: "notLead" | "noSuchUser" | "self" | "notMember" };
+export type LeadResult = { ok: true } | { error: "notLead" | "noSuchUser" | "self" | "notMember" };
 
 const NAME_MAX = 100;
 
