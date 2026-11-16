@@ -557,12 +557,17 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   sits under at most one division (`programmes.division_id`). `organisation.server.ts` holds the
   admin-only writes; a division is deleted only while it is empty. Beheer → Organisatie
   (`/admin/organisation`) names the layer, manages the divisions and places the programmes; the
-  programmes themselves stay team-owned (BESLUIT-2026-11-10-3). A **learning line** keeps its own
+  programmes themselves stay team-owned (BESLUIT-2026-11-10-3), by **one or more teams**
+  (`programme_teams`, BESLUIT-2026-11-16-1): a member of any of them reads the programme, a lead
+  of any of them manages it, and a course is in it while it is shared with one of its teams by
+  someone still in that team. An admin links and unlinks teams on the team page
+  (`programmeTeams.server.ts`); the last team is never unlinked, and deleting a team deletes only
+  the programmes it had alone. A **learning line** keeps its own
   programme and may also hold for others (`learning_line_programmes`): linking takes managing both;
   a member of any linked programme reads it and sees only the courses shared with a team of a
   programme they read; only its own programme's lead or an admin manages it. The course page shows
   the course's place in each line it can read, with the course before and after (`linesOfCourse`).
-  A **team** sits under a programme (it owns it), under a division (`teams.division_id`, for a team
+  A **team** sits under its programmes (it owns them, with any other teams), under a division (`teams.division_id`, for a team
   without a programme, such as an exam board) or under nothing (the whole institution); a division
   with a team under it is not deleted. `teamPlaces` names, per team, its programmes and division
   for the admin's person page; Organisatie lists the teams per division. A module team is a

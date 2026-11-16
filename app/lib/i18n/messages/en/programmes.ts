@@ -100,9 +100,10 @@ export const programmes = {
   save: "Save",
   settingsTitle: "Details",
   sharesWith:
-    "Your course is shared with the team {team}, so your colleagues in that team see it in the programme.",
+    "Your course is shared with your team in this programme. That way the colleagues of {team} see it in the programme.",
   summary: "{kind} · team {team} · {courses} courses",
   team: "Team",
+  teams: "Teams",
   toastDeleted: "Programme deleted.",
   toastPlaced: "The course is in the programme.",
   toastRemoved: "The course was taken out of the programme.",

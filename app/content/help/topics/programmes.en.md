@@ -1,19 +1,20 @@
 # Programmes
 
-A **programme** is a bundle of a team's courses. Each course shows the **year** and the **period** it falls in within that programme. That way you see the programme as a whole, not just course by course.
+A **programme** is a bundle of the courses of one or more teams. Each course shows the **year** and the **period** it falls in within that programme. That way you see the programme as a whole, not just course by course.
 
-## Of a team
+## Of one or more teams
 
-A programme belongs to a **team**, such as your programme team, your specialisation or a module team. You can be in several teams; you then see the programmes of all of them. Each programme shows its team.
+A programme belongs to one or more **teams**, such as the programme team and the module teams that make its courses. You can be in several teams; you then see the programmes of all of them. Each programme shows its teams.
 
-- The **team lead** or an **admin** creates the programme and changes its name, level and mode.
-- **Every team member** can put their own courses in it, and courses they co-own, and sees their colleagues' courses.
+- A **team lead** of one of those teams or an **admin** creates the programme and changes its name, level and mode.
+- **Every member** of one of those teams can put their own courses in it, and courses they co-own, and sees their colleagues' courses in the programme.
+- An **admin** links a team to a programme, or takes it off, on the team's page (**Admin → Teams**). A programme always keeps at least one team.
 
 ## Create a programme
 
 If you are a team lead, go to **Programmes** (from the **Courses** page) and fill in:
 
-- **Team**: the team the programme belongs to.
+- **Team**: the programme's first team. An admin can link more teams later.
 
 - **Name**, for example *Computer Science full-time* or *Master Software Engineering*.
 - **Type and level**, for example bachelor (hbo), associate degree (Ad), master (hbo) or wo master. You choose from the types your administrator has switched on.
@@ -25,7 +26,7 @@ On the programme's page, choose one of your own courses or a course you co-own u
 
 You can also do this from the course. The course page has **Belongs to programme**, where you choose the programme, the year and the period.
 
-**Putting a course in a programme shares it with that programme's team.** Your colleagues in that team can view and copy it, just as with [sharing with your team](/help/teams). Only you and whoever works on the course edit it. You change the year and period of your own course yourself.
+**Putting a course in a programme shares it with your teams of that programme.** Every colleague in the programme sees it there; your colleagues in those teams can view and copy it, just as with [sharing with your team](/help/teams). Only you and whoever works on the course edit it. You change the year and period of your own course yourself.
 
 A course can belong to **several programmes**, with its own year and period in each. Think of a full-time and a part-time variant with the same courses, or a course that falls in year 1 of one programme and year 2 of another.
 
@@ -46,7 +47,8 @@ Like the coverage matrix, this is **advice**. Nothing changes in the courses, an
 ## Good to know
 
 - The owner or the team lead may take a course out of a programme. The course stays as it is, and stays shared with the team. You can stop sharing on the course page.
-- If you stop sharing with the team, or leave the team, your course leaves that team's programmes.
+- If you stop sharing with the team, or leave the team, your course leaves that team's programmes, unless you are also in another team of the programme and share it with that one.
+- If a team is deleted, a programme that has another team stays. A programme of that team alone goes with it.
 - If you delete a course, it disappears from all programmes.
 - If the team lead deletes the programme, all courses stay as they are.
 - No AI is involved: a programme only records what you fill in yourself.

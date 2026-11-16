@@ -267,6 +267,13 @@
       "when": 1794485096315,
       "tag": "0037_amazing_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1794820842711,
+      "tag": "0038_blue_wildside",
+      "breakpoints": true
     }
   ]
 }

@@ -45,6 +45,21 @@ describe("Programme list (/programmes)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("preselects the team named in the link (from an admin's team page)", () => {
+    const loaderData = {
+      programmes: [],
+      kinds,
+      teams: [...teams, { id: "t2", name: "Pabo" }],
+    };
+    // biome-ignore lint/suspicious/noExplicitAny: route components take framework-typed props
+    const List = ProgrammeList as ComponentType<any>;
+    const Stub = createRoutesStub([
+      { path: "/programmes", Component: () => <List loaderData={loaderData} /> },
+    ]);
+    render(<Stub initialEntries={["/programmes?team=t2"]} />);
+    expect(screen.getByLabelText("Team")).toHaveDisplayValue("Pabo");
+  });
+
   it("tells a teacher who leads no team who creates a programme", () => {
     renderRoute(ProgrammeList, { programmes: [], kinds, teams: [] });
     expect(screen.queryByRole("button", { name: "Opleiding aanmaken" })).toBeNull();
@@ -95,6 +110,7 @@ describe("Programme page (/programmes/:id)", () => {
       form: "fulltime",
       kindLabel: "hbo-bachelor · voltijd",
       teamName: "Informatica",
+      teamCount: 1,
       canManage: false,
       courses: [
         {
@@ -135,7 +151,8 @@ describe("Programme page (/programmes/:id)", () => {
     expect(screen.queryByLabelText("Jaar (Afstuderen)")).toBeNull();
     expect(screen.queryByRole("button", { name: "Weghalen (Afstuderen)" })).toBeNull();
     expect(screen.getByLabelText("Cursus")).toHaveDisplayValue("Databases");
-    expect(screen.getByText(/gedeeld met het team Informatica/)).toBeVisible();
+    expect(screen.getByText("hbo-bachelor · voltijd · Team Informatica")).toBeVisible();
+    expect(screen.getByText(/zien de collega's van Informatica hem/)).toBeVisible();
     // Only the lead or an admin edits the details.
     expect(screen.queryByLabelText("Vorm")).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
@@ -145,6 +162,16 @@ describe("Programme page (/programmes/:id)", () => {
     renderRoute(ProgrammePage, { ...data, programme: { ...data.programme, canManage: true } });
     expect(screen.getByLabelText("Vorm")).toHaveDisplayValue("voltijd");
     expect(screen.getByRole("button", { name: "Weghalen (Afstuderen)" })).toBeVisible();
+  });
+
+  it("names every team of a programme with several (BESLUIT-2026-11-16-1)", () => {
+    renderRoute(ProgrammePage, {
+      ...data,
+      programme: { ...data.programme, teamName: "Informatica, Moduleteam Web", teamCount: 2 },
+    });
+    expect(
+      screen.getByText("hbo-bachelor · voltijd · Teams Informatica, Moduleteam Web"),
+    ).toBeVisible();
   });
 
   it("says so when every course is already in it", () => {

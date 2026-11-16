@@ -524,3 +524,69 @@ describe("/admin/teams/:id: where the team belongs", () => {
     ).toEqual({ error: "unknown" });
   });
 });
+
+describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () => {
+  it("lists the team's programmes and links another team's programme to this team too", async () => {
+    const programmes = await import("~/server/repositories/programmes.server");
+    const actor = { id: admin.id, role: "admin" };
+    const here = await teams.createTeam("Moduleteam Web");
+    const there = await teams.createTeam("Opleidingsteam Informatica");
+    const own = (await programmes.createProgramme(actor, here.id, {
+      name: "Minor Web",
+      sector: "hbo",
+    }))!;
+    const other = (await programmes.createProgramme(actor, there.id, {
+      name: "Informatica VT",
+      sector: "hbo",
+    }))!;
+    const before = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
+    expect(before.programmes).toEqual([{ id: own.id, name: "Minor Web" }]);
+    expect(before.otherProgrammes).toContainEqual({
+      id: other.id,
+      name: "Informatica VT",
+      teamName: "Opleidingsteam Informatica",
+    });
+    expect(before.otherProgrammes.map((p) => p.id)).not.toContain(own.id);
+
+    const res = await call(adminTeam.action, {
+      request: post({ intent: "linkProgramme", programmeId: other.id }),
+      params: { id: here.id },
+    });
+    expect(res).toEqual({ saved: true });
+    const after = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
+    expect(after.programmes.map((p) => p.name)).toEqual(["Informatica VT", "Minor Web"]);
+    // The other team keeps it: a programme can have several teams.
+    expect((await programmes.getProgramme(actor, other.id))?.teamIds.sort()).toEqual(
+      [here.id, there.id].sort(),
+    );
+    expect(
+      await call(adminTeam.action, {
+        request: post({ intent: "linkProgramme", programmeId: "nope" }),
+        params: { id: here.id },
+      }),
+    ).toEqual({ error: "unknown" });
+  });
+
+  it("unlinks a programme from the team, but not from its last team", async () => {
+    const programmes = await import("~/server/repositories/programmes.server");
+    const links = await import("~/server/repositories/programmeTeams.server");
+    const actor = { id: admin.id, role: "admin" };
+    const a = await teams.createTeam("Team Een");
+    const b = await teams.createTeam("Team Twee");
+    const p = (await programmes.createProgramme(actor, a.id, { name: "Samen", sector: "hbo" }))!;
+    await links.linkProgrammeTeam(actor, p.id, b.id);
+    expect(
+      await call(adminTeam.action, {
+        request: post({ intent: "unlinkProgramme", programmeId: p.id }),
+        params: { id: b.id },
+      }),
+    ).toEqual({ saved: true });
+    expect(
+      await call(adminTeam.action, {
+        request: post({ intent: "unlinkProgramme", programmeId: p.id }),
+        params: { id: a.id },
+      }),
+    ).toEqual({ error: "lastTeam" });
+    expect((await programmes.getProgramme(actor, p.id))?.teamIds).toEqual([a.id]);
+  });
+});

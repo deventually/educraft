@@ -19,6 +19,11 @@ import {
   setTeamDivision,
   teamDivisionId,
 } from "~/server/repositories/organisation.server";
+import { listProgrammes } from "~/server/repositories/programmes.server";
+import {
+  linkProgrammeTeam,
+  unlinkProgrammeTeam,
+} from "~/server/repositories/programmeTeams.server";
 import { divisionWord } from "~/lib/organisation/kinds";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { loc } from "~/lib/i18n/localized";
@@ -32,6 +37,7 @@ import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
 import { TeamDivisionForm } from "~/components/teams/TeamDivisionForm";
+import { TeamProgrammes } from "~/components/teams/TeamProgrammes";
 import { redirectWithFlash } from "~/server/flash.server";
 
 /** The most people one "add" may carry; the candidate list is capped the same. */
@@ -39,19 +45,20 @@ const MAX_PEOPLE = 500;
 
 /**
  * One team's page (admin): name, members and leads, add several colleagues at once by
- * ticking them, remove one, the division it belongs under, the team's choices (P28.3) and delete. The team is the one
+ * ticking them, remove one, the division it belongs under, its programmes, the team's choices (P28.3) and delete. The team is the one
  * in the URL; a `teamId` in a form is ignored.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
-  await requireRole(request, "admin");
+  const admin = await requireRole(request, "admin");
   const team = await getTeamWithMembers(params.id);
   if (!team) throw new Response("Not found", { status: 404 });
-  const [people, offer, divisions, divisionId, kind] = await Promise.all([
+  const [people, offer, divisions, divisionId, kind, programmes] = await Promise.all([
     listPeople({ status: "active", limit: MAX_PEOPLE }),
     getTeamSettingsOffer(),
     listDivisions(),
     teamDivisionId(team.id),
     getDivisionKind(),
+    listProgrammes(admin, 500),
   ]);
   const inTeam = new Set(team.members.map((m) => m.userId));
   const candidates = people
@@ -65,6 +72,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     divisions: divisions.map(({ id, name }) => ({ id, name })),
     divisionId,
     divisionWord: loc(divisionWord(kind), getLocale(request)),
+    // The team's programmes, and the others an admin may link it to (BESLUIT-2026-11-16-1).
+    programmes: programmes
+      .filter((p) => p.teamIds.includes(team.id))
+      .map(({ id, name }) => ({ id, name })),
+    otherProgrammes: programmes
+      .filter((p) => !p.teamIds.includes(team.id))
+      .map(({ id, name, teamName }) => ({ id, name, teamName })),
   };
 }
 
@@ -104,6 +118,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     return (await setTeamDivision(admin, team.id, divisionId))
       ? { saved: true as const }
       : { error: "unknown" as const };
+  }
+  const programmeId = String(fd.get("programmeId") ?? "");
+  if (intent === "linkProgramme") {
+    return (await linkProgrammeTeam(admin, programmeId, team.id))
+      ? { saved: true as const }
+      : { error: "unknown" as const };
+  }
+  if (intent === "unlinkProgramme") {
+    const result = await unlinkProgrammeTeam(admin, programmeId, team.id);
+    if (result === "unlinked") return { saved: true as const };
+    return { error: result === "lastTeam" ? ("lastTeam" as const) : ("unknown" as const) };
   }
   if (intent === "settings") {
     const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
@@ -185,6 +210,7 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
   const { team, candidates, offer, divisions, divisionId, divisionWord } = loaderData;
+  const { programmes, otherProgrammes } = loaderData;
   const actionData = useActionData<typeof action>();
   const errorOf = (code: string | true) =>
     typeof code === "string" ? teamError(t, code) : undefined;
@@ -242,6 +268,8 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
           />
         </div>
       </section>
+
+      <TeamProgrammes teamId={team.id} programmes={programmes} others={otherProgrammes} />
 
       <section className={`${card} space-y-5`} aria-labelledby="team-members">
         <h3 id="team-members" className={h3}>

@@ -5,7 +5,7 @@
  * it; the lead of its own programme or an admin manages it, and linking another programme takes
  * managing that one too. The courses are read through `listProgrammeCourses` of the programmes
  * the reader may read, so a line only shows a course that is still in one of them and still
- * shared with that team.
+ * shared with one of its teams.
  */
 import { randomUUID } from "node:crypto";
 import { asc, eq, like, or, sql } from "drizzle-orm";
@@ -67,11 +67,10 @@ async function readableProgrammes(a: Actor, row: Row) {
 }
 
 /** Every course the actor sees in these programmes, once, by id. */
-function visibleCourses(readable: { id: string; teamId: string }[]) {
+function visibleCourses(readable: { id: string }[]) {
   const all = new Map<string, ReturnType<typeof listProgrammeCourses>[number]>();
   for (const p of readable)
-    for (const c of listProgrammeCourses(p.id, p.teamId))
-      if (!all.has(c.courseId)) all.set(c.courseId, c);
+    for (const c of listProgrammeCourses(p.id)) if (!all.has(c.courseId)) all.set(c.courseId, c);
   return all;
 }
 
