@@ -19,6 +19,7 @@ export const programmes = {
   emptyBody:
     "Een opleiding bundelt de cursussen van een team, met per cursus het jaar en de periode.",
   emptyTitle: "Nog geen opleidingen",
+  errorDeleteAdminOnly: "Alleen een beheerder kan een opleiding verwijderen.",
   errorInvalid: "Dat lukte niet. Kijk de velden nog eens na.",
   errorName: "Geef de opleiding een naam van hooguit 200 tekens.",
   errorNotAllowed: "Alleen de teamleider of een beheerder kan dat.",

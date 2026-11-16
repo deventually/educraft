@@ -18,6 +18,7 @@ export const programmes = {
   deleteTitle: "Delete programme?",
   emptyBody: "A programme bundles the courses of a team, with the year and period of each course.",
   emptyTitle: "No programmes yet",
+  errorDeleteAdminOnly: "Only an admin can delete a programme.",
   errorInvalid: "That didn't work. Please check the fields.",
   errorName: "Give the programme a name of at most 200 characters.",
   errorNotAllowed: "Only the team lead or an admin can do that.",

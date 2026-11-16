@@ -259,8 +259,12 @@ export async function updateProgramme(
   return updated ? rowToProgramme(updated, ids) : null;
 }
 
-/** Removes the programme and its placements; the courses and their shares stay. */
+/**
+ * Removes the programme and its placements; the courses and their shares stay. Only an admin
+ * (BESLUIT-2026-11-16-3): a lead manages the programme but does not delete it.
+ */
 export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
+  if (!isAdmin(a)) return false;
   const row = managedRow(a, id);
   if (!row) return false;
   getDb().transaction((tx) => {

@@ -122,15 +122,26 @@ describe("/programmes", () => {
         kind: "hbo-master",
         teamName,
         courses: 0,
-        canManage: true,
+        canDelete: false,
       }),
     ]);
     expect(data.teams).toEqual([{ id: teamId, name: teamName }]);
     expect(data.kinds.map((k) => k.value)).toContain("wo:master");
   });
 
-  it("deletes a programme I manage", async () => {
+  it("refuses to delete a programme I lead: only an admin deletes one", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Blijft"));
+    expect(
+      await list.action({ request: post("/programmes", { intent: "delete", id: p!.id }) } as never),
+    ).toEqual({ ok: false, error: "Alleen een beheerder kan een opleiding verwijderen." });
+    expect(await repo.getProgramme(me, p!.id)).not.toBeNull();
+  });
+
+  it("lets an admin delete a programme, and offers it in the list", async () => {
     const p = await repo.createProgramme(me, teamId, hbo("Weg"));
+    await signInAs({ id: `route-admin-${n}`, name: "Beheer", role: "admin" });
+    const data = await list.loader({ request: get("/programmes") } as never);
+    expect(data.programmes.find((x) => x.id === p!.id)).toMatchObject({ canDelete: true });
     expect(
       await list.action({ request: post("/programmes", { intent: "delete", id: p!.id }) } as never),
     ).toMatchObject({ ok: true });

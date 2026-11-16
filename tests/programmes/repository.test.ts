@@ -48,7 +48,7 @@ async function world() {
 const hbo = (name: string) => ({ name, sector: "hbo", track: "bachelor" });
 
 describe("programmes of a team: who manages", () => {
-  it("lets the team lead and an admin create, rename and delete; a member or outsider not", async () => {
+  it("lets the team lead and an admin create and rename; a member or outsider not", async () => {
     const { lead, member, outsider, admin, team } = await world();
     expect(await repo.createProgramme(member, team.id, hbo("Mag niet"))).toBeNull();
     expect(await repo.createProgramme(outsider, team.id, hbo("Mag niet"))).toBeNull();
@@ -61,8 +61,16 @@ describe("programmes of a team: who manages", () => {
     expect(
       await repo.updateProgramme(lead, p!.id, { ...hbo("HBO-ICT deeltijd"), form: "parttime" }),
     ).toMatchObject({ name: "HBO-ICT deeltijd", form: "parttime" });
-    expect(await repo.deleteProgramme(member, q!.id)).toBe(false);
-    expect(await repo.deleteProgramme(admin, q!.id)).toBe(true);
+  });
+
+  it("lets only an admin delete a programme, not even its lead (BESLUIT-2026-11-16-3)", async () => {
+    const { lead, member, admin, team } = await world();
+    const p = (await repo.createProgramme(lead, team.id, hbo("HBO-ICT")))!;
+    expect(await repo.deleteProgramme(member, p.id)).toBe(false);
+    expect(await repo.deleteProgramme(lead, p.id)).toBe(false);
+    expect(await repo.getProgramme(lead, p.id)).not.toBeNull();
+    expect(await repo.deleteProgramme(admin, p.id)).toBe(true);
+    expect(await repo.getProgramme(admin, p.id)).toBeNull();
   });
 
   it("refuses invalid input before writing", async () => {

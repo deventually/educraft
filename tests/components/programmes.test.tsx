@@ -68,7 +68,7 @@ describe("Programme list (/programmes)", () => {
     ).toBeVisible();
   });
 
-  it("lists programmes with kind, team and number of courses; delete only where you manage", async () => {
+  it("lists programmes with kind, team and number of courses; delete only for an admin", async () => {
     const { container } = renderRoute(ProgrammeList, {
       programmes: [
         {
@@ -77,7 +77,7 @@ describe("Programme list (/programmes)", () => {
           kind: "hbo-bachelor · voltijd",
           teamName: "Informatica",
           courses: 12,
-          canManage: true,
+          canDelete: true,
         },
         {
           id: "p2",
@@ -85,7 +85,7 @@ describe("Programme list (/programmes)", () => {
           kind: "hbo-bachelor",
           teamName: "Data",
           courses: 3,
-          canManage: false,
+          canDelete: false,
         },
       ],
       kinds,

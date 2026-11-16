@@ -1,8 +1,8 @@
 /**
  * The teams of a programme (BESLUIT-2026-11-16-1): a programme has one or more teams, such as
  * the programme team and its module teams. Every member of one of them reads the programme, a
- * lead of one of them manages it (`programmes.server.ts`). Linking and unlinking is for an admin;
- * a programme always keeps at least one team. The read helpers are for the programme
+ * lead of one of them manages it (`programmes.server.ts`). Linking and unlinking is for an admin
+ * or such a lead (BESLUIT-2026-11-16-3); a programme always keeps at least one team. The read helpers are for the programme
  * repository, which scopes its queries itself.
  */
 import { and, asc, count, eq, inArray } from "drizzle-orm";
@@ -16,6 +16,10 @@ interface Actor {
 }
 
 const isAdmin = (a: Actor) => a.role === "admin";
+
+/** An admin, or a lead of one of the programme's teams: the ones who choose its teams. */
+const choosesTeams = (a: Actor, programmeId: string) =>
+  isAdmin(a) || myTeams(a.id, programmeId).some((m) => m.isLead);
 
 /** The teams of these programmes, by name, per programme id. Not scoped: callers scope. */
 export function teamsOf(programmeIds: string[]): Map<string, { id: string; name: string }[]> {
@@ -49,13 +53,17 @@ export const namesOf = (list: { name: string }[] = []) => list.map((t) => t.name
 const exists = (table: typeof programmes | typeof teams, id: string) =>
   !!getDb().select({ id: table.id }).from(table).where(eq(table.id, id)).get();
 
-/** Links a team to a programme (admin only; linking twice changes nothing). False otherwise. */
+/**
+ * Links a team to a programme (an admin or a lead of one of its teams; linking twice changes
+ * nothing). False otherwise.
+ */
 export async function linkProgrammeTeam(
   a: Actor,
   programmeId: string,
   teamId: string,
 ): Promise<boolean> {
-  if (!isAdmin(a) || !exists(programmes, programmeId) || !exists(teams, teamId)) return false;
+  if (!exists(programmes, programmeId) || !exists(teams, teamId) || !choosesTeams(a, programmeId))
+    return false;
   getDb()
     .insert(programmeTeams)
     .values({ programmeId, teamId, createdAt: new Date() })
@@ -65,7 +73,7 @@ export async function linkProgrammeTeam(
 }
 
 /**
- * Unlinks a team from a programme (admin only). Its members no longer read the programme, and
+ * Unlinks a team from a programme (an admin or a lead of one of its teams). Its members no longer read the programme, and
  * a course shows in it only while it is shared with one of the remaining teams. Never the last
  * team: a programme without a team would be no one's.
  */
@@ -74,7 +82,7 @@ export async function unlinkProgrammeTeam(
   programmeId: string,
   teamId: string,
 ): Promise<"unlinked" | "lastTeam" | "refused"> {
-  if (!isAdmin(a)) return "refused";
+  if (!choosesTeams(a, programmeId)) return "refused";
   const db = getDb();
   const linked = and(
     eq(programmeTeams.programmeId, programmeId),

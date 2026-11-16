@@ -144,7 +144,7 @@ describe("learning lines: the courses in order", () => {
   it("goes with its programme and its team", async () => {
     const a = await world();
     const l1 = await lines.createLine(a.lead, a.programme.id, "Lijn", [a.p1.id]);
-    await programmes.deleteProgramme(a.lead, a.programme.id);
+    await programmes.deleteProgramme({ id: "admin", role: "admin" }, a.programme.id);
     expect(await lines.getLine({ id: "x", role: "admin" }, l1!.id)).toBeNull();
 
     const b = await world();

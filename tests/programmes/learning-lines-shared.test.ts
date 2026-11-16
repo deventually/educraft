@@ -110,7 +110,7 @@ describe("a learning line across programmes", () => {
     expect(await lines.listLines(memberB, b.id)).toEqual([]);
     expect(await lines.getLine(memberB, line.id)).toBeNull();
     await lines.setLineProgrammes(both, line.id, [b.id]);
-    await programmes.deleteProgramme(both, b.id);
+    await programmes.deleteProgramme({ id: "admin", role: "admin" }, b.id);
     expect(await lines.getLine(memberB, line.id)).toBeNull();
     expect((await lines.getLine(both, line.id))?.programmes.map((p) => p.id)).toEqual([a.id]);
   });

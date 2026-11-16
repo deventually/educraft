@@ -33,7 +33,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     kind: programmeKindLabel(p, locale),
     teamName: p.teamName,
     courses: p.courseCount,
-    canManage: p.canManage,
+    // Only an admin deletes a programme (BESLUIT-2026-11-16-3); a lead manages it.
+    canDelete: user.role === "admin",
   }));
   return {
     programmes,
@@ -49,6 +50,7 @@ export async function action({ request }: Route.ActionArgs) {
   const m = getMessages(getLocale(request)).programmes;
   const intent = fd.get("intent");
   if (intent === "delete") {
+    if (user.role !== "admin") return { ok: false as const, error: m.errorDeleteAdminOnly };
     return (await deleteProgramme(user, String(fd.get("id") ?? "")))
       ? { ok: true as const }
       : { ok: false as const, error: m.errorNotFound };
@@ -179,7 +181,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
                     })}
                   </p>
                 </div>
-                {programme.canManage && (
+                {programme.canDelete && (
                   <ConfirmDialog
                     triggerLabel={`${p.delete}: ${programme.name}`}
                     triggerIcon={<Trash2 className="size-4" aria-hidden />}
