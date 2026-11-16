@@ -11,17 +11,20 @@ const link =
  * The programmes a team works on, on the admin's and the lead's team page
  * (BESLUIT-2026-11-16-4), in the fixed pattern (plan step 3): "Opleiding toevoegen" puts the
  * team in programmes of the institution, with their faculty; Weghalen asks first, and the
- * programme stays. "Nieuwe opleiding voor dit team" starts one with this team.
+ * programme stays. "Nieuwe opleiding voor dit team" starts one with this team: only on the
+ * admin's page, since only an admin creates a programme.
  */
 export function TeamProgrammes({
   team,
   programmes,
   choices,
+  canCreate = false,
   headingLevel = 3,
 }: {
   team: { id: string; name: string };
   programmes: { id: string; name: string }[];
   choices: { id: string; name: string; divisionName: string | null }[];
+  canCreate?: boolean;
   headingLevel?: 2 | 3;
 }) {
   const tt = useT().teams;
@@ -33,9 +36,11 @@ export function TeamProgrammes({
       empty={tt.programmesNone}
       add={
         <div className="flex flex-wrap items-center gap-3">
-          <Link to={`/programmes?team=${encodeURIComponent(team.id)}`} className={link}>
-            {tt.programmesNew}
-          </Link>
+          {canCreate && (
+            <Link to={`/programmes?team=${encodeURIComponent(team.id)}`} className={link}>
+              {tt.programmesNew}
+            </Link>
+          )}
           {choices.length > 0 && (
             <AddDialog
               triggerLabel={tt.programmesAdd}

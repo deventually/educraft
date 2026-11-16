@@ -7,7 +7,7 @@ export const programmes = {
     "Je zit niet in een team van deze opleiding. Alleen teamleden zetten hun eigen cursussen erin. Een beheerder zet je in een team via Beheer → Teams.",
   addTeam: "Team toevoegen",
   addTeamHint:
-    "De leden van een toegevoegd team zien de opleiding en zetten er hun cursussen in. Hun teamleider beheert haar mee.",
+    "De leden van een toegevoegd team zien de opleiding en zetten er hun cursussen in. De beheerder beheert haar.",
   addTeamNone: "Er is geen team meer om toe te voegen. Een nieuw team maak je bij Beheer → Teams.",
   addTeamTitle: "Teams toevoegen aan {programme}",
   addTitle: "Cursus toevoegen",
@@ -35,7 +35,7 @@ export const programmes = {
   errorInvalid: "Dat lukte niet. Kijk de velden nog eens na.",
   errorName: "Geef de opleiding een naam van hooguit 200 tekens.",
   errorNoChoice: "Kies er minstens één.",
-  errorNotAllowed: "Alleen de teamleider of een beheerder kan dat.",
+  errorNotAllowed: "Alleen een beheerder kan dat.",
   errorNotFound: "Die opleiding of cursus kan ik niet vinden.",
   errorOwnTeam: "Je kunt alleen je eigen team toevoegen of weghalen.",
   errorPlacement:
@@ -67,12 +67,12 @@ export const programmes = {
     emptyLine: "Er staan geen cursussen (meer) in deze leerlijn.",
     errorCourses: "Kies minstens één cursus van de opleiding.",
     errorName: "Geef de leerlijn een naam van hooguit 200 tekens.",
-    errorNotAllowed: "Alleen de teamleider of een beheerder kan de leerlijn aanpassen.",
+    errorNotAllowed: "Alleen een beheerder kan de leerlijn aanpassen.",
     from: "uit {programme}",
     intro:
       "Een leerlijn is een reeks cursussen binnen de opleiding, op volgorde, zoals Programmeren of Onderzoeken.",
     linkHint:
-      "Je ziet de opleidingen waarvan je teamleider bent. Cursussen uit een aangevinkte opleiding kun je daarna aan de leerlijn toevoegen.",
+      "Je ziet alle opleidingen. Cursussen uit een aangevinkte opleiding kun je daarna aan de leerlijn toevoegen.",
     linkLegend: "Geldt ook voor andere opleidingen",
     linkSave: "Opleidingen opslaan",
     name: "Naam",
@@ -103,7 +103,7 @@ export const programmes = {
   noPlace: "Nog geen jaar of periode",
   noTeamOption: "Nog geen team",
   noTeams:
-    "Een opleiding hoort bij een team. Alleen een teamleider of een beheerder maakt er een aan. Vraag je teamleider als je opleiding er nog niet bij staat.",
+    "Alleen een beheerder maakt een opleiding aan. Een teamleider koppelt zijn team aan een opleiding, op de pagina van het team. Vraag je beheerder als je opleiding er nog niet bij staat.",
   noTeamYet: "nog geen team",
   onCourse: {
     empty: "Deze cursus hoort nog bij geen opleiding.",
@@ -138,7 +138,7 @@ export const programmes = {
   teamsAdded: "{count} teams toegevoegd.",
   teamsEmpty: "Nog geen team. Alleen een beheerder ziet deze opleiding, tot er een team bij komt.",
   teamsIntro:
-    "Het opleidingsteam en de moduleteams. Wie in een van deze teams zit, ziet de opleiding en zet er eigen cursussen in; hun teamleiders beheren haar. Een teamleider voegt zijn eigen team toe of haalt het weg, een beheerder elk team.",
+    "Het opleidingsteam en de moduleteams. Wie in een van deze teams zit, ziet de opleiding en zet er eigen cursussen in; de beheerder beheert haar. Een teamleider voegt zijn eigen team toe of haalt het weg, een beheerder elk team.",
   toastDeleted: "Opleiding verwijderd.",
   toastPlaced: "De cursus staat in de opleiding.",
   toastRemoved: "De cursus is uit de opleiding gehaald.",

@@ -64,6 +64,8 @@ async function status(p: Promise<unknown>): Promise<number | undefined> {
 }
 
 const hbo = (name: string) => ({ name, sector: "hbo", track: "bachelor" });
+/** Only an admin makes a programme (BESLUIT-2026-11-16-4). */
+const ADMIN = { id: "x", role: "admin" as const };
 
 describe("programme routes", () => {
   it("are in the app shell", () => {
@@ -76,7 +78,25 @@ describe("programme routes", () => {
 });
 
 describe("/programmes", () => {
-  it("lets a team lead create a programme for the team, and opens it", async () => {
+  it("refuses a team lead who creates a programme, also for their own team (BESLUIT-2026-11-16-4)", async () => {
+    for (const team of [teamId, ""])
+      expect(
+        await list.action({
+          request: post("/programmes", {
+            intent: "create",
+            teamId: team,
+            name: "HBO-ICT",
+            kind: "hbo:bachelor",
+          }),
+        } as never),
+      ).toEqual({ ok: false, error: "Alleen een beheerder kan dat." });
+    const data = await list.loader({ request: get("/programmes") } as never);
+    expect(data.isAdmin).toBe(false);
+    expect(data.teams).toEqual([]);
+  });
+
+  it("lets an admin create a programme for a team, and opens it", async () => {
+    await signInAs({ id: `route-admin-team-${n}`, name: "Beheer", role: "admin" });
     const r = await list.action({
       request: post("/programmes", {
         intent: "create",
@@ -122,23 +142,8 @@ describe("/programmes", () => {
     });
   });
 
-  it("refuses a lead who creates one without a team", async () => {
-    expect(
-      await list.action({
-        request: post("/programmes", {
-          intent: "create",
-          teamId: "",
-          name: "x",
-          kind: "hbo:bachelor",
-        }),
-      } as never),
-    ).toEqual({ ok: false, error: "Alleen de teamleider of een beheerder kan dat." });
-    expect((await list.loader({ request: get("/programmes") } as never)).isAdmin).toBe(false);
-  });
-
-  it("refuses an empty name, an unknown level, and a team I don't lead", async () => {
-    const other = await teams.createTeam(`Ander team ${n}`);
-    await teams.addMember(other.id, me.id);
+  it("refuses an empty name, an unknown level, and a team that does not exist", async () => {
+    await signInAs({ id: `route-admin-bad-${n}`, name: "Beheer", role: "admin" });
     const create = (fields: Record<string, string>) =>
       list.action({ request: post("/programmes", { intent: "create", ...fields }) } as never);
     expect(await create({ teamId, name: " ", kind: "hbo:bachelor" })).toEqual({
@@ -146,14 +151,14 @@ describe("/programmes", () => {
       error: "Geef de opleiding een naam van hooguit 200 tekens.",
     });
     expect(await create({ teamId, name: "x", kind: "po:groep8" })).toMatchObject({ ok: false });
-    expect(await create({ teamId: other.id, name: "x", kind: "hbo:bachelor" })).toEqual({
+    expect(await create({ teamId: "geen-team", name: "x", kind: "hbo:bachelor" })).toEqual({
       ok: false,
-      error: "Alleen de teamleider of een beheerder kan dat.",
+      error: "Alleen een beheerder kan dat.",
     });
   });
 
-  it("lists the programmes of my teams, with team, kind and courses, and the teams I lead", async () => {
-    await repo.createProgramme(me, teamId, { ...hbo("Master Informatica"), track: "master" });
+  it("lists the programmes of my teams, with team, kind and courses", async () => {
+    await repo.createProgramme(ADMIN, teamId, { ...hbo("Master Informatica"), track: "master" });
     const data = await list.loader({ request: get("/programmes") } as never);
     expect(data.programmes).toEqual([
       expect.objectContaining({
@@ -164,12 +169,11 @@ describe("/programmes", () => {
         canDelete: false,
       }),
     ]);
-    expect(data.teams).toEqual([{ id: teamId, name: teamName }]);
     expect(data.kinds.map((k) => k.value)).toContain("wo:master");
   });
 
   it("refuses to delete a programme I lead: only an admin deletes one", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Blijft"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Blijft"));
     expect(
       await list.action({ request: post("/programmes", { intent: "delete", id: p!.id }) } as never),
     ).toEqual({ ok: false, error: "Alleen een beheerder kan een opleiding verwijderen." });
@@ -177,7 +181,7 @@ describe("/programmes", () => {
   });
 
   it("lets an admin delete a programme, and offers it in the list", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Weg"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Weg"));
     await signInAs({ id: `route-admin-${n}`, name: "Beheer", role: "admin" });
     const data = await list.loader({ request: get("/programmes") } as never);
     expect(data.programmes.find((x) => x.id === p!.id)).toMatchObject({ canDelete: true });
@@ -201,7 +205,7 @@ describe("/programmes/:id", () => {
   });
 
   it("adds my course at a year and period, moves it, and removes it", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const c = await courses.createCourse(me.id, { name: "Programmeren 1" });
     expect((await load(p!.id)).available).toEqual([{ id: c.id, name: "Programmeren 1" }]);
     expect((await load(p!.id)).canPlace).toBe(true);
@@ -225,8 +229,8 @@ describe("/programmes/:id", () => {
     expect(await act(p!.id, { intent: "remove", courseId: c.id })).toMatchObject({ ok: true });
   });
 
-  it("shows a colleague's course, which I may take out but not move", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+  it("shows a colleague's course, which I as lead may neither move nor take out", async () => {
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const c = await courses.createCourse(colleague.id, { name: "Databases" });
     await repo.placeCourse(colleague, p!.id, c.id, { year: 1 });
     expect((await load(p!.id)).programme.courses).toEqual([
@@ -235,12 +239,12 @@ describe("/programmes/:id", () => {
     expect(await act(p!.id, { intent: "place", courseId: c.id, year: "3" })).toMatchObject({
       ok: false,
     });
-    expect(await act(p!.id, { intent: "remove", courseId: c.id })).toMatchObject({ ok: true });
+    expect(await act(p!.id, { intent: "remove", courseId: c.id })).toMatchObject({ ok: false });
   });
 
   it("offers a course I co-own, never one I only edit (BESLUIT-2026-11-10-5)", async () => {
     const members = await import("~/server/repositories/courseMembers.server");
-    const p = await repo.createProgramme(me, teamId, hbo("Deeltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Deeltijd"));
     const coOwned = await courses.createCourse(colleague.id, { name: "Samen van" });
     const edited = await courses.createCourse(colleague.id, { name: "Alleen bewerken" });
     await members.setCourseMember(colleague.id, coOwned.id, me.id, "co-owner");
@@ -254,15 +258,21 @@ describe("/programmes/:id", () => {
   });
 
   it("refuses a year out of range", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const mine = await courses.createCourse(me.id, { name: "Mijn" });
     expect(await act(p!.id, { intent: "place", courseId: mine.id, year: "99" })).toMatchObject({
       ok: false,
     });
   });
 
-  it("saves new settings when I manage it, and refuses when I don't", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Oud"));
+  it("saves new settings for an admin, and refuses the lead (BESLUIT-2026-11-16-4)", async () => {
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Oud"));
+    expect((await load(p!.id)).programme.canManage).toBe(false);
+    expect(await act(p!.id, { intent: "settings", name: "Gekaapt", kind: "wo:master" })).toEqual({
+      ok: false,
+      error: "Alleen een beheerder kan dat.",
+    });
+    await signInAs({ id: `route-admin-settings-${n}`, name: "Beheer", role: "admin" });
     expect(
       await act(p!.id, { intent: "settings", name: "Nieuw", kind: "wo:master", form: "" }),
     ).toMatchObject({ ok: true });
@@ -272,10 +282,6 @@ describe("/programmes/:id", () => {
       track: "master",
       form: null,
     });
-    await teams.setLead(teamId, me.id, false);
-    expect(
-      await act(p!.id, { intent: "settings", name: "Weer anders", kind: "wo:master" }),
-    ).toMatchObject({ ok: false });
   });
 });
 
@@ -293,7 +299,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
     detail.loader({ request: get(`/programmes/${id}`), params: { id } } as never);
 
   it("adds several of my courses at once, at the same year and period", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const a = await courses.createCourse(me.id, { name: "Programmeren 1" });
     const b = await courses.createCourse(me.id, { name: "Databases" });
     expect(
@@ -312,7 +318,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 
   it("refuses adding no course, or a course that is not mine", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const theirs = await courses.createCourse(colleague.id, { name: "Van collega" });
     expect(await actMany(p!.id, [["intent", "add-courses"]])).toMatchObject({ ok: false });
     expect(
@@ -325,7 +331,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 
   it("shows its teams, and offers a lead only the other teams they lead", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const mine = await teams.createTeam(`Mijn moduleteam ${n}`);
     await teams.addMember(mine.id, me.id);
     await teams.setLead(mine.id, me.id, true);
@@ -338,7 +344,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 
   it("lets a lead add their own teams, not another's, and take their team off", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const web = await teams.createTeam(`Moduleteam Web ${n}`);
     await teams.addMember(web.id, me.id);
     await teams.setLead(web.id, me.id, true);
@@ -365,7 +371,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 
   it("lets an admin add any teams at once", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const web = await teams.createTeam(`Moduleteam Web ${n}`);
     const data = await teams.createTeam(`Moduleteam Data ${n}`);
     await signInAs({ id: `route-admin-teams-${n}`, name: "Beheer", role: "admin" });
@@ -383,7 +389,7 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 
   it("refuses a plain member who adds or takes off a team, and offers them none", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Voltijd"));
     const web = await teams.createTeam(`Moduleteam Web ${n}`);
     await signInAs({ id: colleague.id, name: "Collega" });
     expect((await load(p!.id)).teamOptions).toEqual([]);
@@ -410,7 +416,7 @@ describe("/programmes/:id: delete at the bottom, for an admin only", () => {
     detail.action({ request: post(`/programmes/${id}`, fields), params: { id } } as never);
 
   it("offers no delete to the lead, and refuses it", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Blijft"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Blijft"));
     expect((await load(p!.id)).canDelete).toBe(false);
     expect(await act(p!.id, { intent: "delete" })).toEqual({
       ok: false,
@@ -419,7 +425,7 @@ describe("/programmes/:id: delete at the bottom, for an admin only", () => {
   });
 
   it("lets an admin delete it, and goes back to the list", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Weg"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Weg"));
     await signInAs({ id: `route-admin-del-${n}`, name: "Beheer", role: "admin" });
     expect((await load(p!.id)).canDelete).toBe(true);
     const res = (await act(p!.id, { intent: "delete" })) as Response;
@@ -434,7 +440,7 @@ describe("course page: belongs to programme…", () => {
     course.action({ request: post(`/courses/${id}`, fields), params: { id } } as never);
 
   it("places the course in a programme of my team and shows where it sits", async () => {
-    const p = await repo.createProgramme(me, teamId, hbo("Deeltijd"));
+    const p = await repo.createProgramme(ADMIN, teamId, hbo("Deeltijd"));
     const c = await courses.createCourse(me.id, { name: "Databases" });
     expect(
       await act(c.id, { intent: "programme-place", programmeId: p!.id, year: "2", period: "3" }),

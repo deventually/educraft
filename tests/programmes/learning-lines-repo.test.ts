@@ -29,6 +29,9 @@ const withOutcome = (text: string, bloom: "apply" | "create"): CourseData => ({
   assessments: [],
 });
 
+/** Only an admin manages a programme and its learning lines (BESLUIT-2026-11-16-4). */
+const ADMIN = { id: "admin", role: "admin" as const };
+
 /** A team (lead L, member M, outsider O) with a programme and three placed courses. */
 async function world() {
   n += 1;
@@ -46,7 +49,7 @@ async function world() {
   await teams.addMember(team.id, lead.id);
   await teams.addMember(team.id, member.id);
   await teams.setLead(team.id, lead.id, true);
-  const p = await programmes.createProgramme(lead, team.id, { name: "HBO-ICT", sector: "hbo" });
+  const p = await programmes.createProgramme(ADMIN, team.id, { name: "HBO-ICT", sector: "hbo" });
   const mkCourse = async (owner: Actor, name: string, year: number, data: CourseData) => {
     const c = await courses.createCourse(owner.id, { name, data });
     await programmes.placeCourse(owner, p!.id, c.id, { year });
@@ -69,10 +72,11 @@ async function world() {
 }
 
 describe("learning lines: who manages", () => {
-  it("lets the lead create, rename and delete a line; a member reads it; an outsider sees nothing", async () => {
+  it("lets an admin create, rename and delete a line, not the lead; a member reads it; an outsider sees nothing", async () => {
     const { lead, member, outsider, programme, p1, p2 } = await world();
     expect(await lines.createLine(member, programme.id, "Mag niet", [p1.id])).toBeNull();
-    const line = await lines.createLine(lead, programme.id, "Programmeren", [p1.id, p2.id]);
+    expect(await lines.createLine(lead, programme.id, "Mag niet", [p1.id])).toBeNull();
+    const line = await lines.createLine(ADMIN, programme.id, "Programmeren", [p1.id, p2.id]);
     expect(line).toMatchObject({ name: "Programmeren", courseIds: [p1.id, p2.id] });
     expect((await lines.listLines(member, programme.id)).map((l) => l.name)).toEqual([
       "Programmeren",
@@ -81,38 +85,39 @@ describe("learning lines: who manages", () => {
     expect(await lines.getLine(outsider, line!.id)).toBeNull();
 
     expect(await lines.renameLine(member, line!.id, "Gekaapt")).toBe(false);
-    expect(await lines.renameLine(lead, line!.id, "Software")).toBe(true);
+    expect(await lines.renameLine(lead, line!.id, "Gekaapt")).toBe(false);
+    expect(await lines.renameLine(ADMIN, line!.id, "Software")).toBe(true);
     expect(await lines.deleteLine(member, line!.id)).toBe(false);
-    expect(await lines.deleteLine(lead, line!.id)).toBe(true);
+    expect(await lines.deleteLine(ADMIN, line!.id)).toBe(true);
     expect(await lines.listLines(lead, programme.id)).toEqual([]);
   });
 
   it("refuses an empty name and a course that is not in the programme", async () => {
     const { lead, programme, p1 } = await world();
     const stray = await courses.createCourse(lead.id, { name: "Niet in de opleiding" });
-    expect(await lines.createLine(lead, programme.id, " ", [p1.id])).toBeNull();
-    expect(await lines.createLine(lead, programme.id, "Lijn", [p1.id, stray.id])).toBeNull();
+    expect(await lines.createLine(ADMIN, programme.id, " ", [p1.id])).toBeNull();
+    expect(await lines.createLine(ADMIN, programme.id, "Lijn", [p1.id, stray.id])).toBeNull();
   });
 });
 
 describe("learning lines: the courses in order", () => {
   it("keeps the chosen order and moves a course up or down", async () => {
     const { lead, programme, p1, p2, db } = await world();
-    const line = await lines.createLine(lead, programme.id, "Lijn", [p2.id, p1.id, db.id]);
-    expect(await lines.moveCourse(lead, line!.id, p1.id, -1)).toBe(true);
+    const line = await lines.createLine(ADMIN, programme.id, "Lijn", [p2.id, p1.id, db.id]);
+    expect(await lines.moveCourse(ADMIN, line!.id, p1.id, -1)).toBe(true);
     expect((await lines.getLine(lead, line!.id))?.courses.map((c) => c.name)).toEqual([
       "Programmeren 1",
       "Programmeren 2",
       "Databases",
     ]);
     // The first course can't go further up.
-    expect(await lines.moveCourse(lead, line!.id, p1.id, -1)).toBe(false);
+    expect(await lines.moveCourse(ADMIN, line!.id, p1.id, -1)).toBe(false);
   });
 
   it("sets the courses of a line, and gives the overview with the colleagues' outcomes", async () => {
-    const { lead, member, programme, p1, p2 } = await world();
-    const line = await lines.createLine(lead, programme.id, "Lijn", [p1.id]);
-    expect(await lines.setLineCourses(lead, line!.id, [p1.id, p2.id])).toBe(true);
+    const { member, programme, p1, p2 } = await world();
+    const line = await lines.createLine(ADMIN, programme.id, "Lijn", [p1.id]);
+    expect(await lines.setLineCourses(ADMIN, line!.id, [p1.id, p2.id])).toBe(true);
     const got = await lines.getLine(member, line!.id);
     expect(got?.courses).toEqual([
       expect.objectContaining({
@@ -135,20 +140,20 @@ describe("learning lines: the courses in order", () => {
 
   it("leaves out a course that is no longer in the programme or no longer shared", async () => {
     const { lead, member, team, programme, p1, p2, db } = await world();
-    const line = await lines.createLine(lead, programme.id, "Lijn", [p1.id, p2.id, db.id]);
+    const line = await lines.createLine(ADMIN, programme.id, "Lijn", [p1.id, p2.id, db.id]);
     await shares.stopSharing(member.id, "course", p2.id, team.id);
-    await programmes.removeCourse(lead, programme.id, db.id);
+    await programmes.removeCourse(ADMIN, programme.id, db.id);
     expect((await lines.getLine(lead, line!.id))?.courses.map((c) => c.id)).toEqual([p1.id]);
   });
 
   it("goes with its programme, and stays when its programme loses its team", async () => {
     const a = await world();
-    const l1 = await lines.createLine(a.lead, a.programme.id, "Lijn", [a.p1.id]);
+    const l1 = await lines.createLine(ADMIN, a.programme.id, "Lijn", [a.p1.id]);
     await programmes.deleteProgramme({ id: "admin", role: "admin" }, a.programme.id);
     expect(await lines.getLine({ id: "x", role: "admin" }, l1!.id)).toBeNull();
 
     const b = await world();
-    const l2 = await lines.createLine(b.lead, b.programme.id, "Lijn", [b.p1.id]);
+    const l2 = await lines.createLine(ADMIN, b.programme.id, "Lijn", [b.p1.id]);
     await teams.deleteTeam(b.team.id);
     expect(await lines.getLine({ id: "x", role: "admin" }, l2!.id)).not.toBeNull();
   });

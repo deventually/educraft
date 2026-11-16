@@ -35,6 +35,27 @@ describe("help on who makes and links programmes (BESLUIT-2026-11-16-4)", () => 
   });
 });
 
+describe("help: only the admin manages a programme (BESLUIT-2026-11-16-4)", () => {
+  it("says the admin makes and manages programmes and learning lines; a lead only links", () => {
+    expect(topic("nl")).toContain(
+      "Alleen een **beheerder** maakt een opleiding aan en beheert haar",
+    );
+    expect(topic("en")).toContain("Only an **admin** creates and manages a programme");
+    for (const gone of [
+      "of ben je teamleider",
+      "De teamleider of een beheerder maakt hem aan",
+      "mag de eigenaar of de teamleider",
+    ])
+      expect(topic("nl")).not.toContain(gone);
+    for (const gone of [
+      "or you are a team lead",
+      "The team lead or an admin creates it",
+      "The owner or the team lead may",
+    ])
+      expect(topic("en")).not.toContain(gone);
+  });
+});
+
 describe("help on the lead's team page", () => {
   const teams = (lang: "nl" | "en") =>
     readFileSync(`app/content/help/topics/teams.${lang}.md`, "utf8");

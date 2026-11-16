@@ -45,7 +45,7 @@ async function world() {
   await teams.addMember(moduleTeam.id, moduleLead.id);
   await teams.setLead(moduleTeam.id, moduleLead.id, true);
   await teams.addMember(moduleTeam.id, moduleMember.id);
-  const p = (await repo.createProgramme(coordinator, programmeTeam.id, hbo("Informatica VT")))!;
+  const p = (await repo.createProgramme(admin, programmeTeam.id, hbo("Informatica VT")))!;
   return { admin, coordinator, moduleLead, moduleMember, outsider, programmeTeam, moduleTeam, p };
 }
 
@@ -60,13 +60,25 @@ describe("a programme made by the admin (BESLUIT-2026-11-16-4)", () => {
     expect((await repo.listProgrammes(admin)).map((x) => x.id)).toContain(p.id);
   });
 
-  it("refuses a teacher without a team, and an unknown faculty", async () => {
+  it("refuses a teacher, also the lead of the team, and an unknown faculty", async () => {
     const { admin, coordinator, programmeTeam } = await world();
     expect(await repo.createProgramme(coordinator, null, hbo("Mag niet"))).toBeNull();
+    expect(await repo.createProgramme(coordinator, programmeTeam.id, hbo("Mag niet"))).toBeNull();
     expect(await repo.createProgramme(admin, null, hbo("Mag niet"), "nope")).toBeNull();
-    // A lead puts it under no faculty; that is the admin's choice.
-    const p = (await repo.createProgramme(coordinator, programmeTeam.id, hbo("Mag wel"), "x"))!;
-    expect(p).toMatchObject({ divisionId: null });
+  });
+
+  it("is managed only by the admin, not by the lead of one of its teams", async () => {
+    const { admin, coordinator, moduleMember, moduleTeam, p } = await world();
+    expect(await repo.getProgramme(coordinator, p.id)).toMatchObject({ canManage: false });
+    expect(await repo.getProgramme(admin, p.id)).toMatchObject({ canManage: true });
+    expect(await repo.updateProgramme(coordinator, p.id, hbo("Andere naam"))).toBeNull();
+    expect((await repo.updateProgramme(admin, p.id, hbo("Andere naam")))?.name).toBe("Andere naam");
+    // The lead no longer takes a colleague's course out; its owner and the admin do.
+    expect(await links.linkProgrammeTeam(admin, p.id, moduleTeam.id)).toBe(true);
+    const c = await courses.createCourse(moduleMember.id, { name: "Web" });
+    expect(await repo.placeCourse(moduleMember, p.id, c.id, { year: 1, period: 1 })).toBe(true);
+    expect(await repo.removeCourse(coordinator, p.id, c.id)).toBe(false);
+    expect(await repo.removeCourse(admin, p.id, c.id)).toBe(true);
   });
 });
 
@@ -79,14 +91,14 @@ describe("a programme with several teams", () => {
     });
   });
 
-  it("is linked to another team by an admin; that team reads it and its lead manages it", async () => {
+  it("is linked to another team by an admin; that team reads it, its lead does not manage it", async () => {
     const { admin, moduleLead, moduleMember, programmeTeam, moduleTeam, p } = await world();
     expect(await repo.getProgramme(moduleMember, p.id)).toBeNull();
     expect(await links.linkProgrammeTeam(admin, p.id, moduleTeam.id)).toBe(true);
     const seen = await repo.getProgramme(moduleMember, p.id);
     expect(seen).toMatchObject({ canManage: false });
     expect(seen?.teams.map((t) => t.id).sort()).toEqual([programmeTeam.id, moduleTeam.id].sort());
-    expect(await repo.getProgramme(moduleLead, p.id)).toMatchObject({ canManage: true });
+    expect(await repo.getProgramme(moduleLead, p.id)).toMatchObject({ canManage: false });
     expect((await repo.listProgrammes(moduleMember)).map((x) => x.id)).toContain(p.id);
     // Linking twice changes nothing.
     expect(await links.linkProgrammeTeam(admin, p.id, moduleTeam.id)).toBe(true);
@@ -97,7 +109,7 @@ describe("a programme with several teams", () => {
     const { moduleLead, moduleMember, moduleTeam, p } = await world();
     expect(await links.linkProgrammeTeam(moduleLead, p.id, moduleTeam.id)).toBe(true);
     expect(await repo.getProgramme(moduleMember, p.id)).toMatchObject({ canManage: false });
-    expect(await repo.getProgramme(moduleLead, p.id)).toMatchObject({ canManage: true });
+    expect(await repo.getProgramme(moduleLead, p.id)).toMatchObject({ canManage: false });
     expect(await links.unlinkProgrammeTeam(moduleLead, p.id, moduleTeam.id)).toBe("unlinked");
     expect(await repo.getProgramme(moduleMember, p.id)).toBeNull();
   });

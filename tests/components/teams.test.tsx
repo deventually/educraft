@@ -392,6 +392,8 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
       return { saved: true };
     });
     const section = screen.getByRole("region", { name: "Opleidingen" });
+    // Only an admin creates a programme (BESLUIT-2026-11-16-4).
+    expect(within(section).queryByRole("link", { name: /nieuwe opleiding/i })).toBeNull();
     expect(within(section).getByRole("link", { name: "Verpleegkunde voltijd" })).toHaveAttribute(
       "href",
       "/programmes/p-1",

@@ -35,16 +35,16 @@ export async function loader({ request }: Route.LoaderArgs) {
     kind: programmeKindLabel(p, locale),
     teamName: p.teamName,
     courses: p.courseCount,
-    // Only an admin deletes a programme (BESLUIT-2026-11-16-3); a lead manages it.
     canDelete: user.role === "admin",
   }));
+  // Only an admin creates, manages and deletes a programme; a lead links their own team on the
+  // team's page (BESLUIT-2026-11-16-4).
   const isAdmin = user.role === "admin";
   return {
     programmes,
     kinds: await kindOptions(user, locale),
-    // The teams this person may create a programme for: where they lead (an admin: all).
-    teams: await manageableTeams(user),
-    // An admin may start one without a team, under a faculty (BESLUIT-2026-11-16-4).
+    // The teams an admin may create a programme for, or none; also without a team, under a faculty.
+    teams: isAdmin ? await manageableTeams(user) : [],
     isAdmin,
     divisions: isAdmin ? (await listDivisions()).map(({ id, name }) => ({ id, name })) : [],
     divisionWord: loc(divisionWord(await getDivisionKind()), locale),
@@ -99,7 +99,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
   const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
   const divisions = "divisions" in loaderData ? loaderData.divisions : [];
   const divisionWord = "divisionWord" in loaderData ? loaderData.divisionWord : undefined;
-  const canCreate = isAdmin || teams.length > 0;
+  const canCreate = isAdmin;
   // "New programme for this team" on an admin's team page links here with ?team=<id>.
   const [search] = useSearchParams();
   const askedTeam = search.get("team");

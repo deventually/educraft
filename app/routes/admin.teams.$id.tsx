@@ -213,7 +213,7 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <TeamProgrammes team={team} programmes={programmes} choices={otherProgrammes} />
+        <TeamProgrammes team={team} programmes={programmes} choices={otherProgrammes} canCreate />
       </section>
 
       <section className={`${card} space-y-5`} aria-labelledby="team-members">

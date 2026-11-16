@@ -46,26 +46,28 @@ async function world() {
 }
 
 const hbo = (name: string) => ({ name, sector: "hbo", track: "bachelor" });
+/** Only an admin makes a programme (BESLUIT-2026-11-16-4). */
+const ADMIN = { id: "admin", role: "admin" as const };
 
 describe("programmes of a team: who manages", () => {
-  it("lets the team lead and an admin create and rename; a member or outsider not", async () => {
+  it("lets only an admin create and rename; the team lead, a member or outsider not", async () => {
     const { lead, member, outsider, admin, team } = await world();
     expect(await repo.createProgramme(member, team.id, hbo("Mag niet"))).toBeNull();
     expect(await repo.createProgramme(outsider, team.id, hbo("Mag niet"))).toBeNull();
-    const p = await repo.createProgramme(lead, team.id, hbo("HBO-ICT"));
+    expect(await repo.createProgramme(lead, team.id, hbo("Mag niet"))).toBeNull();
+    const p = await repo.createProgramme(admin, team.id, hbo("HBO-ICT"));
     expect(p).toMatchObject({ name: "HBO-ICT", teamIds: [team.id] });
-    const q = await repo.createProgramme(admin, team.id, hbo("Master"));
-    expect(q).not.toBeNull();
 
     expect(await repo.updateProgramme(member, p!.id, hbo("Gekaapt"))).toBeNull();
+    expect(await repo.updateProgramme(lead, p!.id, hbo("Gekaapt"))).toBeNull();
     expect(
-      await repo.updateProgramme(lead, p!.id, { ...hbo("HBO-ICT deeltijd"), form: "parttime" }),
+      await repo.updateProgramme(admin, p!.id, { ...hbo("HBO-ICT deeltijd"), form: "parttime" }),
     ).toMatchObject({ name: "HBO-ICT deeltijd", form: "parttime" });
   });
 
   it("lets only an admin delete a programme, not even its lead (BESLUIT-2026-11-16-3)", async () => {
     const { lead, member, admin, team } = await world();
-    const p = (await repo.createProgramme(lead, team.id, hbo("HBO-ICT")))!;
+    const p = (await repo.createProgramme(ADMIN, team.id, hbo("HBO-ICT")))!;
     expect(await repo.deleteProgramme(member, p.id)).toBe(false);
     expect(await repo.deleteProgramme(lead, p.id)).toBe(false);
     expect(await repo.getProgramme(lead, p.id)).not.toBeNull();
@@ -76,7 +78,7 @@ describe("programmes of a team: who manages", () => {
   it("refuses invalid input before writing", async () => {
     const { lead, team } = await world();
     await expect(
-      repo.createProgramme(lead, team.id, { name: "x", sector: "hbo", track: "phd" }),
+      repo.createProgramme(ADMIN, team.id, { name: "x", sector: "hbo", track: "phd" }),
     ).rejects.toThrow();
     expect(await repo.listProgrammes(lead)).toEqual([]);
   });
@@ -93,12 +95,14 @@ describe("programmes of a team: who manages", () => {
 describe("programmes of a team: who reads", () => {
   it("shows a programme to every member and an admin, never to an outsider", async () => {
     const { lead, member, outsider, admin, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("HBO-ICT"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("HBO-ICT"));
     expect((await repo.listProgrammes(member)).map((x) => x.name)).toEqual(["HBO-ICT"]);
     expect(await repo.listProgrammes(member)).toEqual([
       expect.objectContaining({ teamName: team.name, canManage: false, courseCount: 0 }),
     ]);
-    expect(await repo.listProgrammes(lead)).toEqual([expect.objectContaining({ canManage: true })]);
+    expect(await repo.listProgrammes(lead)).toEqual([
+      expect.objectContaining({ canManage: false }),
+    ]);
     expect(await repo.listProgrammes(outsider)).toEqual([]);
     expect(await repo.getProgramme(outsider, p!.id)).toBeNull();
     expect(await repo.getProgramme(admin, p!.id)).toMatchObject({ canManage: true });
@@ -108,7 +112,7 @@ describe("programmes of a team: who reads", () => {
 describe("courses in a programme", () => {
   it("lets a member place an own course, which shares it with the team", async () => {
     const { lead, member, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("Voltijd"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Voltijd"));
     const c = await courses.createCourse(member.id, { name: "Programmeren 1" });
 
     expect(await repo.placeCourse(member, p!.id, c.id, { year: 1, period: 2 })).toBe(true);
@@ -128,9 +132,9 @@ describe("courses in a programme", () => {
   });
 
   it("places one course in several programmes, each with its own place; placing again moves it", async () => {
-    const { lead, member, team } = await world();
-    const vt = await repo.createProgramme(lead, team.id, { ...hbo("Voltijd"), form: "fulltime" });
-    const dt = await repo.createProgramme(lead, team.id, { ...hbo("Deeltijd"), form: "parttime" });
+    const { member, team } = await world();
+    const vt = await repo.createProgramme(ADMIN, team.id, { ...hbo("Voltijd"), form: "fulltime" });
+    const dt = await repo.createProgramme(ADMIN, team.id, { ...hbo("Deeltijd"), form: "parttime" });
     const c = await courses.createCourse(member.id, { name: "Databases" });
     await repo.placeCourse(member, vt!.id, c.id, { year: 1, period: 1 });
     await repo.placeCourse(member, dt!.id, c.id, { year: 2, period: 3 });
@@ -142,8 +146,8 @@ describe("courses in a programme", () => {
   });
 
   it("orders the courses by year, period and name, unplaced last", async () => {
-    const { lead, member, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const { member, team } = await world();
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     for (const [name, placement] of [
       ["Zonder plek", {}],
       ["Jaar 2", { year: 2, period: 1 }],
@@ -165,7 +169,7 @@ describe("courses in a programme", () => {
 
   it("never places someone else's course, nor in a team the owner is not in", async () => {
     const { lead, member, outsider, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     const theirs = await courses.createCourse(member.id, { name: "Van M" });
     const outsiders = await courses.createCourse(outsider.id, { name: "Van O" });
     const mine = await courses.createCourse(lead.id, { name: "Van L" });
@@ -175,7 +179,7 @@ describe("courses in a programme", () => {
     expect((await repo.getProgramme(lead, p!.id))?.courses).toEqual([]);
   });
 
-  it("lets the owner or the lead take a course out; another member not", async () => {
+  it("lets the owner or an admin take a course out; the lead or another member not", async () => {
     const { lead, member, team } = await world();
     const other = await users.createUser({
       id: `X-${n}`,
@@ -184,20 +188,21 @@ describe("courses in a programme", () => {
       role: "teacher",
     });
     await teams.addMember(team.id, other.id);
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     const c1 = await courses.createCourse(member.id, { name: "Eén" });
     const c2 = await courses.createCourse(member.id, { name: "Twee" });
     await repo.placeCourse(member, p!.id, c1.id, {});
     await repo.placeCourse(member, p!.id, c2.id, {});
     expect(await repo.removeCourse({ id: other.id, role: "teacher" }, p!.id, c1.id)).toBe(false);
     expect(await repo.removeCourse(member, p!.id, c1.id)).toBe(true);
-    expect(await repo.removeCourse(lead, p!.id, c2.id)).toBe(true);
+    expect(await repo.removeCourse(lead, p!.id, c2.id)).toBe(false);
+    expect(await repo.removeCourse(ADMIN, p!.id, c2.id)).toBe(true);
     expect((await repo.getProgramme(lead, p!.id))?.courses).toEqual([]);
   });
 
   it("drops a course when it is no longer shared, deleted, or its owner leaves the team", async () => {
     const { lead, member, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     const [a, b, c] = await Promise.all(
       ["Gestopt", "Verwijderd", "Vertrokken"].map((name) =>
         courses.createCourse(member.id, { name }),
@@ -217,7 +222,7 @@ describe("courses in a programme", () => {
 
   it("stays without a team when its only team goes, for the admin (BESLUIT-2026-11-16-4)", async () => {
     const { lead, member, team } = await world();
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     const c = await courses.createCourse(member.id, { name: "Cursus" });
     await repo.placeCourse(member, p!.id, c.id, {});
     await teams.deleteTeam(team.id);
@@ -229,8 +234,8 @@ describe("courses in a programme", () => {
   });
 
   it("offers a member the programmes of all their teams on the course page", async () => {
-    const { lead, member, outsider, team } = await world();
-    await repo.createProgramme(lead, team.id, hbo("Voltijd"));
+    const { member, outsider, team } = await world();
+    await repo.createProgramme(ADMIN, team.id, hbo("Voltijd"));
     expect(await repo.placeOptions(member.id)).toEqual([
       expect.objectContaining({ name: "Voltijd", teamName: team.name }),
     ]);
@@ -249,7 +254,7 @@ describe("programmes and course co-owners (BESLUIT-2026-11-10-5)", () => {
     const c = await courses.createCourse(outsider.id, { name: "Van de eigenaar" });
     expect(await members.setCourseMember(outsider.id, c.id, member.id, "co-owner")).toBe(true);
 
-    const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
+    const p = await repo.createProgramme(ADMIN, team.id, hbo("Opleiding"));
     expect(await repo.placeCourse(member, p!.id, c.id, { year: 1 })).toBe(true);
     expect((await repo.getProgramme(lead, p!.id))?.courses.map((x) => x.name)).toEqual([
       "Van de eigenaar",

@@ -71,7 +71,7 @@ export const teams: Messages["teams"] = {
   programmesAddTitle: "Add programmes to {team}",
   programmesHeading: "Programmes",
   programmesLinkHint:
-    "A programme can have several teams, such as the programme team and the module teams. This team's members then see it too, and its lead helps manage it.",
+    "A programme can have several teams, such as the programme team and the module teams. This team's members then see it too and put their courses in it. The admin manages it.",
   programmesNew: "New programme for this team",
   programmesNone: "This team has no programme yet.",
   search: "Search by team or person",

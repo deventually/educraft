@@ -7,7 +7,7 @@ export const programmes = {
     "You are not in a team of this programme. Only team members put their own courses in it. An admin adds you to a team under Admin → Teams.",
   addTeam: "Add team",
   addTeamHint:
-    "The members of an added team see the programme and put their courses in it. Their team lead manages it too.",
+    "The members of an added team see the programme and put their courses in it. The admin manages it.",
   addTeamNone: "There is no team left to add. You create a new team under Admin → Teams.",
   addTeamTitle: "Add teams to {programme}",
   addTitle: "Add a course",
@@ -34,7 +34,7 @@ export const programmes = {
   errorInvalid: "That didn't work. Please check the fields.",
   errorName: "Give the programme a name of at most 200 characters.",
   errorNoChoice: "Choose at least one.",
-  errorNotAllowed: "Only the team lead or an admin can do that.",
+  errorNotAllowed: "Only an admin can do that.",
   errorNotFound: "I can't find that programme or course.",
   errorOwnTeam: "You can only add or remove your own team.",
   errorPlacement: "Year and period are whole numbers: year 1 to 8, period 1 to 6.",
@@ -64,12 +64,12 @@ export const programmes = {
     emptyLine: "There are no courses (left) in this learning line.",
     errorCourses: "Choose at least one course of the programme.",
     errorName: "Give the learning line a name of at most 200 characters.",
-    errorNotAllowed: "Only the team lead or an admin can change the learning line.",
+    errorNotAllowed: "Only an admin can change the learning line.",
     from: "from {programme}",
     intro:
       "A learning line is a series of courses within the programme, in order, such as Programming or Research.",
     linkHint:
-      "You see the programmes whose team you lead. You can then add courses from a ticked programme to the learning line.",
+      "You see all programmes. You can then add courses from a ticked programme to the learning line.",
     linkLegend: "Also holds for other programmes",
     linkSave: "Save programmes",
     name: "Name",
@@ -100,7 +100,7 @@ export const programmes = {
   noPlace: "No year or period yet",
   noTeamOption: "No team yet",
   noTeams:
-    "A programme belongs to a team. Only a team lead or an admin creates one. Ask your team lead if your programme isn't listed yet.",
+    "Only an admin creates a programme. A team lead links their team to a programme, on the team's page. Ask your admin if your programme isn't listed yet.",
   noTeamYet: "no team yet",
   onCourse: {
     empty: "This course doesn't belong to a programme yet.",
@@ -135,7 +135,7 @@ export const programmes = {
   teamsAdded: "{count} teams added.",
   teamsEmpty: "No team yet. Only an admin sees this programme until a team joins.",
   teamsIntro:
-    "The programme team and the module teams. Anyone in one of these teams sees the programme and puts their own courses in it; their team leads manage it. A team lead adds or removes their own team, an admin any team.",
+    "The programme team and the module teams. Anyone in one of these teams sees the programme and puts their own courses in it; the admin manages it. A team lead adds or removes their own team, an admin any team.",
   toastDeleted: "Programme deleted.",
   toastPlaced: "The course is in the programme.",
   toastRemoved: "The course was taken out of the programme.",

@@ -31,9 +31,15 @@ const kinds = [
 describe("Programme list (/programmes)", () => {
   const teams = [{ id: "t1", name: "Informatica" }];
 
-  it("offers a team lead Nieuwe opleiding, with team, level and mode, and a guided empty state", async () => {
+  it("offers an admin Nieuwe opleiding, with team, level and mode, and a guided empty state", async () => {
     const user = userEvent.setup();
-    const { container } = renderRoute(ProgrammeList, { programmes: [], kinds, teams });
+    const { container } = renderRoute(ProgrammeList, {
+      programmes: [],
+      kinds,
+      teams,
+      isAdmin: true,
+      divisions: [],
+    });
     expect(screen.getByRole("heading", { level: 1, name: "Opleidingen" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Nog geen opleidingen" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Hoe werken opleidingen?" })).toHaveAttribute(
@@ -43,14 +49,12 @@ describe("Programme list (/programmes)", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     await user.click(screen.getAllByRole("button", { name: "Nieuwe opleiding" })[0]!);
     const dialog = screen.getByRole("dialog", { name: "Nieuwe opleiding" });
-    expect(within(dialog).getByLabelText("Team")).toHaveDisplayValue("Informatica");
+    expect(within(dialog).getByRole("option", { name: "Informatica" })).toBeInTheDocument();
     expect(within(dialog).getByLabelText("Naam")).toBeRequired();
     expect(within(dialog).getByLabelText("Onderwijstype en niveau")).toHaveDisplayValue(
       "hbo-bachelor",
     );
     expect(within(dialog).getByLabelText("Vorm")).toHaveDisplayValue("Niet ingevuld");
-    // A lead does not choose the faculty: that is the admin's.
-    expect(within(dialog).queryByLabelText("Faculteit")).toBeNull();
     expect(within(dialog).getByRole("button", { name: "Opleiding aanmaken" })).toBeVisible();
   });
 
@@ -71,12 +75,10 @@ describe("Programme list (/programmes)", () => {
     await user.selectOptions(within(dialog).getByLabelText("Faculteit"), "d1");
   });
 
-  it("tells a teacher who leads no team who creates a programme", () => {
-    renderRoute(ProgrammeList, { programmes: [], kinds, teams: [] });
+  it("tells a teacher, also a team lead, that the admin creates programmes (BESLUIT-2026-11-16-4)", () => {
+    renderRoute(ProgrammeList, { programmes: [], kinds, teams: [], isAdmin: false });
     expect(screen.queryByRole("button", { name: "Nieuwe opleiding" })).toBeNull();
-    expect(
-      screen.getByText(/Alleen een teamleider of een beheerder maakt er een aan/),
-    ).toBeVisible();
+    expect(screen.getByText(/Alleen een beheerder maakt een opleiding aan/)).toBeVisible();
   });
 
   it("lists programmes with kind, team and number of courses; delete only for an admin", async () => {

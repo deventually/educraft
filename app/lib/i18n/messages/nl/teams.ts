@@ -72,7 +72,7 @@ export const teams = {
   programmesAddTitle: "Opleidingen toevoegen aan {team}",
   programmesHeading: "Opleidingen",
   programmesLinkHint:
-    "Een opleiding kan meer teams hebben, zoals het opleidingsteam en de moduleteams. De leden van dit team zien haar dan ook, de teamleider beheert haar mee.",
+    "Een opleiding kan meer teams hebben, zoals het opleidingsteam en de moduleteams. De leden van dit team zien haar dan ook en zetten er hun cursussen in. De beheerder beheert haar.",
   programmesNew: "Nieuwe opleiding voor dit team",
   programmesNone: "Dit team heeft nog geen opleiding.",
   search: "Zoek op team of persoon",

@@ -1,9 +1,9 @@
 /**
  * Programmes (opleidingen) of one or more teams (BESLUIT-2026-11-10-3, BESLUIT-2026-11-16-1) and
  * the courses in them. Repository rule for team-owned rows: every query is scoped in its WHERE
- * clause to the teams the actor is in (an admin: every team). Managing is for a lead of one of
- * its teams or an admin; only an admin creates one without a team, and deletes one
- * (BESLUIT-2026-11-16-4); linking teams is in `programmeTeams.server.ts`.
+ * clause to the teams the actor is in (an admin: every team). Only an admin creates, manages and
+ * deletes one (BESLUIT-2026-11-16-4); linking teams, also by a lead for their own team, is in
+ * `programmeTeams.server.ts`.
  * Placing a course is for its owner, in a programme of a team they are in, and shares the course
  * with the programme's teams they are in; colleagues read it only through that share
  * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`;
@@ -130,10 +130,6 @@ const rowToProgramme = (r: Row, teamIds: string[]): Programme => ({
   updatedAt: r.updatedAt,
 });
 
-/** An admin, or a lead of one of the programme's teams. */
-const canManage = (a: Actor, programmeId: string) =>
-  isAdmin(a) || myTeams(a.id, programmeId).some((m) => m.isLead);
-
 /** Programmes the actor may read: of a team they are in, or any for an admin. */
 const readable = (a: Actor): SQL | undefined =>
   isAdmin(a)
@@ -148,7 +144,8 @@ function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) 
     ...rowToProgramme(p, ids),
     teams: list,
     teamName: namesOf(list),
-    canManage: canManage(a, p.id),
+    // Only an admin manages a programme; a lead only links their own team (BESLUIT-2026-11-16-4).
+    canManage: isAdmin(a),
     // In one of its teams: only they place a course in it (an admin may not be).
     isMember: myTeams(a.id, p.id).length > 0,
   };
@@ -202,11 +199,10 @@ export async function createProgramme(
   divisionId: string | null = null,
 ): Promise<Programme | null> {
   const values = parseInput(input);
-  // An admin may start one without a team, under a faculty (BESLUIT-2026-11-16-4); a lead
-  // makes one for a team they lead, and leaves the faculty to the admin.
-  if (teamId === null ? !isAdmin(a) : !(await manageableTeams(a)).some((t) => t.id === teamId))
-    return null;
-  const division = isAdmin(a) ? divisionId : null;
+  // Only an admin makes one, with or without a team, under a faculty (BESLUIT-2026-11-16-4).
+  if (!isAdmin(a)) return null;
+  if (teamId && !(await manageableTeams(a)).some((t) => t.id === teamId)) return null;
+  const division = divisionId;
   if (
     division &&
     !getDb().select({ id: divisions.id }).from(divisions).where(eq(divisions.id, division)).get()
@@ -235,7 +231,7 @@ function managedRow(a: Actor, id: string): Row | undefined {
     .from(programmes)
     .where(and(eq(programmes.id, id), readable(a)))
     .get();
-  return row && canManage(a, row.id) ? row : undefined;
+  return row && isAdmin(a) ? row : undefined;
 }
 
 /** Null when the actor may not manage it; throws on invalid input. */
@@ -330,7 +326,7 @@ export async function removeCourse(
     .where(eq(programmes.id, programmeId))
     .get();
   if (!programme) return false;
-  const who = canManage(a, programme.id)
+  const who = isAdmin(a)
     ? undefined
     : or(
         eq(programmeCourses.userId, a.id),
