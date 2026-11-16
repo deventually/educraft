@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NO_PASSWORD, hashPassword, passwordProblem } from "~/server/password.server";
+import { NO_PASSWORD, adminPasswordProblem, hashPassword } from "~/server/password.server";
 import {
   createInvite,
   createPasswordReset,
@@ -161,7 +161,7 @@ async function createAccount(ctx: ListContext) {
   if (mode === "password") {
     const password = String(fd.get("password") ?? "");
     const confirm = String(fd.get("confirm") ?? "");
-    const problem = passwordProblem(password);
+    const problem = adminPasswordProblem(password);
     if (problem) return fail(problem);
     if (password !== confirm) return fail("passwordMismatch");
     passwordHash = await hashPassword(password);

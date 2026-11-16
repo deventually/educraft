@@ -65,6 +65,8 @@ const loaderData = {
   // Default viewer: the owner (super admin). Tests for a regular admin override this.
   isOwner: true,
   ownerId: "admin-1",
+  // Production: the full password rule applies to the admin's forms.
+  strictPasswords: true,
   filter: { q: "", role: "", status: "", team: "" },
   teams: [
     { id: "team-1", name: "Verpleegkunde" },
@@ -292,6 +294,31 @@ describe("Admin user list — one Add button (P28.1)", () => {
     await user.type(screen.getByLabelText(/^e-mailadres$/i), "taken@x.nl");
     await user.click(screen.getByRole("button", { name: /^account aanmaken$/i }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/al in gebruik/i));
+  });
+
+  it("asks for at least 10 characters in production", async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await openAdd(user);
+    await user.click(screen.getByRole("radio", { name: /account met wachtwoord/i }));
+    await user.click(screen.getByRole("radio", { name: /ik kies een beginwachtwoord/i }));
+    const pw = screen.getByLabelText(/^beginwachtwoord/i);
+    expect(pw).toHaveAccessibleName(/minstens 10 tekens/i);
+    expect(pw).toHaveAttribute("minlength", "10");
+    expect(screen.getByLabelText(/^herhaal beginwachtwoord/i)).toHaveAttribute("minlength", "10");
+  });
+
+  it("accepts any initial password outside production, and says so", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute(undefined, { strictPasswords: false });
+    await openAdd(user);
+    await user.click(screen.getByRole("radio", { name: /account met wachtwoord/i }));
+    await user.click(screen.getByRole("radio", { name: /ik kies een beginwachtwoord/i }));
+    const pw = screen.getByLabelText(/^beginwachtwoord/i);
+    expect(pw).toHaveAccessibleName(/buiten productie mag elk wachtwoord/i);
+    expect(pw).not.toHaveAttribute("minlength");
+    expect(screen.getByLabelText(/^herhaal beginwachtwoord/i)).not.toHaveAttribute("minlength");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("has no a11y violations with the add form open, in both ways", async () => {

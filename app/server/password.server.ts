@@ -85,3 +85,24 @@ export function passwordProblem(password: string): PasswordProblem | null {
   if (/^(.{1,4})\1+$/su.test(password)) return "passwordCommon";
   return null;
 }
+
+/**
+ * Whether an admin's password forms (create an account, set a password) apply the full
+ * rule. Only in production: during development an admin may hand out an easy password.
+ * A password someone chooses themselves always uses `passwordProblem`.
+ */
+export function strictAdminPasswords(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+/**
+ * The rule for a password an admin sets for someone else: `passwordProblem` in
+ * production, anything but empty elsewhere.
+ */
+export function adminPasswordProblem(
+  password: string,
+  { production = strictAdminPasswords() }: { production?: boolean } = {},
+): PasswordProblem | null {
+  if (production) return passwordProblem(password);
+  return password.length > 0 ? null : "passwordTooShort";
+}

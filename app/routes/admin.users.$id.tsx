@@ -15,6 +15,7 @@ import { ALL_TOOLS } from "~/lib/registry";
 import { fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { personAction } from "~/server/personActions.server";
+import { strictAdminPasswords } from "~/server/password.server";
 import { personCourses } from "~/server/adminCourses.server";
 import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
 import { ROLES, isRole } from "~/lib/registry/access";
@@ -123,6 +124,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     isOwner: viewerIsOwner,
     isSelf: target.id === admin.id,
     canManage: mayManage(viewerIsOwner, target),
+    // Outside production "Set password" accepts any password.
+    strictPasswords: strictAdminPasswords(),
     person: {
       id: target.id,
       name: target.name,
@@ -168,6 +171,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
     features,
     teams,
     courses,
+    strictPasswords,
   } = loaderData;
   const manage = canManage && !isSelf;
   const displayName = person.name || person.email || person.id;
@@ -362,6 +366,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
           person={person}
           displayName={displayName}
           viewerIsOwner={viewerIsOwner}
+          strictPasswords={strictPasswords}
           resetLink={
             actionData && "resetLink" in actionData && actionData.resetLink
               ? actionData.resetLink

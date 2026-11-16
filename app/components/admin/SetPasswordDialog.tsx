@@ -10,9 +10,20 @@ import { useT } from "~/lib/i18n/useT";
  * password twice. It posts `intent=setPassword` to the route action, which hashes it on
  * the server and logs the user out everywhere; the password is never sent back.
  */
-export function SetPasswordDialog({ userId, name }: { userId: string; name: string }) {
+export function SetPasswordDialog({
+  userId,
+  name,
+  strict,
+}: {
+  userId: string;
+  name: string;
+  /** Whether the full password rule applies (production only); else any password will do. */
+  strict: boolean;
+}) {
   const t = useT();
   const uid = useId();
+  // The browser hint for the server rule (`MIN_PASSWORD_LENGTH`), only where that rule applies.
+  const minLength = strict ? 10 : undefined;
   return (
     <ConfirmDialog
       triggerLabel={t.admin.invites.setPassword}
@@ -25,6 +36,7 @@ export function SetPasswordDialog({ userId, name }: { userId: string; name: stri
       cancelLabel={t.confirm.cancel}
       fields={{ intent: "setPassword", userId }}
     >
+      {!strict && <p className="text-sm text-slate-600">{t.admin.invites.anyPasswordHint}</p>}
       <div>
         <Label htmlFor={`${uid}-pw`}>{t.auth.password}</Label>
         <Input
@@ -33,7 +45,7 @@ export function SetPasswordDialog({ userId, name }: { userId: string; name: stri
           type="password"
           autoComplete="new-password"
           required
-          minLength={10}
+          minLength={minLength}
           className="mt-1"
           data-autofocus
         />
@@ -46,7 +58,7 @@ export function SetPasswordDialog({ userId, name }: { userId: string; name: stri
           type="password"
           autoComplete="new-password"
           required
-          minLength={10}
+          minLength={minLength}
           className="mt-1"
         />
       </div>

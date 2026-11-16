@@ -26,8 +26,11 @@ export function CreateAccountForm({
   result,
   errorMessage,
   extraFields,
+  strictPasswords,
 }: {
   result: CreateAccountResult;
+  /** Whether the full password rule applies (production only); else any password will do. */
+  strictPasswords: boolean;
   /** The text for a refused create (the action's error code, already translated). */
   errorMessage?: string;
   /** More fields posted with the account, after the role (e.g. the team, P28.2). */
@@ -36,6 +39,8 @@ export function CreateAccountForm({
   const t = useT();
   const formRef = useRef<HTMLFormElement>(null);
   const [mode, setMode] = useState<"link" | "password">("link");
+  // The browser hint for the server rule (`MIN_PASSWORD_LENGTH`), only where that rule applies.
+  const minLength = strictPasswords ? 10 : undefined;
   const created = Boolean(result && (result.setPasswordLink || result.accountCreated));
 
   // A fresh result object per submission: clear the typed values after a success only.
@@ -130,14 +135,16 @@ export function CreateAccountForm({
         {mode === "password" && (
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="create-password">{i.createPassword}</Label>
+              <Label htmlFor="create-password">
+                {strictPasswords ? i.createPassword : i.createPasswordAny}
+              </Label>
               <Input
                 id="create-password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={10}
+                minLength={minLength}
                 className="mt-1"
               />
             </div>
@@ -149,7 +156,7 @@ export function CreateAccountForm({
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={10}
+                minLength={minLength}
                 className="mt-1"
               />
             </div>

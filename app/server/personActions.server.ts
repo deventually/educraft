@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { hashPassword, passwordProblem } from "~/server/password.server";
+import { adminPasswordProblem, hashPassword } from "~/server/password.server";
 import {
   createPasswordReset,
   deleteUserCascade,
@@ -196,7 +196,7 @@ export async function personAction(
     if (!target) return { error: "selfPassword" as const };
     const password = String(fd.get("password") ?? "");
     const confirm = String(fd.get("confirm") ?? "");
-    const problem = passwordProblem(password);
+    const problem = adminPasswordProblem(password);
     if (problem) return { error: problem };
     if (password !== confirm) return { error: "passwordMismatch" as const };
     // Bumps sessionVersion: the user is logged out on every device.

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { MIN_PASSWORD_LENGTH, passwordProblem } from "~/server/password.server";
+import {
+  MIN_PASSWORD_LENGTH,
+  adminPasswordProblem,
+  passwordProblem,
+  strictAdminPasswords,
+} from "~/server/password.server";
 
 describe("passwordProblem", () => {
   it("accepts a long, uncommon password", () => {
@@ -39,6 +44,33 @@ describe("passwordProblem", () => {
   });
 
   it("checks the length before the list", () => {
+    expect(passwordProblem("welkom")).toBe("passwordTooShort");
+  });
+});
+
+describe("adminPasswordProblem (an admin sets someone else's password)", () => {
+  it("applies the full rule in production", () => {
+    expect(adminPasswordProblem("welkom", { production: true })).toBe("passwordTooShort");
+    expect(adminPasswordProblem("Welkom2026!", { production: true })).toBe("passwordCommon");
+    expect(adminPasswordProblem("paars-giraffe-fietst-traag", { production: true })).toBeNull();
+  });
+
+  it("accepts any password outside production, even an easy one", () => {
+    expect(adminPasswordProblem("welkom", { production: false })).toBeNull();
+    expect(adminPasswordProblem("a", { production: false })).toBeNull();
+    expect(adminPasswordProblem("Welkom2026!", { production: false })).toBeNull();
+  });
+
+  it("still refuses an empty password outside production", () => {
+    expect(adminPasswordProblem("", { production: false })).toBe("passwordTooShort");
+  });
+
+  it("reads production from NODE_ENV by default, like the local models", () => {
+    expect(strictAdminPasswords()).toBe(process.env.NODE_ENV === "production");
+  });
+
+  it("never relaxes the rule for a password someone chooses themselves", () => {
+    // Sign-up, reset and /account keep using passwordProblem, in every environment.
     expect(passwordProblem("welkom")).toBe("passwordTooShort");
   });
 });

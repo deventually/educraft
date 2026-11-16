@@ -59,6 +59,7 @@ export const admin = {
   },
   invites: {
     accountCreated: "Account aangemaakt.",
+    anyPasswordHint: "Buiten productie mag elk wachtwoord, ook een makkelijk te raden.",
     copy: "Kopiëren",
     createConfirm: "Herhaal beginwachtwoord",
     createEmail: "E-mailadres",
@@ -70,6 +71,7 @@ export const admin = {
     createModePassword: "Ik kies een beginwachtwoord",
     createName: "Naam",
     createPassword: "Beginwachtwoord (minstens 10 tekens)",
+    createPasswordAny: "Beginwachtwoord (buiten productie mag elk wachtwoord)",
     createRole: "Rol",
     createSubmit: "Account aanmaken",
     deactivate: "Op non-actief zetten",
