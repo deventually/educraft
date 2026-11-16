@@ -664,3 +664,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie": keuzes 1 tot en met 6, "Ook
   ontkoppelen moet bevestigd worden met een confirm" en "Is het ook een idee om het beheer met
   een dashboardpagina te starten?").
+- **BESLUIT-2026-11-16-4:** **Een teamleider van de opleiding koppelt teams; alleen een beheerder
+  verwijdert een opleiding.** Een teamleider van een van de teams van een opleiding koppelt een
+  ander team aan die opleiding en haalt een team eraf, net als een beheerder; een opleiding houdt
+  altijd minstens één team. Een teamleider van een team dat (nog) niet bij de opleiding hoort, heeft
+  er geen zeggenschap over. Een opleiding verwijderen kan alleen een beheerder; de teamleider beheert
+  haar wel (naam, niveau, vorm, leerlijnen). De server dwingt dit af in `programmeTeams.server.ts`
+  en `deleteProgramme`. Dit vervangt "een beheerder koppelt een team" uit BESLUIT-2026-11-16-1.
+  Bastiaan, 2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie", keuzes 2 en 3:
+  "Beheerder en teamleider van de opleiding" en "Alleen de beheerder").

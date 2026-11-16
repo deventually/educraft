@@ -50,5 +50,5 @@ Net als de dekkingsmatrix is dit een **advies**. Er verandert niets aan de cursu
 - Stop je met delen met het team, of verlaat je het team, dan gaat je cursus uit de opleidingen van dat team, tenzij je ook in een ander team van die opleiding zit en hem daarmee deelt.
 - Wordt een team opgeheven, dan blijft een opleiding met nog een ander team gewoon bestaan. Een opleiding van alleen dat team verdwijnt mee.
 - Verwijder je een cursus, dan verdwijnt hij uit alle opleidingen.
-- Verwijdert de teamleider de opleiding, dan blijven alle cursussen bestaan.
+- Alleen een **beheerder** verwijdert een opleiding. Alle cursussen blijven dan bestaan.
 - Er komt geen AI aan te pas: een opleiding legt alleen vast wat je zelf invult.

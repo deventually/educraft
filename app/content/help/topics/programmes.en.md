@@ -50,5 +50,5 @@ Like the coverage matrix, this is **advice**. Nothing changes in the courses, an
 - If you stop sharing with the team, or leave the team, your course leaves that team's programmes, unless you are also in another team of the programme and share it with that one.
 - If a team is deleted, a programme that has another team stays. A programme of that team alone goes with it.
 - If you delete a course, it disappears from all programmes.
-- If the team lead deletes the programme, all courses stay as they are.
+- Only an **admin** deletes a programme. All courses stay as they are.
 - No AI is involved: a programme only records what you fill in yourself.
