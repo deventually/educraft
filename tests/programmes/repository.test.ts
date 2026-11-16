@@ -53,7 +53,7 @@ describe("programmes of a team: who manages", () => {
     expect(await repo.createProgramme(member, team.id, hbo("Mag niet"))).toBeNull();
     expect(await repo.createProgramme(outsider, team.id, hbo("Mag niet"))).toBeNull();
     const p = await repo.createProgramme(lead, team.id, hbo("HBO-ICT"));
-    expect(p).toMatchObject({ name: "HBO-ICT", teamId: team.id });
+    expect(p).toMatchObject({ name: "HBO-ICT", teamIds: [team.id] });
     const q = await repo.createProgramme(admin, team.id, hbo("Master"));
     expect(q).not.toBeNull();
 

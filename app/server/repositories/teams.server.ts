@@ -12,7 +12,7 @@
  * A lead never demotes or removes another lead; an admin does (`setLead`, `removeMember`).
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
+import { and, asc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   announcementDismissals,
@@ -20,6 +20,7 @@ import {
   invites,
   learningLines,
   programmeCourses,
+  programmeTeams,
   programmes,
   shares,
   slideTemplates,
@@ -111,11 +112,25 @@ export async function renameTeam(id: string, name: string): Promise<void> {
  */
 export async function deleteTeam(id: string): Promise<void> {
   getDb().transaction((tx) => {
-    // The team's programmes and the courses placed in them go with it.
-    const own = tx.select({ id: programmes.id }).from(programmes).where(eq(programmes.teamId, id));
-    tx.delete(programmeCourses).where(inArray(programmeCourses.programmeId, own)).run();
-    tx.delete(learningLines).where(inArray(learningLines.programmeId, own)).run();
-    tx.delete(programmes).where(eq(programmes.teamId, id)).run();
+    // A programme of this team alone goes with it, with the courses placed in it; a programme
+    // with another team stays and only loses this one (BESLUIT-2026-11-16-1).
+    const own = tx
+      .select({ id: programmeTeams.programmeId })
+      .from(programmeTeams)
+      .where(eq(programmeTeams.teamId, id))
+      .all()
+      .map((r) => r.id);
+    const shared = tx
+      .select({ id: programmeTeams.programmeId })
+      .from(programmeTeams)
+      .where(and(inArray(programmeTeams.programmeId, own), ne(programmeTeams.teamId, id)))
+      .all()
+      .map((r) => r.id);
+    const alone = own.filter((p) => !shared.includes(p));
+    tx.delete(programmeCourses).where(inArray(programmeCourses.programmeId, alone)).run();
+    tx.delete(learningLines).where(inArray(learningLines.programmeId, alone)).run();
+    tx.delete(programmes).where(inArray(programmes.id, alone)).run();
+    tx.delete(programmeTeams).where(eq(programmeTeams.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
     // Announcements for the team go with it, with their dismissals.
     const told = tx
@@ -168,15 +183,16 @@ export async function removeMember(teamId: string, userId: string): Promise<void
     tx.delete(shares)
       .where(and(eq(shares.teamId, teamId), eq(shares.ownerUserId, userId)))
       .run();
-    // Their courses leave the team's programmes.
+    // Their courses leave the team's programmes, unless they are in another team of it.
     tx.delete(programmeCourses)
       .where(
         and(
           eq(programmeCourses.userId, userId),
-          inArray(
-            programmeCourses.programmeId,
-            tx.select({ id: programmes.id }).from(programmes).where(eq(programmes.teamId, teamId)),
-          ),
+          sql`${programmeCourses.programmeId} in (select pt.programme_id from ${programmeTeams} pt
+            where pt.team_id = ${teamId} and not exists (select 1 from ${programmeTeams} other
+              join ${teamMembers} m on m.team_id = other.team_id
+              where other.programme_id = pt.programme_id and other.team_id <> ${teamId}
+                and m.user_id = ${userId}))`,
         ),
       )
       .run();

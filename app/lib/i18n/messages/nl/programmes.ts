@@ -103,9 +103,10 @@ export const programmes = {
   save: "Opslaan",
   settingsTitle: "Gegevens",
   sharesWith:
-    "Je cursus wordt gedeeld met het team {team}. Zo zien je collega's in dat team hem in de opleiding.",
+    "Je cursus wordt gedeeld met jouw team in deze opleiding. Zo zien de collega's van {team} hem in de opleiding.",
   summary: "{kind} · team {team} · {courses} cursussen",
   team: "Team",
+  teams: "Teams",
   toastDeleted: "Opleiding verwijderd.",
   toastPlaced: "De cursus staat in de opleiding.",
   toastRemoved: "De cursus is uit de opleiding gehaald.",

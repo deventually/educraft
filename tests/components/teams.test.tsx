@@ -129,9 +129,60 @@ describe("/admin/teams/:id, the team page", () => {
     divisions: [{ id: "d-1", name: "Faculteit Gezondheid" }],
     divisionId: null as string | null,
     divisionWord: "Faculteit",
+    programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
+    otherProgrammes: [{ id: "p-2", name: "Pabo", teamName: "Team Pabo" }],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
     renderWith(AdminTeam, "/admin/teams/:id", d, action);
+
+  it("shows the team's programmes and links another team's programme to this team", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    const section = screen.getByRole("region", { name: "Opleidingen" });
+    expect(within(section).getByRole("link", { name: "Verpleegkunde voltijd" })).toHaveAttribute(
+      "href",
+      "/programmes/p-1",
+    );
+    expect(
+      within(section).getByRole("link", { name: /nieuwe opleiding voor dit team/i }),
+    ).toHaveAttribute("href", "/programmes?team=team-1");
+    await user.selectOptions(
+      within(section).getByLabelText("Opleiding koppelen aan dit team"),
+      "p-2",
+    );
+    await user.click(within(section).getByRole("button", { name: "Koppelen" }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("linkProgramme");
+    expect(bodies[0]!.get("programmeId")).toBe("p-2");
+  });
+
+  it("unlinks one of the team's programmes in one click", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    await user.click(
+      screen.getByRole("button", { name: "Verpleegkunde voltijd loskoppelen van dit team" }),
+    );
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("unlinkProgramme");
+    expect(bodies[0]!.get("programmeId")).toBe("p-1");
+  });
+
+  it("says so when the team has no programme and none can be linked", () => {
+    page(undefined, { ...data, programmes: [], otherProgrammes: [] });
+    const section = screen.getByRole("region", { name: "Opleidingen" });
+    expect(within(section).getByText(/nog geen opleiding/i)).toBeInTheDocument();
+    expect(within(section).queryByRole("button", { name: "Koppelen" })).toBeNull();
+  });
+
+  it("points to Organisatie when there are no divisions to choose", () => {
+    page(undefined, { ...data, divisions: [] });
+    expect(screen.getByRole("link", { name: /organisatie/i })).toHaveAttribute(
+      "href",
+      "/admin/organisation",
+    );
+  });
   const recorder = () => {
     const bodies: FormData[] = [];
     const action = async ({ request }: { request: Request }) => {

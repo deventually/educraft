@@ -1,19 +1,20 @@
 # Opleidingen
 
-Een **opleiding** is een bundel cursussen van een team. Per cursus staat erbij in welk **jaar** en welke **periode** hij in die opleiding valt. Zo zie je de opleiding als geheel, en niet alleen cursus voor cursus.
+Een **opleiding** is een bundel cursussen van een of meer teams. Per cursus staat erbij in welk **jaar** en welke **periode** hij in die opleiding valt. Zo zie je de opleiding als geheel, en niet alleen cursus voor cursus.
 
-## Van een team
+## Van een of meer teams
 
-Een opleiding hoort bij een **team**, zoals je opleiding, je richting of een moduleteam. Je kunt in meer teams zitten; je ziet dan de opleidingen van al je teams. Bij elke opleiding staat het team erbij.
+Een opleiding hoort bij een of meer **teams**, bijvoorbeeld het opleidingsteam en de moduleteams die de cursussen maken. Je kunt in meer teams zitten; je ziet dan de opleidingen van al je teams. Bij elke opleiding staan haar teams erbij.
 
-- De **teamleider** of een **beheerder** maakt de opleiding aan en past naam, niveau en vorm aan.
-- **Elk teamlid** kan zijn eigen cursussen erin zetten, en ook cursussen waarvan hij mede-eigenaar is, en ziet de cursussen van collega's.
+- Een **teamleider** van een van die teams of een **beheerder** maakt de opleiding aan en past naam, niveau en vorm aan.
+- **Elk lid** van een van die teams kan zijn eigen cursussen erin zetten, en ook cursussen waarvan hij mede-eigenaar is, en ziet de cursussen van collega's in de opleiding.
+- Een **beheerder** koppelt een team aan een opleiding, of haalt het eraf, op de pagina van het team (**Beheer → Teams**). Een opleiding houdt altijd minstens één team.
 
 ## Een opleiding aanmaken
 
 Ben je teamleider, ga dan naar **Opleidingen** (via de pagina **Cursussen**) en vul in:
 
-- **Team**: het team waar de opleiding bij hoort.
+- **Team**: het eerste team van de opleiding. Een beheerder kan er later teams bij koppelen.
 
 - **Naam**, bijvoorbeeld *HBO-ICT voltijd* of *Master Informatica*.
 - **Onderwijstype en niveau**, bijvoorbeeld hbo-bachelor, associate degree (Ad), hbo-master of wo-master. Je kiest uit de onderwijstypen die je beheerder heeft aangezet.
@@ -25,7 +26,7 @@ Op de pagina van de opleiding kies je bij **Cursus toevoegen** een van je eigen 
 
 Je kunt het ook vanaf de cursus doen. Op de cursuspagina staat **Hoort bij opleiding**. Daar kies je de opleiding, het jaar en de periode.
 
-**Zet je een cursus in een opleiding, dan deel je hem met het team van die opleiding.** Je collega's in dat team kunnen hem bekijken en kopiëren, net als bij [delen met je team](/help/teams). Alleen jij en wie aan de cursus meewerkt, bewerken hem. Jaar en periode van je eigen cursus pas je zelf aan.
+**Zet je een cursus in een opleiding, dan deel je hem met jouw teams van die opleiding.** Alle collega's in de opleiding zien hem daar; je collega's in die teams kunnen hem bekijken en kopiëren, net als bij [delen met je team](/help/teams). Alleen jij en wie aan de cursus meewerkt, bewerken hem. Jaar en periode van je eigen cursus pas je zelf aan.
 
 Een cursus kan bij **meer opleidingen** horen, met in elke opleiding een eigen jaar en periode. Denk aan een voltijd- en een deeltijdvariant met dezelfde cursussen, of een cursus die in jaar 1 van de ene en in jaar 2 van de andere opleiding valt.
 
@@ -46,7 +47,8 @@ Net als de dekkingsmatrix is dit een **advies**. Er verandert niets aan de cursu
 ## Goed om te weten
 
 - Een cursus uit de opleiding halen mag de eigenaar of de teamleider. De cursus blijft gewoon bestaan, en blijft gedeeld met het team. Op de cursuspagina kun je stoppen met delen.
-- Stop je met delen met het team, of verlaat je het team, dan gaat je cursus uit de opleidingen van dat team.
+- Stop je met delen met het team, of verlaat je het team, dan gaat je cursus uit de opleidingen van dat team, tenzij je ook in een ander team van die opleiding zit en hem daarmee deelt.
+- Wordt een team opgeheven, dan blijft een opleiding met nog een ander team gewoon bestaan. Een opleiding van alleen dat team verdwijnt mee.
 - Verwijder je een cursus, dan verdwijnt hij uit alle opleidingen.
 - Verwijdert de teamleider de opleiding, dan blijven alle cursussen bestaan.
 - Er komt geen AI aan te pas: een opleiding legt alleen vast wat je zelf invult.

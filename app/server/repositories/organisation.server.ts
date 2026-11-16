@@ -12,7 +12,7 @@ import {
   DivisionNameSchema,
 } from "~/lib/organisation/kinds";
 import { getDb } from "../db.server";
-import { divisions, instanceSettings, programmes, teams } from "../schema.server";
+import { divisions, instanceSettings, programmeTeams, programmes, teams } from "../schema.server";
 
 /** Who acts: the signed-in user's id and role. */
 interface Actor {
@@ -194,8 +194,13 @@ export async function teamPlaces(): Promise<
     if (t.divisionId && names.has(t.divisionId))
       entry(t.id).division = names.get(t.divisionId) ?? null;
   const rows = db
-    .select({ teamId: programmes.teamId, name: programmes.name, divisionId: programmes.divisionId })
+    .select({
+      teamId: programmeTeams.teamId,
+      name: programmes.name,
+      divisionId: programmes.divisionId,
+    })
     .from(programmes)
+    .innerJoin(programmeTeams, eq(programmeTeams.programmeId, programmes.id))
     .orderBy(asc(programmes.name))
     .limit(500)
     .all();

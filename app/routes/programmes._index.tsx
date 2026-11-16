@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form, Link, redirect, useActionData } from "react-router";
+import { Form, Link, redirect, useActionData, useSearchParams } from "react-router";
 import { Layers, Trash2 } from "lucide-react";
 import type { Route } from "./+types/programmes._index";
 import { kindOptions, programmeFromForm, requireProgrammeUser } from "~/server/programmes.server";
@@ -83,6 +83,10 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
   });
   const { programmes, kinds, teams } = loaderData;
   const defaultKind = kinds.some((k) => k.value === "hbo:bachelor") ? "hbo:bachelor" : "";
+  // "New programme for this team" on an admin's team page links here with ?team=<id>.
+  const [search] = useSearchParams();
+  const askedTeam = search.get("team");
+  const defaultTeam = teams.some((team) => team.id === askedTeam) ? askedTeam : undefined;
 
   return (
     <div className="w-full min-w-0">
@@ -110,7 +114,12 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
             <input type="hidden" name="intent" value="create" />
             <div>
               <Label htmlFor={`${id}-team`}>{p.team}</Label>
-              <Select id={`${id}-team`} name="teamId" className="mt-1">
+              <Select
+                id={`${id}-team`}
+                name="teamId"
+                defaultValue={defaultTeam ?? undefined}
+                className="mt-1"
+              >
                 {teams.map((team) => (
                   <option key={team.id} value={team.id}>
                     {team.name}

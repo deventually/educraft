@@ -626,3 +626,16 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   gewone OpenRouter-modellen blijven als taalmodel te kiezen. Bastiaan, 2026-11-13 (thread
   "Jev"-experiment: "ik denk niet dat Jev ooit gekozen moet worden. Het is een onderdeel van
   LimeOnIt"; "Ja ik vind dat Jev een eigen API key moet hebben").
+- **BESLUIT-2026-11-16-1:** **Een opleiding heeft een of meer teams.** Een opleiding is niet meer
+  van precies één team, maar van een of meer (`programme_teams`): bijvoorbeeld het opleidingsteam
+  en de moduleteams die de cursussen maken. Elk lid van een van die teams ziet de opleiding, een
+  teamleider van een van die teams of een beheerder beheert haar. Een beheerder koppelt een team
+  aan een opleiding en haalt het eraf op de pagina van het team; een opleiding houdt altijd
+  minstens één team. Een cursus erin zetten deelt hem met de teams van die opleiding waar de
+  docent in zit; alle teams van de opleiding zien hem dan in de opleiding. Wordt een team
+  opgeheven, dan blijft een opleiding met nog een ander team bestaan. Dit vervangt "een opleiding
+  is van een team" uit BESLUIT-2026-11-10-3; de rest daarvan blijft. Faculteit en leerlijn blijven
+  optioneel, een cursus en een leerlijn kunnen al bij meer opleidingen horen, en een moduleteam
+  als bewerkers van één cursus blijft `course_members` (BESLUIT-2026-11-12-6). Bastiaan,
+  2026-11-16 (thread "Team koppelen aan opleiding herstellen": "En natuurlijk kunnen er meerdere
+  teams per opleiding zitten" en "Prima zoals jij aanbeveelt").

@@ -1,9 +1,10 @@
 /**
- * Programmes (opleidingen) of a team (BESLUIT-2026-11-10-3) and the courses in them.
- * Repository rule for team-owned rows: every query is scoped in its WHERE clause to the
- * teams the actor is in (an admin: every team). Managing (create, rename, delete) is for the
- * team's lead or an admin. Placing a course is for its owner, in a team they are in, and
- * shares the course with that team; colleagues read it only through that share
+ * Programmes (opleidingen) of one or more teams (BESLUIT-2026-11-10-3, BESLUIT-2026-11-16-1) and
+ * the courses in them. Repository rule for team-owned rows: every query is scoped in its WHERE
+ * clause to the teams the actor is in (an admin: every team). Managing (create, rename, delete)
+ * is for a lead of one of its teams or an admin; linking teams is in `programmeTeams.server.ts`.
+ * Placing a course is for its owner, in a programme of a team they are in, and shares the course
+ * with the programme's teams they are in; colleagues read it only through that share
  * (`listProgrammeCourses`, the one read of another teacher's row outside `shares.server.ts`;
  * the learning lines read their courses through it too).
  * Stopping the share, leaving the team or deleting the course takes it out of the programme:
@@ -26,12 +27,14 @@ import {
   learningLineProgrammes,
   learningLines,
   programmeCourses,
+  programmeTeams,
   programmes,
   shares,
   teamMembers,
   teams,
   users,
 } from "../schema.server";
+import { myTeams, namesOf, teamsOf } from "./programmeTeams.server";
 import { shareItem } from "./shares.server";
 
 /** Who acts: the signed-in user's id and role. */
@@ -42,7 +45,8 @@ export interface Actor {
 
 export interface Programme {
   id: string;
-  teamId: string;
+  /** Its teams (at least one), by name. */
+  teamIds: string[];
   name: string;
   sector: Sector;
   track: string | null;
@@ -65,25 +69,25 @@ export interface ProgrammeCourse {
 const cap = (limit?: number) => Math.min(limit ?? 50, 500);
 
 /**
- * The course is shared with the programme's team by someone who may share it (its owner or a
- * co-owner, BESLUIT-2026-11-10-5) and who is still in that team. Needs `courses` in the query.
+ * The course is shared with one of the programme's teams by someone who may share it (its owner
+ * or a co-owner, BESLUIT-2026-11-10-5) and who is still in that team. Needs `courses` in the query.
  */
-const sharedWithTeam = (teamId: SQL | SQLiteColumn | string) =>
+const sharedWithProgramme = (programmeId: SQL | SQLiteColumn | string) =>
   sql`exists (select 1 from ${shares} s
+    join ${programmeTeams} pt on pt.team_id = s.team_id and pt.programme_id = ${programmeId}
     join ${teamMembers} sharer on sharer.team_id = s.team_id and sharer.user_id = s.owner_user_id
-    where s.kind = 'course' and s.item_id = ${courses.id} and s.team_id = ${teamId}
+    where s.kind = 'course' and s.item_id = ${courses.id}
       and (s.owner_user_id = ${courses.userId} or exists (select 1 from ${courseMembers} cm
         where cm.course_id = ${courses.id} and cm.user_id = s.owner_user_id
           and cm.role = 'co-owner')))`;
 
 /**
- * The courses in a programme of `teamId`, by year, period and name (unplaced last): only those
- * shared with that team by their owner or a co-owner who is still in it, with the course JSON (for
+ * The courses in a programme, by year, period and name (unplaced last): only those shared with
+ * one of its teams by their owner or a co-owner who is still in it, with the course JSON (for
  * the learning line overview). Callers check first that the viewer may read the programme.
  */
 export function listProgrammeCourses(
   programmeId: string,
-  teamId: string,
 ): (ProgrammeCourse & { dataJson: string })[] {
   return getDb()
     .select({
@@ -98,7 +102,7 @@ export function listProgrammeCourses(
     .from(programmeCourses)
     .innerJoin(courses, eq(courses.id, programmeCourses.courseId))
     .innerJoin(users, eq(users.id, courses.userId))
-    .where(and(eq(programmeCourses.programmeId, programmeId), sharedWithTeam(teamId)))
+    .where(and(eq(programmeCourses.programmeId, programmeId), sharedWithProgramme(programmeId)))
     .orderBy(
       sql`${programmeCourses.year} IS NULL`,
       asc(programmeCourses.year),
@@ -113,9 +117,9 @@ const isAdmin = (a: Actor) => a.role === "admin";
 
 type Row = typeof programmes.$inferSelect;
 
-const rowToProgramme = (r: Row): Programme => ({
+const rowToProgramme = (r: Row, teamIds: string[]): Programme => ({
   id: r.id,
-  teamId: r.teamId,
+  teamIds,
   name: r.name,
   sector: r.sector as Sector,
   track: r.track,
@@ -125,24 +129,27 @@ const rowToProgramme = (r: Row): Programme => ({
   updatedAt: r.updatedAt,
 });
 
-/** The actor's membership of a team (with the lead stand), or undefined. */
-function membership(userId: string, teamId: string) {
-  return getDb()
-    .select({ isLead: teamMembers.isLead })
-    .from(teamMembers)
-    .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
-    .get();
-}
-
-const canManageTeam = (a: Actor, teamId: string) =>
-  isAdmin(a) || membership(a.id, teamId)?.isLead === true;
+/** An admin, or a lead of one of the programme's teams. */
+const canManage = (a: Actor, programmeId: string) =>
+  isAdmin(a) || myTeams(a.id, programmeId).some((m) => m.isLead);
 
 /** Programmes the actor may read: of a team they are in, or any for an admin. */
 const readable = (a: Actor): SQL | undefined =>
   isAdmin(a)
     ? undefined
-    : sql`exists (select 1 from ${teamMembers} m
-        where m.team_id = ${programmes.teamId} and m.user_id = ${a.id})`;
+    : sql`exists (select 1 from ${programmeTeams} pt join ${teamMembers} m
+        on m.team_id = pt.team_id where pt.programme_id = ${programmes.id} and m.user_id = ${a.id})`;
+
+/** A programme row with its teams, as the actor sees it. */
+function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) {
+  const ids = list.map((t) => t.id);
+  return {
+    ...rowToProgramme(p, ids),
+    teams: list,
+    teamName: namesOf(list),
+    canManage: canManage(a, p.id),
+  };
+}
 
 function parseInput(input: unknown) {
   const p = ProgrammeInputSchema.parse(input);
@@ -166,20 +173,18 @@ export async function manageableTeams(a: Actor): Promise<{ id: string; name: str
 export async function listProgrammes(
   a: Actor,
   limit?: number,
-): Promise<(Programme & { teamName: string; canManage: boolean; courseCount: number })[]> {
+): Promise<(ReturnType<typeof withTeams> & { courseCount: number })[]> {
   const rows = getDb()
-    .select({ p: programmes, teamName: teams.name })
+    .select()
     .from(programmes)
-    .innerJoin(teams, eq(teams.id, programmes.teamId))
     .where(readable(a))
-    .orderBy(asc(programmes.name), asc(teams.name))
+    .orderBy(asc(programmes.name))
     .limit(cap(limit))
     .all();
-  return rows.map(({ p, teamName }) => ({
-    ...rowToProgramme(p),
-    teamName,
-    canManage: canManageTeam(a, p.teamId),
-    courseCount: listProgrammeCourses(p.id, p.teamId).length,
+  const byProgramme = teamsOf(rows.map((p) => p.id));
+  return rows.map((p) => ({
+    ...withTeams(a, p, byProgramme.get(p.id)),
+    courseCount: listProgrammeCourses(p.id).length,
   }));
 }
 
@@ -187,21 +192,16 @@ export async function listProgrammes(
 export async function getProgramme(
   a: Actor,
   id: string,
-): Promise<
-  (Programme & { teamName: string; canManage: boolean; courses: ProgrammeCourse[] }) | null
-> {
-  const hit = getDb()
-    .select({ p: programmes, teamName: teams.name })
+): Promise<(ReturnType<typeof withTeams> & { courses: ProgrammeCourse[] }) | null> {
+  const p = getDb()
+    .select()
     .from(programmes)
-    .innerJoin(teams, eq(teams.id, programmes.teamId))
     .where(and(eq(programmes.id, id), readable(a)))
     .get();
-  if (!hit) return null;
+  if (!p) return null;
   return {
-    ...rowToProgramme(hit.p),
-    teamName: hit.teamName,
-    canManage: canManageTeam(a, hit.p.teamId),
-    courses: listProgrammeCourses(hit.p.id, hit.p.teamId).map(({ dataJson: _, ...c }) => c),
+    ...withTeams(a, p, teamsOf([p.id]).get(p.id)),
+    courses: listProgrammeCourses(p.id).map(({ dataJson: _, ...c }) => c),
   };
 }
 
@@ -212,20 +212,21 @@ export async function createProgramme(
   input: unknown,
 ): Promise<Programme | null> {
   const values = parseInput(input);
-  const team = getDb().select({ id: teams.id }).from(teams).where(eq(teams.id, teamId)).get();
-  if (!team || !canManageTeam(a, teamId)) return null;
+  if (!(await manageableTeams(a)).some((t) => t.id === teamId)) return null;
   const now = new Date();
   const row: Row = {
     id: randomUUID(),
-    teamId,
     createdBy: a.id,
     ...values,
     divisionId: null,
     createdAt: now,
     updatedAt: now,
   };
-  getDb().insert(programmes).values(row).run();
-  return rowToProgramme(row);
+  getDb().transaction((tx) => {
+    tx.insert(programmes).values(row).run();
+    tx.insert(programmeTeams).values({ programmeId: row.id, teamId, createdAt: now }).run();
+  });
+  return rowToProgramme(row, [teamId]);
 }
 
 function managedRow(a: Actor, id: string): Row | undefined {
@@ -234,7 +235,7 @@ function managedRow(a: Actor, id: string): Row | undefined {
     .from(programmes)
     .where(and(eq(programmes.id, id), readable(a)))
     .get();
-  return row && canManageTeam(a, row.teamId) ? row : undefined;
+  return row && canManage(a, row.id) ? row : undefined;
 }
 
 /** Null when the actor may not manage it; throws on invalid input. */
@@ -252,7 +253,8 @@ export async function updateProgramme(
     .where(eq(programmes.id, row.id))
     .returning()
     .get();
-  return updated ? rowToProgramme(updated) : null;
+  const ids = (teamsOf([id]).get(id) ?? []).map((t) => t.id);
+  return updated ? rowToProgramme(updated, ids) : null;
 }
 
 /** Removes the programme and its placements; the courses and their shares stay. */
@@ -265,6 +267,7 @@ export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
     tx.run(sql`delete from ${learningLineProgrammes} where programme_id = ${row.id}
       or line_id in (select id from ${learningLines} where programme_id = ${row.id})`);
     tx.delete(learningLines).where(eq(learningLines.programmeId, row.id)).run();
+    tx.delete(programmeTeams).where(eq(programmeTeams.programmeId, row.id)).run();
     tx.delete(programmes).where(eq(programmes.id, row.id)).run();
   });
   return true;
@@ -272,7 +275,8 @@ export async function deleteProgramme(a: Actor, id: string): Promise<boolean> {
 
 /**
  * Puts a course the actor owns or co-owns in a programme of a team they are in, at this year
- * and period (or moves it there), and shares the course with that team. False otherwise.
+ * and period (or moves it there), and shares the course with the programme's teams they are in.
+ * False otherwise.
  */
 export async function placeCourse(
   a: Actor,
@@ -283,13 +287,10 @@ export async function placeCourse(
   const parsed = PlacementSchema.safeParse(placement);
   if (!parsed.success) return false;
   const db = getDb();
-  const programme = db
-    .select({ id: programmes.id, teamId: programmes.teamId })
-    .from(programmes)
-    .where(eq(programmes.id, programmeId))
-    .get();
-  if (!programme || !membership(a.id, programme.teamId)) return false;
-  if (!(await shareItem(a.id, "course", courseId, programme.teamId))) return false;
+  const mine = myTeams(a.id, programmeId);
+  if (mine.length === 0) return false;
+  for (const { teamId } of mine)
+    if (!(await shareItem(a.id, "course", courseId, teamId))) return false;
   const year = parsed.data.year ?? null;
   const period = parsed.data.period ?? null;
   db.insert(programmeCourses)
@@ -320,12 +321,12 @@ export async function removeCourse(
   courseId: string,
 ): Promise<boolean> {
   const programme = getDb()
-    .select({ teamId: programmes.teamId })
+    .select({ id: programmes.id })
     .from(programmes)
     .where(eq(programmes.id, programmeId))
     .get();
   if (!programme) return false;
-  const who = canManageTeam(a, programme.teamId)
+  const who = canManage(a, programme.id)
     ? undefined
     : or(
         eq(programmeCourses.userId, a.id),
@@ -359,37 +360,35 @@ export async function programmesOfCourse(courseId: string): Promise<
     period: number | null;
   }[]
 > {
-  return getDb()
+  const rows = getDb()
     .select({
       programmeId: programmes.id,
       name: programmes.name,
-      teamName: teams.name,
       year: programmeCourses.year,
       period: programmeCourses.period,
     })
     .from(programmeCourses)
     .innerJoin(programmes, eq(programmes.id, programmeCourses.programmeId))
-    .innerJoin(teams, eq(teams.id, programmes.teamId))
     .innerJoin(courses, eq(courses.id, programmeCourses.courseId))
-    .where(and(eq(programmeCourses.courseId, courseId), sharedWithTeam(programmes.teamId)))
+    .where(and(eq(programmeCourses.courseId, courseId), sharedWithProgramme(programmes.id)))
     .orderBy(asc(programmes.name))
     .limit(cap(500))
     .all();
+  const byProgramme = teamsOf(rows.map((r) => r.programmeId));
+  return rows.map((r) => ({ ...r, teamName: namesOf(byProgramme.get(r.programmeId)) }));
 }
 
 /** The programmes a teacher may put a course in: those of every team they are in. */
 export async function placeOptions(
   userId: string,
 ): Promise<{ id: string; name: string; teamName: string }[]> {
-  return getDb()
-    .select({ id: programmes.id, name: programmes.name, teamName: teams.name })
+  const rows = getDb()
+    .select({ id: programmes.id, name: programmes.name })
     .from(programmes)
-    .innerJoin(teams, eq(teams.id, programmes.teamId))
-    .innerJoin(
-      teamMembers,
-      and(eq(teamMembers.teamId, programmes.teamId), eq(teamMembers.userId, userId)),
-    )
-    .orderBy(asc(programmes.name), asc(teams.name))
+    .where(readable({ id: userId, role: "teacher" }))
+    .orderBy(asc(programmes.name))
     .limit(cap(500))
     .all();
+  const byProgramme = teamsOf(rows.map((r) => r.id));
+  return rows.map((r) => ({ ...r, teamName: namesOf(byProgramme.get(r.id)) }));
 }

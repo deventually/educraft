@@ -40,8 +40,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!kinds.some((k) => k.value === kind))
     kinds.unshift({ value: kind, label: programmeKindLabel({ ...programme, form: null }, locale) });
   const inProgramme = new Set(programme.courses.map((c) => c.courseId));
-  // Only courses you own or co-own can go in; placing shares them with the team
-  // (BESLUIT-2026-11-10-5). An editor's courses are not theirs to place.
+  // Only courses you own or co-own can go in; placing shares them with your teams of the
+  // programme (BESLUIT-2026-11-10-5, BESLUIT-2026-11-16-1). An editor's courses are not theirs to place.
   const managed = (await listCourses(user.id, 500)).filter((c) => c.role !== "editor");
   const mine = new Set(managed.map((c) => c.id));
   const available = managed
@@ -56,6 +56,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       form: programme.form ?? "",
       kindLabel: programmeKindLabel(programme, locale),
       teamName: programme.teamName,
+      teamCount: programme.teams.length,
       canManage: programme.canManage,
       courses: programme.courses.map(({ ownerId: _owner, ...c }) => ({
         ...c,
@@ -149,7 +150,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         {programme.name}
       </h1>
       <p className="mt-1 text-slate-600">
-        {programme.kindLabel} · {p.team} {programme.teamName}
+        {programme.kindLabel} · {programme.teamCount > 1 ? p.teams : p.team} {programme.teamName}
       </p>
 
       <div className="mt-6 space-y-10">

@@ -90,7 +90,7 @@ describe("/programmes", () => {
     const id = ((r as Response).headers.get("Location") ?? "").split("/").pop() ?? "";
     expect(await repo.getProgramme(me, id)).toMatchObject({
       name: "HBO-ICT",
-      teamId,
+      teamIds: [teamId],
       sector: "hbo",
       track: "bachelor",
       form: "parttime",
