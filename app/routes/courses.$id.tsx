@@ -198,6 +198,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
         r.intent === "unshare" ||
         r.intent === "set-member" ||
         r.intent === "remove-member" ||
+        r.intent === "link-team" ||
+        r.intent === "unlink-team" ||
         r.intent === "transfer-course" ||
         r.intent === "programme-place" ||
         r.intent === "programme-remove" ||

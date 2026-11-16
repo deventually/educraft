@@ -274,6 +274,13 @@
       "when": 1794820842711,
       "tag": "0038_blue_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1794822727266,
+      "tag": "0039_eminent_scorpion",
+      "breakpoints": true
     }
   ]
 }

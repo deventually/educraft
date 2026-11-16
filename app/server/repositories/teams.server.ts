@@ -17,6 +17,7 @@ import { getDb } from "../db.server";
 import {
   announcementDismissals,
   announcements,
+  courseTeams,
   invites,
   learningLines,
   programmeCourses,
@@ -132,6 +133,7 @@ export async function deleteTeam(id: string): Promise<void> {
     tx.delete(programmes).where(inArray(programmes.id, alone)).run();
     tx.delete(programmeTeams).where(eq(programmeTeams.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
+    tx.delete(courseTeams).where(eq(courseTeams.teamId, id)).run();
     // Announcements for the team go with it, with their dismissals.
     const told = tx
       .select({ id: announcements.id })

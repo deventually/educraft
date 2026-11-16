@@ -16,6 +16,7 @@ import {
   contextProfiles,
   courseLinks,
   courseMembers,
+  courseTeams,
   programmeCourses,
   courses,
   portfolioDossiers,
@@ -229,6 +230,7 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(courseMembers)
       .where(or(eq(courseMembers.userId, id), inArray(courseMembers.courseId, ownCourses)))
       .run();
+    tx.delete(courseTeams).where(inArray(courseTeams.courseId, ownCourses)).run();
     tx.delete(courses).where(eq(courses.userId, id)).run();
     tx.delete(programmeCourses).where(eq(programmeCourses.userId, id)).run();
     tx.delete(teamMembers).where(eq(teamMembers.userId, id)).run();

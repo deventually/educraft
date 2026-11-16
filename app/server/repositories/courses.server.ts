@@ -19,6 +19,7 @@ import {
   contextProfiles,
   courseLinks,
   courseMembers,
+  courseTeams,
   courses,
   generations,
   programmeCourses,
@@ -26,6 +27,7 @@ import {
   shares,
   users,
 } from "../schema.server";
+import { courseRoles } from "./courseRoles.server";
 
 export interface Course {
   id: string;
@@ -94,7 +96,7 @@ const ownCourse = (userId: string, id: string) =>
 const mayEdit = (userId: string) =>
   or(
     eq(courses.userId, userId),
-    sql`exists (select 1 from ${courseMembers} m
+    sql`exists (select 1 from ${courseRoles} m
       where m.course_id = ${courses.id} and m.user_id = ${userId})`,
   );
 
@@ -104,7 +106,8 @@ const withOwner = (userId: string) =>
     .select({
       row: courses,
       ownerName: users.name,
-      memberRole: sql<string | null>`(select m.role from ${courseMembers} m
+      // "co-owner" sorts before "editor": `min` is the strongest role (member or team).
+      memberRole: sql<string | null>`(select min(m.role) from ${courseRoles} m
         where m.course_id = ${courses.id} and m.user_id = ${userId})`,
     })
     .from(courses)
@@ -232,6 +235,7 @@ export async function deleteCourse(userId: string, id: string): Promise<boolean>
     if (result.changes === 0) return false;
     tx.delete(courseLinks).where(eq(courseLinks.courseId, id)).run();
     tx.delete(courseMembers).where(eq(courseMembers.courseId, id)).run();
+    tx.delete(courseTeams).where(eq(courseTeams.courseId, id)).run();
     tx.delete(shares)
       .where(and(eq(shares.kind, "course"), eq(shares.itemId, id)))
       .run();

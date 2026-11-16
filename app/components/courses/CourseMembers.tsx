@@ -5,6 +5,7 @@ import { Button, Card, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
+import { CourseTeams, type CourseTeamsProps } from "./CourseTeams";
 import { CourseTransfer } from "./CourseTransfer";
 
 type MemberRole = "editor" | "co-owner";
@@ -24,6 +25,10 @@ export interface CourseMembersProps {
   candidates: { userId: string; name: string }[];
   /** Colleagues the owner can hand the course to. */
   transferTo: { userId: string; name: string }[];
+  /** Teams linked to the course (BESLUIT-2026-11-16-2). */
+  teams?: CourseTeamsProps["teams"];
+  /** The manager's own teams that can still be linked. */
+  teamCandidates?: CourseTeamsProps["teamCandidates"];
 }
 
 const ROLES: MemberRole[] = ["editor", "co-owner"];
@@ -39,6 +44,8 @@ export function CourseMembers({
   members,
   candidates,
   transferTo,
+  teams = [],
+  teamCandidates = [],
 }: CourseMembersProps) {
   const t = useT();
   const e = t.courseMembers;
@@ -149,6 +156,8 @@ export function CourseMembers({
               </Button>
             </Form>
           ))}
+
+        <CourseTeams manages={manages} teams={teams} teamCandidates={teamCandidates} />
 
         {myRole === "owner" && transferTo.length > 0 && (
           <div className="mt-4 border-t border-slate-100 pt-3">

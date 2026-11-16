@@ -570,8 +570,9 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   A **team** sits under its programmes (it owns them, with any other teams), under a division (`teams.division_id`, for a team
   without a programme, such as an exam board) or under nothing (the whole institution); a division
   with a team under it is not deleted. `teamPlaces` names, per team, its programmes and division
-  for the admin's person page; Organisatie lists the teams per division. A module team is a
-  course's members (`course_members`), not a team (BESLUIT-2026-11-12-6).
+  for the admin's person page; Organisatie lists the teams per division. A module team works on
+  a course as its members (`course_members`) or, linked as a whole, through `course_teams`
+  (BESLUIT-2026-11-16-2); the course stays one person's.
 - **Exporting a result (P30)** (`app/lib/export/`). A stage says what its result is
   (`OutputFormat.exportAs`); `formatsFor` picks the formats. Every result goes to one in-between
   model (`ExportDoc`, `toExportDoc`); each writer (`docx.ts`, `pptx.ts`, `md.ts`, in `writers.ts`)
