@@ -676,6 +676,16 @@ Emergency switch: *Settings → Secrets and variables → Actions → Variables*
 `npm run test:e2e` itself and puts the result in the PR (`AGENTS.md` says how in a sandbox with
 its own browser, via `PLAYWRIGHT_CHROMIUM_PATH`).
 
+**Fields on one line** (`app/app.css`, `e2e/field-alignment.spec.ts`). In a `grid` of fields, a
+field is a `div` whose first child is a `label[for]` (or a label row), then the input, then
+maybe a hint. One rule in `app.css` lets every such field share its rows with its neighbours
+through CSS subgrid, so a long label or a hint never pushes one input below the next, and a
+button in that grid spans the label and input rows. Nothing per screen: write the field the
+usual way and it lines up. In a `flex items-end` row (fields and a button side by side), the
+hint goes **under the row**, not in the field, or the button lines up with the hint instead of
+the input. The browser test makes one label per row long and fails on any input or button that
+is more than 2px off its neighbours.
+
 **Mutation testing** (Stryker, `stryker.config.json`). Stryker makes small changes (mutants) to
 the core, the registry logic (not its data: `tools/`, `goals.ts`, `keywords.ts`), auth, the
 repositories, the rate limiter and the login throttle, and checks that a test fails for each one. A surviving mutant points at a line no test really pins
