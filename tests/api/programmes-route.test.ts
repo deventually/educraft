@@ -157,10 +157,25 @@ describe("/programmes", () => {
     });
   });
 
+  it("groups the programmes of my teams per faculty, those without one last (plan step 4)", async () => {
+    const org = await import("~/server/repositories/organisation.server");
+    const d = (await org.createDivision(ADMIN, `Techniek ${n}`))!;
+    await repo.createProgramme(ADMIN, teamId, hbo("Zonder faculteit"));
+    await repo.createProgramme(ADMIN, teamId, { ...hbo("Minor Data"), form: "minor" }, d.id);
+    const data = await list.loader({ request: get("/programmes") } as never);
+    expect(
+      data.groups.map((g) => ({ id: g.id, name: g.name, names: g.programmes.map((p) => p.name) })),
+    ).toEqual([
+      { id: d.id, name: d.name, names: ["Minor Data"] },
+      { id: null, name: null, names: ["Zonder faculteit"] },
+    ]);
+    expect(data.groups[0]!.programmes[0]).toMatchObject({ kind: "hbo-bachelor · minor" });
+  });
+
   it("lists the programmes of my teams, with team, kind and courses", async () => {
     await repo.createProgramme(ADMIN, teamId, { ...hbo("Master Informatica"), track: "master" });
     const data = await list.loader({ request: get("/programmes") } as never);
-    expect(data.programmes).toEqual([
+    expect(data.groups.flatMap((g) => g.programmes)).toEqual([
       expect.objectContaining({
         name: "Master Informatica",
         kind: "hbo-master",
@@ -184,7 +199,7 @@ describe("/programmes", () => {
     const p = await repo.createProgramme(ADMIN, teamId, hbo("Weg"));
     await signInAs({ id: `route-admin-${n}`, name: "Beheer", role: "admin" });
     const data = await list.loader({ request: get("/programmes") } as never);
-    expect(data.programmes.find((x) => x.id === p!.id)).toMatchObject({ canDelete: true });
+    expect(data.groups.flatMap((g) => g.programmes).find((x) => x.id === p!.id)).toMatchObject({ canDelete: true });
     expect(
       await list.action({ request: post("/programmes", { intent: "delete", id: p!.id }) } as never),
     ).toMatchObject({ ok: true });

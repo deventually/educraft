@@ -97,6 +97,7 @@ export const programmes = {
   name: "Name",
   namePlaceholder: "For example Computer Science full-time",
   navLink: "Programmes",
+  noDivision: "Without a {division}",
   noPlace: "No year or period yet",
   noTeamOption: "No team yet",
   noTeams:

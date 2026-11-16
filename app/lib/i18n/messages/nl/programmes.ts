@@ -100,6 +100,7 @@ export const programmes = {
   name: "Naam",
   namePlaceholder: "Bijvoorbeeld HBO-ICT voltijd",
   navLink: "Opleidingen",
+  noDivision: "Zonder {division}",
   noPlace: "Nog geen jaar of periode",
   noTeamOption: "Nog geen team",
   noTeams:
