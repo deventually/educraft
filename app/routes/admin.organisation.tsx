@@ -141,12 +141,13 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
                 </option>
               ))}
             </Select>
-            <HelpText id="division-kind-hint">{o.kindHint}</HelpText>
           </div>
           <Button type="submit" variant="secondary">
             {o.kindSave}
           </Button>
         </Form>
+        {/* Under the row, not in the field: so the button lines up with the select. */}
+        <HelpText id="division-kind-hint">{o.kindHint}</HelpText>
       </section>
 
       <Form
