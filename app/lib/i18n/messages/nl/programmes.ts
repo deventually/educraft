@@ -1,6 +1,8 @@
 export const programmes = {
   add: "Toevoegen",
   addNone: "Al je cursussen zitten in deze opleiding.",
+  addNotMember:
+    "Je zit niet in een team van deze opleiding. Alleen teamleden zetten hun eigen cursussen erin. Een beheerder zet je in een team via Beheer → Teams.",
   addTitle: "Cursus toevoegen",
   back: "Alle opleidingen",
   course: "Cursus",

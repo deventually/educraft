@@ -15,7 +15,24 @@ export function watchCsp(page: Page): string[] {
   return violations;
 }
 
+/**
+ * Waits until no finite animation or transition runs (a toast fading in), so axe never measures
+ * contrast halfway through an opacity change. Endless ones (a spinner) are ignored.
+ */
+async function settled(page: Page) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (a) =>
+          a.playState !== "running" ||
+          a.effect?.getComputedTiming().endTime === Number.POSITIVE_INFINITY,
+      ),
+  );
+}
+
 export async function expectNoAxeViolations(page: Page) {
+  await settled(page);
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   const summary = violations.map((v) => ({
     id: v.id,

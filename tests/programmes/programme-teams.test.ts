@@ -131,4 +131,16 @@ describe("a programme with several teams", () => {
       names,
     );
   });
+
+  it("says whether the reader is in one of its teams (only they place courses)", async () => {
+    const { admin, coordinator, moduleMember, moduleTeam, p } = await world();
+    expect(await repo.getProgramme(coordinator, p.id)).toMatchObject({ isMember: true });
+    // An admin reads and manages every programme, but places a course only as a team member.
+    expect(await repo.getProgramme(admin, p.id)).toMatchObject({
+      isMember: false,
+      canManage: true,
+    });
+    await links.linkProgrammeTeam(admin, p.id, moduleTeam.id);
+    expect(await repo.getProgramme(moduleMember, p.id)).toMatchObject({ isMember: true });
+  });
 });

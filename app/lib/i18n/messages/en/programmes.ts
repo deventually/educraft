@@ -1,6 +1,8 @@
 export const programmes = {
   add: "Add",
   addNone: "All your courses are in this programme.",
+  addNotMember:
+    "You are not in a team of this programme. Only team members put their own courses in it. An admin adds you to a team under Admin → Teams.",
   addTitle: "Add a course",
   back: "All programmes",
   course: "Course",
