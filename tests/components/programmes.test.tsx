@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentType } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import ProgrammeList from "~/routes/programmes._index";
@@ -111,6 +112,7 @@ describe("Programme page (/programmes/:id)", () => {
       kindLabel: "hbo-bachelor · voltijd",
       teamName: "Informatica",
       teamCount: 1,
+      teams: [{ id: "t1", name: "Informatica" }],
       canManage: false,
       courses: [
         {
@@ -133,36 +135,98 @@ describe("Programme page (/programmes/:id)", () => {
     },
     kinds,
     available: [{ id: "c3", name: "Databases" }],
+    teamOptions: [] as { id: string; label: string; hint?: string }[],
     canPlace: true,
   };
 
-  it("shows the courses with their place, and forms to move, remove and add", async () => {
+  it("shows the courses with their place, Cursus toevoegen and Weghalen", async () => {
     const { container } = renderRoute(ProgrammePage, data);
     expect(screen.getByRole("heading", { level: 1, name: "HBO-ICT" })).toBeVisible();
-    expect(screen.getByText("Jaar 1 · periode 2")).toBeVisible();
-    expect(screen.getByText("Nog geen jaar of periode")).toBeVisible();
+    const courses = screen.getByRole("region", { name: "Cursussen" });
+    expect(within(courses).getByText(/Jaar 1 · periode 2/)).toBeVisible();
+    expect(within(courses).getByText(/Nog geen jaar of periode/)).toBeVisible();
     expect(screen.getByLabelText("Jaar (Programmeren 1)")).toHaveValue(1);
-    expect(screen.getByRole("button", { name: "Weghalen (Programmeren 1)" })).toBeVisible();
+    expect(within(courses).getByRole("button", { name: "Cursus toevoegen" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Weghalen: Programmeren 1" })).toBeVisible();
     // A colleague's course: who owns it, read-only, no move or remove for a member.
     expect(screen.getByRole("link", { name: "Afstuderen" })).toHaveAttribute(
       "href",
       "/courses/shared/c2",
     );
-    expect(screen.getByText("Van Sanne")).toBeVisible();
+    expect(screen.getByText(/Van Sanne/)).toBeVisible();
     expect(screen.queryByLabelText("Jaar (Afstuderen)")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Weghalen (Afstuderen)" })).toBeNull();
-    expect(screen.getByLabelText("Cursus")).toHaveDisplayValue("Databases");
+    expect(screen.queryByRole("button", { name: "Weghalen: Afstuderen" })).toBeNull();
     expect(screen.getByText("hbo-bachelor · voltijd · Team Informatica")).toBeVisible();
-    expect(screen.getByText(/zien de collega's van Informatica hem/)).toBeVisible();
     // Only the lead or an admin edits the details.
     expect(screen.queryByLabelText("Vorm")).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("adds courses in a dialog: tick several, with one year and period", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammePage, data);
+    await user.click(screen.getByRole("button", { name: "Cursus toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Cursussen toevoegen aan HBO-ICT" });
+    expect(within(dialog).getByRole("checkbox", { name: "Databases" })).toBeVisible();
+    expect(within(dialog).getByLabelText("Jaar")).toBeVisible();
+    expect(within(dialog).getByText(/zien de collega's van Informatica hem/)).toBeVisible();
+  });
+
+  it("asks before taking a course out, and says the course stays", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammePage, data);
+    await user.click(screen.getByRole("button", { name: "Weghalen: Programmeren 1" }));
+    const dialog = screen.getByRole("dialog", { name: "Programmeren 1 weghalen uit HBO-ICT?" });
+    expect(within(dialog).getByText(/De cursus blijft bestaan/)).toBeVisible();
+  });
+
   it("lets the lead edit the details and take out a colleague's course", () => {
     renderRoute(ProgrammePage, { ...data, programme: { ...data.programme, canManage: true } });
     expect(screen.getByLabelText("Vorm")).toHaveDisplayValue("voltijd");
-    expect(screen.getByRole("button", { name: "Weghalen (Afstuderen)" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Weghalen: Afstuderen" })).toBeVisible();
+  });
+
+  it("shows its teams; the lead adds teams and takes one off, never the last", async () => {
+    const user = userEvent.setup();
+    const lead = {
+      ...data,
+      programme: {
+        ...data.programme,
+        canManage: true,
+        teams: [
+          { id: "t1", name: "Informatica" },
+          { id: "t2", name: "Moduleteam Web" },
+        ],
+      },
+      teamOptions: [{ id: "t3", label: "Moduleteam Data", hint: "4 leden" }],
+    };
+    const { container, unmount } = renderRoute(ProgrammePage, lead);
+    const teams = screen.getByRole("region", { name: "Teams" });
+    expect(within(teams).getAllByRole("listitem")).toHaveLength(2);
+    await user.click(within(teams).getByRole("button", { name: "Weghalen: Moduleteam Web" }));
+    expect(
+      screen.getByRole("dialog", { name: "Moduleteam Web weghalen uit HBO-ICT?" }),
+    ).toBeVisible();
+    await user.keyboard("{Escape}");
+    await user.click(within(teams).getByRole("button", { name: "Team toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Teams toevoegen aan HBO-ICT" });
+    expect(within(dialog).getByRole("checkbox", { name: /Moduleteam Data/ })).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    unmount();
+
+    renderRoute(ProgrammePage, {
+      ...lead,
+      programme: { ...lead.programme, teams: [{ id: "t1", name: "Informatica" }] },
+    });
+    const one = screen.getByRole("region", { name: "Teams" });
+    expect(within(one).queryByRole("button", { name: /Weghalen/ })).toBeNull();
+  });
+
+  it("shows a member the teams, without buttons", () => {
+    renderRoute(ProgrammePage, data);
+    const teams = screen.getByRole("region", { name: "Teams" });
+    expect(within(teams).getByText("Informatica")).toBeVisible();
+    expect(within(teams).queryByRole("button")).toBeNull();
   });
 
   it("names every team of a programme with several (BESLUIT-2026-11-16-1)", () => {
@@ -175,14 +239,16 @@ describe("Programme page (/programmes/:id)", () => {
     ).toBeVisible();
   });
 
-  it("tells a reader outside its teams (an admin) why there is no form to add a course", () => {
+  it("tells a reader outside its teams (an admin) why they cannot add a course", () => {
     renderRoute(ProgrammePage, { ...data, canPlace: false });
-    expect(screen.queryByRole("button", { name: "Toevoegen" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cursus toevoegen" })).toBeNull();
     expect(screen.getByText(/Je zit niet in een team van deze opleiding/)).toBeVisible();
   });
 
-  it("says so when every course is already in it", () => {
+  it("says so in the dialog when every course is already in it", async () => {
+    const user = userEvent.setup();
     renderRoute(ProgrammePage, { ...data, available: [] });
+    await user.click(screen.getByRole("button", { name: "Cursus toevoegen" }));
     expect(screen.getByText("Al je cursussen zitten in deze opleiding.")).toBeVisible();
   });
 });

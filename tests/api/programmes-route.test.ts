@@ -240,6 +240,106 @@ describe("/programmes/:id", () => {
   });
 });
 
+describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
+  const actMany = (id: string, entries: [string, string][]) =>
+    detail.action({
+      request: signedRequest(`http://localhost/programmes/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: "lang=nl" },
+        body: new URLSearchParams(entries).toString(),
+      }),
+      params: { id },
+    } as never);
+  const load = (id: string) =>
+    detail.loader({ request: get(`/programmes/${id}`), params: { id } } as never);
+
+  it("adds several of my courses at once, at the same year and period", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const a = await courses.createCourse(me.id, { name: "Programmeren 1" });
+    const b = await courses.createCourse(me.id, { name: "Databases" });
+    expect(
+      await actMany(p!.id, [
+        ["intent", "add-courses"],
+        ["courseId", a.id],
+        ["courseId", b.id],
+        ["year", "1"],
+        ["period", "2"],
+      ]),
+    ).toEqual({ ok: true, message: "2 cursussen toegevoegd." });
+    expect((await load(p!.id)).programme.courses).toEqual([
+      expect.objectContaining({ name: "Databases", year: 1, period: 2 }),
+      expect.objectContaining({ name: "Programmeren 1", year: 1, period: 2 }),
+    ]);
+  });
+
+  it("refuses adding no course, or a course that is not mine", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const theirs = await courses.createCourse(colleague.id, { name: "Van collega" });
+    expect(await actMany(p!.id, [["intent", "add-courses"]])).toMatchObject({ ok: false });
+    expect(
+      await actMany(p!.id, [
+        ["intent", "add-courses"],
+        ["courseId", theirs.id],
+      ]),
+    ).toMatchObject({ ok: false });
+    expect((await load(p!.id)).programme.courses).toEqual([]);
+  });
+
+  it("shows its teams, and to its lead the other teams to add", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const module = await teams.createTeam(`Moduleteam ${n}`);
+    const data = await load(p!.id);
+    expect(data.programme.teams).toEqual([{ id: teamId, name: teamName }]);
+    expect(data.teamOptions).toContainEqual({ id: module.id, label: module.name, hint: "0 leden" });
+    expect(data.teamOptions.map((t) => t.id)).not.toContain(teamId);
+  });
+
+  it("lets its lead add several teams and take one off, never the last", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const web = await teams.createTeam(`Moduleteam Web ${n}`);
+    const data = await teams.createTeam(`Moduleteam Data ${n}`);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "link-teams"],
+        ["teamId", web.id],
+        ["teamId", data.id],
+      ]),
+    ).toEqual({ ok: true, message: "2 teams toegevoegd." });
+    expect((await repo.getProgramme(me, p!.id))?.teamIds).toHaveLength(3);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "unlink-team"],
+        ["teamId", web.id],
+      ]),
+    ).toEqual({ ok: true, message: "Het team is weggehaald." });
+    await repo.getProgramme(me, p!.id);
+    await actMany(p!.id, [
+      ["intent", "unlink-team"],
+      ["teamId", data.id],
+    ]);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "unlink-team"],
+        ["teamId", teamId],
+      ]),
+    ).toEqual({ ok: false, error: "Een opleiding houdt altijd minstens één team." });
+  });
+
+  it("refuses a plain member who adds or takes off a team, and offers them none", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const web = await teams.createTeam(`Moduleteam Web ${n}`);
+    await signInAs({ id: colleague.id, name: "Collega" });
+    expect((await load(p!.id)).teamOptions).toEqual([]);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "link-teams"],
+        ["teamId", web.id],
+      ]),
+    ).toEqual({ ok: false, error: "Alleen de teamleider of een beheerder kan dat." });
+    expect((await repo.getProgramme(me, p!.id))?.teamIds).toEqual([teamId]);
+  });
+});
+
 describe("course page: belongs to programme…", () => {
   const act = (id: string, fields: Record<string, string>) =>
     course.action({ request: post(`/courses/${id}`, fields), params: { id } } as never);
