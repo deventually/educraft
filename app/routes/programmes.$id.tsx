@@ -1,6 +1,5 @@
 import { useId } from "react";
-import { Form, Link, redirect, useActionData } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { redirect, useActionData } from "react-router";
 import type { Route } from "./+types/programmes.$id";
 import {
   kindOptions,
@@ -24,17 +23,23 @@ import {
 import { createLine, listLines } from "~/server/repositories/learningLines.server";
 import { LearningLinesSection } from "~/components/programmes/LearningLinesSection";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
-import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
-import { ProgrammeFields } from "~/components/programmes/ProgrammeFields";
 import { ProgrammeCourses } from "~/components/programmes/ProgrammeCourses";
-import { ProgrammeTeams } from "~/components/programmes/ProgrammeTeams";
+import { ProgrammeDetails } from "~/components/programmes/ProgrammeDetails";
+import { Breadcrumb } from "~/components/Breadcrumb";
+import { Tabs } from "~/components/Tabs";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { redirectWithFlash } from "~/server/flash.server";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
+import {
+  getDivisionKind,
+  listDivisions,
+  setProgrammeDivision,
+} from "~/server/repositories/organisation.server";
+import { divisionWord } from "~/lib/organisation/kinds";
+import { loc } from "~/lib/i18n/localized";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.programme.name ?? "Opleiding"} — LimeOnIt` }];
@@ -50,6 +55,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   // A programme keeps its level even when the admin later switches that sector off.
   if (!kinds.some((k) => k.value === kind))
     kinds.unshift({ value: kind, label: programmeKindLabel({ ...programme, form: null }, locale) });
+  const divisions = (await listDivisions()).map(({ id, name }) => ({ id, name }));
   const inProgramme = new Set(programme.courses.map((c) => c.courseId));
   // Only courses you own or co-own can go in; placing shares them with your teams of the
   // programme (BESLUIT-2026-11-10-5, BESLUIT-2026-11-16-1). An editor's courses are not theirs to place.
@@ -69,6 +75,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       teamName: programme.teamName,
       teamCount: programme.teams.length,
       teams: programme.teams,
+      divisionId: programme.divisionId,
+      divisionName: divisions.find((d) => d.id === programme.divisionId)?.name ?? null,
       canManage: programme.canManage,
       courses: programme.courses.map(({ ownerId: _owner, ...c }) => ({
         ...c,
@@ -96,6 +104,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // Only an admin deletes a programme (BESLUIT-2026-11-16-4).
     canDelete: user.role === "admin",
     isAdmin: user.role === "admin",
+    // An admin chooses the faculty in Gegevens (plan step 4).
+    divisions: user.role === "admin" ? divisions : [],
+    divisionWord: loc(divisionWord(await getDivisionKind()), locale),
     lines: await Promise.all(
       (await listLines(user, programme.id)).map(async (l) => {
         // A line of another programme says where it comes from, when the user reads that one.
@@ -123,9 +134,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "settings") {
     const parsed = ProgrammeInputSchema.safeParse(programmeFromForm(fd));
     if (!parsed.success) return { ok: false as const, error: m.errorInvalid };
-    return (await updateProgramme(user, programme.id, parsed.data))
-      ? { ok: true as const, message: m.toastSaved }
-      : { ok: false as const, error: m.errorNotAllowed };
+    if (!(await updateProgramme(user, programme.id, parsed.data)))
+      return { ok: false as const, error: m.errorNotAllowed };
+    // The faculty, when the form had the field (an admin with faculties).
+    if (fd.has("divisionId"))
+      await setProgrammeDivision(user, programme.id, String(fd.get("divisionId")) || null);
+    return { ok: true as const, message: m.toastSaved };
   }
   if (intent === "line-create") {
     const l = getMessages(getLocale(request)).programmes.lines;
@@ -207,77 +221,78 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
   const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
   const canDelete = "canDelete" in loaderData && loaderData.canDelete;
 
+  const divisions = "divisions" in loaderData ? loaderData.divisions : [];
+  const divisionWord = "divisionWord" in loaderData ? loaderData.divisionWord : undefined;
+  const divisionName = "divisionName" in programme ? programme.divisionName : null;
+
   return (
     <div className="w-full min-w-0">
-      <Link
-        to="/programmes"
-        className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        {p.back}
-      </Link>
+      <Breadcrumb
+        label={t.menu.breadcrumb}
+        items={[{ label: p.heading, to: "/programmes" }, { label: programme.name }]}
+      />
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {programme.name}
       </h1>
       <p className="mt-1 text-slate-600">
-        {programme.kindLabel} ·{" "}
-        {programme.teamCount === 0
-          ? p.noTeamYet
-          : `${programme.teamCount > 1 ? p.teams : p.team} ${programme.teamName}`}
+        {[
+          programme.kindLabel,
+          divisionName,
+          programme.teamCount === 0
+            ? p.noTeamYet
+            : `${programme.teamCount > 1 ? p.teams : p.team} ${programme.teamName}`,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       </p>
 
-      <div className="mt-6 space-y-10">
-        <ProgrammeCourses id={id} programme={programme} available={available} canPlace={canPlace} />
-
-        <ProgrammeTeams
-          programme={programme}
-          teamOptions={teamOptions}
-          myTeamIds={myTeamIds}
-          isAdmin={isAdmin}
-        />
-
-        <LearningLinesSection
-          programmeId={programme.id}
-          lines={lines}
-          courses={programme.courses}
-          canManage={programme.canManage}
-        />
-
-        {programme.canManage && (
-          <section aria-labelledby={`${id}-settings`}>
-            <h2 id={`${id}-settings`} className="text-lg font-medium text-slate-900">
-              {p.settingsTitle}
-            </h2>
-            <Card className="mt-3 p-4">
-              <Form method="post" className="grid gap-4 sm:grid-cols-3">
-                <input type="hidden" name="intent" value="settings" />
-                <ProgrammeFields
-                  id={`${id}-settings`}
-                  kinds={kinds}
-                  defaults={{ name: programme.name, kind: programme.kind, form: programme.form }}
+      <div className="mt-6">
+        <Tabs
+          label={fmt(p.tabsLabel, { programme: programme.name })}
+          tabs={[
+            {
+              id: "courses",
+              label: p.tabCourses,
+              panel: (
+                <ProgrammeCourses
+                  id={id}
+                  programme={programme}
+                  available={available}
+                  canPlace={canPlace}
                 />
-                <div className="sm:col-span-3">
-                  <Button type="submit" size="sm" variant="secondary">
-                    {p.save}
-                  </Button>
-                </div>
-              </Form>
-            </Card>
-          </section>
-        )}
-
-        {canDelete && (
-          <section className="border-t border-slate-200 pt-6">
-            <ConfirmDialog
-              triggerLabel={p.deleteProgramme}
-              title={p.deleteTitle}
-              description={p.deleteBody}
-              confirmLabel={p.delete}
-              cancelLabel={t.confirm.cancel}
-              fields={{ intent: "delete" }}
-            />
-          </section>
-        )}
+              ),
+            },
+            {
+              id: "lines",
+              label: p.tabLines,
+              panel: (
+                <LearningLinesSection
+                  programmeId={programme.id}
+                  lines={lines}
+                  courses={programme.courses}
+                  canManage={programme.canManage}
+                />
+              ),
+            },
+            {
+              id: "details",
+              label: p.tabDetails,
+              panel: (
+                <ProgrammeDetails
+                  id={id}
+                  programme={programme}
+                  kinds={kinds}
+                  teamOptions={teamOptions}
+                  myTeamIds={myTeamIds}
+                  isAdmin={isAdmin}
+                  canDelete={!!canDelete}
+                  divisions={divisions}
+                  divisionWord={divisionWord}
+                />
+              ),
+            },
+          ]}
+        />
       </div>
     </div>
   );

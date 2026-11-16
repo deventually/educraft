@@ -9,5 +9,6 @@ export const programmes: RouteArea = {
       route(":id", "routes/programmes.$id.tsx"),
       route(":id/lines/:lineId", "routes/programmes.$id.lines.$lineId.tsx"),
     ]),
+    route("learning-lines", "routes/learning-lines._index.tsx"),
   ],
 };

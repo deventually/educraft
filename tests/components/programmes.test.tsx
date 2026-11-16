@@ -34,7 +34,7 @@ describe("Programme list (/programmes)", () => {
   it("offers an admin Nieuwe opleiding, with team, level and mode, and a guided empty state", async () => {
     const user = userEvent.setup();
     const { container } = renderRoute(ProgrammeList, {
-      programmes: [],
+      groups: [],
       kinds,
       teams,
       isAdmin: true,
@@ -61,7 +61,7 @@ describe("Programme list (/programmes)", () => {
   it("lets an admin start one without a team, under a faculty", async () => {
     const user = userEvent.setup();
     renderRoute(ProgrammeList, {
-      programmes: [],
+      groups: [],
       kinds,
       teams,
       isAdmin: true,
@@ -76,41 +76,79 @@ describe("Programme list (/programmes)", () => {
   });
 
   it("tells a teacher, also a team lead, that the admin creates programmes (BESLUIT-2026-11-16-4)", () => {
-    renderRoute(ProgrammeList, { programmes: [], kinds, teams: [], isAdmin: false });
+    renderRoute(ProgrammeList, { groups: [], kinds, teams: [], isAdmin: false });
     expect(screen.queryByRole("button", { name: "Nieuwe opleiding" })).toBeNull();
     expect(screen.getByText(/Alleen een beheerder maakt een opleiding aan/)).toBeVisible();
   });
 
-  it("lists programmes with kind, team and number of courses; delete only for an admin", async () => {
+  it("lists programmes per faculty with kind, team and number of courses; delete only for an admin", async () => {
     const { container } = renderRoute(ProgrammeList, {
-      programmes: [
+      groups: [
         {
-          id: "p1",
-          name: "HBO-ICT",
-          kind: "hbo-bachelor · voltijd",
-          teamName: "Informatica",
-          courses: 12,
-          canDelete: true,
+          id: "d1",
+          name: "Faculteit Techniek",
+          programmes: [
+            {
+              id: "p1",
+              name: "HBO-ICT",
+              kind: "hbo-bachelor · voltijd",
+              teamName: "Informatica",
+              courses: 12,
+              canDelete: true,
+            },
+          ],
         },
         {
-          id: "p2",
-          name: "Minor Data",
-          kind: "hbo-bachelor",
-          teamName: "Data",
-          courses: 3,
-          canDelete: false,
+          id: null,
+          name: null,
+          programmes: [
+            {
+              id: "p2",
+              name: "Minor Data",
+              kind: "hbo-bachelor · minor",
+              teamName: "Data",
+              courses: 3,
+              canDelete: false,
+            },
+          ],
         },
       ],
+      divisionWord: "Faculteit",
       kinds,
       teams,
     });
     expect(screen.getByRole("link", { name: "HBO-ICT" })).toHaveAttribute("href", "/programmes/p1");
+    // Per faculty, those without one last (plan step 4).
+    const techniek = screen.getByRole("region", { name: "Faculteit Techniek" });
+    expect(within(techniek).getByRole("link", { name: "HBO-ICT" })).toBeVisible();
+    const none = screen.getByRole("region", { name: "Zonder faculteit" });
+    expect(within(none).getByRole("link", { name: "Minor Data" })).toBeVisible();
     expect(
       screen.getByText("hbo-bachelor · voltijd · team Informatica · 12 cursussen"),
     ).toBeVisible();
     expect(screen.getByRole("button", { name: "Verwijderen: HBO-ICT" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Verwijderen: Minor Data" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("shows one plain list when no programme has a faculty", () => {
+    renderRoute(ProgrammeList, {
+      groups: [
+        {
+          id: null,
+          name: null,
+          programmes: [
+            { id: "p1", name: "HBO-ICT", kind: "hbo", teamName: "", courses: 0, canDelete: false },
+          ],
+        },
+      ],
+      kinds,
+      teams: [],
+    });
+    expect(screen.getByRole("link", { name: "HBO-ICT" })).toBeVisible();
+    expect(screen.queryByRole("region", { name: /zonder/i })).toBeNull();
+    // A programme without a team says so, instead of an empty "team".
+    expect(screen.getByText("hbo · nog geen team · 0 cursussen")).toBeVisible();
   });
 });
 
@@ -151,6 +189,47 @@ describe("Programme page (/programmes/:id)", () => {
     myTeamIds: [] as string[],
     canPlace: true,
   };
+  const openTab = async (user: ReturnType<typeof userEvent.setup>, name: string) =>
+    user.click(screen.getByRole("tab", { name }));
+
+  it("shows the path back, the faculty and its teams on top, and three tabs (plan step 4)", async () => {
+    const user = userEvent.setup();
+    const { container } = renderRoute(ProgrammePage, {
+      ...data,
+      programme: { ...data.programme, divisionName: "Faculteit Techniek" },
+    });
+    const crumbs = screen.getByRole("navigation", { name: "Kruimelpad" });
+    expect(within(crumbs).getByRole("link", { name: "Opleidingen" })).toHaveAttribute(
+      "href",
+      "/programmes",
+    );
+    expect(within(crumbs).getByText("HBO-ICT")).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByText("hbo-bachelor · voltijd · Faculteit Techniek · Team Informatica"),
+    ).toBeVisible();
+    expect(screen.getAllByRole("tab").map((t) => t.textContent)).toEqual([
+      "Cursussen",
+      "Leerlijnen",
+      "Gegevens",
+    ]);
+    expect(screen.getByRole("tab", { name: "Cursussen" })).toHaveAttribute("aria-selected", "true");
+    await openTab(user, "Gegevens");
+    expect(screen.getByRole("region", { name: "Teams" })).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("lets an admin choose the faculty in Gegevens", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammePage, {
+      ...data,
+      isAdmin: true,
+      divisionWord: "Faculteit",
+      divisions: [{ id: "d1", name: "Faculteit Techniek" }],
+      programme: { ...data.programme, canManage: true, divisionId: "d1" },
+    });
+    await openTab(user, "Gegevens");
+    expect(screen.getByLabelText("Faculteit")).toHaveDisplayValue("Faculteit Techniek");
+  });
 
   it("shows the courses with their place, Cursus toevoegen and Weghalen", async () => {
     const { container } = renderRoute(ProgrammePage, data);
@@ -193,9 +272,12 @@ describe("Programme page (/programmes/:id)", () => {
     expect(within(dialog).getByText(/De cursus blijft bestaan/)).toBeVisible();
   });
 
-  it("lets the lead edit the details and take out a colleague's course", () => {
+  it("lets an admin edit the details and take out a colleague's course", async () => {
+    const user = userEvent.setup();
     renderRoute(ProgrammePage, { ...data, programme: { ...data.programme, canManage: true } });
+    await openTab(user, "Gegevens");
     expect(screen.getByLabelText("Vorm")).toHaveDisplayValue("voltijd");
+    await openTab(user, "Cursussen");
     expect(screen.getByRole("button", { name: "Weghalen: Afstuderen" })).toBeVisible();
   });
 
@@ -215,6 +297,7 @@ describe("Programme page (/programmes/:id)", () => {
       myTeamIds: ["t2"],
     };
     const { container } = renderRoute(ProgrammePage, lead);
+    await openTab(user, "Gegevens");
     const teams = screen.getByRole("region", { name: "Teams" });
     expect(within(teams).getAllByRole("listitem")).toHaveLength(2);
     expect(within(teams).queryByRole("button", { name: "Weghalen: Informatica" })).toBeNull();
@@ -232,23 +315,28 @@ describe("Programme page (/programmes/:id)", () => {
   it("always offers an admin Team toevoegen, and says where to make a team when there is none", async () => {
     const user = userEvent.setup();
     renderRoute(ProgrammePage, { ...data, isAdmin: true, teamOptions: [] });
+    await openTab(user, "Gegevens");
     await user.click(screen.getByRole("button", { name: "Team toevoegen" }));
     expect(screen.getByText(/Een nieuw team maak je bij Beheer → Teams/)).toBeVisible();
   });
 
-  it("says so when the programme has no team yet", () => {
+  it("says so when the programme has no team yet", async () => {
+    const user = userEvent.setup();
     renderRoute(ProgrammePage, {
       ...data,
       programme: { ...data.programme, teams: [], teamCount: 0, teamName: "" },
     });
     expect(screen.getByText("hbo-bachelor · voltijd · nog geen team")).toBeVisible();
+    await openTab(user, "Gegevens");
     expect(
       screen.getByText(/Nog geen team. Alleen een beheerder ziet deze opleiding/),
     ).toBeVisible();
   });
 
-  it("shows a member the teams, without buttons", () => {
+  it("shows a member the teams, without buttons", async () => {
+    const user = userEvent.setup();
     renderRoute(ProgrammePage, data);
+    await openTab(user, "Gegevens");
     const teams = screen.getByRole("region", { name: "Teams" });
     expect(within(teams).getByText("Informatica")).toBeVisible();
     expect(within(teams).queryByRole("button")).toBeNull();
@@ -257,6 +345,7 @@ describe("Programme page (/programmes/:id)", () => {
   it("has Verwijderen at the bottom for an admin, after a confirm", async () => {
     const user = userEvent.setup();
     renderRoute(ProgrammePage, { ...data, canDelete: true });
+    await openTab(user, "Gegevens");
     await user.click(screen.getByRole("button", { name: "Opleiding verwijderen" }));
     const dialog = screen.getByRole("dialog", { name: "Opleiding verwijderen?" });
     expect(within(dialog).getByText(/Je cursussen blijven gewoon bestaan/)).toBeVisible();

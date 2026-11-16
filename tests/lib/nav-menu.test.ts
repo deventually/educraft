@@ -35,11 +35,12 @@ describe("main menu", () => {
     expect(bdb).toMatchObject({ kind: "link", link: { to: "/portfolio" } });
   });
 
-  it("opens Onderwijs on courses and programmes, each with a line that says what it is", () => {
+  it("opens Onderwijs on courses, programmes and learning lines, each with a line that says what it is", () => {
     const onderwijs = mainMenu(nl, teacher).find((e) => e.label === "Onderwijs");
     expect(links(onderwijs).map((l) => [l.label, l.to])).toEqual([
       ["Cursussen", "/courses"],
       ["Opleidingen", "/programmes"],
+      ["Leerlijnen", "/learning-lines"],
     ]);
     for (const link of links(onderwijs)) expect(link.description).toBeTruthy();
   });

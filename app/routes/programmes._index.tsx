@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { Link, redirect, useActionData, useSearchParams } from "react-router";
-import { Layers, Trash2 } from "lucide-react";
+import { Layers } from "lucide-react";
 import type { Route } from "./+types/programmes._index";
 import { kindOptions, programmeFromForm, requireProgrammeUser } from "~/server/programmes.server";
 import {
@@ -11,16 +11,15 @@ import {
 import { manageableTeams } from "~/server/repositories/programmeTeams.server";
 import { programmeKindLabel, ProgrammeInputSchema } from "~/lib/programmes/schema";
 import { EmptyState } from "~/components/EmptyState";
-import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
 import { NewProgramme } from "~/components/programmes/NewProgramme";
+import { ProgrammeGroups } from "~/components/programmes/ProgrammeGroups";
 import { getDivisionKind, listDivisions } from "~/server/repositories/organisation.server";
 import { divisionWord } from "~/lib/organisation/kinds";
 import { loc } from "~/lib/i18n/localized";
 import { useT } from "~/lib/i18n/useT";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
-import { fmt } from "~/lib/i18n/format";
 
 export function meta() {
   return [{ title: "Opleidingen — LimeOnIt" }];
@@ -35,18 +34,23 @@ export async function loader({ request }: Route.LoaderArgs) {
     kind: programmeKindLabel(p, locale),
     teamName: p.teamName,
     courses: p.courseCount,
+    divisionId: p.divisionId,
     canDelete: user.role === "admin",
   }));
+  const allDivisions = (await listDivisions()).map(({ id, name }) => ({ id, name }));
   // Only an admin creates, manages and deletes a programme; a lead links their own team on the
   // team's page (BESLUIT-2026-11-16-4).
   const isAdmin = user.role === "admin";
   return {
-    programmes,
+    // Per faculty, in the faculties' order, those without one last (plan step 4).
+    groups: [...allDivisions, { id: null, name: null }]
+      .map((d) => ({ ...d, programmes: programmes.filter((p) => p.divisionId === d.id) }))
+      .filter((g) => g.programmes.length > 0),
     kinds: await kindOptions(user, locale),
     // The teams an admin may create a programme for, or none; also without a team, under a faculty.
     teams: isAdmin ? await manageableTeams(user) : [],
     isAdmin,
-    divisions: isAdmin ? (await listDivisions()).map(({ id, name }) => ({ id, name })) : [],
+    divisions: isAdmin ? allDivisions : [],
     divisionWord: loc(divisionWord(await getDivisionKind()), locale),
   };
 }
@@ -95,7 +99,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
       return { variant: "success", message: p.toastDeleted };
     },
   });
-  const { programmes, kinds, teams } = loaderData;
+  const { groups, kinds, teams } = loaderData;
   const isAdmin = "isAdmin" in loaderData && !!loaderData.isAdmin;
   const divisions = "divisions" in loaderData ? loaderData.divisions : [];
   const divisionWord = "divisionWord" in loaderData ? loaderData.divisionWord : undefined;
@@ -139,7 +143,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
         </p>
       )}
 
-      {programmes.length === 0 ? (
+      {groups.length === 0 ? (
         <EmptyState
           icon={<Layers aria-hidden />}
           title={p.emptyTitle}
@@ -158,42 +162,7 @@ export default function ProgrammeList({ loaderData }: Route.ComponentProps) {
           <h2 id={`${id}-list`} className="text-lg font-medium text-slate-900">
             {p.listTitle}
           </h2>
-          <ul className="mt-3 space-y-3">
-            {programmes.map((programme) => (
-              <li
-                key={programme.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
-              >
-                <div className="min-w-0">
-                  <Link
-                    to={`/programmes/${programme.id}`}
-                    className="font-medium text-slate-900 underline-offset-2 hover:underline"
-                  >
-                    {programme.name}
-                  </Link>
-                  <p className="text-sm text-slate-600">
-                    {fmt(p.summary, {
-                      kind: programme.kind,
-                      team: programme.teamName,
-                      courses: programme.courses,
-                    })}
-                  </p>
-                </div>
-                {programme.canDelete && (
-                  <ConfirmDialog
-                    triggerLabel={`${p.delete}: ${programme.name}`}
-                    triggerIcon={<Trash2 className="size-4" aria-hidden />}
-                    triggerIconOnly
-                    title={p.deleteTitle}
-                    description={p.deleteBody}
-                    confirmLabel={p.delete}
-                    cancelLabel={t.confirm.cancel}
-                    fields={{ intent: "delete", id: programme.id }}
-                  />
-                )}
-              </li>
-            ))}
-          </ul>
+          <ProgrammeGroups groups={groups} divisionWord={divisionWord} />
         </section>
       )}
     </div>

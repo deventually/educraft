@@ -2,18 +2,22 @@
  * Learning lines (leerlijnen): a named, ordered series of courses. A line has its own programme
  * and may also hold for other programmes (`learning_line_programmes`, BESLUIT-2026-11-12-2).
  * Access follows the programmes (`getProgramme`): a member of any linked programme's team reads
- * it; the lead of its own programme or an admin manages it, and linking another programme takes
- * managing that one too. The courses are read through `listProgrammeCourses` of the programmes
+ * it; only an admin manages it (BESLUIT-2026-11-16-4). The courses are read through `listProgrammeCourses` of the programmes
  * the reader may read, so a line only shows a course that is still in one of them and still
  * shared with one of its teams.
  */
 import { randomUUID } from "node:crypto";
-import { asc, eq, like, or, sql } from "drizzle-orm";
+import { asc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { CourseDataSchema } from "~/lib/courses/schema";
 import type { LearningOutcome } from "~/lib/courses/types";
 import { getDb } from "../db.server";
 import { learningLineProgrammes, learningLines } from "../schema.server";
-import { type Actor, getProgramme, listProgrammeCourses } from "./programmes.server";
+import {
+  type Actor,
+  getProgramme,
+  listProgrammeCourses,
+  listProgrammes,
+} from "./programmes.server";
 
 export const LINE_LIMITS = { name: 200, courses: 60, programmes: 20 } as const;
 
@@ -107,6 +111,64 @@ export async function listLines(a: Actor, programmeId: string): Promise<Learning
     .limit(LINE_LIMITS.courses)
     .all()
     .map(rowToLine);
+}
+
+/** A line in the Leerlijnen overview: how many courses, and the programmes the reader sees it in. */
+export interface LineSummary {
+  id: string;
+  name: string;
+  programmeId: string;
+  courses: number;
+  programmes: { id: string; name: string }[];
+}
+
+/**
+ * Every line the actor reads, once (plan step 4): those of the programmes they read and those
+ * that also hold for one, with the programmes they read it in (its own first).
+ */
+export async function listAllLines(a: Actor): Promise<LineSummary[]> {
+  const names = new Map((await listProgrammes(a, 500)).map((p) => [p.id, p.name]));
+  if (names.size === 0) return [];
+  const ids = [...names.keys()];
+  const db = getDb();
+  const linked = db
+    .select({ lineId: learningLineProgrammes.lineId })
+    .from(learningLineProgrammes)
+    .where(inArray(learningLineProgrammes.programmeId, ids))
+    .all()
+    .map((r) => r.lineId);
+  const rows = db
+    .select()
+    .from(learningLines)
+    .where(or(inArray(learningLines.programmeId, ids), inArray(learningLines.id, linked)))
+    .orderBy(asc(learningLines.name))
+    .limit(500)
+    .all();
+  const also = new Map<string, string[]>();
+  if (rows.length > 0)
+    for (const r of db
+      .select()
+      .from(learningLineProgrammes)
+      .where(
+        inArray(
+          learningLineProgrammes.lineId,
+          rows.map((x) => x.id),
+        ),
+      )
+      .all())
+      also.set(r.lineId, [...(also.get(r.lineId) ?? []), r.programmeId]);
+  return rows.map((r) => {
+    const line = rowToLine(r);
+    return {
+      id: line.id,
+      name: line.name,
+      programmeId: line.programmeId,
+      courses: line.courseIds.length,
+      programmes: [line.programmeId, ...(also.get(line.id) ?? [])]
+        .filter((id) => names.has(id))
+        .map((id) => ({ id, name: names.get(id) as string })),
+    };
+  });
 }
 
 export interface LineCourseView {

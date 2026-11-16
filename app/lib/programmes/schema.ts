@@ -15,6 +15,7 @@ export const PROGRAMME_FORMS = [
   { value: "fulltime", label: { nl: "voltijd", en: "full-time" } },
   { value: "parttime", label: { nl: "deeltijd", en: "part-time" } },
   { value: "dual", label: { nl: "duaal", en: "work-based (dual)" } },
+  { value: "minor", label: { nl: "minor", en: "minor" } },
 ] as const satisfies readonly { value: string; label: LocalizedText }[];
 
 export type ProgrammeForm = (typeof PROGRAMME_FORMS)[number]["value"];

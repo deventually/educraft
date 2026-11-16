@@ -13,6 +13,7 @@ export const PAGES: E2EPage[] = [
   { path: "/tools/clear-assignment", as: "teacher" },
   { path: "/courses", as: "teacher" },
   { path: "/programmes", as: "teacher" },
+  { path: "/learning-lines", as: "teacher" },
   { path: "/projects", as: "teacher" },
   { path: "/utilities", as: "teacher" },
   { path: "/help", as: "teacher" },

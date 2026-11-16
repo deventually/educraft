@@ -93,6 +93,11 @@ export function mainMenu(t: Messages, v: Viewer): MenuEntry[] {
           links: [
             { to: "/courses", label: t.nav.courses, description: e.courses },
             { to: "/programmes", label: e.programmes, description: e.programmesDescription },
+            {
+              to: "/learning-lines",
+              label: e.learningLines,
+              description: e.learningLinesDescription,
+            },
           ],
         },
       ],

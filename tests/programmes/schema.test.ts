@@ -24,6 +24,18 @@ describe("ProgrammeInputSchema (the boundary)", () => {
     expect(parses({ name: "x".repeat(PROGRAMME_LIMITS.name + 1), sector: "hbo" })).toBe(false);
   });
 
+  it("accepts a minor as a form, next to full-time, part-time and dual (plan step 4)", () => {
+    expect(
+      parses({ name: "Minor Data Science", sector: "hbo", track: "bachelor", form: "minor" }),
+    ).toBe(true);
+    expect(programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "nl")).toBe(
+      "hbo-bachelor · minor",
+    );
+    expect(programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "en")).toBe(
+      "bachelor (hbo) · minor",
+    );
+  });
+
   it("refuses an unknown sector, a track of another sector and an unknown form", () => {
     expect(parses({ name: "x", sector: "po" })).toBe(false);
     expect(parses({ name: "x", sector: "hbo", track: "phd" })).toBe(false);

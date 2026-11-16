@@ -1,6 +1,6 @@
 import { useId } from "react";
-import { Form, Link, redirect, useActionData } from "react-router";
-import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
+import { Form, redirect, useActionData } from "react-router";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import type { Route } from "./+types/programmes.$id.lines.$lineId";
 import { requireProgrammeUser } from "~/server/programmes.server";
 import {
@@ -17,6 +17,7 @@ import { learningLineOverview } from "~/lib/programmes/learningLine";
 import { Button, Card, Input, Label, Select } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
+import { Breadcrumb } from "~/components/Breadcrumb";
 import { LearningLineOverview } from "~/components/programmes/LearningLineOverview";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -130,13 +131,15 @@ export default function LearningLinePage({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="w-full min-w-0">
-      <Link
-        to={`/programmes/${line.programmeId}`}
-        className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        {fmt(l.back, { programme: line.programmeName })}
-      </Link>
+      <Breadcrumb
+        label={t.menu.breadcrumb}
+        items={[
+          { label: t.programmes.heading, to: "/programmes" },
+          { label: line.programmeName, to: `/programmes/${line.programmeId}?tab=lines` },
+          { label: l.allTitle, to: "/learning-lines" },
+          { label: line.name },
+        ]}
+      />
       <h1 className="mt-2 font-display text-2xl font-medium tracking-tight text-slate-900">
         {line.name}
       </h1>

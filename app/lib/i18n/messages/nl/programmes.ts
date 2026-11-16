@@ -11,7 +11,6 @@ export const programmes = {
   addTeamNone: "Er is geen team meer om toe te voegen. Een nieuw team maak je bij Beheer → Teams.",
   addTeamTitle: "Teams toevoegen aan {programme}",
   addTitle: "Cursus toevoegen",
-  back: "Alle opleidingen",
   course: "Cursus",
   courseAdded: "De cursus is toegevoegd.",
   courses: {
@@ -51,8 +50,15 @@ export const programmes = {
     add: "Toevoegen",
     addCourse: "Cursus toevoegen aan de leerlijn",
     addNone: "Alle cursussen van de opleiding zitten in deze leerlijn.",
+    allCourseOne: "1 cursus · {programmes}",
+    allCourses: "{courses} cursussen · {programmes}",
+    allEmptyBody:
+      "Een leerlijn maakt de beheerder bij een opleiding, op het tabblad Leerlijnen. Hier zie je daarna alle leerlijnen van je opleidingen.",
+    allEmptyTitle: "Nog geen leerlijnen",
+    allIntro:
+      "Alle leerlijnen van je opleidingen. Een leerlijn is een reeks cursussen op volgorde, zoals Programmeren of Onderzoeken.",
+    allTitle: "Leerlijnen",
     alsoFor: "Geldt ook voor: {programmes}",
-    back: "Terug naar {programme}",
     bloomDrops: "Het Bloom-niveau daalt",
     coursesHint:
       "De volgorde is eerst die van jaar en periode. Op de pagina van de leerlijn pas je hem aan.",
@@ -100,6 +106,7 @@ export const programmes = {
   name: "Naam",
   namePlaceholder: "Bijvoorbeeld HBO-ICT voltijd",
   navLink: "Opleidingen",
+  noDivision: "Zonder {division}",
   noPlace: "Nog geen jaar of periode",
   noTeamOption: "Nog geen team",
   noTeams:
@@ -131,6 +138,11 @@ export const programmes = {
   sharesWith:
     "Je cursus wordt gedeeld met jouw team in deze opleiding. Zo zien de collega's van {team} hem in de opleiding.",
   summary: "{kind} · team {team} · {courses} cursussen",
+  summaryNoTeam: "{kind} · nog geen team · {courses} cursussen",
+  tabCourses: "Cursussen",
+  tabDetails: "Gegevens",
+  tabLines: "Leerlijnen",
+  tabsLabel: "Onderdelen van {programme}",
   team: "Team",
   teamAdded: "Het team is toegevoegd.",
   teamRemoved: "Het team is weggehaald.",

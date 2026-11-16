@@ -27,11 +27,14 @@ export const menu = {
     tools: "Welke tools en AI-modellen er zijn.",
     users: "Accounts, rollen en uitnodigingen.",
   },
+  breadcrumb: "Kruimelpad",
   education: {
     courses: "Jouw cursussen en die van je team",
     label: "Onderwijs",
+    learningLines: "Leerlijnen",
+    learningLinesDescription: "Reeksen cursussen over de jaren heen",
     programmes: "Opleidingen",
-    programmesDescription: "Per opleiding de cursussen en leerlijnen",
+    programmesDescription: "Per faculteit, met cursussen, leerlijnen en teams",
   },
   tools: {
     all: "Alle tools",

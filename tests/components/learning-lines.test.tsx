@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentType } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import LearningLinePage from "~/routes/programmes.$id.lines.$lineId";
+import LearningLines from "~/routes/learning-lines._index";
 import { LearningLinesSection } from "~/components/programmes/LearningLinesSection";
 import { learningLineOverview } from "~/lib/programmes/learningLine";
 
@@ -58,15 +59,26 @@ describe("Learning line page", () => {
   it("shows what comes back, per course with its Bloom level, and flags a drop", async () => {
     const { container } = renderRoute(LearningLinePage, data(false));
     expect(screen.getByRole("heading", { level: 1, name: "Programmeren" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Terug naar HBO-ICT" })).toHaveAttribute(
+    // The path back (plan step 4): Opleidingen › HBO-ICT › Leerlijnen › Programmeren.
+    const crumbs = screen.getByRole("navigation", { name: "Kruimelpad" });
+    expect(within(crumbs).getByRole("link", { name: "Opleidingen" })).toHaveAttribute(
       "href",
-      "/programmes/p1",
+      "/programmes",
     );
+    expect(within(crumbs).getByRole("link", { name: "HBO-ICT" })).toHaveAttribute(
+      "href",
+      "/programmes/p1?tab=lines",
+    );
+    expect(within(crumbs).getByRole("link", { name: "Leerlijnen" })).toHaveAttribute(
+      "href",
+      "/learning-lines",
+    );
+    expect(within(crumbs).getByText("Programmeren")).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("heading", { level: 2, name: "Wat komt terug" })).toBeVisible();
     expect(screen.getByText("Het Bloom-niveau daalt")).toBeVisible();
     expect(screen.getAllByText("creëren").length).toBeGreaterThan(0);
     expect(screen.getByText("Je test code.")).toBeVisible();
-    // A team member reads; only the lead changes the order.
+    // A team member reads; only an admin changes the order.
     expect(screen.queryByRole("heading", { name: "Volgorde" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
@@ -160,5 +172,47 @@ describe("Learning lines on the programme page", () => {
     );
     expect(screen.getByText("Nog geen leerlijnen in deze opleiding.")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Leerlijn aanmaken" })).toBeNull();
+  });
+});
+
+describe("Learning lines overview (/learning-lines, plan step 4)", () => {
+  it("lists every line with its courses and programmes, each a link to its page", async () => {
+    const { container } = renderRoute(LearningLines, {
+      lines: [
+        {
+          id: "l1",
+          name: "Onderzoek",
+          href: "/programmes/p1/lines/l1",
+          courses: 3,
+          programmes: "Pabo voltijd, Pabo deeltijd",
+        },
+        {
+          id: "l2",
+          name: "Praktijk",
+          href: "/programmes/p1/lines/l2",
+          courses: 1,
+          programmes: "Pabo voltijd",
+        },
+      ],
+    });
+    expect(screen.getByRole("heading", { level: 1, name: "Leerlijnen" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Onderzoek" })).toHaveAttribute(
+      "href",
+      "/programmes/p1/lines/l1",
+    );
+    expect(screen.getByText("3 cursussen · Pabo voltijd, Pabo deeltijd")).toBeVisible();
+    expect(screen.getByText("1 cursus · Pabo voltijd")).toBeVisible();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says where a line is made when there is none, and points to the programmes", async () => {
+    const { container } = renderRoute(LearningLines, { lines: [] });
+    expect(screen.getByText("Nog geen leerlijnen")).toBeVisible();
+    expect(screen.getByText(/op het tabblad Leerlijnen/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "Opleidingen" })).toHaveAttribute(
+      "href",
+      "/programmes",
+    );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
