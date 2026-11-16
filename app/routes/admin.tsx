@@ -1,17 +1,4 @@
 import { NavLink, Outlet } from "react-router";
-import {
-  Activity,
-  BotMessageSquare,
-  Bug,
-  Gauge,
-  GraduationCap,
-  Megaphone,
-  Network,
-  ScrollText,
-  SlidersHorizontal,
-  Users,
-  UsersRound,
-} from "lucide-react";
 import type { Route } from "./+types/admin";
 import { isOwner, requireRole } from "~/server/auth.server";
 import { adminHealth } from "~/server/health.server";
@@ -20,6 +7,7 @@ import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
 import { cn } from "~/lib/utils";
 import { HelpLink } from "~/components/HelpLink";
+import { adminMenu } from "~/lib/nav/menu";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -39,22 +27,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { health: adminHealth(), isOwner: await isOwner(admin) };
 }
 
-const SECTIONS = [
-  { to: "/admin/users", key: "users", Icon: Users },
-  { to: "/admin/teams", key: "teams", Icon: UsersRound },
-  { to: "/admin/organisation", key: "organisation", Icon: Network },
-  { to: "/admin/announcements", key: "announcements", Icon: Megaphone },
-  { to: "/admin/tools", key: "tools", Icon: SlidersHorizontal },
-  { to: "/admin/agents", key: "agents", Icon: BotMessageSquare },
-  { to: "/admin/context", key: "context", Icon: GraduationCap },
-  { to: "/usage", key: "aiUsage", Icon: Gauge },
-  { to: "/admin/usage", key: "usage", Icon: Activity },
-  { to: "/admin/audit", key: "audit", Icon: ScrollText },
-] as const;
-
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const t = useT();
-  const nav = t.admin.console.nav;
+  const groups = adminMenu(t, { isOwner: loaderData.isOwner });
 
   return (
     <div className="w-full min-w-0">
@@ -67,33 +42,50 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
       </header>
 
       <div className="grid gap-6 md:grid-cols-[13rem_1fr]">
-        {/* Persistent section nav — a sidebar on md+, a horizontal scroller below. */}
+        {/* Persistent section nav, in the groups of the Beheer menu (`~/lib/nav/menu`): a sidebar
+            with headings on md+, one horizontal scroller below. */}
         <nav
           aria-label={t.admin.console.sectionNav}
-          className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0"
+          className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-4 md:overflow-visible md:px-0 md:pb-0"
         >
-          {[
-            ...SECTIONS.map((s) => ({ to: s.to, label: nav[s.key], Icon: s.Icon })),
-            ...(loaderData.isOwner
-              ? [{ to: "/admin/errors", label: t.adminErrors.nav, Icon: Bug }]
-              : []),
-          ].map(({ to, label, Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                cn(
-                  "inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-violet-50 text-violet-700"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                )
-              }
-            >
-              <Icon className="size-4 shrink-0" aria-hidden />
-              {label}
-            </NavLink>
-          ))}
+          {groups.map((group, i) => {
+            const headingId = `admin-section-${i}`;
+            return (
+              <div key={headingId} className="flex shrink-0 md:block">
+                {group.heading && (
+                  <p
+                    id={headingId}
+                    className="hidden px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 md:block"
+                  >
+                    {group.heading}
+                  </p>
+                )}
+                <ul
+                  aria-labelledby={group.heading ? headingId : undefined}
+                  className="flex gap-1 md:flex-col"
+                >
+                  {group.links.map((link) => (
+                    <li key={link.to} className="shrink-0">
+                      <NavLink
+                        to={link.to}
+                        end={link.end}
+                        className={({ isActive }) =>
+                          cn(
+                            "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors md:flex",
+                            isActive
+                              ? "bg-violet-50 text-violet-700"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                          )
+                        }
+                      >
+                        {link.label}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </nav>
 
         <div className="min-w-0">

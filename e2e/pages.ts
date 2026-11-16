@@ -23,6 +23,7 @@ export const PAGES: E2EPage[] = [
   { path: "/assessment-models", as: "teacher" },
   { path: "/usage", as: "teacher" },
   { path: "/usage", as: "admin" },
+  { path: "/admin", as: "admin" },
   { path: "/admin/users", as: "admin" },
   { path: "/admin/tools", as: "admin" },
   { path: "/admin/announcements", as: "admin" },

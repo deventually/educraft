@@ -1,6 +1,6 @@
 # Earlier work: find it and export it
 
-Everything you make with the tools is saved automatically under **Earlier work**. You get there through the link on **Start** and **Tools**, and at the bottom of every page.
+Everything you make with the tools is saved automatically under **Earlier work**. You find it in the **Tools** menu, on **Start** and at the bottom of every page.
 
 ## Finding it again
 

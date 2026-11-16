@@ -651,3 +651,16 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   BESLUIT-2026-11-12-6. Bastiaan, 2026-11-16 (thread "Moduleteam in één keer aan cursus
   koppelen": "een heel team in één keer als bewerkers of mede-eigenaren aan een cursus koppelen" en
   keuzekaart: "Team blijft gekoppeld (meelopen)").
+- **BESLUIT-2026-11-16-3:** **Eén menu voor beheer en navigatie, als data.** Het hoofdmenu is
+  Start · Onderwijs · BDB/BKE · Tools, met Beheer vooraan voor een beheerder. Onderwijs (cursussen,
+  opleidingen, later leerlijnen en teams), Tools en Beheer openen een submenu met een klik. Beheer
+  heeft vier groepen (Mensen, Organisatie, AI, Controle) en begint op *Overzicht en inrichten*: de
+  kerncijfers, zes inrichtingsstappen met een vinkje en alle beheerpagina's met uitleg. Het menu
+  staat op één plek (`app/lib/nav/menu.ts`); kopbalk, hamburgermenu en het zijmenu van Beheer
+  lezen daaruit. Verder geldt voor de volgende stappen: een teamleider van de opleiding koppelt
+  zelf teams aan de opleiding, alleen de beheerder verwijdert een opleiding, een minor is een vorm
+  van een opleiding naast voltijd, deeltijd en duaal, er komt één teampagina voor beheerder en
+  teamleider, en ook weghalen (ontkoppelen) vraagt altijd eerst een bevestiging. Bastiaan,
+  2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie": keuzes 1 tot en met 6, "Ook
+  ontkoppelen moet bevestigd worden met een confirm" en "Is het ook een idee om het beheer met
+  een dashboardpagina te starten?").

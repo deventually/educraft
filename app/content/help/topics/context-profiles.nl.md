@@ -4,7 +4,7 @@ Een **contextprofiel** beschrijft jouw onderwijssituatie één keer, zodat elke 
 
 ## Eén korte pagina
 
-Ga naar **Onderwijscontext** en klik op **Onderwijscontext instellen** (of **Nieuw contextprofiel** als je al een profiel hebt). Je vult één korte pagina in — dezelfde pagina gebruik je later om een profiel te **bewerken**.
+Ga naar **Mijn onderwijscontext** (in het menu onder je naam rechtsboven) en klik op **Onderwijscontext instellen** (of **Nieuw contextprofiel** als je al een profiel hebt). Je vult één korte pagina in — dezelfde pagina gebruik je later om een profiel te **bewerken**.
 
 - **Open staan** de **naam** (bijv. "Software Engineering — jaar 2"), het **onderwijstype**, de **opleiding**, het **vak** en het **studiejaar** (in het vo: de **fase**). Het onderwijstype stelt het niveau al voor.
 - Onder **Meer details (optioneel)** staan het niveau, het domein/vak met eventueel landelijk kader, beroepspraktijk, technologie/methoden, onderwijsconcept, aanspreekvorm en eigen velden. Hoort er al iets bij een bestaand profiel, dan zie je hoeveel er is ingevuld. Ingeklapte velden worden altijd gewoon opgeslagen.
@@ -38,7 +38,7 @@ Zet één profiel als **standaard**; dat wordt dan vooraf geselecteerd op de too
 
 ## Voor beheerders: standaarden
 
-Ben je **beheerder**, dan stel je op de beheerpagina **Onderwijscontext** de standaarden voor de hele omgeving in: welke **onderwijstypen** (sectoren) en — onder **Domeinen / profielen** — welke vakgebieden docenten mogen kiezen. Er blijft altijd minstens één onderwijstype over; laat je **Domeinen / profielen** leeg, dan zijn álle domeinen beschikbaar.
+Ben je **beheerder**, dan stel je op de beheerpagina **Onderwijscontext instelling** de standaarden voor de hele omgeving in: welke **onderwijstypen** (sectoren) en — onder **Domeinen / profielen** — welke vakgebieden docenten mogen kiezen. Er blijft altijd minstens één onderwijstype over; laat je **Domeinen / profielen** leeg, dan zijn álle domeinen beschikbaar.
 
 Elke docent en beheerder volgt deze instellingen; er is geen aparte toegang per docent.
 

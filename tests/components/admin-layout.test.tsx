@@ -29,33 +29,34 @@ async function renderLayout({ isOwner = false } = {}) {
 }
 
 describe("Admin layout", () => {
-  it("shows exactly ten sections in order (AI use before the pilot, Logboek last)", async () => {
+  it("opens on the overview, then the sections in four groups", async () => {
     await renderLayout();
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
-    const links = within(nav).getAllByRole("link");
-    expect(links.map((a) => a.textContent)).toEqual([
-      "Gebruikers",
-      "Teams",
-      "Organisatie",
-      "Mededelingen",
-      "Tools en modellen",
-      "Reviewteam",
-      "Onderwijscontext",
-      "AI-gebruik en kosten",
-      "Feedback en pilot",
-      "Logboek",
+    expect(within(nav).getByRole("link", { name: "Overzicht en inrichten" })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
+    const group = (name: string) =>
+      within(within(nav).getByRole("list", { name }))
+        .getAllByRole("link")
+        .map((a) => [a.textContent, a.getAttribute("href")]);
+    expect(group("Mensen")).toEqual([
+      ["Gebruikers", "/admin/users"],
+      ["Teams", "/admin/teams"],
     ]);
-    expect(links.map((a) => a.getAttribute("href"))).toEqual([
-      "/admin/users",
-      "/admin/teams",
-      "/admin/organisation",
-      "/admin/announcements",
-      "/admin/tools",
-      "/admin/agents",
-      "/admin/context",
-      "/usage",
-      "/admin/usage",
-      "/admin/audit",
+    expect(group("Organisatie")).toEqual([
+      ["Faculteiten en opleidingen", "/admin/organisation"],
+      ["Onderwijscontext instelling", "/admin/context"],
+    ]);
+    expect(group("AI")).toEqual([
+      ["Tools en modellen", "/admin/tools"],
+      ["Reviewteam", "/admin/agents"],
+      ["AI-gebruik en kosten", "/usage"],
+    ]);
+    expect(group("Controle")).toEqual([
+      ["Mededelingen", "/admin/announcements"],
+      ["Feedback en pilot", "/admin/usage"],
+      ["Logboek", "/admin/audit"],
     ]);
   });
 
@@ -63,9 +64,35 @@ describe("Admin layout", () => {
     await renderLayout({ isOwner: true });
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
-    expect(links).toHaveLength(11);
-    expect(links[10]).toHaveTextContent("Recente fouten");
-    expect(links[10]).toHaveAttribute("href", "/admin/errors");
+    expect(links).toHaveLength(12);
+    expect(links.at(-1)).toHaveTextContent("Recente fouten");
+    expect(links.at(-1)).toHaveAttribute("href", "/admin/errors");
+  });
+
+  it("marks only the overview current on the overview, not every admin page", async () => {
+    const Stub = createRoutesStub([
+      {
+        path: "/admin",
+        Component: AdminLayout,
+        loader: () => ({
+          health: {
+            backup: { state: "none" },
+            databaseBytes: null,
+            freeDiskBytes: null,
+            version: "1",
+          },
+          isOwner: false,
+        }),
+        children: [{ index: true, Component: () => <p>overview</p> }],
+      },
+    ]);
+    render(<Stub initialEntries={["/admin"]} />);
+    const nav = await screen.findByRole("navigation", { name: /beheersecties|admin sections/i });
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .filter((a) => a.getAttribute("aria-current")),
+    ).toEqual([within(nav).getByRole("link", { name: "Overzicht en inrichten" })]);
   });
 
   it("shows the health overview above every admin page, with its backup warning", async () => {

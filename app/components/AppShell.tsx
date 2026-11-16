@@ -8,7 +8,9 @@ import type { Tool } from "~/lib/registry/types";
 import type { ShownAnnouncement } from "~/lib/announcements";
 import { AnnouncementBanner } from "./shell/AnnouncementBanner";
 import { LanguageSwitcher } from "./shell/LanguageSwitcher";
-import { type NavItem, navLinkClass } from "./shell/nav";
+import { navLinkClass } from "./shell/nav";
+import { MenuGroups, NavMenu } from "./shell/NavMenu";
+import { accountMenu, isMenuActive, mainMenu, type MenuEntry, type MenuLink } from "~/lib/nav/menu";
 import { RouteAnnouncer } from "./shell/RouteAnnouncer";
 import { SiteFooter } from "./shell/SiteFooter";
 import { UserArea } from "./shell/UserArea";
@@ -77,29 +79,29 @@ export default function AppShell() {
       return tool ? modeOf(tool).fillsHeight : false;
     });
 
-  // The menu of four (P27.3): Start · Cursussen · BDB/BKE · Tools, plus Beheer for an admin.
-  // "Eerder gemaakt" lives on Start and Tools, Onderwijscontext in the account menu, Help is the
-  // question mark at the top right; all of them stay in the footer.
-  const nav: NavItem[] = platform
-    ? [{ to: "/platform", label: t.platform.heading, end: false }]
-    : [
-        // Admin console — first for an admin, so they land on their console entry immediately.
-        ...(user && user.role === "admin"
-          ? [{ to: "/admin", label: t.nav.admin, end: false }]
-          : []),
-        { to: "/start", label: t.nav.start, end: true },
-        ...(courses ? [{ to: "/courses", label: t.nav.courses, end: false }] : []),
-        ...(portfolio ? [{ to: "/portfolio", label: t.nav.portfolio, end: false }] : []),
-        { to: "/tools", label: t.nav.tools, end: false },
-      ];
-  const accountLinks: NavItem[] = platform
+  // The menu is data (`~/lib/nav/menu`): Start · Onderwijs · BDB/BKE · Tools, Beheer first for
+  // an admin; Onderwijs, Tools and Beheer open a submenu. Help is the question mark at the top
+  // right; the footer keeps its own list of links.
+  const nav: MenuEntry[] = platform
+    ? [
+        {
+          kind: "link",
+          id: "platform",
+          label: t.platform.heading,
+          link: { to: "/platform", label: t.platform.heading },
+        },
+      ]
+    : mainMenu(t, { role: user?.role ?? "", courses, portfolio });
+  const accountLinks: MenuLink[] = platform
     ? [{ to: "/account/2fa", label: t.twoFactor.heading, end: true }]
-    : [
-        { to: "/account", label: t.auth.accountArea, end: true },
-        { to: "/context-profiles", label: t.nav.settings, end: false },
-        { to: "/assessment-models", label: t.nav.assessmentModels, end: false },
-        { to: "/usage", label: t.nav.usage, end: true },
-      ];
+    : accountMenu(t);
+  // Which header submenu is open: one at a time, and none after a navigation.
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [menuPath, setMenuPath] = useState(location.pathname);
+  if (menuPath !== location.pathname) {
+    setMenuPath(location.pathname);
+    setOpenMenu(null);
+  }
 
   return (
     <div className="flex h-dvh flex-col bg-slate-50 text-slate-900">
@@ -124,17 +126,30 @@ export default function AppShell() {
           </NavLink>
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Inline nav — visible from md upward. */}
-            <nav aria-label={t.nav.label} className="hidden items-center gap-1 md:flex">
-              {nav.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) => navLinkClass(isActive)}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
+            <nav aria-label={t.nav.label} className="hidden md:block">
+              <ul className="flex items-center gap-1">
+                {nav.map((entry) =>
+                  entry.kind === "link" ? (
+                    <li key={entry.id}>
+                      <NavLink
+                        to={entry.link.to}
+                        end={entry.link.end}
+                        className={({ isActive }) => navLinkClass(isActive)}
+                      >
+                        {entry.label}
+                      </NavLink>
+                    </li>
+                  ) : (
+                    <NavMenu
+                      key={entry.id}
+                      entry={entry}
+                      open={openMenu === entry.id}
+                      active={isMenuActive(entry, location.pathname)}
+                      onOpenChange={(open) => setOpenMenu(open ? entry.id : null)}
+                    />
+                  ),
+                )}
+              </ul>
             </nav>
             <LanguageSwitcher current={locale} redirectTo={redirectTo} />
             {!platform && (
@@ -181,15 +196,34 @@ export default function AppShell() {
             aria-label={t.nav.menuLabel}
             className="border-t border-slate-200 bg-white px-4 py-2 md:hidden"
           >
-            {[nav, ...(user ? [accountLinks] : [])].map((items, i) => (
-              <ul
-                key={items[0]?.to}
-                className={cn(
-                  "flex flex-col gap-1",
-                  i > 0 && "mt-2 border-t border-slate-200 pt-2",
-                )}
-              >
-                {items.map((item) => (
+            <ul className="flex flex-col gap-1">
+              {nav.map((entry) =>
+                entry.kind === "link" ? (
+                  <li key={entry.id}>
+                    <NavLink
+                      to={entry.link.to}
+                      end={entry.link.end}
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) => cn(navLinkClass(isActive), "block")}
+                    >
+                      {entry.label}
+                    </NavLink>
+                  </li>
+                ) : (
+                  <li key={entry.id} className="mt-1 border-t border-slate-100 pt-2">
+                    <p className="px-3 pb-1 text-sm font-semibold text-slate-900">{entry.label}</p>
+                    <MenuGroups
+                      groups={entry.groups}
+                      idPrefix={`${MOBILE_NAV_ID}-${entry.id}`}
+                      onNavigate={() => setMenuOpen(false)}
+                    />
+                  </li>
+                ),
+              )}
+            </ul>
+            {user && (
+              <ul className="mt-2 flex flex-col gap-1 border-t border-slate-200 pt-2">
+                {accountLinks.map((item) => (
                   <li key={item.to}>
                     <NavLink
                       to={item.to}
@@ -202,7 +236,7 @@ export default function AppShell() {
                   </li>
                 ))}
               </ul>
-            ))}
+            )}
           </nav>
         )}
       </header>
