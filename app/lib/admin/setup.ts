@@ -38,13 +38,13 @@ export function setupSteps(f: SetupFacts): SetupStep[] {
     { id: "people", to: "/admin/users", done: f.users > 1, optional: false },
     {
       id: "teams",
-      to: "/admin/teams",
+      to: "/teams",
       done: f.teams > 0 && f.teamsWithoutMembers === 0,
       optional: false,
     },
     {
       id: "link",
-      to: "/admin/teams",
+      to: "/teams",
       done: f.programmes > 0 && f.teams > 0 && f.programmesWithoutTeam === 0,
       optional: false,
     },

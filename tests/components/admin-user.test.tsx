@@ -484,7 +484,7 @@ describe("Admin person page — teams (P28.2)", () => {
     renderPage(undefined, { teams: [] });
     expect(within(section(/^teams$/i)).getByRole("link", { name: /teams/i })).toHaveAttribute(
       "href",
-      "/admin/teams",
+      "/teams",
     );
   });
 

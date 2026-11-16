@@ -54,7 +54,7 @@ export default function AdminOverview({ loaderData }: Route.ComponentProps) {
   const { steps, isOwner, counts } = loaderData;
   const numbers = [
     { key: "users", to: "/admin/users", n: counts.users },
-    { key: "teams", to: "/admin/teams", n: counts.teams },
+    { key: "teams", to: "/teams", n: counts.teams },
     { key: "programmes", to: "/programmes", n: counts.programmes },
     { key: "divisions", to: "/admin/organisation", n: counts.divisions },
   ] as const;

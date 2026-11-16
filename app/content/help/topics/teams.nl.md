@@ -2,7 +2,7 @@
 
 Een **team** is een groep collega's, bijvoorbeeld je opleiding of vakgroep. Een beheerder maakt teams aan en wijst teamleiders aan. Lid zijn deelt niets: alles blijft privé tot je zelf iets deelt.
 
-Je teams zie je op **Account**, onder *Mijn teams*.
+Je teams zie je bij **Onderwijs › Teams**. Open een team om te zien wie erin zitten, wie teamleider is en aan welke opleidingen het team werkt. Als gewoon lid kun je die pagina alleen lezen; e-mailadressen en de keuzes van het team ziet alleen de teamleider. Wat je met je team deelt, zien al deze collega's.
 
 ## Wat je kunt delen
 
@@ -45,7 +45,7 @@ Wat collega's met je team delen, staat onder **Van mijn team**: op de pagina's C
 
 ## Voor teamleiders
 
-Ben je teamleider, dan open je je team vanaf **Account**. Daar kun je:
+Ben je teamleider, dan open je je team bij **Onderwijs › Teams**. Daar kun je:
 
 - collega's toevoegen met **Leden toevoegen**: zoek op naam of e-mailadres, vink aan wie erbij moet en kies **Toevoegen**. Je ziet elke docent met een actief account die nog niet in je team zit; beheerders staan er niet tussen;
 - een **uitnodigingslink** maken voor een nieuwe collega, die daarmee docent en lid van je team wordt;
@@ -54,3 +54,7 @@ Ben je teamleider, dan open je je team vanaf **Account**. Daar kun je:
 - zelf stoppen als teamleider.
 
 Een andere teamleider weghalen doet een beheerder.
+
+## Voor beheerders
+
+Een beheerder ziet bij **Onderwijs › Teams** alle teams, zoekt op team of persoon en maakt een team met **Nieuw team**. Op dezelfde teampagina als de teamleider heeft de beheerder meer knoppen: de naam wijzigen, kiezen waar het team bij hoort, teamleiders aanvinken, elk lid weghalen en het team opheffen.

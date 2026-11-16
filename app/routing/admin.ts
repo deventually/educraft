@@ -11,8 +11,8 @@ export const admin: RouteArea = {
       index("routes/admin._index.tsx"), // redirects to /admin/users
       route("users", "routes/admin.users.tsx"),
       route("users/:id", "routes/admin.users.$id.tsx"), // the person page (P28.1)
-      route("teams", "routes/admin.teams.tsx"), // the team list (P28.2)
-      route("teams/:id", "routes/admin.teams.$id.tsx"), // the team page
+      route("teams", "routes/admin.teams.tsx"), // → /teams (plan step 5)
+      route("teams/:id", "routes/admin.teams.$id.tsx"), // → /teams/:id
       route("organisation", "routes/admin.organisation.tsx"), // divisions and programmes
       route("announcements", "routes/admin.announcements.tsx"), // banners for teachers
       route("tools", "routes/admin.tools.tsx"),

@@ -35,12 +35,13 @@ describe("main menu", () => {
     expect(bdb).toMatchObject({ kind: "link", link: { to: "/portfolio" } });
   });
 
-  it("opens Onderwijs on courses, programmes and learning lines, each with a line that says what it is", () => {
+  it("opens Onderwijs on courses, programmes, learning lines and teams, each with a line that says what it is", () => {
     const onderwijs = mainMenu(nl, teacher).find((e) => e.label === "Onderwijs");
     expect(links(onderwijs).map((l) => [l.label, l.to])).toEqual([
       ["Cursussen", "/courses"],
       ["Opleidingen", "/programmes"],
       ["Leerlijnen", "/learning-lines"],
+      ["Teams", "/teams"],
     ]);
     for (const link of links(onderwijs)) expect(link.description).toBeTruthy();
   });
@@ -90,7 +91,8 @@ describe("Beheer", () => {
   it("holds every admin page exactly once, in its group", () => {
     const groups = adminMenu(nl, { isOwner: false });
     expect(groups.slice(1).map((g) => g.links.map((l) => l.to))).toEqual([
-      ["/admin/users", "/admin/teams"],
+      // Teams live under Onderwijs (plan step 5); Beheer links there too.
+      ["/admin/users", "/teams"],
       ["/admin/organisation", "/admin/context"],
       ["/admin/tools", "/admin/agents", "/usage"],
       ["/admin/announcements", "/admin/usage", "/admin/audit"],

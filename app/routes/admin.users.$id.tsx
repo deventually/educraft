@@ -259,7 +259,7 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
           {teams.length === 0 ? (
             <p className="text-sm text-slate-600">
               {t.teams.noTeams}{" "}
-              <Link to="/admin/teams" className="font-medium text-violet-700 underline">
+              <Link to="/teams" className="font-medium text-violet-700 underline">
                 {t.teams.manageTeams}
               </Link>
             </p>

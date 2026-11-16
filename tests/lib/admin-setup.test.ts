@@ -37,8 +37,8 @@ describe("setupSteps", () => {
       "/admin/organisation",
       "/programmes",
       "/admin/users",
-      "/admin/teams",
-      "/admin/teams",
+      "/teams",
+      "/teams",
     ]);
   });
 

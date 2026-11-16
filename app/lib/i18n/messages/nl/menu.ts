@@ -35,6 +35,8 @@ export const menu = {
     learningLinesDescription: "Reeksen cursussen over de jaren heen",
     programmes: "Opleidingen",
     programmesDescription: "Per faculteit, met cursussen, leerlijnen en teams",
+    teams: "Teams",
+    teamsDescription: "Je teams, met wie erin zitten en hun opleidingen",
   },
   tools: {
     all: "Alle tools",

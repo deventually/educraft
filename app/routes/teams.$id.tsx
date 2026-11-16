@@ -1,308 +1,199 @@
 import { Form, useActionData } from "react-router";
+import { Trash2 } from "lucide-react";
 import type { Route } from "./+types/teams.$id";
-import { requireUser } from "~/server/auth.server";
-import {
-  getTeamForLead,
-  leadAddMembers,
-  leadCandidates,
-  leadCreateInvite,
-  leadMakeLead,
-  leadRemoveMember,
-  leadSetSettings,
-  leadStepDown,
-} from "~/server/repositories/teams.server";
-import { applyTeamSettingsForm, getTeamSettingsOffer } from "~/server/teamSettings.server";
-import { listProgrammes } from "~/server/repositories/programmes.server";
-import {
-  linkProgrammeTeam,
-  programmeChoices,
-  unlinkProgrammeTeam,
-} from "~/server/repositories/programmeTeams.server";
+import { loadTeamPage, teamPageAction } from "~/server/teamPage.server";
 import { TeamProgrammes } from "~/components/teams/TeamProgrammes";
+import { TeamMembers } from "~/components/teams/TeamMembers";
+import { TeamDivisionForm } from "~/components/teams/TeamDivisionForm";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
-import { AddDialog } from "~/components/connections/AddDialog";
+import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
+import { Breadcrumb } from "~/components/Breadcrumb";
 import { fmt } from "~/lib/i18n/format";
 import { LinkCard } from "~/components/admin/LinkCard";
 import { teamError } from "~/components/teams/teamError";
 import { TeamSettingsForm } from "~/components/features/TeamSettingsForm";
-import { redirectWithFlash } from "~/server/flash.server";
 import { HelpLink } from "~/components/HelpLink";
 import { SlideTemplateCard } from "~/components/export/SlideTemplateCard";
-import { getTeamTemplate } from "~/server/repositories/slideTemplates.server";
-
-/** Days a lead's invite link stays valid (the admin's default). */
-const INVITE_DAYS = 14;
 
 /**
- * The team lead's page (P28.2, teacher side): the members (name, e-mail), choose colleagues
- * to add (Leden toevoegen, BESLUIT-2026-11-16-6), remove a plain member after a confirm,
- * make a member lead, step down, the team's
- * choices for parts, tools and models within the instance (P28.3), and an invite link
- * that makes a new teacher a member. Anyone who is not lead of this team, an admin
- * included, gets a 404: the admin works on /admin/teams.
+ * The one team page (plan step 5, BESLUIT-2026-11-16-7), for the admin, the team's lead and a
+ * plain member, with more or fewer controls per role (`teamPage.server.ts` decides who is
+ * what). Everyone sees the members and the programmes; the admin and the lead add and remove,
+ * and choose parts, tools and models (P28.3); the admin also renames, places the team under a
+ * faculty and deletes it; the lead invites, sets the slide template and can step down.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const user = await requireUser(request);
-  const team = await getTeamForLead(user.id, params.id);
-  if (!team) throw new Response("Not found", { status: 404 });
-  return {
-    selfId: user.id,
-    team,
-    // Active colleagues not yet in the team, to tick in Leden toevoegen.
-    candidates: (await leadCandidates(user.id, team.id)) ?? [],
-    offer: await getTeamSettingsOffer(),
-    // The programmes the team works on, and the ones the lead can put it in
-    // (BESLUIT-2026-11-16-4: a lead only their own team, in any programme).
-    programmes: (await listProgrammes(user, 500))
-      .filter((p) => p.teamIds.includes(team.id))
-      .map(({ id, name }) => ({ id, name })),
-    programmeChoices: await programmeChoices(user, team.id),
-    // The team's PowerPoint template (P30.7b), which every member can choose.
-    slideTemplate: await getTeamTemplate(user.id, params.id),
-  };
+  return loadTeamPage(request, params.id);
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const user = await requireUser(request);
-  // notLead → 404, before anything is read from the form.
-  const team = await getTeamForLead(user.id, params.id);
-  if (!team) throw new Response("Not found", { status: 404 });
-  const fd = await request.formData();
-  const intent = String(fd.get("intent") ?? "");
-  const userId = String(fd.get("userId") ?? "");
-  const done = (r: { ok: true } | { error: string }) =>
-    "ok" in r ? { saved: true as const } : { error: r.error };
-
-  if (intent === "addMembers") {
-    const ids = fd.getAll("userIds").map(String);
-    if (ids.length === 0) return { error: "noneSelected" as const };
-    const res = await leadAddMembers(user.id, params.id, ids);
-    return "ok" in res ? { saved: true as const } : { error: res.error };
-  }
-  if (intent === "removeMember") return done(await leadRemoveMember(user.id, params.id, userId));
-  const programmeId = String(fd.get("programmeId") ?? "");
-  if (intent === "linkProgramme") {
-    const ids = [...new Set(fd.getAll("programmeId").map(String))].slice(0, 100);
-    let linked = 0;
-    for (const id of ids) if (await linkProgrammeTeam(user, id, team.id)) linked++;
-    return linked ? { saved: true as const } : { error: "unknown" };
-  }
-  if (intent === "unlinkProgramme") {
-    return (await unlinkProgrammeTeam(user, programmeId, team.id)) === "unlinked"
-      ? { saved: true as const }
-      : { error: "unknown" };
-  }
-  if (intent === "makeLead") return done(await leadMakeLead(user.id, params.id, userId));
-  if (intent === "settings") {
-    // Within the instance's limits: only what is not Off is offered and changed.
-    const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
-    if ("error" in next) return next;
-    return done(await leadSetSettings(user.id, params.id, next));
-  }
-  if (intent === "stepDown") {
-    await leadStepDown(user.id, params.id);
-    // This page is no longer yours: back to the account page with your teams.
-    return redirectWithFlash("/account", "steppedDown");
-  }
-  if (intent === "invite") {
-    const note = String(fd.get("note") ?? "").trim() || null;
-    const res = await leadCreateInvite(user.id, params.id, {
-      note,
-      expiresAt: new Date(Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000),
-    });
-    if (!("token" in res)) throw new Response("Not found", { status: 404 });
-    return { link: `${new URL(request.url).origin}/invite/${res.token}` };
-  }
-  return { error: "unknown" };
+  return teamPageAction(request, params.id);
 }
 
 const h2 = "font-display text-lg font-medium tracking-tight text-slate-900";
 const card = "mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm";
-const th = "px-4 py-2.5 font-semibold";
 
-export default function LeadTeam({ loaderData }: Route.ComponentProps) {
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
-  const { team, selfId, offer, slideTemplate, candidates } = loaderData;
-  const programmes = "programmes" in loaderData ? loaderData.programmes : [];
-  const choices = "programmeChoices" in loaderData ? loaderData.programmeChoices : [];
+  const { role, team, selfId, candidates, offer, programmes, programmeChoices } = loaderData;
   const actionData = useActionData<typeof action>();
+  const errorOf = (code: string | true) =>
+    typeof code === "string" ? teamError(t, code) : undefined;
 
   useFormToast(actionData, {
     result: (d) =>
-      !d
+      !d || "link" in d
         ? null
         : "error" in d && typeof d.error === "string"
           ? { variant: "error", message: teamError(t, d.error) }
           : { variant: "success", message: t.admin.console.saved },
   });
 
+  const intro = { admin: tt.adminTeamIntro, lead: tt.leadIntro, member: tt.memberIntro }[role];
+
   return (
     <div className="w-full min-w-0 space-y-8">
       <header>
-        <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
-          {team.name}
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-600">{tt.leadIntro}</p>
+        <Breadcrumb
+          label={t.menu.breadcrumb}
+          items={[{ label: tt.heading, to: "/teams" }, { label: team.name }]}
+        />
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+            {team.name}
+          </h1>
+          {role === "admin" && (
+            <ConfirmDialog
+              triggerLabel={tt.delete}
+              triggerIcon={<Trash2 className="size-3.5" aria-hidden />}
+              title={fmt(tt.deleteTitle, { name: team.name })}
+              description={tt.deleteBody}
+              confirmLabel={tt.deleteConfirm}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "delete" }}
+            />
+          )}
+        </div>
+        <p className="mt-1 max-w-2xl text-sm text-slate-600">{intro}</p>
         <HelpLink topic="teams" />
       </header>
 
-      <section>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className={h2}>{tt.members}</h2>
-          <AddDialog
-            triggerLabel={tt.addMembersHeading}
-            title={fmt(tt.addMembersTitle, { team: team.name })}
-            description={tt.addMembersHint}
-            intent="addMembers"
-            pick={{
-              name: "userIds",
-              options: candidates.map((c) => ({
-                id: c.id,
-                label: c.name,
-                hint: c.email ?? undefined,
-              })),
-              empty: tt.noCandidates,
-            }}
-          />
-        </div>
-        <div className="relative mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <caption className="sr-only">{tt.members}</caption>
-            <thead className="border-b border-slate-100 bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th scope="col" className={th}>
-                  {tt.colName}
-                </th>
-                <th scope="col" className={`${th} hidden sm:table-cell`}>
-                  {tt.colEmail}
-                </th>
-                <th scope="col" className={th}>
-                  <span className="sr-only">{t.people.colActions}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {team.members.map((m) => (
-                <tr key={m.userId} className="border-b border-slate-50 last:border-0">
-                  <th scope="row" className="px-4 py-2.5 text-left font-medium text-slate-800">
-                    {m.name}
-                    {m.userId === selfId && (
-                      <span className="ml-1.5 text-xs font-normal text-slate-500">
-                        ({t.admin.invites.you})
-                      </span>
-                    )}
-                    {m.isLead && (
-                      <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
-                        {tt.leadBadge}
-                      </span>
-                    )}
-                    {/* On a phone the e-mail sits under the name instead of in a column. */}
-                    <span className="block text-xs font-normal text-slate-500 sm:hidden">
-                      {m.email}
-                    </span>
-                  </th>
-                  <td className="hidden px-4 py-2.5 text-slate-600 sm:table-cell">
-                    {m.email ?? "—"}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {!m.isLead && (
-                      <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
-                        <Form method="post">
-                          <input type="hidden" name="intent" value="makeLead" />
-                          <input type="hidden" name="userId" value={m.userId} />
-                          <Button type="submit" variant="secondary" size="sm">
-                            {tt.makeLead}
-                          </Button>
-                        </Form>
-                        <ConfirmDialog
-                          triggerLabel={t.connections.remove}
-                          triggerContext={m.name}
-                          triggerVariant="ghost"
-                          title={fmt(tt.memberRemoveTitle, { name: m.name, team: team.name })}
-                          description={tt.memberRemoveBody}
-                          confirmLabel={t.connections.remove}
-                          confirmVariant="primary"
-                          cancelLabel={t.confirm.cancel}
-                          fields={{ intent: "removeMember", userId: m.userId }}
-                        />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <TeamProgrammes team={team} programmes={programmes} choices={choices} headingLevel={2} />
-
-      <section aria-labelledby="team-features">
-        <h2 id="team-features" className={h2}>
-          {t.features.teamFeaturesHeading}
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-slate-600">{t.features.teamFeaturesIntro}</p>
-        <div className={`${card} max-w-xl`}>
-          <TeamSettingsForm
-            idPrefix="team"
-            settings={team.settings}
-            offer={offer}
-            errorMessage={(code) => (typeof code === "string" ? teamError(t, code) : undefined)}
-          />
-        </div>
-      </section>
-
-      <section>
-        <h2 className={h2}>{tt.inviteHeading}</h2>
-        <p className="mt-1 text-sm text-slate-600">{tt.inviteIntro}</p>
-        {actionData && "link" in actionData ? (
-          <LinkCard
-            heading={t.admin.invites.linkHeading}
-            hint={t.admin.invites.linkHint}
-            url={actionData.link}
-            copyLabel={t.admin.invites.copy}
-          />
-        ) : (
-          <Form method="post" className={`${card} max-w-xl space-y-3`}>
-            <input type="hidden" name="intent" value="invite" />
-            <div>
-              <Label htmlFor="team-invite-note">{t.admin.invites.noteLabel}</Label>
+      {role === "admin" && (
+        <section aria-labelledby="team-details">
+          <h2 id="team-details" className={h2}>
+            {tt.detailsHeading}
+          </h2>
+          <div className={`${card} space-y-4`}>
+            <AutoSaveForm intent="rename" errorMessage={errorOf} className="max-w-sm">
+              <Label htmlFor="team-name">{tt.nameLabel}</Label>
               <Input
-                id="team-invite-note"
-                name="note"
+                id="team-name"
+                name="name"
                 type="text"
-                placeholder={t.admin.invites.notePlaceholder}
+                defaultValue={team.name}
+                maxLength={100}
                 className="mt-1"
               />
-            </div>
-            <Button type="submit" variant="secondary">
-              {tt.inviteSubmit}
-            </Button>
-          </Form>
-        )}
-      </section>
+            </AutoSaveForm>
+            <TeamDivisionForm
+              divisions={loaderData.divisions}
+              divisionId={loaderData.divisionId}
+              divisionWord={loaderData.divisionWord}
+              errorMessage={errorOf}
+            />
+          </div>
+        </section>
+      )}
 
-      <SlideTemplateCard
-        action={`/teams/${team.id}/slide-template`}
-        current={slideTemplate}
-        scope="team"
+      <TeamMembers
+        role={role}
+        team={team}
+        selfId={selfId}
+        candidates={candidates}
+        errorMessage={errorOf}
       />
 
-      <section>
-        <ConfirmDialog
-          triggerLabel={tt.stepDown}
-          triggerVariant="secondary"
-          title={tt.stepDownTitle}
-          description={tt.stepDownBody}
-          confirmLabel={tt.stepDown}
-          cancelLabel={t.confirm.cancel}
-          fields={{ intent: "stepDown" }}
-        />
-      </section>
+      <TeamProgrammes
+        team={team}
+        programmes={programmes}
+        choices={programmeChoices}
+        canCreate={role === "admin"}
+        readOnly={role === "member"}
+        headingLevel={2}
+      />
+
+      {"settings" in team && offer && (
+        <section aria-labelledby="team-features">
+          <h2 id="team-features" className={h2}>
+            {t.features.teamFeaturesHeading}
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">{t.features.teamFeaturesIntro}</p>
+          <div className={`${card} max-w-xl`}>
+            <TeamSettingsForm
+              idPrefix="team"
+              settings={team.settings}
+              offer={offer}
+              errorMessage={(code) => (typeof code === "string" ? teamError(t, code) : undefined)}
+            />
+          </div>
+        </section>
+      )}
+
+      {role === "lead" && (
+        <>
+          <section>
+            <h2 className={h2}>{tt.inviteHeading}</h2>
+            <p className="mt-1 text-sm text-slate-600">{tt.inviteIntro}</p>
+            {actionData && "link" in actionData ? (
+              <LinkCard
+                heading={t.admin.invites.linkHeading}
+                hint={t.admin.invites.linkHint}
+                url={actionData.link}
+                copyLabel={t.admin.invites.copy}
+              />
+            ) : (
+              <Form method="post" className={`${card} max-w-xl space-y-3`}>
+                <input type="hidden" name="intent" value="invite" />
+                <div>
+                  <Label htmlFor="team-invite-note">{t.admin.invites.noteLabel}</Label>
+                  <Input
+                    id="team-invite-note"
+                    name="note"
+                    type="text"
+                    placeholder={t.admin.invites.notePlaceholder}
+                    className="mt-1"
+                  />
+                </div>
+                <Button type="submit" variant="secondary">
+                  {tt.inviteSubmit}
+                </Button>
+              </Form>
+            )}
+          </section>
+
+          <SlideTemplateCard
+            action={`/teams/${team.id}/slide-template`}
+            current={loaderData.slideTemplate}
+            scope="team"
+          />
+
+          <section>
+            <ConfirmDialog
+              triggerLabel={tt.stepDown}
+              triggerVariant="secondary"
+              title={tt.stepDownTitle}
+              description={tt.stepDownBody}
+              confirmLabel={tt.stepDown}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "stepDown" }}
+            />
+          </section>
+        </>
+      )}
     </div>
   );
 }

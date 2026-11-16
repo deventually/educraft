@@ -95,3 +95,15 @@ describe("help on finding programmes and learning lines (plan step 4)", () => {
     expect(en).not.toContain("A **minor** goes in the programme that offers it");
   });
 });
+
+describe("help on Onderwijs › Teams (plan step 5, BESLUIT-2026-11-16-7)", () => {
+  const teams = (lang: "nl" | "en") =>
+    readFileSync(`app/content/help/topics/teams.${lang}.md`, "utf8");
+  it("sends everyone to Onderwijs › Teams, and says a member only reads", () => {
+    expect(teams("nl")).toContain("**Onderwijs › Teams**");
+    expect(teams("en")).toContain("**Education › Teams**");
+    expect(teams("nl")).not.toContain("open je je team vanaf **Account**");
+    expect(teams("nl")).toMatch(/alleen lezen/i);
+    expect(teams("en")).toMatch(/read only/i);
+  });
+});

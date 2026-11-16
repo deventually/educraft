@@ -231,7 +231,7 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
     expect(topItems(primary)).toEqual(["Start", "Onderwijs", "Tools"]);
   });
 
-  it("opens Onderwijs on a click, with courses, programmes and learning lines", async () => {
+  it("opens Onderwijs on a click, with courses, programmes, learning lines and teams", async () => {
     const user = userEvent.setup();
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
@@ -247,6 +247,7 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
       "/courses",
       "/programmes",
       "/learning-lines",
+      "/teams",
     ]);
     // The line under a link describes it; the link's name stays short.
     expect(within(panel!).getByRole("link", { name: "Opleidingen" })).toHaveAccessibleDescription(
@@ -309,6 +310,7 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
       "/courses",
       "/programmes",
       "/learning-lines",
+      "/teams",
       "/portfolio",
       "/tools",
       "/utilities",
