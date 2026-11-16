@@ -9,6 +9,7 @@ import {
   setUserDisabled,
   setUserRole,
   updateUserEmail,
+  updateUserName,
   updateUserPassword,
 } from "~/server/repositories/users.server";
 import { setUserTeams } from "~/server/repositories/teams.server";
@@ -23,6 +24,7 @@ import { isChoice } from "~/lib/features/rule";
 import { ALL_TOOLS } from "~/lib/registry";
 import { isRole } from "~/lib/registry/access";
 import type { AuditAction, AuditDetail } from "~/lib/auditLog";
+import { MAX_NAME } from "~/lib/people/pasteList";
 import { COURSE_INTENTS, personCourseAction } from "~/server/adminCourses.server";
 
 /** The keys an exception may be set on: every feature and every tool. */
@@ -150,6 +152,18 @@ export async function personAction(
     const reset = await createPasswordReset(userId);
     await audit("resetLinkCreated");
     return { resetLink: `${new URL(request.url).origin}/reset/${reset.token}` };
+  }
+
+  if (intent === "setName") {
+    // A name is no credential: an admin may also set their own here.
+    if (userId !== admin.id && !(await manageTarget(actorIsOwner, userId))) {
+      return { error: "ownerOnly" as const };
+    }
+    const name = String(fd.get("name") ?? "").trim();
+    if (!name) return { error: "nameRequired" as const };
+    if (name.length > MAX_NAME) return { error: "nameTooLong" as const };
+    await updateUserName(userId, name);
+    return { nameSet: true as const };
   }
 
   if (intent === "setEmail") {

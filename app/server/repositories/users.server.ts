@@ -100,6 +100,11 @@ export async function setUserRole(id: string, role: Role): Promise<void> {
   });
 }
 
+/** Overwrite a user's display name (the admin on the person page). Callers validate it. */
+export async function updateUserName(id: string, name: string): Promise<void> {
+  getDb().update(users).set({ name }).where(eq(users.id, id)).run();
+}
+
 /**
  * Overwrite a user's email — self-service change (`/account`) or admin recovery
  * of an email-less account. Pass null to clear. Uniqueness is enforced by the

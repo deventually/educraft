@@ -1454,3 +1454,48 @@ describe("admin users — the list and the person page (P28.1)", () => {
     expect(await users.getUserById(t.id)).toMatchObject({ email: "nothere@example.com" });
   });
 });
+
+describe("person page — the admin sets someone's name", () => {
+  const setName = (userId: string, name: string) =>
+    invoke(personRoute.action, post({ intent: "setName", userId, name })) as Promise<{
+      nameSet?: boolean;
+      error?: string;
+    }>;
+
+  it("sets a teacher's name, trimmed", async () => {
+    const t = await users.createUser({ name: "Oud", passwordHash: "scrypt:a:b", role: "teacher" });
+    expect((await setName(t.id, "  Anna de Vries  ")).nameSet).toBe(true);
+    expect((await users.getUserById(t.id))?.name).toBe("Anna de Vries");
+  });
+
+  it("refuses an empty or overlong name and keeps the old one", async () => {
+    const t = await users.createUser({
+      name: "Blijft",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    expect((await setName(t.id, "   ")).error).toBe("nameRequired");
+    expect((await setName(t.id, "x".repeat(201))).error).toBe("nameTooLong");
+    expect((await users.getUserById(t.id))?.name).toBe("Blijft");
+  });
+
+  it("a regular admin cannot rename another admin; the owner can", async () => {
+    const other = await users.createUser({
+      name: "Andere beheerder",
+      passwordHash: "scrypt:a:b",
+      role: "admin",
+    });
+    expect((await setName(other.id, "Gekaapt")).error).toBe("ownerOnly");
+    expect((await users.getUserById(other.id))?.name).toBe("Andere beheerder");
+    await actAsOwner();
+    expect((await setName(other.id, "Bea Beheer")).nameSet).toBe(true);
+    expect((await users.getUserById(other.id))?.name).toBe("Bea Beheer");
+  });
+
+  it("an admin may set their own name here", async () => {
+    await actAsOwner();
+    expect((await setName(OWNER_ID, "Owner Nieuw")).nameSet).toBe(true);
+    expect((await users.getUserById(OWNER_ID))?.name).toBe("Owner Nieuw");
+    await setName(OWNER_ID, "Owner O");
+  });
+});
