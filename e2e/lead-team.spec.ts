@@ -22,8 +22,12 @@ test("a team lead ticks a colleague to add and takes them out again", async ({ b
   await pick.getByRole("searchbox", { name: "Zoeken" }).fill(USERS.teacher.email);
   await pick.getByRole("checkbox", { name: new RegExp(USERS.teacher.name) }).check();
   await pick.getByRole("button", { name: "Toevoegen (1)" }).click();
+  // Wait for the lead stand itself to be saved: the add above already showed "Opgeslagen".
+  const leadSaved = a.waitForResponse(
+    (r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes("setLead"),
+  );
   await a.getByRole("checkbox", { name: `Teamleider: ${USERS.teacher.name}` }).check();
-  await expect(a.getByRole("status").filter({ hasText: "Opgeslagen" })).toBeVisible();
+  expect((await leadSaved).ok()).toBe(true);
   await admin.close();
 
   // The lead adds a colleague, then takes them out again. Admins are not in the list.
