@@ -58,6 +58,7 @@ export const people: Messages["people"] = {
   listSummary: "{made} invite created, {refused} lines refused.",
   listSummaryMany: "{made} invites created, {refused} lines refused.",
   models: "Models",
+  nameLabel: "Name",
   never: "not yet",
   none: "Nobody found.",
   notManageable: "Only the super admin manages admins. You can only view these details.",

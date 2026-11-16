@@ -155,6 +155,53 @@ describe("Admin person page (P28.1)", () => {
     expect(body?.get("email")).toBe("nieuw@x.nl");
   });
 
+  it("autosaves a name on blur, for the user in the URL", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderPage(async ({ request }) => {
+      body = await request.formData();
+      return { nameSet: true };
+    });
+    const name = within(section(/^account$/i)).getByLabelText(/^naam$/i);
+    expect(name).toHaveValue("Teacher T");
+    await user.clear(name);
+    await user.type(name, "Anna de Vries");
+    await user.tab();
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/opgeslagen/i));
+    expect(body?.get("intent")).toBe("setName");
+    expect(body?.get("name")).toBe("Anna de Vries");
+  });
+
+  it("reverts an empty name with an error toast", async () => {
+    const user = userEvent.setup();
+    renderPage(() => ({ error: "nameRequired" }));
+    const name = within(section(/^account$/i)).getByLabelText(/^naam$/i);
+    await user.clear(name);
+    await user.tab();
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/naam is verplicht/i));
+    expect(name).toHaveValue("Teacher T");
+  });
+
+  it("lets an admin set their own name, and shows it as text when out of reach", () => {
+    const own = renderPage(undefined, {
+      isSelf: true,
+      person: { id: "admin-1", role: "admin" },
+      models: null,
+      features: null,
+    });
+    expect(within(section(/^account$/i)).getByLabelText(/^naam$/i)).toBeInTheDocument();
+    own.unmount();
+    renderPage(undefined, {
+      isOwner: false,
+      canManage: false,
+      person: { role: "admin" },
+      models: null,
+      features: null,
+    });
+    expect(within(section(/^account$/i)).queryByLabelText(/^naam$/i)).toBeNull();
+    expect(within(section(/^account$/i)).getByText("Teacher T")).toBeInTheDocument();
+  });
+
   it("reverts a refused e-mail with an error toast", async () => {
     const user = userEvent.setup();
     renderPage(() => ({ error: "emailTaken" }));

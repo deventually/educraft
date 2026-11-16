@@ -2,7 +2,8 @@ import { z } from "zod";
 
 /** The most people one pasted list may carry; the rest is refused as "tooMany". */
 export const MAX_PASTED_LINES = 200;
-const MAX_NAME = 200;
+/** The longest name a person may have (the paste list and the person page). */
+export const MAX_NAME = 200;
 
 export type PasteRefusal =
   | "invalidEmail"

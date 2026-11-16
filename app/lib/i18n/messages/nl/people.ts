@@ -57,6 +57,7 @@ export const people = {
   listSummary: "{made} uitnodiging gemaakt, {refused} regels geweigerd.",
   listSummaryMany: "{made} uitnodigingen gemaakt, {refused} regels geweigerd.",
   models: "Modellen",
+  nameLabel: "Naam",
   never: "nog niet",
   none: "Niemand gevonden.",
   notManageable:
