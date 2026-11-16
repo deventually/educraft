@@ -28,9 +28,9 @@ export function Tabs({ label, tabs }: { label: string; tabs: Tab[] }) {
       Home: 0,
       End: tabs.length - 1,
     }[e.key];
-    if (next === undefined) return;
+    const id = next === undefined ? undefined : tabs[next]?.id;
+    if (!id) return;
     e.preventDefault();
-    const id = tabs[next]!.id;
     setCurrent(id);
     refs.current[id]?.focus();
   }

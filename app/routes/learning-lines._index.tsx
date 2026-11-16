@@ -15,15 +15,21 @@ export function meta() {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireProgrammeUser(request);
   return {
-    lines: (await listAllLines(user))
-      .filter((l) => l.programmes.length > 0)
-      .map((l) => ({
-        id: l.id,
-        name: l.name,
-        href: `/programmes/${l.programmes[0]!.id}/lines/${l.id}`,
-        courses: l.courses,
-        programmes: l.programmes.map((p) => p.name).join(", "),
-      })),
+    // Each line opens under the first programme the reader sees it in.
+    lines: (await listAllLines(user)).flatMap((l) => {
+      const first = l.programmes[0];
+      return first
+        ? [
+            {
+              id: l.id,
+              name: l.name,
+              href: `/programmes/${first.id}/lines/${l.id}`,
+              courses: l.courses,
+              programmes: l.programmes.map((p) => p.name).join(", "),
+            },
+          ]
+        : [];
+    }),
   };
 }
 
