@@ -132,6 +132,10 @@ export const programmes = {
   sharesWith:
     "Je cursus wordt gedeeld met jouw team in deze opleiding. Zo zien de collega's van {team} hem in de opleiding.",
   summary: "{kind} · team {team} · {courses} cursussen",
+  tabCourses: "Cursussen",
+  tabDetails: "Gegevens",
+  tabLines: "Leerlijnen",
+  tabsLabel: "Onderdelen van {programme}",
   team: "Team",
   teamAdded: "Het team is toegevoegd.",
   teamRemoved: "Het team is weggehaald.",

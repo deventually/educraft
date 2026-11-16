@@ -27,6 +27,7 @@ export const menu = {
     tools: "Welke tools en AI-modellen er zijn.",
     users: "Accounts, rollen en uitnodigingen.",
   },
+  breadcrumb: "Kruimelpad",
   education: {
     courses: "Jouw cursussen en die van je team",
     label: "Onderwijs",

@@ -25,15 +25,15 @@ describe("ProgrammeInputSchema (the boundary)", () => {
   });
 
   it("accepts a minor as a form, next to full-time, part-time and dual (plan step 4)", () => {
-    expect(parses({ name: "Minor Data Science", sector: "hbo", track: "bachelor", form: "minor" })).toBe(
-      true,
+    expect(
+      parses({ name: "Minor Data Science", sector: "hbo", track: "bachelor", form: "minor" }),
+    ).toBe(true);
+    expect(programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "nl")).toBe(
+      "hbo-bachelor · minor",
     );
-    expect(
-      programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "nl"),
-    ).toBe("hbo-bachelor · minor");
-    expect(
-      programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "en"),
-    ).toBe("bachelor (hbo) · minor");
+    expect(programmeKindLabel({ sector: "hbo", track: "bachelor", form: "minor" }, "en")).toBe(
+      "bachelor (hbo) · minor",
+    );
   });
 
   it("refuses an unknown sector, a track of another sector and an unknown form", () => {

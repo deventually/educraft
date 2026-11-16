@@ -28,6 +28,7 @@ export const menu: Messages["menu"] = {
     tools: "Which tools and AI models are available.",
     users: "Accounts, roles and invitations.",
   },
+  breadcrumb: "Breadcrumb",
   education: {
     courses: "Your courses and your team's",
     label: "Education",
