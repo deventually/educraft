@@ -99,10 +99,7 @@ describe("Beheer overview", () => {
       "href",
       "/admin/users",
     );
-    expect(within(numbers).getByRole("link", { name: "1 team" })).toHaveAttribute(
-      "href",
-      "/admin/teams",
-    );
+    expect(within(numbers).getByRole("link", { name: "1 team" })).toHaveAttribute("href", "/teams");
     expect(within(numbers).getByRole("link", { name: "0 opleidingen" })).toHaveAttribute(
       "href",
       "/programmes",

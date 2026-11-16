@@ -90,13 +90,19 @@ A **team** (`teams`, `team_members`) is a group of colleagues; joining shares no
 lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` stays
 `teacher | admin`. All access goes through `app/server/repositories/teams.server.ts`:
 
-- Admins work on every team: `/admin/teams` is the list (search on team or person, one
-  "New team" button) and `/admin/teams/:id` the team page (rename, delete, add several accounts
-  at once by ticking them, remove, lead on/off, the team's choices); and per person on the
-  person page (section Teams).
-- A lead works on `/teams/:id` (teacher side). Every lead function goes through
-  `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team, so the
-  route answers a 404 to everyone else, admins included. A lead ticks colleagues to add from
+- **One overview, one team page** (plan step 5, BESLUIT-2026-11-16-7): Onderwijs › Teams
+  (`/teams`) lists every team for an admin (search on team or person, one "New team" button)
+  and a teacher's own teams (`listMyTeams` in `teamView.server.ts`). `/teams/:id` is the one
+  team page; `app/server/teamPage.server.ts` decides the role. The old `/admin/teams` addresses
+  redirect there.
+- An admin (with two-step verification, `requireRole("admin")`) works on every team: rename,
+  delete, place it under a faculty, add several accounts at once by ticking them, remove, lead
+  on/off, the team's choices; and per person on the person page (section Teams).
+- A plain member only reads their own team: names, who leads and its programmes
+  (`getTeamForMember`, no e-mail addresses, no choices); the action is a 404 for them.
+- A lead works on the same page with the lead functions. Every lead function goes through
+  `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team; anyone
+  who is not admin, lead or member gets a 404. A lead ticks colleagues to add from
   active teachers not yet in the team, never admins (`leadCandidates`, `leadAddMembers`,
   BESLUIT-2026-11-16-6), removes a plain member, makes a member lead, steps down, and mints a
   team invite.
@@ -136,7 +142,7 @@ effective = instance is Off              → off
   `portfolioAccess` keeps the transition: no choice and a dossier → on.
 - **Who sets what:** the admin sets instance stands on `/admin/tools` (one at a time, or every
   tool shown after a search or stand filter at once: intent `toolsBulk`) and any team's choices on
-  `/admin/teams/:id`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
+  `/teams/:id`; a lead sets their own team's choices on `/teams/:id`; only an admin sets an
   exception, on the person page (section *Parts and tools*, which shows the source). A team only
   sees what the instance has not Off; a stored choice for an Off item stays but never counts.
 

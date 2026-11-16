@@ -7,7 +7,8 @@ export const teams: Messages["teams"] = {
   addTeam: "In team",
   adminIntro:
     "Make teams of colleagues and appoint team leads. A team lead adds colleagues themselves. Being a member shares nothing: everything stays private until someone shares it.",
-  allTeams: "All teams",
+  adminTeamIntro:
+    "You manage this team as an admin: its name, where it belongs, its members and leads, and the choices for parts, tools and models.",
   colEmail: "Email",
   colLead: "Team lead",
   colLeads: "Team leads",
@@ -19,6 +20,7 @@ export const teams: Messages["teams"] = {
   deleteBody: "Only the group goes. The accounts stay, and shared items become private again.",
   deleteConfirm: "Delete",
   deleteTitle: "Delete team {name}?",
+  detailsHeading: "Details",
   divisionHint:
     "A programme's team belongs where its programme does. Choose this for a team without a programme, such as an exam board.",
   divisionLabel: "Belongs to {kind}",
@@ -39,6 +41,8 @@ export const teams: Messages["teams"] = {
   leadOf: "Team lead of {name}",
   makeLead: "Make team lead",
   manageTeams: "Manage teams",
+  memberIntro:
+    "You are a member of this team. Here you see who is in it and which programmes the team works on. What you share with your team, all these colleagues see. The team lead manages the team.",
   memberOf: "Member of {name}",
   memberRemoveBody: "The account stays. This person no longer sees what is shared with the team.",
   memberRemoveTitle: "Remove {name} from {team}?",
@@ -52,11 +56,14 @@ export const teams: Messages["teams"] = {
   noMatch: "No teams found.",
   noMembers: "No members yet.",
   noneSelected: "Tick someone first.",
+  noOwnTeams: "You are not in a team yet. A team lead or the admin adds you.",
   noSuchUser:
     "That colleague can't be added: the account no longer exists or is already in the team.",
   noTeam: "No team",
   noTeams: "No teams yet.",
   notMember: "This person is not in the team.",
+  overviewIntro:
+    "The teams you are in. Open a team to see who is in it; if you are its lead, you manage it there.",
   placeProgramme: "Programme {names}",
   placeProgrammes: "Programmes {names}",
   programmeRemoveBody:
@@ -71,6 +78,7 @@ export const teams: Messages["teams"] = {
   programmesNew: "New programme for this team",
   programmesNone: "This team has no programme yet.",
   search: "Search by team or person",
+  searchMine: "Search by team or team lead",
   searchRegion: "Search teams",
   stepDown: "Stop being team lead",
   stepDownBody:

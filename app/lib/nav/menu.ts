@@ -30,7 +30,7 @@ export function adminMenu(t: Messages, { isOwner }: { isOwner: boolean }): MenuG
       heading: m.groups.people,
       links: [
         { to: "/admin/users", label: nav.users, description: m.users },
-        { to: "/admin/teams", label: nav.teams, description: m.teams },
+        { to: "/teams", label: nav.teams, description: m.teams },
       ],
     },
     {
@@ -98,6 +98,7 @@ export function mainMenu(t: Messages, v: Viewer): MenuEntry[] {
               label: e.learningLines,
               description: e.learningLinesDescription,
             },
+            { to: "/teams", label: e.teams, description: e.teamsDescription },
           ],
         },
       ],

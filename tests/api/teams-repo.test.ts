@@ -223,3 +223,33 @@ describe("teams — a lead's functions are scoped to their own team (P28.2)", ()
     await expect(teams.joinTeamFromInvite("gone", p.id)).resolves.toBeUndefined();
   });
 });
+
+describe("teamView — what a teacher sees of their own teams (BESLUIT-2026-11-16-7)", () => {
+  it("lists only my teams, with member count, leads and my lead stand", async () => {
+    const view = await import("~/server/repositories/teamView.server");
+    const { team, lead, member } = await teamWithLead("Mijn view");
+    await teamWithLead("Andermans view");
+    const rows = await view.listMyTeams(member.id);
+    expect(rows).toEqual([
+      { id: team.id, name: "Mijn view", memberCount: 2, leads: [lead.name], isLead: false },
+    ]);
+    expect((await view.listMyTeams(lead.id))[0]?.isLead).toBe(true);
+  });
+
+  it("gives a member names and who leads, no e-mail; nothing to anyone else", async () => {
+    const view = await import("~/server/repositories/teamView.server");
+    const { team, lead, member } = await teamWithLead("Lezen");
+    const stranger = await person("Vreemde");
+    const seen = await view.getTeamForMember(member.id, team.id);
+    expect(seen).toEqual({
+      id: team.id,
+      name: "Lezen",
+      members: expect.arrayContaining([
+        { userId: lead.id, name: lead.name, isLead: true },
+        { userId: member.id, name: member.name, isLead: false },
+      ]),
+    });
+    expect(await view.getTeamForMember(stranger.id, team.id)).toBeNull();
+    expect(await view.getTeamForMember(member.id, "no-such-team")).toBeNull();
+  });
+});

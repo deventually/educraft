@@ -2,7 +2,7 @@
 
 A **team** is a group of colleagues, for example your programme or department. An administrator creates teams and appoints team leads. Being a member shares nothing: everything stays private until you share something yourself.
 
-You see your teams on **Account**, under *My teams*.
+You see your teams under **Education › Teams**. Open a team to see who is in it, who leads it and which programmes the team works on. As a plain member the page is read only; email addresses and the team's choices are for the team lead. What you share with your team, all these colleagues see.
 
 ## What you can share
 
@@ -45,7 +45,7 @@ What colleagues share with your team is listed under **From my team**: on the Co
 
 ## For team leads
 
-If you are a team lead, you open your team from **Account**. There you can:
+If you are a team lead, you open your team under **Education › Teams**. There you can:
 
 - add colleagues with **Add members**: search by name or email address, tick who should join and choose **Add**. You see every teacher with an active account who is not in your team yet; admins are not listed;
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
@@ -54,3 +54,7 @@ If you are a team lead, you open your team from **Account**. There you can:
 - stop being team lead yourself.
 
 Removing another team lead is done by an administrator.
+
+## For administrators
+
+An administrator sees every team under **Education › Teams**, searches by team or person and creates a team with **New team**. On the same team page as the lead, the administrator has more buttons: rename the team, choose where it belongs, tick the team leads, remove any member and delete the team.

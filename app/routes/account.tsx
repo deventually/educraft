@@ -38,7 +38,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     user: { name: user.name, email: user.email, role: user.role },
     // The super admin hands ownership over (npm run set-owner) before deleting (P18.6).
     isOwner: await isOwner(user),
-    // My teams (P28.2); a lead gets a link to the team page.
+    // My teams (P28.2); each opens the one team page (BESLUIT-2026-11-16-7).
     teams: await listTeamsForUser(user.id),
     // Two-step verification (P2-12) has its own page; here only the way there.
     twoFactor: await isTwoFactorEnabled(user.id),
@@ -170,16 +170,12 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           <ul className="mt-3 space-y-1.5 text-sm">
             {loaderData.teams.map((team) => (
               <li key={team.id} className="text-slate-800">
-                {team.isLead ? (
-                  <Link
-                    to={`/teams/${team.id}`}
-                    className="font-medium text-violet-700 underline hover:no-underline"
-                  >
-                    {team.name}
-                  </Link>
-                ) : (
-                  team.name
-                )}
+                <Link
+                  to={`/teams/${team.id}`}
+                  className="font-medium text-violet-700 underline hover:no-underline"
+                >
+                  {team.name}
+                </Link>
                 {team.isLead && (
                   <span className="ml-1.5 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
                     {t.teams.leadBadge}

@@ -701,3 +701,13 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   niet door accounts bladert. Weghalen blijft zoals het was: alleen een gewoon lid, na een
   bevestiging; een andere teamleider haalt een beheerder weg. Bastiaan, 2026-11-16 ("Als
   teamleider moet ik kunnen kiezen wie ik aan mijn team kan toevoegen en weghalen").
+- **BESLUIT-2026-11-16-7:** **Teams voor iedereen: één overzicht en één teampagina.** Onder
+  **Onderwijs › Teams** ziet een beheerder alle teams (zoeken, *Nieuw team*) en een docent de
+  teams waar die in zit. Elk team heeft één pagina, `/teams/:id`, voor beheerder, teamleider en
+  teamlid, met per rol meer of minder knoppen. Een gewoon teamlid leest alleen: wie erin zitten,
+  wie teamleider is en aan welke opleidingen het team werkt; geen e-mailadressen, geen keuzes van
+  het team en geen knoppen. Wie geen lid, teamleider of beheerder is, krijgt een 404. Teams
+  aanmaken blijft alleen voor de beheerder. De oude adressen `/admin/teams` sturen door. Bastiaan,
+  2026-11-16 (plan "eenvoudiger beheer en navigatie", stap 5; keuze "Ja, alleen lezen" op de vraag
+  of een teamlid de pagina van zijn team mag zien, en "Nee, alleen de beheerder" op de vraag of een
+  docent een team mag aanmaken).

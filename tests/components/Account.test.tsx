@@ -98,7 +98,7 @@ describe("Account page", () => {
 });
 
 describe("Account page — my teams (P28.2)", () => {
-  it("lists my teams and links a lead to the team page", async () => {
+  it("lists my teams, each opening the team page (BESLUIT-2026-11-16-7)", async () => {
     const { container } = renderAccount("t@example.com", "teacher", false, [
       { id: "team-1", name: "Verpleegkunde", isLead: true },
       { id: "team-2", name: "Techniek", isLead: false },
@@ -108,8 +108,10 @@ describe("Account page — my teams (P28.2)", () => {
       "href",
       "/teams/team-1",
     );
-    expect(screen.getByText("Techniek")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /techniek/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /techniek/i })).toHaveAttribute(
+      "href",
+      "/teams/team-2",
+    );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

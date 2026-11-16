@@ -36,6 +36,8 @@ export const menu: Messages["menu"] = {
     learningLinesDescription: "Series of courses across the years",
     programmes: "Programmes",
     programmesDescription: "Per faculty, with courses, learning lines and teams",
+    teams: "Teams",
+    teamsDescription: "Your teams, who is in them and their programmes",
   },
   tools: {
     all: "All tools",

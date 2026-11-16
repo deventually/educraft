@@ -31,12 +31,15 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await expect(page.getByText(/nog geen team/)).toBeVisible();
   const programmeUrl = page.url();
 
-  await page.goto("/admin/teams");
+  // Plan step 5: teams live under Onderwijs › Teams.
+  const nav = page.getByRole("navigation", { name: "Hoofdnavigatie" });
+  await nav.getByRole("button", { name: "Onderwijs" }).click();
+  await nav.getByRole("link", { name: "Teams", exact: true }).click();
   await page.getByRole("button", { name: "Nieuw team" }).click();
   await page.getByLabel("Naam van het nieuwe team").fill(team);
   // Creating a team opens its page.
   await page.getByRole("button", { name: "Team aanmaken" }).click();
-  await expect(page.getByRole("heading", { level: 2, name: team })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: team })).toBeVisible();
 
   const programmes = page.getByRole("region", { name: "Opleidingen" });
   await programmes.getByRole("button", { name: "Opleiding toevoegen" }).click();

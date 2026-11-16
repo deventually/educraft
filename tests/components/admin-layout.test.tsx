@@ -42,7 +42,7 @@ describe("Admin layout", () => {
         .map((a) => [a.textContent, a.getAttribute("href")]);
     expect(group("Mensen")).toEqual([
       ["Gebruikers", "/admin/users"],
-      ["Teams", "/admin/teams"],
+      ["Teams", "/teams"],
     ]);
     expect(group("Organisatie")).toEqual([
       ["Faculteiten en opleidingen", "/admin/organisation"],

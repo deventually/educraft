@@ -99,7 +99,7 @@ export function DivisionSection({
             <span key={team.id}>
               {i > 0 && ", "}
               <Link
-                to={`/admin/teams/${team.id}`}
+                to={`/teams/${team.id}`}
                 className="rounded font-medium text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
               >
                 {team.name}

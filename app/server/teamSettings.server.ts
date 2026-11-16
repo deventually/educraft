@@ -1,6 +1,6 @@
 /**
  * What a team may choose (P28.3) and how a posted team form becomes stored choices.
- * Shared by the admin (`/admin/teams`) and the team lead (`/teams/:id`): both see only
+ * Shared by the admin and the team lead on the one team page (`/teams/:id`): both see only
  * what the instance has not Off, and a model set only within the instance.
  */
 import { ALL_TOOLS } from "~/lib/registry";

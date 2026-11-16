@@ -76,7 +76,7 @@ describe("/admin/organisation", () => {
     const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
     expect(within(zorg).getByRole("link", { name: "Onderwijscommissie" })).toHaveAttribute(
       "href",
-      "/admin/teams/t-9",
+      "/teams/t-9",
     );
   });
 

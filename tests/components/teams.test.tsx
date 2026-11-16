@@ -4,9 +4,8 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
-import AdminTeams from "~/routes/admin.teams";
-import AdminTeam from "~/routes/admin.teams.$id";
-import LeadTeam from "~/routes/teams.$id";
+import TeamsOverview from "~/routes/teams._index";
+import TeamPage from "~/routes/teams.$id";
 import { ToastProvider } from "~/components/Toast";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
@@ -51,26 +50,27 @@ function renderWith(
   return render(<Stub initialEntries={[path.replace(":id", "team-1")]} />);
 }
 
-describe("/admin/teams, the list (like the user list)", () => {
+describe("/teams for an admin: every team (plan step 5)", () => {
   const data = {
     q: "",
+    canCreate: true,
     teams: [
-      { id: "team-1", name: "Verpleegkunde", memberCount: 2, leads: ["Lea Lead"] },
-      { id: "team-2", name: "Techniek", memberCount: 0, leads: [] },
+      { id: "team-1", name: "Verpleegkunde", memberCount: 2, leads: ["Lea Lead"], isLead: false },
+      { id: "team-2", name: "Techniek", memberCount: 0, leads: [], isLead: false },
     ],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
-    renderWith(AdminTeams, "/admin/teams", d, action);
+    renderWith(TeamsOverview, "/teams", d, action);
 
   it("shows one row per team with a link, the member count and who leads", () => {
     page();
     const vpk = screen.getByRole("row", { name: /verpleegkunde/i });
     expect(within(vpk).getByRole("link", { name: "Verpleegkunde" })).toHaveAttribute(
       "href",
-      "/admin/teams/team-1",
+      "/teams/team-1",
     );
     expect(within(vpk).getByText("2")).toBeInTheDocument();
-    expect(within(vpk).getByText("Lea Lead")).toBeInTheDocument();
+    expect(within(vpk).getAllByText("Lea Lead").length).toBeGreaterThan(0);
     const tech = screen.getByRole("row", { name: /techniek/i });
     expect(within(tech).getByText("0")).toBeInTheDocument();
   });
@@ -100,10 +100,10 @@ describe("/admin/teams, the list (like the user list)", () => {
   });
 
   it("says so when there are no teams, and when a search finds none", () => {
-    const { unmount } = page(undefined, { q: "", teams: [] });
+    const { unmount } = page(undefined, { q: "", canCreate: true, teams: [] });
     expect(screen.getByText(/nog geen teams/i)).toBeInTheDocument();
     unmount();
-    page(undefined, { q: "xyz", teams: [] });
+    page(undefined, { q: "xyz", canCreate: true, teams: [] });
     expect(screen.getByText(/geen teams gevonden/i)).toBeInTheDocument();
   });
 
@@ -113,8 +113,11 @@ describe("/admin/teams, the list (like the user list)", () => {
   });
 });
 
-describe("/admin/teams/:id, the team page", () => {
+describe("/teams/:id for an admin", () => {
   const data = {
+    role: "admin",
+    selfId: "u-admin",
+    slideTemplate: null,
     team: {
       id: "team-1",
       name: "Verpleegkunde",
@@ -130,13 +133,13 @@ describe("/admin/teams/:id, the team page", () => {
     divisionId: null as string | null,
     divisionWord: "Faculteit",
     programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
-    otherProgrammes: [
+    programmeChoices: [
       { id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" },
       { id: "p-4", name: "Pabo deeltijd", divisionName: null },
     ],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
-    renderWith(AdminTeam, "/admin/teams/:id", d, action);
+    renderWith(TeamPage, "/teams/:id", d, action);
 
   it("shows the team's programmes and adds programmes of other teams in a dialog", async () => {
     const user = userEvent.setup();
@@ -176,7 +179,7 @@ describe("/admin/teams/:id, the team page", () => {
   });
 
   it("says so when the team has no programme and none can be linked", () => {
-    page(undefined, { ...data, programmes: [], otherProgrammes: [] });
+    page(undefined, { ...data, programmes: [], programmeChoices: [] });
     const section = screen.getByRole("region", { name: "Opleidingen" });
     expect(within(section).getByText(/nog geen opleiding/i)).toBeInTheDocument();
     expect(within(section).queryByRole("button", { name: "Opleiding toevoegen" })).toBeNull();
@@ -208,13 +211,12 @@ describe("/admin/teams/:id, the team page", () => {
     expect(bodies.at(-1)?.get("divisionId")).toBe("d-1");
   });
 
-  it("shows the team with a way back to the list", () => {
+  it("shows the team under Teams in the breadcrumb, and the delete button", () => {
     page();
-    expect(screen.getByRole("heading", { level: 2, name: "Verpleegkunde" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /alle teams/i })).toHaveAttribute(
-      "href",
-      "/admin/teams",
-    );
+    expect(screen.getByRole("heading", { level: 1, name: "Verpleegkunde" })).toBeInTheDocument();
+    const crumbs = screen.getByRole("navigation", { name: /kruimelpad|breadcrumb|je bent hier/i });
+    expect(within(crumbs).getByRole("link", { name: "Teams" })).toHaveAttribute("href", "/teams");
+    expect(screen.getByRole("button", { name: /team opheffen/i })).toBeInTheDocument();
   });
 
   it("lists the members with who leads, and autosaves the lead stand", async () => {
@@ -316,7 +318,12 @@ describe("/admin/teams/:id, the team page", () => {
 
 describe("/teams/:id — the lead's page (P28.2)", () => {
   const data = {
+    role: "lead",
     selfId: "u-lead",
+    divisions: [],
+    divisionId: null,
+    divisionWord: "Faculteit",
+    slideTemplate: null,
     team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
     offer,
     programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
@@ -327,7 +334,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     ],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
-    renderWith(LeadTeam, "/teams/:id", d, action);
+    renderWith(TeamPage, "/teams/:id", d, action);
 
   it("shows the members with name, e-mail and lead badge", () => {
     page();
@@ -477,8 +484,12 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
 
 describe("/teams/:id help", () => {
   it("links the lead to the help on teams and sharing", () => {
-    renderWith(LeadTeam, "/teams/:id", {
+    renderWith(TeamPage, "/teams/:id", {
+      role: "lead",
       selfId: "u-lead",
+      programmes: [],
+      programmeChoices: [],
+      slideTemplate: null,
       team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
       offer,
       candidates: [],
@@ -487,5 +498,79 @@ describe("/teams/:id help", () => {
       "href",
       "/help/teams",
     );
+  });
+});
+
+describe("/teams for a teacher: my teams (plan step 5)", () => {
+  const data = {
+    q: "",
+    canCreate: false,
+    teams: [
+      { id: "team-1", name: "Verpleegkunde", memberCount: 2, leads: ["Lea Lead"], isLead: true },
+      { id: "team-2", name: "Toetscommissie", memberCount: 5, leads: [], isLead: false },
+    ],
+  };
+  const page = (d: unknown = data) => renderWith(TeamsOverview, "/teams", d);
+
+  it("lists the teams I am in, each opening its page, with my lead badge", () => {
+    page();
+    expect(screen.getByRole("heading", { level: 1, name: "Teams" })).toBeInTheDocument();
+    const vpk = screen.getByRole("row", { name: /verpleegkunde/i });
+    expect(within(vpk).getByRole("link", { name: "Verpleegkunde" })).toHaveAttribute(
+      "href",
+      "/teams/team-1",
+    );
+    expect(within(vpk).getByText(/^teamleider$/i)).toBeInTheDocument();
+    const toets = screen.getByRole("row", { name: /toetscommissie/i });
+    expect(within(toets).queryByText(/^teamleider$/i)).toBeNull();
+  });
+
+  it("has no Nieuw team, and says so when I am in no team", () => {
+    page({ q: "", canCreate: false, teams: [] });
+    expect(screen.queryByRole("button", { name: /nieuw team/i })).toBeNull();
+    expect(screen.getByText(/je zit nog in geen team/i)).toBeInTheDocument();
+  });
+
+  it("has no a11y violations", async () => {
+    const { container } = page();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+});
+
+describe("/teams/:id for a plain member: read only (BESLUIT-2026-11-16-7)", () => {
+  const data = {
+    role: "member",
+    selfId: "u-mem",
+    team: {
+      id: "team-1",
+      name: "Verpleegkunde",
+      members: members.map(({ userId, name, isLead }) => ({ userId, name, isLead })),
+    },
+    candidates: [],
+    offer: null,
+    programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
+    programmeChoices: [],
+    divisions: [],
+    divisionId: null,
+    divisionWord: "Faculteit",
+    slideTemplate: null,
+  };
+  const page = () => renderWith(TeamPage, "/teams/:id", data);
+
+  it("shows who is in the team, who leads and its programmes, with nothing to press", () => {
+    page();
+    expect(screen.getByText(/je bent lid van dit team/i)).toBeInTheDocument();
+    const lea = screen.getByRole("row", { name: /lea lead/i });
+    expect(within(lea).getByText(/^teamleider$/i)).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /mo member/i })).toHaveTextContent(/jij/i);
+    expect(screen.queryByText("mo@school.nl")).toBeNull();
+    const progs = screen.getByRole("region", { name: "Opleidingen" });
+    expect(within(progs).getByRole("link", { name: "Verpleegkunde voltijd" })).toBeInTheDocument();
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("has no a11y violations", async () => {
+    const { container } = page();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });

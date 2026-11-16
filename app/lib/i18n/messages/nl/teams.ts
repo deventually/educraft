@@ -6,7 +6,8 @@ export const teams = {
   addTeam: "In team",
   adminIntro:
     "Maak teams van collega's en wijs teamleiders aan. Een teamleider voegt zelf collega's toe. Lid zijn deelt niets: alles blijft privé tot iemand zelf iets deelt.",
-  allTeams: "Alle teams",
+  adminTeamIntro:
+    "Je beheert dit team als beheerder: de naam, waar het bij hoort, de leden en teamleiders, en de keuzes voor onderdelen, tools en modellen.",
   colEmail: "E-mail",
   colLead: "Teamleider",
   colLeads: "Teamleiders",
@@ -19,6 +20,7 @@ export const teams = {
     "Alleen de groep verdwijnt. De accounts blijven bestaan en gedeelde stukken worden weer privé.",
   deleteConfirm: "Opheffen",
   deleteTitle: "Team {name} opheffen?",
+  detailsHeading: "Gegevens",
   divisionHint:
     "Een team van een opleiding hoort waar de opleiding hoort. Kies dit voor een team zonder opleiding, zoals een examencommissie.",
   divisionLabel: "Hoort bij {kind}",
@@ -39,6 +41,8 @@ export const teams = {
   leadOf: "Teamleider van {name}",
   makeLead: "Teamleider maken",
   manageTeams: "Teams beheren",
+  memberIntro:
+    "Je bent lid van dit team. Hier zie je wie erin zitten en aan welke opleidingen het team werkt. Wat je met je team deelt, zien al deze collega's. De teamleider beheert het team.",
   memberOf: "Lid van {name}",
   memberRemoveBody:
     "Het account blijft bestaan. Wat met het team gedeeld is, ziet deze persoon niet meer.",
@@ -53,11 +57,14 @@ export const teams = {
   noMatch: "Geen teams gevonden.",
   noMembers: "Nog geen leden.",
   noneSelected: "Vink eerst iemand aan.",
+  noOwnTeams: "Je zit nog in geen team. Een teamleider of de beheerder zet je erin.",
   noSuchUser:
     "Die collega kun je niet toevoegen: het account bestaat niet meer of zit al in het team.",
   noTeam: "Geen team",
   noTeams: "Nog geen teams.",
   notMember: "Deze persoon zit niet in het team.",
+  overviewIntro:
+    "De teams waar je in zit. Open een team om te zien wie erin zitten; ben je teamleider, dan beheer je het daar.",
   placeProgramme: "Opleiding {names}",
   placeProgrammes: "Opleidingen {names}",
   programmeRemoveBody:
@@ -72,6 +79,7 @@ export const teams = {
   programmesNew: "Nieuwe opleiding voor dit team",
   programmesNone: "Dit team heeft nog geen opleiding.",
   search: "Zoek op team of persoon",
+  searchMine: "Zoek op team of teamleider",
   searchRegion: "Teams zoeken",
   stepDown: "Stoppen als teamleider",
   stepDownBody:
