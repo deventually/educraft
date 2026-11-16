@@ -1,7 +1,7 @@
 /**
  * Route glue for working on a course together (BESLUIT-2026-11-10-5): what the course page
- * shows about owner and members, and the `set-member`, `remove-member`, `leave-course` and
- * `transfer-course` intents. The form body is parsed with Zod at the boundary; the repository decides who may
+ * shows about owner, members and linked teams (BESLUIT-2026-11-16-2), and the `set-member`,
+ * `remove-member`, `link-team`, `unlink-team`, `leave-course` and `transfer-course` intents. The form body is parsed with Zod at the boundary; the repository decides who may
  * do what. Leaving, or handing over without staying on, throws a redirect to the course list. Routes stay thin.
  */
 import { redirect } from "react-router";
@@ -19,6 +19,13 @@ import {
   removeCourseMember,
   setCourseMember,
 } from "./repositories/courseMembers.server";
+import {
+  type CourseTeam,
+  linkCourseTeam,
+  listCourseTeams,
+  listTeamCandidates,
+  unlinkCourseTeam,
+} from "./repositories/courseTeams.server";
 import { listTransferCandidates, transferCourse } from "./repositories/courseTransfer.server";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -32,9 +39,18 @@ export interface MemberControls {
   candidates: Colleague[];
   /** Colleagues the owner can hand the course to; empty for anyone else. */
   transferTo: Colleague[];
+  /** Teams linked to the course: all their members work on it. */
+  teams: CourseTeam[];
+  /** The manager's own teams that can still be linked; empty for an editor. */
+  teamCandidates: { id: string; name: string }[];
 }
 
-type MemberIntent = "set-member" | "remove-member" | "transfer-course";
+type MemberIntent =
+  | "set-member"
+  | "remove-member"
+  | "link-team"
+  | "unlink-team"
+  | "transfer-course";
 export type MemberActionResult =
   | { ok: true; intent: MemberIntent; message: string }
   | { ok: false; intent: MemberIntent; error: string };
@@ -42,6 +58,12 @@ export type MemberActionResult =
 const MemberFormSchema = z.object({
   intent: z.enum(["set-member", "remove-member"]),
   userId: z.string().min(1).max(100),
+  role: z.enum(COURSE_ROLES).default("editor"),
+});
+
+const TeamFormSchema = z.object({
+  intent: z.enum(["link-team", "unlink-team"]),
+  teamId: z.string().min(1).max(100),
   role: z.enum(COURSE_ROLES).default("editor"),
 });
 
@@ -60,7 +82,17 @@ export async function memberControls(user: User, course: Course): Promise<Member
     ? await listMemberCandidates(user.id, course.id)
     : [];
   const transferTo = await listTransferCandidates(user.id, course.id);
-  return { myRole, ownerName: course.ownerName, members, candidates, transferTo };
+  const teams = await listCourseTeams(user.id, course.id);
+  const teamCandidates = await listTeamCandidates(user.id, course.id);
+  return {
+    myRole,
+    ownerName: course.ownerName,
+    members,
+    candidates,
+    transferTo,
+    teams,
+    teamCandidates,
+  };
 }
 
 /**
@@ -91,6 +123,22 @@ export async function memberAction(
     if (!done) return { ok: false, intent, error: m.errorTransfer };
     if (!parsed.data.keepAsEditor) throw redirect("/courses");
     return { ok: true, intent, message: m.toastTransferred };
+  }
+  if (intent === "link-team" || intent === "unlink-team") {
+    const parsed = TeamFormSchema.safeParse({
+      intent,
+      teamId: fd.get("teamId"),
+      role: fd.get("role") ?? undefined,
+    });
+    if (!parsed.success) return { ok: false, intent, error: m.errorTeam };
+    const { teamId, role } = parsed.data;
+    const done =
+      intent === "link-team"
+        ? await linkCourseTeam(user.id, course.id, teamId, role)
+        : await unlinkCourseTeam(user.id, course.id, teamId);
+    return done
+      ? { ok: true, intent, message: intent === "link-team" ? m.toastLinked : m.toastUnlinked }
+      : { ok: false, intent, error: m.errorTeam };
   }
   if (intent !== "set-member" && intent !== "remove-member") return null;
   const parsed = MemberFormSchema.safeParse({

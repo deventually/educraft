@@ -124,4 +124,55 @@ describe("CourseMembers (BESLUIT-2026-11-10-5)", () => {
     ));
     expect(screen.queryByRole("button", { name: "Cursus overdragen" })).toBeNull();
   });
+
+  it("lets a manager link a whole team, change its role and unlink it, accessibly", async () => {
+    const posted: FormData[] = [];
+    const { container } = renderAt(
+      () => (
+        <CourseMembers
+          myRole="owner"
+          ownerName="Anna"
+          members={[]}
+          candidates={[cas]}
+          transferTo={[]}
+          teams={[{ id: "t-2", name: "Moduleteam Web", role: "editor", members: ["Bram", "Cas"] }]}
+          teamCandidates={[{ id: "t-1", name: "Moduleteam Databases" }]}
+        />
+      ),
+      (fd) => posted.push(fd),
+    );
+    expect(screen.getByRole("heading", { name: "Teams die meewerken" })).toBeTruthy();
+    expect(screen.getByText("Bram, Cas")).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "Rol van Moduleteam Web" })).toHaveValue("editor");
+    await userEvent.selectOptions(screen.getByLabelText("Team"), "t-1");
+    await userEvent.selectOptions(screen.getByLabelText("Rol voor het team"), "co-owner");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await userEvent.click(screen.getByRole("button", { name: "Team toevoegen" }));
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(Object.fromEntries(posted[0]!)).toEqual({
+      intent: "link-team",
+      teamId: "t-1",
+      role: "co-owner",
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Moduleteam Web weghalen" }));
+    await waitFor(() => expect(posted).toHaveLength(2));
+    expect(Object.fromEntries(posted[1]!)).toEqual({ intent: "unlink-team", teamId: "t-2" });
+  });
+
+  it("shows an editor the linked teams without controls", () => {
+    renderAt(() => (
+      <CourseMembers
+        myRole="editor"
+        ownerName="Anna"
+        members={[bram]}
+        candidates={[]}
+        transferTo={[]}
+        teams={[{ id: "t-1", name: "Moduleteam", role: "editor", members: ["Bram"] }]}
+        teamCandidates={[{ id: "t-3", name: "Ander team" }]}
+      />
+    ));
+    expect(screen.getByText(/Moduleteam/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Team toevoegen" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /weghalen/ })).toBeNull();
+  });
 });

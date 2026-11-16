@@ -53,6 +53,7 @@ type Loaded = {
     ownerName: string;
     members: { userId: string; name: string; role: string }[];
     candidates: { userId: string; name: string }[];
+    teams: { id: string; name: string; role: string; members: string[] }[];
   };
   sharing: { teams: unknown[] };
 };
@@ -71,6 +72,8 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
       members: [],
       candidates: [{ userId: "ed-b", name: "Bram" }],
       transferTo: [{ userId: "ed-b", name: "Bram" }],
+      teams: [],
+      teamCandidates: [{ id: team, name: "Informatica" }],
     });
 
     expect(await act(course.id, { intent: "set-member", userId: "ed-b" })).toMatchObject({
@@ -219,5 +222,29 @@ describe("working on a course together (BESLUIT-2026-11-10-5)", () => {
       await act(course.id, { intent: "transfer-course", userId: "ed-b", keepAsEditor: "on" }),
     ).toMatchObject({ ok: false });
     expect((await courses.getCourse("ed-a", course.id))?.ownerId).toBe("ed-a");
+  });
+
+  it("links a whole team from the course page and unlinks it", async () => {
+    const course = await courses.createCourse("ed-a", {
+      name: "Moduleteam",
+      data: alignedCourse(),
+    });
+    expect(
+      await act(course.id, { intent: "link-team", teamId: team, role: "co-owner" }),
+    ).toMatchObject({ ok: true, intent: "link-team" });
+    expect((await load(course.id)).members).toMatchObject({
+      teams: [{ id: team, name: "Informatica", role: "co-owner", members: ["Bram"] }],
+      teamCandidates: [],
+    });
+    expect((await courses.getCourse("ed-b", course.id))?.role).toBe("co-owner");
+    expect(await act(course.id, { intent: "link-team", teamId: "nope" })).toMatchObject({
+      ok: false,
+      intent: "link-team",
+    });
+    expect(await act(course.id, { intent: "unlink-team", teamId: team })).toMatchObject({
+      ok: true,
+      intent: "unlink-team",
+    });
+    expect(await courses.getCourse("ed-b", course.id)).toBeNull();
   });
 });

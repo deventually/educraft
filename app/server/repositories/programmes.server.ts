@@ -22,7 +22,6 @@ import type { Sector } from "~/lib/context/sectors";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { getDb } from "../db.server";
 import {
-  courseMembers,
   courses,
   learningLineProgrammes,
   learningLines,
@@ -34,6 +33,7 @@ import {
   teams,
   users,
 } from "../schema.server";
+import { courseRoles } from "./courseRoles.server";
 import { myTeams, namesOf, teamsOf } from "./programmeTeams.server";
 import { shareItem } from "./shares.server";
 
@@ -77,7 +77,7 @@ const sharedWithProgramme = (programmeId: SQL | SQLiteColumn | string) =>
     join ${programmeTeams} pt on pt.team_id = s.team_id and pt.programme_id = ${programmeId}
     join ${teamMembers} sharer on sharer.team_id = s.team_id and sharer.user_id = s.owner_user_id
     where s.kind = 'course' and s.item_id = ${courses.id}
-      and (s.owner_user_id = ${courses.userId} or exists (select 1 from ${courseMembers} cm
+      and (s.owner_user_id = ${courses.userId} or exists (select 1 from ${courseRoles} cm
         where cm.course_id = ${courses.id} and cm.user_id = s.owner_user_id
           and cm.role = 'co-owner')))`;
 
@@ -331,7 +331,7 @@ export async function removeCourse(
     : or(
         eq(programmeCourses.userId, a.id),
         sql`exists (select 1 from ${courses} c where c.id = ${programmeCourses.courseId}
-          and (c.user_id = ${a.id} or exists (select 1 from ${courseMembers} cm
+          and (c.user_id = ${a.id} or exists (select 1 from ${courseRoles} cm
             where cm.course_id = c.id and cm.user_id = ${a.id} and cm.role = 'co-owner')))`,
       );
   const result = getDb()

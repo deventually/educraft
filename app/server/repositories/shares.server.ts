@@ -18,7 +18,6 @@ import { getDb } from "../db.server";
 import {
   contextProfiles,
   courseLinks,
-  courseMembers,
   courses,
   generations,
   rubrics,
@@ -27,6 +26,7 @@ import {
   teams,
   users,
 } from "../schema.server";
+import { courseRoles } from "./courseRoles.server";
 import { SHAREABLE_WORK_SLUGS, SHARE_KINDS, type ShareKind } from "~/lib/sharing";
 import { CourseDataSchema } from "~/lib/courses/schema";
 import type { CourseData } from "~/lib/courses/types";
@@ -63,7 +63,7 @@ function mayShare(
 ): SQL {
   const coOwner =
     kind === "course"
-      ? sql` or exists (select 1 from ${courseMembers} cm
+      ? sql` or exists (select 1 from ${courseRoles} cm
           where cm.course_id = ${itemId} and cm.user_id = ${sharer} and cm.role = 'co-owner')`
       : sql``;
   return sql`(${sharer} = ${owner}${coOwner})`;

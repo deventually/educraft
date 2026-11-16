@@ -639,3 +639,15 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   als bewerkers van één cursus blijft `course_members` (BESLUIT-2026-11-12-6). Bastiaan,
   2026-11-16 (thread "Team koppelen aan opleiding herstellen": "En natuurlijk kunnen er meerdere
   teams per opleiding zitten" en "Prima zoals jij aanbeveelt").
+- **BESLUIT-2026-11-16-2:** **Een moduleteam werkt als team mee aan een cursus, en loopt mee.** De
+  eigenaar of een mede-eigenaar koppelt op de cursuspagina een van zijn eigen teams als bewerkers
+  of mede-eigenaren (`course_teams`). Iedereen in dat team werkt mee met die rol zolang hij in het
+  team zit: wie later bij het team komt, werkt meteen mee; wie het team verlaat, niet meer. Wie ook
+  los is toegevoegd, houdt de sterkste rol. De cursus blijft van één eigenaar: verwijderen, de
+  onderwijscontext en overdragen blijven bij die persoon, en een mede-eigenaar via een team erft de
+  cursus niet als het account van de eigenaar verdwijnt. Extra inzetbare docenten zitten niet in
+  het moduleteam en worden, als het nodig is, los toegevoegd. Werk van studenten speelt hier niet
+  mee: de koppeling geeft alleen toegang tot de inhoud van de cursus. Dit is de volgende stap uit
+  BESLUIT-2026-11-12-6. Bastiaan, 2026-11-16 (thread "Moduleteam in één keer aan cursus
+  koppelen": "een heel team in één keer als bewerkers of mede-eigenaren aan een cursus koppelen" en
+  keuzekaart: "Team blijft gekoppeld (meelopen)").

@@ -9,6 +9,7 @@
 import { and, asc, eq, isNull, ne, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import { courseMembers, courses, shares, teamMembers, users } from "../schema.server";
+import { courseRoles } from "./courseRoles.server";
 
 export const COURSE_ROLES = ["editor", "co-owner"] as const;
 export type CourseRole = (typeof COURSE_ROLES)[number];
@@ -38,14 +39,14 @@ const isRole = (role: string): role is CourseRole =>
   (COURSE_ROLES as readonly string[]).includes(role);
 
 /** The owner or a co-owner of the course. */
-function managesCourse(userId: string, courseId: string): boolean {
+export function managesCourse(userId: string, courseId: string): boolean {
   return !!getDb()
     .select({ id: courses.id })
     .from(courses)
     .where(
       and(
         eq(courses.id, courseId),
-        sql`(${courses.userId} = ${userId} or exists (select 1 from ${courseMembers} m
+        sql`(${courses.userId} = ${userId} or exists (select 1 from ${courseRoles} m
           where m.course_id = ${courses.id} and m.user_id = ${userId} and m.role = 'co-owner'))`,
       ),
     )
@@ -142,8 +143,22 @@ export async function listCourseMembers(
     .orderBy(asc(users.name))
     .all()
     .map((r) => ({ ...r, role: isRole(r.role) ? r.role : "editor" }));
-  const mayRead = ownerOf(courseId) === viewerId || rows.some((r) => r.userId === viewerId);
-  return mayRead ? rows : [];
+  return worksOn(viewerId, courseId) ? rows : [];
+}
+
+/** The owner of the course, or someone with a role on it (by hand or through a team). */
+export function worksOn(userId: string, courseId: string): boolean {
+  return !!getDb()
+    .select({ id: courses.id })
+    .from(courses)
+    .where(
+      and(
+        eq(courses.id, courseId),
+        sql`(${courses.userId} = ${userId} or exists (select 1 from ${courseRoles} m
+          where m.course_id = ${courses.id} and m.user_id = ${userId}))`,
+      ),
+    )
+    .get();
 }
 
 /** Whether the viewer may share the course and choose its members. */
