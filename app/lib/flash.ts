@@ -10,6 +10,7 @@ export const FLASH_KEYS = [
   "accountDeleted",
   "dossierCreated",
   "passwordReset",
+  "programmeDeleted",
   "rubricDeleted",
   "rubricDuplicated",
   "signedIn",

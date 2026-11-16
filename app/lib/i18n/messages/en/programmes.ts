@@ -24,6 +24,7 @@ export const programmes = {
   createTitle: "New programme",
   delete: "Delete",
   deleteBody: "The programme goes away. Your courses stay as they are.",
+  deleteProgramme: "Delete programme",
   deleteTitle: "Delete programme?",
   emptyBody: "A programme bundles the courses of a team, with the year and period of each course.",
   emptyTitle: "No programmes yet",

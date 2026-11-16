@@ -9,6 +9,7 @@ import {
   programmeFromForm,
 } from "~/server/programmes.server";
 import {
+  deleteProgramme,
   getProgramme,
   placeCourse,
   removeCourse,
@@ -32,6 +33,8 @@ import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
+import { redirectWithFlash } from "~/server/flash.server";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [{ title: `${data?.programme.name ?? "Opleiding"} — LimeOnIt` }];
@@ -88,6 +91,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
           }))
       : [],
     canPlace: programme.isMember,
+    // Only an admin deletes a programme (BESLUIT-2026-11-16-4).
+    canDelete: user.role === "admin",
     lines: await Promise.all(
       (await listLines(user, programme.id)).map(async (l) => {
         // A line of another programme says where it comes from, when the user reads that one.
@@ -168,6 +173,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     for (const id of chosen) if (await linkProgrammeTeam(user, programme.id, id)) n++;
     return n ? added(n, m.teamAdded, m.teamsAdded) : { ok: false as const, error: m.errorNotFound };
   }
+  if (intent === "delete") {
+    if (user.role !== "admin") return { ok: false as const, error: m.errorDeleteAdminOnly };
+    if (!(await deleteProgramme(user, programme.id)))
+      return { ok: false as const, error: m.errorNotFound };
+    return redirectWithFlash("/programmes", "programmeDeleted");
+  }
   if (intent === "remove") {
     return (await removeCourse(user, programme.id, courseId))
       ? { ok: true as const, message: m.toastRemoved }
@@ -178,7 +189,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 /** One programme: its details, its courses by year and period, and adding a course. */
 export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
-  const p = useT().programmes;
+  const t = useT();
+  const p = t.programmes;
   const id = useId();
   const actionData = useActionData<typeof action>();
   useFormToast(actionData, {
@@ -190,6 +202,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const { programme, kinds, available, canPlace, teamOptions = [], lines = [] } = loaderData;
+  const canDelete = "canDelete" in loaderData && loaderData.canDelete;
 
   return (
     <div className="w-full min-w-0">
@@ -239,6 +252,19 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
                 </div>
               </Form>
             </Card>
+          </section>
+        )}
+
+        {canDelete && (
+          <section className="border-t border-slate-200 pt-6">
+            <ConfirmDialog
+              triggerLabel={p.deleteProgramme}
+              title={p.deleteTitle}
+              description={p.deleteBody}
+              confirmLabel={p.delete}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "delete" }}
+            />
           </section>
         )}
       </div>

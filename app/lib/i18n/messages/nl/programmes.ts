@@ -24,6 +24,7 @@ export const programmes = {
   createTitle: "Nieuwe opleiding",
   delete: "Verwijderen",
   deleteBody: "De opleiding verdwijnt. Je cursussen blijven gewoon bestaan.",
+  deleteProgramme: "Opleiding verwijderen",
   deleteTitle: "Opleiding verwijderen?",
   emptyBody:
     "Een opleiding bundelt de cursussen van een team, met per cursus het jaar en de periode.",

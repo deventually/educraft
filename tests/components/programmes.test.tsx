@@ -229,6 +229,19 @@ describe("Programme page (/programmes/:id)", () => {
     expect(within(teams).queryByRole("button")).toBeNull();
   });
 
+  it("has Verwijderen at the bottom for an admin, after a confirm", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammePage, { ...data, canDelete: true });
+    await user.click(screen.getByRole("button", { name: "Opleiding verwijderen" }));
+    const dialog = screen.getByRole("dialog", { name: "Opleiding verwijderen?" });
+    expect(within(dialog).getByText(/Je cursussen blijven gewoon bestaan/)).toBeVisible();
+  });
+
+  it("has no Verwijderen for anyone else", () => {
+    renderRoute(ProgrammePage, data);
+    expect(screen.queryByRole("button", { name: "Opleiding verwijderen" })).toBeNull();
+  });
+
   it("names every team of a programme with several (BESLUIT-2026-11-16-1)", () => {
     renderRoute(ProgrammePage, {
       ...data,

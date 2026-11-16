@@ -340,6 +340,32 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
   });
 });
 
+describe("/programmes/:id: delete at the bottom, for an admin only", () => {
+  const load = (id: string) =>
+    detail.loader({ request: get(`/programmes/${id}`), params: { id } } as never);
+  const act = (id: string, fields: Record<string, string>) =>
+    detail.action({ request: post(`/programmes/${id}`, fields), params: { id } } as never);
+
+  it("offers no delete to the lead, and refuses it", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Blijft"));
+    expect((await load(p!.id)).canDelete).toBe(false);
+    expect(await act(p!.id, { intent: "delete" })).toEqual({
+      ok: false,
+      error: "Alleen een beheerder kan een opleiding verwijderen.",
+    });
+  });
+
+  it("lets an admin delete it, and goes back to the list", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Weg"));
+    await signInAs({ id: `route-admin-del-${n}`, name: "Beheer", role: "admin" });
+    expect((await load(p!.id)).canDelete).toBe(true);
+    const res = (await act(p!.id, { intent: "delete" })) as Response;
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe("/programmes");
+    expect(await repo.getProgramme(me, p!.id)).toBeNull();
+  });
+});
+
 describe("course page: belongs to programme…", () => {
   const act = (id: string, fields: Record<string, string>) =>
     course.action({ request: post(`/courses/${id}`, fields), params: { id } } as never);
