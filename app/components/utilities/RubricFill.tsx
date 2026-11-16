@@ -117,25 +117,28 @@ export function RubricFill({ rubric, result }: { rubric: FillableRubric; result?
         <span>{f.privacy}</span>
       </p>
 
-      <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3 print:hidden">
-        <div className="min-w-[14rem] flex-1 sm:max-w-sm">
-          <Label htmlFor={`${id}-new`}>{f.newName}</Label>
-          <Input
-            id={`${id}-new`}
-            value={newName}
-            maxLength={200}
-            autoComplete="off"
-            onChange={(e) => setNewName(e.target.value)}
-            aria-describedby={`${id}-new-hint`}
-            className="mt-1"
-          />
-          <HelpText id={`${id}-new-hint`}>{f.newNameHint}</HelpText>
-        </div>
-        <Button type="submit" variant="secondary">
-          <UserPlus className="size-4" aria-hidden />
-          {f.add}
-        </Button>
-      </form>
+      <div className="print:hidden">
+        <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[14rem] flex-1 sm:max-w-sm">
+            <Label htmlFor={`${id}-new`}>{f.newName}</Label>
+            <Input
+              id={`${id}-new`}
+              value={newName}
+              maxLength={200}
+              autoComplete="off"
+              onChange={(e) => setNewName(e.target.value)}
+              aria-describedby={`${id}-new-hint`}
+              className="mt-1"
+            />
+          </div>
+          <Button type="submit" variant="secondary">
+            <UserPlus className="size-4" aria-hidden />
+            {f.add}
+          </Button>
+        </form>
+        {/* Under the row, not in the field: so the button lines up with the input. */}
+        <HelpText id={`${id}-new-hint`}>{f.newNameHint}</HelpText>
+      </div>
 
       {batch.students.length === 0 ? (
         <p className="text-slate-600">{f.empty}</p>

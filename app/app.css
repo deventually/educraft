@@ -298,3 +298,36 @@ body {
   background-color: rgb(252 211 77); /* amber-300 */
   color: inherit;
 }
+
+/*
+ * Fields on one line stay on one line (2026-11-16). In a grid of fields, each field (a label
+ * above an input, maybe a hint under it) shares its rows with its neighbours through subgrid:
+ * label row, input row, hint rows. A long label or a hint under one field never pushes its input
+ * below the inputs next to it, and a label sits right on top of its own input. Anything else in
+ * such a grid (a button) spans the label and input rows and lines up with the inputs when the
+ * grid aligns its items to the end. In a base layer, so an explicit utility on a cell still wins.
+ * Rows of fields in a flex row (`flex items-end`) put a hint under the row, not in the cell.
+ * Checked in the browser by e2e/field-alignment.spec.ts.
+ */
+@layer base {
+  :is(.grid:has(> div > label[for]:first-child), .grid:has(> div > div:first-child > label[for]))
+    > * {
+    grid-row: span 2;
+  }
+  .grid:has(> div > label[for]:first-child ~ :nth-child(3), > div > div:first-child ~ :nth-child(3))
+    > div:not([class*="flex"], [class*="grid"], :has(> :nth-child(5))):is(:has(> label[for]:first-child), :has(> div:first-child > label[for])) {
+    grid-row: span 3;
+  }
+  .grid:has(> div > label[for]:first-child ~ :nth-child(4), > div > div:first-child ~ :nth-child(4))
+    > div:not([class*="flex"], [class*="grid"], :has(> :nth-child(5))):is(:has(> label[for]:first-child), :has(> div:first-child > label[for])) {
+    grid-row: span 4;
+  }
+  .grid > div:not([class*="flex"], [class*="grid"], :has(> :nth-child(5))):is(:has(> label[for]:first-child), :has(> div:first-child > label[for])) {
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+  .grid > div:not([class*="flex"], [class*="grid"], :has(> :nth-child(5))):is(:has(> label[for]:first-child), :has(> div:first-child > label[for])) > :first-child {
+    align-self: end;
+  }
+}
