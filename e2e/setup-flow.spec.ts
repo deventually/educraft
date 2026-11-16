@@ -49,7 +49,7 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
 
   await page.goto(programmeUrl);
   // Plan step 4: the faculty on top, and the teams under the Gegevens tab.
-  await expect(page.getByText(new RegExp(faculty))).toBeVisible();
+  await expect(page.getByText(new RegExp(` · ${faculty} · `))).toBeVisible();
   await page.getByRole("tab", { name: "Gegevens" }).click();
   const teams = page.getByRole("region", { name: "Teams" });
   await expect(teams.getByText(team)).toBeVisible();
