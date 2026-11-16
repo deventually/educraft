@@ -341,11 +341,10 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
   it("lets the lead put the team in programmes and take it out (BESLUIT-2026-11-16-4)", async () => {
     const programmes = await import("~/server/repositories/programmes.server");
     const { team, lead } = await setup();
-    const p = (await programmes.createProgramme(
-      { id: admin.id, role: "admin" },
-      null,
-      { name: `Zonder team ${n}`, sector: "hbo" },
-    ))!;
+    const p = (await programmes.createProgramme({ id: admin.id, role: "admin" }, null, {
+      name: `Zonder team ${n}`,
+      sector: "hbo",
+    }))!;
     await as(lead);
     const before = await call(leadPage.loader, { request: get(), params: { id: team.id } });
     expect(before.programmes).toEqual([]);

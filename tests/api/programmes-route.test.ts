@@ -125,7 +125,12 @@ describe("/programmes", () => {
   it("refuses a lead who creates one without a team", async () => {
     expect(
       await list.action({
-        request: post("/programmes", { intent: "create", teamId: "", name: "x", kind: "hbo:bachelor" }),
+        request: post("/programmes", {
+          intent: "create",
+          teamId: "",
+          name: "x",
+          kind: "hbo:bachelor",
+        }),
       } as never),
     ).toEqual({ ok: false, error: "Alleen de teamleider of een beheerder kan dat." });
     expect((await list.loader({ request: get("/programmes") } as never)).isAdmin).toBe(false);

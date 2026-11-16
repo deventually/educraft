@@ -404,9 +404,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(bodies[0]!.get("intent")).toBe("linkProgramme");
     expect(bodies[0]!.getAll("programmeId")).toEqual(["p-2"]);
     await user.click(screen.getByRole("button", { name: "Weghalen: Verpleegkunde voltijd" }));
-    await user.click(
-      within(screen.getByRole("dialog")).getByRole("button", { name: "Weghalen" }),
-    );
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Weghalen" }));
     await waitFor(() => expect(bodies).toHaveLength(2));
     expect(bodies[1]!.get("intent")).toBe("unlinkProgramme");
   });
