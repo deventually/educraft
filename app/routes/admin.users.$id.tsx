@@ -18,17 +18,16 @@ import { personAction } from "~/server/personActions.server";
 import { strictAdminPasswords } from "~/server/password.server";
 import { personCourses } from "~/server/adminCourses.server";
 import { isTwoFactorEnabled } from "~/server/repositories/twoFactor.server";
-import { ROLES, isRole } from "~/lib/registry/access";
+import { isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
-import { Input, Select } from "~/components/ui";
-import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { TeamsForm } from "~/components/admin/TeamsForm";
 import { PersonAccess } from "~/components/admin/PersonAccess";
 import { PersonCourses } from "~/components/admin/PersonCourses";
-import { LastActive, OwnerBadge, StatusBadge, roleLabel } from "~/components/admin/people";
+import { OwnerBadge } from "~/components/admin/people";
+import { PersonAccount } from "~/components/admin/PersonAccount";
 import { PersonFeatures, type FeatureRow } from "~/components/features/PersonFeatures";
 
 /**
@@ -186,6 +185,8 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
     selfTwoFactor: t.twoFactor.selfReset,
     ownerOnly: i.ownerOnlyError,
     invalidEmail: i.invalidEmailError,
+    nameRequired: t.auth.nameRequired,
+    nameTooLong: p.reasonNameTooLong,
     emailTaken: i.emailTakenError,
     passwordCommon: t.auth.passwordCommon,
     passwordTooShort: t.auth.passwordTooShort,
@@ -243,65 +244,13 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
         {!canManage && !isSelf && <p className="mt-2 text-sm text-slate-600">{p.notManageable}</p>}
       </div>
 
-      {/* ── Account ────────────────────────────────────────────────────────── */}
-      <section>
-        <h2 className={h2}>{p.account}</h2>
-        <dl className={`mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[10rem_1fr] ${card}`}>
-          <dt className="font-medium text-slate-600">
-            {manage ? <label htmlFor="person-email">{p.emailLabel}</label> : p.emailLabel}
-          </dt>
-          <dd className="text-slate-800">
-            {manage ? (
-              <AutoSaveForm intent="setEmail" errorMessage={autoSaveError}>
-                <Input
-                  id="person-email"
-                  name="email"
-                  type="email"
-                  defaultValue={person.email ?? ""}
-                  placeholder={i.emailPlaceholder}
-                  className="h-9 max-w-xs text-sm"
-                />
-              </AutoSaveForm>
-            ) : (
-              (person.email ?? "—")
-            )}
-          </dd>
-          <dt className="font-medium text-slate-600">
-            {viewerIsOwner && !isSelf && isRole(person.role) ? (
-              <label htmlFor="person-role">{p.roleLabel}</label>
-            ) : (
-              p.roleLabel
-            )}
-          </dt>
-          <dd className="text-slate-800">
-            {viewerIsOwner && !isSelf && isRole(person.role) ? (
-              <AutoSaveForm intent="role" errorMessage={autoSaveError}>
-                <Select id="person-role" name="role" defaultValue={person.role} className="w-auto">
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {roleLabel(t, r)}
-                    </option>
-                  ))}
-                </Select>
-              </AutoSaveForm>
-            ) : (
-              roleLabel(t, person.role)
-            )}
-          </dd>
-          <dt className="font-medium text-slate-600">{p.status}</dt>
-          <dd>
-            <StatusBadge status={person.status} />
-          </dd>
-          <dt className="font-medium text-slate-600">{t.twoFactor.adminLabel}</dt>
-          <dd className="text-slate-800">
-            {person.twoFactor ? t.twoFactor.statusOn : t.twoFactor.statusOff}
-          </dd>
-          <dt className="font-medium text-slate-600">{p.lastActive}</dt>
-          <dd className="text-slate-800">
-            <LastActive day={person.lastActiveDay} />
-          </dd>
-        </dl>
-      </section>
+      <PersonAccount
+        person={person}
+        editName={manage || isSelf}
+        editEmail={manage}
+        editRole={viewerIsOwner && !isSelf && isRole(person.role)}
+        errorMessage={autoSaveError}
+      />
 
       {/* ── Teams (P28.2): member and lead per team ────────────────────────── */}
       <section>
