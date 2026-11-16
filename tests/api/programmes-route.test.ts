@@ -154,6 +154,7 @@ describe("/programmes/:id", () => {
     const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
     const c = await courses.createCourse(me.id, { name: "Programmeren 1" });
     expect((await load(p!.id)).available).toEqual([{ id: c.id, name: "Programmeren 1" }]);
+    expect((await load(p!.id)).canPlace).toBe(true);
     expect(
       await act(p!.id, { intent: "place", courseId: c.id, year: "1", period: "2" }),
     ).toMatchObject({ ok: true });

@@ -133,6 +133,7 @@ describe("Programme page (/programmes/:id)", () => {
     },
     kinds,
     available: [{ id: "c3", name: "Databases" }],
+    canPlace: true,
   };
 
   it("shows the courses with their place, and forms to move, remove and add", async () => {
@@ -172,6 +173,12 @@ describe("Programme page (/programmes/:id)", () => {
     expect(
       screen.getByText("hbo-bachelor · voltijd · Teams Informatica, Moduleteam Web"),
     ).toBeVisible();
+  });
+
+  it("tells a reader outside its teams (an admin) why there is no form to add a course", () => {
+    renderRoute(ProgrammePage, { ...data, canPlace: false });
+    expect(screen.queryByRole("button", { name: "Toevoegen" })).toBeNull();
+    expect(screen.getByText(/Je zit niet in een team van deze opleiding/)).toBeVisible();
   });
 
   it("says so when every course is already in it", () => {
